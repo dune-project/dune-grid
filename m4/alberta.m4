@@ -1,3 +1,4 @@
+## -*- autoconf -*-
 # $Id: alberta.m4 5156 2008-04-14 09:28:06Z christi $
 # searches for alberta-headers and libs
 
@@ -27,7 +28,7 @@
 #   ALBERTA_LIBS, ALBERTA_CPPFLAGS and ALBERTA_LDFLAGS.
 #
 #   If want to use a specific dimension DIM, you have to use
-#     -lalberta_$(DIM)d $(ALBERTA_BASE_LIBS)
+#     -ldunealbertagrid_$(DIM)d -lalberta_$(DIM)d $(ALBERTA_BASE_LIBS)
 #   for the LIBS,
 #     $(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=$(DIM) -DENABLE_ALBERTA
 #   for CPPFLAGS and
@@ -152,6 +153,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
   # survived all tests?
   if test "x$HAVE_ALBERTA" = "x1" ; then
+    AC_SUBST([ALBERTAROOT])
     AC_SUBST(ALBERTA_BASE_LIBS, $ALBERTA_BASE_LIBS)
     AC_SUBST(ALBERTA_LIBS, $ALBERTA_LIBS)
     AC_SUBST(ALBERTA_LDFLAGS, $ALBERTA_LDFLAGS)
@@ -178,6 +180,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     # set variable for summary
     with_alberta="yes (Version $ALBERTA_VERSION)"
   else
+    AC_SUBST([ALBERTAROOT], [""])
     AC_SUBST(ALBERTA_BASE_LIBS, "")
     AC_SUBST(ALBERTA_LIBS, "")
     AC_SUBST(ALBERTA_LDFLAGS, "")

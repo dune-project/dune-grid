@@ -8,15 +8,15 @@ libalbertagrid_cppflags = $(AM_CPPFLAGS) $(ALBERTA_INCLUDE_CPPFLAGS) -DENABLE_AL
 
 libalbertagrid_1d_la_SOURCES = $(libalbertagrid_sources)
 libalbertagrid_1d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=1
-libalbertagrid_1d_la_LIBADD = $(DUNE_COMMON_LIBS) $(ALBERTA_BASE_LIBS) -lalberta_1d
+libalbertagrid_1d_la_LIBADD = $(DUNE_COMMON_LIBS) -L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_1d
 
 libalbertagrid_2d_la_SOURCES = $(libalbertagrid_sources)
 libalbertagrid_2d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=2
-libalbertagrid_2d_la_LIBADD = $(DUNE_COMMON_LIBS) $(ALBERTA_BASE_LIBS) -lalberta_2d
+libalbertagrid_2d_la_LIBADD = $(DUNE_COMMON_LIBS) -L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_2d
 
 libalbertagrid_3d_la_SOURCES = $(libalbertagrid_sources)
 libalbertagrid_3d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=3
-libalbertagrid_3d_la_LIBADD = $(DUNE_COMMON_LIBS) $(ALBERTA_BASE_LIBS) -lalberta_3d
+libalbertagrid_3d_la_LIBADD = $(DUNE_COMMON_LIBS) -L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_3d
 endif
 
 albertadir = $(includedir)/dune/grid/albertagrid/

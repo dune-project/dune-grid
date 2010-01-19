@@ -23,7 +23,7 @@ test_alberta3d_refine_SOURCES = test-alberta3d-refine.cc
 test_alberta3d_refine_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=3 -DENABLE_ALBERTA
 test_alberta3d_refine_LDADD = $(LOCAL_LIBS) \
-	$(ALBERTA_LDFLAGS) -lalberta_3d $(ALBERTA_BASE_LIBS)
+	$(ALBERTA_LDFLAGS) -ldunealbertagrid_3d -lalberta_3d $(ALBERTA_BASE_LIBS)
 endif
 
 include $(top_srcdir)/am/global-rules
