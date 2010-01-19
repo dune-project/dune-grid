@@ -80,13 +80,13 @@ try
 {
   Dune::MPIHelper::instance( argc, argv );
 
-  if( argc < 2 )
+  std::string gridfile = SRCDIR "cube-2.dgf";
+  if(argc >= 2)
   {
-    std::cerr << "Usage: " << argv[ 0 ] << " <dgffile>" << std::endl;
-    return 1;
+    gridfile = argv[1];
   }
 
-  Dune::GridPtr< GeometryGrid > pgeogrid( argv[ 1 ] );
+  Dune::GridPtr< GeometryGrid > pgeogrid(gridfile);
   GeometryGrid &geogrid = *pgeogrid;
 
   geogrid.globalRefine( 1 );
