@@ -12,6 +12,13 @@
 namespace Dune
 {
 
+  namespace Alberta
+  {
+    IndexStack *currentIndexStack = 0;
+  }
+
+
+
   // Implementation of AlbertaGridHierarchicIndexSet::CreateEntityNumbers
   // --------------------------------------------------------------------
 

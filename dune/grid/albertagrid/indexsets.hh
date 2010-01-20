@@ -24,7 +24,7 @@ namespace Dune
   {
     typedef Dune::IndexStack< int, 100000 > IndexStack;
 
-    static IndexStack *currentIndexStack = 0;
+    extern IndexStack *currentIndexStack;
   }
 
 
