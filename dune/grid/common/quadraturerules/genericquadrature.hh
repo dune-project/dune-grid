@@ -9,6 +9,7 @@
 #include <dune/common/geometrytype.hh>
 
 #include <dune/grid/common/topologyfactory.hh>
+#include <dune/grid/common/quadraturerules.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
 
@@ -19,57 +20,6 @@ namespace Dune
 
   namespace GenericGeometry
   {
-
-    // QuadraturePoint
-    // ---------------
-
-    /**
-     * @brief Base class for a single quadrature point (point and weight)
-     *        with template field type and dimension
-     **/
-    template< class F, unsigned int dim >
-    class QuadraturePoint
-    {
-      typedef QuadraturePoint< F, dim > This;
-
-    public:
-      static const unsigned int dimension = dim;
-
-      typedef F Field;
-
-      typedef FieldVector< Field, dimension > Vector;
-
-    private:
-      Vector point_;
-      Field weight_;
-
-    public:
-      QuadraturePoint ( const Vector &point, const Field &weight )
-        : point_( point ),
-          weight_( weight )
-      {}
-
-#if 0
-      template <class FF>
-      QuadraturePoint ( const QuadraturePoint<FF,dim>& other )
-        : point_( field_cast<F>(other.point() ) ),
-          weight_( field_cast<F>(other.weight() ) )
-      {}
-#endif
-
-      const Vector &point () const
-      {
-        return point_;
-      }
-
-      const Field &weight () const
-      {
-        return weight_;
-      }
-
-    };
-
-
     // Quadrature
     // ----------
 
@@ -87,21 +37,24 @@ namespace Dune
       typedef F Field;
       static const unsigned int dimension = dim;
 
-      typedef GenericGeometry::QuadraturePoint< Field, dimension > QuadraturePoint;
+      typedef Dune::QuadraturePoint< Field, dimension > QuadraturePoint;
       typedef typename QuadraturePoint::Vector Vector;
 
       typedef typename std::vector< QuadraturePoint >::const_iterator Iterator;
 
-    public:
+    protected:
       //! Constructor taking topology id
-      explicit Quadrature ( const unsigned int topologyId )
-        : topologyId_( topologyId )
+      explicit Quadrature ( const unsigned int topologyId, unsigned int order )
+        : topologyId_( topologyId ),
+          order_( order )
       {}
 
+    public:
       //! Copy constructor
       template< class Q >
       Quadrature ( const Q &q )
-        : topologyId_( q.topologyId() )
+        : topologyId_( q.topologyId() ),
+          order_ (q.order() )
       {
         points_.reserve( q.size() );
         const typename Q::Iterator end = q.end();
@@ -128,9 +81,9 @@ namespace Dune
       }
 
       //! access the coordinates of a quadrature point
-      const Vector &point ( const unsigned int i ) const
+      const Vector &position ( const unsigned int i ) const
       {
-        return (*this)[ i ].point();
+        return (*this)[ i ].position();
       }
 
       //! access the weight of a quadrature point
@@ -143,6 +96,18 @@ namespace Dune
       unsigned int topologyId () const
       {
         return topologyId_;
+      }
+
+      //! order of the quadrature
+      unsigned int order () const
+      {
+        return order_;
+      }
+
+      //! geometry type of the quadrature
+      GeometryType type () const
+      {
+        return geometryType( topologyId_, dim );
       }
 
       //! number of quadrature points
@@ -168,6 +133,7 @@ namespace Dune
     private:
       std::vector< QuadraturePoint > points_;
       unsigned int topologyId_;
+      unsigned int order_;
     };
 
 
@@ -206,7 +172,7 @@ namespace Dune
       typedef typename Base::Vector Vector;
 
       explicit GenericQuadrature ( unsigned int order )
-        : Base( Topology::id )
+        : Base( Topology::id, order )
       {
         Base::insert( Vector( Field( 0 ) ), 1 );
       }
@@ -237,7 +203,7 @@ namespace Dune
 
     public:
       explicit GenericQuadrature ( unsigned int order )
-        : Base( Topology::id )
+        : Base( Topology::id, order )
       {
         OneDQuadrature onedQuad( OneDQuadrature::minPoints(order) );
         BaseQuadrature baseQuad( order );
@@ -245,7 +211,7 @@ namespace Dune
         const unsigned int baseQuadSize = baseQuad.size();
         for( unsigned int bqi = 0; bqi < baseQuadSize; ++bqi )
         {
-          const typename BaseQuadrature::Vector &basePoint = baseQuad[bqi].point( );
+          const typename BaseQuadrature::Vector &basePoint = baseQuad[bqi].position( );
           const Field &baseWeight = baseQuad[bqi].weight( );
 
           Vector point;
@@ -255,7 +221,7 @@ namespace Dune
           const unsigned int onedQuadSize = onedQuad.size();
           for( unsigned int oqi = 0; oqi < onedQuadSize; ++oqi )
           {
-            point[ dimension-1 ] = onedQuad[oqi].point()[ 0 ];
+            point[ dimension-1 ] = onedQuad[oqi].position()[ 0 ];
             Base::insert( point, baseWeight * onedQuad[oqi].weight( ) );
           }
         }
@@ -300,7 +266,7 @@ namespace Dune
 
     public:
       explicit GenericQuadrature ( unsigned int order )
-        : Base( Topology::id )
+        : Base( Topology::id, order )
       {
         OneDQuadrature onedQuad( OneDQuadrature::minPoints(order + dimension-1 ) );
         BaseQuadrature baseQuad( order );
@@ -308,14 +274,14 @@ namespace Dune
         const unsigned int baseQuadSize = baseQuad.size();
         for( unsigned int bqi = 0; bqi < baseQuadSize; ++bqi )
         {
-          const typename BaseQuadrature::Vector &basePoint = baseQuad[bqi].point( );
+          const typename BaseQuadrature::Vector &basePoint = baseQuad[bqi].position( );
           const Field &baseWeight = baseQuad[bqi].weight( );
 
           const unsigned int onedQuadSize = onedQuad.size();
           for( unsigned int oqi = 0; oqi < onedQuadSize; ++oqi )
           {
             Vector point;
-            point[ dimension-1 ] = onedQuad[oqi].point( )[ 0 ];
+            point[ dimension-1 ] = onedQuad[oqi].position( )[ 0 ];
             const Field scale = Field( 1 ) - point[ dimension-1 ];
             for( unsigned int i = 0; i < dimension-1; ++i )
               point[ i ] = scale * basePoint[ i ];
