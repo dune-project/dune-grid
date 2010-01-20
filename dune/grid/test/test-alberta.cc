@@ -75,7 +75,6 @@ void checkProjectedUnitCube ()
     grid->globalRefine( Grid::dimension );
     gridcheck( *grid );
     checkGeometry( grid->leafView() );
-    checkGeometryInFather( *grid );
   }
   delete grid;
 }
