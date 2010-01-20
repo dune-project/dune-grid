@@ -6,20 +6,42 @@
 
 namespace Dune {
 
+  template<int dim, int dimworld>
+  inline ALU2DSPACE Hmesh*
+  ALU2dGrid<dim, dimworld>::
+  createGrid(const std::string& macroTriangFilename,
+             const int nrOfHangingNodes,
+             std::istream* macroFile )
+  {
+#ifdef ALUGRID_NOTEMPFILE_2D
+    if( macroFile )
+    {
+      return new ALU2DSPACE Hmesh(*macroFile,
+                                  nrOfHangingNodes, (nrOfHangingNodes == 0) ?
+                                  ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart);
+    }
+    else
+#endif
+    {
+      return new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename),
+                                  nrOfHangingNodes, (nrOfHangingNodes == 0) ?
+                                  ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart);
+    }
+  }
+
   //--Grid
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::
   ALU2dGrid(const std::string macroTriangFilename,
             const int nrOfHangingNodes,
             const DuneBoundaryProjectionType* bndPrj,
-            const DuneBoundaryProjectionVector* bndVec )
+            const DuneBoundaryProjectionVector* bndVec,
+            std::istream* macroFile )
     :
 #if ALU2DGRID_PARALLEL
       comm_( MPIHelper::getCommunicator() ),
 #endif
-      mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename),
-                                    nrOfHangingNodes, (nrOfHangingNodes == 0) ?
-                                    ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart))
+      mygrid_ ( createGrid(macroTriangFilename, nrOfHangingNodes, macroFile ) )
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_( MAXL, 0 )

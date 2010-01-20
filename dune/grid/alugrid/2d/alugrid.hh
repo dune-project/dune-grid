@@ -44,6 +44,18 @@ namespace Dune
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
 
+    //! \brief constructor for creating ALUSimplexGrid from given macro grid file
+    //! \param macroName filename for macro grid in ALUGrid triangle format
+    ALUSimplexGrid(const std::string macroName,
+                   std::istream& macroFile,
+                   const DuneBoundaryProjectionType* bndProject  = 0,
+                   const DuneBoundaryProjectionVector* bndVector = 0 )
+      : BaseType("",1, bndProject, bndVector,&macroFile)
+    {
+      std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
+      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+    }
+
     //! constructor creating empty grid
     ALUSimplexGrid( ) : BaseType(1)
     {
@@ -249,6 +261,19 @@ namespace Dune
       std::cout << "\nCreated serial ALUConformGrid<"<<dim<<","<<dimworld;
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
+
+    //! \brief constructor for creating ALUConformGrid from given macro grid file
+    //! \param macroName filename for macro grid in ALUGrid triangle format
+    ALUConformGrid(const std::string macroName,
+                   std::istream& macroFile,
+                   const DuneBoundaryProjectionType* bndProject  = 0,
+                   const DuneBoundaryProjectionVector* bndVector = 0 )
+      : BaseType("", 0, bndProject, bndVector, &macroFile)
+    {
+      std::cout << "\nCreated serial ALUConformGrid<"<<dim<<","<<dimworld;
+      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+    }
+
     //! constructor creating empty grid
     ALUConformGrid( ) : BaseType(0)
     {

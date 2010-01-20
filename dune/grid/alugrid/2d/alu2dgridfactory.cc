@@ -18,8 +18,6 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   ALU2dGridFactory<ALUGrid>
   :: ALU2dGridFactory ( bool removeGeneratedFile )
-  // : filename_(),
-  //  removeGeneratedFile_( removeGeneratedFile ),
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
   {}
@@ -27,8 +25,6 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   ALU2dGridFactory<ALUGrid>
   :: ALU2dGridFactory ( const std::string &filename )
-  //: filename_( filename ),
-  //  removeGeneratedFile_( filename.empty() ),
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
   {}
@@ -193,24 +189,34 @@ namespace Dune
     if( addMissingBoundaries )
       recreateBoundaryIds();
 
+#ifndef ALUGRID_NOTEMPFILE_2D
     std::string filename ( temporary ?
                            temporaryFileName( name ) :
                            name );
+#else
+    std::string filename ( name );
+#endif
 
-    std::ofstream out( filename.c_str() );
+    std::ofstream outfile;
+    std::stringstream temp;
+
+    std::ostream* outptr = 0;
+#ifdef ALUGRID_NOTEMPFILE_2D
+    if( temporary )
+      outptr = & temp;
+    else
+#endif
+    {
+      outfile.open( filename.c_str() , std::ios::out );
+      outptr = & outfile;
+    }
+    std::ostream& out = *outptr ;
+
     out.setf( std::ios_base::scientific, std::ios_base::floatfield );
     out.precision( 16 );
-    out << "!Triangles";
+    out << "!Triangles" << std::endl;
 
     const unsigned int numVertices = vertices_.size();
-    // print information about vertices and elements
-    // to header to have an easy check
-    //   out << "  ( noVertices = " << numVertices;
-    //   out << " | noElements = " << elements_.size() << " )" << std :: endl;
-
-    out << std::endl;
-
-
     // now start writing grid
     out << numVertices << std :: endl;
     typedef typename std :: vector< VertexType > :: iterator VertexIteratorType;
@@ -277,19 +283,24 @@ namespace Dune
       }
     }
 
-    // for( unsigned int i = 0; i < numVertices; ++i )
-    //  out << i << "  -1" << std :: endl;
-    out.close();
+    outfile.close();
 
     vertices_.clear();
     elements_.clear();
     boundaryIds_.clear();
     boundaryProjections_.clear();
 
+    std::istream& inFile = temp;
+
     // ALUGrid is taking ownership of the bndProjections pointer
-    Grid *grid = new Grid( filename, globalProjection_ , bndProjections );
-    if( temporary )
-      remove( filename.c_str() );
+    Grid *grid =
+#ifdef ALUGRID_NOTEMPFILE_2D
+      ( temporary ) ? new Grid( filename, inFile, globalProjection_ , bndProjections ) :
+#endif
+      new Grid( filename, globalProjection_ , bndProjections );
+
+    //if( temporary )
+    //  remove( filename.c_str() );
 
     // remove pointer
     globalProjection_ = 0;

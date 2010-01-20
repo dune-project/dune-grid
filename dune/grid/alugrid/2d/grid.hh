@@ -5,6 +5,7 @@
 
 //- System includes
 #include "alu2dinclude.hh"
+#include <iostream>
 #include <vector>
 
 //- Dune includes
@@ -307,11 +308,17 @@ namespace Dune {
 
     //! Constructor which reads an ALU2dGrid Macro Triang file
     //! or given GridFile
-    //ALU2dGrid(std::string macroTriangFilename );
+    //- --constructor
     ALU2dGrid(const std::string macroTriangFilename,
               const int nrOfHangingNodes,
               const DuneBoundaryProjectionType*,
-              const DuneBoundaryProjectionVector* );
+              const DuneBoundaryProjectionVector*,
+              std::istream* macroFile = 0);
+
+    // method creating mesh object
+    ALU2DSPACE Hmesh* createGrid(const std::string&,
+                                 const int,
+                                 std::istream* );
 
     //! Constructor which constructs an empty ALU2dGrid
     ALU2dGrid( int );
