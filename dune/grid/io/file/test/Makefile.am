@@ -5,7 +5,7 @@ if AMIRAMESH
 ALLTESTS += amirameshtest
 endif
 
-if HAVE_ALBERTA
+if ALBERTA
 ALLTESTS += gmshtest-alberta
 endif
 
