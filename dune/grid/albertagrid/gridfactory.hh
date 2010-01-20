@@ -290,7 +290,7 @@ namespace Dune
      *
      *  \returns a pointer to the newly created grid
      *
-     *  \note The caller takes responsibility of creeing the memory allocated
+     *  \note The caller takes responsibility of freeing the memory allocated
      *        for the grid.
      *  \note ALBERTA's grid factory provides a static method for freeing the
      *        grid (destroyGrid).
