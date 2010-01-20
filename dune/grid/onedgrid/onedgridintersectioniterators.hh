@@ -7,7 +7,7 @@
  * \brief The OneDGridLevelIntersectionIterator and OneDGridLeafIntersectionIterator classes
  */
 
-#include <dune/grid/onedgrid/onedintersectionit.hh>
+#include <dune/grid/onedgrid/onedgridintersections.hh>
 
 namespace Dune {
 

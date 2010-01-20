@@ -24,7 +24,7 @@
 #include "onedgrid/onedgridentity.hh"
 #include "onedgrid/onedgridentitypointer.hh"
 #include "onedgrid/onedgridgeometry.hh"
-#include "onedgrid/onedintersectionit.hh"
+#include "onedgrid/onedgridintersections.hh"
 #include "onedgrid/onedgridintersectioniterators.hh"
 #include "onedgrid/onedgridleveliterator.hh"
 #include "onedgrid/onedgridleafiterator.hh"
