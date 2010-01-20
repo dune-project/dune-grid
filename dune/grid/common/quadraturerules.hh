@@ -35,28 +35,31 @@ namespace Dune {
     enum { d=dim };
     typedef ct CoordType;
 
+    static const unsigned int dimension = d;
+    typedef ct Field;
+    typedef Dune::FieldVector<ct,dim> Vector;
+
     //! set up quadrature of given order in d dimensions
-    QuadraturePoint (const FieldVector<ct, dim>& x, double w) : local(x)
+    QuadraturePoint (const Vector& x, ct w) : local(x)
     {
       wght = w;
     }
 
     //! return local coordinates of integration point i
-    const FieldVector<ct, dim>& position () const
+    const Vector& position () const
     {
       return local;
     }
 
     //! return weight associated with integration point i
-    double weight () const
+    const ct &weight () const
     {
       return wght;
     }
-    virtual ~QuadraturePoint(){}
 
   protected:
     FieldVector<ct, dim> local;
-    double wght;
+    ct wght;
   };
 
   /** \brief Defines an \p enum for currently available quadrature rules.
