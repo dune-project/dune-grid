@@ -6,6 +6,35 @@
 
 #include "boundaryextractor.hh"
 
+bool Dune::BoundaryExtractor::identicalOrientation(const UGGridBoundarySegment<2>& a,
+                                                   const UGGridBoundarySegment<2>& b)
+{
+  // Should never be called: 2d segment orientation does not matter in UG
+  abort();
+}
+
+bool Dune::BoundaryExtractor::identicalOrientation(const UGGridBoundarySegment<3>& a,
+                                                   const UGGridBoundarySegment<3>& b)
+{
+  if (a[3]==-1) {   // implies b[3]==-1, too
+
+    // triangles
+    return (a[0]==b[0] && a[1]==b[1] && a[2]==b[2])
+           || (a[0]==b[1] && a[1]==b[2] && a[2]==b[0])
+           || (a[0]==b[2] && a[1]==b[0] && a[2]==b[1]);
+
+  } else {
+
+    // quadrilaterals
+    return (a[0]==b[0] && a[1]==b[1] && a[2]==b[2] && a[3]==b[3])
+           || (a[0]==b[1] && a[1]==b[2] && a[2]==b[3] && a[3]==b[0])
+           || (a[0]==b[2] && a[1]==b[3] && a[2]==b[0] && a[3]==b[1])
+           || (a[0]==b[3] && a[1]==b[0] && a[2]==b[1] && a[3]==b[2]);
+
+  }
+
+}
+
 bool Dune::BoundaryExtractor::oppositeOrientation(const UGGridBoundarySegment<3>& a,
                                                   const UGGridBoundarySegment<3>& b)
 {

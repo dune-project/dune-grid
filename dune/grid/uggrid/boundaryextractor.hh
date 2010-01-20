@@ -133,6 +133,18 @@ namespace Dune {
 
   public:
 
+    /** \brief True if two segments are identically oriented
+
+       It is assumed that they consist of the same vertices.
+     */
+    static bool identicalOrientation(const UGGridBoundarySegment<2>& a, const UGGridBoundarySegment<2>& b);
+
+    /** \brief True if two segments are identically oriented
+
+       It is assumed that they consist of the same vertices.
+     */
+    static bool identicalOrientation(const UGGridBoundarySegment<3>& a, const UGGridBoundarySegment<3>& b);
+
     static void detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
                                        const std::vector<unsigned int>& elementVertices,
                                        std::set<UGGridBoundarySegment<2> >& boundarySegments);
