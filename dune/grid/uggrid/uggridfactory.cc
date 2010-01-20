@@ -337,9 +337,7 @@ createGrid()
     // during the first attempt to refine the grid.
     if (dimworld==3 && !BoundaryExtractor::identicalOrientation(*boundaryElementFace, thisSegment))
       DUNE_THROW(GridError, "Boundary segment orientation doesn't match the grid element orientation"
-                 << " at element face:"
-                 << thisSegment[0] << " " << thisSegment[1]
-                 << " " << thisSegment[2] << " " << thisSegment[3]);
+                 << " at element face: " << thisSegment);
 
     // Everything is fine.  Delete the element face from the list to mark that it has been properly handled
     boundarySegments.erase(thisSegment);

@@ -179,7 +179,7 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
         // from inconsistently oriented grids.
         if (!oppositeOrientation(*status.first, v))
           DUNE_THROW(GridError, "The grid is not consistently oriented!"
-                     << "  Mismatch at element face: " << v[0] << " " << v[1] << " " << v[2] << " " << v[3]);
+                     << "  Mismatch at element face: " << v);
 
         boundarySegments.erase(status.first);
 

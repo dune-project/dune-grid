@@ -118,6 +118,20 @@ namespace Dune {
 
   };
 
+  //! Output operator for array
+  inline std::ostream& operator<< (std::ostream& s, const UGGridBoundarySegment<2>& v)
+  {
+    return s << "[" << v[0] << ", " << v[1] << "]";
+  }
+
+  inline std::ostream& operator<< (std::ostream& s, const UGGridBoundarySegment<3>& v)
+  {
+    s << "[" << v[0] << ", " << v[1] << " " << v[2];
+    if (v[3]!=-1)     // quadrilateral
+      s << " " << v[3] << "]";
+    return s << "]";
+  }
+
   /** \brief Extracts the boundary faces and nodes from a set grid given as a set of elements
    */
   class BoundaryExtractor {
