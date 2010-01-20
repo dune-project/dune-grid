@@ -1,23 +1,21 @@
 # $Id$
 
 if BUILD_DOCS
- PAGES =
+PAGES =
 endif
 
 SUBDIRS = refelements
-
-all: $(PAGES)
-
-# install the pages in the distribution
-docdir=$(datadir)/doc/dune-grid/appl
-doc_DATA = $(PAGES)
 
 # place in website
 BASEDIR=../..
 CURDIR=doc/appl
 
+# install the html pages
+docdir=$(datadir)/doc/dune-grid/appl
+if BUILD_DOCS
+DOCFILES = $(PAGES)
+EXTRA_DIST = $(PAGES)
+endif
+
 include $(top_srcdir)/am/webstuff
-
-CLEANFILES = $(PAGES)
-
 include $(top_srcdir)/am/global-rules

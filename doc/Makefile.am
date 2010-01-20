@@ -6,14 +6,10 @@ endif INKSCAPE
 SUBDIRS = appl $(INKSCAPE_SUBDIRS) doxygen grids
 
 # setting like in dune-web
-BASEDIR=..
 CURDIR=doc
-
-if ! BUILD_DOCS
-# add tag to notify that dist has been build without documentation
-dist-hook:
-	echo "# No documentation included in distribution! " > $(distdir)/$(DOCUMENTATION_TAG_FILE)
-endif
+# position of the web base directory,
+# relative to $(CURDIR)
+BASEDIR=..
 
 include $(top_srcdir)/am/webstuff
 include $(top_srcdir)/am/global-rules

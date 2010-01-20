@@ -12,12 +12,9 @@ if BUILD_DOCS
 endif
 EXTRAINSTALL = refinement.pdf
 
-EXTRA_DIST = $(PICS) refinement.tex
-
 docdir=$(datadir)/doc/dune-grid/refinement
-doc_DATA = $(PDFDOC)
-
-all: $(DOCS) $(PDFDOC)
+DOCFILES = $(PDFDOC)
+EXTRA_DIST = $(PDFDOC)
 
 refinement.dvi: refinement.tex simplexvertexindex.eps referencetokuhn0.eps kuhntriangulation.eps
 
