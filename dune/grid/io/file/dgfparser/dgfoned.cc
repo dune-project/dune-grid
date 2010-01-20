@@ -7,6 +7,12 @@ namespace Dune {
                            const char* filename, MPICommunicatorType ) {
     mg.element=Cube;
     std::ifstream gridin(filename);
+    if (! gridin)
+    {
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " not found");
+    }
+
     if(mg.readDuneGrid(gridin))
     {
       typedef std::map<size_t,double> VtxMapType;

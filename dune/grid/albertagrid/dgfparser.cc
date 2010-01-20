@@ -24,6 +24,12 @@ namespace Dune
     dgf_.dimw = dimworld;
 
     std::ifstream file( filename.c_str() );
+    if (! file)
+    {
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " not found");
+    }
+
     if( !dgf_.readDuneGrid( file, dim, dimworld ) )
     {
       grid_ = new AlbertaGrid< dim, dimworld >( filename.c_str() );

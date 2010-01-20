@@ -10,6 +10,11 @@ namespace Dune {
   {
     mg.element=General;
     std::ifstream gridin(filename);
+    if (! gridin)
+    {
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " not found");
+    }
 
     std::string str(filename);
 

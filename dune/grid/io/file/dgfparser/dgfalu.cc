@@ -18,6 +18,12 @@ namespace Dune
 #endif
 
     std::ifstream file( filename.c_str() );
+    if (! file)
+    {
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " not found");
+    }
+
     if( dgf_.readDuneGrid( file, dimworld, dimworld ) )
     {
       if( dgf_.dimw != dimworld )
@@ -95,6 +101,12 @@ namespace Dune
 #endif
 
     std::ifstream file( filename.c_str() );
+    if (! file)
+    {
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " not found");
+    }
+
     if( dgf_.readDuneGrid( file, dimworld, dimworld ) )
     {
       if( dgf_.dimw != dimworld )
@@ -171,6 +183,12 @@ namespace Dune
 #endif
 
     std::ifstream file( filename.c_str() );
+    if (! file)
+    {
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " not found");
+    }
+
     if( dgf_.readDuneGrid( file, dimworld, dimworld ) )
     {
       if( dgf_.dimw != dimworld )
@@ -251,6 +269,12 @@ namespace Dune
 #endif
 
     std::ifstream file( filename.c_str() );
+    if (! file)
+    {
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " not found");
+    }
+
     if( dgf_.readDuneGrid( file, dimworld, dimworld ) )
     {
       if( dgf_.dimw != dimworld )
