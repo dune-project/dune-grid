@@ -25,6 +25,7 @@
 #include "onedgrid/onedgridentitypointer.hh"
 #include "onedgrid/onedgridgeometry.hh"
 #include "onedgrid/onedintersectionit.hh"
+#include "onedgrid/onedgridintersectioniterators.hh"
 #include "onedgrid/onedgridleveliterator.hh"
 #include "onedgrid/onedgridleafiterator.hh"
 #include "onedgrid/onedgridhieriterator.hh"
@@ -42,10 +43,10 @@ namespace Dune {
         OneDGridEntity,
         OneDGridEntityPointer,
         OneDGridLevelIterator,
-        OneDGridLeafIntersectionIterator,                // leaf  intersection
-        OneDGridLevelIntersectionIterator,                // level intersection
-        OneDGridLeafIntersectionIterator,                // leaf  intersection iter
-        OneDGridLevelIntersectionIterator,                // level intersection iter
+        OneDGridLeafIntersection,
+        OneDGridLevelIntersection,
+        OneDGridLeafIntersectionIterator,
+        OneDGridLevelIntersectionIterator,
         OneDGridHierarchicIterator,
         OneDGridLeafIterator,
         OneDGridLevelIndexSet<const OneDGrid>,
@@ -92,6 +93,8 @@ namespace Dune {
     template <int codim_, int dim_, class GridImp_>
     friend class OneDGridEntity;
     friend class OneDGridHierarchicIterator<OneDGrid>;
+    friend class OneDGridLeafIntersection<const OneDGrid>;
+    friend class OneDGridLevelIntersection<const OneDGrid>;
     friend class OneDGridLeafIntersectionIterator<const OneDGrid>;
     friend class OneDGridLevelIntersectionIterator<const OneDGrid>;
 

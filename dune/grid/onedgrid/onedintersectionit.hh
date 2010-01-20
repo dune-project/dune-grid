@@ -1,38 +1,28 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_ONE_D_GRID_INTERSECTIONIT_HH
-#define DUNE_ONE_D_GRID_INTERSECTIONIT_HH
+#ifndef DUNE_ONE_D_GRID_INTERSECTIONS_HH
+#define DUNE_ONE_D_GRID_INTERSECTIONS_HH
 
 /** \file
- * \brief The OneDGridIntersectionIterator class
+ * \brief The OneDGridLevelIntersection and OneDGridLeafIntersection classes
  */
 
 #include <dune/grid/onedgrid/onedgridentity.hh>
 
 namespace Dune {
 
-  //**********************************************************************
-  //
-  // --OneDGridIntersectionIterator
-  // --IntersectionIterator
-  /** \brief Iterator over all element neighbors
-   * \ingroup OneDGrid
-     Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
-     a neighbor is an entity of codimension 0 which has a common entity of codimension
-     These neighbors are accessed via a IntersectionIterator. This allows the implement
-     non-matching meshes. The number of neigbors may be different from the number
-     of an element!
-   */
+  /** \brief Intersection between two neighboring elements on a level grid */
   template<class GridImp>
-  class OneDGridLevelIntersectionIterator
+  class OneDGridLevelIntersection
   {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
 
-    friend class OneDGridEntity<0,dim,GridImp>;
+    // The corresponding iterator needs to access all members
+    friend class OneDGridLevelIntersectionIterator<GridImp>;
 
     //! Constructor for a given grid entity and a given neighbor
-    OneDGridLevelIntersectionIterator(OneDEntityImp<1>* center, int nb)
+    OneDGridLevelIntersection(OneDEntityImp<1>* center, int nb)
       : center_(center), neighbor_(nb),
         intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
         intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
@@ -40,7 +30,7 @@ namespace Dune {
     {}
 
     /** \brief Constructor creating the 'one-after-last'-iterator */
-    OneDGridLevelIntersectionIterator(OneDEntityImp<1>* center)
+    OneDGridLevelIntersection(OneDEntityImp<1>* center)
       : center_(center), neighbor_(2),
         intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
         intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
@@ -53,22 +43,10 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef Dune::Intersection<const GridImp, Dune::OneDGridLevelIntersectionIterator> Intersection;
 
     //! equality
-    bool equals(const OneDGridLevelIntersectionIterator<GridImp>& other) const {
+    bool equals(const OneDGridLevelIntersection<GridImp>& other) const {
       return (center_ == other.center_) && (neighbor_ == other.neighbor_);
-    }
-
-    //! prefix increment
-    void increment() {
-      neighbor_++;
-    }
-
-    //! \brief dereferencing
-    const Intersection & dereference() const
-    {
-      return reinterpret_cast<const Intersection&>(*this);
     }
 
     OneDEntityImp<1>* target() const {
@@ -265,16 +243,18 @@ namespace Dune {
   };
 
 
+  /** \brief Intersection between two neighboring elements on a leaf grid */
   template<class GridImp>
-  class OneDGridLeafIntersectionIterator
+  class OneDGridLeafIntersection
   {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
 
-    friend class OneDGridEntity<0,dim,GridImp>;
+    // The corresponding iterator needs to access all members
+    friend class OneDGridLeafIntersectionIterator<GridImp>;
 
     //! Constructor for a given grid entity and a given neighbor
-    OneDGridLeafIntersectionIterator(OneDEntityImp<1>* center, int nb)
+    OneDGridLeafIntersection(OneDEntityImp<1>* center, int nb)
       : center_(center), neighbor_(nb),
         intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
         intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
@@ -282,7 +262,7 @@ namespace Dune {
     {}
 
     /** \brief Constructor creating the 'one-after-last'-iterator */
-    OneDGridLeafIntersectionIterator(OneDEntityImp<1>* center)
+    OneDGridLeafIntersection(OneDEntityImp<1>* center)
       : center_(center), neighbor_(2),
         intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
         intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
@@ -295,25 +275,10 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef Dune::Intersection<const GridImp, Dune::OneDGridLeafIntersectionIterator> Intersection;
-
-    //! The Destructor
-    ~OneDGridLeafIntersectionIterator() {};
 
     //! equality
-    bool equals(const OneDGridLeafIntersectionIterator<GridImp>& other) const {
+    bool equals(const OneDGridLeafIntersection<GridImp>& other) const {
       return (center_ == other.center_) && (neighbor_ == other.neighbor_);
-    }
-
-    //! prefix increment
-    void increment() {
-      neighbor_++;
-    }
-
-    //! \brief dereferencing
-    const Intersection & dereference() const
-    {
-      return reinterpret_cast<const Intersection&>(*this);
     }
 
     OneDEntityImp<1>* target() const {

@@ -14,9 +14,9 @@ namespace Dune {
   {
     enum { dim = GridImp::dimension };
     template <class GridImp_>
-    friend class OneDGridLevelIntersectionIterator;
+    friend class OneDGridLevelIntersection;
     template <class GridImp_>
-    friend class OneDGridLeafIntersectionIterator;
+    friend class OneDGridLeafIntersection;
     friend class OneDGridEntity<0,dim,GridImp>;
 
   public:
