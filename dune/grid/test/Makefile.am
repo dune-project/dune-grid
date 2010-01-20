@@ -65,7 +65,7 @@ DUNE_EXTRA_CHECKS = -DDUNE_DEVEL_MODE
 # output coverage
 #COVERAGE = -fprofile-arcs -ftest-coverage
 AM_CXXFLAGS = $(COVERAGE)
-AM_CPPFLAGS = @AM_CPPFLAGS@ $(DUNE_EXTRA_CHECKS) -DSRCDIR='"$(srcdir)/"'
+AM_CPPFLAGS = @AM_CPPFLAGS@ $(DUNE_EXTRA_CHECKS) -DSRCDIR='"$(abs_srcdir)/"'
 
 #
 ## define the programs
