@@ -17,9 +17,4 @@ AC_DEFUN([DUNE_GRID_CHECK_MODULE],[
   std::vector<Dune::OneDGrid::ctype> coords;
   Dune::OneDGrid grid(coords);
   return grid.lbegin<0>(0) == grid.lend<0>(0);])
-
-  # Change Albertas idea of where the dune-grid libraries are, but only if
-  # Alberta was actually found
-  AS_IF([test -n "$DUNEALBERTA_LIBPATHFLAGS"],
-    [DUNEALBERTA_LIBPATHFLAGS='-L$(DUNE_GRID_LIBDIR)'])
 ])

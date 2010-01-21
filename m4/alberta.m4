@@ -12,19 +12,20 @@
 #   ALBERTA_BASE_LIBS = $(ALBERTA_LIBPATHFLAGS) -lalberta_util $ALBERTA_EXTRA
 #     LIBS that are always required independent of dimension
 #
-#   DUNEALBERTA_LIBPATHFLAGS = -L$(top_builddir)/lib
-#     Library path required for libalbertagrid.  The above value is apropriate
-#     when building dune-grid itself.  Other modules will call
-#     DUNE_GRID_CHECK_MODULE to check for dune-grid, so DUNE_GRID_CHECK_MODULE
-#     will reset DUNEALBERTA_LIBPATHFLAGS to something more apropriate.
-#
 #   ALBERTA_LIBPATHFLAGS = -L$(ALBERTAROOT)/lib
 #     Library path required for alberta
 #
-#   ALBERTA_LIBS = $(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_$(ALBERTA_DIM)d \
+#   ALBERTA_LIBS = -L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_$(ALBERTA_DIM)d -ldunegrid \
 #              $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d \
 #              $(ALBERTA_BASE_LIBS)
-#     All LIBS required for the configured dimension
+#     *OR*       = $(top_builddir)/lib/libdunealbertagrid_$(ALBERTA_DIM)d.la \
+#              $(top_builddir)/lib/libdunegrid.la \
+#              $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d \
+#              $(ALBERTA_BASE_LIBS)
+#     All LIBS required for the configured dimension.  The first value is
+#     substituted by default and is apropriate for modules depending on
+#     dune-grid.  dune-grid itself will overwrite that with the second value
+#     however in configure.ac.
 #
 #   ALBERTA1D_LIBS, ALBERTA2D_LIBS, ALBERTA3D_LIBS
 #     Likewise, but with the given dimension hardcoded.
@@ -64,6 +65,10 @@
 #
 # Defines the following automake conditional
 #    ALBERTA
+#
+# configure shell variables:
+#    HAVE_ALBERTA
+#      1 if a working Alberta was found.
 AC_DEFUN([DUNE_PATH_ALBERTA],[
   AC_REQUIRE([AC_PROG_CC])
   AC_REQUIRE([AC_PROG_F77])
@@ -155,10 +160,10 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       ALBERTA_BASE_LIBS="\$(ALBERTA_LIBPATHFLAGS) -lalberta_util $ALBERTA_EXTRA"
       # define varaible lib name depending on problem and world dim, to change
       # afterwards easily 
-      ALBERTA_LIBS='$(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_$(ALBERTA_DIM)d $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d $(ALBERTA_BASE_LIBS)'
-      ALBERTA1D_LIBS='$(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_1d $(ALBERTA_LIBPATHFLAGS) -lalberta_1d $(ALBERTA_BASE_LIBS)'
-      ALBERTA2D_LIBS='$(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_2d $(ALBERTA_LIBPATHFLAGS) -lalberta_2d $(ALBERTA_BASE_LIBS)'
-      ALBERTA3D_LIBS='$(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_3d $(ALBERTA_LIBPATHFLAGS) -lalberta_3d $(ALBERTA_BASE_LIBS)'
+      ALBERTA_LIBS='-L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_$(ALBERTA_DIM)d -ldunegrid $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d $(ALBERTA_BASE_LIBS)'
+      ALBERTA1D_LIBS='-L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_1d -ldunegrid $(ALBERTA_LIBPATHFLAGS) -lalberta_1d $(ALBERTA_BASE_LIBS)'
+      ALBERTA2D_LIBS='-L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_2d -ldunegrid $(ALBERTA_LIBPATHFLAGS) -lalberta_2d $(ALBERTA_BASE_LIBS)'
+      ALBERTA3D_LIBS='-L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_3d -ldunegrid $(ALBERTA_LIBPATHFLAGS) -lalberta_3d $(ALBERTA_BASE_LIBS)'
     fi
 
   fi  # end of alberta check (--without wasn't set)
