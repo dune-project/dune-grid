@@ -319,9 +319,20 @@ namespace Dune
 
      An id set provides a map \f[ m : E \to \mathbf{I}\f] where
      \f$E\f$ is a subset of the entities of a grid and \f$\mathbf{I}\f$ is a discrete
-     set of ids.  These ids need not be consecutive nor positive.  However, the C++ type
-     that implements them is required to provide <tt>operator<()</tt> and <tt>operator==()</tt>.
-     Hence they can be used as keys in an STL <tt>map</tt>.
+     set of ids. These ids need not be consecutive nor positive.
+     However, the ids must be usable as keys for STL associative containers
+     (e.g., <tt>std::map</tt>). For debugging purposes, it must also be possible
+     to write them into standard C++ streams.
+     More precisely, for such a type <tt>Id</tt>, at least the following operators
+     have to be provided:
+     \code
+     bool operator== ( const Id &, const Id & );
+     bool operator!= ( const Id &, const Id & );
+     bool opreator<  ( const Id &, const Id & );
+
+     template< class C, class T >
+     std::basic_ostream< C, T > &operator<< ( std::basic_ostream< C, T > &, const Id & );
+     \endcode
 
      The index map \f$m\f$ has the following properties:
 
