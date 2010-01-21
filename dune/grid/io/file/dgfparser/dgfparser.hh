@@ -493,9 +493,18 @@ namespace Dune
 
     void loadBalance()
     {
-      DataHandle dh(*this);
-      gridPtr_->loadBalance( dh.interface() );
-      gridPtr_->communicate( dh.interface(), InteriorBorder_All_Interface,ForwardCommunication);
+      if ( gridPtr_->comm().size() == 1 )
+        return;
+      int params = nofElParam_ + nofVtxParam_;
+      if ( gridPtr_->comm().max( params ) > 0 )
+      {
+        DataHandle dh(*this);
+        gridPtr_->loadBalance( dh.interface() );
+        gridPtr_->communicate( dh.interface(), InteriorBorder_All_Interface,ForwardCommunication);
+      } else
+      {
+        gridPtr_->loadBalance();
+      }
     }
 
   protected:
