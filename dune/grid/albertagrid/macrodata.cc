@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <vector>
+
 /** \file
  *  \author Martin Nolte
  *  \brief  provides a wrapper for ALBERTA's macro_data structure
@@ -9,6 +11,8 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/forloop.hh>
+
+#include <dune/grid/common/exceptions.hh>
 
 #if HAVE_ALBERTA
 
@@ -172,7 +176,7 @@ namespace Dune
       const int count = macroData.elementCount();
       for( int i = 0; i < count; ++i )
       {
-        FieldMatrix< Real, dimWorld, dimWorld > jacobian;
+        FieldMatrix< Real, dimWorld, dimWorld > jacobianTransposed;
         ElementId &id = macroData.element( i );
 
         const GlobalVector &x = macroData.vertex( id[ 0 ] );
@@ -180,13 +184,81 @@ namespace Dune
         {
           const GlobalVector &y = macroData.vertex( id[ j+1 ] );
           for( int k = 0; k < dimWorld; ++k )
-            jacobian[ j ][ k ] = y[ k ] - x[ k ];
+            jacobianTransposed[ j ][ k ] = y[ k ] - x[ k ];
         }
-        if( determinant( jacobian ) * orientation < 0 )
+        if( determinant( jacobianTransposed ) * orientation < 0 )
           swap( macroData, i, (dimWorld == 3 ? 2 : 0), (dimWorld == 3 ? 3 : 1) );
       }
     }
 
+
+#if DUNE_ALBERTA_VERSION < 0x300
+    template<>
+    template<>
+    void MacroData< 2 >::Library< 3 >
+    ::setOrientation ( MacroData &macroData, const Real orientation )
+    {
+      const int count = macroData.elementCount();
+
+      std::vector< FieldVector< Real, 3 > > normal( count );
+      for( int i = 0; i < count; ++i )
+      {
+        ElementId &id = macroData.element( i );
+
+        FieldMatrix< Real, 2, 3 > jacobianTransposed;
+        const GlobalVector &x = macroData.vertex( id[ 0 ] );
+        for( int j = 0; j < 2; ++j )
+        {
+          const GlobalVector &y = macroData.vertex( id[ j+1 ] );
+          for( int k = 0; k < 3; ++k )
+            jacobianTransposed[ j ][ k ] = y[ k ] - x[ k ];
+        }
+        normal[ i ] = vectorProduct( jacobianTransposed[ 0 ], jacobianTransposed[ 1 ] );
+      }
+
+      std::vector< int > previous( count, -1 );
+      std::vector< int > face( count, -1 );
+      for( int i = 0; i < count; ++i )
+      {
+        if( face[ i ] >= 0 )
+          continue;
+
+        int element = i;
+        while( element >= 0 )
+        {
+          ++face[ element ];
+          if( face[ element ] < 3 )
+          {
+            const int neighbor = macroData.neighbor( element, face[ element ] );
+            if( (neighbor >= 0) && (face[ neighbor ] < 0) )
+            {
+              previous[ neighbor ] = element;
+              if( normal[ element ] * normal[ neighbor ] < 0 )
+              {
+                swap( macroData, neighbor, 0, 1 );
+                normal[ neighbor ] *= -1;
+              }
+              element = neighbor;
+            }
+          }
+          else
+            element = previous[ element ];
+        }
+      }
+
+      bool oriented = true;
+      for( int i = 0; i < count; ++i )
+      {
+        for( int j = 0; j < 3; ++j )
+        {
+          const int nb = macroData.neighbor( i, j );
+          oriented &= ((nb < 0) || (normal[ i ] * normal[ nb ] > 0));
+        }
+      }
+      if( !oriented )
+        DUNE_THROW( GridError, "Surface grid cannot be oriented." );
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x300
 
 
     template< int dim >
