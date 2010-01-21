@@ -12,7 +12,9 @@
 
  */
 
+#include <dune/common/geometrytype.hh>
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/common/gridenums.hh>
 
 template< class Geometry, int codim, int dim >
 struct GeometryInterface
