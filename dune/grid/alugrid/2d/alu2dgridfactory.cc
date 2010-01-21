@@ -290,7 +290,9 @@ namespace Dune
     boundaryIds_.clear();
     boundaryProjections_.clear();
 
+#ifdef ALUGRID_NOTEMPFILE_2D
     std::istream& inFile = temp;
+#endif
 
     // ALUGrid is taking ownership of the bndProjections pointer
     Grid *grid =
