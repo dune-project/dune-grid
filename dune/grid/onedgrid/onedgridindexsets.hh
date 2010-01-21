@@ -77,13 +77,17 @@ namespace Dune {
     template <class EntityType>
     bool contains (const EntityType& e) const
     {
+      // If the entity isn't on the same level as this index set it cannot be contained in the index set
+      if (e.level() != level_)
+        return false;
+
       enum { cd = EntityType::codimension };
       typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LevelIterator IteratorType;
       IteratorType iend = grid_->template lend<cd,All_Partition>(level_);
       for (IteratorType it = grid_->template lbegin<cd,All_Partition>(level_);
            it != iend; ++it)
       {
-        if (it->level() == e.level() && this->template index<cd>(*it) == this->template index<cd>(e))
+        if (this->template index<cd>(*it) == this->template index<cd>(e))
           return true;
       }
       return false;
