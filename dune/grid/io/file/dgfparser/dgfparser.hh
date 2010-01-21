@@ -718,9 +718,19 @@ namespace Dune
      @code
        GridType & grid = *gridptr;
      @endcode
+     Like in all auto_ptr like objects the grid instance is destroyed
+     if the GridPtr goes out of scope. To be able to destruct the GridPtr
+     object without losing the grid call the release method:
+     @code
+       GridType *grid;
+       {
+         GridPtr< GridType > gridPtr( filename.c_str(), mpiHelper.getCommunicator() );
+         grid = gridPtr.release();
+       }
+     @endcode
 
      Remarks:
-     -# The last argument \c should be of the type \c Dune::MPIHelper::MPICommunicator
+     -# The last argument in the constructor of the GridPtr should be of the type \c Dune::MPIHelper::MPICommunicator
         which defaults to \c MPI_COMM_WORLD for parallel runs or some default value for serial runs.
      -# If the file given through the first argument is not a dgf file
         a suitable constructor on the \c GridType class is called - if
@@ -939,14 +949,18 @@ namespace Dune
      accessed using the
      Dune::GridPtr<GridType>::parameters(const Entity& en)
      method. Depending on the codimentsion of \c en the method returns either
-     the element or vertex parameters of that entity in the DGF file which
-     has minimal distance from the midpoint of the entity \c en. Note that in this
-     implementation the search procedure requires is \c O(N) where N is the number
-     of entities defined in the DGF file - in future releases this will be replaced
-     by a nearest neighbor search.
+     the element or vertex parameters of that entity in the DGF file.
      The number of parameters for a given
      codimension can be retrived using the method
      Dune::GridPtr<GridType>::nofParameters.
+     In the case of parallel runs only the process with rank zero reads the
+     dgf file and thus the parameters are only available on that processor.
+     Do not call loadBalance (or for that matter globalRefine, adapt) on the
+     grid instance before retrieving the parameters. To simplify the handling
+     of parameters in a parallel run the Dune::GridPtr<GridType>::loadBalance
+     method can be used to distribute the macro grid and the parameters.
+     Afterwards the parameters can be extracted on each processor using the
+     method GridPtr<GridType>::parameters.
 
     <!---------------------------------------------->
    \section Simplexgeneration Using Tetgen/Triangle
