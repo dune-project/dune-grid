@@ -854,7 +854,7 @@ namespace Dune
        - <em>expression</em> <b>*</b> <em>expression</em>
        - <em>expression</em> <b>/</b> <em>expression</em>
        - <em>expression</em> <b>**</b> <em>expression</em>
-       - <b>sqrt</b><em>expression</em>
+       - <b>sqrt</b> <em>expression</em>
        - <b>sin</b> <em>expression</em>
        - <b>cos</b> <em>expression</em>
        .
@@ -865,7 +865,8 @@ namespace Dune
        boundary segments:\n
        <b>default</b> <em>function</em>\n
        Note: Currently, the attached functions map global coordinates to global
-             coordinates.
+             coordinates. This feature is only available with AlbertaGrid (Version 3.0
+                 or above) or with ALUGrid.
      .
 
      @section CONSTR The Grid Construction Process
@@ -1214,6 +1215,8 @@ namespace Dune
    The following example shows a DGF file that projects 3 sides of a
    quadrilateral onto the surrounding circle:
    @include example-projection.dgf
+
+   \image html  example-projection.png "The resulting grid using AlbertaGrid<2>"
 
      <!---------------------------------------------->
    \section dgfexample4 Grid Generation in 3d

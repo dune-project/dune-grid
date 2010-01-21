@@ -1,9 +1,14 @@
 DGF
 
-INTERVAL
+VERTEX
 -1 -1
+ 1 -1
+-1  1
  1  1
- 1  1
+#
+
+CUBE
+0 1 2 3
 #
 
 PROJECTION
