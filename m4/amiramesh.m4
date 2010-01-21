@@ -1,6 +1,31 @@
+## -*- autoconf -*-
 # $Id: dune_amira.m4 5156 2008-04-14 09:28:06Z christi $
 # searches for amiramesh-headers and libs
 
+# DUNE_PATH_AMIRAMESH()
+# 
+# shell variables:
+#   with_amiramesh
+#     no or yes
+#   AMIRAMESHROOT
+#   AMIRAMESH_LIB_PATH
+#   AMIRAMESH_INCLUDE_PATH
+#   AMIRAMESH_CPPFLAGS
+#   AMIRAMESH_LDFLAGS
+#   AMIRAMESH_LIBS
+#   HAVE_AMIRAMESH
+#     1 or 0 or undef
+#
+# substitutions:
+#   AMIRAMESH_CPPFLAGS
+#   AMIRAMESH_LDFLAGS
+#   AMIRAMESH_LIBS
+#
+# defines:
+#   HAVE_AMIRAMESH
+#
+# conditionals:
+#   AMIRAMESH
 AC_DEFUN([DUNE_PATH_AMIRAMESH],[
   AC_REQUIRE([AC_PROG_CXX])
 
@@ -11,6 +36,9 @@ AC_DEFUN([DUNE_PATH_AMIRAMESH],[
 ac_save_LDFLAGS="$LDFLAGS"
 ac_save_CPPFLAGS="$CPPFLAGS"
 ac_save_LIBS="$LIBS"
+
+# initialize
+HAVE_AMIRAMESH=0
 
 ## do nothing if --without-amiramesh is used
 if test x$with_amiramesh != xno ; then
@@ -32,7 +60,6 @@ fi
 AMIRAMESH_LIB_PATH="$AMIRAMESHROOT/lib"
 AMIRAMESH_INCLUDE_PATH="$AMIRAMESHROOT/include"
 
-LDFLAGS="$LDFLAGS -L$AMIRAMESH_LIB_PATH"
 CPPFLAGS="$CPPFLAGS -I$AMIRAMESH_INCLUDE_PATH"
 
 AC_LANG_PUSH([C++])
@@ -43,16 +70,15 @@ AC_CHECK_HEADER([amiramesh/AmiraMesh.h],
 	HAVE_AMIRAMESH="1"],
   AC_MSG_WARN([AmiraMesh.h not found in $AMIRAMESH_INCLUDE_PATH/amiramesh]))
 
-CPPFLAGS="$AMIRAMESH_CPPFLAGS"
+CPPFLAGS="$ac_save_CPPFLAGS $AMIRAMESH_CPPFLAGS"
 
 # if header is found...
 if test x$HAVE_AMIRAMESH = x1 ; then
-   LIBS="$LIBS -lamiramesh"
+   LIBS="-L$AMIRAMESH_LIB_PATH -lamiramesh $LIBS"
 
    AC_LINK_IFELSE(AC_LANG_PROGRAM([#include "amiramesh/AmiraMesh.h"], [AmiraMesh* am = AmiraMesh::read("test");]),
-	[AMIRAMESH_LIBS="-lamiramesh"
-         AMIRAMESH_LDFLAGS="-L$AMIRAMESH_LIB_PATH"
-         LIBS="$LIBS $AMIRAMESH_LIBS"],
+	[AMIRAMESH_LIBS="-L$AMIRAMESH_LIB_PATH -lamiramesh"
+         AMIRAMESH_LDFLAGS=""],
 	[HAVE_AMIRAMESH="0"
 	AC_MSG_WARN(libamiramesh not found!)])
 fi
@@ -71,9 +97,8 @@ if test x$HAVE_AMIRAMESH = x1 ; then
   AC_DEFINE(HAVE_AMIRAMESH, 1, [Define to 1 if amiramesh-library is found])
 
   # add to global list
-  DUNE_PKG_LDFLAGS="$DUNE_PKG_LDFLAGS $AMIRAMESH_LDFLAGS"
-  DUNE_PKG_LIBS="$DUNE_PKG_LIBS $AMIRAMESH_LIBS"
-  DUNE_PKG_CPPFLAGS="$DUNE_PKG_CPPFLAGS $AMIRAMESH_CPPFLAGS"
+  DUNE_ADD_ALL_PKG([AmiraMesh], [\$(AMIRAMESH_CPPFLAGS)],
+                   [\$(AMIRAMESH_LDFLAGS)], [\$(AMIRAMESH_LIBS)]) 
 
   # set variable for summary
   with_amiramesh="yes"
