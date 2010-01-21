@@ -55,10 +55,10 @@ testalu_LDADD = $(LOCAL_LIBS)			\
 endif
 
 if ALBERTA
-testalberta_CXXFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) -DALBERTAGRID -DGRIDDIM=2
+testalberta_CXXFLAGS = $(AM_CPPFLAGS) $(ALBERTA2D_CPPFLAGS) -DALBERTAGRID -DGRIDDIM=2 -DWORLDDIM=2
 testalberta_SOURCES = main.cc
 testalberta_LDADD = $(LOCAL_LIBS)		\
-	$(ALBERTA_LDFLAGS) $(ALBERTA_LIBS)	\
+	$(ALBERTA2D_LIBS)	\
 	$(LDADD)
 endif
 
@@ -88,7 +88,8 @@ EXTRA_DIST = examplegrid10a.dgf examplegrid10b.dgf examplegrid10.dgf		\
 	examplegrid1gen.dgf examplegrid1s.dgf examplegrid2a.dgf					\
 	examplegrid2b.dgf examplegrid2c.dgf examplegrid2d.dgf					\
 	examplegrid2e.dgf examplegrid5.dgf examplegrid6.dgf examplegrid7.dgf	\
-	examplegrid9.dgf test3d.dgf test2d.dgf test1d.dgf
+	examplegrid9.dgf test3d.dgf test2d.dgf test1d.dgf \
+	example-projection.dgf
 
 CLEANFILES = examplegrid*.dgf.* dgfparser.log test?d.dgf.*
 

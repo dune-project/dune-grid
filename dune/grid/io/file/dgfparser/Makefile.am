@@ -1,8 +1,5 @@
 SUBDIRS = test utils
 
-GRIDDIM=2
-GRIDTYPE=YASPGRID
-
 noinst_LTLIBRARIES = libdgfparser.la
 
 libdgfparser_la_SOURCES = dgfparserblocks.cc dgfprojectionblock.cc dgfparser.cc
