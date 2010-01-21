@@ -1,7 +1,37 @@
-#! /bin/bash
+## -*- autoconf -*-
 # $Id: ug.m4 5156 2008-04-14 09:28:06Z christi $
 # searches for UG headers and libs
 
+# DUNE_PATH_UG()
+#
+# configure shell variables:
+#   UGROOT
+#   UG_LIB_PATH
+#   UG_INCLUDE_PATH
+#   UG_LDFLAGS
+#   UG_LIBS
+#   UG_CPPFLAGS
+#   HAVE_UG
+#       1 or 0 or undefined
+#   with_ug
+#       "no" or "yes" with stuff appended
+#   enable_ug_lgmdomain
+#       yes or no
+#
+# configure substitutions/makefile variables:
+#   UG_CPPFLAGS
+#   UG_LDFLAGS
+#   UG_LIBS
+#
+# preprocessor defines:
+#   HAVE_UG
+#     undefined or ENABLE_UG
+#   UG_LGMDOMAIN
+#     undefined or 1
+#
+# automake conditionals:
+#   UG
+#   UG_LGMDOMAIN
 AC_DEFUN([DUNE_PATH_UG],[
   AC_REQUIRE([AC_PROG_CC])
   AC_REQUIRE([AC_PATH_XTRA])
@@ -15,6 +45,9 @@ AC_DEFUN([DUNE_PATH_UG],[
   ac_save_CPPFLAGS="$CPPFLAGS"
   ac_save_LIBS="$LIBS"
   
+  # initialize
+  HAVE_UG=0
+
   ## do nothing if --without-ug is used
   if test x$with_ug != xno ; then
       
@@ -36,18 +69,21 @@ AC_DEFUN([DUNE_PATH_UG],[
       UG_LIB_PATH="$UGROOT/lib"
       UG_INCLUDE_PATH="$UGROOT/include"
       
-      UG_LDFLAGS="-L$UG_LIB_PATH"
+      UG_LDFLAGS=""
 
       # set variables so that tests can use them
-      LDFLAGS="$LDFLAGS -L$UG_LIB_PATH"
       CPPFLAGS="$CPPFLAGS -I$UG_INCLUDE_PATH -DENABLE_UG"
+      # hack around limitation of AC_CHECK_LIBS: -L really belong into LIBS,
+      # but it has to be in front of the library that AC_CHECK_LIBS inserts on
+      # the linker command line
+      LDFLAGS="$LDFLAGS -L$UG_LIB_PATH"
 
       AC_ARG_ENABLE(ug-lgmdomain,
         AC_HELP_STRING([--enable-ug-lgmdomain],[use UG LGM domain (default is standard domain)]))
       if test x"$enable_ug_lgmdomain" = xyes ; then
-        UG_LIBS="-lugL2 -lugL3 -ldevS"
+        UG_LIBS="-L$UG_LIB_PATH -lugL2 -lugL3 -ldevS"
       else
-        UG_LIBS="-lugS2 -lugS3 -ldevS"
+        UG_LIBS="-L$UG_LIB_PATH -lugS2 -lugS3 -ldevS"
       fi
 
       # backup CPPFLAGS so I can add an additional flag just for AC_CHECk_HEADER
@@ -74,7 +110,7 @@ AC_DEFUN([DUNE_PATH_UG],[
 
       # define LTCXXCOMPILE like it will be defined in the Makefile
       ac_save_CXX="$CXX"
-      LTCXXLINK="./libtool --tag=CXX --mode=link $CXX $CXXFLAGS $LDFLAGS"
+      LTCXXLINK="./libtool --tag=CXX --mode=link $CXX"
       CXX="$LTCXXLINK"
 
       if test x$HAVE_UG = x1; then
@@ -93,8 +129,8 @@ AC_DEFUN([DUNE_PATH_UG],[
               [#include "initug.h"
                #include "parallel.h"],
           [int i = UG::D2::InitDDD()],
-              [UG_LDFLAGS="$LDFLAGS"
-           UG_CPPFLAGS="$UG_CPPFLAGS -DModelP"
+              [UG_LDFLAGS="$DUNEMPILDFLAGS $UG_LDFLAGS"
+           UG_CPPFLAGS="$DUNEMPICPPFLAGS $UG_CPPFLAGS -DModelP"
            HAVE_UG="1"
            UG_LIBS="$UG_LIBS $DUNEMPILIBS"
            with_ug="yes (parallel)"
@@ -108,13 +144,12 @@ AC_DEFUN([DUNE_PATH_UG],[
       # parallel lib not found/does not work?  Let's check for the sequential one
       if test x$HAVE_UG != x1; then
         AC_MSG_CHECKING([UG libraries (sequential)])
-        LIBS="$UG_LIBS"
-        CPPFLAGS="$UG_CPPFLAGS -D_2"
+        LIBS="$UG_LIBS $LIBS"
+        CPPFLAGS="$CPPFLAGS $UG_CPPFLAGS -D_2"
           AC_TRY_LINK(
               [#include "initug.h"],
           [int i = UG::D2::InitUg(0,0)],
-              [UG_LDFLAGS="$LDFLAGS"
-           HAVE_UG="1"
+              [HAVE_UG="1"
                with_ug="yes (sequential)"
            AC_MSG_RESULT(yes)
               ],
@@ -149,34 +184,33 @@ AC_DEFUN([DUNE_PATH_UG],[
       CXX="$ac_save_CXX"
       AC_LANG_POP([C++])
       
-      # did it work?
-      if test x$HAVE_UG = x0 ; then
+  # end of "no --without-ug"
+  fi
+
+  # did it work?
+  if test x$HAVE_UG = x0 ; then
       # reset flags, so they do not appear in makefiles
       UG_LDFLAGS=""
       UG_LIBS=""
       UG_CPPFLAGS=""
-      fi
-      if test x$HAVE_UG = x1 ; then
-      AC_SUBST(UG_LDFLAGS, $UG_LDFLAGS)
-      AC_SUBST(UG_LIBS, $UG_LIBS)
-      AC_SUBST(UG_CPPFLAGS, $UG_CPPFLAGS)
+  fi
+
+  AC_SUBST([UG_LDFLAGS])
+  AC_SUBST([UG_LIBS])
+  AC_SUBST([UG_CPPFLAGS])
+
+  # add to global list
+  DUNE_ADD_ALL_PKG([UG], [$UG_CPPFLAGS], [$UG_LDFLAGS], [$UG_LIBS])
+
+  if test x$HAVE_UG = x1 ; then
       AC_DEFINE(HAVE_UG, ENABLE_UG, 
         [This is only true if UG was found by configure 
          _and_ if the application uses the UG_CPPFLAGS])
       if test x"$enable_ug_lgmdomain" = xyes ; then
         AC_DEFINE(UG_LGMDOMAIN, 1, [use UG LGM domain])
       fi
+  fi 
       
-    # add to global list
-      DUNE_PKG_LDFLAGS="$DUNE_PKG_LDFLAGS $UG_LDFLAGS"
-      DUNE_PKG_LIBS="$DUNE_PKG_LIBS $UG_LIBS"
-      DUNE_PKG_CPPFLAGS="$DUNE_PKG_CPPFLAGS $UG_CPPFLAGS"
-      
-      fi 
-      
-  # end of "no --without-ug"
-  fi
-  
   # tell automake   
   AM_CONDITIONAL(UG, test x$HAVE_UG = x1)
   AM_CONDITIONAL(UG_LGMDOMAIN, test x$HAVE_UG = x1 && test x$UG_LGMDOMAIN = x1)
@@ -189,7 +223,3 @@ AC_DEFUN([DUNE_PATH_UG],[
   DUNE_ADD_SUMMARY_ENTRY([UG],[$with_ug])
   
 ])
-
-dnl Local Variables:
-dnl mode: shell-script
-dnl End:
