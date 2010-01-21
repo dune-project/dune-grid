@@ -22,6 +22,7 @@ void checkAlbertaReader ()
 
   // create grid and just check the macro grid
   Grid *grid = factory.createGrid();
+  grid->globalRefine( 2 );
   gridcheck( *grid );
   //GridFactory< Grid >::destroyGrid( grid );
   delete grid;
