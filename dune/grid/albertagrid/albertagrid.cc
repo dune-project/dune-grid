@@ -34,7 +34,7 @@ namespace Dune
                         "- this assertion can be disabled by defining "
                         "DUNE_ALBERTA_SURFACE_GRID." );
 #endif
-    // If this check fails, reconfigure with --with-alberta-world-dim=dimworld
+    // If this check fails, define ALBERTA_DIM accordingly
     dune_static_assert( (dimworld == Alberta::dimWorld),
                         "Template Parameter dimworld does not match "
                         "ALBERTA's DIM_OF_WORLD setting." );
