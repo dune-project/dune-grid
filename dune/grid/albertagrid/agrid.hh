@@ -156,6 +156,8 @@ namespace Dune
     friend class GridFactory< This >;
 
     friend class AlbertaGridHierarchicIterator< This >;
+
+    friend class AlbertaGridIntersectionBase< const This >;
     friend class AlbertaGridLeafIntersection< const This >;
 
     friend class AlbertaMarkerVector< dim, dimworld >;
