@@ -31,7 +31,7 @@ endif
 GRIDTYPE=YASPGRID
 GRIDDIM=2
 
-ALBERTA_DIM = $(GRIDDIM)
+ALBERTA_DIM = $(WORLDDIM)
 
 #
 ## Some parameters for the geogrid test
