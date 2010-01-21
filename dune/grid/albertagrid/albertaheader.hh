@@ -5,6 +5,15 @@
 
 #if HAVE_ALBERTA
 
+#if not (ALBERTA_DIM > 0)
+  #if HEADERCHECK
+    #undef ALBERTA_DIM
+    #define ALBERTA_DIM 2
+  #else
+    #error ALBERTA_DIM should be 1, 2, or 3
+  #endif
+#endif
+
 // Set ALBERTA's DIM_OF_WORLD preprocessor variable
 #ifndef ALBERTA_DIM
 #error "ALBERTA_DIM needed to use AlbertaGrid."
