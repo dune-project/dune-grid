@@ -31,7 +31,14 @@
   #error "GRIDDIM not defined, use 'ALL_PKG_CPPFLAGS'."
 #endif
 #if not (GRIDDIM > 0)
-  #error "GRIDDIM must be a positive integer. Specify GRIDDIM in make command or use --with-griddim during configure."
+  #if HEADERCHECK
+    #undef GRIDDIM
+    #define GRIDDIM 2
+    #undef WORLDDIM
+    #define WORLDDIM 2
+  #else
+    #error "GRIDDIM must be a positive integer. Specify GRIDDIM in make command or use --with-griddim during configure."
+  #endif
 #endif
 
 #ifndef WORLDDIM

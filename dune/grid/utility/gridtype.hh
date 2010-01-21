@@ -86,6 +86,11 @@
 #include <dune/common/deprecated.hh>
 #include <dune/grid/utility/griddim.hh>
 
+#if HEADERCHECK
+  #undef NOGRID
+  #define YASPGRID
+#endif
+
 // Check for AlbertaGrid
 #if defined ALBERTAGRID
   #if HAVE_GRIDTYPE
