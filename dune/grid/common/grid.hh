@@ -12,13 +12,13 @@
 
 // dune-common includes
 #include <dune/common/deprecated.hh>
-#include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/geometrytype.hh>
 
 // local includes
 #include <dune/grid/common/gridenums.hh>
+#include <dune/grid/common/exceptions.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridview.hh>
@@ -338,16 +338,11 @@ namespace Dune {
          </TABLE>
    */
 
-  //************************************************************************
-  // G R I D E R R O R
-  //************************************************************************
 
-  /** \brief Base class for exceptions in Dune grid modules.
-   */
-
-  class GridError : public Exception {};
 
   // Forward Declarations
+  // --------------------
+
   template<int mydim, int cdim, class GridImp,template<int,int,class> class GeometryImp> class Geometry;
   // dim is necessary because Entity will be specialized for codim==0 _and_ codim==dim
   // EntityImp gets GridImp as 3rd template parameter to distinguish between const and mutable grid

@@ -18,7 +18,7 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   gridview.hh defaultgridview.hh \
   gridenums.hh adaptcallback.hh \
   dynamicsubindexid.hh boundaryprojection.hh \
-  topologyfactory.hh
+  topologyfactory.hh exceptions.hh
 
 SUBDIRS = refinement test quadraturerules
 
