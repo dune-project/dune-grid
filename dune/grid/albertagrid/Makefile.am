@@ -1,5 +1,8 @@
 # $Id$
 
+GRIDDIM=2
+GRIDTYPE=ALBERTAGRID
+
 if ALBERTA
 noinst_LTLIBRARIES = libalbertagrid_1d.la libalbertagrid_2d.la libalbertagrid_3d.la
 
