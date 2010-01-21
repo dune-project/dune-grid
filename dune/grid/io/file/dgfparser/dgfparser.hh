@@ -837,6 +837,35 @@ namespace Dune
        \code
    1 0, 0 1 + 1 0
        \endcode
+     - \b Projection \n
+       Each line either declares a function or it assigns one a boundary segment.
+       Functions are declared as follows:\n
+       <b>function</b> <em>function</em> <b>(</b> <em>variable</em> <b>)</b> <b>=</b> <em>expression</em>\n
+       The following expressions are currently implemented:
+       - <em>constant</em>
+       - <em>variable</em>
+       - <b>(</b> <em>expression</em> <b>)</b>
+       - <em>function</em> <b>(</b> <em>expression</em> <b>)</b>
+       - <em>expression</em> <b>[</b> <em>constant</em> <b>]</b>
+       - <b>-</b> <em>expression</em>
+       - <b>|</b> <em>expression</em> <b>|</b>
+       - <em>expression</em> <b>+</b> <em>expression</em>
+       - <em>expression</em> <b>-</b> <em>expression</em>
+       - <em>expression</em> <b>*</b> <em>expression</em>
+       - <em>expression</em> <b>/</b> <em>expression</em>
+       - <em>expression</em> <b>**</b> <em>expression</em>
+       - <b>sqrt</b><em>expression</em>
+       - <b>sin</b> <em>expression</em>
+       - <b>cos</b> <em>expression</em>
+       .
+       Functions are assigned to boundary segments as follows:\n
+       <b>segment</b> <em>vertex</em> ... <em>vertex</em> <em>function</em>\n
+       Here, the given vertices identify the boundary segment.\n
+       Another possibility is to set a default, assigned to all non-listed
+       boundary segments:\n
+       <b>default</b> <em>function</em>\n
+       Note: Currently, the attached functions map global coordinates to global
+             coordinates.
      .
 
      @section CONSTR The Grid Construction Process
@@ -1069,6 +1098,7 @@ namespace Dune
    - \ref dgfexample2
    - \ref dgfexampleParam
    - \ref dgfexample3
+   - \ref dgfexample6
 
    In three space dimensions:
    - \ref dgfexample4
@@ -1178,6 +1208,12 @@ namespace Dune
    @endcode
    is added than the same simplex grid as for AlbertaGrid<2,2> would be
    constructed.
+
+     <!---------------------------------------------->
+   \section dgfexample6 Boundary Projections
+   The following example shows a DGF file that projects 3 sides of a
+   quadrilateral onto the surrounding circle:
+   @include example-projection.dgf
 
      <!---------------------------------------------->
    \section dgfexample4 Grid Generation in 3d
