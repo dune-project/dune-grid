@@ -1,5 +1,33 @@
+## -*- autoconf -*-
 # searches for psurface-headers and lib
 
+# DUNE_PATH_PSURFACE()
+#
+# DUNE_PATH_AMIRAMESH must be called previously if psurface was built with
+# AmiraMesh support
+#
+# shell variables:
+#   with_psurface
+#     yes or no
+#   PSURFACEROOT
+#   PSURFACE_LIB_PATH
+#   PSURFACE_INCLUDE_PATH
+#   PSURFACE_CPPFLAGS
+#   PSURFACE_LDFLAGS
+#   PSURFACE_LIBS
+#   HAVE_PSURFACE
+#     0 or 1
+#
+# substitutions:
+#   PSURFACE_LIBS
+#   PSURFACE_LDFLAGS
+#   PSURFACE_CPPFLAGS
+#
+# defines:
+#   HAVE_PSURFACE
+#
+# conditionals:
+#   PSURFACE
 AC_DEFUN([DUNE_PATH_PSURFACE],[
   AC_REQUIRE([AC_PROG_CXX])
   AC_REQUIRE([DUNE_PATH_AMIRAMESH])
@@ -11,6 +39,9 @@ AC_DEFUN([DUNE_PATH_PSURFACE],[
 ac_save_LDFLAGS="$LDFLAGS"
 ac_save_CPPFLAGS="$CPPFLAGS"
 ac_save_LIBS="$LIBS"
+
+# initialize to sane value
+HAVE_PSURFACE=0
 
 ## do nothing if --without-psurface is used
 if test x$with_psurface != xno ; then
@@ -32,7 +63,6 @@ fi
 PSURFACE_LIB_PATH="$PSURFACEROOT/lib"
 PSURFACE_INCLUDE_PATH="$PSURFACEROOT/include"
 
-LDFLAGS="$LDFLAGS -L$PSURFACE_LIB_PATH"
 CPPFLAGS="$CPPFLAGS -I$PSURFACE_INCLUDE_PATH"
 
 AC_LANG_PUSH([C++])
@@ -46,7 +76,7 @@ AC_CHECK_HEADER([psurface.h],
     fi
    ])
 
-CPPFLAGS="$PSURFACE_CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $PSURFACE_CPPFLAGS"
 
 # if header is found...
 if test x$HAVE_PSURFACE = x1 ; then
@@ -58,12 +88,12 @@ if test x$HAVE_PSURFACE = x1 ; then
    # for the test to link (and since these flags must be set properly the AmiraMesh
    # test must have been called successfully before).  If psurface is compiled
    # without AmiraMesh support than the additional flags here do not matter.
-   LIBS="$LIBS -lpsurface $AMIRAMESH_LDFLAGS $AMIRAMESH_LIBS"
+   LIBS="-L$PSURFACE_LIB_PATH -lpsurface $AMIRAMESH_LIBS $LIBS"
+   LDFLAGS="$LDFLAGS $AMIRAMESH_LDFLAGS"
 
    AC_LINK_IFELSE(AC_LANG_PROGRAM([#include "psurface.h"], [psurface::LoadMesh("label", "filename");]),
-	[PSURFACE_LIBS="-lpsurface"
-         PSURFACE_LDFLAGS="-L$PSURFACE_LIB_PATH"
-         LIBS="$LIBS $PSURFACE_LIBS"
+	[PSURFACE_LIBS="-L$PSURFACE_LIB_PATH -lpsurface"
+         PSURFACE_LDFLAGS=""
          AC_MSG_RESULT(yes)],
 	[HAVE_PSURFACE="0"
         AC_MSG_RESULT(no)
@@ -84,9 +114,8 @@ if test x$HAVE_PSURFACE = x1 ; then
   AC_DEFINE(HAVE_PSURFACE, 1, [Define to 1 if psurface-library is found])
 
   # add to global list
-  DUNE_PKG_LDFLAGS="$DUNE_PKG_LDFLAGS $PSURFACE_LDFLAGS"
-  DUNE_PKG_LIBS="$DUNE_PKG_LIBS $PSURFACE_LIBS"
-  DUNE_PKG_CPPFLAGS="$DUNE_PKG_CPPFLAGS $PSURFACE_CPPFLAGS"
+  DUNE_ADD_ALL_PKG([psurface], [$PSURFACE_CPPFLAGS],
+                   [$PSURFACE_LDFLAGS], [$PSURFACE_LIBS])
 
   # set variable for summary
   with_psurface="yes"
