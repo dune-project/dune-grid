@@ -57,6 +57,7 @@ namespace Dune
     enum { dim = GridType::dimension };
     enum { dimworld = GridType::dimensionworld };
 
+  public:
 #if HAVE_GRAPE
     // defined in griddisplay.hh
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
@@ -69,7 +70,6 @@ namespace Dune
     typedef void setGridPartIterators_t (DUNE_DAT * , void * gridPart);
 #endif // #if HAVE_GRAPE
 
-  public:
     typedef typename GridType::template Codim<0>:: HierarchicIterator
     HierarchicIteratorType;
 
