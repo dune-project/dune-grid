@@ -394,9 +394,6 @@ bool Dune::OneDGrid::adapt()
 
         OneDGridList<OneDEntityImp<0> >::iterator centerVertexIterator = vertices(i+1).insert(leftUpperVertex->succ_, centerVertex);
 
-        // Check if rightUpperVertex is already in the list
-        OneDGridList<OneDEntityImp<0> >::iterator succOfCenter = centerVertexIterator->succ_;
-
         // ////////////////////////////////////////////////////////////
         // Does the right vertex exist on the next-higher level?
         // If no create it
