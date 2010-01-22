@@ -218,6 +218,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
     DUNE_THROW(IOError, "No nodes found");
 
   static int boundaryNumber = 0;
+  const int dim = GridType::dimension;
 
   for(int i = 0; i < noOfSegments; i++) {
 
@@ -230,7 +231,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
     vertices[2] = point[2];
 
     factory.insertBoundarySegment(vertices,
-                                  new PSurfaceBoundarySegment<GridType::dimension>(boundaryNumber,i));
+                                  shared_ptr<BoundarySegment<dim,dim> >(new PSurfaceBoundarySegment<dim>(boundaryNumber,i)));
 
   }
   boundaryNumber++;
