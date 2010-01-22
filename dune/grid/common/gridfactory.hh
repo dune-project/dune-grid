@@ -12,6 +12,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/geometrytype.hh>
 #include <dune/common/shared_ptr.hh>
+#include <dune/common/function.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/boundarysegment.hh>
@@ -116,15 +117,29 @@ namespace Dune
         \param vertices The vertices of the new element, using the DUNE numbering
 
         Make sure the inserted element is not inverted (this holds even
-        for simplices).  There are grids that can't handle inverted tets.
+        for simplices).  There are grids that can't handle inverted elements.
      */
     virtual void insertElement(const GeometryType& type,
                                const std::vector<unsigned int>& vertices) = 0;
 
+    /** \brief Insert a parametrized element into the coarse grid
+        \param type The GeometryType of the new element
+        \param vertices The vertices of the new element, using the DUNE numbering
+        \param elementParametrization A function prescribing the shape of this element
+
+        Make sure the inserted element is not inverted (this holds even
+        for simplices).  There are grids that can't handle inverted elements.
+     */
+    virtual void insertElement(const GeometryType& type,
+                               const std::vector<unsigned int>& vertices,
+                               const shared_ptr<VirtualFunction<FieldVector<ctype,dimension>,FieldVector<ctype,dimworld> > >& elementParametrization)
+    {
+      DUNE_THROW(GridError, "This grid does not support parametrized elements!");
+    }
+
     /** \brief Method to insert an arbitrarily shaped boundary segment into a coarse grid
         \param vertices The indices of the vertices of the segment
         \param boundarySegment Class implementing the geometry of the boundary segment.
-        The grid object takes control of this object and deallocates it when destructing itself.
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int> vertices,
                                        const shared_ptr<BoundarySegment<dimension,dimworld> >& boundarySegment)
