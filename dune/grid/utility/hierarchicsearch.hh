@@ -52,21 +52,21 @@ namespace Dune
        recursively continue until we found an entity that is part of
        the IndexSet.
      */
-    EntityPointer hFindEntity(const EntityPointer e,
-                              const FieldVector<ct,dimw>& global) const
+    EntityPointer hFindEntity ( const Entity &e,
+                                const FieldVector<ct,dimw>& global) const
     {
       // loop over all child Entities
-      HierarchicIterator it = e->hbegin(e->level()+1);
-      HierarchicIterator end = e->hend(e->level()+1);
-      for (; it != end; ++it)
+      const HierarchicIterator end = e.hend(e.level()+1);
+      for( HierarchicIterator it = e.hbegin( e.level()+1 ); it != end; ++it )
       {
         FieldVector<ct,dim> local = it->geometry().local(global);
         if (GenericReferenceElements<double, dim>::general(it->type()).checkInside(local))
         {
-          // return if we found the leaf
-          if (is.contains(*it)) return it;
-          // else search through the child entites
-          else return hFindEntity(it, global);
+          // return if we found the leaf, else search through the child entites
+          if( is.contains( *it ) )
+            return EntityPointer( it );
+          else
+            return hFindEntity( *it, global );
         }
       }
       DUNE_THROW(Exception, "Unexpected internal Error");
@@ -89,17 +89,23 @@ namespace Dune
       LevelIterator end = g.template lend<0>(0);
       for (; it != end; ++it)
       {
-        FieldVector<ct,dim> local = it->geometry().local(global);
-        if (GenericReferenceElements<double, dim>::general(it->type()).checkInside(local))
-        {
-          // return if we found the leaf
-          if (is.contains(*it)) return it;
-          // else search through the child entites
-          else return hFindEntity(it, global);
-        }
+        const Entity &e = *it;
+        const typename Entity::Geometry &geo = e.geometry();
+
+        FieldVector< ct, dim > local = geo.local( global );
+        if( !GenericReferenceElements< double, dim >::general( geo.type() ).checkInside( local ) )
+          continue;
+
+        if( (dim != dimw) && ((geo.global( local ) - global).two_norm() > 1e-8) )
+          continue;
+
+        // return if we found the leaf, else search through the child entites
+        if( is.contains( *it ) )
+          return EntityPointer( it );
+        else
+          return hFindEntity( *it, global );
       }
-      DUNE_THROW(GridError,
-                 "Coordinate " << global << " is outside the grid");
+      DUNE_THROW( GridError, "Coordinate " << global << " is outside the grid." );
     }
 
   private:
