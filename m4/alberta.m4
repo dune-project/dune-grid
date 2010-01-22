@@ -189,7 +189,8 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     fi
 
     # add to global list
-    DUNE_ADD_ALL_PKG([Alberta], [$ALBERTA_CPPFLAGS], [$ALBERTA_LDFLAGS], [$ALBERTA_LIBS])
+    DUNE_ADD_ALL_PKG([Alberta], [\${ALBERTA_CPPFLAGS}],
+                     [\${ALBERTA_LDFLAGS}], [\${ALBERTA_LIBS}])
 
     # set variable for summary
     with_alberta="yes (Version $ALBERTA_VERSION)"
