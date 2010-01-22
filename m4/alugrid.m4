@@ -1,6 +1,34 @@
-dnl -*- autoconf -*-
+dnl -*- mode: autoconf; tab-width: 4; indent-tabs-mode: nil; -*-
 # searches for alugrid-headers and libs
 
+# DUNE_PATH_ALUGRID()
+#
+# shell variables:
+#   with_alugrid
+#     no or yes
+#   ALUGRIDROOT
+#   ALUGRID_VERSIONNO
+#   ALUGRID_LIB_PATH
+#   ALUGRID_INCLUDE_PATH
+#   ALUGRID_CPPFLAGS
+#   ALUGRID_LDFLAGS
+#   ALUGRID_LIBS
+#   HAVE_ALUGRID
+#     undef or 1 or 0
+#
+# substitutions:
+#   ALUGRID_CPPFLAGS
+#   ALUGRID_LDFLAGS
+#   ALUGRID_LIBS
+#
+# defines:
+#   HAVE_ALUGRID
+#     ENABLE_ALUGRID or undefined
+#   ALUGRID_PARALLEL_H
+#   ALUGRID_SERIAL_H
+#
+# conditionals:
+#   ALUGRID
 AC_DEFUN([DUNE_PATH_ALUGRID],[
   AC_REQUIRE([AC_PROG_CXX])
   AC_REQUIRE([DUNE_MPI])
@@ -13,22 +41,26 @@ AC_DEFUN([DUNE_PATH_ALUGRID],[
 ac_save_LDFLAGS="$LDFLAGS"
 ac_save_CPPFLAGS="$CPPFLAGS"
 ac_save_LIBS="$LIBS"
-# LIBS=""
+
+# initilize to sane value
+HAVE_ALUGRID=0
 
 ## do nothing if no --with-alugrid was supplied
 if test x$with_alugrid != x && test x$with_alugrid != xno ; then
 
   if test x$with_alugrid = xyes ; then
-    AC_MSG_ERROR([You have to provide a directory --with-alugrid=PATH])
+    # use some default value...
+    ALUGRIDROOT="/usr/local/alugrid"
+  else
+    ALUGRIDROOT="$with_alugrid"
   fi
 
-  # is --with-alugrid=bla used?
-  if test "x$with_alugrid" != x ; then
-	if ! test -d $with_alugrid; then
-        AC_MSG_WARN([ALUGrid directory $with_alugrid does not exist])
-	else
-    # expand tilde / other stuff
-		ALUGRIDROOT=`cd $with_alugrid && pwd`
+  # expand tilde / other stuff
+  ALUGRIDROOT=`cd "$ALUGRIDROOT" && pwd`
+
+  if ! test -d "$ALUGRIDROOT"; then
+    AC_MSG_ERROR([ALUGrid directory $ALUGRIDROOT does not exist or is inaccessible])
+  fi
 
     ALUGRID_VERSIONCHECK=$ALUGRIDROOT/bin/alugridversion
     ## check version number 
@@ -45,57 +77,61 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
       fi 
       
     else 
-      AC_MSG_WARN([Couldn't find ALUGrid version checker! ALUGrid version too old!])
+      AC_MSG_ERROR([Couldn't find ALUGrid version checker! ALUGrid version too old or ALUGrid not installed in $ALUGRIDROOT!])
     fi   
-	fi
-  fi
-  if test "x$ALUGRIDROOT" = x; then
-    # use some default value...
-    ALUGRIDROOT="/usr/local/alugrid"
-  fi
 
   ALUGRID_LIB_PATH="$ALUGRIDROOT/lib"
   ALUGRID_INCLUDE_PATH="$ALUGRIDROOT/include"
 
-  # set variables so that tests can use them
-  REM_CPPFLAGS=$CPPFLAGS
-
-  LDFLAGS="$LDFLAGS -L$ALUGRID_LIB_PATH"
-  ALU3D_INC_FLAG="-I$ALUGRID_INCLUDE_PATH -I$ALUGRID_INCLUDE_PATH/serial -I$ALUGRID_INCLUDE_PATH/duneinterface -DENABLE_ALUGRID"
-  CPPFLAGS="$CPPFLAGS $ALU3D_INC_FLAG"
-
-  # check for header
   AC_LANG_PUSH([C++])
+
+  # set variables so that tests can use them
+  ALU3D_INC_FLAG="-I$ALUGRID_INCLUDE_PATH -I$ALUGRID_INCLUDE_PATH/serial -I$ALUGRID_INCLUDE_PATH/duneinterface -DENABLE_ALUGRID"
+  CPPFLAGS="$ac_save_CPPFLAGS $ALU3D_INC_FLAG"
+  # check for header
   AC_CHECK_HEADERS([alugrid_serial.h], 
      [ALUGRID_CPPFLAGS="$ALU3D_INC_FLAG"
+      ALUGRID_LDFLAGS=""
+      ALUGRID_LIBS="-L$ALUGRID_LIB_PATH -lalugrid"
     HAVE_ALUGRID="1"],
     AC_MSG_WARN([alugrid_serial.h not found in $ALUGRID_INCLUDE_PATH]))
    
+  # Yes, we do check whether either alugrid_serial.h or alugrid_parallel.h
+  # works.  Dune decides which one to use depending on how the
+  # alugrid_defineparallel.h header defines ALU3DGRID_BUILD_FOR_PARALLEL.
+  # This could be improved.
   ALU3D_INC_FLAG_PARA="-I$ALUGRID_INCLUDE_PATH/parallel"
-  CPPFLAGS="$CPPFLAGS $ALU3D_INC_FLAG_PARA $DUNEMPICPPFLAGS"
+  CPPFLAGS="$ac_save_CPPFLAGS $DUNEMPICPPFLAGS $ALU3D_INC_FLAG_PARA $ALU3D_INC_FLAG"
   # check for parallel header 
   AC_CHECK_HEADERS([alugrid_parallel.h], 
-     [ALUGRID_CPPFLAGS="$ALU3D_INC_FLAG $ALU3D_INC_FLAG_PARA"
+     [ALUGRID_CPPFLAGS="\${DUNEMPICPPFLAGS} $ALU3D_INC_FLAG $ALU3D_INC_FLAG_PARA"
+      ALUGRID_LDFLAGS="${DUNEMPILDFLAGS}"
+      ALUGRID_LIBS="-L$ALUGRID_LIB_PATH -lalugrid \${DUNEMPILIBS}"
+      # for use with the later library test
+      LDFLAGS="$LDFLAGS $DUNEMPILDFLAGS"
+      LIBS="$DUNEMPILIBS $LIBS"
     HAVE_ALUGRID="1"],
     AC_MSG_WARN([alugrid_parallel.h not found in $ALUGRID_INCLUDE_PATH]))
 
-  CPPFLAGS="$REM_CPPFLAGS"
-  REM_CPPFLAGS=
-
-  REM_LDFLAGS=$LDFLAGS
+  # We check only whether linking with the library works, not for an actual
+  # function from that library.  So we won't need any special stuff in the
+  # CPPFLAGS
+  CPPFLAGS="$ac_save_CPPFLAGS"
+  # This is a kludge to pass the right libpath before the library on the
+  # linker command line.  In the result, the -L flag has to go into the LIBS
+  # variable.
+  LDFLAGS="$LDFLAGS -L$ALUGRID_LIB_PATH"
 
   # if header is found...
   if test x$HAVE_ALUGRID = x1 ; then
     AC_CHECK_LIB(alugrid,[malloc],
-    [ALUGRID_LIBS="-lalugrid $DUNEMPILIBS"
-           ALUGRID_LDFLAGS="-L$ALUGRID_LIB_PATH $DUNEMPILDFLAGS"
-           LIBS="$LIBS $ALUGRID_LIBS"],
+      [: #dumy argument to avoid default action
+      ],
 	  [HAVE_ALUGRID="0"
 	  AC_MSG_WARN(libalugrid not found!)])
   fi
 
-  LDFLAGS=$REM_LDFLAGS
-  AC_LANG_POP
+  AC_LANG_POP([C++])
 
 ## end of alugrid check (--without wasn't set)
 fi
@@ -110,9 +146,8 @@ if test x$HAVE_ALUGRID = x1 ; then
      _and_ if the application uses the ALUGRID_CPPFLAGS])
 
   # add to global list
-  DUNE_PKG_LDFLAGS="$DUNE_PKG_LDFLAGS $ALUGRID_LDFLAGS"
-  DUNE_PKG_LIBS="$DUNE_PKG_LIBS $ALUGRID_LIBS"
-  DUNE_PKG_CPPFLAGS="$DUNE_PKG_CPPFLAGS $ALUGRID_CPPFLAGS"
+  DUNE_ADD_ALL_PKG([ALUGrid], [$ALUGRID_CPPFLAGS],
+                   [$ALUGRID_LDFLAGS], [$ALUGRID_LIBS])
 
   # set variable for summary
   with_alugrid="yes"
