@@ -288,6 +288,7 @@ struct EntityInterface<Grid, 0, dim, true>
     {
       const typename Entity::EntityPointer fatherPtr = e.father();
       const Entity &father = *fatherPtr;
+      father.hbegin(0);
       e.geometryInFather();
     }
 
