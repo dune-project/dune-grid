@@ -885,7 +885,7 @@ namespace Dune {
     unsigned int heapSize_;
 
     /** \brief The classes implementing the geometry of the boundary segments, if requested */
-    std::vector<const BoundarySegment<dim>*> boundarySegments_;
+    std::vector<shared_ptr<BoundarySegment<dim> > > boundarySegments_;
 
     /** \brief Overall number of coarse grid boundary segments.
 

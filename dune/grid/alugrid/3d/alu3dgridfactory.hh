@@ -36,9 +36,6 @@ namespace Dune
     //! \brief type of boundary projection class
     typedef DuneBoundaryProjection< 3 >  DuneBoundaryProjectionType;
 
-    //! \brief type of boundary segment
-    typedef Dune::BoundarySegment< 3, 3> BoundarySegmentType;
-
     template< int codim >
     struct Codim
     {
@@ -178,7 +175,7 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int > vertices,
-                            const BoundarySegmentType *boundarySegment ) ;
+                            const shared_ptr<BoundarySegment<3,3> >& boundarySegment ) ;
 
     /** \brief insert a boundary projection object, (a copy is made)
      *

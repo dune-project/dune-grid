@@ -168,7 +168,7 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int > vertices,
-                          const BoundarySegmentType *boundarySegment )
+                          const shared_ptr<BoundarySegment<3,3> >& boundarySegment )
   {
     FaceType faceId;
     copyAndSort( vertices, faceId );
@@ -190,8 +190,10 @@ namespace Dune
       for( unsigned int j = 0; j < dimensionworld; ++j )
         coords[ i ][ j ] = x[ j ];
     }
+
+    /** \todo Avoid using raw pointers here */
     BoundarySegmentWrapperType* prj =
-      new BoundarySegmentWrapperType( type, coords, boundarySegment );
+      new BoundarySegmentWrapperType( type, coords, boundarySegment.get() );
     boundaryProjections_[ faceId ] = prj;
 #ifndef NDEBUG
     // consistency check

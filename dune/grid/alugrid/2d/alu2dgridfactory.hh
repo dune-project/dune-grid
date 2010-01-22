@@ -26,9 +26,6 @@ namespace Dune
     //! \brief type of boundary projection class
     typedef DuneBoundaryProjection< 2 >  DuneBoundaryProjectionType;
 
-    //! \brief type of boundary segment
-    typedef Dune::BoundarySegment< 2, 2> BoundarySegmentType;
-
     template< int codim >
     struct Codim
     {
@@ -152,12 +149,10 @@ namespace Dune
      *
      *  \param[in]  vertices         vertex indices of boundary face
      *  \param[in]  boundarySegment  geometric realization of shaped boundary
-     *
-     *  \note The grid takes control of the boundary segment.
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int > vertices,
-                            const BoundarySegmentType *boundarySegment ) ;
+                            const shared_ptr<BoundarySegment<2,2> >& boundarySegment ) ;
 
     /** \brief insert a boundary projection object, (a copy is made)
      *

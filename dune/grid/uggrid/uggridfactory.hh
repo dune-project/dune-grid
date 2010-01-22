@@ -192,7 +192,7 @@ namespace Dune {
         The grid object takes control of this object and deallocates it when destructing itself.
      */
     void insertBoundarySegment(const std::vector<unsigned int> vertices,
-                               const BoundarySegment<dimworld>* boundarySegment);
+                               const shared_ptr<BoundarySegment<dimworld> > boundarySegment);
 
 
     /** \brief Finalize grid creation and hand over the grid

@@ -11,6 +11,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/geometrytype.hh>
+#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/boundarysegment.hh>
@@ -126,7 +127,7 @@ namespace Dune
         The grid object takes control of this object and deallocates it when destructing itself.
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int> vertices,
-                                       const BoundarySegment<dimension,dimworld>* boundarySegment)
+                                       const shared_ptr<BoundarySegment<dimension,dimworld> >& boundarySegment)
     {
       DUNE_THROW(GridError, "This grid does not support parametrized boundary segments!");
     }

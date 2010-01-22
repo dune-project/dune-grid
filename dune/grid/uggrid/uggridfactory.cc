@@ -175,7 +175,7 @@ insertElement(const GeometryType& type,
 template <int dimworld>
 void Dune::GridFactory<Dune::UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int> vertices,
-                      const BoundarySegment<dimworld>* boundarySegment)
+                      const shared_ptr<BoundarySegment<dimworld> > boundarySegment)
 {
   array<unsigned int, dimworld*2-2> segmentVertices;
 
@@ -313,7 +313,7 @@ createGrid()
                                                alpha,
                                                beta,
                                                boundarySegmentWrapper,
-                                               const_cast<BoundarySegment<dimworld>*>(grid_->boundarySegments_[i]))==NULL) {
+                                               grid_->boundarySegments_[i].get())==NULL) {
       DUNE_THROW(GridError, "Calling UG" << dimworld << "d::CreateBoundarySegment failed!");
     }
 
@@ -538,8 +538,6 @@ createBegin()
   // ///////////////////////////////////////////////////////
   //   Clean up existing grid structure if there is one
   // ///////////////////////////////////////////////////////
-  for (unsigned int i=0; i<grid_->boundarySegments_.size(); i++)
-    delete grid_->boundarySegments_[i];
 
   // Delete the UG multigrid if there is one (== createEnd() has already
   // been called once for this object)

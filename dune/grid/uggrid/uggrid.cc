@@ -103,9 +103,6 @@ Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
 template < int dim >
 Dune::UGGrid < dim >::~UGGrid()
 {
-  for (unsigned int i=0; i<boundarySegments_.size(); i++)
-    delete boundarySegments_[i];
-
   // Delete the UG multigrid if there is one (== createEnd() has been called)
   if (multigrid_) {
     // Set UG's currBVP variable to the BVP corresponding to this

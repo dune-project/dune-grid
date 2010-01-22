@@ -203,12 +203,10 @@ namespace Dune
      *
      *  \param[in]  vertices         vertex indices of boundary face
      *  \param[in]  boundarySegment  geometric realization of shaped boundary
-     *
-     *  \note The grid takes control of the boundary segment.
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int > vertices,
-                            const BoundarySegment *boundarySegment )
+                            const shared_ptr<BoundarySegment>& boundarySegment )
     {
       const GenericReferenceElement< ctype, dimension-1 > &refSimplex
         = GenericReferenceElements< ctype, dimension-1 >::simplex();
@@ -229,7 +227,9 @@ namespace Dune
       }
 
       GeometryType type( GeometryType::simplex, dimension-1 );
-      insertBoundaryProjection( type, vertices, new BoundarySegmentWrapper( type, coords, boundarySegment ) );
+      /** \todo Instead of extracting the raw pointer here the shared_ptr should be used
+          directly in BoundarySegmentWrapper */
+      insertBoundaryProjection( type, vertices, new BoundarySegmentWrapper( type, coords, boundarySegment.get() ) );
     }
 
     /** \brief add a face transformation (for periodic identification)
