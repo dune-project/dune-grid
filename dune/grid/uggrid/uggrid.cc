@@ -482,15 +482,18 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>:
   //   Extract result from stack
   // //////////////////////////////
 
-  // Initialized with a dummy value because EntityPointer isn't default constructible
-  childElements.resize(list.size(), lbegin<0>(0));
+  // Use reserve / push_back since EntityPointer is not default constructable
+  childElements.clear();
+  childElements.reserve( list.size() );
   childElementSides.resize(list.size());
 
   int i=0;
-  for (f = list.begin(); f!=list.end(); ++f, ++i) {
+  for (f = list.begin(); f!=list.end(); ++f, ++i)
+  {
 
     // Set element
-    this->getRealImplementation(childElements[i]).setToTarget(f->first);
+    typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
+    childElements.push_back( EntityPointer( UGGridEntityPointer< 0, const UGGrid< dim > >( f->first ) ) );
 
     int side = f->second;
 
