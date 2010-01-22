@@ -75,7 +75,7 @@
  * -DGRIDDIM=$(GRIDDIM) -DGRIDTYPE=$(GRIDTYPE)
  * @endcode
  * No by adding the \c ALL_PKG_CPPFLAGS or \c GRIDDIM_CPPFLAGS to the
- * programs \c CXXFLAGS one can choose the grids dimension and type by
+ * programs \c CPPFLAGS one can choose the grids dimension and type by
  * invoking the following make command
  * @code
  *  make GRIDDIM=3 GRIDTYPE=ALBERTAGRID myprogram

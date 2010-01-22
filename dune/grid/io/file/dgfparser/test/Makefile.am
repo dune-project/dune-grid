@@ -1,10 +1,11 @@
-AM_LDFLAGS = @AM_LDFLAGS@			\
-	$(ALL_PKG_LDFLAGS)			\
-	$(DUNEMPILDFLAGS)
-LDADD = $(DUNEMPILIBS)
 AM_CPPFLAGS = @AM_CPPFLAGS@			\
 	$(DUNEMPICPPFLAGS)			\
 	-DSRCDIR="\"$(srcdir)\""
+AM_LDFLAGS = @AM_LDFLAGS@			\
+	$(DUNEMPILDFLAGS)
+LDADD = 					\
+	$(DUNEMPILIBS)				\
+	@LDADD@
 
 if ALUGRID
   TESTALU = testalu
@@ -32,53 +33,67 @@ EXTRA_PROGRAMS = tester
 TESTS = $(ALLTESTS)
 
 tester_SOURCES = main.cc
-tester_CXXFLAGS = $(AM_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
-tester_LDADD = $(LOCAL_LIBS)			\
-	$(ALBERTA_LDFLAGS) $(ALBERTA_LIBS)	\
-	$(GRAPE_LDFLAGS) $(GRAPE_LIBS)		\
-	$(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)	\
-	$(UG_LDFLAGS) $(UG_LIBS)		\
+tester_CPPFLAGS = $(AM_CPPFLAGS)		\
+	$(ALL_PKG_CPPFLAGS)
+tester_LDFLAGS = $(AM_LDFLAGS)			\
+	$(ALL_PKG_LDFLAGS)
+tester_LDADD =					\
+	$(ALL_PKG_LIBS)				\
 	$(LDADD)
 
 viewdgf_SOURCES = viewdgf.cc
 viewdgf_CPPFLAGS = $(AM_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
-viewdgf_LDADD = $(LOCAL_LIBS)			\
-	$(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)	\
+viewdgf_LDFLAGS = $(AM_LDFLAGS)			\
+	$(ALL_PKG_LDFLAGS)
+viewdgf_LDADD =					\
+	$(ALL_PKG_LIBS)				\
 	$(LDADD)
 
 if ALUGRID
-testalu_CXXFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) -DALUGRID_SIMPLEX -DGRIDDIM=3
 testalu_SOURCES = main.cc
-testalu_LDADD = $(LOCAL_LIBS)			\
-	$(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)	\
+testalu_CPPFLAGS = $(AM_CPPFLAGS)		\
+	$(ALUGRID_CPPFLAGS)			\
+	-DALUGRID_SIMPLEX -DGRIDDIM=3
+testalu_LDFLAGS = $(AM_LDFLAGS)			\
+	$(ALUGRID_LDFLAGS)
+testalu_LDADD =					\
+	$(ALUGRID_LIBS)				\
 	$(LDADD)
 endif
 
 if ALBERTA
-testalberta_CXXFLAGS = $(AM_CPPFLAGS) $(ALBERTA2D_CPPFLAGS) -DALBERTAGRID -DGRIDDIM=2 -DWORLDDIM=2
 testalberta_SOURCES = main.cc
-testalberta_LDADD = $(LOCAL_LIBS)		\
+testalberta_CPPFLAGS = $(AM_CPPFLAGS)		\
+	$(ALBERTA2D_CPPFLAGS)			\
+	-DALBERTAGRID -DGRIDDIM=2 -DWORLDDIM=2
+testalberta_LDFLAGS = $(AM_LDFLAGS)		\
+	$(ALBERTA2D_LDFLAGS)
+testalberta_LDADD =				\
 	$(ALBERTA2D_LIBS)	\
 	$(LDADD)
 endif
 
-testsgrid_CXXFLAGS = $(AM_CPPFLAGS) -DSGRID -DGRIDDIM=3
 testsgrid_SOURCES = main.cc
-testsgrid_LDADD = $(LOCAL_LIBS) $(LDADD)
+testsgrid_CPPFLAGS = $(AM_CPPFLAGS)		\
+	-DSGRID -DGRIDDIM=3
 
-testyasp_CXXFLAGS = $(AM_CPPFLAGS) -DYASPGRID -DGRIDDIM=3
 testyasp_SOURCES = main.cc
-testyasp_LDADD = $(LOCAL_LIBS) $(LDADD)
+testyasp_CPPFLAGS = $(AM_CPPFLAGS)		\
+	-DYASPGRID -DGRIDDIM=3
 
-testoned_CXXFLAGS = $(AM_CPPFLAGS) -DONEDGRID -DGRIDDIM=1
 testoned_SOURCES = main.cc
-testoned_LDADD = $(LOCAL_LIBS) $(LDADD)
+testoned_CPPFLAGS = $(AM_CPPFLAGS)		\
+	-DONEDGRID -DGRIDDIM=1
 
 if UG
-testug_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) -DUGGRID -DGRIDDIM=3
 testug_SOURCES = main.cc
-testug_LDADD = $(LOCAL_LIBS)			\
-	$(UG_LDFLAGS) $(UG_LIBS)		\
+testug_CPPFLAGS = $(AM_CPPFLAGS)		\
+	$(UG_CPPFLAGS)				\
+	-DUGGRID -DGRIDDIM=3
+testug_LDFLAGS = $(AM_LDFLAGS)			\
+	$(UG_LDFLAGS)
+testug_LDADD =					\
+	$(UG_LIBS)				\
 	$(LDADD)
 endif
 

@@ -1,12 +1,10 @@
 AM_CPPFLAGS = @AM_CPPFLAGS@			\
-	$(ALL_PKG_CPPFLAGS)			\
-	$(DUNEMPICPPFLAGS)
-LDADD = $(LOCAL_LIBS)				\
-	$(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)	\
-	$(DUNEMPILIBS)
+	$(ALL_PKG_CPPFLAGS)
 AM_LDFLAGS = @AM_LDFLAGS@			\
-	$(DUNEMPILDFLAGS)			\
 	$(ALL_PKG_LDFLAGS)
+LDADD =						\
+	$(ALL_PKG_LIBS)				\
+	@LDADD@
 
 #don't build as noinst_PROGRAMS because they depend on the lib
 #noinst_PROGRAMS = dgf2dgf gmsh2dgf

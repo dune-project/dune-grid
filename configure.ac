@@ -14,9 +14,8 @@ DUNE_AUTOBUILD_FLAGS
 
 # preset variable to path such that #include <dune/...> works
 AC_SUBST(AM_CPPFLAGS, '$(DUNE_CPPFLAGS) -I$(top_srcdir)')
-AC_SUBST(AM_LDFLAGS, '$(DUNE_LDFLAGS) $(DUNE_LIBS)')
-#AC_SUBST([LOCAL_LIBS], '$(top_builddir)/dune/grid/libgrid.la')
-AC_SUBST([LOCAL_LIBS], '-L$(top_builddir)/lib -ldunegrid')
+AC_SUBST(AM_LDFLAGS, '$(DUNE_LDFLAGS)')
+AC_SUBST([LDADD], '$(top_builddir)/dune/grid/libgrid.la $(DUNE_LIBS)')
 
 # Fix Albertas idea of where the dunegrid and libalbertagrid_?d libraries are,
 # since it expects them in $(DUNE_GRID_LIBDIR) by default

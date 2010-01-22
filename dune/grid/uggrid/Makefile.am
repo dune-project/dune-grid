@@ -7,15 +7,16 @@ noinst_LTLIBRARIES = libuggrid.la
 libuggrid_la_SOURCES  = uggrid.cc uggridentity.cc boundaryextractor.cc boundaryextractor.hh \
                         uggridindexsets.cc uggridintersections.cc uggridfactory.cc
 
-libuggrid_la_CXXFLAGS = $(AM_CPPFLAGS)		\
+libuggrid_la_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(UG_CPPFLAGS)				\
 	$(DUNEMPICPPFLAGS)
-libuggrid_la_LIBADD =				\
-	$(UG_LDFLAGS) $(UG_LIBS)		\
-	$(DUNE_COMMON_LIBS)			\
-	$(DUNEMPILIBS)
 libuggrid_la_LDFLAGS = $(AM_LDFLAGS)		\
+	$(UG_LDPFLAGS)				\
 	$(DUNEMPILDFLAGS)
+libuggrid_la_LIBADD =				\
+	$(UG_LIBS)				\
+	$(DUNEMPILIBS)				\
+	$(DUNE_LIBS)
 
 endif
 

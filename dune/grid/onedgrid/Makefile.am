@@ -3,7 +3,7 @@
 noinst_LTLIBRARIES = libonedgrid.la
 
 libonedgrid_la_SOURCES = onedgrid.cc onedgridfactory.cc nulliteratorfactory.cc
-libonedgrid_la_LIBADD = $(DUNE_COMMON_LIBS)
+libonedgrid_la_LIBADD = $(DUNE_LIBS)
 
 onedgriddir = $(includedir)/dune/grid/onedgrid/
 onedgrid_HEADERS = nulliteratorfactory.hh  onedgridentity.hh \

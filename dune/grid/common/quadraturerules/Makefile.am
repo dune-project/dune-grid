@@ -5,6 +5,8 @@ quadraturerules_HEADERS = gaussquadrature.hh  genericquadrature.hh  lobattoquadr
 
 noinst_LTLIBRARIES = libquadraturerules.la
 libquadraturerules_la_SOURCES = quadraturerules.cc cube.cc jacobi_1_0.cc jacobi_2_0.cc
+libquadraturerules_la_LIBADD =			\
+	$(DUNE_LIBS)
 
 extra_DIST=jacobian.mw
 

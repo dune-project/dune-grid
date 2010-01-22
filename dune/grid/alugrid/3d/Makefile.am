@@ -1,5 +1,9 @@
-libalu3d_la_CXXFLAGS = @AM_CPPFLAGS@ $(ALUGRID_CPPFLAGS)
-libalu3d_la_LIBADD =
+libalu3d_la_CPPFLAGS = $(AM_CPPFLAGS)		\
+	$(ALUGRID_CPPFLAGS)
+libalu3d_la_LDFLAGS = $(AM_LDFLAGS)		\
+	$(ALUGRID_LDFLAGS)
+libalu3d_la_LIBADD = 				\
+	$(DUNE_LIBS)
 
 noinst_LTLIBRARIES = libalu3d.la
 if ALUGRID

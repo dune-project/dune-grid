@@ -15,7 +15,7 @@ namespace Dune
   /*!
      \brief Helperclass to find spots that still use the old numbering
 
-     add -DDEPRECATEDINT to your CXXFLAGS to disable the transparent usage of
+     add -DDEPRECATEDINT to your CPPFLAGS to disable the transparent usage of
      deprecated_int. This will disable implicit typeconversion from and to unsigned int
    */
   class deprecated_int

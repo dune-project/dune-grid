@@ -3,7 +3,7 @@
 noinst_LTLIBRARIES = libgridcommon.la
 libgridcommon_la_SOURCES = referenceelements.cc
 libgridcommon_la_LIBADD = quadraturerules/libquadraturerules.la \
-  $(DUNE_COMMON_LIBS)
+  $(DUNE_LIBS)
 
 commondir = $(includedir)/dune/grid/common
 common_HEADERS = virtualrefinement.cc capabilities.hh \

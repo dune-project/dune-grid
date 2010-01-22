@@ -24,7 +24,9 @@ libgrid_la_SOURCES =
 # (see the automake manual, section "Libtool Convenience Libraries")
 nodist_EXTRA_libgrid_la_SOURCES = dummy.cc
 libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
-  $(COMMONLIB) $(DUNE_COMMON_LIBS) $(AMIRALIB) $(DGFPARSERLIB)
+	$(COMMONLIB)				\
+	$(DGFPARSERLIB)				\
+	$(DUNE_LIBS)
 
 # These libraries do not need other libraries besides lcommon
 griddir = $(includedir)/dune/grid

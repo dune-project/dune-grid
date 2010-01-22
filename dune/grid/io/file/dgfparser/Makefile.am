@@ -3,11 +3,15 @@ SUBDIRS = test utils
 noinst_LTLIBRARIES = libdgfparser.la
 
 libdgfparser_la_SOURCES = dgfparserblocks.cc dgfprojectionblock.cc dgfparser.cc
-libdgfparser_la_LIBADD = $(DUNE_COMMON_LIBS)
-
-AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS) $(DUNEMPICPPFLAGS)
-
-AM_LDFLAGS=
+libdgfparser_la_CPPFLAGS = $(AM_CPPFLAGS)	\
+	$(DUNEMPICPPFLAGS)			\
+	$(DUNE_CPPFLAGS)
+libdgfparser_la_LDFLAGS = $(AM_LDFLAGS)		\
+	$(DUNEMPILDFLAGS)			\
+	$(DUNE_LDFLAGS)
+libdgfparser_la_LIBADD =			\
+	$(DUNE_LIBS)				\
+	$(DUNEMPILIBS)
 
 dgfparserdir = $(includedir)/dune/grid/io/file/dgfparser
 dgfparser_HEADERS = dgfwriter.hh \

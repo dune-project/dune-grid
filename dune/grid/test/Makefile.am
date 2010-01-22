@@ -72,17 +72,15 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ $(DUNE_EXTRA_CHECKS) -DSRCDIR='"$(abs_srcdir)/"'
 #
 
 test_sgrid_SOURCES = test-sgrid.cc
-test_sgrid_LDADD = $(LOCAL_LIBS)
 
 test_oned_SOURCES = test-oned.cc
-test_oned_LDADD = $(LOCAL_LIBS)
 
 test_yaspgrid_SOURCES = test-yaspgrid.cc
 test_yaspgrid_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(DUNEMPICPPFLAGS)
 test_yaspgrid_LDFLAGS = $(AM_LDFLAGS)		\
 	$(DUNEMPILDFLAGS)
-test_yaspgrid_LDADD = $(LOCAL_LIBS)		\
+test_yaspgrid_LDADD =				\
 	$(DUNEMPILIBS)				\
 	$(LDADD)
 
@@ -90,7 +88,10 @@ test_yaspgrid_LDADD = $(LOCAL_LIBS)		\
 test_alberta_SOURCES = test-alberta.cc
 test_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) -DGRIDDIM=$(GRIDDIM) $(GRAPE_CPPFLAGS)
 test_alberta_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(GRAPE_LDFLAGS)
-test_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LIBS) $(GRAPE_LIBS)
+test_alberta_LDADD =				\
+	$(GRAPE_LIBS)				\
+	$(ALBERTA_LIBS)				\
+	$(LDADD)
 
 test_alberta_generic_SOURCES = $(test_alberta_SOURCES)
 test_alberta_generic_CPPFLAGS = $(test_alberta_CPPFLAGS) -DDUNE_ALBERTA_USE_GENERICGEOMETRY=1
@@ -99,29 +100,24 @@ test_alberta_generic_LDADD = $(test_alberta_LDADD)
 
 # files for alugrid
 test_alugrid_SOURCES = test-alugrid.cc
-test_alugrid_CXXFLAGS = $(AM_CPPFLAGS) 		\
-	$(ALL_PKG_CPPFLAGS)			\
-	$(DUNEMPICPPFLAGS)
+test_alugrid_CPPFLAGS = $(AM_CPPFLAGS)		\
+	$(ALL_PKG_CPPFLAGS)
 test_alugrid_LDFLAGS = $(AM_LDFLAGS)		\
-	$(DUNEMPILDFLAGS)			\
+	$(ALL_PKG_LDFLAGS)			\
 	-static
-test_alugrid_LDADD = $(LOCAL_LIBS)		\
-	$(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)	\
-	$(DUNEMPILDFLAGS) 			\
+test_alugrid_LDADD =				\
+	$(ALL_PKG_LIBS)				\
 	$(LDADD)
 
 test_geogrid_SOURCES = test-geogrid.cc
 test_geogrid_CPPFLAGS = $(AM_CPPFLAGS)			\
-	$(DUNEMPICPPFLAGS)				\
 	$(ALL_PKG_CPPFLAGS)				\
 	-DCOORDFUNCTION=$(COORDFUNCTION)		\
 	-DCACHECOORDFUNCTION=$(CACHECOORDFUNCTION)
 test_geogrid_LDFLAGS = $(AM_LDFLAGS)		\
-	$(DUNEMPILDFLAGS)			\
 	$(ALL_PKG_LDFLAGS)
-test_geogrid_LDADD = $(LOCAL_LIBS)		\
+test_geogrid_LDADD =				\
 	$(ALL_PKG_LIBS)				\
-	$(DUNEMPILIBS)				\
 	$(LDADD)
 
 # libdune contains both libugX2 and libugX3, always test both dimensions
@@ -132,7 +128,7 @@ test_ug_CPPFLAGS = $(AM_CPPFLAGS)		\
 test_ug_LDFLAGS = $(AM_LDFLAGS)			\
 	$(DUNEMPILDFLAGS)			\
 	$(UG_LDFLAGS)
-test_ug_LDADD = $(LOCAL_LIBS)			\
+test_ug_LDADD =					\
 	$(UG_LIBS)				\
 	$(DUNEMPILIBS)				\
 	$(LDADD)
@@ -145,7 +141,7 @@ test_parallel_ug_CPPFLAGS = $(AM_CPPFLAGS)	\
 test_parallel_ug_LDFLAGS = $(AM_LDFLAGS)	\
 	$(DUNEMPILDFLAGS)			\
 	$(UG_LDFLAGS)
-test_parallel_ug_LDADD = $(LOCAL_LIBS)		\
+test_parallel_ug_LDADD =			\
 	$(UG_LIBS)				\
 	$(DUNEMPILIBS)				\
 	$(LDADD)
@@ -157,7 +153,7 @@ test_ug_lgm_CPPFLAGS = $(AM_CPPFLAGS)		\
 test_ug_lgm_LDFLAGS = $(AM_LDFLAGS)		\
 	$(DUNEMPILDFLAGS)			\
 	$(UG_LDFLAGS)
-test_ug_lgm_LDADD = $(LOCAL_LIBS)		\
+test_ug_lgm_LDADD =				\
 	$(UG_LIBS)				\
 	$(DUNEMPILIBS)				\
 	$(LDADD)
@@ -166,7 +162,10 @@ test_ug_lgm_LDADD = $(LOCAL_LIBS)		\
 test_dgfalu_uggrid_combination_SOURCES = test-dgfalu-uggrid-combination.cc
 test_dgfalu_uggrid_combination_CPPFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(ALUGRID_CPPFLAGS)
 test_dgfalu_uggrid_combination_LDFLAGS = $(AM_LDFLAGS) $(UG_LDFLAGS) $(ALUGRID_LDFLAGS)
-test_dgfalu_uggrid_combination_LDADD = $(LOCAL_LIBS) $(UG_LIBS) $(ALUGRID_LIBS)
+test_dgfalu_uggrid_combination_LDADD =		\
+	$(ALUGRID_LIBS)				\
+	$(UG_LIBS)				\
+	$(LDADD)
 
 ## distribution tarball
 SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc
