@@ -914,7 +914,9 @@ extern "C" {
 // methodName is set by scene set_min_max_value
 static std::string grapeMethodName;
 
-static inline void setMinMaxValuesToColorbars(const double min, const double max)
+static inline void setMinMaxValuesToColorbars(const char* meshName,
+                                              const double min,
+                                              const double max)
 {
   typedef std::list< COLORBAR * > ColorBarListType;
   static bool firstCall = true;
@@ -992,10 +994,26 @@ static inline void setMinMaxValuesToColorbars(const double min, const double max
       COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (mesh3d_bnd_isoline_disp,"bnd-isoline-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (genmesh3d_bnd_isoline_disp,"bnd-isoline-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
     //////////////////////////////
     //////////////////////////////
     firstCall = false;
   }
+
+#ifdef GRAPE_GENMESH_WITH_DIFFERENT_COLORBARS
+  if ( meshName )
+  {
+    COLORBAR * cb = get_colorbar_from_handle( meshName );
+    if( cb )
+    {
+      cb->min = min;
+      cb->max = max;
+    }
+  }
+#endif
 
   typedef ColorBarListType :: iterator iterator;
 
@@ -1034,7 +1052,7 @@ inline GRAPEMESH * setMinMaxValue()
     func->getMinMaxValues(func,&min,&max);
   }
 
-  setMinMaxValuesToColorbars(min,max);
+  setMinMaxValuesToColorbars(mesh->name,min,max);
 
   END_METHOD(mesh);
 }
