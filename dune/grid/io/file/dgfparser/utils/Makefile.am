@@ -6,6 +6,9 @@ LDADD =						\
 	$(ALL_PKG_LIBS)				\
 	@LDADD@
 
+GRIDDIM = 2
+GRIDTYPE = YASPGRID
+
 #don't build as noinst_PROGRAMS because they depend on the lib
 #noinst_PROGRAMS = dgf2dgf gmsh2dgf
 check_PROGRAMS = dgf2dgf gmsh2dgf

@@ -50,11 +50,11 @@ try
   const std::string dgfFileName( argv[ 1 ] );
   const int level = (argc < 3 ? 0 : atoi( argv[ 2 ] ));
 
-  GridPtr< GridType > gridptr( dgfFileName );
+  GridPtr< GridSelector::GridType > gridptr( dgfFileName );
   if( level > 0 )
     gridptr->globalRefine( level );
 
-  typedef GridType::LeafGridView GridView;
+  typedef GridSelector::GridType::LeafGridView GridView;
   GridView gridView = gridptr->leafView();
 
   DGFWriter< GridView > dgfWriter( gridView );

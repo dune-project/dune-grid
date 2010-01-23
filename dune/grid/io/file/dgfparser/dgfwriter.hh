@@ -183,7 +183,7 @@ namespace Dune
 
     // write the name into the "gridparameter" block
     gridout << std::endl << "GRIDPARAMETER" << std::endl;
-    gridout << "NAME " << gridView_.grid().name() << std::endl;
+    // gridout << "NAME " << gridView_.grid().name() << std::endl;
     gridout << "#" << std::endl;
 
     gridout << std::endl << "#" << std::endl;

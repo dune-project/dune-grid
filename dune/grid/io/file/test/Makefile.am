@@ -1,5 +1,8 @@
 ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest gmshtest gmshtest-all
 
+GRIDDIM=2
+GRIDTYPE=YASPGRID
+
 # run amiramesh test only if amiramesh was found
 if AMIRAMESH
 ALLTESTS += amirameshtest
