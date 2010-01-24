@@ -463,12 +463,23 @@ bool Dune::OneDGrid::adapt()
 
         if (eIt->isLeaf()) {
 
+          OneDGridList<OneDEntityImp<1> >::iterator leftNeighbor = getLeftNeighborWithSon(eIt);
+
           // Does the left vertex exist on the next-higher level?
           // If no create it
           OneDGridList<OneDEntityImp<0> >::iterator leftUpperVertex = getLeftUpperVertex(eIt);
 
-          if (leftUpperVertex==NULL)
-            leftUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[0]->pos_, eIt->vertex_[0]->id_);
+          if (leftUpperVertex==NULL) {
+
+            OneDEntityImp<0> newLeftUpperVertex(i+1, eIt->vertex_[0]->pos_, eIt->vertex_[0]->id_);
+
+            // Insert new vertex into vertex list
+            leftUpperVertex = vertices(i+1).insert((leftNeighbor)
+                                                   ? leftNeighbor->sons_[1]->vertex_[1]->succ_
+                                                   : vertices(i+1).begin(),
+                                                   newLeftUpperVertex);
+
+          }
 
           eIt->vertex_[0]->son_ = leftUpperVertex;
 
@@ -476,34 +487,15 @@ bool Dune::OneDGrid::adapt()
           // If no create it
           OneDGridList<OneDEntityImp<0> >::iterator rightUpperVertex = getRightUpperVertex(eIt);
 
-          if (rightUpperVertex==NULL)
-            rightUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[1]->pos_, eIt->vertex_[1]->id_);
+          if (rightUpperVertex==NULL) {
 
-          eIt->vertex_[1]->son_ = rightUpperVertex;
+            OneDEntityImp<0> newRightUpperVertex(i+1, eIt->vertex_[1]->pos_, eIt->vertex_[1]->id_);
 
-          // //////////////////////////////////////
-          // Insert new vertices into vertex list
-          // //////////////////////////////////////
-
-          OneDGridList<OneDEntityImp<1> >::iterator leftNeighbor = getLeftNeighborWithSon(eIt);
-
-          if (leftNeighbor!=NULL) {
-
-            // leftNeighbor exists
-            if ( leftNeighbor->sons_[1]->vertex_[1] != leftUpperVertex)
-              vertices(i+1).insert(leftNeighbor->sons_[1]->vertex_[1]->succ_, *leftUpperVertex);
-
-          } else {
-            // leftNeighbor does not exist
-            vertices(i+1).insert(vertices(i+1).begin(), *leftUpperVertex);
-
+            // Insert new vertex into list
+            rightUpperVertex = vertices(i+1).insert(leftUpperVertex->succ_, newRightUpperVertex);
           }
 
-          // Check if rightUpperVertex is already in the list
-          OneDGridList<OneDEntityImp<0> >::iterator succOfLeft = leftUpperVertex->succ_;
-
-          if (succOfLeft==NULL || succOfLeft != rightUpperVertex)
-            vertices(i+1).insert(leftUpperVertex->succ_, *rightUpperVertex);
+          eIt->vertex_[1]->son_ = rightUpperVertex;
 
           // /////////////////////////
           //   Create new element
