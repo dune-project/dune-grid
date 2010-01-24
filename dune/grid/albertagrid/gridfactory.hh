@@ -205,7 +205,7 @@ namespace Dune
      *  \param[in]  vertices         vertex indices of boundary face
      */
     virtual void
-    insertBoundarySegment ( const std::vector< unsigned int > vertices )
+    insertBoundarySegment ( const std::vector< unsigned int >& vertices )
     {
       DUNE_THROW( NotImplemented, "insertBoundarySegment without a parametrization function" );
     }
@@ -216,7 +216,7 @@ namespace Dune
      *  \param[in]  boundarySegment  geometric realization of shaped boundary
      */
     virtual void
-    insertBoundarySegment ( const std::vector< unsigned int > vertices,
+    insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                             const shared_ptr<BoundarySegment>& boundarySegment )
     {
       const GenericReferenceElement< ctype, dimension-1 > &refSimplex
