@@ -132,6 +132,13 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   void ALU2dGridFactory< ALUGrid > ::
+  insertBoundarySegment ( const std::vector< unsigned int > vertices )
+  {
+    DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
+  }
+
+  template< template< int, int > class ALUGrid >
+  void ALU2dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int > vertices,
                           const shared_ptr<BoundarySegment<2,2> >& boundarySegment )
   {

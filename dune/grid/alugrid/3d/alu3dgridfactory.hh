@@ -166,12 +166,17 @@ namespace Dune
                                const std::vector< unsigned int > &vertices,
                                const DuneBoundaryProjectionType *projection );
 
+    /** \brief insert a boundary segment into the macro grid
+     *
+     *  \param[in]  vertices         vertex indices of boundary face
+     */
+    virtual void
+    insertBoundarySegment ( const std::vector< unsigned int > vertices ) ;
+
     /** \brief insert a shaped boundary segment into the macro grid
      *
      *  \param[in]  vertices         vertex indices of boundary face
      *  \param[in]  boundarySegment  geometric realization of shaped boundary
-     *
-     *  \note The grid takes control of the boundary segment.
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int > vertices,

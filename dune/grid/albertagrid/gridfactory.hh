@@ -199,6 +199,17 @@ namespace Dune
       globalProjection_ = new Projection( projection );
     }
 
+    /** \brief insert a boundary segment into the macro grid
+     *
+     *  Only influences the ordering of the boundary segments
+     *  \param[in]  vertices         vertex indices of boundary face
+     */
+    virtual void
+    insertBoundarySegment ( const std::vector< unsigned int > vertices )
+    {
+      DUNE_THROW( NotImplemented, "insertBoundarySegment without a parametrization function" );
+    }
+
     /** \brief insert a shaped boundary segment into the macro grid
      *
      *  \param[in]  vertices         vertex indices of boundary face
