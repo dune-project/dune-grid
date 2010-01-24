@@ -11,7 +11,7 @@ GRIDTYPE = YASPGRID
 
 #don't build as noinst_PROGRAMS because they depend on the lib
 #noinst_PROGRAMS = dgf2dgf gmsh2dgf
-check_PROGRAMS = dgf2dgf gmsh2dgf
+EXTRA_PROGRAMS = dgf2dgf gmsh2dgf
 
 dgf2dgf_SOURCES = dgf2dgf.cc
 gmsh2dgf_SOURCES = gmsh2dgf.cc
