@@ -3,6 +3,7 @@ libalu3d_la_CPPFLAGS = $(AM_CPPFLAGS)		\
 libalu3d_la_LDFLAGS = $(AM_LDFLAGS)		\
 	$(ALUGRID_LDFLAGS)
 libalu3d_la_LIBADD = 				\
+	$(ALUGRID_LIBS)				\
 	$(DUNE_LIBS)
 
 noinst_LTLIBRARIES = libalu3d.la
