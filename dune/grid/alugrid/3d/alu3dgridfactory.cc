@@ -167,7 +167,14 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   void ALU3dGridFactory< ALUGrid > ::
-  insertBoundarySegment ( const std::vector< unsigned int > vertices,
+  insertBoundarySegment ( const std::vector< unsigned int >& vertices )
+  {
+    DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
+  }
+
+  template< template< int, int > class ALUGrid >
+  void ALU3dGridFactory< ALUGrid > ::
+  insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                           const shared_ptr<BoundarySegment<3,3> >& boundarySegment )
   {
     FaceType faceId;
@@ -191,9 +198,8 @@ namespace Dune
         coords[ i ][ j ] = x[ j ];
     }
 
-    /** \todo Avoid using raw pointers here */
-    BoundarySegmentWrapperType* prj =
-      new BoundarySegmentWrapperType( type, coords, boundarySegment.get() );
+    BoundarySegmentWrapperType* prj
+      = new BoundarySegmentWrapperType( type, coords, boundarySegment );
     boundaryProjections_[ faceId ] = prj;
 #ifndef NDEBUG
     // consistency check
@@ -445,9 +451,12 @@ namespace Dune
     // make changes in macro grid known in every partition
     grid->myGrid().duneNotifyMacroGridChanges();
 #else
-    DUNE_THROW(NotImplemented,"ALUGrid factory not working in parallel right now!");
-#endif
-#endif
+    int size;
+    MPI_Comm_size( communicator_, &size );
+    if( size > 1 )
+      DUNE_THROW(NotImplemented,"ALUGrid factory not working in parallel right now!");
+#endif // #ifdef ALUGRID_EXPORT_MACROGRID_CHANGES
+#endif // #if ALU3DGRID_PARALLEL
 
     // reset wasRefined flags
     grid->postAdapt();

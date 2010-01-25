@@ -548,7 +548,7 @@ namespace Dune
         for (int i=0; i<2; i++)
           vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices, new LinearBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]]));
+          factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<dim,dimWorld> >(new LinearBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]])));
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
         break;
@@ -559,7 +559,7 @@ namespace Dune
         for (int i=0; i<2; i++)
           vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices, new QuadraticBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[2]],nodes[simplexVertices[1]]));
+          factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<dim,dimWorld> >(new QuadraticBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[2]],nodes[simplexVertices[1]])));
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
         break;
@@ -695,7 +695,7 @@ namespace Dune
           vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
 
         if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices,new LinearBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]]));
+          factory.insertBoundarySegment(vertices,shared_ptr<BoundarySegment<dim,dimWorld> >(new LinearBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]])));
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
         break;
@@ -707,7 +707,7 @@ namespace Dune
         for (int i=0; i<3; i++)
           vertices[i] = renumber[simplexVertices[i]];               // renumber vertices first three vertices
         if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices,new QuadraticBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]]));
+          factory.insertBoundarySegment(vertices,shared_ptr<BoundarySegment<dim,dimWorld> >(new QuadraticBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]])));
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
         break;

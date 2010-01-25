@@ -132,7 +132,14 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   void ALU2dGridFactory< ALUGrid > ::
-  insertBoundarySegment ( const std::vector< unsigned int > vertices,
+  insertBoundarySegment ( const std::vector< unsigned int >& vertices )
+  {
+    DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
+  }
+
+  template< template< int, int > class ALUGrid >
+  void ALU2dGridFactory< ALUGrid > ::
+  insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                           const shared_ptr<BoundarySegment<2,2> >& boundarySegment )
   {
     FaceType faceId;
@@ -155,9 +162,8 @@ namespace Dune
       for( unsigned int j = 0; j < dimensionworld; ++j )
         coords[ i ][ j ] = x[ j ];
     }
-    /** \todo Avoid using raw pointers here */
-    BoundarySegmentWrapperType* prj =
-      new BoundarySegmentWrapperType( type, coords, boundarySegment.get() );
+    BoundarySegmentWrapperType* prj
+      = new BoundarySegmentWrapperType( type, coords, boundarySegment );
     boundaryProjections_[ faceId ] = prj;
 #ifndef NDEBUG
     // consistency check

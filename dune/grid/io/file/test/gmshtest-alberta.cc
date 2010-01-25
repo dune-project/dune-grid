@@ -4,6 +4,10 @@
 
 #include <memory>
 
+#include <dune/common/mpihelper.hh>
+
+#undef HAVE_ALBERTA
+
 #if HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #endif
@@ -18,11 +22,14 @@
 
 #include <dune/grid/io/file/gmshreader.hh>
 
+#if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>
+#endif // #if HAVE_GRAPE
 
 #ifndef ALBERTA_DIM
 #define ALBERTA_DIM 2
 #endif
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 #ifndef GRIDDIM
 #define GRIDDIM ALBERTA_DIM
@@ -32,16 +39,26 @@ template <class GridType>
 void checkGmshReader(const char* filename, const int refinements)
 {
   std::auto_ptr< GridType > grid( Dune::GmshReader< GridType >::read( filename ) );
+  grid->loadBalance();
   if( refinements > 0 )
     grid->globalRefine( refinements );
 
+#if HAVE_GRAPE
   Dune::GrapeGridDisplay< GridType > grape( *grid );
   grape.display();
+#endif // #if HAVE_GRAPE
+
+  std::ostringstream vtkName;
+  vtkName << filename << "-" << refinements;
+  Dune::VTKWriter< typename GridType::LeafGridView > vtkWriter( grid->leafView() );
+  vtkWriter.write( vtkName.str() );
 }
 
 int main ( int argc, char **argv )
 try
 {
+  Dune::MPIHelper::instance( argc, argv );
+
   if( argc < 2 )
   {
     std::cerr << "Usage: " << argv[ 0 ] << " <gmshfile> [refinements]" << std::endl;
@@ -54,7 +71,7 @@ try
 
 #if HAVE_ALBERTA
   std::cout << "Checking AlbertaGrid< " << GRIDDIM << " >..." << std::endl;
-  //checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
+  checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
 #endif
 
 #if HAVE_ALUGRID

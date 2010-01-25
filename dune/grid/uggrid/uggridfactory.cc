@@ -174,7 +174,14 @@ insertElement(const GeometryType& type,
 
 template <int dimworld>
 void Dune::GridFactory<Dune::UGGrid<dimworld> >::
-insertBoundarySegment(const std::vector<unsigned int> vertices,
+insertBoundarySegment(const std::vector<unsigned int>& vertices)
+{
+  insertBoundarySegment(vertices, shared_ptr<BoundarySegment<dimworld> >());
+}
+
+template <int dimworld>
+void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+insertBoundarySegment(const std::vector<unsigned int>& vertices,
                       const shared_ptr<BoundarySegment<dimworld> > boundarySegment)
 {
   array<unsigned int, dimworld*2-2> segmentVertices;
@@ -193,8 +200,8 @@ insertBoundarySegment(const std::vector<unsigned int> vertices,
 
   boundarySegmentVertices_.push_back(segmentVertices);
 
-  // Append boundary segment class to the boundary segment class list, so we can
-  // delete them all in the destructor
+  // Append boundary segment class to the boundary segment class list,
+  // to make sure they aren't deleted before the grid object
   grid_->boundarySegments_.push_back(boundarySegment);
 }
 

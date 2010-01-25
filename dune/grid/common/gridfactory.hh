@@ -139,9 +139,14 @@ namespace Dune
 
     /** \brief Method to insert an arbitrarily shaped boundary segment into a coarse grid
         \param vertices The indices of the vertices of the segment
+     */
+    virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices) = 0;
+
+    /** \brief Method to insert an arbitrarily shaped boundary segment into a coarse grid
+        \param vertices The indices of the vertices of the segment
         \param boundarySegment Class implementing the geometry of the boundary segment.
      */
-    virtual void insertBoundarySegment(const std::vector<unsigned int> vertices,
+    virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices,
                                        const shared_ptr<BoundarySegment<dimension,dimworld> >& boundarySegment)
     {
       DUNE_THROW(GridError, "This grid does not support parametrized boundary segments!");

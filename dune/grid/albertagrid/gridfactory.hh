@@ -199,14 +199,25 @@ namespace Dune
       globalProjection_ = new Projection( projection );
     }
 
+    /** \brief insert a boundary segment into the macro grid
+     *
+     *  Only influences the ordering of the boundary segments
+     *  \param[in]  vertices         vertex indices of boundary face
+     */
+    virtual void
+    insertBoundarySegment ( const std::vector< unsigned int >& vertices )
+    {
+      DUNE_THROW( NotImplemented, "insertBoundarySegment without a parametrization function" );
+    }
+
     /** \brief insert a shaped boundary segment into the macro grid
      *
      *  \param[in]  vertices         vertex indices of boundary face
      *  \param[in]  boundarySegment  geometric realization of shaped boundary
      */
     virtual void
-    insertBoundarySegment ( const std::vector< unsigned int > vertices,
-                            const shared_ptr<BoundarySegment>& boundarySegment )
+    insertBoundarySegment ( const std::vector< unsigned int > &vertices,
+                            const shared_ptr< BoundarySegment > &boundarySegment )
     {
       const GenericReferenceElement< ctype, dimension-1 > &refSimplex
         = GenericReferenceElements< ctype, dimension-1 >::simplex();
@@ -227,9 +238,7 @@ namespace Dune
       }
 
       GeometryType type( GeometryType::simplex, dimension-1 );
-      /** \todo Instead of extracting the raw pointer here the shared_ptr should be used
-          directly in BoundarySegmentWrapper */
-      insertBoundaryProjection( type, vertices, new BoundarySegmentWrapper( type, coords, boundarySegment.get() ) );
+      insertBoundaryProjection( type, vertices, new BoundarySegmentWrapper( type, coords, boundarySegment ) );
     }
 
     /** \brief add a face transformation (for periodic identification)
