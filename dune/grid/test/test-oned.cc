@@ -99,6 +99,17 @@ int main () try
 
   testOneDGrid(uniformGrid);
 
+  // Test a uniform grid with RefinementType set to COPY
+  Dune::OneDGrid uniformGrid2(7,       // Number of elements
+                              -0.5,    // Left boundary
+                              2.3      // Right boundary
+                              );
+
+  uniformGrid2.setRefinementType(OneDGrid::COPY);
+
+  testOneDGrid(uniformGrid2);
+
+
   // everything okay
   return 0;
 
