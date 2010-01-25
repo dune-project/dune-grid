@@ -67,9 +67,7 @@ gmshtest_LDADD =				\
 
 gmshtest_alberta_SOURCES = gmshtest-alberta.cc
 gmshtest_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS) -DGRIDDIM=$(ALBERTA_DIM)
-gmshtest_alberta_CLDFLAGS = $(AM_LDFLAGS)	\
-	$(ALBERTA_LDFLAGS)			\
-	$(GRAPE_LDFLAGS)
+gmshtest_alberta_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(GRAPE_LDFLAGS)
 gmshtest_alberta_LDADD =			\
 	$(GRAPE_LIBS)				\
 	$(ALBERTA_LIBS)				\
