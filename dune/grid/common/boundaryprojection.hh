@@ -8,6 +8,7 @@
 
 //- Dune includes
 #include <dune/common/fvector.hh>
+#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/genericgeometry/mappingprovider.hh>
