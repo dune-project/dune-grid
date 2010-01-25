@@ -186,12 +186,19 @@ namespace Dune {
     virtual void insertElement(const GeometryType& type,
                                const std::vector<unsigned int>& vertices);
 
+    /** \brief Method to insert a boundary segment into a coarse grid
+
+       Using this method is optional.  It only influences the ordering of the segments
+
+        \param vertices The indices of the vertices of the segment
+     */
+    void insertBoundarySegment(const std::vector<unsigned int>& vertices);
+
     /** \brief Method to insert an arbitrarily shaped boundary segment into a coarse grid
         \param vertices The indices of the vertices of the segment
         \param boundarySegment Class implementing the geometry of the boundary segment.
-        The grid object takes control of this object and deallocates it when destructing itself.
      */
-    void insertBoundarySegment(const std::vector<unsigned int> vertices,
+    void insertBoundarySegment(const std::vector<unsigned int>& vertices,
                                const shared_ptr<BoundarySegment<dimworld> > boundarySegment);
 
 
