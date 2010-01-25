@@ -162,9 +162,8 @@ namespace Dune
       for( unsigned int j = 0; j < dimensionworld; ++j )
         coords[ i ][ j ] = x[ j ];
     }
-    /** \todo Avoid using raw pointers here */
-    BoundarySegmentWrapperType* prj =
-      new BoundarySegmentWrapperType( type, coords, boundarySegment.get() );
+    BoundarySegmentWrapperType* prj
+      = new BoundarySegmentWrapperType( type, coords, boundarySegment );
     boundaryProjections_[ faceId ] = prj;
 #ifndef NDEBUG
     // consistency check
