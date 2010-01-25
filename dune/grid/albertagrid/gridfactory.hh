@@ -216,8 +216,8 @@ namespace Dune
      *  \param[in]  boundarySegment  geometric realization of shaped boundary
      */
     virtual void
-    insertBoundarySegment ( const std::vector< unsigned int >& vertices,
-                            const shared_ptr<BoundarySegment>& boundarySegment )
+    insertBoundarySegment ( const std::vector< unsigned int > &vertices,
+                            const shared_ptr< BoundarySegment > &boundarySegment )
     {
       const GenericReferenceElement< ctype, dimension-1 > &refSimplex
         = GenericReferenceElements< ctype, dimension-1 >::simplex();
@@ -238,9 +238,7 @@ namespace Dune
       }
 
       GeometryType type( GeometryType::simplex, dimension-1 );
-      /** \todo Instead of extracting the raw pointer here the shared_ptr should be used
-          directly in BoundarySegmentWrapper */
-      insertBoundaryProjection( type, vertices, new BoundarySegmentWrapper( type, coords, boundarySegment.get() ) );
+      insertBoundaryProjection( type, vertices, new BoundarySegmentWrapper( type, coords, boundarySegment ) );
     }
 
     /** \brief add a face transformation (for periodic identification)
