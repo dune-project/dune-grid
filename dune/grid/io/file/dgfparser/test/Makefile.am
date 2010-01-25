@@ -26,8 +26,8 @@ endif
 ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
 
 # programs just to build when "make check" is used
-check_PROGRAMS = $(ALLTESTS) $(VIEWPROGS)
-EXTRA_PROGRAMS = tester
+check_PROGRAMS = $(ALLTESTS)
+EXTRA_PROGRAMS = tester viewdgf
 
 # list of tests to run
 TESTS = $(ALLTESTS)
