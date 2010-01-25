@@ -451,9 +451,12 @@ namespace Dune
     // make changes in macro grid known in every partition
     grid->myGrid().duneNotifyMacroGridChanges();
 #else
-    DUNE_THROW(NotImplemented,"ALUGrid factory not working in parallel right now!");
-#endif
-#endif
+    int size;
+    MPI_Comm_size( communicator_, &size );
+    if( size > 1 )
+      DUNE_THROW(NotImplemented,"ALUGrid factory not working in parallel right now!");
+#endif // #ifdef ALUGRID_EXPORT_MACROGRID_CHANGES
+#endif // #if ALU3DGRID_PARALLEL
 
     // reset wasRefined flags
     grid->postAdapt();
