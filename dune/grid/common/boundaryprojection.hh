@@ -60,7 +60,7 @@ namespace Dune
      */
     BoundarySegmentWrapper ( const GeometryType &type,
                              const std::vector< CoordinateType > &vertices,
-                             const BoundarySegment *boundarySegment )
+                             const shared_ptr< BoundarySegment > boundarySegment )
       : faceMapping_( FaceMappingProvider::mapping( type, vertices ) ),
         boundarySegment_( boundarySegment )
     {
@@ -76,23 +76,15 @@ namespace Dune
 
     ~BoundarySegmentWrapper ()
     {
-      // we abuse the mapping's reference count to determine when to
-      // destruct the boundary segment
       if( --(faceMapping_->referenceCount) == 0 )
-      {
         delete faceMapping_;
-        delete boundarySegment_;
-      }
     }
 
     This &operator= ( const This &other ) const
     {
       ++(other.faceMapping_->referenceCount);
       if( --(faceMapping_->referenceCount == 0) )
-      {
         delete faceMapping_;
-        delete boundarySegment_;
-      }
       faceMapping_ = other.faceMapping_;
       boundarySegment_ = other.boundarySegment_;
       return *this;
@@ -110,7 +102,7 @@ namespace Dune
 
   private:
     FaceMapping *faceMapping_;
-    const BoundarySegment *boundarySegment_;
+    const shared_ptr< BoundarySegment > boundarySegment_;
   };
 
 
