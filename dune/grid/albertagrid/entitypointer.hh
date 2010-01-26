@@ -7,6 +7,8 @@
 
 #include <dune/grid/albertagrid/elementinfo.hh>
 
+#if HAVE_ALBERTA
+
 namespace Dune
 {
 
@@ -209,4 +211,6 @@ namespace Dune
 
 }
 
-#endif
+#endif // #if HAVE_ALBERTA
+
+#endif // #ifndef DUNE_ALBERTA_ENTITYPOINTER_HH

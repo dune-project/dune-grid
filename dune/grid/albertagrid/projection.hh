@@ -8,6 +8,8 @@
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 
+#if HAVE_ALBERTA
+
 namespace Dune
 {
 
@@ -312,5 +314,7 @@ namespace Dune
   }
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif // #ifndef DUNE_ALBERTA_NODEPROJECTION_HH

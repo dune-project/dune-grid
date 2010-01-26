@@ -3,8 +3,6 @@
 #ifndef DUNE_ALBERTAGRIDINDEXSETS_HH
 #define DUNE_ALBERTAGRIDINDEXSETS_HH
 
-#if HAVE_ALBERTA
-
 #include <dune/common/stdstreams.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -16,6 +14,8 @@
 #include <dune/grid/albertagrid/dofvector.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/gridfamily.hh>
+
+#if HAVE_ALBERTA
 
 namespace Dune
 {

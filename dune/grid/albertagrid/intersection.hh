@@ -14,6 +14,8 @@
 
 #define ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES 1
 
+#if HAVE_ALBERTA
+
 namespace Dune
 {
 
@@ -177,5 +179,7 @@ namespace Dune
   };
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif // #ifndef DUNE_ALBERTA_INTERSECTION_HH

@@ -7,6 +7,8 @@
 
 #include <dune/grid/albertagrid/treeiterator.hh>
 
+#if HAVE_ALBERTA
+
 namespace Dune
 {
 
@@ -75,5 +77,7 @@ namespace Dune
   };
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif // #ifndef DUNE_ALBERTA_LEAFITERATOR_HH
