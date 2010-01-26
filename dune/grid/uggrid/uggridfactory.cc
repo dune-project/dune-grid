@@ -283,45 +283,84 @@ createGrid()
   unsigned int i;
   for (i=0; i<grid_->boundarySegments_.size(); i++) {
 
-    /** \todo Due to some UG weirdness, in 3d, CreateBoundarySegment always expects
-        this array to have four entries, even if only a triangular segment is
-        inserted.  If not, undefined values are will be introduced. */
-    int vertices_c_style[dimworld*2-2];
-    for (int j=0; j<dimworld*2-2; j++)
-      vertices_c_style[j] = boundarySegmentVertices_[i][j];
-
-    // Create dummy parameter ranges
-    const double alpha[2] = {0, 0};
-    const double beta[2]  = {1, 1};
-
     // Create some boundary segment name
     char segmentName[20];
     if(sprintf(segmentName, "BS %d", i) < 0)
       DUNE_THROW(GridError, "sprintf returned error code!");
 
-    typedef int (*BndSegFuncPtr)(void *, double *,double *);
-    BndSegFuncPtr boundarySegmentWrapper;
-    if (dimworld==2)
-      boundarySegmentWrapper = boundarySegmentWrapper2d;
-    else {
-      if (vertices_c_style[3]==-1)        // triangular face
-        boundarySegmentWrapper = boundarySegmentWrapper3dTriangle;
-      else
-        boundarySegmentWrapper = boundarySegmentWrapper3dQuad;
-    }
+    // Copy the vertices into a C-style array
+    // We copy four vertices here even if the segment is a triangle -- it doesn't matter
+    int vertices_c_style[dimworld*2-2];
+    for (int j=0; j<dimworld*2-2; j++)
+      vertices_c_style[j] = boundarySegmentVertices_[i][j];
 
-    // Actually create the segment
-    if (UG_NS<dimworld>::CreateBoundarySegment(segmentName,                     // internal name of the boundary segment
-                                               1,                          //  id of left subdomain
-                                               2,                          //  id of right subdomain
-                                               i,    // Index of the segment
-                                               1,                   // Resolution, only for the UG graphics
-                                               vertices_c_style,
-                                               alpha,
-                                               beta,
-                                               boundarySegmentWrapper,
-                                               grid_->boundarySegments_[i].get())==NULL) {
-      DUNE_THROW(GridError, "Calling UG" << dimworld << "d::CreateBoundarySegment failed!");
+    if (grid_->boundarySegments_[i]) {
+
+      // Create dummy parameter ranges
+      const double alpha[2] = {0, 0};
+      const double beta[2]  = {1, 1};
+
+      typedef int (*BndSegFuncPtr)(void *, double *,double *);
+      BndSegFuncPtr boundarySegmentWrapper;
+      if (dimworld==2)
+        boundarySegmentWrapper = boundarySegmentWrapper2d;
+      else {
+        if (vertices_c_style[3]==-1)      // triangular face
+          boundarySegmentWrapper = boundarySegmentWrapper3dTriangle;
+        else
+          boundarySegmentWrapper = boundarySegmentWrapper3dQuad;
+      }
+
+      // Actually create the segment
+      if (UG_NS<dimworld>::CreateBoundarySegment(segmentName,                   // internal name of the boundary segment
+                                                 1,                        //  id of left subdomain
+                                                 2,                        //  id of right subdomain
+                                                 i,  // Index of the segment
+                                                 1,                 // Resolution, only for the UG graphics
+                                                 vertices_c_style,
+                                                 alpha,
+                                                 beta,
+                                                 boundarySegmentWrapper,
+                                                 grid_->boundarySegments_[i].get())==NULL) {
+        DUNE_THROW(GridError, "Calling UG" << dimworld << "d::CreateBoundarySegment failed!");
+      }
+
+    } else {       // No explicit boundary parametrization has been given. We insert a linear segment
+
+      int numVertices = 2;(dimworld==2)
+      ? 2
+      : ((boundarySegmentVertices_[i][3]==-1) ? 3 : 4);
+
+      double segmentCoordinates[dimworld*2-2][dimworld];
+      for (int j=0; j<numVertices; j++)
+        for (int k=0; k<dimworld; k++)
+          segmentCoordinates[j][k] = vertexPositions_[boundarySegmentVertices_[i][j]][k];
+
+      if (dimworld==2) {
+
+        if (UG::D2::CreateLinearSegment(segmentName,
+                                        1,                 /*id of left subdomain */
+                                        2,                /*id of right subdomain*/
+                                        i,                    /*id of segment*/
+                                        numVertices,            // Number of corners
+                                        vertices_c_style,
+                                        (double(*)[2])(segmentCoordinates)
+                                        )==NULL)
+          DUNE_THROW(IOError, "Error calling CreateLinearSegment");
+
+      } else {
+
+        if (UG::D3::CreateLinearSegment(segmentName,
+                                        1,                 /*id of left subdomain */
+                                        2,                /*id of right subdomain*/
+                                        i,                    /*id of segment*/
+                                        numVertices,                    // Number of corners
+                                        vertices_c_style,
+                                        (double(*)[3])(segmentCoordinates)
+                                        )==NULL)
+          DUNE_THROW(IOError, "Error calling CreateLinearSegment");
+      }
+
     }
 
     // /////////////////////////////////////////////////////////////////////
