@@ -336,30 +336,15 @@ createGrid()
         for (int k=0; k<dimworld; k++)
           segmentCoordinates[j][k] = vertexPositions_[boundarySegmentVertices_[i][j]][k];
 
-      if (dimworld==2) {
-
-        if (UG::D2::CreateLinearSegment(segmentName,
-                                        1,                 /*id of left subdomain */
-                                        2,                /*id of right subdomain*/
-                                        i,                    /*id of segment*/
-                                        numVertices,            // Number of corners
-                                        vertices_c_style,
-                                        (double(*)[2])(segmentCoordinates)
-                                        )==NULL)
-          DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-
-      } else {
-
-        if (UG::D3::CreateLinearSegment(segmentName,
-                                        1,                 /*id of left subdomain */
-                                        2,                /*id of right subdomain*/
-                                        i,                    /*id of segment*/
-                                        numVertices,                    // Number of corners
-                                        vertices_c_style,
-                                        (double(*)[3])(segmentCoordinates)
-                                        )==NULL)
-          DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-      }
+      if (UG_NS<dimworld>::CreateLinearSegment(segmentName,
+                                               1,               /*id of left subdomain */
+                                               2,              /*id of right subdomain*/
+                                               i,                  /*id of segment*/
+                                               numVertices,          // Number of corners
+                                               vertices_c_style,
+                                               segmentCoordinates
+                                               )==NULL)
+        DUNE_THROW(IOError, "Error calling CreateLinearSegment");
 
     }
 
@@ -413,40 +398,21 @@ createGrid()
     if(sprintf(segmentName, "BS %d", i) < 0)
       DUNE_THROW(GridError, "sprintf returned error code!");
 
-    if (dimworld==2) {
+    double segmentCoordinates[2*dimworld-2][dimworld];
+    for (int j=0; j<thisSegment.numVertices(); j++)
+      for (int k=0; k<dimworld; k++)
+        segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
 
-      double segmentCoordinates[2][2];
-      for (int j=0; j<thisSegment.numVertices(); j++)
-        for (int k=0; k<dimworld; k++)
-          segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
+    if (UG_NS<dimworld>::CreateLinearSegment(segmentName,
+                                             1,        /*id of left subdomain */
+                                             2,       /*id of right subdomain*/
+                                             i,           /*id of segment*/
+                                             thisSegment.numVertices(),   // Number of corners
+                                             vertices_c_style,
+                                             segmentCoordinates
+                                             )==NULL)
+      DUNE_THROW(IOError, "Error calling CreateLinearSegment");
 
-      if (UG::D2::CreateLinearSegment(segmentName,
-                                      1,               /*id of left subdomain */
-                                      2,              /*id of right subdomain*/
-                                      i,                  /*id of segment*/
-                                      thisSegment.numVertices(),          // Number of corners
-                                      vertices_c_style,
-                                      segmentCoordinates
-                                      )==NULL)
-        DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-
-    } else {
-
-      double segmentCoordinates[4][3];
-      for (int j=0; j<thisSegment.numVertices(); j++)
-        for (int k=0; k<dimworld; k++)
-          segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
-
-      if (UG::D3::CreateLinearSegment(segmentName,
-                                      1,               /*id of left subdomain */
-                                      2,              /*id of right subdomain*/
-                                      i,                  /*id of segment*/
-                                      thisSegment.numVertices(),                  // Number of corners
-                                      vertices_c_style,
-                                      segmentCoordinates
-                                      )==NULL)
-        DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-    }
 #endif
 
   }
