@@ -236,7 +236,7 @@ createGrid()
 
   if (grid_->boundarySegments_.size() > boundarySegments.size())
     DUNE_THROW(GridError, "You have supplied " << grid_->boundarySegments_.size()
-                                               << " parametrized boundary segments,  but the coarse grid has only "
+                                               << " parametrized boundary segments, but the coarse grid has only "
                                                << boundarySegments.size() << " boundary faces!");
 
   // Count number of nodes on the boundary
