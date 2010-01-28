@@ -62,23 +62,22 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
     AC_MSG_ERROR([ALUGrid directory $ALUGRIDROOT does not exist or is inaccessible])
   fi
 
-    ALUGRID_VERSIONCHECK=$ALUGRIDROOT/bin/alugridversion
-    ## check version number 
-    NEEDEDALUGRID_VERSION=1.1
+  REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
+  PKG_CONFIG_PATH=$ALUGRIDROOT
 
-    AC_MSG_CHECKING([ALUGrid version >= $NEEDEDALUGRID_VERSION])
-    if test -f $ALUGRID_VERSIONCHECK; then 
-      ALUGRID_VERSION=`$ALUGRID_VERSIONCHECK -c $NEEDEDALUGRID_VERSION`
-      if test "x$ALUGRID_VERSION" != "x-1"; then 
-        ALUGRID_VERSIONNO=`$ALUGRID_VERSIONCHECK -v`
-        AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSIONNO)])
-      else 
-        AC_MSG_ERROR([ALUGrid version is too old!])
-      fi 
-      
-    else 
-      AC_MSG_ERROR([Couldn't find ALUGrid version checker! ALUGrid version too old or ALUGrid not installed in $ALUGRIDROOT!])
-    fi   
+  ## check version number 
+  NEEDEDALUGRID_VERSION=1.22
+
+  AC_MSG_CHECKING([ALUGrid version >= $NEEDEDALUGRID_VERSION])
+  if `$PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid` ; then 
+    ALUGRID_VERSION=`$PKG_CONFIG --modversion alugrid`
+    AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSION)])
+  else 
+    AC_MSG_ERROR([$PKG_CONFIG couldn't find alugrid.pc! ALUGrid version too old or ALUGrid not installed in $ALUGRIDROOT! You need at least ALUGrid-$NEEDEDALUGRID_VERSION!])
+  fi
+
+  # restore PKG_CONFIG_PATH 
+  PKG_CONFIG_PATH=$REM_PKG_CONFIG_PATH
 
   ALUGRID_LIB_PATH="$ALUGRIDROOT/lib"
   ALUGRID_INCLUDE_PATH="$ALUGRIDROOT/include"

@@ -6,8 +6,10 @@
 #include <string>
 
 #include <dune/common/array.hh>
-#include <amiramesh/AmiraMesh.h>
 
+#if HAVE_AMIRAMESH
+#include <amiramesh/AmiraMesh.h>
+#endif
 
 namespace Dune {
 
@@ -88,7 +90,9 @@ namespace Dune {
 
   protected:
 
+#if HAVE_AMIRAMESH  // better: use a pointer here and forward-declare AmiraMesh
     AmiraMesh amiramesh_;
+#endif
   };
 
   /** @ingroup AmiraMesh
@@ -202,6 +206,8 @@ namespace Dune {
 }
 
 // implementation
+#if HAVE_AMIRAMESH
 #include "amiramesh/amirameshwriter.cc"
+#endif
 
 #endif

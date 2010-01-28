@@ -5,9 +5,14 @@
 
 #include <string>
 
-#include <amiramesh/AmiraMesh.h>
-
 #include <dune/grid/common/gridfactory.hh>
+
+#if HAVE_AMIRAMESH
+#include <amiramesh/AmiraMesh.h>
+#else
+// forward declaration so we can at least compile the header without libamiramesh
+class AmiraMesh;
+#endif
 
 namespace Dune {
 
@@ -89,6 +94,8 @@ namespace Dune {
 
 }
 
+#if HAVE_AMIRAMESH
 #include "amiramesh/amirameshreader.cc"
+#endif
 
 #endif
