@@ -8,8 +8,6 @@
  *  \brief  provides the GridFamily for AlbertaGrid
  */
 
-#if HAVE_ALBERTA
-
 #include <dune/common/collectivecommunication.hh>
 
 #include <dune/grid/common/defaultgridview.hh>
@@ -23,6 +21,8 @@
 #include <dune/grid/common/leveliterator.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
+
+#if HAVE_ALBERTA
 
 namespace Dune
 {

@@ -12,7 +12,7 @@
 
 #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
-#include <dune/grid/io/file/dgfparser/dgfalberta.hh>
+#include <dune/grid/albertagrid/dgfparser.hh>
 #include <dune/grid/io/file/dgfparser/dgfs.hh>
 #include <dune/grid/io/file/dgfparser/dgfoned.hh>
 #include <dune/grid/io/file/dgfparser/dgfug.hh>
@@ -147,9 +147,7 @@ void test ( const GridViewType &view )
         LocalFaceType xf(0.1);
         GlobalType n = iiter->integrationOuterNormal(xf);
         LocalType xx(iiter->geometryInInside().global(xf));
-        const unsigned int duneFaceNr = iiter->numberInSelf();
-        const unsigned int genericFaceNr
-          = MapNumbering< TopologyType > :: template dune2generic< 1 >( duneFaceNr );
+        const int genericFaceNr = iiter->indexInInside();
         GlobalType nM = map.normal( genericFaceNr, xx );
         if ((n-nM).two_norm2()>1e-10) {
           normalErr++;
@@ -179,7 +177,7 @@ try
   }
 
   // create Grid from DGF parser
-  GridPtr< GridType > grid( argv[ 1 ] );
+  GridPtr< GridSelector::GridType > grid( argv[ 1 ] );
 
   test(grid->leafView());
 

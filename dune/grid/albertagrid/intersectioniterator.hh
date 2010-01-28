@@ -12,6 +12,8 @@
  *  \brief  Implementation of the IntersectionIterator for AlbertaGrid
  */
 
+#if HAVE_ALBERTA
+
 namespace Dune
 {
 
@@ -90,5 +92,7 @@ namespace Dune
   };
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif // #ifndef DUNE_ALBERTA_INTERSECTIONITERATOR_HH

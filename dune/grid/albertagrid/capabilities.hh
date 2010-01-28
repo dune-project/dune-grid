@@ -5,6 +5,8 @@
 
 #include <dune/grid/common/capabilities.hh>
 
+#if HAVE_ALBERTA
+
 namespace Dune
 {
 
@@ -85,5 +87,7 @@ namespace Dune
   }
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif // #ifndef DUNE_ALBERTA_CAPABILITIES_HH

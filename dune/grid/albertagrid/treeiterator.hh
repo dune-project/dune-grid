@@ -6,6 +6,8 @@
 #include <dune/grid/albertagrid/meshpointer.hh>
 #include <dune/grid/albertagrid/entitypointer.hh>
 
+#if HAVE_ALBERTA
+
 namespace Dune
 {
 
@@ -490,5 +492,7 @@ namespace Dune
   }
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif // #ifndef DUNE_ALBERTA_TREEITERATOR_HH
