@@ -63,17 +63,18 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
   fi
 
   REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
-  PKG_CONFIG_PATH=$ALUGRIDROOT
+  PKG_CONFIG_PATH="$ALUGRIDROOT:$ALUGRIDROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
 
   ## check version number 
   NEEDEDALUGRID_VERSION=1.22
 
   AC_MSG_CHECKING([ALUGrid version >= $NEEDEDALUGRID_VERSION])
-  if `$PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid` ; then 
+  if $PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid ; then 
     ALUGRID_VERSION=`$PKG_CONFIG --modversion alugrid`
     AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSION)])
   else 
-    AC_MSG_ERROR([$PKG_CONFIG couldn't find alugrid.pc! ALUGrid version too old or ALUGrid not installed in $ALUGRIDROOT! You need at least ALUGrid-$NEEDEDALUGRID_VERSION!])
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([$PKG_CONFIG couldn't find alugrid.pc or wrong version! ALUGrid version too old or ALUGrid not installed in $ALUGRIDROOT! You need at least ALUGrid-$NEEDEDALUGRID_VERSION!])
   fi
 
   # restore PKG_CONFIG_PATH 
@@ -149,7 +150,7 @@ if test x$HAVE_ALUGRID = x1 ; then
                    [$ALUGRID_LDFLAGS], [$ALUGRID_LIBS])
 
   # set variable for summary
-  with_alugrid="yes"
+  with_alugrid="yes (Version $ALUGRID_VERSION)"
 else
   AC_SUBST(ALUGRID_LIBS, "")
   AC_SUBST(ALUGRID_LDFLAGS, "")
