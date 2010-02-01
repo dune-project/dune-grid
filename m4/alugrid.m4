@@ -72,9 +72,22 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
   if $PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid ; then 
     ALUGRID_VERSION=`$PKG_CONFIG --modversion alugrid`
     AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSION)])
-  else 
-    AC_MSG_RESULT([no])
-    AC_MSG_ERROR([$PKG_CONFIG couldn't find alugrid.pc or wrong version! ALUGrid version too old or ALUGrid not installed in $ALUGRIDROOT! You need at least ALUGrid-$NEEDEDALUGRID_VERSION!])
+  else   
+    # old check version 
+    ALUGRID_VERSIONCHECK=$ALUGRIDROOT/bin/alugridversion
+    if test -f $ALUGRID_VERSIONCHECK; then 
+      ALUGRID_VERSION=`$ALUGRID_VERSIONCHECK -c $NEEDEDALUGRID_VERSION`
+      if test "x$ALUGRID_VERSION" != "x-1"; then 
+        ALUGRID_VERSION=`$ALUGRID_VERSIONCHECK -v`
+        AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSION)])
+      else 
+        AC_MSG_RESULT([no])
+        AC_MSG_ERROR([ALUGrid version is too old!])
+      fi
+    else 
+      AC_MSG_RESULT([no])
+      AC_MSG_ERROR([$PKG_CONFIG couldn't find alugrid.pc or wrong version! ALUGrid version is too old or ALUGrid is not installed in $ALUGRIDROOT! You need at least ALUGrid-$NEEDEDALUGRID_VERSION!])
+    fi
   fi
 
   # restore PKG_CONFIG_PATH 
