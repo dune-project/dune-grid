@@ -2,21 +2,28 @@
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_DGFPARSERYASP_HH
 #define DUNE_DGFPARSERYASP_HH
+
 #include <dune/grid/yaspgrid.hh>
 #include "dgfparser.hh"
-namespace Dune {
 
-  namespace dgf {
+namespace Dune
+{
+
+  namespace dgf
+  {
 
     /** \brief Grid parameters for YaspGrid
-        \ingroup DGFGridParameter
-        The YaspGridParameter class is in charge of passing YaspGrid specific
-        parameters to grid construction. Current parameters are: \n \n
-          1. \b overlap defining the overlap of the grid (default value is zero) \n
-          2. \b periodic defining which dimension should have periodic
-                boundaries, i.e. passing \b periodic 0 1 will set
-                periodic boundaries for x and y direction. \n
-        See the \b examplegrid5.dgf file for an example.
+     *  \ingroup DGFGridParameter
+     *
+     *  The YaspGridParameter class is in charge of passing parameters specific
+     *  to YaspGrid to the grid construction.
+     *  Current parameters are:
+     *    -# \b overlap defining the overlap of the grid (default value is zero)
+     *    .
+     *  See the \b examplegrid5.dgf file for an example.
+     *
+     *  \note The \b periodic parameter has been replaced by the
+     *        \b PeriodicFaceTransformation block.
      */
     class YaspGridParameterBlock
       : public GridParameterBlock
