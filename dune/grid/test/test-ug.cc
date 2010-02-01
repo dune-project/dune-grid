@@ -56,28 +56,43 @@ public:
 };
 
 
-void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool parametrization)
+void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool parametrization)
 {
   Dune::GridFactory<Dune::UGGrid<2> > factory(&grid);
 
   // /////////////////////////////
   //   Create boundary segments
   // /////////////////////////////
-  if (parametrization) {
+  if (boundarySegments) {
 
     FieldVector<double,2> center(0);
     center[1] = 15;
 
     std::vector<unsigned int> vertices(2);
 
-    vertices[0] = 1;  vertices[1] = 2;
-    factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI, M_PI*4/3)));
+    if (parametrization) {
 
-    vertices[0] = 2;  vertices[1] = 3;
-    factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3)));
+      vertices[0] = 1;  vertices[1] = 2;
+      factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI, M_PI*4/3)));
 
-    vertices[0] = 3;  vertices[1] = 0;
-    factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2)));
+      vertices[0] = 2;  vertices[1] = 3;
+      factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3)));
+
+      vertices[0] = 3;  vertices[1] = 0;
+      factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2)));
+
+    } else {
+
+      vertices[0] = 1;  vertices[1] = 2;
+      factory.insertBoundarySegment(vertices);
+
+      vertices[0] = 2;  vertices[1] = 3;
+      factory.insertBoundarySegment(vertices);
+
+      vertices[0] = 3;  vertices[1] = 0;
+      factory.insertBoundarySegment(vertices);
+
+    }
 
   }
 
@@ -235,6 +250,17 @@ int main (int argc , char **argv) try
   std::cout << "Testing UGGrid<2> and UGGrid<3> with nonconforming refinement" << std::endl;
   generalTests(false);
 
+  // ////////////////////////////////////////////////////////////////////////////
+  //   Test whether I can create a grid with explict boundary segment ordering,
+  //   but not parametrization functions (only 2d, so far)
+  // ////////////////////////////////////////////////////////////////////////////
+
+  Dune::UGGrid<2> gridWithOrderedBoundarySegments;
+  makeHalfCircleQuad(gridWithOrderedBoundarySegments, true, false);
+
+  gridWithOrderedBoundarySegments.globalRefine(1);
+  gridcheck(gridWithOrderedBoundarySegments);
+
   // ////////////////////////////////////////////////////////////////////////
   //   Check whether geometryInFather returns equal results with and
   //   without parametrized boundaries
@@ -243,12 +269,12 @@ int main (int argc , char **argv) try
   Dune::UGGrid<2> gridWithParametrization, gridWithoutParametrization;
 
   // make grids
-  makeHalfCircleQuad(gridWithoutParametrization, false);
-  makeHalfCircleQuad(gridWithParametrization, true);
+  makeHalfCircleQuad(gridWithoutParametrization, false, false);
+  makeHalfCircleQuad(gridWithParametrization, true, true);
 
   // make grids again just to check this is possible
-  makeHalfCircleQuad(gridWithoutParametrization, false);
-  makeHalfCircleQuad(gridWithParametrization, true);
+  makeHalfCircleQuad(gridWithoutParametrization, false, false);
+  makeHalfCircleQuad(gridWithParametrization, true, true);
 
   gridWithParametrization.globalRefine(1);
   gridWithoutParametrization.globalRefine(1);
@@ -289,7 +315,7 @@ int main (int argc , char **argv) try
     typedef Dune::UGGrid<2>::Traits::LocalIdSet LocalIdSet;
 
     // make grids
-    makeHalfCircleQuad(locallyRefinedGrid, false);
+    makeHalfCircleQuad(locallyRefinedGrid, false, false);
 
     markOne(locallyRefinedGrid,0,1);
     markOne(locallyRefinedGrid,0,1);

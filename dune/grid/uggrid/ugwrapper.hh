@@ -939,6 +939,21 @@ namespace Dune {
                                                   boundarySegmentFunction,
                                                   userData);
     }
+
+    static void* CreateLinearSegment(const char *name,
+                                     int left, int right,
+                                     int index, int numVertices,
+                                     const int* cornerIndices,
+                                     double cornerCoordinates[2][ UG_DIM ])
+    {
+      return UG_NAMESPACE ::CreateLinearSegment(name,            // internal name of the boundary segment
+                                                left,            //  id of left subdomain
+                                                right,           //  id of right subdomain
+                                                index,           // Index of the segment
+                                                numVertices,
+                                                cornerIndices,
+                                                cornerCoordinates);
+    }
 #endif
 
   };
