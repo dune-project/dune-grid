@@ -308,8 +308,10 @@ namespace Dune
 #endif
       new Grid( filename, globalProjection_ , bndProjections );
 
-    //if( temporary )
-    //  remove( filename.c_str() );
+#ifndef ALUGRID_NOTEMPFILE_2D
+    if( temporary )
+      std::remove( filename.c_str() );
+#endif
 
     // remove pointer
     globalProjection_ = 0;
