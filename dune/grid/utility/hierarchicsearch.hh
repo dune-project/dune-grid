@@ -96,7 +96,7 @@ namespace Dune
         if( !GenericReferenceElements< double, dim >::general( geo.type() ).checkInside( local ) )
           continue;
 
-        if( (dim != dimw) && ((geo.global( local ) - global).two_norm() > 1e-8) )
+        if( (int(dim) != int(dimw)) && ((geo.global( local ) - global).two_norm() > 1e-8) )
           continue;
 
         // return if we found the leaf, else search through the child entites
