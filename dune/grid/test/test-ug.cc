@@ -20,9 +20,7 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 
-#ifdef ModelP
-#include <mpi.h>
-#endif
+#include <dune/common/mpihelper.hh>
 
 using namespace Dune;
 
@@ -232,11 +230,8 @@ void generalTests(bool greenClosure)
 
 int main (int argc , char **argv) try
 {
-
-#ifdef ModelP
-  // initialize MPI
-  MPI_Init(&argc,&argv);
-#endif
+  // use MPI helper to initialize MPI
+  MPIHelper :: instance( argc, argv );
 
   // ////////////////////////////////////////////////////////////////////////
   //  Do the standard grid test for a 2d and a 3d UGGrid
@@ -354,12 +349,6 @@ int main (int argc , char **argv) try
       }
     }
   }
-
-
-#ifdef ModelP
-  // Terminate MPI
-  MPI_Finalize();
-#endif
 
   return 0;
 }
