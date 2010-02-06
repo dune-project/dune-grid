@@ -118,7 +118,7 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
   # check for parallel header 
   AC_CHECK_HEADERS([alugrid_parallel.h], 
      [ALUGRID_CPPFLAGS="\${DUNEMPICPPFLAGS} $ALU3D_INC_FLAG $ALU3D_INC_FLAG_PARA"
-      ALUGRID_LDFLAGS="${DUNEMPILDFLAGS}"
+      ALUGRID_LDFLAGS="\${DUNEMPILDFLAGS}"
       ALUGRID_LIBS="-L$ALUGRID_LIB_PATH -lalugrid \${DUNEMPILIBS}"
       # for use with the later library test
       LDFLAGS="$LDFLAGS $DUNEMPILDFLAGS"
