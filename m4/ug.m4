@@ -8,9 +8,12 @@
 #   UGROOT
 #   UG_LIB_PATH
 #   UG_INCLUDE_PATH
-#   UG_LDFLAGS
-#   UG_LIBS
-#   UG_CPPFLAGS
+#   UG_CPPFLAGS, UG_LDFLAGS, UG_LIBS
+#       flags and libs with indirect references for the makefiles, for
+#       instance the literal string '${DUNEMPICPPFLAGS}
+#   direct_UG_CPPFLAGS, direct_UG_LDFLAGS, direct_UG_LIBS
+#       flags and libs with direct valuesfor use in configure, for instance
+#       the value of DUNEMPICPPFLAGS
 #   HAVE_UG
 #       1 or 0 or undefined
 #   with_ug
@@ -82,8 +85,10 @@ AC_DEFUN([DUNE_PATH_UG],[
         AC_HELP_STRING([--enable-ug-lgmdomain],[use UG LGM domain (default is standard domain)]))
       if test x"$enable_ug_lgmdomain" = xyes ; then
         UG_LIBS="-L$UG_LIB_PATH -lugL2 -lugL3 -ldevS"
+        direct_UG_LIBS="-L$UG_LIB_PATH -lugL2 -lugL3 -ldevS"
       else
         UG_LIBS="-L$UG_LIB_PATH -lugS2 -lugS3 -ldevS"
+        direct_UG_LIBS="-L$UG_LIB_PATH -lugS2 -lugS3 -ldevS"
       fi
 
       # backup CPPFLAGS so I can add an additional flag just for AC_CHECk_HEADER
@@ -93,6 +98,7 @@ AC_DEFUN([DUNE_PATH_UG],[
       # check for central header
       AC_CHECK_HEADER([$UG_INCLUDE_PATH/gm.h],
       [UG_CPPFLAGS="-I$UG_INCLUDE_PATH -DENABLE_UG"
+          direct_UG_CPPFLAGS="-I$UG_INCLUDE_PATH -DENABLE_UG"
           HAVE_UG="1"],
       [HAVE_UG="0"
       AC_MSG_WARN([gm.h not found in $UG_INCLUDE_PATH])]
@@ -122,17 +128,20 @@ AC_DEFUN([DUNE_PATH_UG],[
         # If MPI is installed look for the parallel UG
         if test x"$with_mpi" != x"no"; then
             AC_MSG_CHECKING([UG libraries (parallel)])
-            LIBS="$UG_LIBS $DUNEMPILIBS $LIBS"
+            LIBS="$direct_UG_LIBS $DUNEMPILIBS $LIBS"
             LDFLAGS="$LDFLAGS $DUNEMPILDFLAGS"
-            CPPFLAGS="$UG_CPPFLAGS -DModelP -D_2"
+            CPPFLAGS="$direct_UG_CPPFLAGS -DModelP -D_2"
             AC_TRY_LINK(
               [#include "initug.h"
                #include "parallel.h"],
           [int i = UG::D2::InitDDD()],
-              [UG_LDFLAGS="$DUNEMPILDFLAGS $UG_LDFLAGS"
-           UG_CPPFLAGS="$DUNEMPICPPFLAGS $UG_CPPFLAGS -DModelP"
+              [UG_LDFLAGS="\${DUNEMPILDFLAGS} $UG_LDFLAGS"
+           direct_UG_LDFLAGS="$DUNEMPILDFLAGS $direct_UG_LDFLAGS"
+           UG_CPPFLAGS="\${DUNEMPICPPFLAGS} $UG_CPPFLAGS -DModelP"
+           direct_UG_CPPFLAGS="$DUNEMPICPPFLAGS $direct_UG_CPPFLAGS -DModelP"
            HAVE_UG="1"
-           UG_LIBS="$UG_LIBS $DUNEMPILIBS"
+           UG_LIBS="$UG_LIBS \${DUNEMPILIBS}"
+           direct_UG_LIBS="$direct_UG_LIBS $DUNEMPILIBS"
            with_ug="yes (parallel)"
            AC_MSG_RESULT(yes)
               ],
@@ -144,8 +153,8 @@ AC_DEFUN([DUNE_PATH_UG],[
       # parallel lib not found/does not work?  Let's check for the sequential one
       if test x$HAVE_UG != x1; then
         AC_MSG_CHECKING([UG libraries (sequential)])
-        LIBS="$UG_LIBS $LIBS"
-        CPPFLAGS="$CPPFLAGS $UG_CPPFLAGS -D_2"
+        LIBS="$direct_UG_LIBS $LIBS"
+        CPPFLAGS="$CPPFLAGS $direct_UG_CPPFLAGS -D_2"
           AC_TRY_LINK(
               [#include "initug.h"],
           [int i = UG::D2::InitUg(0,0)],
@@ -190,9 +199,12 @@ AC_DEFUN([DUNE_PATH_UG],[
   # did it work?
   if test x$HAVE_UG = x0 ; then
       # reset flags, so they do not appear in makefiles
-      UG_LDFLAGS=""
-      UG_LIBS=""
       UG_CPPFLAGS=""
+      direct_UG_CPPFLAGS=""
+      UG_LDFLAGS=""
+      direct_UG_LDFLAGS=""
+      UG_LIBS=""
+      direct_UG_LIBS=""
   fi
 
   AC_SUBST([UG_LDFLAGS])
@@ -200,7 +212,7 @@ AC_DEFUN([DUNE_PATH_UG],[
   AC_SUBST([UG_CPPFLAGS])
 
   # add to global list
-  DUNE_ADD_ALL_PKG([UG], [$UG_CPPFLAGS], [$UG_LDFLAGS], [$UG_LIBS])
+  DUNE_ADD_ALL_PKG([UG], [\${UG_CPPFLAGS}], [\${UG_LDFLAGS}], [\${UG_LIBS}])
 
   if test x$HAVE_UG = x1 ; then
       AC_DEFINE(HAVE_UG, ENABLE_UG, 
