@@ -884,7 +884,7 @@ namespace Dune {
     // map to old numbering
     typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
     const unsigned int cubeid = GenericGeometry::topologyId( cubeType );
-    const int j = Numbering::template generic2dune( cubeid, i, codim );
+    const int j = Numbering::generic2dune( cubeid, i, codim );
 
     // find expanded coordinates of entity in reference cube
     // has components in {0,1,2}
