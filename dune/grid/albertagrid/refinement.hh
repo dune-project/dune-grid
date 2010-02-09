@@ -81,10 +81,9 @@ namespace Dune
           functor( (*this)[ i ] );
       }
 
-      template< class Functor >
+      template< int codim, class Functor >
       void forEachInteriorSubChild ( Functor &functor ) const
       {
-        const int codim = Functor::codimension;
         ForEachInteriorSubChild< dim, codim >::apply( functor, *this );
       }
     };

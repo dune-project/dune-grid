@@ -199,7 +199,79 @@ namespace Dune
     //! id set impl
     typedef AlbertaGridIdSet<dim,dimworld> IdSetImp;
 
-    struct AdaptationState;
+    //! AdaptationState
+    struct AdaptationState
+    {
+      enum Phase { ComputationPhase, PreAdaptationPhase, PostAdaptationPhase };
+
+    private:
+      Phase phase_;
+      int coarsenMarked_;
+      int refineMarked_;
+
+    public:
+      AdaptationState ()
+        : phase_( ComputationPhase ),
+          coarsenMarked_( 0 ),
+          refineMarked_( 0 )
+      {}
+
+      void mark ( int count )
+      {
+        if( count < 0 )
+          ++coarsenMarked_;
+        if( count > 0 )
+          refineMarked_ += (2 << count);
+      }
+
+      void unmark ( int count )
+      {
+        if( count < 0 )
+          --coarsenMarked_;
+        if( count > 0 )
+          refineMarked_ -= (2 << count);
+      }
+
+      bool coarsen () const
+      {
+        return (coarsenMarked_ > 0);
+      }
+
+      int refineMarked () const
+      {
+        return refineMarked_;
+      }
+
+      void preAdapt ()
+      {
+        if( phase_ != ComputationPhase )
+          error( "preAdapt may only be called in computation phase." );
+        phase_ = PreAdaptationPhase;
+      }
+
+      void adapt ()
+      {
+        if( phase_ != PreAdaptationPhase )
+          error( "adapt may only be called in preadapdation phase." );
+        phase_ = PostAdaptationPhase;
+      }
+
+      void postAdapt ()
+      {
+        if( phase_ != PostAdaptationPhase )
+          error( "postAdapt may only be called in postadaptation phase." );
+        phase_ = ComputationPhase;
+
+        coarsenMarked_ = 0;
+        refineMarked_ = 0;
+      }
+
+    private:
+      void error ( const std::string &message )
+      {
+        DUNE_THROW( InvalidStateException, message );
+      }
+    };
 
     template< class DataHandler >
     struct AdaptationCallback;
@@ -583,85 +655,6 @@ namespace Dune
 
     // current state of adaptation
     AdaptationState adaptationState_;
-  };
-
-
-
-  // AlbertaGrid::AdaptationState
-  // ----------------------------
-
-  template< int dim, int dimworld >
-  struct AlbertaGrid< dim, dimworld >::AdaptationState
-  {
-    enum Phase { ComputationPhase, PreAdaptationPhase, PostAdaptationPhase };
-
-  private:
-    Phase phase_;
-    int coarsenMarked_;
-    int refineMarked_;
-
-  public:
-    AdaptationState ()
-      : phase_( ComputationPhase ),
-        coarsenMarked_( 0 ),
-        refineMarked_( 0 )
-    {}
-
-    void mark ( int count )
-    {
-      if( count < 0 )
-        ++coarsenMarked_;
-      if( count > 0 )
-        refineMarked_ += (2 << count);
-    }
-
-    void unmark ( int count )
-    {
-      if( count < 0 )
-        --coarsenMarked_;
-      if( count > 0 )
-        refineMarked_ -= (2 << count);
-    }
-
-    bool coarsen () const
-    {
-      return (coarsenMarked_ > 0);
-    }
-
-    int refineMarked () const
-    {
-      return refineMarked_;
-    }
-
-    void preAdapt ()
-    {
-      if( phase_ != ComputationPhase )
-        error( "preAdapt may only be called in computation phase." );
-      phase_ = PreAdaptationPhase;
-    }
-
-    void adapt ()
-    {
-      if( phase_ != PreAdaptationPhase )
-        error( "adapt may only be called in preadapdation phase." );
-      phase_ = PostAdaptationPhase;
-    }
-
-    void postAdapt ()
-    {
-      if( phase_ != PostAdaptationPhase )
-        error( "postAdapt may only be called in postadaptation phase." );
-      phase_ = ComputationPhase;
-
-      coarsenMarked_ = 0;
-      refineMarked_ = 0;
-    }
-
-  private:
-    void error ( const std::string &message )
-    {
-      DUNE_THROW( InvalidStateException, message );
-    }
   };
 
 } // namespace Dune

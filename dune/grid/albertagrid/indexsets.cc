@@ -93,10 +93,10 @@ namespace Dune
   template< int dim, int dimworld >
   template< int codim >
   void AlbertaGridHierarchicIndexSet< dim, dimworld >::RefineNumbering< codim >
-  ::interpolateVector ( const IndexVectorPointer &dofVector, const Patch &patch )
+  ::interpolateVector ( const IndexVectorPointer &dofVector, const Alberta::Patch< dimension > &patch )
   {
     RefineNumbering refineNumbering( dofVector );
-    patch.forEachInteriorSubChild( refineNumbering );
+    patch.template forEachInteriorSubChild< codim >( refineNumbering );
   }
 
 
@@ -121,7 +121,7 @@ namespace Dune
   ::restrictVector ( const IndexVectorPointer &dofVector, const Patch &patch )
   {
     CoarsenNumbering coarsenNumbering( dofVector );
-    patch.forEachInteriorSubChild( coarsenNumbering );
+    patch.template forEachInteriorSubChild< codim >( coarsenNumbering );
   }
 
 

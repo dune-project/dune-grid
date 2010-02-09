@@ -311,7 +311,7 @@ namespace Dune
       static void refineInterpolate ( DofVector *dofVector, RC_LIST_EL *list, int n )
       {
         const This dofVectorPointer( dofVector );
-        const Patch< Interpolation::dimension > patch( list, n );
+        typename Interpolation::Patch patch( list, n );
         Interpolation::interpolateVector( dofVectorPointer, patch );
       }
 
@@ -319,7 +319,7 @@ namespace Dune
       static void coarsenRestrict ( DofVector *dofVector, RC_LIST_EL *list, int n )
       {
         const This dofVectorPointer( dofVector );
-        const Patch< Restriction::dimension > patch( list, n );
+        typename Restriction::Patch patch( list, n );
         Restriction::restrictVector( dofVectorPointer, patch );
       }
     };
