@@ -4,8 +4,8 @@ if UG
 
 noinst_LTLIBRARIES = libuggrid.la
 
-libuggrid_la_SOURCES  = uggrid.cc uggridentity.cc boundaryextractor.cc boundaryextractor.hh \
-                        uggridindexsets.cc uggridintersections.cc uggridfactory.cc
+libuggrid_la_SOURCES  = uggridintersections.cc uggrid.cc uggridentity.cc boundaryextractor.cc boundaryextractor.hh \
+                        uggridindexsets.cc uggridfactory.cc
 
 libuggrid_la_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(UG_CPPFLAGS)				\
