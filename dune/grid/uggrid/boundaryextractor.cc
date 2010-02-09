@@ -205,7 +205,7 @@ int Dune::BoundaryExtractor::detectBoundaryNodes(const std::set<UGGridBoundarySe
   for (int i=0; i<noOfNodes; i++)
     isBoundaryNode[i] = -1;
 
-  typename std::set<UGGridBoundarySegment<dim> >::iterator it = boundarySegments.begin();
+  typename std::set<UGGridBoundarySegment<dim> >::const_iterator it = boundarySegments.begin();
 
   for (; it!=boundarySegments.end(); ++it) {
 
