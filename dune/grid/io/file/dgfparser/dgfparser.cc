@@ -4,6 +4,7 @@
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
+#include <unistd.h>
 
 namespace Dune
 {
