@@ -1595,7 +1595,7 @@ namespace Dune {
     friend class Dune::SHierarchicIterator<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SEntity<0,dim,const Dune::SGrid<dim,dimworld> >;
 
-    template<int codim_, int dim_, class GridImp_>
+    template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Dune::SEntityBase;
 
     template<int codim_, class GridImp_>
