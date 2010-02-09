@@ -161,6 +161,11 @@ namespace Dune
     friend class AlbertaGridLeafIntersection< const This >;
 
     friend class AlbertaMarkerVector< dim, dimworld >;
+#if (__GNUC__ < 4) && !(defined __ICC)
+    // add additional friedn decls for gcc 3.4
+    friend struct AlbertaMarkerVector< dim, dimworld >::MarkSubEntities<true>;
+    friend struct AlbertaMarkerVector< dim, dimworld >::MarkSubEntities<false>;
+#endif
     friend class AlbertaGridIndexSet< dim, dimworld >;
     friend class AlbertaGridHierarchicIndexSet< dim, dimworld >;
 
