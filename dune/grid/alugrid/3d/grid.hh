@@ -36,8 +36,6 @@
 
 #include <dune/grid/alugrid/3d/lbdatahandle.hh>
 
-#include <dune/common/mpihelper.hh>
-
 #if ALU3DGRID_PARALLEL
 #include <dune/common/mpicollectivecommunication.hh>
 #else
@@ -180,13 +178,15 @@ namespace Dune {
 
 #if ALU3DGRID_PARALLEL
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
+      typedef Dune :: CollectiveCommunication< MPI_Comm >
+      CollectiveCommunication;
 #else
       // in serial we use LocalIdSet as GlobalIdSet because it much faster
       // that global id set
       typedef LocalIdSet GlobalIdSet;
-#endif
-      typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
+      typedef Dune :: CollectiveCommunication< Grid >
       CollectiveCommunication;
+#endif
     };
   };
 
