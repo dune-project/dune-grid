@@ -37,8 +37,11 @@ namespace Dune {
             const DuneBoundaryProjectionType* bndPrj,
             const DuneBoundaryProjectionVector* bndVec,
             std::istream* macroFile )
-    : comm_( MPIHelper::getCommunicator() )
-      , mygrid_ ( createGrid(macroTriangFilename, nrOfHangingNodes, macroFile ) )
+    :
+#if ALU2DGRID_PARALLEL
+      comm_( MPIHelper::getCommunicator() ),
+#endif
+      mygrid_ ( createGrid(macroTriangFilename, nrOfHangingNodes, macroFile ) )
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_( MAXL, 0 )
@@ -77,8 +80,11 @@ namespace Dune {
   //! Constructor which constructs an empty ALU2dGrid
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(int nrOfHangingNodes)
-    : comm_( MPIHelper::getCommunicator() )
-      , mygrid_ (0)
+    :
+#if ALU2DGRID_PARALLEL
+      comm_( MPIHelper::getCommunicator() ),
+#endif
+      mygrid_ (0)
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)

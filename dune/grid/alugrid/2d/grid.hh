@@ -159,9 +159,13 @@ namespace Dune {
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
       typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
 
-      // use communicator type from MPIHelper
-      typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
+#if ALU2DGRID_PARALLEL
+      typedef Dune :: CollectiveCommunication< MPI_Comm >
       CollectiveCommunication;
+#else
+      typedef Dune :: CollectiveCommunication< GridImp >
+      CollectiveCommunication;
+#endif
     };
   }; // end of ALU2dGridFamily
 
