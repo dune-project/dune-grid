@@ -174,6 +174,8 @@ namespace Dune {
 #if ALU3DGRID_PARALLEL
       , mpAccess_(mpiComm)
       , ccobj_(mpiComm)
+#else
+      , ccobj_( MPIHelper :: getCommunicator() )
 #endif
       , maxlevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)
