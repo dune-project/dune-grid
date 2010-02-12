@@ -1,8 +1,11 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+
 #include <config.h>
 
 #include <string>
+
+#include <dune/common/mpihelper.hh>
 
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/io/file/starcdreader.hh>
@@ -25,6 +28,9 @@ void readGrid (const std::string& baseName)
 
 int main (int argc , char **argv) try
 {
+  // initialize MPI if neccessary
+  Dune::MPIHelper::instance(argc, argv);
+
   std::string gridDirectory = "../../../../doc/grids/starcd/";
 
   // Currently, Star-CD only works for UGGrid
