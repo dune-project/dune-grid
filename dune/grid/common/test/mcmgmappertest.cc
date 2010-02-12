@@ -1,6 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id$
 
 /** \file
     \brief A unit test for the MultipleCodimMultipleGeometryMapper
@@ -143,8 +142,10 @@ void checkFaceDataMapper(const Mapper& mapper, const IndexSet& indexSet)
    than one element type.  So far only UGGrids do this, so we use them to test the mapper.
  */
 
-int main () try
+int main(int argc, char** argv) try
 {
+  // initialize MPI if neccessary
+  Dune::MPIHelper::instance(argc, argv);
 
   // ////////////////////////////////////////////////////////////////////////
   //  Do the test for a 2d UGGrid
