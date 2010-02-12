@@ -31,7 +31,7 @@ int main (int argc , char **argv) try
   // initialize MPI if neccessary
   Dune::MPIHelper::instance(argc, argv);
 
-  std::string gridDirectory = "../../../../doc/grids/starcd/";
+  std::string gridDirectory = "../../../../../doc/grids/starcd/";
 
   // Currently, Star-CD only works for UGGrid
   readGrid<Dune::UGGrid<3> >(gridDirectory + "star");
