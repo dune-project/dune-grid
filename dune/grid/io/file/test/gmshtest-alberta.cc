@@ -85,15 +85,20 @@ try
   {
     const std::string path("../../../../../doc/grids/gmsh/");
 
+#if GRIDDIM == 2
     std::string curved2d( path );
     curved2d += "curved2d.msh";
     runChecks(curved2d, refinements);
-
+    return 0;
+#elif GRIDDIM == 3
     std::string pyramid( path );
     pyramid += "pyramid.msh";
     runChecks(pyramid, refinements);
-
     return 0;
+#else
+    // signal 'skipped' to the test system
+    return 77;
+#endif
   }
 
   if( argc >= 3 )
