@@ -59,18 +59,19 @@ void runChecks(const std::string& filename, unsigned refinements) {
 
 #if HAVE_ALBERTA
   std::cout << "Checking AlbertaGrid< " << GRIDDIM << " >..." << std::endl;
-  checkGmshReader<Dune::AlbertaGrid<GRIDDIM> >(filename, refinements);
+  checkGmshReader<Dune::AlbertaGrid<GRIDDIM> >(filename.c_str(), refinements);
 #endif
 
 #if HAVE_ALUGRID
-  std::cout << "Checking ALUGrid \n";
-  checkGmshReader<Dune::ALUSimplexGrid<GRIDDIM, GRIDDIM> >(filename,
+  std::cout << "Checking ALUSimplexGrid<" << GRIDDIM << "," << GRIDDIM
+            << ">..." << std::endl;
+  checkGmshReader<Dune::ALUSimplexGrid<GRIDDIM, GRIDDIM> >(filename.c_str(),
                                                            refinements);
 #endif
 
 #if HAVE_UG && (GRIDDIM == 3)
-  std::cout << "Checking UG \n";
-  checkGmshReader<Dune::UGGrid<3> >(filename, refinements);
+  std::cout << "Checking UGGrid<" << GRIDDIM << ">..." << std::endl;
+  checkGmshReader<Dune::UGGrid<3> >(filename.c_str(), refinements);
 #endif
 }
 
