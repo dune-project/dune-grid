@@ -7,8 +7,6 @@
 
 #include <dune/common/mpihelper.hh>
 
-#undef HAVE_ALBERTA
-
 #if HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #endif
