@@ -141,7 +141,7 @@ public:
 
     // make sure that global id on all processors are the same
     // here compare the id of the entity that sended the data with my id
-    typename GlobalIdSetImp :: IdType id;
+    //typename GlobalIdSetImp :: IdType id;
     //buff.read( id );
     //typename GlobalIdSetImp :: IdType myId = ids_.id( e );
     //std::cout << id << " id | my Id = " << myId << "\n";
