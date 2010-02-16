@@ -11,8 +11,9 @@
 // const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection<GridImp>::dimworld>& Dune::UGGridLevelIntersection<GridImp>::outerNormal(const Dune::FieldVector<typename GridImp::ctype, (Dune::UGGridLevelIntersection<GridImp>::dim - 1)>&) const;
 
 template<class GridImp>
-const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection<GridImp>::dimworld>&
-Dune::UGGridLevelIntersection <GridImp>::outerNormal (const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection<GridImp>::dim-1 >& local) const
+const typename Dune::UGGridLevelIntersection<GridImp>::WorldVector&
+Dune::UGGridLevelIntersection<GridImp>::outerNormal
+  (const typename Dune::UGGridLevelIntersection<GridImp>::FaceVector& local) const
 {
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
@@ -211,8 +212,9 @@ int Dune::UGGridLevelIntersection<GridImp>::indexInOutside () const
 
 /** \bug Doesn't work properly for nonplanar nonconforming quadrilateral faces */
 template<class GridImp>
-const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLeafIntersection<GridImp>::dimworld>&
-Dune::UGGridLeafIntersection <GridImp>::outerNormal (const FieldVector<typename GridImp::ctype, Dune::UGGridLeafIntersection<GridImp>::dim-1>& local) const
+const typename Dune::UGGridLeafIntersection<GridImp>::WorldVector&
+Dune::UGGridLeafIntersection<GridImp>::outerNormal
+  (const typename Dune::UGGridLeafIntersection<GridImp>::FaceVector& local) const
 {
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
