@@ -1,5 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+
 #ifndef DUNE_QUADRATURERULES_HH
 #define DUNE_QUADRATURERULES_HH
 
@@ -314,6 +315,16 @@ namespace Dune {
     }
   };
 
+  extern template CubeQuadratureRule<float, 1>::CubeQuadratureRule(int);
+  extern template CubeQuadratureRule<double, 1>::CubeQuadratureRule(int);
+
+} // namespace Dune
+
+#define DUNE_INCLUDING_IMPLEMENTATION
+#include "quadraturerules/cube_imp.hh"
+
+namespace Dune {
+
   /** \brief Jacobi-Gauss quadrature for alpha=1, beta=0
       \ingroup Quadrature
    */
@@ -366,6 +377,16 @@ namespace Dune {
         this->push_back(QuadraturePoint<ct,dim>(_points[i], _weight[i]));
     }
   };
+
+  extern template Jacobi1QuadratureRule<float, 1>::Jacobi1QuadratureRule(int);
+  extern template Jacobi1QuadratureRule<double, 1>::Jacobi1QuadratureRule(int);
+
+} // namespace Dune
+
+#define DUNE_INCLUDING_IMPLEMENTATION
+#include "quadraturerules/jacobi_1_0_imp.hh"
+
+namespace Dune {
 
   /** \brief Jacobi-Gauss quadrature for alpha=2, beta=0
       \ingroup Quadrature
@@ -421,6 +442,16 @@ namespace Dune {
         this->push_back(QuadraturePoint<ct,dim>(_points[i], _weight[i]));
     }
   };
+
+  extern template Jacobi2QuadratureRule<float, 1>::Jacobi2QuadratureRule(int);
+  extern template Jacobi2QuadratureRule<double, 1>::Jacobi2QuadratureRule(int);
+
+} // namespace Dune
+
+#define DUNE_INCLUDING_IMPLEMENTATION
+#include "quadraturerules/jacobi_2_0_imp.hh"
+
+namespace Dune {
 
   /************************************************
    * Quadraturerule for Simplices/Triangle

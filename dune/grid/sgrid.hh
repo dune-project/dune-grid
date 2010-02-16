@@ -1228,7 +1228,7 @@ namespace Dune {
     IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< 0 >::Entity &e,
                    int i, unsigned int codim ) const
     {
-      return grid.getRealImplementation(e).template subPersistentIndex(codim, i);
+      return grid.getRealImplementation(e).subPersistentIndex(codim, i);
     }
 
   private:

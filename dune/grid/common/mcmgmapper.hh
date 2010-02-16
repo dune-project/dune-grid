@@ -58,10 +58,14 @@ namespace Dune
   {
   public:
 
+    // the following lines need to be skipped for intel compilers, because they
+    // lead to ambiguous calls to methods
+#ifndef __INTEL_COMPILER
     //! import the base class implementation of map and contains (including the deprecated version)
     //! \todo remove in after next release
     using Mapper< typename GV::Grid, MultipleCodimMultipleGeomTypeMapper >::map;
     using Mapper< typename GV::Grid, MultipleCodimMultipleGeomTypeMapper >::contains;
+#endif
 
     /** @brief Construct mapper from grid and one of its index sets.
      *

@@ -74,7 +74,7 @@ gmshtest_alberta_LDADD =			\
 	$(LDADD)
 
 gmshtest_alugrid_SOURCES = gmshtest-alberta.cc
-gmshtest_alugrid_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(GRAPE_CPPFLAGS) -DGRIDDIM=$(ALBERTA_DIM)
+gmshtest_alugrid_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(GRAPE_CPPFLAGS) $(GRIDDIM_CPPFLAGS)
 gmshtest_alugrid_LDFLAGS = $(AM_LDFLAGS)	\
 	$(ALUGRID_LDFLAGS)			\
 	$(GRAPE_LDFLAGS)

@@ -1,12 +1,11 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+
 #include <config.h>
 
 #include <memory>
 
 #include <dune/common/mpihelper.hh>
-
-#undef HAVE_ALBERTA
 
 #if HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
@@ -54,35 +53,58 @@ void checkGmshReader(const char* filename, const int refinements)
   vtkWriter.write( vtkName.str() );
 }
 
+void runChecks(const std::string& filename, unsigned refinements) {
+  std::cout << "running gmshtest with gmsh files \"" << filename << "\" and "
+            << refinements << " refinements." << std::endl;
+
+#if HAVE_ALBERTA
+  std::cout << "Checking AlbertaGrid< " << GRIDDIM << " >..." << std::endl;
+  checkGmshReader<Dune::AlbertaGrid<GRIDDIM> >(filename.c_str(), refinements);
+#endif
+
+#if HAVE_ALUGRID
+  std::cout << "Checking ALUSimplexGrid<" << GRIDDIM << "," << GRIDDIM
+            << ">..." << std::endl;
+  checkGmshReader<Dune::ALUSimplexGrid<GRIDDIM, GRIDDIM> >(filename.c_str(),
+                                                           refinements);
+#endif
+
+#if HAVE_UG && (GRIDDIM == 3)
+  std::cout << "Checking UGGrid<" << GRIDDIM << ">..." << std::endl;
+  checkGmshReader<Dune::UGGrid<3> >(filename.c_str(), refinements);
+#endif
+}
+
 int main ( int argc, char **argv )
 try
 {
   Dune::MPIHelper::instance( argc, argv );
+  int refinements = 0;
 
   if( argc < 2 )
   {
-    std::cerr << "Usage: " << argv[ 0 ] << " <gmshfile> [refinements]" << std::endl;
-    return 1;
+    const std::string path("../../../../../doc/grids/gmsh/");
+
+#if GRIDDIM == 2
+    std::string curved2d( path );
+    curved2d += "curved2d.msh";
+    runChecks(curved2d, refinements);
+    return 0;
+#elif GRIDDIM == 3
+    std::string pyramid( path );
+    pyramid += "pyramid.msh";
+    runChecks(pyramid, refinements);
+    return 0;
+#else
+    // signal 'skipped' to the test system
+    return 77;
+#endif
   }
 
-  int refinements = 0;
   if( argc >= 3 )
     refinements = atoi( argv[2] );
 
-#if HAVE_ALBERTA
-  std::cout << "Checking AlbertaGrid< " << GRIDDIM << " >..." << std::endl;
-  checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
-#endif
-
-#if HAVE_ALUGRID
-  std::cout << "Checking ALUGrid \n";
-  checkGmshReader< Dune::ALUSimplexGrid< GRIDDIM, GRIDDIM > > ( argv[1], refinements );
-#endif
-
-#if HAVE_UG && (GRIDDIM == 3)
-  std::cout << "Checking UG \n";
-  checkGmshReader< Dune::UGGrid< 3 > > ( argv[1], refinements );
-#endif
+  runChecks(argv[1], refinements);
 
   return 0;
 }

@@ -1,6 +1,9 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+
 #include "config.h"
+
+#include <dune/common/mpihelper.hh>
 
 #include <dune/grid/sgrid.hh>
 #if HAVE_UG
@@ -25,7 +28,9 @@ void testReadingGrid(const std::string& filename) {
 
 }
 
-int main() try {
+int main(int argc, char** argv) try {
+  // initialize MPI if neccessary
+  Dune::MPIHelper::instance(argc, argv);
 
   const std::string path("../../../../../doc/grids/gmsh/");
   std::string curved2d( path );
