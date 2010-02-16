@@ -96,7 +96,9 @@ namespace Dune
        this set, which is inherited by child boundary segments.
        The size of the boundary segment index set (i.e., the number of boundary
        indices on the macro level) can be determined through the method
-       Grid::numBoundarySegments.
+       Grid::numBoundarySegments.<br>
+       Note that the boundary segment index is not persistent over dynamic load
+       balancing.
      \if old_documentation
        Different types of physical boundaries can be modeled using either
        the global coordinates of the intersection or by using the
