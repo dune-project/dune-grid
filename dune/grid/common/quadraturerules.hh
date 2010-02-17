@@ -5,6 +5,7 @@
 #define DUNE_QUADRATURERULES_HH
 
 #include <iostream>
+#include <limits>
 #include <vector>
 #include <map>
 
@@ -279,6 +280,25 @@ namespace Dune {
     }
   };
 
+  //! \internal Helper template for the initialization of the quadrature rules
+  template<typename ct,
+      bool fundamental = std::numeric_limits<ct>::is_specialized>
+  struct CubeQuadratureInitHelper;
+  template<typename ct>
+  struct CubeQuadratureInitHelper<ct, true> {
+    static void init(int p,
+                     std::vector< FieldVector<ct, 1> > & _points,
+                     std::vector< ct > & _weight,
+                     int & delivered_order);
+  };
+  template<typename ct>
+  struct CubeQuadratureInitHelper<ct, false> {
+    static void init(int p,
+                     std::vector< FieldVector<ct, 1> > & _points,
+                     std::vector< ct > & _weight,
+                     int & delivered_order);
+  };
+
   //! @copydoc CubeQuadratureRule
   //! Specialization for 1D.
   template<typename ct>
@@ -295,19 +315,16 @@ namespace Dune {
 
     ~CubeQuadratureRule(){}
   private:
-    void init(int p,
-              std::vector< FieldVector<ct, dim> > & _points,
-              std::vector< double > & _weight,
-              int & delivered_order);
     friend class QuadratureRuleFactory<ct,dim>;
     CubeQuadratureRule (int p)
       : QuadratureRule<ct,1>(GeometryType(GeometryType::cube, 1))
     {
       //! set up quadrature of given order in d dimensions
       std::vector< FieldVector<ct, dim> > _points;
-      std::vector< double > _weight;
+      std::vector< ct > _weight;
 
-      init(p, _points, _weight, this->delivered_order);
+      CubeQuadratureInitHelper<ct>::init
+        (p, _points, _weight, this->delivered_order);
 
       assert(_points.size() == _weight.size());
       for (size_t i = 0; i < _points.size(); i++)
@@ -330,6 +347,25 @@ namespace Dune {
    */
   template<typename ct, int dim>
   class Jacobi1QuadratureRule;
+
+  //! \internal Helper template for the initialization of the quadrature rules
+  template<typename ct,
+      bool fundamental = std::numeric_limits<ct>::is_specialized>
+  struct Jacobi1QuadratureInitHelper;
+  template<typename ct>
+  struct Jacobi1QuadratureInitHelper<ct, true> {
+    static void init(int p,
+                     std::vector< FieldVector<ct, 1> > & _points,
+                     std::vector< ct > & _weight,
+                     int & delivered_order);
+  };
+  template<typename ct>
+  struct Jacobi1QuadratureInitHelper<ct, false> {
+    static void init(int p,
+                     std::vector< FieldVector<ct, 1> > & _points,
+                     std::vector< ct > & _weight,
+                     int & delivered_order);
+  };
 
   /** \brief Jacobi-Gauss quadrature for alpha=1, beta=0
       \ingroup Quadrature
@@ -356,21 +392,18 @@ namespace Dune {
 
     ~Jacobi1QuadratureRule(){}
   private:
-    void init(int p,
-              std::vector< FieldVector<ct, dim> > & _points,
-              std::vector< double > & _weight,
-              int & delivered_order);
     friend class QuadratureRuleFactory<ct,dim>;
     Jacobi1QuadratureRule (int p)
       : QuadratureRule<ct,1>(GeometryType(GeometryType::cube, 1))
     {
       //! set up quadrature of given order in d dimensions
       std::vector< FieldVector<ct, dim> > _points;
-      std::vector< double > _weight;
+      std::vector< ct > _weight;
 
       int delivered_order;
 
-      init(p, _points, _weight, delivered_order);
+      Jacobi1QuadratureInitHelper<ct>::init
+        (p, _points, _weight, delivered_order);
       this->delivered_order = delivered_order;
       assert(_points.size() == _weight.size());
       for (size_t i = 0; i < _points.size(); i++)
@@ -393,6 +426,25 @@ namespace Dune {
    */
   template<typename ct, int dim>
   class Jacobi2QuadratureRule;
+
+  //! \internal Helper template for the initialization of the quadrature rules
+  template<typename ct,
+      bool fundamental = std::numeric_limits<ct>::is_specialized>
+  struct Jacobi2QuadratureInitHelper;
+  template<typename ct>
+  struct Jacobi2QuadratureInitHelper<ct, true> {
+    static void init(int p,
+                     std::vector< FieldVector<ct, 1> > & _points,
+                     std::vector< ct > & _weight,
+                     int & delivered_order);
+  };
+  template<typename ct>
+  struct Jacobi2QuadratureInitHelper<ct, false> {
+    static void init(int p,
+                     std::vector< FieldVector<ct, 1> > & _points,
+                     std::vector< ct > & _weight,
+                     int & delivered_order);
+  };
 
   /** \brief Jacobi-Gauss quadrature for alpha=2, beta=0
       \ingroup Quadrature
@@ -420,21 +472,18 @@ namespace Dune {
 
     ~Jacobi2QuadratureRule(){}
   private:
-    void init(int p,
-              std::vector< FieldVector<ct, dim> > & _points,
-              std::vector< double > & _weight,
-              int & delivered_order);
     friend class QuadratureRuleFactory<ct,dim>;
     Jacobi2QuadratureRule (int p)
       : QuadratureRule<ct,1>(GeometryType(GeometryType::cube, 1))
     {
       //! set up quadrature of given order in d dimensions
       std::vector< FieldVector<ct, dim> > _points;
-      std::vector< double > _weight;
+      std::vector< ct > _weight;
 
       int delivered_order;
 
-      init(p, _points, _weight, delivered_order);
+      Jacobi2QuadratureInitHelper<ct>::init
+        (p, _points, _weight, delivered_order);
 
       this->delivered_order = delivered_order;
       assert(_points.size() == _weight.size());
