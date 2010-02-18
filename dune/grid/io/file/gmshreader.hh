@@ -346,7 +346,7 @@ namespace Dune
         DUNE_THROW(Dune::IOError, "expected $MeshFormat in first line");
       readfile(file,3,"%lg %d %d\n",&version_number,&file_type,&data_size);
       if( (version_number < 2.0) || (version_number > 2.1) )
-        DUNE_THROW(Dune::IOError, "can only Gmsh version 2 files");
+        DUNE_THROW(Dune::IOError, "can only read Gmsh version 2 files");
       if (verbose) std::cout << "version " << version_number << " Gmsh file detected" << std::endl;
       readfile(file,1,"%s\n",buf);
       if (strcmp(buf,"$EndMeshFormat")!=0)
