@@ -338,15 +338,16 @@ namespace Dune
       line = 0;
 
       // process header
-      int version_number, file_type, data_size;
+      double version_number;
+      int file_type, data_size;
 
       readfile(file,1,"%s\n",buf);
       if (strcmp(buf,"$MeshFormat")!=0)
         DUNE_THROW(Dune::IOError, "expected $MeshFormat in first line");
-      readfile(file,3,"%d %d %d\n",&version_number,&file_type,&data_size);
-      if (version_number!=2)
-        DUNE_THROW(Dune::IOError, "can only read version_number==2");
-      if (verbose) std::cout << "version 2 Gmsh file detected" << std::endl;
+      readfile(file,3,"%lg %d %d\n",&version_number,&file_type,&data_size);
+      if( (version_number < 2.0) || (version_number > 2.1) )
+        DUNE_THROW(Dune::IOError, "can only Gmsh version 2 files");
+      if (verbose) std::cout << "version " << version_number << " Gmsh file detected" << std::endl;
       readfile(file,1,"%s\n",buf);
       if (strcmp(buf,"$EndMeshFormat")!=0)
         DUNE_THROW(Dune::IOError, "expected $EndMeshFormat");
@@ -526,7 +527,7 @@ namespace Dune
         element_count++;
         break;
       default :
-        fgets(buf,512,file);             // skip rest of line if no triangle
+        readfile(file,1,"%s\n",buf);             // skip rest of line if no triangle
       }
     }
 
@@ -585,7 +586,7 @@ namespace Dune
         element_count++;
         break;
       default :
-        fgets(buf,512,file);             // skip rest of line if no tetrahedron
+        readfile(file,1,"%s\n",buf);             // skip rest of line if no tetrahedron
       }
     }
   public:
