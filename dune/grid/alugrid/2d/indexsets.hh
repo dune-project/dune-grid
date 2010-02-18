@@ -38,7 +38,7 @@ namespace Dune
   template <int dim, int dimworld>
   class ALU2dGridHierarchicIndexSet :
     public IndexSet <ALU2dGrid<dim,dimworld>,
-        ALU2dGridHierarchicIndexSet<dim,dimworld> >
+        ALU2dGridHierarchicIndexSet<dim,dimworld>, int >
   {
     typedef ALU2dGridHierarchicIndexSet< dim, dimworld > This;
 

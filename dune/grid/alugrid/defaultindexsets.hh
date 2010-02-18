@@ -271,7 +271,7 @@ namespace Dune {
    */
   template <class GridImp>
   class DefaultLevelIndexSet :
-    public IndexSet< GridImp, DefaultLevelIndexSet <GridImp> >
+    public IndexSet< GridImp, DefaultLevelIndexSet <GridImp>, unsigned int >
 
   {
     typedef GridImp GridType;
@@ -398,7 +398,7 @@ namespace Dune {
     }
 
     //! return size of IndexSet for a given level and codim
-    int size ( int codim ) const
+    IndexType size ( int codim ) const
     {
       assert( codim >= 0 && codim <= GridType::dimension );
       return size_[codim];
@@ -406,7 +406,7 @@ namespace Dune {
 
     //! return size of IndexSet for a given level and codim
     //! this method is to be revised
-    int size ( GeometryType type ) const
+    IndexType size ( GeometryType type ) const
     {
       if( typeNotValid(type) ) return 0;
       return size_[GridType::dimension-type.dim()];
@@ -578,7 +578,7 @@ namespace Dune {
   //! Default LeafIndexSet
   template <class GridImp>
   class DefaultLeafIndexSet :
-    public IndexSet< GridImp, DefaultLeafIndexSet <GridImp> >
+    public IndexSet< GridImp, DefaultLeafIndexSet <GridImp>, unsigned int >
 
   {
     typedef GridImp GridType;
@@ -693,7 +693,7 @@ namespace Dune {
     }
 
     //! return size of IndexSet for a given codim
-    int size ( int codim ) const
+    IndexType size ( int codim ) const
     {
       assert( codim >= 0 && codim <= GridType::dimension );
       return size_[codim];
@@ -701,7 +701,7 @@ namespace Dune {
 
     //! return size of IndexSet for a codim
     //! this method is to be revised
-    int size ( GeometryType type ) const
+    IndexType size ( GeometryType type ) const
     {
       if( typeNotValid(type) ) return 0;
       return size_[GridType::dimension-type.dim()];
