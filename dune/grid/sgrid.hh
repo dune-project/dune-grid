@@ -776,7 +776,7 @@ namespace Dune {
     FieldVector<ctype, GridImp::dimensionworld> integrationOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
     {
       FieldVector<ctype, dimworld> n = unitOuterNormal(local);
-      n *= is_global.integrationElement(local);
+      n *= geometry().integrationElement(local);
       return n;
     }
 
