@@ -27,12 +27,10 @@ namespace Dune
     typedef typename Grid::template Codim<dimension>::Entity Vertex;
     typedef Dune::GridFactory<Grid> GridFactory;
 
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() );
     explicit DGFGridFactory ( const std::string &filename,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator())
-      : dgf_( 0, 1 )
-    {
-      generate( filename );
-    }
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() );
 
     Grid *grid () const
     {
@@ -83,7 +81,7 @@ namespace Dune
     }
 
   private:
-    void generate( const std::string &filename );
+    bool generate( std::istream &input );
 
     Grid *grid_;
     GridFactory factory_;

@@ -16,31 +16,47 @@ namespace Dune
   // ------------------------------------------------
 
   template< int dim, int dimworld >
-  void DGFGridFactory< AlbertaGrid< dim, dimworld > >
-  ::generate( const std::string &filename )
+  DGFGridFactory< AlbertaGrid< dim, dimworld > >
+  ::DGFGridFactory ( std::istream &input, MPICommunicatorType comm )
+    : dgf_( 0, 1 )
+  {
+    input.clear();
+    input.seekg( 0 );
+    if( !input )
+      DUNE_THROW(DGFException, "Error resetting input stream." );
+    generate( input );
+  }
+
+
+  template< int dim, int dimworld >
+  DGFGridFactory< AlbertaGrid< dim, dimworld > >
+  ::DGFGridFactory ( const std::string &filename, MPICommunicatorType comm )
+    : dgf_( 0, 1 )
+  {
+    std::ifstream input( filename.c_str() );
+    if( !input )
+      DUNE_THROW( DGFException, "Macrofile " << filename << " not found." );
+    if( !generate( input ) )
+      grid_ = new AlbertaGrid< dim, dimworld >( filename.c_str() );
+    input.close();
+  }
+
+
+  template< int dim, int dimworld >
+  bool DGFGridFactory< AlbertaGrid< dim, dimworld > >::generate( std::istream &input )
   {
     dgf_.element = DuneGridFormatParser::Simplex;
     dgf_.dimgrid = dim;
     dgf_.dimw = dimworld;
 
-    std::ifstream file( filename.c_str() );
-    if (! file)
-    {
-      DUNE_THROW(DGFException,
-                 "Macrofile " << filename << " not found");
-    }
-
-    if( !dgf_.readDuneGrid( file, dim, dimworld ) )
-    {
-      grid_ = new AlbertaGrid< dim, dimworld >( filename.c_str() );
-      return;
-    }
+    if( !dgf_.readDuneGrid( input, dim, dimworld ) )
+      return false;
 
     if( dim == dimworld )
       dgf_.setOrientation( 0, 1 );
     dgf_.setRefinement( 0, 1, -1, -1 );
 
-    dgf::GridParameterBlock parameter( file );
+    dgf::GridParameterBlock parameter( input );
     std::string gridName = parameter.name( "AlbertaGrid" );
 
     for( int n = 0; n < dgf_.nofvtx; ++n )
@@ -89,7 +105,7 @@ namespace Dune
     if( GridFactory::supportPeriodicity )
     {
       typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
-      dgf::PeriodicFaceTransformationBlock block( file, dimworld );
+      dgf::PeriodicFaceTransformationBlock block( input, dimworld );
       const int size = block.numTransformations();
       for( int k = 0; k < size; ++k )
       {
@@ -108,7 +124,7 @@ namespace Dune
       }
     }
 
-    dgf::ProjectionBlock projectionBlock( file, dimworld );
+    dgf::ProjectionBlock projectionBlock( input, dimworld );
     const DuneBoundaryProjection< dimworld > *projection
       = projectionBlock.template defaultProjection< dimworld >();
     if( projection != 0 )
@@ -131,6 +147,7 @@ namespace Dune
       factory_.write( dumpFileName );
 
     grid_ = factory_.createGrid( gridName );
+    return true;
   }
 
 
