@@ -57,8 +57,6 @@ namespace Dune
     void writeTetgenPoly ( std::ostream & );
     //! method to write macrogridfiles in alu format (cam be used without dune)
     void writeAlu ( std :: ostream & );
-    //! method to write macrogridfiles in alberta format (cam be used without dune)
-    void writeAlberta ( std::ostream & );
 
   protected:
     // dimension of world and problem: set through the readDuneGrid() method

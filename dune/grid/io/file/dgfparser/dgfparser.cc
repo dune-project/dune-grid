@@ -98,62 +98,9 @@ namespace Dune
       info(0),
       rank_(rank),
       size_(size)
-  {}
-
-
-  // Output to Alberta macrogridfile (2d/3d)
-  void DuneGridFormatParser :: writeAlberta ( std::ostream &out )
   {
-    // writes an output file for in gird type Alberta
-    out << "DIM: " << dimw
-        << "\n" << "DIM_OF_WORLD: "
-        << dimw << "\n"
-        << "\nnumber of vertices: "
-        << nofvtx <<  "\nnumber of elements: "
-        << nofelements << std::endl;
-    out <<  "\nvertex coordinates: " <<  std::endl;
-    for (int n=0; n<nofvtx; n++) {
-      for (int j=0; j<dimw; j++) {
-        out << vtx[n][j] << " ";
-      }
-      out << std::endl;
-    }
-    out << "\nelement vertices: "  << std::endl;
-    for (int n=0; n<nofelements; n++) {
-      for (int j=0; j<dimw+1; j++) {
-        // riesiger Hack! die make6 methode erzeugt nur jeden zweiten Tetraeder
-        // richtig, bei den geraden Tetras muessen die letzten beide Knoten
-        // vertauscht werden...
-        if ( cube2simplex &&
-             dimw==3 && n%2==0) {
-          if (j==2) out << " " << elements[n][3] << " ";
-          else if (j==3) out << " " << elements[n][2] << " ";
-          else if (j==1) out << " " << elements[n][1] << " ";
-          else if (j==0) out << " " << elements[n][0] << " ";
-        }
-        else
-          out << " " << elements[n][j] << " ";
-      }
-      out << std::endl;
-    }
-    out << "\nelement boundaries: "  << std::endl;
-    facemap_t :: iterator pos;
-    for( int simpl=0; simpl < nofelements ; simpl++) {
-      for (int i =0 ; i< dimw+1 ; i++) {
-        facemap_t :: key_type key2( elements[ simpl ], dimw, i+1 );
-        // DGFEntityKey< unsigned int > key2( elements[ simpl ], dimw, i+1 );
-        pos=facemap.find(key2);
-        if (pos==facemap.end())
-          out << "0 ";
-        else {
-          if (pos->second == 0)
-            out << "E ";
-          else
-            out << pos->second << " ";
-        }
-      }
-      out << " " << std::endl;
-    }
+    if( (rank_ < 0) || (rank_ >= size_) )
+      DUNE_THROW( DGFException, "Invalid rank: " << rank << " (not in [ 0, " << size_ << " [)." );
   }
 
 
