@@ -77,10 +77,17 @@ namespace Dune
     const static int dimension = Grid::dimension;
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
 
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+    {
+      generate( input, comm );
+    }
+
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
     {
-      generate( filename, comm );
+      std::ifstream input( filename.c_str() );
+      generate( input, comm );
     }
 
     Grid *grid() const
@@ -112,25 +119,20 @@ namespace Dune
     }
 
   private:
-    void generate( const std::string &filename, MPICommunicatorType comm );
+    void generate( std::istream &gridin, MPICommunicatorType comm );
+
     Grid *grid_;
     std::vector<double> emptyParam;
   };
 
   template< int dim >
   inline void DGFGridFactory< YaspGrid< dim > >
-  ::generate ( const std::string &filename, MPICommunicatorType comm )
+  ::generate ( std::istream &gridin, MPICommunicatorType comm )
   {
-    std::ifstream gridin( filename.c_str() );
     dgf::IntervalBlock intervalBlock( gridin );
 
     if( !intervalBlock.isactive() )
-    {
-      DUNE_THROW( DGFException,
-                  "Macrofile " << filename << " must have Intervall-Block "
-                               << "to be used to initialize YaspGrid!\n"
-                               << "No alternative File-Format defined");
-    }
+      DUNE_THROW( DGFException, "YaspGrid can only be created from an interval block." );
 
     if( intervalBlock.numIntervals() != 1 )
       DUNE_THROW( DGFException, "YaspGrid can only handle 1 interval block." );
