@@ -51,8 +51,8 @@ namespace Dune
           factory_.insertElement( elementType, dgf_.elements[ n ] );
           for( int face = 0; face <= dimworld; ++face )
           {
-            typedef MacroGrid::facemap_t::key_type Key;
-            typedef MacroGrid::facemap_t::iterator Iterator;
+            typedef DuneGridFormatParser::facemap_t::key_type Key;
+            typedef DuneGridFormatParser::facemap_t::iterator Iterator;
 
             const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
             const Iterator it = dgf_.facemap.find( key );
@@ -132,8 +132,8 @@ namespace Dune
           factory_.insertElement( elementType, dgf_.elements[ n ] );
           for( int face = 0; face < 2*dimworld; ++face )
           {
-            typedef MacroGrid::facemap_t::key_type Key;
-            typedef MacroGrid::facemap_t::iterator Iterator;
+            typedef DuneGridFormatParser::facemap_t::key_type Key;
+            typedef DuneGridFormatParser::facemap_t::iterator Iterator;
 
             const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
             const Iterator it = dgf_.facemap.find( key );
@@ -215,8 +215,8 @@ namespace Dune
           factory_.insertElement( elementType, dgf_.elements[ n ] );
           for( int face = 0; face <= dimworld; ++face )
           {
-            typedef MacroGrid::facemap_t::key_type Key;
-            typedef MacroGrid::facemap_t::iterator Iterator;
+            typedef DuneGridFormatParser::facemap_t::key_type Key;
+            typedef DuneGridFormatParser::facemap_t::iterator Iterator;
 
             const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
             const Iterator it = dgf_.facemap.find( key );
@@ -301,8 +301,8 @@ namespace Dune
           factory_.insertElement( elementType, dgf_.elements[ n ] );
           for( int face = 0; face <= dimworld; ++face )
           {
-            typedef MacroGrid::facemap_t::key_type Key;
-            typedef MacroGrid::facemap_t::iterator Iterator;
+            typedef DuneGridFormatParser::facemap_t::key_type Key;
+            typedef DuneGridFormatParser::facemap_t::iterator Iterator;
 
             const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
             const Iterator it = dgf_.facemap.find( key );
