@@ -184,6 +184,14 @@ namespace Dune
     typedef typename Grid::template Codim< dimension >::Entity Vertex;
 
   public:
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : macroGrid_( comm )
+    {
+      DUNE_THROW( DGFException, "DGF factories using old MacroGrid implementation"
+                  "don't support creation from std::istream." );
+    }
+
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : macroGrid_( filename.c_str(), comm )
