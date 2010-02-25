@@ -71,7 +71,7 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   struct DGFCoordFunctionFactory< HostGrid, CoordFunction, false >
   {
-    static CoordFunction *create ( const std::string &filename, const HostGrid &hostGrid )
+    static CoordFunction *create ( std::istream &input, const HostGrid &hostGrid )
     {
       return new CoordFunction;
     }
@@ -81,7 +81,7 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   struct DGFCoordFunctionFactory< HostGrid, CoordFunction, true >
   {
-    static CoordFunction *create ( const std::string &filename, const HostGrid &hostGrid )
+    static CoordFunction *create ( std::istream &input, const HostGrid &hostGrid )
     {
       return new CoordFunction( hostGrid );
     }
@@ -93,10 +93,9 @@ namespace Dune
   {
     typedef DGFCoordFunction< dimD, dimR > CoordFunction;
 
-    static CoordFunction *create ( const std::string &filename, const HostGrid &hostGrid )
+    static CoordFunction *create ( std::istream &input, const HostGrid &hostGrid )
     {
-      std::ifstream file( filename.c_str() );
-      dgf::ProjectionBlock projectionBlock( file, dimR );
+      dgf::ProjectionBlock projectionBlock( input, dimR );
       const typename CoordFunction::Expression *expression = projectionBlock.function( "coordfunction" );
       if( expression == 0 )
         DUNE_THROW( DGFException, "no coordfunction specified in DGF file." );
@@ -121,6 +120,17 @@ namespace Dune
 
     typedef DGFCoordFunctionFactory< HostGrid, CoordFunction > CoordFunctionFactory;
 
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicator comm = MPIHelper::getCommunicator() )
+      : dgfHostFactory_( input, comm ),
+        grid_( 0 )
+    {
+      HostGrid *hostGrid = dgfHostFactory_.grid();
+      assert( hostGrid != 0 );
+      CoordFunction *coordFunction = CoordFunctionFactory::create( input, *hostGrid );
+      grid_ = new Grid( *hostGrid, *coordFunction );
+    }
+
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicator comm = MPIHelper::getCommunicator() )
       : dgfHostFactory_( filename, comm ),
@@ -128,7 +138,8 @@ namespace Dune
     {
       HostGrid *hostGrid = dgfHostFactory_.grid();
       assert( hostGrid != 0 );
-      CoordFunction *coordFunction = CoordFunctionFactory::create( filename, *hostGrid );
+      std::ifstream input( filename.c_str() );
+      CoordFunction *coordFunction = CoordFunctionFactory::create( input, *hostGrid );
       grid_ = new Grid( *hostGrid, *coordFunction );
     }
 
