@@ -60,13 +60,12 @@ namespace Dune
     typedef typename Grid::template Codim<dimension>::Entity Vertex;
     typedef Dune::GridFactory<Grid> GridFactory;
 
-    explicit DGFBaseFactory ( const std::string &filename )
+    DGFBaseFactory ()
       : factory_( ),
         dgf_( 0, 1 )
     {}
 
-    explicit DGFBaseFactory ( const std::string &filename,
-                              MPICommunicatorType comm )
+    explicit DGFBaseFactory ( MPICommunicatorType comm )
       : factory_(comm),
         dgf_( rank(comm), size(comm) )
     {}
@@ -176,62 +175,131 @@ namespace Dune
   struct DGFGridFactory< ALUSimplexGrid<3,3> > :
     public DGFBaseFactory< ALUSimplexGrid<3,3> >
   {
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : DGFBaseFactory< ALUSimplexGrid<3,3> >( comm )
+    {
+      input.clear();
+      input.seekg( 0 );
+      if( !input )
+        DUNE_THROW( DGFException, "Error resetting input stream." );
+      generate( input, comm );
+    }
+
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
-      : DGFBaseFactory< ALUSimplexGrid<3,3> >( filename, comm )
+      : DGFBaseFactory< ALUSimplexGrid<3,3> >( comm )
     {
-      generate( filename, comm );
+      std::ifstream input( filename.c_str() );
+      if( !input )
+        DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
+      if( !generate( input, comm, filename ) )
+        grid_ = callDirectly( "ALUSimplexGrid< 3 , 3 >", rank( comm ), filename.c_str(), comm );
     }
-  protected:
-    void generate( const std::string &filename,
-                   MPICommunicatorType comm );
 
+  protected:
+    bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
   };
+
   template <>
   struct DGFGridFactory< ALUCubeGrid<3,3> > :
     public DGFBaseFactory< ALUCubeGrid<3,3> >
   {
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : DGFBaseFactory< ALUCubeGrid<3,3> >( comm )
+    {
+      input.clear();
+      input.seekg( 0 );
+      if( !input )
+        DUNE_THROW( DGFException, "Error resetting input stream." );
+      generate( input, comm );
+    }
+
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
-      : DGFBaseFactory< ALUCubeGrid<3,3> >( filename, comm )
+      : DGFBaseFactory< ALUCubeGrid<3,3> >( comm )
     {
-      generate( filename, comm );
+      std::ifstream input( filename.c_str() );
+      if( !input )
+        DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
+      if( !generate( input, comm, filename ) )
+        grid_ = callDirectly( "ALUCubeGrid< 3 , 3 >", rank( comm ), filename.c_str(), comm );
     }
-  protected:
-    void generate( const std::string &filename,
-                   MPICommunicatorType comm );
 
+  protected:
+    bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
   };
+
   template <>
   struct DGFGridFactory< ALUConformGrid<2,2> > :
     public DGFBaseFactory< ALUConformGrid<2,2> >
   {
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : DGFBaseFactory< ALUConformGrid<2,2> >()
+    {
+      input.clear();
+      input.seekg( 0 );
+      if( !input )
+        DUNE_THROW( DGFException, "Error resetting input stream." );
+      generate( input, comm );
+    }
+
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
-      : DGFBaseFactory< ALUConformGrid<2,2> >( filename )
+      : DGFBaseFactory< ALUConformGrid<2,2> >()
     {
-      generate( filename, comm );
+      std::ifstream input( filename.c_str() );
+      if( !input )
+        DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
+      if( !generate( input, comm, filename ) )
+      {
+        if( fileExists( filename.c_str() ) )
+          grid_ = new Grid( filename );
+        else
+          DUNE_THROW( GridError, "Unable to create a 2d ALUGrid from '" << filename << "'." );
+      }
     }
   protected:
-    void generate( const std::string &filename,
-                   MPICommunicatorType comm );
-
+    bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
   };
+
   template <>
   struct DGFGridFactory< ALUSimplexGrid<2,2> > :
     public DGFBaseFactory< ALUSimplexGrid<2,2> >
   {
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : DGFBaseFactory< ALUSimplexGrid<2,2> >()
+    {
+      input.clear();
+      input.seekg( 0 );
+      if( !input )
+        DUNE_THROW(DGFException, "Error resetting input stream." );
+      generate( input, comm );
+    }
+
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
-      : DGFBaseFactory< ALUSimplexGrid<2,2> >( filename )
+      : DGFBaseFactory< ALUSimplexGrid<2,2> >()
     {
-      generate( filename, comm );
+      std::ifstream input( filename.c_str() );
+      if( !input )
+        DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
+      if( !generate( input, comm, filename ) )
+      {
+        if( fileExists( filename.c_str() ) )
+          grid_ = new Grid( filename );
+        else
+          DUNE_THROW( GridError, "Unable to create a 2d ALUGrid from '" << filename << "'." );
+      }
     }
-  protected:
-    void generate( const std::string &filename,
-                   MPICommunicatorType comm );
 
+  protected:
+    bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
   };
+
 }
 
 #include "dgfalu.cc"
