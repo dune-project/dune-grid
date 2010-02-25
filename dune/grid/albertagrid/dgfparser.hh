@@ -107,6 +107,37 @@ namespace Dune
     }
   };
 
+
+
+  // Implementation of DGFGridFactory for AlbertaGrid
+  // ------------------------------------------------
+
+  template< int dim, int dimworld >
+  inline DGFGridFactory< AlbertaGrid< dim, dimworld > >
+  ::DGFGridFactory ( std::istream &input, MPICommunicatorType comm )
+    : dgf_( 0, 1 )
+  {
+    input.clear();
+    input.seekg( 0 );
+    if( !input )
+      DUNE_THROW(DGFException, "Error resetting input stream." );
+    generate( input );
+  }
+
+
+  template< int dim, int dimworld >
+  inline DGFGridFactory< AlbertaGrid< dim, dimworld > >
+  ::DGFGridFactory ( const std::string &filename, MPICommunicatorType comm )
+    : dgf_( 0, 1 )
+  {
+    std::ifstream input( filename.c_str() );
+    if( !input )
+      DUNE_THROW( DGFException, "Macrofile " << filename << " not found." );
+    if( !generate( input ) )
+      grid_ = new AlbertaGrid< dim, dimworld >( filename.c_str() );
+    input.close();
+  }
+
 }
 
 #endif // #if HAVE_ALBERTA
