@@ -291,6 +291,7 @@ namespace Dune
       if( dimension < 3 )
         macroData_.setOrientation( Alberta::Real( 1 ) );
       assert( macroData_.checkNeighbors() );
+      macroData_.checkCycles();
       ProjectionFactory projectionFactory( *this );
       return new Grid( macroData_, gridName, projectionFactory );
     }

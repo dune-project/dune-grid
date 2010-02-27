@@ -94,7 +94,7 @@ namespace Dune
        *  This is a postprocessing step and should be done after finalizing
        *  the triangulation.
        *
-       *  \note Thouth it is possible to call markLongestEdge in insert mode,
+       *  \note Though it is possible to call markLongestEdge in insert mode,
        *        you must make sure that all required vertices have been set.
        */
       void markLongestEdge ();
@@ -170,6 +170,8 @@ namespace Dune
       void insertWallTrafo ( const GlobalMatrix &m, const GlobalVector &t );
       void insertWallTrafo ( const FieldMatrix< Real, dimWorld, dimWorld > &matrix,
                              const FieldVector< Real, dimWorld > &shift );
+
+      void checkCycles ();
 
       void read ( const std::string &filename, bool binary = false );
 
@@ -418,7 +420,7 @@ namespace Dune
     ::insertWallTrafo ( const GlobalMatrix &m, const GlobalVector &t )
     {
       DUNE_THROW( AlbertaError,
-                  "Periodic grids are only supported in ALBERTA 2.1 or higher." );
+                  "Periodic grids are only supported in ALBERTA 3.0 or higher." );
     }
 
     template< int dim >
@@ -427,9 +429,18 @@ namespace Dune
                         const FieldVector< Real, dimWorld > &shift )
     {
       DUNE_THROW( AlbertaError,
-                  "Periodic grids are only supported in ALBERTA 2.1 or higher." );
+                  "Periodic grids are only supported in ALBERTA 3.0 or higher." );
     }
 #endif // #if DUNE_ALBERTA_VERSION <= 0x200
+
+
+    template< int dim >
+    inline void MacroData< dim >::checkCycles ()
+    {
+      // ensure that the macro data has been finalized
+      finalize();
+      ALBERTA macro_test( data_, NULL );
+    }
 
 
     template< int dim >
