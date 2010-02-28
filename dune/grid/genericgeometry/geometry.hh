@@ -201,10 +201,7 @@ namespace Dune
      *    template< class Topology >
      *    struct Mapping
      *    {
-     *      typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
-     *      typedef CoordStorage< Topology, typename Traits :: GlobalCoordType >
-     *        CornerStorage;
-     *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
+     *      typedef CornerMapping< CoordTraits, Topology, dimWorld > type;
      *    };
      *
      *    // explained below
@@ -223,23 +220,12 @@ namespace Dune
      *  is the GenericGeometry::CornerMapping which defines
      *  the simple mapping taking corners of the reference
      *  elements to corner of the entity in space.
-     *  The class given by Traits::Mapping::CornerStorage
-     *  (an example is given by GenericGeometry::CoordPointerStorage).
-     *  is a container for the coordinates of the corners
-     *  returned by the Dune::Geometry (also required for
-     *  non-linear reference mappings).
-     *  The third type in Traits::Mapping is a traits class
-     *  for the reference mapping, following the structure of
-     *  GenericGeometry::MappingTraits.
      *
      *  The central reference mapping specified by Traits::Mapping::type
-     *  requires
-     *  a constructure taking a single argument. The
-     *  GenericGeometry::BasicGeometry has a constructure
-     *  with one template argument which is passed on to
-     *  the constructure of the used provided reference mapping.
-     *  The interface for the this class is
-     *  GenericGeometry::Mapping.
+     *  requires a constructor taking a single argument.
+     *  The GenericGeometry::BasicGeometry has a constructor with one template
+     *  argument which is passed on to the constructor of the reference mapping.
+     *  The interface for the this class is GenericGeometry::Mapping.
      *
      *  To increase the efficiency of the geometry
      *  implementation, different strategies for
