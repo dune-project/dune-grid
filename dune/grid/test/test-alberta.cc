@@ -100,7 +100,9 @@ try {
 
     /* use grid-file appropriate for dimensions */
     std::ostringstream sfilename;
-    sfilename << SRCDIR "simplex-testgrid-" << GridType::dimension << "-" << GridType::dimensionworld << ".dgf";
+    const int dimWorld = GridType::dimensionworld;
+    sfilename << SRCDIR "simplex-testgrid-" << GridType::dimension << "-"
+              << std::min( dimWorld, 3) << ".dgf";
     filename = sfilename.str();
   }
   else
