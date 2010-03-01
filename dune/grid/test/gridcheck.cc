@@ -369,11 +369,11 @@ void assertNeighbor (Grid &g)
           it->geometryInOutside();
 
           // numbering
-          const int numberInNeighbor = it->indexInOutside();
+          const int indexInOutside = it->indexInOutside();
           const int numFaces = outside.template count< 1 >();
-          if( (numberInNeighbor < 0) || (numberInNeighbor >= numFaces) )
+          if( (indexInOutside < 0) || (indexInOutside >= numFaces) )
           {
-            std :: cout << "Error: Invalid numberInNeighbor: " << numberInNeighbor
+            std :: cout << "Error: Invalid indexInOutside: " << indexInOutside
                         << " (should be between 0 and " << (numFaces-1) << ")"
                         << std :: endl;
             assert( false );
