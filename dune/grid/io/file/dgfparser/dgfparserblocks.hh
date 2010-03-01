@@ -108,7 +108,8 @@ namespace Dune
     class VertexBlock
       : public BasicBlock
     {
-      int dimworld;        // the dimesnsion of the vertices (is given from user)
+      int dimvertex;       // the dimension of the vertices (determined from DGF file)
+      int dimworld;        // the dimension of the world (either dimvertex or given by user)
       bool goodline;       // active line describes a vertex
       int vtxoffset;
       int nofParam;

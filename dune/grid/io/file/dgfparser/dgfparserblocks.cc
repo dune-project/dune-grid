@@ -141,6 +141,7 @@ namespace Dune
 
     VertexBlock :: VertexBlock ( std :: istream &in, int &pdimworld )
       : BasicBlock( in, ID ),
+        dimvertex( -1 ),
         dimworld( pdimworld ),
         goodline( true ),
         vtxoffset( 0 ),
@@ -163,15 +164,22 @@ namespace Dune
           nofParam=x;
       }
 
-      if( dimworld < 0 )
-        dimworld = getDimWorld();
-      pdimworld=dimworld;
+      dimvertex = getDimWorld();
+      if( pdimworld < 0 )
+        pdimworld = dimvertex;
+      dimworld = pdimworld;
 
-      if( dimworld <= 0 )
+      if( dimworld < dimvertex )
       {
         DUNE_THROW( DGFException,
                     "Error in " << *this << ": "
-                                << "Unable to determine dimension of vertices." );
+                                << "Vertex dimension greater than world dimension." );
+      }
+      if( dimworld > dimvertex )
+      {
+        dwarn << ID << " block: Embedding "
+              << dimvertex << "-dimensional vertices into "
+              << dimworld << "-dimensional space." << std::endl;
       }
     }
 
@@ -183,8 +191,8 @@ namespace Dune
       nofp = nofParam;
       reset();
 
-      std :: vector< double > point( dimworld );
-      std :: vector< double > param( nofParam );
+      std::vector< double > point( dimworld );
+      std::vector< double > param( nofParam );
       while( next( point, param ) )
       {
         points.push_back( point );
@@ -197,6 +205,18 @@ namespace Dune
 
     int VertexBlock :: getDimWorld ()
     {
+      if( findtoken( "dimension" ) )
+      {
+        int dimworld;
+        if( !getnextentry( dimworld ) || (dimworld <= 0) )
+        {
+          DUNE_THROW( DGFException,
+                      "Error in " << *this << ": "
+                                  << "Invalid value given for 'dimension'." );
+        }
+        return dimworld;
+      }
+
       reset();
       while( getnextline() )
       {
@@ -207,7 +227,10 @@ namespace Dune
         if( dimworld > 0 )
           return dimworld;
       }
-      return 0;
+
+      DUNE_THROW( DGFException,
+                  "Error in " << *this << ": "
+                              << "Unable to determine dimension of vertices." );
     }
 
 
@@ -222,22 +245,25 @@ namespace Dune
       double x;
       for( ; getnextentry( x ); ++n )
       {
-        if( n < dimworld )
+        if( n < dimvertex )
           point[ n ] = x;
-        else if( n-dimworld < nofParam )
-          param[ n-dimworld ] = x;
+        else if( n-dimvertex < nofParam )
+          param[ n-dimvertex ] = x;
       }
-      if( n == dimworld + nofParam )
-        return (goodline = true);
 
-      if( n > 0 )
+      if( n == 0 )
+        return next( point, param );
+      else if( n != dimvertex + nofParam )
       {
         DUNE_THROW ( DGFException, "Error in " << *this << ": "
                                                << "Wrong number of coordinates and parameters "
                                                << "(got " << n
-                                               << ", expected " << (dimworld + nofParam) << ")" );
+                                               << ", expected " << (dimvertex + nofParam) << ")" );
       }
-      return next( point, param );
+
+      for( int i = dimvertex; i < dimworld; ++i )
+        point[ i ] = double( 0 );
+      return (goodline = true);
     }
 
 
