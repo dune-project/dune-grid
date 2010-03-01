@@ -1,29 +1,41 @@
 # $Id$
 
 if ALBERTA
-noinst_LTLIBRARIES = libalbertagrid_1d.la libalbertagrid_2d.la libalbertagrid_3d.la
-
 libalbertagrid_sources = dgfparser.cc  elementinfo.cc  indexsets.cc  macrodata.cc  meshpointer.cc
 libalbertagrid_cppflags = $(AM_CPPFLAGS) $(ALBERTA_INCLUDE_CPPFLAGS) -DENABLE_ALBERTA
-
-libalbertagrid_1d_la_SOURCES = $(libalbertagrid_sources)
-libalbertagrid_1d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=1
-libalbertagrid_1d_la_LIBADD =					\
-	-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_1d	\
-	$(DUNE_LIBS)
-
-libalbertagrid_2d_la_SOURCES = $(libalbertagrid_sources)
-libalbertagrid_2d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=2
-libalbertagrid_2d_la_LIBADD = 					\
-	-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_2d	\
-	$(DUNE_LIBS)
-
-libalbertagrid_3d_la_SOURCES = $(libalbertagrid_sources)
-libalbertagrid_3d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=3
-libalbertagrid_3d_la_LIBADD =					\
-	-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_3d	\
-	 $(DUNE_LIBS)
 endif
+
+ALBERTAGRID_LIBS =
+
+if ALBERTA_1D
+ALBERTAGRID_LIBS += libalbertagrid_1d.la
+endif
+if ALBERTA_2D
+ALBERTAGRID_LIBS += libalbertagrid_2d.la
+endif
+if ALBERTA_3D
+ALBERTAGRID_LIBS += libalbertagrid_3d.la
+endif
+if ALBERTA_4D
+ALBERTAGRID_LIBS += libalbertagrid_4d.la
+endif
+if ALBERTA_5D
+ALBERTAGRID_LIBS += libalbertagrid_5d.la
+endif
+if ALBERTA_6D
+ALBERTAGRID_LIBS += libalbertagrid_6d.la
+endif
+if ALBERTA_7D
+ALBERTAGRID_LIBS += libalbertagrid_7d.la
+endif
+if ALBERTA_8D
+ALBERTAGRID_LIBS += libalbertagrid_8d.la
+endif
+if ALBERTA_9D
+ALBERTAGRID_LIBS += libalbertagrid_9d.la
+endif
+
+noinst_LTLIBRARIES = $(ALBERTAGRID_LIBS)
 
 albertadir = $(includedir)/dune/grid/albertagrid/
 alberta_HEADERS = agrid.hh albertagrid.cc \
@@ -41,5 +53,41 @@ alberta_HEADERS = agrid.hh albertagrid.cc \
   gridfamily.hh
 
 SUBDIRS = test
+
+libalbertagrid_1d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_1d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=1
+libalbertagrid_1d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_1d $(DUNE_LIBS)
+
+libalbertagrid_2d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_2d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=2
+libalbertagrid_2d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_2d $(DUNE_LIBS)
+
+libalbertagrid_3d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_3d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=3
+libalbertagrid_3d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_3d $(DUNE_LIBS)
+
+libalbertagrid_4d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_4d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=4
+libalbertagrid_4d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_4d $(DUNE_LIBS)
+
+libalbertagrid_5d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_5d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=5
+libalbertagrid_5d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_5d $(DUNE_LIBS)
+
+libalbertagrid_6d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_6d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=6
+libalbertagrid_6d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_6d $(DUNE_LIBS)
+
+libalbertagrid_7d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_7d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=7
+libalbertagrid_7d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_7d $(DUNE_LIBS)
+
+libalbertagrid_8d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_8d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=8
+libalbertagrid_8d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_8d $(DUNE_LIBS)
+
+libalbertagrid_9d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_9d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=9
+libalbertagrid_9d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_9d $(DUNE_LIBS)
 
 include $(top_srcdir)/am/global-rules

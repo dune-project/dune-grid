@@ -166,6 +166,7 @@ namespace Dune
     ::setOrientation ( MacroData &macroData, const Real orientation )
     {}
 
+#if ALBERTA_DIM <= 3
     template<>
     template<>
     void MacroData< dimWorld >::Library< dimWorld >
@@ -190,6 +191,7 @@ namespace Dune
           swap( macroData, i, (dimWorld == 3 ? 2 : 0), (dimWorld == 3 ? 3 : 1) );
       }
     }
+#endif // #if ALBERTA_DIM <= 3
 
 
 #if DUNE_ALBERTA_VERSION < 0x300
