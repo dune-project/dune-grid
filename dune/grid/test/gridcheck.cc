@@ -236,11 +236,11 @@ template <class Grid>
 void assertNeighbor (Grid &g)
 {
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
-  typedef typename Grid::template Codim<0>::LevelIntersectionIterator IntersectionIterator;
+  typedef typename Grid::LevelIntersectionIterator IntersectionIterator;
   enum { dim = Grid::dimension };
   typedef typename Grid::ctype ct;
 
-  typedef typename Grid::template Codim<0>::GlobalIdSet GlobalIdSet;
+  typedef typename Grid::GlobalIdSet GlobalIdSet;
   const GlobalIdSet & globalid = g.globalIdSet();
 
   typedef typename Grid::template Codim< 0 >::Entity Entity;
@@ -474,7 +474,7 @@ void iterate(Grid &g)
 {
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-  typedef typename Grid::template Codim<0>::HierarchicIterator HierarchicIterator;
+  typedef typename Grid::HierarchicIterator HierarchicIterator;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
   int l = g.maxLevel();
   LevelIterator it = g.template lbegin<0>(l);
@@ -563,8 +563,8 @@ void iteratorEquals (Grid &g)
 {
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
-  typedef typename Grid::template Codim<0>::HierarchicIterator HierarchicIterator;
-  typedef typename Grid::template Codim<0>::LeafIntersectionIterator IntersectionIterator;
+  typedef typename Grid::HierarchicIterator HierarchicIterator;
+  typedef typename Grid::LeafIntersectionIterator IntersectionIterator;
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
 
   // assignment tests

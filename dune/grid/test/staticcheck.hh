@@ -445,10 +445,10 @@ struct GridInterface
     LeafInterface< Grid>();
 
     // Check for index sets
-    typedef typename Grid::template Codim<0>::LevelIndexSet LevelIndexSet;
-    typedef typename Grid::template Codim<0>::LeafIndexSet LeafIndexSet;
-    typedef typename Grid::template Codim<0>::LocalIdSet LocalIdSet;
-    typedef typename Grid::template Codim<0>::GlobalIdSet GlobalIdSet;
+    typedef typename Grid::LevelIndexSet LevelIndexSet;
+    typedef typename Grid::LeafIndexSet LeafIndexSet;
+    typedef typename Grid::LocalIdSet LocalIdSet;
+    typedef typename Grid::GlobalIdSet GlobalIdSet;
 
     g.levelIndexSet(0);
     if (g.template lbegin<0>(0) !=g.template lend<0>(0) ) {
