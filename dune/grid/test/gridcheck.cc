@@ -329,9 +329,14 @@ void assertNeighbor (Grid &g)
           visited[ numberInSelf ] = true;
         }
 
-        // id of boundary segment
+        // index / id of boundary segment
         if( it->boundary() )
+        {
+          it->boundarySegmentIndex();
+#if !DISABLE_DEPRECATED_METHOD_CHECK
           it->boundaryId();
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
+        }
 
         // check id
         assert( globalid.id(*(it->inside())) == globalid.id( entity ) );

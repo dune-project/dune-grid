@@ -188,8 +188,11 @@ struct IntersectionIteratorInterface
     inter.boundary();
     inter.neighbor();
 
+    inter.boundarySegmentIndex();
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     // id of boundary segment
     inter.boundaryId();
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     // neighbouring elements
     inter.inside();
