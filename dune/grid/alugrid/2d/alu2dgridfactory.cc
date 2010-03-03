@@ -174,7 +174,7 @@ namespace Dune
       VertexType global = (*prj)( coords [ i ] );
       if( (global - coords[ i ]).two_norm() > 1e-6 )
       {
-        DUNE_THROW(GridError,"Fucking bnd segments");
+        DUNE_THROW(GridError,"BoundarySegment does not map face vertices to face vertices.");
       }
     }
 #endif
