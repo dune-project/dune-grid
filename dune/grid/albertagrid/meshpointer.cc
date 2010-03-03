@@ -12,6 +12,7 @@ namespace Dune
   namespace Alberta
   {
 
+#if 0
     template<>
     template<>
     unsigned int MeshPointer< 1 >::Library< dimWorld >::boundaryCount = 0;
@@ -37,6 +38,62 @@ namespace Dune
     template<>
     template<>
     const void *MeshPointer< 3 >::Library< dimWorld >::projectionFactory = 0;
+#endif
+
+
+
+    // Implementation of MeshPointer
+    // -----------------------------
+
+    template< int dim >
+    template< int dimWorld >
+    unsigned int MeshPointer< dim >::Library< dimWorld >::boundaryCount = 0;
+
+    template< int dim >
+    template< int dimWorld >
+    const void *MeshPointer< dim >::Library< dimWorld >::projectionFactory = 0;
+
+
+
+    template< int dim >
+    template< int dimWorld >
+    void MeshPointer< dim >::Library< dimWorld >::release ( MeshPointer &ptr )
+    {
+      if( ptr.mesh_ == NULL )
+        return;
+
+      // free projections
+      const MacroIterator eit = ptr.end();
+      for( MacroIterator it = ptr.begin(); it != eit; ++it )
+      {
+        MacroElement &macroEl = const_cast< MacroElement & >( it.macroElement() );
+        for( int i = 0; i <= dim+1; ++i )
+        {
+          if( macroEl.projection[ i ] != NULL )
+          {
+            delete static_cast< BasicNodeProjection * >( macroEl.projection[ i ] );
+            macroEl.projection[ i ] = NULL;
+          }
+        }
+      }
+
+      // free mesh
+      ALBERTA free_mesh( ptr.mesh_ );
+      ptr.mesh_ = NULL;
+    }
+
+
+
+    // Instantiation
+    // -------------
+
+    template struct Dune::Alberta::MeshPointer< 1 >::Library< dimWorld >;
+#if ALBERTA_DIM >= 2
+    template struct Dune::Alberta::MeshPointer< 2 >::Library< dimWorld >;
+#endif // #if ALBERTA_DIM >= 2
+#if ALBERTA_DIM >= 3
+    template struct Dune::Alberta::MeshPointer< 3 >::Library< dimWorld >;
+#endif // #if ALBERTA_DIM >= 3
 
   }
 

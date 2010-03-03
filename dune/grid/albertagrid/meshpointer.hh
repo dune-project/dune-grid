@@ -47,11 +47,7 @@ namespace Dune
       class BoundaryProvider;
 
       template< int dimWorld >
-      struct Library
-      {
-        static unsigned int boundaryCount;
-        static const void *projectionFactory;
-      };
+      struct Library;
 
     public:
       class MacroIterator;
@@ -153,6 +149,26 @@ namespace Dune
     };
 
 
+
+    // MeshPointer::Library
+    // --------------------
+
+    template< int dim >
+    template< int dimWorld >
+    struct MeshPointer< dim >::Library
+    {
+      typedef Alberta::MeshPointer< dim > MeshPointer;
+
+      static unsigned int boundaryCount;
+      static const void *projectionFactory;
+
+      static void release ( MeshPointer &ptr );
+    };
+
+
+
+    // Implementation of MeshPointer
+    // -----------------------------
 
     template< int dim >
     inline int MeshPointer< dim >::numMacroElements () const
@@ -273,26 +289,7 @@ namespace Dune
     template< int dim >
     inline void MeshPointer< dim >::release ()
     {
-      if( mesh_ == NULL )
-        return;
-      // free projections
-      const MacroIterator eit = end();
-      for( MacroIterator it = begin(); it != eit; ++it )
-      {
-        MacroElement &macroEl = const_cast< MacroElement & >( it.macroElement() );
-        for( int i = 0; i <= dim+1; ++i )
-        {
-          if( macroEl.projection[ i ] != NULL )
-          {
-            delete static_cast< BasicNodeProjection * >( macroEl.projection[ i ] );
-            macroEl.projection[ i ] = NULL;
-          }
-        }
-      }
-
-      // free mesh
-      ALBERTA free_mesh( mesh_ );
-      mesh_ = NULL;
+      Library< dimWorld >::release( *this );
     }
 
 
