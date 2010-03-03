@@ -134,8 +134,8 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
   {
-    if( boundaryProjections_.size() > 0 )
-      DUNE_THROW(InvalidStateException,"You can only add one globalProjection or projections for each face, but not both");
+    if( globalProjection_ )
+      DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
 
     globalProjection_ = &bndProjection;
   }
@@ -147,9 +147,6 @@ namespace Dune
                              const std::vector< unsigned int > &vertices,
                              const DuneBoundaryProjectionType *projection )
   {
-    if( globalProjection_ )
-      DUNE_THROW(InvalidStateException,"You can only add one globalProjection or projections for each face, but not both");
-
     if( (int)type.dim() != dimension-1 )
       DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
     assert( type.isCube() || type.isSimplex() );
@@ -192,6 +189,9 @@ namespace Dune
     std::vector< VertexType > coords( numVx );
     for( size_t i = 0; i < numVx; ++i )
     {
+      // if this assertions is thrown vertices were not inserted at first
+      assert( vertices_.size() > vertices[ i ] );
+
       // get global coordinate and copy it
       const VertexType &x = vertices_[ vertices[ i ] ];
       for( unsigned int j = 0; j < dimensionworld; ++j )
@@ -207,7 +207,7 @@ namespace Dune
     {
       VertexType global = (*prj)( coords [ i ] );
       if( (global - coords[ i ]).two_norm() > 1e-6 )
-        DUNE_THROW(GridError,"Fuck gmsh");
+        DUNE_THROW(GridError,"Fucking bnd segments");
     }
 #endif
   }
@@ -312,8 +312,6 @@ namespace Dune
       const size_t bndProjectionSize = boundaryProjections_.size();
       if( bndProjectionSize > 0 )
       {
-        if( bndProjectionSize != boundarySegments )
-          DUNE_THROW(InvalidStateException,"wrong number of boudnary projections");
         // the memory is freed by the grid on destruction
         bndProjections = new BoundaryProjectionVector( boundarySegments );
         const BoundaryIdIteratorType endB = boundaryIds_.end();
@@ -324,8 +322,21 @@ namespace Dune
           FaceType faceId ( (*it).first);
           std::sort( faceId.begin(), faceId.end() );
 
+          const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
+
+          // if not projection given for this face use global projection
+          if( ! projection )
+          {
+            typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
+            // we need to wrap the global projection because of
+            // deleting in desctructor of ALUGrid
+            assert( globalProjection_ );
+            projection = new ProjectionWrapperType( *globalProjection_ );
+            assert( projection );
+          }
+
           // copy pointer
-          (*bndProjections)[ segmentIndex ] = boundaryProjections_[ faceId ];
+          (*bndProjections)[ segmentIndex ] = projection;
         }
 
       } // end ! temporary
@@ -333,6 +344,10 @@ namespace Dune
 
     // free memory
     boundaryProjections_.clear();
+
+    // if we have a vector reset global projection
+    // because empty positions are filled with global projection anyway
+    if( bndProjections ) globalProjection_ = 0;
 
     // ALUGrid is taking ownership of bndProjections
     // and is going to delete this pointer

@@ -100,8 +100,8 @@ namespace Dune
   void ALU2dGridFactory< ALUGrid > ::
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
   {
-    if( boundaryProjections_.size() > 0 )
-      DUNE_THROW(InvalidStateException,"You can only add one globalProjection or projections for each face, but not both");
+    if( globalProjection_ )
+      DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
 
     globalProjection_ = &bndProjection;
   }
@@ -112,9 +112,6 @@ namespace Dune
                              const std::vector< unsigned int > &vertices,
                              const DuneBoundaryProjectionType *projection )
   {
-    if( globalProjection_ )
-      DUNE_THROW(InvalidStateException,"You can only add one globalProjection or projections for each face, but not both");
-
     if( (int)type.dim() != dimension-1 )
       DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
     assert( type.isSimplex() );
@@ -270,8 +267,6 @@ namespace Dune
     const size_t bndProjectionSize = boundaryProjections_.size();
     if( bndProjectionSize > 0 )
     {
-      if( bndProjectionSize != boundarySegments )
-        DUNE_THROW(InvalidStateException,"wrong number of boudnary projections");
       // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments );
     }
@@ -292,8 +287,20 @@ namespace Dune
         FaceType faceId (boundaryId.first);
         std::sort( faceId.begin(), faceId.end() );
 
+        const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
+
+        // if not projection given for this face use global projection
+        if( ! projection )
+        {
+          typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
+          // we need to wrap the global projection because of
+          // deleting in desctructor of ALUGrid
+          assert( globalProjection_ );
+          projection = new ProjectionWrapperType( *globalProjection_ );
+        }
+
         // copy pointer
-        (*bndProjections)[ segmentIndex ] = boundaryProjections_[ faceId ];
+        (*bndProjections)[ segmentIndex ] = projection;
       }
     }
 
@@ -307,6 +314,10 @@ namespace Dune
 #ifdef ALUGRID_NOTEMPFILE_2D
     std::istream& inFile = temp;
 #endif
+
+    // if we have a vector reset global projection
+    // because empty positions are filled with global projection anyway
+    if( bndProjections ) globalProjection_ = 0;
 
     // ALUGrid is taking ownership of the bndProjections pointer
     Grid *grid =
