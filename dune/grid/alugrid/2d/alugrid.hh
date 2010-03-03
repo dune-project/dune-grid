@@ -53,7 +53,10 @@ namespace Dune
       : BaseType("",1, bndProject, bndVector,&macroFile)
     {
       std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
-      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      if( macroName == "" )
+        std::cout <<">. \n\n";
+      else
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
 
     //! constructor creating empty grid
@@ -271,7 +274,10 @@ namespace Dune
       : BaseType("", 0, bndProject, bndVector, &macroFile)
     {
       std::cout << "\nCreated serial ALUConformGrid<"<<dim<<","<<dimworld;
-      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      if( macroName == "" )
+        std::cout <<">. \n\n";
+      else
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
 
     //! constructor creating empty grid

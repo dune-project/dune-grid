@@ -157,21 +157,28 @@ namespace Dune
     std::vector< VertexType > coords( numVx );
     for( size_t i = 0; i < numVx; ++i )
     {
+      // if this assertions is thrown vertices were not inserted at first
+      assert( vertices_.size() > vertices[ i ] );
+
       // get global coordinate and copy it
       const VertexType &x = vertices_[ vertices[ i ] ];
       for( unsigned int j = 0; j < dimensionworld; ++j )
         coords[ i ][ j ] = x[ j ];
     }
+
     BoundarySegmentWrapperType* prj
       = new BoundarySegmentWrapperType( type, coords, boundarySegment );
     boundaryProjections_[ faceId ] = prj;
+
 #ifndef NDEBUG
     // consistency check
     for( size_t i = 0; i < numVx; ++i )
     {
       VertexType global = (*prj)( coords [ i ] );
       if( (global - coords[ i ]).two_norm() > 1e-6 )
-        DUNE_THROW(GridError,"Fuck gmsh");
+      {
+        DUNE_THROW(GridError,"Fucking bnd segments");
+      }
     }
 #endif
   }
