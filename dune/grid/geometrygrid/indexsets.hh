@@ -80,7 +80,7 @@ namespace Dune
       template< int codim >
       IndexType subIndex ( const typename Grid::template Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
       {
-        return Grid::getRealImplementation( entity ).template subIndex( hostIndexSet(), i, subcodim );
+        return Grid::getRealImplementation( entity ).subIndex( hostIndexSet(), i, subcodim );
       }
 
       template< class Entity >
