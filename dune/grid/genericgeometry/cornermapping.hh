@@ -517,7 +517,7 @@ namespace Dune
      *  lagrange type reference mappings.
      */
     template< class CoordTraits, class Topo, unsigned int dimW,
-        class CStorage = CoordPointerStorage< CoordTraits, Topo, dimW >,
+        class CStorage = CoordStorage< CoordTraits, Topo, dimW >,
         bool affine = false >
     class CornerMapping
     {

@@ -1,0 +1,9 @@
+test-alberta3d-refine
+
+Makefile
+Makefile.in
+
+*.swp
+
+.deps
+.libs

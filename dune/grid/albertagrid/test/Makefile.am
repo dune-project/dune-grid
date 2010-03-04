@@ -6,18 +6,7 @@ XFAIL_TESTS =
 
 GRIDDIM=2
 
-EXTRA_DIST += svgout.cc
-
 if ALBERTA
-check_PROGRAMS += svgout
-svgout_SOURCES = svgout.cc
-svgout_CPPFLAGS = $(AM_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
-svgout_LDFLAGS = $(AM_LDFLAGS)			\
-	$(ALL_PKG_LDFLAGS)
-svgout_LDADD = 					\
-	$(ALL_PKG_LIBS)				\
-	$(LDADD)
-
 # test program will return the special exit code 77 ("skipped") if alberta is
 # not available
 TESTS += test-alberta3d-refine
