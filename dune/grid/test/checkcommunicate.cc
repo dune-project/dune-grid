@@ -3,8 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <config.h>
-
 
 #include <dune/common/fvector.hh>
 #include <dune/grid/common/gridview.hh>
