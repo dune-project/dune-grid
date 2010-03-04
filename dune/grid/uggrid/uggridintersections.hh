@@ -29,6 +29,9 @@ namespace Dune {
     // The corresponding iterator needs to access all members
     friend class UGGridLevelIntersectionIterator<GridImp>;
 
+    typedef FieldVector<UGCtype, dimworld> WorldVector;
+    typedef FieldVector<UGCtype, dim-1> FaceVector;
+
   public:
 
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
@@ -131,8 +134,8 @@ namespace Dune {
     int indexInOutside () const;
 
     //! return outer normal
-    const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection<GridImp>::dimworld>&
-    outerNormal (const Dune::FieldVector<typename GridImp::ctype, dim-1> & local) const;
+    const WorldVector&
+    outerNormal (const FaceVector& local) const;
 
     //! return outer normal
     const FieldVector<UGCtype, dimworld>&
@@ -209,6 +212,9 @@ namespace Dune {
 
     // The corresponding iterator needs to access all members
     friend class UGGridLeafIntersectionIterator<GridImp>;
+
+    typedef FieldVector<UGCtype, dimworld> WorldVector;
+    typedef FieldVector<UGCtype, dim-1> FaceVector;
 
   public:
 
@@ -359,8 +365,8 @@ namespace Dune {
 
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    const FieldVector<typename GridImp::ctype, Dune::UGGridLeafIntersection<GridImp>::dimworld>&
-    outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const;
+    const WorldVector&
+    outerNormal (const FaceVector& local) const;
 
     //! return outer normal
     const FieldVector<UGCtype, dimworld>&
