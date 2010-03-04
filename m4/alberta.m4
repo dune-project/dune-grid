@@ -15,41 +15,48 @@
 #   ALBERTA_LIBPATHFLAGS = -L$(ALBERTAROOT)/lib
 #     Library path required for alberta
 #
-#   ALBERTA_LIBS = -L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_$(ALBERTA_DIM)d -ldunegrid \
-#              $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d \
+#   ALBERTA%DIM%D_LIBS = -L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_%DIM%d -ldunegrid \
+#              $(ALBERTA_LIBPATHFLAGS) -lalberta_%DIM%d \
 #              $(ALBERTA_BASE_LIBS)
-#     *OR*       = $(top_builddir)/lib/libdunealbertagrid_$(ALBERTA_DIM)d.la \
+#     *OR*       = $(top_builddir)/lib/libdunealbertagrid_%DIM%d.la \
 #              $(top_builddir)/lib/libdunegrid.la \
-#              $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d \
+#              $(ALBERTA_LIBPATHFLAGS) -lalberta_%DIM%d \
 #              $(ALBERTA_BASE_LIBS)
-#     All LIBS required for the configured dimension.  The first value is
+#     All LIBS required for dimension %DIM% (1, 2, or 3).  The first value is
 #     substituted by default and is apropriate for modules depending on
 #     dune-grid.  dune-grid itself will overwrite that with the second value
 #     however in configure.ac.
 #
-#   ALBERTA1D_LIBS, ALBERTA2D_LIBS, ALBERTA3D_LIBS
-#     Likewise, but with the given dimension hardcoded.
+#   ALBERTA_LIBS = $(ALBERTA($ALBERTA_DIM)D_LIBS)
+#     All LIBS required for the configured dimension.  The value of this
+#     variable will be empty for dimensions other than 1, 2, or 3.
 #
 #   ALBERTA_INCLUDE_CPPFLAGS = -I$(ALBERTAROOT)/include/alberta
 #     Include path required for Alberta.
 #
-#   ALBERTA_DIM_CPPFLAGS = -DALBERTA_DIM=$(ALBERTA_DIM)
-#     Pass the configured dimension as a CPP define
+#   ALBERTA%DIM%D_CPPFLAGS = $(ALBERTA_INCLUDE_CPPFLAGS) \
+#              -DALBERTA_DIM=%DIM% -DENABLE_ALBERTA
+#     All CPPFLAGS required for dimension %DIM% (1, 2, or 3).
 #
-#   ALBERTA_CPPFLAGS = $(ALBERTA_INCLUDE_CPPFLAGS) $(ALBERTA_DIM_CPPFLAGS) -DENABLE_ALBERTA
-#     All CPPFLAGS required for the configured dimension
+#   ALBERTA_CPPFLAGS = $(ALBERTA$(ALBERTA_DIM)D_CPPFLAGS)
+#     All CPPFLAGS required for the configured dimension.  The value of this
+#     variable will be empty for dimensions other than 1, 2, or 3, thus
+#     ENABLE_ALBERTA will not be defined inside the program, disabling alberta
+#     support.
 #
-#   ALBERTA1D_CPPFLAGS, ALBERTA2D_CPPFLAGS, ALBERTA3D_CPPFLAGS
-#     Likewise, but with the given dimension hardcoded.
+#   ALBERTA%DIM%D_LDFLAGS =
+#     All LDFLAGS required for dimension %DIM% (1, 2, or 3).  These are
+#     currently empty and exist just for consistency.
 #
-#   ALBERTA_LDFLAGS =
-#     Just for consistency.
-#
-#   ALBERTA1D_LDFLAGS, ALBERTA2D_LDFLAGS, ALBERTA3D_LDFLAGS
-#     Just for consistency.
+#   ALBERTA_LDFLAGS = $(ALBERTA$(ALBERTA_DIM)_LDFLAGS)
+#     All LDFLAGS required for the configured dimension.  These are currently
+#     empty and exist just for consistency.
 #
 #   If you want to use the the configured dimension, you have to use
-#   $(ALBERTA_LIBS), $(ALBERTA_CPPFLAGS) and $(ALBERTA_LDFLAGS).
+#   $(ALBERTA_LIBS), $(ALBERTA_CPPFLAGS) and $(ALBERTA_LDFLAGS).  If the
+#   configured dimension is anything other than 1, 2, or 3, these variable
+#   will substitute empty values, thus disabling support for alberta in the
+#   program.
 #
 #   If want to use a specific dimension, say 2, you have to use
 #   $(ALBERTA2D_LIBS), $(ALBERTA2D_CPPFLAGS) and $(ALBERTA2D_LDFLAGS).
@@ -108,8 +115,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
     # set variables so that tests can use them
     ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTAROOT/include/alberta"
-    ALBERTA_DIM_CPPFLAGS='-DALBERTA_DIM=$(ALBERTA_DIM)'
-    ALBERTA_CPPFLAGS='$(ALBERTA_INCLUDE_CPPFLAGS) $(ALBERTA_DIM_CPPFLAGS) -DENABLE_ALBERTA'
+    ALBERTA_CPPFLAGS='$(ALBERTA$(ALBERTA_DIM)D_CPPFLAGS)'
     ALBERTA1D_CPPFLAGS='$(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=1 -DENABLE_ALBERTA'
     ALBERTA2D_CPPFLAGS='$(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=2 -DENABLE_ALBERTA'
     ALBERTA3D_CPPFLAGS='$(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=3 -DENABLE_ALBERTA'
@@ -160,7 +166,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       ALBERTA_BASE_LIBS="\$(ALBERTA_LIBPATHFLAGS) -lalberta_util $ALBERTA_EXTRA"
       # define varaible lib name depending on problem and world dim, to change
       # afterwards easily 
-      ALBERTA_LIBS='-L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_$(ALBERTA_DIM)d -ldunegrid $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d $(ALBERTA_BASE_LIBS)'
+      ALBERTA_LIBS='$(ALBERTA$(ALBERTA_DIM)D_LIBS)'
       ALBERTA1D_LIBS='-L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_1d -ldunegrid $(ALBERTA_LIBPATHFLAGS) -lalberta_1d $(ALBERTA_BASE_LIBS)'
       ALBERTA2D_LIBS='-L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_2d -ldunegrid $(ALBERTA_LIBPATHFLAGS) -lalberta_2d $(ALBERTA_BASE_LIBS)'
       ALBERTA3D_LIBS='-L$(DUNE_GRID_LIBDIR) -ldunealbertagrid_3d -ldunegrid $(ALBERTA_LIBPATHFLAGS) -lalberta_3d $(ALBERTA_BASE_LIBS)'
@@ -169,7 +175,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   fi  # end of alberta check (--without wasn't set)
 
   # clear all the LDFLAGS variables explicitly
-  ALBERTA_LDFLAGS=
+  ALBERTA_LDFLAGS='${ALBERTA${ALBERTA_DIM}D_LDFLAGS}'
   ALBERTA1D_LDFLAGS=
   ALBERTA2D_LDFLAGS=
   ALBERTA3D_LDFLAGS=
