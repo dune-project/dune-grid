@@ -152,10 +152,11 @@ fprintf(fd,&quot;// -*-c++-*-
 
 namespace Dune {
   
+  // for fundamental types
   template&lt;typename ct&gt;
-  void %sQuadratureRule&lt;ct,1&gt;::init(int p,
-         std::vector&lt; FieldVector&lt;ct, dim&gt; &gt; &amp; _points,
-         std::vector&lt; double &gt; &amp; _weight,
+  void %sQuadratureInitHelper&lt;ct,true&gt;::init(int p,
+         std::vector&lt; FieldVector&lt;ct, 1&gt; &gt; &amp; _points,
+         std::vector&lt; ct &gt; &amp; _weight,
          int &amp; delivered_order)
   {
     switch(p)
@@ -176,6 +177,39 @@ for i from 1 to maxp/2+1 do
 <Font encoding="UTF-8">    fprintf(fd,&quot;      _points[%d] = %a;\134n&quot;,n-1,p/2+0.5);
 </Font>    w:=evalf(weight(i,alpha,beta,p));
 <Font encoding="UTF-8">    fprintf(fd,&quot;      _weight[%d] = %a;\134n&quot;,n-1,w/2);
+</Font>  end do:
+<Font encoding="UTF-8">  fprintf(fd,&quot;      break;\134n\134n&quot;);
+</Font>end do:
+fprintf(fd,&quot;    default:
+<Font encoding="UTF-8">      DUNE_THROW(QuadratureOrderOutOfRange, \134&quot;Quadrature rule \134&quot; &lt;&lt; p &lt;&lt; \134&quot; not supported!\134&quot;);
+</Font>    }
+  }
+
+  // for non-fundamental types: assign numbers as strings
+  template&lt;typename ct&gt;
+  void %sQuadratureInitHelper&lt;ct,false&gt;::init(int p,
+         std::vector&lt; FieldVector&lt;ct, 1&gt; &gt; &amp; _points,
+         std::vector&lt; ct &gt; &amp; _weight,
+         int &amp; delivered_order)
+  {
+    switch(p)
+    {
+&quot;,name);
+for i from 1 to maxp/2+1 do
+<Font encoding="UTF-8">  fprintf(fd,&quot;    // order %d,%d\134n    case %d:\134n    case %d:\134n&quot;, 2*i-2,2*i-1, 2*i-2,2*i-1);
+</Font>  points := fsolve(jacobi(i,alpha,beta)):
+  if i=1 then points:=array([points]): end if:
+  N:=0:
+  for p in points do N:=N+1: end do:
+<Font encoding="UTF-8">  fprintf(fd,&quot;      delivered_order = %d;\134n&quot;,2*i-1);
+  fprintf(fd,&quot;      _points.resize(%d);\134n&quot;,N);
+  fprintf(fd,&quot;      _weight.resize(%d);\134n&quot;,N);
+</Font>  n:=0:
+  for n from 1 to N do
+    p:=points[n]:
+<Font encoding="UTF-8">    fprintf(fd,&quot;      _points[%d] = \134&quot;%a\134&quot;;\134n&quot;,n-1,p/2+0.5);
+</Font>    w:=evalf(weight(i,alpha,beta,p));
+<Font encoding="UTF-8">    fprintf(fd,&quot;      _weight[%d] = \134&quot;%a\134&quot;;\134n&quot;,n-1,w/2);
 </Font>  end do:
 <Font encoding="UTF-8">  fprintf(fd,&quot;      break;\134n\134n&quot;);
 </Font>end do:
