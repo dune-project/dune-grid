@@ -200,7 +200,6 @@ namespace Dune
     template< class T >
     static void exchange ( T &x, T &y );
 
-    void assertGeometryType( const GeometryType &geometry );
     static std::string temporaryFileName (const std::string& dgfName );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
@@ -229,16 +228,6 @@ namespace Dune
   inline void ALU2dGridFactory< ALUGrid >::exchange ( T &x, T &y )
   {
     T dummy = x; x = y; y = dummy;
-  }
-
-
-  template< template< int, int > class ALUGrid >
-  inline void ALU2dGridFactory< ALUGrid >
-  ::assertGeometryType( const GeometryType &geometry )
-  {
-    if( !geometry.isTriangle() )
-      DUNE_THROW( GridError, "Only triangles can be inserted into "
-                  "ALUGrid< 2, 2 >." );
   }
 
 

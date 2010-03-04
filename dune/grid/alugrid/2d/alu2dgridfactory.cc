@@ -47,10 +47,10 @@ namespace Dune
   :: insertElement ( const GeometryType &geometry,
                      const std::vector< unsigned int > &vertices )
   {
-    assertGeometryType( geometry );
-    if( geometry.dim() != dimension )
-      DUNE_THROW( GridError, "Only 2-dimensional elements can be inserted "
-                  "into a 2-dimensional ALUGrid." );
+    if( !geometry.isTriangle() )
+      DUNE_THROW( GridError, "Only triangles can be inserted into "
+                  "ALUGrid< 2, 2 >." );
+
     if( vertices.size() != numCorners )
       DUNE_THROW( GridError, "Wrong number of vertices." );
 
@@ -64,7 +64,8 @@ namespace Dune
                       const std::vector< unsigned int > &vertices,
                       const int id )
   {
-    assertGeometryType( geometry );
+    // lines can be either cube or simplex
+    assert( geometry.isSimplex() || geometry.isCube() );
     if( geometry.dim() != dimension-1 )
     {
       DUNE_THROW( GridError, "Only 2-dimensional boundaries can be inserted "
@@ -112,9 +113,9 @@ namespace Dune
                              const std::vector< unsigned int > &vertices,
                              const DuneBoundaryProjectionType *projection )
   {
+    assert( type.isSimplex() || type.isCube() );
     if( (int)type.dim() != dimension-1 )
       DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
-    assert( type.isSimplex() );
 
     FaceType faceId;
     copyAndSort( vertices, faceId );
