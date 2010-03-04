@@ -31,7 +31,31 @@ namespace Dune
     virtual CoordinateType operator() (const CoordinateType& global) const = 0;
   };
 
+  template < int dimworld >
+  class BoundaryProjectionWrapper
+    : public DuneBoundaryProjection< dimworld >
+  {
+  protected:
+    typedef DuneBoundaryProjection< dimworld > BaseType;
+    const BaseType& proj_;
+  public:
+    //! \brief type of coordinate vector
+    typedef typename BaseType :: CoordinateType CoordinateType;
 
+    // constructor taking other projection
+    BoundaryProjectionWrapper( const BaseType& proje )
+      : proj_( proje )
+    {}
+
+    //! destructor
+    ~BoundaryProjectionWrapper () {}
+
+    //! \brief projection operator projection a global coordinate
+    CoordinateType operator() (const CoordinateType& global) const
+    {
+      return proj_( global );
+    }
+  };
 
   // BoundarySegmentWrapper
   // ----------------------

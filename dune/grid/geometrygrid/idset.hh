@@ -45,7 +45,7 @@ namespace Dune
 
       IdType subId ( const typename Traits::template Codim< 0 >::Entity &entity, int i, unsigned int codim ) const
       {
-        return hostIdSet_.template subId( Grid::template getHostEntity< 0 >( entity ), i, codim );
+        return hostIdSet_.subId( Grid::template getHostEntity< 0 >( entity ), i, codim );
       }
 
     private:
