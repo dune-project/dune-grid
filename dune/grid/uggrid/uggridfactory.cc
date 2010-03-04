@@ -19,7 +19,7 @@ using namespace Dune;
 
 static int boundarySegmentWrapper2d(void *data, double *param, double *result)
 {
-  const BoundarySegment<2>* boundarySegment = static_cast<const BoundarySegment<2>*>(data);
+  const BoundarySegment<2>* boundarySegment = static_cast<BoundarySegment<2>*>(data);
 
   FieldVector<double, 2> global = (*boundarySegment)(*((FieldVector<double,1>*)param));
 
@@ -31,7 +31,7 @@ static int boundarySegmentWrapper2d(void *data, double *param, double *result)
 
 static int boundarySegmentWrapper3dTriangle(void *data, double *param, double *result)
 {
-  const BoundarySegment<3>* boundarySegment = static_cast<const BoundarySegment<3>*>(data);
+  const BoundarySegment<3>* boundarySegment = static_cast<BoundarySegment<3>*>(data);
 
   // UG produces coordinates in the triangle (0,0) -- (1,0) -- (1,1),
   // but we want them to be in (0,0) -- (1,0) -- (0,1)
@@ -50,7 +50,7 @@ static int boundarySegmentWrapper3dTriangle(void *data, double *param, double *r
 
 static int boundarySegmentWrapper3dQuad(void *data, double *param, double *result)
 {
-  const BoundarySegment<3>* boundarySegment = static_cast<const BoundarySegment<3>*>(data);
+  const BoundarySegment<3>* boundarySegment = static_cast<BoundarySegment<3>*>(data);
 
   FieldVector<double, 3> global = (*boundarySegment)(*((FieldVector<double,2>*)param));
 

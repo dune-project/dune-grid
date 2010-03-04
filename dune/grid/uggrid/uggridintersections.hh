@@ -16,11 +16,11 @@ namespace Dune {
   template<class GridImp>
   class UGGridLevelIntersection
   {
-
+  public:
     enum {dim=GridImp::dimension};
-
     enum {dimworld=GridImp::dimensionworld};
 
+  private:
     friend class UGGridEntity<0,dim,GridImp>;
 
     // The type used to store coordinates
@@ -131,10 +131,12 @@ namespace Dune {
     int indexInOutside () const;
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const;
+    const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection<GridImp>::dimworld>&
+    outerNormal (const Dune::FieldVector<typename GridImp::ctype, dim-1> & local) const;
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& integrationOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
+    const FieldVector<UGCtype, dimworld>&
+    integrationOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
     {
       integrationOuterNormal_ = outerNormal(local);
 
@@ -145,7 +147,8 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& unitOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
+    const FieldVector<UGCtype, GridImp::dimensionworld>&
+    unitOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
     {
       unitOuterNormal_ = outerNormal(local);
       unitOuterNormal_ /= unitOuterNormal_.two_norm();
@@ -153,7 +156,8 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& centerUnitOuterNormal () const
+    const FieldVector<UGCtype, GridImp::dimensionworld>&
+    centerUnitOuterNormal () const
     {
       GeometryType type = geometry().type();
       const GenericReferenceElement<UGCtype, dim-1> & refElement =
@@ -355,10 +359,12 @@ namespace Dune {
 
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    const FieldVector<UGCtype, GridImp::dimensionworld>& outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const;
+    const FieldVector<typename GridImp::ctype, Dune::UGGridLeafIntersection<GridImp>::dimworld>&
+    outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const;
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& integrationOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
+    const FieldVector<UGCtype, dimworld>&
+    integrationOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
     {
       integrationOuterNormal_ = outerNormal(local);
 
@@ -372,14 +378,16 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& unitOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const {
+    const FieldVector<UGCtype, dimworld>&
+    unitOuterNormal (const FieldVector<UGCtype, dim-1>& local) const {
       unitOuterNormal_ = outerNormal(local);
       unitOuterNormal_ /= unitOuterNormal_.two_norm();
       return unitOuterNormal_;
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& centerUnitOuterNormal () const
+    const FieldVector<UGCtype, dimworld>&
+    centerUnitOuterNormal () const
     {
       GeometryType type = geometry().type();
       const GenericReferenceElement<UGCtype, dim-1> & refElement =

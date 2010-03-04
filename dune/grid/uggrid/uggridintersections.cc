@@ -7,9 +7,12 @@
 
 #include <set>
 
+// const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection::dimworld>& Dune::UGGridLevelIntersection<GridImp>::outerNormal(const Dune::FieldVector<typename GridImp::ctype, (Dune::UGGridLevelIntersection<GridImp>::dim - 1)>&) const;
+// const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection<GridImp>::dimworld>& Dune::UGGridLevelIntersection<GridImp>::outerNormal(const Dune::FieldVector<typename GridImp::ctype, (Dune::UGGridLevelIntersection<GridImp>::dim - 1)>&) const;
+
 template<class GridImp>
-const Dune::FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
-Dune::UGGridLevelIntersection <GridImp>::outerNormal (const Dune::FieldVector<UGCtype, GridImp::dimension-1>& local) const
+const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection<GridImp>::dimworld>&
+Dune::UGGridLevelIntersection <GridImp>::outerNormal (const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection<GridImp>::dim-1 >& local) const
 {
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
@@ -208,8 +211,8 @@ int Dune::UGGridLevelIntersection<GridImp>::indexInOutside () const
 
 /** \bug Doesn't work properly for nonplanar nonconforming quadrilateral faces */
 template<class GridImp>
-const Dune::FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
-Dune::UGGridLeafIntersection <GridImp>::outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
+const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLeafIntersection<GridImp>::dimworld>&
+Dune::UGGridLeafIntersection <GridImp>::outerNormal (const FieldVector<typename GridImp::ctype, Dune::UGGridLeafIntersection<GridImp>::dim-1>& local) const
 {
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
