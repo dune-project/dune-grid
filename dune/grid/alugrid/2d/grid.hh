@@ -577,17 +577,18 @@ namespace Dune {
     ALUGridBoundaryProjectionType* vertexProjection_ ;
 
     //! return boudanry projection for given segment Id
-    const DuneBoundaryProjectionType& boundaryProjection(const int segmentIndex) const
+    const DuneBoundaryProjectionType* boundaryProjection(const int segmentIndex) const
     {
       if( bndPrj_ )
       {
-        return *bndPrj_;
+        return bndPrj_;
       }
       else
       {
+        // note pointer can be zero (identity mapping)
         assert( bndVec_ );
         assert( segmentIndex < (int) bndVec_->size() );
-        return *(*bndVec_)[ segmentIndex ];
+        return (*bndVec_)[ segmentIndex ];
       }
     }
 

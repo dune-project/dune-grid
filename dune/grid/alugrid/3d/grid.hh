@@ -684,17 +684,18 @@ namespace Dune {
     void checkMacroGrid ();
 
     //! return boudanry projection for given segment Id
-    const DuneBoundaryProjectionType& boundaryProjection(const int segmentIndex) const
+    const DuneBoundaryProjectionType* boundaryProjection(const int segmentIndex) const
     {
       if( bndPrj_ )
       {
-        return *bndPrj_;
+        return bndPrj_;
       }
       else
       {
+        // pointer can be zero (which is emulates the identity mapping then)
         assert( bndVec_ );
         assert( segmentIndex < (int) bndVec_->size() );
-        return *(*bndVec_)[ segmentIndex ];
+        return (*bndVec_)[ segmentIndex ];
       }
     }
 

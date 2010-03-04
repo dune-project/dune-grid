@@ -62,8 +62,6 @@ namespace Dune
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
 
-    // const std::string filename_;
-    // bool removeGeneratedFile_;
     VertexVector vertices_;
     ElementVector elements_;
     BoundaryIdVector boundaryIds_;
@@ -238,8 +236,8 @@ namespace Dune
   inline void ALU2dGridFactory< ALUGrid >
   ::assertGeometryType( const GeometryType &geometry )
   {
-    if( !geometry.isSimplex() )
-      DUNE_THROW( GridError, "Only simplex geometries can be inserted into "
+    if( !geometry.isTriangle() )
+      DUNE_THROW( GridError, "Only triangles can be inserted into "
                   "ALUGrid< 2, 2 >." );
   }
 

@@ -268,7 +268,8 @@ namespace Dune
     if( bndProjectionSize > 0 )
     {
       // the memory is freed by the grid on destruction
-      bndProjections = new BoundaryProjectionVector( boundarySegments );
+      bndProjections = new BoundaryProjectionVector( boundarySegments,
+                                                     (DuneBoundaryProjectionType*) 0 );
     }
 
     const BoundaryIdIteratorType endB = boundaryIds_.end();
@@ -289,13 +290,12 @@ namespace Dune
 
         const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
 
-        // if not projection given for this face use global projection
-        if( ! projection )
+        // if no projection given we use global projection, otherwise identity
+        if( ! projection && globalProjection_ )
         {
           typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
           // we need to wrap the global projection because of
           // deleting in desctructor of ALUGrid
-          assert( globalProjection_ );
           projection = new ProjectionWrapperType( *globalProjection_ );
         }
 

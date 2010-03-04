@@ -46,11 +46,16 @@ namespace Dune {
     {
 #ifdef ALUGRID_VERTEX_PROJECTION
       // get boundary projection
-      const DuneBoundaryProjectionType& bndPrj = grid_.boundaryProjection( segmentIndex );
+      const DuneBoundaryProjectionType* bndPrj =
+        grid_.boundaryProjection( segmentIndex );
 
-      // call projection operator
-      reinterpret_cast<CoordinateType &> (* (&prj[0])) =
-        bndPrj( reinterpret_cast<const CoordinateType &> (* (&orig[0])) );
+      // if pointer is zero we do nothing, i.e. identity mapping
+      if( bndPrj )
+      {
+        // call projection operator
+        reinterpret_cast<CoordinateType &> (* (&prj[0])) =
+          (*bndPrj)( reinterpret_cast<const CoordinateType &> (* (&orig[0])) );
+      }
 #endif
 
       // return 1 for success

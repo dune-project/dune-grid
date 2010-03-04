@@ -207,7 +207,7 @@ namespace Dune
     {
       VertexType global = (*prj)( coords [ i ] );
       if( (global - coords[ i ]).two_norm() > 1e-6 )
-        DUNE_THROW(GridError,"Fucking bnd segments");
+        DUNE_THROW(GridError,"BoundarySegment does not map face vertices to face vertices.");
     }
 #endif
   }
@@ -313,7 +313,8 @@ namespace Dune
       if( bndProjectionSize > 0 )
       {
         // the memory is freed by the grid on destruction
-        bndProjections = new BoundaryProjectionVector( boundarySegments );
+        bndProjections = new BoundaryProjectionVector( boundarySegments,
+                                                       (DuneBoundaryProjectionType*) 0 );
         const BoundaryIdIteratorType endB = boundaryIds_.end();
         int segmentIndex = 0;
         for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
@@ -324,13 +325,12 @@ namespace Dune
 
           const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
 
-          // if not projection given for this face use global projection
-          if( ! projection )
+          // if no projection given we use global projection, otherwise identity
+          if( ! projection && globalProjection_ )
           {
             typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
             // we need to wrap the global projection because of
-            // deleting in desctructor of ALUGrid
-            assert( globalProjection_ );
+            // delete in desctructor of ALUGrid
             projection = new ProjectionWrapperType( *globalProjection_ );
             assert( projection );
           }
