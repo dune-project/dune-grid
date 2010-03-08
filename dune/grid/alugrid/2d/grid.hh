@@ -617,6 +617,9 @@ namespace Dune {
     typedef ALUMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
     typedef ALUMemoryProvider< LevelIntersectionIteratorImp > LevelIntersectionIteratorProviderType;
 
+  protected:
+    using BaseType :: getRealImplementation ;
+
   public:
     template< class IntersectionInterfaceType >
     const typename BaseType

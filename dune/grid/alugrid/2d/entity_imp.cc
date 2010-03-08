@@ -49,7 +49,6 @@ namespace Dune {
     : grid_(grid),
       item_(0),
       geoObj_(GeometryImp()),
-      geoImp_(grid_.getRealImplementation(geoObj_)),
       level_(level),
       face_(-1)
   {}
@@ -61,7 +60,7 @@ namespace Dune {
     level_ = level;
     face_ = face;
 
-    geoImp_.unsetUp2Date();
+    geoImpl().unsetUp2Date();
   }
 
 
@@ -71,7 +70,7 @@ namespace Dune {
     item_   = const_cast<ElementType *> (&vx);
     level_  = (*item_).level();
 
-    geoImp_.unsetUp2Date();
+    geoImpl().unsetUp2Date();
   }
 
   //! set item pointer to NULL
@@ -87,7 +86,6 @@ namespace Dune {
     : grid_(org.grid_),
       item_(org.item_),
       geoObj_(GeometryImp()),
-      geoImp_(grid_.getRealImplementation(geoObj_)),
       level_(org.level_),
       face_(org.face_)
   {}
@@ -97,10 +95,10 @@ namespace Dune {
   inline const typename ALU2dGridEntity<cd, dim, GridImp> :: Geometry &
   ALU2dGridEntity<cd, dim, GridImp> :: geometry () const
   {
-    if( !geoImp_.up2Date() )
-      geoImp_.buildGeom(*item_,face_);
+    if( !geoImpl().up2Date() )
+      geoImpl().buildGeom(*item_,face_);
 
-    assert( geoImp_.up2Date() );
+    assert( geoImpl().up2Date() );
     return geoObj_;
   }
 
@@ -149,8 +147,6 @@ namespace Dune {
     grid_(grid)
     , item_(0)
     , geoObj_(GeometryImp())
-    , geoImp_(grid_.getRealImplementation(geoObj_))
-    , walkLevel_ (level)
     , isLeaf_ (false)
   {}
 
@@ -161,8 +157,6 @@ namespace Dune {
     : grid_(org.grid_),
       item_(org.item_),
       geoObj_(GeometryImp()),
-      geoImp_(grid_.getRealImplementation(geoObj_)),
-      walkLevel_(org.walkLevel_),
       isLeaf_(org.isLeaf_)
   {}
 
@@ -179,10 +173,10 @@ namespace Dune {
   geometry () const
   {
     assert(item_ != 0);
-    if(! geoImp_.up2Date() )
-      geoImp_.buildGeom(*item_);
+    if(! geoImpl().up2Date() )
+      geoImpl().buildGeom(*item_);
 
-    assert( geoImp_.up2Date() );
+    assert( geoImpl().up2Date() );
     return geoObj_;
   }
 
@@ -360,20 +354,17 @@ namespace Dune {
     item_= const_cast<HElementType *> (&element);
     isLeaf_  = ((*item_).down() == 0);
 
-    geoImp_.unsetUp2Date();
+    geoImpl().unsetUp2Date();
   }
 
   //! set actual walk level
   template<int dim, class GridImp>
   inline void ALU2dGridEntity<0,dim,GridImp> :: reset ( int l )
   {
-    assert( walkLevel_ >= 0 );
-
     item_       = 0;
-    walkLevel_     = l;
     isLeaf_     = false;
 
-    geoImp_.unsetUp2Date();
+    geoImpl().unsetUp2Date();
   }
 
   //! set item pointer to NULL

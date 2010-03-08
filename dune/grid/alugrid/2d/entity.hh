@@ -83,7 +83,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
     //! type of geometry implementation
     typedef MakeableInterfaceObject<Geometry> GeometryObj;
-    typedef ALU2dGridGeometry<dim-cd,dimworld,GridImp> GeometryImp;
+    typedef ALU2dGridGeometry<dim-cd,dimworld, const GridImp> GeometryImp;
 
     //! tpye of EntityPointer
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
@@ -155,6 +155,12 @@ namespace Dune {
     int getIndex () const;
 
   private:
+    //! returns reference to geometry implementation
+    GeometryImp& geoImpl() const {
+      return
+        grid_.getRealImplementation(geoObj_);
+    }
+
     //! the grid this entity belongs to
     const GridImp &grid_;
 
@@ -163,7 +169,6 @@ namespace Dune {
     //! the current geometry
 
     mutable GeometryObj geoObj_;
-    mutable GeometryImp & geoImp_;
 
     mutable int level_;
     mutable int face_;
@@ -220,7 +225,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
     //! type of our Geometry implementation
     typedef MakeableInterfaceObject<Geometry> GeometryObj;
-    typedef ALU2dGridGeometry<dim,dimworld,GridImp> GeometryImp;
+    typedef ALU2dGridGeometry<dim,dimworld, const GridImp> GeometryImp;
 
     //! tpye of intersection iterator
     typedef LeafIntersectionIteratorWrapper< GridImp > ALU2dGridLeafIntersectionIteratorType;
@@ -442,6 +447,9 @@ namespace Dune {
     //! return which number of child we are, i.e. 0 or 1
     int nChild () const;
 
+    //! returns reference to geometry implementation
+    GeometryImp& geoImpl() const { return grid_.getRealImplementation(geoObj_); }
+
     //! return index of sub entity with codim = cc and local number i
     //! i.e. return global number of vertex i
     //! for use in hierarchical index set
@@ -455,11 +463,9 @@ namespace Dune {
     //! the current element of grid
     mutable HElementType *item_;
 
-    //! the cuurent geometry
+    //! the current geometry
     mutable GeometryObj geoObj_;
-    mutable GeometryImp & geoImp_;
 
-    mutable int walkLevel_; //! tells the actual level of walk put to LevelIterator..
     //! is true if entity is leaf entity
     mutable bool isLeaf_;
 
