@@ -66,8 +66,10 @@ namespace Dune
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
 
     public:
-      Intersection ()
-        : geo_( GeometryImpl() )
+      Intersection ( const EntityPointer &inside, const HostIntersection &hostIntersection )
+        : inside_( &inside ),
+          hostIntersection_( &hostIntersection ),
+          geo_( GeometryImpl() )
       {}
 
       Intersection ( const Intersection &other )
@@ -186,13 +188,6 @@ namespace Dune
         return *hostIntersection_;
       }
 
-      void initialize( const EntityPointer &inside, const HostIntersection &hostIntersection )
-      {
-        inside_ = &inside;
-        hostIntersection_ = &hostIntersection;
-        Grid :: getRealImplementation( geo_ ) = GeometryImpl();
-      }
-
     protected:
       const Grid &grid () const
       {
@@ -216,19 +211,29 @@ namespace Dune
     };
 
 
+
     // LeafIntersection
     // ----------------
 
     template< class HostGrid, class CoordFunction >
     class LeafIntersection< const GeometryGrid< HostGrid, CoordFunction > >
-      : public Intersection
-        < const GeometryGrid< HostGrid, CoordFunction >,
-            typename HostGrid :: Traits :: LeafIntersection >
+      : public Intersection< const GeometryGrid< HostGrid, CoordFunction >,
+            typename HostGrid::Traits::LeafIntersection >
     {
-      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
-      typedef typename HostGrid :: Traits :: LeafIntersection HostIntersection;
-
       template< class > friend class IntersectionWrapper;
+
+      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef typename HostGrid::Traits::LeafIntersection HostIntersection;
+
+      typedef Intersection< const Grid, HostIntersection > Base;
+
+      typedef typename Base::EntityPointer EntityPointer;
+
+    public:
+      LeafIntersection ( const EntityPointer &inside,
+                         const HostIntersection &hostIntersection )
+        : Base( inside, hostIntersection )
+      {}
     };
 
 
@@ -238,45 +243,23 @@ namespace Dune
 
     template< class HostGrid, class CoordFunction >
     class LevelIntersection< const GeometryGrid< HostGrid, CoordFunction > >
-      : public Intersection
-        < const GeometryGrid< HostGrid, CoordFunction >,
-            typename HostGrid :: Traits :: LevelIntersection >
+      : public Intersection< const GeometryGrid< HostGrid, CoordFunction >,
+            typename HostGrid::Traits::LevelIntersection >
     {
-      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
-      typedef typename HostGrid :: Traits :: LevelIntersection HostIntersection;
-
       template< class > friend class IntersectionWrapper;
-    };
 
+      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef typename HostGrid::Traits::LevelIntersection HostIntersection;
 
+      typedef Intersection< const Grid, HostIntersection > Base;
 
-    // IntersectionWrapper
-    // -------------------
-
-    template< class Intersection >
-    class IntersectionWrapper
-      : public Intersection
-    {
-      typedef Intersection Base;
-
-    protected:
-      using Base :: getRealImp;
+      typedef typename Base::EntityPointer EntityPointer;
 
     public:
-      typedef typename Intersection :: ImplementationType Implementation;
-
-      typedef typename Implementation :: EntityPointer EntityPointer;
-      typedef typename Implementation :: HostIntersection HostIntersection;
-
-      IntersectionWrapper ()
-        : Base( Implementation() )
+      LevelIntersection ( const EntityPointer &inside,
+                          const HostIntersection &hostIntersection )
+        : Base( inside, hostIntersection )
       {}
-
-      void initialize( const EntityPointer &inside,
-                       const HostIntersection &hostIntersection )
-      {
-        getRealImp().initialize( inside, hostIntersection );
-      }
     };
 
   }

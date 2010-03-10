@@ -4,7 +4,6 @@
 #define DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 
 #include <dune/grid/geometrygrid/entitypointer.hh>
-#include <dune/grid/geometrygrid/storage.hh>
 #include <dune/grid/geometrygrid/intersection.hh>
 
 namespace Dune
@@ -33,21 +32,21 @@ namespace Dune
     template< class Traits >
     class IntersectionIterator
     {
-      typedef typename Traits :: HostIntersectionIterator HostIntersectionIterator;
+      typedef typename Traits::HostIntersectionIterator HostIntersectionIterator;
 
     public:
-      typedef typename Traits :: Intersection Intersection;
-      typedef typename Traits :: GridTraits :: Grid Grid;
+      typedef typename Traits::Intersection Intersection;
+      typedef typename Traits::GridTraits::Grid Grid;
 
-      typedef typename Grid :: template Codim< 0 > :: EntityPointer EntityPointer;
+      typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
 
     private:
-      typedef GeoGrid :: IntersectionWrapper< Intersection > IntersectionWrapper;
-      typedef GeoGrid :: Storage< IntersectionWrapper > IntersectionStorage;
+      typedef typename Traits::IntersectionImpl IntersectionImpl;
 
       EntityPointer inside_;
       HostIntersectionIterator hostIterator_;
-      mutable IntersectionWrapper *intersection_;
+      mutable Intersection *intersection_;
+      mutable char intersectionMemory_[ sizeof( Intersection ) ];
 
     public:
       template< class Entity >
@@ -74,7 +73,8 @@ namespace Dune
 
       ~IntersectionIterator ()
       {
-        IntersectionStorage :: free( intersection_ );
+        if( intersection_ != 0 )
+          intersection_->~Intersection();
       }
 
       bool equals ( const IntersectionIterator &other ) const
@@ -91,10 +91,7 @@ namespace Dune
       const Intersection &dereference () const
       {
         if( intersection_ == 0 )
-        {
-          intersection_ = IntersectionStorage :: alloc();
-          intersection_->initialize( inside_, *hostIterator_ );
-        }
+          intersection_ = new( &intersectionMemory_ )Intersection( IntersectionImpl( inside_, *hostIterator_ ) );
         return *intersection_;
       }
 
@@ -106,7 +103,8 @@ namespace Dune
 
       void update ()
       {
-        IntersectionStorage :: free( intersection_ );
+        if( intersection_ != 0 )
+          intersection_->~Intersection();
         intersection_ = 0;
       }
     };
@@ -119,11 +117,12 @@ namespace Dune
     template< class Grid >
     struct LeafIntersectionIteratorTraits
     {
-      typedef typename remove_const< Grid > :: type :: Traits GridTraits;
+      typedef typename remove_const< Grid >::type::Traits GridTraits;
 
-      typedef typename GridTraits :: LeafIntersection Intersection;
+      typedef typename GridTraits::LeafIntersection Intersection;
+      typedef LeafIntersection< const Grid > IntersectionImpl;
 
-      typedef typename GridTraits :: HostGrid :: Traits :: LeafIntersectionIterator
+      typedef typename GridTraits::HostGrid::Traits::LeafIntersectionIterator
       HostIntersectionIterator;
     };
 
@@ -160,18 +159,19 @@ namespace Dune
     template< class Grid >
     struct LevelIntersectionIteratorTraits
     {
-      typedef typename remove_const< Grid > :: type :: Traits GridTraits;
+      typedef typename remove_const< Grid >::type::Traits GridTraits;
 
-      typedef typename GridTraits :: LevelIntersection Intersection;
+      typedef typename GridTraits::LevelIntersection Intersection;
+      typedef LevelIntersection< const Grid > IntersectionImpl;
 
-      typedef typename GridTraits :: HostGrid :: Traits :: LevelIntersectionIterator
+      typedef typename GridTraits::HostGrid::Traits::LevelIntersectionIterator
       HostIntersectionIterator;
     };
 
 
 
     // LevelIntersectionIterator
-    // -------------------------------------
+    // -------------------------
 
     template< class Grid >
     class LevelIntersectionIterator
@@ -197,4 +197,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_INTERSECTIONITERATOR_HH
