@@ -196,9 +196,10 @@ namespace Dune {
     typedef ALU2dGrid<dim,dimworld> ThisType;
     typedef GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> > BaseType;
 
-    friend class ALU2dGridEntity<0,dim,const ThisType>;
-    friend class ALU2dGridEntity<1,dim,const ThisType>;
-    friend class ALU2dGridEntity<dim,dim,const ThisType>;
+    template< int, int, class > friend class ALU2dGridEntity;
+    // friend class ALU2dGridEntity<0,dim,const ThisType>;
+    // friend class ALU2dGridEntity<1,dim,const ThisType>;
+    // friend class ALU2dGridEntity<dim,dim,const ThisType>;
 
     friend class ALU2dGridGeometry<0,dimworld,const ThisType>;
     friend class ALU2dGridGeometry<1,dimworld,const ThisType>;
