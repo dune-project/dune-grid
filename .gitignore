@@ -19,3 +19,5 @@ dune-grid-?.?
 ltmain.sh
 am
 .libs
+gridtype.hh
+dgfgridtype.hh
