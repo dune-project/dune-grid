@@ -20,7 +20,9 @@ AC_DEFUN([DUNE_DEFINE_GRIDTYPE],[
     NEXT_DEFINITION="${NEXT_DEFINITION}    #error \"Preprocessor assertion $2 failed.\"\n"
     NEXT_DEFINITION="${NEXT_DEFINITION}  #endif // #if ! ($2)\n"
   ])
-  NEXT_DEFINITION="${NEXT_DEFINITION}  #include <$4>\n"
+  for file in $4 ; do
+    NEXT_DEFINITION="${NEXT_DEFINITION}  #include <$file>\n"
+  done
   NEXT_DEFINITION="${NEXT_DEFINITION}  namespace Dune\n"
   NEXT_DEFINITION="${NEXT_DEFINITION}  {\n"
   NEXT_DEFINITION="${NEXT_DEFINITION}    namespace GridSelector\n"
@@ -35,7 +37,9 @@ AC_DEFUN([DUNE_DEFINE_GRIDTYPE],[
 
   NEXT_DEFINITION=
   NEXT_DEFINITION="${NEXT_DEFINITION}#if defined $1\n"
-  NEXT_DEFINITION="${NEXT_DEFINITION}  #include <$5>\n"
+  for file in $5 ; do
+    NEXT_DEFINITION="${NEXT_DEFINITION}  #include <$file>\n"
+  done
   NEXT_DEFINITION="${NEXT_DEFINITION}#endif // #if defined $1\n\n"
 
   DUNE_DGFGRIDTYPE_DEFINITIONS="${DUNE_DGFGRIDTYPE_DEFINITIONS}${NEXT_DEFINITION}"
