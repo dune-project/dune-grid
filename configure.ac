@@ -77,3 +77,4 @@ AC_CONFIG_FILES([Makefile
     m4/Makefile
     dune-grid.pc])
 AC_OUTPUT
+DUNE_OUTPUT_GRIDTYPE
