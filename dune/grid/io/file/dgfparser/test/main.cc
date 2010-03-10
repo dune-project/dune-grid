@@ -7,7 +7,7 @@
 
 // #include <dune/grid/test/gridcheck.cc>
 #include <dune/grid/utility/griddim.hh>
-#include "../dgfgridtype.hh"
+#include <dgfgridtype.hh>
 
 #if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>

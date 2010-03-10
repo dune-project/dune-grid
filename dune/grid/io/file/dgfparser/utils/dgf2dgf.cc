@@ -30,7 +30,7 @@
 
 #include <iostream>
 
-#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
+#include <dgfgridtype.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
 using namespace Dune;

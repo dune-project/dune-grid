@@ -14,7 +14,7 @@
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #endif
 
-#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
+#include <dgfgridtype.hh>
 
 #include "testgeo.hh"
 

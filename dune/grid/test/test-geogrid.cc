@@ -9,7 +9,7 @@
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/geometrygrid/cachedcoordfunction.hh>
 #include <dune/grid/io/file/dgfparser/dgfgeogrid.hh>
-#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
+#include <dgfgridtype.hh>
 
 #include "functions.hh"
 
