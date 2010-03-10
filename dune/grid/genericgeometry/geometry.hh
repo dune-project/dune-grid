@@ -517,11 +517,6 @@ namespace Dune
         : Base()
       {}
 
-      /** \brief Constructor accepting a mapping */
-      explicit Geometry ( Mapping &mapping )
-        : Base( mapping )
-      {}
-
       /** \brief Copy constructor from another geometry */
       template< class Geo >
       explicit Geometry ( const Geo &geo )
@@ -572,11 +567,6 @@ namespace Dune
       /** \brief Default constructor */
       LocalGeometry ()
         : Base()
-      {}
-
-      /** \brief Constructor accepting a mapping */
-      explicit LocalGeometry ( Mapping &mapping )
-        : Base( mapping )
       {}
 
       /** \brief Copy constructor from another geometry */
