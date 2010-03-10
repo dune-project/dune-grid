@@ -44,7 +44,7 @@ void testWritingUniformData() {
   SGrid<2,2> sgrid2d(n,h);
 
   // create data buffer
-  std::vector<double> vertexdata2d(sgrid2d.size(2));
+  std::vector<FieldVector<double,1> > vertexdata2d(sgrid2d.size(2));
 
   SGrid<2,2>::Codim<2>::LeafIterator vIt2d    = sgrid2d.leafbegin<2>();
   SGrid<2,2>::Codim<2>::LeafIterator vEndIt2d = sgrid2d.leafend<2>();
@@ -67,7 +67,7 @@ void testWritingUniformData() {
   SGrid<3,3> sgrid3d(n,h);
 
   // create data buffer
-  std::vector<double> vertexdata3d(sgrid3d.size(3));
+  std::vector<FieldVector<double,1> > vertexdata3d(sgrid3d.size(3));
 
   SGrid<3,3>::Codim<3>::LeafIterator vIt    = sgrid3d.leafbegin<3>();
   SGrid<3,3>::Codim<3>::LeafIterator vEndIt = sgrid3d.leafend<3>();
@@ -92,29 +92,29 @@ int main() try {
   // Test whether unstructured grids can be read and written
 #if HAVE_UG
   std::cout << "reading UGGrid<2>" << std::endl;
-  testReadingUnstructuredGrid<UGGrid<2> >("../../../../doc/grids/amiramesh/hybrid-testgrid-2d.am");
+  testReadingUnstructuredGrid<UGGrid<2> >("../../../../../doc/grids/amiramesh/hybrid-testgrid-2d.am");
 
   std::cout << "reading UGGrid<3>" << std::endl;
-  testReadingUnstructuredGrid<UGGrid<3> >("../../../../doc/grids/amiramesh/hybrid-testgrid-3d.am");
+  testReadingUnstructuredGrid<UGGrid<3> >("../../../../../doc/grids/amiramesh/hybrid-testgrid-3d.am");
 #endif
 
 #if HAVE_ALBERTA
   std::cout << "reading AlbertaGrid<2>" << std::endl;
-  testReadingUnstructuredGrid<AlbertaGrid<2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
+  testReadingUnstructuredGrid<AlbertaGrid<2> >("../../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
 
   std::cout << "reading AlbertaGrid<3>" << std::endl;
-  testReadingUnstructuredGrid<AlbertaGrid<3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
+  testReadingUnstructuredGrid<AlbertaGrid<3> >("../../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
 #endif
 
 #if HAVE_ALUGRID
   std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
-  testReadingUnstructuredGrid<ALUSimplexGrid<2,2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
+  testReadingUnstructuredGrid<ALUSimplexGrid<2,2> >("../../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
 
   std::cout << "reading ALUSimplexGrid<3,3>" << std::endl;
-  testReadingUnstructuredGrid<ALUSimplexGrid<3,3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
+  testReadingUnstructuredGrid<ALUSimplexGrid<3,3> >("../../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
 
   std::cout << "reading ALUCubeGrid<3,3>" << std::endl;
-  testReadingUnstructuredGrid<ALUCubeGrid<3,3> >("../../../../doc/grids/amiramesh/cube-testgrid-3d.am");
+  testReadingUnstructuredGrid<ALUCubeGrid<3,3> >("../../../../../doc/grids/amiramesh/cube-testgrid-3d.am");
 #endif
 
   // Test whether writing uniform data works
