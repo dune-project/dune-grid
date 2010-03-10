@@ -215,6 +215,7 @@ AC_DEFUN([DUNE_PATH_UG],[
   DUNE_ADD_ALL_PKG([UG], [\${UG_CPPFLAGS}], [\${UG_LDFLAGS}], [\${UG_LIBS}])
 
   if test x$HAVE_UG = x1 ; then
+      DUNE_DEFINE_GRIDTYPE([UGGRID],[GRIDDIM == WORLDDIM],[Dune::UGGrid< dimgrid >],[dune/grid/uggrid.hh],[dune/grid/io/file/dgfparser/dgfug.hh])
       AC_DEFINE(HAVE_UG, ENABLE_UG, 
         [This is only true if UG was found by configure 
          _and_ if the application uses the UG_CPPFLAGS])

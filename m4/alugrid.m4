@@ -162,6 +162,10 @@ if test x$HAVE_ALUGRID = x1 ; then
   DUNE_ADD_ALL_PKG([ALUGrid], [$ALUGRID_CPPFLAGS],
                    [$ALUGRID_LDFLAGS], [$ALUGRID_LIBS])
 
+  DUNE_DEFINE_GRIDTYPE([ALUGRID_CONFORM],[],[Dune::ALUConformGrid< dimgrid, dimworld >],[dune/grid/alugrid.hh],[dune/grid/io/file/dgfparser/dgfalu.hh])
+  DUNE_DEFINE_GRIDTYPE([ALUGRID_CUBE],[],[Dune::ALUCubeGrid< dimgrid, dimworld >],[dune/grid/alugrid.hh],[dune/grid/io/file/dgfparser/dgfalu.hh])
+  DUNE_DEFINE_GRIDTYPE([ALUGRID_SIMPLEX],[],[Dune::ALUSimplexGrid< dimgrid, dimworld >],[dune/grid/alugrid.hh],[dune/grid/io/file/dgfparser/dgfalu.hh])
+
   # set variable for summary
   with_alugrid="yes (Version $ALUGRID_VERSION)"
 else
