@@ -41,35 +41,8 @@ namespace Dune
 
     // arbitrary dimension, implementation is in specialization
     template< int dimension, int dimWorld = dimension >
-    class GmshReaderLinearBoundarySegment
-    {};
-
-    // arbitrary dimension, implementation is in specialization
-    template< int dimension, int dimWorld = dimension >
     class GmshReaderQuadraticBoundarySegment
     {};
-
-    // linear boundary segments in 1d
-    template< int dimWorld >
-    struct GmshReaderLinearBoundarySegment< 2, dimWorld >
-      : public Dune::BoundarySegment< 2, dimWorld >
-    {
-      typedef Dune::FieldVector< double, dimWorld > GlobalVector;
-
-      GmshReaderLinearBoundarySegment ( const GlobalVector &p0, const GlobalVector &p1 )
-        : x_( p0 ), p_( p1 - p0 )
-      {}
-
-      virtual GlobalVector operator() ( const Dune::FieldVector< double, 1 > &local ) const
-      {
-        GlobalVector y = x_;
-        y.axpy( local[ 0 ], p_ );
-        return y;
-      }
-
-    private:
-      GlobalVector x_, p_;
-    };
 
     // quadratic boundary segments in 1d
     /*
@@ -115,33 +88,6 @@ namespace Dune
     private:
       GlobalVector p0,p1,p2;
       double alpha;
-    };
-
-    // linear boundary segments in 2d
-    template<>
-    struct GmshReaderLinearBoundarySegment< 3, 3 >
-      : public Dune::BoundarySegment< 3 >
-    {
-      GmshReaderLinearBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
-                                       Dune::FieldVector<double,3> p2_)
-        : p0(p0_), p1(p1_), p2(p2_)
-      {
-        //        std::cout << "created boundary segment " << p0 << " | " << p1 << " | " << p2 << std::endl;
-      }
-
-      virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
-      {
-        Dune::FieldVector<double,3> y;
-        y = 0.0;
-        y.axpy(1.0-local[0]-local[1],p0);
-        y.axpy(local[0],p1);
-        y.axpy(local[1],p2);
-        //        std::cout << "eval boundary segment local=" << local << " y=" << y << std::endl;
-        return y;
-      }
-
-    private:
-      Dune::FieldVector<double,3> p0,p1,p2;
     };
 
 
@@ -248,7 +194,7 @@ namespace Dune
 
   }   // end empty namespace
 
-  //! Parser for Gmsh data. Implementations must be (partially) deimension dependent
+  //! Parser for Gmsh data. Implementations must be (partially) dimension dependent
   template<typename GridType, int dimension>
   class GmshReaderParser
   {};
@@ -468,7 +414,6 @@ namespace Dune
     using Base::boundary_id_to_physical_entity;
     using Base::readfile;
 
-    typedef GmshReaderLinearBoundarySegment< dim, dimWorld > LinearBoundarySegment;
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
 
     friend class GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> >;
@@ -545,11 +490,7 @@ namespace Dune
         // segments are the default.
         simplexVertices.resize(2);
         readfile(file,2,"%d %d\n",&(simplexVertices[0]),&(simplexVertices[1]));
-        vertices.resize(2);
-        for (int i=0; i<2; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
-        if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<dim,dimWorld> >(new LinearBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]])));
+
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
         break;
@@ -613,7 +554,6 @@ namespace Dune
     using Base::boundary_id_to_physical_entity;
     using Base::readfile;
 
-    typedef GmshReaderLinearBoundarySegment< dim, dimWorld > LinearBoundarySegment;
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
 
     friend class GmshReaderParserBase< GridType, GmshReaderParser<GridType, 3> >;
@@ -691,12 +631,6 @@ namespace Dune
         // are the default anyways.
         simplexVertices.resize(3);
         readfile(file,3,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
-        vertices.resize(3);
-        for (int i=0; i<3; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
-
-        if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices,shared_ptr<BoundarySegment<dim,dimWorld> >(new LinearBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]])));
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
         break;
