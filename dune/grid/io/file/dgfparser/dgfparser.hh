@@ -334,62 +334,28 @@ namespace Dune
     explicit GridPtr ( const std::string &filename,
                        MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : gridPtr_( 0 ),
-        elParam_(0),
-        vtxParam_(0),
-        bndId_(0),
-        nofElParam_(0),
-        nofVtxParam_(0)
+        elParam_( 0 ),
+        vtxParam_( 0 ),
+        bndId_( 0 ),
+        nofElParam_( 0 ),
+        nofVtxParam_( 0 )
     {
       DGFGridFactory< GridType > dgfFactory( filename, comm );
-      gridPtr_ = std::auto_ptr< GridType >( dgfFactory.grid() );
+      initialize( dgfFactory );
+    }
 
-      typedef typename GridType::LeafGridView GridView;
-      GridView gridView = gridPtr_->leafView();
-      const typename GridView::IndexSet &indexSet = gridView.indexSet();
-
-      nofElParam_ = dgfFactory.template numParameters< 0 >();
-      nofVtxParam_ = dgfFactory.template numParameters< dimension >();
-      if ( nofElParam_ > 0 )
-        elParam_.resize( indexSet.size(0) );
-      if ( nofVtxParam_ > 0 )
-        vtxParam_.resize( indexSet.size(dimension) );
-      bndId_.resize( indexSet.size(1) );
-
-      const PartitionIteratorType partType = Interior_Partition;
-      typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
-      const Iterator enditer = gridView.template end< 0, partType >();
-      for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
-      {
-        const typename Iterator::Entity &el = *iter;
-        if ( nofElParam_ > 0 ) {
-          std::swap( elParam_[ indexSet.index(el) ], dgfFactory.parameter(el) );
-          assert( elParam_[ indexSet.index(el) ].size()  == (size_t)nofElParam_ );
-        }
-        if ( nofVtxParam_ > 0 )
-        {
-          for ( int v = 0; v < el.template count<dimension>(); ++v)
-          {
-            typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
-            if ( vtxParam_[ index ].empty() )
-              std::swap( vtxParam_[ index ], dgfFactory.parameter(*el.template subEntity<dimension>(v) ) );
-            assert( vtxParam_[ index ].size()  == (size_t)nofVtxParam_ );
-          }
-        }
-        if ( el.hasBoundaryIntersections() )
-        {
-          typedef typename GridView::IntersectionIterator IntersectionIterator;
-          const IntersectionIterator iend = gridView.iend(el);
-          for( IntersectionIterator iiter = gridView.ibegin(el); iiter != iend; ++iiter )
-          {
-            const typename IntersectionIterator::Intersection &inter = *iiter;
-            if ( inter.boundary( ) )
-            {
-              bndId_[ indexSet.subIndex(el,inter.indexInInside(),1) ]
-                = dgfFactory.boundaryId( inter );
-            }
-          }
-        }
-      }
+    //! constructor given a std::istream
+    explicit GridPtr ( std::istream &input,
+                       MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : gridPtr_( 0 ),
+        elParam_( 0 ),
+        vtxParam_( 0 ),
+        bndId_( 0 ),
+        nofElParam_( 0 ),
+        nofVtxParam_( 0 )
+    {
+      DGFGridFactory< GridType > dgfFactory( input, comm );
+      initialize( dgfFactory );
     }
 
     //! Default constructor, creating empty GridPtr
@@ -514,6 +480,59 @@ namespace Dune
     }
 
   protected:
+    void initialize ( DGFGridFactory< GridType > &dgfFactory )
+    {
+      gridPtr_ = std::auto_ptr< GridType >( dgfFactory.grid() );
+
+      typedef typename GridType::LeafGridView GridView;
+      GridView gridView = gridPtr_->leafView();
+      const typename GridView::IndexSet &indexSet = gridView.indexSet();
+
+      nofElParam_ = dgfFactory.template numParameters< 0 >();
+      nofVtxParam_ = dgfFactory.template numParameters< dimension >();
+      if ( nofElParam_ > 0 )
+        elParam_.resize( indexSet.size(0) );
+      if ( nofVtxParam_ > 0 )
+        vtxParam_.resize( indexSet.size(dimension) );
+      bndId_.resize( indexSet.size(1) );
+
+      const PartitionIteratorType partType = Interior_Partition;
+      typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
+      const Iterator enditer = gridView.template end< 0, partType >();
+      for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
+      {
+        const typename Iterator::Entity &el = *iter;
+        if ( nofElParam_ > 0 ) {
+          std::swap( elParam_[ indexSet.index(el) ], dgfFactory.parameter(el) );
+          assert( elParam_[ indexSet.index(el) ].size()  == (size_t)nofElParam_ );
+        }
+        if ( nofVtxParam_ > 0 )
+        {
+          for ( int v = 0; v < el.template count<dimension>(); ++v)
+          {
+            typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
+            if ( vtxParam_[ index ].empty() )
+              std::swap( vtxParam_[ index ], dgfFactory.parameter(*el.template subEntity<dimension>(v) ) );
+            assert( vtxParam_[ index ].size()  == (size_t)nofVtxParam_ );
+          }
+        }
+        if ( el.hasBoundaryIntersections() )
+        {
+          typedef typename GridView::IntersectionIterator IntersectionIterator;
+          const IntersectionIterator iend = gridView.iend(el);
+          for( IntersectionIterator iiter = gridView.ibegin(el); iiter != iend; ++iiter )
+          {
+            const typename IntersectionIterator::Intersection &inter = *iiter;
+            if ( inter.boundary( ) )
+            {
+              bndId_[ indexSet.subIndex(el,inter.indexInInside(),1) ]
+                = dgfFactory.boundaryId( inter );
+            }
+          }
+        }
+      }
+    }
+
     template <class Entity>
     std::vector< double > &params ( const Entity &entity )
     {
