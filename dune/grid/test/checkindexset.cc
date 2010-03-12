@@ -111,8 +111,8 @@ namespace Dune
         assert( numVertices > 0 );
 
         // create vectors of number of vertices on sub entity
-        std::vector<int> local (numVertices,-1);
-        std::vector<int> global(numVertices,-1);
+        std::vector<int> local (numVertices);
+        std::vector<int> global(numVertices);
 
         for( int j = 0; j < numVertices; ++j )
         {
