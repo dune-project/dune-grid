@@ -45,18 +45,18 @@ namespace Dune
     return (vx1-vx2).infinity_norm() < eps;
   }
 
-  // check some functionality of the grid
-  template <int codim, class GridType, class EntityType,
+  // check various features of codim-0 entities (elements)
+  template <int codim, class GridType,
       class IndexSetType, class OutputStreamImp,
       class MapType1 , class MapType2 , class MapType3 >
   void checkSubEntity ( const GridType & grid,
-                        const EntityType &en , const IndexSetType & lset,
+                        const typename GridType::template Codim<0>::Entity &en , const IndexSetType & lset,
                         OutputStreamImp & sout , MapType1 & subEntities , MapType2 & vertices ,
                         MapType3 & vertexCoordsMap )
   {
-    enum { dim = EntityType::dimension };
+    enum { dim = GridType::dimension };
     const int dimworld = GridType::dimensionworld;
-    typedef typename EntityType::ctype coordType;
+    typedef typename GridType::ctype coordType;
 
     const GeometryType type = en.type();
     assert( type == en.geometry().type() );
