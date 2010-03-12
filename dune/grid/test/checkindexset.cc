@@ -49,7 +49,7 @@ namespace Dune
       \param grid The grid we are testing
       \param en The grid element we are testing
       \param lset The corresponding level set
-      \param sout The output stream that error message will be sent to
+      \param sout The output stream that status (non-error) messages will go to
       \param subEntities ?????
       \param vertices ?????
       \param vertexCoordsMap Map that associates vertex positions to indices (integers)
@@ -95,7 +95,6 @@ namespace Dune
 
     for( int subEntity = 0; subEntity < refElem.size( 0, 0, codim ); ++subEntity )
     {
-      typedef std::pair< int, GeometryType > SubEntityKeyType;
       typedef Dune::GenericGeometry::MapNumberingProvider< dim > MapNumbering;
 
 #if defined DUNE_ENABLE_OLD_NUMBERING && !defined NEW_SUBENTITY_NUMBERING
@@ -110,9 +109,8 @@ namespace Dune
         // every entity must have at least one vertex
         assert( numVertices > 0 );
 
-        // create vectors of number of vertices on sub entity
+        // The local vertex numbers
         std::vector<int> local (numVertices);
-        std::vector<int> global(numVertices);
 
         for( int j = 0; j < numVertices; ++j )
         {
@@ -130,9 +128,19 @@ namespace Dune
           sout << ", " << local[ j ];
         sout << "]" << std::endl;
 
+        // The global vertex numbers
+        std::vector<int> global(numVertices);
         for( int j = 0; j < numVertices; ++j )
           global[ j ] = lset.subIndex( en, local[ j ], dim );
 
+        sout << "Found global numbers of entity [ ";
+        for( int j = 0; j < numVertices; ++j )
+          sout << global[ j ] << " ";
+        sout << "]" << std::endl;
+
+        // Check whether we get the same index if we
+        // -- ask for the subEntity itself and then its index
+        // -- ask for the subIndex directly
         typedef typename GridType::template Codim< codim >::EntityPointer SubEntityPointer;
         const SubEntityPointer subEntityPtr = en.template subEntity< codim >( subEntity );
         if( lset.subIndex( en, subEntity, codim ) != lset.index( *subEntityPtr) )
@@ -141,9 +149,12 @@ namespace Dune
           assert( lset.subIndex( en, subEntity, codim ) == lset.index( *subEntityPtr) );
         }
 
-        SubEntityKeyType globalSubEntity( lset.index( *subEntityPtr ), subEntityPtr->type() );
+        // Make a unique identifier for the subEntity.  Since indices are unique only per GeometryType,
+        // we need a (index,GeometryType)-pair.
+        std::pair<int, GeometryType> globalSubEntity( lset.index( *subEntityPtr ), subEntityPtr->type() );
         assert( globalSubEntity.first >= 0 );
-        sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << "," << globalSubEntity.second << ") on en = " << lset.index(en) << std::endl;
+        sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << ","
+             << globalSubEntity.second << ") on en = " << lset.index(en) << std::endl;
 
         if( subEntityPtr->type() != subEntityPtr->geometry().type() )
         {
@@ -154,11 +165,7 @@ namespace Dune
         // assert that all sub entities have the same level
         assert( subEntityPtr.level() == en.level() );
 
-        sout << "Found global numbers of entity [ ";
-        for( int j = 0; j < numVertices; ++j )
-          sout << global[ j ] << " ";
-        sout << "]" << std::endl;
-
+        // Loop over all vertices
         for( int j = 0; j < numVertices; ++j )
         {
 #if !defined DUNE_ENABLE_OLD_NUMBERING || defined NEW_SUBENTITY_NUMBERING
@@ -169,14 +176,16 @@ namespace Dune
 #endif
 
           {
-            // get entity pointer of sub entity codim=dim (Vertex)
+            // get entity pointer to subEntity vertex
             typedef typename GridType::template Codim< dim >::EntityPointer VertexPointer;
             VertexPointer vxp = en.template subEntity< dim >( local[ j ] );
 
-            FieldVector< coordType, dimworld > vx = vxp->geometry().corner( 0 );
+            // Find the global coordinate of the vertex by its index
             if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
             {
+              // Check whether index and coordinate match
               FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap.at(global[j]) );
+              FieldVector< coordType, dimworld > vx = vxp->geometry().corner( 0 );
               if( ! compareVec( vxcheck, vx ) )
               {
                 std::cerr << "ERROR map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
@@ -185,17 +194,17 @@ namespace Dune
             }
           }
 
-          FieldVector< coordType, dimworld > vx = subEntityPtr->geometry().corner( gj );
           if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
           {
             FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap.at(global[j]) );
+            FieldVector< coordType, dimworld > vx = subEntityPtr->geometry().corner( gj );
             if( ! compareVec( vxcheck, vx ) )
             {
               std::cerr << "Error map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
               //assert( compareVec( vxcheck, vx ) );
             }
           }
-          sout << "vx[" << global[j] << "] = "  << vx << "\n";
+          sout << "vx[" << global[j] << "] = "  <<  subEntityPtr->geometry().corner( gj ) << "\n";
         }
         sout << "sort vector of global vertex\n";
 
@@ -210,8 +219,7 @@ namespace Dune
         }
         else
         {
-          SubEntityKeyType otherSubEntity = vertices[global];
-          assert( globalSubEntity == otherSubEntity );
+          assert( globalSubEntity == vertices[global] );
         }
 
         // check whether subEntity is already stored in map
