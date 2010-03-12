@@ -62,6 +62,9 @@ namespace Dune
             jtj[ i ][ j ] += jt[ i ][ k ] * jt[ j ][ k ];
       if( std::abs( std::sqrt( jtj.determinant() ) - geometry.integrationElement( x ) ) > 1e-8 )
         std::cerr << "Error: integrationElement is not consistent with jacobianTransposed." << std::endl;
+      if (geometry.affine())
+        if( std::abs( geometry.volume() - refElement.volume()*geometry.integrationElement( x ) ) > 1e-8 )
+          std::cerr << "Error: volume is not consistent with jacobianTransposed." << std::endl;
     }
 
     {
