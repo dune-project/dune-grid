@@ -267,14 +267,9 @@ namespace Dune {
     assert(this->current.item_ != 0);
     typedef double (&normal_t)[dimworld];
 
-    if( this->current.useOutside_ )
-    {
-      this->current.neigh_->outernormal( this->current.opposite_, ((normal_t) (&outerNormal_)[0]) );
-      outerNormal_ *= -1.0;
-      return outerNormal_;
-    }
-
     this->current.item_->outernormal(  this->current.index_,  ((normal_t) (&outerNormal_)[0]) );
+    if( this->current.useOutside_ )
+      outerNormal_ *= 0.5;
     return outerNormal_;
   }
 
@@ -485,12 +480,9 @@ namespace Dune {
         return ;
       }
 
-      if(this->current.item_->hasHangingNode(this->current.index_))
-        this->current.useOutside_ = true;
-      else
-        this->current.useOutside_ = false;
-
       addNeighboursToStack();
+      // if more then one element in stack we have non-conform intersection
+      this->current.useOutside_ = (neighbourStack_.size() > 1);
       if (neighbourStack_.empty())
       {
         this->current.neigh_ = 0;
@@ -575,8 +567,6 @@ namespace Dune {
         }
       }
     }
-    // if more then one element in stack we have non-conform intersection
-    this->current.useOutside_ = (neighbourStack_.size() > 1);
   }
 
   //! reset IntersectionIterator to first neighbour
@@ -602,36 +592,17 @@ namespace Dune {
     }
 
     this->current.item_ = const_cast<HElementType *> (&elem);
-    this->current.index_ = 0;
-    this->current.neigh_ = elem.nbel(0);
-    this->current.opposite_= elem.opposite(0);
+    this->current.index_ = -1;
+    this->current.neigh_ = 0;
+    this->current.opposite_= -1;
 
-    assert(this->current.opposite_ >= 0 && this->current.opposite_ < 3);
-    assert(this->current. item_ );
 
     this->walkLevel_ = wLevel;
     this->done_ = false;
 
-    if(this->current.item_->hasHangingNode(0))
-      this->current.useOutside_ = true;
-    else
-      this->current.useOutside_ = false;
+    assert(this->current. item_ );
 
-    if(!this->current.neigh_ )
-    {
-      this->current.isBoundary_ = true ;
-      this->current.opposite_ = -1;
-    }
-    else {
-      this->current.isBoundary_ = false;
-      if (this->current.neigh_->level() != this->walkLevel_)
-      {
-        // index is increased in increment again
-        this->current.index_ = -1;
-        this->current.neigh_ = 0;
-        increment();
-      }
-    }
+    increment();
   }
 
   //********************************************************************
