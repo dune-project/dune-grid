@@ -45,7 +45,15 @@ namespace Dune
     return (vx1-vx2).infinity_norm() < eps;
   }
 
-  // check various features of codim-0 entities (elements)
+  /** \brief Check various features of codim-0 entities (elements)
+      \param grid The grid we are testing
+      \param en The grid element we are testing
+      \param lset The corresponding level set
+      \param sout The output stream that error message will be sent to
+      \param subEntities ?????
+      \param vertices ?????
+      \param vertexCoordsMap Map that associates vertex positions to indices (integers)
+   */
   template <int codim, class GridType,
       class IndexSetType, class OutputStreamImp,
       class MapType1 , class MapType2 , class MapType3 >
@@ -69,7 +77,7 @@ namespace Dune
       = ReferenceElements< coordType, dim >::general( type );
 #endif
 
-    // check all subEntities of codimension  codim
+    // check whether the element has the number of codim-subentities mandated by the reference element
     if(en.template count<codim>() != refElem.size(0,0,codim))
     {
       std::cerr << "entity index = " << lset.index(en)
@@ -96,16 +104,17 @@ namespace Dune
 #endif
 
       {
-        int numSubEntities = refElem.size( subEntity, codim, dim );
+        // Number of vertices of the current subentity
+        int numVertices = refElem.size( subEntity, codim, dim );
 
         // every entity must have at least one vertex
-        assert( numSubEntities > 0 );
+        assert( numVertices > 0 );
 
         // create vectors of number of vertices on sub entity
-        std::vector<int> local (numSubEntities,-1);
-        std::vector<int> global(numSubEntities,-1);
+        std::vector<int> local (numVertices,-1);
+        std::vector<int> global(numVertices,-1);
 
-        for( int j = 0; j < numSubEntities; ++j )
+        for( int j = 0; j < numVertices; ++j )
         {
 #if !defined DUNE_ENABLE_OLD_NUMBERING || defined NEW_SUBENTITY_NUMBERING
           local[ j ] = refElem.subEntity ( subEntity, codim, j, dim );
@@ -115,13 +124,13 @@ namespace Dune
 #endif
         }
 
-        sout << numSubEntities << " vertices on subEntity< codim = " << codim << " >" << std::endl;
+        sout << numVertices << " vertices on subEntity< codim = " << codim << " >" << std::endl;
         sout << "check subentity [" << local[ 0 ];
-        for( int j = 1; j < numSubEntities; ++j )
+        for( int j = 1; j < numVertices; ++j )
           sout << ", " << local[ j ];
         sout << "]" << std::endl;
 
-        for( int j = 0; j < numSubEntities; ++j )
+        for( int j = 0; j < numVertices; ++j )
           global[ j ] = lset.subIndex( en, local[ j ], dim );
 
         typedef typename GridType::template Codim< codim >::EntityPointer SubEntityPointer;
@@ -146,7 +155,7 @@ namespace Dune
         assert( subEntityPtr.level() == en.level() );
 
         sout << "Found global numbers of entity [ ";
-        for( int j = 0; j < numSubEntities; ++j )
+        for( int j = 0; j < numVertices; ++j )
           sout << global[ j ] << " ";
         sout << "]" << std::endl;
 
@@ -155,7 +164,7 @@ namespace Dune
         oldIndex = 0;
 #endif
 
-        for( int j = 0; j < numSubEntities; ++j )
+        for( int j = 0; j < numVertices; ++j )
         {
 #if !defined DUNE_ENABLE_OLD_NUMBERING || defined NEW_SUBENTITY_NUMBERING
           const int gj = j;
@@ -222,13 +231,13 @@ namespace Dune
           {
             std::cerr << "For subEntity key (" << globalSubEntity.first << "," << globalSubEntity.second << ") \n";
             std::cerr << "Got ";
-            for(int j=0 ; j<numSubEntities; j++ )
+            for(int j=0 ; j<numVertices; j++ )
             {
               std::cerr << global[j] << " ";
             }
             std::cerr << "\n";
             std::cerr << "Found ";
-            for(int j=0 ; j<numSubEntities; j++ )
+            for(int j=0 ; j<numVertices; j++ )
             {
               std::cerr << globalcheck [j] << " ";
             }
