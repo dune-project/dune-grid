@@ -80,17 +80,11 @@ namespace Dune {
   inline FieldVector<alu2d_ctype, cdim> ALU2dGridGeometry<mydim, cdim, GridImp> ::
   global (const FieldVector<alu2d_ctype, mydim>& local) const
   {
+    if ( cdim == 0)
+      return geoImpl_[0];
     FieldVector<alu2d_ctype, cdim> global;
     geoImpl_.mapping().map2world(local, global);
     return global;
-  }
-
-  // specialization for vertices
-  template <>
-  inline FieldVector<alu2d_ctype, 2> ALU2dGridGeometry<0, 2, const ALU2dGrid<2,2> > ::
-  global (const FieldVector<alu2d_ctype, 0>& local) const
-  {
-    return geoImpl_[ 0 ];
   }
 
   //! maps a global coordinate within the element to a
@@ -99,40 +93,24 @@ namespace Dune {
   inline FieldVector<alu2d_ctype,  mydim> ALU2dGridGeometry <mydim, cdim, GridImp> ::
   local (const FieldVector<alu2d_ctype, cdim>& global) const
   {
+    if (mydim == 0)
+      return FieldVector<alu2d_ctype, mydim> (1);
     FieldVector<alu2d_ctype, mydim> local;
     geoImpl_.mapping().world2map(global, local);
     return local;
-  }
-
-  // specialization for vertices
-  template <>
-  inline FieldVector<alu2d_ctype, 0> ALU2dGridGeometry<0,2,const ALU2dGrid<2,2> >::
-  local(const FieldVector<alu2d_ctype, 2>& global) const
-  {
-    return FieldVector<alu2d_ctype, 0> (1);
   }
 
   template <int mydim, int cdim, class GridImp>
   inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>::
   integrationElement (const FieldVector<alu2d_ctype, mydim>& local) const
   {
-    // only check this if no boundary projection is available
-    assert( ( haveProjection_ ) ? true :
-            std::abs( geoImpl_.mapping().det( local ) - det_ ) < 1e-8 );
-    return det_;
-  }
-
-  template <>
-  inline alu2d_ctype ALU2dGridGeometry<0,2,const ALU2dGrid<2,2> >::
-  integrationElement (const FieldVector<alu2d_ctype, 0>& local) const
-  {
-    return 1.0;
+    return (mydim==0) ? 1. : det_;
   }
 
   template <int mydim, int cdim, class GridImp>
   inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>:: volume () const
   {
-    return (mydim == 2) ? 0.5 * det_ : det_;
+    return (mydim == 2) ? 0.5 * det_ : (mydim == 1) ? det_ : 1.;
   }
 
   template <int mydim, int cdim, class GridImp>
