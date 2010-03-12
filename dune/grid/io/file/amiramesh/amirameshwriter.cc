@@ -576,8 +576,12 @@ void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
     amiramesh_.insert(loc);
   }
 
-  // set up data (we assume ISTL conventions)
-  int numComponents = DataContainer::block_type::size;
+  // set up data
+  // we assume that at least the inner vector follows ISTL conventions
+  // unfortunately istl and std containers are not compatible
+  // in that it is not possible to extract the size
+  // of array and FieldVector by the same method
+  int numComponents = DataContainer::value_type::size;
 
   AmiraMesh::Data* amData =
     new AmiraMesh::Data("Data", loc, McPrimType::mc_double, numComponents);
