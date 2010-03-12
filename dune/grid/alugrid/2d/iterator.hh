@@ -75,7 +75,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef ALU2dGridEntity<0,dim,GridImp> EntityImp;
     typedef ALU2dGridGeometry<dim-1,dimworld,GridImp> GeometryImp;
-    typedef ALU2dGridGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
+    typedef ALU2dGridGeometry<dim-1,dim,GridImp> LocalGeometryImp;
     typedef FieldVector<alu2d_ctype, dimworld> NormalType;
 
     typedef ALU2dGridEntityPointer<0,GridImp> EntityPointerImp;
