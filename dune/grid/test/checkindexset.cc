@@ -37,7 +37,7 @@ struct EnableLevelIntersectionIteratorCheck< const Grid >
 namespace Dune
 {
 
-  // compare 2 FieldVectors
+  // Check whether two FieldVectors are equal in the max norm
   template <typename ctype, int dim>
   bool compareVec(const FieldVector<ctype,dim> & vx1 , const FieldVector<ctype,dim> & vx2 )
   {
@@ -45,7 +45,7 @@ namespace Dune
     return (vx1-vx2).infinity_norm() < eps;
   }
 
-  // check som functionality of grid
+  // check some functionality of the grid
   template <int codim, class GridType, class EntityType,
       class IndexSetType, class OutputStreamImp,
       class MapType1 , class MapType2 , class MapType3 >
@@ -98,7 +98,7 @@ namespace Dune
       {
         int numSubEntities = refElem.size( subEntity, codim, dim );
 
-        // every entity have at least one vertex
+        // every entity must have at least one vertex
         assert( numSubEntities > 0 );
 
         // create vectors of number of vertices on sub entity
@@ -143,7 +143,6 @@ namespace Dune
         }
 
         // assert that all sub entities have the same level
-        // otherwise one of the theoretical conditions is violated
         assert( subEntityPtr.level() == en.level() );
 
         sout << "Found global numbers of entity [ ";
