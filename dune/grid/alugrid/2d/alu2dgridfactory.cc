@@ -15,41 +15,41 @@
 
 namespace Dune
 {
-  template< template< int, int > class ALUGrid >
-  ALU2dGridFactory<ALUGrid>
+  template< template< int, int > class ALUGrid, int dimw >
+  ALU2dGridFactory<ALUGrid,dimw>
   :: ALU2dGridFactory ( bool removeGeneratedFile )
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
   {}
 
-  template< template< int, int > class ALUGrid >
-  ALU2dGridFactory<ALUGrid>
+  template< template< int, int > class ALUGrid, int dimw >
+  ALU2dGridFactory<ALUGrid,dimw>
   :: ALU2dGridFactory ( const std::string &filename )
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
   {}
 
 
-  template< template< int, int > class ALUGrid >
-  ALU2dGridFactory<ALUGrid> :: ~ALU2dGridFactory ()
+  template< template< int, int > class ALUGrid, int dimw >
+  ALU2dGridFactory<ALUGrid,dimw> :: ~ALU2dGridFactory ()
   {}
 
 
-  template< template< int, int > class ALUGrid >
-  void ALU2dGridFactory<ALUGrid> :: insertVertex ( const VertexType &pos )
+  template< template< int, int > class ALUGrid, int dimw >
+  void ALU2dGridFactory<ALUGrid,dimw> :: insertVertex ( const VertexType &pos )
   {
     vertices_.push_back( pos );
   }
 
 
-  template< template< int, int > class ALUGrid >
-  void ALU2dGridFactory<ALUGrid>
+  template< template< int, int > class ALUGrid, int dimw >
+  void ALU2dGridFactory<ALUGrid,dimw>
   :: insertElement ( const GeometryType &geometry,
                      const std::vector< unsigned int > &vertices )
   {
     if( !geometry.isTriangle() )
       DUNE_THROW( GridError, "Only triangles can be inserted into "
-                  "ALUGrid< 2, 2 >." );
+                  "ALUGrid< 2, " << dimw << " >." );
 
     if( vertices.size() != numCorners )
       DUNE_THROW( GridError, "Wrong number of vertices." );
@@ -58,8 +58,8 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
-  void ALU2dGridFactory<ALUGrid>
+  template< template< int, int > class ALUGrid, int dimw >
+  void ALU2dGridFactory<ALUGrid,dimw>
   :: insertBoundary ( const GeometryType &geometry,
                       const std::vector< unsigned int > &vertices,
                       const int id )
@@ -83,8 +83,8 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
-  void ALU2dGridFactory<ALUGrid>
+  template< template< int, int > class ALUGrid, int dimw >
+  void ALU2dGridFactory<ALUGrid,dimw>
   ::insertBoundary ( const int element, const int face, const int id )
   {
     if( (element < 0) || (element >= (int)elements_.size()) )
@@ -97,8 +97,8 @@ namespace Dune
     ++numFacesInserted_;
   }
 
-  template< template< int, int > class ALUGrid >
-  void ALU2dGridFactory< ALUGrid > ::
+  template< template< int, int > class ALUGrid, int dimw >
+  void ALU2dGridFactory< ALUGrid,dimw > ::
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
   {
     if( globalProjection_ )
@@ -107,8 +107,8 @@ namespace Dune
     globalProjection_ = &bndProjection;
   }
 
-  template< template< int, int > class ALUGrid >
-  void ALU2dGridFactory< ALUGrid > ::
+  template< template< int, int > class ALUGrid, int dimw >
+  void ALU2dGridFactory< ALUGrid,dimw > ::
   insertBoundaryProjection ( const GeometryType &type,
                              const std::vector< unsigned int > &vertices,
                              const DuneBoundaryProjectionType *projection )
@@ -128,17 +128,17 @@ namespace Dune
     boundaryProjections_[ faceId ] = projection;
   }
 
-  template< template< int, int > class ALUGrid >
-  void ALU2dGridFactory< ALUGrid > ::
+  template< template< int, int > class ALUGrid, int dimw >
+  void ALU2dGridFactory< ALUGrid, dimw > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )
   {
     DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
   }
 
-  template< template< int, int > class ALUGrid >
-  void ALU2dGridFactory< ALUGrid > ::
+  template< template< int, int > class ALUGrid, int dimw >
+  void ALU2dGridFactory< ALUGrid, dimw > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
-                          const shared_ptr<BoundarySegment<2,2> >& boundarySegment )
+                          const shared_ptr<BoundarySegment<2,dimw> >& boundarySegment )
   {
     FaceType faceId;
     copyAndSort( vertices, faceId );
@@ -181,21 +181,21 @@ namespace Dune
 #endif
   }
 
-  template< template< int, int > class ALUGrid >
-  ALUGrid< 2, 2 > *ALU2dGridFactory< ALUGrid >::createGrid ()
+  template< template< int, int > class ALUGrid, int dimw >
+  ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >::createGrid ()
   {
     return createGrid( true, true, "" );
   }
 
-  template< template< int, int > class ALUGrid >
-  ALUGrid< 2, 2 > *ALU2dGridFactory< ALUGrid >
+  template< template< int, int > class ALUGrid, int dimw >
+  ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >
   ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
   {
     return createGrid( addMissingBoundaries, true, dgfName );
   }
 
-  template< template< int, int > class ALUGrid >
-  ALUGrid< 2, 2 > *ALU2dGridFactory< ALUGrid >
+  template< template< int, int > class ALUGrid, int dimw >
+  ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >
   ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
     if( addMissingBoundaries )
@@ -339,9 +339,9 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
+  template< template< int, int > class ALUGrid, int dimw >
   inline std::string
-  ALU2dGridFactory<ALUGrid>::temporaryFileName ( const std::string& dgfName )
+  ALU2dGridFactory<ALUGrid,dimw>::temporaryFileName ( const std::string& dgfName )
   {
     std::string filename ( dgfName );
     if( filename.empty() )
@@ -362,8 +362,8 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
-  inline void ALU2dGridFactory<ALUGrid>
+  template< template< int, int > class ALUGrid, int dimw >
+  inline void ALU2dGridFactory<ALUGrid,dimw>
   ::generateFace ( const ElementType &element, const int f, FaceType &face )
   {
     if (f==0) { face[0]=element[0]; face[1]=element[1]; }
@@ -371,8 +371,8 @@ namespace Dune
     if (f==2) { face[0]=element[1]; face[1]=element[2]; }
   }
 
-  template< template< int, int > class ALUGrid >
-  inline void ALU2dGridFactory<ALUGrid>
+  template< template< int, int > class ALUGrid, int dimw >
+  inline void ALU2dGridFactory<ALUGrid,dimw>
   ::recreateBoundaryIds ( const int defaultId )
   {
     typedef std::pair< unsigned int, int > SubEntity;

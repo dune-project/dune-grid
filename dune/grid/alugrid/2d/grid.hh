@@ -190,8 +190,9 @@ namespace Dune {
     public HasObjectStream,
     public HasHierarchicIndexSet
   {
-    dune_static_assert(dim      == 2, "ALU2dGrid only implemented for 2dp");
-    dune_static_assert(dimworld == 2, "ALU2dGrid only implemented for 2dw");
+    dune_static_assert(dim      == 2, "ALU2dGrid only implemented for grid dim 2");
+    dune_static_assert(dimworld == 2, "ALU2dGrid only implemented for world dim 2");
+    // dune_static_assert(dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3");
 
     typedef ALU2dGrid<dim,dimworld> ThisType;
     typedef GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> > BaseType;

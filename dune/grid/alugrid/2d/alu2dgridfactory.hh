@@ -16,15 +16,15 @@ namespace Dune
 {
 
   /** \brief Factory class for 2d ALUGrids */
-  template< template< int, int > class ALUGrid >
+  template< template< int, int > class ALUGrid, int dimw >
   class ALU2dGridFactory
-    : public GridFactoryInterface< ALUGrid< 2, 2 > >
+    : public GridFactoryInterface< ALUGrid< 2, dimw > >
   {
   public:
-    typedef ALUGrid< 2, 2 > Grid;
+    typedef ALUGrid< 2, dimw > Grid;
 
     //! \brief type of boundary projection class
-    typedef DuneBoundaryProjection< 2 >  DuneBoundaryProjectionType;
+    typedef DuneBoundaryProjection< dimw >  DuneBoundaryProjectionType;
 
     template< int codim >
     struct Codim
@@ -33,10 +33,10 @@ namespace Dune
     };
 
   private:
-    typedef Dune::BoundarySegmentWrapper<2, 2> BoundarySegmentWrapperType;
+    typedef Dune::BoundarySegmentWrapper<2, dimw> BoundarySegmentWrapperType;
 
 
-    typedef ALU2dGridFactory< ALUGrid > ThisType;
+    typedef ALU2dGridFactory< ALUGrid,dimw > ThisType;
     typedef GridFactoryInterface< Grid > BaseType;
 
     typedef typename Grid::ctype ctype;
@@ -157,7 +157,7 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int >& vertices,
-                            const shared_ptr<BoundarySegment<2,2> >& boundarySegment ) ;
+                            const shared_ptr<BoundarySegment<2,dimw> >& boundarySegment ) ;
 
     /** \brief insert a boundary projection object, (a copy is made)
      *
@@ -207,8 +207,8 @@ namespace Dune
   };
 
 
-  template< template< int, int > class ALUGrid >
-  struct ALU2dGridFactory< ALUGrid >::FaceLess
+  template< template< int, int > class ALUGrid, int dimw >
+  struct ALU2dGridFactory< ALUGrid, dimw >::FaceLess
     : public std::binary_function< FaceType, FaceType, bool >
   {
     bool operator() ( const FaceType &a, const FaceType &b ) const
@@ -223,26 +223,26 @@ namespace Dune
   };
 
 
-  template< template< int, int > class ALUGrid >
+  template< template< int, int > class ALUGrid, int dimw >
   template< class T >
-  inline void ALU2dGridFactory< ALUGrid >::exchange ( T &x, T &y )
+  inline void ALU2dGridFactory< ALUGrid, dimw >::exchange ( T &x, T &y )
   {
     T dummy = x; x = y; y = dummy;
   }
 
 
-  /** \brief Specialization of the generic GridFactory for ALUConformGrid<2,2>
+  /** \brief Specialization of the generic GridFactory for ALUConformGrid<2,dimw>
    *  \ingroup GridFactory
    */
-  template<>
-  class GridFactory< ALUConformGrid<2,2> >
-    : public ALU2dGridFactory<ALUConformGrid>
+  template<int dimw>
+  class GridFactory< ALUConformGrid<2,dimw> >
+    : public ALU2dGridFactory<ALUConformGrid, dimw>
   {
     typedef GridFactory ThisType;
-    typedef ALU2dGridFactory<ALUConformGrid> BaseType;
+    typedef ALU2dGridFactory<ALUConformGrid,dimw> BaseType;
 
   public:
-    typedef ALUConformGrid< 2, 2 > Grid;
+    typedef ALUConformGrid< 2, dimw > Grid;
 
   public:
     /** \brief Default constructor */
@@ -255,18 +255,18 @@ namespace Dune
       : BaseType( filename )
     {}
   };
-  /** \brief Specialization of the generic GridFactory for ALUSimplexGrid<2,2>
+  /** \brief Specialization of the generic GridFactory for ALUSimplexGrid<2,dimw>
    *  \ingroup GridFactory
    */
-  template<>
-  class GridFactory< ALUSimplexGrid<2,2> >
-    : public ALU2dGridFactory<ALUSimplexGrid>
+  template<int dimw>
+  class GridFactory< ALUSimplexGrid<2,dimw> >
+    : public ALU2dGridFactory<ALUSimplexGrid,dimw>
   {
     typedef GridFactory ThisType;
-    typedef ALU2dGridFactory<ALUSimplexGrid> BaseType;
+    typedef ALU2dGridFactory<ALUSimplexGrid,dimw> BaseType;
 
   public:
-    typedef ALUSimplexGrid< 2, 2 > Grid;
+    typedef ALUSimplexGrid< 2, dimw > Grid;
 
   public:
     /** \brief Default constructor */

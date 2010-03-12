@@ -16,22 +16,22 @@ namespace Dune
       \brief grid with support for simplicial mesh in 2d.
       \ingroup ALUSimplexGrid
    */
-  template<>
-  class ALUSimplexGrid< 2, 2 >
-    : public Dune::ALU2dGrid< 2, 2 >
+  template<int dimw>
+  class ALUSimplexGrid< 2, dimw >
+    : public Dune::ALU2dGrid< 2, dimw >
   {
-    typedef ALUSimplexGrid< 2, 2 > This;
+    typedef ALUSimplexGrid< 2, dimw > This;
 
-    typedef Dune::ALU2dGrid< 2, 2 > BaseType;
+    typedef Dune::ALU2dGrid< 2, dimw > BaseType;
     enum { dim      = 2 };
-    enum { dimworld = 2 };
+    enum { dimworld = dimw };
 
   public:
     //! type of boundary projection
-    typedef BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+    typedef typename BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
 
     //! type of boundary projection
-    typedef BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
+    typedef typename BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
     //! \brief constructor for creating ALUSimplexGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
@@ -70,30 +70,30 @@ namespace Dune
 
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     enum { refineStepsForHalf = 1 };
-    typedef BaseType::ctype ctype;
-    typedef BaseType::GridFamily GridFamily;
-    typedef GridFamily::Traits Traits;
-    typedef BaseType::LocalIdSetImp LocalIdSetImp;
-    typedef Traits :: GlobalIdSet GlobalIdSet;
-    typedef Traits :: LocalIdSet LocalIdSet;
-    typedef GridFamily :: LevelIndexSetImp LevelIndexSetImp;
-    typedef GridFamily :: LeafIndexSetImp LeafIndexSetImp;
-    typedef BaseType::LeafIteratorImp LeafIteratorImp;
-    typedef Traits::Codim<0>::LeafIterator LeafIteratorType;
-    typedef Traits::Codim<0>::LeafIterator LeafIterator;
-    typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
+    typedef typename BaseType::ctype ctype;
+    typedef typename BaseType::GridFamily GridFamily;
+    typedef typename GridFamily::Traits Traits;
+    typedef typename BaseType::LocalIdSetImp LocalIdSetImp;
+    typedef typename Traits :: GlobalIdSet GlobalIdSet;
+    typedef typename Traits :: LocalIdSet LocalIdSet;
+    typedef typename GridFamily :: LevelIndexSetImp LevelIndexSetImp;
+    typedef typename GridFamily :: LeafIndexSetImp LeafIndexSetImp;
+    typedef typename BaseType::LeafIteratorImp LeafIteratorImp;
+    typedef typename Traits::template Codim<0>::LeafIterator LeafIteratorType;
+    typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
+    typedef typename BaseType::HierarchicIteratorImp HierarchicIteratorImp;
 
     template< PartitionIteratorType pitype >
     struct Partition
     {
-      typedef Dune::GridView< DefaultLevelGridViewTraits< const This, pitype > >
+      typedef typename Dune::GridView< DefaultLevelGridViewTraits< const This, pitype > >
       LevelGridView;
-      typedef Dune::GridView< DefaultLeafGridViewTraits< const This, pitype > >
+      typedef typename Dune::GridView< DefaultLeafGridViewTraits< const This, pitype > >
       LeafGridView;
     };
 
-    typedef Partition< All_Partition > :: LevelGridView LevelGridView;
-    typedef Partition< All_Partition > :: LeafGridView LeafGridView;
+    typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;
+    typedef typename Partition< All_Partition > :: LeafGridView LeafGridView;
 
     template< PartitionIteratorType pitype >
     typename Partition< pitype >::LevelGridView levelView ( int level ) const
@@ -113,13 +113,13 @@ namespace Dune
 
     LevelGridView levelView ( int level ) const
     {
-      typedef LevelGridView::GridViewImp LevelGridViewImp;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
       return LevelGridView( LevelGridViewImp( *this, level ) );
     }
 
     LeafGridView leafView () const
     {
-      typedef LeafGridView::GridViewImp LeafGridViewImp;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
       return LeafGridView( LeafGridViewImp( *this ) );
     }
 
@@ -130,7 +130,7 @@ namespace Dune
     friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
-    template< template< int, int > class >
+    template< template< int, int > class, int >
     friend class ALU2dGridFactory;
 
     //! Copy constructor should not be used
@@ -160,7 +160,7 @@ namespace Dune
      (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
 
      \li Available Implementations
-            - Dune::ALUConformGrid<2,2>
+            - Dune::ALUConformGrid<2,dimw>
 
      For installation instructions see http://www.dune-project.org/external_libraries/install_alugrid.html .
    */
@@ -238,21 +238,21 @@ namespace Dune
      \brief grid with support for simplicial mesh in 2d.
      \ingroup ALUConformGrid
    */
-  template<>
-  class ALUConformGrid< 2, 2 >
-    : public Dune::ALU2dGrid< 2, 2 >
+  template<int dimw>
+  class ALUConformGrid< 2, dimw >
+    : public Dune::ALU2dGrid< 2, dimw >
   {
-    typedef ALUConformGrid< 2, 2 > This;
+    typedef ALUConformGrid< 2, dimw > This;
 
-    typedef Dune::ALU2dGrid<2,2> BaseType;
+    typedef Dune::ALU2dGrid<2,dimw> BaseType;
     enum { dim      = 2 };
-    enum { dimworld = 2 };
+    enum { dimworld = dimw };
   public:
     //! type of boundary projection
-    typedef BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+    typedef typename BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
 
     //! type of boundary projection
-    typedef BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
+    typedef typename BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
     //! \brief constructor for creating ALUConformGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
@@ -291,30 +291,30 @@ namespace Dune
 
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     enum { refineStepsForHalf = 2 };
-    typedef BaseType::ctype ctype;
-    typedef BaseType::GridFamily GridFamily;
-    typedef GridFamily::Traits Traits;
-    typedef BaseType::LocalIdSetImp LocalIdSetImp;
-    typedef Traits :: GlobalIdSet GlobalIdSet;
-    typedef Traits :: LocalIdSet LocalIdSet;
-    typedef GridFamily :: LevelIndexSetImp LevelIndexSetImp;
-    typedef GridFamily :: LeafIndexSetImp LeafIndexSetImp;
-    typedef BaseType::LeafIteratorImp LeafIteratorImp;
-    typedef Traits::Codim<0>::LeafIterator LeafIteratorType;
-    typedef Traits::Codim<0>::LeafIterator LeafIterator;
-    typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
+    typedef typename BaseType::ctype ctype;
+    typedef typename BaseType::GridFamily GridFamily;
+    typedef typename GridFamily::Traits Traits;
+    typedef typename BaseType::LocalIdSetImp LocalIdSetImp;
+    typedef typename Traits :: GlobalIdSet GlobalIdSet;
+    typedef typename Traits :: LocalIdSet LocalIdSet;
+    typedef typename GridFamily :: LevelIndexSetImp LevelIndexSetImp;
+    typedef typename GridFamily :: LeafIndexSetImp LeafIndexSetImp;
+    typedef typename BaseType::LeafIteratorImp LeafIteratorImp;
+    typedef typename Traits::template Codim<0>::LeafIterator LeafIteratorType;
+    typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
+    typedef typename BaseType::HierarchicIteratorImp HierarchicIteratorImp;
 
     template< PartitionIteratorType pitype >
     struct Partition
     {
-      typedef Dune::GridView< DefaultLevelGridViewTraits< const This, pitype > >
+      typedef typename Dune::GridView< DefaultLevelGridViewTraits< const This, pitype > >
       LevelGridView;
-      typedef Dune::GridView< DefaultLeafGridViewTraits< const This, pitype > >
+      typedef typename Dune::GridView< DefaultLeafGridViewTraits< const This, pitype > >
       LeafGridView;
     };
 
-    typedef Partition< All_Partition > :: LevelGridView LevelGridView;
-    typedef Partition< All_Partition > :: LeafGridView LeafGridView;
+    typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;
+    typedef typename Partition< All_Partition > :: LeafGridView LeafGridView;
 
     template< PartitionIteratorType pitype >
     typename Partition< pitype >::LevelGridView levelView ( int level ) const
@@ -334,13 +334,13 @@ namespace Dune
 
     LevelGridView levelView ( int level ) const
     {
-      typedef LevelGridView::GridViewImp LevelGridViewImp;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
       return LevelGridView( LevelGridViewImp( *this, level ) );
     }
 
     LeafGridView leafView () const
     {
-      typedef LeafGridView::GridViewImp LeafGridViewImp;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
       return LeafGridView( LeafGridViewImp( *this ) );
     }
 
@@ -351,7 +351,7 @@ namespace Dune
     friend class Conversion< ALUConformGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUConformGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
-    template< template< int, int > class >
+    template< template< int, int > class, int >
     friend class ALU2dGridFactory;
 
     //! Copy constructor should not be used
