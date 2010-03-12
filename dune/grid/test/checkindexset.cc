@@ -50,8 +50,8 @@ namespace Dune
       \param en The grid element we are testing
       \param lset The corresponding level set
       \param sout The output stream that status (non-error) messages will go to
-      \param subEntities ?????
-      \param vertices ?????
+      \param setOfVerticesPerSubEntity A map that associates a vector of vertex indices to a subEntity
+      \param subEntityPerSetOfVertices The reverse: a map that associates a subEntity to a vector of vertex indices
       \param vertexCoordsMap Map that associates vertex positions to indices (integers)
    */
   template <int codim, class GridType,
@@ -59,7 +59,8 @@ namespace Dune
       class MapType1 , class MapType2 , class MapType3 >
   void checkSubEntity ( const GridType & grid,
                         const typename GridType::template Codim<0>::Entity &en , const IndexSetType & lset,
-                        OutputStreamImp & sout , MapType1 & subEntities , MapType2 & vertices ,
+                        OutputStreamImp & sout , MapType1 & setOfVerticesPerSubEntity ,
+                        MapType2 & subEntityPerSetOfVertices,
                         const MapType3 & vertexCoordsMap )
   {
     enum { dim = GridType::dimension };
@@ -208,23 +209,23 @@ namespace Dune
         std::sort( global.begin(), global.end() );
 
         // check whether vertex key is already stored in map
-        if(vertices.find(global) == vertices.end())
+        if(subEntityPerSetOfVertices.find(global) == subEntityPerSetOfVertices.end())
         {
-          vertices[global] = globalSubEntity;
+          subEntityPerSetOfVertices[global] = globalSubEntity;
         }
         else
         {
-          assert( globalSubEntity == vertices[global] );
+          assert( globalSubEntity == subEntityPerSetOfVertices[global] );
         }
 
         // check whether subEntity is already stored in map
-        if(subEntities.find(globalSubEntity) == subEntities.end() )
+        if(setOfVerticesPerSubEntity.find(globalSubEntity) == setOfVerticesPerSubEntity.end() )
         {
-          subEntities[globalSubEntity] = global;
+          setOfVerticesPerSubEntity[globalSubEntity] = global;
         }
         else
         {
-          std::vector<int> globalcheck = subEntities[globalSubEntity];
+          std::vector<int> globalcheck = setOfVerticesPerSubEntity[globalSubEntity];
           if(! (global == globalcheck ))
           {
             std::cerr << "For subEntity key (" << globalSubEntity.first << "," << globalSubEntity.second << ") \n";
@@ -386,8 +387,8 @@ namespace Dune
 
     typedef std::pair < int , GeometryType > SubEntityKeyType;
     typedef std::map < int , std::pair<int,int> > subEntitymapType;
-    std::map < SubEntityKeyType , std::vector<int> > subEntities;
-    std::map < std::vector<int> , SubEntityKeyType > vertices;
+    std::map < SubEntityKeyType , std::vector<int> > setOfVerticesPerSubEntity;
+    std::map < std::vector<int> , SubEntityKeyType > subEntityPerSetOfVertices;
 
     std::map < int , FieldVector<coordType,dimworld> > vertexCoordsMap;
     // setup vertex map , store vertex coords for vertex number
@@ -530,7 +531,7 @@ namespace Dune
         // check sub entities
         ////////////////////////////////////////////////////////////
         checkSubEntity< codim >( grid, *it, lset, sout,
-                                 subEntities, vertices, vertexCoordsMap );
+                                 setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
 
         // check neighbors
         if( codim == 1 )
@@ -546,7 +547,7 @@ namespace Dune
                 continue;
 
               checkSubEntity< codim >( grid, *(nit->outside()), lset, sout,
-                                       subEntities, vertices, vertexCoordsMap );
+                                       setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
             }
           }
           else
