@@ -42,12 +42,7 @@ namespace Dune
   bool compareVec(const FieldVector<ctype,dim> & vx1 , const FieldVector<ctype,dim> & vx2 )
   {
     const ctype eps = 1e5 * std::numeric_limits<ctype>::epsilon();
-    bool comp = true;
-    for(int i=0; i<dim; i++)
-    {
-      if(std::abs( vx1[i] - vx2[i] ) > eps ) comp = false;
-    }
-    return comp;
+    return (vx1-vx2).infinity_norm() < eps;
   }
 
   // check som functionality of grid
