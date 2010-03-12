@@ -4,6 +4,10 @@
 
 #define NEW_SUBENTITY_NUMBERING 1
 // #undef DUNE_ENABLE_OLD_NUMBERING
+// #define DISABLE_DEPRECATED_METHOD_CHECK 1
+
+// #define NO2D
+// #define NO3D
 
 #include <iostream>
 #include <sstream>
@@ -150,10 +154,11 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     grape.display();
   }
 
-  std::cout << "  CHECKING: Refined" << std::endl;
   // be careful, each global refine create 8 x maxlevel elements
   std::cout << "  CHECKING: Macro" << std::endl;
   gridcheck(grid);
+  std::cout << "  CHECKING: Macro-intersections" << std::endl;
+  checkIntersectionIterator(grid);
 
   // only check twists for simplex grids
   // const bool checkTwist = grid.geomTypes(0)[0].isSimplex();
@@ -166,6 +171,8 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
     std::cout << "  CHECKING: Refined" << std::endl;
     gridcheck(grid);
+    std::cout << "  CHECKING: intersections" << std::endl;
+    checkIntersectionIterator(grid);
     // if( checkTwist )
     //  checkTwists( grid.leafView(), NoMapTwist() );
 
