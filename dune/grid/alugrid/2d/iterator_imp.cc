@@ -26,8 +26,8 @@ namespace Dune {
   inline ALU2dGridIntersectionBase<GridImp> ::
   ALU2dGridIntersectionBase(const GridImp & grid, const HElementType* el, int wLevel, bool end) :
     intersectionGlobal_(GeometryImp()),
-    intersectionSelfLocal_(GeometryImp()),
-    intersectionNeighborLocal_(GeometryImp()),
+    intersectionSelfLocal_(LocalGeometryImp()),
+    intersectionNeighborLocal_(LocalGeometryImp()),
     grid_(grid),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
     nFaces_(3),
@@ -50,8 +50,8 @@ namespace Dune {
   inline ALU2dGridIntersectionBase<GridImp> ::
   ALU2dGridIntersectionBase(const GridImp & grid, int wLevel) :
     intersectionGlobal_(GeometryImp()),
-    intersectionSelfLocal_(GeometryImp()),
-    intersectionNeighborLocal_(GeometryImp()),
+    intersectionSelfLocal_(LocalGeometryImp()),
+    intersectionNeighborLocal_(LocalGeometryImp()),
     grid_(grid),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
     nFaces_(3),
@@ -68,8 +68,8 @@ namespace Dune {
   ALU2dGridIntersectionBase(const ALU2dGridIntersectionBase<GridImp> & org) :
     current(org.current),
     intersectionGlobal_(GeometryImp()),
-    intersectionSelfLocal_(GeometryImp()),
-    intersectionNeighborLocal_(GeometryImp()),
+    intersectionSelfLocal_(LocalGeometryImp()),
+    intersectionNeighborLocal_(LocalGeometryImp()),
     grid_(org.grid_),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
     nFaces_(org.nFaces_),
@@ -265,7 +265,7 @@ namespace Dune {
   ALU2dGridIntersectionBase<GridImp> :: outerNormal (const FieldVector<alu2d_ctype, dim-1>& local) const
   {
     assert(this->current.item_ != 0);
-    typedef double (&normal_t)[2];
+    typedef double (&normal_t)[dimworld];
 
     if( this->current.useOutside_ )
     {

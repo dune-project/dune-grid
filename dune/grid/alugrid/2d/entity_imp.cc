@@ -211,19 +211,18 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline const typename ALU2dGridEntity<0, dim, GridImp>:: Geometry & ALU2dGridEntity<0,dim,GridImp> ::
+  inline const typename ALU2dGridEntity<0, dim, GridImp>:: LocalGeometry & ALU2dGridEntity<0,dim,GridImp> ::
   geometryInFather () const
   {
     assert( item_ );
     const int child = this->nChild();
     assert( level() > 0 );
 
-    typedef MakeableInterfaceObject<Geometry> GeometryObject;
-    typedef typename GeometryObject::ImplementationType GeometryImp;
+    typedef MakeableInterfaceObject<LocalGeometry> LocalGeometryObject;
     // to be improved, when we using not the refine 8 rule
     if( grid_.nonConform() )
     {
-      static ALU2DLocalGeometryStorage<GeometryObject,4> geoms;
+      static ALU2DLocalGeometryStorage<LocalGeometryObject,4> geoms;
       if(!geoms.geomCreated(child))
       {
         typedef typename GridImp::template Codim<0> ::EntityPointer EntityPointer;
@@ -234,7 +233,7 @@ namespace Dune {
     }
     else
     {
-      static ALU2DLocalGeometryStorage<GeometryObject,2> geoms;
+      static ALU2DLocalGeometryStorage<LocalGeometryObject,2> geoms;
       if(!geoms.geomCreated(child))
       {
         typedef typename GridImp::template Codim<0> ::EntityPointer EntityPointer;

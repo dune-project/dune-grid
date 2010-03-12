@@ -79,7 +79,7 @@ namespace Dune {
 
     //! type of our interface entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
-    //! tpye of corresponding interface geometry
+    //! type of corresponding interface geometry
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
     //! type of geometry implementation
     typedef MakeableInterfaceObject<Geometry> GeometryObj;
@@ -223,6 +223,8 @@ namespace Dune {
   public:
     //! type of our Geometry interface
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
+    //! type of corresponding interface local geometry
+    typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
     //! type of our Geometry implementation
     typedef MakeableInterfaceObject<Geometry> GeometryObj;
     typedef ALU2dGridGeometry<dim,dimworld, const GridImp> GeometryImp;
@@ -383,7 +385,7 @@ namespace Dune {
        is only done for simple discretizations. Assumes that meshes are nested.
      */
 
-    const Geometry & geometryInFather () const;
+    const LocalGeometry & geometryInFather () const;
 
     //! The former state() method has been replaced by:
     bool mightVanish () const

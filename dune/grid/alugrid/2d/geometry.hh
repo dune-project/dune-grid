@@ -36,9 +36,8 @@ namespace Dune
       static inline void copy(const CoordPtrType& p,
                               CoordinateVectorType& c)
       {
-        assert( cdim == 2 );
-        c[0] = p[0];
-        c[1] = p[1];
+        for (int i=0; i<cdim; ++i)
+          c[i] = p[i];
       }
     };
 

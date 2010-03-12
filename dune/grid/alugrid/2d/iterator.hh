@@ -81,6 +81,7 @@ namespace Dune {
     typedef ALU2dGridEntityPointer<0,GridImp> EntityPointerImp;
 
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
+    typedef MakeableInterfaceObject< LocalGeometry > LocalGeometryObject;
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
 
@@ -211,8 +212,8 @@ namespace Dune {
 
     // the local geometries
     mutable GeometryObject intersectionGlobal_;
-    mutable GeometryObject intersectionSelfLocal_;
-    mutable GeometryObject intersectionNeighborLocal_;
+    mutable LocalGeometryObject intersectionSelfLocal_;
+    mutable LocalGeometryObject intersectionNeighborLocal_;
 
     // reference to grid
     const GridImp & grid_;
@@ -266,7 +267,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef ALU2dGridEntity<0,dim,GridImp> EntityImp;
     typedef ALU2dGridGeometry<dim-1,dimworld,GridImp> GeometryImp;
-    typedef ALU2dGridGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
+    typedef ALU2dGridGeometry<dim-1,dim,GridImp> LocalGeometryImp;
     typedef FieldVector<alu2d_ctype, dimworld> NormalType;
     typedef ALU2dGridEntityPointer<0,GridImp> EntityPointer;
 
@@ -353,7 +354,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef ALU2dGridEntity<0,dim,GridImp> EntityImp;
     typedef ALU2dGridGeometry<dim-1,dimworld,GridImp> GeometryImp;
-    typedef ALU2dGridGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
+    typedef ALU2dGridGeometry<dim-1,dim,GridImp> LocalGeometryImp;
     typedef FieldVector<alu2d_ctype, dimworld> NormalType;
     typedef ALU2dGridEntityPointer<0,GridImp> EntityPointer;
 
