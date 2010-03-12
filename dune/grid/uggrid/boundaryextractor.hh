@@ -126,9 +126,9 @@ namespace Dune {
 
   inline std::ostream& operator<< (std::ostream& s, const UGGridBoundarySegment<3>& v)
   {
-    s << "[" << v[0] << ", " << v[1] << " " << v[2];
+    s << "[" << v[0] << ", " << v[1] << ", " << v[2];
     if (v[3]!=-1)     // quadrilateral
-      s << " " << v[3] << "]";
+      s << ", " << v[3];
     return s << "]";
   }
 

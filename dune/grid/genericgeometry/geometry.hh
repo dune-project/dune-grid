@@ -330,15 +330,6 @@ namespace Dune
         : mapping_( 0 )
       {}
 
-#if 0
-      /** \brief Constructor taking a mapping */
-      explicit BasicGeometry ( Mapping &mapping )
-        : mapping_( &mapping )
-      {
-        ++mapping_->referenceCount;
-      }
-#endif
-
       /** \brief Constructor using a GeometryType and a list of corner coordinates */
       template< class CoordVector >
       BasicGeometry ( const GeometryType &type, const CoordVector &coords )
@@ -438,23 +429,10 @@ namespace Dune
       }
 
       /** \brief return center of element */
-      GlobalCoordinate center ( ) const
+      GlobalCoordinate center () const
       {
-        // get corresponding reference element
-        const GenericReferenceElement< ctype , mydim > & refElement =
-          GenericReferenceElements< ctype, mydim >::general(type());
-
-        // center is (for now) the centroid of the reference element mapped to
-        // this geometry.
-        return global(refElement.position(0,0));
+        return mapping().center();
       }
-#if 0
-      /** \brief Return true if a given point is within the parameter domain */
-      bool checkInside ( const LocalCoordinate &local ) const
-      {
-        return mapping().checkInside( local );
-      }
-#endif
 
       /** \brief Return true if this is an affine geometry */
       bool affine () const

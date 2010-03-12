@@ -785,14 +785,6 @@ namespace Dune {
       closureType_ = type;
     }
 
-    /** \brief Collapses the grid hierarchy into a single grid level*/
-    void collapse() {
-      if (Collapse(multigrid_))
-        DUNE_THROW(GridError, "UG" << dim << "d::Collapse() returned error code!");
-
-      setIndices(true, NULL);
-    }
-
     /** \brief Sets a vertex to a new position
 
        Changing a vertex' position changes its position on all grid levels!*/

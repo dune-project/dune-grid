@@ -124,6 +124,16 @@ namespace Dune
         return ReferenceElement::numCorners;
       }
 
+      /** \brief obtain the centroid of the mapping's image
+       *
+       *  \note Currently, this method is defined to return the image
+       *        of the reference element's barycenter.
+       */
+      GlobalCoordType center () const
+      {
+        return global( ReferenceElement::template baryCenter< 0 >( 0 ) );
+      }
+
       /** \brief check whether a point lies within the reference element
        *
        *  \param[in]  x  local coorinate of point to check

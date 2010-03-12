@@ -122,6 +122,9 @@ namespace Dune
       /** \copydoc CachedMapping::numCorners */
       virtual int numCorners () const = 0;
 
+      /** \copydoc CachedMapping::center */
+      virtual GlobalCoordType center () const = 0;
+
       /** \copydoc CachedMapping::global */
       virtual GlobalCoordType global ( const LocalCoordType &x ) const = 0;
 
@@ -268,6 +271,11 @@ namespace Dune
       virtual int numCorners () const
       {
         return mapping_.numCorners();
+      }
+
+      virtual GlobalCoordType center () const
+      {
+        return mapping_.center();
       }
 
       virtual GlobalCoordType global ( const LocalCoordType &local ) const
