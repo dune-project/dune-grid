@@ -31,15 +31,15 @@ namespace Dune
     static double refineWeight () { return 0.125; }
   };
 
-  template<>
-  struct DGFGridInfo< ALUSimplexGrid< 2, 2 > >
+  template<int dimw>
+  struct DGFGridInfo< ALUSimplexGrid< 2, dimw > >
   {
     static int refineStepsForHalf () { return 1; }
     static double refineWeight () { return 0.25; }
   };
 
-  template<>
-  struct DGFGridInfo< Dune::ALUConformGrid< 2, 2 > >
+  template<int dimw>
+  struct DGFGridInfo< Dune::ALUConformGrid< 2, dimw > >
   {
     static int refineStepsForHalf () { return 2; }
     static double refineWeight () { return 0.5; }
@@ -231,13 +231,17 @@ namespace Dune
     bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
   };
 
-  template <>
-  struct DGFGridFactory< ALUConformGrid<2,2> > :
-    public DGFBaseFactory< ALUConformGrid<2,2> >
+  template <int dimw>
+  struct DGFGridFactory< ALUConformGrid<2,dimw> > :
+    public DGFBaseFactory< ALUConformGrid<2,dimw> >
   {
+    typedef DGFBaseFactory< ALUConformGrid<2,dimw> > Base;
+    typedef typename Base:: MPICommunicatorType MPICommunicatorType;
+    typedef typename Base::Grid Grid;
+    const static int dimension = Grid::dimension;
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
-      : DGFBaseFactory< ALUConformGrid<2,2> >()
+      : Base()
     {
       input.clear();
       input.seekg( 0 );
@@ -248,30 +252,37 @@ namespace Dune
 
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
-      : DGFBaseFactory< ALUConformGrid<2,2> >()
+      : DGFBaseFactory< ALUConformGrid<2,dimw> >()
     {
       std::ifstream input( filename.c_str() );
       if( !input )
         DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
       if( !generate( input, comm, filename ) )
       {
-        if( fileExists( filename.c_str() ) )
-          grid_ = new Grid( filename );
+        if( Base::fileExists( filename.c_str() ) )
+          Base::grid_ = new Grid( filename );
         else
           DUNE_THROW( GridError, "Unable to create a 2d ALUGrid from '" << filename << "'." );
       }
     }
   protected:
     bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
+    using Base::grid_;
+    using Base::factory_;
+    using Base::dgf_;
   };
 
-  template <>
-  struct DGFGridFactory< ALUSimplexGrid<2,2> > :
-    public DGFBaseFactory< ALUSimplexGrid<2,2> >
+  template <int dimw>
+  struct DGFGridFactory< ALUSimplexGrid<2,dimw> > :
+    public DGFBaseFactory< ALUSimplexGrid<2,dimw> >
   {
+    typedef DGFBaseFactory< ALUSimplexGrid<2,dimw> > Base;
+    typedef typename Base::MPICommunicatorType MPICommunicatorType;
+    typedef typename Base::Grid Grid;
+    const static int dimension = Grid::dimension;
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
-      : DGFBaseFactory< ALUSimplexGrid<2,2> >()
+      : Base()
     {
       input.clear();
       input.seekg( 0 );
@@ -282,15 +293,15 @@ namespace Dune
 
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
-      : DGFBaseFactory< ALUSimplexGrid<2,2> >()
+      : DGFBaseFactory< ALUSimplexGrid<2,dimw> >()
     {
       std::ifstream input( filename.c_str() );
       if( !input )
         DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
       if( !generate( input, comm, filename ) )
       {
-        if( fileExists( filename.c_str() ) )
-          grid_ = new Grid( filename );
+        if( Base::fileExists( filename.c_str() ) )
+          Base::grid_ = new Grid( filename );
         else
           DUNE_THROW( GridError, "Unable to create a 2d ALUGrid from '" << filename << "'." );
       }
@@ -298,6 +309,9 @@ namespace Dune
 
   protected:
     bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
+    using Base::grid_;
+    using Base::factory_;
+    using Base::dgf_;
   };
 
 }

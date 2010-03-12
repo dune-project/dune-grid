@@ -145,19 +145,20 @@ namespace Dune
     return true;
   }
 
-  bool DGFGridFactory< ALUSimplexGrid< 2, 2 > >
+  template <int dimw>
+  bool DGFGridFactory< ALUSimplexGrid< 2, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
-    const int dimworld = 2;
+    const int dimworld = dimw;
     dgf_.element = DuneGridFormatParser::Simplex;
-    dgf_.dimgrid = dimworld;
+    dgf_.dimgrid = 2;
     dgf_.dimw = dimworld;
     int rank = 0;
 #if ALU2DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    if( !dgf_.readDuneGrid( file, dimworld, dimworld ) )
+    if( !dgf_.readDuneGrid( file, 2, dimworld ) )
       return false;
 
     if( dgf_.dimw != dimworld )
@@ -177,14 +178,14 @@ namespace Dune
         factory_.insertVertex( pos );
       }
 
-      GeometryType elementType( GeometryType::simplex, dimworld );
+      GeometryType elementType( GeometryType::simplex, 2 );
       for( int n = 0; n < dgf_.nofelements; ++n )
       {
         factory_.insertElement( elementType, dgf_.elements[ n ] );
         for( int face = 0; face <= dimworld; ++face )
         {
-          typedef DuneGridFormatParser::facemap_t::key_type Key;
-          typedef DuneGridFormatParser::facemap_t::iterator Iterator;
+          typedef typename DuneGridFormatParser::facemap_t::key_type Key;
+          typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
 
           const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
@@ -216,19 +217,20 @@ namespace Dune
     return true;
   }
 
-  bool DGFGridFactory< ALUConformGrid< 2, 2 > >
+  template <int dimw>
+  bool DGFGridFactory< ALUConformGrid< 2, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
-    const int dimworld = 2;
+    const int dimworld = dimw;
     dgf_.element = DuneGridFormatParser::Simplex;
-    dgf_.dimgrid = dimworld;
+    dgf_.dimgrid = 2;
     dgf_.dimw = dimworld;
     int rank = 0;
 #if ALU2DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    if( !dgf_.readDuneGrid( file, dimworld, dimworld ) )
+    if( !dgf_.readDuneGrid( file, 2, dimworld ) )
       return false;
     if( dgf_.dimw != dimworld )
       DUNE_THROW( DGFException, "Macrofile is for dimension " << dgf_.dimw
@@ -247,14 +249,14 @@ namespace Dune
         factory_.insertVertex( pos );
       }
 
-      GeometryType elementType( GeometryType::simplex, dimworld );
+      GeometryType elementType( GeometryType::simplex, 2 );
       for( int n = 0; n < dgf_.nofelements; ++n )
       {
         factory_.insertElement( elementType, dgf_.elements[ n ] );
         for( int face = 0; face <= dimworld; ++face )
         {
-          typedef DuneGridFormatParser::facemap_t::key_type Key;
-          typedef DuneGridFormatParser::facemap_t::iterator Iterator;
+          typedef typename DuneGridFormatParser::facemap_t::key_type Key;
+          typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
 
           const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
