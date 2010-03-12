@@ -37,7 +37,7 @@
     #undef WORLDDIM
     #define WORLDDIM 2
   #else
-    #error "GRIDDIM must be a positive integer. Specify GRIDDIM in make command or use --with-griddim during configure."
+    #error "GRIDDIM must be a positive integer. Specify GRIDDIM in make command."
   #endif
 #endif
 
