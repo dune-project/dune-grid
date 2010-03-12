@@ -52,7 +52,7 @@ namespace Dune
   void checkSubEntity ( const GridType & grid,
                         const typename GridType::template Codim<0>::Entity &en , const IndexSetType & lset,
                         OutputStreamImp & sout , MapType1 & subEntities , MapType2 & vertices ,
-                        MapType3 & vertexCoordsMap )
+                        const MapType3 & vertexCoordsMap )
   {
     enum { dim = GridType::dimension };
     const int dimworld = GridType::dimensionworld;
@@ -172,7 +172,7 @@ namespace Dune
             FieldVector< coordType, dimworld > vx = vxp->geometry().corner( 0 );
             if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
             {
-              FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[global[j]] );
+              FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap.at(global[j]) );
               if( ! compareVec( vxcheck, vx ) )
               {
                 std::cerr << "ERROR map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
@@ -184,7 +184,7 @@ namespace Dune
           FieldVector< coordType, dimworld > vx = subEntityPtr->geometry().corner( gj );
           if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
           {
-            FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[global[j]] );
+            FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap.at(global[j]) );
             if( ! compareVec( vxcheck, vx ) )
             {
               std::cerr << "Error map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
