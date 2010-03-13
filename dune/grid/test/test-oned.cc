@@ -34,11 +34,11 @@ OneDGrid* testFactory()
   GeometryType segment(GeometryType::simplex,1);
   std::vector<unsigned int> v(2);
   v[0] = 6;  v[1] = 1;   factory.insertElement(segment, v);
-  v[0] = 0;  v[1] = 6;   factory.insertElement(segment, v);
   v[0] = 4;  v[1] = 0;   factory.insertElement(segment, v);
+  v[0] = 0;  v[1] = 6;   factory.insertElement(segment, v);
   v[0] = 5;  v[1] = 4;   factory.insertElement(segment, v);
-  v[0] = 2;  v[1] = 5;   factory.insertElement(segment, v);
   v[0] = 3;  v[1] = 2;   factory.insertElement(segment, v);
+  v[0] = 2;  v[1] = 5;   factory.insertElement(segment, v);
 
   // Create the grid
   OneDGrid* grid = factory.createGrid();
@@ -55,6 +55,27 @@ OneDGrid* testFactory()
     if ( (vertexPositions[idx] - p).two_norm() > 1e-6 )
       DUNE_THROW(GridError, "Vertex with index " << idx << " should have position " << vertexPositions[idx]
                                                  << " but has position " << p << ".");
+  }
+
+  // Test whether the element numbering is in insertion order
+
+  std::vector<FieldVector<double,1> > elementCenters(6);    // a priori knowledge: this is where the element centers should be
+  elementCenters[0] = 0.85;
+  elementCenters[1] = 0.5;
+  elementCenters[2] = 0.65;
+  elementCenters[3] = 0.35;
+  elementCenters[4] = 0.1;
+  elementCenters[5] = 0.25;
+
+  OneDGrid::Codim<0>::LevelIterator eIt    = grid->lbegin<0>(0);
+  OneDGrid::Codim<0>::LevelIterator eEndIt = grid->lend<0>(0);
+
+  for (; eIt!=eEndIt; ++eIt) {
+    unsigned int idx = indexSet.index(*eIt);
+    FieldVector<double,1> p = eIt->geometry().center();
+    if ( (elementCenters[idx] - p).two_norm() > 1e-6 )
+      DUNE_THROW(GridError, "Element with index " << idx << " should have center " << elementCenters[idx]
+                                                  << " but has center " << p << ".");
   }
 
   // return the grid for further tests
