@@ -96,17 +96,36 @@ createGrid()
   // The only thing of interest are the indices.
   // ///////////////////////////////////////////////////////////////////
 
+  std::vector<double> vertexPositionsByIndex(vertexPositions_.size());
+  for (std::map<FieldVector<ctype,1>, unsigned int >::iterator it = vertexPositions_.begin();
+       it != vertexPositions_.end();
+       ++it)
+    vertexPositionsByIndex[it->second] = it->first;
+
+  // first sort elements by increasing position.  That is how they are expected in the grid data structure
+  std::map<double, std::pair<Dune::array<unsigned int, 2>, unsigned int> > elementsByPosition;
+
+  for (size_t i=0; i<elements_.size(); i++)
+    elementsByPosition.insert(std::make_pair(vertexPositionsByIndex[elements_[i][0]],     // order by position of left vertex
+                                             std::make_pair(elements_[i], i)      // the element and its position in the insertion sequence
+                                             ));
+
+
   OneDGridList<OneDEntityImp<0> >::iterator it = Dune::get<0>(grid_->entityImps_[0]).begin();
-  for (size_t i=0; i<vertexPositions_.size()-1; i++) {
+  std::map<double, std::pair<Dune::array<unsigned int, 2>, unsigned int> >::iterator eIt = elementsByPosition.begin();
+
+  /** \todo Looping over the vertices to get all elements assumes that
+      the grid is connected.
+   */
+  for (size_t i=0; i<vertexPositions_.size()-1; i++, ++eIt) {
 
     OneDEntityImp<1> newElement(0, grid_->getNextFreeId(0));
     newElement.vertex_[0] = it;
     it = it->succ_;
     newElement.vertex_[1] = it;
 
-    // temporary: indices chosen by geographic ordering, not by insertion ordering
-    newElement.levelIndex_ = i;
-    newElement.leafIndex_  = i;
+    newElement.levelIndex_ = eIt->second.second;
+    newElement.leafIndex_  = eIt->second.second;
 
     grid_->elements(0).push_back(newElement);
 
