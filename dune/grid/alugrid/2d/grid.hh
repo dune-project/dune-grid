@@ -299,7 +299,8 @@ namespace Dune {
 
 #ifdef ALUGRID_VERTEX_PROJECTION
     //! type of ALUGrid Vertex Projection Interface
-    typedef ALU2DSPACE ProjectVertex_t ALUGridVertexProjectionType;
+    //typedef ALU2DSPACE ProjectVertex_t ALUGridVertexProjectionType;
+    typedef ALU2DSPACE VertexProjection< dimworld > ALUGridVertexProjectionType;
 #endif
 
   protected:
