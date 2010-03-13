@@ -191,8 +191,11 @@ namespace Dune {
     public HasHierarchicIndexSet
   {
     dune_static_assert(dim      == 2, "ALU2dGrid only implemented for grid dim 2");
+#if ALUGRID_SURFACE_2D
+    dune_static_assert(dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3");
+#else
     dune_static_assert(dimworld == 2, "ALU2dGrid only implemented for world dim 2");
-    // dune_static_assert(dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3");
+#endif
 
     typedef ALU2dGrid<dim,dimworld> ThisType;
     typedef GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> > BaseType;
@@ -479,7 +482,7 @@ namespace Dune {
 
     void calcExtras();
 
-    typedef typename ALU2dImplTraits::template Codim<0>:: InterfaceType ALUElementType;
+    typedef typename ALU2dImplTraits< dimworld >::template Codim<0>:: InterfaceType ALUElementType;
     // clear refinement marker of element and all children
     void hierarchicClear(ALUElementType* el);
   public:

@@ -75,7 +75,8 @@ namespace Dune {
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
 
   public:
-    typedef typename Dune::ALU2dImplTraits::template Codim<cd>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<cd>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<2>::InterfaceType VertexType;
 
     //! type of our interface entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
@@ -111,7 +112,7 @@ namespace Dune {
      */
     //! set element as normal entity
     void setElement(const ElementType &element, int face=-1, int level = -1) const;
-    void setElement(const HElementType & el, const ALU2DSPACE Vertex & vx);
+    void setElement(const HElementType & el, const VertexType & vx);
     void setElement(const ALU2dGridEntity & org) const {
       setElement(*(org.item_), org.face_);
     }
@@ -490,7 +491,7 @@ namespace Dune {
     typedef ALU2dGridEntityPointer< codim, GridImp > ThisType;
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
-    typedef typename Dune::ALU2dImplTraits::template Codim<codim>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<codim>::InterfaceType ElementType;
 
   public:
     enum { codimension = codim };

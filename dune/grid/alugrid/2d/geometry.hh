@@ -283,6 +283,7 @@ namespace Dune
     enum { dimbary=mydim+1};
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplInterface< 0, GridImp::dimensionworld >::Type VertexType;
 
     // type of specialized geometry implementation
     typedef typename MyALU2dGridGeometryImplementation<cdim> ::
@@ -338,7 +339,7 @@ namespace Dune
     // method for edges
     bool buildGeom(const HElementType & item, const int aluFace);
     // method for vertices
-    bool buildGeom(const ALU2DSPACE Vertex & item, const int );
+    bool buildGeom(const VertexType & item, const int );
 
     //! build geometry for intersectionSelfLocal and
     //! intersectionNeighborLocal

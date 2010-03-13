@@ -20,25 +20,42 @@
 
 namespace Dune {
 
-  struct ALU2dImplTraits {
-    template <int cdim>
-    struct Codim;
+  template< int dim, int dimw >
+  struct ALU2dImplInterface;
+
+  template< int dimw >
+  struct ALU2dImplInterface< 0, dimw >
+  {
+#ifdef ALUGRID_SURFACE_2D
+    typedef ALU2DSPACE Hmesh_basic::vertex_t Type;
+#else
+    typedef ALU2DSPACE Vertex Type;
+#endif
   };
 
-  template<>
-  struct ALU2dImplTraits::Codim<0> {
-    typedef ALU2DSPACE Hmesh_basic::helement_t InterfaceType;
+  template< int dimw >
+  struct ALU2dImplInterface< 1, dimw >
+  {
+    typedef ALU2DSPACE Hmesh_basic::helement_t Type;
   };
 
-  template<>
-  struct ALU2dImplTraits::Codim<1> {
-    typedef ALU2DSPACE Hmesh_basic::helement_t InterfaceType;
+  template< int dimw >
+  struct ALU2dImplInterface< 2, dimw >
+  {
+    typedef ALU2DSPACE Hmesh_basic::helement_t Type;
   };
 
-  template <>
-  struct ALU2dImplTraits::Codim<2> {
-    typedef ALU2DSPACE Vertex InterfaceType;
+
+  template< int dimw >
+  struct ALU2dImplTraits
+  {
+    template< int cdim >
+    struct Codim
+    {
+      typedef typename ALU2dImplInterface< 2-cdim, dimw >::Type InterfaceType;
+    };
   };
+
 
   class ALU2dGridMarkerVector
   {
@@ -58,8 +75,9 @@ namespace Dune {
     template <class GridType>
     void update (const GridType & grid, int level )
     {
-      typedef typename Dune::ALU2dImplTraits::template Codim<0>::InterfaceType ElementType;
-      typedef typename Dune::ALU2dImplTraits::template Codim<2>::InterfaceType VertexType;
+      static const int dimworld = GridType::dimensionworld;
+      typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<0>::InterfaceType ElementType;
+      typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<2>::InterfaceType VertexType;
       typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
 
       // resize
@@ -128,8 +146,9 @@ namespace Dune {
     template <class GridType>
     void update (const GridType & grid)
     {
-      typedef typename Dune::ALU2dImplTraits::template Codim<0>::InterfaceType ElementType;
-      typedef typename Dune::ALU2dImplTraits::template Codim<2>::InterfaceType VertexType;
+      static const int dimworld = GridType::dimensionworld;
+      typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<0>::InterfaceType ElementType;
+      typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<2>::InterfaceType VertexType;
       typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
 
       // resize edge marker

@@ -178,7 +178,7 @@ namespace Dune {
   //! built Geometry for vertices
   template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildGeom(const ALU2DSPACE Vertex & item , const int )
+  buildGeom(const VertexType & item , const int )
   {
     assert( &item );
     // update geometry impl

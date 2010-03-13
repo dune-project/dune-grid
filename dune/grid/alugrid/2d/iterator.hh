@@ -451,7 +451,7 @@ namespace Dune {
   public:
     //! type of entity we iterate (interface)
     typedef typename GridImp::template Codim<cdim>::Entity Entity;
-    typedef typename Dune::ALU2dImplTraits::template Codim<cdim>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<cdim>::InterfaceType ElementType;
 
     //! Constructor called by LeafIterator
     ALU2dGridLeafIterator(const GridImp & grid, bool end);
@@ -511,7 +511,7 @@ namespace Dune {
   public:
     //! type of entity we iterate (interface)
     typedef typename GridImp::template Codim<1>::Entity Entity;
-    typedef typename Dune::ALU2dImplTraits::template Codim<1>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<1>::InterfaceType ElementType;
 
     //! Constructor called by LeafIterator
     ALU2dGridLeafIterator(const GridImp & grid, bool end);
@@ -598,7 +598,7 @@ namespace Dune {
     HElementType * item_;
 
     //! type of entity we iterate (interface)
-    typedef typename Dune::ALU2dImplTraits::template Codim<0>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<0>::InterfaceType ElementType;
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
     IteratorType iter_;
 
@@ -659,7 +659,7 @@ namespace Dune {
     // current item
     HElementType * item_;
     //! type of entity we iterate (interface)
-    typedef typename Dune::ALU2dImplTraits::template Codim<1>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<1>::InterfaceType ElementType;
     ElementType * elem_;
     // Listwalkptr is a proxy for iterator pointers
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
@@ -728,11 +728,13 @@ namespace Dune {
     int myFace_;
     //! true if iterator is already a copy
 
-    HElementType * item_;
-    ALU2DSPACE Vertex * vertex_;
-
     //! type of entity we iterate (interface)
-    typedef typename Dune::ALU2dImplTraits::template Codim<0>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<0>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<2>::InterfaceType VertexType;
+
+    HElementType * item_;
+    VertexType * vertex_;
+
 
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
     IteratorType iter_;

@@ -436,9 +436,9 @@ namespace Dune {
   hierarchicClear (ALUElementType* el)
   {
     // clear actual tag
-    el->Refco_el::clear();
+    el->ALU2DSPACE Refco_el::clear();
     // clear refined tag
-    el->Refco_el::clearWas();
+    el->ALU2DSPACE Refco_el::clearWas();
     // go to children
     for(ALUElementType* child = el->down(); child; child = child->next())
     {

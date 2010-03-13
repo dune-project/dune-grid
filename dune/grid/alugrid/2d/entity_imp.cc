@@ -65,7 +65,7 @@ namespace Dune {
 
 
   template<>
-  inline void ALU2dGridEntity<2,2,ALU2dGrid<2,2> > :: setElement(const HElementType & el, const ALU2DSPACE Vertex & vx)
+  inline void ALU2dGridEntity<2,2,ALU2dGrid<2,2> > :: setElement(const HElementType & el, const VertexType & vx)
   {
     item_   = const_cast<ElementType *> (&vx);
     level_  = (*item_).level();
@@ -647,8 +647,9 @@ namespace Dune {
   struct ElementWrapper<2, dim, GridImp>{
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplInterface< 0, GridImp::dimensionworld >::Type VertexType;
 
-    static inline int getElemIndex(GridImp & grid, const ALU2DSPACE Vertex &elem, int) {
+    static inline int getElemIndex(GridImp & grid, const VertexType &elem, int) {
       return elem.getIndex();
     }
     static inline int subIndex(GridImp & grid, const HElementType &elem, int i) {
@@ -666,7 +667,7 @@ namespace Dune {
       DUNE_THROW(NotImplemented, "Not yet implemented this codim!");
       return -1;
     }
-    static inline bool isTheSame(const ALU2DSPACE Vertex * elem, int face, const ALU2DSPACE Vertex * org, int org_face) {
+    static inline bool isTheSame(const VertexType * elem, int face, const VertexType * org, int org_face) {
       return (elem == org);
     }
   };
