@@ -21,14 +21,14 @@ OneDGrid* testFactory()
   GridFactory<OneDGrid> factory;
 
   // Insert vertices
-  FieldVector<double,1> pos;
-  pos[0] = 0.6;    factory.insertVertex(pos);
-  pos[0] = 1.0;    factory.insertVertex(pos);
-  pos[0] = 0.2;    factory.insertVertex(pos);
-  pos[0] = 0.0;    factory.insertVertex(pos);
-  pos[0] = 0.4;    factory.insertVertex(pos);
-  pos[0] = 0.3;    factory.insertVertex(pos);
-  pos[0] = 0.7;    factory.insertVertex(pos);
+  std::vector<FieldVector<double,1> > vertexPositions(7);
+  vertexPositions[0][0] = 0.6;    factory.insertVertex(vertexPositions[0]);
+  vertexPositions[1][0] = 1.0;    factory.insertVertex(vertexPositions[1]);
+  vertexPositions[2][0] = 0.2;    factory.insertVertex(vertexPositions[2]);
+  vertexPositions[3][0] = 0.0;    factory.insertVertex(vertexPositions[3]);
+  vertexPositions[4][0] = 0.4;    factory.insertVertex(vertexPositions[4]);
+  vertexPositions[5][0] = 0.3;    factory.insertVertex(vertexPositions[5]);
+  vertexPositions[6][0] = 0.7;    factory.insertVertex(vertexPositions[6]);
 
   // Insert elements
   GeometryType segment(GeometryType::simplex,1);
@@ -41,7 +41,24 @@ OneDGrid* testFactory()
   v[0] = 3;  v[1] = 2;   factory.insertElement(segment, v);
 
   // Create the grid
-  return factory.createGrid();
+  OneDGrid* grid = factory.createGrid();
+
+  // Test whether the vertex numbering is in insertion order
+  OneDGrid::Codim<1>::LevelIterator vIt    = grid->lbegin<1>(0);
+  OneDGrid::Codim<1>::LevelIterator vEndIt = grid->lend<1>(0);
+
+  const OneDGrid::LevelGridView::IndexSet& indexSet = grid->levelView(0).indexSet();
+
+  for (; vIt!=vEndIt; ++vIt) {
+    unsigned int idx = indexSet.index(*vIt);
+    FieldVector<double,1> p = vIt->geometry().corner(0);
+    if ( (vertexPositions[idx] - p).two_norm() > 1e-6 )
+      DUNE_THROW(GridError, "Vertex with index " << idx << " should have position " << vertexPositions[idx]
+                                                 << " but has position " << p << ".");
+  }
+
+  // return the grid for further tests
+  return grid;
 }
 
 void testOneDGrid(OneDGrid& grid)
