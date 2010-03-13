@@ -47,14 +47,19 @@ OneDGrid* testFactory()
   OneDGrid::Codim<1>::LevelIterator vIt    = grid->lbegin<1>(0);
   OneDGrid::Codim<1>::LevelIterator vEndIt = grid->lend<1>(0);
 
-  const OneDGrid::LevelGridView::IndexSet& indexSet = grid->levelView(0).indexSet();
+  const OneDGrid::LevelGridView::IndexSet& levelIndexSet = grid->levelView(0).indexSet();
+  const OneDGrid::LeafGridView::IndexSet&  leafIndexSet  = grid->leafView().indexSet();
 
   for (; vIt!=vEndIt; ++vIt) {
-    unsigned int idx = indexSet.index(*vIt);
+    unsigned int idx = levelIndexSet.index(*vIt);
     FieldVector<double,1> p = vIt->geometry().corner(0);
     if ( (vertexPositions[idx] - p).two_norm() > 1e-6 )
-      DUNE_THROW(GridError, "Vertex with index " << idx << " should have position " << vertexPositions[idx]
-                                                 << " but has position " << p << ".");
+      DUNE_THROW(GridError, "Vertex with level index " << idx << " should have position " << vertexPositions[idx]
+                                                       << " but has position " << p << ".");
+
+    // leaf index should be the same
+    if (idx != leafIndexSet.index(*vIt))
+      DUNE_THROW(GridError, "Newly created OneDGrids should have matching level- and leaf vertex indices.");
   }
 
   // Test whether the element numbering is in insertion order
@@ -71,11 +76,15 @@ OneDGrid* testFactory()
   OneDGrid::Codim<0>::LevelIterator eEndIt = grid->lend<0>(0);
 
   for (; eIt!=eEndIt; ++eIt) {
-    unsigned int idx = indexSet.index(*eIt);
+    unsigned int idx = levelIndexSet.index(*eIt);
     FieldVector<double,1> p = eIt->geometry().center();
     if ( (elementCenters[idx] - p).two_norm() > 1e-6 )
       DUNE_THROW(GridError, "Element with index " << idx << " should have center " << elementCenters[idx]
                                                   << " but has center " << p << ".");
+
+    // leaf index should be the same
+    if (idx != leafIndexSet.index(*eIt))
+      DUNE_THROW(GridError, "Newly created OneDGrids should have matching level- and leaf element indices.");
   }
 
   // return the grid for further tests
