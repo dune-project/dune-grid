@@ -89,7 +89,7 @@ namespace Dune {
         of the elements. */
     std::vector<Dune::array<unsigned int, 2> > elements_;
 
-    /** \brief Buffer the vertices until createend() is called */
+    /** \brief Buffer the vertices until createGrid() is called */
     std::map<FieldVector<ctype,1>, unsigned int > vertexPositions_;
 
     /** \brief Counter that creates the vertex indices */
