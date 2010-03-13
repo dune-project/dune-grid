@@ -3,6 +3,7 @@
 #include <config.h>
 
 #include <dune/grid/onedgrid/onedgridfactory.hh>
+#include <dune/grid/onedgrid/onedgridindexsets.hh>
 
 using namespace Dune;
 
@@ -103,6 +104,10 @@ createGrid()
     it = it->succ_;
     newElement.vertex_[1] = it;
 
+    // temporary: indices chosen by geographic ordering, not by insertion ordering
+    newElement.levelIndex_ = i;
+    newElement.leafIndex_  = i;
+
     grid_->elements(0).push_back(newElement);
 
   }
@@ -111,7 +116,11 @@ createGrid()
   //   Create the index sets
   // ///////////////////////////////////////////////////
 
-  grid_->setIndices();
+  grid_->levelIndexSets_.resize(1);
+  grid_->levelIndexSets_[0] = new OneDGridLevelIndexSet<const OneDGrid>(*grid_, 0);
+  grid_->levelIndexSets_[0]->setSizesAndTypes(vertexPositions_.size(), elements_.size());
+
+  grid_->leafIndexSet_.setSizesAndTypes(vertexPositions_.size(), elements_.size());
 
   // ///////////////////////////////////////////////////
   // hand over the grid and delete the member pointer

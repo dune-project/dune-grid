@@ -93,6 +93,29 @@ namespace Dune {
       return false;
     }
 
+    /** \brief Sets the corresponding internal fields.  Used by the GridFactory */
+    void setSizesAndTypes(unsigned int numVertices, unsigned int numElements) {
+
+      numVertices_ = numVertices;
+      numElements_ = numElements;
+
+      // ///////////////////////////////////////////////
+      //   Update the list of geometry types present
+      // ///////////////////////////////////////////////
+      if (numElements_>0) {
+        myTypes_[0].resize(1);
+        myTypes_[0][0] = GeometryType(1);
+      } else
+        myTypes_[0].resize(0);
+
+      if (numVertices_>0) {
+        myTypes_[1].resize(1);
+        myTypes_[1][0] = GeometryType(0);
+      } else
+        myTypes_[1].resize(0);
+
+    }
+
     /** \todo Should be private */
     void update() {
 
@@ -115,20 +138,8 @@ namespace Dune {
         /** \todo Remove this const cast */
         const_cast<OneDEntityImp<0>*>(vIt)->levelIndex_ = numVertices_++;
 
-      // ///////////////////////////////////////////////
-      //   Update the list of geometry types present
-      // ///////////////////////////////////////////////
-      if (numElements_>0) {
-        myTypes_[0].resize(1);
-        myTypes_[0][0] = GeometryType(1);
-      } else
-        myTypes_[0].resize(0);
-
-      if (numVertices_>0) {
-        myTypes_[1].resize(1);
-        myTypes_[1][0] = GeometryType(0);
-      } else
-        myTypes_[1].resize(0);
+      // set the list of geometry types
+      setSizesAndTypes(numVertices_, numElements_);
     }
 
   private:
@@ -241,6 +252,29 @@ namespace Dune {
       return false;
     }
 
+    /** \brief Sets the corresponding internal fields.  Used by the GridFactory */
+    void setSizesAndTypes(unsigned int numVertices, unsigned int numElements) {
+
+      numVertices_ = numVertices;
+      numElements_ = numElements;
+
+      // ///////////////////////////////////////////////
+      //   Update the list of geometry types present
+      // ///////////////////////////////////////////////
+      if (numElements_>0) {
+        myTypes_[0].resize(1);
+        myTypes_[0][0] = GeometryType(1);
+      } else
+        myTypes_[0].resize(0);
+
+      if (numVertices_>0) {
+        myTypes_[1].resize(1);
+        myTypes_[1][0] = GeometryType(0);
+      } else
+        myTypes_[1].resize(0);
+
+    }
+
     /** \todo Should be private */
     void update() {
 
@@ -278,20 +312,8 @@ namespace Dune {
 
       }
 
-      // ///////////////////////////////////////////////
-      //   Update the list of geometry types present
-      // ///////////////////////////////////////////////
-      if (numElements_>0) {
-        myTypes_[0].resize(1);
-        myTypes_[0][0] = GeometryType(1);
-      } else
-        myTypes_[0].resize(0);
-
-      if (numVertices_>0) {
-        myTypes_[1].resize(1);
-        myTypes_[1][0] = GeometryType(0);
-      } else
-        myTypes_[1].resize(0);
+      // set the list of geometry types
+      setSizesAndTypes(numVertices_, numElements_);
 
     }
 
