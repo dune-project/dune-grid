@@ -26,7 +26,7 @@ namespace ALU2DSPACENAME {
   /////////////////////////////////////////////////////////////////
   template< class GridType, class AdaptDataHandle >
   class AdaptRestrictProlong2dImpl
-    : public AdaptRestrictProlong2d ALU2DDIMWORLD( GridType::dimensionworld )
+    : public AdaptRestrictProlong2d ALU2DDIMWORLD( GridType::dimensionworld,3 )
   {
     GridType & grid_;
     typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;

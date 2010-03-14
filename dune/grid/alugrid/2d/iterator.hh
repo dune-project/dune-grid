@@ -348,7 +348,7 @@ namespace Dune {
     enum { dimensionworld  = GridImp::dimensionworld };
 
   private:
-    typedef ALU2DSPACE Thinelement ALU2DDIMWORLD ( dimworld ) ThinelementType;
+    typedef ALU2DSPACE Thinelement ALU2DDIMWORLD ( dimworld,3 ) ThinelementType;
     typedef std::pair< ThinelementType *, std::pair<int, bool> > IntersectionInfo;
 
   public:

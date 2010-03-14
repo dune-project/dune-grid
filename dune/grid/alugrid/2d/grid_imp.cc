@@ -386,7 +386,7 @@ namespace Dune {
       ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh());
       for( walk->first() ; ! walk->done() ; walk->next())
       {
-        ALU2DSPACE Element ALU2DDIMWORLD(dimworld) & tr = walk->getitem();
+        ALU2DSPACE Element ALU2DDIMWORLD(dimworld,3) & tr = walk->getitem();
         tr.ALU2DSPACE Refco_el::mark(ALU2DSPACE Refco::ref);
       }
 #endif
@@ -453,7 +453,7 @@ namespace Dune {
   inline void ALU2dGrid<dim, dimworld> :: postAdapt ()
   {
     // clear refinement markers throughout the grid
-    typedef ALU2DSPACE Macro < ALU2DSPACE Element ALU2DDIMWORLD(dimworld) > macro_t;
+    typedef ALU2DSPACE Macro < ALU2DSPACE Element ALU2DDIMWORLD(dimworld,3) > macro_t;
 
     // get macro element iterator
     ALU2DSPACE Listwalkptr <macro_t> walk(mesh());

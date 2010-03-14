@@ -8,9 +8,9 @@
 #define ALU2DSPACENAME ALUGridSpace
 
 #ifdef ALUGRID_SURFACE_2D
-#define ALU2DDIMWORLD(dimw) < dimw >
+#define ALU2DDIMWORLD(dimw,nv) < dimw,nv >
 #else
-#define ALU2DDIMWORLD(dimw)
+#define ALU2DDIMWORLD(dimw,nv)
 #endif
 
 // use the ALU3dGrid Parallel detection
