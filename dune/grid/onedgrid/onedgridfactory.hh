@@ -63,9 +63,7 @@ namespace Dune {
     /** \brief Insert a boundary segment (== a point).
         This influences the ordering of the boundary segments
      */
-    virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices) {
-      DUNE_THROW(NotImplemented, "insertBoundarySegment");
-    }
+    virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices);
 
     /** \brief Finalize grid creation and hand over the grid
 
@@ -94,6 +92,9 @@ namespace Dune {
 
     /** \brief Counter that creates the vertex indices */
     unsigned int vertexIndex_;
+
+    /** \brief Store the explicitly given boundary segments until createGrid() is called */
+    std::vector<unsigned int> boundarySegments_;
 
   };
 
