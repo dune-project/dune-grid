@@ -339,8 +339,6 @@ namespace Dune {
     friend class LeafIntersectionIteratorWrapper<GridImp>;
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
-    typedef std::pair<ALU2DSPACE Thinelement*, std::pair<int, bool> > IntersectionInfo;
-
   public:
     typedef ALUMemoryProvider< ThisType > StorageType;
     enum { dim       = GridImp::dimension };
@@ -349,6 +347,11 @@ namespace Dune {
     enum { dimension       = GridImp::dimension };
     enum { dimensionworld  = GridImp::dimensionworld };
 
+  private:
+    typedef ALU2DSPACE Thinelement ALU2DDIMWORLD ( dimworld ) ThinelementType;
+    typedef std::pair< ThinelementType *, std::pair<int, bool> > IntersectionInfo;
+
+  public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;

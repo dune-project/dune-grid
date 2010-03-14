@@ -7,6 +7,12 @@
 #define ALU2DSPACE ALUGridSpace ::
 #define ALU2DSPACENAME ALUGridSpace
 
+#ifdef ALUGRID_SURFACE_2D
+#define ALU2DDIMWORLD(dimw) < dimw >
+#else
+#define ALU2DDIMWORLD(dimw)
+#endif
+
 // use the ALU3dGrid Parallel detection
 //#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
 #define ALU2DGRID_PARALLEL 0

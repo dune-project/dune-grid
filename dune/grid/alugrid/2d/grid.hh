@@ -191,7 +191,7 @@ namespace Dune {
     public HasHierarchicIndexSet
   {
     dune_static_assert(dim      == 2, "ALU2dGrid only implemented for grid dim 2");
-#if ALUGRID_SURFACE_2D
+#ifdef ALUGRID_SURFACE_2D
     dune_static_assert(dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3");
 #else
     dune_static_assert(dimworld == 2, "ALU2dGrid only implemented for world dim 2");
