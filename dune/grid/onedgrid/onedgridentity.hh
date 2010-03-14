@@ -34,6 +34,7 @@ namespace Dune {
   template <int mydim>
   class OneDEntityImp {};
 
+  /** \brief Specialization for vertices */
   template <>
   class OneDEntityImp<0>
   {
@@ -82,6 +83,7 @@ namespace Dune {
   };
 
 
+  /** \brief Specialization for elements */
   template <>
   class OneDEntityImp<1>
   {
@@ -90,9 +92,10 @@ namespace Dune {
     /** \brief The different ways to mark an element for grid changes */
     enum MarkState { DO_NOTHING , COARSEN , REFINE };
 
-    OneDEntityImp(int level, unsigned int id)
+    OneDEntityImp(int level, unsigned int id, bool reversedBoundarySegmentNumbering)
       : id_(id), level_(level),
         markState_(DO_NOTHING), isNew_(false),
+        reversedBoundarySegmentNumbering_(reversedBoundarySegmentNumbering),
         pred_(OneDGridNullIteratorFactory<1>::null()),
         succ_(OneDGridNullIteratorFactory<1>::null())
     {
@@ -128,6 +131,14 @@ namespace Dune {
 
     /** \brief This flag is set by adapt() if this element has been newly created. */
     bool isNew_;
+
+    /** Since a OneDGrid is one-dimensional and connected, there can only be two possible numberings
+        of the boundary segments.  Either the left one is '0' and the right one is '1' or the reverse.
+        This flag stores which is the case. It has the same value throughout the entire grid.
+        This is a waste, because the Intersections class (which hands out the information), can
+        access data here much easier than data in the central grid class.
+     */
+    bool reversedBoundarySegmentNumbering_;
 
     /** \brief Predecessor in the doubly linked list of elements */
     OneDEntityImp<1>* pred_;

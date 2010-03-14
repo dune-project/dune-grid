@@ -148,8 +148,9 @@ namespace Dune {
 
     //! return index of the boundary segment
     int boundarySegmentIndex () const {
-      /** \todo It is hardwired here that the domain is connected, i.e., the boundary consists of two points */
-      return (neighbor_==0) ? 0 : 1;
+      // It is hardwired here that the domain is connected, i.e., the boundary consists of two points
+      return ((neighbor_==0 && center_->reversedBoundarySegmentNumbering_==false)
+              || (neighbor_==1 && center_->reversedBoundarySegmentNumbering_==true)) ? 0 : 1;
     }
 
     //! Here returned element is in LOCAL coordinates of the element
@@ -424,8 +425,9 @@ namespace Dune {
 
     //! return index of the boundary segment
     int boundarySegmentIndex () const {
-      /** \todo It is hardwired here that the domain is connected, i.e., the boundary consists of two points */
-      return (neighbor_==0) ? 0 : 1;
+      // It is hardwired here that the domain is connected, i.e., the boundary consists of two points
+      return ((neighbor_==0 && center_->reversedBoundarySegmentNumbering_==false)
+              || (neighbor_==1 && center_->reversedBoundarySegmentNumbering_==true)) ? 0 : 1;
     }
 
     //! Here returned element is in LOCAL coordinates of the element

@@ -406,6 +406,11 @@ namespace Dune {
 
     unsigned int freeElementIdCounter_;
 
+    /** Since a OneDGrid is one-dimensional and connected, there can only be two possible numberings
+        of the boundary segments.  Either the left one is '0' and the right one is '1' or the reverse.
+        This flag stores which is the case. */
+    bool reversedBoundarySegmentNumbering_;
+
   }; // end Class OneDGrid
 
   namespace Capabilities
