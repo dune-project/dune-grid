@@ -40,10 +40,17 @@ OneDGrid* testFactory()
   v[0] = 3;  v[1] = 2;   factory.insertElement(segment, v);
   v[0] = 2;  v[1] = 5;   factory.insertElement(segment, v);
 
+  // Insert boundary segments
+  std::vector<unsigned int> s(1);
+  s[0] = 1;   factory.insertBoundarySegment(s);
+  s[0] = 3;   factory.insertBoundarySegment(s);
+
   // Create the grid
   OneDGrid* grid = factory.createGrid();
 
-  // Test whether the vertex numbering is in insertion order
+  // //////////////////////////////////////////////////////////////
+  //   Test whether the vertex numbering is in insertion order
+  // //////////////////////////////////////////////////////////////
   OneDGrid::Codim<1>::LevelIterator vIt    = grid->lbegin<1>(0);
   OneDGrid::Codim<1>::LevelIterator vEndIt = grid->lend<1>(0);
 
@@ -62,7 +69,9 @@ OneDGrid* testFactory()
       DUNE_THROW(GridError, "Newly created OneDGrids should have matching level- and leaf vertex indices.");
   }
 
-  // Test whether the element numbering is in insertion order
+  // //////////////////////////////////////////////////////////////
+  //   Test whether the element numbering is in insertion order
+  // //////////////////////////////////////////////////////////////
 
   std::vector<FieldVector<double,1> > elementCenters(6);    // a priori knowledge: this is where the element centers should be
   elementCenters[0] = 0.85;
@@ -87,7 +96,36 @@ OneDGrid* testFactory()
       DUNE_THROW(GridError, "Newly created OneDGrids should have matching level- and leaf element indices.");
   }
 
-  // return the grid for further tests
+  // /////////////////////////////////////////////////////////////////////////
+  //   Test whether the boundary segment numbering is in insertion order
+  // /////////////////////////////////////////////////////////////////////////
+
+  for (eIt = grid->lbegin<0>(0); eIt!=eEndIt; ++eIt) {
+
+    OneDGrid::LevelGridView::IntersectionIterator iIt    = eIt->ilevelbegin();
+    OneDGrid::LevelGridView::IntersectionIterator iEndIt = eIt->ilevelend();
+
+    for (; iIt!=iEndIt; ++iIt) {
+
+      if (iIt->boundary()) {
+
+        if (iIt->boundarySegmentIndex()==0 && std::abs(iIt->geometry().corner(0)[0] - 1) > 1e-6)
+          DUNE_THROW(GridError, "BoundarySegment with index 0 should have position 1,"
+                     << " but has " << iIt->geometry().corner(0) << ".");
+
+        if (iIt->boundarySegmentIndex()==1 && std::abs(iIt->geometry().corner(0)[0]) > 1e-6)
+          DUNE_THROW(GridError, "BoundarySegment with index 1 should have position 0,"
+                     << " but has " << iIt->geometry().corner(0) << ".");
+
+      }
+
+    }
+
+  }
+
+  // //////////////////////////////////////////////////////////////
+  //   return the grid for further tests
+  // //////////////////////////////////////////////////////////////
   return grid;
 }
 
