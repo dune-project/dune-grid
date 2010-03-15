@@ -120,7 +120,7 @@ void checkIteratorAssignment(GridType & grid)
     if( it != grid.template lend<dim>(0) )
     {
       assert( it->level() == 0 );
-      EntityPointerType p = it;
+      EntityPointerType p( it );
 
       assert( p.level()  == 0 );
       assert( p->level() == 0 );
@@ -348,6 +348,15 @@ int main (int argc , char **argv) {
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
+
+#ifdef ALUGRID_SURFACE_2D
+        typedef ALUSimplexGrid< 2, 3 > SurfaceGridType;
+        std::string surfaceFilename( SRCDIR "simplex-testgrid-2-3.dgf" );
+        std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
+        GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
+        checkCapabilities< false >( *surfaceGridPtr );
+        checkALUSerial( *surfaceGridPtr, 1, display );
+#endif // #ifdef ALUGRID_SURFACE_2D
       }
 
       // check conform ALUGrid for 2d
@@ -362,8 +371,17 @@ int main (int argc , char **argv) {
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
+
+#ifdef ALUGRID_SURFACE_2D
+        typedef ALUConformGrid< 2, 3 > SurfaceGridType;
+        std::string surfaceFilename( SRCDIR "simplex-testgrid-2-3.dgf" );
+        std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
+        GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
+        checkCapabilities< true >( *surfaceGridPtr );
+        checkALUSerial( *surfaceGridPtr, 1, display );
+#endif // #ifdef ALUGRID_SURFACE_2D
       }
-#endif
+#endif // #ifndef NO_2D
 
 #ifndef NO_3D
       if( testALU3dCube )
