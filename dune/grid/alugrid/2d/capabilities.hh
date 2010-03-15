@@ -41,8 +41,8 @@ namespace Dune
     /** \brief ALUSimplexGrid has entities for all codimension
        \ingroup ALUSimplexGrid
      */
-    template< int cdim >
-    struct hasEntity< ALUSimplexGrid< 2, 2 >, cdim >
+    template< int dimworld, int cdim >
+    struct hasEntity< ALUSimplexGrid< 2, dimworld >, cdim >
     {
       static const bool v = true;
     };
@@ -52,8 +52,8 @@ namespace Dune
      */
 #if ALU2DGRID_PARALLEL
     //- default is false
-    template<>
-    struct isParallel< ALUSimplexGrid< 2, 2 > >
+    template< int dimworld >
+    struct isParallel< ALUSimplexGrid< 2, dimworld > >
     {
       static const bool v = true;
     };
@@ -64,8 +64,8 @@ namespace Dune
      */
 #if ALU2DGRID_PARALLEL
     //- default is false
-    template< int codim >
-    struct canCommunicate< ALUSimplexGrid< 2, 2 >, codim >
+    template< int dimworld, int codim >
+    struct canCommunicate< ALUSimplexGrid< 2, dimworld >, codim >
     {
       static const bool v = true;
     };
@@ -74,8 +74,8 @@ namespace Dune
     /** \brief ALUSimplexGrid has conforming level grids
        \ingroup ALUSimplexGrid
      */
-    template<>
-    struct isLevelwiseConforming< ALUSimplexGrid< 2, 2 > >
+    template< int dimworld >
+    struct isLevelwiseConforming< ALUSimplexGrid< 2, dimworld > >
     {
       static const bool v = true;
     };
@@ -83,8 +83,8 @@ namespace Dune
     /** \brief ALUSimplexGrid has supports hanging nodes
        \ingroup ALUSimplexGrid
      */
-    template<>
-    struct hasHangingNodes< ALUSimplexGrid< 2, 2 > >
+    template< int dimworld >
+    struct hasHangingNodes< ALUSimplexGrid< 2, dimworld > >
     {
       static const bool v = true;
     };
@@ -92,14 +92,14 @@ namespace Dune
     /** \brief ALUSimplexGrid has backup and restore facilities
        \ingroup ALUSimplexGrid
      */
-    template<>
-    struct hasBackupRestoreFacilities< ALUSimplexGrid< 2, 2 > >
+    template< int dimworld >
+    struct hasBackupRestoreFacilities< ALUSimplexGrid< 2, dimworld > >
     {
       static const bool v = true;
     };
 
     // Capabilities for ALUConformGrid
-    // ----------------------------
+    // -------------------------------
 
     /** \struct isLeafwiseConforming
        \ingroup ALUConformGrid
@@ -112,8 +112,8 @@ namespace Dune
     /** \brief ALUConformGrid has entities for all codimension
        \ingroup ALUConformGrid
      */
-    template< int cdim >
-    struct hasEntity< ALUConformGrid< 2, 2 >, cdim >
+    template< int dimworld, int cdim >
+    struct hasEntity< ALUConformGrid< 2, dimworld >, cdim >
     {
       static const bool v = true;
     };
@@ -123,8 +123,8 @@ namespace Dune
      */
 #if ALU2DGRID_PARALLEL
     //- default is false
-    template<>
-    struct isParallel< ALUConformGrid< 2, 2 > >
+    template< int dimworld >
+    struct isParallel< ALUConformGrid< 2, dimworld > >
     {
       static const bool v = true;
     };
@@ -135,8 +135,8 @@ namespace Dune
      */
 #if ALU2DGRID_PARALLEL
     //- default is false
-    template< int codim >
-    struct canCommunicate< ALUConformGrid< 2, 2 >, codim >
+    template< int dimworld, int codim >
+    struct canCommunicate< ALUConformGrid< 2, dimworld >, codim >
     {
       static const bool v = true;
     };
@@ -149,8 +149,8 @@ namespace Dune
     /** \brief ALUConformGrid has a conforming leaf grid
        \ingroup ALUConformGrid
      */
-    template<>
-    struct isLeafwiseConforming< ALUConformGrid< 2, 2 > >
+    template< int dimworld >
+    struct isLeafwiseConforming< ALUConformGrid< 2, dimworld > >
     {
       static const bool v = true;
     };
@@ -162,8 +162,8 @@ namespace Dune
     /** \brief ALUConformGrid has backup and restore facilities
        \ingroup ALUConformGrid
      */
-    template<>
-    struct hasBackupRestoreFacilities< ALUConformGrid< 2, 2 > >
+    template< int dimworld >
+    struct hasBackupRestoreFacilities< ALUConformGrid< 2, dimworld > >
     {
       static const bool v = true;
     };
