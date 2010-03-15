@@ -212,6 +212,7 @@ namespace Dune {
     friend class ALU2dGridGeometry<0,dimworld,const ThisType>;
     friend class ALU2dGridGeometry<1,dimworld,const ThisType>;
     friend class ALU2dGridGeometry<dim,dimworld,const ThisType>;
+    template< class, int > friend class ALU2DLocalGeometryStorage;
 
     friend class ALU2dGridEntityPointer<0,const ThisType>;
     friend class ALU2dGridEntityPointer<1,const ThisType>;
