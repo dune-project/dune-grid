@@ -31,7 +31,7 @@ namespace ALU2DSPACENAME {
     GridType & grid_;
     typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
     typedef typename EntityType :: ImplementationType RealEntityType;
-    typedef typename Hmesh_basic::helement_t HElementType ;
+    typedef typename Dune::ALU2dImplTraits<GridType::dimensionworld>::HElementType HElementType ;
 
     EntityType & reFather_;
     EntityType & reSon_;

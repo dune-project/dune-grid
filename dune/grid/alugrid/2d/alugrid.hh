@@ -166,8 +166,7 @@ namespace Dune
      For installation instructions see http://www.dune-project.org/external_libraries/install_alugrid.html .
    */
   template <int dim, int dimworld>
-  class ALUConformGrid {};
-
+  class ALUConformGrid;
   namespace Capabilities {
     /** \struct isLeafwiseConforming
        \ingroup ALUConformGrid

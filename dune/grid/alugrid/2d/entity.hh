@@ -72,7 +72,7 @@ namespace Dune {
 
     friend class ALU2dGridHierarchicIndexSet<dim,dimworld>;
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
 
   public:
     typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<cd>::InterfaceType ElementType;
@@ -219,7 +219,7 @@ namespace Dune {
 
     friend class ALU2dGridHierarchicIndexSet<dim,dimworld>;
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
 
   public:
     //! type of our Geometry interface

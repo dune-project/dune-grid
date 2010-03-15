@@ -33,7 +33,7 @@ namespace Dune {
   struct ALU2dImplInterface< 0, dimw >
   {
 #ifdef ALUGRID_SURFACE_2D
-    typedef ALU2DSPACE Hmesh_basic::vertex_t Type;
+    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,3) ::vertex_t Type; // NVTX
 #else
     typedef ALU2DSPACE Vertex Type;
 #endif
@@ -42,13 +42,13 @@ namespace Dune {
   template< int dimw >
   struct ALU2dImplInterface< 1, dimw >
   {
-    typedef ALU2DSPACE Hmesh_basic::helement_t Type;
+    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,3) ::helement_t Type; // NVTX
   };
 
   template< int dimw >
   struct ALU2dImplInterface< 2, dimw >
   {
-    typedef ALU2DSPACE Hmesh_basic::helement_t Type;
+    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,3) ::helement_t Type; // NVTX
   };
 
 
@@ -60,6 +60,10 @@ namespace Dune {
     {
       typedef typename ALU2dImplInterface< 2-cdim, dimw >::Type InterfaceType;
     };
+    typedef ALU2DSPACE Hmesh ALU2DDIMWORLD (dimw,3) HmeshType;             // NVTX
+    typedef ALU2DSPACE Thinelement ALU2DDIMWORLD (dimw,3) ThinelementType; // NVTX
+    typedef ALU2DSPACE Element ALU2DDIMWORLD (dimw,3) ElementType;         // NVTX
+    typedef typename HmeshType :: helement_t HElementType;
   };
 
 

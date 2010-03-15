@@ -7,7 +7,7 @@
 namespace Dune {
 
   template<int dim, int dimworld>
-  inline ALU2DSPACE Hmesh*
+  inline typename ALU2dGrid<dim, dimworld>::HmeshType*
   ALU2dGrid<dim, dimworld>::
   createGrid(const std::string& macroTriangFilename,
              const int nrOfHangingNodes,
@@ -16,16 +16,16 @@ namespace Dune {
 #ifdef ALUGRID_NOTEMPFILE_2D
     if( macroFile )
     {
-      return new ALU2DSPACE Hmesh(*macroFile,
-                                  nrOfHangingNodes, (nrOfHangingNodes == 0) ?
-                                  ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart);
+      return new HmeshType(*macroFile,
+                           nrOfHangingNodes, (nrOfHangingNodes == 0) ?
+                           ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart);
     }
     else
 #endif
     {
-      return new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename),
-                                  nrOfHangingNodes, (nrOfHangingNodes == 0) ?
-                                  ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart);
+      return new HmeshType(checkMacroGridFile(macroTriangFilename),
+                           nrOfHangingNodes, (nrOfHangingNodes == 0) ?
+                           ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart);
     }
   }
 
@@ -269,7 +269,7 @@ namespace Dune {
   {
     maxLevel_ = 0;
     // walk the leaf level and take maximum as maxLevel
-    ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk( mesh() );
+    ALU2DSPACE Listwalkptr <HElementType> walk( mesh() );
     for( walk->first() ; ! walk->done() ; walk->next())
     {
       if(walk->getitem().level() > maxLevel_ )
@@ -383,10 +383,10 @@ namespace Dune {
 
       rankManager_.notifyMarking();
 #else
-      ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh());
+      ALU2DSPACE Listwalkptr <HElementType> walk(mesh());
       for( walk->first() ; ! walk->done() ; walk->next())
       {
-        ALU2DSPACE Element ALU2DDIMWORLD(dimworld,3) & tr = walk->getitem();
+        ElementType & tr = walk->getitem();
         tr.ALU2DSPACE Refco_el::mark(ALU2DSPACE Refco::ref);
       }
 #endif
@@ -453,7 +453,7 @@ namespace Dune {
   inline void ALU2dGrid<dim, dimworld> :: postAdapt ()
   {
     // clear refinement markers throughout the grid
-    typedef ALU2DSPACE Macro < ALU2DSPACE Element ALU2DDIMWORLD(dimworld,3) > macro_t;
+    typedef ALU2DSPACE Macro < ElementType > macro_t;
 
     // get macro element iterator
     ALU2DSPACE Listwalkptr <macro_t> walk(mesh());
@@ -644,12 +644,12 @@ namespace Dune {
 
   // private methods that return underlying ALU2D Grid
   template <int dim, int dimworld>
-  inline ALU2DSPACE Hmesh & ALU2dGrid<dim, dimworld>::myGrid()
+  inline typename ALU2dGrid<dim, dimworld>::HmeshType & ALU2dGrid<dim, dimworld>::myGrid()
   {
     return mesh();
   }
   template <int dim, int dimworld>
-  inline ALU2DSPACE Hmesh & ALU2dGrid<dim, dimworld>::myGrid() const
+  inline typename ALU2dGrid<dim, dimworld>::HmeshType & ALU2dGrid<dim, dimworld>::myGrid() const
   {
     return mesh();
   }
@@ -690,7 +690,7 @@ namespace Dune {
   inline bool ALU2dGrid<dim, dimworld>::
   writeGrid_Xdr(const std::string filename, alu2d_ctype time ) const
   {
-    ALU2DSPACE Hmesh & mygrd = myGrid();
+    HmeshType & mygrd = myGrid();
     mygrd.storeGrid(filename.c_str(),time,0);
 
 #if ALU2DGRID_PARALLEL
@@ -724,7 +724,7 @@ namespace Dune {
     {
       // if grid exists delete first
       if( mygrid_ ) delete mygrid_;
-      mygrid_ = new ALU2DSPACE Hmesh (filename.c_str());
+      mygrid_ = new HmeshType (filename.c_str());
       assert(mygrid_ != 0);
     }
     {

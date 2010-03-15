@@ -83,7 +83,7 @@ namespace Dune {
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
     typedef MakeableInterfaceObject< LocalGeometry > LocalGeometryObject;
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<dimensionworld>::HElementType HElementType ;
 
     // type of local geometry storage
     typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp>
@@ -243,8 +243,10 @@ namespace Dune {
     : public ALU2dGridIntersectionBase<GridImp>
       //,  public IntersectionIteratorDefaultImplementation <GridImp, ALU2dGridLevelIntersectionIterator >
   {
+    enum { dim       = GridImp::dimension };
+    enum { dimworld  = GridImp::dimensionworld };
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
     friend class LevelIntersectionIteratorWrapper<GridImp>;
 
     typedef ALU2dGridLevelIntersectionIterator<GridImp> ThisType;
@@ -254,9 +256,6 @@ namespace Dune {
 
   public:
     typedef ALUMemoryProvider< ThisType > StorageType;
-
-    enum { dim       = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
 
     enum { dimension       = GridImp::dimension };
     enum { dimensionworld  = GridImp::dimensionworld };
@@ -335,7 +334,7 @@ namespace Dune {
       //, public IntersectionIteratorDefaultImplementation<GridImp, ALU2dGridLevelIntersectionIterator>
   {
     typedef ALU2dGridLeafIntersectionIterator<GridImp> ThisType;
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
     friend class LeafIntersectionIteratorWrapper<GridImp>;
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
@@ -348,7 +347,7 @@ namespace Dune {
     enum { dimensionworld  = GridImp::dimensionworld };
 
   private:
-    typedef ALU2DSPACE Thinelement ALU2DDIMWORLD ( dimworld,3 ) ThinelementType;
+    typedef typename ALU2dImplTraits<dimworld>::ThinelementType ThinelementType;
     typedef std::pair< ThinelementType *, std::pair<int, bool> > IntersectionInfo;
 
   public:
@@ -573,7 +572,7 @@ namespace Dune {
     typedef ALU2dGridEntityPointer<codim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
     typedef ALU2dGridLevelIterator<0,pitype,GridImp> ThisType;
 
   public:
@@ -630,7 +629,7 @@ namespace Dune {
     typedef ALU2dGridEntityPointer<codim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
 
     typedef ALU2dGridLevelIterator<1,pitype,GridImp> ThisType;
   public:
@@ -701,7 +700,7 @@ namespace Dune {
     typedef ALU2dGridEntityPointer<codim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
     typedef ALU2dGridLevelIterator<2,pitype,GridImp> ThisType;
 
   public:
@@ -767,7 +766,7 @@ namespace Dune {
     // my type
     typedef ALU2dGridHierarchicIterator<GridImp> ThisType;
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
 
   public:
     //! type of entities we iterate

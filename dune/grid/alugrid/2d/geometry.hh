@@ -282,7 +282,7 @@ namespace Dune
     //! know dimension of barycentric coordinates
     enum { dimbary=mydim+1};
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
     typedef typename ALU2dImplInterface< 0, GridImp::dimensionworld >::Type VertexType;
 
     // type of specialized geometry implementation

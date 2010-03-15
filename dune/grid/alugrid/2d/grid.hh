@@ -200,6 +200,10 @@ namespace Dune {
     typedef ALU2dGrid<dim,dimworld> ThisType;
     typedef GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> > BaseType;
 
+    typedef typename ALU2dImplTraits<dimworld>::HmeshType HmeshType ;
+    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits<dimworld>::ElementType ElementType ;
+
     template< int, int, class > friend class ALU2dGridEntity;
     // friend class ALU2dGridEntity<0,dim,const ThisType>;
     // friend class ALU2dGridEntity<1,dim,const ThisType>;
@@ -322,9 +326,9 @@ namespace Dune {
               std::istream* macroFile = 0);
 
     // method creating mesh object
-    ALU2DSPACE Hmesh* createGrid(const std::string&,
-                                 const int,
-                                 std::istream* );
+    HmeshType* createGrid(const std::string&,
+                          const int,
+                          std::istream* );
 
     //! Constructor which constructs an empty ALU2dGrid
     ALU2dGrid( int );
@@ -439,8 +443,8 @@ namespace Dune {
     // return reference to org ALU2dGrid
     // private method, but otherwise we have to friend class all possible
     // types of LevelIterator ==> later
-    ALU2DSPACE Hmesh & myGrid();
-    ALU2DSPACE Hmesh & myGrid() const;
+    HmeshType & myGrid();
+    HmeshType & myGrid() const;
 
     //! refine grid refCount times
     void globalRefine ( int refCount );
@@ -534,14 +538,14 @@ namespace Dune {
     const char * checkMacroGridFile(const std::string & filename);
 
     //! the real grid
-    mutable ALU2DSPACE Hmesh* mygrid_;
+    mutable HmeshType* mygrid_;
 
     // return reference to grid
-    ALU2DSPACE Hmesh& mesh() const {
+    HmeshType& mesh() const {
       assert(mygrid_);
       return *mygrid_;
     }
-    // mutable ALU2DSPACE Hmesh& mesh_;
+    // mutable HmeshType& mesh_;
 
     //! the hierarchic index set
     HierarchicIndexSet hIndexSet_;

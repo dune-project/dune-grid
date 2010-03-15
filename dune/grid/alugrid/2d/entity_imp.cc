@@ -317,19 +317,19 @@ namespace Dune {
     if(refCount < 0)
     {
       if(level() <= 0) return false;
-      item_->Refco_el::mark(ALU2DSPACE Refco::crs);
+      item_->ALU2DSPACE Refco_el::mark(ALU2DSPACE Refco::crs);
       return true;
     }
 
     // mark for refinement
     if(refCount > 0)
     {
-      item_->Refco_el::mark(ALU2DSPACE Refco::ref);
+      item_->ALU2DSPACE Refco_el::mark(ALU2DSPACE Refco::ref);
       return true;
     }
 
     // mark with none
-    item_->Refco_el::mark(ALU2DSPACE Refco::none);
+    item_->ALU2DSPACE Refco_el::mark(ALU2DSPACE Refco::none);
     return true;
   }
 
@@ -337,9 +337,9 @@ namespace Dune {
   inline int ALU2dGridEntity<0,dim,GridImp> :: getMark() const
   {
     assert(item_ != 0);
-    if(item_->Refco_el::is(ALU2DSPACE Refco::ref)) return 1;
-    if(item_->Refco_el::is(ALU2DSPACE Refco::crs)) return -1;
-    assert( item_->Refco_el::is(ALU2DSPACE Refco::none) );
+    if(item_->ALU2DSPACE Refco_el::is(ALU2DSPACE Refco::ref)) return 1;
+    if(item_->ALU2DSPACE Refco_el::is(ALU2DSPACE Refco::crs)) return -1;
+    assert( item_->ALU2DSPACE Refco_el::is(ALU2DSPACE Refco::none) );
     return 0;
   }
 
@@ -574,7 +574,7 @@ namespace Dune {
   template<int dim, class GridImp>
   struct ElementWrapper<0,dim, GridImp>{
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
 
     static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i) {
       //assert(!i);
@@ -603,7 +603,7 @@ namespace Dune {
   template<int dim, class GridImp>
   struct ElementWrapper<1, dim, GridImp>{
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
 
     static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i)
     {
@@ -646,7 +646,7 @@ namespace Dune {
   template<int dim, class GridImp>
   struct ElementWrapper<2, dim, GridImp>{
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
     typedef typename ALU2dImplInterface< 0, GridImp::dimensionworld >::Type VertexType;
 
     static inline int getElemIndex(GridImp & grid, const VertexType &elem, int) {

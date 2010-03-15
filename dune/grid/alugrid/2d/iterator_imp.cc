@@ -529,7 +529,7 @@ namespace Dune {
       {
         dummy.second.first =
           getOppositeInFather(dummy.second.first, dummy.first->childNr());
-        assert(dummy.second.first >= 0 && dummy.second.first < 3);
+        assert(dummy.second.first >= 0 && (dummy.second.first) < 3); // parsing error???
         dummy.first = dummy.first->father();
       }
       assert(dummy.first->level()==this->walkLevel_);
@@ -544,7 +544,7 @@ namespace Dune {
 
         dummy.second.first =
           getOppositeInFather(dummy.second.first, dummy.first->childNr() );
-        assert(dummy.second.first >= 0 && dummy.second.first < 3);
+        assert(dummy.second.first >= 0 && (dummy.second.first) < 3); // parsing error???
 
         // get next
         dummy.first = dummy.first->father();
