@@ -6,8 +6,8 @@
 // #undef DUNE_ENABLE_OLD_NUMBERING
 // #define DISABLE_DEPRECATED_METHOD_CHECK 1
 
-// #define NO2D
-// #define NO3D
+// #define NO_2D
+// #define NO_3D
 
 #include <iostream>
 #include <sstream>
@@ -17,6 +17,7 @@
 
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
+#include <dune/common/static_assert.hh>
 
 #include "gridcheck.cc"
 
@@ -28,6 +29,43 @@
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 
 using namespace Dune;
+
+template <bool leafconform, class Grid>
+void checkCapabilities(const Grid& grid)
+{
+  dune_static_assert( Dune::Capabilities::isLevelwiseConforming< Grid > :: v == ! leafconform,
+                      "isLevelwiseConforming is not set correctly");
+  dune_static_assert( Dune::Capabilities::isLeafwiseConforming< Grid > :: v == leafconform,
+                      "isLevelwiseConforming is not set correctly");
+  static const bool hasEntity = Dune::Capabilities::hasEntity<Grid, 1> :: v == true;
+  dune_static_assert( hasEntity,
+                      "hasEntity is not set correctly");
+  dune_static_assert( Dune::Capabilities::hasHangingNodes< Grid > :: v == ! leafconform,
+                      "hasHangingNodes is not set correctly");
+  dune_static_assert( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
+                      "hasBackupRestoreFacilities is not set correctly");
+
+  static const bool reallyParallel =
+#if ALU3DGRID_PARALLEL
+    Grid :: dimension == 3;
+#else
+    false ;
+#endif
+  dune_static_assert( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
+                      "isParallel is not set correctly");
+
+  static const bool reallyCanCommunicate =
+#if ALU3DGRID_PARALLEL
+    Grid :: dimension == 3;
+#else
+    false ;
+#endif
+  static const bool canCommunicate = Dune::Capabilities::canCommunicate< Grid, 1 > :: v
+                                     == reallyCanCommunicate;
+  dune_static_assert( canCommunicate,
+                      "canCommunicate is not set correctly");
+
+}
 
 template <class GridType>
 void makeNonConfGrid(GridType &grid,int level,int adapt) {
@@ -296,14 +334,15 @@ int main (int argc , char **argv) {
       }
 #endif
 
-#ifndef NO2D
-      // check non-confrom ALUGrid for 2d
+#ifndef NO_2D
+      // check non-conform ALUGrid for 2d
       if( testALU2dSimplex )
       {
         typedef ALUSimplexGrid<2,2> GridType;
         std::string filename(SRCDIR "simplex-testgrid-2-2.dgf");
         std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
+        checkCapabilities< false >( *gridPtr );
         checkALUSerial(*gridPtr, 2, display);
 
         //CircleBoundaryProjection<2> bndPrj;
@@ -311,12 +350,13 @@ int main (int argc , char **argv) {
         //checkALUSerial(grid,2);
       }
 
-      // check confrom ALUGrid for 2d
+      // check conform ALUGrid for 2d
       if( testALU2dConform )
       {
         typedef ALUConformGrid<2,2> GridType;
         std::string filename(SRCDIR "simplex-testgrid-2-2.dgf");
         GridPtr<GridType> gridPtr(filename);
+        checkCapabilities< true >( *gridPtr );
         checkALUSerial(*gridPtr, 2, display);
 
         //CircleBoundaryProjection<2> bndPrj;
@@ -332,6 +372,7 @@ int main (int argc , char **argv) {
 
         typedef ALUCubeGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
+        checkCapabilities< false >( *gridPtr );
         GridType & grid = *gridPtr;
 
         {
@@ -357,6 +398,7 @@ int main (int argc , char **argv) {
 
         typedef ALUSimplexGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
+        checkCapabilities< false >( *gridPtr );
         GridType & grid = *gridPtr;
 
         {

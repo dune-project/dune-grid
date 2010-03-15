@@ -6,6 +6,7 @@
 // only include this code, if ENABLE_ALUGRID is defined
 #ifdef ENABLE_ALUGRID
 
+#include <dune/grid/alugrid/2d/capabilities.hh>
 #include <dune/grid/alugrid/2d/grid.hh>
 
 namespace Dune
