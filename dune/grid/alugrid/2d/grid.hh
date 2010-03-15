@@ -70,7 +70,7 @@ namespace Dune {
   class ALU2dGridHierarchicIndexSet;
   template <class EntityImp>
   class ALUMemoryProvider;
-  template<int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid;
   template <class GeometryImp, int nChild>
   class ALU2DLocalGeometryStorage;
@@ -85,9 +85,11 @@ namespace Dune {
   // --Grid
   //
   //**********************************************************************
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   struct ALU2dGridFamily
   {
+    typedef ALU2dGrid< dim, dimworld, eltype > GridImp;
+
     //! Type of the global id set
     typedef ALU2dGridLocalIdSet<dim,dimworld> GlobalIdSetImp;
 
@@ -95,18 +97,16 @@ namespace Dune {
     typedef ALU2dGridLocalIdSet<dim,dimworld> LocalIdSetImp;
 
     //! Type of the level index set
-    typedef DefaultLevelIndexSet<ALU2dGrid < dim, dimworld > >  LevelIndexSetImp;
+    typedef DefaultLevelIndexSet< GridImp > LevelIndexSetImp;
     //! Type of the leaf index set
-    typedef DefaultLeafIndexSet<ALU2dGrid < dim, dimworld > >   LeafIndexSetImp;
+    typedef DefaultLeafIndexSet< GridImp > LeafIndexSetImp;
 
     typedef int GlobalIdType;
     typedef int LocalIdType;
 
-    typedef ALU2dGrid<dim,dimworld> GridImp;
-
     struct Traits
     {
-      typedef ALU2dGrid<dim,dimworld> Grid;
+      typedef GridImp Grid;
 
       typedef Dune :: Intersection< const GridImp, LeafIntersectionWrapper > LeafIntersection;
       typedef Dune :: Intersection< const GridImp, LevelIntersectionWrapper > LevelIntersection;
@@ -184,24 +184,27 @@ namespace Dune {
 
    */
 
-  template <int dim, int dimworld>
-  class ALU2dGrid :
-    public GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> >,
-    public HasObjectStream,
-    public HasHierarchicIndexSet
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype = ALU2DSPACE triangle >
+  class ALU2dGrid
+    : public GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > >,
+      public HasObjectStream,
+      public HasHierarchicIndexSet
   {
-    dune_static_assert(dim      == 2, "ALU2dGrid only implemented for grid dim 2");
+    typedef ALU2dGrid< dim, dimworld, eltype > ThisType;
+    typedef GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > > BaseType;
+
+    dune_static_assert( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
 #ifdef ALUGRID_SURFACE_2D
-    dune_static_assert(dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3");
+    dune_static_assert( dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3." );
 #else
-    dune_static_assert(dimworld == 2, "ALU2dGrid only implemented for world dim 2");
+    dune_static_assert( dimworld == 2, "ALU2dGrid only implemented for world dim 2." );
+    dune_static_assert( eltype == ALU2DSPACE triangle, "ALU2dGrid only implemented for triangles." );
 #endif
 
-    typedef ALU2dGrid<dim,dimworld> ThisType;
-    typedef GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> > BaseType;
-
   public:
-    static const ALU2DSPACE ElementType elementType = ALU2DSPACE triangle;
+    static const ALU2DSPACE ElementType elementType = eltype;
+
+    typedef typename ALU2dGridFamily< dim, dimworld, elementType >::Traits Traits;
 
   private:
     typedef typename ALU2dImplTraits<dimworld, elementType >::HmeshType HmeshType ;
@@ -233,10 +236,6 @@ namespace Dune {
     //**********************************************************
     // The Interface Methods
     //**********************************************************
-  public:
-    //! my Traits class
-    typedef typename ALU2dGridFamily < dim , dimworld > :: Traits Traits;
-
   protected:
     typedef MakeableInterfaceObject<typename Traits::template
         Codim<0>::Geometry> GeometryObject;
@@ -249,7 +248,8 @@ namespace Dune {
     typedef ALU2dGridObjectStream ObjectStreamType;
 
     //! my Traits class
-    typedef ALU2dGridFamily < dim , dimworld > GridFamily;
+    typedef ALU2dGridFamily < dim, dimworld, eltype > GridFamily;
+
     //! Type of the hierarchic index set
     typedef ALU2dGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSet;
 

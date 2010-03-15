@@ -1,14 +1,14 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-
 #ifndef DUNE_ALU2DGRID_IMP_CC
 #define DUNE_ALU2DGRID_IMP_CC
 
-namespace Dune {
+namespace Dune
+{
 
-  template<int dim, int dimworld>
-  inline typename ALU2dGrid<dim, dimworld>::HmeshType*
-  ALU2dGrid<dim, dimworld>::
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline typename ALU2dGrid< dim, dimworld, eltype >::HmeshType*
+  ALU2dGrid< dim, dimworld, eltype >::
   createGrid(const std::string& macroTriangFilename,
              const int nrOfHangingNodes,
              std::istream* macroFile )
@@ -30,8 +30,8 @@ namespace Dune {
   }
 
   //--Grid
-  template<int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline ALU2dGrid< dim, dimworld, eltype >::
   ALU2dGrid(const std::string macroTriangFilename,
             const int nrOfHangingNodes,
             const DuneBoundaryProjectionType* bndPrj,
@@ -78,8 +78,8 @@ namespace Dune {
   }
 
   //! Constructor which constructs an empty ALU2dGrid
-  template<int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::ALU2dGrid(int nrOfHangingNodes)
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline ALU2dGrid< dim, dimworld, eltype >::ALU2dGrid(int nrOfHangingNodes)
     :
 #if ALU2DGRID_PARALLEL
       comm_( MPIHelper::getCommunicator() ),
@@ -106,8 +106,8 @@ namespace Dune {
     makeGeomTypes();
   }
 
-  template <int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::ALU2dGrid(const ALU2dGrid<dim, dimworld> & g)
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline ALU2dGrid< dim, dimworld, eltype >::ALU2dGrid( const ALU2dGrid< dim, dimworld, eltype > &g )
     : mygrid_ (0)
       , maxLevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)
@@ -119,8 +119,8 @@ namespace Dune {
     DUNE_THROW(GridError,"Do not use copy constructor of ALU2dGrid! \n");
   }
 
-  template <int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::~ALU2dGrid()
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline ALU2dGrid< dim, dimworld, eltype >::~ALU2dGrid()
   {
     delete vertexProjection_ ;
     if( bndVec_ )
@@ -140,9 +140,9 @@ namespace Dune {
   }
 
   //! Iterator to first entity of given codim on level
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline const char *
-  ALU2dGrid<dim, dimworld> :: checkMacroGridFile(const std::string & filename)
+  ALU2dGrid< dim, dimworld, eltype >::checkMacroGridFile(const std::string & filename)
   {
     std::ifstream file(filename.c_str());
     if(!file)
@@ -170,102 +170,106 @@ namespace Dune {
 
 
   //! Iterator to first entity of given codim on level
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template<int cd, PartitionIteratorType pitype>
-  inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
-  ALU2dGrid<dim, dimworld> :: lbegin (int level) const {
+  inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
+  ALU2dGrid< dim, dimworld, eltype >::lbegin (int level) const {
     return ALU2dGridLevelIterator<cd, pitype, const ThisType>(*this, level, pitype == Ghost_Partition);
   }
 
   //! one past the end on this level
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template<int cd, PartitionIteratorType pitype>
-  inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
-  ALU2dGrid<dim, dimworld> :: lend (int level) const {
+  inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
+  ALU2dGrid< dim, dimworld, eltype >::lend (int level) const {
     return ALU2dGridLevelIterator<cd, pitype, const ThisType>(*this, level, true);
   }
 
   //! Iterator to first entity of given codim on level
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template<int cd>
-  inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<cd>::template Partition<All_Partition>::LevelIterator
-  ALU2dGrid<dim, dimworld>::lbegin (int level) const {
+  inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<cd>::template Partition<All_Partition>::LevelIterator
+  ALU2dGrid< dim, dimworld, eltype >::lbegin (int level) const {
     return ALU2dGridLevelIterator<cd, All_Partition, const ThisType>(*this, level, false);
   }
 
   //! one past the end on this level
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template<int cd>
-  inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<cd>::template Partition<All_Partition>::LevelIterator
-  ALU2dGrid<dim, dimworld>::lend (int level) const {
+  inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<cd>::template Partition<All_Partition>::LevelIterator
+  ALU2dGrid< dim, dimworld, eltype >::lend (int level) const {
     return ALU2dGridLevelIterator<cd, All_Partition, const ThisType>(*this, level, true);
   }
 
   //! Iterator to first entity of codim 0 on level
-  template <int dim, int dimworld>
-  inline typename ALU2dGrid<dim, dimworld>::LevelIteratorType ALU2dGrid<dim, dimworld>::lbegin (int level) const {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline typename ALU2dGrid< dim, dimworld, eltype >::LevelIteratorType
+  ALU2dGrid< dim, dimworld, eltype >::lbegin (int level) const {
     return LevelIteratorImp(*this, level, false);
   }
 
   //! last entity of codim 0 on level
-  template <int dim, int dimworld>
-  inline typename ALU2dGrid<dim, dimworld>::LevelIteratorType ALU2dGrid<dim, dimworld> :: lend (int level) const {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline typename ALU2dGrid< dim, dimworld, eltype >::LevelIteratorType
+  ALU2dGrid< dim, dimworld, eltype >::lend (int level) const {
     return LevelIteratorImp(*this, level, true);
   }
 
   //! General definiton for a leaf iterator
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template <int codim, PartitionIteratorType pitype>
-  inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-  ALU2dGrid<dim, dimworld> :: leafbegin() const {
+  inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
+  ALU2dGrid< dim, dimworld, eltype >::leafbegin() const {
     return ALU2dGridLeafIterator<codim, pitype, const ThisType> (*this, pitype == Ghost_Partition);
   }
 
   //! General definition for an end iterator on leaf level
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template <int codim, PartitionIteratorType pitype>
-  inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-  ALU2dGrid<dim, dimworld>:: leafend() const {
+  inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
+  ALU2dGrid< dim, dimworld, eltype >::leafend() const {
     return ALU2dGridLeafIterator<codim, pitype, const ThisType> (*this, true);
   }
 
   //! General definiton for a leaf iterator
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template <int codim>
-  inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<codim>::LeafIterator
-  ALU2dGrid<dim, dimworld>:: leafbegin() const {
+  inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<codim>::LeafIterator
+  ALU2dGrid< dim, dimworld, eltype >::leafbegin() const {
     return ALU2dGridLeafIterator<codim, All_Partition, const ThisType> (*this, false);
   }
 
   //! General definition for an end iterator on leaf level
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template <int codim>
-  inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<codim>::LeafIterator
-  ALU2dGrid<dim, dimworld>:: leafend() const {
+  inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<codim>::LeafIterator
+  ALU2dGrid< dim, dimworld, eltype >::leafend() const {
     return ALU2dGridLeafIterator<codim, All_Partition, const ThisType> (*this, true);
   }
 
   //! Iterator to first entity of codim 0 on leaf level (All_Partition)
-  template <int dim, int dimworld>
-  inline typename ALU2dGrid<dim, dimworld>::LeafIteratorType ALU2dGrid<dim, dimworld> :: leafbegin () const {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline typename ALU2dGrid< dim, dimworld, eltype >::LeafIteratorType
+  ALU2dGrid< dim, dimworld, eltype >::leafbegin () const {
     return LeafIteratorImp(*this,false);
   }
 
   //! one past the end on this leaf level (codim 0 and All_Partition)
-  template <int dim, int dimworld>
-  inline typename ALU2dGrid<dim, dimworld>::LeafIteratorType ALU2dGrid<dim, dimworld>:: leafend () const {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline typename ALU2dGrid< dim, dimworld, eltype >::LeafIteratorType
+  ALU2dGrid< dim, dimworld, eltype >::leafend () const {
     return LeafIteratorImp(*this,true);
   }
 
   //! Return maximum level defined in this grid. Levels are numbered
   //! 0 ... maxLevel with 0 the coarsest level.
-  template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld> :: maxLevel() const {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline int ALU2dGrid< dim, dimworld, eltype >::maxLevel() const {
     return maxLevel_;
   }
 
-  template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld>::calcMaxlevel()
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline void ALU2dGrid< dim, dimworld, eltype >::calcMaxlevel()
   {
     maxLevel_ = 0;
     // walk the leaf level and take maximum as maxLevel
@@ -277,8 +281,8 @@ namespace Dune {
     }
   }
 
-  template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld>::calcExtras()
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline void ALU2dGrid< dim, dimworld, eltype >::calcExtras()
   {
     // only in truly parallel runs update this
     //if( comm_.size() > 1 ) rankManager_.update();
@@ -314,29 +318,29 @@ namespace Dune {
   }
 
   //! Every time the grid is refined, data should be updated
-  template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld>::updateStatus() {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline void ALU2dGrid< dim, dimworld, eltype >::updateStatus() {
     calcMaxlevel();
     calcExtras();
   }
 
   //! number of grid entities in the entire grid for given codim
-  template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld>:: hierSetSize (int cd) const {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline int ALU2dGrid< dim, dimworld, eltype >::hierSetSize (int cd) const {
     return mesh().indexManagerSize(cd);
   }
 
   //! number of grid entities per level and codim
-  template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld> :: size (int level, int cd) const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline int ALU2dGrid< dim, dimworld, eltype >::size (int level, int cd) const
   {
     assert( sizeCache_ );
     return sizeCache_->size(level,cd);
   }
 
   //! number of entities per level, codim and geometry type in this process
-  template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld> :: size (int level, GeometryType type) const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline int ALU2dGrid< dim, dimworld, eltype >::size (int level, GeometryType type) const
   {
     if (type.isSimplex()) {
       return size(level, dim-type.dim());
@@ -345,8 +349,8 @@ namespace Dune {
   }
 
   //! number of leaf entities per codim and geometry type in this process
-  template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld> :: size (GeometryType type) const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline int ALU2dGrid< dim, dimworld, eltype >::size (GeometryType type) const
   {
     if (type.isSimplex()) {
       return size(dim-type.dim());
@@ -354,16 +358,16 @@ namespace Dune {
     return 0;
   }
 
-  template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld> :: size (int codim) const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline int ALU2dGrid< dim, dimworld, eltype >::size (int codim) const
   {
     assert( sizeCache_ );
     return sizeCache_->size(codim);
   }
 
   //! refine grid refCount times
-  template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld> :: globalRefine(int refCount)
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline void ALU2dGrid< dim, dimworld, eltype >::globalRefine(int refCount)
   {
     if( refCount <= 0 )
       return;
@@ -406,9 +410,9 @@ namespace Dune {
 
 
   // global refine
-  template< int dim, int dimworld >
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template< class GridImp, class DataHandle >
-  inline void ALU2dGrid< dim, dimworld >
+  inline void ALU2dGrid< dim, dimworld, eltype >
   ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
     assert( (refCount + maxLevel()) < MAXL );
@@ -425,14 +429,14 @@ namespace Dune {
 
 
   //! returns true if a least one entity was marked for coarseing
-  template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld> :: preAdapt () {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline bool ALU2dGrid< dim, dimworld, eltype >::preAdapt () {
     return (coarsenMarked_ > 0);
   }
 
 
-  template <int dim, int dimworld>
-  inline void ALU2dGrid< dim, dimworld >::hierarchicClear ( HElementType *el )
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline void ALU2dGrid< dim, dimworld, eltype >::hierarchicClear ( HElementType *el )
   {
     // clear actual tag
     el->ALU2DSPACE Refco_el::clear();
@@ -448,8 +452,8 @@ namespace Dune {
 
 
   //! clear all entity new markers
-  template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld> :: postAdapt ()
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline void ALU2dGrid< dim, dimworld, eltype >::postAdapt ()
   {
     // clear refinement markers throughout the grid
     typedef ALU2DSPACE Macro < ElementType > macro_t;
@@ -476,8 +480,8 @@ namespace Dune {
   /**! refine all positive marked leaf entities,
      return true if a least one entity was refined
    */
-  template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld> :: adapt ( )
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline bool ALU2dGrid< dim, dimworld, eltype >::adapt ()
   {
 
 #if ALU2DGRID_PARALLEL
@@ -516,9 +520,9 @@ namespace Dune {
 
 
   // --adapt
-  template< int dim, int dimworld >
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template< class GridImp, class DataHandle >
-  inline bool ALU2dGrid< dim, dimworld >
+  inline bool ALU2dGrid< dim, dimworld, eltype >
   ::adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
     typedef AdaptDataHandleInterface< GridImp, DataHandle > AdaptDataHandle;
@@ -565,8 +569,8 @@ namespace Dune {
     return ref;
   }
 
-  template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld> ::
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline bool ALU2dGrid< dim, dimworld, eltype >::
   mark( int refCount , const typename Traits::template Codim<0>::Entity & en )
   {
     bool marked = this->getRealImplementation(en).mark(refCount);
@@ -578,14 +582,14 @@ namespace Dune {
     return marked;
   }
 
-  template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld> :: getMark(const typename Traits::template Codim<0>::Entity & e ) const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline int ALU2dGrid< dim, dimworld, eltype >::getMark(const typename Traits::template Codim<0>::Entity & e ) const
   {
     return this->getRealImplementation(e).getMark();
   }
 
-  template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld>::makeGeomTypes()
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline void ALU2dGrid< dim, dimworld, eltype >::makeGeomTypes()
   {
     // stored is the dim, where is the codim
     for(int i=dim; i>= 0; i--)
@@ -596,34 +600,40 @@ namespace Dune {
   }
 
   //! get global id set of grid
-  template <int dim, int dimworld>
-  inline const typename ALU2dGrid<dim, dimworld>::GlobalIdSet & ALU2dGrid<dim, dimworld>:: globalIdSet () const {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline const typename ALU2dGrid< dim, dimworld, eltype >::GlobalIdSet &
+  ALU2dGrid< dim, dimworld, eltype >::globalIdSet () const
+  {
     return localIdSet();
   }
 
   //! get global id set of grid
-  template <int dim, int dimworld>
-  inline const typename ALU2dGrid<dim, dimworld>::LocalIdSet & ALU2dGrid<dim, dimworld>:: localIdSet () const {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline const typename ALU2dGrid< dim, dimworld, eltype >::LocalIdSet &
+  ALU2dGrid< dim, dimworld, eltype >::localIdSet () const
+  {
     return localIdSet_;
   }
 
   //! get hierarchic index set of the grid
-  template <int dim, int dimworld>
-  inline const typename ALU2dGrid<dim, dimworld>::HierarchicIndexSet & ALU2dGrid<dim, dimworld>::hierarchicIndexSet () const {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline const typename ALU2dGrid< dim, dimworld, eltype >::HierarchicIndexSet &
+  ALU2dGrid< dim, dimworld, eltype >::hierarchicIndexSet () const
+  {
     return hIndexSet_;
   }
 
-  template <int dim, int dimworld>
-  inline const typename ALU2dGrid<dim, dimworld>::Traits :: LeafIndexSet &
-  ALU2dGrid<dim, dimworld>::leafIndexSet() const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline const typename ALU2dGrid< dim, dimworld, eltype >::Traits::LeafIndexSet &
+  ALU2dGrid< dim, dimworld, eltype >::leafIndexSet() const
   {
     if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetImp ( *this );
     return *leafIndexSet_;
   }
 
-  template <int dim, int dimworld>
-  inline const typename ALU2dGrid<dim, dimworld>::Traits :: LevelIndexSet &
-  ALU2dGrid<dim, dimworld>::levelIndexSet( int level ) const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline const typename ALU2dGrid< dim, dimworld, eltype >::Traits::LevelIndexSet &
+  ALU2dGrid< dim, dimworld, eltype >::levelIndexSet( int level ) const
   {
     // check if level fits in vector
     assert( level >= 0 );
@@ -635,27 +645,33 @@ namespace Dune {
   }
 
 
-  template <int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld> & ALU2dGrid<dim, dimworld>::operator = (const ALU2dGrid<dim, dimworld> & g) {
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline ALU2dGrid< dim, dimworld, eltype > &
+  ALU2dGrid< dim, dimworld, eltype >::operator= ( const ALU2dGrid< dim, dimworld, eltype > &g)
+  {
     DUNE_THROW(GridError,"Do not use assignment operator of ALU2dGrid! \n");
     return (*this);
   }
 
   // private methods that return underlying ALU2D Grid
-  template <int dim, int dimworld>
-  inline typename ALU2dGrid<dim, dimworld>::HmeshType & ALU2dGrid<dim, dimworld>::myGrid()
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline typename ALU2dGrid< dim, dimworld, eltype >::HmeshType &
+  ALU2dGrid< dim, dimworld, eltype >::myGrid()
   {
     return mesh();
   }
-  template <int dim, int dimworld>
-  inline typename ALU2dGrid<dim, dimworld>::HmeshType & ALU2dGrid<dim, dimworld>::myGrid() const
+
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline typename ALU2dGrid< dim, dimworld, eltype >::HmeshType &
+  ALU2dGrid< dim, dimworld, eltype >::myGrid() const
   {
     return mesh();
   }
 
   //! return dummy communication
-  template <int dim, int dimworld>
-  inline const typename ALU2dGrid<dim, dimworld>::CollectiveCommunicationType & ALU2dGrid<dim, dimworld>::comm() const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline const typename ALU2dGrid< dim, dimworld, eltype >::CollectiveCommunicationType &
+  ALU2dGrid< dim, dimworld, eltype >::comm() const
   {
     return comm_;
   }
@@ -663,10 +679,10 @@ namespace Dune {
 
   // **************************************************************
   // ***************************************************************
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template <GrapeIOFileFormatType ftype>
-  inline bool ALU2dGrid<dim, dimworld>::
-  writeGrid(const std::string filename, alu2d_ctype time ) const
+  inline bool
+  ALU2dGrid< dim, dimworld, eltype >::writeGrid(const std::string filename, alu2d_ctype time ) const
   {
     switch(ftype)
     {
@@ -677,17 +693,17 @@ namespace Dune {
     return false;
   }
 
-  template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld>::
-  writeGrid_Ascii(const std::string filename, alu2d_ctype time ) const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline bool
+  ALU2dGrid< dim, dimworld, eltype >::writeGrid_Ascii(const std::string filename, alu2d_ctype time ) const
   {
     abort();
     return true;
   }
 
-  template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld>::
-  writeGrid_Xdr(const std::string filename, alu2d_ctype time ) const
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline bool
+  ALU2dGrid< dim, dimworld, eltype >::writeGrid_Xdr(const std::string filename, alu2d_ctype time ) const
   {
     HmeshType & mygrd = myGrid();
     mygrd.storeGrid(filename.c_str(),time,0);
@@ -715,10 +731,10 @@ namespace Dune {
     return true;
   }
 
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template <GrapeIOFileFormatType ftype>
-  inline bool ALU2dGrid<dim,dimworld>::
-  readGrid( const std::string filename, alu2d_ctype & time )
+  inline bool
+  ALU2dGrid< dim,dimworld, eltype >::readGrid( const std::string filename, alu2d_ctype & time )
   {
     {
       // if grid exists delete first
@@ -758,9 +774,9 @@ namespace Dune {
 
 
   // communicate level data
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template <class DataHandleImp,class DataType>
-  inline void ALU2dGrid<dim, dimworld>::
+  inline void ALU2dGrid< dim, dimworld, eltype >::
   communicate (CommDataHandleIF<DataHandleImp,DataType> & data,
                InterfaceType iftype, CommunicationDirection dir, int level ) const
   {
@@ -774,9 +790,9 @@ namespace Dune {
   }
 
   // communicate level data
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template <class DataHandleImp,class DataType>
-  inline void ALU2dGrid<dim, dimworld>::
+  inline void ALU2dGrid< dim, dimworld, eltype >::
   communicate (CommDataHandleIF<DataHandleImp,DataType> & data,
                InterfaceType iftype, CommunicationDirection dir) const
   {
@@ -790,8 +806,8 @@ namespace Dune {
   }
 
   // re-balance load of grid
-  template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld> :: loadBalance ()
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline bool ALU2dGrid< dim, dimworld, eltype >::loadBalance ()
   {
 #if ALU2DGRID_PARALLEL
     if( comm_.size()  <= 1 ) return false;
@@ -804,9 +820,9 @@ namespace Dune {
   }
 
   // re-balance load of grid
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   template <class DataHandleImp>
-  inline bool ALU2dGrid<dim, dimworld> :: loadBalance (DataHandleImp& data)
+  inline bool ALU2dGrid< dim, dimworld, eltype >::loadBalance (DataHandleImp& data)
   {
 #if ALU2DGRID_PARALLEL
     if( comm_.size()  <= 1 ) return false;

@@ -23,7 +23,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template <int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid;
 
   template<int cd, int dim, class GridImp>
@@ -37,15 +37,15 @@ namespace Dune
   //! hierarchic index set of ALU2dGrid
   template <int dim, int dimworld>
   class ALU2dGridHierarchicIndexSet :
-    public IndexSet <ALU2dGrid<dim,dimworld>,
-        ALU2dGridHierarchicIndexSet<dim,dimworld>, int >
+    public IndexSet< ALU2dGrid< dim, dimworld, ALU2DSPACE triangle >, // ONLY TRIANGLE
+        ALU2dGridHierarchicIndexSet< dim, dimworld >, int >
   {
     typedef ALU2dGridHierarchicIndexSet< dim, dimworld > This;
 
-    typedef ALU2dGrid<dim,dimworld> GridType;
+    typedef ALU2dGrid< dim, dimworld, ALU2DSPACE triangle > GridType; // ONLY TRIANGLE
     enum { numCodim = dim+1 }; // i.e. 3
 
-    friend class ALU2dGrid<dim,dimworld>;
+    friend class ALU2dGrid< dim, dimworld, ALU2DSPACE triangle >; // ONLY TRIANGLE
 
     ALU2dGridHierarchicIndexSet( const GridType &grid )
       : grid_( grid )
@@ -544,12 +544,13 @@ namespace Dune
   //! hierarchic index set of ALU3dGrid
   template <int dim, int dimworld>
   class ALU2dGridLocalIdSet :
-    public IdSet < ALU2dGrid<dim,dimworld> ,
-        ALU2dGridLocalIdSet<dim,dimworld> ,
-        int >
+    public IdSet < ALU2dGrid< dim, dimworld, ALU2DSPACE triangle >, // ONLY TRIANGLE
+        ALU2dGridLocalIdSet< dim, dimworld >, int >
   {
-    typedef ALU2dGrid<dim,dimworld> GridType;
+    typedef ALU2dGrid< dim, dimworld, ALU2DSPACE triangle > GridType; // ONLY TRIANGLE
     typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
+
+    friend class ALU2dGrid< dim, dimworld, ALU2DSPACE triangle >; // ONLY TRIANGLE
 
     // this means that only up to 300000000 entities are allowed
     enum { codimMultiplier = 300000000 };
@@ -561,7 +562,6 @@ namespace Dune
       for(int i=0; i<dim+1; i++)
         codimStart_[i] = i*codimMultiplier;
     }
-    friend class ALU2dGrid<dim,dimworld>;
 
     // fake method to have the same method like GlobalIdSet
     void updateIdSet() {}

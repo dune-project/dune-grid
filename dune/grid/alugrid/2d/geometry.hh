@@ -20,7 +20,7 @@ namespace Dune
   class ALU2dGridEntityPointer;
   template<int mydim, int cdim, class GridImp>
   class ALU2dGridGeometry;
-  template<int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid;
 
   template <int cdim>

@@ -32,7 +32,7 @@ namespace Dune {
   class ALU2dGridIntersectionIterator;
   template<int codim, PartitionIteratorType, class GridImp>
   class ALU2dGridLeafIterator;
-  template<int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid;
 
   //**********************************************************************
@@ -54,7 +54,7 @@ namespace Dune {
     static const int dimworld = GridImp::dimensionworld;
     static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
-    friend class ALU2dGrid < dim , dimworld>;
+    friend class ALU2dGrid< dim, dimworld, eltype >;
     friend class ALU2dGridIntersectionIterator < GridImp >;
     friend class ALU2dGridIntersectionIterator < const GridImp >;
     friend class ALU2dGridLevelIntersectionIterator < GridImp >;
@@ -202,7 +202,7 @@ namespace Dune {
     static const int dimworld = GridImp::dimensionworld;
     static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
-    friend class ALU2dGrid < dim , dimworld>;
+    friend class ALU2dGrid< dim, dimworld, eltype >;
     friend class ALU2dGridIntersectionIterator < GridImp >;
     friend class ALU2dGridIntersectionIterator < const GridImp >;
     friend class ALU2dGridLevelIntersectionIterator < GridImp >;

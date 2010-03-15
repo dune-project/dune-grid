@@ -37,7 +37,7 @@ namespace Dune {
   class ALU2dGridLevelIntersectionIterator;
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class ALU2dGridLeafIterator;
-  template<int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid;
 
 
@@ -426,7 +426,7 @@ namespace Dune {
     friend class ALU2dGridEntity<0,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
     friend class ALU2dGridEntity<dim,dimworld,GridImp>;
-    friend class ALU2dGrid < dim , dimworld >;
+    friend class ALU2dGrid< dim, dimworld, eltype >;
 
     typedef ALU2dGridEntityPointer<cdim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<cdim,dim,GridImp> EntityImp;
@@ -509,7 +509,7 @@ namespace Dune {
     friend class ALU2dGridEntity<0,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
     friend class ALU2dGridEntity<dim,dimworld,GridImp>;
-    friend class ALU2dGrid < dim , dimworld >;
+    friend class ALU2dGrid< dim, dimworld, eltype >;
 
     typedef ALU2dGridEntityPointer<1,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<1,dim,GridImp> EntityImp;
@@ -576,7 +576,7 @@ namespace Dune {
     friend class ALU2dGridEntity<dim,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
     friend class ALU2dGridEntity<0,dimworld,GridImp>;
-    friend class ALU2dGrid < dim , dimworld >;
+    friend class ALU2dGrid< dim, dimworld, eltype >;
 
     typedef ALU2dGridEntityPointer<codim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
@@ -634,7 +634,7 @@ namespace Dune {
     friend class ALU2dGridEntity<dim,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
     friend class ALU2dGridEntity<0,dimworld,GridImp>;
-    friend class ALU2dGrid < dim , dimworld >;
+    friend class ALU2dGrid< dim, dimworld, eltype >;
 
     typedef ALU2dGridEntityPointer<codim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
@@ -706,7 +706,7 @@ namespace Dune {
     friend class ALU2dGridEntity<dim,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
     friend class ALU2dGridEntity<0,dimworld,GridImp>;
-    friend class ALU2dGrid < dim , dimworld >;
+    friend class ALU2dGrid< dim, dimworld, eltype >;
 
     typedef ALU2dGridEntityPointer<codim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
