@@ -8,9 +8,9 @@
 #define ALU2DSPACENAME ALUGridSpace
 
 #ifdef ALUGRID_SURFACE_2D
-#define ALU2DDIMWORLD(dimw,nv) < dimw,nv >
+#define ALU2DDIMWORLD(dimw,eltype) < dimw,(eltype == ALU2DSPACE triangle ? 3 : 4) >
 #else
-#define ALU2DDIMWORLD(dimw,nv)
+#define ALU2DDIMWORLD(dimw,eltype)
 #endif
 
 // use the ALU3dGrid Parallel detection
@@ -24,48 +24,70 @@
 #warning "Using ALU2dGrid in parallel"
 #endif
 
-namespace Dune {
 
-  template< int dim, int dimw >
+namespace ALU2DSPACENAME
+{
+
+  enum ElementType { triangle, quadrilateral, mixed };
+
+}
+
+
+namespace Dune
+{
+
+  // ALU2dImplInterface
+  // ------------------
+
+  template< int dim, int dimw, ALU2DSPACE ElementType eltype >
   struct ALU2dImplInterface;
 
-  template< int dimw >
-  struct ALU2dImplInterface< 0, dimw >
+  template< int dimw, ALU2DSPACE ElementType eltype >
+  struct ALU2dImplInterface< 0, dimw, eltype >
   {
 #ifdef ALUGRID_SURFACE_2D
-    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,3) ::vertex_t Type; // NVTX
+    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,eltype) ::vertex_t Type;
 #else
     typedef ALU2DSPACE Vertex Type;
 #endif
   };
 
-  template< int dimw >
-  struct ALU2dImplInterface< 1, dimw >
+  template< int dimw, ALU2DSPACE ElementType eltype >
+  struct ALU2dImplInterface< 1, dimw, eltype >
   {
-    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,3) ::helement_t Type; // NVTX
+    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,eltype) ::helement_t Type;
   };
 
-  template< int dimw >
-  struct ALU2dImplInterface< 2, dimw >
+  template< int dimw, ALU2DSPACE ElementType eltype >
+  struct ALU2dImplInterface< 2, dimw, eltype >
   {
-    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,3) ::helement_t Type; // NVTX
+    typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,eltype) ::helement_t Type;
   };
 
 
-  template< int dimw >
+
+  // ALU2dImplTraits
+  // ---------------
+
+  template< int dimw, ALU2DSPACE ElementType eltype >
   struct ALU2dImplTraits
   {
     template< int cdim >
     struct Codim
     {
-      typedef typename ALU2dImplInterface< 2-cdim, dimw >::Type InterfaceType;
+      typedef typename ALU2dImplInterface< 2-cdim, dimw, eltype >::Type InterfaceType;
     };
-    typedef ALU2DSPACE Hmesh ALU2DDIMWORLD (dimw,3) HmeshType;             // NVTX
-    typedef ALU2DSPACE Thinelement ALU2DDIMWORLD (dimw,3) ThinelementType; // NVTX
-    typedef ALU2DSPACE Element ALU2DDIMWORLD (dimw,3) ElementType;         // NVTX
-    typedef typename HmeshType :: helement_t HElementType;
+
+    typedef ALU2DSPACE Hmesh ALU2DDIMWORLD (dimw,eltype) HmeshType;
+    typedef ALU2DSPACE Thinelement ALU2DDIMWORLD (dimw,eltype) ThinelementType;
+    typedef ALU2DSPACE Element ALU2DDIMWORLD (dimw,eltype) ElementType;
+    typedef typename HmeshType::helement_t HElementType;
   };
 
+
+
+  // ALU2dGridMarkerVector
+  // ---------------------
 
   class ALU2dGridMarkerVector
   {
@@ -86,8 +108,10 @@ namespace Dune {
     void update (const GridType & grid, int level )
     {
       static const int dimworld = GridType::dimensionworld;
-      typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<0>::InterfaceType ElementType;
-      typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<2>::InterfaceType VertexType;
+      static const ALU2DSPACE ElementType eltype = GridType::elementType;
+
+      typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<0>::InterfaceType ElementType;
+      typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<2>::InterfaceType VertexType;
       typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
 
       // resize
@@ -157,8 +181,10 @@ namespace Dune {
     void update (const GridType & grid)
     {
       static const int dimworld = GridType::dimensionworld;
-      typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<0>::InterfaceType ElementType;
-      typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<2>::InterfaceType VertexType;
+      static const ALU2DSPACE ElementType eltype = GridType::elementType;
+
+      typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<0>::InterfaceType ElementType;
+      typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<2>::InterfaceType VertexType;
       typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
 
       // resize edge marker

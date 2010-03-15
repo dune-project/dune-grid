@@ -57,13 +57,14 @@ namespace Dune {
   template<class GridImp>
   class ALU2dGridIntersectionBase
   {
+    static const int dim = GridImp::dimension;
+    static const int dimworld  = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
+
   public:
     typedef ALU2dGridIntersectionBase< GridImp > ImplementationType;
     //! type of the intersection
     typedef Dune::Intersection< GridImp, Dune::ALU2dGridIntersectionBase > Intersection;
-
-    enum { dim       = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
 
     enum { dimension       = GridImp::dimension };
     enum { dimensionworld  = GridImp::dimensionworld };
@@ -83,7 +84,7 @@ namespace Dune {
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
     typedef MakeableInterfaceObject< LocalGeometry > LocalGeometryObject;
 
-    typedef typename ALU2dImplTraits<dimensionworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
 
     // type of local geometry storage
     typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp>
@@ -243,10 +244,11 @@ namespace Dune {
     : public ALU2dGridIntersectionBase<GridImp>
       //,  public IntersectionIteratorDefaultImplementation <GridImp, ALU2dGridLevelIntersectionIterator >
   {
-    enum { dim       = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
+    static const int dim = GridImp::dimension;
+    static const int dimworld  = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
-    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
     friend class LevelIntersectionIteratorWrapper<GridImp>;
 
     typedef ALU2dGridLevelIntersectionIterator<GridImp> ThisType;
@@ -334,20 +336,24 @@ namespace Dune {
       //, public IntersectionIteratorDefaultImplementation<GridImp, ALU2dGridLevelIntersectionIterator>
   {
     typedef ALU2dGridLeafIntersectionIterator<GridImp> ThisType;
-    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
+
     friend class LeafIntersectionIteratorWrapper<GridImp>;
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
+    static const int dim = GridImp::dimension;
+    static const int dimworld  = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
+
   public:
     typedef ALUMemoryProvider< ThisType > StorageType;
-    enum { dim       = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
 
     enum { dimension       = GridImp::dimension };
     enum { dimensionworld  = GridImp::dimensionworld };
 
   private:
-    typedef typename ALU2dImplTraits<dimworld>::ThinelementType ThinelementType;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
+
     typedef std::pair< ThinelementType *, std::pair<int, bool> > IntersectionInfo;
 
   public:
@@ -412,9 +418,10 @@ namespace Dune {
     : public ALU2dGridEntityPointer<cdim,GridImp>
       // public LeafIteratorDefaultImplementation<cdim, pitype, GridImp, ALU2dGridLeafIterator>
   {
-    enum { dim = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
-    enum { codim = cdim };
+    static const int dim = GridImp::dimension;
+    static const int dimworld  = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
+    static const int codim = cdim;
 
     friend class ALU2dGridEntity<0,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
@@ -453,7 +460,7 @@ namespace Dune {
   public:
     //! type of entity we iterate (interface)
     typedef typename GridImp::template Codim<cdim>::Entity Entity;
-    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<cdim>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<cdim>::InterfaceType ElementType;
 
     //! Constructor called by LeafIterator
     ALU2dGridLeafIterator(const GridImp & grid, bool end);
@@ -494,9 +501,10 @@ namespace Dune {
     : public ALU2dGridEntityPointer<1,GridImp>
       // public LeafIteratorDefaultImplementation<1, pitype, GridImp, ALU2dGridLeafIterator>
   {
-    enum { dim = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
-    enum { codim = 1 };
+    static const int dim = GridImp::dimension;
+    static const int dimworld  = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
+    static const int codim = 1;
 
     friend class ALU2dGridEntity<0,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
@@ -513,7 +521,7 @@ namespace Dune {
   public:
     //! type of entity we iterate (interface)
     typedef typename GridImp::template Codim<1>::Entity Entity;
-    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<1>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<1>::InterfaceType ElementType;
 
     //! Constructor called by LeafIterator
     ALU2dGridLeafIterator(const GridImp & grid, bool end);
@@ -560,9 +568,10 @@ namespace Dune {
     : public ALU2dGridEntityPointer<0,GridImp>
       // public LevelIteratorDefaultImplementation <0, pitype, GridImp, ALU2dGridLevelIterator>
   {
-    enum { dim       = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
-    enum { codim  = 0 };
+    static const int dim = GridImp::dimension;
+    static const int dimworld  = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
+    static const int codim = 0;
 
     friend class ALU2dGridEntity<dim,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
@@ -572,7 +581,7 @@ namespace Dune {
     typedef ALU2dGridEntityPointer<codim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
 
-    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
     typedef ALU2dGridLevelIterator<0,pitype,GridImp> ThisType;
 
   public:
@@ -600,7 +609,7 @@ namespace Dune {
     HElementType * item_;
 
     //! type of entity we iterate (interface)
-    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<0>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld, eltype  >::template Codim<0>::InterfaceType ElementType;
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
     IteratorType iter_;
 
@@ -617,9 +626,10 @@ namespace Dune {
     : public ALU2dGridEntityPointer<1,GridImp>
       // public LevelIteratorDefaultImplementation <1, pitype, GridImp, ALU2dGridLevelIterator>
   {
-    enum { dim       = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
-    enum { codim  = 1 };
+    static const int dim = GridImp::dimension;
+    static const int dimworld  = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
+    static const int codim = 1;
 
     friend class ALU2dGridEntity<dim,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
@@ -629,7 +639,7 @@ namespace Dune {
     typedef ALU2dGridEntityPointer<codim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
 
-    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
 
     typedef ALU2dGridLevelIterator<1,pitype,GridImp> ThisType;
   public:
@@ -661,7 +671,7 @@ namespace Dune {
     // current item
     HElementType * item_;
     //! type of entity we iterate (interface)
-    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<1>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<1>::InterfaceType ElementType;
     ElementType * elem_;
     // Listwalkptr is a proxy for iterator pointers
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
@@ -688,9 +698,10 @@ namespace Dune {
     : public ALU2dGridEntityPointer<2,GridImp>
       // public LevelIteratorDefaultImplementation <2, pitype, GridImp, ALU2dGridLevelIterator>
   {
-    enum { dim       = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
-    enum { codim  = 2 };
+    static const int dim = GridImp::dimension;
+    static const int dimworld  = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
+    static const int codim = 2;
 
     friend class ALU2dGridEntity<dim,dimworld,GridImp>;
     friend class ALU2dGridEntity<1,dimworld,GridImp>;
@@ -700,7 +711,7 @@ namespace Dune {
     typedef ALU2dGridEntityPointer<codim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
 
-    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
     typedef ALU2dGridLevelIterator<2,pitype,GridImp> ThisType;
 
   public:
@@ -731,8 +742,8 @@ namespace Dune {
     //! true if iterator is already a copy
 
     //! type of entity we iterate (interface)
-    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<0>::InterfaceType ElementType;
-    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<2>::InterfaceType VertexType;
+    typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<0>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<2>::InterfaceType VertexType;
 
     HElementType * item_;
     VertexType * vertex_;
@@ -762,11 +773,14 @@ namespace Dune {
     : public ALU2dGridEntityPointer<0,GridImp>
       // public HierarchicIteratorDefaultImplementation <GridImp,ALU2dGridHierarchicIterator>
   {
-    enum { dim = GridImp::dimension };
-    // my type
     typedef ALU2dGridHierarchicIterator<GridImp> ThisType;
 
-    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
+    static const int dim = GridImp::dimension;
+    static const int dimworld  = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
+    static const int codim = 2;
+
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 
   public:
     //! type of entities we iterate

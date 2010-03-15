@@ -386,7 +386,7 @@ namespace Dune {
       ALU2DSPACE Listwalkptr <HElementType> walk(mesh());
       for( walk->first() ; ! walk->done() ; walk->next())
       {
-        ElementType & tr = walk->getitem();
+        ElementType &tr = walk->getitem();
         tr.ALU2DSPACE Refco_el::mark(ALU2DSPACE Refco::ref);
       }
 #endif
@@ -432,15 +432,14 @@ namespace Dune {
 
 
   template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld> ::
-  hierarchicClear (ALUElementType* el)
+  inline void ALU2dGrid< dim, dimworld >::hierarchicClear ( HElementType *el )
   {
     // clear actual tag
     el->ALU2DSPACE Refco_el::clear();
     // clear refined tag
     el->ALU2DSPACE Refco_el::clearWas();
     // go to children
-    for(ALUElementType* child = el->down(); child; child = child->next())
+    for( HElementType *child = el->down(); child; child = child->next() )
     {
       // clear marker for child
       hierarchicClear(child);
@@ -460,9 +459,9 @@ namespace Dune {
     for( walk->first() ; ! walk->done() ; walk->next())
     {
       // get element pointer
-      ALUElementType* el = walk->getitem().operator ->();
+      HElementType *el = walk->getitem().operator ->();
       // hierarchically clear all markers
-      hierarchicClear(el);
+      hierarchicClear( el );
     }
 
     // reset marked element counters

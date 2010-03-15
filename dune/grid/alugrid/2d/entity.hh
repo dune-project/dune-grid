@@ -51,7 +51,8 @@ namespace Dune {
   class ALU2dGridEntity :
     public EntityDefaultImplementation <cd,dim,GridImp,ALU2dGridEntity>
   {
-    enum { dimworld = GridImp::dimensionworld };
+    static const int dimworld = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
     friend class ALU2dGrid < dim , dimworld>;
     friend class ALU2dGridIntersectionIterator < GridImp >;
@@ -72,11 +73,11 @@ namespace Dune {
 
     friend class ALU2dGridHierarchicIndexSet<dim,dimworld>;
 
-    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 
   public:
-    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<cd>::InterfaceType ElementType;
-    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<2>::InterfaceType VertexType;
+    typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<cd>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<2>::InterfaceType VertexType;
 
     //! type of our interface entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
@@ -198,7 +199,8 @@ namespace Dune {
   class ALU2dGridEntity<0,dim,GridImp>
     : public EntityDefaultImplementation<0,dim,GridImp,ALU2dGridEntity>
   {
-    enum { dimworld = GridImp::dimensionworld };
+    static const int dimworld = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
     friend class ALU2dGrid < dim , dimworld>;
     friend class ALU2dGridIntersectionIterator < GridImp >;
@@ -219,7 +221,7 @@ namespace Dune {
 
     friend class ALU2dGridHierarchicIndexSet<dim,dimworld>;
 
-    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 
   public:
     //! type of our Geometry interface
@@ -489,9 +491,12 @@ namespace Dune {
   {
     // type of this class
     typedef ALU2dGridEntityPointer< codim, GridImp > ThisType;
-    enum { dim       = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
-    typedef typename Dune::ALU2dImplTraits< dimworld >::template Codim<codim>::InterfaceType ElementType;
+
+    static const int dim = GridImp::dimension;
+    static const int dimworld = GridImp::dimensionworld;
+    static const ALU2DSPACE ElementType eltype = GridImp::elementType;
+
+    typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<codim>::InterfaceType ElementType;
 
   public:
     enum { codimension = codim };

@@ -574,7 +574,7 @@ namespace Dune {
   template<int dim, class GridImp>
   struct ElementWrapper<0,dim, GridImp>{
 
-    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits< GridImp::dimensionworld, GridImp::elementType >::HElementType HElementType ;
 
     static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i) {
       //assert(!i);
@@ -603,7 +603,7 @@ namespace Dune {
   template<int dim, class GridImp>
   struct ElementWrapper<1, dim, GridImp>{
 
-    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
+    typedef typename ALU2dImplTraits< GridImp::dimensionworld, GridImp::elementType >::HElementType HElementType ;
 
     static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i)
     {
@@ -646,8 +646,8 @@ namespace Dune {
   template<int dim, class GridImp>
   struct ElementWrapper<2, dim, GridImp>{
 
-    typedef typename ALU2dImplTraits<GridImp::dimensionworld>::HElementType HElementType ;
-    typedef typename ALU2dImplInterface< 0, GridImp::dimensionworld >::Type VertexType;
+    typedef typename ALU2dImplTraits< GridImp::dimensionworld, GridImp::elementType >::HElementType HElementType ;
+    typedef typename ALU2dImplInterface< 0, GridImp::dimensionworld, GridImp::elementType >::Type VertexType;
 
     static inline int getElemIndex(GridImp & grid, const VertexType &elem, int) {
       return elem.getIndex();

@@ -200,9 +200,13 @@ namespace Dune {
     typedef ALU2dGrid<dim,dimworld> ThisType;
     typedef GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> > BaseType;
 
-    typedef typename ALU2dImplTraits<dimworld>::HmeshType HmeshType ;
-    typedef typename ALU2dImplTraits<dimworld>::HElementType HElementType ;
-    typedef typename ALU2dImplTraits<dimworld>::ElementType ElementType ;
+  public:
+    static const ALU2DSPACE ElementType elementType = ALU2DSPACE triangle;
+
+  private:
+    typedef typename ALU2dImplTraits<dimworld, elementType >::HmeshType HmeshType ;
+    typedef typename ALU2dImplTraits<dimworld, elementType >::HElementType HElementType ;
+    typedef typename ALU2dImplTraits<dimworld, elementType >::ElementType ElementType ;
 
     template< int, int, class > friend class ALU2dGridEntity;
     // friend class ALU2dGridEntity<0,dim,const ThisType>;
@@ -487,9 +491,8 @@ namespace Dune {
 
     void calcExtras();
 
-    typedef typename ALU2dImplTraits< dimworld >::template Codim<0>:: InterfaceType ALUElementType;
     // clear refinement marker of element and all children
-    void hierarchicClear(ALUElementType* el);
+    void hierarchicClear( HElementType *el );
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
     typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
