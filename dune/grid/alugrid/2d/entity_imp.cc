@@ -63,15 +63,16 @@ namespace Dune {
     geoImpl().unsetUp2Date();
   }
 
+  /*
+     template<>
+     inline void ALU2dGridEntity<2,2,ALU2dGrid<2,2> > :: setElement(const HElementType & el, const VertexType & vx)
+     {
+     item_   = const_cast<ElementType *> (&vx);
+     level_  = (*item_).level();
 
-  template<>
-  inline void ALU2dGridEntity<2,2,ALU2dGrid<2,2> > :: setElement(const HElementType & el, const VertexType & vx)
-  {
-    item_   = const_cast<ElementType *> (&vx);
-    level_  = (*item_).level();
-
-    geoImpl().unsetUp2Date();
-  }
+     geoImpl().unsetUp2Date();
+     }
+   */
 
   //! set item pointer to NULL
   template<int cd, int dim, class GridImp>
@@ -428,19 +429,21 @@ namespace Dune {
     }
   }
 
-  //! update underlying item pointer and set entity
-  //! specialization for codim 0
-  template<>
-  inline void ALU2dGridEntityPointer<0, const ALU2dGrid<2,2> > :: updateEntityPointer(ElementType * item, int , int ) {
-    assert(item != 0);
-    item_ = item;
-    assert(item_);
+  /*
+     //! update underlying item pointer and set entity
+     //! specialization for codim 0
+     template<>
+     inline void ALU2dGridEntityPointer<0, const ALU2dGrid<2,2> > :: updateEntityPointer(ElementType * item, int , int ) {
+     assert(item != 0);
+     item_ = item;
+     assert(item_);
 
-    if( entity_ )
-    {
+     if( entity_ )
+     {
       entityImp().setElement( *item_, -1 , -1 );
-    }
-  }
+     }
+     }
+   */
 
 
   //! Constructor for EntityPointer that points to an element
@@ -512,6 +515,10 @@ namespace Dune {
   inline int ALU2dGridEntityPointer<cd, GridImp>:: level () const
   {
     assert( item_ );
+
+    if (cd == 0)
+      return item_->level();
+
     if (level_ == -1)
     {
       if (cd == 2)
@@ -525,14 +532,6 @@ namespace Dune {
       }
     }
     return level_;
-  }
-
-  //! ask for level of entities
-  template<>
-  inline int ALU2dGridEntityPointer<0, const ALU2dGrid<2,2> >:: level () const
-  {
-    assert( item_ );
-    return item_->level();
   }
 
   template<int cd, class GridImp>

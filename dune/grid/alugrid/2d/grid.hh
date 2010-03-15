@@ -62,11 +62,9 @@ namespace Dune {
   class ALU2dGridMakeableEntity;
   template <class GridImp>
   class ALU2dGridFaceGeometryInfo;
-  template<int dim, int dimworld>
-  class ALU2dGridGlobalIdSet;
-  template<int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGridLocalIdSet;
-  template<int dim, int dimworld>
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGridHierarchicIndexSet;
   template <class EntityImp>
   class ALUMemoryProvider;
@@ -91,10 +89,10 @@ namespace Dune {
     typedef ALU2dGrid< dim, dimworld, eltype > GridImp;
 
     //! Type of the global id set
-    typedef ALU2dGridLocalIdSet<dim,dimworld> GlobalIdSetImp;
+    typedef ALU2dGridLocalIdSet<dim,dimworld,eltype> GlobalIdSetImp;
 
     //! Type of the local id set
-    typedef ALU2dGridLocalIdSet<dim,dimworld> LocalIdSetImp;
+    typedef ALU2dGridLocalIdSet<dim,dimworld,eltype> LocalIdSetImp;
 
     //! Type of the level index set
     typedef DefaultLevelIndexSet< GridImp > LevelIndexSetImp;
@@ -184,7 +182,7 @@ namespace Dune {
 
    */
 
-  template< int dim, int dimworld, ALU2DSPACE ElementType eltype = ALU2DSPACE triangle >
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid
     : public GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > >,
       public HasObjectStream,
@@ -225,7 +223,7 @@ namespace Dune {
     friend class ALU2dGridEntityPointer<1,const ThisType>;
     friend class ALU2dGridEntityPointer<dim,const ThisType>;
 
-    friend class ALU2dGridHierarchicIndexSet<dim,dimworld>;
+    friend class ALU2dGridHierarchicIndexSet<dim,dimworld,elementType>;
     //friend class ALU2dGridGlobalIdSet<dim,dimworld>;
     //friend class ALU2dGridLocalIdSet<dim,dimworld>;
 
@@ -251,10 +249,10 @@ namespace Dune {
     typedef ALU2dGridFamily < dim, dimworld, eltype > GridFamily;
 
     //! Type of the hierarchic index set
-    typedef ALU2dGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSet;
+    typedef ALU2dGridHierarchicIndexSet<dim,dimworld,elementType> HierarchicIndexSet;
 
     //! Type of the local id set
-    typedef ALU2dGridLocalIdSet<dim,dimworld> LocalIdSetImp;
+    typedef ALU2dGridLocalIdSet<dim,dimworld,elementType> LocalIdSetImp;
     typedef LocalIdSetImp GlobalIdSetImp;
 
     //! Type of the global id set
@@ -526,11 +524,11 @@ namespace Dune {
     // create GeomTypes
     void makeGeomTypes ();
 
-    friend class Conversion<ALU2dGrid<dim, dimworld>, HasObjectStream>;
-    friend class Conversion<const ALU2dGrid<dim, dimworld>, HasObjectStream>;
+    friend class Conversion<ALU2dGrid<dim, dimworld,eltype>, HasObjectStream>;
+    friend class Conversion<const ALU2dGrid<dim, dimworld,eltype>, HasObjectStream>;
 
-    friend class Conversion<ALU2dGrid<dim, dimworld>, HasHierarchicIndexSet>;
-    friend class Conversion<const ALU2dGrid<dim, dimworld>, HasHierarchicIndexSet>;
+    friend class Conversion<ALU2dGrid<dim, dimworld,eltype>, HasHierarchicIndexSet>;
+    friend class Conversion<const ALU2dGrid<dim, dimworld,eltype>, HasHierarchicIndexSet>;
 
     //! Copy constructor should not be used
     ALU2dGrid( const ThisType & g );
@@ -831,20 +829,20 @@ namespace Dune {
 
   namespace Capabilities
   {
-    template<int dim, int dimw, int cdim>
-    struct hasEntity<ALU2dGrid<dim,dimw>, cdim >
+    template<int dim, int dimw, ALU2DSPACE ElementType eltype, int cdim>
+    struct hasEntity<ALU2dGrid<dim,dimw,eltype>, cdim >
     {
       static const bool v = true;
     };
 
-    template<int dim, int dimw>
-    struct isLevelwiseConforming< ALU2dGrid<dim,dimw> >
+    template<int dim, int dimw, ALU2DSPACE ElementType eltype>
+    struct isLevelwiseConforming< ALU2dGrid<dim,dimw,eltype> >
     {
       static const bool v = false;
     };
 
-    template<int dim, int dimw>
-    struct hasHangingNodes< ALU2dGrid<dim,dimw> >
+    template<int dim, int dimw, ALU2DSPACE ElementType eltype>
+    struct hasHangingNodes< ALU2dGrid<dim,dimw,eltype> >
     {
       static const bool v = false;
     };

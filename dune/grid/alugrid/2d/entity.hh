@@ -71,7 +71,7 @@ namespace Dune {
     friend class ALU2dGridLeafIterator <2, All_Partition,GridImp>;
     friend class ALU2dGridMakeableEntity<0,dim,GridImp>;
 
-    friend class ALU2dGridHierarchicIndexSet<dim,dimworld>;
+    friend class ALU2dGridHierarchicIndexSet<dim,dimworld,eltype>;
 
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 
@@ -219,7 +219,7 @@ namespace Dune {
     friend class ALU2dGridLeafIterator <2, All_Partition,GridImp>;
     friend class ALU2dGridMakeableEntity<0,dim,GridImp>;
 
-    friend class ALU2dGridHierarchicIndexSet<dim,dimworld>;
+    friend class ALU2dGridHierarchicIndexSet<dim,dimworld,eltype>;
 
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 

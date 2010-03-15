@@ -19,11 +19,11 @@ namespace Dune
    */
   template<int dimw>
   class ALUSimplexGrid< 2, dimw >
-    : public Dune::ALU2dGrid< 2, dimw >
+    : public Dune::ALU2dGrid< 2, dimw, ALU2DSPACE triangle >
   {
     typedef ALUSimplexGrid< 2, dimw > This;
 
-    typedef Dune::ALU2dGrid< 2, dimw > BaseType;
+    typedef Dune::ALU2dGrid< 2, dimw, ALU2DSPACE triangle > BaseType;
     enum { dim      = 2 };
     enum { dimworld = dimw };
 
@@ -240,11 +240,11 @@ namespace Dune
    */
   template<int dimw>
   class ALUConformGrid< 2, dimw >
-    : public Dune::ALU2dGrid< 2, dimw >
+    : public Dune::ALU2dGrid< 2, dimw, ALU2DSPACE triangle >
   {
     typedef ALUConformGrid< 2, dimw > This;
 
-    typedef Dune::ALU2dGrid<2,dimw> BaseType;
+    typedef Dune::ALU2dGrid<2,dimw, ALU2DSPACE triangle> BaseType;
     enum { dim      = 2 };
     enum { dimworld = dimw };
   public:

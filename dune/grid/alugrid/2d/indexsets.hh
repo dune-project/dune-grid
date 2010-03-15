@@ -35,17 +35,17 @@ namespace Dune
   // ---------------------------
 
   //! hierarchic index set of ALU2dGrid
-  template <int dim, int dimworld>
+  template <int dim, int dimworld, ALU2DSPACE ElementType eltype>
   class ALU2dGridHierarchicIndexSet :
-    public IndexSet< ALU2dGrid< dim, dimworld, ALU2DSPACE triangle >, // ONLY TRIANGLE
-        ALU2dGridHierarchicIndexSet< dim, dimworld >, int >
+    public IndexSet< ALU2dGrid< dim, dimworld, eltype >,
+        ALU2dGridHierarchicIndexSet< dim, dimworld, eltype >, int >
   {
-    typedef ALU2dGridHierarchicIndexSet< dim, dimworld > This;
+    typedef ALU2dGridHierarchicIndexSet< dim, dimworld, eltype > This;
 
-    typedef ALU2dGrid< dim, dimworld, ALU2DSPACE triangle > GridType; // ONLY TRIANGLE
+    typedef ALU2dGrid< dim, dimworld, eltype > GridType;
     enum { numCodim = dim+1 }; // i.e. 3
 
-    friend class ALU2dGrid< dim, dimworld, ALU2DSPACE triangle >; // ONLY TRIANGLE
+    friend class ALU2dGrid< dim, dimworld, eltype >;
 
     ALU2dGridHierarchicIndexSet( const GridType &grid )
       : grid_( grid )
@@ -542,15 +542,15 @@ namespace Dune
   //***********************************************************
 
   //! hierarchic index set of ALU3dGrid
-  template <int dim, int dimworld>
+  template <int dim, int dimworld, ALU2DSPACE ElementType eltype>
   class ALU2dGridLocalIdSet :
-    public IdSet < ALU2dGrid< dim, dimworld, ALU2DSPACE triangle >, // ONLY TRIANGLE
-        ALU2dGridLocalIdSet< dim, dimworld >, int >
+    public IdSet < ALU2dGrid< dim, dimworld, eltype >,
+        ALU2dGridLocalIdSet< dim, dimworld, eltype >, int >
   {
-    typedef ALU2dGrid< dim, dimworld, ALU2DSPACE triangle > GridType; // ONLY TRIANGLE
+    typedef ALU2dGrid< dim, dimworld, eltype > GridType;
     typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
 
-    friend class ALU2dGrid< dim, dimworld, ALU2DSPACE triangle >; // ONLY TRIANGLE
+    friend class ALU2dGrid< dim, dimworld, eltype >;
 
     // this means that only up to 300000000 entities are allowed
     enum { codimMultiplier = 300000000 };
