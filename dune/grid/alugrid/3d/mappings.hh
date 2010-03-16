@@ -129,6 +129,7 @@ namespace Dune {
                        double (&_b)[4][3] );
   } ;
 
+
   //! A bilinear surface mapping
   // NOTE: this class is different to the BilinearSurfaceMapping in
   // ALUGrid, for example the reference elements differ
@@ -212,6 +213,62 @@ namespace Dune {
     void buildMapping (const vector_t & , const vector_t & ,
                        const vector_t & , const vector_t & );
   } ;
+
+
+
+  template< int cdim >
+  class BilinearMapping
+  {
+  protected:
+    typedef alu3d_ctype ctype;
+
+    typedef FieldVector< ctype, cdim > world_t;
+    typedef FieldVector< ctype, 2 > map_t;
+
+    typedef FieldMatrix< ctype, 2, cdim > matrix_t;
+    typedef FieldMatrix< ctype, cdim, 2 > inv_t;
+
+    ctype _b [4][cdim];
+
+    mutable ctype det_;
+    mutable matrix_t matrix_;
+    mutable inv_t invTransposed_;
+
+    mutable bool affine_;
+    mutable bool calcedMatrix_;
+    mutable bool calcedDet_;
+    mutable bool calcedInv_;
+
+  public:
+    BilinearMapping ();
+    BilinearMapping ( const world_t &p0, const world_t &p1,
+                      const world_t &p2, const world_t &p3 );
+    BilinearMapping ( const ctype (&p0)[ cdim ], const ctype (&p1)[ cdim ],
+                      const ctype (&p2)[ cdim ], const ctype (&p3)[ cdim ] );
+
+    bool affine () const;
+
+    void world2map ( const world_t &, map_t & ) const;
+    void map2world ( const ctype x, const ctype y, world_t &w ) const;
+    void map2world ( const map_t &, world_t & ) const;
+
+    ctype det ( const map_t & ) const;
+
+    const matrix_t &jacobianTransposed ( const map_t & ) const;
+    const inv_t &jacobianInverseTransposed ( const map_t & ) const;
+
+    template< class vector_t >
+    void buildMapping ( const vector_t &, const vector_t &,
+                        const vector_t &, const vector_t & );
+
+  protected:
+    static void multTransposedMatrix ( const matrix_t &, FieldMatrix< ctype, 2, 2 > & );
+    static void multMatrix ( const matrix_t &, const FieldMatrix< ctype, 2, 2 > &, inv_t & );
+
+    void map2worldlinear ( const ctype, const ctype ) const;
+    void inverse ( const map_t & ) const;
+  };
+
 
 
   //! A linear surface mapping

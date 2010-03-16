@@ -360,7 +360,11 @@ namespace Dune {
     return ;
   }
 
-  //- Bilinear surface mapping
+
+
+  // BilinearSurfaceMapping
+  // ----------------------
+
   // Constructor for FieldVectors
   inline BilinearSurfaceMapping ::
   BilinearSurfaceMapping ()
@@ -525,6 +529,7 @@ namespace Dune {
     _calcedInv = _affine ;
     return ;
   }
+
   inline const BilinearSurfaceMapping:: inv_t&
   BilinearSurfaceMapping::jacobianInverseTransposed(const coord2_t & local) const
   {
@@ -586,6 +591,242 @@ namespace Dune {
     map[1] = map_[1];
     return ;
   }
+
+
+
+  // BilinearMapping
+  // ---------------
+
+  template< int cdim >
+  inline BilinearMapping< cdim >::BilinearMapping ()
+    : calcedMatrix_( false ),
+      calcedDet_( false ),
+      calcedInv_( false )
+  {
+    for( int i = 0; i < 4; ++i )
+      for( int j = 0; j < cdim; ++j )
+        _b[ i ][ j ] = ctype( 0 );
+    affine_ = true;
+  }
+
+
+  template< int cdim >
+  inline BilinearMapping< cdim >
+  ::BilinearMapping ( const world_t &p0, const world_t &p1,
+                      const world_t &p2, const world_t &p3 )
+  {
+    buildMapping( p0, p1, p2, p3 );
+  }
+
+
+  template< int cdim >
+  inline BilinearMapping< cdim >
+  ::BilinearMapping ( const ctype (&p0)[ cdim ], const ctype (&p1)[ cdim ],
+                      const ctype (&p2)[ cdim ], const ctype (&p3)[ cdim ] )
+  {
+    buildMapping( p0, p1, p2, p3 );
+  }
+
+
+  template< int cdim >
+  inline bool BilinearMapping< cdim >::affine () const
+  {
+    return affine_;
+  }
+
+
+  template< int cdim >
+  inline void BilinearMapping< cdim >::map2world ( const map_t &m, world_t &w ) const
+  {
+    map2world( m[0], m[1], w );
+  }
+
+
+  template< int cdim >
+  inline void BilinearMapping< cdim >::map2world ( const ctype x, const ctype y, world_t &w ) const
+  {
+    const alu3d_ctype xy = x * y;
+    for( int i = 0; i < cdim; ++i )
+      w[i] = _b [0][i] + x * _b [1][i] + y * _b [2][i] + xy * _b [3][i];
+  }
+
+
+  template< int cdim >
+  inline void BilinearMapping< cdim >::world2map ( const world_t &w, map_t &m ) const
+  {
+    ctype error;
+    do {
+      world_t dw;
+      map2world( m, dw );
+      dw -= w;
+
+      inverse( m );
+
+      map_t dm;
+      invTransposed_.mtv( dw, dm );
+      error = dm.two_norm2();
+      m -= dm;
+    }
+    while( error > ALUnumericEpsilon * ALUnumericEpsilon );
+  }
+
+
+  template< int cdim >
+  inline typename BilinearMapping< cdim >::ctype
+  BilinearMapping< cdim >::det ( const map_t &m ) const
+  {
+    inverse( m );
+    return det_;
+  }
+
+  template<>
+  inline BilinearMapping< 2 >::ctype
+  BilinearMapping< 2 >::det ( const map_t &m ) const
+  {
+    if( !calcedDet_ )
+    {
+      map2worldlinear( m[0], m[1] );
+
+      const world_t &u = matrix_[0];
+      const world_t &v = matrix_[1];
+
+      det_ = fabs( u[0] * v[1] - u[1] * v[0] );
+      calcedDet_ = affine();
+    }
+    return det_;
+  }
+
+  template<>
+  inline BilinearMapping< 3 >::ctype
+  BilinearMapping< 3 >::det ( const map_t &m ) const
+  {
+    if( !calcedDet_ )
+    {
+      map2worldlinear( m[0], m[1] );
+
+      const world_t &u = matrix_[0];
+      const world_t &v = matrix_[1];
+
+      world_t n;
+      for ( int i = 0; i < 3; ++i )
+        n[i] = v[(i+1)%3] * u[(i+2)%3] - v[(i+2)%3] * u[(i+1)%3];
+
+      det_ = n.two_norm();
+      calcedDet_ = affine();
+    }
+    return det_;
+  }
+
+
+  template< int cdim >
+  inline const typename BilinearMapping< cdim >::matrix_t &
+  BilinearMapping< cdim >::jacobianTransposed ( const map_t &m ) const
+  {
+    map2worldlinear( m[0], m[1] );
+    return matrix_;
+  }
+
+
+  template< int cdim >
+  inline const typename BilinearMapping< cdim >::inv_t &
+  BilinearMapping< cdim >::jacobianInverseTransposed ( const map_t &m ) const
+  {
+    inverse( m );
+    return invTransposed_;
+  }
+
+
+  template< int cdim >
+  template< class vector_t >
+  inline void BilinearMapping< cdim >
+  ::buildMapping ( const vector_t &p0, const vector_t &p1,
+                   const vector_t &p2, const vector_t &p3 )
+  {
+    for( int i = 0; i < cdim; ++i )
+    {
+      _b [0][i] = p0 [i];
+      _b [1][i] = p1 [i] - p0 [i];
+      _b [2][i] = p2 [i] - p0 [i];
+      _b [3][i] = p3 [i] - p2 [i] - _b [1][i];
+    }
+
+    ctype sum = fabs( _b [3][0] );
+    for( int i = 1; i < cdim; ++i )
+      sum += fabs( _b [3][i] );
+    affine_ = (sum < ALUnumericEpsilon );
+
+    calcedMatrix_ = calcedDet_ = calcedInv_ = false;
+  }
+
+
+  template< int cdim >
+  inline void BilinearMapping< cdim >
+  ::multTransposedMatrix ( const matrix_t &A, FieldMatrix< ctype, 2, 2 > &C )
+  {
+    for( int i = 0; i < 2; ++i )
+    {
+      for( int j = 0; j < 2; ++j )
+      {
+        C[i][j] = A[i][0] * A[j][0];
+        for( int k=1; k < cdim; ++k )
+          C[i][j] += A[i][k] * A[j][k];
+      }
+    }
+  }
+
+
+  template< int cdim >
+  inline void BilinearMapping< cdim >
+  ::multMatrix ( const matrix_t &A, const FieldMatrix< ctype, 2, 2 > &B, inv_t &C )
+  {
+    for( int i = 0; i < cdim; ++i )
+      for( int j = 0; j < 2; ++j )
+        C[i][j] = A[0][i] * B[0][j] + A[1][i] * B[1][j];
+  }
+
+
+  template< int cdim >
+  inline void BilinearMapping< cdim >
+  ::map2worldlinear ( const alu3d_ctype x, const alu3d_ctype y ) const
+  {
+    if( !calcedMatrix_ )
+    {
+      for( int i = 0; i < cdim; ++i )
+      {
+        matrix_[i][0] = _b [1][i] + y * _b [3][i];
+        matrix_[i][1] = _b [2][i] + x * _b [3][i];
+      }
+      calcedMatrix_ = affine();
+    }
+  }
+
+
+  template<>
+  inline void BilinearMapping< 2 >::inverse ( const map_t &m ) const
+  {
+    if( !calcedInv_ )
+    {
+      map2worldlinear ( m[0], m[1] );
+      det_ = std::abs( FMatrixHelp::invertMatrix( matrix_, invTransposed_ ) );
+      calcedDet_ = calcedInv_ = affine();
+    }
+  }
+
+  template< int cdim >
+  inline void BilinearMapping< cdim >::inverse ( const map_t &m ) const
+  {
+    // use least squares approach
+    if( !calcedInv_ )
+    {
+      FieldMatrix< ctype, 2, 2 > AT_A, inv_AT_A;
+      multTransposedMatrix( matrix_, AT_A );
+      FMatrixHelp::invertMatrix( AT_A, inv_AT_A );
+      multMatrix( matrix_, inv_AT_A, invTransposed_ );
+      calcedInv_ = affine();
+    }
+  }
+
+
 
   ////////////////////////////////////////////////////////////////////////
   //
