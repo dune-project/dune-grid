@@ -30,8 +30,7 @@ namespace Dune
     grid_(grid),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
     nFaces_(3),
-    walkLevel_(wLevel),
-    done_(end)
+    walkLevel_(wLevel)
   {
     if (!end)
     {
@@ -52,8 +51,7 @@ namespace Dune
     grid_(grid),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
     nFaces_(3),
-    walkLevel_(wLevel),
-    done_(true)
+    walkLevel_(wLevel)
   {
     this->done();
   }
@@ -70,8 +68,7 @@ namespace Dune
     grid_(org.grid_),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
     nFaces_(org.nFaces_),
-    walkLevel_(org.walkLevel_),
-    done_(org.done_)
+    walkLevel_(org.walkLevel_)
   {}
 
   template<class GridImp>
@@ -82,7 +79,6 @@ namespace Dune
     assert( &grid_ == &org.grid_);
     nFaces_    = org.nFaces_;
     walkLevel_ = org.walkLevel_;
-    done_ = org.done_;
     current = org.current;
 
     // unset geometry information
@@ -91,11 +87,10 @@ namespace Dune
 
   //! check whether entities are the same or whether iterator is done
   template<class GridImp>
-  inline bool ALU2dGridIntersectionBase<GridImp> ::
-  equals (const ALU2dGridIntersectionBase<GridImp> & i) const
+  inline bool ALU2dGridIntersectionBase< GridImp >
+  ::equals ( const ALU2dGridIntersectionBase< GridImp > &other ) const
   {
-    return ((this->current.item_ == i.current.item_) &&
-            (this->done_ == i.done_));
+    return ((current.item_ == other.current.item_) && (current.index_ == other.current.index_));
   }
 
 
@@ -122,15 +117,14 @@ namespace Dune
   }
 
   //! reset IntersectionIterator to first neighbour
-  template<class GridImp>
-  inline void ALU2dGridIntersectionBase<GridImp> :: setFirstItem(const HElementType & elem, int wLevel)
+  template< class GridImp >
+  inline void ALU2dGridIntersectionBase< GridImp >::setFirstItem(const HElementType & elem, int wLevel)
   {
-    this->current.item_ = const_cast<HElementType *> (&elem);
-    assert( this->current.item_ );
+    current.item_ = const_cast< HElementType * >( &elem );
+    assert( current.item_ != 0 );
     walkLevel_ = wLevel;
-    done_ = false;
-    this->current.index_ = 0;
-    this->current.opposite_ = this->current.item_->opposite(this->current.index_);
+    current.index_ = 0;
+    current.opposite_ = current.item_->opposite( current.index_ );
 
     unsetUp2Date();
   }
@@ -213,9 +207,9 @@ namespace Dune
     return EntityPointerImp(grid_, *(this->current.item_), -1, walkLevel_);
   }
 
-  template<class GridImp>
-  inline void ALU2dGridIntersectionBase<GridImp> :: done() {
-    done_ = true;
+  template< class GridImp >
+  inline void ALU2dGridIntersectionBase<GridImp>::done ()
+  {
     current.item_ = 0;
     current.neigh_ = 0;
     current.index_= nFaces_;
@@ -582,7 +576,6 @@ namespace Dune
 
 
     this->walkLevel_ = wLevel;
-    this->done_ = false;
 
     assert(this->current. item_ );
 
@@ -762,7 +755,6 @@ namespace Dune
     this->current.index_ = -1;
     assert(this->current.item_ );
     this->walkLevel_ = wLevel;
-    this->done_ = false;
     increment();
   }
 

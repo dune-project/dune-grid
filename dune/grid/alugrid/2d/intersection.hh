@@ -225,9 +225,6 @@ namespace Dune
 
     // unit outer normal
     mutable NormalType outerNormal_;
-
-    // true if end iterator
-    bool done_;
   }; // end ALU2dGridIntersectionBase
 
 
