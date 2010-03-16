@@ -1,11 +1,13 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_ALU2DGRIDGEOMETRYIMP_CC
-#define DUNE_ALU2DGRIDGEOMETRYIMP_CC
+#ifndef DUNE_ALU2DGRID_GEOMETRYIMP_CC
+#define DUNE_ALU2DGRID_GEOMETRYIMP_CC
 
 #include <dune/grid/genericgeometry/conversion.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
-namespace Dune {
+namespace Dune
+{
 
   // implementation of methods
 
@@ -16,121 +18,180 @@ namespace Dune {
   //**********************************************************************
 
 
-  template <int mydim, int cdim, class GridImp>
-  inline ALU2dGridGeometry<mydim, cdim, GridImp> :: ALU2dGridGeometry()
-    : geoImpl_()
-      , det_(1.0)
-      , up2Date_(false)
+  template< int mydim, int cdim, class GridImp >
+  inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ()
+    : geoImpl_(),
+      det_( 1.0 ),
+      up2Date_( false )
 #ifndef NDEBUG
-      , haveProjection_ ( false )
+      , haveProjection_( false )
 #endif
   {}
 
-  //! print the GeometryInformation
-  template <int mydim, int cdim, class GridImp>
-  inline void ALU2dGridGeometry <mydim, cdim, GridImp> :: print (std::ostream& ss) const {
 
-    ss << "ALU2dGridGeometry<" << mydim << "," << cdim << "> = {\n";
-    for(int i=0; i<corners(); i++)
+  //! print the GeometryInformation
+  template< int mydim, int cdim, class GridImp >
+  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::print ( std::ostream &out ) const
+  {
+    out << "ALU2dGridGeometry< " << mydim << ", " << cdim << " > = ";
+    char c = '{';
+    for( int i = 0; i < corners(); ++i )
     {
-      ss << " corner " << i << " ";
-      ss << "{" << ((*this)[i]) << "}"; ss << std::endl;
+      out << c << " (" << corner( i ) << ")";
+      c = ',';
     }
-    ss << "} \n";
+    out << " }" << std::endl;
   }
+
 
   //! return the element type identifier
   //! line , triangle or tetrahedron, depends on dim
-  template <int mydim, int cdim, class GridImp>
+  template< int mydim, int cdim, class GridImp >
   inline const GeometryType ALU2dGridGeometry< mydim, cdim, GridImp >::type () const
   {
-    return GeometryType( GeometryType::simplex, mydim );
+    if( mydim == 2 )
+    {
+      switch( GridImp::elementType )
+      {
+      case ALU2DSPACE triangle :
+        return GeometryType( GeometryType::simplex, 2 );
+
+      case ALU2DSPACE quadrilateral :
+        return GeometryType( GeometryType::cube, 2 );
+
+      case ALU2DSPACE mixed :
+        DUNE_THROW( NotImplemented, "Geometry::type() not implemented for ElementType mixed." );
+      }
+    }
+    else
+      return GeometryType( GeometryType::simplex, mydim );
   }
 
-  //! return the number of corners of this element. Corners are numbered 0...mydim+1
-  template <int mydim, int cdim, class GridImp>
-  inline int ALU2dGridGeometry<mydim, cdim, GridImp> :: corners () const
+  //! return the number of corners of this element. Corners are numbered 0...mydim
+  template< int mydim, int cdim, class GridImp >
+  inline int ALU2dGridGeometry< mydim, cdim, GridImp >::corners () const
   {
-    return mydim+1;
+    if( mydim == 2 )
+    {
+      switch( GridImp::elementType )
+      {
+      case ALU2DSPACE triangle :
+        return 3;
+
+      case ALU2DSPACE quadrilateral :
+        return 4;
+
+      case ALU2DSPACE mixed :
+        DUNE_THROW( NotImplemented, "Geometry::corners() not implemented for ElementType mixed." );
+      }
+    }
+    else
+      return mydim+1;
   }
 
   ///////////////////////////////////////////////////////////////////////
 
+
   //! access to coordinates of corners. Index is the number of the corner
   template <int mydim, int cdim, class GridImp>
-  inline const FieldVector<alu2d_ctype, cdim>& ALU2dGridGeometry<mydim, cdim, GridImp> :: operator[] (int i) const
+  inline const typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate &
+  ALU2dGridGeometry< mydim, cdim, GridImp >::operator[] ( int i ) const
   {
     typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
     const unsigned int tid = GenericGeometry::topologyId( type() );
-    const int j = Numbering::template generic2dune< mydim >( tid, i );
-    return this->operator[](j);
+    static GlobalCoordinate c;
+    return (c = corner( Numbering::template dune2generic< mydim >( tid, i ) ));
   }
 
+
   //! access to coordinates of corners. Index is the number of the corner
-  template <int mydim, int cdim, class GridImp>
-  inline FieldVector<alu2d_ctype, cdim> ALU2dGridGeometry<mydim, cdim, GridImp> ::
-  corner(int i) const
+  template< int mydim, int cdim, class GridImp >
+  inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
+  ALU2dGridGeometry< mydim, cdim, GridImp >::corner ( int i ) const
   {
-    return geoImpl_[ i ];
+    const GenericReferenceElement< alu2d_ctype, mydim > &refElement
+      = GenericReferenceElements< alu2d_ctype, mydim >::general( type() );
+    return global( refElement.position( i, mydim ) );
   }
+
 
   //! maps a local coordinate within reference element to
   //! global coordinate in element
-  template <int mydim, int cdim, class GridImp>
-  inline FieldVector<alu2d_ctype, cdim> ALU2dGridGeometry<mydim, cdim, GridImp> ::
-  global (const FieldVector<alu2d_ctype, mydim>& local) const
+  template< int mydim, int cdim, class GridImp >
+  inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
+  ALU2dGridGeometry< mydim, cdim, GridImp >::global ( const LocalCoordinate &local ) const
   {
-    if ( cdim == 0)
-      return geoImpl_[0];
-    FieldVector<alu2d_ctype, cdim> global;
-    geoImpl_.mapping().map2world(local, global);
+    GlobalCoordinate global;
+    geoImpl_.mapping().map2world( local, global );
     return global;
   }
 
+
   //! maps a global coordinate within the element to a
   //! local coordinate in its reference element
-  template <int mydim, int cdim, class GridImp>
-  inline FieldVector<alu2d_ctype,  mydim> ALU2dGridGeometry <mydim, cdim, GridImp> ::
-  local (const FieldVector<alu2d_ctype, cdim>& global) const
+  template< int mydim, int cdim, class GridImp >
+  inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::LocalCoordinate
+  ALU2dGridGeometry< mydim, cdim, GridImp >::local ( const GlobalCoordinate &global ) const
   {
-    if (mydim == 0)
-      return FieldVector<alu2d_ctype, mydim> (1);
-    FieldVector<alu2d_ctype, mydim> local;
-    geoImpl_.mapping().world2map(global, local);
+    if( mydim == 0 )
+      return LocalCoordinate( 1 );
+
+    LocalCoordinate local;
+    geoImpl_.mapping().world2map( global, local );
     return local;
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>::
-  integrationElement (const FieldVector<alu2d_ctype, mydim>& local) const
+
+  template< int mydim, int cdim, class GridImp >
+  inline alu2d_ctype
+  ALU2dGridGeometry< mydim, cdim, GridImp >::integrationElement ( const LocalCoordinate &local ) const
   {
-    return (mydim==0) ? 1. : det_;
+    return (mydim == 0 ? 1.0 : det_);
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>:: volume () const
+
+  template< int mydim, int cdim, class GridImp >
+  inline alu2d_ctype ALU2dGridGeometry< mydim, cdim, GridImp >::volume () const
   {
-    return (mydim == 2) ? 0.5 * det_ : (mydim == 1) ? det_ : 1.;
+    if( mydim == 2 )
+    {
+      switch( GridImp::elementType )
+      {
+      case ALU2DSPACE triangle :
+        return 0.5 * det_;
+
+      case ALU2DSPACE quadrilateral :
+        return det_;
+
+      case ALU2DSPACE mixed :
+        DUNE_THROW( NotImplemented, "Geometry::volume() not implemented for ElementType mixed." );
+      }
+    }
+    else
+      return (mydim == 0 ? 1.0 : det_);
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<alu2d_ctype,mydim,cdim>& ALU2dGridGeometry<mydim,cdim,GridImp>::
-  jacobianTransposed (const FieldVector<alu2d_ctype, mydim>& local) const
+
+  template< int mydim, int cdim, class GridImp >
+  inline const FieldMatrix<alu2d_ctype,mydim,cdim>&
+  ALU2dGridGeometry< mydim, cdim, GridImp>::jacobianTransposed ( const LocalCoordinate &local ) const
   {
     return geoImpl_.mapping().jacobianTransposed( local );
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<alu2d_ctype,cdim,mydim>& ALU2dGridGeometry<mydim,cdim,GridImp>::
-  jacobianInverseTransposed (const FieldVector<alu2d_ctype, mydim>& local) const
+
+  template< int mydim, int cdim, class GridImp >
+  inline const FieldMatrix<alu2d_ctype,cdim,mydim>&
+  ALU2dGridGeometry< mydim, cdim, GridImp >::jacobianInverseTransposed ( const LocalCoordinate &local ) const
   {
     return geoImpl_.mapping().jacobianInverseTransposed( local );
   }
 
+
   //! built Geometry for triangles
-  template <int mydim, int cdim, class GridImp>
-  inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildGeom(const HElementType & item)
+  template< int mydim, int cdim, class GridImp >
+  inline bool
+  ALU2dGridGeometry< mydim, cdim, GridImp >::buildGeom( const HElementType &item )
   {
     // check item
     assert( &item );
@@ -140,8 +201,12 @@ namespace Dune {
                      item.getVertex( 1 )->coord() ,
                      item.getVertex( 2 )->coord() );
 
-    // store det
-    det_ = 2.0 * item.area();
+    // store volume
+    det_ = item.area();
+    if( (mydim == 2) && (GridImp::elementType == ALU2DSPACE triangle) )
+      det_ *= 2;
+    if( GridImp::elementType == ALU2DSPACE mixed )
+      DUNE_THROW( NotImplemented, "Geometry::buildGeom() not implemented for ElementType mixed." );
 
     // geom is up2date
     up2Date_ = true;
@@ -149,6 +214,7 @@ namespace Dune {
     // geometry built
     return true;
   }
+
 
   //! built Geometry for edges
   template <int mydim, int cdim, class GridImp>
@@ -165,7 +231,7 @@ namespace Dune {
     geoImpl_.update( item.getVertex( (aluFace + (1 + twist)) % 3 )->coord() ,
                      item.getVertex( (aluFace + (2 - twist)) % 3 )->coord() );
 
-    // store det
+    // store volume
     det_ = item.sidelength( aluFace );
 
     // geom is up2date
@@ -202,7 +268,7 @@ namespace Dune {
     geoImpl_.updateLocal( geo, localGeom );
 
     // calculate volume
-    FieldVector<alu2d_ctype, mydim> local(0.25);
+    LocalCoordinate local( 0.25 );
     det_ = geoImpl_.mapping().det( local );
 
     // geom is up2date
@@ -274,8 +340,7 @@ namespace Dune {
 
     // store volume which is a part of one
     det_ = myGeom.volume() / fatherGeom.volume();
-    assert( det_ > 0.0 );
-    assert( det_ < 1.0 );
+    assert( (det_ > 0.0) && (det_ < 1.0) );
 
     // geom is up2date
     up2Date_ = true;
@@ -289,4 +354,5 @@ namespace Dune {
   }
 
 } //end namespace Dune
-#endif
+
+#endif // #ifndef DUNE_ALU2DGRID_GEOMETRYIMP_CC
