@@ -193,7 +193,7 @@ namespace Dune
     GeometryType type () const;
 
   protected:
-    virtual bool conforming() const = 0;
+    //virtual bool conforming() const = 0;
 
     //! return true if intersection is with boundary
     void checkValid () ;
@@ -239,11 +239,13 @@ namespace Dune
   // --IntersectionLevelIterator
   //**********************************************************************
 
-  template<class GridImp>
+  template< class GridImp >
   class ALU2dGridLevelIntersectionIterator
-    : public ALU2dGridIntersectionBase<GridImp>
-      //,  public IntersectionIteratorDefaultImplementation <GridImp, ALU2dGridLevelIntersectionIterator >
+    : public ALU2dGridIntersectionBase< GridImp >
   {
+    typedef ALU2dGridLevelIntersectionIterator< GridImp > ThisType;
+    typedef ALU2dGridIntersectionBase< GridImp > BaseType;
+
     static const int dim = GridImp::dimension;
     static const int dimworld  = GridImp::dimensionworld;
     static const ALU2DSPACE ElementType eltype = GridImp::elementType;
@@ -251,7 +253,6 @@ namespace Dune
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
     friend class LevelIntersectionIteratorWrapper<GridImp>;
 
-    typedef ALU2dGridLevelIntersectionIterator<GridImp> ThisType;
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
     typedef std::pair<HElementType *, std::pair<int, bool> > IntersectionInfo;
@@ -288,21 +289,19 @@ namespace Dune
     //! increment iterator
     void increment ();
 
-  protected:
-    bool isConform() const {
-      return this->neighbor() ?
-             this->current.neigh_ == this->current.item_->neighbour(this->current.index_) :
-             true;
-    }
   public:
     //! level is conforming when non-conform grid used
     //! otherwise might not be conform
     bool conforming () const
     {
-      return ( this->grid_.nonConform() ) ?
-             true : isConform();
+      return (this->grid_.nonConform() || isConform());
     }
 
+  protected:
+    bool isConform() const
+    {
+      return (!this->neighbor() || (current.neigh_ == current.item_->neighbour( current.index_ )));
+    }
 
   private:
     void doIncrement ();
@@ -319,8 +318,17 @@ namespace Dune
     int getOppositeInFather(int nrInChild, int nrOfChild) const;
     int getOppositeInChild(int nrInFather, int nrOfChild) const;
 
+    void setupIntersection ();
+
+  protected:
+    using BaseType::current;
+    using BaseType::nFaces_;
+    using BaseType::walkLevel_;
+
+  private:
     mutable std::stack<IntersectionInfo> neighbourStack_;
   }; // end ALU2dGridLevelIntersectionIterator
+
 
 
   //********************************************************************
@@ -330,12 +338,12 @@ namespace Dune
   //
   //********************************************************************
 
-  template<class GridImp>
+  template< class GridImp >
   class ALU2dGridLeafIntersectionIterator
-    : public ALU2dGridIntersectionBase<GridImp>
-      //, public IntersectionIteratorDefaultImplementation<GridImp, ALU2dGridLevelIntersectionIterator>
+    : public ALU2dGridIntersectionBase< GridImp >
   {
-    typedef ALU2dGridLeafIntersectionIterator<GridImp> ThisType;
+    typedef ALU2dGridLeafIntersectionIterator< GridImp > ThisType;
+    typedef ALU2dGridIntersectionBase< GridImp > BaseType;
 
     friend class LeafIntersectionIteratorWrapper<GridImp>;
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
@@ -382,12 +390,17 @@ namespace Dune
     //! increment iterator
     void increment ();
 
+  public:
     //! leaf is conforming, when conform grid version used
     bool conforming () const
     {
-      return ( this->grid_.nonConform() ) ?
-             ((this->neighbor()) ? (this->current.item_->level() == this->current.neigh_->level()) : true ) :
-             true;
+      return (!this->grid_.nonConform() || isConform());
+    }
+
+  protected:
+    bool isConform() const
+    {
+      return (!this->neighbor() || (current.neigh_->level() == current.item_->level()));
     }
 
   private:
@@ -399,8 +412,14 @@ namespace Dune
     template <class EntityType>
     void first(const EntityType & en, int wLevel);
 
-    std::stack<IntersectionInfo> nbStack_;
+    void setupIntersection ();
 
+  protected:
+    using BaseType::current;
+    using BaseType::nFaces_;
+
+  private:
+    std::stack<IntersectionInfo> nbStack_;
 
   }; // end ALU2dGridLeafIntersectionIterator
 

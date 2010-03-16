@@ -39,9 +39,7 @@ namespace Dune
       this->setFirstItem(*el,wLevel);
     }
     else
-    {
       this->done();
-    }
   }
 
   //constructor for end iterator
@@ -463,109 +461,96 @@ namespace Dune
   template<class GridImp>
   inline void ALU2dGridLevelIntersectionIterator<GridImp> :: doIncrement ()
   {
-    if (this->current.index_ >= this->nFaces_) {
+    assert( current.index_ < nFaces_ );
+#if 0
+    // this cannot happen
+    if( current.index_ >= nFaces_ )
+    {
       this->done();
       return;
     }
+#endif
 
     this->unsetUp2Date();
 
-    if (neighbourStack_.empty())
+    if( neighbourStack_.empty() )
     {
-      ++this->current.index_;
-      if (this->current.index_ >= this->nFaces_)
+      ++current.index_;
+      if( current.index_ >= nFaces_ )
       {
         this->done();
-        return ;
+        return;
       }
 
       addNeighboursToStack();
       // if more then one element in stack we have non-conform intersection
       this->current.useOutside_ = (neighbourStack_.size() > 1);
-      if (neighbourStack_.empty())
+
+      if( neighbourStack_.empty() )
       {
-        this->current.neigh_ = 0;
-        this->current.opposite_ = this->current.item_->opposite(this->current.index_);
+        current.neigh_ = 0;
+        current.opposite_ = current.item_->opposite( current.index_ );
         // we have only boundary if intersection is on domain boundary
-        this->current.isBoundary_  = (this->current.item_->nbbnd(this->current.index_) != 0);
+        current.isBoundary_  = (current.item_->nbbnd( current.index_ ) != 0);
         return;
       }
     }
 
-    IntersectionInfo& info    = neighbourStack_.top();
-    this->current.neigh_      = info.first;
-    this->current.opposite_   = info.second.first;
-    this->current.isBoundary_ = info.second.second;
-    assert( this->current.isBoundary_ == false);
-    neighbourStack_.pop();
+    setupIntersection();
 
-    assert( (this->current.neigh_) ? (this->current.neigh_->level()==this->walkLevel_) : 1);
-    return;
+    assert( !current.isBoundary_ );
+    assert( !current.neigh_ || (current.neigh_->level() == walkLevel_) );
   }
 
-  template<class GridImp>
-  inline void ALU2dGridLevelIntersectionIterator<GridImp> ::
-  addNeighboursToStack ()
+
+  template< class GridImp >
+  inline void
+  ALU2dGridLevelIntersectionIterator< GridImp >::addNeighboursToStack ()
   {
-    assert (this->current.index_ < 3);
+    assert( current.index_ < nFaces_ );
+
     IntersectionInfo dummy;
+    dummy.first = current.item_->nbel( current.index_ );
+    if( dummy.first == 0 )
+      return;
 
-    dummy.first = this->current.item_->nbel(this->current.index_);
-    if(dummy.first == 0)
-    {
-      return ;
-    }
-
-    dummy.second.first = this->current.item_->opposite(this->current.index_);
+    dummy.second.first = current.item_->opposite( current.index_ );
     dummy.second.second = false;
 
-    if (dummy.first->level() == this->walkLevel_) {
-      neighbourStack_.push(dummy);
-    }
-    else if (dummy.first->level() > this->walkLevel_)
+    while( dummy.first->level() > walkLevel_ )
     {
-      while (dummy.first->level() > this->walkLevel_)
-      {
-        dummy.second.first =
-          getOppositeInFather(dummy.second.first, dummy.first->childNr());
-        assert(dummy.second.first >= 0 && (dummy.second.first) < 3); // parsing error???
-        dummy.first = dummy.first->father();
-      }
-      assert(dummy.first->level()==this->walkLevel_);
-      neighbourStack_.push(dummy);
+      dummy.second.first = getOppositeInFather( dummy.second.first, dummy.first->childNr() );
+      assert( (dummy.second.first >= 0) && (dummy.second.first) < nFaces_); // parsing error???
+      dummy.first = dummy.first->father();
     }
-    else
+
+    if( dummy.first->level() < walkLevel_ )
     {
-      while ( dummy.first )
+      while( dummy.first != 0 )
       {
-        const int lev = dummy.first->level();
-        if(lev >= this->walkLevel_ - 1) break;
+        const int level = dummy.first->level();
+        if( level >= walkLevel_ - 1 )
+          break;
 
-        dummy.second.first =
-          getOppositeInFather(dummy.second.first, dummy.first->childNr() );
-        assert(dummy.second.first >= 0 && (dummy.second.first) < 3); // parsing error???
-
-        // get next
+        dummy.second.first = getOppositeInFather( dummy.second.first, dummy.first->childNr() );
+        assert( (dummy.second.first >= 0) && (dummy.second.first) < nFaces_); // parsing error???
         dummy.first = dummy.first->father();
       }
 
-      if (dummy.first)
+      if( dummy.first != 0 )
       {
-        assert(dummy.first->level() == this->walkLevel_ - 1);
+        assert( dummy.first->level() == walkLevel_ - 1 );
 
-        HElementType * tmp = dummy.first->down();
-        while ( tmp )
+        for( HElementType *tmp = dummy.first->down(); tmp != 0; tmp = tmp->next() )
         {
-          int tmpOpposite = getOppositeInChild(dummy.second.first, tmp->childNr() );
-          if (tmpOpposite != -1)
-          {
-            IntersectionInfo dummy2(tmp, std::pair<int, bool> (tmpOpposite, false));
-            neighbourStack_.push(dummy2);
-          }
-          tmp = tmp->next();
+          int tmpOpposite = getOppositeInChild( dummy.second.first, tmp->childNr() );
+          if( tmpOpposite != -1 )
+            neighbourStack_.push( IntersectionInfo( tmp, std::pair< int, bool >( tmpOpposite, false ) ) );
         }
       }
     }
+    else
+      neighbourStack_.push( dummy );
   }
 
   //! reset IntersectionIterator to first neighbour
@@ -603,6 +588,20 @@ namespace Dune
 
     increment();
   }
+
+
+  template< class GridImp >
+  inline void ALU2dGridLevelIntersectionIterator< GridImp >::setupIntersection ()
+  {
+    assert( !neighbourStack_.empty() );
+
+    IntersectionInfo &info = neighbourStack_.top();
+    current.neigh_ = info.first;
+    current.opposite_ = info.second.first;
+    current.isBoundary_ = info.second.second;
+    neighbourStack_.pop();
+  }
+
 
   //********************************************************************
   //
@@ -668,83 +667,68 @@ namespace Dune
   template<class GridImp>
   inline void ALU2dGridLeafIntersectionIterator<GridImp> :: doIncrement ()
   {
-    if (this->current.index_ >= this->nFaces_)
+    assert( current.index_ < nFaces_ );
+#if 0
+    // this cannot happen
+    if( current.index_ >= nFaces_ )
     {
       this->done();
       return ;
     }
+#endif
 
     this->unsetUp2Date();
 
     // non conform case and we still have neighbours
-    if(this->current.item_->hashvtx(this->current.index_) && !nbStack_.empty())
+    if( current.item_->hashvtx( current.index_ ) && !nbStack_.empty() )
     {
-      IntersectionInfo& info = nbStack_.top();
-      this->current.neigh_      = static_cast<HElementType *>(info.first);
-      this->current.opposite_   = info.second.first;
-      this->current.isBoundary_ = info.second.second;
-      nbStack_.pop();
+      setupIntersection();
       return;
     }
 
-    ++this->current.index_;
-    if (this->current.index_ >= this->nFaces_)
+    ++current.index_;
+    if( current.index_ >= nFaces_ )
     {
       this->done();
       return;
     }
 
+    current.useOutside_ = current.item_->hasHangingNode( current.index_ );
     // non-conform case
-    if (this->current.item_->hasHangingNode(this->current.index_))
+    if( current.useOutside_ )
     {
-      this->current.useOutside_ = true;
       // stack should be empty here
       assert( nbStack_.empty() );
 
       IntersectionInfo dummy;
 
       // insert left intersection
-      dummy.first = this->current.item_->getLeftIntersection(this->current.index_);
-      dummy.second.first = this->current.item_->opposite(this->current.index_);
-      dummy.second.second = (dummy.first==0) ? true : false ;
-      nbStack_.push(dummy);
+      dummy.first = current.item_->getLeftIntersection( current.index_ );  // neighbor
+      dummy.second.first = current.item_->opposite( current.index_ );      // opposite vertex
+      dummy.second.second = (dummy.first ==0);                             // is boundary
+      nbStack_.push( dummy );
 
       // insert right intersection
-      dummy.first = this->current.item_->getRightIntersection(this->current.index_);
-      dummy.second.first = this->current.item_->opposite(this->current.index_);
-      dummy.second.second = (dummy.first==0) ? true : false ;
-      nbStack_.push(dummy);
+      dummy.first = current.item_->getRightIntersection( current.index_ ); // neighbor
+      dummy.second.first = current.item_->opposite( current.index_ );      // opposite vertex
+      dummy.second.second = (dummy.first == 0);                            // is boundary
+      nbStack_.push( dummy );
 
-      // nbStack should contain some elements here
-      assert( ! nbStack_.empty() );
-
-      IntersectionInfo& info    = nbStack_.top();
-      this->current.neigh_      = static_cast<HElementType *>(info.first);
-      this->current.opposite_   = info.second.first;
-      this->current.isBoundary_ = info.second.second;
-      nbStack_.pop();
+      setupIntersection();
     }
     //conform case
     else
     {
-      this->current.useOutside_ = false;
-      this->current.neigh_ = this->current.item_->nbel(this->current.index_);
-      if (this->current.neigh_ == 0)
-      {
-        this->current.isBoundary_ = true;
-        this->current.opposite_ = -1;
-      }
-      else
-      {
-        this->current.isBoundary_ = false;
-        this->current.opposite_ = this->current.item_->opposite(this->current.index_);
-      }
+      current.neigh_ = current.item_->nbel( current.index_ );
+      current.isBoundary_ = (current.neigh_ == 0);
+      current.opposite_ = (current.isBoundary_ ? -1 : current.item_->opposite( current.index_ ));
     }
 
-    if (this->current.index_ >= this->nFaces_)
+#if 0
+    // this cannot happen
+    if( current.index_ >= nFaces_ )
       this->done();
-
-    return;
+#endif
   }
 
 
@@ -780,6 +764,19 @@ namespace Dune
     this->walkLevel_ = wLevel;
     this->done_ = false;
     increment();
+  }
+
+
+  template< class GridImp >
+  inline void ALU2dGridLeafIntersectionIterator< GridImp >::setupIntersection ()
+  {
+    assert( !nbStack_.empty() );
+
+    IntersectionInfo &info = nbStack_.top();
+    current.neigh_ = static_cast< HElementType * >( info.first );
+    current.opposite_ = info.second.first;
+    current.isBoundary_ = info.second.second;
+    nbStack_.pop();
   }
 
 } //end namespace Dune
