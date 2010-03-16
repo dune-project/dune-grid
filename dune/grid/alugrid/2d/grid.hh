@@ -852,7 +852,8 @@ namespace Dune {
 
 #include "entity.hh"
 #include "geometry.hh"
-#include "iterator.hh"
+#include <dune/grid/alugrid/2d/intersection.hh>
+#include <dune/grid/alugrid/2d/iterator.hh>
 
 #include "grid_imp.cc"
 
