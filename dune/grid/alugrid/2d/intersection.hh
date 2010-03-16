@@ -77,7 +77,8 @@ namespace Dune
     typedef ALU2dGridEntity<0,dim,GridImp> EntityImp;
     typedef ALU2dGridGeometry<dim-1,dimworld,GridImp> GeometryImp;
     typedef ALU2dGridGeometry<dim-1,dim,GridImp> LocalGeometryImp;
-    typedef FieldVector<alu2d_ctype, dimworld> NormalType;
+    typedef FieldVector< alu2d_ctype, dimworld > NormalType;
+    typedef FieldVector< alu2d_ctype, dim-1 > LocalCoordinate;
 
     typedef ALU2dGridEntityPointer<0,GridImp> EntityPointerImp;
 
@@ -181,9 +182,9 @@ namespace Dune
     // deprecated methods
     int twistInNeighbor () const { return twistInOutside(); }
 
-    NormalType & outerNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
-    NormalType & integrationOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
-    NormalType unitOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
+    NormalType outerNormal ( const LocalCoordinate &local ) const;
+    NormalType integrationOuterNormal ( const LocalCoordinate &local ) const;
+    NormalType unitOuterNormal ( const LocalCoordinate &local ) const;
 
     const LocalGeometry &geometryInInside () const;
     const LocalGeometry &geometryInOutside () const;
@@ -222,9 +223,6 @@ namespace Dune
 
     mutable int nFaces_;
     mutable int walkLevel_;
-
-    // unit outer normal
-    mutable NormalType outerNormal_;
   }; // end ALU2dGridIntersectionBase
 
 

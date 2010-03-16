@@ -251,31 +251,34 @@ namespace Dune
     return (1 + this->current.index_ + this->current.opposite_) % 2;
   }
 
-  template<class GridImp>
-  inline typename ALU2dGridIntersectionBase<GridImp>::NormalType &
-  ALU2dGridIntersectionBase<GridImp> :: outerNormal (const FieldVector<alu2d_ctype, dim-1>& local) const
+  template< class GridImp >
+  inline typename ALU2dGridIntersectionBase<GridImp>::NormalType
+  ALU2dGridIntersectionBase< GridImp >::outerNormal ( const LocalCoordinate &local ) const
   {
-    assert(this->current.item_ != 0);
+    assert( (current.item_ != 0) && (current.index_ < nFaces_) );
+
     typedef double (&normal_t)[dimworld];
 
-    this->current.item_->outernormal(  this->current.index_,  ((normal_t) (&outerNormal_)[0]) );
-    if( this->current.useOutside_ )
-      outerNormal_ *= 0.5;
-    return outerNormal_;
+    NormalType outerNormal;
+    current.item_->outernormal( current.index_, (normal_t)(&outerNormal)[0] );
+    if( current.useOutside_ )
+      outerNormal *= 0.5;
+    return outerNormal;
   }
 
-  template<class GridImp>
-  inline typename ALU2dGridIntersectionBase<GridImp>::NormalType &
-  ALU2dGridIntersectionBase<GridImp> :: integrationOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const {
-    return this->outerNormal(local);
-  }
-
-  template<class GridImp>
+  template< class GridImp >
   inline typename ALU2dGridIntersectionBase<GridImp>::NormalType
-  ALU2dGridIntersectionBase<GridImp> :: unitOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const
+  ALU2dGridIntersectionBase< GridImp >::integrationOuterNormal ( const LocalCoordinate &local ) const
   {
-    NormalType unitNormal( this->outerNormal(local) );
-    unitNormal *= (1.0/unitNormal.two_norm());
+    return outerNormal( local );
+  }
+
+  template< class GridImp >
+  inline typename ALU2dGridIntersectionBase<GridImp>::NormalType
+  ALU2dGridIntersectionBase< GridImp >::unitOuterNormal ( const LocalCoordinate &local ) const
+  {
+    NormalType unitNormal( outerNormal( local ) );
+    unitNormal *= (1.0 / unitNormal.two_norm());
     return unitNormal;
   }
 
