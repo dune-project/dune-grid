@@ -7,6 +7,7 @@
 #ifdef ENABLE_ALUGRID
 
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/alugrid/3d/alu3dinclude.hh>
 
 /** @file
  *  @author Robert Kloefkorn
@@ -50,17 +51,24 @@ namespace Dune
     /** \brief ALUCubeGrid is parallel
        \ingroup ALUCubeGrid
      */
+#if ALU3DGRID_PARALLEL
     template<>
     struct isParallel< ALUCubeGrid< 3, 3 > >
     {
       static const bool v = true;
     };
+#endif
 
+    /** \brief ALUCubeGrid can communicate
+       \ingroup ALUCubeGrid
+     */
+#if ALU3DGRID_PARALLEL
     template< int codim >
     struct canCommunicate< ALUCubeGrid< 3, 3 >, codim >
     {
       static const bool v = true;
     };
+#endif
 
     /** \brief ALUCubeGrid has conforming level grids
        \ingroup ALUCubeGrid
@@ -114,17 +122,24 @@ namespace Dune
     /** \brief ALUSimplexGrid is parallel
        \ingroup ALUSimplexGrid
      */
+#if ALU3DGRID_PARALLEL
     template<>
     struct isParallel< ALUSimplexGrid< 3, 3 > >
     {
       static const bool v = true;
     };
+#endif
 
+    /** \brief ALUSimplexGrid can communicate
+       \ingroup ALUSimplexGrid
+     */
+#if ALU3DGRID_PARALLEL
     template< int codim >
     struct canCommunicate< ALUSimplexGrid< 3, 3 >, codim >
     {
       static const bool v = true;
     };
+#endif
 
     /** \brief ALUSimplexGrid has conforming level grids
        \ingroup ALUSimplexGrid

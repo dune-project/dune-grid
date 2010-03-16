@@ -82,61 +82,6 @@ namespace Dune
   template< int dim, int dimworld >
   class ALUSimplexGrid;
 
-  namespace Capabilities {
-    /** \struct isLeafwiseConforming
-       \ingroup ALUSimplexGrid
-     */
-
-    /** \struct IsUnstructured
-       \ingroup ALUSimplexGrid
-     */
-
-    /** \brief ALUSimplexGrid has entities for all codimension
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw, int cdim >
-    struct hasEntity<Dune::ALUSimplexGrid<dim, dimw>, cdim >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUSimplexGrid is parallel
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw>
-    struct isParallel<const ALUSimplexGrid<dim, dimw> > {
-      static const bool v = false;
-    };
-
-    /** \brief ALUSimplexGrid has conforming level grids
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw>
-    struct isLevelwiseConforming< ALUSimplexGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUSimplexGrid has supports hanging nodes
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw>
-    struct hasHangingNodes< ALUSimplexGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUSimplexGrid has backup and restore facilities
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw>
-    struct hasBackupRestoreFacilities< ALUSimplexGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-  } // end namespace Capabilities
-
 
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
