@@ -44,51 +44,6 @@ namespace Dune
   }
 
 
-  //! return the element type identifier
-  //! line , triangle or tetrahedron, depends on dim
-  template< int mydim, int cdim, class GridImp >
-  inline const GeometryType ALU2dGridGeometry< mydim, cdim, GridImp >::type () const
-  {
-    if( mydim == 2 )
-    {
-      switch( GridImp::elementType )
-      {
-      case ALU2DSPACE triangle :
-        return GeometryType( GeometryType::simplex, 2 );
-
-      case ALU2DSPACE quadrilateral :
-        return GeometryType( GeometryType::cube, 2 );
-
-      case ALU2DSPACE mixed :
-        DUNE_THROW( NotImplemented, "Geometry::type() not implemented for ElementType mixed." );
-      }
-    }
-    else
-      return GeometryType( GeometryType::simplex, mydim );
-  }
-
-  //! return the number of corners of this element. Corners are numbered 0...mydim
-  template< int mydim, int cdim, class GridImp >
-  inline int ALU2dGridGeometry< mydim, cdim, GridImp >::corners () const
-  {
-    if( mydim == 2 )
-    {
-      switch( GridImp::elementType )
-      {
-      case ALU2DSPACE triangle :
-        return 3;
-
-      case ALU2DSPACE quadrilateral :
-        return 4;
-
-      case ALU2DSPACE mixed :
-        DUNE_THROW( NotImplemented, "Geometry::corners() not implemented for ElementType mixed." );
-      }
-    }
-    else
-      return mydim+1;
-  }
-
   ///////////////////////////////////////////////////////////////////////
 
 
@@ -122,7 +77,7 @@ namespace Dune
   ALU2dGridGeometry< mydim, cdim, GridImp >::global ( const LocalCoordinate &local ) const
   {
     GlobalCoordinate global;
-    geoImpl_.mapping().map2world( local, global );
+    geoImpl_.map2world( local, global );
     return global;
   }
 
@@ -137,7 +92,7 @@ namespace Dune
       return LocalCoordinate( 1 );
 
     LocalCoordinate local;
-    geoImpl_.mapping().world2map( global, local );
+    geoImpl_.world2map( global, local );
     return local;
   }
 
@@ -176,7 +131,7 @@ namespace Dune
   inline const FieldMatrix<alu2d_ctype,mydim,cdim>&
   ALU2dGridGeometry< mydim, cdim, GridImp>::jacobianTransposed ( const LocalCoordinate &local ) const
   {
-    return geoImpl_.mapping().jacobianTransposed( local );
+    return geoImpl_.jacobianTransposed( local );
   }
 
 
@@ -184,7 +139,7 @@ namespace Dune
   inline const FieldMatrix<alu2d_ctype,cdim,mydim>&
   ALU2dGridGeometry< mydim, cdim, GridImp >::jacobianInverseTransposed ( const LocalCoordinate &local ) const
   {
-    return geoImpl_.mapping().jacobianInverseTransposed( local );
+    return geoImpl_.jacobianInverseTransposed( local );
   }
 
 
@@ -195,18 +150,13 @@ namespace Dune
   {
     // check item
     assert( &item );
+    assert( mydim == 2 );
 
     // update geometry impl
-    geoImpl_.update( item.getVertex( 0 )->coord() ,
-                     item.getVertex( 1 )->coord() ,
-                     item.getVertex( 2 )->coord() );
+    geoImpl_.update( item );
 
     // store volume
-    det_ = item.area();
-    if( (mydim == 2) && (GridImp::elementType == ALU2DSPACE triangle) )
-      det_ *= 2;
-    if( GridImp::elementType == ALU2DSPACE mixed )
-      DUNE_THROW( NotImplemented, "Geometry::buildGeom() not implemented for ElementType mixed." );
+    det_ = (geoImpl_.corners() == 3 ? 2 * item.area() : item.area());
 
     // geom is up2date
     up2Date_ = true;
@@ -269,7 +219,7 @@ namespace Dune
 
     // calculate volume
     LocalCoordinate local( 0.25 );
-    det_ = geoImpl_.mapping().det( local );
+    det_ = geoImpl_.det( local );
 
     // geom is up2date
     up2Date_ = true;

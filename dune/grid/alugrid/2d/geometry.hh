@@ -31,137 +31,506 @@ namespace Dune
   template< int cdim, ALU2DSPACE ElementType eltype >
   class MyALU2dGridGeometryImpl< 0, cdim, eltype >
   {
-    enum { corners_ = 1 };
-
-    //! the vertex coordinates
-    typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
-
     typedef LinearMapping< cdim, 0 > MappingType;
 
-    MappingType liMap_;
+    typedef typename MappingType::ctype ctype;
+
+    typedef typename MappingType::map_t map_t;
+    typedef typename MappingType::world_t world_t;
+
+    typedef typename MappingType::matrix_t matrix_t;
+    typedef typename MappingType::inv_t inv_t;
+
+    MappingType mapping_;
 
   public:
-    // return true since we have affine mapping
-    bool affine() const { return true; }
-
-    const MappingType &mapping() const { return liMap_; }
-
-    // update vertex
-    template< class CoordPtrType >
-    inline void update( const CoordPtrType &p0 )
+    bool affine() const
     {
-      liMap_.buildMapping( p0 );
+      return mapping_.affine();
+    }
+
+    int corners () const
+    {
+      return 1;
+    }
+
+    GeometryType type () const
+    {
+      return GeometryType( GeometryType::simplex, 0 );
+    }
+
+    void map2world ( const map_t &m, world_t &w ) const
+    {
+      return mapping_.map2world( m, w );
+    }
+
+    void world2map ( const world_t &w, map_t &m ) const
+    {
+      return mapping_.world2map( w, m );
+    }
+
+    const matrix_t &jacobianTransposed ( const map_t &m ) const
+    {
+      return mapping_.jacobianTransposed( m );
+    }
+
+    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
+    {
+      return mapping_.jacobianInverseTransposed( m );
+    }
+
+    ctype det ( const map_t &m ) const
+    {
+      return mapping_.det( m );
+    }
+
+    // update geometry coordinates
+    template< class Vector >
+    void update ( const Vector &p0 )
+    {
+      mapping_.buildMapping( p0 );
     }
   };
 
+  // geometry implementation for lines
   template< int cdim, ALU2DSPACE ElementType eltype >
   class MyALU2dGridGeometryImpl< 1, cdim, eltype >
   {
-    enum { corners_ = 2 };
+    static const int ncorners = 2;
 
-    //! the vertex coordinates
-    typedef FieldMatrix<alu2d_ctype, corners_ , cdim>  CoordinateMatrixType;
-    typedef LinearMapping< cdim, 1 >   MappingType;
+    typedef LinearMapping< cdim, 1 > MappingType;
 
-    MappingType liMap_;
+    typedef typename MappingType::ctype ctype;
+
+    typedef typename MappingType::map_t map_t;
+    typedef typename MappingType::world_t world_t;
+
+    typedef typename MappingType::matrix_t matrix_t;
+    typedef typename MappingType::inv_t inv_t;
+
+    MappingType mapping_;
 
   public:
-    // return true since we have affine mapping
-    bool affine() const { return liMap_.affine(); }
+    bool affine() const
+    {
+      return mapping_.affine();
+    }
+
+    int corners () const
+    {
+      return ncorners;
+    }
+
+    GeometryType type () const
+    {
+      return GeometryType( GeometryType::simplex, 1 );
+    }
+
+    void map2world ( const map_t &m, world_t &w ) const
+    {
+      return mapping_.map2world( m, w );
+    }
+
+    void world2map ( const world_t &w, map_t &m ) const
+    {
+      return mapping_.world2map( w, m );
+    }
+
+    const matrix_t &jacobianTransposed ( const map_t &m ) const
+    {
+      return mapping_.jacobianTransposed( m );
+    }
+
+    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
+    {
+      return mapping_.jacobianInverseTransposed( m );
+    }
+
+    ctype det ( const map_t &m ) const
+    {
+      return mapping_.det( m );
+    }
 
     // update geometry in father coordinates
-    template <class GeometryImp, class LocalGeoImp>
-    inline void updateLocal(const GeometryImp& globalGeom,
-                            const LocalGeoImp& localGeom)
+    template< class Geo, class LocalGeo >
+    void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
     {
-      CoordinateMatrixType coord;
+      assert( localGeo.corners() == ncorners );
       // compute the local coordinates in father refelem
-      for(int i=0; i < localGeom.corners() ; ++i)
+      FieldMatrix< alu2d_ctype, ncorners, cdim > coord;
+      for( int i = 0; i < ncorners; ++i )
       {
         // calculate coordinate
-        coord[i] = globalGeom.local( localGeom.corner( i ) );
-
+        coord[ i ] = geo.local( localGeo.corner( i ) );
         // to avoid rounding errors
-        for(int j=0; j<cdim; ++j)
-        {
-          if ( coord[i][j] < 1e-14) coord[i][j] = 0.0;
-        }
+        for( int j = 0; j < cdim; ++j )
+          coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
       }
-      liMap_.buildMapping( coord[ 0 ], coord[ 1 ] );
+      mapping_.buildMapping( coord[ 0 ], coord[ 1 ] );
     }
 
     // update geometry coordinates
-    template <class CoordPtrType>
-    inline void update(const CoordPtrType& p0,
-                       const CoordPtrType& p1)
+    template< class Vector >
+    void update ( const Vector &p0, const Vector &p1 )
     {
-      liMap_.buildMapping( p0, p1 );
-    }
-
-    // return mapping (always up2date)
-    inline MappingType &mapping()
-    {
-      return liMap_;
+      mapping_.buildMapping( p0, p1 );
     }
   };
 
-  // geom impl for elements
-  template< int cdim, ALU2DSPACE ElementType eltype >
-  class MyALU2dGridGeometryImpl< 2, cdim, eltype >
+  // geometry implementation for triangles
+  template< int cdim >
+  class MyALU2dGridGeometryImpl< 2, cdim, ALU2DSPACE triangle >
   {
-    enum { corners_ = (eltype == ALU2DSPACE triangle ? 3 : 4) };
+    static const int ncorners = 3;
 
-    //! the vertex coordinates
-    typedef FieldMatrix<alu2d_ctype, corners_ , cdim>  CoordinateMatrixType;
+    typedef LinearMapping< cdim, 2 > MappingType;
 
-    typedef LinearMapping< cdim, 2 > LinearMappingType;
-    typedef BilinearMapping< cdim > BilinearMappingType;
+    typedef typename MappingType::ctype ctype;
 
-    typedef LinearMappingType MappingType;
+    typedef typename MappingType::map_t map_t;
+    typedef typename MappingType::world_t world_t;
 
-    MappingType liMap_;
+    typedef typename MappingType::matrix_t matrix_t;
+    typedef typename MappingType::inv_t inv_t;
+
+    MappingType mapping_;
 
   public:
-    // return true since we have affine mapping
-    bool affine() const { return liMap_.affine(); }
+    bool affine () const
+    {
+      return mapping_.affine();
+    }
+
+    int corners () const
+    {
+      return ncorners;
+    }
+
+    GeometryType type () const
+    {
+      return GeometryType( GeometryType::simplex, 2 );
+    }
+
+    void map2world ( const map_t &m, world_t &w ) const
+    {
+      return mapping_.map2world( m, w );
+    }
+
+    void world2map ( const world_t &w, map_t &m ) const
+    {
+      return mapping_.world2map( w, m );
+    }
+
+    const matrix_t &jacobianTransposed ( const map_t &m ) const
+    {
+      return mapping_.jacobianTransposed( m );
+    }
+
+    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
+    {
+      return mapping_.jacobianInverseTransposed( m );
+    }
+
+    ctype det ( const map_t &m ) const
+    {
+      return mapping_.det( m );
+    }
 
     // update geometry in father coordinates
-    template <class GeometryImp, class LocalGeoImp>
-    inline void updateLocal(const GeometryImp& globalGeom,
-                            const LocalGeoImp& localGeom)
+    template< class Geo, class LocalGeo >
+    void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
     {
-      CoordinateMatrixType coord;
+      assert( localGeo.corners() == ncorners );
       // compute the local coordinates in father refelem
-      for(int i=0; i < localGeom.corners() ; ++i)
+      FieldMatrix< alu2d_ctype, ncorners, cdim > coord;
+      for( int i = 0; i < ncorners; ++i )
       {
         // calculate coordinate
-        coord[i] = globalGeom.local( localGeom.corner( i ) );
-
+        coord[ i ] = geo.local( localGeo.corner( i ) );
         // to avoid rounding errors
-        for(int j=0; j<cdim; ++j)
-        {
-          if ( coord[i][j] < 1e-14) coord[i][j] = 0.0;
-        }
+        for( int j = 0; j < cdim; ++j )
+          coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
       }
-      liMap_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
+      mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
     }
 
+#if 0
     // update geometry coordinates
-    template <class CoordPtrType>
-    inline void update(const CoordPtrType& p0,
-                       const CoordPtrType& p1,
-                       const CoordPtrType& p2)
+    template< class Vector >
+    void update ( const Vector &p0, const Vector &p1, const Vector &p2 )
     {
-      liMap_.buildMapping( p0, p1, p2 );
+      mapping_.buildMapping( p0, p1, p2 );
     }
+#endif
 
-    // return mapping (always up2date)
-    inline MappingType& mapping()
+    template< class HElement >
+    void update ( const HElement &item )
     {
-      return liMap_;
+      mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
+                             item.getVertex( 2 )->coord() );
     }
   };
 
+  // geometry implementation for quadrilaterals
+  template< int cdim >
+  class MyALU2dGridGeometryImpl< 2, cdim, ALU2DSPACE quadrilateral >
+  {
+    static const int ncorners = 4;
+
+    typedef BilinearMapping< cdim > MappingType;
+
+    typedef typename MappingType::ctype ctype;
+
+    typedef typename MappingType::map_t map_t;
+    typedef typename MappingType::world_t world_t;
+
+    typedef typename MappingType::matrix_t matrix_t;
+    typedef typename MappingType::inv_t inv_t;
+
+    MappingType mapping_;
+
+  public:
+    bool affine () const
+    {
+      return mapping_.affine();
+    }
+
+    int corners () const
+    {
+      return ncorners;
+    }
+
+    GeometryType type () const
+    {
+      return GeometryType( GeometryType::cube, 2 );
+    }
+
+    void map2world ( const map_t &m, world_t &w ) const
+    {
+      return mapping_.map2world( m, w );
+    }
+
+    void world2map ( const world_t &w, map_t &m ) const
+    {
+      return mapping_.world2map( w, m );
+    }
+
+    const matrix_t &jacobianTransposed ( const map_t &m ) const
+    {
+      return mapping_.jacobianTransposed( m );
+    }
+
+    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
+    {
+      return mapping_.jacobianInverseTransposed( m );
+    }
+
+    ctype det ( const map_t &m ) const
+    {
+      return mapping_.det( m );
+    }
+
+    // update geometry in father coordinates
+    template< class Geo, class LocalGeo >
+    void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
+    {
+      assert( localGeo.corners() == ncorners );
+      // compute the local coordinates in father refelem
+      FieldMatrix< alu2d_ctype, ncorners, cdim > coord;
+      for( int i = 0; i < ncorners; ++i )
+      {
+        // calculate coordinate
+        coord[ i ] = geo.local( localGeo.corner( i ) );
+        // to avoid rounding errors
+        for( int j = 0; j < cdim; ++j )
+          coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
+      }
+      mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
+    }
+
+#if 0
+    // update geometry coordinates
+    template< class Vector >
+    void update ( const Vector &p0, const Vector &p1, const Vector &p2, const Vector &p3 )
+    {
+      mapping_.buildMapping( p0, p1, p2, p3 );
+    }
+#endif
+
+    template< class HElement >
+    void update ( const HElement &item )
+    {
+      mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
+                             item.getVertex( 2 )->coord(), item.getVertex( 3 )->coord() );
+    }
+  };
+
+  // geometry implementation for triangles
+  template< int cdim >
+  class MyALU2dGridGeometryImpl< 2, cdim, ALU2DSPACE mixed >
+  {
+    typedef Dune::LinearMapping< cdim, 2 > LinearMapping;
+    typedef Dune::BilinearMapping< cdim > BilinearMapping;
+
+    typedef typename LinearMapping::ctype ctype;
+
+    typedef typename LinearMapping::map_t map_t;
+    typedef typename LinearMapping::world_t world_t;
+
+    typedef typename LinearMapping::matrix_t matrix_t;
+    typedef typename LinearMapping::inv_t inv_t;
+
+    static const int lms = sizeof( LinearMapping );
+    static const int bms = sizeof( BilinearMapping );
+
+    int corners_;
+    char mapping_[ lms > bms ? lms : bms ];
+
+  public:
+    MyALU2dGridGeometryImpl () : corners_( 0 ) {}
+
+    MyALU2dGridGeometryImpl ( const MyALU2dGridGeometryImpl &other )
+      : corners_( other.corners() )
+    {
+      if( corners_ == 3 )
+        new( &mapping_ )LinearMapping( other.linearMapping() );
+      if( corners_ == 4 )
+        new( &mapping_ )BilinearMapping( other.bilinearMapping() );
+    }
+
+    bool affine () const
+    {
+      return (corners() == 3 ? linearMapping().affine() : bilinearMapping().affine());
+    }
+
+    int corners () const
+    {
+      return corners_;
+    }
+
+    GeometryType type () const
+    {
+      return GeometryType( corners_ == 3 ? GeometryType::simplex : GeometryType::cube, 2 );
+    }
+
+    void map2world ( const map_t &m, world_t &w ) const
+    {
+      if( corners() == 3 )
+        linearMapping().map2world( m, w );
+      else
+        bilinearMapping().map2world( m, w );
+    }
+
+    void world2map ( const world_t &w, map_t &m ) const
+    {
+      if( corners() == 3 )
+        linearMapping().world2map( w, m );
+      else
+        bilinearMapping().world2map( w, m );
+    }
+
+    const matrix_t &jacobianTransposed ( const map_t &m ) const
+    {
+      return (corners() == 3 ? linearMapping().jacobianTransposed( m ) : bilinearMapping().jacobianTransposed( m ));
+    }
+
+    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
+    {
+      return (corners() == 3 ? linearMapping().jacobianInverseTransposed( m ) : bilinearMapping().jacobianInverseTransposed( m ));
+    }
+
+    ctype det ( const map_t &m ) const
+    {
+      return (corners() == 3 ? linearMapping().det( m ) : bilinearMapping().det( m ));
+    }
+
+    // update geometry in father coordinates
+    template< class Geo, class LocalGeo >
+    void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
+    {
+      const int corners = localGeo.corners();
+
+      // compute the local coordinates in father refelem
+      FieldMatrix< alu2d_ctype, 4, cdim > coord;
+      for( int i = 0; i < corners; ++i )
+      {
+        // calculate coordinate
+        coord[ i ] = geo.local( localGeo.corner( i ) );
+        // to avoid rounding errors
+        for( int j = 0; j < cdim; ++j )
+          coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
+      }
+
+      updateMapping( corners );
+      if( corners == 3 )
+        linearMapping().buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
+      else
+        bilinearMapping().buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
+    }
+
+#if 0
+    // update geometry coordinates
+    template< class Vector >
+    void update ( const Vector &p0, const Vector &p1, const Vector &p2 )
+    {
+      updateMapping( 3 );
+      linearMapping().buildMapping( p0, p1, p2 );
+    }
+
+    // update geometry coordinates
+    template< class Vector >
+    void update ( const Vector &p0, const Vector &p1, const Vector &p2, const Vector &p3 )
+    {
+      updateMapping( 4 );
+      bilinearMapping().buildMapping( p0, p1, p2, p3 );
+    }
+#endif
+
+    template< class HElement >
+    void update ( const HElement &item )
+    {
+      // how do we get the number of corners, here?
+      const int corners = 3;
+      updateMapping( corners );
+      if( corners == 3 )
+        linearMapping().buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
+                                      item.getVertex( 2 )->coord() );
+      else
+        bilinearMapping().buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
+                                        item.getVertex( 2 )->coord(), item.getVertex( 3 )->coord() );
+    }
+
+  private:
+    MyALU2dGridGeometryImpl &operator= ( const MyALU2dGridGeometryImpl &other );
+
+    const LinearMapping &linearMapping () const { return static_cast< const LinearMapping * >( &mapping_ ); }
+    LinearMapping &linearMapping () { return static_cast< LinearMapping * >( &mapping_ ); }
+
+    const BilinearMapping &bilinearMapping () const { return static_cast< const BilinearMapping * >( &mapping_ ); }
+    BilinearMapping &bilinearMapping () { return static_cast< BilinearMapping * >( &mapping_ ); }
+
+    void updateMapping ( const int corners )
+    {
+      assert( (corners == 3) || (corners == 4) );
+      if( corners != corners_ )
+      {
+        destroyMapping();
+        corners = corners_;
+        if( corners == 3 )
+          new( &mapping_ )LinearMapping;
+        else
+          new( &mapping_ )BilinearMapping;
+      }
+    }
+
+    void destroyMapping ()
+    {
+      if( corners() == 3 )
+        linearMapping().~LinearMapping();
+      else if( corners() == 4 )
+        bilinearMapping().~BilinearMapping();
+    }
+  };
 
 
   //**********************************************************************
@@ -213,10 +582,10 @@ namespace Dune
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
-    const GeometryType type () const;
+    const GeometryType type () const { return geoImpl_.type(); }
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const;
+    int corners () const { return geoImpl_.corners(); }
 
     //! access to coordinates of corners. Index is the number of the corner
     const GlobalCoordinate &operator[] ( int i ) const;
