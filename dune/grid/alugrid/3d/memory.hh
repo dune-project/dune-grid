@@ -5,61 +5,30 @@
 
 #include <cassert>
 #include <cstdlib>
+
+#define USE_FINITE_STACK
+
+#ifdef USE_FINITE_STACK
+#include <dune/common/finitestack.hh>
+#else
 #include <stack>
+#endif
 
 namespace Dune {
 
   //! organize the memory management for entitys used by the NeighborIterator
   template <class Object>
-  class ALUFastMemoryProvider
-  {
-    static std::stack < Object * > objStack_;
-    typedef ALUFastMemoryProvider < Object > MyType;
-    typedef Object ObjectType;
-
-  public:
-    void * operator new (size_t s);
-    void operator delete (void *obj, size_t s);
-  };
-
-  template <class Object>
-  std::stack< Object * > ALUFastMemoryProvider< Object > :: objStack_;
-
-  template <class Object>
-  inline void *
-  ALUFastMemoryProvider<Object> :: operator new (size_t s)
-  {
-    assert( s == sizeof(ObjectType) );
-    if( objStack_.empty() )
-    {
-      void * obj = std::malloc( sizeof(ObjectType) );
-      assert( obj );
-      return obj;
-    }
-    else
-    {
-      ObjectType * obj = objStack_.top();
-      objStack_.pop();
-      return ((void  *) obj);
-    }
-  }
-
-  template <class Object>
-  inline void
-  ALUFastMemoryProvider<Object> :: operator delete (void *ptr, size_t s)
-  {
-    assert( s == sizeof(ObjectType) );
-    objStack_.push( (ObjectType *) ptr );
-  }
-
-
-  //! organize the memory management for entitys used by the NeighborIterator
-  template <class Object>
   class ALUMemoryProvider
   {
-    std::stack < Object * > objStack_;
+#ifdef USE_FINITE_STACK
+    enum { maxStackObjects = 256 };
+    FiniteStack< Object* , maxStackObjects > objStack_;
+#else
+    std::stack < Object* > objStack_;
+#endif
 
     typedef ALUMemoryProvider < Object > MyType;
+
   public:
     typedef Object ObjectType;
 
@@ -83,9 +52,7 @@ namespace Dune {
       }
       else
       {
-        ObjectType * obj = objStack_.top();
-        objStack_.pop();
-        return obj;
+        return stackObject();
       }
     }
 
@@ -94,6 +61,21 @@ namespace Dune {
 
     //! free, move element to stack, returns NULL
     void freeObject (ObjectType * obj);
+
+  protected:
+    inline ObjectType * stackObject()
+    {
+      assert( ! objStack_.empty() );
+#ifdef USE_FINITE_STACK
+      // finite stack does also return object on pop
+      return objStack_.pop();
+#else
+      // std stack does not
+      ObjectType * obj = objStack_.top();
+      objStack_.pop();
+      return obj;
+#endif
+    }
 
   private:
     //! do not copy pointers
@@ -117,9 +99,7 @@ namespace Dune {
     }
     else
     {
-      ObjectType * obj = objStack_.top();
-      objStack_.pop();
-      return obj;
+      return stackObject();
     }
   }
 
@@ -134,19 +114,16 @@ namespace Dune {
     }
     else
     {
-      ObjectType * obj = objStack_.top();
-      objStack_.pop();
-      return obj;
+      return stackObject();
     }
   }
 
   template <class Object>
   inline ALUMemoryProvider<Object>::~ALUMemoryProvider()
   {
-    while ( !objStack_.empty() )
+    while ( ! objStack_.empty() )
     {
-      ObjectType * obj = objStack_.top();
-      objStack_.pop();
+      ObjectType * obj = stackObject();
       delete obj;
     }
   }
@@ -154,8 +131,15 @@ namespace Dune {
   template <class Object>
   inline void ALUMemoryProvider<Object>::freeObject(Object * obj)
   {
+#ifdef USE_FINITE_STACK
+    if( objStack_.full() )
+      delete obj;
+    else
+#endif
     objStack_.push( obj );
   }
+
+#undef USE_FINITE_STACK
 
 } // end namespace Dune
 
