@@ -126,8 +126,8 @@ namespace Dune
   #if not HAVE_ALUGRID
     #error "ALUGRID_CUBE defined but no ALUGRID version found!"
   #endif
-  #if (GRIDDIM != 3) || (WORLDDIM != GRIDDIM)
-    #error "ALUGRID_CUBE is only available for GRIDDIM=3 and WORLDDIM=GRIDDIM."
+  #if (GRIDDIM < 2) || (GRIDDIM > 3)
+    #error "ALUGRID_SIMPLEX is only available for GRIDDIM=2 and GRIDDIM=3."
   #endif
 
   #include <dune/grid/alugrid.hh>
@@ -151,9 +151,11 @@ namespace Dune
   #if (GRIDDIM < 2) || (GRIDDIM > 3)
     #error "ALUGRID_SIMPLEX is only available for GRIDDIM=2 and GRIDDIM=3."
   #endif
-  #if (WORLDDIM != GRIDDIM)
-    #error "ALUGRID_SIMPLEX is only available for WORLDDIM=GRIDDIM."
-  #endif
+/*
+   #if (WORLDDIM != GRIDDIM)
+   #error "ALUGRID_SIMPLEX is only available for WORLDDIM=GRIDDIM."
+   #endif
+ */
 
   #include <dune/grid/alugrid.hh>
 namespace Dune
@@ -173,9 +175,11 @@ namespace Dune
   #if not HAVE_ALUGRID
     #error "ALUGRID_CONFORM defined but no ALUGRID version found!"
   #endif
-  #if (GRIDDIM != 2) || (WORLDDIM != GRIDDIM)
-    #error "ALUGRID_CONFORM is only available for GRIDDIM=2 and WORLDDIM=GRIDDIM."
-  #endif
+/*
+   #if (GRIDDIM != 2) // || (WORLDDIM != GRIDDIM)
+   #error "ALUGRID_CONFORM is only available for GRIDDIM=2 and WORLDDIM=GRIDDIM."
+   #endif
+ */
   #include <dune/grid/alugrid.hh>
 namespace Dune
 {

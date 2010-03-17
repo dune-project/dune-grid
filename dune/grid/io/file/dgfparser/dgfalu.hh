@@ -39,6 +39,13 @@ namespace Dune
   };
 
   template<int dimw>
+  struct DGFGridInfo< ALUCubeGrid< 2, dimw > >
+  {
+    static int refineStepsForHalf () { return 1; }
+    static double refineWeight () { return 0.25; }
+  };
+
+  template<int dimw>
   struct DGFGridInfo< Dune::ALUConformGrid< 2, dimw > >
   {
     static int refineStepsForHalf () { return 2; }
@@ -294,6 +301,48 @@ namespace Dune
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
       : DGFBaseFactory< ALUSimplexGrid<2,dimw> >()
+    {
+      std::ifstream input( filename.c_str() );
+      if( !input )
+        DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
+      if( !generate( input, comm, filename ) )
+      {
+        if( Base::fileExists( filename.c_str() ) )
+          Base::grid_ = new Grid( filename );
+        else
+          DUNE_THROW( GridError, "Unable to create a 2d ALUGrid from '" << filename << "'." );
+      }
+    }
+
+  protected:
+    bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
+    using Base::grid_;
+    using Base::factory_;
+    using Base::dgf_;
+  };
+
+  template <int dimw>
+  struct DGFGridFactory< ALUCubeGrid<2,dimw> > :
+    public DGFBaseFactory< ALUCubeGrid<2,dimw> >
+  {
+    typedef DGFBaseFactory< ALUCubeGrid<2,dimw> > Base;
+    typedef typename Base::MPICommunicatorType MPICommunicatorType;
+    typedef typename Base::Grid Grid;
+    const static int dimension = Grid::dimension;
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : Base()
+    {
+      input.clear();
+      input.seekg( 0 );
+      if( !input )
+        DUNE_THROW(DGFException, "Error resetting input stream." );
+      generate( input, comm );
+    }
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+      : DGFBaseFactory< ALUCubeGrid<2,dimw> >()
     {
       std::ifstream input( filename.c_str() );
       if( !input )

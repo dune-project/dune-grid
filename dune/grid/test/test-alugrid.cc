@@ -4,10 +4,10 @@
 
 #define NEW_SUBENTITY_NUMBERING 1
 // #undef DUNE_ENABLE_OLD_NUMBERING
-// #define DISABLE_DEPRECATED_METHOD_CHECK 1
+ #define DISABLE_DEPRECATED_METHOD_CHECK 1
 
 // #define NO_2D
-// #define NO_3D
+#define NO_3D
 
 #include <iostream>
 #include <sstream>
@@ -292,6 +292,7 @@ int main (int argc , char **argv) {
 
     bool testALU2dSimplex = initialize ;
     bool testALU2dConform = initialize ;
+    bool testALU2dCube    = initialize ;
     bool testALU3dSimplex = initialize ;
     bool testALU3dCube    = initialize ;
 
@@ -299,10 +300,12 @@ int main (int argc , char **argv) {
     {
       testALU2dSimplex = true ;
       testALU2dConform = true ;
+      testALU2dCube   = true ;
     }
 
     if( key == "2dsimp" ) testALU2dSimplex = true ;
     if( key == "2dconf" ) testALU2dConform = true ;
+    if( key == "2dcube" ) testALU2dCube    = true ;
 
     if( key == "3d" )
     {
@@ -335,7 +338,30 @@ int main (int argc , char **argv) {
 #endif
 
 #ifndef NO_2D
+#ifdef ALUGRID_SURFACE_2D
       // check non-conform ALUGrid for 2d
+      if( testALU2dCube )
+      {
+        typedef ALUCubeGrid<2,2> GridType;
+        std::string filename(SRCDIR "simplex-testgrid-2-2.dgf");
+        std::cout << "READING from " << filename << std::endl;
+        GridPtr<GridType> gridPtr(filename);
+        checkCapabilities< false >( *gridPtr );
+        checkALUSerial(*gridPtr, 2, display);
+
+        //CircleBoundaryProjection<2> bndPrj;
+        //GridType grid("alu2d.triangle", &bndPrj );
+        //checkALUSerial(grid,2);
+
+        typedef ALUCubeGrid< 2, 3 > SurfaceGridType;
+        std::string surfaceFilename( SRCDIR "simplex-testgrid-2-3.dgf" );
+        std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
+        GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
+        checkCapabilities< false >( *surfaceGridPtr );
+        checkALUSerial( *surfaceGridPtr, 1, display );
+      }
+#endif // #ifdef ALUGRID_SURFACE_2D
+       // check non-conform ALUGrid for 2d
       if( testALU2dSimplex )
       {
         typedef ALUSimplexGrid<2,2> GridType;

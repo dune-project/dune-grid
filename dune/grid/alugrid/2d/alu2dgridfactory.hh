@@ -280,6 +280,31 @@ namespace Dune
     {}
   };
 
+  /** \brief Specialization of the generic GridFactory for ALUCubeGrid<2,dimw>
+   *  \ingroup GridFactory
+   */
+  template<int dimw>
+  class GridFactory< ALUCubeGrid<2,dimw> >
+    : public ALU2dGridFactory<ALUCubeGrid,dimw>
+  {
+    typedef GridFactory ThisType;
+    typedef ALU2dGridFactory<ALUCubeGrid,dimw> BaseType;
+
+  public:
+    typedef ALUCubeGrid< 2, dimw > Grid;
+
+  public:
+    /** \brief Default constructor */
+    explicit GridFactory ( )
+      : BaseType( )
+    {}
+
+    /** \brief constructor taking filename */
+    GridFactory ( const std::string &filename )
+      : BaseType( filename )
+    {}
+  };
+
 }
 
 // This include is nasty, but we cannot incorporate 'alu2dgridfactory.cc' into

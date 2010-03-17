@@ -12,6 +12,188 @@
 namespace Dune
 {
 
+  template<int dimw>
+  class ALUCubeGrid< 2, dimw >;
+  namespace Capabilities {
+    // Capabilities for ALUCubeGrid
+    // ----------------------------
+
+    /** \struct isLeafwiseConforming
+       \ingroup ALUCubeGrid
+     */
+
+    /** \struct IsUnstructured
+       \ingroup ALUCubeGrid
+     */
+
+    /** \brief ALUCubeGrid has entities for all codimension
+       \ingroup ALUCubeGrid
+     */
+    template< int wdim, int cdim >
+    struct hasEntity< Dune::ALUCubeGrid< 2, wdim >, cdim >
+    {
+      static const bool v = true;
+    };
+
+
+    /** \brief ALUCubeGrid has conforming level grids
+       \ingroup ALUCubeGrid
+     */
+    template<int wdim>
+    struct isLevelwiseConforming< Dune::ALUCubeGrid< 2, wdim > >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUCubeGrid has supports hanging nodes
+       \ingroup ALUCubeGrid
+     */
+    template<int wdim>
+    struct hasHangingNodes< Dune::ALUCubeGrid< 2, wdim > >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUCubeGrid has backup and restore facilities
+       \ingroup ALUCubeGrid
+     */
+    template<int wdim>
+    struct hasBackupRestoreFacilities< Dune::ALUCubeGrid< 2, wdim > >
+    {
+      static const bool v = true;
+    };
+  }
+
+  /** @copydoc ALUCubeGrid
+      \brief [<em> provides \ref Dune::Grid </em>]
+      \brief grid with support for cube mesh in 2d.
+      \ingroup ALUCubeGrid
+   */
+  template<int dimw>
+  class ALUCubeGrid< 2, dimw >
+    : public Dune::ALU2dGrid< 2, dimw, ALU2DSPACE quadrilateral >
+  {
+    typedef ALUCubeGrid< 2, dimw > This;
+
+    typedef Dune::ALU2dGrid< 2, dimw, ALU2DSPACE quadrilateral > BaseType;
+    enum { dim      = 2 };
+    enum { dimworld = dimw };
+
+  public:
+    //! type of boundary projection
+    typedef typename BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+
+    //! type of boundary projection
+    typedef typename BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
+
+    //! \brief constructor for creating ALUSimplexGrid from given macro grid file
+    //! \param macroName filename for macro grid in ALUGrid triangle format
+    ALUCubeGrid(const std::string macroName,
+                const DuneBoundaryProjectionType* bndProject  = 0,
+                const DuneBoundaryProjectionVector* bndVector = 0 )
+      : BaseType(macroName,1, bndProject, bndVector)
+    {
+      std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
+      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+    }
+
+    //! \brief constructor for creating ALUSimplexGrid from given macro grid file
+    //! \param macroName filename for macro grid in ALUGrid triangle format
+    ALUCubeGrid(const std::string macroName,
+                std::istream& macroFile,
+                const DuneBoundaryProjectionType* bndProject  = 0,
+                const DuneBoundaryProjectionVector* bndVector = 0 )
+      : BaseType("",1, bndProject, bndVector,&macroFile)
+    {
+      std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
+      if( macroName == "" )
+        std::cout <<">. \n\n";
+      else
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+    }
+
+    //! constructor creating empty grid
+    ALUCubeGrid( ) : BaseType(1)
+    {
+      std::cout << "\nCreated empty ALUCubeGrid<"<<dim<<","<<dimworld <<">. \n\n";
+    }
+
+    //! return name of the grid
+    static inline std::string name () DUNE_DEPRECATED { return "ALUCubeGrid"; }
+
+    enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
+    enum { refineStepsForHalf = 1 };
+    typedef typename BaseType::ctype ctype;
+    typedef typename BaseType::GridFamily GridFamily;
+    typedef typename GridFamily::Traits Traits;
+    typedef typename BaseType::LocalIdSetImp LocalIdSetImp;
+    typedef typename Traits :: GlobalIdSet GlobalIdSet;
+    typedef typename Traits :: LocalIdSet LocalIdSet;
+    typedef typename GridFamily :: LevelIndexSetImp LevelIndexSetImp;
+    typedef typename GridFamily :: LeafIndexSetImp LeafIndexSetImp;
+    typedef typename BaseType::LeafIteratorImp LeafIteratorImp;
+    typedef typename Traits::template Codim<0>::LeafIterator LeafIteratorType;
+    typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
+    typedef typename BaseType::HierarchicIteratorImp HierarchicIteratorImp;
+
+    template< PartitionIteratorType pitype >
+    struct Partition
+    {
+      typedef typename Dune::GridView< DefaultLevelGridViewTraits< const This, pitype > >
+      LevelGridView;
+      typedef typename Dune::GridView< DefaultLeafGridViewTraits< const This, pitype > >
+      LeafGridView;
+    };
+
+    typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;
+    typedef typename Partition< All_Partition > :: LeafGridView LeafGridView;
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelView ( int level ) const
+    {
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafView () const
+    {
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+  private:
+    friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
+    friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
+
+    friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+    friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+
+    template< template< int, int > class, int >
+    friend class ALU2dGridFactory;
+
+    //! Copy constructor should not be used
+    ALUCubeGrid( const ALUCubeGrid & g ) ; // : BaseType(g) {}
+
+    //! assignment operator should not be used
+    ALUCubeGrid<dim,dimworld>&
+    operator = (const ALUCubeGrid& g);
+  };
+
   /** @copydoc ALUSimplexGrid
       \brief [<em> provides \ref Dune::Grid </em>]
       \brief grid with support for simplicial mesh in 2d.
