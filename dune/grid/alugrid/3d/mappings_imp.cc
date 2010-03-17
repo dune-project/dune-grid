@@ -981,6 +981,33 @@ namespace Dune {
     return ;
   }
 
+  template<>
+  template< class vector_t >
+  inline void LinearMapping< 2, 0 >::buildMapping ( const vector_t &p0 )
+  {
+    _p0[0] = p0[0];
+    _p0[1] = p0[1];
+
+    _det = 1.0;
+
+    // initialize flags
+    _calcedDet = _calcedInv = true;
+  }
+
+  template<>
+  template< class vector_t >
+  inline void LinearMapping< 3, 0 >::buildMapping ( const vector_t &p0 )
+  {
+    _p0[0] = p0[0];
+    _p0[1] = p0[1];
+    _p0[2] = p0[2];
+
+    _det = 1.0;
+
+    // initialize flags
+    _calcedDet = _calcedInv = true;
+  }
+
   // local --> global
   template <int cdim, int mydim>
   inline void LinearMapping<cdim, mydim> ::

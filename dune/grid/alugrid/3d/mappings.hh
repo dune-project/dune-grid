@@ -356,6 +356,9 @@ namespace Dune {
     // public because also used in faceutility
     template <class vector_t>
     void buildMapping (const vector_t & , const vector_t & );
+
+    template <class vector_t>
+    void buildMapping (const vector_t & );
   } ;
 
 
