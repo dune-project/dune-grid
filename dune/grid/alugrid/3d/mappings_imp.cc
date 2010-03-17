@@ -1011,7 +1011,7 @@ namespace Dune {
   // local --> global
   template <int cdim, int mydim>
   inline void LinearMapping<cdim, mydim> ::
-  map2world (const localcoord_t& local, coord_t& global) const
+  map2world (const map_t& local, world_t& global) const
   {
     // initialize
     global = _p0;
@@ -1023,10 +1023,10 @@ namespace Dune {
   // global --> local
   template <int cdim, int mydim>
   inline void LinearMapping<cdim, mydim> ::
-  world2map (const coord_t& global, localcoord_t& local) const
+  world2map (const world_t& global, map_t& local) const
   {
     // initialize
-    coord_t globalCoord( global );
+    world_t globalCoord( global );
     // substract p0
     globalCoord -= _p0;
 
@@ -1038,7 +1038,7 @@ namespace Dune {
   // tetra mapping
   template <int cdim, int mydim>
   inline void LinearMapping<cdim, mydim> ::
-  inverse(const localcoord_t& local) const
+  inverse(const map_t& local) const
   {
     // invert transposed matrix and return determinant
     _det = std::abs( FMatrixHelp::invertMatrix(_matrix , _invTransposed ) );
@@ -1049,7 +1049,7 @@ namespace Dune {
   // tetra mapping
   template <int cdim, int mydim>
   inline void LinearMapping<cdim, mydim> ::
-  calculateDeterminant(const localcoord_t& local) const
+  calculateDeterminant(const map_t& local) const
   {
     inverse( local );
   }
@@ -1057,7 +1057,7 @@ namespace Dune {
   // triangle mapping
   template <>
   inline void LinearMapping<3, 2> ::
-  inverse(const localcoord_t& local) const
+  inverse(const map_t& local) const
   {
     inverseCodimOne( local );
   }
@@ -1065,17 +1065,17 @@ namespace Dune {
   // edge mapping
   template <>
   inline void LinearMapping<2, 1> ::
-  inverse(const localcoord_t& local) const
+  inverse(const map_t& local) const
   {
     inverseCodimOne( local );
   }
 
   template <int cdim, int mydim>
   inline void LinearMapping<cdim, mydim> ::
-  inverseCodimOne(const localcoord_t& local) const
+  inverseCodimOne(const map_t& local) const
   {
     // use least squares approach
-    FieldMatrix<alu3d_ctype, mydim, mydim> AT_A;
+    FieldMatrix<ctype, mydim, mydim> AT_A;
 
     /*
        inv_t matrix;
@@ -1091,7 +1091,7 @@ namespace Dune {
     multTransposedMatrix(_matrix, AT_A );
 
     // calc Jinv_ = A (A^T*A)^-1
-    FieldMatrix< alu3d_ctype, mydim, mydim> inv_AT_A;
+    FieldMatrix< ctype, mydim, mydim> inv_AT_A;
 
     FMatrixHelp :: invertMatrix( AT_A, inv_AT_A );
     //FMatrixHelp :: multMatrix( matrix, inv_AT_A, _invTransposed );
@@ -1104,11 +1104,11 @@ namespace Dune {
   // triangle mapping
   template <>
   inline void LinearMapping<3, 2> ::
-  calculateDeterminant(const localcoord_t& local) const
+  calculateDeterminant(const map_t& local) const
   {
     enum { cdim  = 3 };
-    coord_t tmpV; //! temporary memory
-    coord_t tmpU; //! temporary memory
+    world_t tmpV; //! temporary memory
+    world_t tmpU; //! temporary memory
 
     for(int i=0; i<cdim; ++i)
     {
@@ -1119,7 +1119,7 @@ namespace Dune {
       tmpU[i] = _matrix[1][i] - _matrix[0][i];
     }
 
-    coord_t globalCoord;
+    world_t globalCoord;
 
     // calculate scaled outer normal
     for(int i=0; i<cdim; ++i)
@@ -1138,7 +1138,7 @@ namespace Dune {
   template <int cdim, int mydim>
   inline void LinearMapping<cdim, mydim> ::
   multTransposedMatrix(const matrix_t& matrix,
-                       FieldMatrix<alu3d_ctype, mydim, mydim>& result) const
+                       FieldMatrix<ctype, mydim, mydim>& result) const
   {
     typedef typename matrix_t::size_type size_type;
     for(size_type i=0; i<mydim; ++i)
@@ -1157,7 +1157,7 @@ namespace Dune {
   template <int cdim, int mydim>
   inline void LinearMapping<cdim, mydim> ::
   multMatrix ( const matrix_t &A,
-               const FieldMatrix< alu3d_ctype, mydim, mydim > &B,
+               const FieldMatrix< ctype, mydim, mydim > &B,
                inv_t& ret ) const
   {
     //! calculates ret = A * B
@@ -1177,15 +1177,15 @@ namespace Dune {
   // edge mapping
   template <>
   inline void LinearMapping<3, 1> ::
-  inverse(const localcoord_t& local) const
+  inverse(const map_t& local) const
   {
-    FieldMatrix<alu3d_ctype, 1, 1> AT_A_;
+    FieldMatrix<ctype, 1, 1> AT_A_;
 
     // calc ret = A^T*A
     multTransposedMatrix(_matrix, AT_A_ );
 
     // calc Jinv_ = A (A^T*A)^-1
-    FieldMatrix< alu3d_ctype, 1, 1 > inv_AT_A;
+    FieldMatrix< ctype, 1, 1 > inv_AT_A;
     FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
     multMatrix( _matrix, inv_AT_A, _invTransposed );
 
@@ -1196,7 +1196,7 @@ namespace Dune {
   // triangle mapping
   template <>
   inline void LinearMapping<3, 1> ::
-  calculateDeterminant(const localcoord_t& local) const
+  calculateDeterminant(const map_t& local) const
   {
     // calculate length
     _det = std::sqrt( (_matrix[0][0] * _matrix[0][0]) +
@@ -1209,7 +1209,7 @@ namespace Dune {
   // triangle mapping
   template <>
   inline void LinearMapping<2, 1> ::
-  calculateDeterminant(const localcoord_t& local) const
+  calculateDeterminant(const map_t& local) const
   {
     // calculate length
     _det = std::sqrt( (_matrix[0][0] * _matrix[0][0]) +
@@ -1220,8 +1220,8 @@ namespace Dune {
   }
 
   template <int cdim, int mydim>
-  inline alu3d_ctype LinearMapping<cdim, mydim> ::
-  det(const localcoord_t& local ) const
+  inline typename LinearMapping< cdim, mydim >::ctype
+  LinearMapping<cdim, mydim >::det( const map_t& local ) const
   {
     // return det if already calculated
     if( _calcedDet ) return _det;
@@ -1235,7 +1235,7 @@ namespace Dune {
   template <int cdim, int mydim>
   inline const typename LinearMapping<cdim, mydim> :: matrix_t&
   LinearMapping<cdim, mydim> ::
-  jacobianTransposed(const localcoord_t & local) const
+  jacobianTransposed(const map_t & local) const
   {
     return _matrix;
   }
@@ -1243,7 +1243,7 @@ namespace Dune {
   template <int cdim, int mydim>
   inline const typename LinearMapping<cdim, mydim> :: inv_t&
   LinearMapping<cdim, mydim> ::
-  jacobianInverseTransposed(const localcoord_t & local) const
+  jacobianInverseTransposed(const map_t & local) const
   {
     // if calculated return
     if( _calcedInv ) return _invTransposed;
@@ -1257,7 +1257,7 @@ namespace Dune {
   template <>
   inline const LinearMapping<3, 0> :: inv_t&
   LinearMapping<3, 0> ::
-  jacobianInverseTransposed(const localcoord_t & local) const
+  jacobianInverseTransposed(const map_t & local) const
   {
     return _invTransposed;
   }
@@ -1265,7 +1265,7 @@ namespace Dune {
   template <>
   inline const LinearMapping<2, 0> :: inv_t&
   LinearMapping<2, 0> ::
-  jacobianInverseTransposed(const localcoord_t & local) const
+  jacobianInverseTransposed(const map_t & local) const
   {
     return _invTransposed;
   }

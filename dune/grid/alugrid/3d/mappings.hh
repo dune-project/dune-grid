@@ -216,10 +216,10 @@ namespace Dune {
 
 
 
+  //! A bilinear mapping
   template< int cdim >
-  class BilinearMapping
+  struct BilinearMapping
   {
-  protected:
     typedef alu3d_ctype ctype;
 
     typedef FieldVector< ctype, cdim > world_t;
@@ -228,6 +228,7 @@ namespace Dune {
     typedef FieldMatrix< ctype, 2, cdim > matrix_t;
     typedef FieldMatrix< ctype, cdim, 2 > inv_t;
 
+  protected:
     ctype _b [4][cdim];
 
     mutable ctype det_;
@@ -271,24 +272,25 @@ namespace Dune {
 
 
 
-  //! A linear surface mapping
-  template <int cdim, int mydim>
-  class LinearMapping
+  //! A linear mapping
+  template< int cdim, int mydim >
+  struct LinearMapping
   {
+    typedef alu3d_ctype ctype;
+
+    typedef FieldVector< ctype, cdim > world_t;
+    typedef FieldVector< ctype, mydim > map_t;
+
+    typedef FieldMatrix< ctype, mydim, cdim > matrix_t;
+    typedef FieldMatrix< ctype, cdim, mydim > inv_t;
+
   protected:
-    // alu3d_ctype = double
-    typedef FieldVector<alu3d_ctype, cdim>   coord_t;
-    typedef FieldVector<alu3d_ctype, mydim>  localcoord_t;
-
-    typedef FieldMatrix<alu3d_ctype, mydim, cdim> matrix_t ;
-    typedef FieldMatrix<alu3d_ctype, cdim, mydim> inv_t ;
-
     matrix_t _matrix;             //!< transformation matrix (transposed)
     mutable inv_t _invTransposed; //!< storage for inverse of jacobian (transposed)
-    coord_t _p0;                  //! P[0]
+    world_t _p0;                  //! P[0]
 
     //! stores the determinant of the inverse
-    mutable alu3d_ctype _det;
+    mutable ctype _det;
 
     //! true if inverse has been calculated
     mutable bool _calcedInv;
@@ -307,36 +309,36 @@ namespace Dune {
     inline bool affine () const { return true ; }
 
     // return reference to transposed jacobian
-    const matrix_t& jacobianTransposed(const localcoord_t&) const ;
+    const matrix_t& jacobianTransposed(const map_t &) const ;
 
     // return reference to transposed jacobian inverse
-    const inv_t& jacobianInverseTransposed(const localcoord_t&) const ;
+    const inv_t& jacobianInverseTransposed(const map_t &) const ;
 
     // calculates determinant of mapping
-    alu3d_ctype det(const localcoord_t&) const;
+    ctype det(const map_t&) const;
 
     // maps from local coordinates to global coordinates
-    void world2map(const coord_t &, localcoord_t & ) const;
+    void world2map(const world_t &, map_t &) const;
 
     // maps form global coordinates to local (within reference element)
     // coordinates
-    void map2world(const localcoord_t&, coord_t&) const ;
+    void map2world(const map_t &, world_t &) const ;
 
   protected:
     // calculate inverse
-    void inverse (const localcoord_t&) const;
+    void inverse (const map_t&) const;
 
     // calculate inverse one codim one entity
-    void inverseCodimOne (const localcoord_t&) const;
+    void inverseCodimOne (const map_t&) const;
 
     // calculate determinant
-    void calculateDeterminant (const localcoord_t&) const;
+    void calculateDeterminant (const map_t&) const;
 
     void multTransposedMatrix(const matrix_t& matrix,
-                              FieldMatrix<alu3d_ctype, mydim, mydim>& result) const;
+                              FieldMatrix<ctype, mydim, mydim>& result) const;
 
     void multMatrix ( const matrix_t& A,
-                      const FieldMatrix< alu3d_ctype, mydim, mydim> &B,
+                      const FieldMatrix< ctype, mydim, mydim> &B,
                       inv_t& ret ) const ;
 
   public:
