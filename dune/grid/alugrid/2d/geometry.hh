@@ -254,15 +254,6 @@ namespace Dune
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
     }
 
-#if 0
-    // update geometry coordinates
-    template< class Vector >
-    void update ( const Vector &p0, const Vector &p1, const Vector &p2 )
-    {
-      mapping_.buildMapping( p0, p1, p2 );
-    }
-#endif
-
     template< class HElement >
     void update ( const HElement &item )
     {
@@ -347,15 +338,6 @@ namespace Dune
       }
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
     }
-
-#if 0
-    // update geometry coordinates
-    template< class Vector >
-    void update ( const Vector &p0, const Vector &p1, const Vector &p2, const Vector &p3 )
-    {
-      mapping_.buildMapping( p0, p1, p2, p3 );
-    }
-#endif
 
     template< class HElement >
     void update ( const HElement &item )
@@ -468,29 +450,10 @@ namespace Dune
         bilinearMapping().buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
     }
 
-#if 0
-    // update geometry coordinates
-    template< class Vector >
-    void update ( const Vector &p0, const Vector &p1, const Vector &p2 )
-    {
-      updateMapping( 3 );
-      linearMapping().buildMapping( p0, p1, p2 );
-    }
-
-    // update geometry coordinates
-    template< class Vector >
-    void update ( const Vector &p0, const Vector &p1, const Vector &p2, const Vector &p3 )
-    {
-      updateMapping( 4 );
-      bilinearMapping().buildMapping( p0, p1, p2, p3 );
-    }
-#endif
-
     template< class HElement >
     void update ( const HElement &item )
     {
-      // how do we get the number of corners, here?
-      const int corners = 3;
+      const int corners = item.numvertices();
       updateMapping( corners );
       if( corners == 3 )
         linearMapping().buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
