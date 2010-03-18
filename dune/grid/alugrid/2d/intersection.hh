@@ -85,7 +85,9 @@ namespace Dune
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
     typedef MakeableInterfaceObject< LocalGeometry > LocalGeometryObject;
 
+    typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
 
     // type of local geometry storage
     typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp>
@@ -96,30 +98,44 @@ namespace Dune
     friend class LeafIntersectionIteratorWrapper<GridImp>;
 
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
+
   protected:
     struct impl
     {
-      impl() : item_(0) , neigh_(0) , index_(0) , opposite_(0), isBoundary_(false), useOutside_(false) { }
-      impl(const impl & org) : item_(org.item_) , neigh_(org.neigh_) , index_(org.index_) , opposite_(org.opposite_),
-                               isBoundary_(org.isBoundary_), useOutside_(org.useOutside_) { }
+      impl() : item_(0), neighbor_(0), index_(0), opposite_(0), useOutside_(false) {}
 
-      impl & operator = (const impl & org)
+      HElementType *inside () const
       {
-        item_ = org.item_;
-        neigh_ = org.neigh_;
-        index_ = org.index_;
-        opposite_ = org.opposite_;
-        isBoundary_ = org.isBoundary_;
-        useOutside_ = org.useOutside_;
-        return *this;
+        return item_;
+      }
+
+      bool isBoundary () const
+      {
+        return (neighbor_ != 0) && (neighbor_->thinis( ThinelementType::bndel_like ));
+      }
+
+      bool hasOutside () const
+      {
+        return (neighbor_ != 0) && (neighbor_->thinis( ThinelementType::element_like ));
+      }
+
+      HBndElType *boundary () const
+      {
+        assert( isBoundary() );
+        return (HBndElType *)neighbor_;
+      }
+
+      HElementType *outside () const
+      {
+        assert( hasOutside() );
+        return (HElementType *)neighbor_;
       }
 
       // current element from which we started the intersection iterator
       mutable HElementType* item_;
-      mutable HElementType* neigh_;
+      mutable ThinelementType *neighbor_;
       mutable int index_;
       mutable int opposite_;
-      mutable bool isBoundary_;
       mutable bool useOutside_;
     } current;
 
@@ -245,12 +261,14 @@ namespace Dune
     static const int dimworld  = GridImp::dimensionworld;
     static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
-    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
+    typedef typename BaseType::ThinelementType ThinelementType;
+    typedef typename BaseType::HElementType HElementType;
+
     friend class LevelIntersectionIteratorWrapper<GridImp>;
 
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
-    typedef std::pair<HElementType *, std::pair<int, bool> > IntersectionInfo;
+    typedef std::pair< ThinelementType *, int > IntersectionInfo;
 
   public:
     typedef ALUMemoryProvider< ThisType > StorageType;
@@ -295,7 +313,7 @@ namespace Dune
   protected:
     bool isConform() const
     {
-      return (!this->neighbor() || (current.neigh_ == current.item_->neighbour( current.index_ )));
+      return (!current.hasOutside() || (current.outside() == current.inside()->neighbour( current.index_ )));
     }
 
   private:
@@ -321,7 +339,7 @@ namespace Dune
     using BaseType::walkLevel_;
 
   private:
-    mutable std::stack<IntersectionInfo> neighbourStack_;
+    mutable std::stack<IntersectionInfo> nbStack_;
   }; // end ALU2dGridLevelIntersectionIterator
 
 
@@ -357,7 +375,7 @@ namespace Dune
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
 
-    typedef std::pair< ThinelementType *, std::pair<int, bool> > IntersectionInfo;
+    typedef std::pair< ThinelementType *, int > IntersectionInfo;
 
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -395,7 +413,7 @@ namespace Dune
   protected:
     bool isConform() const
     {
-      return (!this->neighbor() || (current.neigh_->level() == current.item_->level()));
+      return (!current.hasOutside() || (current.outside()->level() == current.inside()->level()) );
     }
 
   private:
@@ -412,6 +430,7 @@ namespace Dune
   protected:
     using BaseType::current;
     using BaseType::nFaces_;
+    using BaseType::walkLevel_;
 
   private:
     std::stack<IntersectionInfo> nbStack_;

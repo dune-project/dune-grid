@@ -82,6 +82,7 @@ namespace Dune
     typedef ALU2DSPACE Thinelement ALU2DDIMWORLD (dimw,eltype) ThinelementType;
     typedef ALU2DSPACE Element ALU2DDIMWORLD (dimw,eltype) ElementType;
     typedef typename HmeshType::helement_t HElementType;
+    typedef typename HmeshType::hbndel_t HBndElType;
   };
 
 
