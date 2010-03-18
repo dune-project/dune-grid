@@ -184,7 +184,7 @@ namespace Dune
           if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
           {
             // Check whether index and coordinate match
-            FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap.at(global[j]) );
+            FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap.find(global[j])->second );
             FieldVector< coordType, dimworld > vx1 = vxp->geometry().corner( 0 );
             if( ! compareVec( vxcheck, vx1 ) )
             {
