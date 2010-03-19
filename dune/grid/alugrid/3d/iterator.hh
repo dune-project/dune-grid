@@ -228,6 +228,7 @@ namespace Dune {
   protected:
     // set interator to end iterator
     void done () ;
+    template< class EntityType > void done ( const EntityType &en ) { done(); }
 
     // reset IntersectionIterator to first neighbour
     void setFirstItem(const HElementType & elem, int wLevel);
