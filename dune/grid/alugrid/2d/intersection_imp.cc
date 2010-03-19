@@ -110,35 +110,17 @@ namespace Dune
 #endif
   }
 
-  //! reset IntersectionIterator to first neighbour
-  template< class GridImp >
-  inline void ALU2dGridIntersectionBase< GridImp >::setFirstItem(const HElementType & elem, int wLevel)
-  {
-    current.setInside( const_cast< HElementType * >( &elem ) );
-    assert( current.inside() != 0 );
-    walkLevel_ = wLevel;
-    current.index_ = 0;
-    current.opposite_ = current.inside()->opposite( current.index_ );
-
-    unsetUp2Date();
-  }
-
 
   //! return true if intersection is with boundary
   template<class GridImp>
   inline void ALU2dGridIntersectionBase<GridImp> :: checkValid ()
   {
-    if( !current.hasOutside() )
-      return;
-
-    const int index = current.outside()->getIndex();
-    if( this->grid_.rankManager().isValid( index, All_Partition ) )
-      return;
-
-    // the neighbor is not valid, so don't report it
-    current.neighbor_ = 0;
-    // this detects a ghost face
-    current.opposite_ = -222;
+    if( current.outside() )
+    {
+      const int index = current.outside()->getIndex();
+      if( !this->grid_.rankManager().isValid( index, All_Partition ) )
+        current.setOutside( 0, -222 );
+    }
   }
 
   //! return true if intersection is with boundary
@@ -173,7 +155,7 @@ namespace Dune
   template<class GridImp>
   inline bool ALU2dGridIntersectionBase<GridImp> :: neighbor () const
   {
-    return current.hasOutside();
+    return bool( current.outside() );
   }
 
   //! return EntityPointer to the Entity on the inside of this intersection.
@@ -189,7 +171,7 @@ namespace Dune
   inline void ALU2dGridIntersectionBase<GridImp>::done ( const HElementType *inside )
   {
     current.setInside( const_cast< HElementType * >( inside ) );
-    current.neighbor_ = 0;
+    current.setOutside( 0, -1 );
     current.index_= current.nFaces();
   }
 
@@ -198,8 +180,7 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< GridImp >::EntityPointer
   ALU2dGridIntersectionBase< GridImp >::outside() const
   {
-    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
-    assert( current.hasOutside() );
+    assert( current.inside() && current.outside() );
     return EntityPointerImp( grid_, *current.outside(), -1, walkLevel_ );
   }
 
@@ -218,7 +199,7 @@ namespace Dune
   template<class GridImp>
   inline int ALU2dGridIntersectionBase<GridImp>::indexInOutside () const
   {
-    const int i = current.opposite_;
+    const int i = current.opposite();
     if( (eltype == ALU2DSPACE triangle) || ((eltype == ALU2DSPACE mixed) && (current.nFaces() == 3)) )
       return 2 - i;
     else
@@ -235,7 +216,7 @@ namespace Dune
   inline int ALU2dGridIntersectionBase< GridImp >::twistInOutside () const
   {
     // twist is either 0 or 1 depending on the edge numbers
-    return (1 + current.index_ + current.opposite_) % 2;
+    return (1 + current.index_ + current.opposite()) % 2;
   }
 
   template< class GridImp >
@@ -299,7 +280,7 @@ namespace Dune
   inline const typename ALU2dGridIntersectionBase<GridImp>::LocalGeometry&
   ALU2dGridIntersectionBase< GridImp >::geometryInOutside () const
   {
-    assert( (current.inside() != 0) && current.hasOutside() );
+    assert( current.inside() && current.outside() );
 
     // only in non-conform situation we use default method
     //if( ! this->conforming() )
@@ -318,7 +299,7 @@ namespace Dune
        else
        {
        // parameters are face and twist
-       return localGeomStorage_.localGeom(  this->current.opposite_,
+       return localGeomStorage_.localGeom(  this->current.opposite(),
                                           1 - (this->current.index_ % 2) );
        }
      */
@@ -328,13 +309,13 @@ namespace Dune
   inline const typename ALU2dGridIntersectionBase<GridImp>::Geometry&
   ALU2dGridIntersectionBase<GridImp>::geometry () const
   {
-    assert( current.inside() != 0 );
+    assert( current.inside() );
 
     if( ! this->grid_.getRealImplementation(intersectionGlobal_).up2Date() )
     {
       if( this->current.useOutside_ )
         this->grid_.getRealImplementation(intersectionGlobal_).
-        buildGeom(*current.outside(), current.opposite_);
+        buildGeom(*current.outside(), current.opposite());
       else
         this->grid_.getRealImplementation(intersectionGlobal_).
         buildGeom(*current.inside(), current.index_);
@@ -459,16 +440,12 @@ namespace Dune
       current.useOutside_ = (nbStack_.size() > 1);
 
       if( nbStack_.empty() )
-      {
-        current.neighbor_ = 0;
-        current.opposite_ = -1;
-        return;
-      }
+        return current.setOutside( 0, -1 );
     }
 
     setupIntersection();
 
-    assert( !current.hasOutside() || (current.outside()->level() == walkLevel_) );
+    assert( !current.outside() || (current.outside()->level() == walkLevel_) );
   }
 
 
@@ -478,48 +455,58 @@ namespace Dune
   {
     assert( current.index_ < current.nFaces() );
 
+    ThinelementType *neighbor = current.inside()->neighbour( current.index_ );
+    assert( neighbor );
+
     IntersectionInfo info;
-    info.first = current.inside()->neighbour( current.index_ );
-    info.second = current.inside()->opposite( current.index_ );
-    assert( info.first != 0 );
-
-    if( !info.first->thinis( ThinelementType::element_like ) )
+    if( neighbor->thinis( ThinelementType::bndel_like ) )
     {
-      nbStack_.push( info );
-      return;
+      HBndElType *bndel = (HBndElType *)neighbor;
+      if( bndel->type() != HBndElType::periodic )
+        return;
+
+      PeriodicBndElType *bndnb = ((PeriodicBndElType *)bndel)->periodic_nb;
+      assert( bndnb && bndnb->neighbour( 0 ) && bndnb->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+      info.first = (HElementType *)bndnb->neighbour( 0 );
+      info.second = bndnb->opposite( 0 );
     }
-
-    HElementType *hnb = (HElementType *)info.first;
-    while( hnb->level() > walkLevel_ )
+    else
     {
-      info.second = getOppositeInFather( info.second, hnb->childNr() );
+      assert( neighbor->thinis( ThinelementType::element_like ) );
+      info.first = (HElementType *)neighbor;
+      info.second = current.inside()->opposite( current.index_ );
+    }
+    assert( info.first );
+
+    while( info.first->level() > walkLevel_ )
+    {
+      info.second = getOppositeInFather( info.second, info.first->childNr() );
       assert( (info.second >= 0) && (info.second < current.nFaces()) );
-      info.first = hnb = hnb->father();
+      info.first = info.first->father();
     }
 
-    if( hnb->level() >= walkLevel_ )
+    if( info.first->level() >= walkLevel_ )
     {
       nbStack_.push( info );
       return;
     }
 
     // why should we go up, here?
-    while( (hnb != 0) && (hnb->level() < walkLevel_ - 1) )
+    while( info.first && (info.first->level() < walkLevel_ - 1) )
     {
-      info.second = getOppositeInFather( info.second, hnb->childNr() );
+      info.second = getOppositeInFather( info.second, info.first->childNr() );
       assert( (info.second >= 0) && (info.second < current.nFaces()) );
-      info.first = hnb = hnb->father();
+      info.first = info.first->father();
     }
 
-    if( hnb != 0 )
+    if( info.first )
     {
-      assert( hnb->level() == walkLevel_ - 1 );
+      assert( info.first->level() == walkLevel_ - 1 );
 
       const int opposite = info.second;
-      for( hnb = hnb->down(); hnb != 0; hnb = hnb->next() )
+      for( info.first = info.first->down(); info.first; info.first = info.first->next() )
       {
-        info.first = hnb;
-        info.second = getOppositeInChild( opposite, hnb->childNr() );
+        info.second = getOppositeInChild( opposite, info.first->childNr() );
         if( info.second != -1 )
           nbStack_.push( info );
       }
@@ -548,9 +535,7 @@ namespace Dune
 
     current.setInside( const_cast< HElementType * >( &elem ) );
     current.index_ = -1;
-    current.neighbor_ = 0;
-    current.opposite_= -1;
-
+    current.setOutside( 0, -1 );
 
     walkLevel_ = wLevel;
 
@@ -566,8 +551,7 @@ namespace Dune
     assert( !nbStack_.empty() );
 
     IntersectionInfo &info = nbStack_.top();
-    current.neighbor_ = info.first;
-    current.opposite_ = info.second;
+    current.setOutside( info.first, info.second );
     nbStack_.pop();
   }
 
@@ -638,12 +622,9 @@ namespace Dune
 
     this->unsetUp2Date();
 
-    // non conform case and we still have neighbours
-    if( current.inside()->hashvtx( current.index_ ) && !nbStack_.empty() )
-    {
-      setupIntersection();
-      return;
-    }
+    // do we still have neighbours?
+    if( !nbStack_.empty() )
+      return setupIntersection();
 
     ++current.index_;
     if( current.index_ >= current.nFaces())
@@ -652,32 +633,73 @@ namespace Dune
       return;
     }
 
-    current.useOutside_ = current.inside()->hasHangingNode( current.index_ );
-    // non-conform case
-    if( current.useOutside_ )
+    ThinelementType *neighbor = current.inside()->neighbour( current.index_ );
+    assert( neighbor );
+
+    if( neighbor->thinis( ThinelementType::bndel_like ) )
     {
-      // stack should be empty here
-      assert( nbStack_.empty() );
+      HBndElType *bndel = (HBndElType *)neighbor;
+      if( bndel->type() != HBndElType::periodic )
+      {
+        current.useOutside_ = false;
+        return current.setOutside( 0, -1 );
+      }
 
-      IntersectionInfo info;
+      PeriodicBndElType *bndnb = ((PeriodicBndElType *)bndel)->periodic_nb;
+      assert( bndnb && bndnb->neighbour( 0 ) && bndnb->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+      current.useOutside_ = !bndnb->leaf();
+      if( current.useOutside_ )
+      {
+        IntersectionInfo info;
 
-      // insert left intersection
-      info.first = current.inside()->getLeftIntersection( current.index_ );  // neighbor
-      info.second = current.inside()->opposite( current.index_ );            // opposite vertex
-      nbStack_.push( info );
+        // insert left intersection
+        HBndElType *left = bndnb->down();
+        assert( left && left->leaf() );
+        assert( left->neighbour( 0 ) && left->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+        info.first = (HElementType *)left->neighbour( 0 );
+        info.second = left->opposite( 0 );
+        nbStack_.push( info );
 
-      // insert right intersection
-      info.first = current.inside()->getRightIntersection( current.index_ ); // neighbor
-      info.second = current.inside()->opposite( current.index_ );            // opposite vertex
-      nbStack_.push( info );
+        HBndElType *right = left->next();
+        assert( right && right->leaf() );
+        assert( right->neighbour( 0 ) && right->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+        info.first = (HElementType *)right->neighbour( 0 );
+        info.second = right->opposite( 0 );
+        nbStack_.push( info );
 
-      setupIntersection();
+        setupIntersection();
+      }
+      else
+        current.setOutside( (HElementType *)bndnb->neighbour( 0 ), bndnb->opposite( 0 ) );
     }
-    //conform case
     else
     {
-      current.neighbor_ = current.inside()->neighbour( current.index_ );
-      current.opposite_ = current.inside()->opposite( current.index_ );
+      current.useOutside_ = current.inside()->hasHangingNode( current.index_ );
+      const int opposite = current.inside()->opposite( current.index_ );
+      if( current.useOutside_ )
+      {
+        IntersectionInfo info;
+
+        // insert left intersection
+        ThinelementType *left = current.inside()->getLeftIntersection( current.index_ );
+        assert( left && left->thinis( ThinelementType::element_like ) );
+        info.first = (HElementType *)left;   // neighbor
+        info.second = opposite;              // opposite vertex
+        assert( info.first->leaf() );
+        nbStack_.push( info );
+
+        // insert right intersection
+        ThinelementType *right = current.inside()->getRightIntersection( current.index_ );
+        assert( right && right->thinis( ThinelementType::element_like ) );
+        info.first = (HElementType *)right;  // neighbor
+        info.second = opposite;              // opposite vertex
+        assert( info.first->leaf() );
+        nbStack_.push( info );
+
+        setupIntersection();
+      }
+      else
+        current.setOutside( (HElementType *)current.inside()->neighbour( current.index_ ), opposite );
     }
   }
 
@@ -717,8 +739,7 @@ namespace Dune
     assert( !nbStack_.empty() );
 
     IntersectionInfo &info = nbStack_.top();
-    current.neighbor_ = info.first;
-    current.opposite_ = info.second;
+    current.setOutside( info.first, info.second );
     nbStack_.pop();
   }
 

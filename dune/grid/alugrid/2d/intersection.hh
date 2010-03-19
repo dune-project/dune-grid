@@ -88,7 +88,6 @@ namespace Dune
     typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
-    typedef typename ALU2dImplTraits< dimworld, eltype >::PeriodicBndElType PeriodicBndElType;
 
     // type of local geometry storage
     typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp>
@@ -103,15 +102,16 @@ namespace Dune
   protected:
     struct impl
     {
-      explicit impl( HElementType *item = 0 )
-        : index_(0), neighbor_(0), opposite_(0), useOutside_(false)
+      explicit impl( HElementType *inside = 0 )
+        : index_(0), useOutside_(false)
       {
-        setInside( item );
+        setInside( inside );
+        setOutside( 0, -1 );
       }
 
       HElementType *inside () const
       {
-        return item_;
+        return inside_;
       }
 
       int nFaces () const
@@ -121,51 +121,47 @@ namespace Dune
 
       bool isBoundary () const
       {
-        return (neighbor_ != 0) && (neighbor_->thinis( ThinelementType::bndel_like ));
-      }
-
-      bool hasOutside () const
-      {
-        if( neighbor_ != 0 )
-          return neighbor_->thinis( ThinelementType::element_like ) || (boundary()->type() == HBndElType::periodic);
-        else
-          return false;
+        assert( inside() && (index_ < nFaces()) && inside()->neighbour( index_ ) );
+        return inside()->neighbour( index_ )->thinis( ThinelementType::bndel_like );
       }
 
       HBndElType *boundary () const
       {
         assert( isBoundary() );
-        return (HBndElType *)neighbor_;
+        return (HBndElType *)inside()->neighbour( index_ );
       }
 
       HElementType *outside () const
       {
-        assert( hasOutside() );
-        if( neighbor_->thinis( ThinelementType::element_like ) )
-          return (HElementType *)neighbor_;
-        else
-        {
-          ThinelementType *oppBndEl = ((PeriodicBndElType *)neighbor_)->periodic_nb;
-          assert( oppBndEl != 0 );
-          return (HElementType *)oppBndEl->neighbour( 0 );
-        }
+        return outside_;
       }
 
-      void setInside ( HElementType *item )
+      int opposite () const
       {
-        item_ = item;
-        nFaces_ = (item != 0 ? item->numfaces() : 0);
+        return opposite_;
+      }
+
+      void setInside ( HElementType *inside )
+      {
+        inside_ = inside;
+        nFaces_ = (inside != 0 ? inside->numfaces() : 0);
+      }
+
+      void setOutside ( HElementType *outside, int opposite )
+      {
+        outside_ = outside;
+        opposite_ = opposite;
       }
 
       // current element from which we started the intersection iterator
     private:
-      HElementType *item_;
+      HElementType *inside_;
+      HElementType *outside_;
       int nFaces_;
+      int opposite_;
 
     public:
       mutable int index_;
-      mutable ThinelementType *neighbor_;
-      mutable int opposite_;
       mutable bool useOutside_;
     } current;
 
@@ -256,7 +252,7 @@ namespace Dune
     void first ( const EntityImp &en, int wLevel );
 
     // reset IntersectionIterator to first neighbour
-    virtual void setFirstItem(const HElementType & elem, int wLevel);
+    virtual void setFirstItem ( const HElementType &elem, int wLevel ) = 0;
 
     // the local geometries
     mutable GeometryObject intersectionGlobal_;
@@ -290,14 +286,16 @@ namespace Dune
     static const int dimworld  = GridImp::dimensionworld;
     static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
-    typedef typename BaseType::ThinelementType ThinelementType;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
     typedef typename BaseType::HElementType HElementType;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::PeriodicBndElType PeriodicBndElType;
 
     friend class LevelIntersectionIteratorWrapper<GridImp>;
 
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
-    typedef std::pair< ThinelementType *, int > IntersectionInfo;
+    typedef std::pair< HElementType *, int > IntersectionInfo;
 
   public:
     typedef ALUMemoryProvider< ThisType > StorageType;
@@ -342,7 +340,7 @@ namespace Dune
   protected:
     bool isConform() const
     {
-      return (!current.hasOutside() || (current.outside() == current.inside()->neighbour( current.index_ )));
+      return (!current.outside() || (current.outside() == current.inside()->neighbour( current.index_ )));
     }
 
   private:
@@ -402,10 +400,12 @@ namespace Dune
     enum { dimensionworld  = GridImp::dimensionworld };
 
   private:
-    typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
+    typedef typename BaseType::HElementType HElementType;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::PeriodicBndElType PeriodicBndElType;
 
-    typedef std::pair< ThinelementType *, int > IntersectionInfo;
+    typedef std::pair< HElementType *, int > IntersectionInfo;
 
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -443,7 +443,7 @@ namespace Dune
   protected:
     bool isConform() const
     {
-      return (!current.hasOutside() || (current.outside()->level() == current.inside()->level()) );
+      return (!current.outside() || (current.outside()->level() == current.inside()->level()) );
     }
 
   private:
