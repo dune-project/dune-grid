@@ -695,6 +695,123 @@ namespace Dune
 #include <dune/grid/albertagrid/undefine-2.0.hh>
 #endif
 
+// We use MEM_ALLOC, so undefine it here.
+#undef MEM_ALLOC
+
+// We use MEM_REALLOC, so undefine it here.
+#undef MEM_REALLOC
+
+// We use MEM_CALLOC, so undefine it here.
+#undef MEM_CALLOC
+
+// We use MEM_FREE, so undefine it here.
+#undef MEM_FREE
+
+// Macro ERROR may be defined by alberta_util.h. If so, undefine it.
+#ifdef ERROR
+#undef ERROR
+#endif // #ifdef ERROR
+
+// Macro ERROR_EXIT may be defined by alberta_util.h. If so, undefine it.
+#ifdef ERROR_EXIT
+#undef ERROR_EXIT
+#endif // #ifdef ERROR_EXIT
+
+// Macro WARNING may be defined by alberta_util.h. If so, undefine it.
+#ifdef WARNING
+#undef WARNING
+#endif // #ifdef WARNING
+
+// Macro TEST may be defined by alberta_util.h. If so, undefine it.
+#ifdef TEST
+#undef TEST
+#endif // #ifdef TEST
+
+// Macro TEST_EXIT may be defined by alberta_util.h. If so, undefine it.
+#ifdef TEST_EXIT
+#undef TEST_EXIT
+#endif // #ifdef TEST_EXIT
+
+// Macro DEBUG_TEST may be defined by alberta_util.h. If so, undefine it.
+#ifdef DEBUG_TEST
+#undef DEBUG_TEST
+#endif // #ifdef DEBUG_TEST
+
+// Macro DEBUG_TEST_EXIT may be defined by alberta_util.h. If so, undefine it.
+#ifdef DEBUG_TEST_EXIT
+#undef DEBUG_TEST_EXIT
+#endif // #ifdef DEBUG_TEST_EXIT
+
+// Macro INFO may be defined by alberta_util.h. If so, undefine it.
+#ifdef INFO
+#undef INFO
+#endif // #ifdef INFO
+
+// Macro PRINT_INFO may be defined by alberta_util.h. If so, undefine it.
+#ifdef PRINT_INFO
+#undef PRINT_INFO
+#endif // #ifdef PRINT_INFO
+
+// Macro PRINT_INT_VEC may be defined by alberta_util.h. If so, undefine it.
+#ifdef PRINT_INT_VEC
+#undef PRINT_INT_VEC
+#endif // #ifdef PRINT_INT_VEC
+
+// Macro PRINT_REAL_VEC may be defined by alberta_util.h. If so, undefine it.
+#ifdef PRINT_REAL_VEC
+#undef PRINT_REAL_VEC
+#endif // #ifdef PRINT_REAL_VEC
+
+// Macro WAIT may be defined by alberta_util.h. If so, undefine it.
+#ifdef WAIT
+#undef WAIT
+#endif // #ifdef WAIT
+
+// Macro WAIT_REALLY may be defined by alberta_util.h. If so, undefine it.
+#ifdef WAIT_REALLY
+#undef WAIT_REALLY
+#endif // #ifdef WAIT_REALLY
+
+// Macro GET_WORKSPACE may be defined by alberta_util.h. If so, undefine it.
+#ifdef GET_WORKSPACE
+#undef GET_WORKSPACE
+#endif // #ifdef GET_WORKSPACE
+
+// Macro FREE_WORKSPACE may be defined by alberta_util.h. If so, undefine it.
+#ifdef FREE_WORKSPACE
+#undef FREE_WORKSPACE
+#endif // #ifdef FREE_WORKSPACE
+
+// Macro MAT_ALLOC may be defined by alberta_util.h. If so, undefine it.
+#ifdef MAT_ALLOC
+#undef MAT_ALLOC
+#endif // #ifdef MAT_ALLOC
+
+// Macro MAT_FREE may be defined by alberta_util.h. If so, undefine it.
+#ifdef MAT_FREE
+#undef MAT_FREE
+#endif // #ifdef MAT_FREE
+
+// Macro NAME may be defined by alberta_util.h. If so, undefine it.
+#ifdef NAME
+#undef NAME
+#endif // #ifdef NAME
+
+// Macro GET_STRUCT may be defined by alberta_util.h. If so, undefine it.
+#ifdef GET_STRUCT
+#undef GET_STRUCT
+#endif // #ifdef GET_STRUCT
+
+// Macro ADD_PARAMETER may be defined by alberta_util.h. If so, undefine it.
+#ifdef ADD_PARAMETER
+#undef ADD_PARAMETER
+#endif // #ifdef ADD_PARAMETER
+
+// Macro GET_PARAMETER may be defined by alberta_util.h. If so, undefine it.
+#ifdef GET_PARAMETER
+#undef GET_PARAMETER
+#endif // #ifdef GET_PARAMETER
+
 #define _ALBERTA_H_
 
 #endif // HAVE_ALBERTA
