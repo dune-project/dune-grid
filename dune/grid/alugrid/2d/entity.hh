@@ -270,8 +270,13 @@ namespace Dune {
      */
     template<int cc>
     int count () const {
+#ifdef ALUGRID_SURFACE_2D
+      assert( item_ );
+      return (cc==0) ? 1 : item_->numvertices();
+#else
       enum {c = (cc==0) ? 1 : dim+1};
       return c;
+#endif
     }
 
     /**
@@ -355,8 +360,29 @@ namespace Dune {
     template< int codim >
     typename Codim< codim >::EntityPointer subEntity ( int i ) const
     {
+      int j = i;
       // apply mapping for codim 1
-      return entity< codim >( (codim == 1) ? ( 2 - i ) : i );
+      // dune to alu
+      switch (codim)
+      {
+      case 1 :
+        if( item_->numvertices() == 3 )
+          j = 2 - i;
+        else
+          switch (i) { case 0 : j=2;break;
+                     case 1 : j=0;break;
+                     case 2 : j=3;break;
+                     case 3 : j=1;break;}
+        break;
+      case 2 :
+        if( item_->numvertices() == 4 )
+          switch (i) { case 0 : j=0;break;
+                     case 1 : j=1;break;
+                     case 2 : j=3;break;
+                     case 3 : j=2;break;}
+        break;
+      }
+      return entity< codim >( j );
     }
 
     //! return partition type of this entity ( see grid.hh )

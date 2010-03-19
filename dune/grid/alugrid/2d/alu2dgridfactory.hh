@@ -44,8 +44,7 @@ namespace Dune
     static const unsigned int dimension = Grid::dimension;
     static const unsigned int dimensionworld = Grid::dimensionworld;
 
-    static const unsigned int numCorners = 3;
-    static const unsigned int numFaces = 3;
+    static const ALU2DSPACE ElementType elementType = Grid::elementType;
     static const unsigned int numFaceCorners = 2;
 
     typedef FieldVector< ctype, dimensionworld > VertexType;

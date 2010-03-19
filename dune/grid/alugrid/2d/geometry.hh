@@ -56,7 +56,9 @@ namespace Dune
 
     GeometryType type () const
     {
-      return GeometryType( GeometryType::simplex, 0 );
+      return GeometryType(
+               (eltype == ALU2DSPACE triangle ? GeometryType::simplex : GeometryType::cube),
+               0 );
     }
 
     void map2world ( const map_t &m, world_t &w ) const
@@ -123,7 +125,9 @@ namespace Dune
 
     GeometryType type () const
     {
-      return GeometryType( GeometryType::simplex, 1 );
+      return GeometryType(
+               (eltype == ALU2DSPACE triangle ? GeometryType::simplex : GeometryType::cube),
+               1 );
     }
 
     void map2world ( const map_t &m, world_t &w ) const
@@ -343,7 +347,7 @@ namespace Dune
     void update ( const HElement &item )
     {
       mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
-                             item.getVertex( 2 )->coord(), item.getVertex( 3 )->coord() );
+                             item.getVertex( 3 )->coord(), item.getVertex( 2 )->coord() );
     }
   };
 
@@ -460,7 +464,7 @@ namespace Dune
                                       item.getVertex( 2 )->coord() );
       else
         bilinearMapping().buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
-                                        item.getVertex( 2 )->coord(), item.getVertex( 3 )->coord() );
+                                        item.getVertex( 3 )->coord(), item.getVertex( 2 )->coord() );
     }
 
   private:
@@ -596,7 +600,7 @@ namespace Dune
     bool buildLocalGeom(const GeometryType & geo , const LocalGeomType & lg);
 
     //! build local geometry given local face number
-    bool buildLocalGeometry(const int faceNumber, const int twist);
+    bool buildLocalGeometry(const int faceNumber, const int twist,const int coorns);
 
     //! return non-const reference to coord vecs
     FieldVector<alu2d_ctype, cdim>& getCoordVec (int i);
@@ -617,7 +621,7 @@ namespace Dune
 
   protected:
     // return reference coordinates of the alu triangle
-    FieldMatrix<alu2d_ctype, 3, 3> calculateReferenceCoords() const;
+    FieldMatrix<alu2d_ctype, 4, 3> calculateReferenceCoords(const int corners) const;
 
     // implementation of coord and mapping
     mutable GeometryImplType geoImpl_;
@@ -691,21 +695,29 @@ namespace Dune
   class ALU2DIntersectionGeometryStorage
   {
     // one geometry for each face and twist 0 and 1
-    LocalGeometry* geoms_[ 3 ][ 2 ];
+    LocalGeometry* geoms_[ 2 ][ 4 ][ 2 ];
 
   protected:
     // create empty storage
     ALU2DIntersectionGeometryStorage ()
     {
-      for( int i=0; i<3; ++i)
+      for( int i=0; i<4; ++i)
       {
         for( int j=0; j<2; ++j)
         {
           LocalGeometryImp geo;
+          if ( i < 3 )
+          {
+            // build geometry
+            geo.buildLocalGeometry( i, j, 3 );
+            // create dune geoemtry
+            geoms_[ 0 ][ i ][ j ] = new LocalGeometry( geo );
+          } else geoms_[0][3][j] = 0;
+
           // build geometry
-          geo.buildLocalGeometry( i, j );
+          geo.buildLocalGeometry( i, j, 4 );
           // create dune geoemtry
-          geoms_[ i ][ j ] = new LocalGeometry( geo );
+          geoms_[ 1 ][ i ][ j ] = new LocalGeometry( geo );
         }
       }
     }
@@ -714,20 +726,22 @@ namespace Dune
     // destructor
     ~ALU2DIntersectionGeometryStorage()
     {
-      for( size_t i=0; i<3; ++i)
-        for( size_t j=0; j<2; ++j)
-          delete geoms_[ i ][ j ];
+      for( size_t k=0; k<2; ++k)
+        for( size_t i=0; i<4; ++i)
+          for( size_t j=0; j<2; ++j)
+            delete geoms_[ k ][ i ][ j ];
     }
 
     typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp> ThisType;
 
     // return reference to local geometry
-    const LocalGeometry& localGeom(const int aluFace, const int twist) const
+    const LocalGeometry& localGeom(const int aluFace, const int twist, const int corners) const
     {
-      assert( 0 <= aluFace && aluFace < 3 );
+      assert( corners == 3 || corners == 4 );
+      assert( 0 <= aluFace && aluFace < corners );
       assert( twist == 0 || twist == 1 );
-      assert( geoms_[ aluFace ][ twist ] );
-      return *geoms_[ aluFace ][ twist ];
+      assert( geoms_[ corners-3 ][ aluFace ][ twist ] );
+      return *geoms_[ corners-3 ][ aluFace ][ twist ];
     }
 
     // return static instance

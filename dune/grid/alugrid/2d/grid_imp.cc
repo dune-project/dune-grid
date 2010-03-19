@@ -294,7 +294,9 @@ namespace Dune
     // reset size cache
     ////////////////////////////////////
     if(sizeCache_) delete sizeCache_;
-    bool isSimplex = true;
+    bool isSimplex = (eltype == ALU2DSPACE triangle);
+    if ( eltype == ALU2DSPACE mixed )
+      DUNE_THROW( NotImplemented, "size for mixed grids" );
 
     sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
     /////////////////////////////////////
@@ -342,20 +344,30 @@ namespace Dune
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline int ALU2dGrid< dim, dimworld, eltype >::size (int level, GeometryType type) const
   {
-    if (type.isSimplex()) {
-      return size(level, dim-type.dim());
+    switch (eltype)
+    {
+    case ALU2DSPACE triangle :
+      return type.isSimplex() ? size(level, dim-type.dim()) : 0;
+    case ALU2DSPACE quadrilateral :
+      return type.isCube() ? size(level, dim-type.dim()) : 0;
+    case ALU2DSPACE mixed :
+      DUNE_THROW( NotImplemented, "size method for mixed grids" );
     }
-    return 0;
   }
 
   //! number of leaf entities per codim and geometry type in this process
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline int ALU2dGrid< dim, dimworld, eltype >::size (GeometryType type) const
   {
-    if (type.isSimplex()) {
-      return size(dim-type.dim());
+    switch (eltype)
+    {
+    case ALU2DSPACE triangle :
+      return type.isSimplex() ? size(dim-type.dim()) : 0;
+    case ALU2DSPACE quadrilateral :
+      return type.isCube() ? size(dim-type.dim()) : 0;
+    case ALU2DSPACE mixed :
+      DUNE_THROW( NotImplemented, "size method for mixed grids" );
     }
-    return 0;
   }
 
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
@@ -591,12 +603,15 @@ namespace Dune
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline void ALU2dGrid< dim, dimworld, eltype >::makeGeomTypes()
   {
+    assert( eltype != ALU2DSPACE mixed ); // ?????????
+    const GeometryType :: BasicType basic = ( eltype == ALU2DSPACE triangle ) ?
+                                            GeometryType :: simplex : GeometryType::cube;
     // stored is the dim, where is the codim
-    for(int i=dim; i>= 0; i--)
-    {
-      geomTypes_[ dim-i ].resize( 1 );
-      geomTypes_[ dim-i ][ 0 ] = GeometryType( GeometryType :: simplex, i );
-    }
+    for (int i=0; i<3; ++i)
+      geomTypes_[i].clear();
+    geomTypes_[ 2 ].push_back( GeometryType( basic, 0 ) );
+    geomTypes_[ 1 ].push_back( GeometryType( basic, 1 ) );
+    geomTypes_[ 0 ].push_back( GeometryType( basic, 2 ) );
   }
 
   //! get global id set of grid

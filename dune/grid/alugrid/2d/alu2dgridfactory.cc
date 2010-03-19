@@ -47,11 +47,23 @@ namespace Dune
   :: insertElement ( const GeometryType &geometry,
                      const std::vector< unsigned int > &vertices )
   {
-    if( !geometry.isTriangle() )
-      DUNE_THROW( GridError, "Only triangles can be inserted into "
-                  "ALUGrid< 2, " << dimw << " >." );
-
-    if( vertices.size() != numCorners )
+    switch (elementType)
+    {
+    case ALU2DSPACE triangle :
+      if( !geometry.isTriangle() )
+        DUNE_THROW( GridError, "Only triangles can be inserted into "
+                    "ALUGrid< 2, " << dimw << ", triangle >." );
+      break;
+    case ALU2DSPACE quadrilateral :
+      if( !geometry.isCube() )
+        DUNE_THROW( GridError, "Only cubes can be inserted into "
+                    "ALUGrid< 2, " << dimw << ", quadrilateral >." );
+      break;
+    default :
+      assert( geometry.isSimplex() || geometry.isCube() );
+    }
+    if ( (geometry.isSimplex() && vertices.size() != 3) ||
+         (geometry.isCube() && vertices.size() != 4) )
       DUNE_THROW( GridError, "Wrong number of vertices." );
 
     elements_.push_back( vertices );
@@ -247,15 +259,11 @@ namespace Dune
     const ElementIteratorType endE = elements_.end();
     for( ElementIteratorType it = elements_.begin(); it != endE; ++it )
     {
-      array< unsigned int, numCorners > element;
-      for( unsigned int i = 0; i < numCorners; ++i )
-      {
-        element[ i ] = (*it)[ i ];
-      }
-
-      out << element[ 0 ];
-      for( unsigned int i = 1; i < numCorners; ++i )
-        out << "  " << element[ i ];
+      out << (*it)[ 0 ];
+      out << "  " << (*it)[ 1 ];
+      if ( it->size() == 4 )
+        out << "  " << (*it)[ 3 ];
+      out << "  " << (*it)[ 2 ];
       out << std :: endl;
     }
 
@@ -366,9 +374,35 @@ namespace Dune
   inline void ALU2dGridFactory<ALUGrid,dimw>
   ::generateFace ( const ElementType &element, const int f, FaceType &face )
   {
-    if (f==0) { face[0]=element[0]; face[1]=element[1]; }
-    if (f==1) { face[0]=element[0]; face[1]=element[2]; }
-    if (f==2) { face[0]=element[1]; face[1]=element[2]; }
+    if (element.size() == 3)
+      switch (f)
+      {
+      case 0 :
+        face[0]=element[0]; face[1]=element[1];
+        break;
+      case 1 :
+        face[0]=element[0]; face[1]=element[2];
+        break;
+      case 2 :
+        face[0]=element[1]; face[1]=element[2];
+        break;
+      }
+    else
+      switch (f)
+      {
+      case 0 :
+        face[0]=element[0]; face[1]=element[2];
+        break;
+      case 1 :
+        face[0]=element[1]; face[1]=element[3];
+        break;
+      case 2 :
+        face[0]=element[0]; face[1]=element[1];
+        break;
+      case 3 :
+        face[0]=element[2]; face[1]=element[3];
+        break;
+      }
   }
 
   template< template< int, int > class ALUGrid, int dimw >
@@ -385,7 +419,7 @@ namespace Dune
     const unsigned int numElements = elements_.size();
     for( unsigned int n = 0; n < numElements; ++n )
     {
-      for( unsigned int face = 0; face < numFaces; ++face )
+      for( unsigned int face = 0; face < elements_[n].size(); ++face )
       {
         FaceType key;
         generateFace( elements_[ n ], face, key );

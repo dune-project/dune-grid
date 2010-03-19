@@ -101,7 +101,10 @@ namespace Dune
   inline alu2d_ctype
   ALU2dGridGeometry< mydim, cdim, GridImp >::integrationElement ( const LocalCoordinate &local ) const
   {
-    return (mydim == 0 ? 1.0 : det_);
+    if ( eltype == ALU2DSPACE triangle || mydim < 2 )
+      return (mydim == 0 ? 1.0 : det_);
+    else
+      return geoImpl_.det(local);
   }
 
 
@@ -171,15 +174,24 @@ namespace Dune
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
   buildGeom(const HElementType & item, const int aluFace)
   {
+    assert( mydim == 1 );
     // face 1 is twisted
-    const int twist = (aluFace % 2);
+    const int nf = item.numfaces();
+
+    // for triangles face 1 is twisted and for quatrilaterals faces 1 and 2
+    const int twist = (nf == 3) ? (aluFace % 2) : (aluFace>>1)^(aluFace&1);
+    // std::cout << nf << " " << aluFace << " " << twist << std::endl;
+    //           << " ( " item.getVertex( (aluFace + 1 + twist ) % nf )->coord() ,
+    //           << " , " item.getVertex( (aluFace + 2 - twist ) % nf )->coord()
+    //           << " ) " << std::endl;
 
     // check item
     assert( &item );
 
+
     // update geometry impl
-    geoImpl_.update( item.getVertex( (aluFace + (1 + twist)) % 3 )->coord() ,
-                     item.getVertex( (aluFace + (2 - twist)) % 3 )->coord() );
+    geoImpl_.update( item.getVertex( (aluFace + 1 + twist ) % nf )->coord() ,
+                     item.getVertex( (aluFace + 2 - twist ) % nf )->coord() );
 
     // store volume
     det_ = item.sidelength( aluFace );
@@ -196,6 +208,8 @@ namespace Dune
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
   buildGeom(const VertexType & item , const int )
   {
+    assert( mydim == 0 );
+
     assert( &item );
     // update geometry impl
     geoImpl_.update( item.coord() );
@@ -230,43 +244,53 @@ namespace Dune
 
   // built Geometry (faceNumber is in generic numbering)
   template <int mydim, int cdim, class GridImp>
-  inline FieldMatrix<alu2d_ctype, 3 , 3> ALU2dGridGeometry<mydim,cdim,GridImp>::
-  calculateReferenceCoords() const
+  inline FieldMatrix<alu2d_ctype, 4 , 3> ALU2dGridGeometry<mydim,cdim,GridImp>::
+  calculateReferenceCoords(const int corners) const
   {
     // calculate reference coordinates of aLUGrid reference triangle
 
     // set all to zero
-    FieldMatrix<alu2d_ctype, 3 , 3> refCoord (0.0);
-
+    FieldMatrix<alu2d_ctype, 4 , 3> refCoord;
+    for (int i=0; i<4; ++i)
+    {
+      refCoord[i][0]=0.;
+      refCoord[i][1]=0.;
+      refCoord[i][2]=1.;
+    }
     // point 1
     refCoord[1][0] = 1.0;
-    // point 2
-    refCoord[2][1] = 1.0;
-
-    // length of faces
-    refCoord[0][2] = M_SQRT2;
-    refCoord[1][2] = 1.0;
-    refCoord[2][2] = 1.0;
-
+    // point (corners-1)
+    refCoord[corners-1][1] = 1.0;
+    if (corners == 3)
+    {
+      // length of faces
+      refCoord[0][2] = M_SQRT2;
+    }
+    else
+    {
+      // point 2
+      refCoord[2][0] = 1.0;
+      refCoord[2][1] = 1.0;
+    }
     return refCoord;
   }
 
   // built Geometry (faceNumber is in generic numbering)
   template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildLocalGeometry(const int aluFace, const int twist)
+  buildLocalGeometry(const int aluFace, const int twist, const int corners)
   {
     assert( twist == 0 || twist == 1 );
     assert( mydim == 1 );
 
     // get coordinates of reference element
-    static const FieldMatrix<alu2d_ctype, 3, 3> refCoord ( calculateReferenceCoords() );
+    const FieldMatrix<alu2d_ctype, 4, 3> refCoord ( calculateReferenceCoords(corners) );
 
     // just map the point of the global intersection to the local
     // coordinates , this is the default procedure
     // for simplices this is not so bad
-    geoImpl_.update( refCoord[( aluFace + ( twist   %2) + 1) % 3],
-                     refCoord[( aluFace + ((twist+1)%2) + 1) % 3] );
+    geoImpl_.update( refCoord[ ( aluFace + 1+twist ) % corners ],
+                     refCoord[ ( aluFace + 2-twist ) % corners ] );
 
     // get length of faces
     det_ = refCoord[ aluFace ][2];

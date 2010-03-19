@@ -109,6 +109,7 @@ namespace Dune
     template <class GridType>
     void update (const GridType & grid, int level )
     {
+      enum { dim = GridType::dimension };
       static const int dimworld = GridType::dimensionworld;
       static const ALU2DSPACE ElementType eltype = GridType::elementType;
 
@@ -127,7 +128,6 @@ namespace Dune
         for(size_t k=0; k<markerSize; ++k) marker_[i][k] = -1;
       }
 
-      enum { dim = GridType::dimension };
       IteratorType iter(grid.myGrid(), level);
 
       for(iter->first(); !iter->done(); iter->next())
@@ -139,7 +139,7 @@ namespace Dune
 #if ALU2DGRID_PARALLEL
         if( ! grid.rankManager().isValid( elIdx , All_Partition ) ) continue;
 #endif
-        for(int i=0; i<dim+1; ++i)
+        for(int i=0; i<elem.numvertices(); ++i)
         {
           enum { vxCodim = 1 };
           int vxIdx = elem.getVertex(i)->getIndex();
@@ -223,7 +223,7 @@ namespace Dune
 #endif
         int level = elem.level();
 
-        for(int i=0; i<dim+1; ++i)
+        for(int i=0; i<elem.numvertices(); ++i)
         {
           int vxIdx = elem.getVertex(i)->getIndex();
 

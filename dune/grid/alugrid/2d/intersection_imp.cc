@@ -270,9 +270,9 @@ namespace Dune
     }
     else
     {
+      const int twist = (current.nFaces() == 3) ? (current.index_ % 2) : (current.index_>>1)^(current.index_&1);
       // parameters are face and twist
-      return localGeomStorage_.localGeom(  this->current.index_,
-                                           (this->current.index_ % 2) );
+      return localGeomStorage_.localGeom(  current.index_, twist, current.nFaces() );
     }
   }
 
@@ -299,8 +299,8 @@ namespace Dune
        else
        {
        // parameters are face and twist
-       return localGeomStorage_.localGeom(  this->current.opposite(),
-                                          1 - (this->current.index_ % 2) );
+       const int twist = (current.nFaces() == 3) ? (current.opposite_ % 2) : (current.opposite_>>1)^(current.opposite_&1);
+       return localGeomStorage_.localGeom( current.opposite_, 1-twist, current.nFaces()  );
        }
      */
   }
@@ -313,7 +313,7 @@ namespace Dune
 
     if( ! this->grid_.getRealImplementation(intersectionGlobal_).up2Date() )
     {
-      if( this->current.useOutside_ )
+      if( current.useOutside_ )
         this->grid_.getRealImplementation(intersectionGlobal_).
         buildGeom(*current.outside(), current.opposite());
       else
@@ -329,7 +329,9 @@ namespace Dune
   template< class GridImp >
   inline GeometryType ALU2dGridIntersectionBase< GridImp >::type () const
   {
-    return GeometryType( GeometryType::simplex, dimension-1 );
+    return GeometryType(
+             (eltype == ALU2DSPACE triangle ? GeometryType::simplex : GeometryType::cube),
+             1 );
   }
 
   template< class GridImp >

@@ -284,15 +284,29 @@ namespace Dune {
   inline int ALU2dGridEntity<0,dim,GridImp> :: subIndex(int i, unsigned int codim) const
   {
     assert( item_ != 0 );
+    int j = i;
     switch( codim )
     {
     case 0 :
-      return ElementWrapper<0, dim, GridImp>::subIndex (grid_, *item_, i);
+      return ElementWrapper<0, dim, GridImp>::subIndex (grid_, *item_, j);
     case 1 :
       // also apply mapping to generic ref elem by switching edges
-      return ElementWrapper<1, dim, GridImp>::subIndex (grid_, *item_, 2-i);
+      if( item_->numvertices() == 3 )
+        j = 2 - i;
+      else
+        switch (i) { case 0 : j=2;break;
+                   case 1 : j=0;break;
+                   case 2 : j=3;break;
+                   case 3 : j=1;break;}
+      // j = ((i^2)>>1) | ((i&1)<<1);
+      return ElementWrapper<1, dim, GridImp>::subIndex (grid_, *item_, j);
     case 2 :
-      return ElementWrapper<2, dim, GridImp>::subIndex (grid_, *item_, i);
+      if( item_->numvertices() == 4 )
+        switch (i) { case 0 : j=0;break;
+                   case 1 : j=1;break;
+                   case 2 : j=3;break;
+                   case 3 : j=2;break;}
+      return ElementWrapper<2, dim, GridImp>::subIndex (grid_, *item_, j);
     default :
       assert( false );
       abort();
@@ -606,18 +620,18 @@ namespace Dune {
 
     static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i)
     {
-      assert(i < 3 && i >= 0);
+      assert(i < elem.numvertices() && i >= 0);
       return elem.edge_idx(i);
     }
     static inline int subIndex(GridImp & grid, const HElementType &elem, int i)
     {
-      assert(i < 3 && i >= 0);
+      assert(i < elem.numvertices() && i >= 0);
       return elem.edge_idx(i);
     }
     static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<1>:: EntityPointer
     subEntity(GridImp & grid, const HElementType &elem, int i)
     {
-      assert(i < 3 && i >= 0);
+      assert(i < elem.numvertices() && i >= 0);
       return ALU2dGridEntityPointer<1, GridImp > (grid, elem, i, elem.level());
     }
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
@@ -652,13 +666,13 @@ namespace Dune {
       return elem.getIndex();
     }
     static inline int subIndex(GridImp & grid, const HElementType &elem, int i) {
-      assert(i < 3 && i >= 0);
+      assert(i < elem.numvertices() && i >= 0);
       //return elem.vertex(i)->getIndex();
       return elem.getVertex(i)->getIndex();
     }
     static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<2>:: EntityPointer
     subEntity(GridImp & grid, const HElementType &elem, int i) {
-      assert(i < 3 && i >= 0);
+      assert(i < elem.numvertices() && i >= 0);
       //return ALU2dGridEntityPointer<2, GridImp > (grid, *(elem.vertex(i)), -1, elem.level());
       return ALU2dGridEntityPointer<2, GridImp > (grid, *(elem.getVertex(i)), -1, elem.level());
     }

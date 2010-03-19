@@ -233,7 +233,8 @@ namespace Dune
 
     int goNext = goNextElement();
     if (goNext) {
-      assert(face_==3);
+      assert( (eltype == ALU2DSPACE triangle && face_==3) ||
+              (eltype == ALU2DSPACE quadrilateral && face_==4) );
 
       // go next element
       iter->next();
@@ -288,7 +289,7 @@ namespace Dune
     assert(face_>=0);
     int elIdx = this->item_->getIndex();
 
-    while (face_ < 3) {
+    while (face_ < this->item_->numfaces() ) {
       int idx = this->item_->edge_idx(face_);
       // check if face is visited on this element
       if(marker_.isOnElement(elIdx,idx,1))
@@ -495,7 +496,7 @@ namespace Dune
     item_ = &iter->getitem();
     int elIdx = item_->getIndex();
 
-    while (myFace_ < 3) {
+    while (myFace_ < item_->numfaces() ) {
       int idx = item_->edge_idx(myFace_);
       // check if face is visited on this element
       if( marker().isOnElement(elIdx,idx,1) )
@@ -508,7 +509,8 @@ namespace Dune
 
     if (goNext)
     {
-      assert(myFace_==3);
+      assert( (eltype == ALU2DSPACE triangle && myFace_==3) ||
+              (eltype == ALU2DSPACE quadrilateral && myFace_==4) );
 
       iter->next();
       if(iter->done())
@@ -664,7 +666,7 @@ namespace Dune
     item_ = &iter->getitem();
     int elIdx = item_->getIndex();
 
-    while (myFace_ < 3) {
+    while (myFace_ < item_->numfaces() ) {
       vertex_ = item_->getVertex(myFace_);
       int idx = vertex_->getIndex();
 
@@ -678,7 +680,8 @@ namespace Dune
     }
 
     if (goNext) {
-      assert(myFace_==3);
+      assert( (eltype == ALU2DSPACE triangle && myFace_==3) ||
+              (eltype == ALU2DSPACE quadrilateral && myFace_==4) );
 
       iter->next();
       if(iter->done())

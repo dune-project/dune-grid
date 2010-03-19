@@ -1046,6 +1046,25 @@ namespace Dune {
     _calcedDet = _calcedInv = true ;
   }
 
+  template <>
+  inline void LinearMapping<3, 0> ::
+  inverse(const map_t& local) const
+  {
+    // invert transposed matrix and return determinant
+    _det = 1.;
+    // set flag
+    _calcedDet = _calcedInv = true ;
+  }
+  template <>
+  inline void LinearMapping<2, 0> ::
+  inverse(const map_t& local) const
+  {
+    // invert transposed matrix and return determinant
+    _det = 1.;
+    // set flag
+    _calcedDet = _calcedInv = true ;
+  }
+
   // tetra mapping
   template <int cdim, int mydim>
   inline void LinearMapping<cdim, mydim> ::
