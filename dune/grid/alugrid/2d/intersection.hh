@@ -88,6 +88,7 @@ namespace Dune
     typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
+    typedef typename ALU2dImplTraits< dimworld, eltype >::PeriodicBndElType PeriodicBndElType;
 
     // type of local geometry storage
     typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp>
@@ -125,7 +126,10 @@ namespace Dune
 
       bool hasOutside () const
       {
-        return (neighbor_ != 0) && (neighbor_->thinis( ThinelementType::element_like ));
+        if( neighbor_ != 0 )
+          return neighbor_->thinis( ThinelementType::element_like ) || (boundary()->type() == HBndElType::periodic);
+        else
+          return false;
       }
 
       HBndElType *boundary () const
@@ -137,7 +141,14 @@ namespace Dune
       HElementType *outside () const
       {
         assert( hasOutside() );
-        return (HElementType *)neighbor_;
+        if( neighbor_->thinis( ThinelementType::element_like ) )
+          return (HElementType *)neighbor_;
+        else
+        {
+          ThinelementType *oppBndEl = ((PeriodicBndElType *)neighbor_)->periodic_nb;
+          assert( oppBndEl != 0 );
+          return (HElementType *)oppBndEl->neighbour( 0 );
+        }
       }
 
       void setInside ( HElementType *item )

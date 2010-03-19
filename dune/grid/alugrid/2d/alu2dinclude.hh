@@ -83,6 +83,7 @@ namespace Dune
     typedef ALU2DSPACE Element ALU2DDIMWORLD (dimw,eltype) ElementType;
     typedef typename HmeshType::helement_t HElementType;
     typedef typename HmeshType::hbndel_t HBndElType;
+    typedef ALU2DSPACE Bndel_periodic ALU2DDIMWORLD (dimw,eltype) PeriodicBndElType;
   };
 
 
