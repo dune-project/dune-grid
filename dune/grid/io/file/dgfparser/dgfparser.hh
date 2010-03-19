@@ -148,7 +148,7 @@ namespace Dune
     }
     static int size( MPICommunicatorType MPICOMM )
     {
-      int size = 0;
+      int size = 1;
 #if HAVE_MPI
       MPI_Comm_size( MPICOMM, &size );
 #endif
