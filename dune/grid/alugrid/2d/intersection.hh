@@ -102,11 +102,20 @@ namespace Dune
   protected:
     struct impl
     {
-      impl() : item_(0), neighbor_(0), index_(0), opposite_(0), useOutside_(false) {}
+      explicit impl( HElementType *item = 0 )
+        : index_(0), neighbor_(0), opposite_(0), useOutside_(false)
+      {
+        setInside( item );
+      }
 
       HElementType *inside () const
       {
         return item_;
+      }
+
+      int nFaces () const
+      {
+        return nFaces_;
       }
 
       bool isBoundary () const
@@ -131,10 +140,20 @@ namespace Dune
         return (HElementType *)neighbor_;
       }
 
+      void setInside ( HElementType *item )
+      {
+        item_ = item;
+        nFaces_ = (item != 0 ? item->numfaces() : 0);
+      }
+
       // current element from which we started the intersection iterator
-      mutable HElementType* item_;
-      mutable ThinelementType *neighbor_;
+    private:
+      HElementType *item_;
+      int nFaces_;
+
+    public:
       mutable int index_;
+      mutable ThinelementType *neighbor_;
       mutable int opposite_;
       mutable bool useOutside_;
     } current;
@@ -216,14 +235,14 @@ namespace Dune
     void checkValid () ;
 
     // set interator to end iterator
-    void done () ;
+    void done ( const HElementType *inside );
+    void done ( const EntityImp &en ) { done( &en.getItem() ); }
 
     // invalidate status of internal objects
     void unsetUp2Date() ;
 
     // reset IntersectionIterator to first neighbour
-    template <class EntityType>
-    void first(const EntityType & en, int wLevel);
+    void first ( const EntityImp &en, int wLevel );
 
     // reset IntersectionIterator to first neighbour
     virtual void setFirstItem(const HElementType & elem, int wLevel);
@@ -237,7 +256,6 @@ namespace Dune
     const GridImp & grid_;
     const LocalGeometryStorageType& localGeomStorage_;
 
-    mutable int nFaces_;
     mutable int walkLevel_;
   }; // end ALU2dGridIntersectionBase
 
@@ -334,8 +352,9 @@ namespace Dune
     void setupIntersection ();
 
   protected:
+    using BaseType::done;
+
     using BaseType::current;
-    using BaseType::nFaces_;
     using BaseType::walkLevel_;
 
   private:
@@ -428,8 +447,9 @@ namespace Dune
     void setupIntersection ();
 
   protected:
+    using BaseType::done;
+
     using BaseType::current;
-    using BaseType::nFaces_;
     using BaseType::walkLevel_;
 
   private:

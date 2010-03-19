@@ -29,16 +29,15 @@ namespace Dune
     intersectionNeighborLocal_(LocalGeometryImp()),
     grid_(grid),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
-    nFaces_(3),
     walkLevel_(wLevel)
   {
     if (!end)
     {
       assert(walkLevel_ >= 0);
-      this->setFirstItem(*el,wLevel);
+      setFirstItem(*el,wLevel);
     }
     else
-      this->done();
+      done( el );
   }
 
   //constructor for end iterator
@@ -50,10 +49,9 @@ namespace Dune
     intersectionNeighborLocal_(LocalGeometryImp()),
     grid_(grid),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
-    nFaces_(3),
     walkLevel_(wLevel)
   {
-    this->done();
+    this->done( 0 );
   }
 
 
@@ -67,7 +65,6 @@ namespace Dune
     intersectionNeighborLocal_(LocalGeometryImp()),
     grid_(org.grid_),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
-    nFaces_(org.nFaces_),
     walkLevel_(org.walkLevel_)
   {}
 
@@ -77,7 +74,6 @@ namespace Dune
   assign(const ALU2dGridIntersectionBase<GridImp> & org)
   {
     assert( &grid_ == &org.grid_);
-    nFaces_    = org.nFaces_;
     walkLevel_ = org.walkLevel_;
     current = org.current;
 
@@ -105,23 +101,21 @@ namespace Dune
 
   //! reset IntersectionIterator to first neighbour
   template<class GridImp>
-  template<class EntityType>
   inline void ALU2dGridIntersectionBase<GridImp> ::
-  first(const EntityType & en, int wLevel)
+  first ( const EntityImp &en, int wLevel )
   {
-    this->setFirstItem(en.getItem(),wLevel);
-  #if ALU2DGRID_PARALLEL
-    this->checkValid();
-  #endif
-
+    setFirstItem(en.getItem(),wLevel);
+#if ALU2DGRID_PARALLEL
+    checkValid();
+#endif
   }
 
   //! reset IntersectionIterator to first neighbour
   template< class GridImp >
   inline void ALU2dGridIntersectionBase< GridImp >::setFirstItem(const HElementType & elem, int wLevel)
   {
-    current.item_ = const_cast< HElementType * >( &elem );
-    assert( current.item_ != 0 );
+    current.setInside( const_cast< HElementType * >( &elem ) );
+    assert( current.inside() != 0 );
     walkLevel_ = wLevel;
     current.index_ = 0;
     current.opposite_ = current.inside()->opposite( current.index_ );
@@ -134,15 +128,17 @@ namespace Dune
   template<class GridImp>
   inline void ALU2dGridIntersectionBase<GridImp> :: checkValid ()
   {
-    // in case of non-valid neighbor set boundary
-    if ( this->current.neigh_ &&
-         ! this->grid_.rankManager().isValid( this->current.neigh_->getIndex(), All_Partition) )
-    {
-      this->current.neigh_      = 0;
-      this->current.isBoundary_ = true ;
-      // this detects a ghost face
-      this->current.opposite_   = -222;
-    }
+    if( !current.hasOutside() )
+      return;
+
+    const int index = current.outside()->getIndex();
+    if( this->grid_.rankManager().isValid( index, All_Partition ) )
+      return;
+
+    // the neighbor is not valid, so don't report it
+    current.neighbor_ = 0;
+    // this detects a ghost face
+    current.opposite_ = -222;
   }
 
   //! return true if intersection is with boundary
@@ -155,9 +151,8 @@ namespace Dune
   template<class GridImp>
   inline int ALU2dGridIntersectionBase<GridImp> :: boundaryId() const
   {
-    // return boundary id in case of boundary
-    // note ALUGrid stores negative values
     assert( current.inside() );
+    // ALUGrid stores negative values, so make 'em positive
     return (current.isBoundary() ? std::abs( current.boundary()->type() ) : 0);
   }
 
@@ -186,16 +181,16 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< GridImp >::EntityPointer
   ALU2dGridIntersectionBase< GridImp >::inside() const
   {
-    assert( (current.inside() != 0) && (current.index_ < nFaces_) );
+    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
     return EntityPointerImp( grid_, *current.inside(), -1, walkLevel_ );
   }
 
   template< class GridImp >
-  inline void ALU2dGridIntersectionBase<GridImp>::done ()
+  inline void ALU2dGridIntersectionBase<GridImp>::done ( const HElementType *inside )
   {
-    current.item_ = 0;
+    current.setInside( const_cast< HElementType * >( inside ) );
     current.neighbor_ = 0;
-    current.index_= nFaces_;
+    current.index_= current.nFaces();
   }
 
   //! return EntityPointer to the Entity on the outside of this intersection.
@@ -203,7 +198,7 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< GridImp >::EntityPointer
   ALU2dGridIntersectionBase< GridImp >::outside() const
   {
-    assert( (current.inside() != 0) && (current.index_ < nFaces_) );
+    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
     assert( current.hasOutside() );
     return EntityPointerImp( grid_, *current.outside(), -1, walkLevel_ );
   }
@@ -213,7 +208,7 @@ namespace Dune
   inline int ALU2dGridIntersectionBase<GridImp>::indexInInside () const
   {
     const int i = current.index_;
-    if( (eltype == ALU2DSPACE triangle) || ((eltype == ALU2DSPACE mixed) && (nFaces_ == 3)) )
+    if( (eltype == ALU2DSPACE triangle) || ((eltype == ALU2DSPACE mixed) && (current.nFaces() == 3)) )
       return 2 - i;
     else
       return ((i^2)>>1) | ((i&1)<<1);
@@ -224,7 +219,7 @@ namespace Dune
   inline int ALU2dGridIntersectionBase<GridImp>::indexInOutside () const
   {
     const int i = current.opposite_;
-    if( (eltype == ALU2DSPACE triangle) || ((eltype == ALU2DSPACE mixed) && (nFaces_ == 3)) )
+    if( (eltype == ALU2DSPACE triangle) || ((eltype == ALU2DSPACE mixed) && (current.nFaces() == 3)) )
       return 2 - i;
     else
       return ((i^2)>>1) | ((i&1)<<1);
@@ -247,7 +242,7 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase<GridImp>::NormalType
   ALU2dGridIntersectionBase< GridImp >::outerNormal ( const LocalCoordinate &local ) const
   {
-    assert( (current.inside() != 0) && (current.index_ < nFaces_) );
+    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
 
     typedef double (&normal_t)[dimworld];
 
@@ -279,7 +274,7 @@ namespace Dune
   inline const typename ALU2dGridIntersectionBase<GridImp>::LocalGeometry&
   ALU2dGridIntersectionBase< GridImp >::geometryInInside () const
   {
-    assert( (current.inside() != 0) && (current.index_ < nFaces_) );
+    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
 
     // only in non-conform situation we use default method
     if( current.useOutside_ )
@@ -384,9 +379,7 @@ namespace Dune
       setFirstItem(*el,wLevel);
     }
     else
-    {
-      this-> done();
-    }
+      this->done( el );
   }
 
   template<class GridImp>
@@ -394,7 +387,6 @@ namespace Dune
   ALU2dGridLevelIntersectionIterator(const GridImp & grid, int wLevel) :
     ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(grid, wLevel)
   {}
-
 
   //! The copy constructor
   template<class GridImp>
@@ -449,16 +441,16 @@ namespace Dune
   template<class GridImp>
   inline void ALU2dGridLevelIntersectionIterator<GridImp> :: doIncrement ()
   {
-    assert( current.index_ < nFaces_ );
+    assert( current.index_ < current.nFaces() );
 
     this->unsetUp2Date();
 
     if( nbStack_.empty() )
     {
       ++current.index_;
-      if( current.index_ >= nFaces_ )
+      if( current.index_ >= current.nFaces() )
       {
-        this->done();
+        assert( current.index_ == current.nFaces() );
         return;
       }
 
@@ -484,7 +476,7 @@ namespace Dune
   inline void
   ALU2dGridLevelIntersectionIterator< GridImp >::addNeighboursToStack ()
   {
-    assert( current.index_ < nFaces_ );
+    assert( current.index_ < current.nFaces() );
 
     IntersectionInfo info;
     info.first = current.inside()->neighbour( current.index_ );
@@ -501,7 +493,7 @@ namespace Dune
     while( hnb->level() > walkLevel_ )
     {
       info.second = getOppositeInFather( info.second, hnb->childNr() );
-      assert( (info.second >= 0) && (info.second < nFaces_) );
+      assert( (info.second >= 0) && (info.second < current.nFaces()) );
       info.first = hnb = hnb->father();
     }
 
@@ -515,7 +507,7 @@ namespace Dune
     while( (hnb != 0) && (hnb->level() < walkLevel_ - 1) )
     {
       info.second = getOppositeInFather( info.second, hnb->childNr() );
-      assert( (info.second >= 0) && (info.second < nFaces_) );
+      assert( (info.second >= 0) && (info.second < current.nFaces()) );
       info.first = hnb = hnb->father();
     }
 
@@ -554,7 +546,7 @@ namespace Dune
     while( ! nbStack_.empty() )
       nbStack_.pop();
 
-    current.item_ = const_cast<HElementType *> (&elem);
+    current.setInside( const_cast< HElementType * >( &elem ) );
     current.index_ = -1;
     current.neighbor_ = 0;
     current.opposite_= -1;
@@ -600,9 +592,7 @@ namespace Dune
       setFirstItem(*el,wLevel);
     }
     else
-    {
-      this->done();
-    }
+      done( el );
   }
 
   template<class GridImp>
@@ -644,15 +634,7 @@ namespace Dune
   template<class GridImp>
   inline void ALU2dGridLeafIntersectionIterator<GridImp> :: doIncrement ()
   {
-    assert( current.index_ < nFaces_ );
-#if 0
-    // this cannot happen
-    if( current.index_ >= nFaces_ )
-    {
-      this->done();
-      return ;
-    }
-#endif
+    assert( current.index_ < current.nFaces() );
 
     this->unsetUp2Date();
 
@@ -664,9 +646,9 @@ namespace Dune
     }
 
     ++current.index_;
-    if( current.index_ >= nFaces_ )
+    if( current.index_ >= current.nFaces())
     {
-      this->done();
+      assert( current.index_ == current.nFaces() );
       return;
     }
 
@@ -707,13 +689,10 @@ namespace Dune
   first(const EntityType & en, int wLevel)
   {
     // if called on non-leaf, just return end iterator
-    if(! en.isLeaf())
-    {
-      this->done();
-      return ;
-    }
-
-    setFirstItem(en.getItem(),wLevel);
+    if( en.isLeaf() )
+      setFirstItem( en.getItem(), wLevel );
+    else
+      done( &en.getItem() );
   }
 
   //! reset IntersectionIterator to first neighbour
@@ -724,7 +703,7 @@ namespace Dune
     while( ! nbStack_.empty() )
       nbStack_.pop();
 
-    current.item_ = const_cast<HElementType *> (&elem);
+    current.setInside( const_cast< HElementType * >( &elem ) );
     current.index_ = -1;
     assert( current.inside() );
     walkLevel_ = wLevel;
