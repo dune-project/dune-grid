@@ -55,7 +55,7 @@ namespace Dune {
         , it_( grid_.getIntersection(wLevel, (IntersectionIteratorImpl *) 0) )
     {
       if(end)
-        it().done();
+        it().done( en );
       else
         it().first(en,wLevel);
     }
