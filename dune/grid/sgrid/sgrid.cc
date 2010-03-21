@@ -416,20 +416,20 @@ namespace Dune {
     if (count<0 || count>=grid->getRealImplementation(self).entity().template count<1>())
     {
       grid->getRealImplementation(ne).index = -1;
-      return;     // done, this is end iterator
+      return;   // done, this is end iterator
     }
     valid_count = true;
 
     // and compute compressed coordinates of neighbor
     array<int,dim> zrednb = zred;
-    zrednb[count/2] += -1+2*(count%2);     // (count%2) ? +1 : -1
+    zrednb[count/2] += -1+2*(count%2); // (count%2) ? +1 : -1
 
     // now check if neighbor exists
     is_on_boundary = !grid->exists(grid->getRealImplementation(self).l,zrednb);
     if (is_on_boundary)
     {
       grid->getRealImplementation(ne).index = -1;
-      return;     // ok, done it
+      return;   // ok, done it
     }
 
     // now neighbor is in the grid and must be initialized.
@@ -496,9 +496,9 @@ namespace Dune {
     array<int,dim> z1 =
       grid->getRealImplementation(grid->getRealImplementation(self).entity()).z;
     if (c==1)
-      z1[dir] += 1;           // odd
+      z1[dir] += 1;   // odd
     else
-      z1[dir] -= 1;           // even
+      z1[dir] -= 1;   // even
 
     // z1 is even in direction dir, all others must be odd because it is codim 1
     FieldMatrix<ctype,dim,dim> __AsLocal;
@@ -508,16 +508,16 @@ namespace Dune {
 
     // local coordinates in self
     p1Local = 0.0;
-    p1Local[dir] = c;        // all points have p[dir]=c in entity
-    __AsLocal[dim-1] = p1Local;     // position vector
+    p1Local[dir] = c;    // all points have p[dir]=c in entity
+    __AsLocal[dim-1] = p1Local; // position vector
     t = 0;
-    for (int i=0; i<dim; ++i)     // this loop makes dim-1 direction vectors
+    for (int i=0; i<dim; ++i) // this loop makes dim-1 direction vectors
       if (i!=dir)
       {
         // each i!=dir gives one direction vector
         p2Local = p1Local;
         p2Local[i] = 1.0;
-        __AsLocal[t] = p2Local-p1Local;                 // a direction vector
+        __AsLocal[t] = p2Local-p1Local;     // a direction vector
         ++t;
       }
     // update geometry
@@ -525,16 +525,16 @@ namespace Dune {
 
     // local coordinates in neighbor
     p1Local = 0.0;
-    p1Local[dir] = 1-c;        // all points have p[dir]=1-c in entity
-    __AsLocal[dim-1] = p1Local;       // position vector
+    p1Local[dir] = 1-c;    // all points have p[dir]=1-c in entity
+    __AsLocal[dim-1] = p1Local;   // position vector
     t = 0;
-    for (int i=0; i<dim; ++i)     // this loop makes dim-1 direction vectors
+    for (int i=0; i<dim; ++i) // this loop makes dim-1 direction vectors
       if (i!=dir)
       {
         // each i!=dir gives one direction vector
         p2Local = p1Local;
         p2Local[i] = 1.0;
-        __AsLocal[t] = p2Local-p1Local;                 // a direction vector
+        __AsLocal[t] = p2Local-p1Local;     // a direction vector
         ++t;
       }
     // update geometry
@@ -548,11 +548,11 @@ namespace Dune {
       if (i!=dir)
       {
         // each i!=dir gives one direction vector
-        z1[i] += 1;                 // direction i => even
+        z1[i] += 1;     // direction i => even
         p2 = grid->pos(self.level(),z1);
-        z1[i] -= 2;                 // direction i => even
+        z1[i] -= 2;     // direction i => even
         p1 = grid->pos(self.level(),z1);
-        z1[i] += 1;                 // revert t to original state
+        z1[i] += 1;     // revert t to original state
         __As[t] = p2-p1;
         ++t;
       }
