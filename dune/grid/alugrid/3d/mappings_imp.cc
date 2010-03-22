@@ -667,7 +667,7 @@ namespace Dune {
       error = dm.two_norm2();
       m -= dm;
     }
-    while( error > ALUnumericEpsilon * ALUnumericEpsilon );
+    while( error > ALUnumericEpsilon ); // * ALUnumericEpsilon );
   }
 
 
