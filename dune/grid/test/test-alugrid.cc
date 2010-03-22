@@ -285,7 +285,11 @@ int main (int argc , char **argv) {
     }
     else
     {
+#ifdef ALUGRID_SURFACE_2D
+      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dcube> <display>" << std::endl;
+#else
       std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dconf|3d|3dsimp|3dcube> <display>" << std::endl;
+#endif
     }
 
     const bool display = (argc > 2);
@@ -343,7 +347,7 @@ int main (int argc , char **argv) {
       if( testALU2dCube )
       {
         typedef ALUCubeGrid<2,2> GridType;
-        std::string filename(SRCDIR "simplex-testgrid-2-2.dgf");
+        std::string filename( SRCDIR "cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
         checkCapabilities< false >( *gridPtr );
@@ -354,7 +358,7 @@ int main (int argc , char **argv) {
         //checkALUSerial(grid,2);
 
         typedef ALUCubeGrid< 2, 3 > SurfaceGridType;
-        std::string surfaceFilename( SRCDIR "simplex-testgrid-2-3.dgf" );
+        std::string surfaceFilename( SRCDIR "cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< false >( *surfaceGridPtr );
