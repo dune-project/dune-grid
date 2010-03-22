@@ -52,7 +52,7 @@ namespace Dune {
       }
       else
       {
-        return stackObject();
+        return popObject();
       }
     }
 
@@ -63,7 +63,7 @@ namespace Dune {
     void freeObject (ObjectType * obj);
 
   protected:
-    inline ObjectType * stackObject()
+    inline ObjectType * popObject()
     {
       assert( ! objStack_.empty() );
 #ifdef USE_FINITE_STACK
@@ -99,7 +99,7 @@ namespace Dune {
     }
     else
     {
-      return stackObject();
+      return popObject();
     }
   }
 
@@ -114,7 +114,7 @@ namespace Dune {
     }
     else
     {
-      return stackObject();
+      return popObject();
     }
   }
 
@@ -123,7 +123,7 @@ namespace Dune {
   {
     while ( ! objStack_.empty() )
     {
-      ObjectType * obj = stackObject();
+      ObjectType * obj = popObject();
       delete obj;
     }
   }
@@ -133,7 +133,10 @@ namespace Dune {
   {
 #ifdef USE_FINITE_STACK
     if( objStack_.full() )
+    {
+      //std::cout << "Delete Object \n";
       delete obj;
+    }
     else
 #endif
     objStack_.push( obj );
