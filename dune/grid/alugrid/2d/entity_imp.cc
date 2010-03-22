@@ -217,25 +217,32 @@ namespace Dune {
   inline const typename ALU2dGridEntity<0, dim, GridImp>:: LocalGeometry & ALU2dGridEntity<0,dim,GridImp> ::
   geometryInFather () const
   {
-    assert( item_ );
-    const int child = this->nChild();
     assert( level() > 0 );
 
     typedef MakeableInterfaceObject<LocalGeometry> LocalGeometryObject;
-    // to be improved, when we using not the refine 8 rule
-    if( grid_.nonConform() )
+
+    const GeometryType myType = type();
+    // we need to storages in case of cube grid,
+    // one for quadrilaterals and one for triangles
+    if( GridImp :: elementType != ALU2DSPACE triangle && myType.isCube() )
     {
-      static ALULocalGeometryStorage<GridImp, LocalGeometryObject,4> geoms( type(), true );
-      assert( geoms.geomCreated(child) );
-      return geoms[child];
+      assert( grid_.nonConform() );
+      static ALULocalGeometryStorage<GridImp, LocalGeometryObject,4> geoms( myType, true );
+      return geoms[ nChild() ];
     }
     else
     {
-      static ALULocalGeometryStorage<GridImp, LocalGeometryObject,2> geoms( type(), false );
-      assert( geoms.geomCreated(child) );
-      return geoms[child];
+      if( grid_.nonConform() )
+      {
+        static ALULocalGeometryStorage<GridImp, LocalGeometryObject,4> geoms( myType, true );
+        return geoms[ nChild() ];
+      }
+      else
+      {
+        static ALULocalGeometryStorage<GridImp, LocalGeometryObject,2> geoms( myType, false );
+        return geoms[ nChild() ];
+      }
     }
-
   }
 
   template<int dim, class GridImp>
