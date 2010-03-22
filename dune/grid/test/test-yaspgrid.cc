@@ -27,7 +27,7 @@ void check_yasp(bool p0=false) {
   std::cout << std::endl << std::endl;
 
   fTupel Len; Len = 1.0;
-  iTupel s; s = 3;
+  iTupel s; s = 2; s[0] = 6;
   bTupel p; p = false;
   p[0] = p0;
   int overlap = 1;
