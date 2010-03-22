@@ -679,6 +679,7 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
   size_t numBoundarySegments = gridView.grid().numBoundarySegments();
   size_t countBoundarySegments = 0;
   std::vector< int > count( numBoundarySegments, 0 );
+  bool error = false;
 
   const Iterator end = gridView.template end< 0 >();
   for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
@@ -697,6 +698,7 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
         std::cerr << "Error: Boundary segment index out of bounds: (index: "
                   << index << ", size: " << numBoundarySegments << ")."
                   << std::endl;
+        error = true;
       }
       else
         ++count[ index ];
@@ -710,6 +712,7 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
     std::cerr << "Error: Wrong number of boundary segments (reported: "
               << numBoundarySegments << ", counted: "
               << countBoundarySegments << ")." << std::endl;
+    error = true;
   }
 
   for( size_t i = 0; i < count.size(); ++i )
@@ -718,13 +721,20 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
     {
       std::cerr << "Error: Boundary segment indices not consecutive (index "
                 << i << " not used)." << std::endl;
+      error = true;
     }
     else if( count[ i ] != 1 )
     {
       std::cerr << "Error: Boundary segment index not unique within macro grid"
                 << " (index " << i << " used " << count[ i ] << " times)."
                 << std::endl;
+      error = true;
     }
+  }
+
+  if (error)
+  {
+    DUNE_THROW(Dune::Exception, "Error encountered during checkBoundarySegmentIndex.");
   }
 }
 
