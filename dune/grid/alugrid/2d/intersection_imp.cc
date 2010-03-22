@@ -6,6 +6,7 @@
 #include <stack>
 #include <utility>
 
+#include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/alugrid/2d/geometry.hh>
 #include <dune/grid/alugrid/2d/entity.hh>
 #include <dune/grid/alugrid/2d/grid.hh>
@@ -228,7 +229,17 @@ namespace Dune
     typedef double (&normal_t)[dimworld];
 
     NormalType outerNormal;
-    current.inside()->outernormal( current.index_, (normal_t)(&outerNormal)[0] );
+    if ( dimworld == 2 || current.inside()->numvertices() == 3 ) // current.inside()->affine()
+      current.inside()->outernormal( current.index_, (normal_t)(&outerNormal)[0] );
+    else
+    {
+      const GenericReferenceElement< alu2d_ctype, dim > &refElement =
+        GenericReferenceElements< alu2d_ctype, dim >::cube();
+      typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
+      typename LocalGeometry::GlobalCoordinate refNormal = refElement.template mapping< 0 >( 0 ).normal( indexInInside(), xInside );
+      inside()->geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
+      outerNormal *= inside()->geometry().integrationElement( xInside );
+    }
     if( current.useOutside_ )
       outerNormal *= 0.5;
     return outerNormal;
