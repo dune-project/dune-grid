@@ -1605,35 +1605,64 @@ namespace Dune {
     //! (attach your boundary condition as needed)
     int boundarySegmentIndex() const
     {
-      if(! boundary()) return -1;
+      if(! boundary())
+        DUNE_THROW(GridError, "called boundarySegmentIndex while boundary() == false");
       update();
-      // size of global macro grid
-      const FieldVector<int, dim>& size =
-        _inside.gridlevel().mg()->begin().cell_global().size();
+      // size of local macro grid
+      const FieldVector<int, dim> & size = _inside.gridlevel().mg()->begin().cell_overlap().size();
+      const FieldVector<int, dim> & origin = _inside.gridlevel().mg()->begin().cell_overlap().origin();
+      FieldVector<int, dim> sides;
+      {
+        for (int i=0; i<dim; i++)
+        {
+          sides[i] =
+            ((_inside.gridlevel().mg()->begin().cell_overlap().origin(i)
+              == _inside.gridlevel().mg()->begin().cell_global().origin(i))+
+             (_inside.gridlevel().mg()->begin().cell_overlap().origin(i) +
+                      _inside.gridlevel().mg()->begin().cell_overlap().size(i)
+                      == _inside.gridlevel().mg()->begin().cell_global().origin(i) +
+                      _inside.gridlevel().mg()->begin().cell_global().size(i)));
+        }
+      }
       // gobal position of the cell on macro grid
       FieldVector<int, dim> pos = _inside.transformingsubiterator().coord();
+      pos -= origin;
       pos /= (1<<_inside.level());
-      // compute index in the face
-      int offset = 1;
+      // compute unit-cube-face-sizes
+      FieldVector<int, dim> fsize;
+      {
+        int vol = 1;
+        for (int k=0; k<dim; k++)
+          vol *= size[k];
+        for (int k=0; k<dim; k++)
+          fsize[k] = vol/size[k];
+      }
+      // compute index in the unit-cube-face
       int index = 0;
-      for (int k=dim-1; k>=0; k--)
       {
-        if (k == _dir) continue;
-        index += pos[k] * offset;
-        offset *= size[k];
-      }
-      // compute offset
-      for (int k=0; k<=_dir; k++)
-      {
-        offset = 1;
-        for (int l=0; l<dim; l++)
+        int localoffset = 1;
+        for (int k=dim-1; k>=0; k--)
         {
-          if (l==k) continue;
-          offset *= size[l];
+          if (k == _dir) continue;
+          index += (pos[k]) * localoffset;
+          localoffset *= size[k];
         }
-        int factor = 2*(k<_dir) + _face*(k==_dir);
-        index += factor * offset;
       }
+      // add unit-cube-face-offsets
+      {
+        for (int k=0; k<_dir; k++)
+          index += sides[k] * fsize[k];
+        // add fsize if we are on the right face and there is a left-face-boundary on this processor
+        index += _face * (sides[_dir]>1) * fsize[_dir];
+      }
+
+      // int rank = 0;
+      // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      // std::cout << rank << "... size: " << size << " sides: " << sides
+      //           << " fsize: " << fsize
+      //           << " pos: " << pos << " face: " << int(_dir) << "/" << int(_face)
+      //           << " index: " << index << std::endl;
+
       return index;
     }
 
@@ -2446,7 +2475,21 @@ namespace Dune {
 
     void boundarysegmentssize()
     {
-      const FieldVector<int, dim> & size = MultiYGrid<dim,ctype>::begin().cell_global().size();
+      // sizes of local macro grid
+      const FieldVector<int, dim> & size = MultiYGrid<dim,ctype>::begin().cell_overlap().size();
+      FieldVector<int, dim> sides;
+      {
+        for (int i=0; i<dim; i++)
+        {
+          sides[i] =
+            ((MultiYGrid<dim,ctype>::begin().cell_overlap().origin(i)
+              == MultiYGrid<dim,ctype>::begin().cell_global().origin(i))+
+             (MultiYGrid<dim,ctype>::begin().cell_overlap().origin(i) +
+                    MultiYGrid<dim,ctype>::begin().cell_overlap().size(i)
+                    == MultiYGrid<dim,ctype>::begin().cell_global().origin(i) +
+                    MultiYGrid<dim,ctype>::begin().cell_global().size(i)));
+        }
+      }
       nBSegments = 0;
       for (int k=0; k<dim; k++)
       {
@@ -2456,7 +2499,7 @@ namespace Dune {
           if (l==k) continue;
           offset *= size[l];
         }
-        nBSegments += 2*offset;
+        nBSegments += sides[k]*offset;
       }
     }
 
