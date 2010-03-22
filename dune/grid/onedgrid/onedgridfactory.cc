@@ -57,6 +57,15 @@ insertElement(const GeometryType& type,
 
 }
 
+void Dune::GridFactory<Dune::OneDGrid>::
+insertBoundarySegment(const std::vector<unsigned int>& vertices)
+{
+  if (vertices.size() != 1)
+    DUNE_THROW(GridError, "OneDGrid BoundarySegments must have exactly one vertex.");
+
+  boundarySegments_.push_back(vertices[0]);
+}
+
 Dune::OneDGrid* Dune::GridFactory<Dune::OneDGrid>::
 createGrid()
 {
@@ -88,19 +97,34 @@ createGrid()
 
   }
 
-  // ///////////////////////////////////////////////////////////////////
-  //   Insert the elements into the grid
-  //
-  // This is a 1d grid and currently it has to be connected. Hence we actually
-  // know where the elements are, even without being told explicitly.
-  // The only thing of interest are the indices.
-  // ///////////////////////////////////////////////////////////////////
-
+  // //////////////////////////////////////////////////////////////////
+  //   Make an array with the vertex positions accessible by index
+  //   We'll need that several times.
+  // //////////////////////////////////////////////////////////////////
   std::vector<double> vertexPositionsByIndex(vertexPositions_.size());
   for (std::map<FieldVector<ctype,1>, unsigned int >::iterator it = vertexPositions_.begin();
        it != vertexPositions_.end();
        ++it)
     vertexPositionsByIndex[it->second] = it->first;
+
+  // ///////////////////////////////////////////////////
+  //   Set the numbering of the boundary segments
+  // ///////////////////////////////////////////////////
+
+  if (boundarySegments_.size() > 2)
+    DUNE_THROW(GridError, "You cannot provide more than two boundary segments to a OneDGrid (it must be connected).");
+
+  if (boundarySegments_.size() > 1
+      && vertexPositionsByIndex[boundarySegments_[0]] > vertexPositions_.begin()->first[0])
+    grid_->reversedBoundarySegmentNumbering_ = true;
+
+  // ///////////////////////////////////////////////////////////////////
+  //   Insert the elements into the grid
+  //
+  // This is a 1d grid and it has to be connected. Hence we actually
+  // know where the elements are, even without being told explicitly.
+  // The only thing of interest are the indices.
+  // ///////////////////////////////////////////////////////////////////
 
   // first sort elements by increasing position.  That is how they are expected in the grid data structure
   std::map<double, std::pair<Dune::array<unsigned int, 2>, unsigned int> > elementsByPosition;
@@ -119,7 +143,7 @@ createGrid()
    */
   for (size_t i=0; i<vertexPositions_.size()-1; i++, ++eIt) {
 
-    OneDEntityImp<1> newElement(0, grid_->getNextFreeId(0));
+    OneDEntityImp<1> newElement(0, grid_->getNextFreeId(0), grid_->reversedBoundarySegmentNumbering_);
     newElement.vertex_[0] = it;
     it = it->succ_;
     newElement.vertex_[1] = it;

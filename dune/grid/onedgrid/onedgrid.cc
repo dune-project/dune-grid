@@ -10,7 +10,8 @@ Dune::OneDGrid::OneDGrid()
     leafIndexSet_(*this),
     idSet_(*this),
     freeVertexIdCounter_(0),
-    freeElementIdCounter_(0)
+    freeElementIdCounter_(0),
+    reversedBoundarySegmentNumbering_(false)
 {}
 
 Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype& rightBoundary)
@@ -18,7 +19,8 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
     leafIndexSet_(*this),
     idSet_(*this),
     freeVertexIdCounter_(0),
-    freeElementIdCounter_(0)
+    freeElementIdCounter_(0),
+    reversedBoundarySegmentNumbering_(false)
 {
   if (numElements<1)
     DUNE_THROW(GridError, "Nonpositive number of elements requested!");
@@ -43,7 +45,7 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
   OneDGridList<OneDEntityImp<0> >::iterator it = vertices(0).begin();
   for (int i=0; i<numElements; i++) {
 
-    OneDEntityImp<1> newElement(0, getNextFreeId(0));
+    OneDEntityImp<1> newElement(0, getNextFreeId(0), false);
     newElement.vertex_[0] = it;
     it = it->succ_;
     newElement.vertex_[1] = it;
@@ -60,7 +62,8 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
     leafIndexSet_(*this),
     idSet_(*this),
     freeVertexIdCounter_(0),
-    freeElementIdCounter_(0)
+    freeElementIdCounter_(0),
+    reversedBoundarySegmentNumbering_(false)
 {
   if (coords.size()<2)
     DUNE_THROW(GridError, "You have to provide at least two coordinates!");
@@ -78,7 +81,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
   OneDGridList<OneDEntityImp<0> >::iterator it = vertices(0).begin();
   for (size_t i=0; i<coords.size()-1; i++) {
 
-    OneDEntityImp<1> newElement(0, getNextFreeId(0));
+    OneDEntityImp<1> newElement(0, getNextFreeId(0), false);
     newElement.vertex_[0] = it;
     it = it->succ_;
     newElement.vertex_[1] = it;
@@ -414,13 +417,13 @@ bool Dune::OneDGrid::adapt()
         // ///////////////////////
         // Create new elements
         // ///////////////////////
-        OneDEntityImp<1> newElement0(i+1, getNextFreeId(0));
+        OneDEntityImp<1> newElement0(i+1, getNextFreeId(0), reversedBoundarySegmentNumbering_);
         newElement0.vertex_[0] = leftUpperVertex;
         newElement0.vertex_[1] = centerVertexIterator;
         newElement0.father_ = eIt;
         newElement0.isNew_ = true;
 
-        OneDEntityImp<1> newElement1(i+1, getNextFreeId(0));
+        OneDEntityImp<1> newElement1(i+1, getNextFreeId(0), reversedBoundarySegmentNumbering_);
         newElement1.vertex_[0] = centerVertexIterator;
         newElement1.vertex_[1] = rightUpperVertex;
         newElement1.father_ = eIt;
@@ -500,7 +503,7 @@ bool Dune::OneDGrid::adapt()
           // /////////////////////////
           //   Create new element
           // /////////////////////////
-          OneDEntityImp<1> newElement(i+1, eIt->id_);
+          OneDEntityImp<1> newElement(i+1, eIt->id_, reversedBoundarySegmentNumbering_);
           newElement.vertex_[0] = leftUpperVertex;
           newElement.vertex_[1] = rightUpperVertex;
           newElement.father_ = eIt;
