@@ -1,10 +1,11 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 #include <dune/common/exceptions.hh>
-// #include <dune/grid/common/referenceelements.hh>
 
 #include "geometry.hh"
 #include "grid.hh"
+
+#include <dune/grid/alugrid/geostorage.hh>
 
 namespace Dune {
 
@@ -335,13 +336,8 @@ namespace Dune {
     typedef typename GeometryObject::ImplementationType GeometryImp;
     // to be improved, when we using not the refine 8 rule
     // see alu3dutility.hh for implementation
-    static LocalGeometryStorage<GeometryObject,8> geoms;
-    if(!geoms.geomCreated(child))
-    {
-      typedef typename GridImp::template Codim<0> ::EntityPointer EntityPointer;
-      const EntityPointer ep = father();
-      geoms.create(grid_,(*ep).geometry(),geometry(),child );
-    }
+    static ALULocalGeometryStorage<GridImp,GeometryObject,8> geoms( type(), true);
+    assert( geoms.geomCreated(child) );
     return geoms[child];
   }
 

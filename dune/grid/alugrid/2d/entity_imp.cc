@@ -7,6 +7,8 @@
 #include "grid.hh"
 #include <dune/common/exceptions.hh>
 
+#include <dune/grid/alugrid/geostorage.hh>
+
 namespace Dune {
 
 
@@ -223,24 +225,14 @@ namespace Dune {
     // to be improved, when we using not the refine 8 rule
     if( grid_.nonConform() )
     {
-      static ALU2DLocalGeometryStorage<LocalGeometryObject,4> geoms;
-      if(!geoms.geomCreated(child))
-      {
-        typedef typename GridImp::template Codim<0> ::EntityPointer EntityPointer;
-        const EntityPointer ep = father();
-        geoms.create(grid_, (*ep).geometry(), geometry(), child);
-      }
+      static ALULocalGeometryStorage<GridImp, LocalGeometryObject,4> geoms( type(), true );
+      assert( geoms.geomCreated(child) );
       return geoms[child];
     }
     else
     {
-      static ALU2DLocalGeometryStorage<LocalGeometryObject,2> geoms;
-      if(!geoms.geomCreated(child))
-      {
-        typedef typename GridImp::template Codim<0> ::EntityPointer EntityPointer;
-        const EntityPointer ep = father();
-        geoms.create(grid_,(*ep).geometry(),geometry(),child );
-      }
+      static ALULocalGeometryStorage<GridImp, LocalGeometryObject,2> geoms( type(), false );
+      assert( geoms.geomCreated(child) );
       return geoms[child];
     }
 

@@ -23,9 +23,6 @@ namespace Dune
     : geoImpl_(),
       det_( 1.0 ),
       up2Date_( false )
-#ifndef NDEBUG
-      , haveProjection_( false )
-#endif
   {}
 
 
@@ -306,8 +303,7 @@ namespace Dune
   template <int mydim, int cdim, class GridImp >
   inline bool ALU2dGridGeometry<mydim, cdim,GridImp>::
   buildGeomInFather(const Geometry & fatherGeom ,
-                    const Geometry & myGeom,
-                    const bool hasBndProjection )
+                    const Geometry & myGeom)
   {
     // update geometry
     geoImpl_.updateLocal( fatherGeom, myGeom );
@@ -318,11 +314,6 @@ namespace Dune
 
     // geom is up2date
     up2Date_ = true;
-
-#ifndef NDEBUG
-    // set projection information
-    haveProjection_ = hasBndProjection;
-#endif
 
     return true;
   }

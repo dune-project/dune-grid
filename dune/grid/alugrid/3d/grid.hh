@@ -81,6 +81,8 @@ namespace Dune {
   struct ALU3dGridEntityFactory;
   template< template< int, int > class ALUGrid >
   class ALU3dGridFactory;
+  template <class GridImp, class GeometryImp, int nChild>
+  class ALULocalGeometryStorage;
 
   //**********************************************************************
   //
@@ -270,7 +272,7 @@ namespace Dune {
 
   protected:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Geometry> GeometryObject;
-    friend class LocalGeometryStorage< GeometryObject , 8 >;
+    friend class ALULocalGeometryStorage< const ThisType, GeometryObject , 8 >;
 
   public:
     //! Type of the hierarchic index set
@@ -864,19 +866,10 @@ namespace Dune {
     {
       return * (leafInterItProvider_.getObject( *this, wLevel ));
     }
-    LeafIntersectionIteratorImp& getIntersectionCopy(const LeafIntersectionIteratorImp& org) const
-    {
-      return * (leafInterItProvider_.getObjectCopy( org ));
-    }
 
     LevelIntersectionIteratorImp& getIntersection(const int wLevel, const LevelIntersectionIteratorImp* ) const
     {
       return * (levelInterItProvider_.getObject( *this, wLevel ));
-    }
-
-    LevelIntersectionIteratorImp& getIntersectionCopy(const LevelIntersectionIteratorImp& org) const
-    {
-      return * (levelInterItProvider_.getObjectCopy( org ));
     }
 
     void freeIntersection(LeafIntersectionIteratorImp  & it) const { leafInterItProvider_.freeObject( &it ); }

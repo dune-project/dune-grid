@@ -9,10 +9,7 @@
 #include <dune/grid/common/gridfactory.hh>
 
 #include <dune/grid/alugrid/3d/alu3dinclude.hh>
-//#include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
-
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
-//#include <dune/grid/alugrid/2d/alu2dgridfactory.hh>
 
 namespace Dune
 {

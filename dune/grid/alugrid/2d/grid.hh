@@ -70,8 +70,8 @@ namespace Dune {
   class ALUMemoryProvider;
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid;
-  template <class GeometryImp, int nChild>
-  class ALU2DLocalGeometryStorage;
+  template <class GridImp, class GeometryImp, int nChild>
+  class ALULocalGeometryStorage;
   template <class GridImp, int codim>
   struct ALU2dGridEntityFactory;
 
@@ -217,7 +217,7 @@ namespace Dune {
     friend class ALU2dGridGeometry<0,dimworld,const ThisType>;
     friend class ALU2dGridGeometry<1,dimworld,const ThisType>;
     friend class ALU2dGridGeometry<dim,dimworld,const ThisType>;
-    template< class, int > friend class ALU2DLocalGeometryStorage;
+    template< class, class, int > friend class ALULocalGeometryStorage;
 
     friend class ALU2dGridEntityPointer<0,const ThisType>;
     friend class ALU2dGridEntityPointer<1,const ThisType>;
@@ -237,8 +237,8 @@ namespace Dune {
   protected:
     typedef MakeableInterfaceObject<typename Traits::template
         Codim<0>::Geometry> GeometryObject;
-    friend class ALU2DLocalGeometryStorage<GeometryObject, 4 >;
-    friend class ALU2DLocalGeometryStorage<GeometryObject, 2 >;
+    friend class ALULocalGeometryStorage<const ThisType, GeometryObject, 4 >;
+    friend class ALULocalGeometryStorage<const ThisType, GeometryObject, 2 >;
 
   public:
 
@@ -663,19 +663,10 @@ namespace Dune {
     {
       return * (leafInterItProvider_.getObject( *this, wLevel ));
     }
-    LeafIntersectionIteratorImp& getIntersectionCopy(const LeafIntersectionIteratorImp& org) const
-    {
-      return * (leafInterItProvider_.getObjectCopy( org ));
-    }
 
     LevelIntersectionIteratorImp& getIntersection(const int wLevel, const LevelIntersectionIteratorImp* ) const
     {
       return * (levelInterItProvider_.getObject( *this, wLevel ));
-    }
-
-    LevelIntersectionIteratorImp& getIntersectionCopy(const LevelIntersectionIteratorImp& org) const
-    {
-      return * (levelInterItProvider_.getObjectCopy( org ));
     }
 
     void freeIntersection(LeafIntersectionIteratorImp  & it) const { leafInterItProvider_.freeObject( &it ); }

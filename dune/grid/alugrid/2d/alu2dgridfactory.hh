@@ -91,12 +91,6 @@ namespace Dune
 
     /** \brief insert a vertex into the coarse grid
      *
-     *  \param[in]  verbose  verbosity (true/flase)
-     */
-    void setVerbosity( const bool verbose ) { grdVerbose_ = verbose ; }
-
-    /** \brief insert a vertex into the coarse grid
-     *
      *  \param[in]  pos  position of the vertex
      */
     virtual void insertVertex ( const VertexType &pos );
@@ -201,6 +195,13 @@ namespace Dune
     Grid *createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
 
     Grid *createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
+
+  protected:
+    /** \brief insert a vertex into the coarse grid
+     *
+     *  \param[in]  verbose  verbosity (true/flase)
+     */
+    void setVerbosity( const bool verbose ) { grdVerbose_ = verbose ; }
 
   private:
     template< class T >

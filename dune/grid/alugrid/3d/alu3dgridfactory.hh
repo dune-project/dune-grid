@@ -87,6 +87,7 @@ namespace Dune
     const DuneBoundaryProjectionType* globalProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
     unsigned int numFacesInserted_;
+    bool grdVerbose_;
 
     // copy vertex numbers and store smalled #dimension ones
     void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
@@ -219,6 +220,13 @@ namespace Dune
       return ( insertionIndex(intersection) < numFacesInserted_ );
     }
 
+  protected:
+    /** \brief set verbosity
+     *
+     *  \param[in]  verbose   verbose (true/false)
+     */
+    void setVerbosity( const bool verbose ) { grdVerbose_ = verbose ; }
+
   private:
     template< class T >
     static void exchange ( T &x, T &y );
@@ -301,6 +309,15 @@ namespace Dune
                     = MPIHelper::getCommunicator() )
       : BaseType( filename, communicator )
     {}
+
+    /** \brief constructor taking verbosity flag */
+    GridFactory ( const bool verbose,
+                  const MPICommunicatorType &communicator
+                    = MPIHelper::getCommunicator() )
+      : BaseType( communicator )
+    {
+      this->setVerbosity( verbose );
+    }
   };
 
 
@@ -333,6 +350,15 @@ namespace Dune
                     = MPIHelper::getCommunicator() )
       : BaseType( filename, communicator )
     {}
+
+    /** \brief constructor taking verbosity flag */
+    GridFactory ( const bool verbose,
+                  const MPICommunicatorType &communicator
+                    = MPIHelper::getCommunicator() )
+      : BaseType( communicator )
+    {
+      this->setVerbosity( verbose );
+    }
   };
 
 }

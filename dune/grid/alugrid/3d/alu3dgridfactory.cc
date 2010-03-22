@@ -22,7 +22,8 @@ namespace Dune
                         bool removeGeneratedFile )
     : communicator_( communicator ),
       globalProjection_ ( 0 ),
-      numFacesInserted_ ( 0 )
+      numFacesInserted_ ( 0 ),
+      grdVerbose_( true )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -36,7 +37,8 @@ namespace Dune
                         const MPICommunicatorType &communicator )
     : communicator_( communicator ),
       globalProjection_ ( 0 ),
-      numFacesInserted_ ( 0 )
+      numFacesInserted_ ( 0 ),
+      grdVerbose_( true )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -353,15 +355,17 @@ namespace Dune
     // and is going to delete this pointer
 #if ALU3DGRID_PARALLEL
     Grid *grid = (rank_ == 0) ?
-                 new Grid( communicator_, globalProjection_, bndProjections , name ) :
+                 new Grid( communicator_, globalProjection_, bndProjections , name, grdVerbose_ ) :
                  new Grid( communicator_ );
 #else
-    Grid *grid = new Grid( globalProjection_, bndProjections , name );
+    Grid *grid = new Grid( globalProjection_, bndProjections , name , grdVerbose_ );
 #endif
     assert( grid );
 
-    // remove pointer
+    // remove pointers
     globalProjection_ = 0;
+    // is removed by grid instance
+    bndProjections    = 0;
 
     // insert grid using ALUGrid macro grid builder
 #if ALU3DGRID_PARALLEL

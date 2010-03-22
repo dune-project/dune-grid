@@ -59,10 +59,12 @@ namespace Dune
     ALUCubeGrid(const std::string macroName,
                 MPI_Comm mpiComm = MPI_COMM_WORLD,
                 const DuneBoundaryProjectionType* bndProject = 0,
-                const DuneBoundaryProjectionVector* bndVector= 0 ) :
+                const DuneBoundaryProjectionVector* bndVector= 0,
+                const bool verb = true ) :
       BaseType(macroName,mpiComm,bndProject, bndVector)
     {
-      if(this->comm().rank() == 0)
+      const bool verbose = verb && this->comm().rank() == 0;
+      if( verbose )
       {
         std::cout << "\nCreated parallel ALUCubeGrid<"<<dim<<","<<dimworld;
         std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
@@ -79,10 +81,12 @@ namespace Dune
     ALUCubeGrid(MPI_Comm mpiComm,
                 const DuneBoundaryProjectionType* bndProject ,
                 const DuneBoundaryProjectionVector* bndVector,
-                const std::string macroName ) :
+                const std::string macroName,
+                const bool verb = true ) :
       BaseType("", mpiComm, bndProject, bndVector)
     {
-      if(this->comm().rank() == 0)
+      const bool verbose = verb && this->comm().rank() == 0;
+      if( verbose )
       {
         std::cout << "\nCreated parallel ALUCubeGrid<"<<dim<<","<<dimworld;
         std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
@@ -105,11 +109,15 @@ namespace Dune
     //! \param macroName filename for macro grid in ALUGrid hexa format
     ALUCubeGrid(const std::string macroName,
                 const DuneBoundaryProjectionType* bndProject = 0,
-                const DuneBoundaryProjectionVector* bndVector= 0 )
+                const DuneBoundaryProjectionVector* bndVector= 0,
+                const bool verbose = true )
       : BaseType(macroName, bndProject, bndVector)
     {
-      std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
-      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      if( verbose )
+      {
+        std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      }
     }
 
     //! \brief constructor called from ALUGridFactory
@@ -120,11 +128,15 @@ namespace Dune
     //! \param macroName filename from which ALUGrid is being generated
     ALUCubeGrid(const DuneBoundaryProjectionType* bndProject ,
                 const DuneBoundaryProjectionVector* bndVector,
-                const std::string macroName)
+                const std::string macroName,
+                const bool verbose = true )
       : BaseType("", bndProject, bndVector)
     {
-      std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
-      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      if( verbose )
+      {
+        std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      }
     }
 
     //! constructor creating empty grid
@@ -239,10 +251,12 @@ namespace Dune
     ALUSimplexGrid(const std::string macroName,
                    MPI_Comm mpiComm = MPI_COMM_WORLD,
                    const DuneBoundaryProjectionType* bndProject = 0,
-                   const DuneBoundaryProjectionVector* bndVector = 0 ) :
+                   const DuneBoundaryProjectionVector* bndVector = 0,
+                   const bool verb = true ) :
       BaseType(macroName, mpiComm, bndProject, bndVector)
     {
-      if(this->comm().rank() == 0)
+      const bool verbose = verb && this->comm().rank() == 0;
+      if( verbose )
       {
         std::cout << "\nCreated parallel ALUSimplexGrid<"<<dim<<","<<dimworld;
         std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
@@ -259,10 +273,12 @@ namespace Dune
     ALUSimplexGrid(MPI_Comm mpiComm,
                    const DuneBoundaryProjectionType* bndProject ,
                    const DuneBoundaryProjectionVector* bndVector,
-                   const std::string macroName) :
+                   const std::string macroName,
+                   const bool verb = true ) :
       BaseType("", mpiComm, bndProject, bndVector)
     {
-      if(this->comm().rank() == 0)
+      const bool verbose = verb && this->comm().rank() == 0;
+      if( verbose )
       {
         std::cout << "\nCreated parallel ALUSimplexGrid<"<<dim<<","<<dimworld;
         std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
@@ -285,11 +301,15 @@ namespace Dune
     //! \param macroName filename for macro grid in ALUGrid tetra format
     ALUSimplexGrid(const std::string macroName,
                    const DuneBoundaryProjectionType* bndProject = 0,
-                   const DuneBoundaryProjectionVector* bndVector = 0 ) :
+                   const DuneBoundaryProjectionVector* bndVector = 0,
+                   const bool verbose = true ) :
       BaseType(macroName, bndProject, bndVector)
     {
-      std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
-      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      if( verbose )
+      {
+        std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      }
     }
 
     //! \brief constructor called from ALUGridFactory
@@ -301,11 +321,15 @@ namespace Dune
     //! \param macroName filename from which ALUGrid is being generated
     ALUSimplexGrid(const DuneBoundaryProjectionType* bndProject,
                    const DuneBoundaryProjectionVector* bndVector,
-                   const std::string macroName ) :
+                   const std::string macroName,
+                   const bool verbose = true ) :
       BaseType("", bndProject, bndVector)
     {
-      std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
-      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      if( verbose )
+      {
+        std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      }
     }
 
     //! constructor creating empty grid

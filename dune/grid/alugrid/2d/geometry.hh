@@ -610,8 +610,7 @@ namespace Dune
 
     //! build geometry with local coords of child in reference element
     inline bool buildGeomInFather(const Geometry &fatherGeom ,
-                                  const Geometry & myGeom,
-                                  const bool hasBndProjection = false );
+                                  const Geometry & myGeom );
 
     // returns true if geometry is up-2-date
     inline bool up2Date() const { return up2Date_; }
@@ -631,65 +630,8 @@ namespace Dune
 
     //! is true if geom is up2date
     mutable bool up2Date_;
-
-#ifndef NDEBUG
-    //! true if boundary projection is set
-    mutable bool haveProjection_;
-#endif
   };
 
-
-
-  template <class GeometryImp, int nChild>
-  class ALU2DLocalGeometryStorage {
-
-    // array with pointers to the geometries
-    std::vector < GeometryImp * > geoms_;
-    // count local geometry creation
-    int count_;
-  public:
-    // create empty storage
-    ALU2DLocalGeometryStorage () : geoms_ (nChild) , count_ (0)
-    {
-      for(size_t i=0 ; i<geoms_.size(); ++i) geoms_[i] = 0;
-    }
-
-    // desctructor deleteing geometries
-    ~ALU2DLocalGeometryStorage ()
-    {
-      for(size_t i=0 ; i<geoms_.size(); ++i)
-        if(geoms_[i]) delete geoms_[i];
-    }
-
-    // check if geometry has been created
-    bool geomCreated(int child) const { return geoms_[child] != 0; }
-
-    // create local geometry
-    template <class GridImp, class Geometry>
-    void create (const GridImp & grid,
-                 const Geometry & father,
-                 const Geometry & son, const int child)
-    {
-      assert( !geomCreated(child) );
-      assert( child >=0 && child < nChild );
-
-      assert( count_ < nChild );
-      ++count_;
-
-      typedef typename GeometryImp :: ImplementationType ImplType;
-      GeometryImp * g = new GeometryImp(ImplType());
-      geoms_[child] = g;
-      GeometryImp & geo = *g;
-      grid.getRealImplementation(geo).
-      buildGeomInFather( father, son, grid.hasBoundaryProjection() );
-    }
-    // return reference to local geometry
-    const GeometryImp & operator [] (int child) const
-    {
-      assert( geomCreated(child) );
-      return *(geoms_[child]);
-    }
-  };
 
   template <class LocalGeometry, class LocalGeometryImp>
   class ALU2DIntersectionGeometryStorage
