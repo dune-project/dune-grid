@@ -63,15 +63,15 @@ namespace Dune {
     //! The copy constructor
     IntersectionIteratorWrapper(const ThisType & org)
       : grid_( org.grid_ )
-        , it_( grid_.getIntersectionCopy( org.it() ) )
+        , it_( grid_.getIntersection(-1, (IntersectionIteratorImpl *) 0) )
     {
-      it().assign(org.it() );
+      it().assign( org.it() );
     }
 
     //! the f*cking assignment operator
     ThisType & operator = (const ThisType & org)
     {
-      it().assign(org.it_);
+      it().assign( org.it() );
       return *this;
     }
 
