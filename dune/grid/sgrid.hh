@@ -43,6 +43,7 @@ namespace Dune {
   template<int codim, class GridImp> class SEntityPointer;
   template<int codim, PartitionIteratorType, class GridImp> class SLevelIterator;
   template<int dim, int dimworld, class ctype> class SGrid;
+  template<class GridImp> class SIntersection;
   template<class GridImp> class SIntersectionIterator;
   template<class GridImp> class SHierarchicIterator;
 
@@ -703,7 +704,8 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef Dune::Intersection<const GridImp, Dune::SIntersectionIterator> Intersection;
+    typedef Dune::SIntersection<GridImp> IntersectionImp;
+    typedef Dune::Intersection<const GridImp, Dune::SIntersection> Intersection;
     //! know your own dimension
     enum { dimension=dim };
     //! know your own dimension of world
@@ -719,7 +721,7 @@ namespace Dune {
     //! \brief dereferencing
     const Intersection & dereference() const
     {
-      return reinterpret_cast<const Intersection&>(*this);
+      return intersection;
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
@@ -812,7 +814,8 @@ namespace Dune {
       zred(_grid->compress(grid->getRealImplementation(ne).l,_self->z)),
       is_self_local(SGeometry<dim-1, dim, GridImp>()),
       is_global(SGeometry<dim-1, dimworld, GridImp>()),
-      is_nb_local(SGeometry<dim-1, dim, GridImp>())
+      is_nb_local(SGeometry<dim-1, dim, GridImp>()),
+      intersection(IntersectionImp(*this))
     {
       // make neighbor
       make(_count);
@@ -826,7 +829,8 @@ namespace Dune {
       built_intersections(false),
       is_self_local(SGeometry<dim-1, dim, GridImp>()),
       is_global(SGeometry<dim-1, dimworld, GridImp>()),
-      is_nb_local(SGeometry<dim-1, dim, GridImp>())
+      is_nb_local(SGeometry<dim-1, dim, GridImp>()),
+      intersection(IntersectionImp(*this))
     {}
 
     //! assignment operator
@@ -862,6 +866,135 @@ namespace Dune {
     mutable LocalGeometry is_self_local;  //!< intersection in own local coordinates
     mutable Geometry is_global;           //!< intersection in global coordinates, map consistent with is_self_local
     mutable LocalGeometry is_nb_local;    //!< intersection in neighbors local coordinates
+    Intersection intersection;
+  };
+
+  template<class GridImp>
+  class SIntersection
+  {
+    enum { dim=GridImp::dimension };
+    enum { dimworld=GridImp::dimensionworld };
+  public:
+    typedef typename GridImp::template Codim<0>::Entity Entity;
+    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<1>::Geometry Geometry;
+    typedef typename Geometry::LocalCoordinate LocalCoordinate;
+    typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
+    typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
+    typedef Dune::Intersection<const GridImp, Dune::SIntersectionIterator> Intersection;
+    //! know your own dimension
+    enum { dimension=dim };
+    //! know your own dimension of world
+    enum { dimensionworld=dimworld };
+    //! define type used for coordinates in grid module
+    typedef typename GridImp::ctype ctype;
+
+    bool boundary () const
+    {
+      return is.boundary();
+    }
+
+    /*! @brief Identifier for boundary segment from macro grid. */
+    int boundaryId () const
+    {
+      return is.boundaryId();
+    }
+
+    /*! @brief index of the boundary segment within the macro grid  */
+    size_t boundarySegmentIndex () const
+    {
+      return is.boundarySegmentIndex();
+    }
+
+    /*! @brief return true if intersection is shared with another element. */
+    bool neighbor () const
+    {
+      return is.neighbor();
+    }
+
+    /*! @brief return EntityPointer to the Entity on the inside of this intersection. */
+    EntityPointer inside() const
+    {
+      return is.inside();
+    }
+
+    /*! @brief return EntityPointer to the Entity on the outside of this intersection. */
+    EntityPointer outside() const
+    {
+      return is.outside();
+    }
+
+    /*! @brief return true if intersection is conform. */
+    bool conforming () const
+    {
+      return is.conforming();
+    }
+
+    /*! @brief geometrical information about this intersection in local coordinates of the inside() entity. */
+    const LocalGeometry &geometryInInside () const
+    {
+      return is.geometryInInside();
+    }
+
+    /*! @brief geometrical information about this intersection in local coordinates of the outside() entity. */
+    const LocalGeometry &geometryInOutside () const
+    {
+      return is.geometryInOutside();
+    }
+
+    /*! @brief geometrical information about the intersection in global coordinates. */
+    const Geometry &geometry () const
+    {
+      return is.geometry();
+    }
+
+    /*! @brief obtain the type of reference element for this intersection */
+    GeometryType type () const
+    {
+      return is.type();
+    }
+
+    /*! @brief Local index of codim 1 entity in the inside() entity where intersection is contained in */
+    int indexInInside () const
+    {
+      return is.indexInInside();
+    }
+
+    /*! @brief Local index of codim 1 entity in outside() entity where intersection is contained in */
+    int indexInOutside () const
+    {
+      return is.indexInOutside();
+    }
+
+    /*! @brief Return an outer normal (length not necessarily 1) */
+    GlobalCoordinate outerNormal (const LocalCoordinate& local) const
+    {
+      return is.outerNormal(local);
+    }
+
+    /*! @brief return outer normal scaled with the integration element */
+    GlobalCoordinate integrationOuterNormal (const LocalCoordinate& local) const
+    {
+      return is.integrationOuterNormal(local);
+    }
+
+    /*! @brief Return unit outer normal (length == 1)  */
+    GlobalCoordinate unitOuterNormal (const LocalCoordinate& local) const
+    {
+      return is.unitOuterNormal(local);
+    }
+
+    /*! @brief Return unit outer normal (length == 1) */
+    GlobalCoordinate centerUnitOuterNormal () const
+    {
+      return is.centerUnitOuterNormal();
+    }
+
+    //! constructor
+    SIntersection (const SIntersectionIterator<GridImp> & is_) : is(is_) {}
+
+  private:
+    const SIntersectionIterator<GridImp> & is;
   };
 
   //************************************************************************
@@ -1242,8 +1375,8 @@ namespace Dune {
     typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld,ctype>,
         SGeometry,SEntity,
         SEntityPointer,SLevelIterator,
-        SIntersectionIterator,              // leaf intersection
-        SIntersectionIterator,              // level intersection
+        SIntersection,              // leaf intersection
+        SIntersection,              // level intersection
         SIntersectionIterator,              // leaf  intersection iter
         SIntersectionIterator,              // level intersection iter
         SHierarchicIterator,
