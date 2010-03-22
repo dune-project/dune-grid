@@ -1626,8 +1626,8 @@ namespace Dune {
       }
       // gobal position of the cell on macro grid
       FieldVector<int, dim> pos = _inside.transformingsubiterator().coord();
-      pos -= origin;
       pos /= (1<<_inside.level());
+      pos -= origin;
       // compute unit-cube-face-sizes
       FieldVector<int, dim> fsize;
       {
