@@ -67,6 +67,7 @@ namespace Dune
     const DuneBoundaryProjectionType* globalProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
     unsigned int numFacesInserted_;
+    bool grdVerbose_;
 
     // copy vertex numbers and store smalled #dimension ones
     void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
@@ -87,6 +88,12 @@ namespace Dune
 
     /** \brief Destructor */
     virtual ~ALU2dGridFactory ();
+
+    /** \brief insert a vertex into the coarse grid
+     *
+     *  \param[in]  verbose  verbosity (true/flase)
+     */
+    void setVerbosity( const bool verbose ) { grdVerbose_ = verbose ; }
 
     /** \brief insert a vertex into the coarse grid
      *
@@ -253,6 +260,13 @@ namespace Dune
     GridFactory ( const std::string &filename )
       : BaseType( filename )
     {}
+
+    /** \brief constructor taking filename */
+    GridFactory ( const bool verbose )
+      : BaseType( )
+    {
+      this->setVerbosity( verbose );
+    }
   };
   /** \brief Specialization of the generic GridFactory for ALUSimplexGrid<2,dimw>
    *  \ingroup GridFactory
@@ -277,6 +291,13 @@ namespace Dune
     GridFactory ( const std::string &filename )
       : BaseType( filename )
     {}
+
+    /** \brief constructor taking filename */
+    GridFactory ( const bool verbose )
+      : BaseType( )
+    {
+      this->setVerbosity( verbose );
+    }
   };
 
   /** \brief Specialization of the generic GridFactory for ALUCubeGrid<2,dimw>
@@ -302,6 +323,13 @@ namespace Dune
     GridFactory ( const std::string &filename )
       : BaseType( filename )
     {}
+
+    /** \brief constructor taking filename */
+    GridFactory ( const bool verbose )
+      : BaseType( )
+    {
+      this->setVerbosity( verbose );
+    }
   };
 
 }

@@ -19,14 +19,16 @@ namespace Dune
   ALU2dGridFactory<ALUGrid,dimw>
   :: ALU2dGridFactory ( bool removeGeneratedFile )
     : globalProjection_ ( 0 ),
-      numFacesInserted_ ( 0 )
+      numFacesInserted_ ( 0 ),
+      grdVerbose_( true )
   {}
 
   template< template< int, int > class ALUGrid, int dimw >
   ALU2dGridFactory<ALUGrid,dimw>
   :: ALU2dGridFactory ( const std::string &filename )
     : globalProjection_ ( 0 ),
-      numFacesInserted_ ( 0 )
+      numFacesInserted_ ( 0 ),
+      grdVerbose_( true )
   {}
 
 
@@ -331,17 +333,19 @@ namespace Dune
     // ALUGrid is taking ownership of the bndProjections pointer
     Grid *grid =
 #ifdef ALUGRID_NOTEMPFILE_2D
-      ( temporary ) ? new Grid( filename, inFile, globalProjection_ , bndProjections ) :
+      ( temporary ) ? new Grid( filename, inFile, globalProjection_ , bndProjections, grdVerbose_ ) :
 #endif
-      new Grid( filename, globalProjection_ , bndProjections );
+      new Grid( filename, globalProjection_ , bndProjections, grdVerbose_ );
 
 #ifndef ALUGRID_NOTEMPFILE_2D
     if( temporary )
       std::remove( filename.c_str() );
 #endif
 
-    // remove pointer
+    // remove pointers
     globalProjection_ = 0;
+    // is removed by the grid
+    bndProjections    = 0;
 
     return grid;
   }
