@@ -174,7 +174,8 @@ namespace Dune
       GridType& grid    = *gridPtr;
 
       // refine once to get children
-      grid.globalRefine( 1 );
+      const int level = 1;
+      grid.globalRefine( level );
 
       {
         typedef typename GridType :: template Partition< All_Partition >:: LevelGridView MacroGridView;
@@ -189,15 +190,15 @@ namespace Dune
         typedef typename Iterator :: Entity EntityType;
 
         const EntityType& entity = *it;
+        const typename EntityType :: Geometry& geo = entity.geometry();
         typedef typename EntityType :: HierarchicIterator HierarchicIteratorType;
-        const int level = 1;
         const HierarchicIteratorType end = entity.hend( level );
 
         int childNum = 0;
         for( HierarchicIteratorType child = entity.hbegin( level );
              child != end; ++child, ++childNum )
         {
-          create( grid, entity.geometry(), child->geometry(), childNum );
+          create( grid, geo, child->geometry(), childNum );
         }
       }
 
