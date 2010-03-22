@@ -793,8 +793,8 @@ namespace Dune {
     {
       for( int i = 0; i < cdim; ++i )
       {
-        matrix_[i][0] = _b [1][i] + y * _b [3][i];
-        matrix_[i][1] = _b [2][i] + x * _b [3][i];
+        matrix_[0][i] = _b [1][i] + y * _b [3][i];
+        matrix_[1][i] = _b [2][i] + x * _b [3][i];
       }
       calcedMatrix_ = affine();
     }
@@ -819,6 +819,7 @@ namespace Dune {
     if( !calcedInv_ )
     {
       FieldMatrix< ctype, 2, 2 > AT_A, inv_AT_A;
+      map2worldlinear ( m[0], m[1] );
       multTransposedMatrix( matrix_, AT_A );
       FMatrixHelp::invertMatrix( AT_A, inv_AT_A );
       multMatrix( matrix_, inv_AT_A, invTransposed_ );
