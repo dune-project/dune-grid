@@ -35,14 +35,13 @@ namespace Dune
   private:
     typedef Dune::BoundarySegmentWrapper<2, dimw> BoundarySegmentWrapperType;
 
-
     typedef ALU2dGridFactory< ALUGrid,dimw > ThisType;
     typedef GridFactoryInterface< Grid > BaseType;
 
     typedef typename Grid::ctype ctype;
 
-    static const unsigned int dimension = Grid::dimension;
-    static const unsigned int dimensionworld = Grid::dimensionworld;
+    static const int dimension = Grid::dimension;
+    static const int dimensionworld = Grid::dimensionworld;
 
     static const ALU2DSPACE ElementType elementType = Grid::elementType;
     static const unsigned int numFaceCorners = 2;
@@ -50,6 +49,14 @@ namespace Dune
     typedef FieldVector< ctype, dimensionworld > VertexType;
     typedef std::vector< unsigned int > ElementType;
     typedef array< unsigned int, numFaceCorners > FaceType;
+
+    static const int periodicBndId = ALU2dImplTraits< dimensionworld, elementType >::HBndElType::general_periodic;
+
+  public:
+    //! type of vector for world coordinates
+    typedef FieldVector< ctype, dimensionworld > WorldVector;
+    //! type of matrix from world coordinates to world coordinates
+    typedef FieldMatrix< ctype, dimensionworld, dimensionworld > WorldMatrix;
 
   private:
     struct FaceLess;
@@ -61,6 +68,11 @@ namespace Dune
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
 
+    typedef std::pair< unsigned int, int > SubEntity;
+    typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
+    typedef std::vector< std::pair< WorldMatrix, WorldVector > > FaceTransformationVector;
+    typedef std::map< FaceType, unsigned int, FaceLess > PeriodicNeighborMap;
+
     VertexVector vertices_;
     ElementVector elements_;
     BoundaryIdVector boundaryIds_;
@@ -68,6 +80,8 @@ namespace Dune
     BoundaryProjectionMap boundaryProjections_;
     unsigned int numFacesInserted_;
     bool grdVerbose_;
+    FaceTransformationVector faceTransformations_;
+    PeriodicNeighborMap periodicNeighborMap_;
 
     // copy vertex numbers and store smalled #dimension ones
     void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
@@ -165,6 +179,20 @@ namespace Dune
      */
     virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection );
 
+    /** \brief add a face transformation (for periodic identification)
+     *
+     *  A face transformation is an affine mapping T from world coordinates
+     *  to world coordinates. The grid factory then glues two faces f and g
+     *  if T( f ) = g or T( g ) = f.
+     *
+     *  \param[in]  matrix  matrix describing the linear part of T
+     *  \param[in]  shift   vector describing T( 0 )
+     */
+    void insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
+    {
+      faceTransformations_.push_back( std::make_pair( matrix, shift ) );
+    }
+
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
     {
@@ -210,6 +238,7 @@ namespace Dune
     static std::string temporaryFileName (const std::string& dgfName );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
+    typename FaceMap::iterator findPeriodicNeighbor( const FaceType &key, FaceMap &faceMap ) const;
     void recreateBoundaryIds ( const int defaultId = 1 );
   };
 
