@@ -246,6 +246,8 @@ namespace Dune
     typedef typename Base:: MPICommunicatorType MPICommunicatorType;
     typedef typename Base::Grid Grid;
     const static int dimension = Grid::dimension;
+    typedef typename Base::GridFactory GridFactory;
+
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : Base()
@@ -287,6 +289,8 @@ namespace Dune
     typedef typename Base::MPICommunicatorType MPICommunicatorType;
     typedef typename Base::Grid Grid;
     const static int dimension = Grid::dimension;
+    typedef typename Base::GridFactory GridFactory;
+
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : Base()
@@ -329,6 +333,8 @@ namespace Dune
     typedef typename Base::MPICommunicatorType MPICommunicatorType;
     typedef typename Base::Grid Grid;
     const static int dimension = Grid::dimension;
+    typedef typename Base::GridFactory GridFactory;
+
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : Base()
