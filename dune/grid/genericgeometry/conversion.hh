@@ -147,14 +147,31 @@ namespace Dune
       static const unsigned int numTopologies = (1 << dimension);
 
     private:
-      template< int i >
-      struct Builder;
-
-      GeometryType types_[ numTopologies ];
+      GeometryType types_[ numTopologies / 2 ];
 
       DuneGeometryTypeProvider ()
       {
-        ForLoop< Builder, 0, numTopologies-1 >::apply( types_ );
+        if( dimension > 3 )
+        {
+          for( unsigned int i = 0; i < numTopologies / 2; ++i )
+            types_[ i ].makeNone( dimension );
+        }
+
+        if( dimension >= 3 )
+        {
+          const unsigned int d = (dimension >= 2 ? dimension-2 : 0);
+          types_[ 0 ].makeSimplex( dimension );
+          types_[ (1 << d) ] = GeometryType( GeometryType::prism, dimension );
+          types_[ (1 << d) - 1 ] = GeometryType( GeometryType::pyramid, dimension );
+          types_[ (1 << (d+1)) - 1 ].makeCube( dimension );
+        }
+        else if( dimension == 2 )
+        {
+          types_[ 0 ].makeSimplex( dimension );
+          types_[ 1 ].makeCube( dimension );
+        }
+        else
+          types_[ 0 ] = GeometryType( linetype, dimension );
       }
 
       static const DuneGeometryTypeProvider &instance ()
@@ -173,21 +190,7 @@ namespace Dune
       static const GeometryType &type ( unsigned int topologyId )
       {
         assert( topologyId < numTopologies );
-        return instance().types_[ topologyId ];
-      }
-    };
-
-
-    template< unsigned int dim, GeometryType::BasicType linetype >
-    template< int i >
-    struct DuneGeometryTypeProvider< dim, linetype >::Builder
-    {
-      typedef typename GenericGeometry::Topology< i, dimension >::type Topology;
-      typedef GenericGeometry::DuneGeometryType< Topology, linetype > DuneGeometryType;
-
-      static void apply ( GeometryType (&types)[ numTopologies ] )
-      {
-        types[ i ] = DuneGeometryType::type();
+        return instance().types_[ topologyId / 2 ];
       }
     };
 
