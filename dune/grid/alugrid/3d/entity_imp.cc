@@ -335,7 +335,7 @@ namespace Dune {
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
     typedef typename GeometryObject::ImplementationType GeometryImp;
     // to be improved, when we using not the refine 8 rule
-    // see alu3dutility.hh for implementation
+    // see alu3dinclude.hh for implementation
     static ALULocalGeometryStorage<GridImp,GeometryObject,8> geoms( type(), true);
     assert( geoms.geomCreated(child) );
     return geoms[child];
@@ -576,7 +576,7 @@ namespace Dune {
     assert(item_ != 0);
     // if isGhost is true the end iterator will be returned
     //return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isGhost() );
-#ifdef ALU3DGRID_PARALLEL
+#if ALU3DGRID_PARALLEL
     if( isGhost() )
     {
       return ALU3dGridHierarchicIterator<GridImp>(grid_,*ghost_,maxlevel, isLeaf() );
@@ -634,7 +634,7 @@ namespace Dune {
       std::cerr << "ALU3dGridEntity<0," << dim << "," << dimworld << "> :: father() : no father of entity globalid = " << getIndex() << "\n";
       return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<HElementType &> (*item_));
     }
-#ifdef ALU3DGRID_PARALLEL
+#if ALU3DGRID_PARALLEL
     if( isGhost () )
     {
       return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<const HBndSegType &> (*(getGhost().up())));
