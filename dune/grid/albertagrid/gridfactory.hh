@@ -244,8 +244,8 @@ namespace Dune
     /** \brief add a face transformation (for periodic identification)
      *
      *  A face transformation is an affine mapping T from world coordinates
-     *  to world coordinates. ALBERTA periodically identifies to faces f and g
-     *  is T( f ) = g or T( g ) = f.
+     *  to world coordinates. ALBERTA periodically identifies two faces f and g
+     *  if T( f ) = g or T( g ) = f.
      *
      *  \param[in]  matrix  matrix describing the linear part of T
      *  \param[in]  shift   vector describing T( 0 )
