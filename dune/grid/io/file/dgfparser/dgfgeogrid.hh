@@ -151,13 +151,13 @@ namespace Dune
     template< class Intersection >
     bool wasInserted ( const Intersection &intersection ) const
     {
-      return dgfHostFactory_.wasInserted( HostGridAccess< Grid >::getIntersection( intersection ) );
+      return dgfHostFactory_.wasInserted( HostGridAccess< Grid >::hostIntersection( intersection ) );
     }
 
     template< class Intersection >
     int boundaryId ( const Intersection &intersection ) const
     {
-      return dgfHostFactory_.boundaryId( HostGridAccess< Grid >::getIntersection( intersection ) );
+      return dgfHostFactory_.boundaryId( HostGridAccess< Grid >::hostIntersection( intersection ) );
     }
 
     template< int codim >
@@ -169,7 +169,7 @@ namespace Dune
     template< class Entity >
     std::vector< double > &parameter ( const Entity &entity )
     {
-      return dgfHostFactory_.parameter( HostGridAccess< Grid >::getEntity( entity ) );
+      return dgfHostFactory_.parameter( HostGridAccess< Grid >::hostEntity( entity ) );
     }
 
   private:
