@@ -12,36 +12,6 @@ namespace Dune
   namespace Alberta
   {
 
-#if 0
-    template<>
-    template<>
-    unsigned int MeshPointer< 1 >::Library< dimWorld >::boundaryCount = 0;
-
-    template<>
-    template<>
-    const void *MeshPointer< 1 >::Library< dimWorld >::projectionFactory = 0;
-
-
-    template<>
-    template<>
-    unsigned int MeshPointer< 2 >::Library< dimWorld >::boundaryCount = 0;
-
-    template<>
-    template<>
-    const void *MeshPointer< 2 >::Library< dimWorld >::projectionFactory = 0;
-
-
-    template<>
-    template<>
-    unsigned int MeshPointer< 3 >::Library< dimWorld >::boundaryCount = 0;
-
-    template<>
-    template<>
-    const void *MeshPointer< 3 >::Library< dimWorld >::projectionFactory = 0;
-#endif
-
-
-
     // Implementation of MeshPointer
     // -----------------------------
 

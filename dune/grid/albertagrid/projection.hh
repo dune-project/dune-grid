@@ -24,24 +24,6 @@ namespace Dune
 
 
 
-    // NoProjection
-    // ------------
-
-    template< int dim >
-    struct NoProjection
-    {
-      static const int dimension = dim;
-
-      typedef Alberta::ElementInfo< dimension > ElementInfo;
-
-      // note: GlobalVector is an array type; global is the return value
-      void operator() ( const ElementInfo &elementInfo, const LocalVector local,
-                        GlobalVector global ) const
-      {}
-    };
-
-
-
     // DuneBoundaryProjection
     // ----------------------
 
@@ -273,7 +255,7 @@ namespace Dune
     // NodeProjection
     // --------------
 
-    template< int dim, class Projection = NoProjection< dim > >
+    template< int dim, class Projection >
     class NodeProjection
       : public BasicNodeProjection
     {
