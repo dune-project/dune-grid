@@ -8,7 +8,8 @@ libalu3d_la_LIBADD = 				\
 
 noinst_LTLIBRARIES = libalu3d.la
 if ALUGRID
-  libalu3d_la_SOURCES = mappings.cc topology.cc faceutility.cc
+  libalu3d_la_SOURCES = mappings.cc topology.cc faceutility.cc \
+                        alu3dgridfactory.cc grid_imp.cc
 else
   libalu3d_la_SOURCES = topology.cc
 endif

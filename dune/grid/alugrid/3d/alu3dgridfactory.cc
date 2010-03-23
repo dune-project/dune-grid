@@ -13,38 +13,10 @@
 
 #include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
 
+#ifdef ENABLE_ALUGRID
+
 namespace Dune
 {
-
-  template< template< int, int > class ALUGrid >
-  ALU3dGridFactory< ALUGrid >
-  :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
-                        bool removeGeneratedFile )
-    : communicator_( communicator ),
-      globalProjection_ ( 0 ),
-      numFacesInserted_ ( 0 ),
-      grdVerbose_( true )
-  {
-#if ALU3DGRID_PARALLEL
-    MPI_Comm_rank( communicator, &rank_ );
-#endif
-  }
-
-
-  template< template< int, int > class ALUGrid >
-  ALU3dGridFactory< ALUGrid >
-  :: ALU3dGridFactory ( const std::string &filename,
-                        const MPICommunicatorType &communicator )
-    : communicator_( communicator ),
-      globalProjection_ ( 0 ),
-      numFacesInserted_ ( 0 ),
-      grdVerbose_( true )
-  {
-#if ALU3DGRID_PARALLEL
-    MPI_Comm_rank( communicator, &rank_ );
-#endif
-  }
-
 
   template< template< int, int > class ALUGrid >
   ALU3dGridFactory< ALUGrid > :: ~ALU3dGridFactory ()
@@ -54,10 +26,9 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexType &pos )
   {
-#if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
       DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
-#endif
+
     vertices_.push_back( pos );
   }
 
@@ -67,10 +38,9 @@ namespace Dune
   :: insertElement ( const GeometryType &geometry,
                      const std::vector< unsigned int > &vertices )
   {
-#if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
       DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
-#endif
+
     assertGeometryType( geometry );
     if( geometry.dim() != dimension )
       DUNE_THROW( GridError, "Only 3-dimensional elements can be inserted "
@@ -88,10 +58,9 @@ namespace Dune
                       const std::vector< unsigned int > &vertices,
                       const int id )
   {
-#if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
       DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
-#endif
+
     assertGeometryType( geometry );
     if( geometry.dim() != dimension-1 )
     {
@@ -117,10 +86,8 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >
   ::insertBoundary ( const int element, const int face, const int id )
   {
-#if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
       DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
-#endif
 
     if( (element < 0) || (element >= (int)elements_.size()) )
       DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
@@ -164,6 +131,7 @@ namespace Dune
     boundaryProjections_[ faceId ] = projection;
   }
 
+#if 0
   template< template< int, int > class ALUGrid >
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )
@@ -213,6 +181,7 @@ namespace Dune
     }
 #endif
   }
+#endif
 
   template< template< int, int > class ALUGrid >
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >::createGrid ()
@@ -234,9 +203,7 @@ namespace Dune
     typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator BoundaryIdIteratorType;
     BoundaryProjectionVector* bndProjections = 0;
 
-#if ALU3DGRID_PARALLEL
     if( rank_ == 0 )
-#endif
     {
       correctElementOrientation();
       if( addMissingBoundaries )
@@ -353,13 +320,12 @@ namespace Dune
 
     // ALUGrid is taking ownership of bndProjections
     // and is going to delete this pointer
-#if ALU3DGRID_PARALLEL
     Grid *grid = (rank_ == 0) ?
                  new Grid( communicator_, globalProjection_, bndProjections , name, grdVerbose_ ) :
                  new Grid( communicator_ );
-#else
-    Grid *grid = new Grid( globalProjection_, bndProjections , name , grdVerbose_ );
-#endif
+
+    //Grid *grid = new Grid( globalProjection_, bndProjections , name , grdVerbose_ );
+
     assert( grid );
 
     // remove pointers
@@ -368,19 +334,9 @@ namespace Dune
     bndProjections    = 0;
 
     // insert grid using ALUGrid macro grid builder
-#if ALU3DGRID_PARALLEL
     if( rank_ == 0 )
-#endif
     {
-      // create ALUGrid macro grid builder
-      typedef ALU3DSPACE Gitter :: Geometric :: BuilderIF BuilderIF;
-#if ALU3DGRID_PARALLEL
-      BuilderIF& builder = dynamic_cast<BuilderIF &> (grid->myGrid().containerPll());
-#else
-      BuilderIF& builder = dynamic_cast<BuilderIF &> (grid->myGrid().container());
-#endif
-
-      ALU3DSPACE MacroGridBuilder mgb ( builder
+      ALU3DSPACE MacroGridBuilder mgb ( getBuilder(grid)
 #ifdef ALUGRID_VERTEX_PROJECTION
                                         , grid->myGrid().vertexProjection()
 #endif
@@ -459,23 +415,19 @@ namespace Dune
     }
 
     // clear vertices
-    vertices_.resize( 0 );
+    vertices_ = VertexVector();
     // clear elements
-    elements_.resize( 0 );
+    elements_ = ElementVector();
     // free memory
     boundaryIds_.clear();
 
-#if ALU3DGRID_PARALLEL
 #ifdef ALUGRID_EXPORT_MACROGRID_CHANGES
     // make changes in macro grid known in every partition
     grid->myGrid().duneNotifyMacroGridChanges();
 #else
-    int size;
-    MPI_Comm_size( communicator_, &size );
-    if( size > 1 )
+    if( grid->comm().size() > 1 )
       DUNE_THROW(NotImplemented,"ALUGrid factory not working in parallel right now!");
 #endif // #ifdef ALUGRID_EXPORT_MACROGRID_CHANGES
-#endif // #if ALU3DGRID_PARALLEL
 
     // reset wasRefined flags
     grid->postAdapt();
@@ -487,7 +439,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  inline void ALU3dGridFactory< ALUGrid >
+  void ALU3dGridFactory< ALUGrid >
   ::generateFace ( const ElementType &element, const int f, FaceType &face )
   {
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
@@ -502,7 +454,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  inline void
+  void
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
   {
     const typename ElementVector::iterator elementEnd = elements_.end();
@@ -548,7 +500,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  inline void ALU3dGridFactory< ALUGrid >
+  void ALU3dGridFactory< ALUGrid >
   ::recreateBoundaryIds ( const int defaultId )
   {
     typedef std::pair< unsigned int, int > SubEntity;
@@ -602,4 +554,8 @@ namespace Dune
       insertBoundary( faceIt->second.first, faceIt->second.second, defaultId );
   }
 
+  template class ALU3dGridFactory< ALUCubeGrid >;
+  template class ALU3dGridFactory< ALUSimplexGrid >;
 }
+
+#endif

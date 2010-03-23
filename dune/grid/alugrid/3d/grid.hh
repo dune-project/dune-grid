@@ -36,6 +36,8 @@
 
 #include <dune/grid/alugrid/3d/lbdatahandle.hh>
 
+#include <dune/common/mpihelper.hh>
+
 #if ALU3DGRID_PARALLEL
 #include <dune/common/mpicollectivecommunication.hh>
 #else
@@ -342,18 +344,13 @@ namespace Dune {
     };
 
   protected:
+    typedef typename MPIHelper :: MPICommunicator MPICommunicatorType;
     //! Constructor which reads an ALU3dGrid Macro Triang file
     //! or given GridFile
-#if ALU3DGRID_PARALLEL
     ALU3dGrid(const std::string macroTriangFilename,
-              MPI_Comm mpiComm,
+              const MPICommunicatorType mpiComm,
               const DuneBoundaryProjectionType* bndPrj,
               const DuneBoundaryProjectionVector* bndVec);
-#else
-    ALU3dGrid(const std::string macroTriangFilename,
-              const DuneBoundaryProjectionType* bndPrj,
-              const DuneBoundaryProjectionVector* bndVec);
-#endif
   public:
 
     //! \brief Desctructor
@@ -657,7 +654,8 @@ namespace Dune {
     // return reference to org ALU3dGrid
     // private method, but otherwise we have to friend class all possible
     // types of LevelIterator ==> later
-    ALU3DSPACE GitterImplType & myGrid() const;
+    ALU3DSPACE GitterImplType& myGrid() const;
+    ALU3DSPACE GitterImplType* createALUGrid(const char *);
 
     //! return reference to Dune reference element according to elType
     const ReferenceElementType & referenceElement() const { return referenceElement_; }
@@ -1016,5 +1014,6 @@ namespace Dune {
 
 } // end namespace Dune
 
-#include "grid_imp.cc"
+//#include "grid_imp.cc"
+#include "grid_inline.hh"
 #endif

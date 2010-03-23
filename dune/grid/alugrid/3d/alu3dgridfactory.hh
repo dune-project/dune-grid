@@ -78,9 +78,8 @@ namespace Dune
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
 
     MPICommunicatorType communicator_;
-#if ALU3DGRID_PARALLEL
     int rank_;
-#endif
+
     VertexVector vertices_;
     ElementVector elements_;
     BoundaryIdVector boundaryIds_;
@@ -90,13 +89,36 @@ namespace Dune
     bool grdVerbose_;
 
     // copy vertex numbers and store smalled #dimension ones
-    void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
+    inline void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
     {
       std::vector<unsigned int> tmp( vertices );
       std::sort( tmp.begin(), tmp.end() );
 
       // copy only the first dimension vertices (enough for key)
       for( size_t i = 0; i < faceId.size(); ++i ) faceId[ i ] = tmp[ i ];
+    }
+
+    // return rank of process
+    inline int getRank(const MPICommunicatorType &communicator) const
+    {
+      int rank = 0;
+#if ALU3DGRID_PARALLEL
+      MPI_Comm_rank( communicator, &rank );
+#endif
+      return rank;
+    }
+
+    // return appropriate ALUGrid builder
+    inline typename ALU3DSPACE Gitter :: Geometric :: BuilderIF&
+    getBuilder(Grid * grid) const
+    {
+      // create ALUGrid macro grid builder
+      typedef ALU3DSPACE Gitter :: Geometric :: BuilderIF BuilderIF;
+#if ALU3DGRID_PARALLEL
+      return dynamic_cast<BuilderIF &> (grid->myGrid().containerPll());
+#else
+      return dynamic_cast<BuilderIF &> (grid->myGrid().container());
+#endif
     }
 
   public:
@@ -361,11 +383,86 @@ namespace Dune
     }
   };
 
-}
+  template< template< int, int > class ALUGrid >
+  inline
+  ALU3dGridFactory< ALUGrid >
+  :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
+                        bool removeGeneratedFile )
+    : communicator_( communicator ),
+      rank_( getRank(communicator_) ),
+      globalProjection_ ( 0 ),
+      numFacesInserted_ ( 0 ),
+      grdVerbose_( true )
+  {}
 
-// This include is nasty, but we cannot incorporate 'alu3dgridfactory.cc' into
-// the lib before HAVE_MPI behaves predictable
-#include "alu3dgridfactory.cc"
+  template< template< int, int > class ALUGrid >
+  inline
+  ALU3dGridFactory< ALUGrid >
+  :: ALU3dGridFactory ( const std::string &filename,
+                        const MPICommunicatorType &communicator )
+    : communicator_( communicator ),
+      rank_( getRank(communicator_) ),
+      globalProjection_ ( 0 ),
+      numFacesInserted_ ( 0 ),
+      grdVerbose_( true )
+  {}
+
+
+  template< template< int, int > class ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid > ::
+  insertBoundarySegment ( const std::vector< unsigned int >& vertices )
+  {
+    DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
+  }
+
+  template< template< int, int > class ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid > ::
+  insertBoundarySegment ( const std::vector< unsigned int >& vertices,
+                          const shared_ptr<BoundarySegment<3,3> >& boundarySegment )
+  {
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
+
+    if( vertices.size() != numFaceCorners )
+      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+      DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+
+    const size_t numVx = vertices.size();
+    GeometryType type( (numVx == 3) ? GeometryType::simplex : GeometryType::cube, dimension-1 );
+
+    std::vector< VertexType > coords( numVx );
+    for( size_t i = 0; i < numVx; ++i )
+    {
+      // if this assertions is thrown vertices were not inserted at first
+      assert( vertices_.size() > vertices[ i ] );
+
+      // get global coordinate and copy it
+      const VertexType &x = vertices_[ vertices[ i ] ];
+      for( unsigned int j = 0; j < dimensionworld; ++j )
+        coords[ i ][ j ] = x[ j ];
+    }
+
+    BoundarySegmentWrapperType* prj
+      = new BoundarySegmentWrapperType( type, coords, boundarySegment );
+    boundaryProjections_[ faceId ] = prj;
+#ifndef NDEBUG
+    // consistency check
+    for( size_t i = 0; i < numVx; ++i )
+    {
+      VertexType global = (*prj)( coords [ i ] );
+      if( (global - coords[ i ]).two_norm() > 1e-6 )
+        DUNE_THROW(GridError,"BoundarySegment does not map face vertices to face vertices.");
+    }
+#endif
+  }
+
+
+
+
+
+}
 
 #endif // #ifdef ENABLE_ALUGRID
 
