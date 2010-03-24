@@ -35,6 +35,12 @@ AC_DEFUN([DUNE_PATH_ALUGRID],[
 
   AC_ARG_WITH(alugrid,
     AC_HELP_STRING([--with-alugrid=PATH],[directory where ALUGrid is installed]))
+
+  AC_ARG_WITH([alugrid-libdir],dnl
+    AS_HELP_STRING([--with-alugrid-libdir=PATH],dnl
+      [Directory where ALUGrid library is installed. Note that this will override library path detection, so use this parameter only if default library detection fails and you know exactly where your ALUGrid library is located.]))dnl
+
+
 # do not use alugrid debug lib 
 
 # store old values
@@ -94,6 +100,15 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
   PKG_CONFIG_PATH=$REM_PKG_CONFIG_PATH
 
   ALUGRID_LIB_PATH="$ALUGRIDROOT/lib"
+  if test x"$with_alugrid_libdir" != x"" && test x"$with_alugrid_libdir" != x"no"
+  then
+    if ! test -d "$with_alugrid_libdir"
+    then
+      AC_MSG_ERROR([library directory $with_alugrid_libdir for ALUGrid does not exist or is inaccessible.])dnl
+    else
+      ALUGRID_LIB_PATH="$with_alugrid_libdir"
+    fi
+  fi
   ALUGRID_INCLUDE_PATH="$ALUGRIDROOT/include"
 
   AC_LANG_PUSH([C++])
