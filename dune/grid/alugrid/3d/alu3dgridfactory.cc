@@ -87,7 +87,6 @@ namespace Dune
     }
     boundaryId.second = id;
     boundaryIds_.push_back( boundaryId );
-    ++numFacesInserted_;
   }
 
 
@@ -106,7 +105,6 @@ namespace Dune
     generateFace( elements_[ element ], face, boundaryId.first );
     boundaryId.second = id;
     boundaryIds_.push_back( boundaryId );
-    ++numFacesInserted_;
   }
 
   template< template< int, int > class ALUGrid >
@@ -221,6 +219,7 @@ namespace Dune
     if( allowGridGeneration_ )
     {
       correctElementOrientation();
+      numFacesInserted_ = boundaryIds_.size();
       if( addMissingBoundaries )
         recreateBoundaryIds();
 
