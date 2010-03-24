@@ -170,8 +170,19 @@ namespace Dune
       for(size_t i=0; i<vertices.size(); ++i) vertices[ i ] = i;
       factory.insertElement(type, vertices);
 
+      // save original sbuf
+      std::streambuf* cerr_sbuf = std::cerr.rdbuf();
+      std::stringstream tempout;
+      // redirect 'cerr' to a 'fout' to avoid unnecessary output in constructors
+      std::cerr.rdbuf(tempout.rdbuf());
+
       GridType* gridPtr = factory.createGrid();
       GridType& grid    = *gridPtr;
+
+      // restore the original stream buffer
+      std::cerr.rdbuf(cerr_sbuf);
+
+      //std::cerr = savecerr;
 
       // refine once to get children
       const int level = 1;
