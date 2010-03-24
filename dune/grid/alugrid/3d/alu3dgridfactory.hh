@@ -85,7 +85,8 @@ namespace Dune
     const DuneBoundaryProjectionType* globalProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
     unsigned int numFacesInserted_;
-    bool grdVerbose_;
+    bool realGrid_;
+    const bool allowGridGeneration_;
 
     MPICommunicatorType communicator_;
 
@@ -113,8 +114,8 @@ namespace Dune
     // return grid object
     virtual Grid* createGridObj( BoundaryProjectionVector* bndProjections, const std::string& name ) const
     {
-      return (rank_ == 0) ?
-             new Grid( communicator_, globalProjection_, bndProjections , name, grdVerbose_ ) :
+      return ( allowGridGeneration_ ) ?
+             new Grid( communicator_, globalProjection_, bndProjections , name, realGrid_ ) :
              new Grid( communicator_ );
     }
 
@@ -128,6 +129,10 @@ namespace Dune
     explicit ALU3dGridFactory ( const std::string &filename,
                                 const MPICommunicatorType &communicator
                                   = MPIHelper::getCommunicator() );
+
+    /** \brief constructor taking verbose flag */
+    explicit ALU3dGridFactory ( const bool verbose,
+                                const MPICommunicatorType &communicator );
 
     /** \brief Destructor */
     virtual ~ALU3dGridFactory ();
@@ -239,13 +244,6 @@ namespace Dune
       return ( insertionIndex(intersection) < numFacesInserted_ );
     }
 
-  protected:
-    /** \brief set verbosity
-     *
-     *  \param[in]  verbose   verbose (true/false)
-     */
-    void setVerbosity( const bool verbose ) { grdVerbose_ = verbose ; }
-
   private:
     template< class T >
     static void exchange ( T &x, T &y );
@@ -329,14 +327,14 @@ namespace Dune
       : BaseType( filename, communicator )
     {}
 
+  protected:
+    template< class, class, int > friend class ALULocalGeometryStorage;
     /** \brief constructor taking verbosity flag */
-    GridFactory ( const bool verbose,
+    GridFactory ( const bool realGrid,
                   const MPICommunicatorType &communicator
                     = MPIHelper::getCommunicator() )
-      : BaseType( communicator )
-    {
-      this->setVerbosity( verbose );
-    }
+      : BaseType( realGrid, communicator )
+    {}
   };
 
 
@@ -370,14 +368,14 @@ namespace Dune
       : BaseType( filename, communicator )
     {}
 
+  protected:
+    template< class, class, int > friend class ALULocalGeometryStorage;
     /** \brief constructor taking verbosity flag */
-    GridFactory ( const bool verbose,
+    GridFactory ( const bool realGrid,
                   const MPICommunicatorType &communicator
                     = MPIHelper::getCommunicator() )
-      : BaseType( communicator )
-    {
-      this->setVerbosity( verbose );
-    }
+      : BaseType( realGrid, communicator )
+    {}
   };
 
   template< template< int, int > class ALUGrid >
@@ -388,7 +386,8 @@ namespace Dune
     : rank_( getRank(communicator) ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
-      grdVerbose_( true ),
+      realGrid_( true ),
+      allowGridGeneration_( rank_ == 0 ),
       communicator_( communicator )
   {}
 
@@ -400,11 +399,23 @@ namespace Dune
     : rank_( getRank(communicator) ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
-      grdVerbose_( true ),
+      realGrid_( true ),
+      allowGridGeneration_( rank_ == 0 ),
       communicator_( communicator )
   {}
 
-
+  template< template< int, int > class ALUGrid >
+  inline
+  ALU3dGridFactory< ALUGrid >
+  :: ALU3dGridFactory ( const bool realGrid,
+                        const MPICommunicatorType &communicator )
+    : rank_( getRank(communicator) ),
+      globalProjection_ ( 0 ),
+      numFacesInserted_ ( 0 ),
+      realGrid_( realGrid ),
+      allowGridGeneration_( true ),
+      communicator_( communicator )
+  {}
   template< template< int, int > class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )

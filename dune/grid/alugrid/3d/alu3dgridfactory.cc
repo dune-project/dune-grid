@@ -33,7 +33,7 @@ namespace Dune
   alu_inline
   void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexType &pos )
   {
-    if( rank_ != 0 )
+    if( ! allowGridGeneration_ )
       DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
 
     vertices_.push_back( pos );
@@ -46,7 +46,7 @@ namespace Dune
   :: insertElement ( const GeometryType &geometry,
                      const std::vector< unsigned int > &vertices )
   {
-    if( rank_ != 0 )
+    if( ! allowGridGeneration_ )
       DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
 
     assertGeometryType( geometry );
@@ -67,7 +67,7 @@ namespace Dune
                       const std::vector< unsigned int > &vertices,
                       const int id )
   {
-    if( rank_ != 0 )
+    if( ! allowGridGeneration_ )
       DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
 
     assertGeometryType( geometry );
@@ -96,7 +96,7 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >
   ::insertBoundary ( const int element, const int face, const int id )
   {
-    if( rank_ != 0 )
+    if( ! allowGridGeneration_ )
       DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
 
     if( (element < 0) || (element >= (int)elements_.size()) )
@@ -218,7 +218,7 @@ namespace Dune
     typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator BoundaryIdIteratorType;
     BoundaryProjectionVector* bndProjections = 0;
 
-    if( rank_ == 0 )
+    if( allowGridGeneration_ )
     {
       correctElementOrientation();
       if( addMissingBoundaries )
@@ -344,7 +344,7 @@ namespace Dune
     bndProjections    = 0;
 
     // insert grid using ALUGrid macro grid builder
-    if( rank_ == 0 )
+    if( allowGridGeneration_ )
     {
       ALU3DSPACE MacroGridBuilder mgb ( grid->getBuilder()
 #ifdef ALUGRID_VERTEX_PROJECTION
@@ -431,8 +431,11 @@ namespace Dune
     boundaryIds_.clear();
 
 #ifdef ALUGRID_EXPORT_MACROGRID_CHANGES
-    // make changes in macro grid known in every partition
-    grid->duneNotifyMacroGridChanges();
+    if( realGrid_ )
+    {
+      // make changes in macro grid known in every partition
+      grid->duneNotifyMacroGridChanges();
+    }
 #else
     if( grid->comm().size() > 1 )
       DUNE_THROW(NotImplemented,"ALUGrid factory not working in parallel right now!");
