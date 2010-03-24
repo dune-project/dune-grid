@@ -4,9 +4,11 @@
 #include <dune/common/stdstreams.hh>
 
 // Local includes
+#include "alu3dinclude.hh"
 #include "entity.hh"
 #include "iterator.hh"
 #include "datahandle.hh"
+#include "grid.hh"
 
 namespace Dune {
 
@@ -19,13 +21,9 @@ namespace Dune {
             const DuneBoundaryProjectionVector* bndVec
             )
     : mygrid_ (0)
-#if ALU3DGRID_PARALLEL
-      , mpAccess_(mpiComm)
-      , ccobj_(mpiComm)
-#endif
       , maxlevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)
-      , geomTypes_(dim+1, std::vector<GeometryType>(1) )
+      , geomTypes_() //dim+1, std::vector<GeometryType>(1) )
       , hIndexSet_ (*this)
       , globalIdSet_(0), localIdSet_(*this)
       , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
@@ -37,12 +35,24 @@ namespace Dune {
       , bndPrj_ ( bndPrj )
       , bndVec_ ( (bndVec) ? (new DuneBoundaryProjectionVector( *bndVec )) : 0 )
       , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
+      , communications_( new Communications( mpiComm ) )
   {
-    makeGeomTypes();
+    assert( elType == tetra || elType == hexa );
+    typename GeometryType :: BasicType basicType = (elType == tetra) ?
+                                                   GeometryType::simplex : GeometryType::cube;
+
+    geomTypes_.resize( dim+1 );
+    // stored is the dim, where is the codim
+    for(int i=dim; i>= 0; i--)
+    {
+      geomTypes_[dim-i].resize( 1 );
+      geomTypes_[dim-i][0] = GeometryType(basicType,i);
+    }
 
     // check macro grid file for keyword
     this->checkMacroGridFile (macroTriangFilename);
 
+    assert( communications_ );
 #if ALU3DGRID_PARALLEL == 0
     // in serial version call empty constructor when no file given
     if( macroTriangFilename == "" )
@@ -59,7 +69,7 @@ namespace Dune {
 
 #if ALU3DGRID_PARALLEL
     dverb << "************************************************\n";
-    dverb << "Created grid on p=" << mpAccess_.myrank() << "\n";
+    dverb << "Created grid on p=" << communications_->mpAccess_.myrank() << "\n";
     dverb << "************************************************\n";
 #endif
     this->checkMacroGrid ();
@@ -94,12 +104,13 @@ namespace Dune {
   inline ALU3DSPACE GitterImplType* ALU3dGrid<dim, dimworld, elType>::
   createALUGrid(const char* macroName)
   {
+    assert( communications_ );
     return new ALU3DSPACE GitterImplType (macroName
 #if ALU3DGRID_PARALLEL
-                                          , mpAccess_
+                                          , communications_->mpAccess_
 #endif
 #ifdef ALUGRID_VERTEX_PROJECTION
-                                          , vertexProjection_ // only available in ALUGrid-1.15 or newer
+                                          , vertexProjection() // only available in ALUGrid-1.15 or newer
 #endif
                                           );
   }

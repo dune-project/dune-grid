@@ -26,9 +26,13 @@ namespace Dune {
 
   //! A trilinear mapping from the Dune reference hexahedron into the physical
   //! space (same as in mapp_cube_3d.h, but for a different reference hexahedron)
-  class TrilinearMapping {
+  class TrilinearMapping
+  {
+  public:
+    typedef double double_t[3];
     typedef FieldVector<double, 3> coord_t;
     typedef FieldMatrix<double, 3, 3> mat_t;
+  private:
     static const double _epsilon ;
 
     // the internal mapping
@@ -73,7 +77,7 @@ namespace Dune {
                       const vector_t&, const vector_t&);
 
     // returns true if mapping is affine
-    inline bool affine () const;
+    inline bool affine () const { return affine_; }
   };
 
   //! A bilinear surface mapping
@@ -83,13 +87,14 @@ namespace Dune {
   // also the point numbering is different
   class SurfaceNormalCalculator
   {
-  protected:
+  public:
     // our coordinate types
     typedef FieldVector<double, 3> coord3_t;
     typedef FieldVector<double, 2> coord2_t;
 
     // type of coordinate vectors from elements
     typedef double double3_t[3];
+  protected:
 
     double _n [3][3] ;
 
@@ -218,8 +223,9 @@ namespace Dune {
 
   //! A bilinear mapping
   template< int cdim >
-  struct BilinearMapping
+  class BilinearMapping
   {
+  public:
     typedef alu3d_ctype ctype;
 
     typedef FieldVector< ctype, cdim > world_t;
@@ -274,9 +280,12 @@ namespace Dune {
 
   //! A linear mapping
   template< int cdim, int mydim >
-  struct LinearMapping
+  class LinearMapping
   {
+  public:
     typedef alu3d_ctype ctype;
+
+    typedef ctype double_t[ cdim ];
 
     typedef FieldVector< ctype, cdim > world_t;
     typedef FieldVector< ctype, mydim > map_t;
@@ -442,6 +451,7 @@ namespace Dune {
 
 } // end namespace Dune
 
-#include "mappings_imp.cc"
-
+#if COMPILE_ALUGRID_INLINE
+  #include "mappings_imp.cc"
+#endif
 #endif

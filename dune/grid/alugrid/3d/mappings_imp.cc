@@ -1,10 +1,14 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#ifndef DUNE_ALUGRID_MAPPINGS_IMP_CC
+#define DUNE_ALUGRID_MAPPINGS_IMP_CC
+
+#include "mappings.hh"
 
 namespace Dune {
 
   //- Trilinear mapping (from alu3dmappings.hh)
-  inline TrilinearMapping ::
+  alu_inline TrilinearMapping ::
   TrilinearMapping (const coord_t& p0, const coord_t& p1,
                     const coord_t& p2, const coord_t& p3,
                     const coord_t& p4, const coord_t& p5,
@@ -15,7 +19,7 @@ namespace Dune {
   }
 
   template <class vector_t>
-  inline void TrilinearMapping ::
+  alu_inline void TrilinearMapping ::
   buildMapping(const vector_t& p0, const vector_t& p1,
                const vector_t& p2, const vector_t& p3,
                const vector_t& p4, const vector_t& p5,
@@ -68,7 +72,7 @@ namespace Dune {
     return ;
   }
 
-  inline TrilinearMapping :: TrilinearMapping (const TrilinearMapping & map)
+  alu_inline TrilinearMapping :: TrilinearMapping (const TrilinearMapping & map)
   {
     // copy mapping
     for (int i = 0 ; i < 8 ; ++i)
@@ -80,14 +84,14 @@ namespace Dune {
     return ;
   }
 
-  inline const FieldMatrix<double, 3, 3>&
+  alu_inline const FieldMatrix<double, 3, 3>&
   TrilinearMapping::jacobianTransposed(const coord_t& p)
   {
     linear( p );
     return Df;
   }
 
-  inline const FieldMatrix<double, 3, 3>&
+  alu_inline const FieldMatrix<double, 3, 3>&
   TrilinearMapping::jacobianInverseTransposed(const coord_t& p)
   {
     // calculate inverse if not calculated or not affine
@@ -106,14 +110,14 @@ namespace Dune {
     }
   }
 
-  inline void TrilinearMapping ::
+  alu_inline void TrilinearMapping ::
   map2world(const coord_t& p, coord_t& world) const
   {
     map2world(p[0], p[1], p[2], world);
     return ;
   }
 
-  inline void TrilinearMapping ::
+  alu_inline void TrilinearMapping ::
   map2world(const double x, const double y,
             const double z, coord_t& world ) const
   {
@@ -127,14 +131,14 @@ namespace Dune {
     return ;
   }
 
-  inline void TrilinearMapping :: linear(const coord_t& p )
+  alu_inline void TrilinearMapping :: linear(const coord_t& p )
   {
     linear(p[0], p[1], p[2]);
   }
 
-  inline void TrilinearMapping :: linear(const double x,
-                                         const double y,
-                                         const double z)
+  alu_inline void TrilinearMapping :: linear(const double x,
+                                             const double y,
+                                             const double z)
   {
     if( ! calcedLinear_ )
     {
@@ -162,7 +166,7 @@ namespace Dune {
     }
   }
 
-  inline double TrilinearMapping :: det(const coord_t& point )
+  alu_inline double TrilinearMapping :: det(const coord_t& point )
   {
     // use cached value of determinant
     if( calcedDet_ ) return DetDf;
@@ -189,7 +193,7 @@ namespace Dune {
     return DetDf;
   }
 
-  inline void TrilinearMapping :: inverse(const coord_t& point)
+  alu_inline void TrilinearMapping :: inverse(const coord_t& point)
   {
     // return when inverse already calculated
     if( calcedInv_ ) return ;
@@ -213,7 +217,7 @@ namespace Dune {
     return ;
   }
 
-  inline void TrilinearMapping::world2map (const coord_t& wld , coord_t& map )
+  alu_inline void TrilinearMapping::world2map (const coord_t& wld , coord_t& map )
   {
     //  Newton - Iteration zum Invertieren der Abbildung f.
     double err = 10.0 * _epsilon ;
@@ -244,14 +248,9 @@ namespace Dune {
     return ;
   }
 
-  inline bool TrilinearMapping :: affine () const
-  {
-    return affine_;
-  }
-
   //- Bilinear surface mapping
   // Constructor for FieldVectors
-  inline SurfaceNormalCalculator :: SurfaceNormalCalculator()
+  alu_inline SurfaceNormalCalculator :: SurfaceNormalCalculator()
   {
     double p[3] = {0.0,0.0,0.0};
     //initialize with zero
@@ -261,7 +260,7 @@ namespace Dune {
   // the real constructor, this can be called for FieldVectors
   // and double[3], we dont have to convert one type
   template <class vector_t>
-  inline void SurfaceNormalCalculator ::
+  alu_inline void SurfaceNormalCalculator ::
   buildMapping  (const vector_t & _p0, const vector_t & _p1,
                  const vector_t & _p2, const vector_t & _p3)
   {
@@ -272,7 +271,7 @@ namespace Dune {
   // the real constructor, this can be called for FieldVectors
   // and double[3], we dont have to convert one type
   template <class vector_t>
-  inline void SurfaceNormalCalculator ::
+  alu_inline void SurfaceNormalCalculator ::
   buildMapping  (const vector_t & _p0, const vector_t & _p1,
                  const vector_t & _p2, const vector_t & _p3,
                  double (&_b)[4][3])
@@ -317,7 +316,7 @@ namespace Dune {
     return ;
   }
 
-  inline SurfaceNormalCalculator ::
+  alu_inline SurfaceNormalCalculator ::
   SurfaceNormalCalculator(const SurfaceNormalCalculator & m)
   {
     // copy n
@@ -330,14 +329,14 @@ namespace Dune {
     return ;
   }
 
-  inline void SurfaceNormalCalculator::
+  alu_inline void SurfaceNormalCalculator::
   normal (const coord2_t& map, coord3_t& norm) const
   {
     normal(map[0],map[1],norm);
     return ;
   }
 
-  inline void SurfaceNormalCalculator ::
+  alu_inline void SurfaceNormalCalculator ::
   normal (const double x, const double y, coord3_t& norm) const {
     norm [0] = -(_n [0][0] + _n [1][0] * x + _n [2][0] * y);
     norm [1] = -(_n [0][1] + _n [1][1] * x + _n [2][1] * y);
@@ -345,14 +344,14 @@ namespace Dune {
     return ;
   }
 
-  inline void SurfaceNormalCalculator ::
+  alu_inline void SurfaceNormalCalculator ::
   negativeNormal (const coord2_t& map, coord3_t& norm) const
   {
     negativeNormal(map[0],map[1],norm);
     return ;
   }
 
-  inline void SurfaceNormalCalculator ::
+  alu_inline void SurfaceNormalCalculator ::
   negativeNormal(const double x, const double y, coord3_t& norm) const {
     norm [0] = (_n [0][0] + _n [1][0] * x + _n [2][0] * y);
     norm [1] = (_n [0][1] + _n [1][1] * x + _n [2][1] * y);
@@ -366,7 +365,7 @@ namespace Dune {
   // ----------------------
 
   // Constructor for FieldVectors
-  inline BilinearSurfaceMapping ::
+  alu_inline BilinearSurfaceMapping ::
   BilinearSurfaceMapping ()
   {
     double p[3] = {0.0,0.0,0.0};
@@ -376,7 +375,7 @@ namespace Dune {
 
   //- Bilinear surface mapping
   // Constructor for FieldVectors
-  inline BilinearSurfaceMapping ::
+  alu_inline BilinearSurfaceMapping ::
   BilinearSurfaceMapping (const coord3_t& x0, const coord3_t& x1,
                           const coord3_t& x2, const coord3_t& x3)
   {
@@ -384,7 +383,7 @@ namespace Dune {
   }
 
   // Constructor for double[3]
-  inline BilinearSurfaceMapping ::
+  alu_inline BilinearSurfaceMapping ::
   BilinearSurfaceMapping (const double3_t & x0, const double3_t & x1,
                           const double3_t & x2, const double3_t & x3)
   {
@@ -394,7 +393,7 @@ namespace Dune {
   // the real constructor, this can be called for FieldVectors
   // and double[3], we dont have to convert one type
   template <class vector_t>
-  inline void BilinearSurfaceMapping ::
+  alu_inline void BilinearSurfaceMapping ::
   buildMapping  (const vector_t & _p0, const vector_t & _p1,
                  const vector_t & _p2, const vector_t & _p3)
   {
@@ -404,7 +403,7 @@ namespace Dune {
     return ;
   }
 
-  inline BilinearSurfaceMapping ::
+  alu_inline BilinearSurfaceMapping ::
   BilinearSurfaceMapping (const BilinearSurfaceMapping & m)
     : BaseType(m)
   {
@@ -420,13 +419,13 @@ namespace Dune {
     return ;
   }
 
-  inline void BilinearSurfaceMapping ::
+  alu_inline void BilinearSurfaceMapping ::
   map2world (const coord2_t& map, coord3_t& wld) const
   {
     map2world(map[0],map[1],wld);
   }
 
-  inline void BilinearSurfaceMapping ::
+  alu_inline void BilinearSurfaceMapping ::
   map2world (const double x, const double y, coord3_t& w) const
   {
     const double xy = x * y ;
@@ -437,7 +436,7 @@ namespace Dune {
   }
 
 
-  inline void BilinearSurfaceMapping ::
+  alu_inline void BilinearSurfaceMapping ::
   map2worldnormal (const double x,
                    const double y,
                    const double z,
@@ -452,7 +451,7 @@ namespace Dune {
     return ;
   }
 
-  inline void BilinearSurfaceMapping ::
+  alu_inline void BilinearSurfaceMapping ::
   map2worldlinear(const double x, const double y, const double z) const
   {
     normal(x,y,normal_);
@@ -472,7 +471,7 @@ namespace Dune {
     return ;
   }
 
-  inline const BilinearSurfaceMapping:: matrix_t&
+  alu_inline const BilinearSurfaceMapping:: matrix_t&
   BilinearSurfaceMapping::jacobianTransposed(const coord2_t & local) const
   {
     if( ! _calcedMatrix )
@@ -496,7 +495,7 @@ namespace Dune {
   }
 
   // calculates determinant of face mapping
-  inline double BilinearSurfaceMapping :: det(const coord2_t& point ) const
+  alu_inline double BilinearSurfaceMapping :: det(const coord2_t& point ) const
   {
     // calculate normal
     normal(point[0], point[1], normal_);
@@ -505,7 +504,7 @@ namespace Dune {
     return normal_.two_norm();
   }
 
-  inline void BilinearSurfaceMapping :: inverse(const coord3_t& point ) const
+  alu_inline void BilinearSurfaceMapping :: inverse(const coord3_t& point ) const
   {
     if( _calcedInv ) return ;
 
@@ -530,7 +529,7 @@ namespace Dune {
     return ;
   }
 
-  inline const BilinearSurfaceMapping:: inv_t&
+  alu_inline const BilinearSurfaceMapping:: inv_t&
   BilinearSurfaceMapping::jacobianInverseTransposed(const coord2_t & local) const
   {
     // if calculated return
@@ -558,7 +557,7 @@ namespace Dune {
     return invTransposed_;
   }
 
-  inline void BilinearSurfaceMapping::world2map (const coord3_t& wld , coord2_t& map ) const
+  alu_inline void BilinearSurfaceMapping::world2map (const coord3_t& wld , coord2_t& map ) const
   {
     //  Newton - Iteration zum Invertieren der Abbildung f.
     double err = 10.0 * _epsilon ;
@@ -598,7 +597,7 @@ namespace Dune {
   // ---------------
 
   template< int cdim >
-  inline BilinearMapping< cdim >::BilinearMapping ()
+  alu_inline BilinearMapping< cdim >::BilinearMapping ()
     : calcedMatrix_( false ),
       calcedDet_( false ),
       calcedInv_( false )
@@ -611,7 +610,7 @@ namespace Dune {
 
 
   template< int cdim >
-  inline BilinearMapping< cdim >
+  alu_inline BilinearMapping< cdim >
   ::BilinearMapping ( const world_t &p0, const world_t &p1,
                       const world_t &p2, const world_t &p3 )
   {
@@ -620,7 +619,7 @@ namespace Dune {
 
 
   template< int cdim >
-  inline BilinearMapping< cdim >
+  alu_inline BilinearMapping< cdim >
   ::BilinearMapping ( const ctype (&p0)[ cdim ], const ctype (&p1)[ cdim ],
                       const ctype (&p2)[ cdim ], const ctype (&p3)[ cdim ] )
   {
@@ -629,21 +628,21 @@ namespace Dune {
 
 
   template< int cdim >
-  inline bool BilinearMapping< cdim >::affine () const
+  alu_inline bool BilinearMapping< cdim >::affine () const
   {
     return affine_;
   }
 
 
   template< int cdim >
-  inline void BilinearMapping< cdim >::map2world ( const map_t &m, world_t &w ) const
+  alu_inline void BilinearMapping< cdim >::map2world ( const map_t &m, world_t &w ) const
   {
     map2world( m[0], m[1], w );
   }
 
 
   template< int cdim >
-  inline void BilinearMapping< cdim >::map2world ( const ctype x, const ctype y, world_t &w ) const
+  alu_inline void BilinearMapping< cdim >::map2world ( const ctype x, const ctype y, world_t &w ) const
   {
     const alu3d_ctype xy = x * y;
     for( int i = 0; i < cdim; ++i )
@@ -652,7 +651,7 @@ namespace Dune {
 
 
   template< int cdim >
-  inline void BilinearMapping< cdim >::world2map ( const world_t &w, map_t &m ) const
+  alu_inline void BilinearMapping< cdim >::world2map ( const world_t &w, map_t &m ) const
   {
     ctype error;
     do {
@@ -672,7 +671,7 @@ namespace Dune {
 
 
   template< int cdim >
-  inline typename BilinearMapping< cdim >::ctype
+  alu_inline typename BilinearMapping< cdim >::ctype
   BilinearMapping< cdim >::det ( const map_t &m ) const
   {
     inverse( m );
@@ -680,7 +679,7 @@ namespace Dune {
   }
 
   template<>
-  inline BilinearMapping< 2 >::ctype
+  alu_inline BilinearMapping< 2 >::ctype
   BilinearMapping< 2 >::det ( const map_t &m ) const
   {
     if( !calcedDet_ )
@@ -697,7 +696,7 @@ namespace Dune {
   }
 
   template<>
-  inline BilinearMapping< 3 >::ctype
+  alu_inline BilinearMapping< 3 >::ctype
   BilinearMapping< 3 >::det ( const map_t &m ) const
   {
     if( !calcedDet_ )
@@ -719,7 +718,7 @@ namespace Dune {
 
 
   template< int cdim >
-  inline const typename BilinearMapping< cdim >::matrix_t &
+  alu_inline const typename BilinearMapping< cdim >::matrix_t &
   BilinearMapping< cdim >::jacobianTransposed ( const map_t &m ) const
   {
     map2worldlinear( m[0], m[1] );
@@ -728,7 +727,7 @@ namespace Dune {
 
 
   template< int cdim >
-  inline const typename BilinearMapping< cdim >::inv_t &
+  alu_inline const typename BilinearMapping< cdim >::inv_t &
   BilinearMapping< cdim >::jacobianInverseTransposed ( const map_t &m ) const
   {
     inverse( m );
@@ -738,7 +737,7 @@ namespace Dune {
 
   template< int cdim >
   template< class vector_t >
-  inline void BilinearMapping< cdim >
+  alu_inline void BilinearMapping< cdim >
   ::buildMapping ( const vector_t &p0, const vector_t &p1,
                    const vector_t &p2, const vector_t &p3 )
   {
@@ -760,7 +759,7 @@ namespace Dune {
 
 
   template< int cdim >
-  inline void BilinearMapping< cdim >
+  alu_inline void BilinearMapping< cdim >
   ::multTransposedMatrix ( const matrix_t &A, FieldMatrix< ctype, 2, 2 > &C )
   {
     for( int i = 0; i < 2; ++i )
@@ -776,7 +775,7 @@ namespace Dune {
 
 
   template< int cdim >
-  inline void BilinearMapping< cdim >
+  alu_inline void BilinearMapping< cdim >
   ::multMatrix ( const matrix_t &A, const FieldMatrix< ctype, 2, 2 > &B, inv_t &C )
   {
     for( int i = 0; i < cdim; ++i )
@@ -786,7 +785,7 @@ namespace Dune {
 
 
   template< int cdim >
-  inline void BilinearMapping< cdim >
+  alu_inline void BilinearMapping< cdim >
   ::map2worldlinear ( const alu3d_ctype x, const alu3d_ctype y ) const
   {
     if( !calcedMatrix_ )
@@ -802,7 +801,7 @@ namespace Dune {
 
 
   template<>
-  inline void BilinearMapping< 2 >::inverse ( const map_t &m ) const
+  alu_inline void BilinearMapping< 2 >::inverse ( const map_t &m ) const
   {
     if( !calcedInv_ )
     {
@@ -813,7 +812,7 @@ namespace Dune {
   }
 
   template< int cdim >
-  inline void BilinearMapping< cdim >::inverse ( const map_t &m ) const
+  alu_inline void BilinearMapping< cdim >::inverse ( const map_t &m ) const
   {
     // use least squares approach
     if( !calcedInv_ )
@@ -839,7 +838,7 @@ namespace Dune {
   //- Bilinear surface mapping
   // Constructor for FieldVectors
   template <int cdim, int mydim>
-  inline LinearMapping<cdim, mydim> ::
+  alu_inline LinearMapping<cdim, mydim> ::
   LinearMapping ()
     : _matrix ( 0.0 )
       , _invTransposed( 0.0 )
@@ -850,7 +849,7 @@ namespace Dune {
 
   // copy constructor
   template <int cdim, int mydim>
-  inline LinearMapping<cdim, mydim> ::
+  alu_inline LinearMapping<cdim, mydim> ::
   LinearMapping (const LinearMapping & m)
     : _matrix ( m._matrix )
       , _invTransposed( m._invTransposed )
@@ -863,7 +862,7 @@ namespace Dune {
   // and double[3], we dont have to convert one type
   template <>
   template <class vector_t>
-  inline void LinearMapping<3, 3> ::
+  alu_inline void LinearMapping<3, 3> ::
   buildMapping  (const vector_t & p0, const vector_t & p1,
                  const vector_t & p2, const vector_t & p3 )
   {
@@ -892,7 +891,7 @@ namespace Dune {
   // and double[3], we dont have to convert one type
   template <>
   template <class vector_t>
-  inline void LinearMapping<3, 2> ::
+  alu_inline void LinearMapping<3, 2> ::
   buildMapping  (const vector_t & p0, const vector_t & p1,
                  const vector_t & p2)
   {
@@ -918,7 +917,7 @@ namespace Dune {
   // and double[3], we dont have to convert one type
   template <int cdim, int mydim>
   template <class vector_t>
-  inline void LinearMapping<cdim, mydim> ::
+  alu_inline void LinearMapping<cdim, mydim> ::
   buildMapping  (const vector_t & p0, const vector_t & p1)
   {
     assert( mydim == 1 );
@@ -941,7 +940,7 @@ namespace Dune {
   // and double[3], we dont have to convert one type
   template <>
   template <class vector_t>
-  inline void LinearMapping<2, 2> ::
+  alu_inline void LinearMapping<2, 2> ::
   buildMapping  (const vector_t & p0,
                  const vector_t & p1,
                  const vector_t & p2)
@@ -964,7 +963,7 @@ namespace Dune {
   // and double[3], we dont have to convert one type
   template <>
   template <class vector_t>
-  inline void LinearMapping<2, 1> ::
+  alu_inline void LinearMapping<2, 1> ::
   buildMapping  (const vector_t & p0, const vector_t & p1)
   {
     _matrix [0][0] = p1[0] - p0 [0] ;
@@ -984,7 +983,7 @@ namespace Dune {
 
   template<>
   template< class vector_t >
-  inline void LinearMapping< 2, 0 >::buildMapping ( const vector_t &p0 )
+  alu_inline void LinearMapping< 2, 0 >::buildMapping ( const vector_t &p0 )
   {
     _p0[0] = p0[0];
     _p0[1] = p0[1];
@@ -997,7 +996,7 @@ namespace Dune {
 
   template<>
   template< class vector_t >
-  inline void LinearMapping< 3, 0 >::buildMapping ( const vector_t &p0 )
+  alu_inline void LinearMapping< 3, 0 >::buildMapping ( const vector_t &p0 )
   {
     _p0[0] = p0[0];
     _p0[1] = p0[1];
@@ -1011,7 +1010,7 @@ namespace Dune {
 
   // local --> global
   template <int cdim, int mydim>
-  inline void LinearMapping<cdim, mydim> ::
+  alu_inline void LinearMapping<cdim, mydim> ::
   map2world (const map_t& local, world_t& global) const
   {
     // initialize
@@ -1023,7 +1022,7 @@ namespace Dune {
 
   // global --> local
   template <int cdim, int mydim>
-  inline void LinearMapping<cdim, mydim> ::
+  alu_inline void LinearMapping<cdim, mydim> ::
   world2map (const world_t& global, map_t& local) const
   {
     // initialize
@@ -1038,7 +1037,7 @@ namespace Dune {
 
   // tetra mapping
   template <int cdim, int mydim>
-  inline void LinearMapping<cdim, mydim> ::
+  alu_inline void LinearMapping<cdim, mydim> ::
   inverse(const map_t& local) const
   {
     // invert transposed matrix and return determinant
@@ -1048,7 +1047,7 @@ namespace Dune {
   }
 
   template <>
-  inline void LinearMapping<3, 0> ::
+  alu_inline void LinearMapping<3, 0> ::
   inverse(const map_t& local) const
   {
     // invert transposed matrix and return determinant
@@ -1057,7 +1056,7 @@ namespace Dune {
     _calcedDet = _calcedInv = true ;
   }
   template <>
-  inline void LinearMapping<2, 0> ::
+  alu_inline void LinearMapping<2, 0> ::
   inverse(const map_t& local) const
   {
     // invert transposed matrix and return determinant
@@ -1068,7 +1067,7 @@ namespace Dune {
 
   // tetra mapping
   template <int cdim, int mydim>
-  inline void LinearMapping<cdim, mydim> ::
+  alu_inline void LinearMapping<cdim, mydim> ::
   calculateDeterminant(const map_t& local) const
   {
     inverse( local );
@@ -1076,7 +1075,7 @@ namespace Dune {
 
   // triangle mapping
   template <>
-  inline void LinearMapping<3, 2> ::
+  alu_inline void LinearMapping<3, 2> ::
   inverse(const map_t& local) const
   {
     inverseCodimOne( local );
@@ -1084,14 +1083,24 @@ namespace Dune {
 
   // edge mapping
   template <>
-  inline void LinearMapping<2, 1> ::
+  alu_inline void LinearMapping<2, 1> ::
   inverse(const map_t& local) const
   {
     inverseCodimOne( local );
   }
 
+  template <>
+  alu_inline void LinearMapping<3, 0> ::
+  inverseCodimOne(const map_t& local) const
+  {}
+
+  template <>
+  alu_inline void LinearMapping<2, 0> ::
+  inverseCodimOne(const map_t& local) const
+  {}
+
   template <int cdim, int mydim>
-  inline void LinearMapping<cdim, mydim> ::
+  alu_inline void LinearMapping<cdim, mydim> ::
   inverseCodimOne(const map_t& local) const
   {
     // use least squares approach
@@ -1123,7 +1132,7 @@ namespace Dune {
 
   // triangle mapping
   template <>
-  inline void LinearMapping<3, 2> ::
+  alu_inline void LinearMapping<3, 2> ::
   calculateDeterminant(const map_t& local) const
   {
     enum { cdim  = 3 };
@@ -1156,7 +1165,7 @@ namespace Dune {
   }
 
   template <int cdim, int mydim>
-  inline void LinearMapping<cdim, mydim> ::
+  alu_inline void LinearMapping<cdim, mydim> ::
   multTransposedMatrix(const matrix_t& matrix,
                        FieldMatrix<ctype, mydim, mydim>& result) const
   {
@@ -1175,7 +1184,7 @@ namespace Dune {
   }
 
   template <int cdim, int mydim>
-  inline void LinearMapping<cdim, mydim> ::
+  alu_inline void LinearMapping<cdim, mydim> ::
   multMatrix ( const matrix_t &A,
                const FieldMatrix< ctype, mydim, mydim > &B,
                inv_t& ret ) const
@@ -1196,7 +1205,7 @@ namespace Dune {
 
   // edge mapping
   template <>
-  inline void LinearMapping<3, 1> ::
+  alu_inline void LinearMapping<3, 1> ::
   inverse(const map_t& local) const
   {
     FieldMatrix<ctype, 1, 1> AT_A_;
@@ -1215,7 +1224,7 @@ namespace Dune {
 
   // triangle mapping
   template <>
-  inline void LinearMapping<3, 1> ::
+  alu_inline void LinearMapping<3, 1> ::
   calculateDeterminant(const map_t& local) const
   {
     // calculate length
@@ -1228,7 +1237,7 @@ namespace Dune {
   }
   // triangle mapping
   template <>
-  inline void LinearMapping<2, 1> ::
+  alu_inline void LinearMapping<2, 1> ::
   calculateDeterminant(const map_t& local) const
   {
     // calculate length
@@ -1240,7 +1249,7 @@ namespace Dune {
   }
 
   template <int cdim, int mydim>
-  inline typename LinearMapping< cdim, mydim >::ctype
+  alu_inline typename LinearMapping< cdim, mydim >::ctype
   LinearMapping<cdim, mydim >::det( const map_t& local ) const
   {
     // return det if already calculated
@@ -1253,7 +1262,7 @@ namespace Dune {
   }
 
   template <int cdim, int mydim>
-  inline const typename LinearMapping<cdim, mydim> :: matrix_t&
+  alu_inline const typename LinearMapping<cdim, mydim> :: matrix_t&
   LinearMapping<cdim, mydim> ::
   jacobianTransposed(const map_t & local) const
   {
@@ -1261,7 +1270,7 @@ namespace Dune {
   }
 
   template <int cdim, int mydim>
-  inline const typename LinearMapping<cdim, mydim> :: inv_t&
+  alu_inline const typename LinearMapping<cdim, mydim> :: inv_t&
   LinearMapping<cdim, mydim> ::
   jacobianInverseTransposed(const map_t & local) const
   {
@@ -1275,7 +1284,7 @@ namespace Dune {
   }
 
   template <>
-  inline const LinearMapping<3, 0> :: inv_t&
+  alu_inline const LinearMapping<3, 0> :: inv_t&
   LinearMapping<3, 0> ::
   jacobianInverseTransposed(const map_t & local) const
   {
@@ -1283,11 +1292,141 @@ namespace Dune {
   }
 
   template <>
-  inline const LinearMapping<2, 0> :: inv_t&
+  alu_inline const LinearMapping<2, 0> :: inv_t&
   LinearMapping<2, 0> ::
   jacobianInverseTransposed(const map_t & local) const
   {
     return _invTransposed;
   }
 
+#if COMPILE_ALUGRID_LIB
+  // Instantiation
+  class TrilinearMapping ;
+  template void TrilinearMapping::buildMapping< TrilinearMapping::coord_t >
+    (const TrilinearMapping::coord_t& ,
+    const TrilinearMapping::coord_t& ,
+    const TrilinearMapping::coord_t& ,
+    const TrilinearMapping::coord_t& ,
+    const TrilinearMapping::coord_t& ,
+    const TrilinearMapping::coord_t& ,
+    const TrilinearMapping::coord_t& ,
+    const TrilinearMapping::coord_t& );
+  template void TrilinearMapping::buildMapping< TrilinearMapping::double_t >
+    (const TrilinearMapping::double_t& ,
+    const TrilinearMapping::double_t& ,
+    const TrilinearMapping::double_t& ,
+    const TrilinearMapping::double_t& ,
+    const TrilinearMapping::double_t& ,
+    const TrilinearMapping::double_t& ,
+    const TrilinearMapping::double_t& ,
+    const TrilinearMapping::double_t& );
+
+  class SurfaceNormalCalculator ;
+
+  template void SurfaceNormalCalculator::buildMapping< SurfaceNormalCalculator::coord3_t >
+    (const SurfaceNormalCalculator::coord3_t & ,
+    const SurfaceNormalCalculator::coord3_t & ,
+    const SurfaceNormalCalculator::coord3_t & ,
+    const SurfaceNormalCalculator::coord3_t & );
+
+  template void SurfaceNormalCalculator::buildMapping< SurfaceNormalCalculator::double3_t >
+    (const SurfaceNormalCalculator::double3_t & ,
+    const SurfaceNormalCalculator::double3_t & ,
+    const SurfaceNormalCalculator::double3_t & ,
+    const SurfaceNormalCalculator::double3_t & );
+
+  class BilinearSurfaceMapping ;
+
+  template void BilinearSurfaceMapping::buildMapping< BilinearSurfaceMapping::coord3_t >
+    (const BilinearSurfaceMapping::coord3_t & ,
+    const BilinearSurfaceMapping::coord3_t & ,
+    const BilinearSurfaceMapping::coord3_t & ,
+    const BilinearSurfaceMapping::coord3_t & );
+
+  template void BilinearSurfaceMapping::buildMapping< BilinearSurfaceMapping::double3_t >
+    (const BilinearSurfaceMapping::double3_t & ,
+    const BilinearSurfaceMapping::double3_t & ,
+    const BilinearSurfaceMapping::double3_t & ,
+    const BilinearSurfaceMapping::double3_t & );
+
+  template class LinearMapping<3, 3> ;
+  template void LinearMapping<3, 3>::buildMapping< LinearMapping<3, 3>::world_t >
+    ( const LinearMapping<3, 3>::world_t&,
+    const LinearMapping<3, 3>::world_t&,
+    const LinearMapping<3, 3>::world_t&,
+    const LinearMapping<3, 3>::world_t& );
+  template void LinearMapping<3, 3>::buildMapping< LinearMapping<3, 3>::double_t >
+    ( const LinearMapping<3, 3>::double_t&,
+    const LinearMapping<3, 3>::double_t&,
+    const LinearMapping<3, 3>::double_t&,
+    const LinearMapping<3, 3>::double_t& );
+
+  template class LinearMapping<3, 2> ;
+  template void LinearMapping<3, 2>::buildMapping< LinearMapping<3, 2>::world_t >
+    ( const LinearMapping<3, 2>::world_t&,
+    const LinearMapping<3, 2>::world_t&,
+    const LinearMapping<3, 2>::world_t&);
+  template void LinearMapping<3, 2>::buildMapping< LinearMapping<3, 2>::double_t >
+    ( const LinearMapping<3, 2>::double_t&,
+    const LinearMapping<3, 2>::double_t&,
+    const LinearMapping<3, 2>::double_t&);
+
+  template class LinearMapping<2, 2> ;
+  template void LinearMapping<2, 2>::buildMapping< LinearMapping<2, 2>::world_t >
+    ( const LinearMapping<2, 2>::world_t&,
+    const LinearMapping<2, 2>::world_t&,
+    const LinearMapping<2, 2>::world_t&);
+  template void LinearMapping<2, 2>::buildMapping< LinearMapping<2, 2>::double_t >
+    ( const LinearMapping<2, 2>::double_t&,
+    const LinearMapping<2, 2>::double_t&,
+    const LinearMapping<2, 2>::double_t&);
+
+  template class LinearMapping<3, 1> ;
+  template void LinearMapping<3, 1>::buildMapping< LinearMapping<3, 1>::world_t >
+    ( const LinearMapping<3, 1>::world_t&,
+    const LinearMapping<3, 1>::world_t& );
+  template void LinearMapping<3, 1>::buildMapping< LinearMapping<3, 1>::double_t >
+    ( const LinearMapping<3, 1>::double_t&,
+    const LinearMapping<3, 1>::double_t& );
+
+  template class LinearMapping<2, 1> ;
+  template void LinearMapping<2, 1>::buildMapping< LinearMapping<2, 1>::world_t >
+    ( const LinearMapping<2, 1>::world_t&,
+    const LinearMapping<2, 1>::world_t& );
+  template void LinearMapping<2, 1>::buildMapping< LinearMapping<2, 1>::double_t >
+    ( const LinearMapping<2, 1>::double_t&,
+    const LinearMapping<2, 1>::double_t& );
+  /// wtf?
+  template void LinearMapping<2, 1>::buildMapping< LinearMapping<3, 1>::world_t >
+    ( const LinearMapping<3, 1>::world_t&,
+    const LinearMapping<3, 1>::world_t& );
+
+  template class LinearMapping<3, 0> ;
+  template void LinearMapping<3, 0>::buildMapping< LinearMapping<3, 0>::double_t >
+    ( const LinearMapping<3, 0>::double_t& );
+  template void LinearMapping<3, 0>::buildMapping< LinearMapping<3, 0>::world_t >
+    ( const LinearMapping<3, 0>::world_t& );
+
+  template class LinearMapping<2, 0> ;
+  template void LinearMapping<2, 0>::buildMapping< LinearMapping<2, 0>::world_t >
+    ( const LinearMapping<2, 0>::world_t& );
+  template void LinearMapping<2, 0>::buildMapping< LinearMapping<2, 0>::double_t >
+    ( const LinearMapping<2, 0>::double_t& );
+
+  template class BilinearMapping< 2 > ;
+  template void BilinearMapping< 2 >::buildMapping< BilinearMapping< 2 >::world_t >
+    ( const BilinearMapping< 2 >::world_t&,
+    const BilinearMapping< 2 >::world_t&,
+    const BilinearMapping< 2 >::world_t&,
+    const BilinearMapping< 2 >::world_t& );
+
+  template class BilinearMapping< 3 > ;
+  template void BilinearMapping< 3 >::buildMapping< BilinearMapping< 3 >::world_t >
+    ( const BilinearMapping< 3 >::world_t&,
+    const BilinearMapping< 3 >::world_t&,
+    const BilinearMapping< 3 >::world_t&,
+    const BilinearMapping< 3 >::world_t& );
+#endif
+
 } // end namespace Dune
+#endif // end DUNE_ALUGRID_MAPPINGS_IMP_CC

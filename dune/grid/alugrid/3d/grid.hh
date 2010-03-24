@@ -32,7 +32,6 @@
 #include "indexsets.hh"
 #include "memory.hh"
 #include "datahandle.hh"
-#include "alu3dutility.hh"
 
 #include <dune/grid/alugrid/3d/lbdatahandle.hh>
 
@@ -102,8 +101,8 @@ namespace Dune {
     //! Type of the global id set
     typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
 #else
-    typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
-    //typedef LocalIdSetImp GlobalIdSetImp;
+    //typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
+    typedef LocalIdSetImp GlobalIdSetImp;
 #endif
 
     //! Type of the level index set
@@ -572,7 +571,7 @@ namespace Dune {
 
   public:
     /** \brief @copydoc Dune::Grid::comm() */
-    const CollectiveCommunicationType & comm () const { return ccobj_; }
+    const CollectiveCommunicationType& comm () const { return communications().ccobj_; }
 
     //! returns if a least one entity was marked for coarsening
     bool preAdapt ( );
@@ -654,8 +653,31 @@ namespace Dune {
     // return reference to org ALU3dGrid
     // private method, but otherwise we have to friend class all possible
     // types of LevelIterator ==> later
-    ALU3DSPACE GitterImplType& myGrid() const;
-    ALU3DSPACE GitterImplType* createALUGrid(const char *);
+    virtual ALU3DSPACE GitterImplType& myGrid() const;
+    virtual ALU3DSPACE GitterImplType* createALUGrid(const char *);
+
+    ALUGridVertexProjectionType* vertexProjection() { return (ALUGridVertexProjectionType *) vertexProjection_; }
+
+    // return appropriate ALUGrid builder
+    virtual typename ALU3DSPACE Gitter :: Geometric :: BuilderIF&
+    getBuilder() const
+    {
+      // create ALUGrid macro grid builder
+      typedef ALU3DSPACE Gitter :: Geometric :: BuilderIF BuilderIF;
+#if ALU3DGRID_PARALLEL
+      return dynamic_cast<BuilderIF &> (myGrid().containerPll());
+#else
+      return dynamic_cast<BuilderIF &> (myGrid().container());
+#endif
+    }
+
+    // helper function for factory
+    virtual void duneNotifyMacroGridChanges()
+    {
+#if ALU3DGRID_PARALLEL
+      myGrid().duneNotifyMacroGridChanges();
+#endif
+    }
 
     //! return reference to Dune reference element according to elType
     const ReferenceElementType & referenceElement() const { return referenceElement_; }
@@ -701,23 +723,9 @@ namespace Dune {
 
     // the real ALU grid
     mutable ALU3DSPACE GitterImplType * mygrid_;
-#if ALU3DGRID_PARALLEL
-    ALU3DSPACE MpAccessMPI mpAccess_;
-#endif
-
-    // collective comm, same as mpAccess_, only Peters "generic" (haha)version
-    CollectiveCommunicationType ccobj_;
-
   public:
     // number of links to other processors, for internal use only
-    int nlinks () const {
-#if ALU3DGRID_PARALLEL
-      return mpAccess_.nlinks();
-#else
-      // if no other processors exist then links is 0
-      return 0;
-#endif
-    }
+    int nlinks () const { return communications().nlinks(); }
 
   private:
     // max level of grid
@@ -730,9 +738,6 @@ namespace Dune {
     // at the moment the number of different geom types is 1
     enum { numberOfGeomTypes = 1 };
     std::vector< std::vector<GeometryType> > geomTypes_;
-
-    // create GeomTypes
-    void makeGeomTypes ();
 
     // our hierarchic index set
     HierarchicIndexSet hIndexSet_;
@@ -892,6 +897,31 @@ namespace Dune {
 
     // boundary projection for vertices
     ALUGridBoundaryProjectionType* vertexProjection_ ;
+
+    struct Communications
+    {
+      // collective comm, same as mpAccess_, only Peters "generic" (haha)version
+      CollectiveCommunicationType ccobj_;
+#if ALU3DGRID_PARALLEL
+      ALU3DSPACE MpAccessMPI mpAccess_;
+      Communications( MPICommunicatorType mpiComm )
+        : ccobj_( mpiComm ) , mpAccess_( mpiComm )
+      {}
+      int nlinks () const { return mpAccess_.nlinks(); }
+#else
+      Communications( MPICommunicatorType mpiComm ) {}
+      int nlinks () const { return 0; }
+#endif
+    };
+
+    const Communications& communications() const
+    {
+      assert( communications_ );
+      return *communications_;
+    }
+
+    // pointer to communications object
+    Communications* communications_;
   }; // end class ALU3dGrid
 
   template <class GridImp>
@@ -1014,6 +1044,8 @@ namespace Dune {
 
 } // end namespace Dune
 
-//#include "grid_imp.cc"
 #include "grid_inline.hh"
+#if COMPILE_ALUGRID_INLINE
+  #include "grid_imp.cc"
+#endif
 #endif

@@ -1,8 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// Of course, we would like to put this into the lib, but unfortunately HAVE_MPI
-// is unpredictable.
-//#include <config.h>
+#ifndef DUNE_ALU3DGRID_FACTORY_CC
+#define DUNE_ALU3DGRID_FACTORY_CC
 
 #include <algorithm>
 #include <cstdlib>
@@ -15,15 +14,23 @@
 
 #ifdef ENABLE_ALUGRID
 
+#if COMPILE_ALUGRID_INLINE
+#define alu_inline inline
+#else
+#define alu_inline
+#endif
+
 namespace Dune
 {
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   ALU3dGridFactory< ALUGrid > :: ~ALU3dGridFactory ()
   {}
 
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexType &pos )
   {
     if( rank_ != 0 )
@@ -34,6 +41,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   void ALU3dGridFactory< ALUGrid >
   :: insertElement ( const GeometryType &geometry,
                      const std::vector< unsigned int > &vertices )
@@ -53,6 +61,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   void ALU3dGridFactory< ALUGrid >
   :: insertBoundary ( const GeometryType &geometry,
                       const std::vector< unsigned int > &vertices,
@@ -83,6 +92,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   void ALU3dGridFactory< ALUGrid >
   ::insertBoundary ( const int element, const int face, const int id )
   {
@@ -100,6 +110,7 @@ namespace Dune
   }
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
   {
@@ -111,6 +122,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection ( const GeometryType &type,
                              const std::vector< unsigned int > &vertices,
@@ -184,12 +196,14 @@ namespace Dune
 #endif
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >::createGrid ()
   {
     return createGrid( true, true, "" );
   }
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
   ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
   {
@@ -197,6 +211,7 @@ namespace Dune
   }
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
   ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
@@ -320,12 +335,7 @@ namespace Dune
 
     // ALUGrid is taking ownership of bndProjections
     // and is going to delete this pointer
-    Grid *grid = (rank_ == 0) ?
-                 new Grid( communicator_, globalProjection_, bndProjections , name, grdVerbose_ ) :
-                 new Grid( communicator_ );
-
-    //Grid *grid = new Grid( globalProjection_, bndProjections , name , grdVerbose_ );
-
+    Grid* grid = createGridObj( bndProjections , name );
     assert( grid );
 
     // remove pointers
@@ -336,14 +346,13 @@ namespace Dune
     // insert grid using ALUGrid macro grid builder
     if( rank_ == 0 )
     {
-      ALU3DSPACE MacroGridBuilder mgb ( getBuilder(grid)
+      ALU3DSPACE MacroGridBuilder mgb ( grid->getBuilder()
 #ifdef ALUGRID_VERTEX_PROJECTION
-                                        , grid->myGrid().vertexProjection()
+                                        , grid->vertexProjection()
 #endif
                                         );
 
-      // now start writing grid
-      //
+      // now start inserting grid
       const int vxSize = vertices_.size();
       for( int vxIdx = 0; vxIdx < vxSize ; ++vxIdx )
       {
@@ -423,7 +432,7 @@ namespace Dune
 
 #ifdef ALUGRID_EXPORT_MACROGRID_CHANGES
     // make changes in macro grid known in every partition
-    grid->myGrid().duneNotifyMacroGridChanges();
+    grid->duneNotifyMacroGridChanges();
 #else
     if( grid->comm().size() > 1 )
       DUNE_THROW(NotImplemented,"ALUGrid factory not working in parallel right now!");
@@ -439,6 +448,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   void ALU3dGridFactory< ALUGrid >
   ::generateFace ( const ElementType &element, const int f, FaceType &face )
   {
@@ -454,6 +464,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   void
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
   {
@@ -500,6 +511,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
+  alu_inline
   void ALU3dGridFactory< ALUGrid >
   ::recreateBoundaryIds ( const int defaultId )
   {
@@ -554,8 +566,12 @@ namespace Dune
       insertBoundary( faceIt->second.first, faceIt->second.second, defaultId );
   }
 
+#if COMPILE_ALUGRID_LIB
   template class ALU3dGridFactory< ALUCubeGrid >;
   template class ALU3dGridFactory< ALUSimplexGrid >;
-}
-
 #endif
+}
+#endif // end ENABLE_ALUGRID
+#undef alu_inline
+
+#endif // end DUNE_ALU3DGRID_FACTORY_CC

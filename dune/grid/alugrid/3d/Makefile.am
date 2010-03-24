@@ -1,4 +1,4 @@
-libalu3d_la_CPPFLAGS = $(AM_CPPFLAGS)		\
+libalu3d_la_CPPFLAGS = $(AM_CPPFLAGS)	\
 	$(ALUGRID_CPPFLAGS)
 libalu3d_la_LDFLAGS = $(AM_LDFLAGS)		\
 	$(ALUGRID_LDFLAGS)
@@ -8,7 +8,7 @@ libalu3d_la_LIBADD = 				\
 
 noinst_LTLIBRARIES = libalu3d.la
 if ALUGRID
-  libalu3d_la_SOURCES = mappings.cc topology.cc faceutility.cc \
+  libalu3d_la_SOURCES = mappings.cc mappings_imp.cc topology.cc faceutility.cc \
                         alu3dgridfactory.cc grid_imp.cc
 else
   libalu3d_la_SOURCES = topology.cc
@@ -20,6 +20,6 @@ alu3dgrid_HEADERS = alu3dinclude.hh alu3dgridfactory.hh alu3dgridfactory.cc \
   mappings.hh mappings_imp.cc topology.hh entity.hh entity_imp.cc \
   faceutility.hh faceutility_imp.cc geometry.hh geometry_imp.cc \
   indexsets.hh iterator.hh iterator_imp.cc alu3diterators.hh \
-  alu3dutility.hh lbdatahandle.hh alugrid.hh capabilities.hh
+  lbdatahandle.hh alugrid.hh capabilities.hh
 
 include $(top_srcdir)/am/global-rules

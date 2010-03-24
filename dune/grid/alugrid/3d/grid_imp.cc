@@ -1,5 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#ifndef DUNE_ALUGRID_GRID_IMP_CC
+#define DUNE_ALUGRID_GRID_IMP_CC
+
 // Dune includes
 #include <dune/common/stdstreams.hh>
 
@@ -12,8 +15,8 @@
 
 namespace Dune {
 
-
   template <class GridType >
+  alu_inline
   void ALU3dGridVertexList ::
   setupVxList(const GridType & grid, int level)
   {
@@ -81,6 +84,7 @@ namespace Dune {
   }
 
   template <class GridType >
+  alu_inline
   void ALU3dGridLeafVertexList ::
   setupVxList(const GridType & grid)
   {
@@ -162,6 +166,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   ALU3dGrid<dim, dimworld, elType> & ALU3dGrid<dim, dimworld, elType>::operator = (const ALU3dGrid<dim, dimworld, elType> & g)
   {
     DUNE_THROW(GridError,"Do not use assignment operator of ALU3dGrid! \n");
@@ -169,8 +174,10 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   ALU3dGrid<dim, dimworld, elType>::~ALU3dGrid()
   {
+    delete communications_;
     delete vertexProjection_;
     //delete bndPrj_;
     if( bndVec_ )
@@ -198,6 +205,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   int ALU3dGrid<dim, dimworld, elType>::size(int level, int codim) const
   {
     // if we dont have this level return 0
@@ -221,28 +229,9 @@ namespace Dune {
 #endif
   }
 
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  void ALU3dGrid<dim, dimworld, elType>::makeGeomTypes()
-  {
-    if(elType == tetra)
-    {
-      // stored is the dim, where is the codim
-      for(int i=dim; i>= 0; i--)
-        geomTypes_[dim-i][0] = GeometryType(GeometryType::simplex,i);
-      return;
-    }
-    if(elType == hexa)
-    {
-      // stored is the dim, where is the codim
-      for(int i=dim; i>= 0; i--)
-        geomTypes_[dim-i][0] = GeometryType(GeometryType::cube,i);
-      return;
-    }
-    DUNE_THROW(GridError,"Geometrytype not implemented!");
-  }
-
   // --size
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   int ALU3dGrid<dim, dimworld, elType>::size(int level, GeometryType type) const
   {
     if(elType == tetra && !type.isSimplex()) return 0;
@@ -251,6 +240,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   int ALU3dGrid<dim, dimworld, elType>::size(int codim) const
   {
     assert( codim >= 0 );
@@ -261,6 +251,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   int ALU3dGrid<dim, dimworld, elType>::size(GeometryType type) const
   {
     if(elType == tetra && !type.isSimplex()) return 0;
@@ -269,6 +260,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   int ALU3dGrid<dim, dimworld, elType>::ghostSize(int codim) const
   {
     assert( codim >= 0 );
@@ -279,6 +271,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   int ALU3dGrid<dim, dimworld, elType>::ghostSize(int level, int codim) const
   {
     assert( codim >= 0 );
@@ -291,6 +284,7 @@ namespace Dune {
 
   // calc all necessary things that might have changed
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   void ALU3dGrid<dim, dimworld, elType>::setMaxLevel(int mxl)
   {
     maxlevel_ = std::max(maxlevel_,mxl);
@@ -298,6 +292,7 @@ namespace Dune {
 
   // calc all necessary things that might have changed
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   void ALU3dGrid<dim, dimworld, elType>::updateStatus()
   {
     calcMaxLevel();
@@ -305,6 +300,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   void ALU3dGrid<dim, dimworld, elType>::calcMaxLevel()
   {
     // old fashioned way
@@ -335,6 +331,7 @@ namespace Dune {
 
   // --calcExtras
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   void ALU3dGrid<dim, dimworld, elType>::calcExtras()
   {
     if(sizeCache_) delete sizeCache_;
@@ -371,6 +368,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   const typename ALU3dGrid<dim, dimworld, elType>::Traits :: LeafIndexSet &
   ALU3dGrid<dim, dimworld, elType>::leafIndexSet() const
   {
@@ -379,6 +377,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   const typename ALU3dGrid<dim, dimworld, elType>::Traits :: LevelIndexSet &
   ALU3dGrid<dim, dimworld, elType>::levelIndexSet( int level ) const
   {
@@ -393,6 +392,7 @@ namespace Dune {
 
   // global refine
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   void ALU3dGrid<dim, dimworld, elType>::globalRefine ( int refCount )
   {
     assert( (refCount + maxLevel()) < MAXL );
@@ -412,6 +412,7 @@ namespace Dune {
   // global refine
   template< int dim, int dimworld, ALU3dGridElementType elType >
   template< class GridImp, class DataHandle >
+  alu_inline
   void ALU3dGrid< dim, dimworld, elType >
   ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
@@ -429,6 +430,7 @@ namespace Dune {
 
   // preprocess grid
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   bool ALU3dGrid<dim, dimworld, elType>::preAdapt()
   {
     return (coarsenMarked_ > 0);
@@ -436,6 +438,7 @@ namespace Dune {
 
   // adapt grid
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   bool ALU3dGrid<dim, dimworld, elType>::adapt()
   {
     bool ref = false;
@@ -486,6 +489,7 @@ namespace Dune {
   // --adapt
   template< int dim, int dimworld, ALU3dGridElementType elType >
   template< class GridImp, class DataHandle >
+  alu_inline
   bool ALU3dGrid< dim, dimworld, elType >
   ::adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
@@ -553,6 +557,7 @@ namespace Dune {
 
   // post process grid
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   void ALU3dGrid<dim, dimworld, elType>::postAdapt()
   {
     {
@@ -583,6 +588,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   bool ALU3dGrid<dim, dimworld, elType>::
   writeGrid_Ascii(const std::string filename, alu3d_ctype time , bool scientific  ) const
   {
@@ -718,6 +724,7 @@ namespace Dune {
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
   template <GrapeIOFileFormatType ftype>
+  alu_inline
   bool ALU3dGrid<dim, dimworld, elType>::
   writeGrid(const std::string filename, alu3d_ctype time ) const
   {
@@ -732,6 +739,7 @@ namespace Dune {
 
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   bool ALU3dGrid<dim, dimworld, elType>::
   writeGrid_Xdr(const std::string filename, alu3d_ctype time ) const
   {
@@ -758,6 +766,7 @@ namespace Dune {
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
   template <GrapeIOFileFormatType ftype>
+  alu_inline
   bool ALU3dGrid<dim,dimworld, elType>::
   readGrid( const std::string filename, alu3d_ctype & time )
   {
@@ -821,6 +830,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   void ALU3dGrid<dim, dimworld, elType>::checkMacroGridFile(const std::string filename)
   {
     if(filename == "") return;
@@ -858,6 +868,7 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  alu_inline
   void ALU3dGrid<dim, dimworld, elType>::checkMacroGrid()
   {
     typedef ALU3DSPACE LevelIterator < ALU3DSPACE HElementType > IteratorType;
@@ -875,6 +886,7 @@ namespace Dune {
     }
   }
 
+  alu_inline
   const char * elType2Name( ALU3dGridElementType elType )
   {
     switch( elType )
@@ -886,8 +898,11 @@ namespace Dune {
     }
   }
 
+#if COMPILE_ALUGRID_LIB
   // Instantiation
   template class ALU3dGrid<3 ,3, hexa>;
   template class ALU3dGrid<3 ,3, tetra>;
+#endif
 
 } // end namespace Dune
+#endif // end DUNE_ALUGRID_GRID_IMP_CC

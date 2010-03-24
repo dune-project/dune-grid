@@ -3,6 +3,25 @@
 #ifndef DUNE_ALU3DINCLUDE_HH
 #define DUNE_ALU3DINCLUDE_HH
 
+//////////////////////////////////////////////////////////////////////
+// compile imp.cc into lib (1 yes, 0 no)
+// if you change this, you'll get what you deserve
+//////////////////////////////////////////////////////////////////////
+#define COMPILE_ALUGRID_LIB 0
+
+#if COMPILE_ALUGRID_LIB
+  #define COMPILE_ALUGRID_INLINE 0
+#else
+  #define COMPILE_ALUGRID_INLINE 1
+#endif
+
+#if COMPILE_ALUGRID_INLINE
+#define alu_inline inline
+#else
+#define alu_inline
+#endif
+/////////////////////////////////////////////////////////////////////
+
 // all methods and classes of the ALUGrid are defined in the namespace
 #define ALU3DSPACE ALUGridSpace ::
 
@@ -34,28 +53,24 @@
 namespace ALUGridSpace {
 
 #if ALU3DGRID_PARALLEL
-  typedef GatherScatter GatherScatterType;
-
   typedef GitterDunePll GitterType;
+  //typedef Gitter GitterType;
   typedef GitterDunePll GitterImplType;
 
-  typedef Hbnd3PllInternal<GitterType::Objects::Hbnd3Default,
-      BndsegPllBaseXClosure<GitterType::hbndseg3_GEO>,
-      BndsegPllBaseXMacroClosure<GitterType::hbndseg3_GEO> > :: micro_t MicroType;
-
-  // value for boundary to other processes
-  static const int ProcessorBoundary_t = GitterImplType::hbndseg_STI::closure;
-
+  typedef Hbnd3PllInternal<GitterImplType::Objects::Hbnd3Default,
+      BndsegPllBaseXClosure<GitterImplType::hbndseg3_GEO>,
+      BndsegPllBaseXMacroClosure<GitterImplType::hbndseg3_GEO> > :: micro_t MicroType;
 #else
-  typedef GatherScatter GatherScatterType;
-
   // the header
   typedef Gitter GitterType;
   typedef GitterDuneImpl GitterImplType;
-  typedef GitterType::hface_STI PLLFaceType;                     // Interface Face
-
 #endif
 
+  // value for boundary to other processes
+  static const int ProcessorBoundary_t = GitterType::hbndseg_STI::closure;
+
+  // general GatherScatter type
+  typedef GatherScatter GatherScatterType;
 
   // typedefs of Element types
   typedef GitterType::helement_STI HElementType;               // Interface Element
@@ -316,6 +331,22 @@ namespace Dune {
   };
 
   typedef ALU3dGridItemList ALU3dGridItemListType;
+
+  /////////////////////////////////////////////////////////////////////////
+  //  some helper functions
+  /////////////////////////////////////////////////////////////////////////
+
+  inline const ALU3dImplTraits<tetra>::GEOFaceType*
+  getFace(const ALU3DSPACE GEOTetraElementType& elem, int index) {
+    assert(index >= 0 && index < 4);
+    return elem.myhface3(ElementTopologyMapping<tetra>::dune2aluFace(index));
+  }
+
+  inline const ALU3dImplTraits<hexa>::GEOFaceType*
+  getFace(const ALU3DSPACE GEOHexaElementType& elem, int index) {
+    assert(index >= 0 && index < 6);
+    return elem.myhface4(ElementTopologyMapping<hexa>::dune2aluFace(index));
+  }
 
 } // end namespace Dune
 

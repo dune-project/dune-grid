@@ -1,10 +1,13 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#include "alu3dinclude.hh"
+
+//#if COMPILE_ALUGRID_INLINE_FILES
+
 #include "geometry.hh"
 #include "entity.hh"
 #include "grid.hh"
 #include "faceutility.hh"
-#include "alu3dutility.hh"
 
 #include <dune/common/misc.hh>
 
@@ -1181,3 +1184,5 @@ namespace Dune {
 
 
 } // end namespace Dune
+
+//#endif // COMPILE_ALUGRID_INLINE_FILES

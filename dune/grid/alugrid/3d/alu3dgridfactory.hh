@@ -77,7 +77,6 @@ namespace Dune
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
 
-    MPICommunicatorType communicator_;
     int rank_;
 
     VertexVector vertices_;
@@ -87,6 +86,8 @@ namespace Dune
     BoundaryProjectionMap boundaryProjections_;
     unsigned int numFacesInserted_;
     bool grdVerbose_;
+
+    MPICommunicatorType communicator_;
 
     // copy vertex numbers and store smalled #dimension ones
     inline void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
@@ -108,17 +109,13 @@ namespace Dune
       return rank;
     }
 
-    // return appropriate ALUGrid builder
-    inline typename ALU3DSPACE Gitter :: Geometric :: BuilderIF&
-    getBuilder(Grid * grid) const
+  private:
+    // return grid object
+    virtual Grid* createGridObj( BoundaryProjectionVector* bndProjections, const std::string& name ) const
     {
-      // create ALUGrid macro grid builder
-      typedef ALU3DSPACE Gitter :: Geometric :: BuilderIF BuilderIF;
-#if ALU3DGRID_PARALLEL
-      return dynamic_cast<BuilderIF &> (grid->myGrid().containerPll());
-#else
-      return dynamic_cast<BuilderIF &> (grid->myGrid().container());
-#endif
+      return (rank_ == 0) ?
+             new Grid( communicator_, globalProjection_, bndProjections , name, grdVerbose_ ) :
+             new Grid( communicator_ );
     }
 
   public:
@@ -388,11 +385,11 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                         bool removeGeneratedFile )
-    : communicator_( communicator ),
-      rank_( getRank(communicator_) ),
+    : rank_( getRank(communicator) ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
-      grdVerbose_( true )
+      grdVerbose_( true ),
+      communicator_( communicator )
   {}
 
   template< template< int, int > class ALUGrid >
@@ -400,11 +397,11 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const std::string &filename,
                         const MPICommunicatorType &communicator )
-    : communicator_( communicator ),
-      rank_( getRank(communicator_) ),
+    : rank_( getRank(communicator) ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
-      grdVerbose_( true )
+      grdVerbose_( true ),
+      communicator_( communicator )
   {}
 
 
@@ -458,12 +455,11 @@ namespace Dune
 #endif
   }
 
-
-
-
-
 }
 
 #endif // #ifdef ENABLE_ALUGRID
 
+#if COMPILE_ALUGRID_INLINE
+  #include "alu3dgridfactory.cc"
+#endif
 #endif

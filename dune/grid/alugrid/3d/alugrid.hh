@@ -345,4 +345,5 @@ namespace Dune
 
 #endif // #ifdef ENABLE_ALUGRID
 
+#undef alu_inline
 #endif
