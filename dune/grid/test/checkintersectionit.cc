@@ -449,8 +449,8 @@ void checkIntersectionIterator(const GridViewType& view,
   //       Therefore we only issue a warning.
   if( (sumNormal.two_norm() > 1e-8) && (eIt->partitionType() != Dune::GhostEntity) )
   {
-    std :: cout << "Warning: Integral over outer normals is nonzero: "
-                << sumNormal << std :: endl;
+    // std :: cout << "Warning: Integral over outer normals is nonzero: "
+    //             << sumNormal << std :: endl;
     ++errorState.sumNormalsNonZero;
   }
 
