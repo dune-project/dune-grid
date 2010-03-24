@@ -5,7 +5,7 @@
 
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/gridview.hh>
-#include <dune/grid/common/quadraturerules.hh>
+#include <dune/grid/common/quadraturerules/gaussquadrature.hh>
 #include <dune/common/forloop.hh>
 
 namespace Dune
@@ -26,7 +26,9 @@ namespace Dune
     else
       std::cerr << "Error: Incorrect number of corners (" << geometry.corners() << ", should be " << refElement.size( mydim ) << ")." << std::endl;
 
-    const QuadratureRule< double, mydim > &quadrature = QuadratureRules< double, mydim >::rule( geometry.type(), 2 );
+    typedef Dune::GenericGeometry::GaussPoints< double > Points;
+    typedef Dune::GenericGeometry::GenericQuadratureFactory< mydim, double, Points > QuadratureFactory;
+    const typename QuadratureFactory::Object &quadrature = *QuadratureFactory::create( geometry.type(), 2 );
     for( size_t i = 0; i < quadrature.size(); ++i )
     {
       const typename Geometry::LocalCoordinate &x = quadrature[ i ].position();
@@ -66,6 +68,7 @@ namespace Dune
         if( std::abs( geometry.volume() - refElement.volume()*geometry.integrationElement( x ) ) > 1e-8 )
           std::cerr << "Error: volume is not consistent with jacobianTransposed." << std::endl;
     }
+    QuadratureFactory::release( &quadrature );
 
     {
       // get reference element

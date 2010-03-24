@@ -5,7 +5,7 @@
 
 #include <cmath>
 
-#include <dune/grid/common/quadraturerules.hh>
+#include <dune/grid/common/quadraturerules/gaussquadrature.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 
 #include "checkgeometry.cc"
@@ -159,8 +159,6 @@ void checkIntersectionIterator(const GridViewType& view,
     //   This has to be zero.
     // //////////////////////////////////////////////////////////////////////
     const int interDim = Intersection::LocalGeometry::mydimension;
-    const QuadratureRule< double, interDim > &quad
-      = QuadratureRules< double, interDim >::rule( iIt->type(), 3 );
 
     typedef typename Intersection::Entity EntityType;
     typedef typename EntityType::EntityPointer EntityPointer;
@@ -301,6 +299,9 @@ void checkIntersectionIterator(const GridViewType& view,
       DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left hand side and global view!");
 
     // Use a quadrature rule as a set of test points
+    typedef Dune::GenericGeometry::GaussPoints< double > Points;
+    typedef Dune::GenericGeometry::GenericQuadratureFactory< interDim, double, Points > QuadratureFactory;
+    const typename QuadratureFactory::Object &quad = *QuadratureFactory::create( iIt->type(), 3 );
     for (size_t i=0; i<quad.size(); i++)
     {
       const typename LocalGeometry::LocalCoordinate &pt = quad[ i ].position();
@@ -392,6 +393,7 @@ void checkIntersectionIterator(const GridViewType& view,
       if( (globalPos - localPos).infinity_norm() > 1e-6 )
         DUNE_THROW( GridError, "entity.geometry().global( intersection.geometryInInside().global( x ) ) != intersection.geometry().global( x ) at x = " << quad[ i ].position() << "." );
     }
+    QuadratureFactory::release( &quad );
 
     if( (iIt->centerUnitOuterNormal() - iIt->unitOuterNormal( refFace.position( 0, 0 ) )).two_norm() > 1e-8 )
     {
@@ -417,9 +419,9 @@ void checkIntersectionIterator(const GridViewType& view,
 
       // (Ab)use a quadrature rule as a set of test points
       const int interDim = Intersection::LocalGeometry::mydimension;
-      const QuadratureRule<double, interDim>& quad
-        = QuadratureRules<double, interDim>::rule(intersectionNeighborLocal.type(), 2);
-
+      typedef Dune::GenericGeometry::GaussPoints< double > Points;
+      typedef Dune::GenericGeometry::GenericQuadratureFactory< interDim, double, Points > QuadratureFactory;
+      const typename QuadratureFactory::Object &quad = *QuadratureFactory::create( iIt->type(), 3 );
       for (size_t i=0; i<quad.size(); i++)
       {
         typename IntersectionGeometry::GlobalCoordinate globalPos = intersectionGlobal.global(quad[i].position());
@@ -429,6 +431,7 @@ void checkIntersectionIterator(const GridViewType& view,
           DUNE_THROW(GridError, "global( intersectionNeighborLocal(global() ) is not the same as intersectionGlobal.global() at " << quad[i].position() << "!");
 
       }
+      QuadratureFactory::release( &quad );
 
     }
 
