@@ -134,8 +134,9 @@ namespace Dune
      *  \tparam  linetype  basic geometry type to assign to a line
      *                     (either simplex or cube)
      *
-     *  \note This class will only be available up to 3D. After that, not all
-     *        geometries are simplices, pyramids, prisms or cubes.
+     *  \note After 3D not all geometries are simplices, pyramids, prisms or
+     *        cubes so that no meaningful GeometryType is available; therefore
+     *        none is returned.
      */
     template< unsigned int dim, GeometryType::BasicType linetype >
     struct DuneGeometryTypeProvider
@@ -147,7 +148,7 @@ namespace Dune
       static const unsigned int numTopologies = (1 << dimension);
 
     private:
-      GeometryType types_[ numTopologies / 2 ];
+      GeometryType types_[ (dimension>=1) ? numTopologies / 2 : numTopologies ];
 
       DuneGeometryTypeProvider ()
       {
