@@ -1,9 +1,13 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#ifndef DUNE_ALUGRID_GEOMETRY_IMP_CC
+#define DUNE_ALUGRID_GEOMETRY_IMP_CC
+
 #include <dune/grid/genericgeometry/conversion.hh>
 
 #include "grid.hh"
 #include "mappings.hh"
+#include "geometry.hh"
 
 namespace Dune {
   // --Geometry
@@ -30,7 +34,7 @@ namespace Dune {
   }
 
   template< int mydim, int cdim, class GridImp>
-  inline const FieldVector<alu3d_ctype, cdim>&
+  inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate&
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   operator[] (int i) const
   {
@@ -41,7 +45,7 @@ namespace Dune {
   }
 
   template< int mydim, int cdim, class GridImp>
-  inline FieldVector<alu3d_ctype, cdim>
+  inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   corner (int i) const
   {
@@ -50,29 +54,29 @@ namespace Dune {
 
 
   template< int mydim, int cdim, class GridImp>
-  inline FieldVector<alu3d_ctype, cdim>
+  inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate
   ALU3dGridGeometry<mydim, cdim, GridImp >::
-  global (const FieldVector<alu3d_ctype, mydim>& local) const
+  global (const LocalCoordinate& local) const
   {
-    FieldVector<alu3d_ctype, cdim> global;
+    GlobalCoordinate global;
     geoImpl_.mapping().map2world(local, global);
     return global;
   }
 
   template< int mydim, int cdim, class GridImp >
-  inline FieldVector<alu3d_ctype, mydim>
+  inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::LocalCoordinate
   ALU3dGridGeometry<mydim, cdim, GridImp >::
-  local (const FieldVector<alu3d_ctype, cdim>& global) const
+  local (const GlobalCoordinate& global) const
   {
-    FieldVector<alu3d_ctype, mydim> local;
+    LocalCoordinate local;
     geoImpl_.mapping().world2map(global, local);
     return local;
   }
 
   template< int mydim, int cdim, class GridImp>
-  inline alu3d_ctype
+  inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype
   ALU3dGridGeometry<mydim, cdim, GridImp >::
-  integrationElement (const FieldVector<alu3d_ctype, mydim>& local) const
+  integrationElement (const LocalCoordinate& local) const
   {
     return geoImpl_.mapping().det( local );
   }
@@ -81,7 +85,7 @@ namespace Dune {
   template<>
   inline alu3d_ctype
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, tetra> >::
-  integrationElement (const FieldVector<alu3d_ctype, 3>& local) const
+  integrationElement (const FieldVector<ctype, 3>& local) const
   {
     return 6.0 * volume_;
   }
@@ -89,7 +93,7 @@ namespace Dune {
   template<>
   inline alu3d_ctype
   ALU3dGridGeometry<0, 3, const ALU3dGrid<3, 3, hexa> >::
-  integrationElement (const FieldVector<alu3d_ctype, 0>& local) const
+  integrationElement (const FieldVector<ctype, 0>& local) const
   {
     return 1.0;
   }
@@ -97,7 +101,7 @@ namespace Dune {
   template<>
   inline alu3d_ctype
   ALU3dGridGeometry<0, 3, const ALU3dGrid<3, 3, tetra> >::
-  integrationElement (const FieldVector<alu3d_ctype, 0>& local) const
+  integrationElement (const FieldVector<ctype, 0>& local) const
   {
     return 1.0;
   }
@@ -126,16 +130,16 @@ namespace Dune {
   {
     enum { factor = Factorial<2>::factorial };
     // local vector does not affect the result
-    const FieldVector<alu3d_ctype, 2> dummy(0.0);
-    return integrationElement( dummy ) / ((alu3d_ctype) factor);
+    const FieldVector<ctype, 2> dummy(0.0);
+    return integrationElement( dummy ) / ((ctype) factor);
   }
 
   template<int mydim, int cdim, class GridImp>
-  inline alu3d_ctype
+  inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   volume () const
   {
-    return integrationElement(FieldVector<alu3d_ctype, mydim> (0.5));
+    return integrationElement(LocalCoordinate(0.5));
   }
 
   template< int mydim, int cdim, class GridImp>
@@ -147,17 +151,17 @@ namespace Dune {
   }
 
   template< int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<alu3d_ctype, cdim, mydim>&
+  inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::Jacobian&
   ALU3dGridGeometry<mydim, cdim, GridImp >::
-  jacobianInverseTransposed (const FieldVector<alu3d_ctype, mydim>& local) const
+  jacobianInverseTransposed (const LocalCoordinate & local) const
   {
     return geoImpl_.mapping().jacobianInverseTransposed( local );
   }
 
   template< int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<alu3d_ctype, mydim, cdim>&
+  inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::JacobianTransposed&
   ALU3dGridGeometry<mydim, cdim, GridImp >::
-  jacobianTransposed (const FieldVector<alu3d_ctype, mydim>& local) const
+  jacobianTransposed (const LocalCoordinate & local) const
   {
     return geoImpl_.mapping().jacobianTransposed( local );
   }
@@ -193,7 +197,7 @@ namespace Dune {
     {
       volume_ /= 6.0;
 #ifndef NDEBUG
-      FieldVector< alu3d_ctype, mydim> local( 0.0 );
+      LocalCoordinate local( 0.0 );
       assert( std::abs( 6.0 * volume_ - integrationElement( local ) ) < 1e-12 );
 #endif
     }
@@ -382,3 +386,4 @@ namespace Dune {
   }
 
 } // end namespace Dune
+#endif // end DUNE_ALUGRID_GEOMETRY_IMP_CC

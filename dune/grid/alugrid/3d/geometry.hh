@@ -68,6 +68,56 @@ namespace Dune
 
       typedef LinearMapping<cdim, dim> MappingType;
 
+      CoordinateMatrixType coord_;
+      MappingType liMap_;
+      bool builtMapping_;
+
+    public:
+      GeometryImpl() : coord_() , liMap_() , builtMapping_(false) {}
+      GeometryImpl(const GeometryImpl& other)
+        : coord_(other.coord_),
+          liMap_(other.liMap_),
+          builtMapping_(other.builtMapping_)
+      {}
+
+      // return coordinate vector
+      inline const CoordinateVectorType& operator [] (const int i) const
+      {
+        assert( i>=0 && i<corners_ );
+        return coord_[i];
+      }
+
+      inline MappingType& mapping()
+      {
+        if( builtMapping_ ) return liMap_;
+
+        liMap_.buildMapping( coord_[0] );
+        builtMapping_ = true ;
+        return liMap_;
+      }
+
+      // update vertex
+      template <class CoordPtrType>
+      inline void update(const CoordPtrType& p0)
+      {
+        assert( corners_ == 1 );
+        copy( p0, coord_[0] );
+      }
+    };
+
+    // geometry implementation for edges and vertices
+    template <int dummy, ALU3dGridElementType eltype>
+    class GeometryImpl<dummy,1,eltype> : public CoordVecCopy
+    {
+      using CoordVecCopy :: copy ;
+
+      enum { dim = 1 };
+      enum { corners_ = dim+1 };
+      //! the vertex coordinates
+      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
+
+      typedef LinearMapping<cdim, dim> MappingType;
+
       // for edges use LinearMapping<cdim, 1> here that has all features
       // implemented
 
@@ -110,14 +160,6 @@ namespace Dune
         builtMapping_ = false;
       }
 
-
-      // update vertex
-      template <class CoordPtrType>
-      inline void update(const CoordPtrType& p0)
-      {
-        assert( corners_ == 1 );
-        copy( p0, coord_[0] );
-      }
     };
 
     // geom impl for simplex faces (triangles)
@@ -511,8 +553,22 @@ namespace Dune
     template GeometryImpl<0, mydim, elementType > GeometryImplType;
 
   public:
+    typedef typename GridImp :: ctype ctype;
+
+    //! type of local coordinates
+    typedef FieldVector<ctype, mydim> LocalCoordinate;
+
+    //! type of the global coordinates
+    typedef FieldVector<ctype, cdim > GlobalCoordinate;
+
+    //! type of jacobian (also of jacobian inverse transposed)
+    typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
+
+    //! type of jacobian transposed
+    typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
+
     // type of coordinate matrix for faces
-    typedef FieldMatrix<alu3d_ctype,
+    typedef FieldMatrix<ctype,
         EntityCount< elementType > :: numVerticesPerFace , 3> FaceCoordinatesType;
 
     //! for makeRefGeometry == true a Geometry with the coordinates of the
@@ -527,34 +583,34 @@ namespace Dune
     int corners () const;
 
     //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<alu3d_ctype, cdim>& operator[] (int i) const;
+    const GlobalCoordinate& operator[] (int i) const;
 
     //! access to coordinates of corners. Index is the number of the corner
-    FieldVector<alu3d_ctype, cdim> corner (int i) const;
+    GlobalCoordinate corner (int i) const;
 
     //! maps a local coordinate within reference element to
     //! global coordinate in element
-    FieldVector<alu3d_ctype, cdim> global (const FieldVector<alu3d_ctype, mydim>& local) const;
+    GlobalCoordinate global (const LocalCoordinate& local) const;
 
     //! maps a global coordinate within the element to a
     //! local coordinate in its reference element
-    FieldVector<alu3d_ctype,  mydim> local (const FieldVector<alu3d_ctype, cdim>& global) const;
+    LocalCoordinate local (const GlobalCoordinate& global) const;
 
     //! A(l) , see grid.hh
-    alu3d_ctype integrationElement (const FieldVector<alu3d_ctype, mydim>& local) const;
+    ctype integrationElement (const LocalCoordinate& local) const;
 
     //! can only be called for dim=dimworld! (Trivially true, since there is no
     //! other specialization...)
-    const FieldMatrix<alu3d_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<alu3d_ctype, mydim>& local) const;
+    const Jacobian& jacobianInverseTransposed (const LocalCoordinate& local) const;
 
     //! jacobian transposed
-    const FieldMatrix<alu3d_ctype,mydim,cdim>& jacobianTransposed (const FieldVector<alu3d_ctype, mydim>& local) const;
+    const JacobianTransposed& jacobianTransposed (const LocalCoordinate& local) const;
 
     //! returns true if mapping is affine
     inline bool affine () const;
 
     //! returns volume of geometry
-    alu3d_ctype volume () const;
+    ctype volume () const;
 
     //***********************************************************************
     //!  Methods that not belong to the Interface, but have to be public
@@ -593,7 +649,7 @@ namespace Dune
     // implementation of coord and mapping
     mutable GeometryImplType geoImpl_;
     // volume
-    mutable alu3d_ctype volume_;
+    mutable ctype volume_;
   };
 
 } // end namespace Dune
