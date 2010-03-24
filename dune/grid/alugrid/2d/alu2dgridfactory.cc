@@ -527,7 +527,7 @@ namespace Dune
         if( nbpos != faceMap.end() )
         {
           id = -periodicBndId;
-          if( periodicNeighborMap_.find( nbpos->first ) )
+          if( periodicNeighborMap_.find( nbpos->first ) != periodicNeighborMap_.end() )
             DUNE_THROW( GridError, "One boundary segment can only identified with one other." );
           periodicNeighborMap_[ nbpos->first ] = boundaryIds_.size();
         }
@@ -555,7 +555,7 @@ namespace Dune
         if( nbpos != faceMap.end() )
         {
           id = -periodicBndId;
-          if( periodicNeighborMap_.find( nbpos->first ) )
+          if( periodicNeighborMap_.find( nbpos->first ) != periodicNeighborMap_.end() )
             DUNE_THROW( GridError, "One boundary segment can only identified with one other." );
           periodicNeighborMap_[ nbpos->first ] = boundaryIds_.size();
         }
