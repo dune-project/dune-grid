@@ -653,20 +653,31 @@ namespace Dune {
   template< int cdim >
   alu_inline void BilinearMapping< cdim >::world2map ( const world_t &w, map_t &m ) const
   {
-    ctype error;
+    world_t dw;
+    m[0] = m[1] = 0.5;
+    map2world( m, dw );
+    dw -= w;
+
+    double step;
     do {
-      world_t dw;
-      map2world( m, dw );
-      dw -= w;
+      step = 0;
+      for( int j = 0; j < 2; ++j )
+      {
+        world_t d;
+        for( int i = 0; i < cdim; ++i )
+          d[i] = _b [j+1][i] + m[1-j] * _b [3][i];
+        const ctype dd = d*d;
+        if( dd < ALUnumericEpsilon*ALUnumericEpsilon )
+          continue;
 
-      inverse( m );
-
-      map_t dm;
-      invTransposed_.mtv( dw, dm );
-      error = dm.two_norm2();
-      m -= dm;
+        const ctype alpha = -(dw*d) / dd;
+        dw.axpy( alpha, d );
+        m[j] += alpha;
+        step += std::abs( alpha );
+      }
     }
-    while( error > ALUnumericEpsilon ); // * ALUnumericEpsilon );
+    while( step > ALUnumericEpsilon );
+    //while( dw.two_norm2() > ALUnumericEpsilon*ALUnumericEpsilon );
   }
 
 
