@@ -192,6 +192,7 @@ namespace Dune {
       ghost_      = org.ghost_;
       innerLevel_ = org.innerLevel_;
       index_      = org.index_;
+      done_       = org.done_;
       connector_.updateFaceInfo(org.connector_.face(),innerLevel_,
                                 item_->twist(ElementTopo::dune2aluFace(index_)));
       geoProvider_.resetFaceGeom();
@@ -199,6 +200,7 @@ namespace Dune {
     else {
       done();
     }
+    assert( equals(org) );
   }
 
   // check whether entities are the same or whether iterator is done
