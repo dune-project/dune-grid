@@ -1092,11 +1092,6 @@ namespace Dune
         DUNE_THROW( DGFException,
                     "Too few coordinates for point p0 in IntervalBlock" );
       }
-      else if( dimw_ > 3 )
-      {
-        DUNE_THROW( DGFException,
-                    "Interval block only implemented for dimension 1,2, and 3" );
-      }
 
       reset();
       while( next() ) ;
