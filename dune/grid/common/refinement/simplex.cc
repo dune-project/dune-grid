@@ -252,6 +252,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/grid/common/geometry.hh>
 #include "base.cc"
 
 namespace Dune {
