@@ -16,16 +16,14 @@
 namespace Dune
 {
   template< template< int, int > class ALUGrid, int dimw >
-  ALU2dGridFactory<ALUGrid,dimw>
-  :: ALU2dGridFactory ( bool removeGeneratedFile )
+  ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( bool removeGeneratedFile )
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
       grdVerbose_( true )
   {}
 
   template< template< int, int > class ALUGrid, int dimw >
-  ALU2dGridFactory<ALUGrid,dimw>
-  :: ALU2dGridFactory ( const std::string &filename )
+  ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( const std::string &filename )
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
       grdVerbose_( true )
@@ -33,21 +31,21 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid, int dimw >
-  ALU2dGridFactory<ALUGrid,dimw> :: ~ALU2dGridFactory ()
+  ALU2dGridFactory< ALUGrid, dimw >::~ALU2dGridFactory ()
   {}
 
 
   template< template< int, int > class ALUGrid, int dimw >
-  void ALU2dGridFactory<ALUGrid,dimw> :: insertVertex ( const VertexType &pos )
+  void ALU2dGridFactory< ALUGrid, dimw >::insertVertex ( const VertexType &pos )
   {
     vertices_.push_back( pos );
   }
 
 
   template< template< int, int > class ALUGrid, int dimw >
-  void ALU2dGridFactory<ALUGrid,dimw>
-  :: insertElement ( const GeometryType &geometry,
-                     const std::vector< unsigned int > &vertices )
+  void ALU2dGridFactory< ALUGrid, dimw >
+  ::insertElement ( const GeometryType &geometry,
+                    const std::vector< unsigned int > &vertices )
   {
     switch (elementType)
     {
@@ -435,13 +433,9 @@ namespace Dune
     const TrafoIterator trend = faceTransformations_.end();
     for( TrafoIterator trit = faceTransformations_.begin(); trit != trend; ++trit )
     {
-      const WorldMatrix &matrix = trit->first;
-      const WorldVector &shift = trit->second;
-
       WorldVector w[ 2 ];
-      w[ 0 ] = w[ 1 ] = shift;
-      matrix.umv( v[ 0 ], w[ 0 ] );
-      matrix.umv( v[ 1 ], w[ 1 ] );
+      w[ 0 ] = trit->evaluate( v[ 0 ] );
+      w[ 1 ] = trit->evaluate( v[ 1 ] );
 
       const FaceIterator fend = faceMap.end();
       for( FaceIterator fit = faceMap.begin(); fit != fend; ++fit )
@@ -454,9 +448,8 @@ namespace Dune
           return fit;
 
         WorldVector ww[ 2 ];
-        ww[ 0 ] = ww[ 1 ] = shift;
-        matrix.umv( vv[ 0 ], ww[ 0 ] );
-        matrix.umv( vv[ 1 ], ww[ 1 ] );
+        ww[ 0 ] = trit->evaluate( vv[ 0 ] );
+        ww[ 1 ] = trit->evaluate( vv[ 1 ] );
 
         if( ((v[ 0 ] - ww[ 0 ]).two_norm() < 1e-8) && ((v[ 1 ] - ww[ 1 ]).two_norm() < 1e-8) )
           return fit;

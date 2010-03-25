@@ -11,6 +11,7 @@
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/alugrid/2d/grid.hh>
+#include <dune/grid/alugrid/2d/transformation.hh>
 
 namespace Dune
 {
@@ -53,10 +54,12 @@ namespace Dune
     static const int periodicBndId = ALU2dImplTraits< dimensionworld, elementType >::HBndElType::general_periodic;
 
   public:
+    typedef ALU2dTransformation< dimensionworld > Transformation;
+
     //! type of vector for world coordinates
-    typedef FieldVector< ctype, dimensionworld > WorldVector;
+    typedef typename Transformation::WorldVector WorldVector;
     //! type of matrix from world coordinates to world coordinates
-    typedef FieldMatrix< ctype, dimensionworld, dimensionworld > WorldMatrix;
+    typedef typename Transformation::WorldMatrix WorldMatrix;
 
   private:
     struct FaceLess;
@@ -70,7 +73,7 @@ namespace Dune
 
     typedef std::pair< unsigned int, int > SubEntity;
     typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
-    typedef std::vector< std::pair< WorldMatrix, WorldVector > > FaceTransformationVector;
+    typedef std::vector< Transformation > FaceTransformationVector;
     typedef std::map< FaceType, unsigned int, FaceLess > PeriodicNeighborMap;
 
     VertexVector vertices_;
@@ -190,7 +193,7 @@ namespace Dune
      */
     void insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
     {
-      faceTransformations_.push_back( std::make_pair( matrix, shift ) );
+      faceTransformations_.push_back( Transformation( matrix, shift ) );
     }
 
     virtual unsigned int
