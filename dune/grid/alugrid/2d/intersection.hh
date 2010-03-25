@@ -11,6 +11,7 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
 
+#include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/alugrid/2d/entity.hh>
 
 namespace Dune
@@ -39,6 +40,44 @@ namespace Dune
   class ALU2dGridLeafIterator;
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid;
+
+
+
+  // ALU2DIntersectionGeometryStorage
+  // --------------------------------
+
+  template< class LocalGeometry, class LocalGeometryImp >
+  class ALU2DIntersectionGeometryStorage
+  {
+    typedef ALU2DIntersectionGeometryStorage< LocalGeometry, LocalGeometryImp > ThisType;
+
+    // one geometry for each face and twist 0 and 1
+    LocalGeometry* geoms_[ 2 ][ 4 ][ 2 ];
+
+  private:
+    ALU2DIntersectionGeometryStorage ();
+
+  public:
+    ~ALU2DIntersectionGeometryStorage ();
+
+    // return reference to local geometry
+    const LocalGeometry& localGeom(const int aluFace, const int twist, const int corners) const
+    {
+      assert( corners == 3 || corners == 4 );
+      assert( 0 <= aluFace && aluFace < corners );
+      assert( twist == 0 || twist == 1 );
+      assert( geoms_[ corners-3 ][ aluFace ][ twist ] );
+      return *geoms_[ corners-3 ][ aluFace ][ twist ];
+    }
+
+    // return static instance
+    static const ThisType &instance ()
+    {
+      static const ThisType geomStorage;
+      return geomStorage;
+    }
+  };
+
 
 
   //**********************************************************************
@@ -168,10 +207,6 @@ namespace Dune
   public:
     //! The default Constructor , creating an empty ALU2dGridIntersectionIterator
     ALU2dGridIntersectionBase(const GridImp & grid, int wLevel);
-
-    //! The default Constructor , level tells on which level we want
-    //! neighbours
-    ALU2dGridIntersectionBase(const GridImp & grid, const HElementType* el, int wLevel, bool end=true);
 
     //! The copy constructor
     ALU2dGridIntersectionBase(const ThisType & org);
@@ -355,8 +390,8 @@ namespace Dune
 
     void addNeighboursToStack();
 
-    int getOppositeInFather(int nrInChild, int nrOfChild) const;
-    int getOppositeInChild(int nrInFather, int nrOfChild) const;
+    static int getOppositeInFather ( int nrInChild, int nrOfChild );
+    static int getOppositeInChild ( int nrInFather, int nrOfChild );
 
     void setupIntersection ();
 

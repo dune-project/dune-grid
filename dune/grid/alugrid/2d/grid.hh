@@ -35,8 +35,6 @@
 
 namespace Dune {
 
-  typedef double alu2d_ctype;
-
   // Forward declarations
   template<int cd, int dim, class GridImp>
   class ALU2dGridEntity;
@@ -309,7 +307,6 @@ namespace Dune {
 
 #ifdef ALUGRID_VERTEX_PROJECTION
     //! type of ALUGrid Vertex Projection Interface
-    //typedef ALU2DSPACE ProjectVertex_t ALUGridVertexProjectionType;
     typedef ALU2DSPACE VertexProjection< dimworld > ALUGridVertexProjectionType;
 #endif
 

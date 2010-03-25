@@ -21,26 +21,6 @@ namespace Dune
   //
   //********************************************************************
 
-  //! Constructor
-  template<class GridImp>
-  inline ALU2dGridIntersectionBase<GridImp> ::
-  ALU2dGridIntersectionBase(const GridImp & grid, const HElementType* el, int wLevel, bool end) :
-    intersectionGlobal_(GeometryImp()),
-    intersectionSelfLocal_(LocalGeometryImp()),
-    intersectionNeighborLocal_(LocalGeometryImp()),
-    grid_(grid),
-    localGeomStorage_( LocalGeometryStorageType :: instance() ),
-    walkLevel_(wLevel)
-  {
-    if (!end)
-    {
-      assert(walkLevel_ >= 0);
-      setFirstItem(*el,wLevel);
-    }
-    else
-      done( el );
-  }
-
   //constructor for end iterator
   template<class GridImp>
   inline ALU2dGridIntersectionBase<GridImp> ::
@@ -364,8 +344,8 @@ namespace Dune
   //! Constructor
   template<class GridImp>
   inline ALU2dGridLevelIntersectionIterator<GridImp> ::
-  ALU2dGridLevelIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end) :
-    ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(grid, el, wLevel, end)
+  ALU2dGridLevelIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end)
+    : ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase( grid, wLevel )
   {
     if (!end)
     {
@@ -401,26 +381,6 @@ namespace Dune
   }
 
 
-  template<class GridImp>
-  inline int ALU2dGridLevelIntersectionIterator<GridImp> ::
-  getOppositeInFather(const int nrInChild, const int nrOfChild) const
-  {
-    int ret = (nrInChild==0) ? (2-nrOfChild) :
-              ((nrInChild-nrOfChild==2 || nrInChild-nrOfChild==0) ? -1 : 0);
-    assert(ret >= -1 && ret < 3);
-    return ret;
-  }
-
-  template<class GridImp>
-  inline int ALU2dGridLevelIntersectionIterator<GridImp> ::
-  getOppositeInChild(const int nrInFather, const int nrOfChild) const
-  {
-    int ret = (nrInFather==0) ? (nrOfChild+1) :
-              ((nrInFather-nrOfChild==1) ? -1 : 0);
-    assert( ret >= -1 && ret < 3 );
-    return ret;
-  }
-
   //! increment iterator
   template<class GridImp>
   inline void ALU2dGridLevelIntersectionIterator<GridImp> :: increment ()
@@ -431,100 +391,6 @@ namespace Dune
   #endif
   }
 
-  //! increment iterator
-  template<class GridImp>
-  inline void ALU2dGridLevelIntersectionIterator<GridImp> :: doIncrement ()
-  {
-    assert( current.index_ < current.nFaces() );
-
-    this->unsetUp2Date();
-
-    if( nbStack_.empty() )
-    {
-      ++current.index_;
-      if( current.index_ >= current.nFaces() )
-      {
-        assert( current.index_ == current.nFaces() );
-        return;
-      }
-
-      addNeighboursToStack();
-      // if more then one element in stack we have non-conform intersection
-      current.useOutside_ = (nbStack_.size() > 1);
-
-      if( nbStack_.empty() )
-        return current.setOutside( 0, -1 );
-    }
-
-    setupIntersection();
-
-    assert( !current.outside() || (current.outside()->level() == walkLevel_) );
-  }
-
-
-  template< class GridImp >
-  inline void
-  ALU2dGridLevelIntersectionIterator< GridImp >::addNeighboursToStack ()
-  {
-    assert( current.index_ < current.nFaces() );
-
-    ThinelementType *neighbor = current.inside()->neighbour( current.index_ );
-    assert( neighbor );
-
-    IntersectionInfo info;
-    if( neighbor->thinis( ThinelementType::bndel_like ) )
-    {
-      HBndElType *bndel = (HBndElType *)neighbor;
-      if( bndel->type() != HBndElType::periodic )
-        return;
-
-      PeriodicBndElType *bndnb = ((PeriodicBndElType *)bndel)->periodic_nb;
-      assert( bndnb && bndnb->neighbour( 0 ) && bndnb->neighbour( 0 )->thinis( ThinelementType::element_like ) );
-      info.first = (HElementType *)bndnb->neighbour( 0 );
-      info.second = bndnb->opposite( 0 );
-    }
-    else
-    {
-      assert( neighbor->thinis( ThinelementType::element_like ) );
-      info.first = (HElementType *)neighbor;
-      info.second = current.inside()->opposite( current.index_ );
-    }
-    assert( info.first );
-
-    while( info.first->level() > walkLevel_ )
-    {
-      info.second = getOppositeInFather( info.second, info.first->childNr() );
-      assert( (info.second >= 0) && (info.second < current.nFaces()) );
-      info.first = info.first->father();
-    }
-
-    if( info.first->level() >= walkLevel_ )
-    {
-      nbStack_.push( info );
-      return;
-    }
-
-    // why should we go up, here?
-    while( info.first && (info.first->level() < walkLevel_ - 1) )
-    {
-      info.second = getOppositeInFather( info.second, info.first->childNr() );
-      assert( (info.second >= 0) && (info.second < current.nFaces()) );
-      info.first = info.first->father();
-    }
-
-    if( info.first )
-    {
-      assert( info.first->level() == walkLevel_ - 1 );
-
-      const int opposite = info.second;
-      for( info.first = info.first->down(); info.first; info.first = info.first->next() )
-      {
-        info.second = getOppositeInChild( opposite, info.first->childNr() );
-        if( info.second != -1 )
-          nbStack_.push( info );
-      }
-    }
-  }
 
   //! reset IntersectionIterator to first neighbour
   template<class GridImp>
@@ -538,37 +404,6 @@ namespace Dune
   #endif
   }
 
-  //! reset IntersectionIterator to first neighbour
-  template<class GridImp>
-  inline void ALU2dGridLevelIntersectionIterator<GridImp> :: setFirstItem(const HElementType & elem, int wLevel)
-  {
-    // empty stack first
-    while( ! nbStack_.empty() )
-      nbStack_.pop();
-
-    current.setInside( const_cast< HElementType * >( &elem ) );
-    current.index_ = -1;
-    current.setOutside( 0, -1 );
-
-    walkLevel_ = wLevel;
-
-    assert( current.inside() );
-
-    increment();
-  }
-
-
-  template< class GridImp >
-  inline void ALU2dGridLevelIntersectionIterator< GridImp >::setupIntersection ()
-  {
-    assert( !nbStack_.empty() );
-
-    IntersectionInfo &info = nbStack_.top();
-    current.setOutside( info.first, info.second );
-    nbStack_.pop();
-  }
-
-
   //********************************************************************
   //
   //  --ALU2dGridLeafIntersectionIterator
@@ -580,8 +415,8 @@ namespace Dune
   // Constructor
   template<class GridImp>
   inline ALU2dGridLeafIntersectionIterator<GridImp> ::
-  ALU2dGridLeafIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end) :
-    ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(grid, el, wLevel, end)
+  ALU2dGridLeafIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end)
+    : ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase( grid, wLevel )
   {
     if (!end)
     {

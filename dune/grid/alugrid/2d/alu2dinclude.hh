@@ -4,6 +4,12 @@
 #define DUNE_ALU2DGRID_INCLUDE_HH
 
 #include <alugrid_2d.h>
+
+// fix for ALUGrid 1.22, where ALUGRID_VERTEX_PROJECTION is defined only in alugrid_serial.h
+#ifndef ALUGRID_VERTEX_PROJECTION
+#include <alugrid_serial.h>
+#endif
+
 #define ALU2DSPACE ALUGridSpace ::
 #define ALU2DSPACENAME ALUGridSpace
 
@@ -35,6 +41,10 @@ namespace ALU2DSPACENAME
 
 namespace Dune
 {
+
+  typedef double alu2d_ctype;
+
+
 
   // ALU2dImplInterface
   // ------------------

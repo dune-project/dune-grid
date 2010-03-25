@@ -7,7 +7,7 @@
 #include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>
 
-// alugrid mappings
+#include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/alugrid/3d/mappings.hh>
 
 namespace Dune
@@ -630,68 +630,6 @@ namespace Dune
 
     //! is true if geom is up2date
     mutable bool up2Date_;
-  };
-
-
-  template <class LocalGeometry, class LocalGeometryImp>
-  class ALU2DIntersectionGeometryStorage
-  {
-    // one geometry for each face and twist 0 and 1
-    LocalGeometry* geoms_[ 2 ][ 4 ][ 2 ];
-
-  protected:
-    // create empty storage
-    ALU2DIntersectionGeometryStorage ()
-    {
-      for( int i=0; i<4; ++i)
-      {
-        for( int j=0; j<2; ++j)
-        {
-          LocalGeometryImp geo;
-          if ( i < 3 )
-          {
-            // build geometry
-            geo.buildLocalGeometry( i, j, 3 );
-            // create dune geoemtry
-            geoms_[ 0 ][ i ][ j ] = new LocalGeometry( geo );
-          } else geoms_[0][3][j] = 0;
-
-          // build geometry
-          geo.buildLocalGeometry( i, j, 4 );
-          // create dune geoemtry
-          geoms_[ 1 ][ i ][ j ] = new LocalGeometry( geo );
-        }
-      }
-    }
-
-  public:
-    // destructor
-    ~ALU2DIntersectionGeometryStorage()
-    {
-      for( size_t k=0; k<2; ++k)
-        for( size_t i=0; i<4; ++i)
-          for( size_t j=0; j<2; ++j)
-            delete geoms_[ k ][ i ][ j ];
-    }
-
-    typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp> ThisType;
-
-    // return reference to local geometry
-    const LocalGeometry& localGeom(const int aluFace, const int twist, const int corners) const
-    {
-      assert( corners == 3 || corners == 4 );
-      assert( 0 <= aluFace && aluFace < corners );
-      assert( twist == 0 || twist == 1 );
-      assert( geoms_[ corners-3 ][ aluFace ][ twist ] );
-      return *geoms_[ corners-3 ][ aluFace ][ twist ];
-    }
-
-    // return static instance
-    static const ThisType& instance()
-    {
-      static const ThisType geomStorage;
-      return geomStorage;
-    }
   };
 
 } // end namespace Dune

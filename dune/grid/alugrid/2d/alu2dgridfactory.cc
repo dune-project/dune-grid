@@ -1,8 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// Of course, we would like to put this into the lib, but unfortunately HAVE_MPI
-// is unpredictable.
-//#include <config.h>
+#include <config.h>
 
 #include <algorithm>
 #include <cstdlib>
@@ -12,28 +10,10 @@
 #include <fstream>
 
 #include <dune/grid/alugrid/2d/alu2dgridfactory.hh>
+#include <dune/grid/alugrid/2d/alugrid.hh>
 
 namespace Dune
 {
-  template< template< int, int > class ALUGrid, int dimw >
-  ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( bool removeGeneratedFile )
-    : globalProjection_ ( 0 ),
-      numFacesInserted_ ( 0 ),
-      grdVerbose_( true )
-  {}
-
-  template< template< int, int > class ALUGrid, int dimw >
-  ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( const std::string &filename )
-    : globalProjection_ ( 0 ),
-      numFacesInserted_ ( 0 ),
-      grdVerbose_( true )
-  {}
-
-
-  template< template< int, int > class ALUGrid, int dimw >
-  ALU2dGridFactory< ALUGrid, dimw >::~ALU2dGridFactory ()
-  {}
-
 
   template< template< int, int > class ALUGrid, int dimw >
   void ALU2dGridFactory< ALUGrid, dimw >::insertVertex ( const VertexType &pos )
@@ -47,7 +27,7 @@ namespace Dune
   ::insertElement ( const GeometryType &geometry,
                     const std::vector< unsigned int > &vertices )
   {
-    switch (elementType)
+    switch( elementType )
     {
     case ALU2DSPACE triangle :
       if( !geometry.isTriangle() )
@@ -62,8 +42,8 @@ namespace Dune
     default :
       assert( geometry.isSimplex() || geometry.isCube() );
     }
-    if ( (geometry.isSimplex() && vertices.size() != 3) ||
-         (geometry.isCube() && vertices.size() != 4) )
+    if( (geometry.isSimplex() && (vertices.size() != 3))
+        || (geometry.isCube() && (vertices.size() != 4)) )
       DUNE_THROW( GridError, "Wrong number of vertices." );
 
     elements_.push_back( vertices );
@@ -71,10 +51,10 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid, int dimw >
-  void ALU2dGridFactory<ALUGrid,dimw>
-  :: insertBoundary ( const GeometryType &geometry,
-                      const std::vector< unsigned int > &vertices,
-                      const int id )
+  void ALU2dGridFactory< ALUGrid, dimw >
+  ::insertBoundary ( const GeometryType &geometry,
+                     const std::vector< unsigned int > &vertices,
+                     const int id )
   {
     // lines can be either cube or simplex
     assert( geometry.isSimplex() || geometry.isCube() );
@@ -98,7 +78,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid, int dimw >
-  void ALU2dGridFactory<ALUGrid,dimw>
+  void ALU2dGridFactory< ALUGrid, dimw >
   ::insertBoundary ( const int element, const int face, const int id )
   {
     if( (element < 0) || (element >= (int)elements_.size()) )
@@ -110,9 +90,10 @@ namespace Dune
     boundaryIds_.push_back( boundaryId );
   }
 
+
   template< template< int, int > class ALUGrid, int dimw >
-  void ALU2dGridFactory< ALUGrid,dimw > ::
-  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
+  void ALU2dGridFactory< ALUGrid, dimw >
+  ::insertBoundaryProjection ( const DuneBoundaryProjectionType &bndProjection )
   {
     if( globalProjection_ )
       DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
@@ -120,11 +101,12 @@ namespace Dune
     globalProjection_ = &bndProjection;
   }
 
+
   template< template< int, int > class ALUGrid, int dimw >
-  void ALU2dGridFactory< ALUGrid,dimw > ::
-  insertBoundaryProjection ( const GeometryType &type,
-                             const std::vector< unsigned int > &vertices,
-                             const DuneBoundaryProjectionType *projection )
+  void ALU2dGridFactory< ALUGrid, dimw >
+  ::insertBoundaryProjection ( const GeometryType &type,
+                               const std::vector< unsigned int > &vertices,
+                               const DuneBoundaryProjectionType *projection )
   {
     assert( type.isSimplex() || type.isCube() );
     if( (int)type.dim() != dimension-1 )
@@ -141,17 +123,19 @@ namespace Dune
     boundaryProjections_[ faceId ] = projection;
   }
 
+
   template< template< int, int > class ALUGrid, int dimw >
-  void ALU2dGridFactory< ALUGrid, dimw > ::
-  insertBoundarySegment ( const std::vector< unsigned int >& vertices )
+  void ALU2dGridFactory< ALUGrid, dimw >
+  ::insertBoundarySegment ( const std::vector< unsigned int >& vertices )
   {
     DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
   }
 
+
   template< template< int, int > class ALUGrid, int dimw >
-  void ALU2dGridFactory< ALUGrid, dimw > ::
-  insertBoundarySegment ( const std::vector< unsigned int >& vertices,
-                          const shared_ptr<BoundarySegment<2,dimw> >& boundarySegment )
+  void ALU2dGridFactory< ALUGrid, dimw >
+  ::insertBoundarySegment ( const std::vector< unsigned int > &vertices,
+                            const shared_ptr< BoundarySegment< 2, dimw > > &boundarySegment )
   {
     FaceType faceId;
     copyAndSort( vertices, faceId );
@@ -194,18 +178,14 @@ namespace Dune
 #endif
   }
 
-  template< template< int, int > class ALUGrid, int dimw >
-  ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >::createGrid ()
-  {
-    return createGrid( true, true, "" );
-  }
 
   template< template< int, int > class ALUGrid, int dimw >
-  ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >
-  ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
+  void ALU2dGridFactory< ALUGrid, dimw >
+  :: insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
   {
-    return createGrid( addMissingBoundaries, true, dgfName );
+    faceTransformations_.push_back( Transformation( matrix, shift ) );
   }
+
 
   template< template< int, int > class ALUGrid, int dimw >
   ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >
@@ -361,7 +341,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid, int dimw >
-  inline std::string
+  std::string
   ALU2dGridFactory<ALUGrid,dimw>::temporaryFileName ( const std::string& dgfName )
   {
     std::string filename ( dgfName );
@@ -420,9 +400,9 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid, int dimw >
-  inline typename ALU2dGridFactory< ALUGrid, dimw >::FaceMap::iterator
+  typename ALU2dGridFactory< ALUGrid, dimw >::FaceMap::iterator
   ALU2dGridFactory< ALUGrid, dimw >
-  ::findPeriodicNeighbor( const FaceType &key, FaceMap &faceMap ) const
+  ::findPeriodicNeighbor ( const FaceType &key, FaceMap &faceMap ) const
   {
     typedef typename FaceTransformationVector::const_iterator TrafoIterator;
     typedef typename FaceMap::iterator FaceIterator;
@@ -462,8 +442,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid, int dimw >
-  inline void ALU2dGridFactory< ALUGrid, dimw >
-  ::recreateBoundaryIds ( const int defaultId )
+  void ALU2dGridFactory< ALUGrid, dimw >::recreateBoundaryIds ( const int defaultId )
   {
     typedef typename FaceMap::iterator FaceIterator;
     typedef typename PeriodicNeighborMap::const_iterator PeriodicNbIterator;
@@ -559,3 +538,17 @@ namespace Dune
   }
 
 }
+
+
+
+// Template Instantiation
+// ----------------------
+
+template class Dune::ALU2dGridFactory< Dune::ALUConformGrid, 2 >;
+template class Dune::ALU2dGridFactory< Dune::ALUConformGrid, 3 >;
+
+template class Dune::ALU2dGridFactory< Dune::ALUCubeGrid, 2 >;
+template class Dune::ALU2dGridFactory< Dune::ALUCubeGrid, 3 >;
+
+template class Dune::ALU2dGridFactory< Dune::ALUSimplexGrid, 2 >;
+template class Dune::ALU2dGridFactory< Dune::ALUSimplexGrid, 3 >;

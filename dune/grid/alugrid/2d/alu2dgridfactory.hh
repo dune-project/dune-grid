@@ -10,6 +10,7 @@
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridfactory.hh>
+
 #include <dune/grid/alugrid/2d/grid.hh>
 #include <dune/grid/alugrid/2d/transformation.hh>
 
@@ -191,26 +192,26 @@ namespace Dune
      *  \param[in]  matrix  matrix describing the linear part of T
      *  \param[in]  shift   vector describing T( 0 )
      */
-    void insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
-    {
-      faceTransformations_.push_back( Transformation( matrix, shift ) );
-    }
+    void insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift );
 
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
     {
       return Grid::getRealImplementation( entity ).getIndex();
     }
+
     virtual unsigned int
     insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
     {
       return Grid::getRealImplementation( entity ).getIndex();
     }
+
     virtual unsigned int
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
       return intersection.boundarySegmentIndex();
     }
+
     virtual bool
     wasInserted ( const typename Grid::LeafIntersection &intersection ) const
     {
@@ -235,9 +236,6 @@ namespace Dune
     void setVerbosity( const bool verbose ) { grdVerbose_ = verbose ; }
 
   private:
-    template< class T >
-    static void exchange ( T &x, T &y );
-
     static std::string temporaryFileName (const std::string& dgfName );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
@@ -260,14 +258,6 @@ namespace Dune
       return false;
     }
   };
-
-
-  template< template< int, int > class ALUGrid, int dimw >
-  template< class T >
-  inline void ALU2dGridFactory< ALUGrid, dimw >::exchange ( T &x, T &y )
-  {
-    T dummy = x; x = y; y = dummy;
-  }
 
 
   /** \brief Specialization of the generic GridFactory for ALUConformGrid<2,dimw>
@@ -365,12 +355,48 @@ namespace Dune
     }
   };
 
-}
 
-// This include is nasty, but we cannot incorporate 'alu2dgridfactory.cc' into
-// the lib before HAVE_MPI behaves predictable
-#include "alu2dgridfactory.cc"
+
+  // Inline Implementations
+  // ----------------------
+
+  template< template< int, int > class ALUGrid, int dimw >
+  inline ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( bool removeGeneratedFile )
+    : globalProjection_ ( 0 ),
+      numFacesInserted_ ( 0 ),
+      grdVerbose_( true )
+  {}
+
+
+  template< template< int, int > class ALUGrid, int dimw >
+  inline ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( const std::string &filename )
+    : globalProjection_ ( 0 ),
+      numFacesInserted_ ( 0 ),
+      grdVerbose_( true )
+  {}
+
+
+  template< template< int, int > class ALUGrid, int dimw >
+  inline ALU2dGridFactory< ALUGrid, dimw >::~ALU2dGridFactory ()
+  {}
+
+
+  template< template< int, int > class ALUGrid, int dimw >
+  inline ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >::createGrid ()
+  {
+    return createGrid( true, true, "" );
+  }
+
+
+  template< template< int, int > class ALUGrid, int dimw >
+  inline ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >
+  ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
+  {
+    return createGrid( addMissingBoundaries, true, dgfName );
+  }
+
+}
 
 #endif // #ifdef ENABLE_ALUGRID
 
-#endif
+#endif // #ifndef DUNE_ALU2DGRID_FACTORY_HH
