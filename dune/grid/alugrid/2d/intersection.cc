@@ -196,6 +196,125 @@ namespace Dune
     nbStack_.pop();
   }
 
+
+
+  // Implementation of ALU2dGridLeafIntersectionIterator
+  // ---------------------------------------------------
+
+  //! increment iterator
+  template< class GridImp >
+  void ALU2dGridLeafIntersectionIterator< GridImp >::doIncrement ()
+  {
+    assert( current.index_ < current.nFaces() );
+
+    this->unsetUp2Date();
+
+    // do we still have neighbours?
+    if( !nbStack_.empty() )
+      return setupIntersection();
+
+    ++current.index_;
+    if( current.index_ >= current.nFaces())
+    {
+      assert( current.index_ == current.nFaces() );
+      return;
+    }
+
+    ThinelementType *neighbor = current.inside()->neighbour( current.index_ );
+    assert( neighbor );
+
+    if( neighbor->thinis( ThinelementType::bndel_like ) )
+    {
+      HBndElType *bndel = (HBndElType *)neighbor;
+      if( bndel->type() != HBndElType::periodic )
+      {
+        current.useOutside_ = false;
+        return current.setOutside( 0, -1 );
+      }
+
+      PeriodicBndElType *bndnb = ((PeriodicBndElType *)bndel)->periodic_nb;
+      assert( bndnb && bndnb->neighbour( 0 ) && bndnb->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+      current.useOutside_ = !bndnb->leaf();
+      if( current.useOutside_ )
+      {
+        IntersectionInfo info;
+
+        // insert left intersection
+        HBndElType *left = bndnb->down();
+        assert( left && left->leaf() );
+        assert( left->neighbour( 0 ) && left->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+        info.first = (HElementType *)left->neighbour( 0 );
+        info.second = left->opposite( 0 );
+        nbStack_.push( info );
+
+        HBndElType *right = left->next();
+        assert( right && right->leaf() );
+        assert( right->neighbour( 0 ) && right->neighbour( 0 )->thinis( ThinelementType::element_like ) );
+        info.first = (HElementType *)right->neighbour( 0 );
+        info.second = right->opposite( 0 );
+        nbStack_.push( info );
+
+        setupIntersection();
+      }
+      else
+        current.setOutside( (HElementType *)bndnb->neighbour( 0 ), bndnb->opposite( 0 ) );
+    }
+    else
+    {
+      current.useOutside_ = current.inside()->hasHangingNode( current.index_ );
+      const int opposite = current.inside()->opposite( current.index_ );
+      if( current.useOutside_ )
+      {
+        IntersectionInfo info;
+
+        // insert left intersection
+        ThinelementType *left = current.inside()->getLeftIntersection( current.index_ );
+        assert( left && left->thinis( ThinelementType::element_like ) );
+        info.first = (HElementType *)left;   // neighbor
+        info.second = opposite;              // opposite vertex
+        assert( info.first->leaf() );
+        nbStack_.push( info );
+
+        // insert right intersection
+        ThinelementType *right = current.inside()->getRightIntersection( current.index_ );
+        assert( right && right->thinis( ThinelementType::element_like ) );
+        info.first = (HElementType *)right;  // neighbor
+        info.second = opposite;              // opposite vertex
+        assert( info.first->leaf() );
+        nbStack_.push( info );
+
+        setupIntersection();
+      }
+      else
+        current.setOutside( (HElementType *)current.inside()->neighbour( current.index_ ), opposite );
+    }
+  }
+
+
+  template< class GridImp >
+  void ALU2dGridLeafIntersectionIterator< GridImp >::setFirstItem ( const HElementType &elem, int wLevel )
+  {
+    while( !nbStack_.empty() )
+      nbStack_.pop();
+
+    current.setInside( const_cast< HElementType * >( &elem ) );
+    current.index_ = -1;
+    assert( current.inside() );
+    walkLevel_ = wLevel;
+    increment();
+  }
+
+
+  template< class GridImp >
+  inline void ALU2dGridLeafIntersectionIterator< GridImp >::setupIntersection ()
+  {
+    assert( !nbStack_.empty() );
+
+    IntersectionInfo &info = nbStack_.top();
+    current.setOutside( info.first, info.second );
+    nbStack_.pop();
+  }
+
 }
 
 
@@ -226,4 +345,13 @@ template class Dune::ALU2dGridLevelIntersectionIterator< const Dune::ALU2dGrid< 
 
 template class Dune::ALU2dGridLevelIntersectionIterator< const Dune::ALU2dGrid< 2, 3, ALU2DSPACE triangle > >;
 template class Dune::ALU2dGridLevelIntersectionIterator< const Dune::ALU2dGrid< 2, 3, ALU2DSPACE quadrilateral > >;
+#endif // #ifdef ALUGRID_SURFACE_2D
+
+
+template class Dune::ALU2dGridLeafIntersectionIterator< const Dune::ALU2dGrid< 2, 2, ALU2DSPACE triangle > >;
+#ifdef ALUGRID_SURFACE_2D
+template class Dune::ALU2dGridLeafIntersectionIterator< const Dune::ALU2dGrid< 2, 2, ALU2DSPACE quadrilateral > >;
+
+template class Dune::ALU2dGridLeafIntersectionIterator< const Dune::ALU2dGrid< 2, 3, ALU2DSPACE triangle > >;
+template class Dune::ALU2dGridLeafIntersectionIterator< const Dune::ALU2dGrid< 2, 3, ALU2DSPACE quadrilateral > >;
 #endif // #ifdef ALUGRID_SURFACE_2D
