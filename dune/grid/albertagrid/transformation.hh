@@ -14,6 +14,8 @@ namespace Dune
 
   class AlbertaTransformation
   {
+    typedef Alberta::GlobalSpace GlobalSpace;
+
   public:
     typedef Alberta::Real ctype;
 
@@ -21,13 +23,6 @@ namespace Dune
 
     typedef FieldVector< ctype, dimension > WorldVector;
 
-  private:
-    typedef Alberta::GlobalSpace GlobalSpace;
-
-    const GlobalSpace::Matrix &matrix_;
-    const GlobalSpace::Vector &shift_;
-
-  public:
     explicit
     AlbertaTransformation ( const Alberta::AffineTransformation *trafo = NULL )
       : matrix_( (trafo != NULL ? trafo->M : GlobalSpace::identityMatrix()) ),
@@ -66,10 +61,14 @@ namespace Dune
       }
       return x;
     }
+
+  private:
+    const GlobalSpace::Matrix &matrix_;
+    const GlobalSpace::Vector &shift_;
   };
 
 }
 
 #endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_TRANSFORMATION_HH
