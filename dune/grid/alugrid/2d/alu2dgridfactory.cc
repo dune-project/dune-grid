@@ -545,10 +545,11 @@ namespace Dune
 // ----------------------
 
 template class Dune::ALU2dGridFactory< Dune::ALUConformGrid, 2 >;
-template class Dune::ALU2dGridFactory< Dune::ALUConformGrid, 3 >;
-
-template class Dune::ALU2dGridFactory< Dune::ALUCubeGrid, 2 >;
-template class Dune::ALU2dGridFactory< Dune::ALUCubeGrid, 3 >;
-
 template class Dune::ALU2dGridFactory< Dune::ALUSimplexGrid, 2 >;
+#ifdef ALUGRID_SURFACE_2D
+template class Dune::ALU2dGridFactory< Dune::ALUCubeGrid, 2 >;
+
+template class Dune::ALU2dGridFactory< Dune::ALUConformGrid, 3 >;
 template class Dune::ALU2dGridFactory< Dune::ALUSimplexGrid, 3 >;
+template class Dune::ALU2dGridFactory< Dune::ALUCubeGrid, 3 >;
+#endif // #ifdef ALUGRID_SURFACE_2D
