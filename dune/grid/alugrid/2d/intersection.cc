@@ -11,40 +11,30 @@ namespace Dune
   // Implementation of ALU2DIntersectionGeometryStorage
   // --------------------------------------------------
 
-  template< class LocalGeometry, class LocalGeometryImp >
-  ALU2DIntersectionGeometryStorage< LocalGeometry, LocalGeometryImp >::ALU2DIntersectionGeometryStorage ()
+  template< class LocalGeometry >
+  ALU2DIntersectionGeometryStorage< LocalGeometry >::ALU2DIntersectionGeometryStorage ()
   {
     for( int i = 0; i < 4; ++i )
     {
+      geoms_[ 0 ][ i ].reserve( 2 );
+      geoms_[ 1 ][ i ].reserve( 2 );
       for( int j = 0; j < 2; ++j )
       {
-        LocalGeometryImp geo;
+        LocalGeometryImpl geo;
         if ( i < 3 )
         {
           // build geometry
           geo.buildLocalGeometry( i, j, 3 );
           // create dune geoemtry
-          geoms_[ 0 ][ i ][ j ] = new LocalGeometry( geo );
+          geoms_[ 0 ][ i ].push_back( MakeableLocalGeometry( geo ) );
         }
-        else
-          geoms_[ 0 ][ 3 ][ j ] = 0;
 
         // build geometry
         geo.buildLocalGeometry( i, j, 4 );
         // create dune geoemtry
-        geoms_[ 1 ][ i ][ j ] = new LocalGeometry( geo );
+        geoms_[ 1 ][ i ].push_back( MakeableLocalGeometry( geo ) );
       }
     }
-  }
-
-
-  template< class LocalGeometry, class LocalGeometryImp >
-  ALU2DIntersectionGeometryStorage< LocalGeometry, LocalGeometryImp >::~ALU2DIntersectionGeometryStorage ()
-  {
-    for( int k = 0; k < 2; ++k )
-      for( int i = 0; i < 4; ++i )
-        for( int j = 0; j < 2; ++j )
-          delete geoms_[ k ][ i ][ j ];
   }
 
 
@@ -323,19 +313,15 @@ namespace Dune
 // ----------------------
 
 template class Dune::ALU2DIntersectionGeometryStorage
-< Dune::Geometry< 1, 2, const Dune::ALU2dGrid< 2, 2, ALU2DSPACE triangle >, Dune::ALU2dGridGeometry >,
-    Dune::ALU2dGridGeometry< 1, 2, const Dune::ALU2dGrid< 2, 2, ALU2DSPACE triangle > > >;
+< Dune::Geometry< 1, 2, const Dune::ALU2dGrid< 2, 2, ALU2DSPACE triangle >, Dune::ALU2dGridGeometry > >;
 #ifdef ALUGRID_SURFACE_2D
 template class Dune::ALU2DIntersectionGeometryStorage
-< Dune::Geometry< 1, 2, const Dune::ALU2dGrid< 2, 2, ALU2DSPACE quadrilateral >, Dune::ALU2dGridGeometry >,
-    Dune::ALU2dGridGeometry< 1, 2, const Dune::ALU2dGrid< 2, 2, ALU2DSPACE quadrilateral > > >;
+< Dune::Geometry< 1, 2, const Dune::ALU2dGrid< 2, 2, ALU2DSPACE quadrilateral >, Dune::ALU2dGridGeometry > >;
 
 template class Dune::ALU2DIntersectionGeometryStorage
-< Dune::Geometry< 1, 2, const Dune::ALU2dGrid< 2, 3, ALU2DSPACE triangle >, Dune::ALU2dGridGeometry >,
-    Dune::ALU2dGridGeometry< 1, 2, const Dune::ALU2dGrid< 2, 3, ALU2DSPACE triangle > > >;
+< Dune::Geometry< 1, 2, const Dune::ALU2dGrid< 2, 3, ALU2DSPACE triangle >, Dune::ALU2dGridGeometry > >;
 template class Dune::ALU2DIntersectionGeometryStorage
-< Dune::Geometry< 1, 2, const Dune::ALU2dGrid< 2, 3, ALU2DSPACE quadrilateral >, Dune::ALU2dGridGeometry >,
-    Dune::ALU2dGridGeometry< 1, 2, const Dune::ALU2dGrid< 2, 3, ALU2DSPACE quadrilateral > > >;
+< Dune::Geometry< 1, 2, const Dune::ALU2dGrid< 2, 3, ALU2DSPACE quadrilateral >, Dune::ALU2dGridGeometry > >;
 #endif // #ifdef ALUGRID_SURFACE_2D
 
 

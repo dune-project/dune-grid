@@ -25,8 +25,6 @@ namespace Dune {
   class ALU2dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU2dGridGeometry;
-  template <class LocalGeometry, class LocalGeometryImp>
-  class ALU2DIntersectionGeometryStorage;
   template<class GridImp>
   class ALU2dGridHierarchicIterator;
   template<class GridImp>

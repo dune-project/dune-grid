@@ -26,8 +26,6 @@ namespace Dune
   class ALU2dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU2dGridGeometry;
-  template <class LocalGeometry, class LocalGeometryImp>
-  class ALU2DIntersectionGeometryStorage;
   template<class GridImp>
   class ALU2dGridHierarchicIterator;
   template<class GridImp>
@@ -46,28 +44,28 @@ namespace Dune
   // ALU2DIntersectionGeometryStorage
   // --------------------------------
 
-  template< class LocalGeometry, class LocalGeometryImp >
+  template< class LocalGeometry >
   class ALU2DIntersectionGeometryStorage
   {
-    typedef ALU2DIntersectionGeometryStorage< LocalGeometry, LocalGeometryImp > ThisType;
+    typedef ALU2DIntersectionGeometryStorage< LocalGeometry > ThisType;
+
+    typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
+    typedef typename MakeableLocalGeometry::ImplementationType LocalGeometryImpl;
 
     // one geometry for each face and twist 0 and 1
-    LocalGeometry* geoms_[ 2 ][ 4 ][ 2 ];
+    std::vector< MakeableLocalGeometry > geoms_[ 2 ][ 4 ];
 
   private:
     ALU2DIntersectionGeometryStorage ();
 
   public:
-    ~ALU2DIntersectionGeometryStorage ();
-
     // return reference to local geometry
-    const LocalGeometry& localGeom(const int aluFace, const int twist, const int corners) const
+    const LocalGeometry &localGeom ( const int aluFace, const int twist, const int corners ) const
     {
       assert( corners == 3 || corners == 4 );
       assert( 0 <= aluFace && aluFace < corners );
       assert( twist == 0 || twist == 1 );
-      assert( geoms_[ corners-3 ][ aluFace ][ twist ] );
-      return *geoms_[ corners-3 ][ aluFace ][ twist ];
+      return geoms_[ corners-3 ][ aluFace ][ twist ];
     }
 
     // return static instance
@@ -129,8 +127,7 @@ namespace Dune
     typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
 
     // type of local geometry storage
-    typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp>
-    LocalGeometryStorageType ;
+    typedef ALU2DIntersectionGeometryStorage< LocalGeometry > LocalGeometryStorageType;
 
     typedef ALU2dGridIntersectionBase<GridImp> ThisType;
     friend class LevelIntersectionIteratorWrapper<GridImp>;
