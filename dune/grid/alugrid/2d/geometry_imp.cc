@@ -240,28 +240,22 @@ namespace Dune
   }
 
   // built Geometry (faceNumber is in generic numbering)
-  template <int mydim, int cdim, class GridImp>
-  inline FieldMatrix<alu2d_ctype, 4 , 3> ALU2dGridGeometry<mydim,cdim,GridImp>::
-  calculateReferenceCoords(const int corners) const
+  template< int mydim, int cdim, class GridImp >
+  inline std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > >
+  ALU2dGridGeometry< mydim, cdim, GridImp >::calculateReferenceCoords ( const int corners )
   {
     // calculate reference coordinates of aLUGrid reference triangle
 
-    // set all to zero
-    FieldMatrix<alu2d_ctype, 4 , 3> refCoord;
-    for (int i=0; i<4; ++i)
-    {
-      refCoord[i][0]=0.;
-      refCoord[i][1]=0.;
-      refCoord[i][2]=1.;
-    }
+    FieldMatrix< alu2d_ctype, 4, 2 > refCoord( 0. );
+    FieldVector< alu2d_ctype, 4 > lengths( 1. );
+
     // point 1
     refCoord[1][0] = 1.0;
     // point (corners-1)
     refCoord[corners-1][1] = 1.0;
-    if (corners == 3)
+    if( corners == 3 )
     {
-      // length of faces
-      refCoord[0][2] = M_SQRT2;
+      lengths[0] = M_SQRT2;
     }
     else
     {
@@ -269,7 +263,7 @@ namespace Dune
       refCoord[2][0] = 1.0;
       refCoord[2][1] = 1.0;
     }
-    return refCoord;
+    return std::make_pair( refCoord, lengths );
   }
 
   // built Geometry (faceNumber is in generic numbering)
@@ -281,16 +275,17 @@ namespace Dune
     assert( mydim == 1 );
 
     // get coordinates of reference element
-    const FieldMatrix<alu2d_ctype, 4, 3> refCoord ( calculateReferenceCoords(corners) );
+    typedef std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > > RefCoord;
+    RefCoord refCoord( calculateReferenceCoords( corners ) );
 
     // just map the point of the global intersection to the local
     // coordinates , this is the default procedure
     // for simplices this is not so bad
-    geoImpl_.update( refCoord[ ( aluFace + 1+twist ) % corners ],
-                     refCoord[ ( aluFace + 2-twist ) % corners ] );
+    geoImpl_.update( refCoord.first[ ( aluFace + 1+twist ) % corners ],
+                     refCoord.first[ ( aluFace + 2-twist ) % corners ] );
 
     // get length of faces
-    det_ = refCoord[ aluFace ][2];
+    det_ = refCoord.second[ aluFace ];
 
     // geom is up2date
     up2Date_ = true;

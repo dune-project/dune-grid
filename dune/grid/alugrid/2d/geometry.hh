@@ -620,7 +620,8 @@ namespace Dune
 
   protected:
     // return reference coordinates of the alu triangle
-    FieldMatrix<alu2d_ctype, 4, 3> calculateReferenceCoords(const int corners) const;
+    static std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > >
+    calculateReferenceCoords ( const int corners );
 
     // implementation of coord and mapping
     mutable GeometryImplType geoImpl_;
