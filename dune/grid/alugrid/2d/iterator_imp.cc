@@ -45,11 +45,11 @@ namespace Dune
         elem_ = &(iter_->getitem());
 
 #if ALU2DGRID_PARALLEL
-        bool valid = (cdim == 0) ?
-                     (this->grid_.rankManager().isValid( elem_->getIndex(), pitype )) :
-                     marker_.isValidVertex( elem_->getIndex() );
+        const bool valid = (cdim == 0) ?
+                           (this->grid_.rankManager().isValid( elem_->getIndex(), pitype )) :
+                           marker_.isValidVertex( elem_->getIndex() );
 #else
-        bool valid = true;
+        const bool valid = true;
 #endif
 
         // if we found valid item, call update

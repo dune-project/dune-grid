@@ -12,58 +12,6 @@
 namespace Dune
 {
 
-  template<int dimw>
-  class ALUCubeGrid< 2, dimw >;
-  namespace Capabilities {
-    // Capabilities for ALUCubeGrid
-    // ----------------------------
-
-    /** \struct isLeafwiseConforming
-       \ingroup ALUCubeGrid
-     */
-
-    /** \struct IsUnstructured
-       \ingroup ALUCubeGrid
-     */
-
-    /** \brief ALUCubeGrid has entities for all codimension
-       \ingroup ALUCubeGrid
-     */
-    template< int wdim, int cdim >
-    struct hasEntity< Dune::ALUCubeGrid< 2, wdim >, cdim >
-    {
-      static const bool v = true;
-    };
-
-
-    /** \brief ALUCubeGrid has conforming level grids
-       \ingroup ALUCubeGrid
-     */
-    template<int wdim>
-    struct isLevelwiseConforming< Dune::ALUCubeGrid< 2, wdim > >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUCubeGrid has supports hanging nodes
-       \ingroup ALUCubeGrid
-     */
-    template<int wdim>
-    struct hasHangingNodes< Dune::ALUCubeGrid< 2, wdim > >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUCubeGrid has backup and restore facilities
-       \ingroup ALUCubeGrid
-     */
-    template<int wdim>
-    struct hasBackupRestoreFacilities< Dune::ALUCubeGrid< 2, wdim > >
-    {
-      static const bool v = true;
-    };
-  }
-
   /** @copydoc ALUCubeGrid
       \brief [<em> provides \ref Dune::Grid </em>]
       \brief grid with support for cube mesh in 2d.

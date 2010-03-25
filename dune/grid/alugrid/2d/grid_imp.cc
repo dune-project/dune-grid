@@ -273,12 +273,12 @@ namespace Dune
   {
     maxLevel_ = 0;
     // walk the leaf level and take maximum as maxLevel
-    ALU2DSPACE Listwalkptr <HElementType> walk( mesh() );
-    for( walk->first() ; ! walk->done() ; walk->next())
-    {
-      if(walk->getitem().level() > maxLevel_ )
-        maxLevel_ = walk->getitem().level();
-    }
+    ALU2DSPACE Listwalkptr< HElementType > walk( mesh() );
+    for( walk->first(); !walk->done(); walk->next() )
+      maxLevel_ = std::max( maxLevel_, walk->getitem().level() );
+#if ALU2DGRID_PARALLEL
+    maxLevel_ = comm().max( maxLevel_ );
+#endif
   }
 
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
@@ -386,26 +386,19 @@ namespace Dune
 
     for (int j = 0; j < refCount; ++j)
     {
+      ALU2DSPACE Listwalkptr< HElementType > walk( mesh() );
+      for( walk->first(); !walk->done(); walk->next() )
+      {
+        HElementType &item = walk->getitem();
 #if ALU2DGRID_PARALLEL
-      {
-        typedef typename Traits :: template Codim<0> :: template Partition<Interior_Partition> :: LeafIterator LeafIterator;
-        LeafIterator endit = this->template leafend<0,Interior_Partition> ();
-        for(LeafIterator it = this->template leafbegin<0,Interior_Partition> ();
-            it != endit; ++it )
-        {
-          this->mark( 1, *it );
-        }
+        if( rankManager().isValid( item.getIndex(), Interior_Partition ) )
+#endif // #if ALU2DGRID_PARALLEL
+        item.ALU2DSPACE Refco_el::mark( ALU2DSPACE Refco::ref );
       }
-
+#if ALU2DGRID_PARALLEL
       rankManager_.notifyMarking();
-#else
-      ALU2DSPACE Listwalkptr <HElementType> walk(mesh());
-      for( walk->first() ; ! walk->done() ; walk->next())
-      {
-        ElementType &tr = walk->getitem();
-        tr.ALU2DSPACE Refco_el::mark(ALU2DSPACE Refco::ref);
-      }
-#endif
+#endif // #if ALU2DGRID_PARALLEL
+
       mesh().refine();
 
       // in parallel update rank information
@@ -413,6 +406,7 @@ namespace Dune
       rankManager_.update();
 #endif
     }
+
     //update data
     updateStatus();
 

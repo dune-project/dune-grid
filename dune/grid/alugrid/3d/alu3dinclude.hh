@@ -25,22 +25,7 @@
 // all methods and classes of the ALUGrid are defined in the namespace
 #define ALU3DSPACE ALUGridSpace ::
 
-#include <alugrid_defineparallel.h>
-
-#if HAVE_MPI
-// if this variable is defined,
-// // then parallel version of ALUGrid is compiled
-  #if ALU3DGRID_BUILD_FOR_PARALLEL == 0
-    #warning "The ALUGrid-library wasn't compiled for parallel usage. Reconfigure\
-  using the MPI compiler script or compile Dune without the MPI support!\
-  Defaulting to serial ALUGrid!"
-    #define ALU3DGRID_PARALLEL 0
-  #else
-    #define ALU3DGRID_PARALLEL 1
-  #endif
-#else
-  #define ALU3DGRID_PARALLEL 0
-#endif
+#include <dune/grid/alugrid/checkparallel.hh>
 
 // if MPI was found include all headers
 #if ALU3DGRID_PARALLEL

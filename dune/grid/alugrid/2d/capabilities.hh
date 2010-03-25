@@ -20,8 +20,13 @@ namespace Dune
   template< int dim, int dimworld >
   class ALUSimplexGrid;
 
+  template< int dim, int dimw >
+  class ALUCubeGrid;
+
   template< int dim, int dimworld >
   class ALUConformGrid;
+
+
 
   namespace Capabilities
   {
@@ -64,8 +69,8 @@ namespace Dune
      */
 #if ALU2DGRID_PARALLEL
     //- default is false
-    template< int dimworld, int codim >
-    struct canCommunicate< ALUSimplexGrid< 2, dimworld >, codim >
+    template< int dimworld >
+    struct canCommunicate< ALUSimplexGrid< 2, dimworld >, 0 >
     {
       static const bool v = true;
     };
@@ -97,6 +102,81 @@ namespace Dune
     {
       static const bool v = true;
     };
+
+
+
+    // Capabilities for ALUCubeGrid
+    // ----------------------------
+
+    /** \struct isLeafwiseConforming
+       \ingroup ALUCubeGrid
+     */
+
+    /** \struct IsUnstructured
+       \ingroup ALUCubeGrid
+     */
+
+    /** \brief ALUCubeGrid has entities for all codimension
+       \ingroup ALUCubeGrid
+     */
+    template< int wdim, int cdim >
+    struct hasEntity< Dune::ALUCubeGrid< 2, wdim >, cdim >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUCubeGrid is parallel
+       \ingroup ALUCubeGrid
+     */
+#if ALU2DGRID_PARALLEL
+    //- default is false
+    template< int dimworld >
+    struct isParallel< ALUCubeGrid< 2, dimworld > >
+    {
+      static const bool v = true;
+    };
+#endif
+
+    /** \brief ALUCubeGrid can communicate
+       \ingroup ALUCubeGrid
+     */
+#if ALU2DGRID_PARALLEL
+    //- default is false
+    template< int dimworld >
+    struct canCommunicate< ALUCubeGrid< 2, dimworld >, 0 >
+    {
+      static const bool v = true;
+    };
+#endif
+
+    /** \brief ALUCubeGrid has conforming level grids
+       \ingroup ALUCubeGrid
+     */
+    template<int wdim>
+    struct isLevelwiseConforming< Dune::ALUCubeGrid< 2, wdim > >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUCubeGrid has supports hanging nodes
+       \ingroup ALUCubeGrid
+     */
+    template<int wdim>
+    struct hasHangingNodes< Dune::ALUCubeGrid< 2, wdim > >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUCubeGrid has backup and restore facilities
+       \ingroup ALUCubeGrid
+     */
+    template<int wdim>
+    struct hasBackupRestoreFacilities< Dune::ALUCubeGrid< 2, wdim > >
+    {
+      static const bool v = true;
+    };
+
+
 
     // Capabilities for ALUConformGrid
     // -------------------------------
@@ -135,8 +215,8 @@ namespace Dune
      */
 #if ALU2DGRID_PARALLEL
     //- default is false
-    template< int dimworld, int codim >
-    struct canCommunicate< ALUConformGrid< 2, dimworld >, codim >
+    template< int dimworld >
+    struct canCommunicate< ALUConformGrid< 2, dimworld >, 0 >
     {
       static const bool v = true;
     };

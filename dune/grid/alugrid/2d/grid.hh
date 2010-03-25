@@ -740,6 +740,20 @@ namespace Dune {
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
                       InterfaceType iftype, CommunicationDirection dir) const;
 
+    int ghostSize ( int level, int codim ) const
+    {
+      return ghostSize( codim );
+    }
+
+    int ghostSize ( int codim ) const
+    {
+#if ALU2DGRID_PARALLEL
+      return 1;
+#else
+      return 0;
+#endif
+    }
+
     /** \brief @copydoc Dune::Grid::loadBalance */
     bool loadBalance() ;
 
