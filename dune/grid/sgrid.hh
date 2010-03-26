@@ -994,7 +994,9 @@ namespace Dune {
     SIntersection (const SIntersectionIterator<GridImp> & is_) : is(is_) {}
 
   private:
+#ifndef DOXYGEN // doxygen can't handle this recursive usage
     const SIntersectionIterator<GridImp> & is;
+#endif
   };
 
   //************************************************************************
