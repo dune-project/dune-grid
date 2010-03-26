@@ -454,14 +454,14 @@ namespace Dune
         return mapping().jacobianInverseTransposed( local );
       }
 
-      /** \brief compute an outer normal
+      /** \brief compute an outer normal to an element face
        *
        *  \param[in]  face   number of the face (in generic numbering)
-       *  \param[in]  local  point to compute the normal in (in local coordinates)
+       *  \param[in]  local  point to compute the normal in (in local coordinates with respect to the element, *not* the face)
        *
        *  \returns an outer normal to the given face at the given point
        *
-       *  \note Thouogh the local coordinates are given with respect to geometry's
+       *  \note Though the local coordinates are given with respect to geometry's
        *        reference domain, the point is required to be on the given face.
        */
       GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
