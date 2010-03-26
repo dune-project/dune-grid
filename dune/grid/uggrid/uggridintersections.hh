@@ -414,7 +414,7 @@ namespace Dune {
           return i;
 
       // this point should not be reached, otherwise throw exception
-      DUNE_THROW(InvalidStateException,"no consitency in numberInNeighbor");
+      DUNE_THROW(InvalidStateException,"no consistency in numberInNeighbor");
       return -1;
     }
 
