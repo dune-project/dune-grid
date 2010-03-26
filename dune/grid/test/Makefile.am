@@ -168,7 +168,7 @@ test_dgfalu_uggrid_combination_LDADD =		\
 	$(LDADD)
 
 ## distribution tarball
-SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc
+SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc functions.hh
 
 GRIDFILES = \
   simplex-testgrid-2-2.dgf simplex-testgrid-2-3.dgf simplex-testgrid-3-3-large.dgf simplex-testgrid-3-3.dgf \

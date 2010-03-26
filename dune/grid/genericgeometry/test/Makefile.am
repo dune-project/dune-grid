@@ -23,4 +23,6 @@ testgeo_SOURCES = testgeo.cc
 
 grefelement_SOURCES = grefelement.cc
 
+SOURCES = testgeo.cc grefelement.cc testmapping.cc testsubtopologies.cc testgeo.hh
+
 include $(top_srcdir)/am/global-rules
