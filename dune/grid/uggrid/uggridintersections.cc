@@ -7,86 +7,25 @@
 
 #include <set>
 
-// const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection::dimworld>& Dune::UGGridLevelIntersection<GridImp>::outerNormal(const Dune::FieldVector<typename GridImp::ctype, (Dune::UGGridLevelIntersection<GridImp>::dim - 1)>&) const;
-// const Dune::FieldVector<typename GridImp::ctype, Dune::UGGridLevelIntersection<GridImp>::dimworld>& Dune::UGGridLevelIntersection<GridImp>::outerNormal(const Dune::FieldVector<typename GridImp::ctype, (Dune::UGGridLevelIntersection<GridImp>::dim - 1)>&) const;
 
 template<class GridImp>
 const typename Dune::UGGridLevelIntersection<GridImp>::WorldVector&
 Dune::UGGridLevelIntersection<GridImp>::outerNormal
   (const typename Dune::UGGridLevelIntersection<GridImp>::FaceVector& local) const
 {
-  // //////////////////////////////////////////////////////
-  //   Implementation for 3D
-  // //////////////////////////////////////////////////////
+  // Implementation uses the GenericGeometry facilities.  For this we need to set up a
+  // generic geometry of the _inside_ element, which then has a method computing the normal.
+  std::vector<FieldVector<typename GridImp::ctype, dim> > corners(inside()->template count<dim>());
 
-  if (dim == 3) {
+  for (int i=0; i<corners.size(); i++)
+    corners[i] = inside()->geometry().corner(i);
 
-    if (UG_NS<dim>::Corners_Of_Side(center_, neighborCount_) == 3) {
+  GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > insideGeometry(inside()->type(), corners);
 
-      // A triangular intersection.  The normals are constant
-      const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 0))->myvertex->iv.x;
-      const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 1))->myvertex->iv.x;
-      const UGCtype* cPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 2))->myvertex->iv.x;
-
-      FieldVector<UGCtype, 3> ba, ca;
-
-      for (int i=0; i<3; i++) {
-        ba[i] = bPos[i] - aPos[i];
-        ca[i] = cPos[i] - aPos[i];
-      }
-
-      outerNormal_[0] = ba[1]*ca[2] - ba[2]*ca[1];
-      outerNormal_[1] = ba[2]*ca[0] - ba[0]*ca[2];
-      outerNormal_[2] = ba[0]*ca[1] - ba[1]*ca[0];
-
-    } else {
-
-      // A quadrilateral: compute the normal in each corner and do bilinear interpolation
-      // The cornerNormals array uses UG corner numbering
-      FieldVector<UGCtype,3> cornerNormals[4];
-      for (int i=0; i<4; i++) {
-
-        // Compute the normal on the i-th corner
-        const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,i))->myvertex->iv.x;
-        const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,(i+1)%4))->myvertex->iv.x;
-        const UGCtype* cPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,(i+3)%4))->myvertex->iv.x;
-
-        FieldVector<UGCtype, 3> ba, ca;
-
-        for (int j=0; j<3; j++) {
-          ba[j] = bPos[j] - aPos[j];
-          ca[j] = cPos[j] - aPos[j];
-        }
-
-        cornerNormals[i][0] = ba[1]*ca[2] - ba[2]*ca[1];
-        cornerNormals[i][1] = ba[2]*ca[0] - ba[0]*ca[2];
-        cornerNormals[i][2] = ba[0]*ca[1] - ba[1]*ca[0];
-      }
-
-      // Bilinear interpolation
-      for (int i=0; i<3; i++)
-        outerNormal_[i] = (1-local[0])*(1-local[1])*cornerNormals[0][i]
-                          + local[0]     * (1-local[1]) * cornerNormals[1][i]
-                          + local[0]     * local[1]     * cornerNormals[2][i]
-                          + (1-local[0]) * local[1]     * cornerNormals[3][i];
-
-    }
-
-  } else {     // if (dim==3) ... else
-
-    // //////////////////////////////////////////////////////
-    //   Implementation for 2D
-    // //////////////////////////////////////////////////////
-
-    // Get the vertices of this side.
-    const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 0))->myvertex->iv.x;
-    const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 1))->myvertex->iv.x;
-
-    // compute normal
-    outerNormal_[0] = bPos[1] - aPos[1];
-    outerNormal_[1] = aPos[0] - bPos[0];
-
-  }
+  // Actually compute the normal.
+  // Note: The local coordinates that have to be provided are with respect to the inside() element
+  outerNormal_ = insideGeometry.normal(indexInInside(),
+                                       geometryInInside().global(local));
 
   return outerNormal_;
 }
@@ -210,84 +149,29 @@ int Dune::UGGridLevelIntersection<GridImp>::indexInOutside () const
 //   Implementations for the class UGGridLeafIntersection
 // /////////////////////////////////////////////////////////////////////////////
 
-/** \bug Doesn't work properly for nonplanar nonconforming quadrilateral faces */
+/** \bug Doesn't work properly for nonplanar nonconforming quadrilateral faces,
+   because the local coordinates are interpreted as being with respect to the element
+   face.  Instead, they should be interpreted with respect to the intersection.
+   If the face is flat this doesn't matter.
+ */
 template<class GridImp>
 const typename Dune::UGGridLeafIntersection<GridImp>::WorldVector&
 Dune::UGGridLeafIntersection<GridImp>::outerNormal
   (const typename Dune::UGGridLeafIntersection<GridImp>::FaceVector& local) const
 {
-  // //////////////////////////////////////////////////////
-  //   Implementation for 3D
-  // //////////////////////////////////////////////////////
+  // Implementation uses the GenericGeometry facilities.  For this we need to set up a
+  // generic geometry of the _inside_ element, which then has a method computing the normal.
+  std::vector<FieldVector<typename GridImp::ctype, dim> > corners(inside()->template count<dim>());
 
-  if (dim == 3) {
+  for (int i=0; i<corners.size(); i++)
+    corners[i] = inside()->geometry().corner(i);
 
-    if (UG_NS<dim>::Corners_Of_Side(center_, neighborCount_) == 3) {
+  GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > insideGeometry(inside()->type(), corners);
 
-      // A triangular intersection.  The normals are constant
-      const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 0))->myvertex->iv.x;
-      const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 1))->myvertex->iv.x;
-      const UGCtype* cPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 2))->myvertex->iv.x;
-
-      FieldVector<UGCtype, 3> ba, ca;
-
-      for (int i=0; i<3; i++) {
-        ba[i] = bPos[i] - aPos[i];
-        ca[i] = cPos[i] - aPos[i];
-      }
-
-      outerNormal_[0] = ba[1]*ca[2] - ba[2]*ca[1];
-      outerNormal_[1] = ba[2]*ca[0] - ba[0]*ca[2];
-      outerNormal_[2] = ba[0]*ca[1] - ba[1]*ca[0];
-
-    } else {
-
-      // A quadrilateral: compute the normal in each corner and do bilinear interpolation
-      // The cornerNormals array uses UG corner numbering
-      FieldVector<UGCtype,3> cornerNormals[4];
-      for (int i=0; i<4; i++) {
-
-        // Compute the normal on the i-th corner
-        const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,i))->myvertex->iv.x;
-        const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,(i+1)%4))->myvertex->iv.x;
-        const UGCtype* cPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,(i+3)%4))->myvertex->iv.x;
-
-        FieldVector<UGCtype, 3> ba, ca;
-
-        for (int j=0; j<3; j++) {
-          ba[j] = bPos[j] - aPos[j];
-          ca[j] = cPos[j] - aPos[j];
-        }
-
-        cornerNormals[i][0] = ba[1]*ca[2] - ba[2]*ca[1];
-        cornerNormals[i][1] = ba[2]*ca[0] - ba[0]*ca[2];
-        cornerNormals[i][2] = ba[0]*ca[1] - ba[1]*ca[0];
-      }
-
-      // Bilinear interpolation
-      for (int i=0; i<3; i++)
-        outerNormal_[i] = (1-local[0])*(1-local[1])*cornerNormals[0][i]
-                          + local[0]     * (1-local[1]) * cornerNormals[1][i]
-                          + local[0]     * local[1]     * cornerNormals[2][i]
-                          + (1-local[0]) * local[1]     * cornerNormals[3][i];
-
-    }
-
-  } else {     // if (dim==3) ... else
-
-    // //////////////////////////////////////////////////////
-    //   Implementation for 2D
-    // //////////////////////////////////////////////////////
-
-    // Get the vertices of this side.
-    const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 0))->myvertex->iv.x;
-    const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 1))->myvertex->iv.x;
-
-    // compute normal
-    outerNormal_[0] = bPos[1] - aPos[1];
-    outerNormal_[1] = aPos[0] - bPos[0];
-
-  }
+  // Actually compute the normal.
+  // Note: The local coordinates that have to be provided are with respect to the inside() element
+  outerNormal_ = insideGeometry.normal(indexInInside(),
+                                       geometryInInside().global(local));
 
   return outerNormal_;
 }
