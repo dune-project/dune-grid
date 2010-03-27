@@ -3,6 +3,10 @@
 #ifndef DUNE_STARCD_READER_HH
 #define DUNE_STARCD_READER_HH
 
+#include <dune/common/exceptions.hh>
+#include <dune/common/geometrytype.hh>
+#include <dune/grid/common/gridfactory.hh>
+#include <iostream>
 #include <fstream>
 
 namespace Dune {
