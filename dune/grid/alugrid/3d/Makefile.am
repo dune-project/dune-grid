@@ -22,4 +22,6 @@ alu3dgrid_HEADERS = alu3dinclude.hh alu3dgridfactory.hh alu3dgridfactory.cc \
   indexsets.hh iterator.hh iterator_imp.cc alu3diterators.hh \
   lbdatahandle.hh alugrid.hh capabilities.hh
 
+headercheck_IGNORE = $(alu3dgrid_HEADERS)
+
 include $(top_srcdir)/am/global-rules
