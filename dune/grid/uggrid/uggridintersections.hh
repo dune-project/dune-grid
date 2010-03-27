@@ -418,6 +418,9 @@ namespace Dune {
       return -1;
     }
 
+    /** \brief Find the topological father face */
+    int getFatherSide(const typename UG_NS<dim>::Element* me, int side) const;
+
     /** \brief Precompute list of all leaf intersections of the current element face */
     void constructLeafSubfaces();
 

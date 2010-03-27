@@ -386,6 +386,119 @@ int Dune::UGGridLeafIntersection<GridImp>::indexInOutside () const
   return Numbering::template dune2generic< 1 >( tid, number );
 }
 
+template <class GridImp>
+int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const typename UG_NS<dim>::Element* me,
+                                                         int side) const
+{
+  const typename UG_NS<dim>::Element* father = UG_NS<dim>::EFather(me);
+  int fatherSide;
+
+  // //////////////////////////////////////////////////////////////
+  //   Find the topological father face
+  // //////////////////////////////////////////////////////////////
+  if (dim==2) {
+
+    // Get the two nodes
+    const typename UG_NS<dim>::Node* n0 = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, 0));
+    const typename UG_NS<dim>::Node* n1 = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, 1));
+
+    const typename UG_NS<dim>::Node* fatherN0, *fatherN1;
+    assert(!(UG::D2::ReadCW(n0, UG::D2::NTYPE_CE) == UG::D2::MID_NODE
+             && UG::D2::ReadCW(n1, UG::D2::NTYPE_CE) == UG::D2::MID_NODE));
+
+    if (UG::D2::ReadCW(n1, UG::D2::NTYPE_CE) == UG::D2::MID_NODE) {
+
+      // n0 exists on the coarser level, but n1 doesn't
+      const typename UG_NS<dim>::Edge* fatherEdge = (const typename UG_NS<dim>::Edge*)n1->father;
+      fatherN0 = fatherEdge->links[0].nbnode;
+      fatherN1 = fatherEdge->links[1].nbnode;
+
+    } else if (UG::D2::ReadCW(n0, UG::D2::NTYPE_CE) == UG::D2::MID_NODE) {
+
+      // n1 exists on the coarser level, but n0 doesn't
+      const typename UG_NS<dim>::Edge* fatherEdge = (const typename UG_NS<dim>::Edge*)n0->father;
+      fatherN0 = fatherEdge->links[0].nbnode;
+      fatherN1 = fatherEdge->links[1].nbnode;
+
+    } else {
+
+      // This edge is a copy
+      fatherN0 = (const typename UG_NS<dim>::Node*)n0->father;
+      fatherN1 = (const typename UG_NS<dim>::Node*)n1->father;
+
+    }
+
+    // Find the corresponding side on the father element
+    int i;
+    for (i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
+      if ( (fatherN0 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 0))
+            && fatherN1 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 1)))
+           || (fatherN0 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 1))
+               && fatherN1 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 0))))
+        break;
+    }
+
+    assert (i<UG_NS<dim>::Sides_Of_Elem(father));
+    return i;
+
+  } else {    //  dim==3
+
+    // Get the nodes
+    int nNodes = UG_NS<dim>::Corners_Of_Side(me,side);
+    const typename UG_NS<dim>::Node* n[nNodes];
+    for (int i=0; i<nNodes; i++)
+      n[i] = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, i));
+
+    std::set<const typename UG_NS<dim>::Node*> fatherNodes;      // No more than four father nodes
+
+    for (int i=0; i<nNodes; i++) {
+
+      switch (UG::D3::ReadCW(n[i], UG::D3::NTYPE_CE)) {
+
+      case UG::D3::CORNER_NODE :
+        fatherNodes.insert((const typename UG_NS<dim>::Node*)n[i]->father);
+        break;
+      case UG::D3::MID_NODE :
+        fatherNodes.insert( ((const typename UG_NS<dim>::Edge*)n[i]->father)->links[0].nbnode );
+        fatherNodes.insert( ((const typename UG_NS<dim>::Edge*)n[i]->father)->links[1].nbnode );
+        break;
+      default :
+        break;
+        // Do nothing
+      }
+
+    }
+
+    /* When explicitly using anisotropic refinement rules without green closure there
+       may be the case that a quad face is split into two quads and a triangle.
+       In that case the triangle has two CORNER_NODEs and one MID_NODES.  The current
+       code does not know how to handle this situation. */
+    if (fatherNodes.size() < 3)
+      DUNE_THROW(NotImplemented, "Anisotropic nonconforming grids are not fully implemented!");
+
+    // Find the corresponding side on the father element
+    int i;
+    for (i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
+      unsigned int found = 0;
+      typename std::set<const typename UG_NS<dim>::Node*>::iterator fNIt = fatherNodes.begin();
+      for (; fNIt != fatherNodes.end(); ++fNIt)
+        for (int k=0; k<UG_NS<dim>::Corners_Of_Side(father,i); k++)
+          if (*fNIt == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, k))) {
+            found++;
+            break;
+          }
+
+      if (found==fatherNodes.size())
+        return i;
+
+    }
+
+  }
+
+  // Should never happen
+  return -1;
+}
+
 template< class GridImp>
 void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
 
@@ -411,114 +524,14 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
     const typename UG_NS<dim>::Element* father = UG_NS<GridImp::dimensionworld>::EFather(center_);
 
     int side = neighborCount_;
-    int fatherSide = -1;
 
     while (father != NULL) {
 
-      // //////////////////////////////////////////////////////////////
-      //   Find the topological father face
-      // //////////////////////////////////////////////////////////////
-      if (dim==2) {
+      // Get the father element side of the current element side
+      int fatherSide = getFatherSide(me,side);
 
-        // Get the two nodes
-        const typename UG_NS<dim>::Node* n0 = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, 0));
-        const typename UG_NS<dim>::Node* n1 = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, 1));
-
-        const typename UG_NS<dim>::Node* fatherN0, *fatherN1;
-        assert(!(UG::D2::ReadCW(n0, UG::D2::NTYPE_CE) == UG::D2::MID_NODE
-                 && UG::D2::ReadCW(n1, UG::D2::NTYPE_CE) == UG::D2::MID_NODE));
-
-        if (UG::D2::ReadCW(n1, UG::D2::NTYPE_CE) == UG::D2::MID_NODE) {
-
-          // n0 exists on the coarser level, but n1 doesn't
-          const typename UG_NS<dim>::Edge* fatherEdge = (const typename UG_NS<dim>::Edge*)n1->father;
-          fatherN0 = fatherEdge->links[0].nbnode;
-          fatherN1 = fatherEdge->links[1].nbnode;
-
-        } else if (UG::D2::ReadCW(n0, UG::D2::NTYPE_CE) == UG::D2::MID_NODE) {
-
-          // n1 exists on the coarser level, but n0 doesn't
-          const typename UG_NS<dim>::Edge* fatherEdge = (const typename UG_NS<dim>::Edge*)n0->father;
-          fatherN0 = fatherEdge->links[0].nbnode;
-          fatherN1 = fatherEdge->links[1].nbnode;
-
-        } else {
-
-          // This edge is a copy
-          fatherN0 = (const typename UG_NS<dim>::Node*)n0->father;
-          fatherN1 = (const typename UG_NS<dim>::Node*)n1->father;
-
-        }
-
-        // Find the corresponding side on the father element
-        int i;
-        for (i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
-          if ( (fatherN0 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 0))
-                && fatherN1 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 1)))
-               || (fatherN0 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 1))
-                   && fatherN1 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 0))))
-            break;
-        }
-
-        assert (i<UG_NS<dim>::Sides_Of_Elem(father));
-        fatherSide = i;
-
-      } else {        //  dim==3
-
-        // Get the nodes
-        int nNodes = UG_NS<dim>::Corners_Of_Side(me,side);
-        const typename UG_NS<dim>::Node* n[nNodes];
-        for (int i=0; i<nNodes; i++)
-          n[i] = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, i));
-
-        std::set<const typename UG_NS<dim>::Node*> fatherNodes;          // No more than four father nodes
-
-        for (int i=0; i<nNodes; i++) {
-
-          switch (UG::D3::ReadCW(n[i], UG::D3::NTYPE_CE)) {
-
-          case UG::D3::CORNER_NODE :
-            fatherNodes.insert((const typename UG_NS<dim>::Node*)n[i]->father);
-            break;
-          case UG::D3::MID_NODE :
-            fatherNodes.insert( ((const typename UG_NS<dim>::Edge*)n[i]->father)->links[0].nbnode );
-            fatherNodes.insert( ((const typename UG_NS<dim>::Edge*)n[i]->father)->links[1].nbnode );
-            break;
-          default :
-            break;
-            // Do nothing
-          }
-
-        }
-
-        /* When explicitly using anisotropic refinement rules without green closure there
-           may be the case that a quad face is split into two quads and a triangle.
-           In that case the triangle has two CORNER_NODEs and one MID_NODES.  The current
-           code does not know how to handle this situation. */
-        if (fatherNodes.size() < 3)
-          DUNE_THROW(NotImplemented, "Anisotropic nonconforming grids are not fully implemented!");
-
-        // Find the corresponding side on the father element
-        int i;
-        for (i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
-          unsigned int found = 0;
-          typename std::set<const typename UG_NS<dim>::Node*>::iterator fNIt = fatherNodes.begin();
-          for (; fNIt != fatherNodes.end(); ++fNIt)
-            for (int k=0; k<UG_NS<dim>::Corners_Of_Side(father,i); k++)
-              if (*fNIt == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, k))) {
-                found++;
-                break;
-              }
-
-          if (found==fatherNodes.size()) {
-            fatherSide = i;
-            break;
-          }
-
-        }
-      }
-
-      // Do we have a neighbor on across this side?
+      // Do we have a neighbor on across this side?  If yes we have exactly one leaf intersection
+      // with that neighbor.
       typename UG_NS<dim>::Element* otherElement = UG_NS<dim>::NbElem(father, fatherSide);
       if (otherElement) {
         const int nSides = UG_NS<dim>::Sides_Of_Elem(otherElement);
