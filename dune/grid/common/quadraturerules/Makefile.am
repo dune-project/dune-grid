@@ -9,6 +9,12 @@ quadraturerules_HEADERS =			\
 	jacobi_2_0_imp.hh			\
 	lobattoquadrature.hh
 
+headercheck_IGNORE = \
+	cube_imp.hh				\
+	jacobi_1_0_imp.hh			\
+	jacobi_2_0_imp.hh
+
+
 noinst_LTLIBRARIES = libquadraturerules.la
 libquadraturerules_la_SOURCES = quadraturerules.cc cube.cc jacobi_1_0.cc jacobi_2_0.cc
 libquadraturerules_la_LIBADD =			\
