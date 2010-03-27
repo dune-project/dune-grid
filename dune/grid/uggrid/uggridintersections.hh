@@ -208,7 +208,7 @@ namespace Dune {
     typedef typename GridImp::ctype UGCtype;
 
     // An element face identfied by an element and a face number
-    typedef std::pair<typename UG_NS<dim>::Element*, int> Face;
+    typedef std::pair<const typename UG_NS<dim>::Element*, int> Face;
 
     // The corresponding iterator needs to access all members
     friend class UGGridLeafIntersectionIterator<GridImp>;
@@ -250,12 +250,13 @@ namespace Dune {
     //! (that is the neighboring Entity)
     EntityPointer outside() const {
 
-      typename UG_NS<dim>::Element* otherelem = leafSubFaces_[subNeighborCount_].first;
+      const typename UG_NS<dim>::Element* otherelem = leafSubFaces_[subNeighborCount_].first;
 
       if (otherelem==0)
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
-      return UGGridEntityPointer<0,GridImp>(otherelem);
+      /** \todo Remove the const_cast */
+      return UGGridEntityPointer<0,GridImp>(const_cast<typename UG_NS<dim>::Element*>(otherelem));
     }
 
     //! return true if intersection is with boundary.
@@ -419,7 +420,7 @@ namespace Dune {
     }
 
     /** \brief Find the topological father face */
-    int getFatherSide(const typename UG_NS<dim>::Element* me, int side) const;
+    int getFatherSide(const Face& currentFace) const;
 
     /** \brief Precompute list of all leaf intersections of the current element face */
     void constructLeafSubfaces();

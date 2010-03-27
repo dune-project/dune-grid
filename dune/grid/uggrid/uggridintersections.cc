@@ -209,17 +209,17 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
   } else {
 
-    const typename UG_NS<dim>::Element* other = leafSubFaces_[subNeighborCount_].first;
-    int otherSide                             = leafSubFaces_[subNeighborCount_].second;
+    Face otherFace = leafSubFaces_[subNeighborCount_];
 
-    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(other, otherSide);
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
     GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
       // Get world coordinate of other element's vertex
-      const UGCtype* worldPos = UG_NS<dim>::Corner(other,UG_NS<dim>::Corner_Of_Side(other,otherSide,i))->myvertex->iv.x;
+      const UGCtype* worldPos = UG_NS<dim>::Corner(otherFace.first,
+                                                   UG_NS<dim>::Corner_Of_Side(otherFace.first,otherFace.second,i))->myvertex->iv.x;
 
       // Get the local coordinate with respect to this element
       // coorddim*coorddim is an upper bound for the number of vertices
@@ -273,20 +273,19 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
   } else {
 
-    const typename UG_NS<dim>::Element* other = leafSubFaces_[subNeighborCount_].first;
-    int otherSide                             = leafSubFaces_[subNeighborCount_].second;
+    Face otherFace = leafSubFaces_[subNeighborCount_];
 
-    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(other, otherSide);
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
     GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
       // get number of corner in UG's numbering system
-      int cornerIdx = UG_NS<dim>::Corner_Of_Side(other, otherSide, i);
+      int cornerIdx = UG_NS<dim>::Corner_Of_Side(otherFace.first, otherFace.second, i);
 
       // Get world coordinate of other element's vertex
-      const UGCtype* worldPos = UG_NS<dim>::Corner(other,cornerIdx)->myvertex->iv.x;
+      const UGCtype* worldPos = UG_NS<dim>::Corner(otherFace.first,cornerIdx)->myvertex->iv.x;
 
       // and poke them into the Geometry
       for (int j=0; j<dim; j++)
@@ -346,18 +345,17 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
   } else {
 
-    const typename UG_NS<dim>::Element* other = leafSubFaces_[subNeighborCount_].first;
-    int otherSide                             = leafSubFaces_[subNeighborCount_].second;
+    Face otherFace = leafSubFaces_[subNeighborCount_];
 
-    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(other, otherSide);
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
     GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
       // get the local coordinate of j-th corner
-      int v = UG_NS<dim>::Corner_Of_Side(other,otherSide,i);
-      UG_NS<dim>::getCornerLocal(other, v, coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
+      int v = UG_NS<dim>::Corner_Of_Side(otherFace.first,otherFace.second,i);
+      UG_NS<dim>::getCornerLocal(otherFace.first, v, coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
 
     }
 
@@ -387,11 +385,9 @@ int Dune::UGGridLeafIntersection<GridImp>::indexInOutside () const
 }
 
 template <class GridImp>
-int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const typename UG_NS<dim>::Element* me,
-                                                         int side) const
+int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace) const
 {
-  const typename UG_NS<dim>::Element* father = UG_NS<dim>::EFather(me);
-  int fatherSide;
+  const typename UG_NS<dim>::Element* father = UG_NS<dim>::EFather(currentFace.first);
 
   // //////////////////////////////////////////////////////////////
   //   Find the topological father face
@@ -399,8 +395,10 @@ int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const typename UG_NS<di
   if (dim==2) {
 
     // Get the two nodes
-    const typename UG_NS<dim>::Node* n0 = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, 0));
-    const typename UG_NS<dim>::Node* n1 = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, 1));
+    const typename UG_NS<dim>::Node* n0 = UG_NS<dim>::Corner(currentFace.first,
+                                                             UG_NS<dim>::Corner_Of_Side(currentFace.first, currentFace.second, 0));
+    const typename UG_NS<dim>::Node* n1 = UG_NS<dim>::Corner(currentFace.first,
+                                                             UG_NS<dim>::Corner_Of_Side(currentFace.first, currentFace.second, 1));
 
     const typename UG_NS<dim>::Node* fatherN0, *fatherN1;
     assert(!(UG::D2::ReadCW(n0, UG::D2::NTYPE_CE) == UG::D2::MID_NODE
@@ -444,10 +442,10 @@ int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const typename UG_NS<di
   } else {    //  dim==3
 
     // Get the nodes
-    int nNodes = UG_NS<dim>::Corners_Of_Side(me,side);
+    int nNodes = UG_NS<dim>::Corners_Of_Side(currentFace.first,currentFace.second);
     const typename UG_NS<dim>::Node* n[nNodes];
     for (int i=0; i<nNodes; i++)
-      n[i] = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, i));
+      n[i] = UG_NS<dim>::Corner(currentFace.first,UG_NS<dim>::Corner_Of_Side(currentFace.first, currentFace.second, i));
 
     std::set<const typename UG_NS<dim>::Node*> fatherNodes;      // No more than four father nodes
 
@@ -520,15 +518,13 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
     leafSubFaces_.resize(1);
 
     // I am a leaf and the neighbor does not exist: go down
-    const typename UG_NS<dim>::Element* me = center_;
+    Face currentFace(center_, neighborCount_);
     const typename UG_NS<dim>::Element* father = UG_NS<GridImp::dimensionworld>::EFather(center_);
-
-    int side = neighborCount_;
 
     while (father != NULL) {
 
       // Get the father element side of the current element side
-      int fatherSide = getFatherSide(me,side);
+      int fatherSide = getFatherSide(currentFace);
 
       // Do we have a neighbor on across this side?  If yes we have exactly one leaf intersection
       // with that neighbor.
@@ -544,9 +540,8 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
       }
 
       // Go further down
-      me     = father;
+      currentFace = Face(father,fatherSide);
       father = UG_NS<dim>::EFather(father);
-      side   = fatherSide;
 
     }
 
@@ -589,7 +584,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   typename SLList<Face>::iterator f = list.begin();
   for (; f!=list.end(); ++f) {
 
-    typename UG_NS<dim>::Element* theElement = f->first;
+    const typename UG_NS<dim>::Element* theElement = f->first;
 
     int Sons_of_Side = 0;
     typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
