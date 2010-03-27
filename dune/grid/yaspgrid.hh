@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <stack>
+#include <cstdint>
 
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
