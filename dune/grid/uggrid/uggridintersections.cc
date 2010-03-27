@@ -392,13 +392,16 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   // Do nothing if level neighbor doesn't exit
   typename UG_NS<dim>::Element* levelNeighbor = UG_NS<dim>::NbElem(center_, neighborCount_);
 
+  // If the level neighbor exists and is leaf, then there is only a single leaf intersection
   if (levelNeighbor != NULL && UG_NS<dim>::isLeaf(levelNeighbor)) {
     leafSubFaces_.resize(1);
     leafSubFaces_[0] = Face(levelNeighbor, numberInNeighbor(center_, levelNeighbor));
     return;
   }
 
-  // Go down
+  // If the level neighbor does not exist, then leaf intersections exist only with neighbors
+  // on lower levels, if they exist at all.  Therefore we descend in the hierarchy towards
+  // the coarsest grid until we have found a level neighbor.
   if (levelNeighbor == NULL) {
 
     leafSubFaces_.resize(1);
@@ -460,7 +463,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
         assert (i<UG_NS<dim>::Sides_Of_Elem(father));
         fatherSide = i;
 
-      } else {
+      } else {        //  dim==3
 
         // Get the nodes
         int nNodes = UG_NS<dim>::Corners_Of_Side(me,side);
@@ -490,7 +493,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
 
         /* When explicitly using anisotropic refinement rules without green closure there
            may be the case that a quad face is split into two quads and a triangle.
-           In that case the triangle has to CORNER_NODEs and one MID_NODES.  The current
+           In that case the triangle has two CORNER_NODEs and one MID_NODES.  The current
            code does not know how to handle this situation. */
         if (fatherNodes.size() < 3)
           DUNE_THROW(NotImplemented, "Anisotropic nonconforming grids are not fully implemented!");

@@ -418,6 +418,7 @@ namespace Dune {
       return -1;
     }
 
+    /** \brief Precompute list of all leaf intersections of the current element face */
     void constructLeafSubfaces();
 
     //! vector storing the outer normal
