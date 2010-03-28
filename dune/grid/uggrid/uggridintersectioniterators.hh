@@ -97,15 +97,17 @@ namespace Dune {
     //! prefix increment
     void increment() {
 
-      GridImp::getRealImplementation(intersection_).subNeighborCount_++;
+      UGGridLeafIntersection<GridImp>& intersectionImp = GridImp::getRealImplementation(intersection_);
 
-      if (GridImp::getRealImplementation(intersection_).subNeighborCount_ >= GridImp::getRealImplementation(intersection_).leafSubFaces_.size() ) {
+      intersectionImp.subNeighborCount_++;
 
-        GridImp::getRealImplementation(intersection_).neighborCount_++;
-        GridImp::getRealImplementation(intersection_).subNeighborCount_ = 0;
+      if (intersectionImp.subNeighborCount_ >= intersectionImp.leafSubFaces_.size() ) {
 
-        if (GridImp::getRealImplementation(intersection_).neighborCount_ < UG_NS<dim>::Sides_Of_Elem(GridImp::getRealImplementation(intersection_).center_))
-          GridImp::getRealImplementation(intersection_).constructLeafSubfaces();
+        intersectionImp.neighborCount_++;
+        intersectionImp.subNeighborCount_ = 0;
+
+        if (intersectionImp.neighborCount_ < UG_NS<dim>::Sides_Of_Elem(intersectionImp.center_))
+          intersectionImp.constructLeafSubfaces();
 
       }
 
