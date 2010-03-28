@@ -207,7 +207,7 @@ namespace Dune
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int >& vertices )
     {
-      DUNE_THROW( NotImplemented, "insertBoundarySegment without a parametrization function" );
+      DUNE_THROW( NotImplemented, "AlbertaGrid::insertBoundarySegment without a parametrization function" );
     }
 
     /** \brief insert a shaped boundary segment into the macro grid
