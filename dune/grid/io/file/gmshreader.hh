@@ -490,7 +490,11 @@ namespace Dune
         // segments are the default.
         simplexVertices.resize(2);
         readfile(file,2,"%d %d\n",&(simplexVertices[0]),&(simplexVertices[1]));
-
+        vertices.resize(2);
+        for (int i=0; i<2; i++)
+          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
+        if (insert_boundary_segments)
+          factory.insertBoundarySegment(vertices);
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
         break;
@@ -631,6 +635,12 @@ namespace Dune
         // are the default anyways.
         simplexVertices.resize(3);
         readfile(file,3,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
+        vertices.resize(3);
+        for (int i=0; i<3; i++)
+          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
+
+        if (insert_boundary_segments)
+          factory.insertBoundarySegment(vertices);
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
         break;
