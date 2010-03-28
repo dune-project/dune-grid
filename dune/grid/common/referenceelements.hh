@@ -33,7 +33,7 @@ namespace Dune
       const int dim = RT::d;
 
       assert(cdim == codim);
-      static FieldMatrix<CoordType, dim-codim, dim> mat;
+      FieldMatrix<CoordType, dim-codim, dim> mat;
 
       int zeroLocalIdx = refElem.subEntity(i, cdim, 0, dim);
       FieldVector<CoordType, dim> result =
