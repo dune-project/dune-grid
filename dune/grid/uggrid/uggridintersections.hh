@@ -55,7 +55,7 @@ namespace Dune {
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
-    //! (that is the Entity where we started this Iterator)
+    //! (that is the entity where we started this iterator)
     EntityPointer inside() const {
       return UGGridEntityPointer<0,GridImp>(center_);
     }
@@ -71,8 +71,7 @@ namespace Dune {
       return UGGridEntityPointer<0,GridImp>(otherelem);
     }
 
-    //! return true if intersection is with boundary. \todo connection with
-    //! boundary information, processor/outer boundary
+    //! return true if intersection is with boundary.
     bool boundary () const {
       return UG_NS<dim>::Side_On_Bnd(center_, neighborCount_);
     }
@@ -87,7 +86,7 @@ namespace Dune {
       return boundarySegmentIndex();
     }
 
-    //! return information about the Boundary
+    /** \brief return index of the corresponding coarse grid boundary segment */
     int boundarySegmentIndex () const {
 #ifndef NDEBUG
       if (!boundary())
@@ -193,7 +192,7 @@ namespace Dune {
   };
 
 
-  /** \brief Implementation class for an intersection with an element on the same level */
+  /** \brief Implementation class for a leaf intersection in a UGGrid */
   template<class GridImp>
   class UGGridLeafIntersection
   {
@@ -207,7 +206,7 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype UGCtype;
 
-    // An element face identfied by an element and a face number
+    // An element face identfied by the element and a face number
     typedef std::pair<const typename UG_NS<dim>::Element*, int> Face;
 
     // The corresponding iterator needs to access all members
@@ -274,7 +273,7 @@ namespace Dune {
       return boundarySegmentIndex();
     }
 
-    //! return information about the Boundary
+    /** \brief Return index of corresponding coarse grid boundary segment */
     int boundarySegmentIndex () const {
 #ifndef NDEBUG
       if (!boundary())
@@ -419,7 +418,7 @@ namespace Dune {
       return -1;
     }
 
-    /** \brief Find the topological father face */
+    /** \brief Find the topological father face of a given fact*/
     int getFatherSide(const Face& currentFace) const;
 
     /** \brief Precompute list of all leaf intersections of the current element face */
@@ -445,11 +444,11 @@ namespace Dune {
     //! count on which neighbor we are lookin' at. Note that this is interpreted in UG's ordering!
     int neighborCount_;
 
-    //! For nonconforming intersection: which intersection within the face given
-    //! by neighborCount_ are we looking at?
-    unsigned int subNeighborCount_;
-
+    /** \brief List of precomputed intersections */
     std::vector<Face> leafSubFaces_;
+
+    /** \brief Current position in the leafSubFaces_ array */
+    unsigned int subNeighborCount_;
 
   };
 

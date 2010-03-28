@@ -11,17 +11,7 @@
 
 namespace Dune {
 
-  //**********************************************************************
-  //
-  // --UGGridIntersectionIterator
-  // --IntersectionIterator
-  /** \brief Iterator over all element neighbors
-   * \ingroup UGGrid
-     Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
-     a neighbor is an entity of codimension 0 which has a common entity of codimension 1
-     These neighbors are accessed via a IntersectionIterator. This allows the implement
-     non-matching meshes. The number of neigbors may be different from the number
-     of an element!
+  /** \brief Implementation of the UGGrid LevelIntersectionIterator
    */
   template<class GridImp>
   class UGGridLevelIntersectionIterator
@@ -68,6 +58,8 @@ namespace Dune {
   };
 
 
+  /** \brief Implementation of the UGGrid LeafIntersectionIterator
+   */
   template<class GridImp>
   class UGGridLeafIntersectionIterator
   {
@@ -94,18 +86,29 @@ namespace Dune {
       return GridImp::getRealImplementation(intersection_).equals(GridImp::getRealImplementation(other.intersection_));
     }
 
-    //! prefix increment
+    /** \brief Prefix increment.
+
+       The UG data structure does not directly contain information about leaf neighbors/intersections.
+       Therefore getting that information is fairly expensive.  In particular, it is too expensive to
+       start looking for the next intersection whenever 'increment()' is called.  Therefore, all
+       intersections of one face of the 'inside' element are precomputed, and incrementing then traverses
+       this precomputed list.  If the list is exhausted the iterator advances to the next faces
+       and precomputes all intersections there.
+     */
     void increment() {
 
       UGGridLeafIntersection<GridImp>& intersectionImp = GridImp::getRealImplementation(intersection_);
 
       intersectionImp.subNeighborCount_++;
 
+      // are there no more intersections for the current element face?
       if (intersectionImp.subNeighborCount_ >= intersectionImp.leafSubFaces_.size() ) {
 
+        // move to the next face
         intersectionImp.neighborCount_++;
         intersectionImp.subNeighborCount_ = 0;
 
+        // if the next face is not the end iterator construct all intersections for it
         if (intersectionImp.neighborCount_ < UG_NS<dim>::Sides_Of_Elem(intersectionImp.center_))
           intersectionImp.constructLeafSubfaces();
 

@@ -389,20 +389,25 @@ int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace
 {
   const typename UG_NS<dim>::Element* father = UG_NS<dim>::EFather(currentFace.first);
 
-  // //////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////////
   //   Find the topological father face
-  // //////////////////////////////////////////////////////////////
+  //   The implementation is different for 2d and 3d grids, because UG provides
+  //   more information in the 2d case.  It is hence easier to handle.
+  // ///////////////////////////////////////////////////////////////////////////////
   if (dim==2) {
 
-    // Get the two nodes
+    // Get the two nodes of the current element face
     const typename UG_NS<dim>::Node* n0 = UG_NS<dim>::Corner(currentFace.first,
                                                              UG_NS<dim>::Corner_Of_Side(currentFace.first, currentFace.second, 0));
     const typename UG_NS<dim>::Node* n1 = UG_NS<dim>::Corner(currentFace.first,
                                                              UG_NS<dim>::Corner_Of_Side(currentFace.first, currentFace.second, 1));
 
-    const typename UG_NS<dim>::Node* fatherN0, *fatherN1;
+    // We assume that at least one of the two nodes has a father on the next-coarser level.
+    // A node that doesn't corresponds to an edge.
     assert(!(UG::D2::ReadCW(n0, UG::D2::NTYPE_CE) == UG::D2::MID_NODE
              && UG::D2::ReadCW(n1, UG::D2::NTYPE_CE) == UG::D2::MID_NODE));
+
+    const typename UG_NS<dim>::Node* fatherN0, *fatherN1;
 
     if (UG::D2::ReadCW(n1, UG::D2::NTYPE_CE) == UG::D2::MID_NODE) {
 
@@ -427,17 +432,16 @@ int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace
     }
 
     // Find the corresponding side on the father element
-    int i;
-    for (i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
+    for (int i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
       if ( (fatherN0 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 0))
             && fatherN1 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 1)))
            || (fatherN0 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 1))
                && fatherN1 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 0))))
-        break;
+        return i;
     }
 
-    assert (i<UG_NS<dim>::Sides_Of_Elem(father));
-    return i;
+    DUNE_THROW(InvalidStateException,"getFatherSide() didn't find a father.");
+    return 0;
 
   } else {    //  dim==3
 
@@ -551,9 +555,9 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   }
 
 
-  // ///////////////
-  //   init list
-  // ///////////////
+  // Third case: there is a neighbor but it is not leaf.  Therefore we have to go up in the
+  // hierarchy (i.e. towards finer grids) until we are on the leaf level.  UG is nice enough
+  // to provide descendents of element faces itself.  We simply use that functionality.
 
   SLList<Face> list;
   int levelNeighborSide = numberInNeighbor(center_, levelNeighbor);
@@ -578,7 +582,9 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
     list.push_back(Face(SonList[i],SonSides[i]));
 
   // //////////////////////////////////////////////////
-  //   Traverse and collect all children of the side
+  //   Get_Sons_of_ElementSide only computes direct sons.  Therefore in order to get all
+  //   descendents (to then filter out the leaf descendents) we have to search iteratively.
+  //   We do a breadth-first search.
   // //////////////////////////////////////////////////
 
   typename SLList<Face>::iterator f = list.begin();
