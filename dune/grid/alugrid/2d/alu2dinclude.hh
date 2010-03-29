@@ -5,6 +5,25 @@
 
 #include <alugrid_2d.h>
 
+//////////////////////////////////////////////////////////////////////
+// compile imp.cc into lib (1 yes, 0 no)
+// if you change this, you'll get what you deserve
+//////////////////////////////////////////////////////////////////////
+#define COMPILE_ALU2DGRID_LIB 0
+
+#if COMPILE_ALU2DGRID_LIB
+  #define COMPILE_ALU2DGRID_INLINE 0
+#else
+  #define COMPILE_ALU2DGRID_INLINE 1
+#endif
+
+#if COMPILE_ALU2DGRID_INLINE
+#define alu2d_inline inline
+#else
+#define alu2d_inline
+#endif
+/////////////////////////////////////////////////////////////////////
+
 // fix for ALUGrid 1.22, where ALUGRID_VERTEX_PROJECTION is defined only in alugrid_serial.h
 #ifndef ALUGRID_VERTEX_PROJECTION
 #include <alugrid_serial.h>

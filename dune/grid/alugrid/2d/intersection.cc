@@ -1,5 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#ifndef DUNE_ALU2DGRID_INTERSECTION_CC
+#define DUNE_ALU2DGRID_INTERSECTION_CC
+
 #include <config.h>
 
 #include <dune/grid/alugrid/2d/geometry.hh>
@@ -12,6 +15,7 @@ namespace Dune
   // --------------------------------------------------
 
   template< class LocalGeometry >
+  alu2d_inline
   ALU2DIntersectionGeometryStorage< LocalGeometry >::ALU2DIntersectionGeometryStorage ()
   {
     for( int i = 0; i < 4; ++i )
@@ -43,7 +47,8 @@ namespace Dune
   // ----------------------------------------------------
 
   template< class GridImp >
-  inline int ALU2dGridLevelIntersectionIterator< GridImp >
+  alu2d_inline
+  int ALU2dGridLevelIntersectionIterator< GridImp >
   ::getOppositeInFather ( const int nrInChild, const int nrOfChild )
   {
     int ret = (nrInChild==0) ? (2-nrOfChild)
@@ -54,7 +59,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline int ALU2dGridLevelIntersectionIterator< GridImp >
+  alu2d_inline
+  int ALU2dGridLevelIntersectionIterator< GridImp >
   ::getOppositeInChild ( const int nrInFather, const int nrOfChild )
   {
     int ret = (nrInFather==0) ? (nrOfChild+1) : ((nrInFather-nrOfChild==1) ? -1 : 0);
@@ -64,6 +70,7 @@ namespace Dune
 
 
   template< class GridImp >
+  alu2d_inline
   void ALU2dGridLevelIntersectionIterator< GridImp >::addNeighboursToStack ()
   {
     assert( current.index_ < current.nFaces() );
@@ -128,6 +135,7 @@ namespace Dune
 
 
   template< class GridImp >
+  alu2d_inline
   void ALU2dGridLevelIntersectionIterator< GridImp >::doIncrement ()
   {
     assert( current.index_ < current.nFaces() );
@@ -158,6 +166,7 @@ namespace Dune
 
 
   template< class GridImp >
+  alu2d_inline
   void ALU2dGridLevelIntersectionIterator< GridImp >::setFirstItem ( const HElementType &elem, int wLevel )
   {
     // empty stack first
@@ -177,7 +186,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline void ALU2dGridLevelIntersectionIterator< GridImp >::setupIntersection ()
+  alu2d_inline
+  void ALU2dGridLevelIntersectionIterator< GridImp >::setupIntersection ()
   {
     assert( !nbStack_.empty() );
 
@@ -193,6 +203,7 @@ namespace Dune
 
   //! increment iterator
   template< class GridImp >
+  alu2d_inline
   void ALU2dGridLeafIntersectionIterator< GridImp >::doIncrement ()
   {
     assert( current.index_ < current.nFaces() );
@@ -282,6 +293,7 @@ namespace Dune
 
 
   template< class GridImp >
+  alu2d_inline
   void ALU2dGridLeafIntersectionIterator< GridImp >::setFirstItem ( const HElementType &elem, int wLevel )
   {
     while( !nbStack_.empty() )
@@ -296,7 +308,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline void ALU2dGridLeafIntersectionIterator< GridImp >::setupIntersection ()
+  alu2d_inline
+  void ALU2dGridLeafIntersectionIterator< GridImp >::setupIntersection ()
   {
     assert( !nbStack_.empty() );
 
@@ -308,7 +321,7 @@ namespace Dune
 }
 
 
-
+#if COMPILE_ALU2DGRID_LIB
 // Template Instantiation
 // ----------------------
 
@@ -341,3 +354,6 @@ template class Dune::ALU2dGridLeafIntersectionIterator< const Dune::ALU2dGrid< 2
 template class Dune::ALU2dGridLeafIntersectionIterator< const Dune::ALU2dGrid< 2, 3, ALU2DSPACE triangle > >;
 template class Dune::ALU2dGridLeafIntersectionIterator< const Dune::ALU2dGrid< 2, 3, ALU2DSPACE quadrilateral > >;
 #endif // #ifdef ALUGRID_SURFACE_2D
+
+#endif
+#endif

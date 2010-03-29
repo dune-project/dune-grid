@@ -503,5 +503,8 @@ namespace Dune
 } // end namespace Dune
 
 #include "intersection_imp.cc"
+#if COMPILE_ALU2DGRID_INLINE
+  #include "intersection.cc"
+#endif
 
 #endif // #ifndef DUNE_ALU2DGRID_INTERSECTION_HH
