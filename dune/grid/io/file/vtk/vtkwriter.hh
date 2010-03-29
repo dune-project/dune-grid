@@ -730,6 +730,8 @@ namespace Dune
       // write process data
       std::ofstream file;
       file.open( pieceName.str().c_str(), std::ios::binary );
+      if (! file.is_open())
+        DUNE_THROW(IOError, "Could not write to piece file " << pieceName);
       writeDataFile( file );
       file.close();
 
@@ -749,6 +751,8 @@ namespace Dune
       if( commRank == 0 )
       {
         file.open( parallelName.str().c_str() );
+        if (! file.is_open())
+          DUNE_THROW(IOError, "Could not write to parallel file " << parallelName);
         writeParallelHeader( file, name.c_str(), ".", commSize );
         file.close();
       }
@@ -862,6 +866,8 @@ namespace Dune
       else
         sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath, commSize, commRank, name);
       file.open(fullname,std::ios::binary);
+      if (! file.is_open())
+        DUNE_THROW(IOError, "Could not write to piecefile file " << fullname);
       writeDataFile(file);
       file.close();
       gridView_.comm().barrier();
@@ -872,6 +878,8 @@ namespace Dune
         else
           sprintf(fullname,"%s/s%04d:%s.pvtp",path, commSize, name);
         file.open(fullname);
+        if (! file.is_open())
+          DUNE_THROW(IOError, "Could not write to parallel file " << fullname);
         writeParallelHeader(file,name,relpiecepath, commSize );
         file.close();
       }
