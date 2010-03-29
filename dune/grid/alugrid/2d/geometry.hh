@@ -562,14 +562,14 @@ namespace Dune
 
     //! maps a local coordinate within reference element to
     //! global coordinate in element
-    GlobalCoordinate global ( const LocalCoordinate &local ) const;
+    GlobalCoordinate global ( const LocalCoordinate& local ) const;
 
     //! maps a global coordinate within the element to a
     //! local coordinate in its reference element
-    FieldVector<alu2d_ctype,  mydim> local (const FieldVector<alu2d_ctype, cdim>& global) const;
+    LocalCoordinate local (const GlobalCoordinate& global) const;
 
     //! A(l) , see grid.hh
-    alu2d_ctype integrationElement (const FieldVector<alu2d_ctype, mydim>& local) const;
+    alu2d_ctype integrationElement (const LocalCoordinate& local) const;
 
     //! return volume of geometry
     alu2d_ctype volume () const;
@@ -578,10 +578,10 @@ namespace Dune
     bool affine() const { return geoImpl_.affine(); }
 
     //! jacobian inverse transposed
-    const FieldMatrix<alu2d_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<alu2d_ctype, mydim>& local) const;
+    const FieldMatrix<alu2d_ctype,cdim,mydim>& jacobianInverseTransposed (const LocalCoordinate& local) const;
 
     //! jacobian transposed
-    const FieldMatrix<alu2d_ctype,mydim,cdim>& jacobianTransposed (const FieldVector<alu2d_ctype, mydim>& local) const;
+    const FieldMatrix<alu2d_ctype,mydim,cdim>& jacobianTransposed (const LocalCoordinate& local) const;
 
     //***********************************************************************
     //!  Methods that not belong to the Interface, but have to be public
@@ -603,7 +603,7 @@ namespace Dune
     bool buildLocalGeometry(const int faceNumber, const int twist,const int coorns);
 
     //! return non-const reference to coord vecs
-    FieldVector<alu2d_ctype, cdim>& getCoordVec (int i);
+    GlobalCoordinate& getCoordVec (int i);
 
     //! print internal data
     void print (std::ostream& ss) const;
