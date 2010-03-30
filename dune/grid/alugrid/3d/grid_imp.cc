@@ -902,6 +902,16 @@ namespace Dune {
   // Instantiation
   template class ALU3dGrid<3 ,3, hexa>;
   template class ALU3dGrid<3 ,3, tetra>;
+
+  template bool ALU3dGrid<3 ,3, tetra> :: readGrid< xdr > (const std::string, alu3d_ctype & );
+  template bool ALU3dGrid<3 ,3, tetra> :: readGrid< ascii > (const std::string, alu3d_ctype & );
+  template bool ALU3dGrid<3 ,3, tetra> :: writeGrid< xdr > (const std::string, alu3d_ctype ) const ;
+  template bool ALU3dGrid<3 ,3, tetra> :: writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
+
+  template bool ALU3dGrid<3 ,3, hexa> :: readGrid< xdr > (const std::string, alu3d_ctype & );
+  template bool ALU3dGrid<3 ,3, hexa> :: readGrid< ascii > (const std::string, alu3d_ctype & );
+  template bool ALU3dGrid<3 ,3, hexa> :: writeGrid< xdr > (const std::string, alu3d_ctype ) const ;
+  template bool ALU3dGrid<3 ,3, hexa> :: writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
 #endif
 
 } // end namespace Dune
