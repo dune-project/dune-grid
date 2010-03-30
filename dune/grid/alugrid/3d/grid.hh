@@ -653,7 +653,7 @@ namespace Dune {
     // return reference to org ALU3dGrid
     // private method, but otherwise we have to friend class all possible
     // types of LevelIterator ==> later
-    virtual ALU3DSPACE GitterImplType& myGrid() const;
+    ALU3DSPACE GitterImplType& myGrid() const;
     virtual ALU3DSPACE GitterImplType* createALUGrid(const char *);
 
     ALUGridVertexProjectionType* vertexProjection() { return (ALUGridVertexProjectionType *) vertexProjection_; }
