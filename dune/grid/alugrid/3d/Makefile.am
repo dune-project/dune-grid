@@ -8,8 +8,9 @@ libalu3d_la_LIBADD = 				\
 
 noinst_LTLIBRARIES = libalu3d.la
 if ALUGRID
-  libalu3d_la_SOURCES = mappings.cc mappings_imp.cc topology.cc faceutility.cc \
-                        alu3dgridfactory.cc grid_imp.cc
+#  libalu3d_la_SOURCES = mappings.cc mappings_imp.cc topology.cc faceutility.cc \
+#                        alu3dgridfactory.cc grid_imp.cc iterator.cc
+  libalu3d_la_SOURCES = mappings.cc topology.cc faceutility.cc
 else
   libalu3d_la_SOURCES = topology.cc
 endif
@@ -19,7 +20,7 @@ alu3dgrid_HEADERS = alu3dinclude.hh alu3dgridfactory.hh alu3dgridfactory.cc \
   datahandle.hh memory.hh grid.hh grid_imp.cc grid_inline.hh \
   mappings.hh mappings_imp.cc topology.hh entity.hh entity_imp.cc \
   faceutility.hh faceutility_imp.cc geometry.hh geometry_imp.cc \
-  indexsets.hh iterator.hh iterator_imp.cc alu3diterators.hh \
+  indexsets.hh iterator.hh iterator.cc iterator_imp.cc alu3diterators.hh \
   lbdatahandle.hh alugrid.hh capabilities.hh
 
 headercheck_IGNORE = $(alu3dgrid_HEADERS)
