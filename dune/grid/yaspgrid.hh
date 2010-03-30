@@ -7,7 +7,13 @@
 #include <vector>
 #include <algorithm>
 #include <stack>
-#include <cstdint>
+
+// either include stdint.h or provide fallback for uint8_t
+#if HAVE_STDINT_H
+#include <stdint.h>
+#else
+typedef unsigned char uint8_t;
+#endif
 
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
