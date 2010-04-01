@@ -8,8 +8,12 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
 
+#if HAVE_ALUGRID
+
 #include <dune/grid/alugrid/3d/alu3dinclude.hh>
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
+
+#endif
 
 namespace Dune
 {
