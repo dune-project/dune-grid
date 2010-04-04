@@ -84,7 +84,7 @@ void checkQuadrature(Dune::GeometryType t)
 
         for (int d=0; d<dim; d++)
         {
-          integral[d] += weight*std::pow(x[d],p);
+          integral[d] += weight*std::pow(x[d],double(p));
         }
       }
 
@@ -101,7 +101,7 @@ void checkQuadrature(Dune::GeometryType t)
           dir = d;
         }
       }
-      ctype epsilon = std::pow(2.0,p)*p*std::numeric_limits<double>::epsilon();
+      ctype epsilon = std::pow(2.0,double(p))*p*std::numeric_limits<double>::epsilon();
       if (p==0)
         epsilon = 2.0*std::numeric_limits<double>::epsilon();
       if (maxRelativeError > epsilon) {
