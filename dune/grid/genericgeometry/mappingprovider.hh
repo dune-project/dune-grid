@@ -48,6 +48,8 @@ namespace Dune
       typedef HybridMapping< dim, GeometryTraits > Mapping;
 
     private:
+      template< bool > struct AllTypes;
+      template< bool > struct OnlySimplexCube;
 
       template< GeometryType :: BasicType type, class CoordVector >
       static Mapping *virtualMapping ( const CoordVector &coords )
@@ -62,33 +64,50 @@ namespace Dune
       mapping ( const GeometryType &type, const CoordVector &coords )
       {
         assert( type.dim() == Mapping :: dimension );
+        typedef typename SelectType< (Mapping :: dimension >= 3), AllTypes<true>, OnlySimplexCube<false> >::Type Switch;
+        return Switch :: mapping( type.basicType(), coords );
+      }
+    };
 
-        if (Mapping :: dimension >= 3) {  // static if: can be evaluated at compile time
 
-          // If our dimension is at least 3 there are four possible types of elements
-          switch( type.basicType() )
-          {
-          case GeometryType :: simplex :
-            return virtualMapping< GeometryType :: simplex, CoordVector >( coords );
+    template< unsigned int dim, class GeometryTraits >
+    template< bool >
+    struct VirtualMappingFactory< dim, GeometryTraits > :: AllTypes
+    {
+      template< class CoordVector >
+      static Mapping *
+      mapping ( GeometryType :: BasicType type, const CoordVector &coords )
+      {
+        switch( type )
+        {
+        case GeometryType :: simplex :
+          return virtualMapping< GeometryType :: simplex, CoordVector >( coords );
 
-          case GeometryType :: cube :
-            return virtualMapping< GeometryType :: cube, CoordVector >( coords );
+        case GeometryType :: cube :
+          return virtualMapping< GeometryType :: cube, CoordVector >( coords );
 
-          case GeometryType :: prism :
-            return virtualMapping< GeometryType :: prism, CoordVector >( coords );
+        case GeometryType :: prism :
+          return virtualMapping< GeometryType :: prism, CoordVector >( coords );
 
-          case GeometryType :: pyramid :
-            return virtualMapping< GeometryType :: pyramid, CoordVector >( coords );
+        case GeometryType :: pyramid :
+          return virtualMapping< GeometryType :: pyramid, CoordVector >( coords );
 
-          default :
-            DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );
-          }
-
+        default :
+          DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );
         }
+      }
+    };
 
-        // Our dimension is less than 3.  There can be only triangles or quadrilaterals.
-        /** \todo The case dim=1 is actually missing */
-        switch( type.basicType() )
+
+    template< unsigned int dim, class GeometryTraits >
+    template< bool >
+    struct VirtualMappingFactory< dim, GeometryTraits > :: OnlySimplexCube
+    {
+      template< class CoordVector >
+      static Mapping *
+      mapping ( GeometryType :: BasicType type, const CoordVector &coords )
+      {
+        switch( type )
         {
         case GeometryType :: simplex :
           return virtualMapping< GeometryType :: simplex, CoordVector >( coords );
@@ -99,9 +118,9 @@ namespace Dune
         default :
           DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );
         }
-
       }
     };
+
 
 
 
