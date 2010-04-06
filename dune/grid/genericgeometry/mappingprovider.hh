@@ -51,10 +51,11 @@ namespace Dune
       template< bool > struct AllTypes;
       template< bool > struct OnlySimplexCube;
 
-      template< GeometryType :: BasicType type, class CoordVector >
+      template< GeometryType::BasicType type, class CoordVector >
       static Mapping *virtualMapping ( const CoordVector &coords )
       {
-        typedef typename Convert< type, dim > :: type Topology;
+        // Note: for dim < 3, Convert may only be instantiated for cube and simplex
+        typedef typename Convert< type, dim >::type Topology;
         return new VirtualMapping< Topology, GeometryTraits >( coords );
       }
 
@@ -63,12 +64,24 @@ namespace Dune
       static Mapping *
       mapping ( const GeometryType &type, const CoordVector &coords )
       {
-        assert( type.dim() == Mapping :: dimension );
-        typedef typename SelectType< (Mapping :: dimension >= 3), AllTypes<true>, OnlySimplexCube<false> >::Type Switch;
-        return Switch :: mapping( type.basicType(), coords );
+        assert( type.dim() == Mapping::dimension );
+        // This construction instantiates either AllTypes or OnlySimplexCube,
+        // depending on Mapping::dimension.
+        typedef typename SelectType< (Mapping::dimension >= 3), AllTypes<true>, OnlySimplexCube<false> >::Type Switch;
+        return Switch::mapping( type.basicType(), coords );
       }
     };
 
+
+
+    // VirtualMappingFactory::AllTypes
+    //
+    // Allow construction of VirtualMappings for all geometry types
+    // (i.e., simplex, cube, prism and pyramid). This construction
+    // method is used if dim >= 3.
+    //
+    // Note: The boolean template argument is a dummy that prevents
+    //       instatiation unless this template is used.
 
     template< unsigned int dim, class GeometryTraits >
     template< bool >
@@ -98,6 +111,14 @@ namespace Dune
       }
     };
 
+
+    // VirtualMappingFactory::OnlySimplexCube
+    //
+    // Allow construction of VirtualMappings only for simplices and cube. This
+    // construction method is used for dim < 3.
+    //
+    // Note: The boolean template argument is a dummy that prevents
+    //       instatiation unless this template is used.
 
     template< unsigned int dim, class GeometryTraits >
     template< bool >
@@ -197,4 +218,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GENERICGEOMETRY_MAPPINGPROVIDER_HH
