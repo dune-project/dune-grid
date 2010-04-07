@@ -13,6 +13,12 @@
 
 #include "grid.hh"
 
+#if COMPILE_ALUGRID_INLINE
+#define alu_inline inline
+#else
+#define alu_inline
+#endif
+
 namespace Dune {
 
   template <class GridType >

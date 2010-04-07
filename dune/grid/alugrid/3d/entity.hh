@@ -686,6 +686,10 @@ namespace Dune {
 
 } // end namespace Dune
 
-#include "entity_imp.cc"
+#include "entity_inline.hh"
+
+#if COMPILE_ALUGRID_INLINE
+  #include "entity_imp.cc"
+#endif
 
 #endif
