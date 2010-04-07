@@ -86,14 +86,16 @@ namespace Dune
     BoundarySegmentWrapper ( const GeometryType &type,
                              const std::vector< CoordinateType > &vertices,
                              const shared_ptr< BoundarySegment > boundarySegment )
-      : faceMapping_( FaceMappingProvider::mapping( type, vertices ) ),
+      : allocator_(),
+        faceMapping_( FaceMappingProvider::mapping( type, vertices, allocator_ ) ),
         boundarySegment_( boundarySegment )
     {
       faceMapping_->referenceCount = 1;
     }
 
     BoundarySegmentWrapper ( const This &other )
-      : faceMapping_( other.faceMapping_ ),
+      : allocator_( other.allocator_ ),
+        faceMapping_( other.faceMapping_ ),
         boundarySegment_( other.boundarySegment_ )
     {
       ++(faceMapping_->referenceCount);
@@ -102,14 +104,21 @@ namespace Dune
     ~BoundarySegmentWrapper ()
     {
       if( --(faceMapping_->referenceCount) == 0 )
-        delete faceMapping_;
+      {
+        allocator_.destroy( faceMapping_ );
+        allocator_.deallocate( faceMapping_ );
+      }
     }
 
     This &operator= ( const This &other ) const
     {
       ++(other.faceMapping_->referenceCount);
       if( --(faceMapping_->referenceCount == 0) )
-        delete faceMapping_;
+      {
+        allocator_.destroy( faceMapping_ );
+        allocator_.deallocate( faceMapping_ );
+      }
+      allocator_ = other.allocator_;
       faceMapping_ = other.faceMapping_;
       boundarySegment_ = other.boundarySegment_;
       return *this;
@@ -126,6 +135,7 @@ namespace Dune
     }
 
   private:
+    typename GeometryTraits::Allocator allocator_;
     FaceMapping *faceMapping_;
     const shared_ptr< BoundarySegment > boundarySegment_;
   };
