@@ -5,7 +5,9 @@
 
 #include <string>
 
+#include <dune/common/smallobject.hh>
 #include <dune/common/static_assert.hh>
+
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid/geometrygrid/capabilities.hh>
@@ -93,6 +95,8 @@ namespace Dune
         static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
         static const EvaluationType evaluateNormal = ComputeOnDemand;
       };
+
+      typedef SmallObjectPolyAllocator Allocator;
     };
 
   }
