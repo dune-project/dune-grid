@@ -3,8 +3,6 @@
 #ifndef DUNE_GENERICGEOMETRY_CACHED_MAPPING_HH
 #define DUNE_GENERICGEOMETRY_CACHED_MAPPING_HH
 
-#include <dune/common/smallobject.hh>
-
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
@@ -34,7 +32,6 @@ namespace Dune
      */
     template< class Topology, class GeometryTraits >
     class CachedMapping
-      : public SmallObject
     {
       typedef CachedMapping< Topology, GeometryTraits > This;
 
@@ -314,10 +311,10 @@ namespace Dune
 
       template< unsigned int codim, bool hybrid >
       typename TraceProvider< Topology, GeometryTraits, codim, hybrid >::Trace *
-      trace ( unsigned int i ) const
+      trace ( unsigned int i, typename GeometryTraits::Allocator &allocator ) const
       {
         typedef TraceProvider< Topology, GeometryTraits, codim, hybrid > Provider;
-        return Provider::trace( mapping_, i );
+        return Provider::trace( mapping_, i, allocator );
       }
 
       /** \brief obtain a trace of this mapping to some subentity
@@ -384,4 +381,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GENERICGEOMETRY_CACHED_MAPPING_HH

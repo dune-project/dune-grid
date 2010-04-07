@@ -4,6 +4,7 @@
 #define DUNE_GENERICGEOMETRY_GEOMETRYTRAITS_HH
 
 #include <dune/common/geometrytype.hh>
+#include <dune/common/polyallocator.hh>
 
 #include <dune/grid/genericgeometry/matrix.hh>
 #include <dune/grid/genericgeometry/cornermapping.hh>
@@ -181,6 +182,8 @@ namespace Dune
         static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
         static const EvaluationType evaluateNormal = ComputeOnDemand;
       };
+
+      typedef PolyAllocator Allocator;
     };
 
 
@@ -322,4 +325,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GENERICGEOMETRY_GEOMETRYTRAITS_HH

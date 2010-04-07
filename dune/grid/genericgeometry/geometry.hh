@@ -276,6 +276,8 @@ namespace Dune
       typedef FieldMatrix< ctype, coorddimension, mydimension > Jacobian;
       typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
 
+      typedef typename Traits::Allocator Allocator;
+
     private:
       dune_static_assert( (0 <= mydimension) && (mydimension <= dimGrid),
                           "Invalid geometry dimension." );
@@ -306,20 +308,18 @@ namespace Dune
     protected:
       typedef typename MappingProvider :: Mapping Mapping;
 
-    private:
-      Mapping *mapping_;
-
     public:
-
       /** \brief Default constructor */
-      BasicGeometry ()
-        : mapping_( 0 )
+      explicit BasicGeometry ( const Allocator &allocator = Allocator() )
+        : allocator_( allocator ),
+          mapping_( 0 )
       {}
 
       /** \brief Constructor using a GeometryType and a list of corner coordinates */
       template< class CoordVector >
-      BasicGeometry ( const GeometryType &type, const CoordVector &coords )
-        : mapping_( MappingProvider :: mapping( type, coords ) )
+      BasicGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
+        : allocator_( allocator ),
+          mapping_( MappingProvider::mapping( type, coords, allocator_ ) )
       {
         mapping_->referenceCount = 1;
       }
@@ -339,14 +339,16 @@ namespace Dune
        */
       template< int fatherdim >
       BasicGeometry ( const BasicGeometry< fatherdim, Traits > &father, int i )
-        : mapping_( subMapping( father, i ) )
+        : allocator_( father.allocator_ ),
+          mapping_( subMapping( father, i ) )
       {
         mapping_->referenceCount = 1;
       }
 
       /** \brief Copy constructor */
       BasicGeometry ( const BasicGeometry &other )
-        : mapping_( other.mapping_ )
+        : allocator_( other.allocator_ ),
+          mapping_( other.mapping_ )
       {
         if( mapping_ != 0 )
           ++(mapping_->referenceCount);
@@ -356,7 +358,10 @@ namespace Dune
       ~BasicGeometry ()
       {
         if( (mapping_ != 0) && ((--mapping_->referenceCount) == 0) )
-          delete mapping_;
+        {
+          allocator_.destroy( mapping_ );
+          allocator_.deallocate( mapping_ );
+        }
       }
 
       /** \brief Assignment from other BasicGeometry */
@@ -365,7 +370,11 @@ namespace Dune
         if( other.mapping_ != 0 )
           ++(other.mapping_->referenceCount);
         if( (mapping_ != 0) && (--(mapping_->referenceCount) == 0) )
-          delete mapping_;
+        {
+          allocator_.destroy( mapping_ );
+          allocator_.deallocate( mapping_ );
+        }
+        allocator_ = other.allocator_;
         mapping_ = other.mapping_;
         return *this;
       }
@@ -481,8 +490,12 @@ namespace Dune
       subMapping ( const BasicGeometry< fatherdim, Traits > &father, int i )
       {
         const unsigned int codim = fatherdim - mydim;
-        return father.mapping().template trace< codim >( i );
+        return father.mapping().template trace< codim >( i, allocator_ );
       }
+
+    private:
+      Allocator allocator_;
+      Mapping *mapping_;
     };
 
 
@@ -509,25 +522,26 @@ namespace Dune
       typedef BasicGeometry< mydim, GlobalGeometryTraits< Grid > > Base;
 
     protected:
-      typedef typename Base :: Mapping Mapping;
+      typedef typename Base::Mapping Mapping;
 
     public:
+      typedef typename Base::Allocator Allocator;
+
       /** \brief Default constructor */
-      Geometry ()
-        : Base()
+      explicit Geometry ( const Allocator &allocator = Allocator() )
+        : Base( allocator )
       {}
 
       /** \brief Copy constructor from another geometry */
       template< class Geo >
-      explicit Geometry ( const Geo &geo )
-        : Base( geo.type(), geo )
+      explicit Geometry ( const Geo &geo, const Allocator &allocator = Allocator() )
+        : Base( geo.type(), geo, allocator )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
-      Geometry ( const GeometryType &type,
-                 const CoordVector &coords )
-        : Base( type, coords )
+      Geometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
+        : Base( type, coords, allocator )
       {}
 
       /** \todo Please doc me! */
@@ -561,24 +575,26 @@ namespace Dune
       typedef BasicGeometry< mydim, LocalGeometryTraits< Grid > > Base;
 
     protected:
-      typedef typename Base :: Mapping Mapping;
+      typedef typename Base::Mapping Mapping;
 
     public:
+      typedef typename Base::Allocator Allocator;
+
       /** \brief Default constructor */
-      LocalGeometry ()
-        : Base()
+      explicit LocalGeometry ( const Allocator &allocator = Allocator() )
+        : Base( allocator )
       {}
 
       /** \brief Copy constructor from another geometry */
       template< class Geo >
-      explicit LocalGeometry ( const Geo &geo )
-        : Base( geo.type(), geo )
+      explicit LocalGeometry ( const Geo &geo, const Allocator &allocator = Allocator() )
+        : Base( geo.type(), geo, allocator )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
-      LocalGeometry ( const GeometryType &type, const CoordVector &coords )
-        : Base( type, coords )
+      LocalGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator )
+        : Base( type, coords, allocator )
       {}
 
       /** \todo Please doc me! */

@@ -24,13 +24,16 @@ namespace Dune
 
     public:
       typedef CachedMapping< Topology, GeometryTraits > Mapping;
+      typedef typename GeometryTraits::Allocator Allocator;
 
       template< class CoordVector >
       static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords )
+      mapping ( const GeometryType &type, const CoordVector &coords, Allocator &allocator )
       {
-        assert( type.dim() == Mapping :: dimension );
-        return new Mapping( coords );
+        assert( type.dim() == Mapping::dimension );
+        Mapping *mapping = allocator.template allocate< Mapping >();
+        allocator.construct( mapping, Mapping( coords ) );
+        return mapping;
       }
     };
 
@@ -46,29 +49,34 @@ namespace Dune
 
     public:
       typedef HybridMapping< dim, GeometryTraits > Mapping;
+      typedef typename GeometryTraits::Allocator Allocator;
 
     private:
       template< bool > struct AllTypes;
       template< bool > struct OnlySimplexCube;
 
       template< GeometryType::BasicType type, class CoordVector >
-      static Mapping *virtualMapping ( const CoordVector &coords )
+      static Mapping *virtualMapping ( const CoordVector &coords, Allocator &allocator )
       {
         // Note: for dim < 3, Convert may only be instantiated for cube and simplex
         typedef typename Convert< type, dim >::type Topology;
-        return new VirtualMapping< Topology, GeometryTraits >( coords );
+        typedef GenericGeometry::VirtualMapping< Topology, GeometryTraits > VirtualMapping;
+
+        VirtualMapping *mapping = allocator.template allocate< VirtualMapping >();
+        allocator.construct( mapping, VirtualMapping( coords ) );
+        return mapping;
       }
 
     public:
       template< class CoordVector >
       static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords )
+      mapping ( const GeometryType &type, const CoordVector &coords, Allocator &allocator )
       {
         assert( type.dim() == Mapping::dimension );
         // This construction instantiates either AllTypes or OnlySimplexCube,
         // depending on Mapping::dimension.
         typedef typename SelectType< (Mapping::dimension >= 3), AllTypes<true>, OnlySimplexCube<false> >::Type Switch;
-        return Switch::mapping( type.basicType(), coords );
+        return Switch::mapping( type.basicType(), coords, allocator );
       }
     };
 
@@ -89,21 +97,21 @@ namespace Dune
     {
       template< class CoordVector >
       static Mapping *
-      mapping ( GeometryType :: BasicType type, const CoordVector &coords )
+      mapping ( GeometryType::BasicType type, const CoordVector &coords, Allocator &allocator )
       {
         switch( type )
         {
-        case GeometryType :: simplex :
-          return virtualMapping< GeometryType :: simplex, CoordVector >( coords );
+        case GeometryType::simplex :
+          return virtualMapping< GeometryType::simplex, CoordVector >( coords, allocator );
 
-        case GeometryType :: cube :
-          return virtualMapping< GeometryType :: cube, CoordVector >( coords );
+        case GeometryType::cube :
+          return virtualMapping< GeometryType::cube, CoordVector >( coords, allocator );
 
-        case GeometryType :: prism :
-          return virtualMapping< GeometryType :: prism, CoordVector >( coords );
+        case GeometryType::prism :
+          return virtualMapping< GeometryType::prism, CoordVector >( coords, allocator );
 
-        case GeometryType :: pyramid :
-          return virtualMapping< GeometryType :: pyramid, CoordVector >( coords );
+        case GeometryType::pyramid :
+          return virtualMapping< GeometryType::pyramid, CoordVector >( coords, allocator );
 
         default :
           DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );
@@ -126,15 +134,15 @@ namespace Dune
     {
       template< class CoordVector >
       static Mapping *
-      mapping ( GeometryType :: BasicType type, const CoordVector &coords )
+      mapping ( GeometryType::BasicType type, const CoordVector &coords, Allocator &allocator )
       {
         switch( type )
         {
-        case GeometryType :: simplex :
-          return virtualMapping< GeometryType :: simplex, CoordVector >( coords );
+        case GeometryType::simplex :
+          return virtualMapping< GeometryType::simplex, CoordVector >( coords, allocator );
 
-        case GeometryType :: cube :
-          return virtualMapping< GeometryType :: cube, CoordVector >( coords );
+        case GeometryType::cube :
+          return virtualMapping< GeometryType::cube, CoordVector >( coords, allocator );
 
         default :
           DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );
@@ -162,6 +170,8 @@ namespace Dune
       static const unsigned int codimension = codim;
       static const unsigned int mydimension = dimension - codimension;
 
+      typedef typename GeometryTraits::Allocator Allocator;
+
     private:
       typedef VirtualMappingFactory< mydimension, GeometryTraits > Factory;
 
@@ -170,9 +180,9 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords )
+      mapping ( const GeometryType &type, const CoordVector &coords, Allocator &allocator )
       {
-        return Factory :: mapping( type, coords );
+        return Factory::mapping( type, coords, allocator );
       }
     };
 
@@ -188,6 +198,8 @@ namespace Dune
       static const unsigned int mydimension = dimension - codimension;
 
       static const bool hybrid = IsCodimHybrid< Topology, codim > :: value;
+
+      typedef typename GeometryTraits::Allocator Allocator;
 
     private:
       template< bool >
@@ -208,9 +220,9 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords )
+      mapping ( const GeometryType &type, const CoordVector &coords, Allocator &allocator )
       {
-        return Factory :: mapping( type, coords );
+        return Factory::mapping( type, coords, allocator );
       }
     };
 

@@ -45,6 +45,8 @@ namespace Dune
 
       typedef typename CachedMapping< Topology, GeometryTraits > :: Mapping Mapping;
 
+      typedef typename GeometryTraits::Allocator Allocator;
+
     private:
       static const unsigned int numSubTopologies
         = Mapping :: ReferenceElement :: template Codim< codimension > :: size;
@@ -57,10 +59,10 @@ namespace Dune
       template< int i > struct Builder;
 
     public:
-      typedef typename Factory :: Trace Trace;
+      typedef typename Factory::Trace Trace;
 
     private:
-      typedef Trace *(*Create)( const Mapping &mapping );
+      typedef Trace *(*Create)( const Mapping &mapping, Allocator &allocator );
 
       Create create[ numSubTopologies ];
 
@@ -76,9 +78,9 @@ namespace Dune
       }
 
     public:
-      static Trace *trace ( const Mapping &mapping, unsigned int i )
+      static Trace *trace ( const Mapping &mapping, unsigned int i, Allocator &allocator )
       {
-        return (*instance().create[ i ])( mapping );
+        return (*instance().create[ i ])( mapping, allocator );
       }
     };
 
@@ -100,10 +102,12 @@ namespace Dune
       typedef HybridMapping< mydimension, GeometryTraits > Trace;
 
       template< int i >
-      static Trace *create ( const Mapping &mapping )
+      static Trace *create ( const Mapping &mapping, Allocator &allocator )
       {
-        typedef typename VirtualTrace< i > :: type Trace;
-        return new Trace( mapping.template trace< codim, i >() );
+        typedef typename VirtualTrace< i >::type Trace;
+        Trace *trace = allocator.template allocate< Trace >();
+        allocator.construct( trace, Trace( mapping.template trace< codim, i >() ) );
+        return trace;
       }
     };
 
@@ -120,9 +124,11 @@ namespace Dune
       typedef CachedMapping< SubTopology, GeometryTraits > Trace;
 
       template< int i >
-      static Trace *create ( const Mapping &mapping )
+      static Trace *create ( const Mapping &mapping, Allocator &allocator )
       {
-        return new Trace( mapping.template trace< codim, i >() );
+        Trace *trace = allocator.template allocate< Trace >();
+        allocator.construct( trace, mapping.template trace< codim, i >() );
+        return trace;
       }
     };
 
