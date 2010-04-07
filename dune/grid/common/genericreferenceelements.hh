@@ -3,10 +3,12 @@
 #ifndef DUNE_GENERICREFERENCEELEMENTS_HH
 #define DUNE_GENERICREFERENCEELEMENTS_HH
 
+#include <dune/common/forloop.hh>
+#include <dune/common/polyallocator.hh>
+
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
-#include <dune/common/forloop.hh>
 
 namespace Dune
 {
@@ -71,6 +73,8 @@ namespace Dune
         static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::PreCompute;
         static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::PreCompute;
       };
+
+      typedef PolyAllocator Allocator;
     };
 
   public:
@@ -97,6 +101,7 @@ namespace Dune
 
     typedef GenericGeometry::CodimTable< MappingArray, dim > MappingsTable;
 
+    typename GeometryTraits::Allocator allocator_;
     std::vector< SubEntityInfo > info_[ dim+1 ];
     double volume_;
     MappingsTable mappings_;
@@ -311,7 +316,7 @@ namespace Dune
       mappings_[ codim0Variable ].resize( 1 );
       mappings_[ codim0Variable ][ 0 ]  = new VirtualMapping( codim0Variable );
 
-      Dune::ForLoop< Init::template Codim, 0, dim >::apply( info_, mappings_ );
+      Dune::ForLoop< Init::template Codim, 0, dim >::apply( info_, mappings_, allocator_ );
       volume_ = GenericGeometry::ReferenceDomain< Topology >::template volume< double >();
     }
 
@@ -460,16 +465,13 @@ namespace Dune
         }
       };
 
-      static void apply ( std::vector< SubEntityInfo > (&info)[ dim+1 ],
-                          MappingsTable &mappings )
+      static void
+      apply ( std::vector< SubEntityInfo > (&info)[ dim+1 ],
+              MappingsTable &mappings, typename GeometryTraits::Allocator &allocator )
       {
         const unsigned int size = GenericGeometry::Size< Topology, codim >::value;
         info[ codim ].resize( size );
         Dune::ForLoop< SubTopology, 0, size-1 >::apply( info[ codim ] );
-        /*
-           for( unsigned int i = 0; i < size; ++i )
-           info[ codim ][ i ].template initialize< Topology, codim >( i );
-         */
 
         if( codim > 0 )
         {
@@ -479,7 +481,7 @@ namespace Dune
           Int2Type< codim > codimVariable;
           mappings[ codimVariable ].resize( size );
           for( unsigned int i = 0; i < size; ++i )
-            mappings[ codimVariable ][ i ] = refMapping.template trace< codim >( i );
+            mappings[ codimVariable ][ i ] = refMapping.template trace< codim >( i, allocator );
         }
       }
     };
