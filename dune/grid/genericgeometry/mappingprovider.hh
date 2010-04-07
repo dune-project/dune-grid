@@ -4,6 +4,8 @@
 #define DUNE_GENERICGEOMETRY_MAPPINGPROVIDER_HH
 
 #include <dune/common/typetraits.hh>
+
+#include <dune/grid/genericgeometry/maximum.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/cachedmapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
@@ -25,6 +27,8 @@ namespace Dune
     public:
       typedef CachedMapping< Topology, GeometryTraits > Mapping;
       typedef typename GeometryTraits::Allocator Allocator;
+
+      static const unsigned int mappingSize = sizeof( Mapping );
 
       template< class CoordVector >
       static Mapping *
@@ -52,31 +56,40 @@ namespace Dune
       typedef typename GeometryTraits::Allocator Allocator;
 
     private:
-      template< bool > struct AllTypes;
-      template< bool > struct OnlySimplexCube;
-
-      template< GeometryType::BasicType type, class CoordVector >
-      static Mapping *virtualMapping ( const CoordVector &coords, Allocator &allocator )
+      template< GeometryType::BasicType type >
+      struct Type
       {
         // Note: for dim < 3, Convert may only be instantiated for cube and simplex
         typedef typename Convert< type, dim >::type Topology;
         typedef GenericGeometry::VirtualMapping< Topology, GeometryTraits > VirtualMapping;
 
+        static const unsigned int mappingSize = sizeof( VirtualMapping );
+      };
+
+      template< bool > struct AllTypes;
+      template< bool > struct OnlySimplexCube;
+
+      // This construction instantiates either AllTypes or OnlySimplexCube, depending on dim
+      typedef typename SelectType< (dim >= 3), AllTypes< true >, OnlySimplexCube< false > >::Type Types;
+
+      template< GeometryType::BasicType type, class CoordVector >
+      static Mapping *virtualMapping ( const CoordVector &coords, Allocator &allocator )
+      {
+        typedef typename Type< type >::VirtualMapping VirtualMapping;
         VirtualMapping *mapping = allocator.template allocate< VirtualMapping >();
         allocator.construct( mapping, VirtualMapping( coords ) );
         return mapping;
       }
 
     public:
+      static const unsigned int mappingSize = Types::mappingSize;
+
       template< class CoordVector >
       static Mapping *
       mapping ( const GeometryType &type, const CoordVector &coords, Allocator &allocator )
       {
         assert( type.dim() == Mapping::dimension );
-        // This construction instantiates either AllTypes or OnlySimplexCube,
-        // depending on Mapping::dimension.
-        typedef typename SelectType< (Mapping::dimension >= 3), AllTypes<true>, OnlySimplexCube<false> >::Type Switch;
-        return Switch::mapping( type.basicType(), coords, allocator );
+        return Types::mapping( type.basicType(), coords, allocator );
       }
     };
 
@@ -95,6 +108,10 @@ namespace Dune
     template< bool >
     struct VirtualMappingFactory< dim, GeometryTraits > :: AllTypes
     {
+      static const unsigned int mappingSize
+        = Maximum< Type< GeometryType::simplex >::mappingSize, Type< GeometryType::cube >::mappingSize,
+          Type< GeometryType::prism >::mappingSize, Type< GeometryType::pyramid >::mappingSize >::v;
+
       template< class CoordVector >
       static Mapping *
       mapping ( GeometryType::BasicType type, const CoordVector &coords, Allocator &allocator )
@@ -132,6 +149,9 @@ namespace Dune
     template< bool >
     struct VirtualMappingFactory< dim, GeometryTraits > :: OnlySimplexCube
     {
+      static const unsigned int mappingSize
+        = Maximum< Type< GeometryType::simplex >::mappingSize, Type< GeometryType::cube >::mappingSize >::v;
+
       template< class CoordVector >
       static Mapping *
       mapping ( GeometryType::BasicType type, const CoordVector &coords, Allocator &allocator )
@@ -176,7 +196,10 @@ namespace Dune
       typedef VirtualMappingFactory< mydimension, GeometryTraits > Factory;
 
     public:
-      typedef typename Factory :: Mapping Mapping;
+      // Maximal amount of memory required to store a mapping
+      static const unsigned int mappingSize = Factory::mappingSize;
+
+      typedef typename Factory::Mapping Mapping;
 
       template< class CoordVector >
       static Mapping *
@@ -216,7 +239,10 @@ namespace Dune
       typedef typename SelectType< hybrid, HybridFactory<true>, NonHybridFactory<false> >::Type Factory;
 
     public:
-      typedef typename Factory :: Mapping Mapping;
+      // Maximal amount of memory required to store a mapping
+      static const unsigned int mappingSize = Factory::mappingSize;
+
+      typedef typename Factory::Mapping Mapping;
 
       template< class CoordVector >
       static Mapping *
