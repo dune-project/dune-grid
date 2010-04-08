@@ -32,9 +32,9 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords, Allocator &allocator )
+      mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
       {
-        assert( type.dim() == Mapping::dimension );
+        assert( topologyId == Topology::id );
         Mapping *mapping = allocator.template allocate< Mapping >();
         allocator.construct( mapping, Mapping( coords ) );
         return mapping;
@@ -51,125 +51,86 @@ namespace Dune
     {
       typedef VirtualMappingFactory< dim, GeometryTraits > This;
 
+      static const unsigned int numTopologies = (1 << dim);
+
+      template< class CoordVector >
+      class ConstructorTable;
+
+      template< int topologyId >
+      struct MappingSize
+      {
+        typedef typename GenericGeometry::Topology< (unsigned int) topologyId, dim >::type Topology;
+        static const int v = sizeof( VirtualMapping< Topology, GeometryTraits > );
+      };
+
     public:
       typedef HybridMapping< dim, GeometryTraits > Mapping;
       typedef typename GeometryTraits::Allocator Allocator;
 
+      static const unsigned int mappingSize = Maximum< MappingSize, 0, numTopologies-1 >::v;
+
+      template< class CoordVector >
+      static Mapping *
+      mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
+      {
+        static ConstructorTable< CoordVector > construct;
+        return construct[ topologyId ]( coords, allocator );
+      }
+    };
+
+
+    // VirtualMappingFactory::ConstructorTable
+    // ---------------------------------------
+
+    template< unsigned int dim, class GeometryTraits >
+    template< class CoordVector >
+    class VirtualMappingFactory< dim, GeometryTraits >::ConstructorTable
+    {
+      typedef Mapping *(*Construct)( const CoordVector &coords, Allocator &allocator );
+
+      template< int i >
+      struct Builder;
+
+    public:
+      ConstructorTable ()
+      {
+        ForLoop< Builder, 0, numTopologies-1 >::apply( construct_ );
+      }
+
+      Construct operator[] ( const unsigned int topologyId )
+      {
+        assert( topologyId < numTopologies );
+        return construct_[ topologyId ];
+      }
+
     private:
-      template< GeometryType::BasicType type >
-      struct Type
+      template< class Topology >
+      static Mapping *construct ( const CoordVector &coords, Allocator &allocator )
       {
-        // Note: for dim < 3, Convert may only be instantiated for cube and simplex
-        typedef typename Convert< type, dim >::type Topology;
-        typedef GenericGeometry::VirtualMapping< Topology, GeometryTraits > VirtualMapping;
-
-        static const unsigned int mappingSize = sizeof( VirtualMapping );
-      };
-
-      template< bool > struct AllTypes;
-      template< bool > struct OnlySimplexCube;
-
-      // This construction instantiates either AllTypes or OnlySimplexCube, depending on dim
-      typedef typename SelectType< (dim >= 3), AllTypes< true >, OnlySimplexCube< false > >::Type Types;
-
-      template< GeometryType::BasicType type, class CoordVector >
-      static Mapping *virtualMapping ( const CoordVector &coords, Allocator &allocator )
-      {
-        typedef typename Type< type >::VirtualMapping VirtualMapping;
-        VirtualMapping *mapping = allocator.template allocate< VirtualMapping >();
-        allocator.construct( mapping, VirtualMapping( coords ) );
+        typedef VirtualMapping< Topology, GeometryTraits > VMapping;
+        VMapping *mapping = allocator.template allocate< VMapping >();
+        allocator.construct( mapping, VMapping( coords ) );
         return mapping;
       }
 
-    public:
-      static const unsigned int mappingSize = Types::mappingSize;
-
-      template< class CoordVector >
-      static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords, Allocator &allocator )
-      {
-        assert( type.dim() == Mapping::dimension );
-        return Types::mapping( type.basicType(), coords, allocator );
-      }
+      Construct construct_[ numTopologies ];
     };
 
 
-
-    // VirtualMappingFactory::AllTypes
-    //
-    // Allow construction of VirtualMappings for all geometry types
-    // (i.e., simplex, cube, prism and pyramid). This construction
-    // method is used if dim >= 3.
-    //
-    // Note: The boolean template argument is a dummy that prevents
-    //       instatiation unless this template is used.
+    // VirtualMappingFactory::ConstructorTable::Builder
+    // ------------------------------------------------
 
     template< unsigned int dim, class GeometryTraits >
-    template< bool >
-    struct VirtualMappingFactory< dim, GeometryTraits > :: AllTypes
+    template< class CoordVector >
+    template< int topologyId >
+    struct VirtualMappingFactory< dim, GeometryTraits >::ConstructorTable< CoordVector >::Builder
     {
-      static const unsigned int mappingSize
-        = Maximum< Type< GeometryType::simplex >::mappingSize, Type< GeometryType::cube >::mappingSize,
-          Type< GeometryType::prism >::mappingSize, Type< GeometryType::pyramid >::mappingSize >::v;
-
-      template< class CoordVector >
-      static Mapping *
-      mapping ( GeometryType::BasicType type, const CoordVector &coords, Allocator &allocator )
+      static void apply ( Construct (&construct)[ numTopologies ] )
       {
-        switch( type )
-        {
-        case GeometryType::simplex :
-          return virtualMapping< GeometryType::simplex, CoordVector >( coords, allocator );
-
-        case GeometryType::cube :
-          return virtualMapping< GeometryType::cube, CoordVector >( coords, allocator );
-
-        case GeometryType::prism :
-          return virtualMapping< GeometryType::prism, CoordVector >( coords, allocator );
-
-        case GeometryType::pyramid :
-          return virtualMapping< GeometryType::pyramid, CoordVector >( coords, allocator );
-
-        default :
-          DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );
-        }
+        typedef typename GenericGeometry::Topology< (unsigned int) topologyId, dim >::type Topology;
+        construct[ topologyId ] = ConstructorTable< CoordVector >::template construct< Topology >;
       }
     };
-
-
-    // VirtualMappingFactory::OnlySimplexCube
-    //
-    // Allow construction of VirtualMappings only for simplices and cube. This
-    // construction method is used for dim < 3.
-    //
-    // Note: The boolean template argument is a dummy that prevents
-    //       instatiation unless this template is used.
-
-    template< unsigned int dim, class GeometryTraits >
-    template< bool >
-    struct VirtualMappingFactory< dim, GeometryTraits > :: OnlySimplexCube
-    {
-      static const unsigned int mappingSize
-        = Maximum< Type< GeometryType::simplex >::mappingSize, Type< GeometryType::cube >::mappingSize >::v;
-
-      template< class CoordVector >
-      static Mapping *
-      mapping ( GeometryType::BasicType type, const CoordVector &coords, Allocator &allocator )
-      {
-        switch( type )
-        {
-        case GeometryType::simplex :
-          return virtualMapping< GeometryType::simplex, CoordVector >( coords, allocator );
-
-        case GeometryType::cube :
-          return virtualMapping< GeometryType::cube, CoordVector >( coords, allocator );
-
-        default :
-          DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );
-        }
-      }
-    };
-
 
 
 
@@ -203,9 +164,9 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords, Allocator &allocator )
+      mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
       {
-        return Factory::mapping( type, coords, allocator );
+        return Factory::mapping( topologyId, coords, allocator );
       }
     };
 
@@ -233,7 +194,7 @@ namespace Dune
       template< bool >
       struct NonHybridFactory
         : public CachedMappingFactory
-          < typename SubTopology< Topology, codim, 0 > :: type, GeometryTraits >
+          < typename SubTopology< Topology, codim, 0 >::type, GeometryTraits >
       {};
 
       typedef typename SelectType< hybrid, HybridFactory<true>, NonHybridFactory<false> >::Type Factory;
@@ -246,9 +207,9 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords, Allocator &allocator )
+      mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
       {
-        return Factory::mapping( type, coords, allocator );
+        return Factory::mapping( topologyId, coords, allocator );
       }
     };
 

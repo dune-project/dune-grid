@@ -6,14 +6,22 @@
 namespace Dune
 {
 
-  template< unsigned int v1 = 0, unsigned int v2 = 0, unsigned int v3 = 0, unsigned int v4 = 0,
-      unsigned int v5 = 0, unsigned int v6 = 0, unsigned int v7 = 0, unsigned int v8 = 0 >
+  template< template< int > class Value, int first, int last >
   struct Maximum
   {
-    template< unsigned int w1, unsigned int w2 >
-    struct M { static const unsigned int v = (w1 > w2 ? w1 : w2); };
+    template< int v1, int v2 >
+    struct M { static const int v = (v1 > v2 ? v1 : v2); };
 
-    static const int v = M< M< M< v1, v2 >::v, M< v3, v4 >::v >::v, M< M< v5, v6 >::v, M< v7, v8 >::v >::v >::v;
+    static const int v = M< Value< first >::v, Maximum< Value, first+1, last >::v >::v;
+
+  private:
+    dune_static_assert( (first <= last), "Maximum: first > last" );
+  };
+
+  template< template< int > class Value, int last >
+  struct Maximum< Value, last, last >
+  {
+    static const int v = Value< last >::v;
   };
 
 }
