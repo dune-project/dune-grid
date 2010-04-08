@@ -103,7 +103,8 @@ namespace Dune
     friend class Dune::GenericLeafIterator<GridImp>;
 
     // need to make copy constructor of EntityPointer work for any iterator
-    friend class EntityPointer<GridImp,typename IteratorImp::EntityPointerImp>;
+    //friend class EntityPointer<GridImp,typename IteratorImp::EntityPointerImp>;
+    template< class, class > friend class EntityPointer;
 
   protected:
     IteratorImp realIterator;
@@ -140,9 +141,10 @@ namespace Dune
             these are derived from EntityPointer<...> with their
             corresponding implementation.
      */
-    template<class ItImp>
-    EntityPointer(const EntityPointer<GridImp,ItImp> & ep) :
-      realIterator(ep.realIterator) {}
+    template< class ItImp >
+    explicit EntityPointer ( const EntityPointer< GridImp, ItImp > &ep )
+      : realIterator( ep.realIterator )
+    {}
 
     /** \brief Templatized constructor from type of entity that
         this entity pointer points to. This constructor can be used to
@@ -153,23 +155,30 @@ namespace Dune
     EntityPointer(const Entity& entity) :
       realIterator( entity.getRealImp() ) {}
 
+    template< class ItImp >
+    EntityPointer &operator= ( const EntityPointer< GridImp, ItImp > &ep )
+    {
+      realIterator = ep.realIterator;
+      return *this;
+    }
+
     /** \brief Cast to EntityPointer with base class of implementation as engine.
             This conversion ensures assignablity of LevelIterator, LeafIterator and
             HierarchicIterator to EntityPointer.
      */
-    operator EntityPointer<GridImp,base>&()
+    operator EntityPointer< GridImp, base > & ()
     {
       return reinterpret_cast<EntityPointer<GridImp,base>&>(*this);
-    };
+    }
 
     /** \brief Cast to EntityPointer with const base class of implementation as engine.
             This conversion ensures assignablity of LevelIterator, LeafIterator and
             HierarchicIterator to EntityPointer.
      */
-    operator const EntityPointer<GridImp,base>&() const
+    operator const EntityPointer< GridImp, base > & () const
     {
       return reinterpret_cast<const EntityPointer<GridImp,base>&>(*this);
-    };
+    }
 
     /** \brief Reduce the entity pointers used
         memory to a minimum necessary to store all needed information.
@@ -211,9 +220,10 @@ namespace Dune
             Due to the conversion operators one can compare
             all kinds of iterators and EntityPointer.
      */
-    bool operator==(const EntityPointer<GridImp,base>& rhs) const
+    template< class ItImp >
+    bool operator== ( const EntityPointer< GridImp, ItImp > &rhs ) const
     {
-      return rhs.equals(*this);
+      return equals( rhs );
     }
 
     /** \brief Checks for inequality.
@@ -221,9 +231,10 @@ namespace Dune
             Due to the conversion operators one can compare
             all kinds of iterators and EntityPointer.
      */
-    bool operator!=(const EntityPointer<GridImp,base>& rhs) const
+    template< class ItImp >
+    bool operator!= ( const EntityPointer< GridImp, ItImp > &rhs ) const
     {
-      return ! rhs.equals(*this);
+      return !equals( rhs );
     }
     //@}
 
@@ -263,14 +274,14 @@ namespace Dune
       realIterator(i) {};
 
     /** @brief Forward equality check to realIterator */
-    bool equals(const EntityPointer& rhs) const
+    template< class ItImp >
+    bool equals ( const EntityPointer< GridImp, ItImp > &rhs ) const
     {
-      return this->realIterator.equals(rhs.realIterator);
+      return realIterator.equals( rhs.realIterator );
     }
     //@}
 
   protected:
-
     // give the GridDefaultImplementation class access to the realImp
     friend class GridDefaultImplementation<
         GridImp::dimension, GridImp::dimensionworld,
