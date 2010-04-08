@@ -598,8 +598,6 @@ void iteratorEquals (Grid &g)
   EntityPointer e2 = h2;
   const EntityPointer & re1 = l1;
   const EntityPointer & re2 = L2;
-  EntityPointer & re3 = l1;
-  EntityPointer & re4 = h1;
 
   // assign
   l1 = l2;
@@ -609,7 +607,6 @@ void iteratorEquals (Grid &g)
   e1 = e2;
   e1 = re1;
   e2 = re2;
-  re3 = re4;
 
   // equals
   #define TestEquals(i) { \
