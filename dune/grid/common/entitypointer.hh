@@ -163,8 +163,9 @@ namespace Dune
     }
 
     /** \brief Cast to EntityPointer with const base class of implementation as engine.
-            This conversion ensures assignablity of LevelIterator, LeafIterator and
-            HierarchicIterator to EntityPointer.
+     *
+     *  \note  This cast is no longer needed to ensure assignability of iterators to
+     *         EntityPointer.
      */
     operator const EntityPointer< GridImp, base > & () const
     {
