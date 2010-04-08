@@ -4,7 +4,7 @@
 namespace Dune
 {
 
-  bool DGFGridFactory< ALUSimplexGrid< 3, 3 > >
+  inline bool DGFGridFactory< ALUSimplexGrid< 3, 3 > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
     const int dimworld = 3;
@@ -75,7 +75,9 @@ namespace Dune
       grid_ = factory_.createGrid( dgf_.facemap.empty(), true, filename );
     return true;
   }
-  bool DGFGridFactory< ALUCubeGrid< 3, 3 > >
+
+
+  inline bool DGFGridFactory< ALUCubeGrid< 3, 3 > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
     const int dimworld = 3;
@@ -145,8 +147,9 @@ namespace Dune
     return true;
   }
 
+
   template <int dimw>
-  bool DGFGridFactory< ALUSimplexGrid< 2, dimw > >
+  inline bool DGFGridFactory< ALUSimplexGrid< 2, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
     const int dimworld = dimw;
@@ -236,8 +239,9 @@ namespace Dune
     return true;
   }
 
+
   template <int dimw>
-  bool DGFGridFactory< ALUCubeGrid< 2, dimw > >
+  inline bool DGFGridFactory< ALUCubeGrid< 2, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
     const int dimworld = dimw;
@@ -327,8 +331,9 @@ namespace Dune
     return true;
   }
 
+
   template <int dimw>
-  bool DGFGridFactory< ALUConformGrid< 2, dimw > >
+  inline bool DGFGridFactory< ALUConformGrid< 2, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
     const int dimworld = dimw;
