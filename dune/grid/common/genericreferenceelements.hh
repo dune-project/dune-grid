@@ -292,6 +292,12 @@ namespace Dune
       return info_[ c ][ i ].type();
     }
 
+    unsigned int topologyId ( int i, int c ) const
+    {
+      assert( (c >= 0) && (c <= dim) );
+      return info_[ c ][ i ].topologyId();
+    }
+
     /** \brief obtain the volume of the reference element */
     double volume () const
     {
@@ -345,6 +351,7 @@ namespace Dune
     int codim_;
     std::vector< int > numbering_[ dim+1 ];
     FieldVector< ctype, dim > baryCenter_;
+    unsigned int topologyId_;
     GeometryType type_;
 
   public:
@@ -370,6 +377,11 @@ namespace Dune
       return type_;
     }
 
+    unsigned int topologyId () const
+    {
+      return topologyId_;
+    }
+
     template< class Topology, unsigned int codim, unsigned int i >
     void initialize ()
     {
@@ -384,6 +396,7 @@ namespace Dune
       baryCenter_ = RefElement::template baryCenter< codim >( i );
 
       typedef typename GenericGeometry::SubTopology< Topology, codim, i >::type SubTopology;
+      topologyId_ = SubTopology::id;
       type_ = GenericGeometry::DuneGeometryType< SubTopology, GeometryType::simplex >::type();
     }
   };

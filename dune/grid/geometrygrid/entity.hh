@@ -474,7 +474,9 @@ namespace Dune
 
       unsigned int topologyId () const
       {
-        return GenericGeometry::topologyId( type() );
+        const GenericReferenceElement< ctype, dimension > &refElement
+          = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
+        return refElement.topologyId( subEntity_, codimension );
       }
 
       /** \brief obtain the level of this entity */
