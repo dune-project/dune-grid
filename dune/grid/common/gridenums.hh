@@ -85,6 +85,40 @@ namespace Dune {
     All_All_Interface=4                            //!< send all and receive all entities
   };
 
+
+  //! write an InterfaceType to a stream
+  /**
+   * \code
+   *#include <dune/grid/common/gridenums.hh>
+   * \endcode
+   *
+   * @ingroup GIRelatedTypes
+   */
+  inline std::ostream &operator<< ( std::ostream &out, const InterfaceType &type )
+  {
+    switch( type )
+    {
+    case InteriorBorder_InteriorBorder_Interface :
+      return out << "interior-border / interior-border interface";
+
+    case InteriorBorder_All_Interface :
+      return out << "interior-border / all interface";
+
+    case Overlap_OverlapFront_Interface :
+      return out << "overlap / overlap-front interface";
+
+    case Overlap_All_Interface :
+      return out << "overlap / all interface";
+
+    case All_All_Interface :
+      return out << "all / all interface";
+
+    default :
+      return out << "unknown interface";
+    }
+  }
+
+
   /** \brief Parameter to be used for the parallel level- and leaf iterators
    *
    * \code
