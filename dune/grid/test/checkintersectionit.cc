@@ -198,13 +198,19 @@ void checkIntersectionIterator(const GridViewType& view,
 
       for (; outsideIIt!=outsideIEndIt; ++outsideIIt) {
 
-        if (outsideIIt->neighbor() && outsideIIt->outside() == iIt->inside()) {
-
-          if (outsideIIt->indexInInside() != iIt->indexInOutside())
-            DUNE_THROW(GridError, "outside()->outside() == inside(), but with incorrect numbering!");
-          else
-            insideFound = true;
-
+        if (outsideIIt->neighbor() && outsideIIt->outside() == iIt->inside())
+        {
+          insideFound = true;
+          const int idxInside = outsideIIt->indexInInside();
+          const int idxOutside = iIt->indexInOutside();
+          if( idxOutside != idxInside )
+          {
+            std::cerr << "Error: outside()->outside() == inside()"
+                      << ", but with incorrect numbering" << std::endl;
+            std::cerr << "       (inside().indexInOutside = " << idxOutside
+                      << ", outside().indexInInside = " << idxInside << ")." << std::endl;
+            assert( false );
+          }
         }
 
       }
