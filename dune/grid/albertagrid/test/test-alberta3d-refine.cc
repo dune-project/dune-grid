@@ -79,7 +79,7 @@ int main(int argc, char** argv)
       Dune::shared_ptr<Grid> grid = TriangulatedUnitCubeMaker<Grid>::create();
       grid->globalRefine(2);
 
-      result = 0;
+      result = 1;
     }
 #endif
 
