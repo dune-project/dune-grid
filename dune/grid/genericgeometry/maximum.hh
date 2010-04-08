@@ -3,6 +3,8 @@
 #ifndef DUNE_GENERICGEOMETRY_MAXIMUM_HH
 #define DUNE_GENERICGEOMETRY_MAXIMUM_HH
 
+#include <dune/common/static_assert.hh>
+
 namespace Dune
 {
 
