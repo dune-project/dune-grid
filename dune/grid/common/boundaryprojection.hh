@@ -87,7 +87,7 @@ namespace Dune
                              const std::vector< CoordinateType > &vertices,
                              const shared_ptr< BoundarySegment > boundarySegment )
       : allocator_(),
-        faceMapping_( FaceMappingProvider::mapping( type, vertices, allocator_ ) ),
+        faceMapping_( FaceMappingProvider::mapping( GenericGeometry::topologyId( type ), vertices, allocator_ ) ),
         boundarySegment_( boundarySegment )
     {
       faceMapping_->referenceCount = 1;
