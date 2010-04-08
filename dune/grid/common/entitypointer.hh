@@ -162,15 +162,6 @@ namespace Dune
       return *this;
     }
 
-    /** \brief Cast to EntityPointer with base class of implementation as engine.
-            This conversion ensures assignablity of LevelIterator, LeafIterator and
-            HierarchicIterator to EntityPointer.
-     */
-    operator EntityPointer< GridImp, base > & ()
-    {
-      return reinterpret_cast<EntityPointer<GridImp,base>&>(*this);
-    }
-
     /** \brief Cast to EntityPointer with const base class of implementation as engine.
             This conversion ensures assignablity of LevelIterator, LeafIterator and
             HierarchicIterator to EntityPointer.
