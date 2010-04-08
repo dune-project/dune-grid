@@ -132,7 +132,7 @@ namespace Dune
         {
           const LocalGeometry &localGeo = geometryInInside();
           CoordVector coords( inside()->geometry(), localGeo );
-          geo = GeometryImpl( localGeo.type(), coords );
+          geo = GeometryImpl( topologyId(), coords );
         }
         return geo_;
       }
@@ -140,6 +140,11 @@ namespace Dune
       GeometryType type () const
       {
         return hostIntersection().type();
+      }
+
+      unsigned int topologyId () const
+      {
+        return GenericGeometry::topologyId( type() );
       }
 
       int indexInInside () const

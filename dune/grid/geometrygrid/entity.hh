@@ -206,6 +206,11 @@ namespace Dune
         return hostEntity().type();
       }
 
+      unsigned int topologyId () const
+      {
+        return GenericGeometry::topologyId( type() );
+      }
+
       /** \brief obtain the level of this entity */
       int level () const
       {
@@ -238,7 +243,7 @@ namespace Dune
         if( !geo )
         {
           CoordVector coords( hostEntity(), grid().coordFunction() );
-          geo = GeometryImpl( type(), coords );
+          geo = GeometryImpl( topologyId(), coords );
         }
         return geo_;
       }
@@ -467,6 +472,11 @@ namespace Dune
         return refElement.type( subEntity_, codimension );
       }
 
+      unsigned int topologyId () const
+      {
+        return GenericGeometry::topologyId( type() );
+      }
+
       /** \brief obtain the level of this entity */
       int level () const
       {
@@ -519,7 +529,7 @@ namespace Dune
         if( !geo )
         {
           CoordVector coords( hostElement(), subEntity_, grid().coordFunction() );
-          geo = GeometryImpl( type(), coords );
+          geo = GeometryImpl( topologyId(), coords );
         }
         return geo_;
       }
@@ -771,6 +781,11 @@ namespace Dune
         return hostEntity().type();
       }
 
+      unsigned int topologyId () const
+      {
+        return GenericGeometry::topologyId( type() );
+      }
+
       /** \brief obtain the level of this entity */
       int level () const
       {
@@ -804,7 +819,7 @@ namespace Dune
         if( !geo )
         {
           CoordVector coords( hostEntity(), grid().coordFunction() );
-          geo = GeometryImpl( type(), coords );
+          geo = GeometryImpl( topologyId(), coords );
         }
         return geo_;
       }
