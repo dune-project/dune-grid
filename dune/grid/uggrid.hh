@@ -753,7 +753,7 @@ namespace Dune {
         \param maxl The finest level that should be traversed by the iterator
         \param[out] childElements For each subface: element index, elementSide, and level
      */
-    void getChildrenOfSubface(typename Traits::template Codim<0>::EntityPointer & e,
+    void getChildrenOfSubface(const typename Traits::template Codim<0>::EntityPointer & e,
                               int elementSide,
                               int maxl,
                               std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,

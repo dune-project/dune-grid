@@ -400,7 +400,7 @@ void Dune::UGGrid < dim >::globalRefine(int n)
 }
 
 template <int dim>
-void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>::EntityPointer & e,
+void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Codim<0>::EntityPointer & e,
                                              int elementSide,
                                              int maxl,
                                              std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
