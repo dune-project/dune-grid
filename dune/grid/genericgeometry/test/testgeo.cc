@@ -20,12 +20,6 @@
 
 using namespace Dune;
 
-
-
-
-
-// ****************************************************************
-//
 int phiErr;
 int jTinvJTErr;
 int volumeErr;
@@ -33,7 +27,8 @@ int detErr;
 int volErr;
 int normalErr;
 
-typedef Topology<GridType> ConversionType;
+typedef Topology< GridSelector::GridType > ConversionType;
+
 template <class Geo1,class Geo2>
 void testGeo(const Geo1& geo1, const Geo2& geo2) {
   typedef FieldVector<double, Geo1::mydimension> LocalType;
@@ -134,10 +129,11 @@ void test(const GridViewType& view) {
   ElementIterator eIt    = view.template begin<0>();
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geoDune = eIt->geometry();
+    const unsigned int topologyId = GenericGeometry::topologyId( geoDune.type() );
+    GeoCoordVector< GeometryType > coordVector( geoDune );
     // GenericGeometryType genericMap(geoDune,typename GenericGeometryType::CachingType(geoDune) );
-    GenericGeometry::Geometry< GridType::dimension, GridType::dimensionworld, GridType >
-    genericMap( geoDune.type(),geoDune );
-    testGeo(geoDune,genericMap);
+    GenericGeometry::Geometry< GridType::dimension, GridType::dimensionworld, GridType > genericMap( topologyId, coordVector );
+    testGeo( geoDune, genericMap );
 
     // typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
     //  SubGeometryType;
@@ -151,11 +147,10 @@ void test(const GridViewType& view) {
       typedef FieldVector<double, GeometryType::mydimension> LocalType;
       typedef FieldVector<double, GeometryType::mydimension-1> LocalFaceType;
 
-      const int faceNr = iit->numberInSelf();
+      const int faceNr = iit->indexInInside();
 
-      //iit->intersectionSelfLocal();
       LocalFaceType xf( 0.1 );
-      LocalType xx( iit->intersectionSelfLocal().global( xf ) );
+      LocalType xx( iit->geometryInInside().global( xf ) );
       const GlobalType &nG = iit->integrationOuterNormal( xf );
       const GlobalType &nM = genericMap.normal( faceNr, xx );
       if( (nG - nM).two_norm2() > 1e-10 )
@@ -170,7 +165,7 @@ void test(const GridViewType& view) {
       }
 
       SubGeometryType subMap( genericMap, faceNr );
-      testGeo( iit->intersectionGlobal(), subMap );
+      testGeo( iit->geometry(), subMap );
     }
   }
 }
@@ -179,8 +174,7 @@ int main(int argc, char ** argv, char ** envp)
 try
 {
   // this method calls MPI_Init, if MPI is enabled
-  // MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
-  // int myrank = mpiHelper.rank();
+  MPIHelper::instance(argc,argv);
 
   if (argc<2) {
     std::cerr << "supply grid file as parameter!" << std::endl;
@@ -188,7 +182,7 @@ try
   }
 
   // create Grid from DGF parser
-  GridPtr<GridType> grid( argv[ 1 ] );
+  GridPtr< GridSelector::GridType > grid( argv[ 1 ] );
   test(grid->leafView());
 
   if ( phiErr>0) {

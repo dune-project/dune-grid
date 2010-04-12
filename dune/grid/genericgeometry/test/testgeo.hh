@@ -3,6 +3,8 @@
 #ifndef TESTGEO_HH
 #define TESTGEO_HH
 
+#include <dune/common/polyallocator.hh>
+
 #include <dune/grid/alugrid/3d/topology.hh>
 #include <dune/grid/genericgeometry/geometry.hh>
 
@@ -124,10 +126,33 @@ namespace Dune
         static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
         static const EvaluationType evaluateNormal = ComputeOnDemand;
       };
+
+      typedef Dune::PolyAllocator Allocator;
     };
 
   }
 
+
+
+  // GeoCoordVector
+  // --------------
+
+  template< class Geo >
+  struct GeoCoordVector
+  {
+    explicit GeoCoordVector( const Geo &geo )
+      : geo_( geo )
+    {}
+
+    typename Geo::GlobalCoordinate operator[] ( const int i ) const
+    {
+      return geo_.corner( i );
+    }
+
+  private:
+    const Geo &geo_;
+  };
+
 }
 
-#endif
+#endif // #ifndef TESTGEO_HH
