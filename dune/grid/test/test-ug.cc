@@ -255,45 +255,50 @@ int main (int argc , char **argv) try
   //   but not parametrization functions (only 2d, so far)
   // ////////////////////////////////////////////////////////////////////////////
 
-  Dune::UGGrid<2> gridWithOrderedBoundarySegments;
-  makeHalfCircleQuad(gridWithOrderedBoundarySegments, true, false);
+  {
+    Dune::UGGrid<2> gridWithOrderedBoundarySegments;
+    makeHalfCircleQuad(gridWithOrderedBoundarySegments, true, false);
 
-  gridWithOrderedBoundarySegments.globalRefine(1);
-  gridcheck(gridWithOrderedBoundarySegments);
+    gridWithOrderedBoundarySegments.globalRefine(1);
+    gridcheck(gridWithOrderedBoundarySegments);
+  }
 
   // ////////////////////////////////////////////////////////////////////////
   //   Check whether geometryInFather returns equal results with and
   //   without parametrized boundaries
   // ////////////////////////////////////////////////////////////////////////
 
-  Dune::UGGrid<2> gridWithParametrization, gridWithoutParametrization;
+  {
+    Dune::UGGrid<2> gridWithParametrization, gridWithoutParametrization;
 
-  // make grids
-  makeHalfCircleQuad(gridWithoutParametrization, false, false);
-  makeHalfCircleQuad(gridWithParametrization, true, true);
+    // make grids
+    makeHalfCircleQuad(gridWithoutParametrization, false, false);
+    makeHalfCircleQuad(gridWithParametrization, true, true);
 
-  // make grids again just to check this is possible
-  makeHalfCircleQuad(gridWithoutParametrization, false, false);
-  makeHalfCircleQuad(gridWithParametrization, true, true);
+    // make grids again just to check this is possible
+    makeHalfCircleQuad(gridWithoutParametrization, false, false);
+    makeHalfCircleQuad(gridWithParametrization, true, true);
 
-  gridWithParametrization.globalRefine(1);
-  gridWithoutParametrization.globalRefine(1);
+    gridWithParametrization.globalRefine(1);
+    gridWithoutParametrization.globalRefine(1);
 
-  typedef Dune::UGGrid<2>::Codim<0>::LevelIterator ElementIterator;
-  ElementIterator eIt    = gridWithParametrization.lbegin<0>(1);
-  ElementIterator eWoIt  = gridWithoutParametrization.lbegin<0>(1);
-  ElementIterator eEndIt = gridWithParametrization.lend<0>(1);
+    typedef Dune::UGGrid<2>::Codim<0>::LevelIterator ElementIterator;
+    ElementIterator eIt    = gridWithParametrization.lbegin<0>(1);
+    ElementIterator eWoIt  = gridWithoutParametrization.lbegin<0>(1);
+    ElementIterator eEndIt = gridWithParametrization.lend<0>(1);
 
-  for (; eIt!=eEndIt; ++eIt, ++eWoIt) {
+    for (; eIt!=eEndIt; ++eIt, ++eWoIt) {
 
-    // The grids where constructed identically and they are traversed identically
-    // Thus their respective output from geometryInFather should be the same
-    for (int i=0; i<eIt->geometry().corners(); i++) {
+      // The grids where constructed identically and they are traversed identically
+      // Thus their respective output from geometryInFather should be the same
+      for (int i=0; i<eIt->geometry().corners(); i++) {
 
-      Dune::FieldVector<double,2> diff = eIt->geometryInFather().corner(i) - eWoIt->geometryInFather().corner(i);
+        Dune::FieldVector<double,2> diff = eIt->geometryInFather().corner(i) - eWoIt->geometryInFather().corner(i);
 
-      if ( diff.two_norm() > 1e-5 )
-        DUNE_THROW(Dune::GridError, "output of geometryInFather() depends on boundary parametrization!");
+        if ( diff.two_norm() > 1e-5 )
+          DUNE_THROW(Dune::GridError, "output of geometryInFather() depends on boundary parametrization!");
+
+      }
 
     }
 
