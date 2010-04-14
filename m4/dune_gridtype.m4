@@ -69,7 +69,7 @@ AC_DEFUN([DUNE_OUTPUT_GRIDTYPE],[
 
 EOF
 
-  echo -e "$DUNE_GRIDTYPE_DEFINITIONS" >> $GRIDTYPE_HH
+  echo "$DUNE_GRIDTYPE_DEFINITIONS" | sed -e 's/\\n/\n/g' >> $GRIDTYPE_HH
 
   cat >> $GRIDTYPE_HH << EOF
 // NOGRID is used to specify that no default was set during configure
@@ -99,7 +99,7 @@ EOF
 
 EOF
 
-  echo -e "$DUNE_DGFGRIDTYPE_DEFINITIONS" >> $DGFGRIDTYPE_HH
+  echo "$DUNE_DGFGRIDTYPE_DEFINITIONS" | sed -e 's/\\n/\n/g' >> $DGFGRIDTYPE_HH
 
   cat >> $DGFGRIDTYPE_HH << EOF
 #endif // #ifndef DUNE_DGFGRIDTYPE_HH
