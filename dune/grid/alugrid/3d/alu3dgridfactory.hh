@@ -420,7 +420,17 @@ namespace Dune
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )
   {
-    DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
+
+    if( vertices.size() != numFaceCorners )
+      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+      DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+    //  DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
+
+    boundaryProjections_[ faceId ] = 0;
   }
 
   template< template< int, int > class ALUGrid >
