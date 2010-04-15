@@ -137,14 +137,27 @@ namespace Dune
       DUNE_THROW(GridError, "This grid does not support parametrized elements!");
     }
 
-    /** \brief Method to insert an arbitrarily shaped boundary segment into a coarse grid
-        \param vertices The indices of the vertices of the segment
+    /** \brief insert a boundary segment
+     *
+     *  This method inserts a boundary segment into the coarse grid. Using
+     *  this method has two advantages over not using it:
+     *  - The boundary segment gets an insertion index.
+     *  - The grid factory can verify that this is actually a boundary segment
+     *  .
+     *
+     *  \note You are not forced to insert all boundary segments. The grid
+     *        factory will find the remaining boundary segments itself.
+     *
+     *  \param[in]  vertices  the indices of the vertices of the segment
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices) = 0;
 
-    /** \brief Method to insert an arbitrarily shaped boundary segment into a coarse grid
-        \param vertices The indices of the vertices of the segment
-        \param boundarySegment Class implementing the geometry of the boundary segment.
+    /** \brief insert an arbitrarily shaped boundary segment
+     *
+     *  This method inserts a boundary segment into the coarse grid.
+     *
+     *  \param[in]  vertices         the indices of the vertices of the segment
+     *  \param[in]  boundarySegment  user defined implementation of the boundary segment's geometry
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices,
                                        const shared_ptr<BoundarySegment<dimension,dimworld> >& boundarySegment)
