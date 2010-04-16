@@ -173,11 +173,6 @@ namespace Dune
         return reinterpret_cast< const EntityPointerImp & >( *this );
       }
 
-      operator EntityPointerImp & ()
-      {
-        return reinterpret_cast< EntityPointerImp & >( *this );
-      }
-
       template< class T >
       bool equals ( const EntityPointer< T, fake > &other ) const
       {
