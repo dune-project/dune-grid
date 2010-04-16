@@ -104,7 +104,7 @@
 #ifdef ModelP
 namespace Dune {
 
-  // converts the UG speak message buffers to DUNE speak and vince-versa
+  // converts the UG speak message buffers to DUNE speak and vice-versa
   template <class DataHandle, int GridDim, int codim>
   class UGMessageBuffer {
   protected:
@@ -128,7 +128,6 @@ namespace Dune {
     void read(DataType &t)
     { this->readRaw_<DataType>(t);  }
 
-
   protected:
     friend class Dune::UGGrid<dim>;
 
@@ -147,26 +146,26 @@ namespace Dune {
     }
 
     // returns number of bytes required for the UG message buffer
-    static unsigned ugBufferSize_(const GridType &grid)
+    template <class GridView>
+    static unsigned ugBufferSize_(const GridView &gv)
     {
       if (duneDataHandle_->fixedsize(dim, codim)) {
         return sizeof(DataType)
-               * duneDataHandle_->size(*grid.template lbegin<codim,InteriorBorder_Partition>(0));
+               * duneDataHandle_->size(*gv.template begin<codim,InteriorBorder_Partition>());
       }
 
-      typedef typename
-      GridType::template Codim<codim>::Entity Entity;
+      typedef typename GridView::template Codim<codim>::Entity Entity;
 
       // iterate over all entities, find the maximum size for
       // the current rank
       int maxSize = 0;
       typedef typename
-      GridType
+      GridView
       ::template Codim<codim>
       ::template Partition<Dune::All_Partition>
-      ::LeafIterator LeafIterator;
-      LeafIterator it = grid.template leafbegin<codim, Dune::All_Partition>();
-      const LeafIterator &endIt = grid.template leafend<codim, Dune::All_Partition>();
+      ::Iterator Iterator;
+      Iterator it = gv.template begin<codim, Dune::All_Partition>();
+      const Iterator endIt = gv.template end<codim, Dune::All_Partition>();
       for (; it != endIt; ++it) {
         maxSize = std::max((int) maxSize,
                            (int) duneDataHandle_->size(*it));
@@ -189,17 +188,25 @@ namespace Dune {
     {
       if (codim == 0) {
         UGMakeableEntity<0, dim, UGGrid<dim> > e((typename UG_NS<dim>::Element*)obj);
-        ThisType msgBuf(static_cast<DataType*>(data));
-        if (!duneDataHandle_->fixedsize(dim, codim))
-          msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
-        duneDataHandle_->gather(msgBuf, e);
+        // safety check to only communicate what is needed
+        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Element*)obj)) || e.level() == level)
+        {
+          ThisType msgBuf(static_cast<DataType*>(data));
+          if (!duneDataHandle_->fixedsize(dim, codim))
+            msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
+          duneDataHandle_->gather(msgBuf, e);
+        }
       }
       else if (codim == dim) {
         UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Node*)obj);
-        ThisType msgBuf(static_cast<DataType*>(data));
-        if (!duneDataHandle_->fixedsize(dim, codim))
-          msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
-        duneDataHandle_->gather(msgBuf, e);
+        // safety check to only communicate what is needed
+        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Node*)obj)) || e.level() == level)
+        {
+          ThisType msgBuf(static_cast<DataType*>(data));
+          if (!duneDataHandle_->fixedsize(dim, codim))
+            msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
+          duneDataHandle_->gather(msgBuf, e);
+        }
       }
       else {
         DUNE_THROW(GridError,
@@ -212,34 +219,41 @@ namespace Dune {
     }
 
     // called by DDD_IFOneway to deserialize the data structure
-    // which has been received
+    // that has been received
     static int ugScatter_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
 
       if (codim == 0) {
-
         typedef UGMakeableEntity<0, dim, UGGrid<dim> > Entity;
         Entity e((typename UG_NS<dim>::Element*)obj);
-        ThisType msgBuf(static_cast<DataType*>(data));
-        int n;
-        if (!duneDataHandle_->fixedsize(dim, codim))
-          msgBuf.readRaw_(n);
-        else
-          n = duneDataHandle_->template size<Entity>(e);
-        if (n > 0)
-          duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
+        // safety check to only communicate what is needed
+        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Element*)obj)) || e.level() == level)
+        {
+          ThisType msgBuf(static_cast<DataType*>(data));
+          int n;
+          if (!duneDataHandle_->fixedsize(dim, codim))
+            msgBuf.readRaw_(n);
+          else
+            n = duneDataHandle_->template size<Entity>(e);
+          if (n > 0)
+            duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
+        }
       }
       else if (codim == dim) {
         typedef UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > Entity;
         Entity e((typename UG_NS<dim>::Node*)obj);
-        ThisType msgBuf(static_cast<DataType*>(data));
-        int n;
-        if (!duneDataHandle_->fixedsize(dim, codim))
-          msgBuf.readRaw_(n);
-        else
-          n = duneDataHandle_->template size<Entity>(e);
-        if (n > 0)
-          duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
+        // safety check to only communicate what is needed
+        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Node*)obj)) || e.level() == level)
+        {
+          ThisType msgBuf(static_cast<DataType*>(data));
+          int n;
+          if (!duneDataHandle_->fixedsize(dim, codim))
+            msgBuf.readRaw_(n);
+          else
+            n = duneDataHandle_->template size<Entity>(e);
+          if (n > 0)
+            duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
+        }
       }
       else {
         DUNE_THROW(GridError,
@@ -252,6 +266,8 @@ namespace Dune {
     }
     static DataHandle *duneDataHandle_;
 
+    static int level;
+
     char              *ugData_;
   };
 
@@ -259,6 +275,9 @@ namespace Dune {
 
 template <class DataHandle, int GridDim, int codim>
 DataHandle *Dune::UGMessageBuffer<DataHandle,GridDim,codim>::duneDataHandle_ = 0;
+
+template <class DataHandle, int GridDim, int codim>
+int Dune::UGMessageBuffer<DataHandle,GridDim,codim>::level = -1;
 #endif
 
 namespace Dune {
@@ -617,7 +636,19 @@ namespace Dune {
     template<class DataHandle>
     void communicate (DataHandle& dataHandle, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
-      DUNE_THROW(NotImplemented, "Level communication has not been implemented yet!");
+#ifdef ModelP
+      typedef typename UGGrid::LevelGridView LevelGridView;
+
+      for (int curCodim = 0; curCodim <= dim; ++curCodim) {
+        if (!dataHandle.contains(dim, curCodim))
+          continue;
+
+        if (curCodim == 0)
+          communicateUG_<LevelGridView, DataHandle, 0>(this->levelView(level), level, dataHandle, iftype, dir);
+        else if (curCodim == dim)
+          communicateUG_<LevelGridView, DataHandle, dim>(this->levelView(level), level, dataHandle, iftype, dir);
+      }
+#endif
     }
 
     /** \brief The communication interface for all codims on the leaf level
@@ -635,14 +666,17 @@ namespace Dune {
                      CommunicationDirection dir) const
     {
 #ifdef ModelP
+      typedef typename UGGrid::LeafGridView LeafGridView;
+
       for (int curCodim = 0; curCodim <= dim; ++curCodim) {
         if (!dataHandle.contains(dim, curCodim))
           continue;
 
+        int level = -1;
         if (curCodim == 0)
-          communicateUG_<DataHandle, 0>(dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, 0>(this->leafView(), level, dataHandle, iftype, dir);
         else if (curCodim == dim)
-          communicateUG_<DataHandle, dim>(dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, dim>(this->leafView(), level, dataHandle, iftype, dir);
       }
 #endif
     }
@@ -655,8 +689,9 @@ namespace Dune {
 
   protected:
 #ifdef ModelP
-    template <class DataHandle, int codim>
-    void communicateUG_(DataHandle &dataHandle,
+    template <class GridView, class DataHandle, int codim>
+    void communicateUG_(const GridView& gv, int level,
+                        DataHandle &dataHandle,
                         InterfaceType iftype,
                         CommunicationDirection dir) const
     {
@@ -670,10 +705,12 @@ namespace Dune {
       typedef UGMessageBuffer<DataHandle,dim,codim> UGMsgBuf;
       UGMsgBuf::duneDataHandle_ = &dataHandle;
 
+      UGMsgBuf::level = level;
+
       std::vector<typename UG_NS<dim>::DDD_IF> ugIfs;
       findDDDInterfaces_(ugIfs, iftype, codim);
 
-      unsigned bufSize = UGMsgBuf::ugBufferSize_(*this);
+      unsigned bufSize = UGMsgBuf::ugBufferSize_(gv);
       if (!bufSize)
         return;     // we don't need to communicate if we don't have any data!
       for (unsigned i=0; i < ugIfs.size(); ++i)

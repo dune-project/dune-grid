@@ -525,7 +525,11 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
     Face currentFace(center_, neighborCount_);
     const typename UG_NS<dim>::Element* father = UG_NS<GridImp::dimensionworld>::EFather(center_);
 
-    while (father != NULL) {
+    while (father != NULL
+#ifdef ModelP
+           && !UG_NS<dim>::isGhost(father)
+#endif
+           ) {
 
       // Get the father element side of the current element side
       int fatherSide = getFatherSide(currentFace);
@@ -546,7 +550,6 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
       // Go further down
       currentFace = Face(father,fatherSide);
       father = UG_NS<dim>::EFather(father);
-
     }
 
     // Nothing found
