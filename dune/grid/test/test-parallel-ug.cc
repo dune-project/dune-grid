@@ -144,12 +144,12 @@ void checkIntersections(const GridView &gv)
       ++ n;
     }
 
-    if (n != 2*GridView::dimension)
+    if (n != it->template count<1>())
     {
 
       DUNE_THROW(Dune::InvalidStateException,
                  "Number of faces for non-ghost cell incorrect. Is "
-                 << n << " but should be " << 2*GridView::dimension);
+                 << n << " but should be " << it->template count<1>());
     }
   }
 }
@@ -297,7 +297,7 @@ void createGrid(GridType &grid, int n)
 }
 
 template <class GridView, int commCodim>
-void testCommunication(const GridView &gridView)
+void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=false)
 {
   std::cout << "Testing communication for codim " << commCodim << " entities\n";
 
@@ -336,33 +336,42 @@ void testCommunication(const GridView &gridView)
 
   // communicate the entities at the interior border to all other
   // processes
-  gridView.grid().communicate(datahandle,
-                              Dune::InteriorBorder_All_Interface,
-                              Dune::ForwardCommunication);
+  gridView.communicate(datahandle, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
 
   //////////////////////////////////////////////////////
   // Write results to disk
   //////////////////////////////////////////////////////
-  std::cout << "Writing data to disk\n";
-  Dune::VTKWriter<GridView> writer(gridView);
-  if (commCodim == 0) {
-    writer.addCellData(userDataSend, "Send");
-    writer.addCellData(userDataReceive, "Receive");
-    writer.addCellData(partitionType, "Partition Type");
-    writer.addCellData(entityIndex, "Entity Index");
-  }
-  else if (commCodim == dim) {
-    writer.addVertexData(userDataSend, "Send");
-    writer.addVertexData(userDataReceive, "Receive");
-    writer.addVertexData(partitionType, "Partition Type");
-    writer.addVertexData(entityIndex, "Entity Index");
-  }
+  if (printVTK)
+  {
+    std::cout << "Writing data to disk\n";
+    Dune::VTKWriter<GridView> writer(gridView);
+    if (commCodim == 0) {
+      writer.addCellData(userDataSend, "Send");
+      writer.addCellData(userDataReceive, "Receive");
+      writer.addCellData(partitionType, "Partition Type");
+      writer.addCellData(entityIndex, "Entity Index");
+    }
+    else if (commCodim == dim) {
+      writer.addVertexData(userDataSend, "Send");
+      writer.addVertexData(userDataReceive, "Receive");
+      writer.addVertexData(partitionType, "Partition Type");
+      writer.addVertexData(entityIndex, "Entity Index");
+    }
 
-  char fileName[1024];
-  sprintf(fileName, "test-parallel-ug-dim=%d-commCodim=%d", dim, commCodim);
-  writer.write(fileName,
-               Dune::VTKOptions::ascii);
-  std::cout << "Done writing data to disk\n";
+    char fileName[1024];
+    sprintf(fileName, "test-parallel-ug-dim=%d-commCodim=%d", dim, commCodim);
+    if (isLeaf)
+      strcat(fileName, "-leaf");
+    else
+    {
+      char levelName[10];
+      sprintf(levelName, "-level=%d", (gridView.template begin<commCodim>())->level());
+      strcat(fileName, levelName);
+    }
+    writer.write(fileName,
+                 Dune::VTKOptions::ascii);
+    std::cout << "Done writing data to disk\n";
+  }
 };
 
 template <int dim>
@@ -377,7 +386,6 @@ void testParallelUG()
   typedef UGGrid<dim> GridType;
   GridType grid;
   createGrid(grid, n);
-
 
   //////////////////////////////////////////////////////
   // Distribute the grid
@@ -407,8 +415,8 @@ void testParallelUG()
 
   typedef typename GridType::LevelGridView LevelGV;
   typedef typename GridType::LeafGridView LeafGV;
-  LeafGV leafGridView = grid.leafView();
-  LevelGV level0GridView = grid.levelView(0);
+  const LeafGV&  leafGridView = grid.leafView();
+  const LevelGV& level0GridView = grid.levelView(0);
 
   std::cout << "LevelGridView for level 0 has " << level0GridView.size(0)
             << " elements "  << level0GridView.size(dim - 1)
@@ -420,24 +428,25 @@ void testParallelUG()
             << " nodes.\n";
 
   // some consistency checks for the mappers and the intersections
-  checkIntersections(grid.levelView(0));
-  checkMappersWrapper<dim, 0, LevelGV>::check(grid.levelView(0));
-  checkMappersWrapper<dim, 1, LevelGV>::check(grid.levelView(0));
-  checkMappersWrapper<dim, 2, LevelGV>::check(grid.levelView(0));
-  checkMappersWrapper<dim, 3, LevelGV>::check(grid.levelView(0));
+  checkIntersections(level0GridView);
+  checkMappersWrapper<dim, 0, LevelGV>::check(level0GridView);
+  checkMappersWrapper<dim, 1, LevelGV>::check(level0GridView);
+  checkMappersWrapper<dim, 2, LevelGV>::check(level0GridView);
+  checkMappersWrapper<dim, 3, LevelGV>::check(level0GridView);
 
-  checkIntersections(grid.leafView());
-  checkMappersWrapper<dim, 0, LeafGV>::check(grid.leafView());
-  checkMappersWrapper<dim, 1, LeafGV>::check(grid.leafView());
-  checkMappersWrapper<dim, 2, LeafGV>::check(grid.leafView());
-  checkMappersWrapper<dim, 3, LeafGV>::check(grid.leafView());
+  checkIntersections(leafGridView);
+  checkMappersWrapper<dim, 0, LeafGV>::check(leafGridView);
+  checkMappersWrapper<dim, 1, LeafGV>::check(leafGridView);
+  checkMappersWrapper<dim, 2, LeafGV>::check(leafGridView);
+  checkMappersWrapper<dim, 3, LeafGV>::check(leafGridView);
 
+  // Test element and node communication on level view
+  testCommunication<typename GridType::LevelGridView, 0>(level0GridView, false);
+  testCommunication<typename GridType::LevelGridView, dim>(level0GridView, false);
 
-  //////////////////////////////////////////////////////
-  // Test element and node communication
-  //////////////////////////////////////////////////////
-  testCommunication<typename GridType::LevelGridView, 0>(grid.levelView(0));
-  testCommunication<typename GridType::LeafGridView, dim>(grid.leafView());
+  // Test element and node communication on leaf view
+  testCommunication<typename GridType::LeafGridView, 0>(leafGridView, true);
+  testCommunication<typename GridType::LeafGridView, dim>(leafGridView, true);
 
   ////////////////////////////////////////////////////
   //  Refine globally and test again
@@ -461,8 +470,12 @@ void testParallelUG()
   checkMappersWrapper<dim, 3, LeafGV>::check(grid.leafView());
 
   for (int i=0; i<=grid.maxLevel(); i++)
-    testCommunication<typename GridType::LevelGridView, 0>(grid.levelView(i));
-  testCommunication<typename GridType::LeafGridView, dim>(grid.leafView());
+  {
+    testCommunication<typename GridType::LevelGridView, 0>(grid.levelView(i), false);
+    testCommunication<typename GridType::LevelGridView, dim>(grid.levelView(i), false);
+  }
+  testCommunication<typename GridType::LeafGridView, 0>(grid.leafView(), true);
+  testCommunication<typename GridType::LeafGridView, dim>(grid.leafView(), true);
 
 };
 
