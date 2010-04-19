@@ -529,16 +529,12 @@ namespace Dune {
     //! Return true if the element is a ghost element
 #ifdef ModelP
     static bool isGhost(const UG_NS< UG_DIM >::Element* theElement) {
-#define PARHDRE(p) (&((p)->ge.ddd))
-#define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
       if (EPRIO(theElement) == UG_NAMESPACE::PrioHGhost
           || EPRIO(theElement) == UG_NAMESPACE::PrioVGhost
           || EPRIO(theElement) == UG_NAMESPACE::PrioVHGhost)
         return true;
       else
         return false;
-#undef EPRIO
-#undef PARHDRE
     }
 #endif
 
