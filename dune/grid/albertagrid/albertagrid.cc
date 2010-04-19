@@ -10,8 +10,6 @@
 //  namespace Dune
 //
 //************************************************************************
-#include "datahandle.hh"
-
 #include "geometry.cc"
 #include "entity.cc"
 #include "intersection.cc"

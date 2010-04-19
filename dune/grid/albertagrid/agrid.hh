@@ -48,6 +48,7 @@
 #include <dune/grid/albertagrid/level.hh>
 #include <dune/grid/albertagrid/intersection.hh>
 #include <dune/grid/albertagrid/intersectioniterator.hh>
+#include <dune/grid/albertagrid/datahandle.hh>
 
 #include "indexsets.hh"
 #include "geometry.hh"
@@ -168,6 +169,9 @@ namespace Dune
 #endif
     friend class AlbertaGridIndexSet< dim, dimworld >;
     friend class AlbertaGridHierarchicIndexSet< dim, dimworld >;
+
+    template< class, class >
+    friend class Alberta::AdaptRestrictProlongHandler;
 
   public:
     //! the grid family of AlbertaGrid
