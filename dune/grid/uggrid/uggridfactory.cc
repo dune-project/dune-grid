@@ -327,9 +327,9 @@ createGrid()
 
     } else {       // No explicit boundary parametrization has been given. We insert a linear segment
 
-      int numVertices = 2;(dimworld==2)
-      ? 2
-      : ((boundarySegmentVertices_[i][3]==-1) ? 3 : 4);
+      int numVertices = (dimworld==2)
+                        ? 2
+                        : ((boundarySegmentVertices_[i][3]==-1) ? 3 : 4);
 
       double segmentCoordinates[dimworld*2-2][dimworld];
       for (int j=0; j<numVertices; j++)

@@ -15,6 +15,10 @@
 
 #include <dune/common/mpihelper.hh>
 
+#ifndef UG_DEFAULT_HEAPSIZE
+#define UG_DEFAULT_HEAPSIZE 500
+#endif
+
 #ifdef ModelP
 #include <dune/common/mpicollectivecommunication.hh>
 #endif
@@ -398,7 +402,7 @@ namespace Dune {
      *
      * \param heapSize The size of UG's internal memory in megabytes for this grid.
      */
-    UGGrid(unsigned int heapSize=500);
+    UGGrid(unsigned int heapSize=UG_DEFAULT_HEAPSIZE);
 
     //! Destructor
     ~UGGrid();
