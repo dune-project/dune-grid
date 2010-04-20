@@ -50,13 +50,16 @@ namespace Dune
     //!
     //! fills the vtx,element, and bound vectors
     //! returns true if reading succeded
-    bool readDuneGrid( std :: istream &, int dimG = -1, int dimW = -1 );
+    bool readDuneGrid( std::istream &, int dimG, int dimW );
+
+    bool readDuneGrid( std::istream &input, int dimG = -1 ) DUNE_DEPRECATED
+    {
+      return readDuneGrid( input, dimG, -1 );
+    }
 
     //! method to write in Tetgen/Triangle Poly Format
     void writeTetgenPoly ( const std :: string &, std ::string &, std :: string & );
     void writeTetgenPoly ( std::ostream & );
-    //! method to write macrogridfiles in alu format (cam be used without dune)
-    void writeAlu ( std :: ostream & );
 
   protected:
     // dimension of world and problem: set through the readDuneGrid() method
