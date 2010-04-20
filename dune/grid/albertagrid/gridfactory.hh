@@ -182,7 +182,7 @@ namespace Dune
       const InsertResult result = boundaryMap_.insert( std::make_pair( faceId, boundaryProjections_.size() ) );
       if( !result.second )
         DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
-      boundaryProjections_.push_back( Projection( *projection ) );
+      boundaryProjections_.push_back( projection );
     }
 
 
@@ -196,7 +196,7 @@ namespace Dune
     {
       if( globalProjection_ != 0 )
         DUNE_THROW( GridError, "Only one global boundary projection can be attached to a grid." );
-      globalProjection_ = new Projection( projection );
+      globalProjection_ = &projection;
     }
 
     /** \brief insert a boundary segment into the macro grid
@@ -207,7 +207,8 @@ namespace Dune
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int >& vertices )
     {
-      DUNE_THROW( NotImplemented, "AlbertaGrid::insertBoundarySegment without a parametrization function" );
+      GeometryType type( GeometryType::simplex, dimension-1 );
+      insertBoundaryProjection( type, vertices, 0 );
     }
 
     /** \brief insert a shaped boundary segment into the macro grid
@@ -390,9 +391,9 @@ namespace Dune
 
     MacroData macroData_;
     NumberingMap numberingMap_;
-    const Projection *globalProjection_;
+    const DuneProjection *globalProjection_;
     BoundaryMap boundaryMap_;
-    std::vector< Projection > boundaryProjections_;
+    std::vector< const DuneProjection * > boundaryProjections_;
   };
 
 
@@ -523,8 +524,14 @@ namespace Dune
 
     bool hasProjection ( const ElementInfo &elementInfo, const int face ) const
     {
-      return (gridFactory().globalProjection_ != 0)
-             || (gridFactory().insertionIndex( elementInfo, face ) < std::numeric_limits< unsigned int >::max());
+      if( gridFactory().globalProjection_ != 0 )
+        return true;
+
+      const unsigned int index = gridFactory().insertionIndex( elementInfo, face );
+      if( index < std::numeric_limits< unsigned int >::max() )
+        return (gridFactory().boundaryProjections_[ index ] != 0);
+      else
+        return false;
     }
 
     bool hasProjection ( const ElementInfo &elementInfo ) const
@@ -536,16 +543,20 @@ namespace Dune
     {
       const unsigned int index = gridFactory().insertionIndex( elementInfo, face );
       if( index < std::numeric_limits< unsigned int >::max() )
-        return gridFactory().boundaryProjections_[ index ];
+      {
+        const DuneProjection *projection = gridFactory().boundaryProjections_[ index ];
+        if( projection != 0 )
+          return Projection( *projection );
+      }
 
       assert( gridFactory().globalProjection_ != 0 );
-      return *gridFactory().globalProjection_;
+      return Projection( *gridFactory().globalProjection_ );
     };
 
     Projection projection ( const ElementInfo &elementInfo ) const
     {
       assert( gridFactory().globalProjection_ != 0 );
-      return *gridFactory().globalProjection_;
+      return Projection( *gridFactory().globalProjection_ );
     };
 
     const GridFactory &gridFactory () const
