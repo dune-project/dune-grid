@@ -11,24 +11,26 @@ namespace Dune
     dgf_.element = DuneGridFormatParser::Simplex;
     dgf_.dimgrid = dimworld;
     dgf_.dimw = dimworld;
+
+    const bool isDGF = dgf_.isDuneGridFormat( file );
+    file.seekg( 0 );
+    if( !isDGF )
+      return false;
+
     int rank = 0;
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    if( !dgf_.readDuneGrid( file, dimworld, dimworld ) )
-      return false;
-
-    if( dgf_.dimw != dimworld )
-      DUNE_THROW( DGFException, "Macrofile is for dimension " << dgf_.dimw
-                                                              << " and cannot be used to initialize an "
-                                                              << "ALUGrid of dimension " << dimension << ".");
-    if (dimworld == 3)
-      dgf_.setOrientation( 2, 3 );
-
     dgf::GridParameterBlock parameter( file );
+
     if( rank == 0 )
     {
+      if( !dgf_.readDuneGrid( file, dimworld, dimworld ) )
+        DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
+
+      dgf_.setOrientation( 2, 3 );
+
       for( int n = 0; n < dgf_.nofvtx; ++n )
       {
         FieldVector< double, dimworld > pos;
@@ -84,22 +86,24 @@ namespace Dune
     dgf_.element = DuneGridFormatParser::Cube;
     dgf_.dimgrid = dimworld;
     dgf_.dimw = dimworld;
+
+    const bool isDGF = dgf_.isDuneGridFormat( file );
+    file.seekg( 0 );
+    if( !isDGF )
+      return false;
+
     int rank = 0;
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    if( !dgf_.readDuneGrid( file, dimworld, dimworld ) )
-      return false;
-
-    if( dgf_.dimw != dimworld )
-      DUNE_THROW( DGFException, "Macrofile is for dimension " << dgf_.dimw
-                                                              << " and cannot be used to initialize an "
-                                                              << "ALUGrid of dimension " << dimension << ".");
-
     dgf::GridParameterBlock parameter( file );
+
     if( rank == 0 )
     {
+      if( !dgf_.readDuneGrid( file, dimworld, dimworld ) )
+        DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
+
       for( int n = 0; n < dgf_.nofvtx; ++n )
       {
         FieldVector< double, dimworld > pos;
@@ -156,23 +160,24 @@ namespace Dune
     dgf_.element = DuneGridFormatParser::Simplex;
     dgf_.dimgrid = 2;
     dgf_.dimw = dimworld;
+
+    const bool isDGF = dgf_.isDuneGridFormat( file );
+    file.seekg( 0 );
+    if( !isDGF )
+      return false;
+
     int rank = 0;
 #if ALU2DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    if( !dgf_.readDuneGrid( file, 2, dimworld ) )
-      return false;
-
-    if( dgf_.dimw != dimworld )
-      DUNE_THROW( DGFException, "Macrofile is for dimension " << dgf_.dimw
-                                                              << " and cannot be used to initialize an "
-                                                              << "ALUGrid of dimension " << dimension << ".");
-
     dgf::GridParameterBlock parameter( file );
 
     if( rank == 0 )
     {
+      if( !dgf_.readDuneGrid( file, 2, dimworld ) )
+        DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
+
       for( int n = 0; n < dgf_.nofvtx; ++n )
       {
         FieldVector< double, dimworld > pos;
@@ -248,23 +253,24 @@ namespace Dune
     dgf_.element = DuneGridFormatParser::Cube;
     dgf_.dimgrid = 2;
     dgf_.dimw = dimworld;
+
+    const bool isDGF = dgf_.isDuneGridFormat( file );
+    file.seekg( 0 );
+    if( !isDGF )
+      return false;
+
     int rank = 0;
 #if ALU2DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    if( !dgf_.readDuneGrid( file, 2, dimworld ) )
-      return false;
-
-    if( dgf_.dimw != dimworld )
-      DUNE_THROW( DGFException, "Macrofile is for dimension " << dgf_.dimw
-                                                              << " and cannot be used to initialize an "
-                                                              << "ALUGrid of dimension " << dimension << ".");
-
     dgf::GridParameterBlock parameter( file );
 
     if( rank == 0 )
     {
+      if( !dgf_.readDuneGrid( file, 2, dimworld ) )
+        DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
+
       for( int n = 0; n < dgf_.nofvtx; ++n )
       {
         FieldVector< double, dimworld > pos;
@@ -340,22 +346,24 @@ namespace Dune
     dgf_.element = DuneGridFormatParser::Simplex;
     dgf_.dimgrid = 2;
     dgf_.dimw = dimworld;
+
+    const bool isDGF = dgf_.isDuneGridFormat( file );
+    file.seekg( 0 );
+    if( !isDGF )
+      return false;
+
     int rank = 0;
 #if ALU2DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    if( !dgf_.readDuneGrid( file, 2, dimworld ) )
-      return false;
-    if( dgf_.dimw != dimworld )
-      DUNE_THROW( DGFException, "Macrofile is for dimension " << dgf_.dimw
-                                                              << " and cannot be used to initialize an "
-                                                              << "ALUGrid of dimension " << dimension << ".");
-
     dgf::GridParameterBlock parameter( file );
 
     if( rank == 0 )
     {
+      if( !dgf_.readDuneGrid( file, 2, dimworld ) )
+        DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
+
       for( int n = 0; n < dgf_.nofvtx; ++n )
       {
         FieldVector< double, dimworld > pos;

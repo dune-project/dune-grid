@@ -9,6 +9,9 @@
 namespace Dune
 {
 
+  static const std::string dgfid( "DGF" );
+
+
   class DGFPrintInfo
   {
     std::ofstream out;
@@ -269,23 +272,27 @@ namespace Dune
     dverb.flush();
   }
 
-
-  bool DuneGridFormatParser
-  :: readDuneGrid ( std :: istream &gridin, int dimG, int dimW )
+  bool DuneGridFormatParser::isDuneGridFormat ( std::istream &gridin )
   {
-    static const std :: string dgfid( "DGF" );
-    std :: string idline;
-    std :: getline( gridin, idline );
-    dgf :: makeupcase( idline );
-    std :: istringstream idstream( idline );
-    std :: string id;
+    std::string idline;
+    std::getline( gridin, idline );
+    dgf::makeupcase( idline );
+
+    std::string id;
+    std::istringstream idstream( idline );
     idstream >> id;
+
     // compare id to DGF keyword
-    if ( id != dgfid )
+    return (id == dgfid);
+  }
+
+  bool DuneGridFormatParser::readDuneGrid ( std::istream &gridin, int dimG, int dimW )
+  {
+    if( !isDuneGridFormat( gridin ) )
     {
-      std :: cerr << "Couldn't find '" << dgfid << "' keyword."
-                  << "File is not in DuneGridFormat. Exiting parser..."
-                  << std :: endl;
+      std::cerr << "Couldn't find '" << dgfid << "' keyword."
+                << "File is not in DuneGridFormat. Exiting parser..."
+                << std::endl;
       return false;
     } // not a DGF file, prehaps native file format
 
@@ -297,9 +304,6 @@ namespace Dune
     vtxoffset = 0;
     nofvtx=0;
     nofelements=0;
-
-    if (rank_ > 0)
-      return true;
 
     info = new DGFPrintInfo( "dgfparser" );
 

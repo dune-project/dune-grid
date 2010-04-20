@@ -46,6 +46,8 @@ namespace Dune
     //! constructor
     DuneGridFormatParser ( int rank, int size );
 
+    static bool isDuneGridFormat ( std::istream & );
+
     //! \brief method which reads the dgf file
     //!
     //! fills the vtx,element, and bound vectors
