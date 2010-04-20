@@ -17,7 +17,7 @@ namespace Dune
 {
 
   template< template< int, int > class ALUGrid >
-  ALU3dGridFactory< ALUGrid >
+  inline ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                         bool removeGeneratedFile )
     : communicator_( communicator ),
@@ -31,7 +31,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  ALU3dGridFactory< ALUGrid >
+  inline ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const std::string &filename,
                         const MPICommunicatorType &communicator )
     : communicator_( communicator ),
@@ -45,12 +45,12 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  ALU3dGridFactory< ALUGrid > :: ~ALU3dGridFactory ()
+  inline ALU3dGridFactory< ALUGrid > :: ~ALU3dGridFactory ()
   {}
 
 
   template< template< int, int > class ALUGrid >
-  void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexType &pos )
+  inline void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexType &pos )
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
@@ -61,7 +61,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  void ALU3dGridFactory< ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid >
   :: insertElement ( const GeometryType &geometry,
                      const std::vector< unsigned int > &vertices )
   {
@@ -81,7 +81,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  void ALU3dGridFactory< ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid >
   :: insertBoundary ( const GeometryType &geometry,
                       const std::vector< unsigned int > &vertices,
                       const int id )
@@ -112,7 +112,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  void ALU3dGridFactory< ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid >
   ::insertBoundary ( const int element, const int face, const int id )
   {
 #if ALU3DGRID_PARALLEL
@@ -131,7 +131,7 @@ namespace Dune
   }
 
   template< template< int, int > class ALUGrid >
-  void ALU3dGridFactory< ALUGrid > ::
+  inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
   {
     if( globalProjection_ )
@@ -142,7 +142,7 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  void ALU3dGridFactory< ALUGrid > ::
+  inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection ( const GeometryType &type,
                              const std::vector< unsigned int > &vertices,
                              const DuneBoundaryProjectionType *projection )
@@ -163,14 +163,14 @@ namespace Dune
   }
 
   template< template< int, int > class ALUGrid >
-  void ALU3dGridFactory< ALUGrid > ::
+  inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )
   {
     DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
   }
 
   template< template< int, int > class ALUGrid >
-  void ALU3dGridFactory< ALUGrid > ::
+  inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                           const shared_ptr<BoundarySegment<3,3> >& boundarySegment )
   {
@@ -213,20 +213,20 @@ namespace Dune
   }
 
   template< template< int, int > class ALUGrid >
-  ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >::createGrid ()
+  inline ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >::createGrid ()
   {
     return createGrid( true, true, "" );
   }
 
   template< template< int, int > class ALUGrid >
-  ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
+  inline ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
   ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
   {
     return createGrid( addMissingBoundaries, true, dgfName );
   }
 
   template< template< int, int > class ALUGrid >
-  ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
+  inline ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
   ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
     typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator BoundaryIdIteratorType;

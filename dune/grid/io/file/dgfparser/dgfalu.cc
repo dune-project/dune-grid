@@ -4,7 +4,7 @@
 namespace Dune
 {
 
-  void DGFGridFactory< ALUSimplexGrid< 3, 3 > >
+  inline void DGFGridFactory< ALUSimplexGrid< 3, 3 > >
   ::generate( const std::string &filename,
               MPICommunicatorType communicator )
   {
@@ -87,7 +87,7 @@ namespace Dune
       grid_ =  callDirectly ("ALUSimplexGrid< 3 , 3 >", rank, filename.c_str(), communicator);
     }
   }
-  void DGFGridFactory< ALUCubeGrid< 3, 3 > >
+  inline void DGFGridFactory< ALUCubeGrid< 3, 3 > >
   ::generate( const std::string &filename,
               MPICommunicatorType communicator )
   {
@@ -169,7 +169,7 @@ namespace Dune
     }
   }
 
-  void DGFGridFactory< ALUSimplexGrid< 2, 2 > >
+  inline void DGFGridFactory< ALUSimplexGrid< 2, 2 > >
   ::generate( const std::string &filename,
               MPICommunicatorType communicator )
   {
@@ -255,7 +255,7 @@ namespace Dune
                     << filename << "'." );
     }
   }
-  void DGFGridFactory< ALUConformGrid< 2, 2 > >
+  inline void DGFGridFactory< ALUConformGrid< 2, 2 > >
   ::generate( const std::string &filename,
               MPICommunicatorType communicator )
   {
