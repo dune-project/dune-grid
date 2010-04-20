@@ -1,7 +1,7 @@
 # $Id$
 
-SUBDIRS = albertagrid alugrid common onedgrid sgrid uggrid utility yaspgrid \
-	test io genericgeometry geometrygrid
+SUBDIRS = genericgeometry common alugrid onedgrid sgrid uggrid utility \
+          yaspgrid io albertagrid geometrygrid test
 noinst_LTLIBRARIES = libgrid.la
 
 # always part of lib:
