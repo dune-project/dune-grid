@@ -17,10 +17,11 @@ Dune::UGGridLevelIntersection<GridImp>::outerNormal
   // generic geometry of the _inside_ element, which then has a method computing the normal.
   std::vector<FieldVector<typename GridImp::ctype, dim> > corners(inside()->template count<dim>());
 
-  for (int i=0; i<corners.size(); i++)
+  for (size_t i=0; i<corners.size(); i++)
     corners[i] = inside()->geometry().corner(i);
 
-  GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > insideGeometry(inside()->type(), corners);
+  typedef GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > ElementGeometry;
+  ElementGeometry insideGeometry( GenericGeometry::topologyId( inside()->type() ), corners );
 
   // Actually compute the normal.
   // Note: The local coordinates that have to be provided are with respect to the inside() element
@@ -163,10 +164,11 @@ Dune::UGGridLeafIntersection<GridImp>::outerNormal
   // generic geometry of the _inside_ element, which then has a method computing the normal.
   std::vector<FieldVector<typename GridImp::ctype, dim> > corners(inside()->template count<dim>());
 
-  for (int i=0; i<corners.size(); i++)
+  for (size_t i=0; i<corners.size(); i++)
     corners[i] = inside()->geometry().corner(i);
 
-  GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > insideGeometry(inside()->type(), corners);
+  typedef GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > ElementGeometry;
+  ElementGeometry insideGeometry( GenericGeometry::topologyId( inside()->type() ), corners );
 
   // Actually compute the normal.
   // Note: The local coordinates that have to be provided are with respect to the inside() element

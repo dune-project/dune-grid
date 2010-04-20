@@ -215,7 +215,7 @@ namespace Dune {
     {
       // set up base class
       // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
-      Base::operator=(Base(type,coordinates));
+      static_cast< Base & >( *this ) = Base( GenericGeometry::topologyId( type ), coordinates );
     }
 
   };
@@ -247,7 +247,7 @@ namespace Dune {
     {
       // set up base class
       // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
-      Base::operator=(Base(type,coordinates));
+      static_cast< Base & >( *this ) = Base( GenericGeometry::topologyId( type ), coordinates );
     }
 
   };
