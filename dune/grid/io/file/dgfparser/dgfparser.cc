@@ -432,9 +432,6 @@ namespace Dune
     nofvtx=0;
     nofelements=0;
 
-    if (rank_ > 0)
-      return true;
-
     info = new DGFPrintInfo( "dgfparser" );
 
     dgf :: IntervalBlock interval( gridin );
