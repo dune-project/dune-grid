@@ -18,16 +18,8 @@ namespace Dune {
 
     std::string str(filename);
 
-    if(mg.readDuneGrid(gridin))
+    if( mg.readDuneGrid( gridin, dim, dim ) )
     {
-      if (mg.dimw != dim) {
-        DUNE_THROW(DGFException,
-                   "Macrofile " << filename << " is for dimension " << mg.dimw
-                                << " and cannot be used to initialize an "
-                                << "UGGrid of dimension "
-                                << dim);
-      }
-
       mg.setOrientation(0,1);
 
       // get grid parameter block
