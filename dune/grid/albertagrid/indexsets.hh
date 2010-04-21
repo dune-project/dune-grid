@@ -599,15 +599,29 @@ namespace Dune
     }
 
     /** \copydoc IdSet::subId(const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity &e,int i,unsigned int codim) const */
-    IdType subId ( const typename Grid::template Codim< 0 >::Entity &e,
-                   int i, int codim ) const
+    IdType subId ( const typename Grid::template Codim< 0 >::Entity &e, int i, unsigned int subcodim ) const
     {
-      assert( (codim >= 0) && (codim <= dimension) );
-      const IdType index = hIndexSet_.subIndex( e, i, codim );
-      return (index << 2) | IdType( codim );
+      assert( int( subcodim ) <= dimension );
+      const IdType index = hIndexSet_.subIndex( e, i, subcodim );
+      return (index << 2) | IdType( subcodim );
+    }
+
+    template< int codim >
+    IdType subId ( const typename Grid::template Codim< codim >::Entity &e, int i, unsigned int subcodim ) const
+    {
+      assert( (codim >= 0) && (codim <= dimension) && (int( codim + subcodim ) <= dimension) );
+      const IdType index = hIndexSet_.subIndex( e, i, subcodim );
+      return (index << 2) | IdType( codim + subcodim );
+    }
+
+    template< class Entity >
+    IdType subId ( const Entity &e, int i, unsigned int subcodim ) const
+    {
+      return subId< Entity::codimension >( e, i, subcodim );
     }
 
   private:
+    // prohibit copying
     AlbertaGridIdSet ( const This & );
 
     const HierarchicIndexSet &hIndexSet_;
