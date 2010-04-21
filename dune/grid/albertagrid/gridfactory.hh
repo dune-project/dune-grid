@@ -67,6 +67,7 @@ namespace Dune
     typedef FieldMatrix< ctype, dimensionworld, dimensionworld > WorldMatrix;
 
     typedef DuneBoundaryProjection< dimensionworld > DuneProjection;
+    typedef Dune::shared_ptr< const DuneProjection > DuneProjectionPtr;
     typedef Dune::BoundarySegment< dimension, dimensionworld > BoundarySegment;
 
     template< int codim >
@@ -100,7 +101,7 @@ namespace Dune
 
     /** default constructor */
     GridFactory ()
-      : globalProjection_( 0 )
+      : globalProjection_( (const DuneProjection *) 0 )
     {
       macroData_.create();
     }
@@ -182,7 +183,7 @@ namespace Dune
       const InsertResult result = boundaryMap_.insert( std::make_pair( faceId, boundaryProjections_.size() ) );
       if( !result.second )
         DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
-      boundaryProjections_.push_back( projection );
+      boundaryProjections_.push_back( DuneProjectionPtr( projection ) );
     }
 
 
@@ -192,11 +193,11 @@ namespace Dune
      *
      *  \note The grid takes control of the projection object.
      */
-    virtual void insertBoundaryProjection ( const DuneProjection &projection )
+    virtual void insertBoundaryProjection ( const DuneProjection *projection )
     {
       if( globalProjection_ != 0 )
         DUNE_THROW( GridError, "Only one global boundary projection can be attached to a grid." );
-      globalProjection_ = &projection;
+      globalProjection_ = DuneProjectionPtr( projection );
     }
 
     /** \brief insert a boundary segment into the macro grid
@@ -391,16 +392,15 @@ namespace Dune
 
     MacroData macroData_;
     NumberingMap numberingMap_;
-    const DuneProjection *globalProjection_;
+    DuneProjectionPtr globalProjection_;
     BoundaryMap boundaryMap_;
-    std::vector< const DuneProjection * > boundaryProjections_;
+    std::vector< DuneProjectionPtr > boundaryProjections_;
   };
 
 
   template< int dim, int dimworld >
   GridFactory< AlbertaGrid< dim, dimworld > >::~GridFactory ()
   {
-    //delete globalProjection_;
     macroData_.release();
   }
 
@@ -524,19 +524,19 @@ namespace Dune
 
     bool hasProjection ( const ElementInfo &elementInfo, const int face ) const
     {
-      if( gridFactory().globalProjection_ != 0 )
+      if( gridFactory().globalProjection_ )
         return true;
 
       const unsigned int index = gridFactory().insertionIndex( elementInfo, face );
       if( index < std::numeric_limits< unsigned int >::max() )
-        return (gridFactory().boundaryProjections_[ index ] != 0);
+        return gridFactory().boundaryProjections_[ index ];
       else
         return false;
     }
 
     bool hasProjection ( const ElementInfo &elementInfo ) const
     {
-      return (gridFactory().globalProjection_ != 0);
+      return gridFactory().globalProjection_;
     }
 
     Projection projection ( const ElementInfo &elementInfo, const int face ) const
@@ -544,19 +544,19 @@ namespace Dune
       const unsigned int index = gridFactory().insertionIndex( elementInfo, face );
       if( index < std::numeric_limits< unsigned int >::max() )
       {
-        const DuneProjection *projection = gridFactory().boundaryProjections_[ index ];
-        if( projection != 0 )
-          return Projection( *projection );
+        const DuneProjectionPtr &projection = gridFactory().boundaryProjections_[ index ];
+        if( projection )
+          return Projection( projection );
       }
 
-      assert( gridFactory().globalProjection_ != 0 );
-      return Projection( *gridFactory().globalProjection_ );
+      assert( gridFactory().globalProjection_ );
+      return Projection( gridFactory().globalProjection_ );
     };
 
     Projection projection ( const ElementInfo &elementInfo ) const
     {
-      assert( gridFactory().globalProjection_ != 0 );
-      return Projection( *gridFactory().globalProjection_ );
+      assert( gridFactory().globalProjection_ );
+      return Projection( gridFactory().globalProjection_ );
     };
 
     const GridFactory &gridFactory () const
@@ -572,4 +572,4 @@ namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_GRIDFACTORY_HH
