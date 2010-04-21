@@ -147,7 +147,7 @@ namespace Dune
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;
 
-      typedef Dune::CollectiveCommunication< AlbertaGrid<dim,dimworld> > CollectiveCommunication;
+      typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
     };
   };
 
