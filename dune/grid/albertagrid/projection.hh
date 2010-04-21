@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_NODEPROJECTION_HH
 #define DUNE_ALBERTA_NODEPROJECTION_HH
 
+#include <dune/common/shared_ptr.hh>
+
 #include <dune/grid/common/boundaryprojection.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
@@ -57,40 +59,11 @@ namespace Dune
       typedef FieldVector< Real, dimWorld > GlobalCoordinate;
 
       typedef Dune::DuneBoundaryProjection< dimWorld > Projection;
+      typedef Dune::shared_ptr< const Projection > ProjectionPtr;
 
-      explicit DuneBoundaryProjection ( const Projection &projection )
-        : projection_( &projection ),
-          refCount_( new int ( 1 ) )
+      explicit DuneBoundaryProjection ( const ProjectionPtr &projection )
+        : projection_( projection )
       {}
-
-      DuneBoundaryProjection ( const This &other )
-        : projection_( other.projection_ ),
-          refCount_( other.refCount_ )
-      {
-        ++(*refCount_);
-      }
-
-      ~DuneBoundaryProjection ()
-      {
-        if( --(*refCount_) == 0 )
-        {
-          delete refCount_;
-          delete projection_;
-        }
-      }
-
-      This &operator= ( const This &other )
-      {
-        ++(*other.refCount_);
-        if( --(*refCount_) == 0 )
-        {
-          delete refCount_;
-          delete projection_;
-        }
-        refCount_ = other.refCount_;
-        projection_ = other.projection_;
-        return *this;
-      }
 
       // note: GlobalVector is an array type; global is the return value
       void operator() ( const ElementInfo &elementInfo, const LocalVector local,
@@ -110,8 +83,7 @@ namespace Dune
       }
 
     private:
-      const Projection *projection_;
-      int *refCount_;
+      ProjectionPtr projection_;
     };
 
 

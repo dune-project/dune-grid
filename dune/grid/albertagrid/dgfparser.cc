@@ -112,7 +112,7 @@ namespace Dune
     const DuneBoundaryProjection< dimworld > *projection
       = projectionBlock.template defaultProjection< dimworld >();
     if( projection != 0 )
-      factory_.insertBoundaryProjection( *projection );
+      factory_.insertBoundaryProjection( projection );
     const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
     for( size_t i = 0; i < numBoundaryProjections; ++i )
     {
