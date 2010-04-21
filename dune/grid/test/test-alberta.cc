@@ -62,12 +62,12 @@ void markOne ( GridType & grid , int num , int ref )
 template< class Grid >
 void checkProjectedUnitCube ()
 {
+  typedef Dune::CircleBoundaryProjection< Grid::dimensionworld > Projection;
   std::cout << ">>> Checking projected unit cube..." << std::endl;
-  Dune::CircleBoundaryProjection< Grid::dimensionworld > projection;
   Dune::GridFactory< Grid > gridFactory;
   BasicUnitCube< Grid::dimension >::insertVertices( gridFactory, -1.0, 1.0 );
   BasicUnitCube< Grid::dimension >::insertSimplices( gridFactory );
-  gridFactory.insertBoundaryProjection( projection );
+  gridFactory.insertBoundaryProjection( new Projection );
   gridFactory.markLongestEdge();
   Grid *grid = gridFactory.createGrid();
   for( int i = 0; i < 2; ++i )
