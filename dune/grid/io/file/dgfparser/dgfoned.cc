@@ -13,7 +13,7 @@ namespace Dune {
                  "Macrofile " << filename << " not found");
     }
 
-    if(mg.readDuneGrid(gridin))
+    if(mg.readDuneGrid(gridin, OneDGrid::dimension, OneDGrid::dimensionworld))
     {
       typedef std::map<size_t,double> VtxMapType;
       typedef VtxMapType :: iterator iterator;
