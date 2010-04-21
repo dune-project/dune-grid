@@ -1,0 +1,17 @@
+testsubtopologies
+testmapping
+testgeo
+grefelement
+testmatrix
+
+Makefile
+Makefile.in
+
+.deps
+.libs
+
+*.dgf.*
+*.log
+*.so.*
+*.swp
+*.tmp*
