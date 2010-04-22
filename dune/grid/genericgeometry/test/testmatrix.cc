@@ -17,6 +17,7 @@ int main()
   typedef double Field;
   //typedef long double Field;
   //typedef GMPField< 72 > Field;
+  //typedef GMPField< 160 > Field;
 
   typedef GenericGeometry::MatrixHelper< GenericGeometry::DuneCoordTraits< Field > > MatrixHelper;
 
@@ -34,7 +35,27 @@ int main()
   std::cout << "detAAT = " << detAAT << std::endl;
 
   FieldMatrix< Field, 2, 2 > invA;
-  Field det = MatrixHelper::rightInvA< 2, 2 >( A, invA );
-  std::cout << "det = " << det << std::endl;
+  Field detA = MatrixHelper::rightInvA< 2, 2 >( A, invA );
+  std::cout << "detA = " << detA << std::endl;
   std::cout << "invA = [ " << invA[ 0 ] << ", " << invA[ 1 ] << " ]" << std::endl;
+
+  // Lets do the same crap for a non-square matrix.
+  FieldMatrix< Field, 2, 3 > B;
+  B[0][0] =  0.099999999999999867;
+  B[0][1] = -0.010000000000002118;
+  B[0][2] = 0;
+  B[1][0] =  0.099999999999999867;
+  B[1][1] = -0.0099999999999998979;
+  B[1][2] = 0;
+
+  std::cout << std::scientific << std::setprecision( 20 );
+
+  Field detBBT = MatrixHelper::detAAT< 2, 3 >( B );
+  std::cout << "detBBT = " << detBBT << std::endl;
+
+  FieldMatrix< Field, 3, 2 > invB;
+  Field detB = MatrixHelper::rightInvA< 2, 3 >( B, invB );
+  std::cout << "detB = " << detB << std::endl;
+  std::cout << "invB = [ " << invB[ 0 ] << ", " << invB[ 1 ] << invB[ 2 ] << " ]" << std::endl;
+
 }
