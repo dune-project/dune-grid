@@ -117,7 +117,7 @@ namespace Dune
       {
         JacobianTransposedType JT;
         jacobianTransposed( x, JT );
-        return MatrixHelper :: template detAAT< dimension, dimWorld >( JT );
+        return MatrixHelper :: template sqrtDetAAT< dimension, dimWorld >( JT );
       }
 
       const Implementation &implementation () const

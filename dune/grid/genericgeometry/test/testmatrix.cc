@@ -21,8 +21,8 @@ int main()
 
   typedef GenericGeometry::MatrixHelper< GenericGeometry::DuneCoordTraits< Field > > MatrixHelper;
 
-  // Test whether I can compute the determinant of A A^T of a nearly singular matrix.
-  // This particular matrix makes the detAAT method abort as of dune-grid revision 6631.
+  // Test whether I can compute the square root of the determinant of A A^T of a nearly singular matrix.
+  // This particular matrix makes the sqrtDetAAT method abort in dune-grid revision 6631.
   FieldMatrix< Field, 2, 2 > A;
   A[0][0] =  0.099999999999999867;
   A[0][1] = -0.010000000000002118;
@@ -31,8 +31,8 @@ int main()
 
   std::cout << std::scientific << std::setprecision( 20 );
 
-  Field detAAT = MatrixHelper::detAAT< 2, 2 >( A );
-  std::cout << "detAAT = " << detAAT << std::endl;
+  Field sqrtDetAAT = MatrixHelper::sqrtDetAAT< 2, 2 >( A );
+  std::cout << "sqrtDetAAT = " << sqrtDetAAT << std::endl;
 
   FieldMatrix< Field, 2, 2 > invA;
   Field detA = MatrixHelper::rightInvA< 2, 2 >( A, invA );
@@ -50,8 +50,8 @@ int main()
 
   std::cout << std::scientific << std::setprecision( 20 );
 
-  Field detBBT = MatrixHelper::detAAT< 2, 3 >( B );
-  std::cout << "detBBT = " << detBBT << std::endl;
+  Field sqrtDetBBT = MatrixHelper::sqrtDetAAT< 2, 3 >( B );
+  std::cout << "sqrtDetBBT = " << sqrtDetBBT << std::endl;
 
   FieldMatrix< Field, 3, 2 > invB;
   Field detB = MatrixHelper::rightInvA< 2, 3 >( B, invB );
