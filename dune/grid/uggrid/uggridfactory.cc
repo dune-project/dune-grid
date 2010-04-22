@@ -363,13 +363,6 @@ createGrid()
       DUNE_THROW(GridError, "You have provided a boundary parametrization for"
                  << " a segment which is not boundary segment in the grid!");
 
-    // In 3d the orientation of parametrized boundary segments has to be consistent with
-    // the grid.  If not, UG cannot properly extract the boundary lines and will abort
-    // during the first attempt to refine the grid.
-    if (dimworld==3 && !BoundaryExtractor::identicalOrientation(*boundaryElementFace, thisSegment))
-      DUNE_THROW(GridError, "Boundary segment orientation doesn't match the grid element orientation"
-                 << " at element face: " << thisSegment);
-
     // Everything is fine.  Delete the element face from the list to mark that it has been properly handled
     boundarySegments.erase(thisSegment);
   }

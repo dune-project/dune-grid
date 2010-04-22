@@ -6,57 +6,6 @@
 
 #include "boundaryextractor.hh"
 
-bool Dune::BoundaryExtractor::identicalOrientation(const UGGridBoundarySegment<2>& a,
-                                                   const UGGridBoundarySegment<2>& b)
-{
-  // Should never be called: 2d segment orientation does not matter in UG
-  abort();
-}
-
-bool Dune::BoundaryExtractor::identicalOrientation(const UGGridBoundarySegment<3>& a,
-                                                   const UGGridBoundarySegment<3>& b)
-{
-  if (a[3]==-1) {   // implies b[3]==-1, too
-
-    // triangles
-    return (a[0]==b[0] && a[1]==b[1] && a[2]==b[2])
-           || (a[0]==b[1] && a[1]==b[2] && a[2]==b[0])
-           || (a[0]==b[2] && a[1]==b[0] && a[2]==b[1]);
-
-  } else {
-
-    // quadrilaterals
-    return (a[0]==b[0] && a[1]==b[1] && a[2]==b[2] && a[3]==b[3])
-           || (a[0]==b[1] && a[1]==b[2] && a[2]==b[3] && a[3]==b[0])
-           || (a[0]==b[2] && a[1]==b[3] && a[2]==b[0] && a[3]==b[1])
-           || (a[0]==b[3] && a[1]==b[0] && a[2]==b[1] && a[3]==b[2]);
-
-  }
-
-}
-
-bool Dune::BoundaryExtractor::oppositeOrientation(const UGGridBoundarySegment<3>& a,
-                                                  const UGGridBoundarySegment<3>& b)
-{
-  if (a[3]==-1) {   // implies b[3]==-1, too
-
-    // triangles
-    return (a[0]==b[2] && a[1]==b[1] && a[2]==b[0])
-           || (a[0]==b[1] && a[1]==b[0] && a[2]==b[2])
-           || (a[0]==b[0] && a[1]==b[2] && a[2]==b[1]);
-
-  } else {
-
-    // quadrilaterals
-    return (a[0]==b[3] && a[1]==b[2] && a[2]==b[1] && a[3]==b[0])
-           || (a[0]==b[2] && a[1]==b[1] && a[2]==b[0] && a[3]==b[3])
-           || (a[0]==b[1] && a[1]==b[0] && a[2]==b[3] && a[3]==b[2])
-           || (a[0]==b[0] && a[1]==b[3] && a[2]==b[2] && a[3]==b[1]);
-
-  }
-
-}
-
 void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
                                                      const std::vector<unsigned int>& elementVertices,
                                                      std::set<UGGridBoundarySegment<2> >& boundarySegments)
@@ -173,13 +122,6 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
       std::pair<std::set<UGGridBoundarySegment<3> >::iterator,bool> status = boundarySegments.insert(v);
 
       if (!status.second) {           //  Not inserted because already existing
-
-        // Test whether the face vertices are oriented in opposite directions.
-        // If not, UG will barf because it cannot extract the boundary lines
-        // from inconsistently oriented grids.
-        if (!oppositeOrientation(*status.first, v))
-          DUNE_THROW(GridError, "The grid is not consistently oriented!"
-                     << "  Mismatch at element face: " << v);
 
         boundarySegments.erase(status.first);
 
