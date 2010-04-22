@@ -24,5 +24,7 @@ testgeo_SOURCES = testgeo.cc
 grefelement_SOURCES = grefelement.cc
 
 testmatrix_SOURCES = testmatrix.cc
+testmatrix_CPPFLAGS = $(AM_CPPFLAGS) $(GMP_CPPFLAGS)
+testmatrix_LDADD = $(LDADD) $(GMP_LIBS)
 
 include $(top_srcdir)/am/global-rules
