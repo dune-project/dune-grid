@@ -95,8 +95,8 @@ void testWithGeometryType(Dune::GeometryType gt, bool checkSubentityOrientation)
         {
           int gj = SubEntityNumbering<T,dim,dim>::dune2generic(gt, i, codim, j, c);
 
-          unsigned int subEntityIndex = ref.subEntity(i, codim, j, c);
-          unsigned int genericSubEntityIndex = gref.subEntity(gi, codim, gj, c);
+          // unsigned int subEntityIndex = ref.subEntity(i, codim, j, c);
+          // unsigned int genericSubEntityIndex = gref.subEntity(gi, codim, gj, c);
 
           subSubEntities.insert(ref.subEntity(i, codim, j, c));
           genericSubSubEntities.insert(Numbering::generic2dune(gtId, gref.subEntity(gi, codim, gj, c), c));
@@ -104,7 +104,7 @@ void testWithGeometryType(Dune::GeometryType gt, bool checkSubentityOrientation)
           if (checkSubentityOrientation)
           {
             // test subEntity uses the same orientation
-            if (ref.subEntity(i, codim, j, c) != Numbering::generic2dune(gtId, gref.subEntity(gi, codim, gj, c), c))
+            if (ref.subEntity(i, codim, j, c) != int(Numbering::generic2dune(gtId, gref.subEntity(gi, codim, gj, c), c)))
             {
               std::cout << "        ref.subEntity(" <<i << "," << codim<< "," << j << "," << c << ") != Numbering::generic2dune(gtId, gref.subEntity(" << gi << "," << codim << "," << gj << "," << c << ")," << c << ")" << std::endl;
               std::cout << "        ref.subEntity(" << i << "," << codim << "," << j << "," << c << ") = " << ref.subEntity(i, codim, j, c) << std::endl;
