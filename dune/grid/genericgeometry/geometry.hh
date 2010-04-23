@@ -374,10 +374,7 @@ namespace Dune
       ~BasicGeometry ()
       {
         if( (mapping_ != 0) && ((--mapping_->referenceCount) == 0) )
-        {
           allocator_.destroy( mapping_ );
-          allocator_.deallocate( mapping_ );
-        }
       }
 
       /** \brief Assignment from other BasicGeometry */
@@ -386,10 +383,7 @@ namespace Dune
         if( other.mapping_ != 0 )
           ++(other.mapping_->referenceCount);
         if( (mapping_ != 0) && (--(mapping_->referenceCount) == 0) )
-        {
           allocator_.destroy( mapping_ );
-          allocator_.deallocate( mapping_ );
-        }
         allocator_ = other.allocator_;
         mapping_ = other.mapping_;
         return *this;

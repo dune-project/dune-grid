@@ -105,9 +105,7 @@ namespace Dune
       static Trace *create ( const Mapping &mapping, Allocator &allocator )
       {
         typedef typename VirtualTrace< i >::type Trace;
-        Trace *trace = allocator.template allocate< Trace >();
-        allocator.construct( trace, Trace( mapping.template trace< codim, i >() ) );
-        return trace;
+        return allocator.create( Trace( mapping.template trace< codim, i >() ) );
       }
     };
 
@@ -126,9 +124,7 @@ namespace Dune
       template< int i >
       static Trace *create ( const Mapping &mapping, Allocator &allocator )
       {
-        Trace *trace = allocator.template allocate< Trace >();
-        allocator.construct( trace, mapping.template trace< codim, i >() );
-        return trace;
+        return allocator.create( mapping.template trace< codim, i >() );
       }
     };
 

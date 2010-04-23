@@ -35,9 +35,7 @@ namespace Dune
       mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
       {
         assert( topologyId == Topology::id );
-        Mapping *mapping = allocator.template allocate< Mapping >();
-        allocator.construct( mapping, Mapping( coords ) );
-        return mapping;
+        return allocator.create( Mapping( coords ) );
       }
     };
 
@@ -108,9 +106,7 @@ namespace Dune
       static Mapping *construct ( const CoordVector &coords, Allocator &allocator )
       {
         typedef VirtualMapping< Topology, GeometryTraits > VMapping;
-        VMapping *mapping = allocator.template allocate< VMapping >();
-        allocator.construct( mapping, VMapping( coords ) );
-        return mapping;
+        return allocator.create( VMapping( coords ) );
       }
 
       Construct construct_[ numTopologies ];
