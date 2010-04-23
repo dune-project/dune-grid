@@ -63,12 +63,10 @@ namespace Dune
         Int2Type< 0 > codim0Variable;
         topology_ = &(ReferenceTopologies< dimension >::get( Topology::id ));
 
-        VirtualMapping *virtualMapping = allocator_.template allocate< VirtualMapping >();
-        allocator_.construct( virtualMapping, VirtualMapping( codim0Variable ) );
-        virtualMapping->referenceCount = 1;
 
         mappings_[ codim0Variable ].resize( 1 );
-        mappings_[ codim0Variable ][ 0 ] = virtualMapping;
+        mappings_[ codim0Variable ][ 0 ] = allocator_.create( VirtualMapping( codim0Variable ) );
+        mappings_[ codim0Variable ][ 0 ]->referenceCount = 1;
 
         ForLoop< Init::template Codim, 1, dimension >::apply( mappings_, allocator_ );
       }
@@ -163,10 +161,7 @@ namespace Dune
         Int2Type< codim > codimVariable;
         const unsigned int size = mappings[ codimVariable ].size();
         for( unsigned int i = 0; i < size; ++i )
-        {
           allocator.destroy( mappings[ codimVariable ][ i ] );
-          allocator.deallocate( mappings[ codimVariable ][ i ] );
-        }
       };
     };
 
