@@ -34,6 +34,8 @@
 #define GRIDDIM ALBERTA_DIM
 #endif
 
+// #define USEGRAPE 1
+
 template <class GridType>
 void checkGmshReader(const char* filename, const int refinements)
 {
@@ -42,7 +44,7 @@ void checkGmshReader(const char* filename, const int refinements)
   if( refinements > 0 )
     grid->globalRefine( refinements );
 
-#if HAVE_GRAPE
+#if HAVE_GRAPE && USEGRAPE
   Dune::GrapeGridDisplay< GridType > grape( *grid );
   grape.display();
 #endif // #if HAVE_GRAPE
