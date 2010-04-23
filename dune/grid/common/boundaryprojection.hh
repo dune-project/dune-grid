@@ -104,20 +104,14 @@ namespace Dune
     ~BoundarySegmentWrapper ()
     {
       if( --(faceMapping_->referenceCount) == 0 )
-      {
         allocator_.destroy( faceMapping_ );
-        allocator_.deallocate( faceMapping_ );
-      }
     }
 
     This &operator= ( const This &other ) const
     {
       ++(other.faceMapping_->referenceCount);
       if( --(faceMapping_->referenceCount == 0) )
-      {
         allocator_.destroy( faceMapping_ );
-        allocator_.deallocate( faceMapping_ );
-      }
       allocator_ = other.allocator_;
       faceMapping_ = other.faceMapping_;
       boundarySegment_ = other.boundarySegment_;

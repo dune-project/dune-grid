@@ -40,18 +40,25 @@ namespace Dune
   template< class ctype, int dim >
   class GenericReferenceElement
   {
+    typedef GenericReferenceElement< ctype, dim > This;
+
+    friend class GenericReferenceElementContainer< ctype, dim >;
+
     // make copy constructor private
     GenericReferenceElement(const GenericReferenceElement &);
 
     // make empty constructor
     GenericReferenceElement() {};
-    friend class GenericReferenceElementContainer< ctype, dim >;
 
-    typedef GenericReferenceElement< ctype, dim > This;
+    ~GenericReferenceElement ()
+    {
+      ForLoop< Destroy, 0, dim >::apply( mappings_, allocator_ );
+    }
 
     class SubEntityInfo;
     template< class Topology > class CornerStorage;
     template< class Topology > struct Initialize;
+    template< int codim > struct Destroy;
 
     struct GeometryTraits
       : public GenericGeometry::DefaultGeometryTraits< ctype, dim, dim >
@@ -88,16 +95,9 @@ namespace Dune
 
   private:
     template< int codim >
-    class MappingArray
+    struct MappingArray
       : public std::vector< typename Codim< codim >::Mapping * >
-    {
-    public:
-      ~MappingArray()
-      {
-        for (size_t i=0; i<this->size(); i++)
-          delete (*this)[i];
-      }
-    };
+    {};
 
     typedef GenericGeometry::CodimTable< MappingArray, dim > MappingsTable;
 
@@ -320,7 +320,7 @@ namespace Dune
 
       Int2Type< 0 > codim0Variable;
       mappings_[ codim0Variable ].resize( 1 );
-      mappings_[ codim0Variable ][ 0 ]  = new VirtualMapping( codim0Variable );
+      mappings_[ codim0Variable ][ 0 ]  = allocator_.create( VirtualMapping( codim0Variable ) );
 
       Dune::ForLoop< Init::template Codim, 0, dim >::apply( info_, mappings_, allocator_ );
       volume_ = GenericGeometry::ReferenceDomain< Topology >::template volume< double >();
@@ -498,6 +498,20 @@ namespace Dune
         }
       }
     };
+  };
+
+
+
+  template< class ctype, int dim >
+  template< int codim >
+  struct GenericReferenceElement< ctype, dim >::Destroy
+  {
+    static void apply ( MappingsTable &mappings, typename GeometryTraits::Allocator &allocator )
+    {
+      Int2Type< codim > codimVariable;
+      for( size_t i = 0; i < mappings[ codimVariable ].size(); ++i )
+        allocator.destroy( mappings[ codimVariable ][ i ] );
+    }
   };
 
 
