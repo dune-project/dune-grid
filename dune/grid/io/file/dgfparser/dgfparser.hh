@@ -171,7 +171,10 @@ namespace Dune
      *  \endcode
      */
     template< class GridType >
-    class Impl;
+    class Impl
+    {
+      dune_static_assert( false,"dgf grid factory missing - did you forget to add the corresponding dgf header or dgfgridtype.hh ?");
+    };
 
     const char* filename_;
     MPICommunicatorType MPICOMM_;
