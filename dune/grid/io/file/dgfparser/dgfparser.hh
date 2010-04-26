@@ -171,9 +171,14 @@ namespace Dune
      *  \endcode
      */
     template< class GridType >
-    class Impl
+    struct Impl
     {
-      dune_static_assert( false,"dgf grid factory missing - did you forget to add the corresponding dgf header or dgfgridtype.hh ?");
+      static GridType* generate(MacroGrid& mg,
+                                const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
+      {
+        // make assertion depend on the template argument but always evaluate to false
+        dune_static_assert( GridType::dimension<0,"dgf grid factory missing - did you forget to add the corresponding dgf header or dgfgridtype.hh ?");
+      }
     };
 
     const char* filename_;
