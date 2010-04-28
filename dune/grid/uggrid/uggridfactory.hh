@@ -221,7 +221,7 @@ namespace Dune {
     bool factoryOwnsGrid_;
 
     /** \brief Buffer for the vertices of each explicitly given boundary segment */
-    std::vector<array<unsigned int, dimworld*2-2> > boundarySegmentVertices_;
+    std::vector<array<int, dimworld*2-2> > boundarySegmentVertices_;
 
     /** \brief While inserting the elements this array records the number of
         vertices of each element. */

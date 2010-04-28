@@ -184,7 +184,7 @@ void Dune::GridFactory<Dune::UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int>& vertices,
                       const shared_ptr<BoundarySegment<dimworld> > boundarySegment)
 {
-  array<unsigned int, dimworld*2-2> segmentVertices;
+  array<int, dimworld*2-2> segmentVertices;
 
   for (size_t i=0; i<vertices.size(); i++)
     segmentVertices[i] = vertices[i];
@@ -329,7 +329,7 @@ createGrid()
 
       int numVertices = (dimworld==2)
                         ? 2
-                        : ((boundarySegmentVertices_[i][3]==(unsigned int)(-1)) ? 3 : 4);
+                        : ((boundarySegmentVertices_[i][3]==-1) ? 3 : 4);
 
       double segmentCoordinates[dimworld*2-2][dimworld];
       for (int j=0; j<numVertices; j++)
