@@ -329,7 +329,7 @@ createGrid()
 
       int numVertices = (dimworld==2)
                         ? 2
-                        : ((boundarySegmentVertices_[i][3]==-1) ? 3 : 4);
+                        : ((boundarySegmentVertices_[i][3]==(unsigned int)(-1)) ? 3 : 4);
 
       double segmentCoordinates[dimworld*2-2][dimworld];
       for (int j=0; j<numVertices; j++)
