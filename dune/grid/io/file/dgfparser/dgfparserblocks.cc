@@ -471,8 +471,9 @@ namespace Dune
                                      {{0,0,0},{1,1,1},{0,1,1},{0,0,1}} };
       static int offset2[2][3][2] = {{{0,0},{1,0},{0,1}},
                                      {{1,1},{0,1},{1,0}}};
-      if( vtx.size()==0 )
-        DUNE_THROW( DGFException, "Cannot convert emty cube grid to simplex grid.");
+      if (elements.empty())
+        return 0;
+
       const int dimworld = vtx[ 0 ].size();
 
       int dimgrid = 0;
