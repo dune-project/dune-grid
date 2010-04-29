@@ -9,7 +9,6 @@
 
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/entity.hh>
-#include <dune/grid/geometrygrid/storage.hh>
 
 namespace Dune
 {
@@ -103,41 +102,40 @@ namespace Dune
       static const int codimension = HostEntity::codimension;
       typedef typename Traits::template Codim< codimension >::Entity Entity;
       typedef GeoGrid::EntityWrapper< Entity > EntityWrapper;
-      typedef GeoGrid::Storage< EntityWrapper > EntityStorage;
 
       template< bool >
-      struct InitializeReal
+      struct CreateReal
       {
-        static void
-        apply ( EntityWrapper &entity, const Grid &grid, const HostEntity &hostEntity )
+        static EntityWrapper
+        apply ( const Grid &grid, const HostEntity &hostEntity )
         {
-          entity.initialize( grid, hostEntity );
+          return EntityWrapper( grid, hostEntity );
         }
       };
 
       template< bool >
-      struct InitializeFake
+      struct CreateFake
       {
-        static void
-        apply ( EntityWrapper &entity, const Grid &grid, const HostEntity &hostEntity )
+        static EntityWrapper
+        apply ( const Grid &grid, const HostEntity &hostEntity )
         {
-          noEntity( codimension );
+          DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
+                      << codimension << "." );
         }
       };
 
       static const bool hasHostEntity = Capabilities::hasHostEntity< Grid, codimension >::v;
-      typedef typename SelectType< hasHostEntity, InitializeReal<true>, InitializeFake<false> >::Type Initialize;
+      typedef typename SelectType< hasHostEntity, CreateReal< true >, CreateFake< false > >::Type Create;
 
     public:
       EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
-        : entity_( EntityStorage :: alloc() )
-      {
-        Initialize::apply( *entity_, grid, hostEntity );
-      }
+        : entity_( grid.create( Create::apply( grid, hostEntity ) ) )
+      {}
 
       ~EntityProxy ()
       {
-        EntityStorage::free( entity_ );
+        const Grid &grid = Grid::getRealImplementation( *entity_ ).grid();
+        grid.destroy( entity_ );
       }
 
       const Entity &operator* () const

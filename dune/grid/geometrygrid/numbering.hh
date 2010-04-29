@@ -6,9 +6,38 @@
 namespace Dune
 {
 
-  template< int dim >
-  class IdenticalNumbering
-  {};
+  // IdenticaldNumbering
+  // -------------------
+
+  struct IdenticalNumbering
+  {
+    template< int codim >
+    struct EntityNumbering;
+
+    template< class Entity >
+    EntityNumbering< Entity::codimension >
+    operator[] ( const Entity &entity ) const
+    {
+      return EntityNumbering< Entity::codimension >();
+    }
+  };
+
+
+
+  // IdenticalNumbering
+  // ------------------
+
+  template< int codim >
+  struct IdenticalNumbering::EntityNumbering
+  {
+    enum Direction { Forward, Backward };
+
+    template< Direction direction >
+    unsigned int map ( const int subcodim, const unsigned int i ) const
+    {
+      return i;
+    }
+  };
 
 }
 

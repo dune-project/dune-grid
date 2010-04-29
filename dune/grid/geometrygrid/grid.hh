@@ -36,7 +36,7 @@ namespace Dune
   class DefaultCoordFunction;
 
   template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid >,
-      class Numbering = IdenticalNumbering< HostGrid::dimension > >
+      class Numbering = IdenticalNumbering >
   class GeometryGrid;
 
 
@@ -180,6 +180,8 @@ namespace Dune
 
           typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
           typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
+
+          typedef typename Numbering::template EntityNumbering< codim > EntityNumbering;
         };
 
         typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LeafIndexSet >
@@ -283,8 +285,12 @@ namespace Dune
     template< class, class, class > friend class GeoGrid::IndexSet;
     template< class > friend class HostGridAccess;
 
+    template< class, class > friend class GeoGrid::CommDataHandle;
+
     template< int, PartitionIteratorType, class > friend class GeoGrid::LevelIteratorTraits;
     template< int, PartitionIteratorType, class > friend class GeoGrid::LeafIteratorTraits;
+
+    typedef SmallObjectPolyAllocator Allocator;
 
   public:
     /** \cond */
@@ -393,13 +399,15 @@ namespace Dune
      *  The references to host grid and coordinate function are stored in the
      *  grid. Therefore, they must remain valid until the grid is destroyed.
      *
-     *  \param hostGrid       reference to the grid to wrap
-     *  \param coordFunction  reference to the coordinate function
+     *  \param[in]  hostGrid       reference to the grid to wrap
+     *  \param[in]  coordFunction  reference to the coordinate function
+     *  \param[in]  allocator      polymorphic allocator
      */
-    GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction )
+    GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction, const Allocator &allocator = Allocator() )
       : HierarchicIndexSetProvider( *this ),
         hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
+        allocator_( allocator ),
         levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
         leafIndexSet_( 0 ),
         globalIdSet_( hostGrid.globalIdSet() ),
@@ -868,9 +876,22 @@ namespace Dune
       return getRealImplementation( entity ).hostEntity();
     }
 
+    template< class T >
+    T *create ( const T &value ) const
+    {
+      return allocator_.create( value );
+    }
+
+    template< class T >
+    void destroy ( T *p ) const
+    {
+      return allocator_.destroy( p );
+    }
+
   private:
     HostGrid *const hostGrid_;
     CoordFunction &coordFunction_;
+    mutable Allocator allocator_;
     mutable std::vector< LevelIndexSet * > levelIndexSets_;
     mutable LeafIndexSet *leafIndexSet_;
 

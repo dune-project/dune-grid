@@ -6,7 +6,6 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid/geometrygrid/capabilities.hh>
-#include <dune/grid/geometrygrid/storage.hh>
 
 namespace Dune
 {
@@ -111,7 +110,6 @@ namespace Dune
 
     private:
       typedef GeoGrid::EntityWrapper< Entity > EntityWrapper;
-      typedef GeoGrid::Storage< EntityWrapper > EntityStorage;
 
       const Grid *grid_;
       mutable EntityWrapper *entity_;
@@ -157,7 +155,8 @@ namespace Dune
 
       ~EntityPointer ()
       {
-        EntityStorage::free( entity_ );
+        if( entity_ )
+          grid().destroy( entity_ );
       }
 
       This &operator= ( const This &other )
@@ -182,10 +181,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( entity_ == 0 )
-        {
-          entity_ = EntityStorage::alloc();
-          entity_->initialize( grid(), *hostIterator() );
-        }
+          entity_ = grid().create( EntityWrapper( grid(), *hostIterator() ) );
         return *entity_;
       }
 
@@ -213,8 +209,11 @@ namespace Dune
     protected:
       void releaseEntity ()
       {
-        EntityStorage::free( entity_ );
-        entity_ = 0;
+        if( entity_ )
+        {
+          grid().destroy( entity_ );
+          entity_ = 0;
+        }
       }
     };
 
@@ -245,7 +244,6 @@ namespace Dune
 
     private:
       typedef GeoGrid::EntityWrapper< Entity > EntityWrapper;
-      typedef GeoGrid::Storage< EntityWrapper > EntityStorage;
 
       const Grid *grid_;
       mutable EntityWrapper *entity_;
@@ -298,7 +296,8 @@ namespace Dune
 
       ~EntityPointer ()
       {
-        EntityStorage::free( entity_ );
+        if( entity_ )
+          grid().destroy( entity_ );
       }
 
       This &operator= ( const This &other )
@@ -348,10 +347,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( entity_ == 0 )
-        {
-          entity_ = EntityStorage::alloc();
-          entity_->initialize( grid(), *hostElementIterator(), subEntity_ );
-        }
+          entity_ = grid().create( EntityWrapper( grid(), *hostElementIterator(), subEntity_ ) );
         return *entity_;
       }
 
@@ -374,8 +370,11 @@ namespace Dune
     protected:
       void releaseEntity ()
       {
-        EntityStorage::free( entity_ );
-        entity_ = 0;
+        if( entity_ )
+        {
+          grid().destroy( entity_ );
+          entity_ = 0;
+        }
       }
 
       const HostElementIterator &hostElementIterator () const

@@ -143,17 +143,6 @@ namespace Dune
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
-      /** \brief construct an uninitialized entity
-       *
-       *  The default constructor is provided for use with storages. Call
-       *  initialize before using this entity.
-       *
-       *  \note An uninitialized entity shall not be used.
-       */
-      EntityBase ()
-        : geo_( GeometryImpl() )
-      {}
-
       /** \brief construct an initialized entity
        *
        *  \param[in]  grid        GeometryGrid this entity belongs to
@@ -400,17 +389,6 @@ namespace Dune
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
-      /** \brief construct an uninitialized entity
-       *
-       *  The default constructor is provided for use with storages. Call
-       *  initialize before using this entity.
-       *
-       *  \note An uninitialized entity shall not be used.
-       */
-      EntityBase ()
-        : geo_( GeometryImpl() )
-      {}
-
       /** \brief construct an initialized entity
        *
        *  \param[in]  grid        GeometryGrid this entity belongs to
@@ -645,7 +623,7 @@ namespace Dune
     template< class Grid >
     class EntityBase< 0, Grid, false >
     {
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
     public:
       /** \name Attributes
@@ -654,11 +632,11 @@ namespace Dune
       //! codimensioon of the entity
       static const int codimension = 0;
       //! dimension of the grid
-      static const int dimension = Traits :: dimension;
+      static const int dimension = Traits::dimension;
       //! dimension of the entity
       static const int mydimension = dimension - codimension;
       //! dimension of the world
-      static const int dimensionworld = Traits :: dimensionworld;
+      static const int dimensionworld = Traits::dimensionworld;
 
       //! \b true, if the entity is faked, i.e., if there is no corresponding host entity
       static const bool fake = false;
@@ -668,68 +646,56 @@ namespace Dune
        *  \{ */
 
       //! coordinate type of the grid
-      typedef typename Traits :: ctype ctype;
+      typedef typename Traits::ctype ctype;
 
       //! type of corresponding geometry
-      typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
+      typedef typename Traits::template Codim< codimension >::Geometry Geometry;
       //! type of corresponding local geometry
-      typedef typename Traits :: template Codim< codimension > :: LocalGeometry LocalGeometry;
+      typedef typename Traits::template Codim< codimension >::LocalGeometry LocalGeometry;
       //! type of corresponding entity pointer
-      typedef typename Traits :: template Codim< codimension > :: EntityPointer EntityPointer;
+      typedef typename Traits::template Codim< codimension >::EntityPointer EntityPointer;
 
       //! type of hierarchic iterator
-      typedef typename Traits :: HierarchicIterator HierarchicIterator;
+      typedef typename Traits::HierarchicIterator HierarchicIterator;
       //! type of leaf intersection iterator
-      typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
+      typedef typename Traits::LeafIntersectionIterator LeafIntersectionIterator;
       //! type of level intersection iterator
-      typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
+      typedef typename Traits::LevelIntersectionIterator LevelIntersectionIterator;
 
       /** \} */
 
     private:
-      typedef typename Traits :: HostGrid HostGrid;
-      typedef typename Traits :: CoordFunction CoordFunction;
+      typedef typename Traits::HostGrid HostGrid;
+      typedef typename Traits::CoordFunction CoordFunction;
+
+      typedef typename Traits::template Codim< codimension >::EntityNumbering EntityNumbering;
 
     public:
       /** \name Host Types
        *  \{ */
 
       //! type of corresponding host entity
-      typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
+      typedef typename HostGrid::template Codim< codimension > :: Entity HostEntity;
       //! type of corresponding host entity pointer
-      typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
+      typedef typename HostGrid::template Codim< codimension > :: EntityPointer HostEntityPointer;
 
       //! type of host elements, i.e., of host entities of codimension 0
-      typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
+      typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
       /** \} */
 
     private:
-      typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
+      typedef typename HostGrid::template Codim< codimension >::Geometry HostGeometry;
 
-      typedef typename GenericGeometry :: GlobalGeometryTraits<Grid> :: template Codim<codimension> :: CoordVector CoordVector;
+      typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::template Codim< codimension >::CoordVector
+      CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
-      typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
-      typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
-
-      const Grid *grid_;
-      const HostEntity *hostEntity_;
-      mutable MakeableGeometry geo_;
+      typedef typename MakeableGeometry::ImplementationType GeometryImpl;
+      typedef typename GeometryImpl::GlobalCoordinate GlobalCoordinate;
 
     public:
       /** \name Construction, Initialization and Destruction
        *  \{ */
-
-      /** \brief construct an uninitialized entity
-       *
-       *  The default constructor is provided for use with storages. Call
-       *  initialize before using this entity.
-       *
-       *  \note An uninitialized entity shall not be used.
-       */
-      EntityBase ()
-        : geo_( GeometryImpl() )
-      {}
 
       /** \brief construct an initialized entity
        *
@@ -1011,6 +977,12 @@ namespace Dune
       }
 
       /** \} */
+
+    private:
+      const Grid *grid_;
+      const HostEntity *hostEntity_;
+      EntityNumbering numbering_;
+      mutable MakeableGeometry geo_;
     };
 
 
@@ -1022,12 +994,15 @@ namespace Dune
       typedef EntityBase< codim, Grid > Base;
 
     public:
-      Entity ()
-        : Base()
+      typedef typename Base::HostEntity HostEntity;
+      typedef typename Base::HostElement HostElement;
+
+      Entity ( const Grid &grid, const HostEntity &hostEntity )
+        : Base( grid, hostEntity )
       {}
 
-      Entity ( const Grid &grid )
-        : Base( grid )
+      Entity ( const Grid &grid, const HostElement &hostElement, int subEntity )
+        : Base( grid, hostElement, subEntity )
       {}
     };
 
@@ -1048,8 +1023,12 @@ namespace Dune
       typedef typename Implementation::HostEntity HostEntity;
       typedef typename Implementation::HostElement HostElement;
 
-      EntityWrapper ()
-        : Base( Implementation() )
+      EntityWrapper ( const Grid &grid, const HostEntity &hostEntity )
+        : Base( Implementation( grid, hostEntity ) )
+      {}
+
+      EntityWrapper ( const Grid &grid, const HostElement &hostElement, int subEntity )
+        : Base( Implementation( grid, hostElement, subEntity ) )
       {}
 
       /** \brief (re)initialize the entity
