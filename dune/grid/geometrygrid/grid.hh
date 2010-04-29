@@ -20,6 +20,7 @@
 #include <dune/grid/geometrygrid/indexsets.hh>
 #include <dune/grid/geometrygrid/datahandle.hh>
 #include <dune/grid/geometrygrid/backuprestore.hh>
+#include <dune/grid/geometrygrid/numbering.hh>
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
@@ -34,8 +35,8 @@ namespace Dune
   template< class HostGrid >
   class DefaultCoordFunction;
 
-  template< class HostGrid,
-      class CoordFunction = DefaultCoordFunction< HostGrid > >
+  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid >,
+      class Numbering = IdenticalNumbering< HostGrid::dimension > >
   class GeometryGrid;
 
 
@@ -45,8 +46,7 @@ namespace Dune
 
   template< class HostGrid >
   class DefaultCoordFunction
-    : public IdenticalCoordFunction
-      < typename HostGrid :: ctype, HostGrid :: dimensionworld >
+    : public IdenticalCoordFunction< typename HostGrid::ctype, HostGrid::dimensionworld >
   {};
 
 
@@ -57,34 +57,35 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class HostGrid, class CoordFunction >
-    struct GlobalGeometryTraits< GeometryGrid< HostGrid, CoordFunction > >
-      : public DefaultGeometryTraits
-        < typename HostGrid :: ctype, HostGrid :: dimension, CoordFunction :: dimRange >
+    template< class HostGrid, class CoordFunction, class Numbering >
+    struct GlobalGeometryTraits< GeometryGrid< HostGrid, CoordFunction, Numbering > >
+      : public DefaultGeometryTraits< typename HostGrid::ctype, HostGrid::dimension, CoordFunction::dimRange >
     {
       typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-      typedef DuneCoordTraits< typename HostGrid :: ctype > CoordTraits;
+      typedef DuneCoordTraits< typename HostGrid::ctype > CoordTraits;
 
-      static const int dimGrid = HostGrid :: dimension;
-      static const int dimWorld = CoordFunction :: dimRange;
+      static const int dimGrid = HostGrid::dimension;
+      static const int dimWorld = CoordFunction::dimRange;
 
       static const bool hybrid = true;
-      // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+      // static const GeometryType::BasicType dunetype = GeometryType::simplex;
 
-      static const GeometryType :: BasicType linetype = GeometryType :: simplex;
+      static const GeometryType::BasicType linetype = GeometryType::simplex;
 
-      template <int codim>
-      struct Codim {
-        enum {fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v)};
-        typedef GeoGrid :: CoordVector<dimGrid-codim,const Grid,fake> CoordVector;
+      template< int codim >
+      struct Codim
+      {
+        static const bool fake = !(Capabilities::hasHostEntity< Grid, codim >::v);
+        typedef GeoGrid::CoordVector< dimGrid-codim, const Grid, fake > CoordVector;
       };
-      typedef GeoGrid :: IntersectionCoordVector< const Grid > IntersectionCoordVector;
+
+      typedef GeoGrid::IntersectionCoordVector< const Grid > IntersectionCoordVector;
 
       template< class Topology >
       struct Mapping
       {
-        typedef GeoGrid :: CornerStorage< Topology, const Grid > CornerStorage;
+        typedef GeoGrid::CornerStorage< Topology, const Grid > CornerStorage;
         typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage > type;
       };
 
@@ -112,16 +113,16 @@ namespace Dune
     // GeometryGridExportParams
     // ------------------------
 
-    template< class HG, class CF >
+    template< class HG, class CF, class N >
     class ExportParams
     {
-      static const bool isCoordFunction
-        = isCoordFunctionInterface< typename CF :: Interface > :: value;
+      static const bool isCoordFunction = isCoordFunctionInterface< typename CF::Interface >::value;
       dune_static_assert( isCoordFunction, "Invalid CoordFunction." );
 
     public:
       typedef HG HostGrid;
       typedef CF CoordFunction;
+      typedef N Numbering;
     };
 
 
@@ -129,95 +130,76 @@ namespace Dune
     // GeometryGridFamily
     // ------------------
 
-    template< class HostGrid, class CoordFunction >
+    template< class HostGrid, class CoordFunction, class Numbering >
     struct GridFamily
     {
       struct Traits
-        : public ExportParams< HostGrid, CoordFunction >
+        : public ExportParams< HostGrid, CoordFunction, Numbering >
       {
-        typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+        typedef GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
 
-        typedef typename HostGrid :: ctype ctype;
+        typedef typename HostGrid::ctype ctype;
 
-        static const int dimension = HostGrid :: dimension;
-        static const int dimensionworld = CoordFunction :: dimRange;
+        static const int dimension = HostGrid::dimension;
+        static const int dimensionworld = CoordFunction::dimRange;
 
-        typedef Dune :: Intersection< const Grid, GeoGrid :: LeafIntersection >
-        LeafIntersection;
-        typedef Dune :: Intersection< const Grid, GeoGrid :: LevelIntersection >
-        LevelIntersection;
+        typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection > LeafIntersection;
+        typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection > LevelIntersection;
 
-        typedef Dune :: IntersectionIterator
-        < const Grid, GeoGrid :: LeafIntersectionIterator,
-            GeoGrid :: LeafIntersection >
+        typedef Dune::IntersectionIterator
+        < const Grid, GeoGrid::LeafIntersectionIterator, GeoGrid::LeafIntersection >
         LeafIntersectionIterator;
-        typedef Dune :: IntersectionIterator
-        < const Grid, GeoGrid :: LevelIntersectionIterator,
-            GeoGrid :: LevelIntersection >
+        typedef Dune::IntersectionIterator
+        < const Grid, GeoGrid::LevelIntersectionIterator, GeoGrid::LevelIntersection >
         LevelIntersectionIterator;
 
-        typedef Dune :: HierarchicIterator
-        < const Grid, GeoGrid :: HierarchicIterator >
+        typedef Dune::HierarchicIterator< const Grid, GeoGrid::HierarchicIterator >
         HierarchicIterator;
 
         template< int codim >
         struct Codim
         {
-          typedef Dune :: Geometry
-          < dimension-codim, dimensionworld, const Grid,
-              Dune :: GenericGeometry :: Geometry >
+          typedef Dune::Geometry
+          < dimension-codim, dimensionworld, const Grid, Dune::GenericGeometry::Geometry >
           Geometry;
-          typedef typename HostGrid :: template Codim< codim > :: LocalGeometry
-          LocalGeometry;
+          typedef typename HostGrid::template Codim< codim >::LocalGeometry LocalGeometry;
 
-          typedef GeoGrid :: EntityPointerTraits< codim, const Grid >
-          EntityPointerTraits;
-          typedef GeoGrid :: EntityPointer< EntityPointerTraits > EntityPointerImpl;
-          typedef Dune :: EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
-          typedef typename EntityPointerTraits :: Entity Entity;
+          typedef GeoGrid::EntityPointerTraits< codim, const Grid > EntityPointerTraits;
+          typedef GeoGrid::EntityPointer< EntityPointerTraits > EntityPointerImpl;
+          typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
+          typedef typename EntityPointerTraits::Entity Entity;
 
           template< PartitionIteratorType pitype >
           struct Partition
           {
-            typedef Dune::LeafIterator
-            < codim, pitype, const Grid, GeoGrid::LeafIterator >
+            typedef Dune::LeafIterator< codim, pitype, const Grid, GeoGrid::LeafIterator >
             LeafIterator;
-            typedef Dune::LevelIterator
-            < codim, pitype, const Grid, GeoGrid::LevelIterator >
+            typedef Dune::LevelIterator< codim, pitype, const Grid, GeoGrid::LevelIterator >
             LevelIterator;
           };
 
-          typedef typename Partition< All_Partition >::LeafIterator
-          LeafIterator;
-          typedef typename Partition< All_Partition >::LevelIterator
-          LevelIterator;
+          typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
+          typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
         };
 
-        typedef GeoGrid::IndexSet
-        < const Grid, typename HostGrid::Traits::LeafIndexSet >
+        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LeafIndexSet >
         LeafIndexSet;
-        typedef GeoGrid::IndexSet
-        < const Grid, typename HostGrid::Traits::LevelIndexSet >
+        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LevelIndexSet >
         LevelIndexSet;
 
-        typedef GeoGrid::IdSet
-        < const Grid, typename HostGrid::Traits::GlobalIdSet >
+        typedef GeoGrid::IdSet< const Grid, typename HostGrid::Traits::GlobalIdSet >
         GlobalIdSet;
-        typedef GeoGrid::IdSet
-        < const Grid, typename HostGrid::Traits::LocalIdSet >
+        typedef GeoGrid::IdSet< const Grid, typename HostGrid::Traits::LocalIdSet >
         LocalIdSet;
 
-        typedef typename HostGrid::Traits::CollectiveCommunication
-        CollectiveCommunication;
+        typedef typename HostGrid::Traits::CollectiveCommunication CollectiveCommunication;
 
         template< PartitionIteratorType pitype >
         struct Partition
         {
-          typedef Dune :: GridView
-          < DefaultLeafGridViewTraits< const Grid, pitype > >
+          typedef Dune::GridView< DefaultLeafGridViewTraits< const Grid, pitype > >
           LeafGridView;
-          typedef Dune :: GridView
-          < DefaultLevelGridViewTraits< const Grid, pitype > >
+          typedef Dune::GridView< DefaultLevelGridViewTraits< const Grid, pitype > >
           LevelGridView;
         };
       };
@@ -267,58 +249,53 @@ namespace Dune
    *
    *  \tparam HostGrid       DUNE grid to be wrapped (called host grid)
    *  \tparam CoordFunction  coordinate function
+   *  \tparam Numbering      renumbering or subentities (default is identity)
    *
    *  \nosubgrouping
    */
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Numbering >
   class GeometryGrid
   /** \cond */
     : public GridDefaultImplementation
-      < HostGrid :: dimension, CoordFunction :: dimRange,
-          typename HostGrid :: ctype,
-          GeoGrid :: GridFamily< HostGrid, CoordFunction > >,
-      public GeoGrid :: ExportParams< HostGrid, CoordFunction >,
-      public GeoGrid :: HierarchicIndexSetProvider< HostGrid, CoordFunction >,
-      public GeoGrid :: BackupRestoreFacilities
-      < GeometryGrid< HostGrid, CoordFunction >,
-          Capabilities::hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction > >::v >
+      < HostGrid::dimension, CoordFunction::dimRange, typename HostGrid::ctype,
+          GeoGrid::GridFamily< HostGrid, CoordFunction, Numbering > >,
+      public GeoGrid::ExportParams< HostGrid, CoordFunction, Numbering >,
+      public GeoGrid::HierarchicIndexSetProvider< HostGrid, CoordFunction, Numbering >,
+      public GeoGrid::BackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction, Numbering > >
       /** \endcond */
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
 
     typedef GridDefaultImplementation
-    < HostGrid :: dimension, CoordFunction :: dimRange,
-        typename HostGrid :: ctype,
-        GeoGrid :: GridFamily< HostGrid, CoordFunction > >
+    < HostGrid::dimension, CoordFunction::dimRange, typename HostGrid::ctype,
+        GeoGrid::GridFamily< HostGrid, CoordFunction, Numbering > >
     Base;
 
-    typedef GeoGrid :: HierarchicIndexSetProvider< HostGrid, CoordFunction >
+    typedef GeoGrid::HierarchicIndexSetProvider< HostGrid, CoordFunction, Numbering >
     HierarchicIndexSetProvider;
 
-    friend class GeoGrid :: HierarchicIterator< const Grid >;
+    friend class GeoGrid::HierarchicIterator< const Grid >;
 
-    template< int, class, bool > friend class GeoGrid :: EntityBase;
-    template< class, bool > friend class GeoGrid :: EntityPointer;
-    template< class, class > friend class GeoGrid :: Intersection;
-    template< class, class > friend class GeoGrid :: IdSet;
-    template< class, class, class > friend class GeoGrid :: IndexSet;
+    template< int, class, bool > friend class GeoGrid::EntityBase;
+    template< class, bool > friend class GeoGrid::EntityPointer;
+    template< class, class > friend class GeoGrid::Intersection;
+    template< class, class > friend class GeoGrid::IdSet;
+    template< class, class, class > friend class GeoGrid::IndexSet;
     template< class > friend class HostGridAccess;
 
-    template< int, PartitionIteratorType, class >
-    friend class GeoGrid :: LevelIteratorTraits;
-    template< int, PartitionIteratorType, class >
-    friend class GeoGrid :: LeafIteratorTraits;
+    template< int, PartitionIteratorType, class > friend class GeoGrid::LevelIteratorTraits;
+    template< int, PartitionIteratorType, class > friend class GeoGrid::LeafIteratorTraits;
 
   public:
     /** \cond */
-    typedef GeoGrid :: GridFamily< HostGrid, CoordFunction > GridFamily;
+    typedef GeoGrid::GridFamily< HostGrid, CoordFunction, Numbering > GridFamily;
     /** \endcond */
 
     /** \name Traits
      *  \{ */
 
     //! type of the grid traits
-    typedef typename GridFamily :: Traits Traits;
+    typedef typename GridFamily::Traits Traits;
 
     /** \brief traits structure containing types for a codimension
      *
@@ -335,11 +312,11 @@ namespace Dune
      *  \{ */
 
     //! iterator over the grid hierarchy
-    typedef typename Traits :: HierarchicIterator HierarchicIterator;
+    typedef typename Traits::HierarchicIterator HierarchicIterator;
     //! iterator over intersections with other entities on the leaf level
-    typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename Traits::LeafIntersectionIterator LeafIntersectionIterator;
     //! iterator over intersections with other entities on the same level
-    typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
+    typedef typename Traits::LevelIntersectionIterator LevelIntersectionIterator;
 
     /** \} */
 
@@ -354,7 +331,7 @@ namespace Dune
      *
      *  The leaf index set is a model of Dune::IndexSet.
      */
-    typedef typename Traits :: LeafIndexSet LeafIndexSet;
+    typedef typename Traits::LeafIndexSet LeafIndexSet;
 
     /** \brief type of level index set
      *
@@ -364,7 +341,7 @@ namespace Dune
      *
      *  The level index set is a model of Dune::IndexSet.
      */
-    typedef typename Traits :: LevelIndexSet LevelIndexSet;
+    typedef typename Traits::LevelIndexSet LevelIndexSet;
 
     /** \brief type of global id set
      *
@@ -376,7 +353,7 @@ namespace Dune
      *
      *  The global id set is a model of Dune::IdSet.
      */
-    typedef typename Traits :: GlobalIdSet GlobalIdSet;
+    typedef typename Traits::GlobalIdSet GlobalIdSet;
 
     /** \brief type of local id set
      *
@@ -393,7 +370,7 @@ namespace Dune
      *
      *  The global id set is a model of Dune::IdSet.
      */
-    typedef typename Traits :: LocalIdSet LocalIdSet;
+    typedef typename Traits::LocalIdSet LocalIdSet;
 
     /** \} */
 
@@ -401,23 +378,13 @@ namespace Dune
      * \{ */
 
     //! type of vector coordinates (e.g., double)
-    typedef typename Traits :: ctype ctype;
+    typedef typename Traits::ctype ctype;
 
     //! communicator with all other processes having some part of the grid
-    typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
+    typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
     /** \} */
 
-  private:
-    HostGrid *const hostGrid_;
-    CoordFunction &coordFunction_;
-    mutable std :: vector< LevelIndexSet * > levelIndexSets_;
-    mutable LeafIndexSet *leafIndexSet_;
-
-    GlobalIdSet globalIdSet_;
-    LocalIdSet localIdSet_;
-
-  public:
     /** \name Construction and Destruction
      *  \{ */
 
@@ -462,10 +429,9 @@ namespace Dune
      *
      *  \returns ''GeometryGrid\< \em host \em grid \em name \>''
      */
-    std :: string name () const
+    std::string name () const DUNE_DEPRECATED
     {
-      return std :: string( "GeometryGrid< " )
-             + hostGrid().name() + std :: string( " >" );
+      return std::string( "GeometryGrid< " ) + hostGrid().name() + std::string( " >" );
     }
 
     /** \} */
@@ -538,90 +504,90 @@ namespace Dune
      *
      *  \returns number of leaf entities with a geometry of type \em type
      */
-    size_t numBoundarySegments ( ) const
+    size_t numBoundarySegments () const
     {
       return hostGrid().numBoundarySegments( );
     }
     /** \} */
 
     template< int codim >
-    typename Codim< codim > :: LevelIterator lbegin ( int level ) const
+    typename Codim< codim >::LevelIterator lbegin ( int level ) const
     {
-      typedef MakeableInterfaceObject< typename Codim< codim > :: LevelIterator >
+      typedef MakeableInterfaceObject< typename Codim< codim >::LevelIterator >
       MakeableIterator;
-      typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl :: Traits :: begin ) );
+      typedef typename MakeableIterator::ImplementationType Impl;
+      return MakeableIterator( Impl( *this, level, Impl::Traits::begin ) );
     }
 
     template< int codim >
-    typename Codim< codim > :: LevelIterator lend ( int level ) const
+    typename Codim< codim >::LevelIterator lend ( int level ) const
     {
-      typedef MakeableInterfaceObject< typename Codim< codim > :: LevelIterator >
+      typedef MakeableInterfaceObject< typename Codim< codim >::LevelIterator >
       MakeableIterator;
-      typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl :: Traits :: end ) );
+      typedef typename MakeableIterator::ImplementationType Impl;
+      return MakeableIterator( Impl( *this, level, Impl::Traits::end ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim > :: template Partition<pitype> :: LevelIterator
+    typename Codim< codim >::template Partition< pitype >::LevelIterator
     lbegin ( int level ) const
     {
       typedef MakeableInterfaceObject
-      < typename Codim< codim > :: template Partition< pitype > :: LevelIterator >
+      < typename Codim< codim >::template Partition< pitype >::LevelIterator >
       MakeableIterator;
-      typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl :: Traits :: begin ) );
+      typedef typename MakeableIterator::ImplementationType Impl;
+      return MakeableIterator( Impl( *this, level, Impl::Traits::begin ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim > :: template Partition<pitype> :: LevelIterator
+    typename Codim< codim >::template Partition< pitype >::LevelIterator
     lend ( int level ) const
     {
       typedef MakeableInterfaceObject
-      < typename Codim< codim > :: template Partition< pitype > :: LevelIterator >
+      < typename Codim< codim >::template Partition< pitype >::LevelIterator >
       MakeableIterator;
-      typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl :: Traits :: end ) );
+      typedef typename MakeableIterator::ImplementationType Impl;
+      return MakeableIterator( Impl( *this, level, Impl::Traits::end ) );
     }
 
     template< int codim >
-    typename Codim< codim > :: LeafIterator leafbegin () const
+    typename Codim< codim >::LeafIterator leafbegin () const
     {
-      typedef MakeableInterfaceObject< typename Codim< codim > :: LeafIterator >
+      typedef MakeableInterfaceObject< typename Codim< codim >::LeafIterator >
       MakeableIterator;
-      typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl :: Traits :: begin ) );
+      typedef typename MakeableIterator::ImplementationType Impl;
+      return MakeableIterator( Impl( *this, Impl::Traits::begin ) );
     }
 
     template< int codim >
-    typename Codim< codim > :: LeafIterator leafend () const
+    typename Codim< codim >::LeafIterator leafend () const
     {
-      typedef MakeableInterfaceObject< typename Codim< codim > :: LeafIterator >
+      typedef MakeableInterfaceObject< typename Codim< codim >::LeafIterator >
       MakeableIterator;
-      typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl :: Traits :: end ) );
+      typedef typename MakeableIterator::ImplementationType Impl;
+      return MakeableIterator( Impl( *this, Impl::Traits::end ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim > :: template Partition< pitype > :: LeafIterator
+    typename Codim< codim >::template Partition< pitype >::LeafIterator
     leafbegin () const
     {
       typedef MakeableInterfaceObject
-      < typename Codim< codim > :: template Partition< pitype > :: LeafIterator >
+      < typename Codim< codim >::template Partition< pitype >::LeafIterator >
       MakeableIterator;
-      typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl :: Traits :: begin ) );
+      typedef typename MakeableIterator::ImplementationType Impl;
+      return MakeableIterator( Impl( *this, Impl::Traits::begin ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim > :: template Partition< pitype > :: LeafIterator
+    typename Codim< codim >::template Partition< pitype >::LeafIterator
     leafend () const
     {
       typedef MakeableInterfaceObject
-      < typename Codim< codim > :: template Partition< pitype > :: LeafIterator >
+      < typename Codim< codim >::template Partition< pitype >::LeafIterator >
       MakeableIterator;
-      typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl :: Traits :: end ) );
+      typedef typename MakeableIterator::ImplementationType Impl;
+      return MakeableIterator( Impl( *this, Impl::Traits::end ) );
     }
 
     const GlobalIdSet &globalIdSet () const
@@ -666,12 +632,12 @@ namespace Dune
       update();
     }
 
-    bool mark ( int refCount, const typename Codim< 0 > :: Entity &entity )
+    bool mark ( int refCount, const typename Codim< 0 >::Entity &entity )
     {
       return hostGrid().mark( refCount, getHostEntity< 0 >( entity ) );
     }
 
-    int getMark ( const typename Codim< 0 > :: Entity &entity ) const
+    int getMark ( const typename Codim< 0 >::Entity &entity ) const
     {
       return hostGrid().getMark( getHostEntity< 0 >( entity ) );
     }
@@ -796,7 +762,9 @@ namespace Dune
     {
       return hostGrid().comm();
     }
-#if 0   // data handle interface different between geo and interface
+
+#if 0
+    // data handle interface different between geo and interface
 
     /** \brief rebalance the load each process has to handle
      *
@@ -843,6 +811,7 @@ namespace Dune
       return gridChanged;
     }
 #endif
+
     /** \} */
 
     /** \name Miscellaneous Methods
@@ -869,8 +838,7 @@ namespace Dune
     void update ()
     {
       // adapt the coordinate function
-      GeoGrid :: AdaptCoordFunction< typename CoordFunction :: Interface >
-      :: adapt( coordFunction_ );
+      GeoGrid::AdaptCoordFunction< typename CoordFunction::Interface >::adapt( coordFunction_ );
 
       const int newNumLevels = maxLevel()+1;
       const int oldNumLevels = levelIndexSets_.size();
@@ -886,7 +854,7 @@ namespace Dune
     /** \} */
 
   protected:
-    using Base :: getRealImplementation;
+    using Base::getRealImplementation;
 
     const CoordFunction &coordFunction () const
     {
@@ -894,19 +862,28 @@ namespace Dune
     }
 
     template< int codim >
-    static const typename HostGrid :: template Codim< codim > :: Entity &
-    getHostEntity( const typename Codim< codim > :: Entity &entity )
+    static const typename HostGrid::template Codim< codim >::Entity &
+    getHostEntity( const typename Codim< codim >::Entity &entity )
     {
       return getRealImplementation( entity ).hostEntity();
     }
+
+  private:
+    HostGrid *const hostGrid_;
+    CoordFunction &coordFunction_;
+    mutable std::vector< LevelIndexSet * > levelIndexSets_;
+    mutable LeafIndexSet *leafIndexSet_;
+
+    GlobalIdSet globalIdSet_;
+    LocalIdSet localIdSet_;
   };
 
 
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Numbering >
   template< int codim >
-  struct GeometryGrid< HostGrid, CoordFunction > :: Codim
-    : public Base :: template Codim< codim >
+  struct GeometryGrid< HostGrid, CoordFunction, Numbering >::Codim
+    : public Base::template Codim< codim >
   {
     /** \name Entity and Entity Pointer Types
      *  \{ */
@@ -915,13 +892,13 @@ namespace Dune
      *
      *  The entity is a model of Dune::Entity.
      */
-    typedef typename Traits :: template Codim< codim > :: Entity Entity;
+    typedef typename Traits::template Codim< codim >::Entity Entity;
 
     /** \brief type of entity pointer
      *
      *  The entity pointer is a model of Dune::EntityPointer.
      */
-    typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
+    typedef typename Traits::template Codim< codim >::EntityPointer EntityPointer;
 
     /** \} */
 
@@ -936,7 +913,7 @@ namespace Dune
      *  The geometry is a model of Dune::Geometry, implemented through the
      *  generic geometries provided by dune-grid.
      */
-    typedef typename Traits :: template Codim< codim > :: Geometry Geometry;
+    typedef typename Traits::template Codim< codim >::Geometry Geometry;
 
     /** \brief type of local geometry
      *
@@ -946,7 +923,7 @@ namespace Dune
      *  The local geometry is a model of Dune::Geometry, implemented through
      *  the generic geometries provided by dune-grid.
      */
-    typedef typename Traits :: template Codim< codim > :: LocalGeometry LocalGeometry;
+    typedef typename Traits::template Codim< codim >::LocalGeometry LocalGeometry;
 
     /** \} */
 
@@ -956,11 +933,11 @@ namespace Dune
     template< PartitionIteratorType pitype >
     struct Partition
     {
-      typedef typename Traits :: template Codim< codim >
-      :: template Partition< pitype > :: LeafIterator
+      typedef typename Traits::template Codim< codim >
+      ::template Partition< pitype >::LeafIterator
       LeafIterator;
-      typedef typename Traits :: template Codim< codim >
-      :: template Partition< pitype > :: LevelIterator
+      typedef typename Traits::template Codim< codim >
+      ::template Partition< pitype >::LevelIterator
       LevelIterator;
     };
 
@@ -971,7 +948,7 @@ namespace Dune
      *
      *  The level iterator is a model of Dune::LevelIterator.
      */
-    typedef typename Partition< All_Partition > :: LeafIterator LeafIterator;
+    typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
 
     /** \brief type of leaf iterator
      *
@@ -980,12 +957,11 @@ namespace Dune
      *
      *  The leaf iterator is a model of Dune::LeafIterator.
      */
-    typedef typename Partition< All_Partition > :: LevelIterator LevelIterator;
+    typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
 
     /** \} */
   };
 
-
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_GRID_HH

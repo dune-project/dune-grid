@@ -12,7 +12,7 @@ namespace Dune
   // External Forward Declataions
   // ----------------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Numbering >
   class GeometryGrid;
 
 
@@ -40,10 +40,10 @@ namespace Dune
     // Intersection
     // ------------
 
-    template< class HostGrid, class CoordFunction, class HostIntersection >
-    class Intersection< const GeometryGrid< HostGrid, CoordFunction >, HostIntersection >
+    template< class HostGrid, class CoordFunction, class Numbering, class HostIntersection >
+    class Intersection< const GeometryGrid< HostGrid, CoordFunction, Numbering >, HostIntersection >
     {
-      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
 
       typedef typename HostIntersection::Geometry HostGeometry;
       typedef typename HostIntersection::LocalGeometry HostLocalGeometry;
@@ -220,14 +220,15 @@ namespace Dune
     // LeafIntersection
     // ----------------
 
-    template< class HostGrid, class CoordFunction >
-    class LeafIntersection< const GeometryGrid< HostGrid, CoordFunction > >
-      : public Intersection< const GeometryGrid< HostGrid, CoordFunction >,
+    template< class HostGrid, class CoordFunction, class Numbering >
+    class LeafIntersection< const GeometryGrid< HostGrid, CoordFunction, Numbering > >
+      : public Intersection
+        < const GeometryGrid< HostGrid, CoordFunction, Numbering >,
             typename HostGrid::Traits::LeafIntersection >
     {
       template< class > friend class IntersectionWrapper;
 
-      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
       typedef typename HostGrid::Traits::LeafIntersection HostIntersection;
 
       typedef Intersection< const Grid, HostIntersection > Base;
@@ -246,14 +247,15 @@ namespace Dune
     // LevelIntersection
     // -----------------
 
-    template< class HostGrid, class CoordFunction >
-    class LevelIntersection< const GeometryGrid< HostGrid, CoordFunction > >
-      : public Intersection< const GeometryGrid< HostGrid, CoordFunction >,
+    template< class HostGrid, class CoordFunction, class Numbering >
+    class LevelIntersection< const GeometryGrid< HostGrid, CoordFunction, Numbering > >
+      : public Intersection
+        < const GeometryGrid< HostGrid, CoordFunction, Numbering >,
             typename HostGrid::Traits::LevelIntersection >
     {
       template< class > friend class IntersectionWrapper;
 
-      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
       typedef typename HostGrid::Traits::LevelIntersection HostIntersection;
 
       typedef Intersection< const Grid, HostIntersection > Base;

@@ -14,7 +14,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CordFunction >
+  template< class HostGrid, class CordFunction, class Numbering >
   class GeometryGrid;
 
 
@@ -31,7 +31,7 @@ namespace Dune
     template< class >
     class EntityWrapper;
 
-    template< class HostGrid, class CoordFunction >
+    template< class HostGrid, class CoordFunction, class Numbering >
     struct ExportParams;
 
 
@@ -61,11 +61,11 @@ namespace Dune
     {};
     /** \endcond */
 
-    template< int codim, class HostGrid, class CoordFunction >
-    struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction > >
-      : public ExportParams< HostGrid, CoordFunction >
+    template< int codim, class HostGrid, class CoordFunction, class Numbering >
+    struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction, Numbering > >
+      : public ExportParams< HostGrid, CoordFunction, Numbering >
     {
-      typedef Dune::GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef Dune::GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
 
       static const bool fake = !Capabilities::hasHostEntity< Grid, codim >::v;
 
@@ -96,7 +96,7 @@ namespace Dune
 
       typedef typename Traits::Grid Grid;
 
-      typedef EntityPointerTraits< Traits :: codimension, const Grid > BaseTraits;
+      typedef EntityPointerTraits< Traits::codimension, const Grid > BaseTraits;
       friend class EntityPointer< BaseTraits, false >;
 
     public:

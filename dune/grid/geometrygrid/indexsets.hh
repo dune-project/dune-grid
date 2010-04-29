@@ -18,7 +18,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Numbering >
   class GeometryGrid;
 
 
@@ -29,7 +29,7 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< class HostGrid, class CoordFunction,
+    template< class HostGrid, class CoordFunction, class Numbering,
         bool hasHierarchicIndexSet = Capabilities::hasHierarchicIndexSet< HostGrid >::v >
     class HierarchicIndexSetProvider;
 
@@ -55,18 +55,18 @@ namespace Dune
 
       typedef typename Base::IndexType IndexType;
 
-    private:
-      const HostIndexSet *hostIndexSet_;
-
-    public:
-      using Base::subIndex;
+      template< int codim >
+      struct Codim
+      {
+        typedef typename Traits::template Codim< codim >::Entity Entity;
+      };
 
       IndexSet ( const HostIndexSet &hostIndexSet )
         : hostIndexSet_( &hostIndexSet )
       {}
 
       template< int codim >
-      IndexType index ( const typename Grid::template Codim< codim >::Entity &entity ) const
+      IndexType index ( const typename Codim< codim >::Entity &entity ) const
       {
         return Grid::getRealImplementation( entity ).index( hostIndexSet() );
       }
@@ -77,8 +77,16 @@ namespace Dune
         return index< Entity::codimension >( entity );
       }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
       template< int codim >
-      IndexType subIndex ( const typename Grid::template Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
+      IndexType DUNE_DEPRECATED subIndex ( const typename Codim< 0 >::Entity &entity, deprecated_int i ) const
+      {
+        return Base::template subIndex< codim >( entity, i );
+      }
+#endif // #ifdef DUNE_ENABLE_OLD_NUMBERING
+
+      template< int codim >
+      IndexType subIndex ( const typename Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
       {
         return Grid::getRealImplementation( entity ).subIndex( hostIndexSet(), i, subcodim );
       }
@@ -90,7 +98,7 @@ namespace Dune
       }
 
       // This one is only necessary due to the using directive
-      IndexType subIndex ( const typename Grid::template Codim< 0 >::Entity &entity, int i, unsigned int subcodim ) const
+      IndexType subIndex ( const typename Codim< 0 >::Entity &entity, int i, unsigned int subcodim ) const
       {
         return subIndex< 0 >( entity, i, subcodim );
       }
@@ -128,6 +136,8 @@ namespace Dune
         assert( hostIndexSet_ != 0 );
         return *hostIndexSet_;
       }
+
+      const HostIndexSet *hostIndexSet_;
     };
 
 
@@ -135,16 +145,16 @@ namespace Dune
     // HierarchicIndexSetProvider
     // --------------------------
 
-    template< class HostGrid, class CoordFunction >
-    class HierarchicIndexSetProvider< HostGrid, CoordFunction, false >
+    template< class HostGrid, class CoordFunction, class Numbering >
+    class HierarchicIndexSetProvider< HostGrid, CoordFunction, Numbering, false >
     {};
 
-    template< class HostGrid, class CoordFunction >
-    class HierarchicIndexSetProvider< HostGrid, CoordFunction, true >
+    template< class HostGrid, class CoordFunction, class Numbering >
+    class HierarchicIndexSetProvider< HostGrid, CoordFunction, Numbering, true >
     {
-      typedef HierarchicIndexSetProvider< HostGrid, CoordFunction, true > This;
+      typedef HierarchicIndexSetProvider< HostGrid, CoordFunction, Numbering, true > This;
 
-      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
 
     public:
       typedef IndexSet< const Grid, typename HostGrid::HierarchicIndexSet >
@@ -187,4 +197,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_INDEXSETS_HH

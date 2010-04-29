@@ -5,6 +5,8 @@
 
 #include <dune/grid/utility/grapedataioformattypes.hh>
 
+#include <dune/grid/geometrygrid/capabilities.hh>
+
 namespace Dune
 {
 
@@ -14,7 +16,7 @@ namespace Dune
     // BackupRestoreFacilities
     // -----------------------
 
-    template< class Grid, bool hasBackupRestoreFacilities >
+    template< class Grid, bool hasBackupRestoreFacilities = Capabilities::hasBackupRestoreFacilities< Grid > ::v >
     class BackupRestoreFacilities
     {};
 
@@ -33,13 +35,13 @@ namespace Dune
 
     public:
       template< GrapeIOFileFormatType type >
-      bool writeGrid ( const std :: string &filename, double time ) const
+      bool writeGrid ( const std::string &filename, double time ) const
       {
         return asImp().hostGrid().template writeGrid< type >( filename, time );
       }
 
       template< GrapeIOFileFormatType type >
-      bool readGrid ( const std :: string &filename, double &time )
+      bool readGrid ( const std::string &filename, double &time )
       {
         const bool success
           = asImp().hostGrid().template readGrid< type >( filename, time );
@@ -63,4 +65,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_BACKUPRESTORE_HH

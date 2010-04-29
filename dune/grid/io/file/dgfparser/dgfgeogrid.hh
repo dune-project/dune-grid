@@ -4,6 +4,7 @@
 #define DUNE_DGFGEOGRID_HH
 
 #include <dune/common/typetraits.hh>
+
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/dgfparser/dgfprojectionblock.hh>
@@ -108,10 +109,10 @@ namespace Dune
   // DGFGridFactory for GeometryGrid
   // -------------------------------
 
-  template< class HostGrid, class CoordFunction >
-  struct DGFGridFactory< GeometryGrid< HostGrid, CoordFunction > >
+  template< class HostGrid, class CoordFunction, class Numbering >
+  struct DGFGridFactory< GeometryGrid< HostGrid, CoordFunction, Numbering > >
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
 
     const static int dimension = Grid::dimension;
     typedef MPIHelper::MPICommunicator MPICommunicator;
@@ -182,8 +183,8 @@ namespace Dune
   // DGFGridInfo for GeometryGrid
   // ----------------------------
 
-  template< class HostGrid, class CoordFunction >
-  struct DGFGridInfo< GeometryGrid< HostGrid, CoordFunction > >
+  template< class HostGrid, class CoordFunction, class Numbering >
+  struct DGFGridInfo< GeometryGrid< HostGrid, CoordFunction, Numbering > >
   {
     static int refineStepsForHalf ()
     {

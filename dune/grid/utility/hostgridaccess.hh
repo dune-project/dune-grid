@@ -11,7 +11,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Numbering >
   class GeometryGrid;
 
 
@@ -31,13 +31,13 @@ namespace Dune
    *
    *  \nosubgrouping
    */
-  template< class HG, class CoordFunction >
-  struct HostGridAccess< GeometryGrid< HG, CoordFunction > >
+  template< class HG, class CoordFunction, class Numbering >
+  struct HostGridAccess< GeometryGrid< HG, CoordFunction, Numbering > >
   {
     /** \name Exported Types
      * \{ */
 
-    typedef GeometryGrid< HG, CoordFunction > Grid;
+    typedef GeometryGrid< HG, CoordFunction, Numbering > Grid;
 
     //! type of HostGrid
     typedef typename Grid::HostGrid HostGrid;
