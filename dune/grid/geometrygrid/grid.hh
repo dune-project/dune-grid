@@ -110,8 +110,8 @@ namespace Dune
   namespace GeoGrid
   {
 
-    // GeometryGridExportParams
-    // ------------------------
+    // ExportParams
+    // ------------
 
     template< class HG, class CF, class N >
     class ExportParams
@@ -127,8 +127,8 @@ namespace Dune
 
 
 
-    // GeometryGridFamily
-    // ------------------
+    // GridFamily
+    // ----------
 
     template< class HostGrid, class CoordFunction, class Numbering >
     struct GridFamily
@@ -879,6 +879,9 @@ namespace Dune
   };
 
 
+
+  // GeometryGrid::Codim
+  // -------------------
 
   template< class HostGrid, class CoordFunction, class Numbering >
   template< int codim >
