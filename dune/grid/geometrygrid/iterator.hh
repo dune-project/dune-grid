@@ -13,7 +13,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CoordFunction, class Numbering >
+  template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
   class GeometryGrid;
 
 

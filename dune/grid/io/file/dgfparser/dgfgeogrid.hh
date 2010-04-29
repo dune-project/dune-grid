@@ -109,10 +109,10 @@ namespace Dune
   // DGFGridFactory for GeometryGrid
   // -------------------------------
 
-  template< class HostGrid, class CoordFunction, class Numbering >
-  struct DGFGridFactory< GeometryGrid< HostGrid, CoordFunction, Numbering > >
+  template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
+  struct DGFGridFactory< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
   {
-    typedef GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
+    typedef GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > Grid;
 
     const static int dimension = Grid::dimension;
     typedef MPIHelper::MPICommunicator MPICommunicator;
@@ -183,8 +183,8 @@ namespace Dune
   // DGFGridInfo for GeometryGrid
   // ----------------------------
 
-  template< class HostGrid, class CoordFunction, class Numbering >
-  struct DGFGridInfo< GeometryGrid< HostGrid, CoordFunction, Numbering > >
+  template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
+  struct DGFGridInfo< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
   {
     static int refineStepsForHalf ()
     {

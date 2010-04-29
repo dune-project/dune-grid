@@ -13,7 +13,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CordFunction, class Numbering >
+  template< class HostGrid, class CordFunction, class Numbering, class Allocator >
   class GeometryGrid;
 
 
@@ -30,7 +30,7 @@ namespace Dune
     template< class >
     class EntityWrapper;
 
-    template< class HostGrid, class CoordFunction, class Numbering >
+    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
     struct ExportParams;
 
 
@@ -60,11 +60,11 @@ namespace Dune
     {};
     /** \endcond */
 
-    template< int codim, class HostGrid, class CoordFunction, class Numbering >
-    struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction, Numbering > >
-      : public ExportParams< HostGrid, CoordFunction, Numbering >
+    template< int codim, class HostGrid, class CoordFunction, class Numbering, class Allocator >
+    struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
+      : public ExportParams< HostGrid, CoordFunction, Numbering, Allocator >
     {
-      typedef Dune::GeometryGrid< HostGrid, CoordFunction, Numbering > Grid;
+      typedef Dune::GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > Grid;
 
       static const bool fake = !Capabilities::hasHostEntity< Grid, codim >::v;
 
@@ -156,7 +156,7 @@ namespace Dune
       ~EntityPointer ()
       {
         if( entity_ )
-          grid().destroy( entity_ );
+          grid().allocator().destroy( entity_ );
       }
 
       This &operator= ( const This &other )
@@ -181,7 +181,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( entity_ == 0 )
-          entity_ = grid().create( EntityWrapper( grid(), *hostIterator() ) );
+          entity_ = grid().allocator().create( EntityWrapper( grid(), *hostIterator() ) );
         return *entity_;
       }
 
@@ -211,7 +211,7 @@ namespace Dune
       {
         if( entity_ )
         {
-          grid().destroy( entity_ );
+          grid().allocator().destroy( entity_ );
           entity_ = 0;
         }
       }
@@ -297,7 +297,7 @@ namespace Dune
       ~EntityPointer ()
       {
         if( entity_ )
-          grid().destroy( entity_ );
+          grid().allocator().destroy( entity_ );
       }
 
       This &operator= ( const This &other )
@@ -347,7 +347,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( entity_ == 0 )
-          entity_ = grid().create( EntityWrapper( grid(), *hostElementIterator(), subEntity_ ) );
+          entity_ = grid().allocator().create( EntityWrapper( grid(), *hostElementIterator(), subEntity_ ) );
         return *entity_;
       }
 
@@ -372,7 +372,7 @@ namespace Dune
       {
         if( entity_ )
         {
-          grid().destroy( entity_ );
+          grid().allocator().destroy( entity_ );
           entity_ = 0;
         }
       }
