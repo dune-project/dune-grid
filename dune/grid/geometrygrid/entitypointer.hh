@@ -27,9 +27,6 @@ namespace Dune
     template< int, int, class >
     class Entity;
 
-    template< class >
-    class EntityWrapper;
-
     template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
     struct ExportParams;
 
@@ -108,18 +105,14 @@ namespace Dune
 
       typedef EntityPointer< BaseTraits, fake > EntityPointerImp;
 
-    private:
-      typedef GeoGrid::EntityWrapper< Entity > EntityWrapper;
-
-      const Grid *grid_;
-      mutable EntityWrapper *entity_;
-
     protected:
       typedef typename Traits::HostEntityPointer HostEntityPointer;
       typedef typename Traits::HostEntityIterator HostEntityIterator;
       typedef typename Traits::HostElement HostElement;
 
-      HostEntityIterator hostEntityIterator_;
+    private:
+      typedef MakeableInterfaceObject< Entity > EntityWrapper;
+      typedef typename EntityWrapper::ImplementationType EntityImpl;
 
     public:
       EntityPointer ( const Grid &grid, const HostEntityIterator &hostEntityIterator )
@@ -134,7 +127,7 @@ namespace Dune
           hostEntityIterator_( hostElement.template subEntity< codimension >( subEntity ) )
       {}
 
-      EntityPointer ( const typename EntityWrapper::Implementation &entity )
+      EntityPointer ( const EntityImpl &entity )
         : grid_( &entity.grid() ),
           entity_( 0 ),
           hostEntityIterator_( entity.hostEntity() )
@@ -181,7 +174,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( entity_ == 0 )
-          entity_ = grid().allocator().create( EntityWrapper( grid(), *hostIterator() ) );
+          entity_ = grid().allocator().create( EntityWrapper( EntityImpl( grid(), *hostIterator() ) ) );
         return *entity_;
       }
 
@@ -215,6 +208,13 @@ namespace Dune
           entity_ = 0;
         }
       }
+
+    private:
+      const Grid *grid_;
+      mutable EntityWrapper *entity_;
+
+    protected:
+      HostEntityIterator hostEntityIterator_;
     };
 
 
@@ -242,19 +242,14 @@ namespace Dune
 
       typedef EntityPointer< BaseTraits, fake > EntityPointerImp;
 
-    private:
-      typedef GeoGrid::EntityWrapper< Entity > EntityWrapper;
-
-      const Grid *grid_;
-      mutable EntityWrapper *entity_;
-
     protected:
       typedef typename Traits::HostEntityPointer HostEntityPointer;
       typedef typename Traits::HostElementIterator HostElementIterator;
       typedef typename Traits::HostElement HostElement;
 
-      int subEntity_;
-      HostElementIterator hostElementIterator_;
+    private:
+      typedef MakeableInterfaceObject< Entity > EntityWrapper;
+      typedef typename EntityWrapper::ImplementationType EntityImpl;
 
     public:
       EntityPointer ( const Grid &grid,
@@ -272,7 +267,7 @@ namespace Dune
           hostElementIterator_( hostElement )
       {}
 
-      EntityPointer ( const typename EntityWrapper::Implementation &entity )
+      EntityPointer ( const EntityImpl &entity )
         : grid_( &entity.grid() ),
           entity_( 0 ),
           subEntity_( entity.subEntity() ),
@@ -347,7 +342,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( entity_ == 0 )
-          entity_ = grid().allocator().create( EntityWrapper( grid(), *hostElementIterator(), subEntity_ ) );
+          entity_ = grid().allocator().create( EntityWrapper( EntityImpl( grid(), *hostElementIterator(), subEntity_ ) ) );
         return *entity_;
       }
 
@@ -381,6 +376,14 @@ namespace Dune
       {
         return hostElementIterator_;
       }
+
+    private:
+      const Grid *grid_;
+      mutable EntityWrapper *entity_;
+
+    protected:
+      int subEntity_;
+      HostElementIterator hostElementIterator_;
     };
 
   }

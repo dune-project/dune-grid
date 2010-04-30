@@ -16,14 +16,6 @@ namespace Dune
   namespace GeoGrid
   {
 
-    // External Forward Declarations
-    // -----------------------------
-
-    template< class Entity >
-    class GeometryGridEntityWrapper;
-
-
-
     // GeometryGridDataHandle
     // ----------------------
 
@@ -101,7 +93,8 @@ namespace Dune
     {
       static const int codimension = HostEntity::codimension;
       typedef typename Traits::template Codim< codimension >::Entity Entity;
-      typedef GeoGrid::EntityWrapper< Entity > EntityWrapper;
+      typedef MakeableInterfaceObject< Entity > EntityWrapper;
+      typedef typename EntityWrapper::ImplementationType EntityImpl;
 
       template< bool >
       struct CreateReal
@@ -109,7 +102,7 @@ namespace Dune
         static EntityWrapper
         apply ( const Grid &grid, const HostEntity &hostEntity )
         {
-          return EntityWrapper( grid, hostEntity );
+          return EntityWrapper( EntityImpl( grid, hostEntity ) );
         }
       };
 

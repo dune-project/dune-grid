@@ -163,20 +163,6 @@ namespace Dune
           geo_( GeometryImpl( grid().allocator() ) )
       {}
 
-      /** \brief (re)initialize the entity
-       *
-       *  \param[in]  grid        GeometryGrid this entity belongs to
-       *  \param[in]  hostEntity  corresponding entity in the host grid
-       *
-       *  \note Both references must remain valid as long as this entity is in
-       *        use.
-       */
-      void initialize ( const Grid &grid, const HostEntity &hostEntity )
-      {
-        grid_ = &grid;
-        hostEntity_ = &hostEntity;
-        Grid::getRealImplementation( geo_ ) = GeometryImpl( grid.allocator() );
-      }
       /** \} */
 
     private:
@@ -413,23 +399,6 @@ namespace Dune
           geo_( GeometryImpl( grid().allocator() ) )
       {}
 
-      /** \brief (re)initialize the entity
-       *
-       *  \param[in]  grid        GeometryGrid this entity belongs to
-       *  \param[in]  hostElement any host element containing the corresponding
-       *                          host entity
-       *  \param[in]  subEntity   number of this entity within the host element
-       *
-       *  \note Both references must remain valid as long as this entity is in
-       *        use.
-       */
-      void initialize ( const Grid &grid, const HostElement &hostElement, int subEntity )
-      {
-        grid_ = &grid;
-        hostElement_ = &hostElement;
-        subEntity_ = subEntity;
-        Grid::getRealImplementation( geo_ ) = GeometryImpl( grid.allocator() );
-      }
       /** \} */
 
     private:
@@ -717,20 +686,6 @@ namespace Dune
           geo_( GeometryImpl( grid().allocator() ) )
       {}
 
-      /** \brief (re)initialize the entity
-       *
-       *  \param[in]  grid        GeometryGrid this entity belongs to
-       *  \param[in]  hostEntity  corresponding entity in the host grid
-       *
-       *  \note Both references must remain valid as long as this entity is in
-       *        use.
-       */
-      void initialize ( const Grid &grid, const HostEntity &hostEntity )
-      {
-        grid_ = &grid;
-        hostEntity_ = &hostEntity;
-        Grid::getRealImplementation( geo_ ) = GeometryImpl( grid.allocator() );
-      }
       /** \} */
 
     private:
@@ -1004,64 +959,6 @@ namespace Dune
       Entity ( const Grid &grid, const HostElement &hostElement, int subEntity )
         : Base( grid, hostElement, subEntity )
       {}
-    };
-
-
-
-    template< int codim, int dim, class Grid >
-    class EntityWrapper< Dune::Entity< codim, dim, Grid, Entity > >
-      : public Dune::Entity< codim, dim, Grid, Entity >
-    {
-      typedef Dune::Entity< codim, dim, Grid, Entity > Base;
-
-    protected:
-      using Base::getRealImp;
-
-    public:
-      typedef Entity< codim, dim, Grid > Implementation;
-
-      typedef typename Implementation::HostEntity HostEntity;
-      typedef typename Implementation::HostElement HostElement;
-
-      EntityWrapper ( const Grid &grid, const HostEntity &hostEntity )
-        : Base( Implementation( grid, hostEntity ) )
-      {}
-
-      EntityWrapper ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : Base( Implementation( grid, hostElement, subEntity ) )
-      {}
-
-      /** \brief (re)initialize the entity
-       *
-       *  \note This method may only be used for non-fake entities.
-       *
-       *  \param[in]  grid        GeometryGrid this entity belongs to
-       *  \param[in]  hostEntity  corresponding entity in the host grid
-       *
-       *  \note Both references must remain valid as long as this entity is in
-       *        use.
-       */
-      void initialize ( const Grid &grid, const HostEntity &hostEntity )
-      {
-        getRealImp().initialize( grid, hostEntity );
-      }
-
-      /** \brief (re)initialize the entity
-       *
-       *  \note This method may only be used for fake entities.
-       *
-       *  \param[in]  grid        GeometryGrid this entity belongs to
-       *  \param[in]  hostElement any host element containing the corresponding
-       *                          host entity
-       *  \param[in]  subEntity   number of this entity within the host element
-       *
-       *  \note Both references must remain valid as long as this entity is in
-       *        use.
-       */
-      void initialize ( const Grid &grid, const HostElement &hostElement, int subEntity )
-      {
-        getRealImp().initialize( grid, hostElement, subEntity );
-      }
     };
 
   }
