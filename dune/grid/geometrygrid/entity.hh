@@ -47,24 +47,6 @@ namespace Dune
     template< int codim, int dim, class Grid >
     class Entity;
 
-    /** \class EntityWrapper
-     *  \brief wrapper around the DUNE entity interface
-     *  \ingroup GeoGrid
-     *
-     *  This class wraps the DUNE interface for the entity, making creation
-     *  and initialization a little easier. It is similar to
-     *  MakeableInterfaceObject, but specialized for the GeometryGrid entity
-     *  implementation.
-     *
-     *  \note MakeableInterfaceObject cannot be used when a default constructor
-     *        is required. As our storage implementation needs a default
-     *        constructor, we add the wrapper explicitly.
-     *
-     *  \tparam  Entity  an instatiation of Entity
-     */
-    template< class Entity >
-    class EntityWrapper;
-
 
 
     // EntityBase (real)
