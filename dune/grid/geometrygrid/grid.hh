@@ -869,6 +869,11 @@ namespace Dune
       return coordFunction_;
     }
 
+    const Numbering &numbering () const
+    {
+      return numbering_;
+    }
+
     template< int codim >
     static const typename HostGrid::template Codim< codim >::Entity &
     getHostEntity( const typename Codim< codim >::Entity &entity )
@@ -884,6 +889,7 @@ namespace Dune
   private:
     HostGrid *const hostGrid_;
     CoordFunction &coordFunction_;
+    Numbering numbering_;
     mutable Allocator allocator_;
     mutable std::vector< LevelIndexSet * > levelIndexSets_;
     mutable LeafIndexSet *leafIndexSet_;

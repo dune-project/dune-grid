@@ -96,6 +96,8 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename Traits::CoordFunction CoordFunction;
 
+      typedef typename Traits::template Codim< codimension >::EntityNumbering EntityNumbering;
+
     public:
       /** \name Host Types
        *  \{ */
@@ -117,10 +119,6 @@ namespace Dune
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
 
-      const Grid *grid_;
-      const HostEntity *hostEntity_;
-      mutable MakeableGeometry geo_;
-
     public:
       /** \name Construction, Initialization and Destruction
        *  \{ */
@@ -136,12 +134,14 @@ namespace Dune
       EntityBase ( const Grid &grid, const HostEntity &hostEntity )
         : grid_( &grid ),
           hostEntity_( &hostEntity ),
+          numbering_( grid.numbering()[ hostEntity ] ),
           geo_( GeometryImpl( grid.allocator() ) )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostEntity_( other.hostEntity_ ),
+          numbering_( other.numbering_ ),
           geo_( GeometryImpl( grid().allocator() ) )
       {}
 
@@ -276,6 +276,12 @@ namespace Dune
         return idSet.template id< codimension >( hostEntity() );
       }
       /** \} */
+
+    private:
+      const Grid *grid_;
+      const HostEntity *hostEntity_;
+      EntityNumbering numbering_;
+      mutable MakeableGeometry geo_;
     };
 
 
@@ -326,6 +332,8 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename Traits::CoordFunction CoordFunction;
 
+      typedef typename Traits::template Codim< 0 >::EntityNumbering ElementNumbering;
+
     public:
       /** \name Host Types
        *  \{ */
@@ -348,11 +356,6 @@ namespace Dune
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
 
-      const Grid *grid_;
-      const HostElement *hostElement_;
-      unsigned int subEntity_;
-      mutable Geometry geo_;
-
     public:
       /** \name Construction, Initialization and Destruction
        *  \{ */
@@ -370,6 +373,7 @@ namespace Dune
       EntityBase ( const Grid &grid, const HostElement &hostElement, int subEntity )
         : grid_( &grid ),
           hostElement_( &hostElement ),
+          numbering_( grid.numbering()[ hostElement ] ),
           subEntity_( subEntity ),
           geo_( GeometryImpl( grid.allocator() ) )
       {}
@@ -377,6 +381,7 @@ namespace Dune
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostElement_( other.hostElement_ ),
+          numbering_( other.numbering_ ),
           subEntity_( other.subEntity_ ),
           geo_( GeometryImpl( grid().allocator() ) )
       {}
@@ -556,6 +561,13 @@ namespace Dune
         const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
         return hostElement().template subEntity< dimension >( j )->partitionType();
       }
+
+    private:
+      const Grid *grid_;
+      const HostElement *hostElement_;
+      ElementNumbering numbering_;
+      unsigned int subEntity_;
+      mutable Geometry geo_;
     };
 
 
@@ -659,12 +671,14 @@ namespace Dune
       EntityBase ( const Grid &grid, const HostEntity &hostEntity )
         : grid_( &grid ),
           hostEntity_( &hostEntity ),
+          numbering_( grid.numbering()[ hostEntity ] ),
           geo_( GeometryImpl( grid.allocator() ) )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostEntity_( other.hostEntity_ ),
+          numbering_( other.numbering_ ),
           geo_( GeometryImpl( grid().allocator() ) )
       {}
 
