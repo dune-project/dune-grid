@@ -508,7 +508,7 @@ namespace Dune
       template< class HostIndexSet >
       typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
       {
-        const unsigned int j = numbering_.template map< Numbering::Backward >( cd, subEntity_ );
+        const unsigned int j = numbering_.template map< Numbering::Backward >( codimension, subEntity_ );
         return indexSet.subIndex( hostElement(), j, codimension );
       }
 
@@ -555,7 +555,7 @@ namespace Dune
       template< class HostIdSet >
       typename HostIdSet::IdType id ( const HostIdSet &idSet ) const
       {
-        const unsigned int j = numbering_.template map< Numbering::Backward >( cd, subEntity_ );
+        const unsigned int j = numbering_.template map< Numbering::Backward >( codimension, subEntity_ );
         return idSet.subId( hostElement(), j, codimension );
       }
       /** \} */
