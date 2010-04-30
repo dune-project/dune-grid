@@ -23,9 +23,6 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< class Grid, class HostIntersection >
-    class Intersection;
-
     template< class Grid >
     class LeafIntersection;
 
@@ -40,24 +37,24 @@ namespace Dune
     // Intersection
     // ------------
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator, class HostIntersection >
-    class Intersection< const GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator >, HostIntersection >
+    template< class Grid, class HostIntersection >
+    class Intersection
     {
-      typedef GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > Grid;
-
       typedef typename HostIntersection::Geometry HostGeometry;
       typedef typename HostIntersection::LocalGeometry HostLocalGeometry;
 
+      typedef typename remove_const< Grid >::type::Traits Traits;
+
     public:
-      typedef typename Grid::ctype ctype;
+      typedef typename Traits::ctype ctype;
 
-      enum { dimension = Grid::dimension };
-      enum { dimensionworld = Grid::dimensionworld };
+      static const int dimension = Traits::dimension;
+      static const int dimensionworld = Traits::dimensionworld;
 
-      typedef typename Grid::template Codim< 0 >::Entity Entity;
-      typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
-      typedef typename Grid::template Codim< 1 >::Geometry Geometry;
-      typedef typename Grid::template Codim< 1 >::LocalGeometry LocalGeometry;
+      typedef typename Traits::template Codim< 0 >::Entity Entity;
+      typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
+      typedef typename Traits::template Codim< 1 >::Geometry Geometry;
+      typedef typename Traits::template Codim< 1 >::LocalGeometry LocalGeometry;
 
     private:
       typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::IntersectionCoordVector CoordVector;
@@ -65,7 +62,7 @@ namespace Dune
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
 
-      typedef typename Grid::Traits::IntersectionNumbering IntersectionNumbering;
+      typedef typename Traits::IntersectionNumbering Numbering;
 
     public:
       Intersection ( const EntityPointer &inside, const HostIntersection &hostIntersection )
@@ -153,12 +150,14 @@ namespace Dune
 
       int indexInInside () const
       {
-        return hostIntersection().indexInInside();
+        const int i = hostIntersection().indexInInside();
+        return numbering_.template map< Numbering::Inside >( i );
       }
 
       int indexInOutside () const
       {
-        return hostIntersection().indexInOutside();
+        const int i = hostIntersection().indexInOutside();
+        return numbering_.template map< Numbering::Outside >( i );
       }
 
       FieldVector< ctype, dimensionworld >
@@ -216,7 +215,7 @@ namespace Dune
     private:
       const EntityPointer *inside_;
       const HostIntersection *hostIntersection_;
-      IntersectionNumbering numbering_;
+      Numbering numbering_;
       mutable MakeableGeometry geo_;
     };
 

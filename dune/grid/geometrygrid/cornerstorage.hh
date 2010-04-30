@@ -120,6 +120,7 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename Traits::CoordFunction CoordFunction;
 
+      typedef typename Traits::template Codim< codimension >::EntityNumbering Numbering;
       typedef typename HostGrid::template Codim< codimension >::Entity HostEntity;
 
       typedef GeoGrid :: CoordFunctionCaller< HostEntity, typename CoordFunction::Interface >
@@ -127,20 +128,27 @@ namespace Dune
 
     public:
       CoordVector ( const HostEntity &hostEntity,
-                    const CoordFunction &coordFunction )
-        : coordFunctionCaller_( hostEntity, coordFunction )
+                    const CoordFunction &coordFunction,
+                    const Numbering &numbering )
+        : coordFunctionCaller_( hostEntity, coordFunction ),
+          numbering_( numbering )
       {}
 
       template< unsigned int numCorners >
       void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
+        const int subcodim = dimension - codimension;
         assert( numCorners == coordFunctionCaller_.numCorners() );
         for( unsigned int i = 0; i < numCorners; ++i )
-          coordFunctionCaller_.evaluate( i, corners[ i ] );
+        {
+          const unsigned int j = numbering_.template map< Numbering::Backward >( subcodim, i );
+          coordFunctionCaller_.evaluate( j, corners[ i ] );
+        }
       }
 
     private:
       const CoordFunctionCaller coordFunctionCaller_;
+      Numbering numbering_;
     };
 
 
@@ -161,6 +169,7 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename Traits::CoordFunction CoordFunction;
 
+      typedef typename Traits::template Codim< 0 >::EntityNumbering Numbering;
       typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
 
       typedef GeoGrid::CoordFunctionCaller< HostElement, typename CoordFunction::Interface >
@@ -169,9 +178,11 @@ namespace Dune
     public:
       CoordVector ( const HostElement &hostElement,
                     const unsigned int subEntity,
-                    const CoordFunction &coordFunction )
+                    const CoordFunction &coordFunction,
+                    const Numbering &numbering )
         : coordFunctionCaller_( hostElement, coordFunction ),
-          subEntity_( subEntity )
+          subEntity_( subEntity ),
+          numbering_( numbering )
       {}
 
       template< unsigned int numCorners >
@@ -184,14 +195,16 @@ namespace Dune
 
         for( unsigned int i = 0; i < numCorners; ++i )
         {
-          const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
-          coordFunctionCaller_.evaluate( j, corners[ i ] );
+          const unsigned int j = refElement.subEntity( subEntity_, codimension, i, dimension );
+          const unsigned int k = numbering_.template map< Numbering::Backward >( dimension, j );
+          coordFunctionCaller_.evaluate( k, corners[ i ] );
         }
       }
 
     private:
       const CoordFunctionCaller coordFunctionCaller_;
       const unsigned int subEntity_;
+      Numbering numbering_;
     };
 
 

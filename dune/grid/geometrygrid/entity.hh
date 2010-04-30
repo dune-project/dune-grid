@@ -96,7 +96,7 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename Traits::CoordFunction CoordFunction;
 
-      typedef typename Traits::template Codim< codimension >::EntityNumbering EntityNumbering;
+      typedef typename Traits::template Codim< codimension >::EntityNumbering Numbering;
 
     public:
       /** \name Host Types
@@ -114,7 +114,8 @@ namespace Dune
     private:
       typedef typename HostGrid::template Codim< codimension >::Geometry HostGeometry;
 
-      typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::template Codim<codimension>::CoordVector CoordVector;
+      typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::template Codim< codimension >::CoordVector
+      CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
@@ -199,7 +200,7 @@ namespace Dune
         GeometryImpl &geo = Grid::getRealImplementation( geo_ );
         if( !geo )
         {
-          CoordVector coords( hostEntity(), grid().coordFunction() );
+          CoordVector coords( hostEntity(), grid().coordFunction(), numbering_ );
           geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
@@ -280,7 +281,7 @@ namespace Dune
     private:
       const Grid *grid_;
       const HostEntity *hostEntity_;
-      EntityNumbering numbering_;
+      Numbering numbering_;
       mutable MakeableGeometry geo_;
     };
 
@@ -332,7 +333,7 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename Traits::CoordFunction CoordFunction;
 
-      typedef typename Traits::template Codim< 0 >::EntityNumbering ElementNumbering;
+      typedef typename Traits::template Codim< 0 >::EntityNumbering Numbering;
 
     public:
       /** \name Host Types
@@ -351,7 +352,8 @@ namespace Dune
       typedef typename HostGrid::template Codim< 0 >::Geometry HostGeometry;
       typedef typename HostGrid::template Codim< dimension >::EntityPointer HostVertexPointer;
 
-      typedef typename GenericGeometry::GlobalGeometryTraits<Grid> :: template Codim<codimension> :: CoordVector CoordVector;
+      typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::template Codim< codimension >::CoordVector
+      CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
@@ -464,7 +466,7 @@ namespace Dune
         GeometryImpl &geo = Grid::getRealImplementation( geo_ );
         if( !geo )
         {
-          CoordVector coords( hostElement(), subEntity_, grid().coordFunction() );
+          CoordVector coords( hostElement(), subEntity_, grid().coordFunction(), numbering_ );
           geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
@@ -565,7 +567,7 @@ namespace Dune
     private:
       const Grid *grid_;
       const HostElement *hostElement_;
-      ElementNumbering numbering_;
+      Numbering numbering_;
       unsigned int subEntity_;
       mutable Geometry geo_;
     };
@@ -631,7 +633,7 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename Traits::CoordFunction CoordFunction;
 
-      typedef typename Traits::template Codim< codimension >::EntityNumbering EntityNumbering;
+      typedef typename Traits::template Codim< codimension >::EntityNumbering Numbering;
 
     public:
       /** \name Host Types
@@ -737,7 +739,7 @@ namespace Dune
 
         if( !geo )
         {
-          CoordVector coords( hostEntity(), grid().coordFunction() );
+          CoordVector coords( hostEntity(), grid().coordFunction(), numbering_ );
           geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
@@ -932,7 +934,7 @@ namespace Dune
     private:
       const Grid *grid_;
       const HostEntity *hostEntity_;
-      EntityNumbering numbering_;
+      Numbering numbering_;
       mutable MakeableGeometry geo_;
     };
 
