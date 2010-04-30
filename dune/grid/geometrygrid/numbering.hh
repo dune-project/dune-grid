@@ -42,8 +42,8 @@ namespace Dune
 
 
 
-  // IdenticalNumbering::EntityNumbering
-  // -----------------------------------
+  // IdenticalNumbering::IntersectionNumbering
+  // -----------------------------------------
 
   struct IdenticalNumbering::IntersectionNumbering
   {

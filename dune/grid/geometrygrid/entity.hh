@@ -248,7 +248,8 @@ namespace Dune
       typename HostIndexSet::IndexType
       subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
       {
-        return indexSet.subIndex( hostEntity(), i, cd );
+        const unsigned int j = numbering_.template map< Numbering::Backward >( cd, i );
+        return indexSet.subIndex( hostEntity(), j, cd );
       }
 
       /** \brief check whether the entity is contained in a host index set
@@ -507,7 +508,8 @@ namespace Dune
       template< class HostIndexSet >
       typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
       {
-        return indexSet.subIndex( hostElement(), subEntity_, codimension );
+        const unsigned int j = numbering_.template map< Numbering::Backward >( cd, subEntity_ );
+        return indexSet.subIndex( hostElement(), j, codimension );
       }
 
       /** \brief obtain the index of a subentity from a host IndexSet
@@ -526,7 +528,8 @@ namespace Dune
         const GenericReferenceElement< ctype, dimension > &refElement
           = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
         const int j = refElement.subEntity( subEntity_, codimension, i, codimension+cd );
-        return indexSet.subIndex( hostElement(), j, codimension+cd );
+        const unsigned int k = numbering_.template map< Numbering::Backward >( codimension+cd, j );
+        return indexSet.subIndex( hostElement(), k, codimension+cd );
       }
 
       /** \brief check whether the entity is contained in a host index set
@@ -552,7 +555,8 @@ namespace Dune
       template< class HostIdSet >
       typename HostIdSet::IdType id ( const HostIdSet &idSet ) const
       {
-        return idSet.subId( hostElement(), subEntity_, codimension );
+        const unsigned int j = numbering_.template map< Numbering::Backward >( cd, subEntity_ );
+        return idSet.subId( hostElement(), j, codimension );
       }
       /** \} */
 
@@ -561,7 +565,8 @@ namespace Dune
       vertexPartitionType ( const GenericReferenceElement< ctype, dimension > &refElement, int i ) const
       {
         const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
-        return hostElement().template subEntity< dimension >( j )->partitionType();
+        const unsigned int k = numbering_.template map< Numbering::Backward >( dimension, j );
+        return hostElement().template subEntity< dimension >( k )->partitionType();
       }
 
     private:
@@ -900,7 +905,8 @@ namespace Dune
       typename HostIndexSet::IndexType
       subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
       {
-        return indexSet.subIndex( hostEntity(), i, cd );
+        const unsigned int j = numbering_.template map< Numbering::Backward >( cd, i );
+        return indexSet.subIndex( hostEntity(), j, cd );
       }
 
       /** \brief check whether the entity is contained in a host index set
