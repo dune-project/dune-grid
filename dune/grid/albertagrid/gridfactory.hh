@@ -195,7 +195,7 @@ namespace Dune
      */
     virtual void insertBoundaryProjection ( const DuneProjection *projection )
     {
-      if( globalProjection_ != 0 )
+      if( globalProjection_ )
         DUNE_THROW( GridError, "Only one global boundary projection can be attached to a grid." );
       globalProjection_ = DuneProjectionPtr( projection );
     }
@@ -224,7 +224,7 @@ namespace Dune
       const GenericReferenceElement< ctype, dimension-1 > &refSimplex
         = GenericReferenceElements< ctype, dimension-1 >::simplex();
 
-      if( boundarySegment == 0 )
+      if( !boundarySegment )
         DUNE_THROW( GridError, "Trying to insert null as a boundary segment." );
       if( (int)vertices.size() != refSimplex.size( dimension-1 ) )
         DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
@@ -529,14 +529,14 @@ namespace Dune
 
       const unsigned int index = gridFactory().insertionIndex( elementInfo, face );
       if( index < std::numeric_limits< unsigned int >::max() )
-        return gridFactory().boundaryProjections_[ index ];
+        return bool( gridFactory().boundaryProjections_[ index ] );
       else
         return false;
     }
 
     bool hasProjection ( const ElementInfo &elementInfo ) const
     {
-      return gridFactory().globalProjection_;
+      return bool( gridFactory().globalProjection_ );
     }
 
     Projection projection ( const ElementInfo &elementInfo, const int face ) const
