@@ -147,6 +147,8 @@ namespace Dune
         typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection > LeafIntersection;
         typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection > LevelIntersection;
 
+        typedef typename Numbering::IntersectionNumbering IntersectionNumbering;
+
         typedef Dune::IntersectionIterator
         < const Grid, GeoGrid::LeafIntersectionIterator, GeoGrid::LeafIntersection >
         LeafIntersectionIterator;

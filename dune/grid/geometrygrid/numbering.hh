@@ -14,18 +14,19 @@ namespace Dune
     template< int codim >
     struct EntityNumbering;
 
-    template< class Entity >
-    EntityNumbering< Entity::codimension >
-    operator[] ( const Entity &entity ) const
-    {
-      return EntityNumbering< Entity::codimension >();
-    }
+    struct IntersectionNumbering;
+
+    template< int codim, int dim, class G, template< int, int, class > class I >
+    EntityNumbering< codim > operator[] ( const Entity< codim, dim, G, I > &entity ) const;
+
+    template< class G, template< class > class I >
+    IntersectionNumbering operator[] ( const Intersection< G, I > &intersection ) const;
   };
 
 
 
-  // IdenticalNumbering
-  // ------------------
+  // IdenticalNumbering::EntityNumbering
+  // -----------------------------------
 
   template< int codim >
   struct IdenticalNumbering::EntityNumbering
@@ -38,6 +39,42 @@ namespace Dune
       return i;
     }
   };
+
+
+
+  // IdenticalNumbering::EntityNumbering
+  // -----------------------------------
+
+  struct IdenticalNumbering::IntersectionNumbering
+  {
+    enum Side { Inside, Outside };
+
+    template< Side side >
+    unsigned int map ( const unsigned int face ) const
+    {
+      return face;
+    }
+  };
+
+
+
+  // Implementation of IdenticalNumbering
+  // ------------------------------------
+
+  template< int codim, int dim, class G, template< int, int, class > class I >
+  IdenticalNumbering::EntityNumbering< codim >
+  IdenticalNumbering::operator[] ( const Entity< codim, dim, G, I > &entity ) const
+  {
+    return EntityNumbering< codim >();
+  }
+
+
+  template< class G, template< class > class I >
+  IdenticalNumbering::IntersectionNumbering
+  IdenticalNumbering::operator[] ( const Intersection< G, I > &intersection ) const
+  {
+    return IntersectionNumbering();
+  }
 
 }
 

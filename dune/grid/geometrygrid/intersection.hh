@@ -65,16 +65,20 @@ namespace Dune
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
 
+      typedef typename Grid::Traits::IntersectionNumbering IntersectionNumbering;
+
     public:
       Intersection ( const EntityPointer &inside, const HostIntersection &hostIntersection )
         : inside_( &inside ),
           hostIntersection_( &hostIntersection ),
+          numbering_( grid().numbering()[ hostIntersection ] ),
           geo_( GeometryImpl( grid().allocator() ) )
       {}
 
       Intersection ( const Intersection &other )
         : inside_( other.inside_ ),
           hostIntersection_( other.hostIntersection_ ),
+          numbering_( other.numbering_ ),
           geo_( GeometryImpl( grid().allocator() ) )
       {}
 
@@ -212,6 +216,7 @@ namespace Dune
     private:
       const EntityPointer *inside_;
       const HostIntersection *hostIntersection_;
+      IntersectionNumbering numbering_;
       mutable MakeableGeometry geo_;
     };
 
