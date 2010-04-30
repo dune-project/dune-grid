@@ -154,13 +154,13 @@ namespace Dune
       EntityBase ( const Grid &grid, const HostEntity &hostEntity )
         : grid_( &grid ),
           hostEntity_( &hostEntity ),
-          geo_( GeometryImpl() )
+          geo_( GeometryImpl( grid.allocator() ) )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostEntity_( other.hostEntity_ ),
-          geo_( GeometryImpl() )
+          geo_( GeometryImpl( grid().allocator() ) )
       {}
 
       /** \brief (re)initialize the entity
@@ -175,7 +175,7 @@ namespace Dune
       {
         grid_ = &grid;
         hostEntity_ = &hostEntity;
-        Grid :: getRealImplementation( geo_ ) = GeometryImpl();
+        Grid::getRealImplementation( geo_ ) = GeometryImpl( grid.allocator() );
       }
       /** \} */
 
@@ -232,7 +232,7 @@ namespace Dune
         if( !geo )
         {
           CoordVector coords( hostEntity(), grid().coordFunction() );
-          geo = GeometryImpl( topologyId(), coords );
+          geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
       }
@@ -403,14 +403,14 @@ namespace Dune
         : grid_( &grid ),
           hostElement_( &hostElement ),
           subEntity_( subEntity ),
-          geo_( GeometryImpl() )
+          geo_( GeometryImpl( grid.allocator() ) )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostElement_( other.hostElement_ ),
           subEntity_( other.subEntity_ ),
-          geo_( GeometryImpl() )
+          geo_( GeometryImpl( grid().allocator() ) )
       {}
 
       /** \brief (re)initialize the entity
@@ -428,7 +428,7 @@ namespace Dune
         grid_ = &grid;
         hostElement_ = &hostElement;
         subEntity_ = subEntity;
-        Grid::getRealImplementation( geo_ ) = GeometryImpl();
+        Grid::getRealImplementation( geo_ ) = GeometryImpl( grid.allocator() );
       }
       /** \} */
 
@@ -505,11 +505,11 @@ namespace Dune
        */
       const Geometry &geometry () const
       {
-        GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
+        GeometryImpl &geo = Grid::getRealImplementation( geo_ );
         if( !geo )
         {
           CoordVector coords( hostElement(), subEntity_, grid().coordFunction() );
-          geo = GeometryImpl( topologyId(), coords );
+          geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
       }
@@ -708,13 +708,13 @@ namespace Dune
       EntityBase ( const Grid &grid, const HostEntity &hostEntity )
         : grid_( &grid ),
           hostEntity_( &hostEntity ),
-          geo_( GeometryImpl() )
+          geo_( GeometryImpl( grid.allocator() ) )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostEntity_( other.hostEntity_ ),
-          geo_( GeometryImpl() )
+          geo_( GeometryImpl( grid().allocator() ) )
       {}
 
       /** \brief (re)initialize the entity
@@ -729,7 +729,7 @@ namespace Dune
       {
         grid_ = &grid;
         hostEntity_ = &hostEntity;
-        Grid :: getRealImplementation( geo_ ) = GeometryImpl();
+        Grid::getRealImplementation( geo_ ) = GeometryImpl( grid.allocator() );
       }
       /** \} */
 
@@ -782,12 +782,12 @@ namespace Dune
        */
       const Geometry &geometry () const
       {
-        GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
+        GeometryImpl &geo = Grid::getRealImplementation( geo_ );
 
         if( !geo )
         {
           CoordVector coords( hostEntity(), grid().coordFunction() );
-          geo = GeometryImpl( topologyId(), coords );
+          geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
       }

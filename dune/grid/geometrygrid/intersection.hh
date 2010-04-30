@@ -69,13 +69,13 @@ namespace Dune
       Intersection ( const EntityPointer &inside, const HostIntersection &hostIntersection )
         : inside_( &inside ),
           hostIntersection_( &hostIntersection ),
-          geo_( GeometryImpl() )
+          geo_( GeometryImpl( grid().allocator() ) )
       {}
 
       Intersection ( const Intersection &other )
         : inside_( other.inside_ ),
           hostIntersection_( other.hostIntersection_ ),
-          geo_( GeometryImpl() )
+          geo_( GeometryImpl( grid().allocator() ) )
       {}
 
       const EntityPointer &inside () const
@@ -132,7 +132,7 @@ namespace Dune
         {
           const LocalGeometry &localGeo = geometryInInside();
           CoordVector coords( inside()->geometry(), localGeo );
-          geo = GeometryImpl( topologyId(), coords );
+          geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
       }
