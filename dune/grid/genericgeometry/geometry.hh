@@ -273,8 +273,8 @@ namespace Dune
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
 
       /** \brief Type used for Jacobian matrices */
-      typedef FieldMatrix< ctype, coorddimension, mydimension > Jacobian;
-      typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
+      typedef const FieldMatrix< ctype, coorddimension, mydimension > &JacobianInverseTransposed;
+      typedef const FieldMatrix< ctype, mydimension, coorddimension > &JacobianTransposed;
 
       typedef typename Traits::Allocator Allocator;
 
@@ -461,14 +461,14 @@ namespace Dune
        *         transformation from the reference element into the world
        *         space
        */
-      const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const
+      JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const
       {
         return mapping().jacobianTransposed( local );
       }
 
       /** \brief Compute the transpose of the inverse Jacobian matrix of the transformation
           from the reference element into the world space */
-      const Jacobian &jacobianInverseTransposed ( const LocalCoordinate &local ) const
+      JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
       {
         return mapping().jacobianInverseTransposed( local );
       }
