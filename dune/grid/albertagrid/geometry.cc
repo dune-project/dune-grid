@@ -50,7 +50,7 @@ namespace Dune
 
 
   template< int mydim, int cdim, class GridImp >
-  inline const typename AlbertaGridGeometry< mydim, cdim, GridImp >::JacobianTransposed &
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::JacobianTransposed
   AlbertaGridGeometry< mydim, cdim, GridImp >::jacobianTransposed () const
   {
     if( !builtJT_ )
@@ -68,7 +68,7 @@ namespace Dune
 
 
   template< int mydim, int cdim, class GridImp >
-  inline const typename AlbertaGridGeometry< mydim, cdim, GridImp >::JacobianInverseTransposed &
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::JacobianInverseTransposed
   AlbertaGridGeometry< mydim, cdim, GridImp >::jacobianInverseTransposed () const
   {
     if( !builtJTInv_ )
