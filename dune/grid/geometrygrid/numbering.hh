@@ -62,7 +62,7 @@ namespace Dune
   // ------------------------------------
 
   template< int codim, int dim, class G, template< int, int, class > class I >
-  IdenticalNumbering::EntityNumbering< codim >
+  inline IdenticalNumbering::EntityNumbering< codim >
   IdenticalNumbering::operator[] ( const Entity< codim, dim, G, I > &entity ) const
   {
     return EntityNumbering< codim >();
@@ -70,7 +70,7 @@ namespace Dune
 
 
   template< class G, template< class > class I >
-  IdenticalNumbering::IntersectionNumbering
+  inline IdenticalNumbering::IntersectionNumbering
   IdenticalNumbering::operator[] ( const Intersection< G, I > &intersection ) const
   {
     return IntersectionNumbering();
