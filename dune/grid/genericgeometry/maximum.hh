@@ -3,28 +3,34 @@
 #ifndef DUNE_GENERICGEOMETRY_MAXIMUM_HH
 #define DUNE_GENERICGEOMETRY_MAXIMUM_HH
 
-#include <dune/common/static_assert.hh>
+#include <dune/common/forloop.hh>
 
 namespace Dune
 {
 
-  template< template< int > class Value, int first, int last >
-  struct Maximum
+  namespace GenericGeometry
   {
-    template< int v1, int v2 >
-    struct M { static const int v = (v1 > v2 ? v1 : v2); };
 
-    static const int v = M< Value< first >::v, Maximum< Value, first+1, last >::v >::v;
+    // StaticMaximum
+    // -------------
 
-  private:
-    dune_static_assert( (first <= last), "Maximum: first > last" );
-  };
+    template< class A, class B >
+    struct StaticMaximum
+    {
+      static const int v = (A::v > B::v ? A::v : B::v);
+    };
 
-  template< template< int > class Value, int last >
-  struct Maximum< Value, last, last >
-  {
-    static const int v = Value< last >::v;
-  };
+
+
+    // Maximum
+    // -------
+
+    template< template< int > class Value, int first, int last >
+    struct Maximum
+      : public GenericForLoop< StaticMaximum, Value, first, last >
+    {};
+
+  }
 
 }
 

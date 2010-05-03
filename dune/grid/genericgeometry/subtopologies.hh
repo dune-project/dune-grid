@@ -559,20 +559,35 @@ namespace Dune
     {
       static const unsigned int dimension = Topology::dimension;
 
+      template< class A, class B >
+      struct StaticSum
+      {
+        static const unsigned int v = A::v + B::v;
+      };
+
+      template< int codim >
+      struct Size
+      {
+        static const unsigned int v = GenericGeometry::Size< Topology, codim >::v;
+      };
+
       template< int codim >
       struct CalcOffset
       {
         static void apply ( unsigned int (&offsets)[ dimension+2 ] )
         {
-          offsets[ codim+1 ] = offsets[ codim ] + Size< Topology, codim >::value;
+          offsets[ codim+1 ] = offsets[ codim ] + Size< codim >::v;
         }
       };
 
     public:
+      static const unsigned int staticSize = GenericForLoop< StaticSum, Size, 0, dimension >::v;
+
       SubTopologyMapper ()
       {
         offsets_[ 0 ] = 0;
         ForLoop< CalcOffset, 0, dimension >::apply( offsets_ );
+        assert( size() == staticSize );
       };
 
       unsigned int operator() ( const unsigned int codim, const unsigned int subEntity ) const
