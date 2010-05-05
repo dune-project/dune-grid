@@ -245,8 +245,10 @@ namespace Dune
     typedef FieldVector< ctype, mydimension > LocalVector;
     typedef FieldVector< ctype, coorddimension > GlobalVector;
 
-    typedef const FieldMatrix< ctype, mydimension, coorddimension > &JacobianTransposed;
-    typedef const FieldMatrix< ctype, coorddimension, mydimension > &JacobianInverseTransposed;
+    typedef FieldMatrix< ctype, mydimension, coorddimension >
+    JacobianTransposed;
+    typedef FieldMatrix< ctype, coorddimension, mydimension >
+    JacobianInverseTransposed;
 
   private:
     static const int numCorners = mydimension + 1;
@@ -334,10 +336,11 @@ namespace Dune
      *  \note This method is not part of the geometry interface. It is used
      *        internally only.
      */
-    JacobianTransposed jacobianTransposed () const;
+    const JacobianTransposed &jacobianTransposed () const;
 
     /** \brief transposed of the geometry mapping's Jacobian */
-    JacobianTransposed jacobianTransposed ( const LocalVector &local ) const
+    const JacobianTransposed &
+    jacobianTransposed ( const LocalVector &local ) const
     {
       return jacobianTransposed();
     }
@@ -347,10 +350,11 @@ namespace Dune
      *  \note This method is not part of the geometry interface. It is used
      *        internally only.
      */
-    JacobianInverseTransposed jacobianInverseTransposed () const;
+    const JacobianInverseTransposed &jacobianInverseTransposed () const;
 
     /** \brief transposed inverse of the geometry mapping's Jacobian */
-    JacobianInverseTransposed jacobianInverseTransposed ( const LocalVector &local ) const
+    const JacobianInverseTransposed &
+    jacobianInverseTransposed ( const LocalVector &local ) const
     {
       return jacobianInverseTransposed();
     }
@@ -387,10 +391,10 @@ namespace Dune
     GlobalVector centroid_;
 
     // storage for the transposed of the jacobian
-    mutable FieldMatrix< ctype, mydimension, coorddimension > jT_;
+    mutable JacobianTransposed jT_;
 
     // storage for the transposed inverse of the jacboian
-    mutable FieldMatrix< ctype, coorddimension, mydimension > jTInv_;
+    mutable JacobianInverseTransposed jTInv_;
 
     // has jT_ been computed, yet?
     mutable bool builtJT_;
@@ -453,8 +457,10 @@ namespace Dune
     typedef FieldVector< ctype, mydimension > LocalVector;
     typedef FieldVector< ctype, coorddimension > GlobalVector;
 
-    typedef const FieldMatrix< ctype, mydimension, coorddimension > &JacobianTransposed;
-    typedef const FieldMatrix< ctype, coorddimension, mydimension > &JacobianInverseTransposed;
+    typedef FieldMatrix< ctype, mydimension, coorddimension >
+    JacobianTransposed;
+    typedef FieldMatrix< ctype, coorddimension, mydimension >
+    JacobianInverseTransposed;
 
   private:
     static const int numCorners = mydimension + 1;
@@ -545,13 +551,14 @@ namespace Dune
      *  \note This method is not part of the geometry interface. It is used
      *        internally only.
      */
-    JacobianTransposed jacobianTransposed () const
+    const JacobianTransposed &jacobianTransposed () const
     {
       return elementInfo_.geometryCache().jacobianTransposed();
     }
 
     /** \brief transposed of the geometry mapping's Jacobian */
-    JacobianTransposed jacobianTransposed ( const LocalVector &local ) const
+    const JacobianTransposed &
+    jacobianTransposed ( const LocalVector &local ) const
     {
       return jacobianTransposed();
     }
@@ -561,13 +568,14 @@ namespace Dune
      *  \note This method is not part of the geometry interface. It is used
      *        internally only.
      */
-    JacobianInverseTransposed jacobianInverseTransposed () const
+    const JacobianInverseTransposed &jacobianInverseTransposed () const
     {
       return elementInfo_.geometryCache().jacobianInverseTransposed();
     }
 
     /** \brief transposed inverse of the geometry mapping's Jacobian */
-    JacobianInverseTransposed jacobianInverseTransposed ( const LocalVector &local ) const
+    const JacobianInverseTransposed &
+    jacobianInverseTransposed ( const LocalVector &local ) const
     {
       return jacobianInverseTransposed();
     }
