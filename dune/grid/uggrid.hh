@@ -825,7 +825,7 @@ namespace Dune {
     /** \brief Sets a vertex to a new position
 
        Changing a vertex' position changes its position on all grid levels!*/
-    void setPosition(typename Traits::template Codim<dim>::EntityPointer& e,
+    void setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,
                      const FieldVector<double, dim>& pos);
 
     /** \brief For a point on the grid boundary return its position on the domain boundary */

@@ -603,7 +603,7 @@ void Dune::UGGrid < dim >::createLGMGrid(const std::string& name)
 }
 
 template < int dim >
-void Dune::UGGrid < dim >::setPosition(typename Traits::template Codim<dim>::EntityPointer& e,
+void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,
                                        const FieldVector<double, dim>& pos)
 {
   typename UG_NS<dim>::Node* target = getRealImplementation(*e).target_;
