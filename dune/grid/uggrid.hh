@@ -179,7 +179,7 @@ namespace Dune {
       // add the size of an unsigned integer to the actual
       // buffer size. (we somewhere have to store the actual
       // number of objects for each entity.)
-      return sizeof(unsigned)*sizeof(DataType)*maxSize;
+      return sizeof(unsigned) + sizeof(DataType)*maxSize;
     }
 
     // called by DDD_IFOneway to serialize the data structure to
