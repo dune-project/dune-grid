@@ -145,38 +145,37 @@ namespace Dune
 
   template<class GridType, class DiscreteFunctionType>
   inline void EvalDiscreteFunctions<GridType,DiscreteFunctionType>::
-  evalCoordNow(EntityType &en, DUNE_FDATA *df , const double *coord, double * val)
+  evalCoordNow ( EntityType &entity, DUNE_FDATA *df, const double *coord, double * val )
   {
-    assert( coord );
-    enum { dim = GridType::dimension };
+    const int dim = GridType::dimension;
 
     assert( df );
-    assert( df->discFunc );
-    DiscreteFunctionType & func = *((DiscreteFunctionType *) ( df->discFunc));
+    assert( coord );
 
-    typedef typename DiscreteFunctionType::LocalFunctionType LocalFunctionType;
+    const DiscreteFunctionType *function = static_cast< const DiscreteFunctionType * >( df->discFunc );
+    assert( func );
 
-
-    const int * comp = df->comp;
+    const int *comp = df->comp;
     assert( comp );
 
     // get local function
-    LocalFunctionType lf = func.localFunction( en );
-
-    static DomainType domTmp_;
+    typedef typename DiscreteFunctionType::LocalFunctionType LocalFunction;
+    const LocalFunction localFunction = function->localFunction( entity );
 
     // convert double to FieldVector
-    for(int i=0; i<dim; i++) domTmp_[i] = coord[i];
+    typename EntityType::Geometry::LocalCoordinate x;
+    for( int i = 0; i < dim; ++i )
+      x[ i ] = coord[ i ];
 
-    static RangeType tmp_;
-    // evaluate local function on local (on reference element)
-    // point == domTmp
-    lf.evaluate( domTmp_ , tmp_);
+    // evaluate local function in local (on reference element) point x
+    RangeType tmp;
+    localFunction.evaluate( x, tmp );
 
     const int dimVal = df->dimVal;
-    for(int i=0; i<dimVal; ++i) val[i] = tmp_[comp[i]];
-    return;
+    for( int i = 0; i < dimVal; ++i )
+      val[ i ] = tmp[ comp[ i ] ];
   }
+
 
   template<class GridType, class DiscreteFunctionType>
   inline void EvalDiscreteFunctions<GridType,DiscreteFunctionType>::
