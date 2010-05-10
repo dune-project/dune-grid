@@ -153,7 +153,7 @@ namespace Dune
     assert( coord );
 
     const DiscreteFunctionType *function = static_cast< const DiscreteFunctionType * >( df->discFunc );
-    assert( func );
+    assert( function );
 
     const int *comp = df->comp;
     assert( comp );
