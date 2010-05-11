@@ -3,6 +3,9 @@
 #ifndef DUNE_GEOGRID_NUMBERING_HH
 #define DUNE_GEOGRID_NUMBERING_HH
 
+#include <dune/grid/common/entity.hh>
+#include <dune/grid/common/intersection.hh>
+
 namespace Dune
 {
 

@@ -18,12 +18,10 @@
 #include <dune/grid/geometrygrid/iterator.hh>
 #include <dune/grid/geometrygrid/idset.hh>
 #include <dune/grid/geometrygrid/indexsets.hh>
+#include <dune/grid/geometrygrid/localgeometry.hh>
 #include <dune/grid/geometrygrid/datahandle.hh>
 #include <dune/grid/geometrygrid/backuprestore.hh>
 #include <dune/grid/geometrygrid/numbering.hh>
-
-#include <dune/grid/genericgeometry/geometry.hh>
-
 #include <dune/grid/geometrygrid/identity.hh>
 
 namespace Dune
@@ -165,7 +163,7 @@ namespace Dune
           typedef Dune::Geometry
           < dimension-codim, dimensionworld, const Grid, Dune::GenericGeometry::Geometry >
           Geometry;
-          typedef typename HostGrid::template Codim< codim >::LocalGeometry LocalGeometry;
+          typedef typename LocalGeometryProvider< Grid, codim >::LocalGeometry LocalGeometry;
 
           typedef GeoGrid::EntityPointerTraits< codim, const Grid > EntityPointerTraits;
           typedef GeoGrid::EntityPointer< EntityPointerTraits > EntityPointerImpl;

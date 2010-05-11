@@ -8,6 +8,7 @@
 
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
+#include <dune/grid/geometrygrid/localgeometry.hh>
 
 namespace Dune
 {
@@ -663,6 +664,9 @@ namespace Dune
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
       typedef typename GeometryImpl::GlobalCoordinate GlobalCoordinate;
 
+      typedef GeoGrid::LocalGeometryProvider< typename remove_const< Grid >::type, codimension >
+      LocalGeometryProvider;
+
     public:
       /** \name Construction, Initialization and Destruction
        *  \{ */
@@ -833,7 +837,7 @@ namespace Dune
 
       const LocalGeometry &geometryInFather () const
       {
-        return hostEntity().geometryInFather();
+        return geoInFatherProvider_( hostEntity().geometryInFather(), numbering_ );
       }
 
       HierarchicIterator hbegin ( int maxLevel ) const
@@ -942,6 +946,7 @@ namespace Dune
       const HostEntity *hostEntity_;
       Numbering numbering_;
       mutable MakeableGeometry geo_;
+      LocalGeometryProvider geoInFatherProvider_;
     };
 
 
