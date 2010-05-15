@@ -2560,7 +2560,7 @@ namespace Dune {
     }
 
 #else
-    YaspGrid (int, Dune::FieldVector<ctype, dim> L,
+    YaspGrid (Dune::FakeMPIHelper::MPICommunicator, Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
