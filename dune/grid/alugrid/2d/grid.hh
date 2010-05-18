@@ -26,7 +26,7 @@
 
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
-#include "../bndprojection.hh"
+#include <dune/grid/alugrid/2d/bndprojection.hh>
 
 //- Local includes
 #include "indexsets.hh"
@@ -313,8 +313,9 @@ namespace Dune {
   protected:
 
     friend class ALUGridBoundaryProjection< ThisType >;
+    friend class ALU2dGridBoundaryProjection< ThisType >;
     // type of ALUGrid boundary projection wrapper
-    typedef ALUGridBoundaryProjection< ThisType > ALUGridBoundaryProjectionType;
+    typedef ALU2dGridBoundaryProjection< ThisType > ALUGridBoundaryProjectionType;
 
     //! Constructor which reads an ALU2dGrid Macro Triang file
     //! or given GridFile
@@ -584,6 +585,11 @@ namespace Dune {
 
     // boundary projection for vertices
     ALUGridBoundaryProjectionType* vertexProjection_ ;
+
+    const DuneBoundaryProjectionType *globalProjection () const
+    {
+      return bndPrj_;
+    }
 
     //! return boudanry projection for given segment Id
     const DuneBoundaryProjectionType* boundaryProjection(const int segmentIndex) const
