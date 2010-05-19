@@ -166,13 +166,13 @@ namespace Dune
 
     //! return reference to the real implementation
     EntityImp<cd,dim,GridImp> & getRealImp() { return realEntity; }
-    //! return reference to the real implementation
+    //! return const reference to the real implementation
     const EntityImp<cd,dim,GridImp> & getRealImp() const { return realEntity; }
 
   protected:
     /** hide copy constructor */
     Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
-    /** hide assignement operator */
+    /** hide assignment operator */
     Entity & operator = (const Entity& rhs) {
       realEntity = rhs.realEntity;
       return *this;
@@ -215,8 +215,12 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
 
     /** \brief The geometry type of this entity when the geometry is expressed
-       embedded in the father element.  This differs from Geometry only when
-       dim != dimworld.*/
+       embedded in the father element.
+
+       This differs from Geometry in particular when dim != dimworld,
+       but even when dim == dimworld the implementation may choose to use
+       a different type here.
+     */
     typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
 
     /** \brief EntityPointer types of the different codimensions */
@@ -254,7 +258,7 @@ namespace Dune
       //! Know the world dimension
       dimensionworld=dimworld
     };
-    //! Type used for coordinates in grid module
+    //! Type used for coordinates
     typedef ct ctype;
     //@}
 
