@@ -22,6 +22,7 @@ typedef unsigned char uint8_t;
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/collectivecommunication.hh>
+#include <dune/common/mpihelper.hh>
 #include <dune/grid/common/indexidset.hh>
 #include <dune/grid/common/datahandleif.hh>
 
