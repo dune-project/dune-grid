@@ -1,4 +1,4 @@
-ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest gmshtest gmshtest-all
+ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest gmshtest
 
 GRIDDIM=2
 GRIDTYPE=YASPGRID
@@ -9,7 +9,8 @@ ALLTESTS += amirameshtest
 endif
 
 if ALBERTA
-ALLTESTS += gmshtest-alberta
+ALLTESTS += gmshtest-alberta2d
+ALLTESTS += gmshtest-alberta3d
 endif
 
 if ALUGRID
@@ -56,40 +57,25 @@ amirameshtest_LDADD =				\
 	$(AMIRAMESH_LIBS)			\
 	$(LDADD)
 
-gmshtest_SOURCES = gmshtest.cc
-gmshtest_CPPFLAGS = $(AM_CPPFLAGS)		\
-	$(ALL_PKG_CPPFLAGS)
-gmshtest_LDFLAGS = $(AM_LDFLAGS)		\
-	$(ALL_PKG_LDFLAGS)
-gmshtest_LDADD =				\
-	$(ALL_PKG_LIBS)				\
-	$(LDADD)
+gmshtest_SOURCES  = gmshtest.cc
+gmshtest_CPPFLAGS = $(AM_CPPFLAGS)  $(ALL_PKG_CPPFLAGS)
+gmshtest_LDFLAGS  = $(AM_LDFLAGS)   $(ALL_PKG_LDFLAGS)
+gmshtest_LDADD    = $(ALL_PKG_LIBS) $(LDADD)
 
-gmshtest_alberta_SOURCES = gmshtest-alberta.cc
-gmshtest_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS) -DGRIDDIM=$(ALBERTA_DIM)
-gmshtest_alberta_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(GRAPE_LDFLAGS)
-gmshtest_alberta_LDADD =			\
-	$(GRAPE_LIBS)				\
-	$(ALBERTA_LIBS)				\
-	$(LDADD)
+gmshtest_alberta2d_SOURCES  = gmshtest.cc
+gmshtest_alberta2d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS) -DGRIDDIM=$(ALBERTA_DIM)
+gmshtest_alberta2d_LDFLAGS  = $(AM_LDFLAGS)  $(ALBERTA_LDFLAGS)  $(GRAPE_LDFLAGS)
+gmshtest_alberta2d_LDADD    =	$(GRAPE_LIBS)	 $(ALBERTA_LIBS)		 $(LDADD)
 
-gmshtest_alugrid_SOURCES = gmshtest-alberta.cc
+gmshtest_alberta3d_SOURCES  = gmshtest.cc
+gmshtest_alberta3d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA3D_CPPFLAGS) $(GRAPE_CPPFLAGS)
+gmshtest_alberta3d_LDFLAGS  = $(AM_LDFLAGS)  $(ALBERTA3D_LDFLAGS)  $(GRAPE_LDFLAGS)
+gmshtest_alberta3d_LDADD    =	$(GRAPE_LIBS)	 $(ALBERTA3D_LIBS)		 $(LDADD)
+
+gmshtest_alugrid_SOURCES  = gmshtest.cc
 gmshtest_alugrid_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(GRAPE_CPPFLAGS) $(GRIDDIM_CPPFLAGS)
-gmshtest_alugrid_LDFLAGS = $(AM_LDFLAGS)	\
-	$(ALUGRID_LDFLAGS)			\
-	$(GRAPE_LDFLAGS)
-gmshtest_alugrid_LDADD =			\
-	$(GRAPE_LIBS)				\
-	$(ALUGRID_LIBS)				\
-	$(LDADD)
-
-gmshtest_all_SOURCES = gmshtest-alberta.cc
-gmshtest_all_CPPFLAGS = $(AM_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
-gmshtest_all_LDFLAGS = $(AM_LDFLAGS)		\
-	$(ALL_PKG_LDFLAGS)
-gmshtest_all_LDADD =				\
-	$(ALL_PKG_LIBS)				\
-	$(LDADD)
+gmshtest_alugrid_LDFLAGS  = $(AM_LDFLAGS)	 $(ALUGRID_LDFLAGS)	 $(GRAPE_LDFLAGS)
+gmshtest_alugrid_LDADD    =	$(GRAPE_LIBS)	 $(ALUGRID_LIBS)		 $(LDADD)
 
 starcdreadertest_SOURCES = starcdreadertest.cc
 starcdreadertest_CPPFLAGS = $(AM_CPPFLAGS)	\

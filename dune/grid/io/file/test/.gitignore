@@ -20,5 +20,6 @@ subsamplingvtktest
 vtksequencetest
 vtktest
 gmshtest
-gmshtest-alberta
+gmshtest-alberta2d
+gmshtest-alberta3d
 gmshtest-alugrid
