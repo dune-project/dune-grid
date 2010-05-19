@@ -670,6 +670,12 @@ namespace Dune
     // topologyId
     // ----------
 
+    //! convert a GeometryType into a topologyId
+    /**
+     * \code
+     *#include <dune/grid/genericgeometry/conversion.hh>
+     * \endcode
+     */
     inline unsigned int topologyId ( const GeometryType &type )
     {
       const unsigned int dim = type.dim();
