@@ -57,8 +57,6 @@ namespace Dune
    */
   template<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
   class Entity {
-    enum { dimworld = GridImp::dimensionworld };
-    typedef typename GridImp::ctype ct;
   protected:
     EntityImp<cd,dim,GridImp> realEntity;
   public:
@@ -90,11 +88,11 @@ namespace Dune
     };
     enum {
       //! \brief Know the dimension of world.
-      dimensionworld=dimworld
+      dimensionworld=GridImp::dimensionworld
     };
 
     //! @brief coordinate type of the Grid
-    typedef ct ctype;
+    typedef typename GridImp::ctype ctype;
     //@}
 
 
@@ -193,9 +191,6 @@ namespace Dune
   template<int dim, class GridImp, template<int,int,class> class EntityImp>
   class Entity <0,dim,GridImp,EntityImp>
   {
-    enum { dimworld = GridImp::dimensionworld };
-    typedef typename GridImp::ctype ct;
-
   protected:
     typedef typename remove_const<GridImp>::type mutableGridImp;
 
@@ -256,10 +251,10 @@ namespace Dune
     };
     enum {
       //! Know the world dimension
-      dimensionworld=dimworld
+      dimensionworld=GridImp::dimensionworld
     };
     //! Type used for coordinates
-    typedef ct ctype;
+    typedef typename GridImp::ctype ctype;
     //@}
 
 
@@ -552,8 +547,6 @@ namespace Dune
   template<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
   class EntityDefaultImplementation
   {
-    enum { dimworld = GridImp::dimensionworld };
-    typedef typename GridImp::ctype ct;
   public:
     //! know your own codimension
     enum { codimension=cd };
@@ -565,10 +558,10 @@ namespace Dune
     enum { mydimension=dim-cd };
 
     //! know your own dimension of world
-    enum { dimensionworld=dimworld };
+    enum { dimensionworld=GridImp::dimensionworld };
 
     //! define type used for coordinates in grid module
-    typedef ct ctype;
+    typedef typename GridImp::ctype ctype;
 
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::GenericReferenceElement.
@@ -601,9 +594,6 @@ namespace Dune
   template<int dim, class GridImp, template<int,int,class> class EntityImp>
   class EntityDefaultImplementation <0,dim,GridImp,EntityImp>
   {
-    enum { dimworld = GridImp::dimensionworld };
-    typedef typename GridImp::ctype ct;
-
   public:
     //! know your own codimension
     enum { codimension=0 };
@@ -615,10 +605,10 @@ namespace Dune
     enum { mydimension=dim };
 
     //! know your own dimension of world
-    enum { dimensionworld=dimworld };
+    enum { dimensionworld=GridImp::dimensionworld };
 
     //! define type used for coordinates in grid module
-    typedef ct ctype;
+    typedef typename GridImp::ctype ctype;
 
     /** @brief Returns true if element is of regular type in red/green type refinement.
        In bisection or hanging node refinement this is always true.
