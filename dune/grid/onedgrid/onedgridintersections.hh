@@ -141,6 +141,11 @@ namespace Dune {
       return OneDGridEntityPointer<0,GridImp>(target());
     }
 
+    //! return information about the Boundary
+    int boundaryId () const {
+      return boundarySegmentIndex();
+    }
+
     //! return index of the boundary segment
     int boundarySegmentIndex () const {
       // It is hardwired here that the domain is connected, i.e., the boundary consists of two points
@@ -411,6 +416,11 @@ namespace Dune {
     EntityPointer outside() const
     {
       return OneDGridEntityPointer<0,GridImp>(target());
+    }
+
+    //! return information about the Boundary
+    int boundaryId () const {
+      return boundarySegmentIndex();
     }
 
     //! return index of the boundary segment

@@ -172,6 +172,12 @@ void checkIntersectionIterator(const GridViewType& view,
       // entity has boundary intersections
       hasBoundaryIntersection = true;
 
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+      if( iIt->boundaryId() < 0 )
+      {
+        DUNE_THROW(GridError, "boundary id has negative value (" << iIt->boundaryId() << ") !");
+      }
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
       if( ! iIt->conforming() )
       {
         DUNE_THROW(GridError, "Boundary intersection should be conforming!");
