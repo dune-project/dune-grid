@@ -61,10 +61,6 @@ struct subIndexCheck
       {
         int id_e = levelIndexSet.index( e );
         int id_e_i = levelIndexSet.index( *ep );
-#if defined DUNE_ENABLE_OLD_NUMBERING && !DISABLE_DEPRECATED_METHOD_CHECK
-        int subid_e_i_old = levelIndexSet.template subIndex<cd>( e, i);
-        subid_e_i_old = 0;
-#endif
         int subid_e_i = levelIndexSet.subIndex( e, i, cd );
         std::cerr << "Error: levelIndexSet.index( *(e.template subEntity< cd >( i ) ) ) "
                   << "!= levelIndexSet.subIndex( e, i, cd )  "
@@ -791,9 +787,6 @@ void gridcheck (Grid &g)
                   << ", subId=" << g.globalIdSet().subId(*it,0,dim) << ") of cell " << g.globalIdSet().id(*it) << std::endl;
         assert(false);
       }
-#if defined DUNE_ENABLE_OLD_NUMBERING && !DISABLE_DEPRECATED_METHOD_CHECK
-      g.globalIdSet().template subId<dim>(*it,0);
-#endif
     }
   }
 

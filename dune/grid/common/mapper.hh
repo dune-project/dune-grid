@@ -125,32 +125,6 @@ namespace Dune
       return asImp().map(e);
     }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
-    /**
-       \deprecated use map without template parameter
-       \brief please read the details
-
-       \warning \{
-       this method uses the numbering of the old referenceelements (see GridReferenceElements)
-       the output of map (without template parameter) will differ as it uses the numbering of the generic referenceelements
-       (see GridGenericReferenceElements).
-       \}
-
-       Map subentity of codim 0 entity to array index.
-
-       \param e Reference to codim 0 entity.
-       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
-       \return An index in the range 0 ... Max number of entities in set - 1.
-     */
-    template<int cc>     // this is now the subentity's codim
-    int DUNE_DEPRECATED map (const typename G::Traits::template Codim<0>::Entity& e, deprecated_int i) const
-    {
-      typedef GenericGeometry::MapNumberingProvider< G::dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( e.type() );
-      const int j = Numbering::template dune2generic< cc >( tid, i.value() );
-      return asImp().map(e,j,cc);
-    }
-#endif
 
     /** @brief Map subentity i of codim cc of a codim 0 entity to array index.
 
@@ -196,34 +170,6 @@ namespace Dune
       return asImp().contains(e,result );
     }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
-    /**
-       \deprecated use map without template parameter
-       \brief please read the details
-
-       \warning \{
-       this method uses the numbering of the old referenceelements (see GridReferenceElements)
-       the output of map (without template parameter) will differ as it uses the numbering of the generic referenceelements
-       (see GridGenericReferenceElements).
-       \}
-
-       Returns true if the subentity is contained in the index set and at the same time
-       the array index is returned.
-
-       \param[in] e Reference to codim 0 entity
-       \param[in] i subentity number
-       \param[out] result Filled with array index if entity is contained
-       \return true if entity is in entity set of the mapper
-     */
-    template<int cc>     // this is now the subentity's codim
-    bool DUNE_DEPRECATED contains (const typename G::Traits::template Codim<0>::Entity& e, deprecated_int i, int& result) const
-    {
-      typedef GenericGeometry::MapNumberingProvider< G::dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( e.type() );
-      const int j = Numbering::template dune2generic< cc >( tid, i.value() );
-      return asImp().contains(e,j,cc,result);
-    }
-#endif
 
     /** @brief Returns true if the subentity is contained in the index set and at the same time
             the array index is returned.

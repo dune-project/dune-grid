@@ -72,17 +72,6 @@ namespace Dune
       return GridType::getRealImplementation( entity ).getIndex();
     }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
-    //! return subIndex of given entity
-    template< int codim >
-    int DUNE_DEPRECATED subIndex ( const EntityCodim0Type &e, deprecated_int i ) const
-    {
-      typedef ALU3dGridEntity< 0, dim, const GridType > EntityImpl;
-      const EntityImpl &entity = GridType::getRealImplementation( e );
-      return entity.template getSubIndex< codim >( i );
-    }
-#endif
-
     //! return subIndex i of given entity for subEntity with codim
     int subIndex ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {

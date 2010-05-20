@@ -115,21 +115,6 @@ namespace Dune
      */
     int corners () const { return realGeometry.corners(); }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
-    /** \brief Access to corners of the geometry.
-       \param[in] i The number of the corner
-       \return const reference to a vector containing the position \f$g(c_i)\f$ where
-       \f$c_i\f$ is the position of the i'th corner of the reference element.
-     */
-    const GlobalCoordinate operator[] ( deprecated_int i ) const DUNE_DEPRECATED
-    {
-      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( type() );
-      const int j = Numbering::template dune2generic< dimension >( tid, i.value() );
-      return realGeometry.corner(j);
-    }
-#endif
-
     /** \brief Obtain a corner of the geometry
      *
      *  This method is for convenient access to the corners of the geometry. The

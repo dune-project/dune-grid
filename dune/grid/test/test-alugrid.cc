@@ -2,10 +2,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#define NEW_SUBENTITY_NUMBERING 1
-// #undef DUNE_ENABLE_OLD_NUMBERING
- #define DISABLE_DEPRECATED_METHOD_CHECK 1
-
 // #define NO_2D
 #define NO_3D
 

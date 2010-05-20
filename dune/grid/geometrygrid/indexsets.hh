@@ -77,14 +77,6 @@ namespace Dune
         return index< Entity::codimension >( entity );
       }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
-      template< int codim >
-      IndexType DUNE_DEPRECATED subIndex ( const typename Codim< 0 >::Entity &entity, deprecated_int i ) const
-      {
-        return Base::template subIndex< codim >( entity, i );
-      }
-#endif // #ifdef DUNE_ENABLE_OLD_NUMBERING
-
       template< int codim >
       IndexType subIndex ( const typename Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
       {

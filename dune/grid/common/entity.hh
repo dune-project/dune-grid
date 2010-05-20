@@ -286,20 +286,6 @@ namespace Dune
      */
     template<int cc> int count () const { return realEntity.count<cc>(); }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
-    /** \brief Access to subentity <tt>i</tt> of codimension <tt>codim</tt>.
-     */
-    template< int codim >
-    typename Codim< codim >::EntityPointer
-    DUNE_DEPRECATED entity (deprecated_int i) const
-    {
-      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( type() );
-      const int j = Numbering::template dune2generic< codim >( tid, i.value() );
-      return realEntity.subEntity< codim >( j );
-    }
-#endif
-
     /** \brief obtain a pointer to a subentity
      *
      *  \tparam  codim  codimension of the desired subentity

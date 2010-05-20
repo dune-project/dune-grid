@@ -1,7 +1,11 @@
 # $Id$
 
 noinst_LTLIBRARIES = libgridcommon.la
-libgridcommon_la_SOURCES = referenceelements.cc
+# construct only from sub-libraries
+libgridcommon_la_SOURCES =
+# This forces automake to use the C++ linker
+# (see the automake manual, section "Libtool Convenience Libraries")
+nodist_EXTRA_libgridcommon_la_SOURCES = dummy.cc
 libgridcommon_la_LIBADD = quadraturerules/libquadraturerules.la \
   $(DUNE_LIBS)
 
@@ -10,7 +14,7 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   entity.hh entitypointer.hh geometry.hh grid.hh \
   hierarchiciterator.hh indexstack.hh intersection.hh intersectioniterator.hh \
   leafiterator.hh leveliterator.hh refinement.hh \
-  virtualrefinement.hh referenceelements.hh genericreferenceelements.hh \
+  virtualrefinement.hh genericreferenceelements.hh \
   boundarysegment.hh gridinfo.hh indexidset.hh mapper.hh \
   mcmgmapper.hh scsgmapper.hh universalmapper.hh sizecache.hh \
   intersectioniteratorwrapper.hh quadraturerules.hh \

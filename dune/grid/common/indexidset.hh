@@ -123,42 +123,6 @@ namespace Dune
       return asImp().template index<cc>(e);
     }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
-    /**
-       \deprecated use subIndex without template parameter
-       \brief please read the details
-
-       \warning \{
-       this method uses the numbering of the old referenceelements (see GridReferenceElements)
-       the output of subIndex (without template parameter) will differ as it uses the numbering of the generic referenceelements
-       (see GridGenericReferenceElements).
-       \}
-
-       Map subentity of codim cc of codim 0 entity to index.
-
-       The result of calling this method with an entity that is not
-       in the index set is undefined.
-
-       \tparam cc Codimension of the subentity we are interested in
-       \param e Reference to codim 0 entity.
-       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
-       \return An index in the range 0 ... Max number of entities in set - 1.
-     */
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cc>
-    IndexType
-    DUNE_DEPRECATED subIndex ( const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, deprecated_int i ) const
-    {
-      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( e.type() );
-      const int j = Numbering::template dune2generic< cc >( tid, i.value() );
-      return asImp().subIndex(e,j,cc);
-    }
-#endif
-
     /** @brief Map subentity of codim cc of codim 0 entity to index.
 
        The result of calling this method with an entity that is not
@@ -408,35 +372,6 @@ namespace Dune
     {
       return asImp().template id<cc>(e);
     }
-
-#ifdef DUNE_ENABLE_OLD_NUMBERING
-    /**
-       \deprecated use subId without template parameter
-       \brief please read the details
-
-       \warning \{
-       this method uses the numbering of the old referenceelements (see GridReferenceElements)
-       the output of subId (without template parameter) will differ as it uses the numbering of the generic referenceelements
-       (see GridGenericReferenceElements).
-       \}
-
-       Get id of subentity i of codim cc of a codim 0 entity.
-     */
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cc>
-    IdType DUNE_DEPRECATED
-    subId ( const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, deprecated_int i ) const
-    {
-      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( e.type() );
-      const int j = Numbering::template dune2generic< cc >( tid, i.value() );
-      const unsigned int codim = cc;
-      return asImp().subId(e,j,codim);
-    }
-#endif
 
     /** \brief Get id of subentity i of codim cc of a codim 0 entity.
      */
