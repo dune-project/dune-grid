@@ -475,19 +475,6 @@ namespace Dune {
       /*! \brief A type that is a model of Dune::LeafIterator with partition type All_Partition
        */
       typedef typename GridFamily::Traits::template Codim<cd>::LeafIterator LeafIterator;
-
-      // The following  types used to be part of the Codim structure.
-      // Yet, they are independent of the codimension.
-      typedef typename GridFamily::Traits::LeafIntersection LeafIntersection DUNE_DEPRECATED;
-      typedef typename GridFamily::Traits::LevelIntersection LevelIntersection DUNE_DEPRECATED;
-      typedef typename GridFamily::Traits::LeafIntersectionIterator LeafIntersectionIterator DUNE_DEPRECATED;
-      typedef typename GridFamily::Traits::LevelIntersectionIterator LevelIntersectionIterator DUNE_DEPRECATED;
-      typedef typename GridFamily::Traits::HierarchicIterator HierarchicIterator DUNE_DEPRECATED;
-      typedef typename GridFamily::Traits::LevelIndexSet LevelIndexSet DUNE_DEPRECATED;
-      typedef typename GridFamily::Traits::LeafIndexSet LeafIndexSet DUNE_DEPRECATED;
-      typedef typename GridFamily::Traits::GlobalIdSet GlobalIdSet DUNE_DEPRECATED;
-      typedef typename GridFamily::Traits::LocalIdSet LocalIdSet DUNE_DEPRECATED;
-      typedef typename GridFamily::Traits::CollectiveCommunication CollectiveCommunication DUNE_DEPRECATED;
     };
 
     /*! \brief A type that is a model of Dune::LeafIntersection, an
