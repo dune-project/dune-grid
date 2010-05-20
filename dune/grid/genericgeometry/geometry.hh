@@ -253,6 +253,7 @@ namespace Dune
 
       static const int dimGrid = Traits :: dimGrid;
 
+      /** \brief Be friend with other instantiations of the same class */
       template< int, class > friend class BasicGeometry;
 
     public:
