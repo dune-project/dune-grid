@@ -62,6 +62,14 @@
 namespace Dune
 {
 
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class Grid >
+  class DGFGridFactory;
+
+
+
   // AlbertaGrid
   // -----------
 
@@ -155,6 +163,7 @@ namespace Dune
     template< int, class > friend class AlbertaGridEntityPointer;
 
     friend class GridFactory< This >;
+    friend class DGFGridFactory< This >;
 
     friend class AlbertaGridHierarchicIterator< This >;
 
