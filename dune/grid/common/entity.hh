@@ -135,12 +135,6 @@ namespace Dune
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {};
 
-    /* not part of the interface but maybe in later versions
-       \brief Id of the boundary which is associated with the entity,
-       returns 0 for inner entities, arbitrary int otherwise
-     */
-    //int boundaryId () const { return realEntity.boundaryId(); }
-
     //@}
 
   protected:
@@ -479,23 +473,6 @@ namespace Dune
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {};
 
-    // @copydoc Dune::Entity::boundaryId()
-    // maybe available in later versions
-    //int boundaryId () const { return realEntity.boundaryId(); }
-
-    /* not part of the interface, mybe in later versions
-       \brief The boundaryId of the i-th subentity of codimension <tt>cc</tt>
-
-       This does the same as <code>entity<cc>(i).boundaryId()</code>, but it is
-       usually a lot faster.
-     */
-    /*
-       template <int cc> int subBoundaryId  ( int i ) const
-       {
-        return realEntity.subBoundaryId<cc>(i);
-       }
-     */
-
     //@}
 
 
@@ -619,20 +596,6 @@ namespace Dune
         be used to access the Dune::GenericReferenceElement.
      */
     GeometryType type () const { return asImp().geometry().type(); };
-
-    /* maybe in later versions
-     * \brief Default implementation for access to boundaryId of sub entities
-     *
-     * Default implementation for access to boundaryId via interface method
-     * entity<codim>.boundaryId(), default is very slow, but works, can be
-     * overloaded be the actual grid implementation.
-     */
-    /*
-       template <int cc> int subBoundaryId  ( int i ) const
-       {
-        return (asImp().template entity<cc>(i))->boundaryId();
-       }
-     */
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
      */

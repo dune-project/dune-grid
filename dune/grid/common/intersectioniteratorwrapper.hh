@@ -100,9 +100,6 @@ namespace Dune {
     //! return true if across the intersection a neighbor on this level exists
     bool neighbor () const { return it().neighbor(); }
 
-    //! return information about the Boundary
-    int boundaryId () const { return it().boundaryId(); }
-
     //! return the boundary segment index
     size_t boundarySegmentIndex() const { return it().boundarySegmentIndex(); }
 

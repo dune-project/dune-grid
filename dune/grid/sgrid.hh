@@ -738,11 +738,6 @@ namespace Dune {
     //! return true if intersection is conform.
     bool conforming () const;
 
-    int boundaryId () const {
-      if (boundary()) return count + 1;
-      return 0;
-    };
-
     int boundarySegmentIndex () const {
       if (boundary())
         return grid->boundarySegmentIndex(self.level(), count, zred);
@@ -892,12 +887,6 @@ namespace Dune {
     bool boundary () const
     {
       return is.boundary();
-    }
-
-    /*! @brief Identifier for boundary segment from macro grid. */
-    int boundaryId () const
-    {
-      return is.boundaryId();
     }
 
     /*! @brief index of the boundary segment within the macro grid  */

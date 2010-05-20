@@ -81,11 +81,6 @@ namespace Dune {
       return UG_NS<dim>::NbElem(center_, neighborCount_) != NULL;
     }
 
-    //! return information about the Boundary
-    int boundaryId () const DUNE_DEPRECATED {
-      return boundarySegmentIndex();
-    }
-
     /** \brief return index of the corresponding coarse grid boundary segment */
     int boundarySegmentIndex () const {
 #ifndef NDEBUG
@@ -266,11 +261,6 @@ namespace Dune {
     //! return true if a neighbor element exists across this intersection
     bool neighbor () const {
       return leafSubFaces_[subNeighborCount_].first != NULL;
-    }
-
-    //! return information about the Boundary
-    int boundaryId () const DUNE_DEPRECATED {
-      return boundarySegmentIndex();
     }
 
     /** \brief Return index of corresponding coarse grid boundary segment */

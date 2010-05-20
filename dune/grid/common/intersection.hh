@@ -99,28 +99,6 @@ namespace Dune
        Grid::numBoundarySegments.<br>
        Note that the boundary segment index is not persistent over dynamic load
        balancing.
-     \if old_documentation
-       Different types of physical boundaries can be modeled using either
-       the global coordinates of the intersection or by using the
-       boundaryID method. On some grids (AluGrid, AlbertaGrid) this
-       method returns an integer value which can be individually assigned
-       to each boundary intersection of the macro grid and which is
-       prolonged to higher levels during grid refinement.<br>
-       A more general concept will be included in latter releases along the
-       following guidelines:
-       - We require differently constructed geometries outside the domain
-       - The kind of construction depends on the discrete problem
-       - Therefor these constructions can't be part of the Grid interface
-       - Utility classes are required to do this construction
-       - The utility classes must be parameterized with the intersection (in our
-         case the Intersection)
-       - The utility classes return a suitable transformation of the inner()
-         entitys geometry (with respect to the intersection), e.g.,
-         reflection at the intersection
-         point reflection
-         reflection combined with translation...
-       .
-     \endif
      </dd>
      <dt>Handling periodic boundaries: </dt>
      <dd>
@@ -205,26 +183,6 @@ namespace Dune
     bool boundary () const
     {
       return this->real.boundary();
-    }
-
-    /**
-       \brief Identifier for boundary segment from macro grid.
-
-       One can attach a boundary Id to a boundary segment on the macro
-       grid. This Id will also be used for all fragments of these
-       boundary segments.
-
-       The numbering is defined as:
-       - Id==0 for all intersections without boundary()==false
-       - Id>=0 for all intersections without boundary()==true
-
-       The way the Identifiers are attached to the grid may differ
-       between the different grid implementations.
-
-     */
-    int boundaryId () const DUNE_DEPRECATED
-    {
-      return this->real.boundaryId();
     }
 
     /** \brief index of the boundary segment within the macro grid

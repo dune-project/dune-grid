@@ -1603,14 +1603,6 @@ namespace Dune {
 
     //! identifier for boundary segment from macro grid
     //! (attach your boundary condition as needed)
-    int boundaryId() const
-    {
-      if(boundary()) return indexInInside()+1;
-      return 0;
-    }
-
-    //! identifier for boundary segment from macro grid
-    //! (attach your boundary condition as needed)
     int boundarySegmentIndex() const
     {
       if(! boundary())

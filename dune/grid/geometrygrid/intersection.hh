@@ -106,11 +106,6 @@ namespace Dune
         return hostIntersection().neighbor();
       }
 
-      int boundaryId () const
-      {
-        return hostIntersection().boundaryId();
-      }
-
       size_t boundarySegmentIndex () const
       {
         return hostIntersection().boundarySegmentIndex();
