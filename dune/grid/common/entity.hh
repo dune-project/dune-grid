@@ -223,13 +223,13 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
     /** \brief The LeafIntersectionIterator type*/
-    typedef typename GridImp::template Codim<0>::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
 
     /** \brief The LevelIntersectionIterator type*/
-    typedef typename GridImp::template Codim<0>::LevelIntersectionIterator LevelIntersectionIterator;
+    typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
 
     /** \brief The HierarchicIterator type*/
-    typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
+    typedef typename GridImp::HierarchicIterator HierarchicIterator;
 
     enum {
       //! Know your own codimension
