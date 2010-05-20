@@ -253,15 +253,6 @@ namespace Dune
       return this->real.geometryInInside();
     }
 
-    /**
-       \deprecated use geometryInInside (renamed to improve consistency)
-       \brief please read the details
-     */
-    const LocalGeometry& intersectionSelfLocal () const DUNE_DEPRECATED
-    {
-      return geometryInInside();
-    }
-
     /** \brief geometrical information about this intersection in local
      *         coordinates of the outside() entity.
      *
@@ -274,15 +265,6 @@ namespace Dune
       return this->real.geometryInOutside();
     }
 
-    /**
-       \deprecated use geometryInOutside (renamed to improve consistency)
-       \brief please read the details
-     */
-    const LocalGeometry& intersectionNeighborLocal () const DUNE_DEPRECATED
-    {
-      return geometryInOutside();
-    }
-
     /** \brief geometrical information about the intersection in global coordinates.
      *
      *  This method returns a Geometry object that provides a mapping from
@@ -291,15 +273,6 @@ namespace Dune
     const Geometry &geometry () const
     {
       return this->real.geometry();
-    }
-
-    /**
-       \deprecated use geometry (renamed to improve consistency)
-       \brief please read the details
-     */
-    const Geometry& intersectionGlobal () const DUNE_DEPRECATED
-    {
-      return geometry();
     }
 
     /** \brief obtain the type of reference element for this intersection */
