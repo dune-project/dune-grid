@@ -333,9 +333,6 @@ void assertNeighbor (Grid &g)
         if( it->boundary() )
         {
           it->boundarySegmentIndex();
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-          it->boundaryId();
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
         }
 
         // check id
