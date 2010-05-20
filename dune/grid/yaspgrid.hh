@@ -724,10 +724,10 @@ namespace Dune {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
     };
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-    typedef typename GridImp::template Codim<0>::LevelIntersectionIterator IntersectionIterator;
-    typedef typename GridImp::template Codim<0>::LevelIntersectionIterator LevelIntersectionIterator;
-    typedef typename GridImp::template Codim<0>::LeafIntersectionIterator LeafIntersectionIterator;
-    typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
+    typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
+    typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
+    typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename GridImp::HierarchicIterator HierarchicIterator;
 
     //! define the type used for persisitent indices
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
