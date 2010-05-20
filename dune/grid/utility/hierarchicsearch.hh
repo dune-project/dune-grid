@@ -40,7 +40,7 @@ namespace Dune
     typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
 
     //! type of HierarchicIterator
-    typedef typename Grid::template Codim<0>::HierarchicIterator HierarchicIterator;
+    typedef typename Grid::HierarchicIterator HierarchicIterator;
 
     /**
        internal helper method
