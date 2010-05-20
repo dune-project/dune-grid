@@ -7,7 +7,7 @@ GRIDDIM = 3
 #WORLDDIM = 3
 DIMENSION = 3
 
-check_PROGRAMS = testsubtopologies testmapping testgeo grefelement testmatrix
+check_PROGRAMS = testsubtopologies testmapping testgeo testmatrix
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS)
 AM_LDFLAGS = @AM_LDFLAGS@ $(ALL_PKG_LDFLAGS)
@@ -20,8 +20,6 @@ testsubtopologies_CPPFLAGS = $(AM_CPPFLAGS)			\
 testmapping_SOURCES = testmapping.cc
 
 testgeo_SOURCES = testgeo.cc
-
-grefelement_SOURCES = grefelement.cc
 
 testmatrix_SOURCES = testmatrix.cc
 testmatrix_CPPFLAGS = $(AM_CPPFLAGS) $(GMP_CPPFLAGS)
