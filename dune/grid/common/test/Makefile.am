@@ -5,7 +5,7 @@ TESTPROGS = mcmgmappertest
 endif
 
 # which tests to run
-TESTS = test-quadrature test-genericquadrature referenceelementstest checkrefnumbering scsgmappertest $(TESTPROGS)
+TESTS = test-quadrature test-genericquadrature referenceelementstest scsgmappertest $(TESTPROGS)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTS)
@@ -30,8 +30,6 @@ mcmgmappertest_LDADD =				\
 scsgmappertest_SOURCES = scsgmappertest.cc
 
 referenceelementstest_SOURCES = referenceelementstest.cc
-
-checkrefnumbering_SOURCES = checkrefnumbering.cc
 
 test_quadrature_SOURCES = test-quadrature.cc
 
