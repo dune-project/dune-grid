@@ -211,7 +211,7 @@ namespace Dune
     typedef AlbertaGridGlobalGeometry< dimension, dimworld, GridImp > GeometryImp;
 
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
-    typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
+    typedef typename GridImp::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
     typedef Dune::AlbertaGridLeafIntersectionIterator< GridImp > AlbertaGridLeafIntersectionIterator;
