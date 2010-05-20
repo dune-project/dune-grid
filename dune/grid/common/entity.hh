@@ -635,8 +635,7 @@ namespace Dune
     bool hasBoundaryIntersections () const
     {
       {
-        typedef typename GridImp :: template Codim<0> :: LevelIntersectionIterator
-        IntersectionIterator;
+        typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
         IntersectionIterator end = asImp().ilevelend();
         for(IntersectionIterator it = asImp().ilevelbegin(); it != end; ++it)
         {
@@ -645,8 +644,7 @@ namespace Dune
       }
 
       {
-        typedef typename GridImp :: template Codim<0> :: LeafIntersectionIterator
-        IntersectionIterator;
+        typedef typename GridImp::LeafIntersectionIterator IntersectionIterator;
         IntersectionIterator end = asImp().ileafend();
         for(IntersectionIterator it = asImp().ileafbegin(); it != end; ++it)
         {
