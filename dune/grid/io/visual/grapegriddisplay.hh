@@ -70,8 +70,7 @@ namespace Dune
     typedef void setGridPartIterators_t (DUNE_DAT * , void * gridPart);
 #endif // #if HAVE_GRAPE
 
-    typedef typename GridType::template Codim<0>:: HierarchicIterator
-    HierarchicIteratorType;
+    typedef typename GridType::HierarchicIterator HierarchicIteratorType;
 
     typedef typename GridType::Traits::LocalIdSet LocalIdSetType;
     typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
