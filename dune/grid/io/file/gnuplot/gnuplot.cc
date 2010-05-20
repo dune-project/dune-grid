@@ -37,8 +37,8 @@ namespace Dune {
         assert (i == counter++);
         // calc positions
         assert(it->geometry().corners() == 2);
-        const FieldVector<ctype,dimworld>& left = it->geometry()[0];
-        const FieldVector<ctype,dimworld>& right = it->geometry()[1];
+        const FieldVector<ctype,dimworld>& left = it->geometry().corner(0);
+        const FieldVector<ctype,dimworld>& right = it->geometry().corner(1);
         assert(left[0] < right[0]);
         // write gnuplot rows for left & right vertex
         writeRow(file, left, _data[2*i]);
@@ -53,7 +53,7 @@ namespace Dune {
       for (; it != end; ++it) {
 
         // write gnuplot rows for vertex
-        writeRow(file, it->geometry()[0], _data[_is.index(*it)]);
+        writeRow(file, it->geometry().corner(0), _data[_is.index(*it)]);
 
       }
 
