@@ -42,8 +42,14 @@ namespace Dune {
     }
 
     //! prefix increment
-    void increment() {
-      GridImp::getRealImplementation(intersection_).neighborCount_++;
+    void increment ()
+    {
+      UGGridLevelIntersection< GridImp > &intersection = GridImp::getRealImplementation( intersection_ );
+      ++intersection.neighborCount_;
+      // invalidate intersection geometries
+      GridImp::getRealImplementation( intersection.selfLocal_ ).compactify();
+      GridImp::getRealImplementation( intersection.neighLocal_ ).compactify();
+      GridImp::getRealImplementation( intersection.neighGlob_ ).compactify();
     }
 
     //! \brief dereferencing
@@ -95,25 +101,26 @@ namespace Dune {
        this precomputed list.  If the list is exhausted the iterator advances to the next faces
        and precomputes all intersections there.
      */
-    void increment() {
-
-      UGGridLeafIntersection<GridImp>& intersectionImp = GridImp::getRealImplementation(intersection_);
-
-      intersectionImp.subNeighborCount_++;
+    void increment ()
+    {
+      UGGridLeafIntersection< GridImp > &intersection = GridImp::getRealImplementation( intersection_ );
+      ++intersection.subNeighborCount_;
+      // invalidate intersection geometries
+      GridImp::getRealImplementation( intersection.selfLocal_ ).compactify();
+      GridImp::getRealImplementation( intersection.neighLocal_ ).compactify();
+      GridImp::getRealImplementation( intersection.neighGlob_ ).compactify();
 
       // are there no more intersections for the current element face?
-      if (intersectionImp.subNeighborCount_ >= intersectionImp.leafSubFaces_.size() ) {
-
+      if( intersection.subNeighborCount_ >= intersection.leafSubFaces_.size() )
+      {
         // move to the next face
-        intersectionImp.neighborCount_++;
-        intersectionImp.subNeighborCount_ = 0;
+        ++intersection.neighborCount_;
+        intersection.subNeighborCount_ = 0;
 
         // if the next face is not the end iterator construct all intersections for it
-        if (intersectionImp.neighborCount_ < UG_NS<dim>::Sides_Of_Elem(intersectionImp.center_))
-          intersectionImp.constructLeafSubfaces();
-
+        if( intersection.neighborCount_ < UG_NS<dim>::Sides_Of_Elem( intersection.center_ ) )
+          intersection.constructLeafSubfaces();
       }
-
     }
 
     //! \brief dereferencing
@@ -129,4 +136,4 @@ namespace Dune {
 
 }  // namespace Dune
 
-#endif
+#endif // #ifndef DUNE_UGINTERSECTIONIT_HH
