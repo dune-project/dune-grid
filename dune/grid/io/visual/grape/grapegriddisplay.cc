@@ -32,7 +32,6 @@ namespace Dune
       , vertexIndex(GrapeGridDisplay<GridType>::template getVertexIndex<LeafIndexSetType>),
 #endif
       grid_(grid)
-      // , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
       , hasLevelIntersections_(HasLevelIntersections<GridType>::value)
       , gridPart_(0)
       , indexSet_( (void *)(&grid.leafIndexSet()) )
@@ -59,7 +58,6 @@ namespace Dune
                     template getVertexIndex<typename GridPartType::IndexSetType>),
 #endif
       grid_(gridPart.grid())
-      // , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
       , hasLevelIntersections_(HasLevelIntersections<GridType>::value)
       , gridPart_((void *) &gridPart)
       , indexSet_( (void *)(&gridPart.indexSet()) )
@@ -84,7 +82,6 @@ namespace Dune
       vertexIndex( getVertexIndex< typename GridView< VT >::IndexSet > ),
 #endif
       grid_( gridView.grid() ),
-      // hasLevelIntersections_( grid_.name() != "AlbertaGrid" ),
       hasLevelIntersections_(HasLevelIntersections<GridType>::value),
       gridPart_( (void *)&gridView ),
       indexSet_( (void *)&gridView.indexSet() ),
@@ -308,21 +305,6 @@ namespace Dune
         IntersectionIteratorType nit = gridPart.ibegin(en);
 
         checkNeighbors(nit,endnit,he);
-
-        // for this type of element we have to swap the faces
-        if(he->type == g_hexahedron)
-        {
-          int help_bnd [MAX_EL_FACE];
-          for(int i=0; i < MAX_EL_FACE; ++i) help_bnd[i] = he->bnd[i] ;
-
-          assert( MAX_EL_FACE == 6 );
-          // do the mapping from dune to grape hexa
-          he->bnd[0] = help_bnd[4];
-          he->bnd[1] = help_bnd[5];
-          he->bnd[3] = help_bnd[1];
-          he->bnd[4] = help_bnd[3];
-          he->bnd[5] = help_bnd[0];
-        }
       }
 
       // for data displaying
@@ -366,22 +348,6 @@ namespace Dune
     IntersectionIterator iit  = gridView.ibegin( entity );
 
     checkNeighbors( iit, iend, he );
-
-    // for this type of element we have to swap the faces
-    if( he->type == g_hexahedron )
-    {
-      int help_bnd[ MAX_EL_FACE ];
-      for( int i = 0; i < MAX_EL_FACE; ++i )
-        help_bnd[ i ] = he->bnd[ i ];
-
-      assert( MAX_EL_FACE == 6 );
-      // do the mapping from dune to grape hexa
-      he->bnd[ 0 ] = help_bnd[ 4 ];
-      he->bnd[ 1 ] = help_bnd[ 5 ];
-      he->bnd[ 3 ] = help_bnd[ 1 ];
-      he->bnd[ 4 ] = help_bnd[ 3 ];
-      he->bnd[ 5 ] = help_bnd[ 0 ];
-    }
 
     // for data displaying
     he->actElement = it;
