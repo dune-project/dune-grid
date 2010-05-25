@@ -104,6 +104,7 @@ namespace Dune
     typename GeometryTraits::Allocator allocator_;
     std::vector< SubEntityInfo > info_[ dim+1 ];
     double volume_;
+    std::vector< FieldVector< ctype, dim > > volumeNormals_;
     MappingsTable mappings_;
 
   public:
@@ -304,6 +305,19 @@ namespace Dune
       return volume_;
     }
 
+    /** \brief obtain the volume outer normal of the reference element
+     *
+     *  The volume outer normal is the outer normal whose length coincides
+     *  with the face's volume.
+     *
+     *  \param[in]  face  index of the face, whose normal is desired
+     */
+    const FieldVector< ctype, dim > &volumeOuterNormal ( int face ) const
+    {
+      assert( (face >= 0) && (face < int( volumeNormals_.size())) );
+      return volumeNormals_[ face ];
+    }
+
     /** \brief initialize the reference element
      *
      *  \tparam  Topology  topology of the desired reference element
@@ -323,7 +337,11 @@ namespace Dune
       mappings_[ codim0Variable ][ 0 ]  = allocator_.create( VirtualMapping( codim0Variable ) );
 
       Dune::ForLoop< Init::template Codim, 0, dim >::apply( info_, mappings_, allocator_ );
-      volume_ = GenericGeometry::ReferenceDomain< Topology >::template volume< double >();
+      typedef GenericGeometry::ReferenceDomain< Topology > ReferenceDomain;
+      volume_ = ReferenceDomain::template volume< double >();
+      volumeNormals_.resize( ReferenceDomain::numNormals );
+      for( unsigned int i = 0; i < ReferenceDomain::numNormals; ++i )
+        ReferenceDomain::integrationOuterNormal( i ,volumeNormals_[ i ] );
     }
 
     /** \brief initialize the reference element
