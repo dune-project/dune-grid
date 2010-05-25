@@ -165,8 +165,18 @@ namespace Dune
       {
         typedef typename Grid::template Codim< 0 >::Geometry Geometry;
         const Geometry &geo = inside()->geometry();
+
+        const GenericReferenceElement< ctype, dimension > &refElement
+          = GenericReferenceElements< ctype, dimension>::general( geo.type() );
+
         FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
-        return Grid::getRealImplementation( geo ).normal( indexInInside(), x );
+        const typename Geometry::Jacobian &jit = geo.jacobianInverseTransposed( x );
+        const FieldVector< ctype, dimension > &refNormal = refElement.volumeOuterNormal( indexInInside() );
+
+        FieldVector< ctype, dimensionworld > normal;
+        jit.mv( refNormal, normal );
+        normal *= geo.integrationElement( x );
+        return normal;
       }
 
       FieldVector< ctype, dimensionworld >
