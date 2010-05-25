@@ -2,83 +2,55 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#include <dune/common/smallobject.hh>
-
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/uggrid/uggridintersections.hh>
 
 #include <set>
 
 
-template< class GridImp >
-struct UGElementCoordVector
-{
-  typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
-
-  UGElementCoordVector ( const Geometry &geometry )
-    : geometry_( geometry )
-  {}
-
-  typename Geometry::GlobalCoordinate operator[] ( const int i ) const
-  {
-    assert( (i >= 0) && (i < geometry_.corners()) );
-    return geometry_.corner( i );
-  }
-
-  unsigned int topologyId () const
-  {
-    return Dune::GenericGeometry::topologyId( geometry_.type() );
-  }
-
-private:
-  const Geometry &geometry_;
-};
-
-
-
 template<class GridImp>
-typename Dune::UGGridLevelIntersection<GridImp>::WorldVector
+const typename Dune::UGGridLevelIntersection<GridImp>::WorldVector&
 Dune::UGGridLevelIntersection<GridImp>::outerNormal
   (const typename Dune::UGGridLevelIntersection<GridImp>::FaceVector& local) const
 {
   // Implementation uses the GenericGeometry facilities.  For this we need to set up a
   // generic geometry of the _inside_ element, which then has a method computing the normal.
-  EntityPointer pInside = inside();
-  UGElementCoordVector< GridImp > coordVector( pInside->geometry() );
+  std::vector<FieldVector<typename GridImp::ctype, dim> > corners(inside()->template count<dim>());
 
-  typedef GenericGeometry::BasicGeometry< dim, UGGridGeometryTraits< GridImp > > ElementGeometry;
-  ElementGeometry insideGeometry( coordVector.topologyId(), coordVector );
+  for (size_t i=0; i<corners.size(); i++)
+    corners[i] = inside()->geometry().corner(i);
+
+  typedef GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > ElementGeometry;
+  ElementGeometry insideGeometry( GenericGeometry::topologyId( inside()->type() ), corners );
 
   // Actually compute the normal.
   // Note: The local coordinates that have to be provided are with respect to the inside() element
-  typename ElementGeometry::LocalCoordinate x = geometryInInside().global( local );
-  return insideGeometry.normal( indexInInside(), x );
+  outerNormal_ = insideGeometry.normal(indexInInside(),
+                                       geometryInInside().global(local));
+
+  return outerNormal_;
 }
 
 template< class GridImp>
 const typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry&
 Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
 {
-  if( !GridImp::getRealImplementation( selfLocal_ ) )
-  {
-    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-    std::vector< WorldVector > coordinates( numCornersOfSide );
-    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+  int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
+  std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+  GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
-    for( int i = 0; i < numCornersOfSide; ++i )
-    {
+  for (int i=0; i<numCornersOfSide; i++) {
 
-      // get number of corner in UG's numbering system
-      int ugIdx     = UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType);
-      int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, ugIdx);
+    // get number of corner in UG's numbering system
+    int ugIdx     = UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType);
+    int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, ugIdx);
 
-      // get the corners local coordinates
-      UG_NS<dim>::getCornerLocal(center_,cornerIdx,coordinates[i]);
+    // get the corners local coordinates
+    UG_NS<dim>::getCornerLocal(center_,cornerIdx,coordinates[i]);
 
-    }
-
-    GridImp::getRealImplementation( selfLocal_ ).setup( coordinates );
   }
+
+  GridImp::getRealImplementation(selfLocal_).setup(intersectionGeometryType, coordinates);
 
   return selfLocal_;
 }
@@ -87,24 +59,22 @@ template< class GridImp>
 const typename Dune::UGGridLevelIntersection<GridImp>::Geometry&
 Dune::UGGridLevelIntersection<GridImp>::geometry () const
 {
-  if( !GridImp::getRealImplementation( neighGlob_ ) )
-  {
-    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+  int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
+  std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+  GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
-    for (int i=0; i<numCornersOfSide; i++) {
+  for (int i=0; i<numCornersOfSide; i++) {
 
-      int ugIdx     = UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType);
-      int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, ugIdx);
-      typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
+    int ugIdx     = UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType);
+    int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, ugIdx);
+    typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
 
-      for (int j=0; j<dim; j++)
-        coordinates[i][j] = node->myvertex->iv.x[j];
-    }
+    for (int j=0; j<dim; j++)
+      coordinates[i][j] = node->myvertex->iv.x[j];
 
-    GridImp::getRealImplementation( neighGlob_ ).setup( coordinates );
   }
+
+  GridImp::getRealImplementation(neighGlob_).setup(intersectionGeometryType, coordinates);
 
   return neighGlob_;
 }
@@ -113,42 +83,40 @@ template< class GridImp>
 const typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry&
 Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
 {
-  if( !GridImp::getRealImplementation( neighLocal_ ) )
-  {
-    typename UG_NS<dim>::Element *other;
+  typename UG_NS<dim>::Element *other;
 
-    // if we have a neighbor on this level, then return it
-    other = UG_NS<dim>::NbElem(center_, neighborCount_);
-    if (!other)
-      DUNE_THROW(GridError,"no neighbor found");
+  // if we have a neighbor on this level, then return it
+  other = UG_NS<dim>::NbElem(center_, neighborCount_);
+  if (!other)
+    DUNE_THROW(GridError,"no neighbor found");
 
-    // ///////////////////////////////////////
-    // go on and get the local coordinates
-    // ///////////////////////////////////////
-    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_,neighborCount_);
-    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+  // ///////////////////////////////////////
+  // go on and get the local coordinates
+  // ///////////////////////////////////////
+  int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_,neighborCount_);
+  std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+  GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
-    for (int i=0; i<numCornersOfSide; i++)
-    {
-      // get the node in this element
-      int localCornerNumber = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
-      const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_,localCornerNumber);
+  for (int i=0; i<numCornersOfSide; i++) {
 
-      // get this node's local index in the neighbor element
-      int j;
-      for (j=0; j<UG_NS<dim>::Corners_Of_Elem(other); j++)
-        if (UG_NS<dim>::Corner(other, j) == node)
-          break;
+    // get the node in this element
+    int localCornerNumber = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
+    const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_,localCornerNumber);
 
-      assert(j<UG_NS<dim>::Corners_Of_Elem(other));
+    // get this node's local index in the neighbor element
+    int j;
+    for (j=0; j<UG_NS<dim>::Corners_Of_Elem(other); j++)
+      if (UG_NS<dim>::Corner(other, j) == node)
+        break;
 
-      // get the local coordinate there
-      UG_NS<dim>::getCornerLocal(other,j,coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
-    }
+    assert(j<UG_NS<dim>::Corners_Of_Elem(other));
 
-    GridImp::getRealImplementation( neighLocal_ ).setup( coordinates );
+    // get the local coordinate there
+    UG_NS<dim>::getCornerLocal(other,j,coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
+
   }
+
+  GridImp::getRealImplementation(neighLocal_).setup(intersectionGeometryType, coordinates);
 
   return neighLocal_;
 }
@@ -188,146 +156,147 @@ int Dune::UGGridLevelIntersection<GridImp>::indexInOutside () const
    If the face is flat this doesn't matter.
  */
 template<class GridImp>
-typename Dune::UGGridLeafIntersection<GridImp>::WorldVector
+const typename Dune::UGGridLeafIntersection<GridImp>::WorldVector&
 Dune::UGGridLeafIntersection<GridImp>::outerNormal
   (const typename Dune::UGGridLeafIntersection<GridImp>::FaceVector& local) const
 {
-  EntityPointer pInside = inside();
-  UGElementCoordVector< GridImp > coordVector( pInside->geometry() );
+  // Implementation uses the GenericGeometry facilities.  For this we need to set up a
+  // generic geometry of the _inside_ element, which then has a method computing the normal.
+  std::vector<FieldVector<typename GridImp::ctype, dim> > corners(inside()->template count<dim>());
 
-  typedef GenericGeometry::BasicGeometry< dim, UGGridGeometryTraits< GridImp > > ElementGeometry;
-  ElementGeometry insideGeometry( coordVector.topologyId(), coordVector );
+  for (size_t i=0; i<corners.size(); i++)
+    corners[i] = inside()->geometry().corner(i);
+
+  typedef GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > ElementGeometry;
+  ElementGeometry insideGeometry( GenericGeometry::topologyId( inside()->type() ), corners );
 
   // Actually compute the normal.
   // Note: The local coordinates that have to be provided are with respect to the inside() element
-  typename ElementGeometry::LocalCoordinate x = geometryInInside().global( local );
-  return insideGeometry.normal( indexInInside(), x );
+  outerNormal_ = insideGeometry.normal(indexInInside(),
+                                       geometryInInside().global(local));
+
+  return outerNormal_;
 }
 
 template< class GridImp>
 const typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry&
 Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 {
-  if( !GridImp::getRealImplementation( selfLocal_ ) )
-  {
-    std::vector< WorldVector > coordinates;
+  if (leafSubFaces_[0].first == NULL         // boundary intersection
+      // or if this face is the intersection
+      || UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
+      || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
+          && leafSubFaces_.size()==1)
+      ) {
 
-    if (leafSubFaces_[0].first == NULL           // boundary intersection
-        // or if this face is the intersection
-        || UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
-        || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
-            && leafSubFaces_.size()==1)
-        ) {
+    // //////////////////////////////////////////////////////
+    //   The easy case: a conforming intersection
+    // //////////////////////////////////////////////////////
 
-      // //////////////////////////////////////////////////////
-      //   The easy case: a conforming intersection
-      // //////////////////////////////////////////////////////
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
-      const int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-      coordinates.resize( numCornersOfSide );
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+    for (int i=0; i<numCornersOfSide; i++)
+    {
+      // get number of corner in UG's numbering system
+      int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
 
-      for (int i=0; i<numCornersOfSide; i++)
-      {
-        // get number of corner in UG's numbering system
-        int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
-
-        // get the corners local coordinates
-        UG_NS<dim>::getCornerLocal(center_,cornerIdx,coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
-
-      }
-
-    } else {
-
-      Face otherFace = leafSubFaces_[subNeighborCount_];
-
-      const int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
-      coordinates.resize( numCornersOfSide );
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
-
-      for (int i=0; i<numCornersOfSide; i++) {
-
-        // Get world coordinate of other element's vertex
-        const UGCtype* worldPos = UG_NS<dim>::Corner(otherFace.first,
-                                                     UG_NS<dim>::Corner_Of_Side(otherFace.first,otherFace.second,i))->myvertex->iv.x;
-
-        // Get the local coordinate with respect to this element
-        // coorddim*coorddim is an upper bound for the number of vertices
-        UGCtype* cornerCoords[dim*dim];
-        UG_NS<dim>::Corner_Coordinates(center_, cornerCoords);
-
-        // Actually do the computation
-        /** \todo Why is this const_cast necessary? */
-        UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(center_),
-                                  const_cast<const double**>(cornerCoords), worldPos,
-                                  &coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][0]);
-
-      }
+      // get the corners local coordinates
+      UG_NS<dim>::getCornerLocal(center_,cornerIdx,coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
 
     }
-    GridImp::getRealImplementation(selfLocal_).setup( coordinates );
+
+    GridImp::getRealImplementation(selfLocal_).setup(intersectionGeometryType, coordinates);
+
+  } else {
+
+    Face otherFace = leafSubFaces_[subNeighborCount_];
+
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+
+    for (int i=0; i<numCornersOfSide; i++) {
+
+      // Get world coordinate of other element's vertex
+      const UGCtype* worldPos = UG_NS<dim>::Corner(otherFace.first,
+                                                   UG_NS<dim>::Corner_Of_Side(otherFace.first,otherFace.second,i))->myvertex->iv.x;
+
+      // Get the local coordinate with respect to this element
+      // coorddim*coorddim is an upper bound for the number of vertices
+      UGCtype* cornerCoords[dim*dim];
+      UG_NS<dim>::Corner_Coordinates(center_, cornerCoords);
+
+      // Actually do the computation
+      /** \todo Why is this const_cast necessary? */
+      UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(center_),
+                                const_cast<const double**>(cornerCoords), worldPos,
+                                &coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][0]);
+
+    }
+
+    GridImp::getRealImplementation(selfLocal_).setup(intersectionGeometryType, coordinates);
   }
+
   return selfLocal_;
 }
 
-template< class GridImp >
+template< class GridImp>
 const typename Dune::UGGridLeafIntersection<GridImp>::Geometry&
 Dune::UGGridLeafIntersection< GridImp >::geometry () const
 {
-  if( !GridImp::getRealImplementation( neighGlob_ ) )
-  {
-    std::vector< WorldVector > coordinates;
+  if (leafSubFaces_[0].first == NULL         // boundary intersection
+      // or if this face is the intersection
+      || UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
+      || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
+          && leafSubFaces_.size()==1)
+      ) {
 
-    if (leafSubFaces_[0].first == NULL           // boundary intersection
-        // or if this face is the intersection
-        || UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
-        || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
-            && leafSubFaces_.size()==1)
-        ) {
+    // //////////////////////////////////////////////////////
+    //   The easy case: a conforming intersection
+    // //////////////////////////////////////////////////////
 
-      // //////////////////////////////////////////////////////
-      //   The easy case: a conforming intersection
-      // //////////////////////////////////////////////////////
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
-      const int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-      coordinates.resize( numCornersOfSide );
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+    for (int i=0; i<numCornersOfSide; i++) {
 
-      for (int i=0; i<numCornersOfSide; i++) {
+      int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
+      const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
 
-        int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
-        const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
-
-        for (int j=0; j<dim; j++)
-          coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = node->myvertex->iv.x[j];
-
-      }
-
-    } else {
-
-      Face otherFace = leafSubFaces_[subNeighborCount_];
-
-      const int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
-      coordinates.resize( numCornersOfSide );
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
-
-      for (int i=0; i<numCornersOfSide; i++) {
-
-        // get number of corner in UG's numbering system
-        int cornerIdx = UG_NS<dim>::Corner_Of_Side(otherFace.first, otherFace.second, i);
-
-        // Get world coordinate of other element's vertex
-        const UGCtype* worldPos = UG_NS<dim>::Corner(otherFace.first,cornerIdx)->myvertex->iv.x;
-
-        // and poke them into the Geometry
-        for (int j=0; j<dim; j++)
-          coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = worldPos[j];
-
-      }
+      for (int j=0; j<dim; j++)
+        coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = node->myvertex->iv.x[j];
 
     }
 
-    GridImp::getRealImplementation( neighGlob_ ).setup( coordinates );
+    GridImp::getRealImplementation(neighGlob_).setup(intersectionGeometryType, coordinates);
+
+  } else {
+
+    Face otherFace = leafSubFaces_[subNeighborCount_];
+
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+
+    for (int i=0; i<numCornersOfSide; i++) {
+
+      // get number of corner in UG's numbering system
+      int cornerIdx = UG_NS<dim>::Corner_Of_Side(otherFace.first, otherFace.second, i);
+
+      // Get world coordinate of other element's vertex
+      const UGCtype* worldPos = UG_NS<dim>::Corner(otherFace.first,cornerIdx)->myvertex->iv.x;
+
+      // and poke them into the Geometry
+      for (int j=0; j<dim; j++)
+        coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = worldPos[j];
+
+    }
+
+    GridImp::getRealImplementation(neighGlob_).setup(intersectionGeometryType, coordinates);
+
   }
 
   return neighGlob_;
@@ -338,65 +307,62 @@ template< class GridImp>
 const typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry&
 Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 {
-  if( !GridImp::getRealImplementation( neighLocal_ ) )
-  {
-    if (leafSubFaces_[0].first == NULL)
-      DUNE_THROW(GridError, "There is no neighbor!");
+  if (leafSubFaces_[0].first == NULL)
+    DUNE_THROW(GridError, "There is no neighbor!");
 
-    std::vector< WorldVector > coordinates;
+  if (  // if this face is the intersection
+    UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
+    || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
+        && leafSubFaces_.size()==1)
+    ) {
 
-    if (    // if this face is the intersection
-      UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
-      || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
-          && leafSubFaces_.size()==1)
-      ) {
+    const typename UG_NS<dim>::Element* other = leafSubFaces_[subNeighborCount_].first;
 
-      const typename UG_NS<dim>::Element* other = leafSubFaces_[subNeighborCount_].first;
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
-      const int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-      coordinates.resize( numCornersOfSide );
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+    for (int i=0; i<numCornersOfSide; i++) {
 
-      for (int i=0; i<numCornersOfSide; i++) {
+      // get number of corner in UG's numbering system
+      int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
 
-        // get number of corner in UG's numbering system
-        int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
+      // Get world coordinate of this element's vertex
+      const UGCtype* worldPos = UG_NS<dim>::Corner(center_,cornerIdx)->myvertex->iv.x;
 
-        // Get world coordinate of this element's vertex
-        const UGCtype* worldPos = UG_NS<dim>::Corner(center_,cornerIdx)->myvertex->iv.x;
+      // Get the local coordinate with respect to the other element
+      // coorddim*coorddim is an upper bound for the number of vertices
+      UGCtype* cornerCoords[dim*dim];
+      UG_NS<dim>::Corner_Coordinates(other, cornerCoords);
 
-        // Get the local coordinate with respect to the other element
-        // coorddim*coorddim is an upper bound for the number of vertices
-        UGCtype* cornerCoords[dim*dim];
-        UG_NS<dim>::Corner_Coordinates(other, cornerCoords);
-
-        // Actually do the computation
-        /** \todo Why is this const_cast necessary? */
-        UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(other),
-                                  const_cast<const double**>(cornerCoords), worldPos,
-                                  &coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][0]);
-
-      }
-
-    } else {
-
-      Face otherFace = leafSubFaces_[subNeighborCount_];
-
-      const int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
-      coordinates.resize( numCornersOfSide );
-      std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
-
-      for (int i=0; i<numCornersOfSide; i++) {
-
-        // get the local coordinate of j-th corner
-        int v = UG_NS<dim>::Corner_Of_Side(otherFace.first,otherFace.second,i);
-        UG_NS<dim>::getCornerLocal(otherFace.first, v, coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
-
-      }
+      // Actually do the computation
+      /** \todo Why is this const_cast necessary? */
+      UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(other),
+                                const_cast<const double**>(cornerCoords), worldPos,
+                                &coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][0]);
 
     }
-    GridImp::getRealImplementation( neighLocal_ ).setup( coordinates );
+
+    GridImp::getRealImplementation(neighLocal_).setup(intersectionGeometryType, coordinates);
+
+  } else {
+
+    Face otherFace = leafSubFaces_[subNeighborCount_];
+
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+
+    for (int i=0; i<numCornersOfSide; i++) {
+
+      // get the local coordinate of j-th corner
+      int v = UG_NS<dim>::Corner_Of_Side(otherFace.first,otherFace.second,i);
+      UG_NS<dim>::getCornerLocal(otherFace.first, v, coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
+
+    }
+
+    GridImp::getRealImplementation(neighLocal_).setup(intersectionGeometryType, coordinates);
+
   }
 
   return neighLocal_;

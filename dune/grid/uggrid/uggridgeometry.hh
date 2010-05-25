@@ -193,17 +193,10 @@ namespace Dune {
   /*                                                              */
   /****************************************************************/
 
-  template< class GridImp >
-  struct UGGridGeometryTraits
-    : public GenericGeometry::DefaultGeometryTraits< typename GridImp::ctype, GridImp::dimension, GridImp::dimension >
-  {};
-
-
   template<class GridImp>
-  class UGGridGeometry< 2, 3, GridImp >
-    : public GenericGeometry::BasicGeometry< 2, UGGridGeometryTraits< GridImp > >
+  class UGGridGeometry<2, 3, GridImp> :
+    public GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> >
   {
-    typedef GenericGeometry::BasicGeometry< 2, UGGridGeometryTraits< GridImp > > Base;
 
     template <int codim_, int dim_, class GridImp_>
     friend class UGGridEntity;
@@ -211,27 +204,17 @@ namespace Dune {
     template <class GridImp_>
     friend class UGGridIntersectionIterator;
 
-  public:
-    void compactify ()
-    {
-      static_cast< Base & >( *this ) = Base();
-    }
+    typedef typename GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> > Base;
 
-    void setup ( const std::vector< FieldVector< typename GridImp::ctype, 3 > > &coordinates )
-    {
-      assert( !static_cast< Base & >( *this ) );
-      const unsigned int cubeId = GenericGeometry::CubeTopology< 2 >::type::id;
-      const unsigned int simplexId = GenericGeometry::SimplexTopology< 2 >::type::id;
-      const unsigned int topologyId = (coordinates.size() == 4 ? cubeId : simplexId);
-      static_cast< Base & >( *this ) = Base( topologyId, coordinates );
-    }
+  public:
 
     /** \brief Setup method with a geometry type and a set of corners
         \param coordinates The corner coordinates in DUNE numbering
      */
     void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
     {
-      assert( !static_cast< Base & >( *this ) );
+      // set up base class
+      // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
       static_cast< Base & >( *this ) = Base( GenericGeometry::topologyId( type ), coordinates );
     }
 
@@ -245,10 +228,9 @@ namespace Dune {
   /****************************************************************/
 
   template<class GridImp>
-  class UGGridGeometry< 1, 2, GridImp >
-    : public GenericGeometry::BasicGeometry< 1, UGGridGeometryTraits< GridImp > >
+  class UGGridGeometry <1, 2, GridImp> :
+    public GenericGeometry::BasicGeometry<1, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> >
   {
-    typedef GenericGeometry::BasicGeometry< 1, UGGridGeometryTraits< GridImp > > Base;
 
     template <int codim_, int dim_, class GridImp_>
     friend class UGGridEntity;
@@ -256,23 +238,15 @@ namespace Dune {
     template <class GridImp_>
     friend class UGGridIntersectionIterator;
 
-  public:
-    void compactify ()
-    {
-      static_cast< Base & >( *this ) = Base();
-    }
+    typedef typename GenericGeometry::BasicGeometry<1, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> > Base;
 
-    void setup ( const std::vector< FieldVector< typename GridImp::ctype, 2 > > &coordinates )
-    {
-      assert( !static_cast< Base & >( *this ) );
-      const unsigned int topologyId = GenericGeometry::SimplexTopology< 1 >::type::id;
-      static_cast< Base & >( *this ) = Base( topologyId, coordinates );
-    }
+  public:
 
     /** \brief Constructor with a geometry type and a set of corners */
     void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,2> >& coordinates)
     {
-      assert( !static_cast< Base & >( *this ) );
+      // set up base class
+      // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
       static_cast< Base & >( *this ) = Base( GenericGeometry::topologyId( type ), coordinates );
     }
 
@@ -283,4 +257,4 @@ namespace Dune {
 // Include method definitions
 #include "uggridgeometry.cc"
 
-#endif // #ifndef DUNE_UGGRIDGEOMETRY_HH
+#endif
