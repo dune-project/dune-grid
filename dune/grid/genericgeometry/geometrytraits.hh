@@ -170,7 +170,6 @@ namespace Dune
        *  - evaluateJacobianTransposed
        *  - evaluateJacobianInverseTransposed
        *  - evaluateIntegrationElement
-       *  - evaluateNormal
        *  .
        *  These parameters control how eager these evaluations shall be
        *  performed in the case of an affine mapping.
@@ -180,7 +179,6 @@ namespace Dune
         static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
         static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
         static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
-        static const EvaluationType evaluateNormal = ComputeOnDemand;
       };
 
       typedef PolyAllocator Allocator;
@@ -236,7 +234,6 @@ namespace Dune
      *      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
      *      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
      *      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
-     *      static const EvaluationType evaluateNormal = ComputeOnDemand;
      *    };
      *  };
      *  \endcode
@@ -304,7 +301,6 @@ namespace Dune
      *      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
      *      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
      *      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
-     *      static const EvaluationType evaluateNormal = ComputeOnDemand;
      *    };
      *  };
      *  \endcode

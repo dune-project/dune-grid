@@ -185,7 +185,6 @@ namespace Dune
         static const EvaluationType evaluateJacobianTransposed = PreCompute;
         static const EvaluationType evaluateJacobianInverseTransposed = PreCompute;
         static const EvaluationType evaluateIntegrationElement = PreCompute;
-        static const EvaluationType evaluateNormal = PreCompute;
       };
     };
 

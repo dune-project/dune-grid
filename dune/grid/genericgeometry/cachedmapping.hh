@@ -73,8 +73,6 @@ namespace Dune
     private:
       typedef typename Traits::MatrixHelper MatrixHelper;
 
-      static const unsigned int numNormals = ReferenceElement::numNormals;
-
     public:
       template< class CoordVector >
       explicit CachedMapping ( const CoordVector &coords )
@@ -83,9 +81,6 @@ namespace Dune
           jacobianInverseTransposedComputed_( false ),
           integrationElementComputed_( false )
       {
-        for( unsigned int i = 0; i < numNormals; ++i )
-          normalComputed_[ i ] = false;
-
         if( alwaysAffine )
           affine_ = true;
         else
@@ -276,39 +271,6 @@ namespace Dune
         return refVolume * integrationElement( baryCenter() );
       }
 
-      /** \brief obtain a (covariant) normal to the mappings's image
-       *
-       *  The returned normal is the (integration) outer normal for the given
-       *  face of the reference element \f$\hat n_{face}\f$, tranformed by the
-       *  inverse Piola transformation, i.e.,
-       *  \f[n(x) = \sqrt{|J^T(x)J(x)|} J^T(x) \hat n_{face},\f]
-       *  where \f$J(x)\f$ denotes the Jacobian of the mapping.
-       *
-       *  \param[in]  face  face whose normal should be transformed
-       *  \param[in]  x     local coordinate in which the transformation should be
-       *                    applied
-       *
-       *  \returns a reference to the (integration) outer normal
-       *
-       *  \note This method is only useful, if x actually belongs to face i.
-       *        The result is well-defined, though.
-       *  \note In the case of an affine mapping, the normals are cached for
-       *        later reuse.
-       */
-      const GlobalCoordType &normal ( int face, const LocalCoordType &x ) const
-      {
-        assert( (unsigned int)face < numNormals );
-        if( !normalComputed_[ face ] )
-        {
-          const JacobianType &JT = jacobianInverseTransposed( x );
-          const LocalCoordType &refNormal =  ReferenceElement :: integrationOuterNormal( face );
-          MatrixHelper::template Ax< dimWorld, dimension >( JT, refNormal, normal_[ face ] );
-          normal_[ face ] *= integrationElement_;
-          normalComputed_[ face ] = affine();
-        }
-        return normal_[ face ];
-      }
-
       template< unsigned int codim, bool hybrid >
       typename TraceProvider< Topology, GeometryTraits, codim, hybrid >::Trace *
       trace ( unsigned int i, typename GeometryTraits::Allocator &allocator ) const
@@ -367,14 +329,12 @@ namespace Dune
       mutable JacobianTransposedType jacobianTransposed_;
       mutable JacobianType jacobianInverseTransposed_;
       mutable FieldType integrationElement_;
-      mutable array< GlobalCoordType, numNormals > normal_;
 
       mutable bool affine_;
 
       mutable bool jacobianTransposedComputed_;
       mutable bool jacobianInverseTransposedComputed_;
       mutable bool integrationElementComputed_;
-      mutable array< bool, numNormals > normalComputed_;
     };
 
   }

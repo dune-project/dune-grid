@@ -3,8 +3,10 @@
 #ifndef DUNE_GENERICGEOMETRY_GEOMETRY_HH
 #define DUNE_GENERICGEOMETRY_GEOMETRY_HH
 
-#include <dune/grid/common/geometry.hh>
 #include <dune/common/typetraits.hh>
+
+#include <dune/grid/common/geometry.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 #include <dune/grid/genericgeometry/mappingprovider.hh>
 #include <dune/grid/genericgeometry/geometrytraits.hh>
@@ -484,9 +486,19 @@ namespace Dune
        *  \note Though the local coordinates are given with respect to geometry's
        *        reference domain, the point is required to be on the given face.
        */
-      GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
+      GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const DUNE_DEPRECATED
       {
-        return mapping().normal( face, local );
+        const GenericReferenceElement< ctype, mydimension > &refElement
+          = GenericReferenceElements< ctype, mydimension>::general( type() );
+        assert( face < refElement.size( 1 ) );
+
+        const JacobianInverseTransposed &jit = jacobianInverseTransposed( local );
+        const LocalCoordinate &refNormal = refElement.volumeOuterNormal( face );
+
+        GlobalCoordinate normal;
+        jit.mv( refNormal, normal );
+        normal *= integrationElement( local );
+        return normal;
       }
 
     private:

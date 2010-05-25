@@ -148,10 +148,6 @@ namespace Dune
       virtual const JacobianType &
       jacobianInverseTransposed ( const LocalCoordType &x ) const = 0;
 
-      /** \copydoc CachedMapping::normal */
-      virtual GlobalCoordType
-      normal ( int face, const LocalCoordType &x ) const = 0;
-
     protected:
       using HybridMappingBase< dim, GeometryTraits >::trace;
 
@@ -316,11 +312,6 @@ namespace Dune
       jacobianInverseTransposed ( const LocalCoordType &local ) const
       {
         return mapping_.jacobianInverseTransposed( local );
-      }
-
-      virtual GlobalCoordType normal ( int face, const LocalCoordType &local ) const
-      {
-        return mapping_.normal( face , local );
       }
 
       template< int codim >
