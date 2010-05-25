@@ -83,7 +83,7 @@ namespace Dune {
     }
 
     //! return information about the Boundary
-    int boundaryId () const DUNE_DEPRECATED {
+    int boundaryId () const {
       return boundarySegmentIndex();
     }
 
@@ -269,7 +269,7 @@ namespace Dune {
     }
 
     //! return information about the Boundary
-    int boundaryId () const DUNE_DEPRECATED {
+    int boundaryId () const {
       return boundarySegmentIndex();
     }
 
