@@ -607,6 +607,10 @@ namespace Dune {
     //! write leaf grid in macro grid format to ascii file
     bool writeGrid_Ascii( const std::string filename, alu3d_ctype time, bool scientific = false ) const ;
 
+    /** \brief write macro grid in ALUGrid macro format to path/filename.rank
+     */
+    bool writeMacroGrid( const std::string path, const std::string filename ) const ;
+
     /** \brief read Grid from file filename and store time of mesh in time
      */
     template <GrapeIOFileFormatType ftype>

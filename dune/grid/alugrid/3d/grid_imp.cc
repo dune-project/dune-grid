@@ -771,6 +771,26 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline bool ALU3dGrid<dim, dimworld, elType>::
+  writeMacroGrid( const std::string path, const std::string name) const
+  {
+    std::stringstream filename;
+    filename << path << "/" << name << "." << comm().rank();
+
+    std::ofstream macro( filename.str().c_str() );
+
+    if( macro )
+    {
+      // dump distributed macro grid as ascii files
+      myGrid().container().backupCMode( macro );
+    }
+    else
+      std::cerr << "WARNING: couldn't open file `" <<  filename.str() << "' for writing!" << std::endl;
+
+    return true;
+  }
+
+  template <int dim, int dimworld, ALU3dGridElementType elType>
   template <GrapeIOFileFormatType ftype>
   alu_inline
   bool ALU3dGrid<dim,dimworld, elType>::
