@@ -6,7 +6,8 @@
 #include <dune/common/forloop.hh>
 #include <dune/common/polyallocator.hh>
 
-#include <dune/grid/genericgeometry/referenceelements.hh>
+#include <dune/grid/genericgeometry/subtopologies.hh>
+#include <dune/grid/genericgeometry/referencedomain.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
 
@@ -404,14 +405,22 @@ namespace Dune
     void initialize ()
     {
       typedef Initialize< Topology, codim > Init;
-      typedef GenericGeometry::ReferenceElement< Topology, ctype > RefElement;
+      typedef GenericGeometry::ReferenceDomain< Topology > RefDomain;
 
       codim_ = codim;
 
       const unsigned int iVariable = i;
       Dune::ForLoop< Init::template SubCodim, 0, dim-codim >::apply( iVariable, numbering_ );
 
-      baryCenter_ = RefElement::template baryCenter< codim >( i );
+      baryCenter_ = ctype( 0 );
+      static const unsigned int numCorners = size( dim );
+      for( unsigned int j = 0; j < numCorners; ++j )
+      {
+        FieldVector< ctype, dim > corner;
+        RefDomain::corner( number( j, dim ), corner );
+        baryCenter_ += corner;
+      }
+      baryCenter_ *= ctype( 1 ) / ctype( numCorners );
 
       typedef typename GenericGeometry::SubTopology< Topology, codim, i >::type SubTopology;
       topologyId_ = SubTopology::id;
@@ -424,7 +433,7 @@ namespace Dune
   template< class Topology >
   class GenericReferenceElement< ctype, dim >::CornerStorage
   {
-    typedef GenericGeometry::ReferenceElement< Topology, ctype > RefElement;
+    typedef GenericGeometry::ReferenceDomain< Topology > RefDomain;
 
   public:
     static const unsigned int size = Topology::numCorners;
@@ -438,7 +447,7 @@ namespace Dune
     explicit CornerStorage ( const Int2Type< 0 > & )
     {
       for( unsigned int i = 0; i < size; ++i )
-        coords_[ i ] = RefElement::corner( i );
+        RefDomain::corner( i, coords_[ i ] );
     }
 
     template< class Mapping, unsigned int codim >
@@ -464,14 +473,15 @@ namespace Dune
   template< int subcodim >
   struct GenericReferenceElement< ctype, dim >::SubEntityInfo::Initialize< Topology, codim >::SubCodim
   {
-    typedef GenericGeometry::ReferenceElement< Topology, ctype > RefElement;
+    typedef GenericGeometry::SubTopologySize< Topology, codim, subcodim > SubSize;
+    typedef GenericGeometry::GenericSubTopologyNumbering< Topology, codim, subcodim > SubNumbering;
 
     static void apply ( unsigned int i, std::vector< int > (&numbering)[ dim+1 ] )
     {
-      const unsigned int size = RefElement::template size< codim, subcodim >( i );
+      const unsigned int size = SubSize::size( i );
       numbering[ codim+subcodim ].resize( size );
       for( unsigned int j = 0; j < size; ++j )
-        numbering[ codim+subcodim ][ j ] = RefElement::template subNumbering< codim, subcodim >( i, j );
+        numbering[ codim+subcodim ][ j ] = SubNumbering::number( i, j );
     }
   };
 
