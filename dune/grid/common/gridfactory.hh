@@ -317,6 +317,23 @@ namespace Dune
       DUNE_THROW(GridError, "There is no grid factory for this grid type!");
     }
 
+    /** \brief insert a boundary segment
+     *
+     *  This method inserts a boundary segment into the coarse grid. Using
+     *  this method has two advantages over not using it:
+     *  - The boundary segment gets an insertion index.
+     *  - The grid factory can verify that this is actually a boundary segment
+     *  .
+     *
+     *  \note You are not forced to insert all boundary segments. The grid
+     *        factory will find the remaining boundary segments itself.
+     *
+     *  \param[in]  vertices  the indices of the vertices of the segment
+     */
+    virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices) {
+      DUNE_THROW(GridError, "There is no grid factory for this grid type!");
+    }
+
     /** \brief Finalize grid creation and hand over the grid
 
        The receiver takes responsibility of the memory allocated for the grid
