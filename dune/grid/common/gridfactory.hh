@@ -282,7 +282,9 @@ namespace Dune
   public:
 
     /** \brief Default constructor */
-    GridFactory();
+    GridFactory() {
+      DUNE_THROW(GridError, "There is no grid factory for this grid type!");
+    }
 
     /** \brief Constructor for a given grid object
 
