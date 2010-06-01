@@ -431,6 +431,15 @@ namespace Dune
     //  DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
 
     boundaryProjections_[ faceId ] = 0;
+
+    std::pair< FaceType, int > boundaryId;
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+    {
+      const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
+      boundaryId.first[ j ] = vertices[ i ];
+    }
+    boundaryId.second = 1;
+    boundaryIds_.push_back( boundaryId );
   }
 
   template< template< int, int > class ALUGrid >
@@ -474,6 +483,15 @@ namespace Dune
         DUNE_THROW(GridError,"BoundarySegment does not map face vertices to face vertices.");
     }
 #endif
+
+    std::pair< FaceType, int > boundaryId;
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+    {
+      const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
+      boundaryId.first[ j ] = vertices[ i ];
+    }
+    boundaryId.second = 1;
+    boundaryIds_.push_back( boundaryId );
   }
 
 }

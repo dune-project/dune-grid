@@ -138,6 +138,12 @@ namespace Dune
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
 
     boundaryProjections_[ faceId ] = 0;
+
+    std::pair< FaceType, int > boundaryId;
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+      boundaryId.first[ i ] = vertices[ i ];
+    boundaryId.second = -1; // some default
+    boundaryIds_.push_back( boundaryId );
   }
 
 
@@ -185,6 +191,12 @@ namespace Dune
       }
     }
 #endif
+
+    std::pair< FaceType, int > boundaryId;
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+      boundaryId.first[ i ] = vertices[ i ];
+    boundaryId.second = -1; // some default
+    boundaryIds_.push_back( boundaryId );
   }
 
 
