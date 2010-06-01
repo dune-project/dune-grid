@@ -3,7 +3,9 @@
 #ifndef DUNE_ALU2DGRID_INTERSECTION_CC
 #define DUNE_ALU2DGRID_INTERSECTION_CC
 
+#if ! COMPILE_ALU2DGRID_INLINE
 #include <config.h>
+#endif
 
 #include <dune/grid/alugrid/2d/geometry.hh>
 #include <dune/grid/alugrid/2d/intersection.hh>
