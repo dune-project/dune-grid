@@ -49,7 +49,17 @@
 #error "DIM_OF_WORLD not defined."
 #endif
 
+#ifdef HAVE_CONFIG_H
+#define ALBERTASAVE_HAVE_CONFIG_H HAVE_CONFIG_H
+#undef HAVE_CONFIG_H
+#endif
+
 #include <alberta.h>
+
+#ifdef ALBERTASAVE_HAVE_CONFIG_H
+#define HAVE_CONFIG_H ALBERTASAVE_HAVE_CONFIG_H
+#undef ALBERTASAVE_HAVE_CONFIG_H
+#endif
 
 #ifndef _ALBERTA_H_
 #error "Unable to include alberta.h."
