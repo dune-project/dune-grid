@@ -19,7 +19,6 @@
 
 #include <dune/common/mpihelper.hh>
 
-#include <gridtype.hh>
 #include <dune/grid/io/file/gmshreader.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 

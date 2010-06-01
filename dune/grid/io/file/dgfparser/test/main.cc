@@ -4,10 +4,11 @@
 
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 #define NEW_SUBENTITY_NUMBERING 1
+#define CHECK 1
 
-// #include <dune/grid/test/gridcheck.cc>
-#include <dune/grid/utility/griddim.hh>
-#include <dgfgridtype.hh>
+#include <dune/grid/test/gridcheck.cc>
+#include <dune/grid/test/checkgeometryinfather.cc>
+#include <dune/grid/test/checkintersectionit.cc>
 
 #if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>
@@ -65,7 +66,15 @@ void display ( const std::string &name,
 template< class GridView >
 void test ( const GridView &view )
 {
-  // gridcheck( const_cast< typename GridView::Grid & >( view.grid() ) );
+  typename GridView::Grid &grid = const_cast< typename GridView::Grid & >( view.grid());
+  gridcheck( grid );
+
+  // check the method geometryInFather()
+  std::cout << "  CHECKING: geometry in father" << std::endl;
+  checkGeometryInFather( grid );
+  // check the intersection iterator and the geometries it returns
+  std::cout << "  CHECKING: intersections" << std::endl;
+  checkIntersectionIterator( grid );
 }
 
 int main(int argc, char ** argv, char ** envp)

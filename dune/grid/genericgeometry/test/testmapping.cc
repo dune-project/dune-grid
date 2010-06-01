@@ -17,8 +17,6 @@
 #include <dune/grid/io/file/dgfparser/dgfoned.hh>
 #include <dune/grid/io/file/dgfparser/dgfug.hh>
 
-#include <dgfgridtype.hh>
-
 #include "testgeo.hh"
 
 using namespace Dune;

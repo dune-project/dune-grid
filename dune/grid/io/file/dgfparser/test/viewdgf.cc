@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 
-#include <dgfgridtype.hh>
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 
 using namespace Dune;
