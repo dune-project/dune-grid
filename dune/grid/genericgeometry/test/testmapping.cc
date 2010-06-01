@@ -143,6 +143,7 @@ void test ( const GridViewType &view )
         volErr++;
         std::cout << "volume : " << vol << " " << volM << std::endl;
       }
+#if 0
       // test normal
       IIteratorType iiter = view.ibegin(*eIt);
       for (; iiter != view.iend(*eIt); ++ iiter) {
@@ -160,6 +161,7 @@ void test ( const GridViewType &view )
                     << std::endl;
         }
       }
+#endif
     }
   }
 }
