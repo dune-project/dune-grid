@@ -1,3 +1,12 @@
+AC_DEFUN([DUNE_DEFINE_GRIDTYPE_INCLUDE],[
+  m4_if(regexp([$1],'\w'),[-1],[
+    [NEXT_DEFINITION="${NEXT_DEFINITION}  #include <]$1[>\n"]
+  ],[
+    [NEXT_DEFINITION="${NEXT_DEFINITION}  #include <]m4_substr([$1],0,regexp([$1],'\w'))[>\n"]
+    DUNE_DEFINE_GRIDTYPE_INCLUDE([m4_substr([$1],[regexp([$1],'\w')])])
+  ])
+])
+
 # DUNE_DEFINE_GRIDTYPE([GRIDTYPE],[ASSERTION],[DUNETYPE],[HEADER],[DGFHEADER])
 #
 # Add a new GRIDTYPE target DUNE's preprocessor magic.
@@ -15,14 +24,12 @@ AC_DEFUN([DUNE_DEFINE_GRIDTYPE],[
   NEXT_DEFINITION="${NEXT_DEFINITION}  #if HAVE_GRIDTYPE\n"
   NEXT_DEFINITION="${NEXT_DEFINITION}    #error \"Ambiguous definition of GRIDTYPE.\"\n"
   NEXT_DEFINITION="${NEXT_DEFINITION}  #endif // #if HAVE_GRIDTYPE\n"
-  AS_IF([test "x$2" != "x"],[
+  m4_if([$2],[],[],[
     NEXT_DEFINITION="${NEXT_DEFINITION}  #if ! ($2)\n"
     NEXT_DEFINITION="${NEXT_DEFINITION}    #error \"Preprocessor assertion $2 failed.\"\n"
     NEXT_DEFINITION="${NEXT_DEFINITION}  #endif // #if ! ($2)\n"
   ])
-  for file in $4 ; do
-    NEXT_DEFINITION="${NEXT_DEFINITION}  #include <$file>\n"
-  done
+  DUNE_DEFINE_GRIDTYPE_INCLUDE([$4])
   NEXT_DEFINITION="${NEXT_DEFINITION}  namespace Dune\n"
   NEXT_DEFINITION="${NEXT_DEFINITION}  {\n"
   NEXT_DEFINITION="${NEXT_DEFINITION}    namespace GridSelector\n"
@@ -37,9 +44,7 @@ AC_DEFUN([DUNE_DEFINE_GRIDTYPE],[
 
   NEXT_DEFINITION=
   NEXT_DEFINITION="${NEXT_DEFINITION}#if defined $1\n"
-  for file in $5 ; do
-    NEXT_DEFINITION="${NEXT_DEFINITION}  #include <$file>\n"
-  done
+  DUNE_DEFINE_GRIDTYPE_INCLUDE([$5])
   NEXT_DEFINITION="${NEXT_DEFINITION}#endif // #if defined $1\n\n"
 
   DUNE_DGFGRIDTYPE_DEFINITIONS="${DUNE_DGFGRIDTYPE_DEFINITIONS}${NEXT_DEFINITION}"
