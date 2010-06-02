@@ -73,15 +73,23 @@ try
 
   const std::string path( "../../../../../doc/grids/gmsh/" );
   std::string curved2d( path ); curved2d += "curved2d.msh";
+  std::string circ2nd(  path ); circ2nd  += "circle2ndorder.msh";
   std::string pyramid(  path ); pyramid  += "pyramid.msh";
+  std::string pyr2nd(   path ); pyr2nd   += "pyramid2ndorder.msh";
 
   // test reading of unstructured grids
 #if HAVE_UG
   std::cout << "reading UGGrid<2>" << std::endl;
   testReadingGrid<UGGrid<2> >( curved2d, refinements );
 
+  std::cout << "reading UGGrid<2> with second order boundary approximation" << std::endl;
+  testReadingGrid<UGGrid<2> >( circ2nd, refinements );
+
   std::cout << "reading UGGrid<3>" << std::endl;
   testReadingGrid<UGGrid<3> >( pyramid, refinements );
+
+  std::cout << "reading UGGrid<3> with second order boundary approximation" << std::endl;
+  testReadingGrid<UGGrid<3> >( pyr2nd,  refinements );
 #endif
 
 #if HAVE_ALBERTA
