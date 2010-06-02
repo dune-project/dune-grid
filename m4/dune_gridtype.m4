@@ -52,11 +52,3 @@ DUNE_DEFINE_GRIDTYPE_INCLUDE([$5])dnl
   #define USED_$1_GRIDTYPE 1
 #endif // #if defined $1]dnl
 )])
-
-# DUNE_OUTPUT_GRIDTYPE
-# 
-# Writes out 'gridtype.hh' and 'dgfgridtype.hh' for the project.
-#
-# If a project intends to use this magic, its configure.ac should contain a
-# call to this macro (somewhere around AC_OUTPUT)
-AC_DEFUN([DUNE_OUTPUT_GRIDTYPE])
