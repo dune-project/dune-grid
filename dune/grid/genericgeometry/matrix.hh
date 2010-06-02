@@ -367,9 +367,11 @@ namespace Dune
       static FieldType
       detAAT ( const typename Traits :: template Matrix< m, n > :: type &A )
       {
-        if( n >= m )
+        if( (n == 2) && (m == 2) )
+          return std::abs( A[ 0 ][ 0 ]*A[ 1 ][ 1 ] - A[ 1 ][ 0 ]*A[ 0 ][ 1 ] );
+        else if( n >= m )
         {
-          typename Traits :: template Matrix< m, m > :: type aat;
+          typename Traits::template Matrix< m, m >::type aat;
           AAT_L< m, n >( A, aat );
           return spdDetA< m >( aat );
         }
@@ -421,7 +423,7 @@ namespace Dune
           ret[ 1 ][ 1 ] = A[ 0 ][ 0 ] * detInv;
           ret[ 1 ][ 0 ] = -A[ 1 ][ 0 ] * detInv;
           ret[ 0 ][ 1 ] = -A[ 0 ][ 1 ] * detInv;
-          return det;
+          return std::abs( det );
         }
         else
         {
