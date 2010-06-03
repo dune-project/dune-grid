@@ -34,6 +34,13 @@ namespace Dune
       {
         typedef FieldMatrix< ctype, rows, cols > type;
       };
+
+      // This limit is, e.g., used in the termination criterion of the Newton
+      // scheme within the generic implementation of the method local
+      static const ctype epsilon ()
+      {
+        return 1e-6;
+      }
     };
 
 

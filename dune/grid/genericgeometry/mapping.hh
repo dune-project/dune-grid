@@ -85,18 +85,20 @@ namespace Dune
 
       void local ( const GlobalCoordType &y, LocalCoordType &x ) const
       {
-        x = ReferenceElement :: template baryCenter< 0 >( 0 );
+        const FieldType epsilon = CoordTraits::epsilon();
+        x = ReferenceElement::template baryCenter< 0 >( 0 );
         LocalCoordType dx;
         do
-        { // DF^n dx^n = F^n, x^{n+1} -= dx^n
+        {
+          // DF^n dx^n = F^n, x^{n+1} -= dx^n
           JacobianTransposedType JT;
           jacobianTransposed( x, JT );
           GlobalCoordType z;
           global( x, z );
           z -= y;
-          MatrixHelper :: template xTRightInvA< dimension, dimWorld >( JT, z, dx );
+          MatrixHelper::template xTRightInvA< dimension, dimWorld >( JT, z, dx );
           x -= dx;
-        } while( dx.two_norm2() > 1e-12 ); // use some numeric_limit eps?
+        } while( dx.two_norm2() > epsilon*epsilon );
       }
 
       bool jacobianTransposed ( const LocalCoordType &x,
@@ -136,4 +138,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GENERICGEOMETRY_MAPPING_HH
