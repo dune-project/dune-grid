@@ -81,6 +81,9 @@ namespace Dune
     /**
        @brief Search the IndexSet of this HierarchicSearch for an Entity
        containing point global.
+
+       \exception GridError No element of the coarse grid contains the given
+                            coordinate.
      */
     EntityPointer findEntity(const FieldVector<ct,dimw>& global) const
     {
