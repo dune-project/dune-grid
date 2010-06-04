@@ -251,20 +251,20 @@ namespace Dune
       return gridView_.template end< 0, VTK_Partition >();
     }
 
-    //! Iterate over the grids vertices
+    //! Iterate over the grid's vertices
     /**
      * This class iterates over the elements, and within the elements over the
-     * corners.  If the data mode dm is nonconforming, this class behaves
-     * identical to CornerIterator: each vertex is visited once for each
-     * element where it is a corner.  If dm is conforming each vertex is
-     * visited only once globally, for the first element whare it is a corner.
+     * corners.  If the data mode dm is nonconforming, each vertex is visited
+     * once for each element where it is a corner (similar to CornerIterator).
+     * If dm is conforming each vertex is visited only once globally, for the
+     * first element where it is a corner.  Contrary to CornerIterator, visit
+     * the corners of a given element in Dune-ordering.
      *
      * Dereferencing the iterator yields the current entity, and the index of
      * the current corner within that entity is returned by the iterators
-     * localindex() method.  Other useful methods on the iterator itself are
-     * id() which returns a process-local consecutive zero-starting integer
-     * for the vertex, and position() which returns the element-local position
-     * of the corner.
+     * localindex() method.  Another useful method on the iterator itself is
+     * position() which returns the element-local position of the current
+     * corner.
      */
     class VertexIterator :
       public ForwardIteratorFacade<VertexIterator, Entity, Entity&, int>
@@ -273,16 +273,12 @@ namespace Dune
       GridCellIterator gend;
       VTKOptions::DataMode datamode;
       // Index of the currently visited corner within the current element.
-      // This appears to be in Dune-numbering, although the id() method
-      // assumed VTK-numbering.
+      // NOTE: this is in Dune-numbering, in contrast to CornerIterator.
       int index;
       const VertexMapper & vertexmapper;
       std::vector<bool> visited;
       // in conforming mode, for each vertex id (as obtained by vertexmapper)
       // hold its number in the iteration order (VertexIterator)
-      const std::vector<int> & number;
-      // holds the number of corners of all the elements we have seen so far,
-      // excluding the current element
       int offset;
     protected:
       void basicIncrement ()
@@ -305,18 +301,14 @@ namespace Dune
       VertexIterator(const GridCellIterator & x,
                      const GridCellIterator & end,
                      const VTKOptions::DataMode & dm,
-                     const VertexMapper & vm,
-                     const std::vector<int> & num) :
+                     const VertexMapper & vm) :
         git(x), gend(end), datamode(dm), index(0),
         vertexmapper(vm), visited(vm.size(), false),
-        number(num), offset(0)
+        offset(0)
       {
         if (datamode == VTKOptions::conforming && git != gend)
           visited[vertexmapper.map(*git,index,n)] = true;
       };
-      /**
-       * This method assumes Dune-numbering for index.
-       */
       void increment ()
       {
         switch (datamode)
@@ -343,36 +335,12 @@ namespace Dune
       {
         return *git;
       }
-      //! Process-local consecutive zero-string vertex id
-      /**
-       * This method assumes that index in VTK's numbering.
-       */
-      int id () const
-      {
-        switch (datamode)
-        {
-        case VTKOptions::conforming :
-          return
-            number[vertexmapper.map(*git,renumber(*git,index),n)];
-        case VTKOptions::nonconforming :
-          return offset + renumber(*git,index);
-        default :
-          DUNE_THROW(IOError,"VTKWriter: unsupported DataMode" << datamode);
-        }
-      }
-      //! index of vertex within the entity
-      /**
-       * The return value of this method is currently used in a way which
-       * works only with Dune-numbering.
-       */
+      //! index of vertex within the entity, in Dune-numbering
       int localindex () const
       {
         return index;
       }
       //! position of vertex inside the entity
-      /**
-       * This method assumed Dune-numbering for index
-       */
       const FieldVector<DT,n> & position () const
       {
         return GenericReferenceElements<DT,n>::general(git->type()).position(index,n);
@@ -383,14 +351,14 @@ namespace Dune
     {
       return VertexIterator( gridView_.template begin< 0, VTK_Partition >(),
                              gridView_.template end< 0, VTK_Partition >(),
-                             datamode, *vertexmapper, number );
+                             datamode, *vertexmapper );
     }
 
     VertexIterator vertexEnd () const
     {
       return VertexIterator( gridView_.template end< 0, VTK_Partition >(),
                              gridView_.template end< 0, VTK_Partition >(),
-                             datamode, *vertexmapper, number );
+                             datamode, *vertexmapper );
     }
 
     //! Iterate over the elements' corners
@@ -398,15 +366,15 @@ namespace Dune
      * This class iterates over the elements, and within the elements over the
      * corners.  Each vertex in the grid can be a corner in multiple elements,
      * and is visited once for each element it is associated with.  This class
-     * differs from VertexIterator in that it always visits a given vertex
-     * once for each element where that vertex is a corner with, independent
-     * of the data mode dm.
+     * differs from VertexIterator in that it visits the corners of a given
+     * element in VTK-ordering, and that it always visits a given vertex once
+     * for each element where that vertex is a corner in, independent of the
+     * data mode dm.
      *
-     * Dereferencing the iterator yields the current entity, and the index of
-     * the current corner within that entity is returned by the iterators
-     * localindex() method.  Another useful method on the iterator itself is
-     * id() which returns a process-local consecutive zero-starting integer
-     * for the vertex.
+     * Dereferencing the iterator yields the current entity.  Another useful
+     * method on the iterator itself is id(), which returns the number of the
+     * current corners associated vertex, in the numbering given by the
+     * iteration order of VertexIterator.
      */
     class CornerIterator :
       public ForwardIteratorFacade<CornerIterator, Entity, Entity&, int>
@@ -415,20 +383,27 @@ namespace Dune
       GridCellIterator gend;
       VTKOptions::DataMode datamode;
       // Index of the currently visited corner within the current element.
-      // This appears to be in Dune-numbering, although the id() method
-      // assumed VTK-numbering.
+      // NOTE: this is in VTK-numbering, in contrast to VertexIterator.
       int index;
       const VertexMapper & vertexmapper;
-      std::vector<bool> visited;
       // in conforming mode, for each vertex id (as obtained by vertexmapper)
-      // hold its number in the iteration order (VertexIterator, *not*
+      // hold its number in the iteration order of VertexIterator (*not*
       // CornerIterator)
       const std::vector<int> & number;
       // holds the number of corners of all the elements we have seen so far,
       // excluding the current element
       int offset;
-    protected:
-      void basicIncrement ()
+
+    public:
+      CornerIterator(const GridCellIterator & x,
+                     const GridCellIterator & end,
+                     const VTKOptions::DataMode & dm,
+                     const VertexMapper & vm,
+                     const std::vector<int> & num) :
+        git(x), gend(end), datamode(dm), index(0),
+        vertexmapper(vm),
+        number(num), offset(0) {};
+      void increment ()
       {
         if( git == gend )
           return;
@@ -444,19 +419,6 @@ namespace Dune
             ++git;
         }
       }
-    public:
-      CornerIterator(const GridCellIterator & x,
-                     const GridCellIterator & end,
-                     const VTKOptions::DataMode & dm,
-                     const VertexMapper & vm,
-                     const std::vector<int> & num) :
-        git(x), gend(end), datamode(dm), index(0),
-        vertexmapper(vm),
-        number(num), offset(0) {};
-      void increment ()
-      {
-        basicIncrement();
-      }
       bool equals (const CornerIterator & cit) const
       {
         return git == cit.git
@@ -468,11 +430,8 @@ namespace Dune
       }
       //! Process-local consecutive zero-starting vertex id
       /**
-       * This is the same id as returned by VertexIterator::id() method for
-       * the same corner.  This means, it is the vertices which a numbered
-       * consecutively here, not the corners.
-       *
-       * This method assumes VTK-numbering for index.
+       * This method returns the number of this corners associated vertex, in
+       * the numbering given by the iteration order of VertexIterator.
        */
       int id () const
       {
@@ -486,15 +445,6 @@ namespace Dune
         default :
           DUNE_THROW(IOError,"VTKWriter: unsupported DataMode" << datamode);
         }
-      }
-      //! index of vertex within the entity, Dune-numbering
-      /**
-       * The return value of this method is currently used in a way which
-       * works only with Dune-numbering.
-       */
-      int localindex () const
-      {
-        return index;
       }
     };
 
