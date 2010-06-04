@@ -55,7 +55,7 @@ public:
    */
   virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<DT,n>& xi) const
   {
-    return comp*0.1;
+    return e.geometry().global(xi)[comp];
   }
 
   // get name
