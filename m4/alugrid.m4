@@ -182,7 +182,8 @@ if test x$HAVE_ALUGRID = x1 ; then
   DUNE_DEFINE_GRIDTYPE([ALUGRID_SIMPLEX],[],[Dune::ALUSimplexGrid< dimgrid, dimworld >],[dune/grid/alugrid.hh],[dune/grid/io/file/dgfparser/dgfalu.hh])
 
   # set variable for summary
-  with_alugrid="yes (Version $ALUGRID_VERSION)"
+  with_alugrid="version $ALUGRID_VERSION"
+  with_alugrid_long="$ALUGRIDROOT"
 else
   AC_SUBST(ALUGRID_LIBS, "")
   AC_SUBST(ALUGRID_LDFLAGS, "")
@@ -190,6 +191,7 @@ else
 
   # set variable for summary
   with_alugrid="no"
+  with_alugrid_long=""
 fi
   
 # also tell automake
@@ -200,6 +202,6 @@ LIBS="$ac_save_LIBS"
 CPPFLAGS="$ac_save_CPPFLAGS"
 LDFLAGS="$ac_save_LDFLAGS"
 
-DUNE_ADD_SUMMARY_ENTRY([ALUGrid],[$with_alugrid])
+DUNE_ADD_SUMMARY_ENTRY([ALUGrid],[$with_alugrid],[$with_alugrid_long])
 
 ])

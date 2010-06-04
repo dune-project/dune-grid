@@ -220,7 +220,8 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     DUNE_DEFINE_GRIDTYPE([ALBERTAGRID],[WORLDDIM == ALBERTA_DIM],[Dune::AlbertaGrid< dimgrid >],[dune/grid/albertagrid.hh],[dune/grid/albertagrid/dgfparser.hh])
 
     # set variable for summary
-    with_alberta="yes (Version $ALBERTA_VERSION supporting world dims $ALBERTA_WORLD_DIMS)"
+    with_alberta="version $ALBERTA_VERSION"
+    with_alberta_long="$ALBERTAROOT ; world dims $ALBERTA_WORLD_DIMS"
 
   ],[
 
@@ -246,6 +247,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
     # set variable for summary
     with_alberta="no"
+    with_alberta_long=""
 
   ])
     
@@ -308,5 +310,5 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   CPPFLAGS="$ac_save_CPPFLAGS"
   LDFLAGS="$ac_save_LDFLAGS"
 
-  DUNE_ADD_SUMMARY_ENTRY([ALBERTA],[$with_alberta])
+  DUNE_ADD_SUMMARY_ENTRY([ALBERTA],[$with_alberta],[$with_alberta_long])
 ])
