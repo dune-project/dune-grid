@@ -1,13 +1,12 @@
 AC_DEFUN([DUNE_DEFINE_GRIDTYPE_INCLUDE],[dnl
-m4_if(regexp([$1],'\w'),[-1],[dnl
+m4_if($#,0,[],[dnl
   #include <$1>
-],[dnl
-  #include <m4_substr([$1],0,regexp([$1],'\w'))>
-  DUNE_DEFINE_GRIDTYPE_INCLUDE([m4_substr([$1],[regexp([$1],'\w')])])dnl
+m4_if($#,1,[],[DUNE_DEFINE_GRIDTYPE_INCLUDE(m4_shift($@))])dnl
 ])dnl
 ])
 
-# DUNE_DEFINE_GRIDTYPE([GRIDTYPE],[ASSERTION],[DUNETYPE],[HEADER],[DGFHEADER])
+
+# DUNE_DEFINE_GRIDTYPE([GRIDTYPE],[ASSERTION],[DUNETYPE],[HEADER],...)
 #
 # Add a new GRIDTYPE target DUNE's preprocessor magic.
 # 
@@ -15,7 +14,6 @@ m4_if(regexp([$1],'\w'),[-1],[dnl
 #             ASSERTION  condition to be checked by the preprocessor
 #             DUNETYPE   C++ type of the grid
 #             HEADER     name of the header file which includes the grid
-#             DGFHEADER  name of the header for the DGFGridFactory for the grid
 #
 # Example: DUNE_DEFINE_GRIDTYPE([YASPGRID],[GRIDDIM == WORLDDIM],[Dune::YaspGrid< dimgrid >],[dune/grid/yaspgrid.hh],[dune/grid/io/file/dgfparser/dgfyasp.hh])
 AC_DEFUN([DUNE_DEFINE_GRIDTYPE],[AH_BOTTOM(dnl
@@ -36,8 +34,7 @@ m4_if([$2],[],[],[
     #error "Preprocessor assertion $2 failed."
   #endif
 ])
-DUNE_DEFINE_GRIDTYPE_INCLUDE([$4])dnl
-DUNE_DEFINE_GRIDTYPE_INCLUDE([$5])dnl
+DUNE_DEFINE_GRIDTYPE_INCLUDE(m4_shift(m4_shift(m4_shift($@))))dnl
 [
   namespace Dune
   {
