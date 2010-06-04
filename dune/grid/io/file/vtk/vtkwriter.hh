@@ -1616,13 +1616,17 @@ namespace Dune
         s << "  ";
     }
 
-    //! renumber VTK -> Dune
+    //! renumber VTK <-> Dune
+    /**
+     * Since the renumbering never does anything more complex than exchanging
+     * two indices, this method works both ways.
+     */
     static int renumber (const GeometryType &t, int i)
     {
       static const int quadRenumbering[4] = {0,1,3,2};
       static const int cubeRenumbering[8] = {0,1,3,2,4,5,7,6};
       static const int prismRenumbering[6] = {0,2,1,3,5,4};
-      static const int pyramidRenumbering[6] = {0,2,1,3,5,4};
+      static const int pyramidRenumbering[5] = {0,1,3,2,4};
       if (t.isQuadrilateral())
         return quadRenumbering[i];
       if (t.isPyramid())
