@@ -31,25 +31,26 @@ namespace Dune
    * version is usually not used directly but is used to implement versions for leafwise and levelwise
    * entity sets.
    *
-   * Template parameters are:
-   *
-   * \par GV
-   *    A Dune GridView type.
-   * \par Layout
-   *  A helper class with a method contains(), that returns true for all geometry
-   *  types that are in the domain of the map.  The class should be of the following
-   *  shape
+   * \tparam GV     A Dune GridView type.
+   * \tparam Layout A helper class template with a method contains(), that
+   *                returns true for all geometry types that are in the domain
+   *                of the map.  The class should be of the following shape
      \code
-     template<int dim>
+     template<int dimgrid>
      struct LayoutClass {
-        bool contains (Dune::GeometryType gt) const {
-            // Return true if gt is in the domain of the map
-        }
+     bool contains (Dune::GeometryType gt) const {
+        // Return true if gt is in the domain of the map
+     }
      };
      \endcode
+   *                The MultipleCodimMultipleGeomTypeMapper will always
+   *                substitute the dimension of the grid for the template
+   *                parameter dimgrid.
    *
-   * If you don't want to use the default constructor of the LayoutClass you can construct it yourself
-   * and hand it to the respective constructor.
+   * If you don't want to use the default constructor of the LayoutClass you
+   * can construct it yourself and hand it to the respective constructor (with
+   * dimgrid=GV::dimension).  In this case the layout class should be copy
+   * constructible.
    */
   template <typename GV, template<int> class Layout>
   class MultipleCodimMultipleGeomTypeMapper :
@@ -190,22 +191,11 @@ namespace Dune
 
      This mapper uses all leaf entities of a certain codimension as its entity set.
 
-     Template parameters are:
-
-     \par G
-     A %Dune grid type.
-     \par Layout
-     A helper class with a method contains(), that returns true for all geometry
-     types that are in the domain of the map.  The class should be of the following
-     shape
-     \code
-     template<int dim>
-     struct LayoutClass {
-        bool contains (Dune::GeometryType gt) {
-            // Return true if gt is in the domain of the map
-        }
-     };
-     \endcode
+     \tparam G      A %Dune grid type.
+     \tparam Layout A helper class template which determines which types of
+                 entities are mapped by this mapper.  See
+                 MultipleCodimMultipleGeomTypeMapper for how exactly this
+                 template should look.
    */
   template <typename G, template<int> class Layout>
   class LeafMultipleCodimMultipleGeomTypeMapper
@@ -240,22 +230,11 @@ namespace Dune
 
      This mapper uses all entities of a certain codimension on a given level as its entity set.
 
-     Template parameters are:
-
-     \par G
-     A %Dune grid type.
-     \par Layout
-     A helper class with a method contains(), that returns true for all geometry
-     types that are in the domain of the map.  The class should be of the following
-     shape
-     \code
-     template<int dim>
-     struct LayoutClass {
-        bool contains (Dune::GeometryType gt) {
-            // Return true if gt is in the domain of the map
-        }
-     };
-     \endcode
+     \tparam G      A %Dune grid type.
+     \tparam Layout A helper class template which determines which types of
+                 entities are mapped by this mapper.  See
+                 MultipleCodimMultipleGeomTypeMapper for how exactly this
+                 template should look.
    */
   template <typename G, template<int> class Layout>
   class LevelMultipleCodimMultipleGeomTypeMapper
