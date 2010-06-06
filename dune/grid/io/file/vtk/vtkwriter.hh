@@ -183,24 +183,6 @@ namespace Dune
    */
   template< class GridView >
   class VTKWriter {
-    template<int dim>
-    struct P0Layout
-    {
-      bool contains (Dune::GeometryType gt)
-      {
-        return gt.dim()==dim;
-      }
-    };
-
-    template<int dim>
-    struct P1Layout
-    {
-      bool contains (Dune::GeometryType gt)
-      {
-        return gt.dim()==0;
-      }
-    };
-
     // extract types
     typedef typename GridView::Grid Grid;
     typedef typename Grid::ctype DT;
@@ -222,7 +204,7 @@ namespace Dune
     ::template Partition< VTK_Partition >::Iterator
     GridVertexIterator;
 
-    typedef MultipleCodimMultipleGeomTypeMapper< GridView, P1Layout > VertexMapper;
+    typedef MultipleCodimMultipleGeomTypeMapper< GridView, MCMGVertexLayout > VertexMapper;
 
   public:
     typedef Dune::VTKFunction<Grid> VTKFunction;
@@ -472,7 +454,8 @@ namespace Dune
     template<class V>
     class P0VectorWrapper : public VTKFunction
     {
-      typedef MultipleCodimMultipleGeomTypeMapper< GridView, P0Layout > VM0;
+      typedef MultipleCodimMultipleGeomTypeMapper<GridView,
+          MCMGElementLayout> VM0;
     public:
       //! return number of components
       virtual int ncomps () const
@@ -524,7 +507,8 @@ namespace Dune
     template<class V>
     class P1VectorWrapper : public VTKFunction
     {
-      typedef MultipleCodimMultipleGeomTypeMapper< GridView, P1Layout > VM1;
+      typedef MultipleCodimMultipleGeomTypeMapper<GridView,
+          MCMGVertexLayout> VM1;
 
     public:
       //! return number of components

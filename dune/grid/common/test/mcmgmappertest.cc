@@ -16,25 +16,6 @@
 
 using namespace Dune;
 
-// Parameter for mapper class
-template<int dim>
-struct ElementDataLayout
-{
-  bool contains (Dune::GeometryType gt)
-  {
-    return gt.dim()==dim;
-  }
-};
-
-template<int dim>
-struct FaceDataLayout
-{
-  bool contains (Dune::GeometryType gt)
-  {
-    return gt.dim()==dim-1;
-  }
-};
-
 
 // /////////////////////////////////////////////////////////////////////////////////
 //   Check whether the index created for element data is unique, consecutive
@@ -144,25 +125,25 @@ template<typename Grid>
 void checkGrid(const Grid& grid) {
   static const unsigned dimg = Grid::dimension;
   {   // check constructor without layout class
-    LeafMultipleCodimMultipleGeomTypeMapper<Grid, ElementDataLayout>
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
     leafMCMGMapper(grid);
     checkElementDataMapper(leafMCMGMapper, grid.leafView());
   }
   {   // check constructor with layout class
-    LeafMultipleCodimMultipleGeomTypeMapper<Grid, ElementDataLayout>
-    leafMCMGMapper(grid, ElementDataLayout<dimg>());
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
+    leafMCMGMapper(grid, MCMGElementLayout<dimg>());
     checkElementDataMapper(leafMCMGMapper, grid.leafView());
   }
 
   for (int i=2; i<=grid.maxLevel(); i++) {
     {     // check constructor without layout class
-      LevelMultipleCodimMultipleGeomTypeMapper<Grid, ElementDataLayout>
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
       levelMCMGMapper(grid, i);
       checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
     }
     {     // check constructor with layout class
-      LevelMultipleCodimMultipleGeomTypeMapper<Grid, ElementDataLayout>
-      levelMCMGMapper(grid, i, ElementDataLayout<dimg>());
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
+      levelMCMGMapper(grid, i, MCMGElementLayout<dimg>());
       checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
     }
   }
