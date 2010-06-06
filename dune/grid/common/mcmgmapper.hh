@@ -6,6 +6,9 @@
 
 #include <iostream>
 #include <map>
+
+#include <dune/common/geometrytype.hh>
+
 #include "mapper.hh"
 #include "genericreferenceelements.hh"
 
@@ -22,6 +25,44 @@ namespace Dune
    *
    * @{
    */
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  //  Common Layout templates
+  //
+
+  //! Layout template for elements
+  /**
+   * This layout template is is for use in the
+   * MultipleCodimMultipleGeomTypeMapper.  It select only elements (entities
+   * with codim=0 or dim=dimgrid).
+   *
+   * \tparam dimgrid The dimension of the grid.
+   */
+  template<int dimgrid> struct MCMGElementLayout {
+    //! test whether entities of the given geometry type should be included in
+    //! the map
+    bool contains (Dune::GeometryType gt) { return gt.dim()==dimgrid; }
+  };
+
+  //! Layout template for vertices
+  /**
+   * This layout template is is for use in the
+   * MultipleCodimMultipleGeomTypeMapper.  It select only vertices (entities
+   * with codim=dimgrid or dim=0).
+   *
+   * \tparam dimgrid The dimension of the grid.
+   */
+  template<int dim> struct MCMGVertexLayout {
+    //! test whether entities of the given geometry type should be included in
+    //! the map
+    bool contains (Dune::GeometryType gt) { return gt.dim()==0; }
+  };
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  //  MultipleCodimMultipleGeomTypeMapper
+  //
 
   /** @brief Implementation class for a multiple codim and multiple geometry type mapper.
    *
@@ -51,6 +92,10 @@ namespace Dune
    * can construct it yourself and hand it to the respective constructor (with
    * dimgrid=GV::dimension).  In this case the layout class should be copy
    * constructible.
+   *
+   * Thare are to predefined Layout class templates For the common cases that
+   * only elements or only vertices should be mapped: MCMGElementLayout and
+   * MCMGVertexLayout.
    */
   template <typename GV, template<int> class Layout>
   class MultipleCodimMultipleGeomTypeMapper :
@@ -186,6 +231,11 @@ namespace Dune
     std::map<GeometryType,int> offset;     // provide a map with all geometry types
     mutable Layout<GV::dimension> layout;     // get layout object
   };
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  //  Leaf and level mapper
+  //
 
   /** @brief Multiple codim and multiple geometry type mapper for leaf entities.
 
