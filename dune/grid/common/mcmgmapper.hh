@@ -211,12 +211,14 @@ namespace Dune
   class LeafMultipleCodimMultipleGeomTypeMapper
     : public MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,Layout>
   {
+    typedef MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,
+        Layout> Base;
   public:
     /** @brief The constructor
          @param grid A reference to a grid.
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid)
-      : MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,Layout>(grid.leafView())
+      : Base(grid.leafView())
     {}
 
     /** @brief The constructor
@@ -228,7 +230,7 @@ namespace Dune
      * @param layout A layout object
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const Layout<G::dimension> layout)
-      : MultipleCodimMultipleGeomTypeMapper<typename G::Traits::LeafIndexSet,Layout>(grid,grid.leafIndexSet(),layout)
+      : Base(grid.leafView(),layout)
     {}
 
   };
@@ -258,13 +260,15 @@ namespace Dune
   template <typename G, template<int> class Layout>
   class LevelMultipleCodimMultipleGeomTypeMapper
     : public MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,Layout> {
+    typedef MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,
+        Layout> Base;
   public:
     /** @brief The constructor
          @param grid A reference to a grid.
          @param level A valid level of the grid.
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level)
-      : MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,Layout>(grid.levelView(level))
+      : Base(grid.levelView(level))
     {}
 
     /** @brief The constructor
@@ -277,7 +281,7 @@ namespace Dune
      * @param layout A layout object
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const Layout<G::dimension> layout)
-      : MultipleCodimMultipleGeomTypeMapper<typename G::Traits::LevekIndexSet,Layout>(grid,grid.levelIndexSet(level),layout)
+      : Base(grid.levelView(level),layout)
     {}
 
   };
