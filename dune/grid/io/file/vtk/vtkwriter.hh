@@ -274,7 +274,7 @@ namespace Dune
       VTKOptions::DataMode datamode;
       // Index of the currently visited corner within the current element.
       // NOTE: this is in Dune-numbering, in contrast to CornerIterator.
-      int index;
+      int cornerIndexDune;
       const VertexMapper & vertexmapper;
       std::vector<bool> visited;
       // in conforming mode, for each vertex id (as obtained by vertexmapper)
@@ -285,12 +285,12 @@ namespace Dune
       {
         if( git == gend )
           return;
-        ++index;
+        ++cornerIndexDune;
         const int numCorners = git->template count< n >();
-        if( index == numCorners )
+        if( cornerIndexDune == numCorners )
         {
           offset += numCorners;
-          index = 0;
+          cornerIndexDune = 0;
 
           ++git;
           while( (git != gend) && (git->partitionType() != InteriorEntity) )
@@ -302,24 +302,24 @@ namespace Dune
                      const GridCellIterator & end,
                      const VTKOptions::DataMode & dm,
                      const VertexMapper & vm) :
-        git(x), gend(end), datamode(dm), index(0),
+        git(x), gend(end), datamode(dm), cornerIndexDune(0),
         vertexmapper(vm), visited(vm.size(), false),
         offset(0)
       {
         if (datamode == VTKOptions::conforming && git != gend)
-          visited[vertexmapper.map(*git,index,n)] = true;
+          visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
       };
       void increment ()
       {
         switch (datamode)
         {
         case VTKOptions::conforming :
-          while(visited[vertexmapper.map(*git,index,n)])
+          while(visited[vertexmapper.map(*git,cornerIndexDune,n)])
           {
             basicIncrement();
             if (git == gend) return;
           }
-          visited[vertexmapper.map(*git,index,n)] = true;
+          visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
           break;
         case VTKOptions::nonconforming :
           basicIncrement();
@@ -329,7 +329,8 @@ namespace Dune
       bool equals (const VertexIterator & cit) const
       {
         return git == cit.git
-               && index == cit.index && datamode == cit.datamode;
+               && cornerIndexDune == cit.cornerIndexDune
+               && datamode == cit.datamode;
       }
       Entity& dereference() const
       {
@@ -338,12 +339,13 @@ namespace Dune
       //! index of vertex within the entity, in Dune-numbering
       int localindex () const
       {
-        return index;
+        return cornerIndexDune;
       }
       //! position of vertex inside the entity
       const FieldVector<DT,n> & position () const
       {
-        return GenericReferenceElements<DT,n>::general(git->type()).position(index,n);
+        return GenericReferenceElements<DT,n>::general(git->type())
+               .position(cornerIndexDune,n);
       }
     };
 
@@ -384,7 +386,7 @@ namespace Dune
       VTKOptions::DataMode datamode;
       // Index of the currently visited corner within the current element.
       // NOTE: this is in VTK-numbering, in contrast to VertexIterator.
-      int index;
+      int cornerIndexVTK;
       const VertexMapper & vertexmapper;
       // in conforming mode, for each vertex id (as obtained by vertexmapper)
       // hold its number in the iteration order of VertexIterator (*not*
@@ -400,19 +402,19 @@ namespace Dune
                      const VTKOptions::DataMode & dm,
                      const VertexMapper & vm,
                      const std::vector<int> & num) :
-        git(x), gend(end), datamode(dm), index(0),
+        git(x), gend(end), datamode(dm), cornerIndexVTK(0),
         vertexmapper(vm),
         number(num), offset(0) {};
       void increment ()
       {
         if( git == gend )
           return;
-        ++index;
+        ++cornerIndexVTK;
         const int numCorners = git->template count< n >();
-        if( index == numCorners )
+        if( cornerIndexVTK == numCorners )
         {
           offset += numCorners;
-          index = 0;
+          cornerIndexVTK = 0;
 
           ++git;
           while( (git != gend) && (git->partitionType() != InteriorEntity) )
@@ -422,7 +424,8 @@ namespace Dune
       bool equals (const CornerIterator & cit) const
       {
         return git == cit.git
-               && index == cit.index && datamode == cit.datamode;
+               && cornerIndexVTK == cit.cornerIndexVTK
+               && datamode == cit.datamode;
       }
       Entity& dereference() const
       {
@@ -439,9 +442,9 @@ namespace Dune
         {
         case VTKOptions::conforming :
           return
-            number[vertexmapper.map(*git,renumber(*git,index),n)];
+            number[vertexmapper.map(*git,renumber(*git,cornerIndexVTK),n)];
         case VTKOptions::nonconforming :
-          return offset + renumber(*git,index);
+          return offset + renumber(*git,cornerIndexVTK);
         default :
           DUNE_THROW(IOError,"VTKWriter: unsupported DataMode" << datamode);
         }
