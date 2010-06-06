@@ -137,6 +137,37 @@ void checkFaceDataMapper(const Mapper& mapper, const IndexSet& indexSet)
 #endif
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//   Run all the checks for a given grid.
+//////////////////////////////////////////////////////////////////////////////
+template<typename Grid>
+void checkGrid(const Grid& grid) {
+  static const unsigned dimg = Grid::dimension;
+  {   // check constructor without layout class
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, ElementDataLayout>
+    leafMCMGMapper(grid);
+    checkElementDataMapper(leafMCMGMapper, grid.leafView());
+  }
+  {   // check constructor with layout class
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, ElementDataLayout>
+    leafMCMGMapper(grid, ElementDataLayout<dimg>());
+    checkElementDataMapper(leafMCMGMapper, grid.leafView());
+  }
+
+  for (int i=2; i<=grid.maxLevel(); i++) {
+    {     // check constructor without layout class
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid, ElementDataLayout>
+      levelMCMGMapper(grid, i);
+      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
+    }
+    {     // check constructor with layout class
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid, ElementDataLayout>
+      levelMCMGMapper(grid, i, ElementDataLayout<dimg>());
+      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
+    }
+  }
+}
+
 /*
    The MultipleGeometryMultipleCodimMapper only does something helpful on grids with more
    than one element type.  So far only UGGrids do this, so we use them to test the mapper.
@@ -163,13 +194,7 @@ int main(int argc, char** argv) try
     grid.adapt();
     grid.globalRefine(1);
 
-    LeafMultipleCodimMultipleGeomTypeMapper<GridType, ElementDataLayout> leafMCMGMapper(grid);
-    checkElementDataMapper(leafMCMGMapper, grid.leafView());
-
-    for (int i=2; i<=grid.maxLevel(); i++) {
-      LevelMultipleCodimMultipleGeomTypeMapper<GridType, ElementDataLayout> levelMCMGMapper(grid, i);
-      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
-    }
+    checkGrid(grid);
   }
 
   // ////////////////////////////////////////////////////////////////////////
@@ -188,13 +213,7 @@ int main(int argc, char** argv) try
     grid.adapt();
     grid.globalRefine(1);
 
-    LeafMultipleCodimMultipleGeomTypeMapper<GridType, ElementDataLayout> leafMCMGMapper(grid);
-    checkElementDataMapper(leafMCMGMapper, grid.leafView());
-
-    for (int i=2; i<=grid.maxLevel(); i++) {
-      LevelMultipleCodimMultipleGeomTypeMapper<GridType, ElementDataLayout> levelMCMGMapper(grid, i);
-      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
-    }
+    checkGrid(grid);
   }
 
   return 0;
