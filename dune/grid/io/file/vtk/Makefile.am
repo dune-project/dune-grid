@@ -3,6 +3,7 @@
 vtkiodir = $(includedir)/dune/grid/io/file/vtk
 vtkio_HEADERS =					\
 	b64enc.hh				\
+	common.hh				\
 	subsamplingvtkwriter.hh			\
 	vtksequencewriter.hh			\
 	vtkwriter.hh

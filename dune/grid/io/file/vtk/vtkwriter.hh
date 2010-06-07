@@ -20,6 +20,7 @@
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridenums.hh>
+#include <dune/grid/io/file/vtk/common.hh>
 
 #include "b64enc.hh"
 
@@ -42,104 +43,6 @@
 
 namespace Dune
 {
-  /** \brief options for VTK output
-      \ingroup VTK */
-  struct VTKOptions
-  {
-    enum OutputType {
-      /** @brief Output to the file is in ascii. */
-      ascii,
-      /** @brief Output to the file is inline binary. */
-      binary,
-      /** @brief Ouput is appended binary to the file. */
-      binaryappended
-      // /** @brief Output to the file is compressed inline binary. */
-      // binarycompressed,
-      // /** @brief Ouput is compressed and appended to the file. */
-      // compressedappended
-    };
-    enum DataMode {
-      /** @brief Output conforming data. */
-      conforming,
-      /** @brief Output non conforming data. */
-      nonconforming
-    };
-  };
-
-
-  // map type to name in data array
-  template<class T>
-  struct VTKTypeNameTraits {
-    std::string operator () (){
-      return "";
-    }
-  };
-
-  template<>
-  struct VTKTypeNameTraits<char> {
-    std::string operator () () {
-      return "Int8";
-    }
-    typedef int PrintType;
-  };
-
-  template<>
-  struct VTKTypeNameTraits<unsigned char> {
-    std::string operator () () {
-      return "UInt8";
-    }
-    typedef int PrintType;
-  };
-
-  template<>
-  struct VTKTypeNameTraits<short> {
-    std::string operator () () {
-      return "Int16";
-    }
-    typedef short PrintType;
-  };
-
-  template<>
-  struct VTKTypeNameTraits<unsigned short> {
-    std::string operator () () {
-      return "UInt16";
-    }
-    typedef unsigned short PrintType;
-  };
-
-  template<>
-  struct VTKTypeNameTraits<int> {
-    std::string operator () () {
-      return "Int32";
-    }
-    typedef int PrintType;
-  };
-
-  template<>
-  struct VTKTypeNameTraits<unsigned int> {
-    std::string operator () () {
-      return "UInt32";
-    }
-    typedef unsigned int PrintType;
-  };
-
-  template<>
-  struct VTKTypeNameTraits<float> {
-    std::string operator () () {
-      return "Float32";
-    }
-    typedef float PrintType;
-  };
-
-  template<>
-  struct VTKTypeNameTraits<double> {
-    std::string operator () () {
-      return "Float64";
-    }
-    typedef double PrintType;
-  };
-
-
   /** \brief A base class for grid functions with any return type and dimension
       \ingroup VTK
 
