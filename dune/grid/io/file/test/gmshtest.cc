@@ -74,6 +74,7 @@ try
   const std::string path( "../../../../../doc/grids/gmsh/" );
   std::string curved2d( path ); curved2d += "curved2d.msh";
   std::string circ2nd(  path ); circ2nd  += "circle2ndorder.msh";
+  std::string sphere(   path ); sphere   += "sphere.msh";
   std::string pyramid(  path ); pyramid  += "pyramid.msh";
   std::string pyr2nd(   path ); pyr2nd   += "pyramid2ndorder.msh";
 
@@ -98,6 +99,8 @@ try
   testReadingGrid<AlbertaGrid<2> >( curved2d, refinements );
 #endif
 #if ALBERTA_DIM==3
+  std::cout << "reading AlbertaGrid<2>" << std::endl;
+  testReadingGrid<AlbertaGrid<2> >( sphere, refinements );
   std::cout << "reading AlbertaGrid<3>" << std::endl;
   testReadingGrid<AlbertaGrid<3> >( pyramid, refinements );
 #endif
