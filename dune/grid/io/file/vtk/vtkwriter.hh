@@ -21,6 +21,7 @@
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/io/file/vtk/common.hh>
+#include <dune/grid/io/file/vtk/function.hh>
 
 #include "b64enc.hh"
 
@@ -43,39 +44,6 @@
 
 namespace Dune
 {
-  /** \brief A base class for grid functions with any return type and dimension
-      \ingroup VTK
-
-      Trick : use double as return type
-   */
-  template <class Grid>
-  class VTKFunction
-  {
-  public:
-    typedef typename Grid::ctype ctype;
-    enum { dim = Grid::dimension };
-    typedef typename Grid::template Codim< 0 >::Entity Entity;
-
-    //! return number of components (1 for scalar valued functions, 3 for
-    //! vector valued function in 3D etc.)
-    virtual int ncomps () const = 0;
-
-    //! evaluate single component comp in the entity e at local coordinates xi
-    /*! Evaluate the function in an entity at local coordinates.
-       @param[in]  comp   number of component to be evaluated
-       @param[in]  e      reference to grid entity of codimension 0
-       @param[in]  xi     point in local coordinates of the reference element of e
-       \return            value of the component
-     */
-    virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<ctype,dim>& xi) const = 0;
-
-    //! get name
-    virtual std::string name () const = 0;
-
-    //! virtual destructor
-    virtual ~VTKFunction () {}
-  };
-
   /**
    * @brief Writer for the ouput of grid functions in the vtk format.
    * @ingroup VTK
@@ -350,127 +318,6 @@ namespace Dune
                              datamode, *vertexmapper, number );
     }
 
-  private:
-    /** \brief take a vector and interpret it as cell data
-        \ingroup VTK
-     */
-    template<class V>
-    class P0VectorWrapper : public VTKFunction
-    {
-      typedef MultipleCodimMultipleGeomTypeMapper<GridView,
-          MCMGElementLayout> VM0;
-    public:
-      //! return number of components
-      virtual int ncomps () const
-      {
-        return 1;
-      }
-
-      //! evaluate
-      virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<DT,n>& xi) const
-      {
-        return v[mapper.map(e)*ncomps_+mycomp_];
-      }
-
-      //! get name
-      virtual std::string name () const
-      {
-        return s;
-      }
-
-      //! construct from a vector and a name
-      P0VectorWrapper ( const GridView &gridView, const V &v_, const std::string &s_, int ncomps=1, int mycomp=0 )
-        : // g( gridView.grid() ),
-          // is( gridView.indexSet() ),
-          v( v_ ),
-          s( s_ ),
-          ncomps_(ncomps),
-          mycomp_(mycomp),
-          mapper( gridView )
-      {
-        if (v.size()!=(unsigned int)(mapper.size()*ncomps_))
-          DUNE_THROW(IOError,"VTKWriter::P0VectorWrapper: size mismatch");
-      }
-
-      virtual ~P0VectorWrapper() {}
-
-    private:
-      // const Grid& g;
-      // const IndexSet &is;
-      const V& v;
-      std::string s;
-      int ncomps_,mycomp_;
-      VM0 mapper;
-    };
-
-    /** \brief take a vector and interpret it as vertex data
-        \ingroup VTK
-        \tparam V Data container type
-     */
-    template<class V>
-    class P1VectorWrapper : public VTKFunction
-    {
-      typedef MultipleCodimMultipleGeomTypeMapper<GridView,
-          MCMGVertexLayout> VM1;
-
-    public:
-      //! return number of components
-      virtual int ncomps () const
-      {
-        return 1;
-      }
-
-      //! evaluate
-      virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<DT,n>& xi) const
-      {
-        double min=1E100;
-        int imin=-1;
-        Dune::GeometryType gt = e.type();
-        for (int i=0; i<e.template count<n>(); ++i)
-        {
-          Dune::FieldVector<DT,n>
-          local = Dune::GenericReferenceElements<DT,n>::general(gt).position(i,n);
-          local -= xi;
-          if (local.infinity_norm()<min)
-          {
-            min = local.infinity_norm();
-            imin = i;
-          }
-        }
-        return v[mapper.map(e,imin,n)*ncomps_+mycomp_];
-      }
-
-      //! get name
-      virtual std::string name () const
-      {
-        return s;
-      }
-
-      //! construct from a vector and a name
-      P1VectorWrapper ( const GridView &gridView, const V &v_, const std::string &s_, int ncomps=1, int mycomp=0 )
-        : g( gridView.grid() ),
-          is( gridView.indexSet() ),
-          v( v_ ),
-          s( s_ ),
-          ncomps_(ncomps),
-          mycomp_(mycomp),
-          mapper( gridView )
-      {
-        if (v.size()!=(unsigned int)(mapper.size()*ncomps_))
-          DUNE_THROW(IOError,"VTKWriter::P1VectorWrapper: size mismatch");
-      }
-
-      virtual ~P1VectorWrapper() {}
-
-    private:
-      const Grid& g;
-      const IndexSet &is;
-      const V& v;
-      std::string s;
-      int ncomps_,mycomp_;
-      VM1 mapper;
-    };
-
   public:
     /**
      * @brief Construct a VTKWriter working on a specific GridView.
@@ -525,12 +372,13 @@ namespace Dune
     template<class V>
     void addCellData (const V& v, const std::string &name, int ncomps = 1)
     {
+      typedef P0VTKFunction<GridView, V> Function;
       for (int c=0; c<ncomps; ++c) {
         std::stringstream compName;
         compName << name;
         if (ncomps>1)
           compName << "[" << c << "]";
-        VTKFunction* p = new P0VectorWrapper< V >( gridView_, v, compName.str(), ncomps, c );
+        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
         celldata.push_back(VTKFunctionPtr(p));
       }
     }
@@ -572,12 +420,13 @@ namespace Dune
     template<class V>
     void addVertexData (const V& v, const std::string &name, int ncomps=1)
     {
+      typedef P1VTKFunction<GridView, V> Function;
       for (int c=0; c<ncomps; ++c) {
         std::stringstream compName;
         compName << name;
         if (ncomps>1)
           compName << "[" << c << "]";
-        VTKFunction* p = new P1VectorWrapper< V >( gridView_, v, compName.str(), ncomps, c);
+        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
         vertexdata.push_back(VTKFunctionPtr(p));
       }
     }
