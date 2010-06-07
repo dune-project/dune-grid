@@ -1,6 +1,10 @@
 # $Id: Makefile.am 2547 2006-04-28 12:15:33Z robertk $
 
 vtkiodir = $(includedir)/dune/grid/io/file/vtk
-vtkio_HEADERS = subsamplingvtkwriter.hh vtkwriter.hh vtksequencewriter.hh b64enc.hh
+vtkio_HEADERS =					\
+	b64enc.hh				\
+	subsamplingvtkwriter.hh			\
+	vtksequencewriter.hh			\
+	vtkwriter.hh
 
 include $(top_srcdir)/am/global-rules
