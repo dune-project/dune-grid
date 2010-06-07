@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <string>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -478,6 +479,105 @@ namespace Dune
     }
 
   protected:
+    //! return name of a parallel piece file
+    /**
+     * \param name     Base name of the VTK output.  This should be without
+     *                 any directory parts and without a filename extension.
+     * \param path     Directory part of the resulting piece name.  May be
+     *                 empty, in which case the resulting name will not have a
+     *                 directory part.  If non-empty, may or may not have a
+     *                 trailing '/'.  If a trailing slash is missing, one is
+     *                 appended implicitly.
+     * \param commRank Rank of the process to generate a piece name for.
+     * \param commSize Number of processes writing a parallel vtk output.
+     */
+    std::string getParallelPieceName(const std::string& name,
+                                     const std::string& path,
+                                     int commRank, int commSize) const
+    {
+      std::ostringstream s;
+      if(path.size() > 0) {
+        s << path;
+        if(path[path.size()-1] != '/')
+          s << '/';
+      }
+      s << 's' << std::setw(4) << std::setfill('0') << commSize << ':';
+      s << 'p' << std::setw(4) << std::setfill('0') << commRank << ':';
+      s << name;
+      if(GridView::dimension > 1)
+        s << ".vtu";
+      else
+        s << ".vtp";
+      return s.str();
+    }
+
+    //! return name of a parallel header file
+    /**
+     * \param name     Base name of the VTK output.  This should be without
+     *                 any directory parts and without a filename extension.
+     * \param path     Directory part of the resulting header name.  May be
+     *                 empty, in which case the resulting name will not have a
+     *                 directory part.  If non-empty, may or may not have a
+     *                 trailing '/'.  If a trailing slash is missing, one is
+     *                 appended implicitly.
+     * \param commSize Number of processes writing a parallel vtk output.
+     */
+    std::string getParallelHeaderName(const std::string& name,
+                                      const std::string& path,
+                                      int commSize) const
+    {
+      std::ostringstream s;
+      if(path.size() > 0) {
+        s << path;
+        if(path[path.size()-1] != '/')
+          s << '/';
+      }
+      s << 's' << std::setw(4) << std::setfill('0') << commSize << ':';
+      s << name;
+      if(GridView::dimension > 1)
+        s << ".pvtu";
+      else
+        s << ".pvtp";
+      return s.str();
+    }
+
+    //! return name of a parallel piece file
+    /**
+     * For parallel runs (commSize > 1) this is the same as
+     * parallelPieceName().  For serial runs this skips the process and run
+     * size prefixes in the file name.
+     *
+     * \param name     Base name of the VTK output.  This should be without
+     *                 any directory parts and without a filename extension.
+     * \param path     Directory part of the resulting piece name.  May be
+     *                 empty, in which case the resulting name will not have a
+     *                 directory part.  If non-empty, may or may not have a
+     *                 trailing '/'.  If a trailing slash is missing, one is
+     *                 appended implicitly.
+     * \param commRank Rank of the process to generate a piece name for.
+     * \param commSize Number of processes writing a parallel vtk output.
+     */
+    std::string getPieceName(const std::string& name,
+                             const std::string& path,
+                             int commRank, int commSize) const
+    {
+      if(commSize > 1)
+        return getParallelPieceName(name, path, commRank, commSize);
+
+      std::ostringstream s;
+      if(path.size() > 0) {
+        s << path;
+        if(path[path.size()-1] != '/')
+          s << '/';
+      }
+      s << name;
+      if(GridView::dimension > 1)
+        s << ".vtu";
+      else
+        s << ".vtp";
+      return s.str();
+    }
+
     std::string write ( const std::string &name,
                         VTKOptions::OutputType type,
                         const int commRank,
@@ -490,17 +590,11 @@ namespace Dune
       bytecount = 0;
 
       // generate filename for process data
-      std::ostringstream pieceName;
-      if( commSize > 1 )
-      {
-        pieceName << "s" << std::setfill( '0' ) << std::setw( 4 ) << commSize << ":";
-        pieceName << "p" << std::setfill( '0' ) << std::setw( 4 ) << commRank << ":";
-      }
-      pieceName << name << (GridView::dimension > 1 ? ".vtu" : ".vtp");
+      std::string pieceName = getPieceName(name, "", commRank, commSize);
 
       // write process data
       std::ofstream file;
-      file.open( pieceName.str().c_str(), std::ios::binary );
+      file.open( pieceName.c_str(), std::ios::binary );
       if (! file.is_open())
         DUNE_THROW(IOError, "Could not write to piece file " << pieceName);
       writeDataFile( file );
@@ -508,20 +602,18 @@ namespace Dune
 
       // for serial jobs we're done here
       if( commSize == 1 )
-        return pieceName.str();
+        return pieceName;
 
       // synchronize processes
       gridView_.comm().barrier();
 
       // generate name of parallel header
-      std::ostringstream parallelName;
-      parallelName << "s" << std::setfill( '0' ) << std::setw( 4 ) << commSize << ":";
-      parallelName << name << (GridView::dimension > 1 ? ".pvtu" : ".pvtp");
+      std::string parallelName = getParallelHeaderName(name, "", commSize);
 
       // on process 0: write out parallel header
       if( commRank == 0 )
       {
-        file.open( parallelName.str().c_str() );
+        file.open( parallelName.c_str() );
         if (! file.is_open())
           DUNE_THROW(IOError, "Could not write to parallel file " << parallelName);
         writeParallelHeader( file, name.c_str(), ".", commSize );
@@ -530,7 +622,7 @@ namespace Dune
 
       // synchronize processes
       gridView_.comm().barrier();
-      return parallelName.str();
+      return parallelName;
     }
 
     //! write output; interface might change later
@@ -631,24 +723,18 @@ namespace Dune
         // the pieces are relative to the pvtu files
         sprintf(relpiecepath,"%s",extendpath);
       }
-      char fullname[ 8192 ];
-      if (GridView::dimension>1)
-        sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath, commSize, commRank, name);
-      else
-        sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath, commSize, commRank, name);
-      file.open(fullname,std::ios::binary);
+      std::string fullname = getParallelPieceName(name, piecepath, commRank,
+                                                  commSize);
+      file.open(fullname.c_str(),std::ios::binary);
       if (! file.is_open())
         DUNE_THROW(IOError, "Could not write to piecefile file " << fullname);
       writeDataFile(file);
       file.close();
       gridView_.comm().barrier();
+      fullname = getParallelHeaderName(name, path, commSize);
       if( commRank  ==0 )
       {
-        if (GridView::dimension>1)
-          sprintf(fullname,"%s/s%04d:%s.pvtu",path, commSize, name);
-        else
-          sprintf(fullname,"%s/s%04d:%s.pvtp",path, commSize, name);
-        file.open(fullname);
+        file.open(fullname.c_str());
         if (! file.is_open())
           DUNE_THROW(IOError, "Could not write to parallel file " << fullname);
         writeParallelHeader(file,name,relpiecepath, commSize );
@@ -769,11 +855,9 @@ namespace Dune
       // Pieces
       for( int i = 0; i < commSize; ++i )
       {
-        char fullname[ 4096 ];
-        if (GridView::dimension>1)
-          sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath, commSize, i,piecename);
-        else
-          sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath, commSize, i,piecename);
+        const std::string& fullname = getParallelPieceName(piecename,
+                                                           piecepath, i,
+                                                           commSize);
         indent(s); s << "<Piece Source=\"" << fullname << "\"/>\n";
       }
 
