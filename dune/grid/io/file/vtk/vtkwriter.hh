@@ -778,6 +778,23 @@ namespace Dune
 
   private:
     //! write header file in parallel case to stream
+    /**
+     * Writes a .pvtu/.pvtp file for a collection of concurrently written
+     * .vtu/.vtp files.
+     *
+     * \param s         Stream to write the file contents to.
+     * \param piecename Base name of the pieces.  Should not contain a
+     *                  directory part or filename extension.
+     * \param piecepath Directory part of the pieces.  Since paraview does not
+     *                  support absolute paths in parallel collection files,
+     *                  this should be a path relative to the directory the
+     *                  collection file resides in.  A trailing '/' is
+     *                  optional, and an empty value "" is equivalent to the
+     *                  value "." except it will look nicer in the collection
+     *                  file.
+     * \param commSize  Number of processes which are producing the VTK
+     *                  output.
+     */
     void writeParallelHeader ( std::ostream& s, const char* piecename, const char* piecepath,
                                const int commSize )
     {
