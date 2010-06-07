@@ -456,6 +456,11 @@ namespace Dune
 
     /** \brief write output (interface might change later)
      *
+     *  This method can be used in parallel as well as in serial programs.
+     *  For serial runs (commSize=1) it chooses other names without the
+     *  "s####:p####:" prefix for the .vtu/.vtp files and omits writing of the
+     *  .pvtu/pvtp file however.
+     *
      *  \param[in]  name  basic name to write (may not contain a path)
      *  \param[in]  type  type of output (e.g,, ASCII) (optional)
      */
@@ -467,10 +472,37 @@ namespace Dune
 
     /** \brief write output (interface might change later)
      *
-     *  \param[in]  name        basic name to write (may not contain a path)
-     *  \param[in]  path        path to data output
-     *  \param[in]  extendpath  path keyword for each process
-     *  \param[in]  type        type of output (e.g,, ASCII) (optional)
+     * "pwrite" means "path write" (i.e. write somewhere else than the current
+     * directory).  The "p" does not mean this method has a monopoly on
+     * parallel writing, the regular write(const std::string &,
+     * VTKOptions::OutputType) method ca do that just fine.
+     *
+     * \param name       Base name of the output files.  This should not
+     *                   contain any directory part and no filename
+     *                   extensions.  It will be used both for each processes
+     *                   piece as well as the parallel collection file.
+     * \param path       Directory where to put the parallel collection file.
+     * \param extendpath Directory where to put the piece file of this process.
+     * \param type       How to encode the data in the file (e.g. ascii).
+     *
+     * The path variable determines the directory where the .pvtu/.pvtp file
+     * is written.  The directory where each processors .vtu/.vtp is written
+     * depends on both the argument path and extendpath.  The parallel header
+     * (.pvtu/.pvtp) actually contains relative paths to the .vtu/.vtp files,
+     * denoted here as relpiecepath:
+     * <ul>
+     * <li>If path both starts and ends with a '/', then extendpath is a
+     *     absolute path starting at the root directory (no matter whether
+     *     extenpath actually starts with '/' or not).  relpiecepath starts
+     *     with as many ".." seperated by '/' as path contains '/', followed
+     *     by the value of extendpath with a leading and a trailing '/' added
+     *     if they were not present already.
+     * <li>Otherwise, extendpath is relative to path (again, no matter whether
+     *     extenpath actually starts with '/' or not).  relpiecepath is
+     *     exactly identical to extendpath -- this implies that a leading '/'
+     *     in extendpath is not permissible in this case, otherwise
+     *     relpiecepath would not be relative.
+     * </ul>
      */
     std::string pwrite ( const char* name,  const char* path, const char* extendpath,
                          VTKOptions::OutputType type = VTKOptions::ascii )
@@ -626,6 +658,37 @@ namespace Dune
     }
 
     //! write output; interface might change later
+    /**
+     * \param name       Base name of the output files.  This should not
+     *                   contain any directory part and not filename
+     *                   extensions.  It will be used both for each processes
+     *                   piece as well as the parallel collection file.
+     * \param path       Directory where to put the parallel collection file.
+     * \param extendpath Directory where to put the piece file of this process.
+     * \param ot         How to encode the data in the file.
+     * \param commRank   Rank of the current process.
+     * \param commSize   Number of processes taking part in this write
+     *                   operation.
+     *
+     * The path variable determines the directory where the .pvtu/.pvtp file
+     * is written.  The directory where each processors .vtu/.vtp is written
+     * depends on both the argument path and extendpath.  The parallel header
+     * (.pvtu/.pvtp) actually contains relative paths to the .vtu/.vtp files,
+     * denoted here as relpiecepath:
+     * <ul>
+     * <li>If path both starts and ends with a '/', then extendpath is a
+     *     absolute path starting at the root directory (no matter whether
+     *     extenpath actually starts with '/' or not).  relpiecepath starts
+     *     with as many ".." seperated by '/' as path contains '/', followed
+     *     by the value of extendpath with a leading and a trailing '/' added
+     *     if they were not present already.
+     * <li>Otherwise, extendpath is relative to path (again, no matter whether
+     *     extenpath actually starts with '/' or not).  relpiecepath is
+     *     exactly identical to extendpath -- this implies that a leading '/'
+     *     in extendpath is not permissible in this case, otherwise
+     *     relpiecepath would not be relative.
+     * </ul>
+     */
     std::string pwrite ( const char* name,  const char* path, const char* extendpath,
                          VTKOptions::OutputType ot,
                          const int commRank,
