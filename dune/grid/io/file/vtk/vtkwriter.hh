@@ -84,10 +84,19 @@ namespace Dune
   protected:
     typedef typename std::list<VTKFunctionPtr>::const_iterator FunctionIterator;
 
+    //! Iterator over the grids elements
+    /**
+     * This class iterates over the gridview's elements.  It is the same as
+     * the gridview's Codim<0>::Iterator for the InteriorBorder_Partition,
+     * except that it add a position() method.
+     */
     class CellIterator : public GridCellIterator
     {
     public:
+      //! construct a CellIterator from the gridview's Iterator.
       CellIterator(const GridCellIterator & x) : GridCellIterator(x) {};
+      //! get the position of the center of the element, in element-local
+      //! coordinates
       const FieldVector<DT,n> position() const
       {
         return GenericReferenceElements<DT,n>::general((*this)->type()).position(0,0);
