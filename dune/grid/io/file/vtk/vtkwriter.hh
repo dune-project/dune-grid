@@ -744,38 +744,6 @@ namespace Dune
       return fullname;
     }
 
-  protected:
-    enum VTKGeometryType
-    {
-      vtkLine = 3,
-      vtkTriangle = 5,
-      vtkQuadrilateral = 9,
-      vtkTetrahedron = 10,
-      vtkHexahedron = 12,
-      vtkPrism = 13,
-      vtkPyramid = 14
-    };
-
-    //! mapping from GeometryType to VTKGeometryType
-    static VTKGeometryType vtkType(const Dune::GeometryType & t)
-    {
-      if (t.isLine())
-        return vtkLine;
-      if (t.isTriangle())
-        return vtkTriangle;
-      if (t.isQuadrilateral())
-        return vtkQuadrilateral;
-      if (t.isTetrahedron())
-        return vtkTetrahedron;
-      if (t.isPyramid())
-        return vtkPyramid;
-      if (t.isPrism())
-        return vtkPrism;
-      if (t.isHexahedron())
-        return vtkHexahedron;
-      DUNE_THROW(IOError,"VTKWriter: unsupported GeometryType " << t);
-    }
-
   private:
     //! write header file in parallel case to stream
     /**

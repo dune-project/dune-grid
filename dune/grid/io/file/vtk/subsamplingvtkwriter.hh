@@ -61,7 +61,6 @@ namespace Dune
     using Base::vertexBegin;
     using Base::vertexEnd;
     using Base::vertexdata;
-    using Base::vtkType;
 
   public:
     /**
