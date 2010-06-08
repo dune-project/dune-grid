@@ -460,7 +460,8 @@ namespace Dune
      *  This method can be used in parallel as well as in serial programs.
      *  For serial runs (commSize=1) it chooses other names without the
      *  "s####:p####:" prefix for the .vtu/.vtp files and omits writing of the
-     *  .pvtu/pvtp file however.
+     *  .pvtu/pvtp file however.  For parallel runs (commSize > 1) it is the
+     *  same as a call to pwrite() with path="" and extendpath="".
      *
      *  \param[in]  name  basic name to write (may not contain a path)
      *  \param[in]  type  type of output (e.g,, ASCII) (optional)
@@ -566,11 +567,10 @@ namespace Dune
       return s.str();
     }
 
-    //! return name of a parallel piece file
+    //! return name of a serial piece file
     /**
-     * For parallel runs (commSize > 1) this is the same as
-     * parallelPieceName().  For serial runs this skips the process and run
-     * size prefixes in the file name.
+     * This is similar to getParallelPieceName, but skips the prefixes for
+     * commSize ("s####:") and commRank ("p####:").
      *
      * \param name     Base name of the VTK output.  This should be without
      *                 any directory parts and without a filename extension.
@@ -579,35 +579,41 @@ namespace Dune
      *                 directory part.  If non-empty, may or may not have a
      *                 trailing '/'.  If a trailing slash is missing, one is
      *                 appended implicitly.
-     * \param commRank Rank of the process to generate a piece name for.
-     * \param commSize Number of processes writing a parallel vtk output.
      */
-    std::string getPieceName(const std::string& name,
-                             const std::string& path,
-                             int commRank, int commSize) const
+    std::string getSerialPieceName(const std::string& name,
+                                   const std::string& path) const
     {
-      if(commSize > 1)
-        return getParallelPieceName(name, path, commRank, commSize);
+      static const std::string extension =
+        GridView::dimension == 1 ? ".vtp" : ".vtu";
 
-      std::ostringstream s;
-      if(path.size() > 0) {
-        s << path;
-        if(path[path.size()-1] != '/')
-          s << '/';
-      }
-      s << name;
-      if(GridView::dimension > 1)
-        s << ".vtu";
-      else
-        s << ".vtp";
-      return s.str();
+      return concatPaths(path, name+extension);
     }
 
+    /** \brief write output (interface might change later)
+     *
+     *  This method can be used in parallel as well as in serial programs.
+     *  For serial runs (commSize=1) it chooses other names without the
+     *  "s####:p####:" prefix for the .vtu/.vtp files and omits writing of the
+     *  .pvtu/pvtp file however.  For parallel runs (commSize > 1) it is the
+     *  same as a call to pwrite() with path="" and extendpath="".
+     *
+     *  \param name     Base name of the output files.  This should not
+     *                  contain any directory part and no filename extensions.
+     *  \param type     How to encode the data in the file.
+     *  \param commRank Rank of the current process.
+     *  \param commSize Number of processes taking part in this write
+     *                  operation.
+     */
     std::string write ( const std::string &name,
                         VTKOptions::OutputType type,
                         const int commRank,
                         const int commSize )
     {
+      // in the parallel case, just use pwrite, it has all the necessary
+      // stuff, so we don't need to reimplement it here.
+      if(commSize > 1)
+        return pwrite(name, "", "", type, commRank, commSize);
+
       // make data mode visible to private functions
       outputtype = type;
 
@@ -615,7 +621,7 @@ namespace Dune
       bytecount = 0;
 
       // generate filename for process data
-      std::string pieceName = getPieceName(name, "", commRank, commSize);
+      std::string pieceName = getSerialPieceName(name, "");
 
       // write process data
       std::ofstream file;
@@ -625,29 +631,7 @@ namespace Dune
       writeDataFile( file );
       file.close();
 
-      // for serial jobs we're done here
-      if( commSize == 1 )
-        return pieceName;
-
-      // synchronize processes
-      gridView_.comm().barrier();
-
-      // generate name of parallel header
-      std::string parallelName = getParallelHeaderName(name, "", commSize);
-
-      // on process 0: write out parallel header
-      if( commRank == 0 )
-      {
-        file.open( parallelName.c_str() );
-        if (! file.is_open())
-          DUNE_THROW(IOError, "Could not write to parallel file " << parallelName);
-        writeParallelHeader( file, name.c_str(), ".", commSize );
-        file.close();
-      }
-
-      // synchronize processes
-      gridView_.comm().barrier();
-      return parallelName;
+      return pieceName;
     }
 
     //! write output; interface might change later
@@ -674,10 +658,10 @@ namespace Dune
      * \throw NotImplemented Extendpath is absolute but path is relative.
      * \throw IOError        Failed to open a file.
      */
-    std::string pwrite ( const char* name,  const char* path, const char* extendpath,
-                         VTKOptions::OutputType ot,
-                         const int commRank,
-                         const int commSize )
+    std::string pwrite(const std::string& name, const std::string& path,
+                       const std::string& extendpath,
+                       VTKOptions::OutputType ot, const int commRank,
+                       const int commSize )
     {
       // make data mode visible to private functions
       outputtype=ot;
