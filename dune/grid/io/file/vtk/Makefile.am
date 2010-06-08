@@ -4,6 +4,7 @@ vtkiodir = $(includedir)/dune/grid/io/file/vtk
 vtkio_HEADERS =					\
 	b64enc.hh				\
 	common.hh				\
+	dataarraywriter.hh			\
 	function.hh				\
 	subsamplingvtkwriter.hh			\
 	vtksequencewriter.hh			\

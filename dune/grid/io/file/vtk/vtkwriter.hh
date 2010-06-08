@@ -23,9 +23,8 @@
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/io/file/vtk/common.hh>
+#include <dune/grid/io/file/vtk/dataarraywriter.hh>
 #include <dune/grid/io/file/vtk/function.hh>
-
-#include "b64enc.hh"
 
 /** @file
     @author Peter Bastian, Christian Engwer
@@ -1198,157 +1197,6 @@ namespace Dune
       s.flush();
     }
 
-    //! base class for data array writers
-    template<class T>
-    class VTKDataArrayWriter
-    {
-    public:
-      //! write one data element
-      virtual void write (T data) = 0;
-      //! virtual destructor
-      virtual ~VTKDataArrayWriter () {}
-    };
-
-  private:
-    //! a streaming writer for data array tags, uses ASCII inline format
-    template<class T>
-    class VTKAsciiDataArrayWriter : public VTKDataArrayWriter<T>
-    {
-    public:
-      //! make a new data array writer
-      VTKAsciiDataArrayWriter (std::ostream& theStream, std::string name, int ncomps)
-        : s(theStream), counter(0), numPerLine(12)
-      {
-        VTKTypeNameTraits<T> tn;
-        s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
-        //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-        if (ncomps>3)
-          DUNE_THROW(IOError, "VTKWriter does not support more than 3 components");
-        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
-        s << "format=\"ascii\">\n";
-      }
-
-      //! write one data element to output stream
-      void write (T data)
-      {
-        typedef typename VTKTypeNameTraits<T>::PrintType PT;
-        s << (PT) data << " ";
-        counter++;
-        if (counter%numPerLine==0) s << "\n";
-      }
-
-      //! finish output; writes end tag
-      ~VTKAsciiDataArrayWriter ()
-      {
-        if (counter%numPerLine!=0) s << std::endl;
-        s << "</DataArray>\n";
-      }
-
-    private:
-      std::ostream& s;
-      int counter;
-      int numPerLine;
-    };
-
-    // a streaming writer for data array tags, uses binary inline format
-    template<class T>
-    class VTKBinaryDataArrayWriter : public VTKDataArrayWriter<T>
-    {
-    public:
-      //! make a new data array writer
-      VTKBinaryDataArrayWriter (std::ostream& theStream, std::string name, int ncomps, int nitems)
-        : s(theStream)
-      {
-        VTKTypeNameTraits<T> tn;
-        ncomps = (ncomps>1 ? 3 : 1);
-        s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
-        //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-        if (ncomps>3)
-          DUNE_THROW(IOError, "VTKWriter does not support more than 3 components");
-        s << "NumberOfComponents=\"" << ncomps << "\" ";
-        s << "format=\"binary\">\n";
-        // reset chunk
-        chunk.txt.read(0,0);
-        // store size
-        unsigned long int size = ncomps*nitems*sizeof(T);
-        b64enc(size);
-        flush();
-      }
-
-      //! write one data element to output stream
-      void write (T data)
-      {
-        b64enc(data);
-      }
-
-      //! finish output; writes end tag
-      ~VTKBinaryDataArrayWriter ()
-      {
-        flush();
-        s << "\n</DataArray>\n";
-        s.flush();
-      }
-
-    private:
-      template <class X>
-      void b64enc(X & data)
-      {
-        char* p = reinterpret_cast<char*>(&data);
-        for (size_t len = sizeof(X); len > 0; len--,p++)
-        {
-          chunk.txt.put(*p);
-          if (chunk.txt.size == 3)
-          {
-            chunk.data.write(obuf);
-            s.write(obuf,4);
-          }
-        }
-      }
-
-      void flush()
-      {
-        if (chunk.txt.size > 0)
-        {
-          chunk.data.write(obuf);
-          s.write(obuf,4);
-        }
-      }
-
-      std::ostream& s;
-      b64chunk chunk;
-      char obuf[4];
-    };
-
-    //! a streaming writer for data array tags, uses binary appended format
-    template<class T>
-    class VTKBinaryAppendedDataArrayWriter : public VTKDataArrayWriter<T>
-    {
-    public:
-      //! make a new data array writer
-      VTKBinaryAppendedDataArrayWriter (std::ostream& theStream, std::string name, int ncomps, unsigned int& bc)
-        : s(theStream),bytecount(bc)
-      {
-        VTKTypeNameTraits<T> tn;
-        s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
-        //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-        if (ncomps>3)
-          DUNE_THROW(IOError, "VTKWriter does not support more than 3 components");
-        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
-        s << "format=\"appended\" offset=\""<< bytecount << "\" />\n";
-        bytecount += 4;   // header
-      }
-
-      //! write one data element to output stream
-      void write (T data)
-      {
-        bytecount += sizeof(T);
-      }
-
-    private:
-      std::ostream& s;
-      unsigned int& bytecount;
-    };
-
   protected:
     /** @brief Make a VTKDataArrayWriter with new
      *
@@ -1363,15 +1211,8 @@ namespace Dune
                                                   unsigned int components,
                                                   unsigned int totallength)
     {
-      switch(outputtype) {
-      case VTKOptions::ascii :
-        return new VTKAsciiDataArrayWriter<T>(s, name, components);
-      case VTKOptions::binary :
-        return new VTKBinaryDataArrayWriter<T>(s, name, components, totallength);
-      case VTKOptions::binaryappended :
-        return new VTKBinaryAppendedDataArrayWriter<T>(s, name, components, bytecount);
-      }
-      DUNE_THROW(IOError, "VTKWriter: unsupported OutputType" << outputtype);
+      return Dune::makeVTKDataArrayWriter<T>(outputtype, s, name, components,
+                                             totallength, bytecount);
     }
 
     //! write out data in binary

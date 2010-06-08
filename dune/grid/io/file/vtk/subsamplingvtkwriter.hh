@@ -160,7 +160,7 @@ namespace Dune
     indentUp();
     for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
     {
-      typename Base::template VTKDataArrayWriter<float>
+      VTKDataArrayWriter<float>
       *p = Base::template makeVTKDataArrayWriter<float>(s, (*it)->name().c_str(), (*it)->ncomps(), (*it)->ncomps()*ncells);
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
@@ -202,7 +202,7 @@ namespace Dune
     indentUp();
     for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
     {
-      typename Base::template VTKDataArrayWriter<float>
+      VTKDataArrayWriter<float>
       *p = Base::template makeVTKDataArrayWriter<float>(s, (*it)->name().c_str(), (*it)->ncomps(), (*it)->ncomps()*nvertices);
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
@@ -230,7 +230,7 @@ namespace Dune
     indent(s); s << "<Points>" << std::endl;
     indentUp();
 
-    typename Base::template VTKDataArrayWriter<float>
+    VTKDataArrayWriter<float>
     *p = Base::template makeVTKDataArrayWriter<float>(s, "Coordinates", 3, 3*nvertices);
     for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
     {
@@ -263,7 +263,7 @@ namespace Dune
     indentUp();
 
     // connectivity
-    typename Base::template VTKDataArrayWriter<int>
+    VTKDataArrayWriter<int>
     *p1 = Base::template makeVTKDataArrayWriter<int>(s, "connectivity", 1, ncorners);
     {
       // The offset within the index numbering
@@ -285,7 +285,7 @@ namespace Dune
     delete p1;
 
     // offsets
-    typename Base::template VTKDataArrayWriter<int>
+    VTKDataArrayWriter<int>
     *p2 = Base::template makeVTKDataArrayWriter<int>(s, "offsets", 1, ncells);
     {
       // The offset into the connectivity array
@@ -306,7 +306,7 @@ namespace Dune
     // types
     if (dim>1)
     {
-      typename Base::template VTKDataArrayWriter<unsigned char>
+      VTKDataArrayWriter<unsigned char>
       *p3 = Base::template makeVTKDataArrayWriter<unsigned char>(s, "types", 1, ncells);
       for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
       {
