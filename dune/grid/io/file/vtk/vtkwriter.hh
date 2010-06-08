@@ -17,6 +17,7 @@
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
+#include <dune/common/path.hh>
 #include <dune/common/shared_ptr.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
@@ -478,31 +479,23 @@ namespace Dune
      * VTKOptions::OutputType) method ca do that just fine.
      *
      * \param name       Base name of the output files.  This should not
-     *                   contain any directory part and no filename
+     *                   contain any directory part and not filename
      *                   extensions.  It will be used both for each processes
      *                   piece as well as the parallel collection file.
-     * \param path       Directory where to put the parallel collection file.
-     * \param extendpath Directory where to put the piece file of this process.
-     * \param type       How to encode the data in the file (e.g. ascii).
+     * \param path       Directory where to put the parallel collection
+     *                   (.pvtu/.pvtp) file.  If it is relative, it is taken
+     *                   realtive to the current directory.
+     * \param extendpath Directory where to put the piece file (.vtu/.vtp) of
+     *                   this process.  If it is relative, it is taken
+     *                   relative to the directory denoted by path.
+     * \param type       How to encode the data in the file.
      *
-     * The path variable determines the directory where the .pvtu/.pvtp file
-     * is written.  The directory where each processors .vtu/.vtp is written
-     * depends on both the argument path and extendpath.  The parallel header
-     * (.pvtu/.pvtp) actually contains relative paths to the .vtu/.vtp files,
-     * denoted here as relpiecepath:
-     * <ul>
-     * <li>If path both starts and ends with a '/', then extendpath is a
-     *     absolute path starting at the root directory (no matter whether
-     *     extenpath actually starts with '/' or not).  relpiecepath starts
-     *     with as many ".." seperated by '/' as path contains '/', followed
-     *     by the value of extendpath with a leading and a trailing '/' added
-     *     if they were not present already.
-     * <li>Otherwise, extendpath is relative to path (again, no matter whether
-     *     extenpath actually starts with '/' or not).  relpiecepath is
-     *     exactly identical to extendpath -- this implies that a leading '/'
-     *     in extendpath is not permissible in this case, otherwise
-     *     relpiecepath would not be relative.
-     * </ul>
+     * \note Currently, extendpath may not be absolute unless path is
+     *       absolute, because that would require the value of the current
+     *       directory.
+     *
+     * \throw NotImplemented Extendpath is absolute but path is relative.
+     * \throw IOError        Failed to open a file.
      */
     std::string pwrite ( const char* name,  const char* path, const char* extendpath,
                          VTKOptions::OutputType type = VTKOptions::ascii )
@@ -663,31 +656,23 @@ namespace Dune
      *                   contain any directory part and not filename
      *                   extensions.  It will be used both for each processes
      *                   piece as well as the parallel collection file.
-     * \param path       Directory where to put the parallel collection file.
-     * \param extendpath Directory where to put the piece file of this process.
+     * \param path       Directory where to put the parallel collection
+     *                   (.pvtu/.pvtp) file.  If it is relative, it is taken
+     *                   realtive to the current directory.
+     * \param extendpath Directory where to put the piece file (.vtu/.vtp) of
+     *                   this process.  If it is relative, it is taken
+     *                   relative to the directory denoted by path.
      * \param ot         How to encode the data in the file.
      * \param commRank   Rank of the current process.
      * \param commSize   Number of processes taking part in this write
      *                   operation.
      *
-     * The path variable determines the directory where the .pvtu/.pvtp file
-     * is written.  The directory where each processors .vtu/.vtp is written
-     * depends on both the argument path and extendpath.  The parallel header
-     * (.pvtu/.pvtp) actually contains relative paths to the .vtu/.vtp files,
-     * denoted here as relpiecepath:
-     * <ul>
-     * <li>If path both starts and ends with a '/', then extendpath is a
-     *     absolute path starting at the root directory (no matter whether
-     *     extenpath actually starts with '/' or not).  relpiecepath starts
-     *     with as many ".." seperated by '/' as path contains '/', followed
-     *     by the value of extendpath with a leading and a trailing '/' added
-     *     if they were not present already.
-     * <li>Otherwise, extendpath is relative to path (again, no matter whether
-     *     extenpath actually starts with '/' or not).  relpiecepath is
-     *     exactly identical to extendpath -- this implies that a leading '/'
-     *     in extendpath is not permissible in this case, otherwise
-     *     relpiecepath would not be relative.
-     * </ul>
+     * \note Currently, extendpath may not be absolute unless path is
+     *       absolute, because that would require the value of the current
+     *       directory.
+     *
+     * \throw NotImplemented Extendpath is absolute but path is relative.
+     * \throw IOError        Failed to open a file.
      */
     std::string pwrite ( const char* name,  const char* path, const char* extendpath,
                          VTKOptions::OutputType ot,
@@ -702,90 +687,10 @@ namespace Dune
 
       // do some magic because paraview can only cope with relative pathes to piece files
       std::ofstream file;
-      char piecepath[ 4096 ];
-      char relpiecepath[ 4096 ];
-      int n=strlen(path);
-      int m=strlen(extendpath);
-      if (n>0 && path[0]=='/' && path[n-1]=='/')
-      {
-        // 1) path is an absolute path to the directory where the pvtu file will be placed
-        // 2) extendpath is an absolute path from "/" where the pieces are placed
-        // 3) pieces are addressed relative in the pvtu files
-        if (m==0)
-        {
-          // write pieces to root :-)
-          piecepath[0] = '/';
-          piecepath[1] = '\0';
-        }
-        else
-        {
-          // make piecepath absolute with trailing "/"
-          char *p=piecepath;
-          if (extendpath[0]!='/')
-          {
-            *p = '/';
-            p++;
-          }
-          for (int i=0; i<m; i++)
-          {
-            *p = extendpath[i];
-            p++;
-          }
-          if (*(p-1)!='/')
-          {
-            *p = '/';
-            p++;
-          }
-          *p = '\0';
-        }
-        // path and piecepath are either "/" or have leading and trailing /
-        // count slashes in path
-        int k=0;
-        const char *p=path;
-        while (*p!='\0')
-        {
-          if (*p=='/') k++;
-          p++;
-        }
-        char *pp = relpiecepath;
-        if (k>1)
-        {
-          for (int i=0; i<k; i++)
-          {
-            *pp='.'; pp++; *pp='.'; pp++; *pp='/'; pp++;
-          }
-        }
-        // now copy the extendpath
-        for (int i=0; i<m; i++)
-        {
-          if (i==0 && extendpath[i]=='/') continue;
-          *pp = extendpath[i];
-          pp++;
-        }
-        if ( pp!=relpiecepath && (*(pp-1)!='/') )
-        {
-          *pp = '/';
-          pp++;
-        }
-        *pp = '\0';
-      }
-      else
-      {
-        // 1) path is a relative path to the directory where pvtu files are placed
-        // 2) extendpath is relative to where the pvtu files are and there the pieces are placed
-        if (n==0 || m==0)
-          sprintf(piecepath,"%s%s",path,extendpath);
-        else
-        {
-          // both are non-zero
-          if (path[n-1]!='/' && extendpath[0]!='/')
-            sprintf(piecepath,"%s/%s",path,extendpath);
-          else
-            sprintf(piecepath,"%s%s",path,extendpath);
-        }
-        // the pieces are relative to the pvtu files
-        sprintf(relpiecepath,"%s",extendpath);
-      }
+      std::string piecepath = concatPaths(path, extendpath);
+      std::string relpiecepath = relativePath(path, piecepath);
+
+      // write this processes .vtu/.vtp piece file
       std::string fullname = getParallelPieceName(name, piecepath, commRank,
                                                   commSize);
       file.open(fullname.c_str(),std::ios::binary);
@@ -794,6 +699,8 @@ namespace Dune
       writeDataFile(file);
       file.close();
       gridView_.comm().barrier();
+
+      // if we are rank 0, write .pvtu/.pvtp parallel header
       fullname = getParallelHeaderName(name, path, commSize);
       if( commRank  ==0 )
       {
@@ -826,8 +733,8 @@ namespace Dune
      * \param commSize  Number of processes which are producing the VTK
      *                  output.
      */
-    void writeParallelHeader ( std::ostream& s, const char* piecename, const char* piecepath,
-                               const int commSize )
+    void writeParallelHeader(std::ostream& s, const std::string& piecename,
+                             const std::string& piecepath, const int commSize)
     {
       // xml header
       s << "<?xml version=\"1.0\"?>\n";
