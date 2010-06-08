@@ -90,6 +90,9 @@ void doWrite( const GridView &gridView, Dune :: VTKOptions :: DataMode dm )
   vtk.write(name);
 
   snprintf(name,256,"vtktest-%iD-%s-binary", dim, VTKDataMode(dm));
+  vtk.write(name, Dune::VTKOptions::binary);
+
+  snprintf(name,256,"vtktest-%iD-%s-binaryappended", dim, VTKDataMode(dm));
   vtk.write(name, Dune::VTKOptions::binaryappended);
 }
 
