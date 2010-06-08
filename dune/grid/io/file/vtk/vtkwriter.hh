@@ -958,7 +958,8 @@ namespace Dune
       indentUp();
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       {
-        VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>(s, (*it)->name().c_str(), (*it)->ncomps(), (*it)->ncomps()*ncells);
+        VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>
+                                         (s, (*it)->name().c_str(), (*it)->ncomps(), ncells);
         for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
@@ -994,7 +995,8 @@ namespace Dune
       indentUp();
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
-        VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>(s, (*it)->name().c_str(), (*it)->ncomps(), (*it)->ncomps()*nvertices);
+        VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>
+                                         (s, (*it)->name().c_str(), (*it)->ncomps(), nvertices);
         for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
@@ -1016,7 +1018,8 @@ namespace Dune
       indent(s); s << "<Points>\n";
       indentUp();
 
-      VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>(s, "Coordinates", 3, 3*nvertices);
+      VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>
+                                       (s, "Coordinates", 3, nvertices);
       VertexIterator vEnd = vertexEnd();
       for (VertexIterator vit=vertexBegin(); vit!=vEnd; ++vit)
       {
@@ -1044,13 +1047,15 @@ namespace Dune
       indentUp();
 
       // connectivity
-      VTKDataArrayWriter<int> *p1 = makeVTKDataArrayWriter<int>(s, "connectivity", 1, ncorners);
+      VTKDataArrayWriter<int> *p1 = makeVTKDataArrayWriter<int>
+                                      (s, "connectivity", 1, ncorners);
       for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
         p1->write(it.id());
       delete p1;
 
       // offsets
-      VTKDataArrayWriter<int> *p2 = makeVTKDataArrayWriter<int>(s, "offsets", 1, ncells);
+      VTKDataArrayWriter<int> *p2 = makeVTKDataArrayWriter<int>
+                                      (s, "offsets", 1, ncells);
       {
         int offset = 0;
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
@@ -1064,7 +1069,8 @@ namespace Dune
       // types
       if (n>1)
       {
-        VTKDataArrayWriter<unsigned char> *p3 = makeVTKDataArrayWriter<unsigned char>(s, "types", 1, ncells);
+        VTKDataArrayWriter<unsigned char> *p3 =
+          makeVTKDataArrayWriter<unsigned char>(s, "types", 1, ncells);
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
           int vtktype = vtkType(it->type());
@@ -1207,16 +1213,17 @@ namespace Dune
      * @param s           The stream to write to
      * @param name        The name of the vtk array
      * @param components  The number of components of the vector
-     * @param totallength the total number of entries, i.e. components*vectors
+     * @param nitems      Number of vectors in the array (i.e. number of
+     *                    cells/vertices)
      */
     template<class T>
     VTKDataArrayWriter<T> *makeVTKDataArrayWriter(std::ostream &s,
                                                   const char *name,
                                                   unsigned int components,
-                                                  unsigned int totallength)
+                                                  unsigned int nitems)
     {
       return Dune::makeVTKDataArrayWriter<T>(outputtype, s, name, components,
-                                             totallength, bytecount);
+                                             nitems, bytecount);
     }
 
     //! write out data in binary

@@ -252,7 +252,8 @@ namespace Dune
    * @param s           The stream to write to
    * @param name        The name of the vtk array
    * @param components  The number of components of the vector
-   * @param totallength the total number of entries, i.e. components*vectors
+   * @param nitems      Number of vectors in the array (i.e. number of
+   *                    cells/vertices)
    * @param bc          Byte count variable: this is incremented by one for
    *                    each byte which has to beritte to the appended data
    *                    section later.  This will actually only happen for
@@ -261,13 +262,13 @@ namespace Dune
   template<class T> VTKDataArrayWriter<T> *
   makeVTKDataArrayWriter(VTKOptions::OutputType outputtype, std::ostream &s,
                          const char *name, unsigned int components,
-                         unsigned int totallength, unsigned int& bc)
+                         unsigned int nitems, unsigned int& bc)
   {
     switch(outputtype) {
     case VTKOptions::ascii :
       return new VTKAsciiDataArrayWriter<T>(s, name, components);
     case VTKOptions::binary :
-      return new VTKBinaryDataArrayWriter<T>(s, name, components, totallength);
+      return new VTKBinaryDataArrayWriter<T>(s, name, components, nitems);
     case VTKOptions::binaryappended :
       return new VTKBinaryAppendedDataArrayWriter<T>(s, name, components, bc);
     }
