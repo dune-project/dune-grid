@@ -461,10 +461,10 @@ namespace Dune
 
       const std::string &dumpFileName ( ) const
       {
-        if( (foundFlags_ & foundDumpFileName) == 0 )
+        if( (foundFlags_ & foundDumpFileName) != 0 )
         {
-          dwarn << "GridParameterBlock: Parameter 'dumpfilename' not specified, "
-                << "not dumping!" << std::endl;
+          dwarn << "GridParameterBlock: found Parameter 'dumpfilename', "
+                << "dumping file to `" << dumpFileName_ << "'" << std::endl;
         }
         return dumpFileName_;
       }
