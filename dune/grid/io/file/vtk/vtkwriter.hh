@@ -305,9 +305,10 @@ namespace Dune
         {
         case VTKOptions::conforming :
           return
-            number[vertexmapper.map(*git,renumber(*git,cornerIndexVTK),n)];
+            number[vertexmapper.map(*git,vtkRenumber(*git,cornerIndexVTK),
+                                    n)];
         case VTKOptions::nonconforming :
-          return offset + renumber(*git,cornerIndexVTK);
+          return offset + vtkRenumber(*git,cornerIndexVTK);
         default :
           DUNE_THROW(IOError,"VTKWriter: unsupported DataMode" << datamode);
         }
@@ -1253,32 +1254,6 @@ namespace Dune
     {
       for (int i=0; i<indentCount; i++)
         s << "  ";
-    }
-
-    //! renumber VTK <-> Dune
-    /**
-     * Since the renumbering never does anything more complex than exchanging
-     * two indices, this method works both ways.
-     */
-    static int renumber (const GeometryType &t, int i)
-    {
-      static const int quadRenumbering[4] = {0,1,3,2};
-      static const int cubeRenumbering[8] = {0,1,3,2,4,5,7,6};
-      static const int prismRenumbering[6] = {0,2,1,3,5,4};
-      static const int pyramidRenumbering[5] = {0,1,3,2,4};
-      if (t.isQuadrilateral())
-        return quadRenumbering[i];
-      if (t.isPyramid())
-        return pyramidRenumbering[i];
-      if (t.isPrism())
-        return prismRenumbering[i];
-      if (t.isHexahedron())
-        return cubeRenumbering[i];
-      return i;
-    }
-    static int renumber (const Entity& e, int i)
-    {
-      return renumber(e.type(), i);
     }
 
     // the list of registered functions

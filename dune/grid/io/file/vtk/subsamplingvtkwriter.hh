@@ -56,7 +56,6 @@ namespace Dune
     using Base::ncorners;
     using Base::nvertices;
     using Base::outputtype;
-    using Base::renumber;
     using Base::vertexBegin;
     using Base::vertexEnd;
     using Base::vertexdata;
@@ -293,7 +292,7 @@ namespace Dune
         {
           IndexVector indices = sit.vertexIndices();
           for(unsigned int ii = 0; ii < indices.size(); ++ii)
-            p1->write(offset+indices[renumber(coercedToType, ii)]);
+            p1->write(offset+indices[vtkRenumber(coercedToType, ii)]);
         }
         offset += refinement.nVertices(level);
       }
@@ -430,7 +429,7 @@ namespace Dune
         {
           IndexVector indices = sit.vertexIndices();
           for(unsigned int ii = 0; ii < indices.size(); ++ii)
-            stream.write(offset+indices[renumber(coerceTo, ii)]);
+            stream.write(offset+indices[vtkRenumber(coerceTo, ii)]);
         }
         offset += refinement.nVertices(level);
       }
