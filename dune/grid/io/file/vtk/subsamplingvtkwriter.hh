@@ -52,7 +52,6 @@ namespace Dune
     using Base::indent;
     using Base::indentDown;
     using Base::indentUp;
-    using Base::makeVTKDataArrayWriter;
     using Base::ncells;
     using Base::ncorners;
     using Base::nvertices;
@@ -93,16 +92,20 @@ namespace Dune
     virtual void countEntities(int &nvertices, int &ncells, int &ncorners);
 
     //! write cell data
-    virtual void writeCellData (std::ostream& s);
+    virtual void writeCellData(std::ostream& s,
+                               VTKDataArrayWriterFactory& factory);
 
     //! write vertex data
-    virtual void writeVertexData (std::ostream& s);
+    virtual void writeVertexData(std::ostream& s,
+                                 VTKDataArrayWriterFactory& factory);
 
     //! write the positions of vertices
-    virtual void writeGridPoints (std::ostream& s);
+    virtual void writeGridPoints(std::ostream& s,
+                                 VTKDataArrayWriterFactory& factory);
 
     //! write the connectivity array
-    virtual void writeGridCells (std::ostream& s);
+    virtual void writeGridCells(std::ostream& s,
+                                VTKDataArrayWriterFactory& factory);
 
     //! write the appended data sections
     virtual void writeAppendedData (std::ostream& s);
@@ -141,7 +144,8 @@ namespace Dune
 
   //! write cell data
   template <class GridView>
-  void SubsamplingVTKWriter<GridView>::writeCellData (std::ostream& s)
+  void SubsamplingVTKWriter<GridView>::
+  writeCellData(std::ostream& s, VTKDataArrayWriterFactory& factory)
   {
     indent(s); s << "<CellData";
     for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
@@ -160,8 +164,13 @@ namespace Dune
     indentUp();
     for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
     {
-      VTKDataArrayWriter<float>
-      *p = Base::template makeVTKDataArrayWriter<float>(s, (*it)->name().c_str(), (*it)->ncomps(), (*it)->ncomps()*ncells);
+      // vtk file format: a vector data always should have 3 comps (with 3rd
+      // comp = 0 in 2D case)
+      unsigned writecomps = (*it)->ncomps();
+      if(writecomps == 2) writecomps = 3;
+
+      shared_ptr<VTKDataArrayWriter<float> > p
+        (factory.make<float>((*it)->name(), writecomps, ncells));
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
         Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
@@ -171,11 +180,10 @@ namespace Dune
           for (int j=0; j<(*it)->ncomps(); j++)
             p->write((*it)->evaluate(j,*i,sit.coords()));
           // expand 2D-Vectors to 3D
-          if((*it)->ncomps()==2)
+          for(unsigned j = (*it)->ncomps(); j < writecomps; j++)
             p->write(0.0);
         }
       }
-      delete p;
     }
     indentDown();
     indent(s); s << "</CellData>" << std::endl;
@@ -183,7 +191,8 @@ namespace Dune
 
   //! write vertex data
   template <class GridView>
-  void SubsamplingVTKWriter<GridView>::writeVertexData (std::ostream& s)
+  void SubsamplingVTKWriter<GridView>::
+  writeVertexData(std::ostream& s, VTKDataArrayWriterFactory& factory)
   {
     indent(s); s << "<PointData";
     for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
@@ -202,8 +211,13 @@ namespace Dune
     indentUp();
     for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
     {
-      VTKDataArrayWriter<float>
-      *p = Base::template makeVTKDataArrayWriter<float>(s, (*it)->name().c_str(), (*it)->ncomps(), (*it)->ncomps()*nvertices);
+      // vtk file format: a vector data always should have 3 comps (with 3rd
+      // comp = 0 in 2D case)
+      unsigned writecomps = (*it)->ncomps();
+      if(writecomps == 2) writecomps = 3;
+
+      shared_ptr<VTKDataArrayWriter<float> > p
+        (factory.make<float>((*it)->name(), writecomps, nvertices));
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
         Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
@@ -213,11 +227,10 @@ namespace Dune
           for (int j=0; j<(*it)->ncomps(); j++)
             p->write((*it)->evaluate(j,*i,sit.coords()));
           //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-          if((*it)->ncomps()==2)
+          for(unsigned j = (*it)->ncomps(); j < writecomps; j++)
             p->write(0.0);
         }
       }
-      delete p;
     }
     indentDown();
     indent(s); s << "</PointData>" << std::endl;
@@ -225,13 +238,14 @@ namespace Dune
 
   //! write the positions of vertices
   template <class GridView>
-  void SubsamplingVTKWriter<GridView>::writeGridPoints (std::ostream& s)
+  void SubsamplingVTKWriter<GridView>::
+  writeGridPoints(std::ostream& s, VTKDataArrayWriterFactory& factory)
   {
     indent(s); s << "<Points>" << std::endl;
     indentUp();
 
-    VTKDataArrayWriter<float>
-    *p = Base::template makeVTKDataArrayWriter<float>(s, "Coordinates", 3, 3*nvertices);
+    shared_ptr<VTKDataArrayWriter<float> > p
+      (factory.make<float>("Coordinates", 3, nvertices));
     for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
     {
       Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
@@ -245,7 +259,8 @@ namespace Dune
           p->write(0.0);
       }
     }
-    delete p;
+    // free the VTKDataArrayWriter before touching the stream
+    p.reset();
 
     indentDown();
     indent(s); s << "</Points>" << std::endl;
@@ -253,7 +268,8 @@ namespace Dune
 
   //! write the connectivity array
   template <class GridView>
-  void SubsamplingVTKWriter<GridView>::writeGridCells (std::ostream& s)
+  void SubsamplingVTKWriter<GridView>::
+  writeGridCells(std::ostream& s, VTKDataArrayWriterFactory& factory)
   {
     indent(s);
     if (dim>1)
@@ -263,9 +279,9 @@ namespace Dune
     indentUp();
 
     // connectivity
-    VTKDataArrayWriter<int>
-    *p1 = Base::template makeVTKDataArrayWriter<int>(s, "connectivity", 1, ncorners);
     {
+      shared_ptr<VTKDataArrayWriter<int> > p1
+        (factory.make<int>("connectivity", 1, ncorners));
       // The offset within the index numbering
       int offset = 0;
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
@@ -282,12 +298,11 @@ namespace Dune
         offset += refinement.nVertices(level);
       }
     }
-    delete p1;
 
     // offsets
-    VTKDataArrayWriter<int>
-    *p2 = Base::template makeVTKDataArrayWriter<int>(s, "offsets", 1, ncells);
     {
+      shared_ptr<VTKDataArrayWriter<int> > p2
+        (factory.make<int>("offsets", 1, ncells));
       // The offset into the connectivity array
       int offset = 0;
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
@@ -301,13 +316,12 @@ namespace Dune
         }
       }
     }
-    delete p2;
 
     // types
     if (dim>1)
     {
-      VTKDataArrayWriter<unsigned char>
-      *p3 = Base::template makeVTKDataArrayWriter<unsigned char>(s, "types", 1, ncells);
+      shared_ptr<VTKDataArrayWriter<unsigned char> > p3
+        (factory.make<unsigned char>("types", 1, ncells));
       for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
       {
         GeometryType coerceTo = subsampledGeometryType(it->type());
@@ -316,7 +330,6 @@ namespace Dune
         for(int i = 0; i < refinement.nElements(level); ++i)
           p3->write(vtktype);
       }
-      delete p3;
     }
 
     indentDown();

@@ -616,9 +616,6 @@ namespace Dune
       // make data mode visible to private functions
       outputtype = type;
 
-      // reset byte counter for binary appended output
-      bytecount = 0;
-
       // generate filename for process data
       std::string pieceName = getSerialPieceName(name, "");
 
@@ -664,9 +661,6 @@ namespace Dune
     {
       // make data mode visible to private functions
       outputtype=ot;
-
-      // reset byte counter for binary appended output
-      bytecount = 0;
 
       // do some magic because paraview can only cope with relative pathes to piece files
       std::ofstream file;
@@ -847,17 +841,20 @@ namespace Dune
           << " NumberOfPolys=\"0\"\n";
       indentUp();
 
+      // factory for dataarraywriters
+      VTKDataArrayWriterFactory factory(outputtype, s);
+
       // PointData
-      writeVertexData(s);
+      writeVertexData(s, factory);
 
       // CellData
-      writeCellData(s);
+      writeCellData(s, factory);
 
       // Points
-      writeGridPoints(s);
+      writeGridPoints(s, factory);
 
       // Cells
-      writeGridCells(s);
+      writeGridCells(s, factory);
 
       // /Piece
       indentDown();
@@ -939,7 +936,8 @@ namespace Dune
     }
 
     //! write cell data
-    virtual void writeCellData (std::ostream& s)
+    virtual void writeCellData(std::ostream& s,
+                               VTKDataArrayWriterFactory& factory)
     {
       indent(s); s << "<CellData";
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
@@ -958,17 +956,21 @@ namespace Dune
       indentUp();
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       {
-        VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>
-                                         (s, (*it)->name().c_str(), (*it)->ncomps(), ncells);
+        // vtk file format: a vector data always should have 3 comps (with
+        // 3rd comp = 0 in 2D case)
+        unsigned writecomps = (*it)->ncomps();
+        if(writecomps == 2) writecomps = 3;
+        shared_ptr<VTKDataArrayWriter<float> > p
+          (factory.make<float>((*it)->name(), writecomps, ncells));
         for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
             p->write((*it)->evaluate(j,*i,i.position()));
-          //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-          if((*it)->ncomps()==2)
+          // vtk file format: a vector data always should have 3 comps (with
+          // 3rd comp = 0 in 2D case)
+          for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
             p->write(0.0);
         }
-        delete p;
       }
       indentDown();
       indent(s); s << "</CellData>\n";
@@ -976,7 +978,8 @@ namespace Dune
     }
 
     //! write vertex data
-    virtual void writeVertexData (std::ostream& s)
+    virtual void writeVertexData(std::ostream& s,
+                                 VTKDataArrayWriterFactory& factory)
     {
       indent(s); s << "<PointData";
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
@@ -995,17 +998,21 @@ namespace Dune
       indentUp();
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
-        VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>
-                                         (s, (*it)->name().c_str(), (*it)->ncomps(), nvertices);
+        // vtk file format: a vector data always should have 3 comps (with
+        // 3rd comp = 0 in 2D case)
+        unsigned writecomps = (*it)->ncomps();
+        if(writecomps == 2) writecomps = 3;
+        shared_ptr<VTKDataArrayWriter<float> > p
+          (factory.make<float>((*it)->name(), writecomps, nvertices));
         for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
             p->write((*it)->evaluate(j,*vit,vit.position()));
-          //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-          if((*it)->ncomps()==2)
+          // vtk file format: a vector data always should have 3 comps (with
+          // 3rd comp = 0 in 2D case)
+          for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
             p->write(0.0);
         }
-        delete p;
       }
       indentDown();
       indent(s); s << "</PointData>\n";
@@ -1013,13 +1020,14 @@ namespace Dune
     }
 
     //! write the positions of vertices
-    virtual void writeGridPoints (std::ostream& s)
+    virtual void writeGridPoints(std::ostream& s,
+                                 VTKDataArrayWriterFactory& factory)
     {
       indent(s); s << "<Points>\n";
       indentUp();
 
-      VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>
-                                       (s, "Coordinates", 3, nvertices);
+      shared_ptr<VTKDataArrayWriter<float> > p
+        (factory.make<float>("Coordinates", 3, nvertices));
       VertexIterator vEnd = vertexEnd();
       for (VertexIterator vit=vertexBegin(); vit!=vEnd; ++vit)
       {
@@ -1029,7 +1037,8 @@ namespace Dune
         for (int j=std::min(dimw,3); j<3; j++)
           p->write(0.0);
       }
-      delete p;
+      // free the VTKDataArrayWriter before touching the stream
+      p.reset();
 
       indentDown();
       indent(s); s << "</Points>\n";
@@ -1037,7 +1046,8 @@ namespace Dune
     }
 
     //! write the connectivity array
-    virtual void writeGridCells (std::ostream& s)
+    virtual void writeGridCells(std::ostream& s,
+                                VTKDataArrayWriterFactory& factory)
     {
       indent(s);
       if (n>1)
@@ -1047,16 +1057,17 @@ namespace Dune
       indentUp();
 
       // connectivity
-      VTKDataArrayWriter<int> *p1 = makeVTKDataArrayWriter<int>
-                                      (s, "connectivity", 1, ncorners);
-      for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
-        p1->write(it.id());
-      delete p1;
+      {
+        shared_ptr<VTKDataArrayWriter<int> > p1
+          (factory.make<int>("connectivity", 1, ncorners));
+        for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
+          p1->write(it.id());
+      }
 
       // offsets
-      VTKDataArrayWriter<int> *p2 = makeVTKDataArrayWriter<int>
-                                      (s, "offsets", 1, ncells);
       {
+        shared_ptr<VTKDataArrayWriter<int> > p2
+          (factory.make<int>("offsets", 1, ncells));
         int offset = 0;
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
@@ -1064,19 +1075,17 @@ namespace Dune
           p2->write(offset);
         }
       }
-      delete p2;
 
       // types
       if (n>1)
       {
-        VTKDataArrayWriter<unsigned char> *p3 =
-          makeVTKDataArrayWriter<unsigned char>(s, "types", 1, ncells);
+        shared_ptr<VTKDataArrayWriter<unsigned char> > p3
+          (factory.make<unsigned char>("types", 1, ncells));
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
           int vtktype = vtkType(it->type());
           p3->write(vtktype);
         }
-        delete p3;
       }
 
       indentDown();
@@ -1208,24 +1217,6 @@ namespace Dune
     }
 
   protected:
-    /** @brief Make a VTKDataArrayWriter with new
-     *
-     * @param s           The stream to write to
-     * @param name        The name of the vtk array
-     * @param components  The number of components of the vector
-     * @param nitems      Number of vectors in the array (i.e. number of
-     *                    cells/vertices)
-     */
-    template<class T>
-    VTKDataArrayWriter<T> *makeVTKDataArrayWriter(std::ostream &s,
-                                                  const char *name,
-                                                  unsigned int components,
-                                                  unsigned int nitems)
-    {
-      return Dune::makeVTKDataArrayWriter<T>(outputtype, s, name, components,
-                                             nitems, bytecount);
-    }
-
     //! write out data in binary
     class SimpleStream
     {
@@ -1315,8 +1306,6 @@ namespace Dune
     VTKOptions::DataMode datamode;
   protected:
     VTKOptions::OutputType outputtype;
-  private:
-    unsigned int bytecount;
   };
 
   /** \brief VTKWriter on the leaf grid

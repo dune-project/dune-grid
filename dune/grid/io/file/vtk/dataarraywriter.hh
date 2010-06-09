@@ -246,35 +246,60 @@ namespace Dune
     unsigned int& bytecount;
   };
 
-  /** @brief Make a VTKDataArrayWriter with new
-   *
-   * @param outputtype  Which incarnation of VTKDataArrayWriter to return.
-   * @param s           The stream to write to
-   * @param name        The name of the vtk array
-   * @param components  The number of components of the vector
-   * @param nitems      Number of vectors in the array (i.e. number of
-   *                    cells/vertices)
-   * @param bc          Byte count variable: this is incremented by one for
-   *                    each byte which has to beritte to the appended data
-   *                    section later.  This will actually only happen for
-   *                    outputtype=binaryappended.
+  //! a factory for VTKDataArrayWriters
+  /**
+   * Some types of VTKDataArrayWriters need to communicate data sauch as byte
+   * counts between different instances which write to the same stream.  This
+   * factory will manage that data.
    */
-  template<class T> VTKDataArrayWriter<T> *
-  makeVTKDataArrayWriter(VTKOptions::OutputType outputtype, std::ostream &s,
-                         const char *name, unsigned int components,
-                         unsigned int nitems, unsigned int& bc)
-  {
-    switch(outputtype) {
-    case VTKOptions::ascii :
-      return new VTKAsciiDataArrayWriter<T>(s, name, components);
-    case VTKOptions::binary :
-      return new VTKBinaryDataArrayWriter<T>(s, name, components, nitems);
-    case VTKOptions::binaryappended :
-      return new VTKBinaryAppendedDataArrayWriter<T>(s, name, components, bc);
+  class VTKDataArrayWriterFactory {
+    VTKOptions::OutputType type;
+    std::ostream& stream;
+    unsigned bytecount;
+
+  public:
+    //! create a VTKDataArrayWriterFactory
+    /**
+     * \param type_   Type of VTKDataArrayWriters to create
+     * \param stream_ The stream that the VTKDataArrayWriters will write to.
+     *
+     * Better avoid having multiple active factories on the same stream at the
+     * same time.  Having an inactive factory (one whose make() method is not
+     * called anymore before destruction) around at the same time as an active
+     * one should be OK however.
+     */
+    inline VTKDataArrayWriterFactory(VTKOptions::OutputType type_,
+                                     std::ostream& stream_)
+      : type(type_), stream(stream_), bytecount(0)
+    { }
+
+    //! create a VTKDataArrayWriter
+    /**
+     * \tparam T Type of the data to write.
+     *
+     * \param name   Name of the array to write.
+     * \param ncomps Number of components of the vectors in to array.
+     * \param nitems Number of vectors in the array.
+     *
+     * The should never be more than one VTKDataArrayWriter on the same stream
+     * around.  The returned object should be freed with delete.
+     */
+    template<typename T>
+    VTKDataArrayWriter<T>* make(const std::string& name, unsigned ncomps,
+                                unsigned nitems) {
+      switch(type) {
+      case VTKOptions::ascii :
+        return new VTKAsciiDataArrayWriter<T>(stream, name, ncomps);
+      case VTKOptions::binary :
+        return new VTKBinaryDataArrayWriter<T>(stream, name, ncomps, nitems);
+      case VTKOptions::binaryappended :
+        return new VTKBinaryAppendedDataArrayWriter<T>(stream, name, ncomps,
+                                                       bytecount);
+      }
+      DUNE_THROW(IOError, "VTKDataArrayWriter: unsupported OutputType " <<
+                 type);
     }
-    DUNE_THROW(IOError, "VTKDataArrayWriter: unsupported OutputType " <<
-               outputtype);
-  }
+  };
 
   //! \} group VTK
 
