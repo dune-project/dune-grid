@@ -132,22 +132,31 @@ namespace Dune
                                MPICommunicatorType communicator )
     {
   #if ALU3DGRID_PARALLEL
+      // in parallel runs add rank to filename
       std :: stringstream tmps;
       tmps << filename << "." << rank;
       const std :: string &tmp = tmps.str();
 
+      // if file exits then use it
       if( fileExists( tmp.c_str() ) )
         return new Grid( tmp.c_str(), communicator );
   #endif
-      if( fileExists( filename ) )
+      // for rank 0 we also check the normal file name
+      if( rank == 0 )
       {
-        if( rank == 0 )
-          return new Grid( filename );
-        else
-          return new Grid( );
+        if( fileExists( filename ) )
+          return new Grid( filename , communicator );
+
+        // only throw this exception on rank 0 because
+        // for the other ranks we can still create empty grids
+        DUNE_THROW( GridError, "Unable to create " << gridname << " from '"
+                                                   << filename << "'." );
       }
-      DUNE_THROW( GridError, "Unable to create " << gridname << " from '"
-                                                 << filename << "'." );
+      else
+        dwarn << "WARNING:  P[" << rank << "]: Creating empty grid!" << std::endl;
+
+      // return empty grid on all other processes
+      return new Grid( communicator );
     }
     static bool fileExists ( const char *fileName )
     {
@@ -198,9 +207,12 @@ namespace Dune
       : DGFBaseFactory< ALUSimplexGrid<3,3> >( comm )
     {
       std::ifstream input( filename.c_str() );
-      if( !input )
-        DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
-      if( !generate( input, comm, filename ) )
+
+      bool fileFound = input.is_open() ;
+      if( fileFound )
+        fileFound |= generate( input, comm, filename );
+
+      if( ! fileFound )
         grid_ = callDirectly( "ALUSimplexGrid< 3 , 3 >", rank( comm ), filename.c_str(), comm );
     }
 
@@ -228,9 +240,11 @@ namespace Dune
       : DGFBaseFactory< ALUCubeGrid<3,3> >( comm )
     {
       std::ifstream input( filename.c_str() );
-      if( !input )
-        DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
-      if( !generate( input, comm, filename ) )
+      bool fileFound = input.is_open() ;
+      if( fileFound )
+        fileFound |= generate( input, comm, filename );
+
+      if( ! fileFound )
         grid_ = callDirectly( "ALUCubeGrid< 3 , 3 >", rank( comm ), filename.c_str(), comm );
     }
 
