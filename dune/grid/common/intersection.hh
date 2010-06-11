@@ -192,8 +192,14 @@ namespace Dune
     /** \brief Codim 1 geometry returned by geometryInInside and geometryInOutside() */
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
+    //! @brief Export codim of intersection (always 1)
+    enum { codimension=1 /*!< codim of intersection in grid */ };
+
     //! @brief Export grid dimension
     enum { dimension=dim /*!< grid dimension */ };
+
+    //! @brief Export dimension of the intersection
+    enum { mydimension=dim-1 /*!< intersection's dimension */ };
 
     //! @brief Export dimension of world
     enum { dimensionworld=dimworld /*!< dimension of world */ };
