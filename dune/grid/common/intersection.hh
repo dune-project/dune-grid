@@ -165,7 +165,7 @@ namespace Dune
     /** \brief Pointer to the type of entities that this Intersection belongs to */
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
-    /** \brief Codim 1 geometry returned by intersectionGlobal() */
+    /** \brief Codim 1 geometry returned by geometry() */
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
 
     /** \brief local coordinate type used as parameter for the normals */
@@ -174,8 +174,7 @@ namespace Dune
     /** \brief global coordinate type used as parameter for the normals */
     typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
 
-    /** \brief Codim 1 geometry returned by intersectionSelfLocal()
-        and intersectionNeighborLocal() */
+    /** \brief Codim 1 geometry returned by geometryInInside and geometryInOutside() */
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
     //! @brief Export grid dimension
