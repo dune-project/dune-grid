@@ -815,6 +815,7 @@ namespace Dune
        Each line consists of a positive integer denoting a boundary
        id and a set of vertex indices (see \b Vertex block)
        describing one boundary patch of the macrogrid.
+       Note that a special orderning of the vertex numbers in not required.
      - \b Cube  \n
        Each line consists of \c dimworld<SUP>2</SUP> vertex indices
        (see \b Vertex block) describing one cube
@@ -824,9 +825,10 @@ namespace Dune
          @link GridReferenceElements reference element@endlink then
          the mapping between the local numbering used and the dune reference
          cube has to be prescribed by a line starting with the keyword \b map
-         followed by
-         \c dimworld<SUP>2</SUP> values describing the mapping between the
-         local vertex numbers.
+         followed by the permutation of the numbers
+         \c 0...2<SUP>dimworld</SUP> describing the mapping from the
+         local vertex numbers in the reference elements used in the dgf file
+         to the local vertex numbers in dune reference element.
        - By means of the special keyword \b parameters followed by a positive
          integer \c n it is possible to add \c n parameters to each element of the
          grid. These double valued parameters then have to be added to the definition
