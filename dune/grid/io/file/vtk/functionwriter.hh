@@ -210,6 +210,41 @@ namespace Dune
       }
     };
 
+    //! writer for the offsets array
+    template<typename Cell>
+    class OffsetsWriter
+      : public FunctionWriterBase<Cell>
+    {
+      typedef FunctionWriterBase<Cell> Base;
+
+      shared_ptr<DataArrayWriter<unsigned> > arraywriter;
+      unsigned offset;
+
+    public:
+      //! return name
+      virtual std::string name() const { return "offsets"; }
+
+      //! return number of components of the vector
+      virtual unsigned ncomps() const { return 1; }
+
+      //! start writing with the given writer
+      virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
+        arraywriter.reset(writer.makeArrayWriter<unsigned>(name(), ncomps(),
+                                                           nitems));
+        offset = 0;
+        return !arraywriter->writeIsNoop();
+      }
+      //! write at the given position
+      virtual void write(const Cell& cell, const typename Base::Domain&) {
+        offset += cell.geometry().corners();
+        arraywriter->write(offset);
+      };
+      //! signal end of writing
+      virtual void endWrite() {
+        arraywriter.reset();
+      }
+    };
+
   } // namespace VTK
 
   //! \} group VTK
