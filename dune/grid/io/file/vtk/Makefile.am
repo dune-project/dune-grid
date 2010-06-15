@@ -9,6 +9,7 @@ vtkio_HEADERS =					\
 	subsamplingvtkwriter.hh			\
 	streams.hh				\
 	vtksequencewriter.hh			\
-	vtkwriter.hh
+	vtkwriter.hh				\
+	vtuwriter.hh
 
 include $(top_srcdir)/am/global-rules
