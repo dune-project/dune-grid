@@ -25,281 +25,261 @@ namespace Dune
   //! \addtogroup VTK
   //! \{
 
-  //! base class for data array writers
-  /**
-   * \tparam T Type of the data elements to write
-   *
-   * The usage pattern for this class is as follows:
-   * \code
-     {
-     // create an automatically cleaned up writer, giving it the stream to write
-     // to, the name the array should have in the VTK file, the number of
-     // components (dimension) of the field, and the number of entries in the
-     // array overall (number of components times number of cells/number of
-     // vertices).  The type of the writer (ascii, binary, binaryappended) is
-     // determined from the type argument.
-     std::auto_ptr<VTKDataArrayWriter<T> > p
-     (makeVTKDataArrayWriter<T>(type, stream, func.name(), func.ncomps(),
-                               array_size));
-     // Iterate over Elements
-     // For point data iterate over the vertices instead (not shown here)
-     for (CellIterator i=cellBegin(); i!=cellEnd(); ++i) {
-     // iterate over the components
-     for (int j=0; j < func.ncomps(); j++)
-      p->write(func.evaluate(j, *i, i.position()));
-     // Fill 2D data to 3D; makes paraview happier
-     if(func.ncomps()==2)
-      p->write(0.0);
-     }
-     }
-   * \endcode
-   *
-   * In the constructor, the actual writer implementation will prepare the
-   * stream for writing the data.  This usually means writing a "<DataArray>"
-   * header to the stream.  In the write() method it will write a data element
-   * to the stream (this is not true for binaryappended mode however: in this
-   * mode write just counts the number of bytes that would be written, the
-   * actual writing has to happen later independent of the writer).  Finally,
-   * in the destructor, the stream is put back in a sane state.  That usually
-   * means writing something line "</DataArray>".
+  namespace VTK {
 
-   * This is an abstract base class; for an actual implementation look at
-   * VTKAsciiDataArrayWriter, VTKBinaryDataArrayWriter, or
-   * VTKBinaryAppendedDataArrayWriter.
-   */
-  template<class T>
-  class VTKDataArrayWriter
-  {
-  public:
-    //! write one data element
-    virtual void write (T data) = 0;
-    //! virtual destructor
-    virtual ~VTKDataArrayWriter () {}
-  };
-
-  //! a streaming writer for data array tags, uses ASCII inline format
-  template<class T>
-  class VTKAsciiDataArrayWriter : public VTKDataArrayWriter<T>
-  {
-  public:
-    //! make a new data array writer
+    //! base class for data array writers
     /**
-     * \param theStream Stream to write to.
-     * \param name      Name of array to write.
-     * \param ncomps    Number of components of the array.
+     * \tparam T Type of the data elements to write
+     *
+     * This is an abstract base class; for an actual implementation look at
+     * VTKAsciiDataArrayWriter, VTKBinaryDataArrayWriter, or
+     * VTKBinaryAppendedDataArrayWriter.
+     *
+     * To create an actual DataArrayWriter, one would usually use an object of
+     * class DataArrayWriterFactory.
+     *
+     * In the constructor, the actual writer implementation will prepare the
+     * stream for writing the data.  This usually means writing a
+     * "<DataArray>" header to the stream.  In the write() method it will
+     * write a data element to the stream (this is not true for binaryappended
+     * mode however: in this mode write just counts the number of bytes that
+     * would be written, the actual writing has to happen later independent of
+     * the writer).  Finally, in the destructor, the stream is put back in a
+     * sane state.  That usually means writing something line "</DataArray>".
      */
-    VTKAsciiDataArrayWriter (std::ostream& theStream, std::string name,
-                             int ncomps)
-      : s(theStream), counter(0), numPerLine(12)
+    template<class T>
+    class DataArrayWriter
     {
-      VTK::TypeName<T> tn;
-      s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
-      // vtk file format: a vector data always should have 3 comps (with 3rd
-      // comp = 0 in 2D case)
-      if (ncomps>3)
-        DUNE_THROW(IOError, "VTKWriter does not support more than 3 "
-                   "components");
-      s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
-      s << "format=\"ascii\">\n";
-    }
+    public:
+      //! write one data element
+      virtual void write (T data) = 0;
+      //! virtual destructor
+      virtual ~DataArrayWriter () {}
+    };
 
-    //! write one data element to output stream
-    void write (T data)
+    //! a streaming writer for data array tags, uses ASCII inline format
+    template<class T>
+    class AsciiDataArrayWriter : public DataArrayWriter<T>
     {
-      typedef typename VTK::PrintType<T>::Type PT;
-      s << (PT) data << " ";
-      counter++;
-      if (counter%numPerLine==0) s << "\n";
-    }
-
-    //! finish output; writes end tag
-    ~VTKAsciiDataArrayWriter ()
-    {
-      if (counter%numPerLine!=0) s << std::endl;
-      s << "</DataArray>\n";
-    }
-
-  private:
-    std::ostream& s;
-    int counter;
-    int numPerLine;
-  };
-
-  //! a streaming writer for data array tags, uses binary inline format
-  template<class T>
-  class VTKBinaryDataArrayWriter : public VTKDataArrayWriter<T>
-  {
-  public:
-    //! make a new data array writer
-    /**
-     * \param theStream Stream to write to.
-     * \param name      Name of array to write.
-     * \param ncomps    Number of components of the array.
-     * \param nitems    Number of cells for cell data/Number of vertices for
-     *                  point data.
-     */
-    VTKBinaryDataArrayWriter (std::ostream& theStream, std::string name,
-                              int ncomps, int nitems)
-      : s(theStream)
-    {
-      VTK::TypeName<T> tn;
-      ncomps = (ncomps>1 ? 3 : 1);
-      s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
-      // vtk file format: a vector data always should have 3 comps (with 3rd
-      // comp = 0 in 2D case)
-      if (ncomps>3)
-        DUNE_THROW(IOError, "VTKWriter does not support more than 3 "
-                   "components");
-      s << "NumberOfComponents=\"" << ncomps << "\" ";
-      s << "format=\"binary\">\n";
-      // reset chunk
-      chunk.txt.read(0,0);
-      // store size
-      unsigned long int size = ncomps*nitems*sizeof(T);
-      b64enc(size);
-      flush();
-    }
-
-    //! write one data element to output stream
-    void write (T data)
-    {
-      b64enc(data);
-    }
-
-    //! finish output; writes end tag
-    ~VTKBinaryDataArrayWriter ()
-    {
-      flush();
-      s << "\n</DataArray>\n";
-      s.flush();
-    }
-
-  private:
-    template <class X>
-    void b64enc(X & data)
-    {
-      char* p = reinterpret_cast<char*>(&data);
-      for (size_t len = sizeof(X); len > 0; len--,p++)
+    public:
+      //! make a new data array writer
+      /**
+       * \param theStream Stream to write to.
+       * \param name      Name of array to write.
+       * \param ncomps    Number of components of the array.
+       */
+      AsciiDataArrayWriter(std::ostream& theStream, std::string name,
+                           int ncomps)
+        : s(theStream), counter(0), numPerLine(12)
       {
-        chunk.txt.put(*p);
-        if (chunk.txt.size == 3)
+        TypeName<T> tn;
+        s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
+        // vtk file format: a vector data always should have 3 comps (with 3rd
+        // comp = 0 in 2D case)
+        if (ncomps>3)
+          DUNE_THROW(IOError, "VTKWriter does not support more than 3 "
+                     "components");
+        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
+        s << "format=\"ascii\">\n";
+      }
+
+      //! write one data element to output stream
+      void write (T data)
+      {
+        typedef typename PrintType<T>::Type PT;
+        s << (PT) data << " ";
+        counter++;
+        if (counter%numPerLine==0) s << "\n";
+      }
+
+      //! finish output; writes end tag
+      ~AsciiDataArrayWriter ()
+      {
+        if (counter%numPerLine!=0) s << std::endl;
+        s << "</DataArray>\n";
+      }
+
+    private:
+      std::ostream& s;
+      int counter;
+      int numPerLine;
+    };
+
+    //! a streaming writer for data array tags, uses binary inline format
+    template<class T>
+    class BinaryDataArrayWriter : public DataArrayWriter<T>
+    {
+    public:
+      //! make a new data array writer
+      /**
+       * \param theStream Stream to write to.
+       * \param name      Name of array to write.
+       * \param ncomps    Number of components of the array.
+       * \param nitems    Number of cells for cell data/Number of vertices for
+       *                  point data.
+       */
+      BinaryDataArrayWriter(std::ostream& theStream, std::string name,
+                            int ncomps, int nitems)
+        : s(theStream)
+      {
+        TypeName<T> tn;
+        ncomps = (ncomps>1 ? 3 : 1);
+        s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
+        // vtk file format: a vector data always should have 3 comps (with 3rd
+        // comp = 0 in 2D case)
+        if (ncomps>3)
+          DUNE_THROW(IOError, "VTKWriter does not support more than 3 "
+                     "components");
+        s << "NumberOfComponents=\"" << ncomps << "\" ";
+        s << "format=\"binary\">\n";
+        // reset chunk
+        chunk.txt.read(0,0);
+        // store size
+        unsigned long int size = ncomps*nitems*sizeof(T);
+        b64enc(size);
+        flush();
+      }
+
+      //! write one data element to output stream
+      void write (T data)
+      {
+        b64enc(data);
+      }
+
+      //! finish output; writes end tag
+      ~BinaryDataArrayWriter ()
+      {
+        flush();
+        s << "\n</DataArray>\n";
+        s.flush();
+      }
+
+    private:
+      template <class X>
+      void b64enc(X & data)
+      {
+        char* p = reinterpret_cast<char*>(&data);
+        for (size_t len = sizeof(X); len > 0; len--,p++)
+        {
+          chunk.txt.put(*p);
+          if (chunk.txt.size == 3)
+          {
+            chunk.data.write(obuf);
+            s.write(obuf,4);
+          }
+        }
+      }
+
+      void flush()
+      {
+        if (chunk.txt.size > 0)
         {
           chunk.data.write(obuf);
           s.write(obuf,4);
         }
       }
-    }
 
-    void flush()
+      std::ostream& s;
+      b64chunk chunk;
+      char obuf[4];
+    };
+
+    //! a streaming writer for data array tags, uses binary appended format
+    template<class T>
+    class BinaryAppendedDataArrayWriter : public DataArrayWriter<T>
     {
-      if (chunk.txt.size > 0)
+    public:
+      //! make a new data array writer
+      /**
+       * \param theStream Stream to write to.
+       * \param name      Name of array to write.
+       * \param ncomps    Number of components of the array.
+       * \param bc        Byte count variable: this is incremented by one for
+       *                  each byte which has to beritte to the appended data
+       *                  section later.
+       */
+      BinaryAppendedDataArrayWriter(std::ostream& theStream, std::string name,
+                                    int ncomps, unsigned int& bc)
+        : s(theStream),bytecount(bc)
       {
-        chunk.data.write(obuf);
-        s.write(obuf,4);
+        TypeName<T> tn;
+        s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
+        // vtk file format: a vector data always should have 3 comps(with 3rd
+        // comp = 0 in 2D case)
+        if (ncomps>3)
+          DUNE_THROW(IOError, "VTKWriter does not support more than 3 "
+                     "components");
+        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
+        s << "format=\"appended\" offset=\""<< bytecount << "\" />\n";
+        bytecount += 4; // header
       }
-    }
 
-    std::ostream& s;
-    b64chunk chunk;
-    char obuf[4];
-  };
-
-  //! a streaming writer for data array tags, uses binary appended format
-  template<class T>
-  class VTKBinaryAppendedDataArrayWriter : public VTKDataArrayWriter<T>
-  {
-  public:
-    //! make a new data array writer
-    /**
-     * \param theStream Stream to write to.
-     * \param name      Name of array to write.
-     * \param ncomps    Number of components of the array.
-     * \param bc        Byte count variable: this is incremented by one for
-     *                  each byte which has to beritte to the appended data
-     *                  section later.
-     */
-    VTKBinaryAppendedDataArrayWriter (std::ostream& theStream,
-                                      std::string name, int ncomps,
-                                      unsigned int& bc)
-      : s(theStream),bytecount(bc)
-    {
-      VTK::TypeName<T> tn;
-      s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
-      // vtk file format: a vector data always should have 3 comps(with 3rd
-      // comp = 0 in 2D case)
-      if (ncomps>3)
-        DUNE_THROW(IOError, "VTKWriter does not support more than 3 "
-                   "components");
-      s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
-      s << "format=\"appended\" offset=\""<< bytecount << "\" />\n";
-      bytecount += 4; // header
-    }
-
-    //! write one data element to output stream
-    void write (T data)
-    {
-      bytecount += sizeof(T);
-    }
-
-  private:
-    std::ostream& s;
-    unsigned int& bytecount;
-  };
-
-  //! a factory for VTKDataArrayWriters
-  /**
-   * Some types of VTKDataArrayWriters need to communicate data sauch as byte
-   * counts between different instances which write to the same stream.  This
-   * factory will manage that data.
-   */
-  class VTKDataArrayWriterFactory {
-    VTK::OutputType type;
-    std::ostream& stream;
-    unsigned bytecount;
-
-  public:
-    //! create a VTKDataArrayWriterFactory
-    /**
-     * \param type_   Type of VTKDataArrayWriters to create
-     * \param stream_ The stream that the VTKDataArrayWriters will write to.
-     *
-     * Better avoid having multiple active factories on the same stream at the
-     * same time.  Having an inactive factory (one whose make() method is not
-     * called anymore before destruction) around at the same time as an active
-     * one should be OK however.
-     */
-    inline VTKDataArrayWriterFactory(VTK::OutputType type_,
-                                     std::ostream& stream_)
-      : type(type_), stream(stream_), bytecount(0)
-    { }
-
-    //! create a VTKDataArrayWriter
-    /**
-     * \tparam T Type of the data to write.
-     *
-     * \param name   Name of the array to write.
-     * \param ncomps Number of components of the vectors in to array.
-     * \param nitems Number of vectors in the array.
-     *
-     * The should never be more than one VTKDataArrayWriter on the same stream
-     * around.  The returned object should be freed with delete.
-     */
-    template<typename T>
-    VTKDataArrayWriter<T>* make(const std::string& name, unsigned ncomps,
-                                unsigned nitems) {
-      switch(type) {
-      case VTK::ascii :
-        return new VTKAsciiDataArrayWriter<T>(stream, name, ncomps);
-      case VTK::binary :
-        return new VTKBinaryDataArrayWriter<T>(stream, name, ncomps, nitems);
-      case VTK::binaryappended :
-        return new VTKBinaryAppendedDataArrayWriter<T>(stream, name, ncomps,
-                                                       bytecount);
+      //! write one data element to output stream
+      void write (T data)
+      {
+        bytecount += sizeof(T);
       }
-      DUNE_THROW(IOError, "VTKDataArrayWriter: unsupported OutputType " <<
-                 type);
-    }
-  };
+
+    private:
+      std::ostream& s;
+      unsigned int& bytecount;
+    };
+
+    //! a factory for DataArrayWriters
+    /**
+     * Some types of DataArrayWriters need to communicate data sauch as byte
+     * counts between different instances which write to the same stream.
+     * This factory will manage that data.
+     */
+    class DataArrayWriterFactory {
+      OutputType type;
+      std::ostream& stream;
+      unsigned bytecount;
+
+    public:
+      //! create a DataArrayWriterFactory
+      /**
+       * \param type_   Type of DataArrayWriters to create
+       * \param stream_ The stream that the DataArrayWriters will write to.
+       *
+       * Better avoid having multiple active factories on the same stream at
+       * the same time.  Having an inactive factory (one whose make() method
+       * is not called anymore before destruction) around at the same time as
+       * an active one should be OK however.
+       */
+      inline DataArrayWriterFactory(OutputType type_, std::ostream& stream_)
+        : type(type_), stream(stream_), bytecount(0)
+      { }
+
+      //! create a DataArrayWriter
+      /**
+       * \tparam T Type of the data to write.
+       *
+       * \param name   Name of the array to write.
+       * \param ncomps Number of components of the vectors in to array.
+       * \param nitems Number of vectors in the array.
+       *
+       * The should never be more than one DataArrayWriter on the same stream
+       * around.  The returned object should be freed with delete.
+       */
+      template<typename T>
+      DataArrayWriter<T>* make(const std::string& name, unsigned ncomps,
+                               unsigned nitems) {
+        switch(type) {
+        case ascii :
+          return new AsciiDataArrayWriter<T>(stream, name, ncomps);
+        case binary :
+          return new BinaryDataArrayWriter<T>(stream, name, ncomps, nitems);
+        case binaryappended :
+          return new BinaryAppendedDataArrayWriter<T>(stream, name, ncomps,
+                                                      bytecount);
+        }
+        DUNE_THROW(IOError, "Dune::VTK::DataArrayWriter: unsupported "
+                   "OutputType " << type);
+      }
+    };
+
+  } // namespace VTK
 
   //! \} group VTK
 
