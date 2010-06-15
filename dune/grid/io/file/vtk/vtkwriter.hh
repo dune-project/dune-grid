@@ -26,6 +26,7 @@
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/grid/io/file/vtk/dataarraywriter.hh>
 #include <dune/grid/io/file/vtk/function.hh>
+#include <dune/grid/io/file/vtk/pvtuwriter.hh>
 #include <dune/grid/io/file/vtk/streams.hh>
 #include <dune/grid/io/file/vtk/vtuwriter.hh>
 
@@ -714,80 +715,66 @@ namespace Dune
     void writeParallelHeader(std::ostream& s, const std::string& piecename,
                              const std::string& piecepath, const int commSize)
     {
-      Indent indent;
-      // xml header
-      s << indent << "<?xml version=\"1.0\"?>\n";
+      VTK::FileType fileType =
+        (n == 1) ? VTK::polyData : VTK::unstructuredGrid;
 
-      // VTKFile
-      s << indent << "<VTKFile type=\"P" << getTypeString()
-        << "\" version=\"0.1\""
-        << " byte_order=\"" << VTK::getEndiannessString() << "\">\n";
-      ++indent;
+      VTK::PVTUWriter writer(s, fileType);
 
-      // PUnstructuredGrid
-      s << indent << "<P" << getTypeString() << " GhostLevel=\"0\">\n";
-      ++indent;
+      writer.beginMain();
 
       // PPointData
-      s << indent << "<PPointData";
-      for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
-        if ((*it)->ncomps()==1)
-        {
-          s << " Scalars=\"" << (*it)->name() << "\"" ;
-          break;
-        }
-      for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
-        if ((*it)->ncomps()>1)
-        {
-          s << " Vectors=\"" << (*it)->name() << "\"" ;
-          break;
-        }
-      s << ">\n";
-      ++indent;
-      for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
-        s << indent << "<PDataArray type=\"Float32\" "
-          << "Name=\"" << (*it)->name() << "\" ";
-        s << "NumberOfComponents=\"" << ((*it)->ncomps()>1 ? 3 : 1) << "\" ";
-        s << "format=\"" << getFormatString() << "\"/>\n";
+        std::string scalars;
+        for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end();
+             ++it)
+          if ((*it)->ncomps()==1)
+          {
+            scalars = (*it)->name();
+            break;
+          }
+        std::string vectors;
+        for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end();
+             ++it)
+          if ((*it)->ncomps()>1)
+          {
+            vectors = (*it)->name();
+            break;
+          }
+        writer.beginPointData(scalars, vectors);
       }
-      --indent;
-      s << indent << "</PPointData>\n";
+      for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end();
+           ++it)
+        writer.addArray<float>((*it)->name(), (*it)->ncomps()>1 ? 3 : 1);
+      writer.endPointData();
 
       // PCellData
-      s << indent << "<PCellData";
-      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
-        if ((*it)->ncomps()==1)
-        {
-          s << " Scalars=\"" << (*it)->name() << "\"" ;
-          break;
-        }
-      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
-        if ((*it)->ncomps()>1)
-        {
-          s << " Vectors=\"" << (*it)->name() << "\"" ;
-          break;
-        }
-      s << ">\n";
-      ++indent;
-      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       {
-        s << indent << "<PDataArray type=\"Float32\" "
-          << "Name=\"" << (*it)->name() << "\" ";
-        s << "NumberOfComponents=\"" << ((*it)->ncomps()>1 ? 3 : 1) << "\" ";
-        s << "format=\"" << getFormatString() << "\"/>\n";
+        std::string scalars;
+        for (FunctionIterator it=celldata.begin(); it!=celldata.end();
+             ++it)
+          if ((*it)->ncomps()==1)
+          {
+            scalars = (*it)->name();
+            break;
+          }
+        std::string vectors;
+        for (FunctionIterator it=celldata.begin(); it!=celldata.end();
+             ++it)
+          if ((*it)->ncomps()>1)
+          {
+            vectors = (*it)->name();
+            break;
+          }
+        writer.beginCellData(scalars, vectors);
       }
-      --indent;
-      s << indent << "</PCellData>\n";
+      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
+        writer.addArray<float>((*it)->name(), (*it)->ncomps()>1 ? 3 : 1);
+      writer.endCellData();
 
       // PPoints
-      s << indent << "<PPoints>\n";
-      ++indent;
-      s << indent << "<PDataArray type=\"Float32\" Name=\"Coordinates\" "
-        << "NumberOfComponents=\"" << "3" << "\" ";
-      s << "format=\"" << getFormatString() << "\"/>\n";
-      --indent;
-      s << indent << "</PPoints>\n";
+      writer.beginPoints();
+      writer.addArray<float>("Coordinates", 3);
+      writer.endPoints();
 
       // Pieces
       for( int i = 0; i < commSize; ++i )
@@ -795,18 +782,10 @@ namespace Dune
         const std::string& fullname = getParallelPieceName(piecename,
                                                            piecepath, i,
                                                            commSize);
-        s << indent << "<Piece Source=\"" << fullname << "\"/>\n";
+        writer.addPiece(fullname);
       }
 
-      // /PUnstructuredGrid
-      --indent;
-      s << indent << "</P" << getTypeString() << ">\n";
-
-      // /VTKFile
-      --indent;
-      s << indent << "</VTKFile>\n";
-
-      s.flush();
+      writer.endMain();
     }
 
     //! write data file to stream
