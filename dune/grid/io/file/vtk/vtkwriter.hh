@@ -1084,7 +1084,7 @@ namespace Dune
           (factory.make<unsigned char>("types", 1, ncells));
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
-          int vtktype = vtkType(it->type());
+          int vtktype = VTK::geometryType(it->type());
           p3->write(vtktype);
         }
       }
@@ -1206,7 +1206,7 @@ namespace Dune
         stream.write(blocklength);
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
-          unsigned char vtktype = vtkType(it->type());
+          unsigned char vtktype = VTK::geometryType(it->type());
           stream.write(vtktype);
         }
       }

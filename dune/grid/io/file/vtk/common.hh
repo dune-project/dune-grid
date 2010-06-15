@@ -217,44 +217,44 @@ namespace Dune
       }
     };
 
-  }
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  VTK::GeometryType related stuff
+    //
 
-  //////////////////////////////////////////////////////////////////////
-  //
-  //  VTKGeometryType related stuff
-  //
+    //! Type representing VTK's entity geometry types
+    /**
+     * Only the types which have a corresponding Dune::GeometryType have been
+     * included here.  Dune-type names have been used, this mainly makes a
+     * difference for vtkPrism, which is known by VTK as VTK_WEDGE.
+     */
+    enum GeometryType {
+      vertex = 1,
+      line = 3,
+      triangle = 5,
+      quadrilateral = 9,
+      tetrahedron = 10,
+      hexahedron = 12,
+      prism = 13,
+      pyramid = 14
+    };
 
-  //! Type representing VTK's entity geometry types
-  /**
-   * Only the types which have a corresponding Dune::GeometryType have been
-   * included here.  Dune-type names have been used, this mainly makes a
-   * difference for vtkPrism, which is known by VTK as VTK_WEDGE.
-   */
-  enum VTKGeometryType {
-    vtkVertex = 1,
-    vtkLine = 3,
-    vtkTriangle = 5,
-    vtkQuadrilateral = 9,
-    vtkTetrahedron = 10,
-    vtkHexahedron = 12,
-    vtkPrism = 13,
-    vtkPyramid = 14
-  };
+    //! mapping from GeometryType to VTKGeometryType
+    inline GeometryType geometryType(const Dune::GeometryType& t)
+    {
+      if (t.isVertex()) return vertex;
+      if (t.isLine()) return line;
+      if (t.isTriangle()) return triangle;
+      if (t.isQuadrilateral()) return quadrilateral;
+      if (t.isTetrahedron()) return tetrahedron;
+      if (t.isPyramid()) return pyramid;
+      if (t.isPrism()) return prism;
+      if (t.isHexahedron()) return hexahedron;
 
-  //! mapping from GeometryType to VTKGeometryType
-  inline VTKGeometryType vtkType(const GeometryType & t)
-  {
-    if (t.isVertex()) return vtkVertex;
-    if (t.isLine()) return vtkLine;
-    if (t.isTriangle()) return vtkTriangle;
-    if (t.isQuadrilateral()) return vtkQuadrilateral;
-    if (t.isTetrahedron()) return vtkTetrahedron;
-    if (t.isPyramid()) return vtkPyramid;
-    if (t.isPrism()) return vtkPrism;
-    if (t.isHexahedron()) return vtkHexahedron;
+      DUNE_THROW(IOError,"VTKWriter: unsupported GeometryType " << t);
+    }
 
-    DUNE_THROW(IOError,"VTKWriter: unsupported GeometryType " << t);
-  }
+  } // namespace VTK
 
   ////////////////////////////////////////////////////////////////////////
   //

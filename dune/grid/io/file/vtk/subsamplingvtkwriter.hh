@@ -324,7 +324,7 @@ namespace Dune
       {
         GeometryType coerceTo = subsampledGeometryType(it->type());
         Refinement &refinement = buildRefinement<dim, ctype>(it->type(), coerceTo);
-        int vtktype = vtkType(coerceTo);
+        int vtktype = VTK::geometryType(coerceTo);
         for(int i = 0; i < refinement.nElements(level); ++i)
           p3->write(vtktype);
       }
@@ -461,7 +461,7 @@ namespace Dune
       {
         GeometryType coerceTo = subsampledGeometryType(it->type());
         Refinement &refinement = buildRefinement<dim, ctype>(it->type(), coerceTo);
-        unsigned char vtktype = vtkType(coerceTo);
+        unsigned char vtktype = VTK::geometryType(coerceTo);
         for(int i = 0; i < refinement.nElements(level); ++i)
           stream.write(vtktype);
       }
