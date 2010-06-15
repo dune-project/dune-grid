@@ -38,6 +38,7 @@ namespace Dune {
       typedef typename GV::IndexSet IndexSet;
       typedef ConformingConnectivityWriter<ConformingVolumeIteratorFactory<GV>
           > ConnectivityWriter;
+      typedef typename GV::CollectiveCommunication CollectiveCommunication;
 
       explicit ConformingVolumeIteratorFactory(const GV& gv_)
         : gv(gv_)
@@ -68,6 +69,9 @@ namespace Dune {
       ConnectivityWriter makeConnectivity() const {
         return ConnectivityWriter(*this);
       }
+      const CollectiveCommunication& comm() const {
+        return gv.comm();
+      }
     };
 
     template<typename GV>
@@ -89,6 +93,7 @@ namespace Dune {
 
       typedef typename GV::IndexSet IndexSet;
       typedef NonConformingConnectivityWriter<Cell> ConnectivityWriter;
+      typedef typename GV::CollectiveCommunication CollectiveCommunication;
 
       explicit NonConformingVolumeIteratorFactory(const GV& gv_)
         : gv(gv_)
@@ -114,6 +119,9 @@ namespace Dune {
       const IndexSet& indexSet() const { return gv.indexSet(); }
       ConnectivityWriter makeConnectivity() const {
         return ConnectivityWriter();
+      }
+      const CollectiveCommunication& comm() const {
+        return gv.comm();
       }
     };
 
