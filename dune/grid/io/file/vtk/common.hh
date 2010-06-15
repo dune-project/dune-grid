@@ -254,51 +254,50 @@ namespace Dune
       DUNE_THROW(IOError,"VTKWriter: unsupported GeometryType " << t);
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    //
+    //  Functions for transforming the index of a corner inside an entity
+    //  between Dune and VTK
+    //
+
+    //! renumber VTK <-> Dune
+    /**
+     * Since the renumbering never does anything more complex than exchanging
+     * two indices, this method works both ways.
+     */
+    inline int renumber(const Dune::GeometryType &t, int i)
+    {
+      static const int quadRenumbering[4] = {0,1,3,2};
+      static const int cubeRenumbering[8] = {0,1,3,2,4,5,7,6};
+      static const int prismRenumbering[6] = {0,2,1,3,5,4};
+      static const int pyramidRenumbering[5] = {0,1,3,2,4};
+
+      if (t.isQuadrilateral()) return quadRenumbering[i];
+      if (t.isPyramid()) return pyramidRenumbering[i];
+      if (t.isPrism()) return prismRenumbering[i];
+      if (t.isHexahedron()) return cubeRenumbering[i];
+
+      return i;
+    }
+
+    //! renumber VTK <-> Dune
+    /**
+     * This function is just a convenience shortcut function wrapping
+     * renumber(const GeometryType&, int).
+     *
+     * \param t Entity, Intersection or Geometry to do the renumbering in.
+     *          Basically, anything with a method type() returning a
+     *          GeometryType should work here.
+     * \param i Index to of corner in either Dune or VTK numbering (the result
+     *          will be in the other numbering)
+     */
+    template<typename T>
+    int renumber(const T& t, int i)
+    {
+      return renumber(t.type(), i);
+    }
+
   } // namespace VTK
-
-  ////////////////////////////////////////////////////////////////////////
-  //
-  //  Functions for transforming the index of a corner inside an entity
-  //  between Dune and VTK
-  //
-
-  //! renumber VTK <-> Dune
-  /**
-   * Since the renumbering never does anything more complex than exchanging
-   * two indices, this method works both ways.
-   */
-  inline int vtkRenumber(const GeometryType &t, int i)
-  {
-    static const int quadRenumbering[4] = {0,1,3,2};
-    static const int cubeRenumbering[8] = {0,1,3,2,4,5,7,6};
-    static const int prismRenumbering[6] = {0,2,1,3,5,4};
-    static const int pyramidRenumbering[5] = {0,1,3,2,4};
-    if (t.isQuadrilateral())
-      return quadRenumbering[i];
-    if (t.isPyramid())
-      return pyramidRenumbering[i];
-    if (t.isPrism())
-      return prismRenumbering[i];
-    if (t.isHexahedron())
-      return cubeRenumbering[i];
-    return i;
-  }
-  //! renumber VTK <-> Dune
-  /**
-   * This function is just a convenience shortcut function wrapping
-   * renumber(const GeometryType&, int).
-   *
-   * \param t Entity, Intersection or Geometry to do the renumbering in.
-   *          Basically, anything with a method type() returning a
-   *          GeometryType should work here.
-   * \param i Index to of corner in either Dune or VTK numbering (the result
-   *          will be in the other numbering)
-   */
-  template<typename T>
-  int vtkRenumber(const T& t, int i)
-  {
-    return vtkRenumber(t.type(), i);
-  }
 
   //! \} group VTK
 

@@ -305,10 +305,10 @@ namespace Dune
         {
         case VTK::conforming :
           return
-            number[vertexmapper.map(*git,vtkRenumber(*git,cornerIndexVTK),
+            number[vertexmapper.map(*git,VTK::renumber(*git,cornerIndexVTK),
                                     n)];
         case VTK::nonconforming :
-          return offset + vtkRenumber(*git,cornerIndexVTK);
+          return offset + VTK::renumber(*git,cornerIndexVTK);
         default :
           DUNE_THROW(IOError,"VTKWriter: unsupported DataMode" << datamode);
         }

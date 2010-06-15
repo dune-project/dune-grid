@@ -291,7 +291,7 @@ namespace Dune
         {
           IndexVector indices = sit.vertexIndices();
           for(unsigned int ii = 0; ii < indices.size(); ++ii)
-            p1->write(offset+indices[vtkRenumber(coercedToType, ii)]);
+            p1->write(offset+indices[VTK::renumber(coercedToType, ii)]);
         }
         offset += refinement.nVertices(level);
       }
@@ -428,7 +428,7 @@ namespace Dune
         {
           IndexVector indices = sit.vertexIndices();
           for(unsigned int ii = 0; ii < indices.size(); ++ii)
-            stream.write(offset+indices[vtkRenumber(coerceTo, ii)]);
+            stream.write(offset+indices[VTK::renumber(coerceTo, ii)]);
         }
         offset += refinement.nVertices(level);
       }
