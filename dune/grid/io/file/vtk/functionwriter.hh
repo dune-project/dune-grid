@@ -10,8 +10,10 @@
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/grid/io/file/vtk/dataarraywriter.hh>
 #include <dune/grid/io/file/vtk/vtuwriter.hh>
 
 namespace Dune
@@ -66,6 +68,50 @@ namespace Dune
       virtual void endWrite() = 0;
       //! destructor
       virtual ~FunctionWriterBase() {};
+    };
+
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  Writers for the grid information
+    //
+
+    //! writer for the Coordinates array
+    template<typename Cell>
+    class CoordinatesWriter
+      : public FunctionWriterBase<Cell>
+    {
+      typedef FunctionWriterBase<Cell> Base;
+
+      shared_ptr<DataArrayWriter<float> > arraywriter;
+
+    public:
+
+      //! return name
+      virtual std::string name() const { return "Coordinates"; }
+
+      //! return number of components of the vector
+      virtual unsigned ncomps() const { return 3; }
+
+      //! start writing with the given writer
+      virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
+        arraywriter.reset(writer.makeArrayWriter<float>(name(), ncomps(),
+                                                        nitems));
+        return !arraywriter->writeIsNoop();
+      }
+      //! write at the given position
+      virtual void write(const typename Base::Cell& cell,
+                         const typename Base::Domain& xl) {
+        FieldVector<typename Base::Cell::ctype, Base::Cell::dimensionworld> xg
+          = cell.geometry().global(xl);
+        for(unsigned d = 0; d < 3 && d < Base::Cell::dimensionworld; ++d)
+          arraywriter->write(xg[d]);
+        for(unsigned d = Base::Cell::dimensionworld; d < 3; ++d)
+          arraywriter->write(0);
+      };
+      //! signal end of writing
+      virtual void endWrite() {
+        arraywriter.reset();
+      }
     };
 
   } // namespace VTK
