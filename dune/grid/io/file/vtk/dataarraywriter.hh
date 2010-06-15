@@ -199,6 +199,48 @@ namespace Dune
       unsigned int& bytecount;
     };
 
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  Naked ArrayWriters for the appended section
+    //
+
+    //! a streaming writer for data array tags, uses binary inline format
+    template<class T>
+    class NakedBase64DataArrayWriter : public DataArrayWriter<T>
+    {
+    public:
+      //! make a new data array writer
+      /**
+       * \param theStream Stream to write to.
+       * \param ncomps    Number of components of the array.
+       * \param nitems    Number of cells for cell data/Number of vertices for
+       *                  point data.
+       */
+      NakedBase64DataArrayWriter(std::ostream& theStream, int ncomps,
+                                 int nitems)
+        : b64(theStream)
+      {
+        // store size
+        unsigned long int size = ncomps*nitems*sizeof(T);
+        b64.write(size);
+        b64.flush();
+      }
+
+      //! write one data element to output stream
+      void write (T data)
+      {
+        b64.write(data);
+      }
+
+    private:
+      Base64Stream b64;
+    };
+
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  Factory
+    //
+
     //! a factory for DataArrayWriters
     /**
      * Some types of DataArrayWriters need to communicate data sauch as byte
