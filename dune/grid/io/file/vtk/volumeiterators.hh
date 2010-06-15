@@ -8,6 +8,7 @@
 
 #include <dune/grid/io/file/vtk/corner.hh>
 #include <dune/grid/io/file/vtk/corneriterator.hh>
+#include <dune/grid/io/file/vtk/functionwriter.hh>
 #include <dune/grid/io/file/vtk/pointiterator.hh>
 
 namespace Dune {
@@ -35,6 +36,8 @@ namespace Dune {
           typename GV::IndexSet> PointIterator;
 
       typedef typename GV::IndexSet IndexSet;
+      typedef ConformingConnectivityWriter<ConformingVolumeIteratorFactory<GV>
+          > ConnectivityWriter;
 
       explicit ConformingVolumeIteratorFactory(const GV& gv_)
         : gv(gv_)
@@ -62,6 +65,9 @@ namespace Dune {
       }
 
       const IndexSet& indexSet() const { return gv.indexSet(); }
+      ConnectivityWriter makeConnectivity() const {
+        return ConnectivityWriter(*this);
+      }
     };
 
     template<typename GV>
@@ -82,6 +88,7 @@ namespace Dune {
       typedef CornerIterator PointIterator;
 
       typedef typename GV::IndexSet IndexSet;
+      typedef NonConformingConnectivityWriter<Cell> ConnectivityWriter;
 
       explicit NonConformingVolumeIteratorFactory(const GV& gv_)
         : gv(gv_)
@@ -105,6 +112,9 @@ namespace Dune {
       PointIterator endPoints() const { return endCorners(); }
 
       const IndexSet& indexSet() const { return gv.indexSet(); }
+      ConnectivityWriter makeConnectivity() const {
+        return ConnectivityWriter();
+      }
     };
 
   } // namespace VTK
