@@ -8,6 +8,7 @@
 #include <string>
 
 #include <dune/common/exceptions.hh>
+#include <dune/common/indent.hh>
 
 #include <dune/grid/io/file/vtk/streams.hh>
 #include <dune/grid/io/file/vtk/common.hh>
@@ -67,13 +68,17 @@ namespace Dune
        * \param theStream Stream to write to.
        * \param name      Name of array to write.
        * \param ncomps    Number of components of the array.
+       * \param indent_   Indentation to use.  This is use as-is for the
+       *                  header and trailer lines, but increase by one level
+       *                  for the actual data.
        */
       AsciiDataArrayWriter(std::ostream& theStream, std::string name,
-                           int ncomps)
-        : s(theStream), counter(0), numPerLine(12)
+                           int ncomps, const Indent& indent_)
+        : s(theStream), counter(0), numPerLine(12), indent(indent_)
       {
         TypeName<T> tn;
-        s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
+        s << indent << "<DataArray type=\"" << tn() << "\" "
+          << "Name=\"" << name << "\" ";
         // vtk file format: a vector data always should have 3 comps (with 3rd
         // comp = 0 in 2D case)
         if (ncomps>3)
@@ -81,13 +86,16 @@ namespace Dune
                      "components");
         s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
         s << "format=\"ascii\">\n";
+        ++indent;
       }
 
       //! write one data element to output stream
       void write (T data)
       {
         typedef typename PrintType<T>::Type PT;
-        s << (PT) data << " ";
+        if(counter%numPerLine==0) s << indent;
+        else s << " ";
+        s << (PT) data;
         counter++;
         if (counter%numPerLine==0) s << "\n";
       }
@@ -95,14 +103,16 @@ namespace Dune
       //! finish output; writes end tag
       ~AsciiDataArrayWriter ()
       {
-        if (counter%numPerLine!=0) s << std::endl;
-        s << "</DataArray>\n";
+        if (counter%numPerLine!=0) s << "\n";
+        --indent;
+        s << indent << "</DataArray>\n";
       }
 
     private:
       std::ostream& s;
       int counter;
       int numPerLine;
+      Indent indent;
     };
 
     //! a streaming writer for data array tags, uses binary inline format
@@ -117,14 +127,18 @@ namespace Dune
        * \param ncomps    Number of components of the array.
        * \param nitems    Number of cells for cell data/Number of vertices for
        *                  point data.
+       * \param indent_   Indentation to use.  This is use as-is for the
+       *                  header and trailer lines, but increase by one level
+       *                  for the actual data.
        */
       BinaryDataArrayWriter(std::ostream& theStream, std::string name,
-                            int ncomps, int nitems)
-        : s(theStream), b64(theStream)
+                            int ncomps, int nitems, const Indent& indent_)
+        : s(theStream), b64(theStream), indent(indent_)
       {
         TypeName<T> tn;
         ncomps = (ncomps>1 ? 3 : 1);
-        s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
+        s << indent << "<DataArray type=\"" << tn() << "\" "
+          << "Name=\"" << name << "\" ";
         // vtk file format: a vector data always should have 3 comps (with 3rd
         // comp = 0 in 2D case)
         if (ncomps>3)
@@ -133,6 +147,8 @@ namespace Dune
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"binary\">\n";
 
+        // write indentation for the data chunk
+        s << indent+1;
         // store size
         unsigned long int size = ncomps*nitems*sizeof(T);
         b64.write(size);
@@ -149,13 +165,16 @@ namespace Dune
       ~BinaryDataArrayWriter ()
       {
         b64.flush();
-        s << "\n</DataArray>\n";
+        // append newline to written data
+        s << "\n";
+        s << indent << "</DataArray>\n";
         s.flush();
       }
 
     private:
       std::ostream& s;
       Base64Stream b64;
+      const Indent& indent;
     };
 
     //! a streaming writer for data array tags, uses binary appended format
@@ -171,13 +190,17 @@ namespace Dune
        * \param bc        Byte count variable: this is incremented by one for
        *                  each byte which has to beritte to the appended data
        *                  section later.
+       * \param indent_   Indentation to use.  This is uses as-is for the
+       *                  header line.
        */
       BinaryAppendedDataArrayWriter(std::ostream& theStream, std::string name,
-                                    int ncomps, unsigned int& bc)
+                                    int ncomps, unsigned int& bc,
+                                    const Indent& indent)
         : s(theStream),bytecount(bc)
       {
         TypeName<T> tn;
-        s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
+        s << indent << "<DataArray type=\"" << tn() << "\" "
+          << "Name=\"" << name << "\" ";
         // vtk file format: a vector data always should have 3 comps(with 3rd
         // comp = 0 in 2D case)
         if (ncomps>3)
@@ -328,23 +351,27 @@ namespace Dune
        * \param name   Name of the array to write.
        * \param ncomps Number of components of the vectors in to array.
        * \param nitems Number of vectors in the array.
+       * \param indent Indentation to use.  This is use as-is for the header
+       *               and trailer lines, but increase by one level for the
+       *               actual data.
        *
        * The should never be more than one DataArrayWriter on the same stream
        * around.  The returned object should be freed with delete.
        */
       template<typename T>
       DataArrayWriter<T>* make(const std::string& name, unsigned ncomps,
-                               unsigned nitems) {
+                               unsigned nitems, const Indent& indent) {
         switch(phase) {
         case main :
           switch(type) {
           case ascii :
-            return new AsciiDataArrayWriter<T>(stream, name, ncomps);
+            return new AsciiDataArrayWriter<T>(stream, name, ncomps, indent);
           case binary :
-            return new BinaryDataArrayWriter<T>(stream, name, ncomps, nitems);
+            return new BinaryDataArrayWriter<T>(stream, name, ncomps, nitems,
+                                                indent);
           case binaryappended :
             return new BinaryAppendedDataArrayWriter<T>(stream, name, ncomps,
-                                                        bytecount);
+                                                        bytecount, indent);
           }
           break;
         case appended :

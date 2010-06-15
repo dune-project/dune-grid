@@ -16,6 +16,7 @@
 
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/indent.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/path.hh>
 #include <dune/common/shared_ptr.hh>
@@ -342,10 +343,7 @@ namespace Dune
                          VTK::DataMode dm = VTK::conforming )
       : gridView_( gridView ),
         datamode( dm )
-    {
-      indentCount = 0;
-      numPerLine = 4*3; //should be a multiple of 3 !
-    }
+    { }
 
     /**
      * @brief Add a grid function that lives on the cells of the grid to the visualization.
@@ -715,21 +713,21 @@ namespace Dune
     void writeParallelHeader(std::ostream& s, const std::string& piecename,
                              const std::string& piecepath, const int commSize)
     {
+      Indent indent;
       // xml header
-      s << "<?xml version=\"1.0\"?>\n";
+      s << indent << "<?xml version=\"1.0\"?>\n";
 
       // VTKFile
-      s << "<VTKFile type=\"P" << getTypeString()
+      s << indent << "<VTKFile type=\"P" << getTypeString()
         << "\" version=\"0.1\" byte_order=\"" << getEndiannessString() << "\">\n";
-      indentUp();
+      ++indent;
 
       // PUnstructuredGrid
-      indent(s);
-      s << "<P" << getTypeString() << " GhostLevel=\"0\">\n";
-      indentUp();
+      s << indent << "<P" << getTypeString() << " GhostLevel=\"0\">\n";
+      ++indent;
 
       // PPointData
-      indent(s); s << "<PPointData";
+      s << indent << "<PPointData";
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
         if ((*it)->ncomps()==1)
         {
@@ -743,18 +741,19 @@ namespace Dune
           break;
         }
       s << ">\n";
-      indentUp();
+      ++indent;
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
-        indent(s); s << "<PDataArray type=\"Float32\" Name=\"" << (*it)->name() << "\" ";
+        s << indent << "<PDataArray type=\"Float32\" "
+          << "Name=\"" << (*it)->name() << "\" ";
         s << "NumberOfComponents=\"" << ((*it)->ncomps()>1 ? 3 : 1) << "\" ";
         s << "format=\"" << getFormatString() << "\"/>\n";
       }
-      indentDown();
-      indent(s); s << "</PPointData>\n";
+      --indent;
+      s << indent << "</PPointData>\n";
 
       // PCellData
-      indent(s); s << "<PCellData";
+      s << indent << "<PCellData";
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
         if ((*it)->ncomps()==1)
         {
@@ -768,23 +767,25 @@ namespace Dune
           break;
         }
       s << ">\n";
-      indentUp();
+      ++indent;
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       {
-        indent(s); s << "<PDataArray type=\"Float32\" Name=\"" << (*it)->name() << "\" ";
+        s << indent << "<PDataArray type=\"Float32\" "
+          << "Name=\"" << (*it)->name() << "\" ";
         s << "NumberOfComponents=\"" << ((*it)->ncomps()>1 ? 3 : 1) << "\" ";
         s << "format=\"" << getFormatString() << "\"/>\n";
       }
-      indentDown();
-      indent(s); s << "</PCellData>\n";
+      --indent;
+      s << indent << "</PCellData>\n";
 
       // PPoints
-      indent(s); s << "<PPoints>\n";
-      indentUp();
-      indent(s); s << "<PDataArray type=\"Float32\" Name=\"Coordinates\" NumberOfComponents=\"" << "3" << "\" ";
+      s << indent << "<PPoints>\n";
+      ++indent;
+      s << indent << "<PDataArray type=\"Float32\" Name=\"Coordinates\" "
+        << "NumberOfComponents=\"" << "3" << "\" ";
       s << "format=\"" << getFormatString() << "\"/>\n";
-      indentDown();
-      indent(s); s << "</PPoints>\n";
+      --indent;
+      s << indent << "</PPoints>\n";
 
       // Pieces
       for( int i = 0; i < commSize; ++i )
@@ -792,17 +793,16 @@ namespace Dune
         const std::string& fullname = getParallelPieceName(piecename,
                                                            piecepath, i,
                                                            commSize);
-        indent(s); s << "<Piece Source=\"" << fullname << "\"/>\n";
+        s << indent << "<Piece Source=\"" << fullname << "\"/>\n";
       }
 
       // /PUnstructuredGrid
-      indentDown();
-      indent(s);
-      s << "</P" << getTypeString() << ">\n";
+      --indent;
+      s << indent << "</P" << getTypeString() << ">\n";
 
       // /VTKFile
-      indentDown();
-      s << "</VTKFile>\n";
+      --indent;
+      s << indent << "</VTKFile>\n";
 
       s.flush();
     }
@@ -810,13 +810,15 @@ namespace Dune
     //! write data file to stream
     void writeDataFile (std::ostream& s)
     {
+      Indent indent;
+
       // xml header
-      s << "<?xml version=\"1.0\"?>\n";
+      s << indent << "<?xml version=\"1.0\"?>\n";
 
       // VTKFile
-      s << "<VTKFile type=\"" << getTypeString()
+      s << indent  << "<VTKFile type=\"" << getTypeString()
         << "\" version=\"0.1\" byte_order=\"" << getEndiannessString() << "\">\n";
-      indentUp();
+      ++indent;
 
       // Grid characteristics
       vertexmapper = new VertexMapper( gridView_ );
@@ -828,52 +830,52 @@ namespace Dune
       countEntities(nvertices, ncells, ncorners);
 
       // UnstructuredGrid
-      indent(s);
-      s << "<" << getTypeString() << ">\n";
-      indentUp();
+      s << indent << "<" << getTypeString() << ">\n";
+      ++indent;
 
       // Piece
-      indent(s);
       if (n>1)
-        s << "<Piece NumberOfPoints=\"" << nvertices << "\" NumberOfCells=\"" << ncells << "\">\n";
+        s << indent
+          << "<Piece NumberOfPoints=\"" << nvertices << "\""
+          << " NumberOfCells=\"" << ncells << "\">\n";
       else
-        s << "<Piece NumberOfPoints=\"" << nvertices << "\""
+        s << indent
+          << "<Piece NumberOfPoints=\"" << nvertices << "\""
           << " NumberOfVerts=\"0\""
           << " NumberOfLines=\"" << ncells << "\">"
           << " NumberOfPolys=\"0\"\n";
-      indentUp();
+      ++indent;
 
       // factory for dataarraywriters
       VTK::DataArrayWriterFactory factory(outputtype, s);
 
       // PointData
-      writeVertexData(s, factory);
+      writeVertexData(s, indent, factory);
 
       // CellData
-      writeCellData(s, factory);
+      writeCellData(s, indent, factory);
 
       // Points
-      writeGridPoints(s, factory);
+      writeGridPoints(s, indent, factory);
 
       // Cells
-      writeGridCells(s, factory);
+      writeGridCells(s, indent, factory);
 
       // /Piece
-      indentDown();
-      indent(s); s << "</Piece>\n";
+      --indent;
+      s << indent << "</Piece>\n";
 
       // /UnstructuredGrid
-      indentDown();
-      indent(s);
-      s << "</" << getTypeString() << ">\n";
+      --indent;
+      s << indent << "</" << getTypeString() << ">\n";
 
       // write appended binary dat section
       if(factory.beginAppended())
-        writeAppendedData(s, factory);
+        writeAppendedData(s, indent, factory);
 
       // /VTKFile
-      indentDown();
-      s << "</VTKFile>\n";
+      --indent;
+      s << indent << "</VTKFile>\n";
 
       s.flush();
 
@@ -938,10 +940,10 @@ namespace Dune
     }
 
     //! write cell data
-    virtual void writeCellData(std::ostream& s,
+    virtual void writeCellData(std::ostream& s, Indent indent,
                                VTK::DataArrayWriterFactory& factory)
     {
-      indent(s); s << "<CellData";
+      s << indent << "<CellData";
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
         if ((*it)->ncomps()==1)
         {
@@ -955,7 +957,7 @@ namespace Dune
           break;
         }
       s << ">\n";
-      indentUp();
+      ++indent;
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       {
         // vtk file format: a vector data always should have 3 comps (with
@@ -963,7 +965,7 @@ namespace Dune
         unsigned writecomps = (*it)->ncomps();
         if(writecomps == 2) writecomps = 3;
         shared_ptr<VTK::DataArrayWriter<float> > p
-          (factory.make<float>((*it)->name(), writecomps, ncells));
+          (factory.make<float>((*it)->name(), writecomps, ncells, indent));
         for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
@@ -974,16 +976,16 @@ namespace Dune
             p->write(0.0);
         }
       }
-      indentDown();
-      indent(s); s << "</CellData>\n";
+      --indent;
+      s << indent << "</CellData>\n";
       s.flush();
     }
 
     //! write vertex data
-    virtual void writeVertexData(std::ostream& s,
+    virtual void writeVertexData(std::ostream& s, Indent indent,
                                  VTK::DataArrayWriterFactory& factory)
     {
-      indent(s); s << "<PointData";
+      s << indent << "<PointData";
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
         if ((*it)->ncomps()==1)
         {
@@ -997,7 +999,7 @@ namespace Dune
           break;
         }
       s << ">\n";
-      indentUp();
+      ++indent;
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
         // vtk file format: a vector data always should have 3 comps (with
@@ -1005,7 +1007,8 @@ namespace Dune
         unsigned writecomps = (*it)->ncomps();
         if(writecomps == 2) writecomps = 3;
         shared_ptr<VTK::DataArrayWriter<float> > p
-          (factory.make<float>((*it)->name(), writecomps, nvertices));
+          (factory.make<float>((*it)->name(), writecomps, nvertices,
+                               indent));
         for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
@@ -1016,20 +1019,19 @@ namespace Dune
             p->write(0.0);
         }
       }
-      indentDown();
-      indent(s); s << "</PointData>\n";
+      --indent;
+      s << indent << "</PointData>\n";
       s.flush();
     }
 
     //! write the positions of vertices
-    virtual void writeGridPoints(std::ostream& s,
+    virtual void writeGridPoints(std::ostream& s, const Indent& indent,
                                  VTK::DataArrayWriterFactory& factory)
     {
-      indent(s); s << "<Points>\n";
-      indentUp();
+      s << indent << "<Points>\n";
 
       shared_ptr<VTK::DataArrayWriter<float> > p
-        (factory.make<float>("Coordinates", 3, nvertices));
+        (factory.make<float>("Coordinates", 3, nvertices, indent+1));
       VertexIterator vEnd = vertexEnd();
       for (VertexIterator vit=vertexBegin(); vit!=vEnd; ++vit)
       {
@@ -1042,26 +1044,24 @@ namespace Dune
       // free the VTK::DataArrayWriter before touching the stream
       p.reset();
 
-      indentDown();
-      indent(s); s << "</Points>\n";
+      s << indent << "</Points>\n";
       s.flush();
     }
 
     //! write the connectivity array
-    virtual void writeGridCells(std::ostream& s,
+    virtual void writeGridCells(std::ostream& s, Indent indent,
                                 VTK::DataArrayWriterFactory& factory)
     {
-      indent(s);
       if (n>1)
-        s << "<Cells>\n";
+        s << indent << "<Cells>\n";
       else
-        s << "<Lines>\n";
-      indentUp();
+        s << indent << "<Lines>\n";
+      ++indent;
 
       // connectivity
       {
         shared_ptr<VTK::DataArrayWriter<int> > p1
-          (factory.make<int>("connectivity", 1, ncorners));
+          (factory.make<int>("connectivity", 1, ncorners, indent));
         for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
           p1->write(it.id());
       }
@@ -1069,7 +1069,7 @@ namespace Dune
       // offsets
       {
         shared_ptr<VTK::DataArrayWriter<int> > p2
-          (factory.make<int>("offsets", 1, ncells));
+          (factory.make<int>("offsets", 1, ncells, indent));
         int offset = 0;
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
@@ -1082,7 +1082,7 @@ namespace Dune
       if (n>1)
       {
         shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
-          (factory.make<unsigned char>("types", 1, ncells));
+          (factory.make<unsigned char>("types", 1, ncells, indent));
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
           int vtktype = VTK::geometryType(it->type());
@@ -1090,22 +1090,21 @@ namespace Dune
         }
       }
 
-      indentDown();
-      indent(s);
+      --indent;
       if (n>1)
-        s << "</Cells>\n";
+        s << indent << "</Cells>\n";
       else
-        s << "</Lines>\n";
+        s << indent << "</Lines>\n";
       s.flush();
     }
 
     //! write the appended data sections
-    virtual void writeAppendedData(std::ostream& s,
+    virtual void writeAppendedData(std::ostream& s, Indent indent,
                                    VTK::DataArrayWriterFactory& factory)
     {
-      indent(s); s << "<AppendedData encoding=\"raw\">\n";
-      indentUp();
-      indent(s); s << "_";   // indicates start of binary data
+      s << indent << "<AppendedData encoding=\"raw\">\n";
+      ++indent;
+      s << indent << "_";   // indicates start of binary data
 
       // point data
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
@@ -1115,7 +1114,8 @@ namespace Dune
         unsigned writecomps = (*it)->ncomps();
         if(writecomps == 2) writecomps = 3;
         shared_ptr<VTK::DataArrayWriter<float> > p
-          (factory.make<float>((*it)->name(), writecomps, nvertices));
+          (factory.make<float>((*it)->name(), writecomps, nvertices,
+                               indent));
         for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
@@ -1135,7 +1135,7 @@ namespace Dune
         unsigned writecomps = (*it)->ncomps();
         if(writecomps == 2) writecomps = 3;
         shared_ptr<VTK::DataArrayWriter<float> > p
-          (factory.make<float>((*it)->name(), writecomps, ncells));
+          (factory.make<float>((*it)->name(), writecomps, ncells, indent));
         for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
@@ -1150,7 +1150,7 @@ namespace Dune
       // point coordinates
       {
         shared_ptr<VTK::DataArrayWriter<float> > p
-          (factory.make<float>("Coordinates", 3, nvertices));
+          (factory.make<float>("Coordinates", 3, nvertices, indent));
         VertexIterator vEnd = vertexEnd();
         for (VertexIterator vit=vertexBegin(); vit!=vEnd; ++vit)
         {
@@ -1165,7 +1165,7 @@ namespace Dune
       // connectivity
       {
         shared_ptr<VTK::DataArrayWriter<int> > p1
-          (factory.make<int>("connectivity", 1, ncorners));
+          (factory.make<int>("connectivity", 1, ncorners, indent));
         for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
           p1->write(it.id());
       }
@@ -1173,7 +1173,7 @@ namespace Dune
       // offsets
       {
         shared_ptr<VTK::DataArrayWriter<int> > p2
-          (factory.make<int>("offsets", 1, ncells));
+          (factory.make<int>("offsets", 1, ncells, indent));
         int offset = 0;
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
@@ -1186,7 +1186,7 @@ namespace Dune
       if (n>1)
       {
         shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
-          (factory.make<unsigned char>("types", 1, ncells));
+          (factory.make<unsigned char>("types", 1, ncells, indent));
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
           int vtktype = VTK::geometryType(it->type());
@@ -1195,31 +1195,12 @@ namespace Dune
       }
 
       s << std::endl;
-      indentDown();
-      indent(s); s << "</AppendedData>\n";
+      --indent;
+      s << indent << "</AppendedData>\n";
       s.flush();
     }
 
   protected:
-    //! increase indentation level
-    void indentUp ()
-    {
-      indentCount++;
-    }
-
-    //! decrease indentation level
-    void indentDown ()
-    {
-      indentCount--;
-    }
-
-    //! write indentation to stream
-    void indent (std::ostream& s)
-    {
-      for (int i=0; i<indentCount; i++)
-        s << "  ";
-    }
-
     // the list of registered functions
     std::list<VTKFunctionPtr> celldata;
     std::list<VTKFunctionPtr> vertexdata;
@@ -1227,10 +1208,6 @@ namespace Dune
   private:
     // the grid
     GridView gridView_;
-
-    // indend counter
-    int indentCount;
-    int numPerLine;
 
     // temporary grid information
   protected:
