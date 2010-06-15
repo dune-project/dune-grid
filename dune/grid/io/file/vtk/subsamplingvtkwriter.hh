@@ -163,19 +163,23 @@ namespace Dune
 
       shared_ptr<VTK::DataArrayWriter<float> > p
         (writer.makeArrayWriter<float>((*it)->name(), writecomps, ncells));
-      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-      {
-        Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
-        for(SubElementIterator sit = refinement.eBegin(level), send = refinement.eEnd(level);
-            sit != send; ++sit)
+      if(!p->writeIsNoop())
+        for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
         {
-          for (int j=0; j<(*it)->ncomps(); j++)
-            p->write((*it)->evaluate(j,*i,sit.coords()));
-          // expand 2D-Vectors to 3D
-          for(unsigned j = (*it)->ncomps(); j < writecomps; j++)
-            p->write(0.0);
+          Refinement &refinement =
+            buildRefinement<dim, ctype>(i->type(),
+                                        subsampledGeometryType(i->type()));
+          for(SubElementIterator sit = refinement.eBegin(level),
+              send = refinement.eEnd(level);
+              sit != send; ++sit)
+          {
+            for (int j=0; j<(*it)->ncomps(); j++)
+              p->write((*it)->evaluate(j,*i,sit.coords()));
+            // expand 2D-Vectors to 3D
+            for(unsigned j = (*it)->ncomps(); j < writecomps; j++)
+              p->write(0.0);
+          }
         }
-      }
     }
     writer.endCellData();
   }
@@ -212,19 +216,24 @@ namespace Dune
 
       shared_ptr<VTK::DataArrayWriter<float> > p
         (writer.makeArrayWriter<float>((*it)->name(), writecomps, nvertices));
-      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-      {
-        Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
-        for(SubVertexIterator sit = refinement.vBegin(level), send = refinement.vEnd(level);
-            sit != send; ++sit)
+      if(!p->writeIsNoop())
+        for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
         {
-          for (int j=0; j<(*it)->ncomps(); j++)
-            p->write((*it)->evaluate(j,*i,sit.coords()));
-          //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-          for(unsigned j = (*it)->ncomps(); j < writecomps; j++)
-            p->write(0.0);
+          Refinement &refinement =
+            buildRefinement<dim, ctype>(i->type(),
+                                        subsampledGeometryType(i->type()));
+          for(SubVertexIterator sit = refinement.vBegin(level),
+              send = refinement.vEnd(level);
+              sit != send; ++sit)
+          {
+            for (int j=0; j<(*it)->ncomps(); j++)
+              p->write((*it)->evaluate(j,*i,sit.coords()));
+            // vtk file format: a vector data always should have 3 comps (with
+            // 3rd comp = 0 in 2D case)
+            for(unsigned j = (*it)->ncomps(); j < writecomps; j++)
+              p->write(0.0);
+          }
         }
-      }
     }
     writer.endPointData();
   }
@@ -237,19 +246,23 @@ namespace Dune
 
     shared_ptr<VTK::DataArrayWriter<float> > p
       (writer.makeArrayWriter<float>("Coordinates", 3, nvertices));
-    for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-    {
-      Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
-      for(SubVertexIterator sit = refinement.vBegin(level), send = refinement.vEnd(level);
-          sit != send; ++sit)
+    if(!p->writeIsNoop())
+      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
-        FieldVector<ctype, dimw> coords = i->geometry().global(sit.coords());
-        for (int j=0; j<std::min(int(dimw),3); j++)
-          p->write(coords[j]);
-        for (int j=std::min(int(dimw),3); j<3; j++)
-          p->write(0.0);
+        Refinement &refinement =
+          buildRefinement<dim, ctype>(i->type(),
+                                      subsampledGeometryType(i->type()));
+        for(SubVertexIterator sit = refinement.vBegin(level),
+            send = refinement.vEnd(level);
+            sit != send; ++sit)
+        {
+          FieldVector<ctype, dimw> coords = i->geometry().global(sit.coords());
+          for (int j=0; j<std::min(int(dimw),3); j++)
+            p->write(coords[j]);
+          for (int j=std::min(int(dimw),3); j<3; j++)
+            p->write(0.0);
+        }
       }
-    }
     // free the VTK::DataArrayWriter before touching the stream
     p.reset();
 
@@ -267,19 +280,23 @@ namespace Dune
       shared_ptr<VTK::DataArrayWriter<int> > p1
         (writer.makeArrayWriter<int>("connectivity", 1, ncorners));
       // The offset within the index numbering
-      int offset = 0;
-      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-      {
-        GeometryType coercedToType = subsampledGeometryType(i->type());
-        Refinement &refinement = buildRefinement<dim, ctype>(i->type(), coercedToType);
-        for(SubElementIterator sit = refinement.eBegin(level), send = refinement.eEnd(level);
-            sit != send; ++sit)
+      if(!p1->writeIsNoop()) {
+        int offset = 0;
+        for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
         {
-          IndexVector indices = sit.vertexIndices();
-          for(unsigned int ii = 0; ii < indices.size(); ++ii)
-            p1->write(offset+indices[VTK::renumber(coercedToType, ii)]);
+          GeometryType coercedToType = subsampledGeometryType(i->type());
+          Refinement &refinement =
+            buildRefinement<dim, ctype>(i->type(), coercedToType);
+          for(SubElementIterator sit = refinement.eBegin(level),
+              send = refinement.eEnd(level);
+              sit != send; ++sit)
+          {
+            IndexVector indices = sit.vertexIndices();
+            for(unsigned int ii = 0; ii < indices.size(); ++ii)
+              p1->write(offset+indices[VTK::renumber(coercedToType, ii)]);
+          }
+          offset += refinement.nVertices(level);
         }
-        offset += refinement.nVertices(level);
       }
     }
 
@@ -287,16 +304,22 @@ namespace Dune
     {
       shared_ptr<VTK::DataArrayWriter<int> > p2
         (writer.makeArrayWriter<int>("offsets", 1, ncells));
-      // The offset into the connectivity array
-      int offset = 0;
-      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-      {
-        Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
-        unsigned int verticesPerCell = refinement.eBegin(level).vertexIndices().size();
-        for(int element = 0; element < refinement.nElements(level); ++element)
+      if(!p2->writeIsNoop()) {
+        // The offset into the connectivity array
+        int offset = 0;
+        for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
         {
-          offset += verticesPerCell;
-          p2->write(offset);
+          Refinement &refinement =
+            buildRefinement<dim, ctype>(i->type(),
+                                        subsampledGeometryType(i->type()));
+          unsigned int verticesPerCell =
+            refinement.eBegin(level).vertexIndices().size();
+          for(int element = 0; element < refinement.nElements(level);
+              ++element)
+          {
+            offset += verticesPerCell;
+            p2->write(offset);
+          }
         }
       }
     }
@@ -306,14 +329,16 @@ namespace Dune
     {
       shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
         (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
-      for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
-      {
-        GeometryType coerceTo = subsampledGeometryType(it->type());
-        Refinement &refinement = buildRefinement<dim, ctype>(it->type(), coerceTo);
-        int vtktype = VTK::geometryType(coerceTo);
-        for(int i = 0; i < refinement.nElements(level); ++i)
-          p3->write(vtktype);
-      }
+      if(!p3->writeIsNoop())
+        for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
+        {
+          GeometryType coerceTo = subsampledGeometryType(it->type());
+          Refinement &refinement =
+            buildRefinement<dim, ctype>(it->type(), coerceTo);
+          int vtktype = VTK::geometryType(coerceTo);
+          for(int i = 0; i < refinement.nElements(level); ++i)
+            p3->write(vtktype);
+        }
     }
 
     writer.endCells();

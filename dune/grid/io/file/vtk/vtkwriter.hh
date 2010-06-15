@@ -934,15 +934,16 @@ namespace Dune
         shared_ptr<VTK::DataArrayWriter<float> > p
           (writer.makeArrayWriter<float>((*it)->name(), writecomps,
                                          ncells));
-        for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-        {
-          for (int j=0; j<(*it)->ncomps(); j++)
-            p->write((*it)->evaluate(j,*i,i.position()));
-          // vtk file format: a vector data always should have 3 comps (with
-          // 3rd comp = 0 in 2D case)
-          for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
-            p->write(0.0);
-        }
+        if(!p->writeIsNoop())
+          for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
+          {
+            for (int j=0; j<(*it)->ncomps(); j++)
+              p->write((*it)->evaluate(j,*i,i.position()));
+            // vtk file format: a vector data always should have 3 comps
+            // (with 3rd comp = 0 in 2D case)
+            for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
+              p->write(0.0);
+          }
       }
       writer.endCellData();
     }
@@ -978,15 +979,16 @@ namespace Dune
         shared_ptr<VTK::DataArrayWriter<float> > p
           (writer.makeArrayWriter<float>((*it)->name(), writecomps,
                                          nvertices));
-        for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
-        {
-          for (int j=0; j<(*it)->ncomps(); j++)
-            p->write((*it)->evaluate(j,*vit,vit.position()));
-          // vtk file format: a vector data always should have 3 comps (with
-          // 3rd comp = 0 in 2D case)
-          for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
-            p->write(0.0);
-        }
+        if(!p->writeIsNoop())
+          for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
+          {
+            for (int j=0; j<(*it)->ncomps(); j++)
+              p->write((*it)->evaluate(j,*vit,vit.position()));
+            // vtk file format: a vector data always should have 3 comps
+            // (with 3rd comp = 0 in 2D case)
+            for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
+              p->write(0.0);
+          }
       }
       writer.endPointData();
     }
@@ -998,14 +1000,16 @@ namespace Dune
 
       shared_ptr<VTK::DataArrayWriter<float> > p
         (writer.makeArrayWriter<float>("Coordinates", 3, nvertices));
-      VertexIterator vEnd = vertexEnd();
-      for (VertexIterator vit=vertexBegin(); vit!=vEnd; ++vit)
-      {
-        int dimw=w;
-        for (int j=0; j<std::min(dimw,3); j++)
-          p->write(vit->geometry().corner(vit.localindex())[j]);
-        for (int j=std::min(dimw,3); j<3; j++)
-          p->write(0.0);
+      if(!p->writeIsNoop()) {
+        VertexIterator vEnd = vertexEnd();
+        for (VertexIterator vit=vertexBegin(); vit!=vEnd; ++vit)
+        {
+          int dimw=w;
+          for (int j=0; j<std::min(dimw,3); j++)
+            p->write(vit->geometry().corner(vit.localindex())[j]);
+          for (int j=std::min(dimw,3); j<3; j++)
+            p->write(0.0);
+        }
       }
       // free the VTK::DataArrayWriter before touching the stream
       p.reset();
@@ -1022,19 +1026,22 @@ namespace Dune
       {
         shared_ptr<VTK::DataArrayWriter<int> > p1
           (writer.makeArrayWriter<int>("connectivity", 1, ncorners));
-        for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
-          p1->write(it.id());
+        if(!p1->writeIsNoop())
+          for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
+            p1->write(it.id());
       }
 
       // offsets
       {
         shared_ptr<VTK::DataArrayWriter<int> > p2
           (writer.makeArrayWriter<int>("offsets", 1, ncells));
-        int offset = 0;
-        for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
-        {
-          offset += it->template count<n>();
-          p2->write(offset);
+        if(!p2->writeIsNoop()) {
+          int offset = 0;
+          for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
+          {
+            offset += it->template count<n>();
+            p2->write(offset);
+          }
         }
       }
 
@@ -1043,11 +1050,12 @@ namespace Dune
       {
         shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
           (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
-        for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
-        {
-          int vtktype = VTK::geometryType(it->type());
-          p3->write(vtktype);
-        }
+        if(!p3->writeIsNoop())
+          for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
+          {
+            int vtktype = VTK::geometryType(it->type());
+            p3->write(vtktype);
+          }
       }
 
       writer.endCells();

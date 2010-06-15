@@ -54,6 +54,8 @@ namespace Dune
     public:
       //! write one data element
       virtual void write (T data) = 0;
+      //! whether calls to write may be skipped
+      virtual bool writeIsNoop() const { return false; }
       //! virtual destructor
       virtual ~DataArrayWriter () {}
     };
@@ -199,6 +201,9 @@ namespace Dune
 
       //! write one data element to output stream (noop)
       void write (T data) { }
+
+      //! whether calls to write may be skipped
+      bool writeIsNoop() const { return true; }
     };
 
     //! a streaming writer for data array tags, uses appended base64 format
@@ -237,6 +242,9 @@ namespace Dune
 
       //! write one data element to output stream (noop)
       void write (T data) { }
+
+      //! whether calls to write may be skipped
+      bool writeIsNoop() const { return true; }
     };
 
     //////////////////////////////////////////////////////////////////////
