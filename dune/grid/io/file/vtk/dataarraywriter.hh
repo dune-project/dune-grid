@@ -204,7 +204,7 @@ namespace Dune
     //  Naked ArrayWriters for the appended section
     //
 
-    //! a streaming writer for data array tags, uses binary inline format
+    //! a streaming writer for appended data array tags, uses base64 format
     template<class T>
     class NakedBase64DataArrayWriter : public DataArrayWriter<T>
     {
@@ -234,6 +234,34 @@ namespace Dune
 
     private:
       Base64Stream b64;
+    };
+
+    //! a streaming writer for appended data arrays, uses raw format
+    template<class T>
+    class NakedRawDataArrayWriter : public DataArrayWriter<T>
+    {
+      RawStream s;
+
+    public:
+      //! make a new data array writer
+      /**
+       * \param theStream Stream to write to.
+       * \param ncomps    Number of components of the array.
+       * \param nitems    Number of cells for cell data/Number of vertices for
+       *                  point data.
+       */
+      NakedRawDataArrayWriter(std::ostream& theStream, int ncomps,
+                              int nitems)
+        : s(theStream)
+      {
+        s.write((unsigned int)(ncomps*nitems*sizeof(T)));
+      }
+
+      //! write one data element to output stream
+      void write (T data)
+      {
+        s.write(data);
+      }
     };
 
     //////////////////////////////////////////////////////////////////////
