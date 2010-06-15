@@ -3,6 +3,7 @@
 vtkiodir = $(includedir)/dune/grid/io/file/vtk
 vtkio_HEADERS =					\
 	b64enc.hh				\
+	basicwriter.hh				\
 	common.hh				\
 	corner.hh				\
 	corneriterator.hh			\
