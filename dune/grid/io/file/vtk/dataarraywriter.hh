@@ -9,7 +9,7 @@
 
 #include <dune/common/exceptions.hh>
 
-#include <dune/grid/io/file/vtk/b64enc.hh>
+#include <dune/grid/io/file/vtk/streams.hh>
 #include <dune/grid/io/file/vtk/common.hh>
 
 /** @file
@@ -120,7 +120,7 @@ namespace Dune
        */
       BinaryDataArrayWriter(std::ostream& theStream, std::string name,
                             int ncomps, int nitems)
-        : s(theStream)
+        : s(theStream), b64(theStream)
       {
         TypeName<T> tn;
         ncomps = (ncomps>1 ? 3 : 1);
@@ -132,56 +132,30 @@ namespace Dune
                      "components");
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"binary\">\n";
-        // reset chunk
-        chunk.txt.read(0,0);
+
         // store size
         unsigned long int size = ncomps*nitems*sizeof(T);
-        b64enc(size);
-        flush();
+        b64.write(size);
+        b64.flush();
       }
 
       //! write one data element to output stream
       void write (T data)
       {
-        b64enc(data);
+        b64.write(data);
       }
 
       //! finish output; writes end tag
       ~BinaryDataArrayWriter ()
       {
-        flush();
+        b64.flush();
         s << "\n</DataArray>\n";
         s.flush();
       }
 
     private:
-      template <class X>
-      void b64enc(X & data)
-      {
-        char* p = reinterpret_cast<char*>(&data);
-        for (size_t len = sizeof(X); len > 0; len--,p++)
-        {
-          chunk.txt.put(*p);
-          if (chunk.txt.size == 3)
-          {
-            chunk.data.write(obuf);
-            s.write(obuf,4);
-          }
-        }
-      }
-
-      void flush()
-      {
-        if (chunk.txt.size > 0)
-        {
-          chunk.data.write(obuf);
-          s.write(obuf,4);
-        }
-      }
-
       std::ostream& s;
-      b64chunk chunk;
-      char obuf[4];
+      Base64Stream b64;
     };
 
     //! a streaming writer for data array tags, uses binary appended format
