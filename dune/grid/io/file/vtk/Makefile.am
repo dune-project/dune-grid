@@ -13,6 +13,7 @@ vtkio_HEADERS =					\
 	functionwriter.hh			\
 	pointiterator.hh			\
 	pvtuwriter.hh				\
+	skeletonfunction.hh			\
 	subsamplingvtkwriter.hh			\
 	streams.hh				\
 	volumeiterators.hh			\
