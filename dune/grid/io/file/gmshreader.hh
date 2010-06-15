@@ -513,6 +513,17 @@ namespace Dune
           }
         element_count++;
         break;
+      case 3 :          // 4-node quadrilateral
+        simplexVertices.resize(4);
+        readfile(file,4,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]));
+        for (int i=0; i<3; i++)
+          if (renumber.find(simplexVertices[i])==renumber.end())
+          {
+            renumber[simplexVertices[i]] = number_of_real_vertices++;
+            factory.insertVertex(nodes[simplexVertices[i]]);
+          }
+        element_count++;
+        break;
       case 9 :          // 6-node triangle
         simplexVertices.resize(6);
         readfile(file,6,"%d %d %d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
@@ -570,6 +581,19 @@ namespace Dune
         for (int i=0; i<3; i++)
           vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+        element_index_to_physical_entity[element_count] = physical_entity;
+        element_count++;
+        break;
+      case 3 :          // 4-node quadrilateral
+        simplexVertices.resize(4);
+        readfile(file,4,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]));
+        vertices.resize(4);
+        // renumber vertices: a) global renumbering, and b) gmsh-to-dune quad renumbering
+        vertices[0] = renumber[simplexVertices[0]];
+        vertices[1] = renumber[simplexVertices[1]];
+        vertices[2] = renumber[simplexVertices[3]];
+        vertices[3] = renumber[simplexVertices[2]];
+        factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim),vertices);
         element_index_to_physical_entity[element_count] = physical_entity;
         element_count++;
         break;
