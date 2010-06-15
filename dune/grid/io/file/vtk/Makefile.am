@@ -8,6 +8,7 @@ vtkio_HEADERS =					\
 	corneriterator.hh			\
 	dataarraywriter.hh			\
 	function.hh				\
+	functionwriter.hh			\
 	pointiterator.hh			\
 	pvtuwriter.hh				\
 	subsamplingvtkwriter.hh			\
