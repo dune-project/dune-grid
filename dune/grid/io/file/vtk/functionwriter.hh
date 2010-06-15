@@ -14,6 +14,7 @@
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/grid/io/file/vtk/common.hh>
 #include <dune/grid/io/file/vtk/dataarraywriter.hh>
 #include <dune/grid/io/file/vtk/vtuwriter.hh>
 
@@ -238,6 +239,38 @@ namespace Dune
       virtual void write(const Cell& cell, const typename Base::Domain&) {
         offset += cell.geometry().corners();
         arraywriter->write(offset);
+      };
+      //! signal end of writing
+      virtual void endWrite() {
+        arraywriter.reset();
+      }
+    };
+
+    //! writer for the types array
+    template<typename Cell>
+    class TypesWriter
+      : public FunctionWriterBase<Cell>
+    {
+      typedef FunctionWriterBase<Cell> Base;
+
+      shared_ptr<DataArrayWriter<unsigned char> > arraywriter;
+
+    public:
+      //! return name
+      virtual std::string name() const { return "types"; }
+
+      //! return number of components of the vector
+      virtual unsigned ncomps() const { return 1; }
+
+      //! start writing with the given writer
+      virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
+        arraywriter.reset(writer.makeArrayWriter<unsigned char>
+                            ( name(), ncomps(), nitems));
+        return !arraywriter->writeIsNoop();
+      }
+      //! write at the given position
+      virtual void write(const Cell& cell, const typename Base::Domain&) {
+        arraywriter->write(geometryType(cell.type()));
       };
       //! signal end of writing
       virtual void endWrite() {
