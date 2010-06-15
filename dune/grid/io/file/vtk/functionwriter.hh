@@ -16,6 +16,7 @@
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/grid/io/file/vtk/dataarraywriter.hh>
+#include <dune/grid/io/file/vtk/pvtuwriter.hh>
 #include <dune/grid/io/file/vtk/vtuwriter.hh>
 
 namespace Dune
@@ -42,6 +43,8 @@ namespace Dune
       //! return number of components of the vector
       virtual unsigned ncomps() const = 0;
 
+      //! add this field to the given parallel writer
+      virtual void addArray(PVTUWriter& writer) = 0;
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) = 0;
       //! write at the given position
@@ -100,6 +103,11 @@ namespace Dune
         else return func->ncomps();
       }
 
+      //! add this field to the given parallel writer
+      virtual void addArray(PVTUWriter& writer) {
+        writer.addArray<float>(name(), ncomps());
+      }
+
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
         arraywriter.reset(writer.makeArrayWriter<float>(name(), ncomps(),
@@ -143,6 +151,11 @@ namespace Dune
 
       //! return number of components of the vector
       virtual unsigned ncomps() const { return 3; }
+
+      //! add this field to the given parallel writer
+      virtual void addArray(PVTUWriter& writer) {
+        writer.addArray<float>(name(), ncomps());
+      }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
@@ -189,6 +202,11 @@ namespace Dune
 
       //! return number of components of the vector
       virtual unsigned ncomps() const { return 1; }
+
+      //! add this field to the given parallel writer
+      virtual void addArray(PVTUWriter& writer) {
+        writer.addArray<unsigned>(name(), ncomps());
+      }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
@@ -242,6 +260,11 @@ namespace Dune
       //! return number of components of the vector
       virtual unsigned ncomps() const { return 1; }
 
+      //! add this field to the given parallel writer
+      virtual void addArray(PVTUWriter& writer) {
+        writer.addArray<unsigned>(name(), ncomps());
+      }
+
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
         arraywriter.reset(writer.makeArrayWriter<unsigned>(name(), ncomps(),
@@ -278,6 +301,11 @@ namespace Dune
       //! return number of components of the vector
       virtual unsigned ncomps() const { return 1; }
 
+      //! add this field to the given parallel writer
+      virtual void addArray(PVTUWriter& writer) {
+        writer.addArray<unsigned>(name(), ncomps());
+      }
+
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
         arraywriter.reset(writer.makeArrayWriter<unsigned>(name(), ncomps(),
@@ -311,6 +339,11 @@ namespace Dune
 
       //! return number of components of the vector
       virtual unsigned ncomps() const { return 1; }
+
+      //! add this field to the given parallel writer
+      virtual void addArray(PVTUWriter& writer) {
+        writer.addArray<unsigned char>(name(), ncomps());
+      }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
