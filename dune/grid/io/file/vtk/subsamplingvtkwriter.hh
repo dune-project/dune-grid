@@ -342,14 +342,7 @@ namespace Dune
   writeAppendedData(std::ostream& s, Indent indent,
                     VTK::DataArrayWriterFactory& factory)
   {
-    std::string encoding;
-    switch(outputtype) {
-    case VTK::appendedraw :    encoding = "raw";    break;
-    case VTK::appendedbase64 : encoding = "base64"; break;
-    default : DUNE_THROW(IOError, "VTKWriter: unsupported OutputType "
-                         << outputtype);
-    }
-
+    const std::string& encoding = factory.appendedEncoding();
     s << indent << "<AppendedData encoding=\"" << encoding << "\">\n";
     ++indent;
     s << indent << "_"; // indicates start of binary data

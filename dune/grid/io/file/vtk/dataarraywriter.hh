@@ -362,6 +362,23 @@ namespace Dune
                    "OutputType " << type);
       }
 
+      //! query encoding string for appended data
+      const std::string& appendedEncoding() const {
+        static const std::string rawString = "raw";
+        static const std::string base64String = "base64";
+
+        switch(type) {
+        case ascii :
+        case base64 :
+          DUNE_THROW(IOError, "DataArrayWriterFactory::appendedEncoding(): No "
+                     "appended encoding for OutputType " << type);
+        case appendedraw :    return rawString;
+        case appendedbase64 : return base64String;
+        }
+        DUNE_THROW(IOError, "DataArrayWriterFactory::appendedEncoding(): "
+                   "unsupported OutputType " << type);
+      }
+
       //! create a DataArrayWriter
       /**
        * \tparam T Type of the data to write.
