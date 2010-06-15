@@ -3,7 +3,11 @@
 #ifndef DUNE_GRID_LEAFITERATOR_HH
 #define DUNE_GRID_LEAFITERATOR_HH
 
+#include <cstddef>
+#include <iterator>
+
 #include <dune/grid/common/entitypointer.hh>
+#include <dune/grid/common/gridenums.hh>
 
 namespace Dune
 {
@@ -44,5 +48,22 @@ namespace Dune
   };
 
 }
+
+namespace std {
+
+  template
+  < int codim, Dune::PartitionIteratorType pitype, class GridImp,
+      template<int,Dune::PartitionIteratorType,class> class LeafIteratorImp>
+  struct iterator_traits<Dune::LeafIterator<codim, pitype, GridImp,
+          LeafIteratorImp> > {
+    typedef ptrdiff_t difference_type;
+    typedef const typename Dune::LeafIterator<codim, pitype, GridImp,
+        LeafIteratorImp>::Entity value_type;
+    typedef value_type* pointer;
+    typedef value_type& reference;
+    typedef forward_iterator_tag iterator_category;
+  };
+
+} // namespace std
 
 #endif // DUNE_GRID_LEAFITERATOR_HH

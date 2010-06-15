@@ -3,6 +3,11 @@
 #ifndef DUNE_GRID_LEVELITERATOR_HH
 #define DUNE_GRID_LEVELITERATOR_HH
 
+#include <cstddef>
+#include <iterator>
+
+#include <dune/grid/common/gridenums.hh>
+
 #include "entitypointer.hh"
 
 namespace Dune
@@ -47,5 +52,22 @@ namespace Dune
   };
 
 }
+
+namespace std {
+
+  template
+  < int codim, Dune::PartitionIteratorType pitype, class GridImp,
+      template<int,Dune::PartitionIteratorType,class> class LevelIteratorImp>
+  struct iterator_traits<Dune::LevelIterator<codim, pitype, GridImp,
+          LevelIteratorImp> > {
+    typedef ptrdiff_t difference_type;
+    typedef const typename Dune::LevelIterator<codim, pitype, GridImp,
+        LevelIteratorImp>::Entity value_type;
+    typedef value_type* pointer;
+    typedef value_type& reference;
+    typedef forward_iterator_tag iterator_category;
+  };
+
+} // namespace std
 
 #endif // DUNE_GRID_LEVELITERATOR_HH
