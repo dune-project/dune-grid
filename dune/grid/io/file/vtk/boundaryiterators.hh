@@ -9,6 +9,10 @@
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/shared_ptr.hh>
 
+#include <dune/grid/io/file/vtk/corner.hh>
+#include <dune/grid/io/file/vtk/corneriterator.hh>
+#include <dune/grid/io/file/vtk/functionwriter.hh>
+
 namespace Dune {
 
   //! \addtogroup VTK
@@ -136,6 +140,64 @@ namespace Dune {
           iit.reset(new IntersectionIterator(gv->ibegin(*eit)));
 
         while(!valid()) basic_increment();
+      }
+    };
+
+    template<typename ElementIndexSet>
+    class IntersectionIndexSet {
+      const ElementIndexSet& eis;
+
+    public:
+      IntersectionIndexSet(const ElementIndexSet& eis_)
+        : eis(eis)
+      { }
+    };
+
+    template<typename GV>
+    class NonConformingBoundaryIteratorFactory {
+      const GV& gv;
+
+    public:
+      static const unsigned dimCell = GV::dimension-1;
+
+      typedef typename GV::Intersection Cell;
+      typedef BoundaryIterator<GV> CellIterator;
+
+      typedef VTK::Corner<Cell> Corner;
+      typedef VTK::CornerIterator<CellIterator> CornerIterator;
+
+      typedef Corner Point;
+      typedef CornerIterator PointIterator;
+
+      typedef NonConformingConnectivityWriter<Cell> ConnectivityWriter;
+      typedef typename GV::CollectiveCommunication CollectiveCommunication;
+
+      explicit NonConformingBoundaryIteratorFactory(const GV& gv_)
+        : gv(gv_)
+      { }
+
+      CellIterator beginCells() const {
+        return CellIterator(gv);
+      }
+      CellIterator endCells() const {
+        return CellIterator(gv, true);
+      }
+
+      CornerIterator beginCorners() const {
+        return CornerIterator(beginCells(), endCells());
+      }
+      CornerIterator endCorners() const {
+        return CornerIterator(endCells());
+      }
+
+      PointIterator beginPoints() const { return beginCorners(); }
+      PointIterator endPoints() const { return endCorners(); }
+
+      ConnectivityWriter makeConnectivity() const {
+        return ConnectivityWriter();
+      }
+      const CollectiveCommunication& comm() const {
+        return gv.comm();
       }
     };
 
