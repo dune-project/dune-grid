@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <string>
 #include <typeinfo>
+#include <vector>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
@@ -111,6 +112,67 @@ namespace Dune
       //! signal end of writing
       virtual void endWrite() {
         arraywriter.reset();
+      }
+    };
+
+    //! writer for the connectivity array in conforming mode
+    template<typename IteratorFactory>
+    class ConformingConnectivityWriter
+      : public FunctionWriterBase<typename IteratorFactory::Cell>
+    {
+      typedef FunctionWriterBase<typename IteratorFactory::Cell> Base;
+      static const unsigned mydim = Base::Cell::mydimension;
+
+      const IteratorFactory& factory;
+      shared_ptr<DataArrayWriter<unsigned> > arraywriter;
+      std::vector<unsigned> pointIndices;
+
+    public:
+      //! create a writer with the given iteratorfactory
+      ConformingConnectivityWriter(const IteratorFactory& factory_)
+        : factory(factory_)
+      { }
+
+      //! return name
+      virtual std::string name() const { return "connectivity"; }
+
+      //! return number of components of the vector
+      virtual unsigned ncomps() const { return 1; }
+
+      //! start writing with the given writer
+      virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
+        arraywriter.reset(writer.makeArrayWriter<unsigned>(name(), ncomps(),
+                                                           nitems));
+        if(arraywriter->writeIsNoop())
+          return false;
+
+        //! write is meaningful, we need to build the data
+        pointIndices.resize(factory.indexSet().size(mydim));
+        const typename IteratorFactory::PointIterator& pend =
+          factory.endPoints();
+        typename IteratorFactory::PointIterator pit = factory.beginPoints();
+        unsigned counter = 0;
+        while(pit != pend) {
+          pointIndices[factory.indexSet().subIndex
+                         (pit->cell(), pit->duneIndex(), mydim)] = counter;
+          ++counter;
+          ++pit;
+        }
+        return true;
+      }
+      //! write at the given corner
+      virtual void write(const typename Base::Cell& cell, unsigned cornerIndex)
+      {
+        // if pointIndices is empty, we're in writeIsNoop mode
+        if(pointIndices.size() == 0)
+          return;
+        arraywriter->write(pointIndices[factory.indexSet().subIndex
+                                          (cell, cornerIndex, mydim)]);
+      }
+      //! signal end of writing
+      virtual void endWrite() {
+        arraywriter.reset();
+        pointIndices.clear();
       }
     };
 
