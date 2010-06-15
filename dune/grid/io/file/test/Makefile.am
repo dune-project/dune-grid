@@ -28,6 +28,9 @@ check_PROGRAMS = $(ALLTESTS)
 # list of tests to run
 TESTS = $(ALLTESTS)
 
+ALLTESTS += conformvolumevtktest
+conformvolumevtktest_SOURCES = conformvolumevtktest.cc
+
 vtktest_SOURCES = vtktest.cc
 
 vtksequencetest_SOURCES = vtksequencetest.cc
