@@ -176,6 +176,40 @@ namespace Dune
       }
     };
 
+    //! writer for the connectivity array in nonconforming mode
+    template<typename Cell>
+    class NonConformingConnectivityWriter
+      : public FunctionWriterBase<Cell>
+    {
+      shared_ptr<DataArrayWriter<unsigned> > arraywriter;
+      unsigned counter;
+
+    public:
+      //! return name
+      virtual std::string name() const { return "connectivity"; }
+
+      //! return number of components of the vector
+      virtual unsigned ncomps() const { return 1; }
+
+      //! start writing with the given writer
+      virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
+        arraywriter.reset(writer.makeArrayWriter<unsigned>(name(), ncomps(),
+                                                           nitems));
+        counter = 0;
+        return !arraywriter->writeIsNoop();
+      }
+      //! write at the given corner
+      virtual void write(const Cell& cell, unsigned cornerIndex)
+      {
+        arraywriter->write(counter);
+        ++counter;
+      }
+      //! signal end of writing
+      virtual void endWrite() {
+        arraywriter.reset();
+      }
+    };
+
   } // namespace VTK
 
   //! \} group VTK
