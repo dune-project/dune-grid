@@ -15,6 +15,7 @@ vtkio_HEADERS =					\
 	subsamplingvtkwriter.hh			\
 	streams.hh				\
 	volumeiterators.hh			\
+	volumewriter.hh				\
 	vtksequencewriter.hh			\
 	vtkwriter.hh				\
 	vtuwriter.hh
