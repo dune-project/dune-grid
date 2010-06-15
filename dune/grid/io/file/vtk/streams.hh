@@ -77,6 +77,26 @@ namespace Dune {
     }
   };
 
+  //! write out data in binary
+  class RawStream
+  {
+  public:
+    //! make a new stream
+    inline RawStream (std::ostream& theStream)
+      : s(theStream)
+    {}
+
+    //! write data to stream
+    template<class T>
+    void write (T data)
+    {
+      char* p = reinterpret_cast<char*>(&data);
+      s.write(p,sizeof(T));
+    }
+  private:
+    std::ostream& s;
+  };
+
 } // namespace Dune
 
 #endif // DUNE_GRID_IO_FILE_VTK_STREAMS_HH

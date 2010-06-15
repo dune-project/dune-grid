@@ -25,6 +25,7 @@
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/grid/io/file/vtk/dataarraywriter.hh>
 #include <dune/grid/io/file/vtk/function.hh>
+#include <dune/grid/io/file/vtk/streams.hh>
 
 /** @file
     @author Peter Bastian, Christian Engwer
@@ -1105,7 +1106,7 @@ namespace Dune
       indentUp();
       indent(s); s << "_";   // indicates start of binary data
 
-      SimpleStream stream(s);
+      RawStream stream(s);
 
       // write length before each data block
       unsigned int blocklength;
@@ -1218,25 +1219,6 @@ namespace Dune
     }
 
   protected:
-    //! write out data in binary
-    class SimpleStream
-    {
-    public:
-      //! make a new stream
-      SimpleStream (std::ostream& theStream)
-        : s(theStream)
-      {}
-      //! write data to stream
-      template<class T>
-      void write (T data)
-      {
-        char* p = reinterpret_cast<char*>(&data);
-        s.write(p,sizeof(T));
-      }
-    private:
-      std::ostream& s;
-    };
-
     //! increase indentation level
     void indentUp ()
     {
