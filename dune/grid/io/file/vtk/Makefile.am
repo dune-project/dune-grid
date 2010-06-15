@@ -5,6 +5,7 @@ vtkio_HEADERS =					\
 	b64enc.hh				\
 	common.hh				\
 	corner.hh				\
+	corneriterator.hh			\
 	dataarraywriter.hh			\
 	function.hh				\
 	pvtuwriter.hh				\
