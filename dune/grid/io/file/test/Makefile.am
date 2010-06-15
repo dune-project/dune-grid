@@ -31,6 +31,9 @@ TESTS = $(ALLTESTS)
 ALLTESTS += conformvolumevtktest
 conformvolumevtktest_SOURCES = conformvolumevtktest.cc
 
+ALLTESTS += nonconformboundaryvtktest
+nonconformboundaryvtktest_SOURCES = nonconformboundaryvtktest.cc
+
 vtktest_SOURCES = vtktest.cc
 
 vtksequencetest_SOURCES = vtksequencetest.cc
