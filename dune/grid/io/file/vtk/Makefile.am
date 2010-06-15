@@ -6,6 +6,7 @@ vtkio_HEADERS =					\
 	common.hh				\
 	dataarraywriter.hh			\
 	function.hh				\
+	pvtuwriter.hh				\
 	subsamplingvtkwriter.hh			\
 	streams.hh				\
 	vtksequencewriter.hh			\
