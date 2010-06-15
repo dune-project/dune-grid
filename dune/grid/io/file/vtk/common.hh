@@ -4,11 +4,14 @@
 #ifndef DUNE_GRID_IO_FILE_VTK_COMMON_HH
 #define DUNE_GRID_IO_FILE_VTK_COMMON_HH
 
+#include <limits>
+#include <sstream>
 #include <string>
 
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/geometrytype.hh>
+#include <dune/common/typetraits.hh>
 
 /** @file
     @author Peter Bastian, Christian Engwer
@@ -131,89 +134,90 @@ namespace Dune
     static const VTK::DataMode nonconforming = VTK::nonconforming;
   };
 
-  //////////////////////////////////////////////////////////////////////
-  //
-  //  VTKTypeNameTraits
-  //
+  namespace VTK {
 
-  //! map type to its VTK name in data array
-  /**
-   * \tparam T The type whose VTK name is requested
-   */
-  template<class T>
-  struct VTKTypeNameTraits {
-    //! return VTK name of the type
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  PrintType
+    //
+
+    //! determine a type to safely put another type into a stream
     /**
-     * If the type is not known to VTK, return empty string.
+     * This is mainly interating for character types which should print as
+     * their integral value, not as a character.
      */
-    std::string operator () (){
-      return "";
-    }
-  };
+    template<typename T>
+    struct PrintType {
+      //! type to convert T to before putting it into a stream with <<
+      typedef T Type;
+    };
 
-  template<>
-  struct VTKTypeNameTraits<char> {
-    std::string operator () () {
-      return "Int8";
-    }
-    typedef int PrintType;
-  };
+    template<>
+    struct PrintType<unsigned char> {
+      typedef unsigned Type;
+    };
 
-  template<>
-  struct VTKTypeNameTraits<unsigned char> {
-    std::string operator () () {
-      return "UInt8";
-    }
-    typedef int PrintType;
-  };
+    template<>
+    struct PrintType<signed char> {
+      typedef int Type;
+    };
 
-  template<>
-  struct VTKTypeNameTraits<short> {
-    std::string operator () () {
-      return "Int16";
-    }
-    typedef short PrintType;
-  };
+    template<>
+    struct PrintType<char> {
+      typedef SelectType<std::numeric_limits<char>::is_signed, int, unsigned>
+      Type;
+    };
 
-  template<>
-  struct VTKTypeNameTraits<unsigned short> {
-    std::string operator () () {
-      return "UInt16";
-    }
-    typedef unsigned short PrintType;
-  };
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  TypeName
+    //
 
-  template<>
-  struct VTKTypeNameTraits<int> {
-    std::string operator () () {
-      return "Int32";
-    }
-    typedef int PrintType;
-  };
+    //! map type to its VTK name in data array
+    /**
+     * \tparam T The type whose VTK name is requested
+     */
+    template<typename T>
+    class TypeName {
+      static std::string getString() {
+        static const unsigned int_sizes[] = { 8, 16, 32, 64, 0 };
+        static const unsigned float_sizes[] = { 32, 64, 0 };
+        const unsigned* sizes;
 
-  template<>
-  struct VTKTypeNameTraits<unsigned int> {
-    std::string operator () () {
-      return "UInt32";
-    }
-    typedef unsigned int PrintType;
-  };
+        std::ostringstream s;
+        if(std::numeric_limits<T>::is_integer) {
+          if(std::numeric_limits<T>::is_signed)
+            s << "Int";
+          else
+            s << "UInt";
+          sizes = int_sizes;
+        }
+        else {
+          // assume float
+          s << "Float";
+          sizes = float_sizes;
+        }
 
-  template<>
-  struct VTKTypeNameTraits<float> {
-    std::string operator () () {
-      return "Float32";
-    }
-    typedef float PrintType;
-  };
+        static const unsigned size = 8*sizeof(T);
+        while(*sizes != 0 && *sizes <= size) ++sizes;
+        --sizes;
+        s << *sizes;
 
-  template<>
-  struct VTKTypeNameTraits<double> {
-    std::string operator () () {
-      return "Float64";
-    }
-    typedef double PrintType;
-  };
+        return s.str();
+      }
+
+    public:
+      //! return VTK name of the type
+      /**
+       * If the type is not known to VTK, return empty string.
+       */
+      const std::string& operator()() const {
+        static const std::string s = getString();
+        return s;
+      }
+    };
+
+  }
 
   //////////////////////////////////////////////////////////////////////
   //

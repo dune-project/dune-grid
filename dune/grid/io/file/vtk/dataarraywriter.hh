@@ -92,7 +92,7 @@ namespace Dune
                              int ncomps)
       : s(theStream), counter(0), numPerLine(12)
     {
-      VTKTypeNameTraits<T> tn;
+      VTK::TypeName<T> tn;
       s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
       // vtk file format: a vector data always should have 3 comps (with 3rd
       // comp = 0 in 2D case)
@@ -106,7 +106,7 @@ namespace Dune
     //! write one data element to output stream
     void write (T data)
     {
-      typedef typename VTKTypeNameTraits<T>::PrintType PT;
+      typedef typename VTK::PrintType<T>::Type PT;
       s << (PT) data << " ";
       counter++;
       if (counter%numPerLine==0) s << "\n";
@@ -142,7 +142,7 @@ namespace Dune
                               int ncomps, int nitems)
       : s(theStream)
     {
-      VTKTypeNameTraits<T> tn;
+      VTK::TypeName<T> tn;
       ncomps = (ncomps>1 ? 3 : 1);
       s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
       // vtk file format: a vector data always should have 3 comps (with 3rd
@@ -223,7 +223,7 @@ namespace Dune
                                       unsigned int& bc)
       : s(theStream),bytecount(bc)
     {
-      VTKTypeNameTraits<T> tn;
+      VTK::TypeName<T> tn;
       s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
       // vtk file format: a vector data always should have 3 comps(with 3rd
       // comp = 0 in 2D case)
