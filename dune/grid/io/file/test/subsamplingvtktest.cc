@@ -78,9 +78,9 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
            dim, (coerceToSimplex ? "simplex" : "natural"));
   vtk.write(name);
 
-  snprintf(name,256,"subsamplingvtktest-%iD-%s-binary",
+  snprintf(name,256,"subsamplingvtktest-%iD-%s-appendedraw",
            dim, (coerceToSimplex ? "simplex" : "natural"));
-  vtk.write(name, Dune::VTK::binaryappended);
+  vtk.write(name, Dune::VTK::appendedraw);
 }
 
 template<int dim>

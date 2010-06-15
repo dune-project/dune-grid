@@ -36,10 +36,12 @@ namespace Dune
     enum OutputType {
       //! Output to the file is in ascii.
       ascii,
-      //! Output to the file is inline binary.
-      binary,
-      //! Ouput is appended binary to the file.
-      binaryappended
+      //! Output to the file is inline base64 binary.
+      base64,
+      //! Ouput is to the file is appended raw binary
+      appendedraw,
+      //! Ouput is to the file is appended base64 binary
+      appendedbase64
       // //! Output to the file is compressed inline binary.
       // binarycompressed,
       // //! Ouput is compressed and appended to the file.
@@ -87,19 +89,19 @@ namespace Dune
     typedef DUNE_DEPRECATED VTK::OutputType OutputType;
     //! Output to the file is in ascii.
     /**
-     * \deprecated Use the value from the namespace VTK instead
+     * \deprecated Use VTK::ascii instead
      */
     static const VTK::OutputType ascii = VTK::ascii;
     //! Output to the file is inline binary.
     /**
-     * \deprecated Use the value from the namespace VTK instead
+     * \deprecated Use VTK::base64 instead
      */
-    static const VTK::OutputType binary = VTK::binary;
+    static const VTK::OutputType binary = VTK::base64;
     //! Ouput is appended binary to the file.
     /**
-     * \deprecated Use the value from the namespace VTK instead
+     * \deprecated Use VTK::appendedraw instead
      */
-    static const VTK::OutputType binaryappended = VTK::binaryappended;
+    static const VTK::OutputType binaryappended = VTK::appendedraw;
     //! Whether to produce conforming or non-conforming output.
     /**
      * This applies to the conformity of the data; a non-conforming grid can

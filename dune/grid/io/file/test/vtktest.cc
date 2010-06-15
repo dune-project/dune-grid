@@ -89,11 +89,14 @@ void doWrite( const GridView &gridView, Dune :: VTKOptions :: DataMode dm )
   snprintf(name,256,"vtktest-%iD-%s-ascii", dim, VTKDataMode(dm));
   vtk.write(name);
 
-  snprintf(name,256,"vtktest-%iD-%s-binary", dim, VTKDataMode(dm));
-  vtk.write(name, Dune::VTK::binary);
+  snprintf(name,256,"vtktest-%iD-%s-base64", dim, VTKDataMode(dm));
+  vtk.write(name, Dune::VTK::base64);
 
-  snprintf(name,256,"vtktest-%iD-%s-binaryappended", dim, VTKDataMode(dm));
-  vtk.write(name, Dune::VTK::binaryappended);
+  snprintf(name,256,"vtktest-%iD-%s-appendedraw", dim, VTKDataMode(dm));
+  vtk.write(name, Dune::VTK::appendedraw);
+
+  snprintf(name,256,"vtktest-%iD-%s-appendedbase64", dim, VTKDataMode(dm));
+  vtk.write(name, Dune::VTK::appendedbase64);
 }
 
 template<int dim>

@@ -166,44 +166,77 @@ namespace Dune
       const Indent& indent;
     };
 
-    //! a streaming writer for data array tags, uses binary appended format
+    //! a streaming writer for data array tags, uses appended raw format
     template<class T>
-    class BinaryAppendedDataArrayWriter : public DataArrayWriter<T>
+    class AppendedRawDataArrayWriter : public DataArrayWriter<T>
     {
     public:
       //! make a new data array writer
       /**
-       * \param theStream Stream to write to.
+       * \param s         Stream to write to.
        * \param name      Name of array to write.
        * \param ncomps    Number of components of the array.
-       * \param bc        Byte count variable: this is incremented by one for
-       *                  each byte which has to beritte to the appended data
+       * \param nitems    Number of cells for cell data/Number of vertices for
+       *                  point data.
+       * \param offset    Byte count variable: this is incremented by one for
+       *                  each byte which has to written to the appended data
        *                  section later.
        * \param indent_   Indentation to use.  This is uses as-is for the
        *                  header line.
        */
-      BinaryAppendedDataArrayWriter(std::ostream& theStream, std::string name,
-                                    int ncomps, unsigned int& bc,
-                                    const Indent& indent)
-        : s(theStream),bytecount(bc)
+      AppendedRawDataArrayWriter(std::ostream& s, std::string name,
+                                 int ncomps, unsigned nitems, unsigned& offset,
+                                 const Indent& indent)
       {
         TypeName<T> tn;
         s << indent << "<DataArray type=\"" << tn() << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
-        s << "format=\"appended\" offset=\""<< bytecount << "\" />\n";
-        bytecount += 4; // header
+        s << "format=\"appended\" offset=\""<< offset << "\" />\n";
+        offset += 4; // header
+        offset += ncomps*nitems*sizeof(T);
       }
 
-      //! write one data element to output stream
-      void write (T data)
+      //! write one data element to output stream (noop)
+      void write (T data) { }
+    };
+
+    //! a streaming writer for data array tags, uses appended base64 format
+    template<class T>
+    class AppendedBase64DataArrayWriter : public DataArrayWriter<T>
+    {
+    public:
+      //! make a new data array writer
+      /**
+       * \param s         Stream to write to.
+       * \param name      Name of array to write.
+       * \param ncomps    Number of components of the array.
+       * \param nitems    Number of cells for cell data/Number of vertices for
+       *                  point data.
+       * \param offset    Byte count variable: this is incremented by one for
+       *                  each base64 char which has to written to the
+       *                  appended data section later.
+       * \param indent_   Indentation to use.  This is uses as-is for the
+       *                  header line.
+       */
+      AppendedBase64DataArrayWriter(std::ostream& s, std::string name,
+                                    int ncomps, unsigned nitems,
+                                    unsigned& offset, const Indent& indent)
       {
-        bytecount += sizeof(T);
+        TypeName<T> tn;
+        s << indent << "<DataArray type=\"" << tn() << "\" "
+          << "Name=\"" << name << "\" ";
+        s << "NumberOfComponents=\"" << ncomps << "\" ";
+        s << "format=\"appended\" offset=\""<< offset << "\" />\n";
+        offset += 8; // header
+        unsigned bytes = ncomps*nitems*sizeof(T);
+        offset += bytes/3*4;
+        if(bytes%3 != 0)
+          offset += 4;
       }
 
-    private:
-      std::ostream& s;
-      unsigned int& bytecount;
+      //! write one data element to output stream (noop)
+      void write (T data) { }
     };
 
     //////////////////////////////////////////////////////////////////////
@@ -287,7 +320,7 @@ namespace Dune
 
       OutputType type;
       std::ostream& stream;
-      unsigned bytecount;
+      unsigned offset;
       //! whether we are in the main or in the appended section writing phase
       Phase phase;
 
@@ -303,7 +336,7 @@ namespace Dune
        * an active one should be OK however.
        */
       inline DataArrayWriterFactory(OutputType type_, std::ostream& stream_)
-        : type(type_), stream(stream_), bytecount(0), phase(main)
+        : type(type_), stream(stream_), offset(0), phase(main)
       { }
 
       //! signal start of the appeneded section
@@ -321,8 +354,9 @@ namespace Dune
         phase = appended;
         switch(type) {
         case ascii :          return false;
-        case binary :         return false;
-        case binaryappended : return true;
+        case base64 :         return false;
+        case appendedraw :    return true;
+        case appendedbase64 : return true;
         }
         DUNE_THROW(IOError, "Dune::VTK::DataArrayWriter: unsupported "
                    "OutputType " << type);
@@ -350,21 +384,27 @@ namespace Dune
           switch(type) {
           case ascii :
             return new AsciiDataArrayWriter<T>(stream, name, ncomps, indent);
-          case binary :
+          case base64 :
             return new BinaryDataArrayWriter<T>(stream, name, ncomps, nitems,
                                                 indent);
-          case binaryappended :
-            return new BinaryAppendedDataArrayWriter<T>(stream, name, ncomps,
-                                                        bytecount, indent);
+          case appendedraw :
+            return new AppendedRawDataArrayWriter<T>(stream, name, ncomps,
+                                                     nitems, offset, indent);
+          case appendedbase64 :
+            return new AppendedBase64DataArrayWriter<T>(stream, name, ncomps,
+                                                        nitems, offset,
+                                                        indent);
           }
           break;
         case appended :
           switch(type) {
           case ascii :
-          case binary :
+          case base64 :
             break; // invlid in appended mode
-          case binaryappended :
+          case appendedraw :
             return new NakedRawDataArrayWriter<T>(stream, ncomps, nitems);
+          case appendedbase64 :
+            return new NakedBase64DataArrayWriter<T>(stream, ncomps, nitems);
           }
           break;
         }
