@@ -74,6 +74,56 @@ namespace Dune
 
     //////////////////////////////////////////////////////////////////////
     //
+    //  A Generic Function writer for VTKFunctions
+    //
+
+    //! Base class for function writers
+    template<typename Func>
+    class VTKFunctionWriter
+      : public FunctionWriterBase<typename Func::Entity>
+    {
+      typedef FunctionWriterBase<typename Func::Entity> Base;
+      shared_ptr<const Func> func;
+      shared_ptr<DataArrayWriter<float> > arraywriter;
+
+    public:
+      VTKFunctionWriter(const shared_ptr<const Func>& func_)
+        : func(func_)
+      { }
+
+      //! return name
+      virtual std::string name() const { return func->name(); }
+
+      //! return number of components of the vector
+      virtual unsigned ncomps() const {
+        if(func->ncomps() == 2) return 3;
+        else return func->ncomps();
+      }
+
+      //! start writing with the given writer
+      virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
+        arraywriter.reset(writer.makeArrayWriter<float>(name(), ncomps(),
+                                                        nitems));
+        return !arraywriter->writeIsNoop();
+      }
+
+      //! write at the given position
+      virtual void write(const typename Base::Cell& cell,
+                         const typename Base::Domain& xl) {
+        for(int d = 0; d < func->ncomps(); ++d)
+          arraywriter->write(func->evaluate(d, cell, xl));
+        for(unsigned d = func->ncomps(); d < ncomps(); ++d)
+          arraywriter->write(0);
+      }
+
+      //! signal end of writing
+      virtual void endWrite() {
+        arraywriter.reset();
+      }
+    };
+
+    //////////////////////////////////////////////////////////////////////
+    //
     //  Writers for the grid information
     //
 
