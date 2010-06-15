@@ -4,9 +4,15 @@
 #ifndef DUNE_GRID_IO_FILE_VTK_SKELETONFUNCTION_HH
 #define DUNE_GRID_IO_FILE_VTK_SKELETONFUNCTION_HH
 
+#include <string>
 #include <vector>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/shared_ptr.hh>
+
+#include <dune/grid/io/file/vtk/functionwriter.hh>
+#include <dune/grid/io/file/vtk/pvtuwriter.hh>
+#include <dune/grid/io/file/vtk/vtuwriter.hh>
 
 namespace Dune {
 
@@ -57,6 +63,73 @@ namespace Dune {
       void evaluate(const typename Traits::Cell& c,
                     const typename Traits::Domain& xl,
                     typename Traits::Range& result) const;
+    };
+
+    ////////////////////////////////////////////////////////////////////////
+    //
+    //  Class for writing SkeletonFunctions
+    //
+
+    //! function writer for skeleton functions
+    /**
+     * \tparam Func Function to write.  Must be a model of
+     *              SkeletonFunctionInterface.
+     */
+    template<typename Func>
+    class SkeletonFunctionWriter
+      : public FunctionWriterBase<typename Func::Traits::Cell>
+    {
+      typedef typename Func::Traits::RangeField RF;
+
+      shared_ptr<const Func> func;
+      std::string name_;
+      unsigned dimR;
+      shared_ptr<DataArrayWriter<RF> > arraywriter;
+
+    public:
+      SkeletonFunctionWriter(const shared_ptr<const Func>& func_,
+                             const std::string& name, unsigned dimR_)
+        : func(func_), name_(name), dimR(dimR_)
+      { }
+
+      SkeletonFunctionWriter(const shared_ptr<const Func>& func_,
+                             const std::string& name)
+        : func(func_), name_(name), dimR(func->dimRange())
+      { }
+
+      //! return name
+      virtual std::string name() const { return name_; }
+
+      //! return number of components of the vector
+      virtual unsigned ncomps() const { return dimR; }
+
+      //! add this field to the given parallel writer
+      virtual void addArray(PVTUWriter& writer) {
+        writer.addArray<RF>(name(), ncomps());
+      }
+
+      //! start writing with the given writer
+      virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
+        arraywriter.reset(writer.makeArrayWriter<RF>(name(), ncomps(),
+                                                     nitems));
+        return !arraywriter->writeIsNoop();
+      }
+
+      //! write at the given position
+      virtual void write(const typename Func::Traits::Cell& cell,
+                         const typename Func::Traits::Domain& xl) {
+        typename Func::Traits::Range result;
+        func->evaluate(cell, xl, result);
+        for(unsigned d = 0; d < result.size() && d < dimR; ++d)
+          arraywriter->write(result[d]);
+        for(unsigned d = result.size(); d < dimR; ++d)
+          arraywriter->write(0);
+      }
+
+      //! signal end of writing
+      virtual void endWrite() {
+        arraywriter.reset();
+      }
     };
 
   } // namespace VTK
