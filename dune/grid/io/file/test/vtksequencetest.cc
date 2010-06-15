@@ -11,13 +11,13 @@
 #include <vector>
 #include <unistd.h>
 
-const char* VTKDataMode(Dune::VTKOptions::DataMode dm)
+const char* VTKDataMode(Dune::VTK::DataMode dm)
 {
   switch(dm)
   {
-  case Dune::VTKOptions::conforming :
+  case Dune::VTK::conforming :
     return "conforming";
-  case Dune::VTKOptions::nonconforming :
+  case Dune::VTK::nonconforming :
     return "nonconforming";
   }
   return "";
@@ -63,7 +63,7 @@ public:
 };
 
 template< class GridView >
-void doWrite( const GridView &gridView, Dune :: VTKOptions :: DataMode dm )
+void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
 {
   enum { dim = GridView :: dimension };
 
@@ -97,12 +97,12 @@ void vtkCheck(int* n, double* h)
   Dune::SGrid<dim,dim> g(n, h);
   g.globalRefine(1);
 
-  doWrite( g.template leafView< VTK_Partition >(), Dune :: VTKOptions :: conforming );
-  doWrite( g.template leafView< VTK_Partition >(), Dune :: VTKOptions :: nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune :: VTKOptions :: conforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune :: VTKOptions :: nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune :: VTKOptions :: conforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune :: VTKOptions :: nonconforming );
+  doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::conforming );
+  doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::nonconforming );
+  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::conforming );
+  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::nonconforming );
+  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune::VTK::conforming );
+  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune::VTK::nonconforming );
 }
 
 int main(int argc, char **argv)

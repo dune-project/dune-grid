@@ -80,7 +80,7 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
 
   snprintf(name,256,"subsamplingvtktest-%iD-%s-binary",
            dim, (coerceToSimplex ? "simplex" : "natural"));
-  vtk.write(name, Dune::VTKOptions::binaryappended);
+  vtk.write(name, Dune::VTK::binaryappended);
 }
 
 template<int dim>

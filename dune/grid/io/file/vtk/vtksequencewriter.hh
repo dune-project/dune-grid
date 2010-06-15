@@ -28,7 +28,7 @@ namespace Dune {
                                  const std::string& name,
                                  const std::string& path,
                                  const std::string& extendpath,
-                                 VTKOptions::DataMode dm = VTKOptions::conforming )
+                                 VTK::DataMode dm = VTK::conforming )
       : BaseType(gridView,dm),
         name_(name), path_(path),
         extendpath_(extendpath),
@@ -50,8 +50,7 @@ namespace Dune {
                  << "</VTKFile> \n" << std::flush;
       }
     }
-    void write (double time,
-                VTKOptions::OutputType ot = VTKOptions::ascii)
+    void write (double time, VTK::OutputType ot = VTK::ascii)
     {
       std::stringstream name;
       name.fill('0');

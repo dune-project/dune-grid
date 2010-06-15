@@ -6,6 +6,7 @@
 
 #include <string>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/geometrytype.hh>
 
@@ -21,25 +22,24 @@ namespace Dune
   //! \addtogroup VTK
   //! \{
 
-  //////////////////////////////////////////////////////////////////////
-  //
-  //  VTKOptions
-  //
+  namespace VTK {
 
-  //! options for VTK output
-  struct VTKOptions
-  {
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  VTKOptions
+    //
+
     //! How the bulk data should be stored in the file
     enum OutputType {
-      /** @brief Output to the file is in ascii. */
+      //! Output to the file is in ascii.
       ascii,
-      /** @brief Output to the file is inline binary. */
+      //! Output to the file is inline binary.
       binary,
-      /** @brief Ouput is appended binary to the file. */
+      //! Ouput is appended binary to the file.
       binaryappended
-      // /** @brief Output to the file is compressed inline binary. */
+      // //! Output to the file is compressed inline binary.
       // binarycompressed,
-      // /** @brief Ouput is compressed and appended to the file. */
+      // //! Ouput is compressed and appended to the file.
       // compressedappended
     };
     //! Whether to produce conforming or non-conforming output.
@@ -64,6 +64,71 @@ namespace Dune
        */
       nonconforming
     };
+
+  } // namespace VTK
+
+  //! options for VTK output
+  /**
+   * \deprecated Use the enums from the namespace VTK instead
+   */
+  struct DUNE_DEPRECATED VTKOptions {
+    //! How the bulk data should be stored in the file
+    /**
+     * \deprecated Use the enum from the namespace VTK instead.  When
+     *             converting your code, look for any occurances of
+     *             VTKOptions::ascii, VTKOptions::binary, and
+     *             VTKOptions::binaryappended, and convert them es well.
+     *             Unfortunately, marking the compatibility constants here as
+     *             deprecated seems to have no effect.
+     */
+    typedef DUNE_DEPRECATED VTK::OutputType OutputType;
+    //! Output to the file is in ascii.
+    /**
+     * \deprecated Use the value from the namespace VTK instead
+     */
+    static const VTK::OutputType ascii = VTK::ascii;
+    //! Output to the file is inline binary.
+    /**
+     * \deprecated Use the value from the namespace VTK instead
+     */
+    static const VTK::OutputType binary = VTK::binary;
+    //! Ouput is appended binary to the file.
+    /**
+     * \deprecated Use the value from the namespace VTK instead
+     */
+    static const VTK::OutputType binaryappended = VTK::binaryappended;
+    //! Whether to produce conforming or non-conforming output.
+    /**
+     * This applies to the conformity of the data; a non-conforming grid can
+     * still be written in conforming data mode, and it is quite possible for
+     * data to be non-conforming on a conforming grid.
+     *
+     * \deprecated Use the enum from the namespace VTK instead.  When
+     *             converting your code, look for any occurances of
+     *             VTKOptions::conforming or VTKOptions::nonconforming, and
+     *             convert them es well.  Unfortunately, marking the
+     *             compatibility constants here as deprecated seems to have no
+     *             effect.
+     */
+    typedef DUNE_DEPRECATED VTK::DataMode DataMode;
+    //! Output conforming data.
+    /**
+     * Neighboring elements share common vertices and thus have a common DoF
+     * on that vertex.
+     *
+     * \deprecated Use the value from the namespace VTK instead
+     */
+    static const VTK::DataMode conforming = VTK::conforming;
+    //! Output non-conforming data.
+    /**
+     * Each element has it's own set of vertices.  The position of a vertex of
+     * one element will concide with the position of the corresponding vertex
+     * on another element.  This allows for multiple DoFs (one per element) on
+     * the "same" vertex.
+     *
+     * \deprecated Use the value from the namespace VTK instead
+     */
+    static const VTK::DataMode nonconforming = VTK::nonconforming;
   };
 
   //////////////////////////////////////////////////////////////////////

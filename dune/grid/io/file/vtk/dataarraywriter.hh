@@ -253,7 +253,7 @@ namespace Dune
    * factory will manage that data.
    */
   class VTKDataArrayWriterFactory {
-    VTKOptions::OutputType type;
+    VTK::OutputType type;
     std::ostream& stream;
     unsigned bytecount;
 
@@ -268,7 +268,7 @@ namespace Dune
      * called anymore before destruction) around at the same time as an active
      * one should be OK however.
      */
-    inline VTKDataArrayWriterFactory(VTKOptions::OutputType type_,
+    inline VTKDataArrayWriterFactory(VTK::OutputType type_,
                                      std::ostream& stream_)
       : type(type_), stream(stream_), bytecount(0)
     { }
@@ -288,11 +288,11 @@ namespace Dune
     VTKDataArrayWriter<T>* make(const std::string& name, unsigned ncomps,
                                 unsigned nitems) {
       switch(type) {
-      case VTKOptions::ascii :
+      case VTK::ascii :
         return new VTKAsciiDataArrayWriter<T>(stream, name, ncomps);
-      case VTKOptions::binary :
+      case VTK::binary :
         return new VTKBinaryDataArrayWriter<T>(stream, name, ncomps, nitems);
-      case VTKOptions::binaryappended :
+      case VTK::binaryappended :
         return new VTKBinaryAppendedDataArrayWriter<T>(stream, name, ncomps,
                                                        bytecount);
       }

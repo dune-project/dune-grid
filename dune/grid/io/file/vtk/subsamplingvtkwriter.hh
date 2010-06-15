@@ -74,7 +74,7 @@ namespace Dune
      */
     explicit SubsamplingVTKWriter (const GridView &gridView,
                                    unsigned int level_, bool coerceToSimplex_ = false)
-      : Base(gridView, VTKOptions::nonconforming)
+      : Base(gridView, VTK::nonconforming)
         , level(level_), coerceToSimplex(coerceToSimplex_)
     { }
 

@@ -11,13 +11,13 @@
 #include <vector>
 #include <unistd.h>
 
-const char* VTKDataMode(Dune::VTKOptions::DataMode dm)
+const char* VTKDataMode(Dune::VTK::DataMode dm)
 {
   switch(dm)
   {
-  case Dune::VTKOptions::conforming :
+  case Dune::VTK::conforming :
     return "conforming";
-  case Dune::VTKOptions::nonconforming :
+  case Dune::VTK::nonconforming :
     return "nonconforming";
   }
   return "";
@@ -90,10 +90,10 @@ void doWrite( const GridView &gridView, Dune :: VTKOptions :: DataMode dm )
   vtk.write(name);
 
   snprintf(name,256,"vtktest-%iD-%s-binary", dim, VTKDataMode(dm));
-  vtk.write(name, Dune::VTKOptions::binary);
+  vtk.write(name, Dune::VTK::binary);
 
   snprintf(name,256,"vtktest-%iD-%s-binaryappended", dim, VTKDataMode(dm));
-  vtk.write(name, Dune::VTKOptions::binaryappended);
+  vtk.write(name, Dune::VTK::binaryappended);
 }
 
 template<int dim>
@@ -104,12 +104,12 @@ void vtkCheck(int* n, double* h)
   Dune::SGrid<dim,dim> g(n, h);
   g.globalRefine(1);
 
-  doWrite( g.template leafView< VTK_Partition >(), Dune :: VTKOptions :: conforming );
-  doWrite( g.template leafView< VTK_Partition >(), Dune :: VTKOptions :: nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune :: VTKOptions :: conforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune :: VTKOptions :: nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune :: VTKOptions :: conforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune :: VTKOptions :: nonconforming );
+  doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::conforming );
+  doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::nonconforming );
+  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::conforming );
+  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::nonconforming );
+  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune::VTK::conforming );
+  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune::VTK::nonconforming );
 }
 
 int main(int argc, char **argv)

@@ -368,8 +368,7 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
       sprintf(levelName, "-level=%d", (gridView.template begin<commCodim>())->level());
       strcat(fileName, levelName);
     }
-    writer.write(fileName,
-                 Dune::VTKOptions::ascii);
+    writer.write(fileName, Dune::VTK::ascii);
     std::cout << "Done writing data to disk\n";
   }
 };

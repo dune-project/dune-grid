@@ -134,7 +134,7 @@ namespace Dune
     {
       GridCellIterator git;
       GridCellIterator gend;
-      VTKOptions::DataMode datamode;
+      VTK::DataMode datamode;
       // Index of the currently visited corner within the current element.
       // NOTE: this is in Dune-numbering, in contrast to CornerIterator.
       int cornerIndexDune;
@@ -163,20 +163,20 @@ namespace Dune
     public:
       VertexIterator(const GridCellIterator & x,
                      const GridCellIterator & end,
-                     const VTKOptions::DataMode & dm,
+                     const VTK::DataMode & dm,
                      const VertexMapper & vm) :
         git(x), gend(end), datamode(dm), cornerIndexDune(0),
         vertexmapper(vm), visited(vm.size(), false),
         offset(0)
       {
-        if (datamode == VTKOptions::conforming && git != gend)
+        if (datamode == VTK::conforming && git != gend)
           visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
       };
       void increment ()
       {
         switch (datamode)
         {
-        case VTKOptions::conforming :
+        case VTK::conforming :
           while(visited[vertexmapper.map(*git,cornerIndexDune,n)])
           {
             basicIncrement();
@@ -184,7 +184,7 @@ namespace Dune
           }
           visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
           break;
-        case VTKOptions::nonconforming :
+        case VTK::nonconforming :
           basicIncrement();
           break;
         }
@@ -246,7 +246,7 @@ namespace Dune
     {
       GridCellIterator git;
       GridCellIterator gend;
-      VTKOptions::DataMode datamode;
+      VTK::DataMode datamode;
       // Index of the currently visited corner within the current element.
       // NOTE: this is in VTK-numbering, in contrast to VertexIterator.
       int cornerIndexVTK;
@@ -262,7 +262,7 @@ namespace Dune
     public:
       CornerIterator(const GridCellIterator & x,
                      const GridCellIterator & end,
-                     const VTKOptions::DataMode & dm,
+                     const VTK::DataMode & dm,
                      const VertexMapper & vm,
                      const std::vector<int> & num) :
         git(x), gend(end), datamode(dm), cornerIndexVTK(0),
@@ -303,11 +303,11 @@ namespace Dune
       {
         switch (datamode)
         {
-        case VTKOptions::conforming :
+        case VTK::conforming :
           return
             number[vertexmapper.map(*git,vtkRenumber(*git,cornerIndexVTK),
                                     n)];
-        case VTKOptions::nonconforming :
+        case VTK::nonconforming :
           return offset + vtkRenumber(*git,cornerIndexVTK);
         default :
           DUNE_THROW(IOError,"VTKWriter: unsupported DataMode" << datamode);
@@ -338,7 +338,7 @@ namespace Dune
      * @param dm The data mode.
      */
     explicit VTKWriter ( const GridView &gridView,
-                         VTKOptions::DataMode dm = VTKOptions::conforming )
+                         VTK::DataMode dm = VTK::conforming )
       : gridView_( gridView ),
         datamode( dm )
     {
@@ -467,7 +467,7 @@ namespace Dune
      *  \param[in]  type  type of output (e.g,, ASCII) (optional)
      */
     std::string write ( const std::string &name,
-                        VTKOptions::OutputType type = VTKOptions::ascii )
+                        VTK::OutputType type = VTK::ascii )
     {
       return write( name, type, gridView_.comm().rank(), gridView_.comm().size() );
     }
@@ -477,7 +477,7 @@ namespace Dune
      * "pwrite" means "path write" (i.e. write somewhere else than the current
      * directory).  The "p" does not mean this method has a monopoly on
      * parallel writing, the regular write(const std::string &,
-     * VTKOptions::OutputType) method ca do that just fine.
+     * VTK::OutputType) method ca do that just fine.
      *
      * \param name       Base name of the output files.  This should not
      *                   contain any directory part and not filename
@@ -499,7 +499,7 @@ namespace Dune
      * \throw IOError        Failed to open a file.
      */
     std::string pwrite ( const char* name,  const char* path, const char* extendpath,
-                         VTKOptions::OutputType type = VTKOptions::ascii )
+                         VTK::OutputType type = VTK::ascii )
     {
       return pwrite( name, path, extendpath, type, gridView_.comm().rank(), gridView_.comm().size() );
     }
@@ -605,7 +605,7 @@ namespace Dune
      *                  operation.
      */
     std::string write ( const std::string &name,
-                        VTKOptions::OutputType type,
+                        VTK::OutputType type,
                         const int commRank,
                         const int commSize )
     {
@@ -657,7 +657,7 @@ namespace Dune
      */
     std::string pwrite(const std::string& name, const std::string& path,
                        const std::string& extendpath,
-                       VTKOptions::OutputType ot, const int commRank,
+                       VTK::OutputType ot, const int commRank,
                        const int commSize )
     {
       // make data mode visible to private functions
@@ -819,7 +819,7 @@ namespace Dune
 
       // Grid characteristics
       vertexmapper = new VertexMapper( gridView_ );
-      if (datamode == VTKOptions::conforming)
+      if (datamode == VTK::conforming)
       {
         number.resize(vertexmapper->size());
         for (std::vector<int>::size_type i=0; i<number.size(); i++) number[i] = -1;
@@ -867,7 +867,7 @@ namespace Dune
       s << "</" << getTypeString() << ">\n";
 
       // write appended binary dat section
-      if (outputtype==VTKOptions::binaryappended)
+      if (outputtype==VTK::binaryappended)
         writeAppendedData(s);
 
       // /VTKFile
@@ -891,11 +891,11 @@ namespace Dune
 
     std::string getFormatString() const
     {
-      if (outputtype==VTKOptions::ascii)
+      if (outputtype==VTK::ascii)
         return "ascii";
-      if (outputtype==VTKOptions::binary)
+      if (outputtype==VTK::binary)
         return "binary";
-      if (outputtype==VTKOptions::binaryappended)
+      if (outputtype==VTK::binaryappended)
         return "appended";
       DUNE_THROW(IOError, "VTKWriter: unsupported OutputType" << outputtype);
     }
@@ -922,7 +922,7 @@ namespace Dune
         for (int i=0; i<it->template count<n>(); ++i)
         {
           ncorners++;
-          if (datamode == VTKOptions::conforming)
+          if (datamode == VTK::conforming)
           {
             int alpha = vertexmapper->map(*it,i,n);
             if (number[alpha]<0)
@@ -1278,9 +1278,9 @@ namespace Dune
     // in conforming mode, for each vertex id (as obtained by vertexmapper)
     // hold its number in the iteration order (VertexIterator)
     std::vector<int> number;
-    VTKOptions::DataMode datamode;
+    VTK::DataMode datamode;
   protected:
-    VTKOptions::OutputType outputtype;
+    VTK::OutputType outputtype;
   };
 
   /** \brief VTKWriter on the leaf grid
@@ -1295,7 +1295,7 @@ namespace Dune
   public:
     /** \brief Construct a VTK writer for the leaf level of a given grid */
     explicit LeafVTKWriter ( const Grid &grid,
-                             VTKOptions::DataMode dm = VTKOptions::conforming ) DUNE_DEPRECATED
+                             VTK::DataMode dm = VTK::conforming ) DUNE_DEPRECATED
       : Base( grid.leafView(), dm )
     {}
   };
@@ -1312,7 +1312,7 @@ namespace Dune
   public:
     /** \brief Construct a VTK writer for a certain level of a given grid */
     LevelVTKWriter ( const Grid &grid, int level,
-                     VTKOptions::DataMode dm = VTKOptions::conforming ) DUNE_DEPRECATED
+                     VTK::DataMode dm = VTK::conforming ) DUNE_DEPRECATED
       : Base( grid.levelView( level ), dm )
     {}
   };
