@@ -21,6 +21,11 @@ namespace Dune {
     class ConformingVolumeIteratorFactory {
       const GV& gv;
 
+      typedef typename GV::IndexSet IndexSet;
+      const IndexSet& indexSet() const { return gv.indexSet(); }
+      friend class ConformingConnectivityWriter<
+          ConformingVolumeIteratorFactory<GV> >;
+
     public:
       static const unsigned dimCell = GV::dimension;
 
@@ -35,7 +40,6 @@ namespace Dune {
       typedef VTK::PointIterator<CellIterator,
           typename GV::IndexSet> PointIterator;
 
-      typedef typename GV::IndexSet IndexSet;
       typedef ConformingConnectivityWriter<ConformingVolumeIteratorFactory<GV>
           > ConnectivityWriter;
       typedef typename GV::CollectiveCommunication CollectiveCommunication;
@@ -65,7 +69,6 @@ namespace Dune {
         return PointIterator(endCells());
       }
 
-      const IndexSet& indexSet() const { return gv.indexSet(); }
       ConnectivityWriter makeConnectivity() const {
         return ConnectivityWriter(*this);
       }
@@ -91,7 +94,6 @@ namespace Dune {
       typedef Corner Point;
       typedef CornerIterator PointIterator;
 
-      typedef typename GV::IndexSet IndexSet;
       typedef NonConformingConnectivityWriter<Cell> ConnectivityWriter;
       typedef typename GV::CollectiveCommunication CollectiveCommunication;
 
@@ -116,7 +118,6 @@ namespace Dune {
       PointIterator beginPoints() const { return beginCorners(); }
       PointIterator endPoints() const { return endCorners(); }
 
-      const IndexSet& indexSet() const { return gv.indexSet(); }
       ConnectivityWriter makeConnectivity() const {
         return ConnectivityWriter();
       }
