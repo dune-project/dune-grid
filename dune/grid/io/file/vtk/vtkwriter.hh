@@ -868,8 +868,8 @@ namespace Dune
       s << "</" << getTypeString() << ">\n";
 
       // write appended binary dat section
-      if (outputtype==VTK::binaryappended)
-        writeAppendedData(s);
+      if(factory.beginAppended())
+        writeAppendedData(s, factory);
 
       // /VTKFile
       indentDown();
@@ -1100,115 +1100,97 @@ namespace Dune
     }
 
     //! write the appended data sections
-    virtual void writeAppendedData (std::ostream& s)
+    virtual void writeAppendedData(std::ostream& s,
+                                   VTK::DataArrayWriterFactory& factory)
     {
       indent(s); s << "<AppendedData encoding=\"raw\">\n";
       indentUp();
       indent(s); s << "_";   // indicates start of binary data
 
-      RawStream stream(s);
-
-      // write length before each data block
-      unsigned int blocklength;
-
       // point data
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
-
-        blocklength = nvertices * (*it)->ncomps() * sizeof(float);
-        //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-        if((*it)->ncomps()==2)
-          blocklength = nvertices * (3) * sizeof(float);
-        stream.write(blocklength);
-        std::vector<bool> visited(vertexmapper->size(), false);
+        // vtk file format: a vector data always should have 3 comps (with
+        // 3rd comp = 0 in 2D case)
+        unsigned writecomps = (*it)->ncomps();
+        if(writecomps == 2) writecomps = 3;
+        shared_ptr<VTK::DataArrayWriter<float> > p
+          (factory.make<float>((*it)->name(), writecomps, nvertices));
         for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
-          {
-            float data = (*it)->evaluate(j,*vit,vit.position());
-            stream.write(data);
-          }
-          //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-          if((*it)->ncomps()==2)
-          {
-            float data=0.0;
-            stream.write(data);
-          }
+            p->write((*it)->evaluate(j,*vit,vit.position()));
+          // vtk file format: a vector data always should have 3 comps (with
+          // 3rd comp = 0 in 2D case)
+          for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
+            p->write(0.0);
         }
       }
 
       // cell data
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       {
-        blocklength = ncells * (*it)->ncomps() * sizeof(float);
         // vtk file format: a vector data always should have 3 comps (with
         // 3rd comp = 0 in 2D case)
-        if((*it)->ncomps()==2)
-          blocklength = ncells * (3) * sizeof(float);
-        stream.write(blocklength);
+        unsigned writecomps = (*it)->ncomps();
+        if(writecomps == 2) writecomps = 3;
+        shared_ptr<VTK::DataArrayWriter<float> > p
+          (factory.make<float>((*it)->name(), writecomps, ncells));
         for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
-          {
-            float data = (*it)->evaluate(j,*i,i.position());
-            stream.write(data);
-          }
-          //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-          if((*it)->ncomps()==2)
-          {
-            float data=0.0;
-            stream.write(data);
-          }
+            p->write((*it)->evaluate(j,*i,i.position()));
+          // vtk file format: a vector data always should have 3 comps (with
+          // 3rd comp = 0 in 2D case)
+          for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
+            p->write(0.0);
         }
       }
 
       // point coordinates
-      blocklength = nvertices * 3 * sizeof(float);
-      stream.write(blocklength);
-      std::vector<bool> visited(vertexmapper->size(), false);
-      for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
       {
-        int dimw=w;
-        float data;
-        for (int j=0; j<std::min(dimw,3); j++)
+        shared_ptr<VTK::DataArrayWriter<float> > p
+          (factory.make<float>("Coordinates", 3, nvertices));
+        VertexIterator vEnd = vertexEnd();
+        for (VertexIterator vit=vertexBegin(); vit!=vEnd; ++vit)
         {
-          data = vit->geometry().corner(vit.localindex())[j];
-          stream.write(data);
+          int dimw=w;
+          for (int j=0; j<std::min(dimw,3); j++)
+            p->write(vit->geometry().corner(vit.localindex())[j]);
+          for (int j=std::min(dimw,3); j<3; j++)
+            p->write(0.0);
         }
-        data = 0;
-        for (int j=std::min(dimw,3); j<3; j++)
-          stream.write(data);
       }
 
       // connectivity
-      blocklength = ncorners * sizeof(unsigned int);
-      stream.write(blocklength);
-      for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
       {
-        stream.write(it.id());
+        shared_ptr<VTK::DataArrayWriter<int> > p1
+          (factory.make<int>("connectivity", 1, ncorners));
+        for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
+          p1->write(it.id());
       }
 
       // offsets
-      blocklength = ncells * sizeof(unsigned int);
-      stream.write(blocklength);
       {
+        shared_ptr<VTK::DataArrayWriter<int> > p2
+          (factory.make<int>("offsets", 1, ncells));
         int offset = 0;
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
           offset += it->template count<n>();
-          stream.write(offset);
+          p2->write(offset);
         }
       }
 
       // cell types
       if (n>1)
       {
-        blocklength = ncells * sizeof(unsigned char);
-        stream.write(blocklength);
+        shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
+          (factory.make<unsigned char>("types", 1, ncells));
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
-          unsigned char vtktype = VTK::geometryType(it->type());
-          stream.write(vtktype);
+          int vtktype = VTK::geometryType(it->type());
+          p3->write(vtktype);
         }
       }
 

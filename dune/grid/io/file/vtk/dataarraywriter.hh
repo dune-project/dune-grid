@@ -276,9 +276,13 @@ namespace Dune
      * This factory will manage that data.
      */
     class DataArrayWriterFactory {
+      enum Phase { main, appended };
+
       OutputType type;
       std::ostream& stream;
       unsigned bytecount;
+      //! whether we are in the main or in the appended section writing phase
+      Phase phase;
 
     public:
       //! create a DataArrayWriterFactory
@@ -292,8 +296,30 @@ namespace Dune
        * an active one should be OK however.
        */
       inline DataArrayWriterFactory(OutputType type_, std::ostream& stream_)
-        : type(type_), stream(stream_), bytecount(0)
+        : type(type_), stream(stream_), bytecount(0), phase(main)
       { }
+
+      //! signal start of the appeneded section
+      /**
+       * This method should be called after the main section has been written,
+       * but before the appended section has been started.  After this method
+       * has been called, a call to make will produce DataArrayWriters
+       * suitable for the appended section.  The return value of this method
+       * signals whether a appended section should be written at all: true
+       * means write an appended section, false means don't write an appended
+       * section.  If an appended section is not needed, the method make() may
+       * not be called after a call to this method.
+       */
+      inline bool beginAppended() {
+        phase = appended;
+        switch(type) {
+        case ascii :          return false;
+        case binary :         return false;
+        case binaryappended : return true;
+        }
+        DUNE_THROW(IOError, "Dune::VTK::DataArrayWriter: unsupported "
+                   "OutputType " << type);
+      }
 
       //! create a DataArrayWriter
       /**
@@ -309,17 +335,30 @@ namespace Dune
       template<typename T>
       DataArrayWriter<T>* make(const std::string& name, unsigned ncomps,
                                unsigned nitems) {
-        switch(type) {
-        case ascii :
-          return new AsciiDataArrayWriter<T>(stream, name, ncomps);
-        case binary :
-          return new BinaryDataArrayWriter<T>(stream, name, ncomps, nitems);
-        case binaryappended :
-          return new BinaryAppendedDataArrayWriter<T>(stream, name, ncomps,
-                                                      bytecount);
+        switch(phase) {
+        case main :
+          switch(type) {
+          case ascii :
+            return new AsciiDataArrayWriter<T>(stream, name, ncomps);
+          case binary :
+            return new BinaryDataArrayWriter<T>(stream, name, ncomps, nitems);
+          case binaryappended :
+            return new BinaryAppendedDataArrayWriter<T>(stream, name, ncomps,
+                                                        bytecount);
+          }
+          break;
+        case appended :
+          switch(type) {
+          case ascii :
+          case binary :
+            break; // invlid in appended mode
+          case binaryappended :
+            return new NakedRawDataArrayWriter<T>(stream, ncomps, nitems);
+          }
+          break;
         }
         DUNE_THROW(IOError, "Dune::VTK::DataArrayWriter: unsupported "
-                   "OutputType " << type);
+                   "OutputType " << type << " in phase " << phase);
       }
     };
 
