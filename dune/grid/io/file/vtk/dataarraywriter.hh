@@ -79,12 +79,7 @@ namespace Dune
         TypeName<T> tn;
         s << indent << "<DataArray type=\"" << tn() << "\" "
           << "Name=\"" << name << "\" ";
-        // vtk file format: a vector data always should have 3 comps (with 3rd
-        // comp = 0 in 2D case)
-        if (ncomps>3)
-          DUNE_THROW(IOError, "VTKWriter does not support more than 3 "
-                     "components");
-        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
+        s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"ascii\">\n";
         ++indent;
       }
@@ -136,14 +131,8 @@ namespace Dune
         : s(theStream), b64(theStream), indent(indent_)
       {
         TypeName<T> tn;
-        ncomps = (ncomps>1 ? 3 : 1);
         s << indent << "<DataArray type=\"" << tn() << "\" "
           << "Name=\"" << name << "\" ";
-        // vtk file format: a vector data always should have 3 comps (with 3rd
-        // comp = 0 in 2D case)
-        if (ncomps>3)
-          DUNE_THROW(IOError, "VTKWriter does not support more than 3 "
-                     "components");
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"binary\">\n";
 
@@ -201,12 +190,7 @@ namespace Dune
         TypeName<T> tn;
         s << indent << "<DataArray type=\"" << tn() << "\" "
           << "Name=\"" << name << "\" ";
-        // vtk file format: a vector data always should have 3 comps(with 3rd
-        // comp = 0 in 2D case)
-        if (ncomps>3)
-          DUNE_THROW(IOError, "VTKWriter does not support more than 3 "
-                     "components");
-        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
+        s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"appended\" offset=\""<< bytecount << "\" />\n";
         bytecount += 4; // header
       }
