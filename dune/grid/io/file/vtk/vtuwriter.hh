@@ -106,14 +106,6 @@ namespace Dune {
       bool doAppended;
 
     public:
-      //! which type of VTK file to write
-      enum VTKFileType {
-        //! for .vtp files
-        polyData,
-        //! for .vtu files
-        unstructuredGrid
-      };
-
       //! create a VTUWriter object
       /**
        * \param stream_    Stream to write to.
@@ -124,7 +116,7 @@ namespace Dune {
        * Create object and write header.
        */
       inline VTUWriter(std::ostream& stream_, OutputType outputType,
-                       VTKFileType fileType_)
+                       FileType fileType_)
         : stream(stream_), factory(outputType, stream)
       {
         switch(fileType_) {

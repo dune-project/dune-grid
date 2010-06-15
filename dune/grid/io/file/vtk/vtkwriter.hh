@@ -812,9 +812,8 @@ namespace Dune
     //! write data file to stream
     void writeDataFile (std::ostream& s)
     {
-      VTK::VTUWriter::VTKFileType fileType = (n == 1)
-                                             ? VTK::VTUWriter::polyData
-                                             : VTK::VTUWriter::unstructuredGrid;
+      VTK::FileType fileType =
+        (n == 1) ? VTK::polyData : VTK::unstructuredGrid;
 
       VTK::VTUWriter writer(s, outputtype, fileType);
 

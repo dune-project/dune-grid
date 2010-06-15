@@ -318,6 +318,19 @@ namespace Dune
         return "LittleEndian";
     }
 
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  which type of vtkfile to write
+    //
+
+    //! which type of VTK file to write
+    enum FileType {
+      //! for .vtp files (PolyData)
+      polyData,
+      //! for .vtu files (UnstructuredGrid)
+      unstructuredGrid
+    };
+
   } // namespace VTK
 
   //! \} group VTK
