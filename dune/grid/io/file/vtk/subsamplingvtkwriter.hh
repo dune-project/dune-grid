@@ -10,6 +10,7 @@
 #include <dune/common/indent.hh>
 #include <dune/grid/common/virtualrefinement.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
+#include <dune/grid/io/file/vtk/vtuwriter.hh>
 
 /** @file
     @author Jö Fahlke
@@ -87,24 +88,16 @@ namespace Dune
     virtual void countEntities(int &nvertices, int &ncells, int &ncorners);
 
     //! write cell data
-    virtual void writeCellData(std::ostream& s, Indent indent,
-                               VTK::DataArrayWriterFactory& factory);
+    virtual void writeCellData(VTK::VTUWriter& writer);
 
     //! write vertex data
-    virtual void writeVertexData(std::ostream& s, Indent indent,
-                                 VTK::DataArrayWriterFactory& factory);
+    virtual void writeVertexData(VTK::VTUWriter& writer);
 
     //! write the positions of vertices
-    virtual void writeGridPoints(std::ostream& s, const Indent& indent,
-                                 VTK::DataArrayWriterFactory& factory);
+    virtual void writeGridPoints(VTK::VTUWriter& writer);
 
     //! write the connectivity array
-    virtual void writeGridCells(std::ostream& s, Indent indent,
-                                VTK::DataArrayWriterFactory& factory);
-
-    //! write the appended data sections
-    virtual void writeAppendedData (std::ostream& s, Indent indent,
-                                    VTK::DataArrayWriterFactory& factory);
+    virtual void writeGridCells(VTK::VTUWriter& writer);
 
   public:
     using Base::addVertexData;
@@ -140,25 +133,27 @@ namespace Dune
 
   //! write cell data
   template <class GridView>
-  void SubsamplingVTKWriter<GridView>::
-  writeCellData(std::ostream& s, Indent indent,
-                VTK::DataArrayWriterFactory& factory)
+  void SubsamplingVTKWriter<GridView>::writeCellData(VTK::VTUWriter& writer)
   {
-    s << indent << "<CellData";
+    if(celldata.size() == 0)
+      return;
+
+    std::string scalars = "";
     for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       if ((*it)->ncomps()==1)
       {
-        s << " Scalars=\"" << (*it)->name() << "\"" ;
+        scalars = (*it)->name();
         break;
       }
+    std::string vectors = "";
     for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       if ((*it)->ncomps()>1)
       {
-        s << " Vectors=\"" << (*it)->name() << "\"" ;
+        vectors = (*it)->name();
         break;
       }
-    s << ">" << std::endl;
-    ++indent;
+
+    writer.beginCellData(scalars, vectors);
     for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
     {
       // vtk file format: a vector data always should have 3 comps (with 3rd
@@ -167,7 +162,7 @@ namespace Dune
       if(writecomps == 2) writecomps = 3;
 
       shared_ptr<VTK::DataArrayWriter<float> > p
-        (factory.make<float>((*it)->name(), writecomps, ncells, indent));
+        (writer.makeArrayWriter<float>((*it)->name(), writecomps, ncells));
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
         Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
@@ -182,31 +177,32 @@ namespace Dune
         }
       }
     }
-    --indent;
-    s << indent << "</CellData>" << std::endl;
+    writer.endCellData();
   }
 
   //! write vertex data
   template <class GridView>
-  void SubsamplingVTKWriter<GridView>::
-  writeVertexData(std::ostream& s, Indent indent,
-                  VTK::DataArrayWriterFactory& factory)
+  void SubsamplingVTKWriter<GridView>::writeVertexData(VTK::VTUWriter& writer)
   {
-    s << indent << "<PointData";
+    if(vertexdata.size() == 0)
+      return;
+
+    std::string scalars = "";
     for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       if ((*it)->ncomps()==1)
       {
-        s << " Scalars=\"" << (*it)->name() << "\"" ;
+        scalars = (*it)->name();
         break;
       }
+    std::string vectors = "";
     for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       if ((*it)->ncomps()>1)
       {
-        s << " Vectors=\"" << (*it)->name() << "\"" ;
+        vectors = (*it)->name();
         break;
       }
-    s << ">" << std::endl;
-    ++indent;
+
+    writer.beginPointData(scalars, vectors);
     for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
     {
       // vtk file format: a vector data always should have 3 comps (with 3rd
@@ -215,7 +211,7 @@ namespace Dune
       if(writecomps == 2) writecomps = 3;
 
       shared_ptr<VTK::DataArrayWriter<float> > p
-        (factory.make<float>((*it)->name(), writecomps, nvertices, indent));
+        (writer.makeArrayWriter<float>((*it)->name(), writecomps, nvertices));
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
         Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
@@ -230,20 +226,17 @@ namespace Dune
         }
       }
     }
-    --indent;
-    s << indent << "</PointData>" << std::endl;
+    writer.endPointData();
   }
 
   //! write the positions of vertices
   template <class GridView>
-  void SubsamplingVTKWriter<GridView>::
-  writeGridPoints(std::ostream& s, const Indent& indent,
-                  VTK::DataArrayWriterFactory& factory)
+  void SubsamplingVTKWriter<GridView>::writeGridPoints(VTK::VTUWriter& writer)
   {
-    s << indent << "<Points>" << std::endl;
+    writer.beginPoints();
 
     shared_ptr<VTK::DataArrayWriter<float> > p
-      (factory.make<float>("Coordinates", 3, nvertices, indent+1));
+      (writer.makeArrayWriter<float>("Coordinates", 3, nvertices));
     for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
     {
       Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
@@ -260,25 +253,19 @@ namespace Dune
     // free the VTK::DataArrayWriter before touching the stream
     p.reset();
 
-    s << indent << "</Points>" << std::endl;
+    writer.endPoints();
   }
 
   //! write the connectivity array
   template <class GridView>
-  void SubsamplingVTKWriter<GridView>::
-  writeGridCells(std::ostream& s, Indent indent,
-                 VTK::DataArrayWriterFactory& factory)
+  void SubsamplingVTKWriter<GridView>::writeGridCells(VTK::VTUWriter& writer)
   {
-    if (dim>1)
-      s << indent << "<Cells>\n";
-    else
-      s << indent << "<Lines>\n";
-    ++indent;
+    writer.beginCells();
 
     // connectivity
     {
       shared_ptr<VTK::DataArrayWriter<int> > p1
-        (factory.make<int>("connectivity", 1, ncorners, indent));
+        (writer.makeArrayWriter<int>("connectivity", 1, ncorners));
       // The offset within the index numbering
       int offset = 0;
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
@@ -299,7 +286,7 @@ namespace Dune
     // offsets
     {
       shared_ptr<VTK::DataArrayWriter<int> > p2
-        (factory.make<int>("offsets", 1, ncells, indent));
+        (writer.makeArrayWriter<int>("offsets", 1, ncells));
       // The offset into the connectivity array
       int offset = 0;
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
@@ -318,7 +305,7 @@ namespace Dune
     if (dim>1)
     {
       shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
-        (factory.make<unsigned char>("types", 1, ncells, indent));
+        (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
       for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
       {
         GeometryType coerceTo = subsampledGeometryType(it->type());
@@ -329,150 +316,7 @@ namespace Dune
       }
     }
 
-    -- indent;
-    if (dim>1)
-      s << indent << "</Cells>\n";
-    else
-      s << indent << "</Lines>\n";
-  }
-
-  //! write the appended data sections
-  template <class GridView>
-  void SubsamplingVTKWriter<GridView>::
-  writeAppendedData(std::ostream& s, Indent indent,
-                    VTK::DataArrayWriterFactory& factory)
-  {
-    const std::string& encoding = factory.appendedEncoding();
-    s << indent << "<AppendedData encoding=\"" << encoding << "\">\n";
-    ++indent;
-    s << indent << "_"; // indicates start of binary data
-
-    // point data
-    for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
-    {
-      // vtk file format: a vector data always should have 3 comps (with 3rd
-      // comp = 0 in 2D case)
-      unsigned writecomps = (*it)->ncomps();
-      if(writecomps == 2) writecomps = 3;
-
-      shared_ptr<VTK::DataArrayWriter<float> > p
-        (factory.make<float>((*it)->name(), writecomps, ncells, indent));
-      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-      {
-        Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
-        for(SubElementIterator sit = refinement.eBegin(level), send = refinement.eEnd(level);
-            sit != send; ++sit)
-        {
-          for (int j=0; j<(*it)->ncomps(); j++)
-            p->write((*it)->evaluate(j,*i,sit.coords()));
-          // expand 2D-Vectors to 3D
-          for(unsigned j = (*it)->ncomps(); j < writecomps; j++)
-            p->write(0.0);
-        }
-      }
-    }
-
-    // cell data
-    for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
-    {
-      // vtk file format: a vector data always should have 3 comps (with 3rd
-      // comp = 0 in 2D case)
-      unsigned writecomps = (*it)->ncomps();
-      if(writecomps == 2) writecomps = 3;
-
-      shared_ptr<VTK::DataArrayWriter<float> > p
-        (factory.make<float>((*it)->name(), writecomps, nvertices, indent));
-      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-      {
-        Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
-        for(SubVertexIterator sit = refinement.vBegin(level), send = refinement.vEnd(level);
-            sit != send; ++sit)
-        {
-          for (int j=0; j<(*it)->ncomps(); j++)
-            p->write((*it)->evaluate(j,*i,sit.coords()));
-          //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-          for(unsigned j = (*it)->ncomps(); j < writecomps; j++)
-            p->write(0.0);
-        }
-      }
-    }
-
-    // point coordinates
-    {
-      shared_ptr<VTK::DataArrayWriter<float> > p
-        (factory.make<float>("Coordinates", 3, nvertices, indent));
-      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-      {
-        Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
-        for(SubVertexIterator sit = refinement.vBegin(level), send = refinement.vEnd(level);
-            sit != send; ++sit)
-        {
-          FieldVector<ctype, dimw> coords = i->geometry().global(sit.coords());
-          for (int j=0; j<std::min(int(dimw),3); j++)
-            p->write(coords[j]);
-          for (int j=std::min(int(dimw),3); j<3; j++)
-            p->write(0.0);
-        }
-      }
-    }
-
-    // connectivity
-    {
-      shared_ptr<VTK::DataArrayWriter<int> > p1
-        (factory.make<int>("connectivity", 1, ncorners, indent));
-      // The offset within the index numbering
-      int offset = 0;
-      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-      {
-        GeometryType coercedToType = subsampledGeometryType(i->type());
-        Refinement &refinement = buildRefinement<dim, ctype>(i->type(), coercedToType);
-        for(SubElementIterator sit = refinement.eBegin(level), send = refinement.eEnd(level);
-            sit != send; ++sit)
-        {
-          IndexVector indices = sit.vertexIndices();
-          for(unsigned int ii = 0; ii < indices.size(); ++ii)
-            p1->write(offset+indices[VTK::renumber(coercedToType, ii)]);
-        }
-        offset += refinement.nVertices(level);
-      }
-    }
-
-    // offsets
-    {
-      shared_ptr<VTK::DataArrayWriter<int> > p2
-        (factory.make<int>("offsets", 1, ncells, indent));
-      // The offset into the connectivity array
-      int offset = 0;
-      for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-      {
-        Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
-        unsigned int verticesPerCell = refinement.eBegin(level).vertexIndices().size();
-        for(int element = 0; element < refinement.nElements(level); ++element)
-        {
-          offset += verticesPerCell;
-          p2->write(offset);
-        }
-      }
-    }
-
-    // cell types
-    if (dim>1)
-    {
-      shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
-        (factory.make<unsigned char>("types", 1, ncells, indent));
-      for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
-      {
-        GeometryType coerceTo = subsampledGeometryType(it->type());
-        Refinement &refinement = buildRefinement<dim, ctype>(it->type(), coerceTo);
-        int vtktype = VTK::geometryType(coerceTo);
-        for(int i = 0; i < refinement.nElements(level); ++i)
-          p3->write(vtktype);
-      }
-    }
-
-    s << std::endl;
-    --indent;
-    s << indent << "</AppendedData>" << std::endl;
+    writer.endCells();
   }
 }
 
