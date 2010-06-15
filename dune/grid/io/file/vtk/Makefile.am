@@ -5,6 +5,7 @@ vtkio_HEADERS =					\
 	b64enc.hh				\
 	basicwriter.hh				\
 	boundaryiterators.hh			\
+	boundarywriter.hh			\
 	common.hh				\
 	corner.hh				\
 	corneriterator.hh			\
