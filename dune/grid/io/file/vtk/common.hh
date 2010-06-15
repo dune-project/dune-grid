@@ -299,6 +299,25 @@ namespace Dune
       return renumber(t.type(), i);
     }
 
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  Determine Endianness
+    //
+
+    //! determine endianness of this C++ implementation
+    /**
+     * \returns A string suitable for the byte_order property in VTK files;
+     *          either "BigEndian" or "LittleEndian".
+     */
+    inline std::string getEndiannessString()
+    {
+      short i = 1;
+      if (reinterpret_cast<char*>(&i)[1] == 1)
+        return "BigEndian";
+      else
+        return "LittleEndian";
+    }
+
   } // namespace VTK
 
   //! \} group VTK

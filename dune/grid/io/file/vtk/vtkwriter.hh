@@ -719,7 +719,8 @@ namespace Dune
 
       // VTKFile
       s << indent << "<VTKFile type=\"P" << getTypeString()
-        << "\" version=\"0.1\" byte_order=\"" << getEndiannessString() << "\">\n";
+        << "\" version=\"0.1\""
+        << " byte_order=\"" << VTK::getEndiannessString() << "\">\n";
       ++indent;
 
       // PUnstructuredGrid
@@ -817,7 +818,8 @@ namespace Dune
 
       // VTKFile
       s << indent  << "<VTKFile type=\"" << getTypeString()
-        << "\" version=\"0.1\" byte_order=\"" << getEndiannessString() << "\">\n";
+        << "\" version=\"0.1\""
+        << " byte_order=\"" << VTK::getEndiannessString() << "\">\n";
       ++indent;
 
       // Grid characteristics
@@ -883,15 +885,6 @@ namespace Dune
     }
 
   protected:
-    std::string getEndiannessString() const
-    {
-      short i = 1;
-      if (reinterpret_cast<char*>(&i)[1] == 1)
-        return "BigEndian";
-      else
-        return "LittleEndian";
-    }
-
     std::string getFormatString() const
     {
       if (outputtype==VTK::ascii)
