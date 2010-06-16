@@ -815,7 +815,7 @@ namespace Dune
        Each line consists of a positive integer denoting a boundary
        id and a set of vertex indices (see \b Vertex block)
        describing one boundary patch of the macrogrid.
-       Note that a special orderning of the vertex numbers in not required.
+       Note that a special ordering of the vertex numbers is not required.
      - \b Cube  \n
        Each line consists of \c dimworld<SUP>2</SUP> vertex indices
        (see \b Vertex block) describing one cube
