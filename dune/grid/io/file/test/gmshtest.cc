@@ -74,6 +74,7 @@ try
   const std::string path( "../../../../../doc/grids/gmsh/" );
   std::string curved2d( path ); curved2d += "curved2d.msh";
   std::string circ2nd(  path ); circ2nd  += "circle2ndorder.msh";
+  std::string unitsquare_quads_2x2(path);  unitsquare_quads_2x2 += "unitsquare_quads_2x2.msh";
   std::string sphere(   path ); sphere   += "sphere.msh";
   std::string pyramid(  path ); pyramid  += "pyramid.msh";
   std::string pyr2nd(   path ); pyr2nd   += "pyramid2ndorder.msh";
@@ -85,6 +86,9 @@ try
 
   std::cout << "reading UGGrid<2> with second order boundary approximation" << std::endl;
   testReadingGrid<UGGrid<2> >( circ2nd, refinements );
+
+  std::cout << "reading UGGrid<2>" << std::endl;
+  testReadingGrid<UGGrid<2> >( unitsquare_quads_2x2, refinements );
 
   std::cout << "reading UGGrid<3>" << std::endl;
   testReadingGrid<UGGrid<3> >( pyramid, refinements );
