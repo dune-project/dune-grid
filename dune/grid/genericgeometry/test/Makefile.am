@@ -7,6 +7,8 @@ GRIDDIM = 3
 #WORLDDIM = 3
 DIMENSION = 3
 
+check_HEADERS = testgeo.hh
+
 check_PROGRAMS = testsubtopologies testmapping testgeo testmatrix
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS)
