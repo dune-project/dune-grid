@@ -7,6 +7,8 @@ GRIDDIM = 3
 #WORLDDIM = 3
 DIMENSION = 3
 
+check_HEADERS = testgeo.hh
+
 check_PROGRAMS = testsubtopologies testmapping testgeo grefelement
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS)
@@ -23,6 +25,6 @@ testgeo_SOURCES = testgeo.cc
 
 grefelement_SOURCES = grefelement.cc
 
-SOURCES = testgeo.cc grefelement.cc testmapping.cc testsubtopologies.cc testgeo.hh
+SOURCES = testgeo.cc grefelement.cc testmapping.cc testsubtopologies.cc
 
 include $(top_srcdir)/am/global-rules
