@@ -174,7 +174,8 @@ namespace Dune {
     enum {dim = remove_const<GridImp>::type::dimension};
 
     //! constructor stores reference to a grid and level
-    UGGridLeafIndexSet (const GridImp& g) : grid_(g)
+    UGGridLeafIndexSet (const GridImp& g)
+      : grid_(g), coarsestLevelWithLeafElements_(0)
     {}
 
     //! get index of an entity

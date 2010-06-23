@@ -208,6 +208,9 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
     // used to compute the coarsest level with leaf elements
     bool containsLeafElements = false;
 
+    // this value is used in the parallel case, when a local grid may not contain any elements at all
+    coarsestLevelWithLeafElements_ = 0;
+
     typename GridImp::Traits::template Codim<0>::LevelIterator eIt    = grid_.template lbegin<0>(level_);
     typename GridImp::Traits::template Codim<0>::LevelIterator eEndIt = grid_.template lend<0>(level_);
 
