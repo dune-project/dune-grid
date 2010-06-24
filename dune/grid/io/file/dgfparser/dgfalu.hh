@@ -210,7 +210,7 @@ namespace Dune
 
       bool fileFound = input.is_open() ;
       if( fileFound )
-        fileFound |= generate( input, comm, filename );
+        fileFound = generate( input, comm, filename );
 
       if( ! fileFound )
         grid_ = callDirectly( "ALUSimplexGrid< 3 , 3 >", rank( comm ), filename.c_str(), comm );
@@ -242,7 +242,7 @@ namespace Dune
       std::ifstream input( filename.c_str() );
       bool fileFound = input.is_open() ;
       if( fileFound )
-        fileFound |= generate( input, comm, filename );
+        fileFound = generate( input, comm, filename );
 
       if( ! fileFound )
         grid_ = callDirectly( "ALUCubeGrid< 3 , 3 >", rank( comm ), filename.c_str(), comm );
