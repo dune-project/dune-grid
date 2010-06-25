@@ -839,8 +839,8 @@ namespace Dune {
       UG_NAMESPACE ::ExitUg();
     }
 
-    static void DisposeMultiGrid(UG_NAMESPACE ::multigrid* mg) {
-      UG_NAMESPACE ::DisposeMultiGrid(mg);
+    static int DisposeMultiGrid(UG_NAMESPACE ::multigrid* mg) {
+      return UG_NAMESPACE ::DisposeMultiGrid(mg);
     }
 
 #ifndef UG_LGMDOMAIN
