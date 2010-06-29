@@ -207,6 +207,8 @@ namespace Dune {
     typedef typename ALU2dImplTraits<dimworld, elementType >::HElementType HElementType ;
     typedef typename ALU2dImplTraits<dimworld, elementType >::ElementType ElementType ;
 
+    template< class > friend class DGFBaseFactory;
+
     template< int, int, class > friend class ALU2dGridEntity;
     // friend class ALU2dGridEntity<0,dim,const ThisType>;
     // friend class ALU2dGridEntity<1,dim,const ThisType>;
@@ -304,11 +306,6 @@ namespace Dune {
     typedef typename Traits :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
     //! \brief boundary projection type
     typedef typename Traits :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
-
-#ifdef ALUGRID_VERTEX_PROJECTION
-    //! type of ALUGrid Vertex Projection Interface
-    typedef ALU2DSPACE VertexProjection< dimworld > ALUGridVertexProjectionType;
-#endif
 
   protected:
 

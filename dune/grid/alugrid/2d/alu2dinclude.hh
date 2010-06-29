@@ -3,6 +3,8 @@
 #ifndef DUNE_ALU2DGRID_INCLUDE_HH
 #define DUNE_ALU2DGRID_INCLUDE_HH
 
+#define ALU2DGRID_COMPATIBILITY_LEVEL 2
+
 #include <alugrid_2d.h>
 
 //////////////////////////////////////////////////////////////////////
@@ -29,12 +31,13 @@
 #include <alugrid_serial.h>
 #endif
 
-#define ALU2DSPACE ALUGridSpace ::
-#define ALU2DSPACENAME ALUGridSpace
+#define ALU2DSPACE ALU2DSPACENAME ::
 
 #ifdef ALUGRID_SURFACE_2D
+#define ALU2DSPACENAME ALU2DGrid
 #define ALU2DDIMWORLD(dimw,eltype) < dimw,(eltype == ALU2DSPACE triangle ? 3 : 4) >
 #else
+#define ALU2DSPACENAME ALUGridSpace
 #define ALU2DDIMWORLD(dimw,eltype)
 #endif
 
