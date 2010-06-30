@@ -307,6 +307,12 @@ namespace Dune {
     //! \brief boundary projection type
     typedef typename Traits :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
+#ifdef ALUGRID_VERTEX_PROJECTION
+    //! type of ALUGrid Vertex Projection Interface
+    typedef ALUGridSpace :: VertexProjection< dimworld > ALUGridVertexProjectionType;
+#endif
+
+
   protected:
 
     friend class ALUGridBoundaryProjection< ThisType >;
