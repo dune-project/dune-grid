@@ -74,6 +74,7 @@ AC_DEFUN([DUNE_PATH_UG],[
         UG_INCLUDE_PATH="$UGROOT/include/ug/"
 	  else
         UG_INCLUDE_PATH="$UGROOT/include/"
+	  fi
       
       UG_LDFLAGS=""
 
