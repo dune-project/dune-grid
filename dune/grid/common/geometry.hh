@@ -37,12 +37,10 @@ namespace Dune
      @brief Wrapper class for geometries
 
 
-     Template parameters are:
-
-     - <tt>mydim</tt> Dimension of the domain
-     - <tt>cdim</tt> Dimension of the range
-     - <tt>GridImp</tt> Type that is a model of Dune::Grid
-     - <tt>GeometryImp</tt> Class template that is a model of Dune::Geometry
+     \tparam mydim Dimension of the domain
+     \tparam cdim Dimension of the range
+     \tparam GridImp Type that is a model of Dune::Grid
+     \tparam GeometryImp Class template that is a model of Dune::Geometry
 
      <H3>Maps</H3>
 

@@ -429,9 +429,7 @@ namespace Dune {
 
     /** \brief A Traits struct that collects all associated types of one implementation
 
-       Template parameter:
-
-       - <tt>cd</tt> codimension. Note that not all types in this struct depend on this template parameter.
+       \tparam cd codimension. Note that not all types in this struct depend on this template parameter.
      */
     template <int cd>
     struct Codim
