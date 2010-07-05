@@ -155,20 +155,6 @@ namespace Dune
       return realGeometry.local(global);
     }
 
-    /** \brief Checks whether a point is in the reference element \f$D\f$
-     *
-     *  \param[in]  local  point \f$x\f$ to verify
-     *  \returns true, if \f$x\in D\f$ of.
-     *
-     *  \deprecated Use the corresponding method in GenericReferenceElement
-     */
-    bool checkInside ( const LocalCoordinate& local ) const DUNE_DEPRECATED
-    {
-      const GenericReferenceElement< ctype, mydim > &refElement
-        = GenericReferenceElements< ctype, mydim >::general( type() );
-      return refElement.checkInside( local );
-    }
-
     /** \brief Return the factor appearing in the integral transformation formula
 
        Let \f$ g : D \to W\f$ denote the transformation described by the Geometry.
