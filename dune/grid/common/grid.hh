@@ -1186,7 +1186,7 @@ namespace Dune {
       >
   struct GridTraits
   {
-    /** \brief The type that implementing the grid. */
+    /** \brief The type that implements the grid. */
     typedef GridImp Grid;
 
     /** \brief The type of the intersection at the leafs of the grid. */
