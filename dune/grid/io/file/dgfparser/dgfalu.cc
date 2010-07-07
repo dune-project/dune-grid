@@ -33,7 +33,7 @@ namespace Dune
 
       for( int n = 0; n < dgf_.nofvtx; ++n )
       {
-        FieldVector< double, dimworld > pos;
+        FieldVector< ALUSimplexGrid< 3, 3 > :: ctype, dimworld > pos;
         for( int i = 0; i < dimworld; ++i )
           pos[ i ] = dgf_.vtx[ n ][ i ];
         factory_.insertVertex( pos );
@@ -106,7 +106,7 @@ namespace Dune
 
       for( int n = 0; n < dgf_.nofvtx; ++n )
       {
-        FieldVector< double, dimworld > pos;
+        FieldVector< ALUCubeGrid< 3, 3 >::ctype , dimworld > pos;
         for( int i = 0; i < dimworld; ++i )
           pos[ i ] = dgf_.vtx[ n ][ i ];
         factory_.insertVertex( pos );
