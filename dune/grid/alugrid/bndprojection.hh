@@ -7,7 +7,7 @@ namespace Dune {
 
   //! \brief ALUGrid boundary projection implementation
   //!  DuneBndProjection has to fulfil the DuneBoundaryProjection interface
-  template <class GridImp>
+  template <class GridImp, class ctype = double >
   class ALUGridBoundaryProjection
 #ifdef ALUGRID_VERTEX_PROJECTION
     : public GridImp :: ALUGridVertexProjectionType
@@ -15,7 +15,7 @@ namespace Dune {
   {
     typedef GridImp GridType;
     // type of double coordinate vector
-    typedef double coord_t[ GridType :: dimensionworld ];
+    typedef ctype coord_t[ GridType :: dimensionworld ];
   protected:
 
     //! reference to boundary projection implementation

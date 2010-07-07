@@ -29,25 +29,25 @@ namespace Dune {
   class TrilinearMapping
   {
   public:
-    typedef double double_t[3];
-    typedef FieldVector<double, 3> coord_t;
-    typedef FieldMatrix<double, 3, 3> mat_t;
+    typedef alu3d_ctype double_t[3];
+    typedef FieldVector<alu3d_ctype, 3> coord_t;
+    typedef FieldMatrix<alu3d_ctype, 3, 3> mat_t;
   private:
     static const double _epsilon ;
 
     // the internal mapping
-    double a [8][3] ;
+    alu3d_ctype a [8][3] ;
     mat_t Df;
     mat_t Dfi;
     mat_t invTransposed_;
-    double DetDf ;
+    alu3d_ctype DetDf ;
 
     bool calcedDet_;
     bool calcedLinear_;
     bool calcedInv_;
     bool affine_;
 
-    void linear (const double, const double, const double) ;
+    void linear (const alu3d_ctype, const alu3d_ctype, const alu3d_ctype) ;
     void linear (const coord_t&) ;
     void inverse (const coord_t&) ;
   public:
@@ -62,11 +62,11 @@ namespace Dune {
     TrilinearMapping (const TrilinearMapping &) ;
 
     ~TrilinearMapping () {}
-    double det (const coord_t&) ;
+    alu3d_ctype det (const coord_t&) ;
     const mat_t& jacobianInverseTransposed(const coord_t&);
     const mat_t& jacobianTransposed(const coord_t&);
     void map2world (const coord_t&, coord_t&) const ;
-    void map2world (const double , const double , const double ,
+    void map2world (const alu3d_ctype , const alu3d_ctype , const alu3d_ctype ,
                     coord_t&) const ;
     void world2map (const coord_t&, coord_t&) ;
 
@@ -89,14 +89,14 @@ namespace Dune {
   {
   public:
     // our coordinate types
-    typedef FieldVector<double, 3> coord3_t;
-    typedef FieldVector<double, 2> coord2_t;
+    typedef FieldVector<alu3d_ctype, 3> coord3_t;
+    typedef FieldVector<alu3d_ctype, 2> coord2_t;
 
     // type of coordinate vectors from elements
-    typedef double double3_t[3];
+    typedef alu3d_ctype double3_t[3];
   protected:
 
-    double _n [3][3] ;
+    alu3d_ctype _n [3][3] ;
 
     static const double _epsilon ;
 
@@ -114,10 +114,10 @@ namespace Dune {
 
     // calcuates normal
     void normal(const coord2_t&, coord3_t&) const ;
-    void normal(const double, const double, coord3_t&) const;
+    void normal(const alu3d_ctype, const alu3d_ctype, coord3_t&) const;
 
     void negativeNormal(const coord2_t&, coord3_t&) const ;
-    void negativeNormal(const double, const double, coord3_t&) const;
+    void negativeNormal(const alu3d_ctype, const alu3d_ctype, coord3_t&) const;
 
   public:
     // builds _b and _n, called from the constructors
@@ -131,7 +131,7 @@ namespace Dune {
     template <class vector_t>
     void buildMapping (const vector_t & , const vector_t & ,
                        const vector_t & , const vector_t & ,
-                       double (&_b)[4][3] );
+                       alu3d_ctype (&_b)[4][3] );
   } ;
 
 
@@ -149,27 +149,27 @@ namespace Dune {
     static const double _epsilon;
 
     // our coordinate types
-    typedef FieldVector<double, 3> coord3_t;
-    typedef FieldVector<double, 2> coord2_t;
+    typedef FieldVector<alu3d_ctype, 3> coord3_t;
+    typedef FieldVector<alu3d_ctype, 2> coord2_t;
 
     // type of coordinate vectors from elements
-    typedef double double3_t[3];
+    typedef alu3d_ctype double3_t[3];
 
     // type for helper matrices
-    typedef FieldMatrix<double,3,3> mat3_t;
+    typedef FieldMatrix<alu3d_ctype,3,3> mat3_t;
 
     // type for inverse matrices
-    typedef FieldMatrix<double,2,3> matrix_t;
+    typedef FieldMatrix<alu3d_ctype,2,3> matrix_t;
 
     // type for inverse matrices
-    typedef FieldMatrix<double,3,2> inv_t;
+    typedef FieldMatrix<alu3d_ctype,3,2> inv_t;
 
-    double _b [4][3] ;
+    alu3d_ctype _b [4][3] ;
 
     mutable mat3_t Df,Dfi;
     mutable inv_t invTransposed_;
     mutable matrix_t matrix_;
-    mutable double DetDf;
+    mutable alu3d_ctype DetDf;
 
     mutable coord3_t normal_;
     mutable coord3_t tmp_;
@@ -197,7 +197,7 @@ namespace Dune {
     const matrix_t& jacobianTransposed(const coord2_t&) const ;
 
     // calculates determinant of face mapping using the normal
-    double det(const coord2_t&) const;
+    alu3d_ctype det(const coord2_t&) const;
 
     // maps from local coordinates to global coordinates
     void world2map(const coord3_t &, coord2_t & ) const;
@@ -205,11 +205,11 @@ namespace Dune {
     // maps form global coordinates to local (within reference element)
     // coordinates
     void map2world(const coord2_t&, coord3_t&) const ;
-    void map2world(const double ,const double , coord3_t&) const ;
+    void map2world(const alu3d_ctype ,const alu3d_ctype , coord3_t&) const ;
 
   private:
-    void map2worldnormal(const double, const double, const double , coord3_t&) const;
-    void map2worldlinear(const double, const double, const double ) const;
+    void map2worldnormal(const alu3d_ctype, const alu3d_ctype, const alu3d_ctype , coord3_t&) const;
+    void map2worldlinear(const alu3d_ctype, const alu3d_ctype, const alu3d_ctype ) const;
 
   public:
     // builds _b and _n, called from the constructors

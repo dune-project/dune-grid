@@ -296,9 +296,9 @@ namespace Dune {
     typedef ALU3DSPACE ProjectVertex ALUGridVertexProjectionType;
   protected:
 
-    friend class ALUGridBoundaryProjection< ThisType >;
+    friend class ALUGridBoundaryProjection< ThisType , alu3d_ctype >;
     // type of ALUGrid boundary projection wrapper
-    typedef ALUGridBoundaryProjection< ThisType > ALUGridBoundaryProjectionType;
+    typedef ALUGridBoundaryProjection< ThisType , alu3d_ctype > ALUGridBoundaryProjectionType;
 
     //! Type of the local id set
     typedef typename ALU3dGridFamily < dim , dimworld , elType > :: LocalIdSetImp LocalIdSetImp;

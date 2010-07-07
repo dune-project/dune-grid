@@ -40,7 +40,7 @@ namespace Dune
 
     struct CoordVecCopy
     {
-      // copy coordinate vector from field vector or double[cdim]
+      // copy coordinate vector from field vector or alu3d_ctype[cdim]
       template <class CoordPtrType>
       static inline void copy(const CoordPtrType& p,
                               CoordinateVectorType& c)
@@ -293,7 +293,7 @@ namespace Dune
       enum { corners_ = 8 };
 
       //! the vertex coordinates
-      typedef double CoordPtrType[cdim];
+      typedef alu3d_ctype CoordPtrType[cdim];
 
       //! the vertex coordinates
       typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
@@ -416,7 +416,7 @@ namespace Dune
       enum { corners_ = 4 };
 
       //! the vertex coordinates
-      typedef double CoordPtrType[cdim];
+      typedef alu3d_ctype CoordPtrType[cdim];
 
       //! the vertex coordinates
       typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;

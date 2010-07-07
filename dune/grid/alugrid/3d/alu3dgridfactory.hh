@@ -459,7 +459,10 @@ namespace Dune
     const size_t numVx = vertices.size();
     GeometryType type( (numVx == 3) ? GeometryType::simplex : GeometryType::cube, dimension-1 );
 
-    std::vector< VertexType > coords( numVx );
+    // we need double here because of the structure of BoundarySegment
+    // and BoundarySegmentWrapper which have double as coordinate type
+    typedef FieldVector< double, dimensionworld > CoordType;
+    std::vector< CoordType > coords( numVx );
     for( size_t i = 0; i < numVx; ++i )
     {
       // if this assertions is thrown vertices were not inserted at first
@@ -478,7 +481,7 @@ namespace Dune
     // consistency check
     for( size_t i = 0; i < numVx; ++i )
     {
-      VertexType global = (*prj)( coords [ i ] );
+      CoordType global = (*prj)( coords [ i ] );
       if( (global - coords[ i ]).two_norm() > 1e-6 )
         DUNE_THROW(GridError,"BoundarySegment does not map face vertices to face vertices.");
     }

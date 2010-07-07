@@ -401,9 +401,9 @@ namespace Dune {
     {
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
-      const double (&_p0)[3] = face.myvertex(0)->Point();
-      const double (&_p1)[3] = face.myvertex(1)->Point();
-      const double (&_p2)[3] = face.myvertex(2)->Point();
+      const alu3d_ctype (&_p0)[3] = face.myvertex(0)->Point();
+      const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
+      const alu3d_ctype (&_p2)[3] = face.myvertex(2)->Point();
 
       // change sign if face normal points into inner element
       // factor is 1.0 to get integration outer normal and not volume outer normal
