@@ -279,6 +279,7 @@ void checkIntersectionIterator(const GridViewType& view,
     //   Check the geometry returned by intersectionGlobal()
     // //////////////////////////////////////////////////////////
     typedef typename Intersection::Geometry Geometry;
+    typedef typename Geometry :: ctype ctype ;
     const Geometry &intersectionGlobal = iIt->geometry();
 
     checkGeometry(intersectionGlobal);
@@ -305,8 +306,8 @@ void checkIntersectionIterator(const GridViewType& view,
       DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left hand side and global view!");
 
     // Use a quadrature rule as a set of test points
-    typedef Dune::GenericGeometry::GaussPoints< double > Points;
-    typedef Dune::GenericGeometry::GenericQuadratureFactory< interDim, double, Points > QuadratureFactory;
+    typedef Dune::GenericGeometry::GaussPoints< ctype > Points;
+    typedef Dune::GenericGeometry::GenericQuadratureFactory< interDim, ctype, Points > QuadratureFactory;
     const typename QuadratureFactory::Object &quad = *QuadratureFactory::create( iIt->type(), 3 );
     for (size_t i=0; i<quad.size(); i++)
     {
@@ -425,8 +426,8 @@ void checkIntersectionIterator(const GridViewType& view,
 
       // (Ab)use a quadrature rule as a set of test points
       const int interDim = Intersection::LocalGeometry::mydimension;
-      typedef Dune::GenericGeometry::GaussPoints< double > Points;
-      typedef Dune::GenericGeometry::GenericQuadratureFactory< interDim, double, Points > QuadratureFactory;
+      typedef Dune::GenericGeometry::GaussPoints< ctype > Points;
+      typedef Dune::GenericGeometry::GenericQuadratureFactory< interDim, ctype, Points > QuadratureFactory;
       const typename QuadratureFactory::Object &quad = *QuadratureFactory::create( iIt->type(), 3 );
       for (size_t i=0; i<quad.size(); i++)
       {

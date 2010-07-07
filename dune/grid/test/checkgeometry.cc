@@ -13,8 +13,9 @@ namespace Dune
   template< int mydim, int cdim, class Grid, template< int, int, class > class Imp >
   void checkGeometry ( const Geometry< mydim, cdim, Grid, Imp > &geometry )
   {
+    typedef typename Grid :: ctype ctype ;
     typedef Dune::Geometry< mydim, cdim, Grid, Imp > Geometry;
-    const GenericReferenceElement< double, mydim > &refElement = GenericReferenceElements< double, mydim >::general( geometry.type() );
+    const GenericReferenceElement< ctype, mydim > &refElement = GenericReferenceElements< ctype, mydim >::general( geometry.type() );
     if( refElement.size( mydim ) == geometry.corners() )
     {
       for( int i = 0; i < geometry.corners(); ++i )
@@ -26,8 +27,8 @@ namespace Dune
     else
       std::cerr << "Error: Incorrect number of corners (" << geometry.corners() << ", should be " << refElement.size( mydim ) << ")." << std::endl;
 
-    typedef Dune::GenericGeometry::GaussPoints< double > Points;
-    typedef Dune::GenericGeometry::GenericQuadratureFactory< mydim, double, Points > QuadratureFactory;
+    typedef Dune::GenericGeometry::GaussPoints< ctype > Points;
+    typedef Dune::GenericGeometry::GenericQuadratureFactory< mydim, ctype, Points > QuadratureFactory;
     const typename QuadratureFactory::Object &quadrature = *QuadratureFactory::create( geometry.type(), 2 );
     for( size_t i = 0; i < quadrature.size(); ++i )
     {
@@ -36,10 +37,10 @@ namespace Dune
       if( (x - geometry.local( geometry.global( x ) )).two_norm() > 1e-8 )
         std::cerr << "Error: global and local are not inverse to each other." << std::endl;
 
-      const FieldMatrix< double, mydim, cdim > &jt = geometry.jacobianTransposed( x );
-      const FieldMatrix< double, cdim, mydim > &jit = geometry.jacobianInverseTransposed( x );
+      const FieldMatrix< ctype, mydim, cdim > &jt = geometry.jacobianTransposed( x );
+      const FieldMatrix< ctype, cdim, mydim > &jit = geometry.jacobianInverseTransposed( x );
 
-      FieldMatrix< double, mydim, mydim > id;
+      FieldMatrix< ctype, mydim, mydim > id;
       FMatrixHelp::multMatrix( jt, jit, id );
       bool isId = true;
       for( int j = 0; j < mydim; ++j )
@@ -57,7 +58,7 @@ namespace Dune
       if( geometry.integrationElement( x ) < 0 )
         std::cerr << "Error: Negative integrationElement found." << std::endl;
 
-      FieldMatrix< double, mydim, mydim > jtj( 0 );
+      FieldMatrix< ctype, mydim, mydim > jtj( 0 );
       for( int i = 0; i < mydim; ++i )
         for( int j = 0; j < mydim; ++j )
           for( int k = 0; k < cdim; ++k )
