@@ -368,6 +368,8 @@ namespace Dune {
       if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
     }
     if(leafIndexSet_) leafIndexSet_->calcNewIndex();
+    // build global ID set new (to be revised)
+    if( globalIdSet_ ) globalIdSet_->updateIdSet();
 
     coarsenMarked_ = 0;
     refineMarked_  = 0;
