@@ -5,6 +5,7 @@
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
+#include <dune/grid/geometrygrid/hostcorners.hh>
 #include <dune/grid/geometrygrid/coordfunction.hh>
 
 namespace Dune
@@ -25,36 +26,34 @@ namespace Dune
       typedef AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl > CoordFunctionInterface;
       typedef CoordFunctionCaller< HostEntity, CoordFunctionInterface > This;
 
-      static const int dimension = HostEntity::dimension;
-
-      typedef typename HostEntity::Geometry HostGeometry;
-
-      typedef typename CoordFunctionInterface::RangeVector RangeVector;
+      static const int codimension = HostEntity::codimension;
 
     public:
+      typedef typename CoordFunctionInterface::RangeVector RangeVector;
+
       CoordFunctionCaller ( const HostEntity &hostEntity,
                             const CoordFunctionInterface &coordFunction )
-        : hostGeometry_( hostEntity.geometry() ),
+        : hostCorners_( hostEntity ),
           coordFunction_( coordFunction )
       {}
 
       void evaluate ( unsigned int i, RangeVector &y ) const
       {
-        coordFunction_.evaluate( hostGeometry_.corner( i ), y );
+        coordFunction_.evaluate( hostCorners_.corner( i ), y );
       }
 
       GeometryType type () const
       {
-        return hostGeometry_.type();
+        return hostCorners_.type();
       }
 
       unsigned int numCorners () const
       {
-        return hostGeometry_.corners();
+        return hostCorners_.numCorners();
       }
 
     private:
-      const HostGeometry &hostGeometry_;
+      const HostCorners< HostEntity > hostCorners_;
       const CoordFunctionInterface &coordFunction_;
     };
 
@@ -92,7 +91,6 @@ namespace Dune
       const HostEntity &hostEntity_;
       const CoordFunctionInterface &coordFunction_;
     };
-
 
 
 
