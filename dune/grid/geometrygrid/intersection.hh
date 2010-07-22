@@ -29,9 +29,6 @@ namespace Dune
     template< class Grid >
     class LevelIntersection;
 
-    template< class Intersection >
-    class IntersectionWrapper;
-
 
 
     // Intersection
@@ -240,8 +237,6 @@ namespace Dune
         < const GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator >,
             typename HostGrid::Traits::LeafIntersection >
     {
-      template< class > friend class IntersectionWrapper;
-
       typedef GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > Grid;
       typedef typename HostGrid::Traits::LeafIntersection HostIntersection;
 
@@ -267,8 +262,6 @@ namespace Dune
         < const GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator >,
             typename HostGrid::Traits::LevelIntersection >
     {
-      template< class > friend class IntersectionWrapper;
-
       typedef GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > Grid;
       typedef typename HostGrid::Traits::LevelIntersection HostIntersection;
 
