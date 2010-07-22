@@ -4,6 +4,34 @@
 
 #include <dune/common/forloop.hh>
 
+
+// CheckCodimIterators
+// -------------------
+
+template< class GridView, int codim,
+    bool hasEntity = Dune::Capabilities::hasEntity< typename GridView::Grid, codim >::v >
+struct CheckCodimIterators;
+
+template< class GridView, int codim >
+struct CheckCodimIterators< GridView, codim, false >
+{
+  static void apply ( const GridView &gridView )
+  {
+    std::cerr << "Warning: Not checking iterators for codimension " << codim
+              << ", because the corresponding entities are not implemented." << std::endl;
+  }
+};
+
+template< class GridView, int codim >
+struct CheckCodimIterators< GridView, codim, true >
+{
+  static void apply ( const GridView &gridView );
+};
+
+
+// CheckIterators
+// --------------
+
 template< class GridView >
 class CheckIterators
 {
@@ -19,10 +47,26 @@ public:
 };
 
 
+// CheckIterators::CheckCodim
+// --------------------------
 
 template< class GridView >
 template< int codim >
 struct CheckIterators< GridView >::CheckCodim
+{
+  static void apply ( const GridView &gridView )
+  {
+    return CheckCodimIterators< GridView, codim >::apply( gridView );
+  }
+};
+
+
+// Implementation of CheckCodimIterators
+// -------------------------------------
+
+template< class GridView, int codim >
+inline void CheckCodimIterators< GridView, codim, true >
+::apply ( const GridView &gridView )
 {
   typedef typename GridView::Grid::Traits::LocalIdSet LocalIdSet;
   typedef typename LocalIdSet::IdType IdType;
@@ -30,38 +74,35 @@ struct CheckIterators< GridView >::CheckCodim
   typedef typename GridView::template Codim< codim >::Iterator CodimIterator;
   typedef typename GridView::template Codim< 0 >::Iterator ElementIterator;
 
-  static void apply ( const GridView &gridView )
+  const LocalIdSet &idSet = gridView.grid().localIdSet();
+
+  std::map< IdType, int > count;
+  int size = 0;
+
+  const CodimIterator codimEnd = gridView.template end< codim >();
+  for( CodimIterator it = gridView.template begin< codim >(); it != codimEnd; ++it )
   {
-    const LocalIdSet &idSet = gridView.grid().localIdSet();
+    ++count[ idSet.id( *it ) ];
+    ++size;
+  }
 
-    std::map< IdType, int > count;
-    int size = 0;
-
-    const CodimIterator codimEnd = gridView.template end< codim >();
-    for( CodimIterator it = gridView.template begin< codim >(); it != codimEnd; ++it )
+  const ElementIterator elementEnd = gridView.template end< 0 >();
+  for( ElementIterator it = gridView.template begin< 0 >(); it != elementEnd; ++it )
+  {
+    const typename ElementIterator::Entity &entity = *it;
+    for( int i = 0; i < entity.template count< codim >(); ++i )
     {
-      ++count[ idSet.id( *it ) ];
-      ++size;
-    }
-
-    const ElementIterator elementEnd = gridView.template end< 0 >();
-    for( ElementIterator it = gridView.template begin< 0 >(); it != elementEnd; ++it )
-    {
-      const typename ElementIterator::Entity &entity = *it;
-      for( int i = 0; i < entity.template count< codim >(); ++i )
+      IdType id = idSet.subId( entity, i, codim );
+      if( count[ id ] != 1 )
       {
-        IdType id = idSet.subId( entity, i, codim );
-        if( count[ id ] != 1 )
-        {
-          std::cerr << "Error: Codim " << codim << " iterator"
-                    << " visited entity " << id
-                    << " " << count[ id ] << " times." << std::endl;
-          assert( count[ id ] == 1 );
-        }
+        std::cerr << "Error: Codim " << codim << " iterator"
+                  << " visited entity " << id
+                  << " " << count[ id ] << " times." << std::endl;
+        assert( count[ id ] == 1 );
       }
     }
   }
-};
+}
 
 
 
