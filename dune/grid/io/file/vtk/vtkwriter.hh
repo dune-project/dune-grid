@@ -134,7 +134,7 @@ namespace Dune
      * corner.
      */
     class VertexIterator :
-      public ForwardIteratorFacade<VertexIterator, Entity, Entity&, int>
+      public ForwardIteratorFacade<VertexIterator, const Entity, const Entity&, int>
     {
       GridCellIterator git;
       GridCellIterator gend;
@@ -199,7 +199,7 @@ namespace Dune
                && cornerIndexDune == cit.cornerIndexDune
                && datamode == cit.datamode;
       }
-      Entity& dereference() const
+      const Entity& dereference() const
       {
         return *git;
       }
@@ -246,7 +246,7 @@ namespace Dune
      * iteration order of VertexIterator.
      */
     class CornerIterator :
-      public ForwardIteratorFacade<CornerIterator, Entity, Entity&, int>
+      public ForwardIteratorFacade<CornerIterator, const Entity, const Entity&, int>
     {
       GridCellIterator git;
       GridCellIterator gend;
@@ -294,7 +294,7 @@ namespace Dune
                && cornerIndexVTK == cit.cornerIndexVTK
                && datamode == cit.datamode;
       }
-      Entity& dereference() const
+      const Entity& dereference() const
       {
         return *git;
       }
