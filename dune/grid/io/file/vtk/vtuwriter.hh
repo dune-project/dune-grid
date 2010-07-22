@@ -95,7 +95,9 @@ namespace Dune {
      *
      */
     class VTUWriter {
+    public:
       std::ostream& stream;
+    private:
       DataArrayWriterFactory factory;
       Indent indent;
 
