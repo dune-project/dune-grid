@@ -65,17 +65,6 @@ namespace Dune {
     geoImpl().unsetUp2Date();
   }
 
-  /*
-     template<>
-     inline void ALU2dGridEntity<2,2,ALU2dGrid<2,2> > :: setElement(const HElementType & el, const VertexType & vx)
-     {
-     item_   = const_cast<ElementType *> (&vx);
-     level_  = (*item_).level();
-
-     geoImpl().unsetUp2Date();
-     }
-   */
-
   //! set item pointer to NULL
   template<int cd, int dim, class GridImp>
   inline void ALU2dGridEntity<cd,dim,GridImp> :: removeElement() {
