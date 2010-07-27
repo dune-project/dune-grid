@@ -29,8 +29,7 @@ namespace Dune
      *                  (do not specify, the defualt value is already the
      *                  intended use)
      */
-    template< int codim, class Grid,
-        bool fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v) >
+    template< int codim, class Grid, bool fake = !(Capabilities::hasHostEntity< Grid, codim >::v) >
     class EntityBase;
 
     /** \class Entity
@@ -201,7 +200,7 @@ namespace Dune
         GeometryImpl &geo = Grid::getRealImplementation( geo_ );
         if( !geo )
         {
-          CoordVector coords( hostEntity(), grid().coordFunction(), numbering_ );
+          CoordVector coords( hostEntity(), grid().coordFunction(), numbering() );
           geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
@@ -220,6 +219,11 @@ namespace Dune
       const HostEntity &hostEntity () const
       {
         return *hostEntity_;
+      }
+
+      const Numbering &numbering () const
+      {
+        return numbering_;
       }
 
       /** \brief obtain the entity's index from a host IndexSet
@@ -249,7 +253,7 @@ namespace Dune
       typename HostIndexSet::IndexType
       subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
       {
-        const unsigned int j = numbering_.template map< Numbering::Backward >( cd, i );
+        const unsigned int j = numbering().template map< Numbering::Backward >( cd, i );
         return indexSet.subIndex( hostEntity(), j, cd );
       }
 
@@ -468,7 +472,7 @@ namespace Dune
         GeometryImpl &geo = Grid::getRealImplementation( geo_ );
         if( !geo )
         {
-          CoordVector coords( hostElement(), subEntity_, grid().coordFunction(), numbering_ );
+          CoordVector coords( hostElement(), subEntity_, grid().coordFunction(), numbering() );
           geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
@@ -483,6 +487,11 @@ namespace Dune
         return *grid_;
       }
 
+      const HostEntity &hostEntity () const
+      {
+        DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension " << codimension << "." );
+      }
+
       const HostElement &hostElement () const
       {
         return *hostElement_;
@@ -493,10 +502,9 @@ namespace Dune
         return subEntity_;
       }
 
-      const HostEntity &hostEntity () const
+      const Numbering &numbering () const
       {
-        DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
-                    << codimension << "." );
+        return numbering_;
       }
 
       /** \brief obtain the entity's index from a host IndexSet
@@ -509,7 +517,7 @@ namespace Dune
       template< class HostIndexSet >
       typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
       {
-        const unsigned int j = numbering_.template map< Numbering::Backward >( codimension, subEntity_ );
+        const unsigned int j = numbering().template map< Numbering::Backward >( codimension, subEntity_ );
         return indexSet.subIndex( hostElement(), j, codimension );
       }
 
@@ -529,7 +537,7 @@ namespace Dune
         const GenericReferenceElement< ctype, dimension > &refElement
           = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
         const int j = refElement.subEntity( subEntity_, codimension, i, codimension+cd );
-        const unsigned int k = numbering_.template map< Numbering::Backward >( codimension+cd, j );
+        const unsigned int k = numbering().template map< Numbering::Backward >( codimension+cd, j );
         return indexSet.subIndex( hostElement(), k, codimension+cd );
       }
 
@@ -556,7 +564,7 @@ namespace Dune
       template< class HostIdSet >
       typename HostIdSet::IdType id ( const HostIdSet &idSet ) const
       {
-        const unsigned int j = numbering_.template map< Numbering::Backward >( codimension, subEntity_ );
+        const unsigned int j = numbering().template map< Numbering::Backward >( codimension, subEntity_ );
         return idSet.subId( hostElement(), j, codimension );
       }
       /** \} */
@@ -566,7 +574,7 @@ namespace Dune
       vertexPartitionType ( const GenericReferenceElement< ctype, dimension > &refElement, int i ) const
       {
         const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
-        const unsigned int k = numbering_.template map< Numbering::Backward >( dimension, j );
+        const unsigned int k = numbering().template map< Numbering::Backward >( dimension, j );
         return hostElement().template subEntity< dimension >( k )->partitionType();
       }
 
@@ -580,20 +588,39 @@ namespace Dune
 
 
 
-    // EntityBase for codimension 0
-    // ----------------------------
+    // Entity
+    // ------
 
-    /** \copydoc EntityBase
-     *
-     *  This specialization implements the extended interface for \em codim = 0.
-     *  As all host grids provide this entity, we need only specialize the case
-     *  \em fake = \b false.
-     *
-     *  \nosubgrouping
-     */
-    template< class Grid >
-    class EntityBase< 0, Grid, false >
+    template< int codim, int dim, class Grid >
+    class Entity
+      : public EntityBase< codim, Grid >
     {
+      typedef EntityBase< codim, Grid > Base;
+
+    public:
+      typedef typename Base::HostEntity HostEntity;
+      typedef typename Base::HostElement HostElement;
+
+      Entity ( const Grid &grid, const HostEntity &hostEntity )
+        : Base( grid, hostEntity )
+      {}
+
+      Entity ( const Grid &grid, const HostElement &hostElement, int subEntity )
+        : Base( grid, hostElement, subEntity )
+      {}
+    };
+
+
+
+    // Entity for codimension 0
+    // ------------------------
+
+    template< int dim, class Grid >
+    class Entity< 0, dim, Grid >
+      : public EntityBase< 0, Grid >
+    {
+      typedef EntityBase< 0, Grid > Base;
+
       typedef typename remove_const< Grid >::type::Traits Traits;
 
     public:
@@ -601,26 +628,21 @@ namespace Dune
        *  \{ */
 
       //! codimensioon of the entity
-      static const int codimension = 0;
+      static const int codimension = Base::codimension;
       //! dimension of the grid
-      static const int dimension = Traits::dimension;
+      static const int dimension = Base::dimension;
       //! dimension of the entity
-      static const int mydimension = dimension - codimension;
+      static const int mydimension = Base::mydimension;
       //! dimension of the world
-      static const int dimensionworld = Traits::dimensionworld;
+      static const int dimensionworld = Base::dimensionworld;
 
       //! \b true, if the entity is faked, i.e., if there is no corresponding host entity
-      static const bool fake = false;
+      static const bool fake = Base::fake;
       /** \} */
 
       /** \name Types Required by DUNE
        *  \{ */
 
-      //! coordinate type of the grid
-      typedef typename Traits::ctype ctype;
-
-      //! type of corresponding geometry
-      typedef typename Traits::template Codim< codimension >::Geometry Geometry;
       //! type of corresponding local geometry
       typedef typename Traits::template Codim< codimension >::LocalGeometry LocalGeometry;
       //! type of corresponding entity pointer
@@ -636,124 +658,24 @@ namespace Dune
       /** \} */
 
     private:
-      typedef typename Traits::HostGrid HostGrid;
-      typedef typename Traits::CoordFunction CoordFunction;
-
-      typedef typename Traits::template Codim< codimension >::EntityNumbering Numbering;
-
-    public:
-      /** \name Host Types
-       *  \{ */
-
-      //! type of corresponding host entity
-      typedef typename HostGrid::template Codim< codimension > :: Entity HostEntity;
-      //! type of corresponding host entity pointer
-      typedef typename HostGrid::template Codim< codimension > :: EntityPointer HostEntityPointer;
-
-      //! type of host elements, i.e., of host entities of codimension 0
-      typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
-      /** \} */
-
-    private:
-      typedef typename HostGrid::template Codim< codimension >::Geometry HostGeometry;
-
-      typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::template Codim< codimension >::CoordVector
-      CoordVector;
-
-      typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
-      typedef typename MakeableGeometry::ImplementationType GeometryImpl;
-      typedef typename GeometryImpl::GlobalCoordinate GlobalCoordinate;
-
       typedef GeoGrid::LocalGeometryProvider< typename remove_const< Grid >::type, codimension >
       LocalGeometryProvider;
 
     public:
-      /** \name Construction, Initialization and Destruction
-       *  \{ */
+      typedef typename Base::HostEntity HostEntity;
+      typedef typename Base::HostElement HostElement;
 
-      /** \brief construct an initialized entity
-       *
-       *  \param[in]  grid        GeometryGrid this entity belongs to
-       *  \param[in]  hostEntity  corresponding entity in the host grid
-       *
-       *  \note Both references must remain valid as long as this entity is in
-       *        use.
-       */
-      EntityBase ( const Grid &grid, const HostEntity &hostEntity )
-        : grid_( &grid ),
-          hostEntity_( &hostEntity ),
-          numbering_( grid.numbering()[ hostEntity ] ),
-          geo_( GeometryImpl( grid.allocator() ) )
+      using Base::grid;
+      using Base::hostEntity;
+      using Base::numbering;
+
+      Entity ( const Grid &grid, const HostEntity &hostEntity )
+        : Base( grid, hostEntity )
       {}
 
-      EntityBase ( const EntityBase &other )
-        : grid_( other.grid_ ),
-          hostEntity_( other.hostEntity_ ),
-          numbering_( other.numbering_ ),
-          geo_( GeometryImpl( grid().allocator() ) )
+      Entity ( const Grid &grid, const HostElement &hostElement, int subEntity )
+        : Base( grid, hostElement, subEntity )
       {}
-
-      /** \} */
-
-    private:
-      EntityBase &operator= ( const EntityBase & );
-
-    public:
-      /** \name Methods Shared by Entities of All Codimensions
-       *  \{ */
-
-      /** \brief obtain the name of the corresponding reference element
-       *
-       *  This type can be used to access the DUNE reference element.
-       */
-      GeometryType type () const
-      {
-        return hostEntity().type();
-      }
-
-      unsigned int topologyId () const
-      {
-        return GenericGeometry::topologyId( type() );
-      }
-
-      /** \brief obtain the level of this entity */
-      int level () const
-      {
-        return hostEntity().level();
-      }
-
-      /** \brief obtain the partition type of this entity */
-      PartitionType partitionType () const
-      {
-        return hostEntity().partitionType();
-      }
-
-      /** obtain the geometry of this entity
-       *
-       *  Each DUNE entity encapsulates a geometry object, representing the map
-       *  from the reference element to world coordinates. Wrapping the geometry
-       *  is the main objective of the GeometryGrid.
-       *
-       *  The GeometryGrid provides geometries of order 1, obtained by
-       *  interpolation of its corners \f$y_i\f$. There corners are calculated
-       *  from the corners \f$x_i\f$ of the host geometry through the
-       *  GeometryGrid's coordinate function \f$c\f$, i.e.,
-       *  \f$y_i = c( x_i )\f$.
-       *
-       *  \returns a const reference to the geometry
-       */
-      const Geometry &geometry () const
-      {
-        GeometryImpl &geo = Grid::getRealImplementation( geo_ );
-
-        if( !geo )
-        {
-          CoordVector coords( hostEntity(), grid().coordFunction(), numbering_ );
-          geo = GeometryImpl( topologyId(), coords, grid().allocator() );
-        }
-        return geo_;
-      }
-      /** \} */
 
       template< int codim >
       int count () const
@@ -769,7 +691,7 @@ namespace Dune
         typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
         typedef typename MakeableEntityPointer::ImplementationType EntityPointerImpl;
 
-        EntityPointerImpl impl( *grid_, hostEntity(), i );
+        EntityPointerImpl impl( grid(), hostEntity(), i );
         return MakeableEntityPointer( impl );
       }
 
@@ -827,7 +749,7 @@ namespace Dune
       {
         typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
         typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-        return MakeableEntityPointer( EntityPointerImpl( *grid_, hostEntity().father() ) );
+        return MakeableEntityPointer( EntityPointerImpl( grid(), hostEntity().father() ) );
       }
 
       bool hasFather () const
@@ -837,14 +759,14 @@ namespace Dune
 
       const LocalGeometry &geometryInFather () const
       {
-        return geoInFatherProvider_( hostEntity().geometryInFather(), numbering_ );
+        return geoInFatherProvider_( hostEntity().geometryInFather(), numbering() );
       }
 
       HierarchicIterator hbegin ( int maxLevel ) const
       {
         typedef MakeableInterfaceObject< HierarchicIterator > MakeableIterator;
         typedef typename MakeableIterator :: ImplementationType Impl;
-        Impl impl( *grid_, hostEntity().hbegin( maxLevel ) );
+        Impl impl( grid(), hostEntity().hbegin( maxLevel ) );
         return MakeableIterator( impl );
       }
 
@@ -852,7 +774,7 @@ namespace Dune
       {
         typedef MakeableInterfaceObject< HierarchicIterator > MakeableIterator;
         typedef typename MakeableIterator :: ImplementationType Impl;
-        Impl impl( *grid_, hostEntity().hend( maxLevel ) );
+        Impl impl( grid(), hostEntity().hend( maxLevel ) );
         return MakeableIterator( impl );
       }
 
@@ -871,103 +793,8 @@ namespace Dune
         return hostEntity().mightVanish();
       }
 
-      /** \name Methods Supporting the Grid Implementation
-       *  \{ */
-      const Grid &grid () const
-      {
-        return *grid_;
-      }
-
-      const HostEntity &hostEntity () const
-      {
-        return *hostEntity_;
-      }
-
-      /** \brief obtain the entity's index from a host IndexSet
-       *
-       *  \internal This method is provided by the entity, because its
-       *  implementation is different for fake and non-fake entities.
-       *
-       *  \param[in]  indexSet  host IndexSet to use
-       */
-      template< class HostIndexSet >
-      typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
-      {
-        return indexSet.template index< codimension >( hostEntity() );
-      }
-
-      /** \brief obtain the index of a subentity from a host IndexSet
-       *
-       *  \internal This method is provided by the entity, because its
-       *  implementation is different for fake and non-fake entities.
-       *
-       *  \param[in]  indexSet  host IndexSet to use
-       *  \param[in]  i         number of the subentity
-       *  \param[in]  cd        codimension of the subentity
-       */
-      template< class HostIndexSet >
-      typename HostIndexSet::IndexType
-      subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
-      {
-        const unsigned int j = numbering_.template map< Numbering::Backward >( cd, i );
-        return indexSet.subIndex( hostEntity(), j, cd );
-      }
-
-      /** \brief check whether the entity is contained in a host index set
-       *
-       *  \internal This method is provided by the entity, because its
-       *  implementation is different for fake and non-fake entities.
-       *
-       *  \param  indexSet  host IndexSet to use
-       */
-      template< class HostIndexSet >
-      bool isContained ( const HostIndexSet &indexSet ) const
-      {
-        return indexSet.contains( hostEntity() );
-      }
-
-      /** \brief obtain the entity's id from a host IdSet
-       *
-       *  \internal This method is provided by the entity, because its
-       *  implementation is different for fake and non-fake entities.
-       *
-       *  \param  idSet  host IdSet to use
-       */
-      template< class HostIdSet >
-      typename HostIdSet::IdType id ( const HostIdSet &idSet ) const
-      {
-        return idSet.template id< codimension >( hostEntity() );
-      }
-
-      /** \} */
-
     private:
-      const Grid *grid_;
-      const HostEntity *hostEntity_;
-      Numbering numbering_;
-      mutable MakeableGeometry geo_;
       LocalGeometryProvider geoInFatherProvider_;
-    };
-
-
-
-    template< int codim, int dim, class Grid >
-    class Entity
-      : public EntityBase< codim, Grid >
-    {
-      typedef EntityBase< codim, Grid > Base;
-
-    public:
-      typedef typename Base::HostEntity HostEntity;
-      typedef typename Base::HostElement HostElement;
-
-      Entity ( const Grid &grid, const HostEntity &hostEntity )
-        : Base( grid, hostEntity )
-      {}
-
-      Entity ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : Base( grid, hostElement, subEntity )
-      {}
     };
 
   }
