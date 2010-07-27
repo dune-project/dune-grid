@@ -410,20 +410,25 @@ namespace Dune
         allocator_( allocator ),
         levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
         leafIndexSet_( 0 ),
-        globalIdSet_( hostGrid.globalIdSet() ),
-        localIdSet_( hostGrid.localIdSet() )
+        globalIdSet_( 0 ),
+        localIdSet_( 0 )
     {}
 
     /** \brief destructor
      */
     ~GeometryGrid ()
     {
-      if( leafIndexSet_ != 0 )
+      if( localIdSet_ )
+        delete localIdSet_;
+      if( globalIdSet_ )
+        delete globalIdSet_;
+
+      if( leafIndexSet_ )
         delete leafIndexSet_;
 
       for( unsigned int i = 0; i < levelIndexSets_.size(); ++i )
       {
-        if( levelIndexSets_[ i ] != 0 )
+        if( levelIndexSets_[ i ] )
           delete( levelIndexSets_[ i ] );
       }
     }
@@ -600,12 +605,18 @@ namespace Dune
 
     const GlobalIdSet &globalIdSet () const
     {
-      return globalIdSet_;
+      if( !globalIdSet_ )
+        globalIdSet_ = new GlobalIdSet( hostGrid().globalIdSet() );
+      assert( globalIdSet_ );
+      return *globalIdSet_;
     }
 
     const LocalIdSet &localIdSet () const
     {
-      return localIdSet_;
+      if( !localIdSet_ )
+        localIdSet_ = new LocalIdSet( hostGrid().localIdSet() );
+      assert( localIdSet_ );
+      return *localIdSet_;
     }
 
     const LevelIndexSet &levelIndexSet ( int level ) const
@@ -617,20 +628,18 @@ namespace Dune
                                                                       << " requested." );
       }
 
-      if( levelIndexSets_[ level ] == 0 )
-      {
-        levelIndexSets_[ level ]
-          = new LevelIndexSet( hostGrid().levelIndexSet( level ) );
-      }
-      assert( levelIndexSets_[ level ] != 0 );
-      return *levelIndexSets_[ level ];
+      LevelIndexSet *&levelIndexSet = levelIndexSets_[ level ];
+      if( !levelIndexSet )
+        levelIndexSet = new LevelIndexSet( hostGrid().levelIndexSet( level ) );
+      assert( levelIndexSet );
+      return *levelIndexSet;
     }
 
     const LeafIndexSet &leafIndexSet () const
     {
-      if( leafIndexSet_ == 0 )
+      if( !leafIndexSet_ )
         leafIndexSet_ = new LeafIndexSet( hostGrid().leafIndexSet() );
-      assert( leafIndexSet_ != 0 );
+      assert( leafIndexSet_ );
       return *leafIndexSet_;
     }
 
@@ -893,9 +902,8 @@ namespace Dune
     mutable Allocator allocator_;
     mutable std::vector< LevelIndexSet * > levelIndexSets_;
     mutable LeafIndexSet *leafIndexSet_;
-
-    GlobalIdSet globalIdSet_;
-    LocalIdSet localIdSet_;
+    mutable GlobalIdSet *globalIdSet_;
+    mutable LocalIdSet *localIdSet_;
   };
 
 
