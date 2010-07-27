@@ -93,23 +93,23 @@ namespace Dune
     {
       static const int codimension = HostEntity::codimension;
       typedef typename Traits::template Codim< codimension >::Entity Entity;
-      typedef MakeableInterfaceObject< Entity > EntityWrapper;
-      typedef typename EntityWrapper::ImplementationType EntityImpl;
+      typedef MakeableInterfaceObject< Entity > MakeableEntity;
+      typedef typename MakeableEntity::ImplementationType EntityImpl;
 
       template< bool >
       struct CreateReal
       {
-        static EntityWrapper
+        static MakeableEntity
         apply ( const Grid &grid, const HostEntity &hostEntity )
         {
-          return EntityWrapper( EntityImpl( grid, hostEntity ) );
+          return MakeableEntity( EntityImpl( grid, hostEntity ) );
         }
       };
 
       template< bool >
       struct CreateFake
       {
-        static EntityWrapper
+        static MakeableEntity
         apply ( const Grid &grid, const HostEntity &hostEntity )
         {
           DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
@@ -137,7 +137,7 @@ namespace Dune
       }
 
     private:
-      EntityWrapper *entity_;
+      MakeableEntity *entity_;
     };
 
   }

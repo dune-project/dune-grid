@@ -111,8 +111,8 @@ namespace Dune
       typedef typename Traits::HostElement HostElement;
 
     private:
-      typedef MakeableInterfaceObject< Entity > EntityWrapper;
-      typedef typename EntityWrapper::ImplementationType EntityImpl;
+      typedef MakeableInterfaceObject< Entity > MakeableEntity;
+      typedef typename MakeableEntity::ImplementationType EntityImpl;
 
     public:
       EntityPointer ( const Grid &grid, const HostEntityIterator &hostEntityIterator )
@@ -174,7 +174,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( entity_ == 0 )
-          entity_ = grid().allocator().create( EntityWrapper( EntityImpl( grid(), *hostIterator() ) ) );
+          entity_ = grid().allocator().create( MakeableEntity( EntityImpl( grid(), *hostIterator() ) ) );
         return *entity_;
       }
 
@@ -211,7 +211,7 @@ namespace Dune
 
     private:
       const Grid *grid_;
-      mutable EntityWrapper *entity_;
+      mutable MakeableEntity *entity_;
 
     protected:
       HostEntityIterator hostEntityIterator_;
@@ -248,8 +248,8 @@ namespace Dune
       typedef typename Traits::HostElement HostElement;
 
     private:
-      typedef MakeableInterfaceObject< Entity > EntityWrapper;
-      typedef typename EntityWrapper::ImplementationType EntityImpl;
+      typedef MakeableInterfaceObject< Entity > MakeableEntity;
+      typedef typename MakeableEntity::ImplementationType EntityImpl;
 
     public:
       EntityPointer ( const Grid &grid,
@@ -342,7 +342,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( entity_ == 0 )
-          entity_ = grid().allocator().create( EntityWrapper( EntityImpl( grid(), *hostElementIterator(), subEntity_ ) ) );
+          entity_ = grid().allocator().create( MakeableEntity( EntityImpl( grid(), *hostElementIterator(), subEntity_ ) ) );
         return *entity_;
       }
 
@@ -379,7 +379,7 @@ namespace Dune
 
     private:
       const Grid *grid_;
-      mutable EntityWrapper *entity_;
+      mutable MakeableEntity *entity_;
 
     protected:
       int subEntity_;
