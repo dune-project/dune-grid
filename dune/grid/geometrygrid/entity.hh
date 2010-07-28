@@ -49,6 +49,20 @@ namespace Dune
 
 
 
+    // External Forward Declarations
+    // -----------------------------
+
+    template< class Grid >
+    class LevelIntersectionIterator;
+
+    template< class Grid >
+    class LeafIntersectionIterator;
+
+    template< class Grid >
+    class HierarchicIterator;
+
+
+
     // EntityBase (real)
     // -----------------
 
@@ -673,10 +687,6 @@ namespace Dune
         : Base( grid, hostEntity )
       {}
 
-      Entity ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : Base( grid, hostElement, subEntity )
-      {}
-
       template< int codim >
       int count () const
       {
@@ -687,52 +697,32 @@ namespace Dune
       typename Grid::template Codim< codim >::EntityPointer
       subEntity ( int i ) const
       {
-        typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
-        typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
-        typedef typename MakeableEntityPointer::ImplementationType EntityPointerImpl;
-
-        EntityPointerImpl impl( grid(), hostEntity(), i );
-        return MakeableEntityPointer( impl );
+        typedef typename Traits::template Codim< codim >::EntityPointerImpl EntityPointerImpl;
+        return EntityPointerImpl( grid(), hostEntity(), i );
       }
 
       LevelIntersectionIterator ilevelbegin () const
       {
-        typedef MakeableInterfaceObject< LevelIntersectionIterator >
-        MakeableLevelIntersectionIterator;
-        typedef typename MakeableLevelIntersectionIterator :: ImplementationType
-        LevelIntersectionIteratorImpl;
-        LevelIntersectionIteratorImpl impl( *this, hostEntity().ilevelbegin() );
-        return MakeableLevelIntersectionIterator( impl );
+        typedef GeoGrid::LevelIntersectionIterator< Grid > LevelIntersectionIteratorImpl;
+        return LevelIntersectionIteratorImpl( *this, hostEntity().ilevelbegin() );
       }
 
       LevelIntersectionIterator ilevelend () const
       {
-        typedef MakeableInterfaceObject< LevelIntersectionIterator >
-        MakeableLevelIntersectionIterator;
-        typedef typename MakeableLevelIntersectionIterator :: ImplementationType
-        LevelIntersectionIteratorImpl;
-        LevelIntersectionIteratorImpl impl( *this, hostEntity().ilevelend() );
-        return MakeableLevelIntersectionIterator( impl );
+        typedef GeoGrid::LevelIntersectionIterator< Grid > LevelIntersectionIteratorImpl;
+        return LevelIntersectionIteratorImpl( *this, hostEntity().ilevelend() );
       }
 
       LeafIntersectionIterator ileafbegin () const
       {
-        typedef MakeableInterfaceObject< LeafIntersectionIterator >
-        MakeableLeafIntersectionIterator;
-        typedef typename MakeableLeafIntersectionIterator :: ImplementationType
-        LeafIntersectionIteratorImpl;
-        LeafIntersectionIteratorImpl impl( *this, hostEntity().ileafbegin() );
-        return MakeableLeafIntersectionIterator( impl );
+        typedef GeoGrid::LeafIntersectionIterator< Grid > LeafIntersectionIteratorImpl;
+        return LeafIntersectionIteratorImpl( *this, hostEntity().ileafbegin() );
       }
 
       LeafIntersectionIterator ileafend () const
       {
-        typedef MakeableInterfaceObject< LeafIntersectionIterator >
-        MakeableLeafIntersectionIterator;
-        typedef typename MakeableLeafIntersectionIterator :: ImplementationType
-        LeafIntersectionIteratorImpl;
-        LeafIntersectionIteratorImpl impl( *this, hostEntity().ileafend() );
-        return MakeableLeafIntersectionIterator( impl );
+        typedef GeoGrid::LeafIntersectionIterator< Grid > LeafIntersectionIteratorImpl;
+        return LeafIntersectionIteratorImpl( *this, hostEntity().ileafend() );
       }
 
       bool hasBoundaryIntersections () const
@@ -747,9 +737,8 @@ namespace Dune
 
       EntityPointer father () const
       {
-        typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
-        typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-        return MakeableEntityPointer( EntityPointerImpl( grid(), hostEntity().father() ) );
+        typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
+        return EntityPointerImpl( grid(), hostEntity().father() );
       }
 
       bool hasFather () const
@@ -764,18 +753,14 @@ namespace Dune
 
       HierarchicIterator hbegin ( int maxLevel ) const
       {
-        typedef MakeableInterfaceObject< HierarchicIterator > MakeableIterator;
-        typedef typename MakeableIterator :: ImplementationType Impl;
-        Impl impl( grid(), hostEntity().hbegin( maxLevel ) );
-        return MakeableIterator( impl );
+        typedef GeoGrid::HierarchicIterator< Grid > HierarchicIteratorImpl;
+        return HierarchicIteratorImpl( grid(), hostEntity().hbegin( maxLevel ) );
       }
 
       HierarchicIterator hend ( int maxLevel ) const
       {
-        typedef MakeableInterfaceObject< HierarchicIterator > MakeableIterator;
-        typedef typename MakeableIterator :: ImplementationType Impl;
-        Impl impl( grid(), hostEntity().hend( maxLevel ) );
-        return MakeableIterator( impl );
+        typedef GeoGrid::HierarchicIterator< Grid > HierarchicIteratorImpl;
+        return HierarchicIteratorImpl( grid(), hostEntity().hend( maxLevel ) );
       }
 
       bool isRegular () const
