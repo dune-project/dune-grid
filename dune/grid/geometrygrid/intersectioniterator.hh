@@ -34,25 +34,24 @@ namespace Dune
     {
       typedef typename Traits::HostIntersectionIterator HostIntersectionIterator;
 
+      typedef typename Traits::GridTraits GridTraits;
+
     public:
       typedef typename Traits::Intersection Intersection;
-      typedef typename Traits::GridTraits::Grid Grid;
+      typedef typename GridTraits::Grid Grid;
 
-      typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
+      typedef typename GridTraits::template Codim< 0 >::EntityPointer EntityPointer;
 
     private:
       typedef typename Traits::IntersectionImpl IntersectionImpl;
 
-      EntityPointer inside_;
-      HostIntersectionIterator hostIterator_;
-      mutable Intersection *intersection_;
-      mutable char intersectionMemory_[ sizeof( Intersection ) ];
+      typedef typename GridTraits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
 
     public:
       template< class Entity >
       IntersectionIterator ( const Entity &inside,
                              const HostIntersectionIterator &hostIterator )
-        : inside_( inside.template subEntity< 0 >( 0 ) ),
+        : inside_( EntityPointerImpl( inside ) ),
           hostIterator_( hostIterator ),
           intersection_( 0 )
       {}
@@ -98,7 +97,7 @@ namespace Dune
     private:
       const Grid &grid () const
       {
-        return Grid :: getRealImplementation( inside_ ).grid();
+        return Grid::getRealImplementation( inside_ ).grid();
       }
 
       void update ()
@@ -107,6 +106,11 @@ namespace Dune
           intersection_->~Intersection();
         intersection_ = 0;
       }
+
+      EntityPointer inside_;
+      HostIntersectionIterator hostIterator_;
+      mutable Intersection *intersection_;
+      mutable char intersectionMemory_[ sizeof( Intersection ) ];
     };
 
 
