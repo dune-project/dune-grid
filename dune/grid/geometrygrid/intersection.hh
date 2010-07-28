@@ -53,6 +53,8 @@ namespace Dune
       typedef typename Traits::template Codim< 1 >::Geometry Geometry;
       typedef typename Traits::template Codim< 1 >::LocalGeometry LocalGeometry;
 
+      typedef typename Traits::template Codim< 0 >::Geometry ElementGeometry;
+
     private:
       typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::IntersectionCoordVector CoordVector;
 
@@ -64,23 +66,25 @@ namespace Dune
       typedef typename Traits::IntersectionNumbering Numbering;
 
     public:
-      Intersection ( const EntityPointer &inside, const HostIntersection &hostIntersection )
-        : inside_( &inside ),
+      Intersection ( const Grid &grid, const ElementGeometry &insideGeo, const HostIntersection &hostIntersection )
+        : grid_( &grid ),
+          insideGeo_( Grid::getRealImplementation( insideGeo ) ),
           hostIntersection_( &hostIntersection ),
-          numbering_( grid().numbering()[ hostIntersection ] ),
-          geo_( GeometryImpl( grid().allocator() ) )
+          numbering_( grid.numbering()[ hostIntersection ] ),
+          geo_( GeometryImpl( grid.allocator() ) )
       {}
 
       Intersection ( const Intersection &other )
-        : inside_( other.inside_ ),
+        : grid_( other.grid_ ),
+          insideGeo_( Grid::getRealImplementation( other.insideGeo_ ) ),
           hostIntersection_( other.hostIntersection_ ),
           numbering_( other.numbering_ ),
-          geo_( GeometryImpl( grid().allocator() ) )
+          geo_( Grid::getRealImplementation( other.geo_ ) )
       {}
 
-      const EntityPointer &inside () const
+      EntityPointer inside () const
       {
-        return *inside_;
+        return EntityPointerImpl( grid(), hostIntersection().inside() );
       }
 
       EntityPointer outside () const
@@ -206,7 +210,7 @@ namespace Dune
     protected:
       const Grid &grid () const
       {
-        return Grid::getRealImplementation( inside() ).grid();
+        return *grid_;
       }
 
       bool isValid () const
@@ -220,12 +224,13 @@ namespace Dune
       }
 
     private:
-      const typename Entity::Geometry &insideGeometry () const
+      const ElementGeometry &insideGeometry () const
       {
-        return inside()->geometry();
+        return insideGeo_;
       }
 
-      const EntityPointer *inside_;
+      const Grid *grid_;
+      ElementGeometry insideGeo_;
       const HostIntersection *hostIntersection_;
       Numbering numbering_;
       mutable MakeableGeometry geo_;
@@ -247,12 +252,11 @@ namespace Dune
 
       typedef Intersection< const Grid, HostIntersection > Base;
 
-      typedef typename Base::EntityPointer EntityPointer;
-
     public:
-      LeafIntersection ( const EntityPointer &inside,
-                         const HostIntersection &hostIntersection )
-        : Base( inside, hostIntersection )
+      typedef typename Base::ElementGeometry ElementGeometry;
+
+      LeafIntersection ( const Grid &grid, const ElementGeometry &insideGeo, const HostIntersection &hostIntersection )
+        : Base( grid, insideGeo, hostIntersection )
       {}
     };
 
@@ -272,12 +276,11 @@ namespace Dune
 
       typedef Intersection< const Grid, HostIntersection > Base;
 
-      typedef typename Base::EntityPointer EntityPointer;
-
     public:
-      LevelIntersection ( const EntityPointer &inside,
-                          const HostIntersection &hostIntersection )
-        : Base( inside, hostIntersection )
+      typedef typename Base::ElementGeometry ElementGeometry;
+
+      LevelIntersection ( const Grid &grid, const ElementGeometry &insideGeo, const HostIntersection &hostIntersection )
+        : Base( grid, insideGeo, hostIntersection )
       {}
     };
 

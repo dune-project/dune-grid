@@ -46,25 +46,29 @@ namespace Dune
       typedef typename Traits::IntersectionImpl IntersectionImpl;
 
       typedef typename GridTraits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
+      typedef typename GridTraits::template Codim< 0 >::Geometry ElementGeometry;
 
     public:
       template< class Entity >
       IntersectionIterator ( const Entity &inside,
                              const HostIntersectionIterator &hostIterator )
-        : inside_( EntityPointerImpl( inside ) ),
+        : grid_( &inside.grid() ),
+          insideGeo_( Grid::getRealImplementation( inside.geometry() ) ),
           hostIterator_( hostIterator ),
           intersection_( 0 )
       {}
 
       IntersectionIterator  ( const IntersectionIterator &other )
-        : inside_( other.inside_ ),
+        : grid_( other.grid_ ),
+          insideGeo_( Grid::getRealImplementation( other.insideGeo_ ) ),
           hostIterator_( other.hostIterator_ ),
           intersection_( 0 )
       {}
 
       IntersectionIterator &operator= ( const IntersectionIterator &other )
       {
-        inside_ = other.inside_;
+        grid_ = other.grid_;
+        Grid::getRealImplementation( insideGeo_ ) = Grid::getRealImplementation( other.insideGeo_ );
         hostIterator_ = other.hostIterator_;
         update();
         return *this;
@@ -90,14 +94,14 @@ namespace Dune
       const Intersection &dereference () const
       {
         if( intersection_ == 0 )
-          intersection_ = new( &intersectionMemory_ )Intersection( IntersectionImpl( inside_, *hostIterator_ ) );
+          intersection_ = new( &intersectionMemory_ )Intersection( IntersectionImpl( grid(), insideGeo_, *hostIterator_ ) );
         return *intersection_;
       }
 
     private:
       const Grid &grid () const
       {
-        return Grid::getRealImplementation( inside_ ).grid();
+        return *grid_;
       }
 
       void update ()
@@ -107,7 +111,8 @@ namespace Dune
         intersection_ = 0;
       }
 
-      EntityPointer inside_;
+      const Grid *grid_;
+      ElementGeometry insideGeo_;
       HostIntersectionIterator hostIterator_;
       mutable Intersection *intersection_;
       mutable char intersectionMemory_[ sizeof( Intersection ) ];
