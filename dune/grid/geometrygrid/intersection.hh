@@ -56,6 +56,8 @@ namespace Dune
     private:
       typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::IntersectionCoordVector CoordVector;
 
+      typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
+
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
 
@@ -83,9 +85,7 @@ namespace Dune
 
       EntityPointer outside () const
       {
-        typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
-        typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-        return MakeableEntityPointer( EntityPointerImpl( grid(), hostIntersection().outside() ) );
+        return EntityPointerImpl( grid(), hostIntersection().outside() );
       }
 
       bool boundary () const
@@ -129,7 +129,7 @@ namespace Dune
         if( !geo )
         {
           const LocalGeometry &localGeo = geometryInInside();
-          CoordVector coords( inside()->geometry(), localGeo );
+          CoordVector coords( insideGeometry(), localGeo );
           geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
@@ -161,7 +161,7 @@ namespace Dune
       integrationOuterNormal ( const FieldVector< ctype, dimension-1 > &local ) const
       {
         typedef typename Grid::template Codim< 0 >::Geometry Geometry;
-        const Geometry &geo = inside()->geometry();
+        const Geometry &geo = insideGeometry();
 
         const GenericReferenceElement< ctype, dimension > &refElement
           = GenericReferenceElements< ctype, dimension>::general( geo.type() );
@@ -220,6 +220,11 @@ namespace Dune
       }
 
     private:
+      const typename Entity::Geometry &insideGeometry () const
+      {
+        return inside()->geometry();
+      }
+
       const EntityPointer *inside_;
       const HostIntersection *hostIntersection_;
       Numbering numbering_;
