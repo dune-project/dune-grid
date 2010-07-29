@@ -52,33 +52,9 @@ namespace Dune
       template< class Entity >
       IntersectionIterator ( const Entity &inside,
                              const HostIntersectionIterator &hostIterator )
-        : grid_( &inside.grid() ),
-          insideGeo_( Grid::getRealImplementation( inside.geometry() ) ),
-          hostIterator_( hostIterator ),
-          intersection_( 0 )
+        : hostIterator_( hostIterator ),
+          intersection_( IntersectionImpl( inside.grid(), inside.geometry() ) )
       {}
-
-      IntersectionIterator  ( const IntersectionIterator &other )
-        : grid_( other.grid_ ),
-          insideGeo_( Grid::getRealImplementation( other.insideGeo_ ) ),
-          hostIterator_( other.hostIterator_ ),
-          intersection_( 0 )
-      {}
-
-      IntersectionIterator &operator= ( const IntersectionIterator &other )
-      {
-        grid_ = other.grid_;
-        Grid::getRealImplementation( insideGeo_ ) = Grid::getRealImplementation( other.insideGeo_ );
-        hostIterator_ = other.hostIterator_;
-        update();
-        return *this;
-      }
-
-      ~IntersectionIterator ()
-      {
-        if( intersection_ != 0 )
-          intersection_->~Intersection();
-      }
 
       bool equals ( const IntersectionIterator &other ) const
       {
@@ -88,34 +64,24 @@ namespace Dune
       void increment ()
       {
         ++hostIterator_;
-        update();
+        intersectionImpl().invalidate();
       }
 
       const Intersection &dereference () const
       {
-        if( intersection_ == 0 )
-          intersection_ = new( &intersectionMemory_ )Intersection( IntersectionImpl( grid(), insideGeo_, *hostIterator_ ) );
-        return *intersection_;
+        if( !intersectionImpl() )
+          intersectionImpl().initialize( *hostIterator_ );
+        return intersection_;
       }
 
     private:
-      const Grid &grid () const
+      IntersectionImpl &intersectionImpl () const
       {
-        return *grid_;
+        return Grid::getRealImplementation( intersection_ );
       }
 
-      void update ()
-      {
-        if( intersection_ != 0 )
-          intersection_->~Intersection();
-        intersection_ = 0;
-      }
-
-      const Grid *grid_;
-      ElementGeometry insideGeo_;
       HostIntersectionIterator hostIterator_;
-      mutable Intersection *intersection_;
-      mutable char intersectionMemory_[ sizeof( Intersection ) ];
+      mutable Intersection intersection_;
     };
 
 

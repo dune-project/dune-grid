@@ -66,21 +66,29 @@ namespace Dune
       typedef typename Traits::IntersectionNumbering Numbering;
 
     public:
-      Intersection ( const Grid &grid, const ElementGeometry &insideGeo, const HostIntersection &hostIntersection )
+      Intersection ( const Grid &grid, const ElementGeometry &insideGeo )
         : grid_( &grid ),
           insideGeo_( Grid::getRealImplementation( insideGeo ) ),
-          hostIntersection_( &hostIntersection ),
-          numbering_( grid.numbering()[ hostIntersection ] ),
+          hostIntersection_( 0 ),
           geo_( GeometryImpl( grid.allocator() ) )
       {}
 
       Intersection ( const Intersection &other )
         : grid_( other.grid_ ),
           insideGeo_( Grid::getRealImplementation( other.insideGeo_ ) ),
-          hostIntersection_( other.hostIntersection_ ),
-          numbering_( other.numbering_ ),
-          geo_( Grid::getRealImplementation( other.geo_ ) )
+          hostIntersection_( 0 ),
+          geo_( GeometryImpl( grid().allocator() ) )
       {}
+
+      const Intersection &operator= ( const Intersection &other )
+      {
+        grid_ = other.grid_;
+        Grid::getRealImplementation( insideGeo_ ) = Grid::getRealImplementation( other.insideGeo_ );
+        invalidate();
+        return *this;
+      }
+
+      operator bool () const { return bool( hostIntersection_ ); }
 
       EntityPointer inside () const
       {
@@ -92,25 +100,13 @@ namespace Dune
         return EntityPointerImpl( grid(), hostIntersection().outside() );
       }
 
-      bool boundary () const
-      {
-        return hostIntersection().boundary();
-      }
+      bool boundary () const { return hostIntersection().boundary(); }
 
-      bool conforming () const
-      {
-        return hostIntersection().conforming();
-      }
+      bool conforming () const { return hostIntersection().conforming(); }
 
-      bool neighbor () const
-      {
-        return hostIntersection().neighbor();
-      }
+      bool neighbor () const { return hostIntersection().neighbor(); }
 
-      int boundaryId () const
-      {
-        return hostIntersection().boundaryId();
-      }
+      int boundaryId () const { return hostIntersection().boundaryId(); }
 
       size_t boundarySegmentIndex () const
       {
@@ -139,10 +135,7 @@ namespace Dune
         return geo_;
       }
 
-      GeometryType type () const
-      {
-        return hostIntersection().type();
-      }
+      GeometryType type () const { return hostIntersection().type(); }
 
       unsigned int topologyId () const
       {
@@ -203,31 +196,26 @@ namespace Dune
 
       const HostIntersection &hostIntersection () const
       {
-        assert( isValid() );
+        assert( *this );
         return *hostIntersection_;
       }
 
-    protected:
-      const Grid &grid () const
-      {
-        return *grid_;
-      }
-
-      bool isValid () const
-      {
-        return (hostIntersection_ != 0);
-      }
+      const Grid &grid () const { return *grid_; }
 
       void invalidate ()
       {
         hostIntersection_ = 0;
+        Grid::getRealImplementation( geo_ ) = GeometryImpl( grid().allocator() );
+      }
+
+      void initialize ( const HostIntersection &hostIntersection )
+      {
+        assert( !(*this) );
+        hostIntersection_ = &hostIntersection;
       }
 
     private:
-      const ElementGeometry &insideGeometry () const
-      {
-        return insideGeo_;
-      }
+      const ElementGeometry &insideGeometry () const { return insideGeo_; }
 
       const Grid *grid_;
       ElementGeometry insideGeo_;
@@ -255,8 +243,8 @@ namespace Dune
     public:
       typedef typename Base::ElementGeometry ElementGeometry;
 
-      LeafIntersection ( const Grid &grid, const ElementGeometry &insideGeo, const HostIntersection &hostIntersection )
-        : Base( grid, insideGeo, hostIntersection )
+      LeafIntersection ( const Grid &grid, const ElementGeometry &insideGeo )
+        : Base( grid, insideGeo )
       {}
     };
 
@@ -279,8 +267,8 @@ namespace Dune
     public:
       typedef typename Base::ElementGeometry ElementGeometry;
 
-      LevelIntersection ( const Grid &grid, const ElementGeometry &insideGeo, const HostIntersection &hostIntersection )
-        : Base( grid, insideGeo, hostIntersection )
+      LevelIntersection ( const Grid &grid, const ElementGeometry &insideGeo )
+        : Base( grid, insideGeo )
       {}
     };
 
