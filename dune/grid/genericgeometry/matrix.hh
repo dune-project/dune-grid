@@ -364,17 +364,27 @@ namespace Dune
       }
 
       /** \brief Compute the square root of the determinant of A times A transposed
-
-         This is the volume element for an embedded submanifold and needed
-         to implement the method integrationElement().
+       *
+       *  This is the volume element for an embedded submanifold and needed to
+       *  implement the method integrationElement().
        */
       template< int m, int n >
       static FieldType
-      sqrtDetAAT ( const typename Traits :: template Matrix< m, n > :: type &A )
+      sqrtDetAAT ( const typename Traits::template Matrix< m, n >::type &A )
       {
         if( (n == 2) && (m == 2) )
+        {
           // Special implementation for 2x2 matrices: faster and more stable
           return std::abs( A[ 0 ][ 0 ]*A[ 1 ][ 1 ] - A[ 1 ][ 0 ]*A[ 0 ][ 1 ] );
+        }
+        else if( (n == 3) && (m == 3) )
+        {
+          // Special implementation for 3x3 matrices
+          const FieldType v0 = A[ 0 ][ 1 ] * A[ 1 ][ 2 ] - A[ 1 ][ 1 ] * A[ 0 ][ 2 ];
+          const FieldType v1 = A[ 0 ][ 2 ] * A[ 1 ][ 0 ] - A[ 1 ][ 2 ] * A[ 0 ][ 0 ];
+          const FieldType v2 = A[ 0 ][ 0 ] * A[ 1 ][ 1 ] - A[ 1 ][ 0 ] * A[ 0 ][ 1 ];
+          return std::abs( v0 * A[ 2 ][ 0 ] + v1 * A[ 2 ][ 1 ] + v2 * A[ 2 ][ 2 ] );
+        }
         else if( n >= m )
         {
           // General case
