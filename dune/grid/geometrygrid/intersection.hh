@@ -63,6 +63,8 @@ namespace Dune
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry::ImplementationType GeometryImpl;
 
+      typedef typename MakeableInterfaceObject< ElementGeometry >::ImplementationType ElementGeometryImpl;
+
       typedef typename Traits::IntersectionNumbering Numbering;
 
     public:
@@ -157,19 +159,19 @@ namespace Dune
       FieldVector< ctype, dimensionworld >
       integrationOuterNormal ( const FieldVector< ctype, dimension-1 > &local ) const
       {
-        typedef typename Grid::template Codim< 0 >::Geometry Geometry;
-        const Geometry &geo = insideGeometry();
+        const ElementGeometryImpl &geo = Grid::getRealImplementation( insideGeometry() );
 
         const GenericReferenceElement< ctype, dimension > &refElement
           = GenericReferenceElements< ctype, dimension>::general( geo.type() );
 
         FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
-        const typename Geometry::Jacobian &jit = geo.jacobianInverseTransposed( x );
+        const typename ElementGeometryImpl::JacobianInverseTransposed &jit = geo.jacobianInverseTransposed( x );
         const FieldVector< ctype, dimension > &refNormal = refElement.volumeOuterNormal( indexInInside() );
 
         FieldVector< ctype, dimensionworld > normal;
         jit.mv( refNormal, normal );
-        normal *= geo.integrationElement( x );
+        normal *= ctype( 1 ) / jit.det();
+        //normal *= geo.integrationElement( x );
         return normal;
       }
 
