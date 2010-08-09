@@ -95,7 +95,7 @@ AC_DEFUN([DUNE_PATH_UG],[
         direct_UG_LIBS="-L$UG_LIB_PATH -lugS2 -lugS3 -ldevS"
       fi
 
-      # backup CPPFLAGS so I can add an additional flag just for AC_CHECk_HEADER
+      # backup CPPFLAGS so I can add an additional flag just for AC_CHECK_HEADER
       CPPFLAGS_BACKUP="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -D_2"
 
