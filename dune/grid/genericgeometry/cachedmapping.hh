@@ -220,7 +220,7 @@ namespace Dune
       ctype det () const
       {
         // integrationElement is always computed with jacobianInverseTransposed
-        return ctype( 1 ) / storage().integrationElement_;
+        return ctype( 1 ) / storage().integrationElement;
       }
 
     private:
