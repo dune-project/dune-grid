@@ -38,6 +38,7 @@ AC_CONFIG_FILES([Makefile
     doc/doxygen/Makefile
     doc/doxygen/Doxyfile
     doc/grids/Makefile
+    doc/grids/amc/Makefile
     doc/grids/amiramesh/Makefile
     doc/grids/dgf/Makefile
     doc/grids/gridfactory/Makefile
