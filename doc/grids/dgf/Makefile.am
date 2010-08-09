@@ -1,4 +1,8 @@
-GRIDS =
+GRIDS = grid2Y.dgf \
+        grid3A.dgf \
+        grid3Y.dgf \
+        octahedron.dgf \
+        unstr_cube.dgf
 
 dgfdir=$(includedir)/dune/doc/grids/dgf
 dgf_DATA = $(GRIDS)
