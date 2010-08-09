@@ -17,7 +17,13 @@ m4_if($#,1,[],[DUNE_DEFINE_GRIDTYPE_INCLUDE(m4_shift($@))])dnl
 #
 # Example: DUNE_DEFINE_GRIDTYPE([YASPGRID],[GRIDDIM == WORLDDIM],[Dune::YaspGrid< dimgrid >],[dune/grid/yaspgrid.hh],[dune/grid/io/file/dgfparser/dgfyasp.hh])
 AC_DEFUN([DUNE_DEFINE_GRIDTYPE],[AH_BOTTOM(dnl
-[#if defined $1 && ! defined USED_$1_GRIDTYPE
+[/* add GRIDTYPE typedef for grid implementation $3:
+    defining $1 during compilation typedefs this grid implementation as GridType
+    in namespace Dune::GridSelector;
+    also integer constants dimegrid and dimworld are set in this namespace.
+    The required headers for this grid implementation are also included.
+  */
+ #if defined $1 && ! defined USED_$1_GRIDTYPE
   #if HAVE_GRIDTYPE
    #error "Ambiguous definition of GRIDTYPE."
   #endif 
