@@ -301,11 +301,10 @@ namespace Dune
 
       typedef typename SelectType< Traits :: hybrid, Hybrid<true>, NonHybrid<false> > :: Type :: Mapping
       ElementMapping;
-      typedef GenericGeometry :: MappingProvider< ElementMapping, codimension >
-      MappingProvider;
+      typedef GenericGeometry::MappingProvider< ElementMapping, codimension > MappingProvider;
 
     protected:
-      typedef typename MappingProvider :: Mapping Mapping;
+      typedef typename MappingProvider::Mapping Mapping;
 
     public:
       /** \brief Type used for Jacobian matrices */
@@ -330,6 +329,26 @@ namespace Dune
       BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
         : allocator_( allocator ),
           mapping_( MappingProvider::mapping( topologyId, coords, allocator_ ) )
+      {
+        mapping_->referenceCount = 1;
+      }
+
+      /** \brief constructor
+       *
+       *  \param[in]  topologyId  topology id of the desired geometry
+       *  \param[in]  coords      coordinates
+       *  \param[in]  affine      flag whether the mapping is affine
+       *  \param[in]  allocator   allocator to use when allocating the mapping
+       *                          (optional, if the allocator can be default
+       *                          constructed)
+       *
+       *  \note It is assume that the flag affine is true if and only if the
+       *        mapping is affine.
+       */
+      template< class CoordVector >
+      BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
+        : allocator_( allocator ),
+          mapping_( MappingProvider::mapping( topologyId, std::pair< const CoordVector &, bool >( coords, affine ), allocator_ ) )
       {
         mapping_->referenceCount = 1;
       }
@@ -561,10 +580,15 @@ namespace Dune
         : Base( topologyId, coords, allocator )
       {}
 
+      template< class CoordVector >
+      Geometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
+        : Base( topologyId, coords, affine, allocator )
+      {}
+
       /** \brief Copy constructor from another geometry */
       template< class Geo >
       explicit Geometry ( const Geo &geo, const Allocator &allocator = Allocator() )
-        : Base( topologyId( geo.type() ), geo, allocator )
+        : Base( topologyId( geo.type() ), geo, geo.affine(), allocator )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
@@ -619,10 +643,15 @@ namespace Dune
         : Base( topologyId, coords, allocator )
       {}
 
+      template< class CoordVector >
+      LocalGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
+        : Base( topologyId, coords, affine, allocator )
+      {}
+
       /** \brief Copy constructor from another geometry */
       template< class Geo >
       explicit LocalGeometry ( const Geo &geo, const Allocator &allocator = Allocator() )
-        : Base( topologyId( geo.type() ), geo, allocator )
+        : Base( topologyId( geo.type() ), geo, geo.affine(), allocator )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
@@ -642,4 +671,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GENERICGEOMETRY_GEOMETRY_HH

@@ -302,17 +302,15 @@ namespace Dune
           storage().affine = true;
         else
           computeJacobianTransposed( baryCenter() );
+        preCompute();
+      }
 
-        if( affine() )
-        {
-          if( (Caching::evaluateJacobianTransposed == PreCompute) && !jacobianTransposed() )
-            computeJacobianTransposed( baryCenter() );
-
-          if( Caching::evaluateJacobianInverseTransposed == PreCompute )
-            computeJacobianInverseTransposed( baryCenter() );
-          else if( Caching::evaluateIntegrationElement == PreCompute )
-            jacobianTransposed().det();
-        }
+      template< class CoordVector >
+      explicit CachedMapping ( const std::pair< const CoordVector &, bool > &coords )
+        : mapping_( coords.first )
+      {
+        storage().affine = coords.second;
+        preCompute();
       }
 
       /** \brief obtain topology id of the corresponding reference element */
@@ -533,6 +531,21 @@ namespace Dune
       const JacobianInverseTransposed &jacobianInverseTransposed () const
       {
         return jacobianInverseTransposed_;
+      }
+
+      void preCompute ()
+      {
+        assert( affine() == mapping_.jacobianTransposed( baryCenter(), storage().jacobianTransposed ) );
+        if( !affine() )
+          return;
+
+        if( (Caching::evaluateJacobianTransposed == PreCompute) && !jacobianTransposed() )
+          computeJacobianTransposed( baryCenter() );
+
+        if( Caching::evaluateJacobianInverseTransposed == PreCompute )
+          computeJacobianInverseTransposed( baryCenter() );
+        else if( Caching::evaluateIntegrationElement == PreCompute )
+          jacobianTransposed().det();
       }
 
       void computeJacobianTransposed ( const LocalCoordinate &x ) const
