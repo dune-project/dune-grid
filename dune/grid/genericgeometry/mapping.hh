@@ -41,8 +41,8 @@ namespace Dune
       static const unsigned int dimWorld = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
-      typedef typename Traits :: LocalCoordType LocalCoordType;
-      typedef typename Traits :: GlobalCoordType GlobalCoordType;
+      typedef typename Traits :: LocalCoordinate LocalCoordinate;
+      typedef typename Traits :: GlobalCoordinate GlobalCoordinate;
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
@@ -73,27 +73,27 @@ namespace Dune
         : impl_( implementation )
       {}
 
-      const GlobalCoordType &corner ( int i ) const
+      const GlobalCoordinate &corner ( int i ) const
       {
         return implementation().corner( i );
       }
 
-      void global ( const LocalCoordType &x, GlobalCoordType &y ) const
+      void global ( const LocalCoordinate &x, GlobalCoordinate &y ) const
       {
         implementation().global( x, y );
       }
 
-      void local ( const GlobalCoordType &y, LocalCoordType &x ) const
+      void local ( const GlobalCoordinate &y, LocalCoordinate &x ) const
       {
         const FieldType epsilon = CoordTraits::epsilon();
         x = ReferenceElement::template baryCenter< 0 >( 0 );
-        LocalCoordType dx;
+        LocalCoordinate dx;
         do
         {
           // DF^n dx^n = F^n, x^{n+1} -= dx^n
           JacobianTransposedType JT;
           jacobianTransposed( x, JT );
-          GlobalCoordType z;
+          GlobalCoordinate z;
           global( x, z );
           z -= y;
           MatrixHelper::template xTRightInvA< dimension, dimWorld >( JT, z, dx );
@@ -101,21 +101,21 @@ namespace Dune
         } while( dx.two_norm2() > epsilon*epsilon );
       }
 
-      bool jacobianTransposed ( const LocalCoordType &x,
+      bool jacobianTransposed ( const LocalCoordinate &x,
                                 JacobianTransposedType &JT ) const
       {
         return implementation().jacobianTransposed( x, JT );
       }
 
       FieldType
-      jacobianInverseTransposed ( const LocalCoordType &x, JacobianType &JTInv ) const
+      jacobianInverseTransposed ( const LocalCoordinate &x, JacobianType &JTInv ) const
       {
         JacobianTransposedType JT;
         jacobianTransposed( x, JT );
         return MatrixHelper :: template rightInvA< dimension, dimWorld >( JT, JTInv );
       }
 
-      FieldType integrationElement ( const LocalCoordType &x ) const
+      FieldType integrationElement ( const LocalCoordinate &x ) const
       {
         JacobianTransposedType JT;
         jacobianTransposed( x, JT );

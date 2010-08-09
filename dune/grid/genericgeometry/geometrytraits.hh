@@ -61,8 +61,8 @@ namespace Dune
       static const unsigned int dimWorld = dimW;
 
       typedef typename CoordTraits :: ctype FieldType;
-      typedef typename CoordTraits :: template Vector< dimension > :: type LocalCoordType;
-      typedef typename CoordTraits :: template Vector< dimWorld > :: type GlobalCoordType;
+      typedef typename CoordTraits :: template Vector< dimension > :: type LocalCoordinate;
+      typedef typename CoordTraits :: template Vector< dimWorld > :: type GlobalCoordinate;
 
       typedef typename CoordTraits :: template Matrix< dimWorld, dimension > :: type
       JacobianType;
@@ -231,7 +231,7 @@ namespace Dune
      *    struct Mapping
      *    {
      *      typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
-     *      typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
+     *      typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordinate >
      *        CornerStorage;
      *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
      *    };
@@ -298,7 +298,7 @@ namespace Dune
      *    struct Mapping
      *    {
      *      typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
-     *      typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
+     *      typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordinate >
      *        CornerStorage;
      *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
      *    };

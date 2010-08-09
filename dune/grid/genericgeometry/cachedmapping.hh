@@ -51,8 +51,8 @@ namespace Dune
       static const unsigned int dimWorld = Traits::dimWorld;
 
       typedef typename Traits::FieldType FieldType;
-      typedef typename Traits::LocalCoordType LocalCoordType;
-      typedef typename Traits::GlobalCoordType GlobalCoordType;
+      typedef typename Traits::LocalCoordinate LocalCoordinate;
+      typedef typename Traits::GlobalCoordinate GlobalCoordinate;
       typedef typename Traits::JacobianType JacobianType;
       typedef typename Traits::JacobianTransposedType JacobianTransposedType;
 
@@ -105,7 +105,7 @@ namespace Dune
       }
 
       // do we still require this mehtod?
-      const GlobalCoordType &corner ( int i ) const
+      const GlobalCoordinate &corner ( int i ) const
       {
         return mapping_.corner( i );
       }
@@ -121,7 +121,7 @@ namespace Dune
        *  \note Currently, this method is defined to return the image
        *        of the reference element's barycenter.
        */
-      GlobalCoordType center () const
+      GlobalCoordinate center () const
       {
         return global( ReferenceElement::template baryCenter< 0 >( 0 ) );
       }
@@ -133,7 +133,7 @@ namespace Dune
        *  \note Historically, this method was part of the geometry interface.
        *        It is still required for the GenericReferenceElement.
        */
-      static bool checkInside ( const LocalCoordType &x )
+      static bool checkInside ( const LocalCoordinate &x )
       {
         return ReferenceElement::checkInside( x );
       }
@@ -150,9 +150,9 @@ namespace Dune
        *
        *  \returns corresponding global coordinate
        */
-      GlobalCoordType global ( const LocalCoordType &x ) const
+      GlobalCoordinate global ( const LocalCoordinate &x ) const
       {
-        GlobalCoordType y;
+        GlobalCoordinate y;
         if( jacobianTransposedComputed_ )
         {
           MatrixHelper::template ATx< dimension, dimWorld >( jacobianTransposed_, x, y );
@@ -174,18 +174,18 @@ namespace Dune
        *  (global( x ) - y).two_norm()
        *  \endcode
        */
-      LocalCoordType local ( const GlobalCoordType &y ) const
+      LocalCoordinate local ( const GlobalCoordinate &y ) const
       {
-        LocalCoordType x;
+        LocalCoordinate x;
         if( jacobianInverseTransposedComputed_ )
         {
-          GlobalCoordType z = y - corner( 0 );
+          GlobalCoordinate z = y - corner( 0 );
           MatrixHelper :: template ATx< dimWorld, dimension >( jacobianInverseTransposed_, z, x );
         }
         else if( affine() )
         {
           const JacobianTransposedType &JT = jacobianTransposed( baryCenter() );
-          GlobalCoordType z = y - corner( 0 );
+          GlobalCoordinate z = y - corner( 0 );
           MatrixHelper :: template xTRightInvA< dimension, dimWorld >( JT, z, x );
         }
         else
@@ -202,7 +202,7 @@ namespace Dune
        *  \note The returned reference is reused on the next call to
        *        JacobianTransposed, destroying the previous value.
        */
-      const JacobianTransposedType &jacobianTransposed ( const LocalCoordType &x ) const
+      const JacobianTransposedType &jacobianTransposed ( const LocalCoordinate &x ) const
       {
         const EvaluationType evaluate = Caching::evaluateJacobianTransposed;
         if( (evaluate == PreCompute) && alwaysAffine )
@@ -227,7 +227,7 @@ namespace Dune
        *        jacobianInverseTransposed before integrationElement, if both
        *        are required.
        */
-      FieldType integrationElement ( const LocalCoordType &x ) const
+      FieldType integrationElement ( const LocalCoordinate &x ) const
       {
         const EvaluationType evaluateI = Caching::evaluateIntegrationElement;
         const EvaluationType evaluateJ = Caching::evaluateJacobianInverseTransposed;
@@ -245,7 +245,7 @@ namespace Dune
        *  the Jacobian by \f$J(x)\f$, the following condition holds:
        *  \f[J^{-1}(x) J(x) = I.\f]
        */
-      const JacobianType &jacobianInverseTransposed ( const LocalCoordType &x ) const
+      const JacobianType &jacobianInverseTransposed ( const LocalCoordinate &x ) const
       {
         const EvaluationType evaluate = Caching::evaluateJacobianInverseTransposed;
         if( (evaluate == PreCompute) && alwaysAffine )
@@ -296,25 +296,25 @@ namespace Dune
       }
 
     private:
-      static const LocalCoordType &baryCenter ()
+      static const LocalCoordinate &baryCenter ()
       {
         return ReferenceElement::template baryCenter< 0 >( 0 );
       }
 
-      void computeJacobianTransposed ( const LocalCoordType &x ) const
+      void computeJacobianTransposed ( const LocalCoordinate &x ) const
       {
         affine_ = mapping_.jacobianTransposed( x, jacobianTransposed_ );
         jacobianTransposedComputed_ = affine_;
       }
 
-      void computeJacobianInverseTransposed ( const LocalCoordType &x ) const
+      void computeJacobianInverseTransposed ( const LocalCoordinate &x ) const
       {
         // jacobian is computed here instead of using the cached value or returning the jacobian
         integrationElement_ = mapping_.jacobianInverseTransposed( x, jacobianInverseTransposed_ );
         integrationElementComputed_ = jacobianInverseTransposedComputed_ = affine();
       }
 
-      void computeIntegrationElement ( const LocalCoordType &x ) const
+      void computeIntegrationElement ( const LocalCoordinate &x ) const
       {
         integrationElement_ = mapping_.integrationElement( x );
         integrationElementComputed_ = affine();

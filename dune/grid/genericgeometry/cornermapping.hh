@@ -38,14 +38,14 @@ namespace Dune
       static const unsigned int dimW = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
-      typedef typename Traits :: LocalCoordType LocalCoordType;
-      typedef typename Traits :: GlobalCoordType GlobalCoordType;
+      typedef typename Traits :: LocalCoordinate LocalCoordinate;
+      typedef typename Traits :: GlobalCoordinate GlobalCoordinate;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
       static const bool alwaysAffine = true;
 
       template< class CoordStorage >
-      static const GlobalCoordType &origin ( const CoordStorage &coords )
+      static const GlobalCoordinate &origin ( const CoordStorage &coords )
       {
         dune_static_assert( CoordStorage :: size, "Invalid offset." );
         return coords[ offset ];
@@ -53,29 +53,29 @@ namespace Dune
 
       template< class CoordStorage >
       static void phi_set ( const CoordStorage &coords,
-                            const LocalCoordType &x,
+                            const LocalCoordinate &x,
                             const FieldType &factor,
-                            GlobalCoordType &p )
+                            GlobalCoordinate &p )
       {
-        const GlobalCoordType &y = origin( coords );
+        const GlobalCoordinate &y = origin( coords );
         for( unsigned int i = 0; i < dimW; ++i )
           p[ i ] = factor * y[ i ];
       }
 
       template< class CoordStorage >
       static void phi_add ( const CoordStorage &coords,
-                            const LocalCoordType &x,
+                            const LocalCoordinate &x,
                             const FieldType &factor,
-                            GlobalCoordType &p )
+                            GlobalCoordinate &p )
       {
-        const GlobalCoordType &y = origin( coords );
+        const GlobalCoordinate &y = origin( coords );
         for( unsigned int i = 0; i < dimW; ++i )
           p[ i ] += factor * y[ i ];
       }
 
       template< class CoordStorage >
       static bool Dphi_set ( const CoordStorage &coords,
-                             const LocalCoordType &x,
+                             const LocalCoordinate &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
@@ -84,7 +84,7 @@ namespace Dune
 
       template< class CoordStorage >
       static bool Dphi_add ( const CoordStorage &coords,
-                             const LocalCoordType &x,
+                             const LocalCoordinate &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
@@ -109,23 +109,23 @@ namespace Dune
       static const unsigned int dimW = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
-      typedef typename Traits :: LocalCoordType LocalCoordType;
-      typedef typename Traits :: GlobalCoordType GlobalCoordType;
+      typedef typename Traits :: LocalCoordinate LocalCoordinate;
+      typedef typename Traits :: GlobalCoordinate GlobalCoordinate;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
       static const bool alwaysAffine = ((dim < 2) || affine);
 
       template< class CoordStorage >
-      static const GlobalCoordType &origin ( const CoordStorage &coords )
+      static const GlobalCoordinate &origin ( const CoordStorage &coords )
       {
         return BottomMapping :: origin( coords );
       }
 
       template< class CoordStorage >
       static void phi_set ( const CoordStorage &coords,
-                            const LocalCoordType &x,
+                            const LocalCoordinate &x,
                             const FieldType &factor,
-                            GlobalCoordType &p )
+                            GlobalCoordinate &p )
       {
         const FieldType xn = x[ dim-1 ];
         const FieldType cxn = FieldType( 1 ) - xn;
@@ -135,9 +135,9 @@ namespace Dune
 
       template< class CoordStorage >
       static void phi_add ( const CoordStorage &coords,
-                            const LocalCoordType &x,
+                            const LocalCoordinate &x,
                             const FieldType &factor,
-                            GlobalCoordType &p )
+                            GlobalCoordinate &p )
       {
         const FieldType xn = x[ dim-1 ];
         const FieldType cxn = FieldType( 1 ) - xn;
@@ -147,7 +147,7 @@ namespace Dune
 
       template< class CoordStorage >
       static bool Dphi_set ( const CoordStorage &coords,
-                             const LocalCoordType &x,
+                             const LocalCoordinate &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
@@ -181,7 +181,7 @@ namespace Dune
 
       template< class CoordStorage >
       static bool Dphi_add ( const CoordStorage &coords,
-                             const LocalCoordType &x,
+                             const LocalCoordinate &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
@@ -232,29 +232,29 @@ namespace Dune
       static const unsigned int dimW = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
-      typedef typename Traits :: LocalCoordType LocalCoordType;
-      typedef typename Traits :: GlobalCoordType GlobalCoordType;
+      typedef typename Traits :: LocalCoordinate LocalCoordinate;
+      typedef typename Traits :: GlobalCoordinate GlobalCoordinate;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
       static const bool alwaysAffine = (BottomMapping :: alwaysAffine || affine);
 
       template< class CoordStorage >
-      static const GlobalCoordType &origin ( const CoordStorage &coords )
+      static const GlobalCoordinate &origin ( const CoordStorage &coords )
       {
         return BottomMapping :: origin( coords );
       }
 
       template< class CoordStorage >
       static void phi_set ( const CoordStorage &coords,
-                            const LocalCoordType &x,
+                            const LocalCoordinate &x,
                             const FieldType &factor,
-                            GlobalCoordType &p )
+                            GlobalCoordinate &p )
       {
         const FieldType xn = x[ dim-1 ];
         if( alwaysAffine )
         {
-          const GlobalCoordType &top = TopMapping :: origin( coords );
-          const GlobalCoordType &bottom = BottomMapping :: origin( coords );
+          const GlobalCoordinate &top = TopMapping :: origin( coords );
+          const GlobalCoordinate &bottom = BottomMapping :: origin( coords );
 
           BottomMapping :: phi_set( coords, x, factor, p );
           for( unsigned int i = 0; i < dimW; ++i )
@@ -267,7 +267,7 @@ namespace Dune
           if( cxn > 1e-12 )
           {
             const FieldType icxn = FieldType( 1 ) / cxn;
-            LocalCoordType xb;
+            LocalCoordinate xb;
             for( unsigned int i = 0; i < dim-1; ++i )
               xb[ i ] = icxn * x[ i ];
 
@@ -278,15 +278,15 @@ namespace Dune
 
       template< class CoordStorage >
       static void phi_add ( const CoordStorage &coords,
-                            const LocalCoordType &x,
+                            const LocalCoordinate &x,
                             const FieldType &factor,
-                            GlobalCoordType &p )
+                            GlobalCoordinate &p )
       {
         const FieldType xn = x[ dim-1 ];
         if( alwaysAffine )
         {
-          const GlobalCoordType &top = TopMapping :: origin( coords );
-          const GlobalCoordType &bottom = BottomMapping :: origin( coords );
+          const GlobalCoordinate &top = TopMapping :: origin( coords );
+          const GlobalCoordinate &bottom = BottomMapping :: origin( coords );
 
           BottomMapping :: phi_add( coords, x, factor, p );
           for( unsigned int i = 0; i < dimW; ++i )
@@ -299,7 +299,7 @@ namespace Dune
           if( cxn > 1e-12 )
           {
             const FieldType icxn = FieldType( 1 ) / cxn;
-            LocalCoordType xb;
+            LocalCoordinate xb;
             for( unsigned int i = 0; i < dim-1; ++i )
               xb[ i ] = icxn * x[ i ];
 
@@ -310,16 +310,16 @@ namespace Dune
 
       template< class CoordStorage >
       static bool Dphi_set ( const CoordStorage &coords,
-                             const LocalCoordType &x,
+                             const LocalCoordinate &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
-        GlobalCoordType &q = J[ dim-1 ];
+        GlobalCoordinate &q = J[ dim-1 ];
         bool affine;
         if( alwaysAffine )
         {
-          const GlobalCoordType &top = TopMapping :: origin( coords );
-          const GlobalCoordType &bottom = BottomMapping :: origin( coords );
+          const GlobalCoordinate &top = TopMapping :: origin( coords );
+          const GlobalCoordinate &bottom = BottomMapping :: origin( coords );
 
           affine = BottomMapping :: Dphi_set( coords, x, factor, J );
           for( unsigned int i = 0; i < dimW; ++i )
@@ -330,7 +330,7 @@ namespace Dune
           const FieldType xn = x[ dim-1 ];
           const FieldType cxn = FieldType( 1 ) - xn;
           const FieldType icxn = FieldType( 1 ) / cxn;
-          LocalCoordType xb;
+          LocalCoordinate xb;
           for( unsigned int i = 0; i < dim-1; ++i )
             xb[ i ] = icxn * x[ i ];
           affine = BottomMapping :: Dphi_set( coords, xb, factor, J );
@@ -349,16 +349,16 @@ namespace Dune
 
       template< class CoordStorage >
       static bool Dphi_add ( const CoordStorage &coords,
-                             const LocalCoordType &x,
+                             const LocalCoordinate &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
-        GlobalCoordType &q = J[ dim-1 ];
+        GlobalCoordinate &q = J[ dim-1 ];
         bool affine;
         if( alwaysAffine )
         {
-          const GlobalCoordType &top = TopMapping :: origin( coords );
-          const GlobalCoordType &bottom = BottomMapping :: origin( coords );
+          const GlobalCoordinate &top = TopMapping :: origin( coords );
+          const GlobalCoordinate &bottom = BottomMapping :: origin( coords );
 
           affine = BottomMapping :: Dphi_add( coords, x, factor, J );
           for( unsigned int i = 0; i < dimW; ++i )
@@ -369,7 +369,7 @@ namespace Dune
           const FieldType xn = x[ dim-1 ];
           const FieldType cxn = FieldType( 1 ) - xn;
           const FieldType icxn = FieldType( 1 ) / cxn;
-          LocalCoordType xb;
+          LocalCoordinate xb;
           for( unsigned int i = 0; i < dim-1; ++i )
             xb[ i ] = icxn * x[ i ];
           affine = BottomMapping :: Dphi_add( coords, xb, factor, J );
@@ -395,7 +395,7 @@ namespace Dune
     template< class Mapping, unsigned int codim >
     class SubMappingCoords
     {
-      typedef typename Mapping :: GlobalCoordType GlobalCoordType;
+      typedef typename Mapping :: GlobalCoordinate GlobalCoordinate;
       typedef typename Mapping :: ReferenceElement ReferenceElement;
 
       static const unsigned int dimension = ReferenceElement :: dimension;
@@ -408,7 +408,7 @@ namespace Dune
         : mapping_( mapping ), i_( i )
       {}
 
-      const GlobalCoordType &operator[] ( unsigned int j ) const
+      const GlobalCoordinate &operator[] ( unsigned int j ) const
       {
         const unsigned int k
           = ReferenceElement :: template subNumbering< codim, dimension - codim >( i_, j );
@@ -532,8 +532,8 @@ namespace Dune
       static const unsigned int dimWorld = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
-      typedef typename Traits :: LocalCoordType LocalCoordType;
-      typedef typename Traits :: GlobalCoordType GlobalCoordType;
+      typedef typename Traits :: LocalCoordinate LocalCoordinate;
+      typedef typename Traits :: GlobalCoordinate GlobalCoordinate;
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
@@ -562,17 +562,17 @@ namespace Dune
         : coords_( coords )
       {}
 
-      const GlobalCoordType &corner ( int i ) const
+      const GlobalCoordinate &corner ( int i ) const
       {
         return coords_[ i ];
       }
 
-      void global ( const LocalCoordType &x, GlobalCoordType &y ) const
+      void global ( const LocalCoordinate &x, GlobalCoordinate &y ) const
       {
         GenericMapping :: phi_set( coords_, x, FieldType( 1 ), y );
       }
 
-      bool jacobianTransposed ( const LocalCoordType &x,
+      bool jacobianTransposed ( const LocalCoordinate &x,
                                 JacobianTransposedType &JT ) const
       {
         return GenericMapping :: Dphi_set( coords_, x, FieldType( 1 ), JT );

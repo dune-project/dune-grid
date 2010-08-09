@@ -92,8 +92,8 @@ namespace Dune
       static const unsigned int dimWorld = Traits::dimWorld;
 
       typedef typename Traits::FieldType FieldType;
-      typedef typename Traits::LocalCoordType LocalCoordType;
-      typedef typename Traits::GlobalCoordType GlobalCoordType;
+      typedef typename Traits::LocalCoordinate LocalCoordinate;
+      typedef typename Traits::GlobalCoordinate GlobalCoordinate;
       typedef typename Traits::JacobianType JacobianType;
       typedef typename Traits::JacobianTransposedType JacobianTransposedType;
 
@@ -114,39 +114,39 @@ namespace Dune
       virtual unsigned int topologyId () const = 0;
 
       /** \copydoc CachedMapping::corner */
-      virtual const GlobalCoordType &corner ( int i ) const = 0;
+      virtual const GlobalCoordinate &corner ( int i ) const = 0;
 
       /** \copydoc CachedMapping::numCorners */
       virtual int numCorners () const = 0;
 
       /** \copydoc CachedMapping::center */
-      virtual GlobalCoordType center () const = 0;
+      virtual GlobalCoordinate center () const = 0;
 
       /** \copydoc CachedMapping::global */
-      virtual GlobalCoordType global ( const LocalCoordType &x ) const = 0;
+      virtual GlobalCoordinate global ( const LocalCoordinate &x ) const = 0;
 
       /** \copydoc CachedMapping::local */
-      virtual LocalCoordType local ( const GlobalCoordType &y ) const = 0;
+      virtual LocalCoordinate local ( const GlobalCoordinate &y ) const = 0;
 
       /** \copydoc CachedMapping::checkInside */
-      virtual bool checkInside ( const LocalCoordType &x ) const = 0;
+      virtual bool checkInside ( const LocalCoordinate &x ) const = 0;
 
       /** \copydoc CachedMapping::affine */
       virtual bool affine () const = 0;
 
       /** \copydoc CachedMapping::integrationElement */
-      virtual FieldType integrationElement ( const LocalCoordType &x ) const = 0;
+      virtual FieldType integrationElement ( const LocalCoordinate &x ) const = 0;
 
       /** \copydoc CachedMapping::volume */
       virtual FieldType volume () const = 0;
 
       /** \copydoc CachedMapping::jacobianTransposed */
       virtual const JacobianTransposedType &
-      jacobianTransposed ( const LocalCoordType &x ) const = 0;
+      jacobianTransposed ( const LocalCoordinate &x ) const = 0;
 
       /** \copydoc CachedMapping::jacobianInverseTransposed */
       virtual const JacobianType &
-      jacobianInverseTransposed ( const LocalCoordType &x ) const = 0;
+      jacobianInverseTransposed ( const LocalCoordinate &x ) const = 0;
 
     protected:
       using HybridMappingBase< dim, GeometryTraits >::trace;
@@ -228,8 +228,8 @@ namespace Dune
       static const unsigned int dimWorld = Traits :: dimWorld;
 
       typedef typename Traits::FieldType FieldType;
-      typedef typename Traits::LocalCoordType LocalCoordType;
-      typedef typename Traits::GlobalCoordType GlobalCoordType;
+      typedef typename Traits::LocalCoordinate LocalCoordinate;
+      typedef typename Traits::GlobalCoordinate GlobalCoordinate;
       typedef typename Traits::JacobianType JacobianType;
       typedef typename Traits::JacobianTransposedType JacobianTransposedType;
 
@@ -257,7 +257,7 @@ namespace Dune
         return mapping_.topologyId();
       }
 
-      virtual const GlobalCoordType &corner ( int i ) const
+      virtual const GlobalCoordinate &corner ( int i ) const
       {
         return mapping_.corner( i );
       }
@@ -267,22 +267,22 @@ namespace Dune
         return mapping_.numCorners();
       }
 
-      virtual GlobalCoordType center () const
+      virtual GlobalCoordinate center () const
       {
         return mapping_.center();
       }
 
-      virtual GlobalCoordType global ( const LocalCoordType &local ) const
+      virtual GlobalCoordinate global ( const LocalCoordinate &local ) const
       {
         return mapping_.global( local );
       }
 
-      virtual LocalCoordType local ( const GlobalCoordType &global ) const
+      virtual LocalCoordinate local ( const GlobalCoordinate &global ) const
       {
         return mapping_.local( global );
       }
 
-      virtual bool checkInside ( const LocalCoordType &local ) const
+      virtual bool checkInside ( const LocalCoordinate &local ) const
       {
         return mapping_.checkInside( local );
       }
@@ -292,7 +292,7 @@ namespace Dune
         return mapping_.affine();
       }
 
-      virtual FieldType integrationElement ( const LocalCoordType &local ) const
+      virtual FieldType integrationElement ( const LocalCoordinate &local ) const
       {
         return mapping_.integrationElement( local );
       }
@@ -303,13 +303,13 @@ namespace Dune
       }
 
       virtual const JacobianTransposedType &
-      jacobianTransposed ( const LocalCoordType &local ) const
+      jacobianTransposed ( const LocalCoordinate &local ) const
       {
         return mapping_.jacobianTransposed( local );
       }
 
       virtual const JacobianType &
-      jacobianInverseTransposed ( const LocalCoordType &local ) const
+      jacobianInverseTransposed ( const LocalCoordinate &local ) const
       {
         return mapping_.jacobianInverseTransposed( local );
       }
