@@ -94,8 +94,9 @@ namespace Dune
       typedef typename Traits::FieldType FieldType;
       typedef typename Traits::LocalCoordinate LocalCoordinate;
       typedef typename Traits::GlobalCoordinate GlobalCoordinate;
-      typedef typename Traits::JacobianType JacobianType;
-      typedef typename Traits::JacobianTransposedType JacobianTransposedType;
+
+      typedef CachedJacobianTransposed< dimension, GeometryTraits > JacobianTransposed;
+      typedef CachedJacobianInverseTransposed< dimension, GeometryTraits > JacobianInverseTransposed;
 
       template< int codim >
       struct Codim
@@ -141,11 +142,11 @@ namespace Dune
       virtual FieldType volume () const = 0;
 
       /** \copydoc CachedMapping::jacobianTransposed */
-      virtual const JacobianTransposedType &
+      virtual const JacobianTransposed &
       jacobianTransposed ( const LocalCoordinate &x ) const = 0;
 
       /** \copydoc CachedMapping::jacobianInverseTransposed */
-      virtual const JacobianType &
+      virtual const JacobianInverseTransposed &
       jacobianInverseTransposed ( const LocalCoordinate &x ) const = 0;
 
     protected:
@@ -230,10 +231,11 @@ namespace Dune
       typedef typename Traits::FieldType FieldType;
       typedef typename Traits::LocalCoordinate LocalCoordinate;
       typedef typename Traits::GlobalCoordinate GlobalCoordinate;
-      typedef typename Traits::JacobianType JacobianType;
-      typedef typename Traits::JacobianTransposedType JacobianTransposedType;
 
-      typedef typename Mapping :: ReferenceElement ReferenceElement;
+      typedef typename Base::JacobianTransposed JacobianTransposed;
+      typedef typename Base::JacobianInverseTransposed JacobianInverseTransposed;
+
+      typedef typename Mapping::ReferenceElement ReferenceElement;
 
       template< int codim >
       struct Codim
@@ -302,13 +304,13 @@ namespace Dune
         return mapping_.volume();
       }
 
-      virtual const JacobianTransposedType &
+      virtual const JacobianTransposed &
       jacobianTransposed ( const LocalCoordinate &local ) const
       {
         return mapping_.jacobianTransposed( local );
       }
 
-      virtual const JacobianType &
+      virtual const JacobianInverseTransposed &
       jacobianInverseTransposed ( const LocalCoordinate &local ) const
       {
         return mapping_.jacobianInverseTransposed( local );

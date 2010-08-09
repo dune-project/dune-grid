@@ -275,10 +275,6 @@ namespace Dune
       /** \brief Type used for world coordinates */
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
 
-      /** \brief Type used for Jacobian matrices */
-      typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
-      typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
-
       typedef typename Traits::Allocator Allocator;
 
     private:
@@ -310,6 +306,11 @@ namespace Dune
 
     protected:
       typedef typename MappingProvider :: Mapping Mapping;
+
+    public:
+      /** \brief Type used for Jacobian matrices */
+      typedef typename Mapping::JacobianTransposed JacobianTransposed;
+      typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
 
     public:
       /** \brief Default constructor */
