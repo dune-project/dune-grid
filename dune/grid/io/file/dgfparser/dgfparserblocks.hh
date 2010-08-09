@@ -565,52 +565,6 @@ namespace Dune
         return n;
       }
 
-#if 0
-      int segments ( int block, int i ) const
-      {
-        return get( block ).n[ i ];
-      }
-
-      double length ( int block, int i ) const
-      {
-        const Interval &interval = get( block );
-        return interval.p[ 1 ][ i ] - interval.p[ 0 ][ i ];
-      }
-
-      double start ( int block, int i ) const
-      {
-        return get( block ).p[ 0 ][ i ];
-      }
-
-      double end ( int block, int i )
-      {
-        return get( block ).p[ 1 ][ i ];
-      }
-
-      int getIndex ( int block, int i, int j = 0, int k = 0 )
-      {
-        const Interval &interval = get( block );
-
-        int n0 = interval.n[ 0 ]+1;
-        int n1 = interval.n[ 1 ]+1;
-
-        switch( dimw() )
-        {
-        case 1 :
-          return i;
-
-        case 2 :
-          return j*n0 + i;
-
-        case 3 :
-          return (k*n1 + j)*n0 + i;
-
-        default :
-          DUNE_THROW( InvalidStateException, "dimw must be 1, 2 or 3" );
-        }
-      }
-#endif
-
     private:
       template< class T >
       void parseLine ( std::vector< T > &v );
