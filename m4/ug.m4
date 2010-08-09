@@ -220,7 +220,7 @@ AC_DEFUN([DUNE_PATH_UG],[
 
   if test x$HAVE_UG = x1 ; then
 
-      # add support for GRIDTYPE=UGGRID to generated gridtype.hh / dgfgridtype.hh
+      # add support for GRIDTYPE=UGGRID to config.h
       DUNE_DEFINE_GRIDTYPE([UGGRID],[GRIDDIM == WORLDDIM],[Dune::UGGrid< dimgrid >],[dune/grid/uggrid.hh],[dune/grid/io/file/dgfparser/dgfug.hh])
 
       AC_DEFINE(HAVE_UG, ENABLE_UG, 
