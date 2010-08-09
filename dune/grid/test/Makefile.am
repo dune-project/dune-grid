@@ -65,7 +65,7 @@ DUNE_EXTRA_CHECKS = -DDUNE_DEVEL_MODE
 # output coverage
 #COVERAGE = -fprofile-arcs -ftest-coverage
 AM_CXXFLAGS = $(COVERAGE)
-AM_CPPFLAGS = @AM_CPPFLAGS@ $(DUNE_EXTRA_CHECKS) -DSRCDIR='"$(abs_srcdir)/"'
+AM_CPPFLAGS = @AM_CPPFLAGS@ $(DUNE_EXTRA_CHECKS)
 
 # The directory where the example grid files used for testing are located
 AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
