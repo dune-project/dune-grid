@@ -7,7 +7,7 @@
 
 #include <dune/common/gmpfield.hh>
 
-#include "../matrix.hh"
+#include "../matrixhelper.hh"
 #include "../geometrytraits.hh"
 
 using namespace Dune;
