@@ -15,6 +15,225 @@ namespace Dune
   namespace GenericGeometry
   {
 
+    // Internal Forward Declarations
+    // -----------------------------
+
+    template< unsigned int, class >
+    class CachedJacobianTransposed;
+
+    template< unsigned int, class >
+    class CachedJacobianInverseTransposed;
+
+
+
+    // CachedStorage
+    // -------------
+
+    template< unsigned int dim, class GeometryTraits >
+    class CachedStorage
+    {
+      friend class CachedJacobianTransposed< dim, GeometryTraits >;
+
+    public:
+      static const unsigned int dimension = dim;
+      static const unsigned int dimWorld = GeometryTraits::dimWorld;
+
+      typedef MappingTraits< typename GeometryTraits::CoordTraits, dimension, dimWorld > Traits;
+
+      typedef typename GeometryTraits::Caching Caching;
+
+      typename Traits::JacobianTransposedType jacobianTransposed;
+      typename Traits::JacobianType jacobianInverseTransposed;
+      typename Traits::FieldType integrationElement;
+
+      CachedStorage ()
+        : affine( false ),
+          jacobianTransposedComputed( false ),
+          jacobianInverseTransposedComputed( false ),
+          integrationElementComputed( false )
+      {}
+
+      bool affine;
+
+      bool jacobianTransposedComputed;
+      bool jacobianInverseTransposedComputed;
+      bool integrationElementComputed;
+    };
+
+
+
+    // CachedJacobianTranposed
+    // -----------------------
+
+    template< unsigned int dim, class GeometryTraits >
+    class CachedJacobianTransposed
+    {
+      friend class CachedJacobianInverseTransposed< dim, GeometryTraits >;
+
+      typedef CachedStorage< dim, GeometryTraits > Storage;
+      typedef typename Storage::Traits Traits;
+
+      typedef typename Traits::MatrixHelper MatrixHelper;
+
+    public:
+      typedef typename Traits::FieldType ctype;
+
+      static const int rows = Traits::dimension;
+      static const int cols = Traits::dimWorld;
+
+      typedef typename Traits::JacobianTransposedType FieldMatrix;
+
+      operator bool () const
+      {
+        return storage().jacobianTransposedComputed;
+      }
+
+      operator const FieldMatrix & () const
+      {
+        assert( *this );
+        return storage().jacobianTransposed;
+      }
+
+      template< class X, class Y >
+      void mv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).mv( x, y );
+      }
+
+      template< class X, class Y >
+      void mtv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).mtv( x, y );
+      }
+
+      template< class X, class Y >
+      void umv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).umv( x, y );
+      }
+
+      template< class X, class Y >
+      void umtv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).umtv( x, y );
+      }
+
+      template< class X, class Y >
+      void mmv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).mmv( x, y );
+      }
+
+      template< class X, class Y >
+      void mmtv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).mmtv( x, y );
+      }
+
+      ctype det () const
+      {
+        if( !storage().integrationElementComputed )
+        {
+          storage().integrationElement = MatrixHelper::template sqrtDetAAT< rows, cols >( storage().jacobianTransposed );
+          storage().integrationElementComputed = storage().affine;
+        }
+        return storage().integrationElement;
+      }
+
+    private:
+      Storage &storage () const { return storage_; }
+
+      mutable Storage storage_;
+    };
+
+
+
+    // CachedJacobianInverseTransposed
+    // -------------------------------
+
+    template< unsigned int dim, class GeometryTraits >
+    class CachedJacobianInverseTransposed
+    {
+      template< class, class > friend class CachedMapping;
+
+      typedef CachedJacobianTransposed< dim, GeometryTraits > JacobianTransposed;
+      typedef typename JacobianTransposed::Storage Storage;
+      typedef typename JacobianTransposed::Traits Traits;
+
+      typedef typename Traits::MatrixHelper MatrixHelper;
+
+    public:
+      typedef typename Traits::FieldType ctype;
+
+      static const int rows = Traits::dimWorld;
+      static const int cols = Traits::dimension;
+
+      typedef typename Traits::JacobianType FieldMatrix;
+
+      operator bool () const
+      {
+        return storage().jacobianInverseTransposedComputed;
+      }
+
+      operator const FieldMatrix & () const
+      {
+        assert( *this );
+        return storage().jacobianInverseTransposed;
+      }
+
+      template< class X, class Y >
+      void mv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).mv( x, y );
+      }
+
+      template< class X, class Y >
+      void mtv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).mtv( x, y );
+      }
+
+      template< class X, class Y >
+      void umv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).umv( x, y );
+      }
+
+      template< class X, class Y >
+      void umtv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).umtv( x, y );
+      }
+
+      template< class X, class Y >
+      void mmv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).mmv( x, y );
+      }
+
+      template< class X, class Y >
+      void mmtv ( const X &x, Y &y ) const
+      {
+        static_cast< const FieldMatrix & >( *this ).mmtv( x, y );
+      }
+
+      ctype det () const
+      {
+        // integrationElement is always computed with jacobianInverseTransposed
+        return ctype( 1 ) / storage().integrationElement_;
+      }
+
+    private:
+      JacobianTransposed &jacobianTransposed () { return jacobianTransposed_; }
+      const JacobianTransposed &jacobianTransposed () const { return jacobianTransposed_; }
+
+      Storage &storage () const { return jacobianTransposed().storage(); }
+
+      JacobianTransposed jacobianTransposed_;
+    };
+
+
+
     // CachedMapping
     // -------------
 
@@ -53,8 +272,10 @@ namespace Dune
       typedef typename Traits::FieldType FieldType;
       typedef typename Traits::LocalCoordinate LocalCoordinate;
       typedef typename Traits::GlobalCoordinate GlobalCoordinate;
-      typedef typename Traits::JacobianType JacobianType;
-      typedef typename Traits::JacobianTransposedType JacobianTransposedType;
+
+      typedef CachedStorage< dimension, GeometryTraits > Storage;
+      typedef CachedJacobianTransposed< dimension, GeometryTraits > JacobianTransposed;
+      typedef CachedJacobianInverseTransposed< dimension, GeometryTraits > JacobianInverseTransposed;
 
       typedef GenericGeometry::ReferenceElement< Topology, FieldType > ReferenceElement;
 
@@ -64,8 +285,7 @@ namespace Dune
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename TraceProvider< Topology, GeometryTraits, codim, false > :: Trace
-        Trace;
+        typedef typename TraceProvider< Topology, GeometryTraits, codim, false >::Trace Trace;
       };
 
       typedef typename GeometryTraits::Caching Caching;
@@ -76,25 +296,22 @@ namespace Dune
     public:
       template< class CoordVector >
       explicit CachedMapping ( const CoordVector &coords )
-        : mapping_( coords ),
-          jacobianTransposedComputed_( false ),
-          jacobianInverseTransposedComputed_( false ),
-          integrationElementComputed_( false )
+        : mapping_( coords )
       {
         if( alwaysAffine )
-          affine_ = true;
+          storage().affine = true;
         else
           computeJacobianTransposed( baryCenter() );
 
         if( affine() )
         {
-          if( (Caching :: evaluateJacobianTransposed == PreCompute) && !jacobianTransposedComputed_ )
+          if( (Caching::evaluateJacobianTransposed == PreCompute) && !jacobianTransposed() )
             computeJacobianTransposed( baryCenter() );
 
-          if( Caching :: evaluateJacobianInverseTransposed == PreCompute )
+          if( Caching::evaluateJacobianInverseTransposed == PreCompute )
             computeJacobianInverseTransposed( baryCenter() );
-          else if( Caching :: evaluateIntegrationElement == PreCompute )
-            computeIntegrationElement( baryCenter() );
+          else if( Caching::evaluateIntegrationElement == PreCompute )
+            jacobianTransposed().det();
         }
       }
 
@@ -141,7 +358,7 @@ namespace Dune
       /** \brief is this mapping affine? */
       bool affine () const
       {
-        return (alwaysAffine || affine_);
+        return (alwaysAffine || storage().affine);
       }
 
       /** \brief evaluate the mapping
@@ -153,10 +370,12 @@ namespace Dune
       GlobalCoordinate global ( const LocalCoordinate &x ) const
       {
         GlobalCoordinate y;
-        if( jacobianTransposedComputed_ )
+        if( jacobianTransposed() )
         {
-          MatrixHelper::template ATx< dimension, dimWorld >( jacobianTransposed_, x, y );
-          y += corner( 0 );
+          y = corner( 0 );
+          jacobianTransposed().umtv( x, y );
+          //MatrixHelper::template ATx< dimension, dimWorld >( jacobianTransposed_, x, y );
+          //y += corner( 0 );
         }
         else
           mapping_.global( x, y );
@@ -177,16 +396,17 @@ namespace Dune
       LocalCoordinate local ( const GlobalCoordinate &y ) const
       {
         LocalCoordinate x;
-        if( jacobianInverseTransposedComputed_ )
+        if( jacobianInverseTransposed() )
         {
           GlobalCoordinate z = y - corner( 0 );
-          MatrixHelper :: template ATx< dimWorld, dimension >( jacobianInverseTransposed_, z, x );
+          jacobianInverseTransposed().mtv( z, x );
+          // MatrixHelper::template ATx< dimWorld, dimension >( jacobianInverseTransposed(), z, x );
         }
         else if( affine() )
         {
-          const JacobianTransposedType &JT = jacobianTransposed( baryCenter() );
+          const JacobianTransposed &JT = jacobianTransposed( baryCenter() );
           GlobalCoordinate z = y - corner( 0 );
-          MatrixHelper :: template xTRightInvA< dimension, dimWorld >( JT, z, x );
+          MatrixHelper::template xTRightInvA< dimension, dimWorld >( JT, z, x );
         }
         else
           mapping_.local( y, x );
@@ -202,15 +422,15 @@ namespace Dune
        *  \note The returned reference is reused on the next call to
        *        JacobianTransposed, destroying the previous value.
        */
-      const JacobianTransposedType &jacobianTransposed ( const LocalCoordinate &x ) const
+      const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &x ) const
       {
         const EvaluationType evaluate = Caching::evaluateJacobianTransposed;
         if( (evaluate == PreCompute) && alwaysAffine )
-          return jacobianTransposed_;
+          return jacobianTransposed();
 
-        if( !jacobianTransposedComputed_ )
+        if( !jacobianTransposed() )
           computeJacobianTransposed( x );
-        return jacobianTransposed_;
+        return jacobianTransposed();
       }
 
       /** \brief obtain the integration element
@@ -232,11 +452,9 @@ namespace Dune
         const EvaluationType evaluateI = Caching::evaluateIntegrationElement;
         const EvaluationType evaluateJ = Caching::evaluateJacobianInverseTransposed;
         if( ((evaluateI == PreCompute) || (evaluateJ == PreCompute)) && alwaysAffine )
-          return integrationElement_;
-
-        if( !integrationElementComputed_ )
-          computeIntegrationElement( x );
-        return integrationElement_;
+          return storage().integrationElement;
+        else
+          return jacobianTransposed( x ).det();
       }
 
       /** \brief obtain the transposed of the Jacobian's inverse
@@ -245,15 +463,16 @@ namespace Dune
        *  the Jacobian by \f$J(x)\f$, the following condition holds:
        *  \f[J^{-1}(x) J(x) = I.\f]
        */
-      const JacobianType &jacobianInverseTransposed ( const LocalCoordinate &x ) const
+      const JacobianInverseTransposed &
+      jacobianInverseTransposed ( const LocalCoordinate &x ) const
       {
         const EvaluationType evaluate = Caching::evaluateJacobianInverseTransposed;
         if( (evaluate == PreCompute) && alwaysAffine )
-          return jacobianInverseTransposed_;
+          return jacobianInverseTransposed();
 
-        if( !jacobianInverseTransposedComputed_ )
+        if( !jacobianInverseTransposed() )
           computeJacobianInverseTransposed( x );
-        return jacobianInverseTransposed_;
+        return jacobianInverseTransposed();
       }
 
       /** \brief obtain the volume of the mapping's image
@@ -301,23 +520,33 @@ namespace Dune
         return ReferenceElement::template baryCenter< 0 >( 0 );
       }
 
+      Storage &storage () const
+      {
+        return jacobianInverseTransposed().storage();
+      }
+
+      const JacobianTransposed &jacobianTransposed () const
+      {
+        return jacobianInverseTransposed().jacobianTransposed();
+      }
+
+      const JacobianInverseTransposed &jacobianInverseTransposed () const
+      {
+        return jacobianInverseTransposed_;
+      }
+
       void computeJacobianTransposed ( const LocalCoordinate &x ) const
       {
-        affine_ = mapping_.jacobianTransposed( x, jacobianTransposed_ );
-        jacobianTransposedComputed_ = affine_;
+        storage().affine = mapping_.jacobianTransposed( x, storage().jacobianTransposed );
+        storage().jacobianTransposedComputed = affine();
       }
 
       void computeJacobianInverseTransposed ( const LocalCoordinate &x ) const
       {
-        // jacobian is computed here instead of using the cached value or returning the jacobian
-        integrationElement_ = mapping_.jacobianInverseTransposed( x, jacobianInverseTransposed_ );
-        integrationElementComputed_ = jacobianInverseTransposedComputed_ = affine();
-      }
-
-      void computeIntegrationElement ( const LocalCoordinate &x ) const
-      {
-        integrationElement_ = mapping_.integrationElement( x );
-        integrationElementComputed_ = affine();
+        storage().integrationElement
+          = MatrixHelper::template rightInvA< dimension, dimWorld >( jacobianTransposed( x ), storage().jacobianInverseTransposed );
+        storage().integrationElementComputed = affine();
+        storage().jacobianInverseTransposedComputed = affine();
       }
 
     public:
@@ -325,16 +554,7 @@ namespace Dune
 
     private:
       Mapping mapping_;
-
-      mutable JacobianTransposedType jacobianTransposed_;
-      mutable JacobianType jacobianInverseTransposed_;
-      mutable FieldType integrationElement_;
-
-      mutable bool affine_;
-
-      mutable bool jacobianTransposedComputed_;
-      mutable bool jacobianInverseTransposedComputed_;
-      mutable bool integrationElementComputed_;
+      JacobianInverseTransposed jacobianInverseTransposed_;
     };
 
   }
