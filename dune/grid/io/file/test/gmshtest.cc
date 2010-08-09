@@ -71,7 +71,7 @@ try
   if ( argc > 1 )
     refinements = atoi( argv[1] );
 
-  const std::string path( "../../../../../doc/grids/gmsh/" );
+  const std::string path = std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "gmsh/";
   std::string curved2d( path ); curved2d += "curved2d.msh";
   std::string circ2nd(  path ); circ2nd  += "circle2ndorder.msh";
   std::string unitsquare_quads_2x2(path);  unitsquare_quads_2x2 += "unitsquare_quads_2x2.msh";

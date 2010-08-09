@@ -92,29 +92,29 @@ int main() try {
   // Test whether unstructured grids can be read and written
 #if HAVE_UG
   std::cout << "reading UGGrid<2>" << std::endl;
-  testReadingUnstructuredGrid<UGGrid<2> >("../../../../../doc/grids/amiramesh/hybrid-testgrid-2d.am");
+  testReadingUnstructuredGrid<UGGrid<2> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/hybrid-testgrid-2d.am");
 
   std::cout << "reading UGGrid<3>" << std::endl;
-  testReadingUnstructuredGrid<UGGrid<3> >("../../../../../doc/grids/amiramesh/hybrid-testgrid-3d.am");
+  testReadingUnstructuredGrid<UGGrid<3> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/hybrid-testgrid-3d.am");
 #endif
 
 #if HAVE_ALBERTA
   std::cout << "reading AlbertaGrid<2>" << std::endl;
-  testReadingUnstructuredGrid<AlbertaGrid<2> >("../../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
+  testReadingUnstructuredGrid<AlbertaGrid<2> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-2d.am");
 
   std::cout << "reading AlbertaGrid<3>" << std::endl;
-  testReadingUnstructuredGrid<AlbertaGrid<3> >("../../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
+  testReadingUnstructuredGrid<AlbertaGrid<3> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-3d.am");
 #endif
 
 #if HAVE_ALUGRID
   std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
-  testReadingUnstructuredGrid<ALUSimplexGrid<2,2> >("../../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
+  testReadingUnstructuredGrid<ALUSimplexGrid<2,2> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-2d.am");
 
   std::cout << "reading ALUSimplexGrid<3,3>" << std::endl;
-  testReadingUnstructuredGrid<ALUSimplexGrid<3,3> >("../../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
+  testReadingUnstructuredGrid<ALUSimplexGrid<3,3> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-3d.am");
 
   std::cout << "reading ALUCubeGrid<3,3>" << std::endl;
-  testReadingUnstructuredGrid<ALUCubeGrid<3,3> >("../../../../../doc/grids/amiramesh/cube-testgrid-3d.am");
+  testReadingUnstructuredGrid<ALUCubeGrid<3,3> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/cube-testgrid-3d.am");
 #endif
 
   // Test whether writing uniform data works
