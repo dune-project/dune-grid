@@ -14,7 +14,7 @@ void checkAlbertaReader ()
   std::cout << ">>> Checking AlbertaReader..." << std::endl;
 
   std::ostringstream filename;
-  filename << SRCDIR << "grid-" << Grid::dimension << "-" << Grid::dimensionworld << ".amc";
+  filename << DUNE_GRID_EXAMPLE_GRIDS_PATH << "amc/grid-" << Grid::dimension << "-" << Grid::dimensionworld << ".amc";
 
   Dune::AlbertaReader< Grid > reader;
   Dune::GridFactory< Grid > factory;
