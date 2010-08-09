@@ -79,7 +79,7 @@ try
 {
   Dune::MPIHelper::instance( argc, argv );
 
-  std::string gridfile = SRCDIR "cube-2.dgf";
+  std::string gridfile = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-2.dgf";
   if(argc >= 2)
   {
     gridfile = argv[1];
