@@ -478,7 +478,7 @@ namespace Dune
      * "pwrite" means "path write" (i.e. write somewhere else than the current
      * directory).  The "p" does not mean this method has a monopoly on
      * parallel writing, the regular write(const std::string &,
-     * VTK::OutputType) method ca do that just fine.
+     * VTK::OutputType) method can do that just fine.
      *
      * \param name       Base name of the output files.  This should not
      *                   contain any directory part and not filename
