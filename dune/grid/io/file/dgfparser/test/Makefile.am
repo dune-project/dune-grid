@@ -1,11 +1,13 @@
 AM_CPPFLAGS = @AM_CPPFLAGS@			\
-	$(DUNEMPICPPFLAGS)			\
-	-DSRCDIR="\"$(srcdir)\""
+	$(DUNEMPICPPFLAGS)
 AM_LDFLAGS = @AM_LDFLAGS@			\
 	$(DUNEMPILDFLAGS)
 LDADD = 					\
 	$(DUNEMPILIBS)				\
 	@LDADD@
+
+# The directory where the example grid files used for testing are located
+AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
 
 if ALUGRID
   TESTALU = testalu

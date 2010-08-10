@@ -93,7 +93,7 @@ try {
   {
     std::stringstream namestr;
     namestr << "test" << GridType::dimension << "d.dgf";
-    filename = namestr.str();
+    filename = std::string( DUNE_GRID_EXAMPLE_GRIDS_PATH ) + "dgf/" + namestr.str();
   }
 
   std::cout << "tester: start grid reading; file " << filename << std::endl;
