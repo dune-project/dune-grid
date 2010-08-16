@@ -1,5 +1,7 @@
 # $Id$
 
+SUBDIRS = test
+
 gridutilitydir =  $(includedir)/dune/grid/utility
 gridutility_HEADERS = hierarchicsearch.hh \
   grapedataioformattypes.hh gridtype.hh griddim.hh \

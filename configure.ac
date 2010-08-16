@@ -59,6 +59,7 @@ AC_CONFIG_FILES([Makefile
     dune/grid/yaspgrid/Makefile
     dune/grid/onedgrid/Makefile
     dune/grid/utility/Makefile
+    dune/grid/utility/test/Makefile
     dune/grid/alugrid/2d/Makefile
     dune/grid/alugrid/3d/Makefile
     dune/grid/alugrid/Makefile
