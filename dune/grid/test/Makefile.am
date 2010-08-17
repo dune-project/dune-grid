@@ -173,13 +173,8 @@ test_dgfalu_uggrid_combination_LDADD =		\
 ## distribution tarball
 SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc
 
-GRIDFILES = \
-  simplex-testgrid-2-2.dgf simplex-testgrid-2-3.dgf simplex-testgrid-3-3-large.dgf simplex-testgrid-3-3.dgf \
-  grid-1-1.amc  grid-2-2.amc  grid-2-3.amc  grid-3-3.amc \
-  basicunitcube-2d.dgf cube-2.dgf torus-2.dgf torus-3.dgf
-
 # gridcheck not used explicitly, we should still ship it :)
-EXTRA_DIST = $(GRIDFILES) $(SOURCES)
+EXTRA_DIST = $(SOURCES)
 
 CLEANFILES = *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log
 
