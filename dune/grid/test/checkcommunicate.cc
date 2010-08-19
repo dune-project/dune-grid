@@ -429,7 +429,7 @@ class CheckCommunication
     return maxerr;
   }
 
-  // The main ''algorithn''
+  // The main ''algorithm''
   bool checkCommunication ()
   {
     upwind_[ 0 ] = -0.1113;
