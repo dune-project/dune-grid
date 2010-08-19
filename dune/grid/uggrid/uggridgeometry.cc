@@ -1,12 +1,11 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-//****************************************************************
-//
-// --UGGridGeometry
-//
-//****************************************************************
+#include "config.h"
 
 #include <algorithm>
+
+#include <dune/grid/uggrid.hh>
+#include <dune/grid/uggrid/uggridgeometry.hh>
 
 ///////////////////////////////////////////////////////////////////////
 //
@@ -228,3 +227,14 @@ jacobianTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& loc
 
   return jac_;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////
+//   Explicit template instantiations
+/////////////////////////////////////////////////////////////////////////////////
+
+template class Dune::UGGridGeometry<0,2, const Dune::UGGrid<2> >;
+template class Dune::UGGridGeometry<2,2, const Dune::UGGrid<2> >;
+
+template class Dune::UGGridGeometry<0,3, const Dune::UGGrid<3> >;
+template class Dune::UGGridGeometry<3,3, const Dune::UGGrid<3> >;

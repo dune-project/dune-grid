@@ -254,7 +254,4 @@ namespace Dune {
 
 }  // namespace Dune
 
-// Include method definitions
-#include "uggridgeometry.cc"
-
 #endif

@@ -49,9 +49,6 @@ namespace Dune {
 
   };
 
-  // Include class method definitions
-#include "uggridhieriterator.cc"
-
 }  // end namespace Dune
 
 #endif

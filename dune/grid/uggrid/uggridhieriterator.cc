@@ -1,5 +1,10 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#include "config.h"
+
+#include <dune/grid/uggrid.hh>
+#include <dune/grid/uggrid/uggridhieriterator.hh>
+
 //***************************************************************
 //
 //  --UGGridHierarchicIterator
@@ -8,7 +13,7 @@
 //***************************************************************
 
 template<class GridImp>
-void UGGridHierarchicIterator<GridImp>::increment()
+void Dune::UGGridHierarchicIterator<GridImp>::increment()
 {
   if (elementStack_.empty())
     return;
@@ -36,3 +41,10 @@ void UGGridHierarchicIterator<GridImp>::increment()
     this->virtualEntity_.setToTarget(elementStack_.top());
 
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+//   Explicit template instantiations
+/////////////////////////////////////////////////////////////////////////////////
+
+template class Dune::UGGridHierarchicIterator<const Dune::UGGrid<2> >;
+template class Dune::UGGridHierarchicIterator<const Dune::UGGrid<3> >;

@@ -5,7 +5,7 @@ if UG
 noinst_LTLIBRARIES = libuggrid.la
 
 libuggrid_la_SOURCES  = uggridintersections.cc uggrid.cc uggridentity.cc boundaryextractor.cc boundaryextractor.hh \
-                        uggridindexsets.cc uggridfactory.cc
+                        uggridindexsets.cc uggridfactory.cc uggridgeometry.cc uggridhieriterator.cc
 
 libuggrid_la_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(UG_CPPFLAGS)				\
@@ -26,8 +26,7 @@ headercheck_IGNORE = uggridentity.hh uggridentitypointer.hh uggridgeometry.hh \
                      uggridintersectioniterators.hh ugwrapper.hh
 
 uggriddir = $(includedir)/dune/grid/uggrid/
-uggrid_HEADERS = uggridfactory.hh uggridgeometry.cc \
-  uggridentitypointer.hh uggridhieriterator.cc \
+uggrid_HEADERS = uggridfactory.hh uggridentitypointer.hh \
   ugwrapper.hh uggridentity.hh uggridgeometry.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
   uggridintersections.hh uggridintersectioniterators.hh uggridindexsets.hh \
