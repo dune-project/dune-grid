@@ -164,58 +164,6 @@ local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
   return result;
 }
 
-#if 0
-template<int mydim, int coorddim, class GridImp>
-bool Dune::UGGridGeometry<mydim,coorddim,GridImp>::
-checkInside(const Dune::FieldVector<UGCtype, mydim> &loc) const
-{
-  switch (mydim) {
-
-  case 0 :  // vertex
-    return false;
-  case 1 :  // line
-    return 0 <= loc[0] && loc[0] <= 1;
-  case 2 :
-
-    switch (UG_NS<coorddim>::Tag(target_)) {
-    case UG::D2::TRIANGLE :
-      return 0 <= loc[0] && 0 <= loc[1] && (loc[0]+loc[1])<=1;
-    case UG::D2::QUADRILATERAL :
-      return 0 <= loc[0] && loc[0] <= 1
-             && 0 <= loc[1] && loc[1] <= 1;
-    default :
-      DUNE_THROW(GridError, "UGGridGeometry::checkInside():  ERROR:  Unknown type "
-                 << UG_NS<coorddim>::Tag(target_) << " found!");
-    }
-
-  case 3 :
-    switch (UG_NS<coorddim>::Tag(target_)) {
-
-    case UG::D3::TETRAHEDRON :
-      return 0 <= loc[0] && 0 <= loc[1] && 0 <= loc[2]
-             && (loc[0]+loc[1]+loc[2]) <= 1;
-    case UG::D3::PYRAMID :
-      return 0 <= loc[0] && 0 <= loc[1] && 0 <= loc[2]
-             && (loc[0]+loc[2]) <= 1
-             && (loc[1]+loc[2]) <= 1;
-    case UG::D3::PRISM :
-      return 0 <= loc[0] && 0 <= loc[1]
-             && (loc[0]+loc[1])<=1
-             && 0 <= loc[2] && loc[2] <= 1;
-    case UG::D3::HEXAHEDRON :
-      return 0 <= loc[0] && loc[0] <= 1
-             && 0 <= loc[1] && loc[1] <= 1
-             && 0 <= loc[2] && loc[2] <= 1;
-    default :
-      DUNE_THROW(GridError, "UGGridGeometry::checkInside():  ERROR:  Unknown type "
-                 << UG_NS<coorddim>::Tag(target_) << " found!");
-
-    }
-  }
-
-}
-#endif
-
 
 template< int mydim, int coorddim, class GridImp>
 typename GridImp::ctype Dune::UGGridGeometry<mydim,coorddim,GridImp>::
