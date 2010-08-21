@@ -283,7 +283,7 @@ namespace Dune
       for( int n = 0; n < dgf_.nofelements; ++n )
       {
         factory_.insertElement( elementType, dgf_.elements[ n ] );
-        for( int face = 0; face <= dimworld; ++face )
+        for( int face = 0; face < 2*dimworld; ++face )
         {
           typedef typename DuneGridFormatParser::facemap_t::key_type Key;
           typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
