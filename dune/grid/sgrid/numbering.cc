@@ -35,7 +35,7 @@ namespace Dune {
   template<int dim>
   inline array<int,dim> LexOrder<dim>::z (int n) const
   {
-    array<int,dim> z;
+    array<int,dim> z = {};
     for (int i=0; i<dim; i++)
     {
       z[i] = n%N[i];
@@ -123,7 +123,7 @@ namespace Dune {
     for (int b=0; b<power2(dim); b++)     // loop over all binary partitions
     {
       int mask=1;
-      array<int,dim> t;
+      array<int,dim> t = {};
       for (int i=0; i<dim; i++)
       {
         if (b&mask)

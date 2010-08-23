@@ -683,7 +683,7 @@ namespace Dune {
     // define boudary segments
     boundarysize = 0;
     {
-      array<int, dim-1> bN;
+      array<int, dim-1> bN = {};
       for (int dir = 0; dir < dim; dir++)
       {
         // extent of this face
