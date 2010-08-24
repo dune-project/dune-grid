@@ -104,16 +104,26 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   # LIBS=""
 
   ## do nothing if no --with-alberta was supplied
-  AS_IF([test x$with_alberta != x && test x$with_alberta != xno],[
+  AS_IF([test x$with_alberta != xno],[
 
-    # initialize to some default value
-    ALBERTAROOT="/usr/local/alberta"
     # is --with-alberta=PATH used?
-    if test -d $with_alberta ; then
-      ALBERTAROOT=`cd $with_alberta && pwd`
-    elif test "x$with_alberta" != "xyes" ; then
-      AC_MSG_WARN([ALBERTA directory '$with_alberta' does not exist])
-    fi
+    AS_IF([test "x$with_alberta" != "x"],[
+      AS_IF([test -d $with_alberta],[
+        AC_MSG_NOTICE([searching for ALBERTA in $with_alberta...])
+        ALBERTAROOT=`cd $with_alberta && pwd`
+      ],[
+        AC_MSG_WARN([ALBERTA directory '$with_alberta' does not exist])
+      ])
+    ],[
+      # educated guess for alberta root
+      for d in /usr /usr/local /usr/local/alberta /opt/alberta; do
+        AC_MSG_NOTICE([searching for ALBERTA in $d...])
+        AS_IF([test -d $d/include/alberta],[
+          ALBERTAROOT="$d"
+          break
+        ])
+      done
+    ])
 
     ALBERTA_VERSION="2.0"
 
@@ -163,24 +173,18 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
       AS_IF([test x$enable_alberta_libcheck = xno],[
         AC_MSG_WARN([Disabled checking whether libalberta_Nd can be linked.])
-      ])
-
-      ALBERTA_WORLD_DIMS=
-      for N in 1 2 3 4 5 6 7 8 9 ; do
-        AS_IF([test -f "$ALBERTAROOT/lib/libalberta_${N}d.a"],[
-          AS_IF([test x$enable_alberta_libcheck != xno],[
-            AC_CHECK_LIB(alberta_${N}d,[mesh_traverse],[
-              ALBERTA_WORLD_DIMS="$ALBERTA_WORLD_DIMS $N"
-            ],[
-              AC_MSG_WARN([Cannot link to libalberta_${N}d.])
-            ])
-          ],[
+      ],[
+        ALBERTA_WORLD_DIMS=
+        for N in 1 2 3 4 5 6 7 8 9; do
+          AC_CHECK_LIB(alberta_${N}d,[mesh_traverse],[
             ALBERTA_WORLD_DIMS="$ALBERTA_WORLD_DIMS $N"
           ])
-        ])
-      done
+        done
+      ])
 
       AS_IF([test "x$ALBERTA_WORLD_DIMS" != "x"],[
+        AC_MSG_NOTICE([Found libalberta_Nd for N = $ALBERTA_WORLD_DIMS])
+
         ALBERTA_BASE_LIBS="\$(ALBERTA_LIBPATHFLAGS) -lalberta_util $ALBERTA_EXTRA"
 
         # define library variables for all found libraries
