@@ -546,7 +546,7 @@ namespace Dune
     template< class Topology, unsigned int codim >
     struct IsCodimHybrid
     {
-      enum { value = (codim != 0) && IsHybrid< Topology > :: value };
+      static const bool value = (codim != 0) && IsHybrid< Topology >::value;
     };
 
 
@@ -562,13 +562,13 @@ namespace Dune
       template< class A, class B >
       struct StaticSum
       {
-        static const unsigned int v = A::v + B::v;
+        static const unsigned int value = A::value + B::value;
       };
 
       template< int codim >
       struct Size
       {
-        static const unsigned int v = GenericGeometry::Size< Topology, codim >::v;
+        static const unsigned int value = GenericGeometry::Size< Topology, codim >::value;
       };
 
       template< int codim >
@@ -576,12 +576,12 @@ namespace Dune
       {
         static void apply ( unsigned int (&offsets)[ dimension+2 ] )
         {
-          offsets[ codim+1 ] = offsets[ codim ] + Size< codim >::v;
+          offsets[ codim+1 ] = offsets[ codim ] + Size< codim >::value;
         }
       };
 
     public:
-      static const unsigned int staticSize = GenericForLoop< StaticSum, Size, 0, dimension >::v;
+      static const unsigned int staticSize = GenericForLoop< StaticSum, Size, 0, dimension >::value;
 
       SubTopologyMapper ()
       {
@@ -610,4 +610,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GENERICGEOMETRY_SUBTOPOLOGIES_HH
