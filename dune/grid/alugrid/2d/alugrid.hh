@@ -357,15 +357,6 @@ namespace Dune
       static const bool v = true;
     };
 
-    /** \brief ALUConformGrid does not support hanging nodes
-       \ingroup ALUConformGrid
-     */
-    template<int dim,int dimw>
-    struct hasHangingNodes< ALUConformGrid<dim,dimw> >
-    {
-      static const bool v = false;
-    };
-
     /** \brief ALUConformGrid has backup and restore facilities
        \ingroup ALUConformGrid
      */
