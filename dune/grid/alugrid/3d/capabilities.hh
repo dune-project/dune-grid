@@ -79,15 +79,6 @@ namespace Dune
       static const bool v = true;
     };
 
-    /** \brief ALUCubeGrid has supports hanging nodes
-       \ingroup ALUCubeGrid
-     */
-    template<>
-    struct hasHangingNodes< ALUCubeGrid< 3, 3 > >
-    {
-      static const bool v = true;
-    };
-
     /** \brief ALUCubeGrid has backup and restore facilities
        \ingroup ALUCubeGrid
      */
@@ -146,15 +137,6 @@ namespace Dune
      */
     template<>
     struct isLevelwiseConforming< ALUSimplexGrid< 3, 3 > >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUSimplexGrid has supports hanging nodes
-       \ingroup ALUSimplexGrid
-     */
-    template<>
-    struct hasHangingNodes< ALUSimplexGrid< 3, 3 > >
     {
       static const bool v = true;
     };
