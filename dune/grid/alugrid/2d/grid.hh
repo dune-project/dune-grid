@@ -852,11 +852,6 @@ namespace Dune {
       static const bool v = false;
     };
 
-    template<int dim, int dimw, ALU2DSPACE ElementType eltype>
-    struct hasHangingNodes< ALU2dGrid<dim,dimw,eltype> >
-    {
-      static const bool v = false;
-    };
   } // end namespace Capabilities
 
 } // end namespace Dune

@@ -1033,12 +1033,6 @@ namespace Dune {
     };
 
     template<int dim, int dimw, Dune::ALU3dGridElementType elType>
-    struct hasHangingNodes< ALU3dGrid<dim,dimw,elType> >
-    {
-      static const bool v = true;
-    };
-
-    template<int dim, int dimw, Dune::ALU3dGridElementType elType>
     struct hasBackupRestoreFacilities< ALU3dGrid<dim,dimw,elType> >
     {
       static const bool v = true;
