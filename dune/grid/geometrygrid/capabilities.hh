@@ -51,12 +51,6 @@ namespace Dune
 
 
     template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct hasHangingNodes< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
-    {
-      static const bool v = hasHangingNodes< HostGrid >::v;
-    };
-
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
     struct hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
     {
       static const bool v = hasBackupRestoreFacilities< HostGrid >::v;
@@ -72,12 +66,6 @@ namespace Dune
     struct isLeafwiseConforming< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
     {
       static const bool v = isLeafwiseConforming< HostGrid >::v;
-    };
-
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct IsUnstructured< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
-    {
-      static const bool v = true;
     };
 
     template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
