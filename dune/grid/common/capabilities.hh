@@ -93,7 +93,7 @@ namespace Dune
 
     /** \brief Specialize with 'true' if the grid implementation is thread safe. (default=false)
 
-        This capability is 'true' if the grid <b>always</b> thread safe.
+        This capability is 'true' if the grid is <b>always</b> thread safe.
         This means especially that all grid modification, like load balancing and
         grid adaption are also thread safe.
 
