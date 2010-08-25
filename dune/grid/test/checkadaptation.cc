@@ -95,17 +95,12 @@ void checkHierarchy(const EntityType& entity)
 }
 
 template <class GridType>
-void checkAdaptation(GridType& grid, const bool greenClosure = false )
+void checkAdaptRefinement(GridType& grid, const bool greenClosure = false )
 {
   using namespace Dune;
 
   // skip empty grids
   if( grid.template lbegin<0>( 0 ) == grid.template lend<0>( 0 ) ) return ;
-
-  // save start level
-  const int startLevel = grid.maxLevel();
-  // save start grid size
-  const int startSize  = grid.size( 0 );
 
   // some things are different for bisection grids
   const bool bisectionGrid =
@@ -185,7 +180,34 @@ void checkAdaptation(GridType& grid, const bool greenClosure = false )
       }
     }
   }
+}
 
+template <class GridType>
+void checkAdaptation(GridType& grid, const bool greenClosure = false )
+{
+  using namespace Dune;
+
+  // skip empty grids
+  if( grid.template lbegin<0>( 0 ) == grid.template lend<0>( 0 ) ) return ;
+
+  // save start level
+  const int startLevel = grid.maxLevel();
+  // save start grid size
+  const int startSize  = grid.size( 0 );
+
+  // some things are different for bisection grids
+  const bool bisectionGrid =
+    Capabilities::isLevelwiseConforming<GridType> :: v  == false &&
+    Capabilities::isLeafwiseConforming<GridType>  :: v  == true ;
+
+  /*
+     run the refinement check
+   */
+  checkAdaptRefinement(grid, greenClosure);
+
+  /*
+     run coarsening check
+   */
   int counter = 0;
   const int counterEstimate = (grid.maxLevel() - startLevel) * 10;
   // now the same with coarsening
@@ -282,4 +304,5 @@ void checkAdaptation(GridType& grid, const bool greenClosure = false )
           << startLevel << "  new = " << grid.maxLevel() << std::endl;
   }
 }
+
 #endif
