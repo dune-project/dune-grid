@@ -636,6 +636,10 @@ namespace Dune {
     {
       return this->realEntity.gridlevel();
     }
+    const GridImp * yaspgrid() const
+    {
+      return this->realEntity.yaspgrid();
+    }
   };
 
   template<int codim, int dim, class GridImp>
@@ -666,6 +670,11 @@ namespace Dune {
 
     //! return partition type attribute
     PartitionType partitionType () const
+    {
+      DUNE_THROW(GridError, "YaspEntity not implemented");
+    }
+
+    const GridImp * yaspgrid() const
     {
       DUNE_THROW(GridError, "YaspEntity not implemented");
     }
@@ -881,7 +890,8 @@ namespace Dune {
 
     /**\brief Returns true, if entity might disappear during the next call to adapt()
      */
-    bool mightVanish () const { return _yg->adaptRefCount < 0 && _g.mg()->maxlevel() < _g.level() - _yg->adaptRefCount; }
+    bool mightVanish () const { return false; }
+    // { return _yg->adaptRefCount < 0 && _g.mg()->maxlevel() < _g.level() - _yg->adaptRefCount; }
 
     //! returns intersection iterator for first intersection
     IntersectionIterator ibegin () const
@@ -2083,7 +2093,7 @@ namespace Dune {
 
     //! constructor
     YaspEntityPointer (const GridImp * yg, const YGLI & g, const TSI & it)
-      : _yg(yg), _g(g), _it(it), _entity(_yg, _g,_it)
+      : _g(g), _it(it), _entity(yg, _g,_it)
     {
       if (codim>0 && codim<dim)
       {
@@ -2093,10 +2103,9 @@ namespace Dune {
 
     //! copy constructor
     YaspEntityPointer (const YaspEntityImp& entity)
-      : _yg(entity.yaspgrid()),
-        _g(entity.gridlevel()),
+      : _g(entity.gridlevel()),
         _it(entity.transformingsubiterator()),
-        _entity(_yg,_g,_it)
+        _entity(entity.yaspgrid(),_g,_it)
     {
       if (codim>0 && codim<dim)
       {
@@ -2106,7 +2115,7 @@ namespace Dune {
 
     //! copy constructor
     YaspEntityPointer (const YaspEntityPointer& rhs)
-      : _yg(rhs._yg), _g(rhs._g), _it(rhs._it), _entity(_yg, _g,_it)
+      : _g(rhs._g), _it(rhs._it), _entity(rhs._entity.yaspgrid(),_g,_it)
     {
       if (codim>0 && codim<dim)
       {
@@ -2165,8 +2174,6 @@ namespace Dune {
     }
 
   protected:
-  #warning remove this member... it is already stored in the _entity
-    const GridImp * _yg; // access to the YaspGrid
     YGLI _g;             // access to grid level
     TSI _it;             // position in the grid level
     mutable SpecialEntity _entity; //!< virtual entity
@@ -2576,7 +2583,7 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
       : YMG(comm,L,s,periodic,overlap,lb), ccobj(comm),
-        keep_ovlp(true), adaptRefCount(0)
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       init();
     }
@@ -2587,7 +2594,7 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
       : YMG(L,s,periodic,overlap,lb),
-        keep_ovlp(true), adaptRefCount(0)
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       init();
     }
@@ -2612,10 +2619,10 @@ namespace Dune {
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
       : MultiYGrid<dim,ctype>(MPI_COMM_SELF,L,s,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
-        keep_ovlp(true), adaptRefCount(0)
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
       : MultiYGrid<dim,ctype>(L,s,periodic,overlap,lb),
-        keep_ovlp(true), adaptRefCount(0)
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
       init();
@@ -2681,6 +2688,7 @@ namespace Dune {
      */
     bool mark( int refCount, const typename Traits::template Codim<0>::Entity & e )
     {
+      assert(adaptActive == false);
       if (e.level() != maxLevel()) return false;
       adaptRefCount = std::max(adaptRefCount, refCount);
       return true;
@@ -2705,10 +2713,19 @@ namespace Dune {
     }
 
     //! returns true, if the grid will be coarsened
-    bool preAdapt () { return (adaptRefCount < 0); }
+    bool preAdapt ()
+    {
+      adaptActive = true;
+      adaptRefCount = comm().max(adaptRefCount);
+      return (adaptRefCount < 0);
+    }
 
     //! clean up some markers
-    void postAdapt() { adaptRefCount = 0; }
+    void postAdapt()
+    {
+      adaptActive = false;
+      adaptRefCount = 0;
+    }
 
     //! one past the end on this level
     template<int cd, PartitionIteratorType pitype>
@@ -3339,6 +3356,7 @@ namespace Dune {
     int sizes[MAXL][dim+1]; // total number of entities per level and codim
     bool keep_ovlp;
     int adaptRefCount;
+    bool adaptActive;
   };
 
   namespace Capabilities
