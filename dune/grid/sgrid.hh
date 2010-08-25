@@ -1916,24 +1916,6 @@ namespace Dune {
       static const bool v = true;
     };
 
-    /** \brief SGrid does not support unstructured grids
-       \ingroup SGrid
-     */
-    template<int dim, int dimw>
-    struct IsUnstructured< SGrid<dim,dimw> >
-    {
-      static const bool v = false;
-    };
-
-    /** \brief SGrid does not support hanging nodes
-       \ingroup SGrid
-     */
-    template<int dim, int dimw>
-    struct hasHangingNodes< SGrid<dim,dimw> >
-    {
-      static const bool v = false;
-    };
-
   } // end namespace Capabilities
 
 } // end namespace Dune
