@@ -459,15 +459,6 @@ namespace Dune {
       static const bool v = true;
     };
 
-    /** \brief OneDGrid does not support hanging nodes
-       \ingroup OneDGrid
-     */
-    template<>
-    struct hasHangingNodes< OneDGrid >
-    {
-      static const bool v = false;
-    };
-
   }
 
 } // namespace Dune
