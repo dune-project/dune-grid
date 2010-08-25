@@ -92,14 +92,11 @@ namespace Dune
     //! type of the global coordinates
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
+    //! type of jacobian (also of jacobian inverse transposed)
+    typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
+
     //! type of jacobian transposed
-    typedef typename ImplementationType::JacobianTransposed JacobianTransposed;
-
-    //! type of jacobian inverse transposed
-    typedef typename ImplementationType::JacobianInverseTransposed JacobianInverseTransposed;
-
-    // just for compatibility
-    typedef JacobianInverseTransposed Jacobian;
+    typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::GenericReferenceElement.
@@ -213,7 +210,8 @@ namespace Dune
      *
      *  \return \f$J_g^T(x)\f$
      */
-    const JacobianTransposed &jacobianTransposed ( const LocalCoordinate& local ) const
+    const JacobianTransposed &
+    jacobianTransposed ( const LocalCoordinate& local ) const
     {
       return realGeometry.jacobianTransposed( local );
     }
@@ -237,7 +235,7 @@ namespace Dune
      *        This means that it is inverse for all tangential vectors in
      *        \f$g(x)\f$ while mapping all normal vectors to zero.
      */
-    const JacobianInverseTransposed &jacobianInverseTransposed ( const LocalCoordinate &local ) const
+    const Jacobian& jacobianInverseTransposed (const LocalCoordinate& local) const
     {
       return realGeometry.jacobianInverseTransposed(local);
     }
@@ -282,9 +280,6 @@ namespace Dune
   public:
     // save typing
     typedef typename GridImp::ctype ctype;
-
-    typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
-    typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
 
     //! return volume of the geometry
     ctype volume () const
@@ -333,9 +328,6 @@ namespace Dune
   public:
     // save typing
     typedef typename GridImp::ctype ctype;
-
-    typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
-    typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
 
     //! return the only coordinate
     FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const

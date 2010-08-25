@@ -263,8 +263,7 @@ void assertNeighbor (Grid &g)
     // after creation of LevelIterator on different level
     if (g.maxLevel()>0)
     {
-      //EntityPointer p = g.template lbegin<0>(0);
-      EntityPointer p( g.template lbegin<0>(0) );
+      EntityPointer p = g.template lbegin<0>(0);
       p = g.template lbegin<0>(1);
       LevelIterator it = g.template lbegin<0>(0);
       p->ilevelbegin();
@@ -575,10 +574,8 @@ void iteratorEquals (Grid &g)
     return;
 
   // check '==' consistency
-  //EntityPointer a = g.template levelView<Dune::All_Partition>(0).template begin<0>();
-  //EntityPointer i = g.template levelView<Dune::Interior_Partition>(0).template begin<0>();
-  EntityPointer a( g.template levelView<Dune::All_Partition>(0).template begin<0>() );
-  EntityPointer i( g.template levelView<Dune::Interior_Partition>(0).template begin<0>() );
+  EntityPointer a = g.template levelView<Dune::All_Partition>(0).template begin<0>();
+  EntityPointer i = g.template levelView<Dune::Interior_Partition>(0).template begin<0>();
 
   assert(
     (g.levelIndexSet(0).index(*a) != g.levelIndexSet(0).index(*i)) // index equal
@@ -593,14 +590,10 @@ void iteratorEquals (Grid &g)
   HierarchicIterator h2 = l2->hbegin(99);
   IntersectionIterator i1 = l1->ileafbegin();
   IntersectionIterator i2 = l2->ileafbegin();
-  //EntityPointer e1 = l1;
-  //EntityPointer e2 = h2;
-  EntityPointer e1( l1 );
-  EntityPointer e2( h2 );
-#if !DISABLE_DEPRECATED_METHOD_CHECK
+  EntityPointer e1 = l1;
+  EntityPointer e2 = h2;
   const EntityPointer & re1 = l1;
   const EntityPointer & re2 = L2;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
   // assign
   l1 = l2;
@@ -608,10 +601,8 @@ void iteratorEquals (Grid &g)
   h1 = h2;
   i1 = i2;
   e1 = e2;
-#if !DISABLE_DEPRECATED_METHOD_CHECK
   e1 = re1;
   e2 = re2;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
   // equals
   #define TestEquals(i) { \

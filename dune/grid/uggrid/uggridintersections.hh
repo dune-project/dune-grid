@@ -133,25 +133,33 @@ namespace Dune {
     int indexInOutside () const;
 
     //! return outer normal
-    WorldVector outerNormal ( const FaceVector &local ) const;
+    const WorldVector&
+    outerNormal (const FaceVector& local) const;
 
     //! return outer normal
-    WorldVector integrationOuterNormal ( const FaceVector &local ) const
+    const FieldVector<UGCtype, dimworld>&
+    integrationOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
     {
-      WorldVector integrationOuterNormal = outerNormal( local );
-      const UGCtype scale = geometry().integrationElement( local ) / integrationOuterNormal.two_norm();
-      return integrationOuterNormal *= scale;
+      integrationOuterNormal_ = outerNormal(local);
+
+      const UGCtype scale = geometry().integrationElement( local ) / integrationOuterNormal_.two_norm();
+      integrationOuterNormal_ *= scale;
+
+      return integrationOuterNormal_;
     }
 
     //! return outer normal
-    WorldVector unitOuterNormal ( const FaceVector &local ) const
+    const FieldVector<UGCtype, GridImp::dimensionworld>&
+    unitOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
     {
-      WorldVector unitOuterNormal = outerNormal( local );
-      return unitOuterNormal /= unitOuterNormal.two_norm();
+      unitOuterNormal_ = outerNormal(local);
+      unitOuterNormal_ /= unitOuterNormal_.two_norm();
+      return unitOuterNormal_;
     }
 
     //! return outer normal
-    WorldVector centerUnitOuterNormal () const
+    const FieldVector<UGCtype, GridImp::dimensionworld>&
+    centerUnitOuterNormal () const
     {
       GeometryType type = geometry().type();
       const GenericReferenceElement<UGCtype, dim-1> & refElement =
@@ -160,6 +168,11 @@ namespace Dune {
     }
 
   private:
+
+    //! vector storing the outer normal
+    mutable FieldVector<UGCtype, dimworld> outerNormal_;
+    mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
+    mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
@@ -352,25 +365,35 @@ namespace Dune {
 
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    WorldVector outerNormal ( const FaceVector &local ) const;
+    const WorldVector&
+    outerNormal (const FaceVector& local) const;
 
     //! return outer normal
-    WorldVector integrationOuterNormal ( const FaceVector &local ) const
+    const FieldVector<UGCtype, dimworld>&
+    integrationOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
     {
-      WorldVector integrationOuterNormal = outerNormal( local );
-      const UGCtype scale = geometry().integrationElement( local ) / integrationOuterNormal.two_norm();
-      return integrationOuterNormal *= scale;
+      integrationOuterNormal_ = outerNormal(local);
+
+      //integrationOuterNormal_ /= integrationOuterNormal_.two_norm();
+      //integrationOuterNormal_ *= geometry().integrationElement(local);
+
+      const UGCtype scale = geometry().integrationElement( local ) / integrationOuterNormal_.two_norm();
+      integrationOuterNormal_ *= scale;
+
+      return integrationOuterNormal_;
     }
 
     //! return outer normal
-    WorldVector unitOuterNormal ( const FaceVector &local ) const
-    {
-      WorldVector unitOuterNormal = outerNormal( local );
-      return unitOuterNormal /= unitOuterNormal.two_norm();
+    const FieldVector<UGCtype, dimworld>&
+    unitOuterNormal (const FieldVector<UGCtype, dim-1>& local) const {
+      unitOuterNormal_ = outerNormal(local);
+      unitOuterNormal_ /= unitOuterNormal_.two_norm();
+      return unitOuterNormal_;
     }
 
     //! return outer normal
-    WorldVector centerUnitOuterNormal () const
+    const FieldVector<UGCtype, dimworld>&
+    centerUnitOuterNormal () const
     {
       GeometryType type = geometry().type();
       const GenericReferenceElement<UGCtype, dim-1> & refElement =
@@ -401,6 +424,11 @@ namespace Dune {
     /** \brief Precompute list of all leaf intersections of the current element face */
     void constructLeafSubfaces();
 
+    //! vector storing the outer normal
+    mutable FieldVector<UGCtype, dimworld> outerNormal_;
+    mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
+    mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
+
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
     mutable MakeableInterfaceObject<LocalGeometry> selfLocal_;
@@ -426,4 +454,4 @@ namespace Dune {
 
 }  // namespace Dune
 
-#endif // #ifndef DUNE_UGGRID_INTERSECTIONS_HH
+#endif

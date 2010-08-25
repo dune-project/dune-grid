@@ -138,18 +138,11 @@ namespace Dune
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    template< int codim >
-    IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< codim >::Entity &e,
-                         int i, unsigned int subcodim ) const
+    IndexType subIndex (const typename remove_const<GridImp>::type::
+                        Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION( (asImp().subIndex( e, i, subcodim )) );
-      return asImp().subIndex( e, i, subcodim );
-    }
-
-    template< class Entity >
-    IndexType subIndex ( const Entity &e, int i, unsigned int subcodim ) const
-    {
-      return subIndex< Entity::codimension >( e, i, subcodim );
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().subIndex(e,i,codim)));
+      return asImp().subIndex(e,i,codim);
     }
     //@}
 
@@ -382,17 +375,10 @@ namespace Dune
 
     /** \brief Get id of subentity i of codim cc of a codim 0 entity.
      */
-    template< int codim >
-    IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< codim >::Entity &e,
-                   int i, unsigned int subcodim ) const
+    IdType subId (const typename remove_const<GridImp>::type::
+                  Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
-      return asImp().subId( e, i, subcodim );
-    }
-
-    template< class Entity >
-    IdType subId ( const Entity &e, int i, unsigned int subcodim ) const
-    {
-      return subId< Entity::codimension >( e, i, subcodim );
+      return asImp().subId(e,i,codim);
     }
 
     // Default constructor (is not provided automatically because copy constructor is private)
