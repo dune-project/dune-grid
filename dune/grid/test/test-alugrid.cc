@@ -2,8 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-// #define NO_2D
+//#define NO_2D
 #define NO_3D
+//#define NO_PERIODIC
 
 #include <iostream>
 #include <sstream>
@@ -17,10 +18,11 @@
 
 #include "gridcheck.cc"
 
+#include "checkgeometry.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
-#include "checktwists.cc"
+//#include "checktwists.cc"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 
@@ -41,26 +43,23 @@ void checkCapabilities(const Grid& grid)
   dune_static_assert( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                       "hasBackupRestoreFacilities is not set correctly");
 
-  static const bool reallyParallel =
 #if ALU3DGRID_PARALLEL
-    Grid :: dimension == 3;
+#if ALU2DGRID_PARALLEL
+  static const bool reallyParallel = true;
 #else
-    false ;
+  static const bool reallyParallel = (Grid::dimension == 3);
 #endif
-  dune_static_assert( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
+#else
+  static const bool reallyParallel = false;
+#endif
+  dune_static_assert( Dune::Capabilities::isParallel< Grid >::v == reallyParallel,
                       "isParallel is not set correctly");
+  dune_static_assert( (Dune::Capabilities::canCommunicate< Grid, 0 >::v == reallyParallel),
+                      "canCommunicate is not set correctly" );
 
-  static const bool reallyCanCommunicate =
-#if ALU3DGRID_PARALLEL
-    Grid :: dimension == 3;
-#else
-    false ;
-#endif
-  static const bool canCommunicate = Dune::Capabilities::canCommunicate< Grid, 1 > :: v
-                                     == reallyCanCommunicate;
-  dune_static_assert( canCommunicate,
+  static const bool reallyCanCommunicate = reallyParallel && (Grid::dimension == 3);
+  dune_static_assert( (Dune::Capabilities::canCommunicate< Grid, 1 >::v == reallyCanCommunicate),
                       "canCommunicate is not set correctly");
-
 }
 
 template <class GridType>
@@ -191,6 +190,8 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   // be careful, each global refine create 8 x maxlevel elements
   std::cout << "  CHECKING: Macro" << std::endl;
   gridcheck(grid);
+  std::cout << "  CHECKING: Macro-Geometry" << std::endl;
+  checkGeometry( grid.leafView() );
   std::cout << "  CHECKING: Macro-intersections" << std::endl;
   checkIntersectionIterator(grid);
 
@@ -282,7 +283,7 @@ int main (int argc , char **argv) {
     else
     {
 #ifdef ALUGRID_SURFACE_2D
-      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dcube> <display>" << std::endl;
+      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|surfacesimp|3d|3dsimp|3dcube> <display>" << std::endl;
 #else
       std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dconf|3d|3dsimp|3dcube> <display>" << std::endl;
 #endif
@@ -291,6 +292,7 @@ int main (int argc , char **argv) {
     const bool display = (argc > 2);
 
     bool testALU2dSimplex = initialize ;
+    bool testALUSurfaceSimplex = initialize;
     bool testALU2dConform = initialize ;
     bool testALU2dCube    = initialize ;
     bool testALU3dSimplex = initialize ;
@@ -299,6 +301,7 @@ int main (int argc , char **argv) {
     if( key == "2d" )
     {
       testALU2dSimplex = true ;
+      testALUSurfaceSimplex = true;
       testALU2dConform = true ;
       testALU2dCube   = true ;
     }
@@ -306,6 +309,7 @@ int main (int argc , char **argv) {
     if( key == "2dsimp" ) testALU2dSimplex = true ;
     if( key == "2dconf" ) testALU2dConform = true ;
     if( key == "2dcube" ) testALU2dCube    = true ;
+    if( key == "surfacesimp" ) testALUSurfaceSimplex = true;
 
     if( key == "3d" )
     {
@@ -349,6 +353,13 @@ int main (int argc , char **argv) {
         checkCapabilities< false >( *gridPtr );
         checkALUSerial(*gridPtr, 2, display);
 
+#ifndef NO_PERIODIC
+        std::string periodicFilename(SRCDIR "torus-2.dgf");
+        std::cout << "READING from " << periodicFilename << std::endl;
+        gridPtr = GridPtr< GridType >( periodicFilename );
+        checkALUSerial(*gridPtr, 2, display );
+#endif // #ifndef NO_PERIODIC
+
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
@@ -376,14 +387,24 @@ int main (int argc , char **argv) {
         //checkALUSerial(grid,2);
 
 #ifdef ALUGRID_SURFACE_2D
+        std::string periodicFilename(SRCDIR "torus-2.dgf");
+        std::cout << "READING from " << periodicFilename << std::endl;
+        gridPtr = GridPtr< GridType >( periodicFilename );
+        checkALUSerial(*gridPtr, 2, display );
+#endif // #ifdef ALUGRID_SURFACE_2D
+      }
+
+#ifdef ALUGRID_SURFACE_2D
+      if( testALUSurfaceSimplex )
+      {
         typedef ALUSimplexGrid< 2, 3 > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< false >( *surfaceGridPtr );
         checkALUSerial( *surfaceGridPtr, 1, display );
-#endif // #ifdef ALUGRID_SURFACE_2D
       }
+#endif // #ifdef ALUGRID_SURFACE_2D
 
       // check conform ALUGrid for 2d
       if( testALU2dConform )
@@ -399,6 +420,13 @@ int main (int argc , char **argv) {
         //checkALUSerial(grid,2);
 
 #ifdef ALUGRID_SURFACE_2D
+#ifndef NO_PERIODIC
+        std::string periodicFilename(SRCDIR "torus-2.dgf");
+        std::cout << "READING from " << periodicFilename << std::endl;
+        gridPtr = GridPtr< GridType >( periodicFilename );
+        checkALUSerial(*gridPtr, 2, display );
+#endif // #ifndef NO_PERIODIC
+
         typedef ALUConformGrid< 2, 3 > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;

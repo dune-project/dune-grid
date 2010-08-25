@@ -3427,24 +3427,6 @@ namespace Dune {
       static const bool v = true;
     };
 
-    /** \brief YaspGrid does not support unstructured grids
-       \ingroup YaspGrid
-     */
-    template<int dim>
-    struct IsUnstructured< YaspGrid<dim> >
-    {
-      static const bool v = false;
-    };
-
-    /** \brief YaspGrid does not support hanging nodes
-       \ingroup YaspGrid
-     */
-    template<int dim>
-    struct hasHangingNodes< YaspGrid<dim> >
-    {
-      static const bool v = false;
-    };
-
   }
 
 } // end namespace

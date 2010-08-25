@@ -49,19 +49,21 @@ inline void checkParallel ( const Dune::FieldVector< ctype, dimworld > &normal,
 // Check whether the normal is orthogonal to the intersection, i.e.,
 // whether (J^-1 * n) = 0. Here J is the jacobian of the intersection
 // geometry (intersectionGlobal) and n is a normal.
-template< class ctype, int dimworld, int facedim, class String >
+template< class ctype, int dimworld, class JacobianInverseTransposed, class String >
 inline void checkJIn ( const Dune :: FieldVector< ctype, dimworld > &normal,
-                       const Dune :: FieldMatrix< ctype, dimworld, facedim > &jit,
+                       const JacobianInverseTransposed &jit,
                        const String & name )
 {
+  const int facedim = JacobianInverseTransposed::cols;
   Dune :: FieldVector< ctype, facedim > x( ctype( 0 ) );
   jit.umtv( normal, x );
   if (x.infinity_norm() > 1e-8)
   {
+    const Dune::FieldMatrix< ctype, dimworld, facedim > &mjit = jit;
     std :: cerr << "Error:  (J^-1 * n) != 0." << std :: endl;
     std :: cerr << "       " << name << " = " << normal
                 << std :: endl;
-    std :: cerr << "       J^-1^T = \n" << jit << std::endl;
+    std :: cerr << "       J^-1^T = \n" << mjit << std::endl;
     assert( false );
   }
 }
@@ -178,11 +180,11 @@ void checkIntersectionIterator(const GridViewType& view,
         DUNE_THROW(GridError, "boundary id has negative value (" << iIt->boundaryId() << ") !");
       }
 #endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
-      if( ! iIt->conforming() )
-      {
-        DUNE_THROW(GridError, "Boundary intersection should be conforming!");
-      }
     }
+
+    if( !iIt->neighbor() && !iIt->conforming() )
+      DUNE_THROW( GridError, "Intersections without neighbor should be conforming!" );
+
 
     // //////////////////////////////////////////////////////////////////////
     //   Check whether the 'has-intersection-with'-relation is symmetric
@@ -312,7 +314,7 @@ void checkIntersectionIterator(const GridViewType& view,
     for (size_t i=0; i<quad.size(); i++)
     {
       const typename LocalGeometry::LocalCoordinate &pt = quad[ i ].position();
-      const typename IntersectionGeometry::Jacobian &jit
+      const typename IntersectionGeometry::JacobianInverseTransposed &jit
         = intersectionGlobal.jacobianInverseTransposed( pt );
 
       // independently calculate the integration outer normal for the inside element
