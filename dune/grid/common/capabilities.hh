@@ -63,16 +63,6 @@ namespace Dune
       static const bool v = false;
     };
 
-    /** \brief Specialize with 'true' if implementation provides grids with hanging nodes. (default=false)
-        \ingroup GICapabilities
-        \deprecated
-     */
-    template<class Grid>
-    struct hasHangingNodes
-    {
-      static const bool v = false;
-    };
-
     /** \brief Specialize with 'true' if implementation provides backup and restore facilities. (default=false)
         \ingroup GICapabilities
      */
@@ -80,15 +70,6 @@ namespace Dune
     struct hasBackupRestoreFacilities
     {
       static const bool v = false;
-    };
-
-    /** \brief Specialize with 'true' if implementation provides unstructured grids. (default=true)
-        \ingroup GICapabilities
-        \deprecated
-     */
-    template <class Grid>
-    struct IsUnstructured {
-      static const bool v = true;
     };
 
     /** \brief Specialize with 'true' if the grid implementation is thread safe. (default=false)
@@ -159,20 +140,9 @@ namespace Dune
     };
 
     template<class Grid>
-    struct hasHangingNodes<const Grid>
-    {
-      static const bool v = Dune::Capabilities::hasHangingNodes<Grid>::v;
-    };
-
-    template<class Grid>
     struct hasBackupRestoreFacilities<const Grid>
     {
       static const bool v = Dune::Capabilities::hasBackupRestoreFacilities<Grid>::v;
-    };
-
-    template <class Grid>
-    struct IsUnstructured<const Grid> {
-      static const bool v = Dune::Capabilities::IsUnstructured<Grid>::v;
     };
 
     template <class Grid>
