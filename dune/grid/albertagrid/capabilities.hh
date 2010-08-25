@@ -52,15 +52,6 @@ namespace Dune
       static const bool v = true;
     };
 
-    /** \brief AlbertaGrid does not support hanging nodes
-     *  \ingroup AlbertaGrid
-     */
-    template< int dim, int dimworld >
-    struct hasHangingNodes< AlbertaGrid< dim, dimworld > >
-    {
-      static const bool v = false;
-    };
-
     /** \brief   AlbertaGrid has backup and restore facilities
      *  \ingroup AlbertaGrid
      */
