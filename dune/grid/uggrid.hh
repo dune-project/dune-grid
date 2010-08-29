@@ -988,15 +988,6 @@ namespace Dune {
       static const bool v = false;
     };
 
-    /** \brief UGGrid does support hanging nodes
-       \ingroup UGGrid
-     */
-    template<int dim>
-    struct hasHangingNodes< UGGrid<dim> >
-    {
-      static const bool v = true;
-    };
-
   }
 
 } // namespace Dune
