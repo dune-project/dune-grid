@@ -538,8 +538,6 @@ void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
                                                      const DataContainer& data)
 {
   dune_static_assert(dim==2 || dim==3, "You can only write 2d and 3d uniform data to AmiraMesh");
-  dune_static_assert(Capabilities::IsUnstructured<typename GridView::Grid>::v == false,
-                     "writeUniformData() only for structured grids!");
 
   // ///////////////////////////////////////////
   //   Detect grid bounding box
