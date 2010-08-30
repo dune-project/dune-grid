@@ -173,7 +173,7 @@ namespace Dune {
     /** \brief Create a structured simplex grid
 
         This works in all dimensions.  The Coxeter-Freudenthal-Kuhn triangulation is
-        used, which split each cube into dim! simplices.  See Allgower and Georg,
+        used, which splits each cube into dim! simplices.  See Allgower and Georg,
         'Numerical Path Following' for a description.
      */
     static shared_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
