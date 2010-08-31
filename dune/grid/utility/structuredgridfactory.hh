@@ -7,6 +7,10 @@
     \brief A class to construct structured cube and simplex grids using the grid factory
  */
 
+#include <dune/common/array.hh>
+#include <dune/common/shared_ptr.hh>
+#include <dune/grid/common/gridfactory.hh>
+
 namespace Dune {
 
   /** \brief Construct structured cube and simplex grids in unstructured grid managers
