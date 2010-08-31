@@ -3,6 +3,9 @@
 #ifndef  BASICUNITCUBE_HH
 #define  BASICUNITCUBE_HH
 
+#warning The BasicUnitCube class is deprecated (since dune-grid 2.1).  Please use the StructuredGridFactory\
+  (in dune/grid/utility/structuredgridfactory.hh) instead!
+
 #include <dune/grid/common/gridfactory.hh>
 
 // declaration of a basic unit cube that uses the GridFactory
