@@ -19,6 +19,7 @@ libalu_la_SOURCES =
 # This forces automake to use the C++ linker
 # (see the automake manual, section "Libtool Convenience Libraries")
 nodist_EXTRA_libalu_la_SOURCES = dummy.cc
+sourcescheck_DUMMY = dummy.cc
 libalu_la_LIBADD = $(ALULIB) $(DUNE_LIBS)
 
 include $(top_srcdir)/am/global-rules

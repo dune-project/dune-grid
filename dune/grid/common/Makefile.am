@@ -6,6 +6,7 @@ libgridcommon_la_SOURCES =
 # This forces automake to use the C++ linker
 # (see the automake manual, section "Libtool Convenience Libraries")
 nodist_EXTRA_libgridcommon_la_SOURCES = dummy.cc
+sourcescheck_DUMMY = dummy.cc
 libgridcommon_la_LIBADD = quadraturerules/libquadraturerules.la \
   $(DUNE_LIBS)
 

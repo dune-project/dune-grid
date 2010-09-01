@@ -112,7 +112,7 @@ test_alugrid_LDADD =				\
 	$(ALL_PKG_LIBS)				\
 	$(LDADD)
 
-test_geogrid_SOURCES = test-geogrid.cc
+test_geogrid_SOURCES = test-geogrid.cc functions.hh
 test_geogrid_CPPFLAGS = $(AM_CPPFLAGS)			\
 	$(ALL_PKG_CPPFLAGS)				\
 	-DCOORDFUNCTION=$(COORDFUNCTION)		\

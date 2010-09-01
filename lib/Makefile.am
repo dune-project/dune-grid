@@ -39,6 +39,7 @@ libdunegrid_la_SOURCES =
 # This forces automake to use the C++ linker
 # (see the automake manual, section "Libtool Convenience Libraries")
 nodist_EXTRA_libdunegrid_la_SOURCES = dummy.cc
+sourcescheck_DUMMY = dummy.cc
 libdunegrid_la_LIBADD = ../dune/grid/libgrid.la
 
 # ../dune/grid/albertagrid/libalbertagrid_?d.la is a convenience library, so
