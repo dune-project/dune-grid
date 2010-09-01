@@ -3,6 +3,8 @@
 #ifndef DUNE_GEOGRID_HOSTCORNERS_HH
 #define DUNE_GEOGRID_HOSTCORNERS_HH
 
+#include <dune/common/geometrytype.hh>
+
 namespace Dune
 {
 
