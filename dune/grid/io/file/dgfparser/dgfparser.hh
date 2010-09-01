@@ -61,7 +61,7 @@ namespace Dune
 
     //! method to write in Tetgen/Triangle Poly Format
     void writeTetgenPoly ( const std :: string &, std ::string &, std :: string & );
-    void writeTetgenPoly ( std::ostream & );
+    void writeTetgenPoly ( std::ostream &out, const bool writeSegments = true );
 
   protected:
     // dimension of world and problem: set through the readDuneGrid() method

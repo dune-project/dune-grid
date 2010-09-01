@@ -109,22 +109,19 @@ namespace Dune
 
   // Output to Tetgen/Triangle poly-file
   void DuneGridFormatParser
-  :: writeTetgenPoly ( const std :: string &prefixname,
-                       std :: string &extension, std::string &params )
+  ::writeTetgenPoly ( const std::string &prefixname, std::string &extension, std::string &params )
   {
     std::string name = prefixname;
-    if (dimw==2)
+    params = "";
+    if( dimw == 2 )
     {
       if (facemap.size()+elements.size()>0)
       {
         extension = ".poly";
-        params = " -Ap ";
+        params += " -Ap ";
       }
       else
-      {
         extension = ".node";
-        params = "";
-      }
       name += extension;
       info->print("writting poly file "+name);
       std::ofstream polys(name.c_str());
@@ -132,42 +129,23 @@ namespace Dune
     }
     else
     {
-      if (facemap.size()>0 && elements.size()==0)
+      if( facemap.size() > 0 && elements.size() == 0 )
       {
         extension = ".poly";
         name += extension;
         info->print("writting poly file "+name);
         std::ofstream polys(name.c_str());
         writeTetgenPoly(polys);
-        params = " -p ";
+        params += " -p ";
       }
       else
       {
+        extension = ".node";
+        std::ofstream nodes( (name + extension).c_str() );
+        writeTetgenPoly( nodes, false );
+
         {
-          std::string tmpname = name;
-          tmpname += ".node";
-          std::ofstream out(tmpname.c_str());
-          int nr = 0;
-          dverb << "Writing vertices...";
-          out << nofvtx << " " << dimw << " " << nofvtxparams << " 0" << std::endl;
-          for (int n=0; n<nofvtx; n++)
-          {
-            out << nr++ << "   ";
-            for (int j=0; j<dimw; j++)
-            {
-              out << vtx[n][j] << " ";
-            }
-            for (int j=0; j<nofvtxparams; ++j)
-            {
-              out << vtxParams[n][j] << " ";
-            }
-            out << std::endl;
-          }
-        }
-        {
-          std::string tmpname = name;
-          tmpname += ".ele";
-          std::ofstream out(tmpname.c_str());
+          std::ofstream out( (name + ".ele").c_str() );
           int nr = 0;
           dverb << "Writing elements...";
           out << elements.size() << " 4 " << nofelparams << std::endl;
@@ -183,9 +161,7 @@ namespace Dune
           }
         }
         {
-          std::string tmpname = name;
-          tmpname += ".face";
-          std::ofstream out(tmpname.c_str());
+          std::ofstream out( (name + ".face").c_str() );
           facemap_t :: iterator pos;
           int nr = 0;
           dverb << "Writing boundary faces...";
@@ -198,79 +174,89 @@ namespace Dune
             out << std::endl;
           }
         }
-        extension = ".node";
-        name += ".node";
-        if (elements.size()>0)
-          params = " -r ";
-        else
-          params = "";
+
+        if( elements.size() > 0 )
+          params += " -r ";
       }
     }
   }
 
 
   // Output to Tetgen/Triangle poly-file
-  void DuneGridFormatParser :: writeTetgenPoly ( std::ostream &out )
+  void DuneGridFormatParser::writeTetgenPoly ( std::ostream &out, bool writeSegments )
   {
-    int nr = 0;
     dverb << "Writing vertices...";
     out << nofvtx << " " << dimw << " " << nofvtxparams << " 0" << std::endl;
-    for (int n=0; n<nofvtx; n++) {
-      out << nr++ << "   ";
-      for (int j=0; j<dimw; j++) {
-        out << vtx[n][j] << " ";
-      }
-      for (int j=0; j<nofvtxparams; ++j) {
-        out << vtxParams[n][j] << " ";
-      }
+    for( int n = 0, nr = 0; n < nofvtx; ++n )
+    {
+      out << nr++ << " ";
+      for( int j = 0; j < dimw; ++j )
+        out << " " << vtx[ n ][ j ];
+      for( int j = 0; j < nofvtxparams; ++j )
+        out << " " << vtxParams[ n ][ j ];
       out << std::endl;
     }
     dverb << "done" << std::endl;
-    dverb.flush();
-    dverb << "Writing Segments...";
-    out << facemap.size()+elements.size()*3 << " 1 " << std::endl;
-    facemap_t :: iterator pos;
-    nr = 0;
-    for(size_t i=0; i<elements.size(); ++i) {
-      for (int k=0; k<3; k++)
-        out << nr++ << " "
-            << elements[i][(k+1)%3] << " " << elements[i][(k+2)%3] << " 0\n";
-    }
-    for(pos= facemap.begin(); pos!=facemap.end(); ++pos) {
-      if (dimw == 3) {
-        out << "1 0 " << pos->second << std::endl;
-        out << pos->first.size() << " ";
-      }
-      else out << nr << " ";
-      for (int i=0; i<pos->first.size(); i++)
-        out << pos->first.origKey(i) << " ";
-      if (dimw==2)
-        out << pos->second;
-      out << std::endl;
-      nr++;
-    }
-    out << "0" << std::endl;
-    if (nofelparams>0) {
-      assert(dimw==2);
-      out << elements.size()*nofelparams << std::endl;
+
+    if( writeSegments )
+    {
+      dverb << "Writing Segments...";
+      out << facemap.size() + elements.size()*3 << " 1 " << std::endl;
       int nr = 0;
-      for(size_t i=0; i<elements.size(); ++i) {
-        double coord[2] = {0,0};
-        for (int j=0; j<3; j++) {
-          coord[0] += vtx[elements[i][j]][0];
-          coord[1] += vtx[elements[i][j]][1];
-        }
-        coord[0] /= 3.;
-        coord[1] /= 3.;
-        for (int j=0; j<nofelparams; j++)
-          out << nr++ << " "
-              << coord[0] << " " << coord[1] << " " << elParams[i][j] << std::endl;
+
+      // write out triangle faces (this code is purely 2d, but also used for tetgen)
+      for( size_t i = 0; i < elements.size(); ++i )
+      {
+        for( int k = 0; k < 3; ++k )
+          out << nr++ << " " << elements[ i ][ (k+1)%3 ] << " " << elements[ i ][ (k+2)%3 ] << " 0" << std::endl;
       }
-    } else
-      out << 0 << std::endl;
-    dverb << "done" << std::endl;
-    dverb.flush();
+
+      // write out boundary segments
+      for( facemap_t::iterator pos = facemap.begin(); pos != facemap.end(); ++pos, ++nr )
+      {
+        if( dimw == 3 )
+        {
+          out << "1 0 " << pos->second << std::endl;
+          out << pos->first.size();
+        }
+        else
+          out << nr;
+        for( int i = 0; i < pos->first.size(); ++i )
+          out << " " << pos->first.origKey( i );
+        if( dimw == 2 )
+          out << " " << pos->second;
+        out << std::endl;
+      }
+      out << "0" << std::endl;
+
+      // write out element parameters (2d only)
+      if( nofelparams > 0 )
+      {
+        if( dimw != 2 )
+          DUNE_THROW( InvalidStateException, "Element parameters are not supported by tetgen." );
+        out << elements.size() * nofelparams << std::endl;
+        int nr = 0;
+        for( size_t i = 0; i < elements.size(); ++i )
+        {
+          double coord[ 2 ] = { 0, 0 };
+          for( int j = 0; j < 3; ++j )
+          {
+            coord[0] += vtx[ elements[ i ][ j ] ][ 0 ];
+            coord[1] += vtx[ elements[ i ][ j ] ][ 1 ];
+          }
+          coord[0] /= 3.;
+          coord[1] /= 3.;
+          for( int j = 0; j < nofelparams; ++j )
+            out << nr++ << " " << coord[ 0 ] << " " << coord[ 1 ] << " " << elParams[ i ][ j ] << std::endl;
+        }
+      }
+      else
+        out << 0 << std::endl;
+
+      dverb << "done" << std::endl;
+    }
   }
+
 
   bool DuneGridFormatParser::isDuneGridFormat ( std::istream &gridin )
   {
@@ -615,26 +601,20 @@ namespace Dune
     dgf :: SimplexGenerationBlock para(gridin);
     info->block(para);
 
-    // std::string name = "gridparserfile.polylists.tmp";
-    std::string suffix;
-    std::string name = para.dumpFileName(); // look if dump file name was provided
-    bool tempFile = name.empty();
+    // check whether a dump file name was provided
+    std::string name = para.dumpFileName();
+    const bool tempFile = name.empty();
 
-    if (para.hasfile()) // a triangle/tetgen file is provided
+    if( para.hasfile() ) // a triangle/tetgen file is provided
       name = para.filename();
-    else if (tempFile) // we have no dump file name and no triangle/tetgen file -> use temporary file
+    else if( tempFile ) // we have no dump file name and no triangle/tetgen file -> use temporary file
       name = temporaryFileName();
 
-    // const std::string prefixname = name;
-    // const std::string inname = name;
+    std::string suffix;
     std::string params;
 
-    if(!para.hasfile()) {
-      {
-        writeTetgenPoly(name,suffix,params);
-      }
-    }
-    else {
+    if( para.hasfile() )
+    {
       if (para.filetype().size()==0) {
         readTetgenTriangle(name);
         return;
@@ -651,8 +631,11 @@ namespace Dune
                                                                      << "Simplexgeneration-Block");
       }
     }
+    else
+      writeTetgenPoly( name, suffix, params );
+
     int call_nr = 1;
-    if (dimw==2)
+    if( dimw == 2 )
     {
       std::stringstream command;
       command << std::fixed;
@@ -678,8 +661,14 @@ namespace Dune
       command << name << suffix;
       dverb << "Calling : " << command.str() << std::endl;
       info->print("Calling : "+command.str());
-      if( system(command.str().c_str()) < 0 )
-        DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
+      const int status = system( command.str().c_str() );
+      if( status != 0 )
+      {
+        if( status < 0 )
+          DUNE_THROW( SystemError, "Unable to call '" << command.str() << "'." );
+        else
+          DUNE_THROW( DGFException, "Triangle finished unsuccessfully (Command: '" << command.str() << "')." );
+      }
       if (para.display())
       {
         std::stringstream command;
@@ -691,33 +680,35 @@ namespace Dune
           DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
       }
     }
-    else if (dimw==3)
+    else if( dimw == 3 )
     {
       { // first call
         std::stringstream command;
         command << std::fixed;
-        std::string suffix;
+        // std::string suffix;
 
         if (para.haspath())
           command << para.path() << "/";
         command << "tetgen " << params;
 
-        if(para.hasfile())
+        if( para.hasfile() )
         {
-          // name = para.filename();
-          suffix = "."+para.filetype();
+          suffix = "." + para.filetype();
           command << " " << para.parameter() << " ";
-        }
-        else
-        {
-          suffix = "";
         }
 
         command << name << suffix;
         dverb << "Calling : " << command.str() << std::endl;
         info->print("Calling : "+command.str());
-        if( system(command.str().c_str()) < 0 )
-          DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
+
+        const int status = system( command.str().c_str() );
+        if( status != 0 )
+        {
+          if( status < 0 )
+            DUNE_THROW( SystemError, "Unable to call '" << command.str() << "'." );
+          else
+            DUNE_THROW( DGFException, "TetGen finished unsuccessfully (Command: '" << command.str() << "')." );
+        }
       }
       if (para.minAngle()>0 || para.maxArea()>0)
       { // second call
