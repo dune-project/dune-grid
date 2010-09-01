@@ -20,9 +20,9 @@ testsubtopologies_SOURCES = testsubtopologies.cc
 testsubtopologies_CPPFLAGS = $(AM_CPPFLAGS)			\
 	-DGEOMETRYTYPE=$(GEOMETRYTYPE) -DDIMENSION=$(DIMENSION)
 
-testmapping_SOURCES = testmapping.cc
+testmapping_SOURCES = testmapping.cc testgeo.hh
 
-testgeo_SOURCES = testgeo.cc
+testgeo_SOURCES = testgeo.cc testgeo.hh
 
 testmatrix_SOURCES = testmatrix.cc
 testmatrix_CPPFLAGS = $(AM_CPPFLAGS) $(GMP_CPPFLAGS)
