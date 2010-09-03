@@ -185,7 +185,7 @@ namespace Dune
     for( size_t i = 0; i < numVx; ++i )
     {
       VertexType global = (*prj)( coords [ i ] );
-      if( (global - coords[ i ]).two_norm() > 1e-6 )
+      if( (global - coords[ i ]).two_norm() >= epsilon_ )
       {
         DUNE_THROW(GridError,"BoundarySegment does not map face vertices to face vertices.");
       }
@@ -298,8 +298,8 @@ namespace Dune
         Iterator pos = periodicNeighborMap_.find( boundaryId.first );
         if( pos != periodicNeighborMap_.end() )
           out << "  " << pos->second;
-        //else
-        //  DUNE_THROW( InvalidStateException, "Periodic Neighbor not found." );
+        else
+          DUNE_THROW( InvalidStateException, "Periodic Neighbor not found." );
       }
       out << std::endl;
 
@@ -443,18 +443,18 @@ namespace Dune
       {
         const WorldVector vv[ 2 ] = { vertices_[ fit->first[ 0 ] ], vertices_[ fit->first[ 1 ] ] };
 
-        if( ((vv[ 0 ] - w[ 0 ]).two_norm() < 1e-8) && ((vv[ 1 ] - w[ 1 ]).two_norm() < 1e-8) )
+        if( ((vv[ 0 ] - w[ 0 ]).two_norm() < epsilon_) && ((vv[ 1 ] - w[ 1 ]).two_norm() < epsilon_) )
           return fit;
-        if( ((vv[ 0 ] - w[ 1 ]).two_norm() < 1e-8) && ((vv[ 1 ] - w[ 0 ]).two_norm() < 1e-8) )
+        if( ((vv[ 0 ] - w[ 1 ]).two_norm() < epsilon_) && ((vv[ 1 ] - w[ 0 ]).two_norm() < epsilon_) )
           return fit;
 
         WorldVector ww[ 2 ];
         ww[ 0 ] = trit->evaluate( vv[ 0 ] );
         ww[ 1 ] = trit->evaluate( vv[ 1 ] );
 
-        if( ((v[ 0 ] - ww[ 0 ]).two_norm() < 1e-8) && ((v[ 1 ] - ww[ 1 ]).two_norm() < 1e-8) )
+        if( ((v[ 0 ] - ww[ 0 ]).two_norm() < epsilon_) && ((v[ 1 ] - ww[ 1 ]).two_norm() < epsilon_) )
           return fit;
-        if( ((v[ 0 ] - ww[ 1 ]).two_norm() < 1e-8) && ((v[ 1 ] - ww[ 0 ]).two_norm() < 1e-8) )
+        if( ((v[ 0 ] - ww[ 1 ]).two_norm() < epsilon_) && ((v[ 1 ] - ww[ 0 ]).two_norm() < epsilon_) )
           return fit;
       }
     }

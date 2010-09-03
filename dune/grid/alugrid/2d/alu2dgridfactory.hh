@@ -77,16 +77,6 @@ namespace Dune
     typedef std::vector< Transformation > FaceTransformationVector;
     typedef std::map< FaceType, unsigned int, FaceLess > PeriodicNeighborMap;
 
-    VertexVector vertices_;
-    ElementVector elements_;
-    BoundaryIdVector boundaryIds_;
-    const DuneBoundaryProjectionType* globalProjection_ ;
-    BoundaryProjectionMap boundaryProjections_;
-    unsigned int numFacesInserted_;
-    bool grdVerbose_;
-    FaceTransformationVector faceTransformations_;
-    PeriodicNeighborMap periodicNeighborMap_;
-
     // copy vertex numbers and store smalled #dimension ones
     void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
     {
@@ -228,12 +218,14 @@ namespace Dune
 
     Grid *createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
 
+    void setTolerance ( const ctype &epsilon ) { epsilon_ = epsilon; }
+
   protected:
-    /** \brief insert a vertex into the coarse grid
+    /** \brief set factory's verbosity
      *
      *  \param[in]  verbose  verbosity (true/flase)
      */
-    void setVerbosity( const bool verbose ) { grdVerbose_ = verbose ; }
+    void setVerbosity( const bool verbose ) { grdVerbose_ = verbose; }
 
   private:
     static std::string temporaryFileName (const std::string& dgfName );
@@ -241,6 +233,17 @@ namespace Dune
     void correctElementOrientation ();
     typename FaceMap::iterator findPeriodicNeighbor( const FaceType &key, FaceMap &faceMap ) const;
     void recreateBoundaryIds ( const int defaultId = 1 );
+
+    VertexVector vertices_;
+    ElementVector elements_;
+    BoundaryIdVector boundaryIds_;
+    const DuneBoundaryProjectionType* globalProjection_ ;
+    BoundaryProjectionMap boundaryProjections_;
+    unsigned int numFacesInserted_;
+    bool grdVerbose_;
+    FaceTransformationVector faceTransformations_;
+    PeriodicNeighborMap periodicNeighborMap_;
+    ctype epsilon_;
   };
 
 
@@ -364,7 +367,8 @@ namespace Dune
   inline ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( bool removeGeneratedFile )
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
-      grdVerbose_( true )
+      grdVerbose_( true ),
+      epsilon_( 1e-8 )
   {}
 
 
@@ -372,7 +376,8 @@ namespace Dune
   inline ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( const std::string &filename )
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
-      grdVerbose_( true )
+      grdVerbose_( true ),
+      epsilon_( 1e-8 )
   {}
 
 

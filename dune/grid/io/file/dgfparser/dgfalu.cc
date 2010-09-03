@@ -4,6 +4,46 @@
 namespace Dune
 {
 
+  namespace dgf
+  {
+
+    struct ALU2dGridParameterBlock
+      : public GridParameterBlock
+    {
+      ALU2dGridParameterBlock( std::istream &in )
+        : GridParameterBlock( in ),
+          tolerance_( 1e-8 )
+      {
+        if( findtoken( "tolerance" ) )
+        {
+          double x;
+          if( getnextentry(x) )
+            tolerance_ = x;
+          else
+          {
+            dwarn << "GridParameterBlock: found keyword `tolerance' but no value, "
+                  << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+          }
+          if( tolerance_ <= 0 )
+            DUNE_THROW( DGFException, "Nonpositive tolerance specified!" );
+        }
+        else
+        {
+          dwarn << "GridParameterBlock: Parameter 'tolerance' not specified, "
+                << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+        }
+      }
+
+      double tolerance () const { return tolerance_; }
+
+    protected:
+      double tolerance_;
+    };
+
+  }
+
+
+
   inline bool DGFGridFactory< ALUSimplexGrid< 3, 3 > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
@@ -171,10 +211,12 @@ namespace Dune
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    dgf::GridParameterBlock parameter( file );
+    dgf::ALU2dGridParameterBlock parameter( file );
 
     if( rank == 0 )
     {
+      factory_.setTolerance( parameter.tolerance() );
+
       if( !dgf_.readDuneGrid( file, 2, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
@@ -264,10 +306,12 @@ namespace Dune
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    dgf::GridParameterBlock parameter( file );
+    dgf::ALU2dGridParameterBlock parameter( file );
 
     if( rank == 0 )
     {
+      factory_.setTolerance( parameter.tolerance() );
+
       if( !dgf_.readDuneGrid( file, 2, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
@@ -357,10 +401,12 @@ namespace Dune
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    dgf::GridParameterBlock parameter( file );
+    dgf::ALU2dGridParameterBlock parameter( file );
 
     if( rank == 0 )
     {
+      factory_.setTolerance( parameter.tolerance() );
+
       if( !dgf_.readDuneGrid( file, 2, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
