@@ -39,7 +39,7 @@ namespace Dune {
       MultiIndex(const array<unsigned int,dim>& limits)
         : limits_(limits)
       {
-        this->fill(0);
+        std::fill(this->begin(), this->end(), 0);
       }
 
       /** \brief Increment the MultiIndex */
