@@ -55,9 +55,9 @@ namespace Dune
 
       bool affine;
 
-      bool jacobianTransposedComputed;
-      bool jacobianInverseTransposedComputed;
-      bool integrationElementComputed;
+      bool jacobianTransposedComputed;        // = affine, if jacobian transposed was computed
+      bool jacobianInverseTransposedComputed; // = affine, if jacobian inverse transposed was computed
+      bool integrationElementComputed;        // = affine, if integration element was computed
     };
 
 
@@ -90,7 +90,6 @@ namespace Dune
 
       operator const FieldMatrix & () const
       {
-        assert( *this );
         return storage().jacobianTransposed;
       }
 
@@ -177,7 +176,6 @@ namespace Dune
 
       operator const FieldMatrix & () const
       {
-        assert( *this );
         return storage().jacobianInverseTransposed;
       }
 
