@@ -9,12 +9,14 @@ DIMENSION = 3
 
 check_HEADERS = testgeo.hh
 
-check_PROGRAMS = testsubtopologies testmapping testgeo testmatrix
+check_PROGRAMS = testbasicgeometry testsubtopologies testmapping testgeo testmatrix
 TESTS = $(check_PROGRAMS)
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS)
 AM_LDFLAGS = @AM_LDFLAGS@ $(ALL_PKG_LDFLAGS)
 LDADD = $(ALL_PKG_LIBS) @LDADD@
+
+testbasicgeometry_SOURCES = testbasicgeometry.cc
 
 testsubtopologies_SOURCES = testsubtopologies.cc
 testsubtopologies_CPPFLAGS = $(AM_CPPFLAGS)			\
