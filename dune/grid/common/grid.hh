@@ -11,7 +11,6 @@
 #include <string>
 
 // dune-common includes
-#include <dune/common/deprecated.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/geometrytype.hh>
