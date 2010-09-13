@@ -22,7 +22,7 @@
 /*! @defgroup SimplexRefinement Refinement implementation for simplices
     @ingroup Refinement
 
-   This is mainly based on Jürgen Beys
+   This is mainly based on JÃ¼rgen Beys
    <http://www.igpm.rwth-aachen.de/bey/> dissertation.  The relevant
    part is available from
    <http://www.igpm.rwth-aachen.de/Download/reports/bey/simplex.ps.gz>.
@@ -90,7 +90,7 @@
    -->
    \f[N(n,x)=\left({n+x}\atop x\right)\f]
 
-   See Bronstein, Semendjajew, Musiol, Mühlig "Taschenbuch der
+   See Bronstein, Semendjajew, Musiol, MÃ¼hlig "Taschenbuch der
    Mathematik" (1999), Formula (1.35c)
 
    Observations:
