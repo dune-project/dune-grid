@@ -3,7 +3,7 @@
 #include <config.h>
 
 // #define NO_2D
-#define NO_3D
+// #define NO_3D
 
 #include <iostream>
 #include <sstream>
@@ -20,7 +20,7 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
-#include "checktwists.cc"
+//#include "checktwists.cc"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 
@@ -36,8 +36,6 @@ void checkCapabilities(const Grid& grid)
   static const bool hasEntity = Dune::Capabilities::hasEntity<Grid, 1> :: v == true;
   dune_static_assert( hasEntity,
                       "hasEntity is not set correctly");
-  dune_static_assert( Dune::Capabilities::hasHangingNodes< Grid > :: v == ! leafconform,
-                      "hasHangingNodes is not set correctly");
   dune_static_assert( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                       "hasBackupRestoreFacilities is not set correctly");
 
