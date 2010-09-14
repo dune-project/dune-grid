@@ -189,8 +189,8 @@ namespace Dune
         opposite_ = opposite;
       }
 
-      // current element from which we started the intersection iterator
     private:
+      // current element from which we started the intersection iterator
       HElementType *inside_;
       HElementType *outside_;
       int nFaces_;
@@ -268,7 +268,7 @@ namespace Dune
     GeometryType type () const;
 
   protected:
-    //virtual bool conforming() const = 0;
+    virtual bool conforming() const = 0;
 
     //! return true if intersection is with boundary
     void checkValid () ;

@@ -275,19 +275,17 @@ namespace Dune
     // only in non-conform situation we use default method
     if( current.useOutside_ )
     {
-      if( ! this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date() )
-      {
-        this->grid_.getRealImplementation(intersectionSelfLocal_).
-        buildLocalGeom( inside()->geometry() , geometry() );
-      }
-      assert(this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date());
+      if( !GridImp::getRealImplementation( intersectionSelfLocal_ ).up2Date() )
+        GridImp::getRealImplementation( intersectionSelfLocal_ ).buildLocalGeom( inside()->geometry(), geometry() );
+      assert( GridImp::getRealImplementation( intersectionSelfLocal_ ).up2Date() );
       return intersectionSelfLocal_;
     }
     else
     {
-      const int twist = (current.nFaces() == 3) ? (current.index_ % 2) : (current.index_>>1)^(current.index_&1);
       // parameters are face and twist
-      return localGeomStorage_.localGeom(  current.index_, twist, current.nFaces() );
+      const int localTwist = (current.nFaces() == 3) ? (current.index_ % 2) : (current.index_>>1)^(current.index_&1);
+      const int twist = (twistInInside() + localTwist) % 2;
+      return localGeomStorage_.localGeom( current.index_, twist, current.nFaces() );
     }
   }
 
@@ -298,26 +296,20 @@ namespace Dune
     assert( current.inside() && current.outside() );
 
     // only in non-conform situation we use default method
-    //if( ! this->conforming() )
-    //if( this->current.useOutside_ )
+    if( (current.nFaces() != 3) || !conforming() )
     {
-      if( ! this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date() )
-      {
-        // we don't know here wether we have non-conform or conform situation on the neighbor
-        this->grid_.getRealImplementation(intersectionNeighborLocal_).
-        buildLocalGeom( outside()->geometry(), geometry() );
-      }
-      assert(this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date());
+      if( !GridImp::getRealImplementation( intersectionNeighborLocal_ ).up2Date() )
+        GridImp::getRealImplementation( intersectionNeighborLocal_ ).buildLocalGeom( outside()->geometry(), geometry() );
+      assert( GridImp::getRealImplementation( intersectionNeighborLocal_ ).up2Date());
       return intersectionNeighborLocal_;
     }
-    /*
-       else
-       {
-       // parameters are face and twist
-       const int twist = (current.nFaces() == 3) ? (current.opposite_ % 2) : (current.opposite_>>1)^(current.opposite_&1);
-       return localGeomStorage_.localGeom( current.opposite_, 1-twist, current.nFaces()  );
-       }
-     */
+    else
+    {
+      // parameters are face and twist
+      const int localTwist = (current.nFaces() == 3) ? (current.opposite() % 2) : (current.opposite() >> 1)^(current.opposite() & 1);
+      const int twist = (twistInOutside() + localTwist) % 2;
+      return localGeomStorage_.localGeom( current.opposite(), twist, current.nFaces()  );
+    }
   }
 
   template<class GridImp>
@@ -326,17 +318,15 @@ namespace Dune
   {
     assert( current.inside() );
 
-    if( ! this->grid_.getRealImplementation(intersectionGlobal_).up2Date() )
+    if( !GridImp::getRealImplementation( intersectionGlobal_ ).up2Date() )
     {
       if( current.useOutside_ )
-        this->grid_.getRealImplementation(intersectionGlobal_).
-        buildGeom(*current.outside(), current.opposite());
+        GridImp::getRealImplementation( intersectionGlobal_ ).buildGeom( *current.outside(), current.opposite() );
       else
-        this->grid_.getRealImplementation(intersectionGlobal_).
-        buildGeom(*current.inside(), current.index_);
+        GridImp::getRealImplementation( intersectionGlobal_ ).buildGeom( *current.inside(), current.index_ );
     }
 
-    assert(this->grid_.getRealImplementation(intersectionGlobal_).up2Date());
+    assert( GridImp::getRealImplementation( intersectionGlobal_ ).up2Date() );
     return intersectionGlobal_;
   }
 
@@ -344,17 +334,15 @@ namespace Dune
   template< class GridImp >
   inline GeometryType ALU2dGridIntersectionBase< GridImp >::type () const
   {
-    return GeometryType(
-             (eltype == ALU2DSPACE triangle ? GeometryType::simplex : GeometryType::cube),
-             1 );
+    return GeometryType( eltype == ALU2DSPACE triangle ? GeometryType::simplex : GeometryType::cube, 1 );
   }
 
   template< class GridImp >
   inline void ALU2dGridIntersectionBase< GridImp >:: unsetUp2Date ()
   {
-    grid_.getRealImplementation(intersectionGlobal_).unsetUp2Date();
-    grid_.getRealImplementation(intersectionSelfLocal_).unsetUp2Date();
-    grid_.getRealImplementation(intersectionNeighborLocal_).unsetUp2Date();
+    GridImp::getRealImplementation( intersectionGlobal_ ).unsetUp2Date();
+    GridImp::getRealImplementation( intersectionSelfLocal_ ).unsetUp2Date();
+    GridImp::getRealImplementation( intersectionNeighborLocal_ ).unsetUp2Date();
   }
 
 
