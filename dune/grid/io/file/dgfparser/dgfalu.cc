@@ -196,9 +196,10 @@ namespace Dune
   inline bool DGFGridFactory< ALUSimplexGrid< 2, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
+    const int dimgrid = 2;
     const int dimworld = dimw;
     dgf_.element = DuneGridFormatParser::Simplex;
-    dgf_.dimgrid = 2;
+    dgf_.dimgrid = dimgrid;
     dgf_.dimw = dimworld;
 
     const bool isDGF = dgf_.isDuneGridFormat( file );
@@ -217,7 +218,7 @@ namespace Dune
     {
       factory_.setTolerance( parameter.tolerance() );
 
-      if( !dgf_.readDuneGrid( file, 2, dimworld ) )
+      if( !dgf_.readDuneGrid( file, dimgrid, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
       for( int n = 0; n < dgf_.nofvtx; ++n )
@@ -228,16 +229,16 @@ namespace Dune
         factory_.insertVertex( pos );
       }
 
-      GeometryType elementType( GeometryType::simplex, 2 );
+      GeometryType elementType( GeometryType::simplex, dimgrid );
       for( int n = 0; n < dgf_.nofelements; ++n )
       {
         factory_.insertElement( elementType, dgf_.elements[ n ] );
-        for( int face = 0; face <= dimworld; ++face )
+        for( int face = 0; face <= dimgrid; ++face )
         {
           typedef typename DuneGridFormatParser::facemap_t::key_type Key;
           typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
 
-          const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
+          const Key key = ElementFaceUtil::generateFace( dimgrid, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
           if( it != dgf_.facemap.end() )
             factory_.insertBoundary( n, face, it->second );
@@ -252,7 +253,7 @@ namespace Dune
       const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
       for( size_t i = 0; i < numBoundaryProjections; ++i )
       {
-        GeometryType type( GeometryType::simplex, dimworld-1 );
+        GeometryType type( GeometryType::simplex, dimgrid-1 );
         const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
         const DuneBoundaryProjection< dimworld > *projection
           = projectionBlock.boundaryProjection< dimworld >( i );
@@ -291,9 +292,10 @@ namespace Dune
   inline bool DGFGridFactory< ALUCubeGrid< 2, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
+    const int dimgrid = 2;
     const int dimworld = dimw;
     dgf_.element = DuneGridFormatParser::Cube;
-    dgf_.dimgrid = 2;
+    dgf_.dimgrid = dimgrid;
     dgf_.dimw = dimworld;
 
     const bool isDGF = dgf_.isDuneGridFormat( file );
@@ -312,7 +314,7 @@ namespace Dune
     {
       factory_.setTolerance( parameter.tolerance() );
 
-      if( !dgf_.readDuneGrid( file, 2, dimworld ) )
+      if( !dgf_.readDuneGrid( file, dimgrid, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
       for( int n = 0; n < dgf_.nofvtx; ++n )
@@ -323,16 +325,16 @@ namespace Dune
         factory_.insertVertex( pos );
       }
 
-      GeometryType elementType( GeometryType::cube, 2 );
+      GeometryType elementType( GeometryType::cube, dimgrid );
       for( int n = 0; n < dgf_.nofelements; ++n )
       {
         factory_.insertElement( elementType, dgf_.elements[ n ] );
-        for( int face = 0; face < 2*dimworld; ++face )
+        for( int face = 0; face < 2*dimgrid; ++face )
         {
           typedef typename DuneGridFormatParser::facemap_t::key_type Key;
           typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
 
-          const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
+          const Key key = ElementFaceUtil::generateFace( dimgrid, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
           if( it != dgf_.facemap.end() )
             factory_.insertBoundary( n, face, it->second );
@@ -347,7 +349,7 @@ namespace Dune
       const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
       for( size_t i = 0; i < numBoundaryProjections; ++i )
       {
-        GeometryType type( GeometryType::simplex, dimworld-1 );
+        GeometryType type( GeometryType::simplex, dimgrid-1 );
         const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
         const DuneBoundaryProjection< dimworld > *projection
           = projectionBlock.boundaryProjection< dimworld >( i );
@@ -386,9 +388,10 @@ namespace Dune
   inline bool DGFGridFactory< ALUConformGrid< 2, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
+    const int dimgrid = 2;
     const int dimworld = dimw;
     dgf_.element = DuneGridFormatParser::Simplex;
-    dgf_.dimgrid = 2;
+    dgf_.dimgrid = dimgrid;
     dgf_.dimw = dimworld;
 
     const bool isDGF = dgf_.isDuneGridFormat( file );
@@ -407,7 +410,7 @@ namespace Dune
     {
       factory_.setTolerance( parameter.tolerance() );
 
-      if( !dgf_.readDuneGrid( file, 2, dimworld ) )
+      if( !dgf_.readDuneGrid( file, dimgrid, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
       for( int n = 0; n < dgf_.nofvtx; ++n )
@@ -418,16 +421,16 @@ namespace Dune
         factory_.insertVertex( pos );
       }
 
-      GeometryType elementType( GeometryType::simplex, 2 );
+      GeometryType elementType( GeometryType::simplex, dimgrid );
       for( int n = 0; n < dgf_.nofelements; ++n )
       {
         factory_.insertElement( elementType, dgf_.elements[ n ] );
-        for( int face = 0; face <= dimworld; ++face )
+        for( int face = 0; face <= dimgrid; ++face )
         {
           typedef typename DuneGridFormatParser::facemap_t::key_type Key;
           typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
 
-          const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
+          const Key key = ElementFaceUtil::generateFace( dimgrid, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
           if( it != dgf_.facemap.end() )
             factory_.insertBoundary( n, face, it->second );
@@ -442,7 +445,7 @@ namespace Dune
       const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
       for( size_t i = 0; i < numBoundaryProjections; ++i )
       {
-        GeometryType type( GeometryType::cube, dimworld-1 );
+        GeometryType type( GeometryType::cube, dimgrid-1 );
         const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
         const DuneBoundaryProjection< dimworld > *projection
           = projectionBlock.boundaryProjection< dimworld >( i );
