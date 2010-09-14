@@ -231,7 +231,8 @@ namespace Dune
     static std::string temporaryFileName (const std::string& dgfName );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
-    typename FaceMap::iterator findPeriodicNeighbor( const FaceType &key, FaceMap &faceMap ) const;
+    typename FaceMap::const_iterator findPeriodicNeighbor( const FaceMap &faceMap, const FaceType &key ) const;
+    void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
 
     VertexVector vertices_;

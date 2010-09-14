@@ -271,9 +271,8 @@ namespace Dune
     }
 
     const size_t boundarySegments = boundaryIds_.size();
-    out << boundarySegments << std :: endl;
-    typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator
-    BoundaryIdIteratorType;
+    out << boundarySegments << std::endl;
+    typedef typename std::vector< std::pair< FaceType, int > >::iterator BoundaryIdIterator;
 
     BoundaryProjectionVector* bndProjections = 0;
     const size_t bndProjectionSize = boundaryProjections_.size();
@@ -281,12 +280,12 @@ namespace Dune
     {
       // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments,
-                                                     (DuneBoundaryProjectionType*) 0 );
+                                                     (DuneBoundaryProjectionType*)0 );
     }
 
-    const BoundaryIdIteratorType endB = boundaryIds_.end();
+    const BoundaryIdIterator endB = boundaryIds_.end();
     int segmentIndex = 0;
-    for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
+    for( BoundaryIdIterator it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
     {
       const std::pair< FaceType, int > &boundaryId = *it;
       out << boundaryId.second;
@@ -294,8 +293,10 @@ namespace Dune
         out << "  " << boundaryId.first[ i ];
       if( boundaryId.second == periodicBndId )
       {
-        typedef typename PeriodicNeighborMap::const_iterator Iterator;
-        Iterator pos = periodicNeighborMap_.find( boundaryId.first );
+        FaceType key = boundaryId.first;
+        std::sort( key.begin(), key.end() );
+
+        typename PeriodicNeighborMap::const_iterator pos = periodicNeighborMap_.find( key );
         if( pos != periodicNeighborMap_.end() )
           out << "  " << pos->second;
         else
@@ -363,24 +364,16 @@ namespace Dune
 
   template< template< int, int > class ALUGrid, int dimw >
   std::string
-  ALU2dGridFactory<ALUGrid,dimw>::temporaryFileName ( const std::string& dgfName )
+  ALU2dGridFactory<ALUGrid,dimw>::temporaryFileName ( const std::string &dgfName )
   {
-    std::string filename ( dgfName );
-    if( filename.empty() )
-    {
-      filename = "ALU2dGrid.XXXXXX";
-    }
-    else
-    {
-      filename += ".XXXXXX";
-    }
+    const std::string filename( (dgfName.empty() ? std::string( "ALU2dGrid" ) : dgfName) + ".XXXXXX" );
     char filetemp[ FILENAME_MAX ];
-    std :: strcpy( filetemp, filename.c_str() );
+    std::strcpy( filetemp, filename.c_str() );
     const int fd = mkstemp( filetemp );
     if( fd < 0 )
       DUNE_THROW( IOError, "Unable to create temporary file." );
     close( fd );
-    return std :: string( filetemp );
+    return std::string( filetemp );
   }
 
 
@@ -421,12 +414,12 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid, int dimw >
-  typename ALU2dGridFactory< ALUGrid, dimw >::FaceMap::iterator
+  typename ALU2dGridFactory< ALUGrid, dimw >::FaceMap::const_iterator
   ALU2dGridFactory< ALUGrid, dimw >
-  ::findPeriodicNeighbor ( const FaceType &key, FaceMap &faceMap ) const
+  ::findPeriodicNeighbor ( const FaceMap &faceMap, const FaceType &key ) const
   {
     typedef typename FaceTransformationVector::const_iterator TrafoIterator;
-    typedef typename FaceMap::iterator FaceIterator;
+    typedef typename FaceMap::const_iterator FaceMapIterator;
 
     const WorldVector v[ 2 ] = { vertices_[ key[ 0 ] ], vertices_[ key[ 1 ] ] };
 
@@ -438,8 +431,8 @@ namespace Dune
       w[ 0 ] = trit->evaluate( v[ 0 ] );
       w[ 1 ] = trit->evaluate( v[ 1 ] );
 
-      const FaceIterator fend = faceMap.end();
-      for( FaceIterator fit = faceMap.begin(); fit != fend; ++fit )
+      const FaceMapIterator fend = faceMap.end();
+      for( FaceMapIterator fit = faceMap.begin(); fit != fend; ++fit )
       {
         const WorldVector vv[ 2 ] = { vertices_[ fit->first[ 0 ] ], vertices_[ fit->first[ 1 ] ] };
 
@@ -463,6 +456,43 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid, int dimw >
+  void ALU2dGridFactory< ALUGrid, dimw >
+  ::reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id )
+  {
+    typedef typename PeriodicNeighborMap::const_iterator PeriodicNbIterator;
+    typedef typename FaceMap::const_iterator FaceMapIterator;
+    typedef std::pair< FaceType, int > BoundaryId;
+
+    const size_t index = boundaryIds_.size();
+    insertBoundary( pos->second.first, pos->second.second, -id );
+    BoundaryId &boundaryId = boundaryIds_[ index ];
+
+    const FaceType &key = pos->first;
+    const PeriodicNbIterator nb = periodicNeighborMap_.find( key );
+    if( nb != periodicNeighborMap_.end() )
+    {
+      boundaryId.second = periodicBndId;
+      const BoundaryId &nbBoundaryId = boundaryIds_[ nb->second ];
+      FaceType nbKey = nbBoundaryId.first;
+      std::sort( nbKey.begin(), nbKey.end() );
+      periodicNeighborMap_[ nbKey ] = index;
+    }
+    else
+    {
+      const FaceMapIterator nbPos = findPeriodicNeighbor( faceMap, key );
+      if( nbPos != faceMap.end() )
+      {
+        boundaryId.second = periodicBndId;
+        const FaceType &nbKey = nbPos->first;
+        if( periodicNeighborMap_.find( nbKey ) != periodicNeighborMap_.end() )
+          DUNE_THROW( GridError, "One boundary segment can only identified with one other." );
+        periodicNeighborMap_[ nbKey ] = index;
+      }
+    }
+  }
+
+
+  template< template< int, int > class ALUGrid, int dimw >
   void ALU2dGridFactory< ALUGrid, dimw >::recreateBoundaryIds ( const int defaultId )
   {
     typedef typename FaceMap::iterator FaceIterator;
@@ -476,7 +506,7 @@ namespace Dune
     const unsigned int numElements = elements_.size();
     for( unsigned int n = 0; n < numElements; ++n )
     {
-      for( unsigned int face = 0; face < elements_[n].size(); ++face )
+      for( unsigned int face = 0; face < elements_[ n ].size(); ++face )
       {
         FaceType key;
         generateFace( elements_[ n ], face, key );
@@ -502,60 +532,19 @@ namespace Dune
     {
       FaceType key = bndIt->first;
       std::sort( key.begin(), key.end() );
-      int id = -bndIt->second;
 
       const FaceIterator pos = faceMap.find( key );
       if( pos == faceMap.end() )
-        continue;
+        DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
 
-      const PeriodicNbIterator nb = periodicNeighborMap_.find( key );
-      if( nb != periodicNeighborMap_.end() )
-      {
-        id = -periodicBndId;
-        periodicNeighborMap_[ boundaryIds_[ nb->second ].first ] = boundaryIds_.size();
-      }
-      else
-      {
-        const FaceIterator nbpos = findPeriodicNeighbor( key, faceMap );
-        if( nbpos != faceMap.end() )
-        {
-          id = -periodicBndId;
-          if( periodicNeighborMap_.find( nbpos->first ) != periodicNeighborMap_.end() )
-            DUNE_THROW( GridError, "One boundary segment can only identified with one other." );
-          periodicNeighborMap_[ nbpos->first ] = boundaryIds_.size();
-        }
-      }
-
-      insertBoundary( pos->second.first, pos->second.second, id );
+      reinsertBoundary( faceMap, pos, bndIt->second );
       faceMap.erase( pos );
     }
 
     // add all new boundaries (with defaultId)
     const FaceIterator faceEnd = faceMap.end();
     for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )
-    {
-      int id = defaultId;
-
-      const PeriodicNbIterator nb = periodicNeighborMap_.find( faceIt->first );
-      if( nb != periodicNeighborMap_.end() )
-      {
-        id = -periodicBndId;
-        periodicNeighborMap_[ boundaryIds_[ nb->second ].first ] = boundaryIds_.size();
-      }
-      else
-      {
-        const FaceIterator nbpos = findPeriodicNeighbor( faceIt->first, faceMap );
-        if( nbpos != faceMap.end() )
-        {
-          id = -periodicBndId;
-          if( periodicNeighborMap_.find( nbpos->first ) != periodicNeighborMap_.end() )
-            DUNE_THROW( GridError, "One boundary segment can only identified with one other." );
-          periodicNeighborMap_[ nbpos->first ] = boundaryIds_.size();
-        }
-      }
-
-      insertBoundary( faceIt->second.first, faceIt->second.second, id );
-    }
+      reinsertBoundary( faceMap, faceIt, defaultId );
   }
 
 }
