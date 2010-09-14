@@ -111,58 +111,69 @@ namespace Dune
   // ElementFaceUtil
   // ---------------
 
-  template< int dimworld >
+  template< int dim >
   inline DGFEntityKey< unsigned int >
   ElementFaceUtil::generateCubeFace
     ( const std::vector< unsigned int > &element, int f )
   {
-    const GenericReferenceElement< double, dimworld > &refCube
-      = GenericReferenceElements< double, dimworld >::cube();
-    const unsigned int size = refCube.size( f, 1, dimworld );
+    const GenericReferenceElement< double, dim > &refCube
+      = GenericReferenceElements< double, dim >::cube();
+    const unsigned int size = refCube.size( f, 1, dim );
     std::vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++ i )
-      k[ i ] = element[ refCube.subEntity( f, 1, i, dimworld ) ];
+      k[ i ] = element[ refCube.subEntity( f, 1, i, dim ) ];
     return DGFEntityKey< unsigned int >( k );
   }
 
 
-  template< int dimworld >
+  template< int dim >
   inline DGFEntityKey< unsigned int >
   ElementFaceUtil :: generateSimplexFace
     ( const std :: vector< unsigned int > &element, int f )
   {
-    const GenericReferenceElement< double, dimworld > &refSimplex
-      = GenericReferenceElements< double, dimworld >::simplex();
-    const unsigned int size = refSimplex.size( f, 1, dimworld );
+    const GenericReferenceElement< double, dim > &refSimplex
+      = GenericReferenceElements< double, dim >::simplex();
+    const unsigned int size = refSimplex.size( f, 1, dim );
     std :: vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++i )
-      k[ i ] = element[ refSimplex.subEntity( f, 1, i, dimworld ) ];
+      k[ i ] = element[ refSimplex.subEntity( f, 1, i, dim ) ];
     return DGFEntityKey< unsigned int >( k );
   }
 
 
   inline DGFEntityKey< unsigned int >
-  ElementFaceUtil :: generateFace
-    ( int dimw, const std :: vector< unsigned int > &element, int f )
+  ElementFaceUtil::generateFace ( int dim, const std::vector< unsigned int > &element, int f )
   {
-    if (element.size()==size_t(dimw+1)) { // Simplex element
-      if (dimw==3)
-        return generateSimplexFace<3>(element,f);
-      else if (dimw==2)
-        return generateSimplexFace<2>(element,f);
-      else if (dimw==1)
-        return generateSimplexFace<1>(element,f);
+    if( element.size() == size_t(dim+1) )
+    {
+      // Simplex element
+      switch( dim )
+      {
+      case 3 :
+        return generateSimplexFace< 3 >( element, f );
+      case 2 :
+        return generateSimplexFace< 2 >( element, f );
+      case 1 :
+        return generateSimplexFace< 1 >( element, f );
+      default :
+        DUNE_THROW( NotImplemented, "ElementUtil::generateFace not implemented for dim = " << dim << "." );
+      }
     }
-    else { // Cube element
-      if (dimw==3)
-        return generateCubeFace<3>(element,f);
-      else if (dimw==2)
-        return generateCubeFace<2>(element,f);
-      else if (dimw==1)
-        return generateCubeFace<1>(element,f);
+    else
+    {
+      // Cube element
+      switch( dim )
+      {
+      case 3 :
+        return generateCubeFace< 3 >( element, f );
+      case 2 :
+        return generateCubeFace< 2 >( element, f );
+      case 1 :
+        return generateCubeFace< 1 >( element, f );
+      default :
+        DUNE_THROW( NotImplemented, "ElementUtil::generateFace not implemented for dim = " << dim << "." );
+      }
     }
-    DUNE_THROW(DGFException,"WRONG DIMENSION");
-    return generateCubeFace<1>(element,f);
   }
 
 } // end namespace Dune

@@ -15,12 +15,9 @@ namespace Dune
   // DGFEntityKey
   // ------------
 
-  template< class A > class DGFEntityKey
+  template< class A >
+  struct DGFEntityKey
   {
-    std :: vector< A > key_, origKey_;
-    bool origKeySet_;
-
-  public:
     DGFEntityKey ( const std :: vector< A > &key, bool setOrigKey = true );
     DGFEntityKey ( const std::vector< A > &key,
                    int N, int offset, bool setOrigKey = true );
@@ -37,6 +34,10 @@ namespace Dune
     inline bool origKeySet () const;
     inline const A &origKey ( int i ) const;
     inline int size () const;
+
+  private:
+    std :: vector< A > key_, origKey_;
+    bool origKeySet_;
   };
 
 
@@ -80,54 +81,70 @@ namespace Dune
   // ElementFaceUtil
   // ---------------
 
-  class ElementFaceUtil
+  struct ElementFaceUtil
   {
-  public:
-    inline static int nofFaces ( int dimw, std :: vector< unsigned int > &element );
-    inline static int faceSize ( int dimw, bool simpl );
+    inline static int nofFaces ( int dim, std::vector< unsigned int > &element );
+    inline static int faceSize ( int dim, bool simpl );
 
     static DGFEntityKey< unsigned int >
-    generateFace ( int dimw, const std :: vector< unsigned int > &element, int f );
+    generateFace ( int dim, const std::vector< unsigned int > &element, int f );
 
   private:
-    template< int dimworld >
+    template< int dim >
     static DGFEntityKey< unsigned int >
-    generateCubeFace( const std :: vector< unsigned int > &element, int f );
+    generateCubeFace( const std::vector< unsigned int > &element, int f );
 
-    template< int dimworld >
+    template< int dim >
     static DGFEntityKey< unsigned int >
-    generateSimplexFace ( const std :: vector< unsigned int > &element, int f );
+    generateSimplexFace ( const std::vector< unsigned int > &element, int f );
   };
 
 
-  inline int ElementFaceUtil
-  :: nofFaces( int dimw, std :: vector< unsigned int > &element )
+  inline int ElementFaceUtil::nofFaces ( int dim, std::vector< unsigned int > &element )
   {
-    if (dimw==1)
+    switch( dim )
+    {
+    case 1 :
       return 2;
-    else if (dimw==2)
-      switch (element.size()) {
-      case 3 : return 3; break;
-      case 4 : return 4; break;
+    case 2 :
+      switch( element.size() )
+      {
+      case 3 :
+        return 3;
+      case 4 :
+        return 4;
+      default :
+        return -1;
       }
-    else if (dimw==3)
-      switch (element.size()) {
-      case 4 : return 4; break;
-      case 8 : return 6; break;
+    case 3 :
+      switch( element.size() )
+      {
+      case 4 :
+        return 4;
+      case 8 :
+        return 6;
+      default :
+        return -1;
       }
-    return -1;
+    default :
+      return -1;
+    }
   }
 
 
-  inline int ElementFaceUtil :: faceSize( int dimw, bool simpl )
+  inline int ElementFaceUtil::faceSize( int dim, bool simpl )
   {
-    if (dimw==1)
+    switch( dim )
+    {
+    case 1 :
       return 1;
-    else if (dimw==2)
+    case 2 :
       return 2;
-    else if (dimw==3)
-      return ((simpl) ? 3 : 4);
-    return -1;
+    case 3 :
+      return (simpl ? 3 : 4);
+    default :
+      return -1;
+    }
   }
 
 } //end namespace Dune
