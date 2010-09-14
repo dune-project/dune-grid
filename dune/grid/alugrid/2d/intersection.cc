@@ -24,19 +24,19 @@ namespace Dune
     {
       geoms_[ 0 ][ i ].reserve( 2 );
       geoms_[ 1 ][ i ].reserve( 2 );
-      for( int j = 0; j < 2; ++j )
+      for( int twist = 0; twist < 2; ++twist )
       {
         LocalGeometryImpl geo;
         if ( i < 3 )
         {
-          // build geometry
-          geo.buildLocalGeometry( i, j, 3 );
+          // build geometry for triangle face
+          geo.buildLocalGeometry( i, twist, 3 );
           // create dune geoemtry
           geoms_[ 0 ][ i ].push_back( MakeableLocalGeometry( geo ) );
         }
 
-        // build geometry
-        geo.buildLocalGeometry( i, j, 4 );
+        // build geometry for quadrilateral face
+        geo.buildLocalGeometry( i, twist, 4 );
         // create dune geoemtry
         geoms_[ 1 ][ i ].push_back( MakeableLocalGeometry( geo ) );
       }
