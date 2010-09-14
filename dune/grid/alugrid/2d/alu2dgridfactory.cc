@@ -60,7 +60,7 @@ namespace Dune
     assert( geometry.isSimplex() || geometry.isCube() );
     if( geometry.dim() != dimension-1 )
     {
-      DUNE_THROW( GridError, "Only 2-dimensional boundaries can be inserted "
+      DUNE_THROW( GridError, "Only 1-dimensional boundaries can be inserted "
                   "into a 2-dimensional ALUGrid." );
     }
     if( vertices.size() != numFaceCorners )
