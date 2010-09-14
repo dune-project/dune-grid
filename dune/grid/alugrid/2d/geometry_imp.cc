@@ -278,9 +278,6 @@ namespace Dune
     typedef std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > > RefCoord;
     RefCoord refCoord( calculateReferenceCoords( corners ) );
 
-    // just map the point of the global intersection to the local
-    // coordinates , this is the default procedure
-    // for simplices this is not so bad
     geoImpl_.update( refCoord.first[ ( aluFace + 1+twist ) % corners ],
                      refCoord.first[ ( aluFace + 2-twist ) % corners ] );
 
