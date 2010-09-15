@@ -172,31 +172,49 @@ namespace Dune {
   }
 
   //--hexaBuildGeom
-  template <>
+  template <int mydim, int cdim, class GridImp>
   inline bool
-  ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
   buildGeom(const IMPLElementType& item)
   {
-    // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
-    // of number when calling myvertex
-    assert( ElementTopo::dune2aluVertex(0) == 0 );
-    assert( ElementTopo::dune2aluVertex(1) == 1 );
-    assert( ElementTopo::dune2aluVertex(2) == 3 );
-    assert( ElementTopo::dune2aluVertex(3) == 2 );
-    assert( ElementTopo::dune2aluVertex(4) == 4 );
-    assert( ElementTopo::dune2aluVertex(5) == 5 );
-    assert( ElementTopo::dune2aluVertex(6) == 7 );
-    assert( ElementTopo::dune2aluVertex(7) == 6 );
+    if ( elementType == hexa )
+    {
+      // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
+      // of number when calling myvertex
+      assert( ElementTopo::dune2aluVertex(0) == 0 );
+      assert( ElementTopo::dune2aluVertex(1) == 1 );
+      assert( ElementTopo::dune2aluVertex(2) == 3 );
+      assert( ElementTopo::dune2aluVertex(3) == 2 );
+      assert( ElementTopo::dune2aluVertex(4) == 4 );
+      assert( ElementTopo::dune2aluVertex(5) == 5 );
+      assert( ElementTopo::dune2aluVertex(6) == 7 );
+      assert( ElementTopo::dune2aluVertex(7) == 6 );
 
-    // update geo impl
-    geoImpl_.update( item.myvertex(0)->Point(),
-                     item.myvertex(1)->Point(),
-                     item.myvertex(3)->Point(),
-                     item.myvertex(2)->Point(),
-                     item.myvertex(4)->Point(),
-                     item.myvertex(5)->Point(),
-                     item.myvertex(7)->Point(),
-                     item.myvertex(6)->Point() );
+      // update geo impl
+      geoImpl_.update( item.myvertex(0)->Point(),
+                       item.myvertex(1)->Point(),
+                       item.myvertex(3)->Point(),
+                       item.myvertex(2)->Point(),
+                       item.myvertex(4)->Point(),
+                       item.myvertex(5)->Point(),
+                       item.myvertex(7)->Point(),
+                       item.myvertex(6)->Point() );
+    }
+    else if( elementType == tetra )
+    {
+      // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
+      // of number when calling myvertex
+      assert( ElementTopo::dune2aluVertex(0) == 0 );
+      assert( ElementTopo::dune2aluVertex(1) == 1 );
+      assert( ElementTopo::dune2aluVertex(2) == 2 );
+      assert( ElementTopo::dune2aluVertex(3) == 3 );
+
+      // update geo impl
+      geoImpl_.update( item.myvertex(0)->Point(),
+                       item.myvertex(1)->Point(),
+                       item.myvertex(2)->Point(),
+                       item.myvertex(3)->Point() );
+    }
 
     // get volume of element
     volume_ = item.volume();
@@ -204,34 +222,10 @@ namespace Dune {
     return true;
   }
 
-  //--tetraBuildGeom
-  template <>
+  // buildFaceGeom
+  template <int mydim, int cdim, class GridImp>
   inline bool
-  ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, tetra> >::
-  buildGeom(const IMPLElementType& item)
-  {
-    // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
-    // of number when calling myvertex
-    assert( ElementTopo::dune2aluVertex(0) == 0 );
-    assert( ElementTopo::dune2aluVertex(1) == 1 );
-    assert( ElementTopo::dune2aluVertex(2) == 2 );
-    assert( ElementTopo::dune2aluVertex(3) == 3 );
-
-    // update geo impl
-    geoImpl_.update( item.myvertex(0)->Point(),
-                     item.myvertex(1)->Point(),
-                     item.myvertex(2)->Point(),
-                     item.myvertex(3)->Point() );
-
-    // get volume of element
-    volume_ = item.volume();
-
-    return true;
-  }
-
-  template <>
-  inline bool
-  ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > ::
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
   buildGeom(const HFaceType & item, int twist, int duneFace )
   {
     // get geo face
@@ -240,55 +234,40 @@ namespace Dune {
     //assert( duneFace >= 0 && duneFace < 6 );
     if(duneFace < 0 ) duneFace = 0;
 
+    enum { numVertices = ElementTopo::numVerticesPerFace };
     // for all vertices of this face get rotatedIndex
-    int rotatedALUIndex[4];
-    for (int i = 0; i < 4; ++i)
+    int rotatedALUIndex[ numVertices ];
+    for (int i = 0; i < numVertices; ++i)
     {
       // Transform Dune index to ALU index and apply twist
-      int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-      rotatedALUIndex[i] = FaceTopo::twist(localALUIndex, twist);
+      const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
+      rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
     }
 
-    // update geometry implementation
-    geoImpl_.update( face.myvertex(rotatedALUIndex[0])->Point(),
-                     face.myvertex(rotatedALUIndex[1])->Point(),
-                     face.myvertex(rotatedALUIndex[2])->Point(),
-                     face.myvertex(rotatedALUIndex[3])->Point() );
+    if( elementType == hexa )
+    {
+      // update geometry implementation
+      geoImpl_.update( face.myvertex(rotatedALUIndex[0])->Point(),
+                       face.myvertex(rotatedALUIndex[1])->Point(),
+                       face.myvertex(rotatedALUIndex[2])->Point(),
+                       face.myvertex(rotatedALUIndex[3])->Point() );
+    }
+    else if ( elementType == tetra )
+    {
+      // update geometry implementation
+      geoImpl_.update( face.myvertex(rotatedALUIndex[0])->Point(),
+                       face.myvertex(rotatedALUIndex[1])->Point(),
+                       face.myvertex(rotatedALUIndex[2])->Point());
+    }
 
     return true;
   }
 
-  template <>
-  inline bool
-  ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, tetra> > ::
-  buildGeom(const HFaceType & item, int twist, int duneFace )
-  {
-    // get geo face
-    const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
-
-    //assert( duneFace >= 0 && duneFace < 4 );
-    if(duneFace < 0 ) duneFace = 0;
-
-    // for all vertices of this face get rotatedIndex
-    int rotatedALUIndex[3];
-    for (int i = 0; i < 3; ++i)
-    {
-      // Transform Dune index to ALU index and apply twist
-      int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-      rotatedALUIndex[i] = FaceTopo::twist(localALUIndex, twist);
-    }
-
-    // update geometry implementation
-    geoImpl_.update( face.myvertex(rotatedALUIndex[0])->Point(),
-                     face.myvertex(rotatedALUIndex[1])->Point(),
-                     face.myvertex(rotatedALUIndex[2])->Point());
-
-    return true;
-  }
-  template <>
+  // --buildFaceGeom
+  template <int mydim, int cdim, class GridImp>
   template <class coord_t>
   inline bool
-  ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > ::
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
   buildGeom(const coord_t& p0,
             const coord_t& p1,
             const coord_t& p2,
@@ -299,10 +278,11 @@ namespace Dune {
     return true;
   }
 
-  template <>
+  // --buildFaceGeom
+  template <int mydim, int cdim, class GridImp>
   template <class coord_t>
   inline bool
-  ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, tetra> > ::
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
   buildGeom(const coord_t& p0,
             const coord_t& p1,
             const coord_t& p2)
@@ -312,21 +292,18 @@ namespace Dune {
     return true;
   }
 
-
-  template <>
+  template <int mydim, int cdim, class GridImp> // for faces
   inline bool
-  ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > ::
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
   buildGeom(const FaceCoordinatesType& coords)
   {
-    return buildGeom( coords[0], coords[1], coords[2], coords[3] );
-  }
-
-  template <>
-  inline bool
-  ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, tetra> > ::
-  buildGeom(const FaceCoordinatesType& coords)
-  {
-    return buildGeom( coords[0], coords[1], coords[2] );
+    if ( elementType == hexa )
+      return buildGeom( coords[0], coords[1], coords[2], coords[3] );
+    else
+    {
+      assert( elementType == tetra );
+      return buildGeom( coords[0], coords[1], coords[2] );
+    }
   }
 
   template <int mydim, int cdim, class GridImp> // for edges

@@ -50,6 +50,36 @@ namespace Dune
         c[1] = p[1];
         c[2] = p[2];
       }
+
+      template <class CoordPtrType>
+      void update(const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType& ) const
+      {
+        DUNE_THROW(InvalidStateException,"This method should not be called!");
+      }
+
+      template <class CoordPtrType>
+      void update(const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType& ) const
+      {
+        DUNE_THROW(InvalidStateException,"This method should not be called!");
+      }
+
+      template <class CoordPtrType>
+      void update(const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType& ) const
+      {
+        DUNE_THROW(InvalidStateException,"This method should not be called!");
+      }
     };
 
     //! general type of geometry implementation
@@ -73,6 +103,8 @@ namespace Dune
       bool builtMapping_;
 
     public:
+      using CoordVecCopy :: update ;
+
       GeometryImpl() : coord_() , liMap_() , builtMapping_(false) {}
       GeometryImpl(const GeometryImpl& other)
         : coord_(other.coord_),
@@ -126,6 +158,8 @@ namespace Dune
       bool builtMapping_;
 
     public:
+      using CoordVecCopy :: update ;
+
       GeometryImpl() : coord_() , liMap_() , builtMapping_(false) {}
       GeometryImpl(const GeometryImpl& other)
         : coord_(other.coord_),
@@ -181,6 +215,8 @@ namespace Dune
       bool builtMapping_;
 
     public:
+      using CoordVecCopy :: update ;
+
       // constructor
       GeometryImpl() : coord_(), liMap_(), builtMapping_(false) {}
       // copy constructor
@@ -245,6 +281,8 @@ namespace Dune
       bool builtMapping_;
 
     public:
+      using CoordVecCopy :: update ;
+
       // constructor
       GeometryImpl() : coord_(), biMap_(), builtMapping_(false) {}
       // copy constructor
@@ -288,7 +326,7 @@ namespace Dune
 
     // geometry impl for hexahedrons
     template <int dummy>
-    class GeometryImpl<dummy,3, hexa>
+    class GeometryImpl<dummy,3, hexa> : public CoordVecCopy
     {
       enum { corners_ = 8 };
 
@@ -307,12 +345,16 @@ namespace Dune
       bool builtMapping_;
 
     public:
+      using CoordVecCopy :: update ;
+
+      //! constructor creating geo impl
       GeometryImpl() : coordPtr_((CoordPtrType*) 0), triMap_(),
                        fatherCoord_(0),
                        builtMapping_(false)
       {}
 
 
+      //! conpy constructor
       GeometryImpl(const GeometryImpl& other) :
         coordPtr_(other.coordPtr_),
         triMap_(other.triMap_),
@@ -411,7 +453,7 @@ namespace Dune
 
     // geometry impl for hexahedrons
     template <int dummy>
-    class GeometryImpl<dummy,3, tetra>
+    class GeometryImpl<dummy,3, tetra> : public CoordVecCopy
     {
       enum { corners_ = 4 };
 
@@ -430,6 +472,8 @@ namespace Dune
       bool builtMapping_;
 
     public:
+      using CoordVecCopy :: update ;
+
       // default constructor
       GeometryImpl() : coordPtr_((CoordPtrType*) 0), liMap_(),
                        fatherCoord_(0),
