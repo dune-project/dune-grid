@@ -139,30 +139,31 @@ namespace Dune {
     const GridImp& grid() const { return grid_; }
 
   private:
+    //! return reference to geometry implementation
+    GeometryImp& geoImp() const { return grid_.getRealImplementation(geo_); }
+
     //! index is unique within the grid hierarchy and per codim
     int getIndex () const;
 
     //! convert ALUGrid partition type to dune partition type
     PartitionType convertBndId(const HItemType & item) const ;
 
+    //! the cuurent geometry
+    mutable GeometryObject geo_;
+
     // the grid this entity belongs to
     const GridImp &grid_;
+
+    // corresponding ALU3dGrid item, here face, edge, or vertex
+    const ItemType * item_;
 
     int level_; //! level of entity
     int gIndex_; //! hierarchic index
     int twist_; //! twist of the underlying ALU element (with regard to the element that asked for it)
     int face_; //! for face, know on which face we are
 
-    // corresponding ALU3dGrid item, here face, edge, or vertex
-    const ItemType * item_;
-
-    //! the cuurent geometry
-    mutable GeometryObject geo_;
-    GeometryImp & geoImp_;
-
-    mutable bool builtgeometry_;       //!< true if geometry has been constructed
-
-    mutable PartitionType partitionType_;
+    mutable bool builtgeometry_;        //!< true if geometry has been constructed
+    mutable PartitionType partitionType_; //!< partition type of this entity
   };
 
   /*!
@@ -403,32 +404,28 @@ namespace Dune {
     bool isGhost () const { return (ghost_ != 0); }
 
   private:
+    //! return reference to geometry implementation
+    GeometryImp& geoImp() const { return grid_.getRealImplementation(geo_); }
+
     //! index is unique within the grid hierachy and per codim
     int getIndex () const;
 
+    //! the entity's geometry
+    mutable GeometryObject geo_;
+
     // corresponding grid
-    const GridImp  & grid_;
+    const GridImp& grid_;
 
     // the current element of grid
-    mutable IMPLElementType *item_;
+    mutable IMPLElementType* item_;
 
     //! not zero if entity is ghost entity
-    mutable PLLBndFaceType* ghost_;
-
-    //! the cuurent geometry
-    mutable GeometryObject geo_;
-    GeometryImp & geoImp_;
-    mutable bool builtgeometry_; //!< true if geometry has been constructed
+    mutable PLLBndFaceType*  ghost_;
 
     int level_;  //!< level of element
+    bool isLeaf_; //!< is true if entity is leaf entity
+    mutable bool builtgeometry_; //!< true if geometry has been constructed
 
-    mutable GeometryObject geoInFather_;
-    GeometryImp &  geoInFatherImp_;
-
-    // is true if entity is leaf entity
-    bool isLeaf_;
-
-    const ReferenceElementType & refElem_;
   }; // end of ALU3dGridEntity codim = 0
 
   //**********************************************************************

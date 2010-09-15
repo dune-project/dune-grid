@@ -21,14 +21,13 @@ namespace Dune {
   template <int cd, int dim, class GridImp>
   ALU3dGridEntity<cd,dim,GridImp> ::
   ALU3dGridEntity(const GridImp  &grid, int level) :
+    geo_( GeometryImp() ),
     grid_(grid),
+    item_(0),
     level_(0),
     gIndex_(-1),
     twist_(0),
     face_(-1),
-    item_(0),
-    geo_( GeometryImp() ),
-    geoImp_(grid.getRealImplementation(geo_)),
     builtgeometry_(false),
     partitionType_(InteriorEntity)
   {}
@@ -37,14 +36,13 @@ namespace Dune {
   template <int cd, int dim, class GridImp>
   alu_inline ALU3dGridEntity<cd,dim,GridImp> ::
   ALU3dGridEntity(const ALU3dGridEntity<cd,dim,GridImp> & org) :
+    geo_( GeometryImp() ),
     grid_(org.grid_),
+    item_(org.item_),
     level_(org.level_),
     gIndex_(org.gIndex_),
     twist_(org.twist_),
     face_(org.face_),
-    item_(org.item_),
-    geo_( GeometryImp() ),
-    geoImp_(grid_.getRealImplementation(geo_)),
     builtgeometry_(false),
     partitionType_(org.partitionType_)
   {}
@@ -133,7 +131,7 @@ namespace Dune {
   ALU3dGridEntity<cd,dim,GridImp>:: geometry() const
   {
     //assert( (cd == 1) ? (face_ >= 0) : 1 );
-    if(!builtgeometry_) builtgeometry_ = geoImp_.buildGeom(*item_, twist_, face_ );
+    if(!builtgeometry_) builtgeometry_ = geoImp().buildGeom(*item_, twist_, face_ );
     return geo_;
   }
 
@@ -147,33 +145,25 @@ namespace Dune {
   template<int dim, class GridImp>
   alu_inline ALU3dGridEntity<0,dim,GridImp> ::
   ALU3dGridEntity(const GridImp  &grid, int wLevel)
-    : grid_(grid)
+    : geo_(GeometryImp())
+      , grid_( grid )
       , item_( 0 )
       , ghost_( 0 )
-      , geo_(GeometryImp())
-      , geoImp_ (grid_.getRealImplementation(geo_))
-      , builtgeometry_(false)
       , level_(-1)
-      , geoInFather_ (GeometryImp())
-      , geoInFatherImp_(grid_.getRealImplementation(geoInFather_))
       , isLeaf_ (false)
-      , refElem_(grid_.referenceElement())
+      , builtgeometry_(false)
   {  }
 
   template<int dim, class GridImp>
   alu_inline ALU3dGridEntity<0,dim,GridImp> ::
   ALU3dGridEntity(const ALU3dGridEntity<0,dim,GridImp> & org)
-    : grid_(org.grid_)
+    : geo_(GeometryImp())
+      , grid_(org.grid_)
       , item_(org.item_)
       , ghost_( org.ghost_ )
-      , geo_(GeometryImp())
-      , geoImp_ (grid_.getRealImplementation(geo_))
-      , builtgeometry_(false)
       , level_(org.level_)
-      , geoInFather_ (GeometryImp())
-      , geoInFatherImp_(grid_.getRealImplementation(geoInFather_))
       , isLeaf_ (org.isLeaf_)
-      , refElem_(grid_.referenceElement())
+      , builtgeometry_(false)
   {  }
 
   template<int dim, class GridImp>
@@ -181,7 +171,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: geometry () const
   {
     assert(item_ != 0);
-    if(!builtgeometry_) builtgeometry_ = geoImp_.buildGeom(*item_);
+    if( ! builtgeometry_ ) builtgeometry_ = geoImp().buildGeom(*item_);
     return geo_;
   }
 
@@ -197,7 +187,7 @@ namespace Dune {
     // see alu3dinclude.hh for implementation
     static ALULocalGeometryStorage<GridImp,GeometryObject,8> geoms( type(), true);
     assert( geoms.geomCreated(child) );
-    return geoms[child];
+    return geoms[ child ];
   }
 
   //********* begin method subIndex ********************

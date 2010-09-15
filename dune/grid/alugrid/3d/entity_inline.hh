@@ -174,7 +174,7 @@ namespace Dune {
   template<int cc>
   inline int ALU3dGridEntity<0,dim,GridImp> :: count () const
   {
-    return refElem_.size(cc);
+    return grid_.referenceElement().size(cc);
   }
 
   template<int dim, class GridImp>
