@@ -78,60 +78,12 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   integrationElement (const LocalCoordinate& local) const
   {
-    return geoImpl_.mapping().det( local );
-  }
-
-  // specialization for tetrahedrons (det constant and known)
-  template<>
-  inline alu3d_ctype
-  ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, tetra> >::
-  integrationElement (const FieldVector<ctype, 3>& local) const
-  {
-    return 6.0 * volume_;
-  }
-
-  template<>
-  inline alu3d_ctype
-  ALU3dGridGeometry<0, 3, const ALU3dGrid<3, 3, hexa> >::
-  integrationElement (const FieldVector<ctype, 0>& local) const
-  {
-    return 1.0;
-  }
-
-  template<>
-  inline alu3d_ctype
-  ALU3dGridGeometry<0, 3, const ALU3dGrid<3, 3, tetra> >::
-  integrationElement (const FieldVector<ctype, 0>& local) const
-  {
-    return 1.0;
-  }
-
-  template<>
-  inline alu3d_ctype
-  ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-  volume() const
-  {
-    return volume_;
-  }
-
-  template<>
-  inline alu3d_ctype
-  ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, tetra> >::
-  volume() const
-  {
-    return volume_;
-  }
-
-  // specialization for triangles faces
-  template<>
-  inline alu3d_ctype
-  ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, tetra> >::
-  volume () const
-  {
-    enum { factor = Factorial<2>::factorial };
-    // local vector does not affect the result
-    const FieldVector<ctype, 2> dummy(0.0);
-    return integrationElement( dummy ) / ((ctype) factor);
+    if( mydim == cdim && elementType == tetra )
+      return 6.0 * volume_;
+    else if ( mydim == 0 )
+      return 1.0;
+    else
+      return geoImpl_.mapping().det( local );
   }
 
   template<int mydim, int cdim, class GridImp>
@@ -139,7 +91,21 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   volume () const
   {
-    return integrationElement(LocalCoordinate(0.5));
+    if( mydim == cdim )
+    {
+      return volume_ ;
+    }
+    else if ( mydim == cdim - 1 && elementType == tetra )
+    {
+      enum { factor = Factorial<mydim>::factorial };
+      // local vector does not affect the result
+      const LocalCoordinate dummy(0);
+      return integrationElement( dummy ) / ((ctype) factor);
+    }
+    else
+    {
+      return integrationElement(LocalCoordinate(0.5));
+    }
   }
 
   template< int mydim, int cdim, class GridImp>
