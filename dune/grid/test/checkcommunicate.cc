@@ -177,7 +177,7 @@ public:
       for( int j = 0; j < Geometry::dimensionworld; ++j )
       {
         buff.read(x);
-        if( fabs( corner[ j ] - x ) > 1e-8 )
+        if( std::abs( corner[ j ] - x ) > 1e-8 )
         {
           std::cerr << "ERROR in scatter: Vertex <" << i << "," << j << ">: "
                     << " this : (" << corner[ j ] << ")"
@@ -374,7 +374,7 @@ class CheckCommunication
       if( cdim == 0 )
       {
         int index = indexSet_.index( entity );
-        double lerr = fabs( f( mid ) - data[ index ] );
+        double lerr = std::abs( f( mid ) - data[ index ] );
         maxerr = std :: max( maxerr, lerr );
         if( testweight && (weight[ index ] < 0) )
         {
@@ -401,7 +401,7 @@ class CheckCommunication
             cmid += subEp->geometry().corner( j );
           cmid /= double( numVertices );
 
-          double lerr = fabs( f( cmid ) - data[ index ] );
+          double lerr = std::abs( f( cmid ) - data[ index ] );
           maxerr = std::max( maxerr, lerr );
           if( testweight && (weight[ index ] < 0) )
           {
@@ -475,7 +475,7 @@ class CheckCommunication
 
     double result = test( dataSize, data, weight, true );
     sout_ << "Test after Communication on <" << myrank << "> " << result << std :: endl;
-    return (fabs(result) < 1e-8);
+    return (std::abs(result) < 1e-8);
   }
 
 public:
