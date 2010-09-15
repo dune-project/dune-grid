@@ -3,29 +3,23 @@
 #include "config.h"
 #include "mappings.hh"
 
-namespace Dune {
+namespace Dune
+{
+
   const double TrilinearMapping :: _epsilon = 1.0e-8 ;
   const double BilinearSurfaceMapping :: _epsilon = 1.0e-8 ;
   const double SurfaceNormalCalculator :: _epsilon = 1.0e-8 ;
 
 
-  NonConformingFaceMapping<tetra>::
-  NonConformingFaceMapping(RefinementRuleType rule,
-                           int nChild) :
-    rule_(rule),
-    nChild_(nChild) {}
 
-  NonConformingFaceMapping<tetra>::
-  NonConformingFaceMapping(const NonConformingFaceMapping<tetra>& orig) :
-    rule_(orig.rule_),
-    nChild_(orig.nChild_) {}
+  // Implementation of NonConformingFaceMapping
+  // ------------------------------------------
 
-  NonConformingFaceMapping<tetra>::
-  ~NonConformingFaceMapping<tetra>() {}
-
-  void NonConformingFaceMapping<tetra>::
-  child2parent(const CoordinateType& childCoordinates,
-               CoordinateType& parentCoordinates) const {
+  template< class Comm >
+  void NonConformingFaceMapping< tetra, Comm >
+  ::child2parent ( const CoordinateType &childCoordinates,
+                   CoordinateType& parentCoordinates ) const
+  {
     if (rule_ == RefinementRuleType::nosplit) {
       child2parentNosplit(childCoordinates, parentCoordinates);
     }
@@ -48,35 +42,64 @@ namespace Dune {
     } // end if
   }
 
-  void NonConformingFaceMapping<tetra>::
-  child2parentNosplit(const CoordinateType& childCoordinates,
-                      CoordinateType& parentCoordinates) const {
+
+  template< class Comm >
+  typename NonConformingFaceMapping< tetra, Comm >::CoordinateType
+  NonConformingFaceMapping< tetra, Comm >
+  ::child2parent ( const FieldVector< alu3d_ctype, 2 > &childCoordinates ) const
+  {
+    CoordinateType childBary, parentBary;
+    childBary[ 0 ] = 1.0 - childCoordinates[ 0 ] - childCoordinates[ 1 ];
+    childBary[ 1 ] = childCoordinates[ 0 ];
+    childBary[ 2 ] = childCoordinates[ 1 ];
+    child2parent( childBary, parentBary );
+    return parentBary;
+  }
+
+
+  template< class Comm >
+  void NonConformingFaceMapping< tetra, Comm >
+  ::child2parentNosplit ( const CoordinateType& childCoordinates,
+                          CoordinateType& parentCoordinates ) const
+  {
     parentCoordinates = childCoordinates;
   }
-  void NonConformingFaceMapping<tetra>::
-  child2parentE01(const CoordinateType& childCoordinates,
-                  CoordinateType& parentCoordinates) const {
+
+
+  template< class Comm >
+  void NonConformingFaceMapping< tetra, Comm >
+  ::child2parentE01 ( const CoordinateType &childCoordinates,
+                      CoordinateType &parentCoordinates ) const
+  {
     DUNE_THROW(NotImplemented,
                "This refinement rule is currently not supported");
   }
 
-  void NonConformingFaceMapping<tetra>::
-  child2parentE12(const CoordinateType& childCoordinates,
-                  CoordinateType& parentCoordinates) const {
+
+  template< class Comm >
+  void NonConformingFaceMapping< tetra, Comm >
+  ::child2parentE12 ( const CoordinateType &childCoordinates,
+                      CoordinateType &parentCoordinates ) const
+  {
     DUNE_THROW(NotImplemented,
                "This refinement rule is currently not supported");
   }
 
-  void NonConformingFaceMapping<tetra>::
-  child2parentE20(const CoordinateType& childCoordinates,
-                  CoordinateType& parentCoordinates) const {
+
+  template< class Comm >
+  void NonConformingFaceMapping< tetra, Comm >
+  ::child2parentE20 ( const CoordinateType &childCoordinates,
+                      CoordinateType &parentCoordinates ) const
+  {
     DUNE_THROW(NotImplemented,
                "This refinement rule is currently not supported");
   }
 
-  void NonConformingFaceMapping<tetra>::
-  child2parentIso4(const CoordinateType& childCoordinates,
-                   CoordinateType& parentCoordinates) const
+
+  template< class Comm >
+  void NonConformingFaceMapping< tetra, Comm >
+  ::child2parentIso4 ( const CoordinateType &childCoordinates,
+                       CoordinateType &parentCoordinates ) const
   {
     /*
        // The ordering of the coordinates are according to a Dune reference triangle
@@ -167,24 +190,12 @@ namespace Dune {
     } // end switch
   }
 
-  //- Specialisation for hexa
-  NonConformingFaceMapping<hexa>::
-  NonConformingFaceMapping(RefinementRuleType rule,
-                           int nChild) :
-    rule_(rule),
-    nChild_(nChild) {}
 
-  NonConformingFaceMapping<hexa>::
-  NonConformingFaceMapping(const NonConformingFaceMapping<hexa>& orig) :
-    rule_(orig.rule_),
-    nChild_(orig.nChild_) {}
-
-  NonConformingFaceMapping<hexa>::
-  ~NonConformingFaceMapping<hexa>() {}
-
-  void NonConformingFaceMapping<hexa>::
-  child2parent(const CoordinateType& childCoordinates,
-               CoordinateType& parentCoordinates) const {
+  template< class Comm >
+  void NonConformingFaceMapping< hexa, Comm >
+  ::child2parent ( const CoordinateType &childCoordinates,
+                   CoordinateType& parentCoordinates ) const
+  {
     if (rule_ == RefinementRuleType::nosplit) {
       child2parentNosplit(childCoordinates, parentCoordinates);
     }
@@ -198,16 +209,34 @@ namespace Dune {
     }
   }
 
-  void NonConformingFaceMapping<hexa>::
-  child2parentNosplit(const CoordinateType& childCoordinates,
-                      CoordinateType& parentCoordinates) const {
+
+  template< class Comm >
+  typename NonConformingFaceMapping< hexa, Comm >::CoordinateType
+  NonConformingFaceMapping< hexa, Comm >
+  ::child2parent ( const FieldVector< alu3d_ctype, 2 > &childCoordinates ) const
+  {
+    CoordinateType parentCoordinates;
+    child2parent( childCoordinates, parentCoordinates );
+    return parentCoordinates;
+  }
+
+
+
+
+  template< class Comm >
+  void NonConformingFaceMapping< hexa, Comm >
+  ::child2parentNosplit ( const CoordinateType& childCoordinates,
+                          CoordinateType& parentCoordinates ) const
+  {
     parentCoordinates = childCoordinates;
   }
 
-  void NonConformingFaceMapping<hexa>::
-  child2parentIso4(const CoordinateType& childCoordinates,
-                   CoordinateType& parentCoordinates) const {
 
+  template< class Comm >
+  void NonConformingFaceMapping< hexa, Comm >
+  ::child2parentIso4 ( const CoordinateType &childCoordinates,
+                       CoordinateType &parentCoordinates ) const
+  {
     // The ordering of the coordinates are according to a Dune reference elemen
     //
     //
@@ -250,5 +279,18 @@ namespace Dune {
                  << nChild_ << ")");
     } // end switch
   }
+
+
+
+  // Explicit Template Instatiation
+  // ------------------------------
+
+  template class NonConformingFaceMapping< tetra, No_Comm >;
+  template class NonConformingFaceMapping< hexa, No_Comm >;
+
+#if ALU3DGRID_PARALLEL
+  template class NonConformingFaceMapping< tetra, MPI_Comm >;
+  template class NonConformingFaceMapping< hexa, MPI_Comm >;
+#endif // #if ALU3DGRID_PARALLEL
 
 } // end namespace Dune

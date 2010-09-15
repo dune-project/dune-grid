@@ -21,7 +21,7 @@ namespace Dune {
   template<int mydim, int coorddim, class GridImp>
   class ALU3dGridGeometry;
 
-  template <int dim, int dimworld, ALU3dGridElementType elType>
+  template< ALU3dGridElementType, class >
   class ALU3dGrid;
 
   //! A trilinear mapping from the Dune reference hexahedron into the physical
@@ -382,28 +382,24 @@ namespace Dune {
 
   //! General form of non-conforming face mapping
   //! This class is empty and needs to be specialised
-  template <ALU3dGridElementType type>
-  class NonConformingFaceMapping {};
+  template< ALU3dGridElementType type, class Comm >
+  class NonConformingFaceMapping;
 
   //! Non-conforming face mappings for tetrahedra
-  template <>
-  class NonConformingFaceMapping<tetra> {
-  private:
-    //- private typedefs and enums
-  public:
-    //- public typedefs and enums
-    typedef FieldVector<alu3d_ctype, 3> CoordinateType;
-    typedef ALU3DSPACE Hface3RuleType RefinementRuleType;
+  template< class Comm >
+  struct NonConformingFaceMapping< tetra, Comm >
+  {
+    typedef FieldVector< alu3d_ctype, 3 > CoordinateType;
+    typedef typename ALU3dImplTraits< tetra, Comm >::HfaceRuleType RefinementRuleType;
 
-  public:
-    //- public interface methods
-    NonConformingFaceMapping(RefinementRuleType rule,
-                             int nChild);
-    NonConformingFaceMapping(const NonConformingFaceMapping<tetra>& orig);
-    ~NonConformingFaceMapping();
+    NonConformingFaceMapping ( RefinementRuleType rule, int nChild )
+      : rule_( rule ), nChild_( nChild )
+    {}
 
-    void child2parent(const CoordinateType& childCoordinates,
-                      CoordinateType& parentCoordinates) const ;
+    void child2parent ( const CoordinateType &childCoordinates,
+                        CoordinateType &parentCoordinates) const;
+
+    CoordinateType child2parent ( const FieldVector< alu3d_ctype, 2 > &childCoordinates ) const;
 
   private:
     void child2parentNosplit(const CoordinateType& childCoordinates,
@@ -416,35 +412,33 @@ namespace Dune {
                          CoordinateType& parentCoordinates) const;
     void child2parentIso4(const CoordinateType& childCoordinates,
                           CoordinateType& parentCoordinates) const;
-  private:
-    //- private data
+
     RefinementRuleType rule_;
     int nChild_;
   };
 
   //! Non-conforming face mappings for hexahedra
-  template <>
-  class NonConformingFaceMapping<hexa> {
-  private:
-    //- private typedefs and enums
-  public:
-    //- public typedefs and enums
-    typedef FieldVector<alu3d_ctype, 2> CoordinateType;
-    typedef ALU3DSPACE Hface4RuleType RefinementRuleType;
-  public:
-    NonConformingFaceMapping(RefinementRuleType rule, int nChild);
-    NonConformingFaceMapping(const NonConformingFaceMapping<hexa>& orig);
-    ~NonConformingFaceMapping();
+  template< class Comm >
+  struct NonConformingFaceMapping< hexa, Comm >
+  {
+    typedef FieldVector< alu3d_ctype, 2 > CoordinateType;
+    typedef typename ALU3dImplTraits< hexa, Comm >::HfaceRuleType RefinementRuleType;
 
-    void child2parent(const CoordinateType& childCoordinates,
-                      CoordinateType& parentCoordinates) const;
+    NonConformingFaceMapping ( RefinementRuleType rule, int nChild )
+      : rule_( rule ), nChild_( nChild )
+    {}
+
+    void child2parent ( const CoordinateType &childCoordinates,
+                        CoordinateType &parentCoordinates) const;
+
+    CoordinateType child2parent ( const FieldVector< alu3d_ctype, 2 > &childCoordinates ) const;
+
   private:
     void child2parentNosplit(const CoordinateType& childCoordinates,
                              CoordinateType& parentCoordinates) const;
     void child2parentIso4(const CoordinateType& childCoordinates,
                           CoordinateType& parentCoordinates) const;
 
-  private:
     RefinementRuleType rule_;
     int nChild_;
   };

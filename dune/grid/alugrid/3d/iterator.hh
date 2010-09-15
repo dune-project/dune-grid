@@ -32,11 +32,11 @@ namespace Dune {
   class ALU3dGridIntersectionIterator;
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class ALU3dGridLeafIterator;
-  template<int dim, int dimworld, ALU3dGridElementType elType>
+  template< ALU3dGridElementType, class >
   class ALU3dGrid;
-  template <ALU3dGridElementType type>
+  template< ALU3dGridElementType, class >
   class ALU3dGridFaceInfo;
-  template <ALU3dGridElementType elType>
+  template< ALU3dGridElementType, class >
   class ALU3dGridGeometricFaceInfo;
 
   //**********************************************************************
@@ -57,7 +57,9 @@ namespace Dune {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
-    typedef ALU3dImplTraits<GridImp::elementType> ImplTraits;
+    typedef typename GridImp::MPICommunicatorType Comm;
+
+    typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
 
     typedef typename ImplTraits::HElementType HElementType ;
     typedef typename ImplTraits::HBndSegType HBndSegType;
@@ -68,19 +70,18 @@ namespace Dune {
     typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
-    typedef ALU3DSPACE GEOTetraElementType GEOTetraElementType;
-    typedef ALU3DSPACE GEOHexaElementType GEOHexaElementType;
-    typedef ALU3DSPACE BNDFace3Type GEOTriangleBndType;
-    typedef ALU3DSPACE BNDFace4Type GEOQuadBndType;
+    typedef typename ALU3dImplTraits< tetra, Comm >::GEOElementType GEOTetraElementType;
+    typedef typename ALU3dImplTraits< hexa, Comm >::GEOElementType GEOHexaElementType;
+    typedef typename ALU3dImplTraits< tetra, Comm >::BNDFaceType GEOTriangleBndType;
+    typedef typename ALU3dImplTraits< hexa, Comm >::BNDFaceType GEOQuadBndType;
 
-    typedef ALU3dGridFaceInfo<GridImp::elementType> FaceInfoType;
-    typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
+    typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
+    typedef typename std::auto_ptr< FaceInfoType > FaceInfoPointer;
 
     typedef typename SelectType<
         is_same<Int2Type<tetra>, Int2Type<GridImp::elementType> >::value,
-        ALU3dGridGeometricFaceInfoTetra,
-        ALU3dGridGeometricFaceInfoHexa
-        >::Type GeometryInfoType;
+        ALU3dGridGeometricFaceInfoTetra< Comm >,
+        ALU3dGridGeometricFaceInfoHexa< Comm > >::Type GeometryInfoType;
 
     typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
     typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
@@ -253,19 +254,19 @@ namespace Dune {
     void buildLocalGeometries() const;
 
     // get the face corresponding to the index
-    const typename ALU3dImplTraits<tetra>::GEOFaceType*
-    getFace(const GEOTriangleBndType & bnd, int index) const;
+    const typename ALU3dImplTraits< tetra, Comm >::GEOFaceType *
+    getFace ( const GEOTriangleBndType &bnd, int index ) const;
 
     // get the face corresponding to the index
-    const typename ALU3dImplTraits<hexa>::GEOFaceType*
-    getFace(const GEOQuadBndType & bnd, int index) const;
+    const typename ALU3dImplTraits< hexa, Comm >::GEOFaceType *
+    getFace ( const GEOQuadBndType &bnd, int index ) const;
 
     // get the face corresponding to the index
-    const typename ALU3dImplTraits<tetra>::GEOFaceType*
-    getFace(const GEOTetraElementType & elem, int index) const;
+    const typename ALU3dImplTraits< tetra, Comm >::GEOFaceType *
+    getFace ( const GEOTetraElementType &elem, int index ) const;
 
-    const typename ALU3dImplTraits<hexa>::GEOFaceType*
-    getFace(const GEOHexaElementType & elem, int index) const;
+    const typename ALU3dImplTraits< hexa, Comm >::GEOFaceType *
+    getFace ( const GEOHexaElementType &elem, int index ) const;
 
     //! structure containing the topological and geometrical information about
     //! the face which the iterator points to
@@ -305,8 +306,11 @@ namespace Dune {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
-    typedef ALU3dImplTraits<GridImp::elementType> ImplTraits;
-    typedef ALU3DSPACE HElementType HElementType ;
+    typedef typename GridImp::MPICommunicatorType Comm;
+
+    typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
+
+    typedef typename ImplTraits::HElementType HElementType ;
     typedef typename ImplTraits::GEOElementType GEOElementType;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::GEOFaceType GEOFaceType;
@@ -314,14 +318,13 @@ namespace Dune {
     typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
-    typedef ALU3dGridFaceInfo<GridImp::elementType> FaceInfoType;
-    typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
+    typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
+    typedef typename std::auto_ptr< FaceInfoType > FaceInfoPointer;
 
     typedef typename SelectType<
         is_same<Int2Type<tetra>, Int2Type<GridImp::elementType> >::value,
-        ALU3dGridGeometricFaceInfoTetra,
-        ALU3dGridGeometricFaceInfoHexa
-        >::Type GeometryInfoType;
+        ALU3dGridGeometricFaceInfoTetra< Comm >,
+        ALU3dGridGeometricFaceInfoHexa< Comm > >::Type GeometryInfoType;
 
     typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
     typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
@@ -497,30 +500,32 @@ namespace Dune {
    */
   template<int cd, PartitionIteratorType pitype, class GridImp>
   class ALU3dGridLevelIterator
-    : public ALU3dGridEntityPointer <cd,GridImp>,
-      // public LevelIteratorDefaultImplementation <cd,pitype,GridImp,ALU3dGridLevelIterator> ,
-      public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd,pitype> >
+    : public ALU3dGridEntityPointer< cd, GridImp >,
+      public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< cd, pitype, typename GridImp::MPICommunicatorType > >
   {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
+
+    typedef typename GridImp::MPICommunicatorType Comm;
 
     friend class ALU3dGridEntity<3,dim,GridImp>;
     friend class ALU3dGridEntity<2,dim,GridImp>;
     friend class ALU3dGridEntity<1,dim,GridImp>;
     friend class ALU3dGridEntity<0,dim,GridImp>;
-    friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
+    friend class ALU3dGrid< GridImp::elementType, Comm >;
 
-    friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd,pitype> > ;
+    friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< cd, pitype, Comm > >;
+
   public:
     typedef typename GridImp::template Codim<cd>::Entity Entity;
-    typedef ALU3DSPACE VertexListType VertexListType;
+    typedef ALU3dGridVertexList< Comm > VertexListType;
 
     //! typedef of my type
     typedef ALU3dGridLevelIterator<cd,pitype,GridImp> ThisType;
     // the wrapper for the original iterator of the ALU3dGrid
-    typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd,pitype> IteratorType;
+    typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< cd, pitype, Comm > IteratorType;
     typedef IteratorType InternalIteratorType;
-    typedef typename ALU3DSPACE IteratorElType<cd>::val_t val_t;
+    typedef typename ALU3DSPACE IteratorElType< cd, Comm >::val_t val_t;
 
     //! Constructor for begin iterator
     ALU3dGridLevelIterator(const GridImp & grid, int level, bool);
@@ -574,24 +579,25 @@ namespace Dune {
   //! Leaf iterator
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   class ALU3dGridLeafIterator
-    : public ALU3dGridEntityPointer<cdim,GridImp>,
-      // public LeafIteratorDefaultImplementation<cdim, pitype, GridImp, ALU3dGridLeafIterator>,
-      public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper<cdim, pitype> >
+    : public ALU3dGridEntityPointer< cdim, GridImp >,
+      public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper< cdim, pitype, typename GridImp::MPICommunicatorType > >
   {
     enum { dim = GridImp :: dimension };
 
     friend class ALU3dGridEntity<cdim,dim,GridImp>;
     enum { codim = cdim };
 
-    friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper<cdim, pitype> > ;
+    typedef typename GridImp::MPICommunicatorType Comm;
+
+    friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper< cdim, pitype, Comm > >;
 
   public:
     typedef typename GridImp::template Codim<cdim>::Entity Entity;
 
     // the wrapper for the original iterator of the ALU3dGrid
-    typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper<cdim, pitype> IteratorType;
+    typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper< cdim, pitype, Comm > IteratorType;
     typedef IteratorType InternalIteratorType;
-    typedef typename ALU3DSPACE IteratorElType<cdim>::val_t val_t;
+    typedef typename ALU3DSPACE IteratorElType< cdim, Comm >::val_t val_t;
 
     typedef ALU3dGridLeafIterator<cdim, pitype, GridImp> ThisType;
 
@@ -647,10 +653,14 @@ namespace Dune {
     : public ALU3dGridEntityPointer<0,GridImp>
       // public HierarchicIteratorDefaultImplementation <GridImp,ALU3dGridHierarchicIterator>
   {
-    enum { dim = GridImp::dimension };
     typedef ALU3dGridHierarchicIterator<GridImp> ThisType;
-    typedef ALU3DSPACE HElementType HElementType ;
-    typedef ALU3DSPACE HBndSegType HBndSegType  ;
+    enum { dim = GridImp::dimension };
+
+    typedef typename GridImp::MPICommunicatorType Comm;
+
+    typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::HElementType HElementType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
 
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;

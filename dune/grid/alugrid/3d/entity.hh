@@ -29,7 +29,7 @@ namespace Dune {
   class ALU3dGridIntersectionIterator;
   template<int codim, PartitionIteratorType, class GridImp>
   class ALU3dGridLeafIterator;
-  template<int dim, int dimworld, ALU3dGridElementType elType>
+  template< ALU3dGridElementType, class >
   class ALU3dGrid;
 
   /*!
@@ -68,20 +68,22 @@ namespace Dune {
 
     enum { dimworld = GridImp::dimensionworld };
 
-    friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
+    typedef typename GridImp::MPICommunicatorType Comm;
+
+    friend class ALU3dGrid< GridImp::elementType, Comm >;
     friend class ALU3dGridEntity < 0, dim, GridImp >;
     friend class ALU3dGridLevelIterator < cd, All_Partition, GridImp >;
 
-    friend class ALU3dGridHierarchicIndexSet<dim,dimworld,GridImp::elementType>;
+    friend class ALU3dGridHierarchicIndexSet< GridImp::elementType, Comm >;
 
     template< template< int, int > class >
     friend class ALU3dGridFactory;
   public:
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType HItemType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::ImplementationType ItemType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::VertexType VertexType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::HBndSegType HBndSegType;
-
+    typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim<cd>::InterfaceType HItemType;
+    typedef typename ImplTraits::template Codim<cd>::ImplementationType ItemType;
+    typedef typename ImplTraits::VertexType VertexType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
 
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
@@ -192,21 +194,23 @@ namespace Dune {
     static const int dimworld = remove_const< GridImp >::type::dimensionworld;
     static const ALU3dGridElementType elementType = remove_const< GridImp >::type::elementType;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::
-    template Codim<0>::InterfaceType HElementType;
+    typedef typename GridImp::MPICommunicatorType Comm;
 
-    typedef typename ALU3dImplTraits< elementType >::GEOElementType GEOElementType;
-    typedef typename ALU3dImplTraits< elementType >::PLLBndFaceType PLLBndFaceType;
-    typedef typename ALU3dImplTraits< elementType >::IMPLElementType IMPLElementType;
-    typedef typename ALU3dImplTraits< elementType >::HBndSegType HBndSegType;
+    typedef ALU3dImplTraits< elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim<0>::InterfaceType HElementType;
 
-    enum { refine_element_t = ALU3dImplTraits< elementType >::refine_element_t };
-    enum { coarse_element_t = ALU3dImplTraits< elementType >::coarse_element_t };
-    enum { nosplit_element_t = ALU3dImplTraits< elementType >::nosplit_element_t };
+    typedef typename ImplTraits::GEOElementType GEOElementType;
+    typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
+    typedef typename ImplTraits::IMPLElementType IMPLElementType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
 
-    typedef typename ALU3dImplTraits< elementType >::MarkRuleType MarkRuleType;
+    enum { refine_element_t = ImplTraits::refine_element_t };
+    enum { coarse_element_t = ImplTraits::coarse_element_t };
+    enum { nosplit_element_t = ImplTraits::nosplit_element_t };
 
-    friend class ALU3dGrid< dim, dimworld, elementType >;
+    typedef typename ImplTraits::MarkRuleType MarkRuleType;
+
+    friend class ALU3dGrid< elementType, Comm >;
     friend class ALU3dGridIntersectionIterator < GridImp >;
     friend class ALU3dGridIntersectionIterator < const GridImp >;
     friend class ALU3dGridHierarchicIterator   < const GridImp >;
@@ -220,7 +224,7 @@ namespace Dune {
     friend class ALU3dGridLeafIterator <2, All_Partition,GridImp>;
     friend class ALU3dGridLeafIterator <3, All_Partition,GridImp>;
 
-    friend class ALU3dGridHierarchicIndexSet<dim,dimworld,GridImp::elementType>;
+    friend class ALU3dGridHierarchicIndexSet< elementType, Comm >;
 
     template< template< int, int > class >
     friend class ALU3dGridFactory;
@@ -444,14 +448,17 @@ namespace Dune {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
+    typedef typename GridImp::MPICommunicatorType Comm;
+
     friend class ALU3dGridEntity<codim,dim,GridImp>;
     friend class ALU3dGridEntity< 0,dim,GridImp>;
-    friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
+    friend class ALU3dGrid < GridImp::elementType, Comm >;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<codim>::InterfaceType HElementType;
+    typedef ALU3dImplTraits<GridImp::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim<codim>::InterfaceType HElementType;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::HBndSegType HBndSegType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
+    typedef typename ImplTraits::BNDFaceType BNDFaceType;
   public:
     enum { codimension = codim };
 
@@ -551,14 +558,17 @@ namespace Dune {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
+    typedef typename GridImp::MPICommunicatorType Comm;
+
     friend class ALU3dGridEntity<cd,dim,GridImp>;
     friend class ALU3dGridEntity< 0,dim,GridImp>;
-    friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
+    friend class ALU3dGrid < GridImp::elementType, Comm >;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType HElementType;
+    typedef ALU3dImplTraits<GridImp::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::HBndSegType HBndSegType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
+    typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
     typedef ALU3dGridEntity< 0,dim,GridImp> ALU3dGridEntityType ;
   public:
@@ -617,14 +627,17 @@ namespace Dune {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
+    typedef typename GridImp::MPICommunicatorType Comm;
+
     friend class ALU3dGridEntity<cd,dim,GridImp>;
     friend class ALU3dGridEntity< 0,dim,GridImp>;
-    friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
+    friend class ALU3dGrid < GridImp::elementType, Comm >;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType HElementType;
+    typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::HBndSegType HBndSegType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
+    typedef typename ImplTraits::BNDFaceType BNDFaceType;
     typedef ALU3dGridEntity<cd,dim,GridImp> ALU3dGridEntityType;
   public:
     //! type of Entity

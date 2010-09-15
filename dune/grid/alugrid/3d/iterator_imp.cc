@@ -485,7 +485,7 @@ namespace Dune {
   }
 
   template <class GridImp>
-  inline const ALU3dImplTraits<tetra>::GEOFaceType*
+  inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
   ALU3dGridIntersectionIterator<GridImp>::
   getFace(const GEOTriangleBndType & bnd, int index) const
   {
@@ -493,7 +493,7 @@ namespace Dune {
   }
 
   template <class GridImp>
-  inline const ALU3dImplTraits<hexa>::GEOFaceType*
+  inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
   ALU3dGridIntersectionIterator<GridImp>::
   getFace(const GEOQuadBndType & bnd, int index) const
   {
@@ -501,7 +501,7 @@ namespace Dune {
   }
 
   template <class GridImp>
-  inline const ALU3dImplTraits<tetra>::GEOFaceType*
+  inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
   ALU3dGridIntersectionIterator<GridImp>::
   getFace(const GEOTetraElementType & elem, int index) const {
     assert(index >= 0 && index < numFaces);
@@ -509,7 +509,7 @@ namespace Dune {
   }
 
   template <class GridImp>
-  inline const ALU3dImplTraits<hexa>::GEOFaceType*
+  inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
   ALU3dGridIntersectionIterator<GridImp>::
   getFace(const GEOHexaElementType & elem, int index) const {
     assert(index >= 0 && index < numFaces);

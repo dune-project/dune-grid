@@ -25,6 +25,7 @@
 // all methods and classes of the ALUGrid are defined in the namespace
 #define ALU3DSPACE ALUGridSpace ::
 
+#include <dune/common/mpicollectivecommunication.hh>
 #include <dune/grid/alugrid/checkparallel.hh>
 
 // if MPI was found include all headers
@@ -35,199 +36,230 @@
 #include <alugrid_serial.h>
 #endif
 
-namespace ALUGridSpace {
+//- local includes
+#include <dune/grid/alugrid/3d/topology.hh>
 
-#if ALU3DGRID_PARALLEL
-  typedef GitterDunePll GitterType;
-  //typedef Gitter GitterType;
-  typedef GitterDunePll GitterImplType;
+namespace ALUGridSpace
+{
 
-  typedef Hbnd3PllInternal<GitterImplType::Objects::Hbnd3Default,
-      BndsegPllBaseXClosure<GitterImplType::hbndseg3_GEO>,
-      BndsegPllBaseXMacroClosure<GitterImplType::hbndseg3_GEO> > :: micro_t MicroType;
-#else
-  // the header
-  typedef Gitter GitterType;
-  typedef GitterDuneImpl GitterImplType;
-#endif
-
-  // value for boundary to other processes
-  static const int ProcessorBoundary_t = GitterType::hbndseg_STI::closure;
+  static const int ProcessorBoundary_t = Gitter::hbndseg_STI::closure;
 
   // general GatherScatter type
   typedef GatherScatter GatherScatterType;
 
-  // typedefs of Element types
-  typedef GitterType::helement_STI HElementType;               // Interface Element
-  typedef GitterType::hface_STI HFaceType;                     // Interface Face
-  typedef GitterType::hedge_STI HEdgeType;                     // Interface Edge
-  typedef GitterType::vertex_STI VertexType;                   // Interface Vertex
-  typedef GitterType::hbndseg_STI HBndSegType;
-  typedef GitterType::ghostpair_STI GhostPairType;
-  typedef GitterType::Geometric::hface3_GEO GEOFace3Type;     // Tetra Face
-  typedef GitterType::Geometric::hface4_GEO GEOFace4Type; // Hexa Face
-  typedef GitterType::Geometric::hedge1_GEO GEOEdgeT;     // * stays real Face
-  typedef GitterType::Geometric::VertexGeo GEOVertexT;     // * stays real Face
-  typedef GitterImplType::Objects::tetra_IMPL IMPLTetraElementType; //impl Element
-  typedef GitterImplType::Objects::hexa_IMPL IMPLHexaElementType;
-  typedef GitterType::Geometric::tetra_GEO GEOTetraElementType;  // real Element
-  typedef GitterType::Geometric::hexa_GEO GEOHexaElementType;
-  typedef GitterType::Geometric::hasFace3 HasFace3Type;    // has Face with 3 polygons
-  typedef GitterType::Geometric::hasFace4 HasFace4Type;
-  typedef GitterType::Geometric::Hface3Rule Hface3RuleType;
-  typedef GitterType::Geometric::Hface4Rule Hface4RuleType;
+}
 
-  typedef GitterImplType::Objects::Hbnd3Default BNDFace3Type;    // boundary segment
-  typedef GitterImplType::Objects::Hbnd4Default BNDFace4Type;
-  typedef GitterImplType::Objects::hbndseg3_IMPL ImplBndFace3Type;    // boundary segment
-  typedef GitterImplType::Objects::hbndseg4_IMPL ImplBndFace4Type;
-} // end namespace ALUGridSpace
-
-//- local includes
-#include "topology.hh"
-
-namespace Dune {
+namespace Dune
+{
 
   // typedef of ALU3dGridElementType see topology.hh
 
   // i.e. double or float
   typedef double alu3d_ctype;
 
-  template <ALU3dGridElementType elType>
-  struct ALU3dImplTraits {};
 
-  template <>
-  struct ALU3dImplTraits<tetra> {
-    typedef ALU3DSPACE GEOFace3Type GEOFaceType;
-    typedef ALU3DSPACE GEOEdgeT GEOEdgeType;
-    typedef ALU3DSPACE GEOVertexT GEOVertexType;
-    typedef ALU3DSPACE IMPLTetraElementType IMPLElementType;
-    typedef ALU3DSPACE GEOTetraElementType GEOElementType;
-    typedef ALU3DSPACE HasFace3Type HasFaceType;
-    typedef ALU3DSPACE Hface3RuleType HfaceRuleType;
-    typedef ALU3DSPACE BNDFace3Type BNDFaceType;
-    typedef ALU3DSPACE ImplBndFace3Type ImplBndFaceType;
-    typedef ALU3DSPACE BNDFace3Type PLLBndFaceType;
-    typedef ALU3DSPACE HElementType HElementType;    // Interface Element
-    typedef ALU3DSPACE HFaceType HFaceType;          // Interface Face
-    typedef ALU3DSPACE HEdgeType HEdgeType;          // Interface Edge
-    typedef ALU3DSPACE VertexType VertexType;        // Interface Vertex
-    typedef ALU3DSPACE HBndSegType HBndSegType;      // Interface Boundaries
 
-    // refinement and coarsening enum for tetrahedons
-    enum { refine_element_t =
-             ALU3DSPACE GitterType::Geometric::TetraRule::iso8 };
-    enum { coarse_element_t =
-             ALU3DSPACE GitterType::Geometric::TetraRule::crs  };
-    enum { nosplit_element_t = ALU3DSPACE GitterType::Geometric::TetraRule::nosplit };
+  // ALU3dBasicImplTraits
+  // --------------------
 
-    typedef ALU3DSPACE GitterType::Geometric::TetraRule MarkRuleType;
+  template< class Comm >
+  struct ALU3dBasicImplTraits;
 
-    typedef std::pair<GEOFaceType*, int> NeighbourFaceType;
-    typedef std::pair<HasFaceType*, int> NeighbourPairType;
-    typedef ALU3DSPACE GhostPairType GhostPairType;
+  template<>
+  struct ALU3dBasicImplTraits< No_Comm >
+  {
+    typedef ALU3DSPACE Gitter GitterType;
+    typedef ALU3DSPACE GitterDuneImpl GitterImplType;
 
-    template <int cdim>
-    struct Codim;
+    typedef GitterType::helement_STI HElementType;    // Interface Element
+    typedef GitterType::hface_STI HFaceType;          // Interface Face
+    typedef GitterType::hedge_STI HEdgeType;          // Interface Edge
+    typedef GitterType::vertex_STI VertexType;        // Interface Vertex
+    typedef GitterType::hbndseg_STI HBndSegType;
+    typedef GitterType::ghostpair_STI GhostPairType;
 
+    typedef HElementType PllElementType;
+
+    typedef GitterType::Geometric::hedge1_GEO GEOEdgeType;
   };
 
-  template <>
-  struct ALU3dImplTraits<tetra>::Codim<0> {
-    typedef ALU3DSPACE GitterType::helement_STI InterfaceType;
-    typedef IMPLElementType ImplementationType;
-    typedef ALU3DSPACE HBndSegType GhostInterfaceType;
-    typedef PLLBndFaceType GhostImplementationType;
+#if ALU3DGRID_PARALLEL
+  template<>
+  struct ALU3dBasicImplTraits< MPI_Comm >
+  {
+    typedef ALU3DSPACE GitterDunePll GitterType;
+    typedef ALU3DSPACE GitterDunePll GitterImplType;
+
+    typedef GitterType::helement_STI HElementType;    // Interface Element
+    typedef GitterType::hface_STI HFaceType;          // Interface Face
+    typedef GitterType::hedge_STI HEdgeType;          // Interface Edge
+    typedef GitterType::vertex_STI VertexType;        // Interface Vertex
+    typedef GitterType::hbndseg_STI HBndSegType;
+    typedef GitterType::ghostpair_STI GhostPairType;
+
+    typedef ALU3DSPACE ElementPllXIF_t PllElementType;
+
+    typedef GitterType::Geometric::hedge1_GEO GEOEdgeType;
+  };
+#endif // #if ALU3DGRID_PARALLEL
+
+
+
+  // ALU3dCodimImplTraits
+  // --------------------
+
+  template< ALU3dGridElementType elType, class Comm, int codim >
+  struct ALU3dCodimImplTraits;
+
+  template< class Comm >
+  struct ALU3dCodimImplTraits< tetra, Comm, 0 >
+  {
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
+
+    typedef typename GitterType::helement_STI InterfaceType;
+    typedef typename GitterImplType::Objects::tetra_IMPL ImplementationType;
+    typedef typename GitterType::hbndseg_STI GhostInterfaceType;
+    typedef typename GitterImplType::Objects::Hbnd3Default GhostImplementationType;
   };
 
-  template <>
-  struct ALU3dImplTraits<tetra>::Codim<1> {
-    typedef ALU3DSPACE GitterType::hface_STI InterfaceType;
-    typedef GEOFaceType ImplementationType;
+  template< class Comm >
+  struct ALU3dCodimImplTraits< hexa, Comm, 0 >
+  {
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
+
+    typedef typename GitterType::helement_STI InterfaceType;
+    typedef typename GitterImplType::Objects::hexa_IMPL ImplementationType;
+    typedef typename GitterType::hbndseg_STI GhostInterfaceType;
+    typedef typename GitterImplType::Objects::Hbnd4Default GhostImplementationType;
   };
 
-  template <>
-  struct ALU3dImplTraits<tetra>::Codim<2> {
-    typedef ALU3DSPACE GitterType::hedge_STI InterfaceType;
-    typedef GEOEdgeType ImplementationType;
+  template< class Comm >
+  struct ALU3dCodimImplTraits< tetra, Comm, 1 >
+  {
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
+
+    typedef typename GitterType::hface_STI InterfaceType;
+    typedef typename GitterType::Geometric::hface3_GEO ImplementationType;
   };
 
-  template <>
-  struct ALU3dImplTraits<tetra>::Codim<3> {
-    typedef ALU3DSPACE GitterType::vertex_STI InterfaceType;
-    typedef ALU3DSPACE GitterType::Geometric::VertexGeo ImplementationType;
+  template< class Comm >
+  struct ALU3dCodimImplTraits< hexa, Comm, 1 >
+  {
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
+
+    typedef typename GitterType::hface_STI InterfaceType;
+    typedef typename GitterType::Geometric::hface4_GEO ImplementationType;
+  };
+
+  template< ALU3dGridElementType elType, class Comm >
+  struct ALU3dCodimImplTraits< elType, Comm, 2 >
+  {
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
+
+    typedef typename GitterType::hedge_STI InterfaceType;
+    typedef typename GitterType::Geometric::hedge1_GEO ImplementationType;
+  };
+
+  template< ALU3dGridElementType elType, class Comm >
+  struct ALU3dCodimImplTraits< elType, Comm, 3 >
+  {
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
+
+    typedef typename GitterType::vertex_STI InterfaceType;
+    typedef typename GitterType::Geometric::VertexGeo ImplementationType;
   };
 
 
 
-  template <>
-  struct ALU3dImplTraits<hexa> {
-    typedef ALU3DSPACE GEOFace4Type GEOFaceType;
-    typedef ALU3DSPACE GEOEdgeT GEOEdgeType;
-    typedef ALU3DSPACE GEOVertexT GEOVertexType;
-    typedef ALU3DSPACE IMPLHexaElementType IMPLElementType;
-    typedef ALU3DSPACE GEOHexaElementType GEOElementType;
-    typedef ALU3DSPACE HasFace4Type HasFaceType;
-    typedef ALU3DSPACE Hface4RuleType HfaceRuleType;
-    typedef ALU3DSPACE BNDFace4Type BNDFaceType;
-    typedef ALU3DSPACE ImplBndFace4Type ImplBndFaceType;
-    typedef ALU3DSPACE BNDFace4Type PLLBndFaceType;
-    typedef ALU3DSPACE HElementType HElementType;    // Interface Element
-    typedef ALU3DSPACE HFaceType HFaceType;          // Interface Face
-    typedef ALU3DSPACE HEdgeType HEdgeType;          // Interface Edge
-    typedef ALU3DSPACE VertexType VertexType;        // Interface Vertex
-    typedef ALU3DSPACE HBndSegType HBndSegType;      // Interface Boundaries
+  // ALU3dImplTraits
+  // ---------------
 
-    // refinement and coarsening enum for hexahedrons
-    enum { refine_element_t  = ALU3DSPACE GitterType::Geometric::HexaRule::iso8 };
-    enum { coarse_element_t  = ALU3DSPACE GitterType::Geometric::HexaRule::crs  };
-    enum { nosplit_element_t = ALU3DSPACE GitterType::Geometric::HexaRule::nosplit };
+  template< ALU3dGridElementType elType, class Comm >
+  struct ALU3dImplTraits;
 
-    typedef ALU3DSPACE GitterType::Geometric::HexaRule MarkRuleType;
-    typedef std::pair<GEOFaceType*, int> NeighbourFaceType;
-    typedef std::pair<HasFaceType*, int> NeighbourPairType;
-    typedef ALU3DSPACE GhostPairType GhostPairType;
+  template< class Comm >
+  struct ALU3dImplTraits< tetra, Comm >
+    : public ALU3dBasicImplTraits< Comm >
+  {
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
 
-    template <int cdim>
-    struct Codim;
+    typedef typename GitterType::Geometric::hface3_GEO GEOFaceType;
+    typedef typename GitterType::Geometric::VertexGeo GEOVertexType;
+    typedef typename GitterImplType::Objects::tetra_IMPL IMPLElementType;
+    typedef typename GitterType::Geometric::tetra_GEO GEOElementType;
+    typedef typename GitterType::Geometric::hasFace3 HasFaceType;
+    typedef typename GitterType::Geometric::Hface3Rule HfaceRuleType;
+    typedef typename GitterImplType::Objects::Hbnd3Default BNDFaceType;
+    typedef typename GitterImplType::Objects::hbndseg3_IMPL ImplBndFaceType;
+    typedef BNDFaceType PLLBndFaceType;
+
+    typedef typename GitterType::Geometric::TetraRule MarkRuleType;
+
+    // refinement and coarsening enum
+    enum { refine_element_t = MarkRuleType::iso8 };
+    enum { coarse_element_t = MarkRuleType::crs };
+    enum { nosplit_element_t = MarkRuleType::nosplit };
+
+    typedef std::pair< GEOFaceType *, int > NeighbourFaceType;
+    typedef std::pair< HasFaceType *, int > NeighbourPairType;
+
+    template< int codim >
+    struct Codim
+      : public ALU3dCodimImplTraits< tetra, Comm, codim >
+    {};
   };
 
-  template <>
-  struct ALU3dImplTraits<hexa>::Codim<0> {
-    typedef ALU3DSPACE GitterType::helement_STI InterfaceType;
-    typedef IMPLElementType ImplementationType;
-    typedef ALU3DSPACE HBndSegType GhostInterfaceType;
-    typedef PLLBndFaceType GhostImplementationType;
+  template< class Comm >
+  struct ALU3dImplTraits< hexa, Comm >
+    : public ALU3dBasicImplTraits< Comm >
+  {
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
+
+    typedef typename GitterType::Geometric::hface4_GEO GEOFaceType;
+    typedef typename GitterType::Geometric::VertexGeo GEOVertexType;
+    typedef typename GitterImplType::Objects::hexa_IMPL IMPLElementType;
+    typedef typename GitterType::Geometric::hexa_GEO GEOElementType;
+    typedef typename GitterType::Geometric::hasFace4 HasFaceType;
+    typedef typename GitterType::Geometric::Hface4Rule HfaceRuleType;
+    typedef typename GitterImplType::Objects::Hbnd4Default BNDFaceType;
+    typedef typename GitterImplType::Objects::hbndseg4_IMPL ImplBndFaceType;
+    typedef BNDFaceType PLLBndFaceType;
+
+    typedef typename GitterType::Geometric::HexaRule MarkRuleType;
+
+    // refinement and coarsening enum
+    enum { refine_element_t = MarkRuleType::iso8 };
+    enum { coarse_element_t = MarkRuleType::crs };
+    enum { nosplit_element_t = MarkRuleType::nosplit };
+
+    typedef std::pair< GEOFaceType *, int > NeighbourFaceType;
+    typedef std::pair< HasFaceType *, int > NeighbourPairType;
+
+    template< int codim >
+    struct Codim
+      : public ALU3dCodimImplTraits< hexa, Comm, codim >
+    {};
   };
 
-  template <>
-  struct ALU3dImplTraits<hexa>::Codim<1> {
-    typedef ALU3DSPACE GitterType::hface_STI InterfaceType;
-    typedef GEOFaceType ImplementationType;
-  };
 
-  template <>
-  struct ALU3dImplTraits<hexa>::Codim<2> {
-    typedef ALU3DSPACE GitterType::hedge_STI InterfaceType;
-    typedef GEOEdgeType ImplementationType;
-  };
-
-  template <>
-  struct ALU3dImplTraits<hexa>::Codim<3> {
-    typedef ALU3DSPACE GitterType::vertex_STI InterfaceType;
-    typedef ALU3DSPACE GitterType::Geometric::VertexGeo ImplementationType;
-  };
 
   //! contains list of vertices of one level
   //! needed for VertexLevelIterator
-  class ALU3dGridVertexList
+  template< class Comm >
+  struct ALU3dGridVertexList
   {
-  public:
     // level vertex iterator list
-    typedef std::vector < ALU3DSPACE VertexType * > VertexListType;
-    typedef VertexListType :: iterator IteratorType;
+    typedef typename ALU3dBasicImplTraits< Comm >::VertexType VertexType;
+    typedef std::vector< VertexType * > VertexListType;
+    typedef typename VertexListType::iterator IteratorType;
 
-    ALU3dGridVertexList () : up2Date_(false) {}
+    ALU3dGridVertexList ()
+      : up2Date_( false )
+    {}
 
     size_t size () const { return vertexList_.size(); }
 
@@ -247,17 +279,21 @@ namespace Dune {
     VertexListType vertexList_;
   };
 
+
   //! contains list of vertices of one level
   //! needed for VertexLevelIterator
-  class ALU3dGridLeafVertexList
+  template< class Comm >
+  struct ALU3dGridLeafVertexList
   {
-  public:
     // level vertex iterator list
-    typedef std::pair < ALU3DSPACE VertexType * , int > ItemType;
-    typedef std::vector < ItemType > VertexListType;
-    typedef VertexListType :: iterator IteratorType;
+    typedef typename ALU3dBasicImplTraits< Comm >::VertexType VertexType;
+    typedef std::pair< VertexType *, int > ItemType;
+    typedef std::vector< ItemType > VertexListType;
+    typedef typename VertexListType::iterator IteratorType;
 
-    ALU3dGridLeafVertexList () : up2Date_(false) {}
+    ALU3dGridLeafVertexList ()
+      : up2Date_( false )
+    {}
 
     size_t size () const { return vertexList_.size(); }
 
@@ -272,7 +308,8 @@ namespace Dune {
     IteratorType end   () { return vertexList_.end(); }
 
     VertexListType & getItemList() { return vertexList_; }
-    int getLevel(const ALU3DSPACE VertexType & vertex) const
+
+    int getLevel ( const VertexType &vertex ) const
     {
       const int idx = vertex.getIndex();
       assert( idx >= 0 );
@@ -287,7 +324,8 @@ namespace Dune {
     bool up2Date_;
     VertexListType vertexList_;
   };
-  typedef ALU3dGridLeafVertexList LeafVertexListType;
+
+
 
   class ALU3dGridItemList
   {
@@ -321,18 +359,24 @@ namespace Dune {
   //  some helper functions
   /////////////////////////////////////////////////////////////////////////
 
-  inline const ALU3dImplTraits<tetra>::GEOFaceType*
-  getFace(const ALU3DSPACE GEOTetraElementType& elem, int index) {
-    assert(index >= 0 && index < 4);
-    return elem.myhface3(ElementTopologyMapping<tetra>::dune2aluFace(index));
-  }
+  template< class Comm >
+  struct ALU3dGridFaceGetter
+  {
+    static const typename ALU3dImplTraits< tetra, Comm >::GEOFaceType *
+    getFace( const typename ALU3dImplTraits< tetra, Comm >::GEOElementType& elem, int index)
+    {
+      assert(index >= 0 && index < 4);
+      return elem.myhface3( ElementTopologyMapping< tetra >::dune2aluFace(index) );
+    }
 
-  inline const ALU3dImplTraits<hexa>::GEOFaceType*
-  getFace(const ALU3DSPACE GEOHexaElementType& elem, int index) {
-    assert(index >= 0 && index < 6);
-    return elem.myhface4(ElementTopologyMapping<hexa>::dune2aluFace(index));
-  }
+    static const typename ALU3dImplTraits< hexa, Comm >::GEOFaceType*
+    getFace( const typename ALU3dImplTraits< hexa, Comm >::GEOElementType &elem, int index )
+    {
+      assert(index >= 0 && index < 6);
+      return elem.myhface4( ElementTopologyMapping< hexa >::dune2aluFace(index) );
+    }
+  };
 
 } // end namespace Dune
 
-#endif
+#endif // #ifndef DUNE_ALU3DINCLUDE_HH

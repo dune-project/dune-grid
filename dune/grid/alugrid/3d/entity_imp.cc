@@ -101,7 +101,7 @@ namespace Dune {
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
   setGhost(const HBndSegType &ghost)
   {
-    // this method only exists, that we don't have to pecialise the
+    // this method only exists, that we don't have to specialize the
     // Iterators for each codim, this method should not be called otherwise
     // error
     DUNE_THROW(GridError,"This method should not be called!");
@@ -248,7 +248,7 @@ namespace Dune {
   alu_inline int ALU3dGridEntity<0,dim,GridImp> :: getSubIndex (int i) const
   {
     assert(item_ != 0);
-    typedef typename  ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElType;
+    typedef typename  ImplTraits::IMPLElementType IMPLElType;
     return IndexWrapper<IMPLElType,GridImp::elementType,cc>::subIndex ( *item_, i);
   }
 
@@ -263,7 +263,7 @@ namespace Dune {
     case 0 :
       return this->getIndex();
     case 1 :
-      return (getFace(*item_,i))->getIndex();
+      return (ALU3dGridFaceGetter< Comm >::getFace( *item_, i ))->getIndex();
     case 2 :
       return item_->myhedge1( ElemTopo::dune2aluEdge( i ) )->getIndex();
     case 3 :
@@ -288,7 +288,7 @@ namespace Dune {
     entity (const GridImp & grid,
             const int level,
             const EntityType & entity,
-            const typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item,
+            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item,
             int i)
     {
       return ALU3dGridEntityPointer<0, GridImp>( entity );
@@ -306,7 +306,7 @@ namespace Dune {
     entity (const GridImp& grid,
             const int level,
             const EntityType & en,
-            const typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item,
+            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item,
             int duneFace)
     {
       int aluFace = Topo::dune2aluFace(duneFace);
@@ -314,7 +314,7 @@ namespace Dune {
         ALU3dGridEntityPointer<1,GridImp>
           (grid,
           level,
-          *(getFace(item, duneFace)),    // getFace already constains dune2aluFace
+          *(ALU3dGridFaceGetter< typename GridImp::MPICommunicatorType >::getFace(item, duneFace)),    // getFace already constains dune2aluFace
           item.twist(aluFace),
           duneFace    // we need the duneFace number here for the buildGeom method
           );
@@ -335,7 +335,7 @@ namespace Dune {
     entity (const GridImp & grid,
             const int level,
             const EntityType & en,
-            const typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item,
+            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item,
             int i)
     {
       // get reference element
@@ -348,7 +348,7 @@ namespace Dune {
       int v = en.template getSubIndex<dim> (localNum);
 
       // get the hedge object
-      const typename ALU3dImplTraits<GridImp::elementType>::GEOEdgeType &
+      const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType &
       edge = *(item.myhedge1(Topo::dune2aluEdge(i)));
 
       int vx = edge.myvertex(0)->getIndex();
@@ -370,7 +370,7 @@ namespace Dune {
     entity (const GridImp & grid,
             const int level,
             const EntityType & en,
-            const typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item,
+            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item,
             int i)
     {
       return ALU3dGridEntityPointer<3,GridImp>
@@ -462,13 +462,13 @@ namespace Dune {
     if( isGhost() ) return false;
 
     enum { numFaces = EntityCount<GridImp::elementType>::numFaces };
-    typedef typename ALU3dImplTraits<GridImp::elementType>::HasFaceType HasFaceType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::GEOFaceType GEOFaceType;
+    typedef typename ImplTraits::HasFaceType HasFaceType;
+    typedef typename ImplTraits::GEOFaceType GEOFaceType;
 
     assert( item_ );
     for(int i=0; i<numFaces; ++i)
     {
-      const GEOFaceType & face = *getFace(*item_,i);
+      const GEOFaceType &face = *ALU3dGridFaceGetter< Comm >::getFace( *item_, i );
 
 #if ALU3DGRID_PARALLEL
       // don't count internal boundaries as boundary

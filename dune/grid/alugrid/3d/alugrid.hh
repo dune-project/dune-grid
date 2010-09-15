@@ -44,11 +44,11 @@ namespace Dune
    */
   template<>
   class ALUCubeGrid< 3, 3 >
-    : public Dune::ALU3dGrid< 3, 3, Dune::hexa >
+    : public Dune::ALU3dGrid< hexa >
   {
     typedef ALUCubeGrid< 3, 3 > This;
 
-    typedef Dune::ALU3dGrid<3,3,Dune::hexa> BaseType;
+    typedef Dune::ALU3dGrid< hexa > BaseType;
     enum { dim      = 3 };
     enum { dimworld = 3 };
 
@@ -197,11 +197,11 @@ namespace Dune
    */
   template<>
   class ALUSimplexGrid< 3, 3 >
-    : public Dune::ALU3dGrid< 3, 3,Dune::tetra >
+    : public Dune::ALU3dGrid< tetra >
   {
     typedef ALUSimplexGrid< 3, 3 > This;
 
-    typedef Dune::ALU3dGrid<3,3,Dune::tetra> BaseType;
+    typedef Dune::ALU3dGrid< tetra > BaseType;
     enum { dim      = 3 };
     enum { dimworld = 3 };
 

@@ -16,11 +16,13 @@ using std::endl;
 using std::cout;
 using std::flush;
 
-namespace ALUGridSpace {
+namespace ALUGridSpace
+{
 
   //! the corresponding interface class is defined in bsinclude.hh
-  template <class GridType, class DataCollectorType , int codim >
-  class GatherScatterBaseImpl : public GatherScatter
+  template <class GridType, class DataCollectorType, int codim >
+  class GatherScatterBaseImpl
+    : public GatherScatter
   {
   protected:
     const GridType & grid_;
@@ -29,10 +31,11 @@ namespace ALUGridSpace {
         typename GridType::template Codim<codim>::Entity> MakeableEntityType;
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::ImplementationType ImplElementType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::InterfaceType HElementType;
+    typedef typename GridType::MPICommunicatorType Comm;
+
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim< codim >::ImplementationType ImplElementType;
+    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
 
     EntityType  & entity_;
     RealEntityType & realEntity_;
@@ -137,24 +140,18 @@ namespace ALUGridSpace {
         typename GridType::template Codim<0>::Entity> MakeableEntityType;
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::ImplementationType IMPLElementType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::InterfaceType HElementType;
+    typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<1>::InterfaceType HFaceType;
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim< codim >::ImplementationType ImplElementType;
+    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::GhostInterfaceType HGhostType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
 
-#if ALU3DGRID_PARALLEL
-    typedef ALU3DSPACE ElementPllXIF_t PllElementType;
-#else
-    typedef HElementType PllElementType;
-#endif
+    typedef typename ImplTraits::template Codim< codim >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< codim >::GhostImplementationType ImplGhostType;
+
+    typedef typename ImplTraits::PllElementType PllElementType;
 
     EntityType& entity_;
     RealEntityType & realEntity_;
@@ -264,9 +261,9 @@ namespace ALUGridSpace {
 
 #if ALU3DGRID_PARALLEL
   //! the corresponding interface class is defined in bsinclude.hh
-  template <class GridType, class DataCollectorType , int codim >
+  template< class GridType, class DataCollectorType, int codim >
   class GatherScatterLeafData
-    : public GatherScatterBaseImpl<GridType,DataCollectorType,codim>
+    : public GatherScatterBaseImpl< GridType, DataCollectorType, codim >
   {
     enum { dim = GridType :: dimension };
 
@@ -276,20 +273,18 @@ namespace ALUGridSpace {
         typename GridType::template Codim<codim>::Entity> MakeableEntityType;
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::ImplementationType IMPLElementType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::InterfaceType HElementType;
+    typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<1>::InterfaceType HFaceType;
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
+    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<0>::GhostInterfaceType HGhostType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<0>::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
 
-    typedef ALU3DSPACE ElementPllXIF_t PllElementType;
+    typedef typename ImplTraits::template Codim< 0 >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< 0 >::GhostImplementationType ImplGhostType;
+
+    typedef typename ImplTraits::PllElementType PllElementType;
 
   public:
     //! Constructor
@@ -351,20 +346,19 @@ namespace ALUGridSpace {
         typename GridType::template Codim<codim>::Entity> MakeableEntityType;
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::ImplementationType IMPLElementType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::InterfaceType HElementType;
+    typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<1>::InterfaceType HFaceType;
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
+    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<0>::GhostInterfaceType HGhostType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<0>::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
 
-    typedef ALU3DSPACE ElementPllXIF_t PllElementType;
+    typedef typename ImplTraits::template Codim< 0 >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< 0 >::GhostImplementationType ImplGhostType;
+
+    typedef typename ImplTraits::PllElementType PllElementType;
+
     typedef typename GridType::LevelIndexSetImp LevelIndexSetImp;
 
     const LevelIndexSetImp & levelSet_;
@@ -404,20 +398,19 @@ namespace ALUGridSpace {
         typename GridType::template Codim<codim>::Entity> MakeableEntityType;
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::ImplementationType IMPLElementType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::InterfaceType HElementType;
+    typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<1>::InterfaceType HFaceType;
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
+    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<0>::GhostInterfaceType HGhostType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<0>::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
 
-    typedef ALU3DSPACE ElementPllXIF_t PllElementType;
+    typedef typename ImplTraits::template Codim< 0 >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< 0 >::GhostImplementationType ImplGhostType;
+
+    typedef typename ImplTraits::PllElementType PllElementType;
+
     typedef typename GridType::LevelIndexSetImp LevelIndexSetImp;
 
     const LevelIndexSetImp & levelSet_;
@@ -470,7 +463,7 @@ namespace ALUGridSpace {
       return (pll.ghostLevel() == level_);
     }
   };
-#endif
+#endif // #if ALU3DGRID_PARALLEL
 
   //! the corresponding interface class is defined in bsinclude.hh
   template <class GridType, class DataCollectorType, class IndexOperatorType>
@@ -483,24 +476,19 @@ namespace ALUGridSpace {
         typename GridType::template Codim<0>::Entity> MakeableEntityType;
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::ImplementationType IMPLElementType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::InterfaceType HElementType;
+    typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<1>::InterfaceType HFaceType;
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
+    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::GhostInterfaceType HGhostType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
 
-#if ALU3DGRID_PARALLEL
-    typedef ALU3DSPACE ElementPllXIF_t PllElementType;
-#else
-    typedef HElementType PllElementType;
-#endif
+    typedef typename ImplTraits::template Codim< 0 >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< 0 >::GhostImplementationType ImplGhostType;
+
+    typedef typename ImplTraits::PllElementType PllElementType;
+
     GridType & grid_;
 
     EntityType     & entity_;
@@ -588,7 +576,12 @@ namespace ALUGridSpace {
     //DofManagerType & dm_;
     AdaptDataHandle &rp_;
 
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::PLLBndFaceType PLLBndFaceType;
+    typedef typename GridType::MPICommunicatorType Comm;
+
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::HElementType HElementType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
+    typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
 
   public:
     //! Constructor
@@ -707,6 +700,12 @@ namespace ALUGridSpace {
         typename GridType::template Codim<0>::Entity> MakeableEntityType;
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
+    typedef typename GridType::MPICommunicatorType Comm;
+
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::HElementType HElementType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
+
   public:
     //! Constructor
     AdaptRestrictProlongGlSet ( GridType &grid,
@@ -760,7 +759,13 @@ namespace ALUGridSpace {
     RealEntityType & realSon_;
 
     DofManagerType & dm_;
-    typedef typename  Dune::ALU3dImplTraits<GridType::elementType>::PLLBndFaceType PLLBndFaceType;
+
+    typedef typename GridType::MPICommunicatorType Comm;
+
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::HElementType HElementType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
+    typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
 
     int newMemSize_;
   public:
@@ -817,5 +822,6 @@ namespace ALUGridSpace {
     int newElements () const { return newMemSize_; }
   };
 
-} // end namespace
-#endif
+} // end namespace ALUGridSpace
+
+#endif // #ifndef DUNE_ALU3DGRIDDATAHANDLE_HH

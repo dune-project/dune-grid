@@ -25,7 +25,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template <int dim, int dimworld, ALU3dGridElementType elType>
+  template< ALU3dGridElementType, class >
   class ALU3dGrid;
 
   template<int cd, int dim, class GridImp>
@@ -37,17 +37,16 @@ namespace Dune
   // ---------------------------
 
   //! hierarchic index set of ALU3dGrid
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  class ALU3dGridHierarchicIndexSet :
-    public IndexSet <ALU3dGrid<dim,dimworld,elType>,
-        ALU3dGridHierarchicIndexSet<dim,dimworld,elType> >
+  template< ALU3dGridElementType elType, class Comm >
+  class ALU3dGridHierarchicIndexSet
+    : public IndexSet< ALU3dGrid< elType, Comm >, ALU3dGridHierarchicIndexSet< elType, Comm > >
   {
-    typedef ALU3dGridHierarchicIndexSet< dim, dimworld, elType > This;
+    typedef ALU3dGridHierarchicIndexSet< elType, Comm > This;
 
-    typedef ALU3dGrid<dim,dimworld,elType> GridType;
-    enum { numCodim = dim+1 }; // i.e. 4
+    typedef ALU3dGrid< elType, Comm > GridType;
+    enum { numCodim = GridType::dimension + 1 };
 
-    friend class ALU3dGrid<dim,dimworld,elType>;
+    friend class ALU3dGrid< elType, Comm >;
 
     // constructor
     ALU3dGridHierarchicIndexSet( const GridType &grid )
@@ -281,41 +280,40 @@ namespace Dune
   //
   //*****************************************************************
   //! global id set for ALU3dGrid
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  class ALU3dGridGlobalIdSet :
-    public IdSet  < ALU3dGrid<dim,dimworld,elType> ,
-        ALU3dGridGlobalIdSet<dim,dimworld,elType> ,
-        typename  ALU3dGrid<dim,dimworld,elType>::Traits::GlobalIdType >
-    , public ALU3DSPACE AdaptRestrictProlongType
+  template< ALU3dGridElementType elType, class Comm >
+  class ALU3dGridGlobalIdSet
+    : public IdSet< ALU3dGrid< elType, Comm >, ALU3dGridGlobalIdSet< elType, Comm > ,
+          typename ALU3dGrid< elType, Comm >::Traits::GlobalIdType >,
+      public ALU3DSPACE AdaptRestrictProlongType
   {
-    typedef ALU3dGrid<dim,dimworld,elType> GridType;
-    typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
+    typedef ALU3dGrid< elType, Comm > GridType;
+    typedef typename GridType::HierarchicIndexSet HierarchicIndexSetType;
 
-    typedef ALU3dImplTraits<elType> ImplTraitsType;
+    typedef ALU3dImplTraits< elType, Comm > ImplTraitsType;
     typedef typename ImplTraitsType::IMPLElementType IMPLElementType;
     typedef typename ImplTraitsType::GEOElementType GEOElementType;
     typedef typename ImplTraitsType::GEOFaceType GEOFaceType;
     typedef typename ImplTraitsType::GEOEdgeType GEOEdgeType;
 
-    typedef ALU3DSPACE HElementType HElementType;
-    typedef ALU3DSPACE HFaceType HFaceType;
-    typedef ALU3DSPACE HEdgeType HEdgeType;
-    typedef ALU3DSPACE VertexType VertexType;
-    typedef ALU3DSPACE HBndSegType HBndSegType;
+    typedef typename ImplTraitsType::GitterImplType GitterImplType;
 
-    typedef EntityCount<elType> EntityCountType;
+    typedef typename ImplTraitsType::HElementType HElementType;
+    typedef typename ImplTraitsType::HFaceType HFaceType;
+    typedef typename ImplTraitsType::HEdgeType HEdgeType;
+    typedef typename ImplTraitsType::VertexType VertexType;
+    typedef typename ImplTraitsType::HBndSegType HBndSegType;
+
+    typedef EntityCount< elType > EntityCountType;
 
   public:
     //! export type of id
-    // id is of type ALUGridId <  MacroKeyType >
-    typedef typename ALU3dGrid<dim,dimworld,elType>::Traits::GlobalIdType IdType;
+    typedef typename GridType::Traits::GlobalIdType IdType;
 
   private:
     typedef ALUMacroKey MacroKeyType;
 
-    //typedef std::pair < MacroKeyType , int > MacroIdType;
     typedef ALUGridId <  MacroKeyType > MacroIdType; // same as IdType
-    enum { numCodim = dim+1 };
+    enum { numCodim = GridType::dimension+1 };
 
     // this means that only up to 300000000 entities are allowed
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
@@ -459,13 +457,12 @@ namespace Dune
         ids_[i].clear();
       }
 
-      ALU3DSPACE GitterImplType & gitter = const_cast<ALU3DSPACE
-                                                      GitterImplType &> (grid_.myGrid());
+      GitterImplType &gitter = grid_.myGrid();
 
       // all interior and border vertices
       {
-        ALU3DSPACE AccessIterator <VertexType>::Handle fw (gitter.container ()) ;
-        for (fw.first () ; ! fw.done () ; fw.next ())
+        typename ALU3DSPACE AccessIterator< VertexType >::Handle fw( gitter.container() );
+        for( fw.first (); !fw.done(); fw.next() )
         {
           int idx = fw.item().getIndex();
           ids_[3][idx] = buildMacroVertexId( fw.item() );
@@ -474,7 +471,7 @@ namespace Dune
 
       // all ghost vertices
       {
-        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<3,Ghost_Partition> IteratorType;
+        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< 3, Ghost_Partition, Comm > IteratorType;
         IteratorType fw (grid_ , 0 , grid_.nlinks() );
         typedef typename IteratorType :: val_t val_t;
         for (fw.first () ; ! fw.done () ; fw.next ())
@@ -489,7 +486,7 @@ namespace Dune
 
       // create ids for all macro edges
       {
-        ALU3DSPACE AccessIterator <HEdgeType> :: Handle w (gitter.container ()) ;
+        typename ALU3DSPACE AccessIterator< HEdgeType >::Handle w( gitter.container() );
         for (w.first(); !w.done(); w.next())
         {
           int idx = w.item().getIndex();
@@ -500,8 +497,8 @@ namespace Dune
 
       // all ghost edges
       {
-        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<2,Ghost_Partition> IteratorType;
-        IteratorType fw (grid_ , 0 , grid_.nlinks() );
+        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< 2, Ghost_Partition, Comm > IteratorType;
+        IteratorType fw( grid_, 0, grid_.nlinks() );
         typedef typename IteratorType :: val_t val_t;
         for (fw.first () ; ! fw.done () ; fw.next ())
         {
@@ -518,7 +515,7 @@ namespace Dune
 
       // for all macro faces and all children
       {
-        ALU3DSPACE AccessIterator <HFaceType>::Handle w (gitter.container ()) ;
+        typename ALU3DSPACE AccessIterator< HFaceType >::Handle w( gitter.container() );
         for (w.first () ; ! w.done () ; w.next ())
         {
           int idx = w.item().getIndex();
@@ -529,7 +526,7 @@ namespace Dune
 
       // all ghost faces
       {
-        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<1,Ghost_Partition> IteratorType;
+        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< 1, Ghost_Partition, Comm > IteratorType;
         IteratorType fw (grid_ , 0 , grid_.nlinks() );
         typedef typename IteratorType :: val_t val_t;
         for (fw.first () ; ! fw.done () ; fw.next ())
@@ -545,7 +542,7 @@ namespace Dune
 
       // for all macro elements and all internal entities
       {
-        ALU3DSPACE AccessIterator <HElementType> :: Handle w (gitter.container ()) ;
+        typename ALU3DSPACE AccessIterator< HElementType >::Handle w( gitter.container() );
         for (w.first () ; ! w.done () ; w.next ())
         {
           int idx = w.item().getIndex();
@@ -556,7 +553,7 @@ namespace Dune
 
       // all ghost elements
       {
-        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<0,Ghost_Partition> IteratorType;
+        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< 0, Ghost_Partition, Comm > IteratorType;
         IteratorType fw (grid_ , 0 , grid_.nlinks() );
         typedef typename IteratorType :: val_t val_t;
         for (fw.first () ; ! fw.done () ; fw.next ())
@@ -791,12 +788,13 @@ namespace Dune
       assert( ids_[codim][vertex.getIndex()].isValid() );
     }
 
-    friend class ALU3dGrid<dim,dimworld,elType>;
+    friend class ALU3dGrid< elType, Comm >;
 
     const IdType & getId(const IdType & macroId) const
     {
       return macroId;
     }
+
   public:
     //! return global id of given entity
     template <class EntityType>
@@ -877,7 +875,7 @@ namespace Dune
       for(int i=0; i<EntityCountType::numFaces; ++i)
       {
         enum { faceCodim = 1 };
-        BuildIds<dim,elType>::buildFace(*this,item,i,ids_[faceCodim]);
+        BuildIds< GridType::dimension, elType >::buildFace(*this,item,i,ids_[faceCodim]);
       }
 
       for(int i=0; i<EntityCountType::numEdges; ++i)
@@ -934,20 +932,19 @@ namespace Dune
   //***********************************************************
 
   //! hierarchic index set of ALU3dGrid
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  class ALU3dGridLocalIdSet :
-    public IdSet < ALU3dGrid<dim,dimworld,elType> ,
-        ALU3dGridLocalIdSet<dim,dimworld,elType> ,
-        int >
-    , public ALU3DSPACE AdaptRestrictProlongType
+  template< ALU3dGridElementType elType, class Comm >
+  class ALU3dGridLocalIdSet
+    : public IdSet< ALU3dGrid< elType, Comm >, ALU3dGridLocalIdSet< elType, Comm >, int >,
+      public ALU3DSPACE AdaptRestrictProlongType
   {
-    typedef ALU3dGridLocalIdSet< dim, dimworld, elType > This;
+    typedef ALU3dGridLocalIdSet< elType, Comm > This;
 
-    typedef ALU3DSPACE HElementType HElementType;
-    typedef ALU3DSPACE HBndSegType HBndSegType;
+    typedef ALU3dImplTraits< elType, Comm > ImplTraitsType;
+    typedef typename ImplTraitsType::HElementType HElementType;
+    typedef typename ImplTraitsType::HBndSegType HBndSegType;
 
-    typedef ALU3dGrid<dim,dimworld,elType> GridType;
-    typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
+    typedef ALU3dGrid< elType, Comm > GridType;
+    typedef typename GridType::HierarchicIndexSet HierarchicIndexSetType;
 
     // this means that only up to 300000000 entities are allowed
     enum { codimMultiplier = 300000000 };
@@ -956,10 +953,11 @@ namespace Dune
     // create local id set , only for the grid allowed
     ALU3dGridLocalIdSet(const GridType & grid) : hset_(grid.hierarchicIndexSet())
     {
-      for(int i=0; i<dim+1; i++)
-        codimStart_[i] = i*codimMultiplier;
+      for( int codim = 0; codim <= GridType::dimension; ++codim )
+        codimStart_[ codim ] = codim * codimMultiplier;
     }
-    friend class ALU3dGrid<dim,dimworld,elType>;
+
+    friend class ALU3dGrid< elType, Comm >;
 
     // fake method to have the same method like GlobalIdSet
     void updateIdSet() {}
@@ -1015,8 +1013,9 @@ namespace Dune
     const HierarchicIndexSetType & hset_;
 
     // store start of each codim numbers
-    int codimStart_[dim+1];
+    int codimStart_[ GridType::dimension+1 ];
   };
 
 } // end namespace Dune
-#endif
+
+#endif // #ifndef DUNE_ALU3DGRIDINDEXSETS_HH
