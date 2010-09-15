@@ -134,7 +134,6 @@ namespace Dune {
 #ifdef USE_FINITE_STACK
     if( objStack_.full() )
     {
-      //std::cout << "Delete Object \n";
       delete obj;
     }
     else
