@@ -77,8 +77,8 @@ namespace Dune {
     template< template< int, int > class >
     friend class ALU3dGridFactory;
   public:
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType HElementType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::ImplementationType IMPLElementType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType HItemType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::ImplementationType ItemType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::VertexType VertexType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::HBndSegType HBndSegType;
 
@@ -110,11 +110,11 @@ namespace Dune {
     GeometryType type () const;
 
     // set element as normal entity
-    void setElement(const HElementType & item);
-    void setElement(const HElementType & item, const int level, int twist=0, int face = -1);
+    void setElement(const HItemType & item);
+    void setElement(const HItemType & item, const int level, int twist=0, int face = -1);
 
     // not needed anymore
-    void setElement(const HElementType & el,
+    void setElement(const HItemType & el,
                     const VertexType & vx);
 
     //! setGhost is not valid for this codim
@@ -133,7 +133,7 @@ namespace Dune {
     void setEntity ( const ALU3dGridEntity<cd,dim,GridImp> & org );
 
     // return reference to internal item
-    const IMPLElementType & getItem () const { return *item_; }
+    const ItemType & getItem () const { return *item_; }
 
     //! return reference to grid
     const GridImp& grid() const { return grid_; }
@@ -143,7 +143,7 @@ namespace Dune {
     int getIndex () const;
 
     //! convert ALUGrid partition type to dune partition type
-    PartitionType convertBndId(const HElementType & item) const ;
+    PartitionType convertBndId(const HItemType & item) const ;
 
     // the grid this entity belongs to
     const GridImp &grid_;
@@ -153,8 +153,8 @@ namespace Dune {
     int twist_; //! twist of the underlying ALU element (with regard to the element that asked for it)
     int face_; //! for face, know on which face we are
 
-    // corresponding ALU3dGridElement
-    const IMPLElementType * item_;
+    // corresponding ALU3dGrid item, here face, edge, or vertex
+    const ItemType * item_;
 
     //! the cuurent geometry
     mutable GeometryObject geo_;

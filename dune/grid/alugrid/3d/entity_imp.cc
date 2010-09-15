@@ -64,16 +64,17 @@ namespace Dune {
 
   template<int cd, int dim, class GridImp>
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const HElementType & item)
+  setElement(const HItemType & item)
   {
     setElement(item,GetLevel<GridImp,cd>::getLevel(grid_,item));
   }
 
   template<int cd, int dim, class GridImp>
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const HElementType & item, const int level, int twist , int face )
+  setElement(const HItemType & item, const int level, int twist , int face )
   {
-    item_   = static_cast<const IMPLElementType *> (&item);
+    // cast interface to implementation
+    item_   = static_cast<const ItemType *> (&item);
     gIndex_ = (*item_).getIndex();
     twist_  = twist;
     level_  = level;
@@ -82,27 +83,20 @@ namespace Dune {
     partitionType_ = this->convertBndId( *item_ );
   }
 
-  template<>
-  alu_inline void ALU3dGridEntity<3,3,const ALU3dGrid<3,3,hexa> > ::
-  setElement(const HElementType &el, const VertexType &vx)
+  template<int cd, int dim, class GridImp>
+  alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
+  setElement(const HItemType &el, const VertexType &vx)
   {
-    item_   = static_cast<const IMPLElementType *> (&vx);
-    gIndex_ = (*item_).getIndex();
-    level_  = (*item_).level();
-    builtgeometry_=false;
-    partitionType_ = this->convertBndId( *item_ );
-  }
-
-  template<>
-  alu_inline void ALU3dGridEntity<3,3,const ALU3dGrid<3,3,tetra> > ::
-  setElement(const HElementType &el, const VertexType &vx)
-  {
-    // * what the heck does this static_cast do!?
-    item_   = static_cast<const IMPLElementType *> (&vx);
-    gIndex_ = (*item_).getIndex();
-    level_  = (*item_).level();
-    builtgeometry_=false;
-    partitionType_ = this->convertBndId( *item_ );
+    // method is only valid vor vertices
+    if( cd == dim )
+    {
+      // cast interface to implementation
+      item_   = static_cast<const ItemType *> (&vx);
+      gIndex_ = (*item_).getIndex();
+      level_  = (*item_).level();
+      builtgeometry_=false;
+      partitionType_ = this->convertBndId( *item_ );
+    }
   }
 
   template<int cd, int dim, class GridImp>
@@ -117,7 +111,7 @@ namespace Dune {
 
   template<int cd, int dim, class GridImp>
   alu_inline PartitionType ALU3dGridEntity<cd,dim,GridImp> ::
-  convertBndId(const HElementType & item) const
+  convertBndId(const HItemType & item) const
   {
     if(item.isGhost())
     {
