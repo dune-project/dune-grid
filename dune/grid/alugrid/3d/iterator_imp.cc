@@ -354,43 +354,51 @@ namespace Dune {
     return ElementTopo::alu2duneFace( connector_.outerALUFaceIndex() );
   }
 
-  template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInInside () const
+  template< class GridImp >
+  inline int
+  ALU3dGridIntersectionIterator< GridImp >::
+  twistInInside () const
   {
-    const int aluTwist = connector_.innerTwist();
-    const int mappedZero =
-      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInInside(), 0), aluTwist);
+    if( GridImp::elementType == hexa )
+    {
+      const int aluTwist = connector_.innerTwist();
+      const int mappedZero =
+        FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInInside(), 0), aluTwist);
 
-    return
-      (ElementTopo::faceOrientation( indexInInside() ) * sign(aluTwist) < 0 ?
-       mappedZero : -mappedZero-1);
+      return
+        (ElementTopo::faceOrientation( indexInInside() ) * sign(aluTwist) < 0 ?
+         mappedZero : -mappedZero-1);
+    }
+    else
+    {
+      assert( GridImp::elementType == tetra );
+      return connector_.duneTwist( indexInInside(), connector_.innerTwist() );
+    }
   }
 
-  template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3 ,3, tetra> >::twistInInside () const
+  template< class GridImp >
+  inline int
+  ALU3dGridIntersectionIterator< GridImp >::
+  twistInOutside () const
   {
-    return connector_.duneTwist( indexInInside(), connector_.innerTwist() );
+    if( GridImp::elementType == hexa )
+    {
+      const int aluTwist = connector_.outerTwist();
+      const int mappedZero =
+        FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInOutside(), 0), aluTwist);
+
+      return
+        (ElementTopo::faceOrientation( indexInOutside() ) * sign(aluTwist) < 0 ?
+         mappedZero : -mappedZero-1);
+    }
+    else
+    {
+      assert( GridImp::elementType == tetra );
+      return connector_.duneTwist( indexInOutside(), connector_.outerTwist() );
+    }
   }
 
-  template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInOutside () const
-  {
-    const int aluTwist = connector_.outerTwist();
-    const int mappedZero =
-      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInOutside(), 0), aluTwist);
-
-    return
-      (ElementTopo::faceOrientation( indexInOutside() ) * sign(aluTwist) < 0 ?
-       mappedZero : -mappedZero-1);
-  }
-
-  template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3 ,3, tetra> >::twistInOutside () const
-  {
-    return connector_.duneTwist( indexInOutside(), connector_.outerTwist() );
-  }
-
-  template <class GridImp>
+  template<class GridImp>
   inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
   ALU3dGridIntersectionIterator< GridImp >::geometryInOutside () const
   {
@@ -434,21 +442,16 @@ namespace Dune {
     return intersectionGlobal_;
   }
 
-
-  template<>
+  template<class GridImp>
   inline GeometryType
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::type () const
+  ALU3dGridIntersectionIterator<GridImp>::
+  type () const
   {
-    return GeometryType( GeometryType::simplex, dim-1 );
+    return GeometryType(
+             GridImp::elementType == hexa ?
+             GeometryType::cube : GeometryType::simplex,
+             dim-1 );
   }
-
-  template<>
-  inline GeometryType
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::type () const
-  {
-    return GeometryType( GeometryType::cube, dim-1 );
-  }
-
 
   template<class GridImp>
   inline int
