@@ -487,6 +487,10 @@ namespace Dune {
   template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< tetra, No_Comm > >;
 
@@ -496,6 +500,10 @@ namespace Dune {
   template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< tetra, No_Comm > >;
 
@@ -505,6 +513,10 @@ namespace Dune {
   template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< tetra, No_Comm > >;
 
@@ -514,6 +526,10 @@ namespace Dune {
   template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< tetra, No_Comm > >;
 
@@ -523,6 +539,10 @@ namespace Dune {
   template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< tetra, No_Comm > >;
 
@@ -532,6 +552,10 @@ namespace Dune {
   template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< tetra, No_Comm > >;
 
@@ -541,6 +565,10 @@ namespace Dune {
   template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< tetra, No_Comm > >;
 
@@ -550,6 +578,10 @@ namespace Dune {
   template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< hexa, No_Comm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< tetra, No_Comm > >;
   template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< hexa, No_Comm > >;
   template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< tetra, No_Comm > >;
 
@@ -568,6 +600,10 @@ namespace Dune {
   template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
 
@@ -577,6 +613,10 @@ namespace Dune {
   template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
 
@@ -586,6 +626,10 @@ namespace Dune {
   template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
 
@@ -595,6 +639,10 @@ namespace Dune {
   template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
 
@@ -604,6 +652,10 @@ namespace Dune {
   template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
 
@@ -613,6 +665,10 @@ namespace Dune {
   template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
 
@@ -622,6 +678,10 @@ namespace Dune {
   template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
 
@@ -631,6 +691,10 @@ namespace Dune {
   template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< hexa, MPI_Comm > >;
   template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< tetra, MPI_Comm > >;
 
