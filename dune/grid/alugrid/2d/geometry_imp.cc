@@ -192,7 +192,7 @@ namespace Dune
 
     // store volume
     det_ = item.sidelength( aluFace );
-    assert( std::abs( det_ - geoImpl_.det( LocalCoordinate(0.5) ) ) < 1e-14 );
+    //assert( std::abs( det_ - geoImpl_.det( LocalCoordinate(0.5) ) ) < 1e-14 );
 
     // geom is up2date
     up2Date_ = true;
