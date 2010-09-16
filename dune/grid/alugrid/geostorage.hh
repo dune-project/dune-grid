@@ -235,10 +235,9 @@ namespace Dune
       ++count_;
 
       typedef typename GeometryImp :: ImplementationType ImplType;
-      GeometryImp * g = new GeometryImp( ImplType() );
-      geoms_[child] = g;
-      GeometryImp & geo = *g;
-      grid.getRealImplementation(geo).buildGeomInFather( father, son );
+      ImplType geoImp;
+      geoImp.buildGeomInFather( father, son );
+      geoms_[child] = new GeometryImp( geoImp );
     }
   };
 
