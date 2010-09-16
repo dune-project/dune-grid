@@ -200,12 +200,10 @@ namespace Dune {
     assert(item_ != 0);
     // if isGhost is true the end iterator will be returned
     //return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isGhost() );
-#if ALU3DGRID_PARALLEL
     if( isGhost() )
     {
       return ALU3dGridHierarchicIterator<GridImp>(grid_,*ghost_,maxlevel, isLeaf() );
     }
-#endif
     return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isLeaf() );
   }
 
@@ -364,7 +362,6 @@ namespace Dune {
       }
       else
       {
-#if ALU3DGRID_PARALLEL
         // in case of ghost element use different set method
         if( item_->isGhost() )
         {
@@ -374,7 +371,6 @@ namespace Dune {
           locked_ = true ;
         }
         else
-#endif
         {
           // otherwise item is set
           this->entityImp().setElement( *item_ );
