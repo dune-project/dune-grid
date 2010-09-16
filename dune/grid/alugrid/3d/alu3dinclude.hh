@@ -204,6 +204,7 @@ namespace Dune
     typedef typename GitterType::Geometric::VertexGeo GEOVertexType;
     typedef typename GitterImplType::Objects::tetra_IMPL IMPLElementType;
     typedef typename GitterType::Geometric::tetra_GEO GEOElementType;
+    typedef typename GitterType::Geometric::periodic3_GEO GEOPeriodicType;
     typedef typename GitterType::Geometric::hasFace3 HasFaceType;
     typedef typename GitterType::Geometric::Hface3Rule HfaceRuleType;
     typedef typename GitterImplType::Objects::Hbnd3Default BNDFaceType;
@@ -223,6 +224,13 @@ namespace Dune
     struct Codim
       : public ALU3dCodimImplTraits< tetra, Comm, codim >
     {};
+
+    // access of faces
+    template <class Elem>
+    static const GEOFaceType* getFace( const Elem& elem, const int aluFace )
+    {
+      return elem.myhface3( aluFace );
+    }
   };
 
   template< class Comm >
@@ -236,6 +244,7 @@ namespace Dune
     typedef typename GitterType::Geometric::VertexGeo GEOVertexType;
     typedef typename GitterImplType::Objects::hexa_IMPL IMPLElementType;
     typedef typename GitterType::Geometric::hexa_GEO GEOElementType;
+    typedef typename GitterType::Geometric::periodic4_GEO GEOPeriodicType;
     typedef typename GitterType::Geometric::hasFace4 HasFaceType;
     typedef typename GitterType::Geometric::Hface4Rule HfaceRuleType;
     typedef typename GitterImplType::Objects::Hbnd4Default BNDFaceType;
@@ -255,6 +264,13 @@ namespace Dune
     struct Codim
       : public ALU3dCodimImplTraits< hexa, Comm, codim >
     {};
+
+    // access of faces
+    template <class Elem>
+    static const GEOFaceType* getFace( const Elem& elem, const int aluFace )
+    {
+      return elem.myhface4( aluFace );
+    }
   };
 
 
