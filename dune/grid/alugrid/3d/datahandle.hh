@@ -603,25 +603,6 @@ namespace ALUGridSpace
     //! restrict data , elem is always the father
     int preCoarsening ( HElementType & elem )
     {
-#if 0
-      // set element and then start
-      HElementType * son = elem.down();
-
-      assert( son );
-
-      realSon_.setElement(*son);
-      realFather_.setElement(elem);
-      rp_.restrictLocal(reFather_,reSon_,true);
-
-      son = son->next();
-      while( son )
-      {
-        realSon_.setElement(*son);
-        rp_.restrictLocal(reFather_,reSon_,false);
-        son = son->next();
-      }
-#endif
-
       realFather_.setElement( elem );
       rp_.preCoarsening( reFather_ );
 
@@ -633,34 +614,6 @@ namespace ALUGridSpace
     //! prolong data, elem is the father
     int postRefinement ( HElementType & elem )
     {
-#if 0
-      // set element and then start
-      HElementType * son = elem.down();
-      assert( son );
-
-      // reset refinement marker
-      elem.resetRefinedTag();
-
-      realFather_.setElement(elem);
-      realSon_.setElement(*son);
-
-      rp_.prolongLocal(reFather_,reSon_, true);
-
-      son = son->next();
-      while( son )
-      {
-        assert( son );
-
-        realSon_.setElement(*son);
-        rp_.prolongLocal(reFather_,reSon_, false);
-
-        // reset refinement tag
-        son->resetRefinedTag();
-
-        son = son->next();
-      }
-#endif
-
       realFather_.setElement( elem );
       rp_.postRefinement( reFather_ );
 
