@@ -3,6 +3,10 @@
 #ifndef DUNE_ALU3DGRID_FACTORY_CC
 #define DUNE_ALU3DGRID_FACTORY_CC
 
+#if COMPILE_ALUGRID_INLINE == 0
+#include <config.h>
+#endif
+
 #include <algorithm>
 #include <cstdlib>
 #include <cstdio>

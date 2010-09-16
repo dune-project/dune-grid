@@ -3,7 +3,12 @@
 #ifndef DUNE_ALUGRID_ENTITY_CC
 #define DUNE_ALUGRID_ENTITY_CC
 
+#if COMPILE_ALUGRID_INLINE == 0
+#include <config.h>
+#endif
+
 #include "alu3dinclude.hh"
+#include <dune/grid/alugrid/3d/alugrid.hh>
 #include "entity.hh"
 
 #include <dune/grid/alugrid/geostorage.hh>
@@ -12,7 +17,6 @@
 #define alu_inline inline
 #else
 #define alu_inline
-#include <config.h>
 #endif
 
 namespace Dune {
@@ -88,8 +92,10 @@ namespace Dune {
     // method is only valid vor vertices
     if( cd == dim )
     {
+      assert( false );
+      abort();
       // cast interface to implementation
-      item_   = static_cast<const ItemType *> (&vx);
+      //item_   = static_cast<const ItemType *> (&vx);
       gIndex_ = (*item_).getIndex();
       level_  = (*item_).level();
       builtgeometry_=false;
@@ -184,8 +190,8 @@ namespace Dune {
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
     typedef typename GeometryObject::ImplementationType GeometryImp;
     // to be improved, when we using not the refine 8 rule
-    // see alu3dinclude.hh for implementation
-    static ALULocalGeometryStorage<GridImp,GeometryObject,8> geoms( type(), true);
+    // see ../geostrage.hh for implementation
+    static ALULocalGeometryStorage<GridImp, GeometryObject, 8> geoms( type(), true);
     assert( geoms.geomCreated(child) );
     return geoms[ child ];
   }
@@ -813,38 +819,82 @@ namespace Dune {
 
 #if COMPILE_ALUGRID_LIB
   // Instantiation
-  template class ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, tetra> >;
-  template class ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, hexa > >;
+  template class ALU3dGrid< hexa, No_Comm >;
+  template class ALU3dGrid< tetra, No_Comm >;
 
-  template class ALU3dGridEntity<1, 3, const ALU3dGrid< 3, 3, tetra> >;
-  template class ALU3dGridEntity<1, 3, const ALU3dGrid< 3, 3, hexa > >;
+  // Instantiation
+  template class ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, No_Comm > >;
 
-  template class ALU3dGridEntity<2, 3, const ALU3dGrid< 3, 3, tetra> >;
-  template class ALU3dGridEntity<2, 3, const ALU3dGrid< 3, 3, hexa > >;
+  template class ALU3dGridEntity<1, 3, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridEntity<1, 3, const ALU3dGrid< hexa, No_Comm > >;
 
-  template class ALU3dGridEntity<3, 3, const ALU3dGrid< 3, 3, tetra> >;
-  template class ALU3dGridEntity<3, 3, const ALU3dGrid< 3, 3, hexa > >;
+  template class ALU3dGridEntity<2, 3, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridEntity<2, 3, const ALU3dGrid< hexa, No_Comm > >;
 
-  template ALU3dGrid< 3, 3, tetra> :: Traits :: Codim< 0 > :: EntityPointer
-  ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, tetra> > :: subEntity< 0 >( int ) const;
-  template ALU3dGrid< 3, 3, hexa > :: Traits :: Codim< 0 > :: EntityPointer
-  ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, hexa > > :: subEntity< 0 >( int ) const;
+  template class ALU3dGridEntity<3, 3, const ALU3dGrid< tetra, No_Comm > >;
+  template class ALU3dGridEntity<3, 3, const ALU3dGrid< hexa, No_Comm > >;
 
-  template ALU3dGrid< 3, 3, tetra> :: Traits :: Codim< 1 > :: EntityPointer
-  ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, tetra> > :: subEntity< 1 >( int ) const;
-  template ALU3dGrid< 3, 3, hexa > :: Traits :: Codim< 1 > :: EntityPointer
-  ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, hexa > > :: subEntity< 1 >( int ) const;
+  template ALU3dGrid< tetra, No_Comm > :: Traits :: Codim< 0 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, No_Comm > > :: subEntity< 0 >( int ) const;
+  template ALU3dGrid< hexa, No_Comm > :: Traits :: Codim< 0 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, No_Comm > > :: subEntity< 0 >( int ) const;
 
-  template ALU3dGrid< 3, 3, tetra> :: Traits :: Codim< 2 > :: EntityPointer
-  ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, tetra> > :: subEntity< 2 >( int ) const;
-  template ALU3dGrid< 3, 3, hexa > :: Traits :: Codim< 2 > :: EntityPointer
-  ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, hexa > > :: subEntity< 2 >( int ) const;
+  template ALU3dGrid< tetra, No_Comm > :: Traits :: Codim< 1 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, No_Comm > > :: subEntity< 1 >( int ) const;
+  template ALU3dGrid< hexa, No_Comm > :: Traits :: Codim< 1 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, No_Comm > > :: subEntity< 1 >( int ) const;
 
-  template ALU3dGrid< 3, 3, tetra> :: Traits :: Codim< 3 > :: EntityPointer
-  ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, tetra> > :: subEntity< 3 >( int ) const;
-  template ALU3dGrid< 3, 3, hexa > :: Traits :: Codim< 3 > :: EntityPointer
-  ALU3dGridEntity<0, 3, const ALU3dGrid< 3, 3, hexa > > :: subEntity< 3 >( int ) const;
-#endif
+  template ALU3dGrid< tetra, No_Comm > :: Traits :: Codim< 2 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, No_Comm > > :: subEntity< 2 >( int ) const;
+  template ALU3dGrid< hexa, No_Comm > :: Traits :: Codim< 2 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, No_Comm > > :: subEntity< 2 >( int ) const;
+
+  template ALU3dGrid< tetra, No_Comm > :: Traits :: Codim< 3 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, No_Comm > > :: subEntity< 3 >( int ) const;
+  template ALU3dGrid< hexa, No_Comm > :: Traits :: Codim< 3 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, No_Comm > > :: subEntity< 3 >( int ) const;
+
+#if ALU3DGRID_PARALLEL
+  // Instantiation
+  template class ALU3dGrid< hexa, MPI_Comm >;
+  template class ALU3dGrid< tetra, MPI_Comm >;
+
+  // Instantiation with MPI
+  template class ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, MPI_Comm > >;
+
+  template class ALU3dGridEntity<1, 3, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridEntity<1, 3, const ALU3dGrid< hexa, MPI_Comm > >;
+
+  template class ALU3dGridEntity<2, 3, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridEntity<2, 3, const ALU3dGrid< hexa, MPI_Comm > >;
+
+  template class ALU3dGridEntity<3, 3, const ALU3dGrid< tetra, MPI_Comm > >;
+  template class ALU3dGridEntity<3, 3, const ALU3dGrid< hexa, MPI_Comm > >;
+
+  template ALU3dGrid< tetra, MPI_Comm > :: Traits :: Codim< 0 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, MPI_Comm > > :: subEntity< 0 >( int ) const;
+  template ALU3dGrid< hexa, MPI_Comm > :: Traits :: Codim< 0 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, MPI_Comm > > :: subEntity< 0 >( int ) const;
+
+  template ALU3dGrid< tetra, MPI_Comm > :: Traits :: Codim< 1 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, MPI_Comm > > :: subEntity< 1 >( int ) const;
+  template ALU3dGrid< hexa, MPI_Comm > :: Traits :: Codim< 1 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, MPI_Comm > > :: subEntity< 1 >( int ) const;
+
+  template ALU3dGrid< tetra, MPI_Comm > :: Traits :: Codim< 2 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, MPI_Comm > > :: subEntity< 2 >( int ) const;
+  template ALU3dGrid< hexa, MPI_Comm > :: Traits :: Codim< 2 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, MPI_Comm > > :: subEntity< 2 >( int ) const;
+
+  template ALU3dGrid< tetra, MPI_Comm > :: Traits :: Codim< 3 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< tetra, MPI_Comm > > :: subEntity< 3 >( int ) const;
+  template ALU3dGrid< hexa, MPI_Comm > :: Traits :: Codim< 3 > :: EntityPointer
+  ALU3dGridEntity<0, 3, const ALU3dGrid< hexa, MPI_Comm > > :: subEntity< 3 >( int ) const;
+#endif // #if ALU3DGRID_PARALLEL
+
+#endif // #if COMPILE_ALUGRID_LIB
 }
 #undef alu_inline
 #endif

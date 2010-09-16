@@ -3,6 +3,10 @@
 #ifndef DUNE_ALUGRID_GRID_IMP_CC
 #define DUNE_ALUGRID_GRID_IMP_CC
 
+#if COMPILE_ALUGRID_INLINE == 0
+#include <config.h>
+#endif
+
 // Dune includes
 #include <dune/common/stdstreams.hh>
 
