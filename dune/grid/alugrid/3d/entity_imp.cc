@@ -11,6 +11,7 @@
 #include <dune/grid/alugrid/3d/alugrid.hh>
 #include "entity.hh"
 
+#include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
 #include <dune/grid/alugrid/geostorage.hh>
 
 #if COMPILE_ALUGRID_INLINE
