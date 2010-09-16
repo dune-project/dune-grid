@@ -400,11 +400,11 @@ namespace Dune {
     typedef typename Traits::LocalIdSet LocalIdSet;
 
     //! a standard leaf iterator
-    typedef ALU3dGridLeafIterator< 0, All_Partition, ThisType > LeafIteratorImp;
+    typedef ALU3dGridLeafIterator< 0, All_Partition, const ThisType > LeafIteratorImp;
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIteratorType;
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIterator;
 
-    typedef ALU3dGridHierarchicIterator< ThisType > HierarchicIteratorImp;
+    typedef ALU3dGridHierarchicIterator< const ThisType > HierarchicIteratorImp;
 
     typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
