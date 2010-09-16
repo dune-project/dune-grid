@@ -89,11 +89,12 @@ namespace Dune
 
     NonConformingMappingType faceMapper( connector_.face().parentRule(), connector_.face().nChild() );
 
+    const ReferenceFaceType& refFace = getReferenceFace();
     // do the mappings
-    const int numCorners = refFace_.size( 2 );
+    const int numCorners = refFace.size( 2 );
     for( int i = 0; i < numCorners; ++i )
     {
-      const FieldVector< alu3d_ctype, 2 > &childLocal = refFace_.position( i, 2 );
+      const FieldVector< alu3d_ctype, 2 > &childLocal = refFace.position( i, 2 );
       alu3dMap2World( *referenceElementMapping, faceMapper.child2parent( childLocal ), result[ i ] );
     }
 
