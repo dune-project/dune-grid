@@ -18,6 +18,7 @@ namespace Dune {
     outerBoundary_  ( false ),
     ghostBoundary_  ( false ),
     innerBoundary_  ( false ),
+    periodicBoundary_ ( false ),
     conformanceState_(UNDEFINED)
   {}
 
@@ -35,6 +36,7 @@ namespace Dune {
     outerFaceNumber_ = -1;
     outerBoundary_   = false;
     ghostBoundary_   = false;
+    periodicBoundary_  = false;
 
     // points face from inner element away?
     if (innerTwist < 0)
@@ -57,9 +59,15 @@ namespace Dune {
     // if not true we are accessing a fake bnd
     assert( outerElement_->isRealObject() );
 
-#if ALU3DGRID_PARALLEL
-    innerBoundary_ = innerElement_->isboundary();
-    if( innerBoundary_ )
+    const bool parallel = ! Conversion< Comm, No_Comm > :: sameType ;
+
+    // we only have to do this in parallel runs
+    if( parallel )
+    {
+      innerBoundary_ = innerElement_->isboundary();
+    }
+
+    if( parallel && innerBoundary_ )
     {
       // check for ghosts
       // this check is only need in the parallel case
@@ -92,7 +100,6 @@ namespace Dune {
       }
     }
     else
-#endif
     {
       // set inner twist
       assert(innerTwist == innerEntity().twist(innerFaceNumber_));
@@ -102,38 +109,74 @@ namespace Dune {
     outerBoundary_ = outerElement_->isboundary();
     if( outerBoundary_ )
     {
-#if ALU3DGRID_PARALLEL
       // check for ghosts
       // this check is only need in the parallel case
+      // if this cast fails we have a periodic element
       const BNDFaceType * bnd = dynamic_cast<const BNDFaceType *> (outerElement_);
 
-      if(bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
+      if( ! bnd ) // the periodic case
       {
-        // if nonconformity occurs then go up one level
-        if( bnd->level () != bnd->ghostLevel() )
+        outerBoundary_ = false ;
+        periodicBoundary_ = true ;
+        const GEOPeriodicType* periodicElem = dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) ;
+        assert( periodicElem );
+
+        // check whether we have to use the first or the second of the
+        // periodic elements (one of them is the interior again)
+        for( int aluFace = 0; aluFace < 2; ++aluFace )
         {
-          bnd = static_cast<const BNDFaceType *>(bnd->up());
-          assert( bnd );
-          outerElement_ = dynamic_cast<const HasFaceType*> (bnd);
+          //( innerTwist < 0 ) ? 1 : 0 ;
+          const GEOFaceType* face = ImplTraits :: getFace( *periodicElem , aluFace );
+          if( face->nb.rear().first->isboundary() )
+          {
+            outerElement_    = face->nb.front().first ;
+            outerFaceNumber_ = face->nb.front().second ;
+          }
+          else
+          {
+            outerElement_    = face->nb.rear().first ;
+            outerFaceNumber_ = face->nb.rear().second ;
+          }
+          assert( ! outerElement_->isboundary() );
+          if( outerElement_ != innerElement_ ) break ;
         }
-
-        // get ghost and internal number
-        GhostPairType p  = bnd->getGhost();
-
-        outerFaceNumber_ = p.second;
-        ghostBoundary_   = true;
-
-        // this doesn't count as outer boundary
-        outerBoundary_ = false;
-        const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
-        assert(ghost);
-
-        outerTwist_ = ghost->twist(outerFaceNumber_);
+        outerTwist_ = outerEntity().twist( outerALUFaceIndex() );
+        std::cout << "Periodic neighbor " << outerEntity().getIndex() << std::endl;
       }
-      else
-#endif
+      else // the boundary case
       {
-        outerTwist_ = boundaryFace().twist(outerALUFaceIndex());
+        assert( bnd );
+
+        // if this cast is valid we have either
+        // a boundary or a ghost element
+        // the ghost element case
+        if( parallel && bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
+        {
+          // if nonconformity occurs then go up one level
+          if( bnd->level () != bnd->ghostLevel() )
+          {
+            bnd = static_cast<const BNDFaceType *>(bnd->up());
+            assert( bnd );
+            outerElement_ = dynamic_cast<const HasFaceType*> (bnd);
+          }
+
+          // get ghost and internal number
+          GhostPairType p  = bnd->getGhost();
+
+          outerFaceNumber_ = p.second;
+          ghostBoundary_   = true;
+
+          // this doesn't count as outer boundary
+          outerBoundary_ = false;
+          const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
+          assert(ghost);
+
+          outerTwist_ = ghost->twist(outerFaceNumber_);
+        }
+        else // the normal boundary case
+        {
+          outerTwist_ = boundaryFace().twist(outerALUFaceIndex());
+        }
       }
     }
     else
@@ -147,8 +190,9 @@ namespace Dune {
 
   // points face from inner element away?
   template< ALU3dGridElementType type, class Comm >
-  inline ALU3dGridFaceInfo< type, Comm >::ALU3dGridFaceInfo(const GEOFaceType& face,
-                                                            int innerTwist)
+  inline ALU3dGridFaceInfo< type, Comm >::
+  ALU3dGridFaceInfo(const GEOFaceType& face,
+                    int innerTwist)
   {
     updateFaceInfo(face,innerTwist);
   }
@@ -169,8 +213,14 @@ namespace Dune {
       outerBoundary_(orig.outerBoundary_),
       ghostBoundary_(orig.ghostBoundary_),
       innerBoundary_(orig.innerBoundary_),
+      periodicBoundary_ ( orig.periodicBoundary_ ),
       conformanceState_(orig.conformanceState_)
   {}
+
+  template< ALU3dGridElementType type, class Comm >
+  inline bool ALU3dGridFaceInfo< type, Comm >::periodicBoundary() const {
+    return periodicBoundary_;
+  }
 
   template< ALU3dGridElementType type, class Comm >
   inline bool ALU3dGridFaceInfo< type, Comm >::outerBoundary() const {
@@ -204,7 +254,7 @@ namespace Dune {
   template< ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridFaceInfo< type, Comm >::GEOElementType&
   ALU3dGridFaceInfo< type, Comm >::outerEntity() const {
-    assert(!boundary());
+    //assert(!boundary());
     return static_cast<const GEOElementType&>(*outerElement_);
   }
 
@@ -218,7 +268,7 @@ namespace Dune {
   template< ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridFaceInfo< type, Comm >::BNDFaceType&
   ALU3dGridFaceInfo< type, Comm >::boundaryFace() const {
-    assert(boundary());
+    assert( boundary() );
     return static_cast<const BNDFaceType&>(*outerElement_);
   }
 
@@ -254,11 +304,11 @@ namespace Dune {
   inline int ALU3dGridFaceInfo< type, Comm >::outerTwist() const
   {
     // don't check ghost boundaries here
-    assert( (outerBoundary_) ?
-            (outerTwist_ == boundaryFace().twist(0)) :
-            (! ghostBoundary_) ?
-            (outerTwist_ == outerEntity().twist(outerALUFaceIndex())) : true
-            );
+    //assert( (outerBoundary_) ?
+    //          (outerTwist_ == boundaryFace().twist(0)) :
+    //          (! ghostBoundary_) ?
+    //          (outerTwist_ == outerEntity().twist(outerALUFaceIndex())) : true
+    //      );
     return outerTwist_;
   }
 
@@ -308,12 +358,10 @@ namespace Dune {
   inline ALU3dGridGeometricFaceInfoBase< type, Comm >::
   ALU3dGridGeometricFaceInfoBase(const ConnectorType& connector) :
     connector_(connector),
-    generatedGlobal_(false),
-    generatedLocal_(false),
     coordsSelfLocal_(-1.0),
     coordsNeighborLocal_(-1.0),
-    refElem_( getReferenceElement() ),
-    refFace_( getReferenceFace() )
+    generatedGlobal_(false),
+    generatedLocal_(false)
   {}
 
   template< ALU3dGridElementType type, class Comm >
@@ -329,12 +377,10 @@ namespace Dune {
   inline ALU3dGridGeometricFaceInfoBase< type, Comm >::
   ALU3dGridGeometricFaceInfoBase ( const ALU3dGridGeometricFaceInfoBase &orig )
     : connector_(orig.connector_),
-      generatedGlobal_(orig.generatedGlobal_),
-      generatedLocal_(orig.generatedLocal_),
       coordsSelfLocal_(orig.coordsSelfLocal_),
       coordsNeighborLocal_(orig.coordsNeighborLocal_),
-      refElem_( getReferenceElement() ),
-      refFace_( getReferenceFace() )
+      generatedGlobal_(orig.generatedGlobal_),
+      generatedLocal_(orig.generatedLocal_)
   {}
 
   template< ALU3dGridElementType type, class Comm >
@@ -554,7 +600,7 @@ namespace Dune {
                          alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
                                             localALUIndex);
 
-    return refElem_.subEntity(duneFaceIndex, 1, localDuneIndex, 3);
+    return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 3);
   }
 
 
@@ -573,10 +619,12 @@ namespace Dune {
        connector_.innerTwist() :
        connector_.outerTwist());
 
+    const ReferenceElementType& refElem = getReferenceElement();
+
     for (int i = 0; i < numVerticesPerFace; ++i)
     {
       int duneVertexIndex = globalVertexIndex(faceIndex, faceTwist, i);
-      result[i] = refElem_.position(duneVertexIndex, 3);
+      result[i] = refElem.position(duneVertexIndex, 3);
     }
   }
 

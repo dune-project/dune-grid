@@ -50,6 +50,7 @@ namespace Dune
     //- typedefs
     typedef typename ImplTraits::GEOFaceType GEOFaceType;
     typedef typename ImplTraits::GEOElementType GEOElementType;
+    typedef typename ImplTraits::GEOPeriodicType GEOPeriodicType;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::GhostPairType GhostPairType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
@@ -76,6 +77,7 @@ namespace Dune
     //! Lies the face on an internal boundary
     bool boundary() const;
 
+    bool periodicBoundary() const;
     //! is the neighbour element a ghost elemenet or a ghost face
     //! ic case of face true is returned
     bool ghostBoundary () const;
@@ -124,15 +126,16 @@ namespace Dune
     const HasFaceType* innerElement_;
     const HasFaceType* outerElement_;
 
-    int innerFaceNumber_;
-    int outerFaceNumber_;
+    char innerFaceNumber_;
+    char outerFaceNumber_;
 
-    int innerTwist_;
-    int outerTwist_;
+    char innerTwist_;
+    char outerTwist_;
 
     bool outerBoundary_;
     bool ghostBoundary_;
     bool innerBoundary_;
+    bool periodicBoundary_;
 
     ConformanceState conformanceState_;
   };
@@ -258,14 +261,11 @@ namespace Dune
     //- private data
     const ConnectorType& connector_;
 
-    mutable bool generatedGlobal_;
-    mutable bool generatedLocal_;
-
     mutable CoordinateType coordsSelfLocal_;
     mutable CoordinateType coordsNeighborLocal_;
 
-    const ReferenceElementType& refElem_;
-    const ReferenceFaceType& refFace_;
+    mutable bool generatedGlobal_;
+    mutable bool generatedLocal_;
 
     inline static const ReferenceElementType& getReferenceElement()
     {

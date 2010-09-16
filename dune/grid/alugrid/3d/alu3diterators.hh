@@ -243,7 +243,7 @@ namespace ALUGridSpace
   {
     typedef typename IteratorElType< 0, Comm >::ElType ElType;
     typedef typename IteratorElType< 0, Comm >::HBndSegType HBndSegType;
-    typedef LeafIterator< ElType > IteratorType;
+    typedef PureElementLeafIterator< ElType > IteratorType;
 
     // the ALU3dGrid Iterator
     IteratorType it_;

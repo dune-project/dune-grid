@@ -939,8 +939,8 @@ namespace Dune
   void ALU3dGrid< elType, Comm >::checkMacroGrid ()
   {
     typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
-    typedef ALU3DSPACE LevelIterator< HElementType > IteratorType;
-    IteratorType w( this->myGrid(), 0 );
+    typedef ALU3DSPACE PureElementLeafIterator< HElementType > IteratorType;
+    IteratorType w( this->myGrid()  );
     for (w->first () ; ! w->done () ; w->next ())
     {
       ALU3dGridElementType type = (ALU3dGridElementType) w->item().type();

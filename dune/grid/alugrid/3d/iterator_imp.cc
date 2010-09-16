@@ -307,7 +307,7 @@ namespace Dune {
   template<class GridImp>
   inline bool ALU3dGridIntersectionIterator<GridImp>::neighbor () const
   {
-    return ! boundary();
+    return ( connector_.periodicBoundary() ) ? true : ! boundary();
   }
 
   template<class GridImp>
@@ -451,7 +451,9 @@ namespace Dune {
   ALU3dGridIntersectionIterator<GridImp>::boundaryId () const
   {
     assert(item_);
-    return (boundary() ? connector_.boundaryFace().bndtype() : 0);
+    //return ( boundary() ? connector_.boundaryFace().bndtype() : 0);
+    return ( ! boundary() ) ? 0 :
+           ( neighbor() ) ? 20 :  connector_.boundaryFace().bndtype();
   }
 
   template<class GridImp>
@@ -460,7 +462,7 @@ namespace Dune {
   {
     assert(item_);
 #ifdef ALUGRID_VERTEX_PROJECTION
-    assert( boundary() );
+    assert( boundary() && ! neighbor() );
     return connector_.boundaryFace().segmentIndex();
 #else
     derr << "Method available in any version of ALUGrid > 1.14 \n";
@@ -472,7 +474,7 @@ namespace Dune {
   inline void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const
   {
     intersectionSelfLocalImp_.buildGeom(geoProvider_.intersectionSelfLocal());
-    if (!connector_.outerBoundary()) {
+    if ( ! connector_.outerBoundary() ) {
       intersectionNeighborLocalImp_.buildGeom(geoProvider_.intersectionNeighborLocal());
     }
   }
