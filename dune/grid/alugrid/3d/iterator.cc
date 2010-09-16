@@ -274,8 +274,7 @@ namespace Dune {
                               const HElementType & elem, int maxlevel ,bool end)
     : ALU3dGridEntityPointer<0,GridImp> ( grid, maxlevel )
       , elem_(&elem)
-      , ghost_( 0 )
-      , nextGhost_( 0 )
+      , ghostElem_( )
       , maxlevel_(maxlevel)
   {
     if (!end)
@@ -301,7 +300,6 @@ namespace Dune {
     }
   }
 
-#ifdef ALU3DGRID_PARALLEL
   template <class GridImp>
   alu_inline ALU3dGridHierarchicIterator<GridImp> ::
   ALU3dGridHierarchicIterator(const GridImp & grid ,
@@ -310,20 +308,19 @@ namespace Dune {
                               bool end)
     : ALU3dGridEntityPointer<0,GridImp> ( grid, maxlevel )
       , elem_( 0 )
-      , ghost_( &ghost )
-      , nextGhost_( 0 )
+      , ghostElem_( ghost )
       , maxlevel_(maxlevel)
   {
     if( ! end )
     {
       // lock entity pointer
       this->locked_ = true ;
-      nextGhost_ = const_cast<HBndSegType *> (ghost.down());
+      ghostElem_ = const_cast<HBndSegType *> (ghost.down());
 
       // we have children and they lie in the disired level range
-      if( nextGhost_ && nextGhost_->ghostLevel() <= maxlevel_)
+      if( ghostElem_ != 0 && ghostElem_->ghostLevel() <= maxlevel_)
       {
-        this->updateGhostPointer( *nextGhost_ );
+        this->updateGhostPointer( *ghostElem_ );
       }
       else
       { // otherwise do nothing
@@ -335,7 +332,6 @@ namespace Dune {
       this->done();
     }
   }
-#endif
 
   template <class GridImp>
   alu_inline ALU3dGridHierarchicIterator<GridImp> ::
@@ -361,10 +357,7 @@ namespace Dune {
   {
     // copy my data
     elem_      = org.elem_;
-#ifdef ALU3DGRID_PARALLEL
-    ghost_     = org.ghost_;
-    nextGhost_ = org.nextGhost_;
-#endif
+    ghostElem_ = org.ghostElem_;
     maxlevel_  = org.maxlevel_;
 
     // copy entity pointer
@@ -436,21 +429,18 @@ namespace Dune {
   {
     assert(this->item_ != 0);
 
-#ifdef ALU3DGRID_PARALLEL
-    if( ghost_ )
+    if( ghostElem_.valid() )
     {
-      assert( nextGhost_ );
-      nextGhost_ = goNextElement( ghost_, nextGhost_ );
-      if( ! nextGhost_ )
+      ghostElem_ = goNextElement( ghostElem_.ghost(), ghostElem_.nextGhost() );
+      if( ! ghostElem_ )
       {
         this->done();
         return ;
       }
 
-      this->updateGhostPointer( *nextGhost_ );
+      this->updateGhostPointer( *ghostElem_ );
     }
     else
-#endif
     {
       HElementType * nextItem = goNextElement( elem_, this->item_ );
       if( ! nextItem)

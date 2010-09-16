@@ -79,9 +79,7 @@ namespace Dune {
   {
     done_  = true;
     item_  = 0;
-#if ALU3DGRID_PARALLEL
     ghost_ = 0;
-#endif
   }
 
   template<class GridImp>
@@ -103,7 +101,7 @@ namespace Dune {
 
   template<class GridImp>
   inline void ALU3dGridIntersectionIterator<GridImp> ::
-  setInteriorItem (const HElementType & elem, const PLLBndFaceType& ghost, int wLevel)
+  setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel)
   {
     // get correct face number
     index_ = ElementTopo::alu2duneFace( ghost.getGhost().second );
@@ -137,13 +135,11 @@ namespace Dune {
     innerLevel_ = en.level();
     index_  = 0;
 
-#if ALU3DGRID_PARALLEL
     if( en.isGhost() )
     {
       setInteriorItem(en.getItem(), en.getGhost(), wLevel);
     }
     else
-#endif
     {
       assert( numFaces == en.getItem().nFaces() );
       setFirstItem(en.getItem(), wLevel);
@@ -224,19 +220,18 @@ namespace Dune {
     const GEOFaceType * nextFace = 0;
 
     // When neighbour element is refined, try to get the next child on the face
-    if (connector_.conformanceState() == FaceInfoType::REFINED_OUTER) {
+    if (connector_.conformanceState() == FaceInfoType::REFINED_OUTER)
+    {
       nextFace = connector_.face().next();
 
       // There was a next child face...
       if (nextFace)
       {
-#ifdef ALU3DGRID_PARALLEL
-        if( ghost_ )
+        if( ImplTraits :: isGhost( ghost_ ) )
         {
           setGhostFace( *nextFace );
         }
         else
-#endif
         {
           setNewFace(*nextFace);
         }
@@ -252,7 +247,7 @@ namespace Dune {
     // for ghost elements here is finito
     if (index_ >= numFaces || ghost_ )
     {
-      this->done();
+      done();
       return;
     }
 
@@ -275,33 +270,31 @@ namespace Dune {
   inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
   ALU3dGridIntersectionIterator<GridImp>::outside () const
   {
-    assert( this->neighbor() );
+    assert( neighbor() );
     // make sure that outside is not called for an end iterator
-#if ALU3DGRID_PARALLEL
-    if(connector_.ghostBoundary())
+
+    if( connector_.ghostBoundary() )
     {
       // create entity pointer with ghost boundary face
-      return EntityPointer(this->grid_, connector_.boundaryFace() );
+      return EntityPointer(grid_, connector_.boundaryFace() );
     }
-#endif
+
     assert( &connector_.outerEntity() );
-    return EntityPointer(this->grid_, connector_.outerEntity() );
+    return EntityPointer(grid_, connector_.outerEntity() );
   }
 
   template<class GridImp>
   inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
   ALU3dGridIntersectionIterator<GridImp>::inside () const
   {
-#if ALU3DGRID_PARALLEL
-    if( ghost_ )
+    if( ImplTraits :: isGhost( ghost_ ) )
     {
-      return EntityPointer(this->grid_, *ghost_ );
+      return EntityPointer(grid_, *ghost_ );
     }
     else
-#endif
     {
       // make sure that inside is not called for an end iterator
-      return EntityPointer(this->grid_, connector_.innerEntity() );
+      return EntityPointer(grid_, connector_.innerEntity() );
     }
   }
 
@@ -582,17 +575,15 @@ namespace Dune {
   first (const EntityType & en, int wLevel)
   {
     // if given Entity is not leaf, we create an end iterator
-    this->done_   = false;
-    this->index_  = 0;
+    done_   = false;
+    index_  = 0;
     isLeafItem_   = en.isLeaf();
 
-#if ALU3DGRID_PARALLEL
     if( en.isGhost() )
     {
       setInteriorItem(en.getItem(), en.getGhost(), wLevel);
     }
     else
-#endif
     {
       assert( numFaces == en.getItem().nFaces() );
       setFirstItem(en.getItem(), wLevel);
@@ -603,29 +594,29 @@ namespace Dune {
   inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
   setFirstItem (const HElementType & elem, int wLevel)
   {
-    this->ghost_       = 0;
-    this->item_        = static_cast<const IMPLElementType *> (&elem);
+    ghost_       = 0;
+    item_        = static_cast<const IMPLElementType *> (&elem);
     this->innerLevel_  = wLevel;
     // Get first face
-    const GEOFaceType* firstFace = getFace(*this->item_, this->index_);
+    const GEOFaceType* firstFace = getFace(*item_, index_);
     // Store the face in the connector
     setNewFace(*firstFace);
   }
 
   template<class GridImp>
   inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
-  setInteriorItem (const HElementType & elem, const PLLBndFaceType& ghost, int wLevel)
+  setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel)
   {
     // store ghost for method inside
-    this->ghost_   = &ghost;
-    this->item_   = static_cast<const IMPLElementType *> (&elem);
+    ghost_   = &ghost;
+    item_   = static_cast<const IMPLElementType *> (&elem);
     // get correct face number
-    this->index_ = ElementTopo::alu2duneFace( ghost.getGhost().second );
+    index_ = ElementTopo::alu2duneFace( ghost.getGhost().second );
 
-    this->innerLevel_  = wLevel;
+    innerLevel_  = wLevel;
 
     // Get first face
-    const GEOFaceType* firstFace = this->getFace( ghost, this->index_ );
+    const GEOFaceType* firstFace = getFace( ghost, index_ );
 
     // Store the face in the connector
     setNewFace(*firstFace);
@@ -655,20 +646,21 @@ namespace Dune {
   inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
   {
     // level increment
-    assert(this->item_);
+    assert( item_ );
 
     // Next face number of starting element
-    ++this->index_;
+    ++index_;
 
     // When the face number is larger than the number of faces an element
     // can have, we've reached the end...
-    if (this->index_ >= numFaces || this->ghost_ ) {
-      this->done();
+    if ( index_ >= numFaces || ImplTraits::isGhost( ghost_ ) )
+    {
+      done();
       return;
     }
 
     // ... else we can take the next face
-    const GEOFaceType * nextFace = this->getFace(this->connector_.innerEntity(), this->index_);
+    const GEOFaceType * nextFace = getFace(connector_.innerEntity(), index_);
     assert(nextFace);
 
     setNewFace(*nextFace);
@@ -684,7 +676,7 @@ namespace Dune {
   template<class GridImp>
   inline bool ALU3dGridLevelIntersectionIterator<GridImp>::levelNeighbor () const
   {
-    return levelNeighbor_ && (! this->boundary());
+    return levelNeighbor_ && (! boundary());
   }
 
   template<class GridImp>
@@ -698,28 +690,27 @@ namespace Dune {
   inline void ALU3dGridLevelIntersectionIterator<GridImp>::
   setNewFace(const GEOFaceType& newFace)
   {
-    assert( this->item_->level() == this->innerLevel_ );
-    levelNeighbor_ = (newFace.level() == this->innerLevel_);
-    this->connector_.updateFaceInfo(newFace,this->innerLevel_,
-#if ALU3DGRID_PARALLEL
-                                    (this->ghost_) ? this->ghost_->twist(0) :
-#endif
-                                    this->item_->twist(ElementTopo::dune2aluFace(this->index_)));
-    this->geoProvider_.resetFaceGeom();
+    assert( item_->level() == innerLevel_ );
+    levelNeighbor_ = (newFace.level() == innerLevel_);
+    connector_.updateFaceInfo(newFace, innerLevel_,
+                              ( ImplTraits::isGhost( ghost_ ) ) ?
+                              ghost_->twist(0) :
+                              item_->twist(ElementTopo::dune2aluFace( index_ )));
+    geoProvider_.resetFaceGeom();
 
     // check again level neighbor because outer element might be coarser then
     // this element
     if( isLeafItem_ )
     {
-      if( this->connector_.ghostBoundary() )
+      if( connector_.ghostBoundary() )
       {
-        const BNDFaceType & ghost = this->connector_.boundaryFace();
+        const BNDFaceType & ghost = connector_.boundaryFace();
         // if nonconformity occurs then no level neighbor
-        levelNeighbor_ = (this->innerLevel_ == ghost.ghostLevel() );
+        levelNeighbor_ = (innerLevel_ == ghost.ghostLevel() );
       }
-      else if ( ! this->connector_.outerBoundary() )
+      else if ( ! connector_.outerBoundary() )
       {
-        levelNeighbor_ = (this->connector_.outerEntity().level() == this->innerLevel_);
+        levelNeighbor_ = (connector_.outerEntity().level() == innerLevel_);
       }
     }
   }

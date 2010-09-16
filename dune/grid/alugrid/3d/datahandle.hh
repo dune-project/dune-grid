@@ -581,7 +581,7 @@ namespace ALUGridSpace
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::HElementType HElementType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
-    typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
+    typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
   public:
     //! Constructor
@@ -765,7 +765,6 @@ namespace ALUGridSpace
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::HElementType HElementType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
-    typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
 
     int newMemSize_;
   public:

@@ -42,16 +42,17 @@ namespace Dune
   template< ALU3dGridElementType type, class Comm >
   class ALU3dGridFaceInfo
   {
+    typedef ALU3dImplTraits< type, Comm >  ImplTraits;
     //- private typedefs
-    typedef typename ALU3dImplTraits< type, Comm >::HasFaceType HasFaceType;
+    typedef typename ImplTraits::HasFaceType HasFaceType;
   public:
     enum ConformanceState {CONFORMING, REFINED_INNER, REFINED_OUTER, UNDEFINED };
     //- typedefs
-    typedef typename ALU3dImplTraits< type, Comm >::GEOFaceType GEOFaceType;
-    typedef typename ALU3dImplTraits< type, Comm >::GEOElementType GEOElementType;
-    typedef typename ALU3dImplTraits< type, Comm >::IMPLElementType IMPLElementType;
-    typedef typename ALU3dImplTraits< type, Comm >::GhostPairType GhostPairType;
-    typedef typename ALU3dImplTraits< type, Comm >::PLLBndFaceType BndFaceType;
+    typedef typename ImplTraits::GEOFaceType GEOFaceType;
+    typedef typename ImplTraits::GEOElementType GEOElementType;
+    typedef typename ImplTraits::IMPLElementType IMPLElementType;
+    typedef typename ImplTraits::GhostPairType GhostPairType;
+    typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
   public:
     //! constructor creating empty face info
@@ -88,10 +89,10 @@ namespace Dune
     const GEOElementType& outerEntity() const;
     //! Returns the inner element at that face
     //! \note This function is only meaningful at a boundary
-    const BndFaceType& innerFace() const;
+    const BNDFaceType& innerFace() const;
     //! Returns the boundary (outer) element at that face
     //! \note This function is only meaningful at a boundary
-    const BndFaceType& boundaryFace() const;
+    const BNDFaceType& boundaryFace() const;
 
     //! Twist of the face seen from the inner element
     int innerTwist() const;

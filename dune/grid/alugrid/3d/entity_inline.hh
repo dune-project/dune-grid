@@ -122,11 +122,11 @@ namespace Dune {
 
     level_   = item_->level();
     // remember pointer to ghost face
-    ghost_ = static_cast<PLLBndFaceType *> (&ghost);
+    ghost_ = static_cast<BNDFaceType *> (&ghost);
     assert( ghost_ );
     builtgeometry_ = false;
 
-    PLLBndFaceType * dwn = static_cast<PLLBndFaceType *> (ghost.down());
+    BNDFaceType * dwn = static_cast<BNDFaceType *> (ghost.down());
     if ( ! dwn ) isLeaf_ = true;
     else
     {

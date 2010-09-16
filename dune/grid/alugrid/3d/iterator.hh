@@ -67,7 +67,6 @@ namespace Dune {
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::GEOFaceType GEOFaceType;
     typedef typename ImplTraits::NeighbourPairType NeighbourPairType;
-    typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
     typedef typename ALU3dImplTraits< tetra, Comm >::GEOElementType GEOTetraElementType;
@@ -236,7 +235,7 @@ namespace Dune {
 
     // reset IntersectionIterator to first neighbour
     void setInteriorItem(const HElementType  & elem,
-                         const PLLBndFaceType& bnd, int wLevel);
+                         const BNDFaceType& bnd, int wLevel);
 
     // reset IntersectionIterator to first neighbour
     template <class EntityType>
@@ -280,7 +279,7 @@ namespace Dune {
     const IMPLElementType* item_;
 
     //! current pointer to ghost face if iterator was started from ghost element
-    const PLLBndFaceType* ghost_;
+    const BNDFaceType* ghost_;
 
     mutable int innerLevel_;
     mutable int index_;
@@ -315,7 +314,6 @@ namespace Dune {
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::GEOFaceType GEOFaceType;
     typedef typename ImplTraits::NeighbourPairType NeighbourPairType;
-    typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
     typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
@@ -334,10 +332,24 @@ namespace Dune {
              EntityCount<GridImp::elementType>::numVerticesPerFace };
     enum { numVertices = EntityCount<GridImp::elementType>::numVertices };
 
+    typedef ALU3dGridIntersectionIterator<GridImp>      BaseType;
     typedef ALU3dGridLevelIntersectionIterator<GridImp> ThisType;
 
     friend class ALU3dGridEntity<0,dim,GridImp>;
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
+  protected:
+    using BaseType :: item_;
+    using BaseType :: ghost_;
+    using BaseType :: innerLevel_;
+    using BaseType :: index_;
+    using BaseType :: connector_;
+    using BaseType :: geoProvider_;
+    using BaseType :: grid_;
+    using BaseType :: done_;
+    using BaseType :: boundary;
+    using BaseType :: done ;
+    using BaseType :: getFace;
+    using BaseType :: neighbor ;
 
   public:
     //typedef Dune :: Intersection< const GridImp, ThisType >
@@ -388,7 +400,7 @@ namespace Dune {
 
     // reset IntersectionIterator to first neighbour
     void setInteriorItem(const HElementType  & elem,
-                         const PLLBndFaceType& bnd, int wLevel);
+                         const BNDFaceType& bnd, int wLevel);
 
     bool levelNeighbor_;
     bool isLeafItem_;
@@ -662,6 +674,62 @@ namespace Dune {
     typedef typename ImplTraits::HElementType HElementType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
 
+    template < class PointerType, class CommT >
+    class GhostElementStorage;
+
+    //! empty implementation for
+    template < class PointerType >
+    struct GhostElementStorage< PointerType, No_Comm >
+    {
+      GhostElementStorage() {}
+      explicit GhostElementStorage( const PointerType& ) {}
+      PointerType& operator * () {  PointerType* p = 0; assert( false ); abort(); return *p; }
+      const PointerType* ghost () const { return 0; }
+      PointerType* nextGhost () const { return 0; }
+      PointerType* operator -> () const { return 0; }
+      bool operator != (const PointerType* ) const { return false; }
+      bool operator ! () const { return true ; }
+      GhostElementStorage& operator= (const GhostElementStorage& ) { return *this; }
+      GhostElementStorage& operator= (const PointerType* )  { return *this;  }
+      bool valid () const { return false; }
+    };
+
+#if ALU3DGRID_PARALLEL
+    //! implementation holding two ghost pointer
+    template < class PointerType >
+    struct GhostElementStorage< PointerType, MPI_Comm >
+    {
+    private:
+      // pointers to ghost and current ghost
+      const HBndSegType * ghost_;
+      HBndSegType * nextGhost_;
+    public:
+      GhostElementStorage() : ghost_( 0 ), nextGhost_( 0 ) {}
+      explicit GhostElementStorage( const PointerType& gh ) : ghost_( &gh ), nextGhost_( 0 ) {}
+      GhostElementStorage( const GhostElementStorage& org )
+        : ghost_( org.ghost_ ), nextGhost_( org.nextGhost_ ) {}
+
+      PointerType& operator * () { assert( nextGhost_ ); return *nextGhost_; }
+      const PointerType* ghost () const { return ghost_; }
+      PointerType* nextGhost () const { return nextGhost_; }
+      PointerType* operator -> () { return nextGhost_; }
+      bool operator != (const PointerType* p ) const { return (nextGhost_ != p); }
+      bool operator ! () const { return nextGhost_ == 0; }
+      GhostElementStorage& operator= (const GhostElementStorage& org)
+      {
+        ghost_ = org.ghost_;
+        nextGhost_ = org.nextGhost_;
+        return *this;
+      }
+      GhostElementStorage& operator= (PointerType* p)
+      {
+        nextGhost_ = p;
+        return *this;
+      }
+      bool valid () const { return (ghost_ != 0); }
+    };
+#endif
+
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::ctype ctype;
@@ -670,13 +738,11 @@ namespace Dune {
     ALU3dGridHierarchicIterator(const GridImp &grid,
                                 const HElementType & elem, int maxlevel, bool end );
 
-#ifdef ALU3DGRID_PARALLEL
     //! start constructor for ghosts
     ALU3dGridHierarchicIterator(const GridImp &grid,
                                 const HBndSegType& ghost,
                                 int maxlevel,
                                 bool end);
-#endif
 
     //! the normal Constructor
     ALU3dGridHierarchicIterator(const ALU3dGridHierarchicIterator<GridImp> &org);
@@ -710,11 +776,8 @@ namespace Dune {
     //! element from where we started
     const HElementType * elem_;
 
-#ifdef ALU3DGRID_PARALLEL
     // pointers to ghost and current ghost
-    const HBndSegType * ghost_;
-    HBndSegType * nextGhost_;
-#endif
+    GhostElementStorage< HBndSegType, Comm > ghostElem_;
 
     //! maximal level to go down
     int maxlevel_;

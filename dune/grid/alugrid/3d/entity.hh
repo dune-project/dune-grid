@@ -200,7 +200,7 @@ namespace Dune {
     typedef typename ImplTraits::template Codim<0>::InterfaceType HElementType;
 
     typedef typename ImplTraits::GEOElementType GEOElementType;
-    typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
+    typedef typename ImplTraits::BNDFaceType BNDFaceType;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
 
@@ -395,7 +395,7 @@ namespace Dune {
     const IMPLElementType& getItem () const { return *item_; }
 
     // return reference to internal item
-    const PLLBndFaceType& getGhost () const
+    const BNDFaceType& getGhost () const
     {
       assert( isGhost() );
       return *ghost_;
@@ -405,7 +405,7 @@ namespace Dune {
     const GridImp& grid() const { return grid_; }
 
     //! returns true if entity is ghost
-    bool isGhost () const { return (ghost_ != 0); }
+    bool isGhost () const { return ImplTraits::isGhost( ghost_ ); }
 
   private:
     //! return reference to geometry implementation
@@ -424,7 +424,7 @@ namespace Dune {
     mutable IMPLElementType* item_;
 
     //! not zero if entity is ghost entity
-    mutable PLLBndFaceType*  ghost_;
+    mutable BNDFaceType*  ghost_;
 
     int level_;  //!< level of element
     bool isLeaf_; //!< is true if entity is leaf entity

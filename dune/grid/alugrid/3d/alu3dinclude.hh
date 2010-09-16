@@ -81,6 +81,13 @@ namespace Dune
     typedef HElementType PllElementType;
 
     typedef GitterType::Geometric::hedge1_GEO GEOEdgeType;
+
+    //! method for ghost check
+    template <class BndFaceType>
+    static bool isGhost( const BndFaceType* ghost )
+    {
+      return false ;
+    }
   };
 
 #if ALU3DGRID_PARALLEL
@@ -100,6 +107,13 @@ namespace Dune
     typedef ALU3DSPACE ElementPllXIF_t PllElementType;
 
     typedef GitterType::Geometric::hedge1_GEO GEOEdgeType;
+
+    // method for ghost check
+    template <class BndFaceType>
+    static bool isGhost( const BndFaceType* ghost )
+    {
+      return ( ghost != 0 );
+    }
   };
 #endif // #if ALU3DGRID_PARALLEL
 
@@ -194,7 +208,6 @@ namespace Dune
     typedef typename GitterType::Geometric::Hface3Rule HfaceRuleType;
     typedef typename GitterImplType::Objects::Hbnd3Default BNDFaceType;
     typedef typename GitterImplType::Objects::hbndseg3_IMPL ImplBndFaceType;
-    typedef BNDFaceType PLLBndFaceType;
 
     typedef typename GitterType::Geometric::TetraRule MarkRuleType;
 
@@ -227,7 +240,6 @@ namespace Dune
     typedef typename GitterType::Geometric::Hface4Rule HfaceRuleType;
     typedef typename GitterImplType::Objects::Hbnd4Default BNDFaceType;
     typedef typename GitterImplType::Objects::hbndseg4_IMPL ImplBndFaceType;
-    typedef BNDFaceType PLLBndFaceType;
 
     typedef typename GitterType::Geometric::HexaRule MarkRuleType;
 

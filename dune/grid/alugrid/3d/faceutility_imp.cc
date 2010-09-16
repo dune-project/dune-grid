@@ -63,14 +63,14 @@ namespace Dune {
     {
       // check for ghosts
       // this check is only need in the parallel case
-      const BndFaceType * bnd = dynamic_cast<const BndFaceType *> (innerElement_);
+      const BNDFaceType * bnd = dynamic_cast<const BNDFaceType *> (innerElement_);
 
       if(bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
       {
         // if nonconformity occurs then go up one level
         if( bnd->level () != bnd->ghostLevel() )
         {
-          bnd = static_cast<const BndFaceType *>(bnd->up());
+          bnd = static_cast<const BNDFaceType *>(bnd->up());
           assert( bnd );
           innerElement_ = dynamic_cast<const HasFaceType*> (bnd);
         }
@@ -105,14 +105,14 @@ namespace Dune {
 #if ALU3DGRID_PARALLEL
       // check for ghosts
       // this check is only need in the parallel case
-      const BndFaceType * bnd = dynamic_cast<const BndFaceType *> (outerElement_);
+      const BNDFaceType * bnd = dynamic_cast<const BNDFaceType *> (outerElement_);
 
       if(bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
       {
         // if nonconformity occurs then go up one level
         if( bnd->level () != bnd->ghostLevel() )
         {
-          bnd = static_cast<const BndFaceType *>(bnd->up());
+          bnd = static_cast<const BNDFaceType *>(bnd->up());
           assert( bnd );
           outerElement_ = dynamic_cast<const HasFaceType*> (bnd);
         }
@@ -184,7 +184,8 @@ namespace Dune {
 
   template< ALU3dGridElementType type, class Comm >
   inline bool ALU3dGridFaceInfo< type, Comm >::ghostBoundary () const {
-    return ghostBoundary_;
+    // when communicator is No_Comm there is no ghost boundary
+    return Conversion< Comm, No_Comm > :: sameType ? false : ghostBoundary_;
   }
 
   template< ALU3dGridElementType type, class Comm >
@@ -208,17 +209,17 @@ namespace Dune {
   }
 
   template< ALU3dGridElementType type, class Comm >
-  inline const typename ALU3dGridFaceInfo< type, Comm >::BndFaceType&
+  inline const typename ALU3dGridFaceInfo< type, Comm >::BNDFaceType&
   ALU3dGridFaceInfo< type, Comm >::innerFace() const {
     assert( innerElement_->isboundary() );
-    return static_cast<const BndFaceType&>(*innerElement_);
+    return static_cast<const BNDFaceType&>(*innerElement_);
   }
 
   template< ALU3dGridElementType type, class Comm >
-  inline const typename ALU3dGridFaceInfo< type, Comm >::BndFaceType&
+  inline const typename ALU3dGridFaceInfo< type, Comm >::BNDFaceType&
   ALU3dGridFaceInfo< type, Comm >::boundaryFace() const {
     assert(boundary());
-    return static_cast<const BndFaceType&>(*outerElement_);
+    return static_cast<const BNDFaceType&>(*outerElement_);
   }
 
   template< ALU3dGridElementType type, class Comm >

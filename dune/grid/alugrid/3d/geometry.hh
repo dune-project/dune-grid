@@ -579,7 +579,6 @@ namespace Dune
     friend class ALU3dGridIntersectionIterator<GridImp>;
 
     typedef typename ALU3dImplTraits< elementType, Comm >::IMPLElementType IMPLElementType;
-    typedef typename ALU3dImplTraits< elementType, Comm >::PLLBndFaceType PLLBndFaceType;
     typedef typename ALU3dImplTraits< elementType, Comm >::GEOFaceType GEOFaceType;
     typedef typename ALU3dImplTraits< elementType, Comm >::GEOEdgeType GEOEdgeType;
     typedef typename ALU3dImplTraits< elementType, Comm >::GEOVertexType GEOVertexType;
