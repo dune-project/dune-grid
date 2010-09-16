@@ -404,12 +404,10 @@ namespace Dune {
       return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<HElementType &> (*item_));
     }
 
-#if ALU3DGRID_PARALLEL
     if( isGhost () )
     {
       return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<const HBndSegType &> (*(getGhost().up())));
     }
-#endif
 
     return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<HElementType &> ( *up ));
   }
@@ -476,10 +474,8 @@ namespace Dune {
     {
       const GEOFaceType &face = *ALU3dGridFaceGetter< Comm >::getFace( *item_, i );
 
-#if ALU3DGRID_PARALLEL
       // don't count internal boundaries as boundary
       if( face.isBorder() ) continue ;
-#endif
 
       // check both
       const HasFaceType * outerElement = face.nb.front().first;
@@ -596,7 +592,6 @@ namespace Dune {
       }
       else
       {
-#if ALU3DGRID_PARALLEL
         // in case of ghost element use different set method
         if( item_->isGhost() )
         {
@@ -606,7 +601,6 @@ namespace Dune {
           locked_ = true ;
         }
         else
-#endif
         {
           // otherwise item is set
           this->entityImp().setElement( *item_ );
