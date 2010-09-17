@@ -13,7 +13,9 @@
 #include "alu3dinclude.hh"
 #include "iterator.hh"
 
-namespace Dune {
+namespace Dune
+{
+
   // Forward declarations
   template<int cd, int dim, class GridImp>
   class ALU3dGridEntity;
@@ -76,8 +78,8 @@ namespace Dune {
 
     friend class ALU3dGridHierarchicIndexSet< GridImp::elementType, Comm >;
 
-    template< template< int, int > class >
-    friend class ALU3dGridFactory;
+    template< class > friend class ALU3dGridFactory;
+
   public:
     typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim<cd>::InterfaceType HItemType;
@@ -226,8 +228,7 @@ namespace Dune {
 
     friend class ALU3dGridHierarchicIndexSet< elementType, Comm >;
 
-    template< template< int, int > class >
-    friend class ALU3dGridFactory;
+    template< class > friend class ALU3dGridFactory;
 
     // type of reference element
     typedef typename GridImp :: ReferenceElementType ReferenceElementType;

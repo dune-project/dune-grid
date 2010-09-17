@@ -43,7 +43,8 @@
 #include <dune/common/collectivecommunication.hh>
 #endif
 
-namespace Dune {
+namespace Dune
+{
 
   // Forward declarations
   template<int cd, int dim, class GridImp>
@@ -78,7 +79,7 @@ namespace Dune {
   class ALUMemoryProvider;
   template <class GridImp, int codim>
   struct ALU3dGridEntityFactory;
-  template< template< int, int > class ALUGrid >
+  template< class >
   class ALU3dGridFactory;
   template <class GridImp, class GeometryImp, int nChild>
   class ALULocalGeometryStorage;
@@ -127,6 +128,10 @@ namespace Dune {
         return new GitterImplType ( macroName.c_str(), projection );
     }
 
+    static No_Comm defaultComm () { return No_Comm(); }
+
+    static int getRank ( No_Comm comm ) { return 0; }
+
     static typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder ( GitterImplType &grid )
     {
       return dynamic_cast< ALU3DSPACE Gitter::Geometric::BuilderIF & >( grid.container() );
@@ -157,6 +162,15 @@ namespace Dune {
     GitterImplType *createALUGrid ( const std::string &macroName, ALU3DSPACE ProjectVertex *projection )
     {
       return new GitterImplType( macroName.c_str(), mpAccess_, projection );
+    }
+
+    static MPI_Comm defaultComm () { return MPI_COMM_WORLD; }
+
+    static int getRank ( MPI_Comm comm )
+    {
+      int rank = 0;
+      MPI_Comm_rank( comm, &rank );
+      return rank;
     }
 
     static typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder ( GitterImplType &grid )
@@ -713,6 +727,11 @@ namespace Dune {
     int getMark( const typename Traits::template Codim<0>::Entity & e) const;
 
   public:
+    static MPICommunicatorType defaultCommunicator ()
+    {
+      return Communications::defaultComm();
+    }
+
     template< class IntersectionInterfaceType >
     const typename BaseType
     :: template ReturnImplementationType< IntersectionInterfaceType >

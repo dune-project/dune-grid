@@ -15,23 +15,31 @@
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/boundaryprojection.hh>
 
+#include <dune/grid/alugrid/common/transformation.hh>
 #include <dune/grid/alugrid/3d/alugrid.hh>
 
 namespace Dune
 {
 
   /** \brief Factory class for 3d ALUGrids */
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   class ALU3dGridFactory
-    : public GridFactoryInterface< ALUGrid< 3, 3 > >
+    : public GridFactoryInterface< ALUGrid >
   {
     typedef ALU3dGridFactory< ALUGrid > ThisType;
-    typedef GridFactoryInterface< ALUGrid< 3, 3 > > BaseType;
+    typedef GridFactoryInterface< ALUGrid > BaseType;
 
   public:
-    typedef ALUGrid< 3, 3 > Grid;
+    typedef ALUGrid Grid;
 
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
+    typedef typename Grid::ctype ctype;
+
+    static const ALU3dGridElementType elementType = Grid::elementType;
+
+    static const unsigned int dimension = Grid::dimension;
+    static const unsigned int dimensionworld = Grid::dimensionworld;
+
+    typedef typename Grid::MPICommunicatorType MPICommunicatorType;
 
     //! \brief type of boundary projection class
     typedef DuneBoundaryProjection< 3 >  DuneBoundaryProjectionType;
@@ -42,19 +50,19 @@ namespace Dune
       typedef typename Grid::template Codim< codim >::Entity Entity;
     };
 
+    typedef ALUGridTransformation< ctype, dimensionworld > Transformation;
+
+    //! type of vector for world coordinates
+    typedef typename Transformation::WorldVector WorldVector;
+    //! type of matrix from world coordinates to world coordinates
+    typedef typename Transformation::WorldMatrix WorldMatrix;
+
   private:
-    typedef Dune::BoundarySegmentWrapper<3, 3> BoundarySegmentWrapperType;
-
-    typedef typename Grid::ctype ctype;
-
-    static const ALU3dGridElementType elementType = Grid::elementType;
-
     dune_static_assert( (elementType == tetra || elementType == hexa),
                         "ALU3dGridFactory supports only grids containing "
                         "tetrahedrons or hexahedrons exclusively." );
 
-    static const unsigned int dimension = Grid::dimension;
-    static const unsigned int dimensionworld = Grid::dimensionworld;
+    typedef Dune::BoundarySegmentWrapper< dimension, dimensionworld > BoundarySegmentWrapperType;
 
     static const unsigned int numCorners = EntityCount< elementType >::numVertices;
     static const unsigned int numFaces = EntityCount< elementType >::numFaces;
@@ -67,7 +75,6 @@ namespace Dune
     typedef std::vector< unsigned int > ElementType;
     typedef array< unsigned int, numFaceCorners > FaceType;
 
-  private:
     struct FaceLess;
 
     typedef std::vector< VertexType > VertexVector;
@@ -77,37 +84,14 @@ namespace Dune
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
 
-    int rank_;
-
-    VertexVector vertices_;
-    ElementVector elements_;
-    BoundaryIdVector boundaryIds_;
-    const DuneBoundaryProjectionType* globalProjection_ ;
-    BoundaryProjectionMap boundaryProjections_;
-    unsigned int numFacesInserted_;
-    bool realGrid_;
-    const bool allowGridGeneration_;
-
-    MPICommunicatorType communicator_;
-
     // copy vertex numbers and store smalled #dimension ones
-    inline void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
+    void copyAndSort ( const std::vector< unsigned int > &vertices, FaceType &faceId ) const
     {
       std::vector<unsigned int> tmp( vertices );
       std::sort( tmp.begin(), tmp.end() );
 
       // copy only the first dimension vertices (enough for key)
       for( size_t i = 0; i < faceId.size(); ++i ) faceId[ i ] = tmp[ i ];
-    }
-
-    // return rank of process
-    inline int getRank(const MPICommunicatorType &communicator) const
-    {
-      int rank = 0;
-#if ALU3DGRID_PARALLEL
-      MPI_Comm_rank( communicator, &rank );
-#endif
-      return rank;
     }
 
   private:
@@ -121,18 +105,15 @@ namespace Dune
 
   public:
     /** \brief default constructor */
-    explicit ALU3dGridFactory ( const MPICommunicatorType &communicator
-                                  = MPIHelper::getCommunicator(),
+    explicit ALU3dGridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator(),
                                 bool removeGeneratedFile = true );
 
     /** \brief constructor taking filename for temporary outfile */
     explicit ALU3dGridFactory ( const std::string &filename,
-                                const MPICommunicatorType &communicator
-                                  = MPIHelper::getCommunicator() );
+                                const MPICommunicatorType &communicator = Grid::defaultCommunicator() );
 
     /** \brief constructor taking verbose flag */
-    explicit ALU3dGridFactory ( const bool verbose,
-                                const MPICommunicatorType &communicator );
+    explicit ALU3dGridFactory ( const bool verbose, const MPICommunicatorType &communicator );
 
     /** \brief Destructor */
     virtual ~ALU3dGridFactory ();
@@ -252,10 +233,24 @@ namespace Dune
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
     void recreateBoundaryIds ( const int defaultId = 1 );
+
+    int rank_;
+
+    VertexVector vertices_;
+    ElementVector elements_;
+    BoundaryIdVector boundaryIds_;
+    const DuneBoundaryProjectionType* globalProjection_ ;
+    BoundaryProjectionMap boundaryProjections_;
+    unsigned int numFacesInserted_;
+    bool realGrid_;
+    const bool allowGridGeneration_;
+
+    MPICommunicatorType communicator_;
   };
 
 
-  template< template< int, int > class ALUGrid >
+
+  template< class ALUGrid >
   struct ALU3dGridFactory< ALUGrid >::FaceLess
     : public std::binary_function< FaceType, FaceType, bool >
   {
@@ -271,7 +266,7 @@ namespace Dune
   };
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   template< class T >
   inline void ALU3dGridFactory< ALUGrid >::exchange ( T &x, T &y )
   {
@@ -279,7 +274,7 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid >
   ::assertGeometryType( const GeometryType &geometry )
   {
@@ -303,27 +298,24 @@ namespace Dune
    */
   template<>
   class GridFactory< ALUSimplexGrid< 3, 3 > >
-    : public ALU3dGridFactory< ALUSimplexGrid >
+    : public ALU3dGridFactory< ALUSimplexGrid< 3, 3 > >
   {
     typedef GridFactory< ALUSimplexGrid< 3, 3 > > ThisType;
-    typedef ALU3dGridFactory< ALUSimplexGrid > BaseType;
+    typedef ALU3dGridFactory< ALUSimplexGrid< 3, 3 > > BaseType;
 
   public:
-    typedef ALUSimplexGrid< 3, 3 > Grid;
+    typedef BaseType::Grid Grid;
 
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
+    typedef BaseType::MPICommunicatorType MPICommunicatorType;
 
-  public:
     /** \brief Default constructor */
-    explicit GridFactory ( const MPICommunicatorType &communicator
-                             = MPIHelper::getCommunicator() )
+    explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
       : BaseType( communicator )
     {}
 
     /** \brief constructor taking filename */
     GridFactory ( const std::string &filename,
-                  const MPICommunicatorType &communicator
-                    = MPIHelper::getCommunicator() )
+                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
       : BaseType( filename, communicator )
     {}
 
@@ -331,8 +323,7 @@ namespace Dune
     template< class, class, int > friend class ALULocalGeometryStorage;
     /** \brief constructor taking verbosity flag */
     GridFactory ( const bool realGrid,
-                  const MPICommunicatorType &communicator
-                    = MPIHelper::getCommunicator() )
+                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
       : BaseType( realGrid, communicator )
     {}
   };
@@ -344,27 +335,24 @@ namespace Dune
    */
   template<>
   class GridFactory< ALUCubeGrid< 3, 3 > >
-    : public ALU3dGridFactory< ALUCubeGrid >
+    : public ALU3dGridFactory< ALUCubeGrid< 3, 3 > >
   {
     typedef GridFactory< ALUCubeGrid< 3, 3 > > ThisType;
-    typedef ALU3dGridFactory< ALUCubeGrid > BaseType;
+    typedef ALU3dGridFactory< ALUCubeGrid< 3, 3 > > BaseType;
 
   public:
-    typedef ALUCubeGrid< 3, 3 > Grid;
+    typedef BaseType::Grid Grid;
 
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
+    typedef BaseType::MPICommunicatorType MPICommunicatorType;
 
-  public:
     /** \brief Default constructor */
-    explicit GridFactory ( const MPICommunicatorType &communicator
-                             = MPIHelper::getCommunicator() )
+    explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
       : BaseType( communicator )
     {}
 
     /** \brief constructor taking filename */
     GridFactory ( const std::string &filename,
-                  const MPICommunicatorType &communicator
-                    = MPIHelper::getCommunicator() )
+                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
       : BaseType( filename, communicator )
     {}
 
@@ -372,18 +360,17 @@ namespace Dune
     template< class, class, int > friend class ALULocalGeometryStorage;
     /** \brief constructor taking verbosity flag */
     GridFactory ( const bool realGrid,
-                  const MPICommunicatorType &communicator
-                    = MPIHelper::getCommunicator() )
+                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
       : BaseType( realGrid, communicator )
     {}
   };
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   inline
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                         bool removeGeneratedFile )
-    : rank_( getRank(communicator) ),
+    : rank_( ALU3dGridCommunications< elementType, MPICommunicatorType >::getRank( communicator ) ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
       realGrid_( true ),
@@ -391,12 +378,12 @@ namespace Dune
       communicator_( communicator )
   {}
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   inline
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const std::string &filename,
                         const MPICommunicatorType &communicator )
-    : rank_( getRank(communicator) ),
+    : rank_( ALU3dGridCommunications< elementType, MPICommunicatorType >::getRank( communicator ) ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
       realGrid_( true ),
@@ -404,19 +391,20 @@ namespace Dune
       communicator_( communicator )
   {}
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   inline
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const bool realGrid,
                         const MPICommunicatorType &communicator )
-    : rank_( getRank(communicator) ),
+    : rank_( ALU3dGridCommunications< elementType, MPICommunicatorType >::getRank( communicator ) ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
       realGrid_( realGrid ),
       allowGridGeneration_( true ),
       communicator_( communicator )
   {}
-  template< template< int, int > class ALUGrid >
+
+  template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )
   {
@@ -442,7 +430,7 @@ namespace Dune
     boundaryIds_.push_back( boundaryId );
   }
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                           const shared_ptr<BoundarySegment<3,3> >& boundarySegment )

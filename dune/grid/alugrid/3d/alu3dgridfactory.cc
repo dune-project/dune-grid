@@ -27,13 +27,13 @@
 namespace Dune
 {
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   ALU3dGridFactory< ALUGrid > :: ~ALU3dGridFactory ()
   {}
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexType &pos )
   {
@@ -44,7 +44,7 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
   :: insertElement ( const GeometryType &geometry,
@@ -64,7 +64,7 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
   :: insertBoundary ( const GeometryType &geometry,
@@ -94,7 +94,7 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
   ::insertBoundary ( const int element, const int face, const int id )
@@ -111,7 +111,7 @@ namespace Dune
     boundaryIds_.push_back( boundaryId );
   }
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
@@ -123,7 +123,7 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection ( const GeometryType &type,
@@ -146,14 +146,14 @@ namespace Dune
   }
 
 #if 0
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )
   {
     DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
   }
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                           const shared_ptr<BoundarySegment<3,3> >& boundarySegment )
@@ -197,24 +197,24 @@ namespace Dune
   }
 #endif
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
-  ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >::createGrid ()
+  ALUGrid *ALU3dGridFactory< ALUGrid >::createGrid ()
   {
     return createGrid( true, true, "" );
   }
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
-  ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
+  ALUGrid *ALU3dGridFactory< ALUGrid >
   ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
   {
     return createGrid( addMissingBoundaries, true, dgfName );
   }
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
-  ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
+  ALUGrid *ALU3dGridFactory< ALUGrid >
   ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
     typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator BoundaryIdIteratorType;
@@ -453,7 +453,7 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
   ::generateFace ( const ElementType &element, const int f, FaceType &face )
@@ -469,7 +469,7 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   void
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
@@ -516,7 +516,7 @@ namespace Dune
   }
 
 
-  template< template< int, int > class ALUGrid >
+  template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
   ::recreateBoundaryIds ( const int defaultId )
@@ -573,8 +573,8 @@ namespace Dune
   }
 
 #if COMPILE_ALUGRID_LIB
-  template class ALU3dGridFactory< ALUCubeGrid >;
-  template class ALU3dGridFactory< ALUSimplexGrid >;
+  template class ALU3dGridFactory< ALUCubeGrid< 3, 3 > >;
+  template class ALU3dGridFactory< ALUSimplexGrid< 3, 3 > >;
 #endif
 }
 #endif // end ENABLE_ALUGRID

@@ -47,12 +47,13 @@ namespace Dune
     : public Dune::ALU3dGrid< hexa >
   {
     typedef ALUCubeGrid< 3, 3 > This;
-
     typedef Dune::ALU3dGrid< hexa > BaseType;
+
     enum { dim      = 3 };
     enum { dimworld = 3 };
 
-    typedef MPIHelper :: MPICommunicator MPICommunicator;
+    typedef BaseType::MPICommunicatorType MPICommunicatorType;
+
   public:
     //! type of boundary projection
     typedef BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
@@ -65,7 +66,7 @@ namespace Dune
     //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
     //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
     ALUCubeGrid(const std::string macroName,
-                const MPICommunicator mpiComm = MPIHelper::getCommunicator(),
+                const MPICommunicatorType mpiComm = BaseType::defaultCommunicator(),
                 const DuneBoundaryProjectionType* bndProject = 0,
                 const DuneBoundaryProjectionVector* bndVector= 0,
                 const bool verb = true ) :
@@ -86,7 +87,7 @@ namespace Dune
     //! \param bndVector  pointer to vector holding boundary projection for each boundary segment
     //! \note ALUGrid takes ownership of this pointer and will delete it in the desctructor
     //! \param macroName filename from which ALUGrid is being generated
-    ALUCubeGrid(const MPICommunicator mpiComm,
+    ALUCubeGrid(const MPICommunicatorType mpiComm,
                 const DuneBoundaryProjectionType* bndProject ,
                 const DuneBoundaryProjectionVector* bndVector,
                 const std::string macroName,
@@ -102,7 +103,7 @@ namespace Dune
     }
 
     //! \brief constructor creating empty grid
-    ALUCubeGrid(const MPICommunicator mpiComm = MPIHelper::getCommunicator() ) :
+    ALUCubeGrid(const MPICommunicatorType mpiComm = BaseType::defaultCommunicator() ) :
       BaseType("", mpiComm,
                (const DuneBoundaryProjectionType *) 0,
                (const DuneBoundaryProjectionVector* ) 0)
@@ -177,8 +178,7 @@ namespace Dune
     friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
-    template< template< int, int > class >
-    friend class ALU3dGridFactory;
+    template< class > friend class ALU3dGridFactory;
 
     //! Copy constructor should not be used
     ALUCubeGrid( const ALUCubeGrid & g ) ; // : BaseType(g) {}
@@ -200,12 +200,13 @@ namespace Dune
     : public Dune::ALU3dGrid< tetra >
   {
     typedef ALUSimplexGrid< 3, 3 > This;
-
     typedef Dune::ALU3dGrid< tetra > BaseType;
+
     enum { dim      = 3 };
     enum { dimworld = 3 };
 
-    typedef MPIHelper :: MPICommunicator MPICommunicator;
+    typedef BaseType::MPICommunicatorType MPICommunicatorType;
+
   public:
     //! type of boundary projection
     typedef BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
@@ -218,7 +219,7 @@ namespace Dune
     //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
     //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
     ALUSimplexGrid(const std::string macroName,
-                   const MPICommunicator mpiComm = MPIHelper::getCommunicator(),
+                   const MPICommunicatorType mpiComm = BaseType::defaultCommunicator(),
                    const DuneBoundaryProjectionType* bndProject = 0,
                    const DuneBoundaryProjectionVector* bndVector = 0,
                    const bool verb = true ) :
@@ -239,7 +240,7 @@ namespace Dune
     //! \param bndVector  pointer to vector holding boundary projection for each boundary segment
     //!  \note ALUGrid takes ownership of this pointer and will delete it in the desctructor
     //! \param macroName filename from which ALUGrid is being generated
-    ALUSimplexGrid(const MPICommunicator mpiComm,
+    ALUSimplexGrid(const MPICommunicatorType mpiComm,
                    const DuneBoundaryProjectionType* bndProject ,
                    const DuneBoundaryProjectionVector* bndVector,
                    const std::string macroName,
@@ -255,7 +256,7 @@ namespace Dune
     }
 
     //! constructor creating empty grid, empty string creates empty grid
-    ALUSimplexGrid(const MPICommunicator mpiComm = MPIHelper::getCommunicator()) :
+    ALUSimplexGrid(const MPICommunicatorType mpiComm = BaseType::defaultCommunicator()) :
       BaseType("", mpiComm,
                (const DuneBoundaryProjectionType *) 0,
                (const DuneBoundaryProjectionVector* ) 0)
@@ -330,8 +331,7 @@ namespace Dune
     friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
-    template< template< int, int > class >
-    friend class ALU3dGridFactory;
+    template< class > friend class ALU3dGridFactory;
 
     //! Copy constructor should not be used
     ALUSimplexGrid( const ALUSimplexGrid & g ); //  : BaseType(g) {}
