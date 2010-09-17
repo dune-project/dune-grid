@@ -286,7 +286,15 @@ int main (int argc , char **argv) {
 #endif
     }
 
-    const bool display = (argc > 2);
+    const char* newfilename = 0;
+    if( argc > 2 )
+    {
+      if( std::string( argv[ 2 ] ) != "display" )
+        newfilename = argv[ 2 ];
+    }
+
+    // display
+    const bool display = (std::string( newfilename ) == "display");
 
     bool testALU2dSimplex = initialize ;
     bool testALU2dConform = initialize ;
@@ -410,7 +418,11 @@ int main (int argc , char **argv) {
 #ifndef NO_3D
       if( testALU3dCube )
       {
-        std::string filename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf");
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf";
 
         typedef ALUCubeGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
@@ -436,7 +448,11 @@ int main (int argc , char **argv) {
 
       if( testALU3dSimplex )
       {
-        std::string filename(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf");
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf";
 
         typedef ALUSimplexGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
