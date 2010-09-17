@@ -80,6 +80,7 @@ namespace Dune
     typedef std::vector< VertexType > VertexVector;
     typedef std::vector< ElementType > ElementVector;
     typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
+    typedef std::vector< std::pair< FaceType, FaceType > > PeriodicBoundaryVector;
     typedef std::pair< unsigned int, int > SubEntity;
     typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
 
@@ -241,12 +242,12 @@ namespace Dune
     }
 
   private:
-    template< class T >
-    static void exchange ( T &x, T &y );
-
     void assertGeometryType( const GeometryType &geometry );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
+    void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
     void correctElementOrientation ();
+    bool identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2 );
+    void searchPeriodicNeighbor ( FaceMap &faceMap, const typename FaceMap::iterator &pos );
     void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
 
@@ -255,6 +256,7 @@ namespace Dune
     VertexVector vertices_;
     ElementVector elements_;
     BoundaryIdVector boundaryIds_;
+    PeriodicBoundaryVector periodicBoundaries_;
     const DuneBoundaryProjectionType* globalProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
     FaceTransformationVector faceTransformations_;
@@ -281,14 +283,6 @@ namespace Dune
       return false;
     }
   };
-
-
-  template< class ALUGrid >
-  template< class T >
-  inline void ALU3dGridFactory< ALUGrid >::exchange ( T &x, T &y )
-  {
-    T dummy = x; x = y; y = dummy;
-  }
 
 
   template< class ALUGrid >
@@ -381,6 +375,11 @@ namespace Dune
       : BaseType( realGrid, communicator )
     {}
   };
+
+
+
+  // Implementation of ALU3dGridFactory
+  // ----------------------------------
 
   template< class ALUGrid >
   inline
@@ -502,7 +501,15 @@ namespace Dune
     boundaryIds_.push_back( boundaryId );
   }
 
-}
+
+  template< class ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid >
+  ::generateFace ( const SubEntity &subEntity, FaceType &face ) const
+  {
+    generateFace( elements_[ subEntity.first ], subEntity.second, face );
+  }
+
+} // end namespace Dune
 
 #endif // #ifdef ENABLE_ALUGRID
 

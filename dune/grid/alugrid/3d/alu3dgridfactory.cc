@@ -287,16 +287,27 @@ namespace Dune
           out << std :: endl;
         }
 
-        out << boundaryIds_.size() << std :: endl;
+        out << (boundaryIds_.size() + periodicBoundaries_.size()) << std :: endl;
         const BoundaryIdIteratorType endB = boundaryIds_.end();
         for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
         {
-          const std :: pair< FaceType, int > &boundaryId = *it;
+          const std::pair< FaceType, int > &boundaryId = *it;
           out << "-" << boundaryId.second << "  " << numFaceCorners;
 
           for( unsigned int i = 0; i < numFaceCorners; ++i )
             out << "  " << boundaryId.first[ i ];
-          out << std :: endl;
+          out << std::endl;
+        }
+        const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
+        for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
+        {
+          const std::pair< FaceType, FaceType > &facePair = *it;
+          out << "-20  " << (2*numFaceCorners);
+          for( unsigned int i = 0; i < numFaceCorners; ++i )
+            out << "  " << facePair.first[ i ];
+          for( unsigned int i = 0; i < numFaceCorners; ++i )
+            out << "  " << facePair.second[ i ];
+          out << std::endl;
         }
 
         for( unsigned int i = 0; i < numVertices; ++i )
@@ -399,9 +410,7 @@ namespace Dune
           mgb.InsertUniqueTetra( element );
         }
         else
-        {
-          DUNE_THROW(NotImplemented,"Wrong element type");
-        }
+          DUNE_THROW( GridError, "Invalid element type");
       }
 
       const BoundaryIdIteratorType endB = boundaryIds_.end();
@@ -429,9 +438,34 @@ namespace Dune
           mgb.InsertUniqueHbnd3( bndface, bndType );
         }
         else
+          DUNE_THROW( GridError, "Invalid element type");
+      }
+      const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
+      for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
+      {
+        const std::pair< FaceType, FaceType > &facePair = *it;
+        if( elementType == hexa )
         {
-          DUNE_THROW(NotImplemented,"Wrong element type");
+          int perel[ 8 ];
+          for( unsigned int i = 0; i < numFaceCorners; ++i )
+          {
+            perel[ i+0 ] = facePair.first[ i ];
+            perel[ i+4 ] = facePair.second[ i ];
+          }
+          mgb.InsertUniquePeriodic4( perel );
         }
+        else if( elementType == tetra )
+        {
+          int perel[ 6 ];
+          for( unsigned int i = 0; i < 3; ++i )
+          {
+            perel[ i+0 ] = facePair.first[ i ];
+            perel[ i+3 ] = facePair.second[ i ];
+          }
+          mgb.InsertUniquePeriodic3( perel );
+        }
+        else
+          DUNE_THROW( GridError, "Invalid element type" );
       }
 
     }
@@ -518,15 +552,82 @@ namespace Dune
       if( elementType == hexa )
       {
         for( int i = 0; i < 4; ++i )
-          exchange( element[ i ], element[ i+4 ] );
+          std::swap( element[ i ], element[ i+4 ] );
       }
       else
-        exchange( element[ 2 ], element[ 3 ] );
+        std::swap( element[ 2 ], element[ 3 ] );
     } // end of loop over all elements
   }
 
 
   template< class ALUGrid >
+  alu_inline
+  bool ALU3dGridFactory< ALUGrid >
+  ::identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2 )
+  {
+    WorldVector w = transformation.evaluate( vertices_[ key1[ 0 ] ] );
+    int org = -1;
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+    {
+      if( (w - vertices_[ key2[ i ] ]).two_norm() < 1e-6 )
+        org = i;
+    }
+    if( org < 0 )
+      return false;
+
+    FaceType key0;
+    key0[ 0 ] = key2[ org ];
+    for( unsigned int i = 1; i < numFaceCorners; ++i )
+    {
+      w = transformation.evaluate( vertices_[ key1[ i ] ] );
+      const int j = ((org+numFaceCorners)-i) % numFaceCorners;
+      if( (w - vertices_[ key2[ j ] ]).two_norm() >= 1e-6 )
+        return false;
+      key0[ i ] = key2[ j ];
+    }
+
+    periodicBoundaries_.push_back( std::make_pair( key0, key1 ) );
+
+    return true;
+  }
+
+
+  template< class ALUGrid >
+  alu_inline
+  void ALU3dGridFactory< ALUGrid >
+  ::searchPeriodicNeighbor ( FaceMap &faceMap, const typename FaceMap::iterator &pos )
+  {
+    typedef typename FaceTransformationVector::const_iterator TrafoIterator;
+    typedef typename FaceMap::iterator FaceMapIterator;
+
+    if( !faceTransformations_.empty() )
+    {
+      FaceType key1;
+      generateFace( pos->second, key1 );
+
+      const FaceMapIterator fend = faceMap.end();
+      for( FaceMapIterator fit = faceMap.begin(); fit != fend; ++fit )
+      {
+        FaceType key2;
+        generateFace( fit->second, key2 );
+
+        const TrafoIterator trend = faceTransformations_.end();
+        for( TrafoIterator trit = faceTransformations_.begin(); trit != trend; ++trit )
+        {
+          if( identifyFaces( *trit, key1, key2 ) || identifyFaces( *trit, key2, key1 ) )
+          {
+            faceMap.erase( fit );
+            faceMap.erase( pos );
+            return;
+          }
+        }
+      }
+    }
+  }
+
+
+  template< class ALUGrid >
+  alu_inline
   void ALU3dGridFactory< ALUGrid >
   ::reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id )
   {
@@ -561,7 +662,10 @@ namespace Dune
         if( pos != faceMap.end() )
           faceMap.erase( key );
         else
+        {
           faceMap.insert( std::make_pair( key, SubEntity( n, face ) ) );
+          searchPeriodicNeighbor( faceMap, faceMap.find( key ) );
+        }
       }
     }
 
@@ -579,7 +683,8 @@ namespace Dune
       std::sort( key.begin(), key.end() );
       const FaceIterator pos = faceMap.find( key );
       if( pos == faceMap.end() )
-        DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
+        continue;
+      //DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
       reinsertBoundary( faceMap, pos, bndIt->second );
       faceMap.erase( pos );
     }
