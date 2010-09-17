@@ -59,6 +59,7 @@ namespace Dune {
     // if not true we are accessing a fake bnd
     assert( outerElement_->isRealObject() );
 
+    // check whether we are in a parallel environment or not
     const bool parallel = ! Conversion< Comm, No_Comm > :: sameType ;
 
     // we only have to do this in parallel runs
@@ -116,17 +117,15 @@ namespace Dune {
 
       if( ! bnd ) // the periodic case
       {
-        outerBoundary_ = false ;
         periodicBoundary_ = true ;
-        const GEOPeriodicType* periodicElem = dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) ;
-        assert( periodicElem );
+        const GEOPeriodicType* periodicClosure = dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) ;
+        assert( periodicClosure );
 
         // check whether we have to use the first or the second of the
         // periodic elements (one of them is the interior again)
         for( int aluFace = 0; aluFace < 2; ++aluFace )
         {
-          //( innerTwist < 0 ) ? 1 : 0 ;
-          const GEOFaceType* face = ImplTraits :: getFace( *periodicElem , aluFace );
+          const GEOFaceType* face = ImplTraits :: getFace( *periodicClosure , aluFace );
           if( face->nb.rear().first->isboundary() )
           {
             outerElement_    = face->nb.front().first ;
@@ -138,10 +137,11 @@ namespace Dune {
             outerFaceNumber_ = face->nb.rear().second ;
           }
           assert( ! outerElement_->isboundary() );
+          // make sure we got the correct neighbor
+          assert( ImplTraits::getFace( static_cast< const GEOElementType & > (*outerElement_) , outerFaceNumber_ ) == face );
           if( outerElement_ != innerElement_ ) break ;
         }
         outerTwist_ = outerEntity().twist( outerALUFaceIndex() );
-        std::cout << "Periodic neighbor " << outerEntity().getIndex() << std::endl;
       }
       else // the boundary case
       {
@@ -339,7 +339,7 @@ namespace Dune {
 
     // A boundary is always unrefined
     int levelDifference = 0 ;
-    if ( boundary() )
+    if ( boundary() && ! periodicBoundary() )
       levelDifference = innerLevel - boundaryFace().level();
     else
       levelDifference = innerLevel - outerEntity().level();
