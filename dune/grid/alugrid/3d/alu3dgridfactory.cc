@@ -234,7 +234,7 @@ namespace Dune
     {
       correctElementOrientation();
       numFacesInserted_ = boundaryIds_.size();
-      if( addMissingBoundaries )
+      if( addMissingBoundaries || !faceTransformations_.empty() )
         recreateBoundaryIds();
 
       // if dump file should be written
@@ -527,18 +527,26 @@ namespace Dune
 
 
   template< class ALUGrid >
+  void ALU3dGridFactory< ALUGrid >
+  ::reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id )
+  {
+    insertBoundary( pos->second.first, pos->second.second, id );
+  }
+
+
+  template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
   ::recreateBoundaryIds ( const int defaultId )
   {
-    typedef std::pair< unsigned int, int > SubEntity;
-    typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
     typedef typename FaceMap::iterator FaceIterator;
     FaceMap faceMap;
 
+#if 0
     const GeometryType faceGeo( elementType == tetra
                                 ? GeometryType::simplex : GeometryType::cube,
                                 dimension-1 );
+#endif
 
     const unsigned int numElements = elements_.size();
     for( unsigned int n = 0; n < numElements; ++n )
@@ -571,15 +579,15 @@ namespace Dune
       std::sort( key.begin(), key.end() );
       const FaceIterator pos = faceMap.find( key );
       if( pos == faceMap.end() )
-        continue;
-      insertBoundary( pos->second.first, pos->second.second, bndIt->second );
+        DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
+      reinsertBoundary( faceMap, pos, bndIt->second );
       faceMap.erase( pos );
     }
 
     // add all new boundaries (with defaultId)
     const FaceIterator faceEnd = faceMap.end();
     for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )
-      insertBoundary( faceIt->second.first, faceIt->second.second, defaultId );
+      reinsertBoundary( faceMap, faceIt, defaultId );
   }
 
 #if COMPILE_ALUGRID_LIB

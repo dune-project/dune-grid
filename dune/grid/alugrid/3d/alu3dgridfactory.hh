@@ -80,6 +80,8 @@ namespace Dune
     typedef std::vector< VertexType > VertexVector;
     typedef std::vector< ElementType > ElementVector;
     typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
+    typedef std::pair< unsigned int, int > SubEntity;
+    typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
 
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
@@ -245,6 +247,7 @@ namespace Dune
     void assertGeometryType( const GeometryType &geometry );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
+    void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
 
     int rank_;
