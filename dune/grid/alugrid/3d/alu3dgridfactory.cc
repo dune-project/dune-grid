@@ -197,6 +197,16 @@ namespace Dune
   }
 #endif
 
+
+  template< class ALUGrid >
+  alu_inline
+  void ALU3dGridFactory< ALUGrid >
+  ::insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
+  {
+    faceTransformations_.push_back( Transformation( matrix, shift ) );
+  }
+
+
   template< class ALUGrid >
   alu_inline
   ALUGrid *ALU3dGridFactory< ALUGrid >::createGrid ()

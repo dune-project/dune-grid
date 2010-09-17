@@ -84,6 +84,8 @@ namespace Dune
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
 
+    typedef std::vector< Transformation > FaceTransformationVector;
+
     // copy vertex numbers and store smalled #dimension ones
     void copyAndSort ( const std::vector< unsigned int > &vertices, FaceType &faceId ) const
     {
@@ -194,6 +196,17 @@ namespace Dune
      */
     virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection );
 
+    /** \brief add a face transformation (for periodic identification)
+     *
+     *  A face transformation is an affine mapping T from world coordinates
+     *  to world coordinates. The grid factory then glues two faces f and g
+     *  if T( f ) = g or T( g ) = f.
+     *
+     *  \param[in]  matrix  matrix describing the linear part of T
+     *  \param[in]  shift   vector describing T( 0 )
+     */
+    void insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift );
+
     /** \brief finalize the grid creation and hand over the grid
      *
      *  The called takes responsibility for deleing the grid.
@@ -241,6 +254,7 @@ namespace Dune
     BoundaryIdVector boundaryIds_;
     const DuneBoundaryProjectionType* globalProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
+    FaceTransformationVector faceTransformations_;
     unsigned int numFacesInserted_;
     bool realGrid_;
     const bool allowGridGeneration_;
