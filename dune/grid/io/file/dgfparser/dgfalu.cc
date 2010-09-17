@@ -111,6 +111,25 @@ namespace Dune
       }
     }
 
+    typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
+    dgf::PeriodicFaceTransformationBlock trafoBlock( file, dimworld );
+    const int size = trafoBlock.numTransformations();
+    for( int k = 0; k < size; ++k )
+    {
+      const Transformation &trafo = trafoBlock.transformation( k );
+
+      GridFactory::WorldMatrix matrix;
+      for( int i = 0; i < dimworld; ++i )
+        for( int j = 0; j < dimworld; ++j )
+          matrix[ i ][ j ] = trafo.matrix( i, j );
+
+      GridFactory::WorldVector shift;
+      for( int i = 0; i < dimworld; ++i )
+        shift[ i ] = trafo.shift[ i ];
+
+      factory_.insertFaceTransformation( matrix, shift );
+    }
+
     if ( ! parameter.dumpFileName().empty() )
       grid_ = factory_.createGrid( dgf_.facemap.empty(), false, parameter.dumpFileName() );
     else
@@ -182,6 +201,25 @@ namespace Dune
           = projectionBlock.boundaryProjection< dimworld >( i );
         factory_.insertBoundaryProjection( type, vertices, projection );
       }
+    }
+
+    typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
+    dgf::PeriodicFaceTransformationBlock trafoBlock( file, dimworld );
+    const int size = trafoBlock.numTransformations();
+    for( int k = 0; k < size; ++k )
+    {
+      const Transformation &trafo = trafoBlock.transformation( k );
+
+      GridFactory::WorldMatrix matrix;
+      for( int i = 0; i < dimworld; ++i )
+        for( int j = 0; j < dimworld; ++j )
+          matrix[ i ][ j ] = trafo.matrix( i, j );
+
+      GridFactory::WorldVector shift;
+      for( int i = 0; i < dimworld; ++i )
+        shift[ i ] = trafo.shift[ i ];
+
+      factory_.insertFaceTransformation( matrix, shift );
     }
 
     if ( ! parameter.dumpFileName().empty() )
