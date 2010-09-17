@@ -59,13 +59,13 @@ namespace Dune
       {
         if( nonConform )
         {
-          typedef ALUSimplexGrid< dimension, dimensionworld > GridType;
-          storage.template createGeometries< GridType > (type);
+          typedef ALUSimplexGrid< dimension, dimensionworld > Grid;
+          storage.template createGeometries< Grid > (type);
         }
         else
         {
-          typedef ALUConformGrid< dimension, dimensionworld > GridType;
-          storage.template createGeometries< GridType > (type);
+          typedef ALUConformGrid< dimension, dimensionworld > Grid;
+          storage.template createGeometries< Grid > (type);
         }
       }
     };
@@ -80,8 +80,8 @@ namespace Dune
       {
         assert( nonConform );
         {
-          typedef ALUSimplexGrid< dimension, dimensionworld > GridType;
-          storage.template createGeometries< GridType > (type);
+          typedef ALUSimplexGrid< dimension, dimensionworld > Grid;
+          storage.template createGeometries< Grid > (type);
         }
       }
     };
@@ -96,8 +96,8 @@ namespace Dune
       {
         assert ( nonConform ) ;
         {
-          typedef ALUCubeGrid< dimension, dimensionworld > GridType;
-          storage.template createGeometries< GridType > (type);
+          typedef ALUCubeGrid< dimension, dimensionworld > Grid;
+          storage.template createGeometries< Grid > (type);
         }
       }
     };
@@ -112,8 +112,8 @@ namespace Dune
       {
         assert( nonConform );
         {
-          typedef ALUCubeGrid< dimension, dimensionworld > GridType;
-          storage.template createGeometries< GridType > (type);
+          typedef ALUCubeGrid< dimension, dimensionworld > Grid;
+          storage.template createGeometries< Grid > (type);
         }
       }
     };
@@ -147,11 +147,11 @@ namespace Dune
       return *(geoms_[child]);
     }
 
-    template <class GridType>
+    template <class Grid>
     void createGeometries(const GeometryType& type)
     {
       // create factory without verbosity
-      GridFactory<GridType> factory( false );
+      GridFactory< Grid > factory( false );
 
       const Dune::GenericReferenceElement< ctype, dimension > &refElem
         = Dune::GenericReferenceElements< ctype, dimension >::general( type );
@@ -180,8 +180,8 @@ namespace Dune
       // redirect 'cerr' to a 'fout' to avoid unnecessary output in constructors
       std::cerr.rdbuf(tempout.rdbuf());
 
-      GridType* gridPtr = factory.createGrid();
-      GridType& grid    = *gridPtr;
+      Grid* gridPtr = factory.createGrid();
+      Grid& grid    = *gridPtr;
 
       // restore the original stream buffer
       std::cerr.rdbuf(cerr_sbuf);
@@ -193,7 +193,7 @@ namespace Dune
       grid.globalRefine( level );
 
       {
-        typedef typename GridType :: template Partition< All_Partition >:: LevelGridView MacroGridView;
+        typedef typename Grid :: template Partition< All_Partition >:: LevelGridView MacroGridView;
         MacroGridView macroView = grid.template levelView< All_Partition > ( 0 );
         typedef typename MacroGridView :: template Codim< 0 > :: Iterator Iterator;
 
@@ -213,7 +213,7 @@ namespace Dune
         for( HierarchicIteratorType child = entity.hbegin( level );
              child != end; ++child, ++childNum )
         {
-          create( grid, geo, child->geometry(), childNum );
+          create( geo, child->geometry(), childNum );
         }
       }
 
@@ -223,10 +223,10 @@ namespace Dune
 
   protected:
     // create local geometry
-    template <class GridType, class Geometry>
-    void create (const GridType & grid,
-                 const Geometry & father,
-                 const Geometry & son, const int child)
+    template <class Geometry>
+    void create (const Geometry & father,
+                 const Geometry & son,
+                 const int child)
     {
       assert( !geomCreated(child) );
       assert( child >=0 && child < nChild );

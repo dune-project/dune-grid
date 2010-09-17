@@ -320,8 +320,18 @@ namespace Dune
     static bool loadBalance ( Grid &grid, DataHandle &data ) { return false; }
 
     template< class DataHandle, class DataType >
-    static void communicate ( Grid &grid, CommDataHandleIF< DataHandle, DataType > &data,
-                              InterfaceType iftype, CommunicationDirection dir, int level )
+    static void communicate ( const Grid &grid,
+                              const CommDataHandleIF< DataHandle, DataType > &data,
+                              const InterfaceType iftype,
+                              const CommunicationDirection dir,
+                              const int level )
+    {}
+
+    template< class DataHandle, class DataType >
+    static void communicate ( const Grid &grid,
+                              const CommDataHandleIF< DataHandle, DataType > &data,
+                              const InterfaceType iftype,
+                              const CommunicationDirection dir )
     {}
   }; // ALU3dGridCommHelper
 
@@ -410,8 +420,11 @@ namespace Dune
 
 
     template< class DataHandle, class DataType >
-    static void communicate ( const Grid &grid, CommDataHandleIF< DataHandle, DataType > &data,
-                              InterfaceType iftype, CommunicationDirection dir, int level )
+    static void communicate ( const Grid &grid,
+                              CommDataHandleIF< DataHandle, DataType > &data,
+                              const InterfaceType iftype,
+                              const CommunicationDirection dir,
+                              const int level )
     {
       typedef CommDataHandleIF< DataHandle, DataType > DataHandleType;
       typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 3 >::Entity > VertexObject;
@@ -457,8 +470,10 @@ namespace Dune
     }
 
     template< class DataHandle, class DataType >
-    static void communicate ( const Grid &grid, CommDataHandleIF< DataHandle, DataType > &data,
-                              InterfaceType iftype, CommunicationDirection dir )
+    static void communicate ( const Grid &grid,
+                              CommDataHandleIF< DataHandle, DataType > &data,
+                              const InterfaceType iftype,
+                              const CommunicationDirection dir )
     {
       typedef CommDataHandleIF< DataHandle, DataType > DataHandleType;
       typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 3 >::Entity > VertexObject;
