@@ -3,7 +3,7 @@
 alugriddir = $(includedir)/dune/grid/alugrid/
 alugrid_HEADERS = checkparallel.hh  interfaces.hh defaultindexsets.hh bndprojection.hh geostorage.hh
 
-SUBDIRS = 2d 3d
+SUBDIRS = common 2d 3d
 
 noinst_LTLIBRARIES = libalu.la
 

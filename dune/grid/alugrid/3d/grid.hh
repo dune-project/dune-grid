@@ -9,14 +9,14 @@
 //- Dune includes
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
-#include "../interfaces.hh"
+#include <dune/grid/alugrid/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/deprecated.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
-#include "../defaultindexsets.hh"
+#include <dune/grid/alugrid/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/datahandleif.hh>
@@ -24,7 +24,7 @@
 
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
-#include "../bndprojection.hh"
+#include <dune/grid/alugrid/common/bndprojection.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"

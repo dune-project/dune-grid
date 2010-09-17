@@ -11,8 +11,8 @@
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridfactory.hh>
 
+#include <dune/grid/alugrid/common/transformation.hh>
 #include <dune/grid/alugrid/2d/grid.hh>
-#include <dune/grid/alugrid/2d/transformation.hh>
 
 namespace Dune
 {
@@ -55,7 +55,7 @@ namespace Dune
     static const int periodicBndId = ALU2dImplTraits< dimensionworld, elementType >::HBndElType::general_periodic;
 
   public:
-    typedef ALU2dTransformation< dimensionworld > Transformation;
+    typedef ALUGridTransformation< ctype, dimensionworld > Transformation;
 
     //! type of vector for world coordinates
     typedef typename Transformation::WorldVector WorldVector;

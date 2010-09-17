@@ -42,7 +42,7 @@
 #endif
 
 // use the ALU3dGrid Parallel detection
-#include <dune/grid/alugrid/checkparallel.hh>
+#include <dune/grid/alugrid/common/checkparallel.hh>
 //#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
 #define ALU2DGRID_PARALLEL 0
 

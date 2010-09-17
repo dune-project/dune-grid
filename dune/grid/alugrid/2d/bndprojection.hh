@@ -3,7 +3,7 @@
 #ifndef DUNE_ALU2D_BNDPROJECTION_HH
 #define DUNE_ALU2D_BNDPROJECTION_HH
 
-#include <dune/grid/alugrid/bndprojection.hh>
+#include <dune/grid/alugrid/common/bndprojection.hh>
 
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 

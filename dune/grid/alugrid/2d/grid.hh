@@ -11,13 +11,12 @@
 //- Dune includes
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
-#include "../interfaces.hh"
+#include <dune/grid/alugrid/interfaces.hh>
 #include <dune/common/deprecated.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
-// #include <dune/grid/common/referenceelements.hh>
-#include "../defaultindexsets.hh"
+#include <dune/grid/alugrid/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/defaultgridview.hh>
 #include <dune/common/mpihelper.hh>

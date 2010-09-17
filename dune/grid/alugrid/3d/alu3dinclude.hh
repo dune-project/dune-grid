@@ -26,7 +26,8 @@
 #define ALU3DSPACE ALUGridSpace ::
 
 #include <dune/common/mpicollectivecommunication.hh>
-#include <dune/grid/alugrid/checkparallel.hh>
+
+#include <dune/grid/alugrid/common/checkparallel.hh>
 
 // if MPI was found include all headers
 #if ALU3DGRID_PARALLEL

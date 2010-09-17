@@ -14,7 +14,7 @@
 #if COMPILE_ALUGRID_INLINE == 0
 #include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
 #endif
-#include <dune/grid/alugrid/geostorage.hh>
+#include <dune/grid/alugrid/common/geostorage.hh>
 
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline
@@ -193,7 +193,7 @@ namespace Dune {
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
     typedef typename GeometryObject::ImplementationType GeometryImp;
     // to be improved, when we using not the refine 8 rule
-    // see ../geostrage.hh for implementation
+    // see dune/grid/alugrid/common/geostrage.hh for implementation
     static ALULocalGeometryStorage<GridImp, GeometryObject, 8> geoms( type(), true);
     assert( geoms.geomCreated(child) );
     return geoms[ child ];

@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_ALUGRID_2D_TRANSFORMATION_HH
-#define DUNE_ALUGRID_2D_TRANSFORMATION_HH
+#ifndef DUNE_ALUGRID_TRANSFORMATION_HH
+#define DUNE_ALUGRID_TRANSFORMATION_HH
 
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
@@ -11,17 +11,15 @@
 namespace Dune
 {
 
-  template< int dimw >
-  struct ALU2dTransformation
+  template< class ctype, int dimw >
+  struct ALUGridTransformation
   {
-    typedef alu2d_ctype ctype;
-
     static const int dimension = dimw;
 
     typedef FieldVector< ctype, dimension > WorldVector;
     typedef FieldMatrix< ctype, dimension, dimension > WorldMatrix;
 
-    ALU2dTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
+    ALUGridTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
       : matrix_( matrix ),
         shift_( shift )
     {}
@@ -51,4 +49,4 @@ namespace Dune
 
 #endif // #if ENABLE_ALUGRID
 
-#endif // #ifndef DUNE_ALUGRID_2D_TRANSFORMATION_HH
+#endif // #ifndef DUNE_ALUGRID_TRANSFORMATION_HH
