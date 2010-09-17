@@ -7,7 +7,6 @@
 #include "grid.hh"
 #include <dune/common/exceptions.hh>
 
-#include <dune/grid/alugrid/2d/alu2dgridfactory.hh>
 #include <dune/grid/alugrid/geostorage.hh>
 
 namespace Dune {
