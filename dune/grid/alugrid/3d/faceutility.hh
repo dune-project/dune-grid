@@ -126,11 +126,11 @@ namespace Dune
     const HasFaceType* innerElement_;
     const HasFaceType* outerElement_;
 
-    char innerFaceNumber_;
-    char outerFaceNumber_;
+    int innerFaceNumber_;
+    int outerFaceNumber_;
 
-    char innerTwist_;
-    char outerTwist_;
+    int innerTwist_;
+    int outerTwist_;
 
     bool outerBoundary_;
     bool ghostBoundary_;
