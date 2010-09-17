@@ -286,15 +286,13 @@ int main (int argc , char **argv) {
 #endif
     }
 
-    const char* newfilename = 0;
+    const char *newfilename = 0;
+    bool display = false;
     if( argc > 2 )
     {
-      if( std::string( argv[ 2 ] ) != "display" )
-        newfilename = argv[ 2 ];
+      display = (std::string( argv[ 2 ] ) == "display");
+      newfilename = (display ? 0 : argv[ 2 ]);
     }
-
-    // display
-    const bool display = (std::string( newfilename ) == "display");
 
     bool testALU2dSimplex = initialize ;
     bool testALU2dConform = initialize ;
