@@ -178,7 +178,7 @@ void checkIntersectionIterator(const GridViewType& view,
         DUNE_THROW(GridError, "boundary id has negative value (" << iIt->boundaryId() << ") !");
       }
 #endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
-      if( ! iIt->conforming() )
+      if( ! iIt->conforming() && ! iIt->neighbor() )
       {
         DUNE_THROW(GridError, "Boundary intersection should be conforming!");
       }
