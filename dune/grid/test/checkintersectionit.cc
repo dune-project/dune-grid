@@ -314,7 +314,7 @@ void checkIntersectionIterator(const GridViewType& view,
     for (size_t i=0; i<quad.size(); i++)
     {
       const typename LocalGeometry::LocalCoordinate &pt = quad[ i ].position();
-      const typename IntersectionGeometry::JacobianInverseTransposed &jit
+      const typename IntersectionGeometry::Jacobian &jit
         = geometry.jacobianInverseTransposed( pt );
 
       // independently calculate the integration outer normal for the inside element
