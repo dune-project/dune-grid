@@ -3,7 +3,8 @@
 #ifndef DUNE_FACEUTILITY_IMP_HH
 #define DUNE_FACEUTILITY_IMP_HH
 
-namespace Dune {
+namespace Dune
+{
 
 
   template< ALU3dGridElementType type, class Comm >
@@ -119,33 +120,28 @@ namespace Dune {
         const GEOPeriodicType* periodicClosure = dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) ;
         assert( periodicClosure );
 
-        // check whether we have to use the first or the second of the
-        // periodic elements (one of them is the interior again)
-        for( int aluFace = 0; aluFace < 2; ++aluFace )
-        {
 #ifdef ALUGRID_PERIODIC_BOUNDARY
-          segmentIndex_ = periodicClosure->segmentIndex( aluFace );
+        // previously, the segmentIndex( 1 - outerFaceNumber_ ) was used, why?
+        segmentIndex_ = periodicClosure->segmentIndex( outerFaceNumber_ );
 #else
-          // set to zero (grid test will fail)
-          segmentIndex_ = 0 ;
+        // set to zero (grid test will fail)
+        segmentIndex_ = 0 ;
 #endif
-          const GEOFaceType* face = ImplTraits :: getFace( *periodicClosure , aluFace );
-          if( face->nb.rear().first->isboundary() )
-          {
-            outerElement_    = face->nb.front().first ;
-            outerFaceNumber_ = face->nb.front().second ;
-          }
-          else
-          {
-            outerElement_    = face->nb.rear().first ;
-            outerFaceNumber_ = face->nb.rear().second ;
-          }
-          assert( ! outerElement_->isboundary() );
-          // make sure we got the correct neighbor
-          //assert( ImplTraits::getFace( static_cast< const GEOElementType & > (*outerElement_) , outerFaceNumber_ ) == face );
-          if( outerElement_ != innerElement_ ) break ;
+
+        const GEOFaceType* face = ImplTraits::getFace( *periodicClosure, 1 - outerFaceNumber_ );
+        if( face->nb.rear().first->isboundary() )
+        {
+          outerElement_    = face->nb.front().first ;
+          outerFaceNumber_ = face->nb.front().second ;
         }
-        outerTwist_ = outerEntity().twist( outerALUFaceIndex() );
+        else
+        {
+          outerElement_    = face->nb.rear().first ;
+          outerFaceNumber_ = face->nb.rear().second ;
+        }
+        assert( outerElement_->isRealObject() );
+        assert( ! outerElement_->isboundary() );
+        outerTwist_ = outerEntity().twist( outerFaceNumber_ );
       }
       else // the boundary case
       {
