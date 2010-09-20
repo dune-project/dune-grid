@@ -127,6 +127,7 @@ void checkGeometryInFather(const GridType& grid)
         typedef typename GridType::template Codim<0>::Entity::LocalGeometry LocalGeometry;
 
         const LocalGeometry& geometryInFather = eIt->geometryInFather();
+        checkLocalGeometry( geometryInFather, eIt->father()->type(), "geometryInFather" );
 
         // //////////////////////////////////////////////////////
         //   Check for types and constants

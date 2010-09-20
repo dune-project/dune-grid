@@ -10,6 +10,7 @@
 
 namespace Dune
 {
+
   template< int mydim, int cdim, class Grid, template< int, int, class > class Imp >
   void checkGeometry ( const Geometry< mydim, cdim, Grid, Imp > &geometry )
   {
@@ -84,6 +85,31 @@ namespace Dune
         DUNE_THROW(Exception, "center() is not consistent with global(refElem.position(0,0)).");
     }
   }
+
+
+  template< int mydim, int cdim, class Grid, template< int, int, class > class Imp >
+  void checkLocalGeometry ( const Geometry< mydim, cdim, Grid, Imp > &geometry,
+                            GeometryType type, const std::string &geoName = "local geometry" )
+  {
+    checkGeometry( geometry );
+
+    // check that corners are within the reference element of the given type
+    assert( type.dim() == cdim );
+    const GenericReferenceElement< typename Grid::ctype, cdim > &refElement
+      = GenericReferenceElements< typename Grid::ctype, cdim >::general( type );
+
+    const int numCorners = geometry.corners();
+    for( int i = 0; i < numCorners; ++i )
+    {
+      if( !refElement.checkInside( geometry.corner( i ) ) )
+      {
+        std::cerr << "Corner " << i
+                  << " of " << geoName << "  not within reference element: "
+                  << geometry.corner( i ) << "." << std::endl;
+      }
+    }
+  }
+
 
   template <int codim>
   struct CheckSubEntityGeometry
