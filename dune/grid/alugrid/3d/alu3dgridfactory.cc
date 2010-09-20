@@ -304,9 +304,9 @@ namespace Dune
           const std::pair< FaceType, FaceType > &facePair = *it;
           out << "-20  " << (2*numFaceCorners);
           for( unsigned int i = 0; i < numFaceCorners; ++i )
-            out << "  " << facePair.first[ i ];
+            out << "  " << facePair.first[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
           for( unsigned int i = 0; i < numFaceCorners; ++i )
-            out << "  " << facePair.second[ i ];
+            out << "  " << facePair.second[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
           out << std::endl;
         }
 
@@ -459,8 +459,8 @@ namespace Dune
           int perel[ 6 ];
           for( unsigned int i = 0; i < 3; ++i )
           {
-            perel[ i+0 ] = facePair.first[ i ];
-            perel[ i+3 ] = facePair.second[ i ];
+            perel[ i+0 ] = facePair.first[ (3 - i) % 3 ];
+            perel[ i+3 ] = facePair.second[ (3 - i) % 3 ];
           }
           mgb.InsertUniquePeriodic3( perel );
         }
