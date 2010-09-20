@@ -48,20 +48,22 @@ inline void checkParallel ( const Dune::FieldVector< ctype, dimworld > &normal,
 
 // Check whether the normal is orthogonal to the intersection, i.e.,
 // whether (J^-1 * n) = 0. Here J is the jacobian of the intersection
-// geometry (intersectionGlobal) and n is a normal.
-template< class ctype, int dimworld, int facedim, class String >
+// geometry (geometry) and n is a normal.
+template< class ctype, int dimworld, class JacobianInverseTransposed, class String >
 inline void checkJIn ( const Dune :: FieldVector< ctype, dimworld > &normal,
-                       const Dune :: FieldMatrix< ctype, dimworld, facedim > &jit,
+                       const JacobianInverseTransposed &jit,
                        const String & name )
 {
+  const int facedim = JacobianInverseTransposed::cols;
   Dune :: FieldVector< ctype, facedim > x( ctype( 0 ) );
   jit.umtv( normal, x );
   if (x.infinity_norm() > 1e-8)
   {
+    const Dune::FieldMatrix< ctype, dimworld, facedim > &mjit = jit;
     std :: cerr << "Error:  (J^-1 * n) != 0." << std :: endl;
     std :: cerr << "       " << name << " = " << normal
                 << std :: endl;
-    std :: cerr << "       J^-1^T = \n" << jit << std::endl;
+    std :: cerr << "       J^-1^T = \n" << mjit << std::endl;
     assert( false );
   }
 }
@@ -276,15 +278,15 @@ void checkIntersectionIterator(const GridViewType& view,
     }
 
     // //////////////////////////////////////////////////////////
-    //   Check the geometry returned by intersectionGlobal()
+    //   Check the geometry returned by geometry()
     // //////////////////////////////////////////////////////////
     typedef typename Intersection::Geometry Geometry;
     typedef typename Geometry :: ctype ctype ;
-    const Geometry &intersectionGlobal = iIt->geometry();
+    const Geometry &geometry = iIt->geometry();
 
-    checkGeometry(intersectionGlobal);
+    checkGeometry(geometry);
 
-    if( intersectionGlobal.type() != iIt->type() )
+    if( geometry.type() != iIt->type() )
     {
       std::cerr << "Error: Reference geometry type returned by intersection "
                 << "differs from the one returned by the global geometry." << std::endl;
@@ -292,17 +294,17 @@ void checkIntersectionIterator(const GridViewType& view,
     }
 
     // //////////////////////////////////////////////////////////
-    //   Check the geometry returned by intersectionSelfLocal()
+    //   Check the geometry returned by geometryInInside()
     // //////////////////////////////////////////////////////////
 
     typedef typename Intersection::LocalGeometry LocalGeometry;
     typedef typename Intersection::Geometry IntersectionGeometry;
-    const LocalGeometry &intersectionSelfLocal = iIt->geometryInInside();
-    checkGeometry(intersectionSelfLocal);
+    const LocalGeometry &geometryInInside = iIt->geometryInInside();
+    checkGeometry(geometryInInside);
 
-    //  Check the consistency of intersectionSelfLocal() and intersectionGlobal
+    //  Check the consistency of geometryInInside() and geometry
 
-    if (intersectionSelfLocal.corners() != intersectionGlobal.corners())
+    if (geometryInInside.corners() != geometry.corners())
       DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left hand side and global view!");
 
     // Use a quadrature rule as a set of test points
@@ -312,17 +314,17 @@ void checkIntersectionIterator(const GridViewType& view,
     for (size_t i=0; i<quad.size(); i++)
     {
       const typename LocalGeometry::LocalCoordinate &pt = quad[ i ].position();
-      const typename IntersectionGeometry::Jacobian &jit
-        = intersectionGlobal.jacobianInverseTransposed( pt );
+      const typename IntersectionGeometry::JacobianInverseTransposed &jit
+        = geometry.jacobianInverseTransposed( pt );
 
       // independently calculate the integration outer normal for the inside element
-      typename LocalGeometry::GlobalCoordinate xInside = intersectionSelfLocal.global( pt );
+      typename LocalGeometry::GlobalCoordinate xInside = geometryInInside.global( pt );
       const typename LocalGeometry::GlobalCoordinate &refNormal = refElement.volumeOuterNormal( indexInInside );
       typename IntersectionGeometry::GlobalCoordinate refIntNormal;
       geoInside.jacobianInverseTransposed( xInside ).mv( refNormal, refIntNormal );
       // note: refElement.template mapping< 1 >( indexInInside ) is affine,
       //       hence we may use any point to obtain the integrationElement
-      refIntNormal *= geoInside.integrationElement( xInside ) * intersectionSelfLocal.integrationElement( pt )
+      refIntNormal *= geoInside.integrationElement( xInside ) * geometryInInside.integrationElement( pt )
                       / refElement.template mapping< 1 >( indexInInside ).integrationElement( pt );
 
       // Check outer normal
@@ -332,12 +334,12 @@ void checkIntersectionIterator(const GridViewType& view,
 
       // Check normal vector is orthogonal to all vectors connecting
       // the vertices
-      for (int c=1; c<intersectionGlobal.corners(); c++)
+      for (int c=1; c<geometry.corners(); c++)
       {
-        typename IntersectionGeometry::GlobalCoordinate x = intersectionGlobal.corner( c-1 );
-        x -= intersectionGlobal.corner( c );
+        typename IntersectionGeometry::GlobalCoordinate x = geometry.corner( c-1 );
+        x -= geometry.corner( c );
         // this only makes sense for non-curved faces
-        if( intersectionGlobal.affine() && x*normal >= 1e3*std::numeric_limits< ctype >::epsilon() )
+        if( geometry.affine() && x*normal >= 1e3*std::numeric_limits< ctype >::epsilon() )
         {
           std::cerr << "outerNormal not orthogonal to line between corner "
                     << (c-1) << " and corner " << c << "." << std::endl;
@@ -348,7 +350,7 @@ void checkIntersectionIterator(const GridViewType& view,
 
       // Check JacobianInverseTransposed
       // (J^-1 * n) = 0. Here J is the jacobian of the intersection
-      // geometry (intersectionGlobal) and n is a normal.
+      // geometry (geometry) and n is a normal.
       checkJIn( normal, jit, "outerNormal" );
 
       // Check integration outer normal
@@ -356,7 +358,7 @@ void checkIntersectionIterator(const GridViewType& view,
         iIt->integrationOuterNormal( pt );
       sumNormal.axpy( quad[ i ].weight(), intNormal );
 
-      const ctype det = intersectionGlobal.integrationElement( pt );
+      const ctype det = geometry.integrationElement( pt );
       if( std :: abs( det - intNormal.two_norm() ) > 1e-8 )
       {
         std :: cerr << "Error: integrationOuterNormal yields wrong length."
@@ -372,9 +374,9 @@ void checkIntersectionIterator(const GridViewType& view,
       {
         std::cerr << "Error: Wrong integration outer normal (" << intNormal
                   << ", should be " << refIntNormal << ")." << std::endl;
-        std::cerr << "       Intersection: " << intersectionGlobal.corner( 0 );
-        for( int c = 1; c < intersectionGlobal.corners(); ++c )
-          std::cerr << ", " << intersectionGlobal.corner( c );
+        std::cerr << "       Intersection: " << geometry.corner( 0 );
+        for( int c = 1; c < geometry.corners(); ++c )
+          std::cerr << ", " << geometry.corner( c );
         std::cerr << "." << std::endl;
         assert( false );
       }
@@ -393,9 +395,9 @@ void checkIntersectionIterator(const GridViewType& view,
       checkJIn( unitNormal, jit, "unitOuterNormal" );
       checkParallel ( unitNormal, refIntNormal, "unitOuterNormal");
 
-      // check intersectionSelfLocal
-      typename IntersectionGeometry::GlobalCoordinate globalPos = intersectionGlobal.global(quad[i].position());
-      typename IntersectionGeometry::GlobalCoordinate localPos  = eIt->geometry().global(intersectionSelfLocal.global(quad[i].position()));
+      // check geometryInInside
+      typename IntersectionGeometry::GlobalCoordinate globalPos = geometry.global(quad[i].position());
+      typename IntersectionGeometry::GlobalCoordinate localPos  = eIt->geometry().global(geometryInInside.global(quad[i].position()));
 
       if( (globalPos - localPos).infinity_norm() > 1e-6 )
         DUNE_THROW( GridError, "entity.geometry().global( intersection.geometryInInside().global( x ) ) != intersection.geometry().global( x ) at x = " << quad[ i ].position() << "." );
@@ -412,16 +414,16 @@ void checkIntersectionIterator(const GridViewType& view,
     }
 
     // ////////////////////////////////////////////////////////////////
-    //   Check the geometry returned by intersectionNeighborLocal()
+    //   Check the geometry returned by geometryInOutside()
     // ////////////////////////////////////////////////////////////////
 
     if( iIt->neighbor() && !iIt->boundary() )
     {
-      const typename Intersection::LocalGeometry &intersectionNeighborLocal = iIt->geometryInOutside();
+      const typename Intersection::LocalGeometry &geometryInOutside = iIt->geometryInOutside();
 
-      checkGeometry(intersectionNeighborLocal);
+      checkGeometry(geometryInOutside);
 
-      if (intersectionSelfLocal.corners() != intersectionNeighborLocal.corners())
+      if (geometryInInside.corners() != geometryInOutside.corners())
         DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left and right hand side!");
 
       // (Ab)use a quadrature rule as a set of test points
@@ -431,11 +433,11 @@ void checkIntersectionIterator(const GridViewType& view,
       const typename QuadratureFactory::Object &quad = *QuadratureFactory::create( iIt->type(), 3 );
       for (size_t i=0; i<quad.size(); i++)
       {
-        typename IntersectionGeometry::GlobalCoordinate globalPos = intersectionGlobal.global(quad[i].position());
-        typename IntersectionGeometry::GlobalCoordinate localPos  = iIt->outside()->geometry().global(intersectionNeighborLocal.global(quad[i].position()));
+        typename IntersectionGeometry::GlobalCoordinate globalPos = geometry.global(quad[i].position());
+        typename IntersectionGeometry::GlobalCoordinate localPos  = iIt->outside()->geometry().global(geometryInOutside.global(quad[i].position()));
 
         if ( (globalPos - localPos).infinity_norm() > 1e-6)
-          DUNE_THROW(GridError, "global( intersectionNeighborLocal(global() ) is not the same as intersectionGlobal.global() at " << quad[i].position() << "!");
+          DUNE_THROW(GridError, "global( geometryInOutside(global() ) is not the same as geometry.global() at " << quad[i].position() << "!");
 
       }
       QuadratureFactory::release( &quad );
