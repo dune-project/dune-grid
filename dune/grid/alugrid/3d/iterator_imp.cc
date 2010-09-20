@@ -301,13 +301,13 @@ namespace Dune {
   template<class GridImp>
   inline bool ALU3dGridIntersectionIterator<GridImp> :: boundary () const
   {
-    return (connector_.outerBoundary());
+    return connector_.boundary();
   }
 
   template<class GridImp>
-  inline bool ALU3dGridIntersectionIterator<GridImp>::neighbor () const
+  inline bool ALU3dGridIntersectionIterator<GridImp> :: neighbor () const
   {
-    return ( connector_.periodicBoundary() ) ? true : ! boundary();
+    return connector_.neighbor();
   }
 
   template<class GridImp>
@@ -450,24 +450,17 @@ namespace Dune {
   inline int
   ALU3dGridIntersectionIterator<GridImp>::boundaryId () const
   {
-    assert(item_);
-    //return ( boundary() ? connector_.boundaryFace().bndtype() : 0);
-    return ( ! boundary() ) ? 0 :
-           ( neighbor() ) ? 20 :  connector_.boundaryFace().bndtype();
+    assert( item_ );
+    return ( boundary() ) ? connector_.boundaryId() : 0;
   }
 
   template<class GridImp>
   inline size_t
   ALU3dGridIntersectionIterator<GridImp>::boundarySegmentIndex() const
   {
-    assert(item_);
-#ifdef ALUGRID_VERTEX_PROJECTION
-    assert( boundary() && ! neighbor() );
-    return connector_.boundaryFace().segmentIndex();
-#else
-    derr << "Method available in any version of ALUGrid > 1.14 \n";
-    return 0;
-#endif
+    assert( item_ );
+    assert( boundary() );
+    return connector_.segmentIndex();
   }
 
   template <class GridImp>

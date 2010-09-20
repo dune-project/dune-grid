@@ -15,10 +15,8 @@ namespace Dune {
     outerFaceNumber_(-1),
     innerTwist_(-665),
     outerTwist_(-665),
-    outerBoundary_  ( false ),
-    ghostBoundary_  ( false ),
-    innerBoundary_  ( false ),
-    periodicBoundary_ ( false ),
+    segmentIndex_( -1 ),
+    bndType_( noBoundary ),
     conformanceState_(UNDEFINED)
   {}
 
@@ -34,9 +32,8 @@ namespace Dune {
     outerElement_ = 0;
     innerFaceNumber_ = -1;
     outerFaceNumber_ = -1;
-    outerBoundary_   = false;
-    ghostBoundary_   = false;
-    periodicBoundary_  = false;
+    bndType_ = noBoundary;
+    segmentIndex_ = -1;
 
     // points face from inner element away?
     if (innerTwist < 0)
@@ -59,16 +56,13 @@ namespace Dune {
     // if not true we are accessing a fake bnd
     assert( outerElement_->isRealObject() );
 
-    // check whether we are in a parallel environment or not
-    const bool parallel = ! Conversion< Comm, No_Comm > :: sameType ;
-
     // we only have to do this in parallel runs
-    if( parallel )
+    if( parallel() && innerElement_->isboundary() )
     {
-      innerBoundary_ = innerElement_->isboundary();
+      bndType_ = innerGhostBoundary;
     }
 
-    if( parallel && innerBoundary_ )
+    if( parallel() && innerBoundary() )
     {
       // check for ghosts
       // this check is only need in the parallel case
@@ -87,6 +81,7 @@ namespace Dune {
         // get ghost and internal number
         GhostPairType p  = bnd->getGhost();
 
+        // get face number
         innerFaceNumber_ = p.second;
 
         // this doesn't count as outer boundary
@@ -107,9 +102,12 @@ namespace Dune {
       innerTwist_ = innerTwist;
     }
 
-    outerBoundary_ = outerElement_->isboundary();
-    if( outerBoundary_ )
+    if( outerElement_->isboundary() )
     {
+      assert( ! innerBoundary() );
+      // set to default boundary (with domain boundary)
+      bndType_ = domainBoundary ;
+
       // check for ghosts
       // this check is only need in the parallel case
       // if this cast fails we have a periodic element
@@ -117,7 +115,7 @@ namespace Dune {
 
       if( ! bnd ) // the periodic case
       {
-        periodicBoundary_ = true ;
+        bndType_ = periodicBoundary ;
         const GEOPeriodicType* periodicClosure = dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) ;
         assert( periodicClosure );
 
@@ -125,6 +123,12 @@ namespace Dune {
         // periodic elements (one of them is the interior again)
         for( int aluFace = 0; aluFace < 2; ++aluFace )
         {
+#ifdef ALUGRID_PERIODIC_BOUNDARY
+          segmentIndex_ = periodicClosure->segmentIndex( aluFace );
+#else
+          // set to zero (grid test will fail)
+          segmentIndex_ = 0 ;
+#endif
           const GEOFaceType* face = ImplTraits :: getFace( *periodicClosure , aluFace );
           if( face->nb.rear().first->isboundary() )
           {
@@ -138,7 +142,7 @@ namespace Dune {
           }
           assert( ! outerElement_->isboundary() );
           // make sure we got the correct neighbor
-          assert( ImplTraits::getFace( static_cast< const GEOElementType & > (*outerElement_) , outerFaceNumber_ ) == face );
+          //assert( ImplTraits::getFace( static_cast< const GEOElementType & > (*outerElement_) , outerFaceNumber_ ) == face );
           if( outerElement_ != innerElement_ ) break ;
         }
         outerTwist_ = outerEntity().twist( outerALUFaceIndex() );
@@ -150,7 +154,7 @@ namespace Dune {
         // if this cast is valid we have either
         // a boundary or a ghost element
         // the ghost element case
-        if( parallel && bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
+        if( parallel() && bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
         {
           // if nonconformity occurs then go up one level
           if( bnd->level () != bnd->ghostLevel() )
@@ -162,12 +166,11 @@ namespace Dune {
 
           // get ghost and internal number
           GhostPairType p  = bnd->getGhost();
-
           outerFaceNumber_ = p.second;
-          ghostBoundary_   = true;
 
-          // this doesn't count as outer boundary
-          outerBoundary_ = false;
+          // set boundary type to ghost boundary
+          bndType_ = outerGhostBoundary ;
+
           const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
           assert(ghost);
 
@@ -175,12 +178,16 @@ namespace Dune {
         }
         else // the normal boundary case
         {
+          // get outer twist
           outerTwist_ = boundaryFace().twist(outerALUFaceIndex());
+          // store segment index
+          segmentIndex_ = boundaryFace().segmentIndex();
         }
       }
     }
     else
     {
+      // get outer twist
       outerTwist_ = outerEntity().twist(outerALUFaceIndex());
     }
 
@@ -210,57 +217,71 @@ namespace Dune {
       outerFaceNumber_(orig.outerFaceNumber_),
       innerTwist_(orig.innerTwist_),
       outerTwist_(orig.outerTwist_),
-      outerBoundary_(orig.outerBoundary_),
-      ghostBoundary_(orig.ghostBoundary_),
-      innerBoundary_(orig.innerBoundary_),
-      periodicBoundary_ ( orig.periodicBoundary_ ),
+      segmentIndex_( orig.segmentIndex_ ),
+      bndType_( orig.bndType_ ),
       conformanceState_(orig.conformanceState_)
   {}
 
   template< ALU3dGridElementType type, class Comm >
-  inline bool ALU3dGridFaceInfo< type, Comm >::periodicBoundary() const {
-    return periodicBoundary_;
+  inline bool ALU3dGridFaceInfo< type, Comm >::isElementLike() const {
+    return bndType_ < domainBoundary;
+  }
+
+  template< ALU3dGridElementType type, class Comm >
+  inline bool ALU3dGridFaceInfo< type, Comm >::innerBoundary() const {
+    return bndType_ == innerGhostBoundary;
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline bool ALU3dGridFaceInfo< type, Comm >::outerBoundary() const {
-    return outerBoundary_;
+    return bndType_ == domainBoundary;
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline bool ALU3dGridFaceInfo< type, Comm >::boundary() const {
-    return outerBoundary_ || ghostBoundary_;
+    return outerBoundary() || (bndType_ == periodicBoundary);
   }
 
   template< ALU3dGridElementType type, class Comm >
-  inline bool ALU3dGridFaceInfo< type, Comm >::ghostBoundary () const {
+  inline bool ALU3dGridFaceInfo< type, Comm >::neighbor() const
+  {
+    return isElementLike() || ghostBoundary();
+  }
+
+  template< ALU3dGridElementType type, class Comm >
+  inline bool ALU3dGridFaceInfo< type, Comm >::ghostBoundary () const
+  {
     // when communicator is No_Comm there is no ghost boundary
-    return Conversion< Comm, No_Comm > :: sameType ? false : ghostBoundary_;
+    return parallel() ? ( bndType_ == outerGhostBoundary ) : false ;
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridFaceInfo< type, Comm >::GEOFaceType&
-  ALU3dGridFaceInfo< type, Comm >::face() const {
+  ALU3dGridFaceInfo< type, Comm >::face() const
+  {
     return *face_;
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridFaceInfo< type, Comm >::GEOElementType&
-  ALU3dGridFaceInfo< type, Comm >::innerEntity() const {
+  ALU3dGridFaceInfo< type, Comm >::innerEntity() const
+  {
     assert( ! innerElement_->isboundary() );
     return static_cast<const GEOElementType&>(*innerElement_);
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridFaceInfo< type, Comm >::GEOElementType&
-  ALU3dGridFaceInfo< type, Comm >::outerEntity() const {
-    //assert(!boundary());
+  ALU3dGridFaceInfo< type, Comm >::outerEntity() const
+  {
+    assert( isElementLike() );
     return static_cast<const GEOElementType&>(*outerElement_);
   }
 
   template< ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridFaceInfo< type, Comm >::BNDFaceType&
-  ALU3dGridFaceInfo< type, Comm >::innerFace() const {
+  ALU3dGridFaceInfo< type, Comm >::innerFace() const
+  {
     assert( innerElement_->isboundary() );
     return static_cast<const BNDFaceType&>(*innerElement_);
   }
@@ -268,15 +289,27 @@ namespace Dune {
   template< ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridFaceInfo< type, Comm >::BNDFaceType&
   ALU3dGridFaceInfo< type, Comm >::boundaryFace() const {
-    assert( boundary() );
+    assert( ! isElementLike() );
     return static_cast<const BNDFaceType&>(*outerElement_);
   }
 
   template< ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< type, Comm >::segmentIndex() const
+  {
+    assert( segmentIndex_ >= 0 );
+    return segmentIndex_;
+  }
+
+  template< ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< type, Comm >::boundaryId() const
+  {
+    return ( outerBoundary() ) ? boundaryFace().bndtype() : 20 ;
+  }
+  template< ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< type, Comm >::innerTwist() const
   {
     // don't check ghost boundaries here
-    assert( ( ! innerBoundary_) ?
+    assert( ( ! innerBoundary() ) ?
             innerEntity().twist(innerALUFaceIndex()) == innerTwist_ : true );
     return innerTwist_;
   }
@@ -339,10 +372,10 @@ namespace Dune {
 
     // A boundary is always unrefined
     int levelDifference = 0 ;
-    if ( boundary() && ! periodicBoundary() )
-      levelDifference = innerLevel - boundaryFace().level();
-    else
+    if ( isElementLike() )
       levelDifference = innerLevel - outerEntity().level();
+    else
+      levelDifference = innerLevel - boundaryFace().level();
 
     if (levelDifference < 0) {
       result = REFINED_OUTER;

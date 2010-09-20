@@ -71,15 +71,27 @@ namespace Dune
     //! Destructor
     ~ALU3dGridFaceInfo();
 
+  protected:
+    //! returns true if outerEntity casts into a helement
+    bool isElementLike() const;
+
+    //! returns true if inside is a ghost entity
+    bool innerBoundary() const;
+
+  public:
     //- queries
-    //! Lies the face on an outer boundary?
+    //! returns true if the face lies on the domain boundary
+    //! and is not a periodic boundary
     bool outerBoundary() const;
-    //! Lies the face on an internal boundary
+
+    //! returns true if the face lies on the domain boundary
     bool boundary() const;
 
-    bool periodicBoundary() const;
-    //! is the neighbour element a ghost elemenet or a ghost face
-    //! ic case of face true is returned
+    //! returns true if outside is something meaningfull
+    bool neighbor() const ;
+
+    //! is the neighbour element a ghost element or a ghost face
+    //! in case of face true is returned
     bool ghostBoundary () const;
 
     //! Returns the ALU3dGrid face
@@ -109,8 +121,19 @@ namespace Dune
     //! Local number of the face in outer element (ALU3dGrid reference element)
     int outerALUFaceIndex() const;
 
+    //! return boundary segment index if intersection is with domain boundary
+    int segmentIndex() const;
+
+    //! return boundary id if intersection is with domain boundary
+    int boundaryId() const;
+
     //! Description of conformance on the face
     ConformanceState conformanceState() const;
+
+    //! return whether we are in a parallel environment or not
+    const bool parallel() const {
+      return ! Conversion< Comm, No_Comm > :: sameType ;
+    }
 
   private:
     //! Description of conformance on the face
@@ -121,6 +144,7 @@ namespace Dune
     operator=(const ALU3dGridFaceInfo &orig);
 
   private:
+
     //- member data
     const GEOFaceType* face_;
     const HasFaceType* innerElement_;
@@ -132,10 +156,15 @@ namespace Dune
     int innerTwist_;
     int outerTwist_;
 
-    bool outerBoundary_;
-    bool ghostBoundary_;
-    bool innerBoundary_;
-    bool periodicBoundary_;
+    int segmentIndex_;
+
+    enum boundary_t { noBoundary = 0,          // no boundary, outside is normal element
+                      periodicBoundary = 1,    // periodic boundary
+                      domainBoundary = 2,      // boundary with domain, no outside
+                      outerGhostBoundary = 3,  // process boundary, outside is ghost
+                      innerGhostBoundary = 4}; // process boundary, inside is ghost
+
+    boundary_t bndType_;
 
     ConformanceState conformanceState_;
   };

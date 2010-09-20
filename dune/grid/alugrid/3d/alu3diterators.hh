@@ -135,7 +135,12 @@ namespace ALUGridSpace
   {
     typedef typename IteratorElType< 1, Comm >::ElType ElType;
     typedef typename IteratorElType< 1, Comm >::HBndSegType HBndSegType;
+#ifdef ALUGRID_PERIODIC_BOUNDARY
+    typedef ALU3DSPACE any_has_level_periodic< ElType > StopRule_t;
+    typedef GridIterator< ElType, StopRule_t > IteratorType;
+#else
     typedef ALU3DSPACE LevelIterator< ElType > IteratorType;
+#endif
 
     // the iterator
     IteratorType it_;
@@ -147,7 +152,11 @@ namespace ALUGridSpace
     // constructor creating iterator
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
+#ifdef ALUGRID_PERIODIC_BOUNDARY
+      : it_( grid.myGrid(), StopRule_t(level) ),
+#else
       : it_( grid.myGrid(), level ),
+#endif
         elem_( (ElType *) 0, (HBndSegType*) 0 )
     {}
 
@@ -243,7 +252,7 @@ namespace ALUGridSpace
   {
     typedef typename IteratorElType< 0, Comm >::ElType ElType;
     typedef typename IteratorElType< 0, Comm >::HBndSegType HBndSegType;
-    typedef PureElementLeafIterator< ElType > IteratorType;
+    typedef LeafIterator< ElType > IteratorType;
 
     // the ALU3dGrid Iterator
     IteratorType it_;
@@ -1582,8 +1591,6 @@ namespace ALUGridSpace
     val_t & item () const { assert( ! done() ); return iter_.item(); }
   };
 #endif // #if ALU3DGRID_PARALLEL
-
-  //typedef PureElementLeafIterator < GitterType::helement_STI > BSLeafIteratorMaxLevel;
 
 } // end namespace ALUGridSpace
 
