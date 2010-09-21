@@ -396,6 +396,9 @@ namespace Dune
     //! type of ALUGrid Vertex Projection Interface
     typedef ALU3DSPACE ProjectVertex ALUGridVertexProjectionType;
 
+    //! type of collective communication object
+    typedef typename Traits::CollectiveCommunication CollectiveCommunication;
+
   protected:
     friend class ALUGridBoundaryProjection< ThisType, alu3d_ctype >;
     // type of ALUGrid boundary projection wrapper
@@ -419,8 +422,6 @@ namespace Dune
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIterator;
 
     typedef ALU3dGridHierarchicIterator< const ThisType > HierarchicIteratorImp;
-
-    typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
     typedef typename ALU3dImplTraits< elType, Comm >::GitterImplType GitterImplType;
 
