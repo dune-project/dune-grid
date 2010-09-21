@@ -292,7 +292,7 @@ namespace Dune
         for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
         {
           const std::pair< FaceType, int > &boundaryId = *it;
-          out << "-" << boundaryId.second << "  " << numFaceCorners;
+          out << (-boundaryId.second) << "  " << numFaceCorners;
 
           for( unsigned int i = 0; i < numFaceCorners; ++i )
             out << "  " << boundaryId.first[ i ];
@@ -301,8 +301,9 @@ namespace Dune
         const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
         for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
         {
+          typedef typename ALU3dBasicImplTraits< MPICommunicatorType >::HBndSegType HBndSegType;
           const std::pair< FaceType, FaceType > &facePair = *it;
-          out << "-20  " << (2*numFaceCorners);
+          out << (-HBndSegType::periodic) << "  " << (2*numFaceCorners);
           for( unsigned int i = 0; i < numFaceCorners; ++i )
             out << "  " << facePair.first[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
           for( unsigned int i = 0; i < numFaceCorners; ++i )
