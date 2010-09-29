@@ -499,7 +499,7 @@ namespace Dune
      * \throw NotImplemented Extendpath is absolute but path is relative.
      * \throw IOError        Failed to open a file.
      */
-    std::string pwrite ( const char* name,  const char* path, const char* extendpath,
+    std::string pwrite ( const std::string & name,  const std::string & path, const std::string & extendpath,
                          VTK::OutputType type = VTK::ascii )
     {
       return pwrite( name, path, extendpath, type, gridView_.comm().rank(), gridView_.comm().size() );
