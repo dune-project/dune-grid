@@ -57,7 +57,7 @@ namespace Dune {
           (*this)[i] = 0;
 
         }
-
+        return *this;
       }
 
       /** \brief Compute how many times you can call operator++ before getting to (0,...,0) again */
