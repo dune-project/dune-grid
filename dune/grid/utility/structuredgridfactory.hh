@@ -7,6 +7,8 @@
     \brief A class to construct structured cube and simplex grids using the grid factory
  */
 
+#include <cstddef>
+
 #include <dune/common/array.hh>
 #include <dune/common/shared_ptr.hh>
 #include <dune/grid/common/gridfactory.hh>
@@ -104,7 +106,7 @@ namespace Dune {
       if (dim>0)        // paranoia
         unitOffsets[0] = 1;
 
-      for (size_t i=1; i<dim; i++)
+      for (int i=1; i<dim; i++)
         unitOffsets[i] = unitOffsets[i-1] * vertices[i-1];
 
       return unitOffsets;
@@ -189,7 +191,7 @@ namespace Dune {
 
       // Insert uniformly spaced vertices
       array<unsigned int,dim> vertices = elements;
-      for (int i=0; i<vertices.size(); i++)
+      for (std::size_t i=0; i<vertices.size(); i++)
         vertices[i]++;
 
       insertVertices(factory, lowerLeft, upperRight, vertices);
