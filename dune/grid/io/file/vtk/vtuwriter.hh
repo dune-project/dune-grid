@@ -97,6 +97,8 @@ namespace Dune {
     class VTUWriter {
     public:
       std::ostream& stream;
+      enum Phase { main, appended } phase;
+
     private:
       DataArrayWriterFactory factory;
       Indent indent;
@@ -104,7 +106,6 @@ namespace Dune {
       std::string fileType;
       std::string cellName;
 
-      enum Phase { main, appended } phase;
       bool doAppended;
 
     public:
