@@ -32,7 +32,7 @@ namespace Dune {
     StackType& objStack()
     {
 #ifdef _OPENMP
-      assert( objStackVec_.size() > omp_get_thread_num() );
+      assert( (int) objStackVec_.size() > omp_get_thread_num() );
       return objStackVec_[ omp_get_thread_num() ];
 #else
       return objStack_ ;

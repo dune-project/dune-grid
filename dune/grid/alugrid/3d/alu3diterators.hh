@@ -1592,6 +1592,96 @@ namespace ALUGridSpace
   };
 #endif // #if ALU3DGRID_PARALLEL
 
+
+#if _OPENMP
+  template <class RealIteratorType>
+  class ALU3dGridThreadIterator
+    : public IteratorWrapperInterface< typename RealIteratorType :: val_t >
+  {
+    typedef RealIteratorType IteratorType;
+
+    // the real Iterator
+    IteratorType it_;
+  public:
+    typedef typename RealIteratorType :: val_t val_t;
+  protected:
+    const int size_;
+    int start_;
+    int end_;
+    int counter_;
+  public:
+    // constructor creating Iterator
+    template< class GridImp >
+    ALU3dGridThreadIterator( const GridImp &grid, int level, const int links )
+      : it_( grid, level, links )
+        , size_( it_.size() )
+        , start_( 0 )
+        , end_( size_ )
+        , counter_ ( 0 )
+    {
+      const int numThreads = omp_get_num_threads() ;
+      const int myThread = omp_get_thread_num ();
+      if( numThreads > 1 && size_ > 0)
+      {
+        const int counter = ((int) size_ / numThreads ) ;
+        //std::cout << counter << " one size " << std::endl;
+        start_ = counter * myThread ;
+        if( numThreads - 1 == myThread )
+          end_ = size_;
+        else
+          end_   = counter * ( myThread + 1);
+
+        //std::cout << "Size= " << size_ << " I'm thread " << myThread << " with "
+        //  << start_<< " and " << end_ << std::endl;
+      }
+    }
+
+    // constructor copying iterator
+    ALU3dGridThreadIterator(const ALU3dGridThreadIterator & org )
+      : it_( org.it_ ), size_( org.size_ ),
+        start_( org.start_ ), end_( org.end_ ), counter_( org.counter_ )
+    {}
+
+    int size  ()    { return size_; }
+    void next ()    { it_.next(); ++ counter_; assert( counter_ <= end_ ); }
+    void first()
+    {
+      it_.first();
+      counter_ = 0 ;
+      if( omp_get_num_threads() > 1 )
+      {
+        while ( counter_ < start_ && ! done() )
+        {
+          next();
+        }
+      }
+    }
+    int done () const { return it_.done() || counter_ >= end_ ; }
+    val_t & item () const
+    {
+      assert( ! done () );
+      return it_.item();
+    }
+  };
+#else
+  template <class RealIteratorType>
+  class ALU3dGridThreadIterator
+    : public RealIteratorType
+  {
+  public:
+    // constructor creating Iterator
+    template< class GridImp >
+    ALU3dGridThreadIterator( const GridImp &grid, int level, const int links )
+      : RealIteratorType( grid, level, links )
+    {}
+
+    ALU3dGridThreadIterator( const ALU3dGridThreadIterator& org )
+      : RealIteratorType( org )
+    {}
+  };
+#endif // end _OPENMP
+
+
 } // end namespace ALUGridSpace
 
 #endif // #ifndef DUNE_ALU3DITERATORS_HH
