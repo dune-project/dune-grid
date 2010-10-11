@@ -41,14 +41,14 @@ namespace Dune {
   public:
 
     OneDEntityImp(int level, double pos)
-      : pos_(pos), level_(level),
+      : pos_(pos), levelIndex_(0), leafIndex_(0), level_(level),
         son_(OneDGridNullIteratorFactory<0>::null()),
         pred_(OneDGridNullIteratorFactory<0>::null()),
         succ_(OneDGridNullIteratorFactory<0>::null())
     {}
 
     OneDEntityImp(int level, const FieldVector<double, 1>& pos, unsigned int id)
-      : pos_(pos), id_(id), level_(level),
+      : pos_(pos), levelIndex_(0), leafIndex_(0), id_(id), level_(level),
         son_(OneDGridNullIteratorFactory<0>::null()),
         pred_(OneDGridNullIteratorFactory<0>::null()),
         succ_(OneDGridNullIteratorFactory<0>::null())
@@ -93,7 +93,7 @@ namespace Dune {
     enum MarkState { DO_NOTHING , COARSEN , REFINE };
 
     OneDEntityImp(int level, unsigned int id, bool reversedBoundarySegmentNumbering)
-      : id_(id), level_(level),
+      : levelIndex_(0), leafIndex_(0), id_(id), level_(level),
         markState_(DO_NOTHING), isNew_(false),
         reversedBoundarySegmentNumbering_(reversedBoundarySegmentNumbering),
         pred_(OneDGridNullIteratorFactory<1>::null()),
