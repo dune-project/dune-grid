@@ -616,18 +616,18 @@ namespace Dune
 
   template< ALU3dGridElementType type, class Comm >
   inline int ALU3dGridGeometricFaceInfoBase< type, Comm >::
-  globalVertexIndex(int duneFaceIndex,
-                    int aluFaceTwist,
-                    int duneFaceVertexIndex) const
+  globalVertexIndex(const int duneFaceIndex,
+                    const int aluFaceTwist,
+                    const int duneFaceVertexIndex) const
   {
-    int localALUIndex =
+    const int localALUIndex =
       FaceTopo::dune2aluVertex(duneFaceVertexIndex,
                                aluFaceTwist);
 
     // get local ALU vertex number on the element's face
-    int localDuneIndex = ElementTopo::
-                         alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
-                                            localALUIndex);
+    const int localDuneIndex = ElementTopo::
+                               alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
+                                                  localALUIndex);
 
     return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 3);
   }
@@ -639,11 +639,11 @@ namespace Dune
                                      CoordinateType& result) const
   {
     // this is a dune face index
-    int faceIndex =
+    const int faceIndex =
       (side == INNER ?
        ElementTopo::alu2duneFace(connector_.innerALUFaceIndex()) :
        ElementTopo::alu2duneFace(connector_.outerALUFaceIndex()));
-    int faceTwist =
+    const int faceTwist =
       (side == INNER ?
        connector_.innerTwist() :
        connector_.outerTwist());
@@ -656,24 +656,5 @@ namespace Dune
       result[i] = refElem.position(duneVertexIndex, 3);
     }
   }
-
-  template< ALU3dGridElementType type, class Comm >
-  inline void ALU3dGridGeometricFaceInfoBase< type, Comm >::
-  convert2CArray(const FieldVector<alu3d_ctype, 3>& in,
-                 alu3d_ctype (&out)[3]) const {
-    out[0] = in[0];
-    out[1] = in[1];
-    out[2] = in[2];
-  }
-
-  template< ALU3dGridElementType type, class Comm >
-  inline void ALU3dGridGeometricFaceInfoBase< type, Comm >::
-  convert2FieldVector(const alu3d_ctype (&in)[3],
-                      FieldVector<alu3d_ctype, 3>& out) const {
-    out[0] = in[0];
-    out[1] = in[1];
-    out[2] = in[2];
-  }
-
 } //end namespace Dune
 #endif
