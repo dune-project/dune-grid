@@ -304,6 +304,97 @@ namespace Dune
   }
 
 
+  // global refine
+  template< ALU3dGridElementType elType, class Comm >
+  template< class GridImp, class DataHandle >
+  inline
+  void ALU3dGrid< elType, Comm >
+  ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
+  {
+    assert( (refCount + maxLevel()) < MAXL );
+
+    for( int count = refCount; count > 0; --count )
+    {
+      const LeafIteratorType end = leafend();
+      for( LeafIteratorType it = leafbegin(); it != end; ++it )
+        mark( 1 , *it );
+      adapt( handle );
+    }
+  }
+
+
+  // adapt grid
+  // --adapt
+  template< ALU3dGridElementType elType, class Comm >
+  template< class GridImp, class DataHandle >
+  inline
+  bool ALU3dGrid< elType, Comm >
+  ::adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle )
+  {
+    typedef AdaptDataHandleInterface< GridImp, DataHandle > AdaptDataHandle;
+
+    typedef typename EntityObject::ImplementationType EntityImp;
+    EntityObject father( EntityImp( *this, this->maxLevel() ) );
+    EntityObject son( EntityImp( *this, this->maxLevel() ) );
+
+    int defaultChunk = newElementsChunk_;
+    int actChunk     = refineEstimate_ * refineMarked_;
+
+    // guess how many new elements we get
+    int newElements = std::max( actChunk , defaultChunk );
+
+    // true if at least one element was marked for coarsening
+    bool mightCoarse = preAdapt();
+    // reserve memory
+    handle.preAdapt( newElements );
+
+    bool refined = false ;
+    if(globalIdSet_)
+    {
+      // if global id set exists then include into
+      // prolongation process
+      ALU3DSPACE AdaptRestrictProlongGlSet< MyType, AdaptDataHandle, GlobalIdSetImp >
+      rp(*this,
+         father,this->getRealImplementation(father),
+         son,   this->getRealImplementation(son),
+         handle,
+         *globalIdSet_);
+
+      refined = myGrid().duneAdapt(rp); // adapt grid
+    }
+    else
+    {
+      ALU3DSPACE AdaptRestrictProlongImpl< MyType, AdaptDataHandle >
+      rp(*this,
+         father,this->getRealImplementation(father),
+         son,   this->getRealImplementation(son),
+         handle);
+
+      refined = myGrid().duneAdapt(rp); // adapt grid
+    }
+
+    if(refined || mightCoarse)
+    {
+      // only calc extras and skip maxLevel calculation, because of
+      // refinement maxLevel was calculated already
+      updateStatus();
+
+      // no need to call postAdapt here, because markers
+      // are cleand during refinement callback
+    }
+
+    // check whether we have balance
+    handle.postAdapt();
+
+    // here postAdapt is not called, because
+    // reset of refinedTag is done in preCoarsening and postRefinement
+    // methods of datahandle (see datahandle.hh)
+
+    return refined;
+  }
+
+
+
   //*****************************************************************
 
   template< ALU3dGridElementType elType, class Comm >
