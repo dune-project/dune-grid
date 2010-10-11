@@ -273,19 +273,15 @@ namespace Dune
     //- private methods
     void generateLocalGeometries() const;
 
-    int globalVertexIndex(int duneFaceIndex,
-                          int faceTwist,
-                          int duneFaceVertexIndex) const;
+    int globalVertexIndex(const int duneFaceIndex,
+                          const int faceTwist,
+                          const int duneFaceVertexIndex) const;
 
     void referenceElementCoordinatesRefined(SideIdentifier side,
                                             CoordinateType& result) const;
     void referenceElementCoordinatesUnrefined(SideIdentifier side,
                                               CoordinateType& result) const;
 
-    void convert2CArray(const FieldVector<alu3d_ctype, 3>& in,
-                        alu3d_ctype (&out)[3]) const;
-    void convert2FieldVector(const alu3d_ctype (&in)[3],
-                             FieldVector<alu3d_ctype, 3>& out) const;
   protected:
     //- private data
     const ConnectorType& connector_;
