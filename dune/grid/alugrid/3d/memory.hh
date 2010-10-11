@@ -5,14 +5,13 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <vector>
 
-#define USE_FINITE_STACK
-
-#ifdef USE_FINITE_STACK
-#include <dune/common/finitestack.hh>
-#else
-#include <stack>
+#ifdef _OPENMP
+#include <omp.h>
 #endif
+
+#include <dune/common/finitestack.hh>
 
 namespace Dune {
 
@@ -20,20 +19,35 @@ namespace Dune {
   template <class Object>
   class ALUMemoryProvider
   {
-#ifdef USE_FINITE_STACK
     enum { maxStackObjects = 256 };
-    FiniteStack< Object* , maxStackObjects > objStack_;
+    typedef FiniteStack< Object* , maxStackObjects > StackType ;
+#ifdef _OPENMP
+    std::vector< StackType  > objStackVec_;
 #else
-    std::stack < Object* > objStack_;
+    StackType objStack_ ;
 #endif
 
     typedef ALUMemoryProvider < Object > MyType;
+
+    StackType& objStack()
+    {
+#ifdef _OPENMP
+      assert( objStackVec_.size() > omp_get_thread_num() );
+      return objStackVec_[ omp_get_thread_num() ];
+#else
+      return objStack_ ;
+#endif
+    }
 
   public:
     typedef Object ObjectType;
 
     //! delete all objects stored in stack
-    ALUMemoryProvider() {};
+    ALUMemoryProvider()
+#ifdef _OPENMP
+      : objStackVec_( omp_get_max_threads() )
+#endif
+    {}
 
     //! call deleteEntity
     ~ALUMemoryProvider ();
@@ -46,13 +60,13 @@ namespace Dune {
     template <class GridType, class EntityImp>
     inline ObjectType * getEntityObject(const GridType &grid, int level , EntityImp * fakePtr )
     {
-      if( objStack_.empty() )
+      if( objStack().empty() )
       {
         return ( new ObjectType(EntityImp(grid,level) ));
       }
       else
       {
-        return popObject();
+        return stackObject();
       }
     }
 
@@ -63,23 +77,16 @@ namespace Dune {
     void freeObject (ObjectType * obj);
 
   protected:
-    inline ObjectType * popObject()
+    inline ObjectType * stackObject()
     {
-      assert( ! objStack_.empty() );
-#ifdef USE_FINITE_STACK
+      assert( ! objStack().empty() );
       // finite stack does also return object on pop
-      return objStack_.pop();
-#else
-      // std stack does not
-      ObjectType * obj = objStack_.top();
-      objStack_.pop();
-      return obj;
-#endif
+      return objStack().pop();
     }
 
   private:
     //! do not copy pointers
-    ALUMemoryProvider(const ALUMemoryProvider<Object> & org) {}
+    ALUMemoryProvider(const ALUMemoryProvider<Object> & org);
   };
 
 
@@ -93,13 +100,13 @@ namespace Dune {
   ALUMemoryProvider<Object>::getObject
     (const GridType &grid, int level )
   {
-    if( objStack_.empty() )
+    if( objStack().empty() )
     {
       return ( new Object (grid,level) );
     }
     else
     {
-      return popObject();
+      return stackObject();
     }
   }
 
@@ -108,37 +115,43 @@ namespace Dune {
   ALUMemoryProvider<Object>::getObjectCopy
     (const ObjectType & org )
   {
-    if( objStack_.empty() )
+    if( objStack().empty() )
     {
       return ( new Object (org) );
     }
     else
     {
-      return popObject();
+      return stackObject();
     }
   }
 
   template <class Object>
   inline ALUMemoryProvider<Object>::~ALUMemoryProvider()
   {
-    while ( ! objStack_.empty() )
+#ifdef _OPENMP
+    for(size_t i = 0; i< objStackVec_.size(); ++i)
     {
-      ObjectType * obj = popObject();
-      delete obj;
+      StackType& objStk = objStackVec_[ i ];
+#else
+    {
+      StackType& objStk = objStack_;
+#endif
+      while ( ! objStk.empty() )
+      {
+        ObjectType * obj = objStk.pop();
+        delete obj;
+      }
     }
   }
 
   template <class Object>
   inline void ALUMemoryProvider<Object>::freeObject(Object * obj)
   {
-#ifdef USE_FINITE_STACK
-    if( objStack_.full() )
-    {
+    StackType& stk = objStack();
+    if( stk.full() )
       delete obj;
-    }
     else
-#endif
-    objStack_.push( obj );
+      stk.push( obj );
   }
 
 #undef USE_FINITE_STACK
