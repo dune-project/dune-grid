@@ -158,11 +158,11 @@ namespace Dune
 
     int segmentIndex_;
 
-    enum boundary_t { noBoundary = 0,          // no boundary, outside is normal element
-                      periodicBoundary = 1,    // periodic boundary
-                      domainBoundary = 2,      // boundary with domain, no outside
-                      outerGhostBoundary = 3,  // process boundary, outside is ghost
-                      innerGhostBoundary = 4}; // process boundary, inside is ghost
+    enum boundary_t { noBoundary          = 0, // no boundary, outside is normal element
+                      periodicBoundary    = 1, // periodic boundary
+                      innerGhostBoundary  = 2, // process boundary, inside is ghost, outside is normal element
+                      domainBoundary      = 3, // boundary with domain, no outside
+                      outerGhostBoundary  = 4}; // process boundary, outside is ghost
 
     boundary_t bndType_;
 
