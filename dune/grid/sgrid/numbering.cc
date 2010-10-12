@@ -105,10 +105,7 @@ namespace Dune {
   CubeMapper<dim>::CubeMapper ()
   {
     array<int,dim> M;
-
-    // make mesh of single cube
-    for (int i=0; i<dim; i++) M[i]=1;
-
+    M.fill(1);
     make(M);
   }
 
