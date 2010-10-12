@@ -25,12 +25,12 @@
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/grid/alugrid/common/bndprojection.hh>
+#include <dune/grid/alugrid/common/memory.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
 #include "topology.hh"
 #include "indexsets.hh"
-#include "memory.hh"
 #include "datahandle.hh"
 
 #include <dune/grid/alugrid/3d/lbdatahandle.hh>

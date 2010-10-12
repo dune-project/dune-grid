@@ -8,13 +8,13 @@
 // Dune includes
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
+#include <dune/grid/alugrid/common/memory.hh>
 
 // Local includes
 #include "alu3dinclude.hh"
 #include "topology.hh"
 #include "faceutility.hh"
 #include "alu3diterators.hh"
-#include "memory.hh"
 
 namespace Dune {
   // Forward declarations

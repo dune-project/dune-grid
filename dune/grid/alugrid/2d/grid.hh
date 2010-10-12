@@ -29,7 +29,7 @@
 
 //- Local includes
 #include "indexsets.hh"
-#include "../3d/memory.hh"
+#include <dune/grid/alugrid/common/memory.hh>
 #include "datahandle.hh"
 
 namespace Dune {
