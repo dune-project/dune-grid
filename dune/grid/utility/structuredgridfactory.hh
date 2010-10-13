@@ -128,7 +128,7 @@ namespace Dune {
 
       // Insert uniformly spaced vertices
       array<unsigned int,dim> vertices = elements;
-      for (int i=0; i<vertices.size(); i++)
+      for( size_t i = 0; i < vertices.size(); ++i )
         vertices[i]++;
 
       // Insert vertices for structured grid into the factory
