@@ -105,7 +105,7 @@ namespace Dune {
   CubeMapper<dim>::CubeMapper ()
   {
     array<int,dim> M;
-    M.fill(1);
+    std::fill( M.begin(), M.end(), 1 );
     make(M);
   }
 
