@@ -589,7 +589,7 @@ namespace Dune
     // add function wether is exists or not
     if(!already)
     {
-      int num = (int) DiscreteFunctionSpaceType::DimRange;
+      int num = (int) DiscreteFunctionSpaceType::dimRange;
       if(vector) num = 1;
 
       vecFdata_.resize(size+num);
@@ -645,7 +645,7 @@ namespace Dune
             data->name = name;
 
           data->dimVal   = dimVal;
-          data->dimRange = DiscreteFunctionSpaceType::DimRange;
+          data->dimRange = DiscreteFunctionSpaceType::dimRange;
 
           // set grid part selection methods
           typedef typename DiscreteFunctionSpaceType :: GridPartType GridPartType;
