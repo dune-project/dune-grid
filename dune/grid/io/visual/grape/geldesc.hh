@@ -201,6 +201,7 @@ inline static void coord2world_3d(HELEMENT3D * e, const double * coord,
  *  this is the dune local coordinate system
  ***************************************************************************/
 
+static bool Grape_ReferenceElementsInitialized = false ;
 
 static HELEMENT2D_DESCRIPTION quadrilateral_description;
 
@@ -372,128 +373,14 @@ static G_CONST int *prism_polygon_neighbour[6] = {prn1,prn2,prn3,prn4,prn5,prn6}
 
 /*  Standard description                */
 /****************************************************************************/
-
-/*static int  cube_world2coord();
-   static void cube_coord2world();
-   static int cube_check_inside();
-   static HELEMENT3D *cube_neighbour();
-   static int cube_boundary();
- */
-
-#if 0
-static void  cube_coord2world(HELEMENT3D *cube,
-                              const double *coord, double *xyz)
-{
-#if 0
-  int j;
-  const double **v = cube->vertex;
-
-  for(j=0; j<3; j++)
-    xyz[j]=(1.0-coord[2])*((1.0-coord[1])*((1.0-coord[0])*v[0][j]+coord[0]*v[1][j])
-                           + coord[1]    *((1.0-coord[0])*v[3][j]+coord[0]*v[2][j]))
-            + coord[2]   *((1.0-coord[1])*((1.0-coord[0])*v[4][j]+coord[0]*v[5][j])
-                           + coord[1]    *((1.0-coord[0])*v[7][j]+coord[0]*v[6][j]));
-
-  return;
-#endif
-}
-
-static int cube_boundary(HELEMENT3D *el,int pn);
-#if 0
-{ int i;
-  STACKENTRY *stel;
-  stel = (STACKENTRY *)el;
-  switch(pn) {
-  case 0 : return(stel->l[2] == inp->l[2]);
-  case 1 : return(stel->r[2] == inp->r[2]);
-  case 2 : return(stel->l[1] == inp->l[1]);
-  case 3 : return(stel->r[0] == inp->r[0]);
-  case 4 : return(stel->r[1] == inp->r[1]);
-  case 5 : return(stel->l[0] == inp->l[0]);
-  default : fprintf(stderr,"%s l. %s: unknown case in 'cube_boundary'\n",
-                    __FILE__, __LINE__); return(-1);
-  }}
-#endif
-static int cube_check_inside(HELEMENT3D *el,double *coord)
-{
-  int j;
-  static int pp[] = {5,2,0};
-  static int pm[] = {3,4,1};
-
-  for(j=0; j<3; j++) {
-    if(coord[j]<0.) return(pm[j]);
-    if(coord[j]>1.) return(pp[j]);
-  }
-  return(INSIDE);
-
-
-}
-
-
-static int  cube_world2coord(HELEMENT3D *cube,
-                             const double *xyz, double *coord)
-
-{
-#if 0
-  /* MATRIX33 a; VEC3 b; */
-  VEC3 p, q;
-  double **v;
-  int j,k,count,merke[3];
-
-  /********************************************/
-  /* ONLY if the elements are parallelepipeds */
-  /********************************************/
-
-  v = cube->vertex;
-
-  /*
-     for(i=0;i<3;i++) {
-      b[i] = xyz[i]-v[0][i];
-      for(j=0;j<3;j++) a[i][j] = v[help[i]][j]-v[0][j];
-     }
-     g_solve3(a,b,coord);
-   */
-
-  /****************************************************************/
-  /* ONLY if solely the normal in one coord. dir. is not constant */
-  /****************************************************************/
-
-  for(k=0,count = 0; k<3; k++) {
-    if(test_normal(cube,xyz,k,coord)) merke[count++] = k;
-    if(count == 2) {
-      merke[2] = (merke[0]==0) ? ((merke[1]==1) ? 2 : 1) : 0;
-      for(j=0; j<3; j++) {
-        p[j] = v[0][j]+
-               coord[merke[0]]*(v[help[merke[0]]][j]-v[0][j]) +
-               coord[merke[1]]*(v[help[merke[1]]][j]-v[0][j]);
-        q[j] = v[help[merke[2]]][j] +
-               coord[merke[0]]*(v[help2[merke[2]][0]][j]-v[help[merke[2]]][j]) +
-               coord[merke[1]]*(v[help2[merke[2]][1]][j]-v[help[merke[2]]][j])
-               -p[j];
-        p[j] = xyz[j]-p[j];
-      }
-      coord[merke[2]] = g_vec3_skp(p,q)/g_vec3_skp(q,q);
-      break;
-    }
-  }
-  ASSURE((count==2),"world to coord failed",return (INSIDE));
-
-  return(cube_check_inside(cube,coord));
-#endif
-  return 1;
-}
-#endif
-
 /* fill the upper reference elements */
 inline void setupReferenceElements()
 {
-  static bool initialized = false;
-
-  if(!initialized)
+  if( ! Grape_ReferenceElementsInitialized )
   {
     /* fill the helement description in 2D*/
 
-    triangle_description.dindex             = 0; // index of description
+    triangle_description.dindex             = gr_triangle; // index of description
     triangle_description.number_of_vertices = 3;
     /* dimension of local coords */
     triangle_description.dimension_of_coord = GRAPE_DIM;
@@ -506,7 +393,7 @@ inline void setupReferenceElements()
     triangle_description.boundary           = triangle_boundary;
 
 
-    quadrilateral_description.dindex             = 1; // index of description
+    quadrilateral_description.dindex             = gr_quadrilateral; // index of description
     quadrilateral_description.number_of_vertices = 4;
     quadrilateral_description.dimension_of_coord = GRAPE_DIM;
     quadrilateral_description.coord              = quadrilateral_local_coordinate_system;
@@ -519,7 +406,7 @@ inline void setupReferenceElements()
 
     /* fill the helement description in 3D*/
 
-    tetra_description.dindex             = 2; // index of description
+    tetra_description.dindex             = gr_tetrahedron; // index of description
     tetra_description.number_of_vertices = 4;
     tetra_description.number_of_polygons = 4; // i.e. number of faces
     tetra_description.polygon_length = tetra_polygon_length;
@@ -538,7 +425,7 @@ inline void setupReferenceElements()
     tetra_description.coord_of_parent              = NULL;
 
     /* pyramid */
-    pyra_description.dindex             = 3; // index of description , see element type
+    pyra_description.dindex             = gr_pyramid; // index of description , see element type
     pyra_description.number_of_vertices = 5;
     pyra_description.number_of_polygons = 5; // i.e. number of faces
     pyra_description.polygon_length     = pyra_polygon_length;
@@ -556,9 +443,8 @@ inline void setupReferenceElements()
     pyra_description.get_boundary_face_estimate   = NULL;
     pyra_description.coord_of_parent              = NULL;
 
-
     /* prism */
-    prism_description.dindex             = 4; // index of description
+    prism_description.dindex             = gr_prism; // index of description
     prism_description.number_of_vertices = 6;
     prism_description.number_of_polygons = 5; // i.e. number of faces
     prism_description.polygon_length     = prism_polygon_length;
@@ -577,7 +463,7 @@ inline void setupReferenceElements()
     prism_description.coord_of_parent              = NULL;
 
     /* Hexahedrons */
-    cube_description.dindex             = 5; // index of description
+    cube_description.dindex             = gr_hexahedron; // index of description
     cube_description.number_of_vertices = 8;
     cube_description.number_of_polygons = 6; // i.e. number of faces
     cube_description.polygon_length     = cube_polygon_length;
@@ -605,7 +491,7 @@ inline void setupReferenceElements()
     inheritance_rule_in_child_1[1] = vinherit_point_1_in_child_1;
     inheritance_rule_in_child_1[2] = vinherit_point_2;
 
-    initialized = true;
+    Grape_ReferenceElementsInitialized = true ;
   }
 }
 

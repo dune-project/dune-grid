@@ -381,19 +381,24 @@ namespace Dune
     enum { numberOfTypes = (dim == 2) ? 2 : 6 };
 
     std::vector < FieldMatrix<ctype,maxPoints,dim> > points_;
+    GrapeLagrangePoints ( const GrapeLagrangePoints& );
   public:
     //! create lagrange points for given polyOrder and dim,dimworld
-    GrapeLagrangePoints ()
+    GrapeLagrangePoints () : points_()
     {
-      for(int type=0; type<numberOfTypes; type++)
-      {
-        FieldMatrix<ctype,maxPoints,dim> coords(0.0);
-        int nvx = numberOfVertices(type);
+      GrapeInterface_two_two::setupReferenceElements();
+      GrapeInterface_two_three::setupReferenceElements();
+      GrapeInterface_three_three::setupReferenceElements();
 
-        for(int i=0; i<nvx; i++)
+      for(int type=0; type<numberOfTypes; ++type)
+      {
+        FieldMatrix<ctype,maxPoints,dim> coords( ctype(0) );
+        const int nvx = numberOfVertices(type);
+
+        for(int i=0; i<nvx; ++i)
         {
           const double * p = getCoordinate(type,i);
-          for(int j=0; j<dimworld; j++)
+          for(int j=0; j<dimworld; ++j)
           {
             assert( p );
             coords[i][j] = p[j];
@@ -406,7 +411,7 @@ namespace Dune
     //! return lagrange point with localNum
     //! for given element type and polyOrder
     const FieldVector<ctype,dim> &
-    getPoint (int geomType, int polyOrder , int localNum ) const
+    getPoint (const int geomType, const int polyOrder , const int localNum ) const
     {
       assert( polOrd == polyOrder );
       assert( geomType >= 0 );
@@ -415,18 +420,20 @@ namespace Dune
     }
 
   private:
-    int numberOfVertices( int type )
+    static int numberOfVertices( const int type )
     {
-      if(type < 2)
+      if(type < GrapeInterface_three_three::gr_tetrahedron)
         return GrapeInterface_two_two::getElementDescription(type)->number_of_vertices;
       else
         return GrapeInterface_three_three::getElementDescription(type)->number_of_vertices;
     }
 
-    const double * getCoordinate( int type, int i )
+    static const double * getCoordinate( const int type, const int i )
     {
-      if(type < 2)
+      if(type < GrapeInterface_three_three::gr_tetrahedron)
+      {
         return GrapeInterface_two_two::getElementDescription(type)->coord[i];
+      }
       else
         return GrapeInterface_three_three::getElementDescription(type)->coord[i];
     }

@@ -64,7 +64,7 @@ namespace Dune
     const FieldVector<ctype,dim> & localPoint =
       lagrangePoints.getPoint(geomType,polynomialOrder,localNum);
 
-    static RangeType tmp_;
+    RangeType tmp_;
     // evaluate local function on local lagrange point
     lf.evaluate(localPoint,tmp_);
 
@@ -94,11 +94,11 @@ namespace Dune
       const FieldVector<ctype,dim> & localPoint =
         lagrangePoints.getPoint(geomType,polynomialOrder,localNum);
 
-      static RangeType tmp_;
+      RangeType tmp_;
       // evaluate local function on local lagrange point
       lf.evaluate(localPoint,tmp_);
 
-      for(int i=0; i<vlength; i++)
+      for(int i=0; i<vlength; ++i)
       {
         val[i] = tmp_[comp[i]];
       }
@@ -131,11 +131,16 @@ namespace Dune
       LocalFuncType lf = func.localFunction( en );
 
       int dimVal = df->dimVal;
-      if (dim==1 || dimVal==1) {
+      if (dim==1 || dimVal==1)
+      {
         evalScalar(en,geomType, func,lf,comp,localNum,val);
-      } else if (dim!=1 && dimVal==dim) {
+      }
+      else if (dim!=1 && dimVal==dim)
+      {
         evalVector(en,geomType,func,lf,df->comp,dimVal,localNum,val);
-      } else {
+      }
+      else
+      {
         assert(false);
         evalVector(en,geomType,func,lf,df->comp,dimVal,localNum,val);
       }

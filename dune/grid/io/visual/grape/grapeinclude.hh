@@ -60,6 +60,7 @@ namespace Dune
     inline static void init()
     {
       GrapeInterface_two_two::grape_add_remove_methods();
+      GrapeInterface_two_two::setupReferenceElements();
     }
 
     inline static void setThread(int t)
@@ -128,6 +129,7 @@ namespace Dune
     inline static void init()
     {
       GrapeInterface_two_three::grape_add_remove_methods();
+      GrapeInterface_two_three::setupReferenceElements();
     }
 
     inline static void setThread(int t)
@@ -197,6 +199,7 @@ namespace Dune
     {
       GrapeInterface_three_three::initPartitionDisp(__MaxPartition);
       GrapeInterface_three_three::grape_add_remove_methods();
+      GrapeInterface_three_three::setupReferenceElements();
     }
 
     inline static void setThread(int t)
