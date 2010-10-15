@@ -838,9 +838,6 @@ inline void * setupHmesh(const int noe, const int nov,
 
   grapeAddLevelFunction(mesh);
 
-  /* fill the reference elements */
-  setupReferenceElements();
-
   return ((void *) mesh);
 }
 
