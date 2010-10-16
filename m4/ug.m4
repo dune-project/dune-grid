@@ -7,7 +7,6 @@
 # configure shell variables:
 #   UGROOT
 #   UG_LIB_PATH
-#   UG_INCLUDE_PATH
 #   UG_CPPFLAGS, UG_LDFLAGS, UG_LIBS
 #       flags and libs with indirect references for the makefiles, for
 #       instance the literal string '${DUNEMPICPPFLAGS}
@@ -66,7 +65,6 @@ AC_DEFUN([DUNE_PATH_UG],[
       
       # intermediate variables
       UG_LIB_PATH="$UGROOT/lib"
-      UG_INCLUDE_PATH="$UGROOT/include/ug/"
       
       UG_LDFLAGS=""
 
@@ -85,8 +83,8 @@ AC_DEFUN([DUNE_PATH_UG],[
 
       # Check whether UG is installed at all and has a suitable version
       if $PKG_CONFIG --atleast-version=3.9.2 libug; then
-		UG_CPPFLAGS="-I$UG_INCLUDE_PATH -DENABLE_UG"
-		direct_UG_CPPFLAGS="-I$UG_INCLUDE_PATH -DENABLE_UG"
+		UG_CPPFLAGS="`$PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
+		direct_UG_CPPFLAGS="`$PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
 	    HAVE_UG="1"
 	  else
 		HAVE_UG="0"
