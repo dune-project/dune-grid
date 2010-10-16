@@ -117,6 +117,9 @@ AC_DEFUN([DUNE_PATH_UG],[
       # Currently we only check for libug2
       # todo: Check for all the libraries that make up UG
       AC_LANG_PUSH([C++])
+      
+      REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
+      PKG_CONFIG_PATH="$UGROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
 
       # define LTCXXCOMPILE like it will be defined in the Makefile
       ac_save_CXX="$CXX"
@@ -172,28 +175,26 @@ AC_DEFUN([DUNE_PATH_UG],[
       fi
 
           # Okay.  We have found a UG installation.  But has it been built with --enable-dune?
-          # We check this by trying to link to the field int UG::duneMarker, which is there
-          # do indicate just this.
           if test x$HAVE_UG = x1 ; then
+              
             AC_MSG_CHECKING([whether UG has been built with --enable-dune])
-            AC_TRY_LINK(
-                [#define FOR_DUNE
-                    #include "dunemarker.h"],
-                [int i = UG::duneMarker],
-                [#UG_LDFLAGS="$LDFLAGS"
+
+            if test x`$PKG_CONFIG --variable=fordune libug` == xyes; then
                 AC_MSG_RESULT(yes)
-                ],
-                [AC_MSG_RESULT(no)
-                 AC_MSG_WARN([UG has not been built with --enable-dune!])
+            else
+                AC_MSG_RESULT(no)
+                AC_MSG_WARN([UG has not been built with --enable-dune!])
                 HAVE_UG="0"
                 with_ug="no"
-                ]
-                )
+            fi
+            
           fi
-
 
       fi
 
+      # restore PKG_CONFIG_PATH 
+      PKG_CONFIG_PATH=$REM_PKG_CONFIG_PATH
+  
       CXX="$ac_save_CXX"
       AC_LANG_POP([C++])
       
