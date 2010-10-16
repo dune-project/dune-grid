@@ -91,32 +91,26 @@ AC_DEFUN([DUNE_PATH_UG],[
         direct_UG_LIBS="-L$UG_LIB_PATH -lugS2 -lugS3 -ldevS"
       fi
 
-      # backup CPPFLAGS so I can add an additional flag just for AC_CHECK_HEADER
-      CPPFLAGS_BACKUP="$CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS -D_2"
+      REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
+      PKG_CONFIG_PATH="$UGROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-      # check for central header
-      AC_CHECK_HEADER([$UG_INCLUDE_PATH/gm.h],
-      [UG_CPPFLAGS="-I$UG_INCLUDE_PATH -DENABLE_UG"
-          direct_UG_CPPFLAGS="-I$UG_INCLUDE_PATH -DENABLE_UG"
-          HAVE_UG="1"],
-      [HAVE_UG="0"
-      AC_MSG_WARN([gm.h not found in $UG_INCLUDE_PATH])]
-      )
+      # Check whether UG is installed at all and has a suitable version
+      if $PKG_CONFIG --atleast-version=3.9.2 libug; then
+		UG_CPPFLAGS="-I$UG_INCLUDE_PATH -DENABLE_UG"
+		direct_UG_CPPFLAGS="-I$UG_INCLUDE_PATH -DENABLE_UG"
+	    HAVE_UG="1"
+	  else
+		HAVE_UG="0"
+		AC_MSG_WARN([UG not found in $UGROOT])
+      fi
 
       # pre-set variable for summary
       with_ug="no"
       
-      # Restore CPPFLAGS
-      CPPFLAGS="$CPPFLAGS_BACKUP"
-
       # Currently we only check for libug2
       # todo: Check for all the libraries that make up UG
       AC_LANG_PUSH([C++])
       
-      REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
-      PKG_CONFIG_PATH="$UGROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
-
       # define LTCXXCOMPILE like it will be defined in the Makefile
       ac_save_CXX="$CXX"
       LTCXXLINK="./libtool --tag=CXX --mode=link $CXX"
