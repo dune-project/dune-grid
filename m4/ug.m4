@@ -118,51 +118,21 @@ AC_DEFUN([DUNE_PATH_UG],[
 
       if test x$HAVE_UG = x1; then
 
-          # We have found the headers for sure.  Now we reuse the flag to signal
-          # whether we found the libs as well.
-          HAVE_UG="0"
-      
-        # If MPI is installed look for the parallel UG
-        if test x"$with_mpi" != x"no"; then
-            AC_MSG_CHECKING([UG libraries (parallel)])
-            LIBS="$direct_UG_LIBS $DUNEMPILIBS $LIBS"
-            LDFLAGS="$LDFLAGS $DUNEMPILDFLAGS"
-            CPPFLAGS="$direct_UG_CPPFLAGS -DModelP -D_2"
-            AC_TRY_LINK(
-              [#include "initug.h"
-               #include "parallel.h"],
-          [int i = UG::D2::InitDDD()],
-              [UG_LDFLAGS="\${DUNEMPILDFLAGS} $UG_LDFLAGS"
-           direct_UG_LDFLAGS="$DUNEMPILDFLAGS $direct_UG_LDFLAGS"
-           UG_CPPFLAGS="\${DUNEMPICPPFLAGS} $UG_CPPFLAGS -DModelP"
-           direct_UG_CPPFLAGS="$DUNEMPICPPFLAGS $direct_UG_CPPFLAGS -DModelP"
-           HAVE_UG="1"
-           UG_LIBS="$UG_LIBS \${DUNEMPILIBS}"
-           direct_UG_LIBS="$direct_UG_LIBS $DUNEMPILIBS"
-           with_ug="yes (parallel)"
-           AC_MSG_RESULT(yes)
-              ],
-              [AC_MSG_RESULT(no)
-           HAVE_UG="0"]
-          )
-        fi
-
-      # parallel lib not found/does not work?  Let's check for the sequential one
-      if test x$HAVE_UG != x1; then
-        AC_MSG_CHECKING([UG libraries (sequential)])
-        LIBS="$direct_UG_LIBS $LIBS"
-        CPPFLAGS="$CPPFLAGS $direct_UG_CPPFLAGS -D_2"
-          AC_TRY_LINK(
-              [#include "initug.h"],
-          [int i = UG::D2::InitUg(0,0)],
-              [HAVE_UG="1"
-               with_ug="yes (sequential)"
-           AC_MSG_RESULT(yes)
-              ],
-              [AC_MSG_RESULT(no)
-           HAVE_UG="0"]
-          )
-      fi
+	    if test x`$PKG_CONFIG --variable=parallel libug` == xyes; then
+			
+		  UG_LDFLAGS="\${DUNEMPILDFLAGS} $UG_LDFLAGS"
+          direct_UG_LDFLAGS="$DUNEMPILDFLAGS $direct_UG_LDFLAGS"
+          UG_CPPFLAGS="\${DUNEMPICPPFLAGS} $UG_CPPFLAGS -DModelP"
+          direct_UG_CPPFLAGS="$DUNEMPICPPFLAGS $direct_UG_CPPFLAGS -DModelP"
+          UG_LIBS="$UG_LIBS \${DUNEMPILIBS}"
+          direct_UG_LIBS="$direct_UG_LIBS $DUNEMPILIBS"
+          with_ug="yes (parallel)"
+		   
+		else
+			
+          with_ug="yes (sequential)"
+				   
+	    fi
 
           # Okay.  We have found a UG installation.  But has it been built with --enable-dune?
           if test x$HAVE_UG = x1 ; then
