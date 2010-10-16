@@ -109,8 +109,29 @@ AC_DEFUN([DUNE_PATH_UG],[
       
       if test x$HAVE_UG = x1; then
 
-	    if test x`$PKG_CONFIG --variable=parallel libug` == xyes; then
+        # Okay.  We have found a UG installation.  But has it been built with --enable-dune?
+        if test x$HAVE_UG = x1 ; then
+              
+          AC_MSG_CHECKING([whether UG has been built with --enable-dune])
+
+          if test x`$PKG_CONFIG --variable=fordune libug` == xyes; then
+              AC_MSG_RESULT(yes)
+          else
+              AC_MSG_RESULT(no)
+              AC_MSG_WARN([UG has not been built with --enable-dune!])
+              HAVE_UG="0"
+              with_ug="no"
+          fi
+            
+        fi
+        
+      fi
+
+      if test x$HAVE_UG = x1; then
+
+		if test x`$PKG_CONFIG --variable=parallel libug` == xyes; then
 			
+          # Add additional flags needed for parallel UG  
 		  UG_LDFLAGS="\${DUNEMPILDFLAGS} $UG_LDFLAGS"
           direct_UG_LDFLAGS="$DUNEMPILDFLAGS $direct_UG_LDFLAGS"
           UG_CPPFLAGS="\${DUNEMPICPPFLAGS} $UG_CPPFLAGS -DModelP"
@@ -124,22 +145,6 @@ AC_DEFUN([DUNE_PATH_UG],[
           with_ug="yes (sequential)"
 				   
 	    fi
-
-          # Okay.  We have found a UG installation.  But has it been built with --enable-dune?
-          if test x$HAVE_UG = x1 ; then
-              
-            AC_MSG_CHECKING([whether UG has been built with --enable-dune])
-
-            if test x`$PKG_CONFIG --variable=fordune libug` == xyes; then
-                AC_MSG_RESULT(yes)
-            else
-                AC_MSG_RESULT(no)
-                AC_MSG_WARN([UG has not been built with --enable-dune!])
-                HAVE_UG="0"
-                with_ug="no"
-            fi
-            
-          fi
 
       fi
 
