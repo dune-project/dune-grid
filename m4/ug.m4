@@ -74,13 +74,6 @@ AC_DEFUN([DUNE_PATH_UG],[
       
       UG_LDFLAGS=""
 
-      # set variables so that tests can use them
-      CPPFLAGS="$CPPFLAGS -I$UG_INCLUDE_PATH -DENABLE_UG"
-      # hack around limitation of AC_CHECK_LIBS: -L really belong into LIBS,
-      # but it has to be in front of the library that AC_CHECK_LIBS inserts on
-      # the linker command line
-      LDFLAGS="$LDFLAGS -L$UG_LIB_PATH"
-
       AC_ARG_ENABLE(ug-lgmdomain,
         AC_HELP_STRING([--enable-ug-lgmdomain],[use UG LGM domain (default is standard domain)]))
       if test x"$enable_ug_lgmdomain" = xyes ; then
