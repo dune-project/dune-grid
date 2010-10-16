@@ -12,7 +12,7 @@
 #       flags and libs with indirect references for the makefiles, for
 #       instance the literal string '${DUNEMPICPPFLAGS}
 #   direct_UG_CPPFLAGS, direct_UG_LDFLAGS, direct_UG_LIBS
-#       flags and libs with direct valuesfor use in configure, for instance
+#       flags and libs with direct values for use in configure, for instance
 #       the value of DUNEMPICPPFLAGS
 #   HAVE_UG
 #       1 or 0 or undefined
