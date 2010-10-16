@@ -70,11 +70,7 @@ AC_DEFUN([DUNE_PATH_UG],[
       
       # intermediate variables
       UG_LIB_PATH="$UGROOT/lib"
-	  if test -d "$UGROOT/include/ug/"; then
-        UG_INCLUDE_PATH="$UGROOT/include/ug/"
-	  else
-        UG_INCLUDE_PATH="$UGROOT/include/"
-	  fi
+      UG_INCLUDE_PATH="$UGROOT/include/ug/"
       
       UG_LDFLAGS=""
 
