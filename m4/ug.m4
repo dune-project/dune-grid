@@ -63,10 +63,6 @@ AC_DEFUN([DUNE_PATH_UG],[
               UGROOT=`cd $with_ug && pwd`
           fi
       fi
-      if test "x$UGROOT" = x; then
-          # use some default value...
-          UGROOT="/usr/local/ug"
-      fi
       
       # intermediate variables
       UG_LIB_PATH="$UGROOT/lib"
