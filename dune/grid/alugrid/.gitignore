@@ -1,5 +1,4 @@
-Makefile.in
-Makefile
-
-.deps
-.libs
+/Makefile.in
+/Makefile
+/.deps
+/.libs

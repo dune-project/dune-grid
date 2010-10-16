@@ -1,7 +1,5 @@
-Makefile.in
-Makefile
-
-*.swp
-
-.deps
-.libs
+/Makefile.in
+/Makefile
+/*.swp
+/.deps
+/.libs

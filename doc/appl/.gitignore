@@ -1,4 +1,4 @@
-Makefile
-Makefile.in
-*.html
-semantic.cache
+/Makefile
+/Makefile.in
+/*.html
+/semantic.cache

@@ -1,5 +1,5 @@
-.deps
-Makefile
-Makefile.in
-semantic.cache
-*.html
+/.deps
+/Makefile
+/Makefile.in
+/semantic.cache
+/*.html

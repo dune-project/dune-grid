@@ -1,6 +1,9 @@
-/test-alberta3d-refine
+/dgf2dgf
+/gmsh2dgf
 /Makefile
 /Makefile.in
+/TMPDGFParser.*
+/*.log
 /*.swp
 /.deps
 /.libs

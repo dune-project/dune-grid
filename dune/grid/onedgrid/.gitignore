@@ -3,7 +3,5 @@
 /.deps
 /.libs
 /*.lo
-/*.swp
-/libgridcommon.la
+/libonedgrid.la
 /semantic.cache
-/cube-to-tet-6.png

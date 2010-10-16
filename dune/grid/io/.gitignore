@@ -2,8 +2,5 @@
 /Makefile.in
 /.deps
 /.libs
-/*.lo
-/*.swp
-/libgridcommon.la
+/libio.la
 /semantic.cache
-/cube-to-tet-6.png
