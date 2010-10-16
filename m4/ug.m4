@@ -6,7 +6,6 @@
 #
 # configure shell variables:
 #   UGROOT
-#   UG_LIB_PATH
 #   UG_CPPFLAGS, UG_LDFLAGS, UG_LIBS
 #       flags and libs with indirect references for the makefiles, for
 #       instance the literal string '${DUNEMPICPPFLAGS}
@@ -62,24 +61,23 @@ AC_DEFUN([DUNE_PATH_UG],[
               UGROOT=`cd $with_ug && pwd`
           fi
       fi
-      
-      # intermediate variables
-      UG_LIB_PATH="$UGROOT/lib"
-      
+
+      # If an explicit path has been provided it needs to be appended
+      # temporarily to PKG_CONFIG_PATH
+      REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
+      PKG_CONFIG_PATH="$UGROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
+
       UG_LDFLAGS=""
 
       AC_ARG_ENABLE(ug-lgmdomain,
         AC_HELP_STRING([--enable-ug-lgmdomain],[use UG LGM domain (default is standard domain)]))
       if test x"$enable_ug_lgmdomain" = xyes ; then
-        UG_LIBS="-L$UG_LIB_PATH -lugL2 -lugL3 -ldevS"
-        direct_UG_LIBS="-L$UG_LIB_PATH -lugL2 -lugL3 -ldevS"
+        UG_LIBS="`$PKG_CONFIG --libs-only-L libug` -lugL2 -lugL3 -ldevS"
+        direct_UG_LIBS="`$PKG_CONFIG --libs-only-L libug` -lugL2 -lugL3 -ldevS"
       else
-        UG_LIBS="-L$UG_LIB_PATH -lugS2 -lugS3 -ldevS"
-        direct_UG_LIBS="-L$UG_LIB_PATH -lugS2 -lugS3 -ldevS"
+        UG_LIBS="`$PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
+        direct_UG_LIBS="`$PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
       fi
-
-      REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
-      PKG_CONFIG_PATH="$UGROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
 
       # Check whether UG is installed at all and has a suitable version
       if $PKG_CONFIG --atleast-version=3.9.2 libug; then
@@ -88,7 +86,7 @@ AC_DEFUN([DUNE_PATH_UG],[
 	    HAVE_UG="1"
 	  else
 		HAVE_UG="0"
-		AC_MSG_WARN([UG not found in $UGROOT])
+		AC_MSG_WARN([UG not found])
       fi
 
       # pre-set variable for summary
