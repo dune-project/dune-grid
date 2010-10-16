@@ -107,15 +107,6 @@ AC_DEFUN([DUNE_PATH_UG],[
       # pre-set variable for summary
       with_ug="no"
       
-      # Currently we only check for libug2
-      # todo: Check for all the libraries that make up UG
-      AC_LANG_PUSH([C++])
-      
-      # define LTCXXCOMPILE like it will be defined in the Makefile
-      ac_save_CXX="$CXX"
-      LTCXXLINK="./libtool --tag=CXX --mode=link $CXX"
-      CXX="$LTCXXLINK"
-
       if test x$HAVE_UG = x1; then
 
 	    if test x`$PKG_CONFIG --variable=parallel libug` == xyes; then
@@ -155,9 +146,6 @@ AC_DEFUN([DUNE_PATH_UG],[
       # restore PKG_CONFIG_PATH 
       PKG_CONFIG_PATH=$REM_PKG_CONFIG_PATH
   
-      CXX="$ac_save_CXX"
-      AC_LANG_POP([C++])
-      
   # end of "no --without-ug"
   fi
 
