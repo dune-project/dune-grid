@@ -753,6 +753,9 @@ namespace Dune {
           dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF());
           dddIfaces.push_back(UG_NS<dim>::NodeIF());
           return;
+        case All_All_Interface :
+          dddIfaces.push_back(UG_NS<dim>::NodeAllIF());
+          return;
         default :
           DUNE_THROW(GridError,
                      "Node communication not supported for "

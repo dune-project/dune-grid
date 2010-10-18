@@ -248,7 +248,8 @@ namespace Dune {
     enum {NEWEL_CE      = UG_NAMESPACE ::NEWEL_CE,
           COARSEN_CE    = UG_NAMESPACE ::COARSEN_CE,
           ECLASS_CE     = UG_NAMESPACE ::ECLASS_CE,
-          MARK_CE       = UG_NAMESPACE ::MARK_CE};
+          MARK_CE       = UG_NAMESPACE ::MARK_CE,
+          REFINE_CE     = UG_NAMESPACE ::REFINE_CE};
 
     /** \brief Refinement rules */
     enum {NO_REFINEMENT = UG_NAMESPACE ::NO_REFINEMENT,
@@ -529,9 +530,9 @@ namespace Dune {
     //! Return true if the element is a ghost element
 #ifdef ModelP
     static bool isGhost(const UG_NS< UG_DIM >::Element* theElement) {
-      if (EPRIO(theElement) == UG_NAMESPACE::PrioHGhost
-          || EPRIO(theElement) == UG_NAMESPACE::PrioVGhost
-          || EPRIO(theElement) == UG_NAMESPACE::PrioVHGhost)
+      if (EPRIO(theElement) == PrioHGhost
+          || EPRIO(theElement) == PrioVGhost
+          || EPRIO(theElement) == PrioVHGhost)
         return true;
       else
         return false;
@@ -552,25 +553,15 @@ namespace Dune {
 #undef EPRIO
 #undef PARHDRE
 #endif
+      using UG ::UINT;
+      using UG_NAMESPACE ::CONTROL_ENTRY;
+      using UG_NAMESPACE ::control_entries;
 
-      return UG_NAMESPACE ::EstimateHere(theElement);
+      return LEAFELEM(theElement);
     }
 
     //! Return true if the node is a leaf node
     static bool isLeaf(const UG_NS< UG_DIM >::Node* theNode) {
-#ifdef ModelP
-      // HACK: Always treat ghost entities as leafs
-
-#define PARHDRE(p) (&((p)->ddd))
-#define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
-      if (EPRIO(theNode) == UG_NAMESPACE::PrioHGhost
-          || EPRIO(theNode) == UG_NAMESPACE::PrioVGhost
-          || EPRIO(theNode) == UG_NAMESPACE::PrioVHGhost)
-        return true;
-#undef EPRIO
-#undef PARHDRE
-#endif
-
 #ifdef ModelP
 #ifndef PRINTED_PARALLEL_UG_ISLEAF_WARNING
 #warning Method isLeaf() for nodes will not work properly in case of vertical load balancing

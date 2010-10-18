@@ -513,15 +513,15 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   if (levelNeighbor != NULL && UG_NS<dim>::isLeaf(levelNeighbor)) {
     leafSubFaces_.resize(1);
     leafSubFaces_[0] = Face(levelNeighbor, numberInNeighbor(center_, levelNeighbor));
-    return;
   }
 
   // If the level neighbor does not exist, then leaf intersections exist only with neighbors
   // on lower levels, if they exist at all.  Therefore we descend in the hierarchy towards
   // the coarsest grid until we have found a level neighbor.
-  if (levelNeighbor == NULL) {
+  else if (levelNeighbor == NULL) {
 
     leafSubFaces_.resize(1);
+    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)NULL, 0);
 
     // I am a leaf and the neighbor does not exist: go down
     Face currentFace(center_, neighborCount_);
@@ -544,8 +544,9 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
         for (int i=0; i<nSides; i++)
           if (UG_NS<dim>::NbElem(otherElement,i) == father) {
             leafSubFaces_[0] = Face(otherElement, i);
-            return;
+            break;
           }
+        break;
 
       }
 
@@ -553,10 +554,6 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
       currentFace = Face(father,fatherSide);
       father = UG_NS<dim>::EFather(father);
     }
-
-    // Nothing found
-    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)NULL, 0);
-    return;
   }
 
 
@@ -564,74 +561,83 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   // hierarchy (i.e. towards finer grids) until we are on the leaf level.  UG is nice enough
   // to provide descendents of element faces itself.  We simply use that functionality.
 
-  SLList<Face> list;
-  int levelNeighborSide = numberInNeighbor(center_, levelNeighbor);
+  else {
 
-  int Sons_of_Side = 0;
-  typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
-  int SonSides[UG_NS<dim>::MAX_SONS];
-
-  int rv = Get_Sons_of_ElementSide(levelNeighbor,
-                                   levelNeighborSide,
-                                   &Sons_of_Side,
-                                   SonList,        // the output elements
-                                   SonSides,       // Output element side numbers
-                                   true,          // Element sons are not precomputed
-                                   false,          // ioflag: Obsolete debugging flag
-                                   true);
-
-  if (rv!=0)
-    DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
-
-  for (int i=0; i<Sons_of_Side; i++)
-    list.push_back(Face(SonList[i],SonSides[i]));
-
-  // //////////////////////////////////////////////////
-  //   Get_Sons_of_ElementSide only computes direct sons.  Therefore in order to get all
-  //   descendents (to then filter out the leaf descendents) we have to search iteratively.
-  //   We do a breadth-first search.
-  // //////////////////////////////////////////////////
-
-  typename SLList<Face>::iterator f = list.begin();
-  for (; f!=list.end(); ++f) {
-
-    const typename UG_NS<dim>::Element* theElement = f->first;
+    SLList<Face> list;
+    int levelNeighborSide = numberInNeighbor(center_, levelNeighbor);
 
     int Sons_of_Side = 0;
     typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
     int SonSides[UG_NS<dim>::MAX_SONS];
 
-    if (!UG_NS<dim>::isLeaf(theElement)) {
+    int rv = Get_Sons_of_ElementSide(levelNeighbor,
+                                     levelNeighborSide,
+                                     &Sons_of_Side,
+                                     SonList,      // the output elements
+                                     SonSides,     // Output element side numbers
+                                     true,        // Element sons are not precomputed
+                                     false,        // ioflag: Obsolete debugging flag
+                                     true);
 
-      Get_Sons_of_ElementSide(theElement,
-                              f->second,        // Input element side number
-                              &Sons_of_Side,       // Number of topological sons of the element side
-                              SonList,            // Output elements
-                              SonSides,           // Output element side numbers
-                              true,
-                              false,
-                              true);
+    if (rv!=0)
+      DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
-      for (int i=0; i<Sons_of_Side; i++)
-        list.push_back(Face(SonList[i],SonSides[i]));
+    for (int i=0; i<Sons_of_Side; i++)
+      list.push_back(Face(SonList[i],SonSides[i]));
+
+    // //////////////////////////////////////////////////
+    //   Get_Sons_of_ElementSide only computes direct sons.  Therefore in order to get all
+    //   descendents (to then filter out the leaf descendents) we have to search iteratively.
+    //   We do a breadth-first search.
+    // //////////////////////////////////////////////////
+
+    typename SLList<Face>::iterator f = list.begin();
+    for (; f!=list.end(); ++f) {
+
+      const typename UG_NS<dim>::Element* theElement = f->first;
+
+      int Sons_of_Side = 0;
+      typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+      int SonSides[UG_NS<dim>::MAX_SONS];
+
+      if (!UG_NS<dim>::isLeaf(theElement)) {
+
+        Get_Sons_of_ElementSide(theElement,
+                                f->second,      // Input element side number
+                                &Sons_of_Side,     // Number of topological sons of the element side
+                                SonList,          // Output elements
+                                SonSides,         // Output element side numbers
+                                true,
+                                false,
+                                true);
+
+        for (int i=0; i<Sons_of_Side; i++)
+          list.push_back(Face(SonList[i],SonSides[i]));
+
+      }
 
     }
 
+    // //////////////////////////////
+    //   Extract result from stack
+    // //////////////////////////////
+    leafSubFaces_.resize(0);
+
+    for (f = list.begin(); f!=list.end(); ++f) {
+
+      // Set element
+      if (UG_NS<dim>::isLeaf(f->first))
+        leafSubFaces_.push_back(*f);
+
+    }
   }
 
-  // //////////////////////////////
-  //   Extract result from stack
-  // //////////////////////////////
-  leafSubFaces_.resize(0);
-
-  for (f = list.begin(); f!=list.end(); ++f) {
-
-    // Set element
-    if (UG_NS<dim>::isLeaf(f->first))
-      leafSubFaces_.push_back(*f);
-
+  // Nothing found
+  if (leafSubFaces_.empty())
+  {
+    leafSubFaces_.resize(1);
+    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)NULL, 0);
   }
-
 }
 
 // Explicit template instantiations to compile the stuff in this file
