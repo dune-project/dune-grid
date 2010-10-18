@@ -592,8 +592,7 @@ namespace Dune {
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   class ALU3dGridLeafIterator
     : public ALU3dGridEntityPointer< cdim, GridImp >,
-      public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridThreadIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper< cdim, pitype,  typename GridImp::MPICommunicatorType > > >
-      //public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper< cdim, pitype, typename GridImp::MPICommunicatorType > >
+      public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper< cdim, pitype, typename GridImp::MPICommunicatorType > >
   {
     enum { dim = GridImp :: dimension };
 
@@ -606,10 +605,7 @@ namespace Dune {
   public:
     typedef typename GridImp::template Codim<cdim>::Entity Entity;
 
-    // the wrapper for the original iterator of the ALU3dGrid
-    typedef typename ALU3DSPACE ALU3dGridThreadIterator<
-        ALU3DSPACE ALU3dGridLeafIteratorWrapper< cdim, pitype, Comm > >
-    IteratorType ;
+    typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper< cdim, pitype, Comm > IteratorType ;
     friend class ALU3dGridTreeIterator< IteratorType > ;
 
     typedef IteratorType InternalIteratorType;
