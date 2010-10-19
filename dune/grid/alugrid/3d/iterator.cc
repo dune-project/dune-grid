@@ -124,9 +124,9 @@ namespace Dune {
 #endif
 
     // don't dereference empty entity pointer
-    assert( this->item_ );
+    assert( this->key_.item() );
     assert( this->entity_ );
-    assert( this->item_ == & this->entityImp().getItem() );
+    assert( this->key_.item() == & this->entityImp().getItem() );
     return (*this->entity_);
   }
 
@@ -251,9 +251,9 @@ namespace Dune {
 #endif
 
     // don't dereference empty entity pointer
-    assert( this->item_ );
+    assert( this->key_.item() );
     assert( this->entity_ );
-    assert( this->item_ == & this->entityImp().getItem() );
+    assert( this->key_.item() == & this->entityImp().getItem() );
     return (*this->entity_);
   }
 
@@ -427,7 +427,7 @@ namespace Dune {
   template <class GridImp>
   alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   {
-    assert(this->item_ != 0);
+    assert(this->key_.item() != 0);
 
     if( ghostElem_.valid() )
     {
@@ -442,7 +442,7 @@ namespace Dune {
     }
     else
     {
-      HElementType * nextItem = goNextElement( elem_, this->item_ );
+      HElementType * nextItem = goNextElement( elem_, this->key_.item() );
       if( ! nextItem)
       {
         this->done();
@@ -459,9 +459,9 @@ namespace Dune {
   ALU3dGridHierarchicIterator<GridImp> :: dereference () const
   {
     // don't dereference empty entity pointer
-    assert( this->item_ );
+    assert( this->key_.item() );
     assert( this->entity_ );
-    assert( this->item_ == & this->entityImp().getItem() );
+    assert( this->key_.item() == & this->entityImp().getItem() );
     return (*this->entity_);
   }
 
