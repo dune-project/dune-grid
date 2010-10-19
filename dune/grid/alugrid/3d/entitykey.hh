@@ -164,16 +164,21 @@ namespace Dune
     //! assignment operator
     ThisType & operator = (const ThisType & org);
 
+    //! clear the key data structure
     void clear();
 
+    //! set element and level
     void set(const HElementType & item, const int level )
     {
       BaseType :: set( item );
       level_ = level ;
     }
 
+    //! return level
     int level () const { return level_ ; }
+    //! return twist
     int twist () const { return twist_ ; }
+    //! return face
     int face  () const { return face_ ; }
 
     using BaseType :: set ;
@@ -257,6 +262,8 @@ namespace Dune
     {}
   };
 
+
+  //! print alugrid entity key to std::stream
   template <int cd, class GridImp>
   inline std :: ostream &operator<< ( std :: ostream &out,
                                       const ALU3dGridEntityKey<cd,GridImp>& key)
@@ -358,6 +365,7 @@ namespace Dune
   ALU3dGridEntityKey<codim,GridImp>::
   operator = (const ALU3dGridEntityKeyType & org)
   {
+    // docu and cleanup
     BaseType :: operator = ( org );
 
     // clone other stuff

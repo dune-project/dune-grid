@@ -97,9 +97,17 @@ namespace Dune {
   template<int dim, class GridImp>
   inline void
   ALU3dGridEntity<0,dim,GridImp>::
+  setElement(const ALU3dGridEntityKeyType& key )
+  {
+    setElement( *key.item() );
+  }
+
+  template<int dim, class GridImp>
+  inline void
+  ALU3dGridEntity<0,dim,GridImp>::
   setElement(HElementType & element)
   {
-    item_= static_cast<IMPLElementType *> (&element);
+    item_ = static_cast<IMPLElementType *> (&element);
     assert( item_ );
     // make sure this method is not called for ghosts
     assert( ! item_->isGhost() );
@@ -398,7 +406,7 @@ namespace Dune {
         else
         {
           // otherwise item is set
-          entityImp().setElement( *item );
+          entityImp().setElement( key_ );
         }
       }
     }
@@ -466,7 +474,7 @@ namespace Dune {
     if( ! entity_ )
     {
       entity_ = grid_.template getNewEntity<codim> ();
-      entityImp().setElement( *(key_.item()) );
+      entityImp().setElement( key_ );
     }
     assert( key_.item() == & entityImp().getItem() );
     return (*entity_);
@@ -497,7 +505,7 @@ namespace Dune {
     key_.set( *item );
     if( item && entity_ )
     {
-      entityImp().setElement( *(key_.item()) );
+      entityImp().setElement( key_ );
     }
   }
 
@@ -551,7 +559,7 @@ namespace Dune {
       if( ! entity_ )
         getEntity(org);
       else
-        entityImp().setElement( *(key_.item()) , key_.level(), key_.twist(), key_.face() );
+        entityImp().setElement( key_ );
     }
     else
       this->done();
@@ -567,7 +575,7 @@ namespace Dune {
     if( ! entity_ )
     {
       entity_ = grid_.template getNewEntity<codim> ();
-      entityImp().setElement( *(key_.item()) , key_.level(), key_.twist() , key_.face() );
+      entityImp().setElement( key_ );
     }
     assert( key_.item() == & entityImp().getItem() );
     return (*entity_);
@@ -586,7 +594,7 @@ namespace Dune {
     key_.set( *item, level );
     if( item && entity_ )
     {
-      entityImp().setElement( *item , level );
+      entityImp().setElement( key_ );
     }
   }
 

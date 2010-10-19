@@ -121,9 +121,8 @@ namespace Dune
     void setElement(const HItemType & item);
     void setElement(const HItemType & item, const int level, int twist=0, int face = -1);
 
-    // not needed anymore
-    void setElement(const HItemType & el,
-                    const VertexType & vx);
+    /* set entity from key */
+    void setElement(const ALU3dGridEntityKeyType& key);
 
     //! setGhost is not valid for this codim
     void setGhost(const HBndSegType  &ghost);
@@ -380,6 +379,9 @@ namespace Dune
         arguments of these methods
      */
     void setElement(HElementType &element);
+
+    /* set entity from key */
+    void setElement(const ALU3dGridEntityKeyType& key);
 
     //! set original element pointer to fake entity
     void setGhost(HBndSegType & ghost);

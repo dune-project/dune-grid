@@ -76,6 +76,13 @@ namespace Dune {
 
   template<int cd, int dim, class GridImp>
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
+  setElement(const ALU3dGridEntityKeyType& key)
+  {
+    setElement(*key.item(), key.level(), key.twist(), key.face());
+  }
+
+  template<int cd, int dim, class GridImp>
+  alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
   setElement(const HItemType & item, const int level, int twist , int face )
   {
     // cast interface to implementation
@@ -86,24 +93,6 @@ namespace Dune {
     face_   = face;
     builtgeometry_=false;
     partitionType_ = this->convertBndId( *item_ );
-  }
-
-  template<int cd, int dim, class GridImp>
-  alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const HItemType &el, const VertexType &vx)
-  {
-    // method is only valid vor vertices
-    if( cd == dim )
-    {
-      assert( false );
-      abort();
-      // cast interface to implementation
-      //item_   = static_cast<const ItemType *> (&vx);
-      gIndex_ = (*item_).getIndex();
-      level_  = (*item_).level();
-      builtgeometry_=false;
-      partitionType_ = this->convertBndId( *item_ );
-    }
   }
 
   template<int cd, int dim, class GridImp>
