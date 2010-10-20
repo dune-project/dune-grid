@@ -54,6 +54,8 @@ namespace Dune
   template<int cd, class GridImp >
   class ALU3dGridEntityPointerBase;
   template<int cd, class GridImp >
+  class ALU3dGridEntityKey;
+  template<int cd, class GridImp >
   class ALU3dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU3dGridGeometry;
@@ -251,6 +253,9 @@ namespace Dune
         // we could - if needed - introduce an other struct for dimglobal of Geometry
 
         typedef Dune::Entity< cd, dim, const Grid, ALU3dGridEntity > Entity;
+
+        // minimal information to generate entities
+        typedef ALU3dGridEntityKey< cd , const Grid> EntityKey ;
 
         typedef Dune::LevelIterator< cd, All_Partition, const Grid, ALU3dGridLevelIterator > LevelIterator;
 
@@ -780,6 +785,24 @@ namespace Dune
 
     //! return reference to Dune reference element according to elType
     const ReferenceElementType & referenceElement() const { return referenceElement_; }
+
+    template< class EntityType >
+    static
+    typename BaseType :: template ReturnImplementationType< EntityType > :: ImplementationType :: EntityKey
+    key( const EntityType& entity )
+    {
+      return BaseType :: getRealImplementation( entity ).key();
+    }
+
+    template <class ALUEntityKey>
+    typename Traits :: template Codim< ALUEntityKey :: codimension > :: EntityPointer
+    entity( const ALUEntityKey& key ) const
+    {
+      enum { codim = ALUEntityKey :: codimension };
+      typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
+      typedef ALU3dGridEntityPointer < codim, const ThisType > ALUPointer ;
+      return ALUPointer( *this, key ) ;
+    }
 
   protected:
     //! Copy constructor should not be used

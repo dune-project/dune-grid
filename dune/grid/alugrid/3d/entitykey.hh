@@ -69,7 +69,18 @@ namespace Dune
     //! equality
     bool equals (const ALU3dGridEntityKeyType& i) const;
 
+    bool operator == (const ALU3dGridEntityKeyType& i) const
+    {
+      return equals( i );
+    }
+
+    bool operator != (const ALU3dGridEntityKeyType& i) const
+    {
+      return ! equals( i );
+    }
+
     HElementType* item() const { return item_; }
+    HBndSegType* ghost() const { return ghost_; }
 
     void clear()
     {
@@ -99,7 +110,7 @@ namespace Dune
   protected:
     // pointer to item
     mutable HElementType* item_;
-    HBndSegType*  ghost_;
+    mutable HBndSegType*  ghost_;
   };
 
   template<int cd, class GridImp>
@@ -183,11 +194,21 @@ namespace Dune
 
     using BaseType :: set ;
 
+    bool operator == (const ALU3dGridEntityKeyType& i) const
+    {
+      return equals( i );
+    }
+
+    bool operator != (const ALU3dGridEntityKeyType& i) const
+    {
+      return ! equals( i );
+    }
+
     //! equality, calls BaseType equals
     bool equals (const ALU3dGridEntityKeyType& key) const
     {
       // only compare the item pointer, this is the real key
-      return BaseType :: equals( key );
+      return BaseType :: equals( key ) && (level() == key.level());
     }
 
   protected:

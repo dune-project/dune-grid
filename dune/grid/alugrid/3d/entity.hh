@@ -99,6 +99,9 @@ namespace Dune
     //! typedef of my type
     typedef ALU3dGridEntityKey<cd,GridImp> ALU3dGridEntityKeyType;
 
+    //! typedef of my type
+    typedef ALU3dGridEntityKeyType EntityKey;
+
     //! level of this element
     int level () const;
 
@@ -263,6 +266,9 @@ namespace Dune
 
     //! typedef of my type
     typedef ALU3dGridEntityKey<0,GridImp> ALU3dGridEntityKeyType;
+
+    //! typedef of my type
+    typedef ALU3dGridEntityKeyType EntityKey;
 
     //! Constructor creating empty Entity
     ALU3dGridEntity(const GridImp &grid, int level);
@@ -611,6 +617,9 @@ namespace Dune
     using BaseType :: entityImp;
     using BaseType :: grid_;
   public:
+    //! type of entity key
+    typedef ALU3dGridEntityKey<cd, GridImp> ALU3dGridEntityKeyType;
+
     //! type of Entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
 
@@ -627,6 +636,23 @@ namespace Dune
                            const HBndSegType & ghostFace )
       : ALU3dGridEntityPointerBase<cd,GridImp> (grid,ghostFace) {}
 
+    //! Constructor for EntityPointer that points to given entity
+    ALU3dGridEntityPointer(const GridImp& grid, const ALU3dGridEntityKeyType& key)
+      : ALU3dGridEntityPointerBase<cd,GridImp> (grid, key)
+    {
+      // for ghost entities we have to copy right away
+      if( key.ghost() )
+      {
+        assert( entity_ == 0 );
+        entity_ = grid_.template getNewEntity<0> ();
+        assert( entity_ );
+        entityImp().setGhost( *key.ghost() );
+
+        // don't free on compactify, otherwise ghost info is lost
+        this->locked_ = true ;
+      }
+    }
+
     //! Constructor for EntityPointer that points to an entity (interior or ghost)
     ALU3dGridEntityPointer(const ALU3dGridEntityType& entity)
       : ALU3dGridEntityPointerBase<cd,GridImp> (entity.grid(),
@@ -635,10 +661,10 @@ namespace Dune
       // for ghost entities we have to copy right away
       if( entity.isGhost() )
       {
-        assert( this->entity_ == 0 );
-        this->entity_ = this->grid_.template getNewEntity<0> ();
-        assert( this->entity_ );
-        this->entityImp().setEntity( entity );
+        assert( entity_ == 0 );
+        entity_ = grid_.template getNewEntity<0> ();
+        assert( entity_ );
+        entityImp().setEntity( entity );
 
         // don't free on compactify, otherwise ghost info is lost
         this->locked_ = true ;
@@ -688,6 +714,9 @@ namespace Dune
     using BaseType :: getEntity;
 
   public:
+    //! type of entity key
+    typedef ALU3dGridEntityKey<cd, GridImp> ALU3dGridEntityKeyType;
+
     //! type of Entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
 
@@ -710,6 +739,11 @@ namespace Dune
     ALU3dGridEntityPointer(const ALU3dGridEntityType& entity)
       : ALU3dGridEntityPointerBase<cd,GridImp> (entity.grid(),
                                                 entity.key())
+    {}
+
+    //! Constructor for EntityPointer that points to given entity
+    ALU3dGridEntityPointer(const GridImp& grid, const ALU3dGridEntityKeyType& key)
+      : ALU3dGridEntityPointerBase<cd,GridImp> ( grid, key )
     {}
 
     //! copy constructor
