@@ -116,6 +116,11 @@ void checkIteratorAssignment(GridType & grid)
       assert( it->level() == 0 );
       EntityPointerType p( it );
 
+      typedef typename GridType::Traits::template Codim<dim>::EntityKey EntityKey;
+      EntityKey key = GridType :: key( *it );
+      EntityPointerType ep = grid.entity( key );
+      assert( ep == it );
+
       assert( p.level()  == 0 );
       assert( p->level() == 0 );
 
