@@ -30,10 +30,39 @@ namespace Dune
     friend class ALU3dGrid < GridImp::elementType, Comm >;
 
     typedef ALU3dImplTraits<GridImp::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim<codim>::ImplementationType ImplementationType;
     typedef typename ImplTraits::template Codim<codim>::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim<codim>::EntityKeyType KeyType ;
 
-    typedef typename ImplTraits::HBndSegType HBndSegType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
+
+    template <int cd, class Key>
+    struct Bnd
+    {
+      static Key* toKey(const HBndSegType* ghostFace)
+      {
+        return (Key*) 0;
+      }
+      static HElementType* getGhost(BNDFaceType* ghost)
+      {
+        return (HElementType*) 0;
+      }
+    };
+    template <class Key>
+    struct Bnd<0, Key>
+    {
+      static Key* toKey(const HBndSegType* ghostFace)
+      {
+        return static_cast< KeyType* > (const_cast< BNDFaceType* >( static_cast<const BNDFaceType*> (ghostFace)));
+      }
+
+      static HElementType* getGhost(BNDFaceType* ghost)
+      {
+        return ghost->getGhost().first;
+      }
+
+    };
   public:
     static const int defaultValue = -665 ;
 
@@ -55,13 +84,13 @@ namespace Dune
     ALU3dGridEntityKeyBase();
 
     //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKeyBase(const HElementType & item);
+    ALU3dGridEntityKeyBase(const HElementType& item);
 
     //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKeyBase(const HElementType * item, const HBndSegType * ghostFace );
+    ALU3dGridEntityKeyBase(const HElementType* item, const HBndSegType* ghostFace );
 
     //! Constructor for EntityKey that points to an ghost
-    ALU3dGridEntityKeyBase(const HBndSegType & ghostFace );
+    ALU3dGridEntityKeyBase(const HBndSegType& ghostFace );
 
     //! copy constructor
     ALU3dGridEntityKeyBase(const ALU3dGridEntityKeyType & org);
@@ -79,25 +108,42 @@ namespace Dune
       return ! equals( i );
     }
 
-    HElementType* item() const { return item_; }
-    HBndSegType* ghost() const { return ghost_; }
+    HElementType* item() const
+    {
+      if( ! item_ ) return (HElementType*) 0;
+
+      HElementType* myItem = dynamic_cast< HElementType* > (item_);
+      if( ! myItem )
+      {
+        assert( ghost() );
+        return Bnd<codim,KeyType>::getGhost( ghost() );
+      }
+      return myItem;
+    }
+    BNDFaceType* ghost() const { return dynamic_cast< BNDFaceType*  > (item_); }
 
     void clear()
     {
       item_  = 0;
-      ghost_ = 0;
     }
 
-    void set(const HElementType & item)
+    KeyType* toKey(const HElementType* item)
     {
-      item_  = const_cast< HElementType *> (&item);
-      ghost_ = 0;
+      return static_cast< KeyType* > (const_cast< ImplementationType* > (static_cast<const ImplementationType* > (item)));
     }
 
-    void set(const HElementType & item, const HBndSegType & ghostFace)
+    void set(const HElementType& item)
     {
-      item_  = const_cast< HElementType *> (&item);
-      ghost_ = const_cast< HBndSegType * > (&ghostFace);
+      item_ = toKey( &item );
+    }
+
+    KeyType* toKey( const HBndSegType* ghostFace )
+    {
+      return Bnd<codim,KeyType>::toKey( ghostFace );
+    }
+    void set(const HBndSegType& ghostFace)
+    {
+      item_ = toKey( &ghostFace );
     }
 
     int level () const { return defaultValue; }
@@ -109,8 +155,7 @@ namespace Dune
 
   protected:
     // pointer to item
-    mutable HElementType* item_;
-    mutable HBndSegType*  ghost_;
+    mutable KeyType* item_;
   };
 
   template<int cd, class GridImp>
@@ -130,9 +175,9 @@ namespace Dune
     friend class ALU3dGrid < GridImp::elementType, Comm >;
 
     typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim<cd>::ImplementationType ImplementationType;
     typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
 
-    typedef typename ImplTraits::HBndSegType HBndSegType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
     typedef ALU3dGridEntity<cd,dim,GridImp> ALU3dGridEntityType;
 
@@ -146,7 +191,7 @@ namespace Dune
     typedef ALU3dGridEntityKey<cd,GridImp> ALU3dGridEntityKeyType;
 
     //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKey(const HElementType & item)
+    ALU3dGridEntityKey(const ImplementationType & item)
     {
       // this constructor should only be called by codim=0 entity keys
       assert( false );
@@ -242,10 +287,11 @@ namespace Dune
     friend class ALU3dGrid < GridImp::elementType, Comm >;
 
     typedef ALU3dImplTraits<GridImp::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim<cd>::ImplementationType ImplementationType;
     typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
 
-    typedef typename ImplTraits::HBndSegType HBndSegType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
 
     typedef ALU3dGridEntity< 0,dim,GridImp> ALU3dGridEntityType ;
 
@@ -266,15 +312,11 @@ namespace Dune
       : ALU3dGridEntityKeyBase<cd,GridImp> (item) {}
 
     //! Constructor for EntityKey that points to an interior element
-    ALU3dGridEntityKey(const HElementType* item, const HBndSegType* ghostFace )
-      : ALU3dGridEntityKeyBase<cd,GridImp> (item, ghostFace) {}
-
-    //! Constructor for EntityKey that points to an interior element
-    ALU3dGridEntityKey(const HElementType & item, int , int , int )
+    ALU3dGridEntityKey(const HElementType& item, int , int , int )
       : ALU3dGridEntityKeyBase<cd,GridImp> (item) {}
 
     //! Constructor for EntityKey that points to an ghost
-    ALU3dGridEntityKey(const HBndSegType & ghostFace )
+    ALU3dGridEntityKey(const HBndSegType& ghostFace )
       : ALU3dGridEntityKeyBase<cd,GridImp> ( ghostFace ) {}
 
     //! copy constructor
@@ -303,35 +345,24 @@ namespace Dune
   inline ALU3dGridEntityKeyBase<codim,GridImp> ::
   ALU3dGridEntityKeyBase()
     : item_( 0 )
-      , ghost_( 0 )
   {}
 
   template<int codim, class GridImp >
   inline ALU3dGridEntityKeyBase<codim,GridImp> ::
   ALU3dGridEntityKeyBase(const HElementType &item)
-    : item_(const_cast<HElementType *> (&item))
-      , ghost_( 0 )
+    : item_( toKey(&item) )
   {}
 
   template<int codim, class GridImp >
   inline ALU3dGridEntityKeyBase<codim,GridImp> ::
-  ALU3dGridEntityKeyBase(const HElementType *item, const HBndSegType *ghostFace)
-    : item_(const_cast<HElementType *> (item))
-      , ghost_(const_cast<HBndSegType *> (ghostFace))
-  {}
-
-  template<int codim, class GridImp >
-  inline ALU3dGridEntityKeyBase<codim,GridImp> ::
-  ALU3dGridEntityKeyBase(const HBndSegType & ghostFace )
-    : item_( ghostFace.getGhost().first )
-      , ghost_( const_cast<HBndSegType *> (&ghostFace))
+  ALU3dGridEntityKeyBase(const HBndSegType& ghostFace )
+    : item_( toKey(&ghostFace) )
   {}
 
   template<int codim, class GridImp >
   inline ALU3dGridEntityKeyBase<codim,GridImp> ::
   ALU3dGridEntityKeyBase(const ALU3dGridEntityKeyType & org)
     : item_(org.item_)
-      , ghost_(org.ghost_)
   {}
 
   template<int codim, class GridImp >
@@ -340,7 +371,6 @@ namespace Dune
   operator = (const ALU3dGridEntityKeyType & org)
   {
     item_  = org.item_;
-    ghost_ = org.ghost_;
     return *this;
   }
 
@@ -349,7 +379,7 @@ namespace Dune
   equals (const ALU3dGridEntityKeyBase<codim,GridImp>& i) const
   {
     // check equality of underlying items
-    return (item_ == i.item_) && (ghost_ == i.ghost_);
+    return (item_ == i.item_);
   }
 
   ///////////////////////////////////////////////////////////////////

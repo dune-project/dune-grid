@@ -430,7 +430,13 @@ namespace Dune
     bool isGhost () const { return ImplTraits::isGhost( ghost_ ); }
 
     //! return key for this entity
-    ALU3dGridEntityKeyType key() const { return ALU3dGridEntityKeyType(item_, ghost_); }
+    ALU3dGridEntityKeyType key() const
+    {
+      if( isGhost() )
+        return ALU3dGridEntityKeyType( getGhost () );
+      else
+        return ALU3dGridEntityKeyType( getItem() );
+    }
 
   private:
     //! return reference to geometry implementation

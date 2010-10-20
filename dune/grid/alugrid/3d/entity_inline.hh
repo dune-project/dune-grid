@@ -495,7 +495,7 @@ namespace Dune {
     entityImp().setGhost( ghostFace );
     // inside the method setGhost the method getGhost of the ghostFace is
     // called and set as item
-    key_.set(entityImp().getItem(), ghostFace);
+    key_.set( ghostFace );
   }
 
   template<int codim, class GridImp >
