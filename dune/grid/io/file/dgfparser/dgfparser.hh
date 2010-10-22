@@ -536,7 +536,8 @@ namespace Dune
           for( IntersectionIterator iiter = gridView.ibegin(el); iiter != iend; ++iiter )
           {
             const typename IntersectionIterator::Intersection &inter = *iiter;
-            if ( inter.boundary( ) )
+            // dirty hack: check for "none" to make corner point grid work
+            if ( inter.boundary() && !inter.type().isNone() )
             {
               bndId_[ indexSet.subIndex(el,inter.indexInInside(),1) ]
                 = dgfFactory.boundaryId( inter );
