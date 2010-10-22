@@ -10,13 +10,437 @@ namespace Dune
   namespace dgf
   {
 
+    namespace Expr
+    {
+
+      struct ConstantExpression
+        : public ProjectionBlock::Expression
+      {
+        explicit ConstantExpression ( const Vector &value )
+          : value_( value )
+        {}
+
+        explicit ConstantExpression ( const double &value )
+          : value_( 1, value )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        Vector value_;
+      };
+
+
+      struct VariableExpression
+        : public ProjectionBlock::Expression
+      {
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+      };
+
+
+      struct FunctionCallExpression
+        : public ProjectionBlock::Expression
+      {
+        FunctionCallExpression ( const ProjectionBlock::Expression *function,
+                                 const ProjectionBlock::Expression *expression )
+          : function_( function ),
+            expression_( expression )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *function_;
+        const ProjectionBlock::Expression *expression_;
+
+        mutable Vector tmp_;
+      };
+
+
+      struct VectorExpression
+        : public ProjectionBlock::Expression
+      {
+        explicit VectorExpression ( std::vector< const ProjectionBlock::Expression * > expressions )
+          : expressions_( expressions )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        std::vector< const ProjectionBlock::Expression * > expressions_;
+      };
+
+
+      struct BracketExpression
+        : public ProjectionBlock::Expression
+      {
+        BracketExpression ( const ProjectionBlock::Expression *expression, size_t field )
+          : expression_( expression ),
+            field_( field )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *expression_;
+        size_t field_;
+      };
+
+
+      struct MinusExpression
+        : public ProjectionBlock::Expression
+      {
+        explicit MinusExpression ( const ProjectionBlock::Expression *expression )
+          : expression_( expression )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *expression_;
+      };
+
+
+      struct NormExpression
+        : public ProjectionBlock::Expression
+      {
+        explicit NormExpression ( const ProjectionBlock::Expression *expression )
+          : expression_( expression )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *expression_;
+      };
+
+
+      struct SqrtExpression
+        : public ProjectionBlock::Expression
+      {
+        explicit SqrtExpression ( const ProjectionBlock::Expression *expression )
+          : expression_( expression )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *expression_;
+      };
+
+
+      struct SinExpression
+        : public ProjectionBlock::Expression
+      {
+        explicit SinExpression ( const ProjectionBlock::Expression *expression )
+          : expression_( expression )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *expression_;
+      };
+
+
+      struct CosExpression
+        : public ProjectionBlock::Expression
+      {
+        explicit CosExpression ( const ProjectionBlock::Expression *expression )
+          : expression_( expression )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *expression_;
+      };
+
+
+      struct PowerExpression
+        : public ProjectionBlock::Expression
+      {
+        PowerExpression ( const ProjectionBlock::Expression *exprA,
+                          const ProjectionBlock::Expression *exprB )
+          : exprA_( exprA ),
+            exprB_( exprB )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *exprA_;
+        const ProjectionBlock::Expression *exprB_;
+
+        mutable Vector tmp_;
+      };
+
+
+      struct SumExpression
+        : public ProjectionBlock::Expression
+      {
+        SumExpression ( const ProjectionBlock::Expression *exprA,
+                        const ProjectionBlock::Expression *exprB )
+          : exprA_( exprA ),
+            exprB_( exprB )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *exprA_;
+        const ProjectionBlock::Expression *exprB_;
+
+        mutable Vector tmp_;
+      };
+
+
+      struct DifferenceExpression
+        : public ProjectionBlock::Expression
+      {
+        DifferenceExpression ( const ProjectionBlock::Expression *exprA,
+                               const ProjectionBlock::Expression *exprB )
+          : exprA_( exprA ),
+            exprB_( exprB )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *exprA_;
+        const ProjectionBlock::Expression *exprB_;
+
+        mutable Vector tmp_;
+      };
+
+
+      struct ProductExpression
+        : public ProjectionBlock::Expression
+      {
+        ProductExpression ( const ProjectionBlock::Expression *exprA,
+                            const ProjectionBlock::Expression *exprB )
+          : exprA_( exprA ),
+            exprB_( exprB )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *exprA_;
+        const ProjectionBlock::Expression *exprB_;
+
+        mutable Vector tmp_;
+      };
+
+
+      struct QuotientExpression
+        : public ProjectionBlock::Expression
+      {
+        QuotientExpression ( const ProjectionBlock::Expression *exprA,
+                             const ProjectionBlock::Expression *exprB )
+          : exprA_( exprA ),
+            exprB_( exprB )
+        {}
+
+        virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+      private:
+        const ProjectionBlock::Expression *exprA_;
+        const ProjectionBlock::Expression *exprB_;
+      };
+
+
+
+      void ConstantExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        result = value_;
+      }
+
+
+      void VariableExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        result = argument;
+      }
+
+
+      void FunctionCallExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        expression_->evaluate( argument, tmp_ );
+        return function_->evaluate( tmp_, result );
+      }
+
+
+      void VectorExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        result.resize( 0 );
+        Vector r;
+        typedef std::vector< const Expression * >::const_iterator Iterator;
+        const Iterator end = expressions_.end();
+        for( Iterator it = expressions_.begin(); it != end; ++it )
+        {
+          (*it)->evaluate( argument, r );
+          for( size_t i = 0; i < r.size(); ++i )
+            result.push_back( r[ i ] );
+        }
+      }
+
+
+      void BracketExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        expression_->evaluate( argument, result );
+        if( field_ >= result.size() )
+          DUNE_THROW( MathError, "Index out of bounds (" <<  field_ << " not in [ 0, " << result.size() << " [)." );
+        result[ 0 ] = result[ field_ ];
+        result.resize( 1 );
+      }
+
+
+      void MinusExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        expression_->evaluate( argument, result );
+        const size_t size = result.size();
+        for( size_t i = 0; i < size; ++i )
+          result[ i ] *= -1.0;
+      }
+
+
+      void NormExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        expression_->evaluate( argument, result );
+        double normsqr = 0.0;
+        const size_t size = result.size();
+        for( size_t i = 0; i < size; ++i )
+          normsqr += result[ i ] * result[ i ];
+        result.resize( 1 );
+        result[ 0 ] = sqrt( normsqr );
+      }
+
+
+      void SqrtExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        expression_->evaluate( argument, result );
+        if( result.size() != 1 )
+          DUNE_THROW( MathError, "Cannot calculate square root of a vector." );
+        result[ 0 ] = sqrt( result[ 0 ] );
+      }
+
+
+      void SinExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        expression_->evaluate( argument, result );
+        if( result.size() != 1 )
+          DUNE_THROW( MathError, "Cannot calculate the sine of a vector." );
+        result[ 0 ] = sin( result[ 0 ] );
+      }
+
+
+      void CosExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        expression_->evaluate( argument, result );
+        if( result.size() != 1 )
+          DUNE_THROW( MathError, "Cannot calculate the cosine of a vector." );
+        result[ 0 ] = cos( result[ 0 ] );
+      }
+
+
+      void PowerExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        exprA_->evaluate( argument, result );
+        exprB_->evaluate( argument, tmp_ );
+
+        if( (result.size() == 1) && (tmp_.size() == 1) )
+          result[ 0 ] = std::pow( result[ 0 ], tmp_[ 0 ] );
+        else
+          DUNE_THROW( MathError, "Cannot calculate powers of vectors." );
+      }
+
+
+      void SumExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        exprA_->evaluate( argument, result );
+        exprB_->evaluate( argument, tmp_ );
+
+        if( result.size() == tmp_.size() )
+        {
+          const size_t size = result.size();
+          for( size_t i = 0; i < size; ++i )
+            result[ i ] += tmp_[ i ];
+        }
+        else
+          DUNE_THROW( MathError, "Cannot sum vectors of different size." );
+      }
+
+
+      void DifferenceExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        exprA_->evaluate( argument, result );
+        exprB_->evaluate( argument, tmp_ );
+
+        if( result.size() == tmp_.size() )
+        {
+          const size_t size = result.size();
+          for( size_t i = 0; i < size; ++i )
+            result[ i ] -= tmp_[ i ];
+        }
+        else
+          DUNE_THROW( MathError, "Cannot sum vectors of different size." );
+      }
+
+
+      void ProductExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        exprA_->evaluate( argument, result );
+        exprB_->evaluate( argument, tmp_ );
+
+        if( result.size() == tmp_.size() )
+        {
+          double product = 0.0;
+          const size_t size = result.size();
+          for( size_t i = 0; i < size; ++i )
+            product += result[ i ] * tmp_[ i ];
+          result.resize( 1 );
+          result[ 0 ] = product;
+        }
+        else if( tmp_.size() == 1 )
+        {
+          const size_t size = result.size();
+          for( size_t i = 0; i < size; ++i )
+            result[ i ] *= tmp_[ 0 ];
+        }
+        else if( result.size() == 1 )
+        {
+          std::swap( result, tmp_ );
+          const size_t size = result.size();
+          for( size_t i = 0; i < size; ++i )
+            result[ i ] *= tmp_[ 0 ];
+        }
+        else
+          DUNE_THROW( MathError, "Cannot multiply non-scalar vectors of different size." );
+      }
+
+
+      void QuotientExpression::evaluate ( const Vector &argument, Vector &result ) const
+      {
+        exprB_->evaluate( argument, result );
+        if( result.size() != 1 )
+          DUNE_THROW( MathError, "Cannot divide by a vector." );
+        double factor = 1.0 / result[ 0 ];
+
+        exprA_->evaluate( argument, result );
+        const size_t size = result.size();
+        for( size_t i = 0; i < size; ++i )
+          result[ i ] *= factor;
+      }
+
+    }
+
+
+
     // ProjectionBlock
     // ---------------
 
-    const char *ProjectionBlock::ID = "Projection";
-
     ProjectionBlock::ProjectionBlock ( std::istream &in, int dimworld )
-      : BasicBlock( in, ID ),
+      : BasicBlock( in, "Projection" ),
         defaultFunction_( 0 )
     {
       while( getnextline() )
@@ -85,33 +509,41 @@ namespace Dune
       // vector constant
       else if( token.type == Token::openingBracket )
       {
-        std::vector< double > value;
+        std::vector< const Expression * > expressions;
         nextToken();
-        while( token.type == Token::number )
+        while( token.type != Token::closingBracket )
         {
-          value.push_back( token.value );
-          nextToken();
+          expressions.push_back( parseExpression( variableName ) );
+          if( (token.type != Token::comma) && (token.type != Token::closingBracket) )
+          {
+            std::cerr << "Warning: Components of vector expressions should be "
+                      << "separated by ','." << std::endl;
+            std::cerr << "         This separation will be mandatory in future "
+                      << "versions." << std::endl;
+          }
+          if( token.type == Token::comma )
+            nextToken();
         }
-        expression = new ConstantExpression( value );
-        matchToken( Token::closingBracket, "']' expected." );
+        nextToken();
+        expression = new Expr::VectorExpression( expressions );
       }
       // norm expression
       else if( token.type == Token::normDelim )
       {
         nextToken();
-        expression = new NormExpression( parseExpression( variableName ) );
+        expression = new Expr::NormExpression( parseExpression( variableName ) );
         matchToken( Token::normDelim, "'|' expected." );
       }
       // number
       else if( token.type == Token::number )
       {
-        expression = new ConstantExpression( token.value );
+        expression = new Expr::ConstantExpression( token.value );
         nextToken();
       }
       // pi
       else if( token.type == Token::piKeyword )
       {
-        expression = new ConstantExpression( M_PI );
+        expression = new Expr::ConstantExpression( M_PI );
         nextToken();
       }
       else if( token.type == Token::string )
@@ -123,12 +555,12 @@ namespace Dune
             DUNE_THROW( DGFException, "Error in " << *this << ": function " << token.literal << " not declared." );
           nextToken();
           matchToken( Token::openingParen, "'(' expected." );
-          expression = new FunctionCallExpression( it->second, parseExpression( variableName ) );
+          expression = new Expr::FunctionCallExpression( it->second, parseExpression( variableName ) );
           matchToken( Token::closingParen, "')' expected." );
         }
         else
         {
-          expression = new VariableExpression;
+          expression = new Expr::VariableExpression;
           nextToken();
         }
       }
@@ -148,7 +580,7 @@ namespace Dune
         nextToken();
         if( (token.type != Token::number) || (double( int( token.value ) ) != token.value) )
           DUNE_THROW( DGFException, "Error in " << *this << ": integral number expected." );
-        expression = new BracketExpression( expression, int( token.value ) );
+        expression = new Expr::BracketExpression( expression, int( token.value ) );
         nextToken();
         matchToken( Token::closingBracket, "']' expected." );
       }
@@ -165,25 +597,25 @@ namespace Dune
       if( (token.type == Token::additiveOperator) && (token.symbol == '-') )
       {
         nextToken();
-        expression = new MinusExpression( parsePostfixExpression( variableName ) );
+        expression = new Expr::MinusExpression( parsePostfixExpression( variableName ) );
       }
       // sqrt
       else if( token.type == Token::sqrtKeyword )
       {
         nextToken();
-        expression = new SqrtExpression( parseUnaryExpression( variableName ) );
+        expression = new Expr::SqrtExpression( parseUnaryExpression( variableName ) );
       }
       // sin
       else if( token.type == Token::sinKeyword )
       {
         nextToken();
-        expression = new SinExpression( parseUnaryExpression( variableName ) );
+        expression = new Expr::SinExpression( parseUnaryExpression( variableName ) );
       }
       // cos
       else if( token.type == Token::cosKeyword )
       {
         nextToken();
-        expression = new CosExpression( parseUnaryExpression( variableName ) );
+        expression = new Expr::CosExpression( parseUnaryExpression( variableName ) );
       }
       else
         expression = parsePostfixExpression( variableName );
@@ -199,7 +631,7 @@ namespace Dune
       while( token.type == Token::powerOperator )
       {
         nextToken();
-        expression = new PowerExpression( expression, parseUnaryExpression( variableName ) );
+        expression = new Expr::PowerExpression( expression, parseUnaryExpression( variableName ) );
       }
       return expression;
     }
@@ -214,9 +646,9 @@ namespace Dune
         const char symbol = token.symbol;
         nextToken();
         if( symbol == '*' )
-          expression = new ProductExpression( expression, parsePowerExpression( variableName ) );
+          expression = new Expr::ProductExpression( expression, parsePowerExpression( variableName ) );
         else if( symbol == '/' )
-          expression = new QuotientExpression( expression, parsePowerExpression( variableName ) );
+          expression = new Expr::QuotientExpression( expression, parsePowerExpression( variableName ) );
         else
           DUNE_THROW( DGFException, "Error in " << *this << ": Internal tokenizer error." );
       }
@@ -233,9 +665,9 @@ namespace Dune
         const char symbol = token.symbol;
         nextToken();
         if( symbol == '+' )
-          expression = new SumExpression( expression, parseMultiplicativeExpression( variableName ) );
+          expression = new Expr::SumExpression( expression, parseMultiplicativeExpression( variableName ) );
         else if( symbol == '-' )
-          expression = new DifferenceExpression( expression, parseMultiplicativeExpression( variableName ) );
+          expression = new Expr::DifferenceExpression( expression, parseMultiplicativeExpression( variableName ) );
         else
           DUNE_THROW( DGFException, "Error in " << *this << ": Internal tokenizer error." );
       }
@@ -354,6 +786,8 @@ namespace Dune
         }
       }
       // parse single character tokens
+      else if( c == ',' )
+        token.setSymbol( Token::comma, line.get() );
       else if( c == '=' )
         token.setSymbol( Token::equals, line.get() );
       else if( c == '(' )
@@ -436,187 +870,6 @@ namespace Dune
       default :
         return out << "invalid [" << token.type << "]";
       }
-    }
-
-
-    void ProjectionBlock::ConstantExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      result = value_;
-    }
-
-
-    void ProjectionBlock::VariableExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      result = argument;
-    }
-
-
-    void ProjectionBlock::FunctionCallExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      expression_->evaluate( argument, tmp_ );
-      return function_->evaluate( tmp_, result );
-    }
-
-
-    void ProjectionBlock::BracketExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      expression_->evaluate( argument, result );
-      if( field_ >= result.size() )
-        DUNE_THROW( MathError, "Index out of bounds (" <<  field_ << " not in [ 0, " << result.size() << " [)." );
-      result[ 0 ] = result[ field_ ];
-      result.resize( 1 );
-    }
-
-
-    void ProjectionBlock::MinusExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      expression_->evaluate( argument, result );
-      const size_t size = result.size();
-      for( size_t i = 0; i < size; ++i )
-        result[ i ] *= -1.0;
-    }
-
-
-    void ProjectionBlock::NormExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      expression_->evaluate( argument, result );
-      double normsqr = 0.0;
-      const size_t size = result.size();
-      for( size_t i = 0; i < size; ++i )
-        normsqr += result[ i ] * result[ i ];
-      result.resize( 1 );
-      result[ 0 ] = sqrt( normsqr );
-    }
-
-
-    void ProjectionBlock::SqrtExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      expression_->evaluate( argument, result );
-      if( result.size() != 1 )
-        DUNE_THROW( MathError, "Cannot calculate square root of a vector." );
-      result[ 0 ] = sqrt( result[ 0 ] );
-    }
-
-
-    void ProjectionBlock::SinExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      expression_->evaluate( argument, result );
-      if( result.size() != 1 )
-        DUNE_THROW( MathError, "Cannot calculate the sine of a vector." );
-      result[ 0 ] = sin( result[ 0 ] );
-    }
-
-
-    void ProjectionBlock::CosExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      expression_->evaluate( argument, result );
-      if( result.size() != 1 )
-        DUNE_THROW( MathError, "Cannot calculate the cosine of a vector." );
-      result[ 0 ] = cos( result[ 0 ] );
-    }
-
-
-    void ProjectionBlock::PowerExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      exprA_->evaluate( argument, result );
-      exprB_->evaluate( argument, tmp_ );
-
-      if( (result.size() == 1) && (tmp_.size() == 1) )
-        result[ 0 ] = std::pow( result[ 0 ], tmp_[ 0 ] );
-      else
-        DUNE_THROW( MathError, "Cannot calculate powers of vectors." );
-    }
-
-
-    void ProjectionBlock::SumExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      exprA_->evaluate( argument, result );
-      exprB_->evaluate( argument, tmp_ );
-
-      if( result.size() == tmp_.size() )
-      {
-        const size_t size = result.size();
-        for( size_t i = 0; i < size; ++i )
-          result[ i ] += tmp_[ i ];
-      }
-      else
-        DUNE_THROW( MathError, "Cannot sum vectors of different size." );
-    }
-
-
-    void ProjectionBlock::DifferenceExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      exprA_->evaluate( argument, result );
-      exprB_->evaluate( argument, tmp_ );
-
-      if( result.size() == tmp_.size() )
-      {
-        const size_t size = result.size();
-        for( size_t i = 0; i < size; ++i )
-          result[ i ] -= tmp_[ i ];
-      }
-      else
-        DUNE_THROW( MathError, "Cannot sum vectors of different size." );
-    }
-
-
-    void ProjectionBlock::ProductExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      exprA_->evaluate( argument, result );
-      exprB_->evaluate( argument, tmp_ );
-
-      if( result.size() == tmp_.size() )
-      {
-        double product = 0.0;
-        const size_t size = result.size();
-        for( size_t i = 0; i < size; ++i )
-          product += result[ i ] * tmp_[ i ];
-        result.resize( 1 );
-        result[ 0 ] = product;
-      }
-      else if( tmp_.size() == 1 )
-      {
-        const size_t size = result.size();
-        for( size_t i = 0; i < size; ++i )
-          result[ i ] *= tmp_[ 0 ];
-      }
-      else if( result.size() == 1 )
-      {
-        std::swap( result, tmp_ );
-        const size_t size = result.size();
-        for( size_t i = 0; i < size; ++i )
-          result[ i ] *= tmp_[ 0 ];
-      }
-      else
-        DUNE_THROW( MathError, "Cannot multiply non-scalar vectors of different size." );
-    }
-
-
-    void ProjectionBlock::QuotientExpression
-    ::evaluate ( const Vector &argument, Vector &result ) const
-    {
-      exprB_->evaluate( argument, result );
-      if( result.size() != 1 )
-        DUNE_THROW( MathError, "Cannot divide by a vector." );
-      double factor = 1.0 / result[ 0 ];
-
-      exprA_->evaluate( argument, result );
-      const size_t size = result.size();
-      for( size_t i = 0; i < size; ++i )
-        result[ i ] *= factor;
     }
 
   }

@@ -29,6 +29,7 @@ namespace Dune
           string, number,
           defaultKeyword, functionKeyword, segmentKeyword,
           sqrtKeyword, sinKeyword, cosKeyword, piKeyword,
+          comma,
           equals,
           openingParen, closingParen, openingBracket, closingBracket, normDelim,
           additiveOperator, multiplicativeOperator, powerOperator,
@@ -53,27 +54,10 @@ namespace Dune
       struct Expression;
 
     private:
-      struct ConstantExpression;
-      struct VariableExpression;
-      struct FunctionCallExpression;
-      struct BracketExpression;
-      struct MinusExpression;
-      struct NormExpression;
-      struct SqrtExpression;
-      struct SinExpression;
-      struct CosExpression;
-      struct PowerExpression;
-      struct SumExpression;
-      struct DifferenceExpression;
-      struct ProductExpression;
-      struct QuotientExpression;
-
       template< int dimworld >
       struct BoundaryProjection;
 
     public:
-      static const char *ID;
-
       ProjectionBlock ( std::istream &in, int dimworld );
 
       template< int dimworld >
@@ -152,223 +136,6 @@ namespace Dune
       {}
 
       virtual void evaluate ( const Vector &argument, Vector &result ) const = 0;
-    };
-
-
-    struct ProjectionBlock::ConstantExpression
-      : public Expression
-    {
-      explicit ConstantExpression ( const Vector &value )
-        : value_( value )
-      {}
-
-      explicit ConstantExpression ( const double &value )
-        : value_( 1, value )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      Vector value_;
-    };
-
-
-    struct ProjectionBlock::VariableExpression
-      : public Expression
-    {
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-    };
-
-
-    struct ProjectionBlock::FunctionCallExpression
-      : public Expression
-    {
-      FunctionCallExpression ( const Expression *function, const Expression *expression )
-        : function_( function ),
-          expression_( expression )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *function_;
-      const Expression *expression_;
-
-      mutable Vector tmp_;
-    };
-
-
-    struct ProjectionBlock::BracketExpression
-      : public Expression
-    {
-      BracketExpression ( const Expression *expression, size_t field )
-        : expression_( expression ),
-          field_( field )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *expression_;
-      size_t field_;
-    };
-
-
-    struct ProjectionBlock::MinusExpression
-      : public Expression
-    {
-      explicit MinusExpression ( const Expression *expression )
-        : expression_( expression )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *expression_;
-    };
-
-
-    struct ProjectionBlock::NormExpression
-      : public Expression
-    {
-      explicit NormExpression ( const Expression *expression )
-        : expression_( expression )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *expression_;
-    };
-
-
-    struct ProjectionBlock::SqrtExpression
-      : public Expression
-    {
-      explicit SqrtExpression ( const Expression *expression )
-        : expression_( expression )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *expression_;
-    };
-
-
-    struct ProjectionBlock::SinExpression
-      : public Expression
-    {
-      explicit SinExpression ( const Expression *expression )
-        : expression_( expression )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *expression_;
-    };
-
-
-    struct ProjectionBlock::CosExpression
-      : public Expression
-    {
-      explicit CosExpression ( const Expression *expression )
-        : expression_( expression )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *expression_;
-    };
-
-
-    struct ProjectionBlock::PowerExpression
-      : public Expression
-    {
-      PowerExpression ( const Expression *exprA, const Expression *exprB )
-        : exprA_( exprA ),
-          exprB_( exprB )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *exprA_;
-      const Expression *exprB_;
-
-      mutable Vector tmp_;
-    };
-
-
-    struct ProjectionBlock::SumExpression
-      : public Expression
-    {
-      explicit SumExpression ( const Expression *exprA, const Expression *exprB )
-        : exprA_( exprA ),
-          exprB_( exprB )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *exprA_;
-      const Expression *exprB_;
-
-      mutable Vector tmp_;
-    };
-
-
-    struct ProjectionBlock::DifferenceExpression
-      : public Expression
-    {
-      explicit DifferenceExpression ( const Expression *exprA, const Expression *exprB )
-        : exprA_( exprA ),
-          exprB_( exprB )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *exprA_;
-      const Expression *exprB_;
-
-      mutable Vector tmp_;
-    };
-
-
-    struct ProjectionBlock::ProductExpression
-      : public Expression
-    {
-      explicit ProductExpression ( const Expression *exprA, const Expression *exprB )
-        : exprA_( exprA ),
-          exprB_( exprB )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *exprA_;
-      const Expression *exprB_;
-
-      mutable Vector tmp_;
-    };
-
-
-    struct ProjectionBlock::QuotientExpression
-      : public Expression
-    {
-      explicit QuotientExpression ( const Expression *exprA, const Expression *exprB )
-        : exprA_( exprA ),
-          exprB_( exprB )
-      {}
-
-      virtual void evaluate ( const Vector &argument, Vector &result ) const;
-
-    private:
-      const Expression *exprA_;
-      const Expression *exprB_;
     };
 
 
