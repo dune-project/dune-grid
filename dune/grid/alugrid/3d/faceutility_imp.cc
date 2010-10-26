@@ -68,7 +68,7 @@ namespace Dune
     {
       // check for ghosts
       // this check is only need in the parallel case
-      const BNDFaceType * bnd = dynamic_cast<const BNDFaceType *> (innerElement_);
+      const BNDFaceType * bnd = static_cast<const BNDFaceType *> (innerElement_);
 
       if(bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
       {
@@ -77,7 +77,7 @@ namespace Dune
         {
           bnd = static_cast<const BNDFaceType *>(bnd->up());
           assert( bnd );
-          innerElement_ = dynamic_cast<const HasFaceType*> (bnd);
+          innerElement_ = static_cast<const HasFaceType*> (bnd);
         }
 
         // get ghost and internal number
@@ -118,8 +118,8 @@ namespace Dune
       if( ! bnd ) // the periodic case
       {
         bndType_ = periodicBoundary ;
-        const GEOPeriodicType* periodicClosure = dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) ;
-        assert( periodicClosure );
+        assert( dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) );
+        const GEOPeriodicType* periodicClosure = static_cast< const GEOPeriodicType* > ( outerElement_ ) ;
 
 #ifdef ALUGRID_PERIODIC_BOUNDARY
         // previously, the segmentIndex( 1 - outerFaceNumber_ ) was used, why?
@@ -158,7 +158,7 @@ namespace Dune
           {
             bnd = static_cast<const BNDFaceType *>(bnd->up());
             assert( bnd );
-            outerElement_ = dynamic_cast<const HasFaceType*> (bnd);
+            outerElement_ = static_cast<const HasFaceType*> (bnd);
           }
 
           // get ghost and internal number
