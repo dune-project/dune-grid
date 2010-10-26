@@ -18,7 +18,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
+  template< class HostGrid, class CoordFunction, class Allocator >
   class GeometryGrid;
 
 
@@ -29,7 +29,7 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator,
+    template< class HostGrid, class CoordFunction, class Allocator,
         bool hasHierarchicIndexSet = Capabilities::hasHierarchicIndexSet< HostGrid >::v >
     class HierarchicIndexSetProvider;
 
@@ -137,16 +137,16 @@ namespace Dune
     // HierarchicIndexSetProvider
     // --------------------------
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    class HierarchicIndexSetProvider< HostGrid, CoordFunction, Numbering, Allocator, false >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    class HierarchicIndexSetProvider< HostGrid, CoordFunction, Allocator, false >
     {};
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    class HierarchicIndexSetProvider< HostGrid, CoordFunction, Numbering, Allocator, true >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    class HierarchicIndexSetProvider< HostGrid, CoordFunction, Allocator, true >
     {
-      typedef HierarchicIndexSetProvider< HostGrid, CoordFunction, Numbering, Allocator, true > This;
+      typedef HierarchicIndexSetProvider< HostGrid, CoordFunction, Allocator, true > This;
 
-      typedef GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
 
     public:
       typedef IndexSet< const Grid, typename HostGrid::HierarchicIndexSet >

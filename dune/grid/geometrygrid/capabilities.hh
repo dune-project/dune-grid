@@ -15,7 +15,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
+  template< class HostGrid, class CoordFunction, class Allocator >
   class GeometryGrid;
 
 
@@ -29,53 +29,53 @@ namespace Dune
     // Capabilities from dune-grid
     // ---------------------------
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator, int codim >
-    struct hasEntity< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator >, codim >
+    template< class HostGrid, class CoordFunction, class Allocator, int codim >
+    struct hasEntity< GeometryGrid< HostGrid, CoordFunction, Allocator >, codim >
     {
       static const bool v = true;
     };
 
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct isParallel< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct isParallel< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = isParallel< HostGrid >::v;
     };
 
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator, int codim >
-    struct canCommunicate< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator >, codim >
+    template< class HostGrid, class CoordFunction, class Allocator, int codim >
+    struct canCommunicate< GeometryGrid< HostGrid, CoordFunction, Allocator >, codim >
     {
       static const bool v = canCommunicate< HostGrid, codim >::v;
     };
 
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = hasBackupRestoreFacilities< HostGrid >::v;
     };
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct isLevelwiseConforming< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct isLevelwiseConforming< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = isLevelwiseConforming< HostGrid >::v;
     };
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct isLeafwiseConforming< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct isLeafwiseConforming< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = isLeafwiseConforming< HostGrid >::v;
     };
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct threadSafe< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct threadSafe< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = false;
     };
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct viewThreadSafe< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct viewThreadSafe< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = false;
     };
@@ -88,8 +88,8 @@ namespace Dune
     template< class Grid >
     struct hasHierarchicIndexSet;
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct hasHierarchicIndexSet< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct hasHierarchicIndexSet< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = hasHierarchicIndexSet< HostGrid >::v;
     };
@@ -108,8 +108,8 @@ namespace Dune
       static const bool v = hasHostEntity< Grid, codim >::v;
     };
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator, int codim >
-    struct hasHostEntity< GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator >, codim >
+    template< class HostGrid, class CoordFunction, class Allocator, int codim >
+    struct hasHostEntity< GeometryGrid< HostGrid, CoordFunction, Allocator >, codim >
     {
       static const bool v = hasEntity< HostGrid, codim >::v;
     };

@@ -13,7 +13,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CordFunction, class Numbering, class Allocator >
+  template< class HostGrid, class CordFunction, class Allocator >
   class GeometryGrid;
 
 
@@ -27,7 +27,7 @@ namespace Dune
     template< int, int, class >
     class Entity;
 
-    template< class HostGrid, class CoordFunction, class Numbering, class Allocator >
+    template< class HostGrid, class CoordFunction, class Allocator >
     struct ExportParams;
 
 
@@ -57,11 +57,11 @@ namespace Dune
     {};
     /** \endcond */
 
-    template< int codim, class HostGrid, class CoordFunction, class Numbering, class Allocator >
-    struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > >
-      : public ExportParams< HostGrid, CoordFunction, Numbering, Allocator >
+    template< int codim, class HostGrid, class CoordFunction, class Allocator >
+    struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction, Allocator > >
+      : public ExportParams< HostGrid, CoordFunction, Allocator >
     {
-      typedef Dune::GeometryGrid< HostGrid, CoordFunction, Numbering, Allocator > Grid;
+      typedef Dune::GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
 
       static const bool fake = !Capabilities::hasHostEntity< Grid, codim >::v;
 

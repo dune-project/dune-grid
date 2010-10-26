@@ -8,7 +8,6 @@
 
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
-#include <dune/grid/geometrygrid/localgeometry.hh>
 
 namespace Dune
 {
@@ -110,8 +109,6 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename Traits::CoordFunction CoordFunction;
 
-      typedef typename Traits::template Codim< codimension >::EntityNumbering Numbering;
-
     public:
       /** \name Host Types
        *  \{ */
@@ -149,14 +146,12 @@ namespace Dune
       EntityBase ( const Grid &grid, const HostEntity &hostEntity )
         : grid_( &grid ),
           hostEntity_( &hostEntity ),
-          numbering_( grid.numbering()[ hostEntity ] ),
           geo_( GeometryImpl( grid.allocator() ) )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostEntity_( other.hostEntity_ ),
-          numbering_( other.numbering_ ),
           geo_( GeometryImpl( grid().allocator() ) )
       {}
 
@@ -214,7 +209,7 @@ namespace Dune
         GeometryImpl &geo = Grid::getRealImplementation( geo_ );
         if( !geo )
         {
-          CoordVector coords( hostEntity(), grid().coordFunction(), numbering() );
+          CoordVector coords( hostEntity(), grid().coordFunction() );
           geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
@@ -233,11 +228,6 @@ namespace Dune
       const HostEntity &hostEntity () const
       {
         return *hostEntity_;
-      }
-
-      const Numbering &numbering () const
-      {
-        return numbering_;
       }
 
       /** \brief obtain the entity's index from a host IndexSet
@@ -267,8 +257,7 @@ namespace Dune
       typename HostIndexSet::IndexType
       subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
       {
-        const unsigned int j = numbering().template map< Numbering::Backward >( cd, i );
-        return indexSet.subIndex( hostEntity(), j, cd );
+        return indexSet.subIndex( hostEntity(), i, cd );
       }
 
       /** \brief check whether the entity is contained in a host index set
@@ -301,7 +290,6 @@ namespace Dune
     private:
       const Grid *grid_;
       const HostEntity *hostEntity_;
-      Numbering numbering_;
       mutable MakeableGeometry geo_;
     };
 
@@ -353,8 +341,6 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename Traits::CoordFunction CoordFunction;
 
-      typedef typename Traits::template Codim< 0 >::EntityNumbering Numbering;
-
     public:
       /** \name Host Types
        *  \{ */
@@ -395,7 +381,6 @@ namespace Dune
       EntityBase ( const Grid &grid, const HostElement &hostElement, int subEntity )
         : grid_( &grid ),
           hostElement_( &hostElement ),
-          numbering_( grid.numbering()[ hostElement ] ),
           subEntity_( subEntity ),
           geo_( GeometryImpl( grid.allocator() ) )
       {}
@@ -403,7 +388,6 @@ namespace Dune
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostElement_( other.hostElement_ ),
-          numbering_( other.numbering_ ),
           subEntity_( other.subEntity_ ),
           geo_( GeometryImpl( grid().allocator() ) )
       {}
@@ -486,7 +470,7 @@ namespace Dune
         GeometryImpl &geo = Grid::getRealImplementation( geo_ );
         if( !geo )
         {
-          CoordVector coords( hostElement(), subEntity_, grid().coordFunction(), numbering() );
+          CoordVector coords( hostElement(), subEntity_, grid().coordFunction() );
           geo = GeometryImpl( topologyId(), coords, grid().allocator() );
         }
         return geo_;
@@ -516,11 +500,6 @@ namespace Dune
         return subEntity_;
       }
 
-      const Numbering &numbering () const
-      {
-        return numbering_;
-      }
-
       /** \brief obtain the entity's index from a host IndexSet
        *
        *  \internal This method is provided by the entity, because its
@@ -531,8 +510,7 @@ namespace Dune
       template< class HostIndexSet >
       typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
       {
-        const unsigned int j = numbering().template map< Numbering::Backward >( codimension, subEntity_ );
-        return indexSet.subIndex( hostElement(), j, codimension );
+        return indexSet.subIndex( hostElement(), subEntity_, codimension );
       }
 
       /** \brief obtain the index of a subentity from a host IndexSet
@@ -551,8 +529,7 @@ namespace Dune
         const GenericReferenceElement< ctype, dimension > &refElement
           = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
         const int j = refElement.subEntity( subEntity_, codimension, i, codimension+cd );
-        const unsigned int k = numbering().template map< Numbering::Backward >( codimension+cd, j );
-        return indexSet.subIndex( hostElement(), k, codimension+cd );
+        return indexSet.subIndex( hostElement(), j, codimension+cd );
       }
 
       /** \brief check whether the entity is contained in a host index set
@@ -578,8 +555,7 @@ namespace Dune
       template< class HostIdSet >
       typename HostIdSet::IdType id ( const HostIdSet &idSet ) const
       {
-        const unsigned int j = numbering().template map< Numbering::Backward >( codimension, subEntity_ );
-        return idSet.subId( hostElement(), j, codimension );
+        return idSet.subId( hostElement(), subEntity_, codimension );
       }
       /** \} */
 
@@ -588,14 +564,12 @@ namespace Dune
       vertexPartitionType ( const GenericReferenceElement< ctype, dimension > &refElement, int i ) const
       {
         const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
-        const unsigned int k = numbering().template map< Numbering::Backward >( dimension, j );
-        return hostElement().template subEntity< dimension >( k )->partitionType();
+        return hostElement().template subEntity< dimension >( j )->partitionType();
       }
 
     private:
       const Grid *grid_;
       const HostElement *hostElement_;
-      Numbering numbering_;
       unsigned int subEntity_;
       mutable Geometry geo_;
     };
@@ -671,17 +645,11 @@ namespace Dune
 
       /** \} */
 
-    private:
-      typedef GeoGrid::LocalGeometryProvider< typename remove_const< Grid >::type, codimension >
-      LocalGeometryProvider;
-
-    public:
       typedef typename Base::HostEntity HostEntity;
       typedef typename Base::HostElement HostElement;
 
       using Base::grid;
       using Base::hostEntity;
-      using Base::numbering;
 
       Entity ( const Grid &grid, const HostEntity &hostEntity )
         : Base( grid, hostEntity )
@@ -748,7 +716,7 @@ namespace Dune
 
       const LocalGeometry &geometryInFather () const
       {
-        return geoInFatherProvider_( hostEntity().geometryInFather(), numbering() );
+        return hostEntity().geometryInFather();
       }
 
       HierarchicIterator hbegin ( int maxLevel ) const
@@ -777,9 +745,6 @@ namespace Dune
       {
         return hostEntity().mightVanish();
       }
-
-    private:
-      LocalGeometryProvider geoInFatherProvider_;
     };
 
   }
