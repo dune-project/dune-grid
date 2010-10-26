@@ -40,13 +40,13 @@ namespace Dune
     template <int cd, class Key>
     struct Bnd
     {
-      static Key* toKey(const HBndSegType* ghostFace)
+      static Key* toKey(const HBndSegType*)
       {
         return (Key*) 0;
       }
-      static HElementType* getGhost(BNDFaceType* ghost)
+      static HElementType* getItem(KeyType* key)
       {
-        return (HElementType*) 0;
+        return static_cast< HElementType* > ( key );
       }
     };
     template <class Key>
@@ -56,12 +56,24 @@ namespace Dune
       {
         return static_cast< KeyType* > (const_cast< BNDFaceType* >( static_cast<const BNDFaceType*> (ghostFace)));
       }
-
-      static HElementType* getGhost(BNDFaceType* ghost)
+      static HElementType* getItem(KeyType* key)
       {
-        return ghost->getGhost().first;
+        if( key )
+        {
+          if( key->isboundary() )
+          {
+            return ((static_cast< BNDFaceType* > ( key ))->getGhost().first);
+          }
+          else
+          {
+            // we cannot cast to HElement here, since only the implementation is derived
+            // from hasFace
+            return static_cast< HElementType * > (static_cast< ImplementationType* > (key));
+          }
+        }
+        else
+          return static_cast< HElementType * > (0) ;
       }
-
     };
   public:
     static const int defaultValue = -665 ;
@@ -79,6 +91,15 @@ namespace Dune
 
     //! make type of entity pointer implementation available in derived classes
     typedef ALU3dGridEntityKey<codimension,GridImp> EntityKeyImp;
+
+    //! Destructor
+    ~ALU3dGridEntityKeyBase()
+    {
+#ifndef NDEBUG
+      // clear pointer
+      clear();
+#endif
+    }
 
     //! Constructor for EntityKey that points to an element
     ALU3dGridEntityKeyBase();
@@ -98,11 +119,13 @@ namespace Dune
     //! equality
     bool equals (const ALU3dGridEntityKeyType& i) const;
 
+    //! equality operator
     bool operator == (const ALU3dGridEntityKeyType& i) const
     {
       return equals( i );
     }
 
+    //! inequality operator
     bool operator != (const ALU3dGridEntityKeyType& i) const
     {
       return ! equals( i );
@@ -110,21 +133,12 @@ namespace Dune
 
     HElementType* item() const
     {
-      if( ! item_ ) return (HElementType*) 0;
-
-      HElementType* myItem = dynamic_cast< HElementType* > (item_);
-      if( ! myItem )
-      {
-        assert( ghost() );
-        return Bnd<codim,KeyType>::getGhost( ghost() );
-      }
-      return myItem;
+      return Bnd<codim,KeyType>::getItem( item_ );
     }
-    BNDFaceType* ghost() const { return dynamic_cast< BNDFaceType*  > (item_); }
 
     void clear()
     {
-      item_  = 0;
+      item_ = 0;
     }
 
     KeyType* toKey(const HElementType* item)
