@@ -36,21 +36,19 @@ namespace Dune
   private:
     typedef AlbertaGridLeafIntersection< GridImp > IntersectionImp;
 
-    Intersection *intersection_;
-
   public:
     template< class EntityImp >
     AlbertaGridLeafIntersectionIterator ( const EntityImp &entity, Begin )
-      : intersection_( new Intersection( IntersectionImp( entity, 0 ) ) )
+      : intersection_( IntersectionImp( entity, 0 ) )
     {}
 
     template< class EntityImp >
     AlbertaGridLeafIntersectionIterator ( const EntityImp &entity, End )
-      : intersection_( new Intersection( IntersectionImp( entity, dimension+1 ) ) )
+      : intersection_( IntersectionImp( entity, dimension+1 ) )
     {}
 
     AlbertaGridLeafIntersectionIterator ( const This &other )
-      : intersection_( new Intersection( other.intersectionImp() ) )
+      : intersection_( other.intersectionImp() )
     {}
 
     This &operator= ( const This &other )
@@ -59,14 +57,9 @@ namespace Dune
       return *this;
     }
 
-    ~AlbertaGridLeafIntersectionIterator ()
-    {
-      delete intersection_;
-    }
-
     const Intersection &dereference () const
     {
-      return *intersection_;
+      return intersection_;
     }
 
     bool equals ( const This &other ) const
@@ -82,13 +75,15 @@ namespace Dune
   private:
     const IntersectionImp &intersectionImp () const
     {
-      return GridImp::getRealImplementation( *intersection_ );
+      return GridImp::getRealImplementation( intersection_ );
     }
 
     IntersectionImp &intersectionImp ()
     {
-      return GridImp::getRealImplementation( *intersection_ );
+      return GridImp::getRealImplementation( intersection_ );
     }
+
+    Intersection intersection_;
   };
 
 }

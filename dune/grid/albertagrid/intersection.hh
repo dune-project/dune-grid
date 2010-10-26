@@ -3,8 +3,6 @@
 #ifndef DUNE_ALBERTA_INTERSECTION_HH
 #define DUNE_ALBERTA_INTERSECTION_HH
 
-#include <dune/common/smallobject.hh>
-
 #include <dune/grid/common/intersection.hh>
 
 #include <dune/grid/albertagrid/transformation.hh>
@@ -32,7 +30,6 @@ namespace Dune
 
   template< class Grid >
   class AlbertaGridIntersectionBase
-    : public SmallObject
   {
     typedef AlbertaGridIntersectionBase< Grid > This;
 
