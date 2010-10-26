@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <dune/common/smallobject.hh>
+#include <dune/common/polyallocator.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -32,7 +32,7 @@ namespace Dune
   class DefaultCoordFunction;
 
   template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid >,
-      class Allocator = SmallObjectPolyAllocator >
+      class Allocator = PolyAllocator >
   class GeometryGrid;
 
 
