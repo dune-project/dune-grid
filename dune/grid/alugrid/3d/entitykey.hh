@@ -141,12 +141,17 @@ namespace Dune
     //! return iterior item
     HElementType* interior() const
     {
+      assert( ! isGhost() );
       return static_cast< HElementType * > (static_cast< ImplementationType* > (item_));
     }
 
     //! methods for ghosts
     bool isGhost() const { return Bnd<codim,KeyType>::isGhost( item_ ); }
-    BNDFaceType* ghost() const { return Bnd<codim,KeyType>::ghost( item_ ); }
+    BNDFaceType* ghost() const
+    {
+      assert( isGhost() );
+      return Bnd<codim,KeyType>::ghost( item_ );
+    }
 
     void clear()
     {
