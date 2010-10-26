@@ -100,7 +100,7 @@ namespace Dune {
   setElement(const ALU3dGridEntityKeyType& key )
   {
     if( ! key.isGhost() )
-      setElement( *key.item() );
+      setElement( *key.interior() );
     else
       setGhost( *key.ghost() );
   }

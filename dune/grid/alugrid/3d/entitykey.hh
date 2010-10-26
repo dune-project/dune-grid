@@ -138,6 +138,12 @@ namespace Dune
     //! get item from key
     HElementType* item() const { return Bnd<codim,KeyType>::getItem( item_ ); }
 
+    //! return iterior item
+    HElementType* interior() const
+    {
+      return static_cast< HElementType * > (static_cast< ImplementationType* > (item_));
+    }
+
     //! methods for ghosts
     bool isGhost() const { return Bnd<codim,KeyType>::isGhost( item_ ); }
     BNDFaceType* ghost() const { return Bnd<codim,KeyType>::ghost( item_ ); }
