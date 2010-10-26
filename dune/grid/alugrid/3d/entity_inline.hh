@@ -99,7 +99,10 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp>::
   setElement(const ALU3dGridEntityKeyType& key )
   {
-    setElement( *key.item() );
+    if( ! key.isGhost() )
+      setElement( *key.item() );
+    else
+      setGhost( *key.ghost() );
   }
 
   template<int dim, class GridImp>

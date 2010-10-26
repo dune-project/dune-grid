@@ -48,6 +48,8 @@ namespace Dune
       {
         return static_cast< HElementType* > ( key );
       }
+      static bool isGhost(KeyType*) { return false; }
+      static BNDFaceType* ghost( KeyType*  ) { return ( BNDFaceType* ) 0; }
     };
     template <class Key>
     struct Bnd<0, Key>
@@ -74,6 +76,8 @@ namespace Dune
         else
           return static_cast< HElementType * > (0) ;
       }
+      static bool isGhost(KeyType* key) { assert( key ); return key->isboundary(); }
+      static BNDFaceType* ghost( KeyType* key ) { assert( key ); return (static_cast< BNDFaceType* > ( key )); }
     };
   public:
     static const int defaultValue = -665 ;
@@ -131,10 +135,12 @@ namespace Dune
       return ! equals( i );
     }
 
-    HElementType* item() const
-    {
-      return Bnd<codim,KeyType>::getItem( item_ );
-    }
+    //! get item from key
+    HElementType* item() const { return Bnd<codim,KeyType>::getItem( item_ ); }
+
+    //! methods for ghosts
+    bool isGhost() const { return Bnd<codim,KeyType>::isGhost( item_ ); }
+    BNDFaceType* ghost() const { return Bnd<codim,KeyType>::ghost( item_ ); }
 
     void clear()
     {
