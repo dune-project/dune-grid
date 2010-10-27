@@ -88,7 +88,7 @@ namespace Dune
 
   // AnalyticalCoordFunction
   // -----------------------
-  /** @brief Derive an implementation of a discrete coordinate function
+  /** @brief Derive an implementation of an analytical coordinate function
    * from this class.
    **/
   template< class ct, unsigned int dimD, unsigned int dimR, class Impl >
