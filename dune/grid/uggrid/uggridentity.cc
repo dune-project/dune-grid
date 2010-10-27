@@ -72,7 +72,26 @@ bool Dune::UGGridEntity < 0, dim ,GridImp >::isNew () const
 template< int dim, class GridImp>
 bool Dune::UGGridEntity < 0, dim ,GridImp >::mightVanish () const
 {
-  return ((!isRegular()) || (UG_NS<dim>::ReadCW(target_, UG_NS<dim>::COARSEN_CE)));
+  if ((!isRegular()) || (UG_NS<dim>::ReadCW(target_, UG_NS<dim>::COARSEN_CE)))
+    return true;
+
+  // maybe it isn't marked, but a sibling is
+  if(hasFather())
+  {
+    typename UG_NS<dim>::Element* father_ = UG_NS<dim>::EFather(target_);
+    typename UG_NS<dim>::Element* sons_[UG_NS<dim>::MAX_SONS];
+    UG_NS<dim>::GetSons(father_,sons_);
+    for (int i = 0; i < UG_NS<dim>::MAX_SONS; ++i)
+    {
+      if (sons_[i] == NULL) // last son visited
+        break;
+      if (!UG_NS<dim>::isRegular(sons_[i]) || UG_NS<dim>::ReadCW(sons_[i], UG_NS<dim>::COARSEN_CE))
+        return true;
+    }
+  }
+
+  // neither the element nor a sibling is marked
+  return false;
 }
 
 //*****************************************************************8
