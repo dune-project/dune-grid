@@ -6,7 +6,6 @@
 #include <dune/grid/common/intersection.hh>
 
 #include <dune/grid/albertagrid/transformation.hh>
-#include <dune/grid/albertagrid/agmemory.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/geometry.hh>
 

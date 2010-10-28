@@ -77,11 +77,16 @@ namespace Dune
     typedef typename GeometryObject::ImplementationType GeometryImp;
 
   public:
-    //! contructor
-    AlbertaGridEntity ( const GridImp &grid );
+    //! constructor
+    explicit AlbertaGridEntity ( const GridImp &grid );
 
+    //! contructor
+    AlbertaGridEntity ( const GridImp &grid, const ElementInfo &elementInfo, int subEntity );
+
+#if 0
     //! copy constructor
     AlbertaGridEntity ( const This &other );
+#endif
 
     //! level of this element
     int level () const;
@@ -118,7 +123,7 @@ namespace Dune
     //! obtain a reference to the grid
     const GridImp &grid () const
     {
-      return grid_;
+      return *grid_;
     }
 
     //! obtain number of the subentity within the element (in ALBERTA numbering)
@@ -146,7 +151,7 @@ namespace Dune
 
   private:
     // grid this entity belong to
-    const GridImp &grid_;
+    const GridImp *grid_;
 
     // ALBERTA element info
     ElementInfo elementInfo_;
@@ -219,15 +224,15 @@ namespace Dune
 
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
-    //! Destructor, needed perhaps needed for deleteing faceEntity_ and
-    //! edgeEntity_ , see below
-    //! there are only implementations for dim==dimworld 2,3
-    ~AlbertaGridEntity() {};
-
-    //! Constructor, real information is set via setElInfo method
+    //! constructor
     explicit AlbertaGridEntity ( const GridImp &grid );
 
+    //! constructor
+    AlbertaGridEntity ( const GridImp &grid, const ElementInfo &elementInfo, int subEntity );
+
+#if 0
     AlbertaGridEntity ( const This &other );
+#endif
 
     //! level of this element
     int level () const;
@@ -347,12 +352,12 @@ namespace Dune
     void setElement ( const ElementInfo &elementInfo, int subEntity );
 
     // same as setElInfo just with a entity given
-    void setEntity ( const This &other);
+    void setEntity ( const This &other );
 
     //! obtain a reference to the grid
     const GridImp &grid () const
     {
-      return grid_;
+      return *grid_;
     }
 
     //! obtain number of the subentity within the element (in ALBERTA numbering)
@@ -369,9 +374,9 @@ namespace Dune
 
     //! obtain twist of a subentity
     template< int codim >
-    int twist ( int i )
+    int twist ( int i ) const
     {
-      return elementInfo().template twist< codim >( grid_.generic2alberta( codim, i ) );
+      return elementInfo().template twist< codim >( grid().generic2alberta( codim, i ) );
     }
 
   private:
@@ -384,7 +389,7 @@ namespace Dune
     }
 
     //! the corresponding grid
-    const GridImp & grid_;
+    const GridImp *grid_;
 
     // Alberta element info
     ElementInfo elementInfo_;

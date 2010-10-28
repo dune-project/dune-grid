@@ -40,9 +40,6 @@
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/capabilities.hh>
 
-// contains a simple memory management for some componds of this grid
-#include "agmemory.hh"
-
 #include <dune/grid/albertagrid/coordcache.hh>
 #include <dune/grid/albertagrid/gridfamily.hh>
 #include <dune/grid/albertagrid/level.hh>
@@ -560,8 +557,6 @@ namespace Dune
     EntityObject;
 
   public:
-    typedef AGMemoryProvider< EntityObject > EntityProvider;
-
     friend class AlbertaGridLeafIntersectionIterator< const This >;
 
     template< int codim >
@@ -605,15 +600,6 @@ namespace Dune
       return getRealImplementation( intersection );
     }
 
-    // (for internal use only) return obj pointer to EntityImp
-    template< int codim >
-    MakeableInterfaceObject< typename Traits::template Codim< codim >::Entity > *
-    getNewEntity () const;
-
-    // (for internal use only) free obj pointer of EntityImp
-    template <int codim>
-    void freeEntity ( MakeableInterfaceObject< typename Traits::template Codim< codim >::Entity > *entity ) const;
-
   public:
     // read global element number from elNumbers_
     const Alberta::GlobalVector &
@@ -631,8 +617,6 @@ namespace Dune
 
     // number of boundary segments within the macro grid
     size_t numBoundarySegments_;
-
-    mutable EntityProvider entityProvider_;
 
     // map between ALBERTA and DUNE numbering
     Alberta::NumberingMap< dimension, Alberta::Dune2AlbertaNumbering > numberingMap_;
@@ -677,7 +661,6 @@ namespace Dune
 
 } // namespace Dune
 
-#include "agmemory.hh"
 #include "albertagrid.cc"
 
 // undef all dangerous defines
