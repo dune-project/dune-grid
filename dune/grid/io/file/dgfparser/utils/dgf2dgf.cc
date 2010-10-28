@@ -37,6 +37,8 @@ using namespace Dune;
 int main ( int argc, char *argv[] )
 try
 {
+  typedef GridSelector::GridType Grid;
+
   Dune::MPIHelper::instance( argc, argv );
 
   if( argc < 2 )
@@ -49,11 +51,11 @@ try
   const std::string dgfFileName( argv[ 1 ] );
   const int level = (argc < 3 ? 0 : atoi( argv[ 2 ] ));
 
-  GridPtr< GridSelector::GridType > gridptr( dgfFileName );
+  GridPtr< Grid > gridptr( dgfFileName );
   if( level > 0 )
     gridptr->globalRefine( level );
 
-  typedef GridSelector::GridType::LeafGridView GridView;
+  typedef Grid::LeafGridView GridView;
   GridView gridView = gridptr->leafView();
 
   DGFWriter< GridView > dgfWriter( gridView );
@@ -61,7 +63,7 @@ try
 
   const GridView::IndexSet &indexSet = gridView.indexSet();
   std::cerr << "Grid successfully written: "
-            << indexSet.size( GridType::dimension ) << " vertices, "
+            << indexSet.size( Grid::dimension ) << " vertices, "
             << indexSet.size( 0 ) << " elements."
             << std::endl;
 
