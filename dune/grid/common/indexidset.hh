@@ -76,6 +76,7 @@ namespace Dune
   template<class GridImp, class IndexSetImp, class IndexTypeImp>
   class IndexSet
   {
+  public:
     /** \brief The type used for the indices */
     typedef IndexTypeImp IndexType;
 
