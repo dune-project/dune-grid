@@ -20,7 +20,7 @@ libuggrid_la_LIBADD =				\
 
 endif
 
-headercheck_IGNORE = uggridentity.hh uggridentitypointer.hh uggridgeometry.hh \
+headercheck_IGNORE = uggridentity.hh uggridentitypointer.hh uggridfactory.hh uggridgeometry.hh \
                      uggridhieriterator.hh uggridindexsets.hh uggridleafiterator.hh \
                      uggridleveliterator.hh ugincludes.hh uggridintersections.hh \
                      uggridintersectioniterators.hh ugwrapper.hh
