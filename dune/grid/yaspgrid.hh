@@ -2539,6 +2539,8 @@ namespace Dune {
       }
     }
 
+    using MultiYGrid<dim,yaspgrid_ctype>::defaultLoadbalancer;
+
   public:
     //! define type used for coordinates in grid module
     typedef yaspgrid_ctype ctype;
@@ -2581,7 +2583,7 @@ namespace Dune {
     YaspGrid (MPI_Comm comm, Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap,
-              const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : YMG(comm,L,s,periodic,overlap,lb), ccobj(comm),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
@@ -2592,7 +2594,7 @@ namespace Dune {
     YaspGrid (Dune::FakeMPIHelper::MPICommunicator, Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap,
-              const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : YMG(L,s,periodic,overlap,lb),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
