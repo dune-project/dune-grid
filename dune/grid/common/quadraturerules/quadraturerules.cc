@@ -672,7 +672,7 @@ namespace Dune {
           local[1] = gp->position()[0] * (1. - jp->position()[0]);
           weight   = gp->weight() * jp->weight() * (1. - jp->position()[0]);
           // put in container
-          push_back(QuadraturePoint<ct,d>(local,weight));
+          this->push_back(QuadraturePoint<ct,d>(local,weight));
         }
       }
       this->delivered_order = std::min(gauss1D.order(), jac1D.order());
@@ -731,7 +731,7 @@ namespace Dune {
         local[k]=SimplexQuadraturePointsSingleton<2>::sqp.point(m,i)[k];
       weight=SimplexQuadraturePointsSingleton<2>::sqp.weight(m,i);
       // put in container
-      push_back(QuadraturePoint<ct,d>(local,weight));
+      this->push_back(QuadraturePoint<ct,d>(local,weight));
     }
   }
 
@@ -958,7 +958,7 @@ namespace Dune {
             weight   = (1.0-j2p->position()[0]) * (1.0-j2p->position()[0]) * (1.0-j1p->position()[0])
                        * gp->weight() * j1p->weight() * j2p->weight();
             // put in container
-            push_back(QuadraturePoint<ct,d>(local,weight));
+            this->push_back(QuadraturePoint<ct,d>(local,weight));
           }
         }
       }
@@ -995,7 +995,7 @@ namespace Dune {
         local[k]=SimplexQuadraturePointsSingleton<3>::sqp.point(m,i)[k];
       weight=SimplexQuadraturePointsSingleton<3>::sqp.weight(m,i);
       // put in container
-      push_back(QuadraturePoint<ct,d>(local,weight));
+      this->push_back(QuadraturePoint<ct,d>(local,weight));
 
     }
 
