@@ -57,9 +57,6 @@ int main () try
   // Test creation of 2d cube grids
 #if HAVE_UG
   typedef UGGrid<2> QuadrilateralGridType;
-#else
-  std::cout << "WARNING: 2d cube grids not tested because no suitable grid implementation is available!" << std::endl;
-#endif
 
   array<unsigned int,2> elements2d;
   elements2d.fill(4);
@@ -74,14 +71,14 @@ int main () try
   assert(quadrilateralGrid->size(0) == numCubes2d);
 
   gridcheck(*quadrilateralGrid);
+#else
+  std::cout << "WARNING: 2d cube grids not tested because no suitable grid implementation is available!" << std::endl;
+#endif
 
 
   // Test creation of 2d triangle grids
 #if HAVE_UG
   typedef UGGrid<2> TriangleGridType;
-#else
-  std::cout << "WARNING: 2d simplicial grids not tested because no suitable grid implementation is available!" << std::endl;
-#endif
 
   shared_ptr<TriangleGridType> triangleGrid = StructuredGridFactory<TriangleGridType>::createSimplexGrid(FieldVector<double,2>(0),
                                                                                                          FieldVector<double,2>(1),
@@ -91,6 +88,9 @@ int main () try
   assert(triangleGrid->size(0) == 2*numCubes2d);    // each cube gets split into 2 triangles
 
   gridcheck(*triangleGrid);
+#else
+  std::cout << "WARNING: 2d simplicial grids not tested because no suitable grid implementation is available!" << std::endl;
+#endif
 
   // /////////////////////////////////////////////////////////////////////////////
   //   Test 3d grids
@@ -99,9 +99,6 @@ int main () try
   // Test creation of 3d cube grids
 #if HAVE_UG
   typedef UGGrid<3> HexahedralGridType;
-#else
-  std::cout << "WARNING: 3d cube grids not tested because no suitable grid implementation is available!" << std::endl;
-#endif
 
   array<unsigned int,3> elements3d;
   elements3d.fill(4);
@@ -116,14 +113,13 @@ int main () try
   assert(hexahedralGrid->size(0) == numCubes3d);
 
   gridcheck(*hexahedralGrid);
-
+#else
+  std::cout << "WARNING: 3d cube grids not tested because no suitable grid implementation is available!" << std::endl;
+#endif
 
   // Test creation of 3d simplex grids
 #if HAVE_UG
   typedef UGGrid<3> TetrahedralGridType;
-#else
-  std::cout << "WARNING: 3d simplicial grids not tested because no suitable grid implementation is available!" << std::endl;
-#endif
 
   shared_ptr<TetrahedralGridType> tetrahedralGrid = StructuredGridFactory<TetrahedralGridType>::createSimplexGrid(FieldVector<double,3>(0),
                                                                                                                   FieldVector<double,3>(1),
@@ -133,6 +129,9 @@ int main () try
   assert(tetrahedralGrid->size(0) == 6*numCubes3d);    // each cube gets split into 6 tetrahedra
 
   gridcheck(*tetrahedralGrid);
+#else
+  std::cout << "WARNING: 3d simplicial grids not tested because no suitable grid implementation is available!" << std::endl;
+#endif
 
   return 0;
 
