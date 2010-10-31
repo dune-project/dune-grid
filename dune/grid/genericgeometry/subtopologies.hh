@@ -90,7 +90,7 @@ namespace Dune
     };
 
     template< class BaseTopology, unsigned int dim, unsigned int codim >
-    struct SizeImpl< Pyramid< BaseTopology >, dim, codim >
+    class SizeImpl< Pyramid< BaseTopology >, dim, codim >
     {
       typedef Pyramid< BaseTopology > Topology;
       dune_static_assert( (dim == Topology :: dimension), "Wrong dimension" );

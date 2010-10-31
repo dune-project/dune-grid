@@ -268,8 +268,9 @@ namespace Dune
     };
 
     template< template< class > class Operation, class Topology >
-    struct IfTopology< Operation, 0, Topology >
+    class IfTopology< Operation, 0, Topology >
     {
+    public:
       static void apply ( const unsigned int topologyId )
       {
         Operation< Topology >::apply();

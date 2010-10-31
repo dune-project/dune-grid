@@ -22,8 +22,6 @@ namespace Dune
     template< class Topology >
     struct ReferenceDomain;
 
-
-
     // ReferenceDomain
     // ---------------
 
@@ -32,13 +30,14 @@ namespace Dune
 
     /** \cond */
     template<>
-    class ReferenceDomainBase< Point >
+    struct ReferenceDomainBase< Point >
     {
+    private:
       typedef Point Topology;
 
-      friend class ReferenceDomain< Topology >;
-      friend class ReferenceDomainBase< Prism< Topology > >;
-      friend class ReferenceDomainBase< Pyramid< Topology > >;
+      friend struct ReferenceDomain< Topology >;
+      friend struct ReferenceDomainBase< Prism< Topology > >;
+      friend struct ReferenceDomainBase< Pyramid< Topology > >;
 
       static const unsigned int numNormals = 0;
 
@@ -71,8 +70,9 @@ namespace Dune
 
 
     template< class BaseTopology >
-    class ReferenceDomainBase< Prism< BaseTopology > >
+    struct ReferenceDomainBase< Prism< BaseTopology > >
     {
+    private:
       typedef Prism< BaseTopology > Topology;
 
       friend class ReferenceDomain< Topology >;
@@ -129,8 +129,9 @@ namespace Dune
 
 
     template< class BaseTopology >
-    class ReferenceDomainBase< Pyramid< BaseTopology > >
+    struct ReferenceDomainBase< Pyramid< BaseTopology > >
     {
+    private:
       typedef Pyramid< BaseTopology > Topology;
 
       friend class ReferenceDomain< Topology >;
