@@ -15,6 +15,8 @@
 
 #include <dune/common/mpihelper.hh>
 
+#if HAVE_UG
+
 #ifdef ModelP
 #include <dune/common/mpicollectivecommunication.hh>
 #endif
@@ -995,4 +997,5 @@ namespace Dune {
 
 } // namespace Dune
 
+#endif
 #endif
