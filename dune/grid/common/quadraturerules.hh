@@ -162,7 +162,7 @@ namespace Dune {
 
   // Forward declaration of the factory class,
   // needed internally by the QuadratureRules container class.
-  template<typename ctype, int dim> struct QuadratureRuleFactory;
+  template<typename ctype, int dim> class QuadratureRuleFactory;
 
   /** \brief A container for all quadrature rules of dimension <tt>dim</tt>
       \ingroup Quadrature
