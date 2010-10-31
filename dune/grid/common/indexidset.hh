@@ -74,7 +74,7 @@ namespace Dune
      @ingroup IndexIdSets
    */
   template<class GridImp, class IndexSetImp, class IndexTypeImp>
-  struct IndexSet
+  class IndexSet
   {
     /** \brief The type used for the indices */
     typedef IndexTypeImp IndexType;

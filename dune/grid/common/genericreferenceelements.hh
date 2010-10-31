@@ -548,8 +548,9 @@ namespace Dune
   // --------------------------------
 
   template< class ctype, int dim >
-  struct GenericReferenceElementContainer
+  class GenericReferenceElementContainer
   {
+  public:
     typedef GenericReferenceElement< ctype, dim > value_type;
 
     const value_type &operator() ( const GeometryType &type ) const
@@ -616,8 +617,9 @@ namespace Dune
   };
 
   template< class ctype >
-  struct GenericReferenceElementContainer< ctype, 2 >
+  class GenericReferenceElementContainer< ctype, 2 >
   {
+  public:
     typedef GenericReferenceElement< ctype, 2 > value_type;
 
     const value_type &operator() ( const GeometryType &type ) const
@@ -668,8 +670,9 @@ namespace Dune
   };
 
   template< class ctype >
-  struct GenericReferenceElementContainer< ctype, 1 >
+  class GenericReferenceElementContainer< ctype, 1 >
   {
+  public:
     typedef GenericReferenceElement< ctype, 1 > value_type;
 
     const value_type &operator() ( const GeometryType &type ) const
@@ -704,8 +707,9 @@ namespace Dune
   };
 
   template< class ctype >
-  struct GenericReferenceElementContainer< ctype, 0 >
+  class GenericReferenceElementContainer< ctype, 0 >
   {
+  public:
     typedef GenericReferenceElement< ctype, 0 > value_type;
 
     const value_type &operator() ( const GeometryType &type ) const
