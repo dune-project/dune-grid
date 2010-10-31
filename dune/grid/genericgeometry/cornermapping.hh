@@ -152,7 +152,7 @@ namespace Dune
                              JacobianTransposedType &J )
       {
         const FieldType xn = x[ dim-1 ];
-        bool affine = true;
+        bool isAffine = true;
         if( alwaysAffine )
         {
           const FieldType cxn = FieldType( 1 ) - xn;
@@ -162,8 +162,8 @@ namespace Dune
         else
         {
           JacobianTransposedType Jtop;
-          affine &= BottomMapping :: Dphi_set( coords, x, factor, J );
-          affine &= TopMapping :: Dphi_set( coords, x, factor, Jtop );
+          isAffine &= BottomMapping :: Dphi_set( coords, x, factor, J );
+          isAffine &= TopMapping :: Dphi_set( coords, x, factor, Jtop );
 
           FieldType norm = FieldType( 0 );
           for( unsigned int i = 0; i < dim-1; ++i )
@@ -172,11 +172,11 @@ namespace Dune
             norm += Jtop[ i ].two_norm2();
             J[ i ].axpy( xn, Jtop[ i ] );
           }
-          affine &= (norm < 1e-12);
+          isAffine &= (norm < 1e-12);
         }
         BottomMapping :: phi_set( coords, x, -factor, J[ dim-1 ] );
         TopMapping :: phi_add( coords, x, factor, J[ dim-1 ] );
-        return affine;
+        return isAffine;
       }
 
       template< class CoordStorage >
@@ -186,7 +186,7 @@ namespace Dune
                              JacobianTransposedType &J )
       {
         const FieldType xn = x[ dim-1 ];
-        bool affine = true;
+        bool isAffine = true;
         if( alwaysAffine )
         {
           const FieldType cxn = FieldType( 1 ) - xn;
@@ -196,8 +196,8 @@ namespace Dune
         else
         {
           JacobianTransposedType Jbottom, Jtop;
-          affine &= BottomMapping :: Dphi_set( coords, x, FieldType( 1 ), Jbottom );
-          affine &= TopMapping :: Dphi_set( coords, x, FieldType( 1 ), Jtop );
+          isAffine &= BottomMapping :: Dphi_set( coords, x, FieldType( 1 ), Jbottom );
+          isAffine &= TopMapping :: Dphi_set( coords, x, FieldType( 1 ), Jtop );
 
           FieldType norm = FieldType( 0 );
           for( unsigned int i = 0; i < dim-1; ++i )
@@ -207,11 +207,11 @@ namespace Dune
             J[ i ].axpy( factor, Jbottom[ i ] );
             J[ i ].axpy( factor*xn, Jtop[ i ] );
           }
-          affine &= (norm < 1e-12);
+          isAffine &= (norm < 1e-12);
         }
         BottomMapping :: phi_add( coords, x, -factor, J[ dim-1 ] );
         TopMapping :: phi_add( coords, x, factor, J[ dim-1 ] );
-        return affine;
+        return isAffine;
       }
     };
 
@@ -315,13 +315,13 @@ namespace Dune
                              JacobianTransposedType &J )
       {
         GlobalCoordinate &q = J[ dim-1 ];
-        bool affine;
+        bool isAffine;
         if( alwaysAffine )
         {
           const GlobalCoordinate &top = TopMapping :: origin( coords );
           const GlobalCoordinate &bottom = BottomMapping :: origin( coords );
 
-          affine = BottomMapping :: Dphi_set( coords, x, factor, J );
+          isAffine = BottomMapping :: Dphi_set( coords, x, factor, J );
           for( unsigned int i = 0; i < dimW; ++i )
             q[ i ] = factor * (top[ i ] - bottom[ i ]);
         }
@@ -333,7 +333,7 @@ namespace Dune
           LocalCoordinate xb;
           for( unsigned int i = 0; i < dim-1; ++i )
             xb[ i ] = icxn * x[ i ];
-          affine = BottomMapping :: Dphi_set( coords, xb, factor, J );
+          isAffine = BottomMapping :: Dphi_set( coords, xb, factor, J );
 
           TopMapping :: phi_set( coords, x, factor, q );
           BottomMapping :: phi_add( coords, xb, -factor, q );
@@ -344,7 +344,7 @@ namespace Dune
               q[ i ] += J[ j ][ i ] * xb[ j ];
           }
         }
-        return affine;
+        return isAffine;
       }
 
       template< class CoordStorage >
@@ -354,13 +354,13 @@ namespace Dune
                              JacobianTransposedType &J )
       {
         GlobalCoordinate &q = J[ dim-1 ];
-        bool affine;
+        bool isAffine;
         if( alwaysAffine )
         {
           const GlobalCoordinate &top = TopMapping :: origin( coords );
           const GlobalCoordinate &bottom = BottomMapping :: origin( coords );
 
-          affine = BottomMapping :: Dphi_add( coords, x, factor, J );
+          isAffine = BottomMapping :: Dphi_add( coords, x, factor, J );
           for( unsigned int i = 0; i < dimW; ++i )
             q[ i ] += factor * (top[ i ] - bottom[ i ]);
         }
@@ -372,7 +372,7 @@ namespace Dune
           LocalCoordinate xb;
           for( unsigned int i = 0; i < dim-1; ++i )
             xb[ i ] = icxn * x[ i ];
-          affine = BottomMapping :: Dphi_add( coords, xb, factor, J );
+          isAffine = BottomMapping :: Dphi_add( coords, xb, factor, J );
 
           TopMapping :: phi_add( coords, x, factor, q );
           BottomMapping :: phi_add( coords, xb, -factor, q );
@@ -383,7 +383,7 @@ namespace Dune
               q[ i ] += J[ j ][ i ] * xb[ j ];
           }
         }
-        return affine;
+        return isAffine;
       }
     };
 
