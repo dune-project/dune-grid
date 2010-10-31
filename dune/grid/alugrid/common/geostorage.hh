@@ -13,8 +13,6 @@
 #include <dune/grid/alugrid/3d/alu3dinclude.hh>
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 
-#endif
-
 namespace Dune
 {
   template<int dim, int dimw>
@@ -242,4 +240,7 @@ namespace Dune
   };
 
 } // end namespace Dune
+
+#endif // end HAVE_ALUGRID
+
 #endif
