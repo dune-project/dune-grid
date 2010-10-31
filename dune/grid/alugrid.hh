@@ -3,8 +3,8 @@
 #ifndef DUNE_ALUGRID_HH
 #define DUNE_ALUGRID_HH
 
-// only include this code, if ENABLE_ALUGRID is defined
-#ifdef ENABLE_ALUGRID
+// only include this code, if HAVE_ALUGRID is true
+#if HAVE_ALUGRID
 
 #include <dune/grid/alugrid/3d/alugrid.hh>
 #include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
@@ -111,8 +111,6 @@ namespace Dune
 
 } //end  namespace Dune
 
-#else
-#error "Trying to use <dune/grid/alugrid.hh> without ALUGRID_CPPFLAGS."
-#endif // #ifdef ENABLE_ALUGRID
+#endif // #ifdef HAVE_ALUGRID
 
 #endif
