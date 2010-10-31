@@ -36,6 +36,7 @@ namespace Dune {
       { }
 
       using Base::addCellData;
+      using Base::addPointData;
 
       void addCellData(const VTKFunctionPtr& p) {
         addCellData(shared_ptr<typename Base::FunctionWriter>
