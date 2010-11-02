@@ -162,8 +162,10 @@ namespace Dune {
 
     /** \brief Default constructor, optionally with grid-specific options
      *
-     * \note There are no grid-specific options for UG at the moment, so
-     *       any parameters specified have no effect.
+     * UG supports the following grid-specific options:
+     * \li \c heap_size control over UG's memory requirements (same as the
+     *                  \c heapSize parameter to UG's constructor;
+     *                  default: 500).
      */
     explicit GridFactory(const ParameterTree &params = ParameterTree());
 

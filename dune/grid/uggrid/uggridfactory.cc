@@ -70,7 +70,7 @@ template <int dimworld>
 Dune::GridFactory<Dune::UGGrid<dimworld> >::
 GridFactory(const ParameterTree &params)
 {
-  grid_ = new Dune::UGGrid<dimworld>;
+  grid_ = new Dune::UGGrid<dimworld>(params.get("heap_size", 500));
 
   factoryOwnsGrid_ = true;
 
