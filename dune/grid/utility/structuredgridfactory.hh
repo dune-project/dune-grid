@@ -7,10 +7,15 @@
     \brief A class to construct structured cube and simplex grids using the grid factory
  */
 
+#include <algorithm>
 #include <cstddef>
+#include <utility>
 
 #include <dune/common/array.hh>
+#include <dune/common/fvector.hh>
+#include <dune/common/parametertree.hh>
 #include <dune/common/shared_ptr.hh>
+
 #include <dune/grid/common/gridfactory.hh>
 
 namespace Dune {
@@ -112,19 +117,83 @@ namespace Dune {
       return unitOffsets;
     }
 
+    /** \brief parse grid creation options from a parameter tree
+
+        \param params   ParameterTree specifying how to create the grid.
+                        The options noted below are interpreted, any other
+                        options are ignored.  Options usually have
+                        defaults, but if an option is present in the
+                        ParameterTree is must parse successfully, otherwise
+                        there will be exceptions.
+        \param bbox     Parsed from the option \c bbox.lower and \c
+                        bbox.upper.
+        \param elements Parsed from the option \c elements.
+
+        Options in params:
+        \li \c bbox.lower Lower left corner of the grid (default: all 0)
+        \li \c bbox.upper Upper right corner of the grid (default: all 1)
+        \li \c elements   Number of elements in each coordinate direction
+                          (default: all 1)
+     */
+    static void parseOptions(const ParameterTree &params,
+                             std::pair<FieldVector<ctype,dimworld>,
+                                 FieldVector<ctype,dimworld> > &bbox,
+                             array<unsigned, dim> &elements)
+    {
+      std::fill(bbox.first.begin(), bbox.first.end(), 0);
+      std::fill(bbox.second.begin(), bbox.second.end(), 1);
+      std::fill(elements.begin(), elements.end(), 1);
+
+      bbox.first = params.get("bbox.lower", bbox.first);
+      bbox.second = params.get("bbox.upper", bbox.second);
+      elements = params.get("elements", elements);
+    }
+
   public:
+
+    /** \brief Create a structured cube grid
+
+        \param params ParameterTree specifying how to create the grid.
+                      The options noted below are interpreted, and the
+                      ParameterTree is then passed down to the
+                      GridFactory.  In particular, the interpreted options
+                      are not removed from the tree before passing it
+                      down.
+
+        Options in params:
+        \li \c bbox.lower Lower left corner of the grid (default: all 0)
+        \li \c bbox.upper Upper right corner of the grid (default: all 1)
+        \li \c elements   Number of elements in each coordinate direction
+                          (default: all 1)
+     */
+    static shared_ptr<GridType> createCubeGrid(const ParameterTree &params)
+    {
+      std::pair<FieldVector<ctype,dimworld>,
+          FieldVector<ctype,dimworld> > bbox;
+      array<unsigned, dim> elements;
+      parseOptions(params, bbox, elements);
+      return createCubeGrid(bbox.first, bbox.second, elements, params);
+    }
 
     /** \brief Create a structured cube grid
         \param lowerLeft Lower left corner of the grid
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
+        \param params ParameterTree with grid specific options.  This is
+                      passed directly to the underlying GridFactory.  In
+                      particular, this functions does not interpret the \c
+                      bbox.lower, \c bbox.upper, or \c elements options
+                      from the ParameterTree, use createCubeGrid(const
+                      ParameterTree&) for that.
      */
-    static shared_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                                               const FieldVector<ctype,dimworld>& upperRight,
-                                               const array<unsigned int,dim>& elements)
+    static shared_ptr<GridType>
+    createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+                   const FieldVector<ctype,dimworld>& upperRight,
+                   const array<unsigned int,dim>& elements,
+                   const ParameterTree &params = ParameterTree())
     {
       // The grid factory
-      GridFactory<GridType> factory;
+      GridFactory<GridType> factory(params);
 
       // Insert uniformly spaced vertices
       array<unsigned int,dim> vertices = elements;
@@ -178,16 +247,52 @@ namespace Dune {
 
     /** \brief Create a structured simplex grid
 
+        \param params ParameterTree specifying how to create the grid.
+                      The options noted below are interpreted, and the
+                      ParameterTree is then passed down to the
+                      GridFactory.  In particular, the interpreted options
+                      are not removed from the tree before passing it
+                      down.
+
+        Options in params:
+        \li \c bbox.lower Lower left corner of the grid (default: all 0)
+        \li \c bbox.upper Upper right corner of the grid (default: all 1)
+        \li \c elements   Number of elements in each coordinate direction
+                          (default: all 1)
+     */
+    static shared_ptr<GridType>
+    createSimplexGrid(const ParameterTree &params) {
+      std::pair<FieldVector<ctype,dimworld>,
+          FieldVector<ctype,dimworld> > bbox;
+      array<unsigned, dim> elements;
+      parseOptions(params, bbox, elements);
+      return createSimplexGrid(bbox.first, bbox.second, elements,
+                               params);
+    }
+
+    /** \brief Create a structured simplex grid
+        \param lowerLeft Lower left corner of the grid
+        \param upperRight Upper right corner of the grid
+        \param elements Number of elements in each coordinate direction
+        \param params ParameterTree with grid specific options.  This is
+                      passed directly to the underlying GridFactory.  In
+                      particular, this functions does not interpret the \c
+                      bbox.lower, \c bbox.upper, or \c elements options
+                      from the ParameterTree, use createCubeGrid(const
+                      ParameterTree&) for that.
+
         This works in all dimensions.  The Coxeter-Freudenthal-Kuhn triangulation is
         used, which splits each cube into dim! simplices.  See Allgower and Georg,
         'Numerical Path Following' for a description.
      */
-    static shared_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                                                  const FieldVector<ctype,dimworld>& upperRight,
-                                                  const array<unsigned int,dim>& elements)
+    static shared_ptr<GridType>
+    createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+                      const FieldVector<ctype,dimworld>& upperRight,
+                      const array<unsigned int,dim>& elements,
+                      const ParameterTree &params = ParameterTree())
     {
       // The grid factory
-      GridFactory<GridType> factory;
+      GridFactory<GridType> factory(params);
 
       // Insert uniformly spaced vertices
       array<unsigned int,dim> vertices = elements;
