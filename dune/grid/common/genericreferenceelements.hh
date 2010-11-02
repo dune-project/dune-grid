@@ -184,7 +184,7 @@ namespace Dune
 
     /** \brief check if a local coordinate is in the reference element of
      *         the i-th subentity E with codimension c of the current
-     *         referencre element.
+     *         reference element.
      *
      *  Denote by E the i-th subentity of codimension codim of the current
      *  reference element. This method return true, if the given local
