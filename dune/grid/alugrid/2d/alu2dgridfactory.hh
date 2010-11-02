@@ -289,7 +289,7 @@ namespace Dune
       : BaseType( filename )
     {}
 
-    /** \brief constructor taking filename */
+    /** \brief constructor setting verbosity level */
     GridFactory ( const bool verbose )
       : BaseType( )
     {
