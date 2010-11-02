@@ -134,19 +134,24 @@ namespace Dune {
         \li \c bbox.upper Upper right corner of the grid (default: all 1)
         \li \c elements   Number of elements in each coordinate direction
                           (default: all 1)
+        \li \c global_refines Number of globalRefines to apply after
+                              creating the grid (default: 0)
      */
     static void parseOptions(const ParameterTree &params,
                              std::pair<FieldVector<ctype,dimworld>,
                                  FieldVector<ctype,dimworld> > &bbox,
-                             array<unsigned, dim> &elements)
+                             array<unsigned, dim> &elements,
+                             int &globalRefines)
     {
       std::fill(bbox.first.begin(), bbox.first.end(), 0);
       std::fill(bbox.second.begin(), bbox.second.end(), 1);
       std::fill(elements.begin(), elements.end(), 1);
+      globalRefines = 0;
 
       bbox.first = params.get("bbox.lower", bbox.first);
       bbox.second = params.get("bbox.upper", bbox.second);
       elements = params.get("elements", elements);
+      globalRefines = params.get("global_refines", globalRefines);
     }
 
   public:
@@ -165,14 +170,20 @@ namespace Dune {
         \li \c bbox.upper Upper right corner of the grid (default: all 1)
         \li \c elements   Number of elements in each coordinate direction
                           (default: all 1)
+        \li \c global_refines Number of globalRefines to apply after
+                              creating the grid (default: 0)
      */
     static shared_ptr<GridType> createCubeGrid(const ParameterTree &params)
     {
       std::pair<FieldVector<ctype,dimworld>,
           FieldVector<ctype,dimworld> > bbox;
       array<unsigned, dim> elements;
-      parseOptions(params, bbox, elements);
-      return createCubeGrid(bbox.first, bbox.second, elements, params);
+      int globalRefines;
+      parseOptions(params, bbox, elements, globalRefines);
+      shared_ptr<GridType> gridp(createCubeGrid(bbox.first, bbox.second,
+                                                elements, params));
+      gridp->globalRefine(globalRefines);
+      return gridp;
     }
 
     /** \brief Create a structured cube grid
@@ -259,15 +270,21 @@ namespace Dune {
         \li \c bbox.upper Upper right corner of the grid (default: all 1)
         \li \c elements   Number of elements in each coordinate direction
                           (default: all 1)
+        \li \c global_refines Number of globalRefines to apply after
+                              creating the grid (default: 0)
      */
     static shared_ptr<GridType>
     createSimplexGrid(const ParameterTree &params) {
       std::pair<FieldVector<ctype,dimworld>,
           FieldVector<ctype,dimworld> > bbox;
       array<unsigned, dim> elements;
-      parseOptions(params, bbox, elements);
-      return createSimplexGrid(bbox.first, bbox.second, elements,
-                               params);
+      int globalRefines;
+      parseOptions(params, bbox, elements, globalRefines);
+      shared_ptr<GridType> gridp(createSimplexGrid(bbox.first,
+                                                   bbox.second, elements,
+                                                   params));
+      gridp->globalRefine(globalRefines);
+      return gridp;
     }
 
     /** \brief Create a structured simplex grid
