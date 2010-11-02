@@ -13,6 +13,7 @@
 #include <map>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/parametertree.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/onedgrid.hh>
@@ -33,8 +34,12 @@ namespace Dune {
 
   public:
 
-    /** \brief Default constructor */
-    GridFactory();
+    /** \brief Default constructor, optionally with grid-specific options
+     *
+     * \note There are no grid-specific options for OneDGrid at the
+     *       moment, so any parameters specified have no effect.
+     */
+    explicit GridFactory(const ParameterTree &params = ParameterTree());
 
     /** \brief Constructor for a given grid object
 

@@ -11,6 +11,7 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/mpihelper.hh>
+#include <dune/common/parametertree.hh>
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridfactory.hh>
@@ -331,6 +332,17 @@ namespace Dune
       : BaseType( filename, communicator )
     {}
 
+    /** \brief Constructor with grid-specific options
+     *
+     * \note There are no grid-specific options for alugrid at the moment, so
+     *       this constructor is identical to the default constructor.
+     */
+    GridFactory ( const ParameterTree& params,
+                  const MPICommunicatorType &communicator =
+                    Grid::defaultCommunicator() )
+      : BaseType( communicator )
+    {}
+
   protected:
     template< class, class, int > friend class ALULocalGeometryStorage;
     /** \brief constructor taking verbosity flag */
@@ -366,6 +378,17 @@ namespace Dune
     GridFactory ( const std::string &filename,
                   const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
       : BaseType( filename, communicator )
+    {}
+
+    /** \brief Constructor with grid-specific options
+     *
+     * \note There are no grid-specific options for alugrid at the moment, so
+     *       this constructor is identical to the default constructor.
+     */
+    GridFactory ( const ParameterTree& params,
+                  const MPICommunicatorType &communicator =
+                    Grid::defaultCommunicator() )
+      : BaseType( communicator )
     {}
 
   protected:

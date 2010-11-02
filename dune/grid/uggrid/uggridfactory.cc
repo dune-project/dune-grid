@@ -3,6 +3,8 @@
 
 #include <config.h>
 
+#include <dune/common/parametertree.hh>
+
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
 
@@ -66,7 +68,7 @@ static int boundarySegmentWrapper3dQuad(void *data, double *param, double *resul
 
 template <int dimworld>
 Dune::GridFactory<Dune::UGGrid<dimworld> >::
-GridFactory()
+GridFactory(const ParameterTree &params)
 {
   grid_ = new Dune::UGGrid<dimworld>;
 

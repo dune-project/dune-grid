@@ -12,6 +12,7 @@
 #include <dune/common/function.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/geometrytype.hh>
+#include <dune/common/parametertree.hh>
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
@@ -91,6 +92,10 @@ namespace Dune
 
     /** \brief Default constructor */
     GridFactoryInterface()
+    {}
+
+    /** \brief Constructor with grid-specific options */
+    GridFactoryInterface(const ParameterTree& params)
     {}
 
     /** \brief Constructor for a given grid object
@@ -284,6 +289,12 @@ namespace Dune
     /** \brief Default constructor */
     GridFactory() {
       DUNE_THROW(GridError, "There is no grid factory for this grid type!");
+    }
+
+    /** \brief Constructor with grid-specific options */
+    GridFactory(const ParameterTree& params) {
+      DUNE_THROW(GridError,
+                 "There is no grid factory for this grid type!");
     }
 
     /** \brief Constructor for a given grid object

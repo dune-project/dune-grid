@@ -14,6 +14,7 @@
 #include <map>
 
 #include <dune/common/array.hh>
+#include <dune/common/parametertree.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
@@ -100,8 +101,12 @@ namespace Dune
     //! is the factory able to create periodic meshes?
     static const bool supportPeriodicity = MacroData::supportPeriodicity;
 
-    /** default constructor */
-    GridFactory ()
+    /** \brief Default constructor, optionally with grid-specific options
+     *
+     * \note There are no grid-specific options for Alberta at the moment, so
+     *       any parameters specified have no effect.
+     */
+    explicit GridFactory ( const ParameterTree &params = ParameterTree() )
       : globalProjection_( (const DuneProjection *) 0 )
     {
       macroData_.create();

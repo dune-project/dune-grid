@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/parametertree.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/gridfactory.hh>
@@ -159,8 +160,12 @@ namespace Dune {
 
   public:
 
-    /** \brief Default constructor */
-    GridFactory();
+    /** \brief Default constructor, optionally with grid-specific options
+     *
+     * \note There are no grid-specific options for UG at the moment, so
+     *       any parameters specified have no effect.
+     */
+    explicit GridFactory(const ParameterTree &params = ParameterTree());
 
     /** \brief Constructor for a given grid object
 
