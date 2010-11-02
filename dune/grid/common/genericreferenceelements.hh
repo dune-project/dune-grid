@@ -172,7 +172,7 @@ namespace Dune
 
     /** \brief check if a local coordinate is in the reference element
      *
-     *  This method return true, if the given local coordinate is within this
+     *  This method returns true if the given local coordinate is within this
      *  reference element.
      *
      *  \param[in]  local  coordinates of the point
