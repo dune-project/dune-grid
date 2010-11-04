@@ -53,8 +53,8 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
   static const bool v = false;
 };
 
-template< class HostGrid, class CoordFunction >
-struct EnableLevelIntersectionIteratorCheck< Dune::GeometryGrid< HostGrid, CoordFunction > >
+template< class HostGrid, class CoordFunction, class Allocator >
+struct EnableLevelIntersectionIteratorCheck< Dune::GeometryGrid< HostGrid, CoordFunction, Allocator > >
 {
   static const bool v = EnableLevelIntersectionIteratorCheck< HostGrid >::v;
 };
@@ -70,7 +70,9 @@ typedef Dune::CachedCoordFunction< Grid, AnalyticalCoordFunction > CoordFunction
 typedef AnalyticalCoordFunction CoordFunction;
 #endif
 
-typedef Dune::GeometryGrid< Grid, CoordFunction > GeometryGrid;
+typedef Dune::PolyAllocator Allocator;
+// typedef Dune::STLPolyAllocator<> Allocator;
+typedef Dune::GeometryGrid< Grid, CoordFunction, Allocator > GeometryGrid;
 
 
 
