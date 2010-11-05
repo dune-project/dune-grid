@@ -231,8 +231,8 @@ namespace Dune {
     // get geo face
     const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
 
-    //assert( duneFace >= 0 && duneFace < 6 );
-    if(duneFace < 0 ) duneFace = 0;
+    // if face was not set, set it to zero
+    if( duneFace < 0 ) duneFace = 0;
 
     enum { numVertices = ElementTopo::numVerticesPerFace };
     // for all vertices of this face get rotatedIndex

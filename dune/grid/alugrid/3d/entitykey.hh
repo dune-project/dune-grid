@@ -80,7 +80,8 @@ namespace Dune
       static BNDFaceType* ghost( KeyType* key ) { assert( key ); return (static_cast< BNDFaceType* > ( key )); }
     };
   public:
-    static const int defaultValue = -665 ;
+    static const int defaultValue = -1 ;
+    static const int defaultTwist = 0 ;
 
     enum { codimension = codim };
 
@@ -178,7 +179,7 @@ namespace Dune
     }
 
     int level () const { return defaultValue; }
-    int twist () const { return defaultValue; }
+    int twist () const { return defaultTwist; }
     int face  () const { return defaultValue; }
 
     //! assignment operator
@@ -214,6 +215,7 @@ namespace Dune
 
   public:
     using BaseType :: defaultValue ;
+    using BaseType :: defaultTwist ;
 
     //! type of Entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
@@ -232,17 +234,18 @@ namespace Dune
     //! Constructor for EntityKey that points to an element
     ALU3dGridEntityKey(const HElementType & item,
                        const int level,
-                       const int twist = defaultValue,
+                       const int twist = defaultTwist,
                        const int duneFace = defaultValue
                        );
 
     //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKey() : BaseType(), level_(defaultValue), twist_(defaultValue), face_(defaultValue) {}
+    ALU3dGridEntityKey()
+      : BaseType(), level_(defaultValue), twist_(defaultTwist), face_(defaultValue) {}
 
     //! Constructor for EntityKey that points to given entity
     ALU3dGridEntityKey(const ALU3dGridEntityType& entity)
       : ALU3dGridEntityKeyBase<cd,GridImp> (entity.getItem()),
-        level_(entity.level()), twist_(defaultValue), face_(defaultValue)
+        level_(entity.level()), twist_(defaultTwist), face_(defaultValue)
     {}
 
     //! copy constructor
@@ -328,6 +331,7 @@ namespace Dune
 
   public:
     using BaseType :: defaultValue ;
+    using BaseType :: defaultTwist ;
 
     //! type of Entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
@@ -463,7 +467,7 @@ namespace Dune
   {
     BaseType :: clear();
     level_ = defaultValue ;
-    twist_ = defaultValue ;
+    twist_ = defaultTwist ;
     face_  = defaultValue ;
   }
 
