@@ -116,10 +116,12 @@ void checkIteratorAssignment(GridType & grid)
       assert( it->level() == 0 );
       EntityPointerType p( it );
 
+#ifdef NO_2D
       typedef typename GridType::Traits::template Codim<dim>::EntityKey EntityKey;
       EntityKey key = GridType :: key( *it );
       EntityPointerType ep = grid.entity( key );
       assert( ep == it );
+#endif
 
       assert( p.level()  == 0 );
       assert( p->level() == 0 );
@@ -136,6 +138,50 @@ void checkIteratorAssignment(GridType & grid)
     }
   }
 }
+
+
+template <int codim, class GridType>
+void checkIteratorCodim(GridType & grid)
+{
+#ifdef NO_2D
+  typedef typename GridType::template Codim<codim>::
+  template Partition<Dune::InteriorBorder_Partition>::LeafIterator
+  IteratorInteriorBorder;
+
+  typedef typename GridType::template Codim<codim>:: Geometry Geometry ;
+  typedef typename GridType:: ctype ctype;
+
+  /** Loop only over the interior elements, not over ghost elements. */
+  IteratorInteriorBorder endIterator = grid.template leafend<codim,InteriorBorder_Partition>();
+  for (IteratorInteriorBorder iter =
+         grid.template leafbegin<codim,InteriorBorder_Partition>();
+       iter!=endIterator; ++iter)
+  {
+    /** Provide geometry type of element. */
+    const Geometry& geo = iter->geometry();
+    if( geo.corners() > 1 )
+    {
+      Dune::FieldVector<ctype, GridType::dimension>
+      diff( geo.corner(0) - geo.corner(1) );
+      if( diff.two_norm() < 1e-8 )
+      {
+        std::cout << diff << " twonorm = " << diff.two_norm() << " point 0 and 1 do not differ! " << std::endl;
+        assert( diff.two_norm() > 1e-8 );
+      }
+    }
+  }
+#endif
+}
+
+template <class GridType>
+void checkIterators( GridType& grid )
+{
+  checkIteratorCodim< 0 > ( grid );
+  checkIteratorCodim< 1 > ( grid );
+  checkIteratorCodim< 2 > ( grid );
+  checkIteratorCodim< GridType :: dimension > ( grid );
+}
+
 template <class GridType>
 void checkLevelIndexNonConform(GridType & grid)
 {
@@ -223,6 +269,9 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);
 
+  // check iterators
+  checkIterators( grid );
+
   if( display )
   {
     GrapeGridDisplay< GridType > grape( grid );
@@ -255,6 +304,9 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 {
 #if HAVE_MPI
   makeNonConfGrid(grid,gref,mxl);
+
+  // check iterators
+  checkIterators( grid );
 
   // -1 stands for leaf check
   checkCommunication(grid, -1, std::cout);
