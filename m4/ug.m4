@@ -79,14 +79,23 @@ AC_DEFUN([DUNE_PATH_UG],[
         direct_UG_LIBS="`$PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
       fi
 
-      # Check whether UG is installed at all and has a suitable version
-      if $PKG_CONFIG --atleast-version=3.9.2 libug; then
-		UG_CPPFLAGS="`$PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
-		direct_UG_CPPFLAGS="`$PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
+      # Check whether UG is installed at all
+      if $PKG_CONFIG --exists libug; then
 	    HAVE_UG="1"
 	  else
 		HAVE_UG="0"
 		AC_MSG_WARN([UG not found])
+      fi
+
+      if test x$HAVE_UG = x1; then
+          # Does it have a suitable version?
+          if $PKG_CONFIG --atleast-version=3.9.2 libug; then
+              UG_CPPFLAGS="`$PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
+              direct_UG_CPPFLAGS="`$PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
+          else
+              HAVE_UG="0"
+              AC_MSG_WARN([UG version is too old (you need at least 3.9.2)])
+          fi
       fi
 
       # pre-set variable for summary
