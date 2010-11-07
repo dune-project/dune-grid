@@ -11,7 +11,7 @@ libuggrid_la_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(UG_CPPFLAGS)				\
 	$(DUNEMPICPPFLAGS)
 libuggrid_la_LDFLAGS = $(AM_LDFLAGS)		\
-	$(UG_LDPFLAGS)				\
+	$(UG_LDFLAGS)				\
 	$(DUNEMPILDFLAGS)
 libuggrid_la_LIBADD =				\
 	$(UG_LIBS)				\
