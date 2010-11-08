@@ -95,7 +95,7 @@ namespace Dune {
         // scale the multiindex to obtain a world position
         FieldVector<double,dimworld> pos(0);
         for (int j=0; j<dim; j++)
-          pos[j] = index[j] * (upperRight[j]-lowerLeft[j])/(vertices[j]-1);
+          pos[j] = lowerLeft[j] + index[j] * (upperRight[j]-lowerLeft[j])/(vertices[j]-1);
 
         factory.insertVertex(pos);
 
