@@ -8,13 +8,13 @@
  * \brief The UGGrid class
  */
 
-#include <dune/grid/common/capabilities.hh>
-#include <dune/grid/common/grid.hh>
-#include <dune/grid/common/boundarysegment.hh>
 #include <dune/common/collectivecommunication.hh>
+#include <dune/common/mpihelper.hh>
 #include <dune/common/static_assert.hh>
 
-#include <dune/common/mpihelper.hh>
+#include <dune/grid/common/boundarysegment.hh>
+#include <dune/grid/common/capabilities.hh>
+#include <dune/grid/common/grid.hh>
 
 #if HAVE_UG
 
