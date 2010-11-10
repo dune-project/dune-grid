@@ -15,10 +15,28 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/parametertree.hh>
 #include <dune/common/shared_ptr.hh>
+#include <dune/common/typetraits.hh>
 
 #include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/uggrid.hh>
 
 namespace Dune {
+
+  //! \brief Determines whether a GridFactory needs insertion on all ranks
+  //!        or just rank 0
+  /**
+   * If insertion is only required (and permissible) on rank 0, this class
+   * derives from false_type and will have a static member constant \c value
+   * with value \c false.  Otherwise it derives from true_type and has a
+   * static member constant \v value with value \c true.
+   */
+  template<class Grid>
+  struct FactoryNeedsInsertOnAllRanks : public false_type {};
+
+#if HAVE_UG
+  template<int dim>
+  struct FactoryNeedsInsertOnAllRanks<UGGrid<dim> > : public true_type {};
+#endif
 
   /** \brief Construct structured cube and simplex grids in unstructured grid managers
    */
@@ -206,50 +224,57 @@ namespace Dune {
       // The grid factory
       GridFactory<GridType> factory(params);
 
-      // Insert uniformly spaced vertices
-      array<unsigned int,dim> vertices = elements;
-      for( size_t i = 0; i < vertices.size(); ++i )
-        vertices[i]++;
+      if(FactoryNeedsInsertOnAllRanks<GridType>::value ||
+         MPIHelper::getCollectiveCommunication().rank() == 0)
+      {
+        // Insert uniformly spaced vertices
+        array<unsigned int,dim> vertices = elements;
+        for( size_t i = 0; i < vertices.size(); ++i )
+          vertices[i]++;
 
-      // Insert vertices for structured grid into the factory
-      insertVertices(factory, lowerLeft, upperRight, vertices);
+        // Insert vertices for structured grid into the factory
+        insertVertices(factory, lowerLeft, upperRight, vertices);
 
-      // Compute the index offsets needed to move to the adjacent vertices
-      // in the different coordinate directions
-      array<unsigned int, dim> unitOffsets = computeUnitOffsets(vertices);
+        // Compute the index offsets needed to move to the adjacent
+        // vertices in the different coordinate directions
+        array<unsigned int, dim> unitOffsets =
+          computeUnitOffsets(vertices);
 
-      // Compute an element template (the cube at (0,...,0).  All other
-      // cubes are constructed by moving this template around
-      unsigned int nCorners = 1<<dim;
+        // Compute an element template (the cube at (0,...,0).  All
+        // other cubes are constructed by moving this template around
+        unsigned int nCorners = 1<<dim;
 
-      std::vector<unsigned int> cornersTemplate(nCorners,0);
+        std::vector<unsigned int> cornersTemplate(nCorners,0);
 
-      for (size_t i=0; i<nCorners; i++)
-        for (int j=0; j<dim; j++)
-          if ( i & (1<<j) )
-            cornersTemplate[i] += unitOffsets[j];
+        for (size_t i=0; i<nCorners; i++)
+          for (int j=0; j<dim; j++)
+            if ( i & (1<<j) )
+              cornersTemplate[i] += unitOffsets[j];
 
-      // Insert elements
-      MultiIndex index(elements);
+        // Insert elements
+        MultiIndex index(elements);
 
-      // Compute the total number of elementss to be created
-      int numElements = index.cycle();
+        // Compute the total number of elementss to be created
+        int numElements = index.cycle();
 
-      for (int i=0; i<numElements; i++, ++index) {
+        for (int i=0; i<numElements; i++, ++index) {
 
-        // 'base' is the index of the lower left element corner
-        unsigned int base = 0;
-        for (int j=0; j<dim; j++)
-          base += index[j] * unitOffsets[j];
+          // 'base' is the index of the lower left element corner
+          unsigned int base = 0;
+          for (int j=0; j<dim; j++)
+            base += index[j] * unitOffsets[j];
 
-        // insert new element
-        std::vector<unsigned int> corners = cornersTemplate;
-        for (size_t j=0; j<corners.size(); j++)
-          corners[j] += base;
+          // insert new element
+          std::vector<unsigned int> corners = cornersTemplate;
+          for (size_t j=0; j<corners.size(); j++)
+            corners[j] += base;
 
-        factory.insertElement(GeometryType(GeometryType::cube, dim), corners);
+          factory.insertElement
+            (GeometryType(GeometryType::cube, dim), corners);
 
-      }
+        }
+
+      }       // if(rank == 0)
 
       // Create the grid and hand it to the calling method
       return shared_ptr<GridType>(factory.createGrid());
@@ -311,50 +336,61 @@ namespace Dune {
       // The grid factory
       GridFactory<GridType> factory(params);
 
-      // Insert uniformly spaced vertices
-      array<unsigned int,dim> vertices = elements;
-      for (std::size_t i=0; i<vertices.size(); i++)
-        vertices[i]++;
+      if(FactoryNeedsInsertOnAllRanks<GridType>::value ||
+         MPIHelper::getCollectiveCommunication().rank() == 0)
+      {
+        // Insert uniformly spaced vertices
+        array<unsigned int,dim> vertices = elements;
+        for (std::size_t i=0; i<vertices.size(); i++)
+          vertices[i]++;
 
-      insertVertices(factory, lowerLeft, upperRight, vertices);
+        insertVertices(factory, lowerLeft, upperRight, vertices);
 
-      // Compute the index offsets needed to move to the adjacent vertices
-      // in the different coordinate directions
-      array<unsigned int, dim> unitOffsets = computeUnitOffsets(vertices);
+        // Compute the index offsets needed to move to the adjacent
+        // vertices in the different coordinate directions
+        array<unsigned int, dim> unitOffsets =
+          computeUnitOffsets(vertices);
 
-      // Insert the elements
-      std::vector<unsigned int> corners(dim+1);
+        // Insert the elements
+        std::vector<unsigned int> corners(dim+1);
 
-      // Loop over all "cubes", and split up each cube into dim! (factorial) simplices
-      MultiIndex elementsIndex(elements);
-      size_t cycle = elementsIndex.cycle();
+        // Loop over all "cubes", and split up each cube into dim!
+        // (factorial) simplices
+        MultiIndex elementsIndex(elements);
+        size_t cycle = elementsIndex.cycle();
 
-      for (size_t i=0; i<cycle; ++elementsIndex, i++) {
+        for (size_t i=0; i<cycle; ++elementsIndex, i++) {
 
-        // 'base' is the index of the lower left element corner
-        unsigned int base = 0;
-        for (int j=0; j<dim; j++)
-          base += elementsIndex[j] * unitOffsets[j];
-
-        // each permutation of the unit vectors gives a simplex.
-        std::vector<unsigned int> permutation(dim);
-        for (int j=0; j<dim; j++)
-          permutation[j] = j;
-
-        do {
-
-          // Make a simplex
-          std::vector<unsigned int> corners(dim+1);
-          corners[0] = base;
-
+          // 'base' is the index of the lower left element corner
+          unsigned int base = 0;
           for (int j=0; j<dim; j++)
-            corners[j+1] = corners[j] + unitOffsets[permutation[j]];
+            base += elementsIndex[j] * unitOffsets[j];
 
-          factory.insertElement(GeometryType(GeometryType::simplex, dim), corners);
+          // each permutation of the unit vectors gives a simplex.
+          std::vector<unsigned int> permutation(dim);
+          for (int j=0; j<dim; j++)
+            permutation[j] = j;
 
-        } while (std::next_permutation(permutation.begin(), permutation.end()));
+          do {
 
-      }
+            // Make a simplex
+            std::vector<unsigned int> corners(dim+1);
+            corners[0] = base;
+
+            for (int j=0; j<dim; j++)
+              corners[j+1] =
+                corners[j] + unitOffsets[permutation[j]];
+
+            factory.insertElement
+              (GeometryType(GeometryType::simplex, dim),
+              corners);
+
+          } while (std::next_permutation(permutation.begin(),
+                                         permutation.end()));
+
+        }
+
+      }       // if(rank == 0)
 
       // Create the grid and hand it to the calling method
       return shared_ptr<GridType>(factory.createGrid());
