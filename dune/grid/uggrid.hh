@@ -8,7 +8,9 @@
  * \brief The UGGrid class
  */
 
+#include <dune/common/classname.hh>
 #include <dune/common/collectivecommunication.hh>
+#include <dune/common/exceptions.hh>
 #include <dune/common/mpihelper.hh>
 #include <dune/common/static_assert.hh>
 
@@ -650,6 +652,12 @@ namespace Dune {
           communicateUG_<LevelGridView, DataHandle, 0>(this->levelView(level), level, dataHandle, iftype, dir);
         else if (curCodim == dim)
           communicateUG_<LevelGridView, DataHandle, dim>(this->levelView(level), level, dataHandle, iftype, dir);
+        else
+          DUNE_THROW(NotImplemented,
+                     className(*this) << "::communicate(): Only "
+                     "supported for codim=0 and "
+                     "codim=dim(=" << dim << "), but "
+                     "codim=" << curCodim << " was requested");
       }
 #endif
     }
@@ -680,6 +688,12 @@ namespace Dune {
           communicateUG_<LeafGridView, DataHandle, 0>(this->leafView(), level, dataHandle, iftype, dir);
         else if (curCodim == dim)
           communicateUG_<LeafGridView, DataHandle, dim>(this->leafView(), level, dataHandle, iftype, dir);
+        else
+          DUNE_THROW(NotImplemented,
+                     className(*this) << "::communicate(): Only "
+                     "supported for codim=0 and "
+                     "codim=dim(=" << dim << "), but "
+                     "codim=" << curCodim << " was requested");
       }
 #endif
     }
