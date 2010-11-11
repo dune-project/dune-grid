@@ -28,6 +28,7 @@ int main ( int argc, char *argv[] )
 try
 {
   Dune::MPIHelper::instance( argc, argv );
+  typedef Dune::GridSelector::GridType Grid;
 
   if( argc < 2 )
   {
@@ -40,9 +41,9 @@ try
   dgfFileName.resize( dgfFileName.find_last_of( "." ) );
   dgfFileName += ".dgf";
 
-  GridType *grid = GmshReader< GridType  >::read( gmshFileName );
+  Grid *grid = GmshReader< Grid  >::read( gmshFileName );
 
-  typedef GridType::LeafGridView GridView;
+  typedef Grid::LeafGridView GridView;
   GridView gridView = grid->leafView();
 
   DGFWriter< GridView > dgfWriter( gridView );
@@ -50,7 +51,7 @@ try
 
   const GridView::IndexSet &indexSet = gridView.indexSet();
   std::cerr << "Grid successfully written: "
-            << indexSet.size( GridType::dimension ) << " vertices, "
+            << indexSet.size( Grid::dimension ) << " vertices, "
             << indexSet.size( 0 ) << " elements."
             << std::endl;
 
