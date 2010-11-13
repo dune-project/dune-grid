@@ -176,7 +176,7 @@ namespace Dune {
   void SEntityBase<codim,dim,GridImp,EntityImp>::makegeometry () const
   {
     // find dim-codim direction vectors and reference point
-    FieldMatrix<ctype,dim-codim+1,dimworld> __As;
+    FieldMatrix<ctype,dim-codim+1,dimworld> __As(0);
 
     // count number of direction vectors found
     int dir=0;
