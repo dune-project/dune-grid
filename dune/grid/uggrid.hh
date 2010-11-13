@@ -753,6 +753,9 @@ namespace Dune {
         case InteriorBorder_All_Interface :
           dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF());
           return;
+        case All_All_Interface :
+          dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF());
+          return;
         default :
           DUNE_THROW(GridError,
                      "Element communication not supported for "
