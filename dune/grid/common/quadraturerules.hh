@@ -148,7 +148,7 @@ namespace Dune {
         }
 
         // put in container
-        push_back(QuadraturePoint<ct,dim>(local,weight));
+        this->push_back(QuadraturePoint<ct,dim>(local,weight));
       }
     }
 
@@ -244,7 +244,7 @@ namespace Dune {
     CubeQuadratureRule (int p) : QuadratureRule<ct,dim>(GeometryType(GeometryType::cube, d))
     {
       QuadratureRule<ct,1> q1D = QuadratureRules<ct,1>::rule(GeometryType::cube, p);
-      tensor_product( q1D );
+      this->tensor_product( q1D );
       this->delivered_order = q1D.order();
     }
 
@@ -753,7 +753,7 @@ namespace Dune {
           double weight =
             PrismQuadraturePointsSingleton<3>::prqp.weight(m,i);
           // put in container
-          push_back(QuadraturePoint<ct,d>(local,weight));
+          this->push_back(QuadraturePoint<ct,d>(local,weight));
         }
       }
       else {
@@ -776,7 +776,7 @@ namespace Dune {
             double weight = tit->weight() * lit->weight();
 
             // put in container
-            push_back(QuadraturePoint<ct,d>(local,weight));
+            this->push_back(QuadraturePoint<ct,d>(local,weight));
           }
         }
       }
@@ -932,7 +932,7 @@ namespace Dune {
             local[k]=PyramidQuadraturePointsSingleton<3>::pyqp.point(m,i)[k];
           weight=PyramidQuadraturePointsSingleton<3>::pyqp.weight(m,i);
           // put in container
-          push_back(QuadraturePoint<ct,d>(local,weight));
+          this->push_back(QuadraturePoint<ct,d>(local,weight));
         }
       }
       else
@@ -949,12 +949,12 @@ namespace Dune {
           // Simplex 1
           // x:=x+y
           local[0] = local[0]+local[1];
-          push_back(QuadraturePoint<ct,d>(local,weight));
+          this->push_back(QuadraturePoint<ct,d>(local,weight));
           // Simplex 2
           // y:=x+y
           local[0] = it->position()[0];
           local[1] = local[0]+local[1];
-          push_back(QuadraturePoint<ct,d>(local,weight));
+          this->push_back(QuadraturePoint<ct,d>(local,weight));
         }
 
         this->delivered_order = simplex.order();
