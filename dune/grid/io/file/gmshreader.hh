@@ -355,14 +355,29 @@ namespace Dune
       {
         int id, elm_type, number_of_tags;
         readfile(file,3,"%d %d %d",&id,&elm_type,&number_of_tags);
-        int physical_entity, elementary_entity, mesh_partition;
+        int physical_entity, elementary_entity;
+        std::vector<int> mesh_partitions;
+        if ( version_number < 2.2 )
+        {
+          mesh_partitions.resize(1);
+        }
         for (int k=1; k<=number_of_tags; k++)
         {
           int blub;
           readfile(file,1,"%d",&blub);
           if (k==1) physical_entity = blub;
           if (k==2) elementary_entity = blub;
-          if (k==3) mesh_partition = blub;
+          if ( version_number < 2.2 )
+          {
+            if (k==3) mesh_partitions[0] = blub;
+          }
+          else
+          {
+            if (k > 3)
+              mesh_partitions.resize(blub);
+            else
+              mesh_partitions[k-4] = blub;
+          }
         }
         static_cast<DimImp*>(this)->pass1HandleElement(file, elm_type, renumber, nodes);
       }
@@ -386,14 +401,29 @@ namespace Dune
       {
         int id, elm_type, number_of_tags;
         readfile(file,3,"%d %d %d",&id,&elm_type,&number_of_tags);
-        int physical_entity, elementary_entity, mesh_partition;
+        int physical_entity, elementary_entity;
+        std::vector<int> mesh_partitions;
+        if ( version_number < 2.2 )
+        {
+          mesh_partitions.resize(1);
+        }
         for (int k=1; k<=number_of_tags; k++)
         {
           int blub;
           readfile(file,1,"%d",&blub);
           if (k==1) physical_entity = blub;
           if (k==2) elementary_entity = blub;
-          if (k==3) mesh_partition = blub;
+          if ( version_number < 2.2 )
+          {
+            if (k==3) mesh_partitions[0] = blub;
+          }
+          else
+          {
+            if (k > 3)
+              mesh_partitions.resize(blub);
+            else
+              mesh_partitions[k-4] = blub;
+          }
         }
         static_cast<DimImp*>(this)->pass2HandleElement(file, elm_type, renumber, nodes, physical_entity);
       }
