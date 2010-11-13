@@ -148,11 +148,11 @@ namespace Dune {
 
     using RefinementImp::Codim;
 
-    using RefinementImp::VertexIterator;
-    using RefinementImp::CoordVector;
+    using typename RefinementImp::VertexIterator;
+    using typename RefinementImp::CoordVector;
 
-    using RefinementImp::ElementIterator;
-    using RefinementImp::IndexVector;
+    using typename RefinementImp::ElementIterator;
+    using typename RefinementImp::IndexVector;
   };
 
 
