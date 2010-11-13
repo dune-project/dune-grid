@@ -191,6 +191,8 @@ namespace Dune {
       template<int dimension>
       class RefinementGrid : public SGrid<dimension, dimension>
       {
+        using SGrid<dimension, dimension>::maxLevel;
+        using SGrid<dimension, dimension>::globalRefine;
       public:
         //! Know yourself
         typedef RefinementGrid<dimension> This;
@@ -213,8 +215,8 @@ namespace Dune {
       template<int dimension>
       void RefinementGrid<dimension>::refineTo(int level /*! The refinement level to enforce */)
       {
-        if(SGrid<dimension, dimension>::maxLevel() < level)
-          globalRefine(level - SGrid<dimension, dimension>::maxLevel());
+        if(maxLevel() < level)
+          globalRefine(level - maxLevel());
       }
 
 
