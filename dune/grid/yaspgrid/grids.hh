@@ -2154,7 +2154,6 @@ namespace Dune {
       s << std::endl;
     }
 
-  protected:
     // static method to create the default load balance strategy
     static const YLoadBalance<d>* defaultLoadbalancer()
     {

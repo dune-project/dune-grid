@@ -2539,9 +2539,10 @@ namespace Dune {
       }
     }
 
+  public:
+
     using MultiYGrid<dim,yaspgrid_ctype>::defaultLoadbalancer;
 
-  public:
     //! define type used for coordinates in grid module
     typedef yaspgrid_ctype ctype;
 
