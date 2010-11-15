@@ -3093,6 +3093,7 @@ namespace Dune {
       {
         delete[] sends[cnt];
         sends[cnt] = 0;
+        cnt++;
       }
 
       // process receive buffers and delete them
