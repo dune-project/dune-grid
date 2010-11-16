@@ -169,7 +169,7 @@ namespace Dune
 
     friend class AlbertaMarkerVector< dim, dimworld >;
 #if (__GNUC__ < 4) && !(defined __ICC)
-    // add additional friedn decls for gcc 3.4
+    // add additional friend decls for gcc 3.4
     friend struct AlbertaMarkerVector< dim, dimworld >::MarkSubEntities<true>;
     friend struct AlbertaMarkerVector< dim, dimworld >::MarkSubEntities<false>;
 #endif
