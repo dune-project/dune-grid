@@ -96,12 +96,12 @@ AC_DEFUN([DUNE_PATH_UG],[
           AC_MSG_CHECKING([whether UG version is recent enough])
 
           # Does it have a suitable version?
-          if $PKG_CONFIG --atleast-version=3.9.2 libug; then
+          if $PKG_CONFIG --atleast-version=3.9.1-patch3 libug; then
               AC_MSG_RESULT(yes)
           else
               HAVE_UG="0"
               AC_MSG_RESULT(no)
-              AC_MSG_WARN([UG version is too old (you need at least 3.9.2)])
+              AC_MSG_WARN([UG version is too old (you need at least 3.9.1-patch3)])
           fi
       fi
 
