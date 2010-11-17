@@ -235,8 +235,8 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
 
   }
   boundaryNumber++;
-  std::cout << noOfSegments << " segments from psurface file " << filename
-            << " created!" << std::endl;
+  Dune::dinfo << noOfSegments << " segments from psurface file " << filename
+              << " created!" << std::endl;
 
 #endif // #define HAVE_PSURFACE
 
@@ -266,8 +266,8 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
   if (am->findData("Hexahedra", HxINT32, 8, "Nodes")) {
 
     // Load a domain from an AmiraMesh hexagrid file
-    std::cout << "Hexahedral grids with a parametrized boundary are not supported!" << std::endl;
-    std::cout << "I will therefore ignore the boundary parametrization." << std::endl;
+    Dune::dwarn << "Hexahedral grids with a parametrized boundary are not supported!" << std::endl;
+    Dune::dwarn << "I will therefore ignore the boundary parametrization." << std::endl;
 
   } else {
 
@@ -310,8 +310,8 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   if (am->findData("Hexahedra", HxINT32, 8, "Nodes")) {
 
     // Load a domain from an AmiraMesh hexagrid file
-    std::cout << "Hexahedral grids with a parametrized boundary are not supported!" << std::endl;
-    std::cout << "I will therefore ignore the boundary parametrization." << std::endl;
+    Dune::dwarn << "Hexahedral grids with a parametrized boundary are not supported!" << std::endl;
+    Dune::dwarn << "I will therefore ignore the boundary parametrization." << std::endl;
 
   } else {
 
@@ -438,8 +438,8 @@ void Dune::AmiraMeshReader<GridType>::build2dGrid(GridFactory<GridType>& factory
   int noOfNodes = am->nElements("Nodes");
   int noOfElem  = (containsOnlyTriangles) ? am->nElements("Triangles") : am->nElements("Quadrilaterals");
 
-  std::cout << "AmiraMesh contains " << noOfNodes << " nodes and "
-            << noOfElem << " elements\n";
+  Dune::dinfo << "AmiraMesh contains " << noOfNodes << " nodes and "
+              << noOfElem << " elements\n";
 
   // Insert interior nodes
   for(int i=0; i < noOfNodes; i++) {
@@ -499,7 +499,7 @@ void Dune::AmiraMeshReader<GridType>::build2dGrid(GridFactory<GridType>& factory
 
   }
 
-  std::cout << "amiraloadmesh: " << noOfCreatedElem << " elements created" << std::endl;
+  Dune::dinfo << "amiraloadmesh: " << noOfCreatedElem << " elements created" << std::endl;
 
 }
 
@@ -536,7 +536,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
 
   int noOfNodes = am->nElements("Nodes");
 
-  std::cout << "AmiraMesh has " << noOfNodes << " total nodes." << std::endl;
+  Dune::dinfo << "AmiraMesh has " << noOfNodes << " total nodes." << std::endl;
 
   int noOfElem = (isTetraGrid)
                  ? am->nElements("Tetrahedra")
@@ -659,6 +659,6 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
 
   }
 
-  std::cout << "AmiraMesh reader: " << noOfElem << " elements created.\n";
+  Dune::dinfo << "AmiraMesh reader: " << noOfElem << " elements created.\n";
 
 }
