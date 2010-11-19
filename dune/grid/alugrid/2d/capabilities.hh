@@ -52,10 +52,10 @@ namespace Dune
       static const bool v = true;
     };
 
+#if ALU2DGRID_PARALLEL
     /** \brief ALUSimplexGrid is parallel
        \ingroup ALUSimplexGrid
      */
-#if ALU2DGRID_PARALLEL
     //- default is false
     template< int dimworld >
     struct isParallel< ALUSimplexGrid< 2, dimworld > >
@@ -64,10 +64,10 @@ namespace Dune
     };
 #endif
 
+#if ALU2DGRID_PARALLEL
     /** \brief ALUSimplexGrid can communicate
        \ingroup ALUSimplexGrid
      */
-#if ALU2DGRID_PARALLEL
     //- default is false
     template< int dimworld >
     struct canCommunicate< ALUSimplexGrid< 2, dimworld >, 0 >
@@ -116,10 +116,10 @@ namespace Dune
       static const bool v = true;
     };
 
+#if ALU2DGRID_PARALLEL
     /** \brief ALUCubeGrid is parallel
        \ingroup ALUCubeGrid
      */
-#if ALU2DGRID_PARALLEL
     //- default is false
     template< int dimworld >
     struct isParallel< ALUCubeGrid< 2, dimworld > >
@@ -128,10 +128,10 @@ namespace Dune
     };
 #endif
 
+#if ALU2DGRID_PARALLEL
     /** \brief ALUCubeGrid can communicate
        \ingroup ALUCubeGrid
      */
-#if ALU2DGRID_PARALLEL
     //- default is false
     template< int dimworld >
     struct canCommunicate< ALUCubeGrid< 2, dimworld >, 0 >
@@ -180,10 +180,10 @@ namespace Dune
       static const bool v = true;
     };
 
+#if ALU2DGRID_PARALLEL
     /** \brief ALUConformGrid is parallel
        \ingroup ALUConformGrid
      */
-#if ALU2DGRID_PARALLEL
     //- default is false
     template< int dimworld >
     struct isParallel< ALUConformGrid< 2, dimworld > >
@@ -192,10 +192,10 @@ namespace Dune
     };
 #endif
 
+#if ALU2DGRID_PARALLEL
     /** \brief ALUConformGrid can communicate
        \ingroup ALUConformGrid
      */
-#if ALU2DGRID_PARALLEL
     //- default is false
     template< int dimworld >
     struct canCommunicate< ALUConformGrid< 2, dimworld >, 0 >
