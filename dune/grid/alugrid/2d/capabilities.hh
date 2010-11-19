@@ -35,14 +35,6 @@ namespace Dune
     // Capabilities for ALUSimplexGrid
     // -------------------------------
 
-    /** \struct isLeafwiseConforming
-       \ingroup ALUSimplexGrid
-     */
-
-    /** \struct IsUnstructured
-       \ingroup ALUSimplexGrid
-     */
-
     /** \brief ALUSimplexGrid has entities for all codimension
        \ingroup ALUSimplexGrid
      */
@@ -62,7 +54,7 @@ namespace Dune
     {
       static const bool v = true;
     };
-#endif
+#endif // #if ALU2DGRID_PARALLEL
 
 #if ALU2DGRID_PARALLEL
     /** \brief ALUSimplexGrid can communicate
@@ -74,7 +66,7 @@ namespace Dune
     {
       static const bool v = true;
     };
-#endif
+#endif // #if ALU2DGRID_PARALLEL
 
     /** \brief ALUSimplexGrid has conforming level grids
        \ingroup ALUSimplexGrid
@@ -99,14 +91,6 @@ namespace Dune
     // Capabilities for ALUCubeGrid
     // ----------------------------
 
-    /** \struct isLeafwiseConforming
-       \ingroup ALUCubeGrid
-     */
-
-    /** \struct IsUnstructured
-       \ingroup ALUCubeGrid
-     */
-
     /** \brief ALUCubeGrid has entities for all codimension
        \ingroup ALUCubeGrid
      */
@@ -126,7 +110,7 @@ namespace Dune
     {
       static const bool v = true;
     };
-#endif
+#endif // #if ALU2DGRID_PARALLEL
 
 #if ALU2DGRID_PARALLEL
     /** \brief ALUCubeGrid can communicate
@@ -138,7 +122,7 @@ namespace Dune
     {
       static const bool v = true;
     };
-#endif
+#endif // #if ALU2DGRID_PARALLEL
 
     /** \brief ALUCubeGrid has conforming level grids
        \ingroup ALUCubeGrid
@@ -163,14 +147,6 @@ namespace Dune
     // Capabilities for ALUConformGrid
     // -------------------------------
 
-    /** \struct isLeafwiseConforming
-       \ingroup ALUConformGrid
-     */
-
-    /** \struct IsUnstructured
-       \ingroup ALUConformGrid
-     */
-
     /** \brief ALUConformGrid has entities for all codimension
        \ingroup ALUConformGrid
      */
@@ -190,7 +166,7 @@ namespace Dune
     {
       static const bool v = true;
     };
-#endif
+#endif // #if ALU2DGRID_PARALLEL
 
 #if ALU2DGRID_PARALLEL
     /** \brief ALUConformGrid can communicate
@@ -202,11 +178,7 @@ namespace Dune
     {
       static const bool v = true;
     };
-#endif
-
-    /** \brief ALUConformGrid has non-conforming level grids
-       \ingroup ALUConformGrid
-     */
+#endif // #if ALU2DGRID_PARALLEL
 
     /** \brief ALUConformGrid has a conforming leaf grid
        \ingroup ALUConformGrid
@@ -217,10 +189,6 @@ namespace Dune
       static const bool v = true;
     };
 
-    /** \brief ALUConformGrid has no support for hanging nodes
-       \ingroup ALUConformGrid
-     */
-
     /** \brief ALUConformGrid has backup and restore facilities
        \ingroup ALUConformGrid
      */
@@ -230,11 +198,10 @@ namespace Dune
       static const bool v = true;
     };
 
+  } // namespace Capabilities
 
-  } // end namespace Capabilities
-
-} //end  namespace Dune
+} // namespace Dune
 
 #endif // #ifdef ENABLE_ALUGRID
 
-#endif
+#endif // #ifndef DUNE_ALU2DGRID_CAPABILITIES_HH
