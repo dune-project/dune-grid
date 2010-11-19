@@ -463,7 +463,7 @@ namespace Dune
 
   public:
     //! \brief Desctructor
-    ~ALU3dGrid();
+    virtual ~ALU3dGrid();
 
     //! \brief for grid identification
     static inline std::string name ();
