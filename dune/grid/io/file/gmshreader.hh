@@ -374,9 +374,9 @@ namespace Dune
           else
           {
             if (k > 3)
-              mesh_partitions.resize(blub);
-            else
               mesh_partitions[k-4] = blub;
+            else
+              mesh_partitions.resize(blub);
           }
         }
         static_cast<DimImp*>(this)->pass1HandleElement(file, elm_type, renumber, nodes);
@@ -420,9 +420,9 @@ namespace Dune
           else
           {
             if (k > 3)
-              mesh_partitions.resize(blub);
-            else
               mesh_partitions[k-4] = blub;
+            else
+              mesh_partitions.resize(blub);
           }
         }
         static_cast<DimImp*>(this)->pass2HandleElement(file, elm_type, renumber, nodes, physical_entity);
