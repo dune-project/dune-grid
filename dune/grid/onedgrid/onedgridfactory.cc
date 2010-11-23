@@ -3,8 +3,6 @@
 
 #include <config.h>
 
-#include <dune/common/parametertree.hh>
-
 #include <dune/grid/onedgrid/onedgridfactory.hh>
 #include <dune/grid/onedgrid/onedgridindexsets.hh>
 
@@ -12,7 +10,7 @@ using namespace Dune;
 
 
 Dune::GridFactory<Dune::OneDGrid >::
-GridFactory(const ParameterTree &params) :
+GridFactory() :
   factoryOwnsGrid_(true),
   vertexIndex_(0)
 {

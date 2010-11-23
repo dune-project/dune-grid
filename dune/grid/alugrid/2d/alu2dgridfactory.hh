@@ -8,7 +8,6 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/mpihelper.hh>
-#include <dune/common/parametertree.hh>
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridfactory.hh>
@@ -296,15 +295,6 @@ namespace Dune
     {
       this->setVerbosity( verbose );
     }
-
-    /** \brief Constructor with grid-specific options
-     *
-     * \note There are no grid-specific options for alugrid at the moment, so
-     *       this constructor is identical to the default constructor.
-     */
-    GridFactory(const ParameterTree& params)
-      : BaseType( )
-    {}
   };
   /** \brief Specialization of the generic GridFactory for ALUSimplexGrid<2,dimw>
    *  \ingroup GridFactory
@@ -336,15 +326,6 @@ namespace Dune
     {
       this->setVerbosity( verbose );
     }
-
-    /** \brief Constructor with grid-specific options
-     *
-     * \note There are no grid-specific options for alugrid at the moment, so
-     *       this constructor is identical to the default constructor.
-     */
-    GridFactory(const ParameterTree& params)
-      : BaseType( )
-    {}
   };
 
   /** \brief Specialization of the generic GridFactory for ALUCubeGrid<2,dimw>
@@ -377,15 +358,6 @@ namespace Dune
     {
       this->setVerbosity( verbose );
     }
-
-    /** \brief Constructor with grid-specific options
-     *
-     * \note There are no grid-specific options for alugrid at the moment, so
-     *       this constructor is identical to the default constructor.
-     */
-    GridFactory(const ParameterTree& params)
-      : BaseType( )
-    {}
   };
 
 
