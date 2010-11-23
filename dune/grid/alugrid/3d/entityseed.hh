@@ -7,18 +7,18 @@ namespace Dune
 {
 
   template<int cd, class GridImp>
-  class ALU3dGridEntityKey ;
+  class ALU3dGridEntitySeed ;
 
   //**********************************************************************
   //
-  // --ALU3dGridEntityKey
-  // --EntityKey
+  // --ALU3dGridEntitySeed
+  // --EntitySeed
   //**********************************************************************
   template< int codim, class GridImp >
-  class ALU3dGridEntityKeyBase
+  class ALU3dGridEntitySeedBase
   {
   protected:
-    typedef ALU3dGridEntityKeyBase< codim, GridImp > ThisType;
+    typedef ALU3dGridEntitySeedBase< codim, GridImp > ThisType;
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
@@ -32,7 +32,7 @@ namespace Dune
     typedef ALU3dImplTraits<GridImp::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim<codim>::ImplementationType ImplementationType;
     typedef typename ImplTraits::template Codim<codim>::InterfaceType HElementType;
-    typedef typename ImplTraits::template Codim<codim>::EntityKeyType KeyType ;
+    typedef typename ImplTraits::template Codim<codim>::EntitySeedType KeyType ;
 
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
@@ -92,13 +92,13 @@ namespace Dune
     typedef typename EntityObject :: ImplementationType EntityImp;
 
     //! typedef of my type
-    typedef ThisType ALU3dGridEntityKeyType;
+    typedef ThisType ALU3dGridEntitySeedType;
 
     //! make type of entity pointer implementation available in derived classes
-    typedef ALU3dGridEntityKey<codimension,GridImp> EntityKeyImp;
+    typedef ALU3dGridEntitySeed<codimension,GridImp> EntitySeedImp;
 
     //! Destructor
-    ~ALU3dGridEntityKeyBase()
+    ~ALU3dGridEntitySeedBase()
     {
 #ifndef NDEBUG
       // clear pointer
@@ -106,32 +106,32 @@ namespace Dune
 #endif
     }
 
-    //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKeyBase();
+    //! Constructor for EntitySeed that points to an element
+    ALU3dGridEntitySeedBase();
 
-    //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKeyBase(const HElementType& item);
+    //! Constructor for EntitySeed that points to an element
+    ALU3dGridEntitySeedBase(const HElementType& item);
 
-    //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKeyBase(const HElementType* item, const HBndSegType* ghostFace );
+    //! Constructor for EntitySeed that points to an element
+    ALU3dGridEntitySeedBase(const HElementType* item, const HBndSegType* ghostFace );
 
-    //! Constructor for EntityKey that points to an ghost
-    ALU3dGridEntityKeyBase(const HBndSegType& ghostFace );
+    //! Constructor for EntitySeed that points to an ghost
+    ALU3dGridEntitySeedBase(const HBndSegType& ghostFace );
 
     //! copy constructor
-    ALU3dGridEntityKeyBase(const ALU3dGridEntityKeyType & org);
+    ALU3dGridEntitySeedBase(const ALU3dGridEntitySeedType & org);
 
     //! equality
-    bool equals (const ALU3dGridEntityKeyType& i) const;
+    bool equals (const ALU3dGridEntitySeedType& i) const;
 
     //! equality operator
-    bool operator == (const ALU3dGridEntityKeyType& i) const
+    bool operator == (const ALU3dGridEntitySeedType& i) const
     {
       return equals( i );
     }
 
     //! inequality operator
-    bool operator != (const ALU3dGridEntityKeyType& i) const
+    bool operator != (const ALU3dGridEntitySeedType& i) const
     {
       return ! equals( i );
     }
@@ -191,12 +191,12 @@ namespace Dune
   };
 
   template<int cd, class GridImp>
-  class ALU3dGridEntityKey :
-    public ALU3dGridEntityKeyBase<cd,GridImp>
+  class ALU3dGridEntitySeed :
+    public ALU3dGridEntitySeedBase<cd,GridImp>
   {
-    typedef ALU3dGridEntityKeyBase<cd,GridImp> BaseType;
+    typedef ALU3dGridEntitySeedBase<cd,GridImp> BaseType;
 
-    typedef ALU3dGridEntityKey <cd,GridImp> ThisType;
+    typedef ALU3dGridEntitySeed <cd,GridImp> ThisType;
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
@@ -221,35 +221,35 @@ namespace Dune
     typedef typename GridImp::template Codim<cd>::Entity Entity;
 
     //! typedef of my type
-    typedef ALU3dGridEntityKey<cd,GridImp> ALU3dGridEntityKeyType;
+    typedef ALU3dGridEntitySeed<cd,GridImp> ALU3dGridEntitySeedType;
 
-    //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKey(const ImplementationType & item)
+    //! Constructor for EntitySeed that points to an element
+    ALU3dGridEntitySeed(const ImplementationType & item)
     {
       // this constructor should only be called by codim=0 entity keys
       assert( false );
       abort();
     }
 
-    //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKey(const HElementType & item,
-                       const int level,
-                       const int twist = defaultTwist,
-                       const int duneFace = defaultValue
-                       );
+    //! Constructor for EntitySeed that points to an element
+    ALU3dGridEntitySeed(const HElementType & item,
+                        const int level,
+                        const int twist = defaultTwist,
+                        const int duneFace = defaultValue
+                        );
 
-    //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKey()
+    //! Constructor for EntitySeed that points to an element
+    ALU3dGridEntitySeed()
       : BaseType(), level_(defaultValue), twist_(defaultTwist), face_(defaultValue) {}
 
-    //! Constructor for EntityKey that points to given entity
-    ALU3dGridEntityKey(const ALU3dGridEntityType& entity)
-      : ALU3dGridEntityKeyBase<cd,GridImp> (entity.getItem()),
+    //! Constructor for EntitySeed that points to given entity
+    ALU3dGridEntitySeed(const ALU3dGridEntityType& entity)
+      : ALU3dGridEntitySeedBase<cd,GridImp> (entity.getItem()),
         level_(entity.level()), twist_(defaultTwist), face_(defaultValue)
     {}
 
     //! copy constructor
-    ALU3dGridEntityKey(const ALU3dGridEntityKeyType & org);
+    ALU3dGridEntitySeed(const ALU3dGridEntitySeedType & org);
 
     //! assignment operator
     ThisType & operator = (const ThisType & org);
@@ -273,18 +273,18 @@ namespace Dune
 
     using BaseType :: set ;
 
-    bool operator == (const ALU3dGridEntityKeyType& i) const
+    bool operator == (const ALU3dGridEntitySeedType& i) const
     {
       return equals( i );
     }
 
-    bool operator != (const ALU3dGridEntityKeyType& i) const
+    bool operator != (const ALU3dGridEntitySeedType& i) const
     {
       return ! equals( i );
     }
 
     //! equality, calls BaseType equals
-    bool equals (const ALU3dGridEntityKeyType& key) const
+    bool equals (const ALU3dGridEntitySeedType& key) const
     {
       // only compare the item pointer, this is the real key
       return BaseType :: equals( key ) && (level() == key.level());
@@ -299,18 +299,18 @@ namespace Dune
     int face_;
   };
 
-  //! ALUGridEntityKey points to an entity
+  //! ALUGridEntitySeed points to an entity
   //! this class is the specialisation for codim 0,
-  //! it has exactly the same functionality as the ALU3dGridEntityKeyBase
+  //! it has exactly the same functionality as the ALU3dGridEntitySeedBase
   template<class GridImp>
-  class ALU3dGridEntityKey<0,GridImp> :
-    public ALU3dGridEntityKeyBase<0,GridImp>
+  class ALU3dGridEntitySeed<0,GridImp> :
+    public ALU3dGridEntitySeedBase<0,GridImp>
   {
   protected:
-    typedef ALU3dGridEntityKeyBase<0,GridImp> BaseType;
+    typedef ALU3dGridEntitySeedBase<0,GridImp> BaseType;
 
     enum { cd = 0 };
-    typedef ALU3dGridEntityKey <cd,GridImp> ThisType;
+    typedef ALU3dGridEntitySeed <cd,GridImp> ThisType;
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
@@ -337,26 +337,26 @@ namespace Dune
     typedef typename GridImp::template Codim<cd>::Entity Entity;
 
     //! typedef of my type
-    typedef ThisType ALU3dGridEntityKeyType;
+    typedef ThisType ALU3dGridEntitySeedType;
 
-    //! Constructor for EntityKey that points to an element
-    ALU3dGridEntityKey() : BaseType() {}
+    //! Constructor for EntitySeed that points to an element
+    ALU3dGridEntitySeed() : BaseType() {}
 
-    //! Constructor for EntityKey that points to an interior element
-    ALU3dGridEntityKey(const HElementType& item)
-      : ALU3dGridEntityKeyBase<cd,GridImp> (item) {}
+    //! Constructor for EntitySeed that points to an interior element
+    ALU3dGridEntitySeed(const HElementType& item)
+      : ALU3dGridEntitySeedBase<cd,GridImp> (item) {}
 
-    //! Constructor for EntityKey that points to an interior element
-    ALU3dGridEntityKey(const HElementType& item, int , int , int )
-      : ALU3dGridEntityKeyBase<cd,GridImp> (item) {}
+    //! Constructor for EntitySeed that points to an interior element
+    ALU3dGridEntitySeed(const HElementType& item, int , int , int )
+      : ALU3dGridEntitySeedBase<cd,GridImp> (item) {}
 
-    //! Constructor for EntityKey that points to an ghost
-    ALU3dGridEntityKey(const HBndSegType& ghostFace )
-      : ALU3dGridEntityKeyBase<cd,GridImp> ( ghostFace ) {}
+    //! Constructor for EntitySeed that points to an ghost
+    ALU3dGridEntitySeed(const HBndSegType& ghostFace )
+      : ALU3dGridEntitySeedBase<cd,GridImp> ( ghostFace ) {}
 
     //! copy constructor
-    ALU3dGridEntityKey(const ALU3dGridEntityKeyType & org)
-      : ALU3dGridEntityKeyBase<cd,GridImp> (org)
+    ALU3dGridEntitySeed(const ALU3dGridEntitySeedType & org)
+      : ALU3dGridEntitySeedBase<cd,GridImp> (org)
     {}
   };
 
@@ -364,7 +364,7 @@ namespace Dune
   //! print alugrid entity key to std::stream
   template <int cd, class GridImp>
   inline std :: ostream &operator<< ( std :: ostream &out,
-                                      const ALU3dGridEntityKey<cd,GridImp>& key)
+                                      const ALU3dGridEntitySeed<cd,GridImp>& key)
   {
     out << key.item() << " " << key.level() << " " << key.twist() << " " << key.face();
     return out;
@@ -377,41 +377,41 @@ namespace Dune
   //
   //*******************************************************************
   template<int codim, class GridImp >
-  inline ALU3dGridEntityKeyBase<codim,GridImp> ::
-  ALU3dGridEntityKeyBase()
+  inline ALU3dGridEntitySeedBase<codim,GridImp> ::
+  ALU3dGridEntitySeedBase()
     : item_( 0 )
   {}
 
   template<int codim, class GridImp >
-  inline ALU3dGridEntityKeyBase<codim,GridImp> ::
-  ALU3dGridEntityKeyBase(const HElementType &item)
+  inline ALU3dGridEntitySeedBase<codim,GridImp> ::
+  ALU3dGridEntitySeedBase(const HElementType &item)
     : item_( toKey(&item) )
   {}
 
   template<int codim, class GridImp >
-  inline ALU3dGridEntityKeyBase<codim,GridImp> ::
-  ALU3dGridEntityKeyBase(const HBndSegType& ghostFace )
+  inline ALU3dGridEntitySeedBase<codim,GridImp> ::
+  ALU3dGridEntitySeedBase(const HBndSegType& ghostFace )
     : item_( toKey(&ghostFace) )
   {}
 
   template<int codim, class GridImp >
-  inline ALU3dGridEntityKeyBase<codim,GridImp> ::
-  ALU3dGridEntityKeyBase(const ALU3dGridEntityKeyType & org)
+  inline ALU3dGridEntitySeedBase<codim,GridImp> ::
+  ALU3dGridEntitySeedBase(const ALU3dGridEntitySeedType & org)
     : item_(org.item_)
   {}
 
   template<int codim, class GridImp >
-  inline ALU3dGridEntityKeyBase<codim,GridImp> &
-  ALU3dGridEntityKeyBase<codim,GridImp> ::
-  operator = (const ALU3dGridEntityKeyType & org)
+  inline ALU3dGridEntitySeedBase<codim,GridImp> &
+  ALU3dGridEntitySeedBase<codim,GridImp> ::
+  operator = (const ALU3dGridEntitySeedType & org)
   {
     item_  = org.item_;
     return *this;
   }
 
   template<int codim, class GridImp >
-  inline bool ALU3dGridEntityKeyBase<codim,GridImp>::
-  equals (const ALU3dGridEntityKeyBase<codim,GridImp>& i) const
+  inline bool ALU3dGridEntitySeedBase<codim,GridImp>::
+  equals (const ALU3dGridEntitySeedBase<codim,GridImp>& i) const
   {
     // check equality of underlying items
     return (item_ == i.item_);
@@ -424,12 +424,12 @@ namespace Dune
   ///////////////////////////////////////////////////////////////////
 
   template<int codim, class GridImp >
-  inline ALU3dGridEntityKey<codim,GridImp> ::
-  ALU3dGridEntityKey(const HElementType &item,
-                     const int level,
-                     const int twist,
-                     const int duneFace )
-    : ALU3dGridEntityKeyBase<codim,GridImp> (item)
+  inline ALU3dGridEntitySeed<codim,GridImp> ::
+  ALU3dGridEntitySeed(const HElementType &item,
+                      const int level,
+                      const int twist,
+                      const int duneFace )
+    : ALU3dGridEntitySeedBase<codim,GridImp> (item)
       , level_(level)
       , twist_ (twist)
       , face_(duneFace)
@@ -438,18 +438,18 @@ namespace Dune
   }
 
   template<int codim, class GridImp >
-  inline ALU3dGridEntityKey<codim,GridImp> ::
-  ALU3dGridEntityKey(const ALU3dGridEntityKeyType & org)
-    : ALU3dGridEntityKeyBase<codim,GridImp>(org)
+  inline ALU3dGridEntitySeed<codim,GridImp> ::
+  ALU3dGridEntitySeed(const ALU3dGridEntitySeedType & org)
+    : ALU3dGridEntitySeedBase<codim,GridImp>(org)
       , level_(org.level_)
       , twist_(org.twist_)
       , face_(org.face_)
   {}
 
   template<int codim, class GridImp >
-  inline ALU3dGridEntityKey<codim,GridImp> &
-  ALU3dGridEntityKey<codim,GridImp>::
-  operator = (const ALU3dGridEntityKeyType & org)
+  inline ALU3dGridEntitySeed<codim,GridImp> &
+  ALU3dGridEntitySeed<codim,GridImp>::
+  operator = (const ALU3dGridEntitySeedType & org)
   {
     // docu and cleanup
     BaseType :: operator = ( org );
@@ -463,7 +463,7 @@ namespace Dune
 
   template<int codim, class GridImp >
   inline void
-  ALU3dGridEntityKey<codim,GridImp>::clear ()
+  ALU3dGridEntitySeed<codim,GridImp>::clear ()
   {
     BaseType :: clear();
     level_ = defaultValue ;

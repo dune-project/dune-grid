@@ -54,7 +54,7 @@ namespace Dune
   template<int cd, class GridImp >
   class ALU3dGridEntityPointerBase;
   template<int cd, class GridImp >
-  class ALU3dGridEntityKey;
+  class ALU3dGridEntitySeed;
   template<int cd, class GridImp >
   class ALU3dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
@@ -255,7 +255,7 @@ namespace Dune
         typedef Dune::Entity< cd, dim, const Grid, ALU3dGridEntity > Entity;
 
         // minimal information to generate entities
-        typedef ALU3dGridEntityKey< cd , const Grid> EntityKey ;
+        typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
 
         typedef Dune::LevelIterator< cd, All_Partition, const Grid, ALU3dGridLevelIterator > LevelIterator;
 
@@ -788,20 +788,20 @@ namespace Dune
 
     template< class EntityType >
     static
-    typename BaseType :: template ReturnImplementationType< EntityType > :: ImplementationType :: EntityKey
-    key( const EntityType& entity )
+    typename BaseType :: template ReturnImplementationType< EntityType > :: ImplementationType :: EntitySeed
+    seed( const EntityType& entity )
     {
-      return BaseType :: getRealImplementation( entity ).key();
+      return BaseType :: getRealImplementation( entity ).seed();
     }
 
-    template <class ALUEntityKey>
-    typename Traits :: template Codim< ALUEntityKey :: codimension > :: EntityPointer
-    entity( const ALUEntityKey& key ) const
+    template <class ALUEntitySeed>
+    typename Traits :: template Codim< ALUEntitySeed :: codimension > :: EntityPointer
+    entity( const ALUEntitySeed& seed ) const
     {
-      enum { codim = ALUEntityKey :: codimension };
+      enum { codim = ALUEntitySeed :: codimension };
       typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
       typedef ALU3dGridEntityPointer < codim, const ThisType > ALUPointer ;
-      return ALUPointer( *this, key ) ;
+      return ALUPointer( *this, seed ) ;
     }
 
   protected:

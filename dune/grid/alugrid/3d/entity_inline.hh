@@ -97,7 +97,7 @@ namespace Dune {
   template<int dim, class GridImp>
   inline void
   ALU3dGridEntity<0,dim,GridImp>::
-  setElement(const ALU3dGridEntityKeyType& key )
+  setElement(const ALU3dGridEntitySeedType& key )
   {
     if( ! key.isGhost() )
       setElement( *key.interior() );
@@ -283,7 +283,7 @@ namespace Dune {
   ALU3dGridEntityPointerBase(const GridImp & grid,
                              const HElementType &item)
     : grid_(grid)
-      , key_( item )
+      , seed_( item )
       , entity_( 0 )
       , locked_ ( false ) // entity can be released
   {}
@@ -293,7 +293,7 @@ namespace Dune {
   ALU3dGridEntityPointerBase(const GridImp & grid,
                              const HBndSegType & ghostFace )
     : grid_(grid)
-      , key_( ghostFace )
+      , seed_( ghostFace )
       , entity_ ( grid_.template getNewEntity<codim> ( ghostFace.level() ))
       , locked_( true ) // entity should not be released, otherwise is ghost info lost
   {
@@ -304,9 +304,9 @@ namespace Dune {
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
   ALU3dGridEntityPointerBase(const GridImp & grid,
-                             const ALU3dGridEntityKeyType& key )
+                             const ALU3dGridEntitySeedType& key )
     : grid_(grid)
-      , key_( key )
+      , seed_( key )
       , entity_ ( 0 )
       , locked_( false )
   {}
@@ -316,7 +316,7 @@ namespace Dune {
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
   ALU3dGridEntityPointerBase(const GridImp & grid, int level )
     : grid_(grid)
-      , key_()
+      , seed_()
       , entity_ ( grid_.template getNewEntity<codim> ( level ) )
       , locked_ ( false ) // entity can be released
   {
@@ -334,7 +334,7 @@ namespace Dune {
                              const int twist,
                              const int duneFace )
     : grid_(grid)
-      , key_( item, level, twist, duneFace )
+      , seed_( item, level, twist, duneFace )
       , entity_( 0 )
       , locked_ ( false ) // entity can be released
   {}
@@ -343,7 +343,7 @@ namespace Dune {
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
   ALU3dGridEntityPointerBase(const ALU3dGridEntityPointerType & org)
     : grid_(org.grid_)
-      , key_( org.key_ )
+      , seed_( org.seed_ )
       , entity_( 0 )
       , locked_( org.locked_ )
   {
@@ -382,9 +382,9 @@ namespace Dune {
     assert( &grid_ == &org.grid_ );
 
     // set item
-    key_ = org.key_;
+    seed_ = org.seed_;
 
-    HElementType* item = key_.item();
+    HElementType* item = seed_.item();
     // copy locked info
     locked_ = org.locked_;
 
@@ -409,7 +409,7 @@ namespace Dune {
         else
         {
           // otherwise item is set
-          entityImp().setElement( key_ );
+          entityImp().setElement( seed_ );
         }
       }
     }
@@ -430,7 +430,7 @@ namespace Dune {
   template<int codim, class GridImp >
   inline void ALU3dGridEntityPointerBase<codim,GridImp>::done ()
   {
-    key_.clear();
+    seed_.clear();
     locked_ = false;
     // free entity
     freeEntity();
@@ -463,7 +463,7 @@ namespace Dune {
   equals (const ALU3dGridEntityPointerBase<codim,GridImp>& i) const
   {
     // check equality of underlying items
-    return (key_.equals( i.key_ ));
+    return (seed_.equals( i.seed_ ));
   }
 
   template<int codim, class GridImp >
@@ -471,23 +471,23 @@ namespace Dune {
   ALU3dGridEntityPointerBase<codim,GridImp>::dereference () const
   {
     // don't dereference empty entity pointer
-    assert( key_.item() );
-    assert( (key_.item()->isGhost()) ? locked_ : true );
+    assert( seed_.item() );
+    assert( (seed_.item()->isGhost()) ? locked_ : true );
     assert( (locked_) ? (entity_ != 0) : true);
     if( ! entity_ )
     {
       entity_ = grid_.template getNewEntity<codim> ();
-      entityImp().setElement( key_ );
+      entityImp().setElement( seed_ );
     }
-    assert( key_.item() == & entityImp().getItem() );
+    assert( seed_.item() == & entityImp().getItem() );
     return (*entity_);
   }
 
   template<int codim, class GridImp >
   inline int ALU3dGridEntityPointerBase<codim,GridImp>::level () const
   {
-    assert( key_.item() );
-    return key_.item()->level();
+    assert( seed_.item() );
+    return seed_.item()->level();
   }
 
   template<int codim, class GridImp >
@@ -498,17 +498,17 @@ namespace Dune {
     entityImp().setGhost( ghostFace );
     // inside the method setGhost the method getGhost of the ghostFace is
     // called and set as item
-    key_.set( ghostFace );
+    seed_.set( ghostFace );
   }
 
   template<int codim, class GridImp >
   inline void ALU3dGridEntityPointerBase<codim,GridImp>::
   updateEntityPointer( HElementType * item , int )
   {
-    key_.set( *item );
+    seed_.set( *item );
     if( item && entity_ )
     {
-      entityImp().setElement( key_ );
+      entityImp().setElement( seed_ );
     }
   }
 
@@ -550,19 +550,19 @@ namespace Dune {
   clone (const ALU3dGridEntityPointerType & org)
   {
     // copy key
-    key_ = org.key_;
+    seed_ = org.seed_;
 
     assert( &grid_ == &org.grid_ );
     // copy lock status
     this->locked_ = org.locked_;
 
     // if entity exists, just remove item pointer
-    if( key_.item() )
+    if( seed_.item() )
     {
       if( ! entity_ )
         getEntity(org);
       else
-        entityImp().setElement( key_ );
+        entityImp().setElement( seed_ );
     }
     else
       this->done();
@@ -574,30 +574,30 @@ namespace Dune {
   ALU3dGridEntityPointer<codim,GridImp>::dereference () const
   {
     // don't dereference empty entity pointer
-    assert( key_.item() );
+    assert( seed_.item() );
     if( ! entity_ )
     {
       entity_ = grid_.template getNewEntity<codim> ();
-      entityImp().setElement( key_ );
+      entityImp().setElement( seed_ );
     }
-    assert( key_.item() == & entityImp().getItem() );
+    assert( seed_.item() == & entityImp().getItem() );
     return (*entity_);
   }
 
   template<int codim, class GridImp >
   inline int ALU3dGridEntityPointer<codim,GridImp>::level () const
   {
-    return key_.level();
+    return seed_.level();
   }
 
   template<int codim, class GridImp >
   inline void ALU3dGridEntityPointer<codim,GridImp>::
   updateEntityPointer( HElementType * item, int level)
   {
-    key_.set( *item, level );
+    seed_.set( *item, level );
     if( item && entity_ )
     {
-      entityImp().setElement( key_ );
+      entityImp().setElement( seed_ );
     }
   }
 

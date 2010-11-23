@@ -76,9 +76,9 @@ namespace Dune {
 
   template<int cd, int dim, class GridImp>
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const ALU3dGridEntityKeyType& key)
+  setElement(const ALU3dGridEntitySeedType& seed )
   {
-    setElement(*key.item(), key.level(), key.twist(), key.face());
+    setElement(*seed.item(), seed.level(), seed.twist(), seed.face());
   }
 
   template<int cd, int dim, class GridImp>

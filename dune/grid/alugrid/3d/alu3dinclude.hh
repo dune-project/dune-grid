@@ -133,7 +133,7 @@ namespace Dune
     typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
 
     typedef typename GitterType::helement_STI InterfaceType;
-    typedef typename GitterType::Geometric::hasFace3 EntityKeyType;
+    typedef typename GitterType::Geometric::hasFace3 EntitySeedType;
     typedef typename GitterImplType::Objects::tetra_IMPL ImplementationType;
     typedef typename GitterType::hbndseg_STI GhostInterfaceType;
     typedef typename GitterImplType::Objects::Hbnd3Default GhostImplementationType;
@@ -146,7 +146,7 @@ namespace Dune
     typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
 
     typedef typename GitterType::helement_STI InterfaceType;
-    typedef typename GitterType::Geometric::hasFace4 EntityKeyType;
+    typedef typename GitterType::Geometric::hasFace4 EntitySeedType;
     typedef typename GitterImplType::Objects::hexa_IMPL ImplementationType;
     typedef typename GitterType::hbndseg_STI GhostInterfaceType;
     typedef typename GitterImplType::Objects::Hbnd4Default GhostImplementationType;
@@ -158,7 +158,7 @@ namespace Dune
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
     typedef typename GitterType::hface_STI InterfaceType;
-    typedef InterfaceType EntityKeyType;
+    typedef InterfaceType EntitySeedType;
     typedef typename GitterType::Geometric::hface3_GEO ImplementationType;
   };
 
@@ -168,7 +168,7 @@ namespace Dune
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
     typedef typename GitterType::hface_STI InterfaceType;
-    typedef InterfaceType EntityKeyType;
+    typedef InterfaceType EntitySeedType;
     typedef typename GitterType::Geometric::hface4_GEO ImplementationType;
   };
 
@@ -178,7 +178,7 @@ namespace Dune
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
     typedef typename GitterType::hedge_STI InterfaceType;
-    typedef InterfaceType EntityKeyType;
+    typedef InterfaceType EntitySeedType;
     typedef typename GitterType::Geometric::hedge1_GEO ImplementationType;
   };
 
@@ -188,7 +188,7 @@ namespace Dune
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
     typedef typename GitterType::vertex_STI InterfaceType;
-    typedef InterfaceType EntityKeyType;
+    typedef InterfaceType EntitySeedType;
     typedef typename GitterType::Geometric::VertexGeo ImplementationType;
   };
 
