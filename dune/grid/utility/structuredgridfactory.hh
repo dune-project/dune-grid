@@ -18,27 +18,29 @@
 
 namespace Dune {
 
-  //! \brief Determines whether a GridFactory needs insertion on all ranks
-  //!        or just rank 0
-  /**
-   * If insertion is only required (and permissible) on rank 0, this class
-   * derives from false_type and will have a static member constant \c value
-   * with value \c false.  Otherwise it derives from true_type and has a
-   * static member constant \v value with value \c true.
-   */
-  template<class Grid>
-  struct FactoryNeedsInsertOnAllRanks : public false_type {};
-
-#if HAVE_UG
-  template<int dim>
-  struct FactoryNeedsInsertOnAllRanks<UGGrid<dim> > : public true_type {};
-#endif
-
   /** \brief Construct structured cube and simplex grids in unstructured grid managers
    */
   template <class GridType>
   class StructuredGridFactory
   {
+    //! \brief Determines whether a GridFactory needs insertion on all
+    //!        ranks or just rank 0
+    /**
+     * If insertion is only required (and permissible) on rank 0, this
+     * class derives from false_type and will have a static member
+     * constant \c value with value \c false.  Otherwise it derives from
+     * true_type and has a static member constant \v value with value \c
+     * true.
+     */
+    template<class Grid>
+    struct FactoryNeedsInsertOnAllRanks : public false_type {};
+
+#if HAVE_UG
+    template<int dim>
+    struct FactoryNeedsInsertOnAllRanks<UGGrid<dim> > :
+      public true_type
+    {};
+#endif
 
     typedef typename GridType::ctype ctype;
 
