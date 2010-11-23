@@ -13,6 +13,7 @@
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/common/mpihelper.hh>
 #include <dune/grid/common/gridenums.hh>
+#include <dune/grid/utility/structuredgridfactory.hh>
 
 using namespace Dune;
 
@@ -228,73 +229,6 @@ template <class GridView>
 struct checkMappersWrapper<2, 1, GridView>
 { static void check(const GridView &gv) { } };
 
-template <class Grid>
-void insertVertices(int n, Dune::GridFactory<Grid> &factory, int coordIdx=0)
-{
-  static FieldVector<double,Grid::dimension> pos;
-  if (coordIdx == Grid::dimension) {
-    factory.insertVertex(pos);
-    return;
-  }
-
-  for (int i=0; i < n; ++i) {
-    pos[coordIdx] = double(i)/(n-1);
-    insertVertices(n, factory, coordIdx + 1);
-  }
-}
-
-template <class GridType>
-void insertElements(int n, Dune::GridFactory<GridType> &factory, unsigned coordIdx=0)
-{
-  const int dim = GridType::dimension;
-
-  if (dim == 3) {
-    for (int i=0; i<n-1; i++) {
-      for (int j=0; j<n-1; j++) {
-        for (int k=0; k<n-1; k++) {
-          std::vector<unsigned int> v(8);
-          v[0] = k*n*n + i*n + j;
-          v[1] = k*n*n + i*n + j+1;
-          v[2] = k*n*n + (i+1)*n + j;
-          v[3] = k*n*n + (i+1)*n + j+1;
-
-          v[4] = (k+1)*n*n + i*n + j;
-          v[5] = (k+1)*n*n + i*n + j+1;
-          v[6] = (k+1)*n*n + (i+1)*n + j;
-          v[7] = (k+1)*n*n + (i+1)*n + j+1;
-
-          factory.insertElement(GeometryType(GeometryType::cube,dim), v);
-        }
-      }
-    }
-  }
-  else if (dim == 2) {
-    for (int i=0; i<n-1; i++) {
-      for (int j=0; j<n-1; j++) {
-        std::vector<unsigned int> v(4);
-        v[0] = i*n + j;
-        v[1] = i*n + j+1;
-        v[2] = (i+1)*n + j;
-        v[3] = (i+1)*n + j+1;
-
-        factory.insertElement(GeometryType(GeometryType::cube,dim), v);
-      }
-    }
-  }
-};
-
-template <class GridType>
-void createGrid(GridType &grid, int n)
-{
-  typedef Dune::GridFactory<GridType> GridFactory;
-
-  GridFactory factory(&grid);
-
-  insertVertices<GridType>(n, factory);
-  insertElements<GridType>(n, factory);
-
-  factory.createGrid();
-}
 
 template <class GridView, int commCodim>
 void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=false)
@@ -381,10 +315,16 @@ void testParallelUG()
   ////////////////////////////////////////////////////////////
   // Create uniform grid on rank 0
   ////////////////////////////////////////////////////////////
-  int n = 11;
+
   typedef UGGrid<dim> GridType;
-  GridType grid;
-  createGrid(grid, n);
+
+  StructuredGridFactory<GridType> structuredGridFactory;
+
+  Dune::FieldVector<double,dim> lowerLeft(0);
+  Dune::FieldVector<double,dim> upperRight(1);
+  Dune::array<unsigned int, dim> elements;
+  std::fill(elements.begin(), elements.end(), 10);
+  shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
 
   //////////////////////////////////////////////////////
   // Distribute the grid
@@ -395,18 +335,18 @@ void testParallelUG()
                        32,   // maxlevel
                        1);   // minelement
    */
-  grid.loadBalance();
+  grid->loadBalance();
 
 
-  std::cout << "Process " << grid.comm().rank() + 1
-            << " has " << grid.size(0)
-            << " elements and " << grid.size(dim)
+  std::cout << "Process " << grid->comm().rank() + 1
+            << " has " << grid->size(0)
+            << " elements and " << grid->size(dim)
             << " nodes.\n";
 
   // make sure each process has some elements
-  assert(grid.size(0) > 0);
+  assert(grid->size(0) > 0);
   // make sure each process has some nodes
-  assert(grid.size(dim) > 0);
+  assert(grid->size(dim) > 0);
 
   //////////////////////////////////////////////////////
   // Test level and leaf mappers/gridViews
@@ -414,8 +354,8 @@ void testParallelUG()
 
   typedef typename GridType::LevelGridView LevelGV;
   typedef typename GridType::LeafGridView LeafGV;
-  const LeafGV&  leafGridView = grid.leafView();
-  const LevelGV& level0GridView = grid.levelView(0);
+  const LeafGV&  leafGridView = grid->leafView();
+  const LevelGV& level0GridView = grid->levelView(0);
 
   std::cout << "LevelGridView for level 0 has " << level0GridView.size(0)
             << " elements "  << level0GridView.size(dim - 1)
@@ -452,29 +392,29 @@ void testParallelUG()
   ////////////////////////////////////////////////////
 
   std::cout << "Global refinement\n";
-  grid.globalRefine(1);
+  grid->globalRefine(1);
 
-  for (int i=0; i<=grid.maxLevel(); i++) {
-    checkIntersections(grid.levelView(i));
-    checkMappersWrapper<dim, 0, LevelGV>::check(grid.levelView(i));
-    checkMappersWrapper<dim, 1, LevelGV>::check(grid.levelView(i));
-    checkMappersWrapper<dim, 2, LevelGV>::check(grid.levelView(i));
-    checkMappersWrapper<dim, 3, LevelGV>::check(grid.levelView(i));
+  for (int i=0; i<=grid->maxLevel(); i++) {
+    checkIntersections(grid->levelView(i));
+    checkMappersWrapper<dim, 0, LevelGV>::check(grid->levelView(i));
+    checkMappersWrapper<dim, 1, LevelGV>::check(grid->levelView(i));
+    checkMappersWrapper<dim, 2, LevelGV>::check(grid->levelView(i));
+    checkMappersWrapper<dim, 3, LevelGV>::check(grid->levelView(i));
   }
 
-  checkIntersections(grid.leafView());
-  checkMappersWrapper<dim, 0, LeafGV>::check(grid.leafView());
-  checkMappersWrapper<dim, 1, LeafGV>::check(grid.leafView());
-  checkMappersWrapper<dim, 2, LeafGV>::check(grid.leafView());
-  checkMappersWrapper<dim, 3, LeafGV>::check(grid.leafView());
+  checkIntersections(grid->leafView());
+  checkMappersWrapper<dim, 0, LeafGV>::check(grid->leafView());
+  checkMappersWrapper<dim, 1, LeafGV>::check(grid->leafView());
+  checkMappersWrapper<dim, 2, LeafGV>::check(grid->leafView());
+  checkMappersWrapper<dim, 3, LeafGV>::check(grid->leafView());
 
-  for (int i=0; i<=grid.maxLevel(); i++)
+  for (int i=0; i<=grid->maxLevel(); i++)
   {
-    testCommunication<typename GridType::LevelGridView, 0>(grid.levelView(i), false);
-    testCommunication<typename GridType::LevelGridView, dim>(grid.levelView(i), false);
+    testCommunication<typename GridType::LevelGridView, 0>(grid->levelView(i), false);
+    testCommunication<typename GridType::LevelGridView, dim>(grid->levelView(i), false);
   }
-  testCommunication<typename GridType::LeafGridView, 0>(grid.leafView(), true);
-  testCommunication<typename GridType::LeafGridView, dim>(grid.leafView(), true);
+  testCommunication<typename GridType::LeafGridView, 0>(grid->leafView(), true);
+  testCommunication<typename GridType::LeafGridView, dim>(grid->leafView(), true);
 
 };
 
