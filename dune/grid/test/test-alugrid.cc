@@ -117,9 +117,9 @@ void checkIteratorAssignment(GridType & grid)
       EntityPointerType p( it );
 
 #ifdef NO_2D
-      typedef typename GridType::Traits::template Codim<dim>::EntityKey EntityKey;
-      EntityKey key = GridType :: key( *it );
-      EntityPointerType ep = grid.entity( key );
+      typedef typename GridType::Traits::template Codim<dim>::EntitySeed EntitySeed;
+      EntitySeed seed = GridType :: seed( *it );
+      EntityPointerType ep = grid.entity( seed );
       assert( ep == it );
 #endif
 
