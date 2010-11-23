@@ -172,10 +172,12 @@ namespace Dune
       return reinterpret_cast<const EntityPointer<GridImp,base>&>(*this);
     }
 
-    /** \brief Reduce the entity pointers used
+    /** \deprecated Reduce the entity pointers used
         memory to a minimum necessary to store all needed information.
+
+        Use EntitySeed to store entity information.
      */
-    void compactify ()
+    void compactify () DUNE_DEPRECATED
     {
       realIterator.compactify();
     }
