@@ -24,6 +24,9 @@ using namespace Dune;
 template<> int Dune::UGGrid<2>::numOfUGGrids = 0;
 template<> int Dune::UGGrid<3>::numOfUGGrids = 0;
 
+template<> unsigned int Dune::UGGrid<2>::heapSize_ = 500;
+template<> unsigned int Dune::UGGrid<3>::heapSize_ = 500;
+
 
 template <int dim>
 Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
@@ -35,8 +38,29 @@ Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
     closureType_(GREEN),
     someElementHasBeenMarkedForRefinement_(false),
     someElementHasBeenMarkedForCoarsening_(false),
-    heapSize_(heapSize),
     numBoundarySegments_(0)
+{
+  heapSize_ = heapSize;
+  init();
+}
+
+template <int dim>
+Dune::UGGrid < dim >::UGGrid()
+  : multigrid_(NULL),
+    leafIndexSet_(*this),
+    globalIdSet_(*this),
+    localIdSet_(*this),
+    refinementType_(LOCAL),
+    closureType_(GREEN),
+    someElementHasBeenMarkedForRefinement_(false),
+    someElementHasBeenMarkedForCoarsening_(false),
+    numBoundarySegments_(0)
+{
+  init();
+}
+
+template <int dim>
+void Dune::UGGrid < dim >::init()
 {
   if (numOfUGGrids==0) {
 

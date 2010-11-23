@@ -421,12 +421,28 @@ namespace Dune {
     /** \brief Constructor with control over UG's memory requirements
      *
      * \param heapSize The size of UG's internal memory in megabytes for this grid.
+     *
+     * \note The heapsize provided here is stored as the default heapsize.
      */
-    UGGrid(unsigned int heapSize=500);
+    UGGrid(unsigned int heapSize) DUNE_DEPRECATED;
+
+    /** \brief Default constructor
+     *
+     * Uses the default heapsize, which can be set using the static method
+     * setDefaultHeapSize() (or by calling the contructor which take the
+     * heapsize as an argument).
+     */
+    UGGrid();
 
     //! Destructor
     ~UGGrid();
 
+  private:
+    /** \brief Common part of the constructors
+     */
+    void init();
+
+  public:
     //! Return maximum level defined in this grid. Levels are numbered
     //! 0 ... maxlevel with 0 the coarsest level.
     int maxLevel() const;
@@ -845,6 +861,16 @@ namespace Dune {
       closureType_ = type;
     }
 
+    /** \brief Sets the default heap size
+     *
+     * UGGrid keeps an internal heap to allocate memory from, which must be
+     * specified on grid creation (at the latest).  This sets the default heap
+     * size, which is used when no heap size is given to the constructor.
+     */
+    static void setDefaultHeapSize(unsigned size) {
+      heapSize_ = size;
+    }
+
     /** \brief Sets a vertex to a new position
 
        Changing a vertex' position changes its position on all grid levels!*/
@@ -934,7 +960,7 @@ namespace Dune {
      *
      * It is handed over to UG for each new multigrid.
      */
-    unsigned int heapSize_;
+    static unsigned int heapSize_;
 
     /** \brief The classes implementing the geometry of the boundary segments, if requested */
     std::vector<shared_ptr<BoundarySegment<dim> > > boundarySegments_;
