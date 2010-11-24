@@ -344,18 +344,6 @@ namespace Dune
       for( unsigned int i = 0; i < ReferenceDomain::numNormals; ++i )
         ReferenceDomain::integrationOuterNormal( i ,volumeNormals_[ i ] );
     }
-
-    /** \brief initialize the reference element
-     *
-     *  Initialize the reference element for GeometryType (geoType, dim).
-     *
-     *  \tparam  geoType  basic geometry of the desired reference element
-     */
-    template< GeometryType::BasicType geoType >
-    void initialize ()
-    {
-      initializeTopology< typename GenericGeometry::Convert< geoType, dim >::type >();
-    }
   };
 
 
@@ -550,49 +538,40 @@ namespace Dune
   template< class ctype, int dim >
   class GenericReferenceElementContainer
   {
+    static const unsigned int numTopologies = (1u << dim);
+
   public:
     typedef GenericReferenceElement< ctype, dim > value_type;
+
+    const value_type &operator() ( const unsigned int topologyId ) const
+    {
+      return values_[ topologyId ];
+    }
 
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == dim );
-      switch( type.basicType() )
-      {
-      case GeometryType::simplex :
-        return simplex();
-
-      case GeometryType::cube :
-        return cube();
-
-      case GeometryType::pyramid :
-        return pyramid();
-
-      case GeometryType::prism :
-        return prism();
-
-      default :
-        DUNE_THROW( RangeError, "Unknown geometry type: " << type );
-      }
+      return (*this)( type.id() );
     }
 
     const value_type &simplex () const
     {
-      return simplex_;
+      return (*this)( GenericGeometry::SimplexTopology< dim >::type::id );
     }
 
     const value_type &cube () const
     {
-      return cube_;
+      return (*this)( GenericGeometry::CubeTopology< dim >::type::id );
     }
 
     const value_type &pyramid () const
     {
-      return pyramid_;
+      return (*this)( GenericGeometry::PyramidTopology< dim >::type::id );
     }
 
     const value_type &prism () const
     {
-      return prism_;
+      return (*this)( GenericGeometry::PrismTopology< dim >::type::id );
     }
 
     static const GenericReferenceElementContainer &instance ()
@@ -602,148 +581,23 @@ namespace Dune
     }
 
   private:
-    GenericReferenceElementContainer ()
+    template< int topologyId >
+    struct Builder
     {
-      simplex_.template initialize< GeometryType::simplex >();
-      cube_.template initialize< GeometryType::cube >();
-      pyramid_.template initialize< GeometryType::pyramid >();
-      prism_.template initialize< GeometryType::prism >();
-    }
-
-    value_type simplex_;
-    value_type cube_;
-    value_type pyramid_;
-    value_type prism_;
-  };
-
-  template< class ctype >
-  class GenericReferenceElementContainer< ctype, 2 >
-  {
-  public:
-    typedef GenericReferenceElement< ctype, 2 > value_type;
-
-    const value_type &operator() ( const GeometryType &type ) const
-    {
-      assert( type.dim() == 2 );
-      switch( type.basicType() )
+      static void apply ( value_type (&values)[ numTopologies ] )
       {
-      case GeometryType::simplex :
-        return simplex_;
-
-      case GeometryType::cube :
-        return cube_;
-
-      case GeometryType::pyramid :
-      case GeometryType::prism :
-        DUNE_THROW( RangeError, "Invalid geometry type: " << type );
-
-      default :
-        DUNE_THROW( RangeError, "Unknown geometry type: " << type );
+        typedef typename GenericGeometry::Topology< topologyId, dim >::type Topology;
+        values[ topologyId ].template initializeTopology< Topology >();
       }
-    }
+    };
 
-    const value_type &simplex () const
-    {
-      return simplex_;
-    }
-
-    const value_type &cube () const
-    {
-      return cube_;
-    }
-
-    static const GenericReferenceElementContainer &instance ()
-    {
-      static GenericReferenceElementContainer inst;
-      return inst;
-    }
-
-  private:
     GenericReferenceElementContainer ()
     {
-      simplex_.template initialize< GeometryType::simplex >();
-      cube_.template initialize< GeometryType::cube >();
+      ForLoop< Builder, 0, numTopologies-1 >::apply( values_ );
     }
 
-    value_type simplex_;
-    value_type cube_;
+    value_type values_[ numTopologies ];
   };
-
-  template< class ctype >
-  class GenericReferenceElementContainer< ctype, 1 >
-  {
-  public:
-    typedef GenericReferenceElement< ctype, 1 > value_type;
-
-    const value_type &operator() ( const GeometryType &type ) const
-    {
-      assert( type.dim() == 1 );
-      return line_;
-    }
-
-    const value_type &simplex () const
-    {
-      return line_;
-    }
-
-    const value_type &cube () const
-    {
-      return line_;
-    }
-
-    static const GenericReferenceElementContainer &instance ()
-    {
-      static GenericReferenceElementContainer inst;
-      return inst;
-    }
-
-  private:
-    GenericReferenceElementContainer ()
-    {
-      line_.template initialize< GeometryType::simplex >();
-    }
-
-    value_type line_;
-  };
-
-  template< class ctype >
-  class GenericReferenceElementContainer< ctype, 0 >
-  {
-  public:
-    typedef GenericReferenceElement< ctype, 0 > value_type;
-
-    const value_type &operator() ( const GeometryType &type ) const
-    {
-      assert( type.dim() == 0 );
-      return point_;
-    }
-
-    const value_type &simplex () const
-    {
-      return point_;
-    }
-
-    const value_type &cube () const
-    {
-      return point_;
-    }
-
-    static
-    const GenericReferenceElementContainer & instance()
-    {
-      static GenericReferenceElementContainer inst;
-      return inst;
-    }
-
-  private:
-    GenericReferenceElementContainer ()
-    {
-      point_.template initialize< GeometryType::simplex >();
-    }
-
-    value_type point_;
-  };
-
 
 
   // GenericReferenceElements
@@ -782,4 +636,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GENERICREFERENCEELEMENTS_HH
