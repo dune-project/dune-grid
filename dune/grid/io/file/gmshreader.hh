@@ -238,15 +238,24 @@ namespace Dune
                             const std::vector< GlobalVector > & nodes,
                             const int physical_entity);
 
-    void readfile(FILE * file, int cnt, const char * format, ...)
+    // template<class T1, class T2, class T3, class T4, class T5, class T6,
+    //          class T7, class T8, class T9>
+    // void readfile(FILE * file, int cnt, const char * format,
+    //     T1& t1, T2& t2, T3& t3, T4& t4, T5& t5, T6& t6, T7& t7, T8& t8, T9& t9)
+    // {
+    //     readfile(file, cnt, &t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
+    // };
+
+    template<class T1, class T2  = void, class T3 = void, class T4 = void, class T5 = void,
+        class T6 = void, class T7 = void, class T8 = void, class T9 = void, class T10 = void>
+    void readfile(FILE * file, int cnt, const char * format,
+                  T1* t1, T2* t2 = 0, T3* t3 = 0, T4* t4 = 0, T5* t5 = 0,
+                  T6* t6 = 0, T7* t7 = 0, T8* t8 = 0, T9* t9 = 0, T10* t10 = 0)
     {
-      va_list vargs;
-      va_start(vargs,format);
-      int c = vfscanf(file, format, vargs);
+      int c = fscanf(file, format, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
       if (c != cnt)
         DUNE_THROW(Dune::IOError, "Error parsing " << fileName << " line " << line
                                                    << ": Expected '" << format << "', only read " << c << " entries instead of " << cnt << ".");
-      va_end(vargs);
     }
     void skipline(FILE * file)
     {
@@ -402,7 +411,7 @@ namespace Dune
       {
         int id, elm_type, number_of_tags;
         readfile(file,3,"%d %d %d",&id,&elm_type,&number_of_tags);
-        int physical_entity, elementary_entity;
+        int physical_entity = -1, elementary_entity = -1;
         std::vector<int> mesh_partitions;
         if ( version_number < 2.2 )
         {
