@@ -49,7 +49,7 @@ namespace Dune
     //! dynamically create objects
     static Object *create(const Dune::GeometryType &gt, const Key &key)
     {
-      return create( GenericGeometry::topologyId(gt) ,key);
+      return create( gt.id() ,key);
     }
     //! statically create objects
     template <class Topology>
@@ -94,7 +94,7 @@ namespace Dune
     //! @copydoc TopologyFactory::create(const Dune::GeometryType &gt,const Key &key)
     static Object *create(const Dune::GeometryType &gt, const Key &key)
     {
-      return create( GenericGeometry::topologyId(gt) ,key);
+      return create( gt.id() ,key);
     }
     //! @copydoc TopologyFactory::create(const Key &key)
     template< class Topology >
