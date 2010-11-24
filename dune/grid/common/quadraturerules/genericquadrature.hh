@@ -107,7 +107,7 @@ namespace Dune
       //! geometry type of the quadrature
       GeometryType type () const
       {
-        return geometryType( topologyId_, dim );
+        return GeometryType( topologyId_, dim );
       }
 
       //! number of quadrature points
