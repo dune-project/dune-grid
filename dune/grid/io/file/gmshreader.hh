@@ -1,5 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+
 #ifndef DUNE_GMSHREADER_HH
 #define DUNE_GMSHREADER_HH
 
@@ -777,10 +778,9 @@ namespace Dune
     }
 
     /** \todo doc me */
-    template<typename T>
     static GridType* read (const std::string& fileName,
-                           std::vector<T>& boundary_id_to_physical_entity,
-                           std::vector<T>& element_index_to_physical_entity,
+                           std::vector<int>& boundary_id_to_physical_entity,
+                           std::vector<int>& element_index_to_physical_entity,
                            bool verbose = true, bool insert_boundary_segments=true)
     {
       // make a grid factory
@@ -811,10 +811,9 @@ namespace Dune
     }
 
     /** \todo doc me */
-    template<typename T>
     static GridType* read (GridType& grid, const std::string& fileName,
-                           std::vector<T>& boundary_id_to_physical_entity,
-                           std::vector<T>& element_index_to_physical_entity,
+                           std::vector<int>& boundary_id_to_physical_entity,
+                           std::vector<int>& element_index_to_physical_entity,
                            bool verbose = true, bool insert_boundary_segments=true)
     {
       // make a grid factory
@@ -841,11 +840,10 @@ namespace Dune
     }
 
     /** \todo doc me */
-    template<typename T>
     static void read (Dune::GridFactory<GridType>& factory,
                       const std::string& fileName,
-                      std::vector<T>& boundary_id_to_physical_entity,
-                      std::vector<T>& element_index_to_physical_entity,
+                      std::vector<int>& boundary_id_to_physical_entity,
+                      std::vector<int>& element_index_to_physical_entity,
                       bool verbose = true, bool insert_boundary_segments=true)
     {
       // create parse object
