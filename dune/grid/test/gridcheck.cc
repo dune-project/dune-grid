@@ -47,8 +47,10 @@ struct subIndexCheck
       EntityPointer ep( *(e.template subEntity< cd >( i ) ) );
       assert( ep == e.template subEntity< cd >( i ) );
 
+#if !DISABLE_DEPRECATED_METHOD_CHECK
       // test compactify
       ep.compactify();
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
       const typename Grid::LevelIndexSet &levelIndexSet = g.levelIndexSet( e.level() );
 
@@ -153,8 +155,10 @@ void zeroEntityConsistency (Grid &g)
     EntityPointer ep( *it ) ;
     assert( ep == it );
 
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     // check compactify of entity pointer
     ep.compactify();
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     // Entity::subEntity<0>(0) == Entity
     EntityPointer subEntity = it->template subEntity< 0 >( 0 );
