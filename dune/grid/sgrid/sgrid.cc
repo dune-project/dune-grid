@@ -879,7 +879,7 @@ namespace Dune {
   template<int dim, int dimworld, typename ctype>
   inline array<int,dim> SGrid<dim,dimworld,ctype>::subz (const array<int,dim> & z, int i, int codim) const
   {
-    static const GeometryType cubeType(dim);
+    static const GeometryType cubeType(GeometryType::cube, dim);
 
     // map to old numbering
     typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
