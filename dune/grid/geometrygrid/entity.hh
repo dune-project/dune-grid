@@ -173,9 +173,9 @@ namespace Dune
         return hostEntity().type();
       }
 
-      unsigned int topologyId () const
+      unsigned int topologyId () const DUNE_DEPRECATED
       {
-        return GenericGeometry::topologyId( type() );
+        return type().id();
       }
 
       /** \brief obtain the level of this entity */
@@ -210,7 +210,7 @@ namespace Dune
         if( !geo )
         {
           CoordVector coords( hostEntity(), grid().coordFunction() );
-          geo = GeometryImpl( topologyId(), coords, grid().allocator() );
+          geo = GeometryImpl( type().id(), coords, grid().allocator() );
         }
         return geo_;
       }

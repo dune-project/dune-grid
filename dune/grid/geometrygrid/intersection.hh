@@ -130,16 +130,16 @@ namespace Dune
         {
           const LocalGeometry &localGeo = geometryInInside();
           CoordVector coords( insideGeometry(), localGeo );
-          geo = GeometryImpl( topologyId(), coords, grid().allocator() );
+          geo = GeometryImpl( type().id(), coords, grid().allocator() );
         }
         return geo_;
       }
 
       GeometryType type () const { return hostIntersection().type(); }
 
-      unsigned int topologyId () const
+      unsigned int topologyId () const DUNE_DEPRECATED
       {
-        return GenericGeometry::topologyId( type() );
+        return type().id();
       }
 
       int indexInInside () const
