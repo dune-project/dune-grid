@@ -50,7 +50,7 @@ namespace Dune
   ALU2dGridGeometry< mydim, cdim, GridImp >::operator[] ( int i ) const
   {
     typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
-    const unsigned int tid = GenericGeometry::topologyId( type() );
+    const unsigned int tid = type().id();
     static GlobalCoordinate c;
     return (c = corner( Numbering::template dune2generic< mydim >( tid, i ) ));
   }
