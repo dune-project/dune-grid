@@ -358,7 +358,7 @@ namespace Dune
       DUNE_DEPRECATED
       BasicGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
         : allocator_( allocator ),
-          mapping_( MappingProvider::mapping( topologyId( type ), coords, allocator_ ) )
+          mapping_( MappingProvider::mapping( type.id(), coords, allocator_ ) )
       {
         mapping_->referenceCount = 1;
       }
@@ -588,13 +588,13 @@ namespace Dune
       /** \brief Copy constructor from another geometry */
       template< class Geo >
       explicit Geometry ( const Geo &geo, const Allocator &allocator = Allocator() )
-        : Base( topologyId( geo.type() ), geo, geo.affine(), allocator )
+        : Base( geo.type().id(), geo, geo.affine(), allocator )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
       DUNE_DEPRECATED Geometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
-        : Base( topologyId( type ), coords, allocator )
+        : Base( type.id(), coords, allocator )
       {}
 
       /** \todo Please doc me! */
@@ -651,13 +651,13 @@ namespace Dune
       /** \brief Copy constructor from another geometry */
       template< class Geo >
       explicit LocalGeometry ( const Geo &geo, const Allocator &allocator = Allocator() )
-        : Base( topologyId( geo.type() ), geo, geo.affine(), allocator )
+        : Base( geo.type().id(), geo, geo.affine(), allocator )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
       DUNE_DEPRECATED LocalGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator )
-        : Base( topologyId( type ), coords, allocator )
+        : Base( type.id(), coords, allocator )
       {}
 
       /** \todo Please doc me! */
