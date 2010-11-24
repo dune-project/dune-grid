@@ -675,29 +675,13 @@ namespace Dune
      * \code
      *#include <dune/grid/genericgeometry/conversion.hh>
      * \endcode
+     *
+     * \deprecated please use GeometryType::id()
      */
+    inline unsigned int topologyId ( const GeometryType &type ) DUNE_DEPRECATED;
     inline unsigned int topologyId ( const GeometryType &type )
     {
-      const unsigned int dim = type.dim();
-
-      switch( type.basicType() )
-      {
-      case GeometryType::simplex :
-        return 0;
-
-      case GeometryType::cube :
-        return (1 << dim) - 1;
-
-      case GeometryType::pyramid :
-        return (1 << (dim-1)) - 1;
-
-      case GeometryType::prism :
-        return 1 << (dim-1);
-
-      default :
-        DUNE_THROW( RangeError,
-                    "Invalid basic geometry type: " << type.basicType() << "." );
-      }
+      return type.id();
     }
 
 
@@ -706,44 +690,26 @@ namespace Dune
     // ---------------
 
     inline bool
+    hasGeometryType ( const unsigned int topologyId, const unsigned int dimension ) DUNE_DEPRECATED;
+    inline bool
     hasGeometryType ( const unsigned int topologyId, const unsigned int dimension )
     {
-      assert( topologyId < ((unsigned int)1 << dimension) );
-      if( dimension > 3 )
-      {
-        const unsigned int dimBit = ((unsigned int)1 << (dimension-1));
-        const unsigned int baseId = topologyId & (dimBit-1);
-        return ((baseId | 1) == 1) || ((baseId | 1) == (dimBit-1));
-      }
-      else
-        return true;
+      return true;
     }
-
 
 
     // geometryType
     // ------------
+    /*
+       \deprecated you can now construct a GeometryType directly using GeometryType::GeometryType(unsigned int topologyId, unsigned int dim)
 
+     */
+    inline GeometryType
+    geometryType ( const unsigned int topologyId, const unsigned int dimension ) DUNE_DEPRECATED;
     inline GeometryType
     geometryType ( const unsigned int topologyId, const unsigned int dimension )
     {
-      assert( hasGeometryType( topologyId, dimension ) );
-
-      if( dimension >= 3 )
-      {
-        static const GeometryType::BasicType basicType2[ 4 ]
-          = { GeometryType::simplex, GeometryType::pyramid, GeometryType::prism, GeometryType::cube };
-        const unsigned int t = topologyId >> (dimension-2);
-        return GeometryType( basicType2[ t ], dimension );
-      }
-      else if( dimension > 0 )
-      {
-        static const GeometryType::BasicType basicType1[ 2 ]
-          = { GeometryType::simplex, GeometryType::cube };
-        return GeometryType( basicType1[ topologyId >> (dimension-1) ], dimension );
-      }
-      else
-        return GeometryType( GeometryType::simplex, 0 );
+      return GeometryType( topologyId, dimension );
     }
 
   }
