@@ -787,7 +787,7 @@ namespace Dune {
     /*! Intra-element access to subentities of codimension cc > codim.
      */
     template<int cc>
-    typename Codim<cc>::EntityPointer entity (int i) const
+    typename Codim<cc>::EntityPointer subEntity (int i) const
     {
       dune_static_assert( cc == dim || cc == 0 ,
                           "YaspGrid only supports Entities with codim=dim and codim=0");
@@ -807,15 +807,6 @@ namespace Dune {
         return YaspEntityPointer<cc,GridImp>(_yg,_g,_it);
       }
       DUNE_THROW(GridError, "codim " << cc << " (dim=" << dim << ") not (yet) implemented");
-    }
-
-    template< int codim >
-    typename Codim< codim >::EntityPointer subEntity ( int i ) const
-    {
-      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( this->type() );
-      const int j = Numbering::template generic2dune< codim >( tid, i );
-      return entity< codim >( j );
     }
 
     //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
