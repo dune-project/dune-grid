@@ -11,7 +11,6 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/shared_ptr.hh>
-#include <dune/common/typetraits.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/uggrid.hh>
@@ -23,25 +22,6 @@ namespace Dune {
   template <class GridType>
   class StructuredGridFactory
   {
-    //! \brief Determines whether a GridFactory needs insertion on all
-    //!        ranks or just rank 0
-    /**
-     * If insertion is only required (and permissible) on rank 0, this
-     * class derives from false_type and will have a static member
-     * constant \c value with value \c false.  Otherwise it derives from
-     * true_type and has a static member constant \v value with value \c
-     * true.
-     */
-    template<class Grid>
-    struct FactoryNeedsInsertOnAllRanks : public false_type {};
-
-#if HAVE_UG
-    template<int dim>
-    struct FactoryNeedsInsertOnAllRanks<UGGrid<dim> > :
-      public true_type
-    {};
-#endif
-
     typedef typename GridType::ctype ctype;
 
     static const int dim = GridType::dimension;
@@ -147,8 +127,7 @@ namespace Dune {
       // The grid factory
       GridFactory<GridType> factory;
 
-      if(FactoryNeedsInsertOnAllRanks<GridType>::value ||
-         MPIHelper::getCollectiveCommunication().rank() == 0)
+      if (MPIHelper::getCollectiveCommunication().rank() == 0)
       {
         // Insert uniformly spaced vertices
         array<unsigned int,dim> vertices = elements;
@@ -217,8 +196,7 @@ namespace Dune {
       // The grid factory
       GridFactory<GridType> factory;
 
-      if(FactoryNeedsInsertOnAllRanks<GridType>::value ||
-         MPIHelper::getCollectiveCommunication().rank() == 0)
+      if(MPIHelper::getCollectiveCommunication().rank() == 0)
       {
         // Insert uniformly spaced vertices
         array<unsigned int,dim> vertices = elements;
