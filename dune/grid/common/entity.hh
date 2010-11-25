@@ -448,7 +448,9 @@ namespace Dune
      */
     bool isNew () const { return realEntity.isNew(); }
 
-    /**\brief Returns true, if entity might disappear during the next call to adapt()
+    /**\brief Returns true, if entity might disappear during the next call to adapt().
+     * If the method returns false, the entity is guaranteed to still be present after
+     * adaptation.
      */
     bool mightVanish () const { return realEntity.mightVanish(); }
 
