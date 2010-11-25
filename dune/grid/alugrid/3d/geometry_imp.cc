@@ -39,7 +39,7 @@ namespace Dune {
   operator[] (int i) const
   {
     typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
-    const unsigned int tid = GenericGeometry::topologyId( type() );
+    const unsigned int tid = type().id();
     const int j = Numbering::template dune2generic< mydim >( tid, i );
     return geoImpl_[ j ];
   }
