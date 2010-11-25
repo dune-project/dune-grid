@@ -64,8 +64,7 @@ namespace Dune {
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int verticesDUNEtoUGNew(int i, const GeometryType& type) {
       typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
-      const int j = Numbering::generic2dune( tid, i, 2 );
+      const int j = Numbering::generic2dune( type.id(), i, 2 );
 
       return verticesDUNEtoUG(j, type);
     }
@@ -97,8 +96,7 @@ namespace Dune {
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int edgesDUNEtoUGNew(int i, const GeometryType& type) {
       typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
-      const int j = Numbering::generic2dune( tid, i, 1 );
+      const int j = Numbering::generic2dune( type.id(), i, 1 );
 
       return edgesDUNEtoUG(j, type);
     }
@@ -127,8 +125,7 @@ namespace Dune {
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int facesDUNEtoUGNew(int i, const GeometryType& type) {
       typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
-      const int j = Numbering::generic2dune( tid, i, 1 );
+      const int j = Numbering::generic2dune( type.id(), i, 1 );
 
       return facesDUNEtoUG(j, type);
     }
@@ -144,8 +141,7 @@ namespace Dune {
       int j = facesUGtoDUNE(i, type);
 
       typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
-      return Numbering::dune2generic( tid, j, 1 );
+      return Numbering::dune2generic( type.id(), j, 1 );
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
@@ -202,8 +198,7 @@ namespace Dune {
     /** \brief Turn a local edge number from new DUNE numbering to UG numbering */
     static int verticesDUNEtoUGNew(int i, const GeometryType& type) {
       typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
-      const int j = Numbering::generic2dune( tid, i, 3 );
+      const int j = Numbering::generic2dune( type.id(), i, 3 );
 
       return verticesDUNEtoUG(j, type);
     }
@@ -233,8 +228,7 @@ namespace Dune {
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int edgesDUNEtoUGNew(int i, const GeometryType& type) {
       typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
-      const int j = Numbering::generic2dune( tid, i, 2 );
+      const int j = Numbering::generic2dune( type.id(), i, 2 );
 
       return edgesDUNEtoUG(j, type);
     }
@@ -263,8 +257,7 @@ namespace Dune {
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int facesDUNEtoUGNew(int i, const GeometryType& type) {
       typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
-      const int j = Numbering::generic2dune( tid, i, 1 );
+      const int j = Numbering::generic2dune( type.id(), i, 1 );
 
       return facesDUNEtoUG(j, type);
     }
@@ -295,8 +288,7 @@ namespace Dune {
       int j = facesUGtoDUNE(i, type);
 
       typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
-      return Numbering::dune2generic( tid, j, 1 );
+      return Numbering::dune2generic( type.id(), j, 1 );
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
