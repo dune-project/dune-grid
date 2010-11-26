@@ -358,7 +358,6 @@ namespace Dune
     int codim_;
     std::vector< int > numbering_[ dim+1 ];
     FieldVector< ctype, dim > baryCenter_;
-    unsigned int topologyId_;
     GeometryType type_;
 
   public:
@@ -386,7 +385,7 @@ namespace Dune
 
     unsigned int topologyId () const
     {
-      return topologyId_;
+      return type_.id();
     }
 
     template< class Topology, unsigned int codim, unsigned int i >
@@ -411,7 +410,6 @@ namespace Dune
       baryCenter_ *= ctype( 1 ) / ctype( numCorners );
 
       typedef typename GenericGeometry::SubTopology< Topology, codim, i >::type SubTopology;
-      topologyId_ = SubTopology::id;
       type_ = GenericGeometry::DuneGeometryType< SubTopology, GeometryType::simplex >::type();
     }
   };
