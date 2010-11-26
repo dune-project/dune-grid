@@ -294,7 +294,7 @@ namespace Dune
       return info_[ c ][ i ].type();
     }
 
-    unsigned int topologyId ( int i, int c ) const
+    unsigned int topologyId ( int i, int c ) const DUNE_DEPRECATED
     {
       assert( (c >= 0) && (c <= dim) );
       return info_[ c ][ i ].topologyId();
