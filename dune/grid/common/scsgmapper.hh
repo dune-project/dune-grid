@@ -158,7 +158,7 @@ namespace Dune
   template <typename GV, int c>
   inline int SingleCodimSingleGeomTypeMapper<GV,c>::size () const
   {
-    return is.size(c,is.geomTypes(c)[0]);
+    return is.size(c);
   }
 
   template <typename GV, int c>
