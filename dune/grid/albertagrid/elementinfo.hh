@@ -64,14 +64,16 @@ namespace Dune
       typedef GeometryCacheProxy< dim > GeometryCache;
 #endif
 
-    private:
-      InstancePtr instance_;
+      struct Seed;
 
+    private:
       explicit ElementInfo ( const InstancePtr &instance );
 
     public:
       ElementInfo ();
       ElementInfo ( const MeshPointer &mesh, const MacroElement &macroElement,
+                    typename FillFlags::Flags fillFlags = FillFlags::standard );
+      ElementInfo ( const MeshPointer &mesh, const Seed &seed,
                     typename FillFlags::Flags fillFlags = FillFlags::standard );
       ElementInfo ( const ElementInfo &other );
 
@@ -88,6 +90,8 @@ namespace Dune
       int indexInFather () const;
       ElementInfo child ( int i ) const;
       bool isLeaf () const;
+
+      Seed seed () const;
 
       MeshPointer mesh () const;
 
@@ -158,6 +162,8 @@ namespace Dune
 
       static InstancePtr null ();
       static Stack &stack ();
+
+      InstancePtr instance_;
     };
 
 
@@ -232,6 +238,48 @@ namespace Dune
 
 
 
+    // ElementInfo::Seed
+    // -----------------
+
+    template< int dim >
+    struct ElementInfo< dim >::Seed
+    {
+      Seed ( const int macroIndex, const int level, const unsigned long path )
+        : macroIndex_( macroIndex ), level_( level ), path_( path )
+      {}
+
+      bool operator== ( const Seed &other ) const
+      {
+        return (macroIndex() == other.macroIndex()) && (level() == other.level()) && (path() == other.path());
+      }
+
+      bool operator< ( const Seed &other ) const
+      {
+        const bool ml = (macroIndex() < other.macroIndex());
+        const bool me = (macroIndex() == other.macroIndex());
+        const bool ll = (level() < other.level());
+        const bool le = (level() == other.level());
+        const bool pl = (path < other.path());
+        return ml | (me & (ll | (le & pl)));
+      }
+
+      bool operator!= ( const Seed &other ) const { return !(*this == other); }
+      bool operator<= ( const Seed &other ) const { return !(other < *this); }
+      bool operator> ( const Seed &other ) const { return (other < *this); }
+      bool operator>= ( const Seed &other ) const { return !(*this < other); }
+
+      int macroIndex () const { return macroIndex_; }
+      int level () const { return level_; }
+      unsigned long path () const { return path_; }
+
+    private:
+      int macroIndex_;
+      int level_;
+      unsigned long path_;
+    };
+
+
+
     // Implementation of ElementInfo
     // -----------------------------
 
@@ -269,6 +317,52 @@ namespace Dune
         elInfo().opp_vertex[ k ] = -1;
 
       fill_macro_info( mesh, &macroElement, &elInfo() );
+    }
+
+
+    template< int dim >
+    inline ElementInfo< dim >
+    ::ElementInfo ( const MeshPointer &mesh, const Seed &seed,
+                    typename FillFlags::Flags fillFlags )
+    {
+      instance_ = stack().allocate();
+      instance_->parent() = null();
+      ++(instance_->parent()->refCount);
+
+      addReference();
+
+      // fill in macro element info
+      elInfo().fill_flag = fillFlags;
+
+      // Alberta fills opp_vertex only if there is a neighbor
+      for( int k = 0; k < maxNeighbors; ++k )
+        elInfo().opp_vertex[ k ] = -1;
+
+      fill_macro_info( mesh, mesh->macro_els + seed.macroIndex(), &elInfo() );
+
+      // traverse the seed's path
+      unsigned long path = seed.path();
+      for( int i = 0; i < seed.level(); ++i )
+      {
+        InstancePtr child = stack().allocate();
+        child->parent() = instance_;
+
+        instance_ = child;
+        addReference();
+
+        // Alberta fills opp_vertex only if there is a neighbor
+        for( int k = 0; k < maxNeighbors; ++k )
+          child->elInfo.opp_vertex[ k ] = -2;
+
+#if DUNE_ALBERTA_VERSION >= 0x300
+        ALBERTA fill_elinfo( path & 1, FILL_ANY, &elInfo(), &(child->elInfo) );
+#else
+        ALBERTA fill_elinfo( path & 1, &elInfo(), &(child->elInfo) );
+#endif
+        path = path >> 1;
+      }
+
+      assert( this->seed() == seed );
     }
 
 
@@ -319,7 +413,6 @@ namespace Dune
     {
       return (instance_->elInfo.el != other.instance_->elInfo.el);
     }
-
 
 
     template< int dim >
@@ -389,6 +482,29 @@ namespace Dune
 
 
     template< int dim >
+    inline typename ElementInfo< dim >::Seed ElementInfo< dim >::seed () const
+    {
+      assert( !!(*this) );
+
+      int level = 0;
+      unsigned long path = 0;
+      for( InstancePtr p = instance_; p->parent() != null(); p = p->parent() )
+      {
+        const Element *element = p->elInfo.el;
+        const Element *father = p->parent()->elInfo.el;
+        const unsigned long child = static_cast< unsigned long >( father->child[ 1 ] == element );
+        path = (path << 1) | child;
+        ++level;
+      }
+
+      if( level != elInfo.level )
+        DUNE_THROW( NotImplemented, "Seed for fake elements not implemented." );
+
+      return Seed( macroElement().index, level, path );
+    };
+
+
+    template< int dim >
     inline typename ElementInfo< dim >::MeshPointer ElementInfo< dim >::mesh () const
     {
       return MeshPointer( elInfo().mesh );
@@ -405,7 +521,7 @@ namespace Dune
     template< int dim >
     inline int ElementInfo< dim >::level () const
     {
-      return instance_->elInfo.level;
+      return elInfo().level;
     }
 
 
