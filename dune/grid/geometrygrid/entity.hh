@@ -412,7 +412,7 @@ namespace Dune
         return refElement.type( subEntity_, codimension );
       }
 
-      unsigned int topologyId () const
+      unsigned int topologyId () const DUNE_DEPRECATED
       {
         const GenericReferenceElement< ctype, dimension > &refElement
           = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
