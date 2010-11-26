@@ -527,6 +527,19 @@ namespace Dune {
       return 0;
     }
 
+    /** \brief Set the vcount, which in a 3d UG grid, is the number of elements associated to
+     *         a SideVector (1 or 2)
+     *
+     *  This is needed for hacking around bugs in the UG handling of SideVectors
+     */
+    static void setVCount(const UG_NS< UG_DIM >::Element* theElement, int side, int count)
+    {
+      using UG::UINT;
+      typedef UG_NAMESPACE ::vector VECTOR;
+      using UG_NAMESPACE ::svector_offset;
+      SETVCOUNT(SVECTOR(theElement,side),count);
+    }
+
     //! Return true if the element is a ghost element
 #ifdef ModelP
     static bool isGhost(const UG_NS< UG_DIM >::Element* theElement) {

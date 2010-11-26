@@ -740,18 +740,27 @@ template < int dim >
 void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
                                       std::vector<unsigned int>* nodePermutation)
 {
-  /** \todo The code in the following if-clause is a workaround to fix FlySpray issue 170
-      (inconsistent codim 1 subIndices).  UGGrid uses UG's SideVector data structure to
-      store the codim 1 subIndices of elements.  However the UG SideVector code is buggy
-      and SideVectors are not correctly created during refinement.  I provide a workaround
-      because it is not trivial to really fix it in UG, and I'd probably
-      screw up other things if I started to mess around in the UG refinement routines.
-      If ever UGGrid stops relying on SideVectors  to store indices the following
+  /** \todo The code in the following if-clause contains two workarounds to fix FlySpray issues 170
+      (inconsistent codim 1 subIndices) and 810 (Destructor of parallel UGGrid fails).
+
+      UGGrid uses UG's SideVector data structure to store the codim 1 subIndices of elements.
+      However the UG SideVector code is buggy and SideVectors are not correctly created during
+      refinement and load balancing.  In particular
+        - after refinement there may be _two_ SideVector objects for a single face,
+          instead of only one,
+        - After load balancing, and also after refinement, the VCOUNT field of the SideVector
+          (which stores how many elements reference the SideVector) is sometimes not correct.
+
+      I provide a workaround because it is outside of my capabilities to actually fix these
+      issues in UG itself.  I'd probably screw up other things if I started to mess around
+      in the UG refinement routines.
+
+      If ever UGGrid stops relying on SideVectors to store indices the following
       if-clause can be deleted.
    */
   if (dim==3) {
 
-    for (int i=1; i<=maxLevel(); i++) {
+    for (int i=0; i<=maxLevel(); i++) {
 
       typename Traits::template Codim<0>::LevelIterator eIt = lbegin<0>(i);
       typename Traits::template Codim<0>::LevelIterator eEndIt = lend<0>(i);
@@ -765,14 +774,22 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
         for (; nIt!=nEndIt; ++nIt) {
 
+          int side0 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInInside(), eIt->type());
+
+          // Set the correct value for the VCOUNT field:
+          // the number of elements adjacent to this face
+          UG_NS<dim>::setVCount(elem0,side0, (nIt->neighbor() ? 2 : 1));
+
           if (!nIt->neighbor())
             continue;
 
           typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt->outside()).target_;
 
-          int side0 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInInside(), eIt->type());
           int side1 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInOutside(), nIt->outside()->type());
 
+          // If there are two SideVector objects instead of only one (as there should be),
+          // delete one of them.
+          // Isn't it great that UG even provides a dedicated method for this?
           UG::D3::DisposeDoubledSideVector((typename UG_NS<3>::Grid*)multigrid_->grids[i],
                                            (typename UG_NS<3>::Element*)elem0,
                                            side0,
