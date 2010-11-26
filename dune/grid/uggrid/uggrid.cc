@@ -743,12 +743,10 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
   /** \todo The code in the following if-clause is a workaround to fix FlySpray issue 170
       (inconsistent codim 1 subIndices).  UGGrid uses UG's SideVector data structure to
       store the codim 1 subIndices of elements.  However the UG SideVector code is buggy
-      and SideVectors are not correctly created.  There are two reasons why I provide
-      a workaround instead of fixing UG directly:
-      - it is not trivial to fix in UG, and I'd probably screw up other things if I
-      started to mess around in the UG refinement routines
-      - AFAIK Stefan Lang is rewriting that part of UG anyways.
-      As soon as UGGrid does not rely on SideVectors anymore to store indices the following
+      and SideVectors are not correctly created during refinement.  I provide a workaround
+      because it is not trivial to really fix it in UG, and I'd probably
+      screw up other things if I started to mess around in the UG refinement routines.
+      If ever UGGrid stops relying on SideVectors  to store indices the following
       if-clause can be deleted.
    */
   if (dim==3) {
