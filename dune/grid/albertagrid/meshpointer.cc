@@ -27,6 +27,33 @@ namespace Dune
 
     template< int dim >
     template< int dimWorld >
+    void MeshPointer< dim >::Library< dimWorld >
+    ::create ( MeshPointer &ptr, const MacroData< dim > &macroData, const std::string &name,
+               ALBERTA NODE_PROJECTION *(*initNodeProjection)( Mesh *, ALBERTA MACRO_EL *, int ) )
+    {
+#if DUNE_ALBERTA_VERSION >= 0x300
+      ptr.mesh_ = GET_MESH( dim, name.c_str(), macroData, initNodeProjection, NULL );
+#else
+      ptr.mesh_ = GET_MESH( dim, name.c_str(), macroData, initNodeProjection );
+#endif
+
+      // The 1d grid does not create the face projections, so we do it here
+      if( (dim == 1) && (ptr.mesh_ != NULL) )
+      {
+        const MacroIterator eit = ptr.end();
+        for( MacroIterator it = ptr.begin(); it != eit; ++it )
+        {
+          MacroElement &macroEl = const_cast< MacroElement & >( it.macroElement() );
+          for( int i = 1; i <= dim+1; ++i )
+            macroEl.projection[ i ] = initNodeProjection( ptr.mesh_, &macroEl, i );
+        }
+      }
+    }
+
+
+
+    template< int dim >
+    template< int dimWorld >
     void MeshPointer< dim >::Library< dimWorld >::release ( MeshPointer &ptr )
     {
       if( ptr.mesh_ == NULL )

@@ -162,6 +162,9 @@ namespace Dune
       static unsigned int boundaryCount;
       static const void *projectionFactory;
 
+      static void
+      create ( MeshPointer &ptr, const MacroData< dim > &macroData, const std::string &name,
+               ALBERTA NODE_PROJECTION *(*initNodeProjection)( Mesh *, ALBERTA MACRO_EL *, int ) );
       static void release ( MeshPointer &ptr );
     };
 
@@ -218,11 +221,7 @@ namespace Dune
       release();
 
       Library< dimWorld >::boundaryCount = 0;
-#if DUNE_ALBERTA_VERSION >= 0x300
-      mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection, NULL );
-#else
-      mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection );
-#endif
+      Library< dimWorld >::create( *this, macroData, name, &initNodeProjection );
       return Library< dimWorld >::boundaryCount;
     }
 
@@ -239,11 +238,7 @@ namespace Dune
 
       Library< dimWorld >::boundaryCount = 0;
       Library< dimWorld >::projectionFactory = &projectionFactory;
-#if DUNE_ALBERTA_VERSION >= 0x300
-      mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection< ProjectionFactory >, NULL );
-#else
-      mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection< ProjectionFactory > );
-#endif
+      Library< dimWorld >::create( *this, macroData, name, &initNodeProjection< ProjectionFactory > );
       Library< dimWorld >::projectionFactory = 0;
       return Library< dimWorld >::boundaryCount;
     }

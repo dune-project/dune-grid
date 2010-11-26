@@ -166,9 +166,9 @@ namespace Dune
       typedef typename Base::Projection Projection;
       typedef typename Base::ElementInfo ElementInfo;
 
-      typedef typename Projection::Projection DuneProjection;
+      typedef typename Projection::ProjectionPtr DuneProjectionPtr;
 
-      DuneGlobalBoundaryProjectionFactory ( const DuneProjection &projection )
+      DuneGlobalBoundaryProjectionFactory ( const DuneProjectionPtr &projection )
         : projection_( projection )
       {}
 

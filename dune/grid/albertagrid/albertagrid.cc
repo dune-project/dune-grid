@@ -87,7 +87,7 @@ namespace Dune
   inline AlbertaGrid< dim, dimworld >
   ::AlbertaGrid ( const Alberta::MacroData< dimension> &macroData,
                   const std::string &gridName,
-                  const DuneBoundaryProjection< dimensionworld > *projection )
+                  const Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection )
     : mesh_(),
       maxlevel_( 0 ),
       numBoundarySegments_( 0 ),
@@ -103,7 +103,7 @@ namespace Dune
 
     if( projection != 0 )
     {
-      Alberta::DuneGlobalBoundaryProjectionFactory< dimension > projectionFactory( *projection );
+      Alberta::DuneGlobalBoundaryProjectionFactory< dimension > projectionFactory( projection );
       numBoundarySegments_ = mesh_.create( macroData, gridName, projectionFactory );
     }
     else

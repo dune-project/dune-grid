@@ -55,7 +55,7 @@ namespace Dune
   {
     assert( boundary() );
     const Alberta::BasicNodeProjection *projection = elementInfo().boundaryProjection( oppVertex_ );
-    assert( projection != 0 );
+    assert( projection );
     return projection->boundaryIndex();
   }
 

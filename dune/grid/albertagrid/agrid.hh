@@ -311,11 +311,12 @@ namespace Dune
      *
      *  \param[in]  macroData   macro data to create grid from
      *  \param[in]  gridName    name of the grid (defaults to "AlbertaGrid")
-     *  \param[in]  projection  pointer to a global boundary projection (defaults to 0)
+     *  \param[in]  projection  shared pointer to a global boundary projection (defaults to 0)
      */
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
                   const std::string &gridName = "AlbertaGrid",
-                  const DuneBoundaryProjection< dimensionworld > *projection = 0 );
+                  const Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection
+                    = Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > >() );
 
     template< class Proj, class Impl >
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
