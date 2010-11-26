@@ -283,8 +283,7 @@ namespace Dune {
     typename GridImp::template Codim< codim >::EntityPointer subEntity ( int i ) const
     {
       typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( type() );
-      const int j = Numbering::template generic2dune< codim >( tid, i );
+      const int j = Numbering::template generic2dune< codim >( type(), i );
       return entity< codim >( j );
     }
 
