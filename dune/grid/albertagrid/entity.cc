@@ -34,18 +34,6 @@ namespace Dune
       geo_( GeometryImp() )
   {}
 
-#if 0
-  template<int codim, int dim, class GridImp>
-  inline AlbertaGridEntity< codim, dim, GridImp >
-  :: AlbertaGridEntity ( const This &other )
-    : grid_( other.grid_ ),
-      elementInfo_( other.elementInfo_ ),
-      subEntity_( other.subEntity_ ),
-      geo_( other.geo_ )
-  {}
-#endif
-
-
   template<int codim, int dim, class GridImp>
   inline PartitionType AlbertaGridEntity <codim,dim,GridImp>::
   partitionType () const
@@ -154,18 +142,6 @@ namespace Dune
       geo_( GeometryImp() ),
       builtgeometry_( false )
   {}
-
-
-#if 0
-  template< int dim, class GridImp >
-  inline AlbertaGridEntity< 0, dim, GridImp >
-  ::AlbertaGridEntity ( const This &other )
-    : grid_( other.grid_ ),
-      elementInfo_( other.elementInfo_ ),
-      geo_( other.geo_ ),
-      builtgeometry_ ( false )
-  {}
-#endif
 
 
   template< int dim, class GridImp >

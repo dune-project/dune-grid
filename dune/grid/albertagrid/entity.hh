@@ -83,11 +83,6 @@ namespace Dune
     //! contructor
     AlbertaGridEntity ( const GridImp &grid, const ElementInfo &elementInfo, int subEntity );
 
-#if 0
-    //! copy constructor
-    AlbertaGridEntity ( const This &other );
-#endif
-
     //! level of this element
     int level () const;
 
@@ -229,10 +224,6 @@ namespace Dune
 
     //! constructor
     AlbertaGridEntity ( const GridImp &grid, const ElementInfo &elementInfo, int subEntity );
-
-#if 0
-    AlbertaGridEntity ( const This &other );
-#endif
 
     //! level of this element
     int level () const;
