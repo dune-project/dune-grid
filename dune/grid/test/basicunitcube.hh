@@ -3,14 +3,53 @@
 #ifndef  BASICUNITCUBE_HH
 #define  BASICUNITCUBE_HH
 
-#warning The BasicUnitCube class is deprecated (since dune-grid 2.1).  Please use the StructuredGridFactory\
-  (in dune/grid/utility/structuredgridfactory.hh) instead!
+// StructuredGridFactory cannot replace BasicUnitCube when creating a projected unit cube in test-alberta.cc
+/*
+   #warning The BasicUnitCube class is deprecated (since dune-grid 2.1).  Please use the StructuredGridFactory \
+         (in dune/grid/utility/structuredgridfactory.hh) instead!
+ */
 
 #include <dune/grid/common/gridfactory.hh>
 
 // declaration of a basic unit cube that uses the GridFactory
 template< int dim >
 struct BasicUnitCube;
+
+template<>
+struct BasicUnitCube< 1 >
+{
+  template< class Grid >
+  static void insertVertices ( Dune::GridFactory< Grid > &factory, const double left = 0.0, const double right = 1.0 )
+  {
+    Dune::FieldVector<double,1> pos;
+
+    pos[0] = left;
+    factory.insertVertex(pos);
+
+    pos[ 0 ] = right;
+    factory.insertVertex(pos);
+  }
+
+  template< class Grid >
+  static void insertSimplices ( Dune::GridFactory< Grid > &factory )
+  {
+    const Dune::GeometryType type( Dune::GeometryType::simplex, 1 );
+    std::vector< unsigned int > cornerIDs( 2 );
+
+    cornerIDs[0] = 0;  cornerIDs[1] = 1;
+    factory.insertElement( type, cornerIDs );
+  }
+
+  template< class Grid >
+  static void insertCubes ( Dune::GridFactory< Grid > &factory )
+  {
+    const Dune::GeometryType type( Dune::GeometryType::cube, 1 );
+    std::vector< unsigned int > cornerIDs( 2 );
+
+    cornerIDs[0] = 0;  cornerIDs[1] = 1;
+    factory.insertElement( type, cornerIDs );
+  }
+};
 
 // unit cube in two dimensions with 2 variants: triangle and rectangle elements
 template<>
