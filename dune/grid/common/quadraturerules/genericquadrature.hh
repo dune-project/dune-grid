@@ -44,8 +44,8 @@ namespace Dune
 
     protected:
       //! Constructor taking topology id
-      explicit Quadrature ( const unsigned int topologyId, unsigned int order )
-        : topologyId_( topologyId ),
+      Quadrature ( const unsigned int topologyId, unsigned int order )
+        : type_( topologyId, dim ),
           order_( order )
       {}
 
@@ -53,7 +53,7 @@ namespace Dune
       //! Copy constructor
       template< class Q >
       Quadrature ( const Q &q )
-        : topologyId_( q.topologyId() ),
+        : type_( q.type() ),
           order_ (q.order() )
       {
         points_.reserve( q.size() );
@@ -93,9 +93,9 @@ namespace Dune
       }
 
       //! topology id of the quadrature
-      unsigned int topologyId () const
+      unsigned int topologyId () const DUNE_DEPRECATED
       {
-        return topologyId_;
+        return type_.id();
       }
 
       //! order of the quadrature
@@ -107,7 +107,7 @@ namespace Dune
       //! geometry type of the quadrature
       GeometryType type () const
       {
-        return GeometryType( topologyId_, dim );
+        return type_;
       }
 
       //! number of quadrature points
@@ -132,7 +132,7 @@ namespace Dune
 
     private:
       std::vector< QuadraturePoint > points_;
-      unsigned int topologyId_;
+      GeometryType type_;
       unsigned int order_;
     };
 
