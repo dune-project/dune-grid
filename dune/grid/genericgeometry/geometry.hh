@@ -326,7 +326,7 @@ namespace Dune
        *                          (optional, if the allocator can be default constructed)
        */
       template< class CoordVector >
-      BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
+      DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
         : allocator_( allocator ),
           mapping_( MappingProvider::mapping( topologyId, coords, allocator_ ) )
       {
@@ -346,7 +346,7 @@ namespace Dune
        *        mapping is affine.
        */
       template< class CoordVector >
-      BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
+      DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
         : allocator_( allocator ),
           mapping_( MappingProvider::mapping( topologyId, std::pair< const CoordVector &, bool >( coords, affine ), allocator_ ) )
       {
@@ -355,7 +355,6 @@ namespace Dune
 
       /** \brief Constructor using a GeometryType and a list of corner coordinates */
       template< class CoordVector >
-      DUNE_DEPRECATED
       BasicGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
         : allocator_( allocator ),
           mapping_( MappingProvider::mapping( type.id(), coords, allocator_ ) )
@@ -576,12 +575,12 @@ namespace Dune
       {}
 
       template< class CoordVector >
-      Geometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
+      DUNE_DEPRECATED Geometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
         : Base( topologyId, coords, allocator )
       {}
 
       template< class CoordVector >
-      Geometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
+      DUNE_DEPRECATED Geometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
         : Base( topologyId, coords, affine, allocator )
       {}
 
@@ -593,7 +592,7 @@ namespace Dune
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
-      DUNE_DEPRECATED Geometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
+      Geometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
         : Base( type.id(), coords, allocator )
       {}
 
@@ -639,12 +638,12 @@ namespace Dune
       {}
 
       template< class CoordVector >
-      LocalGeometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
+      DUNE_DEPRECATED LocalGeometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
         : Base( topologyId, coords, allocator )
       {}
 
       template< class CoordVector >
-      LocalGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
+      DUNE_DEPRECATED LocalGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
         : Base( topologyId, coords, affine, allocator )
       {}
 
@@ -656,7 +655,7 @@ namespace Dune
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
-      DUNE_DEPRECATED LocalGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator )
+      LocalGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator )
         : Base( type.id(), coords, allocator )
       {}
 

@@ -40,7 +40,7 @@ namespace Dune
     typedef typename Traits::Object Object;
     typedef typename Traits::Factory Factory;
     //! dynamically create objects
-    static Object *create(unsigned int topologyId, const Key &key)
+    static Object *create(unsigned int topologyId, const Key &key) DUNE_DEPRECATED
     {
       Object *object;
       GenericGeometry::IfTopology< Maker, dimension >::apply( topologyId, key, object );
@@ -49,7 +49,9 @@ namespace Dune
     //! dynamically create objects
     static Object *create(const Dune::GeometryType &gt, const Key &key)
     {
-      return create( gt.id() ,key);
+      Object *object;
+      GenericGeometry::IfTopology< Maker, dimension >::apply( gt.id(), key, object );
+      return object;
     }
     //! statically create objects
     template <class Topology>
@@ -86,7 +88,7 @@ namespace Dune
     typedef typename Factory::Key Key;
     typedef const typename Factory::Object Object;
     //! @copydoc TopologyFactory::create(const unsigned int topologyId,const Key &key)
-    static Object *create ( const unsigned int topologyId, const Key &key )
+    static Object *create ( const unsigned int topologyId, const Key &key ) DUNE_DEPRECATED
     {
       assert( topologyId < numTopologies );
       return instance().getObject( topologyId, key );
@@ -94,7 +96,8 @@ namespace Dune
     //! @copydoc TopologyFactory::create(const Dune::GeometryType &gt,const Key &key)
     static Object *create(const Dune::GeometryType &gt, const Key &key)
     {
-      return create( gt.id() ,key);
+      assert( gt.id() < numTopologies );
+      return instance().getObject( gt.id(), key );
     }
     //! @copydoc TopologyFactory::create(const Key &key)
     template< class Topology >

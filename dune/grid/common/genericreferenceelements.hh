@@ -383,7 +383,7 @@ namespace Dune
       return type_;
     }
 
-    unsigned int topologyId () const
+    unsigned int topologyId () const DUNE_DEPRECATED
     {
       return type_.id();
     }
@@ -541,7 +541,7 @@ namespace Dune
   public:
     typedef GenericReferenceElement< ctype, dim > value_type;
 
-    const value_type &operator() ( const unsigned int topologyId ) const
+    const value_type &operator() ( const unsigned int topologyId ) const DUNE_DEPRECATED
     {
       return values_[ topologyId ];
     }
@@ -549,27 +549,27 @@ namespace Dune
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == dim );
-      return (*this)( type.id() );
+      return values_[ type.id() ];
     }
 
     const value_type &simplex () const
     {
-      return (*this)( GenericGeometry::SimplexTopology< dim >::type::id );
+      return values_[ GenericGeometry::SimplexTopology< dim >::type::id ];
     }
 
     const value_type &cube () const
     {
-      return (*this)( GenericGeometry::CubeTopology< dim >::type::id );
+      return values_[ GenericGeometry::CubeTopology< dim >::type::id ];
     }
 
     const value_type &pyramid () const
     {
-      return (*this)( GenericGeometry::PyramidTopology< dim >::type::id );
+      return values_[ GenericGeometry::PyramidTopology< dim >::type::id ];
     }
 
     const value_type &prism () const
     {
-      return (*this)( GenericGeometry::PrismTopology< dim >::type::id );
+      return values_[ GenericGeometry::PrismTopology< dim >::type::id ];
     }
 
     static const GenericReferenceElementContainer &instance ()
