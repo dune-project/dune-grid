@@ -603,7 +603,7 @@ namespace Dune
   // ------------------------
 
   /** \brief Class providing access to the singletons of the generic
-   *  reference elements. Special method are available for
+   *  reference elements. Special methods are available for
    *  simplex and cube elements of any dimension.
    *  The method general can be used to obtain the reference element
    *  for a given geometry type.
