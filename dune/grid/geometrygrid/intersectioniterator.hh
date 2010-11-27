@@ -56,6 +56,18 @@ namespace Dune
           intersection_( IntersectionImpl( inside.grid(), inside.geometry() ) )
       {}
 
+      IntersectionIterator ( const IntersectionIterator &other )
+        : hostIterator_( other.hostIterator_ ),
+          intersection_( IntersectionImpl( Grid::getRealImplementation( other.intersection_ ) ) )
+      {}
+
+      IntersectionIterator &operator= ( const IntersectionIterator &other )
+      {
+        hostIterator_ = other.hostIterator_;
+        Grid::getRealImplementation( intersection_ ) = Grid::getRealImplementation( other.intersection_ );
+        return *this;
+      }
+
       bool equals ( const IntersectionIterator &other ) const
       {
         return (hostIterator_ == other.hostIterator_);
