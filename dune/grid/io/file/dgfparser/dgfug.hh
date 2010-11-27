@@ -15,7 +15,9 @@ namespace Dune
   namespace dgf {
 
     /** \brief Grid parameters for UGGrid
+
         \ingroup DGFGridParameter
+
         The UGGridParameter class is in charge of passing UGGrid specific
         parameters to grid construction. Current parameters are: \n \n
           1. \b closure:(valid values are \b none or \b green,
