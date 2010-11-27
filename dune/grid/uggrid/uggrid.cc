@@ -776,25 +776,27 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
           int side0 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInInside(), eIt->type());
 
+          if (nIt->neighbor()) {
+
+            typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt->outside()).target_;
+
+            int side1 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInOutside(), nIt->outside()->type());
+
+            // If there are two SideVector objects instead of only one (as there should be),
+            // delete one of them.
+            // Isn't it great that UG even provides a dedicated method for this?
+            UG::D3::DisposeDoubledSideVector((typename UG_NS<3>::Grid*)multigrid_->grids[i],
+                                             (typename UG_NS<3>::Element*)elem0,
+                                             side0,
+                                             (typename UG_NS<3>::Element*)elem1,
+                                             side1);
+
+          }
+
           // Set the correct value for the VCOUNT field:
-          // the number of elements adjacent to this face
+          // the number of elements adjacent to this face.
+          // This method may not be called before DisposeDoubledSideVector
           UG_NS<dim>::setVCount(elem0,side0, (nIt->neighbor() ? 2 : 1));
-
-          if (!nIt->neighbor())
-            continue;
-
-          typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt->outside()).target_;
-
-          int side1 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInOutside(), nIt->outside()->type());
-
-          // If there are two SideVector objects instead of only one (as there should be),
-          // delete one of them.
-          // Isn't it great that UG even provides a dedicated method for this?
-          UG::D3::DisposeDoubledSideVector((typename UG_NS<3>::Grid*)multigrid_->grids[i],
-                                           (typename UG_NS<3>::Element*)elem0,
-                                           side0,
-                                           (typename UG_NS<3>::Element*)elem1,
-                                           side1);
 
         }
 
