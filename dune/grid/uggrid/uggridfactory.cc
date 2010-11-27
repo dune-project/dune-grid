@@ -3,12 +3,10 @@
 
 #include <config.h>
 
+#include <dune/common/mpihelper.hh>
+
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
-
-#if HAVE_MPI
-#include <dune/common/mpicollectivecommunication.hh>
-#endif
 
 
 using namespace Dune;
@@ -229,32 +227,23 @@ createGrid()
   //  Communicate the grid information from the master to all other processes
   // ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef ModelP
-  typedef Dune::MPIHelper Helper;
-  typedef Helper::MPICommunicator MPIComm;
-
-  Dune::CollectiveCommunication<MPIComm> communicator(MPI_COMM_WORLD);
-
-  int rank = communicator.rank();
-
   // Broadcast the vertex positions
   int numVertices = vertexPositions_.size();
-  communicator.broadcast(&numVertices, 1, 0);
+  MPIHelper::getCollectiveCommunication().broadcast(&numVertices, 1, 0);
   vertexPositions_.resize(numVertices);
-  communicator.broadcast(&vertexPositions_[0], vertexPositions_.size(), 0);
+  MPIHelper::getCollectiveCommunication().broadcast(&vertexPositions_[0], vertexPositions_.size(), 0);
 
   // Broadcast the element corners
   int numElementVertices = elementVertices_.size();
-  communicator.broadcast(&numElementVertices, 1, 0);
+  MPIHelper::getCollectiveCommunication().broadcast(&numElementVertices, 1, 0);
   elementVertices_.resize(numElementVertices);
-  communicator.broadcast(&elementVertices_[0], elementVertices_.size(), 0);
+  MPIHelper::getCollectiveCommunication().broadcast(&elementVertices_[0], elementVertices_.size(), 0);
 
   // Broadcast the geometry types
   int numElementTypes = elementTypes_.size();
-  communicator.broadcast(&numElementTypes, 1, 0);
+  MPIHelper::getCollectiveCommunication().broadcast(&numElementTypes, 1, 0);
   elementTypes_.resize(numElementTypes);
-  communicator.broadcast(&elementTypes_[0], elementTypes_.size(), 0);
-#endif
+  MPIHelper::getCollectiveCommunication().broadcast(&elementTypes_[0], elementTypes_.size(), 0);
 
   // ///////////////////////////////////////////
   //   Extract grid boundary segments
