@@ -270,7 +270,7 @@ namespace Dune {
 
     //! The copy constructor
     LeafIntersectionIteratorWrapper(const ThisType & org)
-      : intersection_( org.intersection_ )
+      : intersection_( IntersectionImp( org.impl() ) )
     {}
 
     //! the f*cking assignment operator
@@ -366,7 +366,7 @@ namespace Dune {
 
     //! The copy constructor
     LevelIntersectionIteratorWrapper(const ThisType & org)
-      : intersection_( org.intersection_ )
+      : intersection_( IntersectionImp( org.impl() ) )
     {}
 
     //! the f*cking assignment operator
