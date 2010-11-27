@@ -184,7 +184,7 @@ struct IntersectionIteratorInterface
 
     // state
     typedef typename IntersectionIterator::Intersection Intersection;
-    Intersection inter = *i;
+    const Intersection &inter = *i;
     inter.boundary();
     inter.neighbor();
 
