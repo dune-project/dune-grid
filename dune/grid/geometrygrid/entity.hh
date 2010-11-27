@@ -210,7 +210,7 @@ namespace Dune
         if( !geo )
         {
           CoordVector coords( hostEntity(), grid().coordFunction() );
-          geo = GeometryImpl( type().id(), coords, grid().allocator() );
+          geo = GeometryImpl( type(), coords, grid().allocator() );
         }
         return geo_;
       }
