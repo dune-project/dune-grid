@@ -130,7 +130,7 @@ namespace Dune
         {
           const LocalGeometry &localGeo = geometryInInside();
           CoordVector coords( insideGeometry(), localGeo );
-          geo = GeometryImpl( type().id(), coords, grid().allocator() );
+          geo = GeometryImpl( type(), coords, grid().allocator() );
         }
         return geo_;
       }
