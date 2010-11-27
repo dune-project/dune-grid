@@ -587,13 +587,13 @@ namespace Dune
       /** \brief Copy constructor from another geometry */
       template< class Geo >
       explicit Geometry ( const Geo &geo, const Allocator &allocator = Allocator() )
-        : Base( geo.type().id(), geo, geo.affine(), allocator )
+        : Base( geo.type(), geo, geo.affine(), allocator )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
       Geometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
-        : Base( type.id(), coords, allocator )
+        : Base( type, coords, allocator )
       {}
 
       /** \todo Please doc me! */
@@ -650,13 +650,13 @@ namespace Dune
       /** \brief Copy constructor from another geometry */
       template< class Geo >
       explicit LocalGeometry ( const Geo &geo, const Allocator &allocator = Allocator() )
-        : Base( geo.type().id(), geo, geo.affine(), allocator )
+        : Base( geo.type(), geo, geo.affine(), allocator )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
       LocalGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator )
-        : Base( type.id(), coords, allocator )
+        : Base( type, coords, allocator )
       {}
 
       /** \todo Please doc me! */
