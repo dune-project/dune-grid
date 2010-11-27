@@ -1,6 +1,9 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
+#ifndef DUNE_GRID_TEST_CHECKPARTITION_CC
+#define DUNE_GRID_TEST_CHECKPARTITION_CC
+
 #include <map>
 
 #include <dune/common/forloop.hh>
@@ -194,3 +197,5 @@ inline void checkPartitionType ( const GridView &gridView )
   CheckPartitionType< GridView, Dune::OverlapFront_Partition >::apply( gridView );
   CheckPartitionType< GridView, Dune::Ghost_Partition >::apply( gridView );
 }
+
+#endif // DUNE_GRID_TEST_CHECKPARTITION_CC
