@@ -4,10 +4,11 @@
 #ifndef DUNE_CHECK_GEOMETRY_CC
 #define DUNE_CHECK_GEOMETRY_CC
 
+#include <dune/common/forloop.hh>
+
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/quadraturerules/gaussquadrature.hh>
-#include <dune/common/forloop.hh>
 
 namespace Dune
 {

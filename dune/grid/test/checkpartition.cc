@@ -3,9 +3,10 @@
 
 #include <map>
 
+#include <dune/common/forloop.hh>
+
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridenums.hh>
-#include <dune/common/forloop.hh>
 
 template< Dune::PartitionIteratorType pitype >
 struct PartitionFilter;
