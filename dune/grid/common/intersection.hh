@@ -407,10 +407,6 @@ namespace Dune
     /** Copy Constructor from IntersectionImp */
     Intersection(const IntersectionImp<const GridImp> & i) :
       real(i) {};
-
-    /** Copy constructor */
-    Intersection(const Intersection& i) :
-      real(i.real) {}
     //@}
 
     typedef typename remove_const<GridImp>::type mutableGridImp;
@@ -430,6 +426,17 @@ namespace Dune
     //! return reference to the real implementation
     const ImplementationType & getRealImp() const { return real; }
 
+    /* hide copy constructor */
+    Intersection ( const Intersection &i )
+      : real( i.real )
+    {}
+
+    /* hide assignment operator */
+    const Intersection &operator= ( const Intersection &i )
+    {
+      real = i.real;
+      return *this;
+    }
   };
 
   //**********************************************************************
