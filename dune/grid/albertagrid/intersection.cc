@@ -436,7 +436,8 @@ namespace Dune
 #if ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
     const int twist = elementInfo().template twist< 1 >( oppVertex_ );
-    return LocalGeoProvider::instance().faceGeometry( oppVertex_, twist );
+    const int face = (dimension > 1 ? oppVertex_ : 1-oppVertex_);
+    return LocalGeoProvider::instance().faceGeometry( face, twist );
 #else
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeSelfObj_ );
     const LocalCoordReader coordReader( inside()->geometry(), geometry() );
@@ -457,7 +458,8 @@ namespace Dune
     const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
     const int oppVertex = elInfo.opp_vertex[ oppVertex_ ];
     const int twist = elementInfo().twistInNeighbor( oppVertex_ );
-    return LocalGeoProvider::instance().faceGeometry( oppVertex, twist );
+    const int face = (dimension > 1 ? oppVertex : 1-oppVertex);
+    return LocalGeoProvider::instance().faceGeometry( face, twist );
 #else
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeNeighObj_ );
     const LocalCoordReader coordReader( outside()->geometry(), geometry() );
@@ -472,7 +474,8 @@ namespace Dune
   AlbertaGridLeafIntersection< GridImp >::geometry () const
   {
     GeometryImp &geo = GridImp::getRealImplementation( geo_ );
-    const GlobalCoordReader coordReader( grid(), elementInfo(), oppVertex_ );
+    const int face = (dimension > 1 ? oppVertex_ : 1-oppVertex_);
+    const GlobalCoordReader coordReader( grid(), elementInfo(), face );
     geo.build( coordReader );
     return geo_;
   }
