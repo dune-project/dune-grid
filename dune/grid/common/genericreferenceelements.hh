@@ -6,6 +6,7 @@
 
 #include <dune/common/forloop.hh>
 #include <dune/common/polyallocator.hh>
+#include <dune/common/typetraits.hh>
 
 #include <dune/grid/genericgeometry/subtopologies.hh>
 #include <dune/grid/genericgeometry/referencedomain.hh>
@@ -277,7 +278,7 @@ namespace Dune
     template< int codim >
     typename Codim< codim >::Mapping &mapping( int i ) const
     {
-      Int2Type< codim > codimVariable;
+      integral_constant< int, codim > codimVariable;
       return *(mappings_[ codimVariable ][ i ]);
     }
 
@@ -334,7 +335,7 @@ namespace Dune
       typedef Initialize< Topology > Init;
       typedef GenericGeometry::VirtualMapping< Topology, GeometryTraits > VirtualMapping;
 
-      Int2Type< 0 > codim0Variable;
+      integral_constant< int, 0 > codim0Variable;
       mappings_[ codim0Variable ].resize( 1 );
       mappings_[ codim0Variable ][ 0 ]  = allocator_.create( VirtualMapping( codim0Variable ) );
 
@@ -431,7 +432,7 @@ namespace Dune
       typedef CornerStorage< SubTopology > type;
     };
 
-    explicit CornerStorage ( const Int2Type< 0 > & )
+    explicit CornerStorage ( const integral_constant< int, 0 > & )
     {
       for( unsigned int i = 0; i < size; ++i )
         RefDomain::corner( i, coords_[ i ] );
@@ -503,10 +504,10 @@ namespace Dune
 
         if( codim > 0 )
         {
-          Int2Type< 0 > codim0Variable;
+          integral_constant< int, 0 > codim0Variable;
           const ReferenceMapping &refMapping = *(mappings[ codim0Variable ][ 0 ]);
 
-          Int2Type< codim > codimVariable;
+          integral_constant< int, codim > codimVariable;
           mappings[ codimVariable ].resize( size );
           for( unsigned int i = 0; i < size; ++i )
             mappings[ codimVariable ][ i ] = refMapping.template trace< codim >( i, allocator );
@@ -523,7 +524,7 @@ namespace Dune
   {
     static void apply ( MappingsTable &mappings, typename GeometryTraits::Allocator &allocator )
     {
-      Int2Type< codim > codimVariable;
+      integral_constant< int, codim > codimVariable;
       for( size_t i = 0; i < mappings[ codimVariable ].size(); ++i )
         allocator.destroy( mappings[ codimVariable ][ i ] );
     }
