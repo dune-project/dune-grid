@@ -5,6 +5,7 @@
 
 #include <dune/common/polyallocator.hh>
 
+#include <dune/grid/alugrid/3d/grid.hh>
 #include <dune/grid/alugrid/3d/topology.hh>
 #include <dune/grid/genericgeometry/geometry.hh>
 
@@ -14,7 +15,6 @@ namespace Dune
   template <int d1> class YaspGrid;
   template <int d1,int d2> class AlbertaGrid;
   template< int dim, int dimworld > class ALUSimplexGrid;
-  template< int dim, int dimworld, ALU3dGridElementType elType > class ALU3dGrid;
   template <int dim> class UGGrid;
 
 
@@ -59,7 +59,7 @@ namespace Dune
   };
 
   template<>
-  struct Topology< ALU3dGrid< 3, 3, tetra > >
+  struct Topology< ALU3dGrid< tetra > >
   {
     static const GeometryType :: BasicType basicType = GeometryType :: simplex;
     static const int dimension = 3;
