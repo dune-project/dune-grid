@@ -4,6 +4,8 @@
 #ifndef DUNE_GENERICGEOMETRY_REFERENCEMAPPINGS_HH
 #define DUNE_GENERICGEOMETRY_REFERENCEMAPPINGS_HH
 
+#include <dune/common/typetraits.hh>
+
 #include <dune/grid/genericgeometry/referencetopologies.hh>
 #include <dune/grid/genericgeometry/referencedomain.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
@@ -51,7 +53,7 @@ namespace Dune
       template< int codim >
       typename Codim< codim >::Mapping &mapping ( const unsigned int i ) const
       {
-        Int2Type< codim > codimVariable;
+        integral_constant< int, codim > codimVariable;
         return *(mappings_[ codimVariable ][ i ]);
       }
 
@@ -61,7 +63,7 @@ namespace Dune
         typedef Initialize< Topology > Init;
         typedef GenericGeometry::VirtualMapping< Topology, GeometryTraits > VirtualMapping;
 
-        Int2Type< 0 > codim0Variable;
+        integral_constant< int, 0 > codim0Variable;
         topology_ = &(ReferenceTopologies< dimension >::get( Topology::id ));
 
 
@@ -101,7 +103,7 @@ namespace Dune
         typedef CornerStorage< SubTopology > type;
       };
 
-      explicit CornerStorage ( const Int2Type< 0 > & )
+      explicit CornerStorage ( const integral_constant< int, 0 > & )
       {
         for( unsigned int i = 0; i < size; ++i )
           RefDomain::template corner< ctype >( i, coords_[ i ] );
@@ -138,10 +140,10 @@ namespace Dune
         {
           const unsigned int size = GenericGeometry::Size< Topology, codim >::value;
 
-          Int2Type< 0 > codim0Variable;
+          integral_constant< int, 0 > codim0Variable;
           const ReferenceMapping &refMapping = *(mappings[ codim0Variable ][ 0 ]);
 
-          Int2Type< codim > codimVariable;
+          integral_constant< int, codim > codimVariable;
           mappings[ codimVariable ].resize( size );
           for( unsigned int i = 0; i < size; ++i )
           {
@@ -159,7 +161,7 @@ namespace Dune
     {
       static void apply ( MappingsTable &mappings, typename GeometryTraits::Allocator &allocator )
       {
-        Int2Type< codim > codimVariable;
+        integral_constant< int, codim > codimVariable;
         const unsigned int size = mappings[ codimVariable ].size();
         for( unsigned int i = 0; i < size; ++i )
           allocator.destroy( mappings[ codimVariable ][ i ] );
