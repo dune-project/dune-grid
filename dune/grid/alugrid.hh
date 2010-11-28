@@ -13,6 +13,8 @@
 #include <dune/grid/alugrid/2d/alugrid.hh>
 #include <dune/grid/alugrid/2d/alu2dgridfactory.hh>
 
+#include <dune/grid/alugrid/persistentcontainer.hh>
+
 /** @file
     @author Robert Kloefkorn
     @brief Provides base classes for ALUGrid
