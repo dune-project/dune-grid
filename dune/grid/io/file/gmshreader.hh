@@ -246,11 +246,10 @@ namespace Dune
     //     readfile(file, cnt, &t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
     // };
 
-    template<class T1, class T2  = void, class T3 = void, class T4 = void, class T5 = void,
-        class T6 = void, class T7 = void, class T8 = void, class T9 = void, class T10 = void>
     void readfile(FILE * file, int cnt, const char * format,
-                  T1* t1, T2* t2 = 0, T3* t3 = 0, T4* t4 = 0, T5* t5 = 0,
-                  T6* t6 = 0, T7* t7 = 0, T8* t8 = 0, T9* t9 = 0, T10* t10 = 0)
+                  void* t1, void* t2 = 0, void* t3 = 0, void* t4 = 0,
+                  void* t5 = 0, void* t6 = 0, void* t7 = 0, void* t8 = 0,
+                  void* t9 = 0, void* t10 = 0)
     {
       int c = fscanf(file, format, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
       if (c != cnt)
