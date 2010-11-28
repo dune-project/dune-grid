@@ -5,6 +5,7 @@
 #define DUNE_CHECK_GEOMETRY_CC
 
 #include <dune/common/forloop.hh>
+#include <dune/common/typetraits.hh>
 
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/gridview.hh>
@@ -119,11 +120,13 @@ namespace Dune
     template <int dim,class GI,template <int,int,class> class EI>
     static void apply(const Entity<0,dim,GI,EI> &entity)
     {
-      Int2Type<Dune::Capabilities::hasEntity<GI,codim>::v > capVar;
+      integral_constant<
+          bool, Dune::Capabilities::hasEntity<GI,codim>::v
+          > capVar;
       check(capVar,entity);
     }
     template <class Entity>
-    static void check(const Int2Type<true>&, const Entity &entity)
+    static void check(const true_type&, const Entity &entity)
     {
       for (int i=0; i<entity.template count<codim>(); ++i)
       {
@@ -138,7 +141,7 @@ namespace Dune
       }
     }
     template <class Entity>
-    static void check(const Int2Type<false>&, const Entity &entity)
+    static void check(const false_type&, const Entity &entity)
     {}
   };
 
