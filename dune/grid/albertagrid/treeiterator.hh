@@ -4,6 +4,8 @@
 #ifndef DUNE_ALBERTA_TREEITERATOR_HH
 #define DUNE_ALBERTA_TREEITERATOR_HH
 
+#include <dune/common/typetraits.hh>
+
 #include <dune/grid/albertagrid/meshpointer.hh>
 #include <dune/grid/albertagrid/entitypointer.hh>
 
@@ -230,10 +232,13 @@ namespace Dune
     bool stopAtElement ( const ElementInfo &elementInfo ) const;
 
     void goNext ( ElementInfo &elementInfo );
-    void goNext ( const Int2Type< 0 > cdVariable, ElementInfo &elementInfo );
-    void goNext ( const Int2Type< 1 > cdVariable, ElementInfo &elementInfo );
+    void goNext ( const integral_constant< int, 0 > cdVariable,
+                  ElementInfo &elementInfo );
+    void goNext ( const integral_constant< int, 1 > cdVariable,
+                  ElementInfo &elementInfo );
     template< int cd >
-    void goNext ( const Int2Type< cd > cdVariable, ElementInfo &elementInfo );
+    void goNext ( const integral_constant< int, cd > cdVariable,
+                  ElementInfo &elementInfo );
 
     //! current level
     int level_;
@@ -416,13 +421,14 @@ namespace Dune
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNext ( ElementInfo &elementInfo )
   {
-    Int2Type< codim > codimVariable;
+    integral_constant< int, codim > codimVariable;
     goNext( codimVariable, elementInfo );
   }
 
   template< int codim, class GridImp, bool leafIterator >
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
-  ::goNext ( const Int2Type< 0 > cdVariable, ElementInfo &elementInfo )
+  ::goNext ( const integral_constant< int, 0 > cdVariable,
+             ElementInfo &elementInfo )
   {
     assert( stopAtElement( elementInfo ) );
 
@@ -432,7 +438,8 @@ namespace Dune
 
   template< int codim, class GridImp, bool leafIterator >
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
-  ::goNext ( const Int2Type< 1 > cdVariable, ElementInfo &elementInfo )
+  ::goNext ( const integral_constant< int, 1 > cdVariable,
+             ElementInfo &elementInfo )
   {
     assert( stopAtElement( elementInfo ) );
 
@@ -473,7 +480,8 @@ namespace Dune
   template< int codim, class GridImp, bool leafIterator >
   template< int cd >
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
-  ::goNext ( const Int2Type< cd > cdVariable, ElementInfo &elementInfo )
+  ::goNext ( const integral_constant< int, cd > cdVariable,
+             ElementInfo &elementInfo )
   {
     assert( stopAtElement( elementInfo ) );
 
