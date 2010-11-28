@@ -7,6 +7,7 @@
 #include <map>
 
 #include <dune/common/forloop.hh>
+#include <dune/common/typetraits.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridenums.hh>
@@ -111,7 +112,8 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
   typedef typename GridView::template Codim< 0 >::template Partition< Dune::All_Partition >::Iterator AllIterator;
 
   template< class IdSet >
-  static void check ( const Dune::Int2Type< true > &, const GridView &gridView, const IdSet &idSet )
+  static void check ( const Dune::true_type &, const GridView &gridView,
+                      const IdSet &idSet )
   {
     typedef std::map< typename IdSet::IdType, Dune::PartitionType > Map;
     typedef typename Map::iterator MapIterator;
@@ -176,12 +178,14 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
   }
 
   template< class IdSet >
-  static void check ( const Dune::Int2Type< false > &, const GridView &gridView, const IdSet &idSet )
+  static void check ( const Dune::false_type &, const GridView &gridView, const IdSet &idSet )
   {}
 
   static void apply ( const GridView &gridView )
   {
-    Dune::Int2Type< Dune::Capabilities::hasEntity< typename GridView::Grid, codim >::v > capabilityVariable;
+    Dune::integral_constant<
+        bool, Dune::Capabilities::hasEntity< typename GridView::Grid, codim >::v
+        > capabilityVariable;
     check( capabilityVariable, gridView, gridView.grid().localIdSet() );
   }
 };
