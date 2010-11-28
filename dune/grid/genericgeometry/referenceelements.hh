@@ -6,6 +6,7 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/typetraits.hh>
 
 #include <dune/grid/genericgeometry/referencedomain.hh>
 
@@ -51,7 +52,7 @@ namespace Dune
       static const FieldVector< ctype, dimension > &
       baryCenter ( unsigned int i )
       {
-        Int2Type< codim > codimVariable;
+        integral_constant< int, codim > codimVariable;
         return instance().baryCenters_[ codimVariable ][ i ];
       }
 
