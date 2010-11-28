@@ -4,6 +4,8 @@
 #ifndef DUNE_GENERICGEOMTRY_HYBRIDMAPPING_HH
 #define DUNE_GENERICGEOMTRY_HYBRIDMAPPING_HH
 
+#include <dune/common/typetraits.hh>
+
 #include <dune/grid/genericgeometry/geometrytraits.hh>
 #include <dune/grid/genericgeometry/cachedmapping.hh>
 
@@ -45,7 +47,8 @@ namespace Dune
       using HybridMappingBase< dim, GeometryTraits, codim-1 > :: trace;
 
       virtual HybridMapping< dim - codim, GeometryTraits > *
-      trace ( Int2Type< codim >, unsigned int i, typename GeometryTraits::Allocator &allocator ) const = 0;
+      trace ( integral_constant< int, codim >, unsigned int i,
+              typename GeometryTraits::Allocator &allocator ) const = 0;
     };
 
     template< unsigned int dim, class GeometryTraits >
@@ -57,7 +60,8 @@ namespace Dune
       virtual ~HybridMappingBase() {}
     protected:
       virtual HybridMapping< dim, GeometryTraits > *
-      trace ( Int2Type< 0 >, unsigned int i, typename GeometryTraits::Allocator &allocator ) const = 0;
+      trace ( integral_constant< int, 0 >, unsigned int i,
+              typename GeometryTraits::Allocator &allocator ) const = 0;
     };
     /** \endcond */
 
@@ -159,7 +163,7 @@ namespace Dune
       typename Codim< codim >::Trace *
       trace ( unsigned int i, typename GeometryTraits::Allocator &allocator ) const
       {
-        Int2Type< codim > codimVariable;
+        integral_constant< int, codim > codimVariable;
         return trace( codimVariable, i, allocator );
       }
     };
@@ -185,7 +189,8 @@ namespace Dune
       using VirtualMappingBase< Topology, GeometryTraits, codim-1 > :: trace;
 
       virtual HybridMapping< Topology::dimension - codim, GeometryTraits > *
-      trace ( Int2Type< codim >, unsigned int i, typename GeometryTraits::Allocator &allocator ) const
+      trace ( integral_constant< int, codim >, unsigned int i,
+              typename GeometryTraits::Allocator &allocator ) const
       {
         const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
         return impl.template trace< codim >( i, allocator );
@@ -201,7 +206,8 @@ namespace Dune
 
     protected:
       virtual HybridMapping< Topology::dimension, GeometryTraits > *
-      trace ( Int2Type< 0 >, unsigned int i, typename GeometryTraits::Allocator &allocator ) const
+      trace ( integral_constant< int, 0 >, unsigned int i,
+              typename GeometryTraits::Allocator &allocator ) const
       {
         const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
         return impl.template trace< 0 >( i, allocator );
