@@ -4,7 +4,7 @@
 #ifndef DUNE_GENERICGEOMETRY_CODIMTABLE_HH
 #define DUNE_GENERICGEOMETRY_CODIMTABLE_HH
 
-#include <dune/common/misc.hh>
+#include <dune/common/typetraits.hh>
 
 namespace Dune
 {
@@ -37,23 +37,27 @@ namespace Dune
       }
 
       template< int cd >
-      const Element< cd > &operator[] ( const Int2Type< cd > codimVariable ) const
+      const Element< cd > &
+      operator[] ( const integral_constant< int, cd > codimVariable ) const
       {
         return map_[ codimVariable ];
       }
 
       template< int cd >
-      Element< cd > &operator[] ( const Int2Type< cd > &codimVariable )
+      Element< cd > &
+      operator[] ( const integral_constant< int, cd > &codimVariable )
       {
         return map_[ codimVariable ];
       }
 
-      const Element< codim > &operator[] ( const Int2Type< codim > &codimVariable ) const
+      const Element< codim > &
+      operator[] ( const integral_constant< int, codim > &codimVariable ) const
       {
         return element_;
       }
 
-      Element< codim > &operator[] ( const Int2Type< codim > &codimVariable )
+      Element< codim > &
+      operator[] ( const integral_constant< int, codim > &codimVariable )
       {
         return element_;
       }
@@ -81,12 +85,14 @@ namespace Dune
         return *this;
       }
 
-      const Element< 0 > &operator[] ( const Int2Type< 0 > codimVaraible ) const
+      const Element< 0 > &
+      operator[] ( const integral_constant< int, 0 > codimVaraible ) const
       {
         return element_;
       }
 
-      Element< 0 > &operator[] ( const Int2Type< 0 > codimVaraible )
+      Element< 0 > &
+      operator[] ( const integral_constant< int, 0 > codimVaraible )
       {
         return element_;
       }
@@ -114,13 +120,15 @@ namespace Dune
       }
 
       template< int codim >
-      const Element< codim > &operator[] ( const Int2Type< codim > codimVariable ) const
+      const Element< codim > &
+      operator[] ( const integral_constant< int, codim > codimVariable ) const
       {
         return map_[ codimVariable ];
       }
 
       template< int codim >
-      Element< codim > &operator[] ( const Int2Type< codim > codimVariable )
+      Element< codim > &
+      operator[] ( const integral_constant< int, codim > codimVariable )
       {
         return map_[ codimVariable ];
       }
