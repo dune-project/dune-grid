@@ -1296,12 +1296,4 @@ namespace Dune {
 #include "leafiterator.hh"
 #include "indexidset.hh"
 
-template<int d, int dw, class ct, class gf>
-inline std::ostream& operator<< (std::ostream& s,
-                                 const Dune::Grid<d,dw,ct,gf> & g)
-{
-  s << g.name();
-  return s;
-}
-
 #endif
