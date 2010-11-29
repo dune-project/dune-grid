@@ -428,21 +428,6 @@ namespace Dune
 
     /** \} */
 
-    /** \name Grid Identification Methods
-     *  \{ */
-
-    /** \brief obtain a string naming the grid
-     *
-     *  \returns ''GeometryGrid\< \em host \em grid \em name \>''
-     */
-    std::string name () const DUNE_DEPRECATED
-    {
-      return std::string( "GeometryGrid< " ) + hostGrid().name() + std::string( " >" );
-    }
-
-    /** \} */
-
-
     /** \name Size Methods
      *  \{ */
 
