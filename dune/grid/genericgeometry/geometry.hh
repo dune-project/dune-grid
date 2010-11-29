@@ -422,7 +422,8 @@ namespace Dune
       /** \brief Return the topological type of this geometry */
       GeometryType type () const
       {
-        return DuneGeometryTypeProvider :: type( mapping().topologyId() );
+        return GeometryType( mapping().topologyId(), mydimension );
+        // return DuneGeometryTypeProvider :: type( mapping().topologyId() );
       }
 
       /** \brief Return the number of corners */
