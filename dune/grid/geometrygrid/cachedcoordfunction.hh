@@ -4,8 +4,6 @@
 #define DUNE_GEOGRID_CACHEDCOORDFUNCTION_HH
 
 #include <cassert>
-#include <map>
-#include <vector>
 
 #include <dune/common/typetraits.hh>
 
@@ -13,6 +11,7 @@
 
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/coordfunction.hh>
+#include <dune/grid/utility/persistentcontainer.hh>
 
 namespace Dune
 {
@@ -23,16 +22,6 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   class CachedCoordFunction;
 
-  namespace GeoGrid
-  {
-
-    template< class HostGrid, class Coordindate, bool hasHierarchicIndexSet >
-    class CoordCache;
-
-  }
-
-
-
   // GeoGrid::CoordCache
   // -------------------
 
@@ -40,117 +29,54 @@ namespace Dune
   {
 
     template< class HostGrid, class Coordinate >
-    class CoordCache< HostGrid, Coordinate, true >
+    class CoordCache
     {
-      typedef CoordCache< HostGrid, Coordinate, true > This;
+      typedef CoordCache< HostGrid, Coordinate > This;
 
       static const unsigned int dimension = HostGrid::dimension;
 
       typedef typename HostGrid::template Codim< dimension >::Entity Vertex;
 
-      typedef typename HostGrid::HierarchicIndexSet HierarchicIndexSet;
-
-      typedef std::vector< Coordinate > DataCache;
+      typedef PersistentContainer< HostGrid, Coordinate > DataCache;
 
     public:
       explicit CoordCache ( const HostGrid &hostGrid )
-        : indexSet_( hostGrid.hierarchicIndexSet() ),
-          data_( indexSet_.size( dimension ) )
+        : data_(hostGrid,dimension)
       {}
 
       template< class Entity >
       const Coordinate &operator() ( const Entity &entity, unsigned int corner ) const
       {
-        return data_[ indexSet_.subIndex( entity, corner, dimension - Entity::codimension ) ];
+        return data_(entity,corner);
       }
 
       const Coordinate &operator() ( const Vertex &vertex, unsigned int corner ) const
       {
         assert( corner == 0 );
-        return data_[ indexSet_.index( vertex ) ];
+        return data_[ vertex ];
       }
 
       template< class Entity >
       Coordinate &operator() ( const Entity &entity, unsigned int corner )
       {
-        return data_[ indexSet_.subIndex( entity, corner, dimension - Entity::codimension ) ];
+        return data_( entity,corner) ;
       }
 
       Coordinate &operator() ( const Vertex &vertex, unsigned int corner )
       {
         assert( corner == 0 );
-        return data_[ indexSet_.index( vertex ) ];
+        return data_[ vertex ];
       }
 
       void adapt ()
       {
-        data_.resize( indexSet_.size( dimension ) );
+        data_.update();
       }
 
     private:
       CoordCache ( const This & );
       This &operator= ( const This & );
 
-      const HierarchicIndexSet &indexSet_;
-      DataCache data_;
-    };
-
-
-    template< class HostGrid, class Coordinate >
-    class CoordCache< HostGrid, Coordinate, false >
-    {
-      typedef CoordCache< HostGrid, Coordinate, false > This;
-
-      static const unsigned int dimension = HostGrid::dimension;
-
-      typedef typename HostGrid::template Codim< dimension >::Entity Vertex;
-
-      typedef typename HostGrid::Traits::LocalIdSet LocalIdSet;
-      typedef typename LocalIdSet::IdType Id;
-
-      typedef std::map< Id, Coordinate > DataCache;
-
-    public:
-      explicit CoordCache ( const HostGrid &hostGrid )
-        : idSet_( hostGrid.localIdSet() )
-      {}
-
-      template< class Entity >
-      const Coordinate &operator() ( const Entity &entity, unsigned int corner ) const
-      {
-        const Id id = idSet_.subId( entity, corner, dimension );
-        return data_[ id ];
-      }
-
-      const Coordinate &operator() ( const Vertex &vertex, unsigned int corner ) const
-      {
-        assert( corner == 0 );
-        const Id id = idSet_.id( vertex );
-        return data_[ id ];
-      }
-
-      template< class Entity >
-      Coordinate &operator() ( const Entity &entity, unsigned int corner )
-      {
-        const Id id = idSet_.subId( entity, corner, dimension );
-        return data_[ id ];
-      }
-
-      Coordinate &operator() ( const Vertex &vertex, unsigned int corner )
-      {
-        assert( corner == 0 );
-        const Id id = idSet_.id( vertex );
-        return data_[ id ];
-      }
-
-      void adapt ()
-      {}
-
-    private:
-      CoordCache ( const This & );
-      This &operator= ( const This & );
-
-      const LocalIdSet &idSet_;
       mutable DataCache data_;
     };
 
@@ -175,8 +101,7 @@ namespace Dune
     typedef typename Base::RangeVector RangeVector;
 
   private:
-    static const bool hasHierarchicIndexSet = Capabilities::hasHierarchicIndexSet< HostGrid >::v;
-    typedef GeoGrid::CoordCache< HostGrid, RangeVector, hasHierarchicIndexSet > Cache;
+    typedef GeoGrid::CoordCache< HostGrid, RangeVector > Cache;
 
     const HostGrid &hostGrid_;
     const CoordFunction &coordFunction_;
