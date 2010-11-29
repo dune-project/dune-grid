@@ -412,7 +412,8 @@ namespace Dune
       baryCenter_ *= ctype( 1 ) / ctype( numCorners );
 
       typedef typename GenericGeometry::SubTopology< Topology, codim, i >::type SubTopology;
-      type_ = GenericGeometry::DuneGeometryType< SubTopology, GeometryType::simplex >::type();
+      type_ = GeometryType( SubTopology::id, SubTopology::dimension );
+      // type_ = GenericGeometry::DuneGeometryType< SubTopology, GeometryType::simplex >::type();
     }
   };
 
