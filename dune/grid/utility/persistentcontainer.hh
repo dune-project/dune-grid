@@ -91,6 +91,12 @@ namespace Dune
         , data_( other.data_ )
     {}
 
+    //! pass on index set used for Container
+    const Index& index()
+    {
+      return index_;
+    }
+
     //! \brief random access to entity data with correct codimension
     template <class Entity>
     Data& operator [] (const Entity& entity )
