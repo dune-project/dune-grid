@@ -60,7 +60,8 @@ namespace Dune
       static const unsigned int dimension = 0;
       static const GeometryType::BasicType basicType = linetype;
 
-      static GeometryType type ()
+      // GeometryType can be initialized directly with the topologyId
+      static GeometryType type () DUNE_DEPRECATED
       {
         return GeometryType( basicType, dimension );
       }
@@ -88,7 +89,8 @@ namespace Dune
            ? GeometryType::cube
            : GeometryType::prism);
 
-      static GeometryType type ()
+      // GeometryType can be initialized directly with the topologyId
+      static GeometryType type () DUNE_DEPRECATED
       {
         return GeometryType( basicType, dimension );
       }
@@ -116,7 +118,8 @@ namespace Dune
            ? GeometryType::simplex
            : GeometryType::pyramid);
 
-      static GeometryType type ()
+      // GeometryType can be initialized directly with the topologyId
+      static GeometryType type () DUNE_DEPRECATED
       {
         return GeometryType( basicType, dimension );
       }
@@ -150,7 +153,8 @@ namespace Dune
     private:
       GeometryType types_[ (dimension>=1) ? numTopologies / 2 : numTopologies ];
 
-      DuneGeometryTypeProvider ()
+      // GeometryType can be initialized directly with the topologyId
+      DuneGeometryTypeProvider () DUNE_DEPRECATED
       {
         if( dimension > 3 )
         {
