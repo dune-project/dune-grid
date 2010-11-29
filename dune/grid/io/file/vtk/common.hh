@@ -166,7 +166,8 @@ namespace Dune
 
     template<>
     struct PrintType<char> {
-      typedef SelectType<std::numeric_limits<char>::is_signed, int, unsigned>
+      typedef SelectType<std::numeric_limits<char>::is_signed,
+          int, unsigned>::Type
       Type;
     };
 
