@@ -25,8 +25,9 @@ namespace Dune {
     file << "\n";
 
     if (dimworld==1) {
-
+#if !NDEBUG
       int counter = 0;
+#endif
       typedef typename GridView::template Codim<0>::Iterator CellIterator;
       CellIterator it = _gv.template begin<0>();
       CellIterator end = _gv.template end<0>();
