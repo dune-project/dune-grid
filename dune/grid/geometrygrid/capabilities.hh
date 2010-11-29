@@ -82,19 +82,6 @@ namespace Dune
 
 
 
-    // non-standard capabilities
-    // -------------------------
-
-    template< class Grid >
-    struct hasHierarchicIndexSet;
-
-    template< class HostGrid, class CoordFunction, class Allocator >
-    struct hasHierarchicIndexSet< GeometryGrid< HostGrid, CoordFunction, Allocator > >
-    {
-      static const bool v = hasHierarchicIndexSet< HostGrid >::v;
-    };
-
-
 
     // hasHostEntity
     // -------------

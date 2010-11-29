@@ -256,7 +256,6 @@ namespace Dune
       < HostGrid::dimension, CoordFunction::dimRange, typename HostGrid::ctype,
           GeoGrid::GridFamily< HostGrid, CoordFunction, Allocator > >,
       public GeoGrid::ExportParams< HostGrid, CoordFunction, Allocator >,
-      public GeoGrid::HierarchicIndexSetProvider< HostGrid, CoordFunction, Allocator >,
       public GeoGrid::BackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction, Allocator > >
       /** \endcond */
   {
@@ -266,9 +265,6 @@ namespace Dune
     < HostGrid::dimension, CoordFunction::dimRange, typename HostGrid::ctype,
         GeoGrid::GridFamily< HostGrid, CoordFunction, Allocator > >
     Base;
-
-    typedef GeoGrid::HierarchicIndexSetProvider< HostGrid, CoordFunction, Allocator >
-    HierarchicIndexSetProvider;
 
     friend class GeoGrid::HierarchicIterator< const Grid >;
 
@@ -284,6 +280,8 @@ namespace Dune
 
     template< int, PartitionIteratorType, class > friend class GeoGrid::LevelIteratorTraits;
     template< int, PartitionIteratorType, class > friend class GeoGrid::LeafIteratorTraits;
+
+    template < class, class, class > friend class PersistentContainer;
 
   public:
     /** \cond */
@@ -397,8 +395,7 @@ namespace Dune
      *  \param[in]  allocator      polymorphic allocator
      */
     GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction, const Allocator &allocator = Allocator() )
-      : HierarchicIndexSetProvider( *this ),
-        hostGrid_( &hostGrid ),
+      : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
         allocator_( allocator ),
         levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),

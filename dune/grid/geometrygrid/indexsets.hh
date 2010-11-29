@@ -26,15 +26,6 @@ namespace Dune
   namespace GeoGrid
   {
 
-    // Internal Forward Declarations
-    // -----------------------------
-
-    template< class HostGrid, class CoordFunction, class Allocator,
-        bool hasHierarchicIndexSet = Capabilities::hasHierarchicIndexSet< HostGrid >::v >
-    class HierarchicIndexSetProvider;
-
-
-
     // IndexSet
     // --------
 
@@ -130,59 +121,6 @@ namespace Dune
       }
 
       const HostIndexSet *hostIndexSet_;
-    };
-
-
-
-    // HierarchicIndexSetProvider
-    // --------------------------
-
-    template< class HostGrid, class CoordFunction, class Allocator >
-    class HierarchicIndexSetProvider< HostGrid, CoordFunction, Allocator, false >
-    {};
-
-    template< class HostGrid, class CoordFunction, class Allocator >
-    class HierarchicIndexSetProvider< HostGrid, CoordFunction, Allocator, true >
-    {
-      typedef HierarchicIndexSetProvider< HostGrid, CoordFunction, Allocator, true > This;
-
-      typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
-
-    public:
-      typedef IndexSet< const Grid, typename HostGrid::HierarchicIndexSet >
-      HierarchicIndexSet;
-
-    private:
-      const Grid &grid_;
-      mutable HierarchicIndexSet *hierarchicIndexSet_;
-
-    public:
-      HierarchicIndexSetProvider ( const Grid &grid )
-        : grid_( grid ),
-          hierarchicIndexSet_( 0 )
-      {}
-
-      HierarchicIndexSetProvider ( const This &other )
-        : grid_( other.grid_ ),
-          hierarchicIndexSet_( 0 )
-      {}
-
-      ~HierarchicIndexSetProvider ()
-      {
-        if( hierarchicIndexSet_ != 0 )
-          delete hierarchicIndexSet_;
-      }
-
-      const HierarchicIndexSet &hierarchicIndexSet () const
-      {
-        if( hierarchicIndexSet_ == 0 )
-        {
-          hierarchicIndexSet_
-            = new HierarchicIndexSet( grid_.hostGrid().hierarchicIndexSet() );
-        }
-        assert( hierarchicIndexSet_ != 0 );
-        return *hierarchicIndexSet_;
-      }
     };
 
   }
