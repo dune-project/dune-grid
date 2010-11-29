@@ -387,7 +387,6 @@ namespace Dune
     }
   };
 
-#if 0
   // PersistentContainer (default is to use PersistentContainerMap)
   // -------------------
   template < class Grid, class Data, class Allocator>
@@ -409,8 +408,8 @@ namespace Dune
       : BaseType( grid, codim, grid.localIdSet(), allocator )
     {}
   };
-#endif
-#if 1 // the following implementation can be used for a grid providing a hash for the id type
+
+#if 0 // the following implementation can be used for a grid providing a hash for the id type
   template < class MyGrid, class Data, class Allocator >
   class PersistentContainer
     : public PersistentContainerMap< MyGrid, typename MyGrid::Traits::LocalIdSet,
