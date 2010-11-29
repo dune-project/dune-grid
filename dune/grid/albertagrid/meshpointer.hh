@@ -80,38 +80,27 @@ namespace Dune
         return MacroIterator( *this, true );
       }
 
-      std::string name () const
-      {
-        if( mesh_ != NULL )
-          return mesh_->name;
-        else
-          return std::string();
-      }
-
       int numMacroElements () const;
       int size ( int codim ) const;
 
       // create a mesh from a macrodata structure
       // params:  macroData - macro data structure
-      //          name      - grid name
       // returns: number of boundary segments
-      unsigned int create ( const MacroData< dim > &macroData, const std::string &name );
+      unsigned int create ( const MacroData< dim > &macroData );
 
       // create a mesh from a macrodata structure, adding projections
       // params:  macroData         - macro data structure
-      //          name              - grid name
       //          projectionFactory - factory for the projections
       // returns: number of boundary segments
       template< class Proj, class Impl >
-      unsigned int create ( const MacroData< dim > &macroData, const std::string &name,
+      unsigned int create ( const MacroData< dim > &macroData,
                             const ProjectionFactoryInterface< Proj, Impl > &projectionFactory );
 
       // create a mesh from a file
       // params:  filename - file name of an Alberta macro triangulation
-      //          name     - grid name
       //          binary   - read binary?
       // returns: number of boundary segments
-      unsigned int create ( const std::string &filename, const std::string &name, bool binary = false );
+      unsigned int create ( const std::string &filename, bool binary = false );
 
       // read back a mesh from a file
       // params:  filename - file name of an Alberta save file
@@ -163,7 +152,7 @@ namespace Dune
       static const void *projectionFactory;
 
       static void
-      create ( MeshPointer &ptr, const MacroData< dim > &macroData, const std::string &name,
+      create ( MeshPointer &ptr, const MacroData< dim > &macroData,
                ALBERTA NODE_PROJECTION *(*initNodeProjection)( Mesh *, ALBERTA MACRO_EL *, int ) );
       static void release ( MeshPointer &ptr );
     };
@@ -216,12 +205,12 @@ namespace Dune
 
     template< int dim >
     inline unsigned int MeshPointer< dim >
-    ::create ( const MacroData< dim > &macroData, const std::string &name )
+    ::create ( const MacroData< dim > &macroData )
     {
       release();
 
       Library< dimWorld >::boundaryCount = 0;
-      Library< dimWorld >::create( *this, macroData, name, &initNodeProjection );
+      Library< dimWorld >::create( *this, macroData, &initNodeProjection );
       return Library< dimWorld >::boundaryCount;
     }
 
@@ -229,7 +218,7 @@ namespace Dune
     template< int dim >
     template< class Proj, class Impl >
     inline unsigned int MeshPointer< dim >
-    ::create ( const MacroData< dim > &macroData, const std::string &name,
+    ::create ( const MacroData< dim > &macroData,
                const ProjectionFactoryInterface< Proj, Impl > &projectionFactory )
     {
       typedef ProjectionFactoryInterface< Proj, Impl > ProjectionFactory;
@@ -238,7 +227,7 @@ namespace Dune
 
       Library< dimWorld >::boundaryCount = 0;
       Library< dimWorld >::projectionFactory = &projectionFactory;
-      Library< dimWorld >::create( *this, macroData, name, &initNodeProjection< ProjectionFactory > );
+      Library< dimWorld >::create( *this, macroData, &initNodeProjection< ProjectionFactory > );
       Library< dimWorld >::projectionFactory = 0;
       return Library< dimWorld >::boundaryCount;
     }
@@ -248,11 +237,11 @@ namespace Dune
 
     template< int dim >
     inline unsigned int MeshPointer< dim >
-    ::create ( const std::string &filename, const std::string &name, bool binary )
+    ::create ( const std::string &filename, bool binary )
     {
       MacroData< dim > macroData;
       macroData.read( filename, binary );
-      const unsigned int boundaryCount = create( macroData, name );
+      const unsigned int boundaryCount = create( macroData );
       macroData.release();
       return boundaryCount;
     }

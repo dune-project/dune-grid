@@ -286,7 +286,7 @@ namespace Dune
      *  \note ALBERTA's grid factory provides a static method for freeing the
      *        grid (destroyGrid).
      */
-    Grid *createGrid ( const std::string &gridName )
+    Grid *createGrid ()
     {
       macroData_.finalize();
       if( macroData_.elementCount() == 0 )
@@ -296,23 +296,7 @@ namespace Dune
       assert( macroData_.checkNeighbors() );
       macroData_.checkCycles();
       ProjectionFactory projectionFactory( *this );
-      return new Grid( macroData_, gridName, projectionFactory );
-    }
-
-    /** \brief finalize grid creation and hand over the grid
-     *
-     *  \returns a pointer to the newly created grid
-     *
-     *  \note The caller takes responsibility of freeing the memory allocated
-     *        for the grid.
-     *  \note ALBERTA's grid factory provides a static method for freeing the
-     *        grid (destroyGrid).
-     */
-    virtual Grid *createGrid ()
-    {
-      macroData_.finalize();
-      markLongestEdge();
-      return createGrid( "AlbertaGrid" );
+      return new Grid( macroData_, projectionFactory );
     }
 
     /** \brief destroy a grid previously obtain from this factory

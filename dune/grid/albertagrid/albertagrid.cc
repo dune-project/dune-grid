@@ -57,7 +57,6 @@ namespace Dune
   template< class Proj, class Impl >
   inline AlbertaGrid< dim, dimworld >
   ::AlbertaGrid ( const Alberta::MacroData< dimension> &macroData,
-                  const std::string &gridName,
                   const Alberta::ProjectionFactoryInterface< Proj, Impl > &projectionFactory )
     : mesh_(),
       maxlevel_( 0 ),
@@ -72,7 +71,7 @@ namespace Dune
   {
     checkAlbertaDimensions< dim, dimworld >();
 
-    numBoundarySegments_ = mesh_.create( macroData, gridName, projectionFactory );
+    numBoundarySegments_ = mesh_.create( macroData, projectionFactory );
     if( !mesh_ )
       DUNE_THROW( AlbertaError, "Invalid macro data structure." );
 
@@ -86,7 +85,6 @@ namespace Dune
   template< int dim, int dimworld >
   inline AlbertaGrid< dim, dimworld >
   ::AlbertaGrid ( const Alberta::MacroData< dimension> &macroData,
-                  const std::string &gridName,
                   const Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection )
     : mesh_(),
       maxlevel_( 0 ),
@@ -104,10 +102,10 @@ namespace Dune
     if( projection != 0 )
     {
       Alberta::DuneGlobalBoundaryProjectionFactory< dimension > projectionFactory( projection );
-      numBoundarySegments_ = mesh_.create( macroData, gridName, projectionFactory );
+      numBoundarySegments_ = mesh_.create( macroData, projectionFactory );
     }
     else
-      numBoundarySegments_ = mesh_.create( macroData, gridName );
+      numBoundarySegments_ = mesh_.create( macroData );
     if( !mesh_ )
       DUNE_THROW( AlbertaError, "Invalid macro data structure." );
 
@@ -120,8 +118,7 @@ namespace Dune
 
   template < int dim, int dimworld >
   inline AlbertaGrid< dim, dimworld >
-  ::AlbertaGrid ( const std::string &macroGridFileName,
-                  const std::string &gridName )
+  ::AlbertaGrid ( const std::string &macroGridFileName )
     : mesh_(),
       maxlevel_( 0 ),
       hIndexSet_( dofNumbering_ ),
@@ -134,7 +131,7 @@ namespace Dune
   {
     checkAlbertaDimensions< dim, dimworld >();
 
-    numBoundarySegments_ = mesh_.create( macroGridFileName, gridName );
+    numBoundarySegments_ = mesh_.create( macroGridFileName );
     if( !mesh_ )
     {
       DUNE_THROW( AlbertaIOError,

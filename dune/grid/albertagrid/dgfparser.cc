@@ -29,9 +29,6 @@ namespace Dune
       dgf_.setOrientation( 0, 1 );
     dgf_.setRefinement( 0, 1, -1, -1 );
 
-    dgf::GridParameterBlock parameter( input );
-    std::string gridName = parameter.name( "AlbertaGrid" );
-
     for( int n = 0; n < dgf_.nofvtx; ++n )
     {
       typename GridFactory::WorldVector coord;
@@ -112,6 +109,7 @@ namespace Dune
       factory_.insertBoundaryProjection( type, vertices, projection );
     }
 
+    dgf::GridParameterBlock parameter( input );
     if( parameter.markLongestEdge() )
       factory_.markLongestEdge();
 
@@ -119,7 +117,7 @@ namespace Dune
     if( !dumpFileName.empty() )
       factory_.write( dumpFileName );
 
-    grid_ = factory_.createGrid( gridName );
+    grid_ = factory_.createGrid();
     return true;
   }
 

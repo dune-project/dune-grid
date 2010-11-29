@@ -310,26 +310,21 @@ namespace Dune
     /** \brief create a grid from an ALBERTA macro data structure
      *
      *  \param[in]  macroData   macro data to create grid from
-     *  \param[in]  gridName    name of the grid (defaults to "AlbertaGrid")
      *  \param[in]  projection  shared pointer to a global boundary projection (defaults to 0)
      */
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
-                  const std::string &gridName = "AlbertaGrid",
                   const Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection
                     = Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > >() );
 
     template< class Proj, class Impl >
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
-                  const std::string &gridName,
                   const Alberta::ProjectionFactoryInterface< Proj, Impl > &projectionFactory );
 
     /** \brief create a grid from an ALBERTA macro grid file
      *
      *  \param[in]  macroGridFileName  name of the macro grid file
-     *  \param[in]  gridName           name of the grid (defaults to "AlbertaGrid")
      */
-    AlbertaGrid ( const std::string &macroGridFileName,
-                  const std::string &gridName = "AlbertaGrid" );
+    AlbertaGrid ( const std::string &macroGridFileName );
 
     /** \brief desctructor */
     ~AlbertaGrid ();
@@ -446,12 +441,6 @@ namespace Dune
       s << "AlbertaGrid< " << dim << ", " << dimworld << " >";
       return s.str();
     }
-
-    /** \brief return name of the grid */
-    std::string name () const DUNE_DEPRECATED
-    {
-      return mesh_.name();
-    };
 
     //**********************************************************
     // End of Interface Methods
