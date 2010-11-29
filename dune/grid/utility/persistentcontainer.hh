@@ -256,11 +256,12 @@ namespace Dune
     //
     //         Container is to be used to store data on entities of given codim using id to store data in map.
     PersistentContainerMap( const GridType& grid, const int codim, const Id& id,
+                            const typename Map::key_compare& comp,
                             const typename Map::allocator_type &allocator )
       : grid_( grid )
         , codim_( codim )
         , id_( id )
-        , data_(allocator)
+        , data_(comp,allocator)
     {}
     //! \brief constructor creating container filled with default values (for an
     //  unordered_map the constructor taking only an allocator is not available that is
@@ -405,7 +406,7 @@ namespace Dune
     //! Constructor filling the container with values using the default constructor
     //! Depending on the implementation this could be achieved without allocating memory
     PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator=Allocator() )
-      : BaseType( grid, codim, grid.localIdSet(), allocator )
+      : BaseType( grid, codim, grid.localIdSet(), std::less<const IdType>(), allocator )
     {}
   };
 
