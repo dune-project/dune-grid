@@ -145,37 +145,4 @@
  *  \endcode
  *
  *
- *  \note The <tt>GeometryGrid</tt> is able to forward a non-standard feature
- *        of some DUNE grids: the <tt>HierarchicIndexSet</tt>.
- *        Since only very few grids support this feature, <tt>GeometryGrid</tt>
- *        needs to know whether the host grid supports this feature.
- *        To this end, it expects the capability <tt>hasHierarchicIndexSet</tt>
- *        to be set, which is not part of the standard capabilities defined in
- *        <tt>dune/grid/common/capabilities.hh</tt>.
- *        If you intend to use the <tt>GeometryGrid</tt> with a host grid that
- *        potentially does not provide a <tt>HierarchicIndexSet</tt>, you have
- *        to provide a default implementation of this capability:
- *  \code
- *  namespace Dune
- *  {
- *
- *    namespace Capabilities
- *    {
- *
- *      template< class Grid >
- *      struct hasHierarchicIndexSet
- *      {
- *        static const bool v = false;
- *      };
- *
- *      template< class Grid >
- *      struct hasHierarchicIndexSet< const Grid >
- *      {
- *        static const bool v = hasHierarchicIndexSet< Grid >::v;
- *      };
- *
- *    }
- *
- *  }
- *  \endcode
  */
