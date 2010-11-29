@@ -471,7 +471,7 @@ namespace Dune
         if( !geo )
         {
           CoordVector coords( hostElement(), subEntity_, grid().coordFunction() );
-          geo = GeometryImpl( topologyId(), coords, grid().allocator() );
+          geo = GeometryImpl( type(), coords, grid().allocator() );
         }
         return geo_;
       }
