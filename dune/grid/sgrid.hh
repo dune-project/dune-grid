@@ -1468,9 +1468,6 @@ namespace Dune {
     //! define type used for coordinates in grid module
     typedef _ctype ctype;
 
-    //! return the name of this grid
-    std::string name() const DUNE_DEPRECATED { return "SGrid"; }
-
     // constructors
 
     /*! @brief Make an SGrid from extend and number of cells per direction
