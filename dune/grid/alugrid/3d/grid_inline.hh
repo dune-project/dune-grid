@@ -42,12 +42,17 @@ namespace Dune
       , communications_( new Communications( mpiComm ) )
   {
     assert( elType == tetra || elType == hexa );
-    const typename GeometryType::BasicType basicType
-      = (elType == tetra ? GeometryType::simplex : GeometryType::cube);
 
     geomTypes_.resize( dimension+1 );
-    for( int codim = 0; codim <= dimension; ++codim )
-      geomTypes_[ codim ].push_back( GeometryType( basicType, dimension - codim ) );
+    GeometryType tmpType;
+    for( int codim = 0; codim <= dimension; ++codim ) {
+      if (elType == tetra)
+        tmpType.makeSimplex( dimension - codim );
+      else
+        tmpType.makeCube( dimension - codim );
+
+      geomTypes_[ codim ].push_back( tmpType );
+    }
 
     // check macro grid file for keyword
     checkMacroGridFile( macroTriangFilename );
