@@ -79,7 +79,7 @@ namespace Dune
 
   /** @brief A wrapper for a TopologyFactory providing
    *         singleton storage. Same usage as TopologyFactory
-   *         but with empty release method an internal stroage.
+   *         but with empty release method an internal storage.
    **/
   template <class Factory>
   struct TopologySingletonFactory
