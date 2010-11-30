@@ -17,15 +17,15 @@ namespace Dune
    * @brief Provide a factory over the generic topologies
    *
    * This class can be used to dynamically create objects
-   * statically bound by there generic topology.
-   * The method create returns a pointer to an object depending
+   * statically bound by their generic topologies.
+   * The method create() returns a pointer to an object depending
    * on the topology id and a key; the dimension corresponding
    * to the topology id is static and is provided by the
    * Traits class. A static method (taking the Topology as template
-   * argument is also provided).
-   * The Traits class must provide the space dimension
+   * argument) is also provided.
+   * The Traits class must provide the space dimension,
    * the types for the key (Key),
-   * the objects returned (Object) and the underlying factory
+   * the objects returned (Object), and the underlying factory
    * (Factory). This class must have a template method
    * createObject taking a key and returning a pointer to
    * the newly create Object - for destruction call the release
