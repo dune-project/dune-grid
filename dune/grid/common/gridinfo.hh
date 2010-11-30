@@ -8,6 +8,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <dune/common/exceptions.hh>
+#include <dune/common/classname.hh>
 #include "grid.hh"
 #include "genericreferenceelements.hh"
 
@@ -35,9 +36,9 @@ namespace Dune
     const int dimworld = G::dimensionworld;
 
     // grid type and dimension
-    std::cout << prefix << "=> " << typeid(G).name()
-              << "(dim=" << dim
-              << ",dimworld=" << dimworld
+    std::cout << prefix << "=> " << className(grid)
+              << " (dim=" << dim
+              << ", dimworld=" << dimworld
               << ")" << std::endl;
 
     // level information
