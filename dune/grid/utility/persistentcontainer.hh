@@ -102,7 +102,7 @@ namespace Dune
     Data& operator [] (const Entity& entity )
     {
       assert( Entity :: codimension == codim_ );
-      assert( index_.index( entity ) < (typename Index::IndexType)data_.size() );
+      assert( (typename Index::IndexType)index_.index( entity ) < (typename Index::IndexType)data_.size() );
       return data_[ index_.index( entity ) ];
     }
 
@@ -111,21 +111,21 @@ namespace Dune
     const Data& operator [] (const Entity& entity ) const
     {
       assert( Entity :: codimension == codim_ );
-      assert( index_.index( entity ) < (typename Index::IndexType)data_.size() );
+      assert( (typename Index::IndexType)index_.index( entity ) < (typename Index::IndexType)data_.size() );
       return data_[ index_.index( entity ) ];
     }
 
     //! \brief access for sub entity data
     Data& operator () (const ElementType& element, const int subEntity )
     {
-      assert( index_.subIndex( element, subEntity, codim_ ) < (typename Index::IndexType)data_.size() );
+      assert( (typename Index::IndexType)index_.subIndex( element, subEntity, codim_ ) < (typename Index::IndexType)data_.size() );
       return data_[ index_.subIndex( element, subEntity, codim_ ) ];
     }
 
     //! \brief access for sub entity data
     const Data& operator () (const ElementType& element, const int subEntity ) const
     {
-      assert( index_.subIndex( element, subEntity, codim_ ) < (typename Index::IndexType)data_.size() );
+      assert( (typename Index::IndexType)index_.subIndex( element, subEntity, codim_ ) < (typename Index::IndexType)data_.size() );
       return data_[ index_.subIndex( element, subEntity, codim_ ) ];
     }
 
