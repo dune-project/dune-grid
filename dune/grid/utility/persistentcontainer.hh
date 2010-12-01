@@ -4,7 +4,6 @@
 #define DUNE_PERSISTENTCONTAINER_HH
 
 #include <map>
-#include <unordered_map>
 #include <vector>
 
 #include <dune/common/misc.hh>
@@ -417,6 +416,7 @@ namespace Dune
   };
 
 #if 0 // the following implementation can be used for a grid providing a hash for the id type
+#include <unordered_map>
   template < class MyGrid, class Data, class Allocator >
   class PersistentContainer
     : public PersistentContainerMap< MyGrid, typename MyGrid::Traits::LocalIdSet,
