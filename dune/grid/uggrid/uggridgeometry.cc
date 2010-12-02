@@ -60,7 +60,7 @@ operator [](int i) const
   // This geometry is a vertex
   if (mydim==0) {
     // the dummy variable is required to avoid g++ complaining
-    // about dereferncing a type-punned pointer
+    // about dereferencing a type-punned pointer
     double *dummy = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x;
     return *reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim> *>(dummy);
   }
@@ -74,7 +74,7 @@ operator [](int i) const
 
   if (mode_==element_mode) {
     // the dummy variable is required to avoid g++ complaining
-    // about dereferncing a type-punned pointer
+    // about dereferencing a type-punned pointer
     double *dummy = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x;
     return *reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim> *>(dummy);
   }
@@ -89,7 +89,7 @@ corner(int i) const
   // This geometry is a vertex
   if (mydim==0) {
     // the dummy variable is required to avoid g++ complaining
-    // about dereferncing a type-punned pointer
+    // about dereferencing a type-punned pointer
     double *dummy = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x;
     return *reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim> *>(dummy);
   }
@@ -103,7 +103,7 @@ corner(int i) const
 
   if (mode_==element_mode) {
     // the dummy variable is required to avoid g++ complaining
-    // about dereferncing a type-punned pointer
+    // about dereferencing a type-punned pointer
     double *dummy = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x;
     return *reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim> *>(dummy);
   }
