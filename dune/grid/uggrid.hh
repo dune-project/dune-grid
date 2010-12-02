@@ -334,7 +334,7 @@ namespace Dune {
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief Provides the meshes of the finite element toolbox UG.
-     \brief (http://sit.iwr.uni-heidelberg.de/~ug).
+     \brief (http://atlas.gcsc.uni-frankfurt.de/~ug/).
      \ingroup GridImplementations
 
      This is the implementation of the grid interface
@@ -362,8 +362,8 @@ namespace Dune {
      See the documentation for the factory class GridFactory<UGGrid<dimworld> >
      to learn how to create UGGrid objects.
 
-     Please send any questions, suggestions, or bug reports to
-     sander@math.fu-berlin.de
+     Please send any questions, suggestions, or bug reports to the Dune mailing list
+     dune@dune-project.org
 
      For installation instructions see http://www.dune-project.org/external_libraries/install_ug.html .
    */
@@ -1041,5 +1041,5 @@ namespace Dune {
 
 } // namespace Dune
 
-#endif
-#endif
+#endif   // HAVE_UG
+#endif   // DUNE_UGGRID_HH
