@@ -42,8 +42,6 @@
 
      @ingroup Grid
   */
-    /** @defgroup GridReferenceElements Old Dune Reference Elements
-	@ingroup GridGenericReferenceElements */
     /** @defgroup GridDuneREToGenericRE Transition to Generic Reference Elements
 	@ingroup GridGenericReferenceElements */
 
