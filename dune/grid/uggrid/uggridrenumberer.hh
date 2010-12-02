@@ -14,7 +14,9 @@
 
 namespace Dune {
 
-  /** \brief Empty generic class.  All we need is in the specializations for dim=2 and dim=3
+  /** \brief Generic class which doesn't actually renumber anything.
+   *
+   *  It is needed as the 1d implementation, used to set up intersections for 2d grids.
    */
   template <int dim>
   class UGGridRenumberer {
