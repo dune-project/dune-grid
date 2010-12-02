@@ -99,7 +99,7 @@ corner(int i) const
   // ////////////////////////////////
   assert(mydim==coorddim);
 
-  i = UGGridRenumberer<mydim>::verticesDUNEtoUGNew(i,type());
+  i = UGGridRenumberer<mydim>::verticesDUNEtoUG(i,type());
 
   if (mode_==element_mode) {
     // the dummy variable is required to avoid g++ complaining

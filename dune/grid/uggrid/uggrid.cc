@@ -441,7 +441,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
   //   Change the input face number from Dune numbering to UG numbering
   // //////////////////////////////////////////////////////////////////////
 
-  elementSide = UGGridRenumberer<dim>::facesDUNEtoUGNew(elementSide, e->type());
+  elementSide = UGGridRenumberer<dim>::facesDUNEtoUG(elementSide, e->type());
 
   // ///////////////
   //   init list
@@ -522,7 +522,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 
     // Dune numbers the faces of several elements differently than UG.
     // The following switch does the transformation
-    childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNENew(side, childElements[i]->type());
+    childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i]->type());
 
   }
 
@@ -649,7 +649,7 @@ Dune::FieldVector<typename UGGrid<dim>::ctype,dim> Dune::UGGrid<dim>::getBoundar
 
   if (dim==2) {
 
-    int ugEdgeNumber = UGGridRenumberer<dim>::edgesDUNEtoUGNew(iIt->indexInInside(), iIt->inside()->type());
+    int ugEdgeNumber = UGGridRenumberer<dim>::edgesDUNEtoUG(iIt->indexInInside(), iIt->inside()->type());
 
     // Get UG element from which this intersection iterator is taken
     const typename UG_NS<dim>::Element* target = getRealImplementation(*iIt->inside()).target_;
@@ -774,13 +774,13 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
         for (; nIt!=nEndIt; ++nIt) {
 
-          int side0 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInInside(), eIt->type());
+          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt->indexInInside(), eIt->type());
 
           if (nIt->neighbor()) {
 
             typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt->outside()).target_;
 
-            int side1 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInOutside(), nIt->outside()->type());
+            int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt->indexInOutside(), nIt->outside()->type());
 
             // If there are two SideVector objects instead of only one (as there should be),
             // delete one of them.

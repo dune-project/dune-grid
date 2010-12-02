@@ -45,7 +45,7 @@ namespace Dune {
     {
       if (codim==dim)
         return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
-                                                         UGGridRenumberer<dim>::verticesDUNEtoUGNew(i,e.type())));
+                                                         UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
 
       if (codim==0)
         return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).target_);
@@ -55,14 +55,14 @@ namespace Dune {
         int a=GenericReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
         int b=GenericReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
         return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
-                                                                             UGGridRenumberer<dim>::verticesDUNEtoUGNew(a,e.type())),
+                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
                                                           UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
-                                                                             UGGridRenumberer<dim>::verticesDUNEtoUGNew(b,e.type()))));
+                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
       }
 
       if (codim==1)
         return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(grid_->getRealImplementation(e).target_,
-                                                             UGGridRenumberer<dim>::facesDUNEtoUGNew(i,e.type())));
+                                                             UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
 
       DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subIndex isn't implemented for codim==" << codim );
     }
@@ -205,21 +205,21 @@ namespace Dune {
 
       if (codim==dim)
         return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
-                                                        UGGridRenumberer<dim>::verticesDUNEtoUGNew(i,type)));
+                                                        UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
 
       if (codim==dim-1) {
 
         int a=GenericReferenceElements<double,dim>::general(type).subEntity(i,dim-1,0,dim);
         int b=GenericReferenceElements<double,dim>::general(type).subEntity(i,dim-1,1,dim);
         return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
-                                                                            UGGridRenumberer<dim>::verticesDUNEtoUGNew(a,type)),
+                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
                                                          UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
-                                                                            UGGridRenumberer<dim>::verticesDUNEtoUGNew(b,type))));
+                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(b,type))));
       }
 
       if (codim==1)
         return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(grid_.getRealImplementation(e).target_,
-                                                            UGGridRenumberer<dim>::facesDUNEtoUGNew(i,type)));
+                                                            UGGridRenumberer<dim>::facesDUNEtoUG(i,type)));
 
       DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLeafIndex isn't implemented for codim==" << codim );
     }
@@ -442,8 +442,8 @@ namespace Dune {
 
         int a=GenericReferenceElements<double,dim>::general(type).subEntity(i,dim-1,0,dim);
         int b=GenericReferenceElements<double,dim>::general(type).subEntity(i,dim-1,1,dim);
-        const typename UG_NS<dim>::Edge* edge = UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUGNew(a,type)),
-                                                                    UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUGNew(b,type)));
+        const typename UG_NS<dim>::Edge* edge = UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
+                                                                    UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(b,type)));
 
         // If this edge is the copy of an edge on a lower level we return the id of that lower
         // edge, because Dune wants entities which are copies of each other to have the same id.
@@ -471,7 +471,7 @@ namespace Dune {
 
       if (codim==1) {  // Faces
 
-        Face face(target, UGGridRenumberer<dim>::facesDUNEtoUGNew(i,type));
+        Face face(target, UGGridRenumberer<dim>::facesDUNEtoUG(i,type));
 
         // If this face is the copy of a face on a lower level we return the id of that lower
         // face, because Dune wants entities which are copies of each other to have the same id.
@@ -494,10 +494,10 @@ namespace Dune {
       if (codim==dim) {
 #ifdef ModelP
         return (Local)
-               ? UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUGNew(i,type)))
-               : UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUGNew(i,type))->ddd.gid;
+               ? UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)))
+               : UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(i,type))->ddd.gid;
 #else
-        return UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUGNew(i,type)));
+        return UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
 #endif
       }
 

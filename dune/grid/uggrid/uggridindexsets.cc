@@ -28,9 +28,9 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
       int a=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
       int b=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
       int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUGNew(a,gt)),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                               UG_NS<dim>::Corner(target_,
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUGNew(b,gt))));
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt))));
       index = -1;
     }
     /** \todo codim 1 (faces) */
@@ -79,9 +79,9 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
       int a=GenericReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,0,dim);
       int b=GenericReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,1,dim);
       int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target,
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUGNew(a,eType)),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,eType)),
                                                               UG_NS<dim>::Corner(target,
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUGNew(b,eType))));
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,eType))));
       if (index<0)
         index = numEdges_++;
     }
@@ -90,7 +90,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
     if (dim==3)
       for (int i=0; i<eIt->template count<1>(); i++)
       {
-        int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target,UGGridRenumberer<dim>::facesDUNEtoUGNew(i,eType)));
+        int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target,UGGridRenumberer<dim>::facesDUNEtoUG(i,eType)));
         if (index<0) {             // not visited yet
           GeometryType gtType = GenericReferenceElements<double,dim>::general(eType).type(i,1);
           if (gtType.isSimplex()) {
@@ -179,9 +179,9 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
         int a=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
         int b=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
         int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
-                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUGNew(a,gt)),
+                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                                UG_NS<dim>::Corner(target_,
-                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUGNew(b,gt))));
+                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt))));
         index = -1;
       }
 
@@ -190,7 +190,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
         for (int i=0; i<eIt->template count<1>(); i++)
         {
           GeometryType gt = eIt->type();
-          int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUGNew(i,gt)));
+          int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
           index = -1;
         }
     }
@@ -232,9 +232,9 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
         int a=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
         int b=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
         int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
-                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUGNew(a,gt)),
+                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                                UG_NS<dim>::Corner(target_,
-                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUGNew(b,gt))));
+                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt))));
         if (index<0)
         {
           // get new index and assign
@@ -245,9 +245,9 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
           {
             if (!UG_NS<dim>::hasCopy(father_)) break;                                 // handle only copies
             UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(father_,
-                                                                         UGGridRenumberer<dim>::verticesDUNEtoUGNew(a,gt)),
+                                                                         UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                       UG_NS<dim>::Corner(father_,
-                                                                         UGGridRenumberer<dim>::verticesDUNEtoUGNew(b,gt)))) = index;
+                                                                         UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt)))) = index;
             father_ = UG_NS<dim>::EFather(father_);
           }
         }
@@ -258,7 +258,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
         for (int i=0; i<eIt->template count<1>(); i++)
         {
           GeometryType gt = eIt->type();
-          int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUGNew(i,gt)));
+          int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
           if (index<0)                       // not visited yet
           {
             // get new index and assign
@@ -276,7 +276,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
             while (father_!=0)
             {
               if (!UG_NS<dim>::hasCopy(father_)) break;                                   // handle only copies
-              UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(father_,UGGridRenumberer<dim>::facesDUNEtoUGNew(i,gt))) = index;
+              UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(father_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt))) = index;
               father_ = UG_NS<dim>::EFather(father_);
             }
           }
