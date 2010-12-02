@@ -21,7 +21,7 @@ Dune::UGGridLevelIntersection<GridImp>::outerNormal
     corners[i] = inside()->geometry().corner(i);
 
   typedef GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > ElementGeometry;
-  ElementGeometry insideGeometry( GenericGeometry::topologyId( inside()->type() ), corners );
+  ElementGeometry insideGeometry( inside()->type(), corners );
 
   // Actually compute the normal.
   // Note: The local coordinates that have to be provided are with respect to the inside() element
@@ -141,7 +141,7 @@ int Dune::UGGridLevelIntersection<GridImp>::indexInOutside () const
   const int number = UGGridRenumberer<dim>::facesUGtoDUNE(i, nSides);
 
   typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
-  const unsigned int tid = GenericGeometry::topologyId( outside()->type() );
+  const unsigned int tid = outside()->type().id();
   return Numbering::template dune2generic< 1 >( tid, number );
 }
 
@@ -168,7 +168,7 @@ Dune::UGGridLeafIntersection<GridImp>::outerNormal
     corners[i] = inside()->geometry().corner(i);
 
   typedef GenericGeometry::BasicGeometry<dim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,dim,dim> > ElementGeometry;
-  ElementGeometry insideGeometry( GenericGeometry::topologyId( inside()->type() ), corners );
+  ElementGeometry insideGeometry( inside()->type(), corners );
 
   // Actually compute the normal.
   // Note: The local coordinates that have to be provided are with respect to the inside() element
@@ -382,7 +382,7 @@ int Dune::UGGridLeafIntersection<GridImp>::indexInOutside () const
   const int number = UGGridRenumberer<dim>::facesUGtoDUNE(leafSubFaces_[subNeighborCount_].second, nSides);
 
   typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
-  const unsigned int tid = GenericGeometry::topologyId( outside()->type() );
+  const unsigned int tid = outside()->type().id();
   return Numbering::template dune2generic< 1 >( tid, number );
 }
 
