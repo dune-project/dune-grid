@@ -315,7 +315,8 @@ namespace Dune {
      *  are numbered 0 ... count<cc>()-1
      */
     template<int cc>
-    typename GridImp::template Codim<cc>::EntityPointer entity (int i) const {
+    typename GridImp::template Codim<cc>::EntityPointer subEntity (int i) const
+    {
       if (cc==0) {
         assert(i==0);
         // The cast is correct when this if clause is executed
@@ -325,15 +326,6 @@ namespace Dune {
         // The cast is correct when this if clause is executed
         return OneDGridLevelIterator<cc,All_Partition,GridImp>( (OneDEntityImp<1-cc>*) this->target_->vertex_[i]);
       }
-    }
-
-    template< int codim >
-    typename GridImp::template Codim< codim >::EntityPointer subEntity ( int i ) const
-    {
-      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( type() );
-      const int j = Numbering::template generic2dune< codim >( tid, i );
-      return entity< codim >( j );
     }
 
     LeafIntersectionIterator ileafbegin () const {
