@@ -142,11 +142,18 @@ namespace Dune {
      <h2> Loading a Grid on a Parallel Machine </h2>
      <p>
      If you're working on a parallel machine, and you want to set up a
-     parallel grid, proceed as described on all processes.  This will
-     create the grid on the master process and set up UG correctly on all
-     other process.  Call <tt>loadBalance()</tt> to actually distribute the grid.
+     parallel grid, proceed as described only on the rank-0 process.
+     On the other processes just create a GridFactory and call createGrid()
+     to obtain the grid object. This will create the grid on the master process
+     and set up UG correctly on all other process.  Call <tt>loadBalance()</tt>
+     to actually distribute the grid.
      </p>
 
+     <p>\warning To use a parametrized boundary on a parallel machine you need
+     to hand over the boundary segments to the grid factory on <b>all</b> processes.
+     This behavior violates the Dune grid interface specification and will be
+     corrected in the future.
+     </p>
    */
   template <int dimworld>
   class GridFactory<UGGrid<dimworld> > : public GridFactoryInterface<UGGrid<dimworld> > {
