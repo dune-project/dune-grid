@@ -282,9 +282,7 @@ namespace Dune {
     template< int codim >
     typename GridImp::template Codim< codim >::EntityPointer subEntity ( int i ) const
     {
-      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
-      const int j = Numbering::template generic2dune< codim >( type().id(), i );
-      return entity< codim >( j );
+      return entity< codim >( i );
     }
 
     /** \todo It would be faster to not use -1 as the end marker but
