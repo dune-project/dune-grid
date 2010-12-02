@@ -56,16 +56,14 @@ namespace Dune {
 
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int verticesDUNEtoUG(int i, const GeometryType& type) {
-      typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
-      const int j = Numbering::generic2dune( type.id(), i, 2 );
 
       if (type.isCube()) {
         // vertices of a quadrilateral
         const int renumbering[4] = {0, 1, 3, 2};
-        return renumbering[j];
+        return renumbering[i];
       }
 
-      return j;
+      return i;
     }
 
     /** \brief Turn a local vertex number from UG numbering to DUNE numbering */
