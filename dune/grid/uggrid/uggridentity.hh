@@ -277,13 +277,7 @@ namespace Dune {
      *  are numbered 0 ... count<cc>()-1
      */
     template<int cc>
-    typename GridImp::template Codim<cc>::EntityPointer entity (int i) const;
-
-    template< int codim >
-    typename GridImp::template Codim< codim >::EntityPointer subEntity ( int i ) const
-    {
-      return entity< codim >( i );
-    }
+    typename GridImp::template Codim<cc>::EntityPointer subEntity (int i) const;
 
     /** \todo It would be faster to not use -1 as the end marker but
         number of sides instead */
