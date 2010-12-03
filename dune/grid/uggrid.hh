@@ -289,16 +289,16 @@ namespace Dune {
 
 #ifdef ModelP
   template <int dim>
-  class CollectiveCommunication<Dune::UGGrid<dim> > : public CollectiveCommunication<MPI_Comm >
+  class CollectiveCommunication<Dune::UGGrid<dim> > :
+    public CollectiveCommunication< Dune::MPIHelper::MPICommunicator >
   {
-    typedef CollectiveCommunication<MPI_Comm > ParentType;
+    typedef CollectiveCommunication< Dune::MPIHelper::MPICommunicator > ParentType;
   public:
     CollectiveCommunication()
       : ParentType(MPIHelper::getCommunicator())
     {}
   };
 #endif
-
 
   template<int dim, int dimworld>
   struct UGGridFamily
