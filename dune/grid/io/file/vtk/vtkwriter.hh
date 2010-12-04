@@ -349,7 +349,7 @@ namespace Dune
 
     /**
      * @brief Add a grid function that lives on the cells of the grid to the visualization.
-     * @param p Dune:shared_ptr to the function to visualize
+     * @param p Dune::shared_ptr to the function to visualize
      */
     void addCellData (const VTKFunctionPtr & p)
     {
@@ -407,7 +407,7 @@ namespace Dune
 
     /**
      * @brief Add a grid function that lives on the vertices of the grid to the visualization.
-     * @param p Dune:shared_ptr to the function to visualize
+     * @param p Dune::shared_ptr to the function to visualize
      */
     void addVertexData (const VTKFunctionPtr & p)
     {
