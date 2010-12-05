@@ -239,7 +239,8 @@ namespace Dune
     virtual bool
     wasInserted ( const typename Grid::LeafIntersection &intersection ) const
     {
-      return ( insertionIndex(intersection) < numFacesInserted_ );
+      return intersection.boundary() &&
+             ( insertionIndex(intersection) < numFacesInserted_ );
     }
 
   private:
