@@ -2452,8 +2452,21 @@ namespace Dune {
     static void comm (const G& g, DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level)
     {
       if (data.contains(dim,codim))
-        g.template communicateCodim<DataHandle,codim>(data,iftype,dir,level);
+      {
+        DUNE_THROW(GridError, "interface communication not implemented");
+      }
       YaspCommunicateMeta<dim,codim-1>::comm(g,data,iftype,dir,level);
+    }
+  };
+
+  template<int dim>
+  struct YaspCommunicateMeta<dim,dim> {
+    template<class G, class DataHandle>
+    static void comm (const G& g, DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level)
+    {
+      if (data.contains(dim,dim))
+        g.template communicateCodim<DataHandle,dim>(data,iftype,dir,level);
+      YaspCommunicateMeta<dim,dim-1>::comm(g,data,iftype,dir,level);
     }
   };
 
@@ -2907,10 +2920,6 @@ namespace Dune {
           sendlist = &g.send_vertex_overlapfront_overlapfront();
           recvlist = &g.recv_vertex_overlapfront_overlapfront();
         }
-      }
-      if (codim>0 && codim<dim)
-      {
-        DUNE_THROW(GridError, "interface communication not implemented");
       }
 
       // change communication direction?
