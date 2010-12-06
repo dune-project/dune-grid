@@ -38,7 +38,7 @@ AC_DEFUN([DUNE_PATH_ALUGRID],[
 
   AC_ARG_WITH([alugrid-libdir],dnl
     AS_HELP_STRING([--with-alugrid-libdir=PATH],dnl
-      [Directory where ALUGrid library is installed. Note that this will override library path detection, so use this parameter only if default library detection fails and you know exactly where your ALUGrid library is located.]))dnl
+      [Directory where ALUGrid library is installed (deprecated). Note that this will override library path detection, so use this parameter only if default library detection fails and you know exactly where your ALUGrid library is located.]))dnl
 
 
 # do not use alugrid debug lib 
@@ -72,13 +72,32 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
   PKG_CONFIG_PATH="$ALUGRIDROOT:$ALUGRIDROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
 
   ## check version number 
-  NEEDEDALUGRID_VERSION=1.22
+  NEEDEDALUGRID_VERSION=1.23
 
   AC_MSG_CHECKING([ALUGrid version >= $NEEDEDALUGRID_VERSION])
   if $PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid ; then 
     ALUGRID_VERSION=`$PKG_CONFIG --modversion alugrid`
     AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSION)])
+    ALUGRID_INCLUDE_PATH=`$PKG_CONFIG --variable=includedir alugrid`
+    ALUGRID_LIB_PATH=`$PKG_CONFIG --variable=libdir alugrid`
+    if test x"$with_alugrid_libdir" != x"" && test x"$with_alugrid_libdir" != x"no" ; then 
+      AC_MSG_WARN([--with-alugrid-libdir option is obsolete!])
+    fi 
   else   
+    # lib dir and include path 
+    ALUGRID_INCLUDE_PATH="$ALUGRIDROOT/include"
+
+    ALUGRID_LIB_PATH="$ALUGRIDROOT/lib"
+    if test x"$with_alugrid_libdir" != x"" && test x"$with_alugrid_libdir" != x"no"
+    then
+      if ! test -d "$with_alugrid_libdir"
+      then
+        AC_MSG_ERROR([library directory $with_alugrid_libdir for ALUGrid does not exist or is inaccessible.])dnl
+      else
+        ALUGRID_LIB_PATH="$with_alugrid_libdir"
+      fi
+    fi
+
     # old check version 
     ALUGRID_VERSIONCHECK=$ALUGRIDROOT/bin/alugridversion
     if test -f $ALUGRID_VERSIONCHECK; then 
@@ -98,18 +117,6 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
 
   # restore PKG_CONFIG_PATH 
   PKG_CONFIG_PATH=$REM_PKG_CONFIG_PATH
-
-  ALUGRID_LIB_PATH="$ALUGRIDROOT/lib"
-  if test x"$with_alugrid_libdir" != x"" && test x"$with_alugrid_libdir" != x"no"
-  then
-    if ! test -d "$with_alugrid_libdir"
-    then
-      AC_MSG_ERROR([library directory $with_alugrid_libdir for ALUGrid does not exist or is inaccessible.])dnl
-    else
-      ALUGRID_LIB_PATH="$with_alugrid_libdir"
-    fi
-  fi
-  ALUGRID_INCLUDE_PATH="$ALUGRIDROOT/include"
 
   AC_LANG_PUSH([C++])
 
