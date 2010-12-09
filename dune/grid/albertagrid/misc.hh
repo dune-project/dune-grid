@@ -9,8 +9,6 @@
 #include <dune/common/typetraits.hh>
 #include <dune/common/forloop.hh>
 
-#include <dune/grid/genericgeometry/codimtable.hh>
-
 #include <dune/grid/albertagrid/albertaheader.hh>
 
 #if HAVE_ALBERTA
@@ -46,8 +44,6 @@ namespace Dune
 
     // Import Types
     // ------------
-
-    using GenericGeometry::CodimTable;
 
     static const int dimWorld = DIM_OF_WORLD;
 
