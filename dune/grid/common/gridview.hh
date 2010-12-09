@@ -172,6 +172,9 @@ namespace Dune
 
     /** @brief Return true if the given entity is contained in this grid view
      * @todo Currently we call the implementation on the IndexSet.  This may lead to suboptimal efficiency.
+     *
+     * \note If the input element e is not an element of the grid, then
+     *       the result of contains() is undefined.
      */
     template<class EntityType>
     bool contains (const EntityType& e) const

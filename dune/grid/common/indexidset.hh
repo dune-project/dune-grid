@@ -191,6 +191,9 @@ namespace Dune
     }
 
     /** @brief Return true if the given entity is contained in \f$E\f$.
+     *
+     * \note If the input element e is not an element of the grid, then
+     *       the result of contains() is undefined.
      */
     template<class EntityType>
     bool contains (const EntityType& e) const
