@@ -52,6 +52,14 @@ struct subIndexCheck
       ep.compactify();
 #endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
+      const typename Grid::LevelGridView &levelGridView = g.levelView(e.level());
+
+      if( !levelGridView.contains( *ep ) )
+      {
+        std::cerr << "Error: Level grid view does not contain all subentities." << std::endl;
+        assert( false );
+      }
+
       const typename Grid::LevelIndexSet &levelIndexSet = g.levelIndexSet( e.level() );
 
       if( !levelIndexSet.contains( *ep ) )
