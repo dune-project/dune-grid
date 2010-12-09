@@ -170,6 +170,15 @@ namespace Dune
       return asImp().size( type );
     }
 
+    /** @brief Return true if the given entity is contained in this grid view
+     * @todo Currently we call the implementation on the IndexSet.  This may lead to suboptimal efficiency.
+     */
+    template<class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      return asImp().indexSet().contains(e);
+    }
+
     /** \brief obtain begin iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
