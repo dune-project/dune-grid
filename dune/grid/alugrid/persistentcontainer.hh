@@ -5,6 +5,7 @@
 
 #ifdef ENABLE_ALUGRID
 #include <dune/grid/utility/persistentcontainer.hh>
+#include <dune/grid/alugrid.hh>
 
 namespace Dune
 {

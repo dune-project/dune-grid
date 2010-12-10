@@ -5,6 +5,7 @@
 
 #include <dune/common/typetraits.hh>
 #include <dune/grid/utility/persistentcontainer.hh>
+#include <dune/grid/geometrygrid.hh>
 
 namespace Dune
 {
