@@ -3,6 +3,7 @@
 #ifndef DUNE_PERSISTENTCONTAINER_HH
 #define DUNE_PERSISTENTCONTAINER_HH
 
+#include <cassert>
 #include <map>
 #include <vector>
 
