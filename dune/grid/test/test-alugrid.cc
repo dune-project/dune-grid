@@ -5,9 +5,17 @@
 // #define NO_2D
 // #define NO_3D
 
+#define DISABLE_DEPRECATED_METHOD_CHECK 1
+
+#define DISABLE_DEPRECATED_METHOD_CHECK 1
+
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include <dune/common/tupleutility.hh>
+#include <dune/common/tuples.hh>
+#include <dune/grid/genericgeometry/codimtable.hh>
 
 #include <dune/common/mpihelper.hh>
 
@@ -115,13 +123,6 @@ void checkIteratorAssignment(GridType & grid)
     {
       assert( it->level() == 0 );
       EntityPointerType p( it );
-
-#ifdef NO_2D
-      typedef typename GridType::Traits::template Codim<dim>::EntitySeed EntitySeed;
-      EntitySeed seed = GridType :: seed( *it );
-      EntityPointerType ep = grid.entity( seed );
-      assert( ep == it );
-#endif
 
       assert( p.level()  == 0 );
       assert( p->level() == 0 );
