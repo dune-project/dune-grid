@@ -786,19 +786,11 @@ namespace Dune
     //! return reference to Dune reference element according to elType
     const ReferenceElementType & referenceElement() const { return referenceElement_; }
 
-    template< class EntityType >
-    static
-    typename BaseType :: template ReturnImplementationType< EntityType > :: ImplementationType :: EntitySeed
-    seed( const EntityType& entity )
+    template < class EntitySeed >
+    typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
+    entityPointer( const EntitySeed& seed ) const
     {
-      return BaseType :: getRealImplementation( entity ).seed();
-    }
-
-    template <class ALUEntitySeed>
-    typename Traits :: template Codim< ALUEntitySeed :: codimension > :: EntityPointer
-    entity( const ALUEntitySeed& seed ) const
-    {
-      enum { codim = ALUEntitySeed :: codimension };
+      enum { codim = EntitySeed :: codimension };
       typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
       typedef ALU3dGridEntityPointer < codim, const ThisType > ALUPointer ;
       return ALUPointer( *this, seed ) ;

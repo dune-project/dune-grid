@@ -66,13 +66,19 @@ namespace Dune
      */
     //@{
     //===========================================================
-  protected:
+    // this is needed by EntityPointer
+    // for an intermediate time until all entity seeds
+    // are implemented
+    //protected:
     // The type of the wrapped implementation, for internal use only
     typedef EntityImp<cd,dim,GridImp> ImplementationType;
 
   public:
     //! \brief The corresponding geometry type
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
+
+    //! \brief The corresponding entity seed (for storage of entities)
+    typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
 
     enum {
       //! \brief Know your own codimension.
@@ -124,7 +130,12 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::GenericReferenceElement.
      */
-    GeometryType type () const { return realEntity.type(); };
+    GeometryType type () const { return realEntity.type(); }
+
+    /** \brief Return the entity seed which contains sufficient information
+     *  to generate the entity again and uses as less memory as possible
+     */
+    EntitySeed seed () const { return realEntity.seed(); }
 
     //===========================================================
     /** @name Interface for the implementor
@@ -196,10 +207,14 @@ namespace Dune
 
     EntityImp<0,dim,GridImp> realEntity;
 
+    // this is needed by EntityPointer
+    // for an intermediate time until all entity seeds
+    // are implemented
+  public:
     // The type of the wrapped implementation, for internal use only
     typedef EntityImp<0,dim,GridImp> ImplementationType;
-  public:
 
+  public:
     //===========================================================
     /** @name Exported types and constants
      */
@@ -208,6 +223,9 @@ namespace Dune
 
     /** \brief The geometry type of this entity */
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
+
+    //! \brief The corresponding entity seed (for storage of entities)
+    typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
 
     /** \brief The geometry type of this entity when the geometry is expressed
        embedded in the father element.
@@ -277,7 +295,12 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::GenericReferenceElement.
      */
-    GeometryType type () const { return realEntity.type(); };
+    GeometryType type () const { return realEntity.type(); }
+
+    /** \brief Return the entity seed which contains sufficient information
+     *  to generate the entity again and uses as less memory as possible
+     */
+    EntitySeed seed () const { return realEntity.seed(); }
 
     //===========================================================
     /** @name Extended interface of entities of codimension 0
@@ -551,10 +574,24 @@ namespace Dune
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
 
+    //! \brief The corresponding entity seed (for storage of entities)
+    typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
+
+    //! \brief The corresponding entity seed (for storage of entities)
+    typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
+
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::GenericReferenceElement.
      */
     GeometryType type () const { return asImp().geometry().type(); };
+
+    /** \deprecated Implement this method in each grid,
+        default implementation of method seed (only when seed == entity pointer) */
+    EntitySeed seed () const DUNE_DEPRECATED
+    {
+      return EntitySeedHelper :: SeedReturner<
+          EntitySeed,  EntityPointer >::generateSeed ( asImp() );
+    }
 
   private:
     //!  Barton-Nackman trick
@@ -598,6 +635,12 @@ namespace Dune
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
 
+    //! \brief The corresponding entity seed (for storage of entities)
+    typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
+
+    //! \brief The corresponding entity seed (for storage of entities)
+    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+
     /** @brief Returns true if element is of regular type in red/green type refinement.
        In bisection or hanging node refinement this is always true.
      */
@@ -607,6 +650,14 @@ namespace Dune
         be used to access the Dune::GenericReferenceElement.
      */
     GeometryType type () const { return asImp().geometry().type(); };
+
+    /** \deprecated Implement this method in each grid,
+        default implementation of method seed (only when seed == entity pointer) */
+    EntitySeed seed () const DUNE_DEPRECATED
+    {
+      return EntitySeedHelper :: SeedReturner<
+          EntitySeed,  EntityPointer >::generateSeed ( asImp() );
+    }
 
     /* maybe in later versions
      * \brief Default implementation for access to boundaryId of sub entities

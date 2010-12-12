@@ -445,6 +445,9 @@ namespace Dune {
       //! A type that is a model of Dune::EntityPointer<cd,dim,...>.
       typedef typename GridFamily::Traits::template Codim<cd>::EntityPointer EntityPointer;
 
+      //! A type that is a model (not yet) of Dune::EntitySeed<cd,dim,...>.
+      typedef typename GridFamily::Traits::template Codim<cd>::EntitySeed EntitySeed;
+
       //! A struct collecting all types depending on the partition iterator type.
       template <PartitionIteratorType pitype>
       struct Partition
@@ -904,6 +907,14 @@ namespace Dune {
       return asImp().loadBalance(data);
     }
 
+    /** \brief obtain EntityPointer from EntitySeed. */
+    template < class EntitySeed >
+    typename Codim< EntitySeed :: codimension > :: EntityPointer
+    entityPointer( const EntitySeed& seed ) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION( asImp().entityPointer( seed ) );
+      return asImp().entityPointer( seed );
+    }
   protected:
     //!  Barton-Nackman trick
     GridImp& asImp () {return static_cast<GridImp &> (*this);}
@@ -921,6 +932,55 @@ namespace Dune {
   //
   //************************************************************************
   //
+
+  //- helper class for entity seed implementation to provide a default
+  //  implementation based on entity pointer until entity is implemented
+  //  in every grid
+  struct EntitySeedHelper {
+
+    template <class S, class EP>
+    struct SeedReturner
+    {
+      typedef S EntitySeed ;
+      template <class E>
+      static const EntitySeed& generateSeed ( const E& entity )
+      {
+        DUNE_THROW(NotImplemented,"Method EntityImp::seed() not implemented");
+        return *((EntitySeed *)0);
+      }
+    };
+
+    template <class EP>
+    struct SeedReturner< EP, EP >
+    {
+      template <class E>
+      static EP generateSeed ( const E& entity )
+      {
+        return EP( entity );
+      }
+    };
+
+    template <class Seed, class EP>
+    struct EntityPointerReturner
+    {
+      static const EP& generatePointer ( const Seed& seed )
+      {
+        DUNE_THROW(NotImplemented,"Method Grid::entityPointer( seed ) not implemented");
+        return *((EP *)0);
+      }
+    };
+
+    template <class EP>
+    struct EntityPointerReturner< EP, EP >
+    {
+      static const EP& generatePointer ( const EP& seed )
+      {
+        return seed ;
+      }
+    };
+  };
+
+
 
   /**
      \ingroup GridDevel
@@ -1103,6 +1163,22 @@ namespace Dune {
     {
       return false;
     }
+
+    /** \deprecated default implementation of generation of EntityPointer from EntitySeed.
+        This has to be implemented by each grid */
+    template < class EntitySeed >
+    DUNE_DEPRECATED
+    typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
+    entityPointer( const EntitySeed& seed ) const
+    {
+      typedef typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer EntityPointer ;
+
+      // the default implementation is only available
+      // if the type of entity seed is EntityPointer
+      return EntitySeedHelper ::
+             EntityPointerReturner< EntitySeed, EntityPointer > :: generatePointer( seed );
+    }
+
   protected:
     /**
      * @brief Helper class to choose correct implementation return type for getRealImplementation
@@ -1166,7 +1242,9 @@ namespace Dune {
       class LevelIndexSetImp, class LeafIndexSetImp,
       class GlobalIdSetImp, class GIDType, class LocalIdSetImp, class LIDType, class CCType,
       template<class,PartitionIteratorType> class LevelGridViewTraits = DefaultLevelGridViewTraits,
-      template<class,PartitionIteratorType> class LeafGridViewTraits = DefaultLeafGridViewTraits
+      template<class,PartitionIteratorType> class LeafGridViewTraits = DefaultLeafGridViewTraits,
+      template<int,class> class EntitySeedImp = EntityPointerImp,
+      template<int,int,class> class LocalGeometryImp = GeometryImp
       >
   struct GridTraits
   {
@@ -1192,11 +1270,27 @@ namespace Dune {
     template <int cd>
     struct Codim
     {
+    protected:
+      // class to extract whether we are using the default seed type or not
+      template <class Seed, class EPImpl >
+      struct SeedDefault
+      {
+        typedef Seed EntitySeed ;
+      };
+
+      // the default seed type is entity pointer until its implemented
+      template <class EPImpl>
+      struct SeedDefault< EPImpl, EPImpl >
+      {
+        typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntitySeed ;
+      };
+
+    public:
       //! IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
       /** \brief The type of the geometry associated with the entity.*/
       typedef Dune::Geometry<dim-cd, dimw, const GridImp, GeometryImp> Geometry;
       /** \brief The type of the local geometry associated with the entity.*/
-      typedef Dune::Geometry<dim-cd, dim, const GridImp, GeometryImp> LocalGeometry;
+      typedef Dune::Geometry<dim-cd, dim, const GridImp, LocalGeometryImp> LocalGeometry;
       /** \brief The type of the entity. */
       // we could - if needed - introduce another struct for dimglobal of Geometry
       typedef Dune::Entity<cd, dim, const GridImp, EntityImp> Entity;
@@ -1209,6 +1303,9 @@ namespace Dune {
 
       /** \brief The type of the entity pointer for entities of this codim.*/
       typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
+
+      /** \brief The type of the entity seed of this codim.*/
+      typedef typename SeedDefault< EntitySeedImp<cd, const GridImp>, EntityPointerImp<cd,const GridImp> > :: EntitySeed EntitySeed;
 
       /**
        * \brief Traits associated with a specific grid partition type.

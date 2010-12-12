@@ -155,6 +155,14 @@ namespace Dune
     EntityPointer(const Entity& entity) :
       realIterator( entity.getRealImp() ) {}
 
+    /** \brief Constructor from type of entity implementation that
+        this entity pointer points to. This constructor is only
+        used in the EntityDefaultImplementation to implement the method
+        seed() by default when the type of EntitySeed and EntityPointer coniside.
+     */
+    EntityPointer(const typename Entity :: ImplementationType& entityImp) :
+      realIterator( entityImp ) {}
+
     template< class ItImp >
     EntityPointer &operator= ( const EntityPointer< GridImp, ItImp > &ep )
     {

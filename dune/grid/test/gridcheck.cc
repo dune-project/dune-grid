@@ -39,6 +39,18 @@ struct subIndexCheck
 {
   subIndexCheck ( const Grid &g, const Entity &e )
   {
+    {
+      typedef typename Grid::template Codim< Entity::codimension >::EntityPointer EntityPointer;
+      typedef typename Grid::template Codim< Entity::codimension >::EntitySeed EntitySeed;
+      EntitySeed seed = e.seed();
+
+      EntityPointer ep1 ( e );
+      assert( ep1->seed() == seed );
+      EntityPointer ep2 = g.entityPointer( seed );
+      assert( ep1 == ep2 );
+      assert( ep2->seed() == ep1->seed() );
+    }
+
     typedef typename Grid::template Codim< cd >::EntityPointer EntityPointer;
     const int imax = e.template count<cd>();
     for( int i = 0; i < imax; ++i )
@@ -46,6 +58,13 @@ struct subIndexCheck
       // check construction of entity pointers
       EntityPointer ep( *(e.template subEntity< cd >( i ) ) );
       assert( ep == e.template subEntity< cd >( i ) );
+
+      typedef typename Grid::template Codim< cd >::EntitySeed EntitySeed;
+      EntitySeed seed = ep->seed();
+
+      EntityPointer ep2 = g.entityPointer( seed );
+      assert( ep == ep2 );
+      assert( ep2->seed() == seed );
 
 #if !DISABLE_DEPRECATED_METHOD_CHECK
       // test compactify

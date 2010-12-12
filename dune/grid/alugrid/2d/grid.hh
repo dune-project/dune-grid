@@ -130,6 +130,7 @@ namespace Dune {
 
         typedef ALU2dGridEntityPointer< cd, const GridImp > EntityPointerImpl;
         typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
+        typedef EntityPointer EntitySeed;
 
         template <PartitionIteratorType pitype>
         struct Partition
