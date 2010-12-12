@@ -97,10 +97,7 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
     //! typedef of my type
-    typedef ALU3dGridEntitySeed<cd,GridImp> ALU3dGridEntitySeedType;
-
-    //! typedef of my type
-    typedef ALU3dGridEntitySeedType EntitySeed;
+    typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
 
     //! level of this element
     int level () const;
@@ -125,7 +122,7 @@ namespace Dune
     void setElement(const HItemType & item, const int level, int twist=0, int face = -1);
 
     /* set entity from seed */
-    void setElement(const ALU3dGridEntitySeedType& seed);
+    void setElement(const EntitySeed& seed);
 
     //! setGhost is not valid for this codim
     void setGhost(const HBndSegType  &ghost);
@@ -149,9 +146,9 @@ namespace Dune
     const GridImp& grid() const { return grid_; }
 
     //! return seed of entity
-    ALU3dGridEntitySeedType seed() const
+    EntitySeed seed() const
     {
-      return ALU3dGridEntitySeedType( getItem(), level(), twist_, face_ );
+      return EntitySeed( getItem(), level(), twist_, face_ );
     }
 
   private:
@@ -265,10 +262,7 @@ namespace Dune
     };
 
     //! typedef of my type
-    typedef ALU3dGridEntitySeed<0,GridImp> ALU3dGridEntitySeedType;
-
-    //! typedef of my type
-    typedef ALU3dGridEntitySeedType EntitySeed;
+    typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
 
     //! Constructor creating empty Entity
     ALU3dGridEntity(const GridImp &grid, int level);
@@ -387,7 +381,7 @@ namespace Dune
     void setElement(HElementType &element);
 
     /* set entity from seed */
-    void setElement(const ALU3dGridEntitySeedType& seed);
+    void setElement(const EntitySeed& seed);
 
     //! set original element pointer to fake entity
     void setGhost(HBndSegType & ghost);
@@ -430,12 +424,12 @@ namespace Dune
     bool isGhost () const { return ImplTraits::isGhost( ghost_ ); }
 
     //! return key for this entity
-    ALU3dGridEntitySeedType seed() const
+    EntitySeed seed() const
     {
       if( isGhost() )
-        return ALU3dGridEntitySeedType( getGhost () );
+        return EntitySeed( getGhost () );
       else
-        return ALU3dGridEntitySeedType( getItem() );
+        return EntitySeed( getItem() );
     }
 
   private:
@@ -647,7 +641,7 @@ namespace Dune
       : ALU3dGridEntityPointerBase<cd,GridImp> (grid, seed)
     {
       // for ghost entities we have to copy right away
-      if( seed.ghost() )
+      if( seed.isGhost() )
       {
         assert( entity_ == 0 );
         entity_ = grid_.template getNewEntity<0> ();
