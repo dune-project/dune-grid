@@ -165,6 +165,9 @@ namespace Dune
           typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
           typedef typename EntityPointerTraits::Entity Entity;
 
+          // to be revised
+          typedef typename HostGrid::template Codim< codim >::EntitySeed EntitySeed;
+
           template< PartitionIteratorType pitype >
           struct Partition
           {
@@ -803,6 +806,15 @@ namespace Dune
       return gridChanged;
     }
 #endif
+
+    /** \brief obtain EntityPointer from EntitySeed. */
+    template < class EntitySeed >
+    typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
+    entityPointer( const EntitySeed& seed ) const
+    {
+      typedef typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointerImpl EntityPointerImpl;
+      return EntityPointerImpl( *this, hostGrid().entityPointer( seed ) );
+    }
 
     /** \} */
 
