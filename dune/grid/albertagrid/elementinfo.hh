@@ -338,7 +338,7 @@ namespace Dune
       for( int k = 0; k < maxNeighbors; ++k )
         elInfo().opp_vertex[ k ] = -1;
 
-      fill_macro_info( mesh, mesh->macro_els + seed.macroIndex(), &elInfo() );
+      fill_macro_info( mesh, ((Mesh *)mesh)->macro_els + seed.macroIndex(), &elInfo() );
 
       // traverse the seed's path
       unsigned long path = seed.path();
@@ -346,9 +346,6 @@ namespace Dune
       {
         InstancePtr child = stack().allocate();
         child->parent() = instance_;
-
-        instance_ = child;
-        addReference();
 
         // Alberta fills opp_vertex only if there is a neighbor
         for( int k = 0; k < maxNeighbors; ++k )
@@ -359,6 +356,10 @@ namespace Dune
 #else
         ALBERTA fill_elinfo( path & 1, &elInfo(), &(child->elInfo) );
 #endif
+
+        instance_ = child;
+        addReference();
+
         path = path >> 1;
       }
 
@@ -497,7 +498,7 @@ namespace Dune
         ++level;
       }
 
-      if( level != elInfo.level )
+      if( level != elInfo().level )
         DUNE_THROW( NotImplemented, "Seed for fake elements not implemented." );
 
       return Seed( macroElement().index, level, path );

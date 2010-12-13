@@ -46,6 +46,7 @@
 #include <dune/grid/albertagrid/intersection.hh>
 #include <dune/grid/albertagrid/intersectioniterator.hh>
 #include <dune/grid/albertagrid/datahandle.hh>
+#include <dune/grid/albertagrid/entityseed.hh>
 
 #include "indexsets.hh"
 #include "geometry.hh"
@@ -440,6 +441,15 @@ namespace Dune
       std::ostringstream s;
       s << "AlbertaGrid< " << dim << ", " << dimworld << " >";
       return s.str();
+    }
+
+    /** \brief obtain EntityPointer from EntitySeed. */
+    template< class EntitySeed >
+    typename Traits::template Codim< EntitySeed::codimension >::EntityPointer
+    entityPointer ( const EntitySeed &seed ) const
+    {
+      typedef typename Traits::template Codim< EntitySeed::codimension >::EntityPointerImpl EntityPointerImpl;
+      return EntityPointerImpl( *this, seed.elementInfo( meshPointer() ), seed.subEntity() );
     }
 
     //**********************************************************

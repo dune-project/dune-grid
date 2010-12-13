@@ -39,6 +39,9 @@ namespace Dune
   template< int codim, class GridImp >
   class AlbertaGridEntityPointer;
 
+  template< int codim, class Grid >
+  class AlbertaGridEntitySeed;
+
   template< int mydim, int cdim, class GridImp >
   class AlbertaGridGeometry;
 
@@ -120,7 +123,7 @@ namespace Dune
 
         typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
         typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
-        typedef EntityPointer EntitySeed ;
+        typedef AlbertaGridEntitySeed< cd, const GridImp > EntitySeed;
 
         template <PartitionIteratorType pitype>
         struct Partition

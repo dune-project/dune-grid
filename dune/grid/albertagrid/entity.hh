@@ -6,6 +6,7 @@
 #include <dune/grid/common/entity.hh>
 
 #include <dune/grid/albertagrid/elementinfo.hh>
+#include <dune/grid/albertagrid/entityseed.hh>
 #include <dune/grid/albertagrid/geometry.hh>
 
 #if HAVE_ALBERTA
@@ -67,6 +68,7 @@ namespace Dune
     };
 
     typedef typename GridImp::template Codim< codim >::Entity Entity;
+    typedef typename GridImp::template Codim< codim >::EntitySeed EntitySeed;
     typedef typename GridImp::template Codim< codim >::Geometry Geometry;
     typedef typename GridImp::template Codim< codim >::LevelIterator LevelIterator;
 
@@ -94,6 +96,12 @@ namespace Dune
 
     //! type of geometry of this entity
     GeometryType type () const;
+
+    //! obtain entity seed
+    EntitySeed seed () const
+    {
+      return EntitySeed( elementInfo(), subEntity() );
+    }
 
     //***********************************************
     //  End of Interface methods
@@ -173,12 +181,6 @@ namespace Dune
      non-matching meshes. The number of neigbors may be different from the number of faces/edges
      of an element!
    */
-  //***********************
-  //
-  //  --AlbertaGridEntity
-  //  --0Entity
-  //
-  //***********************
   template< int dim, class GridImp >
   class AlbertaGridEntity< 0, dim, GridImp >
     : public EntityDefaultImplementation< 0, dim, GridImp, AlbertaGridEntity >
@@ -206,6 +208,7 @@ namespace Dune
     };
 
     typedef typename GridImp::template Codim< 0 >::Entity Entity;
+    typedef typename GridImp::template Codim< 0 >::EntitySeed EntitySeed;
     typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
     typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
     typedef AlbertaGridGlobalGeometry< dimension, dimworld, GridImp > GeometryImp;
@@ -236,6 +239,12 @@ namespace Dune
 
     //! type of geometry of this entity
     GeometryType type () const;
+
+    //! obtain entity seed
+    EntitySeed seed () const
+    {
+      return EntitySeed( elementInfo() );
+    }
 
     /** obtain the number of subentities of a codimension
      *
