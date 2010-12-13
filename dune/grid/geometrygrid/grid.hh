@@ -12,6 +12,7 @@
 
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/entity.hh>
+#include <dune/grid/geometrygrid/entityseed.hh>
 #include <dune/grid/geometrygrid/entitypointer.hh>
 #include <dune/grid/geometrygrid/intersection.hh>
 #include <dune/grid/geometrygrid/intersectioniterator.hh>
@@ -165,8 +166,7 @@ namespace Dune
           typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
           typedef typename EntityPointerTraits::Entity Entity;
 
-          // to be revised
-          typedef typename HostGrid::template Codim< codim >::EntitySeed EntitySeed;
+          typedef GeoGrid::EntitySeed< codim, const Grid > EntitySeed;
 
           template< PartitionIteratorType pitype >
           struct Partition
@@ -808,12 +808,12 @@ namespace Dune
 #endif
 
     /** \brief obtain EntityPointer from EntitySeed. */
-    template < class EntitySeed >
-    typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
-    entityPointer( const EntitySeed& seed ) const
+    template< class EntitySeed >
+    typename Traits::template Codim< EntitySeed::codimension >::EntityPointer
+    entityPointer ( const EntitySeed &seed ) const
     {
-      typedef typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointerImpl EntityPointerImpl;
-      return EntityPointerImpl( *this, hostGrid().entityPointer( seed ) );
+      typedef typename Traits::template Codim< EntitySeed::codimension >::EntityPointerImpl EntityPointerImpl;
+      return EntityPointerImpl( *this, seed );
     }
 
     /** \} */

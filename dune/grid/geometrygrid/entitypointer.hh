@@ -6,6 +6,7 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid/geometrygrid/capabilities.hh>
+#include <dune/grid/geometrygrid/entityseed.hh>
 
 namespace Dune
 {
@@ -71,6 +72,7 @@ namespace Dune
       static const int codimension = codim;
 
       typedef Dune::Entity< codimension, dimension, const Grid, GeoGrid::Entity > Entity;
+      typedef GeoGrid::EntitySeed< codimension, const Grid > EntitySeed;
 
       typedef typename HostGrid::template Codim< codim >::Entity HostEntity;
       typedef typename HostGrid::template Codim< codim >::EntityPointer HostEntityPointer;
@@ -110,6 +112,8 @@ namespace Dune
       typedef typename Traits::HostEntityIterator HostEntityIterator;
       typedef typename Traits::HostElement HostElement;
 
+      typedef typename Traits::EntitySeed EntitySeed;
+
     private:
       typedef MakeableInterfaceObject< Entity > MakeableEntity;
       typedef typename MakeableEntity::ImplementationType EntityImpl;
@@ -125,6 +129,12 @@ namespace Dune
         : grid_( &grid ),
           entity_( 0 ),
           hostEntityIterator_( hostElement.template subEntity< codimension >( subEntity ) )
+      {}
+
+      EntityPointer ( const Grid &grid, const EntitySeed &seed )
+        : grid_( &grid ),
+          entity_( 0 ),
+          hostEntityIterator_( grid.hostGrid().entityPointer( seed.hostEntitySeed() ) )
       {}
 
       EntityPointer ( const EntityImpl &entity )
@@ -247,6 +257,8 @@ namespace Dune
       typedef typename Traits::HostElementIterator HostElementIterator;
       typedef typename Traits::HostElement HostElement;
 
+      typedef typename Traits::EntitySeed EntitySeed;
+
     private:
       typedef MakeableInterfaceObject< Entity > MakeableEntity;
       typedef typename MakeableEntity::ImplementationType EntityImpl;
@@ -265,6 +277,13 @@ namespace Dune
           entity_( 0 ),
           subEntity_( subEntity ),
           hostElementIterator_( hostElement )
+      {}
+
+      EntityPointer ( const Grid &grid, const EntitySeed &seed )
+        : grid_( &grid ),
+          entity_( 0 ),
+          subEntity_( seed.subEntity() ),
+          hostElementIterator_( grid.hostGrid().entityPointer( seed.hostElementSeed() ) )
       {}
 
       EntityPointer ( const EntityImpl &entity )
