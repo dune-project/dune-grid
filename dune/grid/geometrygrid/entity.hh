@@ -485,7 +485,7 @@ namespace Dune
         return geo_;
       }
       /** \brief return EntitySeed of host grid entity */
-      EntitySeed seed () const { return EntitySeed( grid(), hostElement().seed(), subEntity_ ); }
+      EntitySeed seed () const { return EntitySeed( hostElement().seed(), subEntity_ ); }
       /** \} */
 
       /** \name Methods Supporting the Grid Implementation

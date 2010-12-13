@@ -47,16 +47,6 @@ namespace Dune
         : hostEntitySeed_( hostEntitySeed )
       {}
 
-      bool operator== ( const EntitySeed &other )
-      {
-        return hostEntitySeed() == other.hostEntitySeed();
-      }
-
-      bool operator!= ( const EntitySeed &other )
-      {
-        return hostEntitySeed() != other.hostEntitySeed();
-      }
-
       const HostEntitySeed &hostEntitySeed () const { return hostEntitySeed_; }
 
     private:
@@ -87,34 +77,15 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename HostGrid::template Codim< 0 >::EntitySeed HostElementSeed;
 
-      explicit EntitySeed ( const Grid &grid, const HostElementSeed &hostElementSeed, unsigned int subEntity )
-        : grid_( &grid ),
-          hostElementSeed_( hostElementSeed ),
+      explicit EntitySeed ( const HostElementSeed &hostElementSeed, unsigned int subEntity )
+        : hostElementSeed_( hostElementSeed ),
           subEntity_( subEntity )
       {}
-
-      bool operator== ( const EntitySeed &other )
-      {
-        return id() == other.id();
-      }
-
-      bool operator!= ( const EntitySeed &other )
-      {
-        return id() != other.id();
-      }
 
       const HostElementSeed &hostElementSeed () const { return hostElementSeed_; }
       unsigned int subEntity () const { return subEntity_; }
 
     private:
-      // very slow; only required for comparison
-      typename Traits::LocalIdSet::IdType id () const
-      {
-        const HostGrid &hostGrid = grid_->hostGrid();
-        return hostGrid.localIdSet().subId( *hostGrid.entityPointer( hostElementSeed() ), subEntity(), codim );
-      }
-
-      const Grid *grid_; // only required for comparison
       HostElementSeed hostElementSeed_;
       unsigned int subEntity_;
     };
