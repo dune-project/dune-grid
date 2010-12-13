@@ -10,6 +10,7 @@
 #include <cstddef>
 
 #include <dune/common/array.hh>
+#include <dune/common/fvector.hh>
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/gridfactory.hh>
