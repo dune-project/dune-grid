@@ -118,11 +118,13 @@ namespace Dune
     //! Constructor for EntitySeed that points to an ghost
     ALU3dGridEntitySeedBase(const HBndSegType& ghostFace );
 
+    /////////////////////////////////////////////////////////////
+    //
+    //  interface methods
+    //
+    /////////////////////////////////////////////////////////////
     //! copy constructor
     ALU3dGridEntitySeedBase(const ALU3dGridEntitySeedType & org);
-
-    //! equality
-    bool equals (const ALU3dGridEntitySeedType& i) const;
 
     //! equality operator
     bool operator == (const ALU3dGridEntitySeedType& i) const
@@ -134,6 +136,23 @@ namespace Dune
     bool operator != (const ALU3dGridEntitySeedType& i) const
     {
       return ! equals( i );
+    }
+
+    //! assignment operator
+    ThisType & operator = (const ThisType & org);
+
+    //////////////////////////////////////////////////////
+    //
+    //  non-interface methods
+    //
+    //////////////////////////////////////////////////////
+    //! equality
+    bool equals (const ALU3dGridEntitySeedType& i) const;
+
+    //! invalidate seed
+    void clear()
+    {
+      item_ = 0;
     }
 
     //! get item from key
@@ -154,11 +173,6 @@ namespace Dune
       return Bnd<codim,KeyType>::ghost( item_ );
     }
 
-    void clear()
-    {
-      item_ = 0;
-    }
-
     KeyType* toKey(const HElementType* item)
     {
       return static_cast< KeyType* > (const_cast< ImplementationType* > (static_cast<const ImplementationType* > (item)));
@@ -173,6 +187,7 @@ namespace Dune
     {
       return Bnd<codim,KeyType>::toKey( ghostFace );
     }
+
     void set(const HBndSegType& ghostFace)
     {
       item_ = toKey( &ghostFace );
@@ -181,9 +196,6 @@ namespace Dune
     int level () const { return defaultValue; }
     int twist () const { return defaultTwist; }
     int face  () const { return defaultValue; }
-
-    //! assignment operator
-    ThisType & operator = (const ThisType & org);
 
   protected:
     // pointer to item
