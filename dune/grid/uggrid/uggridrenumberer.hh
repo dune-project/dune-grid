@@ -6,6 +6,8 @@
 /** \file
     \brief Contains a helper class that encapsulates the vertex numbering conversions
     between UG and DUNE
+
+    The UG numbering conventions can be found in the file 'gm/element.c' of UG.
  */
 
 #include <dune/common/geometrytype.hh>
@@ -24,18 +26,12 @@ namespace Dune {
   public:
 
     /** \brief Turn a local vertex number from DUNE numbering to UG numbering
-
-       This is a dummy method which simply returns i.  The real work is done
-       in the class specializations.
      */
     static int verticesDUNEtoUG(int i, const GeometryType& type) {
       return i;
     }
 
     /** \brief Turn a local vertex number from UG numbering to DUNE numbering
-
-       This is a dummy method which simply returns i.  The real work is done
-       in the class specializations.
      */
     static int verticesUGtoDUNE(int i, const GeometryType& type) {
       return i;
@@ -80,25 +76,23 @@ namespace Dune {
 
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int edgesDUNEtoUG(int i, const GeometryType& type) {
-      typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
-      const int j = Numbering::generic2dune( type.id(), i, 1 );
 
       if (type.isCube()) {
 
         // faces of a quadrilateral
         const int renumbering[4] = {3, 1, 0, 2};
-        return renumbering[j];
+        return renumbering[i];
 
       }
 
       if (type.isSimplex()) {
 
         // faces of a triangle
-        const int renumbering[3] = {1, 2, 0};
-        return renumbering[j];
+        const int renumbering[3] = {0, 2, 1};
+        return renumbering[i];
       }
 
-      return j;
+      return i;
     }
 
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
@@ -110,23 +104,20 @@ namespace Dune {
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
     static int facesUGtoDUNE(int i, const GeometryType& type) {
 
-      int j = i;
-
       if (type.isCube()) {
 
         // faces of a quadrilateral
         const int renumbering[4] = {2, 1, 3, 0};
-        j = renumbering[i];
+        return renumbering[i];
 
       } else if (type.isSimplex()) {
 
         // faces of a triangle
-        const int renumbering[3] = {2, 0, 1};
-        j = renumbering[i];
+        const int renumbering[3] = {0, 2, 1};
+        return renumbering[i];
       }
 
-      typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
-      return Numbering::dune2generic( type.id(), j, 1 );
+      return i;
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
@@ -141,7 +132,7 @@ namespace Dune {
       } else if (nSides == 3) {
 
         // faces of a triangle
-        const int renumbering[3] = {2, 0, 1};
+        const int renumbering[3] = {0, 2, 1};
         return renumbering[i];
       }
 
@@ -163,15 +154,18 @@ namespace Dune {
 
     /** \brief Turn a local edge number from new DUNE numbering to UG numbering */
     static int verticesDUNEtoUG(int i, const GeometryType& type) {
-      typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
-      const int j = Numbering::generic2dune( type.id(), i, 3 );
 
       if (type.isCube()) {
         const int renumbering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
-        return renumbering[j];
+        return renumbering[i];
       }
 
-      return j;
+      if (type.isPyramid()) {
+        const int renumbering[5] = {0, 1, 3, 2, 4};
+        return renumbering[i];
+      }
+
+      return i;
     }
 
     /** \brief Turn a local vertex number from UG numbering to DUNE numbering */
@@ -179,6 +173,11 @@ namespace Dune {
 
       if (type.isCube()) {
         const int renumbering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
+        return renumbering[i];
+      }
+
+      if (type.isPyramid()) {
+        const int renumbering[5] = {0, 1, 3, 2, 4};
         return renumbering[i];
       }
 
