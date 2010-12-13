@@ -45,10 +45,9 @@ struct subIndexCheck
       EntitySeed seed = e.seed();
 
       EntityPointer ep1 ( e );
-      assert( ep1->seed() == seed );
+      // regain entity pointer and check equality
       EntityPointer ep2 = g.entityPointer( seed );
       assert( ep1 == ep2 );
-      assert( ep2->seed() == ep1->seed() );
     }
 
     typedef typename Grid::template Codim< cd >::EntityPointer EntityPointer;
@@ -62,9 +61,9 @@ struct subIndexCheck
       typedef typename Grid::template Codim< cd >::EntitySeed EntitySeed;
       EntitySeed seed = ep->seed();
 
+      // regain entity pointer and check equality
       EntityPointer ep2 = g.entityPointer( seed );
       assert( ep == ep2 );
-      assert( ep2->seed() == seed );
 
 #if !DISABLE_DEPRECATED_METHOD_CHECK
       // test compactify
