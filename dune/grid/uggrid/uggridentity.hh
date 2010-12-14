@@ -100,6 +100,9 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
+    /** \brief The type of UGGrid Entity seeds */
+    typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
+
     //! level of this element
     int level () const {
       return UG_NS<dim>::myLevel(target_);
@@ -171,6 +174,9 @@ namespace Dune {
     //! geometry of this entity
     const Geometry& geometry () const {return geo_;}
 
+    /** \brief Get the seed corresponding to this entity */
+    EntitySeed seed () const { return EntitySeed( *this ); }
+
   private:
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
       target_ = target;
@@ -231,6 +237,9 @@ namespace Dune {
     //! Iterator over descendants of the entity
     typedef UGGridHierarchicIterator<GridImp> HierarchicIterator;
 
+    /** \brief The type of UGGrid Entity seeds */
+    typedef typename GridImp::Traits::template Codim<0>::EntitySeed EntitySeed;
+
     UGGridEntity()
       : geo_(UGGridGeometry<dim,dim,GridImp>()),
         geometryInFather_(UGGridGeometry<dim,dim,GridImp>())
@@ -267,6 +276,9 @@ namespace Dune {
     const Geometry& geometry () const {
       return geo_;
     }
+
+    /** \brief Get the seed corresponding to this entity */
+    EntitySeed seed () const { return EntitySeed( *this ); }
 
     /** \brief Return the number of subEntities of codimension cc.
      */
