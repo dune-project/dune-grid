@@ -74,8 +74,8 @@ namespace Dune {
       return i;
     }
 
-    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
-    static int edgesDUNEtoUG(int i, const GeometryType& type) {
+    /** \brief Turn a local face number from DUNE numbering to UG numbering */
+    static int facesDUNEtoUG(int i, const GeometryType& type) {
 
       if (type.isCube()) {
 
@@ -93,12 +93,6 @@ namespace Dune {
       }
 
       return i;
-    }
-
-    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
-    static int facesDUNEtoUG(int i, const GeometryType& type) {
-      // faces are edges in 2d
-      return edgesDUNEtoUG(i,type);
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
@@ -182,22 +176,6 @@ namespace Dune {
       }
 
       return i;
-    }
-
-    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
-    static int edgesDUNEtoUG(int i, const GeometryType& type) {
-      typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
-      const int j = Numbering::generic2dune( type.id(), i, 2 );
-
-      if (type.isCube()) {
-        DUNE_THROW(NotImplemented, "edgesDUNEtoUG for hexahedra");
-        // edges of a hexahedron
-        const int renumbering[6] = {4, 2, 1, 3, 0, 5};
-        return renumbering[j];
-
-      }
-
-      return j;
     }
 
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
