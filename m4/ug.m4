@@ -65,7 +65,7 @@ AC_DEFUN([DUNE_PATH_UG],[
       # If an explicit path has been provided it needs to be appended
       # temporarily to PKG_CONFIG_PATH
       REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
-      PKG_CONFIG_PATH="$UGROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
+      PKG_CONFIG_PATH="$UGROOT:$UGROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
 
       UG_LDFLAGS=""
 
