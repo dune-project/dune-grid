@@ -639,42 +639,6 @@ void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim
 }
 
 template <int dim>
-Dune::FieldVector<typename UGGrid<dim>::ctype,dim> Dune::UGGrid<dim>::getBoundaryPosition(const typename Traits::LevelIntersectionIterator& iIt,
-                                                                                          const FieldVector<ctype,dim-1>& localPos) const
-{
-  if (!iIt->boundary())
-    DUNE_THROW(GridError, "call getBoundaryPosition() only for boundary intersections!");
-
-  FieldVector<ctype,dim> result;
-
-  if (dim==2) {
-
-    int ugEdgeNumber = UGGridRenumberer<dim>::edgesDUNEtoUG(iIt->indexInInside(), iIt->inside()->type());
-
-    // Get UG element from which this intersection iterator is taken
-    const typename UG_NS<dim>::Element* target = getRealImplementation(*iIt->inside()).target_;
-
-    const typename UG_NS<dim>::Vertex* v0 = UG_NS<dim>::Corner(target,UG_NS<dim>::Corner_Of_Edge(target, ugEdgeNumber,0))->myvertex;
-    const typename UG_NS<dim>::Vertex* v1 = UG_NS<dim>::Corner(target,UG_NS<dim>::Corner_Of_Edge(target, ugEdgeNumber,1))->myvertex;
-
-    typename UG_NS<dim>::BNDP* bndp = UG_NS<dim>::BNDP_CreateBndP(multigrid_->theHeap,v0->bv.bndp, v1->bv.bndp,localPos[0]);
-    if (bndp == NULL)
-      DUNE_THROW(GridError, "UG::D" << dim << "::BNDP_CreateBndP() returned NULL!");
-
-    if (UG_NS<dim>::BNDP_Global(bndp,&result[0]))
-      DUNE_THROW(GridError, "UG::D" << dim << "::BNDP_Global() returned nonzero error code!");
-
-    // Get rid of the boundary point again
-    UG_NS<dim>::BNDP_Dispose(multigrid_->theHeap, bndp);
-
-  } else
-    DUNE_THROW(NotImplemented, "getBoundaryPosition for 3d not implemented!");
-
-  return result;
-}
-
-
-template <int dim>
 void Dune::UGGrid<dim>::saveState(const std::string& filename) const
 {
   const char* type = "asc";
