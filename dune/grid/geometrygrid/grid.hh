@@ -65,8 +65,9 @@ namespace Dune
       static const int dimGrid = HostGrid::dimension;
       static const int dimWorld = CoordFunction::dimRange;
 
-      static const bool hybrid = true;
-      // static const unsigned int topologyId = SimplexTopology< dimGrid >::type::id;
+      static const bool hybrid = !Capabilities::hasSingleGeometryType< HostGrid >::v;
+      // this value is only used when hybrid is false (and only valid in that case)
+      static const unsigned int topologyId = Capabilities::hasSingleGeometryType< HostGrid >::topologyId;
 
       template< int codim >
       struct Codim
