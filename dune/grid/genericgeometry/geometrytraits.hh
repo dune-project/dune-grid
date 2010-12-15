@@ -139,15 +139,16 @@ namespace Dune
        *  geometries are a little faster.
        *
        *  If <em>hybrid</em> is set to false, an additional paramter
-       *  <em>dunetype</em> is needed. It specifies the topological type of
-       *  all elements in the grid. Here's an example:
+       *  <em>topologyId</em> is required.
+       *  It specifies the topological type of all elements in the grid.
+       *  Here's an example:
        *  \code
-       *  static const GeometryType::BasicType dunetype = GeometryType::simplex;
+       *  static const unsigned int topologyId = SimplexTopology< dimGrid >::type::id;
        *  \endcode
        */
       static const bool hybrid = true;
-      //   dunetype [ for Codim 0, needed for (hybrid=false) ]
-      // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+      //   topologyId [ for Codim 0, needed for (hybrid=false) ]
+      // static const unsigned int topologyId = SimlexTopology< dimGrid >::type::id;
 
       /** \brief specifies the reference mapping to be used
        *
@@ -218,8 +219,8 @@ namespace Dune
      *
      *    //   hybrid   [ true if Codim 0 is hybrid ]
      *    static const bool hybrid = true;
-     *    //   dunetype [ for Codim 0, needed for (hybrid=false) ]
-     *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+     *    //   topologyId [ for Codim 0, needed for (hybrid=false) ]
+     *    // static const unsigned int topologyId = SimlexTopology< dimGrid >::type::id;
      *
      *    template< class Topology >
      *    struct Mapping
@@ -282,8 +283,8 @@ namespace Dune
      *
      *    //   hybrid   [ true if Codim 0 is hybrid ]
      *    static const bool hybrid = true;
-     *    //   dunetype [ for Codim 0, needed for (hybrid=false) ]
-     *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+     *    //   topologyId [ for Codim 0, needed for (hybrid=false) ]
+     *    // static const unsigned int topologyId = SimlexTopology< dimGrid >::type::id;
      *
      *    template< class Topology >
      *    struct Mapping

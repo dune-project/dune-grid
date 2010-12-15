@@ -84,7 +84,7 @@ namespace Dune
      *    are in a specific situation far from the optimal choice.
      *    For example, an increase
      *    in efficiency can be achieved for grids with a fixed element type
-     *    (set hyprid to false and set the dunetype variable)
+     *    (set hyprid to false and set the topologyId variable)
      *    or for grids with only affine transformations - which in the case of
      *    the local geometries is often true the variable; the last template
      *    argument (default false) can be used to switch to mappings which are
@@ -193,8 +193,8 @@ namespace Dune
      *
      *    //   hybrid   [ true if Codim 0 is hybrid ]
      *    static const bool hybrid = true;
-     *    //   dunetype [ for Codim 0, needed for (hybrid=false) ]
-     *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+     *    //   topologyId [ for Codim 0, needed for (hybrid=false) ]
+     *    // static const unsigned int topologyId = SimlexTopology< dimGrid >::type::id;
      *
      *    // explained below
      *    template< class Topology >
@@ -289,11 +289,11 @@ namespace Dune
       template< bool >
       struct NonHybrid
       {
-        typedef typename Convert< Traits :: dunetype, dimGrid > :: type Topology;
-        typedef GenericGeometry :: CachedMapping< Topology, Traits > Mapping;
+        typedef typename GenericGeometry::Topology< Traits::topologyId, dimGrid >::type Topology;
+        typedef GenericGeometry::CachedMapping< Topology, Traits > Mapping;
       };
 
-      typedef typename SelectType< Traits :: hybrid, Hybrid<true>, NonHybrid<false> > :: Type :: Mapping
+      typedef typename SelectType< Traits::hybrid, Hybrid< true >, NonHybrid< false > >::Type::Mapping
       ElementMapping;
       typedef GenericGeometry::MappingProvider< ElementMapping, codimension > MappingProvider;
 
