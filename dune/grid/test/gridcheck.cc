@@ -251,6 +251,19 @@ void zeroEntityConsistency (Grid &g)
         }
       }
     }
+
+    // check hasSingleGeometryType capability
+    const bool hasSingleGeomType = Dune :: Capabilities :: hasSingleGeometryType< Grid > :: v ;
+    if( hasSingleGeomType )
+    {
+      // check that geometry type generated from constant topo Id is the same as of the codim 0 entity
+      const Dune::GeometryType constantType( Dune :: Capabilities :: hasSingleGeometryType< Grid > :: topologyId , dimGrid );
+      if( it->type() != constantType )
+      {
+        DUNE_THROW(Dune::InvalidStateException,"it->type() " << it->type() << " differs from singleGeometryType " << constantType);
+      }
+    }
+
     subIndexCheck<Grid::dimension, Grid, Entity, true> sick(g,*it);
   }
 }
