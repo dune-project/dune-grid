@@ -196,9 +196,6 @@ namespace Dune
      *    //   dunetype [ for Codim 0, needed for (hybrid=false) ]
      *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
      *
-     *    // what basic geometry type shall the line be considered?
-     *    static const GeometryType :: BasicType linetype = GeometryType :: simplex;
-     *
      *    // explained below
      *    template< class Topology >
      *    struct Mapping
@@ -295,9 +292,6 @@ namespace Dune
         typedef typename Convert< Traits :: dunetype, dimGrid > :: type Topology;
         typedef GenericGeometry :: CachedMapping< Topology, Traits > Mapping;
       };
-
-      typedef GenericGeometry :: DuneGeometryTypeProvider< mydimension, Traits :: linetype >
-      DuneGeometryTypeProvider;
 
       typedef typename SelectType< Traits :: hybrid, Hybrid<true>, NonHybrid<false> > :: Type :: Mapping
       ElementMapping;
@@ -423,7 +417,6 @@ namespace Dune
       GeometryType type () const
       {
         return GeometryType( mapping().topologyId(), mydimension );
-        // return DuneGeometryTypeProvider :: type( mapping().topologyId() );
       }
 
       /** \brief Return the number of corners */

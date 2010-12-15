@@ -149,9 +149,6 @@ namespace Dune
       //   dunetype [ for Codim 0, needed for (hybrid=false) ]
       // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
 
-      //! what basic geometry type shall the line be considered?
-      static const GeometryType :: BasicType linetype = GeometryType :: simplex;
-
       /** \brief specifies the reference mapping to be used
        *
        *  \tparam  Topology  type of topology for which the mapping
@@ -224,9 +221,6 @@ namespace Dune
      *    //   dunetype [ for Codim 0, needed for (hybrid=false) ]
      *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
      *
-     *    // what basic geometry type shall the line be considered?
-     *    static const GeometryType :: BasicType linetype = GeometryType :: simplex;
-     *
      *    template< class Topology >
      *    struct Mapping
      *    {
@@ -290,9 +284,6 @@ namespace Dune
      *    static const bool hybrid = true;
      *    //   dunetype [ for Codim 0, needed for (hybrid=false) ]
      *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
-     *
-     *    // what basic geometry type shall the line be considered?
-     *    static const GeometryType :: BasicType linetype = GeometryType :: simplex;
      *
      *    template< class Topology >
      *    struct Mapping
