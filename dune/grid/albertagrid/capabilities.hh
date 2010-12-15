@@ -4,6 +4,8 @@
 #define DUNE_ALBERTA_CAPABILITIES_HH
 
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
+
 
 #if HAVE_ALBERTA
 
@@ -23,6 +25,17 @@ namespace Dune
 
   namespace Capabilities
   {
+
+    /** \brief AlbertaGrid has only one geometry type for codim 0 entities
+       \ingroup AlbertaGrid
+     */
+    template< int dim, int dimworld >
+    struct hasSingleGeometryType< AlbertaGrid< dim, dimworld > >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry :: SimplexTopology< dim > :: type :: id ;
+    };
+
 
     /** \brief   AlbertaGrid has entities for all codimensions
      *  \ingroup AlbertaGrid
