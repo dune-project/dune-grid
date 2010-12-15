@@ -66,9 +66,7 @@ namespace Dune
       static const int dimWorld = CoordFunction::dimRange;
 
       static const bool hybrid = true;
-      // static const GeometryType::BasicType dunetype = GeometryType::simplex;
-
-      static const GeometryType::BasicType linetype = GeometryType::simplex;
+      // static const unsigned int topologyId = SimplexTopology< dimGrid >::type::id;
 
       template< int codim >
       struct Codim
