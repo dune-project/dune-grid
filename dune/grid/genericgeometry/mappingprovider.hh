@@ -34,7 +34,7 @@ namespace Dune
       static Mapping *
       mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
       {
-        assert( topologyId == Topology::id );
+        assert( (topologyId >> 1) == (Topology::id >> 1) );
         return allocator.create( Mapping( coords ) );
       }
     };
