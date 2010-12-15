@@ -37,6 +37,8 @@ using namespace Dune;
 template <bool leafconform, class Grid>
 void checkCapabilities(const Grid& grid)
 {
+  dune_static_assert( Dune::Capabilities::hasSingleGeometryType< Grid > :: v == true,
+                      "hasSingleGeometryType is not set correctly");
   dune_static_assert( Dune::Capabilities::isLevelwiseConforming< Grid > :: v == ! leafconform,
                       "isLevelwiseConforming is not set correctly");
   dune_static_assert( Dune::Capabilities::isLeafwiseConforming< Grid > :: v == leafconform,
