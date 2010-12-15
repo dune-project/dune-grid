@@ -8,6 +8,8 @@
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/alugrid/3d/alu3dinclude.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
+
 
 /** @file
  *  @author Robert Kloefkorn
@@ -38,6 +40,17 @@ namespace Dune
     /** \struct IsUnstructured
        \ingroup ALUCubeGrid
      */
+
+    /** \brief ALUCubeGrid has only one geometry type for codim 0 entities
+       \ingroup ALUCubeGrid
+     */
+    template< >
+    struct hasSingleGeometryType< ALUCubeGrid< 3, 3 > >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry :: CubeTopology< 3 > :: type :: id ;
+    };
+
 
     /** \brief ALUCubeGrid has entities for all codimension
        \ingroup ALUCubeGrid
@@ -100,6 +113,16 @@ namespace Dune
     /** \struct IsUnstructured
        \ingroup ALUSimplexGrid
      */
+
+    /** \brief ALUSimplexGrid has only one geometry type for codim 0 entities
+       \ingroup ALUSimplexGrid
+     */
+    template< >
+    struct hasSingleGeometryType< ALUSimplexGrid< 3, 3 > >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry :: SimplexTopology< 3 > :: type :: id ;
+    };
 
     /** \brief ALUSimplexGrid has entities for all codimension
        \ingroup ALUSimplexGrid

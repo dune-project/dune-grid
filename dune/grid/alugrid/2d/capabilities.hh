@@ -8,6 +8,8 @@
 
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
+
 
 /** @file
  *  @author Robert Kloefkorn
@@ -34,6 +36,17 @@ namespace Dune
 
     // Capabilities for ALUSimplexGrid
     // -------------------------------
+
+    /** \brief ALUSimplexGrid has only one geometry type for codim 0 entities
+       \ingroup ALUSimplexGrid
+     */
+    template< int dimworld >
+    struct hasSingleGeometryType< ALUSimplexGrid< 2, dimworld > >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry :: SimplexTopology< 2 > :: type :: id ;
+    };
+
 
     /** \brief ALUSimplexGrid has entities for all codimension
        \ingroup ALUSimplexGrid
@@ -91,6 +104,16 @@ namespace Dune
     // Capabilities for ALUCubeGrid
     // ----------------------------
 
+    /** \brief ALUCubeGrid has only one geometry type for codim 0 entities
+       \ingroup ALUCubeGrid
+     */
+    template< int wdim >
+    struct hasSingleGeometryType< ALUCubeGrid< 2, wdim > >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry :: CubeTopology< 2 > :: type :: id ;
+    };
+
     /** \brief ALUCubeGrid has entities for all codimension
        \ingroup ALUCubeGrid
      */
@@ -146,6 +169,16 @@ namespace Dune
 
     // Capabilities for ALUConformGrid
     // -------------------------------
+
+    /** \brief ALUConformGrid has only one geometry type for codim 0 entities
+       \ingroup ALUConformGrid
+     */
+    template< int dimworld >
+    struct hasSingleGeometryType< ALUConformGrid< 2, dimworld > >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry :: SimplexTopology< 2 > :: type :: id ;
+    };
 
     /** \brief ALUConformGrid has entities for all codimension
        \ingroup ALUConformGrid
