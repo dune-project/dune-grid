@@ -13,7 +13,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
-
+#include <dune/grid/genericgeometry/topologytypes.hh>
 
 /** \file
  * \brief The OneDGrid class
@@ -422,6 +422,17 @@ namespace Dune {
     /** \struct IsUnstructured
        \ingroup OneDGrid
      */
+
+    /** \brief OneDGrid has only one geometry type for codim 0 entities
+       \ingroup OneDGrid
+     */
+    template< >
+    struct hasSingleGeometryType< OneDGrid >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry :: CubeTopology< 1 > :: type :: id ;
+    };
+
 
     /** \brief OneDGrid has entities for all codimension
        \ingroup OneDGrid
