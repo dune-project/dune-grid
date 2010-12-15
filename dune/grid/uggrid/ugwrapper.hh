@@ -554,18 +554,6 @@ namespace Dune {
 
     //! Return true if the element is a leaf element
     static bool isLeaf(const UG_NS< UG_DIM >::Element* theElement) {
-#ifdef ModelP
-      // HACK: Always treat ghost entities as leafs
-
-#define PARHDRE(p) (&((p)->ge.ddd))
-#define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
-      if (EPRIO(theElement) == UG_NAMESPACE::PrioHGhost
-          || EPRIO(theElement) == UG_NAMESPACE::PrioVGhost
-          || EPRIO(theElement) == UG_NAMESPACE::PrioVHGhost)
-        return true;
-#undef EPRIO
-#undef PARHDRE
-#endif
       using UG ::UINT;
       using UG_NAMESPACE ::CONTROL_ENTRY;
       using UG_NAMESPACE ::control_entries;
@@ -575,13 +563,7 @@ namespace Dune {
 
     //! Return true if the node is a leaf node
     static bool isLeaf(const UG_NS< UG_DIM >::Node* theNode) {
-#ifdef ModelP
-#ifndef PRINTED_PARALLEL_UG_ISLEAF_WARNING
-#warning Method isLeaf() for nodes will not work properly in case of vertical load balancing
-#define PRINTED_PARALLEL_UG_ISLEAF_WARNING
-#endif // #ifndef PRINTED_PARALLEL_UG_ISLEAF_WARNING
-#endif
-      return !theNode->son;
+      return theNode->isLeaf;
     }
 
     // /////////////////////////////////////////////

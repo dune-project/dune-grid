@@ -48,7 +48,7 @@ namespace Dune {
       } else
         DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);
 
-      if (this->virtualEntity_.getTarget() && !entityOK_())
+      if (this->virtualEntity_.getTarget() && ! (isLeaf() && isInPartition()))
         increment();
     }
 
@@ -64,18 +64,35 @@ namespace Dune {
       do {
         globalIncrement();
       }
-      while (this->virtualEntity_.getTarget() && !entityOK_());
+      while (this->virtualEntity_.getTarget() && ! (isLeaf() && isInPartition()));
     }
 
   private:
     /**
-     * \brief Return true iff the current entity is a leaf and is within the right partition.
+     * \brief Return true iff the current entity is a leaf (element version)
      */
-    bool entityOK_()
+    bool isLeaf(const typename UG_NS<dim>::Element* theElement)
     {
-      if (!UG_NS<dim>::isLeaf(this->virtualEntity_.getTarget()))
+      return UG_NS<dim>::isLeaf(theElement);
+    }
+
+    /**
+     * \brief Return true iff the current entity is a leaf (node version)
+     */
+    bool isLeaf(const typename UG_NS<dim>::Node* theNode)
+    {
+      // in the case of nodes: only visit the uppermost entity if more than one is leaf
+      if (theNode->son != NULL)
         return false;
 
+      return UG_NS<dim>::isLeaf(theNode);
+    }
+
+    /**
+     * \brief Return true iff the current entity has the right PartitionType.
+     */
+    bool isInPartition()
+    {
       Dune::PartitionType entityPIType = this->virtualEntity_.partitionType();
       if (pitype == All_Partition)
         return true;
@@ -89,6 +106,14 @@ namespace Dune {
                 entityPIType == InteriorEntity))
         return true;
       return false;
+    }
+
+    /**
+     * \brief Return true iff the current entity is a leaf entity
+     */
+    bool isLeaf()
+    {
+      return isLeaf(this->virtualEntity_.getTarget());
     }
 
     /** \brief This increment makes the iterator wander over all entities on all levels */

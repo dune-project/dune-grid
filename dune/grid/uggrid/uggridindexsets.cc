@@ -193,6 +193,13 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
           int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
           index = -1;
         }
+
+      // reset the isLeaf information of the nodes
+      for (int i=0; i<eIt->template count<dim>(); i++)
+      {
+        // no need to renumber, we are visiting all the corners
+        UG_NS<dim>::Corner(target_,i)->isLeaf = false;
+      }
     }
   }
 
@@ -281,6 +288,14 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
             }
           }
         }
+
+      // set the isLeaf information of the nodes based on the leaf elements
+      for (int i=0; i< eIt->template count<dim>(); i++)
+      {
+        // no need to renumber, we are visiting all the corners
+        typename UG_NS<dim>::Node* theNode = UG_NS<dim>::Corner(target_,i);
+        theNode->isLeaf = true;
+      }
     }
 
     if (containsLeafElements)
