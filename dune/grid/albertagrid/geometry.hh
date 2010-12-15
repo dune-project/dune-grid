@@ -152,9 +152,7 @@ namespace Dune
     static const int dimWorld = cdim;
 
     static const bool hybrid = false;
-    static const GeometryType::BasicType dunetype = GeometryType::simplex;
-
-    static const GeometryType::BasicType linetype = GeometryType::simplex;
+    static const unsigned int topologyId = GenericGeometry::SimplexTopology< dimGrid >::type::id;
 
     template< class Topology >
     struct Mapping
@@ -203,7 +201,7 @@ namespace Dune
 
     template< class CoordReader >
     AlbertaGridGeometry ( const CoordReader &coordReader )
-      : Base( GenericGeometry::SimplexTopology< mydim >::type::id, coordReader )
+      : Base( GeometryType( GenericGeometry::SimplexTopology< mydim >::type::id, mydim ), coordReader )
     {}
 
     template< class CoordReader >
