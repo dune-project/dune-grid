@@ -14,6 +14,20 @@ namespace Dune
   namespace Capabilities
   {
 
+    /** \brief Specialize with 'true' for if the codimension 0 entity
+        of the grid has only one possible geometry type. In this case the
+        topologyId of this geometry type has also to be specified.
+        (default=false, topologyId=undefined)
+     */
+    template<class Grid>
+    struct hasSingleGeometryType
+    {
+      static const bool v = false;
+      // this value will be initialized with something big
+      // since it is invalid
+      static const unsigned int topologyId = ~0u;
+    };
+
     /** \brief Specialize with 'true' for all codims that a grid implements entities for. (default=false)
         \ingroup GICapabilities
      */
@@ -108,6 +122,14 @@ namespace Dune
        to
        Capabilities::Something<Grid>
      */
+
+    template<class Grid>
+    struct hasSingleGeometryType< const Grid >
+    {
+      static const bool v = Dune::Capabilities::hasSingleGeometryType<Grid>::v;
+      static const unsigned int topologyId =
+        Dune::Capabilities::hasSingleGeometryType<Grid>::topologyId;
+    };
 
     template<class Grid, int codim>
     struct hasEntity<const Grid, codim>
