@@ -17,6 +17,8 @@
 #include <dune/grid/sgrid/numbering.hh>
 #include <dune/grid/common/indexidset.hh>
 
+#include <dune/grid/genericgeometry/topologytypes.hh>
+
 /*! \file sgrid.hh
    This file documents the DUNE grid interface. We use the special implementation for
    simple structured grid to illustrate the different classes and their members.
@@ -1885,6 +1887,16 @@ namespace Dune {
     /** \struct hasBackupRestoreFacilities
        \ingroup SGrid
      */
+
+    /** \brief SGrid has only one geometry type for codim 0 entities
+       \ingroup SGrid
+     */
+    template<int dim, int dimw>
+    struct hasSingleGeometryType< SGrid<dim,dimw> >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry :: CubeTopology< dim > :: type :: id ;
+    };
 
     /** \brief SGrid has entities for all codimension
        \ingroup SGrid

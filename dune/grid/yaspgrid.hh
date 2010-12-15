@@ -25,6 +25,7 @@ typedef unsigned char uint8_t;
 #include <dune/common/mpihelper.hh>
 #include <dune/grid/common/indexidset.hh>
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
 
 
 #if HAVE_MPI
@@ -3370,6 +3371,16 @@ namespace Dune {
     /** \struct hasBackupRestoreFacilities
        \ingroup YaspGrid
      */
+
+    /** \brief YaspGrid has only one geometry type for codim 0 entities
+       \ingroup YaspGrid
+     */
+    template<int dim>
+    struct hasSingleGeometryType< YaspGrid<dim> >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry :: CubeTopology< dim > :: type :: id ;
+    };
 
     /** \brief YaspGrid has codim=0 entities (elements)
        \ingroup YaspGrid
