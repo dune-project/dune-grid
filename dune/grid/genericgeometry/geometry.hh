@@ -84,7 +84,7 @@ namespace Dune
      *    are in a specific situation far from the optimal choice.
      *    For example, an increase
      *    in efficiency can be achieved for grids with a fixed element type
-     *    (set hyprid to false and set the topologyId variable)
+     *    (set hybrid to false and set the topologyId variable)
      *    or for grids with only affine transformations - which in the case of
      *    the local geometries is often true the variable; the last template
      *    argument (default false) can be used to switch to mappings which are
