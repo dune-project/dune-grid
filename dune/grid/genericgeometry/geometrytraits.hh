@@ -138,7 +138,7 @@ namespace Dune
        *  In this case, virtual methods are not necessary and, hence, the
        *  geometries are a little faster.
        *
-       *  If <em>hybrid</em> is set to false, an additional paramter
+       *  If <em>hybrid</em> is set to false, an additional parameter
        *  <em>topologyId</em> is required.
        *  It specifies the topological type of all elements in the grid.
        *  Here's an example:
@@ -155,7 +155,7 @@ namespace Dune
        *  \tparam  Topology  type of topology for which the mapping
        *                     implementation is specified
        *
-       *  This sturcture contains a single tydedef <em>type</em> specifying
+       *  This structure contains a single tydedef <em>type</em> specifying
        *  the implementation of the reference mapping. Basically, it looks like
        *  \code
        *  typedef CornerMapping< ... > type;
@@ -176,7 +176,7 @@ namespace Dune
        *  - evaluateJacobianInverseTransposed
        *  - evaluateIntegrationElement
        *  .
-       *  These parameters control how eager these evaluations shall be
+       *  These parameters control how eagerly these evaluations shall be
        *  performed in the case of an affine mapping.
        */
       struct Caching
