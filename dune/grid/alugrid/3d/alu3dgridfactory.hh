@@ -463,7 +463,11 @@ namespace Dune
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
 
     const size_t numVx = vertices.size();
-    GeometryType type( (numVx == 3) ? GeometryType::simplex : GeometryType::cube, dimension-1 );
+    GeometryType type;
+    if( numVx == 3 )
+      type.makeSimplex( dimension-1 );
+    else
+      type.makeCube( dimension-1 );
 
     // we need double here because of the structure of BoundarySegment
     // and BoundarySegmentWrapper which have double as coordinate type

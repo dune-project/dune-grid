@@ -6,6 +6,7 @@
 // Dune includes
 #include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
 
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/alugrid/3d/mappings.hh>
@@ -57,7 +58,9 @@ namespace Dune
     GeometryType type () const
     {
       return GeometryType(
-               (eltype == ALU2DSPACE triangle ? GeometryType::simplex : GeometryType::cube),
+               (eltype == ALU2DSPACE triangle ?
+                GenericGeometry :: SimplexTopology< 0 > :: type :: id :
+                GenericGeometry :: CubeTopology   < 0 > :: type :: id),
                0 );
     }
 
@@ -126,7 +129,9 @@ namespace Dune
     GeometryType type () const
     {
       return GeometryType(
-               (eltype == ALU2DSPACE triangle ? GeometryType::simplex : GeometryType::cube),
+               (eltype == ALU2DSPACE triangle ?
+                GenericGeometry :: SimplexTopology< 1 > :: type :: id :
+                GenericGeometry :: CubeTopology   < 1 > :: type :: id),
                1 );
     }
 
@@ -212,7 +217,7 @@ namespace Dune
 
     GeometryType type () const
     {
-      return GeometryType( GeometryType::simplex, 2 );
+      return GeometryType( GenericGeometry :: SimplexTopology< 2 > :: type :: id , 2 );
     }
 
     void map2world ( const map_t &m, world_t &w ) const
@@ -396,7 +401,9 @@ namespace Dune
 
     GeometryType type () const
     {
-      return GeometryType( corners_ == 3 ? GeometryType::simplex : GeometryType::cube, 2 );
+      return GeometryType( (corners_ == 3 ?
+                            GenericGeometry :: SimplexTopology< 2 > :: type :: id :
+                            GenericGeometry :: CubeTopology   < 2 > :: type :: id), 2);
     }
 
     void map2world ( const map_t &m, world_t &w ) const

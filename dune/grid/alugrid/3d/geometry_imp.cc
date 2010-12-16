@@ -4,6 +4,7 @@
 #define DUNE_ALUGRID_GEOMETRY_IMP_CC
 
 #include <dune/grid/genericgeometry/conversion.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
 
 #include "grid.hh"
 #include "mappings.hh"
@@ -24,7 +25,9 @@ namespace Dune {
   ALU3dGridGeometry< mydim, cdim, GridImp > :: type () const
   {
     return GeometryType( (elementType == tetra) ?
-                         GeometryType :: simplex : GeometryType :: cube, mydim );
+                         GenericGeometry :: SimplexTopology< mydim > :: type :: id :
+                         GenericGeometry :: CubeTopology   < mydim > :: type :: id,
+                         mydim );
   }
 
   template< int mydim, int cdim, class GridImp>

@@ -337,7 +337,9 @@ namespace Dune
   template< class GridImp >
   inline GeometryType ALU2dGridIntersectionBase< GridImp >::type () const
   {
-    return GeometryType( eltype == ALU2DSPACE triangle ? GeometryType::simplex : GeometryType::cube, 1 );
+    return GeometryType( (eltype == ALU2DSPACE triangle ?
+                          GenericGeometry :: SimplexTopology< 1 > :: type :: id :
+                          GenericGeometry :: CubeTopology   < 1 > :: type :: id), 1);
   }
 
   template< class GridImp >
