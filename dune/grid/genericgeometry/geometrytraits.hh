@@ -170,7 +170,7 @@ namespace Dune
 
       /** \brief specifies how constant values are to be cached
        *
-       *  This structure contains 4 parameters of type
+       *  This structure contains 3 parameters of type
        *  GenericGeometry::EvaluationType:
        *  - evaluateJacobianTransposed
        *  - evaluateJacobianInverseTransposed
