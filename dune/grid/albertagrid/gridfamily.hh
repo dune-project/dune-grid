@@ -14,11 +14,9 @@
 #include <dune/grid/common/entity.hh>
 #include <dune/grid/common/entitypointer.hh>
 #include <dune/grid/common/geometry.hh>
-#include <dune/grid/common/hierarchiciterator.hh>
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/common/intersectioniterator.hh>
-#include <dune/grid/common/leafiterator.hh>
-#include <dune/grid/common/leveliterator.hh>
+#include <dune/grid/common/entityiterator.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
 
@@ -107,7 +105,7 @@ namespace Dune
       < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridLeafIntersection >
       LevelIntersectionIterator;
 
-      typedef Dune::HierarchicIterator<const GridImp, AlbertaGridHierarchicIterator> HierarchicIterator;
+      typedef Dune::EntityIterator< 0, const GridImp, AlbertaGridHierarchicIterator< const GridImp > > HierarchicIterator;
 
       typedef IdType GlobalIdType;
       typedef IdType LocalIdType;
@@ -128,8 +126,8 @@ namespace Dune
         template <PartitionIteratorType pitype>
         struct Partition
         {
-          typedef Dune::LevelIterator<cd,pitype,const GridImp,AlbertaGridLevelIterator> LevelIterator;
-          typedef Dune::LeafIterator<cd,pitype,const GridImp,AlbertaGridLeafIterator> LeafIterator;
+          typedef Dune::EntityIterator< cd, const GridImp, AlbertaGridLevelIterator< cd, pitype, const GridImp > > LevelIterator;
+          typedef Dune::EntityIterator< cd, const GridImp, AlbertaGridLeafIterator< cd, pitype, const GridImp > > LeafIterator;
         };
 
         typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
