@@ -33,21 +33,14 @@ namespace Dune
       Dune::Entity and can be dereferenced, compared and it knows the
       Entity's level.
 
-      You should be able to initialize and interpret every Dune::XxxIterator
-      that iterates over entities
+      You should be able to initialize and interpret every Dune::EntityIterator
       as a Dune::EntityPointer. Therefore we need an inheritance hierarchy of
       the Iterator wrappers:
       \code
-      class Dune::EntityPointer<...>;
+      class Dune::EntityPointer< Grid, IteratorImp >;
 
-      class Dune::LevelIterator<...> :
-         public Dune::EntityPointer<...>;
-
-      class Dune::HierarchicIterator<...> :
-         public Dune::EntityPointer<...>;
-
-      class Dune::LeafIterator<...> :
-         public Dune::EntityPointer<...>;
+      class Dune::EntityIterator< codim, Grid, IteratorImp >
+      : public Dune::EntityPointer< Grid, IteratorImp >;
       \endcode
 
       This hierarchy must be mimicked in the implementation (i.e. SGrid):
