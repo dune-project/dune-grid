@@ -107,7 +107,7 @@ namespace Dune
       if( !refElement.checkInside( geometry.corner( i ) ) )
       {
         std::cerr << "Corner " << i
-                  << " of " << geoName << "  not within reference element: "
+                  << " of " << geoName << " not within reference element: "
                   << geometry.corner( i ) << "." << std::endl;
       }
     }
