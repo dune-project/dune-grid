@@ -114,16 +114,18 @@ namespace Dune {
       return i;
     }
 
-    /** \brief Turn a local face number from UG numbering to DUNE numbering */
-    static int facesUGtoDUNE(int i, int nSides) {
+    /** \brief Turn a local face number from UG numbering to DUNE numbering
+     * \param tag The UG way to specify element types.  See the file ug/gm/gm.h for the possible values
+     */
+    static int facesUGtoDUNE(int i, unsigned int tag) {
 
-      if (nSides == 4) {
+      if (tag == UG::D2::QUADRILATERAL) {
 
         // faces of a quadrilateral
         const int renumbering[4] = {2, 1, 3, 0};
         return renumbering[i];
 
-      } else if (nSides == 3) {
+      } else if (tag = UG::D2::TRIANGLE) {
 
         // faces of a triangle
         const int renumbering[3] = {0, 2, 1};
@@ -223,16 +225,18 @@ namespace Dune {
       return Numbering::dune2generic( type.id(), j, 1 );
     }
 
-    /** \brief Turn a local face number from UG numbering to DUNE numbering */
-    static int facesUGtoDUNE(int i, int nSides) {
+    /** \brief Turn a local face number from UG numbering to DUNE numbering
+     * \param tag The UG way to specify element types.  See the file ug/gm/gm.h for the possible values
+     */
+    static int facesUGtoDUNE(int i, unsigned int tag) {
 
-      if (nSides==6) {
+      if (tag == UG::D3::HEXAHEDRON) {
 
         // faces of a hexahedron
         const int renumbering[6] = {4, 2, 1, 3, 0, 5};
         return renumbering[i];
 
-      } else if (nSides==4) {
+      } else if (tag == UG::D3::TETRAHEDRON) {
 
         // faces of a tetrahedon
         const int renumbering[4] = {3, 0, 1, 2};

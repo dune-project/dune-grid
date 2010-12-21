@@ -123,7 +123,7 @@ namespace Dune {
     //! local index of codim 1 entity in self where intersection is contained in
     int indexInInside () const
     {
-      return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
+      return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dim>::Tag(center_));
     }
 
     //! local index of codim 1 entity in neighbor where intersection is contained
@@ -350,7 +350,7 @@ namespace Dune {
     //! local index of codim 1 entity in self where intersection is contained in
     int indexInInside () const
     {
-      return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
+      return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Tag(center_));
     }
 
     //! local index of codim 1 entity in neighbor where intersection is contained
