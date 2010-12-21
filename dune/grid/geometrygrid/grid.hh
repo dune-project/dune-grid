@@ -149,7 +149,7 @@ namespace Dune
         < const Grid, GeoGrid::LevelIntersectionIterator, GeoGrid::LevelIntersection >
         LevelIntersectionIterator;
 
-        typedef Dune::HierarchicIterator< const Grid, GeoGrid::HierarchicIterator >
+        typedef Dune::EntityIterator< 0, const Grid, GeoGrid::HierarchicIterator< const Grid > >
         HierarchicIterator;
 
         template< int codim >
@@ -170,9 +170,9 @@ namespace Dune
           template< PartitionIteratorType pitype >
           struct Partition
           {
-            typedef Dune::LeafIterator< codim, pitype, const Grid, GeoGrid::LeafIterator >
+            typedef Dune::EntityIterator< codim, const Grid, GeoGrid::LeafIterator< codim, pitype, const Grid > >
             LeafIterator;
-            typedef Dune::LevelIterator< codim, pitype, const Grid, GeoGrid::LevelIterator >
+            typedef Dune::EntityIterator< codim, const Grid, GeoGrid::LevelIterator< codim, pitype, const Grid > >
             LevelIterator;
           };
 
