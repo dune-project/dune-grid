@@ -138,11 +138,7 @@ int Dune::UGGridLevelIntersection<GridImp>::indexInOutside () const
       break;
 
   // now we have to renumber the side i
-  const int number = UGGridRenumberer<dim>::facesUGtoDUNE(i, UG_NS<dim>::Tag(other));
-
-  typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
-  const unsigned int tid = outside()->type().id();
-  return Numbering::template dune2generic< 1 >( tid, number );
+  return UGGridRenumberer<dim>::facesUGtoDUNE(i, UG_NS<dim>::Tag(other));
 }
 
 

@@ -12,8 +12,6 @@
 
 #include <dune/common/geometrytype.hh>
 
-#include <dune/grid/genericgeometry/conversion.hh>
-
 namespace Dune {
 
   /** \brief Generic class which doesn't actually renumber anything.
@@ -182,47 +180,76 @@ namespace Dune {
 
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int facesDUNEtoUG(int i, const GeometryType& type) {
-      typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
-      const int j = Numbering::generic2dune( type.id(), i, 1 );
 
       if (type.isCube()) {
 
         // faces of a hexahedron
         const int renumbering[6] = {4, 2, 1, 3, 0, 5};
-        return renumbering[j];
+        return renumbering[i];
+
+      }
+
+      if (type.isPrism()) {
+
+        // faces of a hexahedron
+        const int renumbering[5] = {1, 3, 2, 0, 4};
+        return renumbering[i];
+
+      }
+
+      if (type.isPyramid()) {
+
+        // faces of a hexahedron
+        const int renumbering[5] = {0, 4, 2, 1, 3};
+        return renumbering[i];
 
       }
 
       if (type.isSimplex()) {
 
         // faces of a tetrahedon
-        const int renumbering[4] = {1, 2, 3, 0};
-        return renumbering[j];
+        const int renumbering[4] = {0, 3, 2, 1};
+        return renumbering[i];
       }
 
-      return j;
+      return i;
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
     static int facesUGtoDUNE(int i, const GeometryType& type) {
 
-      int j = i;
-
       if (type.isCube()) {
 
         // faces of a hexahedron
         const int renumbering[6] = {4, 2, 1, 3, 0, 5};
-        j = renumbering[i];
+        return renumbering[i];
 
-      } else if (type.isSimplex()) {
-
-        // faces of a tetrahedon
-        const int renumbering[4] = {3, 0, 1, 2};
-        j =  renumbering[i];
       }
 
-      typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
-      return Numbering::dune2generic( type.id(), j, 1 );
+      if (type.isPrism()) {
+
+        // faces of a hexahedron
+        const int renumbering[5] = {3, 0, 2, 1, 4};
+        return renumbering[i];
+
+      }
+
+      if (type.isPyramid()) {
+
+        // faces of a hexahedron
+        const int renumbering[5] = {0, 3, 2, 4, 1};
+        return renumbering[i];
+
+      }
+
+      if (type.isSimplex()) {
+
+        // faces of a tetrahedon
+        const int renumbering[4] = {0, 3, 2, 1};
+        return renumbering[i];
+      }
+
+      return i;
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering
@@ -236,10 +263,22 @@ namespace Dune {
         const int renumbering[6] = {4, 2, 1, 3, 0, 5};
         return renumbering[i];
 
+      } if (tag == UG::D3::PRISM) {
+
+        // faces of a hexahedron
+        const int renumbering[5] = {3, 0, 2, 1, 4};
+        return renumbering[i];
+
+      } if (tag == UG::D3::PYRAMID) {
+
+        // faces of a hexahedron
+        const int renumbering[5] = {0, 3, 2, 4, 1};
+        return renumbering[i];
+
       } else if (tag == UG::D3::TETRAHEDRON) {
 
         // faces of a tetrahedon
-        const int renumbering[4] = {3, 0, 1, 2};
+        const int renumbering[4] = {0, 3, 2, 1};
         return renumbering[i];
       }
 
