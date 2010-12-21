@@ -90,6 +90,10 @@ namespace Dune
   }
 
 
+  /** \param geometry The local geometry to be tested
+   * \param type The type of the element that the local geometry is embedded in
+   * \param geoName Helper string that will appear in the error message
+   */
   template< int mydim, int cdim, class Grid, template< int, int, class > class Imp >
   void checkLocalGeometry ( const Geometry< mydim, cdim, Grid, Imp > &geometry,
                             GeometryType type, const std::string &geoName = "local geometry" )
