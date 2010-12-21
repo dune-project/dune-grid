@@ -347,13 +347,9 @@ namespace Dune {
   // EntityImp gets GridImp as 3rd template parameter to distinguish between const and mutable grid
   template<int codim, int dim, class GridImp,template<int,int,class> class EntityImp> class Entity;
   template<class GridImp, class EntityPointerImp> class EntityPointer;
-  template<int codim, PartitionIteratorType pitype, class GridImp,
-      template<int,PartitionIteratorType,class> class LevelIteratorImp> class LevelIterator;
+  template< int codim, class Grid, class IteratorImp > class EntityIterator;
   template<class GridImp, template<class> class IntersectionImp> class Intersection;
   template<class GridImp, template<class> class IntersectionIteratorImp, template<class> class IntersectionImp> class IntersectionIterator;
-  template<class GridImp, template<class> class HierarchicIteratorImp> class HierarchicIterator;
-  template<int codim, PartitionIteratorType pitype, class GridImp,
-      template<int,PartitionIteratorType,class> class LeafIteratorImp> class LeafIterator;
   template<class GridImp> class GenericLeafIterator;
   template<class GridImp, class IndexSetImp, class IndexTypeImp=unsigned int> class IndexSet;
   template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
@@ -1261,7 +1257,7 @@ namespace Dune {
     typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorImp, LevelIntersectionImp> LevelIntersectionIterator;
 
     /** \brief The type of the  hierarchic iterator. */
-    typedef Dune::HierarchicIterator<const GridImp, HierarchicIteratorImp> HierarchicIterator;
+    typedef Dune::EntityIterator< 0, const GridImp, HierarchicIteratorImp< const GridImp > > HierarchicIterator;
 
     /**
      * \brief Traits associated with a specific codim.
@@ -1295,12 +1291,6 @@ namespace Dune {
       // we could - if needed - introduce another struct for dimglobal of Geometry
       typedef Dune::Entity<cd, dim, const GridImp, EntityImp> Entity;
 
-      /** \brief The type of the iterator over all level entities of this codim. */
-      typedef Dune::LevelIterator<cd,All_Partition,const GridImp,LevelIteratorImp> LevelIterator;
-
-      /** \brief The type of the iterator over all leaf entities of this codim. */
-      typedef Dune::LeafIterator<cd,All_Partition,const GridImp,LeafIteratorImp> LeafIterator;
-
       /** \brief The type of the entity pointer for entities of this codim.*/
       typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
 
@@ -1315,10 +1305,17 @@ namespace Dune {
       struct Partition
       {
         /** \brief The type of the iterator over the level entities of this codim on this partition. */
-        typedef Dune::LevelIterator<cd,pitype,const GridImp,LevelIteratorImp> LevelIterator;
+        typedef Dune::EntityIterator< cd, const GridImp, LevelIteratorImp< cd, pitype, const GridImp > > LevelIterator;
         /** \brief The type of the iterator over the leaf entities of this codim on this partition. */
-        typedef Dune::LeafIterator<cd,pitype,const GridImp,LeafIteratorImp> LeafIterator;
+        typedef Dune::EntityIterator< cd, const GridImp, LeafIteratorImp< cd, pitype, const GridImp > > LeafIterator;
       };
+
+      /** \brief The type of the iterator over all leaf entities of this codim. */
+      typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
+
+      /** \brief The type of the entity pointer for entities of this codim.*/
+      typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
+
     private:
       friend class Dune::Entity<cd, dim, const GridImp, EntityImp>;
       typedef EntityPointerImp<cd,const GridImp> EntityPointerImpl;
@@ -1386,11 +1383,9 @@ namespace Dune {
 #include "geometry.hh"
 #include "entity.hh"
 #include "entitypointer.hh"
-#include "leveliterator.hh"
 #include "intersection.hh"
 #include "intersectioniterator.hh"
-#include "hierarchiciterator.hh"
-#include "leafiterator.hh"
+#include "entityiterator.hh"
 #include "indexidset.hh"
 
-#endif
+#endif // #ifndef DUNE_GRID_HH
