@@ -110,7 +110,7 @@ namespace Dune {
       typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > LeafIntersectionIterator;
       typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper, LevelIntersectionWrapper > LevelIntersectionIterator;
 
-      typedef Dune::HierarchicIterator<const GridImp, ALU2dGridHierarchicIterator> HierarchicIterator;
+      typedef Dune::EntityIterator< 0, const GridImp, ALU2dGridHierarchicIterator< const GridImp > > HierarchicIterator;
 
       typedef DuneBoundaryProjection< dimworld > DuneBoundaryProjectionType;
       typedef std::vector< const DuneBoundaryProjectionType *> DuneBoundaryProjectionVector;
@@ -124,10 +124,6 @@ namespace Dune {
         // we could - if needed - introduce an other struct for dimglobal of Geometry
         typedef Dune::Entity<cd, dim, const GridImp, ALU2dGridEntity> Entity;
 
-        typedef Dune::LevelIterator<cd,All_Partition,const GridImp,ALU2dGridLevelIterator> LevelIterator;
-
-        typedef Dune::LeafIterator<cd,All_Partition,const GridImp,ALU2dGridLeafIterator> LeafIterator;
-
         typedef ALU2dGridEntityPointer< cd, const GridImp > EntityPointerImpl;
         typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
         typedef EntityPointer EntitySeed;
@@ -135,9 +131,12 @@ namespace Dune {
         template <PartitionIteratorType pitype>
         struct Partition
         {
-          typedef Dune::LevelIterator<cd,pitype,const GridImp,ALU2dGridLevelIterator> LevelIterator;
-          typedef Dune::LeafIterator<cd,pitype,const GridImp,ALU2dGridLeafIterator> LeafIterator;
+          typedef Dune::EntityIterator< cd, const GridImp, ALU2dGridLevelIterator< cd, pitype, const GridImp > > LevelIterator;
+          typedef Dune::EntityIterator< cd, const GridImp, ALU2dGridLeafIterator< cd, pitype, const GridImp > > LeafIterator;
         };
+
+        typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
+        typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
 
       };
 

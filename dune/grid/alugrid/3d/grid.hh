@@ -239,7 +239,7 @@ namespace Dune
       typedef Dune::IntersectionIterator< const Grid, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > LeafIntersectionIterator;
       typedef Dune::IntersectionIterator< const Grid, LevelIntersectionIteratorWrapper, LevelIntersectionWrapper > LevelIntersectionIterator;
 
-      typedef Dune::HierarchicIterator< const Grid, ALU3dGridHierarchicIterator > HierarchicIterator;
+      typedef Dune::EntityIterator< 0, const Grid, ALU3dGridHierarchicIterator< const Grid > > HierarchicIterator;
 
       typedef DuneBoundaryProjection< dimworld > DuneBoundaryProjectionType;
       typedef std::vector< const DuneBoundaryProjectionType * > DuneBoundaryProjectionVector;
@@ -257,19 +257,18 @@ namespace Dune
         // minimal information to generate entities
         typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
 
-        typedef Dune::LevelIterator< cd, All_Partition, const Grid, ALU3dGridLevelIterator > LevelIterator;
-
-        typedef Dune::LeafIterator< cd, All_Partition, const Grid, ALU3dGridLeafIterator > LeafIterator;
-
         typedef ALU3dGridEntityPointer< cd, const Grid > EntityPointerImpl;
         typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
 
         template< PartitionIteratorType pitype >
         struct Partition
         {
-          typedef Dune::LevelIterator< cd, pitype, const Grid, ALU3dGridLevelIterator > LevelIterator;
-          typedef Dune::LeafIterator< cd, pitype, const Grid, ALU3dGridLeafIterator > LeafIterator;
+          typedef Dune::EntityIterator< cd, const Grid, ALU3dGridLevelIterator< cd, pitype, const Grid > > LevelIterator;
+          typedef Dune::EntityIterator< cd, const Grid, ALU3dGridLeafIterator< cd, pitype, const Grid > > LeafIterator;
         }; // struct Partition
+
+        typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
+        typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
       }; // struct Codim
 
       template< PartitionIteratorType pitype >
