@@ -17,6 +17,9 @@ namespace Dune
           of a given codimension and level of a grid.
           See also the documentation of Dune::EntityPointer.
 
+      \note The LevelIterator interface is deprecated. Use the EntityIterator
+            interface instead.
+
      @ingroup GIEntityPointer
    */
   template<int codim, PartitionIteratorType pitype, class GridImp,
@@ -46,7 +49,7 @@ namespace Dune
 
     /** @brief copy constructor from LevelIteratorImp
      */
-    LevelIterator(const LevelIteratorImp<codim,pitype,const GridImp> & i)
+    LevelIterator(const LevelIteratorImp<codim,pitype,const GridImp> & i) DUNE_DEPRECATED
       : Base( i )
     {}
     //@}

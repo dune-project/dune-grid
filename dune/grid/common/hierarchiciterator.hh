@@ -20,6 +20,9 @@ namespace Dune
      This is redundant but important for memory efficient
      implementations of unstructured hierarchically refined meshes.
 
+     \note The HierarchicIterator interface is deprecated. Use the EntityIterator
+           interface instead.
+
      @ingroup GIEntityPointer
    */
   template<class GridImp, template<class> class HierarchicIteratorImp>
@@ -48,7 +51,7 @@ namespace Dune
 
     /** @brief copy constructor from HierarchicIteratorImp
      */
-    HierarchicIterator (const HierarchicIteratorImp<const GridImp> & i)
+    HierarchicIterator (const HierarchicIteratorImp<const GridImp> & i) DUNE_DEPRECATED
       : Base( i )
     {}
     //@}

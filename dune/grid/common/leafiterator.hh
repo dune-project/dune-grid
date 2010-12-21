@@ -18,6 +18,9 @@ namespace Dune
      of a codimension zero of a grid.
      See also the documentation of Dune::EntityPointer.
 
+     \note The LeafIterator interface is deprecated. Use the EntityIterator
+           interface instead.
+
      @ingroup GIEntityPointer
    */
   template<int codim, PartitionIteratorType pitype, class GridImp,
@@ -43,7 +46,7 @@ namespace Dune
     //===========================================================
 
     /** @brief copy constructor from LevelIteratorImp */
-    LeafIterator (const LeafIteratorImp<codim, pitype, const GridImp> & i)
+    LeafIterator (const LeafIteratorImp<codim, pitype, const GridImp> & i) DUNE_DEPRECATED
       : Base( i )
     {}
     //@}
