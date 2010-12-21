@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <iterator>
 
-#include <dune/grid/common/entitypointer.hh>
+#include <dune/grid/common/entityiterator.hh>
 #include <dune/grid/common/gridenums.hh>
 
 namespace Dune
@@ -22,15 +22,16 @@ namespace Dune
    */
   template<int codim, PartitionIteratorType pitype, class GridImp,
       template<int,PartitionIteratorType,class> class LeafIteratorImp>
-  class LeafIterator :
-    public EntityPointer<GridImp, LeafIteratorImp<codim,pitype,GridImp> >
+  class LeafIterator
+    : public EntityIterator< codim, GridImp, LeafIteratorImp< codim, pitype, GridImp > >
   {
-  public:
-    typedef typename GridImp::template Codim< codim >::Entity Entity;
+    typedef EntityIterator< codim, GridImp, LeafIteratorImp< codim, pitype, GridImp > > Base;
 
+  public:
     /** @brief Preincrement operator. */
     LeafIterator& operator++()
     {
+      ++static_cast< Base & >( *this );
       this->realIterator.increment();
       return *this;
     }
@@ -42,8 +43,9 @@ namespace Dune
     //===========================================================
 
     /** @brief copy constructor from LevelIteratorImp */
-    LeafIterator (const LeafIteratorImp<codim, pitype, const GridImp> & i) :
-      EntityPointer<GridImp, LeafIteratorImp<codim, pitype, GridImp> >(i) {};
+    LeafIterator (const LeafIteratorImp<codim, pitype, const GridImp> & i)
+      : Base( i )
+    {}
     //@}
   };
 

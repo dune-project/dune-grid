@@ -3,9 +3,10 @@
 #ifndef DUNE_GRID_HIERARCHICITERATOR_HH
 #define DUNE_GRID_HIERARCHICITERATOR_HH
 
-#include "entitypointer.hh"
+#include <dune/grid/common/entityiterator.hh>
 
-namespace Dune {
+namespace Dune
+{
 
   /**
      @brief Enables iteration over all codim zero entities
@@ -22,11 +23,12 @@ namespace Dune {
      @ingroup GIEntityPointer
    */
   template<class GridImp, template<class> class HierarchicIteratorImp>
-  class HierarchicIterator :
-    public EntityPointer<GridImp, HierarchicIteratorImp<GridImp> >
+  class HierarchicIterator
+    : public EntityIterator< 0, GridImp, HierarchicIteratorImp< GridImp > >
   {
+    typedef EntityIterator< 0, GridImp, HierarchicIteratorImp< GridImp > > Base;
+
   public:
-    typedef typename GridImp::template Codim<0>::Entity Entity;
     /**
        @brief Preincrement operator.
 
@@ -34,7 +36,7 @@ namespace Dune {
      */
     HierarchicIterator& operator++()
     {
-      this->realIterator.increment();
+      ++static_cast< Base & >( *this );
       return *this;
     }
 
@@ -46,8 +48,9 @@ namespace Dune {
 
     /** @brief copy constructor from HierarchicIteratorImp
      */
-    HierarchicIterator (const HierarchicIteratorImp<const GridImp> & i) :
-      EntityPointer<GridImp,HierarchicIteratorImp<GridImp> >(i) {};
+    HierarchicIterator (const HierarchicIteratorImp<const GridImp> & i)
+      : Base( i )
+    {}
     //@}
   };
 

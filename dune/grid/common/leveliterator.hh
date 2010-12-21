@@ -6,9 +6,8 @@
 #include <cstddef>
 #include <iterator>
 
+#include <dune/grid/common/entityiterator.hh>
 #include <dune/grid/common/gridenums.hh>
-
-#include "entitypointer.hh"
 
 namespace Dune
 {
@@ -22,11 +21,12 @@ namespace Dune
    */
   template<int codim, PartitionIteratorType pitype, class GridImp,
       template<int,PartitionIteratorType,class> class LevelIteratorImp>
-  class LevelIterator :
-    public EntityPointer<GridImp, LevelIteratorImp<codim,pitype,GridImp> >
+  class LevelIterator
+    : public EntityIterator< codim, GridImp, LevelIteratorImp< codim, pitype, GridImp > >
   {
+    typedef EntityIterator< codim, GridImp, LevelIteratorImp< codim, pitype, GridImp > > Base;
+
   public:
-    typedef typename GridImp::template Codim<codim>::Entity Entity;
     /**
        @brief Preincrement operator.
 
@@ -34,7 +34,7 @@ namespace Dune
      */
     LevelIterator& operator++()
     {
-      this->realIterator.increment();
+      ++static_cast< Base & >( *this );
       return *this;
     }
 
@@ -46,8 +46,9 @@ namespace Dune
 
     /** @brief copy constructor from LevelIteratorImp
      */
-    LevelIterator(const LevelIteratorImp<codim,pitype,const GridImp> & i) :
-      EntityPointer<GridImp, LevelIteratorImp<codim,pitype,GridImp> >(i) {};
+    LevelIterator(const LevelIteratorImp<codim,pitype,const GridImp> & i)
+      : Base( i )
+    {}
     //@}
   };
 
