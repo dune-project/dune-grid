@@ -376,11 +376,7 @@ int Dune::UGGridLeafIntersection<GridImp>::indexInOutside () const
 
   // Renumber to DUNE numbering
   unsigned int tag = UG_NS<dim>::Tag(leafSubFaces_[subNeighborCount_].first);
-  const int number = UGGridRenumberer<dim>::facesUGtoDUNE(leafSubFaces_[subNeighborCount_].second, tag);
-
-  typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
-  const unsigned int tid = outside()->type().id();
-  return Numbering::template dune2generic< 1 >( tid, number );
+  return UGGridRenumberer<dim>::facesUGtoDUNE(leafSubFaces_[subNeighborCount_].second, tag);
 }
 
 template <class GridImp>
