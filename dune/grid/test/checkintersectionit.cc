@@ -420,7 +420,7 @@ void checkIntersectionIterator(const GridViewType& view,
     if( iIt->neighbor() )
     {
       const typename Intersection::LocalGeometry &geometryInOutside = iIt->geometryInOutside();
-      checkLocalGeometry( geometryInOutside, eIt->type(), "geometryInOutside" );
+      checkLocalGeometry( geometryInOutside, iIt->outside()->type(), "geometryInOutside" );
 
       if (geometryInInside.corners() != geometryInOutside.corners())
         DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left and right hand side!");
