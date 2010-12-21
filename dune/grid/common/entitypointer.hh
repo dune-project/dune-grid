@@ -175,7 +175,7 @@ namespace Dune
      *  \note  This cast is no longer needed to ensure assignability of iterators to
      *         EntityPointer.
      */
-    operator const EntityPointer< GridImp, base > & () const
+    operator const EntityPointer< GridImp, base > & () const DUNE_DEPRECATED
     {
       return reinterpret_cast<const EntityPointer<GridImp,base>&>(*this);
     }
