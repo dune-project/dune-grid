@@ -1,10 +1,12 @@
 # which tests to run
-TESTS = structuredgridfactorytest
+TESTS =
 
 # programs just to build when "make check" is used
-check_PROGRAMS = structuredgridfactorytest
+check_PROGRAMS =
 
 # define the programs
+TESTS += structuredgridfactorytest
+check_PROGRAMS += structuredgridfactorytest
 structuredgridfactorytest_SOURCES = structuredgridfactorytest.cc
 structuredgridfactorytest_CPPFLAGS = $(AM_CPPFLAGS) \
 	                             $(UG_CPPFLAGS)
