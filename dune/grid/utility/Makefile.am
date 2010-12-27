@@ -10,6 +10,7 @@ gridutility_HEADERS =				\
 	hierarchicsearch.hh			\
 	hostgridaccess.hh			\
 	persistentcontainer.hh			\
-	structuredgridfactory.hh
+	structuredgridfactory.hh		\
+	vertexorder.hh
 
 include $(top_srcdir)/am/global-rules
