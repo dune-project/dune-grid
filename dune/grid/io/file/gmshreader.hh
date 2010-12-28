@@ -707,6 +707,16 @@ namespace Dune
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
         break;
+      case 4 :          // 4-node tetrahedron
+        simplexVertices.resize(4);
+        readfile(file,4,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]));
+        vertices.resize(4);
+        for (int i=0; i<4; i++)
+          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
+        factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+        element_index_to_physical_entity[element_count] = physical_entity;
+        element_count++;
+        break;
       case 9 :          // 6-node triangle
         simplexVertices.resize(6);
         readfile(file,6,"%d %d %d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
@@ -718,16 +728,6 @@ namespace Dune
           factory.insertBoundarySegment(vertices,shared_ptr<BoundarySegment<dim,dimWorld> >(new QuadraticBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]])));
         boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
         boundary_element_count++;
-        break;
-      case 4 :          // 4-node tetrahedron
-        simplexVertices.resize(4);
-        readfile(file,4,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]));
-        vertices.resize(4);
-        for (int i=0; i<4; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
-        factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
-        element_index_to_physical_entity[element_count] = physical_entity;
-        element_count++;
         break;
       case 11 :          // 10-node tetrahedron
         simplexVertices.resize(10);
