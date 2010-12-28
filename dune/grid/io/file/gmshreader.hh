@@ -654,6 +654,48 @@ namespace Dune
           }
         element_count++;
         break;
+      case 5 :          // 8-node hexahedron
+        simplexVertices.resize(8);
+        readfile(file,8,"%d %d %d %d %d %d %d %d\n",
+                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]),
+                 &(simplexVertices[4]),&(simplexVertices[5]),&(simplexVertices[6]),&(simplexVertices[7])
+                 );
+        for (size_t i=0; i<simplexVertices.size(); i++)
+          if (renumber.find(simplexVertices[i])==renumber.end())
+          {
+            renumber[simplexVertices[i]] = number_of_real_vertices++;
+            factory.insertVertex(nodes[simplexVertices[i]]);
+          }
+        element_count++;
+        break;
+      case 6 :          // 6-node prism
+        simplexVertices.resize(6);
+        readfile(file,6,"%d %d %d %d %d %d\n",
+                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]),
+                 &(simplexVertices[4]),&(simplexVertices[5])
+                 );
+        for (size_t i=0; i<simplexVertices.size(); i++)
+          if (renumber.find(simplexVertices[i])==renumber.end())
+          {
+            renumber[simplexVertices[i]] = number_of_real_vertices++;
+            factory.insertVertex(nodes[simplexVertices[i]]);
+          }
+        element_count++;
+        break;
+      case 7 :          // 5-node pyramid
+        simplexVertices.resize(5);
+        readfile(file,5,"%d %d %d %d %d\n",
+                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]),
+                 &(simplexVertices[4])
+                 );
+        for (size_t i=0; i<simplexVertices.size(); i++)
+          if (renumber.find(simplexVertices[i])==renumber.end())
+          {
+            renumber[simplexVertices[i]] = number_of_real_vertices++;
+            factory.insertVertex(nodes[simplexVertices[i]]);
+          }
+        element_count++;
+        break;
       case 9 :          // 6-node triangle
         simplexVertices.resize(6);
         readfile(file,6,"%d %d %d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
@@ -714,6 +756,45 @@ namespace Dune
         for (int i=0; i<4; i++)
           vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+        element_index_to_physical_entity[element_count] = physical_entity;
+        element_count++;
+        break;
+      case 5 :          // 8-node hexahedron
+        simplexVertices.resize(8);
+        readfile(file,8,"%d %d %d %d %d %d %d %d\n",
+                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[3]),&(simplexVertices[2]),
+                 &(simplexVertices[4]),&(simplexVertices[5]),&(simplexVertices[7]),&(simplexVertices[6])
+                 );
+        vertices.resize(8);
+        for (int i=0; i<8; i++)
+          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
+        factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim),vertices);
+        element_index_to_physical_entity[element_count] = physical_entity;
+        element_count++;
+        break;
+      case 6 :          // 6-node prism
+        simplexVertices.resize(6);
+        readfile(file,6,"%d %d %d %d %d %d\n",
+                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]),
+                 &(simplexVertices[4]),&(simplexVertices[5])
+                 );
+        vertices.resize(6);
+        for (int i=0; i<6; i++)
+          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
+        factory.insertElement(Dune::GeometryType(Dune::GeometryType::prism,dim),vertices);
+        element_index_to_physical_entity[element_count] = physical_entity;
+        element_count++;
+        break;
+      case 7 :          // 5-node pyramid
+        simplexVertices.resize(5);
+        readfile(file,5,"%d %d %d %d %d\n",
+                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[3]),&(simplexVertices[2]),
+                 &(simplexVertices[4])
+                 );
+        vertices.resize(5);
+        for (int i=0; i<5; i++)
+          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
+        factory.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,dim),vertices);
         element_index_to_physical_entity[element_count] = physical_entity;
         element_count++;
         break;
