@@ -30,6 +30,8 @@
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #endif
 
+#include <dune/grid/test/gridcheck.cc>
+
 // include VTK writer
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
@@ -48,6 +50,9 @@ void testReadingGrid( const std::string& filename, int refinements )
   grid->loadBalance();
   if ( refinements > 0 )
     grid->globalRefine( refinements );
+
+  // Do some tests to make sure the grid has been properly read
+  gridcheck(*grid);
 
   // grape output
 #if HAVE_GRAPE && USEGRAPE
