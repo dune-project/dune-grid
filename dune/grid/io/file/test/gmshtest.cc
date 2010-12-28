@@ -31,11 +31,7 @@
 #endif
 
 #include <dune/grid/test/gridcheck.cc>
-
-// include VTK writer
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
-
-// include gmshreader
 #include <dune/grid/io/file/gmshreader.hh>
 
 using namespace Dune;
