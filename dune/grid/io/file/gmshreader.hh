@@ -651,20 +651,20 @@ namespace Dune
       formatString += "\n";
 
       // '10' is the largest number of dofs we may encounter in a .msh file
-      std::vector<int> simplexVertices(10);
+      std::vector<int> elementDofs(10);
 
       readfile(file,nDofs[elm_type], formatString.c_str(),
-               &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
-               &(simplexVertices[3]),&(simplexVertices[4]),&(simplexVertices[5]),
-               &(simplexVertices[6]),&(simplexVertices[7]),&(simplexVertices[8]),
-               &(simplexVertices[9]));
+               &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]),
+               &(elementDofs[3]),&(elementDofs[4]),&(elementDofs[5]),
+               &(elementDofs[6]),&(elementDofs[7]),&(elementDofs[8]),
+               &(elementDofs[9]));
 
       // insert each vertex if it hasn't been inserted already
       for (size_t i=0; i<nVertices[elm_type]; i++)
-        if (renumber.find(simplexVertices[i])==renumber.end())
+        if (renumber.find(elementDofs[i])==renumber.end())
         {
-          renumber[simplexVertices[i]] = number_of_real_vertices++;
-          factory.insertVertex(nodes[simplexVertices[i]]);
+          renumber[elementDofs[i]] = number_of_real_vertices++;
+          factory.insertVertex(nodes[elementDofs[i]]);
         }
 
       // count elements and boundary elements
