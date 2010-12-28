@@ -91,11 +91,17 @@ try
   std::cout << "reading UGGrid<2>" << std::endl;
   testReadingGrid<UGGrid<2> >( unitsquare_quads_2x2, refinements );
 
+  std::cout << "reading hybrid UGGrid<2>" << std::endl;
+  testReadingGrid<UGGrid<2> >( path + "hybrid-testgrid-2d.msh", refinements );
+
   std::cout << "reading UGGrid<3>" << std::endl;
   testReadingGrid<UGGrid<3> >( pyramid, refinements );
 
   std::cout << "reading UGGrid<3> with second order boundary approximation" << std::endl;
   testReadingGrid<UGGrid<3> >( pyr2nd,  refinements );
+
+  std::cout << "reading hybrid UGGrid<3>" << std::endl;
+  testReadingGrid<UGGrid<3> >( path + "hybrid-testgrid-3d.msh", refinements );
 #endif
 
 #if HAVE_ALBERTA
