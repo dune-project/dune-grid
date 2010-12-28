@@ -629,101 +629,50 @@ namespace Dune
                             std::map<int,unsigned int> & renumber,
                             const std::vector< GlobalVector > & nodes)
     {
-      std::vector<int> simplexVertices(10);
-      switch (elm_type)
-      {
-      case 2 :          // 3-node triangle
-        simplexVertices.resize(3);
-        readfile(file,3,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
-        for (size_t i=0; i<simplexVertices.size(); i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        boundary_element_count++;
-        break;
-      case 4 :          // 4-node tetrahedron
-        simplexVertices.resize(4);
-        readfile(file,4,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]));
-        for (size_t i=0; i<simplexVertices.size(); i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        element_count++;
-        break;
-      case 5 :          // 8-node hexahedron
-        simplexVertices.resize(8);
-        readfile(file,8,"%d %d %d %d %d %d %d %d\n",
-                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]),
-                 &(simplexVertices[4]),&(simplexVertices[5]),&(simplexVertices[6]),&(simplexVertices[7])
-                 );
-        for (size_t i=0; i<simplexVertices.size(); i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        element_count++;
-        break;
-      case 6 :          // 6-node prism
-        simplexVertices.resize(6);
-        readfile(file,6,"%d %d %d %d %d %d\n",
-                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]),
-                 &(simplexVertices[4]),&(simplexVertices[5])
-                 );
-        for (size_t i=0; i<simplexVertices.size(); i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        element_count++;
-        break;
-      case 7 :          // 5-node pyramid
-        simplexVertices.resize(5);
-        readfile(file,5,"%d %d %d %d %d\n",
-                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]),
-                 &(simplexVertices[4])
-                 );
-        for (size_t i=0; i<simplexVertices.size(); i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        element_count++;
-        break;
-      case 9 :          // 6-node triangle
-        simplexVertices.resize(6);
-        readfile(file,6,"%d %d %d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
-                 &(simplexVertices[3]),&(simplexVertices[4]),&(simplexVertices[5]));
-        for (int i=0; i<3; i++)             // insert only the first three !
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        boundary_element_count++;
-        break;
-      case 11 :          // 10-node tetrahedron
-        simplexVertices.resize(10);
-        readfile(file,10,"%d %d %d %d %d %d %d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
-                 &(simplexVertices[3]),&(simplexVertices[4]),&(simplexVertices[5]),
-                 &(simplexVertices[6]),&(simplexVertices[7]),&(simplexVertices[8]),&(simplexVertices[9]));
-        for (int i=0; i<4; i++)             // insert only the first four !
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        element_count++;
-        break;
-      default :
+      if (elm_type != 2              // 3-node triangle
+          and elm_type != 4          // 4-node tetrahedron
+          and elm_type != 5          // 8-node hexahedron
+          and elm_type != 6          // 6-node prism
+          and elm_type != 7          // 5-node pyramid
+          and elm_type != 9          // 6-node triangle
+          and elm_type != 11)        // 10-node tetrahedron
         DUNE_THROW(Dune::NotImplemented, "GmshReader does not support element type '" << elm_type << "' (yet).");
-      }
+
+      // some data about gmsh elements
+      const int nDofs[12]            = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 6, -1, 10};
+      const int nVertices[12]        = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 3, -1, 4};
+      const bool boundaryElement[12] = {false, false, true,  false, false, false,
+                                        false, false, false, true,  false, false};
+
+      // The format string for parsing is n times '%d' in a row
+      std::string formatString = "%d";
+      for (int i=1; i<nDofs[elm_type]; i++)
+        formatString += " %d";
+      formatString += "\n";
+
+      // '10' is the largest number of dofs we may encounter in a .msh file
+      std::vector<int> simplexVertices(10);
+
+      readfile(file,nDofs[elm_type], formatString.c_str(),
+               &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
+               &(simplexVertices[3]),&(simplexVertices[4]),&(simplexVertices[5]),
+               &(simplexVertices[6]),&(simplexVertices[7]),&(simplexVertices[8]),
+               &(simplexVertices[9]));
+
+      // insert each vertex if it hasn't been inserted already
+      for (size_t i=0; i<nVertices[elm_type]; i++)
+        if (renumber.find(simplexVertices[i])==renumber.end())
+        {
+          renumber[simplexVertices[i]] = number_of_real_vertices++;
+          factory.insertVertex(nodes[simplexVertices[i]]);
+        }
+
+      // count elements and boundary elements
+      if (boundaryElement[elm_type])
+        boundary_element_count++;
+      else
+        element_count++;
+
     }
 
     void pass2HandleElement(FILE* file, const int elm_type,
