@@ -680,99 +680,88 @@ namespace Dune
                             const std::vector< GlobalVector > & nodes,
                             const int physical_entity)
     {
-      std::vector<int> simplexVertices(10);
-      std::vector<unsigned int> vertices(10);
+      if (elm_type != 2              // 3-node triangle
+          and elm_type != 4          // 4-node tetrahedron
+          and elm_type != 5          // 8-node hexahedron
+          and elm_type != 6          // 6-node prism
+          and elm_type != 7          // 5-node pyramid
+          and elm_type != 9          // 6-node triangle
+          and elm_type != 11)        // 10-node tetrahedron
+        DUNE_THROW(Dune::NotImplemented, "GmshReader does not support element type '" << elm_type << "' (yet).");
+
+      // some data about gmsh elements
+      const int nDofs[12]            = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 6, -1, 10};
+      const int nVertices[12]        = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 3, -1, 4};
+      const bool boundaryElement[12] = {false, false, true,  false, false, false,
+                                        false, false, false, true,  false, false};
+
+      // The format string for parsing is n times '%d' in a row
+      std::string formatString = "%d";
+      for (int i=1; i<nDofs[elm_type]; i++)
+        formatString += " %d";
+      formatString += "\n";
+
+      // '10' is the largest number of dofs we may encounter in a .msh file
+      std::vector<int> elementDofs(10);
+
+      readfile(file,nDofs[elm_type], formatString.c_str(),
+               &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]),
+               &(elementDofs[3]),&(elementDofs[4]),&(elementDofs[5]),
+               &(elementDofs[6]),&(elementDofs[7]),&(elementDofs[8]),
+               &(elementDofs[9]));
+
+      // correct differences between gmsh and Dune in the local vertex numbering
+      switch (elm_type)
+      {
+      case 5 :          // 8-node hexahedron
+        std::swap(elementDofs[2],elementDofs[3]);
+        std::swap(elementDofs[6],elementDofs[7]);
+        break;
+      case 7 :          // 5-node pyramid
+        std::swap(elementDofs[2],elementDofs[3]);
+        break;
+      }
+
+      std::vector<unsigned int> vertices(nVertices[elm_type]);
+
+      for (int i=0; i<nVertices[elm_type]; i++)
+        vertices[i] = renumber[elementDofs[i]];         // renumber vertices
+
+      // Actually insert the element
       switch (elm_type)
       {
       case 2 :          // 3-node triangle
-        // Read the vertices but don't do anything with them.  Linear boundary segments
-        // are the default anyways.
-        simplexVertices.resize(3);
-        readfile(file,3,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
-        vertices.resize(3);
-        for (int i=0; i<3; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
-
         if (insert_boundary_segments)
           factory.insertBoundarySegment(vertices);
-        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
-        boundary_element_count++;
         break;
       case 4 :          // 4-node tetrahedron
-        simplexVertices.resize(4);
-        readfile(file,4,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]));
-        vertices.resize(4);
-        for (int i=0; i<4; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
-        element_index_to_physical_entity[element_count] = physical_entity;
-        element_count++;
         break;
       case 5 :          // 8-node hexahedron
-        simplexVertices.resize(8);
-        readfile(file,8,"%d %d %d %d %d %d %d %d\n",
-                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[3]),&(simplexVertices[2]),
-                 &(simplexVertices[4]),&(simplexVertices[5]),&(simplexVertices[7]),&(simplexVertices[6])
-                 );
-        vertices.resize(8);
-        for (int i=0; i<8; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim),vertices);
-        element_index_to_physical_entity[element_count] = physical_entity;
-        element_count++;
         break;
       case 6 :          // 6-node prism
-        simplexVertices.resize(6);
-        readfile(file,6,"%d %d %d %d %d %d\n",
-                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]),
-                 &(simplexVertices[4]),&(simplexVertices[5])
-                 );
-        vertices.resize(6);
-        for (int i=0; i<6; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::prism,dim),vertices);
-        element_index_to_physical_entity[element_count] = physical_entity;
-        element_count++;
         break;
       case 7 :          // 5-node pyramid
-        simplexVertices.resize(5);
-        readfile(file,5,"%d %d %d %d %d\n",
-                 &(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[3]),&(simplexVertices[2]),
-                 &(simplexVertices[4])
-                 );
-        vertices.resize(5);
-        for (int i=0; i<5; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,dim),vertices);
-        element_index_to_physical_entity[element_count] = physical_entity;
-        element_count++;
         break;
       case 9 :          // 6-node triangle
-        simplexVertices.resize(6);
-        readfile(file,6,"%d %d %d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
-                 &(simplexVertices[3]),&(simplexVertices[4]),&(simplexVertices[5]));
-        vertices.resize(3);
-        for (int i=0; i<3; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices first three vertices
         if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices,shared_ptr<BoundarySegment<dim,dimWorld> >(new QuadraticBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]])));
-        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
-        boundary_element_count++;
+          factory.insertBoundarySegment(vertices,shared_ptr<BoundarySegment<dim,dimWorld> >(new QuadraticBoundarySegment(nodes[elementDofs[0]],nodes[elementDofs[1]],nodes[elementDofs[2]],nodes[elementDofs[3]],nodes[elementDofs[4]],nodes[elementDofs[5]])));
         break;
       case 11 :          // 10-node tetrahedron
-        simplexVertices.resize(10);
-        readfile(file,10,"%d %d %d %d %d %d %d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
-                 &(simplexVertices[3]),&(simplexVertices[4]),&(simplexVertices[5]),
-                 &(simplexVertices[6]),&(simplexVertices[7]),&(simplexVertices[8]),&(simplexVertices[9]));
-        vertices.resize(4);
-        for (int i=0; i<4; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+        break;
+      }
+
+      // count elements and boundary elements
+      if (boundaryElement[elm_type]) {
+        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
+        boundary_element_count++;
+      } else {
         element_index_to_physical_entity[element_count] = physical_entity;
         element_count++;
-        break;
-      default :
-        DUNE_THROW(Dune::NotImplemented, "GmshReader does not support element type '" << elm_type << "' (yet).");
       }
     }
   public:
