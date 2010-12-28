@@ -256,16 +256,6 @@ namespace Dune
         DUNE_THROW(Dune::IOError, "Error parsing " << fileName << " line " << line
                                                    << ": Expected '" << format << "', only read " << c << " entries instead of " << cnt << ".");
     }
-    void skipline(FILE * file)
-    {
-      if (!feof(file))
-      {
-        char *s = fgets(buf,512,file);         // skip rest of line if no tetrahedron
-        if (!s)
-          DUNE_THROW(Dune::IOError, "Error parsing " << fileName << " line " << line
-                                                     << ": error in skipline.");
-      }
-    }
 
   public:
 
@@ -630,7 +620,6 @@ namespace Dune
     using Base::insert_boundary_segments;
     using Base::boundary_id_to_physical_entity;
     using Base::readfile;
-    using Base::skipline;
 
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
 
@@ -691,7 +680,7 @@ namespace Dune
         element_count++;
         break;
       default :
-        skipline(file);             // skip rest of line if no tetrahedron
+        DUNE_THROW(Dune::NotImplemented, "GmshReader does not support element type '" << elm_type << "' (yet).");
       }
     }
 
@@ -753,7 +742,7 @@ namespace Dune
         element_count++;
         break;
       default :
-        skipline(file);             // skip rest of line if no tetrahedron
+        DUNE_THROW(Dune::NotImplemented, "GmshReader does not support element type '" << elm_type << "' (yet).");
       }
     }
   public:
