@@ -531,8 +531,7 @@ namespace Dune
       // some data about gmsh elements
       const int nDofs[12]            = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10};
       const int nVertices[12]        = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4};
-      const bool boundaryElement[12] = {false, true, false, false, false, false,
-                                        false, false, true, false,  false, false};
+      const int elementDim[12] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3};
 
       // The format string for parsing is n times '%d' in a row
       std::string formatString = "%d";
@@ -585,12 +584,12 @@ namespace Dune
       }
 
       // count elements and boundary elements
-      if (boundaryElement[elm_type]) {
-        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
-        boundary_element_count++;
-      } else {
+      if (elementDim[elm_type] == 2) {
         element_index_to_physical_entity[element_count] = physical_entity;
         element_count++;
+      } else {
+        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
+        boundary_element_count++;
       }
 
     }
@@ -639,8 +638,7 @@ namespace Dune
       // some data about gmsh elements
       const int nDofs[12]            = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 6, -1, 10};
       const int nVertices[12]        = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 3, -1, 4};
-      const bool boundaryElement[12] = {false, false, true,  false, false, false,
-                                        false, false, false, true,  false, false};
+      const int elementDim[12] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3};
 
       // The format string for parsing is n times '%d' in a row
       std::string formatString = "%d";
@@ -703,12 +701,12 @@ namespace Dune
       }
 
       // count elements and boundary elements
-      if (boundaryElement[elm_type]) {
-        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
-        boundary_element_count++;
-      } else {
+      if (elementDim[elm_type] == 3) {
         element_index_to_physical_entity[element_count] = physical_entity;
         element_count++;
+      } else {
+        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
+        boundary_element_count++;
       }
     }
   public:
