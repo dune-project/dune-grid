@@ -228,11 +228,6 @@ namespace Dune
     // typedefs
     typedef FieldVector< double, dimWorld > GlobalVector;
 
-    // dimension dependent routines
-    void pass1HandleElement(FILE* file, const int elm_type,
-                            std::map<int,unsigned int> & renumber,
-                            const std::vector< GlobalVector > & nodes);
-
     void pass2HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
                             const std::vector< GlobalVector > & nodes,
@@ -378,7 +373,7 @@ namespace Dune
               mesh_partitions.resize(blub);
           }
         }
-        static_cast<DimImp*>(this)->pass1HandleElement(file, elm_type, renumber, nodes);
+        pass1HandleElement(file, elm_type, renumber, nodes);
       }
       if (verbose) std::cout << "number of real vertices = " << number_of_real_vertices << std::endl;
       if (verbose) std::cout << "number of boundary elements = " << boundary_element_count << std::endl;
@@ -432,50 +427,36 @@ namespace Dune
 
       fclose(file);
     }
-  };
-
-  //! Parser for Gmsh data. Specialization for 2D
-  template<typename GridType>
-  class GmshReaderParser<GridType, 2> : public GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> >
-  {
-    typedef GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> > Base;
-    typedef typename Base::GlobalVector GlobalVector;
-    using Base::dim;
-    using Base::dimWorld;
-    using Base::buf;
-    using Base::factory;
-    using Base::verbose;
-    using Base::element_index_to_physical_entity;
-    using Base::element_count;
-    using Base::number_of_real_vertices;
-    using Base::boundary_element_count;
-    using Base::insert_boundary_segments;
-    using Base::boundary_id_to_physical_entity;
-    using Base::readfile;
-
-    typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
-
-    friend class GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> >;
 
     // dimension dependent routines
     void pass1HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
                             const std::vector< GlobalVector > & nodes)
     {
-      if (elm_type != 1              // 2-node line
-          and elm_type != 2          // 3-node triangle
-          and elm_type != 3          // 4-node quadrilateral
-          and elm_type != 8          // 3-node line
-          and elm_type != 9) {       // 6-node triangle
-        readfile(file,1,"%s\n",buf);         // skip rest of line if element is unknown
-        return;
+      if (dim==2) {
+        if (elm_type != 1                // 2-node line
+            and elm_type != 2            // 3-node triangle
+            and elm_type != 3            // 4-node quadrilateral
+            and elm_type != 8            // 3-node line
+            and elm_type != 9) {         // 6-node triangle
+          readfile(file,1,"%s\n",buf);           // skip rest of line if element is unknown
+          return;
+        }
+      } else {
+        if (elm_type != 2            // 3-node triangle
+            and elm_type != 4        // 4-node tetrahedron
+            and elm_type != 5        // 8-node hexahedron
+            and elm_type != 6        // 6-node prism
+            and elm_type != 7        // 5-node pyramid
+            and elm_type != 9        // 6-node triangle
+            and elm_type != 11)      // 10-node tetrahedron
+          DUNE_THROW(Dune::NotImplemented, "GmshReader does not support element type '" << elm_type << "' (yet).");
       }
 
       // some data about gmsh elements
-      const int nDofs[12]            = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10};
-      const int nVertices[12]        = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4};
-      const bool boundaryElement[12] = {false, true, false, false, false, false,
-                                        false, false, true, false,  false, false};
+      const int nDofs[12]      = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10};
+      const int nVertices[12]  = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4};
+      const int elementDim[12] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3};
 
       // The format string for parsing is n times '%d' in a row
       std::string formatString = "%d";
@@ -501,12 +482,37 @@ namespace Dune
         }
 
       // count elements and boundary elements
-      if (boundaryElement[elm_type])
-        boundary_element_count++;
-      else
+      if (elementDim[elm_type] == dim)
         element_count++;
+      else
+        boundary_element_count++;
 
     }
+
+  };
+
+  //! Parser for Gmsh data. Specialization for 2D
+  template<typename GridType>
+  class GmshReaderParser<GridType, 2> : public GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> >
+  {
+    typedef GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> > Base;
+    typedef typename Base::GlobalVector GlobalVector;
+    using Base::dim;
+    using Base::dimWorld;
+    using Base::buf;
+    using Base::factory;
+    using Base::verbose;
+    using Base::element_index_to_physical_entity;
+    using Base::element_count;
+    using Base::number_of_real_vertices;
+    using Base::boundary_element_count;
+    using Base::insert_boundary_segments;
+    using Base::boundary_id_to_physical_entity;
+    using Base::readfile;
+
+    typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
+
+    friend class GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> >;
 
     void pass2HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
@@ -615,56 +621,6 @@ namespace Dune
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
 
     friend class GmshReaderParserBase< GridType, GmshReaderParser<GridType, 3> >;
-
-    void pass1HandleElement(FILE* file, const int elm_type,
-                            std::map<int,unsigned int> & renumber,
-                            const std::vector< GlobalVector > & nodes)
-    {
-      if (elm_type != 2              // 3-node triangle
-          and elm_type != 4          // 4-node tetrahedron
-          and elm_type != 5          // 8-node hexahedron
-          and elm_type != 6          // 6-node prism
-          and elm_type != 7          // 5-node pyramid
-          and elm_type != 9          // 6-node triangle
-          and elm_type != 11)        // 10-node tetrahedron
-        DUNE_THROW(Dune::NotImplemented, "GmshReader does not support element type '" << elm_type << "' (yet).");
-
-      // some data about gmsh elements
-      const int nDofs[12]            = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 6, -1, 10};
-      const int nVertices[12]        = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 3, -1, 4};
-      const bool boundaryElement[12] = {false, false, true,  false, false, false,
-                                        false, false, false, true,  false, false};
-
-      // The format string for parsing is n times '%d' in a row
-      std::string formatString = "%d";
-      for (int i=1; i<nDofs[elm_type]; i++)
-        formatString += " %d";
-      formatString += "\n";
-
-      // '10' is the largest number of dofs we may encounter in a .msh file
-      std::vector<int> elementDofs(10);
-
-      readfile(file,nDofs[elm_type], formatString.c_str(),
-               &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]),
-               &(elementDofs[3]),&(elementDofs[4]),&(elementDofs[5]),
-               &(elementDofs[6]),&(elementDofs[7]),&(elementDofs[8]),
-               &(elementDofs[9]));
-
-      // insert each vertex if it hasn't been inserted already
-      for (size_t i=0; i<nVertices[elm_type]; i++)
-        if (renumber.find(elementDofs[i])==renumber.end())
-        {
-          renumber[elementDofs[i]] = number_of_real_vertices++;
-          factory.insertVertex(nodes[elementDofs[i]]);
-        }
-
-      // count elements and boundary elements
-      if (boundaryElement[elm_type])
-        boundary_element_count++;
-      else
-        element_count++;
-
-    }
 
     void pass2HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
