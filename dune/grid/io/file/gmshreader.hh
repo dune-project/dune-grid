@@ -201,7 +201,7 @@ namespace Dune
   {};
 
   //! dimension independent parts for GmshReaderParser
-  template<typename GridType, typename DimImp>
+  template<typename GridType>
   class GmshReaderParserBase
   {
   protected:
@@ -228,10 +228,10 @@ namespace Dune
     // typedefs
     typedef FieldVector< double, dimWorld > GlobalVector;
 
-    void pass2HandleElement(FILE* file, const int elm_type,
-                            std::map<int,unsigned int> & renumber,
-                            const std::vector< GlobalVector > & nodes,
-                            const int physical_entity);
+    virtual void pass2HandleElement(FILE* file, const int elm_type,
+                                    std::map<int,unsigned int> & renumber,
+                                    const std::vector< GlobalVector > & nodes,
+                                    const int physical_entity) = 0;
 
     // template<class T1, class T2, class T3, class T4, class T5, class T6,
     //          class T7, class T8, class T9>
@@ -419,7 +419,7 @@ namespace Dune
               mesh_partitions.resize(blub);
           }
         }
-        static_cast<DimImp*>(this)->pass2HandleElement(file, elm_type, renumber, nodes, physical_entity);
+        pass2HandleElement(file, elm_type, renumber, nodes, physical_entity);
       }
       readfile(file,1,"%s\n",buf);
       if (strcmp(buf,"$EndElements")!=0)
@@ -493,9 +493,9 @@ namespace Dune
 
   //! Parser for Gmsh data. Specialization for 2D
   template<typename GridType>
-  class GmshReaderParser<GridType, 2> : public GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> >
+  class GmshReaderParser<GridType, 2> : public GmshReaderParserBase< GridType >
   {
-    typedef GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> > Base;
+    typedef GmshReaderParserBase< GridType > Base;
     typedef typename Base::GlobalVector GlobalVector;
     using Base::dim;
     using Base::dimWorld;
@@ -512,7 +512,7 @@ namespace Dune
 
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
 
-    friend class GmshReaderParserBase< GridType, GmshReaderParser<GridType, 2> >;
+    friend class GmshReaderParserBase< GridType >;
 
     void pass2HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
@@ -600,9 +600,9 @@ namespace Dune
 
   //! Parser for Gmsh data. Specialization for 3D
   template<typename GridType>
-  class GmshReaderParser<GridType, 3> : public GmshReaderParserBase< GridType, GmshReaderParser<GridType, 3> >
+  class GmshReaderParser<GridType, 3> : public GmshReaderParserBase< GridType >
   {
-    typedef GmshReaderParserBase< GridType, GmshReaderParser<GridType, 3> > Base;
+    typedef GmshReaderParserBase< GridType > Base;
     typedef typename Base::GlobalVector GlobalVector;
     using Base::dim;
     using Base::dimWorld;
@@ -619,7 +619,7 @@ namespace Dune
 
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
 
-    friend class GmshReaderParserBase< GridType, GmshReaderParser<GridType, 3> >;
+    friend class GmshReaderParserBase< GridType >;
 
     void pass2HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
