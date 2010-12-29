@@ -124,7 +124,7 @@ namespace Dune {
         const int renumbering[4] = {2, 1, 3, 0};
         return renumbering[i];
 
-      } else if (tag = UG::D2::TRIANGLE) {
+      } else if (tag == UG::D2::TRIANGLE) {
 
         // faces of a triangle
         const int renumbering[3] = {0, 2, 1};
