@@ -513,71 +513,80 @@ namespace Dune
                             const std::vector< GlobalVector > & nodes,
                             const int physical_entity)
     {
-      std::vector<int> simplexVertices(6);
-      std::vector<unsigned int> vertices(3);
+      if (elm_type != 1              // 2-node line
+          and elm_type != 2          // 3-node triangle
+          and elm_type != 3          // 4-node quadrilateral
+          and elm_type != 8          // 3-node line
+          and elm_type != 9) {       // 6-node triangle
+        readfile(file,1,"%s\n",buf);         // skip rest of line if element is unknown
+        return;
+      }
+
+      // some data about gmsh elements
+      const int nDofs[12]            = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10};
+      const int nVertices[12]        = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4};
+      const bool boundaryElement[12] = {false, true, false, false, false, false,
+                                        false, false, true, false,  false, false};
+
+      // The format string for parsing is n times '%d' in a row
+      std::string formatString = "%d";
+      for (int i=1; i<nDofs[elm_type]; i++)
+        formatString += " %d";
+      formatString += "\n";
+
+      // '10' is the largest number of dofs we may encounter in a .msh file
+      std::vector<int> elementDofs(10);
+
+      readfile(file,nDofs[elm_type], formatString.c_str(),
+               &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]),
+               &(elementDofs[3]),&(elementDofs[4]),&(elementDofs[5]),
+               &(elementDofs[6]),&(elementDofs[7]),&(elementDofs[8]),
+               &(elementDofs[9]));
+
+      // correct differences between gmsh and Dune in the local vertex numbering
+      switch (elm_type)
+      {
+      case 3 :          // 4-node quadrilateral
+        std::swap(elementDofs[2],elementDofs[3]);
+        break;
+      }
+
+      std::vector<unsigned int> vertices(nVertices[elm_type]);
+
+      for (int i=0; i<nVertices[elm_type]; i++)
+        vertices[i] = renumber[elementDofs[i]];         // renumber vertices
+
+      // Actually insert the element
       switch (elm_type)
       {
       case 1 :          // 2-node line
-        // read the vertices, but don't do anything with them.  Linear boundary
-        // segments are the default.
-        simplexVertices.resize(2);
-        readfile(file,2,"%d %d\n",&(simplexVertices[0]),&(simplexVertices[1]));
-        vertices.resize(2);
-        for (int i=0; i<2; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         if (insert_boundary_segments)
           factory.insertBoundarySegment(vertices);
-        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
-        boundary_element_count++;
-        break;
-      case 8 :          // 3-node line
-        simplexVertices.resize(3);
-        readfile(file,3,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
-        vertices.resize(2);
-        for (int i=0; i<2; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
-        if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<dim,dimWorld> >(new QuadraticBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[2]],nodes[simplexVertices[1]])));
-        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
-        boundary_element_count++;
         break;
       case 2 :          // 3-node triangle
-        simplexVertices.resize(3);
-        readfile(file,3,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
-        vertices.resize(3);
-        for (int i=0; i<3; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
-        element_index_to_physical_entity[element_count] = physical_entity;
-        element_count++;
         break;
       case 3 :          // 4-node quadrilateral
-        simplexVertices.resize(4);
-        readfile(file,4,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]));
-        vertices.resize(4);
-        // renumber vertices: a) global renumbering, and b) gmsh-to-dune quad renumbering
-        vertices[0] = renumber[simplexVertices[0]];
-        vertices[1] = renumber[simplexVertices[1]];
-        vertices[2] = renumber[simplexVertices[3]];
-        vertices[3] = renumber[simplexVertices[2]];
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim),vertices);
-        element_index_to_physical_entity[element_count] = physical_entity;
-        element_count++;
+        break;
+      case 8 :          // 3-node line
+        if (insert_boundary_segments)
+          factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<dim,dimWorld> >(new QuadraticBoundarySegment(nodes[elementDofs[0]],nodes[elementDofs[2]],nodes[elementDofs[1]])));
         break;
       case 9 :          // 6-node triangle
-        simplexVertices.resize(6);
-        readfile(file,6,"%d %d %d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
-                 &(simplexVertices[3]),&(simplexVertices[4]),&(simplexVertices[5]));
-        vertices.resize(3);
-        for (int i=0; i<3; i++)
-          vertices[i] = renumber[simplexVertices[i]];               // renumber vertices
         factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+        break;
+      }
+
+      // count elements and boundary elements
+      if (boundaryElement[elm_type]) {
+        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
+        boundary_element_count++;
+      } else {
         element_index_to_physical_entity[element_count] = physical_entity;
         element_count++;
-        break;
-      default :
-        readfile(file,1,"%s\n",buf);             // skip rest of line if no tetrahedron
       }
+
     }
   public:
     GmshReaderParser(Dune::GridFactory<GridType>& _factory, bool v, bool i) :
