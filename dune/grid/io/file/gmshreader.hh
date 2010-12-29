@@ -462,68 +462,50 @@ namespace Dune
                             std::map<int,unsigned int> & renumber,
                             const std::vector< GlobalVector > & nodes)
     {
-      std::vector<int> simplexVertices(6);
-      switch (elm_type)
-      {
-      case 1 :          // 2-node line
-        simplexVertices.resize(2);
-        readfile(file,2,"%d %d\n",&(simplexVertices[0]),&(simplexVertices[1]));
-        for (int i=0; i<2; i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        boundary_element_count++;
-        break;
-      case 8 :          // 3-node line
-        simplexVertices.resize(3);
-        readfile(file,3,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
-        for (int i=0; i<2; i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        boundary_element_count++;
-        break;
-      case 2 :          // 3-node triangle
-        simplexVertices.resize(3);
-        readfile(file,3,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
-        for (int i=0; i<3; i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        element_count++;
-        break;
-      case 3 :          // 4-node quadrilateral
-        simplexVertices.resize(4);
-        readfile(file,4,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]));
-        for (int i=0; i<3; i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        element_count++;
-        break;
-      case 9 :          // 6-node triangle
-        simplexVertices.resize(6);
-        readfile(file,6,"%d %d %d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),
-                 &(simplexVertices[3]),&(simplexVertices[4]),&(simplexVertices[5]));
-        for (int i=0; i<3; i++)
-          if (renumber.find(simplexVertices[i])==renumber.end())
-          {
-            renumber[simplexVertices[i]] = number_of_real_vertices++;
-            factory.insertVertex(nodes[simplexVertices[i]]);
-          }
-        element_count++;
-        break;
-      default :
-        readfile(file,1,"%s\n",buf);             // skip rest of line if no triangle
+      if (elm_type != 1              // 2-node line
+          and elm_type != 2          // 3-node triangle
+          and elm_type != 3          // 4-node quadrilateral
+          and elm_type != 8          // 3-node line
+          and elm_type != 9) {       // 6-node triangle
+        readfile(file,1,"%s\n",buf);         // skip rest of line if element is unknown
+        return;
       }
+
+      // some data about gmsh elements
+      const int nDofs[12]            = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10};
+      const int nVertices[12]        = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4};
+      const bool boundaryElement[12] = {false, true, false, false, false, false,
+                                        false, false, true, false,  false, false};
+
+      // The format string for parsing is n times '%d' in a row
+      std::string formatString = "%d";
+      for (int i=1; i<nDofs[elm_type]; i++)
+        formatString += " %d";
+      formatString += "\n";
+
+      // '10' is the largest number of dofs we may encounter in a .msh file
+      std::vector<int> elementDofs(10);
+
+      readfile(file,nDofs[elm_type], formatString.c_str(),
+               &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]),
+               &(elementDofs[3]),&(elementDofs[4]),&(elementDofs[5]),
+               &(elementDofs[6]),&(elementDofs[7]),&(elementDofs[8]),
+               &(elementDofs[9]));
+
+      // insert each vertex if it hasn't been inserted already
+      for (size_t i=0; i<nVertices[elm_type]; i++)
+        if (renumber.find(elementDofs[i])==renumber.end())
+        {
+          renumber[elementDofs[i]] = number_of_real_vertices++;
+          factory.insertVertex(nodes[elementDofs[i]]);
+        }
+
+      // count elements and boundary elements
+      if (boundaryElement[elm_type])
+        boundary_element_count++;
+      else
+        element_count++;
+
     }
 
     void pass2HandleElement(FILE* file, const int elm_type,
