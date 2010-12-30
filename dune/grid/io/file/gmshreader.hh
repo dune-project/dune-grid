@@ -433,30 +433,18 @@ namespace Dune
                             std::map<int,unsigned int> & renumber,
                             const std::vector< GlobalVector > & nodes)
     {
-      if (dim==2) {
-        if (elm_type != 1                // 2-node line
-            and elm_type != 2            // 3-node triangle
-            and elm_type != 3            // 4-node quadrilateral
-            and elm_type != 8            // 3-node line
-            and elm_type != 9) {         // 6-node triangle
-          readfile(file,1,"%s\n",buf);           // skip rest of line if element is unknown
-          return;
-        }
-      } else {
-        if (elm_type != 2            // 3-node triangle
-            and elm_type != 4        // 4-node tetrahedron
-            and elm_type != 5        // 8-node hexahedron
-            and elm_type != 6        // 6-node prism
-            and elm_type != 7        // 5-node pyramid
-            and elm_type != 9        // 6-node triangle
-            and elm_type != 11)      // 10-node tetrahedron
-          DUNE_THROW(Dune::NotImplemented, "GmshReader does not support element type '" << elm_type << "' (yet).");
-      }
-
       // some data about gmsh elements
       const int nDofs[12]      = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10};
       const int nVertices[12]  = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4};
       const int elementDim[12] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3};
+
+      // test whether we support the element type
+      if ( not (elm_type >= 0 && elm_type < 12         // index in suitable range?
+                && (elementDim[elm_type] == dim || elementDim[elm_type] == (dim-1) ) ) )         // real element or boundary element?
+      {
+        readfile(file,1,"%s\n",buf);         // skip rest of line if element is unknown
+        return;
+      }
 
       // The format string for parsing is n times '%d' in a row
       std::string formatString = "%d";
