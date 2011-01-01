@@ -302,8 +302,17 @@ namespace Dune
       typedef typename MappingProvider::Mapping Mapping;
 
     public:
-      /** \brief Type used for Jacobian matrices */
+      /** \brief Type used for Jacobian matrices
+       *
+       * \note This is not a FieldMatrix but a proxy type that can be assigned
+       *       to a FieldMatrix.
+       */
       typedef typename Mapping::JacobianTransposed JacobianTransposed;
+      /** \brief Type used for Jacobian matrices
+       *
+       * \note This is not a FieldMatrix but a proxy type that can be assigned
+       *       to a FieldMatrix.
+       */
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
 
     public:
