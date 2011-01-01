@@ -9,6 +9,7 @@ gridutility_HEADERS =				\
 	gridtype.hh				\
 	hierarchicsearch.hh			\
 	hostgridaccess.hh			\
+	mockgeometry.hh				\
 	persistentcontainer.hh			\
 	structuredgridfactory.hh		\
 	vertexorder.hh
