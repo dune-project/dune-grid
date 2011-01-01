@@ -304,14 +304,7 @@ namespace Dune
     public:
       /** \brief Type used for Jacobian matrices */
       typedef typename Mapping::JacobianTransposed JacobianTransposed;
-      /** \brief Type used for Jacobian matrices
-       *
-       * This is identical to \c Jacobian and exists mainly for historical
-       * reasons, and because deprecating typedefs conflicts with g++-4.1.
-       */
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
-      /** \brief Type used for Jacobian matrices */
-      typedef typename Mapping::JacobianInverseTransposed Jacobian;
 
     public:
       /** \brief Default constructor */
