@@ -7,7 +7,7 @@
 
 // Dune includes
 #include <dune/grid/common/entity.hh>
-#include <dune/grid/common/intersectioniteratorwrapper.hh>
+#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
 
 // Local includes
 #include "alu3dinclude.hh"
@@ -82,6 +82,8 @@ namespace Dune
     template< class > friend class ALU3dGridFactory;
 
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim<cd>::InterfaceType HItemType;
     typedef typename ImplTraits::template Codim<cd>::ImplementationType ItemType;
@@ -106,7 +108,7 @@ namespace Dune
     PartitionType partitionType() const;
 
     //! Constructor
-    ALU3dGridEntity(const GridImp &grid, int level);
+    ALU3dGridEntity(const FactoryType &factory, int level);
 
     //! copy Constructor
     ALU3dGridEntity(const ALU3dGridEntity & org);
@@ -143,7 +145,10 @@ namespace Dune
     const ItemType & getItem () const { return *item_; }
 
     //! return reference to grid
-    const GridImp& grid() const { return grid_; }
+    const GridImp& grid() const { return factory_.grid(); }
+
+    //! return reference to factory
+    const FactoryType& factory() const { return factory_; }
 
     //! return seed of entity
     EntitySeed seed() const
@@ -153,7 +158,7 @@ namespace Dune
 
   private:
     //! return reference to geometry implementation
-    GeometryImp& geoImp() const { return grid_.getRealImplementation(geo_); }
+    GeometryImp& geoImp() const { return GridImp :: getRealImplementation(geo_); }
 
     //! index is unique within the grid hierarchy and per codim
     int getIndex () const;
@@ -164,8 +169,8 @@ namespace Dune
     //! the cuurent geometry
     mutable GeometryObject geo_;
 
-    // the grid this entity belongs to
-    const GridImp &grid_;
+    // the factory that created this entity
+    const FactoryType& factory_;
 
     // corresponding ALU3dGrid item, here face, edge, or vertex
     const ItemType * item_;
@@ -243,6 +248,8 @@ namespace Dune
     typedef typename GridImp :: ReferenceElementType ReferenceElementType;
 
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
     typedef ALU3dGridGeometry<dim,dimworld,GridImp> GeometryImp;
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
@@ -265,7 +272,7 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
 
     //! Constructor creating empty Entity
-    ALU3dGridEntity(const GridImp &grid, int level);
+    ALU3dGridEntity(const FactoryType& factory, int level);
 
     //! copy Constructor
     ALU3dGridEntity(const ALU3dGridEntity & org);
@@ -418,7 +425,10 @@ namespace Dune
     }
 
     //! return reference to grid
-    const GridImp& grid() const { return grid_; }
+    const GridImp& grid() const { return factory_.grid(); }
+
+    //! return reference to factory
+    const FactoryType& factory() const { return factory_; }
 
     //! returns true if entity is ghost
     bool isGhost () const { return ImplTraits::isGhost( ghost_ ); }
@@ -434,7 +444,7 @@ namespace Dune
 
   private:
     //! return reference to geometry implementation
-    GeometryImp& geoImp() const { return grid_.getRealImplementation(geo_); }
+    GeometryImp& geoImp() const { return GridImp :: getRealImplementation(geo_); }
 
     //! index is unique within the grid hierachy and per codim
     int getIndex () const;
@@ -442,8 +452,8 @@ namespace Dune
     //! the entity's geometry
     mutable GeometryObject geo_;
 
-    // corresponding grid
-    const GridImp& grid_;
+    // corresponding factory
+    const FactoryType& factory_;
 
     // the current element of grid
     mutable IMPLElementType* item_;
@@ -484,6 +494,8 @@ namespace Dune
     typedef typename ImplTraits::HBndSegType HBndSegType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     enum { codimension = codim };
 
     //! type of Entity
@@ -502,11 +514,11 @@ namespace Dune
     typedef ALU3dGridEntitySeed<codimension, GridImp> ALU3dGridEntitySeedType;
 
     //! Constructor for EntityPointer that points to an element
-    ALU3dGridEntityPointerBase(const GridImp & grid,
+    ALU3dGridEntityPointerBase(const FactoryType& factory,
                                const HElementType & item);
 
     //! Constructor for EntityPointer that points to an element
-    ALU3dGridEntityPointerBase(const GridImp & grid,
+    ALU3dGridEntityPointerBase(const FactoryType& factory,
                                const HElementType & item,
                                const int level,
                                const int twist,
@@ -514,11 +526,11 @@ namespace Dune
                                );
 
     //! Constructor for EntityPointer that points to an ghost
-    ALU3dGridEntityPointerBase(const GridImp & grid,
+    ALU3dGridEntityPointerBase(const FactoryType& factory,
                                const HBndSegType & ghostFace );
 
     //! Constructor for EntityPointer that points to an ghost
-    ALU3dGridEntityPointerBase(const GridImp & grid,
+    ALU3dGridEntityPointerBase(const FactoryType& factory,
                                const ALU3dGridEntitySeedType& seed );
 
     //! copy constructor
@@ -555,17 +567,20 @@ namespace Dune
     //! put entity to entity stack
     void freeEntity ();
 
+    //! return reference to grid
+    const GridImp& grid () const { return factory_.grid(); }
+
     //! Constructor for EntityPointer init of Level-, and Leaf-, and
     //! HierarchicIterator
-    ALU3dGridEntityPointerBase(const GridImp & grid, int level );
+    ALU3dGridEntityPointerBase(const FactoryType& factory, int level );
 
     // update underlying item pointer and set ghost entity
     void updateGhostPointer( HBndSegType & ghostFace );
     // update underlying item pointer and set entity
     void updateEntityPointer( HElementType * item , int level = -1 );
 
-    // reference to grid
-    const GridImp & grid_;
+    // reference to factory
+    const FactoryType& factory_;
 
     // key to gererate entity
     ALU3dGridEntitySeedType seed_;
@@ -579,7 +594,7 @@ namespace Dune
     // return reference to internal entity implementation
     EntityImp & entityImp () const {
       assert( entity_ );
-      return grid_.getRealImplementation(*entity_);
+      return GridImp :: getRealImplementation(*entity_);
     }
   };
 
@@ -615,8 +630,10 @@ namespace Dune
     using BaseType :: seed_;
     using BaseType :: entity_;
     using BaseType :: entityImp;
-    using BaseType :: grid_;
+    using BaseType :: factory_;
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     //! type of entity seed
     typedef ALU3dGridEntitySeed<cd, GridImp> ALU3dGridEntitySeedType;
 
@@ -627,24 +644,24 @@ namespace Dune
     typedef ThisType ALU3dGridEntityPointerType;
 
     //! Constructor for EntityPointer that points to an interior element
-    ALU3dGridEntityPointer(const GridImp & grid,
+    ALU3dGridEntityPointer(const FactoryType& factory,
                            const HElementType & item)
-      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,item) {}
+      : ALU3dGridEntityPointerBase<cd,GridImp> (factory,item) {}
 
     //! Constructor for EntityPointer that points to an ghost
-    ALU3dGridEntityPointer(const GridImp & grid,
+    ALU3dGridEntityPointer(const FactoryType& factory,
                            const HBndSegType & ghostFace )
-      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,ghostFace) {}
+      : ALU3dGridEntityPointerBase<cd,GridImp> (factory,ghostFace) {}
 
     //! Constructor for EntityPointer that points to given entity
-    ALU3dGridEntityPointer(const GridImp& grid, const ALU3dGridEntitySeedType& seed)
-      : ALU3dGridEntityPointerBase<cd,GridImp> (grid, seed)
+    ALU3dGridEntityPointer(const FactoryType& factory, const ALU3dGridEntitySeedType& seed)
+      : ALU3dGridEntityPointerBase<cd,GridImp> (factory, seed)
     {
       // for ghost entities we have to copy right away
       if( seed.isGhost() )
       {
         assert( entity_ == 0 );
-        entity_ = grid_.template getNewEntity<0> ();
+        entity_ = factory_.template getNewEntity<0> ();
         assert( entity_ );
         entityImp().setGhost( *seed.ghost() );
 
@@ -655,14 +672,14 @@ namespace Dune
 
     //! Constructor for EntityPointer that points to an entity (interior or ghost)
     ALU3dGridEntityPointer(const ALU3dGridEntityType& entity)
-      : ALU3dGridEntityPointerBase<cd,GridImp> (entity.grid(),
+      : ALU3dGridEntityPointerBase<cd,GridImp> (entity.factory(),
                                                 entity.seed() )
     {
       // for ghost entities we have to copy right away
       if( entity.isGhost() )
       {
         assert( entity_ == 0 );
-        entity_ = grid_.template getNewEntity<0> ();
+        entity_ = factory_.template getNewEntity<0> ();
         assert( entity_ );
         entityImp().setEntity( entity );
 
@@ -679,8 +696,8 @@ namespace Dune
   protected:
     //! Constructor for EntityPointer init of Level-, and Leaf-, and
     //! HierarchicIterator
-    ALU3dGridEntityPointer(const GridImp & grid, int level )
-      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,level) {}
+    ALU3dGridEntityPointer(const FactoryType& factory, int level )
+      : ALU3dGridEntityPointerBase<cd,GridImp> (factory,level) {}
   };
 
 
@@ -710,10 +727,12 @@ namespace Dune
     using BaseType :: seed_;
     using BaseType :: entity_;
     using BaseType :: entityImp;
-    using BaseType :: grid_;
+    using BaseType :: factory_;
     using BaseType :: getEntity;
 
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     //! type of entity seed
     typedef ALU3dGridEntitySeed<cd, GridImp> ALU3dGridEntitySeedType;
 
@@ -728,7 +747,7 @@ namespace Dune
 
   public:
     //! Constructor for EntityPointer that points to an element
-    ALU3dGridEntityPointer(const GridImp & grid,
+    ALU3dGridEntityPointer(const FactoryType& factory,
                            const int level,
                            const HElementType & item,
                            const int twist = defaultValue,
@@ -737,13 +756,13 @@ namespace Dune
 
     //! Constructor for EntityPointer that points to given entity
     ALU3dGridEntityPointer(const ALU3dGridEntityType& entity)
-      : ALU3dGridEntityPointerBase<cd,GridImp> (entity.grid(),
+      : ALU3dGridEntityPointerBase<cd,GridImp> (entity.factory(),
                                                 entity.seed())
     {}
 
     //! Constructor for EntityPointer that points to given entity
-    ALU3dGridEntityPointer(const GridImp& grid, const ALU3dGridEntitySeedType& seed)
-      : ALU3dGridEntityPointerBase<cd,GridImp> ( grid, seed )
+    ALU3dGridEntityPointer(const FactoryType& factory, const ALU3dGridEntitySeedType& seed)
+      : ALU3dGridEntityPointerBase<cd,GridImp> ( factory, seed )
     {}
 
     //! copy constructor
@@ -766,8 +785,8 @@ namespace Dune
 
     //! Constructor for EntityPointer init of Level-, and Leaf-, and
     //! HierarchicIterator
-    ALU3dGridEntityPointer(const GridImp & grid, int level )
-      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,level)
+    ALU3dGridEntityPointer(const FactoryType& factory, int level )
+      : ALU3dGridEntityPointerBase<cd,GridImp> (factory,level)
     {}
   };
 

@@ -9,8 +9,8 @@
 
 // Dune includes
 #include <dune/grid/common/grid.hh>
-#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
+#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/alugrid/2d/entity.hh>
 
@@ -99,6 +99,8 @@ namespace Dune
     static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
+
     typedef ALU2dGridIntersectionBase< GridImp > ImplementationType;
     //! type of the intersection
     typedef Dune::Intersection< GridImp, Dune::ALU2dGridIntersectionBase > Intersection;
@@ -203,7 +205,7 @@ namespace Dune
 
   public:
     //! The default Constructor , creating an empty ALU2dGridIntersectionIterator
-    ALU2dGridIntersectionBase(const GridImp & grid, int wLevel);
+    ALU2dGridIntersectionBase(const FactoryType& factory, int wLevel);
 
     //! The copy constructor
     ALU2dGridIntersectionBase(const ThisType & org);
@@ -268,6 +270,8 @@ namespace Dune
     GeometryType type () const;
 
   protected:
+    const GridImp& grid() const { return factory_.grid(); }
+
     virtual bool conforming() const = 0;
 
     //! return true if intersection is with boundary
@@ -291,8 +295,8 @@ namespace Dune
     mutable LocalGeometryObject intersectionSelfLocal_;
     mutable LocalGeometryObject intersectionNeighborLocal_;
 
-    // reference to grid
-    const GridImp & grid_;
+    // reference to factory
+    const FactoryType& factory_;
     const LocalGeometryStorageType& localGeomStorage_;
 
     mutable int walkLevel_;
@@ -330,6 +334,7 @@ namespace Dune
     typedef std::pair< HElementType *, int > IntersectionInfo;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
     typedef ALUMemoryProvider< ThisType > StorageType;
 
     enum { dimension       = GridImp::dimension };
@@ -348,10 +353,10 @@ namespace Dune
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
 
     //! The default Constructor , creating an empty ALU2dGridIntersectionIterator
-    ALU2dGridLevelIntersectionIterator(const GridImp & grid, int wLevel);
+    ALU2dGridLevelIntersectionIterator(const FactoryType& factory, int wLevel);
 
     //! The default Constructor , level tells on which level we want neighbours
-    ALU2dGridLevelIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end=true);
+    ALU2dGridLevelIntersectionIterator(const FactoryType& factory, const HElementType* el, int wLevel, bool end=true);
 
     //! The copy constructor
     ALU2dGridLevelIntersectionIterator(const ALU2dGridLevelIntersectionIterator<GridImp> & org);
@@ -366,7 +371,7 @@ namespace Dune
     //! otherwise might not be conform
     bool conforming () const
     {
-      return (this->grid_.nonConform() || isConform());
+      return (this->grid().nonConform() || isConform());
     }
 
   protected:
@@ -426,6 +431,7 @@ namespace Dune
     static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
     typedef ALUMemoryProvider< ThisType > StorageType;
 
     enum { dimension       = GridImp::dimension };
@@ -452,10 +458,10 @@ namespace Dune
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
 
     //! The default Constructor , createing an empty ALU2dGridIntersectionIterator
-    ALU2dGridLeafIntersectionIterator(const GridImp & grid, int wLevel);
+    ALU2dGridLeafIntersectionIterator(const FactoryType& factory, int wLevel);
 
     //! The default Constructor , level tells on which level we want neighbours
-    ALU2dGridLeafIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end=true);
+    ALU2dGridLeafIntersectionIterator(const FactoryType& factory, const HElementType* el, int wLevel, bool end=true);
 
     //! The copy constructor
     ALU2dGridLeafIntersectionIterator(const ALU2dGridLeafIntersectionIterator<GridImp> & org);
@@ -469,7 +475,7 @@ namespace Dune
     //! leaf is conforming, when conform grid version used
     bool conforming () const
     {
-      return (!this->grid_.nonConform() || isConform());
+      return (!this->grid().nonConform() || isConform());
     }
 
   protected:

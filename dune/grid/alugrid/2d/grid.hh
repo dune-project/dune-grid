@@ -11,17 +11,17 @@
 //- Dune includes
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
-#include <dune/grid/alugrid/interfaces.hh>
+#include <dune/grid/alugrid/common/interfaces.hh>
 #include <dune/common/deprecated.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
-#include <dune/grid/alugrid/defaultindexsets.hh>
+#include <dune/grid/alugrid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/defaultgridview.hh>
 #include <dune/common/mpihelper.hh>
 
-#include <dune/grid/common/intersectioniteratorwrapper.hh>
+#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
 
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
@@ -29,7 +29,7 @@
 
 //- Local includes
 #include "indexsets.hh"
-#include <dune/grid/alugrid/common/memory.hh>
+#include <dune/grid/alugrid/common/objectfactory.hh>
 #include "datahandle.hh"
 
 namespace Dune {
@@ -69,8 +69,6 @@ namespace Dune {
   class ALU2dGrid;
   template <class GridImp, class GeometryImp, int nChild>
   class ALULocalGeometryStorage;
-  template <class GridImp, int codim>
-  struct ALU2dGridEntityFactory;
 
   class ALU2dObjectStream;
 
@@ -201,7 +199,14 @@ namespace Dune {
 
     typedef typename ALU2dGridFamily< dim, dimworld, elementType >::Traits Traits;
 
+    // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
+    typedef ALU2dGridLeafIntersectionIterator <const ThisType>  LeafIntersectionIteratorImp;
+    typedef ALU2dGridLevelIntersectionIterator<const ThisType>  LevelIntersectionIteratorImp;
+
+    typedef ALUGridObjectFactory< ThisType >  GridObjectFactoryType;
+
   private:
+
     typedef typename ALU2dImplTraits<dimworld, elementType >::HmeshType HmeshType ;
     typedef typename ALU2dImplTraits<dimworld, elementType >::HElementType HElementType ;
     typedef typename ALU2dImplTraits<dimworld, elementType >::ElementType ElementType ;
@@ -209,9 +214,6 @@ namespace Dune {
     template< class > friend class DGFBaseFactory;
 
     template< int, int, class > friend class ALU2dGridEntity;
-    // friend class ALU2dGridEntity<0,dim,const ThisType>;
-    // friend class ALU2dGridEntity<1,dim,const ThisType>;
-    // friend class ALU2dGridEntity<dim,dim,const ThisType>;
 
     friend class ALU2dGridGeometry<0,dimworld,const ThisType>;
     friend class ALU2dGridGeometry<1,dimworld,const ThisType>;
@@ -223,8 +225,6 @@ namespace Dune {
     friend class ALU2dGridEntityPointer<dim,const ThisType>;
 
     friend class ALU2dGridHierarchicIndexSet<dim,dimworld,elementType>;
-    //friend class ALU2dGridGlobalIdSet<dim,dimworld>;
-    //friend class ALU2dGridLocalIdSet<dim,dimworld>;
 
     friend class ALU2dGridIntersectionBase < const ThisType > ;
     friend class ALU2dGridLevelIntersectionIterator< const ThisType > ;
@@ -495,31 +495,6 @@ namespace Dune {
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
     typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
     typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> VertexObject;
-  private:
-    typedef ALUMemoryProvider< EntityObject > EntityProviderType;
-    typedef ALUMemoryProvider< FaceObject >   FaceProviderType;
-    typedef ALUMemoryProvider< VertexObject > VertexProviderType;
-
-    mutable EntityProviderType entityProvider_;
-    mutable FaceProviderType faceProvider_;
-    mutable VertexProviderType vertexProvider_;
-
-    friend class ALU2dGridEntityFactory<ThisType,0>;
-    friend class ALU2dGridEntityFactory<ThisType,1>;
-    friend class ALU2dGridEntityFactory<ThisType,2>;
-
-    template <int codim>
-    MakeableInterfaceObject<typename Traits::template Codim<codim>:: Entity> * getNewEntity ( int level ) const
-    {
-      return ALU2dGridEntityFactory<ThisType,codim>::getNewEntity(*this,level);
-    }
-
-    template <class EntityType>
-    void freeEntity (EntityType * en) const
-    {
-      enum { codim = EntityType::codimension };
-      return ALU2dGridEntityFactory<ThisType,codim>::freeEntity(*this, en);
-    }
 
     // create GeomTypes
     void makeGeomTypes ();
@@ -547,7 +522,12 @@ namespace Dune {
       assert(mygrid_);
       return *mygrid_;
     }
-    // mutable HmeshType& mesh_;
+
+#ifdef USE_SMP_PARALLEL
+    std::vector< GridObjectFactoryType > factoryVec_;
+#else
+    GridObjectFactoryType factory_;
+#endif
 
     //! the hierarchic index set
     HierarchicIndexSet hIndexSet_;
@@ -568,9 +548,6 @@ namespace Dune {
     int maxLevel_;
     int refineMarked_ , coarsenMarked_;
     const int nrOfHangingNodes_;
-
-    //typedef ALU2dGridVertexList VertexListType;
-    //mutable VertexListType vertexList_[MAXL];
 
     //! the type of our size cache
     typedef SingleTypeSizeCache<ThisType> SizeCacheType;
@@ -627,13 +604,6 @@ namespace Dune {
       return (vertexProjection_ != 0);
     }
 
-    // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
-    typedef ALU2dGridLeafIntersectionIterator <const ThisType>  LeafIntersectionIteratorImp;
-    typedef ALU2dGridLevelIntersectionIterator<const ThisType> LevelIntersectionIteratorImp;
-
-    typedef ALUMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
-    typedef ALUMemoryProvider< LevelIntersectionIteratorImp > LevelIntersectionIteratorProviderType;
-
   protected:
     using BaseType :: getRealImplementation ;
 
@@ -656,29 +626,22 @@ namespace Dune {
       return this->getRealImplementation( intersection );
     }
 
-  private:
+    const GridObjectFactoryType& factory() const {
+#ifdef USE_SMP_PARALLEL
+      assert( (int) factoryVec_.size() > GridObjectFactoryType :: threadNumber() );
+      return factoryVec_[ GridObjectFactoryType :: threadNumber() ];
+#else
+      return factory_;
+#endif
+    }
+
+  protected:
     // max level of grid
     int maxlevel_;
     friend class IntersectionIteratorWrapper < const ThisType, LeafIntersectionIteratorImp > ;
     friend class IntersectionIteratorWrapper < const ThisType, LevelIntersectionIteratorImp > ;
     friend class LeafIntersectionIteratorWrapper < const ThisType > ;
     friend class LevelIntersectionIteratorWrapper< const ThisType > ;
-
-    LeafIntersectionIteratorImp& getIntersection(const int wLevel, const LeafIntersectionIteratorImp* ) const
-    {
-      return * (leafInterItProvider_.getObject( *this, wLevel ));
-    }
-
-    LevelIntersectionIteratorImp& getIntersection(const int wLevel, const LevelIntersectionIteratorImp* ) const
-    {
-      return * (levelInterItProvider_.getObject( *this, wLevel ));
-    }
-
-    void freeIntersection(LeafIntersectionIteratorImp  & it) const { leafInterItProvider_.freeObject( &it ); }
-    void freeIntersection(LevelIntersectionIteratorImp & it) const { levelInterItProvider_.freeObject( &it ); }
-
-    mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
-    mutable LevelIntersectionIteratorProviderType levelInterItProvider_;
 
     mutable ALU2dGridMarkerVector marker_[MAXL];
   public:
@@ -776,66 +739,6 @@ namespace Dune {
     }
 
   }; // end class ALU2dGrid
-
-  template <class GridImp>
-  struct ALU2dGridEntityFactory<GridImp,0>
-  {
-    enum {codim = 0};
-    typedef typename GridImp:: template Codim<codim>::Entity Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObj;
-    typedef typename EntityObj :: ImplementationType EntityImp;
-
-    static EntityObj *
-    getNewEntity (const GridImp& grid, int level)
-    {
-      return grid.entityProvider_.getEntityObject( grid, level, (EntityImp *) 0);
-    }
-
-    static void freeEntity( const GridImp& grid, EntityObj * e )
-    {
-      grid.entityProvider_.freeObject( e );
-    }
-  };
-
-  template <class GridImp>
-  struct ALU2dGridEntityFactory<GridImp,1>
-  {
-    enum {codim = 1};
-    typedef typename GridImp:: template Codim<codim>::Entity Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObj;
-    typedef typename EntityObj :: ImplementationType EntityImp;
-
-    static EntityObj *
-    getNewEntity (const GridImp& grid, int level)
-    {
-      return grid.faceProvider_.getEntityObject( grid, level, (EntityImp *) 0);
-    }
-
-    static void freeEntity( const GridImp& grid, EntityObj * e )
-    {
-      grid.faceProvider_.freeObject( e );
-    }
-  };
-
-  template <class GridImp>
-  struct ALU2dGridEntityFactory<GridImp,2>
-  {
-    enum {codim = 2};
-    typedef typename GridImp:: template Codim<codim>::Entity Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObj;
-    typedef typename EntityObj :: ImplementationType EntityImp;
-
-    static EntityObj *
-    getNewEntity (const GridImp& grid, int level)
-    {
-      return grid.vertexProvider_.getEntityObject( grid, level, (EntityImp *) 0);
-    }
-
-    static void freeEntity( const GridImp& grid, EntityObj * e )
-    {
-      grid.vertexProvider_.freeObject( e );
-    }
-  };
 
   namespace Capabilities
   {

@@ -47,8 +47,8 @@ namespace Dune {
   //! Constructor
   template<int cd, int dim, class GridImp>
   inline ALU2dGridEntity<cd, dim, GridImp> ::
-  ALU2dGridEntity(const GridImp &grid, int level)
-    : grid_(grid),
+  ALU2dGridEntity(const FactoryType& factory, int level)
+    : factory_( factory ),
       item_(0),
       geoObj_(GeometryImp()),
       level_(level),
@@ -75,7 +75,7 @@ namespace Dune {
   template<int cd, int dim, class GridImp>
   inline ALU2dGridEntity<cd, dim, GridImp> ::
   ALU2dGridEntity(const ALU2dGridEntity<cd,dim,GridImp> & org)
-    : grid_(org.grid_),
+    : factory_( org.factory_ ),
       item_(org.item_),
       geoObj_(GeometryImp()),
       level_(org.level_),
@@ -106,7 +106,7 @@ namespace Dune {
   inline int ALU2dGridEntity<cd,dim,GridImp > :: getIndex() const
   {
     assert(item_ != 0);
-    return ElementWrapper<cd, dim, GridImp>::getElemIndex (grid_, *item_, face_);
+    return ElementWrapper<cd, dim, GridImp>::getElemIndex (grid(), *item_, face_);
   }
 
   /**
@@ -135,18 +135,18 @@ namespace Dune {
   //! Constructor creating empty Entity
   template<int dim, class GridImp>
   inline ALU2dGridEntity<0,dim,GridImp> ::
-  ALU2dGridEntity(const GridImp &grid, int level) :
-    grid_(grid)
-    , item_(0)
-    , geoObj_(GeometryImp())
-    , isLeaf_ (false)
+  ALU2dGridEntity(const FactoryType& factory, int level)
+    : factory_( factory )
+      , item_(0)
+      , geoObj_(GeometryImp())
+      , isLeaf_ (false)
   {}
 
   //! Copy Constructor
   template<int dim, class GridImp>
   inline ALU2dGridEntity<0, dim, GridImp> ::
   ALU2dGridEntity(const ALU2dGridEntity<0,dim,GridImp> & org)
-    : grid_(org.grid_),
+    : factory_( org.factory_ ),
       item_(org.item_),
       geoObj_(GeometryImp()),
       isLeaf_(org.isLeaf_)
@@ -192,7 +192,7 @@ namespace Dune {
   inline typename ALU2dGridEntity<0, dim, GridImp> :: EntityPointer ALU2dGridEntity<0,dim,GridImp> :: father () const {
     // don't request for father on macro level
     assert(level()>0);
-    return EntityPointer(grid_, *(item_->father()));
+    return EntityPointer(factory_, *(item_->father()));
   }
 
   template<int dim, class GridImp>
@@ -215,13 +215,13 @@ namespace Dune {
     // one for quadrilaterals and one for triangles
     if( GridImp :: elementType != ALU2DSPACE triangle && myType.isCube() )
     {
-      assert( grid_.nonConform() );
+      assert( grid().nonConform() );
       static ALULocalGeometryStorage<GridImp, LocalGeometryObject,4> geoms( myType, true );
       return geoms[ nChild() ];
     }
     else
     {
-      if( grid_.nonConform() )
+      if( grid().nonConform() )
       {
         static ALULocalGeometryStorage<GridImp, LocalGeometryObject,4> geoms( myType, true );
         return geoms[ nChild() ];
@@ -248,7 +248,7 @@ namespace Dune {
   template<int cc>
   inline int ALU2dGridEntity<0,dim,GridImp> :: getSubIndex(int i) const {
     assert(item_ != 0);
-    return ElementWrapper<cc, dim, GridImp>::subIndex (grid_, *item_,i);
+    return ElementWrapper<cc, dim, GridImp>::subIndex (grid(), *item_,i);
   }
 
   //! Provide access to mesh entity i of given codimension. Entities
@@ -258,14 +258,14 @@ namespace Dune {
   inline typename ALU2dGridEntity<0,dim,GridImp > ::template Codim<cc> :: EntityPointer
   ALU2dGridEntity<0,dim,GridImp> :: entity (int i) const {
     assert(item_ != 0);
-    return ElementWrapper<cc,dim, GridImp>::subEntity (grid_, *item_, i);
+    return ElementWrapper<cc,dim, GridImp>::subEntity (factory(), *item_, i);
   }
 
   template<int dim, class GridImp>
   template <int cc>
   inline int ALU2dGridEntity<0,dim,GridImp> :: subBoundaryId  ( int i ) const {
     assert(item_ != 0);
-    return ElementWrapper<cc, dim, GridImp>::subBoundary (grid_, *item_,i);
+    return ElementWrapper<cc, dim, GridImp>::subBoundary (grid(), *item_,i);
   }
 
   template<int dim, class GridImp>
@@ -276,7 +276,7 @@ namespace Dune {
     switch( codim )
     {
     case 0 :
-      return ElementWrapper<0, dim, GridImp>::subIndex (grid_, *item_, j);
+      return ElementWrapper<0, dim, GridImp>::subIndex (grid(), *item_, j);
     case 1 :
       // also apply mapping to generic ref elem by switching edges
       if( item_->numvertices() == 3 )
@@ -287,14 +287,14 @@ namespace Dune {
                    case 2 : j=3;break;
                    case 3 : j=1;break;}
       // j = ((i^2)>>1) | ((i&1)<<1);
-      return ElementWrapper<1, dim, GridImp>::subIndex (grid_, *item_, j);
+      return ElementWrapper<1, dim, GridImp>::subIndex (grid(), *item_, j);
     case 2 :
       if( item_->numvertices() == 4 )
         switch (i) { case 0 : j=0;break;
                    case 1 : j=1;break;
                    case 2 : j=3;break;
                    case 3 : j=2;break;}
-      return ElementWrapper<2, dim, GridImp>::subIndex (grid_, *item_, j);
+      return ElementWrapper<2, dim, GridImp>::subIndex (grid(), *item_, j);
     default :
       assert( false );
       abort();
@@ -405,7 +405,7 @@ namespace Dune {
     if(entity_)
     {
       entityImp().removeElement();
-      grid_.freeEntity( entity_ );
+      factory_.template freeEntity< cd > ( entity_ );
       entity_ = 0;
     }
   }
@@ -431,63 +431,47 @@ namespace Dune {
     }
   }
 
-  /*
-     //! update underlying item pointer and set entity
-     //! specialization for codim 0
-     template<>
-     inline void ALU2dGridEntityPointer<0, const ALU2dGrid<2,2> > :: updateEntityPointer(ElementType * item, int , int ) {
-     assert(item != 0);
-     item_ = item;
-     assert(item_);
-
-     if( entity_ )
-     {
-      entityImp().setElement( *item_, -1 , -1 );
-     }
-     }
-   */
-
-
   //! Constructor for EntityPointer that points to an element
   template<int cd, class GridImp>
-  inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const GridImp & grid,
-                                                                      const ElementType & item, int face, int level)
-    : grid_(grid)
+  inline ALU2dGridEntityPointer<cd, GridImp>::
+  ALU2dGridEntityPointer(const FactoryType& factory,
+                         const ElementType& item, int face, int level)
+    : factory_( factory )
       , item_(const_cast<ElementType *>(&item))
+      , entity_(0)
       , level_(level)
       , face_(face)
-      , entity_(0)
   { }
 
   //! Constructor for EntityPointer that points to an element
   template<int cd, class GridImp>
   inline ALU2dGridEntityPointer<cd, GridImp>::
   ALU2dGridEntityPointer(const EntityImp& entity)
-    : grid_(entity.grid())
+    : factory_( entity.factory() )
       , item_(& entity.getItem() )
+      , entity_(0)
       , level_(entity.level())
       , face_(entity.getFace())
-      , entity_(0)
   { }
 
   //! Constructor for EntityPointer init of Level- and LeafIterator
   template<int cd, class GridImp>
-  inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const GridImp & grid)
-    : grid_(grid)
+  inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const FactoryType& factory)
+    : factory_( factory )
       , item_(0)
+      , entity_(0)
       , level_(-1)
       , face_(-1)
-      , entity_(0)
   { }
 
   //! Copy Constructor
   template<int cd, class GridImp>
   inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const ThisType & org)
-    : grid_(org.grid_)
+    : factory_( org.factory_ )
       , item_(org.item_)
+      , entity_(0)
       , level_(org.level_)
       , face_(org.face_)
-      , entity_(0)
   {  }
 
   //! Destructor
@@ -505,7 +489,7 @@ namespace Dune {
     assert( item_ );
     if( !entity_ )
     {
-      entity_ = grid_.template getNewEntity<cd> (level());
+      entity_ = factory_.template getNewEntity<cd> (level());
       entityImp().setElement(*item_, face_, level());
     }
     assert( entity_ );
@@ -542,7 +526,7 @@ namespace Dune {
   {
     this->done();
     entity_ = 0;
-    assert(&grid_ == &org.grid_);
+    assert(&factory_ == &org.factory_);
     item_  = org.item_;
     face_  = org.face_;
     level_ = org.level_;
@@ -553,14 +537,14 @@ namespace Dune {
   inline typename ALU2dGridEntityPointer<cd, GridImp>::EntityImp & ALU2dGridEntityPointer<cd, GridImp>::entityImp()
   {
     assert( entity_ );
-    return grid_.getRealImplementation(*entity_);
+    return GridImp :: getRealImplementation(*entity_);
   }
 
   template<int cd, class GridImp>
   inline const typename ALU2dGridEntityPointer<cd, GridImp>:: EntityImp &
   ALU2dGridEntityPointer<cd, GridImp>::entityImp() const {
     assert( entity_ );
-    return grid_.getRealImplementation(*entity_);
+    return GridImp :: getRealImplementation(*entity_);
   }
 
   //********* begin struct ElementWrapper ********************
@@ -573,9 +557,10 @@ namespace Dune {
 
   // specialisation for elements
   template<int dim, class GridImp>
-  struct ElementWrapper<0,dim, GridImp>{
-
+  struct ElementWrapper<0,dim, GridImp>
+  {
     typedef typename ALU2dImplTraits< GridImp::dimensionworld, GridImp::elementType >::HElementType HElementType ;
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
 
     static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i) {
       //assert(!i);
@@ -586,9 +571,9 @@ namespace Dune {
       return elem.getIndex();
     }
     static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<0>:: EntityPointer
-    subEntity(GridImp & grid, const HElementType &elem, int i) {
+    subEntity(const FactoryType& factory, const HElementType &elem, int i) {
       //assert(!i);
-      return ALU2dGridEntityPointer<0, GridImp > (grid, elem, -1, elem.level());
+      return ALU2dGridEntityPointer<0, GridImp > (factory, elem, -1, elem.level());
     }
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       //assert(!i);
@@ -605,6 +590,7 @@ namespace Dune {
   struct ElementWrapper<1, dim, GridImp>{
 
     typedef typename ALU2dImplTraits< GridImp::dimensionworld, GridImp::elementType >::HElementType HElementType ;
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
 
     static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i)
     {
@@ -617,10 +603,10 @@ namespace Dune {
       return elem.edge_idx(i);
     }
     static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<1>:: EntityPointer
-    subEntity(GridImp & grid, const HElementType &elem, int i)
+    subEntity(const FactoryType& factory, const HElementType &elem, int i)
     {
       assert(i < elem.numvertices() && i >= 0);
-      return ALU2dGridEntityPointer<1, GridImp > (grid, elem, i, elem.level());
+      return ALU2dGridEntityPointer<1, GridImp > (factory, elem, i, elem.level());
     }
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       DUNE_THROW(NotImplemented, "Not yet implemented for this codim!");
@@ -649,6 +635,7 @@ namespace Dune {
 
     typedef typename ALU2dImplTraits< GridImp::dimensionworld, GridImp::elementType >::HElementType HElementType ;
     typedef typename ALU2dImplInterface< 0, GridImp::dimensionworld, GridImp::elementType >::Type VertexType;
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
 
     static inline int getElemIndex(GridImp & grid, const VertexType &elem, int) {
       return elem.getIndex();
@@ -659,10 +646,11 @@ namespace Dune {
       return elem.getVertex(i)->getIndex();
     }
     static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<2>:: EntityPointer
-    subEntity(GridImp & grid, const HElementType &elem, int i) {
+    subEntity(const FactoryType& factory, const HElementType &elem, int i)
+    {
       assert(i < elem.numvertices() && i >= 0);
       //return ALU2dGridEntityPointer<2, GridImp > (grid, *(elem.vertex(i)), -1, elem.level());
-      return ALU2dGridEntityPointer<2, GridImp > (grid, *(elem.getVertex(i)), -1, elem.level());
+      return ALU2dGridEntityPointer<2, GridImp > (factory, *(elem.getVertex(i)), -1, elem.level());
     }
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       DUNE_THROW(NotImplemented, "Not yet implemented this codim!");

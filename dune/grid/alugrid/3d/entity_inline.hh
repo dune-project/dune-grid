@@ -185,7 +185,7 @@ namespace Dune {
   template<int cc>
   inline int ALU3dGridEntity<0,dim,GridImp> :: count () const
   {
-    return grid_.referenceElement().size(cc);
+    return grid().referenceElement().size(cc);
   }
 
   template<int dim, class GridImp>
@@ -210,19 +210,18 @@ namespace Dune {
   {
     assert(item_ != 0);
     // if isGhost is true the end iterator will be returned
-    //return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isGhost() );
     if( isGhost() )
     {
-      return ALU3dGridHierarchicIterator<GridImp>(grid_,*ghost_,maxlevel, isLeaf() );
+      return ALU3dGridHierarchicIterator<GridImp>(factory_,*ghost_,maxlevel, isLeaf() );
     }
-    return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isLeaf() );
+    return ALU3dGridHierarchicIterator<GridImp>(factory_,*item_,maxlevel, isLeaf() );
   }
 
   template<int dim, class GridImp>
   inline ALU3dGridHierarchicIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: hend (int maxlevel) const
   {
     assert(item_ != 0);
-    return ALU3dGridHierarchicIterator<GridImp> (grid_, *item_, maxlevel, true);
+    return ALU3dGridHierarchicIterator<GridImp> (factory_, *item_, maxlevel, true);
   }
 
   template<int dim, class GridImp>
@@ -230,7 +229,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ileafbegin () const
   {
     assert(item_ != 0);
-    return ALU3dGridIntersectionIteratorType (grid_, *this, this->level(), false );
+    return ALU3dGridIntersectionIteratorType (*this, this->level(), false );
   }
 
   template<int dim, class GridImp>
@@ -238,7 +237,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ileafend () const
   {
     assert(item_ != 0);
-    return ALU3dGridLeafIntersectionIteratorType (grid_, *this , this->level(), true);
+    return ALU3dGridLeafIntersectionIteratorType (*this , this->level(), true);
   }
 
   template<int dim, class GridImp>
@@ -246,7 +245,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ilevelbegin () const
   {
     assert(item_ != 0);
-    return ALU3dGridLevelIntersectionIteratorType (grid_,*this, this->level(), false );
+    return ALU3dGridLevelIntersectionIteratorType (*this, this->level(), false );
   }
 
   template<int dim, class GridImp>
@@ -254,7 +253,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ilevelend () const
   {
     assert(item_ != 0);
-    return ALU3dGridLevelIntersectionIteratorType (grid_, *this, this->level(),true);
+    return ALU3dGridLevelIntersectionIteratorType (*this, this->level(),true);
   }
 
   // Adaptation methods
@@ -280,9 +279,9 @@ namespace Dune {
   //*******************************************************************
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
-  ALU3dGridEntityPointerBase(const GridImp & grid,
+  ALU3dGridEntityPointerBase(const FactoryType& factory,
                              const HElementType &item)
-    : grid_(grid)
+    : factory_(factory)
       , seed_( item )
       , entity_( 0 )
       , locked_ ( false ) // entity can be released
@@ -290,11 +289,11 @@ namespace Dune {
 
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
-  ALU3dGridEntityPointerBase(const GridImp & grid,
+  ALU3dGridEntityPointerBase(const FactoryType& factory,
                              const HBndSegType & ghostFace )
-    : grid_(grid)
+    : factory_(factory)
       , seed_( ghostFace )
-      , entity_ ( grid_.template getNewEntity<codim> ( ghostFace.level() ))
+      , entity_ ( factory_.template getNewEntity<codim> ( ghostFace.level() ))
       , locked_( true ) // entity should not be released, otherwise is ghost info lost
   {
     // sets entity and item pointer
@@ -303,9 +302,9 @@ namespace Dune {
 
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
-  ALU3dGridEntityPointerBase(const GridImp & grid,
+  ALU3dGridEntityPointerBase(const FactoryType& factory,
                              const ALU3dGridEntitySeedType& key )
-    : grid_(grid)
+    : factory_(factory)
       , seed_( key )
       , entity_ ( 0 )
       , locked_( false )
@@ -314,10 +313,10 @@ namespace Dune {
   // constructor Level,Leaf and HierarchicIterator
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
-  ALU3dGridEntityPointerBase(const GridImp & grid, int level )
-    : grid_(grid)
+  ALU3dGridEntityPointerBase(const FactoryType& factory, int level )
+    : factory_(factory)
       , seed_()
-      , entity_ ( grid_.template getNewEntity<codim> ( level ) )
+      , entity_ ( factory_.template getNewEntity<codim> ( level ) )
       , locked_ ( false ) // entity can be released
   {
     // this needs to be called
@@ -328,12 +327,12 @@ namespace Dune {
 
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
-  ALU3dGridEntityPointerBase(const GridImp & grid,
+  ALU3dGridEntityPointerBase(const FactoryType& factory,
                              const HElementType &item,
                              const int level,
                              const int twist,
                              const int duneFace )
-    : grid_(grid)
+    : factory_(factory)
       , seed_( item, level, twist, duneFace )
       , entity_( 0 )
       , locked_ ( false ) // entity can be released
@@ -342,7 +341,7 @@ namespace Dune {
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
   ALU3dGridEntityPointerBase(const ALU3dGridEntityPointerType & org)
-    : grid_(org.grid_)
+    : factory_(org.factory_)
       , seed_( org.seed_ )
       , entity_( 0 )
       , locked_( org.locked_ )
@@ -359,7 +358,7 @@ namespace Dune {
     if( org.entity_ )
     {
       assert( entity_ == 0 );
-      entity_ = grid_.template getNewEntity<codim> ();
+      entity_ = factory_.template getNewEntity<codim> ();
       // set entity right away
       entityImp().setEntity( org.entityImp() );
     }
@@ -379,7 +378,7 @@ namespace Dune {
   ALU3dGridEntityPointerBase<codim,GridImp> ::
   clone (const ALU3dGridEntityPointerType & org)
   {
-    assert( &grid_ == &org.grid_ );
+    assert( &factory_ == &org.factory_ );
 
     // set item
     seed_ = org.seed_;
@@ -443,7 +442,7 @@ namespace Dune {
     if( entity_ )
     {
       entityImp().removeElement();
-      grid_.template freeEntity<codim> ( (EntityObject *) entity_ );
+      factory_.template freeEntity<codim> ( (EntityObject *) entity_ );
       entity_ = 0;
     }
   }
@@ -476,7 +475,7 @@ namespace Dune {
     assert( (locked_) ? (entity_ != 0) : true);
     if( ! entity_ )
     {
-      entity_ = grid_.template getNewEntity<codim> ();
+      entity_ = factory_.template getNewEntity<codim> ();
       entityImp().setElement( seed_ );
     }
     assert( seed_.item() == & entityImp().getItem() );
@@ -520,12 +519,12 @@ namespace Dune {
 
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointer<codim,GridImp> ::
-  ALU3dGridEntityPointer(const GridImp & grid,
+  ALU3dGridEntityPointer(const FactoryType& factory,
                          const int level,
                          const HElementType &item,
                          const int twist,
                          const int duneFace )
-    : ALU3dGridEntityPointerBase<codim,GridImp> (grid,item,level,twist,duneFace)
+    : ALU3dGridEntityPointerBase<codim,GridImp> (factory,item,level,twist,duneFace)
   {}
 
   template<int codim, class GridImp >
@@ -552,7 +551,7 @@ namespace Dune {
     // copy key
     seed_ = org.seed_;
 
-    assert( &grid_ == &org.grid_ );
+    assert( &factory_ == &org.factory_ );
     // copy lock status
     this->locked_ = org.locked_;
 
@@ -577,7 +576,7 @@ namespace Dune {
     assert( seed_.item() );
     if( ! entity_ )
     {
-      entity_ = grid_.template getNewEntity<codim> ();
+      entity_ = factory_.template getNewEntity<codim> ();
       entityImp().setElement( seed_ );
     }
     assert( seed_.item() == & entityImp().getItem() );

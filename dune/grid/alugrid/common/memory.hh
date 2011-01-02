@@ -7,10 +7,6 @@
 #include <cstdlib>
 #include <vector>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 #include <dune/common/finitestack.hh>
 
 namespace Dune {
@@ -21,48 +17,38 @@ namespace Dune {
   {
     enum { maxStackObjects = 256 };
     typedef FiniteStack< Object* , maxStackObjects > StackType ;
-#ifdef _OPENMP
-    std::vector< StackType  > objStackVec_;
-#else
+
     StackType objStack_ ;
-#endif
 
     typedef ALUMemoryProvider < Object > MyType;
 
-    StackType& objStack()
-    {
-#ifdef _OPENMP
-      assert( (int) objStackVec_.size() > omp_get_thread_num() );
-      return objStackVec_[ omp_get_thread_num() ];
-#else
-      return objStack_ ;
-#endif
-    }
+    StackType& objStack() { return objStack_ ; }
 
   public:
     typedef Object ObjectType;
 
-    //! delete all objects stored in stack
-    ALUMemoryProvider()
-#ifdef _OPENMP
-      : objStackVec_( omp_get_max_threads() )
-#endif
+    //!default constructor
+    ALUMemoryProvider() {}
+
+    //! do not copy pointers
+    ALUMemoryProvider(const ALUMemoryProvider<Object> & org)
+      : objStack_( org.objStack_ )
     {}
 
     //! call deleteEntity
     ~ALUMemoryProvider ();
 
     //! i.e. return pointer to Entity
-    template <class GridType>
-    ObjectType * getObject(const GridType &grid, int level);
+    template <class FactoryType>
+    ObjectType * getObject(const FactoryType &factory, int level);
 
     //! i.e. return pointer to Entity
-    template <class GridType, class EntityImp>
-    inline ObjectType * getEntityObject(const GridType &grid, int level , EntityImp * fakePtr )
+    template <class FactoryType, class EntityImp>
+    inline ObjectType * getEntityObject(const FactoryType& factory, int level , EntityImp * fakePtr )
     {
       if( objStack().empty() )
       {
-        return ( new ObjectType(EntityImp(grid,level) ));
+        return ( new ObjectType(EntityImp(factory,level) ));
       }
       else
       {
@@ -84,9 +70,6 @@ namespace Dune {
       return objStack().pop();
     }
 
-  private:
-    //! do not copy pointers
-    ALUMemoryProvider(const ALUMemoryProvider<Object> & org);
   };
 
 
@@ -95,14 +78,14 @@ namespace Dune {
   //  ALUMemoryProvider implementation
   //
   //************************************************************************
-  template <class Object> template <class GridType>
+  template <class Object> template <class FactoryType>
   inline typename ALUMemoryProvider<Object>::ObjectType *
   ALUMemoryProvider<Object>::getObject
-    (const GridType &grid, int level )
+    (const FactoryType &factory, int level )
   {
     if( objStack().empty() )
     {
-      return ( new Object (grid,level) );
+      return ( new Object (factory, level) );
     }
     else
     {
@@ -128,19 +111,11 @@ namespace Dune {
   template <class Object>
   inline ALUMemoryProvider<Object>::~ALUMemoryProvider()
   {
-#ifdef _OPENMP
-    for(size_t i = 0; i< objStackVec_.size(); ++i)
+    StackType& objStk = objStack_;
+    while ( ! objStk.empty() )
     {
-      StackType& objStk = objStackVec_[ i ];
-#else
-    {
-      StackType& objStk = objStack_;
-#endif
-      while ( ! objStk.empty() )
-      {
-        ObjectType * obj = objStk.pop();
-        delete obj;
-      }
+      ObjectType * obj = objStk.pop();
+      delete obj;
     }
   }
 

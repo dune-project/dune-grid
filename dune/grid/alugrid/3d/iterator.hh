@@ -8,7 +8,7 @@
 
 // Dune includes
 #include <dune/grid/common/grid.hh>
-#include <dune/grid/common/intersectioniteratorwrapper.hh>
+#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/alugrid/common/memory.hh>
 
 // Local includes
@@ -100,6 +100,8 @@ namespace Dune {
     enum IntersectionIteratorType { IntersectionLeaf , IntersectionLevel, IntersectionBoth };
 
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
@@ -118,11 +120,11 @@ namespace Dune {
 
     //! The default Constructor , level tells on which level we want
     //! neighbours
-    ALU3dGridIntersectionIterator(const GridImp & grid,
+    ALU3dGridIntersectionIterator(const FactoryType& factory,
                                   HElementType *el,
                                   int wLevel,bool end=false);
 
-    ALU3dGridIntersectionIterator(const GridImp & grid,int wLevel);
+    ALU3dGridIntersectionIterator(const FactoryType& factory, int wLevel);
 
     //! The copy constructor
     ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org);
@@ -250,6 +252,21 @@ namespace Dune {
     void setGhostFace(const GEOFaceType& newFace);
 
   protected:
+    GeometryImp&  intersectionGlobalImp() const
+    {
+      return GridImp :: getRealImplementation( intersectionGlobal_ );
+    }
+
+    GeometryImp&  intersectionSelfLocalImp() const
+    {
+      return GridImp :: getRealImplementation( intersectionSelfLocal_ );
+    }
+
+    GeometryImp&  intersectionNeighborLocalImp() const
+    {
+      return GridImp :: getRealImplementation( intersectionNeighborLocal_ );
+    }
+
     // generate local geometries
     void buildLocalGeometries() const;
 
@@ -273,8 +290,8 @@ namespace Dune {
     mutable FaceInfoType connector_;
     mutable GeometryInfoType geoProvider_; // need to initialise
 
-    // reference to grid
-    const GridImp & grid_;
+    // reference to factory
+    const FactoryType& factory_;
 
     //! current element from which we started the intersection iterator
     const IMPLElementType* item_;
@@ -286,11 +303,8 @@ namespace Dune {
     mutable int index_;
 
     mutable GeometryObject intersectionGlobal_;
-    mutable GeometryImp &  intersectionGlobalImp_;
     mutable GeometryObject intersectionSelfLocal_;
-    mutable GeometryImp &  intersectionSelfLocalImp_;
     mutable GeometryObject intersectionNeighborLocal_;
-    mutable GeometryImp &  intersectionNeighborLocalImp_;
 
     // unit outer normal
     mutable NormalType unitOuterNormal_;
@@ -345,7 +359,7 @@ namespace Dune {
     using BaseType :: index_;
     using BaseType :: connector_;
     using BaseType :: geoProvider_;
-    using BaseType :: grid_;
+    using BaseType :: factory_;
     using BaseType :: done_;
     using BaseType :: boundary;
     using BaseType :: done ;
@@ -353,16 +367,18 @@ namespace Dune {
     using BaseType :: neighbor ;
 
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     //typedef Dune :: Intersection< const GridImp, ThisType >
     typedef ALUMemoryProvider< ThisType > StorageType;
 
     //! The default Constructor , level tells on which level we want
     //! neighbours
-    ALU3dGridLevelIntersectionIterator(const GridImp & grid,
+    ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
                                        HElementType *el,
                                        int wLevel,bool end=false);
 
-    ALU3dGridLevelIntersectionIterator(const GridImp & grid,int wLevel);
+    ALU3dGridLevelIntersectionIterator(const FactoryType& factory, int wLevel);
 
     //! The copy constructor
     ALU3dGridLevelIntersectionIterator(const ThisType & org);
@@ -530,6 +546,8 @@ namespace Dune {
     friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< cd, pitype, Comm > >;
 
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     typedef ALU3dGridVertexList< Comm > VertexListType;
 
@@ -541,10 +559,10 @@ namespace Dune {
     typedef typename ALU3DSPACE IteratorElType< cd, Comm >::val_t val_t;
 
     //! Constructor for begin iterator
-    ALU3dGridLevelIterator(const GridImp & grid, int level, bool);
+    ALU3dGridLevelIterator(const FactoryType& factory, int level, bool);
 
     //! Constructor for end iterator
-    ALU3dGridLevelIterator(const GridImp & grid, int level);
+    ALU3dGridLevelIterator(const FactoryType& factory, int level);
 
     //! Constructor
     ALU3dGridLevelIterator(const ThisType & org);
@@ -602,8 +620,9 @@ namespace Dune {
 
     typedef typename GridImp::MPICommunicatorType Comm;
 
-
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     typedef typename GridImp::template Codim<cdim>::Entity Entity;
 
     typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper< cdim, pitype, Comm > IteratorType ;
@@ -615,10 +634,10 @@ namespace Dune {
     typedef ALU3dGridLeafIterator<cdim, pitype, GridImp> ThisType;
 
     //! Constructor for end iterators
-    ALU3dGridLeafIterator(const GridImp & grid, int level);
+    ALU3dGridLeafIterator(const FactoryType& factory, int level);
 
     //! Constructor for begin Iterators
-    ALU3dGridLeafIterator(const GridImp & grid, int level , bool isBegin);
+    ALU3dGridLeafIterator(const FactoryType& factory, int level , bool isBegin);
 
     //! copy Constructor
     ALU3dGridLeafIterator(const ThisType & org);
@@ -732,15 +751,18 @@ namespace Dune {
 #endif
 
   public:
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::ctype ctype;
 
     //! the normal Constructor
-    ALU3dGridHierarchicIterator(const GridImp &grid,
-                                const HElementType & elem, int maxlevel, bool end );
+    ALU3dGridHierarchicIterator(const FactoryType& factory,
+                                const HElementType & elem,
+                                int maxlevel, bool end );
 
     //! start constructor for ghosts
-    ALU3dGridHierarchicIterator(const GridImp &grid,
+    ALU3dGridHierarchicIterator(const FactoryType& factory,
                                 const HBndSegType& ghost,
                                 int maxlevel,
                                 bool end);

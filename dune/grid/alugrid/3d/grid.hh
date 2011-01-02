@@ -9,23 +9,23 @@
 //- Dune includes
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
-#include <dune/grid/alugrid/interfaces.hh>
+#include <dune/grid/alugrid/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/deprecated.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
-#include <dune/grid/alugrid/defaultindexsets.hh>
+#include <dune/grid/alugrid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
-#include <dune/grid/common/intersectioniteratorwrapper.hh>
+#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/defaultgridview.hh>
 
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/grid/alugrid/common/bndprojection.hh>
-#include <dune/grid/alugrid/common/memory.hh>
+#include <dune/grid/alugrid/common/objectfactory.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -79,8 +79,6 @@ namespace Dune
   class ALU3dGridHierarchicIndexSet;
   template <class EntityImp>
   class ALUMemoryProvider;
-  template <class GridImp, int codim>
-  struct ALU3dGridEntityFactory;
   template< class >
   class ALU3dGridFactory;
   template <class GridImp, class GeometryImp, int nChild>
@@ -361,6 +359,20 @@ namespace Dune
 
     friend class ALU3dGridCommHelper< elType, Comm >;
 
+    // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
+  public:
+    typedef ALU3dGridIntersectionIterator<const ThisType>
+    IntersectionIteratorImp;
+    typedef ALU3dGridIntersectionIterator<const ThisType>
+    LeafIntersectionIteratorImp;
+    typedef ALU3dGridLevelIntersectionIterator<const ThisType>
+    LevelIntersectionIteratorImp;
+
+    friend class IntersectionIteratorWrapper < const ThisType, LeafIntersectionIteratorImp > ;
+    friend class IntersectionIteratorWrapper < const ThisType, LevelIntersectionIteratorImp > ;
+    friend class LeafIntersectionIteratorWrapper < const ThisType > ;
+    friend class LevelIntersectionIteratorWrapper< const ThisType > ;
+
     //**********************************************************
     // The Interface Methods
     //**********************************************************
@@ -403,6 +415,14 @@ namespace Dune
     //! type of collective communication object
     typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
+  public:
+    typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> EdgeObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<3>::Entity> VertexObject;
+
+    typedef ALUGridObjectFactory< ThisType >  GridObjectFactoryType;
+
   protected:
     friend class ALUGridBoundaryProjection< ThisType, alu3d_ctype >;
     // type of ALUGrid boundary projection wrapper
@@ -431,8 +451,8 @@ namespace Dune
 
     //! max number of levels
     enum {
-      //! \brief maximal number of levels is 64
-      MAXL = 64
+      //! \brief maximal number of levels is 32
+      MAXL = 32
     };
 
     //! element chunk for refinement
@@ -452,7 +472,12 @@ namespace Dune
   public:
     typedef Comm MPICommunicatorType;
 
+    typedef ALU3dGridCommunications< elType, Comm > Communications;
+
   protected:
+    typedef ALU3dGridVertexList< Comm > VertexListType;
+    typedef ALU3dGridLeafVertexList< Comm > LeafVertexListType;
+
     //! Constructor which reads an ALU3dGrid Macro Triang file
     //! or given GridFile
     ALU3dGrid ( const std::string &macroTriangFilename,
@@ -792,125 +817,12 @@ namespace Dune
       enum { codim = EntitySeed :: codimension };
       typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
       typedef ALU3dGridEntityPointer < codim, const ThisType > ALUPointer ;
-      return ALUPointer( *this, seed ) ;
+      return ALUPointer( factory(), seed ) ;
     }
 
-  protected:
-    //! Copy constructor should not be used
-    ALU3dGrid( const ThisType & );
-
-    //! assignment operator should not be used
-    const ThisType &operator= ( const ThisType & );
-
-    //! reset size and global size, update Level- and LeafIndexSet, if they exist
-    void calcExtras();
-
-    //! calculate maxlevel
-    void calcMaxLevel();
-
-    //! make grid walkthrough and calc global size
-    void recalcGlobalSize();
-
-    //! check whether macro grid format is of our type
-    void checkMacroGridFile (const std::string filename);
-
-    //! check whether macro grid has the right element type
-    void checkMacroGrid ();
-
-    //! return boudanry projection for given segment Id
-    const DuneBoundaryProjectionType* boundaryProjection(const int segmentIndex) const
-    {
-      if( bndPrj_ )
-      {
-        return bndPrj_;
-      }
-      else
-      {
-        // pointer can be zero (which is emulates the identity mapping then)
-        assert( bndVec_ );
-        assert( segmentIndex < (int) bndVec_->size() );
-        return (*bndVec_)[ segmentIndex ];
-      }
-    }
-
-    // the real ALU grid
-    mutable GitterImplType *mygrid_;
-
-  public:
     // number of links to other processors, for internal use only
     int nlinks () const { return communications().nlinks(); }
 
-  private:
-    // max level of grid
-    int maxlevel_;
-
-    // count how much elements where marked
-    mutable int coarsenMarked_;
-    mutable int refineMarked_;
-
-    // at the moment the number of different geom types is 1
-    enum { numberOfGeomTypes = 1 };
-    std::vector< std::vector<GeometryType> > geomTypes_;
-
-    // our hierarchic index set
-    HierarchicIndexSet hIndexSet_;
-
-    // out global id set
-    mutable GlobalIdSetImp *globalIdSet_;
-
-    // out global id set
-    LocalIdSetImp localIdSet_;
-
-    // the level index set ( default type )
-    mutable std::vector < LevelIndexSetImp * > levelIndexVec_;
-
-    // the leaf index set
-    mutable LeafIndexSetImp * leafIndexSet_;
-
-    // the entity codim 0
-  public:
-    typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
-    typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
-    typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> EdgeObject;
-    typedef MakeableInterfaceObject<typename Traits::template Codim<3>::Entity> VertexObject;
-  private:
-    typedef ALUMemoryProvider< EntityObject > EntityProvider;
-    typedef ALUMemoryProvider< FaceObject >   FaceProvider;
-    typedef ALUMemoryProvider< EdgeObject >   EdgeProvider;
-    typedef ALUMemoryProvider< VertexObject > VertexProvider;
-
-    template <int codim>
-    inline MakeableInterfaceObject<typename Traits::template Codim<codim>::Entity> *
-    getNewEntity ( int level = -1 ) const
-    {
-      return ALU3dGridEntityFactory<MyType,codim>::getNewEntity(*this,level);
-    }
-
-    template <int codim>
-    inline void freeEntity (MakeableInterfaceObject<typename Traits::template Codim<codim>::Entity> * en) const
-    {
-      ALU3dGridEntityFactory<MyType,codim>::freeEntity(*this, en);
-    }
-
-    mutable EntityProvider entityProvider_;
-    mutable FaceProvider faceProvider_;
-    mutable EdgeProvider edgeProvider_;
-    mutable VertexProvider vertexProvider_;
-
-    // the reference element
-    const ReferenceElementType& referenceElement_;
-
-    typedef ALU3dGridVertexList< Comm > VertexListType;
-    mutable VertexListType vertexList_[MAXL];
-
-    mutable ALU3dGridItemListType ghostLeafList_[ dimension ];
-    mutable ALU3dGridItemListType ghostLevelList_[ dimension ][MAXL];
-
-    mutable ALU3dGridItemListType levelEdgeList_[MAXL];
-
-    typedef ALU3dGridLeafVertexList< Comm > LeafVertexListType;
-    mutable LeafVertexListType leafVertexList_;
-  public:
     LeafVertexListType & getLeafVertexList() const
     {
       if( !leafVertexList_.up2Date() ) leafVertexList_.setupVxList(*this);
@@ -955,30 +867,44 @@ namespace Dune
       assert( level <= maxLevel() );
       return levelEdgeList_[level];
     }
-  private:
 
-    // the type of our size cache
-    typedef SingleTypeSizeCache<MyType> SizeCacheType;
-    SizeCacheType * sizeCache_;
+  protected:
+    //! Copy constructor should not be used
+    ALU3dGrid( const ThisType & );
 
-    // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
-  public:
-    typedef ALU3dGridIntersectionIterator<const ThisType>
-    IntersectionIteratorImp;
-    typedef ALU3dGridIntersectionIterator<const ThisType>
-    LeafIntersectionIteratorImp;
-    typedef ALU3dGridLevelIntersectionIterator<const ThisType>
-    LevelIntersectionIteratorImp;
+    //! assignment operator should not be used
+    const ThisType &operator= ( const ThisType & );
 
-    typedef ALUMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
-    typedef ALUMemoryProvider< LevelIntersectionIteratorImp >   LevelIntersectionIteratorProviderType;
-  private:
-    friend class IntersectionIteratorWrapper < const ThisType, LeafIntersectionIteratorImp > ;
-    friend class IntersectionIteratorWrapper < const ThisType, LevelIntersectionIteratorImp > ;
-    friend class LeafIntersectionIteratorWrapper < const ThisType > ;
-    friend class LevelIntersectionIteratorWrapper< const ThisType > ;
+    //! reset size and global size, update Level- and LeafIndexSet, if they exist
+    void calcExtras();
 
-    typedef ALU3dGridCommunications< elType, Comm > Communications;
+    //! calculate maxlevel
+    void calcMaxLevel();
+
+    //! make grid walkthrough and calc global size
+    void recalcGlobalSize();
+
+    //! check whether macro grid format is of our type
+    void checkMacroGridFile (const std::string filename);
+
+    //! check whether macro grid has the right element type
+    void checkMacroGrid ();
+
+    //! return boudanry projection for given segment Id
+    const DuneBoundaryProjectionType* boundaryProjection(const int segmentIndex) const
+    {
+      if( bndPrj_ )
+      {
+        return bndPrj_;
+      }
+      else
+      {
+        // pointer can be zero (which is emulates the identity mapping then)
+        assert( bndVec_ );
+        assert( segmentIndex < (int) bndVec_->size() );
+        return (*bndVec_)[ segmentIndex ];
+      }
+    }
 
     const Communications &communications () const
     {
@@ -986,26 +912,71 @@ namespace Dune
       return *communications_;
     }
 
-    LeafIntersectionIteratorImp& getIntersection(const int wLevel, const LeafIntersectionIteratorImp* ) const
-    {
-      return * (leafInterItProvider_.getObject( *this, wLevel ));
+    const GridObjectFactoryType& factory() const {
+#ifdef USE_SMP_PARALLEL
+      assert( (int) factoryVec_.size() > GridObjectFactoryType :: threadNumber() );
+      return factoryVec_[ GridObjectFactoryType :: threadNumber() ];
+#else
+      return factory_;
+#endif
     }
+  protected:
+    /////////////////////////////////////////////////////////////////
+    //
+    // Internal variables
+    //
+    /////////////////////////////////////////////////////////////////
 
-    LevelIntersectionIteratorImp& getIntersection(const int wLevel, const LevelIntersectionIteratorImp* ) const
-    {
-      return * (levelInterItProvider_.getObject( *this, wLevel ));
-    }
+    // the real ALU grid
+    mutable GitterImplType *mygrid_;
 
-    void freeIntersection(LeafIntersectionIteratorImp  & it) const { leafInterItProvider_.freeObject( &it ); }
-    void freeIntersection(LevelIntersectionIteratorImp & it) const { levelInterItProvider_.freeObject( &it ); }
+    // max level of grid
+    int maxlevel_;
 
-    mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
-    mutable LevelIntersectionIteratorProviderType levelInterItProvider_;
+    // count how much elements where marked
+    mutable int coarsenMarked_;
+    mutable int refineMarked_;
 
-    friend class ALU3dGridEntityFactory<MyType,0>;
-    friend class ALU3dGridEntityFactory<MyType,1>;
-    friend class ALU3dGridEntityFactory<MyType,2>;
-    friend class ALU3dGridEntityFactory<MyType,3>;
+    // at the moment the number of different geom types is 1
+    enum { numberOfGeomTypes = 1 };
+    std::vector< std::vector<GeometryType> > geomTypes_;
+
+    // our hierarchic index set
+    HierarchicIndexSet hIndexSet_;
+
+    // out global id set
+    mutable GlobalIdSetImp *globalIdSet_;
+
+    // out global id set
+    LocalIdSetImp localIdSet_;
+
+    // the level index set ( default type )
+    mutable std::vector < LevelIndexSetImp * > levelIndexVec_;
+
+    // the leaf index set
+    mutable LeafIndexSetImp * leafIndexSet_;
+
+    // the reference element
+    const ReferenceElementType& referenceElement_;
+
+    mutable VertexListType vertexList_[MAXL];
+
+    mutable ALU3dGridItemListType ghostLeafList_[ dimension ];
+    mutable ALU3dGridItemListType ghostLevelList_[ dimension ][MAXL];
+
+    mutable ALU3dGridItemListType levelEdgeList_[MAXL];
+
+    mutable LeafVertexListType leafVertexList_;
+
+    // the type of our size cache
+    typedef SingleTypeSizeCache<MyType> SizeCacheType;
+    SizeCacheType * sizeCache_;
+
+#ifdef USE_SMP_PARALLEL
+    std::vector< GridObjectFactoryType > factoryVec_;
+#else
+    GridObjectFactoryType factory_;
+#endif
 
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;
@@ -1022,88 +993,6 @@ namespace Dune
     // pointer to communications object
     Communications *communications_;
   }; // end class ALU3dGrid
-
-
-
-  template <class GridImp>
-  struct ALU3dGridEntityFactory<GridImp,0>
-  {
-    enum { codim = 0 };
-    typedef typename GridImp :: template Codim<codim> :: Entity Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObject;
-    typedef typename EntityObject :: ImplementationType EntityImp;
-
-    inline static EntityObject *
-    getNewEntity (const GridImp& grid, int level)
-    {
-      return grid.entityProvider_.getEntityObject( grid, level, (EntityImp *) 0);
-    }
-
-    inline static void freeEntity(const GridImp& grid, EntityObject * e )
-    {
-      grid.entityProvider_.freeObject( e );
-    }
-  };
-
-  template <class GridImp>
-  struct ALU3dGridEntityFactory<GridImp,1>
-  {
-    enum { codim = 1 };
-    typedef typename GridImp :: template Codim<codim> :: Entity Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObject;
-    typedef typename EntityObject :: ImplementationType EntityImp;
-
-    inline static EntityObject *
-    getNewEntity (const GridImp& grid, int level)
-    {
-      return grid.faceProvider_.getEntityObject( grid, level, (EntityImp *) 0);
-    }
-
-    inline static void freeEntity(const GridImp& grid, EntityObject * e )
-    {
-      grid.faceProvider_.freeObject( e );
-    }
-  };
-
-  template <class GridImp>
-  struct ALU3dGridEntityFactory<GridImp,2>
-  {
-    enum { codim = 2 };
-    typedef typename GridImp :: template Codim<codim> :: Entity Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObject;
-    typedef typename EntityObject :: ImplementationType EntityImp;
-
-    inline static EntityObject *
-    getNewEntity (const GridImp& grid, int level)
-    {
-      return grid.edgeProvider_.getEntityObject( grid, level, (EntityImp *) 0);
-    }
-
-    inline static void freeEntity(const GridImp& grid, EntityObject * e )
-    {
-      grid.edgeProvider_.freeObject( e );
-    }
-  };
-
-  template <class GridImp>
-  struct ALU3dGridEntityFactory<GridImp,3>
-  {
-    enum { codim = 3 };
-    typedef typename GridImp :: template Codim<codim> :: Entity Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObject;
-    typedef typename EntityObject :: ImplementationType EntityImp;
-
-    inline static EntityObject *
-    getNewEntity (const GridImp& grid, int level)
-    {
-      return grid.vertexProvider_.getEntityObject( grid, level, (EntityImp *) 0);
-    }
-
-    inline static void freeEntity(const GridImp& grid, EntityObject * e )
-    {
-      grid.vertexProvider_.freeObject( e );
-    }
-  };
 
 
   bool checkMacroGrid ( ALU3dGridElementType elType ,

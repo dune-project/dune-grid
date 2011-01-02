@@ -77,6 +77,8 @@ namespace Dune {
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
+
     typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<cd>::InterfaceType ElementType;
     typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<2>::InterfaceType VertexType;
 
@@ -95,7 +97,7 @@ namespace Dune {
     int level () const;
 
     //! Constructor
-    ALU2dGridEntity(const GridImp &grid, int level);
+    ALU2dGridEntity(const FactoryType& factory, int level);
 
     //! Copy Constructor
     ALU2dGridEntity(const ALU2dGridEntity & org);
@@ -142,7 +144,10 @@ namespace Dune {
     FieldVector<alu2d_ctype, dim>& positionInOwnersFather () const;
 
     //! return reference to grid
-    const GridImp& grid() const { return grid_; }
+    const GridImp& grid() const { return factory_.grid(); }
+
+    //! return reference to factory
+    const FactoryType& factory() const { return factory_; }
 
     //! return reference to current item
     ElementType& getItem() const
@@ -159,13 +164,10 @@ namespace Dune {
 
   private:
     //! returns reference to geometry implementation
-    GeometryImp& geoImpl() const {
-      return
-        grid_.getRealImplementation(geoObj_);
-    }
+    GeometryImp& geoImpl() const { return GridImp :: getRealImplementation(geoObj_);  }
 
-    //! the grid this entity belongs to
-    const GridImp &grid_;
+    //! the factory to create entities
+    const FactoryType& factory_;
 
     //! corresponding ALU2dGridElement
     mutable ElementType * item_;
@@ -225,6 +227,8 @@ namespace Dune {
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
+
     //! type of our Geometry interface
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
     //! type of corresponding interface local geometry
@@ -251,7 +255,7 @@ namespace Dune {
     };
 
     //! Constructor creating empty Entity
-    ALU2dGridEntity(const GridImp &grid, int level);
+    ALU2dGridEntity(const FactoryType& factory, int level);
 
     //! Constructor creating empty Entity
     ALU2dGridEntity(const ALU2dGridEntity & org);
@@ -307,19 +311,19 @@ namespace Dune {
 
     ALU2dGridLevelIntersectionIteratorType ilevelbegin () const
     {
-      return ALU2dGridLevelIntersectionIteratorType(grid_, *this, this->level(),false);
+      return ALU2dGridLevelIntersectionIteratorType( *this, this->level(),false);
     }
     ALU2dGridLevelIntersectionIteratorType ilevelend () const
     {
-      return ALU2dGridLevelIntersectionIteratorType(grid_, *this, this->level(),true);
+      return ALU2dGridLevelIntersectionIteratorType( *this, this->level(),true);
     }
     ALU2dGridLeafIntersectionIteratorType ileafbegin () const
     {
-      return ALU2dGridLeafIntersectionIteratorType(grid_, *this, this->level(), false);
+      return ALU2dGridLeafIntersectionIteratorType( *this, this->level(), false);
     }
     ALU2dGridLeafIntersectionIteratorType ileafend () const
     {
-      return ALU2dGridLeafIntersectionIteratorType(grid_, *this, this->level(),true);
+      return ALU2dGridLeafIntersectionIteratorType( *this, this->level(),true);
     }
 
     //! returns true if Entity is leaf (i.e. has no children)
@@ -341,13 +345,13 @@ namespace Dune {
      */
     ALU2dGridHierarchicIterator<GridImp> hbegin (int maxLevel) const
     {
-      return ALU2dGridHierarchicIterator<GridImp> (grid_,*item_,maxLevel,false);
+      return ALU2dGridHierarchicIterator<GridImp> (factory(), *item_ , maxLevel,false);
     }
 
     //! Returns iterator to one past the last son
     ALU2dGridHierarchicIterator<GridImp> hend (int maxLevel) const
     {
-      return ALU2dGridHierarchicIterator<GridImp> (grid_,*item_,maxLevel,true);
+      return ALU2dGridHierarchicIterator<GridImp> (factory(), *item_, maxLevel,true);
     }
 
     //! Provide access to mesh entity i of given codimension. Entities
@@ -389,7 +393,7 @@ namespace Dune {
     PartitionType partitionType() const
     {
 #if ALU2DGRID_PARALLEL
-      return grid_.rankManager().partitionType( item_->getIndex() );
+      return grid().rankManager().partitionType( item_->getIndex() );
 #else
       return InteriorEntity;
 #endif
@@ -467,7 +471,10 @@ namespace Dune {
     }
 
     //! return reference to grid
-    const GridImp& grid() const { return grid_; }
+    const GridImp& grid() const { return factory_.grid(); }
+
+    //! return reference to factory
+    const FactoryType& factory() const { return factory_; }
 
     // return internal face
     int getFace() const { return -1; }
@@ -480,7 +487,7 @@ namespace Dune {
     int nChild () const;
 
     //! returns reference to geometry implementation
-    GeometryImp& geoImpl() const { return grid_.getRealImplementation(geoObj_); }
+    GeometryImp& geoImpl() const { return GridImp :: getRealImplementation(geoObj_); }
 
     //! return index of sub entity with codim = cc and local number i
     //! i.e. return global number of vertex i
@@ -489,8 +496,8 @@ namespace Dune {
 
     int subIndex (int i, unsigned int codim) const;
 
-    //! corresponding grid
-    const GridImp  & grid_;
+    //! the factory to create entities
+    const FactoryType& factory_;
 
     //! the current element of grid
     mutable HElementType *item_;
@@ -526,6 +533,8 @@ namespace Dune {
     typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<codim>::InterfaceType ElementType;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
+
     enum { codimension = codim };
 
     //! type of stored entity (interface)
@@ -537,7 +546,7 @@ namespace Dune {
     typedef ALU2dGridEntityPointer<codimension,GridImp> EntityPointerImp;
 
     //! Constructor for EntityPointer that points to an element
-    ALU2dGridEntityPointer ( const GridImp &grid,
+    ALU2dGridEntityPointer ( const FactoryType& factory,
                              const ElementType &item,
                              int face = -1,
                              int level = -1
@@ -547,7 +556,7 @@ namespace Dune {
     ALU2dGridEntityPointer(const EntityImp& entity) ;
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
-    ALU2dGridEntityPointer(const GridImp & grid) ;
+    ALU2dGridEntityPointer(const FactoryType& factory) ;
 
     //! Copy Constructor
     ALU2dGridEntityPointer(const ThisType & org) ;
@@ -568,11 +577,14 @@ namespace Dune {
     //! ask for level of entities
     int level () const;
 
+    //! assigment operator
     ThisType & operator = (const ThisType & org);
+
+    //! return reference top grid
+    const GridImp& grid() const { return factory_.grid(); }
 
   protected:
     EntityImp & entityImp();
-
     const EntityImp & entityImp() const;
 
     //! has to be called when iterator is finished
@@ -581,15 +593,16 @@ namespace Dune {
     //! update underlying item pointer and set entity
     void updateEntityPointer( ElementType * item, int face=-1, int level=-1 );
 
-    //! reference to grid
-    const GridImp & grid_;
+    //! reference to entity factory
+    const FactoryType& factory_;
 
     //! pointer to the real (H)Element
     mutable ElementType * item_;
-    mutable int level_;
-    int face_;
     //! entity that this EntityPointer points to
     mutable EntityObj * entity_;
+
+    mutable int level_;
+    int face_;
   };
 
 } // end namespace Dune

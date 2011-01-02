@@ -29,40 +29,34 @@ namespace Dune {
   // --IntersectionIterator
   template<class GridImp>
   inline ALU3dGridIntersectionIterator<GridImp> ::
-  ALU3dGridIntersectionIterator(const GridImp & grid,
+  ALU3dGridIntersectionIterator(const FactoryType& factory,
                                 int wLevel) :
     geoProvider_(connector_),
-    grid_(grid),
+    factory_( factory ),
     item_(0),
     ghost_(0),
     index_(0),
     intersectionGlobal_(GeometryImp()),
-    intersectionGlobalImp_(grid_.getRealImplementation(intersectionGlobal_)),
     intersectionSelfLocal_(GeometryImp()),
-    intersectionSelfLocalImp_(grid_.getRealImplementation(intersectionSelfLocal_)),
     intersectionNeighborLocal_(GeometryImp()),
-    intersectionNeighborLocalImp_(grid_.getRealImplementation(intersectionNeighborLocal_)),
     done_(true)
   {}
 
   // --IntersectionIterator
   template<class GridImp>
   inline ALU3dGridIntersectionIterator<GridImp> ::
-  ALU3dGridIntersectionIterator(const GridImp & grid,
+  ALU3dGridIntersectionIterator(const FactoryType& factory,
                                 HElementType *el,
                                 int wLevel,bool end) :
     connector_(),
     geoProvider_(connector_),
-    grid_(grid),
+    factory_( factory ),
     item_(0),
     ghost_(0),
     index_(0),
     intersectionGlobal_(GeometryImp()),
-    intersectionGlobalImp_(grid_.getRealImplementation(intersectionGlobal_)),
     intersectionSelfLocal_(GeometryImp()),
-    intersectionSelfLocalImp_(grid_.getRealImplementation(intersectionSelfLocal_)),
     intersectionNeighborLocal_(GeometryImp()),
-    intersectionNeighborLocalImp_(grid_.getRealImplementation(intersectionNeighborLocal_)),
     done_(end)
   {
     if (!end)
@@ -154,15 +148,12 @@ namespace Dune {
   ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org) :
     connector_(org.connector_),
     geoProvider_(connector_),
-    grid_(org.grid_),
+    factory_( org.factory_ ),
     item_(org.item_),
     ghost_(org.ghost_),
     intersectionGlobal_(GeometryImp()),
-    intersectionGlobalImp_(grid_.getRealImplementation(intersectionGlobal_)),
     intersectionSelfLocal_(GeometryImp()),
-    intersectionSelfLocalImp_(grid_.getRealImplementation(intersectionSelfLocal_)),
     intersectionNeighborLocal_(GeometryImp()),
-    intersectionNeighborLocalImp_(grid_.getRealImplementation(intersectionNeighborLocal_)),
     done_(org.done_)
   {
     if(org.item_)
@@ -278,11 +269,11 @@ namespace Dune {
     if( connector_.ghostBoundary() )
     {
       // create entity pointer with ghost boundary face
-      return EntityPointer(grid_, connector_.boundaryFace() );
+      return EntityPointer(factory_, connector_.boundaryFace() );
     }
 
     assert( &connector_.outerEntity() );
-    return EntityPointer(grid_, connector_.outerEntity() );
+    return EntityPointer(factory_, connector_.outerEntity() );
   }
 
   template<class GridImp>
@@ -291,12 +282,12 @@ namespace Dune {
   {
     if( ImplTraits :: isGhost( ghost_ ) )
     {
-      return EntityPointer(grid_, *ghost_ );
+      return EntityPointer(factory_, *ghost_ );
     }
     else
     {
       // make sure that inside is not called for an end iterator
-      return EntityPointer(grid_, connector_.innerEntity() );
+      return EntityPointer(factory_, connector_.innerEntity() );
     }
   }
 
@@ -433,7 +424,7 @@ namespace Dune {
   inline const typename ALU3dGridIntersectionIterator<GridImp>::Geometry &
   ALU3dGridIntersectionIterator< GridImp >::geometry () const
   {
-    geoProvider_.buildGlobalGeom(intersectionGlobalImp_);
+    geoProvider_.buildGlobalGeom(intersectionGlobalImp());
     return intersectionGlobal_;
   }
 
@@ -469,9 +460,9 @@ namespace Dune {
   template <class GridImp>
   inline void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const
   {
-    intersectionSelfLocalImp_.buildGeom(geoProvider_.intersectionSelfLocal());
+    intersectionSelfLocalImp().buildGeom(geoProvider_.intersectionSelfLocal());
     if ( ! connector_.outerBoundary() ) {
-      intersectionNeighborLocalImp_.buildGeom(geoProvider_.intersectionNeighborLocal());
+      intersectionNeighborLocalImp().buildGeom(geoProvider_.intersectionNeighborLocal());
     }
   }
 
@@ -549,9 +540,9 @@ namespace Dune {
   // --IntersectionIterator
   template<class GridImp>
   inline ALU3dGridLevelIntersectionIterator<GridImp> ::
-  ALU3dGridLevelIntersectionIterator(const GridImp & grid,
+  ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
                                      int wLevel)
-    : ALU3dGridIntersectionIterator<GridImp>(grid,wLevel)
+    : ALU3dGridIntersectionIterator<GridImp>(factory,wLevel)
       , levelNeighbor_(false)
       , isLeafItem_(false)
   {}
@@ -559,10 +550,10 @@ namespace Dune {
   // --IntersectionIterator
   template<class GridImp>
   inline ALU3dGridLevelIntersectionIterator<GridImp> ::
-  ALU3dGridLevelIntersectionIterator(const GridImp & grid,
+  ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
                                      HElementType *el,
                                      int wLevel,bool end)
-    : ALU3dGridIntersectionIterator<GridImp>(grid,el,wLevel,end)
+    : ALU3dGridIntersectionIterator<GridImp>(factory,el,wLevel,end)
       , levelNeighbor_(false)
       , isLeafItem_(false)
   {}

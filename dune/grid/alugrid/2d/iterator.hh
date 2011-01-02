@@ -4,13 +4,12 @@
 #define DUNE_ALU2DGRID_ITERATOR_HH
 
 // System includes
-
-// Dune includes
-#include <dune/grid/common/grid.hh>
-#include <dune/grid/common/intersectioniteratorwrapper.hh>
 #include <stack>
 #include <utility>
 
+// Dune includes
+#include <dune/grid/common/grid.hh>
+#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
 
 // Local includes
 #include "entity.hh"
@@ -91,12 +90,14 @@ namespace Dune {
     };
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
+
     //! type of entity we iterate (interface)
     typedef typename GridImp::template Codim<cdim>::Entity Entity;
     typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<cdim>::InterfaceType ElementType;
 
     //! Constructor called by LeafIterator
-    ALU2dGridLeafIterator(const GridImp & grid, bool end);
+    ALU2dGridLeafIterator(const FactoryType& factory, bool end);
 
     //! copy Constructor
     ALU2dGridLeafIterator(const ThisType & org);
@@ -152,12 +153,14 @@ namespace Dune {
     typedef typename GridImp :: ALU2dGridLeafMarkerVectorType LeafMarkerVectorType;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
+
     //! type of entity we iterate (interface)
     typedef typename GridImp::template Codim<1>::Entity Entity;
     typedef typename Dune::ALU2dImplTraits< dimworld, eltype >::template Codim<1>::InterfaceType ElementType;
 
     //! Constructor called by LeafIterator
-    ALU2dGridLeafIterator(const GridImp & grid, bool end);
+    ALU2dGridLeafIterator(const FactoryType& factory, bool end);
 
     //! copy Constructor
     ALU2dGridLeafIterator(const ThisType & org);
@@ -178,6 +181,7 @@ namespace Dune {
     //! information for edges
     int face_;
 
+    //! pointer to element
     ElementType * elem_;
 
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
@@ -218,11 +222,12 @@ namespace Dune {
     typedef ALU2dGridLevelIterator<0,pitype,GridImp> ThisType;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
 
     //! Constructor
-    ALU2dGridLevelIterator(const GridImp & grid, int level, bool end);
+    ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end);
 
     //! copy constructor
     ALU2dGridLevelIterator(const ThisType & org);
@@ -239,6 +244,7 @@ namespace Dune {
     //! actual level
     int level_;
 
+    //! pointer to element
     HElementType * item_;
 
     //! type of entity we iterate (interface)
@@ -276,11 +282,12 @@ namespace Dune {
 
     typedef ALU2dGridLevelIterator<1,pitype,GridImp> ThisType;
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
 
     //! Constructor
-    ALU2dGridLevelIterator(const GridImp & grid, int level, bool end);
+    ALU2dGridLevelIterator(const FactoryType& factroy, int level, bool end);
 
     //! copy constructor
     ALU2dGridLevelIterator(const ThisType & org);
@@ -348,11 +355,12 @@ namespace Dune {
     typedef ALU2dGridLevelIterator<2,pitype,GridImp> ThisType;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
 
     //! Constructor
-    ALU2dGridLevelIterator(const GridImp & grid, int level, bool end);
+    ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end);
 
     //! copy constructor
     ALU2dGridLevelIterator(const ThisType & org);
@@ -416,6 +424,8 @@ namespace Dune {
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 
   public:
+    typedef typename GridImp :: GridObjectFactoryType FactoryType;
+
     //! type of entities we iterate
     typedef typename GridImp::template Codim<0>::Entity Entity;
     //! type of coordinates, i.e. double
@@ -424,7 +434,8 @@ namespace Dune {
     typedef ALU2dGridEntity<0,dim,GridImp> EntityImp;
 
     //! the normal Constructor
-    ALU2dGridHierarchicIterator(const GridImp &grid, const HElementType & elem, int maxlevel, bool end=false);
+    ALU2dGridHierarchicIterator(const FactoryType& factory,
+                                const HElementType & elem, int maxlevel, bool end=false);
 
     //! the normal Constructor
     ALU2dGridHierarchicIterator(const ALU2dGridHierarchicIterator<GridImp> &org);

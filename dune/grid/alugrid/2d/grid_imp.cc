@@ -42,6 +42,11 @@ namespace Dune
       comm_( MPIHelper::getCommunicator() ),
 #endif
       mygrid_ ( createGrid(macroTriangFilename, nrOfHangingNodes, macroFile ) )
+#ifdef USE_SMP_PARALLEL
+      , factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) )
+#else
+      , factory_( *this )
+#endif
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_( MAXL, 0 )
@@ -174,7 +179,7 @@ namespace Dune
   template<int cd, PartitionIteratorType pitype>
   inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
   ALU2dGrid< dim, dimworld, eltype >::lbegin (int level) const {
-    return ALU2dGridLevelIterator<cd, pitype, const ThisType>(*this, level, ( comm().size() <= 1 && pitype == Ghost_Partition ) );
+    return ALU2dGridLevelIterator<cd, pitype, const ThisType>( factory(), level, ( comm().size() <= 1 && pitype == Ghost_Partition ) );
   }
 
   //! one past the end on this level
@@ -182,7 +187,7 @@ namespace Dune
   template<int cd, PartitionIteratorType pitype>
   inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
   ALU2dGrid< dim, dimworld, eltype >::lend (int level) const {
-    return ALU2dGridLevelIterator<cd, pitype, const ThisType>(*this, level, true);
+    return ALU2dGridLevelIterator<cd, pitype, const ThisType>( factory(), level, true);
   }
 
   //! Iterator to first entity of given codim on level
@@ -190,7 +195,7 @@ namespace Dune
   template<int cd>
   inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<cd>::template Partition<All_Partition>::LevelIterator
   ALU2dGrid< dim, dimworld, eltype >::lbegin (int level) const {
-    return ALU2dGridLevelIterator<cd, All_Partition, const ThisType>(*this, level, false);
+    return ALU2dGridLevelIterator<cd, All_Partition, const ThisType>( factory(), level, false);
   }
 
   //! one past the end on this level
@@ -198,21 +203,21 @@ namespace Dune
   template<int cd>
   inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<cd>::template Partition<All_Partition>::LevelIterator
   ALU2dGrid< dim, dimworld, eltype >::lend (int level) const {
-    return ALU2dGridLevelIterator<cd, All_Partition, const ThisType>(*this, level, true);
+    return ALU2dGridLevelIterator<cd, All_Partition, const ThisType>( factory(), level, true);
   }
 
   //! Iterator to first entity of codim 0 on level
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline typename ALU2dGrid< dim, dimworld, eltype >::LevelIteratorType
   ALU2dGrid< dim, dimworld, eltype >::lbegin (int level) const {
-    return LevelIteratorImp(*this, level, false);
+    return LevelIteratorImp( factory(), level, false);
   }
 
   //! last entity of codim 0 on level
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline typename ALU2dGrid< dim, dimworld, eltype >::LevelIteratorType
   ALU2dGrid< dim, dimworld, eltype >::lend (int level) const {
-    return LevelIteratorImp(*this, level, true);
+    return LevelIteratorImp( factory(), level, true);
   }
 
   //! General definiton for a leaf iterator
@@ -220,7 +225,7 @@ namespace Dune
   template <int codim, PartitionIteratorType pitype>
   inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
   ALU2dGrid< dim, dimworld, eltype >::leafbegin() const {
-    return ALU2dGridLeafIterator<codim, pitype, const ThisType> (*this, ( comm().size() <= 1 && pitype == Ghost_Partition ) );
+    return ALU2dGridLeafIterator<codim, pitype, const ThisType> ( factory(), ( comm().size() <= 1 && pitype == Ghost_Partition ) );
   }
 
   //! General definition for an end iterator on leaf level
@@ -228,7 +233,7 @@ namespace Dune
   template <int codim, PartitionIteratorType pitype>
   inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
   ALU2dGrid< dim, dimworld, eltype >::leafend() const {
-    return ALU2dGridLeafIterator<codim, pitype, const ThisType> (*this, true);
+    return ALU2dGridLeafIterator<codim, pitype, const ThisType> ( factory(), true);
   }
 
   //! General definiton for a leaf iterator
@@ -236,7 +241,7 @@ namespace Dune
   template <int codim>
   inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<codim>::LeafIterator
   ALU2dGrid< dim, dimworld, eltype >::leafbegin() const {
-    return ALU2dGridLeafIterator<codim, All_Partition, const ThisType> (*this, false);
+    return ALU2dGridLeafIterator<codim, All_Partition, const ThisType> ( factory(), false);
   }
 
   //! General definition for an end iterator on leaf level
@@ -244,21 +249,21 @@ namespace Dune
   template <int codim>
   inline typename ALU2dGrid< dim, dimworld, eltype >::Traits::template Codim<codim>::LeafIterator
   ALU2dGrid< dim, dimworld, eltype >::leafend() const {
-    return ALU2dGridLeafIterator<codim, All_Partition, const ThisType> (*this, true);
+    return ALU2dGridLeafIterator<codim, All_Partition, const ThisType> ( factory(), true);
   }
 
   //! Iterator to first entity of codim 0 on leaf level (All_Partition)
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline typename ALU2dGrid< dim, dimworld, eltype >::LeafIteratorType
   ALU2dGrid< dim, dimworld, eltype >::leafbegin () const {
-    return LeafIteratorImp(*this,false);
+    return LeafIteratorImp( factory(), false);
   }
 
   //! one past the end on this leaf level (codim 0 and All_Partition)
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline typename ALU2dGrid< dim, dimworld, eltype >::LeafIteratorType
   ALU2dGrid< dim, dimworld, eltype >::leafend () const {
-    return LeafIteratorImp(*this,true);
+    return LeafIteratorImp( factory(), true);
   }
 
   //! Return maximum level defined in this grid. Levels are numbered

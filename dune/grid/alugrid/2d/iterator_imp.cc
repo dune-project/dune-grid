@@ -24,16 +24,17 @@ namespace Dune
   //! constructor
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   inline ALU2dGridLeafIterator<cdim, pitype, GridImp> ::
-  ALU2dGridLeafIterator(const GridImp & grid, bool end) :
-    EntityPointerType (grid),
+  ALU2dGridLeafIterator(const FactoryType& factory, bool end) :
+    EntityPointerType ( factory ),
     endIter_(end),
     level_(-1),
     elem_(0),
     iter_(),
-    marker_(grid.getLeafMarker())
+    marker_( factory.grid().getLeafMarker())
   {
     if(!end)
     {
+      const GridImp& grid = factory.grid() ;
       // update marker Vector
       if( (cdim == 2) && (! marker_.up2Date()) ) marker_.update(grid);
 
@@ -46,7 +47,7 @@ namespace Dune
 
 #if ALU2DGRID_PARALLEL
         const bool valid = (cdim == 0) ?
-                           (this->grid_.rankManager().isValid( elem_->getIndex(), pitype )) :
+                           (this->grid().rankManager().isValid( elem_->getIndex(), pitype )) :
                            marker_.isValidVertex( elem_->getIndex() );
 #else
         const bool valid = true;
@@ -121,7 +122,7 @@ namespace Dune
 
 #if ALU2DGRID_PARALLEL
     bool valid = (cdim == 0) ?
-                 (this->grid_.rankManager().isValid( elem_->getIndex(), pitype )) :
+                 (this->grid().rankManager().isValid( elem_->getIndex(), pitype )) :
                  marker_.isValidVertex( elem_->getIndex() );
 
     while ( ! valid )
@@ -139,7 +140,7 @@ namespace Dune
       // get element pointer
       elem_ = &(iter_->getitem());
       valid = (cdim == 0) ?
-              (this->grid_.rankManager().isValid( elem_->getIndex(), pitype )) :
+              (this->grid().rankManager().isValid( elem_->getIndex(), pitype )) :
               marker_.isValidVertex( elem_->getIndex() );
     }
 #endif
@@ -159,17 +160,18 @@ namespace Dune
   //! constructor
   template<PartitionIteratorType pitype, class GridImp>
   inline ALU2dGridLeafIterator<1, pitype, GridImp> ::
-  ALU2dGridLeafIterator(const GridImp & grid, bool end) :
-    EntityPointerType (grid),
+  ALU2dGridLeafIterator(const FactoryType& factory, bool end) :
+    EntityPointerType ( factory ),
     endIter_(end),
     level_(-1),
     face_(0),
     elem_(0),
     iter_(),
-    marker_(grid.getLeafMarker())
+    marker_( factory.grid().getLeafMarker())
   {
     if(!end)
     {
+      const GridImp& grid = factory.grid() ;
       // update marker Vector
       if( ! marker_.up2Date() ) marker_.update(grid);
 
@@ -248,7 +250,7 @@ namespace Dune
       // get new element
       elem_ = &(iter->getitem());
 #if ALU2DGRID_PARALLEL
-      while ( ! this->grid_.rankManager().isValid( elem_->getIndex(), pitype ) )
+      while ( ! this->grid().rankManager().isValid( elem_->getIndex(), pitype ) )
       {
         // go to next item
         iter->next();
@@ -311,14 +313,16 @@ namespace Dune
   //! constructor for cd=0
   template<PartitionIteratorType pitype, class GridImp>
   inline ALU2dGridLevelIterator<0, pitype, GridImp> ::
-  ALU2dGridLevelIterator(const GridImp & grid, int level, bool end) :
-    EntityPointerType (grid),
+  ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :
+    EntityPointerType ( factory ),
     endIter_(end),
     level_(level),
     iter_()
   {
     if(!end)
     {
+      const GridImp& grid = factory.grid() ;
+
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();
       if((!iter_->done()))
@@ -326,7 +330,7 @@ namespace Dune
         item_ = &(iter_->getitem());
         this->updateEntityPointer(item_, -1 , level_);
 #if ALU2DGRID_PARALLEL
-        if ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+        if ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
         {
           increment();
         }
@@ -383,7 +387,7 @@ namespace Dune
     item_ = &iter->getitem();
 
 #if ALU2DGRID_PARALLEL
-    while ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+    while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
     {
       // go to next item
       iter_->next();
@@ -414,18 +418,20 @@ namespace Dune
   //! constructor for cd=1
   template<PartitionIteratorType pitype, class GridImp>
   inline ALU2dGridLevelIterator<1, pitype, GridImp> ::
-  ALU2dGridLevelIterator(const GridImp & grid, int level, bool end) :
-    EntityPointerType (grid),
+  ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :
+    EntityPointerType ( factory ),
     endIter_(end),
     level_(level),
     myFace_(0),
     iter_(),
-    marker_(& grid.getMarkerVector(level))
+    marker_(& factory.grid().getMarkerVector(level) )
   {
     if(!end)
     {
+      const GridImp& grid = factory.grid() ;
+
       // update marker Vector if necessary
-      if( ! marker().up2Date() ) marker().update(grid,level_);
+      if( ! marker().up2Date() ) marker().update( grid, level_);
 
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();
@@ -524,7 +530,7 @@ namespace Dune
       // get new element
       item_ = &iter->getitem();
 #if ALU2DGRID_PARALLEL
-      while ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+      while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
       {
         iter->next();
         if(iter->done())
@@ -568,16 +574,18 @@ namespace Dune
   //! constructor for cd=2
   template<PartitionIteratorType pitype, class GridImp>
   inline ALU2dGridLevelIterator<2, pitype, GridImp> ::
-  ALU2dGridLevelIterator(const GridImp & grid, int level, bool end) :
-    EntityPointerType (grid),
+  ALU2dGridLevelIterator(const FactoryType& factory, int level, bool end) :
+    EntityPointerType ( factory ),
     endIter_(end),
     level_(level),
     myFace_(0),
     iter_(),
-    marker_(& grid.getMarkerVector(level))
+    marker_(& factory.grid().getMarkerVector(level))
   {
     if(!end)
     {
+      const GridImp& grid = factory.grid() ;
+
       // update marker Vector if necessary
       if( ! marker().up2Date() ) marker().update(grid,level_);
 
@@ -588,7 +596,7 @@ namespace Dune
       {
         item_ = &iter_->getitem();
 #if ALU2DGRID_PARALLEL
-        while ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+        while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
         {
           iter_->next();
           if(iter_->done())
@@ -694,7 +702,7 @@ namespace Dune
       item_ = &iter->getitem();
 
 #if ALU2DGRID_PARALLEL
-      while ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+      while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
       {
         iter->next();
         if(iter->done())
@@ -739,11 +747,11 @@ namespace Dune
   //! the normal Constructor
   template<class GridImp>
   inline ALU2dGridHierarchicIterator<GridImp> ::
-  ALU2dGridHierarchicIterator(const GridImp &grid, const HElementType & elem, int maxlevel, bool end) :
-    ALU2dGridEntityPointer<0,GridImp> (grid)
-    , elem_(&elem)
-    , maxlevel_(maxlevel)
-    , endIter_(end) {
+  ALU2dGridHierarchicIterator(const FactoryType& factory, const HElementType & elem, int maxlevel, bool end)
+    : ALU2dGridEntityPointer<0,GridImp>( factory )
+      , elem_(&elem)
+      , maxlevel_(maxlevel)
+      , endIter_(end) {
 
     if (!end)
     {

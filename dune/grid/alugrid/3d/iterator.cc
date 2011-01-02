@@ -24,21 +24,22 @@ namespace Dune {
   // Constructor for begin iterator
   template<int codim, PartitionIteratorType pitype, class GridImp >
   alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
-  ALU3dGridLevelIterator(const GridImp & grid, int level, bool )
-    : ALU3dGridEntityPointer<codim,GridImp> (grid,level)
+  ALU3dGridLevelIterator(const FactoryType& factory, int level, bool )
+    : ALU3dGridEntityPointer<codim,GridImp> (factory,level)
       , level_(level)
       , iter_ (0)
   {
-    iter_  = new IteratorType ( this->grid_ , level_, grid.nlinks() );
+    const GridImp& grid = factory.grid();
+    iter_  = new IteratorType ( grid, level_, grid.nlinks() );
     assert( iter_ );
-    this->firstItem(this->grid_,*this,level_);
+    this->firstItem( grid, *this, level_);
   }
 
   // Constructor for end iterator
   template<int codim, PartitionIteratorType pitype, class GridImp >
   alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
-  ALU3dGridLevelIterator(const GridImp & grid, int level)
-    : ALU3dGridEntityPointer<codim,GridImp> (grid ,level)
+  ALU3dGridLevelIterator(const FactoryType& factory, int level)
+    : ALU3dGridEntityPointer<codim,GridImp> (factory ,level)
       , level_(level)
       , iter_ (0)
   {
@@ -48,7 +49,7 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp >
   alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   ALU3dGridLevelIterator(const ALU3dGridLevelIterator<codim,pitype,GridImp> & org )
-    : ALU3dGridEntityPointer<codim,GridImp> ( org.grid_ , org.level_ )
+    : ALU3dGridEntityPointer<codim,GridImp> ( org.factory_ , org.level_ )
       , level_( org.level_ )
       , iter_(0)
   {
@@ -87,7 +88,7 @@ namespace Dune {
       assert( iter_ );
       if(!(iter_->done()))
       {
-        this->setItem(this->grid_, *this, *iter_, level_ );
+        this->setItem( this->grid(), *this, *iter_, level_ );
         assert( this->equals(org) );
       }
     }
@@ -109,7 +110,7 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp >
   alu_inline void ALU3dGridLevelIterator<codim,pitype,GridImp> :: increment ()
   {
-    this->incrementIterator(this->grid_,*this,level_);
+    this->incrementIterator(this->grid(),*this,level_);
     return ;
   }
 
@@ -118,7 +119,7 @@ namespace Dune {
   ALU3dGridLevelIterator<cdim, pitype, GridImp> :: dereference () const
   {
 #ifndef NDEBUG
-    const ALU3dGridLevelIterator<cdim, pitype, GridImp> endIterator (this->grid_,level_);
+    const ALU3dGridLevelIterator<cdim, pitype, GridImp> endIterator ( this->factory_,level_);
     // assert that iterator not equals end iterator
     assert( ! this->equals(endIterator) );
 #endif
@@ -139,8 +140,8 @@ namespace Dune {
   // constructor for end iterators
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
-  ALU3dGridLeafIterator( const GridImp &grid, int level )
-    : ALU3dGridEntityPointer <cdim,GridImp> ( grid, level )
+  ALU3dGridLeafIterator( const FactoryType& factory, int level )
+    : ALU3dGridEntityPointer <cdim,GridImp> ( factory, level )
       , iter_ (0)
       , walkLevel_(level)
   {
@@ -149,23 +150,24 @@ namespace Dune {
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
-  ALU3dGridLeafIterator(const GridImp &grid, int level ,
+  ALU3dGridLeafIterator(const FactoryType& factory, int level ,
                         bool isBegin)
-    : ALU3dGridEntityPointer <cdim,GridImp> ( grid, level )
+    : ALU3dGridEntityPointer <cdim,GridImp> ( factory, level )
       , iter_ (0)
       , walkLevel_(level)
   {
+    const GridImp& grid = factory.grid();
     // create interior iterator
-    iter_ = new IteratorType ( this->grid_ , level , grid.nlinks() );
+    iter_ = new IteratorType ( grid , level , grid.nlinks() );
     assert( iter_ );
     // -1 to identify as leaf iterator
-    this->firstItem(this->grid_,*this,-1);
+    this->firstItem(grid,*this,-1);
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
   ALU3dGridLeafIterator(const ThisType & org)
-    : ALU3dGridEntityPointer <cdim,GridImp> ( org.grid_, org.walkLevel_ )
+    : ALU3dGridEntityPointer <cdim,GridImp> ( org.factory_, org.walkLevel_ )
       , iter_(0)
       , walkLevel_(org.walkLevel_)
   {
@@ -220,7 +222,7 @@ namespace Dune {
         assert( !iter_->done());
         assert( !org.iter_->done() );
         // -1 to identify leaf iterator
-        this->setItem(this->grid_,*this, *iter_,-1);
+        this->setItem( this->grid(),*this, *iter_,-1);
         assert( this->equals(org) );
       }
     }
@@ -236,7 +238,7 @@ namespace Dune {
   alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: increment ()
   {
     // -1 to identify leaf iterator
-    this->incrementIterator(this->grid_,*this,-1);
+    this->incrementIterator(this->grid(), *this,-1);
     return ;
   }
 
@@ -245,7 +247,7 @@ namespace Dune {
   ALU3dGridLeafIterator<cdim, pitype, GridImp> :: dereference () const
   {
 #ifndef NDEBUG
-    const ALU3dGridLeafIterator<cdim, pitype, GridImp> endIterator (this->grid_, this->grid_.maxLevel());
+    const ALU3dGridLeafIterator<cdim, pitype, GridImp> endIterator (this->factory_, this->grid().maxLevel());
     // assert that iterator not equals end iterator
     assert( ! this->equals(endIterator) );
 #endif
@@ -270,9 +272,9 @@ namespace Dune {
   // --HierarchicIterator
   template <class GridImp>
   alu_inline ALU3dGridHierarchicIterator<GridImp> ::
-  ALU3dGridHierarchicIterator(const GridImp & grid ,
+  ALU3dGridHierarchicIterator(const FactoryType& factory,
                               const HElementType & elem, int maxlevel ,bool end)
-    : ALU3dGridEntityPointer<0,GridImp> ( grid, maxlevel )
+    : ALU3dGridEntityPointer<0,GridImp> ( factory, maxlevel )
       , elem_(&elem)
       , ghostElem_( )
       , maxlevel_(maxlevel)
@@ -302,11 +304,11 @@ namespace Dune {
 
   template <class GridImp>
   alu_inline ALU3dGridHierarchicIterator<GridImp> ::
-  ALU3dGridHierarchicIterator(const GridImp & grid ,
+  ALU3dGridHierarchicIterator(const FactoryType& factory,
                               const HBndSegType& ghost,
                               int maxlevel,
                               bool end)
-    : ALU3dGridEntityPointer<0,GridImp> ( grid, maxlevel )
+    : ALU3dGridEntityPointer<0,GridImp> ( factory, maxlevel )
       , elem_( 0 )
       , ghostElem_( ghost )
       , maxlevel_(maxlevel)
@@ -336,7 +338,7 @@ namespace Dune {
   template <class GridImp>
   alu_inline ALU3dGridHierarchicIterator<GridImp> ::
   ALU3dGridHierarchicIterator(const ThisType& org)
-    : ALU3dGridEntityPointer<0,GridImp> ( org.grid_, org.maxlevel_ )
+    : ALU3dGridEntityPointer<0,GridImp> ( org.factory_, org.maxlevel_ )
   {
     assign( org );
   }

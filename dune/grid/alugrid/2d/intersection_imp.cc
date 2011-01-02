@@ -24,11 +24,11 @@ namespace Dune
   //constructor for end iterator
   template<class GridImp>
   inline ALU2dGridIntersectionBase<GridImp> ::
-  ALU2dGridIntersectionBase(const GridImp & grid, int wLevel) :
+  ALU2dGridIntersectionBase(const FactoryType& factory, int wLevel) :
     intersectionGlobal_(GeometryImp()),
     intersectionSelfLocal_(LocalGeometryImp()),
     intersectionNeighborLocal_(LocalGeometryImp()),
-    grid_(grid),
+    factory_( factory ),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
     walkLevel_(wLevel)
   {
@@ -44,7 +44,7 @@ namespace Dune
     intersectionGlobal_(GeometryImp()),
     intersectionSelfLocal_(LocalGeometryImp()),
     intersectionNeighborLocal_(LocalGeometryImp()),
-    grid_(org.grid_),
+    factory_( org.factory_ ),
     localGeomStorage_( LocalGeometryStorageType :: instance() ),
     walkLevel_(org.walkLevel_)
   {}
@@ -54,7 +54,7 @@ namespace Dune
   ALU2dGridIntersectionBase<GridImp> ::
   assign(const ALU2dGridIntersectionBase<GridImp> & org)
   {
-    assert( &grid_ == &org.grid_);
+    assert( &factory_ == &org.factory_ );
     walkLevel_ = org.walkLevel_;
     current = org.current;
 
@@ -99,7 +99,7 @@ namespace Dune
     if( current.outside() )
     {
       const int index = current.outside()->getIndex();
-      if( !this->grid_.rankManager().isValid( index, All_Partition ) )
+      if( !this->grid().rankManager().isValid( index, All_Partition ) )
         current.setOutside( 0, -222 );
     }
   }
@@ -145,7 +145,7 @@ namespace Dune
   ALU2dGridIntersectionBase< GridImp >::inside() const
   {
     assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
-    return EntityPointerImp( grid_, *current.inside(), -1, walkLevel_ );
+    return EntityPointerImp( factory_, *current.inside(), -1, walkLevel_ );
   }
 
   template< class GridImp >
@@ -162,7 +162,7 @@ namespace Dune
   ALU2dGridIntersectionBase< GridImp >::outside() const
   {
     assert( current.inside() && current.outside() );
-    return EntityPointerImp( grid_, *current.outside(), -1, walkLevel_ );
+    return EntityPointerImp( factory_, *current.outside(), -1, walkLevel_ );
   }
 
   //! local number of codim 1 entity in self where intersection is contained in
@@ -361,8 +361,8 @@ namespace Dune
   //! Constructor
   template<class GridImp>
   inline ALU2dGridLevelIntersectionIterator<GridImp> ::
-  ALU2dGridLevelIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end)
-    : ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase( grid, wLevel )
+  ALU2dGridLevelIntersectionIterator(const FactoryType& factory, const HElementType* el, int wLevel, bool end)
+    : ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase( factory, wLevel )
   {
     if (!end)
     {
@@ -375,8 +375,8 @@ namespace Dune
 
   template<class GridImp>
   inline ALU2dGridLevelIntersectionIterator<GridImp> ::
-  ALU2dGridLevelIntersectionIterator(const GridImp & grid, int wLevel) :
-    ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(grid, wLevel)
+  ALU2dGridLevelIntersectionIterator(const FactoryType& factory, int wLevel) :
+    ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(factory, wLevel)
   {}
 
   //! The copy constructor
@@ -432,8 +432,8 @@ namespace Dune
   // Constructor
   template<class GridImp>
   inline ALU2dGridLeafIntersectionIterator<GridImp> ::
-  ALU2dGridLeafIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end)
-    : ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase( grid, wLevel )
+  ALU2dGridLeafIntersectionIterator(const FactoryType& factory, const HElementType* el, int wLevel, bool end)
+    : ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase( factory, wLevel )
   {
     if (!end)
     {
@@ -446,8 +446,8 @@ namespace Dune
 
   template<class GridImp>
   inline ALU2dGridLeafIntersectionIterator<GridImp> ::
-  ALU2dGridLeafIntersectionIterator(const GridImp & grid, int wLevel) :
-    ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(grid, wLevel)
+  ALU2dGridLeafIntersectionIterator(const FactoryType& factory, int wLevel) :
+    ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(factory, wLevel)
   {}
 
 

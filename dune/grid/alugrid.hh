@@ -13,7 +13,7 @@
 #include <dune/grid/alugrid/2d/alugrid.hh>
 #include <dune/grid/alugrid/2d/alu2dgridfactory.hh>
 
-#include <dune/grid/alugrid/persistentcontainer.hh>
+#include <dune/grid/alugrid/common/persistentcontainer.hh>
 
 /** @file
     @author Robert Kloefkorn
