@@ -7,8 +7,6 @@
 
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 
-#define DISABLE_DEPRECATED_METHOD_CHECK 1
-
 #include <iostream>
 #include <sstream>
 #include <string>
