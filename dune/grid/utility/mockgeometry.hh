@@ -18,7 +18,7 @@ namespace Dune {
   /**
    * This geometry can be used when somewhing mostly like a Dune::Geometry is
    * required, but a full grid is a little bit too much.  It provides the full
-   * interface of Dune::Geometry, except for the grid-specifig member
+   * interface of Dune::Geometry, except for the grid-specific member
    * constants \c dimension and \c dimensionworld.
    *
    * One further difference is that the jacobian methods return by value
