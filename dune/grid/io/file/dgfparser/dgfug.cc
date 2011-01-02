@@ -56,6 +56,14 @@ namespace Dune {
         // cubes
         else if (el.size() == two_power_dim)
           factory.insertElement(GeometryType(GeometryType::cube,dim),el);
+#ifdef EXPERIMENTAL_GRID_EXTENSIONS
+        // pyramid
+        else if (el.size() == 5 )
+          factory.insertElement(GeometryType(GeometryType::pyramid,dim),el);
+        // prisms
+        else if (el.size() == 6 )
+          factory.insertElement(GeometryType(GeometryType::prism,dim),el);
+#endif
         else
           DUNE_THROW(DGFException, "Wrong number of vertices for element");
       }

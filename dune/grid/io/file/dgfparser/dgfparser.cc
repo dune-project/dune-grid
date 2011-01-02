@@ -357,6 +357,9 @@ namespace Dune
 
       dgf :: SimplexBlock bsimplex( gridin, nofvtx, vtxoffset, dimgrid );
       dgf :: CubeBlock bcube( gridin, nofvtx, vtxoffset, dimgrid );
+#ifdef EXPERIMENTAL_GRID_EXTENSIONS
+      dgf :: GeneralBlock bgeneral( gridin, nofvtx, vtxoffset, dimgrid );
+#endif
 
       if( bcube.isactive() && (element != Simplex) )
       {
@@ -373,6 +376,13 @@ namespace Dune
           nofelements += bsimplex.get( elements, elParams, nofelparams );
         }
       }
+#ifdef EXPERIMENTAL_GRID_EXTENSIONS
+      else if( bgeneral.isactive() )
+      {
+        info->block(bgeneral);
+        nofelements += bgeneral.get( elements, elParams, nofelparams );
+      }
+#endif
       else
       {
         simplexgrid = true;
@@ -394,17 +404,6 @@ namespace Dune
               testTriang( i );
           }
         }
-#if 0
-        if( ( nofelements == 0) && bcube.isactive() )
-        {
-          info->block( bcube );
-          info->cube2simplex( element );
-          nofelements = bcube.get( elements, elParams, nofelparams );
-          // make simplex grid
-          nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
-          cube2simplex = true; // needed by AlbertaGrid to write correct simplex info
-        }
-#endif
       }
     }
 
