@@ -34,12 +34,16 @@ namespace Dune {
       return grid_->getRealImplementation(e).levelIndex();
     }
 
-    //! get index of subentity of a codim 0 entity
-    unsigned int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e,
+    //! get index of subentity of an entity
+    template<int cc>
+    unsigned int subIndex (const typename GridImp::Traits::template Codim<cc>::Entity& e,
                            int i,
                            unsigned int codim) const
     {
-      return grid_->getRealImplementation(e).subLevelIndex(i,codim);
+      if( cc == 0 )
+        return grid_->getRealImplementation(e).subLevelIndex(i,codim);
+      else
+        return grid_->getRealImplementation(e).levelIndex();
     }
 
     //! get number of entities of given type and on this level
@@ -164,12 +168,16 @@ namespace Dune {
       return grid_.getRealImplementation(e).leafIndex();
     }
 
-    //! get index of subentity of a codim 0 entity
-    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
+    //! get index of subentity of an entity
+    template<int cc>
+    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e,
                   int i,
                   unsigned int codim) const
     {
-      return grid_.getRealImplementation(e).subLeafIndex(i,codim);
+      if( cc == 0 )
+        return grid_.getRealImplementation(e).subLeafIndex(i,codim);
+      else
+        return grid_.getRealImplementation(e).leafIndex();
     }
 
     //! get number of entities of given codim, type on the leaf level

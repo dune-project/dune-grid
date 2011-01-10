@@ -39,10 +39,14 @@ namespace Dune {
     }
 
     //! get index of subEntity of a codim 0 entity
-    unsigned int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e,
+    template<int cc>
+    unsigned int subIndex (const typename GridImp::Traits::template Codim<cc>::Entity& e,
                            int i,
                            unsigned int codim) const
     {
+      if (cc==dim)
+        return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).target_);
+
       if (codim==dim)
         return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
                                                          UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
@@ -185,10 +189,14 @@ namespace Dune {
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    unsigned int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
+    template<int cc>
+    unsigned int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e,
                            int i,
                            unsigned int codim) const
     {
+      if (cc==dim)
+        return UG_NS<dim>::levelIndex(grid_.getRealImplementation(e).target_);
+
       if (codim==0)
         return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).target_);
 

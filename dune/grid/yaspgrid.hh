@@ -2227,6 +2227,8 @@ namespace Dune {
     typedef IndexSet< GridImp, This, unsigned int > Base;
 
   public:
+    typedef typename Base::IndexType IndexType;
+
     using Base::subIndex;
 
     //! constructor stores reference to a grid and level
@@ -2240,17 +2242,23 @@ namespace Dune {
     }
 
     //! get index of an entity
-    template<int cd>
-    int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const
+    template<int cc>
+    IndexType index (const typename GridImp::Traits::template Codim<cc>::Entity& e) const
     {
+      assert( cc == 0 || cc == GridImp::dimension );
       return grid.getRealImplementation(e).compressedIndex();
     }
 
-    //! get index of subentity of a codim 0 entity
-    int subIndex ( const typename remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
-                   int i, unsigned int codim ) const
+    //! get index of subentity of an entity
+    template< int cc >
+    IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
+                         int i, unsigned int codim ) const
     {
-      return grid.getRealImplementation(e).subCompressedIndex(i,codim);
+      assert( cc == 0 || cc == GridImp::dimension );
+      if( cc == GridImp::dimension )
+        return grid.getRealImplementation(e).compressedIndex();
+      else
+        return grid.getRealImplementation(e).subCompressedIndex(i,codim);
     }
 
     //! get number of entities of given type and level (the level is known to the object)
@@ -2295,6 +2303,8 @@ namespace Dune {
     typedef IndexSet< GridImp, This, unsigned int > Base;
 
   public:
+    typedef typename Base::IndexType IndexType;
+
     using Base::subIndex;
 
     //! constructor stores reference to a grid
@@ -2307,26 +2317,23 @@ namespace Dune {
     }
 
     //! get index of an entity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cd>
-    int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    template<int cc>
+    IndexType index (const typename GridImp::Traits::template Codim<cc>::Entity& e) const
     {
-      assert(cd==0 || cd==GridImp::dimension);
-      return grid.getRealImplementation(e).compressedLeafIndex();
+      assert( cc == 0 || cc == GridImp::dimension );
+      return grid.getRealImplementation(e).compressedIndex();
     }
 
-    //! get index of subentity of a codim 0 entity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    int subIndex ( const typename remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
-                   int i, unsigned int codim ) const
+    //! get index of subentity of an entity
+    template< int cc >
+    IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
+                         int i, unsigned int codim ) const
     {
-      return grid.getRealImplementation(e).subCompressedLeafIndex(i,codim);
+      assert( cc == 0 || cc == GridImp::dimension );
+      if( cc == GridImp::dimension )
+        return grid.getRealImplementation(e).compressedIndex();
+      else
+        return grid.getRealImplementation(e).subCompressedIndex(i,codim);
     }
 
     //! get number of entities of given type

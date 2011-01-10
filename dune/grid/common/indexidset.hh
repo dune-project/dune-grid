@@ -76,6 +76,10 @@ namespace Dune
   template<class GridImp, class IndexSetImp, class IndexTypeImp>
   class IndexSet
   {
+    /* We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet. */
+    typedef typename remove_const< GridImp >::type::Traits Traits;
+
   public:
     /** \brief The type used for the indices */
     typedef IndexTypeImp IndexType;
@@ -124,26 +128,51 @@ namespace Dune
       return asImp().template index<cc>(e);
     }
 
-    /** @brief Map subentity of codim cc of codim 0 entity to index.
-
-       The result of calling this method with an entity that is not
-       in the index set is undefined.
-
-       \param[in]  e      reference to codim 0 entity
-       \param[in]  i      number subentity of e within the codimension
-       \param[in]  codim  codimension of the subentity we're interested in
-
-       \return An index in the range 0 ... Max number of entities in set - 1.
+    /** \brief Map a subentity to an index.
+     *
+     *  The result of calling this method with an entity that is not in the
+     *  index set is undefined.
+     *
+     *  \tparam  cc  codimension of the entity
+     *
+     *  \param[in]  e      reference to codimsion cc entity
+     *  \param[in]  i      number subentity of e within the codimension
+     *  \param[in]  codim  codimension of the subentity we're interested in
+     *                     (must satisfy cc <= codim <= dimension)
+     *
+     *  \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    IndexType subIndex (const typename remove_const<GridImp>::type::
-                        Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    template< int cc >
+    IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &e,
+                         int i, unsigned int codim ) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().subIndex(e,i,codim)));
-      return asImp().subIndex(e,i,codim);
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex< cc >(e,i,codim)));
+      return asImp().template subIndex< cc >(e,i,codim);
+    }
+
+    /** \brief Map a subentity to an index.
+     *
+     *  The result of calling this method with an entity that is not in the
+     *  index set is undefined.
+     *
+     *  \note This method exists for convenience only.
+     *        It extracts the codimension from the type of the entity, which can
+     *        be guessed by the compiler.
+     *
+     *  \tparam  Entity  type of entity (must be GridImp::Codim< cc >::Entity
+     *                   for some cc)
+     *
+     *  \param[in]  e      reference to entity
+     *  \param[in]  i      number subentity of e within the codimension
+     *  \param[in]  codim  codimension of the subentity we're interested in
+     *
+     *  \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    template< class Entity >
+    IndexType subIndex ( const Entity &e, int i, unsigned int codim ) const
+    {
+      static const int cc = Entity::codimension;
+      return asImp().template subIndex< cc >( e, i, codim );
     }
     //@}
 
@@ -230,6 +259,7 @@ namespace Dune
     : public IndexSet< GridImp, IndexSetImp >
   {
     typedef IndexSet< GridImp, IndexSetImp > Base;
+    typedef typename remove_const< GridImp >::type::Traits Traits;
 
   public:
     /** \brief The type used for the indices */
@@ -238,20 +268,34 @@ namespace Dune
     /** \brief dimension of the grid (maximum allowed codimension) */
     static const int dimension = Base::dimension;
 
-    /** @brief Map subentity of codim 0 entity to index.
+    using Base::index;
+    using Base::subIndex;
 
-       \param e Reference to codim 0 entity.
-       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
-       \param cc subentity codim
-       \return An index in the range 0 ... Max number of entities in set - 1.
-       Here the method entity of Entity is used to get the subEntity and
-       then the index of this Entity is returned.
+    //===========================================================
+    /** @name Index access from entity
      */
-    IndexType subIndex (const typename remove_const<GridImp>::type::
-                        Traits::template Codim<0>::Entity& e, int i, int cc) const
+    //@{
+    //===========================================================
+
+    /** \copydoc Dune::IndexSet::subIndex(const typename Traits::template Codim< cc >::Entity &e,int i,unsigned int codim) const
+     *
+     *  The default implementation is as follows:
+     *  \code
+     *  index( *(e.subEntity( i, codim )) );
+     *  \endcode
+     */
+    template< int cc >
+    IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &e, int i, unsigned int codim ) const
     {
-      return Base::index( *(e.subEntity(i, cc) ));
+      return index( *(e.subEntity( i, codim )) );
     }
+    //@}
+
+    //===========================================================
+    /** @name Access to entity set
+     */
+    //@{
+    //===========================================================
 
     /** @brief Return total number of entities of given codim in the entity set \f$E\f$. This
             is simply a sum over all geometry types.
@@ -269,6 +313,7 @@ namespace Dune
         s += Base::size( *it );
       return s;
     }
+    //@{
   };
 
 

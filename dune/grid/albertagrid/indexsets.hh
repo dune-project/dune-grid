@@ -73,12 +73,6 @@ namespace Dune
   public:
     typedef Alberta::IndexStack IndexStack;
 
-    template< int codim >
-    struct Codim
-    {
-      typedef typename Traits::template Codim< codim >::Entity Entity;
-    };
-
     //! return true if entity is contained in set
     template< class Entity >
     bool contains ( const Entity & ) const
@@ -86,56 +80,35 @@ namespace Dune
       return true;
     }
 
-    //! return index of entity
-    template< class Entity >
-    IndexType index ( const Entity &entity ) const
-    {
-      const int codim = Entity::codimension;
-      return index< codim >( entity );
-    }
-
-    //! return hierarchic index of given entity
-    template< int codim >
-    IndexType index ( const typename Codim< codim >::Entity &entity ) const
-    {
-      const AlbertaGridEntity< codim, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
-      return subIndex( entityImp.elementInfo(), entityImp.subEntity(), codim );
-    }
-
-    //! import default implementation of subIndex<cc>
-    //! \todo remove after next release
+    using Base::index;
     using Base::subIndex;
 
-    //! return subIndex of given enitiy's sub entity
-    IndexType subIndex ( const typename Codim< 0 >::Entity &entity, int i, unsigned int subcodim ) const
+    //! return hierarchic index of given entity
+    template< int cc >
+    IndexType index ( const typename Traits::template Codim< cc >::Entity &entity ) const
     {
-      const AlbertaGridEntity< 0, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
-      const int j = entityImp.grid().generic2alberta( subcodim, i );
-      return subIndex( entityImp.elementInfo(), j, subcodim );
+      typedef AlbertaGridEntity< cc, dim, const Grid > EntityImp;
+      const EntityImp &entityImp = Grid::getRealImplementation( entity );
+      return subIndex( entityImp.elementInfo(), entityImp.subEntity(), cc );
     }
 
     //! return subIndex of given enitiy's sub entity
-    template< int codim >
-    IndexType subIndex ( const typename Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
+    template< int cc >
+    IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &entity, int i, unsigned int codim ) const
     {
-      const AlbertaGridEntity< codim, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
+      typedef AlbertaGridEntity< cc, dim, const Grid > EntityImp;
+      const EntityImp &entityImp = Grid::getRealImplementation( entity );
 
-      const GenericReferenceElement< Alberta::Real, dimension > &refElement
-        = GenericReferenceElements< Alberta::Real, dimension >::simplex();
-      const int k = refElement.subEntity( entityImp.subEntity(), codim, i, codim+subcodim );
+      int k = i;
+      if( cc > 0 )
+      {
+        const GenericReferenceElement< Alberta::Real, dimension > &refElement
+          = GenericReferenceElements< Alberta::Real, dimension >::simplex();
+        k = refElement.subEntity( entityImp.subEntity(), cc, i, codim );
+      }
 
-      const int j = entityImp.grid().generic2alberta( codim+subcodim, k );
-      return subIndex( entityImp.elementInfo(), j, codim+subcodim );
-    }
-
-    //! return subIndex of given enitiy's sub entity
-    template< class Entity >
-    IndexType subIndex ( const Entity &entity, int i, unsigned int subcodim ) const
-    {
-      return subIndex< Entity::codimension >( entity, i, subcodim );
+      const int j = entityImp.grid().generic2alberta( codim, k );
+      return subIndex( entityImp.elementInfo(), j, codim );
     }
 
     //! return size of set for given GeometryType
@@ -400,54 +373,35 @@ namespace Dune
       return (subIndex >= 0);
     }
 
-    template< class Entity >
-    IndexType index ( const Entity &entity ) const
-    {
-      const int codim = Entity::codimension;
-      return index< codim >( entity );
-    }
-
-    template< int codim >
-    IndexType index ( const typename Grid::Traits::template Codim< codim >::Entity &entity ) const
-    {
-      const AlbertaGridEntity< codim, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
-      return subIndex( entityImp.elementInfo(), entityImp.subEntity(), codim );
-    }
-
-    //! import default implementation of subIndex<cc>
-    //! \todo remove after next release
+    using Base::index;
     using Base::subIndex;
 
-    //! return subIndex of given enitiy's sub entity
-    IndexType subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i, unsigned int subcodim ) const
+    //! return hierarchic index of given entity
+    template< int cc >
+    IndexType index ( const typename Traits::template Codim< cc >::Entity &entity ) const
     {
-      const AlbertaGridEntity< 0, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
-      const int j = entityImp.grid().generic2alberta( subcodim, i );
-      return subIndex( entityImp.elementInfo(), j, subcodim );
+      typedef AlbertaGridEntity< cc, dim, const Grid > EntityImp;
+      const EntityImp &entityImp = Grid::getRealImplementation( entity );
+      return subIndex( entityImp.elementInfo(), entityImp.subEntity(), cc );
     }
 
     //! return subIndex of given enitiy's sub entity
-    template< int codim >
-    IndexType subIndex ( const typename Traits::template Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
+    template< int cc >
+    IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &entity, int i, unsigned int codim ) const
     {
-      const AlbertaGridEntity< codim, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
+      typedef AlbertaGridEntity< cc, dim, const Grid > EntityImp;
+      const EntityImp &entityImp = Grid::getRealImplementation( entity );
 
-      const GenericReferenceElement< Alberta::Real, dimension > &refElement
-        = GenericReferenceElements< Alberta::Real, dimension >::simplex();
-      const int k = refElement.subEntity( entityImp.subEntity(), codim, i, codim+subcodim );
+      int k = i;
+      if( cc > 0 )
+      {
+        const GenericReferenceElement< Alberta::Real, dimension > &refElement
+          = GenericReferenceElements< Alberta::Real, dimension >::simplex();
+        k = refElement.subEntity( entityImp.subEntity(), cc, i, codim );
+      }
 
-      const int j = entityImp.grid().generic2alberta( codim+subcodim, k );
-      return subIndex( entityImp.elementInfo(), j, codim+subcodim );
-    }
-
-    //! return subIndex of given enitiy's sub entity
-    template< class Entity >
-    IndexType subIndex ( const Entity &entity, int i, unsigned int subcodim ) const
-    {
-      return subIndex< Entity::codimension >( entity, i, subcodim );
+      const int j = entityImp.grid().generic2alberta( codim, k );
+      return subIndex( entityImp.elementInfo(), j, codim );
     }
 
     IndexType size ( const GeometryType &type ) const

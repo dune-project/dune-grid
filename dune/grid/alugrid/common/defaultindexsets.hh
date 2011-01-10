@@ -37,61 +37,12 @@ namespace Dune {
   {
     // dummy value
     enum { myType = -1 };
+
   protected:
     const bool adaptive_;
+
   public:
     template <class IndexSetType, class EntityType,int enCodim, int codim>
-    struct IndexWrapper
-    {
-      static inline int index (const IndexSetType & set, const EntityType & en , int num )
-      {
-        return set.index(en);
-      }
-    };
-
-    // if codim and enCodim are equal, then return index
-    template <class IndexSetType, class EntityType, int codim>
-    struct IndexWrapper<IndexSetType,EntityType,codim,codim>
-    {
-      static inline int index (const IndexSetType & set, const EntityType & en , int num )
-      {
-        return set.index(en);
-      }
-    };
-
-    // return number of vertex num
-    template <class IndexSetType, class EntityType>
-    struct IndexWrapper<IndexSetType,EntityType,0,3>
-    {
-      static inline int index (const IndexSetType & set, const EntityType & en , int num )
-      {
-        return set.template subIndex<3> (en,num);
-      }
-    };
-
-    // return number of vertex num for dim == 2
-    // return number of edge num for dim == 3
-    template <class IndexSetType, class EntityType>
-    struct IndexWrapper<IndexSetType,EntityType,0,2>
-    {
-      static inline int index (const IndexSetType & set, const EntityType & en , int num )
-      {
-        return set.template subIndex<2> (en,num);
-      }
-    };
-
-    // return number of vertex for dim == 1
-    // return number of edge num for dim == 2
-    // return number of face num for dim == 3
-    template <class IndexSetType, class EntityType>
-    struct IndexWrapper<IndexSetType,EntityType,0,1>
-    {
-      static inline int index (const IndexSetType & set, const EntityType & en , int num )
-      {
-        return set.template subIndex<1> (en,num);
-      }
-    };
-
     //! default constructor
     DefaultEmptyIndexSet (bool adaptive) : adaptive_(adaptive) {}
 
@@ -380,7 +331,8 @@ namespace Dune {
 
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
     //! given SubEntity codim and number of SubEntity
-    IndexType subIndex ( const typename GridType::template Codim< 0 >::Entity &e,
+    template< int cc >
+    IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
       const int hIndex = hIndexSet_.subIndex( e, i, codim );
@@ -676,7 +628,8 @@ namespace Dune {
 
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
     //! given SubEntity codim and number of SubEntity
-    IndexType subIndex ( const typename GridType::template Codim< 0 >::Entity &e,
+    template< int cc >
+    IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
       const int hIndex = hIndexSet_.subIndex( e, i, codim );

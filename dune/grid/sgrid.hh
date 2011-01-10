@@ -1178,10 +1178,6 @@ namespace Dune {
 
   public:
 
-    //! import default implementation of subIndex<cc>
-    //! \todo remove after next release
-    using IndexSet<GridImp, SGridLevelIndexSet<GridImp> >::subIndex;
-
     //! constructor stores reference to a grid and level
     SGridLevelIndexSet ( const GridImp &g, int l )
       : grid( g ),
@@ -1200,10 +1196,14 @@ namespace Dune {
       return grid.getRealImplementation(e).compressedIndex();
     }
 
-    int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
+    template< int cc >
+    int subIndex ( const typename GridImp::Traits::template Codim< cc >::Entity &e,
                    int i, unsigned int codim ) const
     {
-      return grid.getRealImplementation(e).subCompressedIndex(codim, i);
+      if( cc == 0 )
+        return grid.getRealImplementation(e).subCompressedIndex(codim, i);
+      else
+        DUNE_THROW( NotImplemented, "subIndex for higher codimension entity not implemented for YaspGrid." );
     }
 
     // return true if the given entity is contained in \f$E\f$.
@@ -1249,10 +1249,6 @@ namespace Dune {
 
   public:
 
-    //! import default implementation of subIndex<cc>
-    //! \todo remove after next release
-    using IndexSet<GridImp, SGridLeafIndexSet<GridImp> >::subIndex;
-
     //! constructor stores reference to a grid and level
     explicit SGridLeafIndexSet ( const GridImp &g )
       : grid( g )
@@ -1274,10 +1270,14 @@ namespace Dune {
       return grid.getRealImplementation(e).compressedLeafIndex();
     }
 
-    int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
+    template< int cc >
+    int subIndex ( const typename GridImp::Traits::template Codim< cc >::Entity &e,
                    int i, unsigned int codim ) const
     {
-      return grid.getRealImplementation(e).subCompressedLeafIndex(codim, i);
+      if( cc == 0 )
+        return grid.getRealImplementation(e).subCompressedIndex(codim, i);
+      else
+        DUNE_THROW( NotImplemented, "subIndex for higher codimension entity not implemented for YaspGrid." );
     }
 
     //! get number of entities of given type

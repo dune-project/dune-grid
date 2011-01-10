@@ -46,44 +46,23 @@ namespace Dune
 
       typedef typename Base::IndexType IndexType;
 
-      template< int codim >
-      struct Codim
-      {
-        typedef typename Traits::template Codim< codim >::Entity Entity;
-      };
-
       IndexSet ( const HostIndexSet &hostIndexSet )
         : hostIndexSet_( &hostIndexSet )
       {}
 
-      template< int codim >
-      IndexType index ( const typename Codim< codim >::Entity &entity ) const
+      using Base::index;
+      using Base::subIndex;
+
+      template< int cc >
+      IndexType index ( const typename Traits::template Codim< cc >::Entity &entity ) const
       {
         return Grid::getRealImplementation( entity ).index( hostIndexSet() );
       }
 
-      template< class Entity >
-      IndexType index ( const Entity &entity ) const
+      template< int cc >
+      IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &entity, int i, unsigned int codim ) const
       {
-        return index< Entity::codimension >( entity );
-      }
-
-      template< int codim >
-      IndexType subIndex ( const typename Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
-      {
-        return Grid::getRealImplementation( entity ).subIndex( hostIndexSet(), i, subcodim );
-      }
-
-      template< class Entity >
-      IndexType subIndex ( const Entity &entity, int i, unsigned int subcodim ) const
-      {
-        return subIndex< Entity::codimension >( entity, i, subcodim );
-      }
-
-      // This one is only necessary due to the using directive
-      IndexType subIndex ( const typename Codim< 0 >::Entity &entity, int i, unsigned int subcodim ) const
-      {
-        return subIndex< 0 >( entity, i, subcodim );
+        return Grid::getRealImplementation( entity ).subIndex( hostIndexSet(), i, codim );
       }
 
       IndexType size ( GeometryType type ) const
@@ -96,16 +75,10 @@ namespace Dune
         return hostIndexSet().size( codim );
       }
 
-      template< int codim >
-      bool contains ( const typename Grid::template Codim< codim >::Entity &entity ) const
-      {
-        return Grid::getRealImplementation( entity ).isContained( hostIndexSet() );
-      }
-
       template< class Entity >
       bool contains ( const Entity &entity ) const
       {
-        return contains< Entity::codimension >( entity );
+        return Grid::getRealImplementation( entity ).isContained( hostIndexSet() );
       }
 
       const std::vector< GeometryType > &geomTypes ( int codim ) const
