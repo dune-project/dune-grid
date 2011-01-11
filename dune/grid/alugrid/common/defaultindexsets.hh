@@ -42,7 +42,6 @@ namespace Dune {
     const bool adaptive_;
 
   public:
-    template <class IndexSetType, class EntityType,int enCodim, int codim>
     //! default constructor
     DefaultEmptyIndexSet (bool adaptive) : adaptive_(adaptive) {}
 
