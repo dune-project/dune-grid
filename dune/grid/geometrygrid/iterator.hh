@@ -201,7 +201,7 @@ namespace Dune
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
-        : Base( grid, Traits :: getHostEntityIterator( grid, level, type ) )
+        : Base( grid, Traits::getHostEntityIterator( grid, level, type ) )
       {}
 
       void increment ()
@@ -236,10 +236,6 @@ namespace Dune
       typedef typename Traits::HostElement HostElement;
       typedef typename Traits::HostElementIterator HostElementIterator;
       typedef typename Traits::HostIndexSet HostIndexSet;
-
-      HostElementIterator hostEnd_;
-      const HostIndexSet *hostIndexSet_;
-      std::vector< bool > visited_;
 
     protected:
       using Base::hostElementIterator_;
@@ -290,6 +286,11 @@ namespace Dune
         }
         releaseEntity();
       }
+
+    private:
+      HostElementIterator hostEnd_;
+      const HostIndexSet *hostIndexSet_;
+      std::vector< bool > visited_;
     };
 
 
@@ -347,8 +348,8 @@ namespace Dune
 
 
 
-    // GridLeafIterator
-    // ----------------
+    // LeafIterator
+    // ------------
 
     template< int codim, PartitionIteratorType pitype, class Grid >
     struct LeafIterator
@@ -443,12 +444,10 @@ namespace Dune
     struct HierarchicIteratorTraits
       : public EntityPointerTraits< 0, Grid >
     {
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
-      typedef typename Traits :: HostGrid :: Traits :: HierarchicIterator
-      HostEntityIterator;
-      typedef typename Traits :: HostGrid :: Traits :: HierarchicIterator
-      HostElementIterator;
+      typedef typename Traits::HostGrid::Traits::HierarchicIterator HostEntityIterator;
+      typedef typename Traits::HostGrid::Traits::HierarchicIterator HostElementIterator;
     };
 
 
@@ -465,10 +464,10 @@ namespace Dune
       typedef EntityPointer< Traits > Base;
 
     protected:
-      typedef typename Traits :: HostEntityIterator HostEntityIterator;
+      typedef typename Traits::HostEntityIterator HostEntityIterator;
 
-      using Base :: hostEntityIterator_;
-      using Base :: releaseEntity;
+      using Base::hostEntityIterator_;
+      using Base::releaseEntity;
 
     public:
       HierarchicIterator ( const Grid &grid,
@@ -483,8 +482,8 @@ namespace Dune
       }
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_ITERATOR_HH
