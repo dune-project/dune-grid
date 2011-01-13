@@ -350,6 +350,8 @@ int main (int argc , char **argv) {
     {
       display = (std::string( argv[ 2 ] ) == "display");
       newfilename = (display ? 0 : argv[ 2 ]);
+      if( newfilename && argc > 3 )
+        display = true ;
     }
 
     bool testALU2dSimplex = initialize ;
