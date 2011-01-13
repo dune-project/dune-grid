@@ -22,6 +22,7 @@
 
 #include "staticcheck.hh"
 #include "checkindexset.cc"
+#include "checkgeometry.cc"
 
 #include <limits>
 
@@ -818,6 +819,10 @@ void gridcheck (Grid &g)
   zeroEntityConsistency(cg);
   assertNeighbor(g);
   assertNeighbor(cg);
+
+  // check geometries of macro level
+  checkGeometry( g.levelView( 0 ) );
+
   // note that for some grid this might fail
   // then un comment this test
   Dune :: checkIndexSet( g, g.leafView(), Dune :: dvverb );
