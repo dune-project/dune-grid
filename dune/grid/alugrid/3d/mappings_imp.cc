@@ -166,7 +166,7 @@ namespace Dune {
     }
   }
 
-  alu_inline alu3d_ctype TrilinearMapping :: det(const coord_t& point, const bool checkDet )
+  alu_inline alu3d_ctype TrilinearMapping :: det(const coord_t& point)
   {
     // use cached value of determinant
     if( calcedDet_ ) return DetDf;
@@ -186,7 +186,7 @@ namespace Dune {
     DetDf = (t4*Df[2][2]-t6*Df[2][1]-t8*Df[2][2]+
              t10*Df[2][1]+t12*Df[1][2]-t14*Df[1][1]);
 
-    assert( ( checkDet ) ? ( DetDf > 0 ) : true );
+    assert( DetDf > 0 );
     //: ( std::cout << "DetDf wrong: " << DetDf << std::endl,false ) );
 
     // set calced det to affine (true if affine false otherwise)
@@ -194,13 +194,13 @@ namespace Dune {
     return DetDf;
   }
 
-  alu_inline void TrilinearMapping :: inverse(const coord_t& point, const bool checkDet )
+  alu_inline void TrilinearMapping :: inverse(const coord_t& point)
   {
     // return when inverse already calculated
     if( calcedInv_ ) return ;
 
     //  Kramer - Regel, det() rechnet Df und DetDf neu aus.
-    const alu3d_ctype val = 1.0 / det(point, checkDet ) ;
+    const alu3d_ctype val = 1.0 / det(point) ;
 
     // calculate inverse^T
     Dfi[0][0] = ( Df[1][1] * Df[2][2] - Df[2][1] * Df[1][2] ) * val ;
@@ -225,13 +225,14 @@ namespace Dune {
 #ifndef NDEBUG
     int count = 0 ;
 #endif
-    map [0] = map [1] = map [2] = .0 ;
+    // start with barycenter
+    map [0] = map [1] = map [2] = 0.5 ;
     coord_t upd ;
     do {
       // do mapping
       map2world (map, upd) ;
       // get inverse
-      inverse ( map , false ) ;
+      inverse ( map ) ;
       const alu3d_ctype u0 = upd [0] - wld [0] ;
       const alu3d_ctype u1 = upd [1] - wld [1] ;
       const alu3d_ctype u2 = upd [2] - wld [2] ;
