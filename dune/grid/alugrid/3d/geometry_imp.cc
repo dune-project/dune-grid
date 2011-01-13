@@ -61,9 +61,17 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   global (const LocalCoordinate& local) const
   {
-    GlobalCoordinate global;
-    geoImpl_.mapping().map2world(local, global);
-    return global;
+    if( mydim > 0 )
+    {
+      GlobalCoordinate global;
+      geoImpl_.mapping().map2world(local, global);
+      return global;
+    }
+    else
+    {
+      // for points just return the only corner we have
+      return corner( 0 );
+    }
   }
 
   template< int mydim, int cdim, class GridImp >
