@@ -58,7 +58,7 @@ namespace Dune {
       {
         for(int j=0; j<3; ++j)
         {
-          sum += fabs(a[i][j]);
+          sum += std::abs(a[i][j]);
         }
       }
 
@@ -166,7 +166,7 @@ namespace Dune {
     }
   }
 
-  alu_inline alu3d_ctype TrilinearMapping :: det(const coord_t& point )
+  alu_inline alu3d_ctype TrilinearMapping :: det(const coord_t& point, const bool checkDet )
   {
     // use cached value of determinant
     if( calcedDet_ ) return DetDf;
@@ -186,20 +186,21 @@ namespace Dune {
     DetDf = (t4*Df[2][2]-t6*Df[2][1]-t8*Df[2][2]+
              t10*Df[2][1]+t12*Df[1][2]-t14*Df[1][1]);
 
-    assert( DetDf > 0 );
+    assert( ( checkDet ) ? ( DetDf > 0 ) : true );
+    //: ( std::cout << "DetDf wrong: " << DetDf << std::endl,false ) );
 
     // set calced det to affine (true if affine false otherwise)
     calcedDet_ = affine_ ;
     return DetDf;
   }
 
-  alu_inline void TrilinearMapping :: inverse(const coord_t& point)
+  alu_inline void TrilinearMapping :: inverse(const coord_t& point, const bool checkDet )
   {
     // return when inverse already calculated
     if( calcedInv_ ) return ;
 
     //  Kramer - Regel, det() rechnet Df und DetDf neu aus.
-    const alu3d_ctype val = 1.0 / det(point) ;
+    const alu3d_ctype val = 1.0 / det(point, checkDet ) ;
 
     // calculate inverse^T
     Dfi[0][0] = ( Df[1][1] * Df[2][2] - Df[2][1] * Df[1][2] ) * val ;
@@ -230,7 +231,7 @@ namespace Dune {
       // do mapping
       map2world (map, upd) ;
       // get inverse
-      inverse ( map ) ;
+      inverse ( map , false ) ;
       const alu3d_ctype u0 = upd [0] - wld [0] ;
       const alu3d_ctype u1 = upd [1] - wld [1] ;
       const alu3d_ctype u2 = upd [2] - wld [2] ;
@@ -242,7 +243,7 @@ namespace Dune {
       map [0] -= c0 ;
       map [1] -= c1 ;
       map [2] -= c2 ;
-      err = std::fabs (c0) + std::fabs (c1) + std::fabs (c2) ;
+      err = std::abs (c0) + std::abs (c1) + std::abs (c2) ;
       assert (count ++ < 1000) ;
     } while (err > _epsilon) ;
     return ;
@@ -306,7 +307,7 @@ namespace Dune {
       // sum all factor from non-linear terms
       for(int j=0; j<3; ++j)
       {
-        sum += fabs(_b[3][j]);
+        sum += std::abs(_b[3][j]);
       }
 
       // mapping is affine when all higher terms are zero
@@ -580,7 +581,7 @@ namespace Dune {
       map_ [0] -= c0 ;
       map_ [1] -= c1 ;
       map_ [2] -= c2 ;
-      err = fabs (c0) + fabs (c1) + fabs (c2) ;
+      err = std::abs (c0) + std::abs (c1) + std::abs (c2) ;
       assert (count ++ < 3000);
     }
     while (err > _epsilon) ;
@@ -700,7 +701,7 @@ namespace Dune {
       const world_t &u = matrix_[0];
       const world_t &v = matrix_[1];
 
-      det_ = fabs( u[0] * v[1] - u[1] * v[0] );
+      det_ = std::abs( u[0] * v[1] - u[1] * v[0] );
       calcedDet_ = affine();
     }
     return det_;
@@ -760,9 +761,9 @@ namespace Dune {
       _b [3][i] = p3 [i] - p2 [i] - _b [1][i];
     }
 
-    ctype sum = fabs( _b [3][0] );
+    ctype sum = std::abs( _b [3][0] );
     for( int i = 1; i < cdim; ++i )
-      sum += fabs( _b [3][i] );
+      sum += std::abs( _b [3][i] );
     affine_ = (sum < ALUnumericEpsilon );
 
     calcedMatrix_ = calcedDet_ = calcedInv_ = false;

@@ -5,6 +5,7 @@
 
 // System includes
 #include <limits>
+#include <cmath>
 
 // Dune includes
 #include <dune/common/fvector.hh>
@@ -49,7 +50,7 @@ namespace Dune {
 
     void linear (const alu3d_ctype, const alu3d_ctype, const alu3d_ctype) ;
     void linear (const coord_t&) ;
-    void inverse (const coord_t&) ;
+    void inverse (const coord_t&, const bool checkDet = true ) ;
   public:
     TrilinearMapping (const coord_t&, const coord_t&,
                       const coord_t&, const coord_t&,
@@ -62,7 +63,7 @@ namespace Dune {
     TrilinearMapping (const TrilinearMapping &) ;
 
     ~TrilinearMapping () {}
-    alu3d_ctype det (const coord_t&) ;
+    alu3d_ctype det (const coord_t&, const bool checkDet = true ) ;
     const mat_t& jacobianInverseTransposed(const coord_t&);
     const mat_t& jacobianTransposed(const coord_t&);
     void map2world (const coord_t&, coord_t&) const ;
