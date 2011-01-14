@@ -74,7 +74,6 @@ void checkProjectedUnitCube ()
   {
     grid->globalRefine( Grid::dimension );
     gridcheck( *grid );
-    checkGeometry( grid->leafView() );
   }
   delete grid;
 }
@@ -126,7 +125,6 @@ try {
 
     checkPartitionType( grid.leafView() );
 
-    checkGeometry( grid.leafView() );
     checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
     checkTwists( grid.leafView(), NoMapTwist() );
@@ -135,7 +133,6 @@ try {
       std::cout << ">>> Refining grid and checking again..." << std::endl;
       grid.globalRefine( 1 );
       gridcheck(grid);
-      checkGeometry( grid.leafView() );
       checkIterators( grid.leafView() );
       checkIntersectionIterator(grid,true);
       checkTwists( grid.leafView(), NoMapTwist() );
@@ -147,7 +144,6 @@ try {
               << " times) and checking again..." << std::endl;
     grid.globalRefine( stepsForHalf );
     gridcheck(grid);
-    checkGeometry( grid.leafView() );
     checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
     checkTwists( grid.leafView(), NoMapTwist() );
@@ -157,7 +153,6 @@ try {
       std::cout << ">>> Refining one element and checking again..." << std::endl;
       markOne(grid,0,dim);
       gridcheck(grid);
-      checkGeometry( grid.leafView() );
       checkIterators( grid.leafView() );
     }
 
