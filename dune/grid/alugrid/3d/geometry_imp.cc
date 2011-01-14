@@ -61,17 +61,9 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   global (const LocalCoordinate& local) const
   {
-    if( mydim > 0 )
-    {
-      GlobalCoordinate global;
-      geoImpl_.mapping().map2world(local, global);
-      return global;
-    }
-    else
-    {
-      // for points just return the only corner we have
-      return corner( 0 );
-    }
+    GlobalCoordinate global;
+    geoImpl_.mapping().map2world(local, global);
+    return global;
   }
 
   template< int mydim, int cdim, class GridImp >
@@ -89,10 +81,9 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   integrationElement (const LocalCoordinate& local) const
   {
+    // this is the only case we need to specialize
     if( mydim == cdim && elementType == tetra )
       return 6.0 * volume_;
-    else if ( mydim == 0 )
-      return 1.0;
     else
       return geoImpl_.mapping().det( local );
   }

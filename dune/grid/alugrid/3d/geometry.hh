@@ -134,6 +134,8 @@ namespace Dune
       {
         assert( corners_ == 1 );
         copy( p0, coord_[0] );
+        // we need to update the mapping
+        builtMapping_ = false ;
       }
     };
 
