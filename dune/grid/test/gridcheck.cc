@@ -820,8 +820,9 @@ void gridcheck (Grid &g)
   assertNeighbor(g);
   assertNeighbor(cg);
 
-  // check geometries of macro level
+  // check geometries of macro level and leaf level
   checkGeometry( g.levelView( 0 ) );
+  checkGeometry( g.leafView() );
 
   // note that for some grid this might fail
   // then un comment this test
