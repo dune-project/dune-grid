@@ -563,7 +563,7 @@ namespace Dune {
   {
     //  Newton - Iteration zum Invertieren der Abbildung f.
     double err = 10.0 * _epsilon ;
-    coord3_t map_ (0);
+    coord3_t map_ (0.5);
 #ifndef NDEBUG
     int count = 0 ;
 #endif
