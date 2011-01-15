@@ -13,6 +13,11 @@
 #if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #endif
+#if HAVE_UG
+#include <dune/grid/uggrid.hh>
+#endif
+#include <dune/grid/yaspgrid.hh>
+#include <doc/grids/gridfactory/hybridtestgrids.hh>
 
 #include "testgeo.hh"
 
@@ -175,13 +180,49 @@ try
   MPIHelper::instance(argc,argv);
 
   if (argc<2) {
-    std::cerr << "supply grid file as parameter!" << std::endl;
-    return 1;
-  }
+    // run a few standard tests when no argument is given
+#if HAVE_UG
+    UGGrid<2>* grid2d = make2DHybridTestGrid<UGGrid<2> >();
+    test(grid2d->leafView());
 
-  // create Grid from DGF parser
-  GridPtr< GridSelector::GridType > grid( argv[ 1 ] );
-  test(grid->leafView());
+    // currently the only grid manager that can handle prisms and pyramids
+    UGGrid<3>* grid3d = make3DHybridTestGrid<UGGrid<3> >();
+    test(grid3d->leafView());
+#endif
+
+    // test with YaspGrid, which always exists
+    Dune::YaspGrid<1> yaspGrid1d(FieldVector<double,1>(1),
+                                 FieldVector<int,1>(2),
+                                 FieldVector<bool,1>(false),
+                                 0);
+    test(yaspGrid1d.leafView());
+
+    Dune::YaspGrid<2> yaspGrid2d(FieldVector<double,2>(1),
+                                 FieldVector<int,2>(2),
+                                 FieldVector<bool,2>(false),
+                                 0);
+    test(yaspGrid2d.leafView());
+
+    Dune::YaspGrid<3> yaspGrid3d(FieldVector<double,3>(1),
+                                 FieldVector<int,3>(2),
+                                 FieldVector<bool,3>(false),
+                                 0);
+    test(yaspGrid3d.leafView());
+#if 0
+    // I can't compile the following code:
+    // gcc (Debian 4.4.5-8) 4.4.5 slowly started aquiring all
+    // my 4GB main memory and then I had to kill it.
+    Dune::YaspGrid<4> yaspGrid4d(FieldVector<double,4>(1),
+                                 FieldVector<int,4>(2),
+                                 FieldVector<bool,4>(false),
+                                 0);
+    test(yaspGrid4d.leafView());
+#endif
+  } else {
+    // create Grid from DGF parser
+    GridPtr< GridSelector::GridType > grid( argv[ 1 ] );
+    test(grid->leafView());
+  }
 
   if ( phiErr>0) {
     std::cout << phiErr << " errors occured in mapping.phi?" << std::endl;
