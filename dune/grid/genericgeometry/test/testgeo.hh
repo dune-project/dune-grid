@@ -5,8 +5,10 @@
 
 #include <dune/common/polyallocator.hh>
 
+#if HAVE_ALUGRID
 #include <dune/grid/alugrid/3d/grid.hh>
 #include <dune/grid/alugrid/3d/topology.hh>
+#endif
 #include <dune/grid/genericgeometry/geometry.hh>
 
 namespace Dune
@@ -58,6 +60,7 @@ namespace Dune
     typedef typename Convert :: type Type;
   };
 
+#if HAVE_ALUGRID
   template<>
   struct Topology< ALU3dGrid< tetra > >
   {
@@ -90,7 +93,7 @@ namespace Dune
     typedef GenericGeometry :: Convert< basicType, dimension > Convert;
     typedef Convert :: type Type;
   };
-
+#endif
 
 
   // GeometryTraits
