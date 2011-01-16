@@ -7,14 +7,19 @@
     \brief A class to construct structured cube and simplex grids using the grid factory
  */
 
+#include <algorithm>
 #include <cstddef>
+#include <cstdlib>
 
 #include <dune/common/array.hh>
+#include <dune/common/classname.hh>
+#include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/mpihelper.hh>
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/yaspgrid.hh>
 
 namespace Dune {
 
@@ -254,6 +259,67 @@ namespace Dune {
 
       // Create the grid and hand it to the calling method
       return shared_ptr<GridType>(factory.createGrid());
+    }
+
+  };
+
+  /** \brief Specialization of the StructuredGridFactory for YaspGrid
+
+      This allows a YaspGrid to be constructed using the
+      StructuredGridFactory just like the unstructured Grids.  There are two
+      limitations:
+      \li YaspGrid does not support simplices
+      \li YaspGrid only support grids which have their lower left corder at
+          the origin.
+   */
+  template<int dim>
+  class StructuredGridFactory<YaspGrid<dim> > {
+    typedef YaspGrid<dim> GridType;
+    typedef typename GridType::ctype ctype;
+    static const int dimworld = GridType::dimensionworld;
+
+  public:
+    /** \brief Create a structured cube grid
+
+        \param lowerLeft  Lower left corner of the grid
+        \param upperRight Upper right corner of the grid
+        \param elements   Number of elements in each coordinate direction
+
+        \note YaspGrid only supports lowerLeft at the origin.  This
+              function throws a GridError if this requirement is not met.
+     */
+    static shared_ptr<GridType>
+    createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+                   const FieldVector<ctype,dimworld>& upperRight,
+                   const array<unsigned int,dim>& elements)
+    {
+      for(int d = 0; d < dimworld; ++d)
+        if(std::abs(lowerLeft[d]) > std::abs(upperRight[d])*1e-10)
+          DUNE_THROW(GridError, className<StructuredGridFactory>()
+                     << "::createCubeGrid(): The lower coordinates "
+                     "must be at the origin for YaspGrid.");
+
+      FieldVector<int, dim> elements_;
+      std::copy(elements.begin(), elements.end(), elements_.begin());
+
+      return shared_ptr<GridType>
+               (new GridType(upperRight, elements_,
+                             FieldVector<bool,dim>(false), 0));
+    }
+
+    /** \brief Create a structured simplex grid
+
+        \note Simplices are not supported in YaspGrid, so this functions
+              unconditionally throws a GridError.
+     */
+    static shared_ptr<GridType>
+    createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+                      const FieldVector<ctype,dimworld>& upperRight,
+                      const array<unsigned int,dim>& elements)
+    {
+      DUNE_THROW(GridError, className<StructuredGridFactory>()
+                 << "::createSimplexGrid(): Simplices are not supported "
+                 "by YaspGrid.");
     }
 
   };
