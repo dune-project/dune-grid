@@ -283,6 +283,7 @@ namespace Dune
      *  \code
      *  index( *(e.subEntity( i, codim )) );
      *  \endcode
+     *  It does only work for cc=0 since the subEntity method is not present otherwise.
      */
     template< int cc >
     IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &e, int i, unsigned int codim ) const
