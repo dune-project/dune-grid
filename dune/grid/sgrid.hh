@@ -1203,7 +1203,7 @@ namespace Dune {
       if( cc == 0 )
         return grid.getRealImplementation(e).subCompressedIndex(codim, i);
       else
-        DUNE_THROW( NotImplemented, "subIndex for higher codimension entity not implemented for YaspGrid." );
+        DUNE_THROW( NotImplemented, "subIndex for higher codimension entity not implemented for SGrid." );
     }
 
     // return true if the given entity is contained in \f$E\f$.
@@ -1277,7 +1277,7 @@ namespace Dune {
       if( cc == 0 )
         return grid.getRealImplementation(e).subCompressedIndex(codim, i);
       else
-        DUNE_THROW( NotImplemented, "subIndex for higher codimension entity not implemented for YaspGrid." );
+        DUNE_THROW( NotImplemented, "subIndex for higher codimension entity not implemented for SGrid." );
     }
 
     //! get number of entities of given type
