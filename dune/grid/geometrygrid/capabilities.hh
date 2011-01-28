@@ -29,6 +29,14 @@ namespace Dune
     // Capabilities from dune-grid
     // ---------------------------
 
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct hasSingleGeometryType< GeometryGrid< HostGrid, CoordFunction, Allocator > >
+    {
+      static const bool v = hasSingleGeometryType< HostGrid > :: v;
+      static const unsigned int topologyId = hasSingleGeometryType< HostGrid > :: topologyId;
+    };
+
+
     template< class HostGrid, class CoordFunction, class Allocator, int codim >
     struct hasEntity< GeometryGrid< HostGrid, CoordFunction, Allocator >, codim >
     {
