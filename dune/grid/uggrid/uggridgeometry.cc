@@ -143,6 +143,10 @@ local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
 {
   FieldVector<UGCtype, mydim> result;
 
+  // do nothing for a vertex
+  if (mydim==0)
+    return result;
+
   if (mode_==element_mode)
   {
     // coorddim*coorddim is an upper bound for the number of vertices
@@ -168,8 +172,11 @@ template< int mydim, int coorddim, class GridImp>
 typename GridImp::ctype Dune::UGGridGeometry<mydim,coorddim,GridImp>::
 integrationElement (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
 {
-  /** \todo No need to recompute the determinant every time on a simplex */
-  return std::abs(1/jacobianInverseTransposed(local).determinant());
+  if (mydim==0)
+    return 1;
+  else
+    /** \todo No need to recompute the determinant every time on a simplex */
+    return std::abs(1/jacobianInverseTransposed(local).determinant());
 }
 
 

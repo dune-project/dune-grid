@@ -116,6 +116,9 @@ namespace Dune {
 
     UGCtype volume() const {
 
+      if (mydim==0)
+        return 1;
+
       if (mode_==element_mode) {
         // coorddim*coorddim is an upper bound for the number of vertices
         UGCtype* cornerCoords[coorddim*coorddim];
