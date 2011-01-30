@@ -338,6 +338,12 @@ namespace Dune {
 
     static int GlobalToLocal(int n, const double** cornerCoords,
                              const double* EvalPoint, double* localCoord) {
+      if (UG_DIM==2)
+        // in 2d we can call this only for triangles and quadrilaterals
+        assert(n==3 or n==4);
+      else
+        // in 3d: tetrahedra, pyramids, prisms, hexahedra
+        assert(n==4 or n==5 or n==6 or n==8);
       return UG_NAMESPACE ::UG_GlobalToLocal(n, cornerCoords, EvalPoint, localCoord);
     }
 
