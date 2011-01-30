@@ -330,9 +330,6 @@ namespace Dune
        *  \param[in]  topologyId  topology id of the desired geometry
        *  \param[in]  coords      coordinates
        *  \param[in]  affine      flag whether the mapping is affine
-       *  \param[in]  allocator   allocator to use when allocating the mapping
-       *                          (optional, if the allocator can be default
-       *                          constructed)
        *
        *  \note It is assume that the flag affine is true if and only if the
        *        mapping is affine.
