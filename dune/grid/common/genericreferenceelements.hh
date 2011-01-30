@@ -12,6 +12,7 @@
 #include <dune/grid/genericgeometry/referencedomain.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
+#include <dune/grid/genericgeometry/mappingprovider.hh>
 
 namespace Dune
 {
@@ -522,10 +523,14 @@ namespace Dune
           integral_constant< int, 0 > codim0Variable;
           const ReferenceMapping &refMapping = *(mappings[ codim0Variable ][ 0 ]);
 
+          typedef typename GenericGeometry::MappingProvider< ReferenceMapping, codim > MappingProvider;
+
           integral_constant< int, codim > codimVariable;
           mappings[ codimVariable ].resize( size );
-          for( unsigned int i = 0; i < size; ++i )
-            refMapping.template trace< codim >( i, mappings[ codimVariable ][ i ] );
+          for( unsigned int i = 0; i < size; ++i ) {
+            char* storage = new char[MappingProvider::maxMappingSize];
+            mappings[ codimVariable ][ i ] = refMapping.template trace< codim >( i, storage );
+          }
         }
       }
     };
@@ -539,9 +544,16 @@ namespace Dune
   {
     static void apply ( MappingsTable &mappings, typename GeometryTraits::Allocator &allocator )
     {
-      integral_constant< int, codim > codimVariable;
-      for( size_t i = 0; i < mappings[ codimVariable ].size(); ++i )
-        allocator.destroy( mappings[ codimVariable ][ i ] );
+      if (codim > 0 )
+      {
+        integral_constant< int, codim > codimVariable;
+        for( size_t i = 0; i < mappings[ codimVariable ].size(); ++i ) {
+          typedef typename Codim<codim>::Mapping Mapping;
+          mappings[ codimVariable ][ i ]->~Mapping();
+          char* storage = (char*)mappings[ codimVariable ][ i ];
+          delete[](storage);
+        }
+      }
     }
   };
 
