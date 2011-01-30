@@ -149,13 +149,13 @@ namespace Dune
       EntityBase ( const Grid &grid, const HostEntity &hostEntity )
         : grid_( &grid ),
           hostEntity_( &hostEntity ),
-          geo_( GeometryImpl( grid.allocator() ) )
+          geo_( GeometryImpl() )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostEntity_( other.hostEntity_ ),
-          geo_( GeometryImpl( grid().allocator() ) )
+          geo_( GeometryImpl() )
       {}
 
       /** \} */
@@ -213,7 +213,7 @@ namespace Dune
         if( !geo )
         {
           CoordVector coords( hostEntity(), grid().coordFunction() );
-          geo = GeometryImpl( type(), coords, grid().allocator() );
+          geo = GeometryImpl( type(), coords );
         }
         return geo_;
       }
@@ -391,14 +391,14 @@ namespace Dune
         : grid_( &grid ),
           hostElement_( &hostElement ),
           subEntity_( subEntity ),
-          geo_( GeometryImpl( grid.allocator() ) )
+          geo_( GeometryImpl() )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostElement_( other.hostElement_ ),
           subEntity_( other.subEntity_ ),
-          geo_( GeometryImpl( grid().allocator() ) )
+          geo_( GeometryImpl() )
       {}
 
       /** \} */
@@ -480,7 +480,7 @@ namespace Dune
         if( !geo )
         {
           CoordVector coords( hostElement(), subEntity_, grid().coordFunction() );
-          geo = GeometryImpl( type(), coords, grid().allocator() );
+          geo = GeometryImpl( type(), coords );
         }
         return geo_;
       }

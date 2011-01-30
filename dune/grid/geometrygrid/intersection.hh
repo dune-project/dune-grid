@@ -70,14 +70,14 @@ namespace Dune
         : grid_( &grid ),
           insideGeo_( Grid::getRealImplementation( insideGeo ) ),
           hostIntersection_( 0 ),
-          geo_( GeometryImpl( grid.allocator() ) )
+          geo_( GeometryImpl() )
       {}
 
       Intersection ( const Intersection &other )
         : grid_( other.grid_ ),
           insideGeo_( Grid::getRealImplementation( other.insideGeo_ ) ),
           hostIntersection_( 0 ),
-          geo_( GeometryImpl( grid().allocator() ) )
+          geo_( GeometryImpl() )
       {}
 
       const Intersection &operator= ( const Intersection &other )
@@ -130,7 +130,7 @@ namespace Dune
         {
           const LocalGeometry &localGeo = geometryInInside();
           CoordVector coords( insideGeometry(), localGeo );
-          geo = GeometryImpl( type(), coords, grid().allocator() );
+          geo = GeometryImpl( type(), coords );
         }
         return geo_;
       }
@@ -203,7 +203,7 @@ namespace Dune
       void invalidate ()
       {
         hostIntersection_ = 0;
-        Grid::getRealImplementation( geo_ ) = GeometryImpl( grid().allocator() );
+        Grid::getRealImplementation( geo_ ) = GeometryImpl();
       }
 
       void initialize ( const HostIntersection &hostIntersection )
