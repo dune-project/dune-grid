@@ -59,13 +59,13 @@ namespace Dune
     public:
       typedef typename Factory::Trace Trace;
 
-      static void construct ( const Mapping &mapping, unsigned int i, Trace *trace )
+      static Trace* construct ( const Mapping &mapping, unsigned int i, Trace *trace )
       {
-        (*instance().construct_[ i ])( mapping, trace );
+        return (*instance().construct_[ i ])( mapping, trace );
       }
 
     private:
-      typedef void (*Construct)( const Mapping &mapping, Trace *trace );
+      typedef Trace* (*Construct)( const Mapping &mapping, Trace *trace );
 
       TraceProvider ()
       {
@@ -99,10 +99,10 @@ namespace Dune
       typedef HybridMapping< mydimension, GeometryTraits > Trace;
 
       template< int i >
-      static void construct ( const Mapping &mapping, Trace *trace )
+      static Trace* construct ( const Mapping &mapping, Trace *trace )
       {
         typedef typename VirtualTrace< i >::type TraceImpl;
-        new( trace ) TraceImpl( mapping.template trace< codim, i >() );
+        return new( trace ) TraceImpl( mapping.template trace< codim, i >() );
       }
     };
 
@@ -119,9 +119,9 @@ namespace Dune
       typedef CachedMapping< SubTopology, GeometryTraits > Trace;
 
       template< int i >
-      static void construct ( const Mapping &mapping, Trace *trace )
+      static Trace* construct ( const Mapping &mapping, Trace *trace )
       {
-        new( trace ) Trace( mapping.template trace< codim, i >() );
+        return new( trace ) Trace( mapping.template trace< codim, i >() );
       }
     };
 

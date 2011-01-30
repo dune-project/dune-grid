@@ -46,7 +46,7 @@ namespace Dune
     protected:
       using HybridMappingBase< dim, GeometryTraits, codim-1 > :: trace;
 
-      virtual void
+      virtual HybridMapping< dim - codim, GeometryTraits >*
       trace ( integral_constant< int, codim >, unsigned int i, HybridMapping< dim - codim, GeometryTraits > *mapping ) const = 0;
     };
 
@@ -59,7 +59,7 @@ namespace Dune
       virtual ~HybridMappingBase() {}
 
     protected:
-      virtual void
+      virtual HybridMapping< dim, GeometryTraits >*
       trace ( integral_constant< int, 0 >, unsigned int i, HybridMapping< dim, GeometryTraits > *mapping ) const = 0;
     };
     /** \endcond */
@@ -158,13 +158,13 @@ namespace Dune
 
     public:
       virtual This *clone () const = 0;
-      virtual void clone ( This *mapping ) const = 0;
+      virtual This *clone ( This *mapping ) const = 0;
 
       template< int codim >
-      void trace ( unsigned int i, typename Codim< codim >::Trace *mapping ) const
+      typename Codim< codim >::Trace* trace ( unsigned int i, typename Codim< codim >::Trace *mapping ) const
       {
         integral_constant< int, codim > codimVariable;
-        trace( codimVariable, i, mapping );
+        return trace( codimVariable, i, mapping );
       }
     };
 
@@ -188,10 +188,10 @@ namespace Dune
     protected:
       using VirtualMappingBase< Topology, GeometryTraits, codim-1 > :: trace;
 
-      virtual void
+      virtual HybridMapping< Topology::dimension - codim, GeometryTraits >*
       trace ( integral_constant< int, codim >, unsigned int i, HybridMapping< Topology::dimension - codim, GeometryTraits > *mapping) const
       {
-        static_cast< const VirtualMapping & >( *this ).template trace< codim >( i, mapping );
+        return static_cast< const VirtualMapping & >( *this ).template trace< codim >( i, mapping );
       }
     };
 
@@ -203,11 +203,11 @@ namespace Dune
       VirtualMapping;
 
     protected:
-      virtual void
+      virtual HybridMapping< Topology::dimension, GeometryTraits >*
       trace ( integral_constant< int, 0 >, unsigned int i,
               HybridMapping< Topology::dimension, GeometryTraits > *mapping ) const
       {
-        static_cast< const VirtualMapping & >( *this ).template trace< 0 >( i, mapping );
+        return static_cast< const VirtualMapping & >( *this ).template trace< 0 >( i, mapping );
       }
     };
     /** \endcond */
@@ -325,15 +325,15 @@ namespace Dune
         return new This( *this );
       }
 
-      virtual void clone ( Base *mapping ) const
+      virtual Base* clone ( Base *mapping ) const
       {
-        new( mapping ) This( *this );
+        return new( mapping ) This( *this );
       }
 
       template< int codim >
-      void trace ( unsigned int i, typename Codim< codim >::Trace *mapping ) const
+      typename Codim< codim >::Trace* trace ( unsigned int i, typename Codim< codim >::Trace *mapping ) const
       {
-        mapping_.template trace< codim, true >( i, mapping );
+        return mapping_.template trace< codim, true >( i, mapping );
       }
 
     protected:

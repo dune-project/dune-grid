@@ -5,6 +5,7 @@
 #define DUNE_GENERICGEOMETRY_GEOMETRY_HH
 
 #include <dune/common/typetraits.hh>
+#include <dune/common/nullptr.hh>
 
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
@@ -317,6 +318,7 @@ namespace Dune
       /** \brief Default constructor
        */
       BasicGeometry ()
+        : mapping_(nullptr)
       {}
 
       /** \brief constructor
@@ -327,7 +329,7 @@ namespace Dune
       template< class CoordVector >
       DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords )
       {
-        MappingProvider::construct( topologyId, coords, &mapping() );
+        mapping_ = MappingProvider::construct( topologyId, coords, &mapping() );
       }
 
       /** \brief constructor
@@ -342,14 +344,14 @@ namespace Dune
       template< class CoordVector >
       DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine )
       {
-        MappingProvider::construct( topologyId( type ), coords, affine, &mapping() );
+        mapping_ = MappingProvider::construct( topologyId( type ), coords, affine, &mapping() );
       }
 
       /** \brief Constructor using a GeometryType and a list of corner coordinates */
       template< class CoordVector >
       BasicGeometry ( const GeometryType &type, const CoordVector &coords )
       {
-        MappingProvider::construct( topologyId( type ), coords, &mapping() );
+        mapping_ = MappingProvider::construct( topologyId( type ), coords, &mapping() );
       }
 
       /** \brief obtain a geometry for a subentity
@@ -369,87 +371,95 @@ namespace Dune
       BasicGeometry ( const BasicGeometry< fatherdim, Traits > &father, int i )
       {
         const unsigned int codim = fatherdim - mydim;
-        father.mapping().template trace< codim >( i, &mapping() );
+        mapping_ = father.mapping().template trace< codim >( i, &mapping() );
       }
 
       /** \brief Copy constructor */
       BasicGeometry ( const BasicGeometry &other )
       {
-        other.mapping().clone( &mapping() );
+        if (other.mapping_)
+          mapping_ = other.mapping_->clone( &mapping() );
+        else
+          mapping_ = nullptr;
       }
 
       /** \brief Destructor */
       ~BasicGeometry ()
       {
-        mapping().~Mapping();
+        if (mapping_)
+          mapping_->~Mapping();
       }
 
       /** \brief Assignment from other BasicGeometry */
       BasicGeometry &operator= ( const BasicGeometry &other )
       {
-        mapping().~Mapping();
-        other.mapping().clone( &mapping() );
+        if (mapping_)
+          mapping_->~Mapping();
+        if (other.mapping_)
+          mapping_ = other.mapping_->clone( &mapping() );
+        else
+          mapping_ = nullptr;
         return *this;
       }
 
       /** \brief Return the topological type of this geometry */
       GeometryType type () const
       {
-        return GeometryType( mapping().topologyId(), mydimension );
+        return GeometryType( mapping_->topologyId(), mydimension );
       }
 
       /** \brief Return the number of corners */
       int corners () const
       {
-        return mapping().numCorners();
+        return mapping_->numCorners();
       }
 
       /** \brief Return the world coordinates of the i-th corner */
       const GlobalCoordinate &operator[] ( int i ) const
       {
-        return mapping().corner( i );
+        return mapping_->corner( i );
       }
 
       /** \brief Return the world coordinates of the i-th corner */
       GlobalCoordinate corner ( const int i ) const
       {
-        return mapping().corner( i );
+        return mapping_->corner( i );
       }
 
       /** \brief Map local to global coordinates */
       GlobalCoordinate global ( const LocalCoordinate &local ) const
       {
-        return mapping().global( local );
+        return mapping_->global( local );
       }
 
       /** \brief Map global to local coordinates */
       LocalCoordinate local ( const GlobalCoordinate &global ) const
       {
-        return mapping().local( global );
+        return mapping_->local( global );
       }
 
       /** \brief return center of element */
       GlobalCoordinate center () const
       {
-        return mapping().center();
+        return mapping_->center();
       }
 
       /** \brief Return true if this is an affine geometry */
       bool affine () const
       {
-        return mapping().affine();
+        return mapping_->affine();
       }
 
       /** \brief Return the factor \$|det F|\$ that appears in the integral transformation formula */
       ctype integrationElement ( const LocalCoordinate &local ) const
       {
-        return mapping().integrationElement( local );
+        return mapping_->integrationElement( local );
       }
 
       /** \brief Return the volume of the element */
       ctype volume () const
       {
-        return mapping().volume();
+        return mapping_->volume();
       }
 
       /** \brief Compute the transpose of the Jacobian matrix of the
@@ -458,14 +468,14 @@ namespace Dune
        */
       const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const
       {
-        return mapping().jacobianTransposed( local );
+        return mapping_->jacobianTransposed( local );
       }
 
       /** \brief Compute the transpose of the inverse Jacobian matrix of the transformation
           from the reference element into the world space */
       const JacobianInverseTransposed &jacobianInverseTransposed ( const LocalCoordinate &local ) const
       {
-        return mapping().jacobianInverseTransposed( local );
+        return mapping_->jacobianInverseTransposed( local );
       }
 
       /** \brief compute an outer normal to an element face
@@ -504,6 +514,14 @@ namespace Dune
         return reinterpret_cast< Mapping & >( mappingStorage_ );
       }
 
+      /** \brief Always points to mappingStorage_, but has the correct type */
+      Mapping* mapping_;
+
+      /** \brief A chunk of raw memory storing the actual object
+       *
+       * We don't know its type, but we don't want to do classical
+       * dynamic polymorphism, because heap allocation is expensive.
+       */
       char mappingStorage_[ MappingProvider::maxMappingSize ];
     };
 
