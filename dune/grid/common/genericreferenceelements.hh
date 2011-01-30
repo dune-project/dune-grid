@@ -27,8 +27,7 @@ namespace Dune
    *  \ingroup GridGenericReferenceElements
    *  \brief This class provides access to geometric and topological
    *  properties of a reference element. This includes its type,
-   *  the number of subentities,
-   *  the volume of the reference element, and a method for checking
+   *  the number of subentities, the volume, and a method for checking
    *  if a point is inside.
    *  The embedding of each subentity into the reference element is also
    *  provided.
@@ -36,7 +35,7 @@ namespace Dune
    *  A singleton of this class for a given geometry type can be accessed
    *  through the GenericReferenceElements class.
 
-   *  \tparam ctype  field type for vectors
+   *  \tparam ctype  field type for coordinates
    *  \tparam dim    dimension of the reference element
    *
    */
@@ -97,17 +96,24 @@ namespace Dune
     };
 
   private:
+
+    /** \brief Stores all subentities of a given codimension */
     template< int codim >
     struct MappingArray
       : public std::vector< typename Codim< codim >::Mapping * >
     {};
 
+    /** \brief Type to store all subentities of all codimensions */
     typedef GenericGeometry::CodimTable< MappingArray, dim > MappingsTable;
 
     typename GeometryTraits::Allocator allocator_;
     std::vector< SubEntityInfo > info_[ dim+1 ];
+
+    /** \brief The reference element volume */
     double volume_;
     std::vector< FieldVector< ctype, dim > > volumeNormals_;
+
+    /** \brief Stores all subentities of all codimensions */
     MappingsTable mappings_;
 
   public:
@@ -172,7 +178,7 @@ namespace Dune
       return info_[ c ][ i ].position();
     }
 
-    /** \brief check if a local coordinate is in the reference element
+    /** \brief check if a coordinate is in the reference element
      *
      *  This method returns true if the given local coordinate is within this
      *  reference element.
@@ -335,13 +341,18 @@ namespace Dune
       typedef Initialize< Topology > Init;
       typedef GenericGeometry::VirtualMapping< Topology, GeometryTraits > VirtualMapping;
 
+      // set up subentities
       integral_constant< int, 0 > codim0Variable;
       mappings_[ codim0Variable ].resize( 1 );
       mappings_[ codim0Variable ][ 0 ]  = allocator_.create( VirtualMapping( codim0Variable ) );
 
       Dune::ForLoop< Init::template Codim, 0, dim >::apply( info_, mappings_, allocator_ );
+
+      // compute reference element volume
       typedef GenericGeometry::ReferenceDomain< Topology > ReferenceDomain;
       volume_ = ReferenceDomain::template volume< double >();
+
+      // compute normals
       volumeNormals_.resize( ReferenceDomain::numNormals );
       for( unsigned int i = 0; i < ReferenceDomain::numNormals; ++i )
         ReferenceDomain::integrationOuterNormal( i ,volumeNormals_[ i ] );
@@ -349,6 +360,9 @@ namespace Dune
   };
 
 
+  /** \brief Topological and geometric information about the subentities
+   *     of a reference element
+   */
   template< class ctype, int dim >
   class GenericReferenceElement< ctype, dim >::SubEntityInfo
   {
