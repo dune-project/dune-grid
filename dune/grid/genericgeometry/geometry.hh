@@ -329,7 +329,7 @@ namespace Dune
       template< class CoordVector >
       DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords )
       {
-        mapping_ = MappingProvider::construct( topologyId, coords, mapping() );
+        mapping_ = MappingProvider::construct( topologyId, coords, mappingStorage_ );
       }
 
       /** \brief constructor
@@ -344,14 +344,14 @@ namespace Dune
       template< class CoordVector >
       DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine )
       {
-        mapping_ = MappingProvider::construct( topologyId( type ), coords, affine, mapping() );
+        mapping_ = MappingProvider::construct( topologyId( type ), coords, affine, mappingStorage_ );
       }
 
       /** \brief Constructor using a GeometryType and a list of corner coordinates */
       template< class CoordVector >
       BasicGeometry ( const GeometryType &type, const CoordVector &coords )
       {
-        mapping_ = MappingProvider::construct( topologyId( type ), coords, mapping() );
+        mapping_ = MappingProvider::construct( topologyId( type ), coords, mappingStorage_ );
       }
 
       /** \brief obtain a geometry for a subentity
@@ -371,13 +371,13 @@ namespace Dune
       BasicGeometry ( const BasicGeometry< fatherdim, Traits > &father, int i )
       {
         const unsigned int codim = fatherdim - mydim;
-        mapping_ = father.mapping_->template trace< codim >( i, mapping() );
+        mapping_ = father.mapping_->template trace< codim >( i, mappingStorage_ );
       }
 
       /** \brief Copy constructor */
       BasicGeometry ( const BasicGeometry &other )
       {
-        mapping_ = (other.mapping_) ? other.mapping_->clone( mapping() ) : nullptr;
+        mapping_ = (other.mapping_) ? other.mapping_->clone( mappingStorage_ ) : nullptr;
       }
 
       /** \brief Destructor */
@@ -392,7 +392,7 @@ namespace Dune
       {
         if (mapping_)
           mapping_->~Mapping();
-        mapping_ = (other.mapping_) ? other.mapping_->clone( mapping() ) : nullptr;
+        mapping_ = (other.mapping_) ? other.mapping_->clone( mappingStorage_ ) : nullptr;
         return *this;
       }
 
@@ -506,15 +506,6 @@ namespace Dune
       }
 
     private:
-      const char* mapping () const
-      {
-        return mappingStorage_;
-      }
-
-      char* mapping ()
-      {
-        return mappingStorage_;
-      }
 
       /** \brief Always points to mappingStorage_, but has the correct type */
       Mapping* mapping_;
