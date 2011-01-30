@@ -491,9 +491,9 @@ namespace Dune
         return new This( *this );
       }
 
-      void clone ( This *mapping ) const
+      This* clone ( char *mappingStorage ) const
       {
-        new( mapping ) This( *this );
+        return new( mappingStorage ) This( *this );
       }
 
       template< unsigned int codim, bool hybrid >
