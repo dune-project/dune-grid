@@ -19,12 +19,7 @@ namespace Dune {
 
     enum {dim=GridImp::dimension};
 
-    enum {dimworld=GridImp::dimensionworld};
-
     friend class UGGridEntity<0,dim,GridImp>;
-
-    // The type used to store coordinates
-    typedef typename GridImp::ctype UGCtype;
 
   public:
 
@@ -66,12 +61,7 @@ namespace Dune {
 
     enum {dim=GridImp::dimension};
 
-    enum {dimworld=GridImp::dimensionworld};
-
     friend class UGGridEntity<0,dim,GridImp>;
-
-    // The type used to store coordinates
-    typedef typename GridImp::ctype UGCtype;
 
   public:
 
