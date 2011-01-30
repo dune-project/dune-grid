@@ -338,11 +338,9 @@ namespace Dune
        *        mapping is affine.
        */
       template< class CoordVector >
-      DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
-        : allocator_( allocator ),
-          mapping_( MappingProvider::mapping( topologyId, std::pair< const CoordVector &, bool >( coords, affine ), allocator_ ) )
+      DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine )
       {
-        mapping_->referenceCount = 1;
+        MappingProvider::construct( topologyId( type ), coords, affine, &mapping() );
       }
 
       /** \brief Constructor using a GeometryType and a list of corner coordinates */
