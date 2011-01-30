@@ -377,10 +377,7 @@ namespace Dune
       /** \brief Copy constructor */
       BasicGeometry ( const BasicGeometry &other )
       {
-        if (other.mapping_)
-          mapping_ = other.mapping_->clone( &mapping() );
-        else
-          mapping_ = nullptr;
+        mapping_ = (other.mapping_) ? other.mapping_->clone( &mapping() ) : nullptr;
       }
 
       /** \brief Destructor */
@@ -395,10 +392,7 @@ namespace Dune
       {
         if (mapping_)
           mapping_->~Mapping();
-        if (other.mapping_)
-          mapping_ = other.mapping_->clone( &mapping() );
-        else
-          mapping_ = nullptr;
+        mapping_ = (other.mapping_) ? other.mapping_->clone( &mapping() ) : nullptr;
         return *this;
       }
 
