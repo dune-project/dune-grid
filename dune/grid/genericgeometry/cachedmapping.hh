@@ -498,9 +498,9 @@ namespace Dune
 
       template< unsigned int codim, bool hybrid >
       typename TraceProvider< Topology, GeometryTraits, codim, hybrid >::Trace*
-      trace ( unsigned int i, typename TraceProvider< Topology, GeometryTraits, codim, hybrid >::Trace *mapping ) const
+      trace ( unsigned int i, char *mappingStorage ) const
       {
-        return TraceProvider< Topology, GeometryTraits, codim, hybrid >::construct( mapping_, i, mapping );
+        return TraceProvider< Topology, GeometryTraits, codim, hybrid >::construct( mapping_, i, mappingStorage );
       }
 
     private:

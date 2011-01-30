@@ -31,10 +31,10 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping*
-      construct ( const unsigned int topologyId, const CoordVector &coords, Mapping *mapping )
+      construct ( const unsigned int topologyId, const CoordVector &coords, char *mappingStorage )
       {
         assert( (topologyId >> 1) == (Topology::id >> 1) );
-        return new( mapping ) Mapping( coords );
+        return new( mappingStorage ) Mapping( coords );
       }
 
       static size_t mappingSize ( const unsigned int topologyId )
@@ -79,10 +79,10 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping*
-      construct ( const unsigned int topologyId, const CoordVector &coords, Mapping *mapping )
+      construct ( const unsigned int topologyId, const CoordVector &coords, char *mappingStorage )
       {
         static ConstructorTable< CoordVector > construct;
-        return construct[ topologyId ]( coords, mapping );
+        return construct[ topologyId ]( coords, mappingStorage );
       }
 
       static size_t mappingSize ( const unsigned int topologyId )
@@ -100,7 +100,7 @@ namespace Dune
     template< class CoordVector >
     class VirtualMappingFactory< dim, GeometryTraits >::ConstructorTable
     {
-      typedef Mapping* (*Construct)( const CoordVector &coords, Mapping *mapping );
+      typedef Mapping* (*Construct)( const CoordVector &coords, char *mappingStorage );
 
       template< int i >
       struct Builder;
@@ -120,10 +120,10 @@ namespace Dune
     private:
       template< class Topology >
       static Mapping*
-      construct ( const CoordVector &coords, Mapping *mapping )
+      construct ( const CoordVector &coords, char *mappingStorage )
       {
         typedef VirtualMapping< Topology, GeometryTraits > VMapping;
-        return new( mapping ) VMapping( coords );
+        return new( mappingStorage ) VMapping( coords );
       }
 
       Construct construct_[ numTopologies ];
@@ -198,9 +198,9 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping*
-      construct ( const unsigned int topologyId, const CoordVector &coords, Mapping *mapping )
+      construct ( const unsigned int topologyId, const CoordVector &coords, char *mappingStorage )
       {
-        return Factory::construct( topologyId, coords, mapping );
+        return Factory::construct( topologyId, coords, mappingStorage );
       }
 
       template< class CoordVector >
@@ -252,9 +252,9 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping*
-      construct ( const unsigned int topologyId, const CoordVector &coords, Mapping *mapping )
+      construct ( const unsigned int topologyId, const CoordVector &coords, char *mappingStorage )
       {
-        return Factory::construct( topologyId, coords, mapping );
+        return Factory::construct( topologyId, coords, mappingStorage );
       }
 
       template< class CoordVector >
