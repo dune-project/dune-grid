@@ -206,9 +206,8 @@ namespace Dune
       template< class CoordVector >
       static Mapping *create ( const unsigned int topologyId, const CoordVector &coords )
       {
-        Mapping *mapping = static_cast< Mapping * >( operator new( mappingSize( topologyId ) ) );
-        construct( topologyId, coords, mapping );
-        return mapping;
+        char *mapping = new char[ mappingSize( topologyId ) ];
+        return construct( topologyId, coords, mapping );
       }
 
       static size_t mappingSize ( const unsigned int topologyId )
