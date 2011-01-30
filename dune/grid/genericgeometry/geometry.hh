@@ -496,15 +496,15 @@ namespace Dune
     private:
       const Mapping &mapping () const
       {
-        return reinterpret_cast< const Mapping & >( mapping_ );
+        return reinterpret_cast< const Mapping & >( mappingStorage_ );
       }
 
       Mapping &mapping ()
       {
-        return reinterpret_cast< Mapping & >( mapping_ );
+        return reinterpret_cast< Mapping & >( mappingStorage_ );
       }
 
-      char mapping_[ MappingProvider::maxMappingSize ];
+      char mappingStorage_[ MappingProvider::maxMappingSize ];
     };
 
 
