@@ -511,7 +511,7 @@ namespace Dune
           integral_constant< int, codim > codimVariable;
           mappings[ codimVariable ].resize( size );
           for( unsigned int i = 0; i < size; ++i )
-            mappings[ codimVariable ][ i ] = refMapping.template trace< codim >( i, allocator );
+            refMapping.template trace< codim >( i, mappings[ codimVariable ][ i ] );
         }
       }
     };
