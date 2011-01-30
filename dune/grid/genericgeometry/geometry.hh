@@ -314,6 +314,11 @@ namespace Dune
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
 
     public:
+      /** \brief Default constructor
+       */
+      BasicGeometry ()
+      {}
+
       /** \brief constructor
        *
        *  \param[in]  topologyId  topology id of the desired geometry
