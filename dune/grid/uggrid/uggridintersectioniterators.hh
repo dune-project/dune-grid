@@ -39,6 +39,10 @@ namespace Dune {
     //! prefix increment
     void increment() {
       GridImp::getRealImplementation(intersection_).neighborCount_++;
+
+      GridImp::getRealImplementation(intersection_).geometryIsUpToDate_          = false;
+      GridImp::getRealImplementation(intersection_).geometryInInsideIsUpToDate_  = false;
+      GridImp::getRealImplementation(intersection_).geometryInOutsideIsUpToDate_ = false;
     }
 
     //! \brief dereferencing
@@ -104,6 +108,11 @@ namespace Dune {
 
       }
 
+      // make sure geometries are not taken from the cache the next time
+      // the geometry{|InInside|InOutside} methods are called.
+      intersectionImp.geometryIsUpToDate_          = false;
+      intersectionImp.geometryInInsideIsUpToDate_  = false;
+      intersectionImp.geometryInOutsideIsUpToDate_ = false;
     }
 
     //! \brief dereferencing

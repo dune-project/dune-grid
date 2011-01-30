@@ -46,6 +46,9 @@ namespace Dune {
       : selfLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         neighLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         neighGlob_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        geometryIsUpToDate_(false),
+        geometryInInsideIsUpToDate_(false),
+        geometryInOutsideIsUpToDate_(false),
         center_(center), neighborCount_(nb)
     {}
 
@@ -180,6 +183,12 @@ namespace Dune {
     //! information.
     mutable MakeableInterfaceObject<Geometry> neighGlob_;
 
+    // The geometries are only constructed when necessary.  The following
+    // flags store whether they have been constructed already.
+    mutable bool geometryIsUpToDate_;
+    mutable bool geometryInInsideIsUpToDate_;
+    mutable bool geometryInOutsideIsUpToDate_;
+
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
 
@@ -223,6 +232,9 @@ namespace Dune {
       : selfLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         neighLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         neighGlob_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        geometryIsUpToDate_(false),
+        geometryInInsideIsUpToDate_(false),
+        geometryInOutsideIsUpToDate_(false),
         center_(center), neighborCount_(nb), subNeighborCount_(0)
     {
       if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
@@ -430,6 +442,12 @@ namespace Dune {
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
     mutable MakeableInterfaceObject<Geometry> neighGlob_;
+
+    // The geometries are only constructed when necessary.  The following
+    // flags store whether they have been constructed already.
+    mutable bool geometryIsUpToDate_;
+    mutable bool geometryInInsideIsUpToDate_;
+    mutable bool geometryInOutsideIsUpToDate_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
