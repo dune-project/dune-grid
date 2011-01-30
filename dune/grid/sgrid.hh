@@ -1850,23 +1850,23 @@ namespace Dune {
     SGrid(const SGrid &) {};
     SGrid & operator = (const SGrid &) { return *this; };
     // generate SGrid
-    void makeSGrid (const int* N_,  const ctype* L_, const ctype* H_);
+    void makeSGrid (const array<int,dim>& N_, const FieldVector<ctype, dim>& L_, const FieldVector<ctype, dim>& H_);
 
     /*
        internal data
      */
     CollectiveCommunication<SGrid> ccobj;
 
-    std::vector<SGridLevelIndexSet<const SGrid<dim,dimworld> >*> indexsets;
+    ReservedVector<SGridLevelIndexSet<const SGrid<dim,dimworld> >*, MAXL> indexsets;
     SGridLeafIndexSet<const SGrid<dim,dimworld> > *theleafindexset;
     SGridGlobalIdSet<const SGrid<dim,dimworld> > *theglobalidset;
 
     int L;                        // number of levels in hierarchic mesh 0<=level<L
-    FieldVector<ctype, dim> low;   // lower left corner of the grid
-    FieldVector<ctype, dim> H;     // length of cube per direction
-    array<int,dim> *N;              // number of elements per direction
-    FieldVector<ctype, dim> *h;    // mesh size per direction
-    mutable CubeMapper<dim> *mapper;     // a mapper for each level
+    FieldVector<ctype, dim> low;  // lower left corner of the grid
+    FieldVector<ctype, dim> H;    // length of cube per direction
+    array<int,dim> *N;            // number of elements per direction
+    FieldVector<ctype, dim> *h;   // mesh size per direction
+    mutable CubeMapper<dim> *mapper; // a mapper for each level
 
     // boundary segement index set
     array<CubeMapper<dim-1>, dim> boundarymapper; // a mapper for each coarse grid face

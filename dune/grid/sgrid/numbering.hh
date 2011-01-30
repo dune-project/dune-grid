@@ -77,10 +77,12 @@ namespace Dune {
    */
   template<int dim>
   class CubeMapper {
-  public:
     //! construct with number of elements (of codim 0) in each direction
     CubeMapper (const array<int,dim>& _NN);
 
+    //! make cube of single element
+    CubeMapper (const CubeMapper&);
+  public:
     //! make cube of single element
     CubeMapper ();
 
@@ -121,8 +123,8 @@ namespace Dune {
     LexOrder<dim> lex[1<<dim];         // lex ordering within binary partition
     JoinOrder<1<<dim> join[dim+1];     // join subsets of codimension
 
-    int power2 (int i) const {return 1<<i;}
-    int ones (int b) const;     // count number of bits set in binary rep of b
+    inline int power2 (int i) const {return 1<<i;}
+    inline int ones (int b) const;     // count number of bits set in binary rep of b
   };
 
 } // end namespace

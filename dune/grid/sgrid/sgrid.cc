@@ -640,8 +640,8 @@ namespace Dune {
   //************************************************************************
   // inline methods for SGrid
   template<int dim, int dimworld, typename ctype>
-  inline void SGrid<dim,dimworld,ctype>::makeSGrid (const int* N_,
-                                                    const ctype* L_, const ctype* H_)
+  inline void SGrid<dim,dimworld,ctype>::makeSGrid (const array<int,dim>& N_,
+                                                    const FieldVector<ctype,dim>& L_, const FieldVector<ctype,dim>& H_)
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
@@ -652,13 +652,8 @@ namespace Dune {
         correct = false;
     if (!correct)
     {
-      FieldVector<ctype,dim> L, H;
-      for (int i=0; i<dim; ++i)
-      {
-        L[i] = L_[i]; H[i] = H_[i];
-      }
       DUNE_THROW(GridError, "Orientation of lower left and upper right corner is wrong: lower = "
-                 << L << " upper = " << H);
+                 << L_ << " upper = " << H_);
     }
 #endif
 
@@ -671,29 +666,18 @@ namespace Dune {
     theglobalidset = new SGridGlobalIdSet<const SGrid<dim,dimworld> >(*this);
 
     L = 1;
-    for (int i=0; i<dim; i++) low[i] = L_[i];
-    for (int i=0; i<dim; i++) H[i] = H_[i];
-    for (int i=0; i<dim; i++) N[0][i] = N_[i];
+    low = L_;
+    H = H_;
+    N[0] = N_;
 
     // define coarse mesh
-    mapper[0].make(N[0]);
-    for (int i=0; i<dim; i++)
-      h[0][i] = (H[i]-low[i])/((ctype)N[0][i]);
-
-    // define boudary segments
-    boundarysize = 0;
+    for (int i=0; i<MAXL; i++)
     {
-      array<int, dim-1> bN = {};
-      for (int dir = 0; dir < dim; dir++)
-      {
-        // extent of this face
-        for (int i=0; i<dir; i++) bN[i] = N[0][i];
-        for (int i=dir+1; i<dim; i++) bN[i-1] = N[0][i];
-        // setup mapper for this face
-        boundarymapper[dir].make(bN);
-        // compute size
-        boundarysize += 2 * boundarymapper[dir].elements(0);
-      }
+      for (int d=0; d<<dim; d++)
+        N[i][d] = N_[d] * (1<<i);
+      mapper[i].make(N[i]);
+      for (int d=0; d<dim; d++)
+        h[i][d] = (H[d]-low[d])/((ctype)N[0][d]);
     }
 
     dinfo << "level=" << L-1 << " size=(" << N[L-1][0];
@@ -706,11 +690,13 @@ namespace Dune {
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
-    ctype L_[dim];
-    for (int i=0; i<dim; i++)
-      L_[i] = 0;
+    array<int,dim> N;
+    FieldVector<ctype,dim> L(0.0);
+    FieldVector<ctype,dim> H(0.0);
+    for (int i=0; i<dim; i++ ) N[i] = N_[i];
+    for (int i=0; i<dim; i++ ) H[i] = H_[i];
 
-    makeSGrid(N_,L_, H_);
+    makeSGrid(N, L, H);
   }
 
   template<int dim, int dimworld, typename ctype>
@@ -718,7 +704,14 @@ namespace Dune {
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
-    makeSGrid(N_, L_, H_);
+    array<int,dim> N;
+    FieldVector<ctype,dim> L(0.0);
+    FieldVector<ctype,dim> H(0.0);
+    for (int i=0; i<dim; i++ ) N[i] = N_[i];
+    for (int i=0; i<dim; i++ ) L[i] = L_[i];
+    for (int i=0; i<dim; i++ ) H[i] = H_[i];
+
+    makeSGrid(N, L, H);
   }
 
   template<int dim, int dimworld, typename ctype>
@@ -727,15 +720,9 @@ namespace Dune {
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
-    ctype LL[dim], HH[dim];
-    int NN[dim];
-
-    for (int i=0; i<dim; ++i)
-    {
-      LL[i] = L_[i]; HH[i] = H_[i]; NN[i] = N_[i];
-    }
-
-    makeSGrid(NN, LL, HH);
+    array<int,dim> N;
+    for (int i=0; i<dim; i++ ) N[i] = N_[i];
+    makeSGrid(N, L_, H_);
   }
 
 
@@ -777,16 +764,7 @@ namespace Dune {
   {
     for(int ref=0; ref<refCount; ref++)
     {
-
-      // refine the mesh
-      for (int i=0; i<dim; i++) N[L][i] = 2*N[L-1][i];
-      mapper[L].make(N[L]);
-
-      // compute mesh size
-      for (int i=0; i<dim; i++)
-        h[L][i] = (H[i]-low[i])/((ctype)N[L][i]);
       L++;
-
       indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,maxLevel()) );
     }
   }

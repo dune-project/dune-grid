@@ -96,16 +96,10 @@ namespace Dune {
   //************************************************************************
 
   template<int dim>
-  CubeMapper<dim>::CubeMapper (const array<int,dim>& _NN)
-  {
-    make(_NN);
-  }
-
-  template<int dim>
   CubeMapper<dim>::CubeMapper ()
   {
     array<int,dim> M;
-    std::fill( M.begin(), M.end(), 1 );
+    for (int i=0; i<dim; i++) M[i] = 1;
     make(M);
   }
 
