@@ -396,6 +396,14 @@ namespace Dune
         return *this;
       }
 
+      /** \brief Test whether this BasicGeometry is properly set up
+          \todo Please doc me better!
+       */
+      bool operator! () const
+      {
+        return (mapping_ == 0);
+      }
+
       /** \brief Return the topological type of this geometry */
       GeometryType type () const
       {
@@ -546,6 +554,10 @@ namespace Dune
       typedef typename Base::Mapping Mapping;
 
     public:
+
+      Geometry ()
+      {}
+
       template< class CoordVector >
       DUNE_DEPRECATED Geometry ( const unsigned int topologyId, const CoordVector &coords )
         : Base( topologyId, coords )
