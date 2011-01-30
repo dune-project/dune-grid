@@ -344,14 +344,14 @@ namespace Dune
       template< class CoordVector >
       DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine )
       {
-        mapping_ = MappingProvider::construct( topologyId( type ), coords, affine, mappingStorage_ );
+        mapping_ = MappingProvider::construct( topologyId, coords, affine, mappingStorage_ );
       }
 
       /** \brief Constructor using a GeometryType and a list of corner coordinates */
       template< class CoordVector >
       BasicGeometry ( const GeometryType &type, const CoordVector &coords )
       {
-        mapping_ = MappingProvider::construct( topologyId( type ), coords, mappingStorage_ );
+        mapping_ = MappingProvider::construct( type.id(), coords, mappingStorage_ );
       }
 
       /** \brief obtain a geometry for a subentity
