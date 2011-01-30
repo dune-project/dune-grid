@@ -486,28 +486,20 @@ namespace Dune
         return refVolume * integrationElement( baryCenter() );
       }
 
-      template< unsigned int codim, bool hybrid >
-      typename TraceProvider< Topology, GeometryTraits, codim, hybrid >::Trace *
-      trace ( unsigned int i, typename GeometryTraits::Allocator &allocator ) const
+      This *clone () const
       {
-        typedef TraceProvider< Topology, GeometryTraits, codim, hybrid > Provider;
-        return Provider::trace( mapping_, i, allocator );
+        return new This( *this );
       }
 
-      /** \brief obtain a trace of this mapping to some subentity
-       *
-       *  \tparam  codim   codimension of the subentity
-       *
-       *  \param[in]  i  number of the subentity
-       *
-       *  \returns a pointer to a mapping representing the trace
-       *
-       *  \note The caller is responsible for deleting the returned mapping.
-       */
-      template< unsigned int codim >
-      typename Codim< codim >::Trace *trace ( unsigned int i ) const
+      void clone ( This *mapping ) const
       {
-        return trace< codim, false >( i );
+        new( mapping ) This( *this );
+      }
+
+      template< unsigned int codim, bool hybrid >
+      void trace ( unsigned int i, typename TraceProvider< Topology, GeometryTraits, codim, hybrid >::Trace *mapping ) const
+      {
+        TraceProvider< Topology, GeometryTraits, codim, hybrid >::construct( mapping_, i, mapping );
       }
 
     private:

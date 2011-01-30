@@ -26,16 +26,20 @@ namespace Dune
 
     public:
       typedef CachedMapping< Topology, GeometryTraits > Mapping;
-      typedef typename GeometryTraits::Allocator Allocator;
 
-      static const unsigned int mappingSize = sizeof( Mapping );
+      static const unsigned int maxMappingSize = sizeof( Mapping );
 
       template< class CoordVector >
-      static Mapping *
-      mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
+      static void
+      construct ( const unsigned int topologyId, const CoordVector &coords, Mapping *mapping )
       {
         assert( (topologyId >> 1) == (Topology::id >> 1) );
-        return allocator.create( Mapping( coords ) );
+        new( mapping ) Mapping( coords );
+      }
+
+      static size_t mappingSize ( const unsigned int topologyId )
+      {
+        return sizeof( Mapping );
       }
     };
 
@@ -51,28 +55,40 @@ namespace Dune
 
       static const unsigned int numTopologies = (1 << dim);
 
-      template< class CoordVector >
-      class ConstructorTable;
-
       template< int topologyId >
       struct MappingSize
       {
         typedef typename GenericGeometry::Topology< (unsigned int) topologyId, dim >::type Topology;
         static const int v = sizeof( VirtualMapping< Topology, GeometryTraits > );
+
+        static void apply ( size_t (&mappingSize)[ numTopologies ] )
+        {
+          mappingSize[ topologyId ] = v;
+        }
       };
+
+      template< class CoordVector >
+      class ConstructorTable;
+
+      struct MappingSizeCache;
 
     public:
       typedef HybridMapping< dim, GeometryTraits > Mapping;
-      typedef typename GeometryTraits::Allocator Allocator;
 
-      static const unsigned int mappingSize = Maximum< MappingSize, 0, numTopologies-1 >::v;
+      static const unsigned int maxMappingSize = Maximum< MappingSize, 0, numTopologies-1 >::v;
 
       template< class CoordVector >
-      static Mapping *
-      mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
+      static void
+      construct ( const unsigned int topologyId, const CoordVector &coords, Mapping *mapping )
       {
         static ConstructorTable< CoordVector > construct;
-        return construct[ topologyId ]( coords, allocator );
+        construct[ topologyId ]( coords, mapping );
+      }
+
+      static size_t mappingSize ( const unsigned int topologyId )
+      {
+        static MappingSizeCache mappingSize;
+        return mappingSize[ topologyId ];
       }
     };
 
@@ -84,7 +100,7 @@ namespace Dune
     template< class CoordVector >
     class VirtualMappingFactory< dim, GeometryTraits >::ConstructorTable
     {
-      typedef Mapping *(*Construct)( const CoordVector &coords, Allocator &allocator );
+      typedef void (*Construct)( const CoordVector &coords, Mapping *mapping );
 
       template< int i >
       struct Builder;
@@ -103,10 +119,11 @@ namespace Dune
 
     private:
       template< class Topology >
-      static Mapping *construct ( const CoordVector &coords, Allocator &allocator )
+      static void
+      construct ( const CoordVector &coords, Mapping *mapping )
       {
         typedef VirtualMapping< Topology, GeometryTraits > VMapping;
-        return allocator.create( VMapping( coords ) );
+        new( mapping ) VMapping( coords );
       }
 
       Construct construct_[ numTopologies ];
@@ -130,6 +147,29 @@ namespace Dune
 
 
 
+    // VirtualMappingFactory::MappingSizeCache
+    // ---------------------------------------
+
+    template< unsigned int dim, class GeometryTraits >
+    struct VirtualMappingFactory< dim, GeometryTraits >::MappingSizeCache
+    {
+      MappingSizeCache ()
+      {
+        ForLoop< MappingSize, 0, numTopologies-1 >::apply( size_ );
+      }
+
+      size_t operator[] ( const unsigned int topologyId )
+      {
+        assert( topologyId < numTopologies );
+        return size_[ topologyId ];
+      }
+
+    private:
+      size_t size_[ numTopologies ];
+    };
+
+
+
     // MappingProvider
     // ---------------
 
@@ -147,22 +187,33 @@ namespace Dune
       static const unsigned int codimension = codim;
       static const unsigned int mydimension = dimension - codimension;
 
-      typedef typename GeometryTraits::Allocator Allocator;
-
     private:
       typedef VirtualMappingFactory< mydimension, GeometryTraits > Factory;
 
     public:
       // Maximal amount of memory required to store a mapping
-      static const unsigned int mappingSize = Factory::mappingSize;
+      static const unsigned int maxMappingSize = Factory::maxMappingSize;
 
       typedef typename Factory::Mapping Mapping;
 
       template< class CoordVector >
-      static Mapping *
-      mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
+      static void
+      construct ( const unsigned int topologyId, const CoordVector &coords, Mapping *mapping )
       {
-        return Factory::mapping( topologyId, coords, allocator );
+        Factory::construct( topologyId, coords, mapping );
+      }
+
+      template< class CoordVector >
+      static Mapping *create ( const unsigned int topologyId, const CoordVector &coords )
+      {
+        Mapping *mapping = static_cast< Mapping * >( operator new( mappingSize( topologyId ) ) );
+        construct( topologyId, coords, mapping );
+        return mapping;
+      }
+
+      static size_t mappingSize ( const unsigned int topologyId )
+      {
+        return Factory::mappingSize( topologyId );
       }
     };
 
@@ -178,8 +229,6 @@ namespace Dune
       static const unsigned int mydimension = dimension - codimension;
 
       static const bool hybrid = IsCodimHybrid< Topology, codim > :: value;
-
-      typedef typename GeometryTraits::Allocator Allocator;
 
     private:
       template< bool >
@@ -197,15 +246,28 @@ namespace Dune
 
     public:
       // Maximal amount of memory required to store a mapping
-      static const unsigned int mappingSize = Factory::mappingSize;
+      static const unsigned int maxMappingSize = Factory::maxMappingSize;
 
       typedef typename Factory::Mapping Mapping;
 
       template< class CoordVector >
-      static Mapping *
-      mapping ( const unsigned int topologyId, const CoordVector &coords, Allocator &allocator )
+      static void
+      construct ( const unsigned int topologyId, const CoordVector &coords, Mapping *mapping )
       {
-        return Factory::mapping( topologyId, coords, allocator );
+        Factory::construct( topologyId, coords, mapping );
+      }
+
+      template< class CoordVector >
+      static Mapping *create ( const unsigned int topologyId, const CoordVector &coords )
+      {
+        Mapping *mapping = static_cast< Mapping * >( operator new( mappingSize( topologyId ) ) );
+        construct( topologyId, coords, mapping );
+        return mapping;
+      }
+
+      static size_t mappingSize ( const unsigned int topologyId )
+      {
+        return Factory::mappingsSize( topologyId );
       }
     };
 

@@ -273,8 +273,6 @@ namespace Dune
       /** \brief Type used for world coordinates */
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
 
-      typedef typename Traits::Allocator Allocator;
-
     private:
       dune_static_assert( (0 <= mydimension) && (mydimension <= dimGrid),
                           "Invalid geometry dimension." );
@@ -316,25 +314,15 @@ namespace Dune
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
 
     public:
-      /** \brief Default constructor */
-      explicit BasicGeometry ( const Allocator &allocator = Allocator() )
-        : allocator_( allocator ),
-          mapping_( 0 )
-      {}
-
       /** \brief constructor
        *
        *  \param[in]  topologyId  topology id of the desired geometry
        *  \param[in]  coords      coordinates
-       *  \param[in]  allocator   allocator to use when allocating the mapping
-       *                          (optional, if the allocator can be default constructed)
        */
       template< class CoordVector >
-      DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
-        : allocator_( allocator ),
-          mapping_( MappingProvider::mapping( topologyId, coords, allocator_ ) )
+      DUNE_DEPRECATED BasicGeometry ( const unsigned int topologyId, const CoordVector &coords )
       {
-        mapping_->referenceCount = 1;
+        MappingProvider::construct( topologyId, coords, &mapping() );
       }
 
       /** \brief constructor
@@ -359,11 +347,9 @@ namespace Dune
 
       /** \brief Constructor using a GeometryType and a list of corner coordinates */
       template< class CoordVector >
-      BasicGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
-        : allocator_( allocator ),
-          mapping_( MappingProvider::mapping( type.id(), coords, allocator_ ) )
+      BasicGeometry ( const GeometryType &type, const CoordVector &coords )
       {
-        mapping_->referenceCount = 1;
+        MappingProvider::construct( topologyId( type ), coords, &mapping() );
       }
 
       /** \brief obtain a geometry for a subentity
@@ -381,46 +367,29 @@ namespace Dune
        */
       template< int fatherdim >
       BasicGeometry ( const BasicGeometry< fatherdim, Traits > &father, int i )
-        : allocator_( father.allocator_ ),
-          mapping_( subMapping( father, i ) )
       {
-        mapping_->referenceCount = 1;
+        const unsigned int codim = fatherdim - mydim;
+        father.mapping().template trace< codim >( i, &mapping() );
       }
 
       /** \brief Copy constructor */
       BasicGeometry ( const BasicGeometry &other )
-        : allocator_( other.allocator_ ),
-          mapping_( other.mapping_ )
       {
-        if( mapping_ != 0 )
-          ++(mapping_->referenceCount);
+        other.mapping().clone( &mapping() );
       }
 
       /** \brief Destructor */
       ~BasicGeometry ()
       {
-        if( (mapping_ != 0) && ((--mapping_->referenceCount) == 0) )
-          allocator_.destroy( mapping_ );
+        mapping().~Mapping();
       }
 
       /** \brief Assignment from other BasicGeometry */
       BasicGeometry &operator= ( const BasicGeometry &other )
       {
-        if( other.mapping_ != 0 )
-          ++(other.mapping_->referenceCount);
-        if( (mapping_ != 0) && (--(mapping_->referenceCount) == 0) )
-          allocator_.destroy( mapping_ );
-        allocator_ = other.allocator_;
-        mapping_ = other.mapping_;
+        mapping().~Mapping();
+        other.mapping().clone( &mapping() );
         return *this;
-      }
-
-      /** \brief Test whether this BasicGeometry is properly set up
-          \todo Please doc me better!
-       */
-      bool operator! () const
-      {
-        return (mapping_ == 0);
       }
 
       /** \brief Return the topological type of this geometry */
@@ -527,21 +496,15 @@ namespace Dune
     private:
       const Mapping &mapping () const
       {
-        assert( mapping_ != 0 );
-        return *mapping_;
+        return reinterpret_cast< const Mapping & >( mapping_ );
       }
 
-      template< int fatherdim >
-      Mapping *
-      subMapping ( const BasicGeometry< fatherdim, Traits > &father, int i )
+      Mapping &mapping ()
       {
-        const unsigned int codim = fatherdim - mydim;
-        return father.mapping().template trace< codim >( i, allocator_ );
+        return reinterpret_cast< Mapping & >( mapping_ );
       }
 
-    private:
-      Allocator allocator_;
-      Mapping *mapping_;
+      char mapping_[ MappingProvider::maxMappingSize ];
     };
 
 
@@ -571,33 +534,26 @@ namespace Dune
       typedef typename Base::Mapping Mapping;
 
     public:
-      typedef typename Base::Allocator Allocator;
-
-      /** \brief Default constructor */
-      explicit Geometry ( const Allocator &allocator = Allocator() )
-        : Base( allocator )
+      template< class CoordVector >
+      DUNE_DEPRECATED Geometry ( const unsigned int topologyId, const CoordVector &coords )
+        : Base( topologyId, coords )
       {}
 
       template< class CoordVector >
-      DUNE_DEPRECATED Geometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
-        : Base( topologyId, coords, allocator )
-      {}
-
-      template< class CoordVector >
-      DUNE_DEPRECATED Geometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
-        : Base( topologyId, coords, affine, allocator )
+      DUNE_DEPRECATED Geometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine )
+        : Base( topologyId, coords, affine )
       {}
 
       /** \brief Copy constructor from another geometry */
       template< class Geo >
-      explicit Geometry ( const Geo &geo, const Allocator &allocator = Allocator() )
-        : Base( geo.type(), geo, geo.affine(), allocator )
+      explicit Geometry ( const Geo &geo )
+        : Base( geo.type(), geo, geo.affine() )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
-      Geometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator = Allocator() )
-        : Base( type, coords, allocator )
+      Geometry ( const GeometryType &type, const CoordVector &coords )
+        : Base( type, coords )
       {}
 
       /** \todo Please doc me! */
@@ -634,33 +590,26 @@ namespace Dune
       typedef typename Base::Mapping Mapping;
 
     public:
-      typedef typename Base::Allocator Allocator;
-
-      /** \brief Default constructor */
-      explicit LocalGeometry ( const Allocator &allocator = Allocator() )
-        : Base( allocator )
+      template< class CoordVector >
+      DUNE_DEPRECATED LocalGeometry ( const unsigned int topologyId, const CoordVector &coords )
+        : Base( topologyId, coords )
       {}
 
       template< class CoordVector >
-      DUNE_DEPRECATED LocalGeometry ( const unsigned int topologyId, const CoordVector &coords, const Allocator &allocator = Allocator() )
-        : Base( topologyId, coords, allocator )
-      {}
-
-      template< class CoordVector >
-      DUNE_DEPRECATED LocalGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine, const Allocator &allocator = Allocator() )
-        : Base( topologyId, coords, affine, allocator )
+      DUNE_DEPRECATED LocalGeometry ( const unsigned int topologyId, const CoordVector &coords, const bool affine )
+        : Base( topologyId, coords, affine )
       {}
 
       /** \brief Copy constructor from another geometry */
       template< class Geo >
-      explicit LocalGeometry ( const Geo &geo, const Allocator &allocator = Allocator() )
-        : Base( geo.type(), geo, geo.affine(), allocator )
+      explicit LocalGeometry ( const Geo &geo )
+        : Base( geo.type(), geo, geo.affine() )
       {}
 
       /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
-      LocalGeometry ( const GeometryType &type, const CoordVector &coords, const Allocator &allocator )
-        : Base( type, coords, allocator )
+      LocalGeometry ( const GeometryType &type, const CoordVector &coords )
+        : Base( type, coords )
       {}
 
       /** \todo Please doc me! */

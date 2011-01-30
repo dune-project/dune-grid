@@ -46,9 +46,8 @@ namespace Dune
     protected:
       using HybridMappingBase< dim, GeometryTraits, codim-1 > :: trace;
 
-      virtual HybridMapping< dim - codim, GeometryTraits > *
-      trace ( integral_constant< int, codim >, unsigned int i,
-              typename GeometryTraits::Allocator &allocator ) const = 0;
+      virtual void
+      trace ( integral_constant< int, codim >, unsigned int i, HybridMapping< dim - codim, GeometryTraits > *mapping ) const = 0;
     };
 
     template< unsigned int dim, class GeometryTraits >
@@ -58,10 +57,10 @@ namespace Dune
 
     public:
       virtual ~HybridMappingBase() {}
+
     protected:
-      virtual HybridMapping< dim, GeometryTraits > *
-      trace ( integral_constant< int, 0 >, unsigned int i,
-              typename GeometryTraits::Allocator &allocator ) const = 0;
+      virtual void
+      trace ( integral_constant< int, 0 >, unsigned int i, HybridMapping< dim, GeometryTraits > *mapping ) const = 0;
     };
     /** \endcond */
 
@@ -158,13 +157,14 @@ namespace Dune
       using HybridMappingBase< dim, GeometryTraits >::trace;
 
     public:
-      /** \copydoc CachedMapping::trace */
+      virtual This *clone () const = 0;
+      virtual void clone ( This *mapping ) const = 0;
+
       template< int codim >
-      typename Codim< codim >::Trace *
-      trace ( unsigned int i, typename GeometryTraits::Allocator &allocator ) const
+      void trace ( unsigned int i, typename Codim< codim >::Trace *mapping ) const
       {
         integral_constant< int, codim > codimVariable;
-        return trace( codimVariable, i, allocator );
+        trace( codimVariable, i, mapping );
       }
     };
 
@@ -188,12 +188,10 @@ namespace Dune
     protected:
       using VirtualMappingBase< Topology, GeometryTraits, codim-1 > :: trace;
 
-      virtual HybridMapping< Topology::dimension - codim, GeometryTraits > *
-      trace ( integral_constant< int, codim >, unsigned int i,
-              typename GeometryTraits::Allocator &allocator ) const
+      virtual void
+      trace ( integral_constant< int, codim >, unsigned int i, HybridMapping< Topology::dimension - codim, GeometryTraits > *mapping) const
       {
-        const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
-        return impl.template trace< codim >( i, allocator );
+        static_cast< const VirtualMapping & >( *this ).template trace< codim >( i, mapping );
       }
     };
 
@@ -205,12 +203,11 @@ namespace Dune
       VirtualMapping;
 
     protected:
-      virtual HybridMapping< Topology::dimension, GeometryTraits > *
+      virtual void
       trace ( integral_constant< int, 0 >, unsigned int i,
-              typename GeometryTraits::Allocator &allocator ) const
+              HybridMapping< Topology::dimension, GeometryTraits > *mapping ) const
       {
-        const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
-        return impl.template trace< 0 >( i, allocator );
+        static_cast< const VirtualMapping & >( *this ).template trace< 0 >( i, mapping );
       }
     };
     /** \endcond */
@@ -323,11 +320,20 @@ namespace Dune
         return mapping_.jacobianInverseTransposed( local );
       }
 
-      template< int codim >
-      typename Codim< codim >::Trace *
-      trace ( unsigned int i, typename GeometryTraits::Allocator &allocator ) const
+      virtual Base *clone () const
       {
-        return mapping_.template trace< codim, true >( i, allocator );
+        return new This( *this );
+      }
+
+      virtual void clone ( Base *mapping ) const
+      {
+        new( mapping ) This( *this );
+      }
+
+      template< int codim >
+      void trace ( unsigned int i, typename Codim< codim >::Trace *mapping ) const
+      {
+        mapping_.template trace< codim, true >( i, mapping );
       }
 
     protected:

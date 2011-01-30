@@ -45,8 +45,6 @@ namespace Dune
 
       typedef typename CachedMapping< Topology, GeometryTraits > :: Mapping Mapping;
 
-      typedef typename GeometryTraits::Allocator Allocator;
-
     private:
       static const unsigned int numSubTopologies
         = Mapping :: ReferenceElement :: template Codim< codimension > :: size;
@@ -61,14 +59,17 @@ namespace Dune
     public:
       typedef typename Factory::Trace Trace;
 
-    private:
-      typedef Trace *(*Create)( const Mapping &mapping, Allocator &allocator );
+      static void construct ( const Mapping &mapping, unsigned int i, Trace *trace )
+      {
+        (*instance().construct_[ i ])( mapping, trace );
+      }
 
-      Create create[ numSubTopologies ];
+    private:
+      typedef void (*Construct)( const Mapping &mapping, Trace *trace );
 
       TraceProvider ()
       {
-        ForLoop< Builder, 0, numSubTopologies-1 > :: apply( create );
+        ForLoop< Builder, 0, numSubTopologies-1 >::apply( construct_ );
       }
 
       static const This &instance ()
@@ -77,11 +78,7 @@ namespace Dune
         return theInstance;
       }
 
-    public:
-      static Trace *trace ( const Mapping &mapping, unsigned int i, Allocator &allocator )
-      {
-        return (*instance().create[ i ])( mapping, allocator );
-      }
+      Construct construct_[ numSubTopologies ];
     };
 
 
@@ -102,10 +99,10 @@ namespace Dune
       typedef HybridMapping< mydimension, GeometryTraits > Trace;
 
       template< int i >
-      static Trace *create ( const Mapping &mapping, Allocator &allocator )
+      static void construct ( const Mapping &mapping, Trace *trace )
       {
-        typedef typename VirtualTrace< i >::type Trace;
-        return allocator.create( Trace( mapping.template trace< codim, i >() ) );
+        typedef typename VirtualTrace< i >::type TraceImpl;
+        new( trace ) TraceImpl( mapping.template trace< codim, i >() );
       }
     };
 
@@ -122,9 +119,9 @@ namespace Dune
       typedef CachedMapping< SubTopology, GeometryTraits > Trace;
 
       template< int i >
-      static Trace *create ( const Mapping &mapping, Allocator &allocator )
+      static void construct ( const Mapping &mapping, Trace *trace )
       {
-        return allocator.create( mapping.template trace< codim, i >() );
+        new( trace ) Trace( mapping.template trace< codim, i >() );
       }
     };
 
@@ -134,9 +131,9 @@ namespace Dune
     template< int i >
     struct TraceProvider< Topology, GeometryTraits, codim, forceHybrid > :: Builder
     {
-      static void apply ( Create (&create)[ numSubTopologies ] )
+      static void apply ( Construct (&construct)[ numSubTopologies ] )
       {
-        create[ i ] = &(Factory :: template create< i >);
+        construct[ i ] = &(Factory::template construct< i >);
       }
     };
 
@@ -144,4 +141,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GENERICGEOMETRY_TRACEPROVIDER_HH
