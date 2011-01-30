@@ -43,9 +43,9 @@ namespace Dune {
         \todo Should be private
      */
     UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb)
-      : selfLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
-        neighLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
-        neighGlob_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+      : geometryInInside_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        geometryInOutside_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        geometry_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),
         geometryInOutsideIsUpToDate_(false),
@@ -176,12 +176,12 @@ namespace Dune {
 
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
-    mutable MakeableInterfaceObject<LocalGeometry> selfLocal_;
-    mutable MakeableInterfaceObject<LocalGeometry> neighLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> geometryInInside_;
+    mutable MakeableInterfaceObject<LocalGeometry> geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
-    mutable MakeableInterfaceObject<Geometry> neighGlob_;
+    mutable MakeableInterfaceObject<Geometry> geometry_;
 
     // The geometries are only constructed when necessary.  The following
     // flags store whether they have been constructed already.
@@ -229,9 +229,9 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb)
-      : selfLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
-        neighLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
-        neighGlob_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+      : geometryInInside_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        geometryInOutside_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        geometry_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),
         geometryInOutsideIsUpToDate_(false),
@@ -436,12 +436,12 @@ namespace Dune {
 
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
-    mutable MakeableInterfaceObject<LocalGeometry> selfLocal_;
-    mutable MakeableInterfaceObject<LocalGeometry> neighLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> geometryInInside_;
+    mutable MakeableInterfaceObject<LocalGeometry> geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
-    mutable MakeableInterfaceObject<Geometry> neighGlob_;
+    mutable MakeableInterfaceObject<Geometry> geometry_;
 
     // The geometries are only constructed when necessary.  The following
     // flags store whether they have been constructed already.
