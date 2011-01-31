@@ -122,14 +122,9 @@ namespace Dune
      *  global( genericReferenceElement.position( i, mydimension )
      *  \endcode
      *
-     *  \note This method replaces the deprecated operator[]. Yet, there are two
-     *        differences:
-     *        - operator[] returns a reference instead of an object
-     *        - operator[] uses the old sub entity numbering
-     *
      *  \param[in]  i  number of the corner (with respect to the generic reference
      *                 element)
-     *  \returns position of the i'th corner
+     *  \returns position of the i-th corner
      */
     GlobalCoordinate corner ( int i ) const
     {
