@@ -106,8 +106,9 @@ namespace Dune
     /** \brief Return true if the geometry mapping is affine and false otherwise */
     bool affine() const { return realGeometry.affine(); }
 
-    /** \brief Return the number of corners of the reference element. Since
-       this is a convex polytope the number of corners is a well-defined concept.
+    /** \brief Return the number of corners of the reference element.
+     *
+       Since a geometry is a convex polytope the number of corners is a well-defined concept.
        The method is redundant because this information is also available
        via the reference element. It is here for efficiency and ease of use.
      */
@@ -188,6 +189,7 @@ namespace Dune
     }
 
     /** \brief return center of geometry
+     *
      *  Note that this method is still subject to a change of name and semantics.
      *  At the moment, the center is not required to be the centroid of the
      *  geometry, or even the centroid of its corners. This makes the current
