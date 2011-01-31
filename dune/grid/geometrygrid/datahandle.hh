@@ -122,13 +122,12 @@ namespace Dune
 
     public:
       EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
-        : entity_( grid.allocator().create( Create::apply( grid, hostEntity ) ) )
+        : entity_(new MakeableEntity(Create::apply( grid, hostEntity ) ) )
       {}
 
       ~EntityProxy ()
       {
-        const Grid &grid = Grid::getRealImplementation( *entity_ ).grid();
-        grid.allocator().destroy( entity_ );
+        delete entity_;
       }
 
       const Entity &operator* () const

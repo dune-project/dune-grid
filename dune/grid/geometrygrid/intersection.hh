@@ -12,7 +12,7 @@ namespace Dune
   // External Forward Declataions
   // ----------------------------
 
-  template< class HostGrid, class CoordFunction, class Allocator >
+  template< class HostGrid, class CoordFunction >
   class GeometryGrid;
 
 
@@ -226,13 +226,13 @@ namespace Dune
     // LeafIntersection
     // ----------------
 
-    template< class HostGrid, class CoordFunction, class Allocator >
-    class LeafIntersection< const GeometryGrid< HostGrid, CoordFunction, Allocator > >
+    template< class HostGrid, class CoordFunction >
+    class LeafIntersection< const GeometryGrid< HostGrid, CoordFunction > >
       : public Intersection
-        < const GeometryGrid< HostGrid, CoordFunction, Allocator >,
+        < const GeometryGrid< HostGrid, CoordFunction >,
             typename HostGrid::Traits::LeafIntersection >
     {
-      typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
       typedef typename HostGrid::Traits::LeafIntersection HostIntersection;
 
       typedef Intersection< const Grid, HostIntersection > Base;
@@ -250,13 +250,13 @@ namespace Dune
     // LevelIntersection
     // -----------------
 
-    template< class HostGrid, class CoordFunction, class Allocator >
-    class LevelIntersection< const GeometryGrid< HostGrid, CoordFunction, Allocator > >
+    template< class HostGrid, class CoordFunction >
+    class LevelIntersection< const GeometryGrid< HostGrid, CoordFunction > >
       : public Intersection
-        < const GeometryGrid< HostGrid, CoordFunction, Allocator >,
+        < const GeometryGrid< HostGrid, CoordFunction >,
             typename HostGrid::Traits::LevelIntersection >
     {
-      typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
       typedef typename HostGrid::Traits::LevelIntersection HostIntersection;
 
       typedef Intersection< const Grid, HostIntersection > Base;

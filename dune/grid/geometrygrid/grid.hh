@@ -5,7 +5,6 @@
 
 #include <string>
 
-#include <dune/common/polyallocator.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -32,8 +31,7 @@ namespace Dune
   template< class HostGrid >
   class DefaultCoordFunction;
 
-  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid >,
-      class Allocator = PolyAllocator >
+  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid > >
   class GeometryGrid;
 
 
@@ -54,11 +52,11 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class HostGrid, class CoordFunction, class Alloc >
-    struct GlobalGeometryTraits< GeometryGrid< HostGrid, CoordFunction, Alloc > >
+    template< class HostGrid, class CoordFunction >
+    struct GlobalGeometryTraits< GeometryGrid< HostGrid, CoordFunction > >
       : public DefaultGeometryTraits< typename HostGrid::ctype, HostGrid::dimension, CoordFunction::dimRange >
     {
-      typedef GeometryGrid< HostGrid, CoordFunction, Alloc > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
       typedef DuneCoordTraits< typename HostGrid::ctype > CoordTraits;
 
@@ -93,7 +91,6 @@ namespace Dune
         static const EvaluationType evaluateNormal = ComputeOnDemand;
       };
 
-      typedef Alloc Allocator;
     };
 
   }
@@ -109,7 +106,7 @@ namespace Dune
     // ExportParams
     // ------------
 
-    template< class HG, class CF, class A >
+    template< class HG, class CF >
     class ExportParams
     {
       static const bool isCoordFunction = isCoordFunctionInterface< typename CF::Interface >::value;
@@ -118,7 +115,6 @@ namespace Dune
     public:
       typedef HG HostGrid;
       typedef CF CoordFunction;
-      typedef A Allocator;
     };
 
 
@@ -126,13 +122,13 @@ namespace Dune
     // GridFamily
     // ----------
 
-    template< class HostGrid, class CoordFunction, class Allocator >
+    template< class HostGrid, class CoordFunction >
     struct GridFamily
     {
       struct Traits
-        : public ExportParams< HostGrid, CoordFunction, Allocator >
+        : public ExportParams< HostGrid, CoordFunction >
       {
-        typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
+        typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
         typedef typename HostGrid::ctype ctype;
 
@@ -247,25 +243,24 @@ namespace Dune
    *
    *  \tparam HostGrid       DUNE grid to be wrapped (called host grid)
    *  \tparam CoordFunction  coordinate function
-   *  \tparal Allocator      polymorphic allocator to use
    *
    *  \nosubgrouping
    */
-  template< class HostGrid, class CoordFunction, class Allocator >
+  template< class HostGrid, class CoordFunction >
   class GeometryGrid
   /** \cond */
     : public GridDefaultImplementation
       < HostGrid::dimension, CoordFunction::dimRange, typename HostGrid::ctype,
-          GeoGrid::GridFamily< HostGrid, CoordFunction, Allocator > >,
-      public GeoGrid::ExportParams< HostGrid, CoordFunction, Allocator >,
-      public GeoGrid::BackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction, Allocator > >
+          GeoGrid::GridFamily< HostGrid, CoordFunction > >,
+      public GeoGrid::ExportParams< HostGrid, CoordFunction >,
+      public GeoGrid::BackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction > >
       /** \endcond */
   {
-    typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
     typedef GridDefaultImplementation
     < HostGrid::dimension, CoordFunction::dimRange, typename HostGrid::ctype,
-        GeoGrid::GridFamily< HostGrid, CoordFunction, Allocator > >
+        GeoGrid::GridFamily< HostGrid, CoordFunction > >
     Base;
 
     friend class GeoGrid::HierarchicIterator< const Grid >;
@@ -287,7 +282,7 @@ namespace Dune
 
   public:
     /** \cond */
-    typedef GeoGrid::GridFamily< HostGrid, CoordFunction, Allocator > GridFamily;
+    typedef GeoGrid::GridFamily< HostGrid, CoordFunction > GridFamily;
     /** \endcond */
 
     /** \name Traits
@@ -394,12 +389,10 @@ namespace Dune
      *
      *  \param[in]  hostGrid       reference to the grid to wrap
      *  \param[in]  coordFunction  reference to the coordinate function
-     *  \param[in]  allocator      polymorphic allocator
      */
-    GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction, const Allocator &allocator = Allocator() )
+    GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction )
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
-        allocator_( allocator ),
         levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
         leafIndexSet_( 0 ),
         globalIdSet_( 0 ),
@@ -871,15 +864,9 @@ namespace Dune
       return getRealImplementation( entity ).hostEntity();
     }
 
-    Allocator &allocator () const
-    {
-      return allocator_;
-    }
-
   private:
     HostGrid *const hostGrid_;
     CoordFunction &coordFunction_;
-    mutable Allocator allocator_;
     mutable std::vector< LevelIndexSet * > levelIndexSets_;
     mutable LeafIndexSet *leafIndexSet_;
     mutable GlobalIdSet *globalIdSet_;
@@ -891,9 +878,9 @@ namespace Dune
   // GeometryGrid::Codim
   // -------------------
 
-  template< class HostGrid, class CoordFunction, class Allocator >
+  template< class HostGrid, class CoordFunction >
   template< int codim >
-  struct GeometryGrid< HostGrid, CoordFunction, Allocator >::Codim
+  struct GeometryGrid< HostGrid, CoordFunction >::Codim
     : public Base::template Codim< codim >
   {
     /** \name Entity and Entity Pointer Types

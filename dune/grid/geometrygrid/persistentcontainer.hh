@@ -12,14 +12,14 @@ namespace Dune
   // PersistentContainer for GeometryGrid
   // ------------------------------------
 
-  template< class HostGrid, class CoordFunction, class CoordAllocator, class Data, class Allocator >
-  class PersistentContainer< GeometryGrid< HostGrid, CoordFunction, CoordAllocator >, Data, Allocator >
+  template< class HostGrid, class CoordFunction, class Data, class Allocator >
+  class PersistentContainer< GeometryGrid< HostGrid, CoordFunction >, Data, Allocator >
     : public PersistentContainer< HostGrid, Data, Allocator >
   {
     typedef PersistentContainer< HostGrid, Data, Allocator > Base;
 
   public:
-    typedef GeometryGrid< HostGrid, CoordFunction, CoordAllocator > GridType;
+    typedef GeometryGrid< HostGrid, CoordFunction > GridType;
 
     typedef typename GridType::template Codim< 0 >::Entity ElementType;
 
