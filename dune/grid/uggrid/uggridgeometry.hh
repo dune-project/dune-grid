@@ -81,9 +81,6 @@ namespace Dune {
     //! access to coordinates of corners. Index is the number of the corner
     FieldVector<UGCtype, coorddim> corner (int i) const;
 
-    //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<UGCtype, coorddim>& operator[] (int i) const;
-
     /** \brief Maps a local coordinate within reference element to
      * global coordinate in element  */
     FieldVector<UGCtype, coorddim> global (const FieldVector<UGCtype, mydim>& local) const;
