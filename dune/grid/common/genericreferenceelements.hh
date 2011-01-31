@@ -5,7 +5,6 @@
 #define DUNE_GENERICREFERENCEELEMENTS_HH
 
 #include <dune/common/forloop.hh>
-#include <dune/common/polyallocator.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/grid/genericgeometry/subtopologies.hh>
@@ -55,7 +54,7 @@ namespace Dune
 
     ~GenericReferenceElement ()
     {
-      ForLoop< Destroy, 0, dim >::apply( mappings_, allocator_ );
+      ForLoop< Destroy, 0, dim >::apply( mappings_ );
     }
 
     class SubEntityInfo;
@@ -84,7 +83,6 @@ namespace Dune
         static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::PreCompute;
       };
 
-      typedef PolyAllocator Allocator;
     };
 
   public:
@@ -107,7 +105,6 @@ namespace Dune
     /** \brief Type to store all subentities of all codimensions */
     typedef GenericGeometry::CodimTable< MappingArray, dim > MappingsTable;
 
-    typename GeometryTraits::Allocator allocator_;
     std::vector< SubEntityInfo > info_[ dim+1 ];
 
     /** \brief The reference element volume */
@@ -345,9 +342,9 @@ namespace Dune
       // set up subentities
       integral_constant< int, 0 > codim0Variable;
       mappings_[ codim0Variable ].resize( 1 );
-      mappings_[ codim0Variable ][ 0 ]  = allocator_.create( VirtualMapping( codim0Variable ) );
+      mappings_[ codim0Variable ][ 0 ]  = new VirtualMapping( codim0Variable );
 
-      Dune::ForLoop< Init::template Codim, 0, dim >::apply( info_, mappings_, allocator_ );
+      Dune::ForLoop< Init::template Codim, 0, dim >::apply( info_, mappings_ );
 
       // compute reference element volume
       typedef GenericGeometry::ReferenceDomain< Topology > ReferenceDomain;
@@ -512,7 +509,7 @@ namespace Dune
 
       static void
       apply ( std::vector< SubEntityInfo > (&info)[ dim+1 ],
-              MappingsTable &mappings, typename GeometryTraits::Allocator &allocator )
+              MappingsTable &mappings )
       {
         const unsigned int size = GenericGeometry::Size< Topology, codim >::value;
         info[ codim ].resize( size );
@@ -542,7 +539,7 @@ namespace Dune
   template< int codim >
   struct GenericReferenceElement< ctype, dim >::Destroy
   {
-    static void apply ( MappingsTable &mappings, typename GeometryTraits::Allocator &allocator )
+    static void apply ( MappingsTable &mappings )
     {
       if (codim > 0 )
       {
