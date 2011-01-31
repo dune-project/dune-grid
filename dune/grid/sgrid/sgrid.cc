@@ -731,15 +731,12 @@ namespace Dune {
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
-    int N_[dim];
-    ctype L_[dim];
-    ctype H_[dim];
+    array<int,dim> N_;
+    FieldVector<ctype,dim> L_(0.0);
+    FieldVector<ctype,dim> H_(1.0);
 
-    for(int i = 0; i < dim; ++i) {
+    for(int i = 0; i < dim; ++i)
       N_[i] = 1;
-      L_[i] = 0.0;
-      H_[i] = 1.0;
-    }
 
     makeSGrid(N_, L_, H_);
   }
