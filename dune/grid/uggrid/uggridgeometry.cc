@@ -60,10 +60,11 @@ corner(int i) const
 {
   // This geometry is a vertex
   if (mydim==0) {
-    // the dummy variable is required to avoid g++ complaining
-    // about dereferencing a type-punned pointer
-    double *dummy = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x;
-    return *reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim> *>(dummy);
+    Dune::FieldVector<typename GridImp::ctype, coorddim> result;
+    for (size_t j=0; j<coorddim; j++)
+      // The cast is here to make the code compile even when target_ is not a node
+      result[j] = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x[j];
+    return result;
   }
 
   // ////////////////////////////////
@@ -74,10 +75,11 @@ corner(int i) const
   i = UGGridRenumberer<mydim>::verticesDUNEtoUG(i,type());
 
   if (mode_==element_mode) {
-    // the dummy variable is required to avoid g++ complaining
-    // about dereferencing a type-punned pointer
-    double *dummy = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x;
-    return *reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim> *>(dummy);
+    Dune::FieldVector<typename GridImp::ctype, coorddim> result;
+    for (size_t j=0; j<coorddim; j++)
+      // The cast is here to make the code compile even when target_ is not an element
+      result[j] = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x[j];
+    return result;
   }
 
   return coord_[i];
