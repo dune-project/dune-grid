@@ -88,32 +88,7 @@ namespace Dune
                              const shared_ptr< BoundarySegment > boundarySegment )
       : faceMapping_( FaceMappingProvider::create( type.id(), vertices ) ),
         boundarySegment_( boundarySegment )
-    {
-      faceMapping_->referenceCount = 1;
-    }
-
-    BoundarySegmentWrapper ( const This &other )
-      : faceMapping_( other.faceMapping_ ),
-        boundarySegment_( other.boundarySegment_ )
-    {
-      ++(faceMapping_->referenceCount);
-    }
-
-    ~BoundarySegmentWrapper ()
-    {
-      if( --(faceMapping_->referenceCount) == 0 )
-        delete faceMapping_;
-    }
-
-    This &operator= ( const This &other ) const
-    {
-      ++(other.faceMapping_->referenceCount);
-      if( --(faceMapping_->referenceCount == 0) )
-        delete faceMapping_;
-      faceMapping_ = other.faceMapping_;
-      boundarySegment_ = other.boundarySegment_;
-      return *this;
-    }
+    {}
 
     CoordinateType operator() ( const CoordinateType &global ) const
     {
@@ -126,7 +101,7 @@ namespace Dune
     }
 
   private:
-    FaceMapping *faceMapping_;
+    shared_ptr< FaceMapping > faceMapping_;
     const shared_ptr< BoundarySegment > boundarySegment_;
   };
 

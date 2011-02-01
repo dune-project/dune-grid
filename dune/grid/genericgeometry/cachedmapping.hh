@@ -553,9 +553,6 @@ namespace Dune
         storage().jacobianInverseTransposedComputed = affine();
       }
 
-    public:
-      unsigned int referenceCount;
-
     private:
       Mapping mapping_;
       JacobianInverseTransposed jacobianInverseTransposed_;

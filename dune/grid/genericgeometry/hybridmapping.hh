@@ -110,8 +110,6 @@ namespace Dune
 
       typedef typename GeometryTraits::Caching Caching;
 
-      unsigned int referenceCount;
-
       virtual ~HybridMapping ()
       {}
 

@@ -69,7 +69,6 @@ namespace Dune
 
         mappings_[ codim0Variable ].resize( 1 );
         mappings_[ codim0Variable ][ 0 ] = allocator_.create( VirtualMapping( codim0Variable ) );
-        mappings_[ codim0Variable ][ 0 ]->referenceCount = 1;
 
         ForLoop< Init::template Codim, 1, dimension >::apply( mappings_, allocator_ );
       }
@@ -146,10 +145,7 @@ namespace Dune
           integral_constant< int, codim > codimVariable;
           mappings[ codimVariable ].resize( size );
           for( unsigned int i = 0; i < size; ++i )
-          {
             mappings[ codimVariable ][ i ] = refMapping.template trace< codim >( i, allocator );
-            mappings[ codimVariable ][ i ]->referenceCount = 1;
-          }
         }
       };
     };
