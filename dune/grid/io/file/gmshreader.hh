@@ -462,7 +462,7 @@ namespace Dune
                &(elementDofs[9]));
 
       // insert each vertex if it hasn't been inserted already
-      for (size_t i=0; i<nVertices[elm_type]; i++)
+      for (int i=0; i<nVertices[elm_type]; i++)
         if (renumber.find(elementDofs[i])==renumber.end())
         {
           renumber[elementDofs[i]] = number_of_real_vertices++;
