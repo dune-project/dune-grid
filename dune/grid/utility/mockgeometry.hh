@@ -52,16 +52,6 @@ namespace Dune {
 
     //! Default constructor.
     MockGeometry() {}
-    //! constructor
-    template<class CoordVector>
-    MockGeometry(unsigned topologyId, const CoordVector &coords) :
-      Base(topologyId, coords)
-    { }
-    //! constructor
-    template<class CoordVector>
-    MockGeometry(unsigned topologyId, const CoordVector &coords, bool affine) :
-      Base(topologyId, coords, affine)
-    { }
     //! Constructor using a GeometryType and a list of corner coordinates.
     template<class CoordVector>
     MockGeometry(const GeometryType &type, const CoordVector &coords) :
