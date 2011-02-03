@@ -45,32 +45,27 @@ namespace Dune {
     using Base::normal;
 
   public:
-    typedef typename Base::Allocator Allocator;
-
     //! type of jacobian (also of jacobian inverse transposed)
     typedef FieldMatrix<ctype, coorddim, mydim> Jacobian;
     //! type of jacobian transposed
     typedef FieldMatrix<ctype, mydim, coorddim> JacobianTransposed;
 
     //! Default constructor.
-    MockGeometry(const Allocator &allocator = Allocator()) : Base(allocator) {}
+    MockGeometry() {}
     //! constructor
     template<class CoordVector>
-    MockGeometry(unsigned topologyId, const CoordVector &coords,
-                 const Allocator &allocator=Allocator()) :
-      Base(topologyId, coords, allocator)
+    MockGeometry(unsigned topologyId, const CoordVector &coords) :
+      Base(topologyId, coords)
     { }
     //! constructor
     template<class CoordVector>
-    MockGeometry(unsigned topologyId, const CoordVector &coords, bool affine,
-                 const Allocator &allocator=Allocator()) :
-      Base(topologyId, coords, affine, allocator)
+    MockGeometry(unsigned topologyId, const CoordVector &coords, bool affine) :
+      Base(topologyId, coords, affine)
     { }
     //! Constructor using a GeometryType and a list of corner coordinates.
     template<class CoordVector>
-    MockGeometry(const GeometryType &type, const CoordVector &coords,
-                 const Allocator &allocator=Allocator()) :
-      Base(type, coords, allocator)
+    MockGeometry(const GeometryType &type, const CoordVector &coords) :
+      Base(type, coords)
     { }
     //! obtain a geometry for a subentity
     template<int fatherdim>
