@@ -1,3 +1,9 @@
+dune-gridinfo-gmsh-alberta-2d
+dune-gridinfo-gmsh-alberta-3d
+dune-gridinfo-gmsh-alucube-3d
+dune-gridinfo-gmsh-alusimplex-2d
+dune-gridinfo-gmsh-alusimplex-3d
+
 Makefile
 Makefile.in
 

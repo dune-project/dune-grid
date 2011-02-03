@@ -171,11 +171,10 @@ namespace Dune {
       for(int i = 0; i < refelem.size(codim); ++i) {
         GeometryType gt = refelem.type(i, codim);
         coords.clear();
-        coords.reserve(refelem.size(i, codim, dim));
+        coords.resize( refelem.size(i, codim, dim) );
         for(std::size_t corner = 0; corner < coords.size(); ++corner)
-          coords.push_back(geo.corner(refelem.subEntity(i, codim, corner,
-                                                        dim)));
-        MockGeometry<ctype, dim-codim, dimw> mygeo(geo.type(), coords);
+          coords[ corner ] = geo.corner( refelem.subEntity( i, codim, corner, dim ) );
+        MockGeometry<ctype, dim-codim, dimw> mygeo(gt, coords);
 
         ctype volume = mygeo.volume();
         EntityInfo<ctype> &ei = gridViewInfo[mygeo.type()];
