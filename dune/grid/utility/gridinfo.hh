@@ -4,14 +4,23 @@
 #ifndef DUNE_GRID_UTILITY_GRIDINFO_HH
 #define DUNE_GRID_UTILITY_GRIDINFO_HH
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <limits>
 #include <map>
 #include <ostream>
 #include <string>
+#include <vector>
 
+#include <dune/common/classname.hh>
+#include <dune/common/exceptions.hh>
+#include <dune/common/forloop.hh>
+#include <dune/common/fvector.hh>
 #include <dune/common/geometrytype.hh>
+
+#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/grid/utility/mockgeometry.hh>
 
 namespace Dune {
 
@@ -145,6 +154,97 @@ namespace Dune {
   {
     info.print(stream, "");
     return stream;
+  }
+
+#ifndef DOXYGEN
+  //! operation for ForLoop Internally used by fillGridViewInfoSerial
+  template<int codim>
+  struct FillGridInfoOperation {
+    template<class Geometry, class RefElem>
+    static void apply(const Geometry &geo, const RefElem &refelem,
+                      GridViewInfo<typename Geometry::ctype> &gridViewInfo)
+    {
+      typedef typename Geometry::ctype ctype;
+      static const std::size_t dimw = Geometry::coorddimension;
+      static const std::size_t dim = Geometry::mydimension;
+      std::vector<FieldVector<ctype, dimw> > coords;
+      for(int i = 0; i < refelem.size(codim); ++i) {
+        GeometryType gt = refelem.type(i, codim);
+        coords.clear();
+        coords.reserve(refelem.size(i, codim, dim));
+        for(std::size_t corner = 0; corner < coords.size(); ++corner)
+          coords.push_back(geo.corner(refelem.subEntity(i, codim, corner,
+                                                        dim)));
+        MockGeometry<ctype, dim-codim, dimw> mygeo(geo.type(), coords);
+
+        ctype volume = mygeo.volume();
+        EntityInfo<ctype> &ei = gridViewInfo[mygeo.type()];
+        ei.volumeMin = std::min(ei.volumeMin, volume);
+        ei.volumeMax = std::max(ei.volumeMax, volume);
+      }
+    }
+  };
+#endif // !DOXYGEN
+
+  //! fill a GridViewInfo structure from a serial grid
+  /**
+   * If used on a parallel grid, it will gather information for entities of
+   * all partitions on each rank locally.
+   */
+  template<class GV>
+  void fillGridViewInfoSerial(const GV &gv,
+                              GridViewInfo<typename GV::ctype> &gridViewInfo)
+  {
+    typedef typename GV::ctype ctype;
+    static const std::size_t dim = GV::dimension;
+    typedef typename GV::template Codim<0>::Iterator EIterator;
+    typedef typename GV::IntersectionIterator IIterator;
+    typedef typename GV::IndexSet IndexSet;
+
+    typedef typename GridViewInfo<ctype>::iterator InfoIterator;
+
+    typedef GenericReferenceElements<ctype, dim> RefElems;
+
+    gridViewInfo.gridName = className<typename GV::Grid>();
+    gridViewInfo.gridViewName = className<GV>();
+    gridViewInfo.partitionName = "";
+    gridViewInfo.clear();
+
+    const EIterator &eend = gv.template end<0>();
+    for(EIterator eit = gv.template begin<0>(); eit != eend; ++eit) {
+      ctype volume = eit->geometry().volume();
+      EntityInfo<ctype> &ei = gridViewInfo[eit->type()];
+      ei.volumeMin = std::min(ei.volumeMin, volume);
+      ei.volumeMax = std::max(ei.volumeMax, volume);
+
+      if(!eit->type().isNone())
+        ForLoop<FillGridInfoOperation, 1, dim>::
+        apply(eit->geometry(), RefElems::general(eit->type()), gridViewInfo);
+    }
+
+    GeometryType gt;
+    gt.makeNone(dim);
+    if(gridViewInfo.count(gt) > 0) {
+      for(std::size_t codim = 0; codim < dim; ++codim) {
+        gt.makeNone(dim-codim);
+        EntityInfo<ctype> & ei = gridViewInfo[gt];
+        ei.volumeMin = ei.volumeMax = std::numeric_limits<ctype>::quiet_NaN();
+      }
+      gt.makeNone(0);
+      EntityInfo<ctype> & ei = gridViewInfo[gt];
+      ei.volumeMin = ei.volumeMax = 0;
+    }
+
+    const InfoIterator &end = gridViewInfo.end();
+    const IndexSet &is = gv.indexSet();
+    for(InfoIterator it = gridViewInfo.begin(); it != end; ++it) {
+      it->second.count = is.size(it->first);
+      if(it->second.count == 0)
+        DUNE_THROW(Exception, "Found Entities of geomentry type " <<
+                   it->first << " while iterating through the grid, but "
+                   "indexSet.size() == 0 for that geometry type");
+    }
+
   }
 
 } // namespace Dune
