@@ -7,7 +7,16 @@ EXTRA_DIST=dune.module
 # need automake >= 1.5
 AUTOMAKE_OPTIONS = foreign 1.5
 
-SUBDIRS = dune doc lib m4
+# All subdirectories that must (or can) be handled before the library is built
+SUBDIRS =					\
+	doc					\
+	dune					\
+	m4
+# The library subdirectory itself
+SUBDIRS += lib
+# All subdirectories that must (or can) be handled after the library is built
+SUBDIRS +=					\
+	utility
 
 # use configured compiler for "make distcheck"
 # doxygen is difficult to convince to build in a special directory...
