@@ -71,7 +71,8 @@ namespace Dune
   template< class Grid >
   inline GeometryType AlbertaGridIntersectionBase< Grid >::type () const
   {
-    return GeometryType( GeometryType::simplex, dimension-1 );
+    typedef typename GenericGeometry::SimplexTopology< dimension-1 >::type Topology;
+    return GeometryType( Topology() );
   }
 
 
@@ -84,7 +85,7 @@ namespace Dune
     const FieldVector< ctype, dimension > &localInInside = refElement.position( indexInInside(), 1 );
     return Grid::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
 #else
-    typedef typename GenericGeometry::Convert< GeometryType::simplex, dimension >::type Topology;
+    typedef typename GenericGeometry::SimplexTopology< dimension >::type Topology;
     typedef GenericGeometry::ReferenceElement< Topology, ctype > ReferenceElement;
     typedef FieldMatrix< ctype, dimensionworld, dimension > Jacobian;
 

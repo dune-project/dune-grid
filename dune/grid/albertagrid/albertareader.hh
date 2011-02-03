@@ -63,7 +63,6 @@ namespace Dune
       }
 
       // insert all elements into the factory
-      const GeometryType geoType( GeometryType::simplex, dimension );
       std::vector< unsigned int > vertices( dimension+1 );
       const int numElements = macroData_.elementCount();
       for( int i = 0; i < numElements; ++i )
@@ -71,7 +70,8 @@ namespace Dune
         const typename MacroData::ElementId &id = macroData_.element( i );
         for( int j = 0; j <= dimension; ++j )
           vertices[ j ] = id[ j ];
-        factory.insertElement( geoType, vertices );
+        typedef typename GenericGeometry::SimplexTopology< dimension >::type Topology;
+        factory.insertElement( GeometryType( Topology() ), vertices );
       }
 
       // release ALBERTA macro data

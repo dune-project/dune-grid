@@ -273,7 +273,8 @@ namespace Dune
     /** \brief obtain the type of reference element */
     GeometryType type () const
     {
-      return GeometryType( GeometryType::simplex, mydimension );
+      typedef typename GenericGeometry::SimplexTopology< mydimension >::type Topology;
+      return GeometryType( Topology() );
     }
 
     //! returns always true since we only have simplices
@@ -485,7 +486,8 @@ namespace Dune
     /** \brief obtain the type of reference element */
     GeometryType type () const
     {
-      return GeometryType( GeometryType::simplex, mydimension );
+      typedef typename GenericGeometry::SimplexTopology< mydimension >::type Topology;
+      return GeometryType( Topology() );
     }
 
     /** \brief number of corner the geometry */

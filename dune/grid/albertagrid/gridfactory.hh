@@ -209,8 +209,8 @@ namespace Dune
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int >& vertices )
     {
-      GeometryType type( GeometryType::simplex, dimension-1 );
-      insertBoundaryProjection( type, vertices, 0 );
+      typedef typename GenericGeometry::SimplexTopology< dimension-1 >::type Topology;
+      insertBoundaryProjection( GeometryType( Topology() ), vertices, 0 );
     }
 
     /** \brief insert a shaped boundary segment into the macro grid
@@ -240,8 +240,9 @@ namespace Dune
           DUNE_THROW( GridError, "Boundary segment does not interpolate the corners." );
       }
 
-      GeometryType type( GeometryType::simplex, dimension-1 );
-      insertBoundaryProjection( type, vertices, new BoundarySegmentWrapper( type, coords, boundarySegment ) );
+      const GeometryType gt = refSimplex.type( 0, 0 );
+      const DuneProjection *prj = new BoundarySegmentWrapper( gt, coords, boundarySegment );
+      insertBoundaryProjection( gt, vertices, prj );
     }
 
     /** \brief add a face transformation (for periodic identification)

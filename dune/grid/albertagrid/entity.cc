@@ -115,7 +115,8 @@ namespace Dune
   template< int codim, int dim, class GridImp >
   inline GeometryType AlbertaGridEntity< codim, dim, GridImp >::type () const
   {
-    return GeometryType( GeometryType::simplex, mydimension );
+    typedef typename GenericGeometry::SimplexTopology< mydimension >::type Topology;
+    return GeometryType( Topology() );
   }
 
 
@@ -275,7 +276,8 @@ namespace Dune
   template< int dim, class GridImp >
   inline GeometryType AlbertaGridEntity< 0, dim, GridImp>::type () const
   {
-    return GeometryType( GeometryType::simplex, mydimension );
+    typedef typename GenericGeometry::SimplexTopology< mydimension >::type Topology;
+    return GeometryType( Topology() );
   }
 
 
