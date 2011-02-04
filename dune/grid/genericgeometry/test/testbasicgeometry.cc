@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include <dune/common/exceptions.hh>
+#include <dune/common/geometrytype.hh>
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
@@ -59,7 +60,9 @@ int main (int argc , char **argv) try
     corners[3][0] = 0.75;  corners[3][1] = 0.25;
 
     typedef GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<double,2,2> > ElementGeometry;
-    ElementGeometry insideGeometry( GenericGeometry::topologyId( GeometryType(GeometryType::cube,2 )), corners );
+    GeometryType gt;
+    gt.makeQuadrilateral();
+    ElementGeometry insideGeometry( gt, corners );
 
     testBasicGeometry(insideGeometry, result);
   }   // quadrilateral
