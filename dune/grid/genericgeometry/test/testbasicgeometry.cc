@@ -11,24 +11,37 @@
 #include <ostream>
 #include <iostream>
 
+#include <dune/common/exceptions.hh>
+
 #include <dune/grid/genericgeometry/geometry.hh>
 
 
 
 using namespace Dune;
 
+void fail(int &result) {
+  result = 1;
+}
+void pass(int &result) {
+  if(result == 77) result = 0;
+}
+
 /** \brief Test the interface of the given BasicGeometry object */
 template <class TestGeometry>
-void testBasicGeometry(const TestGeometry& geometry)
+void testBasicGeometry(const TestGeometry& geometry, int &result)
 {
   const int dim = TestGeometry::mydimension;
 
   geometry.normal(0, FieldVector<double,dim>(0));
 
+  pass(result);
 }
 
 int main (int argc , char **argv) try
 {
+  // 77 means "SKIP"
+  int result = 77;
+
   // Test a line segment
   // ...
 
@@ -48,7 +61,7 @@ int main (int argc , char **argv) try
     typedef GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<double,2,2> > ElementGeometry;
     ElementGeometry insideGeometry( GenericGeometry::topologyId( GeometryType(GeometryType::cube,2 )), corners );
 
-    testBasicGeometry(insideGeometry);
+    testBasicGeometry(insideGeometry, result);
   }   // quadrilateral
 
   // Test a tetrahedron
@@ -63,12 +76,12 @@ int main (int argc , char **argv) try
   // Test a hexahedron
   // ...
 
-  return 0;
+  return result;
 }
 catch (Dune::Exception& e) {
   std::cerr << e << std::endl;
-  return 1;
+  throw;
 } catch (...) {
   std::cerr << "Generic exception!" << std::endl;
-  return 2;
+  throw;
 }
