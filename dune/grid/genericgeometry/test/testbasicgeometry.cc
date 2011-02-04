@@ -8,6 +8,7 @@
 
 #include <config.h>
 
+#include <ostream>
 #include <iostream>
 
 #include <dune/grid/genericgeometry/geometry.hh>
@@ -34,18 +35,21 @@ int main (int argc , char **argv) try
   // Test a triangle
   // ...
 
-  // Test a quadrilateral
-  std::vector<FieldVector<double, 2> > corners(4);
+  {   // Test a quadrilateral
+    std::cout << "Testing quadrilaterals..." << std::endl;
 
-  corners[0][0] = 0.5;   corners[0][1] = 0.0;
-  corners[1][0] = 1.0;   corners[1][1] = 0.0;
-  corners[2][0] = 0.5;   corners[2][1] = 0.25;
-  corners[3][0] = 0.75;   corners[3][1] = 0.25;
+    std::vector<FieldVector<double, 2> > corners(4);
 
-  typedef GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<double,2,2> > ElementGeometry;
-  ElementGeometry insideGeometry( GenericGeometry::topologyId( GeometryType(GeometryType::cube,2 )), corners );
+    corners[0][0] = 0.5;   corners[0][1] = 0.0;
+    corners[1][0] = 1.0;   corners[1][1] = 0.0;
+    corners[2][0] = 0.5;   corners[2][1] = 0.25;
+    corners[3][0] = 0.75;  corners[3][1] = 0.25;
 
-  testBasicGeometry(insideGeometry);
+    typedef GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<double,2,2> > ElementGeometry;
+    ElementGeometry insideGeometry( GenericGeometry::topologyId( GeometryType(GeometryType::cube,2 )), corners );
+
+    testBasicGeometry(insideGeometry);
+  }   // quadrilateral
 
   // Test a tetrahedron
   // ...
