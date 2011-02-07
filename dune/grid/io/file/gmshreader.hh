@@ -216,7 +216,6 @@ namespace Dune
     int element_count;
     // read buffer
     char buf[512];
-    int line;
     std::string fileName;
     // exported data
     std::vector<int> boundary_id_to_physical_entity;
@@ -248,9 +247,11 @@ namespace Dune
                   void* t5 = 0, void* t6 = 0, void* t7 = 0, void* t8 = 0,
                   void* t9 = 0, void* t10 = 0)
     {
+      off_t pos = ftello(file);
       int c = fscanf(file, format, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
       if (c != cnt)
-        DUNE_THROW(Dune::IOError, "Error parsing " << fileName << " line " << line
+        DUNE_THROW(Dune::IOError, "Error parsing " << fileName << " "
+                   "file pos " << pos
                                                    << ": Expected '" << format << "', only read " << c << " entries instead of " << cnt << ".");
     }
 
@@ -287,7 +288,6 @@ namespace Dune
       number_of_real_vertices = 0;
       boundary_element_count = 0;
       element_count = 0;
-      line = 0;
 
       // process header
       double version_number;
