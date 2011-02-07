@@ -317,6 +317,16 @@ namespace Dune
   const int FaceTopologyMapping<tetra>::
   alu2duneTwist_[ 2 * EntityCount<tetra>::numVerticesPerFace] = { -2, -3, -1, 0, 2, 1 };
 
+  // mapping of twists from alu 2 dune
+  template <>
+  const int FaceTopologyMapping<tetra>::
+  aluTwistMap_[ 2 * EntityCount<tetra>::numVerticesPerFace] = { 1, 2, 0, -1, -2, -3 };
+
+  // mapping of twists from alu 2 dune
+  template <>
+  const int FaceTopologyMapping<hexa>::
+  aluTwistMap_[ 2 * EntityCount<hexa>::numVerticesPerFace] = { -2, -3, -4, -1, 0, 1, 2, 3 } ;
+
   // the mapping of vertices in the reference quad
   // this is used for hexa face during intersection iterator build
   // and to calculate the intersectionSelfLocal and

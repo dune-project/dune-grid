@@ -324,10 +324,8 @@ namespace Dune
       (ElementTopo::faceOrientation( faceIdx ) * sign(aluTwist) < 0 ?
        mappedZero : -mappedZero-1);
 
-    // twist map calculated with grid/test/checktwists.cc
-
-    const int map3d[ 6 ] = { 1, 2, 0, -1, -2, -3 };
-    return map3d[ twist + 3 ];
+    // see topology.* files
+    return FaceTopo :: aluTwistMap( twist );
   }
 
   template< ALU3dGridElementType type, class Comm >
