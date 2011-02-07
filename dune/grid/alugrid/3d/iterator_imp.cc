@@ -345,21 +345,7 @@ namespace Dune {
   ALU3dGridIntersectionIterator< GridImp >::
   twistInInside () const
   {
-    if( GridImp::elementType == hexa )
-    {
-      const int aluTwist = connector_.innerTwist();
-      const int mappedZero =
-        FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInInside(), 0), aluTwist);
-
-      return
-        (ElementTopo::faceOrientation( indexInInside() ) * sign(aluTwist) < 0 ?
-         mappedZero : -mappedZero-1);
-    }
-    else
-    {
-      assert( GridImp::elementType == tetra );
-      return connector_.duneTwist( indexInInside(), connector_.innerTwist() );
-    }
+    return connector_.duneTwist( indexInInside(), connector_.innerTwist() );
   }
 
   template< class GridImp >
@@ -367,21 +353,7 @@ namespace Dune {
   ALU3dGridIntersectionIterator< GridImp >::
   twistInOutside () const
   {
-    if( GridImp::elementType == hexa )
-    {
-      const int aluTwist = connector_.outerTwist();
-      const int mappedZero =
-        FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInOutside(), 0), aluTwist);
-
-      return
-        (ElementTopo::faceOrientation( indexInOutside() ) * sign(aluTwist) < 0 ?
-         mappedZero : -mappedZero-1);
-    }
-    else
-    {
-      assert( GridImp::elementType == tetra );
-      return connector_.duneTwist( indexInOutside(), connector_.outerTwist() );
-    }
+    return connector_.duneTwist( indexInOutside(), connector_.outerTwist() );
   }
 
   template<class GridImp>
