@@ -4,20 +4,22 @@
 #ifndef DUNE_GMSHREADER_HH
 #define DUNE_GMSHREADER_HH
 
-#include <iostream>
+#include <cstdarg>
+#include <cstring>
 #include <fstream>
+#include <iostream>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
-#include <stdio.h>
-#include <cstring>
-#include <cstdarg>
 
-#include <dune/common/geometrytype.hh>
+#include <stdio.h>
+
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/grid/common/gridfactory.hh>
+#include <dune/common/geometrytype.hh>
+
 #include <dune/grid/common/boundarysegment.hh>
+#include <dune/grid/common/gridfactory.hh>
 
 namespace Dune
 {
