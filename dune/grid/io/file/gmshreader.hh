@@ -5,6 +5,7 @@
 #define DUNE_GMSHREADER_HH
 
 #include <cstdarg>
+#include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -242,6 +243,10 @@ namespace Dune
     //     readfile(file, cnt, &t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
     // };
 
+    // don't use something like
+    //   readfile(file, 1, "%s\n", buf);
+    // to skip the rest of of the line -- that will only skip the next
+    // whitespace-seperated word!  Use skipline() instead.
     void readfile(FILE * file, int cnt, const char * format,
                   void* t1, void* t2 = 0, void* t3 = 0, void* t4 = 0,
                   void* t5 = 0, void* t6 = 0, void* t7 = 0, void* t8 = 0,
@@ -253,6 +258,15 @@ namespace Dune
         DUNE_THROW(Dune::IOError, "Error parsing " << fileName << " "
                    "file pos " << pos
                                                    << ": Expected '" << format << "', only read " << c << " entries instead of " << cnt << ".");
+    }
+
+    // skip over the rest of the line, including the terminating newline
+    void skipline(FILE * file)
+    {
+      int c;
+      do {
+        c = std::fgetc(file);
+      } while(c != '\n' && c != EOF);
     }
 
   public:
@@ -444,7 +458,7 @@ namespace Dune
       if ( not (elm_type >= 0 && elm_type < 12         // index in suitable range?
                 && (elementDim[elm_type] == dim || elementDim[elm_type] == (dim-1) ) ) )         // real element or boundary element?
       {
-        readfile(file,1,"%s\n",buf);         // skip rest of line if element is unknown
+        skipline(file);         // skip rest of line if element is unknown
         return;
       }
 
@@ -499,6 +513,7 @@ namespace Dune
     using Base::insert_boundary_segments;
     using Base::boundary_id_to_physical_entity;
     using Base::readfile;
+    using Base::skipline;
 
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
 
@@ -514,7 +529,7 @@ namespace Dune
           and elm_type != 3          // 4-node quadrilateral
           and elm_type != 8          // 3-node line
           and elm_type != 9) {       // 6-node triangle
-        readfile(file,1,"%s\n",buf);         // skip rest of line if element is unknown
+        skipline(file);         // skip rest of line if element is unknown
         return;
       }
 
