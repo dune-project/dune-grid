@@ -18,6 +18,7 @@ namespace Dune
         of the grid has only one possible geometry type. In this case the
         topologyId of this geometry type has also to be specified.
         (default=false, topologyId=undefined)
+        \ingroup GICapabilities
      */
     template<class Grid>
     struct hasSingleGeometryType
@@ -28,10 +29,17 @@ namespace Dune
       static const unsigned int topologyId = ~0u;
     };
 
-    /** \brief Specialize with 'true' if the grid is a Cartesian grid,
-        meaning that the normal can be calculated by the formula
-        \f$n[ face/2 ] = 2( face % 2 ) - 1 \f$ and furthermore, the geometry mapping is
-        affine. (default = false)
+    /** \brief Specialize with 'true' if the grid is a Cartesian grid.
+        Cartesian grids satisfy the following properties:
+          - all geometries are affine
+          - The unit outer normal for an intersection with indexInInside = face
+            can be computed by the following code:
+          \code
+             FieldVector< ctype, dim > n( 0 );
+             n[ face / 2 ] = ctype( 2*(face % 2) - 1 );
+          \endcode
+        (default=false).
+        \ingroup GICapabilities
      */
     template<class Grid>
     struct isCartesian
