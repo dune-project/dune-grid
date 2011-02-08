@@ -462,7 +462,8 @@ struct GridInterface
     for (int codim = 0; codim < Grid::dimension; codim++)
       g.levelIndexSet(0).geomTypes(codim);
 
-    if (g.template lbegin<0>(0) !=g.template lend<0>(0) ) {
+    if (g.template leafbegin<0>() != g.template leafend<0>() )
+    {
       // Instantiate all methods of LeafIndexSet
       g.leafIndexSet().index(*g.template leafbegin<0>());
     }
