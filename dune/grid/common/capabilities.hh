@@ -28,6 +28,18 @@ namespace Dune
       static const unsigned int topologyId = ~0u;
     };
 
+    /** \brief Specialize with 'true' if the grid is a Cartesian grid,
+        meaning that the normal can be calculated by the formula
+        \f$n[ face/2 ] = 2( face % 2 ) - 1 \f$ and furthermore, the geometry mapping is
+        affine. (default = false)
+     */
+    template<class Grid>
+    struct isCartesian
+    {
+      // default value is false
+      static const bool v = false;
+    };
+
     /** \brief Specialize with 'true' for all codims that a grid implements entities for. (default=false)
         \ingroup GICapabilities
      */
@@ -129,6 +141,12 @@ namespace Dune
       static const bool v = Dune::Capabilities::hasSingleGeometryType<Grid>::v;
       static const unsigned int topologyId =
         Dune::Capabilities::hasSingleGeometryType<Grid>::topologyId;
+    };
+
+    template<class Grid>
+    struct isCartesian< const Grid >
+    {
+      static const bool v = Dune::Capabilities::isCartesian<Grid>::v;
     };
 
     template<class Grid, int codim>

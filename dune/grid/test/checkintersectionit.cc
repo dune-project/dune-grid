@@ -392,6 +392,22 @@ void checkIntersectionIterator(const GridViewType& view,
         assert( false );
       }
 
+      const bool isCartesian = Dune :: Capabilities :: isCartesian< GridType > :: v ;
+      // check normal for Cartesian grids
+      if( isCartesian )
+      {
+        if( ! geometry.affine() )
+          DUNE_THROW( Dune::GridError, "Intersection geometry is not affine, although isCartesian is true");
+
+        // check that normal of Cartesian grid is given in
+        // a specific way
+        typename Intersection::GlobalCoordinate normal ( 0 );
+        normal[ indexInInside / 2 ] = 2 * ( indexInInside % 2 ) - 1;
+
+        if( (normal - unitNormal).infinity_norm() > 1e-8 )
+          DUNE_THROW( Dune::GridError, "Normal is not in Cartesian format, although isCartesian is true");
+      }
+
       checkJIn( unitNormal, jit, "unitOuterNormal" );
       checkParallel ( unitNormal, refIntNormal, "unitOuterNormal");
 

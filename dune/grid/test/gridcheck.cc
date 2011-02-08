@@ -265,6 +265,14 @@ void zeroEntityConsistency (Grid &g)
       }
     }
 
+    const bool isCartesian = Dune :: Capabilities :: isCartesian< Grid > :: v ;
+    // check geometry for Cartesian grids
+    if( isCartesian )
+    {
+      if( ! it->geometry().affine() )
+        DUNE_THROW( Dune::GridError, "Geometry is not affine, although isCartesian is true");
+    }
+
     subIndexCheck<Grid::dimension, Grid, Entity, true> sick(g,*it);
   }
 }
