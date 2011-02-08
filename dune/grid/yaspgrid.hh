@@ -3389,6 +3389,15 @@ namespace Dune {
       static const unsigned int topologyId = GenericGeometry :: CubeTopology< dim > :: type :: id ;
     };
 
+    /** \brief YaspGrid is a Cartesian grid
+        \ingroup YaspGrid
+     */
+    template<int dim>
+    struct isCartesian< YaspGrid<dim> >
+    {
+      static const bool v = true;
+    };
+
     /** \brief YaspGrid has codim=0 entities (elements)
        \ingroup YaspGrid
      */

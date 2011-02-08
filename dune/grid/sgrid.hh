@@ -1898,6 +1898,15 @@ namespace Dune {
       static const unsigned int topologyId = GenericGeometry :: CubeTopology< dim > :: type :: id ;
     };
 
+    /** \brief SGrid is a Cartesian grid
+        \ingroup SGrid
+     */
+    template<int dim, int dimw>
+    struct isCartesian< SGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
     /** \brief SGrid has entities for all codimension
        \ingroup SGrid
      */
