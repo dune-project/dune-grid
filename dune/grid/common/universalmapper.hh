@@ -28,6 +28,8 @@ namespace Dune
       This implementation uses an ID set and a map, thus it has log complexity for each access.
           Template parameters are:
 
+      Entities need to be registered in order to use them. If an entity is queried with map, the known index is returned or a new index is created. The method contains only return true, if the entites was queried via map already.
+
           \par G
           A Dune grid type.
           \par IDS
@@ -41,7 +43,7 @@ namespace Dune
   public:
 
     //! import the base class implementation of map and contains (including the deprecated version)
-    //! \todo remove in after next release
+    //! \todo remove after next release
     using Mapper< G, UniversalMapper >::map;
     using Mapper< G, UniversalMapper >::contains;
 
@@ -59,6 +61,8 @@ namespace Dune
 
     /** @brief Map entity to array index.
 
+       If an entity is queried with map, the known index is returned or a new index is created. A call to map can never fail.
+
             \param e Reference to codim cc entity, where cc is the template parameter of the function.
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
@@ -74,6 +78,8 @@ namespace Dune
 
 
     /** @brief Map subentity of codim 0 entity to array index.
+
+       If an entity is queried with map, the known index is returned or a new index is created. A call to map can never fail.
 
        \param e Reference to codim 0 entity.
        \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
@@ -103,6 +109,8 @@ namespace Dune
     }
 
     /** @brief Returns true if the entity is contained in the index set
+
+       The method contains only return true, if the entites was queried via map already.
 
        \param e Reference to entity
        \param result integer reference where corresponding index is  stored if true
