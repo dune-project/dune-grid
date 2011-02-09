@@ -411,8 +411,10 @@ namespace Dune {
     }
   };
 
+#ifndef DOXYGEN
   extern template Jacobi1QuadratureRule<float, 1>::Jacobi1QuadratureRule(int);
   extern template Jacobi1QuadratureRule<double, 1>::Jacobi1QuadratureRule(int);
+#endif // !DOXYGEN
 
 } // namespace Dune
 
@@ -492,8 +494,10 @@ namespace Dune {
     }
   };
 
+#ifndef DOXYGEN
   extern template Jacobi2QuadratureRule<float, 1>::Jacobi2QuadratureRule(int);
   extern template Jacobi2QuadratureRule<double, 1>::Jacobi2QuadratureRule(int);
+#endif // !DOXYGEN
 
 } // namespace Dune
 

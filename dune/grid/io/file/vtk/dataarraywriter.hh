@@ -183,7 +183,7 @@ namespace Dune
        * \param offset    Byte count variable: this is incremented by one for
        *                  each byte which has to written to the appended data
        *                  section later.
-       * \param indent_   Indentation to use.  This is uses as-is for the
+       * \param indent    Indentation to use.  This is uses as-is for the
        *                  header line.
        */
       AppendedRawDataArrayWriter(std::ostream& s, std::string name,
@@ -221,7 +221,7 @@ namespace Dune
        * \param offset    Byte count variable: this is incremented by one for
        *                  each base64 char which has to written to the
        *                  appended data section later.
-       * \param indent_   Indentation to use.  This is uses as-is for the
+       * \param indent    Indentation to use.  This is uses as-is for the
        *                  header line.
        */
       AppendedBase64DataArrayWriter(std::ostream& s, std::string name,

@@ -422,7 +422,7 @@ namespace Dune
        *  \param name     Base name of the output files.  This should not
        *                  contain any directory part and no filename
        *                  extensions.
-       *  \param type     How to encode the data in the file.
+       *  \param outputType How to encode the data in the file.
        */
       std::string write(const std::string &name, OutputType outputType)
       {

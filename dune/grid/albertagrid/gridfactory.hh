@@ -278,8 +278,6 @@ namespace Dune
      *  This version of createGrid is original to the AlbertaGrid grid factroy,
      *  allowing to specity a grid name.
      *
-     *  \param[in]  gridName         name for the grid
-     *
      *  \returns a pointer to the newly created grid
      *
      *  \note The caller takes responsibility of creeing the memory allocated

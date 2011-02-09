@@ -1180,7 +1180,7 @@ namespace Dune {
      * @brief Helper class to choose correct implementation return type for getRealImplementation
      *
      * If the template parameter is const, const typename T::ImplementationType is returned otherwise
-     * just typename ::ImplementationType.
+     * just typename ::%ImplementationType.
      */
     template<class T>
     class ReturnImplementationType : public T // implement friendship via subclassing

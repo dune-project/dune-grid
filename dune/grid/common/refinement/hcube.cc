@@ -252,7 +252,7 @@ namespace Dune {
           @tparam codimension Codimension of the iterator
 
           This is the base class for SubEntityIterators.  We have to use
-          this construct because RefinementImp<...>::codim<...> cannot
+          this construct because RefinementImp<...>::%codim<...> cannot
           be specialized without first specializing RefinementImp.
        */
       template<int dimension, class CoordType, int codimension>

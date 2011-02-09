@@ -483,8 +483,6 @@ namespace Dune
 
     /** \brief obtain number of leaf entities
      *
-     *  \param[in]  type   geometry type to consider
-     *
      *  \returns number of leaf entities with a geometry of type \em type
      */
     size_t numBoundarySegments () const

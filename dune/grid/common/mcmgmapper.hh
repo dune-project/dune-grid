@@ -90,7 +90,7 @@ namespace Dune
    *
    * If you don't want to use the default constructor of the LayoutClass you
    * can construct it yourself and hand it to the respective constructor (with
-   * dimgrid=GV::dimension).  In this case the layout class should be copy
+   * dimgrid=GV::%dimension).  In this case the layout class should be copy
    * constructible.
    *
    * Thare are to predefined Layout class templates For the common cases that

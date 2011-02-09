@@ -823,7 +823,7 @@ namespace Dune
        of the macrogrid.
        - If the ordering of the local vertices of the cube elements
          does not follow the %Dune
-         @link GridReferenceElements reference element@endlink then
+         @link GridGenericReferenceElements reference element@endlink then
          the mapping between the local numbering used and the dune reference
          cube has to be prescribed by a line starting with the keyword \b map
          followed by the permutation of the numbers

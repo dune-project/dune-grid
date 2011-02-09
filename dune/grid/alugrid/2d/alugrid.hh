@@ -310,9 +310,19 @@ namespace Dune
             - Dune::ALUConformGrid<2,dimw>
 
      For installation instructions see http://www.dune-project.org/external_libraries/install_alugrid.html .
+
+     \note The unspecialized version of ALUConformGrid is defined for
+           documentation purposes only, only the specializations can actually be
+           used.
    */
   template <int dim, int dimworld>
-  class ALUConformGrid;
+  class ALUConformGrid {
+    dune_static_assert((AlwaysFalse<integral_constant<int,dim> >::value),
+                       "The unspecialized version of ALUConformGrid is defined "
+                       "for documentation purposes only, only the "
+                       "specializations can actually be used.");
+  };
+
   namespace Capabilities {
     /** \struct isLeafwiseConforming
        \ingroup ALUConformGrid

@@ -29,7 +29,7 @@ namespace Dune
     public:
       //! construct a Corner
       /**
-       * \param cell_     Reference to the cell
+       * \param cell      Reference to the cell
        * \param duneIndex Index of the corner within the element in
        *                  Dune-numbering
        */
