@@ -65,6 +65,12 @@ namespace Dune
     //! \param macroName filename for macro grid in ALUGrid hexa format
     //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
     //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for
+    //!                   each boundary segment.  ALUGrid takes ownership of
+    //!                   this pointer and will delete it in the desctructor
+    //! \param verb       Whether to write a notice about grid creation to
+    //!                   stdout.
     ALUCubeGrid(const std::string macroName,
                 const MPICommunicatorType mpiComm = BaseType::defaultCommunicator(),
                 const DuneBoundaryProjectionType* bndProject = 0,
@@ -87,6 +93,8 @@ namespace Dune
     //! \param bndVector  pointer to vector holding boundary projection for each boundary segment
     //! \note ALUGrid takes ownership of this pointer and will delete it in the desctructor
     //! \param macroName filename from which ALUGrid is being generated
+    //! \param verb      Whether to write a notice about grid creation to
+    //!                  stdout.
     ALUCubeGrid(const MPICommunicatorType mpiComm,
                 const DuneBoundaryProjectionType* bndProject ,
                 const DuneBoundaryProjectionVector* bndVector,
@@ -218,6 +226,12 @@ namespace Dune
     //! \param macroName filename for macro grid in ALUGrid tetra format
     //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
     //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for
+    //!                   each boundary segment.  ALUGrid takes ownership of
+    //!                   this pointer and will delete it in the desctructor
+    //! \param verb       Whether to write a notice about grid creation to
+    //!                   stdout.
     ALUSimplexGrid(const std::string macroName,
                    const MPICommunicatorType mpiComm = BaseType::defaultCommunicator(),
                    const DuneBoundaryProjectionType* bndProject = 0,
@@ -240,6 +254,8 @@ namespace Dune
     //! \param bndVector  pointer to vector holding boundary projection for each boundary segment
     //!  \note ALUGrid takes ownership of this pointer and will delete it in the desctructor
     //! \param macroName filename from which ALUGrid is being generated
+    //! \param verb       Whether to write a notice about grid creation to
+    //!                   stdout.
     ALUSimplexGrid(const MPICommunicatorType mpiComm,
                    const DuneBoundaryProjectionType* bndProject ,
                    const DuneBoundaryProjectionVector* bndVector,

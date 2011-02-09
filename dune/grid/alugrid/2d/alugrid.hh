@@ -36,6 +36,12 @@ namespace Dune
 
     //! \brief constructor for creating ALUSimplexGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for
+    //!                   each boundary segment.  ALUGrid takes ownership of
+    //!                   this pointer and will delete it in the desctructor
+    //! \param verbose    Whether to write a notice about grid creation to
+    //!                   stdout.
     ALUCubeGrid(const std::string macroName,
                 const DuneBoundaryProjectionType* bndProject  = 0,
                 const DuneBoundaryProjectionVector* bndVector = 0,
@@ -51,6 +57,13 @@ namespace Dune
 
     //! \brief constructor for creating ALUSimplexGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
+    //! \param macroFile  Stream to read macro grid file contents from.
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for
+    //!                   each boundary segment.  ALUGrid takes ownership of
+    //!                   this pointer and will delete it in the desctructor
+    //! \param verbose    Whether to write a notice about grid creation to
+    //!                   stdout.
     ALUCubeGrid(const std::string macroName,
                 std::istream& macroFile,
                 const DuneBoundaryProjectionType* bndProject  = 0,
@@ -174,6 +187,12 @@ namespace Dune
 
     //! \brief constructor for creating ALUSimplexGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for
+    //!                   each boundary segment.  ALUGrid takes ownership of
+    //!                   this pointer and will delete it in the desctructor
+    //! \param verbose    Whether to write a notice about grid creation to
+    //!                   stdout.
     ALUSimplexGrid(const std::string macroName,
                    const DuneBoundaryProjectionType* bndProject  = 0,
                    const DuneBoundaryProjectionVector* bndVector = 0,
@@ -189,6 +208,13 @@ namespace Dune
 
     //! \brief constructor for creating ALUSimplexGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
+    //! \param macroFile  Stream to read macro grid file contents from.
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for
+    //!                   each boundary segment.  ALUGrid takes ownership of
+    //!                   this pointer and will delete it in the desctructor
+    //! \param verbose    Whether to write a notice about grid creation to
+    //!                   stdout.
     ALUSimplexGrid(const std::string macroName,
                    std::istream& macroFile,
                    const DuneBoundaryProjectionType* bndProject  = 0,
@@ -403,6 +429,12 @@ namespace Dune
 
     //! \brief constructor for creating ALUConformGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for
+    //!                   each boundary segment.  ALUGrid takes ownership of
+    //!                   this pointer and will delete it in the desctructor
+    //! \param verbose    Whether to write a notice about grid creation to
+    //!                   stdout.
     ALUConformGrid(const std::string macroName,
                    const DuneBoundaryProjectionType* bndProject  = 0,
                    const DuneBoundaryProjectionVector* bndVector = 0,
@@ -418,6 +450,13 @@ namespace Dune
 
     //! \brief constructor for creating ALUConformGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
+    //! \param macroFile  Stream to read macro grid file contents from.
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for
+    //!                   each boundary segment.  ALUGrid takes ownership of
+    //!                   this pointer and will delete it in the desctructor
+    //! \param verbose    Whether to write a notice about grid creation to
+    //!                   stdout.
     ALUConformGrid(const std::string macroName,
                    std::istream& macroFile,
                    const DuneBoundaryProjectionType* bndProject  = 0,
