@@ -1,3 +1,4 @@
+
 # $Id$
 
 # include this into website
@@ -12,9 +13,13 @@ CURDIR=doc/appl/refelements
 # install docs
 docdir=$(datadir)/doc/dune-grid/appl/refelements
 if BUILD_DOCS
-DOCFILES = $(EXTRAINSTALL)
 EXTRA_DIST= $(EXTRAINSTALL)
 endif
 
+if INKSCAPE
+update-images: $(EXTRAINSTALL)
+endif
+
 include $(top_srcdir)/am/webstuff
+include $(top_srcdir)/am/inkscape.am
 include $(top_srcdir)/am/global-rules
