@@ -563,7 +563,7 @@ namespace Dune {
 
        \param e Pointer to the element to be marked for refinement
        \param rule One of the UG refinement rules
-       \param side If rule==UG::D2::BLUE (one quadrilateral is split into two rectangles)
+       \param side If rule==UG::%D2::%BLUE (one quadrilateral is split into two rectangles)
        you can choose the orientation of the cut by setting side==0 or side==1
      */
     bool mark(const typename Traits::template Codim<0>::Entity & e,
