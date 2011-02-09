@@ -283,7 +283,7 @@ DataHandle *Dune::UGMessageBuffer<DataHandle,GridDim,codim>::duneDataHandle_ = 0
 
 template <class DataHandle, int GridDim, int codim>
 int Dune::UGMessageBuffer<DataHandle,GridDim,codim>::level = -1;
-#endif
+#endif // ModelP
 
 namespace Dune {
 
@@ -298,7 +298,7 @@ namespace Dune {
       : ParentType(MPIHelper::getCommunicator())
     {}
   };
-#endif
+#endif // ModelP
 
   template<int dim, int dimworld>
   struct UGGridFamily
@@ -672,7 +672,7 @@ namespace Dune {
                      "codim=dim(=" << dim << "), but "
                      "codim=" << curCodim << " was requested");
       }
-#endif
+#endif // ModelP
     }
 
     /** \brief The communication interface for all codims on the leaf level
@@ -708,7 +708,7 @@ namespace Dune {
                      "codim=dim(=" << dim << "), but "
                      "codim=" << curCodim << " was requested");
       }
-#endif
+#endif // ModelP
     }
 
     /** the collective communication */
@@ -804,7 +804,7 @@ namespace Dune {
                    << " by the DUNE UGGrid interface!");
       }
     };
-#endif
+#endif // ModelP
 
   public:
     // **********************************************************
@@ -1007,9 +1007,9 @@ namespace Dune {
     {
 #ifdef ModelP
       static const bool v = true;
-#else
+#else // !ModelP
       static const bool v = false;
-#endif
+#endif // !ModelP
     };
 
     /** \brief UGGrid is levelwise conforming
