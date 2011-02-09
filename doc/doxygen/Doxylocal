@@ -46,7 +46,8 @@ IMAGE_PATH            += @top_srcdir@/dune/grid/sgrid \
                          @top_srcdir@/dune/grid/geometrygrid
 
 PREDEFINED            += ENABLE_ALUGRID \
-                         HAVE_ALBERTA:=1
+                         HAVE_ALBERTA:=1 \
+                         HAVE_UG:=1
 
 EXCLUDE               += @top_srcdir@/dune/grid/io/visual/grape/grapewrapper.hh \
                          @top_srcdir@/dune/grid/common/quadraturerules \
