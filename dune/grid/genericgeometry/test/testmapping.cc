@@ -3,7 +3,6 @@
 #include <config.h>
 
 #include <dune/common/exceptions.hh>
-#include <dune/common/polyallocator.hh>
 
 #include "../cachedmapping.hh"
 #include "../conversion.hh"
@@ -46,7 +45,6 @@ struct MyGeometryTraits
     static const EvaluationType evaluateNormal = ComputeOnDemand;
   };
 
-  typedef Dune::PolyAllocator Allocator;
 };
 
 

@@ -3,8 +3,6 @@
 #ifndef TESTGEO_HH
 #define TESTGEO_HH
 
-#include <dune/common/polyallocator.hh>
-
 #if HAVE_ALUGRID
 #include <dune/grid/alugrid/3d/grid.hh>
 #include <dune/grid/alugrid/3d/topology.hh>
@@ -130,7 +128,6 @@ namespace Dune
         static const EvaluationType evaluateNormal = ComputeOnDemand;
       };
 
-      typedef Dune::PolyAllocator Allocator;
     };
 
   }
