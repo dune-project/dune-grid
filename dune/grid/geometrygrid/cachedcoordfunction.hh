@@ -22,6 +22,8 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   class CachedCoordFunction;
 
+
+
   // GeoGrid::CoordCache
   // -------------------
 

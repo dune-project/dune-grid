@@ -13,13 +13,13 @@ namespace Dune
   // ------------------------------------
 
   template< class HostGrid, class CoordFunction, class Data, class Allocator >
-  class PersistentContainer< GeometryGrid< HostGrid, CoordFunction >, Data, Allocator >
+  class PersistentContainer< GeometryGrid< HostGrid, CoordFunction, Allocator >, Data, Allocator >
     : public PersistentContainer< HostGrid, Data, Allocator >
   {
     typedef PersistentContainer< HostGrid, Data, Allocator > Base;
 
   public:
-    typedef GeometryGrid< HostGrid, CoordFunction > GridType;
+    typedef GeometryGrid< HostGrid, CoordFunction, Allocator > GridType;
 
     typedef typename GridType::template Codim< 0 >::Entity ElementType;
 

@@ -9,6 +9,8 @@
 
 #include <dune/grid/common/grid.hh>
 
+#include <dune/grid/genericgeometry/codimtable.hh>
+
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/entity.hh>
 #include <dune/grid/geometrygrid/entityseed.hh>
@@ -31,7 +33,7 @@ namespace Dune
   template< class HostGrid >
   class DefaultCoordFunction;
 
-  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid > >
+  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid >, class Allocator = std::allocator< void > >
   class GeometryGrid;
 
 
@@ -52,11 +54,11 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class HostGrid, class CoordFunction >
-    struct GlobalGeometryTraits< GeometryGrid< HostGrid, CoordFunction > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct GlobalGeometryTraits< GeometryGrid< HostGrid, CoordFunction, Allocator > >
       : public DefaultGeometryTraits< typename HostGrid::ctype, HostGrid::dimension, CoordFunction::dimRange >
     {
-      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
 
       typedef DuneCoordTraits< typename HostGrid::ctype > CoordTraits;
 
@@ -90,10 +92,9 @@ namespace Dune
         static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
         static const EvaluationType evaluateNormal = ComputeOnDemand;
       };
-
     };
 
-  }
+  } // namespace GenericGeometry
 
 
 
@@ -119,16 +120,44 @@ namespace Dune
 
 
 
+    // EntityAllocator
+    // ---------------
+
+    template< class Entity, class Allocator >
+    struct EntityAllocator
+    {
+      typedef MakeableInterfaceObject< Entity > MakeableEntity;
+
+      template< class EntityImpl >
+      MakeableEntity *allocate ( const EntityImpl &entityImpl )
+      {
+        MakeableEntity *entity = allocator_.allocate( 1 );
+        allocator_.construct( entity, MakeableEntity( entityImpl ) );
+        return entity;
+      }
+
+      void deallocate ( MakeableEntity *entity )
+      {
+        allocator_.destroy( entity );
+        allocator_.deallocate( entity, 1 );
+      }
+
+    private:
+      typename Allocator::template rebind< MakeableEntity >::other allocator_;
+    };
+
+
+
     // GridFamily
     // ----------
 
-    template< class HostGrid, class CoordFunction >
+    template< class HostGrid, class CoordFunction, class Allocator >
     struct GridFamily
     {
       struct Traits
         : public ExportParams< HostGrid, CoordFunction >
       {
-        typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+        typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
 
         typedef typename HostGrid::ctype ctype;
 
@@ -196,10 +225,17 @@ namespace Dune
           typedef Dune::GridView< DefaultLevelGridViewTraits< const Grid, pitype > >
           LevelGridView;
         };
+
+        template< int codim >
+        struct EntityAllocator
+          : public GeoGrid::EntityAllocator< typename Codim< codim >::Entity, Allocator >
+        {};
+
+        typedef GenericGeometry::CodimTable< EntityAllocator, dimension > EntityAllocatorTable;
       };
     };
 
-  }
+  } // namespace GeoGrid
 
 
 
@@ -246,21 +282,21 @@ namespace Dune
    *
    *  \nosubgrouping
    */
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Allocator >
   class GeometryGrid
   /** \cond */
     : public GridDefaultImplementation
       < HostGrid::dimension, CoordFunction::dimRange, typename HostGrid::ctype,
-          GeoGrid::GridFamily< HostGrid, CoordFunction > >,
+          GeoGrid::GridFamily< HostGrid, CoordFunction, Allocator > >,
       public GeoGrid::ExportParams< HostGrid, CoordFunction >,
-      public GeoGrid::BackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction > >
+      public GeoGrid::BackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction, Allocator > >
       /** \endcond */
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
 
     typedef GridDefaultImplementation
     < HostGrid::dimension, CoordFunction::dimRange, typename HostGrid::ctype,
-        GeoGrid::GridFamily< HostGrid, CoordFunction > >
+        GeoGrid::GridFamily< HostGrid, CoordFunction, Allocator > >
     Base;
 
     friend class GeoGrid::HierarchicIterator< const Grid >;
@@ -278,11 +314,11 @@ namespace Dune
     template< int, PartitionIteratorType, class > friend class GeoGrid::LevelIteratorTraits;
     template< int, PartitionIteratorType, class > friend class GeoGrid::LeafIteratorTraits;
 
-    template < class, class, class > friend class PersistentContainer;
+    template< class, class, class > friend class PersistentContainer;
 
   public:
     /** \cond */
-    typedef GeoGrid::GridFamily< HostGrid, CoordFunction > GridFamily;
+    typedef GeoGrid::GridFamily< HostGrid, CoordFunction, Allocator > GridFamily;
     /** \endcond */
 
     /** \name Traits
@@ -862,6 +898,13 @@ namespace Dune
       return getRealImplementation( entity ).hostEntity();
     }
 
+    template< int codim >
+    typename Traits::template EntityAllocator< codim > &entityAllocator() const
+    {
+      integral_constant< int, codim > codimVariable;
+      return entityAllocators_[ codimVariable ];
+    }
+
   private:
     HostGrid *const hostGrid_;
     CoordFunction &coordFunction_;
@@ -869,6 +912,7 @@ namespace Dune
     mutable LeafIndexSet *leafIndexSet_;
     mutable GlobalIdSet *globalIdSet_;
     mutable LocalIdSet *localIdSet_;
+    mutable typename Traits::EntityAllocatorTable entityAllocators_;
   };
 
 
@@ -876,9 +920,9 @@ namespace Dune
   // GeometryGrid::Codim
   // -------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Allocator >
   template< int codim >
-  struct GeometryGrid< HostGrid, CoordFunction >::Codim
+  struct GeometryGrid< HostGrid, CoordFunction, Allocator >::Codim
     : public Base::template Codim< codim >
   {
     /** \name Entity and Entity Pointer Types

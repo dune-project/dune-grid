@@ -14,7 +14,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CordFunction >
+  template< class HostGrid, class CoordFunction, class Allocator >
   class GeometryGrid;
 
 
@@ -58,11 +58,11 @@ namespace Dune
     {};
     /** \endcond */
 
-    template< int codim, class HostGrid, class CoordFunction >
-    struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction > >
+    template< int codim, class HostGrid, class CoordFunction, class Allocator >
+    struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction, Allocator > >
       : public ExportParams< HostGrid, CoordFunction >
     {
-      typedef Dune::GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef Dune::GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
 
       static const bool fake = !Capabilities::hasHostEntity< Grid, codim >::v;
 
@@ -159,7 +159,7 @@ namespace Dune
       ~EntityPointer ()
       {
         if( entity_ )
-          delete( entity_ );
+          entityAllocator().deallocate( entity_ );
       }
 
       This &operator= ( const This &other )
@@ -183,8 +183,8 @@ namespace Dune
 
       Entity &dereference () const
       {
-        if( entity_ == 0 )
-          entity_ = new  MakeableEntity( EntityImpl( grid(), *hostIterator() ) ) ;
+        if( !entity_ )
+          entity_ = entityAllocator().allocate( EntityImpl( grid(), *hostIterator() ) );
         return *entity_;
       }
 
@@ -214,9 +214,15 @@ namespace Dune
       {
         if( entity_ )
         {
-          delete entity_ ;
+          entityAllocator().deallocate( entity_ );
           entity_ = 0;
         }
+      }
+
+      typename Grid::Traits::template EntityAllocator< codimension > &
+      entityAllocator () const
+      {
+        return grid().template entityAllocator< codimension >();
       }
 
     private:
@@ -264,8 +270,7 @@ namespace Dune
       typedef typename MakeableEntity::ImplementationType EntityImpl;
 
     public:
-      EntityPointer ( const Grid &grid,
-                      const HostElementIterator &hostElementIterator, int subEntity )
+      EntityPointer ( const Grid &grid, const HostElementIterator &hostElementIterator, int subEntity )
         : grid_( &grid ),
           entity_( 0 ),
           subEntity_( subEntity ),
@@ -311,7 +316,7 @@ namespace Dune
       ~EntityPointer ()
       {
         if( entity_ )
-          delete entity_;
+          entityAllocator().deallocate( entity_ );
       }
 
       This &operator= ( const This &other )
@@ -360,8 +365,8 @@ namespace Dune
 
       Entity &dereference () const
       {
-        if( entity_ == 0 )
-          entity_ = new MakeableEntity( EntityImpl( grid(), *hostElementIterator(), subEntity_ ) );
+        if( !entity_ )
+          entity_ = entityAllocator().allocate( EntityImpl( grid(), *hostElementIterator(), subEntity_ ) );
         return *entity_;
       }
 
@@ -386,7 +391,7 @@ namespace Dune
       {
         if( entity_ )
         {
-          delete entity_;
+          entityAllocator().deallocate( entity_ );
           entity_ = 0;
         }
       }
@@ -394,6 +399,12 @@ namespace Dune
       const HostElementIterator &hostElementIterator () const
       {
         return hostElementIterator_;
+      }
+
+      typename Grid::Traits::template EntityAllocator< codimension > &
+      entityAllocator () const
+      {
+        return grid().template entityAllocator< codimension >();
       }
 
     private:

@@ -15,7 +15,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Allocator >
   class GeometryGrid;
 
 
@@ -29,61 +29,61 @@ namespace Dune
     // Capabilities from dune-grid
     // ---------------------------
 
-    template< class HostGrid, class CoordFunction >
-    struct hasSingleGeometryType< GeometryGrid< HostGrid, CoordFunction > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct hasSingleGeometryType< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = hasSingleGeometryType< HostGrid > :: v;
       static const unsigned int topologyId = hasSingleGeometryType< HostGrid > :: topologyId;
     };
 
 
-    template< class HostGrid, class CoordFunction, int codim >
-    struct hasEntity< GeometryGrid< HostGrid, CoordFunction >, codim >
+    template< class HostGrid, class CoordFunction, class Allocator, int codim >
+    struct hasEntity< GeometryGrid< HostGrid, CoordFunction, Allocator >, codim >
     {
       static const bool v = true;
     };
 
 
-    template< class HostGrid, class CoordFunction >
-    struct isParallel< GeometryGrid< HostGrid, CoordFunction > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct isParallel< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = isParallel< HostGrid >::v;
     };
 
 
-    template< class HostGrid, class CoordFunction, int codim >
-    struct canCommunicate< GeometryGrid< HostGrid, CoordFunction >, codim >
+    template< class HostGrid, class CoordFunction, class Allocator, int codim >
+    struct canCommunicate< GeometryGrid< HostGrid, CoordFunction, Allocator >, codim >
     {
       static const bool v = canCommunicate< HostGrid, codim >::v;
     };
 
 
-    template< class HostGrid, class CoordFunction >
-    struct hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = hasBackupRestoreFacilities< HostGrid >::v;
     };
 
-    template< class HostGrid, class CoordFunction >
-    struct isLevelwiseConforming< GeometryGrid< HostGrid, CoordFunction > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct isLevelwiseConforming< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = isLevelwiseConforming< HostGrid >::v;
     };
 
-    template< class HostGrid, class CoordFunction >
-    struct isLeafwiseConforming< GeometryGrid< HostGrid, CoordFunction > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct isLeafwiseConforming< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = isLeafwiseConforming< HostGrid >::v;
     };
 
-    template< class HostGrid, class CoordFunction >
-    struct threadSafe< GeometryGrid< HostGrid, CoordFunction > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct threadSafe< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = false;
     };
 
-    template< class HostGrid, class CoordFunction >
-    struct viewThreadSafe< GeometryGrid< HostGrid, CoordFunction > >
+    template< class HostGrid, class CoordFunction, class Allocator >
+    struct viewThreadSafe< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
       static const bool v = false;
     };
@@ -103,8 +103,8 @@ namespace Dune
       static const bool v = hasHostEntity< Grid, codim >::v;
     };
 
-    template< class HostGrid, class CoordFunction, int codim >
-    struct hasHostEntity< GeometryGrid< HostGrid, CoordFunction >, codim >
+    template< class HostGrid, class CoordFunction, class Allocator, int codim >
+    struct hasHostEntity< GeometryGrid< HostGrid, CoordFunction, Allocator >, codim >
     {
       static const bool v = hasEntity< HostGrid, codim >::v;
     };

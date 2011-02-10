@@ -119,7 +119,7 @@ namespace Dune
       typedef typename HostGrid::template Codim< codimension >::EntityPointer HostEntityPointer;
 
       //! type of corresponding entity seed
-      typedef typename Grid::template Codim< codimension >::EntitySeed EntitySeed;
+      typedef typename Traits::template Codim< codimension >::EntitySeed EntitySeed;
 
       //! type of host elements, i.e., of host entities of codimension 0
       typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
@@ -357,7 +357,7 @@ namespace Dune
       typedef typename HostGrid::template Codim< codimension >::EntityPointer HostEntityPointer;
 
       //! type of corresponding entity seed
-      typedef typename Grid::template Codim< codimension >::EntitySeed EntitySeed;
+      typedef typename Traits::template Codim< codimension >::EntitySeed EntitySeed;
 
       //! type of host elements, i.e., of host entities of codimension 0
       typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
