@@ -3,8 +3,6 @@
 #ifndef DUNE_ALBERTA_GEOMETRY_HH
 #define DUNE_ALBERTA_GEOMETRY_HH
 
-#include <dune/common/polyallocator.hh>
-
 #include <dune/grid/common/geometry.hh>
 
 #include <dune/grid/genericgeometry/geometry.hh>
@@ -169,8 +167,6 @@ namespace Dune
       static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::ComputeOnDemand;
     };
 
-    // This should, of cource, be a faster allocator, e.g., SmallObjectPolyAllocator
-    typedef PolyAllocator Allocator;
   };
 
 
