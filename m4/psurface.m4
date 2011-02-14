@@ -68,11 +68,11 @@ CPPFLAGS="$CPPFLAGS -I$PSURFACE_INCLUDE_PATH"
 AC_LANG_PUSH([C++])
 
 # check for header
-AC_CHECK_HEADER([psurface.h], 
+AC_CHECK_HEADER([psurface/PSurface.h], 
    [PSURFACE_CPPFLAGS="-I$PSURFACE_INCLUDE_PATH"
 	HAVE_PSURFACE="1"],
    [if test "x$with_psurface" != x ; then
-    AC_MSG_WARN([psurface.h not found in $PSURFACE_INCLUDE_PATH])
+    AC_MSG_WARN([psurface/PSurface.h not found in $PSURFACE_INCLUDE_PATH])
     fi
    ])
 
@@ -91,7 +91,7 @@ if test x$HAVE_PSURFACE = x1 ; then
    LIBS="-L$PSURFACE_LIB_PATH -lpsurface $AMIRAMESH_LIBS $LIBS"
    LDFLAGS="$LDFLAGS $AMIRAMESH_LDFLAGS"
 
-   AC_LINK_IFELSE(AC_LANG_PROGRAM([#include "psurface.h"], [psurface::LoadMesh("label", "filename");]),
+   AC_LINK_IFELSE(AC_LANG_PROGRAM([#include "psurface/PSurface.h"], [[PSurface<2,double> foo;]]),
 	[PSURFACE_LIBS="-L$PSURFACE_LIB_PATH -lpsurface"
          PSURFACE_LDFLAGS=""
          AC_MSG_RESULT(yes)],
