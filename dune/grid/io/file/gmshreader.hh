@@ -517,8 +517,6 @@ namespace Dune
 
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
 
-    friend class GmshReaderParserBase< GridType >;
-
     void pass2HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
                             const std::vector< GlobalVector > & nodes,
@@ -599,8 +597,6 @@ namespace Dune
     using Base::skipline;
 
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
-
-    friend class GmshReaderParserBase< GridType >;
 
     void pass2HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
@@ -706,8 +702,6 @@ namespace Dune
     using Base::readfile;
 
     typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
-
-    friend class GmshReaderParserBase< GridType >;
 
     void pass2HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
