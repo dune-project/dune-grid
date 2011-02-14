@@ -15,6 +15,7 @@
 #if HAVE_ALUGRID
 #include <dune/grid/alugrid.hh>
 #endif
+#include <dune/grid/onedgrid.hh>
 
 // alberta related stuff
 #ifndef ALBERTA_DIM
@@ -125,10 +126,8 @@ try
   testReadingGrid<ALUSimplexGrid<3,3> >( pyramid, refinements );
 #endif
 
-#if !defined(HAVE_UG) && !defined(HAVE_ALUGRID) && !(HAVE_ALBERTA)
-  // signal 'skipped' to the test system
-  return 77;
-#endif
+  std::cout << "reading OneDGrid" << std::endl;
+  testReadingGrid<OneDGrid>( path + "oned-testgrid.msh", refinements );
 
   return 0;
 
