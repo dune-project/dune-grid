@@ -283,8 +283,10 @@ void zeroEntityConsistency (Grid &g)
 template <class Grid>
 void assertNeighbor (Grid &g)
 {
+  typedef typename Grid::LevelGridView GridView;
+  typedef typename GridView::IntersectionIterator IntersectionIterator;
+
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
-  typedef typename Grid::LevelIntersectionIterator IntersectionIterator;
   enum { dim = Grid::dimension };
   typedef typename Grid::ctype ct;
 
@@ -293,6 +295,8 @@ void assertNeighbor (Grid &g)
 
   typedef typename Grid::template Codim< 0 >::Entity Entity;
   typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
+
+  GridView gridView = g.levelView( 0 );
 
   LevelIterator e = g.template lbegin<0>(0);
   const LevelIterator eend = g.template lend<0>(0);
@@ -318,7 +322,9 @@ void assertNeighbor (Grid &g)
       EntityPointer p( g.template lbegin<0>(0) );
       p = g.template lbegin<0>(1);
       LevelIterator it = g.template lbegin<0>(0);
+#if !DISABLE_DEPRECATED_METHOD_CHECK
       p->ilevelbegin();
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     }
 
     // iterate over level
@@ -333,10 +339,12 @@ void assertNeighbor (Grid &g)
 
       if( !entity.isLeaf() )
       {
+#if !DISABLE_DEPRECATED_METHOD_CHECK
         if( entity.ileafbegin() != entity.ileafend() )
         {
           DUNE_THROW(CheckError, "On non-leaf entities ileafbegin should be equal to ileafend!");
         }
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
       }
 
       const int numFaces = entity.template count< 1 >();
@@ -344,8 +352,8 @@ void assertNeighbor (Grid &g)
       std::vector< bool > visited( numFaces, false );
 
       // loop over intersections
-      IntersectionIterator endit = entity.ilevelend();
-      IntersectionIterator it = entity.ilevelbegin();
+      IntersectionIterator endit = gridView.iend( entity );
+      IntersectionIterator it = gridView.iend( entity );
 
       if( it == endit )
       {
@@ -612,8 +620,12 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
   typedef typename Grid::HierarchicIterator HierarchicIterator;
-  typedef typename Grid::LeafIntersectionIterator IntersectionIterator;
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
+
+  typedef typename Grid::LeafGridView LeafGridView;
+  typedef typename LeafGridView::IntersectionIterator LeafIntersectionIterator;
+
+  LeafGridView leafView = g.leafView();
 
   // assignment tests
   LevelIterator l1 = g.template lbegin<0>(0);
@@ -640,8 +652,8 @@ void iteratorEquals (Grid &g)
 
   HierarchicIterator h1 = l1->hbegin(99);
   HierarchicIterator h2 = l2->hbegin(99);
-  IntersectionIterator i1 = l1->ileafbegin();
-  IntersectionIterator i2 = l2->ileafbegin();
+  LeafIntersectionIterator i1 = leafView.ibegin( *l1 );
+  LeafIntersectionIterator i2 = leafView.ibegin( *l2 );
   EntityPointer e1( l1 );
   EntityPointer e2( h2 );
 #if !DISABLE_DEPRECATED_METHOD_CHECK
@@ -666,15 +678,15 @@ void iteratorEquals (Grid &g)
     i == l2; \
     i == h2; \
     i == L2; \
-    if (i2 != l2->ileafend()) i == i2->inside(); \
-    if (i2 != l2->ileafend() && i2->neighbor()) i == i2->outside(); \
+    if (i2 != leafView.iend( *l2 )) i == i2->inside(); \
+    if (i2 != leafView.iend( *l2 ) && i2->neighbor()) i == i2->outside(); \
 }
   TestEquals(e1);
   TestEquals(l1);
   TestEquals(h1);
   TestEquals(L1);
-  if (i1 != l2->ileafend()) TestEquals(i1->inside());
-  if (i1 != l2->ileafend() && i1->neighbor()) TestEquals(i1->outside());
+  if (i1 != leafView.iend( *l2 )) TestEquals(i1->inside());
+  if (i1 != leafView.iend( *l2 ) && i1->neighbor()) TestEquals(i1->outside());
 }
 
 
