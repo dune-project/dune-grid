@@ -2,6 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <string>
+#include <sstream>
+
 #include <dune/common/exceptions.hh>
 
 #include "../cachedmapping.hh"
@@ -171,13 +174,17 @@ try
   // MPIHelper &mpiHelper = MPIHelper :: instance( argc, argv );
   // int myrank = mpiHelper.rank();
 
+  std::string gridName;
   if (argc<2) {
-    std::cerr << "supply grid file as parameter!" << std::endl;
-    return 1;
+    std::stringstream gridN;
+    gridN << "../../../../doc/grids/dgf/grid" << GridSelector::GridType::dimension << "Y.dgf";
+    gridName = gridN.str();
   }
+  else
+    gridName = argv[1];
 
   // create Grid from DGF parser
-  GridPtr< GridSelector::GridType > grid( argv[ 1 ] );
+  GridPtr< GridSelector::GridType > grid( gridName );
 
   test(grid->leafView());
 
