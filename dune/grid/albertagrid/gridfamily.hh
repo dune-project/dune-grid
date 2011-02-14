@@ -10,7 +10,6 @@
 
 #include <dune/common/collectivecommunication.hh>
 
-#include <dune/grid/common/defaultgridview.hh>
 #include <dune/grid/common/entity.hh>
 #include <dune/grid/common/entitypointer.hh>
 #include <dune/grid/common/geometry.hh>
@@ -19,6 +18,7 @@
 #include <dune/grid/common/entityiterator.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
+#include <dune/grid/albertagrid/gridview.hh>
 
 #if HAVE_ALBERTA
 
@@ -137,10 +137,8 @@ namespace Dune
       template <PartitionIteratorType pitype>
       struct Partition
       {
-        typedef Dune::GridView<DefaultLevelGridViewTraits<const GridImp,pitype> >
-        LevelGridView;
-        typedef Dune::GridView<DefaultLeafGridViewTraits<const GridImp,pitype> >
-        LeafGridView;
+        typedef Dune::GridView<AlbertaLevelGridViewTraits<const GridImp,pitype> > LevelGridView;
+        typedef Dune::GridView<AlbertaLeafGridViewTraits<const GridImp,pitype> > LeafGridView;
       };
 
       typedef IndexSet< GridImp, LevelIndexSetImp, int > LevelIndexSet;

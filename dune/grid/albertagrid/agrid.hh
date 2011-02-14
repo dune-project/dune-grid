@@ -159,6 +159,8 @@ namespace Dune
 
     template< int, int, class > friend class AlbertaGridEntity;
     template< int, class > friend class AlbertaGridEntityPointer;
+    template< class, PartitionIteratorType > friend class AlbertaLevelGridView;
+    template< class, PartitionIteratorType > friend class AlbertaLeafGridView;
 
     friend class GridFactory< This >;
     friend class DGFGridFactory< This >;
@@ -395,6 +397,42 @@ namespace Dune
     size_t numBoundarySegments () const
     {
       return numBoundarySegments_;
+    }
+
+    //! View for a grid level
+    template< PartitionIteratorType pitype >
+    typename Traits::template Partition< pitype >::LevelGridView
+    levelView ( int level ) const
+    {
+      typedef typename Traits::template Partition< pitype >::LevelGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View( ViewImp( *this, level ) );
+    }
+
+    //! View for the leaf grid
+    template< PartitionIteratorType pitype >
+    typename Traits::template Partition< pitype >::LeafGridView leafView () const
+    {
+      typedef typename Traits::template Partition< pitype >::LeafGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View( ViewImp( *this ) );
+    }
+
+    //! View for a grid level for All_Partition
+    typename Traits::template Partition< All_Partition >::LevelGridView
+    levelView ( int level ) const
+    {
+      typedef typename Traits::template Partition< All_Partition >::LevelGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View( ViewImp( *this, level ) );
+    }
+
+    //! View for the leaf grid for All_Partition
+    typename Traits::template Partition< All_Partition >::LeafGridView leafView () const
+    {
+      typedef typename Traits::template Partition< All_Partition >::LeafGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View( ViewImp( *this ) );
     }
 
   public:
