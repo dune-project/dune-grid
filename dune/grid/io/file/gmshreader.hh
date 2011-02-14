@@ -495,6 +495,89 @@ namespace Dune
 
   };
 
+  //! Parser for Gmsh data. Specialization for 1D
+  template<typename GridType>
+  class GmshReaderParser<GridType, 1> : public GmshReaderParserBase< GridType >
+  {
+    typedef GmshReaderParserBase< GridType > Base;
+    typedef typename Base::GlobalVector GlobalVector;
+    using Base::dim;
+    using Base::dimWorld;
+    using Base::buf;
+    using Base::factory;
+    using Base::verbose;
+    using Base::element_index_to_physical_entity;
+    using Base::element_count;
+    using Base::number_of_real_vertices;
+    using Base::boundary_element_count;
+    using Base::insert_boundary_segments;
+    using Base::boundary_id_to_physical_entity;
+    using Base::readfile;
+    using Base::skipline;
+
+    typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
+
+    friend class GmshReaderParserBase< GridType >;
+
+    void pass2HandleElement(FILE* file, const int elm_type,
+                            std::map<int,unsigned int> & renumber,
+                            const std::vector< GlobalVector > & nodes,
+                            const int physical_entity)
+    {
+      if (elm_type != 1) {             // 2-node line
+        skipline(file);         // skip rest of line if element is unknown
+        return;
+      }
+
+      // some data about gmsh elements
+      const int nDofs[12]            = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10};
+      const int nVertices[12]        = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4};
+      const int elementDim[12] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3};
+
+      // The format string for parsing is n times '%d' in a row
+      std::string formatString = "%d";
+      for (int i=1; i<nDofs[elm_type]; i++)
+        formatString += " %d";
+      formatString += "\n";
+
+      // '10' is the largest number of dofs we may encounter in a .msh file
+      std::vector<int> elementDofs(10);
+
+      readfile(file,nDofs[elm_type], formatString.c_str(),
+               &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]),
+               &(elementDofs[3]),&(elementDofs[4]),&(elementDofs[5]),
+               &(elementDofs[6]),&(elementDofs[7]),&(elementDofs[8]),
+               &(elementDofs[9]));
+
+      std::vector<unsigned int> vertices(nVertices[elm_type]);
+
+      for (int i=0; i<nVertices[elm_type]; i++)
+        vertices[i] = renumber[elementDofs[i]];         // renumber vertices
+
+      // Actually insert the element
+      switch (elm_type)
+      {
+      case 1 :          // 2-node line
+        factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+        break;
+      }
+
+      // count elements and boundary elements
+      if (elementDim[elm_type] == 1) {
+        element_index_to_physical_entity[element_count] = physical_entity;
+        element_count++;
+      } else {
+        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
+        boundary_element_count++;
+      }
+
+    }
+  public:
+    GmshReaderParser(Dune::GridFactory<GridType>& _factory, bool v, bool i) :
+      Base(_factory,v,i) {}
+  };
+
+
   //! Parser for Gmsh data. Specialization for 2D
   template<typename GridType>
   class GmshReaderParser<GridType, 2> : public GmshReaderParserBase< GridType >
