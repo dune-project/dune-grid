@@ -137,16 +137,35 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
   # This could be improved.
   ALU3D_INC_FLAG_PARA="-I$ALUGRID_INCLUDE_PATH/parallel"
   CPPFLAGS="$ac_save_CPPFLAGS $DUNEMPICPPFLAGS $ALU3D_INC_FLAG_PARA $ALU3D_INC_FLAG"
-  # check for parallel header 
-  AC_CHECK_HEADERS([alugrid_parallel.h], 
-     [ALUGRID_CPPFLAGS="\${DUNEMPICPPFLAGS} $ALU3D_INC_FLAG $ALU3D_INC_FLAG_PARA"
-      ALUGRID_LDFLAGS="\${DUNEMPILDFLAGS}"
-      ALUGRID_LIBS="-L$ALUGRID_LIB_PATH -lalugrid \${DUNEMPILIBS}"
-      # for use with the later library test
-      LDFLAGS="$LDFLAGS $DUNEMPILDFLAGS"
-      LIBS="$DUNEMPILIBS $LIBS"
-    HAVE_ALUGRID="1"],
-    AC_MSG_WARN([alugrid_parallel.h not found in $ALUGRID_INCLUDE_PATH]))
+
+  HAVE_ALUGRID_PARALLEL="0"
+  # if the serial header was found then also check for the parallel header
+  if test x"$HAVE_ALUGRID" != "x0" ; then
+    AC_TRY_COMPILE([#include <alugrid_defineparallel.h> 
+                    #if ALU3DGRID_BUILD_FOR_PARALLEL == 0 
+                    #error
+                    #endif
+                   ],
+                   [],
+                   [HAVE_ALUGRID_PARALLEL="1"],
+                   [HAVE_ALUGRID_PARALLEL="0"
+                   AC_MSG_WARN("ALUGRID was not build for parallel support!")
+                  ])
+
+    # only check for parallel header when ALUGrid was build for parallel support
+    if test x"$HAVE_ALUGRID_PARALLEL" != "x0" ; then 
+      # check for parallel header 
+      AC_CHECK_HEADERS([alugrid_parallel.h], 
+         [ALUGRID_CPPFLAGS="\${DUNEMPICPPFLAGS} $ALU3D_INC_FLAG $ALU3D_INC_FLAG_PARA"
+          ALUGRID_LDFLAGS="\${DUNEMPILDFLAGS}"
+          ALUGRID_LIBS="-L$ALUGRID_LIB_PATH -lalugrid \${DUNEMPILIBS}"
+          # for use with the later library test
+          LDFLAGS="$LDFLAGS $DUNEMPILDFLAGS"
+          LIBS="$DUNEMPILIBS $LIBS"
+        HAVE_ALUGRID="1"],
+        AC_MSG_WARN([alugrid_parallel.h not found in $ALUGRID_INCLUDE_PATH]))
+    fi 
+  fi
 
   # We check only whether linking with the library works, not for an actual
   # function from that library.  So we won't need any special stuff in the
@@ -189,7 +208,12 @@ if test x$HAVE_ALUGRID = x1 ; then
   DUNE_DEFINE_GRIDTYPE([ALUGRID_SIMPLEX],[],[Dune::ALUSimplexGrid< dimgrid, dimworld >],[dune/grid/alugrid.hh],[dune/grid/io/file/dgfparser/dgfalu.hh])
 
   # set variable for summary
-  with_alugrid="version $ALUGRID_VERSION"
+  if test x"$HAVE_ALUGRID_PARALLEL" != "x0" ; then 
+    with_alugrid_parallel="(parallel)"
+  else 
+    with_alugrid_parallel="(serial)"
+  fi 
+  with_alugrid="version $ALUGRID_VERSION $with_alugrid_parallel"
   with_alugrid_long="$ALUGRIDROOT"
 else
   AC_SUBST(ALUGRID_LIBS, "")
