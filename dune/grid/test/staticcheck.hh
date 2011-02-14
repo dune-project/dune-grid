@@ -297,14 +297,18 @@ struct EntityInterface<Grid, 0, dim, true>
 
     // intersection iterator
     if (checkLevelIter) {
+#if !DISABLE_DEPRECATED_METHOD_CHECK
       e.ilevelbegin();
       e.ilevelend();
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
       // #if 0 // WARNING must be updated to new interface
       IntersectionIteratorInterface<Grid,typename Grid::LevelIntersectionIterator>();
       // #endif
     }
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     e.ileafbegin();
     e.ileafend();
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     // #if 0 // WARNING must be updated to new interface
     if(e.isLeaf())
       IntersectionIteratorInterface<Grid,typename Grid::LevelIntersectionIterator>();
