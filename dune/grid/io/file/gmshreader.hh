@@ -198,11 +198,6 @@ namespace Dune
 
   }   // end empty namespace
 
-  //! Parser for Gmsh data. Implementations must be (partially) dimension dependent
-  template<typename GridType, int dimension>
-  class GmshReaderParser
-  {};
-
   //! dimension independent parts for GmshReaderParser
   template<typename GridType>
   class GmshReaderParserBase
@@ -494,6 +489,11 @@ namespace Dune
     }
 
   };
+
+  //! Parser for Gmsh data. The code is in various specializations of this class
+  template<typename GridType, int dimension>
+  class GmshReaderParser
+  {};
 
   //! Parser for Gmsh data. Specialization for 1D
   template<typename GridType>
