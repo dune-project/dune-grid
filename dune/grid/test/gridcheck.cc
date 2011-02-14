@@ -352,7 +352,7 @@ void assertNeighbor (Grid &g)
       std::vector< bool > visited( numFaces, false );
 
       // loop over intersections
-      IntersectionIterator endit = gridView.iend( entity );
+      IntersectionIterator endit = gridView.ibegin( entity );
       IntersectionIterator it = gridView.iend( entity );
 
       if( it == endit )
