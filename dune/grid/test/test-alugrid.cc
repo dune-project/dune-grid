@@ -30,6 +30,10 @@
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 
+#if ALU3DGRID_PARALLEL && HAVE_MPI
+#define USE_PARALLEL_TEST 1
+#endif
+
 using namespace Dune;
 
 template <bool leafconform, class Grid>
@@ -347,6 +351,12 @@ void writeFile( const GridView& gridView )
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 {
+  {
+    GridType* gr = new GridType();
+    assert( gr );
+    delete gr;
+  }
+
   //writeFile( grid.leafView() );
 
   if( display )
@@ -427,7 +437,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 template <class GridType>
 void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 {
-#if HAVE_MPI
+#if USE_PARALLEL_TEST
   makeNonConfGrid(grid,gref,mxl);
 
   // check iterators
