@@ -90,6 +90,11 @@ namespace Dune
       comm_( MPIHelper::getCommunicator() ),
 #endif
       mygrid_ (0)
+#ifdef USE_SMP_PARALLEL
+      , factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) )
+#else
+      , factory_( *this )
+#endif
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
