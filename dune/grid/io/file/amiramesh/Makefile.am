@@ -16,6 +16,7 @@ libamiramesh_la_LIBADD   = $(PSURFACE_LIBS) \
 endif
 
 amirameshdir = $(includedir)/dune/grid/io/file/amiramesh
-amiramesh_HEADERS = amirameshreader.cc amirameshwriter.cc
+amiramesh_HEADERS = amirameshreader.cc amirameshwriter.cc \
+                    psurface.h
 
 include $(top_srcdir)/am/global-rules
