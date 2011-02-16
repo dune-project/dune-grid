@@ -341,7 +341,7 @@ namespace Dune
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
      */
-    LeafIntersectionIterator ileafbegin () const DUNE_DEPRECATED
+    LeafIntersectionIterator ileafbegin () const
     {
       return realEntity.ileafbegin();
     }
@@ -352,7 +352,7 @@ namespace Dune
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
      */
-    LeafIntersectionIterator ileafend () const DUNE_DEPRECATED
+    LeafIntersectionIterator ileafend () const
     {
       return realEntity.ileafend();
     }
@@ -367,7 +367,7 @@ namespace Dune
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
      */
-    LevelIntersectionIterator ilevelbegin () const DUNE_DEPRECATED
+    LevelIntersectionIterator ilevelbegin () const
     {
       return realEntity.ilevelbegin();
     }
@@ -378,7 +378,7 @@ namespace Dune
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
      */
-    LevelIntersectionIterator ilevelend () const DUNE_DEPRECATED
+    LevelIntersectionIterator ilevelend () const
     {
       return realEntity.ilevelend();
     }
