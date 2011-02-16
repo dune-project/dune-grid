@@ -20,6 +20,8 @@
 
 #include <dune/common/geometrytype.hh>
 
+#include <dune/grid/genericgeometry/topologytypes.hh>
+
 namespace Dune {
 
   /*! @addtogroup Refinement Refinement
@@ -184,49 +186,42 @@ namespace Dune {
     using typename RefinementImp::IndexVector;
   };
 
+  namespace RefinementImp {
+#ifndef DOXYGEN
+    template<GeometryType::BasicType basicType, unsigned dim>
+    struct BasicTypeToTopologyId;
 
+    template<unsigned dim>
+    struct BasicTypeToTopologyId<GeometryType::simplex, dim> {
+      static const unsigned value =
+        GenericGeometry::SimplexTopology<dim>::type::id;
+    };
 
+    template<unsigned dim>
+    struct BasicTypeToTopologyId<GeometryType::cube, dim> {
+      static const unsigned value =
+        GenericGeometry::CubeTopology<dim>::type::id;
+    };
 
+    template<>
+    struct BasicTypeToTopologyId<GeometryType::pyramid, 3> {
+      static const unsigned value = GenericGeometry::Pyramid<
+          GenericGeometry::Prism<
+              GenericGeometry::Pyramid<GenericGeometry::Point>
+              >
+          >::id;
+    };
 
-
-#ifdef OLD_STUFF
-
-  template< GeometryType::BasicType geometryType
-      , class CoordType
-      , GeometryType::BasicType coerceTo
-      , unsigned dimension
-      >
-  class Refinement
-    : StaticRefinement< BasicTypeToTopologyId<geometryType, dimension>::value,
-          CoordType,
-          BasicTypeToTopologyId<coerceTo, dimension>::value,
-          dimension
-          >
-  {
-  private:
-    typedef StaticRefinement< BasicTypeToTopologyId<geometryType, dimension>::value,
-        CoordType,
-        BasicTypeToTopologyId<coerceTo, dimension>::value,
-        dimension
-        > BaseT;
-  public:
-    // typedef ...
-
-    static int nVertices(int level) DUNE_DEPRECATED
-    {
-      BaseT::nVertices(int level);
-    }
-
-    // ...
-
-  };
-
-
-
-  /////////////////
-  ///
-  ///  Refinement
-  ///
+    template<>
+    struct BasicTypeToTopologyId<GeometryType::prism, 3> {
+      static const unsigned value = GenericGeometry::Prism<
+          GenericGeometry::Pyramid<
+              GenericGeometry::Pyramid<GenericGeometry::Point>
+              >
+          >::id;
+    };
+#endif // !DOXYGEN
+  } // namespace RefinementImp
 
   /*! @brief Wrap each @ref Refinement implementation to get a
              consistent interface
@@ -236,87 +231,77 @@ namespace Dune {
      @param coerceTo     The GeometryType::BasicType of the subelements
      @param dimension    The dimension of the refinement.
 
-     @deprecated Please use the Dune::StaticRefinement function which takes
-                 full GeometryTypes as arguments instead.
-
-     @par Member Structs:
-
-     <dl>
-     <dt>template<int codimension> struct @ref Codim</dt>
-     <dd>codimension template containing the SubEntityIterator</dd>
-     </dl>
+     @deprecated Please use the Dune::StaticRefinement class which takes
+                 topologyIds as template arguments instead.
    */
-  template< GeometryType::BasicType geometryType
-      , class CoordType
-      , GeometryType::BasicType coerceTo
-      , int dimension_
+  template< GeometryType::BasicType geometryType,
+      class CoordType,
+      GeometryType::BasicType coerceTo,
+      unsigned dimension
       >
-  class Refinement
-    : public RefinementImp::Traits<geometryType, CoordType, coerceTo, dimension_>::Imp
+  class DUNE_DEPRECATED Refinement :
+    StaticRefinement<
+        RefinementImp::BasicTypeToTopologyId<geometryType, dimension>::value,
+        CoordType,
+        RefinementImp::BasicTypeToTopologyId<coerceTo, dimension>::value,
+        dimension
+        >
   {
+    typedef StaticRefinement<
+        RefinementImp::BasicTypeToTopologyId<geometryType, dimension>::value,
+        CoordType,
+        RefinementImp::BasicTypeToTopologyId<coerceTo, dimension>::value,
+        dimension
+        > Base;
   public:
-#ifdef DOXYGEN
-    /*! @brief The Codim struct inherited from the @ref Refinement implementation
-
-       @tparam codimension There is a different struct Codim for each codimension
-     */
-    template<int codimension>
-    struct Codim
-    {
-      /*! @brief The SubEntityIterator for each codim
-
-         This is @em some sort of type, not necessarily a typedef
-
-       */
-      typedef SubEntityIterator;
-    };
-
-    //! The VertexIterator of the Refinement
-    typedef Codim<dimension>::SubEntityIterator VertexIterator;
-    //! The ElementIterator of the Refinement
-    typedef Codim<0>::SubEntityIterator ElementIterator;
-
-    /*! @brief The CoordVector of the Refinement
-
-       This is always a typedef to a FieldVector
-     */
-    typedef CoordVector;
-    /*! @brief The IndexVector of the Refinement
-
-       This is always a typedef to a FieldVector
-     */
-    typedef IndexVector;
-
     //! Get the number of Vertices
-    static int nVertices(int level);
+    /**
+     * \deprecated The whole Refinement class is deprecated, please use class
+     *             StaticRefinement instead.
+     */
+    static DUNE_DEPRECATED
+    int nVertices(int level) { return Base::nVertices(level); }
     //! Get a VertexIterator
-    static VertexIterator vBegin(int level);
+    /**
+     * \deprecated The whole Refinement class is deprecated, please use class
+     *             StaticRefinement instead.
+     */
+    static DUNE_DEPRECATED
+    typename Base::VertexIterator vBegin(int level)
+    { return Base::vBegin(level); }
     //! Get a VertexIterator
-    static VertexIterator vEnd(int level);
+    /**
+     * \deprecated The whole Refinement class is deprecated, please use class
+     *             StaticRefinement instead.
+     */
+    static DUNE_DEPRECATED
+    typename Base::VertexIterator vEnd(int level)
+    { return Base::vEnd(level); }
 
     //! Get the number of Elements
-    static int nElements(int level);
+    /**
+     * \deprecated The whole Refinement class is deprecated, please use class
+     *             StaticRefinement instead.
+     */
+    static DUNE_DEPRECATED
+    int nElements(int level) { return Base::nVertices(level); }
     //! Get an ElementIterator
-    static ElementIterator eBegin(int level);
+    /**
+     * \deprecated The whole Refinement class is deprecated, please use class
+     *             StaticRefinement instead.
+     */
+    static DUNE_DEPRECATED
+    typename Base::ElementIterator eBegin(int level)
+    { return Base::eBegin(level); }
     //! Get an ElementIterator
-    static ElementIterator eEnd(int level);
-#endif //DOXYGEN
-    typedef typename RefinementImp::Traits<geometryType, CoordType, coerceTo, dimension_>::Imp RefinementImp;
-
-    using RefinementImp::dimension;
-
-    using RefinementImp::Codim;
-
-    using typename RefinementImp::VertexIterator;
-    using typename RefinementImp::CoordVector;
-
-    using typename RefinementImp::ElementIterator;
-    using typename RefinementImp::IndexVector;
+    /**
+     * \deprecated The whole Refinement class is deprecated, please use class
+     *             StaticRefinement instead.
+     */
+    static DUNE_DEPRECATED
+    typename Base::ElementIterator eEnd(int level)
+    { return Base::eEnd(level); }
   };
-
-#endif // OLD_STUFF
-
-
 
   /*! @} */
 
