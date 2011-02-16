@@ -522,6 +522,13 @@ namespace Dune
       case 3 :          // 4-node quadrilateral
         std::swap(elementDofs[2],elementDofs[3]);
         break;
+      case 5 :          // 8-node hexahedron
+        std::swap(elementDofs[2],elementDofs[3]);
+        std::swap(elementDofs[6],elementDofs[7]);
+        break;
+      case 7 :          // 5-node pyramid
+        std::swap(elementDofs[2],elementDofs[3]);
+        break;
       }
 
       // renumber corners to account for the explicitly given vertex
@@ -545,7 +552,22 @@ namespace Dune
         case 3 :            // 4-node quadrilateral
           factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim),vertices);
           break;
+        case 4 :            // 4-node tetrahedron
+          factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          break;
+        case 5 :            // 8-node hexahedron
+          factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim),vertices);
+          break;
+        case 6 :            // 6-node prism
+          factory.insertElement(Dune::GeometryType(Dune::GeometryType::prism,dim),vertices);
+          break;
+        case 7 :            // 5-node pyramid
+          factory.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,dim),vertices);
+          break;
         case 9 :            // 6-node triangle
+          factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          break;
+        case 11 :            // 10-node tetrahedron
           factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
           break;
         }
@@ -559,8 +581,12 @@ namespace Dune
           case 1 :              // 2-node line
             factory.insertBoundarySegment(vertices);
             break;
-          case 8 :              // 3-node line
-            typedef GmshReaderQuadraticBoundarySegment< 2, dimWorld > QuadraticBoundarySegment;
+
+          case 2 :              // 3-node triangle
+            factory.insertBoundarySegment(vertices);
+            break;
+
+          case 8 : {              // 3-node line
             array<FieldVector<double,dim>, 3> v;
             for (int i=0; i<dim; i++) {
               v[0][i] = nodes[elementDofs[0]][i];
@@ -572,6 +598,22 @@ namespace Dune
             factory.insertBoundarySegment(vertices,
                                           shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment));
             break;
+          }
+          case 9 : {              // 6-node triangle
+            array<FieldVector<double,dim>, 6> v;
+            for (int i=0; i<6; i++)
+              for (int j=0; j<dim; j++)
+                v[i][j] = nodes[elementDofs[i]][j];
+
+            BoundarySegment<dim,dimWorld>* newBoundarySegment
+              = (BoundarySegment<dim,dimWorld>*) new GmshReaderQuadraticBoundarySegment< 3, 3 >(v[0], v[1], v[2],
+                                                                                                v[3], v[4], v[5]);
+
+            factory.insertBoundarySegment(vertices,
+                                          shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment));
+            break;
+          }
+
           }
 
         }
@@ -620,110 +662,6 @@ namespace Dune
   class GmshReaderParser<GridType, 3> : public GmshReaderParserBase< GridType >
   {
     typedef GmshReaderParserBase< GridType > Base;
-    typedef typename Base::GlobalVector GlobalVector;
-    using Base::dim;
-    using Base::dimWorld;
-    using Base::buf;
-    using Base::factory;
-    using Base::verbose;
-    using Base::element_index_to_physical_entity;
-    using Base::element_count;
-    using Base::number_of_real_vertices;
-    using Base::boundary_element_count;
-    using Base::insert_boundary_segments;
-    using Base::boundary_id_to_physical_entity;
-    using Base::readfile;
-
-    typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
-
-    void pass2HandleElement(FILE* file, const int elm_type,
-                            std::map<int,unsigned int> & renumber,
-                            const std::vector< GlobalVector > & nodes,
-                            const int physical_entity)
-    {
-      if (elm_type != 2              // 3-node triangle
-          and elm_type != 4          // 4-node tetrahedron
-          and elm_type != 5          // 8-node hexahedron
-          and elm_type != 6          // 6-node prism
-          and elm_type != 7          // 5-node pyramid
-          and elm_type != 9          // 6-node triangle
-          and elm_type != 11)        // 10-node tetrahedron
-        DUNE_THROW(Dune::NotImplemented, "GmshReader does not support element type '" << elm_type << "' (yet).");
-
-      // some data about gmsh elements
-      const int nDofs[12]            = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 6, -1, 10};
-      const int nVertices[12]        = {-1, -1, 3, -1, 4, 8, 6, 5, -1, 3, -1, 4};
-      const int elementDim[12] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3};
-
-      // The format string for parsing is n times '%d' in a row
-      std::string formatString = "%d";
-      for (int i=1; i<nDofs[elm_type]; i++)
-        formatString += " %d";
-      formatString += "\n";
-
-      // '10' is the largest number of dofs we may encounter in a .msh file
-      std::vector<int> elementDofs(10);
-
-      readfile(file,nDofs[elm_type], formatString.c_str(),
-               &(elementDofs[0]),&(elementDofs[1]),&(elementDofs[2]),
-               &(elementDofs[3]),&(elementDofs[4]),&(elementDofs[5]),
-               &(elementDofs[6]),&(elementDofs[7]),&(elementDofs[8]),
-               &(elementDofs[9]));
-
-      // correct differences between gmsh and Dune in the local vertex numbering
-      switch (elm_type)
-      {
-      case 5 :          // 8-node hexahedron
-        std::swap(elementDofs[2],elementDofs[3]);
-        std::swap(elementDofs[6],elementDofs[7]);
-        break;
-      case 7 :          // 5-node pyramid
-        std::swap(elementDofs[2],elementDofs[3]);
-        break;
-      }
-
-      std::vector<unsigned int> vertices(nVertices[elm_type]);
-
-      for (int i=0; i<nVertices[elm_type]; i++)
-        vertices[i] = renumber[elementDofs[i]];         // renumber vertices
-
-      // Actually insert the element
-      switch (elm_type)
-      {
-      case 2 :          // 3-node triangle
-        if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices);
-        break;
-      case 4 :          // 4-node tetrahedron
-        factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
-        break;
-      case 5 :          // 8-node hexahedron
-        factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim),vertices);
-        break;
-      case 6 :          // 6-node prism
-        factory.insertElement(Dune::GeometryType(Dune::GeometryType::prism,dim),vertices);
-        break;
-      case 7 :          // 5-node pyramid
-        factory.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,dim),vertices);
-        break;
-      case 9 :          // 6-node triangle
-        if (insert_boundary_segments)
-          factory.insertBoundarySegment(vertices,shared_ptr<BoundarySegment<dim,dimWorld> >(new QuadraticBoundarySegment(nodes[elementDofs[0]],nodes[elementDofs[1]],nodes[elementDofs[2]],nodes[elementDofs[3]],nodes[elementDofs[4]],nodes[elementDofs[5]])));
-        break;
-      case 11 :          // 10-node tetrahedron
-        factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
-        break;
-      }
-
-      // count elements and boundary elements
-      if (elementDim[elm_type] == 3) {
-        element_index_to_physical_entity[element_count] = physical_entity;
-        element_count++;
-      } else {
-        boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
-        boundary_element_count++;
-      }
-    }
   public:
     GmshReaderParser(Dune::GridFactory<GridType>& _factory, bool v, bool i) :
       Base(_factory,v,i) {}
