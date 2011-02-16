@@ -49,9 +49,7 @@
    name RefinementSubEntityIteratorSpecial.
  */
 
-#if HAVE_MPI
-#include <mpi.h>
-#endif
+#include <cassert>
 
 #include <dune/common/fvector.hh>
 #include <dune/grid/yaspgrid.hh>
@@ -238,15 +236,13 @@ namespace Dune {
 
       template<int dimension>
       RefinementGrid<dimension>::RefinementGrid() :
-        BaseType(
-#if HAVE_MPI
-          MPI_COMM_SELF,
-#endif
-          FieldVector<typename BaseType::ctype, dimension>(1.0),
-          FieldVector<int, dimension>(1),
-          FieldVector<bool, dimension>(false),
-          0)
-      {}
+        BaseType(FieldVector<typename BaseType::ctype, dimension>(1.0),
+                 FieldVector<int, dimension>(1),
+                 FieldVector<bool, dimension>(false),
+                 0)
+      {
+        assert(this->comm().size() == 1);
+      }
 
       template<int dimension>
       RefinementGrid<dimension> *

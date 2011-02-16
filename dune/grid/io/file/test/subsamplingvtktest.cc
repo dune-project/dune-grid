@@ -6,6 +6,7 @@
 
 // dune headers
 #include <dune/common/fvector.hh>
+#include <dune/common/mpihelper.hh>
 
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 #include <dune/grid/yaspgrid.hh>
@@ -96,8 +97,17 @@ void vtkCheck(int* n, double* h)
   std::copy(n, n+dim, s.begin());
   Dune::FieldVector<bool, dim> periodic(false);
 
-  std::cout << std::endl << "subsamplingVTKCheck dim=" << dim << std::endl << std::endl;
-  Dune::YaspGrid<dim> g(L, s, periodic, 0);
+  Dune::YaspGrid<dim> g(
+#if HAVE_MPI
+    MPI_COMM_WORLD,
+#endif
+    L, s, periodic, 0);
+  if(g.comm().rank() == 0)
+    std::cout << std::endl
+              << "subsamplingVTKCheck dim=" << dim
+              << std::endl
+              << std::endl;
+
   g.globalRefine(1);
 
   doWrite( g.leafView(), false);
@@ -112,6 +122,8 @@ void vtkCheck(int* n, double* h)
 int main(int argc, char **argv)
 {
   try {
+
+    Dune::MPIHelper::instance(argc, argv);
 
     int n[] = { 5, 5, 5, 5 };
     double h[] = { 1.0, 2.0, 3.0, 4.0 };

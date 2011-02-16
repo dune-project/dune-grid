@@ -44,6 +44,13 @@ vtksequencetest_SOURCES = vtksequencetest.cc
 gnuplottest_SOURCES = gnuplottest.cc
 
 subsamplingvtktest_SOURCES = subsamplingvtktest.cc test-linking.cc
+subsamplingvtktest_CPPFLAGS = $(AM_CPPFLAGS)	\
+	$(DUNEMPICPPFLAGS)
+subsamplingvtktest_LDFLAGS = $(AM_LDFLAGS)	\
+	$(DUNEMPILDFLAGS)
+subsamplingvtktest_LDADD =			\
+	$(DUNEMPILIBS)				\
+	$(LDADD)
 
 amirameshtest_SOURCES = amirameshtest.cc
 amirameshtest_CPPFLAGS = $(AM_CPPFLAGS)		\
