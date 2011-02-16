@@ -200,7 +200,7 @@ namespace Dune
 
   //! dimension independent parts for GmshReaderParser
   template<typename GridType>
-  class GmshReaderParserBase
+  class GmshReaderParser
   {
   protected:
     // private data
@@ -261,7 +261,7 @@ namespace Dune
 
   public:
 
-    GmshReaderParserBase(Dune::GridFactory<GridType>& _factory, bool v, bool i) :
+    GmshReaderParser(Dune::GridFactory<GridType>& _factory, bool v, bool i) :
       factory(_factory), verbose(v), insert_boundary_segments(i) {}
 
     std::vector<int> & boundaryIdMap()
@@ -632,41 +632,6 @@ namespace Dune
 
   };
 
-  //! Parser for Gmsh data. The code is in various specializations of this class
-  template<typename GridType, int dimension>
-  class GmshReaderParser
-  {};
-
-  //! Parser for Gmsh data. Specialization for 1D
-  template<typename GridType>
-  class GmshReaderParser<GridType, 1> : public GmshReaderParserBase< GridType >
-  {
-    typedef GmshReaderParserBase< GridType > Base;
-  public:
-    GmshReaderParser(Dune::GridFactory<GridType>& _factory, bool v, bool i) :
-      Base(_factory,v,i) {}
-  };
-
-  //! Parser for Gmsh data. Specialization for 2D
-  template<typename GridType>
-  class GmshReaderParser<GridType, 2> : public GmshReaderParserBase< GridType >
-  {
-    typedef GmshReaderParserBase< GridType > Base;
-  public:
-    GmshReaderParser(Dune::GridFactory<GridType>& _factory, bool v, bool i) :
-      Base(_factory,v,i) {}
-  };
-
-  //! Parser for Gmsh data. Specialization for 3D
-  template<typename GridType>
-  class GmshReaderParser<GridType, 3> : public GmshReaderParserBase< GridType >
-  {
-    typedef GmshReaderParserBase< GridType > Base;
-  public:
-    GmshReaderParser(Dune::GridFactory<GridType>& _factory, bool v, bool i) :
-      Base(_factory,v,i) {}
-  };
-
   /**
      \ingroup Gmsh
 
@@ -694,7 +659,7 @@ namespace Dune
       Dune::GridFactory<GridType> factory;
 
       // create parse object
-      GmshReaderParser<GridType,GridType::dimension> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
 
       return factory.createGrid();
@@ -710,7 +675,7 @@ namespace Dune
       Dune::GridFactory<GridType> factory;
 
       // create parse object
-      GmshReaderParser<GridType,GridType::dimension> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
 
       boundary_id_to_physical_entity.swap(parser.boundaryIdMap());
@@ -727,7 +692,7 @@ namespace Dune
       Dune::GridFactory<GridType> factory(&grid);
 
       // create parse object
-      GmshReaderParser<GridType,GridType::dimension> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
 
       return factory.createGrid();
@@ -743,7 +708,7 @@ namespace Dune
       Dune::GridFactory<GridType> factory(&grid);
 
       // create parse object
-      GmshReaderParser<GridType,GridType::dimension> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
 
       boundary_id_to_physical_entity.swap(parser.boundaryIdMap());
@@ -758,7 +723,7 @@ namespace Dune
                       bool verbose = true, bool insert_boundary_segments=true)
     {
       // create parse object
-      GmshReaderParser<GridType,GridType::dimension> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
     }
 
@@ -770,7 +735,7 @@ namespace Dune
                       bool verbose = true, bool insert_boundary_segments=true)
     {
       // create parse object
-      GmshReaderParser<GridType,GridType::dimension> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
 
       boundary_id_to_physical_entity.swap(parser.boundaryIdMap());
