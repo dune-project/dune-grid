@@ -5,6 +5,19 @@
 
 /** \file
     \brief This is a wrapper for the standalone psurface library
+
+    \deprecated This is a badly written C-style wrapper to the psurface library.
+    It used to be part of libpsurface itself, but it had to be removed from
+    there for two reasons.  First of all, C support was to be abandonded
+    eventually.  Secondly, there is also an (important) header called PSurface.h
+    in libsurface.  The two together created problems on case-insensitive
+    file systems such as found, e.g., on certain Macs.  The latter reason
+    is the reason why this file had to be removed from libpsurface rather
+    quickly.  It didn't have the time to properly adapt the corresponding
+    code in dune-grid, therefore I just copied the entire file to here,
+    to have working psurface support in dune-grid even with newer versions
+    of libpsurface that will not ship psurface.h.  It will be removed
+    before the next (2.2) release.
  */
 
 namespace psurface {
