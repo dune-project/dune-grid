@@ -67,6 +67,13 @@ insertBoundarySegment(const std::vector<unsigned int>& vertices)
   boundarySegments_.push_back(vertices[0]);
 }
 
+void Dune::GridFactory<Dune::OneDGrid>::
+insertBoundarySegment(const std::vector<unsigned int>& vertices,
+                      const shared_ptr<BoundarySegment<1> > boundarySegment)
+{
+  insertBoundarySegment(vertices);
+}
+
 Dune::OneDGrid* Dune::GridFactory<Dune::OneDGrid>::
 createGrid()
 {

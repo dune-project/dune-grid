@@ -66,6 +66,16 @@ namespace Dune {
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices);
 
+
+    /** \brief Insert a boundary segment (== a point) and the boundary segment geometry
+     *
+        This influences the ordering of the boundary segments.
+        The BoundarySegment object does not actually have any effect.
+     */
+    virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices,
+                                       const shared_ptr<BoundarySegment<1> > boundarySegment);
+
+
     /** \brief Finalize grid creation and hand over the grid
 
        The receiver takes responsibility of the memory allocated for the grid
