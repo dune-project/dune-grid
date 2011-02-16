@@ -254,7 +254,7 @@
 
    The template function buildRefinement() has to be specialized for
    each dimension.  It makes no sense to test for
-   geometryType==GeometryType::prism when dimension==2.  But this
+   geometryType.isPrism() when dimension==2.  But this
    way we run into a limitation of C++: we can't do partial function
    specialisation.
 

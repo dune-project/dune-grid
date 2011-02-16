@@ -474,10 +474,15 @@ namespace Dune {
     // The refinement traits
     //
 
-    template<class CoordType, int dim>
-    struct Traits<GeometryType::pyramid, CoordType, GeometryType::simplex, dim>
+    template<class CoordType>
+    struct Traits<
+        GenericGeometry::PyramidTopology<3>::type::id & ~1
+        , CoordType
+        , GenericGeometry::SimplexTopology<3>::type::id & ~1
+        , 3
+        >
     {
-      typedef PyramidTriangulation::RefinementImp<dim, CoordType> Imp;
+      typedef PyramidTriangulation::RefinementImp<3, CoordType> Imp;
     };
 
   }   // namespace RefinementImp

@@ -925,11 +925,31 @@ namespace Dune {
     // The refinement traits
     //
 
+
+    /*
+       template<class CoordType, int dim>
+       struct Traits<
+       GeometryType::simplex,
+       CoordType,
+       GeometryType::simplex,
+       dim
+       >
+       {
+       typedef Simplex::RefinementImp<dim, CoordType> Imp;
+       };
+     */
+    // Adrian:
     template<class CoordType, int dim>
-    struct Traits<GeometryType::simplex, CoordType, GeometryType::simplex, dim>
+    struct Traits<
+        GenericGeometry::SimplexTopology<dim>::type::id & ~1
+        , CoordType
+        , GenericGeometry::SimplexTopology<dim>::type::id & ~1
+        , dim
+        >
     {
       typedef Simplex::RefinementImp<dim, CoordType> Imp;
     };
+
 
   } // namespace RefinementImp
 

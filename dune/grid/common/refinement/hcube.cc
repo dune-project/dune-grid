@@ -22,9 +22,9 @@
 /*! @defgroup HCubeRefinement Refinement implementation for hypercubes
     @ingroup Refinement
 
-   This @ref Refinement implementation uses an SGrid as it's backend.
-   The SGrid is wrapped by @ref Dune::RefinementImp::HCube::RefinementGrid to make it singleton.
-   RefinementImp than adapts the SGrid interface to the @ref Refinement
+   This @ref Refinement implementation uses an YaspGrid as it's backend.
+   The YaspGrid is wrapped by @ref Dune::RefinementImp::HCube::RefinementGrid to make it singleton.
+   RefinementImp than adapts the YaspGrid interface to the @ref Refinement
    interface.
 
    @section Iterators The Iterators
@@ -49,8 +49,12 @@
    name RefinementSubEntityIteratorSpecial.
  */
 
+#if HAVE_MPI
+#include <mpi.h>
+#endif
+
 #include <dune/common/fvector.hh>
-#include <dune/grid/sgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/common/iteratorfacades.hh>
@@ -81,7 +85,7 @@ namespace Dune {
 
           We use @ref RefinementGrid as backend to do all the work.
 
-          The interface is the same as for @ref Dune::Refinement (apart
+          The interface is the same as for @ref Dune::StaticRefinement (apart
           from the template parameters).
        */
       template<int dimension_, class CoordType>
@@ -183,21 +187,21 @@ namespace Dune {
          @param dimension Dimension of the refined hypercube
 
          This grid is used as backend by @ref RefinementImp.  It simply
-         wraps an SGrid to make it a singleton.  We have to use SGrids
-         default CoordType here instead of the one from the refined
-         hypercube, because I know of no way to set the CoordType used
-         by SGrid.
+         wraps a YaspGrid to make it a singleton.  We have to use
+         YaspGrids default CoordType here instead of the one from the
+         refined hypercube, because I know of no way to set the
+         CoordType used by YaspGrid.
        */
       template<int dimension>
-      class RefinementGrid : public SGrid<dimension, dimension>
+      class RefinementGrid : public YaspGrid<dimension>
       {
-        using SGrid<dimension, dimension>::maxLevel;
-        using SGrid<dimension, dimension>::globalRefine;
+        using YaspGrid<dimension>::maxLevel;
+        using YaspGrid<dimension>::globalRefine;
       public:
         //! Know yourself
         typedef RefinementGrid<dimension> This;
         //! Know your base class
-        typedef SGrid<dimension, dimension> BaseType;
+        typedef YaspGrid<dimension> BaseType;
 
         //! Make sure the grid as at least the given refinement level
         void refineTo(int level);
@@ -210,7 +214,7 @@ namespace Dune {
       };
 
       /*!
-                This simply wraps the globalRefine() method of SGrid.
+                This simply wraps the globalRefine() method of YaspGrid.
        */
       template<int dimension>
       void RefinementGrid<dimension>::refineTo(int level /*! The refinement level to enforce */)
@@ -233,7 +237,15 @@ namespace Dune {
       }
 
       template<int dimension>
-      RefinementGrid<dimension>::RefinementGrid()
+      RefinementGrid<dimension>::RefinementGrid() :
+        BaseType(
+#if HAVE_MPI
+          MPI_COMM_SELF,
+#endif
+          FieldVector<typename BaseType::ctype, dimension>(1.0),
+          FieldVector<int, dimension>(1),
+          FieldVector<bool, dimension>(false),
+          0)
       {}
 
       template<int dimension>
@@ -402,7 +414,13 @@ namespace Dune {
     //
 
     template<class CoordType, int dim>
-    struct Traits<GeometryType::cube, CoordType, GeometryType::cube, dim>
+    struct Traits<
+        GenericGeometry::CubeTopology<dim>::type::id & (~1)
+        , CoordType
+        , GenericGeometry::CubeTopology<dim>::type::id & (~1)
+        , dim
+        , typename enable_if<(dim >= 2)>::type
+        >
     {
       typedef HCube::RefinementImp<dim, CoordType> Imp;
     };

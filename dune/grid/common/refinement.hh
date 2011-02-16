@@ -25,7 +25,7 @@
    @section General
    <!--=========-->
 
-   The Refinement system allows to temporarily refine a grid or single
+   The %Refinement system allows to temporarily refine a grid or single
    entities without changing the grid itself.  You may want to do this
    because you want to write your data to a file and have to do
    subsampling, but want to continue the calculation with the
@@ -34,7 +34,7 @@
    @subsection Can_do What Refinement can do for you
    <!---------------------------------------------->
 
-   For a given geometry type and refinement level, Refinement will
+   For a given geometry type and refinement level, %Refinement will
    - assign consecutive integer indices starting at 0 to each
     subvertex,
    - assign consecutive integer indices starting at 0 to each
@@ -47,7 +47,7 @@
    be different, for example you can refine a quadrilateral but get
    subelements which are triangles.
 
-   Currently the following geometry types are supportet:
+   Currently the following geometry types are supported:
    - hypercubes (quadrilaterals, hexahedrons),
    - simplices (triangles, tetrahedrons),
    - triangulating hypercubes into simplices (quadrilaterals ->
@@ -56,20 +56,21 @@
    @subsection Cannot_do What Refinement can't do for you
    <!--------------------------------------------------->
 
-   - Refinement does not actually subsample your data, it only tells
+   - %Refinement does not actually subsample your data, it only tells
     you @em where to subsample your data.
    - The geometry types need to be known at compile time.  See @link
     VirtualRefinement VirtualRefinement@endlink if you need to
     calculate the right geometry type at run time.
-   - No Refinement implementations for anything besides hypercubes and
+   - No %Refinement implementations for anything besides hypercubes and
     simplices have been written yet.
 
    @section User_interface The user interface
    <!--===================================-->
 
    @code
-   template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-   class Refinement
+   template<unsigned topologyId, class CoordType,
+           unsigned coerceToId, int dimension>
+   class StaticRefinement
    {
    public:
     enum { dimension };
@@ -78,11 +79,11 @@
     struct codim {
       class SubEntityIterator;
     };
-    typedef VertexIterator;  // These are aliases for codim<codim>::SubEntityIterator
-    typedef ElementIterator;
+    typedef ImplementationDefined VertexIterator;  // These are aliases for codim<codim>::SubEntityIterator
+    typedef ImplementationDefined ElementIterator;
 
-    typedef IndexVector; // These are FieldVectors
-    typedef CoordVector;
+    typedef ImplementationDefined IndexVector; // These are FieldVectors
+    typedef ImplementationDefined CoordVector;
 
     static int nVertices(int level);
     static VertexIterator vBegin(int level);
@@ -99,21 +100,21 @@
    support some additional methods:
 
    @code
-   template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+   template<unsigned topologyId, class CoordType, unsigned coerceToId, int dimension>
    class VertexIterator
    {
    public:
-    typedef Refinement;
+    typedef ImplementationDefined Refinement;
 
     int index() const;
     Refinement::CoordVector coords() const;
    }
 
-   template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+   template<unsigned topologyId, class CoordType, unsigned coerceToId, int dimension>
    class ElementIterator
    {
    public:
-    typedef Refinement;
+    typedef ImplementationDefined Refinement;
 
     int index() const;
     // Coords of the center of mass of the element
@@ -137,7 +138,10 @@
    //#include <dune/grid/common/refinement/hcube.cc>
 
    // Get yourself the Refinement you need:
-   typedef Refinement<GeometryType::cube, SGrid<2, 2>::ctype, GeometryType::cube, 2> MyRefinement;
+   typedef StaticRefinement<GenericGeometry::CubeTopology<2>::type::id,
+                           SGrid<2, 2>::ctype,
+                                                   GenericGeometry::CubeTopology<2>::type::id,
+                                                   2> MyRefinement;
 
    int main()
    {
@@ -170,7 +174,7 @@
    @subsection Guarantees
    <!------------------->
 
-   The Refinement system gives this guarantee (besides conforming to
+   The %Refinement system gives this guarantee (besides conforming to
    the above interface:
    - The indices of the subvertices and subelement start at 0 and are
     consecutive.
@@ -178,7 +182,7 @@
    @section Implementing Implementing a new Refinement type
    <!--=================================================-->
 
-   If you want to write a Refinement implementation for a particular
+   If you want to write a %Refinement implementation for a particular
    geometry type, e.g. SquaringTheCircle (or a particular set of
    geometry types) here is how:
 
@@ -189,52 +193,36 @@
     exactly to the user interface above.
    - put it (and it's helper stuff as apropriate) into it's own
     namespace Dune::RefinementImp::SquaringTheCircle.
-   - define the mapping of geometryType, CoordType and coerceTo to your
+   - define the mapping of topologyId, CoordType and coerceToId to your
     implementation by specialising template struct
     RefinementImp::Traits.  It should look like this:
     @code
    namespace Dune::RefinementImp {
-    // the "dim" template parameter is ignored, since the dimension can be infered
-    template<class CoordType>
-    struct Traits<GeometryType::sphere, CoordType, GeometryType::cube, 2> {
-      typedef SquaringTheCircle::RefinementImp<CoordType> Imp;
-    };
-
     // we're only implementing this for dim=2
     template<class CoordType>
-    struct Traits<GeometryType::sphere, CoordType, GeometryType::cube, 2> {
-      typedef SquaringTheCircle::RefinementImp<CoordType> Imp;
-    };
-
-    template<class CoordType>
-    struct Traits<GeometryType::circle, CoordType, GeometryType::cube, 2> {
-      typedef SquaringTheCircle::RefinementImp<CoordType> Imp;
-    };
-
-    template<class CoordType>
-    struct Traits<GeometryType::sphere, CoordType, GeometryType::quadrilateral, 2> {
+    struct Traits<sphereTopologyId, CoordType,
+                      GenericGeometry::CubeTopology<2>::type::id, 2>
+        {
       typedef SquaringTheCircle::RefinementImp<CoordType> Imp;
     };
    }
     @endcode
     If you implement a template class, you have to specialise struct
     RefinementImp::Traits for every possible combination of
-    geometryType and coerceTo that your implementation supports.
+    topologyId and coerceToId that your implementation supports.
    - \#include "refinement/squaringthecircle.cc" from refinement.hh.
 
-   This is enough to integrate your implementation into the Refinement
+   This is enough to integrate your implementation into the %Refinement
    system.  You probably want to include it into @link
    VirtualRefinement VirtualRefinement@endlink also.
 
    @subsection Namespaces
    <!------------------->
 
-   The (non-virtual) Refinement namespaces is organized in the
-   following way:
-   - Only template class Refinement lives directly in namespace Dune.
+   The (non-virtual) %Refinement system is organized in the following
+   way into namespaces:
+   - Only template class StaticRefinement lives directly in namespace Dune.
    - Use namespace Dune::RefinementImp for all the Implementation.
-   - Use template struct Dune::RefinementImp::Traits instead of
-    template struct Dune::RefinementTraits.
    - Use namespace Dune::RefinementImp::HCube, namespace
     Dune::RefinementImp::Simplex, ... for each implementation.
 
@@ -245,17 +233,17 @@
    <!--------------------------------->
 
    - <strong>Layer 0</strong> declares struct
-    RefinementImp::Traits<geometryType, CoordType, coerceTo, dim>.
-    It's member typedef Imp tells which Refinement implementation to
-    use for a given geometryType (and CoordType).  It is located in
+    RefinementImp::Traits<topologyId, CoordType, coerceToId, dim>.
+    It's member typedef Imp tells which %Refinement implementation to
+    use for a given topologyId (and CoordType).  It is located in
     refinementbase.cc.
    - <strong>Layer 1</strong> defines
     RefinementImp::XXX::RefinementImp.  It implements the Refinements
-    for each geometryType, coerceTo (and CoordType).  Also in this
+    for each topologyId, coerceToId (and CoordType).  Also in this
     layer are the definitions of struct RefinementImp::Traits.  This
     layer is located in refinementXXX.cc.
    - <strong>Layer 2</strong> puts it all together.  It defines class
-    Refinement<geometryType, CoordType, coerceTo, dim> by deriving
+    StaticRefinement<topologyId, CoordType, coerceToId, dim> by deriving
     from the corresponding RefinementImp.  It is located in
     refinementbase.cc.
    - There is a dummy <strong>layer 2.5</strong> which simply includes
@@ -266,7 +254,7 @@
 
  */
 
-// The interface (template<...> class Refinement) is not included here
+// The interface (template<...> class StaticRefinement) is not included here
 // since it derives from parts which I consider implementation.  Look
 // into refinement/base.cc if the documentation is above is not enough.
 #include "refinement/base.cc"

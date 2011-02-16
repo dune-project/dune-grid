@@ -5,9 +5,12 @@
 #include "config.h" // autoconf defines, needed by the dune headers
 
 // dune headers
-#include <dune/grid/sgrid.hh>
-#include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
+#include <dune/common/fvector.hh>
 
+#include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
+#include <dune/grid/yaspgrid.hh>
+
+#include <algorithm>
 #include <vector>
 #include <unistd.h>
 
@@ -43,7 +46,8 @@ public:
    */
   virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<DT,n>& xi) const
   {
-    return comp*0.1;
+    Dune::FieldVector<DT,n> global = e.geometry().global( xi );
+    return global.two_norm2();
   }
 
   // get name
@@ -63,11 +67,11 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
   enum { dim = GridView :: dimension };
 
   const typename GridView :: IndexSet &is = gridView.indexSet();
-  std::vector<int> vertexdata(is.size(dim),dim);
-  std::vector<int> celldata(is.size(0),0);
+  std::vector<int> celldata(is.size(0));
+  for(std::size_t i = 0; i < celldata.size(); ++i) celldata[i] = i;
 
   Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, 1, coerceToSimplex);
-#warning disabled due to FS#676: vtk.addVertexData(vertexdata,"vertexData");
+  // disabled due to FS#676: vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
 
   vtk.addVertexData(new VTKVectorFunction<GridView>("vertex"));
@@ -86,18 +90,23 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
 template<int dim>
 void vtkCheck(int* n, double* h)
 {
-  const Dune :: PartitionIteratorType VTK_Partition = Dune :: InteriorBorder_Partition;
+  Dune::FieldVector<double, dim> L(0);
+  std::copy(h, h+dim, L.begin());
+  Dune::FieldVector<int, dim> s(0);
+  std::copy(n, n+dim, s.begin());
+  Dune::FieldVector<bool, dim> periodic(false);
+
   std::cout << std::endl << "subsamplingVTKCheck dim=" << dim << std::endl << std::endl;
-  Dune::SGrid<dim,dim> g(n, h);
+  Dune::YaspGrid<dim> g(L, s, periodic, 0);
   g.globalRefine(1);
 
-  doWrite( g.template leafView< VTK_Partition >(), false);
-  doWrite( g.template levelView< VTK_Partition >( 0 ), false);
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), false);
+  doWrite( g.leafView(), false);
+  doWrite( g.levelView( 0 ), false);
+  doWrite( g.levelView( g.maxLevel() ), false);
 
-  doWrite( g.template leafView< VTK_Partition >(), true);
-  doWrite( g.template levelView< VTK_Partition >( 0 ), true);
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), true);
+  doWrite( g.leafView(), true);
+  doWrite( g.levelView( 0 ), true);
+  doWrite( g.levelView( g.maxLevel() ), true);
 }
 
 int main(int argc, char **argv)

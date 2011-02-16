@@ -17,16 +17,17 @@
    @endverbatim
  */
 
-#include <assert.h>
-
-#include <dune/common/exceptions.hh>
-#include <dune/common/geometrytype.hh>
-#include "grid.hh"
-#include <dune/common/iteratorfacades.hh>
-#include <dune/common/fvector.hh>
-#include "refinement.hh"
-#include <dune/common/exceptions.hh>
+#include <cassert>
 #include <typeinfo>
+
+#include <dune/common/deprecated.hh>
+#include <dune/common/exceptions.hh>
+#include <dune/common/fvector.hh>
+#include <dune/common/geometrytype.hh>
+#include <dune/common/iteratorfacades.hh>
+
+#include "grid.hh"
+#include "refinement.hh"
 
 namespace Dune {
 
@@ -271,12 +272,17 @@ namespace Dune {
   // The refinement implementation
   //
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
   class VirtualRefinementImp
     : public Dune::VirtualRefinement<dimension, CoordType>
   {
   public:
-    typedef Dune::Refinement<geometryType, CoordType, coerceTo, dimension> Refinement;
+    typedef Dune::StaticRefinement<topologyId, CoordType, coerceToId, dimension> StaticRefinement;
     typedef Dune::VirtualRefinement<dimension, CoordType> VirtualRefinement;
 
     template<int codimension>
@@ -285,10 +291,10 @@ namespace Dune {
     int nVertices(int level) const;
     int nElements(int level) const;
 
-    static VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension> &instance();
+    static VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension> &instance();
   private:
     VirtualRefinementImp() {}
-    static VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension> *instance_;
+    static VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension> *instance_;
 
     typename VirtualRefinement::VertexIteratorBack *vBeginBack(int level) const;
     typename VirtualRefinement::VertexIteratorBack *vEndBack(int level) const;
@@ -296,58 +302,95 @@ namespace Dune {
     typename VirtualRefinement::ElementIteratorBack *eEndBack(int level) const;
   };
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension> &
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::instance()
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension> &
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::instance()
   {
     if(instance_ == 0)
-      instance_ = new VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>;
+      instance_ = new VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>;
     return *instance_;
   }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension> *
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::instance_ = 0;
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension> *
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::instance_ = 0;
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  int
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  int VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::
   nVertices(int level) const
   {
-    return Refinement::nVertices(level);
+    return StaticRefinement::nVertices(level);
   }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::VirtualRefinement::VertexIteratorBack *
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  typename VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::VirtualRefinement::VertexIteratorBack *
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::
   vBeginBack(int level) const
-  { return new SubEntityIteratorBack<dimension>(Refinement::vBegin(level)); }
+  { return new SubEntityIteratorBack<dimension>(StaticRefinement::vBegin(level)); }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::VirtualRefinement::VertexIteratorBack *
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  typename VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::VirtualRefinement::VertexIteratorBack *
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::
   vEndBack(int level) const
-  { return new SubEntityIteratorBack<dimension>(Refinement::vEnd(level)); }
+  { return new SubEntityIteratorBack<dimension>(StaticRefinement::vEnd(level)); }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  int
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::
-  nElements(int level) const
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  int VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::nElements(int level) const
   {
-    return Refinement::nElements(level);
+    return StaticRefinement::nElements(level);
   }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::VirtualRefinement::ElementIteratorBack *
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  typename VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::VirtualRefinement::ElementIteratorBack *
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::
   eBeginBack(int level) const
-  { return new SubEntityIteratorBack<0>(Refinement::eBegin(level)); }
+  { return new SubEntityIteratorBack<0>(StaticRefinement::eBegin(level)); }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::VirtualRefinement::ElementIteratorBack *
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  typename VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::VirtualRefinement::ElementIteratorBack *
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::
   eEndBack(int level) const
-  { return new SubEntityIteratorBack<0>(Refinement::eEnd(level)); }
+  { return new SubEntityIteratorBack<0>(StaticRefinement::eEnd(level)); }
 
   //
   // The iterator backend implementation
@@ -355,56 +398,82 @@ namespace Dune {
 
   // The iterator backend implementation specialties
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension, int codimension>
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      , int codimension
+      >
   class VirtualRefinementImpSubEntityIteratorBackSpecial;
 
   // The iterator backend implementation specialties for vertices
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  class VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, dimension>
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  class VirtualRefinementImpSubEntityIteratorBackSpecial<topologyId, CoordType, coerceToId, dimension, dimension>
     : public VirtualRefinement<dimension, CoordType>::template SubEntityIteratorBack<dimension>
   {};
 
   // The iterator backend implementation specialties for elements
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  class VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, 0>
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  class VirtualRefinementImpSubEntityIteratorBackSpecial<topologyId, CoordType, coerceToId, dimension, 0>
     : public VirtualRefinement<dimension, CoordType>::template SubEntityIteratorBack<0>
   {
   public:
-    typedef Dune::VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension> VirtualRefinementImp;
+    typedef Dune::VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension> VirtualRefinementImp;
     typedef typename VirtualRefinementImp::template SubEntityIteratorBack<0> Common;
-    typedef typename VirtualRefinementImp::Refinement Refinement;
+    typedef typename VirtualRefinementImp::StaticRefinement StaticRefinement;
     typedef VirtualRefinement<dimension, CoordType> RefinementBase;
     typedef typename RefinementBase::IndexVector IndexVector;
 
     IndexVector vertexIndices() const;
   };
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  typename VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, 0>::IndexVector
-  VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, 0>::
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
+  typename VirtualRefinementImpSubEntityIteratorBackSpecial<topologyId, CoordType, coerceToId, dimension, 0>::IndexVector
+  VirtualRefinementImpSubEntityIteratorBackSpecial<topologyId, CoordType, coerceToId, dimension, 0>::
   vertexIndices() const
   {
     IndexVector vIndices;
-    vIndices.reserve(Refinement::IndexVector::dimension);
+    vIndices.reserve(StaticRefinement::IndexVector::dimension);
 
-    typename Refinement::IndexVector sIndices = static_cast<const Common *>(this)->backend.vertexIndices();
-    for(int i = 0; i < Refinement::IndexVector::dimension; ++i)
+    typename StaticRefinement::IndexVector sIndices = static_cast<const Common *>(this)->backend.vertexIndices();
+    for(int i = 0; i < StaticRefinement::IndexVector::dimension; ++i)
       vIndices.push_back(sIndices[i]);
     return vIndices;
   }
 
   // The shared iterator backend implementation
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
   template<int codimension>
-  class VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack
-    : public VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, codimension>
+  class VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::SubEntityIteratorBack
+    : public VirtualRefinementImpSubEntityIteratorBackSpecial<topologyId, CoordType, coerceToId, dimension, codimension>
   {
   public:
-    typedef typename Refinement::template Codim<codimension>::SubEntityIterator BackendIterator;
-    typedef typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::template SubEntityIteratorBack<codimension> This;
+    typedef typename StaticRefinement::template Codim<codimension>::SubEntityIterator BackendIterator;
+    typedef typename VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::template SubEntityIteratorBack<codimension> This;
     typedef typename VirtualRefinement::template SubEntityIteratorBack<codimension> Base;
     typedef typename VirtualRefinement::CoordVector CoordVector;
 
@@ -420,63 +489,73 @@ namespace Dune {
     CoordVector coords() const;
 
   private:
-    friend class VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, codimension>;
+    friend class VirtualRefinementImpSubEntityIteratorBackSpecial<topologyId, CoordType, coerceToId, dimension, codimension>;
     BackendIterator backend;
   };
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
   template<int codimension>
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack<codimension>::
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::SubEntityIteratorBack<codimension>::
   SubEntityIteratorBack(const BackendIterator &backend_)
     : backend(backend_)
   {}
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<
+      unsigned topologyId
+      , class CoordType
+      , unsigned coerceToId
+      , int dimension
+      >
   template<int codimension>
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack<codimension>::
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::SubEntityIteratorBack<codimension>::
   SubEntityIteratorBack(const This &other)
-    : VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, codimension>(other),
+    : VirtualRefinementImpSubEntityIteratorBackSpecial<topologyId, CoordType, coerceToId, dimension, codimension>(other),
       backend(other.backend)
   {}
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<unsigned topologyId, class CoordType, unsigned coerceToId, int dimension>
   template<int codimension>
-  typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::template SubEntityIteratorBack<codimension>::Base *
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack<codimension>::
+  typename VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::template SubEntityIteratorBack<codimension>::Base *
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::SubEntityIteratorBack<codimension>::
   clone() const
   { return new This(*this); }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<unsigned topologyId, class CoordType, unsigned coerceToId, int dimension>
   template<int codimension>
   bool
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack<codimension>::
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::SubEntityIteratorBack<codimension>::
   operator==(const Base &other) const
   {
     try { return backend == dynamic_cast<const This &>(other).backend; }
     catch(std::bad_cast) { return false; }
   }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<unsigned topologyId, class CoordType, unsigned coerceToId, int dimension>
   template<int codimension>
-  typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::template SubEntityIteratorBack<codimension>::Base &
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack<codimension>::
+  typename VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::template SubEntityIteratorBack<codimension>::Base &
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::SubEntityIteratorBack<codimension>::
   operator++()
   {
     ++backend;
     return *this;
   }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<unsigned topologyId, class CoordType, unsigned coerceToId, int dimension>
   template<int codimension>
   int
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack<codimension>::
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::SubEntityIteratorBack<codimension>::
   index() const
   { return backend.index(); }
 
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<unsigned topologyId, class CoordType, unsigned coerceToId, int dimension>
   template<int codimension>
-  typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::template SubEntityIteratorBack<codimension>::CoordVector
-  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack<codimension>::
+  typename VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::template SubEntityIteratorBack<codimension>::CoordVector
+  VirtualRefinementImp<topologyId, CoordType, coerceToId, dimension>::SubEntityIteratorBack<codimension>::
   coords() const
   { return backend.coords(); }
 
@@ -506,7 +585,7 @@ namespace Dune {
   {
     // Check that the user used valid geometry types
     assert(geometryType.dim() == dimension && coerceTo.dim() == dimension);
-    return RefinementBuilder<dimension, CoordType>::build(geometryType.basicType(), coerceTo.basicType());
+    return RefinementBuilder<dimension, CoordType>::build( geometryType.id(), coerceTo.id() );
   }
 
   /*! @brief return a reference to the VirtualRefinement according to
@@ -515,18 +594,26 @@ namespace Dune {
      @tparam dimension Dimension of the element to refine
      @tparam CoordType C++ type of the coordinates
 
+     @deprecated Please use the buildRefinement() function which takes
+                full GeometryTypes as arguments instead.
+
      @throws NotImplemented There is no Refinement implementation for
                            the specified parameters.
    */
   template<int dimension, class CoordType>
+  DUNE_DEPRECATED
   VirtualRefinement<dimension, CoordType> &
   buildRefinement( //! geometry type of the refined element
     GeometryType::BasicType geometryType,
     //! geometry type of the subelements
     GeometryType::BasicType coerceTo)
   {
-    return RefinementBuilder<dimension, CoordType>::build(geometryType, coerceTo);
+    return buildRefinement<dimension, CoordType>
+             ( GeometryType(geometryType, dimension),
+             GeometryType(coerceTo, dimension) );
   }
+
+
 
   // In principle the trick with the class is no longer neccessary,
   // but I'm keeping it in here so it will be easier to specialize
@@ -537,50 +624,154 @@ namespace Dune {
   public:
     static
     VirtualRefinement<dimension, CoordType> &
-    build(GeometryType::BasicType geometryType, GeometryType::BasicType coerceTo)
+    build(
+      unsigned topologyId
+      , unsigned coerceToId
+      )
     {
-      switch(geometryType) {
-      case GeometryType::simplex :
-        switch(coerceTo) {
-        case GeometryType::simplex :
-          return VirtualRefinementImp<GeometryType::simplex, CoordType, GeometryType::simplex, dimension>::instance();
+      topologyId &= ~1;
+      coerceToId &= ~1;
+
+      const unsigned idSimplex = GenericGeometry::SimplexTopology<dimension>::type::id & ~1;
+      const unsigned idCube = GenericGeometry::CubeTopology<dimension>::type::id & ~1;
+
+      switch( topologyId )
+      {
+      //case GeometryType::simplex:
+      case idSimplex :
+        //switch( coerceTo )
+        switch( coerceToId )
+        {
+        //case GeometryType::simplex:
+        case idSimplex :
+          return VirtualRefinementImp< idSimplex, CoordType, idSimplex, dimension>::instance();
         default :
           break;
         }
         break;
-      case GeometryType::cube :
-        switch(coerceTo) {
-        case GeometryType::simplex :
-          return VirtualRefinementImp<GeometryType::cube, CoordType, GeometryType::simplex, dimension>::instance();
-        case GeometryType::cube :
-          return VirtualRefinementImp<GeometryType::cube, CoordType, GeometryType::cube, dimension>::instance();
+
+      //case GeometryType::cube:
+      case idCube :
+        switch( coerceToId )
+        {
+        case idSimplex :
+          return VirtualRefinementImp< idCube, CoordType, idSimplex, dimension>::instance();
+        case idCube :
+          return VirtualRefinementImp< idCube, CoordType, idCube, dimension>::instance();
         default :
           break;
         }
         break;
-      case GeometryType::prism :
-        switch(coerceTo) {
-        case GeometryType::simplex :
-          if(dimension==3)
-            return VirtualRefinementImp<GeometryType::prism, CoordType, GeometryType::simplex, dimension>::instance();
-        default :
-          break;
-        }
-        break;
-      case GeometryType::pyramid :
-        switch(coerceTo) {
-        case GeometryType::simplex :
-          if(dimension==3)
-            return VirtualRefinementImp<GeometryType::pyramid, CoordType, GeometryType::simplex, dimension>::instance();
-        default :
-          break;
-        }
-        break;
+
       default :
         break;
       }
-      DUNE_THROW(NotImplemented, "No Refinement<" << geometryType << ", CoordType, "
-                                                  << coerceTo << " >.");
+      DUNE_THROW( NotImplemented, "No Refinement<" << topologyId << ", CoordType, "
+                                                   << coerceToId << " >.");
+    }
+  };
+
+  template<class CoordType>
+  class RefinementBuilder<1, CoordType>
+  {
+    static const std::size_t dimension = 1;
+  public:
+    static
+    VirtualRefinement<dimension, CoordType> &
+    build(
+      unsigned topologyId
+      , unsigned coerceToId
+      )
+    {
+      topologyId &= ~1;
+      coerceToId &= ~1;
+
+      const unsigned idSimplex = GenericGeometry::SimplexTopology<dimension>::type::id & ~1;
+
+      if(topologyId == 0 && coerceToId == 0)
+        return VirtualRefinementImp< idSimplex, CoordType, idSimplex, dimension>::instance();
+
+      DUNE_THROW( NotImplemented, "No Refinement<" << topologyId << ", CoordType, "
+                                                   << coerceToId << " >.");
+    }
+  };
+
+  template<class CoordType>
+  class RefinementBuilder<3, CoordType>
+  {
+    static const std::size_t dimension = 3;
+  public:
+    static
+    VirtualRefinement<dimension, CoordType> &
+    build(
+      unsigned topologyId
+      , unsigned coerceToId
+      )
+    {
+      topologyId &= ~1;
+      coerceToId &= ~1;
+
+      const unsigned idSimplex = GenericGeometry::SimplexTopology<dimension>::type::id & ~1;
+      const unsigned idCube = GenericGeometry::CubeTopology<dimension>::type::id & ~1;
+      const unsigned idPrism = GenericGeometry::PrismTopology<dimension>::type::id & ~1;
+      const unsigned idPyramid = GenericGeometry::PyramidTopology<dimension>::type::id & ~1;
+
+      switch( topologyId )
+      {
+      //case GeometryType::simplex:
+      case idSimplex :
+        //switch( coerceTo )
+        switch( coerceToId )
+        {
+        //case GeometryType::simplex:
+        case idSimplex :
+          return VirtualRefinementImp< idSimplex, CoordType, idSimplex, dimension>::instance();
+        default :
+          break;
+        }
+        break;
+
+      //case GeometryType::cube:
+      case idCube :
+        switch( coerceToId )
+        {
+        case idSimplex :
+          return VirtualRefinementImp< idCube, CoordType, idSimplex, dimension>::instance();
+        case idCube :
+          return VirtualRefinementImp< idCube, CoordType, idCube, dimension>::instance();
+        default :
+          break;
+        }
+        break;
+
+
+      //case GeometryType::prism:
+      case idPrism :
+        switch( coerceToId )
+        {
+        case idSimplex :
+          return VirtualRefinementImp< idPrism, CoordType, idSimplex, dimension>::instance();
+        default :
+          break;
+        }
+        break;
+
+      //case GeometryType::pyramid:
+      case idPyramid :
+        switch( coerceToId )
+        {
+        case idSimplex :
+          return VirtualRefinementImp< idPyramid, CoordType, idSimplex, dimension>::instance();
+        default :
+          break;
+        }
+        break;
+
+      default :
+        break;
+      }
+      DUNE_THROW( NotImplemented, "No Refinement<" << topologyId << ", CoordType, "
+                                                   << coerceToId << " >.");
     }
   };
 
