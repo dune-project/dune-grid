@@ -84,6 +84,7 @@ AC_CONFIG_FILES([Makefile
     m4/Makefile
     dune-grid.pc
     utility/Makefile
+    utility/gmsh-to-alu/Makefile
     utility/gridinfo-gmsh/Makefile
     ])
 AC_OUTPUT
