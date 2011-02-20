@@ -20,6 +20,7 @@
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/io/file/gmshreader.hh>
 
@@ -28,7 +29,7 @@ template<class Grid>
 class RedistributeDataHandle :
   public Dune::CommDataHandleIF<RedistributeDataHandle<Grid>, int>
 {
-  typedef typename Grid::GlobalIdSet IdSet;
+  typedef typename Grid::LocalIdSet IdSet;
   typedef typename IdSet::IdType Id;
   const Grid &grid;
   std::map<Id, int> &elementTags;
@@ -54,7 +55,7 @@ public:
   }
 
   std::size_t size (const typename Grid::template Codim<0>::Entity &e) const
-  { return elementTags.count(grid.globalIdSet().id(e)); }
+  { return elementTags.count(grid.localIdSet().id(e)); }
 
   template<class MessageBuffer, class Entity>
   void gather(MessageBuffer &buff, const Entity &e) const {
@@ -71,7 +72,7 @@ public:
               const typename Grid::template Codim<0>::Entity &e) const
   {
     typename std::map<Id, int>::const_iterator it =
-      elementTags.find(grid.globalIdSet().id(e));
+      elementTags.find(grid.localIdSet().id(e));
     if(it != elementTags.end())
       buff.write(it->second);
   }
@@ -93,7 +94,7 @@ public:
   {
     switch(n) {
     case 0 : break;
-    case 1 : buff.read(elementTags[grid.globalIdSet().id(e)]); break;
+    case 1 : buff.read(elementTags[grid.localIdSet().id(e)]); break;
     default : DUNE_THROW(Dune::RangeError, "At most one data item may be "
                          "communicated!");
     }
@@ -132,7 +133,10 @@ int main(int argc, char **argv) {
       "    process appends its rank to this filename to form something like\n"
       "    ALUPREFIX.RANK.\n"
       "  TAGS_PREFIX If given, read physical entitity numbers from the .msh file\n"
-      "    and write them into a series of files of the form TAG_PREFIX.RANK.\n"
+      "    and write them into a series of files of the form TAG_PREFIX.RANK.  The\n"
+      "    file format is ASCII with one line per mesh element, each line\n"
+      "    consisting of a whitespace-separated pair of local-ID and physical\n"
+      "    entity number.  Data is only stored for interior entities.\n"
       << std::flush;
       return 1;
     }
@@ -164,16 +168,16 @@ int main(int argc, char **argv) {
     //  transfer data into maps
     //
 
-    typedef Grid::GlobalIdSet::IdType Id;
+    typedef Grid::LocalIdSet::IdType Id;
     typedef std::map<Id, int> TagMap;
     TagMap elementTagMap;
     if(tagsName != "") {
       typedef Grid::LeafGridView GV;
       const GV &gv = gridp->leafView();
-      const Grid::GlobalIdSet &gis = gridp->globalIdSet();
+      const Grid::LocalIdSet &lis = gridp->localIdSet();
       const GV::Codim<0>::Iterator end = gv.end<0>();
       for(GV::Codim<0>::Iterator it = gv.begin<0>(); it != end; ++it)
-        elementTagMap[gis.id(*it)] =
+        elementTagMap[lis.id(*it)] =
           insertionElementTags[gf.insertionIndex(*it)];
     }
 
@@ -233,10 +237,13 @@ int main(int argc, char **argv) {
 
       typedef Grid::LeafGridView GV;
       const GV &gv = gridp->leafView();
-      const Grid::GlobalIdSet &gis = gridp->globalIdSet();
+      const Grid::LocalIdSet &lis = gridp->localIdSet();
       const GV::Codim<0>::Iterator &end = gv.end<0>();
       for(GV::Codim<0>::Iterator it = gv.begin<0>(); it != end; ++it)
-        file << elementTagMap[gis.id(*it)] << "\n";
+        if(it->partitionType() == Dune::InteriorEntity) {
+          Grid::LocalIdSet::IdType id = lis.id(*it);
+          file << id << " " << elementTagMap[id] << "\n";
+        }
 
       if(!file)
         DUNE_THROW(Dune::IOError, "Write error while writing tags to "
