@@ -587,19 +587,19 @@ namespace Dune {
     }
 
     //! Gets the level index of a UG sidevector
-    static int& levelIndex(Vector* theVector) {
+    static UG::UINT& levelIndex(Vector* theVector) {
 #if UG_DIM == 2
       DUNE_THROW(GridError, "levelIndex in side vector only in 3D!");
 #endif
-      return reinterpret_cast<int&>(theVector->index);
+      return theVector->index;
     }
 
     //! Gets the level index of a UG sidevector
-    static const int& levelIndex(const Vector* theVector) {
+    static const UG::UINT& levelIndex(const Vector* theVector) {
 #if UG_DIM == 2
       DUNE_THROW(GridError, "levelIndex in side vector only in 3D!");
 #endif
-      return reinterpret_cast<const int&>(theVector->index);
+      return theVector->index;
     }
 
     //! Gets the level index of a UG edge

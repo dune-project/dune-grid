@@ -90,7 +90,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
     if (dim==3)
       for (int i=0; i<eIt->template count<1>(); i++)
       {
-        int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target,UGGridRenumberer<dim>::facesDUNEtoUG(i,eType)));
+        UG::UINT& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target,UGGridRenumberer<dim>::facesDUNEtoUG(i,eType)));
         if (index<0) {             // not visited yet
           GeometryType gtType = GenericReferenceElements<double,dim>::general(eType).type(i,1);
           if (gtType.isSimplex()) {
