@@ -203,11 +203,11 @@ namespace Dune {
     //! return true if intersection is conform (i.e. only one neighbor)
     bool conforming () const { return it().conforming(); }
 
-  private:
     //! returns reference to underlying intersection iterator implementation
     IntersectionIteratorImp & it() { return it_; }
     const IntersectionIteratorImp & it() const { return it_; }
 
+  private:
     const FactoryType& factory_ ;
     IntersectionIteratorImp & it_;
   }; // end class IntersectionIteratorWrapper
