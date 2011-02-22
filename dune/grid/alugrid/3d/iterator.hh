@@ -219,7 +219,7 @@ namespace Dune {
     //! coordinates for higher order boundary
     NormalType & integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
-    //! return level of iterator
+    //! return level of iterator (level of item)
     int level () const;
 
     //! return true if intersection is conforming
@@ -227,6 +227,9 @@ namespace Dune {
     {
       return (connector_.conformanceState() == FaceInfoType::CONFORMING);
     }
+
+    //! return current face
+    const GEOFaceType& getItem() const { return connector_.face(); }
 
   protected:
     // set interator to end iterator
