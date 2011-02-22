@@ -762,22 +762,15 @@ namespace Dune
       return Communications::defaultComm();
     }
 
-    template< class IntersectionInterfaceType >
-    const typename BaseType
-    :: template ReturnImplementationType< IntersectionInterfaceType >
-    :: ImplementationType & DUNE_DEPRECATED
-    getRealIntersectionIterator ( const IntersectionInterfaceType &it ) const
-    {
-      return this->getRealImplementation(it);
-    }
+    using BaseType :: getRealImplementation ;
 
     template< class IntersectionType >
-    const typename BaseType
+    static const typename BaseType
     :: template ReturnImplementationType< IntersectionType >
     :: ImplementationType &
-    getRealIntersection ( const IntersectionType &intersection ) const
+    getRealIntersection ( const IntersectionType &intersection )
     {
-      return this->getRealImplementation( intersection );
+      return getRealImplementation( intersection );
     }
 
     //! deliver all geometry types used in this grid
