@@ -520,13 +520,15 @@ namespace Dune
       {
         val_t & item = w.item();
 
+        assert( item.first || item.second );
         IMPLElementType * elem = 0;
         if( item.first )
           elem = static_cast<IMPLElementType *> (item.first);
         else if( item.second )
-          elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
-
-        assert( elem );
+        {
+          elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
+          assert( elem );
+        }
         elem->resetRefinedTag();
       }
     }

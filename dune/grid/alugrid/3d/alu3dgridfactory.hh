@@ -51,6 +51,8 @@ namespace Dune
       typedef typename Grid::template Codim< codim >::Entity Entity;
     };
 
+    typedef unsigned int VertexId;
+
     typedef ALUGridTransformation< ctype, dimensionworld > Transformation;
 
     //! type of vector for world coordinates
@@ -78,7 +80,7 @@ namespace Dune
 
     struct FaceLess;
 
-    typedef std::vector< VertexType > VertexVector;
+    typedef std::vector< std::pair< VertexType, size_t > > VertexVector;
     typedef std::vector< ElementType > ElementVector;
     typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
     typedef std::vector< std::pair< FaceType, FaceType > > PeriodicBoundaryVector;
@@ -130,6 +132,9 @@ namespace Dune
      */
     virtual void insertVertex ( const VertexType &pos );
 
+    // for testing parallel GridFactory
+    VertexId insertVertex ( const VertexType &pos, const size_t globalId );
+
     /** \brief insert an element into the coarse grid
      *
      *  \note The order of the vertices must coincide with the vertex order in
@@ -140,7 +145,7 @@ namespace Dune
      */
     virtual void
     insertElement ( const GeometryType &geometry,
-                    const std::vector< unsigned int > &vertices );
+                    const std::vector< VertexId > &vertices );
 
     /** \brief insert a boundary element into the coarse grid
      *
@@ -154,7 +159,7 @@ namespace Dune
      */
     virtual void
     insertBoundary ( const GeometryType &geometry,
-                     const std::vector< unsigned int > &faceVertices,
+                     const std::vector< VertexId > &faceVertices,
                      const int id );
 
     /** \brief mark a face as boundary (and assign a boundary id)
@@ -164,6 +169,12 @@ namespace Dune
      *  \param[in]  id       boundary id to assign to the face
      */
     virtual void insertBoundary ( const int element, const int face, const int id );
+
+    // for testing parallel GridFactory
+    void insertProcessBorder ( const int element, const int face )
+    {
+      insertBoundary( element, face, ALU3DSPACE Gitter::hbndseg::closure );
+    }
 
     /** \brief insert a boundary projection into the macro grid
      *
@@ -175,7 +186,7 @@ namespace Dune
      */
     virtual void
     insertBoundaryProjection ( const GeometryType &type,
-                               const std::vector< unsigned int > &vertices,
+                               const std::vector< VertexId > &vertices,
                                const DuneBoundaryProjectionType *projection );
 
     /** \brief insert a boundary segment into the macro grid
@@ -183,7 +194,7 @@ namespace Dune
      *  \param[in]  vertices         vertex indices of boundary face
      */
     virtual void
-    insertBoundarySegment ( const std::vector< unsigned int >& vertices ) ;
+    insertBoundarySegment ( const std::vector< VertexId >& vertices ) ;
 
     /** \brief insert a shaped boundary segment into the macro grid
      *
@@ -191,7 +202,7 @@ namespace Dune
      *  \param[in]  boundarySegment  geometric realization of shaped boundary
      */
     virtual void
-    insertBoundarySegment ( const std::vector< unsigned int >& vertices,
+    insertBoundarySegment ( const std::vector< VertexId >& vertices,
                             const shared_ptr<BoundarySegment<3,3> >& boundarySegment ) ;
 
     /** \brief insert a boundary projection object, (a copy is made)
@@ -213,7 +224,7 @@ namespace Dune
 
     /** \brief finalize the grid creation and hand over the grid
      *
-     *  The called takes responsibility for deleing the grid.
+     *  The caller takes responsibility for deleing the grid.
      */
     Grid *createGrid ();
 
@@ -244,6 +255,18 @@ namespace Dune
     }
 
   private:
+    size_t globalId ( const VertexId &id ) const
+    {
+      assert( id < vertices_.size() );
+      return vertices_[ id ].second;
+    }
+
+    const VertexType &position ( const VertexId &id ) const
+    {
+      assert( id < vertices_.size() );
+      return vertices_[ id ].first;
+    }
+
     void assertGeometryType( const GeometryType &geometry );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
@@ -479,7 +502,7 @@ namespace Dune
       assert( vertices_.size() > vertices[ i ] );
 
       // get global coordinate and copy it
-      const VertexType &x = vertices_[ vertices[ i ] ];
+      const VertexType &x = position( vertices[ i ] );
       for( unsigned int j = 0; j < dimensionworld; ++j )
         coords[ i ][ j ] = x[ j ];
     }
