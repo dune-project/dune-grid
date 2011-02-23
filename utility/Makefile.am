@@ -1,4 +1,5 @@
 SUBDIRS =					\
+	alu-to-vtk				\
 	gmsh-to-alu				\
 	gridinfo-gmsh
 
