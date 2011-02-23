@@ -53,7 +53,10 @@ int main(int argc, char **argv) {
       "  TAGS_PREFIX If given, read element tag numbers from a series of files of\n"
       "    the form TAG_PREFIX.RANK.  The file format is the same the output of\n"
       "    gmsh-to-alu: ASCII with one line per mesh element, each line consisting\n"
-      "    of a whitespace-separated pair of local-ID and physical entity number.\n"
+      "    of an integral tag number.  White space in the beginning and the end of\n"
+      "    the line is ignored.  Comment lines start with '#' as the first non-\n"
+      "    whitespace character, they are ignored, as are line consisting of\n"
+      "    whitespace only.\n"
       << std::flush;
       return 1;
     }
@@ -68,8 +71,8 @@ int main(int argc, char **argv) {
              << Dune::MPIHelper::getCollectiveCommunication().rank();
 
     Grid grid(rankName.str());
-    typedef Grid::LeafGridView GV;
-    const GV &gv = grid.leafView();
+    typedef Grid::LevelGridView GV;
+    const GV &gv = grid.levelView(0);
 
     //////////////////////////////////////////////////////////////////////
     //
@@ -78,7 +81,11 @@ int main(int argc, char **argv) {
 
     std::vector<int> elementTags;
     if(tagsName != "") {
-      std::map<Grid::LocalIdSet::IdType, int> tagMap;
+      typedef Dune::MultipleCodimMultipleGeomTypeMapper<
+          GV, Dune::MCMGElementLayout
+          > Mapper;
+      Mapper mapper(gv);
+      elementTags.resize(mapper.size(), 0);
 
       std::ostringstream s;
       s << tagsName << "." << grid.comm().rank();
@@ -86,25 +93,31 @@ int main(int argc, char **argv) {
       if(!file)
         DUNE_THROW(Dune::IOError, s.str() << ": Can't open tags-file for "
                    "reading");
-      for(std::size_t lineNo = 0; !file.eof(); ++lineNo) {
+
+
+      std::size_t lineNo = 0;
+      const GV::Codim<0>::Iterator &end = gv.end<0>();
+      for(GV::Codim<0>::Iterator it = gv.begin<0>(); it != end; ++it, ++lineNo)
+      {
         std::string buf;
         std::getline(file, buf);
-        // Don't complain on conversion errors (fail()) at eof, since we will
-        // get a conversion error for the
-        // zero-length-line-without-final-newline at eof.
-        if(file.bad() || (file.fail() && !file.eof()))
-          DUNE_THROW(Dune::IOError, s.str() << ":" << lineNo << ": Read "
-                     "error.");
+        if(file.fail()) {
+          if(file.eof())
+            DUNE_THROW(Dune::IOError, s.str() << ":" << lineNo << ": EOF "
+                       "reached before all data could be read.");
+          else
+            DUNE_THROW(Dune::IOError, s.str() << ":" << lineNo << ": Read "
+                       "error.");
+        }
 
         // skip empty lines and comments
         std::size_t pos = buf.find_first_not_of(" \t");
         if(pos == std::string::npos || buf[pos] == '#')
           continue;
 
-        Grid::LocalIdSet::IdType id;
         int tag;
         std::istringstream line(buf);
-        line >> id >> tag;
+        line >> tag;
         bool fail = !line;
         // make sure there is no garbage at eol except whitespace: try to
         // extract another char which should fail.
@@ -115,23 +128,10 @@ int main(int argc, char **argv) {
         }
         if(fail)
           DUNE_THROW(Dune::IOError, s.str() << ":" << lineNo << ": Invalid "
-                     "formatted input line (expected \"localId tag\\n\")");
-        tagMap[id] = tag;
-
+                     "formatted input line (expected integral tag)");
+        elementTags[mapper.map(*it)] = tag;
       }
 
-      // copy into vector
-      const GV::Codim<0>::Iterator &end = gv.end<0>();
-      const Grid::LocalIdSet &lid = grid.localIdSet();
-      typedef Dune::MultipleCodimMultipleGeomTypeMapper<
-          GV, Dune::MCMGElementLayout
-          > Mapper;
-      Mapper mapper(gv);
-      elementTags.resize(mapper.size(), 0);
-      for(GV::Codim<0>::Iterator it = gv.begin<0>(); it != end; ++it)
-        elementTags[mapper.map(*it)] = tagMap[lid.id(*it)];
-
-      // no need to communicate ghost data -- ghosts won't be written anyway
     }
 
     //////////////////////////////////////////////////////////////////////

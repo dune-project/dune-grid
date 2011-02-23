@@ -135,8 +135,8 @@ int main(int argc, char **argv) {
       "  TAGS_PREFIX If given, read physical entitity numbers from the .msh file\n"
       "    and write them into a series of files of the form TAG_PREFIX.RANK.  The\n"
       "    file format is ASCII with one line per mesh element, each line\n"
-      "    consisting of a whitespace-separated pair of local-ID and physical\n"
-      "    entity number.  Data is only stored for interior entities.\n"
+      "    consisting of a physical.  The lines are written in level 0 iteration\n"
+      "    order for all partition types.\n"
       << std::flush;
       return 1;
     }
@@ -172,8 +172,8 @@ int main(int argc, char **argv) {
     typedef std::map<Id, int> TagMap;
     TagMap elementTagMap;
     if(tagsName != "") {
-      typedef Grid::LeafGridView GV;
-      const GV &gv = gridp->leafView();
+      typedef Grid::LevelGridView GV;
+      const GV &gv = gridp->levelView(0);
       const Grid::LocalIdSet &lis = gridp->localIdSet();
       const GV::Codim<0>::Iterator end = gv.end<0>();
       for(GV::Codim<0>::Iterator it = gv.begin<0>(); it != end; ++it)
@@ -193,6 +193,9 @@ int main(int argc, char **argv) {
       DataHandle dh(*gridp, elementTagMap);
       gridp->loadBalance
         (static_cast<Dune::CommDataHandleIF<DataHandle, int>&>(dh));
+      // also communicate data on non-interior elements
+      gridp->levelView(0).communicate(dh, Dune::InteriorBorder_All_Interface,
+                                      Dune::ForwardCommunication);
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -235,15 +238,12 @@ int main(int argc, char **argv) {
         DUNE_THROW(Dune::IOError, "Can't open tags-file " << s.str() << " for "
                    "writing");
 
-      typedef Grid::LeafGridView GV;
-      const GV &gv = gridp->leafView();
+      typedef Grid::LevelGridView GV;
+      const GV &gv = gridp->levelView(0);
       const Grid::LocalIdSet &lis = gridp->localIdSet();
       const GV::Codim<0>::Iterator &end = gv.end<0>();
       for(GV::Codim<0>::Iterator it = gv.begin<0>(); it != end; ++it)
-        if(it->partitionType() == Dune::InteriorEntity) {
-          Grid::LocalIdSet::IdType id = lis.id(*it);
-          file << id << " " << elementTagMap[id] << "\n";
-        }
+        file << elementTagMap[lis.id(*it)] << "\n";
 
       if(!file)
         DUNE_THROW(Dune::IOError, "Write error while writing tags to "
