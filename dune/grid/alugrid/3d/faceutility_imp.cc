@@ -291,6 +291,15 @@ namespace Dune
   }
 
   template< ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< type, Comm >::outsideLevel() const
+  {
+    assert( outerElement_ );
+    assert( !isElementLike() || outerEntity().level() == outerElement_->nbLevel() );
+    assert( isElementLike() || boundaryFace().level() == outerElement_->nbLevel() );
+    return outerElement_->nbLevel();
+  }
+
+  template< ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< type, Comm >::segmentIndex() const
   {
     assert( segmentIndex_ >= 0 );

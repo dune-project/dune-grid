@@ -495,8 +495,8 @@ namespace Dune {
   inline int
   ALU3dGridIntersectionIterator<GridImp>::
   level() const {
-    assert( item_ );
-    return item_->level();
+    assert( item_ && (innerLevel_ == item_->level()) );
+    return innerLevel_;
   }
 
   /************************************************************************************

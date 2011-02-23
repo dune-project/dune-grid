@@ -222,6 +222,8 @@ namespace Dune {
     //! return level of iterator (level of item)
     int level () const;
 
+    int outsideLevel () const { return connector_.outsideLevel(); }
+
     //! return true if intersection is conforming
     bool conforming () const
     {

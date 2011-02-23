@@ -121,6 +121,8 @@ namespace Dune
     //! Local number of the face in outer element (ALU3dGrid reference element)
     int outerALUFaceIndex() const;
 
+    int outsideLevel() const;
+
     //! return boundary segment index if intersection is with domain boundary
     int segmentIndex() const;
 
