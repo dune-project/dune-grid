@@ -1076,6 +1076,10 @@ namespace Dune {
         return id;
       }
 
+      // map to old numbering
+      static unsigned int edge[ 12 ] = { 0, 1, 2, 3, 4, 5, 8, 9, 6, 7, 10, 11 };
+      i = edge[i];
+
       if (cc==dim-1) // edges, exist only for dim>2
       {
         // Idea: direction i is fixed, all others are vary, i.e. 2^(dim-1) possibilities per direction
@@ -1169,6 +1173,10 @@ namespace Dune {
 
         return index;
       }
+
+      // map to old numbering
+      static unsigned int edge[ 12 ] = { 0, 1, 2, 3, 4, 5, 8, 9, 6, 7, 10, 11 };
+      i = edge[i];
 
       if (cc==dim-1) // edges, exist only for dim>2
       {
@@ -1269,6 +1277,10 @@ namespace Dune {
 
         return index;
       }
+
+      // map to old numbering
+      static unsigned int edge[ 12 ] = { 0, 1, 2, 3, 4, 5, 8, 9, 6, 7, 10, 11 };
+      i = edge[i];
 
       if (cc==dim-1) // edges, exist only for dim>2
       {
