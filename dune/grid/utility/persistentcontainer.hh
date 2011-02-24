@@ -227,9 +227,10 @@ namespace Dune
     class MyIterator
     {
       IteratorType it_;
+    public:
       // get correct data type (const or non-const)
       typedef typename DataExtractor<Data, IteratorType> :: Type value_type ;
-    public:
+
       MyIterator(const IteratorType& it) : it_( it ) {}
       MyIterator(const MyIterator& other) : it_( other.it_ ) {}
 
