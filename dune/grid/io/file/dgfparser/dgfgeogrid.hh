@@ -129,7 +129,7 @@ namespace Dune
       HostGrid *hostGrid = dgfHostFactory_.grid();
       assert( hostGrid != 0 );
       CoordFunction *coordFunction = CoordFunctionFactory::create( input, *hostGrid );
-      grid_ = new Grid( *hostGrid, *coordFunction );
+      grid_ = new Grid( hostGrid, coordFunction );
     }
 
     explicit DGFGridFactory ( const std::string &filename,
@@ -141,7 +141,7 @@ namespace Dune
       assert( hostGrid != 0 );
       std::ifstream input( filename.c_str() );
       CoordFunction *coordFunction = CoordFunctionFactory::create( input, *hostGrid );
-      grid_ = new Grid( *hostGrid, *coordFunction );
+      grid_ = new Grid( hostGrid, coordFunction );
     }
 
     Grid *grid () const
