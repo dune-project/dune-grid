@@ -429,6 +429,25 @@ namespace Dune
     GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction )
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
+        removeHostGrid_( false ),
+        levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
+        leafIndexSet_( 0 ),
+        globalIdSet_( 0 ),
+        localIdSet_( 0 )
+    {}
+
+    /** \brief constructor
+     *
+     *  The grid takes ownership of the pointers to host grid and coordinate
+     *  function. They will be deleted when the grid is destroyed.
+     *
+     *  \param[in]  hostGrid       pointer to the grid to wrap
+     *  \param[in]  coordFunction  pointer to the coordinate function
+     */
+    GeometryGrid ( HostGrid *hostGrid, CoordFunction *coordFunction )
+      : hostGrid_( &hostGrid ),
+        coordFunction_( *coordFunction ),
+        removeHostGrid_( true ),
         levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
         leafIndexSet_( 0 ),
         globalIdSet_( 0 ),
@@ -451,6 +470,12 @@ namespace Dune
       {
         if( levelIndexSets_[ i ] )
           delete( levelIndexSets_[ i ] );
+      }
+
+      if( removeHostGrid_ )
+      {
+        delete &coordFunction_;
+        delete hostGrid_;
       }
     }
 
@@ -908,6 +933,7 @@ namespace Dune
   private:
     HostGrid *const hostGrid_;
     CoordFunction &coordFunction_;
+    bool removeHostGrid_;
     mutable std::vector< LevelIndexSet * > levelIndexSets_;
     mutable LeafIndexSet *leafIndexSet_;
     mutable GlobalIdSet *globalIdSet_;

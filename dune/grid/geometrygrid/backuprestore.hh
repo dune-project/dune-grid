@@ -3,6 +3,7 @@
 #ifndef DUNE_GEOGRID_BACKUPRESTORE_HH
 #define DUNE_GEOGRID_BACKUPRESTORE_HH
 
+#include <dune/grid/common/backuprestore.hh>
 #include <dune/grid/utility/grapedataioformattypes.hh>
 
 #include <dune/grid/geometrygrid/capabilities.hh>
@@ -61,8 +62,48 @@ namespace Dune
       }
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+
+
+  // BackupRestoreFacility for GeometryGrid
+  // --------------------------------------
+
+  template< class HostGrid, class CoordFunction, class Allocator >
+  struct BackupRestoreFacility< GeometryGrid< HostGrid, CoordFunction, Allocator > >
+  {
+    typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
+    typedef BackupRestoreFacility< HostGrid > HostBackupRestoreFacility;
+
+    static void backup ( const Grid &grid, const std::string &path, const std::string &fileprefix )
+    {
+      // notice: We should also backup the coordinate function
+      HostBackupRestoreFacility::backup( grid.hostGrid(), path, fileprefix );
+    }
+
+    static void backup ( const Grid &grid, const std::ostream &stream )
+    {
+      // notice: We should also backup the coordinate function
+      HostBackupRestoreFacility::backup( grid.hostGrid(), stream );
+    }
+
+    static Grid *restore ( const std::string &path, const std::string &fileprefix )
+    {
+      // notice: We should also restore the coordinate function
+      HostGrid *hostGrid = HostBackupRestoreFacility::restore( path, fileprefix );
+      CoordFunction *coordFunction = new CoordFunction();
+      return new Grid( hostGrid, coordFunction );
+    }
+
+    static Grid *restore ( const std::istream &stream )
+    {
+      // notice: We should also restore the coordinate function
+      HostGrid *hostGrid = HostBackupRestoreFacility::restore( stream );
+      CoordFunction *coordFunction = new CoordFunction();
+      return new Grid( hostGrid, coordFunction );
+    }
+  };
+
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_BACKUPRESTORE_HH
