@@ -430,7 +430,7 @@ namespace Dune
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
         removeHostGrid_( false ),
-        levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
+        levelIndexSets_( hostGrid_->maxLevel()+1, (LevelIndexSet *) 0 ),
         leafIndexSet_( 0 ),
         globalIdSet_( 0 ),
         localIdSet_( 0 )
@@ -445,10 +445,10 @@ namespace Dune
      *  \param[in]  coordFunction  pointer to the coordinate function
      */
     GeometryGrid ( HostGrid *hostGrid, CoordFunction *coordFunction )
-      : hostGrid_( &hostGrid ),
+      : hostGrid_( hostGrid ),
         coordFunction_( *coordFunction ),
         removeHostGrid_( true ),
-        levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
+        levelIndexSets_( hostGrid_->maxLevel()+1, (LevelIndexSet *) 0 ),
         leafIndexSet_( 0 ),
         globalIdSet_( 0 ),
         localIdSet_( 0 )
