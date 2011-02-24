@@ -814,6 +814,15 @@ void gridcheck (Grid &g)
   typedef typename Grid  :: ctype ctype;
   typedef typename Grid  :: GridFamily GridFamily;
 
+  /*
+   * Check whether we have a nonzero number of entities in each view
+   */
+  for (int i=0; i<=dim; i++) {
+    assert(g.size(i)>0);
+    for (int j=0; j<=g.maxLevel(); j++)
+      assert(g.size(j,i)>0);
+  }
+
 #if DUNE_VERBOSE_TESTS
   // print infos
   Dune::gridinfo(g, "GridInfo");
