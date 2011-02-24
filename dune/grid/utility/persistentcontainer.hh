@@ -206,10 +206,29 @@ namespace Dune
     typedef typename Map :: iterator iterator ;
     typedef typename Map :: const_iterator const_iterator ;
 
+    template <class D, class IteratorType >
+    struct DataExtractor ;
+
+    // Data type for iterator
+    template <class D>
+    struct DataExtractor< D, iterator >
+    {
+      typedef D Type ;
+    };
+
+    // Data type for const iterator
+    template <class D>
+    struct DataExtractor< D, const_iterator >
+    {
+      typedef const D Type ;
+    };
+
     template <class IteratorType>
     class MyIterator
     {
       IteratorType it_;
+      // get correct data type (const or non-const)
+      typedef typename DataExtractor<Data, IteratorType> :: Type value_type ;
     public:
       MyIterator(const IteratorType& it) : it_( it ) {}
       MyIterator(const MyIterator& other) : it_( other.it_ ) {}
@@ -222,8 +241,8 @@ namespace Dune
         ++it_;
         return *this;
       }
-      Data& operator * () { return (*it_).second; }
-      Data* operator -> () { return &((*it_).second); }
+      value_type& operator * () { return (*it_).second; }
+      value_type* operator -> () { return &((*it_).second); }
       MyIterator& operator = (const MyIterator& other)
       {
         it_ = other.it_;
