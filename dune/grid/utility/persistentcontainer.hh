@@ -50,9 +50,10 @@ namespace Dune
   template <class Grid, class Index, class Vector>
   class PersistentContainerVector
   {
-  protected:
+  public:
     typedef typename Vector::value_type Data;
     typedef Grid GridType;
+  protected:
     const int codim_;
     const Index& index_;
     const double overEstimate_;
@@ -422,7 +423,9 @@ namespace Dune
           std::map<const typename Grid::Traits::LocalIdSet::IdType, Data,
               std::less<const typename Grid::Traits::LocalIdSet::IdType>, Allocator> >
   {
+  public:
     typedef Grid GridType;
+  protected:
     typedef typename Grid::Traits::LocalIdSet IdSet;
     typedef typename IdSet::IdType IdType;
     typedef std::map<const IdType, Data, std::less<const IdType>, Allocator> Map;
