@@ -36,7 +36,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
     /** \todo codim 1 (faces) */
     if (dim==3)
       for (int i=0; i<eIt->template count<1>(); i++)
-        UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,i)) = -1;
+        UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,i)) = std::numeric_limits<UG::UINT>::max();
 
   }
 
@@ -91,7 +91,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
       for (int i=0; i<eIt->template count<1>(); i++)
       {
         UG::UINT& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target,UGGridRenumberer<dim>::facesDUNEtoUG(i,eType)));
-        if (index<0) {             // not visited yet
+        if (index == std::numeric_limits<UG::UINT>::max()) {             // not visited yet
           GeometryType gtType = GenericReferenceElements<double,dim>::general(eType).type(i,1);
           if (gtType.isSimplex()) {
             index = numTriFaces_++;
