@@ -87,9 +87,6 @@ namespace Dune
       std::cout << "\nCreated empty ALUCubeGrid<"<<dim<<","<<dimworld <<">. \n\n";
     }
 
-    //! return name of the grid
-    static inline std::string name () DUNE_DEPRECATED { return "ALUCubeGrid"; }
-
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     enum { refineStepsForHalf = 1 };
     typedef typename BaseType::ctype ctype;
@@ -237,9 +234,6 @@ namespace Dune
     {
       std::cout << "\nCreated empty ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
     }
-
-    //! return name of the grid
-    static inline std::string name () DUNE_DEPRECATED { return "ALUSimplexGrid"; }
 
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     enum { refineStepsForHalf = 1 };
