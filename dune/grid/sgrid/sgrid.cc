@@ -673,16 +673,30 @@ namespace Dune {
     // define coarse mesh
     for (int i=0; i<MAXL; i++)
     {
-      for (int d=0; d<<dim; d++)
-        N[i][d] = N_[d] * (1<<i);
-      mapper[i].make(N[i]);
       for (int d=0; d<dim; d++)
-        h[i][d] = (H[d]-low[d])/((ctype)N[0][d]);
+      {
+        N[i][d] = N_[d] * (1<<i);
+        h[i][d] = (H[d]-low[d])/((ctype)N[i][d]);
+      }
+      mapper[i].make(N[i]);
     }
 
     dinfo << "level=" << L-1 << " size=(" << N[L-1][0];
     for (int i=1; i<dim; i++) dinfo << "," <<  N[L-1][i];
     dinfo << ")" << std::endl;
+
+    // initialize boundary segment mappers
+    boundarysize = 0;
+    for (int d=0; d<dim; d++)
+    {
+      array<int,dim-1> fsize;
+      for (int i=0; i<d; i++)
+        fsize[i] = N_[i];
+      for (int i=d+1; i<dim; i++)
+        fsize[i-1] = N_[i];
+      boundarymapper[d].make(fsize);
+      boundarysize += 2 * boundarymapper[d].elements(0);
+    }
   }
 
   template<int dim, int dimworld, typename ctype>
