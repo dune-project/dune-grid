@@ -816,11 +816,16 @@ void gridcheck (Grid &g)
 
   /*
    * Check whether we have a nonzero number of entities in each view
+   * in case the grid is non-empty
    */
-  for (int i=0; i<=dim; i++) {
-    assert(g.size(i)>0);
-    for (int j=0; j<=g.maxLevel(); j++)
-      assert(g.size(j,i)>0);
+  if( g.size( 0 ) > 0 )
+  {
+    for (int i=0; i<=dim; i++)
+    {
+      assert(g.size(i)>0);
+      for (int j=0; j<=g.maxLevel(); j++)
+        assert(g.size(j,i)>0);
+    }
   }
 
 #if DUNE_VERBOSE_TESTS
