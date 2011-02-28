@@ -604,19 +604,9 @@ namespace Dune {
       return (vertexProjection_ != 0);
     }
 
-  protected:
     using BaseType :: getRealImplementation ;
 
   public:
-    template< class IntersectionInterfaceType >
-    const typename BaseType
-    :: template ReturnImplementationType< IntersectionInterfaceType>
-    :: ImplementationType & DUNE_DEPRECATED
-    getRealIntersectionIterator ( const IntersectionInterfaceType &it ) const
-    {
-      return this->getRealImplementation(it);
-    }
-
     template< class IntersectionType >
     const typename BaseType
     :: template ReturnImplementationType< IntersectionType>
