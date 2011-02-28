@@ -182,12 +182,6 @@ namespace Dune {
     }
 
     //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<ctype, cdim>& operator[] (int i) const DUNE_DEPRECATED
-    {
-      return corner(i);
-    }
-
-    //! access to coordinates of corners. Index is the number of the corner
     FieldVector< ctype, cdim > corner ( const int i ) const
     {
       assert( i >= 0 && i < (int) coord_.N() );
