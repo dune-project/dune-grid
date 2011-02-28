@@ -1063,40 +1063,6 @@ namespace Dune
     VTK::OutputType outputtype;
   };
 
-  /** \brief VTKWriter on the leaf grid
-      \ingroup VTK
-   */
-  template< class Grid >
-  class LeafVTKWriter
-    : public VTKWriter< typename Grid::LeafGridView >
-  {
-    typedef VTKWriter< typename Grid::LeafGridView > Base;
-
-  public:
-    /** \brief Construct a VTK writer for the leaf level of a given grid */
-    explicit LeafVTKWriter ( const Grid &grid,
-                             VTK::DataMode dm = VTK::conforming ) DUNE_DEPRECATED
-      : Base( grid.leafView(), dm )
-    {}
-  };
-
-  /** \brief VTKWriter on a given level grid
-      \ingroup VTK
-   */
-  template< class Grid >
-  class LevelVTKWriter
-    : public VTKWriter< typename Grid::LevelGridView >
-  {
-    typedef VTKWriter< typename Grid::LevelGridView > Base;
-
-  public:
-    /** \brief Construct a VTK writer for a certain level of a given grid */
-    LevelVTKWriter ( const Grid &grid, int level,
-                     VTK::DataMode dm = VTK::conforming ) DUNE_DEPRECATED
-      : Base( grid.levelView( level ), dm )
-    {}
-  };
-
 }
 
 #endif
