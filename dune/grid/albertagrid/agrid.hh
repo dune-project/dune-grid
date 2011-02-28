@@ -629,15 +629,6 @@ namespace Dune
       return getRealImplementation( intersection );
     }
 
-    template< class Intersection >
-    DUNE_DEPRECATED
-    const typename Base
-    ::template ReturnImplementationType< Intersection >::ImplementationType &
-    getRealIntersection ( const Intersection &intersection ) const
-    {
-      return getRealImplementation( intersection );
-    }
-
   public:
     // read global element number from elNumbers_
     const Alberta::GlobalVector &
