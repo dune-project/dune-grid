@@ -47,14 +47,6 @@ namespace Dune
     using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::map;
     using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::contains;
 
-    /** @brief Construct mapper from grid and one fo its index sets.
-
-       \param grid A Dune grid object.
-       \param indexset IndexSet object returned by grid.
-
-     */
-    SingleCodimSingleGeomTypeMapper (const typename GV::Grid& grid, const typename GV::IndexSet& indexset) DUNE_DEPRECATED;
-
     /** @brief Construct mapper from grid and one of its index sets.
 
        \param gridView A Dune GridView object.
@@ -119,15 +111,6 @@ namespace Dune
   };
 
   /** @} */
-
-  template <typename GV, int c>
-  SingleCodimSingleGeomTypeMapper<GV,c>::SingleCodimSingleGeomTypeMapper (const typename GV::Grid& grid, const typename GV::IndexSet& indexset)
-    : is(indexset)
-  {
-    // check that grid has only a single geometry type
-    if (is.geomTypes(c).size() != 1)
-      DUNE_THROW(GridError, "mapper treats only a single codim and a single geometry type");
-  }
 
   template <typename GV, int c>
   SingleCodimSingleGeomTypeMapper<GV,c>::SingleCodimSingleGeomTypeMapper (const GV& gridView)
