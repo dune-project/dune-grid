@@ -98,7 +98,7 @@ test_alberta_LDADD =				\
 
 test_alberta_generic_SOURCES = $(test_alberta_SOURCES)
 test_alberta_generic_CPPFLAGS = $(test_alberta_CPPFLAGS) -DDUNE_ALBERTA_USE_GENERICGEOMETRY=1
-test_alberta_generic_LDFLAGS = $(test_alberta_LDLFAGS)
+test_alberta_generic_LDFLAGS = $(test_alberta_LDFLAGS)
 test_alberta_generic_LDADD = $(test_alberta_LDADD)
 
 # files for alugrid
