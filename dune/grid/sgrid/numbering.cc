@@ -99,7 +99,7 @@ namespace Dune {
   CubeMapper<dim>::CubeMapper ()
   {
     array<int,dim> M;
-    for (int i=0; i<dim; i++) M[i] = 1;
+    M.fill(1);
     make(M);
   }
 
@@ -109,23 +109,22 @@ namespace Dune {
     // store argument
     N=_NN;
 
+    array<int,dim> t;
+    t.fill(1);
+
     // preprocess binary partitions
     for (int i=0; i<=dim; i++) ne[i] = 0;
     for (int b=0; b<power2(dim); b++)     // loop over all binary partitions
     {
       int mask=1;
-      array<int,dim> t = {};
       for (int i=0; i<dim; i++)
       {
+        // bit i is odd
+        t[i] = N[i];
         if (b&mask)
         {
           // bit i is even
-          t[i] = N[i]+1;
-        }
-        else
-        {
-          // bit i is odd
-          t[i] = N[i];
+          t[i]++;
         }
         mask *= 2;
       }
