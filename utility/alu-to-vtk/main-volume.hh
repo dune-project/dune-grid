@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
 
       std::ostringstream s;
       s << tagsName << "." << grid.comm().rank();
-      std::ifstream file(s.str());
+      std::ifstream file(s.str().c_str());
       if(!file)
         DUNE_THROW(Dune::IOError, s.str() << ": Can't open tags-file for "
                    "reading");

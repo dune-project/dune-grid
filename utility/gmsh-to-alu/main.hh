@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
     if(tagsName != "") {
       std::ostringstream s;
       s << tagsName << "." << gridp->comm().rank();
-      std::ofstream file(s.str());
+      std::ofstream file(s.str().c_str());
       if(!file)
         DUNE_THROW(Dune::IOError, "Can't open tags-file " << s.str() << " for "
                    "writing");
