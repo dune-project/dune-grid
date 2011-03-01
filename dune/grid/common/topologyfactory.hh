@@ -91,13 +91,13 @@ namespace Dune
     static Object *create ( const unsigned int topologyId, const Key &key ) DUNE_DEPRECATED
     {
       assert( topologyId < numTopologies );
-      return instance().getObject( topologyId, key );
+      return create( Dune::GeometryType( topologyId, dimension ), key );
     }
     //! @copydoc TopologyFactory::create(const Dune::GeometryType &gt,const Key &key)
-    static Object *create(const Dune::GeometryType &gt, const Key &key)
+    static Object *create ( const Dune::GeometryType &gt, const Key &key )
     {
       assert( gt.id() < numTopologies );
-      return instance().getObject( gt.id(), key );
+      return instance().getObject( gt, key );
     }
     //! @copydoc TopologyFactory::create(const Key &key)
     template< class Topology >
@@ -146,13 +146,14 @@ namespace Dune
       return it->second[ topologyId ];
     }
 
-    Object *getObject ( const unsigned int topologyId, const Key &key )
+    Object *getObject ( const Dune::GeometryType &gt, const Key &key )
     {
-      Object *&object = find(topologyId,key);
+      Object *&object = find( gt.id(), key );
       if( object == 0 )
-        object = Factory::create( topologyId, key );
+        object = Factory::create( gt, key );
       return object;
     }
+
     template< class Topology >
     Object *getObject ( const Key &key )
     {
