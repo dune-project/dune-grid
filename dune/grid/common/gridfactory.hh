@@ -93,19 +93,7 @@ namespace Dune
     GridFactoryInterface()
     {}
 
-    /** \brief Constructor for a given grid object
-
-       If you already have your grid object constructed you can
-       hand it over using this constructor.  A reason may be that
-       you have need a UGGrid object with a non-default heap size.
-
-       If you construct your factory class using this constructor
-       the pointer handed over to you by the method createGrid() is
-       the one you supplied here.
-     */
-    DUNE_DEPRECATED GridFactoryInterface(GridType* grid)
-    {}
-
+    /** \brief virtual destructor */
     virtual ~GridFactoryInterface ()
     {}
 
@@ -285,22 +273,6 @@ namespace Dune
     GridFactory() {
       DUNE_THROW(GridError, "There is no grid factory for this grid type!");
     }
-
-    /** \brief Constructor for a given grid object
-
-       If you already have your grid object constructed you can
-       hand it over using this constructor.  A reason may be that
-       you have need a UGGrid object with a non-default heap size.
-
-       If you construct your factory class using this constructor
-       the pointer handed over to you by the method createGrid() is
-       the one you supplied here.
-     */
-    DUNE_DEPRECATED GridFactory(GridType* grid)
-    {
-      DUNE_THROW(GridError, "There is no grid factory for this grid type!");
-    }
-
 
     /** \brief Insert a vertex into the coarse grid */
     virtual void insertVertex(const FieldVector<ctype,dimworld>& pos) {
