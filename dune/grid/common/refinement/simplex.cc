@@ -940,15 +940,34 @@ namespace Dune {
      */
     // Adrian:
     template<class CoordType, int dim>
-    struct Traits<
-        GenericGeometry::SimplexTopology<dim>::type::id & ~1
-        , CoordType
-        , GenericGeometry::SimplexTopology<dim>::type::id & ~1
-        , dim
-        >
+    struct SimplexTraits
     {
       typedef Simplex::RefinementImp<dim, CoordType> Imp;
     };
+
+    template<class CoordType>
+    struct Traits<
+        GenericGeometry::SimplexTopology< 3 >::type::id & ~1
+        , CoordType
+        , GenericGeometry::SimplexTopology< 3 >::type::id & ~1
+        , 3
+        > : public SimplexTraits< CoordType, 3 > {};
+
+    template<class CoordType>
+    struct Traits<
+        GenericGeometry::SimplexTopology< 2 >::type::id & ~1
+        , CoordType
+        , GenericGeometry::SimplexTopology< 2 >::type::id & ~1
+        , 2
+        > : public SimplexTraits< CoordType, 2 > {};
+
+    template<class CoordType>
+    struct Traits<
+        GenericGeometry::SimplexTopology< 1 >::type::id & ~1
+        , CoordType
+        , GenericGeometry::SimplexTopology< 1 >::type::id & ~1
+        , 1
+        > : public SimplexTraits< CoordType, 1 > {};
 
 
   } // namespace RefinementImp
