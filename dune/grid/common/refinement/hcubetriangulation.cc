@@ -496,16 +496,28 @@ namespace Dune {
     //
 
     template<class CoordType, int dim>
-    struct Traits<
-        GenericGeometry::CubeTopology<dim>::type::id & ~1
-        , CoordType
-        , GenericGeometry::SimplexTopology<dim>::type::id & ~1
-        , dim
-        , typename enable_if<(dim >= 2)>::type
-        >
+    struct HCubeTraits
     {
       typedef HCubeTriangulation::RefinementImp<dim, CoordType> Imp;
     };
+
+    template<class CoordType>
+    struct Traits<
+        GenericGeometry::CubeTopology< 3 >::type::id & ~1
+        , CoordType
+        , GenericGeometry::SimplexTopology< 3 >::type::id & ~1
+        , 3
+        , typename enable_if< true >::type
+        > : public HCubeTraits< CoordType, 3 > {};
+
+    template<class CoordType>
+    struct Traits<
+        GenericGeometry::CubeTopology< 2 >::type::id & ~1
+        , CoordType
+        , GenericGeometry::SimplexTopology< 2 >::type::id & ~1
+        , 2
+        , typename enable_if< true >::type
+        > : public HCubeTraits< CoordType, 2 > {};
 
   } // namespace RefinementImp
 
