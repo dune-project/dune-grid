@@ -47,11 +47,17 @@ namespace Dune {
        @tparam CoordType  The C++ type of the coordinates
        @tparam coerceToId The topologyId of the subelements
        @tparam dimension  The dimension of the refinement.
+       @tparam Dummy      Dummy parameter which can be used for SFINAE, should
+                          always be void.
 
        Each @ref Refinement implementation has to define one or more
        specialisations of this struct to declare what it implements.
        Template class Refinement uses this struct to know which
-       implementation it should inherit from.
+       implementation it should inherit from.  Since non-type template
+       arguments of specializations may not involve template parameters, it is
+       often impossible to specify the specialization for all cases directly.
+       As the workaround, the template parameter \c Dummy can be used for
+       SFINAE with \ref enable_if.
 
        Each specialisation should contain a single member typedef Imp,
        e.g.:
@@ -64,7 +70,7 @@ namespace Dune {
        @endcode
      */
     template<unsigned topologyId, class CoordType,
-        unsigned coerceToId, int dimension>
+        unsigned coerceToId, int dimension, class Dummy = void>
     struct Traits
     {
       //! The implementation this specialisation maps to
@@ -82,13 +88,7 @@ namespace Dune {
         , int dimension
         , class = void
         >
-    struct Traits
-      : public Traits< topologyId & (~1)
-            , CoordType
-            , coerceToId & (~1)
-            , dimension
-            >
-    { };
+    struct Traits;
 
 #endif // !DOXYGEN
   } // namespace RefinementImp

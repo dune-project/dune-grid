@@ -925,49 +925,20 @@ namespace Dune {
     // The refinement traits
     //
 
-
-    /*
-       template<class CoordType, int dim>
-       struct Traits<
-       GeometryType::simplex,
-       CoordType,
-       GeometryType::simplex,
-       dim
-       >
-       {
-       typedef Simplex::RefinementImp<dim, CoordType> Imp;
-       };
-     */
-    // Adrian:
-    template<class CoordType, int dim>
-    struct SimplexTraits
+    template<unsigned topologyId, class CoordType, unsigned coerceToId,
+        int dim>
+    struct Traits<
+        topologyId, CoordType, coerceToId, dim,
+        typename enable_if<
+            ((GenericGeometry::SimplexTopology<dim>::type::id >> 1) ==
+             (topologyId >> 1) &&
+             (GenericGeometry::SimplexTopology<dim>::type::id >> 1) ==
+             (coerceToId >> 1)
+            )>::type
+        >
     {
       typedef Simplex::RefinementImp<dim, CoordType> Imp;
     };
-
-    template<class CoordType>
-    struct Traits<
-        GenericGeometry::SimplexTopology< 3 >::type::id & ~1
-        , CoordType
-        , GenericGeometry::SimplexTopology< 3 >::type::id & ~1
-        , 3
-        > : public SimplexTraits< CoordType, 3 > {};
-
-    template<class CoordType>
-    struct Traits<
-        GenericGeometry::SimplexTopology< 2 >::type::id & ~1
-        , CoordType
-        , GenericGeometry::SimplexTopology< 2 >::type::id & ~1
-        , 2
-        > : public SimplexTraits< CoordType, 2 > {};
-
-    template<class CoordType>
-    struct Traits<
-        GenericGeometry::SimplexTopology< 1 >::type::id & ~1
-        , CoordType
-        , GenericGeometry::SimplexTopology< 1 >::type::id & ~1
-        , 1
-        > : public SimplexTraits< CoordType, 1 > {};
 
 
   } // namespace RefinementImp
