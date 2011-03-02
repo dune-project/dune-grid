@@ -398,7 +398,7 @@ namespace Dune
         {
           info->block(bsimplex);
           nofelements += bsimplex.get( elements, elParams, nofelparams );
-          if( dimw == 2 )
+          if( dimgrid == 2 )
           {
             for( size_t i = 0; i < elements.size(); ++i )
               testTriang( i );
@@ -887,7 +887,8 @@ namespace Dune
                 << std::endl;
       return;
     }
-    if (dimw==2) {
+    if( dimgrid == 2 )
+    {
       for (int i=0; i<nofelements; i++) {
         if (elements[i].size()!=size_t(dimw+1))
           continue;
