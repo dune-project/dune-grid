@@ -5,7 +5,10 @@
 #
 
 if ALBERTA
-  APROG = test-alberta test-alberta-generic
+  APROG = test-alberta-1-1 test-alberta-1-2 test-alberta-2-2 \
+          test-alberta-1-3 test-alberta-2-3 test-alberta-3-3 \
+          test-alberta-generic
+  ALBERTA_EXTRA_PROGS = test-alberta
 endif
 
 if ALUGRID
@@ -56,6 +59,8 @@ TESTS = $(NORMALTESTS)
 # programs just to build when "make check" is used
 check_PROGRAMS = $(NORMALTESTS)
 
+EXTRA_PROGRAMS = $(ALBERTA_EXTRA_PROGS)
+
 #
 ## common flags
 #
@@ -95,6 +100,36 @@ test_alberta_LDADD =				\
 	$(GRAPE_LIBS)				\
 	$(ALBERTA_LIBS)				\
 	$(LDADD)
+
+test_alberta_1_1_SOURCES = test-alberta.cc
+test_alberta_1_1_CPPFLAGS = -DGRIDDIM=1 -DWORLDDIM=1 $(ALBERTA1D_CPPFLAGS) $(GRAPE_CPPFLAGS) $(AM_CPPFLAGS)
+test_alberta_1_1_LDFLAGS = $(ALBERTA1D_LDFLAGS) $(GRAPE_LDFLAGS) $(AM_LDFLAGS)
+test_alberta_1_1_LDADD = $(ALBERTA1D_LIBS) $(GRAPE_LIBS) $(LDADD)
+
+test_alberta_1_2_SOURCES = test-alberta.cc
+test_alberta_1_2_CPPFLAGS = -DGRIDDIM=1 -DWORLDDIM=2 $(ALBERTA2D_CPPFLAGS) $(GRAPE_CPPFLAGS) $(AM_CPPFLAGS)
+test_alberta_1_2_LDFLAGS = $(ALBERTA2D_LDFLAGS) $(GRAPE_LDFLAGS) $(AM_LDFLAGS)
+test_alberta_1_2_LDADD = $(ALBERTA2D_LIBS) $(GRAPE_LIBS) $(LDADD)
+
+test_alberta_2_2_SOURCES = test-alberta.cc
+test_alberta_2_2_CPPFLAGS = -DGRIDDIM=2 -DWORLDDIM=2 $(ALBERTA2D_CPPFLAGS) $(GRAPE_CPPFLAGS) $(AM_CPPFLAGS)
+test_alberta_2_2_LDFLAGS = $(ALBERTA2D_LDFLAGS) $(GRAPE_LDFLAGS) $(AM_LDFLAGS)
+test_alberta_2_2_LDADD = $(ALBERTA2D_LIBS) $(GRAPE_LIBS) $(LDADD)
+
+test_alberta_1_3_SOURCES = test-alberta.cc
+test_alberta_1_3_CPPFLAGS = -DGRIDDIM=1 -DWORLDDIM=3 $(ALBERTA3D_CPPFLAGS) $(GRAPE_CPPFLAGS) $(AM_CPPFLAGS)
+test_alberta_1_3_LDFLAGS = $(ALBERTA3D_LDFLAGS) $(GRAPE_LDFLAGS) $(AM_LDFLAGS)
+test_alberta_1_3_LDADD = $(ALBERTA3D_LIBS) $(GRAPE_LIBS) $(LDADD)
+
+test_alberta_2_3_SOURCES = test-alberta.cc
+test_alberta_2_3_CPPFLAGS = -DGRIDDIM=2 -DWORLDDIM=3 $(ALBERTA3D_CPPFLAGS) $(GRAPE_CPPFLAGS) $(AM_CPPFLAGS)
+test_alberta_2_3_LDFLAGS = $(ALBERTA3D_LDFLAGS) $(GRAPE_LDFLAGS) $(AM_LDFLAGS)
+test_alberta_2_3_LDADD = $(ALBERTA3D_LIBS) $(GRAPE_LIBS) $(LDADD)
+
+test_alberta_3_3_SOURCES = test-alberta.cc
+test_alberta_3_3_CPPFLAGS = -DGRIDDIM=3 -DWORLDDIM=3 $(ALBERTA3D_CPPFLAGS) $(GRAPE_CPPFLAGS) $(AM_CPPFLAGS)
+test_alberta_3_3_LDFLAGS = $(ALBERTA3D_LDFLAGS) $(GRAPE_LDFLAGS) $(AM_LDFLAGS)
+test_alberta_3_3_LDADD = $(ALBERTA3D_LIBS) $(GRAPE_LIBS) $(LDADD)
 
 test_alberta_generic_SOURCES = $(test_alberta_SOURCES)
 test_alberta_generic_CPPFLAGS = $(test_alberta_CPPFLAGS) -DDUNE_ALBERTA_USE_GENERICGEOMETRY=1

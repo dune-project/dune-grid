@@ -4,6 +4,12 @@ Makefile.in
 .libs
 test-alugrid
 test-alberta
+test-alberta-1-1
+test-alberta-1-2
+test-alberta-2-2
+test-alberta-1-3
+test-alberta-2-3
+test-alberta-3-3
 test-alberta-generic
 test-geogrid
 test-sgrid
