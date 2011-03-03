@@ -88,7 +88,7 @@ void Dune::UGGrid < dim >::init()
 
 #ifndef UG_LGMDOMAIN
   if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == NULL)
-    DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned and error code!");
+    DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned an error code!");
 #endif
 
   if (numOfUGGrids==0) {
@@ -97,7 +97,7 @@ void Dune::UGGrid < dim >::init()
     {
       char* nfarg = strdup("newformat DuneFormat2d");
       if (UG_NS<dim>::CreateFormatCmd(1, &nfarg))
-        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned and error code!");
+        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
       free(nfarg);
     }
     if (dim==3)
@@ -110,7 +110,7 @@ void Dune::UGGrid < dim >::init()
       sprintf(newArgs[1], "V s1 : vt 1" ); // generates side vectors in 3D
 
       if (UG_NS<dim>::CreateFormatCmd(2, newArgs))
-        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned and error code!");
+        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
 
       for (int i=0; i<2; i++)
         free(newArgs[i]);
