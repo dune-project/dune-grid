@@ -24,18 +24,24 @@ template <class ctype, int dim>
 ctype analyticSolution (Dune::GeometryType t, int p, int x) {
   using Dune::GeometryType;
   ctype exact=0;
-  switch (t.basicType())
+
+  if( t.id() ==  Dune::GenericGeometry::CubeTopology< dim > ::type::id )
   {
-  case GeometryType::cube :
     exact=1.0/(p+1);
-    break;
-  case GeometryType::simplex :
+    return exact;
+  }
+
+  if( t.id() ==  Dune::GenericGeometry::SimplexTopology< dim > ::type::id )
+  {
     /* 1/(prod(k=1..dim,(p+k)) */
     exact = 1.0;
     for (int k=1; k<=dim; k++) exact*=(p+k);
     exact = 1.0/exact;
-    break;
-  case GeometryType::prism :
+    return exact;
+  }
+
+  if( t.id() ==  Dune::GenericGeometry::PrismTopology< 3 > ::type::id )
+  {
     switch(x) {
     case 0 :
       exact=1.0/((p+2)*(p+1));
@@ -47,8 +53,11 @@ ctype analyticSolution (Dune::GeometryType t, int p, int x) {
       exact=1.0/(2*(p+1));
       break;
     };
-    break;
-  case GeometryType::pyramid :
+    return exact;
+  }
+
+  if( t.id() ==  Dune::GenericGeometry::PyramidTopology< 3 > ::type::id )
+  {
     switch(x) {
     case 0 :
     case 1 :
@@ -58,10 +67,10 @@ ctype analyticSolution (Dune::GeometryType t, int p, int x) {
       exact=2.0/((p+1)*(p+2)*(p+3));
       break;
     };
-    break;
-  default :
-    DUNE_THROW(Dune::NotImplemented, __func__ << " for " << t);
-  };
+    return exact;
+  }
+
+  DUNE_THROW(Dune::NotImplemented, __func__ << " for " << t);
   return exact;
 };
 
@@ -194,21 +203,21 @@ void checkWeights(Dune::GeometryType t)
 int main ()
 {
   try {
-    Dune::GeometryType cube0d(Dune::GeometryType::cube,0);
-    Dune::GeometryType cube1d(Dune::GeometryType::cube,1);
-    Dune::GeometryType cube2d(Dune::GeometryType::cube,2);
-    Dune::GeometryType cube3d(Dune::GeometryType::cube,3);
-    // Dune::GeometryType cube4d(Dune::GeometryType::cube,4);
-    // Dune::GeometryType cube5d(Dune::GeometryType::cube,5);
-    // Dune::GeometryType cube6d(Dune::GeometryType::cube,6);
+    Dune::GeometryType cube0d( Dune::GenericGeometry::CubeTopology< 0 > ::type::id, 0 );
+    Dune::GeometryType cube1d( Dune::GenericGeometry::CubeTopology< 1 > ::type::id, 1 );
+    Dune::GeometryType cube2d( Dune::GenericGeometry::CubeTopology< 2 > ::type::id, 2 );
+    Dune::GeometryType cube3d( Dune::GenericGeometry::CubeTopology< 3 > ::type::id, 3 );
+    //Dune::GeometryType cube4d( Dune::GenericGeometry::CubeTopology< 4 > ::type::id );
+    //Dune::GeometryType cube5d( Dune::GenericGeometry::CubeTopology< 5 > ::type::id );
+    //Dune::GeometryType cube6d( Dune::GenericGeometry::CubeTopology< 6 > ::type::id );
 
-    Dune::GeometryType simplex0d(Dune::GeometryType::simplex,0);
-    Dune::GeometryType simplex1d(Dune::GeometryType::simplex,1);
-    Dune::GeometryType simplex2d(Dune::GeometryType::simplex,2);
-    Dune::GeometryType simplex3d(Dune::GeometryType::simplex,3);
+    Dune::GeometryType simplex0d( Dune::GenericGeometry::SimplexTopology< 0 > ::type::id, 0 );
+    Dune::GeometryType simplex1d( Dune::GenericGeometry::SimplexTopology< 1 > ::type::id, 1 );
+    Dune::GeometryType simplex2d( Dune::GenericGeometry::SimplexTopology< 2 > ::type::id, 2 );
+    Dune::GeometryType simplex3d( Dune::GenericGeometry::SimplexTopology< 3 > ::type::id, 3 );
 
-    Dune::GeometryType prism3d(Dune::GeometryType::prism,3);
-    Dune::GeometryType pyramid3d(Dune::GeometryType::pyramid,3);
+    Dune::GeometryType prism3d( Dune::GenericGeometry::PrismTopology< 3 > ::type::id, 3 );
+    Dune::GeometryType pyramid3d( Dune::GenericGeometry::PyramidTopology< 3 > ::type::id, 3 );
 
     checkWeights<double, 0>(cube0d);
     checkWeights<double, 1>(cube1d);
