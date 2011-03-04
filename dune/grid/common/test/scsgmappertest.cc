@@ -14,6 +14,8 @@
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/common/scsgmapper.hh>
 
+#include <dune/common/mpihelper.hh>
+
 using namespace Dune;
 
 // /////////////////////////////////////////////////////////////////////////////////
@@ -70,8 +72,10 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
    than one element type.  So far only UGGrids do this, so we use them to test the mapper.
  */
 
-int main () try
+int main (int argc, char** argv) try
 {
+  // initialize MPI if necessary
+  Dune :: MPIHelper::instance( argc, argv );
 
   // ////////////////////////////////////////////////////////////////////////
   //  Do the test for a 2d YaspGrid
