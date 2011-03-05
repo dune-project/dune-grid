@@ -4,7 +4,6 @@
 #include <config.h>
 
 #include <set>
-#include <iostream>
 
 #include <dune/grid/uggrid.hh>
 
@@ -163,9 +162,7 @@ Dune::UGGrid < dim >::~UGGrid()
     // DisposeMultiGrid will crash if we don't do this
     UG_NS<dim>::Set_Current_BVP(multigrid_->theBVP);
     if (UG_NS<dim>::DisposeMultiGrid(multigrid_) != 0)
-      /** \todo This should really be a DUNE_THROW, I turned it into a warning
-       * temporarily to be able to run the entire UGGrid test. */
-      std::cerr << "UG" << dim << "d::DisposeMultiGrid returned error code!" << std::endl;
+      DUNE_THROW(GridError, "UG" << dim << "d::DisposeMultiGrid returned error code!");
   }
 
   // DisposeMultiGrid cleans up the BVP as well.  But if there was no
