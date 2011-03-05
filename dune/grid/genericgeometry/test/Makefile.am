@@ -11,7 +11,6 @@ check_HEADERS = testgeo.hh
 
 check_PROGRAMS = testbasicgeometry testsubtopologies testmapping testgeo testmatrix
 TESTS = testbasicgeometry testsubtopologies testmapping testgeo
-XFAIL_TESTS = testbasicgeometry
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS)
 AM_LDFLAGS = @AM_LDFLAGS@ $(ALL_PKG_LDFLAGS)
