@@ -63,14 +63,41 @@ Dune::UGGrid < dim >::UGGrid()
 template <int dim>
 void Dune::UGGrid < dim >::init()
 {
-  if (numOfUGGrids==0) {
+  // If no UGGrid object exists yet start up UG for 2d and 3d
+  if ( (UGGrid<2>::numOfUGGrids+UGGrid<3>::numOfUGGrids)==0) {
 
-    // Init the UG system
+    /* Why do we start UG for 2d and 3d?  Why not just the one for the grid dimension
+     * that we actually need?  The reason is a certain error condition that you get
+     * when using 2d and 3d UGGrids together. This was FlySpray task 887.
+     *
+     * UG has an internal directory-tree-like structure for storing different types of
+     * miscellaneous data.  It is called the 'environment heap'. The method InitUg
+     * creates a directory 'BVP' there, which holds, among other things, a 'problem name'
+     * (a string) for each existing grid.  When you call InitUg twice (i.e., once for 2d
+     * and once for 3d), the second call will not notice that a directory 'BVP' already exists.
+     * This is possible because these directories have a name and a 'type', (an integer
+     * of which I have not really understood what you need it for), and the new 'BVP' directory
+     * has a different type. The new one will appear in the list before the old one.
+     * However, some methods that look for entries in the environment heap only look for the name,
+     * and hence only find the first 'BVP' entry, which only contains the information about
+     * the second grid.  Surprisingly, this doesn't appear to be a problem, at least the dune-grid
+     * unit test for UG successfully tests a 2d and a 3d grid side by side.  However when trying
+     * to delete grids the method DisposeMultiGrid tries to remove a grid's information from the
+     * BVP directory.  However the information of the first grid is in the second BVP directory,
+     * which is effectively hidden by the first one.  DisposeMultiGrid doesn't find the
+     * grid information and reports an error.
+     *
+     * If both calls to InitUg are directly in a row, then all information will be stored
+     * in the first instance of 'BVP', and there is no error.
+     */
     int argc = 1;
     char* arg = strdup("dune.exe");
     char** argv = &arg;
 
-    if (UG_NS<dim>::InitUg(&argc, &argv))
+    if (UG_NS<2>::InitUg(&argc, &argv))
+      DUNE_THROW(GridError, "UG" << dim << "d::InitUg() returned an error code!");
+
+    if (UG_NS<3>::InitUg(&argc, &argv))
       DUNE_THROW(GridError, "UG" << dim << "d::InitUg() returned an error code!");
 
     free(arg);
