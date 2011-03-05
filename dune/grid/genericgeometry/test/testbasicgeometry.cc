@@ -514,6 +514,7 @@ int main (int argc , char **argv) try
 
         // Skip volume-test for now -- it fails, but we don't want to
         // spoil all the other tests.
+        std::cerr << "Skipping volume test because of FS#870" << std::endl;
         volume = std::numeric_limits<double>::quiet_NaN();
 
         gt.makeQuadrilateral();
