@@ -483,6 +483,44 @@ namespace Dune
 
     }
 
+
+
+    // 2d-case: This is not supposed to be used at runtime.
+    template <class E, class V>
+    void boundarysegment_insert(
+      const std::vector<FieldVector<double, 2> >& nodes
+      , const E& elementDofs
+      , const V& vertices
+      )
+    {
+      DUNE_THROW(Exception, "Internal Error: tried to create a 3D boundary segment in a 2D Grid");
+    }
+
+    // 3d-case:
+    template <class E, class V>
+    void boundarysegment_insert(
+      const std::vector<FieldVector<double, 3> >& nodes
+      , const E& elementDofs
+      , const V& vertices
+      )
+    {
+      array<FieldVector<double,dim>, 6> v;
+      for (int i=0; i<6; i++)
+        for (int j=0; j<dim; j++)
+          v[i][j] = nodes[elementDofs[i]][j];
+
+      BoundarySegment<dim,dimWorld>* newBoundarySegment
+        = (BoundarySegment<dim,dimWorld>*) new GmshReaderQuadraticBoundarySegment< 3, 3 >( v[0], v[1], v[2],
+                                                                                           v[3], v[4], v[5] );
+
+      factory.insertBoundarySegment( vertices,
+                                     shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment) );
+    }
+
+
+
+
+
     virtual void pass2HandleElement(FILE* file, const int elm_type,
                                     std::map<int,unsigned int> & renumber,
                                     const std::vector< GlobalVector > & nodes,
@@ -600,17 +638,11 @@ namespace Dune
             break;
           }
           case 9 : {              // 6-node triangle
-            array<FieldVector<double,dim>, 6> v;
-            for (int i=0; i<6; i++)
-              for (int j=0; j<dim; j++)
-                v[i][j] = nodes[elementDofs[i]][j];
-
-            BoundarySegment<dim,dimWorld>* newBoundarySegment
-              = (BoundarySegment<dim,dimWorld>*) new GmshReaderQuadraticBoundarySegment< 3, 3 >(v[0], v[1], v[2],
-                                                                                                v[3], v[4], v[5]);
-
-            factory.insertBoundarySegment(vertices,
-                                          shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment));
+            boundarysegment_insert(
+              nodes
+              , elementDofs
+              , vertices
+              );
             break;
           }
 
