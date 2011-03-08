@@ -2,7 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#include <dune/grid/io/file/dgfparser/dgfsimplexblock.hh>
+#include <dune/grid/io/file/dgfparser/blocks/simplex.hh>
 
 namespace Dune
 {

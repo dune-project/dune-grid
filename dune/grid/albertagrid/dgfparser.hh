@@ -7,7 +7,7 @@
 #include <dune/grid/albertagrid/gridfactory.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
-#include <dune/grid/io/file/dgfparser/dgfprojectionblock.hh>
+#include <dune/grid/io/file/dgfparser/blocks/projection.hh>
 
 #if HAVE_ALBERTA
 

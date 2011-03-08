@@ -7,7 +7,7 @@
 
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
-#include <dune/grid/io/file/dgfparser/dgfprojectionblock.hh>
+#include <dune/grid/io/file/dgfparser/blocks/projection.hh>
 #include <dune/grid/utility/hostgridaccess.hh>
 
 namespace Dune

@@ -70,6 +70,7 @@ AC_CONFIG_FILES([Makefile
     dune/grid/io/file/test/Makefile
     dune/grid/io/file/amiramesh/Makefile
     dune/grid/io/file/dgfparser/Makefile
+    dune/grid/io/file/dgfparser/blocks/Makefile
     dune/grid/io/file/dgfparser/test/Makefile
     dune/grid/io/file/dgfparser/utils/Makefile
     dune/grid/io/file/gnuplot/Makefile

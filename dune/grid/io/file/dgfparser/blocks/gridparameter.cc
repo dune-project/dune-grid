@@ -2,7 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#include <dune/grid/io/file/dgfparser/dgfgridparameterblock.hh>
+#include <dune/grid/io/file/dgfparser/blocks/gridparameter.hh>
 
 namespace Dune
 {

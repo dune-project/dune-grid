@@ -1,39 +1,42 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_DGF_GENERALBLOCK_HH
-#define DUNE_DGF_GENERALBLOCK_HH
+#ifndef DUNE_DGF_SIMPLEXBLOCK_HH
+#define DUNE_DGF_SIMPLEXBLOCK_HH
 
 #include <iostream>
 #include <vector>
 
-#include <dune/grid/io/file/dgfparser/dgfbasicblock.hh>
-
+#include <dune/grid/io/file/dgfparser/blocks/basic.hh>
 
 namespace Dune
 {
 
   namespace dgf
   {
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
-    // GeneralBlock
-    // ---------
+    // SimplexBlock
+    // ------------
 
-    class GeneralBlock
+    class SimplexBlock
       : public BasicBlock
     {
       unsigned int nofvtx;
-      int dimgrid;
-      bool goodline;        // active line describes a vertex
-      std :: vector< unsigned int > map; // active vertex
-      int nofparams;
       int vtxoffset;
+      int dimgrid;
+      bool goodline;                 // active line describes a vertex
+      int nofparams;                 // nof parameters
 
     public:
-      GeneralBlock ( std :: istream &in, int pnofvtx, int pvtxoffset, int &pdimgrid );
+      SimplexBlock ( std :: istream &in, int pnofvtx, int pvtxoffset, int &pdimgrid );
 
-      int get ( std :: vector< std :: vector< unsigned int> > &simplex,
+      int get ( std :: vector< std :: vector< unsigned int > > &simplex,
                 std :: vector< std :: vector< double > > &params,
                 int &nofp );
+
+      // cubes -> simplex
+      static int
+      cube2simplex ( std :: vector< std :: vector< double > > &vtx,
+                     std :: vector< std :: vector< unsigned int > > &elements,
+                     std :: vector< std :: vector< double > > &params );
 
       // some information
       bool ok ()
@@ -53,7 +56,6 @@ namespace Dune
       bool next ( std :: vector< unsigned int > &simplex,
                   std :: vector< double > &param );
     };
-#endif
 
   } // end namespace dgf
 

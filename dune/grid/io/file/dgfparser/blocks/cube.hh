@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 
-#include <dune/grid/io/file/dgfparser/dgfbasicblock.hh>
+#include <dune/grid/io/file/dgfparser/blocks/basic.hh>
 
 
 namespace Dune
