@@ -864,12 +864,14 @@ namespace Dune
     {
       ALBERTA fill_macro_info( mesh, mel, &elInfo );
 
+#if DUNE_ALBERTA_VERSION < 0x300
       // The 1d grid does not fill in projections, so we do it here
       if( (dim == 1) && (elInfo.fill_flag & FILL_PROJECTION) )
       {
         for( int i = 0; i <= N_VERTICES_1D; ++i )
           elInfo.projections[ i ] = mel->projection[ i ];
       }
+#endif
     }
 
     template< int dim >
@@ -880,7 +882,6 @@ namespace Dune
       ALBERTA fill_elinfo( ichild, FILL_ANY, &parentInfo, &elInfo );
 #else
       ALBERTA fill_elinfo( ichild, &parentInfo, &elInfo );
-#endif
 
       // The 1d grid does not fill in projections, so we do it here
       if( (dim == 1) && (elInfo.fill_flag & FILL_PROJECTION) )
@@ -897,6 +898,7 @@ namespace Dune
           elInfo.projections[ 2 ] = parentInfo.projections[ 0 ];
         }
       }
+#endif
     }
 
 
