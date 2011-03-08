@@ -157,6 +157,9 @@ namespace Dune
       static bool isLeaf ( Element *element );
       static bool mightVanish ( Element *element, int depth );
 
+      static void fill ( Mesh *mesh, const ALBERTA MACRO_EL *mel, ALBERTA EL_INFO &elInfo );
+      static void fill ( int ichild, const ALBERTA EL_INFO &parentInfo, ALBERTA EL_INFO &elInfo );
+
       void addReference () const;
       void removeReference () const;
 
@@ -316,7 +319,7 @@ namespace Dune
       for( int k = 0; k < maxNeighbors; ++k )
         elInfo().opp_vertex[ k ] = -1;
 
-      fill_macro_info( mesh, &macroElement, &elInfo() );
+      fill( mesh, &macroElement, elInfo() );
     }
 
 
@@ -338,7 +341,7 @@ namespace Dune
       for( int k = 0; k < maxNeighbors; ++k )
         elInfo().opp_vertex[ k ] = -1;
 
-      fill_macro_info( mesh, ((Mesh *)mesh)->macro_els + seed.macroIndex(), &elInfo() );
+      fill( mesh, ((Mesh *)mesh)->macro_els + seed.macroIndex(), elInfo() );
 
       // traverse the seed's path
       unsigned long path = seed.path();
@@ -351,11 +354,7 @@ namespace Dune
         for( int k = 0; k < maxNeighbors; ++k )
           child->elInfo.opp_vertex[ k ] = -2;
 
-#if DUNE_ALBERTA_VERSION >= 0x300
-        ALBERTA fill_elinfo( path & 1, FILL_ANY, &elInfo(), &(child->elInfo) );
-#else
-        ALBERTA fill_elinfo( path & 1, &elInfo(), &(child->elInfo) );
-#endif
+        fill( path & 1, elInfo(), child->elInfo );
 
         instance_ = child;
         addReference();
@@ -464,12 +463,7 @@ namespace Dune
       for( int k = 0; k < maxNeighbors; ++k )
         child->elInfo.opp_vertex[ k ] = -2;
 
-#if DUNE_ALBERTA_VERSION >= 0x300
-      ALBERTA fill_elinfo( i, FILL_ANY, &elInfo(), &(child->elInfo) );
-#else
-      ALBERTA fill_elinfo( i, &elInfo(), &(child->elInfo) );
-#endif
-
+      fill( i, elInfo(), child->elInfo );
       return ElementInfo< dim >( child );
     }
 
@@ -860,6 +854,25 @@ namespace Dune
         return (element->mark < depth);
       else
         return (mightVanish( element->child[ 0 ], depth-1 ) && mightVanish( element->child[ 1 ], depth-1 ));
+    }
+
+
+    template< int dim >
+    inline void ElementInfo< dim >
+    ::fill ( Mesh *mesh, const ALBERTA MACRO_EL *mel, ALBERTA EL_INFO &elInfo )
+    {
+      ALBERTA fill_macro_info( mesh, mel, &elInfo );
+    }
+
+    template< int dim >
+    inline void ElementInfo< dim >
+    ::fill ( int ichild, const ALBERTA EL_INFO &parentInfo, ALBERTA EL_INFO &elInfo )
+    {
+#if DUNE_ALBERTA_VERSION >= 0x300
+      ALBERTA fill_elinfo( ichild, FILL_ANY, &parentInfo, &elInfo );
+#else
+      ALBERTA fill_elinfo( ichild, &parentInfo, &elInfo );
+#endif
     }
 
 
