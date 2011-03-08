@@ -32,7 +32,7 @@ namespace Dune
     template< class Block >
     void block( const Block &block )
     {
-      out << "Using " << Block :: ID << " block" << std::endl;
+      out << "Using " << block.id() << " block" << std::endl;
     }
 
     void print( const std :: string &message )

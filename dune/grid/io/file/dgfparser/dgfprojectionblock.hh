@@ -6,7 +6,7 @@
 #include <map>
 
 #include <dune/grid/common/boundaryprojection.hh>
-#include <dune/grid/io/file/dgfparser/dgfparserblocks.hh>
+#include <dune/grid/io/file/dgfparser/dgfbasicblock.hh>
 
 namespace Dune
 {

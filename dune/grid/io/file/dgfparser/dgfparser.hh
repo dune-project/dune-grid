@@ -20,11 +20,26 @@
 #include <dune/common/stdstreams.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/datahandleif.hh>
-//- local includes
 
-#include "dgfexception.hh"
-#include "entitykey.hh"
-#include "dgfparserblocks.hh"
+#include <dune/grid/io/file/dgfparser/dgfexception.hh>
+#include <dune/grid/io/file/dgfparser/entitykey.hh>
+
+#include <dune/grid/io/file/dgfparser/dgfbasicblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfcubeblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfgridparameterblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfvertexblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfboundarydomblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfdimblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfintervalblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfsimplexblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfboundarysegblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfperiodicfacetransblock.hh>
+#include <dune/grid/io/file/dgfparser/dgfsimplexgenerationblock.hh>
+
+#ifdef EXPERIMENTAL_GRID_EXTENSIONS
+#include <dune/grid/io/file/dgfparser/dgfgeneralblock.hh>
+#endif
+
 
 namespace Dune
 {
@@ -452,6 +467,7 @@ namespace Dune
       }
       return 0;
     }
+
     //! get parameters defined for each codim 0 und dim entity on the grid through the grid file
     template <class Entity>
     const std::vector< double > &parameters ( const Entity &entity ) const
