@@ -660,7 +660,7 @@ namespace Dune
     {
       assert( !!(*this) );
       assert( (face >= 0) && (face < N_VERTICES_MAX) );
-      return elInfo().vertex_bound[ face ];
+      return elInfo().vertex_bound[ 1-face ];
     }
 
     template<>
@@ -729,7 +729,8 @@ namespace Dune
     {
       assert( !!(*this) );
       assert( (face >= 0) && (face < maxNeighbors) );
-      return static_cast< BasicNodeProjection * >( elInfo().projections[ face+1 ] );
+      const int idx = (dim == 1 ? 2-face : 1+face);
+      return static_cast< BasicNodeProjection * >( elInfo().projections[ idx ] );
     }
 #endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
@@ -862,6 +863,13 @@ namespace Dune
     ::fill ( Mesh *mesh, const ALBERTA MACRO_EL *mel, ALBERTA EL_INFO &elInfo )
     {
       ALBERTA fill_macro_info( mesh, mel, &elInfo );
+
+      // The 1d grid does not fill in projections, so we do it here
+      if( (dim == 1) && (elInfo.fill_flag & FILL_PROJECTION) )
+      {
+        for( int i = 0; i <= N_VERTICES_1D; ++i )
+          elInfo.projections[ i ] = mel->projection[ i ];
+      }
     }
 
     template< int dim >
@@ -873,6 +881,22 @@ namespace Dune
 #else
       ALBERTA fill_elinfo( ichild, &parentInfo, &elInfo );
 #endif
+
+      // The 1d grid does not fill in projections, so we do it here
+      if( (dim == 1) && (elInfo.fill_flag & FILL_PROJECTION) )
+      {
+        elInfo.projections[ 0 ] = parentInfo.projections[ 0 ];
+        if( ichild == 0 )
+        {
+          elInfo.projections[ 1 ] = parentInfo.projections[ 0 ];
+          elInfo.projections[ 2 ] = parentInfo.projections[ 2 ];
+        }
+        else
+        {
+          elInfo.projections[ 1 ] = parentInfo.projections[ 1 ];
+          elInfo.projections[ 2 ] = parentInfo.projections[ 0 ];
+        }
+      }
     }
 
 
@@ -969,10 +993,10 @@ namespace Dune
       return &null_;
     }
 
-  }
+  } // namespace Alberta
 
-}
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_ELEMENTINFO_HH
