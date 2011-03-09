@@ -157,6 +157,9 @@ namespace Dune
       static bool isLeaf ( Element *element );
       static bool mightVanish ( Element *element, int depth );
 
+      static void fill ( Mesh *mesh, const ALBERTA MACRO_EL *mel, ALBERTA EL_INFO &elInfo );
+      static void fill ( int ichild, const ALBERTA EL_INFO &parentInfo, ALBERTA EL_INFO &elInfo );
+
       void addReference () const;
       void removeReference () const;
 
@@ -316,7 +319,7 @@ namespace Dune
       for( int k = 0; k < maxNeighbors; ++k )
         elInfo().opp_vertex[ k ] = -1;
 
-      fill_macro_info( mesh, &macroElement, &elInfo() );
+      fill( mesh, &macroElement, elInfo() );
     }
 
 
@@ -338,7 +341,7 @@ namespace Dune
       for( int k = 0; k < maxNeighbors; ++k )
         elInfo().opp_vertex[ k ] = -1;
 
-      fill_macro_info( mesh, ((Mesh *)mesh)->macro_els + seed.macroIndex(), &elInfo() );
+      fill( mesh, ((Mesh *)mesh)->macro_els + seed.macroIndex(), elInfo() );
 
       // traverse the seed's path
       unsigned long path = seed.path();
@@ -351,11 +354,7 @@ namespace Dune
         for( int k = 0; k < maxNeighbors; ++k )
           child->elInfo.opp_vertex[ k ] = -2;
 
-#if DUNE_ALBERTA_VERSION >= 0x300
-        ALBERTA fill_elinfo( path & 1, FILL_ANY, &elInfo(), &(child->elInfo) );
-#else
-        ALBERTA fill_elinfo( path & 1, &elInfo(), &(child->elInfo) );
-#endif
+        fill( path & 1, elInfo(), child->elInfo );
 
         instance_ = child;
         addReference();
@@ -464,12 +463,7 @@ namespace Dune
       for( int k = 0; k < maxNeighbors; ++k )
         child->elInfo.opp_vertex[ k ] = -2;
 
-#if DUNE_ALBERTA_VERSION >= 0x300
-      ALBERTA fill_elinfo( i, FILL_ANY, &elInfo(), &(child->elInfo) );
-#else
-      ALBERTA fill_elinfo( i, &elInfo(), &(child->elInfo) );
-#endif
-
+      fill( i, elInfo(), child->elInfo );
       return ElementInfo< dim >( child );
     }
 
@@ -666,7 +660,7 @@ namespace Dune
     {
       assert( !!(*this) );
       assert( (face >= 0) && (face < N_VERTICES_MAX) );
-      return elInfo().vertex_bound[ face ];
+      return elInfo().vertex_bound[ 1-face ];
     }
 
     template<>
@@ -735,7 +729,8 @@ namespace Dune
     {
       assert( !!(*this) );
       assert( (face >= 0) && (face < maxNeighbors) );
-      return static_cast< BasicNodeProjection * >( elInfo().projections[ face+1 ] );
+      const int idx = (dim == 1 ? 2-face : 1+face);
+      return static_cast< BasicNodeProjection * >( elInfo().projections[ idx ] );
     }
 #endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
@@ -864,6 +859,50 @@ namespace Dune
 
 
     template< int dim >
+    inline void ElementInfo< dim >
+    ::fill ( Mesh *mesh, const ALBERTA MACRO_EL *mel, ALBERTA EL_INFO &elInfo )
+    {
+      ALBERTA fill_macro_info( mesh, mel, &elInfo );
+
+#if DUNE_ALBERTA_VERSION < 0x300
+      // The 1d grid does not fill in projections, so we do it here
+      if( (dim == 1) && (elInfo.fill_flag & FILL_PROJECTION) )
+      {
+        for( int i = 0; i <= N_VERTICES_1D; ++i )
+          elInfo.projections[ i ] = mel->projection[ i ];
+      }
+#endif
+    }
+
+    template< int dim >
+    inline void ElementInfo< dim >
+    ::fill ( int ichild, const ALBERTA EL_INFO &parentInfo, ALBERTA EL_INFO &elInfo )
+    {
+#if DUNE_ALBERTA_VERSION >= 0x300
+      ALBERTA fill_elinfo( ichild, FILL_ANY, &parentInfo, &elInfo );
+#else
+      ALBERTA fill_elinfo( ichild, &parentInfo, &elInfo );
+
+      // The 1d grid does not fill in projections, so we do it here
+      if( (dim == 1) && (elInfo.fill_flag & FILL_PROJECTION) )
+      {
+        elInfo.projections[ 0 ] = parentInfo.projections[ 0 ];
+        if( ichild == 0 )
+        {
+          elInfo.projections[ 1 ] = parentInfo.projections[ 0 ];
+          elInfo.projections[ 2 ] = parentInfo.projections[ 2 ];
+        }
+        else
+        {
+          elInfo.projections[ 1 ] = parentInfo.projections[ 1 ];
+          elInfo.projections[ 2 ] = parentInfo.projections[ 0 ];
+        }
+      }
+#endif
+    }
+
+
+    template< int dim >
     inline void ElementInfo< dim >::addReference () const
     {
       ++(instance_->refCount);
@@ -956,10 +995,10 @@ namespace Dune
       return &null_;
     }
 
-  }
+  } // namespace Alberta
 
-}
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_ELEMENTINFO_HH
