@@ -121,23 +121,24 @@ int main(int argc, char **argv) {
     if(argc > 2) aluName = argv[2];
     if(argc > 3) tagsName = argv[3];
     if(gmshName == "" || aluName == "" || argc > 4) {
-      std::cerr <<
-      "Convert a .msh-file into a partitioned ALU-macrogridfile\n"
-      "\n"
-      "SYNOPSIS:\n"
-      "  " << programName << " GMSH_FILENAME ALU_PREFIX [TAGS_PREFIX]\n"
-      "\n"
-      "PARAMETERS:\n"
-      "  GMSH_FILENAME .msh-file to read the grid from.\n"
-      "  ALU_PREFIX Filename-prefix for ALUGrid to write the macrogrid to.  Each\n"
-      "    process appends its rank to this filename to form something like\n"
-      "    ALUPREFIX.RANK.\n"
-      "  TAGS_PREFIX If given, read physical entitity numbers from the .msh file\n"
-      "    and write them into a series of files of the form TAG_PREFIX.RANK.  The\n"
-      "    file format is ASCII with one line per mesh element, each line\n"
-      "    consisting of a physical.  The lines are written in level 0 iteration\n"
-      "    order for all partition types.\n"
-      << std::flush;
+      if(Dune::MPIHelper::getCollectiveCommunication().rank() == 0)
+        std::cerr <<
+        "Convert a .msh-file into a partitioned ALU-macrogridfile\n"
+        "\n"
+        "SYNOPSIS:\n"
+        "  " << programName << " GMSH_FILENAME ALU_PREFIX [TAGS_PREFIX]\n"
+        "\n"
+        "PARAMETERS:\n"
+        "  GMSH_FILENAME .msh-file to read the grid from.\n"
+        "  ALU_PREFIX Filename-prefix for ALUGrid to write the macrogrid to.  Each\n"
+        "    process appends its rank to this filename to form something like\n"
+        "    ALUPREFIX.RANK.\n"
+        "  TAGS_PREFIX If given, read physical entitity numbers from the .msh file\n"
+        "    and write them into a series of files of the form TAG_PREFIX.RANK.  The\n"
+        "    file format is ASCII with one line per mesh element, each line\n"
+        "    consisting of a physical.  The lines are written in level 0 iteration\n"
+        "    order for all partition types.\n"
+        << std::flush;
       return 1;
     }
 

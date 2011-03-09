@@ -39,25 +39,26 @@ int main(int argc, char **argv) {
     if(argc > 2) vtkName = argv[2];
     if(argc > 3) tagsName = argv[3];
     if(aluName == "" || vtkName == "" || argc > 4) {
-      std::cerr <<
-      "Convert a ALU-macrogridfile to VTK\n"
-      "\n"
-      "SYNOPSIS:\n"
-      "  " << programName << " ALU_PREFIX VTK_PREFIX [TAGS_PREFIX]\n"
-      "\n"
-      "PARAMETERS:\n"
-      "  ALU_PREFIX Filename-prefix for ALUGrid to read the macrogrid from.  Each\n"
-      "    process appends its rank to this filename to form something like\n"
-      "    ALUPREFIX.RANK.\n"
-      "  VTK_FILENAME Filename-prefix for VTK to write to.\n"
-      "  TAGS_PREFIX If given, read element tag numbers from a series of files of\n"
-      "    the form TAG_PREFIX.RANK.  The file format is the same the output of\n"
-      "    gmsh-to-alu: ASCII with one line per mesh element, each line consisting\n"
-      "    of an integral tag number.  White space in the beginning and the end of\n"
-      "    the line is ignored.  Comment lines start with '#' as the first non-\n"
-      "    whitespace character, they are ignored, as are line consisting of\n"
-      "    whitespace only.\n"
-      << std::flush;
+      if(Dune::MPIHelper::getCollectiveCommunication().rank() == 0)
+        std::cerr <<
+        "Convert a ALU-macrogridfile to VTK\n"
+        "\n"
+        "SYNOPSIS:\n"
+        "  " << programName << " ALU_PREFIX VTK_PREFIX [TAGS_PREFIX]\n"
+        "\n"
+        "PARAMETERS:\n"
+        "  ALU_PREFIX Filename-prefix for ALUGrid to read the macrogrid from.  Each\n"
+        "    process appends its rank to this filename to form something like\n"
+        "    ALUPREFIX.RANK.\n"
+        "  VTK_FILENAME Filename-prefix for VTK to write to.\n"
+        "  TAGS_PREFIX If given, read element tag numbers from a series of files of\n"
+        "    the form TAG_PREFIX.RANK.  The file format is the same the output of\n"
+        "    gmsh-to-alu: ASCII with one line per mesh element, each line consisting\n"
+        "    of an integral tag number.  White space in the beginning and the end of\n"
+        "    the line is ignored.  Comment lines start with '#' as the first non-\n"
+        "    whitespace character, they are ignored, as are line consisting of\n"
+        "    whitespace only.\n"
+        << std::flush;
       return 1;
     }
 
