@@ -34,21 +34,21 @@ namespace Dune
     // count local geometry creation
     int count_;
 
-    enum ElementType { aluTriangle = ALU2DSPACE triangle,
-                       aluQuad     = ALU2DSPACE quadrilateral,
-                       aluTetra    = ALU3DSPACE tetra,
-                       aluHexa     = ALU3DSPACE hexa };
+    static const int aluTriangle = ALU2DSPACE triangle;
+    static const int aluQuad     = ALU2DSPACE quadrilateral;
+    static const int aluTetra    = ALU3DSPACE tetra;
+    static const int aluHexa     = ALU3DSPACE hexa;
 
     // type of grid impl
     typedef typename GridImp :: ctype ctype;
     enum { dimension       = GridImp :: dimension };
     enum { dimensionworld  = GridImp :: dimensionworld };
 
-    template <int dim, int dimworld, ElementType>
+    template <int dummy, int dim, int dimworld, int >
     struct CreateGeometries;
 
-    template <int dim, int dimworld>
-    struct CreateGeometries<dim,dimworld, aluTriangle >
+    template <int dummy, int dimworld>
+    struct CreateGeometries<dummy, 2, dimworld, aluTriangle >
     {
       template <class Storage>
       static void createGeometries(Storage& storage,
@@ -57,19 +57,19 @@ namespace Dune
       {
         if( nonConform )
         {
-          typedef ALUSimplexGrid< dimension, dimensionworld > Grid;
+          typedef ALUSimplexGrid< 2, dimworld > Grid;
           storage.template createGeometries< Grid > (type);
         }
         else
         {
-          typedef ALUConformGrid< dimension, dimensionworld > Grid;
+          typedef ALUConformGrid< 2, dimworld > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }
     };
 
-    template <int dim, int dimworld>
-    struct CreateGeometries<dim,dimworld, aluTetra >
+    template <int dummy>
+    struct CreateGeometries<dummy, 3, 3, aluTetra >
     {
       template <class Storage>
       static void createGeometries(Storage& storage,
@@ -78,14 +78,14 @@ namespace Dune
       {
         assert( nonConform );
         {
-          typedef ALUSimplexGrid< dimension, dimensionworld > Grid;
+          typedef ALUSimplexGrid< 3, 3 > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }
     };
 
-    template <int dim, int dimworld>
-    struct CreateGeometries<dim,dimworld, aluQuad >
+    template <int dummy, int dimworld>
+    struct CreateGeometries<dummy, 2, dimworld, aluQuad >
     {
       template <class Storage>
       static void createGeometries(Storage& storage,
@@ -94,14 +94,14 @@ namespace Dune
       {
         assert ( nonConform ) ;
         {
-          typedef ALUCubeGrid< dimension, dimensionworld > Grid;
+          typedef ALUCubeGrid< 2, dimworld > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }
     };
 
-    template <int dim, int dimworld>
-    struct CreateGeometries<dim,dimworld, aluHexa >
+    template <int dummy>
+    struct CreateGeometries<dummy, 3, 3, aluHexa >
     {
       template <class Storage>
       static void createGeometries(Storage& storage,
@@ -110,7 +110,7 @@ namespace Dune
       {
         assert( nonConform );
         {
-          typedef ALUCubeGrid< dimension, dimensionworld > Grid;
+          typedef ALUCubeGrid< 3, 3 > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }
@@ -121,10 +121,9 @@ namespace Dune
     ALULocalGeometryStorage (const GeometryType type, const bool nonConform)
       : geoms_ (nChild, (GeometryImp *) 0 ) , count_ (0)
     {
-      static const ElementType elType = (ElementType) GridImp :: elementType ;
       // the idea is to create a grid containing the reference element,
       // refine once and the store the father - child relations
-      CreateGeometries<dimension, dimensionworld, elType >
+      CreateGeometries<0, dimension, dimensionworld, GridImp :: elementType >
       ::createGeometries(*this, type, nonConform);
     }
 
@@ -145,7 +144,7 @@ namespace Dune
       return *(geoms_[child]);
     }
 
-    template <class Grid>
+    template < class Grid >
     void createGeometries(const GeometryType& type)
     {
       // create factory without verbosity
