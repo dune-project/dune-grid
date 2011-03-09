@@ -50,9 +50,10 @@ namespace Dune
   template <class Grid, class Index, class Vector>
   class PersistentContainerVector
   {
-  protected:
+  public:
     typedef typename Vector::value_type Data;
     typedef Grid GridType;
+  protected:
     const int codim_;
     const Index& index_;
     const double overEstimate_;
@@ -206,11 +207,31 @@ namespace Dune
     typedef typename Map :: iterator iterator ;
     typedef typename Map :: const_iterator const_iterator ;
 
+    template <class D, class IteratorType >
+    struct DataExtractor ;
+
+    // Data type for iterator
+    template <class D>
+    struct DataExtractor< D, iterator >
+    {
+      typedef D Type ;
+    };
+
+    // Data type for const iterator
+    template <class D>
+    struct DataExtractor< D, const_iterator >
+    {
+      typedef const D Type ;
+    };
+
     template <class IteratorType>
     class MyIterator
     {
       IteratorType it_;
     public:
+      // get correct data type (const or non-const)
+      typedef typename DataExtractor<Data, IteratorType> :: Type value_type ;
+
       MyIterator(const IteratorType& it) : it_( it ) {}
       MyIterator(const MyIterator& other) : it_( other.it_ ) {}
 
@@ -222,8 +243,8 @@ namespace Dune
         ++it_;
         return *this;
       }
-      Data& operator * () { return (*it_).second; }
-      Data* operator -> () { return &((*it_).second); }
+      value_type& operator * () { return (*it_).second; }
+      value_type* operator -> () { return &((*it_).second); }
       MyIterator& operator = (const MyIterator& other)
       {
         it_ = other.it_;
@@ -402,7 +423,9 @@ namespace Dune
           std::map<const typename Grid::Traits::LocalIdSet::IdType, Data,
               std::less<const typename Grid::Traits::LocalIdSet::IdType>, Allocator> >
   {
+  public:
     typedef Grid GridType;
+  protected:
     typedef typename Grid::Traits::LocalIdSet IdSet;
     typedef typename IdSet::IdType IdType;
     typedef std::map<const IdType, Data, std::less<const IdType>, Allocator> Map;
