@@ -19,6 +19,7 @@
 #include <dune/common/fvector.hh>
 
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/gridenums.hh>
 
 namespace Dune
 {
@@ -43,9 +44,6 @@ namespace Dune
 
     //! type of EntityPointer
     typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-
-    //! type of LevelIterator
-    typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
 
     //! type of HierarchicIterator
     typedef typename Grid::HierarchicIterator HierarchicIterator;
@@ -117,11 +115,19 @@ namespace Dune
        \exception GridError No element of the coarse grid contains the given
                             coordinate.
      */
+    template<PartitionIteratorType partition = All_Partition>
     EntityPointer findEntity(const FieldVector<ct,dimw>& global) const
     {
+      typedef typename Grid::template Partition<partition>::LevelGridView
+      LevelGV;
+      const LevelGV &gv = g.template levelView<partition>(0);
+
+      //! type of LevelIterator
+      typedef typename LevelGV::template Codim<0>::Iterator LevelIterator;
+
       // loop over macro level
-      LevelIterator it = g.template lbegin<0>(0);
-      LevelIterator end = g.template lend<0>(0);
+      LevelIterator it = gv.template begin<0>();
+      LevelIterator end = gv.template end<0>();
       for (; it != end; ++it)
       {
         const Entity &e = *it;
