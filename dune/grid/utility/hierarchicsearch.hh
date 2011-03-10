@@ -10,7 +10,14 @@
    containing a given point.
  */
 
+#include <cstddef>
+#include <sstream>
+#include <string>
+
+#include <dune/common/classname.hh>
+#include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
+
 #include <dune/grid/common/grid.hh>
 
 namespace Dune
@@ -43,6 +50,19 @@ namespace Dune
     //! type of HierarchicIterator
     typedef typename Grid::HierarchicIterator HierarchicIterator;
 
+    static std::string formatEntityInformation ( const Entity &e ) {
+      const typename Entity::Geometry &geo = e.geometry();
+      std::ostringstream info;
+      info << "level=" << e.level() << " "
+           << "partition=" << e.partitionType() << " "
+           << "center=(" << geo.center() << ") "
+           << "corners=[(" << geo.corner(0) << ")";
+      for(int i = 1; i < geo.corners(); ++i)
+        info << " (" << e.geometry().corner(i) << ")";
+      info << "]";
+      return info.str();
+    }
+
     /**
        internal helper method
 
@@ -70,7 +90,18 @@ namespace Dune
             return hFindEntity( *it, global );
         }
       }
-      DUNE_THROW(Exception, "Unexpected internal Error");
+      std::ostringstream children;
+      HierarchicIterator it = e.hbegin( e.level()+1 );
+      if(it != end) {
+        children << "{" << formatEntityInformation(*it) << "}";
+        for( ++it; it != end; ++it )
+          children << " {" << formatEntityInformation(*it) << "}";
+      }
+      DUNE_THROW(Exception, "{" << className(*this) << "} Unexpected "
+                 "internal Error: none of the children of the entity "
+                 "{" << formatEntityInformation(e) << "} contains "
+                 "coordinate (" << global << ").  Children are: "
+                 "[" << children.str() << "].");
     }
 
   public:
