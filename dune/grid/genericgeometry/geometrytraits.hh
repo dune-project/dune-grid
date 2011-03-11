@@ -46,8 +46,7 @@ namespace Dune
 
     // MappingTraits
     // -------------
-    /** \class MappingTraits
-     *  \ingroup GenericGeometry
+    /** \ingroup GenericGeometry
      *  \brief Default mapping traits using Dune::FieldVector and
      *  Dune::FieldMatrix
      */
@@ -97,8 +96,7 @@ namespace Dune
     // DefaultGeometryTraits
     // ---------------------
 
-    /** \class   DefaultGeometryTraits
-     *  \ingroup GenericGeometry
+    /** \ingroup GenericGeometry
      *  \brief   default settings for BasicGeometry
      *
      *  The class BasicGeometry requires a template argument <em>Traits</em>.
