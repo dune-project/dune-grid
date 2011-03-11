@@ -91,8 +91,12 @@ namespace Dune
     int nofbound;
 
     // map to generate and find boundary segments
-    typedef std::map< DGFEntityKey< unsigned int >, int > facemap_t;
+    typedef std::pair < int, std::vector< double > > BndParam;
+    typedef std::map< DGFEntityKey< unsigned int >, BndParam > facemap_t;
     facemap_t facemap;
+
+    // true if parameters on a boundary found
+    bool haveBndParameters;
 
     // set by generator depending on element type wanted
     element_t element;
@@ -111,6 +115,9 @@ namespace Dune
 
     // write information about generation process
     DGFPrintInfo * info;
+
+    std::vector < double > emptyParam_;
+
 
   private:
     int rank_;

@@ -3,11 +3,18 @@
 #ifndef DUNE_DGFS_HH
 #define DUNE_DGFS_HH
 
+#include <dune/grid/common/intersection.hh>
 #include <dune/grid/sgrid.hh>
 #include "dgfparser.hh"
 
 namespace Dune
 {
+  // forward declaration
+  // -------------------
+
+  template< class GridImp, template< class > class IntersectionImp >
+  class Intersection;
+
 
   template< int dim, int dimworld, class ctype >
   struct DGFGridFactory< SGrid< dim, dimworld, ctype > >
@@ -53,6 +60,19 @@ namespace Dune
     {
       return 0;
     }
+
+    // return true if boundary paramters found
+    bool haveBoundaryParameters () const
+    {
+      return false;
+    }
+
+    template < class GG, template < class > class II >
+    const std::vector< double > & parameter ( const Intersection< GG, II > & intersection ) const
+    {
+      return emptyParam;
+    }
+
 
     template< class Entity >
     std::vector< double > &parameter ( const Entity &entity )

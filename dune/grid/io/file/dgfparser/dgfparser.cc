@@ -91,6 +91,7 @@ namespace Dune
       elements(0) , nofelements(0),
       bound(0) , nofbound(0),
       facemap(),
+      haveBndParameters( false ),
       element(General),
       simplexgrid(false),
       cube2simplex(false),
@@ -170,7 +171,7 @@ namespace Dune
             out << nr++ << " ";
             for (int i=0; i<pos->first.size(); i++)
               out << pos->first.origKey(i) << " ";
-            out << pos->second;
+            out << pos->second.first;
             out << std::endl;
           }
         }
@@ -216,7 +217,7 @@ namespace Dune
       {
         if( dimw == 3 )
         {
-          out << "1 0 " << pos->second << std::endl;
+          out << "1 0 " << pos->second.first << std::endl;
           out << pos->first.size();
         }
         else
@@ -224,7 +225,7 @@ namespace Dune
         for( int i = 0; i < pos->first.size(); ++i )
           out << " " << pos->first.origKey( i );
         if( dimw == 2 )
-          out << " " << pos->second;
+          out << " " << pos->second.first;
         out << std::endl;
       }
       out << "0" << std::endl;
@@ -483,6 +484,15 @@ namespace Dune
       {
         info->block(segbound);
         nofbound=segbound.get(facemap,(nofelements>0),vtxoffset);
+
+        // check whether we have boundary parameters
+        facemap_t :: iterator pos = facemap.begin();
+        for( ; pos != facemap.end(); ++pos )
+        {
+          if( !pos->second.second.empty() )
+            break;
+        }
+        haveBndParameters = ( pos != facemap.end() );
       }
     }
 
@@ -507,15 +517,16 @@ namespace Dune
           pos=facemap.find(key2);
           if(pos == facemap.end())
           {
-            facemap[key2]=0;
+            facemap[key2].first=0;
+            facemap[key2].second.clear();
           }
-          else if (pos->second==0 ||
+          else if (pos->second.first==0 ||
                    pos->first.origKeySet())
           { // face found twice
             facemap.erase(pos);
           }
           else { // use original key as given in key2
-            int value = pos->second;
+            BndParam value = pos->second;
             facemap.erase(pos);
             facemap[key2] = value;
           }
@@ -546,7 +557,7 @@ namespace Dune
       info->block(dombound);
       for (; dombound.ok(); dombound.next()) {
         for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
-          if(pos->second == 0) {
+          if(pos->second.first == 0) {
             // if an edge of a simplex is inside the domain it has the value zero
             bool isinside=true;
             for (int i=0; i<pos->first.size(); i++)
@@ -559,7 +570,8 @@ namespace Dune
             }
             if (isinside)
             {
-              pos->second = dombound.id();
+              pos->second.first = dombound.id();
+              pos->second.second.clear();
               inbnddomain++;
             }
           }
@@ -569,21 +581,22 @@ namespace Dune
       if (dombound.defaultValueGiven()) {
         info->print("Default boundary ID found");
         for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
-          if(pos->second == 0) {
-            pos->second = dombound.defaultValue();
+          if(pos->second.first == 0) {
+            pos->second.first = dombound.defaultValue();
+            pos->second.second.clear();
             defaultBndSegs++;
           }
         }
       } else {
         for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
-          if(pos->second == 0) {
+          if(pos->second.first == 0) {
             remainingBndSegs++;
           }
         }
       }
     } else {
       for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
-        if(pos->second == 0) {
+        if(pos->second.first == 0) {
           remainingBndSegs++;
         }
       }
@@ -867,7 +880,8 @@ namespace Dune
             {
               facemap_t :: key_type key( p, false );
               //DGFEntityKey< unsigned int > key( p, false );
-              facemap[key]=params;
+              facemap[key].first = params;
+              facemap[key].second.clear();
             }
           }
         }
@@ -947,7 +961,7 @@ namespace Dune
               if( bndFace != facemap.end() )
               {
                 // delete old key, and store new key
-                int bndId = bndFace->second;
+                BndParam bndId = bndFace->second;
                 facemap.erase(bndFace);
                 facemap[key] = bndId;
               }

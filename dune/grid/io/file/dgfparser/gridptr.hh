@@ -17,12 +17,18 @@
 
 #include <dune/grid/io/file/dgfparser/dgfexception.hh>
 #include <dune/grid/io/file/dgfparser/entitykey.hh>
-#include <dune/grid/io/file/dgfparser/dgfgridfactory.hh>
+
+#include <dune/grid/common/intersection.hh>
 
 namespace Dune
 {
+  // forward declarations
+  // --------------------
   template < class G >
   struct DGFGridFactory;
+
+  template< class GridImp, template < class > class IntersectionImp >
+  class Intersection;
 
   //! \brief Class for constructing grids from DGF files.
   //!
@@ -48,9 +54,11 @@ namespace Dune
       : gridPtr_( 0 ),
         elParam_( 0 ),
         vtxParam_( 0 ),
+        bndParam_( 0 ),
         bndId_( 0 ),
         nofElParam_( 0 ),
-        nofVtxParam_( 0 )
+        nofVtxParam_( 0 ),
+        haveBndParam_( false )
     {
       DGFGridFactory< GridType > dgfFactory( filename, comm );
       initialize( dgfFactory );
@@ -62,9 +70,11 @@ namespace Dune
       : gridPtr_( 0 ),
         elParam_( 0 ),
         vtxParam_( 0 ),
+        bndParam_( 0 ),
         bndId_( 0 ),
         nofElParam_( 0 ),
-        nofVtxParam_( 0 )
+        nofVtxParam_( 0 ),
+        haveBndParam_( false )
     {
       DGFGridFactory< GridType > dgfFactory( input, comm );
       initialize( dgfFactory );
@@ -74,14 +84,16 @@ namespace Dune
     GridPtr()
       : gridPtr_(0),
         nofElParam_(0),
-        nofVtxParam_(0)
+        nofVtxParam_(0),
+        haveBndParam_( false )
     {}
 
     //! Constructor storing given pointer to internal auto pointer
     GridPtr( GridType *grd )
       : gridPtr_(grd),
         nofElParam_(0),
-        nofVtxParam_(0)
+        nofVtxParam_(0),
+        haveBndParam_( false )
     {}
 
     //! Copy constructor, copies internal auto pointer
@@ -89,9 +101,11 @@ namespace Dune
       : gridPtr_(org.gridPtr_),
         elParam_(org.elParam_),
         vtxParam_(org.vtxParam_),
+        bndParam_(org.bndParam_),
         bndId_(org.bndId_),
         nofElParam_(org.nofElParam_),
-        nofVtxParam_(org.nofVtxParam_)
+        nofVtxParam_(org.nofVtxParam_),
+        haveBndParam_(org.haveBndParam_)
     {}
 
     //! assignment of grid pointer
@@ -100,9 +114,11 @@ namespace Dune
       gridPtr_ = org.gridPtr_;
       elParam_ = org.elParam_;
       vtxParam_ = org.vtxParam_;
+      bndParam_ = org.bndParam_;
       bndId_ = org.bndId_;
       nofElParam_ = org.nofElParam_;
       nofVtxParam_ = org.nofVtxParam_;
+      haveBndParam_ = org.haveBndParam_;
       return *this;
     }
 
@@ -112,8 +128,10 @@ namespace Dune
       gridPtr_ = std::auto_ptr<GridType>(grd);
       nofVtxParam_ = 0;
       nofElParam_ = 0;
+      haveBndParam_ = false;
       elParam_.resize(0);
       vtxParam_.resize(0);
+      bndParam_.resize(0);
       bndId_.resize(0);
       return *this;
     }
@@ -152,6 +170,20 @@ namespace Dune
       return 0;
     }
 
+    //! get parameters defined for given entity
+    template <class Entity>
+    int nofParameters ( const Entity & ) const
+    {
+      return nofParamters( Entity::codimension );
+    }
+
+    //! get number of parameters defined for a given intersection
+    template< class GridImp, template< class > class IntersectionImp >
+    int nofParameters ( const Intersection< GridImp, IntersectionImp > & intersection ) const
+    {
+      return parameters( intersection ).size();
+    }
+
     //! get parameters defined for each codim 0 und dim entity on the grid through the grid file
     template <class Entity>
     const std::vector< double > &parameters ( const Entity &entity ) const
@@ -176,11 +208,29 @@ namespace Dune
       return emptyParam_;
     }
 
+    //! get paramters for intersection
+    template< class GridImp, template< class > class IntersectionImp >
+    const std::vector< double > & parameters ( const Intersection< GridImp, IntersectionImp > & intersection ) const
+    {
+      // if no paramters given return empty vecto
+      if ( !haveBndParam_ )
+        return emptyParam_;
+
+      // otherwise return paramter vector
+      typedef Dune::Intersection< GridImp, IntersectionImp > Intersection;
+      typename Intersection::EntityPointer inside = intersection.inside();
+      const typename Intersection::Entity & entity = *inside;
+      const int k = gridPtr_->leafView().indexSet().subIndex( entity, intersection.indexInInside(), 1 );
+      return bndParam_[ k ];
+    }
+
     void loadBalance()
     {
       if ( gridPtr_->comm().size() == 1 )
         return;
       int params = nofElParam_ + nofVtxParam_;
+      if ( haveBndParam_ )
+        params += 1;
       if ( gridPtr_->comm().max( params ) > 0 )
       {
         DataHandle dh(*this);
@@ -203,11 +253,15 @@ namespace Dune
 
       nofElParam_ = dgfFactory.template numParameters< 0 >();
       nofVtxParam_ = dgfFactory.template numParameters< dimension >();
+      haveBndParam_ = dgfFactory.haveBoundaryParameters();
+
       if ( nofElParam_ > 0 )
         elParam_.resize( indexSet.size(0) );
       if ( nofVtxParam_ > 0 )
         vtxParam_.resize( indexSet.size(dimension) );
       bndId_.resize( indexSet.size(1) );
+      if ( haveBndParam_ )
+        bndParam_.resize( indexSet.size(1) );
 
       const PartitionIteratorType partType = Interior_Partition;
       typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
@@ -239,8 +293,10 @@ namespace Dune
             // dirty hack: check for "none" to make corner point grid work
             if ( inter.boundary() && !inter.type().isNone() )
             {
-              bndId_[ indexSet.subIndex(el,inter.indexInInside(),1) ]
-                = dgfFactory.boundaryId( inter );
+              const int k = indexSet.subIndex(el,inter.indexInInside(),1);
+              bndId_[ k ] = dgfFactory.boundaryId( inter );
+              if ( haveBndParam_ )
+                bndParam_[ k ] = dgfFactory.parameter( inter );
             }
           }
         }
@@ -396,8 +452,10 @@ namespace Dune
     // element and vertex parameters
     std::vector< std::vector< double > > elParam_;
     std::vector< std::vector< double > > vtxParam_;
+    std::vector< std::vector< double > > bndParam_;
     std::vector< int > bndId_;
     int nofElParam_, nofVtxParam_;
+    bool haveBndParam_;
     std::vector < double > emptyParam_;
   }; // end of class GridPtr
 

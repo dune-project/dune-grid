@@ -23,17 +23,23 @@ namespace Dune
       bool goodline;                   // active line describes a vertex
       std :: vector< unsigned int > p; // active vertex
       int bndid;
+      int numParameters;
+      std :: vector< double > parameters;
       bool simplexgrid;
 
     public:
+      typedef DGFEntityKey< unsigned int> EntityKey;
+      typedef std::pair < int, std::vector< double > > BndParam;
+
       // initialize vertex block and get first vertex
       BoundarySegBlock ( std :: istream &in, int pnofvtx,
                          int pdimworld, bool psimplexgrid );
 
       // some information
-      int get( std :: map< DGFEntityKey< unsigned int>, int > &facemap,
+      int get( std :: map< EntityKey, BndParam > & facemap,
                bool fixedsize,
-               int vtxoffset );
+               int vtxoffset
+               );
 
       bool ok()
       {

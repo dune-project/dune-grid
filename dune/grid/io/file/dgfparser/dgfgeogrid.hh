@@ -9,10 +9,10 @@
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/dgfparser/blocks/projection.hh>
 #include <dune/grid/utility/hostgridaccess.hh>
+#include <dune/grid/common/intersection.hh>
 
 namespace Dune
 {
-
   /************************************************************************
   * Warning:
   * Reading DGF files directly into a GeometryGrid is a dirty hack for
@@ -22,6 +22,10 @@ namespace Dune
   *   2) The coordinate function has to provide a default constructor
   ************************************************************************/
 
+  // forward declaration
+  // -------------------
+  template < class GridImp, template < class > class IntersectionImp >
+  class Intersection;
 
   // DGFCoordFunction
   // ----------------
@@ -165,6 +169,18 @@ namespace Dune
     int numParameters () const
     {
       return dgfHostFactory_.template numParameters< codim >();
+    }
+
+    // return true if boundary paramters found
+    bool haveBoundaryParameters () const
+    {
+      return dgfHostFactory_.haveBoundaryParameters();
+    }
+
+    template< class GG, template< class > class II >
+    std::vector< double > & parameter ( const Intersection< GG, II > & intersection )
+    {
+      return dgfHostFactory_.parameter( HostGridAccess< Grid >::hostIntersection( intersection ) );
     }
 
     template< class Entity >

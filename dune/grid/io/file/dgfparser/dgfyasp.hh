@@ -3,11 +3,18 @@
 #ifndef DUNE_DGFPARSERYASP_HH
 #define DUNE_DGFPARSERYASP_HH
 
+#include <dune/grid/common/intersection.hh>
 #include <dune/grid/yaspgrid.hh>
 #include "dgfparser.hh"
 
 namespace Dune
 {
+  // forward declaration
+  // -------------------
+
+  template< class GridImp, template< class > class IntersectionImp >
+  class Intersection;
+
 
   namespace dgf
   {
@@ -110,6 +117,18 @@ namespace Dune
     int numParameters () const
     {
       return 0;
+    }
+
+    // return true if boundary paramters found
+    bool haveBoundaryParameters () const
+    {
+      return false;
+    }
+
+    template < class GG, template < class > class II >
+    const std::vector< double > & parameter ( const Intersection< GG, II > & intersection ) const
+    {
+      return emptyParam;
     }
 
     template< class Entity >

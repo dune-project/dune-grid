@@ -20,6 +20,8 @@ namespace Dune
         goodline(true),
         p(),
         bndid(-1),
+        numParameters(0),
+        parameters(),
         simplexgrid(psimplexgrid)
     {
       if (!isactive())
@@ -30,7 +32,7 @@ namespace Dune
 
 
     int BoundarySegBlock
-    :: get( std :: map< DGFEntityKey< unsigned int>, int > &facemap,
+    :: get( std :: map< EntityKey, BndParam > &facemap,
             bool fixedsize,
             int vtxoffset )
     {
@@ -59,9 +61,9 @@ namespace Dune
             bound[j] = p[j];
           }
 
-          DGFEntityKey< unsigned int > key( bound, false );
+          EntityKey key( bound, false );
 
-          facemap[key] = bndid;
+          facemap[key] = BndParam( bndid, parameters );
           ++lnofbound;
 
           if (size()>face)
@@ -75,8 +77,8 @@ namespace Dune
                   bound[j] = p[cube2simplex[i][j]];
                 }
 
-                DGFEntityKey< unsigned int > key( bound, false );
-                facemap[key] = bndid;
+                EntityKey key( bound, false );
+                facemap[key] = BndParam( bndid, parameters );
                 ++lnofbound;
               }
             }
@@ -86,8 +88,8 @@ namespace Dune
               {
                 bound[0] = p[i-1];
                 bound[1] = p[i%size()];
-                DGFEntityKey< unsigned int > key( bound, false );
-                facemap[key] = bndid;
+                EntityKey key( bound, false );
+                facemap[key] = BndParam( bndid, parameters );
                 ++lnofbound;
               }
             }
@@ -95,16 +97,16 @@ namespace Dune
         }
         else {
           if (dimworld==3) {
-            DGFEntityKey< unsigned int > key( p, false );
-            facemap[key] = bndid;
+            EntityKey key( p, false );
+            facemap[key] = BndParam( bndid, parameters );
             ++lnofbound;
           } else {
             std :: vector< unsigned int > k( 2 );
             for (size_t i=0; i<p.size()-1; i++) {
               k[0]=p[i];
               k[1]=p[(i+1)%p.size()];
-              DGFEntityKey< unsigned int > key( k, false );
-              facemap[key] = bndid;
+              EntityKey key( k, false );
+              facemap[key] = BndParam( bndid, parameters );
               ++lnofbound;
             }
           }
@@ -116,32 +118,62 @@ namespace Dune
 
     bool BoundarySegBlock :: next ()
     {
-      assert(ok());
-      int n=0;
+      assert( ok() );
       getnextline();
-      if (linenumber()==noflines()) {
+
+      if (linenumber()==noflines())
+      {
         goodline=false;
         return goodline;
       }
+
+      // clear data
       p.clear();
-      int x;
-      if (getnextentry(x)) {
-        bndid = x;
-        if (bndid<=0)
+      numParameters = 0;
+      parameters.clear();
+
+      // get active line
+      std::string currentline = line.str();
+      if( !currentline.empty() )
+      {
+        // find delimiter and split line
+        std::size_t delimiter = currentline.find( ':' );
+        std::string left = currentline.substr( 0, delimiter );
+
+        // read boundary id and boundary vertices from left hand side
         {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "      non-positive boundary id (" << bndid << ") read!");
+          std::istringstream lstream( left );
+          assert( !left.empty() );
+
+          int x;
+          lstream >> x;
+          bndid = x;
+          if ( bndid <= 0 )
+          {
+            DUNE_THROW( DGFException,
+                        "ERROR in " << *this
+                                    << "      non-positive boundary id (" << bndid << ") read!" );
+          }
+
+          while( lstream >> x )
+            p.push_back( x );
         }
-        while (getnextentry(x))
+        // read parameters from right hand side
+        if( delimiter != std::string::npos )
         {
-          p.push_back(x);
-          n++;
+          const std::string right = currentline.substr( delimiter+1, std::string::npos );
+          std::istringstream rstream( right );
+          double y;
+          while( rstream >> y )
+            parameters.push_back( y );
+          numParameters = parameters.size();
         }
-        // goodline=(n==dimworld+1);
+
         goodline=true;
         return goodline;
-      } else return next();
+      }
+      else
+        return next();
     }
 
   } // end namespace dgf

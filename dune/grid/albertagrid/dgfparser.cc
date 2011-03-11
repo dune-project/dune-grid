@@ -68,7 +68,7 @@ namespace Dune
         const Key key( elementId, dimension, face+1 );
         const Iterator it = dgf_.facemap.find( key );
         if( it != dgf_.facemap.end() )
-          factory_.insertBoundary( n, face, it->second );
+          factory_.insertBoundary( n, face, it->second.first );
       }
     }
 

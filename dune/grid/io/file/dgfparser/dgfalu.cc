@@ -91,7 +91,7 @@ namespace Dune
           const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
           if( it != dgf_.facemap.end() )
-            factory_.insertBoundary( n, face, it->second );
+            factory_.insertBoundary( n, face, it->second.first );
         }
       }
 
@@ -183,7 +183,7 @@ namespace Dune
           const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
           if( it != dgf_.facemap.end() )
-            factory_.insertBoundary( n, face, it->second );
+            factory_.insertBoundary( n, face, it->second.first );
         }
       }
 
@@ -279,7 +279,7 @@ namespace Dune
           const Key key = ElementFaceUtil::generateFace( dimgrid, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
           if( it != dgf_.facemap.end() )
-            factory_.insertBoundary( n, face, it->second );
+            factory_.insertBoundary( n, face, it->second.first );
         }
       }
 
@@ -375,7 +375,7 @@ namespace Dune
           const Key key = ElementFaceUtil::generateFace( dimgrid, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
           if( it != dgf_.facemap.end() )
-            factory_.insertBoundary( n, face, it->second );
+            factory_.insertBoundary( n, face, it->second.first );
         }
       }
 
@@ -471,7 +471,7 @@ namespace Dune
           const Key key = ElementFaceUtil::generateFace( dimgrid, dgf_.elements[ n ], face );
           const Iterator it = dgf_.facemap.find( key );
           if( it != dgf_.facemap.end() )
-            factory_.insertBoundary( n, face, it->second );
+            factory_.insertBoundary( n, face, it->second.first );
         }
       }
 

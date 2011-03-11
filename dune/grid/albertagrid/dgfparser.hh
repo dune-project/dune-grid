@@ -3,16 +3,26 @@
 #ifndef DUNE_ALBERTA_DGFPARSER_HH
 #define DUNE_ALBERTA_DGFPARSER_HH
 
+#include <vector>
+
 #include <dune/grid/albertagrid.hh>
 #include <dune/grid/albertagrid/gridfactory.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/dgfparser/blocks/projection.hh>
 
+#include <dune/grid/common/intersection.hh>
+
 #if HAVE_ALBERTA
 
 namespace Dune
 {
+
+  // forward declaration
+  // -------------------
+
+  template < class GridImp, template < class > class IntersectionImp >
+  class Intersection;
 
   // DGFGridFactory for AlbertaGrid
   // ------------------------------
@@ -47,6 +57,38 @@ namespace Dune
     int boundaryId ( const Intersection &intersection ) const
     {
       return Grid::getRealImplementation( intersection ).boundaryId();
+    }
+
+    // return true if boundary paramters found
+    bool haveBoundaryParameters () const
+    {
+      return dgf_.haveBndParameters;
+    }
+
+    template < class GG, template < class > class II >
+    const std::vector< double > & parameter ( const Intersection< GG, II > & intersection ) const
+    {
+      typedef Dune::Intersection< GG, II > Intersection;
+      typename Intersection::EntityPointer inside = intersection.inside();
+      const typename Intersection::Entity & entity = *inside;
+      const int face = intersection.indexInInside();
+
+      const GenericReferenceElement< double, dimension > & refElem =
+        GenericReferenceElements< double, dimension >::general( entity.type() );
+      int corners = refElem.size( face, 1, dimension );
+      std :: vector< unsigned int > bound( corners );
+      for( int i=0; i < corners; ++i )
+      {
+        const int k =  refElem.subEntity( face, 1, i, dimension );
+        bound[ i ] = factory_.insertionIndex( *entity.template subEntity< dimension >( k ) );
+      }
+
+      DuneGridFormatParser::facemap_t::key_type key( bound, false );
+      const DuneGridFormatParser::facemap_t::const_iterator pos = dgf_.facemap.find( key );
+      if( pos != dgf_.facemap.end() )
+        return dgf_.facemap.find( key )->second.second;
+      else
+        return dgf_.emptyParam_;
     }
 
     template< int codim >

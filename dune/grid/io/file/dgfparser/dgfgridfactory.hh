@@ -13,9 +13,15 @@
 #include <dune/grid/io/file/dgfparser/dgfexception.hh>
 #include <dune/grid/io/file/dgfparser/macrogrid.hh>
 
+#include <dune/grid/common/intersection.hh>
+
 
 namespace Dune
 {
+
+  // forward declaration
+  template < class GridImp, template < class > class IntersectionImp >
+  class Intersection;
 
   template < class G >
   struct DGFGridFactory
@@ -77,15 +83,18 @@ namespace Dune
         }
       }
     }
+
     Grid *grid()
     {
       return grid_;
     }
+
     template <class Intersection>
     bool wasInserted(const Intersection &intersection) const
     {
       return intersection.boundary();
     }
+
     template <class Intersection>
     int boundaryId(const Intersection &intersection) const
     {
@@ -101,6 +110,12 @@ namespace Dune
         return macroGrid_.nofvtxparams;
       else
         return 0;
+    }
+
+    template < class Entity >
+    int numParameters ( const Entity & ) const
+    {
+      return numParameters< Entity::codimension >();
     }
 
     std::vector<double>& parameter(const Element &element)
@@ -129,6 +144,18 @@ namespace Dune
       return emptyParam;
     }
 
+    // return true if boundary paramters found
+    bool haveBoundaryParameters () const
+    {
+      return false;
+    }
+
+    template < class GG, template < class > class II >
+    const std::vector< double > & parameter ( const Intersection< GG, II > & intersection ) const
+    {
+      return emptyParam;
+    }
+
   private:
     typedef FieldVector<typename Grid::ctype,Grid::dimensionworld> DomainType;
     struct Compare
@@ -151,6 +178,7 @@ namespace Dune
     };
     typedef std::map< DomainType, size_t, Compare > InsertOrderMap;
     typedef typename InsertOrderMap::const_iterator InsertOrderIterator;
+
     MacroGrid macroGrid_;
     Grid *grid_;
     InsertOrderMap elInsertOrder_;
