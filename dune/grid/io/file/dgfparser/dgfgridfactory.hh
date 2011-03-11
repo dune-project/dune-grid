@@ -37,7 +37,7 @@ namespace Dune
 
   public:
     explicit DGFGridFactory ( std::istream &input,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() ) DUNE_DEPRECATED
       : macroGrid_( comm )
     {
       DUNE_THROW( DGFException, "DGF factories using old MacroGrid implementation"
@@ -45,7 +45,7 @@ namespace Dune
     }
 
     explicit DGFGridFactory ( const std::string &filename,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() ) DUNE_DEPRECATED
       : macroGrid_( filename.c_str(), comm )
     {
       grid_ = macroGrid_.template createGrid< Grid >();
