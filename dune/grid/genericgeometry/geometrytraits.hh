@@ -106,7 +106,7 @@ namespace Dune
      *  geometry and tweaks some performance settings.
      *
      *  This default implementation serves two purposed. Firstly, it documents
-     *  the exprected parameters. Secondly, the user of BasicGeometry can
+     *  the expected parameters. Secondly, the user of BasicGeometry can
      *  derive his traits class from DefaultGeometryTraits. Then, only the
      *  non-default settings have to be specified. Moreover, deriving from
      *  DefaultGeometryTraits makes the user code more robust to changes in
