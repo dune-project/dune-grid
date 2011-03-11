@@ -144,8 +144,6 @@ namespace Dune
        *  \endcode
        */
       static const bool hybrid = true;
-      //   topologyId [ for Codim 0, needed for (hybrid=false) ]
-      // static const unsigned int topologyId = SimlexTopology< dimGrid >::type::id;
 
       /** \brief specifies the reference mapping to be used
        *
@@ -215,8 +213,6 @@ namespace Dune
      *
      *    //   hybrid   [ true if Codim 0 is hybrid ]
      *    static const bool hybrid = true;
-     *    //   topologyId [ for Codim 0, needed for (hybrid=false) ]
-     *    // static const unsigned int topologyId = SimlexTopology< dimGrid >::type::id;
      *
      *    template< class Topology >
      *    struct Mapping
@@ -279,8 +275,6 @@ namespace Dune
      *
      *    //   hybrid   [ true if Codim 0 is hybrid ]
      *    static const bool hybrid = true;
-     *    //   topologyId [ for Codim 0, needed for (hybrid=false) ]
-     *    // static const unsigned int topologyId = SimlexTopology< dimGrid >::type::id;
      *
      *    template< class Topology >
      *    struct Mapping
