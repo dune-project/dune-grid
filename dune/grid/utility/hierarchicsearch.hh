@@ -115,7 +115,17 @@ namespace Dune
        \exception GridError No element of the coarse grid contains the given
                             coordinate.
      */
-    template<PartitionIteratorType partition = All_Partition>
+    EntityPointer findEntity(const FieldVector<ct,dimw>& global) const
+    { return findEntity<All_Partition>(global); }
+
+    /**
+       @brief Search the IndexSet of this HierarchicSearch for an Entity
+       containing point global.
+
+       \exception GridError No element of the coarse grid contains the given
+                            coordinate.
+     */
+    template<PartitionIteratorType partition>
     EntityPointer findEntity(const FieldVector<ct,dimw>& global) const
     {
       typedef typename Grid::template Partition<partition>::LevelGridView
