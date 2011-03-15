@@ -7,27 +7,32 @@
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 
-using namespace Dune;
+template< class Grid >
+void display ( const Grid &grid )
+{
+  Dune::GrapeGridDisplay< Grid > grape( grid, grid.comm().rank() );
+  grape.display();
+}
 
 int main ( int argc, char **argv )
 try
 {
-  const Dune :: MPIHelper &mpi = MPIHelper :: instance( argc, argv );
+  Dune::MPIHelper::instance( argc, argv );
 
   if( argc < 2 )
   {
-    std :: cerr << "Usage: " << argv[ 0 ] << " <dgffile>" << std :: endl;
+    std::cerr << "Usage: " << argv[ 0 ] << " <dgffile>" << std::endl;
     return 1;
   }
 
-  GridPtr< GridType > gridptr( argv[ 1 ] );
-  GrapeGridDisplay< GridType > grape( *gridptr, mpi.rank() );
-  grape.display();
+  typedef Dune::GridSelector::GridType GridType;
+  Dune::GridPtr< GridType > gridptr( argv[ 1 ] );
+  display( *gridptr );
   return 0;
 }
-catch( const Dune :: Exception &exception )
+catch( const Dune::Exception &exception )
 {
-  std :: cerr << exception << std::endl;
+  std::cerr << exception << std::endl;
   return 1;
 }
 catch( ... )
