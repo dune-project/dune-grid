@@ -17,6 +17,7 @@
 
 #include <dune/grid/io/file/dgfparser/dgfexception.hh>
 #include <dune/grid/io/file/dgfparser/entitykey.hh>
+#include <dune/grid/io/file/dgfparser/parser.hh>
 
 #include <dune/grid/common/intersection.hh>
 
@@ -208,20 +209,15 @@ namespace Dune
       return emptyParam_;
     }
 
-    //! get paramters for intersection
+    //! get parameters for intersection
     template< class GridImp, template< class > class IntersectionImp >
-    const std::vector< double > & parameters ( const Intersection< GridImp, IntersectionImp > & intersection ) const
+    const DGFBoundaryParameter::type & parameters ( const Intersection< GridImp, IntersectionImp > & intersection ) const
     {
-      // if no paramters given return empty vecto
+      // if no parameters given return empty vecto
       if ( !haveBndParam_ )
-        return emptyParam_;
+        return emptyBndParam_;
 
-      // otherwise return paramter vector
-      typedef Dune::Intersection< GridImp, IntersectionImp > Intersection;
-      typename Intersection::EntityPointer inside = intersection.inside();
-      const typename Intersection::Entity & entity = *inside;
-      const int k = gridPtr_->leafView().indexSet().subIndex( entity, intersection.indexInInside(), 1 );
-      return bndParam_[ k ];
+      return bndParam_[ intersection.boundarySegmentIndex() ];
     }
 
     void loadBalance()
@@ -261,7 +257,7 @@ namespace Dune
         vtxParam_.resize( indexSet.size(dimension) );
       bndId_.resize( indexSet.size(1) );
       if ( haveBndParam_ )
-        bndParam_.resize( indexSet.size(1) );
+        bndParam_.resize( gridPtr_->numBoundarySegments() );
 
       const PartitionIteratorType partType = Interior_Partition;
       typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
@@ -296,7 +292,7 @@ namespace Dune
               const int k = indexSet.subIndex(el,inter.indexInInside(),1);
               bndId_[ k ] = dgfFactory.boundaryId( inter );
               if ( haveBndParam_ )
-                bndParam_[ k ] = dgfFactory.parameter( inter );
+                bndParam_[ inter.boundarySegmentIndex() ] = dgfFactory.boundaryParameter( inter );
             }
           }
         }
@@ -452,7 +448,8 @@ namespace Dune
     // element and vertex parameters
     std::vector< std::vector< double > > elParam_;
     std::vector< std::vector< double > > vtxParam_;
-    std::vector< std::vector< double > > bndParam_;
+    std::vector< DGFBoundaryParameter::type > bndParam_;
+    DGFBoundaryParameter::type emptyBndParam_;
     std::vector< int > bndId_;
     int nofElParam_, nofVtxParam_;
     bool haveBndParam_;

@@ -119,16 +119,17 @@ namespace Dune
       return 0;
     }
 
-    // return true if boundary paramters found
+    // return true if boundary parameters found
     bool haveBoundaryParameters () const
     {
       return false;
     }
 
     template < class GG, template < class > class II >
-    const std::vector< double > & parameter ( const Intersection< GG, II > & intersection ) const
+    const typename DGFBoundaryParameter::type &
+    boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
-      return emptyParam;
+      return emptyBndParams_;
     }
 
     template< class Entity >
@@ -142,6 +143,7 @@ namespace Dune
 
     Grid *grid_;
     std::vector<double> emptyParam;
+    typename DGFBoundaryParameter::type emptyBndParams_;
   };
 
   template< int dim >

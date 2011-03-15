@@ -8,6 +8,7 @@
 
 #include <dune/grid/alugrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
+#include <dune/grid/io/file/dgfparser/parser.hh>
 #include <dune/grid/io/file/dgfparser/blocks/projection.hh>
 
 #include <dune/grid/common/intersection.hh>
@@ -123,7 +124,8 @@ namespace Dune
     }
 
     template < class GG, template < class > class II >
-    const std::vector< double > & parameter ( const Intersection< GG, II > & intersection ) const
+    const typename DGFBoundaryParameter::type &
+    boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;
       typename Intersection::EntityPointer inside = intersection.inside();
@@ -145,7 +147,7 @@ namespace Dune
       if( pos != dgf_.facemap.end() )
         return dgf_.facemap.find( key )->second.second;
       else
-        return dgf_.emptyParam_;
+        return dgf_.emptyBndParam_;
     }
 
     template< int codim >
@@ -159,7 +161,7 @@ namespace Dune
         return 0;
     }
 
-    // return true if boundary paramters found
+    // return true if boundary parameters found
     bool haveBoundaryParameters () const
     {
       return dgf_.haveBndParameters;

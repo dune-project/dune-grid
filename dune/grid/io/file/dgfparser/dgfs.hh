@@ -61,14 +61,15 @@ namespace Dune
       return 0;
     }
 
-    // return true if boundary paramters found
+    // return true if boundary parameters found
     bool haveBoundaryParameters () const
     {
       return false;
     }
 
     template < class GG, template < class > class II >
-    const std::vector< double > & parameter ( const Intersection< GG, II > & intersection ) const
+    const typename DGFBoundaryParameter::type &
+    boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
       return emptyParam;
     }

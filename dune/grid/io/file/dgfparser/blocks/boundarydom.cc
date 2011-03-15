@@ -20,29 +20,43 @@ namespace Dune
         p1(cdimworld),
         p2(cdimworld),
         bndid(0),
+        bndparameter( DGFBoundaryParameter::defaultValue() ),
         withdefault(false),
-        defaultvalue(0)
+        defaultvalue(0),
+        defaultparameter( DGFBoundaryParameter::defaultValue() )
     {
-      if (!isactive())
+      if ( !isactive() )
         return;
-      assert(cdimworld>0);
+
+      assert( cdimworld > 0 );
+
+      if (findtoken("default"))
       {
         int x;
-        if (findtoken("default"))
+        if ( getnextentry( x ) )
         {
-          if (getnextentry(x))
+          if( x <= 0 )
           {
-            if( x <= 0 )
-            {
-              DUNE_THROW(DGFException,
-                         "ERROR in " << *this
-                                     << "      non-positive boundary id (" << x << ") read!");
-            }
-            defaultvalue=x;
-            withdefault = true;
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "      non-positive boundary id (" << x << ") read!");
           }
+
+          defaultvalue = x;
+
+          // find parameter
+          std::string currentline = line.str();
+          std::size_t delimiter = currentline.find( DGFBoundaryParameter::delimiter );
+          if( delimiter != std::string::npos )
+          {
+            defaultparameter =
+              DGFBoundaryParameter::convert( currentline.substr( delimiter+1, std::string::npos ) );
+          }
+
+          withdefault = true;
         }
       }
+
       reset();
       next();
     }
@@ -50,14 +64,19 @@ namespace Dune
 
     bool BoundaryDomBlock :: next ()
     {
-      assert(ok());
+      assert( ok() );
       getnextline();
-      if (linenumber()==noflines()) {
+
+      if ( linenumber()==noflines() )
+      {
         goodline=false;
         return goodline;
       }
+
       int id;
-      if (getnextentry(id))
+      bndparameter = DGFBoundaryParameter::defaultValue();
+
+      if( getnextentry( id ) )
       {
         if( id <= 0 )
         {
@@ -66,16 +85,27 @@ namespace Dune
                                  << "      non-positive boundary id (" << id << ") read!");
         }
         bndid = id;
-        double x;
-        int n=0;
-        while (getnextentry(x))
+
+        // find delimiter
+        std::string currentline = line.str();
+        std::size_t delimiter = currentline.find( DGFBoundaryParameter::delimiter );
+        if( delimiter != std::string::npos )
         {
-          if (0<=n && n<dimworld)
-            p1.at(n)=x;
-          else if (dimworld<=n && n<2*dimworld)
+          bndparameter =
+            DGFBoundaryParameter::convert( currentline.substr( delimiter+1, std::string::npos ) );
+        }
+
+        // read vertices
+        double x;
+        int n = 0;
+        while ( getnextentry( x ) )
+        {
+          if ( 0 <= n && n < dimworld )
+            p1.at( n ) = x;
+          else if ( dimworld <= n && n < 2*dimworld )
           {
-            p2.at(n-dimworld)=x;
-            if (p2.at(n-dimworld)<p1.at(n-dimworld))
+            p2.at( n-dimworld ) = x;
+            if ( p2.at( n-dimworld )< p1.at( n-dimworld ) )
             {
               DUNE_THROW(DGFException,
                          "ERROR in " << *this
@@ -88,8 +118,8 @@ namespace Dune
           n++;
         }
 
-        goodline=(n==dimworld*2);
-        if (!goodline)
+        goodline = ( n == dimworld*2 );
+        if ( !goodline )
         {
           DUNE_THROW(DGFException,
                      "ERROR in " << *this

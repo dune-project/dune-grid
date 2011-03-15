@@ -5,9 +5,11 @@
 
 #include <cassert>
 #include <iostream>
+#include <string>
 #include <vector>
 #include <map>
 
+#include <dune/grid/io/file/dgfparser/parser.hh>
 #include <dune/grid/io/file/dgfparser/blocks/basic.hh>
 
 
@@ -23,13 +25,13 @@ namespace Dune
       bool goodline;                   // active line describes a vertex
       std :: vector< unsigned int > p; // active vertex
       int bndid;
-      int numParameters;
-      std :: vector< double > parameters;
+      typedef DGFBoundaryParameter::type BoundaryParameter;
+      BoundaryParameter parameter;
       bool simplexgrid;
 
     public:
       typedef DGFEntityKey< unsigned int> EntityKey;
-      typedef std::pair < int, std::vector< double > > BndParam;
+      typedef std::pair < int, BoundaryParameter > BndParam;
 
       // initialize vertex block and get first vertex
       BoundarySegBlock ( std :: istream &in, int pnofvtx,

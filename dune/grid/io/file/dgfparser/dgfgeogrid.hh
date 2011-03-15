@@ -11,6 +11,9 @@
 #include <dune/grid/utility/hostgridaccess.hh>
 #include <dune/grid/common/intersection.hh>
 
+#include <dune/grid/io/file/dgfparser/parser.hh>
+
+
 namespace Dune
 {
   /************************************************************************
@@ -171,16 +174,17 @@ namespace Dune
       return dgfHostFactory_.template numParameters< codim >();
     }
 
-    // return true if boundary paramters found
+    // return true if boundary parameters found
     bool haveBoundaryParameters () const
     {
       return dgfHostFactory_.haveBoundaryParameters();
     }
 
     template< class GG, template< class > class II >
-    std::vector< double > & parameter ( const Intersection< GG, II > & intersection )
+    const typename DGFBoundaryParameter::type &
+    boundaryParameter ( const Dune::Intersection< GG, II > & intersection ) const
     {
-      return dgfHostFactory_.parameter( HostGridAccess< Grid >::hostIntersection( intersection ) );
+      return dgfHostFactory_.boundaryParameter( HostGridAccess< Grid >::hostIntersection( intersection ) );
     }
 
     template< class Entity >

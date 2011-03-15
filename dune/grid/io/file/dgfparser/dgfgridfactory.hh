@@ -13,6 +13,7 @@
 #include <dune/grid/io/file/dgfparser/dgfexception.hh>
 #include <dune/grid/io/file/dgfparser/macrogrid.hh>
 
+#include <dune/grid/io/file/dgfparser/parser.hh>
 #include <dune/grid/common/intersection.hh>
 
 
@@ -144,16 +145,17 @@ namespace Dune
       return emptyParam;
     }
 
-    // return true if boundary paramters found
+    // return true if boundary parameters found
     bool haveBoundaryParameters () const
     {
       return false;
     }
 
     template < class GG, template < class > class II >
-    const std::vector< double > & parameter ( const Intersection< GG, II > & intersection ) const
+    const typename DGFBoundaryParameter::type &
+    boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
-      return emptyParam;
+      return emptyBndParams_;
     }
 
   private:
@@ -184,6 +186,7 @@ namespace Dune
     InsertOrderMap elInsertOrder_;
     InsertOrderMap vtxInsertOrder_;
     std::vector<double> emptyParam;
+    typename DGFBoundaryParameter::type & emptyBndParams_;
   };
 
 } // end namespace Dune

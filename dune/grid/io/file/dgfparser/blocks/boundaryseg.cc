@@ -20,8 +20,6 @@ namespace Dune
         goodline(true),
         p(),
         bndid(-1),
-        numParameters(0),
-        parameters(),
         simplexgrid(psimplexgrid)
     {
       if (!isactive())
@@ -63,7 +61,7 @@ namespace Dune
 
           EntityKey key( bound, false );
 
-          facemap[key] = BndParam( bndid, parameters );
+          facemap[key] = BndParam( bndid, parameter );
           ++lnofbound;
 
           if (size()>face)
@@ -78,7 +76,7 @@ namespace Dune
                 }
 
                 EntityKey key( bound, false );
-                facemap[key] = BndParam( bndid, parameters );
+                facemap[key] = BndParam( bndid, parameter );
                 ++lnofbound;
               }
             }
@@ -89,7 +87,7 @@ namespace Dune
                 bound[0] = p[i-1];
                 bound[1] = p[i%size()];
                 EntityKey key( bound, false );
-                facemap[key] = BndParam( bndid, parameters );
+                facemap[key] = BndParam( bndid, parameter );
                 ++lnofbound;
               }
             }
@@ -98,7 +96,7 @@ namespace Dune
         else {
           if (dimworld==3) {
             EntityKey key( p, false );
-            facemap[key] = BndParam( bndid, parameters );
+            facemap[key] = BndParam( bndid, parameter );
             ++lnofbound;
           } else {
             std :: vector< unsigned int > k( 2 );
@@ -106,7 +104,7 @@ namespace Dune
               k[0]=p[i];
               k[1]=p[(i+1)%p.size()];
               EntityKey key( k, false );
-              facemap[key] = BndParam( bndid, parameters );
+              facemap[key] = BndParam( bndid, parameter );
               ++lnofbound;
             }
           }
@@ -129,15 +127,14 @@ namespace Dune
 
       // clear data
       p.clear();
-      numParameters = 0;
-      parameters.clear();
+      parameter = DGFBoundaryParameter::defaultValue();
 
       // get active line
       std::string currentline = line.str();
       if( !currentline.empty() )
       {
         // find delimiter and split line
-        std::size_t delimiter = currentline.find( ':' );
+        std::size_t delimiter = currentline.find( DGFBoundaryParameter::delimiter );
         std::string left = currentline.substr( 0, delimiter );
 
         // read boundary id and boundary vertices from left hand side
@@ -158,15 +155,12 @@ namespace Dune
           while( lstream >> x )
             p.push_back( x );
         }
-        // read parameters from right hand side
+
+        // read parameter from right hand side
         if( delimiter != std::string::npos )
         {
-          const std::string right = currentline.substr( delimiter+1, std::string::npos );
-          std::istringstream rstream( right );
-          double y;
-          while( rstream >> y )
-            parameters.push_back( y );
-          numParameters = parameters.size();
+          std::string strParam = currentline.substr( delimiter+1, std::string::npos );
+          parameter = DGFBoundaryParameter::convert( strParam );
         }
 
         goodline=true;

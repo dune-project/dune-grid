@@ -15,6 +15,29 @@ namespace Dune
 
   class DGFPrintInfo;
 
+  /*! @brief Contains types for additional features
+   */
+  struct DGFBoundaryParameter
+  {
+    //! type of additional boundary parameters
+    typedef std::string type;
+
+    //! default constructor
+    static type defaultValue ()
+    {
+      return type();
+    }
+
+    //! copy from string
+    static type convert ( const std::string & parameter )
+    {
+      return parameter;
+    }
+
+    //! delimiter
+    static const char delimiter = ':';
+  };
+
   //! \brief The %DuneGridFormatParser class: reads a DGF file and stores
   //! build information in vector structures used by the MacroGrid class.
   class DuneGridFormatParser
@@ -91,7 +114,8 @@ namespace Dune
     int nofbound;
 
     // map to generate and find boundary segments
-    typedef std::pair < int, std::vector< double > > BndParam;
+    typedef DGFBoundaryParameter::type BoundaryParameter;
+    typedef std::pair < int, BoundaryParameter > BndParam;
     typedef std::map< DGFEntityKey< unsigned int >, BndParam > facemap_t;
     facemap_t facemap;
 
@@ -117,6 +141,7 @@ namespace Dune
     DGFPrintInfo * info;
 
     std::vector < double > emptyParam_;
+    BoundaryParameter emptyBndParam_;
 
 
   private:

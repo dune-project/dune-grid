@@ -518,7 +518,7 @@ namespace Dune
           if(pos == facemap.end())
           {
             facemap[key2].first=0;
-            facemap[key2].second.clear();
+            facemap[key2].second = DGFBoundaryParameter::defaultValue();
           }
           else if (pos->second.first==0 ||
                    pos->first.origKeySet())
@@ -571,7 +571,7 @@ namespace Dune
             if (isinside)
             {
               pos->second.first = dombound.id();
-              pos->second.second.clear();
+              pos->second.second = dombound.parameter();
               inbnddomain++;
             }
           }
@@ -583,11 +583,12 @@ namespace Dune
         for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
           if(pos->second.first == 0) {
             pos->second.first = dombound.defaultValue();
-            pos->second.second.clear();
+            pos->second.second = dombound.defaultParameter();
             defaultBndSegs++;
           }
         }
-      } else {
+      }
+      else {
         for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
           if(pos->second.first == 0) {
             remainingBndSegs++;
@@ -601,6 +602,19 @@ namespace Dune
         }
       }
     }
+
+    // check for boundary parameters again if necessary
+    if ( !haveBndParameters )
+    {
+      facemap_t :: iterator pos = facemap.begin();
+      for( ; pos != facemap.end(); ++pos )
+      {
+        if( !pos->second.second.empty() )
+          break;
+      }
+      haveBndParameters = ( pos != facemap.end() );
+    }
+
     info->step2(nofbound,facemap.size(),inbnddomain,defaultBndSegs,remainingBndSegs);
   }
 
