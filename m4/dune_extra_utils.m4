@@ -4,7 +4,7 @@ AC_DEFUN([DUNE_EXTRA_UTILS], [
     [AS_HELP_STRING(
         [--enable-extra-utils],
         [Enable compilation and installation of extra utilities from the
-          "utility" subdirectory.])],
+          "src" subdirectory.])],
     [], [enable_extra_utils=no])
   case "$enable_extra_utils" in
   yes|no)
