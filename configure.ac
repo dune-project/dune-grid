@@ -83,7 +83,7 @@ AC_CONFIG_FILES([Makefile
     dune/grid/geometrygrid/Makefile
     m4/Makefile
     dune-grid.pc
-    utility/Makefile
-    utility/gridinfo-gmsh/Makefile
+    src/Makefile
+    src/gridinfo-gmsh/Makefile
     ])
 AC_OUTPUT

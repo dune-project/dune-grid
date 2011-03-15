@@ -19,7 +19,7 @@ if EXTRA_UTILS
 # Using automake conditionals ensures that these directories will always be in
 # DIST_SUBDIRS, even if they are not always in SUBDIRS
 SUBDIRS +=					\
-	utility
+	src
 endif EXTRA_UTILS
 
 # use configured compiler for "make distcheck"
