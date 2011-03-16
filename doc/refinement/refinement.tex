@@ -45,7 +45,7 @@
 % - Introduction (What is Refinement, and what is its purpose)
 % - Design of the Interface
 %   - Refinement
-%   - Why are the Iterators not dereferencable
+%   - Why are the Iterators not dereferenceable
 %   - VirtualRefinement
 %   - buildRefinement()
 % - Extending Refinement
@@ -232,7 +232,7 @@ public:
 \subsubsection{The Iterators}
 
 We decided to deviate from the usual scheme of an iterator in one
-respect: the iterators are not dereferencable.  Instead, you get the
+respect: the iterators are not dereferenceable.  Instead, you get the
 information by directly calling methods of the iterator (see listing
 \ref{intf_iter}).  The reason is that the subentities do not actually
 exist as data within the grid; everything can be calculated on the fly
@@ -283,7 +283,7 @@ classes.  Each wrapper provides the functionality of one corresponding
 The advantage is that our users can treat all \code{VirtualRefinement}
 classes the same, so they only have to write their code once.  The
 disadvantages are that the class is no longer static and it is now
-decided at at runtime which object is called, so the compiler cannot
+decided at runtime which object is called, so the compiler cannot
 inline these methods.  Of course, Refinement was developed with
 disk-based input/output in mind, which is slow anyway, so there is not
 much lost.
@@ -666,13 +666,13 @@ And for the reverse:
 
 \begin{thebibliography}{0}
 \bibitem{dune} Distributed and Unified Numerics Environment
-  \url{http://dune.uni-hd.de}.
-\bibitem{jbey} \foreignlanguage{ngerman}{Jürgen Bey: Finite-Volumen-
-    und Mehrgitterverfahren für elliptische Randwertprobleme.}  The
+  \url{http://www.dune-project.org}.
+\bibitem{jbey} \foreignlanguage{ngerman}{J\"urgen Bey: Finite-Volumen-
+    und Mehrgitterverfahren f\"ur elliptische Randwertprobleme.}  The
   relevant part is available in english at
   \url{http://www.igpm.rwth-aachen.de/bey/ftp/simplex.ps.gz}.
-\bibitem{bronstein} Bronstein, Semendjajew, Musiol, Mühlig
-  "Taschenbuch der Mathematik" (1999)
+\bibitem{bronstein} Bronstein, Semendjajew, Musiol, M\"uhlig
+  ``Taschenbuch der Mathematik'' (1999)
 
 \end{thebibliography}
 
