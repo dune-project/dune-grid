@@ -84,6 +84,11 @@ namespace Dune
     const static int dimension = Grid::dimension;
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
 
+  private:
+    typedef FieldVector< double, dimension > Point;
+    typedef dgf::BoundaryDomBlock BoundaryDomainBlock;
+
+  public:
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
     {
@@ -95,6 +100,11 @@ namespace Dune
     {
       std::ifstream input( filename.c_str() );
       generate( input, comm );
+    }
+
+    ~DGFGridFactory ()
+    {
+      delete boundaryDomainBlock_;
     }
 
     Grid *grid() const
@@ -110,7 +120,18 @@ namespace Dune
     template <class Intersection>
     int boundaryId(const Intersection &intersection) const
     {
-      return intersection.boundaryId();
+      if( boundaryDomainBlock_->isactive() )
+      {
+        std::vector< Point > corners;
+        getCorners( intersection.geometry(), corners );
+        const dgf::DomainData *data = boundaryDomainBlock_->contains( corners );
+        if( data )
+          return data->id();
+        else
+          return intersection.indexInInside();
+      }
+      else
+        return intersection.indexInInside();
     }
 
     template< int codim >
@@ -129,7 +150,18 @@ namespace Dune
     const typename DGFBoundaryParameter::type &
     boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
-      return emptyBndParams_;
+      if( boundaryDomainBlock_->isactive() )
+      {
+        std::vector< Point > corners;
+        getCorners( intersection.geometry(), corners );
+        const dgf::DomainData *data = boundaryDomainBlock_->contains( corners );
+        if( data )
+          return data->parameter();
+        else
+          return DGFBoundaryParameter::defaultValue();
+      }
+      else
+        return DGFBoundaryParameter::defaultValue();
     }
 
     template< class Entity >
@@ -141,9 +173,21 @@ namespace Dune
   private:
     void generate( std::istream &gridin, MPICommunicatorType comm );
 
+    template< class Geometry >
+    static void getCorners ( const Geometry &geometry, std::vector< Point > &corners )
+    {
+      corners.resize( geometry.corners() );
+      for( int i = 0; i < geometry.corners(); ++i )
+      {
+        const typename Geometry::GlobalCoordinate corner = geometry.corner( i );
+        for( int j = 0; j < dimension; ++j )
+          corners[ i ][ j ] = corner[ j ];
+      }
+    }
+
     Grid *grid_;
+    dgf::BoundaryDomBlock *boundaryDomainBlock_;
     std::vector<double> emptyParam;
-    typename DGFBoundaryParameter::type emptyBndParams_;
   };
 
   template< int dim >
@@ -223,6 +267,8 @@ namespace Dune
 #else
     grid_ = new YaspGrid< dim >( lang, anz, per, grdParam.overlap() );
 #endif
+
+    boundaryDomainBlock_ = new dgf::BoundaryDomBlock( gridin, dimension );
   }
 
   template <int dim>
@@ -233,4 +279,4 @@ namespace Dune
 
 
 }
-#endif
+#endif // #ifndef DUNE_DGFPARSERYASP_HH
