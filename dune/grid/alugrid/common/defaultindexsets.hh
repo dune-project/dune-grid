@@ -174,13 +174,8 @@ namespace Dune {
     // the corresponding grid
     const GridType & grid_;
   };
-  //*********************************************************************
-  /*! \brief
-   * DefaultLevelIndexSet generates a level index set for a grid out of a
-   * grids hierarchic index set by storing for each entity in the grid
-   * a number in an array.
-   */
-  //*********************************************************************
+
+  //! LevelIterator tpyes for all codims and partition types
   template <class GridImp>
   struct DefaultLevelIteratorTypes
   {
@@ -215,8 +210,8 @@ namespace Dune {
 
 
   /*! \brief
-     DefaultLevelIndexSet creates a LevelIndexSet for a Grid by using its
-     HierarchicIndexSet
+     DefaultIndexSet creates an index set by using the grids persistent container
+     an a given pair of iterators
    */
   template < class GridImp, class IteratorImp >
   class DefaultIndexSet :
