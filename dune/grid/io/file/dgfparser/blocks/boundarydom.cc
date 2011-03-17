@@ -14,16 +14,11 @@ namespace Dune
     // ----------------
 
     BoundaryDomBlock :: BoundaryDomBlock(std::istream& in,int cdimworld )
-      : BasicBlock(in, "boundarydomain" ),
-        dimworld(cdimworld),
-        goodline(true),
-        p1(cdimworld),
-        p2(cdimworld),
-        bndid(0),
-        bndparameter( DGFBoundaryParameter::defaultValue() ),
-        withdefault(false),
-        defaultvalue(0),
-        defaultparameter( DGFBoundaryParameter::defaultValue() )
+      : BasicBlock( in, "boundarydomain" ),
+        dimworld_( cdimworld ),
+        counter_( -1 ),
+        default_( 0 ),
+        ndomains_( 0 )
     {
       if ( !isactive() )
         return;
@@ -32,116 +27,122 @@ namespace Dune
 
       if (findtoken("default"))
       {
-        int x;
-        if ( getnextentry( x ) )
+        int id;
+        BoundaryParameter parameter = DGFBoundaryParameter::defaultValue();
+
+        // try to read boundary id
+        if ( getnextentry( id ) )
         {
-          if( x <= 0 )
+          if( id <= 0 )
           {
             DUNE_THROW(DGFException,
                        "ERROR in " << *this
-                                   << "      non-positive boundary id (" << x << ") read!");
+                                   << "      non-positive boundary id (" << id << ") read!");
           }
 
-          defaultvalue = x;
-
-          // find parameter
+          // check for parameter
           std::string currentline = line.str();
           std::size_t delimiter = currentline.find( DGFBoundaryParameter::delimiter );
           if( delimiter != std::string::npos )
           {
-            defaultparameter =
+            parameter =
               DGFBoundaryParameter::convert( currentline.substr( delimiter+1, std::string::npos ) );
           }
 
-          withdefault = true;
+          // create default domain data
+          default_ = new DomainData( id, parameter, true );
+
         }
       }
 
+      readBlock();
       reset();
-      next();
     }
 
-
-    bool BoundaryDomBlock :: next ()
+    void BoundaryDomBlock :: readBlock ()
     {
+      reset();
       assert( ok() );
-      getnextline();
 
-      if ( linenumber()==noflines() )
+      while( getnextline() )
       {
-        goodline=false;
-        return goodline;
-      }
+        int id;
+        BoundaryParameter parameter = DGFBoundaryParameter::defaultValue();
 
-      int id;
-      bndparameter = DGFBoundaryParameter::defaultValue();
-
-      if( getnextentry( id ) )
-      {
-        if( id <= 0 )
+        if( getnextentry( id ) )
         {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "      non-positive boundary id (" << id << ") read!");
-        }
-        bndid = id;
-
-        // find delimiter
-        std::string currentline = line.str();
-        std::size_t delimiter = currentline.find( DGFBoundaryParameter::delimiter );
-        if( delimiter != std::string::npos )
-        {
-          bndparameter =
-            DGFBoundaryParameter::convert( currentline.substr( delimiter+1, std::string::npos ) );
-        }
-
-        // read vertices
-        double x;
-        int n = 0;
-        while ( getnextentry( x ) )
-        {
-          if ( 0 <= n && n < dimworld )
-            p1.at( n ) = x;
-          else if ( dimworld <= n && n < 2*dimworld )
+          if( id <= 0 )
           {
-            p2.at( n-dimworld ) = x;
-            if ( p2.at( n-dimworld )< p1.at( n-dimworld ) )
-            {
-              DUNE_THROW(DGFException,
-                         "ERROR in " << *this
-                                     << "      second coordinate smaller than first coordinate: "
-                                     << p2.at(n-dimworld)
-                                     << " read but expected value larger or equal to "
-                                     << p1.at(n-dimworld));
-            }
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "      non-positive boundary id (" << id << ") read!");
           }
-          n++;
-        }
 
-        goodline = ( n == dimworld*2 );
-        if ( !goodline )
-        {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "      wrong number of coordinates: "
-                                 << n << " read but expected " << dimworld);
+          // check for parameter
+          std::string currentline = line.str();
+          std::size_t delimiter = currentline.find( DGFBoundaryParameter::delimiter );
+          if( delimiter != std::string::npos )
+          {
+            parameter =
+              DGFBoundaryParameter::convert( currentline.substr( delimiter+1, std::string::npos ) );
+          }
+
+          DomainData data( id, parameter );
+
+          // read vertices
+          std::vector< double > left( dimworld_ ), right( dimworld_ );
+          double x;
+          int n = 0;
+
+          while ( getnextentry( x ) )
+          {
+            if ( 0 <= n && n < dimworld_ )
+              left.at( n ) = x;
+            else if ( dimworld_ <= n && n < 2*dimworld_ )
+            {
+              right.at( n-dimworld_ ) = x;
+              if ( right.at( n-dimworld_ )< left.at( n-dimworld_ ) )
+              {
+                DUNE_THROW(DGFException,
+                           "ERROR in " << *this
+                                       << "      second coordinate smaller than first coordinate: "
+                                       << right.at(n-dimworld_)
+                                       << " read but expected value larger or equal to "
+                                       << left.at(n-dimworld_));
+              }
+            }
+            n++;
+          }
+          bool goodline = ( n == dimworld_*2 );
+          if ( !goodline )
+          {
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "      wrong number of coordinates: "
+                                   << n << " read but expected " << dimworld_);
+          }
+
+          Domain domain( left, right, data );
+          domains_.push_back( domain );
+
         }
       }
-      else
-        next();
-      return goodline;
+
+      ndomains_ = domains_.size();
     }
 
-
-    bool BoundaryDomBlock :: inside ( const std :: vector< double > &v ) const
+    bool BoundaryDomBlock :: hasParameter () const
     {
-      assert( v.size() == (size_t)dimworld );
-      for( int i = 0; i < dimworld; ++i )
+      for( int i = 0; i < ndomains_; ++i )
       {
-        if( (v[ i ] < p1[ i ]) || (v[ i ] > p2[ i ]) )
-          return false;
+        if( domains_[ i ].data().hasParameter() )
+          return true;
       }
-      return true;
+
+      if( hasDefaultData() )
+        return defaultData()->hasParameter();
+
+      return false;
     }
 
   } // end namespace dgf

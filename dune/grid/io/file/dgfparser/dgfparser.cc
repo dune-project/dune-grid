@@ -4,6 +4,7 @@
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
+#include <dune/grid/io/file/dgfparser/blocks/boundarydom.hh>
 #include <unistd.h>
 
 namespace Dune
@@ -500,6 +501,7 @@ namespace Dune
     if (nofelements==0) return;
 
     dgf :: BoundaryDomBlock dombound(gridin, dimw);
+
     if ( !dombound.isactive() && facemap.empty() ) return;
 
     facemap_t :: iterator pos;
@@ -553,67 +555,35 @@ namespace Dune
     int remainingBndSegs = 0;
     int defaultBndSegs = 0;
     int inbnddomain = 0;
-    if (dombound.isactive()) {
-      info->block(dombound);
-      for (; dombound.ok(); dombound.next()) {
-        for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
-          if(pos->second.first == 0) {
-            // if an edge of a simplex is inside the domain it has the value zero
-            bool isinside=true;
-            for (int i=0; i<pos->first.size(); i++)
-            {
-              if (!dombound.inside(vtx[pos->first[i]]))
-              {
-                isinside=false;
-                break;
-              }
-            }
-            if (isinside)
-            {
-              pos->second.first = dombound.id();
-              pos->second.second = dombound.parameter();
-              inbnddomain++;
-            }
-          }
-        }
-      }
-      // now assign default value to remaining segments - if one was given:
-      if (dombound.defaultValueGiven()) {
-        info->print("Default boundary ID found");
-        for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
-          if(pos->second.first == 0) {
-            pos->second.first = dombound.defaultValue();
-            pos->second.second = dombound.defaultParameter();
-            defaultBndSegs++;
-          }
-        }
-      }
-      else {
-        for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
-          if(pos->second.first == 0) {
-            remainingBndSegs++;
-          }
-        }
-      }
-    } else {
-      for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
-        if(pos->second.first == 0) {
-          remainingBndSegs++;
+    if ( dombound.isactive() )
+    {
+      info->block( dombound );
+      std::vector < std::vector < double > > v;
+      for( pos=facemap.begin(); pos != facemap.end(); ++pos )
+      {
+        if( pos->second.first != 0 )
+          continue;
+
+        v.resize( pos->first.size() );
+        for( int i = 0; i < pos->first.size(); i++ )
+          v[ i ] = vtx[ pos->first[ i ] ];
+        const dgf::DomainData * data = dombound.contains( v );
+        if ( data )
+        {
+          pos->second.first = data->id();
+          pos->second.second = data->parameter();
+          data->isDefault() ? defaultBndSegs ++ : inbnddomain++;
         }
       }
     }
 
-    // check for boundary parameters again if necessary
-    if ( !haveBndParameters )
+    for( pos = facemap.begin(); pos != facemap.end(); ++pos )
     {
-      facemap_t :: iterator pos = facemap.begin();
-      for( ; pos != facemap.end(); ++pos )
-      {
-        if( !pos->second.second.empty() )
-          break;
-      }
-      haveBndParameters = ( pos != facemap.end() );
+      if( pos->second.first == 0 )
+        remainingBndSegs++;
     }
+
+    haveBndParameters = ( haveBndParameters || dombound.hasParameter() );
 
     info->step2(nofbound,facemap.size(),inbnddomain,defaultBndSegs,remainingBndSegs);
   }
