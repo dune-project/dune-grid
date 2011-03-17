@@ -75,14 +75,12 @@ namespace Dune
     PersistentContainerVector( const GridType& grid, const int codim,
                                const Index& index,
                                const double overEstimate,
-                               const typename Vector::allocator_type &allocator)
+                               const typename Vector::allocator_type &allocator )
       : codim_( codim )
         , index_( index )
         , overEstimate_( overEstimate ) // this is not yet the right approach - will be revised
-        , data_(int (index.size(0)*overEstimate), Data(), allocator)
-    {
-      data_.resize(index.size(0));
-    }
+        , data_( index.size( 0 ), Data(), allocator )
+    {}
 
     //! \brief copy constructor
     PersistentContainerVector( const PersistentContainerVector& other )
@@ -167,9 +165,11 @@ namespace Dune
     //! \brief adjust container to correct size and set all values to default
     void clear( )
     {
-      const size_t newSize = index_.size( codim_ );
-      data_.resize( newSize );
+      // clear all entries
       data_.clear();
+      // resize with new default value
+      const size_t newSize = index_.size( codim_ );
+      data_.resize( newSize, Data() );
     }
 
     //! \brief adjust container to correct size including compress
@@ -178,11 +178,11 @@ namespace Dune
       // overestimated on its own...
       const size_t newSize = index_.size( codim_ );
       if (newSize < data_.capacity())
-        data_.resize(newSize);
+        data_.resize(newSize, Data() );
       else
       {
         data_.reserve(newSize*overEstimate_);
-        data_.resize(newSize);
+        data_.resize(newSize, Data() );
       }
     }
   };
