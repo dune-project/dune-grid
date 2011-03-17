@@ -209,6 +209,9 @@ namespace Dune {
   };
 
 
+  // forward declaration of ALU3dGrid
+  template <ALU3dGridElementType elType, class Comm> class ALU3dGrid;
+
   /*! \brief
      DefaultIndexSet creates an index set by using the grids persistent container
      an a given pair of iterators
@@ -357,7 +360,7 @@ namespace Dune {
       assert( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() ));
       assert( indexContainer( codim )[ en ].index() >= 0 );
 #endif
-      return indexContainer( codim )[ en ].index();
+      return indexContainer( cd )[ en ].index();
     }
 
     //! return LevelIndex of given entity
@@ -370,9 +373,9 @@ namespace Dune {
       const int codim = cd;
       //const bool isLeaf = (codim == 0) ? en.isLeaf() : true ;
       assert( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() ));
-      assert( indexContainer( codim )[ en ].index() >= 0 );
+      assert( indexContainer( cd )[ en ].index() >= 0 );
 #endif
-      return indexContainer( codim )[ en ].index();
+      return indexContainer( cd )[ en ].index();
     }
 
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
