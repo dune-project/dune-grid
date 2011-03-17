@@ -437,7 +437,8 @@ namespace Dune {
         //}
 #ifndef NDEBUG
         const int gridSize = ( level_ < 0 ) ? grid_.size( cd ) : grid_.size( level_, cd);
-        assert( size_[cd] == gridSize );
+        const int mySize = size_[cd];
+        assert( mySize == gridSize );
 #endif
       }
     }
