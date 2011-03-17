@@ -12,6 +12,7 @@
 // #include <dune/common/interfaces.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/adaptcallback.hh> // for compatibility only
+#include <dune/grid/utility/persistentcontainer.hh>
 
 /** @file
    @author Robert Kloefkorn
@@ -233,54 +234,76 @@ namespace Dune {
     //! type of index
     typedef unsigned int IndexType;
 
-    typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
+    struct Index
+    {
+      int index_;
+      Index() : index_( -1 ) {}
+      int index() const { return index_; }
+      void set( const int index ) { index_ = index; }
+    };
+
+    typedef PersistentContainer< GridType, Index > PersistentContainerType ;
+    typedef std::vector< PersistentContainerType* > PersistentContainerVectorType;
+
   private:
-
-    //! type of used arrays to store indices
-    typedef std::vector<int> IndexArrayType;
-
-
     typedef DefaultLevelIndexSet<GridType> ThisType;
+
+    template <int dummy, class Grid>
+    struct ContainsIndex
+    {
+      static bool contains( const PersistentContainerType& container,
+                            const size_t index )
+      {
+        DUNE_THROW(NotImplemented,"DefaultLevelIndexSet::containsIndex is only implemented for ALU3dGrid" );
+        return true ;
+      }
+    };
+
+    template <int dummy, ALU3dGridElementType elType, class Comm>
+    struct ContainsIndex< dummy, ALU3dGrid< elType, Comm > >
+    {
+      static bool contains( const PersistentContainerType& container,
+                            const size_t index )
+      {
+        return container.getData( index ).index() >= 0;
+      }
+    };
 
     template <class EntityType, int codim>
     struct InsertEntity
     {
-      template <class HierarchicIndexSet>
       static void insert(const EntityType & en,
-                         const HierarchicIndexSet & hset,
-                         IndexArrayType (&index)[ncodim],
+                         PersistentContainerVectorType &indexContainer,
                          int (&num)[ncodim])
       {
-        IndexArrayType & idx = index[codim];
+        PersistentContainerType& codimContainer = *(indexContainer[ codim ]);
         for( int i = 0; i < en.template count< codim >(); ++i )
         {
-          const int id = hset.subIndex( en, i, codim );
-          if( idx[ id ] < 0 )
+          Index& idx = codimContainer( en , i );
+          if( idx.index() < 0 )
           {
-            idx[id] = num[codim];
-            ++num[codim];
+            idx.set( num[codim] );
+            ++ num[ codim ];
           }
         }
-        InsertEntity<EntityType,codim-1>::insert(en,hset,index,num);
+        InsertEntity<EntityType,codim-1>::insert(en, indexContainer, num);
       }
     };
 
     template <class EntityType>
     struct InsertEntity<EntityType,0>
     {
-      template <class HierarchicIndexSet>
       static void insert(const EntityType & en,
-                         const HierarchicIndexSet & hset,
-                         IndexArrayType (&index)[ncodim],
+                         PersistentContainerVectorType &indexContainer,
                          int (&num)[ncodim])
       {
         enum { codim = 0 };
-        IndexArrayType & idx = index[codim];
-        const int id = hset.index(en);
-        if( idx[id] < 0 )
+        PersistentContainerType& codimContainer = *(indexContainer[ codim ]);
+        Index& idx = codimContainer[ en ];
+        if( idx.index() < 0 )
         {
-          idx[id] = num[codim];
-          ++num[codim];
+          idx.set( num[codim] );
+          ++ num[ codim ];
         }
       }
     };
@@ -292,11 +315,37 @@ namespace Dune {
 
     //! create LevelIndex by using the HierarchicIndexSet of a grid
     //! for the given level
-    DefaultLevelIndexSet(const GridType & grid , int level ) :
-      grid_(grid) , level_(level) , hIndexSet_ ( grid.hierarchicIndexSet() )
-      , size_ ( ncodim )
+    DefaultLevelIndexSet( const GridType & grid ,
+                          const int level )
+      : grid_(grid),
+        indexContainers_( ncodim, (PersistentContainerType *) 0),
+        level_(level)
     {
+      for( int codim=0; codim < ncodim; ++codim )
+        indexContainers_[ codim ] = new PersistentContainerType( grid, codim );
+
       calcNewIndex ();
+    }
+
+    //! desctructor deleting persistent containers
+    ~DefaultLevelIndexSet ()
+    {
+      for( int codim=0; codim < ncodim; ++codim )
+        delete indexContainers_[ codim ];
+    }
+
+    const PersistentContainerType& indexContainer( const size_t codim ) const
+    {
+      assert( codim < indexContainers_.size() );
+      assert( indexContainers_[ codim ] );
+      return *( indexContainers_[ codim ] );
+    }
+
+    PersistentContainerType& indexContainer( const size_t codim )
+    {
+      assert( codim < indexContainers_.size() );
+      assert( indexContainers_[ codim ] );
+      return *( indexContainers_[ codim ] );
     }
 
     //! return LevelIndex of given entity
@@ -309,9 +358,9 @@ namespace Dune {
 #ifndef NDEBUG
       const int codim = cd;
       assert( (codim == dim) ? (1) : (level_ == en.level() ));
-      assert( levelIndex_[codim][ hIndexSet_.index(en) ] >= 0 );
+      assert( indexContainer( codim )[ en ] >= 0 );
 #endif
-      return levelIndex_[cd][ hIndexSet_.index(en) ];
+      return indexContainer( codim )[ en ];
     }
 
     //! return LevelIndex of given entity
@@ -323,9 +372,9 @@ namespace Dune {
 #ifndef NDEBUG
       const int codim = cd;
       assert( (codim == dim) ? (1) : (level_ == en.level() ));
-      assert( levelIndex_[codim][ hIndexSet_.index(en) ] >= 0 );
+      assert( indexContainer( codim )[ en ].index() >= 0 );
 #endif
-      return levelIndex_[cd][ hIndexSet_.index(en) ];
+      return indexContainer( codim )[ en ].index();
     }
 
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
@@ -334,10 +383,9 @@ namespace Dune {
     IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
-      const int hIndex = hIndexSet_.subIndex( e, i, codim );
       assert( (codim != 0) || (level_ == e.level()) );
-      assert( levelIndex_[ codim ][ hIndex ] >= 0 );
-      return levelIndex_[ codim ][ hIndex ];
+      assert( indexContainer( codim ) ( e, i ).index() >= 0 );
+      return indexContainer( codim ) ( e, i ).index();
     }
 
     //! returns true if this set provides an index for given entity
@@ -345,14 +393,14 @@ namespace Dune {
     bool contains (const EntityType& en) const
     {
       enum { cd = EntityType :: codimension };
-      return (levelIndex_[cd][ hIndexSet_.index(en) ] >= 0);
+      return (indexContainer( cd )[ en ].index() >= 0 );
     }
 
     //! return size of IndexSet for a given level and codim
     IndexType size ( int codim ) const
     {
       assert( codim >= 0 && codim <= GridType::dimension );
-      return size_[codim];
+      return size_[ codim ];
     }
 
     //! return size of IndexSet for a given level and codim
@@ -370,7 +418,7 @@ namespace Dune {
       // resize arrays to new size
       for(int cd=0; cd<ncodim; ++cd)
       {
-        resizeVectors(levelIndex_[cd], hIndexSet_.size(cd));
+        indexContainer( cd ).clear();
       }
 
       // walk grid and store index
@@ -378,22 +426,24 @@ namespace Dune {
       template Partition<All_Partition> :: Iterator IteratorType;
 
       // we start with zero for all codims
-      int num[ncodim];
-      for(int cd=0; cd<ncodim; ++cd) num[cd] = 0;
+      for(int cd=0; cd<ncodim; ++cd) size_[cd] = 0;
 
       IteratorType endit  = this->template end  < 0, All_Partition > ();
       for(IteratorType it = this->template begin< 0, All_Partition > ();
           it != endit; ++it)
       {
         assert( it->level() == level_ );
-        insertEntity(*it,num);
+        insertEntity( *it, size_ );
       }
 
       // remember the number of entity on level and cd = 0
       for(int cd=0; cd<ncodim; ++cd)
       {
-        size_[cd] = num[cd];
-        assert( size_[cd] == grid_.size(level_,cd) );
+        //if( size_[cd] != grid_.size( level_, cd) )
+        //{
+        //  std::cout << size_[cd] << " s | g " << grid_.size( level_, cd) << std::endl;
+        //}
+        assert( size_[cd] == grid_.size( level_, cd) );
       }
 
 #ifndef NDEBUG
@@ -405,7 +455,8 @@ namespace Dune {
     template <int cd>
     void checkLevelIndexForCodim ()
     {
-      IndexArrayType & levIndex = levelIndex_[cd];
+      PersistentContainerType& codimContainer = indexContainer( cd );
+
       // resize memory if necessary
       // walk grid and store index
       typedef typename DefaultLevelIteratorTypes<GridImp>:: template Codim<cd>::
@@ -414,15 +465,14 @@ namespace Dune {
       LevelIterator endit  = this->template end  < cd , All_Partition > ();
       for(LevelIterator it = this->template begin< cd , All_Partition > (); it != endit; ++it)
       {
-        int no = hIndexSet_.index(*it);
-        assert( levIndex[no] >= 0 );
+        assert( codimContainer[ *it ].index() >= 0 );
       }
     }
 
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
-      return hIndexSet_.geomTypes( codim );
+      return grid_.geomTypes( codim );
     }
 
     /** @brief Iterator to first entity of given codimension and partition type.
@@ -444,14 +494,9 @@ namespace Dune {
     }
 
     //! returns true if this set provides an index for given entity
-    bool containsIndex (int cd , int idx) const
+    bool containsIndex ( const int cd , const int idx) const
     {
-      assert( cd >= 0 );
-      assert( cd < ncodim );
-
-      assert( idx >= 0);
-      assert( idx < (int) levelIndex_[cd].size());
-      return (levelIndex_[cd][ idx ] >= 0);
+      return ContainsIndex<0, GridType> :: contains( indexContainer( cd ), idx );
     }
 
   private:
@@ -467,43 +512,20 @@ namespace Dune {
     template <class EntityType>
     void insertEntity(EntityType & en, int (&num)[ncodim])
     {
-      InsertEntity<EntityType,dim>::insert(en,hIndexSet_,levelIndex_,num);
-    }
-
-    // resize vectors of index set
-    void resizeVectors(IndexArrayType &a, int newNumberOfEntries)
-    {
-      if(newNumberOfEntries > 0)
-      {
-        a.resize(newNumberOfEntries);
-      }
-      for(size_t i=0; i<a.size(); i++) a[i] = -1;
-    }
-
-    // method prints indices of given codim, for debugging
-    void print (int codim) const
-    {
-      for(size_t i=0; i<levelIndex_[codim].size(); i++)
-      {
-        std::cout << "levelind[" << i << "] = " << levelIndex_[codim][i] << "\n";
-      }
+      InsertEntity<EntityType,dim>::insert( en, indexContainers_, num);
     }
 
     // grid this level set belongs to
     const GridType & grid_;
 
-    // the level for which this index set is created
-    const int level_;
-
-    // the grids HierarchicIndexSet
-    const HierarchicIndexSetType & hIndexSet_;
+    //! vector with PersistentContainer for each codim
+    PersistentContainerVectorType indexContainers_;
 
     // number of entitys of each level an codim
-    IndexArrayType size_;
+    int size_[ ncodim ];
 
-    //*********************************************************
-    // Methods for mapping the hierarchic Index to index on Level
-    IndexArrayType levelIndex_[ncodim];
+    // the level for which this index set is created
+    const int level_;
 
   };
 
@@ -542,7 +564,6 @@ namespace Dune {
     //! type of index
     typedef unsigned int IndexType;
   private:
-    //! type of used arrays to store indices
     typedef std::vector<int> IndexArrayType;
 
     typedef DefaultLeafIndexSet<GridType> ThisType;

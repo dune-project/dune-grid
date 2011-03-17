@@ -62,6 +62,53 @@ namespace Dune
       : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
     {}
   };
+
+  template< int dim, int dimworld, ALU2DSPACE ElementType elType, class Data, class Allocator >
+  class PersistentContainer< ALU2dGrid< dim, dimworld, elType >, Data, Allocator >
+    : public PersistentContainerVector< ALU2dGrid< dim, dimworld, elType >,
+          typename ALU2dGrid< dim, dimworld, elType >::HierarchicIndexSet,
+          std::vector<Data,Allocator> >
+  {
+    typedef ALU2dGrid< dim, dimworld, elType >  GridType;
+    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
+
+  public:
+    //! Constructor filling the container with values using the default constructor
+    //! Depending on the implementation this could be achieved without allocating memory
+    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
+      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    {}
+  };
+
+  template< ALU3dGridElementType elType, class Comm, class Data, class Allocator >
+  class PersistentContainer< ALU3dGrid< elType, Comm >, Data, Allocator >
+    : public PersistentContainerVector< ALU3dGrid< elType, Comm >,
+          typename ALU3dGrid< elType, Comm >::HierarchicIndexSet,
+          std::vector<Data,Allocator> >
+  {
+    typedef ALU3dGrid< elType, Comm >  GridType;
+    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
+
+  protected:
+    using BaseType :: index_;
+    using BaseType :: data_;
+
+  public:
+    //! Constructor filling the container with values using the default constructor
+    //! Depending on the implementation this could be achieved without allocating memory
+    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
+      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    {}
+
+    //! this method is needed for the level communication
+    //! of ALU3dGrid, see datahandle.hh
+    const Data& getData ( const size_t idx ) const
+    {
+      assert( idx < data_.size() );
+      return data_[ idx ];
+    }
+  };
+
 } // end namespace Dune
 #endif // ENABLE_ALU
 
