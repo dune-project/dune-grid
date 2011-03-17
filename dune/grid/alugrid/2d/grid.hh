@@ -556,7 +556,7 @@ namespace Dune {
     const int nrOfHangingNodes_;
 
     //! the type of our size cache
-    typedef SingleTypeSizeCache<ThisType> SizeCacheType;
+    typedef SizeCache<ThisType> SizeCacheType;
     SizeCacheType * sizeCache_;
 
     // flag to make sure postAdapt is called after adapt

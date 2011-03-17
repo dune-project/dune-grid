@@ -294,9 +294,8 @@ namespace Dune
   {
     assert( codim >= 0 );
     assert( codim <= dimension );
-
-    assert( sizeCache_ );
-    return sizeCache_->ghostSize(codim);
+    DUNE_THROW(NotImplemented,"ALU3dGrid:ghostSize not implemented until semantics of the method is clear");
+    return ( codim == 0 ) ? 1 : 0;
   }
 
 
@@ -307,9 +306,8 @@ namespace Dune
     assert( codim >= 0 );
     assert( codim <= dimension );
     assert( level >= 0);
-
-    assert( sizeCache_ );
-    return sizeCache_->ghostSize(level,codim);
+    DUNE_THROW(NotImplemented,"ALU3dGrid:ghostSize not implemented until semantics of the method is clear");
+    return ( codim == 0 ) ? 1 : 0;
   }
 
   // calc all necessary things that might have changed
@@ -368,8 +366,7 @@ namespace Dune
   void ALU3dGrid< elType, Comm >::calcExtras ()
   {
     if(sizeCache_) delete sizeCache_;
-    bool isSimplex = (elType == tetra);
-    sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
+    sizeCache_ = new SizeCacheType (*this);
 
     // unset up2date before recalculating the index sets,
     // becasue they will use this feature

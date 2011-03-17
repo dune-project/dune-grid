@@ -304,11 +304,10 @@ namespace Dune
     // reset size cache
     ////////////////////////////////////
     if(sizeCache_) delete sizeCache_;
-    bool isSimplex = (eltype == ALU2DSPACE triangle);
     if ( eltype == ALU2DSPACE mixed )
       DUNE_THROW( NotImplemented, "size for mixed grids" );
 
-    sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
+    sizeCache_ = new SizeCacheType (*this);
     /////////////////////////////////////
 
     // place this before update of level index, because

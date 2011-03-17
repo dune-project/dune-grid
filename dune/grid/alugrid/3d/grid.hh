@@ -970,7 +970,7 @@ namespace Dune
     mutable LeafVertexListType leafVertexList_;
 
     // the type of our size cache
-    typedef SingleTypeSizeCache<MyType> SizeCacheType;
+    typedef SizeCache<MyType> SizeCacheType;
     SizeCacheType * sizeCache_;
 
 #ifdef USE_SMP_PARALLEL
