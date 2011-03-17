@@ -89,11 +89,6 @@ namespace Dune {
     //! Type of the local id set
     typedef ALU2dGridLocalIdSet<dim,dimworld,eltype> LocalIdSetImp;
 
-    //! Type of the level index set
-    typedef DefaultLevelIndexSet< GridImp > LevelIndexSetImp;
-    //! Type of the leaf index set
-    typedef DefaultLeafIndexSet< GridImp > LeafIndexSetImp;
-
     typedef int GlobalIdType;
     typedef int LocalIdType;
 
@@ -147,6 +142,11 @@ namespace Dune {
         LeafGridView;
       };
 
+      //! Type of the level index set
+      typedef DefaultIndexSet< GridImp, typename Codim<0>::LevelIterator > LevelIndexSetImp;
+      //! Type of the leaf index set
+      typedef DefaultIndexSet< GridImp, typename Codim<0>::LeafIterator > LeafIndexSetImp;
+
       typedef IndexSet<GridImp,LevelIndexSetImp> LevelIndexSet;
       typedef LeafIndexSetImp LeafIndexSet;
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
@@ -160,6 +160,12 @@ namespace Dune {
       CollectiveCommunication;
 #endif
     };
+
+    //! Type of the level index set implementation
+    typedef typename Traits :: LevelIndexSetImp LevelIndexSetImp;
+
+    //! Type of the leaf index set implementation
+    typedef typename Traits :: LeafIndexSetImp LeafIndexSetImp;
   }; // end of ALU2dGridFamily
 
 

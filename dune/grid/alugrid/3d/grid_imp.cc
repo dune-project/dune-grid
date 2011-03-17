@@ -392,9 +392,14 @@ namespace Dune
     // update all index set that are already in use
     for(size_t i=0; i<levelIndexVec_.size(); ++i)
     {
-      if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
+      if(levelIndexVec_[i])
+        (*(levelIndexVec_[i])).calcNewIndex( this->template lbegin<0>( i ),
+                                             this->template lend<0>( i ) );
     }
-    if(leafIndexSet_) leafIndexSet_->calcNewIndex();
+
+    if(leafIndexSet_)
+      leafIndexSet_->calcNewIndex( this->template leafbegin<0>(), this->template leafend<0>() );
+
     // build global ID set new (to be revised)
     if( globalIdSet_ ) globalIdSet_->updateIdSet();
 
@@ -408,7 +413,9 @@ namespace Dune
   const typename ALU3dGrid< elType, Comm >::Traits::LeafIndexSet &
   ALU3dGrid< elType, Comm >::leafIndexSet () const
   {
-    if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetImp ( *this );
+    if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetImp ( *this,
+                                                             this->template leafbegin<0>(),
+                                                             this->template leafend<0>() );
     return *leafIndexSet_;
   }
 
@@ -423,7 +430,11 @@ namespace Dune
     assert( level < (int) levelIndexVec_.size() );
 
     if( levelIndexVec_[level] == 0 )
-      levelIndexVec_[level] = new LevelIndexSetImp ( *this , level );
+      levelIndexVec_[level] =
+        new LevelIndexSetImp ( *this,
+                               this->template lbegin<0> (level),
+                               this->template lend<0> (level),
+                               level );
     return *(levelIndexVec_[level]);
   }
 

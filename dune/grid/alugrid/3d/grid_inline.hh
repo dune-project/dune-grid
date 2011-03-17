@@ -544,7 +544,10 @@ namespace Dune
         // if non-existent, then create for communicaton
         const typename Grid::LevelIndexSetImp *levelISet;
         if( !grid.levelIndexVec_[ level ] )
-          levelISet = new typename Grid::LevelIndexSetImp( grid, level );
+          levelISet = new typename Grid::LevelIndexSetImp(
+            grid,
+            grid.template lbegin<0>( level ),
+            grid.template lend<0>( level ), level );
         else
           levelISet = grid.levelIndexVec_[ level ];
 
