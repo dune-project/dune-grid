@@ -158,8 +158,9 @@ namespace Dune {
     }
 
     //! number of entities per level, codim and geometry type in this process
-    int size (int level, int codim, GeometryType type) const
+    int size (int level, GeometryType type) const
     {
+      const int codim = GridType ::dimension - type.dim();
       if( levelSizes_[codim][level] < 0)
         CountLevelEntities<ThisType,All_Partition,dim>::count(*this,level,codim);
 
@@ -175,16 +176,17 @@ namespace Dune {
     {
       assert( codim >= 0 );
       assert( codim < nCodim );
-      if( leafSizes_[codim] < 0)
+      if( leafSizes_[codim] < 0 )
         CountLeafEntities<ThisType,All_Partition,dim>::count(*this,codim);
       assert( leafSizes_[codim] >= 0 );
       return leafSizes_[codim];
     };
 
     //! number of leaf entities per codim and geometry type in this process
-    int size (int codim, GeometryType type) const
+    int size ( const GeometryType type ) const
     {
-      if( leafSizes_[codim] < 0)
+      const int codim = GridType :: dimension - type.dim();
+      if( leafSizes_[codim] < 0 )
         CountLeafEntities<ThisType,All_Partition,dim>::count(*this,codim);
 
       assert( leafTypeSizes_[codim][ gtIndex( type )] >= 0 );
