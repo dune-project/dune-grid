@@ -23,9 +23,10 @@ namespace Dune
     typedef std::string type;
 
     //! default constructor
-    static type defaultValue ()
+    static const type &defaultValue ()
     {
-      return type();
+      static type value;
+      return value;
     }
 
     //! copy from string
