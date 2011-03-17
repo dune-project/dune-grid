@@ -39,6 +39,7 @@
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/capabilities.hh>
+#include <dune/grid/albertagrid/backuprestore.hh>
 
 #include <dune/grid/albertagrid/coordcache.hh>
 #include <dune/grid/albertagrid/gridfamily.hh>

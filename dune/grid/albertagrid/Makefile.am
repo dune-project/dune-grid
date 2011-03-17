@@ -50,7 +50,7 @@ alberta_HEADERS = agrid.hh albertagrid.cc \
   leveliterator.hh  leafiterator.hh  treeiterator.hh \
   intersection.hh  intersection.cc  intersectioniterator.hh \
   capabilities.hh  gridfactory.hh  dgfparser.hh  albertareader.hh \
-  gridfamily.hh  gridview.hh  persistentcontainer.hh
+  gridfamily.hh  gridview.hh  persistentcontainer.hh  backuprestore.hh
 
 SUBDIRS = test
 
