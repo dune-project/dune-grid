@@ -152,9 +152,6 @@ namespace Dune
       template< class Vector >
       bool contains ( const Vector & x ) const
       {
-        if ( int( x.size() ) != dimensionworld )
-          return false;
-
         bool ret = true;
         for( int i = 0; i < dimensionworld; ++i )
         {
