@@ -155,7 +155,7 @@ namespace Dune
     const typename DGFBoundaryParameter::type &
     boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
-      return emptyBndParams_;
+      return DGFBoundaryParameter::defaultValue();
     }
 
   private:
@@ -186,7 +186,6 @@ namespace Dune
     InsertOrderMap elInsertOrder_;
     InsertOrderMap vtxInsertOrder_;
     std::vector<double> emptyParam;
-    typename DGFBoundaryParameter::type & emptyBndParams_;
   };
 
 } // end namespace Dune
