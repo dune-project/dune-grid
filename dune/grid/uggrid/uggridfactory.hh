@@ -113,10 +113,10 @@ namespace Dune {
 
      <p>
      This methods must compute the world coordinates from the local ones on the
-     boundary segment.  Give these classes to your grid by calling
+     boundary segment.  Give these classes to your grid factory by calling
      </p>
      <pre>
-     grid.insertBoundarySegment(const std::vector&lt;int&gt;& vertices,
+     factory.insertBoundarySegment(const std::vector&lt;int&gt;& vertices,
                              const BoundarySegment&lt;dimworld&gt; *boundarySegment);
      </pre>
 
