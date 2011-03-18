@@ -264,9 +264,10 @@ namespace Dune {
     template <class EntityType, int codim>
     struct InsertEntity
     {
+      template <class SizeVector>
       static void insert(const EntityType & en,
                          PersistentContainerVectorType &indexContainer,
-                         int (&num)[ncodim])
+                         SizeVector& sizes)
       {
         PersistentContainerType& codimContainer = *(indexContainer[ codim ]);
         for( int i = 0; i < en.template count< codim >(); ++i )
@@ -274,28 +275,29 @@ namespace Dune {
           Index& idx = codimContainer( en , i );
           if( idx.index() < 0 )
           {
-            idx.set( num[codim] );
-            ++ num[ codim ];
+            idx.set( sizes[codim] );
+            ++ sizes[ codim ];
           }
         }
-        InsertEntity<EntityType,codim-1>::insert(en, indexContainer, num);
+        InsertEntity<EntityType,codim-1>::insert(en, indexContainer, sizes);
       }
     };
 
     template <class EntityType>
     struct InsertEntity<EntityType,0>
     {
+      template <class SizeVector>
       static void insert(const EntityType & en,
                          PersistentContainerVectorType &indexContainer,
-                         int (&num)[ncodim])
+                         SizeVector& sizes)
       {
         enum { codim = 0 };
         PersistentContainerType& codimContainer = *(indexContainer[ codim ]);
         Index& idx = codimContainer[ en ];
         if( idx.index() < 0 )
         {
-          idx.set( num[codim] );
-          ++ num[ codim ];
+          idx.set( sizes[codim] );
+          ++ sizes[ codim ];
         }
       }
     };
@@ -313,6 +315,7 @@ namespace Dune {
                      const int level = -1 )
       : grid_(grid),
         indexContainers_( ncodim, (PersistentContainerType *) 0),
+        size_( ncodim, -1 ),
         level_(level)
     {
       for( int codim=0; codim < ncodim; ++codim )
@@ -435,7 +438,7 @@ namespace Dune {
 #ifndef NDEBUG
         const int gridSize = ( level_ < 0 ) ? grid_.size( cd ) : grid_.size( level_, cd);
         const int mySize = size_[cd];
-        assert( mySize == gridSize );
+        assert( mySize <= gridSize );
 #endif
       }
     }
@@ -462,11 +465,12 @@ namespace Dune {
       for(size_t i=0; i<geomT.size(); ++i) if(geomT[i] == type) return false;
       return true;
     }
+
     // calculate index for the codim
-    template <class EntityType>
-    void insertEntity(EntityType & en, int (&num)[ncodim])
+    template <class EntityType, class SizeVector>
+    void insertEntity(EntityType & en, SizeVector& sizes)
     {
-      InsertEntity<EntityType,dim>::insert( en, indexContainers_, num);
+      InsertEntity<EntityType,dim>::insert( en, indexContainers_, sizes);
     }
 
     // grid this index set belongs to
@@ -476,7 +480,7 @@ namespace Dune {
     PersistentContainerVectorType indexContainers_;
 
     // number of entitys of each level an codim
-    int size_[ ncodim ];
+    std::vector< int > size_;
 
     // the level for which this index set is created
     const int level_;
