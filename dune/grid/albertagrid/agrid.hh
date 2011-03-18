@@ -670,7 +670,7 @@ namespace Dune
     // is generated, when accessed
     mutable typename GridFamily::LeafIndexSetImp* leafIndexSet_;
 
-    SizeCache< This > *sizeCache_;
+    SizeCache< This > sizeCache_;
 
     typedef AlbertaMarkerVector< dim, dimworld > MarkerVector;
 
