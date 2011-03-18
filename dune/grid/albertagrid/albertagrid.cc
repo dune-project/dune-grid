@@ -44,8 +44,8 @@ namespace Dune
       hIndexSet_( dofNumbering_ ),
       idSet_( hIndexSet_ ),
       levelIndexVec_( (size_t)MAXL, 0 ),
-      leafIndexSet_ ( 0 ),
-      sizeCache_ ( 0 ),
+      leafIndexSet_( 0 ),
+      sizeCache_( 0 ),
       leafMarkerVector_( dofNumbering_ ),
       levelMarkerVector_( (size_t)MAXL, MarkerVector( dofNumbering_ ) )
   {
@@ -184,7 +184,7 @@ namespace Dune
 #endif
     dofNumbering_.release();
 
-    if( sizeCache_ != 0 )
+    if( sizeCache_ )
       delete sizeCache_;
     sizeCache_ = 0;
 
@@ -495,7 +495,7 @@ namespace Dune
   template< int dim, int dimworld >
   inline int AlbertaGrid< dim, dimworld >::size ( int level, int codim ) const
   {
-    assert( sizeCache_ != 0 );
+    assert( sizeCache_ );
     return ((level >= 0) && (level <= maxlevel_) ? sizeCache_->size( level, codim ) : 0);
   }
 
@@ -503,14 +503,15 @@ namespace Dune
   template< int dim, int dimworld >
   inline int AlbertaGrid< dim, dimworld >::size ( int level, GeometryType type ) const
   {
-    return (type.isSimplex() ? size( level, dim - type.dim() ) : 0);
+    assert( sizeCache_ );
+    return ((level >= 0) && (level <= maxlevel_) ? sizeCache_->size( level, type ) : 0);
   }
 
 
   template< int dim, int dimworld >
   inline int AlbertaGrid< dim, dimworld >::size ( int codim ) const
   {
-    assert( sizeCache_ != 0 );
+    assert( sizeCache_ );
     assert( sizeCache_->size( codim ) == mesh_.size( codim ) );
     return mesh_.size( codim );
   }
@@ -519,7 +520,8 @@ namespace Dune
   template< int dim, int dimworld >
   inline int AlbertaGrid< dim, dimworld >::size ( GeometryType type ) const
   {
-    return (type.isSimplex() ? size( dim - type.dim() ) : 0);
+    assert( sizeCache_ );
+    return sizeCache_->size( type );
   }
 
 
@@ -565,9 +567,9 @@ namespace Dune
     // unset up2Dat status, if leafbegin is called then this status is updated
     leafMarkerVector_.clear();
 
-    if(sizeCache_) delete sizeCache_;
-    // first bool says we have simplex, second not cube, third, worryabout
-    sizeCache_ = new SizeCacheType (*this,true,false,true);
+    if( sizeCache_ )
+      delete sizeCache_;
+    sizeCache_ = new SizeCache< This >( *this );
 
     // update index sets (if they exist)
     if( leafIndexSet_ != 0 )
