@@ -209,8 +209,23 @@ namespace Dune {
   };
 
 
-  // forward declaration of ALU3dGrid
-  template <ALU3dGridElementType elType, class Comm> class ALU3dGrid;
+  namespace DefaultIndexSetHelper
+  {
+
+    template< class Grid, class Index >
+    struct ContainsIndex
+    {
+      static bool
+      contains ( const PersistentContainer< Grid, Index > &container,
+                 const size_t index )
+      {
+        DUNE_THROW( NotImplemented, "DefaultIndexSetHelper::ContainsIndex not implemented for this grid." );
+        return true;
+      }
+    };
+
+  } // namespace DefaultIndexSetHelper
+
 
   /*! \brief
      DefaultIndexSet creates an index set by using the grids persistent container
@@ -245,27 +260,6 @@ namespace Dune {
 
   private:
     typedef DefaultIndexSet<GridType, IteratorType > ThisType;
-
-    template <int dummy, class Grid>
-    struct ContainsIndex
-    {
-      static bool contains( const PersistentContainerType& container,
-                            const size_t index )
-      {
-        DUNE_THROW(NotImplemented,"DefaultLevelIndexSet::containsIndex is only implemented for ALU3dGrid" );
-        return true ;
-      }
-    };
-
-    template <int dummy, ALU3dGridElementType elType, class Comm>
-    struct ContainsIndex< dummy, ALU3dGrid< elType, Comm > >
-    {
-      static bool contains( const PersistentContainerType& container,
-                            const size_t index )
-      {
-        return container.getData( index ).index() >= 0;
-      }
-    };
 
     template <class EntityType, int codim>
     struct InsertEntity
@@ -455,7 +449,8 @@ namespace Dune {
     //! returns true if this set provides an index for given entity
     bool containsIndex ( const int cd , const int idx) const
     {
-      return ContainsIndex<0, GridType> :: contains( indexContainer( cd ), idx );
+      typedef DefaultIndexSetHelper::ContainsIndex< GridType, Index > ContainsIndex;
+      return ContainsIndex::contains( indexContainer( cd ), idx );
     }
 
   private:

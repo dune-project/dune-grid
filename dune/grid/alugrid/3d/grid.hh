@@ -100,6 +100,27 @@ namespace Dune
 #endif // #else // #if ALU3DGRID_PARALLEL
 
 
+
+  namespace DefaultIndexSetHelper
+  {
+
+    template< ALU3dGridElementType elType, class Comm, class Index >
+    struct ContainsIndex< ALU3dGrid< elType, Comm >, Index >
+    {
+      typedef ALU3dGrid< elType, Comm > Grid;
+
+      static bool
+      contains ( const PersistentContainer< Grid, Index > &container,
+                 const size_t index )
+      {
+        return (container.getData( index ).index() >= 0);
+      }
+    };
+
+  } // namespace DefaultIndexSetHelper
+
+
+
   // ALU3dGridCommunications
   // -----------------------
 
