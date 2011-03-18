@@ -17,21 +17,20 @@
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 
-/*
-   namespace Dune
-   {
+namespace Dune
+{
 
-   template< int dim, int dimworld >
-   class AlbertaGrid;
+  template< int dim, int dimworld >
+  class AlbertaGrid;
 
-   }
+}
 
-   template< int dim, int dimworld >
-   struct EnableLevelIntersectionIteratorCheck< AlbertaGrid< dim, dimworld > >
-   {
-   static const bool v = false;
-   };
- */
+template< int dim, int dimworld >
+struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > >
+{
+  static const bool v = false;
+};
+
 using namespace Dune;
 template< class GridView >
 void display ( const std::string &name,
