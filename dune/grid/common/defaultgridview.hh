@@ -101,7 +101,6 @@ namespace Dune
 
     DefaultLevelGridView ( const Grid &grid, int level )
       : grid_( &grid ),
-        indexSet_( &(grid.levelIndexSet( level )) ),
         level_( level )
     {}
 
@@ -109,7 +108,6 @@ namespace Dune
 #if 0
     DefaultLevelGridView ( const ThisType &other )
       : grid_( other.grid_ ),
-        indexSet_( other.indexSet_ ),
         level_( other.level_ )
     {}
 
@@ -117,7 +115,6 @@ namespace Dune
     ThisType &operator= ( const ThisType & other)
     {
       grid_ = other.grid_;
-      indexSet_ = other.indexSet_;
       level_ = other.level_;
     }
 #endif
@@ -125,13 +122,14 @@ namespace Dune
     /** \brief obtain a const reference to the underlying hierarchic grid */
     const Grid &grid () const
     {
+      assert( grid_ );
       return *grid_;
     }
 
     /** \brief obtain the index set */
     const IndexSet &indexSet () const
     {
-      return *indexSet_;
+      return grid().levelIndexSet( level_ );
     }
 
     /** \brief obtain numer of entities in a given codimension */
@@ -217,7 +215,6 @@ namespace Dune
 
   private:
     const Grid *grid_;
-    const IndexSet *indexSet_;
     int level_;
   };
 
@@ -303,35 +300,33 @@ namespace Dune
 
   public:
     DefaultLeafGridView ( const Grid &grid )
-      : grid_( &grid ),
-        indexSet_( &(grid.leafIndexSet()) )
+      : grid_( &grid )
     {}
 
     // use default implementation of copy constructor and assignment operator
 #if 0
     DefaultLeafGridView ( const ThisType &other )
-      : grid_( other.grid_ ),
-        indexSet_( other.indexSet_ )
+      : grid_( other.grid_ )
     {}
 
     /** \brief assignment from other GridView on the same grid */
     ThisType &operator= ( const ThisType & other)
     {
       grid_ = other.grid_;
-      indexSet_ = other.indexSet_;
     }
 #endif
 
     /** \brief obtain a const reference to the underlying hierarchic grid */
     const Grid &grid () const
     {
+      assert( grid_ );
       return *grid_;
     }
 
     /** \brief obtain the index set */
     const IndexSet &indexSet () const
     {
-      return *indexSet_;
+      return grid().leafIndexSet();
     }
 
     /** \brief obtain numer of entities in a given codimension */
@@ -417,7 +412,6 @@ namespace Dune
 
   private:
     const Grid *grid_;
-    const IndexSet *indexSet_;
   };
 
 }
