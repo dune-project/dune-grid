@@ -115,24 +115,31 @@ namespace Dune {
     // private copy constructor
     SizeCache (const SizeCache & );
   public:
+    /** \brief constructor taking grid reference */
     SizeCache (const GridType & grid) : grid_( grid )
     {
-      for(int i=0; i<nCodim; i++)
+      reset();
+    }
+
+    /** \brief reset all cached sizes */
+    void reset()
+    {
+      for(int codim=0; codim<nCodim; ++codim)
       {
-        leafSizes_[ i ] = -1;
-        leafTypeSizes_[ i ].resize( sizeCodim( i ), -1 );
+        leafSizes_[ codim ] = -1;
+        leafTypeSizes_[ codim ].resize( sizeCodim( codim ), -1 );
       }
 
-      int numMxl = grid_.maxLevel()+1;
-      for(int i=0; i<nCodim; i++)
+      const int numMxl = grid_.maxLevel()+1;
+      for(int codim=0; codim<nCodim; ++codim)
       {
-        std::vector<int> & vec = levelSizes_[i];
+        std::vector<int> & vec = levelSizes_[codim];
         vec.resize(numMxl);
-        levelTypeSizes_[i].resize( numMxl );
-        for(int level = 0; level<numMxl; level++)
+        levelTypeSizes_[codim].resize( numMxl );
+        for(int level = 0; level<numMxl; ++level)
         {
           vec[level] = -1;
-          levelTypeSizes_[i][level].resize( sizeCodim( i ), -1 );
+          levelTypeSizes_[codim][level].resize( sizeCodim( codim ), -1 );
         }
       }
     }
@@ -140,10 +147,7 @@ namespace Dune {
     //********************************************************************
     // level sizes
     //********************************************************************
-    /** \brief Number of grid entities per level and codim
-     * because lbegin and lend are none const, and we need this methods
-     * counting the entities on each level, you know.
-     */
+    /** \copydoc Dune::Grid::size(int level,int codim) const */
     int size (int level, int codim) const
     {
       assert( codim >= 0 );
@@ -153,11 +157,12 @@ namespace Dune {
 
       if( levelSizes_[codim][level] < 0)
         CountLevelEntities<ThisType,All_Partition,dim>::count(*this,level,codim);
+
       assert( levelSizes_[codim][level] >= 0 );
       return levelSizes_[codim][level];
     }
 
-    //! number of entities per level, codim and geometry type in this process
+    /** \copydoc Dune::Grid::size(int level,GeometryType type) const */
     int size (int level, GeometryType type) const
     {
       const int codim = GridType ::dimension - type.dim();
@@ -171,7 +176,7 @@ namespace Dune {
     //********************************************************************
     // leaf sizes
     //********************************************************************
-    //! number of leaf entities per codim in this process
+    /** \copydoc Dune::Grid::size(int codim) const */
     int size (int codim) const
     {
       assert( codim >= 0 );
@@ -182,7 +187,7 @@ namespace Dune {
       return leafSizes_[codim];
     };
 
-    //! number of leaf entities per codim and geometry type in this process
+    /** \copydoc Dune::Grid::size(GeometryType type) const */
     int size ( const GeometryType type ) const
     {
       const int codim = GridType :: dimension - type.dim();
