@@ -147,7 +147,7 @@ namespace Dune
       if( pos != dgf_.facemap.end() )
         return dgf_.facemap.find( key )->second.second;
       else
-        return dgf_.emptyBndParam_;
+        return DGFBoundaryParameter::defaultValue();
     }
 
     template< int codim >

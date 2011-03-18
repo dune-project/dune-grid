@@ -142,7 +142,6 @@ namespace Dune
     DGFPrintInfo * info;
 
     std::vector < double > emptyParam_;
-    BoundaryParameter emptyBndParam_;
 
 
   private:

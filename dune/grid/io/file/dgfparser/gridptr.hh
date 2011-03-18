@@ -215,7 +215,7 @@ namespace Dune
     {
       // if no parameters given return empty vecto
       if ( !haveBndParam_ )
-        return emptyBndParam_;
+        return DGFBoundaryParameter::defaultValue();
 
       return bndParam_[ intersection.boundarySegmentIndex() ];
     }
@@ -449,7 +449,6 @@ namespace Dune
     std::vector< std::vector< double > > elParam_;
     std::vector< std::vector< double > > vtxParam_;
     std::vector< DGFBoundaryParameter::type > bndParam_;
-    DGFBoundaryParameter::type emptyBndParam_;
     std::vector< int > bndId_;
     int nofElParam_, nofVtxParam_;
     bool haveBndParam_;
