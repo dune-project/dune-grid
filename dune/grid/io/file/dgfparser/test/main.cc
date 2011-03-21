@@ -61,10 +61,9 @@ void display ( const std::string &name,
   vtkWriter.write( name );
 }
 
-template< class GridView >
-void test ( const GridView &view )
+template< class Grid >
+void test ( Grid &grid )
 {
-  typename GridView::Grid &grid = const_cast< typename GridView::Grid & >( view.grid());
   gridcheck( grid );
 
   // check the method geometryInFather()
@@ -72,7 +71,8 @@ void test ( const GridView &view )
   checkGeometryInFather( grid );
   // check the intersection iterator and the geometries it returns
   std::cout << "  CHECKING: intersections" << std::endl;
-  checkIntersectionIterator( grid );
+  bool skip = ! EnableLevelIntersectionIteratorCheck< Grid >::v;
+  checkIntersectionIterator( grid, skip );
 }
 
 int main(int argc, char ** argv, char ** envp)
@@ -168,7 +168,7 @@ try {
   std::cout << "tester: refine grid" << std::endl;
   grid->globalRefine(Dune::DGFGridInfo<GridType>::refineStepsForHalf());
   std::cout << "Grid size: " << grid->size(0) << std::endl;
-  test(gridView);
+  test(*grid);
 #endif
   delete grid;
   return 0;
