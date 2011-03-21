@@ -37,6 +37,14 @@
 
 using namespace Dune;
 
+#if HAVE_ALBERTA
+template< int dim, int dimworld >
+struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > >
+{
+  static const bool v = false;
+};
+#endif
+
 template <typename GridType>
 void testReadingGrid( const std::string& filename, int refinements )
 {
