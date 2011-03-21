@@ -2,8 +2,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#define NEW_SUBENTITY_NUMBERING 1
-
 #include <iostream>
 #include <sstream>
 
@@ -35,7 +33,6 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
 {
   static const bool v = false;
 };
-
 
 
 template <class GridType >

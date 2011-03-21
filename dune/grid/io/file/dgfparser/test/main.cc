@@ -3,7 +3,6 @@
 #include <config.h>
 
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
-#define NEW_SUBENTITY_NUMBERING 1
 #define CHECK 1
 
 #include <dune/grid/test/gridcheck.cc>
