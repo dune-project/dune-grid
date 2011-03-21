@@ -477,15 +477,15 @@ namespace Dune
 
 
 
-    // 2d-case: This is not supposed to be used at runtime.
-    template <class E, class V>
+    // generic-case: This is not supposed to be used at runtime.
+    template <class E, class V, class V2>
     void boundarysegment_insert(
-      const std::vector<FieldVector<double, 2> >& nodes,
+      const V& nodes,
       const E& elementDofs,
-      const V& vertices
+      const V2& vertices
       )
     {
-      DUNE_THROW(Dune::IOError, "tried to create a 3D boundary segment in a 2D Grid");
+      DUNE_THROW(Dune::IOError, "tried to create a 3D boundary segment in a non-3D Grid");
     }
 
     // 3d-case:
