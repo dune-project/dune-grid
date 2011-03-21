@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cassert>
 
+#include <dune/common/mpihelper.hh>
 #include <dune/grid/onedgrid.hh>
 #if HAVE_UG
 #include <dune/grid/uggrid.hh>
@@ -20,8 +21,12 @@
 using namespace Dune;
 
 
-int main () try
-{
+int main (int argc , char **argv)
+try {
+
+  // this method calls MPI_Init, if MPI is enabled
+  MPIHelper & mpihelper = MPIHelper::instance(argc,argv);
+
   // /////////////////////////////////////////////////////////////////////////////
   //   Test 1d grids
   // /////////////////////////////////////////////////////////////////////////////

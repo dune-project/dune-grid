@@ -21,6 +21,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/shared_ptr.hh>
 #include <dune/common/typetraits.hh>
+#include <dune/common/mpihelper.hh>
 
 #include <dune/grid/alugrid.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
@@ -281,8 +282,12 @@ void testVertexOrderByIdCubes(int &result) {
   testVertexOrder<0>(gridp->leafView(), voFactory, result);
 }
 
-int main()
+int main (int argc , char **argv)
 try {
+
+  // this method calls MPI_Init, if MPI is enabled
+  Dune::MPIHelper & mpihelper = Dune::MPIHelper::instance(argc,argv);
+
   int result = 77;
 
   //////////////////////////////////////////////////////////////////////
