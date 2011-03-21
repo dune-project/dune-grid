@@ -2,6 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 
 #include "config.h"
+#define DISABLE_DEPRECATED_METHOD_CHECK 1
 
 #include <dune/common/mpihelper.hh>
 
@@ -36,6 +37,14 @@
 #include <dune/grid/io/file/gmshreader.hh>
 
 using namespace Dune;
+
+#if HAVE_ALBERTA
+template< int dim, int dimworld >
+struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > >
+{
+  static const bool v = false;
+};
+#endif
 
 template <typename GridType>
 void testReadingGrid( const std::string& filename, int refinements )
