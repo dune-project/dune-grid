@@ -225,14 +225,6 @@ namespace Dune
     // typedefs
     typedef FieldVector< double, dimWorld > GlobalVector;
 
-    // template<class T1, class T2, class T3, class T4, class T5, class T6,
-    //          class T7, class T8, class T9>
-    // void readfile(FILE * file, int cnt, const char * format,
-    //     T1& t1, T2& t2, T3& t3, T4& t4, T5& t5, T6& t6, T7& t7, T8& t8, T9& t9)
-    // {
-    //     readfile(file, cnt, &t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
-    // };
-
     // don't use something like
     //   readfile(file, 1, "%s\n", buf);
     // to skip the rest of of the line -- that will only skip the next
@@ -488,20 +480,20 @@ namespace Dune
     // 2d-case: This is not supposed to be used at runtime.
     template <class E, class V>
     void boundarysegment_insert(
-      const std::vector<FieldVector<double, 2> >& nodes
-      , const E& elementDofs
-      , const V& vertices
+      const std::vector<FieldVector<double, 2> >& nodes,
+      const E& elementDofs,
+      const V& vertices
       )
     {
-      DUNE_THROW(Exception, "Internal Error: tried to create a 3D boundary segment in a 2D Grid");
+      DUNE_THROW(Dune::IOError, "tried to create a 3D boundary segment in a 2D Grid");
     }
 
     // 3d-case:
     template <class E, class V>
     void boundarysegment_insert(
-      const std::vector<FieldVector<double, 3> >& nodes
-      , const E& elementDofs
-      , const V& vertices
+      const std::vector<FieldVector<double, 3> >& nodes,
+      const E& elementDofs,
+      const V& vertices
       )
     {
       array<FieldVector<double,dim>, 6> v;
@@ -638,11 +630,7 @@ namespace Dune
             break;
           }
           case 9 : {              // 6-node triangle
-            boundarysegment_insert(
-              nodes
-              , elementDofs
-              , vertices
-              );
+            boundarysegment_insert(nodes, elementDofs, vertices);
             break;
           }
 
