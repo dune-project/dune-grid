@@ -3,6 +3,8 @@
 #ifndef DUNE_GENERICGEOMETRY_MATRIXHELPER_HH
 #define DUNE_GENERICGEOMETRY_MATRIXHELPER_HH
 
+#include <cmath>
+
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/static_assert.hh>
@@ -13,10 +15,30 @@ namespace Dune
   namespace GenericGeometry
   {
 
+    // FieldHelper
+    // -----------
+
+    template< class Field >
+    struct FieldHelper
+    {
+      static Field abs ( const Field &x ) { return std::abs( x ); }
+    };
+
+
+
+    // MatrixHelper
+    // ------------
+
     template< class Traits >
     struct MatrixHelper
     {
-      typedef typename Traits :: ctype FieldType;
+      typedef typename Traits::ctype FieldType;
+
+      static FieldType abs ( const FieldType &x )
+      {
+        //return std::abs( x );
+        return FieldHelper< FieldType >::abs( x );
+      }
 
       template< int m, int n >
       static void
@@ -375,7 +397,7 @@ namespace Dune
         if( (n == 2) && (m == 2) )
         {
           // Special implementation for 2x2 matrices: faster and more stable
-          return std::abs( A[ 0 ][ 0 ]*A[ 1 ][ 1 ] - A[ 1 ][ 0 ]*A[ 0 ][ 1 ] );
+          return abs( A[ 0 ][ 0 ]*A[ 1 ][ 1 ] - A[ 1 ][ 0 ]*A[ 0 ][ 1 ] );
         }
         else if( (n == 3) && (m == 3) )
         {
@@ -383,7 +405,7 @@ namespace Dune
           const FieldType v0 = A[ 0 ][ 1 ] * A[ 1 ][ 2 ] - A[ 1 ][ 1 ] * A[ 0 ][ 2 ];
           const FieldType v1 = A[ 0 ][ 2 ] * A[ 1 ][ 0 ] - A[ 1 ][ 2 ] * A[ 0 ][ 0 ];
           const FieldType v2 = A[ 0 ][ 0 ] * A[ 1 ][ 1 ] - A[ 1 ][ 0 ] * A[ 0 ][ 1 ];
-          return std::abs( v0 * A[ 2 ][ 0 ] + v1 * A[ 2 ][ 1 ] + v2 * A[ 2 ][ 2 ] );
+          return abs( v0 * A[ 2 ][ 0 ] + v1 * A[ 2 ][ 1 ] + v2 * A[ 2 ][ 2 ] );
         }
         else if( n >= m )
         {
@@ -440,7 +462,7 @@ namespace Dune
           ret[ 1 ][ 1 ] = A[ 0 ][ 0 ] * detInv;
           ret[ 1 ][ 0 ] = -A[ 1 ][ 0 ] * detInv;
           ret[ 0 ][ 1 ] = -A[ 0 ][ 1 ] * detInv;
-          return std::abs( det );
+          return abs( det );
         }
         else
         {
@@ -466,8 +488,8 @@ namespace Dune
       }
     };
 
-  }
+  } // namespace GenericGeometry
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GENERICGEOMETRY_MATRIXHELPER_HH
