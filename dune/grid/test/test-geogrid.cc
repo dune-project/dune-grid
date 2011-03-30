@@ -25,23 +25,6 @@ namespace Dune
   template< int dim, int dimworld >
   class AlbertaGrid;
 
-  namespace Capabilities
-  {
-
-    template< class Grid >
-    struct hasHierarchicIndexSet
-    {
-      static const bool v = false;
-    };
-
-    template< class Grid >
-    struct hasHierarchicIndexSet< const Grid >
-    {
-      static const bool v = hasHierarchicIndexSet< Grid >::v;
-    };
-
-  }
-
 }
 
 
