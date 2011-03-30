@@ -182,6 +182,14 @@ for \f$i=1,\dots,s_c(T)\f$:
     \f]
 .
 
+Notice that the number of vertices (i.e., subtopologies of
+codimension\f$d(T)\f$) of a topology \f$T\f$ does not uniquely identify the
+topology.
+To see this, consider the topologies
+\f$T_1 = \mathbf{p}^{\vert\vert\vert\circ\circ}\f$ and
+\f$T_2 = \mathbf{p}^{\circ\circ\circ\circ\vert}\f$.
+For these topologies we have \f$s_d( T_1 ) = s_d( T_2 ) = 10\f$.
+
 
 \section GridGenericGeometrgElement Reference Domains
 
