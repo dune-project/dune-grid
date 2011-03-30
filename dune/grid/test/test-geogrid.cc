@@ -4,6 +4,7 @@
 
 #ifdef COORDFUNCTION
 
+#include <dune/common/poolallocator.hh>
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/geometrygrid/cachedcoordfunction.hh>
 #include <dune/grid/io/file/dgfparser/dgfgeogrid.hh>
@@ -52,22 +53,15 @@ typedef AnalyticalCoordFunction CoordFunction;
 #endif
 
 typedef Dune::GeometryGrid< Grid, CoordFunction > GeometryGrid;
+// I guess PoolAllocator<void... is correct, because the default parameter is std::allocator<void>
+typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::PoolAllocator<void,10> > GeometryGridWithPoolAllocator;
 
 
-
-int main ( int argc, char **argv )
-try
+template <class GeometryGridType>
+void test(const std::string& gridfile)
 {
-  Dune::MPIHelper::instance( argc, argv );
-
-  std::string gridfile = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-2.dgf";
-  if(argc >= 2)
-  {
-    gridfile = argv[1];
-  }
-
-  Dune::GridPtr< GeometryGrid > pgeogrid(gridfile);
-  GeometryGrid &geogrid = *pgeogrid;
+  Dune::GridPtr< GeometryGridType > pgeogrid(gridfile);
+  GeometryGridType &geogrid = *pgeogrid;
 
   geogrid.globalRefine( 1 );
   geogrid.loadBalance();
@@ -100,6 +94,23 @@ try
     for( int i = 0; i <= geogrid.maxLevel(); ++i )
       checkCommunication( geogrid, i, std::cout );
   }
+
+}
+
+int main ( int argc, char **argv )
+try
+{
+  Dune::MPIHelper::instance( argc, argv );
+
+  std::string gridfile = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-2.dgf";
+  if(argc >= 2)
+  {
+    gridfile = argv[1];
+  }
+
+  test<GeometryGrid>(gridfile);
+  // commented out, because it is not working
+  //test<GeometryGridWithPoolAllocator>(gridfile);
 
   return 0;
 }
