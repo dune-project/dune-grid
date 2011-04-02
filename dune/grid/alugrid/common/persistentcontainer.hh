@@ -18,7 +18,9 @@ namespace Dune
           typename ALUConformGrid< dim, dimworld >::HierarchicIndexSet,
           std::vector<Data,Allocator> >
   {
+  public:
     typedef ALUConformGrid< dim, dimworld > GridType;
+  private:
     typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
 
   public:
@@ -35,7 +37,9 @@ namespace Dune
           typename ALUCubeGrid< dim, dimworld >::HierarchicIndexSet,
           std::vector<Data,Allocator> >
   {
+  public:
     typedef ALUCubeGrid< dim, dimworld > GridType;
+  private:
     typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
 
   public:
@@ -52,7 +56,9 @@ namespace Dune
           typename ALUSimplexGrid< dim, dimworld >::HierarchicIndexSet,
           std::vector<Data,Allocator> >
   {
+  public:
     typedef ALUSimplexGrid< dim, dimworld > GridType;
+  private:
     typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
 
   public:
@@ -69,7 +75,9 @@ namespace Dune
           typename ALU2dGrid< dim, dimworld, elType >::HierarchicIndexSet,
           std::vector<Data,Allocator> >
   {
+  public:
     typedef ALU2dGrid< dim, dimworld, elType >  GridType;
+  private:
     typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
 
   public:
@@ -86,7 +94,9 @@ namespace Dune
           typename ALU3dGrid< elType, Comm >::HierarchicIndexSet,
           std::vector<Data,Allocator> >
   {
+  public:
     typedef ALU3dGrid< elType, Comm >  GridType;
+  private:
     typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
 
   protected:
