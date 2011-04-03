@@ -51,13 +51,42 @@ namespace Dune
     //! constructor
     DuneGridFormatParser ( int rank, int size );
 
-    static bool isDuneGridFormat ( std::istream & );
+    /** \brief check whether a stream is in DUNE grid format
+     *
+     *  Actually checks whether the stream starts with the keyword 'DGF'.
+     *
+     *  \param  input  std::istream to check
+     *
+     *  \note The stream must support seeking.
+     *
+     *  \return whether the keyword 'DGF' was found
+     */
+    static bool isDuneGridFormat ( std::istream &input );
 
-    //! \brief method which reads the dgf file
-    //!
-    //! fills the vtx,element, and bound vectors
-    //! returns true if reading succeded
-    bool readDuneGrid( std::istream &, int dimG, int dimW );
+    /** \brief check whether a file is in dune grid format
+     *
+     *  This is just a convenience method. It calls isDuneGridFormat
+     *  with a std::ifstream.
+     *
+     *  \param  filename  file to check
+     *
+     *  \return whether the keyword 'DGF' was found
+     */
+    static bool isDuneGridFormat ( const std::string &filename );
+
+    /** \brief parse dune grid format from stream
+     *
+     *  This method actually fills the vtx, element, and bound vectors.
+     *
+     *  \param      input  std::istream to read the grid from
+     *  \param[in]  dimG   dimension of the grid (i.e., Grid::dimension)
+     *  \param[in]  dimW   dimension of the world (i.e., Grid::dimensionworld)
+     *
+     *  \note The stream must support seeking.
+     *
+     *  \returns whether reading succeeded
+     */
+    bool readDuneGrid( std::istream &input, int dimG, int dimW );
 
     bool readDuneGrid( std::istream &input, int dimG = -1 ) DUNE_DEPRECATED
     {

@@ -260,10 +260,15 @@ namespace Dune
   }
 
 
-  bool DuneGridFormatParser::isDuneGridFormat ( std::istream &gridin )
+  bool DuneGridFormatParser::isDuneGridFormat ( std::istream &input )
   {
+    input.clear();
+    input.seekg( 0 );
+    if( !input )
+      return false;
+
     std::string idline;
-    std::getline( gridin, idline );
+    std::getline( input, idline );
     dgf::makeupcase( idline );
 
     std::string id;
@@ -273,6 +278,14 @@ namespace Dune
     // compare id to DGF keyword
     return (id == dgfid);
   }
+
+
+  bool DuneGridFormatParser::isDuneGridFormat ( const std::string &filename )
+  {
+    std::ifstream input( filename.c_str() );
+    return isDuneGridFormat( input );
+  }
+
 
   bool DuneGridFormatParser::readDuneGrid ( std::istream &gridin, int dimG, int dimW )
   {
