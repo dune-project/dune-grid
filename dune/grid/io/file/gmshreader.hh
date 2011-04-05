@@ -686,7 +686,7 @@ namespace Dune
 
     /** \todo doc me */
     static GridType* read (GridType& grid, const std::string& fileName,
-                           bool verbose = true, bool insert_boundary_segments=true)
+                           bool verbose = true, bool insert_boundary_segments=true) DUNE_DEPRECATED
     {
       // make a grid factory
       Dune::GridFactory<GridType> factory(&grid);
@@ -702,7 +702,7 @@ namespace Dune
     static GridType* read (GridType& grid, const std::string& fileName,
                            std::vector<int>& boundary_id_to_physical_entity,
                            std::vector<int>& element_index_to_physical_entity,
-                           bool verbose = true, bool insert_boundary_segments=true)
+                           bool verbose = true, bool insert_boundary_segments=true) DUNE_DEPRECATED
     {
       // make a grid factory
       Dune::GridFactory<GridType> factory(&grid);
