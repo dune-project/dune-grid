@@ -17,16 +17,15 @@ namespace Dune
   class PersistentContainer< AlbertaGrid< dim, dimworld >, Data, Allocator >
     : public PersistentContainerVector< AlbertaGrid< dim, dimworld >, typename AlbertaGrid< dim, dimworld >::HierarchicIndexSet, std::vector< Data, Allocator > >
   {
-  public:
-    typedef AlbertaGrid< dim, dimworld > GridType;
-    private
-    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector< Data, Allocator > > BaseType;
+    typedef PersistentContainerVector< AlbertaGrid< dim, dimworld >, typename GridType::HierarchicIndexSet, std::vector< Data, Allocator > > Base;
 
   public:
+    typedef AlbertaGrid< dim, dimworld > GridType;
+
     //! Constructor filling the container with values using the default constructor
     //! Depending on the implementation this could be achieved without allocating memory
     PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
-      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+      : Base( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
     {}
   };
 
