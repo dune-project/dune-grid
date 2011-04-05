@@ -17,7 +17,7 @@ namespace Dune
   class PersistentContainer< AlbertaGrid< dim, dimworld >, Data, Allocator >
     : public PersistentContainerVector< AlbertaGrid< dim, dimworld >, typename AlbertaGrid< dim, dimworld >::HierarchicIndexSet, std::vector< Data, Allocator > >
   {
-    typedef PersistentContainerVector< AlbertaGrid< dim, dimworld >, typename GridType::HierarchicIndexSet, std::vector< Data, Allocator > > Base;
+    typedef PersistentContainerVector< AlbertaGrid< dim, dimworld >, typename AlbertaGrid< dim, dimworld >::HierarchicIndexSet, std::vector< Data, Allocator > > Base;
 
   public:
     typedef AlbertaGrid< dim, dimworld > GridType;
