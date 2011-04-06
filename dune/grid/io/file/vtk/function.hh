@@ -248,7 +248,7 @@ namespace Dune
     //! construct from a vector and a name
     /**
      * \param gv     GridView to operate on (used to instantiate a
-     *               MultipleCodimMultipleGeomeTypeMapper, otherwise no
+     *               MultipleCodimMultipleGeomTypeMapper, otherwise no
      *               reference or copy is stored).  Note that this must be the
      *               GridView the vector applies to as well as the GridView
      *               later used by the VTKWriter -- i.e. we do not implicitly
