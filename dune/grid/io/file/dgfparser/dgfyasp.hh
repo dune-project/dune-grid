@@ -143,14 +143,14 @@ namespace Dune
     // return true if boundary parameters found
     bool haveBoundaryParameters () const
     {
-      return false;
+      return boundaryDomainBlock_->isactive();
     }
 
     template < class GG, template < class > class II >
     const typename DGFBoundaryParameter::type &
     boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
-      if( boundaryDomainBlock_->isactive() )
+      if( haveBoundaryParameters() )
       {
         std::vector< Point > corners;
         getCorners( intersection.geometry(), corners );
