@@ -143,7 +143,7 @@ namespace Dune
     // return true if boundary parameters found
     bool haveBoundaryParameters () const
     {
-      return boundaryDomainBlock_->isactive();
+      return boundaryDomainBlock_->hasParameter();
     }
 
     template < class GG, template < class > class II >
