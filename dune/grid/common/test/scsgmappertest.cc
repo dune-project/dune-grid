@@ -15,6 +15,7 @@
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/common/scsgmapper.hh>
 
+#include <dune/common/exceptions.hh>
 #include <dune/common/mpihelper.hh>
 
 using namespace Dune;
@@ -26,18 +27,37 @@ using namespace Dune;
 template <class Mapper, class GridView>
 void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
 {
+  typedef typename GridView::IndexSet IndexSet;
+  const IndexSet &is = gridView.indexSet();
+
   typedef typename GridView::template Codim<0>::Iterator Iterator;
 
   Iterator eIt    = gridView.template begin<0>();
   Iterator eEndIt = gridView.template end<0>();
 
-  size_t min = 1;
-  size_t max = 0;
+  int min = 1;
+  int max = 0;
   std::set<int> indices;
+  int size = mapper.size();
+
+  if (size != int(is.size(0)))
+    DUNE_THROW(GridError, "Mapper size does not agree with index set "
+               "size!");
 
   for (; eIt!=eEndIt; ++eIt) {
 
-    size_t index = mapper.map(*eIt);
+    int index;
+    bool contained = mapper.contains(*eIt, index);
+
+    if ((is.geomTypes(0)[0] == eIt->type()) != contained)
+      DUNE_THROW(GridError, "Mapper::contains() does not agree with the "
+                 "element's geometry type!");
+    if (!contained)
+      continue;
+
+    if (index != mapper.map(*eIt))
+      DUNE_THROW(GridError, "Mapper::contains() and mapper.map() "
+                 "compute different indicex!");
 
     min = std::min(min, index);
     max = std::max(max, index);
@@ -60,10 +80,14 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
       DUNE_THROW(GridError, "Mapper element index is not unique!");
   }
 
+  if (size!=int(indices.size()))
+    DUNE_THROW(GridError, "Mapper size does not agree with the number of "
+               "elements counted by iteration.");
+
   if (min!=0)
     DUNE_THROW(GridError, "Mapper element index is not starting from zero!");
 
-  if (max!=gridView.indexSet().size(0)-1)
+  if (max+1!=size)
     DUNE_THROW(GridError, "Mapper element index is not consecutive!");
 
 }
