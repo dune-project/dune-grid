@@ -116,7 +116,9 @@ if test x$with_alugrid != xno ; then
       fi
     else 
       AC_MSG_RESULT([no])
-      AC_MSG_ERROR([$PKG_CONFIG couldn't find alugrid.pc or wrong version! ALUGrid version is too old or ALUGrid is not installed in $ALUGRIDROOT! You need at least ALUGrid-$NEEDEDALUGRID_VERSION!])
+      AS_IF([test "x$ALUGRIDROOT" != "x"],[
+        AC_MSG_ERROR([$PKG_CONFIG couldn't find alugrid.pc or wrong version! ALUGrid version is too old or ALUGrid is not installed in $ALUGRIDROOT! You need at least ALUGrid-$NEEDEDALUGRID_VERSION!])
+      ])
     fi
   fi
 
