@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
     //
 
     Dune::GridFactory<Grid> gf;
-    std::vector<int> insertionElementTags;
+    Dune::shared_ptr<std::vector<int> > insertionElementTags;
 
     if(mpiHelper.rank() == 0) {
       if(tagsName == "") {
@@ -162,10 +162,11 @@ int main(int argc, char **argv) {
       else {
         std::cout << "[" << timer.elapsed() << "] Reading Gmsh file "
                   << gmshName << " (with tags)" << std::endl;
+        insertionElementTags.reset(new std::vector<int>);
         // make them local since we don't do anything with them anyway atm
         std::vector<int> insertionBoundaryTags;
         Dune::GmshReader<Grid>::read(gf, gmshName, insertionBoundaryTags,
-                                     insertionElementTags);
+                                     *insertionElementTags);
       }
     }
 
@@ -190,7 +191,9 @@ int main(int argc, char **argv) {
       const GV::Codim<0>::Iterator end = gv.end<0>();
       for(GV::Codim<0>::Iterator it = gv.begin<0>(); it != end; ++it)
         elementTagMap[lis.id(*it)] =
-          insertionElementTags[gf.insertionIndex(*it)];
+          (*insertionElementTags)[gf.insertionIndex(*it)];
+
+      insertionElementTags.reset();
     }
 
     //////////////////////////////////////////////////////////////////////
