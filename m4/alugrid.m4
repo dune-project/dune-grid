@@ -52,21 +52,26 @@ ac_save_LIBS="$LIBS"
 HAVE_ALUGRID=0
 
 ## do nothing if no --with-alugrid was supplied
-if test x$with_alugrid != x && test x$with_alugrid != xno ; then
+if test x$with_alugrid != xno ; then
 
-  if test x$with_alugrid = xyes ; then
-    # use some default value...
-    ALUGRIDROOT="/usr/local/alugrid"
-  else
-    ALUGRIDROOT="$with_alugrid"
-  fi
-
-  # expand tilde / other stuff
-  ALUGRIDROOT=`cd "$ALUGRIDROOT" && pwd`
-
-  if ! test -d "$ALUGRIDROOT"; then
-    AC_MSG_ERROR([ALUGrid directory $ALUGRIDROOT does not exist or is inaccessible])
-  fi
+  # is --with-alberta=PATH used?
+  AS_IF([test "x$with_alugrid" != "x"],[
+    AS_IF([test -d $with_alugrid],[
+      AC_MSG_NOTICE([searching for ALUGrid in $with_alugrid...])
+      ALUGRIDROOT=`cd $with_alugrid && pwd`
+    ],[
+      AC_MSG_WARN([ALUGrid directory '$with_alugrid' does not exist or is inaccessible])
+    ])
+  ],[
+    # educated guess for alugrid root
+    for d in /usr /usr/local /usr/local/alugrid /opt/alugrid; do
+      AC_MSG_NOTICE([searching for ALUGrid in $d...])
+      AS_IF([test -f $d/lib/pkgconfig/alugrid.pc -o -x $d/bin/alugridversion],[
+        ALUGRIDROOT="$d"
+        break
+      ])
+    done
+  ])
 
   REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
   PKG_CONFIG_PATH="$ALUGRIDROOT:$ALUGRIDROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
