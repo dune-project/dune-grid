@@ -18,6 +18,7 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/mpihelper.hh>
 #include <dune/common/shared_ptr.hh>
+#include <dune/common/timer.hh>
 
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridenums.hh>
@@ -106,7 +107,9 @@ public:
 int main(int argc, char **argv) {
 
   try {
-    Dune::MPIHelper::instance(argc, argv);
+    Dune::Timer timer;
+
+    const Dune::MPIHelper &mpiHelper = Dune::MPIHelper::instance(argc, argv);
 
     //////////////////////////////////////////////////////////////////////
     //
@@ -150,11 +153,15 @@ int main(int argc, char **argv) {
     Dune::GridFactory<Grid> gf;
     std::vector<int> insertionElementTags;
 
-    if(Dune::MPIHelper::getCollectiveCommunication().rank() == 0)
-    {
-      if(tagsName == "")
+    if(mpiHelper.rank() == 0) {
+      if(tagsName == "") {
+        std::cout << "[" << timer.elapsed() << "] Reading Gmsh file "
+                  << gmshName << " (without tags)" << std::endl;
         Dune::GmshReader<Grid>::read(gf, gmshName);
+      }
       else {
+        std::cout << "[" << timer.elapsed() << "] Reading Gmsh file "
+                  << gmshName << " (with tags)" << std::endl;
         // make them local since we don't do anything with them anyway atm
         std::vector<int> insertionBoundaryTags;
         Dune::GmshReader<Grid>::read(gf, gmshName, insertionBoundaryTags,
@@ -173,6 +180,10 @@ int main(int argc, char **argv) {
     typedef std::map<Id, int> TagMap;
     TagMap elementTagMap;
     if(tagsName != "") {
+      if(mpiHelper.rank() == 0)
+        std::cout << "[" << timer.elapsed() << "] Copying tags into a map"
+                  << std::endl;
+
       typedef Grid::LevelGridView GV;
       const GV &gv = gridp->levelView(0);
       const Grid::LocalIdSet &lis = gridp->localIdSet();
@@ -187,14 +198,24 @@ int main(int argc, char **argv) {
     //  actual loadbalancing
     //
 
-    if(tagsName == "")
+    if(tagsName == "") {
+      if(mpiHelper.rank() == 0)
+        std::cout << "[" << timer.elapsed() << "] Load-balancing grid"
+                  << std::endl;
       gridp->loadBalance();
+    }
     else {
+      if(mpiHelper.rank() == 0)
+        std::cout << "[" << timer.elapsed() << "] Load-balancing grid and "
+                  << "interior data" << std::endl;
       typedef RedistributeDataHandle<Grid> DataHandle;
       DataHandle dh(*gridp, elementTagMap);
       gridp->loadBalance
         (static_cast<Dune::CommDataHandleIF<DataHandle, int>&>(dh));
-      // also communicate data on non-interior elements
+
+      if(mpiHelper.rank() == 0)
+        std::cout << "[" << timer.elapsed() << "] Communicating non-interior "
+                  << "data" << std::endl;
       gridp->levelView(0).communicate(dh, Dune::InteriorBorder_All_Interface,
                                       Dune::ForwardCommunication);
     }
@@ -205,6 +226,10 @@ int main(int argc, char **argv) {
     //
 
     {
+      if(mpiHelper.rank() == 0)
+        std::cout << "[" << timer.elapsed() << "] Writing grid files "
+                  << aluName << ".*" << std::endl;
+
       std::string path;
       std::string basename;
 
@@ -232,6 +257,10 @@ int main(int argc, char **argv) {
     //
 
     if(tagsName != "") {
+      if(mpiHelper.rank() == 0)
+        std::cout << "[" << timer.elapsed() << "] Writing tag files "
+                  << tagsName << ".*" << std::endl;
+
       std::ostringstream s;
       s << tagsName << "." << gridp->comm().rank();
       std::ofstream file(s.str().c_str());
@@ -250,6 +279,9 @@ int main(int argc, char **argv) {
         DUNE_THROW(Dune::IOError, "Write error while writing tags to "
                    "tags-file " << s.str());
     }
+
+    if(mpiHelper.rank() == 0)
+      std::cout << "[" << timer.elapsed() << "] Done." << std::endl;
   }
   catch(const Dune::Exception &e) {
     std::cerr << "Caught Dune exception: " << e << std::endl;
