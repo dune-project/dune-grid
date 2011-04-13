@@ -54,7 +54,7 @@ HAVE_ALUGRID=0
 ## do nothing if no --with-alugrid was supplied
 if test x$with_alugrid != xno ; then
 
-  # is --with-alberta=PATH used?
+  # is --with-alugrid=PATH used?
   AS_IF([test "x$with_alugrid" != "x"],[
     AS_IF([test -d $with_alugrid],[
       AC_MSG_NOTICE([searching for ALUGrid in $with_alugrid...])
