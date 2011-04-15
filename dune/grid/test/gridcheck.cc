@@ -40,7 +40,6 @@ struct subIndexCheck
 {
   subIndexCheck ( const Grid &g, const Entity &e )
   {
-#if !DISABLE_DEPRECATED_METHOD_CHECK
     {
       typedef typename Grid::template Codim< Entity::codimension >::EntityPointer EntityPointer;
       typedef typename Grid::template Codim< Entity::codimension >::EntitySeed EntitySeed;
@@ -51,7 +50,6 @@ struct subIndexCheck
       EntityPointer ep2 = g.entityPointer( seed );
       assert( ep1 == ep2 );
     }
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     typedef typename Grid::template Codim< cd >::EntityPointer EntityPointer;
     const int imax = e.template count<cd>();
@@ -61,14 +59,12 @@ struct subIndexCheck
       EntityPointer ep( *(e.template subEntity< cd >( i ) ) );
       assert( ep == e.template subEntity< cd >( i ) );
 
-#if !DISABLE_DEPRECATED_METHOD_CHECK
       typedef typename Grid::template Codim< cd >::EntitySeed EntitySeed;
       EntitySeed seed = ep->seed();
 
       // regain entity pointer and check equality
       EntityPointer ep2 = g.entityPointer( seed );
       assert( ep == ep2 );
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
 #if !DISABLE_DEPRECATED_METHOD_CHECK
       // test compactify
