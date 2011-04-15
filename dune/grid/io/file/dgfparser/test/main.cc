@@ -131,7 +131,7 @@ try {
       }
     }
 
-    nofVtxParams = gridPtr.nofParameters( GridType::dimension );
+    nofVtxParams = gridPtr.nofParameters( (int) GridType::dimension );
     if( nofVtxParams > 0 )
     {
       std::cout << "Reading Vertex Parameters:" << std::endl;

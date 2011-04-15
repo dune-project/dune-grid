@@ -175,7 +175,7 @@ namespace Dune
     template <class Entity>
     int nofParameters ( const Entity & ) const
     {
-      return nofParamters( Entity::codimension );
+      return nofParameters( (int) Entity::codimension );
     }
 
     //! get number of parameters defined for a given intersection
@@ -413,7 +413,7 @@ namespace Dune
       template<class EntityType>
       size_t size (const EntityType& e) const
       {
-        return gridPtr_.nofParameters(e.codimension);
+        return gridPtr_.nofParameters( (int) e.codimension);
       }
 
       template<class MessageBufferImp, class EntityType>
