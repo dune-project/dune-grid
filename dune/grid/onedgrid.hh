@@ -66,14 +66,13 @@ namespace Dune {
   //**********************************************************************
 
   /**
-     \brief [<em> provides \ref Dune::Grid </em>]
-     Onedimensional adaptive grid
+     \brief One-dimensional adaptive grid
+
+     [<em> provides \ref Dune::Grid </em>]
      \ingroup GridImplementations
 
      This implementation of the grid interface provides one-dimensional
-     grids only.  No matter what the values of dim and dimworld may be,
-     you'll always get a 1D-grid in a 1D-world.  Unlike SGrid, however,
-     which can also be instantiated in 1D, the OneDGrid is nonuniform
+     grids only. The OneDGrid can be nonuniform
      and provides local mesh refinement and coarsening.
    */
   class OneDGrid : public GridDefaultImplementation <1, 1,double,OneDGridFamily<1,1> >
