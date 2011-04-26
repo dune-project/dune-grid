@@ -12,9 +12,9 @@ check_HEADERS = testgeo.hh
 check_PROGRAMS = testbasicgeometry testsubtopologies testmapping testgeo testmatrix
 TESTS = testbasicgeometry testsubtopologies testmapping testgeo
 
-AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS)
-AM_LDFLAGS = @AM_LDFLAGS@ $(ALL_PKG_LDFLAGS)
-LDADD = $(ALL_PKG_LIBS) @LDADD@
+AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS) $(DUNEMPICPPFLAGS)
+AM_LDFLAGS = @AM_LDFLAGS@ $(ALL_PKG_LDFLAGS) $(DUNEMPILIBS)
+LDADD = $(ALL_PKG_LIBS) @LDADD@ $(DUNEMPILDFLAGS)
 
 testbasicgeometry_SOURCES = testbasicgeometry.cc
 
