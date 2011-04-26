@@ -16,6 +16,7 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/geometrytype.hh>
 #include <dune/common/ios_state.hh>
+#include <dune/common/mpihelper.hh>
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
@@ -77,6 +78,8 @@ void testBasicGeometry(const TestGeometry& geometry,
 
 int main (int argc , char **argv) try
 {
+  Dune::MPIHelper::instance(argc, argv);
+
   // 77 means "SKIP"
   int result = 77;
 

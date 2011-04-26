@@ -6,14 +6,17 @@
 #include <iomanip>
 
 #include <dune/common/gmpfield.hh>
+#include <dune/common/mpihelper.hh>
 
 #include "../matrixhelper.hh"
 #include "../geometrytraits.hh"
 
 using namespace Dune;
 
-int main()
+int main(int argc, char** argv)
 {
+  Dune::MPIHelper::instance(argc, argv);
+
   typedef double Field;
   //typedef long double Field;
   //typedef GMPField< 72 > Field;

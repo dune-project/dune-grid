@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include <dune/common/forloop.hh>
+#include <dune/common/mpihelper.hh>
 
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
@@ -171,6 +172,8 @@ struct ForSubTest
 
 int main ( int argc, char **argv )
 {
+  Dune::MPIHelper::instance(argc, argv);
+
   for( int i = 1; i < argc; ++i )
   {
     verbose |= (strcmp( argv[ i ], "-v" ) == 0);
