@@ -14,13 +14,6 @@ SUBDIRS =					\
 	m4
 # The library subdirectory itself
 SUBDIRS += lib
-# All subdirectories that must (or can) be handled after the library is built
-if EXTRA_UTILS
-# Using automake conditionals ensures that these directories will always be in
-# DIST_SUBDIRS, even if they are not always in SUBDIRS
-SUBDIRS +=					\
-	utility
-endif EXTRA_UTILS
 
 # use configured compiler for "make distcheck"
 # doxygen is difficult to convince to build in a special directory...

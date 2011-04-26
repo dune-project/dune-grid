@@ -6,9 +6,6 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([dune/grid/common/grid.hh])
 AM_CONFIG_HEADER([config.h])
 
-# --enable-extra-utils
-DUNE_EXTRA_UTILS
-
 # check all dune-module stuff
 DUNE_CHECK_ALL
 
@@ -83,7 +80,5 @@ AC_CONFIG_FILES([Makefile
     dune/grid/geometrygrid/Makefile
     m4/Makefile
     dune-grid.pc
-    utility/Makefile
-    utility/gridinfo-gmsh/Makefile
     ])
 AC_OUTPUT
