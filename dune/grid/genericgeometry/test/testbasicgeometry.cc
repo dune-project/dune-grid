@@ -5,8 +5,9 @@
     \brief A unit test for the BasicGeometry class
  */
 
-
+#if HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <cstddef>
 #include <cstdlib>
