@@ -15,6 +15,13 @@
 
 #include <dune/grid/alugrid/common/persistentcontainer.hh>
 
+#include <alugrid_defineparallel.h>
+#if ALU3DGRID_BUILD_FOR_PARALLEL && ! HAVE_MPI
+#error When using parallel ALUGrid, you need to
+#error * configure dune with --enable-parallel
+#error * add the DUNEMPI*FLAGS
+#endif
+
 /** @file
     @author Robert Kloefkorn
     @brief Provides base classes for ALUGrid
