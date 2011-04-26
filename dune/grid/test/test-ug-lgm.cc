@@ -4,6 +4,8 @@
 
 #include <config.h>
 
+#if UG_LGMDOMAIN
+
 #include <iostream>
 
 /*
@@ -83,3 +85,9 @@ catch (Dune::Exception& e) {
   std::cerr << "Generic exception!" << std::endl;
   return 2;
 }
+
+#else  // UG_LGMDOMAIN
+int main () {
+  return 77;
+}
+#endif // UG_LGMDOMAIN
