@@ -41,6 +41,8 @@ namespace Dune {
   class ALU2dGridLevelIterator;
   template<int cd, class GridImp >
   class ALU2dGridEntityPointer;
+  template<int cd, class GridImp >
+  class ALU2dGridEntitySeed;
   template<int mydim, int coorddim, class GridImp>
   class ALU2dGridMakeableGeometry;
   template<int mydim, int cdim, class GridImp>
@@ -119,7 +121,9 @@ namespace Dune {
 
         typedef ALU2dGridEntityPointer< cd, const GridImp > EntityPointerImpl;
         typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
-        typedef EntityPointer EntitySeed;
+
+        // minimal information to generate entities
+        typedef ALU2dGridEntitySeed< cd , const GridImp > EntitySeed ;
 
         template <PartitionIteratorType pitype>
         struct Partition
@@ -647,6 +651,16 @@ namespace Dune {
     mutable ALU2dGridLeafMarkerVectorType leafMarker_;
 
   public:
+    template < class EntitySeed >
+    typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
+    entityPointer( const EntitySeed& seed ) const
+    {
+      enum { codim = EntitySeed :: codimension };
+      typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
+      typedef ALU2dGridEntityPointer < codim, const ThisType > ALUPointer ;
+      return ALUPointer( factory(), seed ) ;
+    }
+
     //! return reference to vector telling on which element a face is
     //! visted for this level
     ALU2dGridMarkerVector & getMarkerVector(int level) const

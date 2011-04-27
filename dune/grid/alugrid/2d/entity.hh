@@ -12,6 +12,7 @@
 // Local includes
 #include <dune/grid/alugrid/2d/intersection.hh>
 #include <dune/grid/alugrid/2d/iterator.hh>
+#include <dune/grid/alugrid/2d/entityseed.hh>
 
 namespace Dune {
   // Forward declarations
@@ -86,6 +87,10 @@ namespace Dune {
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     //! type of corresponding interface geometry
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
+
+    //! typedef of my type
+    typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
+
     //! type of geometry implementation
     typedef MakeableInterfaceObject<Geometry> GeometryObj;
     typedef ALU2dGridGeometry<dim-cd,dimworld, const GridImp> GeometryImp;
@@ -116,8 +121,10 @@ namespace Dune {
      */
     //! set element as normal entity
     void setElement(const ElementType &element, int face=-1, int level = -1) const;
+    void setElement(const EntitySeed& seed ) const;
     void setElement(const HElementType & el, const VertexType & vx);
-    void setElement(const ALU2dGridEntity & org) const {
+    void setElement(const ALU2dGridEntity & org) const
+    {
       setElement(*(org.item_), org.face_);
     }
 
@@ -154,6 +161,12 @@ namespace Dune {
     {
       assert( item_ );
       return *item_;
+    }
+
+    //! return seed of entity
+    EntitySeed seed() const
+    {
+      return EntitySeed( getItem(), level(), getFace() );
     }
 
     // return internal face
@@ -233,6 +246,10 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
     //! type of corresponding interface local geometry
     typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
+
+    //! typedef of my type
+    typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
+
     //! type of our Geometry implementation
     typedef MakeableInterfaceObject<Geometry> GeometryObj;
     typedef ALU2dGridGeometry<dim,dimworld, const GridImp> GeometryImp;
@@ -449,6 +466,7 @@ namespace Dune {
         arguments of these methods
      */
     void setElement(const HElementType &element, int face=-1, int level = -1) const;
+    void setElement(const EntitySeed& seed ) const;
 
     void setElement(const ALU2dGridEntity & org) const {
       setElement(*(org.item_));
@@ -468,6 +486,12 @@ namespace Dune {
     {
       assert( item_ );
       return *item_;
+    }
+
+    //! return seed of entity
+    EntitySeed seed() const
+    {
+      return EntitySeed( getItem() );
     }
 
     //! return reference to grid
@@ -539,6 +563,9 @@ namespace Dune {
 
     //! type of stored entity (interface)
     typedef typename GridImp::template Codim<codimension>::Entity Entity;
+
+    //! type of the seed
+    typedef typename GridImp::template Codim<codimension>::EntitySeed EntitySeed;
     //! tpye of stored entity (implementation)
     typedef ALU2dGridEntity<codimension,dim,GridImp> EntityImp;
     typedef MakeableInterfaceObject<Entity> EntityObj;
@@ -551,6 +578,9 @@ namespace Dune {
                              int face = -1,
                              int level = -1
                              );
+
+    //! Constructor for EntityPointer init of Level- and LeafIterator
+    ALU2dGridEntityPointer(const FactoryType& factory, const EntitySeed& seed) ;
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
     ALU2dGridEntityPointer(const EntityImp& entity) ;
@@ -596,13 +626,11 @@ namespace Dune {
     //! reference to entity factory
     const FactoryType& factory_;
 
-    //! pointer to the real (H)Element
-    mutable ElementType * item_;
+    //! the essential information
+    EntitySeed seed_ ;
+
     //! entity that this EntityPointer points to
     mutable EntityObj * entity_;
-
-    mutable int level_;
-    int face_;
   };
 
 } // end namespace Dune

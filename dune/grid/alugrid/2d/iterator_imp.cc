@@ -287,12 +287,15 @@ namespace Dune
   }
 
   template<PartitionIteratorType pitype, class GridImp>
-  inline int ALU2dGridLeafIterator<1, pitype, GridImp> :: goNextElement() {
+  inline int ALU2dGridLeafIterator<1, pitype, GridImp> :: goNextElement()
+  {
     assert(face_>=0);
-    int elIdx = this->item_->getIndex();
+    const ElementType* item = this->seed_.item();
+    assert( item );
+    int elIdx = item->getIndex();
 
-    while (face_ < this->item_->numfaces() ) {
-      int idx = this->item_->edge_idx(face_);
+    while (face_ < item->numfaces() ) {
+      int idx = item->edge_idx(face_);
       // check if face is visited on this element
       if(marker_.isOnElement(elIdx,idx,1))
         return 0;
@@ -827,9 +830,9 @@ namespace Dune
   template<class GridImp>
   inline void ALU2dGridHierarchicIterator<GridImp> :: increment() {
 
-    assert(this->item_ != 0);
+    assert( this->seed_.item() != 0);
 
-    HElementType * nextItem = goNextElement( this->item_ );
+    HElementType * nextItem = goNextElement( this->seed_.item() );
     if(!nextItem)
     {
       this->done();

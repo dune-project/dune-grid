@@ -65,6 +65,13 @@ namespace Dune {
     geoImpl().unsetUp2Date();
   }
 
+
+  template<int cd, int dim, class GridImp>
+  inline void ALU2dGridEntity<cd,dim,GridImp>:: setElement( const EntitySeed& seed ) const
+  {
+    setElement( *(seed.item()), seed.face(), seed.level() );
+  }
+
   //! set item pointer to NULL
   template<int cd, int dim, class GridImp>
   inline void ALU2dGridEntity<cd,dim,GridImp> :: removeElement() {
@@ -359,6 +366,14 @@ namespace Dune {
     geoImpl().unsetUp2Date();
   }
 
+  template<int dim, class GridImp>
+  inline void ALU2dGridEntity<0,dim,GridImp> ::
+  setElement(const EntitySeed& seed ) const
+  {
+    setElement( *(seed.item()) ); //, seed.face(), seed.level() );
+  }
+
+
   //! set actual walk level
   template<int dim, class GridImp>
   inline void ALU2dGridEntity<0,dim,GridImp> :: reset ( int l )
@@ -393,9 +408,8 @@ namespace Dune {
   template<int cd, class GridImp>
   inline void ALU2dGridEntityPointer<cd, GridImp> :: done()
   {
-    item_ = 0;
-    face_ = -1; // set face to non-valid value
     compactify();
+    seed_.clear();
   }
 
   template<int cd, class GridImp>
@@ -413,21 +427,19 @@ namespace Dune {
   template<int cd, class GridImp>
   inline bool ALU2dGridEntityPointer<cd, GridImp> :: equals(const ALU2dGridEntityPointer<cd, GridImp> & i) const
   {
-    return ElementWrapper<cd,dim, GridImp>::isTheSame (item_, face_, i.item_, i.face_);
+    return seed_ == i.seed_;
   }
 
   //! update underlying item pointer and set entity
   template<int cd, class GridImp>
-  inline void ALU2dGridEntityPointer<cd, GridImp> :: updateEntityPointer(ElementType * item, int face, int level) {
+  inline void ALU2dGridEntityPointer<cd, GridImp> :: updateEntityPointer(ElementType * item, int face, int level)
+  {
     assert(item != 0);
-    item_ = item;
-    assert(item_);
+    seed_.set( *item, level, face );
 
-    face_= face;
-    level_ = level;
     if( entity_ )
     {
-      entityImp().setElement( *item_, face_, level_);
+      entityImp().setElement( seed_ );
     }
   }
 
@@ -437,10 +449,8 @@ namespace Dune {
   ALU2dGridEntityPointer(const FactoryType& factory,
                          const ElementType& item, int face, int level)
     : factory_( factory )
-      , item_(const_cast<ElementType *>(&item))
+      , seed_( item, level, face )
       , entity_(0)
-      , level_(level)
-      , face_(face)
   { }
 
   //! Constructor for EntityPointer that points to an element
@@ -448,30 +458,33 @@ namespace Dune {
   inline ALU2dGridEntityPointer<cd, GridImp>::
   ALU2dGridEntityPointer(const EntityImp& entity)
     : factory_( entity.factory() )
-      , item_(& entity.getItem() )
+      , seed_( entity.getItem(), entity.level(), entity.getFace() )
       , entity_(0)
-      , level_(entity.level())
-      , face_(entity.getFace())
+  { }
+
+  //! Constructor for EntityPointer that points to an element
+  template<int cd, class GridImp>
+  inline ALU2dGridEntityPointer<cd, GridImp>::
+  ALU2dGridEntityPointer(const FactoryType& factory, const EntitySeed& seed)
+    : factory_( factory )
+      , seed_( seed )
+      , entity_(0)
   { }
 
   //! Constructor for EntityPointer init of Level- and LeafIterator
   template<int cd, class GridImp>
   inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const FactoryType& factory)
     : factory_( factory )
-      , item_(0)
+      , seed_()
       , entity_(0)
-      , level_(-1)
-      , face_(-1)
   { }
 
   //! Copy Constructor
   template<int cd, class GridImp>
   inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const ThisType & org)
     : factory_( org.factory_ )
-      , item_(org.item_)
+      , seed_( org.seed_ )
       , entity_(0)
-      , level_(org.level_)
-      , face_(org.face_)
   {  }
 
   //! Destructor
@@ -486,11 +499,10 @@ namespace Dune {
   inline typename ALU2dGridEntityPointer<cd, GridImp>::Entity &
   ALU2dGridEntityPointer<cd, GridImp>:: dereference() const
   {
-    assert( item_ );
-    if( !entity_ )
+    if( ! entity_ )
     {
       entity_ = factory_.template getNewEntity<cd> (level());
-      entityImp().setElement(*item_, face_, level());
+      entityImp().setElement( seed_ );
     }
     assert( entity_ );
     return *entity_;
@@ -500,24 +512,7 @@ namespace Dune {
   template<int cd, class GridImp>
   inline int ALU2dGridEntityPointer<cd, GridImp>:: level () const
   {
-    assert( item_ );
-
-    if (cd == 0)
-      return item_->level();
-
-    if (level_ == -1)
-    {
-      if (cd == 2)
-      {
-        // ????
-        level_ = item_->level()+1;
-      }
-      else
-      {
-        level_ = item_->level();
-      }
-    }
-    return level_;
+    return seed_.level();
   }
 
   template<int cd, class GridImp>
@@ -525,11 +520,9 @@ namespace Dune {
   ALU2dGridEntityPointer<cd, GridImp>:: operator = (const typename ALU2dGridEntityPointer<cd, GridImp>::ThisType & org)
   {
     this->done();
-    entity_ = 0;
     assert(&factory_ == &org.factory_);
-    item_  = org.item_;
-    face_  = org.face_;
-    level_ = org.level_;
+    seed_ = org.seed_; // copy seed
+    entity_ = 0; // is set when dereference is called
     return *this;
   }
 

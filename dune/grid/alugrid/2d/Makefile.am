@@ -3,7 +3,7 @@ alu2dgrid_HEADERS = alu2dinclude.hh  entity_imp.cc  geometry_imp.cc \
   grid_imp.cc  intersection.hh  iterator.hh  entity.hh  geometry.hh   grid.hh \
   indexsets.hh  intersection_imp.cc  iterator_imp.cc datahandle.hh \
   alu2dgridfactory.hh  alugrid.hh capabilities.hh  bndprojection.hh \
-  intersection.cc  alu2dgridfactory.cc
+  intersection.cc  alu2dgridfactory.cc  entityseed.hh
 
 headercheck_IGNORE = $(alu2dgrid_HEADERS)
 
