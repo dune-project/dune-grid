@@ -62,6 +62,7 @@ namespace Dune {
   template<int mydim, int cdim, class GridImp>  class YaspGeometry;
   template<int codim, int dim, class GridImp>   class YaspEntity;
   template<int codim, class GridImp>            class YaspEntityPointer;
+  template<int codim, class GridImp>            class YaspEntitySeed;
   template<int codim, PartitionIteratorType pitype, class GridImp> class YaspLevelIterator;
   template<class GridImp>            class YaspIntersectionIterator;
   template<class GridImp>            class YaspIntersection;
@@ -728,6 +729,7 @@ namespace Dune {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
     };
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
     typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
     typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
     typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
@@ -753,6 +755,13 @@ namespace Dune {
     //! globalIndex is unique and consecutive per global level
     int globalIndex () const {
       return _g.cell_global().index(_it.coord());
+    }
+
+    /** \brief Return the entity seed which contains sufficient information
+     *  to generate the entity again and uses as less memory as possible
+     */
+    EntitySeed seed () const {
+      return EntitySeed(_g.level(), _it.coord());
     }
 
     //! return partition type attribute
@@ -1345,7 +1354,8 @@ namespace Dune {
     {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
     };
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<dim>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<dim>::EntitySeed EntitySeed;
 
     //! define the type used for persisitent indices
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
@@ -1367,6 +1377,12 @@ namespace Dune {
     //! globally unique, persistent index
     int globalIndex () const { return _g.cell_global().index(_it.coord()); }
 
+    /** \brief Return the entity seed which contains sufficient information
+     *  to generate the entity again and uses as less memory as possible
+     */
+    EntitySeed seed () const {
+      return EntitySeed(_g.level(), _it.coord());
+    }
 
     //! geometry of this entity
     const Geometry& geometry () const { return _geometry; }
@@ -2059,6 +2075,39 @@ namespace Dune {
 
   //========================================================================
   /*!
+     YaspEntitySeed describes the minimal information necessary to create a fully functional YaspEntity
+   */
+  //========================================================================
+  template<int codim, class GridImp>
+  class YaspEntitySeed
+  {
+    //! know your own dimension
+    enum { dim=GridImp::dimension };
+
+  public:
+    //! codimension of entity pointer
+    enum { codimension = codim };
+
+    //! constructor
+    YaspEntitySeed (int level, FieldVector<int, dim> coord)
+      : _l(level), _c(coord)
+    {}
+
+    //! copy constructor
+    YaspEntitySeed (const YaspEntitySeed& rhs)
+      : _l(rhs._l), _c(rhs._c)
+    {}
+
+    int level () const { return _l; }
+    const FieldVector<int, dim> & coord() const { return _c; }
+
+  protected:
+    int _l;                  // grid level
+    FieldVector<int, dim> _c; // coord in the global grid
+  };
+
+  //========================================================================
+  /*!
      YaspEntityPointer serves as a Reference or Pointer to a YaspGrid::Entity.
      It can also be initialized from Yasp::LevelIterator, Yasp::LeafIterator,
      Yasp::HierarchicIterator and Yasp::IntersectionIterator.
@@ -2456,7 +2505,9 @@ namespace Dune {
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
         YaspGlobalIdSet<const YaspGrid<dim> >,
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
-        CCType>
+        CCType,
+        DefaultLevelGridViewTraits, DefaultLeafGridViewTraits,
+        YaspEntitySeed>
     Traits;
   };
 
@@ -2799,6 +2850,26 @@ namespace Dune {
     typename Traits::template Codim<cd>::template Partition<All_Partition>::LeafIterator leafend () const
     {
       return levelend<cd,All_Partition>(maxLevel());
+    }
+
+    // \brief obtain EntityPointer from EntitySeed. */
+    template <typename Seed>
+    typename Traits::template Codim<Seed::codimension>::EntityPointer
+    entityPointer(const Seed& seed) const
+    {
+      static const int codim = Seed::codimension;
+      YGLI g = MultiYGrid<dim,ctype>::begin(seed.level());
+      switch (codim)
+      {
+      case 0 :
+        return YaspEntityPointer<codim,GridImp>(this,g,
+                                                TSI(g.cell_overlap(), seed.coord()));
+      case dim :
+        return YaspEntityPointer<codim,GridImp>(this,g,
+                                                TSI(g.vertex_overlap(), seed.coord()));
+      default :
+        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
+      }
     }
 
     //! return size (= distance in graph) of overlap region
