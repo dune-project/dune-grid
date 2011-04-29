@@ -43,6 +43,7 @@ namespace Dune {
   template<int dim, int dimworld, class GridImp> class SGeometry;
   template<int codim, int dim, class GridImp> class SEntity;
   template<int codim, class GridImp> class SEntityPointer;
+  template<int codim, class GridImp> class SEntitySeed;
   template<int codim, PartitionIteratorType, class GridImp> class SLevelIterator;
   template<int dim, int dimworld, class ctype> class SGrid;
   template<class GridImp> class SIntersection;
@@ -313,6 +314,13 @@ namespace Dune {
 
     //! global index is calculated from the index and grid size
     int globalIndex() const;
+
+    /** \brief Return the entity seed which contains sufficient information
+     *  to generate the entity again and uses as less memory as possible
+     */
+    SEntitySeed<codim, GridImp> seed () const {
+      return SEntitySeed<codim, GridImp>(l, index);
+    }
 
     //! return the element type identifier
     GeometryType type () const
@@ -1134,6 +1142,29 @@ namespace Dune {
     mutable int index;           //!< my consecutive index
     mutable Entity* e;           //!< virtual entity
   };
+
+  /*! describes the minimal information necessary to create a fully functional SEntity
+   */
+  template<int codim, class GridImp>
+  class SEntitySeed
+  {
+    enum { dim = GridImp::dimension };
+  public:
+    enum { codimension = codim };
+
+    //! constructor
+    SEntitySeed (int l, int index) :
+      _l(l), _index(index)
+    {}
+
+    int level () const { return this->_l; }
+    int index () const { return this->_index; }
+
+  private:
+    int _l;                       //!< level where element is on
+    int _index;                   //!< my consecutive index
+  };
+
   //************************************************************************
 
 
@@ -1391,7 +1422,9 @@ namespace Dune {
         bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits>,
         SGridGlobalIdSet<const SGrid<dim,dimworld,ctype> >,
         bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits>,
-        CollectiveCommunication<Dune::SGrid<dim,dimworld,ctype> > >
+        CollectiveCommunication<Dune::SGrid<dim,dimworld,ctype> >,
+        DefaultLevelGridViewTraits, DefaultLeafGridViewTraits,
+        SEntitySeed>
     Traits;
   };
 
@@ -1553,6 +1586,15 @@ namespace Dune {
     typename Traits::template Codim<cd>::template Partition<All_Partition>::LeafIterator leafend () const
     {
       return leafend<cd,All_Partition>();
+    }
+
+    // \brief obtain EntityPointer from EntitySeed. */
+    template <typename Seed>
+    typename Traits::template Codim<Seed::codimension>::EntityPointer
+    entityPointer(const Seed& seed) const
+    {
+      enum { codim = Seed::codimension };
+      return SEntityPointer<codim,const SGrid<dim,dimworld> >(this,seed.level(),seed.index());
     }
 
     /*! The communication interface
