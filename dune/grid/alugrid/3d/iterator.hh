@@ -773,7 +773,7 @@ namespace Dune {
                                 bool end);
 
     //! the normal Constructor
-    ALU3dGridHierarchicIterator(const ALU3dGridHierarchicIterator<GridImp> &org);
+    ALU3dGridHierarchicIterator(const ThisType &org);
 
     //! increment
     void increment();

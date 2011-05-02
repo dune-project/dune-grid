@@ -39,7 +39,7 @@ namespace Dune
   //! The copy constructor
   template<class GridImp>
   inline ALU2dGridIntersectionBase<GridImp> ::
-  ALU2dGridIntersectionBase(const ALU2dGridIntersectionBase<GridImp> & org) :
+  ALU2dGridIntersectionBase(const ThisType & org) :
     current(org.current),
     intersectionGlobal_(GeometryImp()),
     intersectionSelfLocal_(LocalGeometryImp()),

@@ -48,7 +48,7 @@ namespace Dune {
 
   template<int codim, PartitionIteratorType pitype, class GridImp >
   alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
-  ALU3dGridLevelIterator(const ALU3dGridLevelIterator<codim,pitype,GridImp> & org )
+  ALU3dGridLevelIterator(const ThisType & org )
     : ALU3dGridEntityPointer<codim,GridImp> ( org.factory_ , org.level_ )
       , level_( org.level_ )
       , iter_(0)
