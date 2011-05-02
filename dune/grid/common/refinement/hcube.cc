@@ -409,6 +409,7 @@ namespace Dune {
     // The refinement traits
     //
 
+#ifndef DOXYGEN
     template<unsigned topologyId, class CoordType, unsigned coerceToId,
         int dim>
     struct Traits<
@@ -424,6 +425,7 @@ namespace Dune {
     {
       typedef HCube::RefinementImp<dim, CoordType> Imp;
     };
+#endif
 
   } // namespace RefinementImp
 
