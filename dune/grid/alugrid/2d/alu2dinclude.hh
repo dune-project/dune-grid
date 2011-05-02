@@ -68,7 +68,7 @@ namespace Dune
   typedef double alu2d_ctype;
 
 
-
+#ifndef DOXYGEN
   // ALU2dImplInterface
   // ------------------
 
@@ -96,7 +96,7 @@ namespace Dune
   {
     typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,eltype) ::helement_t Type;
   };
-
+#endif
 
 
   // ALU2dImplTraits
