@@ -61,4 +61,5 @@ EXCLUDE               += @top_srcdir@/dune/grid/io/visual/grape/grapewrapper.hh 
                          @top_srcdir@/dune/grid/alugrid/2d/entity_imp.cc \
                          @top_srcdir@/dune/grid/alugrid/2d/geometry_imp.cc  \
                          @top_srcdir@/dune/grid/alugrid/2d/grid_imp.cc \
-                         @top_srcdir@/dune/grid/alugrid/2d/iterator_imp.cc
+                         @top_srcdir@/dune/grid/alugrid/2d/iterator_imp.cc \
+                         @top_srcdir@/dune/grid/io/file/amiramesh/psurface.cc
