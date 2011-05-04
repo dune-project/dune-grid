@@ -1080,23 +1080,20 @@ namespace Dune
   inline std::string
   DuneGridFormatParser::temporaryFileName ()
   {
-    char tempname[ FILENAME_MAX ];
-    std::strcpy( tempname, "TMPDGFParser.XXXXXX" );
+    const std::string tempname( "TMPDGFParser.XXXXXX" );
 
-    std::string fulltempname;
 #ifdef P_tmpdir
-    fulltempname = std::string( P_tmpdir ) + "/" + tempname;
+    const std::string fulltempname = std::string( P_tmpdir ) + "/" + tempname;
 #else
-    fulltempname = std::string( "./" ) + tempname;
+    const std::string fulltempname = std::string( "./" ) + tempname;
 #endif
 
     char filetemp[ FILENAME_MAX ];
-    std::strcpy( filetemp, fulltempname.c_str() );
+    std::strncpy( filetemp, fulltempname.c_str(), FILENAME_MAX );
     const int fd = mkstemp( filetemp );
     if( fd < 0 )
     {
-      fulltempname = std::string(P_tmpdir) + "/" + tempname;
-      std :: strcpy( filetemp, fulltempname.c_str() );
+      std::strncpy( filetemp, fulltempname.c_str(), FILENAME_MAX );
       const int fd = mkstemp( filetemp );
       if ( fd < 0 )
         DUNE_THROW( IOError, "Unable to create temporary file: " +
