@@ -2,10 +2,11 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <cstdio>
+
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/dgfparser/blocks/boundarydom.hh>
-#include <unistd.h>
 
 namespace Dune
 {
@@ -1080,28 +1081,8 @@ namespace Dune
   inline std::string
   DuneGridFormatParser::temporaryFileName ()
   {
-    const std::string tempname( "TMPDGFParser.XXXXXX" );
-
-#ifdef P_tmpdir
-    const std::string fulltempname = std::string( P_tmpdir ) + "/" + tempname;
-#else
-    const std::string fulltempname = std::string( "./" ) + tempname;
-#endif
-
-    char filetemp[ FILENAME_MAX ];
-    std::strncpy( filetemp, fulltempname.c_str(), FILENAME_MAX );
-    const int fd = mkstemp( filetemp );
-    if( fd < 0 )
-    {
-      std::strncpy( filetemp, fulltempname.c_str(), FILENAME_MAX );
-      const int fd = mkstemp( filetemp );
-      if ( fd < 0 )
-        DUNE_THROW( IOError, "Unable to create temporary file: " +
-                    std::string( filetemp ) );
-    }
-    close( fd );
-    remove( filetemp );
-    return std::string( filetemp );
+    char buffer[ L_tmpnam ]; // supply buffer to make it thread safe
+    return std::string( std::tmpnam( buffer ) );
   }
 
 } // end namespace Dune
