@@ -1081,17 +1081,17 @@ namespace Dune
   DuneGridFormatParser::temporaryFileName ()
   {
     char tempname[ FILENAME_MAX ];
-    std :: strcpy( tempname, "TMPDGFParser.XXXXXX" );
+    std::strcpy( tempname, "TMPDGFParser.XXXXXX" );
 
     std::string fulltempname;
 #ifdef P_tmpdir
-    fulltempname = std::string(P_tmpdir) + "/" + tempname;
+    fulltempname = std::string( P_tmpdir ) + "/" + tempname;
 #else
-    fulltempname = "." + "/" + tempname;
+    fulltempname = std::string( "./" ) + tempname;
 #endif
 
     char filetemp[ FILENAME_MAX ];
-    std :: strcpy( filetemp, fulltempname.c_str() );
+    std::strcpy( filetemp, fulltempname.c_str() );
     const int fd = mkstemp( filetemp );
     if( fd < 0 )
     {
@@ -1104,7 +1104,7 @@ namespace Dune
     }
     close( fd );
     remove( filetemp );
-    return std :: string( filetemp );
+    return std::string( filetemp );
   }
 
 } // end namespace Dune
