@@ -410,6 +410,8 @@ namespace Dune
 
     static const ALU3dGridElementType elementType = elType;
     typedef typename ALU3DSPACE GatherScatterType::ObjectStreamType ObjectStreamType;
+    typedef ObjectStreamType InStreamType ;
+    typedef ObjectStreamType OutStreamType ;
 
     typedef ALU3dGridFamily< elType, Comm > GridFamily;
     typedef typename GridFamily::Traits Traits;

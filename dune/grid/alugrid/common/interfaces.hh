@@ -20,6 +20,8 @@ namespace Dune {
   template <bool hasStream, class GridImp, class DefaultImp>
   struct GridObjectStreamOrDefaultHelper {
     typedef typename GridImp::ObjectStreamType ObjectStreamType;
+    typedef typename GridImp::InStreamType InStreamType;
+    typedef typename GridImp::OutStreamType OutStreamType;
   };
 
   //! Helper template (explicit specialisation if GridImp doesn't export an
@@ -27,15 +29,22 @@ namespace Dune {
   template <class GridImp, class DefaultImp>
   struct GridObjectStreamOrDefaultHelper<false, GridImp, DefaultImp> {
     typedef DefaultImp ObjectStreamType;
+    typedef DefaultImp InStreamType;
+    typedef DefaultImp OutStreamType;
   };
 
   //! Template to choose right Object stream type for a given class
   template <class GridImp, class DefaultImp>
-  struct GridObjectStreamOrDefault {
-    typedef typename GridObjectStreamOrDefaultHelper<
+  struct GridObjectStreamOrDefault
+  {
+    typedef GridObjectStreamOrDefaultHelper<
         Conversion<GridImp, HasObjectStream>::exists,
         GridImp,
-        DefaultImp>::ObjectStreamType ObjectStreamType;
+        DefaultImp> GridObjectStreamTraits;
+
+    typedef typename GridObjectStreamTraits :: ObjectStreamType ObjectStreamType;
+    typedef typename GridObjectStreamTraits :: InStreamType InStreamType;    //  read  stream
+    typedef typename GridObjectStreamTraits :: OutStreamType OutStreamType;  //  write stream
   };
 
   //! Tagging interface to indicate that class is of Type DofManager

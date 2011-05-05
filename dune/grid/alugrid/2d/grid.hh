@@ -253,6 +253,8 @@ namespace Dune {
 
     //! dummy object stream
     typedef ALU2dGridObjectStream ObjectStreamType;
+    typedef ObjectStreamType InStreamType ;
+    typedef ObjectStreamType OutStreamType ;
 
     //! my Traits class
     typedef ALU2dGridFamily < dim, dimworld, eltype > GridFamily;
