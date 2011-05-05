@@ -19,7 +19,6 @@ namespace Dune {
   //! stream
   template <bool hasStream, class GridImp, class DefaultImp>
   struct GridObjectStreamOrDefaultHelper {
-    typedef typename GridImp::ObjectStreamType ObjectStreamType;
     typedef typename GridImp::InStreamType InStreamType;
     typedef typename GridImp::OutStreamType OutStreamType;
   };
@@ -28,7 +27,6 @@ namespace Dune {
   //! object stream -> DefaultImplementation is exported)
   template <class GridImp, class DefaultImp>
   struct GridObjectStreamOrDefaultHelper<false, GridImp, DefaultImp> {
-    typedef DefaultImp ObjectStreamType;
     typedef DefaultImp InStreamType;
     typedef DefaultImp OutStreamType;
   };
@@ -42,7 +40,6 @@ namespace Dune {
         GridImp,
         DefaultImp> GridObjectStreamTraits;
 
-    typedef typename GridObjectStreamTraits :: ObjectStreamType ObjectStreamType;
     typedef typename GridObjectStreamTraits :: InStreamType InStreamType;    //  read  stream
     typedef typename GridObjectStreamTraits :: OutStreamType OutStreamType;  //  write stream
   };
