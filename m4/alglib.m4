@@ -38,10 +38,10 @@ AC_DEFUN([DUNE_PATH_ALGLIB],[
   AS_IF([test "x$with_alglib" != "x"],
         [PKG_CONFIG_PATH="$with_alglib:$with_alglib/lib/pkgconfig:$PKG_CONFIG_PATH"])
   AC_MSG_CHECKING([for alglib4dune (>=1.0) via pkgconfig])
-  AS_IF([pkg-config --atleast-version=1.0 alglib4dune],[
-    HAVE_ALGLIB="version `pkg-config --modversion alglib4dune`"
-    ALGLIB_CPPFLAGS="`pkg-config --cflags alglib4dune` -DENABLE_ALGLIB=1"
-    ALGLIB_LIBS="`pkg-config --libs alglib4dune`"
+  AS_IF([PKG_CONFIG_PATH=$PKG_CONFIG_PATH pkg-config --atleast-version=1.0 alglib4dune],[
+    HAVE_ALGLIB="version `PKG_CONFIG_PATH=$PKG_CONFIG_PATH pkg-config --modversion alglib4dune`"
+    ALGLIB_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH pkg-config --cflags alglib4dune` -DENABLE_ALGLIB=1"
+    ALGLIB_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH pkg-config --libs alglib4dune`"
     AC_MSG_RESULT([yes])
   ],[
     AC_MSG_RESULT([no])
