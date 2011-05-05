@@ -73,17 +73,17 @@ AC_DEFUN([DUNE_PATH_UG],[
       AC_ARG_ENABLE(ug-lgmdomain,
         AC_HELP_STRING([--enable-ug-lgmdomain],[use UG LGM domain (default is standard domain)]))
       if test x"$enable_ug_lgmdomain" = xyes ; then
-        UG_LIBS="`$PKG_CONFIG --libs-only-L libug` -lugL2 -lugL3 -ldevS"
-        direct_UG_LIBS="`$PKG_CONFIG --libs-only-L libug` -lugL2 -lugL3 -ldevS"
+        UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugL2 -lugL3 -ldevS"
+        direct_UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugL2 -lugL3 -ldevS"
       else
-        UG_LIBS="`$PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
-        direct_UG_LIBS="`$PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
+        UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
+        direct_UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
       fi
       
       AC_MSG_CHECKING([for UG])
 
       # Check whether UG is installed at all
-      if $PKG_CONFIG --exists libug; then
+      if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --exists libug; then
 	    HAVE_UG="1"
         AC_MSG_RESULT(yes)
 	  else
@@ -97,7 +97,7 @@ AC_DEFUN([DUNE_PATH_UG],[
           AC_MSG_CHECKING([whether UG version is recent enough])
 
           # Does it have a suitable version?
-          if $PKG_CONFIG --atleast-version=3.9.1-patch3 libug; then
+          if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=3.9.1-patch3 libug; then
               AC_MSG_RESULT(yes)
           else
               HAVE_UG="0"
@@ -116,7 +116,7 @@ AC_DEFUN([DUNE_PATH_UG],[
               
           AC_MSG_CHECKING([whether UG has been built with --enable-dune])
 
-          if test x`$PKG_CONFIG --variable=fordune libug` == xyes; then
+          if test x`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=fordune libug` == xyes; then
               AC_MSG_RESULT(yes)
           else
               AC_MSG_RESULT(no)
@@ -132,10 +132,10 @@ AC_DEFUN([DUNE_PATH_UG],[
       if test x$HAVE_UG = x1; then
 
         # Set the compiler flags
-		UG_CPPFLAGS="`$PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
-        direct_UG_CPPFLAGS="`$PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
+		UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
+        direct_UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
 
-          if test x`$PKG_CONFIG --variable=parallel libug` == xyes; then
+          if test x`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=parallel libug` == xyes; then
 			
           # Add additional flags needed for parallel UG  
 		  UG_LDFLAGS="\${DUNEMPILDFLAGS} $UG_LDFLAGS"
