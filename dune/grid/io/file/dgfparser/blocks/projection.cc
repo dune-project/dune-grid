@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <dune/common/math.hh>
+
 #include <dune/grid/io/file/dgfparser/blocks/projection.hh>
 
 namespace Dune
@@ -543,7 +545,7 @@ namespace Dune
       // pi
       else if( token.type == Token::piKeyword )
       {
-        expression = new Expr::ConstantExpression( M_PI );
+        expression = new Expr::ConstantExpression( MathematicalConstants< double >::pi() );
         nextToken();
       }
       else if( token.type == Token::string )
