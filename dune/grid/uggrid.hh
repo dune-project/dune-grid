@@ -761,12 +761,20 @@ namespace Dune {
       case 0 :
         switch (iftype) {
         case InteriorBorder_InteriorBorder_Interface :
-          dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF());
+          // do not communicate anything: Elements can not be in
+          // the interior of two processes at the same time
           return;
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF());
+          // The communicated elements are in the sender's
+          // interior and it does not matter what they are for
+          // the receiver
+          dddIfaces.push_back(UG_NS<dim>::ElementVHIF());
           return;
         case All_All_Interface :
+          // It does neither matter what the communicated
+          // elements are for sender nor for the receiver. If
+          // they are seen by these two processes, data is send
+          // and received.
           dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF());
           return;
         default :
