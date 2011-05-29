@@ -88,6 +88,20 @@ namespace Dune {
                         const array<unsigned int, dim>& n,
                         const DataContainer& data);
 
+    /** \brief Write a 2d grid in a 3d world
+     *
+     * Technically, the format written is 'HyperSurface', not 'AmiraMesh'.
+     * AmiraMesh doesn't support 2d grids in a 3d world.  Hypersurface is the
+     * native Amira format for such grids.  Historically, it is the ancestor of
+     * the AmiraMesh format, and syntactically it is fairly similar.
+     *
+     * Currently, quadrilaterals will get split into triangles.
+     *
+     * \note This code is experimental and may change withour prior warning
+     */
+    static void writeSurfaceGrid(const GridView& gridView,
+                                 const std::string& filename);
+
   protected:
 
 #if HAVE_AMIRAMESH  // better: use a pointer here and forward-declare AmiraMesh

@@ -598,3 +598,131 @@ void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
       ((double*)amData->dataPtr())[i] = (*it)[j];
 
 }
+
+
+template <class GridView>
+void Dune::AmiraMeshWriter<GridView>::writeSurfaceGrid(const GridView& gridView, const std::string& filename)
+{
+  enum {dimworld = GridView::dimensionworld};
+
+  if (dim!=2 or dimworld!=3)
+    DUNE_THROW(Dune::NotImplemented, "writeSurfaceGrid is only implemented for 2D-grids in a 3D world!");
+
+  const typename GridView::IndexSet& indexSet = gridView.indexSet();
+
+  // ////////////////////////////////////////////
+  //   Write header
+  // ////////////////////////////////////////////
+
+  std::ofstream outfile(filename);
+
+  if (!outfile)
+    DUNE_THROW(Dune::IOError, "Couldn't open '" << filename << "' for writing!");
+
+  outfile << "# HyperSurface 0.1 ASCII" << std::endl;
+  outfile << "" << std::endl;
+  outfile << "Parameters {" << std::endl;
+  outfile << "    Materials {" << std::endl;
+  outfile << "        outside {" << std::endl;
+  outfile << "            Id 0" << std::endl;
+  outfile << "        }" << std::endl;
+  outfile << "        inside {" << std::endl;
+  outfile << "            Id 1" << std::endl;
+  outfile << "        }" << std::endl;
+  outfile << "    }" << std::endl;
+  outfile << "" << std::endl;
+  outfile << "}" << std::endl;
+  outfile << std::endl;
+
+  // ////////////////////////////////////////////
+  //   Write vertices
+  // ////////////////////////////////////////////
+
+  outfile << "Vertices " << indexSet.size(dim) << std::endl;
+
+  typedef typename GridView::template Codim<dim>::Iterator VertexIterator;
+
+  // write coordinates
+  // First we need to sort them to make sure they appear in the file in the proper order
+  VertexIterator vIt    = gridView.template begin<dim>();
+  VertexIterator vEndIt = gridView.template end<dim>();
+
+  std::vector<Dune::FieldVector<double,dimworld> > coords(indexSet.size(dim));
+
+  for (; vIt!=vEndIt; ++vIt) {
+    typename GridView::IndexSet::IndexType idx = indexSet.index(*vIt);
+    coords[idx] = vIt->geometry().corner(0);
+  }
+
+  for (size_t i=0; i<coords.size(); i++)
+    outfile << coords[i] << std::endl;
+
+  // ////////////////////////////////////////////
+  //   Write triangles
+  // ////////////////////////////////////////////
+
+  outfile << "NBranchingPoints 0" << std::endl;
+  outfile << "NVerticesOnCurves 0" << std::endl;
+  outfile << "BoundaryCurves 0" << std::endl;
+  outfile << "Patches 1" << std::endl;
+  outfile << "{" << std::endl;
+  outfile << "InnerRegion inside" << std::endl;
+  outfile << "OuterRegion outside" << std::endl;
+  outfile << "BoundaryID 0" << std::endl;
+  outfile << "BranchingPoints 0" << std::endl;
+  outfile << "" << std::endl;
+
+  // Count all boundary segments.  We have to do this manually because
+  // quadrilaterals need to be transformed to two triangles because
+  // Amira doesn't know quadrilateral surfaces :-(((
+  int numFaces = 0;
+  // loop over all elements
+  typedef typename GridView::template Codim<0>::Iterator ElementIterator;
+  ElementIterator it    = gridView.template begin<0>();
+  ElementIterator endIt = gridView.template end<0>();
+
+  for (; it!=endIt; ++it) {
+
+    switch (it->geometry().corners()) {
+    case 3 :
+      numFaces++;
+      break;
+    case 4 :
+      numFaces += 2;
+      break;
+    default :
+      DUNE_THROW(Dune::NotImplemented, "Unknown boundary segment type encountered!");
+    }
+
+  }
+
+  outfile << "Triangles " << numFaces << std::endl;
+
+  // loop over all elements again
+  it = gridView.template begin<0>();
+
+  for (; it!=endIt; ++it) {
+
+    const Dune::GenericReferenceElement<double,dim>& refElement =
+      Dune::GenericReferenceElements<double, dim>::general(it->type());
+
+    int n = refElement.size(dim);
+
+    outfile << indexSet.subIndex(*it, 0, dim) + 1
+            << " " << indexSet.subIndex(*it, 1, dim) + 1
+            << " " << indexSet.subIndex(*it, 2, dim) + 1
+            << std::endl;
+
+    if (n==4)
+      outfile << indexSet.subIndex(*it, 2, dim) + 1
+              << " " << indexSet.subIndex(*it, 3, dim) + 1
+              << " " << indexSet.subIndex(*it, 0, dim) + 1
+              << std::endl;
+
+  }
+
+  outfile << "}" << std::endl;
+
+  Dune::dinfo << "Surface successfully written to: " << filename << std::endl;
+
+}
