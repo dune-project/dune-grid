@@ -459,7 +459,7 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
     && (indexSet.geomTypes(0)[0].isSimplex());
 
   // Get number of components
-  const int ncomp = DataContainer::block_type::size;
+  const int ncomp = DataContainer::value_type::size;
 
   // Set the appropriate content type for 2D grid data, if no other
   // content type hasn't been set already
@@ -503,7 +503,7 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
   amiramesh_.insert(nodeField);
 
   // write the data into the AmiraMesh object
-  typedef typename DataContainer::ConstIterator Iterator;
+  typedef typename DataContainer::const_iterator Iterator;
 
   Iterator dit    = data.begin();
   Iterator ditend = data.end();
