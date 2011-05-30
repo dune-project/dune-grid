@@ -174,7 +174,18 @@ namespace Dune
       FieldVector< ctype, dimensionworld >
       outerNormal ( const FieldVector< ctype, dimension-1 > &local ) const
       {
-        return integrationOuterNormal( local );
+        const ElementGeometryImpl &geo = Grid::getRealImplementation( insideGeometry() );
+
+        const GenericReferenceElement< ctype, dimension > &refElement
+          = GenericReferenceElements< ctype, dimension>::general( geo.type() );
+
+        FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
+        const typename ElementGeometryImpl::JacobianInverseTransposed &jit = geo.jacobianInverseTransposed( x );
+        const FieldVector< ctype, dimension > &refNormal = refElement.volumeOuterNormal( indexInInside() );
+
+        FieldVector< ctype, dimensionworld > normal;
+        jit.mv( refNormal, normal );
+        return normal;
       }
 
       FieldVector< ctype, dimensionworld >
