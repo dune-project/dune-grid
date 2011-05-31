@@ -14,6 +14,10 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
+if AMIRAMESH
+  AMIRAMESHLIB = io/file/amiramesh/libamiramesh.la
+endif
+
 # the ALUGrid lib contains items that are needed
 # in any case, so no dependency from ALUGRID flag
 ALULIB = alugrid/libalu.la
@@ -27,6 +31,7 @@ sourcescheck_DUMMY = dummy.cc
 libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
 	$(COMMONLIB)				\
 	$(DGFPARSERLIB)				\
+        $(AMIRAMESHLIB)                         \
 	$(DUNE_LIBS)
 
 # These libraries do not need other libraries besides lcommon
