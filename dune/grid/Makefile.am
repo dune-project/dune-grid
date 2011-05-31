@@ -15,7 +15,9 @@ if UG
 endif
 
 if AMIRAMESH
+if PSURFACE
   AMIRAMESHLIB = io/file/amiramesh/libamiramesh.la
+endif
 endif
 
 # the ALUGrid lib contains items that are needed
