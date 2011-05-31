@@ -441,8 +441,8 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
                                                     const GridView& gridView,
                                                     bool gridSplitUp)
 {
-  typedef typename GridView::template Codim<0>::Iterator ElementIterator;
   typedef typename GridView::Grid::ctype ct;
+  static const int dimworld = GridView::dimensionworld;
   typedef Dune::VirtualRefinement<dim, ct> Refinement;
 
 
@@ -463,8 +463,14 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
 
   // Set the appropriate content type for 2D grid data, if no other
   // content type hasn't been set already
-  if (dim==2 and amiramesh_.parameters.findBase("ContentType")==NULL)
-    amiramesh_.parameters.set("ContentType", "HxTriangularData");
+  if (dim==2 and amiramesh_.parameters.findBase("ContentType")==NULL) {
+
+    if (dimworld==3)
+      amiramesh_.parameters.set("ContentType", "SurfaceField");
+    else
+      amiramesh_.parameters.set("ContentType", "HxTriangularData");
+
+  }
 
   if (!containsOnlyTetrahedra and dim==3 and !gridSplitUp)
   {
@@ -484,8 +490,14 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
 
   amiramesh_.insert(amLocation);
 
-  // \todo Auto-detect data type
-  AmiraMesh::Data* nodeData = new AmiraMesh::Data("Data", amLocation, McPrimType::mc_double, ncomp);
+  // The primitive data type used to store the data in the file
+  // We are forced to use float for surface (i.e. 2d-in-3d) fields, because Amira
+  // can only read those in float precision
+  McPrimType primType = McPrimType::mc_double;
+  if (Dune::is_same<ct,float>::value or (dim==2 and dimworld==3))
+    primType = McPrimType::mc_float;
+
+  AmiraMesh::Data* nodeData = new AmiraMesh::Data("Data", amLocation, primType, ncomp);
   amiramesh_.insert(nodeData);
 
 
@@ -493,11 +505,11 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
 
   if (containsOnlyTetrahedra || dim==2 || gridSplitUp)
   {
-    nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double, AmiraMesh::t_linear, nodeData);
+    nodeField = new AmiraMesh::Field("sol", ncomp, primType, AmiraMesh::t_linear, nodeData);
   }
   else
   {
-    nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double, AmiraMesh::t_trilinear, nodeData);
+    nodeField = new AmiraMesh::Field("sol", ncomp, primType, AmiraMesh::t_trilinear, nodeData);
   }
 
   amiramesh_.insert(nodeField);
@@ -510,10 +522,18 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
 
   int i=0;
 
-  for (; dit!=ditend; ++dit)
-  {
-    for (int j=0; j<ncomp; j++)
-      ((double*)nodeData->dataPtr())[i++] = (*dit)[j];
+  if (Dune::is_same<ct,float>::value or (dim==2 and dimworld==3)) {
+    // Write double data
+    for (; dit!=ditend; ++dit)
+      for (int j=0; j<ncomp; j++)
+        ((float*)nodeData->dataPtr())[i++] = (*dit)[j];
+
+  } else {
+    // Write float data
+    for (; dit!=ditend; ++dit)
+      for (int j=0; j<ncomp; j++)
+        ((double*)nodeData->dataPtr())[i++] = (*dit)[j];
+
   }
 
 }
