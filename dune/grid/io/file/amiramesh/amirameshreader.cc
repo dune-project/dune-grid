@@ -213,61 +213,6 @@ public:
 // Create the domain from an explicitly given boundary description
 template <class GridType>
 void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factory,
-                                                   const std::string& filename)
-{
-#if HAVE_PSURFACE
-  int point[3] = {-1, -1, -1};
-
-  std::string domainname = filename;
-  /* Load data */
-  if (psurface::LoadMesh(domainname.c_str(), filename.c_str()) != psurface::OK)
-    DUNE_THROW(IOError, "Error in AmiraMeshReader<Dune::UGGrid<3,3> >::createDomain:"
-               << "Domain file could not be opened!");
-
-  if (psurface::StartEditingDomain(domainname.c_str()) != psurface::OK)
-    DUNE_THROW(IOError, "Error in AmiraMeshReader<Dune::UGGrid<3,3> >::createDomain:"
-               << "StartEditing failed!");
-
-  // All further queries to the psurface library refer to the most recently
-  // loaded parametrization.
-
-  int noOfSegments = psurface::GetNoOfSegments();
-  if(noOfSegments <= 0)
-    DUNE_THROW(IOError, "no segments found");
-
-  int noOfNodes = psurface::GetNoOfNodes();
-  if(noOfNodes <= 0)
-    DUNE_THROW(IOError, "No nodes found");
-
-  static int boundaryNumber = 0;
-  const int dim = GridType::dimension;
-
-  for(int i = 0; i < noOfSegments; i++) {
-
-    // Gets the vertices of a boundary segment
-    psurface::GetNodeNumbersOfSegment(point, i);
-
-    std::vector<unsigned int> vertices(3);
-    vertices[0] = point[0];
-    vertices[1] = point[1];
-    vertices[2] = point[2];
-
-    factory.insertBoundarySegment(vertices,
-                                  shared_ptr<BoundarySegment<dim,dim> >(new PSurfaceBoundarySegment<dim>(boundaryNumber,i)));
-
-  }
-  boundaryNumber++;
-  Dune::dinfo << noOfSegments << " segments from psurface file " << filename
-              << " created!" << std::endl;
-
-#endif // #define HAVE_PSURFACE
-
-}
-
-
-// Create the domain from an explicitly given boundary description
-template <class GridType>
-void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factory,
                                                    const shared_ptr<PSurfaceBoundary<GridType::dimension-1> >& boundary)
 {
 #if HAVE_PSURFACE

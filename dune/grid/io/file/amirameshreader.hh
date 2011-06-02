@@ -27,9 +27,6 @@ namespace Dune {
   template<class GridType>
   class AmiraMeshReader {
 
-    /** \brief Create the boundary description from an explicitly given psurface file */
-    static void createDomain(GridFactory<GridType>& factory, const std::string& filename);
-
     /** \brief Create the boundary description from an explicitly given psurface object */
     static void createDomain(GridFactory<GridType>& factory, const shared_ptr<PSurfaceBoundary<GridType::dimension-1> >& boundary);
 
@@ -110,7 +107,11 @@ namespace Dune {
                      const std::string& filename,
                      const std::string& domainFilename);
 
+  private:
     /** \brief Read a grid with a parametrized boundary into a given grid object
+
+       \note Reading files into existing grid objects is not officially supported,
+       and this method is here only for a transition period.
 
        @param grid The grid objects that is to be read
        @param filename The name of the grid file
@@ -120,6 +121,7 @@ namespace Dune {
                      const std::string& filename,
                      const shared_ptr<PSurfaceBoundary<2> >& boundary);
 
+  public:
     /** \brief Read a block vector from an AmiraMesh file
      *
      * The data may either be given on the nodes (P1-Functions) or the elements (P0-Functions).
