@@ -10,6 +10,7 @@
 
 #if HAVE_PSURFACE
 #include "psurface.h"
+#include "psurface/AmiraMeshIO.h"
 #endif
 
 
@@ -327,6 +328,28 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   factory.createGrid();
 #endif // #define HAVE_PSURFACE
 }
+
+template <class GridType>
+Dune::shared_ptr<Dune::PSurfaceBoundary<2> > Dune::AmiraMeshReader<GridType>::readPSurfaceBoundary(const std::string& filename)
+{
+  const int dim=2;
+ #if ! HAVE_PSURFACE
+  DUNE_THROW(NotImplemented, "You have to have libpsurface installed in order to be able to use 'readPSurfaceBoundary'");
+#else
+  std::auto_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
+
+  if (!am.get())
+    DUNE_THROW(IOError, "An error has occured while reading " << filename);
+
+  PSurface<dim,float>* newDomain = (PSurface<dim,float>*)AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
+
+  if (!newDomain)
+    DUNE_THROW(IOError, "An error has occured while reading " << filename);
+
+  return shared_ptr<PSurfaceBoundary<dim> >(new PSurfaceBoundary<dim>(newDomain));
+#endif
+}
+
 
 template <class GridType>
 GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename)

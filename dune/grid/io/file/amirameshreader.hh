@@ -7,6 +7,10 @@
 
 #include <dune/grid/common/gridfactory.hh>
 
+#if HAVE_PSURFACE
+#include <dune/grid/io/file/amiramesh/psurfaceboundary.hh>
+#endif
+
 #if HAVE_AMIRAMESH
 #include <amiramesh/AmiraMesh.h>
 #else
@@ -69,6 +73,26 @@ namespace Dune {
      */
     static GridType* read(const std::string& filename,
                           const std::string& domainFilename);
+
+    /** \brief Read a domain boundary description in the psurface format
+
+       Several grid managers support parametrized boundary segment which carry
+       function describing the true shape of the boundary segment.
+       This information will the be considered when refining the grid.
+
+       In
+       <em>'Krause, Sander, Automatic Construction of Boundary Parametrizations
+       for Geometric Multigrid Solvers, CVS, 2005'</em>,
+       the authors describe a way to automatically build such boundary
+       descriptions.  Their file format can be read by this routine.
+
+       To use this feature you
+       have to have the psurface library and build Dune with --with-psurface.
+       Ask Oliver sander@mi.fu-berlin.de for help.
+
+       @param filename The name of the psurface boundary file
+     */
+    static shared_ptr<PSurfaceBoundary<2> > readPSurfaceBoundary(const std::string& filename);
 
     /** \brief Read a grid with a parametrized boundary into a given grid object
 
