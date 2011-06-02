@@ -317,35 +317,11 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
 #else
   dverb << "This is the AmiraMesh reader for " << className<GridType>() << std::endl;
 
-  // Create a grid factory
-  GridFactory<GridType> factory;
+  // Read the psurface boundary object
+  shared_ptr<PSurfaceBoundary<2> > boundary = readPSurfaceBoundary(domainFilename);
 
-  // /////////////////////////////////////////////////////
-  // Load the AmiraMesh file
-  // /////////////////////////////////////////////////////
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
-
-  if(!am)
-    DUNE_THROW(IOError, "Could not open AmiraMesh file " << filename);
-
-  if (am->findData("Hexahedra", HxINT32, 8, "Nodes")) {
-
-    // Load a domain from an AmiraMesh hexagrid file
-    Dune::dwarn << "Hexahedral grids with a parametrized boundary are not supported!" << std::endl;
-    Dune::dwarn << "I will therefore ignore the boundary parametrization." << std::endl;
-
-  } else {
-
-    // Load domain from an AmiraMesh tetragrid file
-    createDomain(factory, domainFilename);
-
-  }
-
-  // read and build the grid
-  buildGrid(factory, am);
-  delete(am);
-
-  return factory.createGrid();
+  // Read the grid
+  return read(filename, boundary);
 #endif // #define HAVE_PSURFACE
 }
 
@@ -403,6 +379,23 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 #else
   dverb << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
 
+  shared_ptr<PSurfaceBoundary<2> > boundary = readPSurfaceBoundary(domainFilename);
+
+  read(grid, filename, boundary);
+#endif // #define HAVE_PSURFACE
+}
+
+template <class GridType>
+void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
+                                           const std::string& filename,
+                                           const shared_ptr<PSurfaceBoundary<2> >& boundary)
+{
+#if ! HAVE_PSURFACE
+  DUNE_THROW(IOError, "Dune has not been built with support for the "
+             << " psurface library!");
+#else
+  dverb << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
+
   // Create a grid factory
   GridFactory<GridType> factory(&grid);
 
@@ -423,7 +416,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   } else {
 
     // Load domain from an AmiraMesh tetragrid file
-    createDomain(factory, domainFilename);
+    createDomain(factory, boundary);
 
   }
 

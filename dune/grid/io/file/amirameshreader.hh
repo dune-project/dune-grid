@@ -110,6 +110,16 @@ namespace Dune {
                      const std::string& filename,
                      const std::string& domainFilename);
 
+    /** \brief Read a grid with a parametrized boundary into a given grid object
+
+       @param grid The grid objects that is to be read
+       @param filename The name of the grid file
+       @param boundary The PSurface boundary object
+     */
+    static void read(GridType& grid,
+                     const std::string& filename,
+                     const shared_ptr<PSurfaceBoundary<2> >& boundary);
+
     /** \brief Read a block vector from an AmiraMesh file
      *
      * The data may either be given on the nodes (P1-Functions) or the elements (P0-Functions).
