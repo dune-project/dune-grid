@@ -164,7 +164,14 @@ class PSurfaceBoundarySegment<3> : public Dune::BoundarySegment<3>
 {
 public:
   PSurfaceBoundarySegment(int domain, int triangle)
-    : domain_(domain),
+    : psurface_(NULL),
+      domain_(domain),
+      triangle_(triangle)
+  {}
+
+  PSurfaceBoundarySegment(PSurface<2,float>* psurface, int triangle)
+    : psurface_(psurface),
+      domain_(0),
       triangle_(triangle)
   {}
 
@@ -178,11 +185,25 @@ public:
     barCoords[0] = 1 - local[0] - local[1];
     barCoords[1] = local[0];
 
-    psurface::CallPositionParametrizationForDomain(domain_, triangle_, barCoords, &result[0]);
+    if (psurface_) {
+
+      StaticVector<float,2> input(barCoords[0], barCoords[1]);
+      StaticVector<float,3> res;
+
+      if (!psurface_->positionMap(triangle_, input, res))
+        DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
+
+      result[0] = res[0];
+      result[1] = res[1];
+      result[2] = res[2];
+
+    } else
+      psurface::CallPositionParametrizationForDomain(domain_, triangle_, barCoords, &result[0]);
 
     return result;
   }
 
+  PSurface<2,float>* psurface_;
   int domain_;
   int triangle_;
 };
@@ -243,6 +264,49 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
 
 }
 
+
+// Create the domain from an explicitly given boundary description
+template <class GridType>
+void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factory,
+                                                   const shared_ptr<PSurfaceBoundary<GridType::dimension-1> >& boundary)
+{
+#if HAVE_PSURFACE
+  int point[3] = {-1, -1, -1};
+
+  PSurface<2,float>* psurface = boundary->getPSurfaceObject();
+
+  if (!psurface->hasUpToDatePointLocationStructure)
+    psurface->createPointLocationStructure();
+
+  int noOfSegments = psurface->getNumTriangles();
+  if(noOfSegments <= 0)
+    DUNE_THROW(IOError, "no segments found");
+
+  int noOfNodes = psurface->getNumVertices();
+  if(noOfNodes <= 0)
+    DUNE_THROW(IOError, "No nodes found");
+
+  const int dim = GridType::dimension;
+
+  for(int i = 0; i < noOfSegments; i++) {
+
+    // Gets the vertices of a boundary segment
+    std::vector<unsigned int> vertices(3);
+    vertices[0] = psurface->triangles(i).vertices[0];
+    vertices[1] = psurface->triangles(i).vertices[1];
+    vertices[2] = psurface->triangles(i).vertices[2];
+
+    factory.insertBoundarySegment(vertices,
+                                  shared_ptr<BoundarySegment<dim,dim> >(new PSurfaceBoundarySegment<dim>(psurface,i)));
+
+  }
+
+  Dune::dinfo << noOfSegments << " segments from PSurfaceBoundary object created!" << std::endl;
+
+#endif // #define HAVE_PSURFACE
+}
+
+
 template <class GridType>
 GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
                                                 const std::string& domainFilename)
@@ -274,6 +338,48 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
 
     // Load domain from an AmiraMesh tetragrid file
     createDomain(factory, domainFilename);
+
+  }
+
+  // read and build the grid
+  buildGrid(factory, am);
+  delete(am);
+
+  return factory.createGrid();
+#endif // #define HAVE_PSURFACE
+}
+
+template <class GridType>
+GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
+                                                const shared_ptr<PSurfaceBoundary<GridType::dimension-1> >& boundary)
+{
+#if ! HAVE_PSURFACE
+  DUNE_THROW(IOError, "Dune has not been built with support for the "
+             << " psurface library!");
+#else
+  dverb << "This is the AmiraMesh reader for ???" << std::endl;
+
+  // Create a grid factory
+  GridFactory<GridType> factory;
+
+  // /////////////////////////////////////////////////////
+  // Load the AmiraMesh file
+  // /////////////////////////////////////////////////////
+  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+
+  if(!am)
+    DUNE_THROW(IOError, "Could not open AmiraMesh file " << filename);
+
+  if (am->findData("Hexahedra", HxINT32, 8, "Nodes")) {
+
+    // Load a domain from an AmiraMesh hexagrid file
+    Dune::dwarn << "Hexahedral grids with a parametrized boundary are not supported!" << std::endl;
+    Dune::dwarn << "I will therefore ignore the boundary parametrization." << std::endl;
+
+  } else {
+
+    // Load domain from an AmiraMesh tetragrid file
+    createDomain(factory, boundary);
 
   }
 
