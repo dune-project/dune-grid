@@ -149,7 +149,7 @@ template <int dim>
 class PSurfaceBoundarySegment : public Dune::BoundarySegment<dim>
 {
 public:
-  PSurfaceBoundarySegment(int domain, int triangle) {
+  PSurfaceBoundarySegment(PSurface<1,float>* psurface, int triangle) {
     DUNE_THROW(Dune::NotImplemented, "PSurfaceBoundarySegment only exists for dim==3!");
   }
 
@@ -163,15 +163,8 @@ template <>
 class PSurfaceBoundarySegment<3> : public Dune::BoundarySegment<3>
 {
 public:
-  PSurfaceBoundarySegment(int domain, int triangle)
-    : psurface_(NULL),
-      domain_(domain),
-      triangle_(triangle)
-  {}
-
   PSurfaceBoundarySegment(PSurface<2,float>* psurface, int triangle)
     : psurface_(psurface),
-      domain_(0),
       triangle_(triangle)
   {}
 
@@ -180,31 +173,23 @@ public:
     Dune::FieldVector<double, 3> result;
 
     // Transform local to barycentric coordinates
-    double barCoords[2];
+    StaticVector<float,2> barCoords;
 
     barCoords[0] = 1 - local[0] - local[1];
     barCoords[1] = local[0];
 
-    if (psurface_) {
+    StaticVector<float,3> r;
 
-      StaticVector<float,2> input(barCoords[0], barCoords[1]);
-      StaticVector<float,3> res;
+    if (!psurface_->positionMap(triangle_, barCoords, r))
+      DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
 
-      if (!psurface_->positionMap(triangle_, input, res))
-        DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
-
-      result[0] = res[0];
-      result[1] = res[1];
-      result[2] = res[2];
-
-    } else
-      psurface::CallPositionParametrizationForDomain(domain_, triangle_, barCoords, &result[0]);
+    for (int i=0; i<3; i++)
+      result[i] = r[i];
 
     return result;
   }
 
   PSurface<2,float>* psurface_;
-  int domain_;
   int triangle_;
 };
 #endif // #define HAVE_PSURFACE
