@@ -322,7 +322,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   DUNE_THROW(IOError, "Dune has not been built with support for the "
              << " psurface library!");
 #else
-  dverb << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
+  dverb << "This is the AmiraMesh reader for " << className<GridType>() << "!" << std::endl;
 
   shared_ptr<PSurfaceBoundary<2> > boundary = readPSurfaceBoundary(domainFilename);
 
@@ -339,7 +339,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   DUNE_THROW(IOError, "Dune has not been built with support for the "
              << " psurface library!");
 #else
-  dverb << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
+  dverb << "This is the AmiraMesh reader for" << className<GridType>() << "!" << std::endl;
 
   // Create a grid factory
   GridFactory<GridType> factory(&grid);
