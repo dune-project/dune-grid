@@ -9,7 +9,6 @@
 #include <amiramesh/AmiraMesh.h>
 
 #if HAVE_PSURFACE
-#include "psurface.h"
 #include "psurface/AmiraMeshIO.h"
 #endif
 
