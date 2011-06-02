@@ -30,6 +30,18 @@ namespace Dune {
       : psurface_(psurface)
     {}
 
+    /** \brief Obtain a pointer to the underlying PSurface object
+     *
+     * Use this only if you know what you are doing.
+     *
+     * This class retains control over the memory management.  Do not
+     * delete the object to receive.
+     */
+    PSurface<dim,float>* getPSurfaceObject()
+    {
+      return psurface_.get();
+    }
+
   private:
 
     std::auto_ptr<PSurface<dim,float> > psurface_;
