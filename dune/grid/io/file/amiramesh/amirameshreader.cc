@@ -315,7 +315,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
   DUNE_THROW(IOError, "Dune has not been built with support for the "
              << " psurface library!");
 #else
-  dverb << "This is the AmiraMesh reader for ???" << std::endl;
+  dverb << "This is the AmiraMesh reader for " << className<GridType>() << std::endl;
 
   // Create a grid factory
   GridFactory<GridType> factory;
@@ -357,7 +357,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
   DUNE_THROW(IOError, "Dune has not been built with support for the "
              << " psurface library!");
 #else
-  dverb << "This is the AmiraMesh reader for ???" << std::endl;
+  dverb << "This is the AmiraMesh reader for " << className<GridType>() << std::endl;
 
   // Create a grid factory
   GridFactory<GridType> factory;
