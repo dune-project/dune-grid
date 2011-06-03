@@ -25,6 +25,53 @@ namespace Dune {
 
   public:
 
+    /** \brief Implementation of a single BoundarySegment using a psurface object */
+    class PSurfaceBoundarySegment : public Dune::BoundarySegment<dim+1>
+    {
+    public:
+
+      /** \brief Construct from a given psurface and triangle number
+       *
+       * \param psurface The psurface object that implements the segment
+       * \param segment The number of the boundary segment in the psurface object
+       */
+      PSurfaceBoundarySegment(PSurface<2,float>* psurface, int segment)
+        : psurface_(psurface),
+          segment_(segment)
+      {}
+
+      /** \brief Evaluate the parametrization function */
+      virtual Dune::FieldVector<double, dim+1> operator()(const Dune::FieldVector<double,dim>& local) const {
+
+        Dune::FieldVector<double, dim+1> result;
+
+        // Transform local to barycentric coordinates
+        StaticVector<float,dim> barCoords;
+
+        if (dim==2) {
+          barCoords[0] = 1 - local[0] - local[1];
+          barCoords[1] = local[0];
+        } else {          // dim==1
+          barCoords[0] = 1 - local[0];
+        }
+
+        StaticVector<float,dim+1> r;
+
+        if (!psurface_->positionMap(segment_, barCoords, r))
+          DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
+
+        for (int i=0; i<dim+1; i++)
+          result[i] = r[i];
+
+        return result;
+      }
+
+      PSurface<dim,float>* psurface_;
+      int segment_;
+    };
+
+
+
     /** \brief Constructor from a given PSurface object */
     PSurfaceBoundary(PSurface<dim,float>* psurface)
       : psurface_(psurface)

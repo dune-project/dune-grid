@@ -141,59 +141,6 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 }
 
 
-// //////////////////////////////////////////////////
-// //////////////////////////////////////////////////
-#if HAVE_PSURFACE
-template <int dim>
-class PSurfaceBoundarySegment : public Dune::BoundarySegment<dim>
-{
-public:
-  PSurfaceBoundarySegment(PSurface<1,float>* psurface, int triangle) {
-    DUNE_THROW(Dune::NotImplemented, "PSurfaceBoundarySegment only exists for dim==3!");
-  }
-
-  virtual Dune::FieldVector<double, dim> operator()(const Dune::FieldVector<double,dim-1>& local) const {
-    DUNE_THROW(Dune::NotImplemented, "PSurfaceBoundarySegment only exists for dim==3!");
-  }
-
-};
-
-template <>
-class PSurfaceBoundarySegment<3> : public Dune::BoundarySegment<3>
-{
-public:
-  PSurfaceBoundarySegment(PSurface<2,float>* psurface, int triangle)
-    : psurface_(psurface),
-      triangle_(triangle)
-  {}
-
-  virtual Dune::FieldVector<double, 3> operator()(const Dune::FieldVector<double,2>& local) const {
-
-    Dune::FieldVector<double, 3> result;
-
-    // Transform local to barycentric coordinates
-    StaticVector<float,2> barCoords;
-
-    barCoords[0] = 1 - local[0] - local[1];
-    barCoords[1] = local[0];
-
-    StaticVector<float,3> r;
-
-    if (!psurface_->positionMap(triangle_, barCoords, r))
-      DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
-
-    for (int i=0; i<3; i++)
-      result[i] = r[i];
-
-    return result;
-  }
-
-  PSurface<2,float>* psurface_;
-  int triangle_;
-};
-#endif // #define HAVE_PSURFACE
-
-
 // Create the domain from an explicitly given boundary description
 template <class GridType>
 void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factory,
@@ -226,7 +173,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
     vertices[2] = psurface->triangles(i).vertices[2];
 
     factory.insertBoundarySegment(vertices,
-                                  shared_ptr<BoundarySegment<dim,dim> >(new PSurfaceBoundarySegment<dim>(psurface,i)));
+                                  shared_ptr<BoundarySegment<dim,dim> >(new typename PSurfaceBoundary<dim-1>::PSurfaceBoundarySegment(psurface,i)));
 
   }
 
