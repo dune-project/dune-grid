@@ -173,7 +173,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
     vertices[2] = psurface->triangles(i).vertices[2];
 
     factory.insertBoundarySegment(vertices,
-                                  shared_ptr<BoundarySegment<dim,dim> >(new typename PSurfaceBoundary<dim-1>::PSurfaceBoundarySegment(psurface,i)));
+                                  shared_ptr<BoundarySegment<dim,dim> >(new typename PSurfaceBoundary<dim-1>::PSurfaceBoundarySegment(boundary,i)));
 
   }
 

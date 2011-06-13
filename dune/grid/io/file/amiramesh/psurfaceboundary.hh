@@ -35,8 +35,8 @@ namespace Dune {
        * \param psurface The psurface object that implements the segment
        * \param segment The number of the boundary segment in the psurface object
        */
-      PSurfaceBoundarySegment(PSurface<2,float>* psurface, int segment)
-        : psurface_(psurface),
+      PSurfaceBoundarySegment(const shared_ptr<PSurfaceBoundary<2> >& psurfaceBoundary, int segment)
+        : psurfaceBoundary_(psurfaceBoundary),
           segment_(segment)
       {}
 
@@ -57,7 +57,7 @@ namespace Dune {
 
         StaticVector<float,dim+1> r;
 
-        if (!psurface_->positionMap(segment_, barCoords, r))
+        if (!psurfaceBoundary_->getPSurfaceObject()->positionMap(segment_, barCoords, r))
           DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
 
         for (int i=0; i<dim+1; i++)
@@ -66,7 +66,7 @@ namespace Dune {
         return result;
       }
 
-      PSurface<dim,float>* psurface_;
+      shared_ptr<PSurfaceBoundary<dim> > psurfaceBoundary_;
       int segment_;
     };
 
