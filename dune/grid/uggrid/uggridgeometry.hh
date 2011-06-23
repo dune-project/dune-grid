@@ -4,7 +4,7 @@
 #define DUNE_UGGRIDGEOMETRY_HH
 
 /** \file
- * \brief The UGGridElement class and its specializations
+ * \brief The UGGridGeometry class and its specializations
  */
 
 #include "uggridrenumberer.hh"
@@ -15,19 +15,14 @@
 namespace Dune {
 
 
-  //**********************************************************************
-  //
-  // --UGGridElement
   /** \brief Defines the geometry part of a mesh entity.
    * \ingroup UGGrid
 
-     \param mydim An element is a polygon in a hyperplane of dimension dim. 0 <= dim <= 3 is typically
-     dim=0 is a point.
+     \tparam mydim Dimension of the corresponding reference element
+     \tparam coorddim Each corner is a point with coorddim coordinates.
 
-     \param dimworld Each corner is a point with dimworld coordinates.
-
-     This version is actually used only for mydim==coorddim. The manifold
-     versions are in specializations below.
+     This version is actually used only for mydim==coorddim. The mydim<coorddim cases
+     are in specializations below.
    */
   template<int mydim, int coorddim, class GridImp>
   class UGGridGeometry :
