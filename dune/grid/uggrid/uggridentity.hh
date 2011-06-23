@@ -242,7 +242,7 @@ namespace Dune {
 
     UGGridEntity()
       : geo_(UGGridGeometry<dim,dim,GridImp>()),
-        geometryInFather_(UGGridGeometry<dim,dim,GridImp>())
+        geometryInFather_(UGGridLocalGeometry<dim,dim,GridImp>())
     {}
 
     //! Level of this element
@@ -380,7 +380,7 @@ namespace Dune {
     MakeableInterfaceObject<Geometry> geo_;
 
     //! geometry for mapping into father's reference element
-    mutable MakeableInterfaceObject<Geometry> geometryInFather_;
+    mutable MakeableInterfaceObject<LocalGeometry> geometryInFather_;
 
     typename UG_NS<dim>::Element* target_;
 

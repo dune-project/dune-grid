@@ -43,8 +43,8 @@ namespace Dune {
         \todo Should be private
      */
     UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb)
-      : geometryInInside_(UGGridGeometry<dim-1,dimworld,GridImp>()),
-        geometryInOutside_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+      : geometryInInside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
+        geometryInOutside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
         geometry_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),
@@ -229,8 +229,8 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb)
-      : geometryInInside_(UGGridGeometry<dim-1,dimworld,GridImp>()),
-        geometryInOutside_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+      : geometryInInside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
+        geometryInOutside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
         geometry_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),

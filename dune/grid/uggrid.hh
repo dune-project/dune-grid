@@ -94,6 +94,7 @@
 
 // The components of the UGGrid interface
 #include "uggrid/uggridgeometry.hh"
+#include "uggrid/uggridlocalgeometry.hh"
 #include "uggrid/uggridentity.hh"
 #include "uggrid/uggridentitypointer.hh"
 #include "uggrid/uggridintersections.hh"
@@ -320,7 +321,11 @@ namespace Dune {
         unsigned int,
         UGGridIdSet< const UGGrid<dim>, true >,
         unsigned int,
-        CollectiveCommunication<Dune::UGGrid<dim> > >
+        CollectiveCommunication<Dune::UGGrid<dim> >,
+        DefaultLevelGridViewTraits,
+        DefaultLeafGridViewTraits,
+        UGGridEntityPointer,                         // Will be UGGridEntitySeed
+        UGGridLocalGeometry>
     Traits;
   };
 
