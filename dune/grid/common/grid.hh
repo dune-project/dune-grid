@@ -1219,10 +1219,11 @@ namespace Dune {
      \brief A traits struct that collects all associated types of one grid model
      @ingroup GIMiscellaneous
 
-
-     Template parameters:
-
-     - <tt>dim</tt>
+     \tparam dim Grid dimension
+     \tparam dimw Dimension of the world that the grid is embedded in
+     \tparam GIDType Type used for global ids
+     \tparam LIDType Type used for local ids
+     \tparam CCType CollectiveCommunication implementation class
    */
   template <int dim, int dimw, class GridImp,
       template<int,int,class> class GeometryImp,
