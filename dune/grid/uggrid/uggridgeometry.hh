@@ -35,25 +35,10 @@ namespace Dune {
 
   public:
 
-    /** Default constructor. Puts geometry in element mode
+    /** \brief Default constructor
      */
     UGGridGeometry()
     {
-      mode_ = element_mode;
-      jacobianIsUpToDate_ = false;
-      jacobianInverseIsUpToDate_ = false;
-    }
-
-    //! put object in coord_mode
-    void coordmode ()
-    {
-      // set the mode
-      mode_ = coord_mode;
-
-      // initialize pointers to data
-      for (int i=0; i<((mydim==2) ? 4 : 8); i++)
-        cornerpointers_[i] = &(coord_[i][0]);
-
       jacobianIsUpToDate_ = false;
       jacobianInverseIsUpToDate_ = false;
     }
@@ -65,7 +50,7 @@ namespace Dune {
      */
     GeometryType type () const;
 
-    //! returns true if type is simplex, false otherwise (impl could be improved)
+    //! returns true if type is simplex, false otherwise
     bool affine() const { return type().isSimplex(); }
 
     //! return the number of corners of this element.
@@ -111,16 +96,11 @@ namespace Dune {
       if (mydim==0)
         return 1;
 
-      if (mode_==element_mode) {
-        // coorddim*coorddim is an upper bound for the number of vertices
-        UGCtype* cornerCoords[coorddim*coorddim];
-        UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
-        return UG_NS<coorddim>::Area_Of_Element(corners(),
-                                                const_cast<const double**>(cornerCoords));
-      } else {
-        return UG_NS<coorddim>::Area_Of_Element(corners(),
-                                                const_cast<const double**>(cornerpointers_));
-      }
+      // coorddim*coorddim is an upper bound for the number of vertices
+      UGCtype* cornerCoords[coorddim*coorddim];
+      UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+      return UG_NS<coorddim>::Area_Of_Element(corners(),
+                                              const_cast<const double**>(cornerCoords));
     }
 
     //! The inverse transpose of the Jacobian matrix of the mapping from the reference element to this element
@@ -130,11 +110,6 @@ namespace Dune {
 
 
   private:
-    // mode that decides whether coordinates are taken from the element or given explicitely
-    enum SourceMode {element_mode, coord_mode};
-
-    // mode is set by constructor
-    SourceMode mode_;
 
     /** \brief Init the element with a given UG element */
     void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target)
@@ -143,22 +118,6 @@ namespace Dune {
       jacobianIsUpToDate_ = false;
       jacobianInverseIsUpToDate_ = false;
     }
-
-    //! \brief set a corner
-    void setCoords (int i, const UGCtype* pos)
-    {
-      if (mode_!=coord_mode)
-        DUNE_THROW(GridError,"mode must be coord_mode!");
-
-      for (int j=0; j<coorddim; j++)
-        coord_[i][j] = pos[j];
-
-      jacobianIsUpToDate_ = false;
-      jacobianInverseIsUpToDate_ = false;
-    }
-
-    //! the vertex coordinates
-    mutable array<FieldVector<UGCtype, coorddim>, (mydim==2) ? 4 : 8> coord_;
 
     //! The jacobian inverse transposed
     mutable FieldMatrix<UGCtype,coorddim,mydim> jac_inverse_;
@@ -175,9 +134,6 @@ namespace Dune {
     // in coord_mode this is the element whose reference element is mapped into the father's one
     typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target_;
 
-    // in coord_mode we explicitely store an array of coordinates
-    // containing the position in the fathers reference element
-    mutable UGCtype* cornerpointers_[(mydim==2) ? 4 : 8];
   };
 
 

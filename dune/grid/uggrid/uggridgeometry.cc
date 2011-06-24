@@ -74,15 +74,11 @@ corner(int i) const
 
   i = UGGridRenumberer<mydim>::verticesDUNEtoUG(i,type());
 
-  if (mode_==element_mode) {
-    Dune::FieldVector<typename GridImp::ctype, coorddim> result;
-    for (size_t j=0; j<coorddim; j++)
-      // The cast is here to make the code compile even when target_ is not an element
-      result[j] = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x[j];
-    return result;
-  }
-
-  return coord_[i];
+  Dune::FieldVector<typename GridImp::ctype, coorddim> result;
+  for (size_t j=0; j<coorddim; j++)
+    // The cast is here to make the code compile even when target_ is not an element
+    result[j] = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x[j];
+  return result;
 }
 
 template< int mydim, int coorddim, class GridImp>
@@ -91,19 +87,12 @@ global(const FieldVector<UGCtype, mydim>& local) const
 {
   FieldVector<UGCtype, coorddim> globalCoord(0.0);
 
-  if (mode_==element_mode) {
+  // we are an actual element in UG
+  UGCtype* cornerCoords[corners()];
+  UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
-    // we are an actual element in UG
-    UGCtype* cornerCoords[corners()];
-    UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
-
-    // Actually do the computation
-    UG_NS<coorddim>::Local_To_Global(corners(), cornerCoords, local, globalCoord);
-
-  } else {
-    // we are a local element and store the coordinates ourselves
-    UG_NS<coorddim>::Local_To_Global(corners(), cornerpointers_, local, globalCoord);
-  }
+  // Actually do the computation
+  UG_NS<coorddim>::Local_To_Global(corners(), cornerCoords, local, globalCoord);
 
   return globalCoord;
 }
@@ -121,22 +110,13 @@ local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
   if (mydim==0)
     return result;
 
-  if (mode_==element_mode)
-  {
-    // coorddim*coorddim is an upper bound for the number of vertices
-    UGCtype* cornerCoords[coorddim*coorddim];
-    UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+  // coorddim*coorddim is an upper bound for the number of vertices
+  UGCtype* cornerCoords[coorddim*coorddim];
+  UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
-    // Actually do the computation
-    /** \todo Why is this const_cast necessary? */
-    UG_NS<coorddim>::GlobalToLocal(corners(), const_cast<const double**>(cornerCoords), &global[0], &result[0]);
-  }
-  else
-  {
-    // Actually do the computation
-    /** \todo Why is this const_cast necessary? */
-    UG_NS<coorddim>::GlobalToLocal(corners(), const_cast<const double**>(cornerpointers_), &global[0], &result[0]);
-  }
+  // Actually do the computation
+  /** \todo Why is this const_cast necessary? */
+  UG_NS<coorddim>::GlobalToLocal(corners(), const_cast<const double**>(cornerCoords), &global[0], &result[0]);
 
   return result;
 }
@@ -161,20 +141,12 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
   if (jacobianInverseIsUpToDate_)
     return jac_inverse_;
 
-  if (mode_==element_mode) {
+  // compile array of pointers to corner coordinates
+  UGCtype* cornerCoords[corners()];
+  UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
-    // compile array of pointers to corner coordinates
-    UGCtype* cornerCoords[corners()];
-    UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
-
-    // compute the transformation onto the reference element (or vice versa?)
-    UG_NS<coorddim>::Transformation(corners(), cornerCoords, local, jac_inverse_);
-
-  } else
-  {
-    // compute the transformation onto the reference element (or vice versa?)
-    UG_NS<coorddim>::Transformation(corners(), cornerpointers_, local, jac_inverse_);
-  }
+  // compute the transformation onto the reference element (or vice versa?)
+  UG_NS<coorddim>::Transformation(corners(), cornerCoords, local, jac_inverse_);
 
   if (type().isSimplex())
     jacobianInverseIsUpToDate_ = true;
@@ -188,20 +160,12 @@ jacobianTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& loc
   if (jacobianIsUpToDate_)
     return jac_;
 
-  if (mode_==element_mode) {
+  // compile array of pointers to corner coordinates
+  UGCtype* cornerCoords[corners()];
+  UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
-    // compile array of pointers to corner coordinates
-    UGCtype* cornerCoords[corners()];
-    UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
-
-    // compute the transformation onto the reference element (or vice versa?)
-    UG_NS<coorddim>::JacobianTransformation(corners(), cornerCoords, local, jac_);
-
-  } else
-  {
-    // compute the transformation onto the reference element (or vice versa?)
-    UG_NS<coorddim>::JacobianTransformation(corners(), cornerpointers_, local, jac_);
-  }
+  // compute the transformation onto the reference element (or vice versa?)
+  UG_NS<coorddim>::JacobianTransformation(corners(), cornerCoords, local, jac_);
 
   if (type().isSimplex())
     jacobianIsUpToDate_ = true;
