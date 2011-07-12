@@ -744,7 +744,11 @@ namespace Dune
       }
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end();
            ++it)
-        writer.addArray<float>((*it)->name(), (*it)->ncomps()>1 ? 3 : 1);
+      {
+        unsigned writecomps = (*it)->ncomps();
+        if(writecomps == 2) writecomps = 3;
+        writer.addArray<float>((*it)->name(), writecomps);
+      }
       writer.endPointData();
 
       // PCellData
@@ -767,8 +771,11 @@ namespace Dune
           }
         writer.beginCellData(scalars, vectors);
       }
-      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
-        writer.addArray<float>((*it)->name(), (*it)->ncomps()>1 ? 3 : 1);
+      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it) {
+        unsigned writecomps = (*it)->ncomps();
+        if(writecomps == 2) writecomps = 3;
+        writer.addArray<float>((*it)->name(), writecomps);
+      }
       writer.endCellData();
 
       // PPoints
