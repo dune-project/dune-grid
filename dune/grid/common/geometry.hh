@@ -94,9 +94,11 @@ namespace Dune
 
     //! type of jacobian (also of jacobian inverse transposed)
     typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
+    //typedef typename ImplementationType :: Jacobian   Jacobian;
 
     //! type of jacobian transposed
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
+    //typedef typename ImplementationType :: JacobianTransposed  JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::GenericReferenceElement.
@@ -278,6 +280,12 @@ namespace Dune
     // save typing
     typedef typename GridImp::ctype ctype;
 
+    //! type of jacobian (also of jacobian inverse transposed)
+    typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
+
+    //! type of jacobian transposed
+    typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
+
     //! return volume of the geometry
     ctype volume () const
     {
@@ -325,6 +333,12 @@ namespace Dune
   public:
     // save typing
     typedef typename GridImp::ctype ctype;
+
+    //! type of jacobian (also of jacobian inverse transposed)
+    typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
+
+    //! type of jacobian transposed
+    typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
 
     //! return the only coordinate
     FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const
