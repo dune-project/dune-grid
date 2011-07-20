@@ -248,6 +248,7 @@ namespace Dune
     JacobianTransposed;
     typedef FieldMatrix< ctype, coorddimension, mydimension >
     JacobianInverseTransposed;
+    typedef JacobianInverseTransposed Jacobian;
 
   private:
     static const int numCorners = mydimension + 1;
@@ -461,6 +462,7 @@ namespace Dune
     JacobianTransposed;
     typedef FieldMatrix< ctype, coorddimension, mydimension >
     JacobianInverseTransposed;
+    typedef JacobianInverseTransposed Jacobian;
 
   private:
     static const int numCorners = mydimension + 1;
