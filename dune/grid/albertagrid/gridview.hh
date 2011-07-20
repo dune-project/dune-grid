@@ -184,16 +184,23 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 >::Entity &entity ) const
     {
-      DUNE_THROW( NotImplemented, "method ibegin not implemented on LevelGridView for AlbertaGrid." );
-      typename IntersectionIteratorImpl::End end;
-      return IntersectionIteratorImpl( Grid::getRealImplementation( entity ), end );
+      if( grid().maxLevel() == 0)
+      {
+        typename IntersectionIteratorImpl::Begin begin;
+        return IntersectionIteratorImpl( Grid::getRealImplementation( entity ), begin );
+      }
+      else
+      {
+        DUNE_THROW( NotImplemented, "method ibegin not implemented on LevelGridView for AlbertaGrid." );
+        typename IntersectionIteratorImpl::End end;
+        return IntersectionIteratorImpl( Grid::getRealImplementation( entity ), end );
+      }
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 >::Entity &entity ) const
     {
-      DUNE_THROW( NotImplemented, "method iend not implemented on LevelGridView for AlbertaGrid." );
       typename IntersectionIteratorImpl::End end;
       return IntersectionIteratorImpl( Grid::getRealImplementation( entity ), end );
     }

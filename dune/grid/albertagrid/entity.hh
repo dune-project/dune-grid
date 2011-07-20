@@ -283,13 +283,17 @@ namespace Dune
 
     AlbertaGridLevelIntersectionIterator ilevelbegin () const
     {
-      DUNE_THROW( NotImplemented, "method ilevelbegin not implemented for AlbertaGrid." );
-      return ileafend();
+      if( grid().maxLevel() == 0 )
+        return ileafbegin();
+      else
+      {
+        DUNE_THROW( NotImplemented, "method ilevelbegin not implemented for AlbertaGrid." );
+        return ileafend();
+      }
     }
 
     AlbertaGridLevelIntersectionIterator ilevelend () const
     {
-      DUNE_THROW( NotImplemented, "method ilevelend not implemented for AlbertaGrid." );
       return ileafend();
     }
 
