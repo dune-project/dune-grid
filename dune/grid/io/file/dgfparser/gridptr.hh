@@ -189,20 +189,22 @@ namespace Dune
     template <class Entity>
     const std::vector< double > &parameters ( const Entity &entity ) const
     {
+      typedef typename GridType::LevelGridView GridView;
+      GridView gridView = gridPtr_->levelView( 0 );
       switch( (int)Entity::codimension )
       {
       case 0 :
         if( nofElParam_ > 0 )
         {
-          assert( (unsigned int)gridPtr_->leafView().indexSet().index( entity ) < elParam_.size() );
-          return elParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
+          assert( (unsigned int)gridView.indexSet().index( entity ) < elParam_.size() );
+          return elParam_[ gridView.indexSet().index( entity ) ];
         }
         break;
       case GridType::dimension :
         if( nofVtxParam_ > 0 )
         {
-          assert( (unsigned int)gridPtr_->leafView().indexSet().index( entity ) < vtxParam_.size() );
-          return vtxParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
+          assert( (unsigned int)gridView.indexSet().index( entity ) < vtxParam_.size() );
+          return vtxParam_[ gridView.indexSet().index( entity ) ];
         }
         break;
       }
@@ -243,8 +245,8 @@ namespace Dune
     {
       gridPtr_ = std::auto_ptr< GridType >( dgfFactory.grid() );
 
-      typedef typename GridType::LeafGridView GridView;
-      GridView gridView = gridPtr_->leafView();
+      typedef typename GridType::LevelGridView GridView;
+      GridView gridView = gridPtr_->levelView( 0 );
       const typename GridView::IndexSet &indexSet = gridView.indexSet();
 
       nofElParam_ = dgfFactory.template numParameters< 0 >();
@@ -302,20 +304,22 @@ namespace Dune
     template <class Entity>
     std::vector< double > &params ( const Entity &entity )
     {
+      typedef typename GridType::LevelGridView GridView;
+      GridView gridView = gridPtr_->levelView( 0 );
       switch( (int)Entity::codimension )
       {
       case 0 :
         if( nofElParam_ > 0 ) {
-          if ( gridPtr_->leafView().indexSet().index( entity ) >= elParam_.size() )
-            elParam_.resize( gridPtr_->leafView().indexSet().index( entity ) );
-          return elParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
+          if ( gridView.indexSet().index( entity ) >= elParam_.size() )
+            elParam_.resize( gridView.indexSet().index( entity ) );
+          return elParam_[ gridView.indexSet().index( entity ) ];
         }
         break;
       case GridType::dimension :
         if( nofVtxParam_ > 0 ) {
-          if ( gridPtr_->leafView().indexSet().index( entity ) >= vtxParam_.size() )
-            vtxParam_.resize( gridPtr_->leafView().indexSet().index( entity ) );
-          return vtxParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
+          if ( gridView.indexSet().index( entity ) >= vtxParam_.size() )
+            vtxParam_.resize( gridView.indexSet().index( entity ) );
+          return vtxParam_[ gridView.indexSet().index( entity ) ];
         }
         break;
       }
@@ -336,8 +340,8 @@ namespace Dune
         gridPtr_(gridPtr),
         idSet_(gridPtr->localIdSet())
       {
-        typedef typename GridType::LeafGridView GridView;
-        GridView gridView = gridPtr_->leafView();
+        typedef typename GridType::LevelGridView GridView;
+        GridView gridView = gridPtr_->levelView( 0 );
         const typename GridView::IndexSet &indexSet = gridView.indexSet();
 
         const PartitionIteratorType partType = Interior_Partition;
@@ -362,8 +366,8 @@ namespace Dune
 
       ~DataHandle()
       {
-        typedef typename GridType::LeafGridView GridView;
-        GridView gridView = gridPtr_->leafView();
+        typedef typename GridType::LevelGridView GridView;
+        GridView gridView = gridPtr_->levelView( 0 );
         const typename GridView::IndexSet &indexSet = gridView.indexSet();
 
         if ( gridPtr_.nofElParam_ > 0 )
