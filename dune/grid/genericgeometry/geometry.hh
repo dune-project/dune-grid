@@ -312,7 +312,9 @@ namespace Dune
        * \note This is not a FieldMatrix but a proxy type that can be assigned
        *       to a FieldMatrix.
        */
-      typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
+      typedef typename Mapping::JacobianInverseTransposed Jacobian;
+      // for cenvencience, Jacobian is the name of the type in the geometry interface
+      typedef Jacobian JacobianInverseTransposed;
 
     public:
       /** \brief Default constructor
