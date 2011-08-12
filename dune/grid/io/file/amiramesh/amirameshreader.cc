@@ -19,7 +19,7 @@ template <class DiscFuncType>
 void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::string& filename)
 {
   // f may be a block vector
-  const int blocksize = DiscFuncType::block_type::size;
+  const int blocksize = DiscFuncType::block_type::dimension;
 
   // /////////////////////////////////////////////////////
   // Load the AmiraMesh file
