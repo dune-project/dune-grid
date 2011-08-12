@@ -193,12 +193,6 @@ namespace Dune
         return hostIterator().level();
       }
 
-      void compactify ()
-      {
-        hostEntityIterator_.compactify();
-        releaseEntity();
-      }
-
       const HostEntityIterator &hostIterator() const
       {
         return hostEntityIterator_;
@@ -373,12 +367,6 @@ namespace Dune
       int level () const
       {
         return hostElementIterator().level();
-      }
-
-      void compactify ()
-      {
-        hostElementIterator_.compactify();
-        releaseEntity();
       }
 
       const Grid &grid () const

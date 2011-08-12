@@ -61,9 +61,6 @@ namespace Dune {
       return virtualEntity_;
     }
 
-    //! empty method since virtual entity is an object not a pointer
-    void compactify () {}
-
     //! ask for level of entity
     int level () const {return virtualEntity_.level();}
 

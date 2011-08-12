@@ -448,16 +448,6 @@ namespace Dune {
   }
 
   template<int codim, class GridImp >
-  inline void ALU3dGridEntityPointerBase<codim,GridImp>::compactify()
-  {
-    // sets entity pointer in the status of an empty entity
-    if( ! locked_ )
-    {
-      freeEntity ();
-    }
-  }
-
-  template<int codim, class GridImp >
   inline bool ALU3dGridEntityPointerBase<codim,GridImp>::
   equals (const ALU3dGridEntityPointerBase<codim,GridImp>& i) const
   {

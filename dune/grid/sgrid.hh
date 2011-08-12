@@ -1070,7 +1070,6 @@ namespace Dune {
     //! destructor pointer
     ~SEntityPointer()
     {
-      compactify();
 #ifndef NDEBUG
       index = -1;
 #endif
@@ -1083,18 +1082,7 @@ namespace Dune {
       l = other.l;
       index = other.index;
 
-      compactify();
       return *this;
-    }
-
-    /** \brief free all memory that is not necessarily needed */
-    inline void compactify()
-    {
-      if( e )
-      {
-        enStack().push( e );
-        e = 0;
-      }
     }
 
   protected:

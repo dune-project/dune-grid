@@ -2182,9 +2182,6 @@ namespace Dune {
       return _entity;
     }
 
-    //! method compactify is empty for YaspEntiyPointer
-    void compactify() {}
-
     //! ask for level of entity
     int level () const {return _g.level();}
 

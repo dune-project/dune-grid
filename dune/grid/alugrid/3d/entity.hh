@@ -551,9 +551,6 @@ namespace Dune
     //! ask for level of entities
     int level () const ;
 
-    //! reduce memory to minimum needed to store pointer
-    void compactify();
-
   protected:
     // clones object
     void clone (const ALU3dGridEntityPointerType & org);

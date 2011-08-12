@@ -83,9 +83,6 @@ namespace Dune
     //! ask for level of entities
     int level () const;
 
-    //! reduce memory
-    void compactify () {}
-
   protected:
     //! obtain reference to internal entity implementation
     EntityImp &entityImp ();

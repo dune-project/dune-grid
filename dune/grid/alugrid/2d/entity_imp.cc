@@ -408,20 +408,7 @@ namespace Dune {
   template<int cd, class GridImp>
   inline void ALU2dGridEntityPointer<cd, GridImp> :: done()
   {
-    compactify();
     seed_.clear();
-  }
-
-  template<int cd, class GridImp>
-  inline void ALU2dGridEntityPointer<cd, GridImp> :: compactify()
-  {
-    // sets entity pointer in the status of an empty entity
-    if(entity_)
-    {
-      entityImp().removeElement();
-      factory_.template freeEntity< cd > ( entity_ );
-      entity_ = 0;
-    }
   }
 
   template<int cd, class GridImp>

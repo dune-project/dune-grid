@@ -52,9 +52,6 @@ namespace Dune {
       : virtualEntity_(entity)
     {}
 
-    //! empty method since internal entity is not a pointer
-    void compactify () {}
-
   protected:
 
     /** \brief Constructor from a given iterator */

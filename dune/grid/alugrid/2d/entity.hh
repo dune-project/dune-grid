@@ -601,9 +601,6 @@ namespace Dune {
     //! dereferencing
     Entity & dereference() const ;
 
-    //! release entity in order to reduce memory allocation
-    void compactify();
-
     //! ask for level of entities
     int level () const;
 
