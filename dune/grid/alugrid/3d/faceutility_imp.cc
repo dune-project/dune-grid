@@ -130,16 +130,16 @@ namespace Dune
 #endif
 
         const GEOFaceType* face = ImplTraits::getFace( *periodicClosure, 1 - outerFaceNumber_ );
-        if( dynamic_cast< const GEOPeriodicType * >( face->nb.rear().first ) )
-        //if( face->nb.rear().first->isboundary() )
+        assert( (face->nb.front().first == periodicClosure) || (face->nb.rear().first == periodicClosure) );
+        if( face->nb.rear().first == periodicClosure )
         {
-          //assert( !face->nb.front().first->isboundary() );
+          assert( dynamic_cast< const GEOPeriodicType * >( face->nb.rear().first ) );
           outerElement_    = face->nb.front().first ;
           outerFaceNumber_ = face->nb.front().second ;
         }
         else
         {
-          //assert( face->nb.front().first->isboundary() );
+          assert( dynamic_cast< const GEOPeriodicType * >( face->nb.front().first ) );
           outerElement_    = face->nb.rear().first ;
           outerFaceNumber_ = face->nb.rear().second ;
         }
