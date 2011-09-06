@@ -190,8 +190,8 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
         for (int i=0; i<eIt->template count<1>(); i++)
         {
           GeometryType gt = eIt->type();
-          int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
-          index = -1;
+          UG::UINT& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
+          index = std::numeric_limits<UG::UINT>::max();
         }
 
       // reset the isLeaf information of the nodes
@@ -265,8 +265,8 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
         for (int i=0; i<eIt->template count<1>(); i++)
         {
           GeometryType gt = eIt->type();
-          int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
-          if (index<0)                       // not visited yet
+          UG::UINT& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
+          if (index==std::numeric_limits<UG::UINT>::max())                       // not visited yet
           {
             // get new index and assign
             GeometryType gtType = GenericReferenceElements<double,dim>::general(gt).type(i,1);
