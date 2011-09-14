@@ -150,7 +150,6 @@ namespace Dune
         // Loop over all vertices
         for( int j = 0; j < numVertices; ++j )
         {
-          const int gj = j;
 
           // get entity pointer to subEntity vertex
           typedef typename GridType::template Codim< dim >::EntityPointer VertexPointer;
@@ -169,14 +168,14 @@ namespace Dune
             }
 
             // Check again, but this time get the coordinate as a subEntity corner
-            FieldVector< coordType, dimworld > vx2 = subEntityPtr->geometry().corner( gj );
+            FieldVector< coordType, dimworld > vx2 = subEntityPtr->geometry().corner( j );
             if( ! compareVec( vxcheck, vx2 ) )
             {
               std::cerr << "Error map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx2 << "\n";
               //assert( compareVec( vxcheck, vx ) );
             }
           }
-          sout << "vx[" << global[j] << "] = "  <<  subEntityPtr->geometry().corner( gj ) << "\n";
+          sout << "vx[" << global[j] << "] = "  <<  subEntityPtr->geometry().corner( j ) << "\n";
         }
         sout << "sort vector of global vertex\n";
 
