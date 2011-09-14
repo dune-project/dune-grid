@@ -90,7 +90,6 @@ namespace Dune
 
     for( int subEntity = 0; subEntity < refElem.size( 0, 0, codim ); ++subEntity )
     {
-      typedef Dune::GenericGeometry::MapNumberingProvider< dim > MapNumbering;
 
       {
         // Number of vertices of the current subentity
@@ -473,19 +472,6 @@ namespace Dune
             std::cerr << "Error: index( *subEntity< dim >( i ) ) != subIndex( entity, i, dim )" << std::endl;
             assert( vxidx == lset.index( *vxp ) );
           }
-
-#if 0
-          typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
-          const unsigned int tid = GenericGeometry::topologyId( it->type() );
-          const int di = Numbering::template generic2dune< dim >( tid, i );
-
-          // static and dynamic method must yield the same result
-          if( vxidx != lset.template subIndex< dim >( *it, di ) )
-          {
-            std::cerr << "Error: subIndex< dim >( entity, generic2dune( i ) ) != subIndex( entity, i, dim )" << std::endl;
-            assert( vxidx == lset.template subIndex< dim >( *it, dim ) );
-          }
-#endif
 
           // check whether the coordinates are the same
           assert(vertexCoordsMap.find(vxidx)!=vertexCoordsMap.end());
