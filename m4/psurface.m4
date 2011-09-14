@@ -91,7 +91,7 @@ if test x$HAVE_PSURFACE = x1 ; then
    LIBS="-L$PSURFACE_LIB_PATH -lpsurface $AMIRAMESH_LIBS $LIBS"
    LDFLAGS="$LDFLAGS $AMIRAMESH_LDFLAGS"
 
-   AC_LINK_IFELSE(AC_LANG_PROGRAM([#include "psurface/PSurface.h"], [[PSurface<2,double> foo;]]),
+   AC_LINK_IFELSE([AC_LANG_PROGRAM([#include "psurface/PSurface.h"], [[PSurface<2,double> foo;]])],
 	[PSURFACE_LIBS="-L$PSURFACE_LIB_PATH -lpsurface"
          PSURFACE_LDFLAGS=""
          AC_MSG_RESULT(yes)],

@@ -77,7 +77,7 @@ CPPFLAGS="$ac_save_CPPFLAGS $AMIRAMESH_CPPFLAGS"
 if test x$HAVE_AMIRAMESH = x1 ; then
    LIBS="-L$AMIRAMESH_LIB_PATH -lamiramesh $LIBS"
 
-   AC_LINK_IFELSE(AC_LANG_PROGRAM([#include "amiramesh/AmiraMesh.h"], [AmiraMesh* am = AmiraMesh::read("test");]),
+   AC_LINK_IFELSE([AC_LANG_PROGRAM([#include "amiramesh/AmiraMesh.h"], [AmiraMesh* am = AmiraMesh::read("test");])],
 	[AMIRAMESH_LIBS="-L$AMIRAMESH_LIB_PATH -lamiramesh"
          AMIRAMESH_LDFLAGS=""],
 	[HAVE_AMIRAMESH="0"
