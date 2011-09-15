@@ -91,135 +91,134 @@ namespace Dune
     for( int subEntity = 0; subEntity < refElem.size( 0, 0, codim ); ++subEntity )
     {
 
+      // Number of vertices of the current subentity
+      int numVertices = refElem.size( subEntity, codim, dim );
+
+      // every entity must have at least one vertex
+      assert( numVertices > 0 );
+
+      // The local vertex numbers
+      std::vector<int> local (numVertices);
+
+      for( int j = 0; j < numVertices; ++j )
+        local[ j ] = refElem.subEntity ( subEntity, codim, j, dim );
+
+      sout << numVertices << " vertices on subEntity< codim = " << codim << " >" << std::endl;
+      sout << "check subentity [" << local[ 0 ];
+      for( int j = 1; j < numVertices; ++j )
+        sout << ", " << local[ j ];
+      sout << "]" << std::endl;
+
+      // The global vertex numbers
+      std::vector<int> global(numVertices);
+      for( int j = 0; j < numVertices; ++j )
+        global[ j ] = lset.subIndex( en, local[ j ], dim );
+
+      sout << "Found global numbers of entity [ ";
+      for( int j = 0; j < numVertices; ++j )
+        sout << global[ j ] << " ";
+      sout << "]" << std::endl;
+
+      // Check whether we get the same index if we
+      // -- ask for the subEntity itself and then its index
+      // -- ask for the subIndex directly
+      typedef typename GridType::template Codim< codim >::EntityPointer SubEntityPointer;
+      const SubEntityPointer subEntityPtr = en.template subEntity< codim >( subEntity );
+      if( lset.subIndex( en, subEntity, codim ) != lset.index( *subEntityPtr) )
       {
-        // Number of vertices of the current subentity
-        int numVertices = refElem.size( subEntity, codim, dim );
+        std::cerr << "Index for subEntity does not match." << std::endl;
+        assert( lset.subIndex( en, subEntity, codim ) == lset.index( *subEntityPtr) );
+      }
 
-        // every entity must have at least one vertex
-        assert( numVertices > 0 );
+      // Make a unique identifier for the subEntity.  Since indices are unique only per GeometryType,
+      // we need a (index,GeometryType)-pair.
+      std::pair<int, GeometryType> globalSubEntity( lset.index( *subEntityPtr ), subEntityPtr->type() );
+      assert( globalSubEntity.first >= 0 );
+      sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << ","
+           << globalSubEntity.second << ") on en = " << lset.index(en) << std::endl;
 
-        // The local vertex numbers
-        std::vector<int> local (numVertices);
+      if( subEntityPtr->type() != subEntityPtr->geometry().type() )
+      {
+        std::cerr << "Geometry types for subEntity don't match." << std::endl;
+        assert( subEntityPtr->type() == subEntityPtr->geometry().type() );
+      }
 
-        for( int j = 0; j < numVertices; ++j )
-          local[ j ] = refElem.subEntity ( subEntity, codim, j, dim );
+      // assert that all sub entities have the same level
+      assert( subEntityPtr.level() == en.level() );
 
-        sout << numVertices << " vertices on subEntity< codim = " << codim << " >" << std::endl;
-        sout << "check subentity [" << local[ 0 ];
-        for( int j = 1; j < numVertices; ++j )
-          sout << ", " << local[ j ];
-        sout << "]" << std::endl;
+      // Loop over all vertices
+      for( int j = 0; j < numVertices; ++j )
+      {
 
-        // The global vertex numbers
-        std::vector<int> global(numVertices);
-        for( int j = 0; j < numVertices; ++j )
-          global[ j ] = lset.subIndex( en, local[ j ], dim );
+        // get entity pointer to subEntity vertex
+        typedef typename GridType::template Codim< dim >::EntityPointer VertexPointer;
+        VertexPointer vxp = en.template subEntity< dim >( local[ j ] );
 
-        sout << "Found global numbers of entity [ ";
-        for( int j = 0; j < numVertices; ++j )
-          sout << global[ j ] << " ";
-        sout << "]" << std::endl;
-
-        // Check whether we get the same index if we
-        // -- ask for the subEntity itself and then its index
-        // -- ask for the subIndex directly
-        typedef typename GridType::template Codim< codim >::EntityPointer SubEntityPointer;
-        const SubEntityPointer subEntityPtr = en.template subEntity< codim >( subEntity );
-        if( lset.subIndex( en, subEntity, codim ) != lset.index( *subEntityPtr) )
+        // Find the global coordinate of the vertex by its index
+        if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
         {
-          std::cerr << "Index for subEntity does not match." << std::endl;
-          assert( lset.subIndex( en, subEntity, codim ) == lset.index( *subEntityPtr) );
-        }
-
-        // Make a unique identifier for the subEntity.  Since indices are unique only per GeometryType,
-        // we need a (index,GeometryType)-pair.
-        std::pair<int, GeometryType> globalSubEntity( lset.index( *subEntityPtr ), subEntityPtr->type() );
-        assert( globalSubEntity.first >= 0 );
-        sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << ","
-             << globalSubEntity.second << ") on en = " << lset.index(en) << std::endl;
-
-        if( subEntityPtr->type() != subEntityPtr->geometry().type() )
-        {
-          std::cerr << "Geometry types for subEntity don't match." << std::endl;
-          assert( subEntityPtr->type() == subEntityPtr->geometry().type() );
-        }
-
-        // assert that all sub entities have the same level
-        assert( subEntityPtr.level() == en.level() );
-
-        // Loop over all vertices
-        for( int j = 0; j < numVertices; ++j )
-        {
-
-          // get entity pointer to subEntity vertex
-          typedef typename GridType::template Codim< dim >::EntityPointer VertexPointer;
-          VertexPointer vxp = en.template subEntity< dim >( local[ j ] );
-
-          // Find the global coordinate of the vertex by its index
-          if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
+          // Check whether index and coordinate match
+          FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap.find(global[j])->second );
+          FieldVector< coordType, dimworld > vx1 = vxp->geometry().corner( 0 );
+          if( ! compareVec( vxcheck, vx1 ) )
           {
-            // Check whether index and coordinate match
-            FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap.find(global[j])->second );
-            FieldVector< coordType, dimworld > vx1 = vxp->geometry().corner( 0 );
-            if( ! compareVec( vxcheck, vx1 ) )
-            {
-              std::cerr << "ERROR map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx1 << "\n";
-              assert( compareVec( vxcheck, vx1 ) );
-            }
-
-            // Check again, but this time get the coordinate as a subEntity corner
-            FieldVector< coordType, dimworld > vx2 = subEntityPtr->geometry().corner( j );
-            if( ! compareVec( vxcheck, vx2 ) )
-            {
-              std::cerr << "Error map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx2 << "\n";
-              //assert( compareVec( vxcheck, vx ) );
-            }
+            std::cerr << "ERROR map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx1 << "\n";
+            assert( compareVec( vxcheck, vx1 ) );
           }
-          sout << "vx[" << global[j] << "] = "  <<  subEntityPtr->geometry().corner( j ) << "\n";
-        }
-        sout << "sort vector of global vertex\n";
 
-        // sort vector of global vertex number for storage in map
-        // the smallest entry is the first entry
-        std::sort( global.begin(), global.end() );
-
-        // check whether vertex key is already stored in map
-        if(subEntityPerSetOfVertices.find(global) == subEntityPerSetOfVertices.end())
-        {
-          subEntityPerSetOfVertices[global] = globalSubEntity;
-        }
-        else
-        {
-          assert( globalSubEntity == subEntityPerSetOfVertices[global] );
-        }
-
-        // check whether subEntity is already stored in map
-        if(setOfVerticesPerSubEntity.find(globalSubEntity) == setOfVerticesPerSubEntity.end() )
-        {
-          setOfVerticesPerSubEntity[globalSubEntity] = global;
-        }
-        else
-        {
-          std::vector<int> globalcheck = setOfVerticesPerSubEntity[globalSubEntity];
-          if(! (global == globalcheck ))
+          // Check again, but this time get the coordinate as a subEntity corner
+          FieldVector< coordType, dimworld > vx2 = subEntityPtr->geometry().corner( j );
+          if( ! compareVec( vxcheck, vx2 ) )
           {
-            std::cerr << "For subEntity key (" << globalSubEntity.first << "," << globalSubEntity.second << ") \n";
-            std::cerr << "Got ";
-            for(int j=0 ; j<numVertices; j++ )
-            {
-              std::cerr << global[j] << " ";
-            }
-            std::cerr << "\n";
-            std::cerr << "Found ";
-            for(int j=0 ; j<numVertices; j++ )
-            {
-              std::cerr << globalcheck [j] << " ";
-            }
-            std::cerr << "\n";
-            DUNE_THROW(Dune::GridError, "global != globalcheck");
+            std::cerr << "Error map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx2 << "\n";
+            //assert( compareVec( vxcheck, vx ) );
           }
+        }
+        sout << "vx[" << global[j] << "] = "  <<  subEntityPtr->geometry().corner( j ) << "\n";
+      }
+      sout << "sort vector of global vertex\n";
+
+      // sort vector of global vertex number for storage in map
+      // the smallest entry is the first entry
+      std::sort( global.begin(), global.end() );
+
+      // check whether vertex key is already stored in map
+      if(subEntityPerSetOfVertices.find(global) == subEntityPerSetOfVertices.end())
+      {
+        subEntityPerSetOfVertices[global] = globalSubEntity;
+      }
+      else
+      {
+        assert( globalSubEntity == subEntityPerSetOfVertices[global] );
+      }
+
+      // check whether subEntity is already stored in map
+      if(setOfVerticesPerSubEntity.find(globalSubEntity) == setOfVerticesPerSubEntity.end() )
+      {
+        setOfVerticesPerSubEntity[globalSubEntity] = global;
+      }
+      else
+      {
+        std::vector<int> globalcheck = setOfVerticesPerSubEntity[globalSubEntity];
+        if(! (global == globalcheck ))
+        {
+          std::cerr << "For subEntity key (" << globalSubEntity.first << "," << globalSubEntity.second << ") \n";
+          std::cerr << "Got ";
+          for(int j=0 ; j<numVertices; j++ )
+          {
+            std::cerr << global[j] << " ";
+          }
+          std::cerr << "\n";
+          std::cerr << "Found ";
+          for(int j=0 ; j<numVertices; j++ )
+          {
+            std::cerr << globalcheck [j] << " ";
+          }
+          std::cerr << "\n";
+          DUNE_THROW(Dune::GridError, "global != globalcheck");
         }
       }
+
     }   // end check sub entities
     sout << "end check sub entities\n";
   }
