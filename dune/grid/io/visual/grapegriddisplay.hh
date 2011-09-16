@@ -10,6 +10,7 @@
 
 //- Dune includes
 #include <dune/common/stdstreams.hh>
+#include <dune/common/geometrytypeindex.hh>
 #include <dune/grid/common/grid.hh>
 
 #if HAVE_GRAPE
@@ -535,25 +536,43 @@ namespace Dune
      ,  g_unknown            = GrapeInterface_three_three::gr_unknown};
 
   //! convert dune geometry types to grape geometry types with numbers
-  static inline GRAPE_ElementType convertToGrapeType ( GeometryType type , int dim )
+  static inline GRAPE_ElementType convertToGrapeType ( GeometryType duneType , int dim )
   {
-    if(dim < 3)
+    static std::vector< GRAPE_ElementType > convertedType;
+    if( convertedType.size() == 0 )
     {
-      if(type.isTriangle()) return g_triangle;
-      if(type.isQuadrilateral()) return g_quadrilateral;
-      if(type.isVertex()) return g_vertex;
-      if(type.isLine()) return g_line;
-    }
-    else
-    {
-      if(type.isTetrahedron()) return g_tetrahedron;
-      if(type.isHexahedron()) return g_hexahedron;
-      if(type.isPyramid()) return g_pyramid;
-      if(type.isPrism()) return g_prism;
+      const size_t geomSize = GlobalGeometryTypeIndex :: size( 3 ) ;
+      convertedType.resize( geomSize, g_unknown );
+
+      GeometryType type ;
+      ////////////////////////
+      //  2D
+      ////////////////////////
+      type.makeVertex();
+      convertedType[ GlobalGeometryTypeIndex :: index( type ) ] = g_vertex;
+      type.makeLine();
+      convertedType[ GlobalGeometryTypeIndex :: index( type ) ] = g_line;
+      type.makeTriangle();
+      convertedType[ GlobalGeometryTypeIndex :: index( type ) ] = g_triangle;
+      type.makeQuadrilateral();
+      convertedType[ GlobalGeometryTypeIndex :: index( type ) ] = g_quadrilateral;
+
+      ////////////////////////
+      //  3D
+      ////////////////////////
+      type.makeTetrahedron();
+      convertedType[ GlobalGeometryTypeIndex :: index( type ) ] = g_tetrahedron;
+      type.makeHexahedron();
+      convertedType[ GlobalGeometryTypeIndex :: index( type ) ] = g_hexahedron;
+      type.makePyramid();
+      convertedType[ GlobalGeometryTypeIndex :: index( type ) ] = g_pyramid;
+      type.makePrism();
+      convertedType[ GlobalGeometryTypeIndex :: index( type ) ] = g_prism;
     }
 
-    std::cerr << "No requested conversion for GeometryType " << type << "!\n";
-    return g_unknown;
+    assert( GlobalGeometryTypeIndex :: index( duneType ) < convertedType.size() );
+    assert( convertedType[ GlobalGeometryTypeIndex :: index( duneType ) ] != g_unknown );
+    return convertedType[ GlobalGeometryTypeIndex :: index( duneType ) ];
   }
 
   // see geldesc.hh for definition of this mapping
