@@ -75,13 +75,13 @@ namespace Dune
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
 
     // for the data visualization, call implementations evalCoordNow
-    inline static void evalCoordNow (EntityType &en, DUNE_FDATA *fdata, const double *coord, double * val)
+    inline static void evalCoordNow (const EntityType &en, DUNE_FDATA *fdata, const double *coord, double * val)
     {
       EvalImp::evalCoordNow(en,fdata,coord,val);
     }
 
     // for the data visualization, call implementations evalDofNow
-    inline static void evalDofNow (EntityType &en, int geomType, DUNE_FDATA *fdata , int localNum, double * val)
+    inline static void evalDofNow (const EntityType &en, int geomType, DUNE_FDATA *fdata , int localNum, double * val)
     {
       EvalImp::evalDofNow(en,geomType,fdata,localNum,val);
     }
@@ -128,18 +128,18 @@ namespace Dune
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
 
     // for the data visualization
-    inline static void evalCoordNow (EntityType &en, DUNE_FDATA *fdata, const double *coord, double * val);
+    inline static void evalCoordNow (const EntityType &en, DUNE_FDATA *fdata, const double *coord, double * val);
 
     // for the data visualization
-    inline static void evalDofNow (EntityType &en, int geomType, DUNE_FDATA *fdata , int localNum, double * val);
+    inline static void evalDofNow (const EntityType &en, int geomType, DUNE_FDATA *fdata , int localNum, double * val);
 
     // for the data visualization
-    inline static void evalScalar (EntityType &en, int geomType,
+    inline static void evalScalar (const EntityType &en, int geomType,
                                    DiscreteFunctionType & func, LocalFunctionType &lf,
                                    const int * comp , int localNum, double * val);
 
     // for the data visualization
-    inline static void evalVector (EntityType &en, int geomType,
+    inline static void evalVector (const EntityType &en, int geomType,
                                    DiscreteFunctionType & func, LocalFunctionType &lf,
                                    const int * comp, int vend, int localNum, double * val);
 
@@ -222,10 +222,10 @@ namespace Dune
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
 
     // for the data visualization
-    inline static void evalCoordNow (EntityType &en, DUNE_FDATA *fdata, const double *coord, double * val);
+    inline static void evalCoordNow (const EntityType &en, DUNE_FDATA *fdata, const double *coord, double * val);
 
     // for the data visualization
-    inline static void evalDofNow (EntityType &en, int geomType, DUNE_FDATA *fdata , int localNum, double * val);
+    inline static void evalDofNow (const EntityType &en, int geomType, DUNE_FDATA *fdata , int localNum, double * val);
 
     // for the data visualization, evaluate linear funcs
     static void evalVectorLinear ( const EntityType &entity, int geomType,

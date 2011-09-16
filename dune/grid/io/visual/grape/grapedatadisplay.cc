@@ -55,7 +55,7 @@ namespace Dune
   // evaluate scalar functions, means val has length 1
   template <class GridType, class DiscreteFunctionType>
   inline void EvalDiscreteFunctions<GridType,DiscreteFunctionType>::
-  evalScalar (EntityType &en, int geomType,
+  evalScalar (const EntityType &en, int geomType,
               DiscreteFunctionType & func, LocalFunctionType &lf,
               const int * comp, int localNum, double * val)
   {
@@ -76,7 +76,7 @@ namespace Dune
 
   template <class GridType, class DiscreteFunctionType>
   inline void EvalDiscreteFunctions<GridType,DiscreteFunctionType>::
-  evalVector (EntityType &en, int geomType,
+  evalVector (const EntityType &en, int geomType,
               DiscreteFunctionType & func, LocalFunctionType &lf,
               const int * comp, int vlength , int localNum, double * val)
   {
@@ -114,7 +114,7 @@ namespace Dune
 
   template <class GridType, class DiscreteFunctionType>
   inline void EvalDiscreteFunctions<GridType,DiscreteFunctionType>::
-  evalDofNow (EntityType &en, int geomType, DUNE_FDATA *df , int localNum, double * val)
+  evalDofNow (const EntityType &en, int geomType, DUNE_FDATA *df , int localNum, double * val)
   {
     assert( df );
     assert( df->discFunc );
@@ -150,7 +150,7 @@ namespace Dune
 
   template<class GridType, class DiscreteFunctionType>
   inline void EvalDiscreteFunctions<GridType,DiscreteFunctionType>::
-  evalCoordNow ( EntityType &entity, DUNE_FDATA *df, const double *coord, double * val )
+  evalCoordNow ( const EntityType &entity, DUNE_FDATA *df, const double *coord, double * val )
   {
     const int dim = GridType::dimension;
 
@@ -204,7 +204,7 @@ namespace Dune
       const IteratorType end = space.end();
       for(IteratorType it = space.begin(); it != end; ++it)
       {
-        EntityType & en = *it;
+        const EntityType & en = *it;
         int geomType = convertToGrapeType ( en.type() , dimension );
         double val = 0.0;
         for(int i=0; i<en.template count<dimension>(); ++i)
@@ -363,7 +363,7 @@ namespace Dune
 
   template <class GridType, class VectorType, class IndexSetImp >
   inline void EvalVectorData<GridType,VectorType,IndexSetImp>::
-  evalDofNow (EntityType &en, int geomType, DUNE_FDATA *df, int localNum, double * val)
+  evalDofNow (const EntityType &en, int geomType, DUNE_FDATA *df, int localNum, double * val)
   {
     assert( df );
     assert( df->discFunc );
@@ -388,7 +388,7 @@ namespace Dune
 
   template <class GridType, class VectorType,class IndexSetImp>
   inline void EvalVectorData<GridType,VectorType,IndexSetImp>::
-  evalCoordNow(EntityType &en, DUNE_FDATA *df , const double *coord, double * val)
+  evalCoordNow(const EntityType &en, DUNE_FDATA *df , const double *coord, double * val)
   {
     assert( false );
     abort();

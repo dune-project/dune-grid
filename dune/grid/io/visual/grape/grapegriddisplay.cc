@@ -289,7 +289,7 @@ namespace Dune
 
     typedef FieldVector<ctype, dimworld> CoordinateType;
 
-    Entity &en = (*it[0]);
+    const Entity &en = (*it[0]);
 
     // only for debuging, becsaue normaly references are != NULL
     if(&en)
@@ -537,11 +537,11 @@ namespace Dune
   {
     typedef typename  GridType :: template Codim<0> :: Entity EntityType;
 
-    EntityType & en = (*it[0]);
+    const EntityType & en = (*it[0]);
 
     HierarchicIteratorType * hit = (HierarchicIteratorType *) he->hiter;
 
-    EntityType *newEn = (!hit) ? (&en) : (hit[0].operator -> ()) ;
+    const EntityType *newEn = (!hit) ? (&en) : (hit[0].operator -> ()) ;
 
     assert( newEn );
 
@@ -577,7 +577,7 @@ namespace Dune
   {
     typedef typename  GridType::Traits::template Codim<0>::Entity EntityType;
 
-    EntityType &en = (*it[0]);
+    const EntityType &en = (*it[0]);
 
     int childLevel = en.level();
     HierarchicIteratorType * hit = (HierarchicIteratorType *) he->hiter;
@@ -727,7 +727,7 @@ namespace Dune
   // world to local
   template<class GridType> template <class EntityType>
   inline void GrapeGridDisplay<GridType>::
-  local_to_world(EntityType &en, const double * c, double * w)
+  local_to_world(const EntityType &en, const double * c, double * w)
   {
     const int dim = EntityType::dimension;
     const int dimworld = EntityType::dimensionworld;

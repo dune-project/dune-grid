@@ -262,7 +262,7 @@ namespace Dune
 
     // dito
     template <class EntityType>
-    inline void local_to_world(EntityType &en, const double * c, double * w);
+    inline void local_to_world(const EntityType &en, const double * c, double * w);
 
     template <PartitionIteratorType pitype>
     inline void selectIterators(DUNE_DAT *, void *, setGridPartIterators_t *) const;
