@@ -52,8 +52,6 @@ namespace Dune {
       : virtualEntity_(entity)
     {}
 
-  protected:
-
     /** \brief Constructor from a given iterator */
     OneDGridEntityPointer(OneDEntityImp<dim-codim>* it)
       : virtualEntity_(OneDGridEntity<codim, dim, GridImp>())

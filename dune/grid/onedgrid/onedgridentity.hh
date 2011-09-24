@@ -173,7 +173,10 @@ namespace Dune {
     friend class OneDGrid;
 
   public:
-    //! Constructor with a given grid level
+    /** \brief The type of OneDGrid Entity seeds */
+    typedef typename GridImp::Traits::template Codim<cd>::EntitySeed EntitySeed;
+
+    //! Default constructor
     OneDGridEntity()
       : geo_(OneDGridGeometry<dim-cd,1,GridImp>()),
         target_(OneDGridNullIteratorFactory<0>::null())
@@ -199,6 +202,9 @@ namespace Dune {
 
     //! geometry of this entity
     const Geometry& geometry () const {return geo_;}
+
+    /** \brief Get the seed corresponding to this entity */
+    EntitySeed seed () const { return EntitySeed( *this ); }
 
     void setToTarget(OneDEntityImp<0>* target) {
       target_ = target;
@@ -249,6 +255,9 @@ namespace Dune {
     typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
 
+    /** \brief The type of OneDGrid Entity seeds */
+    typedef typename GridImp::Traits::template Codim<0>::EntitySeed EntitySeed;
+
     //! Default Constructor
     OneDGridEntity ()
       : geo_( OneDGridGeometry<dim,1,GridImp>() ),
@@ -272,6 +281,9 @@ namespace Dune {
 
     //! Geometry of this entity
     const Geometry& geometry () const {return geo_;}
+
+    /** \brief Get the seed corresponding to this entity */
+    EntitySeed seed () const { return EntitySeed( *this ); }
 
     //! return the element type identifier (segment)
     GeometryType type () const {return GeometryType(1);}
