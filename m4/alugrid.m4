@@ -156,7 +156,7 @@ if test x$with_alugrid != xno ; then
                    [],
                    [HAVE_ALUGRID_PARALLEL="1"],
                    [HAVE_ALUGRID_PARALLEL="0"
-                   AC_MSG_WARN("ALUGRID was not build for parallel support!")
+                   AC_MSG_WARN("ALUGRID was not built for parallel support!")
                   ])
 
     # only check for parallel header when ALUGrid was build for parallel support
