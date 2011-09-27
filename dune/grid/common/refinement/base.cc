@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_COMON_REFINEMENT_BASE_CC
-#define DUNE_GRID_COMON_REFINEMENT_BASE_CC
+#ifndef DUNE_GRID_COMMON_REFINEMENT_BASE_CC
+#define DUNE_GRID_COMMON_REFINEMENT_BASE_CC
 
 // This file is part of DUNE, a Distributed and Unified Numerics Environment
 // This file is copyright (C) 2005 Jorrit Fahlke <jorrit@jorrit.de>
@@ -307,4 +307,4 @@ namespace Dune {
 
 } // namespace Dune
 
-#endif //DUNE_GRID_COMON_REFINEMENT_BASE_CC
+#endif //DUNE_GRID_COMMON_REFINEMENT_BASE_CC
