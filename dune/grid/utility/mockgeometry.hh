@@ -40,7 +40,7 @@ namespace Dune {
     typedef GenericGeometry::BasicGeometry<mydim, Traits> Base;
 
     // Hide members of BasicGeometry that are not part of Dune::Geometry
-    using Base::JacobianInverseTransposed;
+    using typename Base::JacobianInverseTransposed;
     using Base::operator[];
     using Base::normal;
 
