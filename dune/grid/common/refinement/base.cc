@@ -102,17 +102,11 @@ namespace Dune {
   /*! @brief Wrap each @ref Refinement implementation to get a
              consistent interface
 
-     @param topologyId The topology id of the element to refine
-     @param CoordType  The C++ type of the coordinates
-     @param coerceToId The topology id of the subelements
-     @param dimension  The dimension of the refinement.
+     @tparam topologyId The topology id of the element to refine
+     @tparam CoordType  The C++ type of the coordinates
+     @tparam coerceToId The topology id of the subelements
+     @tparam dimension  The dimension of the refinement.
 
-     @par Member Structs:
-
-     <dl>
-     <dt>template<int codimension> struct @ref Codim</dt>
-     <dd>codimension template containing the SubEntityIterator</dd>
-     </dl>
    */
   template<
       unsigned topologyId
