@@ -529,12 +529,12 @@ namespace Dune
      *  \ingroup GenericGeometry
      *  \brief   generic implementation of a DUNE (global) geometry
      *
-     *  Geometry inherits all its features from Geometry. It only add
+     *  Geometry inherits all its features from BasicGeometry. It only adds
      *  GlobalGeometryTraits< Grid > as Traits parameter to the template
      *  parameter list.
      *
      * \tparam mydim Dimension of the entity
-     * \tparam cdom Dimension of the coordinate space
+     * \tparam cdim Dimension of the coordinate space
      * \tparam Grid The grid this geometry will be used in
      */
     template< int mydim, int cdim, class Grid >
@@ -589,12 +589,12 @@ namespace Dune
      *  \ingroup GenericGeometry
      *  \brief   generic implementation of a DUNE (local) geometry
      *
-     *  Geometry inherits all its features from Geometry. It only adds
+     *  LocalGeometry inherits all its features from BasicGeometry. It only adds
      *  LocalGeometryTraits< Grid > as Traits parameter to the template
      *  parameter list.
      *
      * \tparam mydim Dimension of the entity
-     * \tparam cdom Dimension of the coordinate space
+     * \tparam cdim Dimension of the coordinate space
      * \tparam Grid The grid this geometry will be used in
      */
     template< int mydim, int cdim, class Grid >
