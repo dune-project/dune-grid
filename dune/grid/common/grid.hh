@@ -13,7 +13,9 @@
 // dune-common includes
 #include <dune/common/fvector.hh>
 #include <dune/common/typetraits.hh>
-#include <dune/common/geometrytype.hh>
+
+// dune-geometry includes
+#include <dune/geometry/type.hh>
 
 // local includes
 #include <dune/grid/common/gridenums.hh>

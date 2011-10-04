@@ -7,7 +7,7 @@
 #include <iostream>
 #include <map>
 
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 
 #include "mapper.hh"
 #include "genericreferenceelements.hh"

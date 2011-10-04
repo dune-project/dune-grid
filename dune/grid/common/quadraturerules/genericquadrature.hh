@@ -6,7 +6,8 @@
 #include <vector>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/geometrytype.hh>
+
+#include <dune/geometry/type.hh>
 
 #include <dune/grid/common/topologyfactory.hh>
 #include <dune/grid/common/quadraturerules.hh>
