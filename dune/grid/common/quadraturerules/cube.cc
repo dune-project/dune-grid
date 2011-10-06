@@ -1,12 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#warning #include <dune/grid/common/quadraturerules/cube.cc> is deprecated.
+#warning Use #include <dune/geometry/quadraturerules/cube.cc> instead.
+#warning You may need the new Dune-Geometry core module.
 
-#include "config.h"
-#include "../quadraturerules.hh"
-
-namespace Dune {
-
-  template CubeQuadratureRule<float, 1>::CubeQuadratureRule(int);
-  template CubeQuadratureRule<double, 1>::CubeQuadratureRule(int);
-
-} // namespace
+#include <dune/geometry/quadraturerules/cube.cc>

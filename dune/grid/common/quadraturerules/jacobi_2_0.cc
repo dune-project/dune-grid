@@ -1,12 +1,7 @@
-// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
-// vi: set et ts=8 sw=2 sts=2:
+// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set et ts=4 sw=2 sts=2:
+#warning #include <dune/grid/common/quadraturerules/jacobi_2_0.cc> is deprecated.
+#warning Use #include <dune/geometry/quadraturerules/jacobi_2_0.cc> instead.
+#warning You may need the new Dune-Geometry core module.
 
-#include "config.h"
-#include "../quadraturerules.hh"
-
-namespace Dune {
-
-  template Jacobi2QuadratureRule<float, 1>::Jacobi2QuadratureRule(int);
-  template Jacobi2QuadratureRule<double, 1>::Jacobi2QuadratureRule(int);
-
-} // namespace
+#include <dune/geometry/quadraturerules/jacobi_2_0.cc>
