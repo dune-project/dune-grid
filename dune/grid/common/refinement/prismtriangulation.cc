@@ -5,10 +5,10 @@
 
 
 
-#include <dune/geometry/type.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/type.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 #include "base.cc"
 #include "simplex.cc"
 

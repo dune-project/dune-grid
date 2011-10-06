@@ -4,7 +4,7 @@
 #define DUNE_ALU3DGRIDFACEUTILITY_HH
 
 #include <dune/common/misc.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 
 #include "mappings.hh"
 #include "alu3dinclude.hh"

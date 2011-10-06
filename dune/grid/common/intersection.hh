@@ -6,7 +6,7 @@
 
 #include <dune/grid/common/grid.hh>
 
-#include <dune/grid/genericgeometry/conversion.hh>
+#include <dune/geometry/genericgeometry/conversion.hh>
 
 namespace Dune
 {

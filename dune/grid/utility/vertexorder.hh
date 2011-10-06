@@ -11,10 +11,9 @@
 #include <iterator>
 #include <vector>
 
-#include <dune/geometry/type.hh>
 #include <dune/common/iteratorfacades.hh>
-
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/type.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 
 namespace Dune {
 

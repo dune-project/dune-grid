@@ -4,8 +4,8 @@
 #define DUNE_ENTITYKEY_INLINE_HH
 
 #include <algorithm>
+#include <dune/geometry/genericreferenceelements.hh>
 #include <dune/grid/io/file/dgfparser/entitykey.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
 
 namespace Dune
 {

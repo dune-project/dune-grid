@@ -23,9 +23,9 @@ typedef unsigned char uint8_t;
 #include <dune/common/typetraits.hh>
 #include <dune/common/collectivecommunication.hh>
 #include <dune/common/mpihelper.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/grid/common/indexidset.hh>
 #include <dune/grid/common/datahandleif.hh>
-#include <dune/grid/genericgeometry/topologytypes.hh>
 
 
 #if HAVE_MPI

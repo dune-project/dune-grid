@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 
 using namespace Dune;
 

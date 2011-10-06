@@ -15,12 +15,11 @@
 #include <iostream>
 
 #include <dune/common/exceptions.hh>
-#include <dune/geometry/type.hh>
 #include <dune/common/ios_state.hh>
 #include <dune/common/mpihelper.hh>
 
-#include <dune/grid/genericgeometry/geometry.hh>
-
+#include <dune/geometry/type.hh>
+#include <dune/geometry/genericgeometry/geometry.hh>
 
 
 using namespace Dune;

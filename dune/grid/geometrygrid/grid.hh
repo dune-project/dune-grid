@@ -7,9 +7,9 @@
 
 #include <dune/common/static_assert.hh>
 
-#include <dune/grid/common/grid.hh>
+#include <dune/geometry/genericgeometry/codimtable.hh>
 
-#include <dune/grid/genericgeometry/codimtable.hh>
+#include <dune/grid/common/grid.hh>
 
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/entity.hh>

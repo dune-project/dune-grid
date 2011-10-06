@@ -8,9 +8,8 @@
 
 #include <dune/common/fmatrix.hh>
 #include <dune/geometry/type.hh>
-
-#include <dune/grid/genericgeometry/geometry.hh>
-#include <dune/grid/genericgeometry/geometrytraits.hh>
+#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/geometry/genericgeometry/geometrytraits.hh>
 
 namespace Dune {
 

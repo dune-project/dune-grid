@@ -5,7 +5,7 @@
 To obtain the new reference element include the file
 and use the new reference element class
 @code
-  dune/grid/common/genericreferenceelements.hh
+  dune/geometry/genericreferenceelements.hh
   Dune::GenericReferenceElements
   Dune::GenericReferenceElement
 @endcode

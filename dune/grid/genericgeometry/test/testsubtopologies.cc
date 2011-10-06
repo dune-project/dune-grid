@@ -10,9 +10,9 @@
 #include <dune/common/forloop.hh>
 #include <dune/common/mpihelper.hh>
 
-#include <dune/grid/genericgeometry/topologytypes.hh>
-#include <dune/grid/genericgeometry/conversion.hh>
-#include <dune/grid/genericgeometry/subtopologies.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/genericgeometry/conversion.hh>
+#include <dune/geometry/genericgeometry/subtopologies.hh>
 
 #ifndef GEOMETRYTYPE
 #error "GEOMETRYTYPE must be one of 'simplex', 'cube', 'prism', 'pyramid'"

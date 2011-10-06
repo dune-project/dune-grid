@@ -5,9 +5,9 @@
 #include <vector>
 
 #include <dune/common/fvector.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 #include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/datahandleif.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
 
 /*  Communication Test for Parallel Grids
  *  -------------------------------------

@@ -5,8 +5,8 @@
 
 #include <config.h>
 
-#include <dune/grid/common/quadraturerules.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/quadraturerules.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 
 bool success = true;
 

@@ -15,7 +15,8 @@
 #include <dune/common/path.hh>
 #include <dune/common/shared_ptr.hh>
 
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
+
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/grid/io/file/vtk/functionwriter.hh>
 #include <dune/grid/io/file/vtk/pvtuwriter.hh>

@@ -3,7 +3,7 @@
 #ifndef DUNE_ONE_D_GEOMETRY_HH
 #define DUNE_ONE_D_GEOMETRY_HH
 
-#include <dune/grid/common/geometry.hh>
+#include <dune/geometry/geometry.hh>
 
 #include <dune/grid/onedgrid/onedgridentity.hh>
 

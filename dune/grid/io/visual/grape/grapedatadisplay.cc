@@ -3,7 +3,7 @@
 #if HAVE_GRAPE
 #include "geldesc.hh"
 #endif
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 
 namespace Dune
 {
