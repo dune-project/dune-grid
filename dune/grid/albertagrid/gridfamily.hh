@@ -10,7 +10,7 @@
 
 #include <dune/common/collectivecommunication.hh>
 
-#include <dune/geometry/geometry.hh>
+#include <dune/grid/common/geometry.hh>
 
 #include <dune/grid/common/entity.hh>
 #include <dune/grid/common/entitypointer.hh>

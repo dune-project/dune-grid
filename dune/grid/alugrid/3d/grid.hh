@@ -14,7 +14,7 @@
 #include <dune/common/deprecated.hh>
 #include <dune/common/static_assert.hh>
 
-#include <dune/geometry/common/genericreferenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/alugrid/common/defaultindexsets.hh>

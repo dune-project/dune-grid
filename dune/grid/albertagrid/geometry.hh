@@ -3,8 +3,9 @@
 #ifndef DUNE_ALBERTA_GEOMETRY_HH
 #define DUNE_ALBERTA_GEOMETRY_HH
 
-#include <dune/geometry/geometry.hh>
 #include <dune/geometry/genericgeometry/geometry.hh>
+
+#include <dune/grid/common/geometry.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>

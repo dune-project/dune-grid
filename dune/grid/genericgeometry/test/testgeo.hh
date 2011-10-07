@@ -7,7 +7,7 @@
 #include <dune/grid/alugrid/3d/grid.hh>
 #include <dune/grid/alugrid/3d/topology.hh>
 #endif
-#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/grid/genericgeometry/geometry.hh>
 
 namespace Dune
 {

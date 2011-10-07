@@ -19,7 +19,8 @@
 #include <dune/common/mpihelper.hh>
 
 #include <dune/geometry/type.hh>
-#include <dune/geometry/genericgeometry/geometry.hh>
+
+#include "../geometry.hh"
 
 
 using namespace Dune;

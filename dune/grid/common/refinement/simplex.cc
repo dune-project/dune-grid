@@ -248,10 +248,10 @@
     - \f$x_{p_d}:=x_{p_d}-x_{p_{d+1}}\f$.
  */
 
-#include <dune/geometry/type.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/type.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 #include <dune/grid/common/geometry.hh>
 #include "base.cc"
 
