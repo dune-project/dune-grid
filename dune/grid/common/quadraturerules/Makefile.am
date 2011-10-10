@@ -6,12 +6,4 @@ quadraturerules_HEADERS =			\
 	genericquadrature.hh			\
 	lobattoquadrature.hh
 
-
-noinst_LTLIBRARIES = libquadraturerules.la
-libquadraturerules_la_SOURCES = quadraturerules.cc
-libquadraturerules_la_LIBADD =			\
-	$(DUNE_LIBS)
-
-extra_DIST=jacobian.mw
-
 include $(top_srcdir)/am/global-rules
