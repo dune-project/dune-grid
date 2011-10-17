@@ -27,8 +27,11 @@ namespace Dune {
   template<class GridType>
   class AmiraMeshReader {
 
+    /** \brief Dimension of the grid */
+    enum {dim = GridType::dimension};
+
     /** \brief Create the boundary description from an explicitly given psurface object */
-    static void createDomain(GridFactory<GridType>& factory, const shared_ptr<PSurfaceBoundary<GridType::dimension-1> >& boundary);
+    static void createDomain(GridFactory<GridType>& factory, const shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
 
     /** \brief Create the actual grid */
     static void buildGrid(GridFactory<GridType>& factory, AmiraMesh* am);
@@ -92,10 +95,10 @@ namespace Dune {
 
        @param filename The name of the psurface boundary file
      */
-    static shared_ptr<PSurfaceBoundary<2> > readPSurfaceBoundary(const std::string& filename);
+    static shared_ptr<PSurfaceBoundary<dim-1> > readPSurfaceBoundary(const std::string& filename);
 
     static GridType* read(const std::string& filename,
-                          const shared_ptr<PSurfaceBoundary<GridType::dimension-1> >& boundary);
+                          const shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
 
     /** \brief Read a grid with a parametrized boundary into a given grid object
 
@@ -119,7 +122,7 @@ namespace Dune {
      */
     static void read(GridType& grid,
                      const std::string& filename,
-                     const shared_ptr<PSurfaceBoundary<2> >& boundary);
+                     const shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
 
   public:
     /** \brief Read a block vector from an AmiraMesh file
