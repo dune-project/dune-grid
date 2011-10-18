@@ -1089,6 +1089,7 @@ inline void handleMesh(void *hmesh, bool gridMode )
 
   addProjectUIF();
 
+#ifdef GRID_MODE
   if(gridMode)
   {
     /* if no data then switch to grid mode */
@@ -1100,6 +1101,7 @@ inline void handleMesh(void *hmesh, bool gridMode )
       GRAPE_CALL(grdev,"grid-patch") (G_GRID);
     }
   }
+#endif
 
   sc->object = (TREEOBJECT *)mesh;
 
