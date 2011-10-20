@@ -7,7 +7,6 @@
 #include <dune/common/typetraits.hh>
 #include <dune/common/nullptr.hh>
 
-#include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 
 #include <dune/grid/genericgeometry/mappingprovider.hh>
