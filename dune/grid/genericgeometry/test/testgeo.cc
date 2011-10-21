@@ -9,7 +9,7 @@
 #include <dune/common/exceptions.hh>
 
 #include <dune/geometry/genericgeometry/conversion.hh>
-#include <dune/grid/genericgeometry/geometry.hh>
+#include <dune/geometry/genericgeometry/geometry.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>
 
