@@ -16,6 +16,9 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS) $(DUNEMPICPPFLAGS)
 AM_LDFLAGS = @AM_LDFLAGS@ $(ALL_PKG_LDFLAGS) $(DUNEMPILIBS)
 LDADD = $(ALL_PKG_LIBS) @LDADD@ $(DUNEMPILDFLAGS)
 
+# The directory where the example grid files used for testing are located
+AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
+
 testbasicgeometry_SOURCES = testbasicgeometry.cc
 
 testsubtopologies_SOURCES = testsubtopologies.cc
