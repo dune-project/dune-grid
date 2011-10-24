@@ -14,6 +14,6 @@ gridutility_HEADERS =				\
 	mockgeometry.hh				\
 	persistentcontainer.hh			\
 	structuredgridfactory.hh		\
-	vertexorder.hh
+	vertexorderfactory.hh
 
 include $(top_srcdir)/am/global-rules
