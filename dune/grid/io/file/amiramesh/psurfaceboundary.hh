@@ -46,7 +46,7 @@ namespace Dune {
         Dune::FieldVector<double, dim+1> result;
 
         // Transform local to barycentric coordinates
-        StaticVector<float,dim> barCoords;
+        PSURFACE_NAMESPACE StaticVector<float,dim> barCoords;
 
         if (dim==2) {
           barCoords[0] = 1 - local[0] - local[1];
@@ -55,7 +55,7 @@ namespace Dune {
           barCoords[0] = 1 - local[0];
         }
 
-        StaticVector<float,dim+1> r;
+        PSURFACE_NAMESPACE StaticVector<float,dim+1> r;
 
         if (!psurfaceBoundary_->getPSurfaceObject()->positionMap(segment_, barCoords, r))
           DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
@@ -73,7 +73,7 @@ namespace Dune {
 
 
     /** \brief Constructor from a given PSurface object */
-    PSurfaceBoundary(PSurface<dim,float>* psurface)
+    PSurfaceBoundary(PSURFACE_NAMESPACE PSurface<dim,float>* psurface)
       : psurface_(psurface)
     {}
 
@@ -82,16 +82,16 @@ namespace Dune {
      * Use this only if you know what you are doing.
      *
      * This class retains control over the memory management.  Do not
-     * delete the object to receive.
+     * delete the object you receive.
      */
-    PSurface<dim,float>* getPSurfaceObject()
+    PSURFACE_NAMESPACE PSurface<dim,float>* getPSurfaceObject()
     {
       return psurface_.get();
     }
 
   private:
 
-    std::auto_ptr<PSurface<dim,float> > psurface_;
+    std::auto_ptr<PSURFACE_NAMESPACE PSurface<dim,float> > psurface_;
 
   };
 

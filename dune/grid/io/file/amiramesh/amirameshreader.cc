@@ -152,7 +152,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
   if (dim!=3)
     DUNE_THROW(NotImplemented, "AmiraMeshReader with PSurface support only for 3d grids");
 
-  PSurface<2,float>* psurface = reinterpret_cast<PSurface<2,float>* >(boundary->getPSurfaceObject());
+  PSURFACE_NAMESPACE PSurface<2,float>* psurface = reinterpret_cast<PSURFACE_NAMESPACE PSurface<2,float>* >(boundary->getPSurfaceObject());
 
   if (!psurface->hasUpToDatePointLocationStructure)
     psurface->createPointLocationStructure();
@@ -318,7 +318,8 @@ Dune::shared_ptr<Dune::PSurfaceBoundary<Dune::AmiraMeshReader<GridType>::dim-1> 
   if (!am.get())
     DUNE_THROW(IOError, "An error has occured while reading " << filename);
 
-  PSurface<dim-1,float>* newDomain = (PSurface<dim-1,float>*)AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
+  PSURFACE_NAMESPACE PSurface<dim-1,float>* newDomain
+    = (PSURFACE_NAMESPACE PSurface<dim-1,float>*) PSURFACE_NAMESPACE AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
 
   if (!newDomain)
     DUNE_THROW(IOError, "An error has occured while reading " << filename);
