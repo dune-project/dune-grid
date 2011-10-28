@@ -91,13 +91,32 @@ if test x$HAVE_PSURFACE = x1 ; then
    LIBS="-L$PSURFACE_LIB_PATH -lpsurface $AMIRAMESH_LIBS $LIBS"
    LDFLAGS="$LDFLAGS $AMIRAMESH_LDFLAGS"
 
-   AC_LINK_IFELSE([AC_LANG_PROGRAM([#include "psurface/PSurface.h"], [[PSurface<2,double> foo;]])],
+   # Try to link to the library (for libpsurface-1.3 and newer)
+   AC_LINK_IFELSE([AC_LANG_PROGRAM([#include "psurface/PSurface.h"], [[psurface::PSurface<2,double> foo;]])],
 	[PSURFACE_LIBS="-L$PSURFACE_LIB_PATH -lpsurface"
          PSURFACE_LDFLAGS=""
-         AC_MSG_RESULT(yes)],
-	[HAVE_PSURFACE="0"
-        AC_MSG_RESULT(no)
-	AC_MSG_WARN([psurface header found, but libpsurface missing!])])
+         AC_DEFINE(PSURFACE_NAMESPACE, 
+                   psurface::,
+                   [The namespace prefix of the psurface library])
+         AC_MSG_RESULT([yes (1.3 or newer)])],
+	[HAVE_PSURFACE="0"])
+
+   if test x$HAVE_PSURFACE = x0 ; then
+
+       # Try to link to the library (for libpsurface-1.2 and older)
+       AC_LINK_IFELSE([AC_LANG_PROGRAM([#include "psurface/PSurface.h"], [[PSurface<2,double> foo;]])],
+            [PSURFACE_LIBS="-L$PSURFACE_LIB_PATH -lpsurface"
+             PSURFACE_LDFLAGS=""
+             HAVE_PSURFACE="1"
+             AC_DEFINE(PSURFACE_NAMESPACE, 
+                       [],
+                       [The namespace prefix of the psurface library])
+             AC_MSG_RESULT([yes (1.2 or older)])],
+            [HAVE_PSURFACE="0"
+             AC_MSG_RESULT(no)
+             AC_MSG_WARN([psurface header found, but libpsurface missing!])])
+    fi
+
 fi
 
 AC_LANG_POP([C++])
