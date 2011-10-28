@@ -21,6 +21,9 @@ namespace Dune {
      Each boundary segment is implemented by an object of a class derived from
      BoundarySegment.  The set of these objects is handed over to the grid upon grid
      construction.
+
+     \tparam dim Dimension of the grid
+     \tparam dimworld Dimension of the Euclidean space the grid is embedded in
    */
   template< int dim, int dimworld = dim >
   struct BoundarySegment
