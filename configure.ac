@@ -35,8 +35,6 @@ DUNE_SUMMARY_ALL
 # write output
 AC_CONFIG_FILES([Makefile
     lib/Makefile
-    doc/appl/refelements/Makefile
-    doc/appl/Makefile
     doc/refinement/Makefile
     doc/doxygen/Makefile
     doc/doxygen/Doxyfile
