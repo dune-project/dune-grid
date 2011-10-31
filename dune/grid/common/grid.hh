@@ -1183,21 +1183,23 @@ namespace Dune {
      * just typename ::%ImplementationType.
      */
     template<class T>
-    class ReturnImplementationType : public T // implement friendship via subclassing
+    class ReturnImplementationType
+      : public T // implement friendship via subclassing
     {
     public:
       /** @brief The correct type of the implementation to return. */
-      typedef typename T::ImplementationType ImplementationType;
+      typedef typename T::Implementation ImplementationType;
     private:
       // constructor in only need to compile
       ReturnImplementationType(const T& t) : T(t) {}
     };
 
     template<class T>
-    class ReturnImplementationType<const T> : public T // implement friendship via subclassing
+    class ReturnImplementationType<const T>
+      : public T // implement friendship via subclassing
     {
     public:
-      typedef const typename T::ImplementationType ImplementationType;
+      typedef const typename T::Implementation ImplementationType;
     private:
       // constructor in only need to compile
       ReturnImplementationType(const T& t) : T(t) {}
@@ -1206,7 +1208,7 @@ namespace Dune {
     //! return real implementation of interface class
     template <class InterfaceType>
     static typename ReturnImplementationType<InterfaceType>::ImplementationType &
-    getRealImplementation (InterfaceType &i) { return i.getRealImp(); }
+    getRealImplementation (InterfaceType &i) { return i.impl(); }
 
   protected:
     using Grid< dim, dimworld, ct, GridFamily >::asImp;
@@ -1373,7 +1375,7 @@ namespace Dune {
   template <class InterfaceType>
   struct MakeableInterfaceObject : public InterfaceType
   {
-    typedef typename InterfaceType::ImplementationType ImplementationType;
+    typedef typename InterfaceType::Implementation ImplementationType;
     //! create interface object by calling the contructor of the base class
     explicit MakeableInterfaceObject ( const ImplementationType &realImp )
       : InterfaceType( realImp )

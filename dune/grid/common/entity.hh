@@ -56,9 +56,29 @@ namespace Dune
      \nosubgrouping
    */
   template<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
-  class Entity {
+  class Entity
+  {
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
   protected:
-    EntityImp<cd,dim,GridImp> realEntity;
+    // give the GridDefaultImplementation class access to the realImp
+    friend class GridDefaultImplementation<
+        GridImp::dimension, GridImp::dimensionworld,
+        typename GridImp::ctype,
+        typename GridImp::GridFamily> ;
+#endif
+    // type of underlying implementation, for internal use only
+    typedef EntityImp< cd, dim, GridImp > Implementation;
+
+    //! return reference to the real implementation
+    Implementation &impl () { return realEntity; }
+    //! return reference to the real implementation
+    const Implementation &impl () const { return realEntity; }
+
+  protected:
+    Implementation realEntity;
+
   public:
 
     //===========================================================
@@ -66,14 +86,7 @@ namespace Dune
      */
     //@{
     //===========================================================
-    // this is needed by EntityPointer
-    // for an intermediate time until all entity seeds
-    // are implemented
-    //protected:
-    // The type of the wrapped implementation, for internal use only
-    typedef EntityImp<cd,dim,GridImp> ImplementationType;
 
-  public:
     //! \brief The corresponding geometry type
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
 
@@ -163,20 +176,10 @@ namespace Dune
     //@{
     //===========================================================
 
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    /* make entity pointer friend */
-    friend class Dune::EntityPointer<GridImp,
-        typename GridImp::GridFamily::Traits::template Codim<cd>::EntityPointerImpl>;
-
-    //! return reference to the real implementation
-    EntityImp<cd,dim,GridImp> & getRealImp() { return realEntity; }
-    //! return const reference to the real implementation
-    const EntityImp<cd,dim,GridImp> & getRealImp() const { return realEntity; }
+    // need to make copy constructor of EntityPointer work for any iterator
+    //friend class Dune::EntityPointer<GridImp,
+    //                                 typename GridImp::GridFamily::Traits::template Codim<cd>::EntityPointerImpl>;
+    template< class, class > friend class Dune::EntityPointer;
 
   protected:
     /** hide copy constructor */
@@ -202,19 +205,31 @@ namespace Dune
   template<int dim, class GridImp, template<int,int,class> class EntityImp>
   class Entity <0,dim,GridImp,EntityImp>
   {
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
   protected:
+    // give the GridDefaultImplementation class access to the realImp
+    friend class GridDefaultImplementation<
+        GridImp::dimension, GridImp::dimensionworld,
+        typename GridImp::ctype,
+        typename GridImp::GridFamily> ;
+#endif
+    // type of underlying implementation, for internal use only
+    typedef EntityImp< 0, dim, GridImp > Implementation;
+
+    //! return reference to the real implementation
+    Implementation &impl () { return realEntity; }
+    //! return reference to the real implementation
+    const Implementation &impl () const { return realEntity; }
+
+  protected:
+    Implementation realEntity;
+
     typedef typename remove_const<GridImp>::type mutableGridImp;
 
-    EntityImp<0,dim,GridImp> realEntity;
-
-    // this is needed by EntityPointer
-    // for an intermediate time until all entity seeds
-    // are implemented
   public:
-    // The type of the wrapped implementation, for internal use only
-    typedef EntityImp<0,dim,GridImp> ImplementationType;
 
-  public:
     //===========================================================
     /** @name Exported types and constants
      */
@@ -517,20 +532,10 @@ namespace Dune
     //@{
     //===========================================================
 
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    /* make entity pointer friend */
-    friend class Dune::EntityPointer<GridImp,
-        typename GridImp::GridFamily::Traits::template Codim<0>::EntityPointerImpl>;
-
-    //! return reference to the real implementation
-    EntityImp<0,dim,GridImp> & getRealImp() { return realEntity; }
-    //! return reference to the real implementation
-    const EntityImp<0,dim,GridImp> & getRealImp() const { return realEntity; }
+    // need to make copy constructor of EntityPointer work for any iterator
+    //friend class Dune::EntityPointer<GridImp,
+    //                                 typename GridImp::GridFamily::Traits::template Codim<0>::EntityPointerImpl>;
+    template< class, class > friend class Dune::EntityPointer;
 
   protected:
     /** hide copy constructor */
