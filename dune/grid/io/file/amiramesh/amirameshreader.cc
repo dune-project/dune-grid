@@ -144,12 +144,15 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 // Create the domain from an explicitly given boundary description
 template <class GridType>
 void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factory,
-                                                   const shared_ptr<PSurfaceBoundary<GridType::dimension-1> >& boundary)
+                                                   const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if HAVE_PSURFACE
   int point[3] = {-1, -1, -1};
 
-  PSurface<2,float>* psurface = boundary->getPSurfaceObject();
+  if (dim!=3)
+    DUNE_THROW(NotImplemented, "AmiraMeshReader with PSurface support only for 3d grids");
+
+  PSurface<2,float>* psurface = reinterpret_cast<PSurface<2,float>* >(boundary->getPSurfaceObject());
 
   if (!psurface->hasUpToDatePointLocationStructure)
     psurface->createPointLocationStructure();
@@ -203,7 +206,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
 
 template <class GridType>
 GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
-                                                const shared_ptr<PSurfaceBoundary<GridType::dimension-1> >& boundary)
+                                                const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if ! HAVE_PSURFACE
   DUNE_THROW(IOError, "Dune has not been built with support for the "
@@ -255,7 +258,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 #else
   dverb << "This is the AmiraMesh reader for " << className<GridType>() << "!" << std::endl;
 
-  shared_ptr<PSurfaceBoundary<2> > boundary = readPSurfaceBoundary(domainFilename);
+  shared_ptr<PSurfaceBoundary<dim-1> > boundary = readPSurfaceBoundary(domainFilename);
 
   read(grid, filename, boundary);
 #endif // #define HAVE_PSURFACE
@@ -264,7 +267,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 template <class GridType>
 void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
                                            const std::string& filename,
-                                           const shared_ptr<PSurfaceBoundary<2> >& boundary)
+                                           const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if ! HAVE_PSURFACE
   DUNE_THROW(IOError, "Dune has not been built with support for the "
@@ -305,9 +308,8 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 }
 
 template <class GridType>
-Dune::shared_ptr<Dune::PSurfaceBoundary<2> > Dune::AmiraMeshReader<GridType>::readPSurfaceBoundary(const std::string& filename)
+Dune::shared_ptr<Dune::PSurfaceBoundary<Dune::AmiraMeshReader<GridType>::dim-1> > Dune::AmiraMeshReader<GridType>::readPSurfaceBoundary(const std::string& filename)
 {
-  const int dim=2;
  #if ! HAVE_PSURFACE
   DUNE_THROW(NotImplemented, "You have to have libpsurface installed in order to be able to use 'readPSurfaceBoundary'");
 #else
@@ -316,12 +318,12 @@ Dune::shared_ptr<Dune::PSurfaceBoundary<2> > Dune::AmiraMeshReader<GridType>::re
   if (!am.get())
     DUNE_THROW(IOError, "An error has occured while reading " << filename);
 
-  PSurface<dim,float>* newDomain = (PSurface<dim,float>*)AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
+  PSurface<dim-1,float>* newDomain = (PSurface<dim-1,float>*)AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
 
   if (!newDomain)
     DUNE_THROW(IOError, "An error has occured while reading " << filename);
 
-  return shared_ptr<PSurfaceBoundary<dim> >(new PSurfaceBoundary<dim>(newDomain));
+  return shared_ptr<PSurfaceBoundary<dim-1> >(new PSurfaceBoundary<dim-1>(newDomain));
 #endif
 }
 
