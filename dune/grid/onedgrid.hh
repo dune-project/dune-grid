@@ -24,6 +24,7 @@
 #include "onedgrid/nulliteratorfactory.hh"
 #include "onedgrid/onedgridentity.hh"
 #include "onedgrid/onedgridentitypointer.hh"
+#include "onedgrid/onedgridentityseed.hh"
 #include "onedgrid/onedgridgeometry.hh"
 #include "onedgrid/onedgridintersections.hh"
 #include "onedgrid/onedgridintersectioniterators.hh"
@@ -56,7 +57,10 @@ namespace Dune {
         unsigned int,
         OneDGridIdSet<const OneDGrid>,
         unsigned int,
-        CollectiveCommunication<Dune::OneDGrid> >
+        CollectiveCommunication<Dune::OneDGrid>,
+        DefaultLevelGridViewTraits,
+        DefaultLeafGridViewTraits,
+        OneDGridEntitySeed>
     Traits;
   };
 
@@ -180,6 +184,15 @@ namespace Dune {
     //! one past the end on this level
     template<int codim, PartitionIteratorType PiType>
     typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const;
+
+    /** \brief Create an EntityPointer from an EntitySeed */
+    template <int codim>
+    static typename Traits::template Codim<codim>::EntityPointer
+    entityPointer(const OneDGridEntitySeed<codim, const OneDGrid>& seed)
+    {
+      return typename Traits::template Codim<codim>::EntityPointer(seed.target());
+    }
+
 
     /** \brief Number of grid entities per level and codim
      */

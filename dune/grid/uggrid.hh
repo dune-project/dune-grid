@@ -97,6 +97,7 @@
 #include "uggrid/uggridlocalgeometry.hh"
 #include "uggrid/uggridentity.hh"
 #include "uggrid/uggridentitypointer.hh"
+#include "uggrid/uggridentityseed.hh"
 #include "uggrid/uggridintersections.hh"
 #include "uggrid/uggridintersectioniterators.hh"
 #include "uggrid/uggridleveliterator.hh"
@@ -324,7 +325,7 @@ namespace Dune {
         CollectiveCommunication<Dune::UGGrid<dim> >,
         DefaultLevelGridViewTraits,
         DefaultLeafGridViewTraits,
-        UGGridEntityPointer,                         // Will be UGGridEntitySeed
+        UGGridEntitySeed,
         UGGridLocalGeometry>
     Traits;
   };
@@ -490,6 +491,14 @@ namespace Dune {
     template<int codim, PartitionIteratorType PiType>
     typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const {
       return UGGridLeafIterator<codim,PiType, const UGGrid<dim> >();
+    }
+
+    /** \brief Create an EntityPointer from an EntitySeed */
+    template <int codim>
+    static typename Traits::template Codim<codim>::EntityPointer
+    entityPointer(const UGGridEntitySeed<codim, const UGGrid<dim> >& seed)
+    {
+      return typename Traits::template Codim<codim>::EntityPointer(seed.target());
     }
 
     /** \brief Number of grid entities per level and codim

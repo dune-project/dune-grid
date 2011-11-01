@@ -21,6 +21,8 @@ namespace Dune {
   class UGGrid;
   template<int codim, class GridImp>
   class UGGridEntityPointer;
+  template<int codim, class GridImp>
+  class UGGridEntitySeed;
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class UGGridLevelIterator;
   template<class GridImp>
@@ -90,6 +92,8 @@ namespace Dune {
     friend class UGGridIdSet;
 
     friend class UGGridEntityPointer<codim, GridImp>;
+    friend class UGGridEntitySeed<codim, GridImp>;
+
     typedef typename GridImp::ctype UGCtype;
 
   public:

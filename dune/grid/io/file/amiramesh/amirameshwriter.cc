@@ -735,8 +735,8 @@ void Dune::AmiraMeshWriter<GridView>::writeSurfaceGrid(const GridView& gridView,
 
     if (n==4)
       outfile << indexSet.subIndex(*it, 2, dim) + 1
+              << " " << indexSet.subIndex(*it, 1, dim) + 1
               << " " << indexSet.subIndex(*it, 3, dim) + 1
-              << " " << indexSet.subIndex(*it, 0, dim) + 1
               << std::endl;
 
   }
