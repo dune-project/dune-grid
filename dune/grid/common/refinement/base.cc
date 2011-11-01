@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_COMON_REFINEMENT_BASE_CC
-#define DUNE_GRID_COMON_REFINEMENT_BASE_CC
+#ifndef DUNE_GRID_COMMON_REFINEMENT_BASE_CC
+#define DUNE_GRID_COMMON_REFINEMENT_BASE_CC
 
 // This file is part of DUNE, a Distributed and Unified Numerics Environment
 // This file is copyright (C) 2005 Jorrit Fahlke <jorrit@jorrit.de>
@@ -101,17 +101,11 @@ namespace Dune {
   /*! @brief Wrap each @ref Refinement implementation to get a
              consistent interface
 
-     @param topologyId The topology id of the element to refine
-     @param CoordType  The C++ type of the coordinates
-     @param coerceToId The topology id of the subelements
-     @param dimension  The dimension of the refinement.
+     @tparam topologyId The topology id of the element to refine
+     @tparam CoordType  The C++ type of the coordinates
+     @tparam coerceToId The topology id of the subelements
+     @tparam dimension  The dimension of the refinement.
 
-     @par Member Structs:
-
-     <dl>
-     <dt>template<int codimension> struct @ref Codim</dt>
-     <dd>codimension template containing the SubEntityIterator</dd>
-     </dl>
    */
   template<
       unsigned topologyId
@@ -306,4 +300,4 @@ namespace Dune {
 
 } // namespace Dune
 
-#endif //DUNE_GRID_COMON_REFINEMENT_BASE_CC
+#endif //DUNE_GRID_COMMON_REFINEMENT_BASE_CC
