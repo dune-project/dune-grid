@@ -31,19 +31,19 @@ namespace Dune {
 
       if (codim==dim) {
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]));
+          this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]));
         else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
-          setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]));
+          this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]));
         else     // overlap and overlap-front
-          setToTarget((UGEntity*) 0);
+          this->setToTarget((UGEntity*) 0);
 
       } else if (codim==0) {
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]));
+          this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]));
         else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
-          setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]));
+          this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]));
         else     // overlap and overlap-front
-          setToTarget((UGEntity*) 0);
+          this->setToTarget((UGEntity*) 0);
 
       } else
         DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);
@@ -131,16 +131,16 @@ namespace Dune {
         if (codim==dim) {
 
           if (pitype==All_Partition || pitype==Ghost_Partition)
-            setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[level+1]));
+            this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[level+1]));
           else
-            setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[level+1]));
+            this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[level+1]));
 
         } else if (codim==0) {
 
           if (pitype==All_Partition || pitype==Ghost_Partition)
-            setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[level+1]));
+            this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[level+1]));
           else
-            setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[level+1]));
+            this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[level+1]));
 
         } else
           DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);

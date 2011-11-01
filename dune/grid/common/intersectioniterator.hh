@@ -89,13 +89,28 @@ namespace Dune
   template<class GridImp, template<class> class IntersectionIteratorImp, template<class> class IntersectionImp>
   class IntersectionIterator
   {
-    IntersectionIteratorImp<const GridImp> realIterator;
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
+  protected:
+    // give the GridDefaultImplementation class access to the realImp
+    friend class GridDefaultImplementation<
+        GridImp::dimension, GridImp::dimensionworld,
+        typename GridImp::ctype,
+        typename GridImp::GridFamily> ;
+#endif
+    // type of underlying implementation, for internal use only
+    typedef IntersectionIteratorImp< const GridImp > Implementation;
+
+    //! return reference to the real implementation
+    Implementation &impl () { return realIterator; }
+    //! return reference to the real implementation
+    const Implementation &impl () const { return realIterator; }
+
+  protected:
+    Implementation realIterator;
 
   public:
-
-    // type of real implementation
-    typedef IntersectionIteratorImp<const GridImp> ImplementationType;
-
     /** \brief Type of Intersection this IntersectionIterator points to */
     typedef Dune::Intersection< const GridImp, IntersectionImp > Intersection;
 
@@ -175,18 +190,6 @@ namespace Dune
     //@}
 
     typedef typename remove_const<GridImp>::type mutableGridImp;
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    //! return reference to the real implementation
-    ImplementationType & getRealImp() { return realIterator; }
-    //! return reference to the real implementation
-    const ImplementationType & getRealImp() const { return realIterator; }
-
   };
 
 } // namespace Dune

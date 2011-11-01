@@ -23,6 +23,7 @@
 #include <dune/grid/geometrygrid/datahandle.hh>
 #include <dune/grid/geometrygrid/backuprestore.hh>
 #include <dune/grid/geometrygrid/identity.hh>
+#include <dune/grid/geometrygrid/persistentcontainer.hh>
 
 namespace Dune
 {
@@ -1028,6 +1029,6 @@ namespace Dune
     /** \} */
   };
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_GRID_HH

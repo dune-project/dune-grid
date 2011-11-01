@@ -66,13 +66,29 @@ namespace Dune
      \ingroup GIGeometry
    */
   template<int mydim, int cdim, class GridImp, template<int,int,class> class GeometryImp>
-  class Geometry {
+  class Geometry
+  {
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
+  protected:
+    // give the GridDefaultImplementation class access to the realImp
+    friend class GridDefaultImplementation<
+        GridImp::dimension, GridImp::dimensionworld,
+        typename GridImp::ctype,
+        typename GridImp::GridFamily> ;
+#endif
+    // type of underlying implementation, for internal use only
+    typedef GeometryImp< mydim, cdim, GridImp > Implementation;
+
+    //! return reference to the real implementation
+    Implementation &impl () { return realGeometry; }
+    //! return reference to the real implementation
+    const Implementation &impl () const { return realGeometry; }
 
   protected:
-    GeometryImp<mydim,cdim,GridImp> realGeometry;
+    Implementation realGeometry;
 
-    // type of underlying implementation, for internal use only
-    typedef GeometryImp<mydim,cdim,GridImp> ImplementationType;
   public:
     //! @brief export grid dimension
     enum { dimension=GridImp::dimension /*!< grid dimension */ };
@@ -94,11 +110,11 @@ namespace Dune
 
     //! type of jacobian (also of jacobian inverse transposed)
     typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
-    //typedef typename ImplementationType :: Jacobian   Jacobian;
+    //typedef typename Implementation :: Jacobian   Jacobian;
 
     //! type of jacobian transposed
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
-    //typedef typename ImplementationType :: JacobianTransposed  JacobianTransposed;
+    //typedef typename Implementation :: JacobianTransposed  JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::GenericReferenceElement.
@@ -242,18 +258,6 @@ namespace Dune
   public:
     //! copy constructor from GeometryImp
     explicit Geometry(const GeometryImp<mydim,cdim,GridImp> & e) : realGeometry(e) {};
-
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    //! return reference to the real implementation
-    GeometryImp<mydim,cdim,GridImp> & getRealImp() { return realGeometry; }
-    //! return reference to the real implementation
-    const GeometryImp<mydim,cdim,GridImp> & getRealImp() const { return realGeometry; }
 
   protected:
     /** hide copy constructor */

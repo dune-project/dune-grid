@@ -13,6 +13,7 @@ gridutility_HEADERS =				\
 	hostgridaccess.hh			\
 	mockgeometry.hh				\
 	persistentcontainer.hh			\
+	persistentcontainerwrapper.hh		\
 	structuredgridfactory.hh		\
 	vertexorderfactory.hh
 

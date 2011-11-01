@@ -22,6 +22,10 @@
 #include <dune/grid/io/file/dgfparser/dgfoned.hh>
 #include <dune/grid/io/file/dgfparser/dgfug.hh>
 
+#ifndef DUNE_GRID_EXAMPLE_GRIDS_PATH
+#error DUNE_GRID_EXAMPLE_GRIDS_PATH needs to be set
+#endif
+
 #include "testgeo.hh"
 
 using namespace Dune;
@@ -180,7 +184,7 @@ try
   std::string gridName;
   if (argc<2) {
     std::stringstream gridN;
-    gridN << "../../../../doc/grids/dgf/grid" << GridSelector::GridType::dimension << "Y.dgf";
+    gridN << DUNE_GRID_EXAMPLE_GRIDS_PATH << "dgf/grid" << GridSelector::GridType::dimension << "Y.dgf";
     gridName = gridN.str();
   }
   else

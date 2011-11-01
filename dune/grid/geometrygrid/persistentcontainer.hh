@@ -3,85 +3,36 @@
 #ifndef DUNE_GEOGRID_PERSISTENTCONTAINER_HH
 #define DUNE_GEOGRID_PERSISTENTCONTAINER_HH
 
-#include <dune/common/typetraits.hh>
-#include <dune/grid/utility/persistentcontainer.hh>
-#include <dune/grid/geometrygrid.hh>
+#include <dune/grid/utility/persistentcontainerwrapper.hh>
 
 namespace Dune
 {
+
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class HostGrid, class CoordFunction, class Allocator >
+  class GeometryGrid;
+
+
+
   // PersistentContainer for GeometryGrid
   // ------------------------------------
 
   template< class HostGrid, class CoordFunction, class Data, class Allocator >
   class PersistentContainer< GeometryGrid< HostGrid, CoordFunction, Allocator >, Data, Allocator >
-    : public PersistentContainer< HostGrid, Data, Allocator >
+    : public PersistentContainerWrapper< GeometryGrid< HostGrid, CoordFunction, Allocator >, Data, Allocator >
   {
-    typedef PersistentContainer< HostGrid, Data, Allocator > Base;
+    typedef PersistentContainerWrapper< GeometryGrid< HostGrid, CoordFunction, Allocator >, Data, Allocator > Base;
 
   public:
-    typedef GeometryGrid< HostGrid, CoordFunction, Allocator > GridType;
+    typedef typename Base::Grid Grid;
 
-    typedef typename GridType::template Codim< 0 >::Entity ElementType;
-
-    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
-      : Base( grid.hostGrid(), codim, allocator ),
-        grid_(grid)
+    PersistentContainer ( const Grid &grid, const int codim, const Allocator &allocator = Allocator() )
+      : Base( grid, codim, allocator )
     {}
-
-    template< class Entity >
-    const Data &operator[] ( const Entity &entity ) const
-    {
-      static const bool fake = ! Capabilities::hasHostEntity< GridType, Entity::codimension >::v;
-      integral_constant<bool,fake> a;
-      return data(entity,a);
-    }
-
-    template< class Entity >
-    Data &operator[] ( const Entity &entity )
-    {
-      static const bool fake = ! Capabilities::hasHostEntity< GridType, Entity::codimension >::v;
-      integral_constant<bool,fake> a;
-      return data(entity,a);
-    }
-
-    const Data &operator() ( const ElementType &element, const int subEntity ) const
-    {
-      return Base::operator()( GridType::template getHostEntity<0>( element ), subEntity );
-    }
-
-    Data &operator() ( const ElementType &element, const int subEntity )
-    {
-      return Base::operator()( GridType::template getHostEntity<0>( element ), subEntity );
-    }
-
-  protected:
-    template< class EntityImpl >
-    const Data &data ( const EntityImpl &entity, integral_constant<bool, false > ) const
-    {
-      return Base::operator[]( GridType::template getHostEntity<EntityImpl::codimension>( entity) );
-    }
-
-    template< class EntityImpl >
-    Data &data ( const EntityImpl &entity, integral_constant<bool, false > )
-    {
-      return Base::operator[]( GridType::template getHostEntity<EntityImpl::codimension>( entity) );
-    }
-
-    template< class EntityImpl >
-    const Data &data ( const EntityImpl &entity, integral_constant<bool, true > ) const
-    {
-      return Base::operator()( entity.hostElement(). entity.subEntity() );
-    }
-
-    template< class EntityImpl >
-    Data &data ( const EntityImpl &entity, integral_constant<bool, true > )
-    {
-      return Base::operator()( entity.hostElement(). entity.subEntity() );
-    }
-
-  private:
-    const GridType &grid_;
   };
+
 } // end namespace Dune
 
-#endif // end DUNE_PERSISTENTCONTAINER_HH
+#endif // #ifndef DUNE_GEOGRID_PERSISTENTCONTAINER_HH

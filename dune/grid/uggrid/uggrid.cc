@@ -279,7 +279,7 @@ template < int dim >
 bool Dune::UGGrid < dim >::mark(int refCount,
                                 const typename Traits::template Codim<0>::Entity& e )
 {
-  typename UG_NS<dim>::Element* target = getRealImplementation(e).target_;
+  typename UG_NS<dim>::Element* target = this->getRealImplementation(e).target_;
 
   // No refinement requested
   if (refCount==0) {
@@ -321,7 +321,7 @@ bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity
                                 typename UG_NS<dim>::RefinementRule rule,
                                 int side)
 {
-  typename UG_NS<dim>::Element* target = getRealImplementation(e).target_;
+  typename UG_NS<dim>::Element* target = this->getRealImplementation(e).target_;
 
   if (!UG_NS<dim>::isLeaf(target))
     return false;
@@ -335,7 +335,7 @@ bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity
 template <int dim>
 int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity& e) const
 {
-  typename UG_NS<dim>::Element* target = getRealImplementation(e).target_;
+  typename UG_NS<dim>::Element* target = this->getRealImplementation(e).target_;
 
   // Return -1 if element is marked for coarsening
   if (UG_NS<dim>::ReadCW(target,UG_NS<dim>::COARSEN_CE))
@@ -422,7 +422,7 @@ void Dune::UGGrid <dim>::postAdapt()
     typename Traits::template Codim<0>::LevelIterator eEndIt = lend<0>(i);
 
     for (; eIt!=eEndIt; ++eIt)
-      UG_NS<dim>::WriteCW(getRealImplementation(*eIt).target_, UG_NS<dim>::NEWEL_CE, 0);
+      UG_NS<dim>::WriteCW(this->getRealImplementation(*eIt).target_, UG_NS<dim>::NEWEL_CE, 0);
 
   }
 
@@ -476,7 +476,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
   if (!e->isLeaf()   // Get_Sons_of_ElementSide returns GM_FATAL when called for a leaf !?!
       && e->level() < maxl) {
 
-    typename UG_NS<dim>::Element* theElement = getRealImplementation(*e).target_;
+    typename UG_NS<dim>::Element* theElement = this->getRealImplementation(*e).target_;
 
     int Sons_of_Side = 0;
     typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
@@ -659,7 +659,7 @@ template < int dim >
 void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,
                                        const FieldVector<double, dim>& pos)
 {
-  typename UG_NS<dim>::Node* target = getRealImplementation(*e).target_;
+  typename UG_NS<dim>::Node* target = this->getRealImplementation(*e).target_;
 
   for (int i=0; i<dim; i++)
     target->myvertex->iv.x[i] = pos[i];
@@ -758,7 +758,7 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
       for (; eIt!=eEndIt; ++eIt) {
 
-        typename UG_NS<dim>::Element* elem0 = getRealImplementation(*eIt).target_;
+        typename UG_NS<dim>::Element* elem0 = this->getRealImplementation(*eIt).target_;
 
         typename Traits::template Codim<0>::Entity::LevelIntersectionIterator nIt = eIt->ilevelbegin();
         typename Traits::template Codim<0>::Entity::LevelIntersectionIterator nEndIt = eIt->ilevelend();
@@ -769,7 +769,7 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
           if (nIt->neighbor()) {
 
-            typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt->outside()).target_;
+            typename UG_NS<dim>::Element* elem1 = this->getRealImplementation(*nIt->outside()).target_;
 
             int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt->indexInOutside(), nIt->outside()->type());
 

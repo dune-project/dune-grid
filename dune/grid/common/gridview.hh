@@ -60,10 +60,6 @@ namespace Dune
   public:
     typedef typename ViewTraits :: GridViewImp GridViewImp;
 
-  protected:
-    typedef GridViewImp ImplementationType;
-
-  public:
     /** \brief Traits class */
     typedef ViewTraits Traits;
 
@@ -130,19 +126,19 @@ namespace Dune
 
   public:
     /** \brief constructor (engine concept) */
-    GridView ( const GridViewImp& imp)
-      : imp_( imp )
+    GridView ( const GridViewImp &imp )
+      : impl_( imp )
     {}
 
     /** \brief Copy constructor */
     GridView ( const ThisType &other )
-      : imp_( other.imp_ )
+      : impl_( other.impl_ )
     {}
 
     /** \brief assignment operator */
     ThisType &operator= ( const ThisType &other )
     {
-      imp_ = other.imp_;
+      impl_ = other.impl_;
       return *this;
     }
 
@@ -254,32 +250,33 @@ namespace Dune
       asImp().communicate(data,iftype,dir);
     }
 
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
   protected:
-    ImplementationType &getRealImp ()
-    {
-      return imp_;
-    }
+    // give the GridDefaultImplementation class access to the realImp
+    friend class GridDefaultImplementation< Grid::dimension, Grid::dimensionworld, typename Grid::ctype, typename Grid::GridFamily >;
+#endif
+    // type of underlying implementation, for internal use only
+    typedef GridViewImp Implementation;
 
-    const ImplementationType &getRealImp () const
-    {
-      return imp_;
-    }
+    //! return reference to the real implementation
+    Implementation &impl () { return impl_; }
+    //! return reference to the real implementation
+    const Implementation &impl () const { return impl_; }
+
+  protected:
+    Implementation impl_;
 
     GridViewImp& asImp ()
     {
-      return imp_;
+      return impl_;
     }
 
     const GridViewImp& asImp () const
     {
-      return imp_;
+      return impl_;
     }
-
-  private:
-    friend class GridDefaultImplementation
-    < dimension, dimensionworld, ctype, typename Grid::GridFamily >;
-
-    GridViewImp imp_;
   };
 
 }

@@ -164,16 +164,31 @@ namespace Dune
   template<class GridImp, template<class> class IntersectionImp>
   class Intersection
   {
-    IntersectionImp<const GridImp> real;
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
+  protected:
+    // give the GridDefaultImplementation class access to the realImp
+    friend class GridDefaultImplementation<
+        GridImp::dimension, GridImp::dimensionworld,
+        typename GridImp::ctype,
+        typename GridImp::GridFamily> ;
+#endif
+    // type of underlying implementation, for internal use only
+    typedef IntersectionImp< const GridImp > Implementation;
+
+    //! return reference to the real implementation
+    Implementation &impl () { return real; }
+    //! return reference to the real implementation
+    const Implementation &impl () const { return real; }
+
+  protected:
+    Implementation real;
 
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
 
   public:
-
-    // type of real implementation
-    typedef IntersectionImp<const GridImp> ImplementationType;
-
     /** \brief Type of entity that this Intersection belongs to */
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
@@ -411,20 +426,9 @@ namespace Dune
 
     typedef typename remove_const<GridImp>::type mutableGridImp;
   protected:
-    //! give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
     //! give the pseudo IntersectionIterator class access to the realImp
     //! \todo cleanup this hack
     friend class IntersectionIterator<GridImp, IntersectionImp, IntersectionImp>;
-
-    //! return reference to the real implementation
-    ImplementationType & getRealImp() { return real; }
-    //! return reference to the real implementation
-    const ImplementationType & getRealImp() const { return real; }
 
     /* hide copy constructor */
     Intersection ( const Intersection &i )

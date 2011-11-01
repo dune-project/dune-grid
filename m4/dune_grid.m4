@@ -8,6 +8,7 @@ AC_DEFUN([DUNE_GRID_CHECKS],[
   AC_REQUIRE([DUNE_PATH_PSURFACE])
   AC_REQUIRE([DUNE_PATH_ALUGRID])
   AC_REQUIRE([DUNE_PATH_ALGLIB])
+  AC_REQUIRE([DUNE_EXPERIMENTAL_GRID_EXTENSIONS])
 
   DUNE_DEFINE_GRIDTYPE([ONEDGRID],[(GRIDDIM == 1) && (WORLDDIM == 1)],[Dune::OneDGrid],[dune/grid/onedgrid.hh],[dune/grid/io/file/dgfparser/dgfoned.hh])
   DUNE_DEFINE_GRIDTYPE([SGRID],[],[Dune::SGrid< dimgrid, dimworld >],[dune/grid/sgrid.hh],[dune/grid/io/file/dgfparser/dgfs.hh])

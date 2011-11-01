@@ -634,7 +634,7 @@ void Dune::AmiraMeshWriter<GridView>::writeSurfaceGrid(const GridView& gridView,
   //   Write header
   // ////////////////////////////////////////////
 
-  std::ofstream outfile(filename);
+  std::ofstream outfile(filename.c_str());
 
   if (!outfile)
     DUNE_THROW(Dune::IOError, "Couldn't open '" << filename << "' for writing!");

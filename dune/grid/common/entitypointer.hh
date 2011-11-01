@@ -99,8 +99,26 @@ namespace Dune
     //friend class EntityPointer<GridImp,typename IteratorImp::EntityPointerImp>;
     template< class, class > friend class EntityPointer;
 
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
   protected:
-    IteratorImp realIterator;
+    // give the GridDefaultImplementation class access to the realImp
+    friend class GridDefaultImplementation<
+        GridImp::dimension, GridImp::dimensionworld,
+        typename GridImp::ctype,
+        typename GridImp::GridFamily> ;
+#endif
+    // type of underlying implementation, for internal use only
+    typedef IteratorImp Implementation;
+
+    //! return reference to the real implementation
+    Implementation &impl () { return realIterator; }
+    //! return reference to the real implementation
+    const Implementation &impl () const { return realIterator; }
+
+  protected:
+    Implementation realIterator;
 
     // autocheck whether imp is convertable into imp::base
     typedef typename
@@ -110,9 +128,6 @@ namespace Dune
   public:
     //! codimension of entity pointer
     enum { codimension = IteratorImp::codimension };
-
-    //! type of real implementation
-    typedef IteratorImp ImplementationType;
 
     /** \brief The Entity that this EntityPointer can point to */
     typedef typename IteratorImp::Entity Entity;
@@ -145,16 +160,18 @@ namespace Dune
         entity. The implementation of EntityPointer has to have a
         constructor taking a Dune::Entity.
      */
-    EntityPointer(const Entity& entity) :
-      realIterator( entity.getRealImp() ) {}
+    EntityPointer(const Entity& entity)
+      : realIterator( entity.impl() )
+    {}
 
     /** \brief Constructor from type of entity implementation that
         this entity pointer points to. This constructor is only
         used in the EntityDefaultImplementation to implement the method
         seed() by default when the type of EntitySeed and EntityPointer coniside.
      */
-    EntityPointer(const typename Entity :: ImplementationType& entityImp) :
-      realIterator( entityImp ) {}
+    EntityPointer ( const typename Entity::Implementation &entityImp )
+      : realIterator( entityImp )
+    {}
 
     template< class ItImp >
     EntityPointer &operator= ( const EntityPointer< GridImp, ItImp > &ep )
@@ -265,19 +282,6 @@ namespace Dune
       return realIterator.equals( rhs.realIterator );
     }
     //@}
-
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    //! return reference to the real implementation
-    ImplementationType & getRealImp() { return realIterator; }
-    //! return reference to the real implementation
-    const ImplementationType & getRealImp() const { return realIterator; }
-
   };
 
 }
