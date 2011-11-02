@@ -117,7 +117,7 @@ namespace Dune
       virtual unsigned int topologyId () const = 0;
 
       /** \copydoc CachedMapping::corner */
-      virtual const GlobalCoordinate &corner ( int i ) const = 0;
+      virtual GlobalCoordinate corner ( int i ) const = 0;
 
       /** \copydoc CachedMapping::numCorners */
       virtual int numCorners () const = 0;
@@ -261,7 +261,7 @@ namespace Dune
         return mapping_.topologyId();
       }
 
-      virtual const GlobalCoordinate &corner ( int i ) const
+      virtual GlobalCoordinate corner ( int i ) const
       {
         return mapping_.corner( i );
       }
@@ -338,8 +338,8 @@ namespace Dune
       using VirtualMappingBase< Topology, GeometryTraits > :: trace;
     };
 
-  }
+  } // namespace GenericGeometry
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GENERICGEOMETRY_HYBRIDMAPPING_HH

@@ -317,8 +317,8 @@ namespace Dune
         return ReferenceElement::topologyId;
       }
 
-      // do we still require this mehtod?
-      const GlobalCoordinate &corner ( int i ) const
+      /** \brief obtain coordinates of the i-th corner */
+      GlobalCoordinate corner ( int i ) const
       {
         return mapping_.corner( i );
       }
@@ -558,8 +558,8 @@ namespace Dune
       JacobianInverseTransposed jacobianInverseTransposed_;
     };
 
-  }
+  } // namespace GenericGeometry
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GENERICGEOMETRY_CACHED_MAPPING_HH

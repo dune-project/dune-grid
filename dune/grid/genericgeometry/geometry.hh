@@ -418,12 +418,6 @@ namespace Dune
       }
 
       /** \brief Return the world coordinates of the i-th corner */
-      const GlobalCoordinate &operator[] ( int i ) const
-      {
-        return mapping_->corner( i );
-      }
-
-      /** \brief Return the world coordinates of the i-th corner */
       GlobalCoordinate corner ( const int i ) const
       {
         return mapping_->corner( i );
