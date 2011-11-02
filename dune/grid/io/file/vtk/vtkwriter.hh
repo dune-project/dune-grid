@@ -61,7 +61,7 @@ namespace Dune
   class VTKWriter {
     // extract types
     typedef typename GridView::Grid Grid;
-    typedef typename Grid::ctype DT;
+    typedef typename GridView::ctype DT;
     enum { n = GridView::dimension };
     enum { w = GridView::dimensionworld };
 
@@ -83,8 +83,8 @@ namespace Dune
     typedef MultipleCodimMultipleGeomTypeMapper< GridView, MCMGVertexLayout > VertexMapper;
 
   public:
-    typedef Dune::VTKFunction<Grid> VTKFunction;
-    typedef shared_ptr< Dune::VTKFunction<Grid> > VTKFunctionPtr;
+    typedef Dune::VTKFunction< GridView > VTKFunction;
+    typedef shared_ptr< VTKFunction > VTKFunctionPtr;
 
   protected:
     typedef typename std::list<VTKFunctionPtr>::const_iterator FunctionIterator;

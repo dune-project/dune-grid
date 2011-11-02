@@ -28,7 +28,7 @@ namespace Dune {
       const GV& gv;
 
     public:
-      typedef Dune::VTKFunction<typename GV::Grid> VTKFunction;
+      typedef Dune::VTKFunction< GV > VTKFunction;
       typedef shared_ptr<VTKFunction> VTKFunctionPtr;
 
       ConformingVolumeWriter(const GV& gv_)
