@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <limits>
 
 #include <dune/common/gmpfield.hh>
 #include <dune/common/mpihelper.hh>
@@ -40,10 +41,12 @@ int main(int argc, char** argv)
   Field sqrtDetAAT = MatrixHelper::sqrtDetAAT< 2, 2 >( A );
   std::cout << "sqrtDetAAT = " << sqrtDetAAT << std::endl;
 
-  FieldMatrix< Field, 2, 2 > invA;
-  Field detA = MatrixHelper::rightInvA< 2, 2 >( A, invA );
-  std::cout << "detA = " << detA << std::endl;
-  std::cout << "invA = [ " << invA[ 0 ] << ", " << invA[ 1 ] << " ]" << std::endl;
+  if (std::numeric_limits<Field>::is_exact) {
+    FieldMatrix< Field, 2, 2 > invA;
+    Field detA = MatrixHelper::rightInvA< 2, 2 >( A, invA );
+    std::cout << "detA = " << detA << std::endl;
+    std::cout << "invA = [ " << invA[ 0 ] << ", " << invA[ 1 ] << " ]" << std::endl;
+  }
 
   // Lets do the same crap for a non-square matrix.
   FieldMatrix< Field, 2, 3 > B;
