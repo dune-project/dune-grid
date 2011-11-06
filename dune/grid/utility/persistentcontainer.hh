@@ -421,14 +421,17 @@ namespace Dune
   class PersistentContainer
     : public PersistentContainerMap< Grid, typename Grid::Traits::LocalIdSet,
           std::map<const typename Grid::Traits::LocalIdSet::IdType, Data,
-              std::less<const typename Grid::Traits::LocalIdSet::IdType>, Allocator> >
+              std::less<const typename Grid::Traits::LocalIdSet::IdType>,
+              typename Allocator::rebind<const typename Grid::Traits::LocalIdSet::IdType>::other > >
   {
   public:
     typedef Grid GridType;
   protected:
     typedef typename Grid::Traits::LocalIdSet IdSet;
     typedef typename IdSet::IdType IdType;
-    typedef std::map<const IdType, Data, std::less<const IdType>, Allocator> Map;
+    typedef typename Allocator::rebind<IdType>::other > Allocator;
+    typedef std::map<const IdType, Data, std::less<const IdType>,
+        Allocator> Map;
     typedef PersistentContainerMap< Grid, IdSet, Map > BaseType;
 
   public:
