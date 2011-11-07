@@ -33,13 +33,13 @@ namespace Dune
 
       Trick : use double as return type
    */
-  template <class Grid>
+  template< class GridView >
   class VTKFunction
   {
   public:
-    typedef typename Grid::ctype ctype;
-    enum { dim = Grid::dimension };
-    typedef typename Grid::template Codim< 0 >::Entity Entity;
+    typedef typename GridView::ctype ctype;
+    enum { dim = GridView::dimension };
+    typedef typename GridView::template Codim< 0 >::Entity Entity;
 
     //! return number of components (1 for scalar valued functions, 3 for
     //! vector valued function in 3D etc.)
@@ -85,10 +85,10 @@ namespace Dune
    */
   template<typename GV, typename V>
   class P0VTKFunction
-    : public VTKFunction<typename GV::Grid>
+    : public VTKFunction< GV >
   {
     //! Base class
-    typedef VTKFunction<typename GV::Grid> Base;
+    typedef VTKFunction< GV > Base;
     //! Mapper for elements
     typedef MultipleCodimMultipleGeomTypeMapper<GV, MCMGElementLayout> Mapper;
 
@@ -188,10 +188,10 @@ namespace Dune
    */
   template<typename GV, typename V>
   class P1VTKFunction
-    : public VTKFunction<typename GV::Grid>
+    : public VTKFunction< GV >
   {
     //! Base class
-    typedef VTKFunction<typename GV::Grid> Base;
+    typedef VTKFunction< GV > Base;
     //! Mapper for vertices
     typedef MultipleCodimMultipleGeomTypeMapper<GV, MCMGVertexLayout> Mapper;
 
