@@ -5,7 +5,7 @@ TESTPROGS = mcmgmappertest
 endif
 
 # which tests to run
-TESTS = test-quadrature test-genericquadrature referenceelementstest scsgmappertest $(TESTPROGS)
+TESTS = scsgmappertest $(TESTPROGS)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTS)
@@ -28,11 +28,5 @@ mcmgmappertest_LDADD =				\
 	$(LDADD)
 
 scsgmappertest_SOURCES = scsgmappertest.cc
-
-referenceelementstest_SOURCES = referenceelementstest.cc
-
-test_quadrature_SOURCES = test-quadrature.cc
-
-test_genericquadrature_SOURCES = test-genericquadrature.cc
 
 include $(top_srcdir)/am/global-rules
