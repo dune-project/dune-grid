@@ -9,13 +9,10 @@ TESTS += structuredgridfactorytest
 check_PROGRAMS += structuredgridfactorytest
 structuredgridfactorytest_SOURCES = structuredgridfactorytest.cc
 structuredgridfactorytest_CPPFLAGS = $(AM_CPPFLAGS) \
-	                             $(ALUGRID_CPPFLAGS)			\
 	                             $(UG_CPPFLAGS)
 structuredgridfactorytest_LDFLAGS = $(AM_LDFLAGS) \
-	                            $(ALUGRID_CPPFLAGS)			\
 	                            $(UG_LDFLAGS)
 structuredgridfactorytest_LDADD = $(LDADD) \
-	                                $(ALUGRID_LIBS)				\
                                   $(UG_LIBS)
 
 TESTS += vertexordertest
