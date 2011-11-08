@@ -11,8 +11,9 @@
 
 #include <dune/common/function.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/geometrytype.hh>
 #include <dune/common/shared_ptr.hh>
+
+#include <dune/geometry/type.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/grid.hh>

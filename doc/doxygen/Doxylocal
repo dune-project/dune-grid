@@ -1,7 +1,5 @@
 INPUT                 += @srcdir@/mainpage \
                          @srcdir@/modules \
-                         @top_srcdir@/dune/grid/genericgeometry/doc/genericgeometrypage \
-                         @top_srcdir@/dune/grid/genericgeometry/doc/genericgeometrytransitionpage \
                          @top_srcdir@/dune/grid/modules \
                          @top_srcdir@/dune/grid/albertagrid \
                          @top_srcdir@/dune/grid/albertagrid.hh \

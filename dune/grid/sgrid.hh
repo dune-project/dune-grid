@@ -10,14 +10,13 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/finitestack.hh>
-#include <dune/grid/common/capabilities.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/collectivecommunication.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/sgrid/numbering.hh>
 #include <dune/grid/common/indexidset.hh>
-
-#include <dune/grid/genericgeometry/topologytypes.hh>
 
 /*! \file sgrid.hh
    This file documents the DUNE grid interface. We use the special implementation for

@@ -13,7 +13,8 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
-#include <dune/grid/genericgeometry/topologytypes.hh>
+
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 
 /** \file
  * \brief The OneDGrid class

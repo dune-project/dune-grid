@@ -5,8 +5,8 @@
 
 #include <cmath>
 
-#include <dune/grid/common/quadraturerules/gaussquadrature.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/quadraturerules/gaussquadrature.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 
 #include "checkgeometry.cc"
 

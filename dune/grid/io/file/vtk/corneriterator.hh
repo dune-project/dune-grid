@@ -9,7 +9,8 @@
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/typetraits.hh>
 
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
+
 #include <dune/grid/io/file/vtk/corner.hh>
 
 namespace Dune

@@ -4,7 +4,7 @@
 #define DUNE_STARCD_READER_HH
 
 #include <dune/common/exceptions.hh>
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 #include <dune/grid/common/gridfactory.hh>
 #include <iostream>
 #include <fstream>

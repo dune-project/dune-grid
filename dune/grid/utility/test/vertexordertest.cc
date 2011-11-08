@@ -23,8 +23,9 @@
 #include <dune/common/typetraits.hh>
 #include <dune/common/mpihelper.hh>
 
+#include <dune/geometry/genericreferenceelements.hh>
+
 #include <dune/grid/alugrid.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>

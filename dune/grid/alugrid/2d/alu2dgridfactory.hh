@@ -9,7 +9,8 @@
 #include <dune/common/array.hh>
 #include <dune/common/mpihelper.hh>
 
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
+
 #include <dune/grid/common/gridfactory.hh>
 
 #include <dune/grid/alugrid/common/transformation.hh>

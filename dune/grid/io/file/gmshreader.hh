@@ -17,7 +17,8 @@
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/geometrytype.hh>
+
+#include <dune/geometry/type.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/gridfactory.hh>

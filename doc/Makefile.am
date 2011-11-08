@@ -3,7 +3,7 @@
 if INKSCAPE
 INKSCAPE_SUBDIRS = refinement
 endif INKSCAPE
-SUBDIRS = appl $(INKSCAPE_SUBDIRS) doxygen grids
+SUBDIRS = $(INKSCAPE_SUBDIRS) doxygen grids
 
 # setting like in dune-web
 CURDIR=doc

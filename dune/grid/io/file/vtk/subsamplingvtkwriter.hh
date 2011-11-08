@@ -6,7 +6,7 @@
 
 #include <ostream>
 
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 #include <dune/common/indent.hh>
 #include <dune/grid/common/virtualrefinement.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>

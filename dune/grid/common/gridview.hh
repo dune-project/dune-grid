@@ -3,7 +3,8 @@
 #ifndef DUNE_GRIDVIEW_HH
 #define DUNE_GRIDVIEW_HH
 
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
+
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridenums.hh>
 

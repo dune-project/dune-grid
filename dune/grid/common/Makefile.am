@@ -7,8 +7,7 @@ libgridcommon_la_SOURCES =
 # (see the automake manual, section "Libtool Convenience Libraries")
 nodist_EXTRA_libgridcommon_la_SOURCES = dummy.cc
 sourcescheck_DUMMY = dummy.cc
-libgridcommon_la_LIBADD = quadraturerules/libquadraturerules.la \
-  $(DUNE_LIBS)
+libgridcommon_la_LIBADD = $(DUNE_LIBS)
 
 commondir = $(includedir)/dune/grid/common
 common_HEADERS = virtualrefinement.cc capabilities.hh \

@@ -6,7 +6,7 @@
 // Dune includes
 #include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>
-#include <dune/grid/genericgeometry/topologytypes.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/alugrid/3d/mappings.hh>

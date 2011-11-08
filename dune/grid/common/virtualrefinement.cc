@@ -23,7 +23,7 @@
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 #include <dune/common/iteratorfacades.hh>
 
 #include "grid.hh"

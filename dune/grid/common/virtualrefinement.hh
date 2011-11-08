@@ -271,7 +271,7 @@
  */
 
 #include <vector>
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 #include <dune/common/fvector.hh>
 #include "refinement.hh"
 

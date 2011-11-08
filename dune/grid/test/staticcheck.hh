@@ -12,7 +12,7 @@
 
  */
 
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridenums.hh>
 

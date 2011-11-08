@@ -10,10 +10,11 @@
 #include <vector>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/geometrytype.hh>
 #include <dune/common/shared_ptr.hh>
 
-#include <dune/grid/common/quadraturerules.hh>
+#include <dune/geometry/type.hh>
+#include <dune/geometry/quadraturerules.hh>
+
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 #ifdef HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>

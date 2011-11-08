@@ -8,7 +8,7 @@
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/alugrid/3d/alu3dinclude.hh>
-#include <dune/grid/genericgeometry/topologytypes.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 
 
 /** @file

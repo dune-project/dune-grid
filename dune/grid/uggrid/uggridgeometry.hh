@@ -7,10 +7,12 @@
  * \brief The UGGridGeometry class and its specializations
  */
 
-#include "uggridrenumberer.hh"
 #include <dune/common/array.hh>
 #include <dune/common/fmatrix.hh>
-#include <dune/grid/genericgeometry/geometry.hh>
+
+#include <dune/geometry/genericgeometry/geometry.hh>
+
+#include "uggridrenumberer.hh"
 
 namespace Dune {
 

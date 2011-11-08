@@ -18,9 +18,8 @@
    @endverbatim
  */
 
-#include <dune/common/geometrytype.hh>
-
-#include <dune/grid/genericgeometry/topologytypes.hh>
+#include <dune/geometry/type.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 
 namespace Dune {
 

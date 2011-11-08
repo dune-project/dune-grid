@@ -3,7 +3,7 @@
 #ifndef DUNE_ALUGRID_ITERATOR_IMP_CC
 #define DUNE_ALUGRID_ITERATOR_IMP_CC
 
-#include <dune/grid/genericgeometry/topologytypes.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 
 #include "alu3dinclude.hh"
 

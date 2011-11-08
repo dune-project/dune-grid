@@ -15,8 +15,9 @@
 
 #include <dune/common/array.hh>
 
+#include <dune/geometry/genericreferenceelements.hh>
+
 #include <dune/grid/common/gridfactory.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
 
 #include <dune/grid/utility/grapedataioformattypes.hh>
 

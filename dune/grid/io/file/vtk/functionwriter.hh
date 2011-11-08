@@ -13,7 +13,8 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/shared_ptr.hh>
 
-#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/geometry/genericreferenceelements.hh>
+
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/grid/io/file/vtk/dataarraywriter.hh>
 #include <dune/grid/io/file/vtk/pvtuwriter.hh>

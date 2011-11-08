@@ -7,8 +7,8 @@
 #include <algorithm>
 
 #include <dune/common/fvector.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 #include <dune/grid/common/capabilities.hh>
-#include <dune/grid/common/genericreferenceelements.hh>
 
 #include <map>
 #include <set>

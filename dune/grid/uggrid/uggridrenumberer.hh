@@ -11,7 +11,7 @@
     The UG numbering conventions can be found in the file 'gm/element.c' of UG.
  */
 
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 
 namespace Dune {
 

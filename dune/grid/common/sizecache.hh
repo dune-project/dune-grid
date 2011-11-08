@@ -6,7 +6,7 @@
 #include <cassert>
 #include <vector>
 
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 
 #include <dune/grid/common/gridenums.hh>
 

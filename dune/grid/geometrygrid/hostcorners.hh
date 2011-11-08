@@ -3,7 +3,7 @@
 #ifndef DUNE_GEOGRID_HOSTCORNERS_HH
 #define DUNE_GEOGRID_HOSTCORNERS_HH
 
-#include <dune/common/geometrytype.hh>
+#include <dune/geometry/type.hh>
 
 #include <dune/grid/alugrid/3d/topology.hh>
 #include <dune/grid/common/entity.hh>

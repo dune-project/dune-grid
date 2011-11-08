@@ -7,9 +7,10 @@
 #include <dune/common/forloop.hh>
 #include <dune/common/typetraits.hh>
 
+#include <dune/geometry/quadraturerules/gaussquadrature.hh>
+
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/gridview.hh>
-#include <dune/grid/common/quadraturerules/gaussquadrature.hh>
 
 namespace Dune
 {

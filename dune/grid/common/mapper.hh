@@ -10,7 +10,7 @@
 
 #include <dune/common/bartonnackmanifcheck.hh>
 
-#include <dune/grid/genericgeometry/conversion.hh>
+#include <dune/geometry/genericgeometry/conversion.hh>
 
 /** @file
  * @author Peter Bastian
