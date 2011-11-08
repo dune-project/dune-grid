@@ -79,7 +79,7 @@ namespace Dune
       : codim_( codim )
         , index_( index )
         , overEstimate_( overEstimate ) // this is not yet the right approach - will be revised
-        , data_( index.size( 0 ), Data(), allocator )
+        , data_( index.size( codim ), Data(), allocator )
     {}
 
     //! \brief copy constructor
@@ -430,7 +430,7 @@ namespace Dune
     typedef typename Grid::Traits::LocalIdSet IdSet;
     typedef typename IdSet::IdType IdType;
     typedef typename Allocator::template rebind<IdType>::other IdAllocator;
-    typedef std::map<const IdType, Data, std::less<IdType>,
+    typedef std::map<const IdType, Data, std::less<const IdType>,
         IdAllocator> Map;
     typedef PersistentContainerMap< Grid, IdSet, Map > BaseType;
 
