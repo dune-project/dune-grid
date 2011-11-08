@@ -430,7 +430,7 @@ namespace Dune
     typedef typename Grid::Traits::LocalIdSet IdSet;
     typedef typename IdSet::IdType IdType;
     typedef typename Allocator::template rebind<IdType>::other IdAllocator;
-    typedef std::map<const IdType, Data, std::less<IdType>,
+    typedef std::map<const IdType, Data, std::less<const IdType>,
         IdAllocator> Map;
     typedef PersistentContainerMap< Grid, IdSet, Map > BaseType;
 
