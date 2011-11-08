@@ -72,7 +72,7 @@ bool test(GridType &grid)
         ret = false;
         break;
       }
-      typename EIterator::Entity::EntityPointer up = eit->father();
+      typename EIterator::EntityPointer::Entity::EntityPointer up = eit->father();
       while ( !container0[*up].used )
       {
         if (up->level() == 0)
@@ -129,6 +129,8 @@ try {
     std::cout << "Testing YaspGrid" << std::endl;
     test(grid);
   }
+
+#if HAVE_ALUGRID
   {
     typedef ALUCubeGrid<2,2> GridType;
     array<unsigned int,2> elements2d;
@@ -138,6 +140,7 @@ try {
     std::cout << "Testing ALUGrid" << std::endl;
     test(*grid);
   }
+#endif
 
   return 0;
 
