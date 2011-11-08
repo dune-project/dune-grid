@@ -79,7 +79,7 @@ namespace Dune
       : codim_( codim )
         , index_( index )
         , overEstimate_( overEstimate ) // this is not yet the right approach - will be revised
-        , data_( index.size( 0 ), Data(), allocator )
+        , data_( index.size( codim ), Data(), allocator )
     {}
 
     //! \brief copy constructor
