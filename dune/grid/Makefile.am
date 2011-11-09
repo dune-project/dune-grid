@@ -6,7 +6,6 @@ noinst_LTLIBRARIES = libgrid.la
 
 # always part of lib:
 ONEDLIB = onedgrid/libonedgrid.la
-COMMONLIB = common/libgridcommon.la
 DGFPARSERLIB = io/file/dgfparser/libdgfparser.la
 
 # conditional parts:
@@ -25,7 +24,6 @@ libgrid_la_SOURCES =
 nodist_EXTRA_libgrid_la_SOURCES = dummy.cc
 sourcescheck_DUMMY = dummy.cc
 libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
-	$(COMMONLIB)				\
 	$(DGFPARSERLIB)				\
         $(AMIRAMESHLIB)                         \
 	$(DUNE_LIBS)

@@ -1,14 +1,5 @@
 # $Id$
 
-noinst_LTLIBRARIES = libgridcommon.la
-# construct only from sub-libraries
-libgridcommon_la_SOURCES =
-# This forces automake to use the C++ linker
-# (see the automake manual, section "Libtool Convenience Libraries")
-nodist_EXTRA_libgridcommon_la_SOURCES = dummy.cc
-sourcescheck_DUMMY = dummy.cc
-libgridcommon_la_LIBADD = $(DUNE_LIBS)
-
 commondir = $(includedir)/dune/grid/common
 common_HEADERS = virtualrefinement.cc capabilities.hh \
   entity.hh entitypointer.hh geometry.hh grid.hh \
