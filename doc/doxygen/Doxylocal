@@ -38,7 +38,6 @@ IMAGE_PATH            += @top_srcdir@/dune/grid/sgrid \
                          @top_srcdir@/dune/grid/yaspgrid \
                          @top_srcdir@/dune/grid/common \
                          @top_srcdir@/dune/grid/io/file/dgfparser/test \
-                         @top_srcdir@/doc/appl/refelements \
                          @top_srcdir@/doc/refinement \
                          @top_srcdir@/dune/grid/genericgeometry/doc \
                          @top_srcdir@/dune/grid/geometrygrid

@@ -38,14 +38,6 @@
 	  @ingroup GridInterface */
   
   /**
-     @defgroup GridGenericReferenceElements Generic Reference Elements
-
-     @ingroup Grid
-  */
-    /** @defgroup GridDuneREToGenericRE Transition to Generic Reference Elements
-	@ingroup GridGenericReferenceElements */
-
-  /**
      @defgroup Mapper Mappers
      @ingroup Grid
    */
@@ -125,18 +117,12 @@
 	 @defgroup GridDevel Grid Developer API
 	 @ingroup Grid
         @brief Interfaces needed to implement a new \ref Grid "Dune::Grid"
-  */
 
-        /** \defgroup GenericGeometry Generic Geometry Implementations
-         *  \ingroup  GridDevel
-         */
+        For help implementing the geometries of your grid, have a look at \ref
+        GenericGeometry from \ref dune-geometry.
+  */
 
   /**
      @defgroup Refinement Refinement
-     @ingroup Grid
-   */
-
-  /**
-     @defgroup Quadrature Quadrature
      @ingroup Grid
    */
