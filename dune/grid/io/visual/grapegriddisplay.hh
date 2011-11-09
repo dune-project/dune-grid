@@ -10,7 +10,7 @@
 
 //- Dune includes
 #include <dune/common/stdstreams.hh>
-#include <dune/common/geometrytypeindex.hh>
+#include <dune/geometry/typeindex.hh>
 #include <dune/grid/common/grid.hh>
 
 #if HAVE_GRAPE
