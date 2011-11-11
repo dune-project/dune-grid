@@ -228,6 +228,37 @@ namespace Dune {
     {
       return UG_NAMESPACE::VectorIF;
     }
+
+    /*! Master->HGhost/VHGhost */
+    static DDD_IF &EdgeIF()
+    {
+      return UG_NAMESPACE::EdgeIF;
+    }
+
+    /*! EdgeSymmIF: Master/HGhost/VHGhost */
+    static DDD_IF &BorderEdgeSymmIF()
+    {
+      return UG_NAMESPACE::BorderEdgeSymmIF;
+    }
+
+    /*! EdgeHIF: Master/HGhost/VHGhost */
+    static DDD_IF &EdgeHIF()
+    {
+      return UG_NAMESPACE::EdgeHIF;
+    }
+
+    /*! EdgeVHIF: Master->VGhost/HGhost/VHGhost */
+    static DDD_IF &EdgeVHIF()
+    {
+      return UG_NAMESPACE::EdgeVHIF;
+    }
+
+    /*! EdgeSymmVHIF: Master/VGhost/HGhost/VHGhost */
+    static DDD_IF &EdgeSymmVHIF()
+    {
+      return UG_NAMESPACE::EdgeSymmVHIF;
+    }
+
 #endif
 
     // //////////////////////////////////////////////
@@ -368,6 +399,11 @@ namespace Dune {
     static int myLevel (const UG_NS< UG_DIM >::Node* theNode) {
       using UG::UINT;
       return LEVEL(theNode);
+    }
+
+    static int myLevel (const UG_NS< UG_DIM >::Edge* theEdge) {
+      using UG::UINT;
+      return LEVEL(theEdge);
     }
 
     //! return true if element has an exact copy on the next level
@@ -572,6 +608,11 @@ namespace Dune {
       return theNode->isLeaf;
     }
 
+    //! Return true if the edge is a leaf edge
+    static bool isLeaf(const UG_NS< UG_DIM >::Edge* theEdge) {
+      return theEdge->leafIndex > -1;
+    }
+
     // /////////////////////////////////////////////
     //   Level indices
     // /////////////////////////////////////////////
@@ -772,6 +813,16 @@ namespace Dune {
       using UG_NAMESPACE ::n_offset;
       using UG::UINT;
       return CORNER(theElement, i);
+    }
+
+    //! Returns the i-th edge of a UG element
+    static UG_NS< UG_DIM >::Edge* ElementEdge(const UG_NS< UG_DIM >::Element* theElement, int i) {
+      using UG_NAMESPACE ::NODE;
+      using UG_NAMESPACE ::n_offset;
+      using UG::UINT;
+      using UG_NAMESPACE ::element_descriptors;
+      return GetEdge(CORNER(theElement, CORNER_OF_EDGE(theElement, i, 0)),
+                     CORNER(theElement, CORNER_OF_EDGE(theElement, i, 1)));
     }
 
     //! get edge from node i to node j (in UG's numbering !

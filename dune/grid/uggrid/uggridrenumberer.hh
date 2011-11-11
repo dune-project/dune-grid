@@ -94,6 +94,11 @@ namespace Dune {
       return i;
     }
 
+    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
+    static int edgesDUNEtoUG(int i, const GeometryType& type) {
+      return facesDUNEtoUG(i, type);
+    }
+
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
     static int facesUGtoDUNE(int i, const GeometryType& type) {
 
@@ -111,6 +116,11 @@ namespace Dune {
       }
 
       return i;
+    }
+
+    /** \brief Turn a local edge number from UG numbering to DUNE numbering */
+    static int edgesUGtoDUNE(int i, const GeometryType& type) {
+      return facesUGtoDUNE(i, type);
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering
@@ -132,6 +142,13 @@ namespace Dune {
       }
 
       return i;
+    }
+
+    /** \brief Turn a local edge number from UG numbering to DUNE numbering
+     * \param tag The UG way to specify element types.  See the file ug/gm/gm.h for the possible values
+     */
+    static int edgesUGtoDUNE(int i, unsigned int tag) {
+      return facesUGtoDUNE(i, tag);
     }
 
   };
@@ -180,6 +197,113 @@ namespace Dune {
     }
 
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
+    static int edgesDUNEtoUG(int i, const GeometryType& type) {
+
+      if (type.isCube()) {
+
+        // edges of a hexahedron
+        const int renumbering[12] = {4, 5, 7, 6, 3, 1, 0, 2, 11, 9, 8, 10};
+        return renumbering[i];
+
+      }
+
+      if (type.isPrism()) {
+
+        // edges of a prism
+        const int renumbering[9] = {3, 4, 5, 0, 1, 2, 6, 8, 7};
+        return renumbering[i];
+
+      }
+
+      if (type.isPyramid()) {
+
+        // edges of a pyramid
+        const int renumbering[8] = {3, 1, 0, 2, 4, 5, 7, 6};
+        return renumbering[i];
+
+      }
+
+      if (type.isSimplex()) {
+
+        // edges of a tetrahedon
+        const int renumbering[6] = {0, 2, 1, 3, 4, 5};
+        return renumbering[i];
+      }
+
+      return i;
+    }
+
+    /** \brief Turn a local edge number from UG numbering to DUNE numbering */
+    static int edgesUGtoDUNE(int i, const GeometryType& type) {
+
+      if (type.isCube()) {
+
+        // edges of a hexahedron
+        const int renumbering[12] = {6, 5, 7, 4, 0, 1, 3, 2, 10, 9, 11, 8};
+        return renumbering[i];
+
+      }
+
+      if (type.isPrism()) {
+
+        // edges of a prism
+        const int renumbering[9] = {3, 4, 5, 0, 1, 2, 6, 8, 7};
+        return renumbering[i];
+
+      }
+
+      if (type.isPyramid()) {
+
+        // edges of a pyramid
+        const int renumbering[8] = {2, 1, 3, 0, 4, 5, 7, 6};
+        return renumbering[i];
+
+      }
+
+      if (type.isSimplex()) {
+
+        // edges of a tetrahedon
+        const int renumbering[6] = {0, 2, 1, 3, 4, 5};
+        return renumbering[i];
+      }
+
+      return i;
+    }
+
+    /** \brief Turn a local edge number from UG numbering to DUNE numbering
+     * \param tag The UG way to specify element types.  See the file ug/gm/gm.h for the possible values
+     */
+    static int edgesUGtoDUNE(int i, unsigned int tag) {
+
+      if (tag == UG::D3::HEXAHEDRON) {
+
+        // edges of a hexahedron
+        const int renumbering[12] = {6, 5, 7, 4, 0, 1, 3, 2, 10, 9, 11, 8};
+        return renumbering[i];
+
+      } if (tag == UG::D3::PRISM) {
+
+        // edges of a prism
+        const int renumbering[9] = {3, 4, 5, 0, 1, 2, 6, 8, 7};
+        return renumbering[i];
+
+      } if (tag == UG::D3::PYRAMID) {
+
+        // edges of a pyramid
+        const int renumbering[8] = {2, 1, 3, 0, 4, 5, 7, 6};
+        return renumbering[i];
+
+      } else if (tag == UG::D3::TETRAHEDRON) {
+
+        // edges of a tetrahedon
+        const int renumbering[6] = {0, 2, 1, 3, 4, 5};
+        return renumbering[i];
+      }
+
+      return i;
+    }
+
+    /** \brief Turn a local face number from DUNE numbering to UG numbering */
     static int facesDUNEtoUG(int i, const GeometryType& type) {
 
       if (type.isCube()) {
