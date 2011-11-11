@@ -14,6 +14,7 @@
 #include <dune/common/mpihelper.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
+#include <dune/geometry/genericreferenceelements.hh>
 
 using namespace Dune;
 
@@ -305,7 +306,92 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
     writer.write(fileName, Dune::VTK::ascii);
     std::cout << "Done writing data to disk\n";
   }
+}
+
+//! edge communication
+template <int dim>
+class EdgeCommunication
+{
+public:
+  template <class GridView>
+  static void test(const GridView &gridView)
+  {
+    const int dim = GridView::dimension;
+    const int commCodim = dim - 1;
+
+    std::cout << "Testing communication for codim " << commCodim << " entities\n";
+
+    typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, LayoutWrapper<commCodim>::template Layout>
+    MapperType;
+    MapperType mapper(gridView);
+
+    std::cout << gridView.comm().rank()+1 << ": Index set has " << mapper.size() << " codim " << commCodim << " entities\n";
+
+    // create the user data arrays
+    typedef std::vector<Dune::FieldVector<double, 1> > UserDataType;
+    UserDataType userDataSend(gridView.size(commCodim), 0.0);
+    UserDataType userDataReceive(gridView.size(commCodim), 0.0);
+    UserDataType entityIndex(gridView.size(commCodim), -1e10);
+    UserDataType partitionType(gridView.size(commCodim), -1e10);
+
+    // write the partition type of each entity into the corresponding
+    // result array
+    typename GridView::template Codim<0>::Iterator
+    it = gridView.template begin<0>();
+    const typename GridView::template Codim<0>::Iterator
+    &endIt = gridView.template end<0>();
+    for (; it != endIt; ++it) {
+      int numberOfEdges = it->template count<commCodim>();
+      for (int k = 0; k < numberOfEdges; k++)
+      {
+        typedef typename GridView::template Codim<0>::Entity Element;
+        typedef typename Element::template Codim<commCodim>::EntityPointer EdgePointer;
+        const EdgePointer edgePointer(it->template subEntity<commCodim>(k));
+        entityIndex[mapper.map(*edgePointer)]   = mapper.map(*edgePointer);
+        partitionType[mapper.map(*edgePointer)] = edgePointer->partitionType();
+
+        if (edgePointer->partitionType() == Dune::BorderEntity)
+        {
+          typedef typename GridView::template Codim<0>::Entity Element;
+          const typename Element::Geometry& geometry = it->geometry();
+          Dune::GeometryType gt = geometry.type();
+
+          const typename Dune::GenericReferenceElementContainer<double, dim>::value_type&
+          referenceElement = Dune::GenericReferenceElements<double, dim>::general(gt);
+          const Dune::FieldVector<double, dim>&
+          edgeGlobal = geometry.global(referenceElement.position(k, dim-1));
+          std::cout << gridView.comm().rank()+1 << ": border edge "
+                    << mapper.map(*edgePointer) << " (" << edgeGlobal
+                    << ")" << std::endl;
+        }
+      }
+    }
+
+    // initialize data handle (marks the nodes where some data was
+    // send or received)
+    typedef DataExchange<MapperType, commCodim> MyDataHandle;
+    MyDataHandle datahandle(mapper,
+                            userDataSend,
+                            userDataReceive);
+
+    // communicate the entities at the interior border to all other
+    // processes
+    gridView.communicate(datahandle, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
+  }
 };
+
+//! specialization for 2D: not yet possible
+template <>
+class EdgeCommunication<2>
+{
+public:
+  template <class GridView>
+  static void test(const GridView &gridView)
+  {
+    std::cout << gridView.comm().rank()+1 << ": Skipping edge communication for 2D: not yet possible.\n";
+  }
+};
+
 
 template <int dim>
 void testParallelUG()
@@ -323,7 +409,7 @@ void testParallelUG()
   Dune::FieldVector<double,dim> lowerLeft(0);
   Dune::FieldVector<double,dim> upperRight(1);
   Dune::array<unsigned int, dim> elements;
-  std::fill(elements.begin(), elements.end(), 10);
+  std::fill(elements.begin(), elements.end(), 4);
   shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
 
   //////////////////////////////////////////////////////
@@ -382,10 +468,12 @@ void testParallelUG()
   // Test element and node communication on level view
   testCommunication<typename GridType::LevelGridView, 0>(level0GridView, false);
   testCommunication<typename GridType::LevelGridView, dim>(level0GridView, false);
+  EdgeCommunication<dim>::template test<typename GridType::LevelGridView>(level0GridView);
 
   // Test element and node communication on leaf view
   testCommunication<typename GridType::LeafGridView, 0>(leafGridView, true);
   testCommunication<typename GridType::LeafGridView, dim>(leafGridView, true);
+  EdgeCommunication<dim>::template test<typename GridType::LeafGridView>(leafGridView);
 
   ////////////////////////////////////////////////////
   //  Refine globally and test again
@@ -412,9 +500,11 @@ void testParallelUG()
   {
     testCommunication<typename GridType::LevelGridView, 0>(grid->levelView(i), false);
     testCommunication<typename GridType::LevelGridView, dim>(grid->levelView(i), false);
+    EdgeCommunication<dim>::template test<typename GridType::LevelGridView>(grid->levelView(i));
   }
   testCommunication<typename GridType::LeafGridView, 0>(grid->leafView(), true);
   testCommunication<typename GridType::LeafGridView, dim>(grid->leafView(), true);
+  EdgeCommunication<dim>::template test<typename GridType::LeafGridView>(grid->leafView());
 
 };
 
