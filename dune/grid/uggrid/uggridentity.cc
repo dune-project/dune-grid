@@ -137,20 +137,25 @@ Dune::UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
 {
   assert(i>=0 && i<count<cc>());
 
-  if (cc==dim) {
-
+  if (cc==dim)
+  {
     typename UG_NS<dim>::Node* subEntity = UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i, this->type()));
     // The following cast is here to make the code compile for all cc.
-    // When it gets actually called, cc==0, and the cast is nonexisting.
+    // When it gets actually called, cc==dim, and the cast is nonexisting.
     return typename GridImp::template Codim<cc>::EntityPointer((typename UG_NS<dim>::template Entity<cc>::T*)subEntity);
-
-  } else if (cc==0) {
-    // The following cast is here to make the code compile for all cc.
-    // When it gets actually called, cc==0, and the cast is nonexisting.
+  }
+  else if (cc==dim - 1)
+  {
+    typename UG_NS<dim>::Edge* subEntity = UG_NS<dim>::ElementEdge(target_,UGGridRenumberer<dim>::edgesDUNEtoUG(i, this->type()));
+    return typename GridImp::template Codim<cc>::EntityPointer((typename UG_NS<dim>::template Entity<cc>::T*)subEntity);
+  }
+  else if (cc==0)
+  {
     typename UG_NS<dim>::template Entity<cc>::T* myself = (typename UG_NS<dim>::template Entity<cc>::T*)target_;
     return typename GridImp::template Codim<cc>::EntityPointer(myself);
-  } else
-    DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::entity isn't implemented for cc==" << cc );
+  }
+  else
+    DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subEntity isn't implemented for cc==" << cc );
 }
 
 template<int dim, class GridImp>
@@ -423,6 +428,9 @@ template class Dune::UGGridEntity<3,3, const Dune::UGGrid<3> >;
 template class Dune::UGGridEntity<0,2, const Dune::UGGrid<2> >;
 template class Dune::UGGridEntity<0,3, const Dune::UGGrid<3> >;
 
+template class Dune::UGGridEntity<1,2, const Dune::UGGrid<2> >;
+template class Dune::UGGridEntity<2,3, const Dune::UGGrid<3> >;
+
 template int Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::count<0>() const;
 template int Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::count<1>() const;
 template int Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::count<2>() const;
@@ -436,25 +444,22 @@ template int Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::count<3>() const;
 template Dune::Grid<2, 2, double, Dune::UGGridFamily<2, 2> >::Codim<0>::EntityPointer
 Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<0>(int) const;
 
-#if 0   // Codim 1 EntityPointers not implemented yet
 template Dune::Grid<2, 2, double, Dune::UGGridFamily<2, 2> >::Codim<1>::EntityPointer
 Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<1>(int) const;
-#endif
 
 template Dune::Grid<2, 2, double, Dune::UGGridFamily<2, 2> >::Codim<2>::EntityPointer
 Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<2>(int) const;
 
-
 template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<0>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<0>(int) const;
 
-#if 0   // Codim 1 and 2 EntityPointers not implemented yet
+#if 0   // Faces in 3D are not implemented yet
 template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<1>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<1>(int) const;
+#endif
 
 template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<2>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<2>(int) const;
-#endif
 
 template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<3>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<3>(int) const;

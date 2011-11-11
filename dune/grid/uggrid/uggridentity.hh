@@ -125,8 +125,7 @@ namespace Dune {
 #define PARHDRE(p) (&((p)->ddd))
 #define EPRIO(e) (PARHDRE(e)->prio)
       if (codim != dim) {
-        // TODO: non-nodes and non-elements (elements are done
-        // below)
+        // TODO: faces (elements and edges are done below)
         return InteriorEntity;
       }
 
@@ -193,6 +192,129 @@ namespace Dune {
     typename UG_NS<dim>::template Entity<codim>::T* target_;
 
   };
+
+  /*! \brief Edge entity
+   * \ingroup UGGrid
+   */
+  template<int dim, class GridImp>
+  class UGEdgeEntity
+  {
+    enum {codim = dim - 1};
+    template <int codim_, PartitionIteratorType PiType_, class GridImp_>
+    friend class UGGridLevelIterator;
+
+    friend class UGMakeableEntity<codim,dim,const UGGrid<dim> >;
+    friend class UGMakeableEntity<codim,dim,UGGrid<dim> >;
+
+    friend class UGGrid<dim>;
+
+    template <class GridImp_>
+    friend class UGGridLevelIndexSet;
+
+    template <class GridImp_>
+    friend class UGGridLeafIndexSet;
+
+    template <class GridImp_, bool Local>
+    friend class UGGridIdSet;
+
+    friend class UGGridEntityPointer<codim, GridImp>;
+    friend class UGGridEntitySeed<codim, GridImp>;
+    typedef typename GridImp::ctype UGCtype;
+
+  public:
+
+    typedef typename GridImp::template Codim<codim>::Geometry Geometry;
+
+    /** \brief The type of UGGrid Entity seeds */
+    typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
+
+    //! level of this element
+    int level () const {
+      return UG_NS<dim>::myLevel(target_);
+    }
+
+    /** \brief Return the entity type identifier */
+    GeometryType type() const
+    {
+      return GeometryType(1);
+    }
+
+    /** \brief The partition type for parallel computing
+     * \todo So far it always returns InteriorEntity */
+    PartitionType partitionType () const
+    {
+#ifndef ModelP
+      return InteriorEntity;
+#else
+
+#define PARHDRE(p) (&((p)->ddd))
+#define EPRIO(e) (PARHDRE(e)->prio)
+      typename UG_NS<dim>::Edge *edge =
+        static_cast<typename UG_NS<dim>::Edge *>(target_);
+
+      if (EPRIO(edge)    == UG_NS<dim>::PrioHGhost
+          || EPRIO(edge) == UG_NS<dim>::PrioVGhost
+          || EPRIO(edge) == UG_NS<dim>::PrioVHGhost)
+        return GhostEntity;
+      else if (EPRIO(edge) == UG_NS<dim>::PrioBorder || hasBorderCopy_(edge))
+        return BorderEntity;
+      else if (EPRIO(edge) == UG_NS<dim>::PrioMaster || EPRIO(edge) == UG_NS<dim>::PrioNone)
+        return InteriorEntity;
+      else
+        DUNE_THROW(GridError, "Unknown priority " << EPRIO(edge));
+#undef EPRIO
+#undef PARHDRE
+#endif
+    }
+
+    /*! Intra-element access to entities of codimension cc > codim. Return number of entities
+       with codimension cc.
+     */
+    //!< Default codim 1 Faces and codim == dim Vertices
+    template<int cc> int count () const;
+
+    /** \brief Get the seed corresponding to this entity */
+    EntitySeed seed () const { return EntitySeed( *this ); }
+
+  protected:
+#ifdef ModelP
+    bool hasBorderCopy_(typename UG_NS<dim>::Edge *edge) const {
+#define PARHDR(p)         (&((p)->ddd))
+#define PRIOLIST(n)        UG_NS<dim>::DDD_InfoProcList(PARHDR(n))
+
+      int  *plist = PRIOLIST(edge);
+      for (int i = 0; plist[i] >= 0; i += 2)
+        if (plist[i + 1] == UG_NS<dim>::PrioBorder)
+          return true;
+
+      return false;
+#undef PARHDR
+#undef PRIOLIST
+    }
+#endif
+
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
+      target_ = target;
+    }
+
+    typename UG_NS<dim>::template Entity<codim>::T* target_;
+  };
+
+  /*! \brief Specialization for edge in 2D
+   * \ingroup UGGrid
+   */
+  template<class GridImp>
+  class UGGridEntity<1,2,GridImp>
+    : public UGEdgeEntity<2,GridImp>
+  {};
+
+  /*! \brief Specialization for edge in 3D
+   * \ingroup UGGrid
+   */
+  template<class GridImp>
+  class UGGridEntity<2,3,GridImp>
+    : public UGEdgeEntity<3,GridImp>
+  {};
 
   //***********************
   //
