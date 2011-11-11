@@ -20,7 +20,7 @@
 #include <dune/geometry/type.hh>
 #include <dune/geometry/genericreferenceelements.hh>
 
-#include <dune/grid/utility/mockgeometry.hh>
+#include <dune/geometry/mockgeometry.hh>
 
 namespace Dune {
 
