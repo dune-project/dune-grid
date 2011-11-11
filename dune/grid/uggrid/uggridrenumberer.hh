@@ -192,7 +192,7 @@ namespace Dune {
 
       if (type.isPrism()) {
 
-        // faces of a hexahedron
+        // faces of a prism
         const int renumbering[5] = {1, 3, 2, 0, 4};
         return renumbering[i];
 
@@ -200,7 +200,7 @@ namespace Dune {
 
       if (type.isPyramid()) {
 
-        // faces of a hexahedron
+        // faces of a pyramid
         const int renumbering[5] = {0, 4, 2, 1, 3};
         return renumbering[i];
 
