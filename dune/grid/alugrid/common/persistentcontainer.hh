@@ -69,6 +69,26 @@ namespace Dune
     {}
   };
 
+  template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype,
+      class Data, class Allocator >
+  class PersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype >, Data, Allocator >
+    : public PersistentContainerVector< ALUGrid< dim, dimworld, eltype, refinementtype >,
+          typename ALUGrid< dim, dimworld, eltype, refinementtype >::HierarchicIndexSet,
+          std::vector<Data,Allocator> >
+  {
+  public:
+    typedef ALUGrid< dim, dimworld, eltype, refinementtype > GridType;
+  private:
+    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
+
+  public:
+    //! Constructor filling the container with values using the default constructor
+    //! Depending on the implementation this could be achieved without allocating memory
+    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
+      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    {}
+  };
+
   template< int dim, int dimworld, ALU2DSPACE ElementType elType, class Data, class Allocator >
   class PersistentContainer< ALU2dGrid< dim, dimworld, elType >, Data, Allocator >
     : public PersistentContainerVector< ALU2dGrid< dim, dimworld, elType >,
