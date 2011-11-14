@@ -12,6 +12,9 @@ namespace Dune {
   // i.e . tetra or hexa, mixed is not implemeneted
   enum ALU3dGridElementType { tetra = 4, hexa = 7, mixed, error };
 
+  enum ALUGridElementType { cube, simplex };
+  enum ALUGridRefinementType { conforming, nonconforming };
+
   template <ALU3dGridElementType type>
   struct EntityCount {};
 

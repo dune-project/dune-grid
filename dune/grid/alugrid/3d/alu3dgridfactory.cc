@@ -655,6 +655,10 @@ namespace Dune
 #if COMPILE_ALUGRID_LIB
   template class ALU3dGridFactory< ALUCubeGrid< 3, 3 > >;
   template class ALU3dGridFactory< ALUSimplexGrid< 3, 3 > >;
+
+  template class ALU3dGridFactory< ALUGrid< 3, 3, cube, nonconforming > >;
+  template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, nonconforming > >;
+  template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, conforming > >;
 #endif
 }
 #endif // end ENABLE_ALUGRID

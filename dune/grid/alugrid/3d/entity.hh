@@ -220,8 +220,9 @@ namespace Dune
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
 
-    enum { refine_element_t = ImplTraits::refine_element_t };
-    enum { coarse_element_t = ImplTraits::coarse_element_t };
+    enum { refine_element_t  = ImplTraits::refine_element_t  };
+    enum { bisect_element_t  = ImplTraits::bisect_element_t  };
+    enum { coarse_element_t  = ImplTraits::coarse_element_t  };
     enum { nosplit_element_t = ImplTraits::nosplit_element_t };
 
     typedef typename ImplTraits::MarkRuleType MarkRuleType;

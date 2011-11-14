@@ -178,14 +178,33 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: geometryInFather () const
   {
     assert( item_ );
+    // this method should only be called if a father exists
+    assert( item_->up() );
+
+    // get child number
     const int child = item_->nChild();
+
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
     typedef typename GeometryObject::ImplementationType GeometryImp;
-    // to be improved, when we using not the refine 8 rule
-    // see dune/grid/alugrid/common/geostrage.hh for implementation
-    static ALULocalGeometryStorage<GridImp, GeometryObject, 8> geoms( type(), true);
-    assert( geoms.geomCreated(child) );
-    return geoms[ child ];
+
+    // if the rule of the farher is not refine_element, it has to be bisection
+    // this can only be tru for tetrahedral elements
+    if( GridImp :: elementType == tetra &&
+        item_->up()->getrule() != ImplTraits :: refine_element_t )
+    {
+      static GeometryObject* geom = 0 ;
+      if( geom == 0 ) geom = new GeometryObject( GeometryImp() );
+      grid().getRealImplementation( *geom ).buildGeomInFather( father()->geometry(), geometry() );
+      return *geom;
+    }
+    else
+    {
+      // to be improved, when we using not the refine 8 rule
+      // see dune/grid/alugrid/common/geostrage.hh for implementation
+      static ALULocalGeometryStorage<GridImp, GeometryObject, 8> geoms( type(), true);
+      assert( geoms.geomCreated(child) );
+      return geoms[ child ];
+    }
   }
 
   //********* begin method subIndex ********************
@@ -424,19 +443,28 @@ namespace Dune {
       // don't mark macro elements for coarsening ;)
       if(level() <= 0) return false;
 
-      (*item_).request(coarse_element_t);
+      item_->request(coarse_element_t);
       return true;
     }
 
     // mark for refinement
     if(ref > 0)
     {
-      (*item_).request(refine_element_t);
+      // for tetrahedral elements check whether to use bisection
+      if( GridImp :: elementType == tetra &&
+          grid().conformingRefinement() )
+      {
+        item_->request( bisect_element_t );
+      }
+      else
+      {
+        item_->request( refine_element_t );
+      }
       return true;
     }
 
     // mark for none
-    (*item_).request( nosplit_element_t );
+    item_->request( nosplit_element_t );
     return true;
   }
 

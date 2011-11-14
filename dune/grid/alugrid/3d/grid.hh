@@ -100,7 +100,20 @@ namespace Dune
   class ALU3dGrid;
 #endif // #else // #if ALU3DGRID_PARALLEL
 
+  template <ALUGridElementType elType>
+  struct ALUGridBaseGrid ;
 
+  template <>
+  struct ALUGridBaseGrid< cube >
+  {
+    typedef ALU3dGrid< hexa >  BaseGrid ;
+  };
+
+  template <>
+  struct ALUGridBaseGrid< simplex >
+  {
+    typedef ALU3dGrid< tetra >  BaseGrid ;
+  };
 
   namespace DefaultIndexSetHelper
   {
@@ -346,7 +359,8 @@ namespace Dune
    */
   template< ALU3dGridElementType elType, class Comm >
   class ALU3dGrid
-    : public GridDefaultImplementation< 3, 3, alu3d_ctype, ALU3dGridFamily< elType, Comm > >,
+    : public GridDefaultImplementation< 3, 3, alu3d_ctype,
+          ALU3dGridFamily< elType, Comm > >,
       public HasObjectStream,
       public HasHierarchicIndexSet
   {
@@ -515,7 +529,8 @@ namespace Dune
     ALU3dGrid ( const std::string &macroTriangFilename,
                 const MPICommunicatorType mpiComm,
                 const DuneBoundaryProjectionType *bndPrj,
-                const DuneBoundaryProjectionVector *bndVec );
+                const DuneBoundaryProjectionVector *bndVec,
+                const ALUGridRefinementType refinementType );
 
   public:
     //! \brief Desctructor
@@ -945,6 +960,11 @@ namespace Dune
       return factory_;
 #endif
     }
+
+    const bool conformingRefinement() const
+    {
+      return (refinementType_ == conforming) ;
+    }
   protected:
     /////////////////////////////////////////////////////////////////
     //
@@ -1017,6 +1037,9 @@ namespace Dune
 
     // pointer to communications object
     Communications *communications_;
+
+    // refinement type (nonconforming or conforming)
+    const ALUGridRefinementType refinementType_ ;
   }; // end class ALU3dGrid
 
 

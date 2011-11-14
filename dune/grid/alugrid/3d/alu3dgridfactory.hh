@@ -403,6 +403,42 @@ namespace Dune
   };
 
 
+  /** \brief Specialization of the generic GridFactory for ALUCubeGrid<3,3>
+   *  \ingroup GridFactory
+   */
+  template<ALUGridElementType eltype, ALUGridRefinementType refinementtype >
+  class GridFactory< ALUGrid< 3, 3, eltype, refinementtype > >
+    : public ALU3dGridFactory< ALUGrid< 3, 3, eltype, refinementtype > >
+  {
+    typedef GridFactory< ALUGrid< 3, 3, eltype, refinementtype > > ThisType;
+    typedef ALU3dGridFactory< ALUGrid< 3, 3, eltype, refinementtype > > BaseType;
+
+  public:
+    typedef typename BaseType::Grid Grid;
+
+    typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
+
+    /** \brief Default constructor */
+    explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
+      : BaseType( communicator )
+    {}
+
+    /** \brief constructor taking filename */
+    GridFactory ( const std::string &filename,
+                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
+      : BaseType( filename, communicator )
+    {}
+
+  protected:
+    template< class, class, int > friend class ALULocalGeometryStorage;
+    /** \brief constructor taking verbosity flag */
+    GridFactory ( const bool realGrid,
+                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
+      : BaseType( realGrid, communicator )
+    {}
+  };
+
+
 
   // Implementation of ALU3dGridFactory
   // ----------------------------------

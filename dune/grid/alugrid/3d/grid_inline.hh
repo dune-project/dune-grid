@@ -21,7 +21,8 @@ namespace Dune
   ::ALU3dGrid ( const std::string &macroTriangFilename,
                 const MPICommunicatorType mpiComm,
                 const DuneBoundaryProjectionType *bndPrj,
-                const DuneBoundaryProjectionVector *bndVec )
+                const DuneBoundaryProjectionVector *bndVec,
+                const ALUGridRefinementType refinementType )
     : mygrid_( 0 )
       , maxlevel_( 0 )
       , coarsenMarked_( 0 )
@@ -45,12 +46,14 @@ namespace Dune
       , bndVec_ ( (bndVec) ? (new DuneBoundaryProjectionVector( *bndVec )) : 0 )
       , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
       , communications_( new Communications( mpiComm ) )
+      , refinementType_( refinementType )
   {
     assert( elType == tetra || elType == hexa );
 
     geomTypes_.resize( dimension+1 );
     GeometryType tmpType;
-    for( int codim = 0; codim <= dimension; ++codim ) {
+    for( int codim = 0; codim <= dimension; ++codim )
+    {
       if (elType == tetra)
         tmpType.makeSimplex( dimension - codim );
       else

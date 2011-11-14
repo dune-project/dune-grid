@@ -220,8 +220,15 @@ namespace Dune
     typedef typename GitterType::Geometric::TetraRule MarkRuleType;
 
     // refinement and coarsening enum
-    enum { refine_element_t = MarkRuleType::iso8 };
-    enum { coarse_element_t = MarkRuleType::crs };
+    enum { bisect_element_t  =
+#ifdef ALUGRID_PERIODIC_BOUNDARY
+             MarkRuleType::bisect
+#else
+             MarkRuleType::iso8
+#endif
+    };
+    enum { refine_element_t  = MarkRuleType::iso8    };
+    enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };
 
     typedef std::pair< GEOFaceType *, int > NeighbourFaceType;
@@ -260,8 +267,9 @@ namespace Dune
     typedef typename GitterType::Geometric::HexaRule MarkRuleType;
 
     // refinement and coarsening enum
-    enum { refine_element_t = MarkRuleType::iso8 };
-    enum { coarse_element_t = MarkRuleType::crs };
+    enum { refine_element_t  = MarkRuleType::iso8 };
+    enum { bisect_element_t  = MarkRuleType::iso8 };
+    enum { coarse_element_t  = MarkRuleType::crs };
     enum { nosplit_element_t = MarkRuleType::nosplit };
 
     typedef std::pair< GEOFaceType *, int > NeighbourFaceType;

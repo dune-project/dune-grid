@@ -25,6 +25,8 @@ namespace Dune
   template< int dim, int dimworld >
   class ALUSimplexGrid;
 
+  template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
+  class ALUGrid;
 
 
   namespace Capabilities
@@ -169,6 +171,87 @@ namespace Dune
      */
     template<>
     struct hasBackupRestoreFacilities< ALUSimplexGrid< 3, 3 > >
+    {
+      static const bool v = true;
+    };
+
+    // Capabilities for ALUGrid
+    // -------------------------------
+
+    /** \struct isLeafwiseConforming
+       \ingroup ALUGrid
+     */
+
+    /** \struct IsUnstructured
+       \ingroup ALUGrid
+     */
+
+    /** \brief ALUGrid has only one geometry type for codim 0 entities
+       \ingroup ALUGrid
+     */
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
+    struct hasSingleGeometryType< ALUGrid< 3, 3, eltype, refinementtype > >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = (eltype == cube) ?
+                                             GenericGeometry :: CubeTopology< 3 > :: type :: id :
+                                             GenericGeometry :: SimplexTopology< 3 > :: type :: id ;
+    };
+
+    /** \brief ALUGrid has entities for all codimension
+       \ingroup ALUGrid
+     */
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, int cdim >
+    struct hasEntity< ALUGrid< 3, 3, eltype, refinementtype >, cdim >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUGrid is parallel
+       \ingroup ALUGrid
+     */
+#if ALU3DGRID_PARALLEL
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
+    struct isParallel< ALUGrid< 3, 3, eltype, refinementtype > >
+    {
+      static const bool v = true;
+    };
+#endif
+
+    /** \brief ALUGrid can communicate
+       \ingroup ALUGrid
+     */
+#if ALU3DGRID_PARALLEL
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, int codim >
+    struct canCommunicate< ALUGrid< 3, 3, eltype, refinementtype >, codim >
+    {
+      static const bool v = true;
+    };
+#endif
+
+    /** \brief ALUGrid has conforming level grids
+       \ingroup ALUGrid
+     */
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
+    struct isLevelwiseConforming< ALUGrid< 3, 3, eltype, refinementtype > >
+    {
+      static const bool v = refinementtype == nonconforming;
+    };
+
+    /** \brief ALUGrid has conforming level grids
+       \ingroup ALUGrid
+     */
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
+    struct isLeafwiseConforming< ALUGrid< 3, 3, eltype, refinementtype > >
+    {
+      static const bool v = refinementtype == conforming ;
+    };
+
+    /** \brief ALUGrid has backup and restore facilities
+       \ingroup ALUGrid
+     */
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
+    struct hasBackupRestoreFacilities< ALUGrid< 3, 3, eltype, refinementtype > >
     {
       static const bool v = true;
     };
