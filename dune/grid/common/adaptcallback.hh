@@ -61,6 +61,16 @@ namespace Dune
       asImp().postRefinement( father );
     }
 
+    void restrictLocal( const Entity &father, const Entity& son, bool initialize ) const
+    {
+      asImp().restrictLocal( father, son, initialize );
+    }
+
+    void prolongLocal( const Entity &father, const Entity& son, bool initialize ) const
+    {
+      asImp().prolongLocal( father, son, initialize );
+    }
+
   protected:
     const Impl &asImp () const
     {
