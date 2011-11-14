@@ -393,7 +393,6 @@ namespace Dune
       {
         const std::pair< FaceType, FaceType > &facePair = *it;
         //ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
-        ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg:: periodic );
         if( elementType == hexa )
         {
           int perel[ 8 ];
@@ -403,8 +402,8 @@ namespace Dune
             perel[ i+4 ] = globalId( facePair.second[ i ] );
           }
           mgb.InsertUniquePeriodic4( perel
-#ifdef ALUGRID_PERIODIC_BOUNDARY
-                                     , bndType
+#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
+                                     , ALU3DSPACE Gitter::hbndseg:: periodic
 #endif
                                      );
         }
@@ -417,8 +416,8 @@ namespace Dune
             perel[ i+3 ] = globalId( facePair.second[ (3 - i) % 3 ] );
           }
           mgb.InsertUniquePeriodic3( perel
-#ifdef ALUGRID_PERIODIC_BOUNDARY
-                                     , bndType
+#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
+                                     , ALU3DSPACE Gitter::hbndseg:: periodic
 #endif
                                      );
         }

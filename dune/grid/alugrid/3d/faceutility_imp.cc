@@ -115,7 +115,7 @@ namespace Dune
       // check for ghosts
       // this check is only need in the parallel case
       // if this cast fails we have a periodic element
-      //#ifdef ALUGRID_PERIODIC_BOUNDARY
+      //#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
       ///      const bool periodicBnd = outerElement_->isperiodic();
       //      const BNDFaceType * bnd = 0;
       //      const BNDFaceType * bnd = static_cast<const BNDFaceType *> (outerElement_);
@@ -329,7 +329,7 @@ namespace Dune
   inline int ALU3dGridFaceInfo< type, Comm >::boundaryId() const
   {
     return ( outerBoundary() ) ? boundaryFace().bndtype() :
-#ifdef ALUGRID_PERIODIC_BOUNDARY
+#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
            (bndType_ == periodicBoundary) ?
            static_cast<const GEOPeriodicType&>(*outerElement_).bndtype() :
 #endif

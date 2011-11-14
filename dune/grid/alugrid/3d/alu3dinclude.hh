@@ -221,7 +221,7 @@ namespace Dune
 
     // refinement and coarsening enum
     enum { bisect_element_t  =
-#ifdef ALUGRID_PERIODIC_BOUNDARY
+#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
              MarkRuleType::bisect
 #else
              MarkRuleType::iso8
