@@ -278,13 +278,13 @@ namespace Dune {
       // remember the number of entity on level and cd = 0
       for(int cd=0; cd<ncodim; ++cd)
       {
-        //if( size_[cd] != grid_.size( level_, cd) )
-        //{
-        //  std::cout << size_[cd] << " s | g " << grid_.size( level_, cd) << std::endl;
-        //}
 #ifndef NDEBUG
         const int gridSize = ( level_ < 0 ) ? grid_.size( cd ) : grid_.size( level_, cd);
         const int mySize = size_[cd];
+        if( mySize > gridSize )
+        {
+          std::cout << mySize << " s | g " << gridSize << std::endl;
+        }
         assert( mySize <= gridSize );
 #endif
       }
