@@ -403,21 +403,20 @@ namespace Dune
       const bool verbose = verb && this->comm().rank() == 0;
       if( verbose )
       {
-        std::cout << "\nCreated " << ALUGridParallelSerial() << " " << name() << "<"<<dim<<","<<dimworld;
-        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+        std::cout << "\nCreated " << ALUGridParallelSerial() << " " << name() << nameSuffix()
+                  << " from macro grid file '" << macroName << "'. \n\n";
       }
     }
 
-    static std::string name()
+    static std::string name () { return std::string("ALUGrid"); }
+
+    static std::string nameSuffix()
     {
-      std::string gridname;
-      if( elType == cube )
-        gridname = "ALUCubeGrid" ;
-      else if( refineType == nonconforming )
-        gridname = "ALUSimplexGrid";
-      else
-        gridname = "ALUConformGrid";
-      return gridname;
+      std::string elt ( elType == cube ? "cube," : "simplex," );
+      std::string ref ( refineType == nonconforming ? "nonconforming>" : "conforming>" );
+      std::stringstream suffix;
+      suffix << "<"<<dim<<","<<dimworld<<"," << elt << ref;
+      return suffix.str();
     }
 
 
@@ -440,8 +439,8 @@ namespace Dune
       const bool verbose = verb && this->comm().rank() == 0;
       if( verbose )
       {
-        std::cout << "\nCreated " << ALUGridParallelSerial() << " " << name() << "<"<<dim<<","<<dimworld;
-        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+        std::cout << "\nCreated " << ALUGridParallelSerial() << " " << name() << nameSuffix()
+                  << " from macro grid file '" << macroName << "'. \n\n";
       }
     }
 
@@ -454,7 +453,7 @@ namespace Dune
     {
       if(this->comm().rank() == 0)
       {
-        std::cout << "\nCreated empty " << name() << "<"<<dim<<","<<dimworld <<">. \n\n";
+        std::cout << "\nCreated empty " << ALUGridParallelSerial() << " " << name() << nameSuffix() << "." << std::endl;
       }
     }
 
