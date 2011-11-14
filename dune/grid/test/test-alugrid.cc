@@ -616,7 +616,7 @@ int main (int argc , char **argv) {
         else
           filename = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf";
 
-        typedef ALUCubeGrid<3,3> GridType;
+        typedef ALUGrid<3,3, cube, nonconforming > GridType;
         GridPtr<GridType> gridPtr(filename);
         checkCapabilities< false >( *gridPtr );
         GridType & grid = *gridPtr;
@@ -646,7 +646,7 @@ int main (int argc , char **argv) {
         else
           filename = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf";
 
-        typedef ALUSimplexGrid<3,3> GridType;
+        typedef ALUGrid<3,3, simplex, nonconforming > GridType;
         GridPtr<GridType> gridPtr(filename);
         checkCapabilities< false >( *gridPtr );
         GridType & grid = *gridPtr;
