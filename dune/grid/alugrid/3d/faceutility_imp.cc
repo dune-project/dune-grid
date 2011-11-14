@@ -30,6 +30,7 @@ namespace Dune
                  int innerTwist)
   {
     face_ = &face;
+
     innerElement_ = 0;
     outerElement_ = 0;
     innerFaceNumber_ = -1;
@@ -62,6 +63,7 @@ namespace Dune
     if( parallel() && innerElement_->isboundary() )
     {
       bndType_ = innerGhostBoundary;
+      assert( ! dynamic_cast< const GEOPeriodicType* > ( innerElement_ ) );
     }
 
     if( parallel() && innerBoundary() )
@@ -113,14 +115,21 @@ namespace Dune
       // check for ghosts
       // this check is only need in the parallel case
       // if this cast fails we have a periodic element
+      //#ifdef ALUGRID_PERIODIC_BOUNDARY
+      ///      const bool periodicBnd = outerElement_->isperiodic();
+      //      const BNDFaceType * bnd = 0;
+      //      const BNDFaceType * bnd = static_cast<const BNDFaceType *> (outerElement_);
+      //#else
       const BNDFaceType * bnd = dynamic_cast<const BNDFaceType *> (outerElement_);
-
-      if( ! bnd ) // the periodic case
+      const bool periodicBnd = ( bnd == 0 ) ;
+      //#endif
+      if( periodicBnd ) // the periodic case
       {
         bndType_ = periodicBoundary ;
         assert( dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) );
         const GEOPeriodicType* periodicClosure = static_cast< const GEOPeriodicType* > ( outerElement_ ) ;
 
+        //assert( periodicClosure->bndtype() == GEOPeriodicType :: periodic );
 #ifdef ALUGRID_PERIODIC_BOUNDARY
         // previously, the segmentIndex( 1 - outerFaceNumber_ ) was used, why?
         segmentIndex_ = periodicClosure->segmentIndex( outerFaceNumber_ );
@@ -319,7 +328,12 @@ namespace Dune
   template< ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< type, Comm >::boundaryId() const
   {
-    return ( outerBoundary() ) ? boundaryFace().bndtype() : 20 ;
+    return ( outerBoundary() ) ? boundaryFace().bndtype() :
+#ifdef ALUGRID_PERIODIC_BOUNDARY
+           (bndType_ == periodicBoundary) ?
+           static_cast<const GEOPeriodicType&>(*outerElement_).bndtype() :
+#endif
+           20 ;
   }
   template< ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< type, Comm >::innerTwist() const

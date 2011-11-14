@@ -294,7 +294,6 @@ namespace Dune
   {
     assert( codim >= 0 );
     assert( codim <= dimension );
-    DUNE_THROW(NotImplemented,"ALU3dGrid:ghostSize not implemented until semantics of the method is clear");
     return ( codim == 0 ) ? 1 : 0;
   }
 
@@ -306,7 +305,6 @@ namespace Dune
     assert( codim >= 0 );
     assert( codim <= dimension );
     assert( level >= 0);
-    DUNE_THROW(NotImplemented,"ALU3dGrid:ghostSize not implemented until semantics of the method is clear");
     return ( codim == 0 ) ? 1 : 0;
   }
 
