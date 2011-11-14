@@ -60,6 +60,13 @@ namespace Dune
     static int refineStepsForHalf () { return 2; }
     static double refineWeight () { return 0.5; }
   };
+
+  template<int dimg, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype>
+  struct DGFGridInfo< Dune::ALUGrid< dimg, dimw, eltype, refinementtype > >
+  {
+    static int refineStepsForHalf () { return ( refinementtype == conforming ) ? dimg : 1; }
+    static double refineWeight () { return ( refinementtype == conforming ) ? 0.5 : 1.0/(std::pow( 2.0, double(dimg))); }
+  };
   /** \endcond */
 
   // DGFGridFactory for AluSimplexGrid
@@ -188,6 +195,11 @@ namespace Dune
     }
 
   protected:
+    bool generateALUGrid( const ALUGridElementType eltype,
+                          std::istream &file,
+                          MPICommunicatorType communicator,
+                          const std::string &filename );
+
     static Grid* callDirectly( const char* gridname,
                                const int rank,
                                const char *filename,
@@ -308,6 +320,45 @@ namespace Dune
 
       if( ! fileFound )
         grid_ = callDirectly( "ALUCubeGrid< 3 , 3 >", rank( comm ), filename.c_str(), comm );
+    }
+
+  protected:
+    bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
+  };
+
+  template < ALUGridElementType eltype, ALUGridRefinementType refinementtype >
+  struct DGFGridFactory< ALUGrid<3,3, eltype, refinementtype > > :
+    public DGFBaseFactory< ALUGrid<3,3, eltype, refinementtype > >
+  {
+    typedef ALUGrid<3,3, eltype, refinementtype > DGFGridType;
+    typedef DGFBaseFactory< DGFGridType > BaseType;
+    typedef typename BaseType :: MPICommunicatorType MPICommunicatorType;
+  protected:
+    using BaseType :: grid_;
+    using BaseType :: callDirectly;
+  public:
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : BaseType( comm )
+    {
+      input.clear();
+      input.seekg( 0 );
+      if( !input )
+        DUNE_THROW( DGFException, "Error resetting input stream." );
+      generate( input, comm );
+    }
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+      : BaseType( comm )
+    {
+      std::ifstream input( filename.c_str() );
+      bool fileFound = input.is_open() ;
+      if( fileFound )
+        fileFound = generate( input, comm, filename );
+
+      if( ! fileFound )
+        grid_ = callDirectly( "ALUGrid< 3 , 3, eltype, ref >", rank( comm ), filename.c_str(), comm );
     }
 
   protected:
