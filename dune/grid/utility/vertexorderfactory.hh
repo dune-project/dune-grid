@@ -16,7 +16,7 @@ namespace Dune {
 
   //! Factory for GeneralVertexOrder objects using an IdSet
   /**
-   * \tparam IdSet Type IdSet used to get the ids of the vertices.
+   * \tparam IdSet Type used to get the ids of the vertices.
    * \tparam Index Type of the indices provided by the vertex ordering
    *               object.  Must be integral, may be non-negative.
    *
@@ -44,7 +44,7 @@ namespace Dune {
      *
      * This factory object stores a reference to the IdSet object.  The
      * factory object's value will become singular when the stored reference
-     * becomes invalid.  The only valid operation on an factory with singular
+     * becomes invalid.  The only valid operation on a factory with singular
      * value is destruction, all other operations will result in undefined
      * behaviour.
      */
