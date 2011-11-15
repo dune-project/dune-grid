@@ -8,7 +8,7 @@
 #include <map>
 
 #include <dune/geometry/type.hh>
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include "mapper.hh"
 

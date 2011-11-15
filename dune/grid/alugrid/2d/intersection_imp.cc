@@ -6,7 +6,7 @@
 #include <stack>
 #include <utility>
 
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/alugrid/2d/geometry.hh>
 #include <dune/grid/alugrid/2d/entity.hh>

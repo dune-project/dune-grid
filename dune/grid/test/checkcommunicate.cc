@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <dune/common/fvector.hh>
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/datahandleif.hh>
 

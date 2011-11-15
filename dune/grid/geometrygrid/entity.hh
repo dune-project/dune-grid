@@ -3,7 +3,7 @@
 #ifndef DUNE_GEOGRID_ENTITY_HH
 #define DUNE_GEOGRID_ENTITY_HH
 
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/grid.hh>
 

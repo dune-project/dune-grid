@@ -15,7 +15,7 @@
 
 #include <dune/common/array.hh>
 
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 

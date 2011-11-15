@@ -6,7 +6,7 @@
 #include <cmath>
 
 #include <dune/geometry/quadraturerules/gaussquadrature.hh>
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include "checkgeometry.cc"
 

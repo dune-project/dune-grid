@@ -18,7 +18,7 @@
 #include <dune/common/forloop.hh>
 #include <dune/common/fvector.hh>
 #include <dune/geometry/type.hh>
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/geometry/mockgeometry.hh>
 

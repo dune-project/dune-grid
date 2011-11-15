@@ -12,7 +12,7 @@
 #include <dune/common/fmatrix.hh>
 #include <dune/common/exceptions.hh>
 
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/genericgeometry/conversion.hh>
 
 namespace Dune

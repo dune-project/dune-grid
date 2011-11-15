@@ -14,7 +14,7 @@
 #include <dune/common/mpihelper.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 using namespace Dune;
 

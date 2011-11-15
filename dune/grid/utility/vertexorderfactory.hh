@@ -9,7 +9,7 @@
 #include <functional>
 #include <vector>
 
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/generalvertexorder.hh>
 
 namespace Dune {

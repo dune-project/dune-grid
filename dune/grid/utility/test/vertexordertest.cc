@@ -23,7 +23,7 @@
 #include <dune/common/typetraits.hh>
 #include <dune/common/mpihelper.hh>
 
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/alugrid.hh>
 #include <dune/grid/onedgrid.hh>

@@ -3,7 +3,7 @@
 #ifndef DUNE_GEOGRID_ITERATOR_HH
 #define DUNE_GEOGRID_ITERATOR_HH
 
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/geometrygrid/entitypointer.hh>
 

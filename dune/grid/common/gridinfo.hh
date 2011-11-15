@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include <dune/common/exceptions.hh>
 #include <dune/common/classname.hh>
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 #include "grid.hh"
 
 /** @file

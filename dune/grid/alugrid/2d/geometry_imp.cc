@@ -4,7 +4,7 @@
 #define DUNE_ALU2DGRID_GEOMETRYIMP_CC
 
 #include <dune/geometry/genericgeometry/conversion.hh>
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 namespace Dune
 {

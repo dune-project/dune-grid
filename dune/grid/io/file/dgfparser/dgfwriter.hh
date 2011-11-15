@@ -12,7 +12,7 @@
 #include <vector>
 
 #include <dune/grid/common/grid.hh>
-#include <dune/geometry/genericreferenceelements.hh>
+#include <dune/geometry/referenceelements.hh>
 
 namespace Dune
 {
