@@ -363,7 +363,7 @@ void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
       int noOfElements = 0;
       int count;
 
-      for (int i=0; i<indexSet.geomTypes(0).size(); i++)
+      for (size_t i=0; i<indexSet.geomTypes(0).size(); i++)
       {
         if (indexSet.geomTypes(0)[i].isSimplex())
           count=1;
