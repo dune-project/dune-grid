@@ -236,9 +236,7 @@ void zeroEntityConsistency (Grid &g)
         const typename Geometry::GlobalCoordinate c1 = it->geometry().corner( c );
         const typename Geometry::GlobalCoordinate c2 = it->geometry().corner( d );
         if( (c2-c1).two_norm() < 10 * std::numeric_limits<typename Grid::ctype>::epsilon() )
-        {
-          DUNE_THROW(CheckError, "geometry["<<c<<"] == geometry["<<d<<"]");
-        }
+          DUNE_THROW( CheckError, "geometry.corner( " << c << " ) == geometry.corner( " << d << " )" );
       }
     }
 
