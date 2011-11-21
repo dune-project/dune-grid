@@ -497,9 +497,9 @@ namespace Dune
       const V& vertices
       )
     {
-      array<FieldVector<double,dim>, 6> v;
+      array<FieldVector<double,dimWorld>, 6> v;
       for (int i=0; i<6; i++)
-        for (int j=0; j<dim; j++)
+        for (int j=0; j<dimWorld; j++)
           v[i][j] = nodes[elementDofs[i]][j];
 
       BoundarySegment<dim,dimWorld>* newBoundarySegment
@@ -618,8 +618,8 @@ namespace Dune
             break;
 
           case 8 : {              // 3-node line
-            array<FieldVector<double,dim>, 3> v;
-            for (int i=0; i<dim; i++) {
+            array<FieldVector<double,dimWorld>, 3> v;
+            for (int i=0; i<dimWorld; i++) {
               v[0][i] = nodes[elementDofs[0]][i];
               v[1][i] = nodes[elementDofs[2]][i];                    // yes, the renumbering is intended!
               v[2][i] = nodes[elementDofs[1]][i];
