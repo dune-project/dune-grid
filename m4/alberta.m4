@@ -4,7 +4,7 @@
 
 # Substitutes the following make variables:
 #   ALBERTA_DIM
-#     value of --with-alberta-dim, or taken from --world-dim, or 2 per default
+#     defaults to $WORLD_DIM
 #
 #   ALBERTAROOT = /usr/local/alberta
 #     Root dir of the alberta installation.  Set from --with-alberta=...
