@@ -87,64 +87,51 @@ namespace Dune
    *  simplicial mesh in 1, 2 and 3 space dimensions that can be dynamically
    *  adapted by a bisection algorithm.
    *
-   *  Supported ALBERTA versions include 1.2 and 2.0. Both versions can be
-   *  downloaded from the ALBERTA website (www.alberta-fem.de). After
-   *  installing ALBERTA, just configure DUNE with the --with-alberta option
-   *  and provide the path to ALBERTA. You also have to specify which
-   *  dimensions of grid and world to use. For example, your %Dune configure
-   *  options could contain the following settings
-   *  \code
-   *  --with-alberta=ALBERTAPATH
-   *  --with-alberta-dim=DIMGRID
-   *  \endcode
-   *  The default value for <tt>DIMGRID</tt> is obtained from
-   *  <tt>--with-world-dim</tt>.  If <tt>--with-world-dim</tt> was not given,
-   *  the default is 2.
+   *  Supported ALBERTA versions include 2.0 or higher.
+   *  It can be downloaded from the ALBERTA website (www.alberta-fem.de).
+   *  After installing ALBERTA, just configure DUNE with the --with-alberta
+   *  option and provide the path to ALBERTA.
+   *
+   *  Each program linking to ALBERTA only supports a fixed dimension of world.
+   *  This is obtained from the <tt>ALBERTA_DIM</tt> preprocessor variable,
+   *  which defaults to <tt>WORLDDIM</tt>.
    *
    *  Further installation instructions can be found here:
    *  http://www.dune-project.org/external_libraries/install_alberta.html
-   *
-   *  \note Although ALBERTA supports different combinations of
-   *        <tt>DIMGRID</tt><=<tt>DIMWORLD</tt>, so far only the
-   *        case <tt>DIMGRID</tt>=<tt>DIMWORLD</tt> is supported.
    *
    *  If you use automake and want to compile a program maude, the following
    *  <tt>Makefile.am</tt> snippet might help:
    *  \code
    *  bin_PROGRAMS = maude
    *
+   *  ALBERTA_DIM = 2
+   *
    *  maude_SOURCES = maude.cc
    *  maude_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS)
    *  maude_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(DUNE_LDFLAGS)
    *  maude_LDADD = $(ALBERTA_LIBS) $(DUNE_LIBS)
    *  \endcode
-   *  This will compile and link your program with the default ALBERTA
-   *  dimension set with the <tt>--with-alberta-dim</tt> parameter to
-   *  <tt>configure</tt>.  If you want to use a non-default dimension (or
-   *  different dimension in different programs, you can use the following
-   *  snippet:
+   *  This will compile and link your program with the world dimension
+   *  specified by <tt>WORLDDIM</tt>.
+   *  If you want to use different world dimensions per program, you can use
+   *  the following snippet in your <tt>Makefile.am</tt>:
    *  \code
    *  bin_PROGRAMS = maude2d maude3d
    *
    *  maude2d_SOURCES = maude.cc
-   *  maude2d_CPPFLAGS = $(AM_CPPFLAGS) \
-   *    $(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=2 -DENABLE_ALBERTA
-   *  maude2d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(DUNE_LDFLAGS)
-   *  maude2d_LDADD = -lalberta_2d $(ALBERTA_BASE_LIBS) $(DUNE_LIBS)
+   *  maude2d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA2D_CPPFLAGS)
+   *  maude2d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA2D_LDFLAGS) $(DUNE_LDFLAGS)
+   *  maude2d_LDADD = $(ALBERTA2D_LIBS) $(DUNE_LIBS)
    *
    *  maude3d_SOURCES = maude.cc
-   *  maude3d_CPPFLAGS = $(AM_CPPFLAGS) \
-   *    $(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=3 -DENABLE_ALBERTA
-   *  maude3d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(DUNE_LDFLAGS)
-   *  maude3d_LDADD = -lalberta_3d $(ALBERTA_BASE_LIBS) $(DUNE_LIBS)
+   *  maude3d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA3D_CPPFLAGS)
+   *  maude3d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA3D_LDFLAGS) $(DUNE_LDFLAGS)
+   *  maude3d_LDADD = $(ALBERTA3D_LIBS) $(DUNE_LIBS)
    *  \endcode
-   *  It is not possible to use alberta grids with different world dimensions
-   *  in the same binary however.
    *
-   *  In both cases you have in your program the preprocessor defines
-   *  <tt>HAVE_ALBERTA</tt> which tells you whether alberta was found by
-   *  configure and <tt>ALBERTA_DIM</tt> which tells you the dimension of
-   *  alberta <em>for this program</em>.
+   *  In either case the preprocessor variables <tt>HAVE_ALBERTA</tt>, which
+   *  tells you whether ALBERTA was found by configure, and <tt>ALBERTA_DIM</tt>
+   *  which tells you the dimension of world <em>for this program</em>.
    *
    *  For further details look into the <tt>alberta.m4</tt> autoconf snippet.
    */
