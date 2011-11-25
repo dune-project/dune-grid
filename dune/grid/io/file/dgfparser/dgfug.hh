@@ -43,7 +43,7 @@ namespace Dune
         : GridParameterBlock( in ),
           _noClosure( false ),  // default value
           _noCopy( true ),      // default value
-          _heapsize( 500 )      // default value (see UGGrid constructor)
+          _heapsize( 0 )      // default value (see UGGrid constructor)
       {
         // check closure
         if (findtoken( "closure") )
