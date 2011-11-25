@@ -27,7 +27,8 @@ namespace Dune {
 
       // create grid here to set heap size
       // create grid factory (passed grid is returned by createGrid method)
-      GridFactory<UGGrid<dim> > factory( new UGGrid<dim> ( gridParam.heapSize() ) );
+      UGGrid< dim >::setDefaultHeapSize( gridParam.heapSize() );
+      GridFactory< UGGrid< dim > > factory;
 
       for (int n=0; n<mg.nofvtx; n++)
       {
