@@ -43,8 +43,8 @@ namespace Dune
   private:
     typedef typename GridView::IndexSet IndexSet;
     typedef typename GridView::template Codim< 0 >::Iterator ElementIterator;
-    typedef typename GridView::template Codim< dimGrid >::Iterator VertexIterator;
     typedef typename GridView::IntersectionIterator IntersectionIterator;
+    typedef typename GridView::template Codim< dimGrid >::EntityPointer VertexPointer;
 
     typedef typename IndexSet::IndexType Index;
 
@@ -90,16 +90,28 @@ namespace Dune
     // write DGF header
     gridout << "DGF" << std::endl;
 
-    std::vector< Index > vertexIndex( indexSet.size( dimGrid ) );
+    const Index vxSize = indexSet.size( dimGrid );
+    std::vector< Index > vertexIndex( vxSize, vxSize );
 
     // write all vertices into the "vertex" block
     gridout << std::endl << "VERTEX" << std::endl;
     Index vertexCount = 0;
-    const VertexIterator vend = gridView_.template end< dimGrid >();
-    for( VertexIterator vit = gridView_.template begin< dimGrid >(); vit != vend; ++vit )
+    typedef typename ElementIterator :: Entity Element ;
+    const ElementIterator end = gridView_.template end< 0 >();
+    for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
     {
-      vertexIndex[ indexSet.index( *vit ) ] = vertexCount++;
-      gridout << vit->geometry().corner( 0 ) << std::endl;
+      const Element& element = *it ;
+      const int numCorners = element.template count< dimGrid > ();
+      for( int i=0; i<numCorners; ++i )
+      {
+        const Index vxIndex = indexSet.subIndex( element, i, dimGrid );
+        assert( vxIndex < vxSize );
+        if( vertexIndex[ vxIndex ] == vxSize )
+        {
+          vertexIndex[ vxIndex ] = vertexCount++;
+          gridout << element.geometry().corner( i ) << std::endl;
+        }
+      }
     }
     gridout << "#" << std::endl;
     if( vertexCount != indexSet.size( dimGrid ) )
@@ -107,15 +119,15 @@ namespace Dune
 
     // write all simplices to the "simplex" block
     gridout << std::endl << "SIMPLEX" << std::endl;
-    const ElementIterator end = gridView_.template end< 0 >();
     for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
     {
-      if( !it->type().isSimplex() )
+      const Element& element = *it ;
+      if( ! element.type().isSimplex() )
         continue;
 
       std::vector< Index > vertices( dimGrid+1 );
       for( size_t i = 0; i < vertices.size(); ++i )
-        vertices[ i ] = vertexIndex[ indexSet.subIndex( *it, i, dimGrid ) ];
+        vertices[ i ] = vertexIndex[ indexSet.subIndex( element, i, dimGrid ) ];
 
       gridout << vertices[ 0 ];
       for( size_t i = 1; i < vertices.size(); ++i )
@@ -128,12 +140,13 @@ namespace Dune
     gridout << std::endl << "CUBE" << std::endl;
     for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
     {
-      if( !it->type().isCube() )
+      const Element& element = *it ;
+      if( !element.type().isCube() )
         continue;
 
       std::vector< Index > vertices( 1 << dimGrid );
       for( size_t i = 0; i < vertices.size(); ++i )
-        vertices[ i ] = vertexIndex[ indexSet.subIndex( *it, i, dimGrid ) ];
+        vertices[ i ] = vertexIndex[ indexSet.subIndex( element, i, dimGrid ) ];
 
       gridout << vertices[ 0 ];
       for( size_t i = 1; i < vertices.size(); ++i )
@@ -146,13 +159,14 @@ namespace Dune
     gridout << std::endl << "BOUNDARYSEGMENTS" << std::endl;
     for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
     {
+      const Element& element = *it ;
       if( !it->hasBoundaryIntersections() )
         continue;
 
-      const RefElement &refElement = RefElements::general( it->type() );
+      const RefElement &refElement = RefElements::general( element.type() );
 
-      const IntersectionIterator iend = it->ileafend();
-      for( IntersectionIterator iit = it->ileafbegin(); iit != iend; ++iit )
+      const IntersectionIterator iend = gridView_.iend( element ) ;
+      for( IntersectionIterator iit = gridView_.ibegin( element ); iit != iend; ++iit )
       {
         if( !iit->boundary() )
           continue;
@@ -171,7 +185,7 @@ namespace Dune
         for( unsigned int i = 0; i < faceSize; ++i )
         {
           const int j = refElement.subEntity( faceNumber, 1, i, dimGrid );
-          vertices[ i ] = vertexIndex[ indexSet.subIndex( *it, j, dimGrid ) ];
+          vertices[ i ] = vertexIndex[ indexSet.subIndex( element, j, dimGrid ) ];
         }
         gridout << boundaryId << "   " << vertices[ 0 ];
         for( unsigned int i = 1; i < faceSize; ++i )
