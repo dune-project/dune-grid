@@ -34,7 +34,7 @@ namespace Dune
   //! Layout template for elements
   /**
    * This layout template is for use in the
-   * MultipleCodimMultipleGeomTypeMapper.  It select only elements (entities
+   * MultipleCodimMultipleGeomTypeMapper.  It selects only elements (entities
    * with dim=dimgrid).
    *
    * \tparam dimgrid The dimension of the grid.
@@ -48,7 +48,7 @@ namespace Dune
   //! Layout template for vertices
   /**
    * This layout template is for use in the
-   * MultipleCodimMultipleGeomTypeMapper.  It select only vertices (entities
+   * MultipleCodimMultipleGeomTypeMapper.  It selects only vertices (entities
    * with dim=0).
    *
    * \tparam dimgrid The dimension of the grid.
