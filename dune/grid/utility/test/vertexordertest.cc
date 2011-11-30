@@ -31,6 +31,10 @@
 #include <dune/grid/utility/structuredgridfactory.hh>
 #include <dune/grid/utility/vertexorder.hh>
 
+#ifdef ALUGRID_SURFACE_2D
+#define USE_ALUGRID_SURFACE_2D
+#endif
+
 void fail(int &result) {
   result = 1;
 }
@@ -316,24 +320,24 @@ try {
 #if HAVE_ALUGRID
   std::cout << "== Testing ALUConformGrid<2,2> with simplices" << std::endl;
   testVertexOrderByIdSimplices<Dune::ALUConformGrid<2, 2> >(result);
-#ifdef ALUGRID_SURFACE_2D
+#ifdef USE_ALUGRID_SURFACE_2D
   std::cout << "== Testing ALUConformGrid<2,3> with simplices" << std::endl;
   testVertexOrderByIdSimplices<Dune::ALUConformGrid<2, 3> >(result);
-#endif // ALUGRID_SURFACE_2D
+#endif // USE_ALUGRID_SURFACE_2D
 
-#ifdef ALUGRID_SURFACE_2D
+#ifdef USE_ALUGRID_SURFACE_2D
   std::cout << "== Testing ALUCubeGrid<2,2> with cubes" << std::endl;
   testVertexOrderByIdCubes<Dune::ALUCubeGrid<2, 2> >(result);
   std::cout << "== Testing ALUCubeGrid<2,3> with cubes" << std::endl;
   testVertexOrderByIdCubes<Dune::ALUCubeGrid<2, 3> >(result);
-#endif // ALUGRID_SURFACE_2D
+#endif // USE_ALUGRID_SURFACE_2D
 
   std::cout << "== Testing ALUSimplexGrid<2,2> with simplices" << std::endl;
   testVertexOrderByIdSimplices<Dune::ALUSimplexGrid<2, 2> >(result);
-#ifdef ALUGRID_SURFACE_2D
+#ifdef USE_ALUGRID_SURFACE_2D
   std::cout << "== Testing ALUSimplexGrid<2,3> with simplices" << std::endl;
   testVertexOrderByIdSimplices<Dune::ALUSimplexGrid<2, 3> >(result);
-#endif // ALUGRID_SURFACE_2D
+#endif // USE_ALUGRID_SURFACE_2D
 #endif // HAVE_ALUGRID
 
   //////////////////////////////////////////////////////////////////////
