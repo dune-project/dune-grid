@@ -453,7 +453,7 @@ namespace Dune
     {
       if(this->comm().rank() == 0)
       {
-        std::cout << "\nCreated empty " << ALUGridParallelSerial() << " " << name() << nameSuffix() << "." << std::endl;
+        std::cout << "\nCreated empty " << ALUGridParallelSerial() << " " << name() << nameSuffix() << "." << std::endl << std::endl;
       }
     }
 
