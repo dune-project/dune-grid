@@ -17,6 +17,7 @@ namespace Dune
     innerTwist_(-665),
     outerTwist_(-665),
     segmentIndex_( -1 ),
+    bndId_( -1 ),
     bndType_( noBoundary ),
     conformanceState_(UNDEFINED)
   {}
@@ -37,6 +38,7 @@ namespace Dune
     outerFaceNumber_ = -1;
     bndType_ = noBoundary;
     segmentIndex_ = -1;
+    bndId_ = 0; // inner face
 
     // points face from inner element away?
     if (innerTwist < 0)
@@ -129,13 +131,15 @@ namespace Dune
         assert( dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) );
         const GEOPeriodicType* periodicClosure = static_cast< const GEOPeriodicType* > ( outerElement_ ) ;
 
-        //assert( periodicClosure->bndtype() == GEOPeriodicType :: periodic );
 #ifdef ALUGRID_PERIODIC_BOUNDARY
         // previously, the segmentIndex( 1 - outerFaceNumber_ ) was used, why?
         segmentIndex_ = periodicClosure->segmentIndex( outerFaceNumber_ );
 #else
         // set to zero (grid test will fail)
         segmentIndex_ = 0 ;
+#endif
+#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
+        bndId_  = periodicClosure->bndtype( outerFaceNumber_ );
 #endif
 
         const GEOFaceType* face = ImplTraits::getFace( *periodicClosure, 1 - outerFaceNumber_ );
@@ -198,6 +202,7 @@ namespace Dune
           outerTwist_ = boundaryFace().twist(outerALUFaceIndex());
           // store segment index
           segmentIndex_ = boundaryFace().segmentIndex();
+          bndId_ = boundaryFace().bndtype();
         }
       }
     }
@@ -206,6 +211,9 @@ namespace Dune
       // get outer twist
       outerTwist_ = outerEntity().twist(outerALUFaceIndex());
     }
+
+    // make sure we got boundary id correctly
+    assert( bndType_ == periodicBoundary || bndType_ == domainBoundary ? bndId_ > 0 : bndId_ == 0 );
 
     // set conformance information
     conformanceState_ = getConformanceState(innerLevel);
@@ -234,6 +242,7 @@ namespace Dune
       innerTwist_(orig.innerTwist_),
       outerTwist_(orig.outerTwist_),
       segmentIndex_( orig.segmentIndex_ ),
+      bndId_( orig.bndId_ ),
       bndType_( orig.bndType_ ),
       conformanceState_(orig.conformanceState_)
   {}
@@ -328,13 +337,9 @@ namespace Dune
   template< ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< type, Comm >::boundaryId() const
   {
-    return ( outerBoundary() ) ? boundaryFace().bndtype() :
-#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
-           (bndType_ == periodicBoundary) ?
-           static_cast<const GEOPeriodicType&>(*outerElement_).bndtype() :
-#endif
-           20 ;
+    return bndId_;
   }
+
   template< ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< type, Comm >::innerTwist() const
   {

@@ -54,6 +54,7 @@ namespace Dune
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::GhostPairType GhostPairType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
+    typedef typename ImplTraits::HPeriodicType HPeriodicType;
 
   public:
     //! constructor creating empty face info
@@ -159,6 +160,7 @@ namespace Dune
     int outerTwist_;
 
     int segmentIndex_;
+    int bndId_;
 
     enum boundary_t { noBoundary          = 0, // no boundary, outside is normal element
                       periodicBoundary    = 1, // periodic boundary
