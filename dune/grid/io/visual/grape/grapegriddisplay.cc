@@ -368,8 +368,8 @@ namespace Dune
     he->liter   = 0;
     he->enditer = 0;
 
-    LeafIteratorType * it    = new LeafIteratorType ( grid_.template leafbegin<0, pitype> () );
-    LeafIteratorType * endit = new LeafIteratorType ( grid_.template leafend  <0, pitype> () );
+    LeafIteratorType * it    = new LeafIteratorType ( grid_.leafView().template begin<0, pitype> () );
+    LeafIteratorType * endit = new LeafIteratorType ( grid_.leafView().template end  <0, pitype> () );
 
     he->liter   = (void *) it;
     he->enditer = (void *) endit;
@@ -480,8 +480,8 @@ namespace Dune
     template Partition<pitype> :: LevelIterator LevelIteratorType;
 
     // class copy constructor
-    LevelIteratorType * it    = new LevelIteratorType( grid_.template lbegin<0,pitype> (level) );
-    LevelIteratorType * endit = new LevelIteratorType( grid_.template lend<0,pitype>   (level) );
+    LevelIteratorType * it    = new LevelIteratorType( grid_.levelView( level ).template begin<0,pitype> () );
+    LevelIteratorType * endit = new LevelIteratorType( grid_.levelView( level ).template end<0,pitype>   () );
 
     he->liter   = (void *) it;
     he->enditer = (void *) endit;
