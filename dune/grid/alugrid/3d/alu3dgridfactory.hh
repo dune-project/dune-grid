@@ -83,8 +83,9 @@ namespace Dune
 
     typedef std::vector< std::pair< VertexType, size_t > > VertexVector;
     typedef std::vector< ElementType > ElementVector;
-    typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
-    typedef std::vector< std::pair< FaceType, FaceType > > PeriodicBoundaryVector;
+    typedef std::pair< FaceType, int > BndPair ;
+    typedef std::map< FaceType,  int > BoundaryIdMap;
+    typedef std::vector< std::pair< BndPair, BndPair > > PeriodicBoundaryVector;
     typedef std::pair< unsigned int, int > SubEntity;
     typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
 
@@ -272,8 +273,8 @@ namespace Dune
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
     void correctElementOrientation ();
-    bool identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2 );
-    void searchPeriodicNeighbor ( FaceMap &faceMap, const typename FaceMap::iterator &pos );
+    bool identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2, const int defaultId );
+    void searchPeriodicNeighbor ( FaceMap &faceMap, const typename FaceMap::iterator &pos, const int defaultId  );
     void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
 
@@ -281,7 +282,7 @@ namespace Dune
 
     VertexVector vertices_;
     ElementVector elements_;
-    BoundaryIdVector boundaryIds_;
+    BoundaryIdMap boundaryIds_;
     PeriodicBoundaryVector periodicBoundaries_;
     const DuneBoundaryProjectionType* globalProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
@@ -498,14 +499,14 @@ namespace Dune
 
     boundaryProjections_[ faceId ] = 0;
 
-    std::pair< FaceType, int > boundaryId;
+    BndPair boundaryId;
     for( unsigned int i = 0; i < numFaceCorners; ++i )
     {
       const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
       boundaryId.first[ j ] = vertices[ i ];
     }
     boundaryId.second = 1;
-    boundaryIds_.push_back( boundaryId );
+    boundaryIds_.insert( boundaryId );
   }
 
   template< class ALUGrid >
@@ -557,14 +558,14 @@ namespace Dune
     }
 #endif
 
-    std::pair< FaceType, int > boundaryId;
+    BndPair boundaryId;
     for( unsigned int i = 0; i < numFaceCorners; ++i )
     {
       const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
       boundaryId.first[ j ] = vertices[ i ];
     }
     boundaryId.second = 1;
-    boundaryIds_.push_back( boundaryId );
+    boundaryIds_.insert( boundaryId );
   }
 
 

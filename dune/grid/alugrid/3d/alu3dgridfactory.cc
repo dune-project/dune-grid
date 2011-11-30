@@ -88,14 +88,15 @@ namespace Dune
     if( vertices.size() != numFaceCorners )
       DUNE_THROW( GridError, "Wrong number of vertices." );
 
-    std::pair< FaceType, int > boundaryId;
+    BndPair boundaryId;
     for( unsigned int i = 0; i < numFaceCorners; ++i )
     {
       const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
       boundaryId.first[ j ] = vertices[ i ];
     }
+
     boundaryId.second = id;
-    boundaryIds_.push_back( boundaryId );
+    boundaryIds_.insert( boundaryId );
   }
 
 
@@ -107,10 +108,10 @@ namespace Dune
     if( (element < 0) || (element >= (int)elements_.size()) )
       DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
 
-    std::pair< FaceType, int > boundaryId;
+    BndPair boundaryId;
     generateFace( elements_[ element ], face, boundaryId.first );
     boundaryId.second = id;
-    boundaryIds_.push_back( boundaryId );
+    boundaryIds_.insert( boundaryId );
   }
 
   template< class ALUGrid >
@@ -177,12 +178,12 @@ namespace Dune
   ALUGrid *ALU3dGridFactory< ALUGrid >
   ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
-    typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator BoundaryIdIteratorType;
+    typedef typename BoundaryIdMap :: iterator BoundaryIdIteratorType;
     BoundaryProjectionVector* bndProjections = 0;
 
     correctElementOrientation();
     numFacesInserted_ = boundaryIds_.size();
-    if( addMissingBoundaries || !faceTransformations_.empty() )
+    if( addMissingBoundaries || ! faceTransformations_.empty() )
       recreateBoundaryIds();
 
     // if dump file should be written
@@ -250,12 +251,12 @@ namespace Dune
       for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
       {
         typedef typename ALU3dBasicImplTraits< MPICommunicatorType >::HBndSegType HBndSegType;
-        const std::pair< FaceType, FaceType > &facePair = *it;
+        const std::pair< BndPair, BndPair > &facePair = *it;
         out << (-HBndSegType::periodic) << "  " << (2*numFaceCorners);
         for( unsigned int i = 0; i < numFaceCorners; ++i )
-          out << "  " << facePair.first[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
+          out << "  " << facePair.first.first[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
         for( unsigned int i = 0; i < numFaceCorners; ++i )
-          out << "  " << facePair.second[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
+          out << "  " << facePair.second.first[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
         out << std::endl;
       }
 
@@ -364,7 +365,7 @@ namespace Dune
       const BoundaryIdIteratorType endB = boundaryIds_.end();
       for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
       {
-        const std :: pair< FaceType, int > &boundaryId = *it;
+        const BndPair &boundaryId = *it;
         ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
 
         if( elementType == hexa )
@@ -391,35 +392,42 @@ namespace Dune
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
       for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
       {
-        const std::pair< FaceType, FaceType > &facePair = *it;
-        //ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
+        const std::pair< BndPair, BndPair > &facePair = *it;
         if( elementType == hexa )
         {
           int perel[ 8 ];
           for( unsigned int i = 0; i < numFaceCorners; ++i )
           {
-            perel[ i+0 ] = globalId( facePair.first[ i ] );
-            perel[ i+4 ] = globalId( facePair.second[ i ] );
+            perel[ i+0 ] = globalId( facePair.first.first[ i ] );
+            perel[ i+4 ] = globalId( facePair.second.first[ i ] );
           }
-          mgb.InsertUniquePeriodic4( perel
+
 #ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
-                                     , ALU3DSPACE Gitter::hbndseg:: periodic
+          typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
+          bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
+                               bnd_t( facePair.second.second ) };
+          mgb.InsertUniquePeriodic4( perel, bndId );
+#else
+          mgb.InsertUniquePeriodic4( perel );
 #endif
-                                     );
+
         }
         else if( elementType == tetra )
         {
           int perel[ 6 ];
           for( unsigned int i = 0; i < 3; ++i )
           {
-            perel[ i+0 ] = globalId( facePair.first[ (3 - i) % 3 ] );
-            perel[ i+3 ] = globalId( facePair.second[ (3 - i) % 3 ] );
+            perel[ i+0 ] = globalId( facePair.first.first[ (3 - i) % 3 ] );
+            perel[ i+3 ] = globalId( facePair.second.first[ (3 - i) % 3 ] );
           }
-          mgb.InsertUniquePeriodic3( perel
 #ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
-                                     , ALU3DSPACE Gitter::hbndseg:: periodic
+          typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
+          bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
+                               bnd_t( facePair.second.second ) };
+          mgb.InsertUniquePeriodic3( perel, bndId );
+#else
+          mgb.InsertUniquePeriodic3( perel );
 #endif
-                                     );
         }
         else
           DUNE_THROW( GridError, "Invalid element type" );
@@ -519,7 +527,9 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   bool ALU3dGridFactory< ALUGrid >
-  ::identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2 )
+  ::identifyFaces ( const Transformation &transformation,
+                    const FaceType &key1, const FaceType &key2,
+                    const int defaultId )
   {
     WorldVector w = transformation.evaluate( position( key1[ 0 ] ) );
     int org = -1;
@@ -542,7 +552,25 @@ namespace Dune
       key0[ i ] = key2[ j ];
     }
 
-    periodicBoundaries_.push_back( std::make_pair( key0, key1 ) );
+    int bndId[ 2 ] = { 20, 20 };
+    FaceType keys[ 2 ] = { key1, key2 };
+
+    for( int i=0; i<2; ++i )
+    {
+      typedef typename BoundaryIdMap :: iterator iterator ;
+      iterator pos = boundaryIds_.find( keys[ i ] );
+
+      if( pos != boundaryIds_.end() )
+      {
+        bndId[ i ] = (*pos).second ;
+        boundaryIds_.erase( pos );
+      }
+    }
+
+    BndPair bnd0 ( key0, bndId[ 0 ] );
+    BndPair bnd1 ( key1, bndId[ 1 ] );
+
+    periodicBoundaries_.push_back( std::make_pair( bnd0, bnd1 ) );
 
     return true;
   }
@@ -551,7 +579,8 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
-  ::searchPeriodicNeighbor ( FaceMap &faceMap, const typename FaceMap::iterator &pos )
+  ::searchPeriodicNeighbor ( FaceMap &faceMap, const typename FaceMap::iterator &pos,
+                             const int defaultId )
   {
     typedef typename FaceTransformationVector::const_iterator TrafoIterator;
     typedef typename FaceMap::iterator FaceMapIterator;
@@ -570,7 +599,8 @@ namespace Dune
         const TrafoIterator trend = faceTransformations_.end();
         for( TrafoIterator trit = faceTransformations_.begin(); trit != trend; ++trit )
         {
-          if( identifyFaces( *trit, key1, key2 ) || identifyFaces( *trit, key2, key1 ) )
+          if( identifyFaces( *trit, key1, key2, defaultId) ||
+              identifyFaces( *trit, key2, key1, defaultId) )
           {
             faceMap.erase( fit );
             faceMap.erase( pos );
@@ -599,12 +629,6 @@ namespace Dune
     typedef typename FaceMap::iterator FaceIterator;
     FaceMap faceMap;
 
-#if 0
-    const GeometryType faceGeo( elementType == tetra
-                                ? GeometryType::simplex : GeometryType::cube,
-                                dimension-1 );
-#endif
-
     const unsigned int numElements = elements_.size();
     for( unsigned int n = 0; n < numElements; ++n )
     {
@@ -620,27 +644,30 @@ namespace Dune
         else
         {
           faceMap.insert( std::make_pair( key, SubEntity( n, face ) ) );
-          searchPeriodicNeighbor( faceMap, faceMap.find( key ) );
+          searchPeriodicNeighbor( faceMap, faceMap.find( key ), defaultId );
         }
       }
     }
 
     // swap current boundary ids with an empty vector
-    BoundaryIdVector boundaryIds;
+    BoundaryIdMap boundaryIds;
     boundaryIds_.swap( boundaryIds );
     assert( boundaryIds_.size() == 0 );
 
     // add all current boundary ids again (with their reordered keys)
-    typedef typename BoundaryIdVector::iterator BoundaryIterator;
+    typedef typename BoundaryIdMap::iterator BoundaryIterator;
     const BoundaryIterator bndEnd = boundaryIds.end();
     for( BoundaryIterator bndIt = boundaryIds.begin(); bndIt != bndEnd; ++bndIt )
     {
       FaceType key = bndIt->first;
       std::sort( key.begin(), key.end() );
       const FaceIterator pos = faceMap.find( key );
+
       if( pos == faceMap.end() )
-        continue;
-      //DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
+      {
+        DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
+      }
+
       reinsertBoundary( faceMap, pos, bndIt->second );
       faceMap.erase( pos );
     }
