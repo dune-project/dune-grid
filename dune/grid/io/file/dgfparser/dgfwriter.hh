@@ -114,7 +114,7 @@ namespace Dune
       }
     }
     gridout << "#" << std::endl;
-    if( vertexCount != indexSet.size( dimGrid ) )
+    if( vertexCount != vxSize )
       DUNE_THROW( GridError, "Index set reports wrong number of vertices." );
 
     // write all simplices to the "simplex" block
