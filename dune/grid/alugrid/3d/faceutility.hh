@@ -54,7 +54,6 @@ namespace Dune
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::GhostPairType GhostPairType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
-    typedef typename ImplTraits::HPeriodicType HPeriodicType;
 
   public:
     //! constructor creating empty face info
