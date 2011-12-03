@@ -17,6 +17,9 @@ namespace Dune {
    * without prior notice.  Use it only if you know what you are doing.
    *
    * \tparam dim The dimension of the <b>boundary</b>, not the dimension of the grid.
+   *
+   * \note The dimension 'dim' must be 1 or 2, the psurface library doesn't implement
+   *    anything else.
    */
   template <int dim>
   class PSurfaceBoundary
@@ -35,7 +38,7 @@ namespace Dune {
        * \param psurface The psurface object that implements the segment
        * \param segment The number of the boundary segment in the psurface object
        */
-      PSurfaceBoundarySegment(const shared_ptr<PSurfaceBoundary<2> >& psurfaceBoundary, int segment)
+      PSurfaceBoundarySegment(const shared_ptr<PSurfaceBoundary<dim> >& psurfaceBoundary, int segment)
         : psurfaceBoundary_(psurfaceBoundary),
           segment_(segment)
       {}
