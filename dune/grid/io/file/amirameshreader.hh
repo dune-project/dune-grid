@@ -95,7 +95,7 @@ namespace Dune {
 
        @param filename The name of the psurface boundary file
      */
-    static shared_ptr<PSurfaceBoundary<dim-1> > readPSurfaceBoundary(const std::string& filename);
+    static shared_ptr<PSurfaceBoundary<GridType::dimension-1> > readPSurfaceBoundary(const std::string& filename);
 
     static GridType* read(const std::string& filename,
                           const shared_ptr<PSurfaceBoundary<dim-1> >& boundary);

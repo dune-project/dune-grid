@@ -308,7 +308,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 }
 
 template <class GridType>
-Dune::shared_ptr<Dune::PSurfaceBoundary<Dune::AmiraMeshReader<GridType>::dim-1> > Dune::AmiraMeshReader<GridType>::readPSurfaceBoundary(const std::string& filename)
+Dune::shared_ptr<Dune::PSurfaceBoundary<GridType::dimension-1> > Dune::AmiraMeshReader<GridType>::readPSurfaceBoundary(const std::string& filename)
 {
  #if ! HAVE_PSURFACE
   DUNE_THROW(NotImplemented, "You have to have libpsurface installed in order to be able to use 'readPSurfaceBoundary'");
