@@ -4,10 +4,15 @@
 #ifndef DUNE_GRID_UTILITY_GRIDINFO_GMSH_MAIN_HH
 #define DUNE_GRID_UTILITY_GRIDINFO_GMSH_MAIN_HH
 
+#include <cstddef>
+#include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <ostream>
+#include <sstream>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
@@ -55,11 +60,112 @@ namespace {
   // function that may be linked in from another compilation unit.
   void usage(std::ostream &stream) {
     stream << "USAGE:\n"
-           << "  " << programName << " GRIDFILE\n"
+           << "  " << programName << " [-R REFINES] GRIDFILE\n"
            << "\n"
            << "PARAMTERS:\n"
+           << "  -R REFINES How many global refines to do after reading\n"
+           << "    (default: 0)\n"
            << "  GRIDFILE Name of the .msh file to read the grid from.\n"
            << std::flush;
+  }
+
+  bool prefix_match(const std::string &prefix, const std::string &str)
+  {
+    return str.compare(0,prefix.size(), prefix) == 0;
+  }
+
+  void error_argument_required(const std::string &opt) {
+    std::cerr << "Error: option " << opt << " requires argument\n";
+    usage(std::cerr);
+    std::exit(1);
+  }
+
+  void error_unknown_option(const std::string &opt) {
+    std::cerr << "Error: unknown option: " << opt << "\n";
+    usage(std::cerr);
+    std::exit(1);
+  }
+
+  void error_parsing_optarg(const std::string &opt, const std::string &error) {
+    std::cerr << "Error: option " << opt << ": " << error << "\n";
+    usage(std::cerr);
+    std::exit(1);
+  }
+
+  template<class T>
+  void parse(const std::string &arg, T &val) {
+    std::istringstream s(arg);
+    s >> val;
+    bool good = !s.fail();
+    if(good) {
+      char dummy;
+      s >> dummy;
+      good = s.fail() && s.eof();
+    }
+    if(!good) {
+      std::ostringstream s;
+      s << "Can't parse \"" << arg << "\" as a " << Dune::className(val);
+      throw std::runtime_error(s.str());
+    }
+  }
+
+  std::size_t refines = 0;
+  std::string gridFileName = "";
+
+  void parseOptions(int argc, char **argv) {
+    std::vector<std::string> params;
+    for(++argv; *argv; ++argv) {
+      std::string arg = *argv;
+      if(prefix_match("-", arg)) {
+        std::string opt = arg;
+        if(opt == "--") {
+          for(++argv; *argv; ++argv)
+            params.push_back(*argv);
+          break;
+        }
+        else if(prefix_match("-h", opt) || prefix_match("-?", opt) ||
+                opt == "--help")
+        {
+          usage(std::cout);
+          std::exit(0);
+        }
+        else if(opt == "-R" || opt == "--global-refines") {
+          ++argv;
+          if(!*argv) error_argument_required(opt);
+          try { parse(*argv, refines); }
+          catch(const std::runtime_error &e)
+          { error_parsing_optarg(opt, e.what()); }
+        }
+        else if(prefix_match("-R", opt)) {
+          try { parse(*argv+std::strlen("-R"), refines); }
+          catch(const std::runtime_error &e)
+          { error_parsing_optarg(opt, e.what()); }
+        }
+        else if(prefix_match("--global-refines=", opt)) {
+          try { parse(*argv+std::strlen("--global-refines="), refines); }
+          catch(const std::runtime_error &e)
+          { error_parsing_optarg(opt, e.what()); }
+        }
+        else
+          error_unknown_option(opt);
+      }
+      else
+        params.push_back(arg);
+    }
+    // check command line arguments
+    if(params.size() < 1) {
+      std::cerr << "Need name of a .msh file to read.\n"
+                << std::endl;
+      usage(std::cerr);
+      std::exit(1);
+    }
+    if(params.size() > 1) {
+      std::cerr << "Too many arguments.\n"
+                << std::endl;
+      usage(std::cerr);
+      std::exit(1);
+    }
+    gridFileName = params[0];
   }
 }
 
@@ -76,30 +182,12 @@ int main(int argc, char **argv) {
       return 1;
     }
 
-    // check command line arguments
-    if(argc < 2) {
-      std::cerr << "Need name of a .msh file to read.\n"
-                << std::endl;
-      usage(std::cerr);
-      return 1;
-    }
-    if(argc > 2) {
-      std::cerr << "Too many arguments.\n"
-                << std::endl;
-      usage(std::cerr);
-      return 1;
-    }
-    std::string gridFileName = argv[1];
-    if(gridFileName == "-h" || gridFileName == "-?" ||
-       gridFileName == "--help" || gridFileName == "-help")
-    {
-      usage(std::cout);
-      return 0;
-    }
+    parseOptions(argc, argv);
 
     // read grid
     typedef Dune::GmshReader<Grid> Reader;
     Dune::shared_ptr<Grid> gridp(Reader::read(gridFileName));
+    gridp->globalRefine(refines);
 
     // collect information
     Dune::GridViewInfo<Grid::ctype> gridViewInfo;
