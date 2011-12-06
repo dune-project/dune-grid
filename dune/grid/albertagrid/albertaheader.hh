@@ -54,7 +54,7 @@
 #undef HAVE_CONFIG_H
 #endif
 
-#include <alberta.h>
+#include <alberta/alberta.h>
 
 #ifdef ALBERTASAVE_HAVE_CONFIG_H
 #define HAVE_CONFIG_H ALBERTASAVE_HAVE_CONFIG_H

@@ -128,7 +128,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     ALBERTA_VERSION="2.0"
 
     # set variables so that tests can use them
-    ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTAROOT/include/alberta"
+    ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTAROOT/include"
 
     # define varaible flags depending on problem and world dim, to change afterwards easily
     ALBERTA_CPPFLAGS='$(ALBERTA$(ALBERTA_DIM)D_CPPFLAGS)'
@@ -144,11 +144,11 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
     # check for header
     CPPFLAGS="$ac_save_CPPFLAGS $ALBERTA_INCLUDE_CPPFLAGS -DDIM_OF_WORLD=3 -DEL_INDEX=0"
-    AC_CHECK_HEADER([alberta.h], [HAVE_ALBERTA="1"],
-      AC_MSG_WARN([alberta.h not found in $ALBERTA_INCLUDE_CPPFLAGS]))
+    AC_CHECK_HEADER([alberta/alberta.h], [HAVE_ALBERTA="1"],
+      AC_MSG_WARN([alberta/alberta.h not found in $ALBERTA_INCLUDE_CPPFLAGS]))
 
     if test "x$HAVE_ALBERTA" = "x1" ; then
-      AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],[AC_MSG_WARN([version 3 not found, now looking for version 2])],[#include <alberta.h>])
+      AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],[AC_MSG_WARN([version 3 not found, now looking for version 2])],[#include <alberta/alberta.h>])
     fi
 
     CPPFLAGS="$ac_save_CPPFLAGS $ALBERTA_INCLUDE_CPPFLAGS"
@@ -162,30 +162,33 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     DUNEALBERTA_LIBPATHFLAGS='-L$(top_builddir)/lib'
     LDFLAGS="$LDFLAGS -L$ALBERTAROOT/lib"
     AS_IF([test "x$HAVE_ALBERTA" = "x1"],[
-      AC_CHECK_LIB(alberta_util,[alberta_calloc],
-        [LIBS="-lalberta_util $LIBS"],
-        [HAVE_ALBERTA="0"
-         AC_MSG_WARN(-lalberta_util not found!)])
+      AC_CACHE_CHECK([ALBERTA utilities library],[dune_grid_cv_lib_alberta_utils],[
+        dune_grid_cv_lib_alberta_utils=no
+        for lib_alberta_utils in alberta_utilities alberta_utils ; do
+          LIBS="-l$lib_alberta_utils $ALBERTA_EXTRA $ac_save_LIBS"
+          AC_TRY_LINK_FUNC([alberta_calloc],[dune_grid_cv_lib_alberta_utils=$lib_alberta_utils; break])
+        done
+      ])
+      AS_IF([test "x$dune_grid_cv_lib_alberta_utils" = "xno"],[HAVE_ALBERTA=0])
     ])
 
     # check for ALBERTA grid library...
     AS_IF([test "x$HAVE_ALBERTA" = "x1"],[
-
       AS_IF([test x$enable_alberta_libcheck = xno],[
         AC_MSG_WARN([Disabled checking whether libalberta_Nd can be linked.])
       ],[
-        ALBERTA_WORLD_DIMS=
-        for N in 1 2 3 4 5 6 7 8 9; do
-          AC_CHECK_LIB(alberta_${N}d,[mesh_traverse],[
-            ALBERTA_WORLD_DIMS="$ALBERTA_WORLD_DIMS $N"
-          ])
-        done
+        AC_CACHE_CHECK([ALBERTA world dimensions],[dune_grid_cv_alberta_world_dims],[
+          dune_grid_cv_alberta_world_dims=
+          for N in 1 2 3 4 5 6 7 8 9; do
+            LIBS="-lalberta_${N}d -l$dune_grid_cv_lib_alberta_utils $ALBERTA_EXTRA $ac_save_LIBS"
+            AC_TRY_LINK_FUNC([mesh_traverse],[dune_grid_cv_alberta_world_dims="$dune_grid_cv_alberta_world_dims $N"])
+          done
+        ])
+        ALBERTA_WORLD_DIMS="$dune_grid_cv_alberta_world_dims"
       ])
 
       AS_IF([test "x$ALBERTA_WORLD_DIMS" != "x"],[
-        AC_MSG_NOTICE([Found libalberta_Nd for N = $ALBERTA_WORLD_DIMS])
-
-        ALBERTA_BASE_LIBS="\$(ALBERTA_LIBPATHFLAGS) -lalberta_util $ALBERTA_EXTRA"
+        ALBERTA_BASE_LIBS="\$(ALBERTA_LIBPATHFLAGS) -l$dune_grid_cv_lib_alberta_utils $ALBERTA_EXTRA"
 
         # define library variables for all found libraries
         for N in $ALBERTA_WORLD_DIMS ; do
@@ -195,7 +198,6 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
         done
       ],[
         HAVE_ALBERTA=0
-        AC_MSG_WARN([No ALBERTA grid library (libalberta_Nd) found.])
       ])
 
     ])

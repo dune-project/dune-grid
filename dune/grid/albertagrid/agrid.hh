@@ -14,9 +14,9 @@
 #include <fstream>
 #include <dune/common/deprecated.hh>
 
-#include <vector>
-#include <assert.h>
 #include <algorithm>
+#include <cassert>
+#include <vector>
 
 // Dune includes
 #include <dune/common/misc.hh>
