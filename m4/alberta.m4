@@ -144,8 +144,10 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
     # check for header
     CPPFLAGS="$ac_save_CPPFLAGS $ALBERTA_INCLUDE_CPPFLAGS -DDIM_OF_WORLD=3 -DEL_INDEX=0"
-    AC_CHECK_HEADER([alberta/alberta.h], [HAVE_ALBERTA="1"],
-      AC_MSG_WARN([alberta/alberta.h not found in $ALBERTA_INCLUDE_CPPFLAGS]))
+    AC_CHECK_HEADER([alberta/alberta.h], [HAVE_ALBERTA="1"],[
+      AC_MSG_WARN([alberta/alberta.h not found in $ALBERTA_INCLUDE_CPPFLAGS])
+      AC_MSG_NOTICE([In case you are using ALBERTA 2.0, use double quotes to include alberta.h in $ALBERTA_ROOT/include/alberta/alberta_inlines.h.])
+    ])
 
     if test "x$HAVE_ALBERTA" = "x1" ; then
       AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],[AC_MSG_WARN([version 3 not found, now looking for version 2])],[#include <alberta/alberta.h>])
@@ -164,7 +166,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     AS_IF([test "x$HAVE_ALBERTA" = "x1"],[
       AC_CACHE_CHECK([ALBERTA utilities library],[dune_grid_cv_lib_alberta_utils],[
         dune_grid_cv_lib_alberta_utils=no
-        for lib_alberta_utils in alberta_utilities alberta_utils ; do
+        for lib_alberta_util in alberta_utilities alberta_utils ; do
           LIBS="-l$lib_alberta_utils $ALBERTA_EXTRA $ac_save_LIBS"
           AC_TRY_LINK_FUNC([alberta_calloc],[dune_grid_cv_lib_alberta_utils=$lib_alberta_utils; break])
         done
