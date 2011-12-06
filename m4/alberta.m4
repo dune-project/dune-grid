@@ -166,7 +166,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     AS_IF([test "x$HAVE_ALBERTA" = "x1"],[
       AC_CACHE_CHECK([ALBERTA utilities library],[dune_grid_cv_lib_alberta_utils],[
         dune_grid_cv_lib_alberta_utils=no
-        for lib_alberta_util in alberta_utilities alberta_utils ; do
+        for lib_alberta_utils in alberta_utilities alberta_util ; do
           LIBS="-l$lib_alberta_utils $ALBERTA_EXTRA $ac_save_LIBS"
           AC_TRY_LINK_FUNC([alberta_calloc],[dune_grid_cv_lib_alberta_utils=$lib_alberta_utils; break])
         done
