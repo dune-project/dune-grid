@@ -439,13 +439,13 @@ namespace Dune {
       return NBELEM(theElement, nb);
     }
 
-    static int boundarySegmentIndex(const UG_NS< UG_DIM >::Element* theElement, int nb) {
+    static size_t boundarySegmentIndex(const UG_NS< UG_DIM >::Element* theElement, int nb) {
       using UG_NAMESPACE ::BNDS;
       using UG::UINT;
       using UG_NAMESPACE ::side_offset;
 
       BNDS* bnds = ELEM_BNDS(theElement,nb);
-      int id = UG_NAMESPACE ::GetBoundarySegmentId(bnds);
+      size_t id = UG_NAMESPACE ::GetBoundarySegmentId(bnds);
       return id;
     }
 
