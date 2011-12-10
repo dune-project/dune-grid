@@ -90,7 +90,7 @@ namespace Dune {
     }
 
     /** \brief return index of the corresponding coarse grid boundary segment */
-    int boundarySegmentIndex () const {
+    size_t boundarySegmentIndex () const {
 #ifndef NDEBUG
       if (!boundary())
         DUNE_THROW(GridError, "Calling boundarySegmentIndex() for a non-boundary intersection!");
@@ -283,7 +283,7 @@ namespace Dune {
     }
 
     /** \brief Return index of corresponding coarse grid boundary segment */
-    int boundarySegmentIndex () const {
+    size_t boundarySegmentIndex () const {
 #ifndef NDEBUG
       if (!boundary())
         DUNE_THROW(GridError, "Calling boundarySegmentIndex() for a non-boundary intersection!");
