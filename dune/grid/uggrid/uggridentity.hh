@@ -466,13 +466,6 @@ namespace Dune {
     }
 
     /*! Location of this element relative to the reference element element of the father.
-       This is sufficient to interpolate all dofs in conforming case.
-       Nonconforming may require access to neighbors of father and
-       computations with local coordinates.
-       On the fly case is somewhat inefficient since dofs  are visited several times.
-       If we store interpolation matrices, this is tolerable. We assume that on-the-fly
-       implementation of numerical algorithms is only done for simple discretizations.
-       Assumes that meshes are nested.
      */
     const LocalGeometry& geometryInFather () const;
 
