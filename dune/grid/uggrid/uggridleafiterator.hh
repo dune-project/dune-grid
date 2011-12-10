@@ -31,19 +31,19 @@ namespace Dune {
 
       if (codim==dim) {
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]));
+          this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]), grid_);
         else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
-          this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]));
+          this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]), grid_);
         else     // overlap and overlap-front
-          this->setToTarget((UGEntity*) 0);
+          this->setToTarget(nullptr,nullptr);
 
       } else if (codim==0) {
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]));
+          this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]), grid_);
         else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
-          this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]));
+          this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]), grid_);
         else     // overlap and overlap-front
-          this->setToTarget((UGEntity*) 0);
+          this->setToTarget(nullptr,nullptr);
 
       } else
         DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);
@@ -55,7 +55,7 @@ namespace Dune {
     //! Constructor
     UGGridLeafIterator()
     {
-      this->virtualEntity_.setToTarget(0);
+      this->virtualEntity_.setToTarget(nullptr,nullptr);
     }
 
     //! prefix increment
@@ -123,7 +123,7 @@ namespace Dune {
       int level = this->level();
 
       // Increment on this level
-      this->virtualEntity_.setToTarget(UG_NS<dim>::succ(this->virtualEntity_.getTarget()));
+      this->virtualEntity_.setToTarget(UG_NS<dim>::succ(this->virtualEntity_.getTarget()), grid_);
 
       // If beyond the end of this level set to first of next level
       if (!this->virtualEntity_.getTarget() && level < grid_->maxLevel()) {
@@ -131,16 +131,16 @@ namespace Dune {
         if (codim==dim) {
 
           if (pitype==All_Partition || pitype==Ghost_Partition)
-            this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[level+1]));
+            this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[level+1]), grid_);
           else
-            this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[level+1]));
+            this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[level+1]), grid_);
 
         } else if (codim==0) {
 
           if (pitype==All_Partition || pitype==Ghost_Partition)
-            this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[level+1]));
+            this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[level+1]), grid_);
           else
-            this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[level+1]));
+            this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[level+1]), grid_);
 
         } else
           DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);

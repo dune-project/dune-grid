@@ -36,8 +36,9 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! the default Constructor
-    UGGridHierarchicIterator(int maxLevel)
-      : maxlevel_(maxLevel)
+    UGGridHierarchicIterator(int maxLevel, const GridImp* gridImp)
+      : maxlevel_(maxLevel),
+        gridImp_(gridImp)
     {}
 
     void increment();
@@ -47,6 +48,7 @@ namespace Dune {
 
     std::stack<typename UG_NS<GridImp::dimension>::Element*> elementStack_;
 
+    const GridImp* gridImp_;
   };
 
 }  // end namespace Dune

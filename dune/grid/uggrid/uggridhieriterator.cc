@@ -36,9 +36,9 @@ void Dune::UGGridHierarchicIterator<GridImp>::increment()
   }
 
   if (elementStack_.empty())
-    this->virtualEntity_.setToTarget(NULL);
+    this->virtualEntity_.setToTarget(nullptr,nullptr);
   else
-    this->virtualEntity_.setToTarget(elementStack_.top());
+    this->virtualEntity_.setToTarget(elementStack_.top(),gridImp_);
 
 }
 

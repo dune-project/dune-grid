@@ -38,18 +38,18 @@ namespace Dune {
   {
   public:
 
-    UGMakeableEntity(typename UG_NS<dim>::template Entity<codim>::T* target) :
+    UGMakeableEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) :
       GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
     {
-      this->realEntity.setToTarget(target);
+      this->realEntity.setToTarget(target,gridImp);
     }
 
     UGMakeableEntity() :
       GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
     {}
 
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
-      this->realEntity.setToTarget(target);
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
+      this->realEntity.setToTarget(target,gridImp);
     }
 
     typename UG_NS<dim>::template Entity<codim>::T* getTarget() {
@@ -115,8 +115,7 @@ namespace Dune {
     /** \brief Return the entity type identifier */
     GeometryType type() const;
 
-    /** \brief The partition type for parallel computing
-     * \todo So far it always returns InteriorEntity */
+    /** \brief The partition type for parallel computing */
     PartitionType partitionType () const
     {
 #ifndef ModelP
@@ -181,9 +180,11 @@ namespace Dune {
     EntitySeed seed () const { return EntitySeed( *this ); }
 
   private:
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
+    /** \brief Set this entity to a particular UG entity */
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target,const GridImp* gridImp) {
       target_ = target;
       GridImp::getRealImplementation(geo_).setToTarget(target);
+      gridImp_ = gridImp;
     }
 
     //! the current geometry
@@ -191,6 +192,10 @@ namespace Dune {
 
     typename UG_NS<dim>::template Entity<codim>::T* target_;
 
+    /** \brief gridImp Not actually used, only the codim-0 specialization needs it
+     * But code is simpler if we just keep it everywhere.
+     */
+    const GridImp* gridImp_;
   };
 
   /*! \brief Edge entity
@@ -293,11 +298,17 @@ namespace Dune {
     }
 #endif
 
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       target_ = target;
+      gridImp_ = gridImp;
     }
 
     typename UG_NS<dim>::template Entity<codim>::T* target_;
+
+    /** \brief gridImp Not actually used, only the codim-0 specialization needs it
+     * But code is simpler if we just keep it everywhere.
+     */
+    const GridImp* gridImp_;
   };
 
   /*! \brief Specialization for edge in 2D
@@ -368,7 +379,8 @@ namespace Dune {
 
     UGGridEntity()
       : geo_(UGGridGeometry<dim,dim,GridImp>()),
-        geometryInFather_(UGGridLocalGeometry<dim,dim,GridImp>())
+        geometryInFather_(UGGridLocalGeometry<dim,dim,GridImp>()),
+        gridImp_(NULL)
     {}
 
     //! Level of this element
@@ -420,21 +432,21 @@ namespace Dune {
     /** \todo It would be faster to not use -1 as the end marker but
         number of sides instead */
     UGGridLeafIntersectionIterator<GridImp> ileafbegin () const {
-      return UGGridLeafIntersectionIterator<GridImp>(target_, (isLeaf()) ? 0 : UG_NS<dim>::Sides_Of_Elem(target_));
+      return UGGridLeafIntersectionIterator<GridImp>(target_, (isLeaf()) ? 0 : UG_NS<dim>::Sides_Of_Elem(target_),gridImp_);
     }
 
     UGGridLevelIntersectionIterator<GridImp> ilevelbegin () const {
-      return UGGridLevelIntersectionIterator<GridImp>(target_, 0);
+      return UGGridLevelIntersectionIterator<GridImp>(target_, 0, gridImp_);
     }
 
     //! Reference to one past the last leaf neighbor
     UGGridLeafIntersectionIterator<GridImp> ileafend () const {
-      return UGGridLeafIntersectionIterator<GridImp>(target_, UG_NS<dim>::Sides_Of_Elem(target_));
+      return UGGridLeafIntersectionIterator<GridImp>(target_, UG_NS<dim>::Sides_Of_Elem(target_), gridImp_);
     }
 
     //! Reference to one past the last level neighbor
     UGGridLevelIntersectionIterator<GridImp> ilevelend () const {
-      return UGGridLevelIntersectionIterator<GridImp>(target_, UG_NS<dim>::Sides_Of_Elem(target_));
+      return UGGridLevelIntersectionIterator<GridImp>(target_, UG_NS<dim>::Sides_Of_Elem(target_),gridImp_);
     }
 
     //! returns true if Entity has NO children
@@ -456,7 +468,7 @@ namespace Dune {
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
     typename GridImp::template Codim<0>::EntityPointer father () const {
-      return typename GridImp::template Codim<0>::EntityPointer (UG_NS<dim>::EFather(target_));
+      return typename GridImp::template Codim<0>::EntityPointer (UGGridEntityPointer<0,GridImp>(UG_NS<dim>::EFather(target_),gridImp_));
     }
 
     //! returns true if father entity exists
@@ -493,7 +505,7 @@ namespace Dune {
     bool mightVanish() const;
 
     //!
-    void setToTarget(typename UG_NS<dim>::Element* target);
+    void setToTarget(typename UG_NS<dim>::Element* target, const GridImp* gridImp);
 
     //! the current geometry
     MakeableInterfaceObject<Geometry> geo_;
@@ -502,6 +514,13 @@ namespace Dune {
     mutable MakeableInterfaceObject<LocalGeometry> geometryInFather_;
 
     typename UG_NS<dim>::Element* target_;
+
+    /** \brief Pointer to the grid that we are part of.
+     *
+     * We need that only to hand it over to the intersections,
+     * which need it.
+     */
+    const GridImp* gridImp_;
 
   }; // end of UGGridEntity codim = 0
 

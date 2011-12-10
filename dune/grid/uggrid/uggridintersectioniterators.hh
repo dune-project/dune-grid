@@ -25,8 +25,8 @@ namespace Dune {
 
     /** The default Constructor makes empty Iterator
      */
-    UGGridLevelIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
-      : intersection_(UGGridLevelIntersection<GridImp>(center,nb))
+    UGGridLevelIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
+      : intersection_(UGGridLevelIntersection<GridImp>(center,nb,gridImp))
     {}
 
     //! equality
@@ -69,8 +69,8 @@ namespace Dune {
 
     typedef Dune::Intersection<const GridImp, Dune::UGGridLeafIntersection> Intersection;
 
-    UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
-      : intersection_(UGGridLeafIntersection<GridImp>(center,nb))
+    UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
+      : intersection_(UGGridLeafIntersection<GridImp>(center,nb,gridImp))
     {}
 
     //! equality

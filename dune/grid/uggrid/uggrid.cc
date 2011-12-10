@@ -207,12 +207,10 @@ Dune::UGGrid<dim>::lbegin (int level) const
   if (!multigrid_)
     DUNE_THROW(GridError, "The grid has not been properly initialized!");
 
-  const typename UG_NS<dim>::Grid* theGrid = multigrid_->grids[level];
-
-  if (!theGrid)
+  if (!multigrid_->grids[level])
     DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-  return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >(theGrid);
+  return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >(*this,level);
 }
 
 template<int dim>
@@ -223,12 +221,10 @@ Dune::UGGrid<dim>::lbegin (int level) const
   if (!multigrid_)
     DUNE_THROW(GridError, "The grid has not been properly initialized!");
 
-  typename UG_NS<dim>::Grid* theGrid = multigrid_->grids[level];
-
-  if (!theGrid)
+  if (!multigrid_->grids[level])
     DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-  return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >(theGrid);
+  return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >(*this,level);
 }
 
 template < int dim >
@@ -543,7 +539,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 
     // Set element
     typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
-    childElements.push_back( EntityPointer( UGGridEntityPointer< 0, const UGGrid< dim > >( f->first ) ) );
+    childElements.push_back( EntityPointer( UGGridEntityPointer< 0, const UGGrid< dim > >( f->first, this ) ) );
 
     int side = f->second;
 

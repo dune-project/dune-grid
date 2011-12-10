@@ -602,7 +602,7 @@ namespace Dune {
     static typename Traits::template Codim<codim>::EntityPointer
     entityPointer(const UGGridEntitySeed<codim, const UGGrid<dim> >& seed)
     {
-      return typename Traits::template Codim<codim>::EntityPointer(seed.target());
+      return typename Traits::template Codim<codim>::EntityPointer(UGGridEntityPointer<codim,const UGGrid<dim> >(seed.target(),seed.gridImp()));
     }
 
     /** \brief Number of grid entities per level and codim

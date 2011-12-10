@@ -142,17 +142,17 @@ Dune::UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
     typename UG_NS<dim>::Node* subEntity = UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i, this->type()));
     // The following cast is here to make the code compile for all cc.
     // When it gets actually called, cc==dim, and the cast is nonexisting.
-    return typename GridImp::template Codim<cc>::EntityPointer((typename UG_NS<dim>::template Entity<cc>::T*)subEntity);
+    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity,gridImp_));
   }
   else if (cc==dim - 1)
   {
     typename UG_NS<dim>::Edge* subEntity = UG_NS<dim>::ElementEdge(target_,UGGridRenumberer<dim>::edgesDUNEtoUG(i, this->type()));
-    return typename GridImp::template Codim<cc>::EntityPointer((typename UG_NS<dim>::template Entity<cc>::T*)subEntity);
+    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity,gridImp_));
   }
   else if (cc==0)
   {
     typename UG_NS<dim>::template Entity<cc>::T* myself = (typename UG_NS<dim>::template Entity<cc>::T*)target_;
-    return typename GridImp::template Codim<cc>::EntityPointer(myself);
+    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>(myself,gridImp_));
   }
   else
     DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subEntity isn't implemented for cc==" << cc );
@@ -198,17 +198,18 @@ Dune::GeometryType Dune::UGGridEntity<0,dim,GridImp>::type() const
 
 template<int dim, class GridImp>
 void Dune::UGGridEntity < 0, dim ,GridImp >::
-setToTarget(typename UG_NS<dim>::Element* target)
+setToTarget(typename UG_NS<dim>::Element* target, const GridImp* gridImp)
 {
   target_ = target;
   GridImp::getRealImplementation(geo_).setToTarget(target);
+  gridImp_ = gridImp;
 }
 
 template<int dim, class GridImp>
 Dune::UGGridHierarchicIterator<GridImp>
 Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
 {
-  UGGridHierarchicIterator<GridImp> it(maxlevel);
+  UGGridHierarchicIterator<GridImp> it(maxlevel,gridImp_);
 
   if (level()<maxlevel) {
 
@@ -221,10 +222,12 @@ Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
 
     it.virtualEntity_.setToTarget( (it.elementStack_.empty())
                                    ? NULL
-                                   : it.elementStack_.top() );
+                                   : it.elementStack_.top(),
+                                   gridImp_
+                                   );
 
   } else {
-    it.virtualEntity_.setToTarget(0);
+    it.virtualEntity_.setToTarget(nullptr,nullptr);
   }
 
   return it;
@@ -235,7 +238,7 @@ template< int dim, class GridImp>
 Dune::UGGridHierarchicIterator<GridImp>
 Dune::UGGridEntity < 0, dim ,GridImp >::hend(int maxlevel) const
 {
-  return UGGridHierarchicIterator<GridImp>(maxlevel);
+  return UGGridHierarchicIterator<GridImp>(maxlevel,gridImp_);
 }
 
 template<int dim, class GridImp>

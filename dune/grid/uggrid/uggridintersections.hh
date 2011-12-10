@@ -42,14 +42,15 @@ namespace Dune {
     /** The default Constructor makes empty Iterator
         \todo Should be private
      */
-    UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb)
+    UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : geometryInInside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
         geometryInOutside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
         geometry_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),
         geometryInOutsideIsUpToDate_(false),
-        center_(center), neighborCount_(nb)
+        center_(center), neighborCount_(nb),
+        gridImp_(gridImp)
     {}
 
     //! equality
@@ -60,7 +61,7 @@ namespace Dune {
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the entity where we started this iterator)
     EntityPointer inside() const {
-      return UGGridEntityPointer<0,GridImp>(center_);
+      return UGGridEntityPointer<0,GridImp>(center_,gridImp_);
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
@@ -71,7 +72,7 @@ namespace Dune {
       if (otherelem==0)
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
-      return UGGridEntityPointer<0,GridImp>(otherelem);
+      return UGGridEntityPointer<0,GridImp>(otherelem,gridImp_);
     }
 
     //! return true if intersection is with boundary.
@@ -95,6 +96,7 @@ namespace Dune {
       if (!boundary())
         DUNE_THROW(GridError, "Calling boundarySegmentIndex() for a non-boundary intersection!");
 #endif
+      UG_NS<dim>::Set_Current_BVP(gridImp_->multigrid_->theBVP);
       return UG_NS<dim>::boundarySegmentIndex(center_, neighborCount_);
     }
 
@@ -195,6 +197,9 @@ namespace Dune {
     //! count on which neighbor we are looking at. Note that this is interpreted in UG's ordering!
     int neighborCount_;
 
+    /** \brief The grid we belong to.  We need it to call set_Current_BVP */
+    const GridImp* gridImp_;
+
   };
 
 
@@ -228,14 +233,15 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
-    UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb)
+    UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : geometryInInside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
         geometryInOutside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
         geometry_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),
         geometryInOutsideIsUpToDate_(false),
-        center_(center), neighborCount_(nb), subNeighborCount_(0)
+        center_(center), neighborCount_(nb), subNeighborCount_(0),
+        gridImp_(gridImp)
     {
       if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
         constructLeafSubfaces();
@@ -251,7 +257,7 @@ namespace Dune {
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const {
-      return UGGridEntityPointer<0,GridImp>(center_);
+      return UGGridEntityPointer<0,GridImp>(center_,gridImp_);
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
@@ -264,7 +270,7 @@ namespace Dune {
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
       /** \todo Remove the const_cast */
-      return UGGridEntityPointer<0,GridImp>(const_cast<typename UG_NS<dim>::Element*>(otherelem));
+      return UGGridEntityPointer<0,GridImp>(const_cast<typename UG_NS<dim>::Element*>(otherelem),gridImp_);
     }
 
     //! return true if intersection is with boundary.
@@ -288,6 +294,7 @@ namespace Dune {
       if (!boundary())
         DUNE_THROW(GridError, "Calling boundarySegmentIndex() for a non-boundary intersection!");
 #endif
+      UG_NS<dim>::Set_Current_BVP(gridImp_->multigrid_->theBVP);
       return UG_NS<dim>::boundarySegmentIndex(center_, neighborCount_);
     }
 
@@ -460,6 +467,9 @@ namespace Dune {
 
     /** \brief Current position in the leafSubFaces_ array */
     unsigned int subNeighborCount_;
+
+    /** \brief The grid we belong to.  We need it to call set_Current_BVP */
+    const GridImp* gridImp_;
 
   };
 
