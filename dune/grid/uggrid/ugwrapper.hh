@@ -1039,8 +1039,4 @@ namespace Dune {
 
 #undef UG_NAMESPACE
 
-#if defined ModelP && UG_DIM==3
-#undef PRIO2LISTPART
-#endif
-
 } // namespace Dune
