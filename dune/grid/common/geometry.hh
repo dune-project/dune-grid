@@ -265,11 +265,11 @@ namespace Dune
     {}
 
     /** hide assignment operator */
-    const Geometry &operator = ( const Geometry &rhs )
+    const Geometry &operator= ( const Geometry &rhs )
     {
       realGeometry = rhs.realGeometry;
       return *this;
-    };
+    }
 
     Implementation realGeometry;
   };
@@ -384,6 +384,107 @@ namespace Dune
     GeometryImp<mydim,cdim,GridImp>& asImp () {return static_cast<GeometryImp<mydim,cdim,GridImp>&>(*this);}
     const GeometryImp<mydim,cdim,GridImp>& asImp () const {return static_cast<const GeometryImp<mydim,cdim,GridImp>&>(*this);}
   }; // end GeometryDefault
+
+
+
+  // GeometryReference
+  // -----------------
+
+  template< class Implementation >
+  class GeometryReference
+  {
+    typedef GeometryReference< Implementation > This;
+
+  public:
+    enum { mydimension = Implementation::mydimension };
+    enum { coorddimension = Implementation::coorddimension };
+
+    typedef typename Implementation::ctype ctype;
+
+    typedef typename Implementation::LocalCoordinate LocalCoordinate;
+    typedef typename Implementation::GlobalCoordinate GlobalCoordinate;
+
+    typedef typename Implementation::Jacobian Jacobian;
+    typedef typename Implementation::JacobianTransposed JacobianTransposed;
+
+    explicit GeometryReference ( const Implementation &impl )
+      : impl_( &impl )
+    {}
+
+    GeometryType type () const { return impl().type(); }
+
+    bool affine() const { return impl().affine(); }
+
+    int corners () const { return impl().corners(); }
+    GlobalCoordinate corner ( int i ) const { return impl().corner( i ); }
+    GlobalCoordinate center () const { return impl().center(); }
+
+    GlobalCoordinate global ( const LocalCoordinate &local ) const
+    {
+      return impl().global( local );
+    }
+
+    LocalCoordinate local ( const GlobalCoordinate &global ) const
+    {
+      return impl().local( global );
+    }
+
+    ctype integrationElement ( const LocalCoordinate &local ) const
+    {
+      return impl().integrationElement( local );
+    }
+
+    ctype volume () const { return impl().volume(); }
+
+    const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const
+    {
+      return impl().jacobianTransposed( local );
+    }
+
+    const Jacobian &jacobianInverseTransposed ( const LocalCoordinate &local ) const
+    {
+      return impl().jacobianInverseTransposed( local );
+    }
+
+  private:
+    const Implementation &impl () const { return *impl_; }
+
+    const Implementation *impl_;
+  };
+
+
+
+  // GlobalGeometryReference
+  // -----------------------
+
+  template< int mydim, int cdim, class GridImp >
+  class GlobalGeometryReference
+    : public GeometryReference< typename remove_const< GridImp >::type::Traits::template Codim< remove_const< GridImp >::type::dimension - mydim >::GeometryImpl >
+  {
+    typedef typename remove_const< GridImp >::type::Traits::template Codim< remove_const< GridImp >::type::dimension - mydim >::GeometryImpl Implementation;
+
+  public:
+    explicit GlobalGeometryReference ( const Implementation &impl )
+      : GeometryReference< Implementation >( impl )
+    {}
+  };
+
+
+
+  // LocalGeometryReference
+  // -----------------------
+
+  template< int mydim, int cdim, class GridImp >
+  class LocalGeometryReference
+    : public GeometryReference< typename remove_const< GridImp >::type::Traits::template Codim< remove_const< GridImp >::type::dimension - mydim >::LocalGeometryImpl >
+  {
+    typedef typename remove_const< GridImp >::type::Traits::template Codim< remove_const< GridImp >::type::dimension - mydim >::LocalGeometryImpl Implementation;
+
+  public:
+    explicit LocalGeometryReference ( const Implementation &impl )
+      : GeometryReference< Implementation >( impl )
+    {}
+  };
 
 } // namespace Dune
 
