@@ -356,7 +356,7 @@ namespace Dune {
         typedef typename GridView::template Codim<0>::Entity Element;
         const Element& element = *gv.template begin<0, InteriorBorder_Partition>();
         return sizeof(DataType)
-               * Base::duneDataHandle_->size(element.template subEntity<codim>(0));
+               * Base::duneDataHandle_->size(*element.template subEntity<codim>(0));
       }
 
       DUNE_THROW(GridError, "Only fixedsize implemented");
@@ -387,7 +387,7 @@ namespace Dune {
         typedef typename GridView::template Codim<0>::Entity Element;
         const Element& element = *gv.template begin<0, InteriorBorder_Partition>();
         return sizeof(DataType)
-               * Base::duneDataHandle_->size(element.template subEntity<codim>(0));
+               * Base::duneDataHandle_->size(*element.template subEntity<codim>(0));
       }
 
       DUNE_THROW(GridError, "Only fixedsize implemented");
