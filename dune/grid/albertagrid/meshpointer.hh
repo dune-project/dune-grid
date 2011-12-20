@@ -38,8 +38,6 @@ namespace Dune
     template< int dim >
     class MeshPointer
     {
-      Mesh *mesh_;
-
       typedef Alberta::ElementInfo< dim > ElementInfo;
       typedef typename ElementInfo::MacroElement MacroElement;
       typedef typename ElementInfo::FillFlags FillFlags;
@@ -53,7 +51,7 @@ namespace Dune
       class MacroIterator;
 
       MeshPointer ()
-        : mesh_( NULL )
+        : mesh_( 0 )
       {}
 
       explicit MeshPointer ( Mesh *mesh )
@@ -65,9 +63,9 @@ namespace Dune
         return mesh_;
       }
 
-      bool operator! () const
+      operator bool () const
       {
-        return (mesh_ == NULL);
+        return (bool)mesh_;
       }
 
       MacroIterator begin () const
@@ -135,6 +133,8 @@ namespace Dune
       template< class ProjectionProvider >
       static ALBERTA NODE_PROJECTION *
       initNodeProjection ( Mesh *mesh, ALBERTA MACRO_EL *macroElement, int n );
+
+      Mesh *mesh_;
     };
 
 
@@ -165,7 +165,7 @@ namespace Dune
     template< int dim >
     inline int MeshPointer< dim >::numMacroElements () const
     {
-      return (mesh_ != NULL ? mesh_->n_macro_el : 0);
+      return (mesh_ ? mesh_->n_macro_el : 0);
     }
 
 
@@ -484,9 +484,9 @@ namespace Dune
       int index_;
     };
 
-  }
+  } // namespace Alberta
 
-}
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
 

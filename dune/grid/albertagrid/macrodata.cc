@@ -29,12 +29,12 @@ namespace Dune
     bool MacroData< dim >::Library< dimWorld >
     ::checkNeighbors ( const MacroData &macroData )
     {
-      assert( macroData.data_ != NULL );
-      if( macroData.data_->neigh == NULL )
+      assert( macroData.data_ );
+      if( !(macroData.data_->neigh) )
         return true;
 
 #if DUNE_ALBERTA_VERSION >= 0x300
-      const bool hasOppVertex = (macroData.data_->opp_vertex != NULL);
+      const bool hasOppVertex = (bool)macroData.data_->opp_vertex;
 #else
       const bool hasOppVertex = false;
 #endif
@@ -81,7 +81,7 @@ namespace Dune
     template<>
     void MacroData< 1 >::Library< dimWorld >::markLongestEdge ( MacroData &macroData )
     {
-      assert( macroData.data_ != NULL );
+      assert( macroData.data_ );
     }
 
 
@@ -89,7 +89,7 @@ namespace Dune
     template<>
     void MacroData< 2 >::Library< dimWorld >::markLongestEdge ( MacroData &macroData )
     {
-      assert( macroData.data_ != NULL );
+      assert( macroData.data_ );
       std::cerr << "Marking longest edge for refinement..." << std::endl;
 
       const int count = macroData.elementCount();
@@ -114,7 +114,7 @@ namespace Dune
             { 3, 4, 0, 5, 1, 2 }, { 4, 5, 2, 3, 0, 1 }, { 5, 1, 3, 2, 4, 0 } };
       static const ElementType eltype[ 4 ] = { 1, 0, 0, 1 };
 
-      assert( macroData.data_ != NULL );
+      assert( macroData.data_ );
       std::cerr << "Marking longest edge for refinement..." << std::endl;
 
       bool warnOpposedLongestEdges = false;
@@ -172,7 +172,7 @@ namespace Dune
     void MacroData< dimWorld >::Library< dimWorld >
     ::setOrientation ( MacroData &macroData, const Real orientation )
     {
-      assert( macroData.data_ != NULL );
+      assert( macroData.data_ );
 
       const int count = macroData.elementCount();
       for( int i = 0; i < count; ++i )
@@ -307,15 +307,15 @@ namespace Dune
     template< class Type >
     inline void MacroData< dim >::Library< dimWorld >::rotate ( Type *array, int i, int shift )
     {
-      if( array == NULL )
-        return;
-
-      const int offset = i*numVertices;
-      Type old[ numVertices ];
-      for( int j = 0; j < numVertices; ++j )
-        old[ j ] = array[ offset + j ];
-      for( int j = 0; j < numVertices; ++j )
-        array[ offset + j ] = old[ (j+shift) % numVertices ];
+      if( array )
+      {
+        const int offset = i*numVertices;
+        Type old[ numVertices ];
+        for( int j = 0; j < numVertices; ++j )
+          old[ j ] = array[ offset + j ];
+        for( int j = 0; j < numVertices; ++j )
+          array[ offset + j ] = old[ (j+shift) % numVertices ];
+      }
     }
 
 
@@ -328,9 +328,9 @@ namespace Dune
 
       // correct opposite vertices
 #if DUNE_ALBERTA_VERSION >= 0x300
-      if( macroData.data_->opp_vertex != NULL )
+      if( macroData.data_->opp_vertex )
       {
-        assert( macroData.data_->neigh != NULL );
+        assert( macroData.data_->neigh );
         const int shiftBack = numVertices - (shift % numVertices);
         for( int j = 0; j < numVertices; ++j )
         {
@@ -359,9 +359,9 @@ namespace Dune
     {
       std::swap( macroData.element( el )[ v1 ], macroData.element( el )[ v2 ] );
 #if DUNE_ALBERTA_VERSION >= 0x300
-      if( macroData.data_->opp_vertex != NULL )
+      if( macroData.data_->opp_vertex )
       {
-        assert( macroData.data_->neigh != NULL );
+        assert( macroData.data_->neigh );
 
         const int nb1 = macroData.neighbor( el, v1 );
         if( nb1 >= 0 )
@@ -386,9 +386,9 @@ namespace Dune
       }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
-      if( macroData.data_->neigh != NULL )
+      if( macroData.data_->neigh )
         std::swap( macroData.neighbor( el, v1 ), macroData.neighbor( el, v2 ) );
-      if( macroData.data_->boundary != NULL )
+      if( macroData.data_->boundary )
         std::swap( macroData.boundaryId( el, v1 ), macroData.boundaryId( el, v2 ) );
     }
 
@@ -405,8 +405,8 @@ namespace Dune
     template struct Dune::Alberta::MacroData< 3 >::Library< dimWorld >;
 #endif // #if ALBERTA_DIM >= 3
 
-  } // end namespace Alberta
+  } // namespace Alberta
 
-} // end namespace Dune
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA

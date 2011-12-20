@@ -92,8 +92,8 @@ namespace Dune
     template struct Dune::Alberta::MeshPointer< 3 >::Library< dimWorld >;
 #endif // #if ALBERTA_DIM >= 3
 
-  }
+  } // namespace Alberta
 
-}
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA

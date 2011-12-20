@@ -182,6 +182,6 @@ namespace Dune
   template struct AlbertaGridHierarchicIndexSet< 3, Alberta::dimWorld >;
 #endif // #if ALBERTA_DIM >= 3
 
-}
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
