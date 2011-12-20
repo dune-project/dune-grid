@@ -46,11 +46,6 @@ namespace Dune
     typedef Alberta::MeshPointer< dim > MeshPointer;
     typedef Alberta::HierarchyDofNumbering< dim > DofNumbering;
 
-  private:
-    DofVectorPointer level_;
-    DofAccess dofAccess_;
-
-  public:
     Level operator() ( const Alberta::Element *element ) const
     {
       const Level *array = (Level *)level_;
@@ -102,7 +97,7 @@ namespace Dune
       dofAccess_ = DofAccess( dofSpace );
 
       level_.create( dofSpace, "Element level" );
-      assert( !(!level_) );
+      assert( level_ );
       level_.template setupInterpolation< Interpolation >();
 
       SetLocal setLocal( level_ );
@@ -114,6 +109,10 @@ namespace Dune
       level_.release();
       dofAccess_ = DofAccess();
     }
+
+  private:
+    DofVectorPointer level_;
+    DofAccess dofAccess_;
   };
 
 

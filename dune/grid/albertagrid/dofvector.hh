@@ -201,6 +201,11 @@ namespace Dune
         : dofVector_( dofVector )
       {}
 
+      operator bool () const
+      {
+        return (bool)dofVector_;
+      }
+
       operator DofVector * () const
       {
         return dofVector_;
@@ -213,11 +218,6 @@ namespace Dune
         return ptr;
       }
 
-      bool operator! () const
-      {
-        return (dofVector_ == NULL);
-      }
-
       const DofSpace *dofSpace () const
       {
         return dofVector_->fe_space;
@@ -225,7 +225,7 @@ namespace Dune
 
       std::string name () const
       {
-        if( dofVector_ != NULL )
+        if( dofVector_ )
           return dofVector_->name;
         else
           return std::string();
@@ -251,7 +251,7 @@ namespace Dune
 
       void release ()
       {
-        if( dofVector_ != NULL )
+        if( dofVector_ )
         {
           DofVectorProvider::free( dofVector_ );
           dofVector_ = NULL;
@@ -274,9 +274,9 @@ namespace Dune
       template< class AdaptationData >
       AdaptationData *getAdaptationData () const
       {
-        assert( dofVector_ != NULL );
+        assert( dofVector_ );
 #if DUNE_ALBERTA_VERSION >= 0x300
-        assert( dofVector_->user_data != NULL );
+        assert( dofVector_->user_data );
         return static_cast< AdaptationData * >( dofVector_->user_data );
 #else
         return 0;
@@ -286,7 +286,7 @@ namespace Dune
       template< class AdaptationData >
       void setAdaptationData ( AdaptationData *adaptationData )
       {
-        assert( dofVector_ != NULL );
+        assert( dofVector_ );
 #if DUNE_ALBERTA_VERSION >= 0x300
         dofVector_->user_data = adaptationData;
 #endif // #if DUNE_ALBERTA_VERSION >= 0x300
@@ -295,14 +295,14 @@ namespace Dune
       template< class Interpolation >
       void setupInterpolation ()
       {
-        assert( dofVector_ != NULL );
+        assert( dofVector_ );
         dofVector_->refine_interpol = &refineInterpolate< Interpolation >;
       }
 
       template< class Restriction >
       void setupRestriction ()
       {
-        assert( dofVector_ != NULL );
+        assert( dofVector_ );
         dofVector_->coarse_restrict = &coarsenRestrict< Restriction >;
       }
 
@@ -359,10 +359,10 @@ namespace Dune
       return result;
     }
 
-  }
+  } // namespace Alberta
 
-}
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_DOFVECTOR_HH

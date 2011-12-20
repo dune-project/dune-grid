@@ -38,34 +38,22 @@ namespace Dune
 
       typedef Alberta::ElementInfo< dimension > ElementInfo;
 
-    private:
-      int node_;
-      int index_;
-#ifndef NDEBUG
-      int count_;
-#endif
-
-    public:
       DofAccess ()
         : node_( -1 )
       {}
 
       explicit DofAccess ( const DofSpace *dofSpace )
       {
+        assert( dofSpace );
         node_ = dofSpace->admin->mesh->node[ codimtype ];
         index_ = dofSpace->admin->n0_dof[ codimtype ];
-#ifndef NDEBUG
-        count_ = dofSpace->admin->n_dof[ codimtype ];
-#endif
       }
 
       int operator() ( const Element *element, int subEntity, int i ) const
       {
-#ifndef NDEBUG
+        assert( element );
         assert( node_ != -1 );
         assert( subEntity < numSubEntities );
-        assert( i < count_ );
-#endif
         return element->dof[ node_ + subEntity ][ index_ + i ];
       }
 
@@ -83,6 +71,10 @@ namespace Dune
       {
         return (*this)( elementInfo.el(), subEntity );
       }
+
+    private:
+      int node_;
+      int index_;
     };
 
 
@@ -112,11 +104,6 @@ namespace Dune
 
       typedef std::pair< int, int > Cache;
 
-      MeshPointer mesh_;
-      const DofSpace *emptySpace_;
-      const DofSpace *dofSpace_[ dimension+1 ];
-      Cache cache_[ dimension+1 ];
-
     public:
       HierarchyDofNumbering ()
       {}
@@ -144,21 +131,21 @@ namespace Dune
         return (*this)( element.el(), codim, subEntity );
       }
 
-      bool operator! () const
+      operator bool () const
       {
-        return !mesh_;
+        return (bool)mesh_;
       }
 
       const DofSpace *dofSpace ( int codim ) const
       {
-        assert( !(*this) == false );
+        assert( *this );
         assert( (codim >= 0) && (codim <= dimension) );
         return dofSpace_[ codim ];
       }
 
       const DofSpace *emptyDofSpace () const
       {
-        assert( !(*this) == false );
+        assert( *this );
         return emptySpace_;
       }
 
@@ -176,13 +163,13 @@ namespace Dune
 
       void release ()
       {
-        if( !(*this) )
-          return;
-
-        for( int codim = 0; codim <= dimension; ++codim )
-          freeDofSpace( dofSpace_[ codim ] );
-        freeDofSpace( emptySpace_ );
-        mesh_ = MeshPointer();
+        if( *this )
+        {
+          for( int codim = 0; codim <= dimension; ++codim )
+            freeDofSpace( dofSpace_[ codim ] );
+          freeDofSpace( emptySpace_ );
+          mesh_ = MeshPointer();
+        }
       }
 
     private:
@@ -192,6 +179,11 @@ namespace Dune
                                               const int (&ndof)[ nNodeTypes ],
                                               const bool periodic = false );
       static void freeDofSpace ( const DofSpace *dofSpace );
+
+      MeshPointer mesh_;
+      const DofSpace *emptySpace_;
+      const DofSpace *dofSpace_[ dimension+1 ];
+      Cache cache_[ dimension+1 ];
     };
 
 
@@ -250,7 +242,7 @@ namespace Dune
                                                    const int (&ndof)[ nNodeTypes ],
                                                    const bool periodic )
     {
-      return ALBERTA get_fe_space ( mesh, name.c_str(), ndof, NULL, 1 );
+      return ALBERTA get_fe_space( mesh, name.c_str(), ndof, NULL, 1 );
     }
 #endif // #if DUNE_ALBERTA_VERSION == 0x200
 
@@ -294,14 +286,14 @@ namespace Dune
         name += (char)(codim + '0');
 
         dofSpace[ codim ] = createDofSpace( mesh, name, ndof );
-        assert( dofSpace[ codim ] != NULL );
+        assert( dofSpace[ codim ] );
       }
     };
 
 
 
     // HierarchyDofNumbering::CacheDofSpace
-    // -------------------------------------
+    // ------------------------------------
 
     template< int dim >
     template< int codim >
@@ -309,15 +301,17 @@ namespace Dune
     {
       static void apply ( const DofSpace *(&dofSpace)[ dim+1 ], Cache (&cache)[ dim+1 ] )
       {
+        assert( dofSpace[ codim ] );
         const int codimtype = CodimType< dim, codim >::value;
         cache[ codim ].first = dofSpace[ codim ]->mesh->node[ codimtype ];
         cache[ codim ].second = dofSpace[ codim ]->admin->n0_dof[ codimtype ];
       }
     };
-  }
 
-}
+  } // namespace Alberta
+
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_DOFADMIN_HH
