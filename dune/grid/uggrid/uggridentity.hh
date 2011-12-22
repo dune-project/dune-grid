@@ -151,16 +151,13 @@ namespace Dune {
 #ifdef ModelP
     bool hasBorderCopy_(typename UG_NS<dim>::Node *node) const {
 #define PARHDR(p)         (&((p)->ddd))
-#define PRIOLIST(n)        UG_NS<dim>::DDD_InfoProcList(PARHDR(n))
-
-      int  *plist = PRIOLIST(node);
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(PARHDR(node));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
 
       return false;
 #undef PARHDR
-#undef PRIOLIST
     }
 #endif
 
@@ -285,16 +282,13 @@ namespace Dune {
 #ifdef ModelP
     bool hasBorderCopy_(typename UG_NS<dim>::Edge *edge) const {
 #define PARHDR(p)         (&((p)->ddd))
-#define PRIOLIST(n)        UG_NS<dim>::DDD_InfoProcList(PARHDR(n))
-
-      int  *plist = PRIOLIST(edge);
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(PARHDR(edge));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
 
       return false;
 #undef PARHDR
-#undef PRIOLIST
     }
 #endif
 
