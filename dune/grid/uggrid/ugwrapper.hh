@@ -264,6 +264,11 @@ namespace Dune {
     {
       return EPRIO(element);
     }
+
+    static DDD_HEADER* ParHdr(typename UG_NS< UG_DIM >::Edge *edge)
+    {
+      return PARHDR(edge);
+    }
 #endif
 
     // //////////////////////////////////////////////

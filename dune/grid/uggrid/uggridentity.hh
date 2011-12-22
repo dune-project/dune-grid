@@ -281,14 +281,12 @@ namespace Dune {
   protected:
 #ifdef ModelP
     bool hasBorderCopy_(typename UG_NS<dim>::Edge *edge) const {
-#define PARHDR(p)         (&((p)->ddd))
-      int  *plist = UG_NS<dim>::DDD_InfoProcList(PARHDR(edge));
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(edge));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
 
       return false;
-#undef PARHDR
     }
 #endif
 
