@@ -397,16 +397,12 @@ namespace Dune {
 #ifndef ModelP
       return InteriorEntity;
 #else
-#define PARHDRE(p) (&((p)->ge.ddd))
-#define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
-      if (EPRIO(target_) == UG_NS<dim>::PrioHGhost
-          || EPRIO(target_) == UG_NS<dim>::PrioVGhost
-          || EPRIO(target_) == UG_NS<dim>::PrioVHGhost)
+      if (UG_NS<dim>::EPriority(target_) == UG_NS<dim>::PrioHGhost
+          || UG_NS<dim>::EPriority(target_) == UG_NS<dim>::PrioVGhost
+          || UG_NS<dim>::EPriority(target_) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
       else
         return InteriorEntity;
-#undef EPRIO
-#undef PARHDRE
 #endif
     }
 

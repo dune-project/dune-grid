@@ -259,6 +259,11 @@ namespace Dune {
       return UG_NAMESPACE::EdgeSymmVHIF;
     }
 
+    /** \brief Encapsulates the UG EPRIO macro */
+    static int EPriority(const UG_NS< UG_DIM >::Element* element)
+    {
+      return EPRIO(element);
+    }
 #endif
 
     // //////////////////////////////////////////////
