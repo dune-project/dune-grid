@@ -391,8 +391,7 @@ namespace Dune {
     /** \brief Return the entity type identifier */
     GeometryType type() const;
 
-    /** \brief The partition type for parallel computing
-        \todo Do not copy macro from UG */
+    /** \brief The partition type for parallel computing */
     PartitionType partitionType () const {
 #ifndef ModelP
       return InteriorEntity;
