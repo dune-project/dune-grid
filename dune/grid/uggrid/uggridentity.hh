@@ -121,8 +121,6 @@ namespace Dune {
 #ifndef ModelP
       return InteriorEntity;
 #else
-#define PARHDRE(p) (&((p)->ddd))
-#define EPRIO(e) (PARHDRE(e)->prio)
       if (codim != dim) {
         // TODO: faces (elements and edges are done below)
         return InteriorEntity;
@@ -131,19 +129,16 @@ namespace Dune {
       typename UG_NS<dim>::Node *node =
         static_cast<typename UG_NS<dim>::Node *>(target_);
 
-      if (EPRIO(node)    == UG_NS<dim>::PrioHGhost
-          || EPRIO(node) == UG_NS<dim>::PrioVGhost
-          || EPRIO(node) == UG_NS<dim>::PrioVHGhost)
+      if (UG_NS<dim>::Priority(node)    == UG_NS<dim>::PrioHGhost
+          || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioVGhost
+          || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
-      else if (EPRIO(node) == UG_NS<dim>::PrioBorder || hasBorderCopy_(node))
+      else if (UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioBorder || hasBorderCopy_(node))
         return BorderEntity;
-      else if (EPRIO(node) == UG_NS<dim>::PrioMaster || EPRIO(node) == UG_NS<dim>::PrioNone)
+      else if (UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
       else
-        DUNE_THROW(GridError, "Unknown priority " << EPRIO(node));
-
-#undef EPRIO
-#undef PARHDRE
+        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(node));
 #endif
     }
 
@@ -247,23 +242,19 @@ namespace Dune {
       return InteriorEntity;
 #else
 
-#define PARHDRE(p) (&((p)->ddd))
-#define EPRIO(e) (PARHDRE(e)->prio)
       typename UG_NS<dim>::Edge *edge =
         static_cast<typename UG_NS<dim>::Edge *>(target_);
 
-      if (EPRIO(edge)    == UG_NS<dim>::PrioHGhost
-          || EPRIO(edge) == UG_NS<dim>::PrioVGhost
-          || EPRIO(edge) == UG_NS<dim>::PrioVHGhost)
+      if (UG_NS<dim>::Priority(edge)    == UG_NS<dim>::PrioHGhost
+          || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVGhost
+          || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
-      else if (EPRIO(edge) == UG_NS<dim>::PrioBorder || hasBorderCopy_(edge))
+      else if (UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioBorder || hasBorderCopy_(edge))
         return BorderEntity;
-      else if (EPRIO(edge) == UG_NS<dim>::PrioMaster || EPRIO(edge) == UG_NS<dim>::PrioNone)
+      else if (UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
       else
-        DUNE_THROW(GridError, "Unknown priority " << EPRIO(edge));
-#undef EPRIO
-#undef PARHDRE
+        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(edge));
 #endif
     }
 
