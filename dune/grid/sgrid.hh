@@ -9,9 +9,9 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
-#include <dune/common/finitestack.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/collectivecommunication.hh>
+#include <dune/common/reservedvector.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
@@ -691,7 +691,8 @@ namespace Dune {
     int maxLevel;              //!< maximum level of elements to be processed
     int orig_l, orig_index;       //!< element where begin was called (the root of the tree to be processed)
 
-    FiniteStack<SHierarchicStackElem,GridImp::MAXL> stack;    //!< stack holding elements to be processed
+    //!< stack holding elements to be processed
+    std::stack<SHierarchicStackElem, Dune::ReservedVector<SHierarchicStackElem,GridImp::MAXL> > stack;
 
     void push_sons (int level, int fatherid); //!< push all sons of this element on the stack
   };
