@@ -121,8 +121,6 @@ namespace Dune {
 #ifndef ModelP
       return InteriorEntity;
 #else
-#define PARHDRE(p) (&((p)->ddd))
-#define EPRIO(e) (PARHDRE(e)->prio)
       if (codim != dim) {
         // TODO: faces (elements and edges are done below)
         return InteriorEntity;
@@ -131,36 +129,28 @@ namespace Dune {
       typename UG_NS<dim>::Node *node =
         static_cast<typename UG_NS<dim>::Node *>(target_);
 
-      if (EPRIO(node)    == UG_NS<dim>::PrioHGhost
-          || EPRIO(node) == UG_NS<dim>::PrioVGhost
-          || EPRIO(node) == UG_NS<dim>::PrioVHGhost)
+      if (UG_NS<dim>::Priority(node)    == UG_NS<dim>::PrioHGhost
+          || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioVGhost
+          || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
-      else if (EPRIO(node) == UG_NS<dim>::PrioBorder || hasBorderCopy_(node))
+      else if (UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioBorder || hasBorderCopy_(node))
         return BorderEntity;
-      else if (EPRIO(node) == UG_NS<dim>::PrioMaster || EPRIO(node) == UG_NS<dim>::PrioNone)
+      else if (UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
       else
-        DUNE_THROW(GridError, "Unknown priority " << EPRIO(node));
-
-#undef EPRIO
-#undef PARHDRE
+        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(node));
 #endif
     }
 
   protected:
 #ifdef ModelP
     bool hasBorderCopy_(typename UG_NS<dim>::Node *node) const {
-#define PARHDR(p)         (&((p)->ddd))
-#define PRIOLIST(n)        UG_NS<dim>::DDD_InfoProcList(PARHDR(n))
-
-      int  *plist = PRIOLIST(node);
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(node));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
 
       return false;
-#undef PARHDR
-#undef PRIOLIST
     }
 #endif
 
@@ -252,23 +242,19 @@ namespace Dune {
       return InteriorEntity;
 #else
 
-#define PARHDRE(p) (&((p)->ddd))
-#define EPRIO(e) (PARHDRE(e)->prio)
       typename UG_NS<dim>::Edge *edge =
         static_cast<typename UG_NS<dim>::Edge *>(target_);
 
-      if (EPRIO(edge)    == UG_NS<dim>::PrioHGhost
-          || EPRIO(edge) == UG_NS<dim>::PrioVGhost
-          || EPRIO(edge) == UG_NS<dim>::PrioVHGhost)
+      if (UG_NS<dim>::Priority(edge)    == UG_NS<dim>::PrioHGhost
+          || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVGhost
+          || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
-      else if (EPRIO(edge) == UG_NS<dim>::PrioBorder || hasBorderCopy_(edge))
+      else if (UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioBorder || hasBorderCopy_(edge))
         return BorderEntity;
-      else if (EPRIO(edge) == UG_NS<dim>::PrioMaster || EPRIO(edge) == UG_NS<dim>::PrioNone)
+      else if (UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
       else
-        DUNE_THROW(GridError, "Unknown priority " << EPRIO(edge));
-#undef EPRIO
-#undef PARHDRE
+        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(edge));
 #endif
     }
 
@@ -284,17 +270,12 @@ namespace Dune {
   protected:
 #ifdef ModelP
     bool hasBorderCopy_(typename UG_NS<dim>::Edge *edge) const {
-#define PARHDR(p)         (&((p)->ddd))
-#define PRIOLIST(n)        UG_NS<dim>::DDD_InfoProcList(PARHDR(n))
-
-      int  *plist = PRIOLIST(edge);
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(edge));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
 
       return false;
-#undef PARHDR
-#undef PRIOLIST
     }
 #endif
 
@@ -391,22 +372,17 @@ namespace Dune {
     /** \brief Return the entity type identifier */
     GeometryType type() const;
 
-    /** \brief The partition type for parallel computing
-        \todo Do not copy macro from UG */
+    /** \brief The partition type for parallel computing */
     PartitionType partitionType () const {
 #ifndef ModelP
       return InteriorEntity;
 #else
-#define PARHDRE(p) (&((p)->ge.ddd))
-#define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
-      if (EPRIO(target_) == UG_NS<dim>::PrioHGhost
-          || EPRIO(target_) == UG_NS<dim>::PrioVGhost
-          || EPRIO(target_) == UG_NS<dim>::PrioVHGhost)
+      if (UG_NS<dim>::EPriority(target_) == UG_NS<dim>::PrioHGhost
+          || UG_NS<dim>::EPriority(target_) == UG_NS<dim>::PrioVGhost
+          || UG_NS<dim>::EPriority(target_) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
       else
         return InteriorEntity;
-#undef EPRIO
-#undef PARHDRE
 #endif
     }
 

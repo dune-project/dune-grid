@@ -388,7 +388,8 @@ namespace Dune {
     if (stack.empty()) return;
 
     // OK, lets pop
-    SHierarchicStackElem newe = stack.pop();
+    SHierarchicStackElem newe = stack.top();
+    stack.pop();
     l = newe.l;
     index = newe.index;
     realEntity().make(l,index);     // here is our new element

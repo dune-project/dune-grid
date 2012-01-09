@@ -40,7 +40,7 @@ noinst_LTLIBRARIES = $(ALBERTAGRID_LIBS)
 albertadir = $(includedir)/dune/grid/albertagrid/
 alberta_HEADERS = agrid.hh albertagrid.cc \
   albertaheader.hh \
-  indexsets.hh datahandle.hh \
+  indexsets.hh indexstack.hh datahandle.hh \
   misc.hh  macroelement.hh  elementinfo.hh  geometrycache.hh  meshpointer.hh \
   macrodata.hh  dofadmin.hh  dofvector.hh  refinement.hh  coordcache.hh \
   level.hh \

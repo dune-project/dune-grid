@@ -19,6 +19,9 @@
 
 namespace Dune
 {
+  template <class InterfaceType>
+  struct MakeableInterfaceObject ;
+
   template <class GridImp>
   class ALUGridObjectFactory
   {

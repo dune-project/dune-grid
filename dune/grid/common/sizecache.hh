@@ -101,12 +101,12 @@ namespace Dune {
       }
     };
 
-    const int gtIndex( const GeometryType& type ) const
+    int gtIndex( const GeometryType& type ) const
     {
       return type.id() >> 1 ;
     }
 
-    const int sizeCodim( const int codim ) const
+    int sizeCodim( const int codim ) const
     {
       const int mydim = GridType :: dimension - codim;
       return ((1 << mydim) + 1) / 2;

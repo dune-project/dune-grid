@@ -7,8 +7,8 @@
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
-#include <dune/grid/common/indexstack.hh>
 
+#include <dune/grid/albertagrid/indexstack.hh>
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/dofadmin.hh>
 #include <dune/grid/albertagrid/dofvector.hh>

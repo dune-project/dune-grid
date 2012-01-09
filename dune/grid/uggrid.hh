@@ -157,7 +157,9 @@ namespace Dune {
     static int ugGather_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
       if (codim == 0) {
-        UGMakeableEntity<0, dim, UGGrid<dim> > e((typename UG_NS<dim>::Element*)obj);
+        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
+         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
+        UGMakeableEntity<0, dim, UGGrid<dim> > e((typename UG_NS<dim>::Element*)obj,nullptr);
         // safety check to only communicate what is needed
         if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Element*)obj)) || e.level() == level)
         {
@@ -168,7 +170,9 @@ namespace Dune {
         }
       }
       else if (codim == dim) {
-        UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Node*)obj);
+        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
+         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
+        UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Node*)obj,nullptr);
         // safety check to only communicate what is needed
         if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Node*)obj)) || e.level() == level)
         {
@@ -179,7 +183,9 @@ namespace Dune {
         }
       }
       else if (codim == dim - 1) {
-        UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Edge*)obj);
+        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
+         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
+        UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Edge*)obj,nullptr);
         // safety check to only communicate what is needed
         if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Edge*)obj)) || e.level() == level)
         {
@@ -205,7 +211,9 @@ namespace Dune {
     {
       if (codim == 0) {
         typedef UGMakeableEntity<0, dim, UGGrid<dim> > Entity;
-        Entity e((typename UG_NS<dim>::Element*)obj);
+        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
+         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
+        Entity e((typename UG_NS<dim>::Element*)obj,nullptr);
         // safety check to only communicate what is needed
         if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Element*)obj)) || e.level() == level)
         {
@@ -221,7 +229,9 @@ namespace Dune {
       }
       else if (codim == dim) {
         typedef UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > Entity;
-        Entity e((typename UG_NS<dim>::Node*)obj);
+        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
+         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
+        Entity e((typename UG_NS<dim>::Node*)obj,nullptr);
         // safety check to only communicate what is needed
         if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Node*)obj)) || e.level() == level)
         {
@@ -237,7 +247,9 @@ namespace Dune {
       }
       else if (codim == dim - 1) {        // !!!ALEX!!! Is it possible to send codim 1 in UG<2>?
         typedef UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > Entity;
-        Entity e((typename UG_NS<dim>::Edge*)obj);
+        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
+         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
+        Entity e((typename UG_NS<dim>::Edge*)obj,nullptr);
         // safety check to only communicate what is needed
         if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Edge*)obj)) || e.level() == level)
         {
@@ -344,7 +356,7 @@ namespace Dune {
         typedef typename GridView::template Codim<0>::Entity Element;
         const Element& element = *gv.template begin<0, InteriorBorder_Partition>();
         return sizeof(DataType)
-               * Base::duneDataHandle_->size(element.template subEntity<codim>(0));
+               * Base::duneDataHandle_->size(*element.template subEntity<codim>(0));
       }
 
       DUNE_THROW(GridError, "Only fixedsize implemented");
@@ -375,7 +387,7 @@ namespace Dune {
         typedef typename GridView::template Codim<0>::Entity Element;
         const Element& element = *gv.template begin<0, InteriorBorder_Partition>();
         return sizeof(DataType)
-               * Base::duneDataHandle_->size(element.template subEntity<codim>(0));
+               * Base::duneDataHandle_->size(*element.template subEntity<codim>(0));
       }
 
       DUNE_THROW(GridError, "Only fixedsize implemented");

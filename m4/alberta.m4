@@ -128,7 +128,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     ALBERTA_VERSION="2.0"
 
     # set variables so that tests can use them
-    ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTAROOT/include"
+    ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTAROOT/include -I$ALBERTAROOT/include/alberta"
 
     # define varaible flags depending on problem and world dim, to change afterwards easily
     ALBERTA_CPPFLAGS='$(ALBERTA$(ALBERTA_DIM)D_CPPFLAGS)'

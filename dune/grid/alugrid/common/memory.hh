@@ -7,7 +7,11 @@
 #include <cstdlib>
 #include <vector>
 
-#include <dune/common/finitestack.hh>
+namespace ALUGridSpace
+{
+  template<class T, int length>
+  class ALUGridFiniteStack ;
+}
 
 namespace Dune {
 
@@ -16,8 +20,7 @@ namespace Dune {
   class ALUMemoryProvider
   {
     enum { maxStackObjects = 256 };
-    typedef FiniteStack< Object* , maxStackObjects > StackType ;
-
+    typedef ALUGridSpace :: ALUGridFiniteStack< Object* , maxStackObjects > StackType ;
     StackType objStack_ ;
 
     typedef ALUMemoryProvider < Object > MyType;
