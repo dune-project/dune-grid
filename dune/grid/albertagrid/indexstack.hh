@@ -1,12 +1,12 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_INDEXSTACK_HH
-#define DUNE_INDEXSTACK_HH
+#ifndef DUNE_ALBERTAGRID_INDEXSTACK_HH
+#define DUNE_ALBERTAGRID_INDEXSTACK_HH
 
 #include <assert.h>
 #include <stack>
 
-#include <dune/common/finitestack.hh>
+#include <dune/common/reservedvector.hh>
 
 /** @file
    @author Robert Kloefkorn
@@ -21,7 +21,28 @@ namespace Dune {
   template <class T, int length>
   class IndexStack
   {
-    typedef typename Dune::FiniteStack<T,length> StackType;
+    class MyFiniteStack : public ReservedVector<T,length>
+    {
+      typedef ReservedVector<T,length>  BaseType ;
+      using BaseType :: sz;
+      using BaseType :: data;
+    public:
+      //! Returns true if the stack is full
+      bool full () const { return sz >= length; }
+
+      //! standard psuh method
+      void push( const T& t )  { BaseType :: push_back( t ); }
+
+      //! Removes and returns the uppermost object from the stack
+      T topAndPop ()
+      {
+        assert( sz > 0 );
+        assert( sz <= length );
+        return data[ --sz ];
+      }
+    };
+
+    typedef MyFiniteStack StackType;
     typedef typename std::stack < StackType * > StackListType;
 
     StackListType fullStackList_;
@@ -124,7 +145,7 @@ namespace Dune {
         fullStackList_.pop();
       }
     }
-    return (*stack_).pop();
+    return (*stack_).topAndPop();
   }
 
   template <class T, int length>
