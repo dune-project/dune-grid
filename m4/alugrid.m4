@@ -77,7 +77,7 @@ if test x$with_alugrid != xno ; then
   PKG_CONFIG_PATH="$ALUGRIDROOT:$ALUGRIDROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
 
   ## check version number 
-  NEEDEDALUGRID_VERSION=1.23
+  NEEDEDALUGRID_VERSION=1.50
 
   AC_MSG_CHECKING([ALUGrid version >= $NEEDEDALUGRID_VERSION])
   if $PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid ; then 
