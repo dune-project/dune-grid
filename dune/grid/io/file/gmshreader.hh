@@ -348,29 +348,17 @@ namespace Dune
       {
         int id, elm_type, number_of_tags;
         readfile(file,3,"%d %d %d ",&id,&elm_type,&number_of_tags);
-        int elementary_entity;
-        std::vector<int> mesh_partitions;
-        if ( version_number < 2.2 )
-        {
-          mesh_partitions.resize(1);
-        }
         for (int k=1; k<=number_of_tags; k++)
         {
           int blub;
           readfile(file,1,"%d ",&blub);
           // k == 1: physical entity (not used here)
-          if (k==2) elementary_entity = blub;
-          if ( version_number < 2.2 )
-          {
-            if (k==3) mesh_partitions[0] = blub;
-          }
-          else
-          {
-            if (k > 3)
-              mesh_partitions[k-4] = blub;
-            else
-              mesh_partitions.resize(blub);
-          }
+          // k == 2: elementary entity (not used here either)
+          // if version_number < 2.2:
+          //   k == 3: mesh partition 0
+          // else
+          //   k == 3: number of mesh partitions
+          //   k => 4: mesh partition k-4
         }
         pass1HandleElement(file, elm_type, renumber, nodes);
       }
