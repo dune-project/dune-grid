@@ -50,7 +50,6 @@ namespace Dune {
   ALU2dGridEntity(const FactoryType& factory, int level)
     : factory_( factory ),
       item_(0),
-      geoObj_(GeometryImp()),
       level_(level),
       face_(-1)
   {}
@@ -62,7 +61,7 @@ namespace Dune {
     level_ = level;
     face_ = face;
 
-    geoImpl().unsetUp2Date();
+    geoObj_.unsetUp2Date();
   }
 
 
@@ -84,21 +83,20 @@ namespace Dune {
   ALU2dGridEntity(const ALU2dGridEntity<cd,dim,GridImp> & org)
     : factory_( org.factory_ ),
       item_(org.item_),
-      geoObj_(GeometryImp()),
       level_(org.level_),
       face_(org.face_)
   {}
 
   //! geometry of this entity
-  template<int cd, int dim, class GridImp>
-  inline const typename ALU2dGridEntity<cd, dim, GridImp> :: Geometry &
-  ALU2dGridEntity<cd, dim, GridImp> :: geometry () const
+  template< int cd, int dim, class GridImp >
+  inline typename ALU2dGridEntity< cd, dim, GridImp >::Geometry
+  ALU2dGridEntity< cd, dim, GridImp >::geometry () const
   {
-    if( !geoImpl().up2Date() )
-      geoImpl().buildGeom(*item_,face_);
+    if( !geoObj_.up2Date() )
+      geoObj_.buildGeom( *item_,face_ );
 
-    assert( geoImpl().up2Date() );
-    return geoObj_;
+    assert( geoObj_.up2Date() );
+    return Geometry( geoObj_ );
   }
 
   //! geometry type of geometry of this entity
@@ -145,7 +143,6 @@ namespace Dune {
   ALU2dGridEntity(const FactoryType& factory, int level)
     : factory_( factory )
       , item_(0)
-      , geoObj_(GeometryImp())
       , isLeaf_ (false)
   {}
 
@@ -155,7 +152,6 @@ namespace Dune {
   ALU2dGridEntity(const ALU2dGridEntity<0,dim,GridImp> & org)
     : factory_( org.factory_ ),
       item_(org.item_),
-      geoObj_(GeometryImp()),
       isLeaf_(org.isLeaf_)
   {}
 
@@ -167,16 +163,16 @@ namespace Dune {
   }
 
   //! geometry of this entity
-  template<int dim, class GridImp>
-  inline const typename ALU2dGridEntity<0, dim, GridImp> :: Geometry & ALU2dGridEntity<0,dim,GridImp> ::
-  geometry () const
+  template< int dim, class GridImp >
+  inline typename ALU2dGridEntity< 0, dim, GridImp >::Geometry
+  ALU2dGridEntity< 0, dim, GridImp >::geometry () const
   {
-    assert(item_ != 0);
-    if(! geoImpl().up2Date() )
-      geoImpl().buildGeom(*item_);
+    assert( item_ != 0 );
+    if( !geoObj_.up2Date() )
+      geoObj_.buildGeom( *item_ );
 
-    assert( geoImpl().up2Date() );
-    return geoObj_;
+    assert( geoObj_.up2Date() );
+    return Geometry( geoObj_ );
   }
 
   //! geometry type of geometry of this entity
@@ -209,34 +205,32 @@ namespace Dune {
     return item_->childNr();
   }
 
-  template<int dim, class GridImp>
-  inline const typename ALU2dGridEntity<0, dim, GridImp>:: LocalGeometry & ALU2dGridEntity<0,dim,GridImp> ::
-  geometryInFather () const
+  template< int dim, class GridImp >
+  inline typename ALU2dGridEntity< 0, dim, GridImp >::LocalGeometry
+  ALU2dGridEntity< 0, dim, GridImp >::geometryInFather () const
   {
     assert( level() > 0 );
-
-    typedef MakeableInterfaceObject<LocalGeometry> LocalGeometryObject;
 
     const GeometryType myType = type();
     // we need to storages in case of cube grid,
     // one for quadrilaterals and one for triangles
-    if( GridImp :: elementType != ALU2DSPACE triangle && myType.isCube() )
+    if( (GridImp::elementType != ALU2DSPACE triangle) && myType.isCube() )
     {
       assert( grid().nonConform() );
-      static ALULocalGeometryStorage<GridImp, LocalGeometryObject,4> geoms( myType, true );
-      return geoms[ nChild() ];
+      static ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 > geoms( myType, true );
+      return LocalGeometry( geoms[ nChild() ] );
     }
     else
     {
       if( grid().nonConform() )
       {
-        static ALULocalGeometryStorage<GridImp, LocalGeometryObject,4> geoms( myType, true );
-        return geoms[ nChild() ];
+        static ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 > geoms( myType, true );
+        return LocalGeometry( geoms[ nChild() ] );
       }
       else
       {
-        static ALULocalGeometryStorage<GridImp, LocalGeometryObject,2> geoms( myType, false );
-        return geoms[ nChild() ];
+        static ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 2 > geoms( myType, false );
+        return LocalGeometry( geoms[ nChild() ] );
       }
     }
   }
@@ -363,7 +357,7 @@ namespace Dune {
     item_= const_cast<HElementType *> (&element);
     isLeaf_  = ((*item_).down() == 0);
 
-    geoImpl().unsetUp2Date();
+    geoObj_.unsetUp2Date();
   }
 
   template<int dim, class GridImp>
@@ -381,7 +375,7 @@ namespace Dune {
     item_       = 0;
     isLeaf_     = false;
 
-    geoImpl().unsetUp2Date();
+    geoObj_.unsetUp2Date();
   }
 
   //! set item pointer to NULL

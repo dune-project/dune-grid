@@ -99,6 +99,9 @@ namespace Dune {
   protected:
     enum IntersectionIteratorType { IntersectionLeaf , IntersectionLevel, IntersectionBoth };
 
+    typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
+
   public:
     typedef typename GridImp::GridObjectFactoryType FactoryType;
 
@@ -109,9 +112,6 @@ namespace Dune {
     typedef ALU3dGridIntersectionIterator< GridImp > ImplementationType;
     //! type of the intersection
     typedef Dune::Intersection< GridImp, Dune::ALU3dGridIntersectionIterator > Intersection;
-
-    typedef ALU3dGridGeometry<dim-1,dimworld,GridImp> GeometryImp;
-    typedef MakeableInterfaceObject<Geometry> GeometryObject;
 
     typedef FieldVector<alu3d_ctype, dimworld> NormalType;
     typedef ALU3dGridEntityPointer<0,GridImp> EntityPointer;
@@ -171,13 +171,13 @@ namespace Dune {
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry &geometryInInside () const;
+    LocalGeometry geometryInInside () const;
 
     //! intersection of codimension 1 of this neighbor with element where
     //!  iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where
     //! iteration started.
-    const Geometry &geometry () const;
+    Geometry geometry () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const;
@@ -189,7 +189,7 @@ namespace Dune {
     //! intersection of codimension 1 of this neighbor with element where
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry &geometryInOutside () const;
+    LocalGeometry geometryInOutside () const;
 
     //! local index of codim 1 entity in neighbor where intersection is
     //! contained
@@ -257,21 +257,6 @@ namespace Dune {
     void setGhostFace(const GEOFaceType& newFace);
 
   protected:
-    GeometryImp&  intersectionGlobalImp() const
-    {
-      return GridImp :: getRealImplementation( intersectionGlobal_ );
-    }
-
-    GeometryImp&  intersectionSelfLocalImp() const
-    {
-      return GridImp :: getRealImplementation( intersectionSelfLocal_ );
-    }
-
-    GeometryImp&  intersectionNeighborLocalImp() const
-    {
-      return GridImp :: getRealImplementation( intersectionNeighborLocal_ );
-    }
-
     // generate local geometries
     void buildLocalGeometries() const;
 
@@ -307,9 +292,9 @@ namespace Dune {
     mutable int innerLevel_;
     mutable int index_;
 
-    mutable GeometryObject intersectionGlobal_;
-    mutable GeometryObject intersectionSelfLocal_;
-    mutable GeometryObject intersectionNeighborLocal_;
+    mutable GeometryImpl intersectionGlobal_;
+    mutable GeometryImpl intersectionSelfLocal_;
+    mutable GeometryImpl intersectionNeighborLocal_;
 
     // unit outer normal
     mutable NormalType unitOuterNormal_;

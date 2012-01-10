@@ -32,8 +32,10 @@ namespace Dune {
     typedef FieldVector<UGCtype, dimworld> WorldVector;
     typedef FieldVector<UGCtype, dim-1> FaceVector;
 
-  public:
+    typedef typename GridImp::Traits::template Codim<1>::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim<1>::LocalGeometryImpl LocalGeometryImpl;
 
+  public:
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
@@ -43,10 +45,7 @@ namespace Dune {
         \todo Should be private
      */
     UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
-      : geometryInInside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
-        geometryInOutside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
-        geometry_(UGGridGeometry<dim-1,dimworld,GridImp>()),
-        geometryIsUpToDate_(false),
+      : geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),
         geometryInOutsideIsUpToDate_(false),
         center_(center), neighborCount_(nb),
@@ -109,11 +108,11 @@ namespace Dune {
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry &geometryInInside () const;
+    LocalGeometry geometryInInside () const;
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-    const Geometry &geometry () const;
+    Geometry geometry () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
@@ -123,7 +122,7 @@ namespace Dune {
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry &geometryInOutside () const;
+    LocalGeometry geometryInOutside () const;
 
     //! local index of codim 1 entity in self where intersection is contained in
     int indexInInside () const
@@ -178,12 +177,12 @@ namespace Dune {
 
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
-    mutable MakeableInterfaceObject<LocalGeometry> geometryInInside_;
-    mutable MakeableInterfaceObject<LocalGeometry> geometryInOutside_;
+    mutable LocalGeometryImpl geometryInInside_;
+    mutable LocalGeometryImpl geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
-    mutable MakeableInterfaceObject<Geometry> geometry_;
+    mutable GeometryImpl geometry_;
 
     // The geometries are only constructed when necessary.  The following
     // flags store whether they have been constructed already.
@@ -226,18 +225,17 @@ namespace Dune {
     typedef FieldVector<UGCtype, dimworld> WorldVector;
     typedef FieldVector<UGCtype, dim-1> FaceVector;
 
-  public:
+    typedef typename GridImp::Traits::template Codim<1>::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim<1>::LocalGeometryImpl LocalGeometryImpl;
 
+  public:
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
-      : geometryInInside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
-        geometryInOutside_(UGGridLocalGeometry<dim-1,dimworld,GridImp>()),
-        geometry_(UGGridGeometry<dim-1,dimworld,GridImp>()),
-        geometryIsUpToDate_(false),
+      : geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),
         geometryInOutsideIsUpToDate_(false),
         center_(center), neighborCount_(nb), subNeighborCount_(0),
@@ -350,15 +348,15 @@ namespace Dune {
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry &geometryInInside () const;
+    LocalGeometry geometryInInside () const;
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-    const Geometry &geometry () const;
+    Geometry geometry () const;
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry &geometryInOutside () const;
+    LocalGeometry geometryInOutside () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
@@ -443,12 +441,12 @@ namespace Dune {
 
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
-    mutable MakeableInterfaceObject<LocalGeometry> geometryInInside_;
-    mutable MakeableInterfaceObject<LocalGeometry> geometryInOutside_;
+    mutable LocalGeometryImpl geometryInInside_;
+    mutable LocalGeometryImpl geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
-    mutable MakeableInterfaceObject<Geometry> geometry_;
+    mutable GeometryImpl geometry_;
 
     // The geometries are only constructed when necessary.  The following
     // flags store whether they have been constructed already.

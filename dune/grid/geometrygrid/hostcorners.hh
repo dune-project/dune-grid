@@ -56,7 +56,7 @@ namespace Dune
       }
 
     private:
-      const HostGeometry &hostGeometry_;
+      HostGeometry hostGeometry_;
     };
 
 

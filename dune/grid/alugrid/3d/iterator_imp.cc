@@ -36,9 +36,6 @@ namespace Dune {
     item_(0),
     ghost_(0),
     index_(0),
-    intersectionGlobal_(GeometryImp()),
-    intersectionSelfLocal_(GeometryImp()),
-    intersectionNeighborLocal_(GeometryImp()),
     done_(true)
   {}
 
@@ -54,9 +51,6 @@ namespace Dune {
     item_(0),
     ghost_(0),
     index_(0),
-    intersectionGlobal_(GeometryImp()),
-    intersectionSelfLocal_(GeometryImp()),
-    intersectionNeighborLocal_(GeometryImp()),
     done_(end)
   {
     if (!end)
@@ -151,9 +145,6 @@ namespace Dune {
     factory_( org.factory_ ),
     item_(org.item_),
     ghost_(org.ghost_),
-    intersectionGlobal_(GeometryImp()),
-    intersectionSelfLocal_(GeometryImp()),
-    intersectionNeighborLocal_(GeometryImp()),
     done_(org.done_)
   {
     if(org.item_)
@@ -324,12 +315,12 @@ namespace Dune {
     return index_;
   }
 
-  template <class GridImp>
-  inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
+  template< class GridImp >
+  inline typename ALU3dGridIntersectionIterator< GridImp >::LocalGeometry
   ALU3dGridIntersectionIterator< GridImp >::geometryInInside () const
   {
     buildLocalGeometries();
-    return intersectionSelfLocal_;
+    return LocalGeometry( intersectionSelfLocal_ );
   }
 
 
@@ -356,13 +347,13 @@ namespace Dune {
     return connector_.duneTwist( indexInOutside(), connector_.outerTwist() );
   }
 
-  template<class GridImp>
-  inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
+  template< class GridImp >
+  inline typename ALU3dGridIntersectionIterator< GridImp >::LocalGeometry
   ALU3dGridIntersectionIterator< GridImp >::geometryInOutside () const
   {
     assert(neighbor());
     buildLocalGeometries();
-    return intersectionNeighborLocal_;
+    return LocalGeometry( intersectionNeighborLocal_ );
   }
 
   template<class GridImp>
@@ -392,12 +383,12 @@ namespace Dune {
     return unitOuterNormal_;
   }
 
-  template<class GridImp>
-  inline const typename ALU3dGridIntersectionIterator<GridImp>::Geometry &
+  template< class GridImp >
+  inline typename ALU3dGridIntersectionIterator< GridImp >::Geometry
   ALU3dGridIntersectionIterator< GridImp >::geometry () const
   {
-    geoProvider_.buildGlobalGeom(intersectionGlobalImp());
-    return intersectionGlobal_;
+    geoProvider_.buildGlobalGeom( intersectionGlobal_ );
+    return Geometry( intersectionGlobal_ );
   }
 
   template<class GridImp>
@@ -429,13 +420,12 @@ namespace Dune {
     return connector_.segmentIndex();
   }
 
-  template <class GridImp>
-  inline void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const
+  template< class GridImp >
+  inline void ALU3dGridIntersectionIterator< GridImp >::buildLocalGeometries() const
   {
-    intersectionSelfLocalImp().buildGeom(geoProvider_.intersectionSelfLocal());
-    if ( ! connector_.outerBoundary() ) {
-      intersectionNeighborLocalImp().buildGeom(geoProvider_.intersectionNeighborLocal());
-    }
+    intersectionSelfLocal_.buildGeom( geoProvider_.intersectionSelfLocal() );
+    if ( !connector_.outerBoundary() )
+      intersectionNeighborLocal_.buildGeom( geoProvider_.intersectionNeighborLocal() );
   }
 
   template <class GridImp>

@@ -114,9 +114,9 @@ namespace Dune
       const ALBERTA EL_INFO &elInfo_;
     };
 
-  }
+  } // namespace Alberta
 
-}
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
 

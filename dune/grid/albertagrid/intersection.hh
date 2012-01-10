@@ -51,8 +51,9 @@ namespace Dune
 
   protected:
     typedef AlbertaGridEntity< 0, dimension, Grid > EntityImp;
-    typedef AlbertaGridGeometry< dimension-1, dimensionworld, Grid > GeometryImp;
-    typedef AlbertaGridGeometry< dimension-1, dimension, Grid > LocalGeometryImp;
+
+    typedef typename Grid::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
+    typedef typename Grid::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
 
     struct GlobalCoordReader;
     struct LocalCoordReader;
@@ -109,6 +110,7 @@ namespace Dune
     typedef This ImplementationType;
 
     static const int dimension = Base::dimension;
+    static const int dimensionworld = Base::dimensionworld;
 
     typedef typename Base::NormalVector NormalVector;
     typedef typename Base::LocalCoordType LocalCoordType;
@@ -123,8 +125,9 @@ namespace Dune
 
   protected:
     typedef typename Base::EntityImp EntityImp;
-    typedef typename Base::GeometryImp GeometryImp;
-    typedef typename Base::LocalGeometryImp LocalGeometryImp;
+
+    typedef typename Base::GeometryImpl GeometryImpl;
+    typedef typename Base::LocalGeometryImpl LocalGeometryImpl;
 
     typedef typename Base::GlobalCoordReader GlobalCoordReader;
     typedef typename Base::LocalCoordReader LocalCoordReader;
@@ -151,10 +154,10 @@ namespace Dune
 
     bool conforming () const;
 
-    const LocalGeometry &geometryInInside () const;
-    const LocalGeometry &geometryInOutside () const;
+    LocalGeometry geometryInInside () const;
+    LocalGeometry geometryInOutside () const;
 
-    const Geometry &geometry () const;
+    Geometry geometry () const;
 
     int indexInOutside () const;
 
@@ -167,14 +170,14 @@ namespace Dune
 
   private:
     mutable ElementInfo neighborInfo_;
-    mutable MakeableInterfaceObject< Geometry > geo_;
+    mutable GeometryImpl geo_;
 #if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
-    mutable MakeableInterfaceObject< LocalGeometry > fakeNeighObj_;
-    mutable MakeableInterfaceObject< LocalGeometry > fakeSelfObj_;
+    mutable LocalGeometryImpl fakeNeighObj_;
+    mutable LocalGeometryImpl fakeSelfObj_;
 #endif
   };
 
-}
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
 

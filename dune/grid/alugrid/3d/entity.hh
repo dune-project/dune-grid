@@ -81,6 +81,8 @@ namespace Dune
 
     template< class > friend class ALU3dGridFactory;
 
+    typedef typename GridImp::Traits::template Codim< cd >::GeometryImpl GeometryImpl;
+
   public:
     typedef typename GridImp::GridObjectFactoryType FactoryType;
 
@@ -92,9 +94,6 @@ namespace Dune
 
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
-
-    typedef ALU3dGridGeometry<dim-cd,GridImp::dimensionworld,GridImp> GeometryImp;
-    typedef MakeableInterfaceObject<Geometry> GeometryObject;
 
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
@@ -114,7 +113,7 @@ namespace Dune
     ALU3dGridEntity(const ALU3dGridEntity & org);
 
     //! geometry of this entity
-    const Geometry & geometry () const;
+    Geometry geometry () const;
 
     //! type of geometry of this entity
     GeometryType type () const;
@@ -157,9 +156,6 @@ namespace Dune
     }
 
   private:
-    //! return reference to geometry implementation
-    GeometryImp& geoImp() const { return GridImp :: getRealImplementation(geo_); }
-
     //! index is unique within the grid hierarchy and per codim
     int getIndex () const;
 
@@ -167,7 +163,7 @@ namespace Dune
     PartitionType convertBndId(const HItemType & item) const ;
 
     //! the cuurent geometry
-    mutable GeometryObject geo_;
+    mutable GeometryImpl geo_;
 
     // the factory that created this entity
     const FactoryType& factory_;
@@ -248,12 +244,14 @@ namespace Dune
     // type of reference element
     typedef typename GridImp :: ReferenceElementType ReferenceElementType;
 
+    typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 0 >::LocalGeometryImpl LocalGeometryImpl;
+
   public:
     typedef typename GridImp::GridObjectFactoryType FactoryType;
 
-    typedef typename GridImp::template Codim<0>::Geometry Geometry;
-    typedef ALU3dGridGeometry<dim,dimworld,GridImp> GeometryImp;
-    typedef MakeableInterfaceObject<Geometry> GeometryObject;
+    typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
+    typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
     typedef ALU3dGridIntersectionIterator<GridImp> IntersectionIteratorImp;
 
     typedef LeafIntersectionIteratorWrapper <GridImp>  ALU3dGridIntersectionIteratorType;
@@ -282,7 +280,7 @@ namespace Dune
     int level () const ;
 
     //! geometry of this entity
-    const Geometry & geometry () const;
+    Geometry geometry () const;
 
     //! type of geometry of this entity
     GeometryType type () const;
@@ -350,7 +348,7 @@ namespace Dune
        We assume that on-the-fly implementation of numerical algorithms
        is only done for simple discretizations. Assumes that meshes are nested.
      */
-    const Geometry & geometryInFather () const;
+    LocalGeometry geometryInFather () const;
 
     /*! Inter-level access to son elements on higher levels<=maxlevel.
        This is provided for sparsely stored nested unstructured meshes.
@@ -444,14 +442,11 @@ namespace Dune
     }
 
   private:
-    //! return reference to geometry implementation
-    GeometryImp& geoImp() const { return GridImp :: getRealImplementation(geo_); }
-
     //! index is unique within the grid hierachy and per codim
     int getIndex () const;
 
     //! the entity's geometry
-    mutable GeometryObject geo_;
+    mutable GeometryImpl geo_;
 
     // corresponding factory
     const FactoryType& factory_;

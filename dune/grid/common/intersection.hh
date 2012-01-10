@@ -6,8 +6,6 @@
 
 #include <dune/grid/common/grid.hh>
 
-#include <dune/geometry/genericgeometry/conversion.hh>
-
 namespace Dune
 {
 
@@ -311,7 +309,7 @@ namespace Dune
      *  local coordinates of the intersection to local coordinates of the
      *  inside() entity.
      */
-    const LocalGeometry &geometryInInside () const
+    LocalGeometry geometryInInside () const
     {
       return this->real.geometryInInside();
     }
@@ -323,7 +321,7 @@ namespace Dune
      * local coordinates of the intersection to local coordinates of the
      * outside() entity.
      */
-    const LocalGeometry &geometryInOutside () const
+    LocalGeometry geometryInOutside () const
     {
       return this->real.geometryInOutside();
     }
@@ -333,7 +331,7 @@ namespace Dune
      *  This method returns a Geometry object that provides a mapping from
      *  local coordinates of the intersection to global (world) coordinates.
      */
-    const Geometry &geometry () const
+    Geometry geometry () const
     {
       return this->real.geometry();
     }
@@ -496,6 +494,6 @@ namespace Dune
     {return static_cast<const IntersectionImp<GridImp>&>(*this);}
   };
 
-}
+} // namespace Dune
 
 #endif // DUNE_GRID_INTERSECTION_HH

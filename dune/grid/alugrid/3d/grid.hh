@@ -276,8 +276,12 @@ namespace Dune
       struct Codim
       {
         // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
-        typedef Dune::Geometry< dim-cd, dimworld, const Grid, ALU3dGridGeometry > Geometry;
-        typedef Dune::Geometry< dim-cd, dim, const Grid, ALU3dGridGeometry > LocalGeometry;
+        //typedef Dune::Geometry< dim-cd, dimworld, const Grid, ALU3dGridGeometry > Geometry;
+        //typedef Dune::Geometry< dim-cd, dim, const Grid, ALU3dGridGeometry > LocalGeometry;
+        typedef ALU3dGridGeometry< dim-cd, dimworld, const Grid > GeometryImpl;
+        typedef ALU3dGridGeometry< dim-cd, dim, const Grid > LocalGeometryImpl;
+        typedef Dune::Geometry< dim-cd, dimworld, const Grid, GlobalGeometryReference > Geometry;
+        typedef Dune::Geometry< dim-cd, dim, const Grid, LocalGeometryReference > LocalGeometry;
         // we could - if needed - introduce an other struct for dimglobal of Geometry
 
         typedef Dune::Entity< cd, dim, const Grid, ALU3dGridEntity > Entity;

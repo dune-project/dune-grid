@@ -128,16 +128,21 @@ namespace Dune
     //! Partition type of this entity
     PartitionType partitionType () const { return realEntity.partitionType(); }
 
-    /*! \brief Each entity encapsulates an object of type
-       Dune::Geometry<dimension-codimension,dimensionworld,...> that
-       gives (among other things) the map from a reference element to world coordinates.
-       This method delivers a const reference to such a geometry.
-
-       \note Be careful when storing such references. If the state
-       of any object is changed, e.g. an iterator is advanced, there
-       is no guarantee that the reference remains valid.
+    /** \brief obtain geometric realization of the entity
+     *
+     *  Each entity provides an object of type
+     *  Dune::Geometry< dimension-codimension, dimensionworld, ... > that
+     *  represents the map from a reference element to world coordinates.
+     *
+     *  \note Previously, the geometry was encapsulated in the entity object and
+     *        and a const reference was returned.
+     *
+     *  \note The geometry object is allowed to behave like a reference.
+     *        So, be careful when storing geometries: If the state of any object
+     *        is changed (e.g. an iterator is advanced), there is no guarantee
+     *        that the geometry remains valid.
      */
-    const Geometry& geometry () const { return realEntity.geometry(); }
+    Geometry geometry () const { return realEntity.geometry(); }
     //@}
 
     /** \brief Return the name of the reference element. The type can
@@ -304,7 +309,7 @@ namespace Dune
     PartitionType partitionType () const { return realEntity.partitionType(); }
 
     //! @copydoc Dune::Entity::geometry()
-    const Geometry& geometry () const { return realEntity.geometry(); }
+    Geometry geometry () const { return realEntity.geometry(); }
     //@}
 
     /** \brief Return the name of the reference element. The type can
@@ -449,10 +454,7 @@ namespace Dune
              or implemented in general.
              For some grids it might be available, though.
      */
-    const LocalGeometry& geometryInFather () const
-    {
-      return realEntity.geometryInFather();
-    }
+    LocalGeometry geometryInFather () const { return realEntity.geometryInFather(); }
 
     /**\brief Inter-level access to elements that resulted from (recursive)
        subdivision of this element.

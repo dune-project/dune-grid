@@ -112,7 +112,7 @@ namespace Dune {
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry &geometryInInside () const
+    LocalGeometry geometryInInside () const
     {
       return it().geometryInInside();
     }
@@ -121,7 +121,7 @@ namespace Dune {
     //!  iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where
     //! iteration started.
-    const Geometry &geometry () const
+    Geometry geometry () const
     {
       return it().geometry();
     }
@@ -142,7 +142,7 @@ namespace Dune {
     //! intersection of codimension 1 of this neighbor with element where
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry &geometryInOutside () const
+    LocalGeometry geometryInOutside () const
     {
       return it().geometryInOutside();
     }

@@ -259,10 +259,12 @@ namespace Dune
     {}
 
   protected:
+#if 0
     /** hide copy constructor */
     Geometry ( const Geometry &rhs )
       : realGeometry( rhs.realGeometry )
     {}
+#endif
 
     /** hide assignment operator */
     const Geometry &operator= ( const Geometry &rhs )
@@ -286,8 +288,14 @@ namespace Dune
   class GeometryDefaultImplementation
   {
   public:
+    static const int mydimension = mydim;
+    static const int coorddimension = cdim;
+
     // save typing
     typedef typename GridImp::ctype ctype;
+
+    typedef FieldVector< ctype, mydim > LocalCoordinate;
+    typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
     //! type of jacobian (also of jacobian inverse transposed)
     typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
@@ -304,7 +312,7 @@ namespace Dune
       const GenericReferenceElement< ctype , mydim > & refElement =
         GenericReferenceElements< ctype, mydim >::general(type);
 
-      FieldVector<ctype,mydim> localBaryCenter (0.0);
+      LocalCoordinate localBaryCenter ( 0 );
       // calculate local bary center
       const int corners = refElement.size(0,0,mydim);
       for(int i=0; i<corners; ++i) localBaryCenter += refElement.position(i,mydim);
@@ -315,7 +323,7 @@ namespace Dune
     }
 
     //! return center of the geometry
-    FieldVector<ctype, cdim> center () const
+    GlobalCoordinate center () const
     {
       GeometryType type = asImp().type();
 
@@ -339,9 +347,16 @@ namespace Dune
   {
     // my dimension
     enum { mydim = 0 };
+
   public:
+    static const int mydimension = mydim;
+    static const int coorddimension = cdim;
+
     // save typing
     typedef typename GridImp::ctype ctype;
+
+    typedef FieldVector< ctype, mydim > LocalCoordinate;
+    typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
     //! type of jacobian (also of jacobian inverse transposed)
     typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
@@ -446,9 +461,9 @@ namespace Dune
       return impl().jacobianInverseTransposed( local );
     }
 
-  private:
     const Implementation &impl () const { return *impl_; }
 
+  private:
     const Implementation *impl_;
   };
 
@@ -464,7 +479,7 @@ namespace Dune
     typedef typename remove_const< GridImp >::type::Traits::template Codim< remove_const< GridImp >::type::dimension - mydim >::GeometryImpl Implementation;
 
   public:
-    explicit GlobalGeometryReference ( const Implementation &impl )
+    GlobalGeometryReference ( const Implementation &impl )
       : GeometryReference< Implementation >( impl )
     {}
   };
@@ -481,7 +496,7 @@ namespace Dune
     typedef typename remove_const< GridImp >::type::Traits::template Codim< remove_const< GridImp >::type::dimension - mydim >::LocalGeometryImpl Implementation;
 
   public:
-    explicit LocalGeometryReference ( const Implementation &impl )
+    LocalGeometryReference ( const Implementation &impl )
       : GeometryReference< Implementation >( impl )
     {}
   };

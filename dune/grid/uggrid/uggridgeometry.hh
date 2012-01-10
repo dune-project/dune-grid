@@ -160,6 +160,8 @@ namespace Dune {
     typedef typename GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> > Base;
 
   public:
+    static const int mydimension = 2;
+    static const int coorddimension = 3;
 
     /** \brief Setup method with a geometry type and a set of corners
         \param coordinates The corner coordinates in DUNE numbering
@@ -194,6 +196,8 @@ namespace Dune {
     typedef typename GenericGeometry::BasicGeometry<1, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> > Base;
 
   public:
+    static const int mydimension = 1;
+    static const int coorddimension = 2;
 
     /** \brief Constructor with a geometry type and a set of corners */
     void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,2> >& coordinates)

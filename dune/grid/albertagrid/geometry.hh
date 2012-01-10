@@ -240,8 +240,8 @@ namespace Dune
     static const int codimension = dimension - mydimension;
     static const int coorddimension = cdim;
 
-    typedef FieldVector< ctype, mydimension > LocalVector;
-    typedef FieldVector< ctype, coorddimension > GlobalVector;
+    typedef FieldVector< ctype, mydimension > LocalCoordinate;
+    typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
 
     typedef FieldMatrix< ctype, mydimension, coorddimension >
     JacobianTransposed;
@@ -283,30 +283,30 @@ namespace Dune
     }
 
     /** \brief obtain the i-th corner of this geometry */
-    GlobalVector corner ( const int i ) const
+    GlobalCoordinate corner ( const int i ) const
     {
       assert( (i >= 0) && (i < corners()) );
       return coord_[ i ];
     }
 
     /** \brief return center of geometry */
-    GlobalVector center () const
+    GlobalCoordinate center () const
     {
       return centroid_;
     }
 
     /** \brief deprecated way of obtaining the i-th corner */
-    const GlobalVector &operator[] ( const int i ) const
+    const GlobalCoordinate &operator[] ( const int i ) const
     {
       assert( (i >= 0) && (i < corners()) );
       return coord_[ i ];
     }
 
     /** \brief map a point from the refence element to the geometry */
-    GlobalVector global ( const LocalVector &local ) const;
+    GlobalCoordinate global ( const LocalCoordinate &local ) const;
 
     /** \brief map a point from the geometry to the reference element */
-    LocalVector local ( const GlobalVector &global ) const;
+    LocalCoordinate local ( const GlobalCoordinate &global ) const;
 
     /** \brief integration element of the geometry mapping
      *
@@ -320,7 +320,7 @@ namespace Dune
     }
 
     /** \brief integration element of the geometry mapping */
-    ctype integrationElement ( const LocalVector &local ) const
+    ctype integrationElement ( const LocalCoordinate &local ) const
     {
       return integrationElement();
     }
@@ -340,7 +340,7 @@ namespace Dune
 
     /** \brief transposed of the geometry mapping's Jacobian */
     const JacobianTransposed &
-    jacobianTransposed ( const LocalVector &local ) const
+    jacobianTransposed ( const LocalCoordinate &local ) const
     {
       return jacobianTransposed();
     }
@@ -354,7 +354,7 @@ namespace Dune
 
     /** \brief transposed inverse of the geometry mapping's Jacobian */
     const JacobianInverseTransposed &
-    jacobianInverseTransposed ( const LocalVector &local ) const
+    jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return jacobianInverseTransposed();
     }
@@ -388,7 +388,7 @@ namespace Dune
     CoordMatrix coord_;
 
     //! the center/centroid
-    GlobalVector centroid_;
+    GlobalCoordinate centroid_;
 
     // storage for the transposed of the jacobian
     mutable JacobianTransposed jT_;
@@ -454,8 +454,8 @@ namespace Dune
     static const int codimension = dimension - mydimension;
     static const int coorddimension = cdim;
 
-    typedef FieldVector< ctype, mydimension > LocalVector;
-    typedef FieldVector< ctype, coorddimension > GlobalVector;
+    typedef FieldVector< ctype, mydimension > LocalCoordinate;
+    typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
 
     typedef FieldMatrix< ctype, mydimension, coorddimension >
     JacobianTransposed;
@@ -494,26 +494,26 @@ namespace Dune
     }
 
     /** \brief obtain the i-th corner of this geometry */
-    GlobalVector corner ( const int i ) const
+    GlobalCoordinate corner ( const int i ) const
     {
       assert( (i >= 0) && (i < corners()) );
-      const Alberta::GlobalVector &x = elementInfo_.coordinate( i );
-      GlobalVector y;
+      const Alberta::GlobalCoordinate &x = elementInfo_.coordinate( i );
+      GlobalCoordinate y;
       for( int j = 0; j < coorddimension; ++j )
         y[ j ] = x[ j ];
       return y;
     }
 
     /** \brief deprecated way of obtaining the i-th corner */
-    const GlobalVector &operator[] ( const int i ) const
+    const GlobalCoordinate &operator[] ( const int i ) const
     {
-      return reinterpret_cast< const GlobalVector & >( elementInfo_.coordinate( i ) );
+      return reinterpret_cast< const GlobalCoordinate & >( elementInfo_.coordinate( i ) );
     }
 
     /** \brief return center of geometry */
-    GlobalVector center () const
+    GlobalCoordinate center () const
     {
-      GlobalVector centroid_ = corner( 0 );
+      GlobalCoordinate centroid_ = corner( 0 );
       for( int i = 1; i < numCorners; ++i )
         centroid_ += corner( i );
       centroid_ *= ctype( 1 ) / ctype( numCorners );
@@ -521,10 +521,10 @@ namespace Dune
     }
 
     /** \brief map a point from the refence element to the geometry */
-    GlobalVector global ( const LocalVector &local ) const;
+    GlobalCoordinate global ( const LocalCoordinate &local ) const;
 
     /** \brief map a point from the geometry to the reference element */
-    LocalVector local ( const GlobalVector &global ) const;
+    LocalCoordinate local ( const GlobalCoordinate &global ) const;
 
     /** \brief integration element of the geometry mapping
      *
@@ -537,7 +537,7 @@ namespace Dune
     }
 
     /** \brief integration element of the geometry mapping */
-    ctype integrationElement ( const LocalVector &local ) const
+    ctype integrationElement ( const LocalCoordinate &local ) const
     {
       return integrationElement();
     }
@@ -560,7 +560,7 @@ namespace Dune
 
     /** \brief transposed of the geometry mapping's Jacobian */
     const JacobianTransposed &
-    jacobianTransposed ( const LocalVector &local ) const
+    jacobianTransposed ( const LocalCoordinate &local ) const
     {
       return jacobianTransposed();
     }
@@ -577,7 +577,7 @@ namespace Dune
 
     /** \brief transposed inverse of the geometry mapping's Jacobian */
     const JacobianInverseTransposed &
-    jacobianInverseTransposed ( const LocalVector &local ) const
+    jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return jacobianInverseTransposed();
     }
@@ -623,8 +623,7 @@ namespace Dune
     template< int codim >
     struct Codim
     {
-      typedef Geometry< dimension-codim, dimension, Grid, AlbertaGridGeometry >
-      LocalGeometry;
+      typedef AlbertaGridGeometry< dimension-codim, dimension, Grid > LocalGeometry;
     };
 
     typedef typename Codim< 0 >::LocalGeometry LocalElementGeometry;
