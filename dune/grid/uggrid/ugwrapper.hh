@@ -9,6 +9,17 @@
 
 namespace Dune {
 
+#if UG_DIM == 2
+  /* Define stuff that is needed by the UG wrapper */
+  struct UG_NS_Base {
+    // class to ignore assigned values
+    // avoids unused-variable warnings by the compiler (which you may run into
+    // when using a dummy variable)
+    struct IgnoreType { template<class T> void operator=(const T&) const { } };
+    static const IgnoreType ignore;
+  };
+#endif
+
   /** \brief Encapsulates a few UG methods and macros
    *
    * This class provides a wrapper to several methods and macros from
@@ -24,7 +35,7 @@ namespace Dune {
 #endif
 
   template<>
-  class UG_NS< UG_DIM > {
+  class UG_NS< UG_DIM > : public UG_NS_Base {
   public:
 
     // //////////////////////////////////////////////
@@ -385,8 +396,7 @@ namespace Dune {
       using UG_NAMESPACE ::PRISM;
       using UG_NAMESPACE ::n_offset;
       using UG::UINT;
-      int n;    // Dummy variable just to please the macro
-      CORNER_COORDINATES(theElement, n, x);
+      CORNER_COORDINATES(theElement, ignore, x);
     }
 
     /** \brief Returns pointers to the coordinate arrays of an UG node */
