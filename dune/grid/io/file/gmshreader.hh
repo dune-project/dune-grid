@@ -348,7 +348,7 @@ namespace Dune
       {
         int id, elm_type, number_of_tags;
         readfile(file,3,"%d %d %d ",&id,&elm_type,&number_of_tags);
-        int physical_entity, elementary_entity;
+        int elementary_entity;
         std::vector<int> mesh_partitions;
         if ( version_number < 2.2 )
         {
@@ -358,7 +358,7 @@ namespace Dune
         {
           int blub;
           readfile(file,1,"%d ",&blub);
-          if (k==1) physical_entity = blub;
+          // k == 1: physical entity (not used here)
           if (k==2) elementary_entity = blub;
           if ( version_number < 2.2 )
           {
@@ -394,7 +394,7 @@ namespace Dune
       {
         int id, elm_type, number_of_tags;
         readfile(file,3,"%d %d %d ",&id,&elm_type,&number_of_tags);
-        int physical_entity = -1, elementary_entity = -1;
+        int physical_entity = -1;
         std::vector<int> mesh_partitions;
         if ( version_number < 2.2 )
         {
@@ -405,7 +405,7 @@ namespace Dune
           int blub;
           readfile(file,1,"%d ",&blub);
           if (k==1) physical_entity = blub;
-          if (k==2) elementary_entity = blub;
+          // k == 2: elementary entity (not used here)
           if ( version_number < 2.2 )
           {
             if (k==3) mesh_partitions[0] = blub;
