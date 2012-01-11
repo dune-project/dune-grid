@@ -24,11 +24,9 @@ namespace Dune {
     class MyFiniteStack : public ReservedVector<T,length>
     {
       typedef ReservedVector<T,length>  BaseType ;
-      using BaseType :: sz;
-      using BaseType :: data;
     public:
       //! Returns true if the stack is full
-      bool full () const { return sz >= length; }
+      bool full () const { return this->size() >= length; }
 
       //! standard psuh method
       void push( const T& t )  { BaseType :: push_back( t ); }
@@ -36,9 +34,9 @@ namespace Dune {
       //! Removes and returns the uppermost object from the stack
       T topAndPop ()
       {
-        assert( sz > 0 );
-        assert( sz <= length );
-        return data[ --sz ];
+        assert( !this->empty() );
+        assert( this->size() <= length );
+        return this->top_and_pop_back();
       }
     };
 
