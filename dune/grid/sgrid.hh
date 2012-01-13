@@ -1070,6 +1070,8 @@ namespace Dune {
     //! destructor pointer
     ~SEntityPointer()
     {
+      if( e )
+        enStack().push( e );
 #ifndef NDEBUG
       index = -1;
 #endif
@@ -1081,6 +1083,11 @@ namespace Dune {
       grid = other.grid;
       l = other.l;
       index = other.index;
+
+      // free current entity
+      if( e )
+        enStack().push( e );
+      e = 0;
 
       return *this;
     }
