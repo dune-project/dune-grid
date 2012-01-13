@@ -942,19 +942,19 @@ namespace Dune {
     }
 
     /*! @brief geometrical information about this intersection in local coordinates of the inside() entity. */
-    const LocalGeometry &geometryInInside () const
+    LocalGeometry geometryInInside () const
     {
       return is.geometryInInside();
     }
 
     /*! @brief geometrical information about this intersection in local coordinates of the outside() entity. */
-    const LocalGeometry &geometryInOutside () const
+    LocalGeometry geometryInOutside () const
     {
       return is.geometryInOutside();
     }
 
     /*! @brief geometrical information about the intersection in global coordinates. */
-    const Geometry &geometry () const
+    Geometry geometry () const
     {
       return is.geometry();
     }
@@ -1071,6 +1071,8 @@ namespace Dune {
     //! destructor pointer
     ~SEntityPointer()
     {
+      if( e )
+        enStack().push( e );
 #ifndef NDEBUG
       index = -1;
 #endif
@@ -1082,6 +1084,11 @@ namespace Dune {
       grid = other.grid;
       l = other.l;
       index = other.index;
+
+      // free current entity
+      if( e )
+        enStack().push( e );
+      e = 0;
 
       return *this;
     }
