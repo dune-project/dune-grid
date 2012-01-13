@@ -423,7 +423,7 @@ namespace Dune
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
     explicit GeometryReference ( const Implementation &impl )
-      : impl_( &impl )
+      : impl_( impl )
     {}
 
     GeometryType type () const { return impl().type(); }
@@ -461,10 +461,10 @@ namespace Dune
       return impl().jacobianInverseTransposed( local );
     }
 
-    const Implementation &impl () const { return *impl_; }
+    const Implementation &impl () const { return impl_; }
 
   private:
-    const Implementation *impl_;
+    const Implementation &impl_;
   };
 
 
