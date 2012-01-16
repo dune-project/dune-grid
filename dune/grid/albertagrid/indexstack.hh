@@ -36,7 +36,12 @@ namespace Dune {
       {
         assert( !this->empty() );
         assert( this->size() <= length );
-        return this->top_and_pop_back();
+        // This code is not slower than using the array structure directly.
+        // The compiler removes the temporary completely.  I measured this.
+        // See the commit message for revision 7837 for more details.
+        T tmp = this->back();
+        this->pop_back();
+        return tmp;
       }
     };
 
