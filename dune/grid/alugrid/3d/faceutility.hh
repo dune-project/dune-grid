@@ -133,7 +133,7 @@ namespace Dune
     ConformanceState conformanceState() const;
 
     //! return whether we are in a parallel environment or not
-    const bool parallel() const {
+    bool parallel() const {
       return ! Conversion< Comm, No_Comm > :: sameType ;
     }
 

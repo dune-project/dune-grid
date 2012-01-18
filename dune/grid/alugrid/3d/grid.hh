@@ -961,7 +961,7 @@ namespace Dune
 #endif
     }
 
-    const bool conformingRefinement() const
+    bool conformingRefinement() const
     {
       return (refinementType_ == conforming) ;
     }
