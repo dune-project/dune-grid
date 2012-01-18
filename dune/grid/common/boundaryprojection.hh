@@ -86,7 +86,7 @@ namespace Dune
      */
     BoundarySegmentWrapper ( const GeometryType &type,
                              const std::vector< CoordinateType > &vertices,
-                             const shared_ptr< BoundarySegment > boundarySegment )
+                             const shared_ptr< BoundarySegment > &boundarySegment )
       : faceMapping_( FaceMappingProvider::create( type.id(), vertices ) ),
         boundarySegment_( boundarySegment )
     {}
