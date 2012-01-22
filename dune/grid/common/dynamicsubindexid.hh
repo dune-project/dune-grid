@@ -7,6 +7,8 @@
 #include <dune/common/typetraits.hh>
 #include <dune/geometry/genericgeometry/conversion.hh>
 
+#warning This file is deprecated and will be removed after the release of dune-grid 2.2.
+
 namespace Dune
 {
 
