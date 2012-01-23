@@ -385,7 +385,7 @@ namespace Dune {
       using UG_NAMESPACE ::PRISM;
       using UG_NAMESPACE ::n_offset;
       using UG::UINT;
-      int n;    // Dummy variable just to please the macro
+      int n DUNE_UNUSED;
       CORNER_COORDINATES(theElement, n, x);
     }
 
