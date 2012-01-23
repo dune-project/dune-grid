@@ -1293,9 +1293,9 @@ namespace Dune {
       typedef LocalGeometryImp<dim-cd, dim, const GridImp> LocalGeometryImpl;
       //! IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
       /** \brief The type of the geometry associated with the entity.*/
-      typedef Dune::Geometry<dim-cd, dimw, const GridImp, GlobalGeometryReference> Geometry;
+      typedef Dune::Geometry<dim-cd, dimw, const GridImp, GeometryImp> Geometry;
       /** \brief The type of the local geometry associated with the entity.*/
-      typedef Dune::Geometry<dim-cd, dim, const GridImp, LocalGeometryReference> LocalGeometry;
+      typedef Dune::Geometry<dim-cd, dim, const GridImp, LocalGeometryImp> LocalGeometry;
       /** \brief The type of the entity. */
       // we could - if needed - introduce another struct for dimglobal of Geometry
       typedef Dune::Entity<cd, dim, const GridImp, EntityImp> Entity;

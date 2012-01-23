@@ -66,7 +66,7 @@ namespace Dune
     public:
       Intersection ( const Grid &grid, const ElementGeometry &insideGeo )
         : grid_( &grid ),
-          insideGeo_( Grid::getRealImplementation( insideGeo ).impl() ),
+          insideGeo_( Grid::getRealImplementation( insideGeo ) ),
           hostIntersection_( 0 )
       {}
 
