@@ -21,8 +21,6 @@ using namespace Dune;
 //
 //***********************************************************************
 
-const UG_NS_Base::IgnoreType UG_NS_Base::ignore = UG_NS_Base::IgnoreType();
-
 template<> int Dune::UGGrid<2>::numOfUGGrids = 0;
 template<> int Dune::UGGrid<3>::numOfUGGrids = 0;
 
