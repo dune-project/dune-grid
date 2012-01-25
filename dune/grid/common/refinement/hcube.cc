@@ -354,7 +354,7 @@ namespace Dune {
         void increment();
 
         int index() const;
-        const Geometry &geometry() const;
+        Geometry geometry () const;
       private:
         friend class RefinementSubEntityIteratorSpecial<dimension, CoordType, codimension>;
         BackendIterator backend;
@@ -395,10 +395,11 @@ namespace Dune {
 
       template<int dimension, class CoordType>
       template<int codimension>
-      const typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry &
-      RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
-      geometry() const
-      { return backend->geometry(); }
+      typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry
+      RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::geometry () const
+      {
+        return backend->geometry();
+      }
 
 #endif // DOXYGEN
 

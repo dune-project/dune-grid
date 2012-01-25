@@ -43,8 +43,6 @@ namespace Dune {
 
       template<int mydimension, int coorddimension, class GridImp>
       class Geometry;
-      template<int mydimension, class GridImp>
-      class MakeableGeometry;
 
       // forward declaration of the iterator base
       template<int dimension, class CoordType, int codimension>
@@ -68,7 +66,6 @@ namespace Dune {
       template<int dimension_, class CoordType>
       class RefinementImp {
         friend class Geometry<dimension_, dimension_, RefinementImp>;
-        friend class MakeableGeometry<dimension_, RefinementImp>;
 
       public:
         enum {dimension = dimension_};
@@ -247,7 +244,7 @@ namespace Dune {
         IndexVector vertexIndices() const;
         int index() const;
         CoordVector coords() const;
-        const Geometry &geometry() const;
+        Geometry geometry () const;
       protected:
         typedef typename Refinement::BackendRefinement BackendRefinement;
         typedef typename BackendRefinement::template Codim<0>::SubEntityIterator BackendIterator;
@@ -260,7 +257,7 @@ namespace Dune {
         const BackendIterator backendEnd;
       private:
         mutable bool builtGeometry;
-        mutable MakeableGeometry<dimension, Refinement> geometry_;
+        mutable PrismTriangulation::Geometry< dimension, dimension, RefinementImp< dimension, CoordType > > geometry_;
       };
 
       template<int dimension, class CoordType>
@@ -320,16 +317,15 @@ namespace Dune {
       }
 
       template<int dimension, class CoordType>
-      const typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry &
-      RefinementIteratorSpecial<dimension, CoordType, 0>::
-      geometry() const
+      typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry
+      RefinementIteratorSpecial<dimension, CoordType, 0>::geometry () const
       {
         if(!builtGeometry) {
           geometry_.make(kuhnIndex);
           builtGeometry = true;
         }
 
-        return geometry_;
+        return Geometry( geometry_ );
       }
 
       // common
@@ -455,21 +451,6 @@ namespace Dune {
         mutable bool builtJinv;
         const BackendIterator &backend;
         int kuhnIndex;
-      };
-
-      template<int mydimension, class GridImp>
-      class MakeableGeometry : public Dune::Geometry<mydimension, mydimension, GridImp, Geometry>
-      {
-        typedef typename GridImp::BackendRefinement::template Codim<GridImp::dimension-mydimension>::SubEntityIterator BackendIterator;
-      public:
-        MakeableGeometry(const BackendIterator &backend)
-          : Dune::Geometry<mydimension, mydimension, GridImp, Geometry>(Geometry<mydimension, mydimension, GridImp>(backend))
-        {}
-
-        void make(int kuhnIndex)
-        { realGeometry.make(kuhnIndex); }
-      private:
-        using Dune::Geometry<mydimension, mydimension, GridImp, Geometry>::realGeometry;
       };
 
     } // namespace PrismTriangulation
