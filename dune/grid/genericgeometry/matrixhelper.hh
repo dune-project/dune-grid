@@ -372,6 +372,9 @@ namespace Dune
       static FieldType
       sqrtDetAAT ( const typename Traits::template Matrix< m, n >::type &A )
       {
+        // These special cases are here not only for speed reasons:
+        // The general implementation aborts if the matrix is almost singular,
+        // and the special implementation provide a stable way to handle that case.
         if( (n == 2) && (m == 2) )
         {
           // Special implementation for 2x2 matrices: faster and more stable
@@ -384,6 +387,14 @@ namespace Dune
           const FieldType v1 = A[ 0 ][ 2 ] * A[ 1 ][ 0 ] - A[ 1 ][ 2 ] * A[ 0 ][ 0 ];
           const FieldType v2 = A[ 0 ][ 0 ] * A[ 1 ][ 1 ] - A[ 1 ][ 0 ] * A[ 0 ][ 1 ];
           return std::abs( v0 * A[ 2 ][ 0 ] + v1 * A[ 2 ][ 1 ] + v2 * A[ 2 ][ 2 ] );
+        }
+        else if ( (n == 3) && (m == 2) )
+        {
+          // Special implementation for 2x3 matrices
+          const FieldType v0 = A[ 0 ][ 0 ] * A[ 1 ][ 1 ] - A[ 0 ][ 1 ] * A[ 1 ][ 0 ];
+          const FieldType v1 = A[ 0 ][ 0 ] * A[ 1 ][ 2 ] - A[ 1 ][ 0 ] * A[ 0 ][ 2 ];
+          const FieldType v2 = A[ 0 ][ 1 ] * A[ 1 ][ 2 ] - A[ 0 ][ 2 ] * A[ 1 ][ 1 ];
+          return sqrt( v0*v0 + v1*v1 + v2*v2);
         }
         else if( n >= m )
         {
