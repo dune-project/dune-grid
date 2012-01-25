@@ -958,7 +958,8 @@ namespace Dune {
           return;
         case InteriorBorder_All_Interface :
           dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF());
-          dddIfaces.push_back(UG_NS<dim>::EdgeIF());
+          // Is the following line needed or not?
+          // dddIfaces.push_back(UG_NS<dim>::EdgeIF());
           return;
         default :
           DUNE_THROW(GridError,
