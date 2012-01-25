@@ -332,19 +332,18 @@ namespace Dune {
     }
   };
 
-  template <class DataHandle>
-  class UGMessageBuffer<DataHandle, 2, 1>
-    : public UGMessageBufferBase<DataHandle, 2, 1>
+  template <class DataHandle, int GridDim>
+  class UGEdgeMessageBuffer
+    : public UGMessageBufferBase<DataHandle, GridDim, GridDim-1>
   {
-    enum {codim = 1,
-          GridDim = 2,
-          dim = 2};
+    enum {codim = GridDim-1,
+          dim = GridDim};
     typedef typename DataHandle::DataType DataType;
     typedef UGMessageBufferBase<DataHandle, GridDim, codim> Base;
   protected:
     friend class Dune::UGGrid<dim>;
 
-    UGMessageBuffer(void *ugData)
+    UGEdgeMessageBuffer(void *ugData)
       : Base(ugData)
     {}
 
@@ -359,40 +358,52 @@ namespace Dune {
                * Base::duneDataHandle_->size(*element.template subEntity<codim>(0));
       }
 
-      DUNE_THROW(GridError, "Only fixedsize implemented");
+      typedef typename GridView::template Codim<codim>::Entity Entity;
+
+      // iterate over all entities, find the maximum size for
+      // the current rank
+      int maxSize = 0;
+      typedef typename
+      GridView
+      ::template Codim<0>
+      ::template Partition<Dune::All_Partition>
+      ::Iterator Iterator;
+      Iterator it = gv.template begin<0, Dune::All_Partition>();
+      const Iterator endIt = gv.template end<0, Dune::All_Partition>();
+      for (; it != endIt; ++it) {
+        int numberOfEdges = it->template count<codim>();
+        for (int k = 0; k < numberOfEdges; k++)
+        {
+          typedef typename GridView::template Codim<0>::Entity Element;
+          typedef typename Element::template Codim<codim>::EntityPointer EdgePointer;
+          const EdgePointer edgePointer(it->template subEntity<codim>(k));
+
+          maxSize = std::max((int) maxSize,
+                             (int) Base::duneDataHandle_->size(*edgePointer));
+        }
+      }
+
+      // find maximum size for all ranks
+      maxSize = MPIHelper::getCollectiveCommunication().max(maxSize);
+      if (!maxSize)
+        return 0;
+
+      // add the size of an unsigned integer to the actual
+      // buffer size. (we somewhere have to store the actual
+      // number of objects for each entity.)
+      return sizeof(unsigned) + sizeof(DataType)*maxSize;
     }
   };
+
+  template <class DataHandle>
+  class UGMessageBuffer<DataHandle, 2, 1>
+    : public UGEdgeMessageBuffer<DataHandle, 2>
+  {};
 
   template <class DataHandle>
   class UGMessageBuffer<DataHandle, 3, 2>
-    : public UGMessageBufferBase<DataHandle, 3, 2>
-  {
-    enum {codim = 2,
-          GridDim = 3,
-          dim = 3};
-    typedef typename DataHandle::DataType DataType;
-    typedef UGMessageBufferBase<DataHandle, GridDim, codim> Base;
-  protected:
-    friend class Dune::UGGrid<dim>;
-
-    UGMessageBuffer(void *ugData)
-      : Base(ugData)
-    {}
-
-    // returns number of bytes required for the UG message buffer
-    template <class GridView>
-    static unsigned ugBufferSize_(const GridView &gv)
-    {
-      if (Base::duneDataHandle_->fixedsize(dim, codim)) {
-        typedef typename GridView::template Codim<0>::Entity Element;
-        const Element& element = *gv.template begin<0, InteriorBorder_Partition>();
-        return sizeof(DataType)
-               * Base::duneDataHandle_->size(*element.template subEntity<codim>(0));
-      }
-
-      DUNE_THROW(GridError, "Only fixedsize implemented");
-    }
-  };
+    : public UGEdgeMessageBuffer<DataHandle, 3>
+  {};
 
 }   // end namespace Dune
 
