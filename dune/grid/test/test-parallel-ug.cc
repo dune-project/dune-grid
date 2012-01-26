@@ -380,18 +380,6 @@ public:
   }
 };
 
-//! specialization for 2D: not yet possible
-template <>
-class EdgeCommunication<2>
-{
-public:
-  template <class GridView>
-  static void test(const GridView &gridView)
-  {
-    std::cout << gridView.comm().rank()+1 << ": Skipping edge communication for 2D: not yet possible.\n";
-  }
-};
-
 
 template <int dim>
 void testParallelUG()
