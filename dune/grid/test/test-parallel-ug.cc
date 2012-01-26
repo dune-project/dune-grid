@@ -309,11 +309,10 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
 }
 
 //! edge communication
-template <int dim>
+template <class GridView>
 class EdgeCommunication
 {
 public:
-  template <class GridView>
   static void test(const GridView &gridView)
   {
     const int dim = GridView::dimension;
@@ -456,12 +455,12 @@ void testParallelUG()
   // Test element and node communication on level view
   testCommunication<typename GridType::LevelGridView, 0>(level0GridView, false);
   testCommunication<typename GridType::LevelGridView, dim>(level0GridView, false);
-  EdgeCommunication<dim>::template test<typename GridType::LevelGridView>(level0GridView);
+  EdgeCommunication<typename GridType::LevelGridView>::test(level0GridView);
 
   // Test element and node communication on leaf view
   testCommunication<typename GridType::LeafGridView, 0>(leafGridView, true);
   testCommunication<typename GridType::LeafGridView, dim>(leafGridView, true);
-  EdgeCommunication<dim>::template test<typename GridType::LeafGridView>(leafGridView);
+  EdgeCommunication<typename GridType::LeafGridView>::test(leafGridView);
 
   ////////////////////////////////////////////////////
   //  Refine globally and test again
@@ -488,11 +487,11 @@ void testParallelUG()
   {
     testCommunication<typename GridType::LevelGridView, 0>(grid->levelView(i), false);
     testCommunication<typename GridType::LevelGridView, dim>(grid->levelView(i), false);
-    EdgeCommunication<dim>::template test<typename GridType::LevelGridView>(grid->levelView(i));
+    EdgeCommunication<typename GridType::LevelGridView>::test(grid->levelView(i));
   }
   testCommunication<typename GridType::LeafGridView, 0>(grid->leafView(), true);
   testCommunication<typename GridType::LeafGridView, dim>(grid->leafView(), true);
-  EdgeCommunication<dim>::template test<typename GridType::LeafGridView>(grid->leafView());
+  EdgeCommunication<typename GridType::LeafGridView>::test(grid->leafView());
 
 };
 
