@@ -423,6 +423,8 @@ namespace Dune {
   class SEntity : public SEntityBase<codim,dim,GridImp,SEntity>
   {
     typedef Dune::SEntityBase<codim,dim,GridImp,Dune::SEntity> SEntityBase;
+    friend class SEntityPointer<codim,GridImp>;
+    friend class SIntersectionIterator<GridImp>;
   public:
     //! constructor
     SEntity (GridImp* _grid, int _l, int _id) :
@@ -464,6 +466,8 @@ namespace Dune {
     using SEntityBase::l;
     using SEntityBase::index;
     using SEntityBase::z;
+    friend class SEntityPointer<0,GridImp>;
+    friend class SIntersectionIterator<GridImp>;
   public:
     typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
