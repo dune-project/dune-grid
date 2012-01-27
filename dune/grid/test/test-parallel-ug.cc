@@ -308,15 +308,14 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
   }
 }
 
-//! edge communication
-template <class GridView>
-class EdgeCommunication
+//! edge and face communication
+template <class GridView, int commCodim>
+class EdgeAndFaceCommunication
 {
 public:
   static void test(const GridView &gridView)
   {
     const int dim = GridView::dimension;
-    const int commCodim = dim - 1;
 
     std::cout << "Testing communication for codim " << commCodim << " entities\n";
 
@@ -340,16 +339,16 @@ public:
     const typename GridView::template Codim<0>::Iterator
     &endIt = gridView.template end<0>();
     for (; it != endIt; ++it) {
-      int numberOfEdges = it->template count<commCodim>();
-      for (int k = 0; k < numberOfEdges; k++)
+      int numberOfSubEntities = it->template count<commCodim>();
+      for (int k = 0; k < numberOfSubEntities; k++)
       {
         typedef typename GridView::template Codim<0>::Entity Element;
-        typedef typename Element::template Codim<commCodim>::EntityPointer EdgePointer;
-        const EdgePointer edgePointer(it->template subEntity<commCodim>(k));
-        entityIndex[mapper.map(*edgePointer)]   = mapper.map(*edgePointer);
-        partitionType[mapper.map(*edgePointer)] = edgePointer->partitionType();
+        typedef typename Element::template Codim<commCodim>::EntityPointer EntityPointer;
+        const EntityPointer entityPointer(it->template subEntity<commCodim>(k));
+        entityIndex[mapper.map(*entityPointer)]   = mapper.map(*entityPointer);
+        partitionType[mapper.map(*entityPointer)] = entityPointer->partitionType();
 
-        if (edgePointer->partitionType() == Dune::BorderEntity)
+        if (entityPointer->partitionType() == Dune::BorderEntity)
         {
           typedef typename GridView::template Codim<0>::Entity Element;
           const typename Element::Geometry& geometry = it->geometry();
@@ -358,9 +357,10 @@ public:
           const typename Dune::GenericReferenceElementContainer<double, dim>::value_type&
           referenceElement = Dune::GenericReferenceElements<double, dim>::general(gt);
           const Dune::FieldVector<double, dim>&
-          edgeGlobal = geometry.global(referenceElement.position(k, dim-1));
-          std::cout << gridView.comm().rank()+1 << ": border edge "
-                    << mapper.map(*edgePointer) << " (" << edgeGlobal
+          entityGlobal = geometry.global(referenceElement.position(k, commCodim));
+          std::cout << gridView.comm().rank()+1 << ": border codim "
+                    << commCodim << " entity "
+                    << mapper.map(*entityPointer) << " (" << entityGlobal
                     << ")" << std::endl;
         }
       }
@@ -455,12 +455,18 @@ void testParallelUG()
   // Test element and node communication on level view
   testCommunication<typename GridType::LevelGridView, 0>(level0GridView, false);
   testCommunication<typename GridType::LevelGridView, dim>(level0GridView, false);
-  EdgeCommunication<typename GridType::LevelGridView>::test(level0GridView);
+  EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(level0GridView);
+  // not testing faces yet, because the implementation is still missing
+  //     if (dim == 3)
+  //         EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(level0GridView);
 
   // Test element and node communication on leaf view
   testCommunication<typename GridType::LeafGridView, 0>(leafGridView, true);
   testCommunication<typename GridType::LeafGridView, dim>(leafGridView, true);
-  EdgeCommunication<typename GridType::LeafGridView>::test(leafGridView);
+  EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(leafGridView);
+  // not testing faces yet, because the implementation is still missing
+  //     if (dim == 3)
+  //         EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(leafGridView);
 
   ////////////////////////////////////////////////////
   //  Refine globally and test again
@@ -487,11 +493,17 @@ void testParallelUG()
   {
     testCommunication<typename GridType::LevelGridView, 0>(grid->levelView(i), false);
     testCommunication<typename GridType::LevelGridView, dim>(grid->levelView(i), false);
-    EdgeCommunication<typename GridType::LevelGridView>::test(grid->levelView(i));
+    EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(grid->levelView(i));
+    // not testing faces yet, because the implementation is still missing
+    //         if (dim == 3)
+    //             EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(grid->levelView(i));
   }
   testCommunication<typename GridType::LeafGridView, 0>(grid->leafView(), true);
   testCommunication<typename GridType::LeafGridView, dim>(grid->leafView(), true);
-  EdgeCommunication<typename GridType::LeafGridView>::test(grid->leafView());
+  EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(grid->leafView());
+  // not testing faces yet, because the implementation is still missing
+  //     if (dim == 3)
+  //         EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(grid->leafView());
 
 };
 
