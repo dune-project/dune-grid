@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stack>
 
+#include <dune/common/exceptions.hh>
 #include <dune/common/reservedvector.hh>
 
 /** @file
