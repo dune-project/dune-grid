@@ -2,7 +2,6 @@
 
 ALLM4S =					\
 	alberta.m4				\
-	alglib.m4				\
 	alugrid.m4				\
 	amiramesh.m4				\
 	dune_experimental_grid_extensions.m4	\
