@@ -9,11 +9,11 @@
 #include <sstream>
 
 #include <dune/common/exceptions.hh>
-
-#include "../cachedmapping.hh"
-#include "../conversion.hh"
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>
+
+#include <dune/geometry/genericgeometry/conversion.hh>
+#include <dune/geometry/genericgeometry/geometry.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
