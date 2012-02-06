@@ -21,8 +21,6 @@ using namespace Dune;
 //
 //***********************************************************************
 
-const UG_NS_Base::IgnoreType UG_NS_Base::ignore = UG_NS_Base::IgnoreType();
-
 template<> int Dune::UGGrid<2>::numOfUGGrids = 0;
 template<> int Dune::UGGrid<3>::numOfUGGrids = 0;
 
@@ -1069,13 +1067,3 @@ template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::All_Partition>::Leaf
 Dune::UGGrid<3>::leafend<3,Dune::All_Partition>() const;
 template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LeafIterator
 Dune::UGGrid<3>::leafend<3,Dune::Ghost_Partition>() const;
-
-#ifdef ModelP
-// Very evil (and I hope temporary hack:)
-// The following symbols are used to implement edge communication.  For the 3D case
-// they are defined in UG itself, in ug/parallel/dddif/initddd.c.  However to link to
-// the UG library we also need to have the 2D variants.  With those, the code links,
-// but 2D edge communication doesn't work yet.  That will be investigated.
-UG::D2:: DDD_IF UG::D2:: EdgeIF, UG::D2:: BorderEdgeSymmIF, UG::D2:: EdgeHIF, UG::D2:: EdgeVHIF,
-UG::D2:: EdgeSymmVHIF;
-#endif

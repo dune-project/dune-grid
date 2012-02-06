@@ -319,7 +319,7 @@ namespace Dune
         fileFound = generate( input, comm, filename );
 
       if( ! fileFound )
-        grid_ = callDirectly( "ALUCubeGrid< 3 , 3 >", rank( comm ), filename.c_str(), comm );
+        grid_ = callDirectly( "ALUCubeGrid< 3 , 3 >", this->rank( comm ), filename.c_str(), comm );
     }
 
   protected:
@@ -358,7 +358,7 @@ namespace Dune
         fileFound = generate( input, comm, filename );
 
       if( ! fileFound )
-        grid_ = callDirectly( "ALUGrid< 3 , 3, eltype, ref >", rank( comm ), filename.c_str(), comm );
+        grid_ = callDirectly( "ALUGrid< 3 , 3, eltype, ref >", this->rank( comm ), filename.c_str(), comm );
     }
 
   protected:

@@ -84,7 +84,7 @@ namespace Dune
 
   public:
     typedef Dune::VTKFunction< GridView > VTKFunction;
-    typedef shared_ptr< VTKFunction > VTKFunctionPtr;
+    typedef shared_ptr< const VTKFunction > VTKFunctionPtr;
 
   protected:
     typedef typename std::list<VTKFunctionPtr>::const_iterator FunctionIterator;
