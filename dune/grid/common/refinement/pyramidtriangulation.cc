@@ -318,7 +318,7 @@ namespace Dune {
           builtGeometry = true;
         }
 
-        return geometry_;
+        return Geometry( geometry_ );
       }
 
       // common
