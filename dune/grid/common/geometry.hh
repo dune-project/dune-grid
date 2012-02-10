@@ -268,15 +268,22 @@ namespace Dune
       return impl().jacobianInverseTransposed(local);
     }
 
-  public:
     //! copy constructor from implementation
     explicit Geometry ( const Implementation &impl )
       : realGeometry( impl )
-    {}
+    {
+      deprecationWarning ( integral_constant< bool, storeReference >() );
+    }
 
   private:
     /** hide assignment operator */
     const Geometry &operator= ( const Geometry &rhs );
+
+    void DUNE_DEPRECATED_MSG( "This Dune::Geometry is still a reference to its implementation." )
+    deprecationWarning ( integral_constant< bool, true > ) {}
+
+    void
+    deprecationWarning ( integral_constant< bool, false > ) {}
 
   protected:
     static const bool storeReference = FacadeOptions::StoreGeometryReference< mydim, cdim, GridImp, GeometryImp >::v;
