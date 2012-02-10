@@ -308,6 +308,12 @@ namespace Dune
      *  This method returns a Geometry object that provides a mapping from
      *  local coordinates of the intersection to local coordinates of the
      *  inside() entity.
+     *
+     *  \note Previously, the geometry was encapsulated in the intersection object
+     *        and a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
     LocalGeometry geometryInInside () const
     {
@@ -317,9 +323,15 @@ namespace Dune
     /** \brief geometrical information about this intersection in local
      *         coordinates of the outside() entity.
      *
-     * This method returns a Geometry object that provides a mapping from
-     * local coordinates of the intersection to local coordinates of the
-     * outside() entity.
+     *  This method returns a Geometry object that provides a mapping from
+     *  local coordinates of the intersection to local coordinates of the
+     *  outside() entity.
+     *
+     *  \note Previously, the geometry was encapsulated in the intersection object
+     *        and a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
     LocalGeometry geometryInOutside () const
     {
@@ -330,6 +342,12 @@ namespace Dune
      *
      *  This method returns a Geometry object that provides a mapping from
      *  local coordinates of the intersection to global (world) coordinates.
+     *
+     *  \note Previously, the geometry was encapsulated in the intersection object
+     *        and a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
     Geometry geometry () const
     {

@@ -135,12 +135,10 @@ namespace Dune
      *  represents the map from a reference element to world coordinates.
      *
      *  \note Previously, the geometry was encapsulated in the entity object and
-     *        and a const reference was returned.
+     *        a const reference was returned.
      *
-     *  \note The geometry object is allowed to behave like a reference.
-     *        So, be careful when storing geometries: If the state of any object
-     *        is changed (e.g. an iterator is advanced), there is no guarantee
-     *        that the geometry remains valid.
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
     Geometry geometry () const { return realEntity.geometry(); }
     //@}
@@ -436,23 +434,30 @@ namespace Dune
      */
     bool isRegular() const { return realEntity.isRegular(); }
 
-    /**\brief Provides information how this element has been subdivided from
-       its father element.
-       The returned LocalGeometry is a model of Dune::Geometry<dimension,dimension,...>
-       mapping from the reference element of the given element to the reference
-       element of the father element.
-       This is sufficient to interpolate all degrees of freedom in the
-       conforming case. Nonconforming may require access to neighbors of father and
-       computations with local coordinates.
-       On the fly case is somewhat inefficient since degrees of freedom
-       may be visited several times.
-       If we store interpolation matrices, this is tolerable. We assume that on-the-fly
-       implementation of interpolation is only done for simple discretizations.
-
-       \note If the partitionType of the Entity is GhostEntity,
-             it is not guaranteed that this method is working
-             or implemented in general.
-             For some grids it might be available, though.
+    /** \brief Provides information how this element has been subdivided from its
+     *         father element.
+     *
+     *  The returned LocalGeometry is a model of
+     *  Dune::Geometry<dimension,dimension,...>, mapping the reference element of
+     *  the given entity to the reference element of its father.
+     *
+     *  This information is sufficient to interpolate all degrees of freedom in
+     *  the conforming case.
+     *  Nonconforming may require access to neighbors of the father and
+     *  calculations with local coordinates.
+     *  The on-the-fly case is somewhat inefficient since degrees of freedom may be
+     *  visited several times.
+     *  If we store interpolation matrices, this is tolerable.
+     *  We assume that on-the-fly implementation of interpolation is only done for
+     *  simple discretizations.
+     *
+     *  \note For ghost entities, this method is not guaranteed to be implemented.
+     *
+     *  \note Previously, the geometry was encapsulated in the entity object and
+     *        a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
     LocalGeometry geometryInFather () const { return realEntity.geometryInFather(); }
 
