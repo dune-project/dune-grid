@@ -24,13 +24,12 @@ namespace Dune
   template<int dim, int dimw>
   class ALUConformGrid;
 
-  template <class GridImp,
-      class GeometryImp,
-      int nChild>
+  template< class GridImp, class GeometryImpl, int nChild >
   class ALULocalGeometryStorage
   {
     // array with pointers to the geometries
-    std::vector < GeometryImp * > geoms_;
+    Dune::array< GeometryImpl *, nChild > geoms_;
+
     // count local geometry creation
     int count_;
 
@@ -118,9 +117,10 @@ namespace Dune
 
   public:
     // create empty storage
-    ALULocalGeometryStorage (const GeometryType type, const bool nonConform)
-      : geoms_ (nChild, (GeometryImp *) 0 ) , count_ (0)
+    ALULocalGeometryStorage ( const GeometryType type, const bool nonConform )
+      : count_( 0 )
     {
+      geoms_.fill( (GeometryImpl *) 0 );
       // the idea is to create a grid containing the reference element,
       // refine once and the store the father - child relations
       CreateGeometries<0, dimension, dimensionworld, GridImp :: elementType >
@@ -138,7 +138,7 @@ namespace Dune
     bool geomCreated(int child) const { return geoms_[child] != 0; }
 
     // return reference to local geometry
-    const GeometryImp & operator [] (int child) const
+    const GeometryImpl & operator [] (int child) const
     {
       assert( geomCreated(child) );
       return *(geoms_[child]);
@@ -220,26 +220,24 @@ namespace Dune
 
   protected:
     // create local geometry
-    template <class Geometry>
-    void create (const Geometry & father,
-                 const Geometry & son,
-                 const int child)
+    template< class Geometry >
+    void create ( const Geometry &father,
+                  const Geometry &son,
+                  const int child )
     {
-      assert( !geomCreated(child) );
-      assert( child >=0 && child < nChild );
+      assert( !geomCreated( child ) );
+      assert( (child >= 0) && (child < nChild) );
 
-      assert( count_ < nChild );
+      assert( (count_ < nChild) );
       ++count_;
 
-      typedef typename GeometryImp :: ImplementationType ImplType;
-      ImplType geoImp;
-      geoImp.buildGeomInFather( father, son );
-      geoms_[child] = new GeometryImp( geoImp );
+      geoms_[ child ] = new GeometryImpl();
+      geoms_[ child ]->buildGeomInFather( father, son );
     }
   };
 
-} // end namespace Dune
+} // namespace Dune
 
 #endif // end HAVE_ALUGRID
 
-#endif
+#endif // #ifndef DUNE_ALUGRIDGEOMETRYSTORAGE_HH

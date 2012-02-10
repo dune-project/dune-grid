@@ -300,6 +300,9 @@ namespace Dune {
     friend class SEntityPointer<codim,GridImp>;
     friend class SIntersectionIterator<GridImp>;
     enum { dimworld = GridImp::dimensionworld };
+
+    typedef typename GridImp::Traits::template Codim< codim >::GeometryImpl GeometryImpl;
+
   public:
     typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
@@ -329,12 +332,12 @@ namespace Dune {
     }
 
     //! geometry of this entity
-    const Geometry& geometry () const
+    Geometry geometry () const
     {
       if (!builtgeometry) makegeometry();
 
       // return result
-      return geo;
+      return Geometry( geo );
     }
 
     PartitionType partitionType () const { return InteriorEntity; }
@@ -345,12 +348,10 @@ namespace Dune {
       l(_l),
       index(_index),
       z(grid->z(l,index,codim)),
-      geo(SGeometry<dim-codim,dimworld,GridImp>()),
       builtgeometry(false) {}
 
     //! empty constructor
     SEntityBase () :
-      geo(SGeometry<dim-codim,dimworld,GridImp>()),
       builtgeometry(false) // mark geometry as not built
     {}
 
@@ -360,7 +361,7 @@ namespace Dune {
       l(other.l),
       index(other.index),
       z(other.z),
-      geo(SGeometry<dim-codim,dimworld,GridImp>()), // do not copy geometry
+      geo(), // do not copy geometry
       builtgeometry(false) // mark geometry as not built
     {}
 
@@ -409,7 +410,7 @@ namespace Dune {
     int l;               //!< level where element is on
     int index;           //!< my consecutive index
     array<int,dim> z;    //!< my coordinate, number of even components = codim
-    mutable Geometry geo; //!< geometry, is only built on demand
+    mutable GeometryImpl geo; //!< geometry, is only built on demand
     mutable bool builtgeometry; //!< true if geometry has been constructed
   };
 
@@ -466,8 +467,13 @@ namespace Dune {
     using SEntityBase::l;
     using SEntityBase::index;
     using SEntityBase::z;
+
+    typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 0 >::LocalGeometryImpl LocalGeometryImpl;
+
     friend class SEntityPointer<0,GridImp>;
     friend class SIntersectionIterator<GridImp>;
+
   public:
     typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
@@ -570,7 +576,7 @@ namespace Dune {
        on-the-fly implementation of numerical algorithms is only done for
        simple discretizations.  Assumes that meshes are nested.
      */
-    const LocalGeometry& geometryInFather () const;
+    LocalGeometry geometryInFather () const;
 
     /**
        @brief Inter-level access to son elements on higher levels<=maxLevel.
@@ -587,14 +593,12 @@ namespace Dune {
     //! constructor
     SEntity (GridImp* _grid, int _l, int _index) :
       SEntityBase(_grid,_l,_index),
-      built_father(false),
-      in_father_local(SGeometry<dim,dim,GridImp>())
+      built_father(false)
     {}
 
     SEntity (const SEntity& other ) :
       SEntityBase(other.grid, other.l, other.index ),
-      built_father(false),
-      in_father_local(SGeometry<dim,dim,GridImp>())
+      built_father(false)
     {}
 
     //! Reinitialization
@@ -617,7 +621,7 @@ namespace Dune {
 
     mutable bool built_father;
     mutable int father_index;
-    mutable LocalGeometry in_father_local;
+    mutable LocalGeometryImpl in_father_local;
     void make_father() const;
   };
 
@@ -713,6 +717,10 @@ namespace Dune {
   {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
+
+    typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
+
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
@@ -799,15 +807,15 @@ namespace Dune {
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in LOCAL coordinates of the element where iteration started.
      */
-    const LocalGeometry &geometryInInside () const;
+    LocalGeometry geometryInInside () const;
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in LOCAL coordinates of neighbor
      */
-    const LocalGeometry &geometryInOutside () const;
+    LocalGeometry geometryInOutside () const;
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in GLOBAL coordinates of the element where iteration started.
      */
-    const Geometry &geometry () const;
+    Geometry geometry () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
@@ -826,9 +834,6 @@ namespace Dune {
       self(*_self), ne(self), grid(_grid),
       partition(_grid->partition(grid->getRealImplementation(ne).l,_self->z)),
       zred(_grid->compress(grid->getRealImplementation(ne).l,_self->z)),
-      is_self_local(SGeometry<dim-1, dim, GridImp>()),
-      is_global(SGeometry<dim-1, dimworld, GridImp>()),
-      is_nb_local(SGeometry<dim-1, dim, GridImp>()),
       intersection(IntersectionImp(*this))
     {
       // make neighbor
@@ -841,9 +846,6 @@ namespace Dune {
       count(other.count), valid_count(other.valid_count),
       valid_nb(other.valid_nb), is_on_boundary(other.is_on_boundary),
       built_intersections(false),
-      is_self_local(SGeometry<dim-1, dim, GridImp>()),
-      is_global(SGeometry<dim-1, dimworld, GridImp>()),
-      is_nb_local(SGeometry<dim-1, dim, GridImp>()),
       intersection(IntersectionImp(*this))
     {}
 
@@ -877,9 +879,9 @@ namespace Dune {
     mutable bool valid_nb;                //!< true if nb is initialized
     mutable bool is_on_boundary;          //!< true if neighbor is otside the domain
     mutable bool built_intersections;     //!< true if all intersections have been built
-    mutable LocalGeometry is_self_local;  //!< intersection in own local coordinates
-    mutable Geometry is_global;           //!< intersection in global coordinates, map consistent with is_self_local
-    mutable LocalGeometry is_nb_local;    //!< intersection in neighbors local coordinates
+    mutable LocalGeometryImpl is_self_local;  //!< intersection in own local coordinates
+    mutable GeometryImpl is_global;           //!< intersection in global coordinates, map consistent with is_self_local
+    mutable LocalGeometryImpl is_nb_local;    //!< intersection in neighbors local coordinates
     Intersection intersection;
   };
 
@@ -945,19 +947,19 @@ namespace Dune {
     }
 
     /*! @brief geometrical information about this intersection in local coordinates of the inside() entity. */
-    const LocalGeometry &geometryInInside () const
+    LocalGeometry geometryInInside () const
     {
       return is.geometryInInside();
     }
 
     /*! @brief geometrical information about this intersection in local coordinates of the outside() entity. */
-    const LocalGeometry &geometryInOutside () const
+    LocalGeometry geometryInOutside () const
     {
       return is.geometryInOutside();
     }
 
     /*! @brief geometrical information about the intersection in global coordinates. */
-    const Geometry &geometry () const
+    Geometry geometry () const
     {
       return is.geometry();
     }

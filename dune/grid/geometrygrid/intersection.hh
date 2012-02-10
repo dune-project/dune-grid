@@ -60,30 +60,26 @@ namespace Dune
 
       typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
 
-      typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
-      typedef typename MakeableGeometry::ImplementationType GeometryImpl;
-
-      typedef typename MakeableInterfaceObject< ElementGeometry >::ImplementationType ElementGeometryImpl;
+      typedef typename Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
+      typedef typename Traits::template Codim< 0 >::GeometryImpl ElementGeometryImpl;
 
     public:
       Intersection ( const Grid &grid, const ElementGeometry &insideGeo )
         : grid_( &grid ),
           insideGeo_( Grid::getRealImplementation( insideGeo ) ),
-          hostIntersection_( 0 ),
-          geo_( GeometryImpl() )
+          hostIntersection_( 0 )
       {}
 
       Intersection ( const Intersection &other )
         : grid_( other.grid_ ),
-          insideGeo_( Grid::getRealImplementation( other.insideGeo_ ) ),
-          hostIntersection_( 0 ),
-          geo_( GeometryImpl() )
+          insideGeo_( other.insideGeo_ ),
+          hostIntersection_( 0 )
       {}
 
       const Intersection &operator= ( const Intersection &other )
       {
         grid_ = other.grid_;
-        Grid::getRealImplementation( insideGeo_ ) = Grid::getRealImplementation( other.insideGeo_ );
+        insideGeo_ = other.insideGeo_;
         invalidate();
         return *this;
       }
@@ -113,26 +109,24 @@ namespace Dune
         return hostIntersection().boundarySegmentIndex();
       }
 
-      const LocalGeometry &geometryInInside () const
+      LocalGeometry geometryInInside () const
       {
         return hostIntersection().geometryInInside();
       }
 
-      const LocalGeometry &geometryInOutside () const
+      LocalGeometry geometryInOutside () const
       {
         return hostIntersection().geometryInOutside();
       }
 
-      const Geometry &geometry () const
+      Geometry geometry () const
       {
-        GeometryImpl &geo = Grid::getRealImplementation( geo_ );
-        if( !geo )
+        if( !geo_ )
         {
-          const LocalGeometry &localGeo = geometryInInside();
-          CoordVector coords( insideGeometry(), localGeo );
-          geo = GeometryImpl( type(), coords );
+          CoordVector coords( insideGeo_, geometryInInside() );
+          geo_ = GeometryImpl( type(), coords );
         }
-        return geo_;
+        return Geometry( geo_ );
       }
 
       GeometryType type () const { return hostIntersection().type(); }
@@ -155,32 +149,28 @@ namespace Dune
       FieldVector< ctype, dimensionworld >
       integrationOuterNormal ( const FieldVector< ctype, dimension-1 > &local ) const
       {
-        const ElementGeometryImpl &geo = Grid::getRealImplementation( insideGeometry() );
-
         const GenericReferenceElement< ctype, dimension > &refElement
-          = GenericReferenceElements< ctype, dimension>::general( geo.type() );
+          = GenericReferenceElements< ctype, dimension>::general( insideGeo_.type() );
 
         FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
-        const typename ElementGeometryImpl::JacobianInverseTransposed &jit = geo.jacobianInverseTransposed( x );
+        const typename ElementGeometryImpl::JacobianInverseTransposed &jit = insideGeo_.jacobianInverseTransposed( x );
         const FieldVector< ctype, dimension > &refNormal = refElement.volumeOuterNormal( indexInInside() );
 
         FieldVector< ctype, dimensionworld > normal;
         jit.mv( refNormal, normal );
         normal *= ctype( 1 ) / jit.det();
-        //normal *= geo.integrationElement( x );
+        //normal *= insideGeo_.integrationElement( x );
         return normal;
       }
 
       FieldVector< ctype, dimensionworld >
       outerNormal ( const FieldVector< ctype, dimension-1 > &local ) const
       {
-        const ElementGeometryImpl &geo = Grid::getRealImplementation( insideGeometry() );
-
         const GenericReferenceElement< ctype, dimension > &refElement
-          = GenericReferenceElements< ctype, dimension>::general( geo.type() );
+          = GenericReferenceElements< ctype, dimension>::general( insideGeo_.type() );
 
         FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
-        const typename ElementGeometryImpl::JacobianInverseTransposed &jit = geo.jacobianInverseTransposed( x );
+        const typename ElementGeometryImpl::JacobianInverseTransposed &jit = insideGeo_.jacobianInverseTransposed( x );
         const FieldVector< ctype, dimension > &refNormal = refElement.volumeOuterNormal( indexInInside() );
 
         FieldVector< ctype, dimensionworld > normal;
@@ -214,7 +204,7 @@ namespace Dune
       void invalidate ()
       {
         hostIntersection_ = 0;
-        Grid::getRealImplementation( geo_ ) = GeometryImpl();
+        geo_ = GeometryImpl();
       }
 
       void initialize ( const HostIntersection &hostIntersection )
@@ -224,12 +214,10 @@ namespace Dune
       }
 
     private:
-      const ElementGeometry &insideGeometry () const { return insideGeo_; }
-
       const Grid *grid_;
-      ElementGeometry insideGeo_;
+      ElementGeometryImpl insideGeo_;
       const HostIntersection *hostIntersection_;
-      mutable MakeableGeometry geo_;
+      mutable GeometryImpl geo_;
     };
 
 

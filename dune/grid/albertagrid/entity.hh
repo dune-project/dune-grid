@@ -75,8 +75,9 @@ namespace Dune
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
   private:
-    typedef MakeableInterfaceObject< Geometry > GeometryObject;
-    typedef typename GeometryObject::ImplementationType GeometryImp;
+    //typedef MakeableInterfaceObject< Geometry > GeometryObject;
+    //typedef typename GeometryObject::ImplementationType GeometryImp;
+    typedef typename GridImp::Traits::template Codim< codim >::GeometryImpl GeometryImpl;
 
   public:
     //! constructor
@@ -92,7 +93,7 @@ namespace Dune
     PartitionType partitionType() const;
 
     //! geometry of this entity
-    const Geometry & geometry () const;
+    Geometry geometry () const;
 
     //! type of geometry of this entity
     GeometryType type () const;
@@ -142,17 +143,6 @@ namespace Dune
     }
 
   private:
-    const GeometryImp &geoImp () const
-    {
-      return GridImp :: getRealImplementation( geo_ );
-    }
-
-    GeometryImp &geoImp ()
-    {
-      return GridImp :: getRealImplementation( geo_ );
-    }
-
-  private:
     // grid this entity belong to
     const GridImp *grid_;
 
@@ -163,7 +153,7 @@ namespace Dune
     int subEntity_;
 
     // current geometry
-    GeometryObject geo_;
+    GeometryImpl geo_;
   };
 
 
@@ -211,7 +201,8 @@ namespace Dune
     typedef typename GridImp::template Codim< 0 >::EntitySeed EntitySeed;
     typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
     typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
-    typedef AlbertaGridGlobalGeometry< dimension, dimworld, GridImp > GeometryImp;
+    //typedef AlbertaGridGlobalGeometry< dimension, dimworld, GridImp > GeometryImp;
+    typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
 
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
@@ -235,7 +226,7 @@ namespace Dune
     int boundaryId () const;
 
     //! geometry of this entity
-    const Geometry & geometry () const;
+    Geometry geometry () const;
 
     //! type of geometry of this entity
     GeometryType type () const;
@@ -317,7 +308,7 @@ namespace Dune
      *  On the fly case is somewhat inefficient since dofs  are visited several
      *  times. If we store interpolation matrices, this is tolerable.
      */
-    const LocalGeometry &geometryInFather () const;
+    LocalGeometry geometryInFather () const;
 
     /*! Inter-level access to son elements on higher levels<=maxlevel.
        This is provided for sparsely stored nested unstructured meshes.
@@ -387,11 +378,6 @@ namespace Dune
     //! return which number of child we are, i.e. 0 or 1
     int nChild () const;
 
-    GeometryImp &geoImp () const
-    {
-      return GridImp::getRealImplementation( geo_ );
-    }
-
     //! the corresponding grid
     const GridImp *grid_;
 
@@ -402,7 +388,7 @@ namespace Dune
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
 
     //! the cuurent geometry
-    mutable GeometryObject geo_;
+    mutable GeometryImpl geo_;
     mutable bool builtgeometry_;  //!< true if geometry has been constructed
   }; // end of AlbertaGridEntity codim = 0
 

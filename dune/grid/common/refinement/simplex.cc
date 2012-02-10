@@ -593,9 +593,6 @@ namespace Dune {
 
       // elements
 
-      template<int mydimension, class GridImp>
-      class MakeableGeometry;
-
       template<int dimension, class CoordType>
       class RefinementIteratorSpecial<dimension, CoordType, 0>
       {
@@ -614,7 +611,7 @@ namespace Dune {
         IndexVector vertexIndices() const;
         int index() const;
         CoordVector coords() const;
-        const Geometry &geometry() const;
+        Geometry geometry () const;
       protected:
         typedef FieldVector<int, dimension> Vertex;
         enum { nKuhnSimplices = Factorial<dimension>::factorial };
@@ -625,7 +622,7 @@ namespace Dune {
         int index_;
       private:
         mutable bool builtGeometry;
-        mutable MakeableGeometry<dimension, Refinement> geometry_;
+        mutable Simplex::Geometry< dimension, dimension, RefinementImp< dimension, CoordType > > geometry_;
       };
 
       template<int dimension, class CoordType>
@@ -733,16 +730,15 @@ namespace Dune {
       }
 
       template<int dimension, class CoordType>
-      const typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry &
-      RefinementIteratorSpecial<dimension, CoordType, 0>::
-      geometry() const
+      typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry
+      RefinementIteratorSpecial<dimension, CoordType, 0>::geometry () const
       {
         if(!builtGeometry) {
           geometry_.make(origin, kuhnIndex);
           builtGeometry = true;
         }
 
-        return geometry_;
+        return Geometry( geometry_ );
       }
 
       // common
@@ -885,20 +881,6 @@ namespace Dune {
         int level;
         int kuhnIndex;
         FieldVector<int, coorddimension> origin;
-      };
-
-      template<int mydimension, class GridImp>
-      class MakeableGeometry : public Dune::Geometry<mydimension, mydimension, GridImp, Geometry>
-      {
-      public:
-        MakeableGeometry(int level)
-          : Dune::Geometry<mydimension, mydimension, GridImp, Geometry>(Geometry<mydimension, mydimension, GridImp>(level))
-        {}
-
-        void make(const FieldVector<int, mydimension> &origin, int kuhnIndex)
-        { realGeometry.make(origin, kuhnIndex); }
-      private:
-        using Dune::Geometry<mydimension, mydimension, GridImp, Geometry>::realGeometry;
       };
 
       template<int mydimension, class GridImp>

@@ -351,12 +351,7 @@ namespace Dune
   inline AlbertaGridLeafIntersection< GridImp >
   ::AlbertaGridLeafIntersection ( const EntityImp &entity, const int n )
     : Base( entity, n ),
-      neighborInfo_(),
-      geo_( GeometryImp() )
-#if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
-      , fakeNeighObj_( LocalGeometryImp() )
-      , fakeSelfObj_ ( LocalGeometryImp() )
-#endif
+      neighborInfo_()
   {}
 
 
@@ -364,12 +359,7 @@ namespace Dune
   inline AlbertaGridLeafIntersection< GridImp >
   ::AlbertaGridLeafIntersection ( const This &other )
     : Base( other ),
-      neighborInfo_(),
-      geo_( GeometryImp() )
-#if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
-      , fakeNeighObj_( LocalGeometryImp() )
-      , fakeSelfObj_ ( LocalGeometryImp() )
-#endif
+      neighborInfo_()
   {}
 
 
@@ -431,25 +421,24 @@ namespace Dune
 
 
   template< class GridImp >
-  inline const typename AlbertaGridLeafIntersection< GridImp >::LocalGeometry &
+  inline typename AlbertaGridLeafIntersection< GridImp >::LocalGeometry
   AlbertaGridLeafIntersection< GridImp >::geometryInInside () const
   {
 #if ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
     const int twist = elementInfo().template twist< 1 >( oppVertex_ );
     const int face = (dimension > 1 ? oppVertex_ : 1-oppVertex_);
-    return LocalGeoProvider::instance().faceGeometry( face, twist );
+    return LocalGeometry( LocalGeoProvider::instance().faceGeometry( face, twist ) );
 #else
-    LocalGeometryImp &geo = GridImp::getRealImplementation( fakeSelfObj_ );
     const LocalCoordReader coordReader( inside()->geometry(), geometry() );
-    geo.build( coordReader );
-    return fakeSelfObj_;
+    fakeSelfObj_.build( coordReader );
+    return LocalGeometry( fakeSelfObj_ );
 #endif
   }
 
 
   template< class GridImp >
-  inline const typename AlbertaGridLeafIntersection< GridImp >::LocalGeometry &
+  inline typename AlbertaGridLeafIntersection< GridImp >::LocalGeometry
   AlbertaGridLeafIntersection< GridImp >::geometryInOutside () const
   {
     assert( neighbor() );
@@ -460,25 +449,23 @@ namespace Dune
     const int oppVertex = elInfo.opp_vertex[ oppVertex_ ];
     const int twist = elementInfo().twistInNeighbor( oppVertex_ );
     const int face = (dimension > 1 ? oppVertex : 1-oppVertex);
-    return LocalGeoProvider::instance().faceGeometry( face, twist );
+    return LocalGeometry( LocalGeoProvider::instance().faceGeometry( face, twist ) );
 #else
-    LocalGeometryImp &geo = GridImp::getRealImplementation( fakeNeighObj_ );
     const LocalCoordReader coordReader( outside()->geometry(), geometry() );
-    geo.build( coordReader );
-    return fakeNeighObj_;
+    fakeNeighObj_.build( coordReader );
+    return LocalGeometry( fakeNeighObj_ );
 #endif
   }
 
 
   template< class GridImp >
-  inline const typename AlbertaGridLeafIntersection< GridImp >::Geometry &
+  inline typename AlbertaGridLeafIntersection< GridImp >::Geometry
   AlbertaGridLeafIntersection< GridImp >::geometry () const
   {
-    GeometryImp &geo = GridImp::getRealImplementation( geo_ );
     const int face = (dimension > 1 ? oppVertex_ : 1-oppVertex_);
     const GlobalCoordReader coordReader( grid(), elementInfo(), face );
-    geo.build( coordReader );
-    return geo_;
+    geo_.build( coordReader );
+    return Geometry( geo_ );
   }
 
 
@@ -507,6 +494,6 @@ namespace Dune
     return elementInfo().twistInNeighbor( oppVertex_ );
   }
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_ALBERTA_INTERSECTION_CC

@@ -203,7 +203,7 @@ namespace Dune {
     __As[dir] =grid->pos(l,t);     // all components of t are even
 
     // make element
-    grid->getRealImplementation(geo).make(__As);
+    geo.make(__As);
     builtgeometry = true;
   }
 
@@ -310,7 +310,7 @@ namespace Dune {
     }
     for (int i=0; i<dim; i++) v[i] = 0.5*delta[i];
     __As[dim] =v;
-    this->grid->getRealImplementation(in_father_local).make(__As);     // build geometry
+    in_father_local.make(__As);     // build geometry
 
     built_father = true;
   }
@@ -326,12 +326,11 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline
-  const typename GridImp::template Codim<0>::LocalGeometry&
+  inline typename GridImp::template Codim<0>::LocalGeometry
   SEntity<0,dim,GridImp>::geometryInFather () const
   {
     if (!built_father) make_father();
-    return in_father_local;
+    return LocalGeometry( in_father_local );
   }
 
   template<int dim, class GridImp>
@@ -522,7 +521,7 @@ namespace Dune {
         ++t;
       }
     // update geometry
-    grid->getRealImplementation(is_self_local).make(__AsLocal);
+    is_self_local.make(__AsLocal);
 
     // local coordinates in neighbor
     p1Local = 0.0;
@@ -539,7 +538,7 @@ namespace Dune {
         ++t;
       }
     // update geometry
-    grid->getRealImplementation(is_nb_local).make(__AsLocal);
+    is_nb_local.make(__AsLocal);
 
     // global coordinates
     FieldMatrix<ctype,dim,dimworld> __As;
@@ -562,36 +561,36 @@ namespace Dune {
         z1[i] -= 1;
     __As[t] = grid->pos(self.level(),z1);
     // update geometry
-    grid->getRealImplementation(is_global).make(__As);
+    is_global.make(__As);
 
     built_intersections = true;
   }
 
   template<class GridImp>
-  inline const typename SIntersectionIterator< GridImp >::LocalGeometry &
+  inline typename SIntersectionIterator< GridImp >::LocalGeometry
   SIntersectionIterator< GridImp >::geometryInInside () const
   {
     assert (valid_count);
     if (!built_intersections) makeintersections();
-    return is_self_local;
+    return LocalGeometry( is_self_local );
   }
 
   template<class GridImp>
-  inline const typename SIntersectionIterator< GridImp >::LocalGeometry &
+  inline typename SIntersectionIterator< GridImp >::LocalGeometry
   SIntersectionIterator< GridImp >::geometryInOutside () const
   {
     assert (valid_count);
     if (!built_intersections) makeintersections();
-    return is_nb_local;
+    return LocalGeometry( is_nb_local );
   }
 
   template<class GridImp>
-  inline const typename SIntersectionIterator< GridImp >::Geometry &
+  inline typename SIntersectionIterator< GridImp >::Geometry
   SIntersectionIterator< GridImp >::geometry () const
   {
     assert (valid_count);
     if (!built_intersections) makeintersections();
-    return is_global;
+    return Geometry( is_global );
   }
 
   template<class GridImp>

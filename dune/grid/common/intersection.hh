@@ -6,8 +6,6 @@
 
 #include <dune/grid/common/grid.hh>
 
-#include <dune/geometry/genericgeometry/conversion.hh>
-
 namespace Dune
 {
 
@@ -310,8 +308,14 @@ namespace Dune
      *  This method returns a Geometry object that provides a mapping from
      *  local coordinates of the intersection to local coordinates of the
      *  inside() entity.
+     *
+     *  \note Previously, the geometry was encapsulated in the intersection object
+     *        and a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
-    const LocalGeometry &geometryInInside () const
+    LocalGeometry geometryInInside () const
     {
       return this->real.geometryInInside();
     }
@@ -319,11 +323,17 @@ namespace Dune
     /** \brief geometrical information about this intersection in local
      *         coordinates of the outside() entity.
      *
-     * This method returns a Geometry object that provides a mapping from
-     * local coordinates of the intersection to local coordinates of the
-     * outside() entity.
+     *  This method returns a Geometry object that provides a mapping from
+     *  local coordinates of the intersection to local coordinates of the
+     *  outside() entity.
+     *
+     *  \note Previously, the geometry was encapsulated in the intersection object
+     *        and a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
-    const LocalGeometry &geometryInOutside () const
+    LocalGeometry geometryInOutside () const
     {
       return this->real.geometryInOutside();
     }
@@ -332,8 +342,14 @@ namespace Dune
      *
      *  This method returns a Geometry object that provides a mapping from
      *  local coordinates of the intersection to global (world) coordinates.
+     *
+     *  \note Previously, the geometry was encapsulated in the intersection object
+     *        and a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
-    const Geometry &geometry () const
+    Geometry geometry () const
     {
       return this->real.geometry();
     }
@@ -496,6 +512,6 @@ namespace Dune
     {return static_cast<const IntersectionImp<GridImp>&>(*this);}
   };
 
-}
+} // namespace Dune
 
 #endif // DUNE_GRID_INTERSECTION_HH

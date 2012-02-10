@@ -128,16 +128,19 @@ namespace Dune
     //! Partition type of this entity
     PartitionType partitionType () const { return realEntity.partitionType(); }
 
-    /*! \brief Each entity encapsulates an object of type
-       Dune::Geometry<dimension-codimension,dimensionworld,...> that
-       gives (among other things) the map from a reference element to world coordinates.
-       This method delivers a const reference to such a geometry.
-
-       \note Be careful when storing such references. If the state
-       of any object is changed, e.g. an iterator is advanced, there
-       is no guarantee that the reference remains valid.
+    /** \brief obtain geometric realization of the entity
+     *
+     *  Each entity provides an object of type
+     *  Dune::Geometry< dimension-codimension, dimensionworld, ... > that
+     *  represents the map from a reference element to world coordinates.
+     *
+     *  \note Previously, the geometry was encapsulated in the entity object and
+     *        a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
-    const Geometry& geometry () const { return realEntity.geometry(); }
+    Geometry geometry () const { return realEntity.geometry(); }
     //@}
 
     /** \brief Return the name of the reference element. The type can
@@ -304,7 +307,7 @@ namespace Dune
     PartitionType partitionType () const { return realEntity.partitionType(); }
 
     //! @copydoc Dune::Entity::geometry()
-    const Geometry& geometry () const { return realEntity.geometry(); }
+    Geometry geometry () const { return realEntity.geometry(); }
     //@}
 
     /** \brief Return the name of the reference element. The type can
@@ -431,28 +434,32 @@ namespace Dune
      */
     bool isRegular() const { return realEntity.isRegular(); }
 
-    /**\brief Provides information how this element has been subdivided from
-       its father element.
-       The returned LocalGeometry is a model of Dune::Geometry<dimension,dimension,...>
-       mapping from the reference element of the given element to the reference
-       element of the father element.
-       This is sufficient to interpolate all degrees of freedom in the
-       conforming case. Nonconforming may require access to neighbors of father and
-       computations with local coordinates.
-       On the fly case is somewhat inefficient since degrees of freedom
-       may be visited several times.
-       If we store interpolation matrices, this is tolerable. We assume that on-the-fly
-       implementation of interpolation is only done for simple discretizations.
-
-       \note If the partitionType of the Entity is GhostEntity,
-             it is not guaranteed that this method is working
-             or implemented in general.
-             For some grids it might be available, though.
+    /** \brief Provides information how this element has been subdivided from its
+     *         father element.
+     *
+     *  The returned LocalGeometry is a model of
+     *  Dune::Geometry<dimension,dimension,...>, mapping the reference element of
+     *  the given entity to the reference element of its father.
+     *
+     *  This information is sufficient to interpolate all degrees of freedom in
+     *  the conforming case.
+     *  Nonconforming may require access to neighbors of the father and
+     *  calculations with local coordinates.
+     *  The on-the-fly case is somewhat inefficient since degrees of freedom may be
+     *  visited several times.
+     *  If we store interpolation matrices, this is tolerable.
+     *  We assume that on-the-fly implementation of interpolation is only done for
+     *  simple discretizations.
+     *
+     *  \note For ghost entities, this method is not guaranteed to be implemented.
+     *
+     *  \note Previously, the geometry was encapsulated in the entity object and
+     *        a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
      */
-    const LocalGeometry& geometryInFather () const
-    {
-      return realEntity.geometryInFather();
-    }
+    LocalGeometry geometryInFather () const { return realEntity.geometryInFather(); }
 
     /**\brief Inter-level access to elements that resulted from (recursive)
        subdivision of this element.

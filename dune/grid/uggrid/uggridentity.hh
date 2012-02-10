@@ -96,10 +96,10 @@ namespace Dune {
 
     typedef typename GridImp::ctype UGCtype;
 
-  public:
+    typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
 
+  public:
     UGGridEntity()
-      : geo_(UGGridGeometry<dim-codim,dim,GridImp>())
     {}
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
@@ -164,7 +164,7 @@ namespace Dune {
     template<int cc> int count () const;
 
     //! geometry of this entity
-    const Geometry& geometry () const {return geo_;}
+    Geometry geometry () const { return Geometry( geo_ ); }
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
@@ -173,12 +173,12 @@ namespace Dune {
     /** \brief Set this entity to a particular UG entity */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target,const GridImp* gridImp) {
       target_ = target;
-      GridImp::getRealImplementation(geo_).setToTarget(target);
+      geo_.setToTarget(target);
       gridImp_ = gridImp;
     }
 
     //! the current geometry
-    MakeableInterfaceObject<Geometry> geo_;
+    GeometryImpl geo_;
 
     typename UG_NS<dim>::template Entity<codim>::T* target_;
 
@@ -340,10 +340,11 @@ namespace Dune {
 
     typedef typename GridImp::ctype UGCtype;
 
+    typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 0 >::LocalGeometryImpl LocalGeometryImpl;
+
   public:
-
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
-
     typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
 
     //! The Iterator over neighbors on this level
@@ -359,9 +360,7 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim<0>::EntitySeed EntitySeed;
 
     UGGridEntity()
-      : geo_(UGGridGeometry<dim,dim,GridImp>()),
-        geometryInFather_(UGGridLocalGeometry<dim,dim,GridImp>()),
-        gridImp_(NULL)
+      : gridImp_(NULL)
     {}
 
     //! Level of this element
@@ -387,9 +386,7 @@ namespace Dune {
     }
 
     //! Geometry of this entity
-    const Geometry& geometry () const {
-      return geo_;
-    }
+    Geometry geometry () const { return Geometry( geo_ ); }
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
@@ -455,7 +452,7 @@ namespace Dune {
 
     /*! Location of this element relative to the reference element element of the father.
      */
-    const LocalGeometry& geometryInFather () const;
+    LocalGeometry geometryInFather () const;
 
     /*! Inter-level access to son elements on higher levels<=maxlevel.
        This is provided for sparsely stored nested unstructured meshes.
@@ -484,10 +481,10 @@ namespace Dune {
     void setToTarget(typename UG_NS<dim>::Element* target, const GridImp* gridImp);
 
     //! the current geometry
-    MakeableInterfaceObject<Geometry> geo_;
+    GeometryImpl geo_;
 
     //! geometry for mapping into father's reference element
-    mutable MakeableInterfaceObject<LocalGeometry> geometryInFather_;
+    mutable LocalGeometryImpl geometryInFather_;
 
     typename UG_NS<dim>::Element* target_;
 

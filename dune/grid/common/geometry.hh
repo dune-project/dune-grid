@@ -11,6 +11,7 @@
 
 #include <dune/common/fmatrix.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/genericgeometry/conversion.hh>
@@ -23,6 +24,19 @@ namespace Dune
 
   template< int dim, int dimworld, class ct, class GridFamily >
   class GridDefaultImplementation;
+
+
+
+  namespace FacadeOptions
+  {
+
+    template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
+    struct StoreGeometryReference
+    {
+      static const bool v = true;
+    };
+
+  }
 
 
 
@@ -65,29 +79,28 @@ namespace Dune
 
      \ingroup GIGeometry
    */
-  template<int mydim, int cdim, class GridImp, template<int,int,class> class GeometryImp>
+  template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
   class Geometry
   {
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-#else
+  #else
   protected:
     // give the GridDefaultImplementation class access to the realImp
     friend class GridDefaultImplementation<
         GridImp::dimension, GridImp::dimensionworld,
         typename GridImp::ctype,
         typename GridImp::GridFamily> ;
-#endif
+  #endif
     // type of underlying implementation, for internal use only
     typedef GeometryImp< mydim, cdim, GridImp > Implementation;
 
-    //! return reference to the real implementation
+#if 0
+    //! return reference to the implementation
     Implementation &impl () { return realGeometry; }
-    //! return reference to the real implementation
+#endif
+    //! return reference to the implementation
     const Implementation &impl () const { return realGeometry; }
-
-  protected:
-    Implementation realGeometry;
 
   public:
     //! @brief export grid dimension
@@ -119,10 +132,10 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::GenericReferenceElement.
      */
-    GeometryType type () const { return realGeometry.type(); }
+    GeometryType type () const { return impl().type(); }
 
     /** \brief Return true if the geometry mapping is affine and false otherwise */
-    bool affine() const { return realGeometry.affine(); }
+    bool affine() const { return impl().affine(); }
 
     /** \brief Return the number of corners of the reference element.
      *
@@ -130,7 +143,7 @@ namespace Dune
        The method is redundant because this information is also available
        via the reference element. It is here for efficiency and ease of use.
      */
-    int corners () const { return realGeometry.corners(); }
+    int corners () const { return impl().corners(); }
 
     /** \brief Obtain a corner of the geometry
      *
@@ -146,7 +159,7 @@ namespace Dune
      */
     GlobalCoordinate corner ( int i ) const
     {
-      return realGeometry.corner(i);
+      return impl().corner( i );
     }
 
     /** \brief Evaluate the map \f$ g\f$.
@@ -155,7 +168,7 @@ namespace Dune
      */
     GlobalCoordinate global (const LocalCoordinate& local) const
     {
-      return realGeometry.global(local);
+      return impl().global( local );
     }
 
     /** \brief Evaluate the inverse map \f$ g^{-1}\f$
@@ -164,7 +177,7 @@ namespace Dune
      */
     LocalCoordinate local (const GlobalCoordinate& global) const
     {
-      return realGeometry.local(global);
+      return impl().local( global );
     }
 
     /** \brief Return the factor appearing in the integral transformation formula
@@ -192,13 +205,13 @@ namespace Dune
      */
     ctype integrationElement (const LocalCoordinate& local) const
     {
-      return realGeometry.integrationElement(local);
+      return impl().integrationElement( local );
     }
 
     /** \brief return volume of geometry */
     ctype volume () const
     {
-      return realGeometry.volume();
+      return impl().volume();
     }
 
     /** \brief return center of geometry
@@ -213,7 +226,7 @@ namespace Dune
      */
     GlobalCoordinate center () const
     {
-      return realGeometry.center();
+      return impl().center();
     }
 
     /** \brief Return the transposed of the Jacobian
@@ -228,7 +241,7 @@ namespace Dune
     const JacobianTransposed &
     jacobianTransposed ( const LocalCoordinate& local ) const
     {
-      return realGeometry.jacobianTransposed( local );
+      return impl().jacobianTransposed( local );
     }
 
     /** \brief Return inverse of transposed of Jacobian
@@ -252,22 +265,32 @@ namespace Dune
      */
     const Jacobian& jacobianInverseTransposed (const LocalCoordinate& local) const
     {
-      return realGeometry.jacobianInverseTransposed(local);
+      return impl().jacobianInverseTransposed(local);
     }
 
-  public:
-    //! copy constructor from GeometryImp
-    explicit Geometry(const GeometryImp<mydim,cdim,GridImp> & e) : realGeometry(e) {};
+    //! copy constructor from implementation
+    explicit Geometry ( const Implementation &impl )
+      : realGeometry( impl )
+    {
+      deprecationWarning ( integral_constant< bool, storeReference >() );
+    }
+
+  private:
+    /** hide assignment operator */
+    const Geometry &operator= ( const Geometry &rhs );
+
+    void DUNE_DEPRECATED_MSG( "This Dune::Geometry is still a reference to its implementation." )
+    deprecationWarning ( integral_constant< bool, true > ) {}
+
+    void
+    deprecationWarning ( integral_constant< bool, false > ) {}
 
   protected:
-    /** hide copy constructor */
-    Geometry(const Geometry& rhs) : realGeometry(rhs.realGeometry) {};
-    /** hide assignment operator */
-    Geometry & operator = (const Geometry& rhs) {
-      realGeometry = rhs.realGeometry;
-      return *this;
-    };
+    static const bool storeReference = FacadeOptions::StoreGeometryReference< mydim, cdim, GridImp, GeometryImp >::v;
+
+    typename SelectType< storeReference, const Implementation &, Implementation >::Type realGeometry;
   };
+
 
 
   //************************************************************************
@@ -281,8 +304,14 @@ namespace Dune
   class GeometryDefaultImplementation
   {
   public:
+    static const int mydimension = mydim;
+    static const int coorddimension = cdim;
+
     // save typing
     typedef typename GridImp::ctype ctype;
+
+    typedef FieldVector< ctype, mydim > LocalCoordinate;
+    typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
     //! type of jacobian (also of jacobian inverse transposed)
     typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
@@ -299,7 +328,7 @@ namespace Dune
       const GenericReferenceElement< ctype , mydim > & refElement =
         GenericReferenceElements< ctype, mydim >::general(type);
 
-      FieldVector<ctype,mydim> localBaryCenter (0.0);
+      LocalCoordinate localBaryCenter ( 0 );
       // calculate local bary center
       const int corners = refElement.size(0,0,mydim);
       for(int i=0; i<corners; ++i) localBaryCenter += refElement.position(i,mydim);
@@ -310,7 +339,7 @@ namespace Dune
     }
 
     //! return center of the geometry
-    FieldVector<ctype, cdim> center () const
+    GlobalCoordinate center () const
     {
       GeometryType type = asImp().type();
 
@@ -334,9 +363,16 @@ namespace Dune
   {
     // my dimension
     enum { mydim = 0 };
+
   public:
+    static const int mydimension = mydim;
+    static const int coorddimension = cdim;
+
     // save typing
     typedef typename GridImp::ctype ctype;
+
+    typedef FieldVector< ctype, mydim > LocalCoordinate;
+    typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
     //! type of jacobian (also of jacobian inverse transposed)
     typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
@@ -375,10 +411,11 @@ namespace Dune
     }
 
   private:
-    //!  Barton-Nackman trick
+    // Barton-Nackman trick
     GeometryImp<mydim,cdim,GridImp>& asImp () {return static_cast<GeometryImp<mydim,cdim,GridImp>&>(*this);}
     const GeometryImp<mydim,cdim,GridImp>& asImp () const {return static_cast<const GeometryImp<mydim,cdim,GridImp>&>(*this);}
   }; // end GeometryDefault
 
-}
+} // namespace Dune
+
 #endif // DUNE_GRID_GEOMETRY_HH

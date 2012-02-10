@@ -37,6 +37,9 @@ namespace Dune {
         intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
     {}
 
+    typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
+
   public:
 
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
@@ -155,26 +158,26 @@ namespace Dune {
 
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry &geometryInInside () const
+    LocalGeometry geometryInInside () const
     {
-      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (indexInInside() == 0) ? 0 : 1 );
-      return intersectionSelfLocal_;
+      intersectionSelfLocal_.setPosition( (indexInInside() == 0) ? 0 : 1 );
+      return LocalGeometry( intersectionSelfLocal_ );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry &geometryInOutside () const
+    LocalGeometry geometryInOutside () const
     {
-      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (indexInInside() == 0) ? 1 : 0 );
-      return intersectionNeighborLocal_;
+      intersectionNeighborLocal_.setPosition( (indexInInside() == 0) ? 1 : 0 );
+      return LocalGeometry( intersectionNeighborLocal_ );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-    const Geometry &geometry () const
+    Geometry geometry () const
     {
-      GridImp::getRealImplementation(intersectionGlobal_).target_ = center_->vertex_[neighbor_];
-      return intersectionGlobal_;
+      intersectionGlobal_.target_ = center_->vertex_[neighbor_];
+      return Geometry( intersectionGlobal_ );
     }
 
     /** \brief obtain the type of reference element for this intersection */
@@ -232,14 +235,14 @@ namespace Dune {
 
     /** \brief The geometry that's being returned when intersectionSelfLocal() is called
      */
-    mutable MakeableInterfaceObject<LocalGeometry> intersectionSelfLocal_;
+    mutable LocalGeometryImpl intersectionSelfLocal_;
 
     /** \brief The geometry that's being returned when intersectionNeighborLocal() is called
      */
-    mutable MakeableInterfaceObject<LocalGeometry> intersectionNeighborLocal_;
+    mutable LocalGeometryImpl intersectionNeighborLocal_;
 
     //! The geometry that's being returned when intersectionSelfGlobal() is called
-    mutable MakeableInterfaceObject<Geometry> intersectionGlobal_;
+    mutable GeometryImpl intersectionGlobal_;
 
   };
 
@@ -269,6 +272,9 @@ namespace Dune {
         intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
         intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
     {}
+
+    typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
 
   public:
 
@@ -432,26 +438,26 @@ namespace Dune {
 
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry &geometryInInside () const
+    LocalGeometry geometryInInside () const
     {
-      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (indexInInside() == 0) ? 0 : 1 );
-      return intersectionSelfLocal_;
+      intersectionSelfLocal_.setPosition( (indexInInside() == 0) ? 0 : 1 );
+      return LocalGeometry( intersectionSelfLocal_ );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry &geometryInOutside () const
+    LocalGeometry geometryInOutside () const
     {
-      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (indexInInside() == 0) ? 1 : 0 );
-      return intersectionNeighborLocal_;
+      intersectionNeighborLocal_.setPosition( (indexInInside() == 0) ? 1 : 0 );
+      return LocalGeometry( intersectionNeighborLocal_ );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-    const Geometry &geometry () const
+    Geometry geometry () const
     {
-      GridImp::getRealImplementation(intersectionGlobal_).target_ = center_->vertex_[neighbor_%2];
-      return intersectionGlobal_;
+      intersectionGlobal_.target_ = center_->vertex_[neighbor_%2];
+      return Geometry( intersectionGlobal_ );
     }
 
     /** \brief obtain the type of reference element for this intersection */
@@ -513,14 +519,14 @@ namespace Dune {
 
     /** \brief The geometry that's being returned when intersectionSelfLocal() is called
      */
-    mutable MakeableInterfaceObject<LocalGeometry> intersectionSelfLocal_;
+    mutable LocalGeometryImpl intersectionSelfLocal_;
 
     /** \brief The geometry that's being returned when intersectionNeighborLocal() is called
      */
-    mutable MakeableInterfaceObject<LocalGeometry> intersectionNeighborLocal_;
+    mutable LocalGeometryImpl intersectionNeighborLocal_;
 
     //! The geometry that's being returned when intersectionSelfGlobal() is called
-    mutable MakeableInterfaceObject<Geometry> intersectionGlobal_;
+    mutable GeometryImpl intersectionGlobal_;
 
   };
 

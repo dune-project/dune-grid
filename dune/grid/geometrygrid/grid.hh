@@ -181,9 +181,8 @@ namespace Dune
         template< int codim >
         struct Codim
         {
-          typedef Dune::Geometry
-          < dimension-codim, dimensionworld, const Grid, Dune::GenericGeometry::Geometry >
-          Geometry;
+          typedef Dune::GenericGeometry::Geometry< dimension-codim, dimensionworld, const Grid > GeometryImpl;
+          typedef Dune::Geometry< dimension-codim, dimensionworld, const Grid, Dune::GenericGeometry::Geometry > Geometry;
           typedef typename HostGrid::template Codim< codim >::LocalGeometry LocalGeometry;
 
           typedef GeoGrid::EntityPointerTraits< codim, const Grid > EntityPointerTraits;

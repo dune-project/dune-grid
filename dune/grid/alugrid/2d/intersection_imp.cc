@@ -25,29 +25,23 @@ namespace Dune
   //constructor for end iterator
   template<class GridImp>
   inline ALU2dGridIntersectionBase<GridImp> ::
-  ALU2dGridIntersectionBase(const FactoryType& factory, int wLevel) :
-    intersectionGlobal_(GeometryImp()),
-    intersectionSelfLocal_(LocalGeometryImp()),
-    intersectionNeighborLocal_(LocalGeometryImp()),
-    factory_( factory ),
-    localGeomStorage_( LocalGeometryStorageType :: instance() ),
-    walkLevel_(wLevel)
+  ALU2dGridIntersectionBase(const FactoryType& factory, int wLevel)
+    : factory_( factory ),
+      localGeomStorage_( LocalGeometryStorageType::instance() ),
+      walkLevel_( wLevel )
   {
     this->done( 0 );
   }
 
 
   //! The copy constructor
-  template<class GridImp>
-  inline ALU2dGridIntersectionBase<GridImp> ::
-  ALU2dGridIntersectionBase(const ThisType & org) :
-    current(org.current),
-    intersectionGlobal_(GeometryImp()),
-    intersectionSelfLocal_(LocalGeometryImp()),
-    intersectionNeighborLocal_(LocalGeometryImp()),
-    factory_( org.factory_ ),
-    localGeomStorage_( LocalGeometryStorageType :: instance() ),
-    walkLevel_(org.walkLevel_)
+  template< class GridImp >
+  inline ALU2dGridIntersectionBase< GridImp >
+  ::ALU2dGridIntersectionBase ( const ThisType &other )
+    : current( other.current ),
+      factory_( other.factory_ ),
+      localGeomStorage_( LocalGeometryStorageType::instance() ),
+      walkLevel_( other.walkLevel_ )
   {}
 
   template<class GridImp>
@@ -270,8 +264,8 @@ namespace Dune
   }
 
 
-  template<class GridImp>
-  inline const typename ALU2dGridIntersectionBase<GridImp>::LocalGeometry&
+  template< class GridImp >
+  inline typename ALU2dGridIntersectionBase< GridImp >::LocalGeometry
   ALU2dGridIntersectionBase< GridImp >::geometryInInside () const
   {
     assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
@@ -279,22 +273,22 @@ namespace Dune
     // only in non-conform situation we use default method
     if( current.useOutside_ )
     {
-      if( !GridImp::getRealImplementation( intersectionSelfLocal_ ).up2Date() )
-        GridImp::getRealImplementation( intersectionSelfLocal_ ).buildLocalGeom( inside()->geometry(), geometry() );
-      assert( GridImp::getRealImplementation( intersectionSelfLocal_ ).up2Date() );
-      return intersectionSelfLocal_;
+      if( !intersectionSelfLocal_.up2Date() )
+        intersectionSelfLocal_.buildLocalGeom( inside()->geometry(), geometry() );
+      assert( intersectionSelfLocal_.up2Date() );
+      return LocalGeometry( intersectionSelfLocal_ );
     }
     else
     {
       // parameters are face and twist
       const int localTwist = (current.nFaces() == 3) ? (current.index_ % 2) : (current.index_>>1)^(current.index_&1);
       const int twist = (twistInInside() + localTwist) % 2;
-      return localGeomStorage_.localGeom( current.index_, twist, current.nFaces() );
+      return LocalGeometry( localGeomStorage_.localGeom( current.index_, twist, current.nFaces() ) );
     }
   }
 
-  template<class GridImp>
-  inline const typename ALU2dGridIntersectionBase<GridImp>::LocalGeometry&
+  template< class GridImp >
+  inline typename ALU2dGridIntersectionBase< GridImp >::LocalGeometry
   ALU2dGridIntersectionBase< GridImp >::geometryInOutside () const
   {
     assert( current.inside() && current.outside() );
@@ -302,36 +296,36 @@ namespace Dune
     // only in non-conform situation we use default method
     if( (current.nFaces() != 3) || !conforming() )
     {
-      if( !GridImp::getRealImplementation( intersectionNeighborLocal_ ).up2Date() )
-        GridImp::getRealImplementation( intersectionNeighborLocal_ ).buildLocalGeom( outside()->geometry(), geometry() );
-      assert( GridImp::getRealImplementation( intersectionNeighborLocal_ ).up2Date());
-      return intersectionNeighborLocal_;
+      if( !intersectionNeighborLocal_.up2Date() )
+        intersectionNeighborLocal_.buildLocalGeom( outside()->geometry(), geometry() );
+      assert( intersectionNeighborLocal_.up2Date() );
+      return LocalGeometry( intersectionNeighborLocal_ );
     }
     else
     {
       // parameters are face and twist
       const int localTwist = (current.nFaces() == 3) ? (current.opposite() % 2) : (current.opposite() >> 1)^(current.opposite() & 1);
       const int twist = (twistInOutside() + localTwist) % 2;
-      return localGeomStorage_.localGeom( current.opposite(), twist, current.nFaces()  );
+      return LocalGeometry( localGeomStorage_.localGeom( current.opposite(), twist, current.nFaces() ) );
     }
   }
 
-  template<class GridImp>
-  inline const typename ALU2dGridIntersectionBase<GridImp>::Geometry&
-  ALU2dGridIntersectionBase<GridImp>::geometry () const
+  template< class GridImp >
+  inline typename ALU2dGridIntersectionBase< GridImp >::Geometry
+  ALU2dGridIntersectionBase< GridImp >::geometry () const
   {
     assert( current.inside() );
 
-    if( !GridImp::getRealImplementation( intersectionGlobal_ ).up2Date() )
+    if( !intersectionGlobal_.up2Date() )
     {
       if( current.useOutside_ )
-        GridImp::getRealImplementation( intersectionGlobal_ ).buildGeom( *current.outside(), current.opposite() );
+        intersectionGlobal_.buildGeom( *current.outside(), current.opposite() );
       else
-        GridImp::getRealImplementation( intersectionGlobal_ ).buildGeom( *current.inside(), current.index_ );
+        intersectionGlobal_.buildGeom( *current.inside(), current.index_ );
     }
 
-    assert( GridImp::getRealImplementation( intersectionGlobal_ ).up2Date() );
-    return intersectionGlobal_;
+    assert( intersectionGlobal_.up2Date() );
+    return Geometry( intersectionGlobal_ );
   }
 
 
@@ -346,9 +340,9 @@ namespace Dune
   template< class GridImp >
   inline void ALU2dGridIntersectionBase< GridImp >:: unsetUp2Date ()
   {
-    GridImp::getRealImplementation( intersectionGlobal_ ).unsetUp2Date();
-    GridImp::getRealImplementation( intersectionSelfLocal_ ).unsetUp2Date();
-    GridImp::getRealImplementation( intersectionNeighborLocal_ ).unsetUp2Date();
+    intersectionGlobal_.unsetUp2Date();
+    intersectionSelfLocal_.unsetUp2Date();
+    intersectionNeighborLocal_.unsetUp2Date();
   }
 
 

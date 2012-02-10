@@ -345,6 +345,8 @@ namespace Dune {
   // --------------------
 
   template<int mydim, int cdim, class GridImp,template<int,int,class> class GeometryImp> class Geometry;
+  template< int mydim, int cdim, class GridImp > class GlobalGeometryReference;
+  template< int mydim, int cdim, class GridImp > class LocalGeometryReference;
   // dim is necessary because Entity will be specialized for codim==0 _and_ codim==dim
   // EntityImp gets GridImp as 3rd template parameter to distinguish between const and mutable grid
   template<int codim, int dim, class GridImp,template<int,int,class> class EntityImp> class Entity;
@@ -1287,6 +1289,8 @@ namespace Dune {
       };
 
     public:
+      typedef GeometryImp<dim-cd, dimw, const GridImp> GeometryImpl;
+      typedef LocalGeometryImp<dim-cd, dim, const GridImp> LocalGeometryImpl;
       //! IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
       /** \brief The type of the geometry associated with the entity.*/
       typedef Dune::Geometry<dim-cd, dimw, const GridImp, GeometryImp> Geometry;

@@ -132,8 +132,7 @@ namespace Dune
       typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::template Codim< codimension >::CoordVector
       CoordVector;
 
-      typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
-      typedef typename MakeableGeometry::ImplementationType GeometryImpl;
+      typedef typename Traits::template Codim< codim >::GeometryImpl GeometryImpl;
 
     public:
       /** \name Construction, Initialization and Destruction
@@ -149,14 +148,12 @@ namespace Dune
        */
       EntityBase ( const Grid &grid, const HostEntity &hostEntity )
         : grid_( &grid ),
-          hostEntity_( &hostEntity ),
-          geo_( GeometryImpl() )
+          hostEntity_( &hostEntity )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
-          hostEntity_( other.hostEntity_ ),
-          geo_( GeometryImpl() )
+          hostEntity_( other.hostEntity_ )
       {}
 
       /** \} */
@@ -208,15 +205,14 @@ namespace Dune
        *
        *  \returns a const reference to the geometry
        */
-      const Geometry &geometry () const
+      Geometry geometry () const
       {
-        GeometryImpl &geo = Grid::getRealImplementation( geo_ );
-        if( !geo )
+        if( !geo_ )
         {
           CoordVector coords( hostEntity(), grid().coordFunction() );
-          geo = GeometryImpl( type(), coords );
+          geo_ = GeometryImpl( type(), coords );
         }
-        return geo_;
+        return Geometry( geo_ );
       }
 
       /** \brief return EntitySeed of host grid entity */
@@ -297,7 +293,7 @@ namespace Dune
     private:
       const Grid *grid_;
       const HostEntity *hostEntity_;
-      mutable MakeableGeometry geo_;
+      mutable GeometryImpl geo_;
     };
 
 
@@ -371,8 +367,7 @@ namespace Dune
       typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::template Codim< codimension >::CoordVector
       CoordVector;
 
-      typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
-      typedef typename MakeableGeometry::ImplementationType GeometryImpl;
+      typedef typename Traits::template Codim< codimension >::GeometryImpl GeometryImpl;
 
     public:
       /** \name Construction, Initialization and Destruction
@@ -391,15 +386,13 @@ namespace Dune
       EntityBase ( const Grid &grid, const HostElement &hostElement, int subEntity )
         : grid_( &grid ),
           hostElement_( &hostElement ),
-          subEntity_( subEntity ),
-          geo_( GeometryImpl() )
+          subEntity_( subEntity )
       {}
 
       EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostElement_( other.hostElement_ ),
-          subEntity_( other.subEntity_ ),
-          geo_( GeometryImpl() )
+          subEntity_( other.subEntity_ )
       {}
 
       /** \} */
@@ -475,16 +468,16 @@ namespace Dune
        *
        *  \returns a const reference to the geometry
        */
-      const Geometry &geometry () const
+      Geometry geometry () const
       {
-        GeometryImpl &geo = Grid::getRealImplementation( geo_ );
-        if( !geo )
+        if( !geo_ )
         {
           CoordVector coords( hostElement(), subEntity_, grid().coordFunction() );
-          geo = GeometryImpl( type(), coords );
+          geo_ = GeometryImpl( type(), coords );
         }
-        return geo_;
+        return Geometry( geo_ );
       }
+
       /** \brief return EntitySeed of host grid entity */
       EntitySeed seed () const { return EntitySeed( hostElement().seed(), subEntity_ ); }
       /** \} */
@@ -583,7 +576,7 @@ namespace Dune
       const Grid *grid_;
       const HostElement *hostElement_;
       unsigned int subEntity_;
-      mutable Geometry geo_;
+      mutable GeometryImpl geo_;
     };
 
 
@@ -726,7 +719,7 @@ namespace Dune
         return hostEntity().hasFather();
       }
 
-      const LocalGeometry &geometryInFather () const
+      LocalGeometry geometryInFather () const
       {
         return hostEntity().geometryInFather();
       }
@@ -759,8 +752,8 @@ namespace Dune
       }
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_ENTITY_HH

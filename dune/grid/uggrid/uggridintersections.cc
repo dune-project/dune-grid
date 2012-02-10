@@ -32,7 +32,7 @@ Dune::UGGridLevelIntersection<GridImp>::outerNormal
 }
 
 template< class GridImp>
-const typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry&
+typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry
 Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
 {
   if (!geometryInInsideIsUpToDate_) {
@@ -52,17 +52,17 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
 
     }
 
-    GridImp::getRealImplementation(geometryInInside_).setup(intersectionGeometryType, coordinates);
+    geometryInInside_.setup(intersectionGeometryType, coordinates);
 
     geometryInInsideIsUpToDate_ = true;
 
   }
 
-  return geometryInInside_;
+  return LocalGeometry( geometryInInside_ );
 }
 
 template< class GridImp>
-const typename Dune::UGGridLevelIntersection<GridImp>::Geometry&
+typename Dune::UGGridLevelIntersection<GridImp>::Geometry
 Dune::UGGridLevelIntersection<GridImp>::geometry () const
 {
   if (!geometryIsUpToDate_) {
@@ -82,17 +82,17 @@ Dune::UGGridLevelIntersection<GridImp>::geometry () const
 
     }
 
-    GridImp::getRealImplementation(geometry_).setup(intersectionGeometryType, coordinates);
+    geometry_.setup(intersectionGeometryType, coordinates);
 
     geometryIsUpToDate_ = true;
 
   }
 
-  return geometry_;
+  return Geometry( geometry_ );
 }
 
-template< class GridImp>
-const typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry&
+template<class GridImp>
+typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry
 Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
 {
   if (!geometryInOutsideIsUpToDate_) {
@@ -130,13 +130,13 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
 
     }
 
-    GridImp::getRealImplementation(geometryInOutside_).setup(intersectionGeometryType, coordinates);
+    geometryInOutside_.setup(intersectionGeometryType, coordinates);
 
     geometryInOutsideIsUpToDate_ = true;
 
   }
 
-  return geometryInOutside_;
+  return LocalGeometry( geometryInOutside_ );
 }
 
 template< class GridImp>
@@ -193,7 +193,7 @@ Dune::UGGridLeafIntersection<GridImp>::outerNormal
 }
 
 template< class GridImp>
-const typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry&
+typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry
 Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 {
   if (!geometryInInsideIsUpToDate_) {
@@ -223,7 +223,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      GridImp::getRealImplementation(geometryInInside_).setup(intersectionGeometryType, coordinates);
+      geometryInInside_.setup(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -252,18 +252,18 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      GridImp::getRealImplementation(geometryInInside_).setup(intersectionGeometryType, coordinates);
+      geometryInInside_.setup(intersectionGeometryType, coordinates);
     }
 
     geometryInInsideIsUpToDate_ = true;
 
   }
 
-  return geometryInInside_;
+  return LocalGeometry( geometryInInside_ );
 }
 
 template< class GridImp>
-const typename Dune::UGGridLeafIntersection<GridImp>::Geometry&
+typename Dune::UGGridLeafIntersection<GridImp>::Geometry
 Dune::UGGridLeafIntersection< GridImp >::geometry () const
 {
   if (!geometryIsUpToDate_) {
@@ -293,7 +293,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      GridImp::getRealImplementation(geometry_).setup(intersectionGeometryType, coordinates);
+      geometry_.setup(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -317,7 +317,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      GridImp::getRealImplementation(geometry_).setup(intersectionGeometryType, coordinates);
+      geometry_.setup(intersectionGeometryType, coordinates);
 
     }
 
@@ -325,12 +325,12 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
   }
 
-  return geometry_;
+  return Geometry( geometry_ );
 }
 
 /** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
-const typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry&
+typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry
 Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 {
   if (!geometryInOutsideIsUpToDate_) {
@@ -371,7 +371,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      GridImp::getRealImplementation(geometryInOutside_).setup(intersectionGeometryType, coordinates);
+      geometryInOutside_.setup(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -389,7 +389,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      GridImp::getRealImplementation(geometryInOutside_).setup(intersectionGeometryType, coordinates);
+      geometryInOutside_.setup(intersectionGeometryType, coordinates);
 
     }
 
@@ -397,7 +397,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
   }
 
-  return geometryInOutside_;
+  return LocalGeometry( geometryInOutside_ );
 }
 
 template< class GridImp>

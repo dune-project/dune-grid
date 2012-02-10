@@ -201,7 +201,7 @@ void Dune::UGGridEntity < 0, dim ,GridImp >::
 setToTarget(typename UG_NS<dim>::Element* target, const GridImp* gridImp)
 {
   target_ = target;
-  GridImp::getRealImplementation(geo_).setToTarget(target);
+  geo_.setToTarget(target);
   gridImp_ = gridImp;
 }
 
@@ -242,7 +242,7 @@ Dune::UGGridEntity < 0, dim ,GridImp >::hend(int maxlevel) const
 }
 
 template<int dim, class GridImp>
-const typename Dune::UGGridEntity<0,dim,GridImp>::LocalGeometry&
+typename Dune::UGGridEntity<0,dim,GridImp>::LocalGeometry
 Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 {
   // we need to have a father element
@@ -420,9 +420,9 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 
   }
 
-  GridImp::getRealImplementation(geometryInFather_).setup(type(), cornerCoordinates);
+  geometryInFather_.setup(type(), cornerCoordinates);
 
-  return geometryInFather_;
+  return LocalGeometry( geometryInFather_ );
 }
 
 template class Dune::UGGridEntity<2,2, const Dune::UGGrid<2> >;

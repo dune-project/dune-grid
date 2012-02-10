@@ -172,14 +172,15 @@ namespace Dune {
 
     friend class OneDGrid;
 
+    typedef typename GridImp::Traits::template Codim< cd >::GeometryImpl GeometryImpl;
+
   public:
     /** \brief The type of OneDGrid Entity seeds */
     typedef typename GridImp::Traits::template Codim<cd>::EntitySeed EntitySeed;
 
     //! Default constructor
     OneDGridEntity()
-      : geo_(OneDGridGeometry<dim-cd,1,GridImp>()),
-        target_(OneDGridNullIteratorFactory<0>::null())
+      : target_(OneDGridNullIteratorFactory<0>::null())
     {}
 
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
@@ -201,18 +202,18 @@ namespace Dune {
     GeometryType type () const {return GeometryType(0);}
 
     //! geometry of this entity
-    const Geometry& geometry () const {return geo_;}
+    Geometry geometry () const { return Geometry( geo_ ); }
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
 
     void setToTarget(OneDEntityImp<0>* target) {
       target_ = target;
-      GridImp::getRealImplementation(geo_).target_ = target;
+      geo_.target_ = target;
     }
 
     //! the current geometry
-    MakeableInterfaceObject<Geometry> geo_;
+    GeometryImpl geo_;
 
     OneDEntityImp<0>* target_;
 
@@ -248,8 +249,12 @@ namespace Dune {
     friend class OneDGridHierarchicIterator <GridImp>;
     friend class OneDGridLevelIterator <0,All_Partition,GridImp>;
 
+    typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl LocalGeometryImpl;
+
   public:
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
+    typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
     typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
     typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
@@ -260,9 +265,7 @@ namespace Dune {
 
     //! Default Constructor
     OneDGridEntity ()
-      : geo_( OneDGridGeometry<dim,1,GridImp>() ),
-        geometryInFather_( OneDGridGeometry<dim,1,GridImp>() ),
-        target_( OneDGridNullIteratorFactory<1>::null() )
+      : target_( OneDGridNullIteratorFactory<1>::null() )
     {}
 
 
@@ -280,7 +283,7 @@ namespace Dune {
     unsigned int globalId() const {return target_->id_;}
 
     //! Geometry of this entity
-    const Geometry& geometry () const {return geo_;}
+    Geometry geometry () const { return Geometry( geo_ ); }
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
@@ -382,22 +385,22 @@ namespace Dune {
        We assume that on-the-fly implementation of numerical algorithms
        is only done for simple discretizations. Assumes that meshes are nested.
      */
-    const Geometry& geometryInFather () const {
+    LocalGeometry geometryInFather () const {
       assert(target_->father_);
       assert(target_->father_->sons_[0] == target_ || target_->father_->sons_[1] == target_);
 
       if (target_->father_->sons_[0] == target_ && target_->father_->sons_[1] == target_) {
         // Copied element?
-        GridImp::getRealImplementation(geometryInFather_).setPositions(0,1);
+        geometryInFather_.setPositions(0,1);
       } else if (target_->father_->sons_[0] == target_) {
         // Left son?
-        GridImp::getRealImplementation(geometryInFather_).setPositions(0,0.5);
+        geometryInFather_.setPositions(0,0.5);
       } else {
         // Right son!
-        GridImp::getRealImplementation(geometryInFather_).setPositions(0.5,1);
+        geometryInFather_.setPositions(0.5,1);
       }
 
-      return geometryInFather_;
+      return LocalGeometry( geometryInFather_ );
     }
 
     /*! Inter-level access to son elements on higher levels<=maxlevel.
@@ -443,14 +446,14 @@ namespace Dune {
 
     void setToTarget(OneDEntityImp<1>* target) {
       target_ = target;
-      GridImp::getRealImplementation(geo_).target_ = target;
+      geo_.target_ = target;
     }
 
 
     //! the current geometry
-    MakeableInterfaceObject<Geometry> geo_;
+    GeometryImpl geo_;
 
-    mutable MakeableInterfaceObject<Geometry> geometryInFather_;
+    mutable LocalGeometryImpl geometryInFather_;
 
     OneDEntityImp<1>* target_;
 

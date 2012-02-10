@@ -213,11 +213,11 @@ namespace Dune
 
       typedef typename Traits::HostGrid HostGrid;
 
-      typedef typename Traits::template Codim< 0 >::Geometry ElementGeometry;
+      typedef typename Traits::template Codim< 0 >::GeometryImpl ElementGeometryImpl;
       typedef typename Traits::template Codim< codimension >::LocalGeometry HostLocalGeometry;
 
     public:
-      IntersectionCoordVector ( const ElementGeometry &elementGeometry,
+      IntersectionCoordVector ( const ElementGeometryImpl &elementGeometry,
                                 const HostLocalGeometry &hostLocalGeometry )
         : elementGeometry_( elementGeometry ),
           hostLocalGeometry_( hostLocalGeometry )
@@ -232,8 +232,8 @@ namespace Dune
       }
 
     private:
-      const ElementGeometry &elementGeometry_;
-      const HostLocalGeometry &hostLocalGeometry_;
+      const ElementGeometryImpl &elementGeometry_;
+      HostLocalGeometry hostLocalGeometry_;
     };
 
 

@@ -28,7 +28,6 @@ namespace Dune {
   template <int cd, int dim, class GridImp>
   ALU3dGridEntity<cd,dim,GridImp> ::
   ALU3dGridEntity(const FactoryType& factory, int level) :
-    geo_( GeometryImp() ),
     factory_( factory ),
     item_(0),
     level_(0),
@@ -43,7 +42,6 @@ namespace Dune {
   template <int cd, int dim, class GridImp>
   alu_inline ALU3dGridEntity<cd,dim,GridImp> ::
   ALU3dGridEntity(const ALU3dGridEntity<cd,dim,GridImp> & org) :
-    geo_( GeometryImp() ),
     factory_(org.factory_),
     item_(org.item_),
     level_(org.level_),
@@ -124,13 +122,14 @@ namespace Dune {
     }
   }
 
-  template<int cd, int dim, class GridImp>
-  alu_inline const typename ALU3dGridEntity<cd,dim,GridImp>::Geometry &
-  ALU3dGridEntity<cd,dim,GridImp>:: geometry() const
+  template< int cd, int dim, class GridImp >
+  alu_inline typename ALU3dGridEntity< cd, dim, GridImp >::Geometry
+  ALU3dGridEntity< cd, dim, GridImp >::geometry () const
   {
     //assert( (cd == 1) ? (face_ >= 0) : 1 );
-    if(!builtgeometry_) builtgeometry_ = geoImp().buildGeom(*item_, twist_, face_ );
-    return geo_;
+    if( !builtgeometry_ )
+      builtgeometry_ = geo_.buildGeom( *item_, twist_, face_ );
+    return Geometry( geo_ );
   }
 
   /////////////////////////////////////////////////
@@ -143,8 +142,7 @@ namespace Dune {
   template<int dim, class GridImp>
   alu_inline ALU3dGridEntity<0,dim,GridImp> ::
   ALU3dGridEntity(const FactoryType &factory, int wLevel)
-    : geo_(GeometryImp())
-      , factory_( factory )
+    : factory_( factory )
       , item_( 0 )
       , ghost_( 0 )
       , level_(-1)
@@ -155,8 +153,7 @@ namespace Dune {
   template<int dim, class GridImp>
   alu_inline ALU3dGridEntity<0,dim,GridImp> ::
   ALU3dGridEntity(const ALU3dGridEntity<0,dim,GridImp> & org)
-    : geo_(GeometryImp())
-      , factory_(org.factory_)
+    : factory_(org.factory_)
       , item_(org.item_)
       , ghost_( org.ghost_ )
       , level_(org.level_)
@@ -164,18 +161,19 @@ namespace Dune {
       , builtgeometry_(false)
   {  }
 
-  template<int dim, class GridImp>
-  alu_inline const typename ALU3dGridEntity<0,dim,GridImp>::Geometry &
-  ALU3dGridEntity<0,dim,GridImp> :: geometry () const
+  template< int dim, class GridImp >
+  alu_inline typename ALU3dGridEntity< 0, dim, GridImp >::Geometry
+  ALU3dGridEntity< 0, dim, GridImp >::geometry () const
   {
     assert(item_ != 0);
-    if( ! builtgeometry_ ) builtgeometry_ = geoImp().buildGeom(*item_);
-    return geo_;
+    if( !builtgeometry_ )
+      builtgeometry_ = geo_.buildGeom( *item_ );
+    return Geometry( geo_ );
   }
 
-  template<int dim, class GridImp>
-  alu_inline const typename ALU3dGridEntity<0,dim,GridImp>::Geometry &
-  ALU3dGridEntity<0,dim,GridImp> :: geometryInFather () const
+  template< int dim, class GridImp >
+  alu_inline typename ALU3dGridEntity<0,dim,GridImp>::LocalGeometry
+  ALU3dGridEntity< 0, dim, GridImp >::geometryInFather () const
   {
     assert( item_ );
     // this method should only be called if a father exists
@@ -184,26 +182,21 @@ namespace Dune {
     // get child number
     const int child = item_->nChild();
 
-    typedef MakeableInterfaceObject<Geometry> GeometryObject;
-    typedef typename GeometryObject::ImplementationType GeometryImp;
-
     // if the rule of the farher is not refine_element, it has to be bisection
-    // this can only be tru for tetrahedral elements
-    if( GridImp :: elementType == tetra &&
-        item_->up()->getrule() != ImplTraits :: refine_element_t )
+    // this can only be true for tetrahedral elements
+    if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::refine_element_t) )
     {
-      static GeometryObject* geom = 0 ;
-      if( geom == 0 ) geom = new GeometryObject( GeometryImp() );
-      grid().getRealImplementation( *geom ).buildGeomInFather( father()->geometry(), geometry() );
-      return *geom;
+      static LocalGeometryImpl geom;
+      geom.buildGeomInFather( father()->geometry(), geometry() );
+      return LocalGeometry( geom );
     }
     else
     {
       // to be improved, when we using not the refine 8 rule
       // see dune/grid/alugrid/common/geostrage.hh for implementation
-      static ALULocalGeometryStorage<GridImp, GeometryObject, 8> geoms( type(), true);
-      assert( geoms.geomCreated(child) );
-      return geoms[ child ];
+      static ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 8 > geoms( type(), true );
+      assert( geoms.geomCreated( child ) );
+      return LocalGeometry( geoms[ child ] );
     }
   }
 

@@ -29,10 +29,10 @@ namespace Dune
 
 
   template< int mydim, int cdim, class GridImp >
-  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::GlobalVector
-  AlbertaGridGeometry< mydim, cdim, GridImp >::global ( const LocalVector &local ) const
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
+  AlbertaGridGeometry< mydim, cdim, GridImp >::global ( const LocalCoordinate &local ) const
   {
-    GlobalVector y = corner( 0 );
+    GlobalCoordinate y = corner( 0 );
     jacobianTransposed().umtv( local, y );
     return y;
   }
@@ -40,10 +40,10 @@ namespace Dune
 
   //local implementation for mydim < cdim
   template< int mydim, int cdim, class GridImp >
-  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::LocalVector
-  AlbertaGridGeometry< mydim, cdim, GridImp >::local ( const GlobalVector &global ) const
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::LocalCoordinate
+  AlbertaGridGeometry< mydim, cdim, GridImp >::local ( const GlobalCoordinate &global ) const
   {
-    LocalVector x;
+    LocalCoordinate x;
     jacobianInverseTransposed().mtv( global - corner( 0 ), x );
     return x;
   }
@@ -109,10 +109,10 @@ namespace Dune
 
 #if !DUNE_ALBERTA_CACHE_COORDINATES
   template< int dim, int cdim >
-  inline typename AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::GlobalVector
-  AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::global ( const LocalVector &local ) const
+  inline typename AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::GlobalCoordinate
+  AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::global ( const LocalCoordinate &local ) const
   {
-    GlobalVector y = corner( 0 );
+    GlobalCoordinate y = corner( 0 );
     jacobianTransposed().umtv( local, y );
     return y;
   }
@@ -120,10 +120,10 @@ namespace Dune
 
   //local implementation for mydim < cdim
   template< int dim, int cdim >
-  inline typename AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::LocalVector
-  AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::local ( const GlobalVector &global ) const
+  inline typename AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::LocalCoordinate
+  AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::local ( const GlobalCoordinate &global ) const
   {
-    LocalVector x;
+    LocalCoordinate x;
     jacobianInverseTransposed().mtv( global - corner( 0 ), x );
     return x;
   }
@@ -138,16 +138,12 @@ namespace Dune
   template< class Grid >
   void AlbertaGridLocalGeometryProvider< Grid >::buildGeometryInFather ()
   {
-    typedef MakeableInterfaceObject< LocalElementGeometry > LocalGeoObject;
-    typedef typename LocalGeoObject::ImplementationType LocalGeoImp;
-
     for( int child = 0; child < numChildren; ++child )
     {
       for( int orientation = 0; orientation < 2; ++orientation )
       {
         const GeoInFatherCoordReader coordReader( child, orientation );
-        geometryInFather_[ child ][ orientation ]
-          = new LocalGeoObject( LocalGeoImp( coordReader ) );
+        geometryInFather_[ child ][ orientation ] = new LocalElementGeometry( coordReader );
       }
     }
   }
@@ -156,15 +152,12 @@ namespace Dune
   template< class Grid >
   void AlbertaGridLocalGeometryProvider< Grid >::buildFaceGeometry ()
   {
-    typedef MakeableInterfaceObject< LocalFaceGeometry > LocalGeoObject;
-    typedef typename LocalGeoObject::ImplementationType LocalGeoImp;
-
     for( int face = 0; face < numFaces; ++face )
     {
       for( int twist = minFaceTwist; twist <= maxFaceTwist; ++twist )
       {
         const FaceCoordReader coordReader( face, twist );
-        faceGeometry_[ face ][ twist - minFaceTwist ] = new LocalGeoObject( LocalGeoImp( coordReader ) );
+        faceGeometry_[ face ][ twist - minFaceTwist ] = new LocalFaceGeometry( coordReader );
       }
     }
   }
@@ -183,9 +176,6 @@ namespace Dune
 
   private:
     typedef Alberta::GeometryInFather< dimension > GeoInFather;
-
-    const int child_;
-    const int orientation_;
 
   public:
     GeoInFatherCoordReader ( int child, int orientation )
@@ -210,6 +200,10 @@ namespace Dune
     {
       return ctype( 0 );
     }
+
+  private:
+    const int child_;
+    const int orientation_;
   };
 
 
@@ -224,11 +218,6 @@ namespace Dune
 
     typedef FieldVector< ctype, dimension > Coordinate;
 
-  private:
-    int face_;
-    int twist_;
-
-  public:
     FaceCoordReader ( const int face, const int twist = 0 )
       : face_( face ),
         twist_( twist )
@@ -258,8 +247,11 @@ namespace Dune
       if( i > 0 )
         x[ i-1 ] = ctype( 1 );
     }
+
+    int face_;
+    int twist_;
   };
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_ALBERTA_GEOMETRY_CC

@@ -72,61 +72,6 @@ namespace Dune {
   template<class GridImp>            class YaspGlobalIdSet;
 
   //========================================================================
-  /*!
-     YaspGeometry realizes the concept of the geometric part of a mesh entity.
-
-     We have specializations for dim==dimworld (elements),
-     dim = dimworld-1 (faces) and dim=0 (vertices).
-     The general version throws a GridError on construction.
-   */
-  //========================================================================
-
-  template<int mydim, int cdim, class GridImp>
-  class YaspSpecialGeometry : public Geometry<mydim, cdim, GridImp, YaspGeometry>
-  {
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
-  public:
-    YaspSpecialGeometry(const FieldVector<ctype, cdim>& p, const FieldVector<ctype, cdim>& h, uint8_t& m) :
-      Geometry<mydim, cdim, GridImp, YaspGeometry>(YaspGeometry<mydim, cdim, GridImp>(p,h,m))
-    {}
-    YaspSpecialGeometry() :
-      Geometry<mydim, cdim, GridImp, YaspGeometry>(YaspGeometry<mydim, cdim, GridImp>(false))
-    {};
-  };
-
-  template<int mydim, class GridImp>
-  class YaspSpecialGeometry<mydim,mydim,GridImp> : public Geometry<mydim, mydim, GridImp, YaspGeometry>
-  {
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
-  public:
-    YaspSpecialGeometry(const FieldVector<ctype, mydim>& p, const FieldVector<ctype, mydim>& h) :
-      Geometry<mydim, mydim, GridImp, YaspGeometry>(YaspGeometry<mydim, mydim, GridImp>(p,h))
-    {}
-    YaspSpecialGeometry() :
-      Geometry<mydim, mydim, GridImp, YaspGeometry>(YaspGeometry<mydim, mydim, GridImp>(false))
-    {};
-  };
-
-  template<int cdim, class GridImp>
-  class YaspSpecialGeometry<0,cdim,GridImp> : public Geometry<0, cdim, GridImp, YaspGeometry>
-  {
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
-  public:
-    YaspSpecialGeometry(const FieldVector<ctype, cdim>& p) :
-      Geometry<0, cdim, GridImp, YaspGeometry>(YaspGeometry<0, cdim, GridImp>(p))
-    {}
-    YaspSpecialGeometry(const FieldVector<ctype, cdim>& p, const FieldVector<ctype, cdim>& h, uint8_t& m) :
-      Geometry<0, cdim, GridImp, YaspGeometry>(YaspGeometry<0, cdim, GridImp>(p))
-    {}
-    YaspSpecialGeometry() :
-      Geometry<0, cdim, GridImp, YaspGeometry>(YaspGeometry<0, cdim, GridImp>(false))
-    {};
-  };
-
-  //========================================================================
   // The transformation describing the refinement rule
 
   template<int dim, class GridImp>
@@ -134,8 +79,8 @@ namespace Dune {
   public:
     static FieldVector<yaspgrid_ctype, dim> midpoint; // data neded for the refelem below
     static FieldVector<yaspgrid_ctype, dim> extension; // data needed for the refelem below
-    static YaspSpecialGeometry<dim,dim,GridImp> geo;
-    static YaspSpecialGeometry<dim,dim,GridImp>& getson (int i)
+    static YaspGeometry<dim,dim,GridImp> geo;
+    static YaspGeometry<dim,dim,GridImp>& getson (int i)
     {
       for (int k=0; k<dim; k++)
         if (i&(1<<k))
@@ -148,7 +93,7 @@ namespace Dune {
 
   // initialize static variable with bool constructor (which makes reference elements)
   template<int dim, class GridImp>
-  YaspSpecialGeometry<dim,dim,GridImp>
+  YaspGeometry<dim,dim,GridImp>
   YaspFatherRelativeLocalElement<dim,GridImp>::geo(YaspFatherRelativeLocalElement<dim,GridImp>::midpoint,
                                                    YaspFatherRelativeLocalElement<dim,GridImp>::extension);
   template<int dim, class GridImp>
@@ -156,6 +101,16 @@ namespace Dune {
 
   template<int dim, class GridImp>
   FieldVector<yaspgrid_ctype,dim> YaspFatherRelativeLocalElement<dim,GridImp>::extension(0.5);
+
+  //========================================================================
+  /*!
+     YaspGeometry realizes the concept of the geometric part of a mesh entity.
+
+     We have specializations for dim==dimworld (elements),
+     dim = dimworld-1 (faces) and dim=0 (vertices).
+     The general version throws a GridError on construction.
+   */
+  //========================================================================
 
   //! The general version implements dimworld==dimworld. If this is not the case an error is thrown
   template<int mydim,int cdim, class GridImp>
@@ -570,7 +525,12 @@ namespace Dune {
     }
 
     //! constructor
-    YaspGeometry (const FieldVector<ctype, cdim>& p) : position(p)
+    explicit YaspGeometry ( const FieldVector< ctype, cdim > &p )
+      : position( p )
+    {}
+
+    YaspGeometry ( const FieldVector< ctype, cdim > &p, const FieldVector< ctype, cdim > &h, uint8_t &m )
+      : position( p )
     {}
 
     //! print function
@@ -659,7 +619,7 @@ namespace Dune {
     }
 
     //! geometry of this entity
-    const Geometry& geometry () const
+    Geometry geometry () const
     {
       DUNE_THROW(GridError, "YaspEntity not implemented");
     }
@@ -714,20 +674,24 @@ namespace Dune {
     : public EntityDefaultImplementation <0,dim,GridImp,YaspEntity>
   {
     enum { dimworld = GridImp::dimensionworld };
+
+    typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
+
   public:
     typedef typename GridImp::ctype ctype;
 
     typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
 
-    typedef YaspSpecialGeometry<dim-0,dim,GridImp> SpecialGeometry;
+    typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
+    typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
 
-    typedef typename GridImp::template Codim<0>::Geometry Geometry;
     template <int cd>
     struct Codim
     {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
     };
+
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
     typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
@@ -775,7 +739,7 @@ namespace Dune {
     }
 
     //! geometry of this entity
-    const Geometry& geometry () const { return _geometry; }
+    Geometry geometry () const { return Geometry( _geometry ); }
 
     /*! Return number of subentities with codimension cc.
      */
@@ -847,7 +811,7 @@ namespace Dune {
           implementation of numerical algorithms is only done for simple discretizations.
           Assumes that meshes are nested.
      */
-    const Geometry& geometryInFather () const
+    LocalGeometry geometryInFather () const
     {
       // determine which son we are
       int son = 0;
@@ -856,7 +820,7 @@ namespace Dune {
           son += (1<<k);
 
       // configure one of the 2^dim transformations
-      return YaspFatherRelativeLocalElement<dim,GridImp>::getson(son);
+      return LocalGeometry( YaspFatherRelativeLocalElement<dim,GridImp>::getson(son) );
     }
 
     const TSI& transformingsubiterator () const
@@ -1330,7 +1294,7 @@ namespace Dune {
     const GridImp * _yg;    // access to YaspGrid
     const TSI& _it;         // position in the grid level
     const YGLI& _g;         // access to grid level
-    SpecialGeometry _geometry; // the element geometry
+    GeometryImpl _geometry; // the element geometry
   };
 
 
@@ -1340,20 +1304,23 @@ namespace Dune {
     : public EntityDefaultImplementation <dim,dim,GridImp,YaspEntity>
   {
     enum { dimworld = GridImp::dimensionworld };
+
+    typedef typename GridImp::Traits::template Codim<dim>::GeometryImpl GeometryImpl;
+
   public:
     typedef typename GridImp::ctype ctype;
 
     typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
 
-    typedef YaspSpecialGeometry<dim-dim,dim,GridImp> SpecialGeometry;
-
     typedef typename GridImp::template Codim<dim>::Geometry Geometry;
+
     template <int cd>
     struct Codim
     {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
     };
+
     typedef typename GridImp::template Codim<dim>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<dim>::EntitySeed EntitySeed;
 
@@ -1385,7 +1352,7 @@ namespace Dune {
     }
 
     //! geometry of this entity
-    const Geometry& geometry () const { return _geometry; }
+    Geometry geometry () const { return Geometry( _geometry ); }
 
     //! return partition type attribute
     PartitionType partitionType () const
@@ -1484,7 +1451,7 @@ namespace Dune {
     const GridImp * _yg;          // access to YaspGrid
     const TSI& _it;               // position in the grid level
     const YGLI& _g;               // access to grid level
-    SpecialGeometry _geometry;    // the element geometry
+    GeometryImpl _geometry;       // the element geometry
     // temporary object
     mutable FieldVector<ctype, dim> loc; // always computed before being returned
   };
@@ -1504,6 +1471,10 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
     YaspIntersection();
     YaspIntersection& operator = (const YaspIntersection&);
+
+    typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
+
   public:
     // types used from grids
     typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
@@ -1513,8 +1484,6 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef YaspSpecialEntity<0,dim,GridImp> SpecialEntity;
-    typedef YaspSpecialGeometry<dim-1,dimworld,GridImp> SpecialGeometry;
-    typedef YaspSpecialGeometry<dim-1,dim,GridImp> SpecialLocalGeometry;
     typedef Dune::Intersection<const GridImp, Dune::YaspIntersectionIterator> Intersection;
 
     void update() const {
@@ -1745,26 +1714,26 @@ namespace Dune {
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in LOCAL coordinates of the element where iteration started.
      */
-    const LocalGeometry &geometryInInside () const
+    LocalGeometry geometryInInside () const
     {
-      return _faceInfo[_count].geom_inside;
+      return LocalGeometry( _faceInfo[_count].geom_inside );
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in LOCAL coordinates of neighbor
      */
-    const LocalGeometry &geometryInOutside () const
+    LocalGeometry geometryInOutside () const
     {
-      return _faceInfo[_count].geom_outside;
+      return LocalGeometry( _faceInfo[_count].geom_outside );
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in LOCAL coordinates of neighbor
      */
-    const Geometry &geometry () const
+    Geometry geometry () const
     {
       update();
-      return _is_global;
+      return Geometry( _is_global );
     }
 
     /** \brief obtain the type of reference element for this intersection */
@@ -1850,7 +1819,7 @@ namespace Dune {
     /* current position */
     FieldVector<ctype, dimworld> _pos_world;       //!< center of face in world coordinates
     /* geometry object (get automatically updated) */
-    SpecialGeometry _is_global;                    //!< intersection in global coordinates
+    GeometryImpl _is_global;                       //!< intersection in global coordinates
 
     /* static data */
     static const FieldVector<typename GridImp::ctype, GridImp::dimension> _ext_local;
@@ -1860,8 +1829,8 @@ namespace Dune {
       FieldVector<ctype, dim> pos_outside;     //!< center of face in neighbors local coordinates
       uint8_t dir;
       FieldVector<ctype, dimworld> normal;
-      SpecialLocalGeometry geom_inside;        //!< intersection in own local coordinates
-      SpecialLocalGeometry geom_outside;       //!< intersection in neighbors local coordinates
+      LocalGeometryImpl geom_inside;           //!< intersection in own local coordinates
+      LocalGeometryImpl geom_outside;          //!< intersection in neighbors local coordinates
       faceInfo() :
         geom_inside (pos_inside, _ext_local,dir),
         geom_outside(pos_outside,_ext_local,dir) {}

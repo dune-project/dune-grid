@@ -44,23 +44,21 @@ namespace Dune
   // ALU2DIntersectionGeometryStorage
   // --------------------------------
 
-  template< class LocalGeometry >
+  template< class LocalGeometryImpl >
   class ALU2DIntersectionGeometryStorage
   {
-    typedef ALU2DIntersectionGeometryStorage< LocalGeometry > ThisType;
-
-    typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
-    typedef typename MakeableLocalGeometry::ImplementationType LocalGeometryImpl;
+    typedef ALU2DIntersectionGeometryStorage< LocalGeometryImpl > ThisType;
 
     // one geometry for each face and twist 0 and 1
-    std::vector< MakeableLocalGeometry > geoms_[ 2 ][ 4 ];
+    LocalGeometryImpl geoms_[ 2 ][ 4 ][ 2 ];
+    //std::vector< LocalGeometryImpl > geoms_[ 2 ][ 4 ];
 
   private:
     ALU2DIntersectionGeometryStorage ();
 
   public:
     // return reference to local geometry
-    const LocalGeometry &localGeom ( const int aluFace, const int twist, const int corners ) const
+    const LocalGeometryImpl &localGeom ( const int aluFace, const int twist, const int corners ) const
     {
       assert( corners == 3 || corners == 4 );
       assert( 0 <= aluFace && aluFace < corners );
@@ -98,6 +96,9 @@ namespace Dune
     static const int dimworld  = GridImp::dimensionworld;
     static const ALU2DSPACE ElementType eltype = GridImp::elementType;
 
+    typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
+
   public:
     typedef typename GridImp :: GridObjectFactoryType FactoryType;
 
@@ -114,22 +115,17 @@ namespace Dune
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef ALU2dGridEntity<0,dim,GridImp> EntityImp;
-    typedef ALU2dGridGeometry<dim-1,dimworld,GridImp> GeometryImp;
-    typedef ALU2dGridGeometry<dim-1,dim,GridImp> LocalGeometryImp;
     typedef FieldVector< alu2d_ctype, dimworld > NormalType;
     typedef FieldVector< alu2d_ctype, dim-1 > LocalCoordinate;
 
     typedef ALU2dGridEntityPointer<0,GridImp> EntityPointerImp;
-
-    typedef MakeableInterfaceObject< Geometry > GeometryObject;
-    typedef MakeableInterfaceObject< LocalGeometry > LocalGeometryObject;
 
     typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
 
     // type of local geometry storage
-    typedef ALU2DIntersectionGeometryStorage< LocalGeometry > LocalGeometryStorageType;
+    typedef ALU2DIntersectionGeometryStorage< LocalGeometryImpl > LocalGeometryStorageType;
 
     typedef ALU2dGridIntersectionBase<GridImp> ThisType;
     friend class LevelIntersectionIteratorWrapper<GridImp>;
@@ -262,9 +258,9 @@ namespace Dune
     NormalType integrationOuterNormal ( const LocalCoordinate &local ) const;
     NormalType unitOuterNormal ( const LocalCoordinate &local ) const;
 
-    const LocalGeometry &geometryInInside () const;
-    const LocalGeometry &geometryInOutside () const;
-    const Geometry &geometry () const;
+    LocalGeometry geometryInInside () const;
+    LocalGeometry geometryInOutside () const;
+    Geometry geometry () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const;
@@ -291,13 +287,13 @@ namespace Dune
     virtual void setFirstItem ( const HElementType &elem, int wLevel ) = 0;
 
     // the local geometries
-    mutable GeometryObject intersectionGlobal_;
-    mutable LocalGeometryObject intersectionSelfLocal_;
-    mutable LocalGeometryObject intersectionNeighborLocal_;
+    mutable GeometryImpl intersectionGlobal_;
+    mutable LocalGeometryImpl intersectionSelfLocal_;
+    mutable LocalGeometryImpl intersectionNeighborLocal_;
 
     // reference to factory
     const FactoryType& factory_;
-    const LocalGeometryStorageType& localGeomStorage_;
+    const LocalGeometryStorageType &localGeomStorage_;
 
     mutable int walkLevel_;
   }; // end ALU2dGridIntersectionBase

@@ -77,6 +77,8 @@ namespace Dune {
 
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 
+    typedef typename GridImp::Traits::template Codim< cd >::GeometryImpl GeometryImpl;
+
   public:
     typedef typename GridImp :: GridObjectFactoryType FactoryType;
 
@@ -91,10 +93,6 @@ namespace Dune {
     //! typedef of my type
     typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
 
-    //! type of geometry implementation
-    typedef MakeableInterfaceObject<Geometry> GeometryObj;
-    typedef ALU2dGridGeometry<dim-cd,dimworld, const GridImp> GeometryImp;
-
     //! tpye of EntityPointer
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
@@ -108,7 +106,7 @@ namespace Dune {
     ALU2dGridEntity(const ALU2dGridEntity & org);
 
     //! geometry of this entity
-    const Geometry & geometry () const;
+    Geometry geometry () const;
 
     //! return type of geometry
     GeometryType type() const ;
@@ -176,9 +174,6 @@ namespace Dune {
     int getIndex () const;
 
   private:
-    //! returns reference to geometry implementation
-    GeometryImp& geoImpl() const { return GridImp :: getRealImplementation(geoObj_);  }
-
     //! the factory to create entities
     const FactoryType& factory_;
 
@@ -186,7 +181,7 @@ namespace Dune {
     mutable ElementType * item_;
     //! the current geometry
 
-    mutable GeometryObj geoObj_;
+    mutable GeometryImpl geoObj_;
 
     mutable int level_;
     mutable int face_;
@@ -239,6 +234,9 @@ namespace Dune {
 
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType ;
 
+    typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 0 >::LocalGeometryImpl LocalGeometryImpl;
+
   public:
     typedef typename GridImp :: GridObjectFactoryType FactoryType;
 
@@ -249,10 +247,6 @@ namespace Dune {
 
     //! typedef of my type
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
-
-    //! type of our Geometry implementation
-    typedef MakeableInterfaceObject<Geometry> GeometryObj;
-    typedef ALU2dGridGeometry<dim,dimworld, const GridImp> GeometryImp;
 
     //! tpye of intersection iterator
     typedef LeafIntersectionIteratorWrapper< GridImp > ALU2dGridLeafIntersectionIteratorType;
@@ -281,7 +275,7 @@ namespace Dune {
     int level () const ;
 
     //! geometry of this entity
-    const Geometry & geometry () const;
+    Geometry geometry () const;
 
     //! return type of geometry
     GeometryType type() const ;
@@ -436,7 +430,7 @@ namespace Dune {
        is only done for simple discretizations. Assumes that meshes are nested.
      */
 
-    const LocalGeometry & geometryInFather () const;
+    LocalGeometry geometryInFather () const;
 
     //! The former state() method has been replaced by:
     bool mightVanish () const
@@ -510,9 +504,6 @@ namespace Dune {
     //! return which number of child we are, i.e. 0 or 1
     int nChild () const;
 
-    //! returns reference to geometry implementation
-    GeometryImp& geoImpl() const { return GridImp :: getRealImplementation(geoObj_); }
-
     //! return index of sub entity with codim = cc and local number i
     //! i.e. return global number of vertex i
     //! for use in hierarchical index set
@@ -527,7 +518,7 @@ namespace Dune {
     mutable HElementType *item_;
 
     //! the current geometry
-    mutable GeometryObj geoObj_;
+    mutable GeometryImpl geoObj_;
 
     //! is true if entity is leaf entity
     mutable bool isLeaf_;
