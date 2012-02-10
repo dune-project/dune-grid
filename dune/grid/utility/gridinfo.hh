@@ -197,6 +197,7 @@ namespace Dune {
     typedef typename GV::ctype ctype;
     static const std::size_t dim = GV::dimension;
     typedef typename GV::template Codim<0>::Iterator EIterator;
+    typedef typename GV::template Codim<0>::Geometry EGeometry;
     typedef typename GV::IntersectionIterator IIterator;
     typedef typename GV::IndexSet IndexSet;
 
@@ -216,9 +217,11 @@ namespace Dune {
       ei.volumeMin = std::min(ei.volumeMin, volume);
       ei.volumeMax = std::max(ei.volumeMax, volume);
 
-      if(!eit->type().isNone())
+      if(!eit->type().isNone()) {
+        const EGeometry &geo = eit->geometry();
         ForLoop<FillGridInfoOperation, 1, dim>::
-        apply(eit->geometry(), RefElems::general(eit->type()), gridViewInfo);
+        apply(geo, RefElems::general(eit->type()), gridViewInfo);
+      }
     }
 
     GeometryType gt;
