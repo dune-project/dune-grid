@@ -140,7 +140,7 @@ namespace Dune
       return *indexSet_;
     }
 
-    /** \brief obtain numer of entities in a given codimension */
+    /** \brief obtain number of entities in a given codimension */
     int size ( int codim ) const
     {
       return grid().size( level_, codim );
@@ -353,7 +353,7 @@ namespace Dune
       return *indexSet_;
     }
 
-    /** \brief obtain numer of entities in a given codimension */
+    /** \brief obtain number of entities in a given codimension */
     int size ( int codim ) const
     {
       return grid().size( codim );
