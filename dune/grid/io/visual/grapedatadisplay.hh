@@ -283,6 +283,7 @@ namespace Dune
        @param indexSet The corresponding index set related to the data
        @param polOrd polynominal order of Lagrangespace, only 0 and 1 allowed
        at the momnent
+       @param dimRange dimension of the result data (scalar: 1)
        @param continuous continuous or not (i.e polOrd = 0 ==> discontinuous) default is discontinuous
      */
     template< class VectorType, class IndexSetType >
