@@ -1,3 +1,43 @@
+Copyright holders:
+
+2003--2009    Peter Bastian
+2004--2010    Markus Blatt
+2004--2005    Adrian Burri
+2006--2011    Andreas Dedner
+2010          Martin Drohmann
+2003          Marc Droske
+2003--2012    Christian Engwer
+2004--2012    Jorrit Fahlke
+2007--2012    Bernd Flemisch
+2006--2011    Christoph Gersbacher
+2005--2011    Carsten Gräser
+2012          Christoph Grüninger
+2006          Bernhard Haasdonk
+2010          Ole Klein
+2003--2012    Robert Klöfkorn
+2009--2011    Andreas Lauser
+2007--2009    Sven Marnach
+2012          Eike Müller
+2011          Thomas Müller
+2010--2011    Steffen Müthing
+2003--2005    Thimo Neubauer
+2011          Adrian Ngo
+2008--2012    Martin Nolte
+2004--2006    Mario Ohlberger
+2009--2012    Elias Pipping
+2010          Dan Popovic
+2005--2007    Sreejith Pulloor Kuttanikkad
+2009          Atgeirr Flø Rassmussen
+2009          Uli Sack
+2003--2012    Oliver Sander
+2011          Alexander Schlaich
+2004          Roland Schulz
+2008          Nina Shokina
+2010          Bård Skaflestad
+2009--2011    Jonathan Youett
+
+
+
 The DUNE library and headers are licensed under version 2 of the GNU
 General Public License (see below), with a special exception for
 linking and compiling against DUNE, the so-called "runtime exception."
