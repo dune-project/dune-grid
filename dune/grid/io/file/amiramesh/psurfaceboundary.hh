@@ -35,7 +35,7 @@ namespace Dune {
 
       /** \brief Construct from a given psurface and triangle number
        *
-       * \param psurface The psurface object that implements the segment
+       * \param psurfaceBoundary The psurface object that implements the segment
        * \param segment The number of the boundary segment in the psurface object
        */
       PSurfaceBoundarySegment(const shared_ptr<PSurfaceBoundary<dim> >& psurfaceBoundary, int segment)
