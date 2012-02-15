@@ -850,18 +850,23 @@ namespace Dune {
     {}
 
     //! assignment operator
-    SIntersectionIterator& operator = (const SIntersectionIterator& it)
+    SIntersectionIterator& operator = (const SIntersectionIterator& other)
     {
-      assert(grid == it.grid);
+      /* We can't assign the grid */
+      assert(grid == other.grid);
 
-      /* Assert same Iterator Context */
-      if (partition != it.partition)
-        DUNE_THROW(GridError, "assignment of SIntersectionIterator "
-                   << "with different partition");
+      /* Assign data from other */
+      self = other.self;
+      ne = other.ne;
+      partition = other.partition;
+      zred = other.zred;
+      count = other.count;
+      valid_count = other.valid_count;
+      valid_nb = other.valid_nb;
+      is_on_boundary = other.is_on_boundary;
 
-      /* Assign current position and update ne */
-      self = it.self;
-      make(it.count);
+      /* mark cached data as invalid */
+      built_intersections = false;
 
       return *this;
     }
@@ -872,8 +877,8 @@ namespace Dune {
     EntityPointer self;                   //!< EntityPointer for myself
     mutable EntityPointer ne;             //!< EntityPointer for neighbor
     const GridImp * grid;                 //!< Pointer to the grid
-    const int partition;                  //!< partition number of self, needed for coordinate expansion
-    const array<int,dim> zred;            //!< reduced coordinates of myself, allows easy computation of neighbors
+    int partition;                        //!< partition number of self, needed for coordinate expansion
+    array<int,dim> zred;                  //!< reduced coordinates of myself, allows easy computation of neighbors
     mutable int count;                    //!< number of neighbor
     mutable bool valid_count;             //!< true if count is in range
     mutable bool valid_nb;                //!< true if nb is initialized
