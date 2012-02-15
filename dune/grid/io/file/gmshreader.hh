@@ -661,63 +661,32 @@ namespace Dune
   class GmshReader
   {
   public:
+    typedef GridType Grid;
+
     /** \todo doc me */
-    static GridType* read (const std::string& fileName, bool verbose = true, bool insert_boundary_segments=true)
+    static Grid* read (const std::string& fileName, bool verbose = true, bool insert_boundary_segments=true)
     {
       // make a grid factory
-      Dune::GridFactory<GridType> factory;
+      Dune::GridFactory<Grid> factory;
 
       // create parse object
-      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
 
       return factory.createGrid();
     }
 
     /** \todo doc me */
-    static GridType* read (const std::string& fileName,
-                           std::vector<int>& boundary_id_to_physical_entity,
-                           std::vector<int>& element_index_to_physical_entity,
-                           bool verbose = true, bool insert_boundary_segments=true)
+    static Grid* read (const std::string& fileName,
+                       std::vector<int>& boundary_id_to_physical_entity,
+                       std::vector<int>& element_index_to_physical_entity,
+                       bool verbose = true, bool insert_boundary_segments=true)
     {
       // make a grid factory
-      Dune::GridFactory<GridType> factory;
+      Dune::GridFactory<Grid> factory;
 
       // create parse object
-      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
-      parser.read(fileName);
-
-      boundary_id_to_physical_entity.swap(parser.boundaryIdMap());
-      element_index_to_physical_entity.swap(parser.elementIndexMap());
-
-      return factory.createGrid();
-    }
-
-    /** \todo doc me */
-    static GridType* read (GridType& grid, const std::string& fileName,
-                           bool verbose = true, bool insert_boundary_segments=true) DUNE_DEPRECATED
-    {
-      // make a grid factory
-      Dune::GridFactory<GridType> factory(&grid);
-
-      // create parse object
-      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
-      parser.read(fileName);
-
-      return factory.createGrid();
-    }
-
-    /** \todo doc me */
-    static GridType* read (GridType& grid, const std::string& fileName,
-                           std::vector<int>& boundary_id_to_physical_entity,
-                           std::vector<int>& element_index_to_physical_entity,
-                           bool verbose = true, bool insert_boundary_segments=true) DUNE_DEPRECATED
-    {
-      // make a grid factory
-      Dune::GridFactory<GridType> factory(&grid);
-
-      // create parse object
-      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
 
       boundary_id_to_physical_entity.swap(parser.boundaryIdMap());
@@ -726,25 +695,58 @@ namespace Dune
       return factory.createGrid();
     }
 
+    /** \todo doc me */
+    static Grid* read (Grid& grid, const std::string& fileName,
+                       bool verbose = true, bool insert_boundary_segments=true) DUNE_DEPRECATED
+    {
+      // make a grid factory
+      Dune::GridFactory<Grid> factory(&grid);
+
+      // create parse object
+      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
+      parser.read(fileName);
+
+      return factory.createGrid();
+    }
 
     /** \todo doc me */
-    static void read (Dune::GridFactory<GridType>& factory, const std::string& fileName,
+    static Grid* read (Grid& grid, const std::string& fileName,
+                       std::vector<int>& boundary_id_to_physical_entity,
+                       std::vector<int>& element_index_to_physical_entity,
+                       bool verbose = true, bool insert_boundary_segments=true) DUNE_DEPRECATED
+    {
+      // make a grid factory
+      Dune::GridFactory<Grid> factory(&grid);
+
+      // create parse object
+      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
+      parser.read(fileName);
+
+      boundary_id_to_physical_entity.swap(parser.boundaryIdMap());
+      element_index_to_physical_entity.swap(parser.elementIndexMap());
+
+      return factory.createGrid();
+    }
+
+
+    /** \todo doc me */
+    static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       bool verbose = true, bool insert_boundary_segments=true)
     {
       // create parse object
-      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
     }
 
     /** \todo doc me */
-    static void read (Dune::GridFactory<GridType>& factory,
+    static void read (Dune::GridFactory<Grid>& factory,
                       const std::string& fileName,
                       std::vector<int>& boundary_id_to_physical_entity,
                       std::vector<int>& element_index_to_physical_entity,
                       bool verbose = true, bool insert_boundary_segments=true)
     {
       // create parse object
-      GmshReaderParser<GridType> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
       parser.read(fileName);
 
       boundary_id_to_physical_entity.swap(parser.boundaryIdMap());
