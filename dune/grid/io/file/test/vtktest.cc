@@ -72,7 +72,7 @@ public:
 };
 
 template< class GridView >
-void doWrite( const GridView &gridView, Dune :: VTKOptions :: DataMode dm )
+void doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
 {
   enum { dim = GridView :: dimension };
 
