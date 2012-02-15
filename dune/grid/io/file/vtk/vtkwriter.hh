@@ -460,7 +460,7 @@ namespace Dune
      *
      *  This method can be used in parallel as well as in serial programs.
      *  For serial runs (commSize=1) it chooses other names without the
-     *  "s####:p####:" prefix for the .vtu/.vtp files and omits writing of the
+     *  "s####-p####-" prefix for the .vtu/.vtp files and omits writing of the
      *  .pvtu/pvtp file however.  For parallel runs (commSize > 1) it is the
      *  same as a call to pwrite() with path="" and extendpath="".
      *
@@ -528,8 +528,8 @@ namespace Dune
         if(path[path.size()-1] != '/')
           s << '/';
       }
-      s << 's' << std::setw(4) << std::setfill('0') << commSize << ':';
-      s << 'p' << std::setw(4) << std::setfill('0') << commRank << ':';
+      s << 's' << std::setw(4) << std::setfill('0') << commSize << '-';
+      s << 'p' << std::setw(4) << std::setfill('0') << commRank << '-';
       s << name;
       if(GridView::dimension > 1)
         s << ".vtu";
@@ -559,7 +559,7 @@ namespace Dune
         if(path[path.size()-1] != '/')
           s << '/';
       }
-      s << 's' << std::setw(4) << std::setfill('0') << commSize << ':';
+      s << 's' << std::setw(4) << std::setfill('0') << commSize << '-';
       s << name;
       if(GridView::dimension > 1)
         s << ".pvtu";
@@ -571,7 +571,7 @@ namespace Dune
     //! return name of a serial piece file
     /**
      * This is similar to getParallelPieceName, but skips the prefixes for
-     * commSize ("s####:") and commRank ("p####:").
+     * commSize ("s####-") and commRank ("p####-").
      *
      * \param name     Base name of the VTK output.  This should be without
      *                 any directory parts and without a filename extension.
@@ -594,7 +594,7 @@ namespace Dune
      *
      *  This method can be used in parallel as well as in serial programs.
      *  For serial runs (commSize=1) it chooses other names without the
-     *  "s####:p####:" prefix for the .vtu/.vtp files and omits writing of the
+     *  "s####-p####-" prefix for the .vtu/.vtp files and omits writing of the
      *  .pvtu/pvtp file however.  For parallel runs (commSize > 1) it is the
      *  same as a call to pwrite() with path="" and extendpath="".
      *
