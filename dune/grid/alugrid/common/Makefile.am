@@ -1,5 +1,5 @@
 alucommondir = $(includedir)/dune/grid/alugrid/common
-alucommon_HEADERS = bndprojection.hh  checkparallel.hh
+alucommon_HEADERS = bndprojection.hh  checkparallel.hh \
                     declaration.hh \
                     defaultindexsets.hh \
                     geostorage.hh \
