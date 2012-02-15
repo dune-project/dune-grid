@@ -1,0 +1,4 @@
+#!/bin/sh
+# @configure_input@
+@MPI_TRUE@exec mpirun -np 2 ./vtktest
+@MPI_FALSE@exit 77

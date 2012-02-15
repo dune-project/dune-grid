@@ -27,6 +27,10 @@ endif
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(ALLTESTS)
+check_SCRIPTS =
+
+EXTRA_DIST =
+CLEANFILES =
 
 # list of tests to run
 TESTS = $(ALLTESTS)
@@ -45,6 +49,14 @@ vtktest_LDFLAGS = $(AM_LDFLAGS)			\
 vtktest_LDADD =					\
 	$(DUNEMPILIBS)				\
 	$(LDADD)
+
+check_SCRIPTS += mpivtktest
+TESTS += mpivtktest
+EXTRA_DIST += mpivtktest.in
+CLEANFILES += mpivtktest
+mpivtktest: mpivtktest.in
+	$(top_builddir)/config.status --file=mpivtktest
+	chmod +x mpivtktest
 
 vtksequencetest_SOURCES = vtksequencetest.cc
 
@@ -111,4 +123,4 @@ starcdreadertest_LDADD =			\
 
 include $(top_srcdir)/am/global-rules
 
-CLEANFILES = *.vtu *.vtp *.data sgrid*.am *.pvtu *.pvtp *.pvd
+CLEANFILES += *.vtu *.vtp *.data sgrid*.am *.pvtu *.pvtp *.pvd
