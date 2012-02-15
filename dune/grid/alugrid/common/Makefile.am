@@ -1,6 +1,13 @@
 alucommondir = $(includedir)/dune/grid/alugrid/common
-alucommon_HEADERS = bndprojection.hh  checkparallel.hh  geostorage.hh  transformation.hh \
-memory.hh objectfactory.hh intersectioniteratorwrapper.hh interfaces.hh \
-persistentcontainer.hh defaultindexsets.hh
+alucommon_HEADERS = bndprojection.hh  checkparallel.hh
+                    declaration.hh \
+                    defaultindexsets.hh \
+                    geostorage.hh \
+                    intersectioniteratorwrapper.hh \
+                    interfaces.hh \
+                    memory.hh \
+                    objectfactory.hh \
+                    persistentcontainer.hh \
+                    transformation.hh
 
 include $(top_srcdir)/am/global-rules

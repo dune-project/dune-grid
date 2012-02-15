@@ -362,7 +362,21 @@ namespace Dune
   /**  @copydoc ALUGrid
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief grid with 3d implementations of the grid interface
-     \ingroup ALUGrid
+   */
+  /*--
+     \li Available Implementations
+        - quadrilateral and hexahedral elements only nonconforming refinement
+          - Dune::ALUGrid< 2, 2, cube, nonconforming >
+          - Dune::ALUGrid< 2, 3, cube, nonconforming >
+          - Dune::ALUGrid< 3, 3, cube, nonconforming >
+        - simplicial elements and nonconforming refinement
+          - Dune::ALUGrid< 2, 2, simplex, nonconforming >
+          - Dune::ALUGrid< 2, 3, simplex, nonconforming >
+          - Dune::ALUGrid< 3, 3, simplex, nonconforming >
+        - simplicial elements and bisection refinement
+          - Dune::ALUGrid< 2, 2, simplex, conforming >
+          - Dune::ALUGrid< 2, 3, simplex, conforming >
+          - Dune::ALUGrid< 3, 3, simplex, conforming >
    */
   template< ALUGridElementType elType, ALUGridRefinementType refineType >
   class ALUGrid< 3, 3, elType, refineType >
@@ -384,9 +398,9 @@ namespace Dune
     typedef typename BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
     //! \brief constructor for creating ALUGrid from given macro grid file
-    //! \param macroName filename for macro grid in ALUGrid tetra format
-    //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
-    //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
+    //! \param macroName  filename for macro grid in ALUGrid tetra format
+    //! \param mpiComm    MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
+    //!                   type MPI_Comm and the default value is MPI_COMM_WORLD)
     //! \param bndProject global boundary projection pointer
     //! \param bndVector  pointer to vector holding boundary projection for
     //!                   each boundary segment.  ALUGrid takes ownership of
