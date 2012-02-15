@@ -2,14 +2,16 @@
 // vi: set et ts=4 sw=2 sts=2:
 // $Id:$
 
+#if HAVE_CONFIG_H
 #include "config.h" // autoconf defines, needed by the dune headers
-
-// dune headers
-#include <dune/grid/sgrid.hh>
-#include <dune/grid/io/file/vtk/vtkwriter.hh>
+#endif
 
 #include <vector>
+
 #include <unistd.h>
+
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
+#include <dune/grid/sgrid.hh>
 
 const char* VTKDataMode(Dune::VTK::DataMode dm)
 {
@@ -53,7 +55,8 @@ public:
      @param[in]  xi     point in local coordinates of the reference element of e
      \return            value of the component
    */
-  virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<DT,n>& xi) const
+  virtual double evaluate (int comp, const Entity& e,
+                           const Dune::FieldVector<DT,n>& xi) const
   {
     return comp*0.1;
   }
@@ -65,7 +68,6 @@ public:
     snprintf(_name, 256, "%s-vector-%iD", type, ncomps());
     return std::string(_name);
   };
-
 
 };
 
@@ -102,17 +104,22 @@ void doWrite( const GridView &gridView, Dune :: VTKOptions :: DataMode dm )
 template<int dim>
 void vtkCheck(int* n, double* h)
 {
-  const Dune :: PartitionIteratorType VTK_Partition = Dune :: InteriorBorder_Partition;
+  const Dune :: PartitionIteratorType VTK_Partition
+    = Dune :: InteriorBorder_Partition;
   std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
   Dune::SGrid<dim,dim> g(n, h);
   g.globalRefine(1);
 
   doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::conforming );
   doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::conforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune::VTK::conforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune::VTK::nonconforming );
+  doWrite( g.template levelView< VTK_Partition >( 0 ),
+           Dune::VTK::conforming );
+  doWrite( g.template levelView< VTK_Partition >( 0 ),
+           Dune::VTK::nonconforming );
+  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ),
+           Dune::VTK::conforming );
+  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ),
+           Dune::VTK::nonconforming );
 }
 
 int main(int argc, char **argv)
