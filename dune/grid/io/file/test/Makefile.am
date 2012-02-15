@@ -38,6 +38,13 @@ ALLTESTS += nonconformboundaryvtktest
 nonconformboundaryvtktest_SOURCES = nonconformboundaryvtktest.cc
 
 vtktest_SOURCES = vtktest.cc
+vtktest_CPPFLAGS = $(AM_CPPFLAGS)		\
+	$(DUNEMPICPPFLAGS)
+vtktest_LDFLAGS = $(AM_LDFLAGS)			\
+	$(DUNEMPILDFLAGS)
+vtktest_LDADD =					\
+	$(DUNEMPILIBS)				\
+	$(LDADD)
 
 vtksequencetest_SOURCES = vtksequencetest.cc
 

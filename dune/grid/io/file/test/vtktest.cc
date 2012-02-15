@@ -6,12 +6,18 @@
 #include "config.h" // autoconf defines, needed by the dune headers
 #endif
 
+#include <algorithm>
+#include <iostream>
+#include <ostream>
 #include <vector>
 
 #include <unistd.h>
 
+#include <dune/common/fvector.hh>
+#include <dune/common/mpihelper.hh>
+
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
-#include <dune/grid/sgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 
 const char* VTKDataMode(Dune::VTK::DataMode dm)
 {
@@ -102,12 +108,21 @@ void doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
 }
 
 template<int dim>
-void vtkCheck(int* n, double* h)
+void vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
 {
   const Dune :: PartitionIteratorType VTK_Partition
     = Dune :: InteriorBorder_Partition;
-  std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
-  Dune::SGrid<dim,dim> g(n, h);
+  if(mpiHelper.rank() == 0)
+    std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
+
+  typedef Dune::YaspGrid<dim> Grid;
+  Dune::FieldVector<typename Grid::ctype, dim> L(0);
+  std::copy(h, h+dim, L.begin());
+  Dune::FieldVector<int, dim> s(0);
+  std::copy(n, n+dim, s.begin());
+
+  Dune::YaspGrid<dim> g(mpiHelper.getCommunicator(), L, s,
+                        Dune::FieldVector<bool, dim>(false), 0);
   g.globalRefine(1);
 
   doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::conforming );
@@ -125,13 +140,18 @@ void vtkCheck(int* n, double* h)
 int main(int argc, char **argv)
 {
   try {
+    const Dune::MPIHelper &mpiHelper = Dune::MPIHelper::instance(argc, argv);
+
+    if(mpiHelper.rank() == 0)
+      std::cout << "vtktest: MPI_Comm_size == " << mpiHelper.size()
+                << std::endl;
 
     int n[] = { 5, 5, 5, 5 };
     double h[] = { 1.0, 2.0, 3.0, 4.0 };
 
-    vtkCheck<1>(n,h);
-    vtkCheck<2>(n,h);
-    vtkCheck<3>(n,h);
+    vtkCheck<1>(mpiHelper,n,h);
+    vtkCheck<2>(mpiHelper,n,h);
+    vtkCheck<3>(mpiHelper,n,h);
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
