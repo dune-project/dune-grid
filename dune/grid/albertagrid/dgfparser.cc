@@ -25,10 +25,6 @@ namespace Dune
     if( !dgf_.readDuneGrid( input, dim, dimworld ) )
       return false;
 
-    if( dim == dimworld )
-      dgf_.setOrientation( 0, 1 );
-    dgf_.setRefinement( 0, 1, -1, -1 );
-
     for( int n = 0; n < dgf_.nofvtx; ++n )
     {
       typename GridFactory::WorldVector coord;
