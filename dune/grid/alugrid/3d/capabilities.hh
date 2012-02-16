@@ -7,6 +7,7 @@
 #ifdef ENABLE_ALUGRID
 
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/alugrid/common/declaration.hh>
 #include <dune/grid/alugrid/3d/alu3dinclude.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
@@ -24,9 +25,6 @@ namespace Dune
 
   template< int dim, int dimworld >
   class ALUSimplexGrid;
-
-  template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-  class ALUGrid;
 
 
   namespace Capabilities
