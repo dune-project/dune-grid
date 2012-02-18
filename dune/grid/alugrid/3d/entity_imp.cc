@@ -426,9 +426,9 @@ namespace Dune {
   {
     assert(item_ != 0);
 
-    // if this assertion is thrown then you try to mark a non leaf entity
-    // which is leads to unpredictable results
-    if( !isLeaf() ) return false;
+    // do not allow to mark ghost cells or non-leaf cells
+    // this will lead to unpredictable results errors
+    if( isGhost() || ! isLeaf() ) return false ;
 
     // mark for coarsening
     if(ref < 0)
