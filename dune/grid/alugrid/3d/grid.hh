@@ -831,6 +831,7 @@ namespace Dune
 
     virtual GitterImplType *createALUGrid ( const std::string &macroName )
     {
+      assert( communications_ );
       return communications_->createALUGrid( macroName, vertexProjection() );
     }
 
