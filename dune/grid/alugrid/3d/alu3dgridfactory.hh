@@ -407,12 +407,12 @@ namespace Dune
   /** \brief Specialization of the generic GridFactory for ALUCubeGrid<3,3>
    *  \ingroup GridFactory
    */
-  template<ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-  class GridFactory< ALUGrid< 3, 3, eltype, refinementtype > >
-    : public ALU3dGridFactory< ALUGrid< 3, 3, eltype, refinementtype > >
+  template<ALUGridElementType eltype, ALUGridRefinementType refinementtype , class Comm >
+  class GridFactory< ALUGrid< 3, 3, eltype, refinementtype, Comm > >
+    : public ALU3dGridFactory< ALUGrid< 3, 3, eltype, refinementtype, Comm > >
   {
-    typedef GridFactory< ALUGrid< 3, 3, eltype, refinementtype > > ThisType;
-    typedef ALU3dGridFactory< ALUGrid< 3, 3, eltype, refinementtype > > BaseType;
+    typedef GridFactory< ALUGrid< 3, 3, eltype, refinementtype, Comm > > ThisType;
+    typedef ALU3dGridFactory< ALUGrid< 3, 3, eltype, refinementtype, Comm > > BaseType;
 
   public:
     typedef typename BaseType::Grid Grid;

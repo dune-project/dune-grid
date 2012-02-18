@@ -10,6 +10,7 @@
 
 #if HAVE_ALUGRID
 
+#include <dune/grid/alugrid/common/declaration.hh>
 #include <dune/grid/alugrid/3d/alu3dinclude.hh>
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 
@@ -77,7 +78,7 @@ namespace Dune
       {
         assert( nonConform );
         {
-          typedef ALUSimplexGrid< 3, 3 > Grid;
+          typedef ALUGrid< 3, 3, simplex, nonconforming, No_Comm > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }
@@ -109,7 +110,7 @@ namespace Dune
       {
         assert( nonConform );
         {
-          typedef ALUCubeGrid< 3, 3 > Grid;
+          typedef ALUGrid< 3, 3, cube, nonconforming, No_Comm > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }

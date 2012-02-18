@@ -187,8 +187,8 @@ namespace Dune
     /** \brief ALUGrid has only one geometry type for codim 0 entities
        \ingroup ALUGrid
      */
-    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct hasSingleGeometryType< ALUGrid< 3, 3, eltype, refinementtype > >
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+    struct hasSingleGeometryType< ALUGrid< 3, 3, eltype, refinementtype, Comm > >
     {
       static const bool v = true;
       static const unsigned int topologyId = (eltype == cube) ?
@@ -199,8 +199,8 @@ namespace Dune
     /** \brief ALUGrid has entities for all codimension
        \ingroup ALUGrid
      */
-    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, int cdim >
-    struct hasEntity< ALUGrid< 3, 3, eltype, refinementtype >, cdim >
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm, int cdim >
+    struct hasEntity< ALUGrid< 3, 3, eltype, refinementtype, Comm >, cdim >
     {
       static const bool v = true;
     };
@@ -209,8 +209,8 @@ namespace Dune
        \ingroup ALUGrid
      */
 #if ALU3DGRID_PARALLEL
-    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct isParallel< ALUGrid< 3, 3, eltype, refinementtype > >
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+    struct isParallel< ALUGrid< 3, 3, eltype, refinementtype, Comm > >
     {
       static const bool v = true;
     };
@@ -230,8 +230,8 @@ namespace Dune
     /** \brief ALUGrid has conforming level grids
        \ingroup ALUGrid
      */
-    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct isLevelwiseConforming< ALUGrid< 3, 3, eltype, refinementtype > >
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+    struct isLevelwiseConforming< ALUGrid< 3, 3, eltype, refinementtype, Comm > >
     {
       static const bool v = refinementtype == nonconforming;
     };
@@ -248,8 +248,8 @@ namespace Dune
     /** \brief ALUGrid has backup and restore facilities
        \ingroup ALUGrid
      */
-    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct hasBackupRestoreFacilities< ALUGrid< 3, 3, eltype, refinementtype > >
+    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+    struct hasBackupRestoreFacilities< ALUGrid< 3, 3, eltype, refinementtype, Comm > >
     {
       static const bool v = true;
     };

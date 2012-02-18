@@ -378,12 +378,12 @@ namespace Dune
           - Dune::ALUGrid< 2, 3, simplex, conforming >
           - Dune::ALUGrid< 3, 3, simplex, conforming >
    */
-  template< ALUGridElementType elType, ALUGridRefinementType refineType >
-  class ALUGrid< 3, 3, elType, refineType >
-    : public ALUGridBaseGrid< elType > :: BaseGrid
+  template< ALUGridElementType elType, ALUGridRefinementType refineType, class Comm >
+  class ALUGrid< 3, 3, elType, refineType, Comm >
+    : public ALUGridBaseGrid< elType, Comm > :: BaseGrid
   {
-    typedef ALUGrid< 3, 3, elType, refineType > This;
-    typedef typename ALUGridBaseGrid< elType > :: BaseGrid BaseType;
+    typedef ALUGrid< 3, 3, elType, refineType, Comm > This;
+    typedef typename ALUGridBaseGrid< elType, Comm > :: BaseGrid BaseType;
 
     enum { dim      = 3 };
     enum { dimworld = 3 };

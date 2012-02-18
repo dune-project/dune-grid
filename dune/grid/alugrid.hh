@@ -115,8 +115,7 @@ namespace Dune
 
      For installation instructions see http://www.dune-project.org/external_libraries/install_alugrid.html .
    */
-  template <int dim, int dimworld, ALUGridElementType elType, ALUGridRefinementType refineType >
-  class ALUGrid;
+#include <dune/grid/alugrid/common/declaration.hh>
 
 } //end  namespace Dune
 

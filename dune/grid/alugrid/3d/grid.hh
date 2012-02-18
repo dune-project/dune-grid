@@ -100,19 +100,19 @@ namespace Dune
   class ALU3dGrid;
 #endif // #else // #if ALU3DGRID_PARALLEL
 
-  template <ALUGridElementType elType>
+  template <ALUGridElementType elType, class Comm >
   struct ALUGridBaseGrid ;
 
-  template <>
-  struct ALUGridBaseGrid< cube >
+  template < class Comm >
+  struct ALUGridBaseGrid< cube, Comm >
   {
-    typedef ALU3dGrid< hexa >  BaseGrid ;
+    typedef ALU3dGrid< hexa, Comm >  BaseGrid ;
   };
 
-  template <>
-  struct ALUGridBaseGrid< simplex >
+  template < class Comm>
+  struct ALUGridBaseGrid< simplex, Comm >
   {
-    typedef ALU3dGrid< tetra >  BaseGrid ;
+    typedef ALU3dGrid< tetra, Comm >  BaseGrid ;
   };
 
   namespace DefaultIndexSetHelper
