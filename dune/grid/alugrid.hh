@@ -6,6 +6,8 @@
 // only include this code, if HAVE_ALUGRID is true
 #if HAVE_ALUGRID
 
+#include <dune/grid/alugrid/common/declaration.hh>
+
 #include <dune/grid/alugrid/3d/alugrid.hh>
 #include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
 
