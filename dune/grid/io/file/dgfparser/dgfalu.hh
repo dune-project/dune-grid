@@ -61,16 +61,16 @@ namespace Dune
     static double refineWeight () { return 0.5; }
   };
 
-  template<int dimg, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype>
-  struct DGFGridInfo< Dune::ALUGrid< dimg, dimw, eltype, refinementtype > >
+  template<int dimg, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+  struct DGFGridInfo< Dune::ALUGrid< dimg, dimw, eltype, refinementtype, Comm > >
   {
     static int refineStepsForHalf () { return ( refinementtype == conforming ) ? dimg : 1; }
     static double refineWeight () { return ( refinementtype == conforming ) ? 0.5 : 1.0/(std::pow( 2.0, double(dimg))); }
   };
   /** \endcond */
 
-  // DGFGridFactory for AluSimplexGrid
-  // ------------------------------
+  // DGFGridFactory for AluGrid
+  // --------------------------
 
   // template< int dim, int dimworld > // for a first version
   template < class G >
@@ -200,6 +200,11 @@ namespace Dune
                           MPICommunicatorType communicator,
                           const std::string &filename );
 
+    bool generateALU2dGrid( const ALUGridElementType eltype,
+                            std::istream &file,
+                            MPICommunicatorType communicator,
+                            const std::string &filename );
+
     static Grid* callDirectly( const char* gridname,
                                const int rank,
                                const char *filename,
@@ -326,11 +331,11 @@ namespace Dune
     bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
   };
 
-  template < ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-  struct DGFGridFactory< ALUGrid<3,3, eltype, refinementtype > > :
-    public DGFBaseFactory< ALUGrid<3,3, eltype, refinementtype > >
+  template < ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+  struct DGFGridFactory< ALUGrid<3,3, eltype, refinementtype, Comm > > :
+    public DGFBaseFactory< ALUGrid<3,3, eltype, refinementtype, Comm > >
   {
-    typedef ALUGrid<3,3, eltype, refinementtype > DGFGridType;
+    typedef ALUGrid<3,3, eltype, refinementtype, Comm > DGFGridType;
     typedef DGFBaseFactory< DGFGridType > BaseType;
     typedef typename BaseType :: MPICommunicatorType MPICommunicatorType;
   protected:
@@ -358,7 +363,7 @@ namespace Dune
         fileFound = generate( input, comm, filename );
 
       if( ! fileFound )
-        grid_ = callDirectly( "ALUGrid< 3 , 3, eltype, ref >", this->rank( comm ), filename.c_str(), comm );
+        grid_ = callDirectly( "ALUGrid< 3, 3, eltype, ref, comm >", this->rank( comm ), filename.c_str(), comm );
     }
 
   protected:
@@ -494,6 +499,51 @@ namespace Dune
     using Base::grid_;
     using Base::factory_;
     using Base::dgf_;
+  };
+
+  template < int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+  struct DGFGridFactory< ALUGrid<2, dimw, eltype, refinementtype, Comm > > :
+    public DGFBaseFactory< ALUGrid< 2, dimw, eltype, refinementtype, Comm > >
+  {
+    typedef ALUGrid< 2, dimw, eltype, refinementtype, Comm > DGFGridType;
+    typedef DGFBaseFactory< DGFGridType > BaseType;
+    typedef typename BaseType :: MPICommunicatorType MPICommunicatorType;
+    typedef typename BaseType::Grid Grid;
+    const static int dimension = Grid::dimension;
+    typedef typename BaseType::GridFactory GridFactory;
+
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : BaseType( comm )
+    {
+      input.clear();
+      input.seekg( 0 );
+      if( !input )
+        DUNE_THROW(DGFException, "Error resetting input stream." );
+      generate( input, comm );
+    }
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+      : BaseType( comm )
+    {
+      std::ifstream input( filename.c_str() );
+      if( !input )
+        DUNE_THROW( DGFException, "Macrofile '" << filename << "' not found." );
+      if( !generate( input, comm, filename ) )
+      {
+        if( BaseType::fileExists( filename.c_str() ) )
+          grid_ = new Grid( filename );
+        else
+          DUNE_THROW( GridError, "Unable to create a 2d ALUGrid from '" << filename << "'." );
+      }
+    }
+
+  protected:
+    bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
+    using BaseType::grid_;
+    using BaseType::factory_;
+    using BaseType::dgf_;
   };
 
 }
