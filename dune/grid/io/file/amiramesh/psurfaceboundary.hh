@@ -6,7 +6,7 @@
 /** \file
  *  \brief A domain boundary implemented by the psurface library
  */
-
+#if HAVE_PSURFACE
 #include <psurface/PSurface.h>
 
 namespace Dune {
@@ -100,4 +100,5 @@ namespace Dune {
 
 }
 
-#endif
+#endif // #if HAVE_PSURFACE
+#endif // #ifndef PSURFACE_BOUNDARY_HH

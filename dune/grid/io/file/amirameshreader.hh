@@ -9,7 +9,6 @@
 
 #if HAVE_PSURFACE
 #include <dune/grid/io/file/amiramesh/psurfaceboundary.hh>
-#endif
 
 #if HAVE_AMIRAMESH
 #include <amiramesh/AmiraMesh.h>
@@ -143,4 +142,5 @@ namespace Dune {
 #include "amiramesh/amirameshreader.cc"
 #endif
 
+#endif // #if HAVE_PSURFACE
 #endif

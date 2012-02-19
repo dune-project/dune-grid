@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTAGRID_GRIDVIEW_HH
 #define DUNE_ALBERTAGRID_GRIDVIEW_HH
 
+#if HAVE_ALBERTA
+
 #include <dune/common/typetraits.hh>
 #include <dune/common/exceptions.hh>
 
@@ -453,4 +455,5 @@ namespace Dune
 
 }
 
+#endif // #if HAVE_ALBERTA
 #endif // #ifndef DUNE_ALBERTAGRID_GRIDVIEW_HH

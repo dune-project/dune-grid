@@ -22,7 +22,8 @@ endif
 
 headercheck_IGNORE = uggridentity.hh uggridentitypointer.hh uggridentityseed.hh uggridfactory.hh uggridgeometry.hh \
                      uggridhieriterator.hh uggridindexsets.hh uggridleafiterator.hh \
-                     uggridleveliterator.hh ugincludes.hh uggridintersections.hh \
+                     uggridleveliterator.hh uggridlocalgeometry.hh uggridrenumberer.hh \
+                     ugincludes.hh uggridintersections.hh \
                      uggridintersectioniterators.hh ugwrapper.hh
 
 uggriddir = $(includedir)/dune/grid/uggrid/

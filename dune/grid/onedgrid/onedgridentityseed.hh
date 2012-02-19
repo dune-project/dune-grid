@@ -3,6 +3,8 @@
 #ifndef DUNE_ONE_D_GRID_ENTITY_SEED_HH
 #define DUNE_ONE_D_GRID_ENTITY_SEED_HH
 
+#include "onedgridentity.hh"
+
 /** \file
  *  \brief Implementation of EntitySeed for the OneDGrid grid manager
  */
