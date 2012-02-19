@@ -304,6 +304,53 @@ void checkIterators( GridType& grid )
   checkIteratorCodim< GridType :: dimension > ( grid );
 }
 
+template <int codim, class GridType>
+void checkPersistentContainerCodim(GridType & grid)
+{
+  typedef PersistentContainer< GridType, int > ContainerType ;
+
+  ContainerType persistentContainer ( grid, codim ) ;
+  typedef typename ContainerType :: Iterator iterator;
+
+  // clear container
+  const iterator end = persistentContainer.end();
+  for( iterator it = persistentContainer.begin(); it != end; ++ it )
+    *it = 0;
+
+  typedef typename GridType::template Codim<codim>::LeafIterator Iterator;
+
+  typedef typename GridType::template Codim<codim>:: Entity Entity;
+  typedef typename GridType::template Codim<codim>:: Geometry Geometry ;
+  typedef typename GridType:: ctype ctype;
+
+  /** Loop only over the interior elements, not over ghost elements. */
+  const Iterator endIterator = grid.template leafend<codim>();
+  for (Iterator iter =
+         grid.template leafbegin<codim>();
+       iter!=endIterator; ++iter)
+  {
+    const Entity& entity = *iter ;
+    persistentContainer[ entity ] = 1 ;
+  }
+
+  int sum = 0;
+  for( iterator it = persistentContainer.begin(); it != end; ++ it )
+    sum += *it;
+
+  // the number of leaf entities should equal to what we just stored.
+  if( grid.size( codim ) != sum )
+    DUNE_THROW(InvalidStateException,"PersistentContainer for codim " << codim<< " gives wrong results!");
+}
+
+template <class GridType>
+void checkPersistentContainer( GridType& grid )
+{
+  checkPersistentContainerCodim< 0 > ( grid );
+  checkPersistentContainerCodim< 1 > ( grid );
+  checkPersistentContainerCodim< 2 > ( grid );
+  checkPersistentContainerCodim< GridType :: dimension > ( grid );
+}
+
 template <class GridType>
 void checkLevelIndexNonConform(GridType & grid)
 {
@@ -429,7 +476,11 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   // some checks for assignment of iterators
   checkIteratorAssignment(grid);
 
+  // check level index sets on nonconforming grids
   checkLevelIndexNonConform(grid);
+
+  // check persistent container
+  checkPersistentContainer( grid );
 
   std::cout << std::endl << std::endl;
 }
@@ -524,13 +575,13 @@ int main (int argc , char **argv) {
 
       if( testALU3dCube )
       {
-        ALUCubeGrid<3,3> grid;
+        ALUGrid<3,3, cube, nonconforming > grid;
         checkALUSerial(grid);
       }
 
       if( testALU3dSimplex )
       {
-        ALUSimplexGrid<3,3> grid;
+        ALUGrid<3,3, simplex, nonconforming > grid;
         checkALUSerial(grid);
       }
 #endif
@@ -540,7 +591,7 @@ int main (int argc , char **argv) {
       // check non-conform ALUGrid for 2d
       if( testALU2dCube )
       {
-        typedef ALUCubeGrid<2,2> GridType;
+        typedef ALUGrid<2,2, cube, nonconforming > GridType;
         std::string filename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
@@ -551,7 +602,7 @@ int main (int argc , char **argv) {
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
 
-        typedef ALUCubeGrid< 2, 3 > SurfaceGridType;
+        typedef ALUGrid< 2, 3, cube, nonconforming > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
@@ -562,7 +613,7 @@ int main (int argc , char **argv) {
        // check non-conform ALUGrid for 2d
       if( testALU2dSimplex )
       {
-        typedef ALUSimplexGrid<2,2> GridType;
+        typedef ALUGrid< 2, 2, simplex, nonconforming > GridType;
         std::string filename(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-2.dgf");
         std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
@@ -574,7 +625,7 @@ int main (int argc , char **argv) {
         //checkALUSerial(grid,2);
 
 #ifdef ALUGRID_SURFACE_2D
-        typedef ALUSimplexGrid< 2, 3 > SurfaceGridType;
+        typedef ALUGrid< 2, 3, simplex, nonconforming > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
@@ -586,7 +637,7 @@ int main (int argc , char **argv) {
       // check conform ALUGrid for 2d
       if( testALU2dConform )
       {
-        typedef ALUConformGrid<2,2> GridType;
+        typedef ALUGrid< 2, 2, simplex, conforming > GridType;
         std::string filename(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-2.dgf");
         GridPtr<GridType> gridPtr(filename);
         checkCapabilities< true >( *gridPtr );
@@ -597,7 +648,7 @@ int main (int argc , char **argv) {
         //checkALUSerial(grid,2);
 
 #ifdef ALUGRID_SURFACE_2D
-        typedef ALUConformGrid< 2, 3 > SurfaceGridType;
+        typedef ALUGrid< 2, 3, simplex, conforming > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
