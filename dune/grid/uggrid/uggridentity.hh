@@ -122,7 +122,7 @@ namespace Dune {
       return InteriorEntity;
 #else
       if (codim != dim) {
-        // TODO: faces (elements and edges are done below)
+        /** \todo faces (elements and edges are done below) */
         return InteriorEntity;
       }
 
