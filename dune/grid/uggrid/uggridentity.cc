@@ -154,8 +154,13 @@ Dune::UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
     typename UG_NS<dim>::template Entity<cc>::T* myself = (typename UG_NS<dim>::template Entity<cc>::T*)target_;
     return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>(myself,gridImp_));
   }
+  else if (dim==3 and cc==1)
+  {
+    typename UG_NS<dim>::Vector* subEntity = UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i, this->type()));
+    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity,gridImp_));
+  }
   else
-    DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subEntity isn't implemented for cc==" << cc );
+    DUNE_THROW(GridError, "subEntity for nonexisting codimension requested!" );
 }
 
 template<int dim, class GridImp>
@@ -456,10 +461,8 @@ Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<2>(int) const;
 template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<0>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<0>(int) const;
 
-#if 0   // Faces in 3D are not implemented yet
 template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<1>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<1>(int) const;
-#endif
 
 template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<2>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<2>(int) const;

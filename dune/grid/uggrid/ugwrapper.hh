@@ -58,7 +58,9 @@ namespace Dune {
     typedef UG_NAMESPACE ::BndSegFuncPtr BndSegFuncPtr;
 #endif
 
-    /** \todo This type becomes obsolete as soon as UG implements faces and edges */
+    /** \brief This is actually a type of the UG algebra, not the grid.
+     * We need it to implement face indices and ids in 3d, since UG
+     * doesn't actually have objects for faces in 3d grids. */
     typedef UG_NAMESPACE ::vector Vector;
 
     /** \brief UG type for a hierarchical grid */
@@ -1057,6 +1059,15 @@ namespace Dune {
   public:
     typedef UG_NAMESPACE ::edge T;
   };
+
+#if UG_DIM == 3
+  template <>
+  class UG_NS< UG_DIM >::Entity<1>
+  {
+  public:
+    typedef UG_NAMESPACE ::vector T;
+  };
+#endif
 
   template <>
   class UG_NS< UG_DIM >::Entity< UG_DIM > {

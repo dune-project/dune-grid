@@ -308,6 +308,60 @@ namespace Dune {
     : public UGEdgeEntity<3,GridImp>
   {};
 
+
+  /*! \brief UGGrid face entity
+   * \ingroup UGGrid
+   */
+  template<int dim, class GridImp>
+  class UGFaceEntity
+  {
+    enum {codim = 1};
+
+  public:
+
+    /** \brief Return the entity type identifier */
+    GeometryType type() const
+    {
+      DUNE_THROW(NotImplemented, "UGGridEntity::type() for faces");
+    }
+
+    /** \brief The partition type for parallel computing
+     * \todo So far it always returns InteriorEntity */
+    PartitionType partitionType () const
+    {
+      DUNE_THROW(NotImplemented, "UGGridEntity::partitionType() for faces");
+    }
+
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
+      target_  = target;
+      gridImp_ = gridImp;
+    }
+
+    /** \brief The corresponding UG object */
+    typename UG_NS<dim>::template Entity<codim>::T* target_;
+
+    /** \brief The geometry type cannot be retrieved from the UG object.
+     * We have to store it separately.
+     * \bug This member isn't initialized yet
+     */
+    GeometryType type_;
+
+    /** \brief gridImp Not actually used, only the codim-0 specialization needs it
+     * But code is simpler if we just keep it everywhere.
+     */
+    const GridImp* gridImp_;
+  };
+
+  /*! \brief Specialization for faces in 3D
+   * \ingroup UGGrid
+   */
+  template<class GridImp>
+  class UGGridEntity<1,3,GridImp>
+    : public UGFaceEntity<3,GridImp>
+  {};
+
+
+
   //***********************
   //
   //  --UGGridEntity
