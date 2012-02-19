@@ -16,6 +16,7 @@
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/alugrid/common/declaration.hh>
 #include <dune/grid/alugrid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/defaultgridview.hh>
@@ -74,7 +75,22 @@ namespace Dune {
 
   class ALU2dObjectStream;
 
-  //**********************************************************************
+  // Internal Forward Declarations
+  // -----------------------------
+
+  template < int dimw, class Comm >
+  struct ALUGridBaseGrid< 2, dimw, cube, Comm >
+  {
+    typedef ALU2dGrid< 2, dimw, ALU2DSPACE quadrilateral >  BaseGrid ;
+  };
+
+  template < int dimw, class Comm >
+  struct ALUGridBaseGrid< 2, dimw, simplex, Comm >
+  {
+    typedef ALU2dGrid< 2, dimw, ALU2DSPACE triangle >  BaseGrid ;
+  };
+
+
   //
   // --ALU2dGrid
   // --Grid

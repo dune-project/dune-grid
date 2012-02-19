@@ -7,6 +7,7 @@
 #ifdef ENABLE_ALUGRID
 
 // 3d version
+#include <dune/grid/alugrid/common/capabilities.hh>
 #include <dune/grid/alugrid/3d/capabilities.hh>
 #include <dune/grid/alugrid/3d/indexsets.hh>
 #include <dune/grid/alugrid/3d/iterator.hh>
@@ -359,31 +360,31 @@ namespace Dune
     operator = (const ALUSimplexGrid& g);
   };
 
-  /**  @copydoc ALUGrid
-     \brief [<em> provides \ref Dune::Grid </em>]
-     \brief grid with 3d implementations of the grid interface
-   */
-  /*--
+  /*-
+     (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
+
      \li Available Implementations
-        - quadrilateral and hexahedral elements only nonconforming refinement
-          - Dune::ALUGrid< 2, 2, cube, nonconforming >
-          - Dune::ALUGrid< 2, 3, cube, nonconforming >
-          - Dune::ALUGrid< 3, 3, cube, nonconforming >
-        - simplicial elements and nonconforming refinement
-          - Dune::ALUGrid< 2, 2, simplex, nonconforming >
-          - Dune::ALUGrid< 2, 3, simplex, nonconforming >
-          - Dune::ALUGrid< 3, 3, simplex, nonconforming >
-        - simplicial elements and bisection refinement
-          - Dune::ALUGrid< 2, 2, simplex, conforming >
-          - Dune::ALUGrid< 2, 3, simplex, conforming >
-          - Dune::ALUGrid< 3, 3, simplex, conforming >
+          - quadrilateral and hexahedral elements only nonconforming refinement
+            - Dune::ALUGrid< 2, 2, cube, nonconforming >
+            - Dune::ALUGrid< 2, 3, cube, nonconforming >
+            - Dune::ALUGrid< 3, 3, cube, nonconforming >
+          - simplicial elements and nonconforming refinement
+            - Dune::ALUGrid< 2, 2, simplex, nonconforming >
+            - Dune::ALUGrid< 2, 3, simplex, nonconforming >
+            - Dune::ALUGrid< 3, 3, simplex, nonconforming >
+          - simplicial elements and bisection refinement
+            - Dune::ALUGrid< 2, 2, simplex, conforming >
+            - Dune::ALUGrid< 2, 3, simplex, conforming >
+            - Dune::ALUGrid< 3, 3, simplex, conforming > (work in progress)
+
+     \note template parameter Comm defaults to MPI_Comm, if MPI is available, No_Comm  otherwise.
    */
   template< ALUGridElementType elType, ALUGridRefinementType refineType, class Comm >
   class ALUGrid< 3, 3, elType, refineType, Comm >
-    : public ALUGridBaseGrid< elType, Comm > :: BaseGrid
+    : public ALUGridBaseGrid< 3, 3, elType, Comm > :: BaseGrid
   {
     typedef ALUGrid< 3, 3, elType, refineType, Comm > This;
-    typedef typename ALUGridBaseGrid< elType, Comm > :: BaseGrid BaseType;
+    typedef typename ALUGridBaseGrid< 3, 3, elType, Comm > :: BaseGrid BaseType;
 
     enum { dim      = 3 };
     enum { dimworld = 3 };

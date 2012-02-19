@@ -69,15 +69,15 @@ namespace Dune
     {}
   };
 
-  template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype,
+  template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm,
       class Data, class Allocator >
-  class PersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype >, Data, Allocator >
-    : public PersistentContainerVector< ALUGrid< dim, dimworld, eltype, refinementtype >,
-          typename ALUGrid< dim, dimworld, eltype, refinementtype >::HierarchicIndexSet,
+  class PersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, Data, Allocator >
+    : public PersistentContainerVector< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >,
+          typename ALUGrid< dim, dimworld, eltype, refinementtype, Comm >::HierarchicIndexSet,
           std::vector<Data,Allocator> >
   {
   public:
-    typedef ALUGrid< dim, dimworld, eltype, refinementtype > GridType;
+    typedef ALUGrid< dim, dimworld, eltype, refinementtype, Comm > GridType;
   private:
     typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
 

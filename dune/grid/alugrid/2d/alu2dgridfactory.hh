@@ -20,15 +20,18 @@ namespace Dune
 {
 
   /** \brief Factory class for 2d ALUGrids */
-  template< template< int, int > class ALUGrid, int dimw >
+  template< class GridImp >
   class ALU2dGridFactory
-    : public GridFactoryInterface< ALUGrid< 2, dimw > >
+    : public GridFactoryInterface< GridImp >
   {
   public:
-    typedef ALUGrid< 2, dimw > Grid;
+    typedef GridImp Grid;
+
+    static const int dimension = Grid::dimension;
+    static const int dimensionworld = Grid::dimensionworld;
 
     //! \brief type of boundary projection class
-    typedef DuneBoundaryProjection< dimw >  DuneBoundaryProjectionType;
+    typedef DuneBoundaryProjection< dimensionworld >  DuneBoundaryProjectionType;
 
     template< int codim >
     struct Codim
@@ -37,15 +40,12 @@ namespace Dune
     };
 
   private:
-    typedef Dune::BoundarySegmentWrapper<2, dimw> BoundarySegmentWrapperType;
+    typedef Dune::BoundarySegmentWrapper<2, dimensionworld> BoundarySegmentWrapperType;
 
-    typedef ALU2dGridFactory< ALUGrid,dimw > ThisType;
+    typedef ALU2dGridFactory< Grid > ThisType;
     typedef GridFactoryInterface< Grid > BaseType;
 
     typedef typename Grid::ctype ctype;
-
-    static const int dimension = Grid::dimension;
-    static const int dimensionworld = Grid::dimensionworld;
 
     static const ALU2DSPACE ElementType elementType = Grid::elementType;
     static const unsigned int numFaceCorners = 2;
@@ -167,7 +167,7 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int >& vertices,
-                            const shared_ptr<BoundarySegment<2,dimw> >& boundarySegment ) ;
+                            const shared_ptr<BoundarySegment<2,dimensionworld> >& boundarySegment ) ;
 
     /** \brief insert a boundary projection object, (a copy is made)
      *
@@ -251,8 +251,8 @@ namespace Dune
   };
 
 
-  template< template< int, int > class ALUGrid, int dimw >
-  struct ALU2dGridFactory< ALUGrid, dimw >::FaceLess
+  template< class GridImp >
+  struct ALU2dGridFactory< GridImp >::FaceLess
     : public std::binary_function< FaceType, FaceType, bool >
   {
     bool operator() ( const FaceType &a, const FaceType &b ) const
@@ -272,13 +272,14 @@ namespace Dune
    */
   template<int dimw>
   class GridFactory< ALUConformGrid<2,dimw> >
-    : public ALU2dGridFactory<ALUConformGrid, dimw>
+    : public ALU2dGridFactory<ALUConformGrid<2, dimw> >
   {
-    typedef GridFactory ThisType;
-    typedef ALU2dGridFactory<ALUConformGrid,dimw> BaseType;
-
   public:
     typedef ALUConformGrid< 2, dimw > Grid;
+
+  protected:
+    typedef GridFactory ThisType;
+    typedef ALU2dGridFactory< Grid > BaseType;
 
   public:
     /** \brief Default constructor */
@@ -303,13 +304,14 @@ namespace Dune
    */
   template<int dimw>
   class GridFactory< ALUSimplexGrid<2,dimw> >
-    : public ALU2dGridFactory<ALUSimplexGrid,dimw>
+    : public ALU2dGridFactory<ALUSimplexGrid<2, dimw> >
   {
-    typedef GridFactory ThisType;
-    typedef ALU2dGridFactory<ALUSimplexGrid,dimw> BaseType;
-
   public:
     typedef ALUSimplexGrid< 2, dimw > Grid;
+
+  protected:
+    typedef GridFactory ThisType;
+    typedef ALU2dGridFactory< Grid > BaseType;
 
   public:
     /** \brief Default constructor */
@@ -335,13 +337,48 @@ namespace Dune
    */
   template<int dimw>
   class GridFactory< ALUCubeGrid<2,dimw> >
-    : public ALU2dGridFactory<ALUCubeGrid,dimw>
+    : public ALU2dGridFactory<ALUCubeGrid<2,dimw> >
   {
-    typedef GridFactory ThisType;
-    typedef ALU2dGridFactory<ALUCubeGrid,dimw> BaseType;
-
   public:
     typedef ALUCubeGrid< 2, dimw > Grid;
+
+  protected:
+    typedef GridFactory ThisType;
+    typedef ALU2dGridFactory< Grid > BaseType;
+
+  public:
+    /** \brief Default constructor */
+    explicit GridFactory ( )
+      : BaseType( )
+    {}
+
+    /** \brief constructor taking filename */
+    GridFactory ( const std::string &filename )
+      : BaseType( filename )
+    {}
+
+    /** \brief constructor taking filename */
+    GridFactory ( const bool verbose )
+      : BaseType( )
+    {
+      this->setVerbosity( verbose );
+    }
+  };
+
+  /** \brief Specialization of the generic GridFactory for
+   *        ALUGrid<2,dimw, eltype, refinementtype, Comm >
+   *  \ingroup GridFactory
+   */
+  template<int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm>
+  class GridFactory< ALUGrid<2, dimw, eltype, refinementtype, Comm > >
+    : public ALU2dGridFactory< ALUGrid<2, dimw, eltype, refinementtype, Comm > >
+  {
+  public:
+    typedef ALUGrid<2, dimw, eltype, refinementtype, Comm > Grid;
+
+  protected:
+    typedef GridFactory ThisType;
+    typedef ALU2dGridFactory< Grid > BaseType;
 
   public:
     /** \brief Default constructor */
@@ -367,8 +404,8 @@ namespace Dune
   // Inline Implementations
   // ----------------------
 
-  template< template< int, int > class ALUGrid, int dimw >
-  inline ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( bool removeGeneratedFile )
+  template< class GridImp >
+  inline ALU2dGridFactory< GridImp >::ALU2dGridFactory ( bool removeGeneratedFile )
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
       grdVerbose_( true ),
@@ -376,8 +413,8 @@ namespace Dune
   {}
 
 
-  template< template< int, int > class ALUGrid, int dimw >
-  inline ALU2dGridFactory< ALUGrid, dimw >::ALU2dGridFactory ( const std::string &filename )
+  template< class GridImp >
+  inline ALU2dGridFactory< GridImp >::ALU2dGridFactory ( const std::string &filename )
     : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 ),
       grdVerbose_( true ),
@@ -385,20 +422,20 @@ namespace Dune
   {}
 
 
-  template< template< int, int > class ALUGrid, int dimw >
-  inline ALU2dGridFactory< ALUGrid, dimw >::~ALU2dGridFactory ()
+  template< class GridImp >
+  inline ALU2dGridFactory< GridImp >::~ALU2dGridFactory ()
   {}
 
 
-  template< template< int, int > class ALUGrid, int dimw >
-  inline ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >::createGrid ()
+  template< class GridImp >
+  inline GridImp *ALU2dGridFactory< GridImp >::createGrid ()
   {
     return createGrid( true, true, "" );
   }
 
 
-  template< template< int, int > class ALUGrid, int dimw >
-  inline ALUGrid< 2, dimw > *ALU2dGridFactory< ALUGrid, dimw >
+  template< class GridImp >
+  inline GridImp *ALU2dGridFactory< GridImp >
   ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
   {
     return createGrid( addMissingBoundaries, true, dgfName );

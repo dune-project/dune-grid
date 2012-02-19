@@ -100,17 +100,14 @@ namespace Dune
   class ALU3dGrid;
 #endif // #else // #if ALU3DGRID_PARALLEL
 
-  template <ALUGridElementType elType, class Comm >
-  struct ALUGridBaseGrid ;
-
   template < class Comm >
-  struct ALUGridBaseGrid< cube, Comm >
+  struct ALUGridBaseGrid< 3, 3, cube, Comm >
   {
     typedef ALU3dGrid< hexa, Comm >  BaseGrid ;
   };
 
   template < class Comm>
-  struct ALUGridBaseGrid< simplex, Comm >
+  struct ALUGridBaseGrid< 3, 3, simplex, Comm >
   {
     typedef ALU3dGrid< tetra, Comm >  BaseGrid ;
   };
