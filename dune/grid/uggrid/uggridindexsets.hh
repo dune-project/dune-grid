@@ -313,7 +313,7 @@ namespace Dune {
      The UGGridGlobalIdSet and the UGGridLocalIdSet are virtually identical. This
      class implements them both at once.  You can select the one you want using
      the <tt>Local</tt> template parameter.
-     \param Local false for GlobalIdSet, true for LocalIdSet
+     \tparam Local false for GlobalIdSet, true for LocalIdSet
    */
   template <class GridImp, bool Local>
   class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp,Local>,unsigned int>
