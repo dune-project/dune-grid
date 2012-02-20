@@ -599,7 +599,7 @@ void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
   // unfortunately istl and std containers are not compatible
   // in that it is not possible to extract the size
   // of array and FieldVector by the same method
-  int numComponents = DataContainer::value_type::size;
+  int numComponents = DataContainer::value_type::dimension;
 
   AmiraMesh::Data* amData =
     new AmiraMesh::Data("Data", loc, McPrimType::mc_double, numComponents);
