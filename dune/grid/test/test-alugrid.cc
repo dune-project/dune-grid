@@ -539,23 +539,24 @@ int main (int argc , char **argv) {
         display = true ;
     }
 
+#ifndef NO_2D
     bool testALU2dSimplex = initialize ;
     bool testALU2dConform = initialize ;
     bool testALU2dCube    = initialize ;
-    bool testALU3dSimplex = initialize ;
-    bool testALU3dCube    = initialize ;
-
     if( key == "2d" )
     {
       testALU2dSimplex = true ;
       testALU2dConform = true ;
       testALU2dCube   = true ;
     }
-
     if( key == "2dsimp" ) testALU2dSimplex = true ;
     if( key == "2dconf" ) testALU2dConform = true ;
     if( key == "2dcube" ) testALU2dCube    = true ;
+#endif // #ifndef NO_2D
 
+#ifndef NO_3D
+    bool testALU3dSimplex = initialize ;
+    bool testALU3dCube    = initialize ;
     if( key == "3d" )
     {
       testALU3dSimplex = true ;
@@ -563,6 +564,7 @@ int main (int argc , char **argv) {
     }
     if( key == "3dsimp" ) testALU3dSimplex = true ;
     if( key == "3dcube" ) testALU3dCube    = true ;
+#endif // #ifndef NO_3D
 
     // extra-environment to check destruction
     {
