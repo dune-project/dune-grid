@@ -101,9 +101,6 @@ int main() try {
 #if HAVE_ALBERTA
   std::cout << "reading AlbertaGrid<2>" << std::endl;
   testReadingUnstructuredGrid<AlbertaGrid<2> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-2d.am");
-
-  std::cout << "reading AlbertaGrid<3>" << std::endl;
-  testReadingUnstructuredGrid<AlbertaGrid<3> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-3d.am");
 #endif
 
 #if HAVE_ALUGRID
