@@ -244,16 +244,6 @@ namespace Dune {
       return Jinv;
     }
 
-#if 0
-    //! check whether local is inside reference element
-    bool checkInside (const FieldVector<ctype, mydim>& local) const
-    {
-      for (int i=0; i<mydim; i++)
-        if (local[i]<-yasptolerance || local[i]>1+yasptolerance) return false;
-      return true;
-    }
-#endif
-
     //! constructor from (storage for) midpoint and extension and missing direction number
     YaspGeometry (const FieldVector<ctype, cdim>& p, const FieldVector<ctype, cdim>& h, uint8_t& m)
       : midpoint(p), extension(h), missing(m)
@@ -409,16 +399,6 @@ namespace Dune {
       }
       return Jinv;
     }
-
-#if 0
-    //! check whether local is inside reference element
-    bool checkInside (const FieldVector<ctype, mydim>& local) const
-    {
-      for (int i=0; i<mydim; i++)
-        if (local[i]<-yasptolerance || local[i]>1+yasptolerance) return false;
-      return true;
-    }
-#endif
 
     //! constructor from (storage for) midpoint and extension
     YaspGeometry (const FieldVector<ctype, mydim>& p, const FieldVector<ctype, mydim>& h)
@@ -1492,41 +1472,6 @@ namespace Dune {
     void update() {
       if (_count == 2*_dir + _face || _count >= 2*dim)
         return;
-
-#if 0
-      // update intersection iterator from current position
-      if (_count == 2*_dir + 1 && _face==0)   // direction remains valid
-      {
-        _face = 1;     // 0->1, _dir remains
-
-        // move transforming iterator
-        _outside.transformingsubiterator().move(_dir,2);     // move two cells in positive direction
-
-        // make up faces
-        _pos_world[_dir] += _inside.transformingsubiterator().meshsize(_dir);
-
-        return;
-      }
-      if (_count == 2*_dir + 1 && _face==1)   // change direction
-      {
-        // move transforming iterator
-        _outside.transformingsubiterator().move(_dir,-1);     // move one cell back
-
-        // make up faces
-        _pos_world[_dir] = _inside.transformingsubiterator().position(_dir);
-
-        _face = 0;
-        _dir += 1;
-
-        // move transforming iterator
-        _outside.transformingsubiterator().move(_dir,-1);     // move one cell in negative direction
-
-        // make up faces
-        _pos_world[_dir] -= 0.5*_inside.transformingsubiterator().meshsize(_dir);
-
-        return;
-      }
-#endif
 
       // cleanup old stuff
       _outside.transformingsubiterator().move(_dir,1-2*_face);   // move home
