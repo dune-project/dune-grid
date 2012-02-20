@@ -2557,35 +2557,28 @@ namespace Dune {
        @param overlap size of overlap on coarsest grid (same in all directions)
        @param lb pointer to an overloaded YLoadBalance instance
      */
-#if HAVE_MPI
-    YaspGrid (MPI_Comm comm, Dune::FieldVector<ctype, dim> L,
+    YaspGrid (Dune::MPIHelper::MPICommunicator comm,
+              Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
+#if HAVE_MPI
       : YMG(comm,L,s,periodic,overlap,lb), ccobj(comm),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
-    {
-      init();
-    }
-
 #else
-    YaspGrid (Dune::FakeMPIHelper::MPICommunicator, Dune::FieldVector<ctype, dim> L,
-              Dune::FieldVector<int, dim> s,
-              Dune::FieldVector<bool, dim> periodic, int overlap,
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : YMG(L,s,periodic,overlap,lb),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+#endif
     {
       init();
     }
-#endif
 
 
     /*! Constructor for a sequential YaspGrid, they are all forwarded to the base class.
 
        Sequential here means that the whole grid is living on one process even if your program is running
        in parallel.
-       @see YaspGrid(MPI_Comm comm, Dune::FieldVector<ctype, dim>, Dune::FieldVector<int, dim> s,  Dune::FieldVector<bool, dim> periodic, int overlap)
+       @see YaspGrid(Dune::MPIHelper::MPICommunicator, Dune::FieldVector<ctype, dim>, Dune::FieldVector<int, dim>,  Dune::FieldVector<bool, dim>, int)
        for constructing one parallel grid decomposed between the processors.
        @param L extension of the domain
        @param s number of cells on coarse mesh in each direction
@@ -2598,10 +2591,10 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
-      : MultiYGrid<dim,ctype>(MPI_COMM_SELF,L,s,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
+      : YMG(MPI_COMM_SELF,L,s,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
-      : MultiYGrid<dim,ctype>(L,s,periodic,overlap,lb),
+      : YMG(L,s,periodic,overlap,lb),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
