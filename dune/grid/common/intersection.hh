@@ -241,7 +241,7 @@ namespace Dune
        between the different grid implementations.
 
      */
-    int boundaryId () const
+    int boundaryId () const DUNE_DEPRECATED
     {
       return this->real.boundaryId();
     }
