@@ -9,7 +9,7 @@
 
 namespace Dune {
 
-  /** \brief Store a reference to an entity with a minimal memory footprint (two pointers)
+  /** \brief Store a reference to an entity with a minimal memory footprint (one pointer)
    */
   template<int codim, class GridImp>
   class UGGridEntitySeed
@@ -20,8 +20,7 @@ namespace Dune {
 
     //! construct entity seed from entity
     UGGridEntitySeed (const UGGridEntity<codim,dim,GridImp>& entity)
-      : target_(entity.target_),
-        gridImp_(entity.gridImp_)
+      : target_(entity.target_)
     {}
 
     /** \brief Access to the underlying UG data structure */
@@ -30,18 +29,9 @@ namespace Dune {
       return target_;
     }
 
-    /** \brief Access to the underlying grid */
-    const GridImp* gridImp() const
-    {
-      return gridImp_;
-    }
-
   private:
     /** \brief Plain old pointer to the corresponding UG data structure */
     typename UG_NS<dim>::template Entity<codim>::T* target_;
-
-    /** \brief The grid that the entity belongs to */
-    const GridImp* gridImp_;
   };
 
 } // end namespace Dune

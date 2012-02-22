@@ -622,10 +622,10 @@ namespace Dune {
 
     /** \brief Create an EntityPointer from an EntitySeed */
     template <int codim>
-    static typename Traits::template Codim<codim>::EntityPointer
-    entityPointer(const UGGridEntitySeed<codim, const UGGrid<dim> >& seed)
+    typename Traits::template Codim<codim>::EntityPointer
+    entityPointer(const UGGridEntitySeed<codim, const UGGrid<dim> >& seed) const
     {
-      return typename Traits::template Codim<codim>::EntityPointer(UGGridEntityPointer<codim,const UGGrid<dim> >(seed.target(),seed.gridImp()));
+      return typename Traits::template Codim<codim>::EntityPointer(UGGridEntityPointer<codim,const UGGrid<dim> >(seed.target(),this));
     }
 
     /** \brief Number of grid entities per level and codim
