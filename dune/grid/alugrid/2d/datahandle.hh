@@ -15,9 +15,8 @@ using std::endl;
 using std::cout;
 using std::flush;
 
-namespace ALU2DSPACENAME {
-  //struct AdaptRestrictProlong2dType {
-  //};
+namespace ALU2DSPACENAME
+{
 
   /////////////////////////////////////////////////////////////////
   //
@@ -62,68 +61,22 @@ namespace ALU2DSPACENAME {
     {}
 
     //! restrict data , elem is always the father
-    int preCoarsening ( HElementType & elem )
+    int preCoarsening ( HElementType &father )
     {
-#if 0
-      // set element and then start
-      HElementType * son = elem.down();
-      if(elem.level() > maxlevel_) maxlevel_ = elem.level();
-
-      //elem.resetRefinedTag();
-      assert( son );
-
-      realSon_.setElement(*son);
-      realFather_.setElement(elem);
-      rp_.restrictLocal(reFather_,reSon_,true);
-
-      son = son->next();
-      while( son )
-      {
-        realSon_.setElement(*son);
-        rp_.restrictLocal(reFather_,reSon_,false);
-        son = son->next();
-      }
-#endif
-
-      maxlevel_ = std::max( maxlevel_, elem.level() );
-      //elem.resetRefinedTag();
-      realFather_.setElement( elem );
+      maxlevel_ = std::max( maxlevel_, father.level() );
+      //father.resetRefinedTag();
+      realFather_.setElement( father );
       rp_.preCoarsening( reFather_ );
 
       return 0;
     }
 
     //! prolong data, elem is the father
-    int postRefinement ( HElementType & elem )
+    int postRefinement ( HElementType &father )
     {
-#if 0
-      // set element and then start
-      HElementType * son = elem.down();
-      assert( son );
-      //elem.resetRefinedTag();
-
-      realFather_.setElement(elem);
-      realSon_.setElement(*son);
-      int level = realSon_.level();
-      if(level > maxlevel_) maxlevel_ = level;
-
-      rp_.prolongLocal(reFather_,reSon_, false);
-
-      son = son->next();
-      while( son )
-      {
-        assert( son );
-
-        realSon_.setElement(*son);
-        rp_.prolongLocal(reFather_,reSon_, false);
-
-        son = son->next();
-      }
-#endif
-
-      maxlevel_ = std::max( maxlevel_, elem.level()+1 );
-      //elem.resetRefinedTag();
-      realFather_.setElement( elem );
+      maxlevel_ = std::max( maxlevel_, father.level()+1 );
+      //father.resetRefinedTag();
+      realFather_.setElement( father );
       rp_.postRefinement( reFather_ );
 
       return 0;
@@ -132,5 +85,6 @@ namespace ALU2DSPACENAME {
     int maxLevel () const { return maxlevel_; }
   };
 
-} // end namespace
-#endif
+} // namespace ALU2DSPACENAME
+
+#endif // #ifndef DUNE_ALU2DGRIDDATAHANDLE_HH
