@@ -13,7 +13,6 @@ namespace Dune
              const int nrOfHangingNodes,
              std::istream* macroFile )
   {
-#ifdef ALUGRID_NOTEMPFILE_2D
     if( macroFile )
     {
       return new HmeshType(*macroFile,
@@ -21,7 +20,6 @@ namespace Dune
                            ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart);
     }
     else
-#endif
     {
       return new HmeshType(checkMacroGridFile(macroTriangFilename),
                            nrOfHangingNodes, (nrOfHangingNodes == 0) ?

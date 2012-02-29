@@ -230,11 +230,9 @@ namespace Dune
                                  std::istream& inFile,
                                  BoundaryProjectionVector* bndProjections )
     {
-      return
-#ifdef ALUGRID_NOTEMPFILE_2D
-        ( temporary ) ? new Grid( filename, inFile, globalProjection_, bndProjections, grdVerbose_ ) :
-#endif
-        new Grid( filename, globalProjection_ , bndProjections, grdVerbose_ );
+      return ( temporary ) ?
+             new Grid( filename, inFile, globalProjection_, bndProjections, grdVerbose_ ) :
+             new Grid( filename, globalProjection_ , bndProjections, grdVerbose_ );
     }
 
     /** \brief set factory's verbosity

@@ -221,23 +221,17 @@ namespace Dune
     if( addMissingBoundaries || !faceTransformations_.empty() )
       recreateBoundaryIds();
 
-#ifndef ALUGRID_NOTEMPFILE_2D
     std::string filename ( temporary ?
                            temporaryFileName( name ) :
                            name );
-#else
-    std::string filename ( name );
-#endif
 
     std::ofstream outfile;
     std::stringstream temp;
 
     std::ostream* outptr = 0;
-#ifdef ALUGRID_NOTEMPFILE_2D
     if( temporary )
       outptr = & temp;
     else
-#endif
     {
       outfile.open( filename.c_str() , std::ios::out );
       outptr = & outfile;
@@ -338,9 +332,7 @@ namespace Dune
     boundaryIds_.clear();
     boundaryProjections_.clear();
 
-#ifdef ALUGRID_NOTEMPFILE_2D
     std::istream& inFile = temp;
-#endif
 
     // if we have a vector reset global projection
     // because empty positions are filled with global projection anyway
@@ -349,10 +341,8 @@ namespace Dune
     // ALUGrid is taking ownership of the bndProjections pointer
     Grid *grid = createGridObj( temporary, filename, inFile, bndProjections );
 
-#ifndef ALUGRID_NOTEMPFILE_2D
     if( temporary )
       std::remove( filename.c_str() );
-#endif
 
     // remove pointers
     globalProjection_ = 0;
