@@ -215,15 +215,11 @@ namespace Dune
 
   template< class GridImp >
   GridImp  *ALU2dGridFactory< GridImp >
-  ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
+  ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string filename )
   {
     numFacesInserted_ = boundaryIds_.size();
     if( addMissingBoundaries || !faceTransformations_.empty() )
       recreateBoundaryIds();
-
-    std::string filename ( temporary ?
-                           temporaryFileName( name ) :
-                           name );
 
     std::ofstream outfile;
     std::stringstream temp;
@@ -233,6 +229,7 @@ namespace Dune
       outptr = & temp;
     else
     {
+      abort();
       outfile.open( filename.c_str() , std::ios::out );
       outptr = & outfile;
     }
@@ -341,9 +338,6 @@ namespace Dune
     // ALUGrid is taking ownership of the bndProjections pointer
     Grid *grid = createGridObj( temporary, filename, inFile, bndProjections );
 
-    if( temporary )
-      std::remove( filename.c_str() );
-
     // remove pointers
     globalProjection_ = 0;
     // is removed by the grid
@@ -351,22 +345,6 @@ namespace Dune
 
     return grid;
   }
-
-
-  template< class GridImp >
-  std::string
-  ALU2dGridFactory< GridImp >::temporaryFileName ( const std::string &dgfName )
-  {
-    const std::string filename( (dgfName.empty() ? std::string( "ALU2dGrid" ) : dgfName) + ".XXXXXX" );
-    char filetemp[ FILENAME_MAX ];
-    std::strcpy( filetemp, filename.c_str() );
-    const int fd = mkstemp( filetemp );
-    if( fd < 0 )
-      DUNE_THROW( IOError, "Unable to create temporary file." );
-    close( fd );
-    return std::string( filetemp );
-  }
-
 
   template< class GridImp >
   inline void ALU2dGridFactory< GridImp >
@@ -555,7 +533,6 @@ template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune:
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming, MPI_Comm > >;
 #endif // #if HAVE_MPI
 
-#ifdef ALUGRID_SURFACE_2D
 template class Dune::ALU2dGridFactory< Dune::ALUCubeGrid< 2, 2 > >;
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming, Dune::No_Comm > >;
 
@@ -575,5 +552,3 @@ template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune:
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming, MPI_Comm > >;
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::cube,    Dune::nonconforming, MPI_Comm > >;
 #endif // #if HAVE_MPI
-
-#endif // #ifdef ALUGRID_SURFACE_2D

@@ -242,7 +242,6 @@ namespace Dune
     void setVerbosity( const bool verbose ) { grdVerbose_ = verbose; }
 
   private:
-    static std::string temporaryFileName (const std::string& dgfName );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
     typename FaceMap::const_iterator findPeriodicNeighbor( const FaceMap &faceMap, const FaceType &key ) const;
