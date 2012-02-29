@@ -57,12 +57,12 @@ namespace Dune
       {
         if( nonConform )
         {
-          typedef ALUSimplexGrid< 2, dimworld > Grid;
+          typedef ALUGrid< 2, dimworld, simplex, nonconforming, No_Comm > Grid;
           storage.template createGeometries< Grid > (type);
         }
         else
         {
-          typedef ALUConformGrid< 2, dimworld > Grid;
+          typedef ALUGrid< 2, dimworld, simplex, conforming, No_Comm > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }
@@ -76,11 +76,19 @@ namespace Dune
                                    const GeometryType& type,
                                    const bool nonConform )
       {
-        assert( nonConform );
+        assert ( nonConform ) ;
         {
           typedef ALUGrid< 3, 3, simplex, nonconforming, No_Comm > Grid;
           storage.template createGeometries< Grid > (type);
         }
+        /*
+           // TODO, implement this for refinement of all edges (conforming)
+           else
+           {
+           typedef ALUGrid< 3, 3, simplex, conforming, No_Comm > Grid;
+           storage.template createGeometries< Grid > (type);
+           }
+         */
       }
     };
 
@@ -94,7 +102,7 @@ namespace Dune
       {
         assert ( nonConform ) ;
         {
-          typedef ALUCubeGrid< 2, dimworld > Grid;
+          typedef ALUGrid< 2, dimworld, cube, nonconforming, No_Comm > Grid;
           storage.template createGeometries< Grid > (type);
         }
       }
