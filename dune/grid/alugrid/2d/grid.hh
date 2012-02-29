@@ -365,7 +365,7 @@ namespace Dune {
                           std::istream* );
 
     //! Constructor which constructs an empty ALU2dGrid
-    ALU2dGrid( int );
+    explicit ALU2dGrid( int );
 
   public:
     //! Desctructor
@@ -527,6 +527,7 @@ namespace Dune {
     typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
     typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> VertexObject;
 
+  protected:
     // create GeomTypes
     void makeGeomTypes ();
 
@@ -536,12 +537,14 @@ namespace Dune {
     friend class Conversion<ALU2dGrid<dim, dimworld,eltype>, HasHierarchicIndexSet>;
     friend class Conversion<const ALU2dGrid<dim, dimworld,eltype>, HasHierarchicIndexSet>;
 
+  private:
     //! Copy constructor should not be used
     ALU2dGrid( const ThisType & g );
 
     //! assignment operator should not be used
     ThisType & operator = (const ThisType & g);
 
+  protected:
     // check macro file and return const char * to filename
     const char * checkMacroGridFile(const std::string & filename);
 

@@ -347,11 +347,7 @@ namespace Dune
     if( bndProjections ) globalProjection_ = 0;
 
     // ALUGrid is taking ownership of the bndProjections pointer
-    Grid *grid =
-#ifdef ALUGRID_NOTEMPFILE_2D
-      ( temporary ) ? new Grid( filename, inFile, globalProjection_ , bndProjections, grdVerbose_ ) :
-#endif
-      new Grid( filename, globalProjection_ , bndProjections, grdVerbose_ );
+    Grid *grid = createGridObj( temporary, filename, inFile, bndProjections );
 
 #ifndef ALUGRID_NOTEMPFILE_2D
     if( temporary )

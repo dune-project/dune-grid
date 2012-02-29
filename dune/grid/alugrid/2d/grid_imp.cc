@@ -49,7 +49,7 @@ namespace Dune
 #endif
       , hIndexSet_(*this)
       , localIdSet_(*this)
-      , levelIndexVec_( MAXL, 0 )
+      , levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 )
       , geomTypes_( dim+1 )
       , leafIndexSet_(0)
       , maxLevel_(0)
@@ -97,7 +97,7 @@ namespace Dune
 #endif
       , hIndexSet_(*this)
       , localIdSet_(*this)
-      , levelIndexVec_(MAXL,0)
+      , levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 )
       , geomTypes_( dim+1 )
       , leafIndexSet_(0)
       , maxLevel_(0)
@@ -124,7 +124,8 @@ namespace Dune
       , geomTypes_(dim+1,1)
       , hIndexSet_(*this)
       , localIdSet_ (*this)
-      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
+      , levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 )
+      , leafIndexSet_(0)
   {
     DUNE_THROW(GridError,"Do not use copy constructor of ALU2dGrid! \n");
   }
@@ -143,7 +144,10 @@ namespace Dune
       delete bndVec_; bndVec_ = 0;
     }
 
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
+    for(size_t i=0; i<levelIndexVec_.size(); ++i)
+    {
+      delete levelIndexVec_[i]; levelIndexVec_[i] = 0;
+    }
     delete leafIndexSet_; leafIndexSet_ = 0;
     delete sizeCache_; sizeCache_ = 0;
     delete mygrid_;
@@ -663,6 +667,7 @@ namespace Dune
   {
     // check if level fits in vector
     assert( level >= 0 );
+    assert( levelIndexVec_.size() == MAXL );
     assert( level < (int) levelIndexVec_.size() );
 
     if( levelIndexVec_[level] == 0 )

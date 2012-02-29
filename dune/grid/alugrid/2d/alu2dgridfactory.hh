@@ -224,6 +224,19 @@ namespace Dune
     void setTolerance ( const ctype &epsilon ) { epsilon_ = epsilon; }
 
   protected:
+    //! virtual method for creating grid object (virtual to avoid compiling method into library)
+    virtual Grid* createGridObj( const bool temporary,
+                                 const std::string& filename,
+                                 std::istream& inFile,
+                                 BoundaryProjectionVector* bndProjections )
+    {
+      return
+#ifdef ALUGRID_NOTEMPFILE_2D
+        ( temporary ) ? new Grid( filename, inFile, globalProjection_, bndProjections, grdVerbose_ ) :
+#endif
+        new Grid( filename, globalProjection_ , bndProjections, grdVerbose_ );
+    }
+
     /** \brief set factory's verbosity
      *
      *  \param[in]  verbose  verbosity (true/flase)
