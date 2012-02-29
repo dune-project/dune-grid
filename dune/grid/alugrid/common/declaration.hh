@@ -15,7 +15,7 @@
 namespace Dune {
 
   //! \brief basic element types for ALUGrid
-  enum ALUGridElementType { cube, simplex };
+  enum ALUGridElementType { simplex, cube };
   //! \brief available refinement types for ALUGrid
   enum ALUGridRefinementType { conforming, nonconforming };
 
