@@ -53,10 +53,11 @@ namespace Dune
     explicit GridPtr ( const std::string &filename,
                        MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : gridPtr_( 0 ),
-        elParam_( 0 ),
-        vtxParam_( 0 ),
-        bndParam_( 0 ),
-        bndId_( 0 ),
+        elParam_(),
+        vtxParam_(),
+        bndParam_(),
+        bndId_(),
+        emptyParam_(),
         nofElParam_( 0 ),
         nofVtxParam_( 0 ),
         haveBndParam_( false )
@@ -69,10 +70,11 @@ namespace Dune
     explicit GridPtr ( std::istream &input,
                        MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : gridPtr_( 0 ),
-        elParam_( 0 ),
-        vtxParam_( 0 ),
-        bndParam_( 0 ),
-        bndId_( 0 ),
+        elParam_(),
+        vtxParam_(),
+        bndParam_(),
+        bndId_(),
+        emptyParam_(),
         nofElParam_( 0 ),
         nofVtxParam_( 0 ),
         haveBndParam_( false )
@@ -84,14 +86,24 @@ namespace Dune
     //! Default constructor, creating empty GridPtr
     GridPtr()
       : gridPtr_(0),
+        elParam_(),
+        vtxParam_(),
+        bndParam_(),
+        bndId_(),
+        emptyParam_(),
         nofElParam_(0),
         nofVtxParam_(0),
         haveBndParam_( false )
     {}
 
     //! Constructor storing given pointer to internal auto pointer
-    GridPtr( GridType *grd )
+    explicit GridPtr( GridType *grd )
       : gridPtr_(grd),
+        elParam_(),
+        vtxParam_(),
+        bndParam_(),
+        bndId_(),
+        emptyParam_(),
         nofElParam_(0),
         nofVtxParam_(0),
         haveBndParam_( false )
@@ -104,6 +116,7 @@ namespace Dune
         vtxParam_(org.vtxParam_),
         bndParam_(org.bndParam_),
         bndId_(org.bndId_),
+        emptyParam_( org.emptyParam_ ),
         nofElParam_(org.nofElParam_),
         nofVtxParam_(org.nofVtxParam_),
         haveBndParam_(org.haveBndParam_)
@@ -112,11 +125,13 @@ namespace Dune
     //! assignment of grid pointer
     GridPtr &operator= ( const GridPtr &org )
     {
-      gridPtr_ = org.gridPtr_;
-      elParam_ = org.elParam_;
-      vtxParam_ = org.vtxParam_;
-      bndParam_ = org.bndParam_;
-      bndId_ = org.bndId_;
+      gridPtr_    = org.gridPtr_;
+      elParam_    = org.elParam_;
+      vtxParam_   = org.vtxParam_;
+      bndParam_   = org.bndParam_;
+      bndId_      = org.bndId_;
+      emptyParam_ = org.emptyParam_;
+
       nofElParam_ = org.nofElParam_;
       nofVtxParam_ = org.nofVtxParam_;
       haveBndParam_ = org.haveBndParam_;
@@ -127,13 +142,15 @@ namespace Dune
     GridPtr & operator = (GridType * grd)
     {
       gridPtr_ = std::auto_ptr<GridType>(grd);
-      nofVtxParam_ = 0;
-      nofElParam_ = 0;
-      haveBndParam_ = false;
       elParam_.resize(0);
       vtxParam_.resize(0);
       bndParam_.resize(0);
       bndId_.resize(0);
+      emptyParam_.resize(0);
+
+      nofVtxParam_ = 0;
+      nofElParam_ = 0;
+      haveBndParam_ = false;
       return *this;
     }
 
@@ -454,9 +471,11 @@ namespace Dune
     std::vector< std::vector< double > > vtxParam_;
     std::vector< DGFBoundaryParameter::type > bndParam_;
     std::vector< int > bndId_;
-    int nofElParam_, nofVtxParam_;
-    bool haveBndParam_;
     std::vector < double > emptyParam_;
+
+    int nofElParam_;
+    int nofVtxParam_;
+    bool haveBndParam_;
   }; // end of class GridPtr
 
 } // end namespace Dune
