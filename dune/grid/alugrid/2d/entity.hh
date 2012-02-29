@@ -284,14 +284,10 @@ namespace Dune {
         with codimension cc.
      */
     template<int cc>
-    int count () const {
-#ifdef ALUGRID_SURFACE_2D
+    int count () const
+    {
       assert( item_ );
       return (cc==0) ? 1 : item_->numvertices();
-#else
-      enum {c = (cc==0) ? 1 : dim+1};
-      return c;
-#endif
     }
 
     /**

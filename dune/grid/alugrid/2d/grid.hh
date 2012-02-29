@@ -216,12 +216,7 @@ namespace Dune {
     typedef GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > > BaseType;
 
     dune_static_assert( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
-#ifdef ALUGRID_SURFACE_2D
     dune_static_assert( dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3." );
-#else
-    dune_static_assert( dimworld == 2, "ALU2dGrid only implemented for world dim 2." );
-    dune_static_assert( eltype == ALU2DSPACE triangle, "ALU2dGrid only implemented for triangles." );
-#endif
 
   public:
     static const ALU2DSPACE ElementType elementType = eltype;

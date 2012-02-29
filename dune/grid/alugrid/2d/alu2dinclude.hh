@@ -33,13 +33,8 @@
 
 #define ALU2DSPACE ALU2DSPACENAME ::
 
-#ifdef ALUGRID_SURFACE_2D
 #define ALU2DSPACENAME ALU2DGrid
 #define ALU2DDIMWORLD(dimw,eltype) < dimw,(eltype == ALU2DSPACE triangle ? 3 : 4) >
-#else
-#define ALU2DSPACENAME ALUGridSpace
-#define ALU2DDIMWORLD(dimw,eltype)
-#endif
 
 // use the ALU3dGrid Parallel detection
 #include <dune/grid/alugrid/common/checkparallel.hh>
@@ -78,11 +73,7 @@ namespace Dune
   template< int dimw, ALU2DSPACE ElementType eltype >
   struct ALU2dImplInterface< 0, dimw, eltype >
   {
-#ifdef ALUGRID_SURFACE_2D
     typedef typename ALU2DSPACE Hmesh_basic ALU2DDIMWORLD (dimw,eltype) ::vertex_t Type;
-#else
-    typedef ALU2DSPACE Vertex Type;
-#endif
   };
 
   template< int dimw, ALU2DSPACE ElementType eltype >

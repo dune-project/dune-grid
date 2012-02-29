@@ -198,28 +198,6 @@ namespace Dune
       return (current.index_ + current.opposite()) % 2;
   }
 
-
-#ifndef ALUGRID_SURFACE_2D
-  template< class GridImp >
-  inline typename ALU2dGridIntersectionBase<GridImp>::NormalType
-  ALU2dGridIntersectionBase< GridImp >::outerNormal ( const LocalCoordinate &local ) const
-  {
-    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
-
-    const double (&u)[ dimworld ] = current.inside()->vertex( current.index_+1 )->coord();
-    const double (&v)[ dimworld ] = current.inside()->vertex( current.index_+2 )->coord();
-
-    NormalType outerNormal;
-    outerNormal[ 0 ] = v[ 1 ] - u[ 1 ];
-    outerNormal[ 1 ] = u[ 0 ] - v[ 0 ];
-
-    if( current.useOutside_ )
-      outerNormal *= 0.5;
-    return outerNormal;
-  }
-#endif // #ifndef ALUGRID_SURFACE_2D
-
-#ifdef ALUGRID_SURFACE_2D
   template< class GridImp >
   inline typename ALU2dGridIntersectionBase<GridImp>::NormalType
   ALU2dGridIntersectionBase< GridImp >::outerNormal ( const LocalCoordinate &local ) const
@@ -244,8 +222,6 @@ namespace Dune
       outerNormal *= 0.5;
     return outerNormal;
   }
-#endif // #ifdef ALUGRID_SURFACE_2D
-
 
   template< class GridImp >
   inline typename ALU2dGridIntersectionBase<GridImp>::NormalType

@@ -10,8 +10,6 @@
 namespace Dune
 {
 
-#ifdef ALUGRID_SURFACE_2D
-
   template< class Grid >
   class ALU2dGridBoundaryProjection
     : public ALU2DSPACE VtxProjection ALU2DDIMWORLD(Grid::dimensionworld,Grid::elementType)
@@ -59,22 +57,6 @@ namespace Dune
 
     const Grid &grid_;
   };
-
-#else // #ifdef ALUGRID_SURFACE_2D
-
-  template< class Grid >
-  class ALU2dGridBoundaryProjection
-    : public ALUGridBoundaryProjection< Grid >
-  {
-    typedef ALUGridBoundaryProjection< Grid > Base;
-
-  public:
-    explicit ALU2dGridBoundaryProjection ( const Grid &grid )
-      : Base( grid )
-    {}
-  };
-
-#endif // #else // #ifdef ALUGRID_SURFACE_2D
 
 } // end namespace Dune
 
