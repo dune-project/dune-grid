@@ -106,13 +106,13 @@ namespace Dune {
   /*!
      YaspGeometry realizes the concept of the geometric part of a mesh entity.
 
-     We have specializations for dim==dimworld (elements),
-     dim = dimworld-1 (faces) and dim=0 (vertices).
-     The general version throws a GridError on construction.
+     We have specializations for dim == dimworld (elements) and dim == 0
+     (vertices).  The general version implements dim == dimworld-1 (faces)
+     and otherwise throws a GridError.
    */
   //========================================================================
 
-  //! The general version implements dimworld==dimworld. If this is not the case an error is thrown
+  //! The general version implements dim==dimworld-1. If this is not the case an error is thrown
   template<int mydim,int cdim, class GridImp>
   class YaspGeometry : public GeometryDefaultImplementation<mydim,cdim,GridImp,YaspGeometry>
   {
@@ -276,7 +276,7 @@ namespace Dune {
     // in each direction and the missing direction.
     // References are used because this information
     // is known outside the element in many cases.
-    // Note cdim==cdim+1
+    // Note cdim == mydim+1
 
     // IMPORTANT midpoint and extension are references,
     // YaspGeometry can't be copied
