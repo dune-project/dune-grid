@@ -41,8 +41,8 @@ namespace Dune
      (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
 
      Two tools are available for partitioning :
-     \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
-     \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
+     \li Metis ( version 4.0 and higher, see http://glaros.dtc.umn.edu/gkhome/views/metis/metis/ )
+     \li ParMETIS ( http://glaros.dtc.umn.edu/gkhome/metis/parmetis/overview )
 
      \li Available Implementations
           - Dune::ALUCubeGrid<3,3>
@@ -72,8 +72,8 @@ namespace Dune
      (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
 
      Two tools are available for partitioning :
-     \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
-     \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
+     \li Metis ( version 4.0 and higher, see http://glaros.dtc.umn.edu/gkhome/views/metis/metis/ )
+     \li ParMETIS ( http://glaros.dtc.umn.edu/gkhome/metis/parmetis/overview )
 
      \li Available Implementations
             - Dune::ALUSimplexGrid<3,3>
