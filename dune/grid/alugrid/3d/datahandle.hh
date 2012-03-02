@@ -573,7 +573,6 @@ namespace ALUGridSpace
     RealEntityType & realFather_;
     RealEntityType & realSon_;
 
-    //DofManagerType & dm_;
     AdaptDataHandle &rp_;
 
     typedef typename GridType::MPICommunicatorType Comm;
@@ -600,42 +599,47 @@ namespace ALUGridSpace
     virtual ~AdaptRestrictProlongImpl ()
     {}
 
-    //! restrict data , elem is always the father
-    int preCoarsening ( HElementType & elem )
+    //! restrict data for elements
+    int preCoarsening ( HElementType & father )
     {
-      realFather_.setElement( elem );
+      realFather_.setElement( father );
       rp_.preCoarsening( reFather_ );
 
       // reset refinement marker
-      elem.resetRefinedTag();
+      father.resetRefinedTag();
       return 0;
     }
 
-    //! prolong data, elem is the father
-    int postRefinement ( HElementType & elem )
+    //! prolong data for elements
+    int postRefinement ( HElementType & father )
     {
-      realFather_.setElement( elem );
+      realFather_.setElement( father );
       rp_.postRefinement( reFather_ );
 
       // resert refinement markers
-      elem.resetRefinedTag();
-      for( HElementType *son = elem.down(); son != 0; son = son->next() )
+      father.resetRefinedTag();
+      for( HElementType *son = father.down(); son ; son = son->next() )
         son->resetRefinedTag();
 
       return 0;
     }
 
-    //! restrict data , elem is always the father
-    //! this method is for ghost elements
-    int preCoarsening ( HBndSegType & el )
+    //! restrict data for ghost elements
+    int preCoarsening ( HBndSegType & ghost )
     {
+      assert( ghost.bndtype() == ALU3DSPACE ProcessorBoundary_t );
+      realFather_.setGhost( ghost );
+      rp_.preCoarsening( reFather_ );
       return 0;
     }
 
 
-    //! prolong data, elem is the father
-    int postRefinement ( HBndSegType & el )
+    //! prolong data for ghost elements
+    int postRefinement ( HBndSegType & ghost )
     {
+      assert( ghost.bndtype() == ALU3DSPACE ProcessorBoundary_t );
+      realFather_.setGhost( ghost );
+      rp_.postRefinement( reFather_ );
       return 0;
     }
   };
@@ -672,30 +676,17 @@ namespace ALUGridSpace
 
     virtual ~AdaptRestrictProlongGlSet () {}
 
-    //! restrict data , elem is always the father
-    int preCoarsening ( HElementType & elem )
-    {
-      return BaseType :: preCoarsening (elem );
-    }
-
     //! prolong data, elem is the father
     int postRefinement ( HElementType & elem )
     {
       set_.postRefinement( elem );
       return BaseType :: postRefinement(elem );
     }
-
-    //! restrict data , elem is always the father
-    //! this method is for ghost elements
-    int preCoarsening ( HBndSegType & el )
-    {
-      return 0;
-    }
   };
 
   // this class is for counting the tree depth of the
   // element when unpacking data from load balance
-  template <class GridType , class DofManagerType>
+  template <class GridType , class DataHandleType>
   class LoadBalanceElementCount : public AdaptRestrictProlongType
   {
     GridType & grid_;
@@ -711,7 +702,7 @@ namespace ALUGridSpace
     RealEntityType & realFather_;
     RealEntityType & realSon_;
 
-    DofManagerType & dm_;
+    DataHandleType & dh_;
 
     typedef typename GridType::MPICommunicatorType Comm;
 
@@ -723,17 +714,19 @@ namespace ALUGridSpace
   public:
     //! Constructor
     LoadBalanceElementCount (GridType & grid,
-                             MakeableEntityType & f, RealEntityType & rf, MakeableEntityType & s, RealEntityType & rs,DofManagerType & dm)
+                             MakeableEntityType & f, RealEntityType & rf,
+                             MakeableEntityType & s, RealEntityType & rs,
+                             DataHandleType & dh)
       : grid_(grid)
         , reFather_(f)
         , reSon_(s)
         , realFather_(rf)
         , realSon_(rs)
-        , dm_(dm)
+        , dh_(dh)
         , newMemSize_ (1) // we have at least one element (the macro element)
     {}
 
-    virtual ~LoadBalanceElementCount () {};
+    virtual ~LoadBalanceElementCount () {}
 
     //! restrict data , elem is always the father
     int postRefinement ( HElementType & elem )
