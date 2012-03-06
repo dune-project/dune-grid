@@ -175,7 +175,7 @@ namespace Dune
     // for testing parallel GridFactory
     void insertProcessBorder ( const int element, const int face )
     {
-      insertBoundary( element, face, ALU3DSPACE Gitter::hbndseg::closure );
+      insertBoundary( element, face, ALU3DSPACE ProcessorBoundary_t );
     }
 
     /** \brief insert a boundary projection into the macro grid
