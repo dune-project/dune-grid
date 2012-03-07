@@ -66,7 +66,8 @@ AC_DEFUN([DUNE_PATH_UG],[
       # temporarily to PKG_CONFIG_PATH
       REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
       # The first additional path is for uninstalled UG, the second one for the installed UG
-      PKG_CONFIG_PATH="$UGROOT:$UGROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
+	  UGLIBPKCONFIG=`echo $UGROOT/lib*/pkgconfig | sed -e 's/\s\+/:/g'`
+      PKG_CONFIG_PATH="$UGROOT:$UGLIBPKCONFIG:$PKG_CONFIG_PATH"
 
       UG_LDFLAGS=""
 
@@ -92,12 +93,15 @@ AC_DEFUN([DUNE_PATH_UG],[
 		AC_MSG_WARN([UG not found])
       fi
 
+      ## check version number 
+      NEEDEDUG_VERSION=3.9.1-patch7
+
       if test x$HAVE_UG = x1; then
           
           AC_MSG_CHECKING([whether UG version is recent enough])
 
           # Does it have a suitable version?
-          if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=3.9.1-patch3 libug; then
+          if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=$NEEDEDUG_VERSION libug; then
               AC_MSG_RESULT(yes)
           else
               HAVE_UG="0"
