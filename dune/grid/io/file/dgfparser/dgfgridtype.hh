@@ -6,6 +6,4 @@
 #warning "<dune/grid/io/file/dgfgridtype.hh> has been deprecated."
 #warning "It suffices to include config.h."
 
-#include <dune/grid/utility/gridtype.hh>
-
 #endif

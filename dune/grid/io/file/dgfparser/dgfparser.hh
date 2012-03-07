@@ -77,10 +77,7 @@ namespace Dune {
        <!---------------------------------------------->
        There are two ways of constructing Dune grids using DGF files:
 
-       -# By including the file gridtype.hh from the
-          dune/grid/io/file/dgfparser
-          directory: \n
-          by defining one of the symbols
+       -# By defining one of the symbols
           \c ALBERTAGRID ,
           \c ALUGRID_CUBE ,
           \c ALUGRID_SIMPLEX ,
