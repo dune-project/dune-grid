@@ -5,8 +5,9 @@
 
 // This file is part of DUNE, a Distributed and Unified Numerics Environment
 // This file is copyright (C) 2005 Jorrit Fahlke <jorrit@jorrit.de>
-// It is distributed under the terms of the GNU Lesser General Public License version 2.1
-// See COPYING at the top of the source tree for the full licence.
+// This file is licensed under version 2 of the GNU General Public License,
+// with a special "runtime exception."  See COPYING at the top of the source
+// tree for the full licence.
 
 /*! @file
 
