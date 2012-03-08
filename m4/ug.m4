@@ -106,7 +106,7 @@ AC_DEFUN([DUNE_PATH_UG],[
           else
               HAVE_UG="0"
               AC_MSG_RESULT(no)
-              AC_MSG_WARN([UG version is too old (you need at least 3.9.1-patch3)])
+              AC_MSG_WARN([UG version is too old (you need at least $NEEDEDUG_VERSION)])
           fi
       fi
 
