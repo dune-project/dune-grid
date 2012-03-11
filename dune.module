@@ -2,4 +2,3 @@ Module: dune-grid
 Version: 2.2-svn
 Maintainer: dune@dune-project.org
 Depends: dune-common (>= 2.2) dune-geometry (>= 2.2)
-Extra-Suggests: UG Alberta Alu3d
