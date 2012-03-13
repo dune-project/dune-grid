@@ -298,6 +298,6 @@ namespace Dune
 
   }
 
-}
+} // namespace Dune
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_COORDFUNCTION_HH

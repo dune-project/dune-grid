@@ -10,7 +10,7 @@
 #include <dune/grid/common/gridenums.hh>
 
 #include <dune/grid/geometrygrid/capabilities.hh>
-#include <dune/grid/geometrygrid/coordfunction.hh>
+#include <dune/grid/geometrygrid/coordfunctioncaller.hh>
 #include <dune/grid/utility/persistentcontainer.hh>
 
 namespace Dune
@@ -97,6 +97,8 @@ namespace Dune
     typedef DiscreteCoordFunction< typename CoordFunction::ctype, CoordFunction::dimRange, This > Base;
 
   public:
+    typedef typename Base::ctype ctype;
+
     typedef typename Base::RangeVector RangeVector;
 
   private:
@@ -129,16 +131,14 @@ namespace Dune
     {
       y = cache_( hostEntity, corner );
 #ifndef NDEBUG
+      typedef GeoGrid::CoordFunctionCaller< HostEntity, typename CoordFunction::Interface >
+      CoordFunctionCaller;
+
       RangeVector z;
-      calculate( hostEntity.geometry(), corner, z );
+      CoordFunctionCaller coordFunctionCaller( hostEntity, coordFunction_ );
+      coordFunctionCaller.evaluate( corner, z );
       assert( ((y - z).two_norm() < 1e-6) );
 #endif
-    }
-
-    template< class HostGeometry >
-    void calculate ( const HostGeometry &hostGeometry, unsigned int corner, RangeVector &y ) const
-    {
-      coordFunction_.evaluate( hostGeometry.corner( corner ), y );
     }
 
   private:
@@ -182,12 +182,16 @@ namespace Dune
   inline void CachedCoordFunction< HostGrid, CoordFunction >
   ::insertEntity ( const HostEntity &hostEntity )
   {
-    typedef typename HostEntity::Geometry HostGeometry;
+    typedef GeoGrid::CoordFunctionCaller< HostEntity, typename CoordFunction::Interface >
+    CoordFunctionCaller;
 
-    HostGeometry hostGeo = hostEntity.geometry();
-    const unsigned int numCorners = hostGeo.corners();
+    CoordFunctionCaller coordFunctionCaller( hostEntity, coordFunction_ );
+    const GenericReferenceElement< ctype, HostEntity::dimension > &refElement
+      = GenericReferenceElements< ctype, HostEntity::dimension >::general( hostEntity.type() );
+
+    const unsigned int numCorners = refElement.size( HostEntity::dimension );
     for( unsigned int i = 0; i < numCorners; ++i )
-      calculate( hostGeo, i, cache_( hostEntity, i ) );
+      coordFunctionCaller.evaluate( i, cache_( hostEntity, i ) );
   }
 
 } // namespace Dune
