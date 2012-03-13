@@ -273,7 +273,7 @@ namespace Dune
       : realGeometry( impl )
     {
       // disable deprecation warning for DUNE course
-      deprecationWarning ( integral_constant< bool, storeReference >() );
+      // deprecationWarning ( integral_constant< bool, storeReference >() );
     }
 
   private:
