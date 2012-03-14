@@ -93,6 +93,8 @@ namespace Dune
     const Index vxSize = indexSet.size( dimGrid );
     std::vector< Index > vertexIndex( vxSize, vxSize );
 
+    gridout << "%" << " Elements = " << indexSet.size( 0 ) << "  |  Vertices = " << vxSize << std::endl;
+
     // write all vertices into the "vertex" block
     gridout << std::endl << "VERTEX" << std::endl;
     Index vertexCount = 0;
