@@ -5,11 +5,13 @@
 
 #include <cassert>
 #include <vector>
+#include <set>
 
 #include <dune/common/forloop.hh>
 #include <dune/common/exceptions.hh>
 
 #include <dune/geometry/type.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/capabilities.hh>
@@ -33,7 +35,11 @@ namespace Dune {
     //! number of codims
     enum { nCodim = GridImp::dimension+1 };
 
+    // type of grid
     typedef GridImp GridType;
+
+    // coordinate type
+    typedef typename GridType :: ctype ctype ;
 
     // stores all sizes of the levels
     mutable std::vector< int > levelSizes_[nCodim];
@@ -71,7 +77,9 @@ namespace Dune {
       static void apply(const SzCacheType & sc, int level, int cd)
       {
         if( cd == codim )
-          DUNE_THROW(NotImplemented,"Counting entities of codimension without hasEntity == true is not yet implemented");
+        {
+          sc.template countLevelEntitiesNoCodim<All_Partition,codim> (level);
+        }
       }
     };
 
@@ -102,7 +110,9 @@ namespace Dune {
       static void apply(const SzCacheType & sc, int cd)
       {
         if( cd == codim )
-          DUNE_THROW(NotImplemented,"Counting entities of codimension without hasEntity == true is not yet implemented");
+        {
+          sc.template countLeafEntitiesNoCodim<All_Partition,codim> ();
+        }
       }
     };
 
@@ -253,6 +263,84 @@ namespace Dune {
       for(size_t i=0; i<types; ++i) sumtypes += typeSizes[i];
 
       assert( overall == sumtypes );
+      return overall;
+    }
+
+    template <PartitionIteratorType pitype, int codim>
+    void countLevelEntitiesNoCodim(int level) const
+    {
+      typedef typename GridType :: LevelGridView GridView ;
+      typedef typename GridView :: template Codim< 0 > :: template Partition<pitype>  :: Iterator Iterator ;
+      GridView gridView = grid_.levelView( level );
+      Iterator it  = gridView.template begin< 0, pitype> ();
+      Iterator end = gridView.template end< 0, pitype>   ();
+      levelSizes_[codim][level] = countElementsNoCodim< codim >(it,end, levelTypeSizes_[codim][level]);
+    }
+
+    template <PartitionIteratorType pitype, int codim>
+    void countLeafEntitiesNoCodim() const
+    {
+      // count All_Partition entities
+      typedef typename GridType :: LeafGridView GridView ;
+      typedef typename GridView :: template Codim< 0 > :: template Partition<pitype>  :: Iterator Iterator ;
+      GridView gridView = grid_.leafView();
+      Iterator it  = gridView.template begin< 0, pitype > ();
+      Iterator end = gridView.template end< 0, pitype >   ();
+      leafSizes_[codim] = countElementsNoCodim< codim >(it,end, leafTypeSizes_[codim] );
+    }
+
+    // counts entities with given type for given iterator
+    template < int codim, class IteratorType >
+    int countElementsNoCodim(IteratorType & it, const IteratorType & end, std::vector<int>& typeSizes) const
+    {
+      typedef typename GridType :: LocalIdSet LocalIdSet ;
+      typedef typename LocalIdSet :: IdType IdType ;
+
+      typedef GenericReferenceElement< ctype, dim > ReferenceElementType;
+      typedef GenericReferenceElements< ctype, dim > ReferenceElementContainerType;
+
+      typedef std::set< IdType > CodimIdSetType ;
+
+      typedef typename IteratorType :: Entity ElementType ;
+
+      // get id set
+      const LocalIdSet& idSet = grid_.localIdSet();
+
+      const size_t types = typeSizes.size();
+      for(size_t i=0; i<types; ++i) typeSizes[ i ] = 0;
+
+      std::vector< CodimIdSetType > typeCount( types );
+
+      // count all elements of codimension codim
+      for( ; it != end; ++it )
+      {
+        // get entity
+        const ElementType& element = *it ;
+        // get reference element
+        const ReferenceElementType& refElem =
+          ReferenceElementContainerType :: general( element.type() );
+
+        // count all sub entities of codimension codim
+        const int count = element.template count< codim > ();
+        for( int i=0; i< count; ++ i )
+        {
+          // get geometry type
+          const GeometryType geomType = refElem.type( i, codim );
+          // get id of sub entity
+          const IdType id = idSet.subId( element, i, codim );
+          // insert id into set
+          typeCount[ gtIndex( geomType ) ].insert( id );
+        }
+      }
+
+      // accumulate numbers
+      int overall = 0;
+      for(size_t i=0; i<types; ++i)
+      {
+        typeSizes[ i ] = typeCount[ i ].size();
+        overall += typeSizes[ i ];
+      }
+
       return overall;
     }
   };
