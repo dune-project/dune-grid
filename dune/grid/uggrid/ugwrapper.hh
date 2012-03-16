@@ -279,12 +279,12 @@ namespace Dune {
       return PARHDR(node)->prio;
     }
 
-    static DDD_HEADER* ParHdr(typename UG_NS< UG_DIM >::Edge *edge)
+    static DDD_HEADER* ParHdr(UG_NS< UG_DIM >::Edge *edge)
     {
       return PARHDR(edge);
     }
 
-    static DDD_HEADER* ParHdr(typename UG_NS< UG_DIM >::Node *node)
+    static DDD_HEADER* ParHdr(UG_NS< UG_DIM >::Node *node)
     {
       return PARHDR(node);
     }
