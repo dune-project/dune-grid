@@ -190,7 +190,6 @@ namespace Dune
       ForLoop<CheckSubEntityGeometry,0,GridView<VT>::dimension>::apply(*it);
     }
 
-    checkGeometryLifetime(gridView);
   }
 
 }

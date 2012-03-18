@@ -50,6 +50,8 @@ void check_yasp(bool p0=false) {
   for(int l=0; l<=grid.maxLevel(); ++l)
     checkCommunication(grid,l,Dune::dvverb);
 
+  // check geometry lifetime
+  checkGeometryLifetime( grid.leafView() );
   // check the method geometryInFather()
   checkGeometryInFather(grid);
   // check the intersection iterator and the geometries it returns
