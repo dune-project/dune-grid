@@ -153,13 +153,22 @@ namespace Dune
   template< class VT >
   void checkGeometry ( const GridView< VT > &gridView )
   {
-    typedef typename GridView< VT >::template Codim< 0 >::Iterator Iterator;
+    typedef typename GridView< VT >::template Codim<0>::Iterator Iterator;
+    typedef typename GridView< VT >::template Codim<0>::Geometry Geometry;
 
-    const Iterator end = gridView.template end< 0 >();
-    for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
+    const Iterator end = gridView.template end<0>();
+    Iterator it = gridView.template begin<0>();
+
+    const Geometry &geomRef = it->geometry();
+    const Geometry geomCopy = it->geometry();
+
+    for( ; it != end; ++it )
     {
       ForLoop<CheckSubEntityGeometry,0,GridView<VT>::dimension>::apply(*it);
     }
+
+    assert(&geomRef != &geomCopy);
+    checkGeometry ( geomCopy );
   }
 
 }
