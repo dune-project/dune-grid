@@ -50,9 +50,9 @@ namespace Dune {
 
   /* some sizes for building global ids
    */
-  const int yaspgrid_dim_bits = 24;   // bits for encoding each dimension
-  const int yaspgrid_level_bits = 6;  // bits for encoding level number
-  const int yaspgrid_codim_bits = 4;  // bits for encoding codimension
+  const int yaspgrid_dim_bits = 24; // bits for encoding each dimension
+  const int yaspgrid_level_bits = 6; // bits for encoding level number
+  const int yaspgrid_codim_bits = 4; // bits for encoding codimension
 
 
   //************************************************************************
@@ -71,36 +71,52 @@ namespace Dune {
   template<class GridImp>            class YaspLeafIndexSet;
   template<class GridImp>            class YaspGlobalIdSet;
 
+  namespace FacadeOptions
+  {
+
+    template<int dim, int mydim, int cdim>
+    struct StoreGeometryReference<mydim, cdim, YaspGrid<dim>, YaspGeometry>
+    {
+      static const bool v = false;
+    };
+
+    template<int dim, int mydim, int cdim>
+    struct StoreGeometryReference<mydim, cdim, const YaspGrid<dim>, YaspGeometry>
+    {
+      static const bool v = false;
+    };
+
+  }
+
   //========================================================================
   // The transformation describing the refinement rule
 
   template<int dim, class GridImp>
-  class YaspFatherRelativeLocalElement {
-  public:
-    static FieldVector<yaspgrid_ctype, dim> midpoint; // data neded for the refelem below
-    static FieldVector<yaspgrid_ctype, dim> extension; // data needed for the refelem below
-    static YaspGeometry<dim,dim,GridImp> geo;
-    static YaspGeometry<dim,dim,GridImp>& getson (int i)
+  struct YaspFatherRelativeLocalElement {
+    static const array<YaspGeometry<dim,dim,GridImp>, (1<<dim) > _geo;
+    static array<YaspGeometry<dim,dim,GridImp>, (1<<dim) > initSons()
     {
-      for (int k=0; k<dim; k++)
-        if (i&(1<<k))
-          midpoint[k] = 0.75;
-        else
-          midpoint[k] = 0.25;
+      array<YaspGeometry<dim,dim,GridImp>, (1<<dim) > geo;
+      FieldVector<yaspgrid_ctype,dim> midpoint(0.25);
+      FieldVector<yaspgrid_ctype,dim> extension(0.5);
+      for (int i=0; i<(1<<dim); i++)
+      {
+        midpoint = 0.25;
+        for (int k=0; k<dim; k++)
+        {
+          if (i&(1<<k))
+            midpoint[k] = 0.75;
+        }
+        geo[i] = YaspGeometry<dim,dim,GridImp>(midpoint, extension);
+      }
       return geo;
     }
   };
 
-  // initialize static variable with bool constructor (which makes reference elements)
   template<int dim, class GridImp>
-  YaspGeometry<dim,dim,GridImp>
-  YaspFatherRelativeLocalElement<dim,GridImp>::geo(YaspFatherRelativeLocalElement<dim,GridImp>::midpoint,
-                                                   YaspFatherRelativeLocalElement<dim,GridImp>::extension);
-  template<int dim, class GridImp>
-  FieldVector<yaspgrid_ctype,dim> YaspFatherRelativeLocalElement<dim,GridImp>::midpoint(0.25);
-
-  template<int dim, class GridImp>
-  FieldVector<yaspgrid_ctype,dim> YaspFatherRelativeLocalElement<dim,GridImp>::extension(0.5);
+  const array<YaspGeometry<dim,dim,GridImp>, (1<<dim)>
+  YaspFatherRelativeLocalElement<dim, GridImp>::_geo =
+    YaspFatherRelativeLocalElement<dim, GridImp>::initSons();
 
   //========================================================================
   /*!
@@ -119,8 +135,6 @@ namespace Dune {
   public:
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
-    //! the Reference Geometry
-    typedef Geometry<mydim,mydim,GridImp,Dune::YaspGeometry> ReferenceGeometry;
 
     //! return the element type identifier
     GeometryType type () const
@@ -151,11 +165,11 @@ namespace Dune {
           continue;
         }
         //k is not the missing direction
-        if (i&(1<<bit))    // check whether bit is set or not
-          c[k] = midpoint[k]+0.5*extension[k];     // bit is 1 in i
+        if (i&(1<<bit)) // check whether bit is set or not
+          c[k] = midpoint[k]+0.5*extension[k]; // bit is 1 in i
         else
-          c[k] = midpoint[k]-0.5*extension[k];     // bit is 0 in i
-        bit++;   // we have processed a direction
+          c[k] = midpoint[k]-0.5*extension[k]; // bit is 0 in i
+        bit++; // we have processed a direction
       }
 
       return c;
@@ -222,7 +236,7 @@ namespace Dune {
       {
         if (i != missing)
         {
-          JT[k][i] = extension[i];     // set diagonal element
+          JT[k][i] = extension[i]; // set diagonal element
           k++;
         }
       }
@@ -237,14 +251,17 @@ namespace Dune {
       {
         if (i != missing)
         {
-          Jinv[i][k] = 1.0/extension[i];     // set diagonal element
+          Jinv[i][k] = 1.0/extension[i]; // set diagonal element
           k++;
         }
       }
       return Jinv;
     }
 
-    //! constructor from (storage for) midpoint and extension and missing direction number
+    //! default constructor
+    YaspGeometry () {}
+
+    //! constructor from midpoint and extension and missing direction number
     YaspGeometry (const FieldVector<ctype, cdim>& p, const FieldVector<ctype, cdim>& h, uint8_t& m)
       : midpoint(p), extension(h), missing(m)
     {
@@ -271,27 +288,24 @@ namespace Dune {
         s << " " << extension[i];
       s << " missing is " << missing;
     }
+
+    // const YaspGeometry<mydim,cdim,GridImp>&
+    // operator = (const YaspGeometry<mydim,cdim,GridImp>& g);
+
   private:
     // the element is fully defined by its midpoint the extension
     // in each direction and the missing direction.
-    // References are used because this information
-    // is known outside the element in many cases.
     // Note cdim == mydim+1
 
-    // IMPORTANT midpoint and extension are references,
-    // YaspGeometry can't be copied
-    const FieldVector<ctype, cdim> & midpoint;  // the midpoint
-    const FieldVector<ctype, cdim> & extension; // the extension
-    uint8_t& missing;                     // the missing, i.e. constant direction
+    FieldVector<ctype, cdim> midpoint;  // the midpoint
+    FieldVector<ctype, cdim> extension; // the extension
+    uint8_t missing;                    // the missing, i.e. constant direction
 
     // In addition we need memory in order to return references.
     // Possibly we should change this in the interface ...
     mutable FieldMatrix<ctype, mydim, cdim> JT;   // the transposed of the jacobian
     mutable FieldMatrix<ctype, cdim, mydim> Jinv; // the transposed of the jacobian inverse
     mutable FieldMatrix<ctype, Power_m_p<2,mydim>::power, cdim> coord_; // the coordinates
-
-    const YaspGeometry<mydim,cdim,GridImp>&
-    operator = (const YaspGeometry<mydim,cdim,GridImp>& g);
 
   };
 
@@ -303,8 +317,6 @@ namespace Dune {
   {
   public:
     typedef typename GridImp::ctype ctype;
-    //! the Reference Geometry
-    typedef Geometry<mydim,mydim,GridImp,Dune::YaspGeometry> ReferenceGeometry;
 
     //! return the element type identifier
     GeometryType type () const
@@ -334,9 +346,9 @@ namespace Dune {
       FieldVector<ctype, mydim>& c = coord_[i];
       for (int k=0; k<mydim; k++)
         if (i&(1<<k))
-          c[k] = midpoint[k]+0.5*extension[k];     // kth bit is 1 in i
+          c[k] = midpoint[k]+0.5*extension[k]; // kth bit is 1 in i
         else
-          c[k] = midpoint[k]-0.5*extension[k];     // kth bit is 0 in i
+          c[k] = midpoint[k]-0.5*extension[k]; // kth bit is 0 in i
       return c;
     }
 
@@ -384,8 +396,8 @@ namespace Dune {
     {
       for (int i=0; i<mydim; ++i)
       {
-        JT[i] = 0.0;                        // set column to zero
-        JT[i][i] = extension[i];         // set diagonal element
+        JT[i] = 0.0;              // set column to zero
+        JT[i][i] = extension[i]; // set diagonal element
       }
       return JT;
     }
@@ -394,13 +406,16 @@ namespace Dune {
     {
       for (int i=0; i<mydim; ++i)
       {
-        Jinv[i] = 0.0;                        // set column to zero
-        Jinv[i][i] = 1.0/extension[i];         // set diagonal element
+        Jinv[i] = 0.0;              // set column to zero
+        Jinv[i][i] = 1.0/extension[i]; // set diagonal element
       }
       return Jinv;
     }
 
-    //! constructor from (storage for) midpoint and extension
+    //! default constructor
+    YaspGeometry () {}
+
+    //! constructor from midpoint and extension
     YaspGeometry (const FieldVector<ctype, mydim>& p, const FieldVector<ctype, mydim>& h)
       : midpoint(p), extension(h)
     {}
@@ -423,25 +438,22 @@ namespace Dune {
         s << " " << extension[i];
     }
 
+    // const YaspGeometry<mydim,mydim,GridImp>&
+    // operator = (const YaspGeometry<mydim,mydim,GridImp>& g);
+
   private:
     // the element is fully defined by midpoint and the extension
     // in each direction. References are used because this information
     // is known outside the element in many cases.
     // Note mydim==cdim
 
-    // IMPORTANT midpoint and extension are references,
-    // YaspGeometry can't be copied
-    const FieldVector<ctype, mydim> & midpoint; // the midpoint
-    const FieldVector<ctype, mydim> & extension; // the extension
+    FieldVector<ctype, mydim> midpoint; // the midpoint
+    FieldVector<ctype, mydim> extension; // the extension
 
     // In addition we need memory in order to return references.
     // Possibly we should change this in the interface ...
     mutable FieldMatrix<ctype, mydim, mydim> Jinv,JT; // the transpose of the jacobian and its inverse inverse
     mutable FieldMatrix<ctype, Power_m_p<2,mydim>::power, mydim> coord_; // the coordinates
-
-    // disable copy
-    const YaspGeometry<mydim,mydim,GridImp>&
-    operator = (const YaspGeometry<mydim,mydim,GridImp>& g);
   };
 
   //! specialization for dim=0, this is a vertex
@@ -504,12 +516,16 @@ namespace Dune {
       return Jinv;
     }
 
+    //! default constructor
+    YaspGeometry ()
+    {}
+
     //! constructor
     explicit YaspGeometry ( const FieldVector< ctype, cdim > &p )
       : position( p )
     {}
 
-    YaspGeometry ( const FieldVector< ctype, cdim > &p, const FieldVector< ctype, cdim > &h, uint8_t &m )
+    YaspGeometry ( const FieldVector< ctype, cdim > &p, const FieldVector< ctype, cdim > &, uint8_t &)
       : position( p )
     {}
 
@@ -520,13 +536,11 @@ namespace Dune {
       s << "position " << position;
     }
 
-  private:
-    // IMPORTANT position is a reference,
-    // YaspGeometry can't be copied
-    const FieldVector<ctype, cdim> & position; //!< where the vertex is
+    // const YaspGeometry<0,cdim,GridImp>&
+    // operator = (const YaspGeometry<0,cdim,GridImp>& g);
 
-    const YaspGeometry<0,cdim,GridImp>&
-    operator = (const YaspGeometry<0,cdim,GridImp>& g);
+  private:
+    FieldVector<ctype, cdim> position; //!< position of the vertex
   };
 
   // operator<< for all YaspGeometrys
@@ -687,7 +701,7 @@ namespace Dune {
 
     // constructor
     YaspEntity (const GridImp * yg, const YGLI& g, const TSI& it)
-      : _yg(yg), _it(it), _g(g), _geometry(it.position(),it.meshsize())
+      : _yg(yg), _it(it), _g(g)
     {}
 
     //! level of this element
@@ -719,7 +733,11 @@ namespace Dune {
     }
 
     //! geometry of this entity
-    Geometry geometry () const { return Geometry( _geometry ); }
+    Geometry geometry () const {
+      // the element geometry
+      GeometryImpl _geometry(_it.position(),_it.meshsize());
+      return Geometry( _geometry );
+    }
 
     /*! Return number of subentities with codimension cc.
      */
@@ -800,7 +818,7 @@ namespace Dune {
           son += (1<<k);
 
       // configure one of the 2^dim transformations
-      return LocalGeometry( YaspFatherRelativeLocalElement<dim,GridImp>::getson(son) );
+      return LocalGeometry( YaspFatherRelativeLocalElement<dim,GridImp>::_geo[son] );
     }
 
     const TSI& transformingsubiterator () const
@@ -1274,7 +1292,6 @@ namespace Dune {
     const GridImp * _yg;    // access to YaspGrid
     const TSI& _it;         // position in the grid level
     const YGLI& _g;         // access to grid level
-    GeometryImpl _geometry; // the element geometry
   };
 
 
@@ -1312,7 +1329,7 @@ namespace Dune {
 
     // constructor
     YaspEntity (const GridImp* yg, const YGLI& g, const TSI& it)
-      : _yg(yg), _it(it), _g(g), _geometry(it.position())
+      : _yg(yg), _it(it), _g(g)
     {}
 
     //! level of this element
@@ -1332,7 +1349,10 @@ namespace Dune {
     }
 
     //! geometry of this entity
-    Geometry geometry () const { return Geometry( _geometry ); }
+    Geometry geometry () const {
+      GeometryImpl _geometry(_it.position());
+      return Geometry( _geometry );
+    }
 
     //! return partition type attribute
     PartitionType partitionType () const
@@ -1431,7 +1451,6 @@ namespace Dune {
     const GridImp * _yg;          // access to YaspGrid
     const TSI& _it;               // position in the grid level
     const YGLI& _g;               // access to grid level
-    GeometryImpl _geometry;       // the element geometry
     // temporary object
     mutable FieldVector<ctype, dim> loc; // always computed before being returned
   };
@@ -1466,10 +1485,10 @@ namespace Dune {
     typedef YaspSpecialEntity<0,dim,GridImp> SpecialEntity;
     typedef Dune::Intersection<const GridImp, Dune::YaspIntersectionIterator> Intersection;
 
+    // void update() const {
+    //     const_cast<YaspIntersection*>(this)->update();
+    // }
     void update() const {
-      const_cast<YaspIntersection*>(this)->update();
-    }
-    void update() {
       if (_count == 2*_dir + _face || _count >= 2*dim)
         return;
 
@@ -1673,11 +1692,12 @@ namespace Dune {
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
-       Here returned element is in LOCAL coordinates of neighbor
      */
     Geometry geometry () const
     {
       update();
+      GeometryImpl
+      _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),_dir);
       return Geometry( _is_global );
     }
 
@@ -1711,8 +1731,7 @@ namespace Dune {
       _count(0),
       _dir(0),
       _face(0),
-      _pos_world(myself.transformingsubiterator().position()),
-      _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),_dir)
+      _pos_world(myself.transformingsubiterator().position())
     {
       if (toend)
       {
@@ -1736,9 +1755,7 @@ namespace Dune {
       _count(it._count),
       _dir(it._dir),
       _face(it._face),
-      _pos_world(it._pos_world),
-      // Important: geometry must be recreated -- not copied!
-      _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),_dir)
+      _pos_world(it._pos_world)
     {}
 
     //! copy operator
@@ -1750,7 +1767,6 @@ namespace Dune {
       _dir = it._dir;
       _face = it._face;
       _pos_world = it._pos_world;
-      // Important: geometry is automatically updated
     }
 
   private:
@@ -1762,23 +1778,14 @@ namespace Dune {
     mutable uint8_t _dir;                          //!< count/2
     mutable uint8_t _face;                         //!< count%2
     /* current position */
-    FieldVector<ctype, dimworld> _pos_world;       //!< center of face in world coordinates
-    /* geometry object (get automatically updated) */
-    GeometryImpl _is_global;                       //!< intersection in global coordinates
+    mutable FieldVector<ctype, dimworld> _pos_world;       //!< center of face in world coordinates
 
     /* static data */
-    static const FieldVector<typename GridImp::ctype, GridImp::dimension> _ext_local;
     struct faceInfo
     {
-      FieldVector<ctype, dim> pos_inside;      //!< center of face in own local coordinates
-      FieldVector<ctype, dim> pos_outside;     //!< center of face in neighbors local coordinates
-      uint8_t dir;
       FieldVector<ctype, dimworld> normal;
       LocalGeometryImpl geom_inside;           //!< intersection in own local coordinates
       LocalGeometryImpl geom_outside;          //!< intersection in neighbors local coordinates
-      faceInfo() :
-        geom_inside (pos_inside, _ext_local,dir),
-        geom_outside(pos_outside,_ext_local,dir) {}
     };
 
     /* static face info */
@@ -1786,32 +1793,31 @@ namespace Dune {
 
     static array<faceInfo, 2*dim> initFaceInfo()
     {
+      const FieldVector<typename GridImp::ctype, GridImp::dimension> ext_local(1.0);
       array<faceInfo, 2*dim> I;
-      for (int i=0; i<dim; i++)
+      for (uint8_t i=0; i<dim; i++)
       {
         // center of face
         FieldVector<ctype, dim> a(0.5); a[i] = 0.0;
         FieldVector<ctype, dim> b(0.5); b[i] = 1.0;
-        I[2*i].pos_inside = a;
-        I[2*i].pos_outside = b;
-        I[2*i+1].pos_inside = b;
-        I[2*i+1].pos_outside = a;
-        // direction
-        I[2*i].dir = i;
-        I[2*i+1].dir = i;
         // normal vectors
         I[2*i].normal = 0.0;
         I[2*i+1].normal = 0.0;
         I[2*i].normal[i] = -1.0;
         I[2*i+1].normal[i] = +1.0;
+        // geometries
+        I[2*i].geom_inside =
+          LocalGeometryImpl(a, ext_local, i);
+        I[2*i].geom_outside =
+          LocalGeometryImpl(b, ext_local, i);
+        I[2*i+1].geom_inside =
+          LocalGeometryImpl(b, ext_local, i);
+        I[2*i+1].geom_outside =
+          LocalGeometryImpl(a, ext_local, i);
       }
       return I;
     }
   };
-
-  template<class GridImp>
-  const FieldVector<typename GridImp::ctype, GridImp::dimension>
-  YaspIntersection<GridImp>::_ext_local = FieldVector<typename GridImp::ctype, GridImp::dimension>(1.0);
 
   template<class GridImp>
   const array<typename YaspIntersection<GridImp>::faceInfo, 2*GridImp::dimension>
