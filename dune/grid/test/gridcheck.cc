@@ -309,6 +309,7 @@ void assertNeighbor (Grid &g)
       EntityPointer p( g.template lbegin<0>(0) );
       p = g.template lbegin<0>(1);
       LevelIterator it = g.template lbegin<0>(0);
+      ++it;
 #if !DISABLE_DEPRECATED_METHOD_CHECK
       p->ilevelbegin();
 #endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
