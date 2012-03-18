@@ -150,6 +150,32 @@ namespace Dune
     {}
   };
 
+  template<typename GV>
+  void checkGeometryLifetime (const GV &gridView)
+  {
+    typedef typename GV::template Codim<0>::Iterator Iterator;
+    typedef typename GV::template Codim<0>::Geometry Geometry;
+    typedef typename GV::ctype ctype;
+    enum { dim  = GV::dimension };
+    enum { dimw = GV::dimensionworld };
+
+    const FieldVector<ctype, dim> pos(0.2);
+    const FieldVector<ctype, dimw> glob =
+      gridView.template begin<0>()->geometry().global(pos);
+
+    Iterator it = gridView.template begin<0>();
+    const Geometry geomCopy = it->geometry();
+
+    const Iterator end = gridView.template end<0>();
+    checkGeometry ( geomCopy );
+
+    for(it = gridView.template begin<0>();
+        it != end; ++it )
+    {
+      assert (geomCopy.global(pos) == glob);
+    }
+  }
+
   template< class VT >
   void checkGeometry ( const GridView< VT > &gridView )
   {
@@ -159,16 +185,12 @@ namespace Dune
     const Iterator end = gridView.template end<0>();
     Iterator it = gridView.template begin<0>();
 
-    const Geometry &geomRef = it->geometry();
-    const Geometry geomCopy = it->geometry();
-
     for( ; it != end; ++it )
     {
       ForLoop<CheckSubEntityGeometry,0,GridView<VT>::dimension>::apply(*it);
     }
 
-    assert(&geomRef != &geomCopy);
-    checkGeometry ( geomCopy );
+    checkGeometryLifetime(gridView);
   }
 
 }
