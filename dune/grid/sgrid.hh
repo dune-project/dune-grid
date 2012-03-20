@@ -49,6 +49,25 @@ namespace Dune {
   template<class GridImp> class SIntersectionIterator;
   template<class GridImp> class SHierarchicIterator;
 
+  namespace FacadeOptions
+  {
+
+    template<int dim, int dimworld, class ctype, int mydim, int cdim>
+    struct StoreGeometryReference<mydim, cdim,
+        SGrid<dim,dimworld,ctype>, SGeometry>
+    {
+      static const bool v = false;
+    };
+
+    template<int dim, int dimworld, class ctype, int mydim, int cdim>
+    struct StoreGeometryReference<mydim, cdim,
+        const SGrid<dim,dimworld,ctype>, SGeometry>
+    {
+      static const bool v = false;
+    };
+
+  }
+
   //************************************************************************
   /*!
      SGeometry realizes the concept of the geometric part of a mesh entity.
