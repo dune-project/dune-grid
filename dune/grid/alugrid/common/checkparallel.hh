@@ -5,7 +5,6 @@
 
 #if HAVE_ALUGRID
 #include <alugrid_defineparallel.h>
-#endif
 
 #if HAVE_MPI
 // if this variable is defined,
@@ -18,8 +17,12 @@
   #else
     #define ALU3DGRID_PARALLEL 1
   #endif
-#else
+#else  // #if HAVE_MPI
   #define ALU3DGRID_PARALLEL 0
-#endif
+#endif // #else  // #if HAVE_MPI
+
+#else // #if HAVE_ALUGRID
+  #define ALU3DGRID_PARALLEL 0
+#endif // #else // #if HAVE_ALUGRID
 
 #endif // #ifndef DUNE_ALUGRID_CHECKPARALLEL_HH
