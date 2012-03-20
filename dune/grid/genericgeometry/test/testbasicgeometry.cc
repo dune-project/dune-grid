@@ -20,7 +20,7 @@
 
 #include <dune/geometry/type.hh>
 
-#include "../geometry.hh"
+#include <dune/geometry/genericgeometry/geometry.hh>
 
 
 using namespace Dune;
