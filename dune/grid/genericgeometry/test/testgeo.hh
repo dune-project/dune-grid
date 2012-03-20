@@ -4,6 +4,7 @@
 #define TESTGEO_HH
 
 #if HAVE_ALUGRID
+#include <dune/grid/alugrid/common/declaration.hh>
 #include <dune/grid/alugrid/3d/grid.hh>
 #include <dune/grid/alugrid/3d/topology.hh>
 #endif
