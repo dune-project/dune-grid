@@ -273,7 +273,7 @@ extern void *setupHmesh(const int noe, const int nov,
 extern void deleteHmesh( void * hmesh );
 extern void deleteFunctions( void * hmesh );
 
-extern void displayTimeScene(INFO * info);
+//extern void displayTimeScene(INFO * info, int procs);
 extern void handleMesh (void *hmesh, bool gridMode );
 
 extern DUNE_FDATA * extractData (void *hmesh , int num );
@@ -288,6 +288,6 @@ extern void addHmeshToGlobalTimeScene(double time, void  *hmesh , int proc);
 extern void tsc_timebar(void *timescene, double t_start, double t_end);
 extern void colorBarMinMax(const double min, const double max);
 
-#endif
+#endif // #if HAVE_GRAPE
 
-#endif
+#endif // #ifndef __GRAPE_HMESH_H__

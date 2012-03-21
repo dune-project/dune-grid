@@ -871,18 +871,17 @@ inline void deleteFunctions( void * hmesh )
   //mesh->user_data = 0;
 }
 
-static inline void addProjectUIF()
+static inline void addProjectUIF ()
 {
-  static int firstCall = 1;
-
-  // only call this once otherwise
-  // grape cannot be runed twice with the same program
-  if(firstCall)
+  // only call this once because GraPE cannot be run twice within the same program
+  static bool firstCall = true;
+  if( firstCall )
   {
-    char p_name[32];
-    sprintf(p_name,"uif-m%d",GRAPE_DIM);
-    g_project_add(p_name);
-    firstCall = 0;
+    char p_name[ 32 ];
+    //sprintf( p_name, "uif-m%d", GRAPE_DIM );
+    sprintf( p_name, "uif-m%d-w%d", GRAPE_DIM, GRAPE_DIMWORLD );
+    g_project_add( p_name );
+    firstCall = false;
   }
 }
 
@@ -1062,30 +1061,18 @@ inline void colorBarMinMax(const double min, const double max)
 /* forward declaration */
 static void grape_add_remove_methods(void);
 
-inline void handleMesh(void *hmesh, bool gridMode )
+inline void handleMesh( void *hmesh, bool gridMode )
 {
-  GRAPEMESH *mesh = (GRAPEMESH *) hmesh;
-  assert(mesh != NULL);
+  GRAPEMESH *mesh = (GRAPEMESH *)hmesh;
+  assert( mesh );
 
   // remember last selected function
   static std::string lastFunctionName("zero");
   static std::string lastSlotName("default");
 
-  // static stack to keep scenes
-  static std::stack< SCENE *> sceneStack;
-
-  MANAGER * mgr = (MANAGER *)GRAPE_CALL(Manager,"get-stdmgr") ();
-
-  SCENE * sc = 0 ;
-  if(sceneStack.empty())
-  {
-    sc = (SCENE *)GRAPE_CALL(Scene,"new-instance") ("dune hmesh");
-  }
-  else
-  {
-    sc = sceneStack.top();
-    sceneStack.pop();
-  }
+  MANAGER * mgr = (MANAGER *)GRAPE_CALL( Manager, "get-stdmgr" ) ();
+  SCENE *scene = (SCENE *)GRAPE_CALL( Scene, "new-instance" ) ( "DUNE Grid" );
+  assert( scene );
 
   addProjectUIF();
 
@@ -1103,9 +1090,10 @@ inline void handleMesh(void *hmesh, bool gridMode )
   }
 #endif
 
-  sc->object = (TREEOBJECT *)mesh;
+  scene->object = (TREEOBJECT *)mesh;
 
-  if((!maxlevelButton)) setupLeafButton(mgr,sc,0);
+  if( !maxlevelButton)
+    setupLeafButton( mgr, scene, 0 );
 
   grape_add_remove_methods();
 
@@ -1115,23 +1103,19 @@ inline void handleMesh(void *hmesh, bool gridMode )
     GRAPE_CALL(mesh,"select-function") (lastSlotName.c_str(),lastFunctionName.c_str());
   }
 
-  GRAPE_CALL(mgr,"handle") (sc);  // grape display call
+  GRAPE_CALL( mgr, "handle" ) (scene);  // grape display call
 
-  removeLeafButton(mgr,sc);
+  removeLeafButton(mgr,scene);
 
-  FctSelector :: DataFunctionName_t fctName =
-    FctSelector :: getCurrentFunctionName(mesh);
+  FctSelector::DataFunctionName_t fctName = FctSelector::getCurrentFunctionName( mesh );
 
   // remember last selected function
   lastSlotName     = fctName.first;
   lastFunctionName = fctName.second;
 
   // remove obj
-  sc->object = 0;
-  // preserve sc
-  sceneStack.push(sc);
-
-  return ;
+  scene->object = 0;
+  GRAPE_CALL( scene, "delete" ) ();
 }
 
 /*
@@ -1564,4 +1548,5 @@ inline static void grape_add_remove_methods(void)
     g_project_add(p_name);
   }
 }
-#endif
+
+#endif // #ifndef __GRAPE_HMESH_C__

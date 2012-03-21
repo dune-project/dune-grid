@@ -45,9 +45,13 @@ namespace Dune
 {
 
   static int __MaxPartition = 1;
+
   // the interface to dune
   template <int dim, int dimworld>
-  struct GrapeInterface
+  struct GrapeInterface;
+
+  template<>
+  struct GrapeInterface<2,2>
   {
     static int called;
     typedef GrapeInterface_two_two::DUNE_ELEM DUNE_ELEM;
@@ -255,11 +259,10 @@ namespace Dune
     }
   };
 
-
 } // end namespace Dune
 
 #include "grapecommon.cc"
 
-#endif
+#endif // #if HAVE_GRAPE
 
-#endif
+#endif // #ifndef DUNE_GRIDDISPLAY_HH

@@ -228,6 +228,7 @@ inline void timeSceneInit(INFO *info, const int n_info,
   return;
 }
 
+#if 0
 /* add scene with combined object at the end of scene tree */
 inline SCENE * combine_scenes_send ()
 {
@@ -258,7 +259,7 @@ inline SCENE * combine_scenes_send ()
 }
 
 /* call handle for a bunch of timescenes */
-inline void displayTimeScene(INFO * info, int numberOfProcs )
+inline void displayTimeScene ( INFO *info, int procs )
 {
   TIMESCENE *tsc = (TIMESCENE *) info[0].tsc;
   if(tsc)
@@ -275,13 +276,14 @@ inline void displayTimeScene(INFO * info, int numberOfProcs )
     }
 #endif
     GrapeInterface_two_two::grape_add_remove_methods();
+    GrapeInterface_two_three::grape_add_remove_methods();
     GrapeInterface_three_three::grape_add_remove_methods();
-    GrapeInterface_three_three::initPartitionDisp(numberOfProcs-1);
+    GrapeInterface_three_three::initPartitionDisp( procs-1 );
 
     {
       /* add combine methods to send method of Scene and TimeScene */
-      GRAPE_CALL(Scene,"add-method") ("combine-secnes-send",combine_scenes_send);
-      GRAPE_CALL(TimeScene,"add-method") ("combine-secnes-send",combine_scenes_send);
+      GRAPE_CALL(Scene,"add-method") ("combine-scenes-send",combine_scenes_send);
+      GRAPE_CALL(TimeScene,"add-method") ("combine-scenes-send",combine_scenes_send);
     }
 
     mgr = (MANAGER *)GRAPE_CALL(Manager,"get-stdmgr") ();
@@ -291,9 +293,10 @@ inline void displayTimeScene(INFO * info, int numberOfProcs )
     GRAPE_CALL(mgr,"handle") (tsc);
   }
 }
+#endif
 
 
 #undef MINIMUM
 #undef MAXIMUM
 
-#endif
+#endif // #ifndef __GRAPE_COMMON_CC__
