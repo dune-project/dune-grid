@@ -873,16 +873,17 @@ inline void deleteFunctions( void * hmesh )
 
 static inline void addProjectUIF ()
 {
+#if 0
   // only call this once because GraPE cannot be run twice within the same program
   static bool firstCall = true;
   if( firstCall )
   {
     char p_name[ 32 ];
-    //sprintf( p_name, "uif-m%d", GRAPE_DIM );
-    sprintf( p_name, "uif-m%d-w%d", GRAPE_DIM, GRAPE_DIMWORLD );
+    sprintf( p_name, "uif-m%d", GRAPE_DIM );
     g_project_add( p_name );
     firstCall = false;
   }
+#endif
 }
 
 extern "C" {
