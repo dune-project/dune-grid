@@ -9,7 +9,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif // #ifdef __cplusplus
 
 #define class GrapeClass
 #define private GrapePrivate
@@ -36,7 +36,7 @@ inline void g_newerrorbox (const char * a, const char * b, int c, const char * d
   g_errorbox(((char *)a),((char *)b),c,((char *)d));
 }
 
-// define new allert macro that uses g_newerrorbox
+// define new alert macro that uses g_newerrorbox
 #define GRAPE_ALERT(condition,message,error_exit) \
   do {if(!(condition)) { \
         g_newerrorbox(message,__FILE__,__LINE__,# condition); \
@@ -44,9 +44,9 @@ inline void g_newerrorbox (const char * a, const char * b, int c, const char * d
       }} while(0)
 
 #ifdef __cplusplus
-}
-#endif
+} // extern "C"
+#endif // #ifdef __cplusplus
 
-#endif
+#endif // #if HAVE_GRAPE
 
-#endif
+#endif // #ifndef __GRAPEWRAPPER__
