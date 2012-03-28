@@ -10,18 +10,10 @@
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/indexidset.hh>
 
-#include <dune/grid/geometrygrid/capabilities.hh>
+#include <dune/grid/geometrygrid/declaration.hh>
 
 namespace Dune
 {
-
-  // External Forward Declarations
-  // -----------------------------
-
-  template< class HostGrid, class CoordFunction, class Allocator >
-  class GeometryGrid;
-
-
 
   namespace GeoGrid
   {
@@ -34,21 +26,34 @@ namespace Dune
       : public Dune::IndexSet< Grid, IndexSet< Grid, HostIndexSet >, typename HostIndexSet::IndexType >
     {
       typedef IndexSet< Grid, HostIndexSet > This;
+      typedef Dune::IndexSet< Grid, This, typename HostIndexSet::IndexType > Base;
 
       typedef typename remove_const< Grid >::type::Traits Traits;
 
       typedef typename Traits::HostGrid HostGrid;
 
     public:
-      typedef Dune::IndexSet< Grid, This, typename HostIndexSet::IndexType > Base;
-
-      static const int dimension = Grid::dimension;
+      static const int dimension = Traits::dimension;
 
       typedef typename Base::IndexType IndexType;
 
-      IndexSet ( const HostIndexSet &hostIndexSet )
+      IndexSet ()
+        : hostIndexSet_( 0 )
+      {}
+
+      explicit IndexSet ( const HostIndexSet &hostIndexSet )
         : hostIndexSet_( &hostIndexSet )
       {}
+
+      IndexSet ( const This &other )
+        : hostIndexSet_( other.hostIndexSet_ )
+      {}
+
+      const This &operator= ( const This &other )
+      {
+        hostIndexSet_ = other.hostIndexSet_;
+        return *this;
+      }
 
       using Base::index;
       using Base::subIndex;
@@ -86,18 +91,20 @@ namespace Dune
         return hostIndexSet().geomTypes( codim );
       }
 
+      operator bool () const { return bool( hostIndexSet_ ); }
+
     private:
       const HostIndexSet &hostIndexSet () const
       {
-        assert( hostIndexSet_ != 0 );
+        assert( *this );
         return *hostIndexSet_;
       }
 
       const HostIndexSet *hostIndexSet_;
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_INDEXSETS_HH

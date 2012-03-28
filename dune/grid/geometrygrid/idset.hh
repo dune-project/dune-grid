@@ -18,7 +18,8 @@ namespace Dune
     class IdSet
       : public Dune::IdSet< Grid, IdSet< Grid, HostIdSet >, typename HostIdSet::IdType >
     {
-      typedef Dune::IdSet< Grid, IdSet< Grid, HostIdSet >, typename HostIdSet::IdType > Base;
+      typedef IdSet< Grid, HostIdSet > This;
+      typedef Dune::IdSet< Grid, This, typename HostIdSet::IdType > Base;
 
       typedef typename remove_const< Grid >::type::Traits Traits;
 
@@ -27,36 +28,55 @@ namespace Dune
 
       using Base::subId;
 
-      IdSet ( const HostIdSet &hostIdSet )
-        : hostIdSet_( hostIdSet )
+      IdSet ()
+        : hostIdSet_( 0 )
       {}
+
+      explicit IdSet ( const HostIdSet &hostIdSet )
+        : hostIdSet_( &hostIdSet )
+      {}
+
+      IdSet ( const This &other )
+        : hostIdSet_( other.hostIdSet_ )
+      {}
+
+      const This &operator= ( const This &other )
+      {
+        hostIdSet_ = other.hostIdSet_;
+        return *this;
+      }
 
       template< int codim >
       IdType id ( const typename Traits::template Codim< codim >::Entity &entity ) const
       {
-        return Grid::getRealImplementation( entity ).id( hostIdSet_ );
+        return Grid::getRealImplementation( entity ).id( hostIdSet() );
       }
 
       template< class Entity >
       IdType id ( const Entity &entity ) const
       {
-        return id< Entity :: codimension >( entity );
+        return id< Entity::codimension >( entity );
       }
 
       IdType subId ( const typename Traits::template Codim< 0 >::Entity &entity, int i, unsigned int codim ) const
       {
-        return hostIdSet_.subId( Grid::template getHostEntity< 0 >( entity ), i, codim );
+        return hostIdSet().subId( Grid::template getHostEntity< 0 >( entity ), i, codim );
       }
 
-    private:
-      IdSet ( const IdSet & );
-      IdSet &operator= ( const IdSet & );
+      operator bool () const { return bool( hostIdSet_ ); }
 
-      const HostIdSet &hostIdSet_;
+    private:
+      const HostIdSet &hostIdSet () const
+      {
+        assert( *this );
+        return *hostIdSet_;
+      }
+
+      const HostIdSet *hostIdSet_;
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_IDSET_HH

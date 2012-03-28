@@ -218,10 +218,7 @@ namespace Dune
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
         removeHostGrid_( false ),
-        levelIndexSets_( hostGrid_->maxLevel()+1, (LevelIndexSet *) 0 ),
-        leafIndexSet_( 0 ),
-        globalIdSet_( 0 ),
-        localIdSet_( 0 )
+        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr )
     {}
 
     /** \brief constructor
@@ -236,24 +233,13 @@ namespace Dune
       : hostGrid_( hostGrid ),
         coordFunction_( *coordFunction ),
         removeHostGrid_( true ),
-        levelIndexSets_( hostGrid_->maxLevel()+1, (LevelIndexSet *) 0 ),
-        leafIndexSet_( 0 ),
-        globalIdSet_( 0 ),
-        localIdSet_( 0 )
+        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr )
     {}
 
     /** \brief destructor
      */
     ~GeometryGrid ()
     {
-      if( localIdSet_ )
-        delete localIdSet_;
-      if( globalIdSet_ )
-        delete globalIdSet_;
-
-      if( leafIndexSet_ )
-        delete leafIndexSet_;
-
       for( unsigned int i = 0; i < levelIndexSets_.size(); ++i )
       {
         if( levelIndexSets_[ i ] )
@@ -399,17 +385,17 @@ namespace Dune
     const GlobalIdSet &globalIdSet () const
     {
       if( !globalIdSet_ )
-        globalIdSet_ = new GlobalIdSet( hostGrid().globalIdSet() );
+        globalIdSet_ = GlobalIdSet( hostGrid().globalIdSet() );
       assert( globalIdSet_ );
-      return *globalIdSet_;
+      return globalIdSet_;
     }
 
     const LocalIdSet &localIdSet () const
     {
       if( !localIdSet_ )
-        localIdSet_ = new LocalIdSet( hostGrid().localIdSet() );
+        localIdSet_ = LocalIdSet( hostGrid().localIdSet() );
       assert( localIdSet_ );
-      return *localIdSet_;
+      return localIdSet_;
     }
 
     const LevelIndexSet &levelIndexSet ( int level ) const
@@ -431,9 +417,9 @@ namespace Dune
     const LeafIndexSet &leafIndexSet () const
     {
       if( !leafIndexSet_ )
-        leafIndexSet_ = new LeafIndexSet( hostGrid().leafIndexSet() );
+        leafIndexSet_ = LeafIndexSet( hostGrid().leafIndexSet() );
       assert( leafIndexSet_ );
-      return *leafIndexSet_;
+      return leafIndexSet_;
     }
 
     void globalRefine ( int refCount )
@@ -664,10 +650,10 @@ namespace Dune
 
       for( int i = newNumLevels; i < oldNumLevels; ++i )
       {
-        if( levelIndexSets_[ i ] != 0 )
+        if( levelIndexSets_[ i ] )
           delete levelIndexSets_[ i ];
       }
-      levelIndexSets_.resize( newNumLevels, (LevelIndexSet *)0 );
+      levelIndexSets_.resize( newNumLevels, nullptr );
     }
 
     /** \} */
@@ -699,9 +685,9 @@ namespace Dune
     CoordFunction &coordFunction_;
     bool removeHostGrid_;
     mutable std::vector< LevelIndexSet * > levelIndexSets_;
-    mutable LeafIndexSet *leafIndexSet_;
-    mutable GlobalIdSet *globalIdSet_;
-    mutable LocalIdSet *localIdSet_;
+    mutable LeafIndexSet leafIndexSet_;
+    mutable GlobalIdSet globalIdSet_;
+    mutable LocalIdSet localIdSet_;
     mutable typename Traits::EntityAllocatorTable entityAllocators_;
   };
 
