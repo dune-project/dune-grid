@@ -20,12 +20,6 @@ namespace Dune
     template< class Traits, bool fake = Traits::fake >
     class Iterator;
 
-    template< int codim, PartitionIteratorType pitype, class Grid >
-    class LeafIterator;
-
-    template< int codim, PartitionIteratorType pitype, class Grid >
-    class LevelIterator;
-
     template< class Grid >
     class HierarchicIterator;
 
@@ -301,7 +295,7 @@ namespace Dune
     struct LeafIteratorTraits
       : public EntityPointerTraits< codim, Grid >
     {
-      typedef typename remove_const< Grid >::type::Traits::HostGrid HostGrid;
+      typedef typename EntityPointerTraits< codim, Grid >::HostGrid HostGrid;
 
       typedef PartitionIteratorFilter< codim, pitype, HostGrid > Filter;
 
@@ -345,24 +339,6 @@ namespace Dune
 
 
 
-    // LeafIterator
-    // ------------
-
-    template< int codim, PartitionIteratorType pitype, class Grid >
-    struct LeafIterator
-      : public Iterator< LeafIteratorTraits< codim, pitype, Grid > >
-    {
-      typedef LeafIteratorTraits< codim, pitype, Grid > Traits;
-
-      typedef typename Traits::IteratorType IteratorType;
-
-      LeafIterator ( const Grid &grid, IteratorType type )
-        : Iterator< Traits >( grid, -1, type )
-      {}
-    };
-
-
-
     // LevelIteratorTraits
     // -------------------
 
@@ -370,7 +346,7 @@ namespace Dune
     struct LevelIteratorTraits
       : public EntityPointerTraits< codim, Grid >
     {
-      typedef typename remove_const< Grid >::type::Traits::HostGrid HostGrid;
+      typedef typename EntityPointerTraits< codim, Grid >::HostGrid HostGrid;
 
       typedef PartitionIteratorFilter< codim, pitype, HostGrid > Filter;
 
@@ -410,24 +386,6 @@ namespace Dune
       {
         return hostGrid.levelIndexSet( level );
       }
-    };
-
-
-
-    // LevelIterator
-    // -------------
-
-    template< int codim, PartitionIteratorType pitype, class Grid >
-    struct LevelIterator
-      : public Iterator< LevelIteratorTraits< codim, pitype, Grid > >
-    {
-      typedef LevelIteratorTraits< codim, pitype, Grid > Traits;
-
-      typedef typename Traits::IteratorType IteratorType;
-
-      LevelIterator ( const Grid &grid, int level, IteratorType type )
-        : Iterator< Traits >( grid, level, type )
-      {}
     };
 
 

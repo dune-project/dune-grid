@@ -126,13 +126,15 @@ namespace Dune
     // GridFamily
     // ----------
 
-    template< class HostGrid, class CoordFunction, class Allocator >
+    template< class HG, class CF, class Allocator >
     struct GridFamily
     {
       struct Traits
-        : public ExportParams< HostGrid, CoordFunction >
       {
-        typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
+        typedef GeometryGrid< HG, CF, Allocator > Grid;
+
+        typedef HG HostGrid;
+        typedef CF CoordFunction;
 
         typedef typename HostGrid::ctype ctype;
 
@@ -169,10 +171,11 @@ namespace Dune
           template< PartitionIteratorType pitype >
           struct Partition
           {
-            typedef Dune::EntityIterator< codim, const Grid, GeoGrid::LeafIterator< codim, pitype, const Grid > >
-            LeafIterator;
-            typedef Dune::EntityIterator< codim, const Grid, GeoGrid::LevelIterator< codim, pitype, const Grid > >
-            LevelIterator;
+            typedef GeoGrid::LeafIteratorTraits< codim, pitype, const Grid > LeafIteratorTraits;
+            typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< LeafIteratorTraits > > LeafIterator;
+
+            typedef GeoGrid::LevelIteratorTraits< codim, pitype, const Grid > LevelIteratorTraits;
+            typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< LevelIteratorTraits > > LevelIterator;
           };
 
           typedef typename Partition< All_Partition >::LeafIterator LeafIterator;

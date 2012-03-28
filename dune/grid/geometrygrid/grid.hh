@@ -343,81 +343,57 @@ namespace Dune
     template< int codim >
     typename Codim< codim >::LevelIterator lbegin ( int level ) const
     {
-      typedef MakeableInterfaceObject< typename Codim< codim >::LevelIterator >
-      MakeableIterator;
-      typedef typename MakeableIterator::ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl::Traits::begin ) );
+      return lbegin< codim, All_Partition >( level );
     }
 
     template< int codim >
     typename Codim< codim >::LevelIterator lend ( int level ) const
     {
-      typedef MakeableInterfaceObject< typename Codim< codim >::LevelIterator >
-      MakeableIterator;
-      typedef typename MakeableIterator::ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl::Traits::end ) );
+      return lend< codim, All_Partition >( level );
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LevelIterator
     lbegin ( int level ) const
     {
-      typedef MakeableInterfaceObject
-      < typename Codim< codim >::template Partition< pitype >::LevelIterator >
-      MakeableIterator;
-      typedef typename MakeableIterator::ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl::Traits::begin ) );
+      typedef typename Traits::template Codim< codim >::template Partition< pitype >::LevelIteratorTraits IteratorTraits;
+      return GeoGrid::Iterator< IteratorTraits >( *this, level, IteratorTraits::begin );
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LevelIterator
     lend ( int level ) const
     {
-      typedef MakeableInterfaceObject
-      < typename Codim< codim >::template Partition< pitype >::LevelIterator >
-      MakeableIterator;
-      typedef typename MakeableIterator::ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl::Traits::end ) );
+      typedef typename Traits::template Codim< codim >::template Partition< pitype >::LevelIteratorTraits IteratorTraits;
+      return GeoGrid::Iterator< IteratorTraits >( *this, level, IteratorTraits::end );
     }
 
     template< int codim >
     typename Codim< codim >::LeafIterator leafbegin () const
     {
-      typedef MakeableInterfaceObject< typename Codim< codim >::LeafIterator >
-      MakeableIterator;
-      typedef typename MakeableIterator::ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl::Traits::begin ) );
+      return leafbegin< codim, All_Partition >();
     }
 
     template< int codim >
     typename Codim< codim >::LeafIterator leafend () const
     {
-      typedef MakeableInterfaceObject< typename Codim< codim >::LeafIterator >
-      MakeableIterator;
-      typedef typename MakeableIterator::ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl::Traits::end ) );
+      return leafend< codim, All_Partition >();
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LeafIterator
     leafbegin () const
     {
-      typedef MakeableInterfaceObject
-      < typename Codim< codim >::template Partition< pitype >::LeafIterator >
-      MakeableIterator;
-      typedef typename MakeableIterator::ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl::Traits::begin ) );
+      typedef typename Traits::template Codim< codim >::template Partition< pitype >::LeafIteratorTraits IteratorTraits;
+      return GeoGrid::Iterator< IteratorTraits >( *this, -1, IteratorTraits::begin );
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LeafIterator
     leafend () const
     {
-      typedef MakeableInterfaceObject
-      < typename Codim< codim >::template Partition< pitype >::LeafIterator >
-      MakeableIterator;
-      typedef typename MakeableIterator::ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl::Traits::end ) );
+      typedef typename Traits::template Codim< codim >::template Partition< pitype >::LeafIteratorTraits IteratorTraits;
+      return GeoGrid::Iterator< IteratorTraits >( *this, -1, IteratorTraits::end );
     }
 
     const GlobalIdSet &globalIdSet () const
