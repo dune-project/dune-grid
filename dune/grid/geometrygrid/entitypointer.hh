@@ -21,7 +21,7 @@ namespace Dune
     template< int, int, class >
     class Entity;
 
-    template< class HostGrid, class CoordFunction >
+    template< class, class >
     struct ExportParams;
 
 

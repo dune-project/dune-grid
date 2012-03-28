@@ -40,13 +40,14 @@ namespace Dune
     template< int codim, class Grid >
     struct PartitionIteratorFilter< codim, Interior_Partition, Grid >
     {
-      static const int dimension = Grid::dimension;
+      static const int dimension = remove_const< Grid >::type::dimension;
       static const int codimension = codim;
 
       static const PartitionIteratorType Element_Partition = Interior_Partition;
 
-      typedef typename Grid::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< typename Grid::ctype, dimension > ReferenceElement;
+      typedef typename remove_const< Grid >::type::ctype ctype;
+      typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
+      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -66,13 +67,14 @@ namespace Dune
     template< int codim, class Grid >
     struct PartitionIteratorFilter< codim, InteriorBorder_Partition, Grid >
     {
-      static const int dimension = Grid::dimension;
+      static const int dimension = remove_const< Grid >::type::dimension;
       static const int codimension = codim;
 
       static const PartitionIteratorType Element_Partition = Interior_Partition;
 
-      typedef typename Grid::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< typename Grid::ctype, dimension > ReferenceElement;
+      typedef typename remove_const< Grid >::type::ctype ctype;
+      typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
+      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -84,13 +86,14 @@ namespace Dune
     template< int codim, class Grid >
     struct PartitionIteratorFilter< codim, Overlap_Partition, Grid >
     {
-      static const int dimension = Grid::dimension;
+      static const int dimension = remove_const< Grid >::type::dimension;
       static const int codimension = codim;
 
       static const PartitionIteratorType Element_Partition = Overlap_Partition;
 
-      typedef typename Grid::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< typename Grid::ctype, dimension > ReferenceElement;
+      typedef typename remove_const< Grid >::type::ctype ctype;
+      typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
+      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -113,13 +116,14 @@ namespace Dune
     template< int codim, class Grid >
     struct PartitionIteratorFilter< codim, OverlapFront_Partition, Grid >
     {
-      static const int dimension = Grid::dimension;
+      static const int dimension = remove_const< Grid >::type::dimension;
       static const int codimension = codim;
 
       static const PartitionIteratorType Element_Partition = Overlap_Partition;
 
-      typedef typename Grid::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< typename Grid::ctype, dimension > ReferenceElement;
+      typedef typename remove_const< Grid >::type::ctype ctype;
+      typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
+      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -131,13 +135,14 @@ namespace Dune
     template< int codim, class Grid >
     struct PartitionIteratorFilter< codim, All_Partition, Grid >
     {
-      static const int dimension = Grid::dimension;
+      static const int dimension = remove_const< Grid >::type::dimension;
       static const int codimension = codim;
 
       static const PartitionIteratorType Element_Partition = All_Partition;
 
-      typedef typename Grid::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< typename Grid::ctype, dimension > ReferenceElement;
+      typedef typename remove_const< Grid >::type::ctype ctype;
+      typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
+      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -149,13 +154,14 @@ namespace Dune
     template< int codim, class Grid >
     struct PartitionIteratorFilter< codim, Ghost_Partition, Grid >
     {
-      static const int dimension = Grid::dimension;
+      static const int dimension = remove_const< Grid >::type::dimension;
       static const int codimension = codim;
 
       static const PartitionIteratorType Element_Partition = Ghost_Partition;
 
-      typedef typename Grid::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< typename Grid::ctype, dimension > ReferenceElement;
+      typedef typename remove_const< Grid >::type::ctype ctype;
+      typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
+      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -194,7 +200,7 @@ namespace Dune
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
-        : Base( grid, Traits::getHostEntityIterator( grid, level, type ) )
+        : Base( grid, Traits::getHostEntityIterator( grid.hostGrid(), level, type ) )
       {}
 
       void increment ()
@@ -237,9 +243,9 @@ namespace Dune
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
-        : Base( grid, Traits::getHostElementIterator( grid, level, type ), -1 ),
-          hostEnd_( Traits::getHostElementIterator( grid, level, Traits::end ) ),
-          hostIndexSet_( &Traits::getHostIndexSet( grid, level ) )
+        : Base( grid, Traits::getHostElementIterator( grid.hostGrid(), level, type ), -1 ),
+          hostEnd_( Traits::getHostElementIterator( grid.hostGrid(), level, Traits::end ) ),
+          hostIndexSet_( &Traits::getHostIndexSet( grid.hostGrid(), level ) )
       {
         if( hostElementIterator_ != hostEnd_ )
         {
@@ -295,9 +301,7 @@ namespace Dune
     struct LeafIteratorTraits
       : public EntityPointerTraits< codim, Grid >
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
-
-      typedef typename Traits::HostGrid HostGrid;
+      typedef typename remove_const< Grid >::type::Traits::HostGrid HostGrid;
 
       typedef PartitionIteratorFilter< codim, pitype, HostGrid > Filter;
 
@@ -307,7 +311,7 @@ namespace Dune
       typedef typename HostGrid::template Codim< codim >
       ::template Partition< Entity_Partition >::LeafIterator
       HostEntityIterator;
-      typedef typename HostGrid :: template Codim< 0 >
+      typedef typename HostGrid::template Codim< 0 >
       ::template Partition< Element_Partition >::LeafIterator
       HostElementIterator;
 
@@ -316,26 +320,26 @@ namespace Dune
       enum IteratorType { begin, end };
 
       static HostEntityIterator
-      getHostEntityIterator ( const Grid &grid, int level, IteratorType type )
+      getHostEntityIterator ( const HostGrid &hostGrid, int level, IteratorType type )
       {
         if( type == begin )
-          return grid.hostGrid().template leafbegin< codim, Entity_Partition >();
+          return hostGrid.template leafbegin< codim, Entity_Partition >();
         else
-          return grid.hostGrid().template leafend< codim, Entity_Partition >();
+          return hostGrid.template leafend< codim, Entity_Partition >();
       }
 
       static HostElementIterator
-      getHostElementIterator ( const Grid &grid, int level, IteratorType type )
+      getHostElementIterator ( const HostGrid &hostGrid, int level, IteratorType type )
       {
         if( type == begin )
-          return grid.hostGrid().template leafbegin< 0, Element_Partition >();
+          return hostGrid.template leafbegin< 0, Element_Partition >();
         else
-          return grid.hostGrid().template leafend< 0, Element_Partition >();
+          return hostGrid.template leafend< 0, Element_Partition >();
       }
 
-      static const HostIndexSet &getHostIndexSet ( const Grid &grid, int level )
+      static const HostIndexSet &getHostIndexSet ( const HostGrid &hostGrid, int level )
       {
-        return grid.hostGrid().leafIndexSet();
+        return hostGrid.leafIndexSet();
       }
     };
 
@@ -366,9 +370,7 @@ namespace Dune
     struct LevelIteratorTraits
       : public EntityPointerTraits< codim, Grid >
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
-
-      typedef typename Traits::HostGrid HostGrid;
+      typedef typename remove_const< Grid >::type::Traits::HostGrid HostGrid;
 
       typedef PartitionIteratorFilter< codim, pitype, HostGrid > Filter;
 
@@ -387,26 +389,26 @@ namespace Dune
       enum IteratorType { begin, end };
 
       static HostEntityIterator
-      getHostEntityIterator ( const Grid &grid, int level, IteratorType type )
+      getHostEntityIterator ( const HostGrid &hostGrid, int level, IteratorType type )
       {
         if( type == begin )
-          return grid.hostGrid().template lbegin< codim, Entity_Partition >( level );
+          return hostGrid.template lbegin< codim, Entity_Partition >( level );
         else
-          return grid.hostGrid().template lend< codim, Entity_Partition >( level );
+          return hostGrid.template lend< codim, Entity_Partition >( level );
       }
 
       static HostElementIterator
-      getHostElementIterator ( const Grid &grid, int level, IteratorType type )
+      getHostElementIterator ( const HostGrid &hostGrid, int level, IteratorType type )
       {
         if( type == begin )
-          return grid.hostGrid().template lbegin< 0, Element_Partition >( level );
+          return hostGrid.template lbegin< 0, Element_Partition >( level );
         else
-          return grid.hostGrid().template lend< 0, Element_Partition >( level );
+          return hostGrid.template lend< 0, Element_Partition >( level );
       }
 
-      static const HostIndexSet &getHostIndexSet ( const Grid &grid, int level )
+      static const HostIndexSet &getHostIndexSet ( const HostGrid &hostGrid, int level )
       {
-        return grid.hostGrid().levelIndexSet( level );
+        return hostGrid.levelIndexSet( level );
       }
     };
 
