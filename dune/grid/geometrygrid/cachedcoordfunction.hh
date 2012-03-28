@@ -4,6 +4,7 @@
 #define DUNE_GEOGRID_CACHEDCOORDFUNCTION_HH
 
 #include <cassert>
+#include <memory>
 
 #include <dune/common/typetraits.hh>
 
@@ -19,7 +20,7 @@ namespace Dune
   // Internal Forward Declarations
   // -----------------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Allocator >
   class CachedCoordFunction;
 
 
@@ -30,20 +31,20 @@ namespace Dune
   namespace GeoGrid
   {
 
-    template< class HostGrid, class Coordinate >
+    template< class HostGrid, class Coordinate, class Allocator = std::allocator< Coordinate > >
     class CoordCache
     {
-      typedef CoordCache< HostGrid, Coordinate > This;
+      typedef CoordCache< HostGrid, Coordinate, Allocator > This;
 
       static const unsigned int dimension = HostGrid::dimension;
 
       typedef typename HostGrid::template Codim< dimension >::Entity Vertex;
 
-      typedef PersistentContainer< HostGrid, Coordinate > DataCache;
+      typedef PersistentContainer< HostGrid, Coordinate, Allocator > DataCache;
 
     public:
-      explicit CoordCache ( const HostGrid &hostGrid )
-        : data_( hostGrid, dimension )
+      explicit CoordCache ( const HostGrid &hostGrid, const Allocator &allocator = Allocator() )
+        : data_( hostGrid, dimension, allocator )
       {}
 
       template< class Entity >
@@ -89,7 +90,7 @@ namespace Dune
   // CachedCoordFunction
   // -------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Allocator = std::allocator< void > >
   class CachedCoordFunction
     : public DiscreteCoordFunction< typename CoordFunction::ctype, CoordFunction::dimRange, CachedCoordFunction< HostGrid, CoordFunction > >
   {
@@ -102,15 +103,16 @@ namespace Dune
     typedef typename Base::RangeVector RangeVector;
 
   private:
-    typedef GeoGrid::CoordCache< HostGrid, RangeVector > Cache;
+    typedef GeoGrid::CoordCache< HostGrid, RangeVector, typename Allocator::template rebind< RangeVector >::other > Cache;
 
   public:
     explicit
     CachedCoordFunction ( const HostGrid &hostGrid,
-                          const CoordFunction &coordFunction = CoordFunction() )
+                          const CoordFunction &coordFunction = CoordFunction(),
+                          const Allocator &allocator = Allocator() )
       : hostGrid_( hostGrid ),
         coordFunction_( coordFunction ),
-        cache_( hostGrid )
+        cache_( hostGrid, allocator )
     {
       buildCache();
     }
@@ -152,8 +154,8 @@ namespace Dune
   // Implementation of CachedCoordFunction
   // -------------------------------------
 
-  template< class HostGrid, class CoordFunction >
-  inline void CachedCoordFunction< HostGrid, CoordFunction >::buildCache ()
+  template< class HostGrid, class CoordFunction, class Allocator >
+  inline void CachedCoordFunction< HostGrid, CoordFunction, Allocator >::buildCache ()
   {
     typedef typename HostGrid::template Codim< 0 >::Entity Element;
     typedef typename HostGrid::LevelGridView MacroView;
@@ -177,9 +179,9 @@ namespace Dune
   }
 
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid, class CoordFunction, class Allocator >
   template< class HostEntity >
-  inline void CachedCoordFunction< HostGrid, CoordFunction >
+  inline void CachedCoordFunction< HostGrid, CoordFunction, Allocator >
   ::insertEntity ( const HostEntity &hostEntity )
   {
     typedef GeoGrid::CoordFunctionCaller< HostEntity, typename CoordFunction::Interface >
