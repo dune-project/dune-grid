@@ -296,7 +296,7 @@ namespace Dune
       }
     };
 
-  }
+  } // namespace GeoGrid
 
 } // namespace Dune
 

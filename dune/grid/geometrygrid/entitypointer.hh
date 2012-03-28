@@ -5,19 +5,12 @@
 
 #include <dune/grid/common/grid.hh>
 
+#include <dune/grid/geometrygrid/declaration.hh>
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/entityseed.hh>
 
 namespace Dune
 {
-
-  // External Forward Declarations
-  // -----------------------------
-
-  template< class HostGrid, class CoordFunction, class Allocator >
-  class GeometryGrid;
-
-
 
   namespace GeoGrid
   {
@@ -404,8 +397,8 @@ namespace Dune
       HostElementIterator hostElementIterator_;
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_ENTITYPOINTER_HH

@@ -8,17 +8,10 @@
 #include <dune/common/forloop.hh>
 
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/geometrygrid/declaration.hh>
 
 namespace Dune
 {
-
-  // External Forward Declarations
-  // -----------------------------
-
-  template< class HostGrid, class CoordFunction, class Allocator >
-  class GeometryGrid;
-
-
 
   // Capabilities
   // ------------
@@ -153,8 +146,8 @@ namespace Dune
       }
     };
 
-  }
+  } // namespace Capabilities
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_CAPABILITIES_HH

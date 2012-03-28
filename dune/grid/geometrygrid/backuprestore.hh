@@ -6,6 +6,7 @@
 #include <dune/grid/common/backuprestore.hh>
 #include <dune/grid/utility/grapedataioformattypes.hh>
 
+#include <dune/grid/geometrygrid/declaration.hh>
 #include <dune/grid/geometrygrid/capabilities.hh>
 
 namespace Dune

@@ -4,9 +4,9 @@
 #define DUNE_GEOGRID_DATAHANDLE_HH
 
 #include <dune/common/typetraits.hh>
+
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/grid.hh>
-
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/entity.hh>
 
@@ -139,8 +139,8 @@ namespace Dune
       MakeableEntity *entity_;
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_DATAHANDLE_HH

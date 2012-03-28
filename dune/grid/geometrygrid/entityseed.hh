@@ -90,8 +90,8 @@ namespace Dune
       unsigned int subEntity_;
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_ENTITYSEED_HH

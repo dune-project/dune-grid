@@ -3,18 +3,11 @@
 #ifndef DUNE_GEOGRID_PERSISTENTCONTAINER_HH
 #define DUNE_GEOGRID_PERSISTENTCONTAINER_HH
 
+#include <dune/grid/geometrygrid/declaration.hh>
 #include <dune/grid/utility/persistentcontainerwrapper.hh>
 
 namespace Dune
 {
-
-  // External Forward Declarations
-  // -----------------------------
-
-  template< class HostGrid, class CoordFunction, class Allocator >
-  class GeometryGrid;
-
-
 
   // PersistentContainer for GeometryGrid
   // ------------------------------------
@@ -33,6 +26,6 @@ namespace Dune
     {}
   };
 
-} // end namespace Dune
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_PERSISTENTCONTAINER_HH

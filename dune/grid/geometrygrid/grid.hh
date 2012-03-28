@@ -12,6 +12,7 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid/geometrygrid/capabilities.hh>
+#include <dune/grid/geometrygrid/declaration.hh>
 #include <dune/grid/geometrygrid/entity.hh>
 #include <dune/grid/geometrygrid/entityseed.hh>
 #include <dune/grid/geometrygrid/entitypointer.hh>
@@ -27,17 +28,6 @@
 
 namespace Dune
 {
-
-  // Forward Declarations
-  // --------------------
-
-  template< class HostGrid >
-  class DefaultCoordFunction;
-
-  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid >, class Allocator = std::allocator< void > >
-  class GeometryGrid;
-
-
 
   // DefaultCoordFunction
   // --------------------
@@ -282,7 +272,7 @@ namespace Dune
    *
    *  \nosubgrouping
    */
-  template< class HostGrid, class CoordFunction, class Allocator >
+  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid >, class Allocator = std::allocator< void > >
   class GeometryGrid
   /** \cond */
     : public GridDefaultImplementation

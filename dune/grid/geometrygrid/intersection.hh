@@ -3,19 +3,12 @@
 #ifndef DUNE_GEOGRID_INTERSECTION_HH
 #define DUNE_GEOGRID_INTERSECTION_HH
 
+#include <dune/grid/geometrygrid/declaration.hh>
 #include <dune/grid/geometrygrid/entitypointer.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
 
 namespace Dune
 {
-
-  // External Forward Declataions
-  // ----------------------------
-
-  template< class HostGrid, class CoordFunction, class Allocator >
-  class GeometryGrid;
-
-
 
   namespace GeoGrid
   {
@@ -268,8 +261,8 @@ namespace Dune
       {}
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_INTERSECTION_HH

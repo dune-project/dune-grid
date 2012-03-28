@@ -5,18 +5,11 @@
 
 #include <dune/geometry/referenceelements.hh>
 
+#include <dune/grid/geometrygrid/declaration.hh>
 #include <dune/grid/geometrygrid/entitypointer.hh>
 
 namespace Dune
 {
-
-  // External Forward Declarations
-  // -----------------------------
-
-  template< class HostGrid, class CoordFunction, class Allocator >
-  class GeometryGrid;
-
-
 
   namespace GeoGrid
   {

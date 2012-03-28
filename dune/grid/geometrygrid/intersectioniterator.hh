@@ -180,8 +180,8 @@ namespace Dune
       {}
     };
 
-  }
+  } // namespace GeoGrid
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_INTERSECTIONITERATOR_HH
