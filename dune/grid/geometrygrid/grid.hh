@@ -92,6 +92,7 @@ namespace Dune
 
     template< int, class, bool > friend class GeoGrid::EntityBase;
     template< class, bool > friend class GeoGrid::EntityPointer;
+    template< int, int, class > friend class GeoGrid::Geometry;
     template< class, class > friend class GeoGrid::Intersection;
     template< class > friend class GeoGrid::IntersectionIterator;
     template< class, class > friend class GeoGrid::IdSet;
@@ -215,11 +216,12 @@ namespace Dune
      *  \param[in]  hostGrid       reference to the grid to wrap
      *  \param[in]  coordFunction  reference to the coordinate function
      */
-    GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction )
+    GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
         removeHostGrid_( false ),
-        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr )
+        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
+        storageAllocator_( allocator )
     {}
 
     /** \brief constructor
@@ -230,11 +232,12 @@ namespace Dune
      *  \param[in]  hostGrid       pointer to the grid to wrap
      *  \param[in]  coordFunction  pointer to the coordinate function
      */
-    GeometryGrid ( HostGrid *hostGrid, CoordFunction *coordFunction )
+    GeometryGrid ( HostGrid *hostGrid, CoordFunction *coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( hostGrid ),
         coordFunction_( *coordFunction ),
         removeHostGrid_( true ),
-        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr )
+        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
+        storageAllocator_( allocator )
     {}
 
     /** \brief destructor
@@ -681,15 +684,34 @@ namespace Dune
       return entityAllocators_[ codimVariable ];
     }
 
+    template< int codim >
+    char *allocateMappingStorage ( const GeometryType &gt ) const
+    {
+      assert( gt.dim() == Traits::dimension - codim );
+      typedef GeoGrid::MappingFamily< Traits::dimensionworld, const Grid > MappingFamily;
+      typedef typename MappingFamily::template Codim< codim >::MappingProvider MappingProvider;
+      return storageAllocator_.allocate( MappingProvider::mappingSize( gt.id() ) );
+    }
+
+    template< int codim >
+    void deallocateMappingStorage ( const GeometryType &gt, char *p ) const
+    {
+      assert( gt.dim() == Traits::dimension - codim );
+      typedef GeoGrid::MappingFamily< Traits::dimensionworld, const Grid > MappingFamily;
+      typedef typename MappingFamily::template Codim< codim >::MappingProvider MappingProvider;
+      storageAllocator_.deallocate( p, MappingProvider::mappingSize( gt.id() ) );
+    }
+
   private:
     HostGrid *const hostGrid_;
     CoordFunction &coordFunction_;
     bool removeHostGrid_;
-    mutable std::vector< LevelIndexSet * > levelIndexSets_;
+    mutable std::vector< LevelIndexSet *, Allocator > levelIndexSets_;
     mutable LeafIndexSet leafIndexSet_;
     mutable GlobalIdSet globalIdSet_;
     mutable LocalIdSet localIdSet_;
     mutable typename Traits::EntityAllocatorTable entityAllocators_;
+    mutable typename Allocator::template rebind< char >::other storageAllocator_;
   };
 
 

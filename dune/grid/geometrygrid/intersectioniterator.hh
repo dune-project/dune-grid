@@ -53,7 +53,7 @@ namespace Dune
       IntersectionIterator ( const Entity &inside,
                              const HostIntersectionIterator &hostIterator )
         : hostIterator_( hostIterator ),
-          intersection_( IntersectionImpl( inside.grid(), inside.geometry() ) )
+          intersection_( IntersectionImpl( inside.geometry() ) )
       {}
 
       IntersectionIterator ( const IntersectionIterator &other )

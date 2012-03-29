@@ -57,21 +57,20 @@ namespace Dune
       typedef typename Traits::template Codim< 0 >::GeometryImpl ElementGeometryImpl;
 
     public:
-      Intersection ( const Grid &grid, const ElementGeometry &insideGeo )
-        : grid_( &grid ),
-          insideGeo_( Grid::getRealImplementation( insideGeo ) ),
-          hostIntersection_( 0 )
+      explicit Intersection ( const ElementGeometry &insideGeo )
+        : insideGeo_( Grid::getRealImplementation( insideGeo ) ),
+          hostIntersection_( 0 ),
+          geo_( grid() )
       {}
 
       Intersection ( const Intersection &other )
-        : grid_( other.grid_ ),
-          insideGeo_( other.insideGeo_ ),
-          hostIntersection_( 0 )
+        : insideGeo_( other.insideGeo_ ),
+          hostIntersection_( 0 ),
+          geo_( grid() )
       {}
 
       const Intersection &operator= ( const Intersection &other )
       {
-        grid_ = other.grid_;
         insideGeo_ = other.insideGeo_;
         invalidate();
         return *this;
@@ -117,7 +116,7 @@ namespace Dune
         if( !geo_ )
         {
           CoordVector coords( insideGeo_, geometryInInside() );
-          geo_ = GeometryImpl( type(), coords );
+          geo_ = GeometryImpl( grid(), type(), coords );
         }
         return Geometry( geo_ );
       }
@@ -192,12 +191,12 @@ namespace Dune
         return *hostIntersection_;
       }
 
-      const Grid &grid () const { return *grid_; }
+      const Grid &grid () const { return insideGeo_.grid(); }
 
       void invalidate ()
       {
         hostIntersection_ = 0;
-        geo_ = GeometryImpl();
+        geo_ = GeometryImpl( grid() );
       }
 
       void initialize ( const HostIntersection &hostIntersection )
@@ -207,7 +206,6 @@ namespace Dune
       }
 
     private:
-      const Grid *grid_;
       ElementGeometryImpl insideGeo_;
       const HostIntersection *hostIntersection_;
       mutable GeometryImpl geo_;
@@ -232,8 +230,8 @@ namespace Dune
     public:
       typedef typename Base::ElementGeometry ElementGeometry;
 
-      LeafIntersection ( const Grid &grid, const ElementGeometry &insideGeo )
-        : Base( grid, insideGeo )
+      explicit LeafIntersection ( const ElementGeometry &insideGeo )
+        : Base( insideGeo )
       {}
     };
 
@@ -256,8 +254,8 @@ namespace Dune
     public:
       typedef typename Base::ElementGeometry ElementGeometry;
 
-      LevelIntersection ( const Grid &grid, const ElementGeometry &insideGeo )
-        : Base( grid, insideGeo )
+      explicit LevelIntersection ( const ElementGeometry &insideGeo )
+        : Base( insideGeo )
       {}
     };
 

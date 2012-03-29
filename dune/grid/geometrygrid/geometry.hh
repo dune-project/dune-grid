@@ -48,8 +48,8 @@ namespace Dune
 
 
 
-    // Mapping
-    // -------
+    // MappingFamily
+    // -------------
 
     template< int cdim, class Grid >
     class MappingFamily
@@ -84,6 +84,8 @@ namespace Dune
       {
         typedef GenericGeometry::MappingProvider< ElementMapping, codim > MappingProvider;
         typedef typename MappingProvider::Mapping Mapping;
+
+        static const unsigned int maxMappingSize = MappingProvider::maxMappingSize;
       };
     };
 
@@ -124,38 +126,43 @@ namespace Dune
       // for cenvencience: Jacobian is the name of the type in the geometry interface
       typedef JacobianInverseTransposed Jacobian;
 
-      Geometry ()
-        : mapping_( nullptr )
+      Geometry ( const Grid &grid )
+        : grid_( &grid ),
+          mapping_( nullptr )
       {}
 
       template< class CoordVector >
-      Geometry ( const GeometryType &type, const CoordVector &coords )
+      Geometry ( const Grid &grid, const GeometryType &type, const CoordVector &coords )
+        : grid_( &grid )
       {
-        mapping_ = MappingProvider::construct( type.id(), coords, mappingStorage_ );
+        char *mappingStorage = grid.template allocateMappingStorage< codimension >( type );
+        mapping_ = MappingProvider::construct( type.id(), coords, mappingStorage );
       }
 
       template< int fatherdim >
       Geometry ( const Geometry< fatherdim, cdim, Grid > &father, int i )
+        : grid_( father.grid_ )
       {
         const unsigned int codim = fatherdim - mydim;
-        mapping_ = father.mapping_->template trace< codim >( i, mappingStorage_ );
+        char *mappingStorage = grid().template allocateMappingStorage< codimension >( type );
+        mapping_ = father.mapping_->template trace< codim >( i, mappingStorage );
       }
 
       Geometry ( const This &other )
-        : mapping_( other.mapping_ ? other.mapping_->clone( mappingStorage_ ) : nullptr )
+        : grid_( other.grid_ ),
+          mapping_( copyMapping( other ) )
       {}
 
-      ~Geometry ()
-      {
-        if( mapping_ )
-          mapping_->~Mapping();
-      }
+      ~Geometry () { destroyMapping(); }
 
       const This &operator= ( const This &other )
       {
-        if( mapping_ )
-          mapping_->~Mapping();
-        mapping_ = (other.mapping_) ? other.mapping_->clone( mappingStorage_ ) : nullptr;
+        if( mapping_ != other.mapping_ )
+        {
+          destroyMapping();
+          grid_ = other.grid_;
+          mapping_ = copyMapping( other );
+        }
         return *this;
       }
 
@@ -177,9 +184,32 @@ namespace Dune
       const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianTransposed( local ); }
       const JacobianInverseTransposed &jacobianInverseTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianInverseTransposed( local ); }
 
+      const Grid &grid () const { return *grid_; }
+
     private:
+      void destroyMapping ()
+      {
+        if( mapping_ )
+        {
+          const GeometryType gt = type();
+          mapping_->~Mapping();
+          grid().template deallocateMappingStorage< codimension >( gt, (char *)mapping_ );
+        }
+      }
+
+      static Mapping *copyMapping ( const This &other )
+      {
+        if( other.mapping_ )
+        {
+          char *mappingStorage = other.grid().template allocateMappingStorage< codimension >( other.type() );
+          return other.mapping_->clone( mappingStorage );
+        }
+        else
+          return nullptr;
+      }
+
+      const Grid *grid_;
       Mapping* mapping_;
-      char mappingStorage_[ MappingProvider::maxMappingSize ];
     };
 
   } // namespace GeoGrid

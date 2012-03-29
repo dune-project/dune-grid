@@ -146,12 +146,12 @@ namespace Dune
        *        use.
        */
       EntityBase ( const Grid &grid, const HostEntity &hostEntity )
-        : grid_( &grid ),
+        : geo_( grid ),
           hostEntity_( &hostEntity )
       {}
 
       EntityBase ( const EntityBase &other )
-        : grid_( other.grid_ ),
+        : geo_( other.grid() ),
           hostEntity_( other.hostEntity_ )
       {}
 
@@ -209,7 +209,7 @@ namespace Dune
         if( !geo_ )
         {
           CoordVector coords( hostEntity(), grid().coordFunction() );
-          geo_ = GeometryImpl( type(), coords );
+          geo_ = GeometryImpl( grid(), type(), coords );
         }
         return Geometry( geo_ );
       }
@@ -222,10 +222,7 @@ namespace Dune
       /** \name Methods Supporting the Grid Implementation
        *  \{ */
 
-      const Grid &grid () const
-      {
-        return *grid_;
-      }
+      const Grid &grid () const { return geo_.grid(); }
 
       const HostEntity &hostEntity () const
       {
@@ -290,9 +287,8 @@ namespace Dune
       /** \} */
 
     private:
-      const Grid *grid_;
-      const HostEntity *hostEntity_;
       mutable GeometryImpl geo_;
+      const HostEntity *hostEntity_;
     };
 
 
@@ -382,13 +378,13 @@ namespace Dune
        *        use.
        */
       EntityBase ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : grid_( &grid ),
+        : geo_( grid ),
           hostElement_( &hostElement ),
           subEntity_( subEntity )
       {}
 
       EntityBase ( const EntityBase &other )
-        : grid_( other.grid_ ),
+        : geo_( other.grid() ),
           hostElement_( other.hostElement_ ),
           subEntity_( other.subEntity_ )
       {}
@@ -471,7 +467,7 @@ namespace Dune
         if( !geo_ )
         {
           CoordVector coords( hostElement(), subEntity_, grid().coordFunction() );
-          geo_ = GeometryImpl( type(), coords );
+          geo_ = GeometryImpl( grid(), type(), coords );
         }
         return Geometry( geo_ );
       }
@@ -483,10 +479,7 @@ namespace Dune
       /** \name Methods Supporting the Grid Implementation
        *  \{ */
 
-      const Grid &grid () const
-      {
-        return *grid_;
-      }
+      const Grid &grid () const { return geo_.grid(); }
 
       const HostEntity &hostEntity () const
       {
@@ -571,10 +564,9 @@ namespace Dune
       }
 
     private:
-      const Grid *grid_;
+      mutable GeometryImpl geo_;
       const HostElement *hostElement_;
       unsigned int subEntity_;
-      mutable GeometryImpl geo_;
     };
 
 
