@@ -1,11 +1,10 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_DGFPARSERONED_HH
-#define DUNE_DGFPARSERONED_HH
+#ifndef DUNE_GRID_FILE_IO_DGFPARSER_DGFONED_HH
+#define DUNE_GRID_FILE_IO_DGFPARSER_DGFONED_HH
 
 //- C++ includes
 #include <algorithm>
-#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <istream>
@@ -27,8 +26,6 @@ namespace
   // helper method used below
   double getfirst ( std::vector< double > v )
   {
-    assert( v.size() == 1 );
-    std::cout << "v[ 0 ] = " << v[ 0 ] << std::endl;
     return v[ 0 ];
   }
 }  // end anonymous namespace
@@ -176,7 +173,6 @@ namespace Dune
     if( !( vertexBlock.isactive() || intervalBlock.isactive() ))
       DUNE_THROW( DGFException, "No readable block found" );
 
-    int nvertices = 0;
     std::vector< std::vector< double > > vertices;
 
     // read vertices first
@@ -184,7 +180,7 @@ namespace Dune
     {
       int nparameter = 0;
       std::vector< std::vector< double > > parameter;
-      nvertices = vertexBlock.get( vertices, parameter, nparameter );
+      vertexBlock.get( vertices, parameter, nparameter );
 
       if( nparameter > 0 )
         std::cerr << "Warning: vertex parameters will be ignored" << std::endl;
@@ -201,26 +197,24 @@ namespace Dune
 
       int nintervals = intervalBlock.numIntervals();
       for( int i = 0; i < nintervals; ++i )
-        nvertices += intervalBlock.getVtx( i, vertices );
-    }
-
-    // remove duplicates
-    std::sort( vertices.begin(), vertices.end() );
-    std::vector< std::vector< double > >::iterator it = std::unique( vertices.begin(), vertices.end() );
-    vertices.erase( it, vertices.end() );
-    if( nvertices != int( vertices.size() ) )
-    {
-      std::cerr << "Warning: removed duplicate vertices" << std::endl;
-      nvertices = vertices.size();
+        intervalBlock.getVtx( i, vertices );
     }
 
     // copy to vector of doubles
-    std::vector< double > vtx( nvertices );
+    std::vector< double > vtx( vertices.size() );
     transform( vertices.begin(), vertices.end(), vtx.begin(), getfirst );
 
+    // remove duplicates
+    std::sort( vtx.begin(), vtx.end() );
+    std::vector< double >::iterator it = std::unique( vtx.begin(), vtx.end() );
+    vtx.erase( it, vtx.end() );
+    if( vertices.size() != vtx.size() )
+      std::cerr << "Warning: removed duplicate vertices" << std::endl;
+
+    // create grid
     grid_ = new OneDGrid( vtx );
   }
 
 } // end namespace Dune
 
-#endif // #ifndef DUNE_DGFPARSERONED_HH
+#endif // #ifndef DUNE_GRID_FILE_IO_DGFPARSER_DGFONED_HH
