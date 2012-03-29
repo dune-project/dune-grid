@@ -21,8 +21,7 @@ namespace Dune
   template< int mydim, int cdim, class GridImp >
   inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ()
     : geoImpl_(),
-      det_( 1.0 ),
-      up2Date_( false )
+      det_( 1.0 )
   {}
 
 
@@ -99,7 +98,10 @@ namespace Dune
   ALU2dGridGeometry< mydim, cdim, GridImp >::integrationElement ( const LocalCoordinate &local ) const
   {
     if ( eltype == ALU2DSPACE triangle || mydim < 2 )
+    {
+      assert( geoImpl_.valid() );
       return (mydim == 0 ? 1.0 : det_);
+    }
     else
       return geoImpl_.det(local);
   }
@@ -108,6 +110,7 @@ namespace Dune
   template< int mydim, int cdim, class GridImp >
   inline alu2d_ctype ALU2dGridGeometry< mydim, cdim, GridImp >::volume () const
   {
+    assert( geoImpl_.valid() );
     if( mydim == 2 )
     {
       switch( GridImp::elementType )
@@ -158,9 +161,6 @@ namespace Dune
     // store volume
     det_ = (geoImpl_.corners() == 3 ? 2 * item.area() : item.area());
 
-    // geom is up2date
-    up2Date_ = true;
-
     // geometry built
     return true;
   }
@@ -194,9 +194,6 @@ namespace Dune
     det_ = item.sidelength( aluFace );
     //assert( std::abs( det_ - geoImpl_.det( LocalCoordinate(0.5) ) ) < 1e-14 );
 
-    // geom is up2date
-    up2Date_ = true;
-
     // geometry built
     return true;
   }
@@ -214,9 +211,6 @@ namespace Dune
 
     // volume is already 1.0
 
-    // geom is up2date
-    up2Date_ = true;
-
     return true;
   }
 
@@ -232,9 +226,6 @@ namespace Dune
     // calculate volume
     LocalCoordinate local( 0.25 );
     det_ = geoImpl_.det( local );
-
-    // geom is up2date
-    up2Date_ = true;
 
     // geometry built
     return true;
@@ -285,9 +276,6 @@ namespace Dune
     // get length of faces
     det_ = refCoord.second[ aluFace ];
 
-    // geom is up2date
-    up2Date_ = true;
-
     // geometry built
     return true;
   }
@@ -304,9 +292,6 @@ namespace Dune
     // store volume which is a part of one
     det_ = myGeom.volume() / fatherGeom.volume();
     assert( (det_ > 0.0) && (det_ < 1.0) );
-
-    // geom is up2date
-    up2Date_ = true;
 
     return true;
   }

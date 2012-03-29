@@ -61,7 +61,7 @@ namespace Dune {
     level_ = level;
     face_ = face;
 
-    geoObj_.unsetUp2Date();
+    geoObj_.invalidate();
   }
 
 
@@ -75,6 +75,7 @@ namespace Dune {
   template<int cd, int dim, class GridImp>
   inline void ALU2dGridEntity<cd,dim,GridImp> :: removeElement() {
     item_ = 0;
+    geoObj_.invalidate();
   }
 
   //! Copy Constructor
@@ -92,10 +93,10 @@ namespace Dune {
   inline typename ALU2dGridEntity< cd, dim, GridImp >::Geometry
   ALU2dGridEntity< cd, dim, GridImp >::geometry () const
   {
-    if( !geoObj_.up2Date() )
+    if( !geoObj_.valid() )
       geoObj_.buildGeom( *item_,face_ );
 
-    assert( geoObj_.up2Date() );
+    assert( geoObj_.valid() );
     return Geometry( geoObj_ );
   }
 
@@ -168,10 +169,10 @@ namespace Dune {
   ALU2dGridEntity< 0, dim, GridImp >::geometry () const
   {
     assert( item_ != 0 );
-    if( !geoObj_.up2Date() )
+    if( !geoObj_.valid() )
       geoObj_.buildGeom( *item_ );
 
-    assert( geoObj_.up2Date() );
+    assert( geoObj_.valid() );
     return Geometry( geoObj_ );
   }
 
@@ -357,7 +358,7 @@ namespace Dune {
     item_= const_cast<HElementType *> (&element);
     isLeaf_  = ((*item_).down() == 0);
 
-    geoObj_.unsetUp2Date();
+    geoObj_.invalidate();
   }
 
   template<int dim, class GridImp>
@@ -375,13 +376,14 @@ namespace Dune {
     item_       = 0;
     isLeaf_     = false;
 
-    geoObj_.unsetUp2Date();
+    geoObj_.invalidate();
   }
 
   //! set item pointer to NULL
   template<int dim, class GridImp>
   inline void ALU2dGridEntity<0,dim,GridImp> :: removeElement() {
     item_ = 0;
+    geoObj_.invalidate();
   }
 
   //! compare 2 entities, which means compare the item pointers

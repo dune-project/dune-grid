@@ -249,9 +249,9 @@ namespace Dune
     // only in non-conform situation we use default method
     if( current.useOutside_ )
     {
-      if( !intersectionSelfLocal_.up2Date() )
+      if( !intersectionSelfLocal_.valid() )
         intersectionSelfLocal_.buildLocalGeom( inside()->geometry(), geometry() );
-      assert( intersectionSelfLocal_.up2Date() );
+      assert( intersectionSelfLocal_.valid() );
       return LocalGeometry( intersectionSelfLocal_ );
     }
     else
@@ -272,9 +272,9 @@ namespace Dune
     // only in non-conform situation we use default method
     if( (current.nFaces() != 3) || !conforming() )
     {
-      if( !intersectionNeighborLocal_.up2Date() )
+      if( !intersectionNeighborLocal_.valid() )
         intersectionNeighborLocal_.buildLocalGeom( outside()->geometry(), geometry() );
-      assert( intersectionNeighborLocal_.up2Date() );
+      assert( intersectionNeighborLocal_.valid() );
       return LocalGeometry( intersectionNeighborLocal_ );
     }
     else
@@ -292,7 +292,7 @@ namespace Dune
   {
     assert( current.inside() );
 
-    if( !intersectionGlobal_.up2Date() )
+    if( !intersectionGlobal_.valid() )
     {
       if( current.useOutside_ )
         intersectionGlobal_.buildGeom( *current.outside(), current.opposite() );
@@ -300,7 +300,7 @@ namespace Dune
         intersectionGlobal_.buildGeom( *current.inside(), current.index_ );
     }
 
-    assert( intersectionGlobal_.up2Date() );
+    assert( intersectionGlobal_.valid() );
     return Geometry( intersectionGlobal_ );
   }
 
@@ -316,9 +316,9 @@ namespace Dune
   template< class GridImp >
   inline void ALU2dGridIntersectionBase< GridImp >:: unsetUp2Date ()
   {
-    intersectionGlobal_.unsetUp2Date();
-    intersectionSelfLocal_.unsetUp2Date();
-    intersectionNeighborLocal_.unsetUp2Date();
+    intersectionGlobal_.invalidate();
+    intersectionSelfLocal_.invalidate();
+    intersectionNeighborLocal_.invalidate();
   }
 
 

@@ -43,11 +43,27 @@ namespace Dune
     typedef typename MappingType::inv_t inv_t;
 
     MappingType mapping_;
+    bool valid_ ;
+
+    const MappingType& mapping() const
+    {
+      assert( valid() );
+      return mapping_;
+    }
 
   public:
+    MyALU2dGridGeometryImpl() : mapping_(), valid_( false ) {}
+
+    // returns true if goemetry info is valid
+    bool valid () const { return valid_; }
+
+    // reset geometry status
+    void invalidate() { valid_ = false ; }
+
     bool affine() const
     {
-      return mapping_.affine();
+      assert( valid() );
+      return mapping().affine();
     }
 
     int corners () const
@@ -66,27 +82,27 @@ namespace Dune
 
     void map2world ( const map_t &m, world_t &w ) const
     {
-      return mapping_.map2world( m, w );
+      return mapping().map2world( m, w );
     }
 
     void world2map ( const world_t &w, map_t &m ) const
     {
-      return mapping_.world2map( w, m );
+      return mapping().world2map( w, m );
     }
 
     const matrix_t &jacobianTransposed ( const map_t &m ) const
     {
-      return mapping_.jacobianTransposed( m );
+      return mapping().jacobianTransposed( m );
     }
 
     const inv_t &jacobianInverseTransposed ( const map_t &m ) const
     {
-      return mapping_.jacobianInverseTransposed( m );
+      return mapping().jacobianInverseTransposed( m );
     }
 
     ctype det ( const map_t &m ) const
     {
-      return mapping_.det( m );
+      return mapping().det( m );
     }
 
     // update geometry coordinates
@@ -94,6 +110,7 @@ namespace Dune
     void update ( const Vector &p0 )
     {
       mapping_.buildMapping( p0 );
+      valid_ = true ;
     }
   };
 
@@ -114,11 +131,26 @@ namespace Dune
     typedef typename MappingType::inv_t inv_t;
 
     MappingType mapping_;
+    bool valid_;
+
+    const MappingType& mapping() const
+    {
+      assert( valid() );
+      return mapping_;
+    }
 
   public:
+    MyALU2dGridGeometryImpl() : mapping_(), valid_( false ) {}
+
+    // returns true if goemetry info is valid
+    bool valid () const { return valid_; }
+
+    // reset geometry status
+    void invalidate() { valid_ = false ; }
+
     bool affine() const
     {
-      return mapping_.affine();
+      return mapping().affine();
     }
 
     int corners () const
@@ -137,27 +169,27 @@ namespace Dune
 
     void map2world ( const map_t &m, world_t &w ) const
     {
-      return mapping_.map2world( m, w );
+      return mapping().map2world( m, w );
     }
 
     void world2map ( const world_t &w, map_t &m ) const
     {
-      return mapping_.world2map( w, m );
+      return mapping().world2map( w, m );
     }
 
     const matrix_t &jacobianTransposed ( const map_t &m ) const
     {
-      return mapping_.jacobianTransposed( m );
+      return mapping().jacobianTransposed( m );
     }
 
     const inv_t &jacobianInverseTransposed ( const map_t &m ) const
     {
-      return mapping_.jacobianInverseTransposed( m );
+      return mapping().jacobianInverseTransposed( m );
     }
 
     ctype det ( const map_t &m ) const
     {
-      return mapping_.det( m );
+      return mapping().det( m );
     }
 
     // update geometry in father coordinates
@@ -176,6 +208,7 @@ namespace Dune
           coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
       }
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ] );
+      valid_ = true ;
     }
 
     // update geometry coordinates
@@ -183,6 +216,7 @@ namespace Dune
     void update ( const Vector &p0, const Vector &p1 )
     {
       mapping_.buildMapping( p0, p1 );
+      valid_ = true ;
     }
   };
 
@@ -203,11 +237,26 @@ namespace Dune
     typedef typename MappingType::inv_t inv_t;
 
     MappingType mapping_;
+    bool valid_;
+
+    const MappingType& mapping() const
+    {
+      assert( valid() );
+      return mapping_;
+    }
 
   public:
+    MyALU2dGridGeometryImpl() : mapping_(), valid_( false ) {}
+
+    // returns true if goemetry info is valid
+    bool valid () const { return valid_; }
+
+    // reset geometry status
+    void invalidate() { valid_ = false ; }
+
     bool affine () const
     {
-      return mapping_.affine();
+      return mapping().affine();
     }
 
     int corners () const
@@ -222,27 +271,27 @@ namespace Dune
 
     void map2world ( const map_t &m, world_t &w ) const
     {
-      return mapping_.map2world( m, w );
+      return mapping().map2world( m, w );
     }
 
     void world2map ( const world_t &w, map_t &m ) const
     {
-      return mapping_.world2map( w, m );
+      return mapping().world2map( w, m );
     }
 
     const matrix_t &jacobianTransposed ( const map_t &m ) const
     {
-      return mapping_.jacobianTransposed( m );
+      return mapping().jacobianTransposed( m );
     }
 
     const inv_t &jacobianInverseTransposed ( const map_t &m ) const
     {
-      return mapping_.jacobianInverseTransposed( m );
+      return mapping().jacobianInverseTransposed( m );
     }
 
     ctype det ( const map_t &m ) const
     {
-      return mapping_.det( m );
+      return mapping().det( m );
     }
 
     // update geometry in father coordinates
@@ -261,6 +310,7 @@ namespace Dune
           coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
       }
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
+      valid_ = true ;
     }
 
     template< class HElement >
@@ -268,6 +318,7 @@ namespace Dune
     {
       mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
                              item.getVertex( 2 )->coord() );
+      valid_ = true ;
     }
   };
 
@@ -288,11 +339,26 @@ namespace Dune
     typedef typename MappingType::inv_t inv_t;
 
     MappingType mapping_;
+    bool valid_ ;
+
+    const MappingType& mapping() const
+    {
+      assert( valid() );
+      return mapping_;
+    }
 
   public:
+    MyALU2dGridGeometryImpl() : mapping_(), valid_( false ) {}
+
+    // returns true if goemetry info is valid
+    bool valid () const { return valid_; }
+
+    // reset geometry status
+    void invalidate() { valid_ = false ; }
+
     bool affine () const
     {
-      return mapping_.affine();
+      return mapping().affine();
     }
 
     int corners () const
@@ -307,27 +373,27 @@ namespace Dune
 
     void map2world ( const map_t &m, world_t &w ) const
     {
-      return mapping_.map2world( m, w );
+      return mapping().map2world( m, w );
     }
 
     void world2map ( const world_t &w, map_t &m ) const
     {
-      return mapping_.world2map( w, m );
+      return mapping().world2map( w, m );
     }
 
     const matrix_t &jacobianTransposed ( const map_t &m ) const
     {
-      return mapping_.jacobianTransposed( m );
+      return mapping().jacobianTransposed( m );
     }
 
     const inv_t &jacobianInverseTransposed ( const map_t &m ) const
     {
-      return mapping_.jacobianInverseTransposed( m );
+      return mapping().jacobianInverseTransposed( m );
     }
 
     ctype det ( const map_t &m ) const
     {
-      return mapping_.det( m );
+      return mapping().det( m );
     }
 
     // update geometry in father coordinates
@@ -346,6 +412,7 @@ namespace Dune
           coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
       }
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
+      valid_ = true ;
     }
 
     template< class HElement >
@@ -353,6 +420,7 @@ namespace Dune
     {
       mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
                              item.getVertex( 3 )->coord(), item.getVertex( 2 )->coord() );
+      valid_ = true ;
     }
   };
 
@@ -374,20 +442,27 @@ namespace Dune
     static const int lms = sizeof( LinearMapping );
     static const int bms = sizeof( BilinearMapping );
 
-    int corners_;
     char mapping_[ lms > bms ? lms : bms ];
+    int corners_;
+    bool valid_ ;
 
   public:
-    MyALU2dGridGeometryImpl () : corners_( 0 ) {}
+    MyALU2dGridGeometryImpl () : corners_( 0 ), valid_( false ) {}
 
     MyALU2dGridGeometryImpl ( const MyALU2dGridGeometryImpl &other )
-      : corners_( other.corners() )
+      : corners_( other.corners() ), valid_( other.valid_ )
     {
       if( corners_ == 3 )
         new( &mapping_ )LinearMapping( other.linearMapping() );
       if( corners_ == 4 )
         new( &mapping_ )BilinearMapping( other.bilinearMapping() );
     }
+
+    // returns true if goemetry info is valid
+    bool valid () const { return valid_; }
+
+    // reset geometry status
+    void invalidate() { valid_ = false ; }
 
     bool affine () const
     {
@@ -459,6 +534,8 @@ namespace Dune
         linearMapping().buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
       else
         bilinearMapping().buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
+
+      valid_ = true ;
     }
 
     template< class HElement >
@@ -472,16 +549,36 @@ namespace Dune
       else
         bilinearMapping().buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
                                         item.getVertex( 3 )->coord(), item.getVertex( 2 )->coord() );
+
+      valid_ = true ;
     }
 
   private:
     MyALU2dGridGeometryImpl &operator= ( const MyALU2dGridGeometryImpl &other );
 
-    const LinearMapping &linearMapping () const { return static_cast< const LinearMapping * >( &mapping_ ); }
-    LinearMapping &linearMapping () { return static_cast< LinearMapping * >( &mapping_ ); }
+    const LinearMapping &linearMapping () const
+    {
+      assert( valid() );
+      return static_cast< const LinearMapping * >( &mapping_ );
+    }
 
-    const BilinearMapping &bilinearMapping () const { return static_cast< const BilinearMapping * >( &mapping_ ); }
-    BilinearMapping &bilinearMapping () { return static_cast< BilinearMapping * >( &mapping_ ); }
+    LinearMapping &linearMapping ()
+    {
+      assert( valid() );
+      return static_cast< LinearMapping * >( &mapping_ );
+    }
+
+    const BilinearMapping &bilinearMapping () const
+    {
+      assert( valid() );
+      return static_cast< const BilinearMapping * >( &mapping_ );
+    }
+
+    BilinearMapping &bilinearMapping ()
+    {
+      assert( valid() );
+      return static_cast< BilinearMapping * >( &mapping_ );
+    }
 
     void updateMapping ( const int corners )
     {
@@ -616,14 +713,14 @@ namespace Dune
     void print (std::ostream& ss) const;
 
     //! build geometry with local coords of child in reference element
-    inline bool buildGeomInFather(const Geometry &fatherGeom ,
+    inline bool buildGeomInFather(const Geometry &fatherGeom,
                                   const Geometry & myGeom );
 
     // returns true if geometry is up-2-date
-    inline bool up2Date() const { return up2Date_; }
+    inline bool valid() const { return geoImpl_.valid(); }
 
     // set up2Date flag to false
-    inline void unsetUp2Date() const { up2Date_ = false; }
+    inline void invalidate() const { geoImpl_.invalidate(); }
 
   protected:
     // return reference coordinates of the alu triangle
@@ -635,9 +732,6 @@ namespace Dune
 
     // determinant
     mutable alu2d_ctype det_;
-
-    //! is true if geom is up2date
-    mutable bool up2Date_;
   };
 
 } // end namespace Dune
