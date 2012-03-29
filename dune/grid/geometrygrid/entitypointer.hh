@@ -107,59 +107,44 @@ namespace Dune
 
       typedef typename Traits::EntitySeed EntitySeed;
 
-    private:
-      typedef MakeableInterfaceObject< Entity > MakeableEntity;
-      typedef typename MakeableEntity::ImplementationType EntityImpl;
+      typedef GeoGrid::Entity< codimension, dimension, const Grid > EntityImpl;
 
     public:
       EntityPointer ( const Grid &grid, const HostEntityIterator &hostEntityIterator )
-        : grid_( &grid ),
-          entity_( 0 ),
+        : entity_( EntityImpl( grid ) ),
           hostEntityIterator_( hostEntityIterator )
       {}
 
       EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : grid_( &grid ),
-          entity_( 0 ),
+        : entity_( EntityImpl( grid ) ),
           hostEntityIterator_( hostElement.template subEntity< codimension >( subEntity ) )
       {}
 
       EntityPointer ( const Grid &grid, const EntitySeed &seed )
-        : grid_( &grid ),
-          entity_( 0 ),
+        : entity_( EntityImpl( grid ) ),
           hostEntityIterator_( grid.hostGrid().entityPointer( seed.hostEntitySeed() ) )
       {}
 
       EntityPointer ( const EntityImpl &entity )
-        : grid_( &entity.grid() ),
-          entity_( 0 ),
+        : entity_( EntityImpl( entity.grid() ) ),
           hostEntityIterator_( entity.hostEntity() )
       {}
 
       EntityPointer ( const This &other )
-        : grid_( other.grid_ ),
-          entity_( 0 ),
+        : entity_( EntityImpl( other.grid() ) ),
           hostEntityIterator_( other.hostEntityIterator_ )
       {}
 
       template< class T >
       explicit EntityPointer ( const EntityPointer< T, fake > &other )
-        : grid_( other.grid_ ),
-          entity_( 0 ),
+        : entity_( EntityImpl( other.grid() ) ),
           hostEntityIterator_( other.hostEntityIterator_ )
       {}
 
-      ~EntityPointer ()
+      const This &operator= ( const This &other )
       {
-        if( entity_ )
-          entityAllocator().deallocate( entity_ );
-      }
-
-      This &operator= ( const This &other )
-      {
-        grid_ = other.grid_;
+        entityImpl() = EntityImpl( other.grid() );
         hostEntityIterator_ = other.hostEntityIterator_;
-        releaseEntity();
         return *this;
       }
 
@@ -176,45 +161,25 @@ namespace Dune
 
       Entity &dereference () const
       {
-        if( !entity_ )
-          entity_ = entityAllocator().allocate( EntityImpl( grid(), *hostIterator() ) );
-        return *entity_;
+        if( !entityImpl() )
+          entityImpl() = EntityImpl( grid(), *hostIterator() );
+        return entity_;
       }
 
-      int level () const
-      {
-        return hostIterator().level();
-      }
+      int level () const { return hostIterator().level(); }
 
-      const HostEntityIterator &hostIterator() const
-      {
-        return hostEntityIterator_;
-      }
+      const HostEntityIterator &hostIterator() const { return hostEntityIterator_; }
 
-      const Grid &grid () const
-      {
-        return *grid_;
-      }
+      const Grid &grid () const { return entityImpl().grid(); }
 
     protected:
-      void releaseEntity ()
+      EntityImpl &entityImpl () const
       {
-        if( entity_ )
-        {
-          entityAllocator().deallocate( entity_ );
-          entity_ = 0;
-        }
-      }
-
-      typename Grid::Traits::template EntityAllocator< codimension > &
-      entityAllocator () const
-      {
-        return grid().template entityAllocator< codimension >();
+        return Grid::getRealImplementation( entity_ );
       }
 
     private:
-      const Grid *grid_;
-      mutable MakeableEntity *entity_;
+      mutable Entity entity_;
 
     protected:
       HostEntityIterator hostEntityIterator_;
@@ -252,66 +217,44 @@ namespace Dune
 
       typedef typename Traits::EntitySeed EntitySeed;
 
-    private:
-      typedef MakeableInterfaceObject< Entity > MakeableEntity;
-      typedef typename MakeableEntity::ImplementationType EntityImpl;
+      typedef GeoGrid::Entity< codimension, dimension, const Grid > EntityImpl;
 
     public:
       EntityPointer ( const Grid &grid, const HostElementIterator &hostElementIterator, int subEntity )
-        : grid_( &grid ),
-          entity_( 0 ),
-          subEntity_( subEntity ),
+        : entity_( EntityImpl( grid, subEntity ) ),
           hostElementIterator_( hostElementIterator )
       {}
 
       EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : grid_( &grid ),
-          entity_( 0 ),
-          subEntity_( subEntity ),
+        : entity_( EntityImpl( grid, subEntity ) ),
           hostElementIterator_( hostElement )
       {}
 
       EntityPointer ( const Grid &grid, const EntitySeed &seed )
-        : grid_( &grid ),
-          entity_( 0 ),
-          subEntity_( seed.subEntity() ),
+        : entity_( EntityImpl( grid, seed.subEntity() ) ),
           hostElementIterator_( grid.hostGrid().entityPointer( seed.hostElementSeed() ) )
       {}
 
       EntityPointer ( const EntityImpl &entity )
-        : grid_( &entity.grid() ),
-          entity_( 0 ),
-          subEntity_( entity.subEntity() ),
+        : entity_( EntityImpl( entity.grid(), entity.subEntity() ) ),
           hostElementIterator_( entity.hostElement() )
       {}
 
       EntityPointer ( const This &other )
-        : grid_( other.grid_ ),
-          entity_( 0 ),
-          subEntity_( other.subEntity_ ),
+        : entity_( EntityImpl( other.grid(), other.subEntity() ) ),
           hostElementIterator_( other.hostElementIterator_ )
       {}
 
       template< class T >
       explicit EntityPointer ( const EntityPointer< T, fake > &other )
-        : grid_( other.grid_ ),
-          entity_( 0 ),
-          subEntity_( other.subEntity_ ),
+        : entity_( EntityImpl( other.grid(), other.subEntity() ) ),
           hostElementIterator_( other.hostElementIterator_ )
       {}
 
-      ~EntityPointer ()
+      const This &operator= ( const This &other )
       {
-        if( entity_ )
-          entityAllocator().deallocate( entity_ );
-      }
-
-      This &operator= ( const This &other )
-      {
-        grid_ = other.grid_;
-        subEntity_ = other.subEntity_;
+        entityImpl() = EntityImpl( other.grid(), other.subEntity() );
         hostElementIterator_ = other.hostElementIterator_;
-        releaseEntity();
         return *this;
       }
 
@@ -320,16 +263,11 @@ namespace Dune
         return reinterpret_cast< const EntityPointerImp & >( *this );
       }
 
-      operator EntityPointerImp & ()
-      {
-        return reinterpret_cast< EntityPointerImp & >( *this );
-      }
-
       template< class T >
       bool equals ( const EntityPointer< T, fake > &other ) const
       {
-        const bool thisEnd = (subEntity_ < 0);
-        const bool otherEnd = (other.subEntity_ < 0);
+        const bool thisEnd = (subEntity() < 0);
+        const bool otherEnd = (other.subEntity() < 0);
         if( thisEnd || otherEnd )
           return thisEnd && otherEnd;
 
@@ -345,36 +283,27 @@ namespace Dune
         const HostElement &otherElement = *(other.hostElementIterator());
         assert( indexSet.contains( otherElement ) );
 
-        const int thisIndex = indexSet.subIndex( thisElement, subEntity_, codimension );
-        const int otherIndex = indexSet.subIndex( otherElement, other.subEntity_, codimension );
+        const int thisIndex = indexSet.subIndex( thisElement, subEntity(), codimension );
+        const int otherIndex = indexSet.subIndex( otherElement, other.subEntity(), codimension );
         return (thisIndex == otherIndex);
       }
 
       Entity &dereference () const
       {
-        if( !entity_ )
-          entity_ = entityAllocator().allocate( EntityImpl( grid(), *hostElementIterator(), subEntity_ ) );
-        return *entity_;
+        if( !entityImpl() )
+          entityImpl() = EntityImpl( grid(), *hostElementIterator(), subEntity() );
+        return entity_;
       }
 
-      int level () const
-      {
-        return hostElementIterator().level();
-      }
+      int level () const { return hostElementIterator().level(); }
 
-      const Grid &grid () const
-      {
-        return *grid_;
-      }
+      const Grid &grid () const { return entityImpl().grid(); }
+      int subEntity () const { return entityImpl().subEntity(); }
 
     protected:
-      void releaseEntity ()
+      EntityImpl &entityImpl () const
       {
-        if( entity_ )
-        {
-          entityAllocator().deallocate( entity_ );
-          entity_ = 0;
-        }
+        return Grid::getRealImplementation( entity_ );
       }
 
       const HostElementIterator &hostElementIterator () const
@@ -382,18 +311,10 @@ namespace Dune
         return hostElementIterator_;
       }
 
-      typename Grid::Traits::template EntityAllocator< codimension > &
-      entityAllocator () const
-      {
-        return grid().template entityAllocator< codimension >();
-      }
-
     private:
-      const Grid *grid_;
-      mutable MakeableEntity *entity_;
+      mutable Entity entity_;
 
     protected:
-      int subEntity_;
       HostElementIterator hostElementIterator_;
     };
 

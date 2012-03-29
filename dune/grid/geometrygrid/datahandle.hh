@@ -91,25 +91,26 @@ namespace Dune
     template< class HostEntity >
     class CommDataHandle< Grid, WrappedHandle >::EntityProxy
     {
+      static const int dimension = HostEntity::dimension;
       static const int codimension = HostEntity::codimension;
+
       typedef typename Traits::template Codim< codimension >::Entity Entity;
-      typedef MakeableInterfaceObject< Entity > MakeableEntity;
-      typedef typename MakeableEntity::ImplementationType EntityImpl;
+      typedef GeoGrid::Entity< codimension, dimension, const Grid > EntityImpl;
 
       template< bool >
       struct CreateReal
       {
-        static MakeableEntity
+        static EntityImpl
         apply ( const Grid &grid, const HostEntity &hostEntity )
         {
-          return MakeableEntity( EntityImpl( grid, hostEntity ) );
+          return EntityImpl( grid, hostEntity );
         }
       };
 
       template< bool >
       struct CreateFake
       {
-        static MakeableEntity
+        static EntityImpl
         apply ( const Grid &grid, const HostEntity &hostEntity )
         {
           DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
@@ -122,21 +123,16 @@ namespace Dune
 
     public:
       EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
-        : entity_(new MakeableEntity(Create::apply( grid, hostEntity ) ) )
+        : entity_( Create::apply( grid, hostEntity ) )
       {}
-
-      ~EntityProxy ()
-      {
-        delete entity_;
-      }
 
       const Entity &operator* () const
       {
-        return *entity_;
+        return entity_;
       }
 
     private:
-      MakeableEntity *entity_;
+      Entity entity_;
     };
 
   } // namespace GeoGrid

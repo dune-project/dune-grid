@@ -3,10 +3,11 @@
 #ifndef DUNE_GEOGRID_ENTITY_HH
 #define DUNE_GEOGRID_ENTITY_HH
 
+#include <dune/common/nullptr.hh>
+
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/grid.hh>
-
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
 
@@ -137,6 +138,11 @@ namespace Dune
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
+      EntityBase ( const Grid &grid )
+        : geo_( grid ),
+          hostEntity_( nullptr )
+      {}
+
       /** \brief construct an initialized entity
        *
        *  \param[in]  grid        GeometryGrid this entity belongs to
@@ -157,8 +163,14 @@ namespace Dune
 
       /** \} */
 
-    private:
-      EntityBase &operator= ( const EntityBase & );
+      const EntityBase &operator= ( const EntityBase &other )
+      {
+        geo_ = GeometryImpl( other.grid() );
+        hostEntity_ = other.hostEntity_;
+        return *this;
+      }
+
+      operator bool () const { return bool( hostEntity_ ); }
 
     public:
       /** \name Methods Shared by Entities of All Codimensions
@@ -226,6 +238,7 @@ namespace Dune
 
       const HostEntity &hostEntity () const
       {
+        assert( *this );
         return *hostEntity_;
       }
 
@@ -367,6 +380,12 @@ namespace Dune
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
+      EntityBase ( const Grid &grid, int subEntity )
+        : geo_( grid ),
+          hostElement_( nullptr ),
+          subEntity_( subEntity )
+      {}
+
       /** \brief construct an initialized entity
        *
        *  \param[in]  grid        GeometryGrid this entity belongs to
@@ -391,10 +410,16 @@ namespace Dune
 
       /** \} */
 
-    private:
-      EntityBase &operator= ( const EntityBase & );
+      const EntityBase &operator= ( const EntityBase &other )
+      {
+        geo_ = GeometryImpl( other.grid() );
+        hostElement_ = other.hostElement_;
+        subEntity_ = other.subEntity_;
+        return *this;
+      }
 
-    public:
+      operator bool () const { return bool( hostElement_ ); }
+
       /** \name Methods Shared by Entities of All Codimensions
        *  \{ */
 
@@ -488,13 +513,11 @@ namespace Dune
 
       const HostElement &hostElement () const
       {
+        assert( *this );
         return *hostElement_;
       }
 
-      int subEntity () const
-      {
-        return subEntity_;
-      }
+      int subEntity () const { return subEntity_; }
 
       /** \brief obtain the entity's index from a host IndexSet
        *
@@ -584,8 +607,16 @@ namespace Dune
       typedef typename Base::HostEntity HostEntity;
       typedef typename Base::HostElement HostElement;
 
+      explicit Entity ( const Grid &grid )
+        : Base( grid )
+      {}
+
       Entity ( const Grid &grid, const HostEntity &hostEntity )
         : Base( grid, hostEntity )
+      {}
+
+      Entity ( const Grid &grid, int subEntity )
+        : Base( grid, subEntity )
       {}
 
       Entity ( const Grid &grid, const HostElement &hostElement, int subEntity )
@@ -645,6 +676,10 @@ namespace Dune
 
       using Base::grid;
       using Base::hostEntity;
+
+      Entity ( const Grid &grid )
+        : Base( grid )
+      {}
 
       Entity ( const Grid &grid, const HostEntity &hostEntity )
         : Base( grid, hostEntity )

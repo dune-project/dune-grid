@@ -189,8 +189,11 @@ namespace Dune
       typedef typename Traits::IteratorType IteratorType;
 
     protected:
+      typedef typename Base::EntityImpl EntityImpl;
+
       using Base::hostEntityIterator_;
-      using Base::releaseEntity;
+      using Base::entityImpl;
+      using Base::grid;
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
@@ -200,7 +203,7 @@ namespace Dune
       void increment ()
       {
         ++hostEntityIterator_;
-        releaseEntity();
+        entityImpl() = EntityImpl( grid() );
       }
     };
 
@@ -231,9 +234,11 @@ namespace Dune
       typedef typename Traits::HostIndexSet HostIndexSet;
 
     protected:
+      typedef typename Base::EntityImpl EntityImpl;
+
       using Base::hostElementIterator_;
-      using Base::subEntity_;
-      using Base::releaseEntity;
+      using Base::entityImpl;
+      using Base::grid;
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
@@ -252,6 +257,7 @@ namespace Dune
       {
         typedef typename Traits::ctype ctype;
 
+        int subEntity = this->subEntity();
         while( hostElementIterator_ != hostEnd_ )
         {
           const HostElement &hostElement = *hostElementIterator_;
@@ -259,25 +265,25 @@ namespace Dune
           const GenericReferenceElement< ctype, dimension > &refElement
             = GenericReferenceElements< ctype, dimension >::general( hostElement.type() );
 
-          ++subEntity_;
+          ++subEntity;
           const int count = refElement.size( codimension );
-          for( ; subEntity_ < count; ++subEntity_ )
+          for( ; subEntity < count; ++subEntity )
           {
-            if( !Filter::apply( refElement, hostElement, subEntity_ ) )
+            if( !Filter::apply( refElement, hostElement, subEntity ) )
               continue;
 
-            const size_t index = hostIndexSet_->subIndex( hostElement, subEntity_, codimension );
+            const size_t index = hostIndexSet_->subIndex( hostElement, subEntity, codimension );
             if( !visited_[ index ] )
             {
               visited_[ index ] = true;
-              releaseEntity();
+              entityImpl() = EntityImpl( grid(), subEntity );
               return;
             }
           }
           ++hostElementIterator_;
-          subEntity_ = -1;
+          subEntity = -1;
         }
-        releaseEntity();
+        entityImpl() = EntityImpl( grid(), subEntity );
       }
 
     private:
@@ -417,10 +423,12 @@ namespace Dune
       typedef EntityPointer< Traits > Base;
 
     protected:
+      typedef typename Base::EntityImpl EntityImpl;
       typedef typename Traits::HostEntityIterator HostEntityIterator;
 
       using Base::hostEntityIterator_;
-      using Base::releaseEntity;
+      using Base::entityImpl;
+      using Base::grid;
 
     public:
       HierarchicIterator ( const Grid &grid,
@@ -431,7 +439,7 @@ namespace Dune
       void increment ()
       {
         ++hostEntityIterator_;
-        releaseEntity();
+        entityImpl() = EntityImpl( grid() );
       }
     };
 

@@ -678,13 +678,6 @@ namespace Dune
     }
 
     template< int codim >
-    typename Traits::template EntityAllocator< codim > &entityAllocator() const
-    {
-      integral_constant< int, codim > codimVariable;
-      return entityAllocators_[ codimVariable ];
-    }
-
-    template< int codim >
     char *allocateMappingStorage ( const GeometryType &gt ) const
     {
       assert( gt.dim() == Traits::dimension - codim );
@@ -710,7 +703,6 @@ namespace Dune
     mutable LeafIndexSet leafIndexSet_;
     mutable GlobalIdSet globalIdSet_;
     mutable LocalIdSet localIdSet_;
-    mutable typename Traits::EntityAllocatorTable entityAllocators_;
     mutable typename Allocator::template rebind< char >::other storageAllocator_;
   };
 

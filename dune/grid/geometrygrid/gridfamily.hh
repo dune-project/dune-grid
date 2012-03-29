@@ -5,8 +5,6 @@
 
 #include <dune/common/static_assert.hh>
 
-#include <dune/geometry/genericgeometry/codimtable.hh>
-
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/declaration.hh>
@@ -41,34 +39,6 @@ namespace Dune
     public:
       typedef HG HostGrid;
       typedef CF CoordFunction;
-    };
-
-
-
-    // EntityAllocator
-    // ---------------
-
-    template< class Entity, class Allocator >
-    struct EntityAllocator
-    {
-      typedef MakeableInterfaceObject< Entity > MakeableEntity;
-
-      template< class EntityImpl >
-      MakeableEntity *allocate ( const EntityImpl &entityImpl )
-      {
-        MakeableEntity *entity = allocator_.allocate( 1 );
-        allocator_.construct( entity, MakeableEntity( entityImpl ) );
-        return entity;
-      }
-
-      void deallocate ( MakeableEntity *entity )
-      {
-        allocator_.destroy( entity );
-        allocator_.deallocate( entity, 1 );
-      }
-
-    private:
-      typename Allocator::template rebind< MakeableEntity >::other allocator_;
     };
 
 
@@ -152,13 +122,6 @@ namespace Dune
           typedef Dune::GridView< DefaultLevelGridViewTraits< const Grid, pitype > >
           LevelGridView;
         };
-
-        template< int codim >
-        struct EntityAllocator
-          : public GeoGrid::EntityAllocator< typename Codim< codim >::Entity, Allocator >
-        {};
-
-        typedef GenericGeometry::CodimTable< EntityAllocator, dimension > EntityAllocatorTable;
       };
     };
 
