@@ -48,6 +48,47 @@ namespace Dune
 
 
 
+    // Mapping
+    // -------
+
+    template< int cdim, class Grid >
+    class MappingFamily
+    {
+      typedef typename remove_const< Grid >::type::Traits Traits;
+
+    public:
+      typedef GeoGrid::GeometryTraits< cdim, Grid > GeometryTraits;
+
+      static const int dimension = Traits::dimension;
+
+    private:
+      template< bool >
+      struct Hybrid
+      {
+        typedef GenericGeometry::HybridMapping< dimension, GeometryTraits > ElementMapping;
+      };
+
+      template< bool >
+      struct NonHybrid
+      {
+        static const unsigned int topologyId = Capabilities::hasSingleGeometryType< Grid >::topologyId;
+        typedef typename GenericGeometry::Topology< topologyId, dimension >::type Topology;
+        typedef GenericGeometry::CachedMapping< Topology, GeometryTraits > ElementMapping;
+      };
+
+    public:
+      typedef typename SelectType< Capabilities::hasSingleGeometryType< Grid >::v, NonHybrid< true >, Hybrid< false > >::Type::ElementMapping ElementMapping;
+
+      template< int codim >
+      struct Codim
+      {
+        typedef GenericGeometry::MappingProvider< ElementMapping, codim > MappingProvider;
+        typedef typename MappingProvider::Mapping Mapping;
+      };
+    };
+
+
+
     // Geometry
     // --------
 
@@ -56,46 +97,27 @@ namespace Dune
     {
       typedef Geometry< mydim, cdim, Grid > This;
 
+      typedef GeoGrid::MappingFamily< cdim, Grid > MappingFamily;
       typedef typename remove_const< Grid >::type::Traits Traits;
-      typedef GeoGrid::GeometryTraits< cdim, Grid > GeometryTraits;
 
       template< int, int, class > friend class Geometry;
 
     public:
       static const int mydimension = mydim;
       static const int coorddimension = cdim;
-      static const int dimension = Traits::dimension;
+      static const int dimension = MappingFamily::dimension;
       static const int codimension = dimension - mydimension;
 
-      typedef typename GeometryTraits::CoordTraits::ctype ctype;
+    protected:
+      typedef typename MappingFamily::template Codim< codimension >::MappingProvider MappingProvider;
+      typedef typename MappingFamily::template Codim< codimension >::Mapping Mapping;
+
+    public:
+      typedef typename Mapping::FieldType ctype;
 
       typedef FieldVector< ctype, mydimension > LocalCoordinate;
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
 
-    private:
-      typedef typename Traits::HostGrid HostGrid;
-
-      template< bool >
-      struct Hybrid
-      {
-        typedef GenericGeometry::HybridMapping< dimension, GeometryTraits > Mapping;
-      };
-
-      template< bool >
-      struct NonHybrid
-      {
-        static const unsigned int topologyId = Capabilities::hasSingleGeometryType< HostGrid >::topologyId;
-        typedef typename GenericGeometry::Topology< topologyId, dimension >::type Topology;
-        typedef GenericGeometry::CachedMapping< Topology, GeometryTraits > Mapping;
-      };
-
-      typedef typename SelectType< Capabilities::hasSingleGeometryType< HostGrid >::v, NonHybrid< true >, Hybrid< false > >::Type::Mapping ElementMapping;
-      typedef GenericGeometry::MappingProvider< ElementMapping, codimension > MappingProvider;
-
-    protected:
-      typedef typename MappingProvider::Mapping Mapping;
-
-    public:
       typedef typename Mapping::JacobianTransposed JacobianTransposed;
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
 
