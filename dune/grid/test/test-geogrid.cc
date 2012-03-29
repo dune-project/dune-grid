@@ -53,8 +53,7 @@ typedef AnalyticalCoordFunction CoordFunction;
 #endif
 
 typedef Dune::GeometryGrid< Grid, CoordFunction > GeometryGrid;
-// I guess PoolAllocator<void... is correct, because the default parameter is std::allocator<void>
-typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::PoolAllocator<void,10> > GeometryGridWithPoolAllocator;
+typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::PoolAllocator< char, 16384 > > GeometryGridWithPoolAllocator;
 
 
 template <class GeometryGridType>
