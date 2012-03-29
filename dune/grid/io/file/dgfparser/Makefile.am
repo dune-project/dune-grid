@@ -20,7 +20,7 @@ dgfparser_HEADERS = dgfalberta.hh  dgfalu.cc  dgfexception.hh  \
 		    dgfparser.hh  dgfgeogrid.hh \
 		    dgfwriter.hh  dgfyasp.hh  dgfgridtype.hh \
 		    entitykey.hh  dgfs.hh  entitykey_inline.hh  \
-		    dgfoned.cc  dgfoned.hh dgfgridfactory.hh \
+		    dgfoned.hh dgfgridfactory.hh \
 		    macrogrid.hh  gridptr.hh  parser.hh
 
 include $(top_srcdir)/am/global-rules
