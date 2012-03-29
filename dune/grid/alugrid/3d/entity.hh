@@ -176,7 +176,6 @@ namespace Dune
     int twist_; //! twist of the underlying ALU element (with regard to the element that asked for it)
     int face_; //! for face, know on which face we are
 
-    mutable bool builtgeometry_;        //!< true if geometry has been constructed
     mutable PartitionType partitionType_; //!< partition type of this entity
   };
 
@@ -459,7 +458,6 @@ namespace Dune
 
     int level_;  //!< level of element
     bool isLeaf_; //!< is true if entity is leaf entity
-    mutable bool builtgeometry_; //!< true if geometry has been constructed
 
   }; // end of ALU3dGridEntity codim = 0
      //**********************************************************************

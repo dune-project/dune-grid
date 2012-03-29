@@ -38,8 +38,10 @@ namespace Dune
   public:
     typedef FieldVector<alu3d_ctype, cdim> CoordinateVectorType;
 
+    enum { invalid = -1, updated = 0, buildmapping = 1 };
     struct CoordVecCopy
     {
+
       // copy coordinate vector from field vector or alu3d_ctype[cdim]
       template <class CoordPtrType>
       static inline void copy(const CoordPtrType& p,
@@ -100,31 +102,33 @@ namespace Dune
 
       CoordinateMatrixType coord_;
       MappingType liMap_;
-      bool builtMapping_;
+      char status_;
 
     public:
       using CoordVecCopy :: update ;
 
-      GeometryImpl() : coord_() , liMap_() , builtMapping_(false) {}
+      GeometryImpl() : coord_() , liMap_() , status_( invalid ) {}
       GeometryImpl(const GeometryImpl& other)
         : coord_(other.coord_),
           liMap_(other.liMap_),
-          builtMapping_(other.builtMapping_)
+          status_(other.status_)
       {}
 
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
+        assert( valid() );
         assert( i>=0 && i<corners_ );
         return coord_[i];
       }
 
       inline MappingType& mapping()
       {
-        if( builtMapping_ ) return liMap_;
+        assert( valid() );
+        if( status_ == buildmapping ) return liMap_;
 
         liMap_.buildMapping( coord_[0] );
-        builtMapping_ = true ;
+        status_ = buildmapping ;
         return liMap_;
       }
 
@@ -135,8 +139,14 @@ namespace Dune
         assert( corners_ == 1 );
         copy( p0, coord_[0] );
         // we need to update the mapping
-        builtMapping_ = false ;
+        status_ = updated ;
       }
+
+      // set status to invalid
+      void invalidate () { status_ = invalid ; }
+
+      // return true if geometry is valid
+      bool valid () const { return status_ != invalid ; }
     };
 
     // geometry implementation for edges and vertices
@@ -157,31 +167,33 @@ namespace Dune
 
       CoordinateMatrixType coord_;
       MappingType liMap_;
-      bool builtMapping_;
+      char status_;
 
     public:
       using CoordVecCopy :: update ;
 
-      GeometryImpl() : coord_() , liMap_() , builtMapping_(false) {}
+      GeometryImpl() : coord_() , liMap_() , status_( invalid ) {}
       GeometryImpl(const GeometryImpl& other)
         : coord_(other.coord_),
           liMap_(other.liMap_),
-          builtMapping_(other.builtMapping_)
+          status_(other.status_)
       {}
 
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
+        assert( valid() );
         assert( i>=0 && i<corners_ );
         return coord_[i];
       }
 
       inline MappingType& mapping()
       {
-        if( builtMapping_ ) return liMap_;
+        assert( valid() );
+        if( status_ == buildmapping ) return liMap_;
 
         liMap_.buildMapping( coord_[0], coord_[1] );
-        builtMapping_ = true ;
+        status_ = buildmapping ;
         return liMap_;
       }
 
@@ -193,9 +205,14 @@ namespace Dune
         assert( corners_ == 2 );
         copy( p0, coord_[0] );
         copy( p1, coord_[1] );
-        builtMapping_ = false;
+        status_ = updated;
       }
 
+      // set status to invalid
+      void invalidate () { status_ = invalid ; }
+
+      // return true if geometry is valid
+      bool valid () const { return status_ != invalid ; }
     };
 
     // geom impl for simplex faces (triangles)
@@ -214,23 +231,24 @@ namespace Dune
       CoordinateMatrixType coord_;
 
       MappingType liMap_;
-      bool builtMapping_;
+      char status_;
 
     public:
       using CoordVecCopy :: update ;
 
       // constructor
-      GeometryImpl() : coord_(), liMap_(), builtMapping_(false) {}
+      GeometryImpl() : coord_(), liMap_(), status_( invalid ) {}
       // copy constructor
       GeometryImpl(const GeometryImpl& other) :
         coord_(other.coord_),
         liMap_(other.liMap_),
-        builtMapping_(other.builtMapping_)
+        status_(other.status_)
       {}
 
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
+        assert( valid() );
         assert( i>=0 && i<corners_ );
         return coord_[i];
       }
@@ -244,18 +262,25 @@ namespace Dune
         copy(p0, coord_[0] );
         copy(p1, coord_[1] );
         copy(p2, coord_[2] );
-        builtMapping_ = false;
+        status_ = updated;
       }
 
       // return mapping (always up2date)
       inline MappingType& mapping()
       {
-        if( builtMapping_ ) return liMap_;
+        assert( valid() );
+        if( status_ == buildmapping ) return liMap_;
 
         liMap_.buildMapping( coord_[0], coord_[1], coord_[2] );
-        builtMapping_ = true ;
+        status_ = buildmapping ;
         return liMap_;
       }
+
+      // set status to invalid
+      void invalidate () { status_ = invalid ; }
+
+      // return true if geometry is valid
+      bool valid () const { return status_ != invalid ; }
     };
 
     ///////////////////////////////////////////////////////////////
@@ -280,23 +305,24 @@ namespace Dune
       CoordinateMatrixType coord_;
 
       MappingType biMap_;
-      bool builtMapping_;
+      char status_;
 
     public:
       using CoordVecCopy :: update ;
 
       // constructor
-      GeometryImpl() : coord_(), biMap_(), builtMapping_(false) {}
+      GeometryImpl() : coord_(), biMap_(), status_( invalid ) {}
       // copy constructor
       GeometryImpl(const GeometryImpl& other) :
         coord_(other.coord_),
         biMap_(other.biMap_),
-        builtMapping_(other.builtMapping_)
+        status_(other.status_)
       {}
 
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
+        assert( valid() );
         assert( i>=0 && i<corners_ );
         return coord_[i];
       }
@@ -312,18 +338,25 @@ namespace Dune
         copy(p1, coord_[1] );
         copy(p2, coord_[2] );
         copy(p3, coord_[3] );
-        builtMapping_ = false;
+        status_ = updated;
       }
 
       // return mapping (always up2date)
       inline MappingType& mapping()
       {
-        if( builtMapping_ ) return biMap_;
+        assert( valid() );
+        if( status_ == buildmapping ) return biMap_;
 
         biMap_.buildMapping( coord_[0], coord_[1], coord_[2], coord_[3] );
-        builtMapping_ = true ;
+        status_ = buildmapping ;
         return biMap_;
       }
+
+      // set status to invalid
+      void invalidate () { status_ = invalid ; }
+
+      // return true if geometry is valid
+      bool valid () const { return status_ != invalid ; }
     };
 
     // geometry impl for hexahedrons
@@ -344,7 +377,7 @@ namespace Dune
       FieldVector<const CoordPtrType*, corners_ > coordPtr_;
       MappingType triMap_;
       CoordinateMatrixType* fatherCoord_;
-      bool builtMapping_;
+      char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -352,7 +385,7 @@ namespace Dune
       //! constructor creating geo impl
       GeometryImpl() : coordPtr_((CoordPtrType*) 0), triMap_(),
                        fatherCoord_(0),
-                       builtMapping_(false)
+                       status_( invalid )
       {}
 
 
@@ -361,7 +394,7 @@ namespace Dune
         coordPtr_(other.coordPtr_),
         triMap_(other.triMap_),
         fatherCoord_(0),
-        builtMapping_(other.builtMapping_)
+        status_(other.status_)
       {
         // if father coords are set, then reset coordPtr
         if( other.fatherCoord_ )
@@ -384,6 +417,7 @@ namespace Dune
       // return coordinates
       inline const CoordinateVectorType& operator [] (const int i) const
       {
+        assert( valid() );
         assert( i>=0 && i<corners_ );
         return reinterpret_cast<const CoordinateVectorType&> (*(coordPtr_[i]));
       }
@@ -406,7 +440,7 @@ namespace Dune
         coordPtr_[5] = &p5;
         coordPtr_[6] = &p6;
         coordPtr_[7] = &p7;
-        builtMapping_ = false;
+        status_ = updated;
       }
 
       // update geometry in father coordinates
@@ -436,20 +470,27 @@ namespace Dune
           }
         }
 
-        builtMapping_ = false ;
+        status_ = updated ;
       }
 
       // return mapping (always up2date)
       inline MappingType& mapping()
       {
-        if( builtMapping_ ) return triMap_;
+        assert( valid() );
+        if( status_ == buildmapping ) return triMap_;
 
         triMap_.buildMapping( (*this)[0], (*this)[1], (*this)[2], (*this)[3],
                               (*this)[4], (*this)[5], (*this)[6], (*this)[7] );
 
-        builtMapping_ = true;
+        status_ = buildmapping;
         return triMap_;
       }
+
+      // set status to invalid
+      void invalidate () { status_ = invalid ; }
+
+      // return true if geometry is valid
+      bool valid () const { return status_ != invalid ; }
     };
 
 
@@ -471,7 +512,7 @@ namespace Dune
       FieldVector<const CoordPtrType*, corners_ > coordPtr_;
       MappingType liMap_;
       CoordinateMatrixType* fatherCoord_;
-      bool builtMapping_;
+      char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -479,7 +520,7 @@ namespace Dune
       // default constructor
       GeometryImpl() : coordPtr_((CoordPtrType*) 0), liMap_(),
                        fatherCoord_(0),
-                       builtMapping_(false)
+                       status_( invalid )
       {}
 
       // copy constructor
@@ -487,7 +528,7 @@ namespace Dune
         coordPtr_(other.coordPtr_),
         liMap_(other.liMap_),
         fatherCoord_(0),
-        builtMapping_(other.builtMapping_)
+        status_(other.status_)
       {
         // if father coords are set, then reset coordPtr
         if( other.fatherCoord_ )
@@ -510,6 +551,7 @@ namespace Dune
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
+        assert( valid() );
         assert( i>=0 && i<corners_ );
         return reinterpret_cast<const CoordinateVectorType&> (*(coordPtr_[i]));
       }
@@ -524,7 +566,7 @@ namespace Dune
         coordPtr_[1] = &p1;
         coordPtr_[2] = &p2;
         coordPtr_[3] = &p3;
-        builtMapping_ = false;
+        status_ = updated;
       }
 
       // update geometry in father coordinates
@@ -554,19 +596,26 @@ namespace Dune
           }
         }
 
-        builtMapping_ = false ;
+        status_ = updated;
       }
 
       // return mapping (always up2date)
       inline MappingType& mapping()
       {
-        if( builtMapping_ ) return liMap_;
+        assert( valid() );
+        if( status_ == buildmapping ) return liMap_;
 
         liMap_.buildMapping( (*this)[0], (*this)[1], (*this)[2], (*this)[3] );
 
-        builtMapping_ = true;
+        status_ = buildmapping;
         return liMap_;
       }
+
+      // set status to invalid
+      void invalidate () { status_ = invalid ; }
+
+      // return true if geometry is valid
+      bool valid () const { return status_ != invalid ; }
     };
   }; // end of class ALUGridGeometryImplementation
 
@@ -691,6 +740,12 @@ namespace Dune
     //! print internal data
     //! no interface method
     void print (std::ostream& ss) const;
+
+    //! invalidate geometry implementation to avoid errors
+    void invalidate () ;
+
+    //! invalidate geometry implementation to avoid errors
+    bool valid () const ;
 
   private:
     // implementation of coord and mapping

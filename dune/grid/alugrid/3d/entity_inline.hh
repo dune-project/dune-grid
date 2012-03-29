@@ -22,6 +22,7 @@ namespace Dune {
   removeElement()
   {
     item_ = 0;
+    geo_.invalidate();
   }
 
   template<int cd, int dim, class GridImp>
@@ -69,6 +70,7 @@ namespace Dune {
   {
     item_  = 0;
     ghost_ = 0;
+    geo_.invalidate();
   }
 
   template<int dim, class GridImp>
@@ -77,9 +79,11 @@ namespace Dune {
   {
     item_       = 0;
     ghost_      = 0;
-    builtgeometry_ = false;
     level_      = -1;
     isLeaf_     = false;
+
+    // reset geometry information
+    geo_.invalidate();
   }
 
   // works like assignment
@@ -89,9 +93,11 @@ namespace Dune {
   {
     item_          = org.item_;
     ghost_         = org.ghost_;
-    builtgeometry_ = false;
     level_         = org.level_;
     isLeaf_        = org.isLeaf_;
+
+    // reset geometry information
+    geo_.invalidate();
   }
 
   template<int dim, class GridImp>
@@ -115,9 +121,11 @@ namespace Dune {
     // make sure this method is not called for ghosts
     assert( ! item_->isGhost() );
     ghost_   = 0;
-    builtgeometry_ = false;
     level_   = (*item_).level();
     isLeaf_  = ((*item_).down() == 0);
+
+    // reset geometry information
+    geo_.invalidate();
   }
 
   template<int dim, class GridImp>
@@ -135,7 +143,6 @@ namespace Dune {
     // remember pointer to ghost face
     ghost_ = static_cast<BNDFaceType *> (&ghost);
     assert( ghost_ );
-    builtgeometry_ = false;
 
     BNDFaceType * dwn = static_cast<BNDFaceType *> (ghost.down());
     if ( ! dwn ) isLeaf_ = true;
@@ -151,6 +158,9 @@ namespace Dune {
     // that this is the ghost that we want in the leaf iterator
     // not necessarily is real leaf element
     // see Intersection Iterator, same story
+
+    // reset geometry information
+    geo_.invalidate();
   }
 
   template<int dim, class GridImp>

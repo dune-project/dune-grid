@@ -21,6 +21,20 @@ namespace Dune {
   {}
 
   template< int mydim, int cdim, class GridImp>
+  inline void
+  ALU3dGridGeometry< mydim, cdim, GridImp > :: invalidate ()
+  {
+    geoImpl_.invalidate();
+  }
+
+  template< int mydim, int cdim, class GridImp>
+  inline bool
+  ALU3dGridGeometry< mydim, cdim, GridImp > :: valid () const
+  {
+    return geoImpl_.valid();
+  }
+
+  template< int mydim, int cdim, class GridImp>
   inline GeometryType
   ALU3dGridGeometry< mydim, cdim, GridImp > :: type () const
   {
@@ -32,7 +46,8 @@ namespace Dune {
 
   template< int mydim, int cdim, class GridImp>
   inline int
-  ALU3dGridGeometry<mydim, cdim, GridImp >::corners() const {
+  ALU3dGridGeometry<mydim, cdim, GridImp >::corners() const
+  {
     return corners_;
   }
 
@@ -83,7 +98,10 @@ namespace Dune {
   {
     // this is the only case we need to specialize
     if( mydim == cdim && elementType == tetra )
+    {
+      assert( geoImpl_.valid() );
       return 6.0 * volume_;
+    }
     else
       return geoImpl_.mapping().det( local );
   }
@@ -95,6 +113,7 @@ namespace Dune {
   {
     if( mydim == cdim )
     {
+      assert( geoImpl_.valid() );
       return volume_ ;
     }
     else if ( mydim == cdim - 1 && elementType == tetra )

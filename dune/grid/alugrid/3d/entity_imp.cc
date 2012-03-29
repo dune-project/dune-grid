@@ -34,7 +34,6 @@ namespace Dune {
     gIndex_(-1),
     twist_(0),
     face_(-1),
-    builtgeometry_(false),
     partitionType_(InteriorEntity)
   {}
 
@@ -48,7 +47,6 @@ namespace Dune {
     gIndex_(org.gIndex_),
     twist_(org.twist_),
     face_(org.face_),
-    builtgeometry_(false),
     partitionType_(org.partitionType_)
   {}
 
@@ -61,7 +59,6 @@ namespace Dune {
     twist_  = org.twist_;
     level_  = org.level_;
     face_   = org.face_;
-    builtgeometry_= false;
     partitionType_ = org.partitionType_;
   }
 
@@ -89,8 +86,10 @@ namespace Dune {
     twist_  = twist;
     level_  = level;
     face_   = face;
-    builtgeometry_=false;
     partitionType_ = this->convertBndId( *item_ );
+
+    // reset geometry information
+    geo_.invalidate();
   }
 
   template<int cd, int dim, class GridImp>
@@ -127,8 +126,8 @@ namespace Dune {
   ALU3dGridEntity< cd, dim, GridImp >::geometry () const
   {
     //assert( (cd == 1) ? (face_ >= 0) : 1 );
-    if( !builtgeometry_ )
-      builtgeometry_ = geo_.buildGeom( *item_, twist_, face_ );
+    if( ! geo_.valid() )
+      geo_.buildGeom( *item_, twist_, face_ );
     return Geometry( geo_ );
   }
 
@@ -147,7 +146,6 @@ namespace Dune {
       , ghost_( 0 )
       , level_(-1)
       , isLeaf_ (false)
-      , builtgeometry_(false)
   {  }
 
   template<int dim, class GridImp>
@@ -158,7 +156,6 @@ namespace Dune {
       , ghost_( org.ghost_ )
       , level_(org.level_)
       , isLeaf_ (org.isLeaf_)
-      , builtgeometry_(false)
   {  }
 
   template< int dim, class GridImp >
@@ -166,8 +163,8 @@ namespace Dune {
   ALU3dGridEntity< 0, dim, GridImp >::geometry () const
   {
     assert(item_ != 0);
-    if( !builtgeometry_ )
-      builtgeometry_ = geo_.buildGeom( *item_ );
+    if( ! geo_.valid() )
+      geo_.buildGeom( *item_ );
     return Geometry( geo_ );
   }
 
