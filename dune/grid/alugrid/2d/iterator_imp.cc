@@ -36,7 +36,7 @@ namespace Dune
     {
       const GridImp& grid = factory.grid() ;
       // update marker Vector
-      if( (cdim == 2) && (! marker_.up2Date()) ) marker_.update(grid);
+      if( (cdim == 2) && (! marker_.valid()) ) marker_.update(grid);
 
       iter_ = IteratorType(grid.myGrid());
       iter_->first();
@@ -173,7 +173,7 @@ namespace Dune
     {
       const GridImp& grid = factory.grid() ;
       // update marker Vector
-      if( ! marker_.up2Date() ) marker_.update(grid);
+      if( ! marker_.valid() ) marker_.update(grid);
 
       iter_ = IteratorType(grid.myGrid());
       iter_->first();
@@ -434,7 +434,7 @@ namespace Dune
       const GridImp& grid = factory.grid() ;
 
       // update marker Vector if necessary
-      if( ! marker().up2Date() ) marker().update( grid, level_);
+      if( ! marker().valid() ) marker().update( grid, level_);
 
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();
@@ -590,7 +590,7 @@ namespace Dune
       const GridImp& grid = factory.grid() ;
 
       // update marker Vector if necessary
-      if( ! marker().up2Date() ) marker().update(grid,level_);
+      if( ! marker().valid() ) marker().update(grid,level_);
 
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();

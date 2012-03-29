@@ -119,11 +119,11 @@ namespace Dune
   {
     typedef std::vector< int > VectorType;
   public:
-    ALU2dGridMarkerVector() : up2Date_(false) {}
+    ALU2dGridMarkerVector() : valid_(false) {}
 
-    bool up2Date() const { return up2Date_; }
+    bool valid() const { return valid_; }
 
-    void unsetUp2Date() { up2Date_ = false; }
+    void invalidate() { valid_ = false; }
 
     bool isOnElement(int elementIndex, int idx, int codim) const
     {
@@ -174,29 +174,29 @@ namespace Dune
           if( marker_[edgeCodim][edgeIdx] < 0) marker_[edgeCodim][edgeIdx] = elIdx;
         }
       }
-      up2Date_ = true;
+      valid_ = true;
     }
 
   private:
     VectorType marker_[2];
 
-    bool up2Date_;
+    bool valid_;
   };
 
   class ALU2dGridLeafMarkerVector
   {
     typedef std::vector< int > VectorType;
   public:
-    ALU2dGridLeafMarkerVector() : up2Date_(false) {}
+    ALU2dGridLeafMarkerVector() : valid_(false) {}
 
-    bool up2Date() const { return up2Date_; }
+    bool valid() const { return valid_; }
 
-    void unsetUp2Date() { up2Date_ = false; }
+    void invalidate() { valid_ = false; }
 
     // return true, if edge is visited on given element
     bool isOnElement(int elementIndex, int idx, int codim) const
     {
-      assert( up2Date_ );
+      assert( valid_ );
       // this marker only works for codim 1, i.e. edges
       assert( codim == 1 );
       return marker_[idx] == elementIndex;
@@ -258,13 +258,13 @@ namespace Dune
           if( marker_[edgeIdx] < 0) marker_[edgeIdx] = elIdx;
         }
       }
-      up2Date_ = true;
+      valid_ = true;
     }
 
     //! return level of vertex
     int levelOfVertex(const int vxIdx) const
     {
-      assert( up2Date_ );
+      assert( valid_ );
       assert( vxIdx >= 0 && vxIdx < (int) vertexLevels_.size());
       // if this assertion is thrown, the level has not been initialized
       assert( vertexLevels_[vxIdx] >= 0 );
@@ -274,7 +274,7 @@ namespace Dune
     //! return level of vertex
     bool isValidVertex(const int vxIdx) const
     {
-      assert( up2Date_ );
+      assert( valid_ );
       assert( vxIdx >= 0 && vxIdx < (int) vertexLevels_.size());
       return (vertexLevels_[vxIdx] >= 0);
     }
@@ -283,7 +283,7 @@ namespace Dune
     VectorType marker_;
     VectorType vertexLevels_;
 
-    bool up2Date_;
+    bool valid_;
   };
 
   // dummy object stream class

@@ -716,10 +716,10 @@ namespace Dune
     inline bool buildGeomInFather(const Geometry &fatherGeom,
                                   const Geometry & myGeom );
 
-    // returns true if geometry is up-2-date
+    // returns true if geometry information is valid
     inline bool valid() const { return geoImpl_.valid(); }
 
-    // set up2Date flag to false
+    // invalidate geometry information
     inline void invalidate() const { geoImpl_.invalidate(); }
 
   protected:

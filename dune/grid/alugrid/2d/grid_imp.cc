@@ -314,8 +314,8 @@ namespace Dune
 
     // place this before update of level index, because
     // marker vector is used by level index set
-    for(int i=0; i<MAXL; ++i) marker_[i].unsetUp2Date();
-    leafMarker_.unsetUp2Date();
+    for(int i=0; i<MAXL; ++i) marker_[i].invalidate();
+    leafMarker_.invalidate();
 
     ///////////////////////////////////////////////
     // update existing index sets
