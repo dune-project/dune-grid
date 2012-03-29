@@ -129,8 +129,7 @@ namespace Dune
     private:
       typedef typename HostGrid::template Codim< codimension >::Geometry HostGeometry;
 
-      typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::template Codim< codimension >::CoordVector
-      CoordVector;
+      typedef GeoGrid::CoordVector< mydimension, Grid, fake > CoordVector;
 
       typedef typename Traits::template Codim< codim >::GeometryImpl GeometryImpl;
 
@@ -364,8 +363,7 @@ namespace Dune
       typedef typename HostGrid::template Codim< 0 >::Geometry HostGeometry;
       typedef typename HostGrid::template Codim< dimension >::EntityPointer HostVertexPointer;
 
-      typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::template Codim< codimension >::CoordVector
-      CoordVector;
+      typedef GeoGrid::CoordVector< mydimension, Grid, fake > CoordVector;
 
       typedef typename Traits::template Codim< codimension >::GeometryImpl GeometryImpl;
 

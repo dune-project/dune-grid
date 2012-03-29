@@ -49,7 +49,7 @@ namespace Dune
       typedef typename Traits::template Codim< 0 >::Geometry ElementGeometry;
 
     private:
-      typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::IntersectionCoordVector CoordVector;
+      typedef GeoGrid::IntersectionCoordVector< Grid > CoordVector;
 
       typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
 

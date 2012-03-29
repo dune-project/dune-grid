@@ -3,8 +3,6 @@
 #ifndef DUNE_GEOGRID_CORNERSTORAGE_HH
 #define DUNE_GEOGRID_CORNERSTORAGE_HH
 
-#include <dune/geometry/genericgeometry/geometry.hh>
-
 #include <dune/grid/geometrygrid/coordfunctioncaller.hh>
 
 namespace Dune

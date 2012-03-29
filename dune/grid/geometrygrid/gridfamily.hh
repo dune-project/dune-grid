@@ -8,12 +8,12 @@
 #include <dune/geometry/genericgeometry/codimtable.hh>
 
 #include <dune/grid/common/grid.hh>
-
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/declaration.hh>
 #include <dune/grid/geometrygrid/entity.hh>
 #include <dune/grid/geometrygrid/entityseed.hh>
 #include <dune/grid/geometrygrid/entitypointer.hh>
+#include <dune/grid/geometrygrid/geometry.hh>
 #include <dune/grid/geometrygrid/intersection.hh>
 #include <dune/grid/geometrygrid/intersectioniterator.hh>
 #include <dune/grid/geometrygrid/iterator.hh>
@@ -22,56 +22,6 @@
 
 namespace Dune
 {
-
-  // GenericGeometry::GeometryTraits
-  // -------------------------------
-
-  namespace GenericGeometry
-  {
-
-    template< class HostGrid, class CoordFunction, class Allocator >
-    struct GlobalGeometryTraits< GeometryGrid< HostGrid, CoordFunction, Allocator > >
-      : public DefaultGeometryTraits< typename HostGrid::ctype, HostGrid::dimension, CoordFunction::dimRange >
-    {
-      typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
-
-      typedef DuneCoordTraits< typename HostGrid::ctype > CoordTraits;
-
-      static const int dimGrid = HostGrid::dimension;
-      static const int dimWorld = CoordFunction::dimRange;
-
-      static const bool hybrid = !Capabilities::hasSingleGeometryType< HostGrid >::v;
-      // this value is only used when hybrid is false (and only valid in that case)
-      static const unsigned int topologyId = Capabilities::hasSingleGeometryType< HostGrid >::topologyId;
-
-      template< int codim >
-      struct Codim
-      {
-        static const bool fake = !(Capabilities::hasHostEntity< Grid, codim >::v);
-        typedef GeoGrid::CoordVector< dimGrid-codim, const Grid, fake > CoordVector;
-      };
-
-      typedef GeoGrid::IntersectionCoordVector< const Grid > IntersectionCoordVector;
-
-      template< class Topology >
-      struct Mapping
-      {
-        typedef GeoGrid::CornerStorage< Topology, const Grid > CornerStorage;
-        typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage > type;
-      };
-
-      struct Caching
-      {
-        static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
-        static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
-        static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
-        static const EvaluationType evaluateNormal = ComputeOnDemand;
-      };
-    };
-
-  } // namespace GenericGeometry
-
-
 
   /** \brief namespace containing the implementations of GeometryGrid
    *  \ingroup GeoGrid
@@ -157,8 +107,8 @@ namespace Dune
         template< int codim >
         struct Codim
         {
-          typedef Dune::GenericGeometry::Geometry< dimension-codim, dimensionworld, const Grid > GeometryImpl;
-          typedef Dune::Geometry< dimension-codim, dimensionworld, const Grid, Dune::GenericGeometry::Geometry > Geometry;
+          typedef Dune::GeoGrid::Geometry< dimension-codim, dimensionworld, const Grid > GeometryImpl;
+          typedef Dune::Geometry< dimension-codim, dimensionworld, const Grid, Dune::GeoGrid::Geometry > Geometry;
           typedef typename HostGrid::template Codim< codim >::LocalGeometry LocalGeometry;
 
           typedef GeoGrid::EntityPointerTraits< codim, const Grid > EntityPointerTraits;
