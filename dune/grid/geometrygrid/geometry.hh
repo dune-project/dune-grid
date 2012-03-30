@@ -165,7 +165,8 @@ namespace Dune
         : grid_( other.grid_ ),
           mapping_( other.mapping_ )
       {
-        mapping_->userData().addReference();
+        if( mapping_ )
+          mapping_->userData().addReference();
       }
 
       ~Geometry ()
@@ -218,6 +219,22 @@ namespace Dune
     };
 
   } // namespace GeoGrid
+
+
+
+  // FacadeOptions
+  // -------------
+
+  namespace FacadeOptions
+  {
+
+    template< int mydim, int cdim, class Grid >
+    struct StoreGeometryReference< mydim, cdim, Grid, GeoGrid::Geometry >
+    {
+      static const bool v = false;
+    };
+
+  } // namespace FacadeOptions
 
 } // namespace Dune
 

@@ -156,19 +156,23 @@ namespace Dune
           hostEntity_( &hostEntity )
       {}
 
+#if 0
       EntityBase ( const EntityBase &other )
         : geo_( other.grid() ),
           hostEntity_( other.hostEntity_ )
       {}
+#endif
 
       /** \} */
 
+#if 0
       const EntityBase &operator= ( const EntityBase &other )
       {
         geo_ = GeometryImpl( other.grid() );
         hostEntity_ = other.hostEntity_;
         return *this;
       }
+#endif
 
       operator bool () const { return bool( hostEntity_ ); }
 
@@ -402,14 +406,17 @@ namespace Dune
           subEntity_( subEntity )
       {}
 
+#if 0
       EntityBase ( const EntityBase &other )
         : geo_( other.grid() ),
           hostElement_( other.hostElement_ ),
           subEntity_( other.subEntity_ )
       {}
+#endif
 
       /** \} */
 
+#if 0
       const EntityBase &operator= ( const EntityBase &other )
       {
         geo_ = GeometryImpl( other.grid() );
@@ -417,6 +424,7 @@ namespace Dune
         subEntity_ = other.subEntity_;
         return *this;
       }
+#endif
 
       operator bool () const { return bool( hostElement_ ); }
 

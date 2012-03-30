@@ -125,25 +125,25 @@ namespace Dune
           hostEntityIterator_( grid.hostGrid().entityPointer( seed.hostEntitySeed() ) )
       {}
 
-      EntityPointer ( const EntityImpl &entity )
-        : entity_( EntityImpl( entity.grid() ) ),
+      explicit EntityPointer ( const EntityImpl &entity )
+        : entity_( entity ),
           hostEntityIterator_( entity.hostEntity() )
       {}
 
       EntityPointer ( const This &other )
-        : entity_( EntityImpl( other.grid() ) ),
+        : entity_( other.entityImpl() ),
           hostEntityIterator_( other.hostEntityIterator_ )
       {}
 
       template< class T >
       explicit EntityPointer ( const EntityPointer< T, fake > &other )
-        : entity_( EntityImpl( other.grid() ) ),
+        : entity_( other.entityImpl() ),
           hostEntityIterator_( other.hostEntityIterator_ )
       {}
 
       const This &operator= ( const This &other )
       {
-        entityImpl() = EntityImpl( other.grid() );
+        entityImpl() = other.entityImpl();
         hostEntityIterator_ = other.hostEntityIterator_;
         return *this;
       }
@@ -235,25 +235,25 @@ namespace Dune
           hostElementIterator_( grid.hostGrid().entityPointer( seed.hostElementSeed() ) )
       {}
 
-      EntityPointer ( const EntityImpl &entity )
-        : entity_( EntityImpl( entity.grid(), entity.subEntity() ) ),
+      explicit EntityPointer ( const EntityImpl &entity )
+        : entity_( entity ),
           hostElementIterator_( entity.hostElement() )
       {}
 
       EntityPointer ( const This &other )
-        : entity_( EntityImpl( other.grid(), other.subEntity() ) ),
+        : entity_( other.entityImpl() ),
           hostElementIterator_( other.hostElementIterator_ )
       {}
 
       template< class T >
       explicit EntityPointer ( const EntityPointer< T, fake > &other )
-        : entity_( EntityImpl( other.grid(), other.subEntity() ) ),
+        : entity_( other.entityImpl() ),
           hostElementIterator_( other.hostElementIterator_ )
       {}
 
       const This &operator= ( const This &other )
       {
-        entityImpl() = EntityImpl( other.grid(), other.subEntity() );
+        entityImpl() = other.entityImpl();
         hostElementIterator_ = other.hostElementIterator_;
         return *this;
       }
