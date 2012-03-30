@@ -86,6 +86,9 @@ void test(const std::string& gridfile)
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
     checkPartitionType( geogrid.levelView( i ) );
 
+  std::cerr << "Checking geometry lifetime..." << std::endl;
+  checkGeometryLifetime( geogrid.leafView() );
+
   std::cerr << "Checking communication..." << std::endl;
   checkCommunication( geogrid, -1, std::cout );
   if( EnableLevelIntersectionIteratorCheck< Grid >::v )
