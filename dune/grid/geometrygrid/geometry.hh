@@ -44,6 +44,17 @@ namespace Dune
         static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::ComputeOnDemand;
         static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::ComputeOnDemand;
       };
+
+      struct UserData
+      {
+        UserData () : refCount_( 0 ) {}
+
+        void addReference () { ++refCount_; }
+        bool removeReference () { return (--refCount_ == 0); }
+
+      private:
+        unsigned int refCount_;
+      };
     };
 
 
@@ -73,7 +84,7 @@ namespace Dune
       {
         static const unsigned int topologyId = Capabilities::hasSingleGeometryType< Grid >::topologyId;
         typedef typename GenericGeometry::Topology< topologyId, dimension >::type Topology;
-        typedef GenericGeometry::CachedMapping< Topology, GeometryTraits > ElementMapping;
+        typedef GenericGeometry::NonHybridMapping< Topology, GeometryTraits > ElementMapping;
       };
 
     public:
@@ -137,6 +148,7 @@ namespace Dune
       {
         char *mappingStorage = grid.template allocateMappingStorage< codimension >( type );
         mapping_ = MappingProvider::construct( type.id(), coords, mappingStorage );
+        mapping_->userData().addReference();
       }
 
       template< int fatherdim >
@@ -146,23 +158,30 @@ namespace Dune
         const unsigned int codim = fatherdim - mydim;
         char *mappingStorage = grid().template allocateMappingStorage< codimension >( type );
         mapping_ = father.mapping_->template trace< codim >( i, mappingStorage );
+        mapping_->userData().addReference();
       }
 
       Geometry ( const This &other )
         : grid_( other.grid_ ),
-          mapping_( copyMapping( other ) )
-      {}
+          mapping_( other.mapping_ )
+      {
+        mapping_->userData().addReference();
+      }
 
-      ~Geometry () { destroyMapping(); }
+      ~Geometry ()
+      {
+        if( mapping_ && mapping_->userData().removeReference() )
+          destroyMapping();
+      }
 
       const This &operator= ( const This &other )
       {
-        if( mapping_ != other.mapping_ )
-        {
+        if( other.mapping_ )
+          other.mapping_->userData().addReference();
+        if( mapping_ && mapping_->userData().removeReference() )
           destroyMapping();
-          grid_ = other.grid_;
-          mapping_ = copyMapping( other );
-        }
+        grid_ = other.grid_;
+        mapping_ = other.mapping_;
         return *this;
       }
 
@@ -189,23 +208,9 @@ namespace Dune
     private:
       void destroyMapping ()
       {
-        if( mapping_ )
-        {
-          const GeometryType gt = type();
-          mapping_->~Mapping();
-          grid().template deallocateMappingStorage< codimension >( gt, (char *)mapping_ );
-        }
-      }
-
-      static Mapping *copyMapping ( const This &other )
-      {
-        if( other.mapping_ )
-        {
-          char *mappingStorage = other.grid().template allocateMappingStorage< codimension >( other.type() );
-          return other.mapping_->clone( mappingStorage );
-        }
-        else
-          return nullptr;
+        const GeometryType gt = type();
+        mapping_->~Mapping();
+        grid().template deallocateMappingStorage< codimension >( gt, (char *)mapping_ );
       }
 
       const Grid *grid_;
