@@ -1,150 +1,241 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_DGFPARSERUG_HH
-#define DUNE_DGFPARSERUG_HH
+#ifndef DUNE_GRID_IO_FILE_DGFPARSER_DGFUG_HH
+#define DUNE_GRID_IO_FILE_DGFPARSER_DGFUG_HH
 
-// only include if UG is used
-#if defined ENABLE_UG
+//- C++ includes
+#include <fstream>
+#include <istream>
+#include <string>
+#include <vector>
+
+//- dune-common includes
+#include <dune/common/exceptions.hh>
+#include <dune/common/fvector.hh>
+#include <dune/common/mpihelper.hh>
+
+//- dune-grid includes
+#include <dune/grid/common/intersection.hh>
 #include <dune/grid/uggrid.hh>
-#endif
 
+//- local includes
 #include "dgfparser.hh"
+#include "blocks/gridparameter.hh"
+
+
 namespace Dune
 {
 
-  namespace dgf {
+  namespace dgf
+  {
 
-    /** \brief Grid parameters for UGGrid
+    // UGGridParameterBlock
+    // --------------------
 
-        \ingroup DGFGridParameter
-
-        The UGGridParameter class is in charge of passing UGGrid specific
-        parameters to grid construction. Current parameters are: \n \n
-          1. \b closure:(valid values are \b none or \b green,
-             which is the default value) will set the closure
-             type of the returned UGGrid. \n
-          2. \b copies: (valid values are \b yes or \b none,
-             which is the default value) will enforce that non-refined
-             element are copied to the next level on refinement of a UGGrid. \n
-          3. \b heapsize: set heap size for UGGrid (default value is 500 MB). \n
-        See the \b examplegrid5.dgf file for an example.
-     */
-    class UGGridParameterBlock
+    struct UGGridParameterBlock
       : public GridParameterBlock
     {
+      /** \brief constructor taking istream */
+      UGGridParameterBlock( std::istream &input );
+
+      /** \brief returns true if no closure should be used for UGGrid */
+      bool noClosure () const;
+      /** \brief returns true if no copies are made for UGGrid elements */
+      bool noCopy () const;
+      /** \brief returns heap size used on construction of the grid */
+      size_t heapSize () const;
+
     protected:
-      bool _noClosure; // no closure for UGGrid
-      bool _noCopy; // no copies  for UGGrid
+      bool _noClosure;  // no closure for UGGrid
+      bool _noCopy;     // no copies  for UGGrid
       size_t _heapsize; // heap size  for UGGrid
-
-    public:
-      //! constructor taking istream
-      UGGridParameterBlock(std::istream &in)
-        : GridParameterBlock( in ),
-          _noClosure( false ),  // default value
-          _noCopy( true ),      // default value
-          _heapsize( 0 )      // default value (see UGGrid constructor)
-      {
-        // check closure
-        if (findtoken( "closure") )
-        {
-          std::string clo;
-          if( getnextentry(clo) )
-          {
-            makeupcase(clo);
-            if(clo == "NONE" )
-            {
-              _noClosure = true ;
-            }
-          }
-        }
-        else
-        {
-          dwarn << "UGGridParameterBlock: Parameter 'closure' not specified, "
-                << "defaulting to 'GREEN'." << std::endl;
-        }
-
-        if (findtoken( "copies") )
-        {
-          std::string copies;
-          if( getnextentry(copies) )
-          {
-            makeupcase(copies);
-            if(copies == "YES" )
-            {
-              _noCopy = false ;
-            }
-          }
-        }
-        else
-        {
-          dwarn << "UGGridParameterBlock: Parameter 'copies' not specified, "
-                << "no copies will be generated." << std::endl;
-        }
-
-        bool foundHeapSize = false ;
-        if (findtoken( "heapsize") )
-        {
-          int heap;
-          if( getnextentry( heap ) )
-          {
-            if( heap > 0 )
-            {
-              _heapsize = heap;
-              foundHeapSize = true ;
-            }
-          }
-        }
-
-        if( ! foundHeapSize )
-        {
-          dwarn << "UGGridParameterBlock: Parameter 'heapsize' not specified, "
-                << "defaulting to '500' MB." << std::endl;
-        }
-      }
-
-      //! returns true if no closure should be used for UGGrid
-      bool noClosure () const
-      {
-        return _noClosure;
-      }
-
-      //! returns true if no copies are made for UGGrid elements
-      bool noCopy () const
-      {
-        return _noCopy;
-      }
-
-      //! returns heap size used on construction of the grid
-      size_t heapSize() const
-      {
-        return _heapsize;
-      }
     };
 
   } // end namespace dgf
 
+
+
 #if defined ENABLE_UG
-  /** \cond */
-  template <int dim>
-  class MacroGrid::Impl<UGGrid<dim> > {
+  template< int dim >
+  struct DGFGridInfo< UGGrid< dim > >
+  {
+    static int refineStepsForHalf ()
+    {
+      return 1;
+    }
+
+    static double refineWeight ()
+    {
+      return -1.;
+    }
+  };
+
+
+
+  // DGFGridFactory< UGGrid< dim > >
+  // -------------------------------
+
+  template< int dim >
+  struct DGFGridFactory< UGGrid< dim > >
+  {
+    /** \brief grid type */
+    typedef UGGrid< dim > Grid;
+    /** \brief grid dimension */
+    static const int dimension = dim;
+    /** \brief MPI communicator type */
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
-  public:
-    static UGGrid<dim>* generate(MacroGrid& mg,
-                                 const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
+
+    /** \brief constructor taking istream */
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : grid_( 0 ),
+        factory_(),
+        dgf_( rank( comm ), size( comm ) )
+    {
+      generate( input );
+    }
+
+    /** \brief constructor taking filename */
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : grid_( 0 ),
+        factory_(),
+        dgf_( rank( comm ), size( comm ) )
+    {
+      std::ifstream input( filename.c_str() );
+      if ( !input )
+        DUNE_THROW(DGFException, "Error: Macrofile " << filename << " not found" );
+      generate( input );
+    }
+
+    /** \brief return grid */
+    Grid *grid ()
+    {
+      return grid_;
+    }
+
+    /** \brief please doc me */
+    template< class GG, template< class > class II >
+    bool wasInserted ( const Dune::Intersection< GG, II > &intersection ) const
+    {
+      return factory_.wasInserted( intersection );
+    }
+
+    /** \brief will return boundary segment index */
+    template < class GG, template< class > class II >
+    int boundaryId ( const Dune::Intersection< GG, II > &intersection ) const
+    {
+      return intersection.boundarySegmentIndex();
+    }
+
+    /** \brief return number of parameters */
+    template< int codim >
+    int numParameters () const
+    {
+      if( codim == 0 )
+        return dgf_.nofelparams;
+      else if( codim == dimension )
+        return dgf_.nofvtxparams;
+      else
+        return 0;
+    }
+
+    /** \brief return number of parameters */
+    template< class Entity >
+    int numParameters ( const Entity & ) const
+    {
+      return numParameters< Entity::codimension >();
+    }
+
+    /** \brief return parameter for codim 0 entity */
+    std::vector< double > &parameter ( const typename Grid::template Codim< 0 >::Entity &element )
+    {
+      if( numParameters< 0 >() <= 0 )
+      {
+        DUNE_THROW( InvalidStateException,
+                    "Calling DGFGridFactory::parameter is only allowed if there are parameters." );
+      }
+      return dgf_.elParams[ factory_.insertionIndex( element ) ];
+    }
+
+    /** \brief return parameter for vertex */
+    std::vector< double > &parameter ( const typename Grid::template Codim< dimension >::Entity &vertex )
+    {
+      if( numParameters< dimension >() <= 0 )
+      {
+        DUNE_THROW( InvalidStateException,
+                    "Calling DGFGridFactory::parameter is only allowed if there are parameters." );
+      }
+      return dgf_.vtxParams[ factory_.insertionIndex( vertex ) ];
+    }
+
+    /** \brief UGGrid does not support boundary parameters */
+    bool haveBoundaryParameters () const
+    {
+      return dgf_.haveBndParameters;
+    }
+
+    /** \brief return invalid value */
+    template < class GG, template< class > class II >
+    const DGFBoundaryParameter::type &boundaryParameter ( const Dune::Intersection< GG, II > &intersection ) const
+    {
+      typedef Dune::Intersection< GG, II > Intersection;
+      typename Intersection::EntityPointer inside = intersection.inside();
+      const typename Intersection::Entity &entity = *inside;
+      const int face = intersection.indexInInside();
+
+      const GenericReferenceElement< double, dimension > &refElem
+        = GenericReferenceElements< double, dimension >::general( entity.type() );
+      int corners = refElem.size( face, 1, dimension );
+      std::vector< unsigned int > bound( corners );
+      for( int i = 0; i < corners; ++i )
+      {
+        const int k = refElem.subEntity( face, 1, i, dimension );
+        bound[ i ] = factory_.insertionIndex( *entity.template subEntity< dimension >( k ) );
+      }
+
+      DuneGridFormatParser::facemap_t::key_type key( bound, false );
+      const DuneGridFormatParser::facemap_t::const_iterator pos = dgf_.facemap.find( key );
+      if( pos != dgf_.facemap.end() )
+        return dgf_.facemap.find( key )->second.second;
+      else
+        return DGFBoundaryParameter::defaultValue();
+    }
+
+  private:
+    // create grid
+    void generate ( std::istream &input );
+
+    // return rank
+    static int rank( MPICommunicatorType MPICOMM )
+    {
+      int rank = 0;
+#if HAVE_MPI
+      MPI_Comm_rank( MPICOMM, &rank );
+#endif
+      return rank;
+    }
+
+    // return size
+    static int size( MPICommunicatorType MPICOMM )
+    {
+      int size = 1;
+#if HAVE_MPI
+      MPI_Comm_size( MPICOMM, &size );
+#endif
+      return size;
+    }
+
+    Grid *grid_;
+    GridFactory< UGGrid< dim > > factory_;
+    DuneGridFormatParser dgf_;
   };
-  template <int dimw>
-  struct DGFGridInfo< UGGrid<dimw> > {
-    static int refineStepsForHalf() {return 1;}
-    static double refineWeight() {return -1.;}
-  };
-  /** \endcond */
 #endif
 
-}
+} // end namespace Dune
 
 #if defined ENABLE_UG
 #include "dgfug.cc"
 #endif
 
-#endif
+#endif // #ifndef DUNE_GRID_IO_FILE_DGFPARSER_DGFUG_HH
