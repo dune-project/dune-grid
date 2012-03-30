@@ -16,6 +16,54 @@ namespace Dune
   namespace GeoGrid
   {
 
+    template< int codim, class Grid >
+    class EntityProxy
+    {
+      typedef typename remove_const< Grid >::type::Traits Traits;
+
+      typedef typename Traits::template Codim< codim >::Entity Entity;
+      typedef GeoGrid::Entity< codim, Traits::dimension, const Grid > EntityImpl;
+      typedef typename EntityImpl::HostEntity HostEntity;
+
+      template< bool >
+      struct InitReal
+      {
+        static void apply ( EntityImpl &entityImpl, const HostEntity &hostEntity )
+        {
+          entityImpl.initialize( hostEntity );
+        }
+      };
+
+      template< bool >
+      struct InitFake
+      {
+        static void apply ( EntityImpl &entityImpl, const HostEntity &hostEntity )
+        {
+          DUNE_THROW( NotImplemented, "Host grid has no entities for codimension " << codim << "." );
+        }
+      };
+
+      static const bool hasHostEntity = Capabilities::hasHostEntity< Grid, codim >::v;
+      typedef typename SelectType< hasHostEntity, InitReal< true >, InitFake< false > >::Type Init;
+
+    public:
+      EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
+        : entity_( EntityImpl( grid ) )
+      {
+        Init::apply( Grid::getRealImplementation( entity_ ), hostEntity );
+      }
+
+      const Entity &operator* () const
+      {
+        return entity_;
+      }
+
+    private:
+      Entity entity_;
+    };
+
+
+
     // GeometryGridDataHandle
     // ----------------------
 
@@ -24,9 +72,6 @@ namespace Dune
       : public CommDataHandleIF< CommDataHandle< Grid, WrappedHandle >, typename WrappedHandle::DataType >
     {
       typedef typename remove_const< Grid >::type::Traits Traits;
-
-      template< class HostEntity >
-      class EntityProxy;
 
     public:
       CommDataHandle ( const Grid &grid, WrappedHandle &handle )
@@ -50,21 +95,21 @@ namespace Dune
       template< class HostEntity >
       size_t size ( const HostEntity &hostEntity ) const
       {
-        EntityProxy< HostEntity > proxy( grid_, hostEntity );
+        EntityProxy< HostEntity::codimension, Grid > proxy( grid_, hostEntity );
         return wrappedHandle_.size( *proxy );
       }
 
       template< class MessageBuffer, class HostEntity >
       void gather ( MessageBuffer &buffer, const HostEntity &hostEntity ) const
       {
-        EntityProxy< HostEntity > proxy( grid_, hostEntity );
+        EntityProxy< HostEntity::codimension, Grid > proxy( grid_, hostEntity );
         wrappedHandle_.gather( buffer, *proxy );
       }
 
       template< class MessageBuffer, class HostEntity >
       void scatter ( MessageBuffer &buffer, const HostEntity &hostEntity, size_t size )
       {
-        EntityProxy< HostEntity > proxy( grid_, hostEntity );
+        EntityProxy< HostEntity::codimension, Grid > proxy( grid_, hostEntity );
         wrappedHandle_.scatter( buffer, *proxy, size );
       }
 
@@ -77,62 +122,11 @@ namespace Dune
 
       static void noEntity ( int codim )
       {
-        DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
-                    << codim << "." );
+        DUNE_THROW( NotImplemented, "Host grid has no entities for codimension " << codim << "." );
       }
 
       const Grid &grid_;
       WrappedHandle &wrappedHandle_;
-    };
-
-
-
-    template< class Grid, class WrappedHandle >
-    template< class HostEntity >
-    class CommDataHandle< Grid, WrappedHandle >::EntityProxy
-    {
-      static const int dimension = HostEntity::dimension;
-      static const int codimension = HostEntity::codimension;
-
-      typedef typename Traits::template Codim< codimension >::Entity Entity;
-      typedef GeoGrid::Entity< codimension, dimension, const Grid > EntityImpl;
-
-      template< bool >
-      struct CreateReal
-      {
-        static EntityImpl
-        apply ( const Grid &grid, const HostEntity &hostEntity )
-        {
-          return EntityImpl( grid, hostEntity );
-        }
-      };
-
-      template< bool >
-      struct CreateFake
-      {
-        static EntityImpl
-        apply ( const Grid &grid, const HostEntity &hostEntity )
-        {
-          DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
-                      << codimension << "." );
-        }
-      };
-
-      static const bool hasHostEntity = Capabilities::hasHostEntity< Grid, codimension >::v;
-      typedef typename SelectType< hasHostEntity, CreateReal< true >, CreateFake< false > >::Type Create;
-
-    public:
-      EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
-        : entity_( Create::apply( grid, hostEntity ) )
-      {}
-
-      const Entity &operator* () const
-      {
-        return entity_;
-      }
-
-    private:
-      Entity entity_;
     };
 
   } // namespace GeoGrid

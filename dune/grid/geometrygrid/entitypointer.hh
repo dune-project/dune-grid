@@ -108,8 +108,14 @@ namespace Dune
       typedef typename Traits::EntitySeed EntitySeed;
 
       typedef GeoGrid::Entity< codimension, dimension, const Grid > EntityImpl;
+      typedef typename EntityImpl::GeometryImpl GeometryImpl;
 
     public:
+      EntityPointer ( const GeometryImpl &geo, const HostEntityIterator &hostEntityIterator )
+        : entity_( EntityImpl( geo ) ),
+          hostEntityIterator_( hostEntityIterator )
+      {}
+
       EntityPointer ( const Grid &grid, const HostEntityIterator &hostEntityIterator )
         : entity_( EntityImpl( grid ) ),
           hostEntityIterator_( hostEntityIterator )
@@ -162,7 +168,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( !entityImpl() )
-          entityImpl() = EntityImpl( grid(), *hostIterator() );
+          entityImpl().initialize( *hostIterator() );
         return entity_;
       }
 
@@ -218,8 +224,14 @@ namespace Dune
       typedef typename Traits::EntitySeed EntitySeed;
 
       typedef GeoGrid::Entity< codimension, dimension, const Grid > EntityImpl;
+      typedef typename EntityImpl::GeometryImpl GeometryImpl;
 
     public:
+      EntityPointer ( const GeometryImpl &geo, const HostElementIterator &hostElementIterator, int subEntity )
+        : entity_( EntityImpl( geo, subEntity ) ),
+          hostElementIterator_( hostElementIterator )
+      {}
+
       EntityPointer ( const Grid &grid, const HostElementIterator &hostElementIterator, int subEntity )
         : entity_( EntityImpl( grid, subEntity ) ),
           hostElementIterator_( hostElementIterator )
@@ -291,7 +303,7 @@ namespace Dune
       Entity &dereference () const
       {
         if( !entityImpl() )
-          entityImpl() = EntityImpl( grid(), *hostElementIterator(), subEntity() );
+          entityImpl().initialize( *hostElementIterator() );
         return entity_;
       }
 

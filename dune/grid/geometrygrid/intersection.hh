@@ -80,7 +80,7 @@ namespace Dune
 
       EntityPointer inside () const
       {
-        return EntityPointerImpl( grid(), hostIntersection().inside() );
+        return EntityPointerImpl( insideGeo_, hostIntersection().inside() );
       }
 
       EntityPointer outside () const

@@ -127,52 +127,52 @@ namespace Dune
       typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
       /** \} */
 
+      typedef typename Traits::template Codim< codim >::GeometryImpl GeometryImpl;
+
     private:
       typedef typename HostGrid::template Codim< codimension >::Geometry HostGeometry;
 
       typedef GeoGrid::CoordVector< mydimension, Grid, fake > CoordVector;
 
-      typedef typename Traits::template Codim< codim >::GeometryImpl GeometryImpl;
-
     public:
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
-      EntityBase ( const Grid &grid )
+      /** \brief construct an uninitialized entity
+       *
+       *  \param[in]  grid  GeometryGrid this entity belongs to
+       *
+       *  \note The geometry of an uninitialized entity might already be set
+       */
+      explicit EntityBase ( const Grid &grid )
         : geo_( grid ),
           hostEntity_( nullptr )
       {}
 
-      /** \brief construct an initialized entity
+      /** \brief construct an uninitialized entity
        *
-       *  \param[in]  grid        GeometryGrid this entity belongs to
-       *  \param[in]  hostEntity  corresponding entity in the host grid
+       *  \param[in]  geo  already known geometry this entity will have
        *
-       *  \note Both references must remain valid as long as this entity is in
-       *        use.
+       *  \note The geometry of an uninitialized entity might already be set
        */
-      EntityBase ( const Grid &grid, const HostEntity &hostEntity )
-        : geo_( grid ),
-          hostEntity_( &hostEntity )
+      explicit EntityBase ( const GeometryImpl &geo )
+        : geo_( geo ),
+          hostEntity_( nullptr )
       {}
 
-#if 0
       EntityBase ( const EntityBase &other )
-        : geo_( other.grid() ),
-          hostEntity_( other.hostEntity_ )
+        : geo_( other.geo_ ),
+          hostEntity_( nullptr )
       {}
-#endif
 
       /** \} */
 
-#if 0
       const EntityBase &operator= ( const EntityBase &other )
       {
-        geo_ = GeometryImpl( other.grid() );
-        hostEntity_ = other.hostEntity_;
+        geo_ = other.geo_;
+        hostEntity_ = nullptr;
         return *this;
       }
-#endif
 
       operator bool () const { return bool( hostEntity_ ); }
 
@@ -245,6 +245,15 @@ namespace Dune
         assert( *this );
         return *hostEntity_;
       }
+
+      /** \brief initiliaze an entity
+       *
+       *  \param[in]  hostEntity  reference to the host entity
+       *
+       *  \note The reference must remain valid as long as this entity is in
+       *        use.
+       */
+      void initialize ( const HostEntity &hostEntity ) { hostEntity_ = &hostEntity; }
 
       /** \brief obtain the entity's index from a host IndexSet
        *
@@ -372,59 +381,59 @@ namespace Dune
       typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
       /** \} */
 
+      typedef typename Traits::template Codim< codimension >::GeometryImpl GeometryImpl;
+
     private:
       typedef typename HostGrid::template Codim< 0 >::Geometry HostGeometry;
       typedef typename HostGrid::template Codim< dimension >::EntityPointer HostVertexPointer;
 
       typedef GeoGrid::CoordVector< mydimension, Grid, fake > CoordVector;
 
-      typedef typename Traits::template Codim< codimension >::GeometryImpl GeometryImpl;
-
     public:
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
+      /** \brief construct an uninitialized entity
+       *
+       *  \param[in]  grid       GeometryGrid this entity belongs to
+       *  \param[in]  subEntity  number of this entity within the host element
+       *
+       *  \note The geometry of an uninitialized entity might already be set
+       */
       EntityBase ( const Grid &grid, int subEntity )
         : geo_( grid ),
           hostElement_( nullptr ),
           subEntity_( subEntity )
       {}
 
-      /** \brief construct an initialized entity
+      /** \brief construct an uninitialized entity
        *
-       *  \param[in]  grid        GeometryGrid this entity belongs to
-       *  \param[in]  hostElement any host element containing the corresponding
-       *                          host entity
-       *  \param[in]  subEntity   number of this entity within the host element
+       *  \param[in]  geo        already known geometry this entity will have
+       *  \param[in]  subEntity  number of this entity within the host element
        *
-       *  \note Both references must remain valid as long as this entity is in
-       *        use.
+       *  \note The geometry of an uninitialized entity might already be set
        */
-      EntityBase ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : geo_( grid ),
-          hostElement_( &hostElement ),
+      EntityBase ( const GeometryImpl &geo, int subEntity )
+        : geo_( geo ),
+          hostElement_( nullptr ),
           subEntity_( subEntity )
       {}
 
-#if 0
       EntityBase ( const EntityBase &other )
-        : geo_( other.grid() ),
-          hostElement_( other.hostElement_ ),
+        : geo_( other.geo_ ),
+          hostElement_( nullptr ),
           subEntity_( other.subEntity_ )
       {}
-#endif
 
       /** \} */
 
-#if 0
       const EntityBase &operator= ( const EntityBase &other )
       {
-        geo_ = GeometryImpl( other.grid() );
-        hostElement_ = other.hostElement_;
+        geo_ = other.geo_;
+        hostElement_ = nullptr;
         subEntity_ = other.subEntity_;
         return *this;
       }
-#endif
 
       operator bool () const { return bool( hostElement_ ); }
 
@@ -527,6 +536,15 @@ namespace Dune
 
       int subEntity () const { return subEntity_; }
 
+      /** \brief initiliaze an entity
+       *
+       *  \param[in]  hostElement  reference to the host element
+       *
+       *  \note The reference must remain valid as long as this entity is in
+       *        use.
+       */
+      void initialize ( const HostElement &hostElement ) { hostElement_ = &hostElement; }
+
       /** \brief obtain the entity's index from a host IndexSet
        *
        *  \internal This method is provided by the entity, because its
@@ -614,21 +632,22 @@ namespace Dune
     public:
       typedef typename Base::HostEntity HostEntity;
       typedef typename Base::HostElement HostElement;
+      typedef typename Base::GeometryImpl GeometryImpl;
 
       explicit Entity ( const Grid &grid )
         : Base( grid )
       {}
 
-      Entity ( const Grid &grid, const HostEntity &hostEntity )
-        : Base( grid, hostEntity )
+      explicit Entity ( const GeometryImpl &geo )
+        : Base( geo )
       {}
 
       Entity ( const Grid &grid, int subEntity )
         : Base( grid, subEntity )
       {}
 
-      Entity ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : Base( grid, hostElement, subEntity )
+      Entity ( const GeometryImpl &geo, int subEntity )
+        : Base( geo, subEntity )
       {}
     };
 
@@ -681,16 +700,17 @@ namespace Dune
 
       typedef typename Base::HostEntity HostEntity;
       typedef typename Base::HostElement HostElement;
+      typedef typename Base::GeometryImpl GeometryImpl;
 
       using Base::grid;
       using Base::hostEntity;
 
-      Entity ( const Grid &grid )
+      explicit Entity ( const Grid &grid )
         : Base( grid )
       {}
 
-      Entity ( const Grid &grid, const HostEntity &hostEntity )
-        : Base( grid, hostEntity )
+      explicit Entity ( const GeometryImpl &geo )
+        : Base( geo )
       {}
 
       template< int codim >
