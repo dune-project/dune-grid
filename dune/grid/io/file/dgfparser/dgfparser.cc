@@ -29,7 +29,7 @@ namespace Dune
 
     void finish ()
     {
-      out << "Sucsessful" << std::endl;
+      out << "Successful" << std::endl;
     }
 
     template< class Block >
@@ -127,7 +127,7 @@ namespace Dune
       else
         extension = ".node";
       name += extension;
-      info->print("writting poly file "+name);
+      info->print("writing poly file "+name);
       std::ofstream polys(name.c_str());
       writeTetgenPoly(polys);
     }
@@ -137,7 +137,7 @@ namespace Dune
       {
         extension = ".poly";
         name += extension;
-        info->print("writting poly file "+name);
+        info->print("writing poly file "+name);
         std::ofstream polys(name.c_str());
         writeTetgenPoly(polys);
         params += " -p ";
