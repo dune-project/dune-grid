@@ -1,8 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-//- local includes
-#include <dune/grid/io/file/dgfparser/dgfug.hh>
+#include <config.h>
 
+#include <dune/grid/io/file/dgfparser/dgfug.hh>
 
 namespace Dune
 {
@@ -13,94 +13,86 @@ namespace Dune
     // Implementation of UGGridParameterBlock
     // --------------------------------------
 
-    UGGridParameterBlock::UGGridParameterBlock( std::istream &input )
+    UGGridParameterBlock::UGGridParameterBlock ( std::istream &input )
       : GridParameterBlock( input ),
-        _noClosure( false ), // default value
-        _noCopy( true ),   // default value
-        _heapsize( 0 )     // default value (see UGGrid constructor)
+        noClosure_( false ), // default value
+        noCopy_( true ),   // default value
+        heapSize_( 0 )     // default value (see UGGrid constructor)
     {
       // check closure
-      if (findtoken( "closure") )
+      if( findtoken( "closure" ) )
       {
-        std::string clo;
-        if( getnextentry(clo) )
+        std::string closure;
+        if( getnextentry( closure ) )
         {
-          makeupcase(clo);
-          if(clo == "NONE" )
+          makeupcase( closure );
+          if( closure == "NONE" )
+            noClosure_ = true ;
+          else if( closure != "GREEN" )
           {
-            _noClosure = true ;
+            dwarn << "UGGridParameterBlock: Parameter 'closure' has invalid value: " << closure
+                  << ", using default: 'GREEN'." << std::endl;
           }
         }
       }
       else
       {
-        dwarn << "UGGridParameterBlock: Parameter 'closure' not specified, "
-              << "defaulting to 'GREEN'." << std::endl;
+        dwarn << "UGGridParameterBlock: Parameter 'closure' not specified"
+              << ", using default: 'GREEN'." << std::endl;
       }
 
-      if (findtoken( "copies") )
+      if( findtoken( "copies" ) )
       {
         std::string copies;
-        if( getnextentry(copies) )
+        if( getnextentry( copies ) )
         {
-          makeupcase(copies);
-          if(copies == "YES" )
+          makeupcase( copies );
+          if( copies == "YES" )
+            noCopy_ = false;
+          else if( copies != "NO" )
           {
-            _noCopy = false ;
+            dwarn << "UGGridParameterBlock: Parameter 'copies' has invalid value: " << copies
+                  << ", using default: 'NO'." << std::endl;
           }
         }
       }
       else
       {
-        dwarn << "UGGridParameterBlock: Parameter 'copies' not specified, "
-              << "no copies will be generated." << std::endl;
+        dwarn << "UGGridParameterBlock: Parameter 'copies' not specified"
+              << ", using default: 'NO'." << std::endl;
       }
 
-      bool foundHeapSize = false ;
-      if (findtoken( "heapsize") )
+      if( findtoken( "heapsize" ) )
       {
-        int heap;
-        if( getnextentry( heap ) )
+        int heapSize;
+        if( getnextentry( heapSize ) )
         {
-          if( heap > 0 )
+          if( heapSize > 0 )
+            heapSize_ = heapSize;
+          else
           {
-            _heapsize = heap;
-            foundHeapSize = true ;
+            dwarn << "UGGridParameterBlock: Parameter 'heapsize' is non-positive"
+                  << ", using default: '500' MB." << std::endl;
           }
         }
       }
-
-      if( ! foundHeapSize )
+      else
       {
-        dwarn << "UGGridParameterBlock: Parameter 'heapsize' not specified, "
-              << "defaulting to '500' MB." << std::endl;
+        dwarn << "UGGridParameterBlock: Parameter 'heapsize' not specified"
+              << ", using default: '500' MB." << std::endl;
       }
     }
 
-    bool UGGridParameterBlock::noClosure () const
-    {
-      return _noClosure;
-    }
-
-    bool UGGridParameterBlock::noCopy () const
-    {
-      return _noCopy;
-    }
-
-    size_t UGGridParameterBlock::heapSize() const
-    {
-      return _heapsize;
-    }
-
-  } // end namespace dgf
+  } // namespace dgf
 
 
 
   // Implementation of DGFGridFactory< UGGrid >
   // -------------------------------------------
 
+#if ENABLE_UG
   template< int dim >
-  inline void DGFGridFactory< UGGrid< dim > >::generate ( std::istream &input )
+  void DGFGridFactory< UGGrid< dim > >::generate ( std::istream &input )
   {
     dgf_.element = DuneGridFormatParser::General;
 
@@ -125,34 +117,29 @@ namespace Dune
       factory_.insertVertex( v );
     }
 
-    // eval 2^dim
-    size_t two_power_dim = (1 << dim );
-
     std::vector< unsigned int > el;
     for( int n = 0; n < dgf_.nofelements; n++ )
     {
       el.clear();
-      for( size_t j = 0; j < dgf_.elements[ n ].size(); j++ )
-      {
+      for( size_t j = 0; j < dgf_.elements[ n ].size(); ++j )
         el.push_back( ( dgf_.elements[ n ][ j ] ) );
-      }
 
       // simplices
-      if( (int) el.size() == dgf_.dimw+1 )
+      if( el.size() == std::size_t( dim+1 ) )
         factory_.insertElement( GeometryType( GeometryType::simplex, dim ), el );
       // cubes
-      else if( el.size() == two_power_dim )
-        factory_.insertElement( GeometryType( GeometryType::cube, dim), el );
+      else if( el.size() == 1u << dim )
+        factory_.insertElement( GeometryType( GeometryType::cube, dim ), el );
 #ifdef EXPERIMENTAL_GRID_EXTENSIONS
       // pyramid
-      else if( el.size() == 5 )
+      else if( (dim == 3) && (el.size() == 5u) )
         factory_.insertElement( GeometryType( GeometryType::pyramid, dim ), el );
       // prisms
-      else if( el.size() == 6 )
+      else if( (dim == 3) && (el.size() == 6u) )
         factory_.insertElement( GeometryType( GeometryType::prism, dim ), el );
 #endif
       else
-        DUNE_THROW( DGFException, "Wrong number of vertices for element" );
+        DUNE_THROW( DGFException, "Invalid number of element vertices: " << el.size() );
     }
 
     // create grid
@@ -160,14 +147,15 @@ namespace Dune
 
     // set closure type to none if parameter say so
     if( gridParam.noClosure() )
-    {
       grid_->setClosureType( UGGrid< dim >::NONE );
-    }
 
     if ( !gridParam.noCopy() )
-    {
       grid_->setRefinementType( UGGrid< dim >::COPY );
-    }
   }
 
-} // end namespace Dune
+
+  template void DGFGridFactory< UGGrid< 2 > >::generate ( std::istream &input );
+  template void DGFGridFactory< UGGrid< 3 > >::generate ( std::istream &input );
+#endif // #if ENABLE_UG
+
+} // namespace Dune

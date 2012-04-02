@@ -36,26 +36,26 @@ namespace Dune
       : public GridParameterBlock
     {
       /** \brief constructor taking istream */
-      UGGridParameterBlock( std::istream &input );
+      explicit UGGridParameterBlock ( std::istream &input );
 
       /** \brief returns true if no closure should be used for UGGrid */
-      bool noClosure () const;
+      bool noClosure () const { return noClosure_; }
       /** \brief returns true if no copies are made for UGGrid elements */
-      bool noCopy () const;
+      bool noCopy () const { return noCopy_; }
       /** \brief returns heap size used on construction of the grid */
-      size_t heapSize () const;
+      size_t heapSize () const { return heapSize_; }
 
     protected:
-      bool _noClosure;  // no closure for UGGrid
-      bool _noCopy;     // no copies  for UGGrid
-      size_t _heapsize; // heap size  for UGGrid
+      bool noClosure_;  // no closure for UGGrid
+      bool noCopy_;     // no copies  for UGGrid
+      size_t heapSize_; // heap size  for UGGrid
     };
 
-  } // end namespace dgf
+  } // namespace dgf
 
 
 
-#if defined ENABLE_UG
+#if ENABLE_UG
   template< int dim >
   struct DGFGridInfo< UGGrid< dim > >
   {
@@ -104,7 +104,7 @@ namespace Dune
     {
       std::ifstream input( filename.c_str() );
       if ( !input )
-        DUNE_THROW(DGFException, "Error: Macrofile " << filename << " not found" );
+        DUNE_THROW( DGFException, "Error: Macrofile " << filename << " not found" );
       generate( input );
     }
 
@@ -230,12 +230,8 @@ namespace Dune
     GridFactory< UGGrid< dim > > factory_;
     DuneGridFormatParser dgf_;
   };
-#endif
+#endif // #if ENABLE_UG
 
-} // end namespace Dune
-
-#if defined ENABLE_UG
-#include "dgfug.cc"
-#endif
+} // namespace Dune
 
 #endif // #ifndef DUNE_GRID_IO_FILE_DGFPARSER_DGFUG_HH
