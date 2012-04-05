@@ -310,7 +310,7 @@ namespace Dune {
               v[d]++;
           }
           // compute vertex index tuple from cell tuple
-          vec[i] = asCommon().vertexIdx(v);
+          vec[nIndices-1-i] = asCommon().vertexIdx(v);
         }
         return vec;
       }
