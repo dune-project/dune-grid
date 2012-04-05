@@ -4,7 +4,7 @@
 #define DUNE_GRID_COMMON_REFINEMENT_HCUBE_CC
 
 // This file is part of DUNE, a Distributed and Unified Numerics Environment
-// This file is copyright (C) 2005 Jorrit Fahlke <jorrit@jorrit.de>
+// This file is copyright (C) 2005 Jorrit Fahlke <jorrit@jorrit.de>, 2012 Christian Engwer <christi@dune-project.org>
 // This file is licensed under version 2 of the GNU General Public License,
 // with a special "runtime exception."  See COPYING at the top of the source
 // tree for the full licence.
@@ -245,6 +245,12 @@ namespace Dune {
         typedef typename Refinement::CoordVector CoordVector;
 
         CoordVector coords() const;
+
+      private:
+        const Common & asCommon() const
+        {
+          return *static_cast<const Common*>(this);
+        };
       };
 
       template<int dimension, class CoordType>
@@ -252,9 +258,13 @@ namespace Dune {
       RefinementSubEntityIteratorSpecial<dimension, CoordType, dimension>::
       coords() const
       {
-        // Assume a vertex has exactly one corner
-        // Assume the reference element an n-cube has all coordinates ranging from 0 to 1
-        return static_cast<const Common*>(this)->backend->geometry().corner(0);
+        array<unsigned int, dimension> v(asCommon().vertexCoord());
+        CoordVector c;
+        for (int d=0; d<dimension; d++)
+        {
+          c[d] = v[d]*1.0 / (1<<asCommon()._level);
+        }
+        return c;
       }
 
       // for elements
@@ -270,6 +280,12 @@ namespace Dune {
 
         IndexVector vertexIndices() const;
         CoordVector coords() const;
+
+      private:
+        const Common & asCommon() const
+        {
+          return *static_cast<const Common*>(this);
+        };
       };
 
       template<int dimension, class CoordType>
@@ -281,16 +297,20 @@ namespace Dune {
 
         IndexVector vec;
         // cell index tuple
-        array<unsigned int, dim> e(0);
-        for (int d = 0; d < dimension; d++)
+        array<unsigned int, dimension> e(asCommon().cellCoord());
 
-          // vertices
-          array<unsigned int, dim> v;
+        // vertices
+        array<unsigned int, dimension> v;
         for(int i = 0; i < nIndices; ++i)
         {
+          for (int d = 0; d < dimension; d++)
+          {
+            v[d] = e[d];
+            if (nIndices | (1<<d))
+              v[d]++;
+          }
           // compute vertex index tuple from cell tuple
-
-          vec[i] =;
+          vec[i] = asCommon().coord2idx(v, (1<<asCommon()._level)+1);
         }
         return vec;
       }
@@ -300,15 +320,18 @@ namespace Dune {
       RefinementSubEntityIteratorSpecial<dimension, CoordType, 0>::
       coords() const
       {
-        return static_cast<const Common*>(this)->backend->geometry()
-               .global(GenericReferenceElements<CoordType, dimension>
-                       ::cube().position(0,0));
+        array<unsigned int, dimension> v(asCommon().cellCoord());
+        CoordVector c;
+        for (int d=0; d<dimension; d++)
+        {
+          c[d] = (v[d]*1.0 + 0.5) / (1<<asCommon()._level);
+        }
+        return c;
       }
 
 
 
       // common
-
       template<int dimension, class CoordType>
       template<int codimension>
       class RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator
@@ -325,11 +348,56 @@ namespace Dune {
         void increment();
 
         int index() const;
-        Geometrye geometry () const;
+        Geometry geometry () const;
       private:
         friend class RefinementSubEntityIteratorSpecial<dimension, CoordType, codimension>;
         unsigned int _index;
         unsigned int _level;
+
+        array<unsigned int, dimension>
+        cellCoord(unsigned int idx) const
+        {
+          return idx2coord(idx, 1<<_level);
+        }
+
+        array<unsigned int, dimension>
+        vertexCoord(unsigned int idx) const
+        {
+          return idx2coord(idx, (1<<_level)+1);
+        }
+
+        array<unsigned int, dimension>
+        cellCoord() const
+        {
+          return cellCoord(_index);
+        }
+
+        array<unsigned int, dimension>
+        vertexCoord() const
+        {
+          return vertexCoord(_index);
+        }
+
+        array<unsigned int, dimension>
+        idx2coord(unsigned int idx, unsigned int w) const
+        {
+          array<unsigned int, dimension> c;
+          for (unsigned int d = dimension; d > 0; d--)
+          {
+            c[d-1] = idx/w;
+            idx = idx%w;
+          }
+          c[0] = idx;
+          return c;
+        }
+
+        unsigned int
+        coord2idx(array<unsigned int, dimension> c, unsigned int w) const
+        {
+          unsigned int i(0);
+          return i;
+        }
+
       };
 
 #ifndef DOXYGEN
@@ -356,7 +424,7 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       increment()
       {
-        ++index;
+        ++_index;
       }
 
       template<int dimension, class CoordType>
@@ -365,7 +433,7 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       index() const
       {
-        return index;
+        return _index;
       }
 
       template<int dimension, class CoordType>
