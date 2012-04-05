@@ -56,6 +56,7 @@
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/genericgeometry/geometry.hh>
 #include <dune/common/iteratorfacades.hh>
 #include "base.cc" // for RefinementTraits
 
@@ -70,12 +71,54 @@ namespace Dune {
      */
     namespace HCube {
 
-      //
-      // refinement implementation for hypercubes
-      //
+#ifndef DOXYGEN
+      template <int p, bool odd = p%2>
+      struct PowerImp {};
+#endif
 
-      template<int dimension>
-      class RefinementGrid;
+      //! Helper class for power computation
+      template <int p>
+      struct Power
+      {
+        template <typename T>
+        static T eval(const T & a)
+        {
+          return PowerImp<p>::eval(a);
+        }
+      };
+
+#ifndef DOXYGEN
+      template <int p>
+      struct PowerImp<p,false>
+      {
+        template <typename T>
+        static T eval(const T & a)
+        {
+          T t = Power<p/2>::eval(a);
+          return t*t;
+        }
+      };
+
+      template <int p>
+      struct PowerImp<p,true>
+      {
+        template <typename T>
+        static T eval(const T & a)
+        {
+          return a*Power<p-1>::eval(a);;
+        }
+      };
+
+      template <>
+      struct PowerImp<1,true>
+      {
+        template <typename T>
+        static T eval(const T & a)
+        {
+          return a;
+        }
+      };
+#endif
 
       /*! @brief @ref Refinement implementation for hypercubes
 
@@ -109,9 +152,6 @@ namespace Dune {
         static int nElements(int level);
         static ElementIterator eBegin(int level);
         static ElementIterator eEnd(int level);
-      private:
-        //- Know the backend grid
-        typedef RefinementGrid<dimension> Grid;
       };
 
       template<int dimension, class CoordType>
@@ -119,7 +159,7 @@ namespace Dune {
       struct RefinementImp<dimension, CoordType>::Codim
       {
         class SubEntityIterator;
-        typedef typename RefinementGrid<dimension>::BaseType::template Codim<codimension>::Geometry Geometry;
+        typedef Dune::Geometry<dimension-codimension, dimension, RefinementImp<dimension, CoordType>, GenericGeometry::Geometry> Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -127,8 +167,8 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::
       nVertices(int level)
       {
-        Grid::instance().refineTo(level);
-        return Grid::instance().size(level, dimension);
+        // return (2^level + 1)^dim
+        return Power<dimension>::eval((1<<level)+1);
       }
 
       template<int dimension, class CoordType>
@@ -136,8 +176,7 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::
       vBegin(int level)
       {
-        Grid::instance().refineTo(level);
-        return VertexIterator(Grid::instance().template lbegin<dimension>(level));
+        return VertexIterator(0,level);
       }
 
       template<int dimension, class CoordType>
@@ -145,8 +184,7 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::
       vEnd(int level)
       {
-        Grid::instance().refineTo(level);
-        return VertexIterator(Grid::instance().template lend<dimension>(level));
+        return VertexIterator(nVertices(level),level);
       }
 
       template<int dimension, class CoordType>
@@ -154,8 +192,8 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::
       nElements(int level)
       {
-        Grid::instance().refineTo(level);
-        return Grid::instance().size(level, 0);
+        // return (2^level)^dim
+        return 1<<(level*dimension);
       }
 
       template<int dimension, class CoordType>
@@ -163,8 +201,7 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::
       eBegin(int level)
       {
-        Grid::instance().refineTo(level);
-        return ElementIterator(Grid::instance().template lbegin<0>(level));
+        return ElementIterator(0,level);
       }
 
       template<int dimension, class CoordType>
@@ -172,85 +209,11 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::
       eEnd(int level)
       {
-        Grid::instance().refineTo(level);
-        return ElementIterator(Grid::instance().template lend<0>(level));
+        return ElementIterator(nElements(level),level);
       }
 
       //
-      // The backend Grid
-      //
-
-      /*!
-         @brief Backend grid for hypercube refinement
-
-         @param dimension Dimension of the refined hypercube
-
-         This grid is used as backend by @ref RefinementImp.  It simply
-         wraps a YaspGrid to make it a singleton.  We have to use
-         YaspGrids default CoordType here instead of the one from the
-         refined hypercube, because I know of no way to set the
-         CoordType used by YaspGrid.
-       */
-      template<int dimension>
-      class RefinementGrid : public YaspGrid<dimension>
-      {
-        using YaspGrid<dimension>::maxLevel;
-        using YaspGrid<dimension>::globalRefine;
-      public:
-        //! Know yourself
-        typedef RefinementGrid<dimension> This;
-        //! Know your base class
-        typedef YaspGrid<dimension> BaseType;
-
-        //! Make sure the grid as at least the given refinement level
-        void refineTo(int level);
-        //! Return the singleton instance
-        static This &instance();
-      private:
-        RefinementGrid();
-
-        static This *instance_;
-      };
-
-      /*!
-                This simply wraps the globalRefine() method of YaspGrid.
-       */
-      template<int dimension>
-      void RefinementGrid<dimension>::refineTo(int level /*! The refinement level to enforce */)
-      {
-        if(maxLevel() < level)
-          globalRefine(level - maxLevel());
-      }
-
-
-      /*!
-                Return the singleton instance of the RefinementGrid.  Create it if neccessary.
-       */
-      template<int dimension>
-      RefinementGrid<dimension> &
-      RefinementGrid<dimension>::instance()
-      {
-        if(instance_ == 0)
-          instance_ = new This;
-        return *instance_;
-      }
-
-      template<int dimension>
-      RefinementGrid<dimension>::RefinementGrid() :
-        BaseType(FieldVector<typename BaseType::ctype, dimension>(1.0),
-                 FieldVector<int, dimension>(1),
-                 FieldVector<bool, dimension>(false),
-                 0)
-      {
-        assert(this->comm().size() == 1);
-      }
-
-      template<int dimension>
-      RefinementGrid<dimension> *
-      RefinementGrid<dimension>::instance_ = 0;
-
-      //
-      // The iterator
+      // The iterators
       //
 
 #ifdef DOXYGEN
@@ -316,10 +279,19 @@ namespace Dune {
       {
         enum { nIndices = (1 << dimension) };
 
-        assert(nIndices == static_cast<const Common*>(this)->backend->template count<dimension>());
         IndexVector vec;
+        // cell index tuple
+        array<unsigned int, dim> e(0);
+        for (int d = 0; d < dimension; d++)
+
+          // vertices
+          array<unsigned int, dim> v;
         for(int i = 0; i < nIndices; ++i)
-          vec[i] = RefinementGrid<dimension>::instance().levelIndexSet(static_cast<const Common*>(this)->backend->level()).subIndex(*(static_cast<const Common*>(this)->backend),nIndices - i - 1,dimension);
+        {
+          // compute vertex index tuple from cell tuple
+
+          vec[i] =;
+        }
         return vec;
       }
 
@@ -346,19 +318,18 @@ namespace Dune {
       public:
         typedef RefinementImp<dimension, CoordType> Refinement;
         typedef typename Refinement::template Codim<codimension>::SubEntityIterator This;
-        typedef typename RefinementGrid<dimension>::template Codim<codimension>::LevelIterator
-        BackendIterator;
 
-        SubEntityIterator(const BackendIterator &backend);
+        SubEntityIterator(unsigned int index, unsigned int level);
 
         bool equals(const This &other) const;
         void increment();
 
         int index() const;
-        Geometry geometry () const;
+        Geometrye geometry () const;
       private:
         friend class RefinementSubEntityIteratorSpecial<dimension, CoordType, codimension>;
-        BackendIterator backend;
+        unsigned int _index;
+        unsigned int _level;
       };
 
 #ifndef DOXYGEN
@@ -366,8 +337,8 @@ namespace Dune {
       template<int dimension, class CoordType>
       template<int codimension>
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
-      SubEntityIterator(const BackendIterator &backend_)
-        : backend(backend_)
+      SubEntityIterator(unsigned int index, unsigned int level)
+        : _index(index), _level(level)
       {}
 
       template<int dimension, class CoordType>
@@ -375,7 +346,9 @@ namespace Dune {
       bool
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       equals(const This &other) const
-      { return backend == other.backend; }
+      {
+        return _index == other._index && _level == other._level;
+      }
 
       template<int dimension, class CoordType>
       template<int codimension>
@@ -383,7 +356,7 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       increment()
       {
-        ++backend;
+        ++index;
       }
 
       template<int dimension, class CoordType>
@@ -391,15 +364,16 @@ namespace Dune {
       int
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       index() const
-      { return RefinementGrid<dimension>::instance().levelIndexSet(backend->level()).index(*backend); }
-      //      { return backend->index(); }
+      {
+        return index;
+      }
 
       template<int dimension, class CoordType>
       template<int codimension>
       typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::geometry () const
       {
-        return backend->geometry();
+        assert(false && "Not Implemented");
       }
 
 #endif // DOXYGEN
