@@ -295,22 +295,22 @@ namespace Dune {
       {
         enum { nIndices = (1 << dimension) };
 
-        IndexVector vec;
         // cell index tuple
         array<unsigned int, dimension> e(asCommon().cellCoord());
 
         // vertices
+        IndexVector vec;
         array<unsigned int, dimension> v;
         for(int i = 0; i < nIndices; ++i)
         {
           for (int d = 0; d < dimension; d++)
           {
             v[d] = e[d];
-            if (nIndices | (1<<d))
+            if (i & (1<<d))
               v[d]++;
           }
           // compute vertex index tuple from cell tuple
-          vec[i] = asCommon().coord2idx(v, (1<<asCommon()._level)+1);
+          vec[i] = asCommon().vertexIdx(v);
         }
         return vec;
       }
@@ -382,20 +382,30 @@ namespace Dune {
         idx2coord(unsigned int idx, unsigned int w) const
         {
           array<unsigned int, dimension> c;
-          for (unsigned int d = dimension; d > 0; d--)
+          for (unsigned int d = 0; d < dimension; d++)
           {
-            c[d-1] = idx/w;
-            idx = idx%w;
+            c[d] = idx%w;
+            idx = idx/w;
           }
-          c[0] = idx;
           return c;
         }
 
         unsigned int
         coord2idx(array<unsigned int, dimension> c, unsigned int w) const
         {
-          unsigned int i(0);
+          unsigned int i = 0;
+          for (unsigned int d = dimension; d > 0; d--)
+          {
+            i *= w;
+            i += c[d-1];
+          }
           return i;
+        }
+
+        unsigned int
+        vertexIdx(array<unsigned int, dimension> c) const
+        {
+          return coord2idx(c, (1<<_level)+1);
         }
 
       };
