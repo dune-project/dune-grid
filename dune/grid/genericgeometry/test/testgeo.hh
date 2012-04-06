@@ -129,6 +129,10 @@ namespace Dune
         static const EvaluationType evaluateNormal = ComputeOnDemand;
       };
 
+      /** \brief type of additional user data to be stored in each mapping
+       */
+      struct UserData {};
+
     };
 
   }
