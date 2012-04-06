@@ -34,11 +34,6 @@ namespace Dune
     // count local geometry creation
     int count_;
 
-    static const int aluTriangle = ALU2DSPACE triangle;
-    static const int aluQuad     = ALU2DSPACE quadrilateral;
-    static const int aluTetra    = ALU3DSPACE tetra;
-    static const int aluHexa     = ALU3DSPACE hexa;
-
     // type of grid impl
     typedef typename GridImp :: ctype ctype;
     enum { dimension       = GridImp :: dimension };
@@ -48,7 +43,7 @@ namespace Dune
     struct CreateGeometries;
 
     template <int dummy, int dimworld>
-    struct CreateGeometries<dummy, 2, dimworld, aluTriangle >
+    struct CreateGeometries<dummy, 2, dimworld, ALU2DSPACE triangle >
     {
       template <class Storage>
       static void createGeometries(Storage& storage,
@@ -69,7 +64,7 @@ namespace Dune
     };
 
     template <int dummy>
-    struct CreateGeometries<dummy, 3, 3, aluTetra >
+    struct CreateGeometries<dummy, 3, 3, ALU3DSPACE tetra >
     {
       template <class Storage>
       static void createGeometries(Storage& storage,
@@ -93,7 +88,7 @@ namespace Dune
     };
 
     template <int dummy, int dimworld>
-    struct CreateGeometries<dummy, 2, dimworld, aluQuad >
+    struct CreateGeometries<dummy, 2, dimworld, ALU2DSPACE quadrilateral >
     {
       template <class Storage>
       static void createGeometries(Storage& storage,
@@ -109,7 +104,7 @@ namespace Dune
     };
 
     template <int dummy>
-    struct CreateGeometries<dummy, 3, 3, aluHexa >
+    struct CreateGeometries<dummy, 3, 3, ALU3DSPACE hexa >
     {
       template <class Storage>
       static void createGeometries(Storage& storage,
