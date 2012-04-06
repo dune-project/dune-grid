@@ -166,6 +166,10 @@ namespace Dune
       static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::ComputeOnDemand;
     };
 
+    /** \brief type of additional user data to be stored in each mapping
+     */
+    struct UserData {};
+
   };
 
 
