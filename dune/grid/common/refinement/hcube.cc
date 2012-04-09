@@ -23,11 +23,6 @@
 /*! @defgroup HCubeRefinement Refinement implementation for hypercubes
     @ingroup Refinement
 
-   This @ref Refinement implementation uses an YaspGrid as it's backend.
-   The YaspGrid is wrapped by @ref Dune::RefinementImp::HCube::RefinementGrid to make it singleton.
-   RefinementImp than adapts the YaspGrid interface to the @ref Refinement
-   interface.
-
    @section Iterators The Iterators
    <!--=========================-->
 
@@ -53,11 +48,12 @@
 #include <cassert>
 
 #include <dune/common/fvector.hh>
-#include <dune/grid/yaspgrid.hh>
-#include <dune/grid/common/grid.hh>
+#include <dune/common/iteratorfacades.hh>
+
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/genericgeometry/geometry.hh>
-#include <dune/common/iteratorfacades.hh>
+
+#include <dune/grid/common/geometry.hh>
 #include "base.cc" // for RefinementTraits
 
 namespace Dune {
