@@ -111,8 +111,10 @@ try
   }
 
   test<GeometryGrid>(gridfile);
-  // commented out, because it is not working
-  //test<GeometryGridWithPoolAllocator>(gridfile);
+
+  // compile, but do not actually call, because it is not working yet
+  if (false)
+    test<GeometryGridWithPoolAllocator>(gridfile);
 
   return 0;
 }
