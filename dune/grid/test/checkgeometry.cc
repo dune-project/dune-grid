@@ -4,6 +4,8 @@
 #ifndef DUNE_CHECK_GEOMETRY_CC
 #define DUNE_CHECK_GEOMETRY_CC
 
+#include <limits>
+
 #include <dune/common/forloop.hh>
 #include <dune/common/typetraits.hh>
 
@@ -172,7 +174,9 @@ namespace Dune
     for(it = gridView.template begin<0>();
         it != end; ++it )
     {
-      assert (geomCopy.global(pos) == glob);
+      // due to register/memory differences we might have
+      // errors < 1e-16
+      assert (std::abs((geomCopy.global(pos) - glob).one_norm()) < std::numeric_limits<ctype>::epsilon());
     }
   }
 
