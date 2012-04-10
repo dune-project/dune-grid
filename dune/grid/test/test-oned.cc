@@ -147,6 +147,9 @@ void testOneDGrid(OneDGrid& grid)
   grid.globalRefine(1);
   gridcheck(grid);
 
+  // check geometry lifetime
+  checkGeometryLifetime( grid.leafView() );
+
   // check the method geometryInFather()
   checkGeometryInFather(grid);
 

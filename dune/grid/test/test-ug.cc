@@ -218,6 +218,10 @@ void generalTests(bool greenClosure)
   for(int l=0; l<=grid3d->maxLevel(); ++l)
     checkCommunication(*grid3d,l,Dune::dvverb);
 
+  // check geometry lifetime
+  checkGeometryLifetime( grid2d->leafView() );
+  checkGeometryLifetime( grid3d->leafView() );
+
   // check the method geometryInFather()
   checkGeometryInFather(*grid2d);
   checkGeometryInFather(*grid3d);
