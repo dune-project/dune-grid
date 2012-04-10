@@ -233,6 +233,21 @@ namespace Dune {
 
   };
 
+  namespace FacadeOptions
+  {
+
+    /** \brief Switch on the new implementation for the Geometry interface class
+     * \deprecated Eventually the new implementation will be hardwired,
+     *             and this switch may disappear without prior warning!
+     */
+    template< int mydim, int cdim, class GridImp>
+    struct StoreGeometryReference<mydim,cdim,GridImp,OneDGridGeometry>
+    {
+      static const bool v = false;
+    };
+
+  }
+
 }  // namespace Dune
 
 #endif
