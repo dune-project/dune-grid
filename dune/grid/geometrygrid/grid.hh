@@ -97,7 +97,7 @@ namespace Dune
     template< class, class > friend class GeoGrid::Intersection;
     template< class > friend class GeoGrid::IntersectionIterator;
     template< class, class > friend class GeoGrid::IdSet;
-    template< class, class, class > friend class GeoGrid::IndexSet;
+    template< class, class > friend class GeoGrid::IndexSet;
     template< class > friend class HostGridAccess;
 
     template< class, class > friend class GeoGrid::CommDataHandle;
@@ -663,9 +663,9 @@ namespace Dune
 
     /** \} */
 
-  protected:
     using Base::getRealImplementation;
 
+  protected:
     const CoordFunction &coordFunction () const
     {
       return coordFunction_;
