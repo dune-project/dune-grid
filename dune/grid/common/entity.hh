@@ -331,7 +331,7 @@ namespace Dune
        element of the geometry. It is there for efficiency reasons and to make
        the interface self-contained.
      */
-    template<int cc> int count () const { return realEntity.count<cc>(); }
+    template<int cc> int count () const { return realEntity.template count<cc>(); }
 
     /** \brief obtain a pointer to a subentity
      *
@@ -346,7 +346,7 @@ namespace Dune
     template< int codim >
     typename Codim< codim >::EntityPointer subEntity ( int i ) const
     {
-      return realEntity.subEntity< codim >( i );
+      return realEntity.template subEntity< codim >( i );
     }
 
     /**\brief Access to intersections with neighboring leaf elements.
