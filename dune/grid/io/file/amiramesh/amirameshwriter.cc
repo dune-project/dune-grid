@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <fstream>
 #include <limits>
+#include <dune/common/stdstreams.hh>
 #include <dune/grid/common/virtualrefinement.hh>
 
 template<class GridView>
