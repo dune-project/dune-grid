@@ -334,7 +334,10 @@ namespace Dune
       : BaseType( filename )
     {}
 
-    /** \brief constructor taking filename */
+    /** \brief constructor setting verbosity flag
+     *
+     *  \param[in] verbose verbosity (true/false)
+     */
     GridFactory ( const bool verbose )
       : BaseType( )
     {
@@ -367,7 +370,10 @@ namespace Dune
       : BaseType( filename )
     {}
 
-    /** \brief constructor taking filename */
+    /** \brief constructor setting verbosity flag
+     *
+     *  \param[in] verbose verbosity (true/false)
+     */
     GridFactory ( const bool verbose )
       : BaseType( )
     {
@@ -401,7 +407,10 @@ namespace Dune
       : BaseType( filename )
     {}
 
-    /** \brief constructor taking filename */
+    /** \brief constructor setting verbose flag
+     *
+     *  \param[in] verbose verbosity (true/false)
+     */
     GridFactory ( const bool verbose )
       : BaseType( )
     {

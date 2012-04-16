@@ -82,8 +82,8 @@ namespace Dune {
 
     /** \brief Insert a structured set of vertices into the factory */
     static void insertVertices(GridFactory<GridType>& factory,
-                               const FieldVector<ctype,dim>& lowerLeft,
-                               const FieldVector<ctype,dim>& upperRight,
+                               const FieldVector<ctype,dimworld>& lowerLeft,
+                               const FieldVector<ctype,dimworld>& upperRight,
                                const array<unsigned int,dim>& vertices)
     {
 
@@ -97,7 +97,7 @@ namespace Dune {
 
         // scale the multiindex to obtain a world position
         FieldVector<double,dimworld> pos(0);
-        for (int j=0; j<dim; j++)
+        for (int j=0; j<dimworld; j++)
           pos[j] = lowerLeft[j] + index[j] * (upperRight[j]-lowerLeft[j])/(vertices[j]-1);
 
         factory.insertVertex(pos);

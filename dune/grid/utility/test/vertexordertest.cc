@@ -252,10 +252,11 @@ void testVertexOrder(const GV& gv, const VertexOrderFactory &voFactory,
 template<class Grid>
 void testVertexOrderByIdSimplices(int &result) {
   static const std::size_t dim = Grid::dimension;
+  static const std::size_t dimworld = Grid::dimensionworld;
   typedef typename Grid::ctype DF;
-  typedef Dune::FieldVector<DF, dim> Domain;
+  typedef Dune::FieldVector<DF, dimworld> Domain;
 
-  Dune::array<unsigned, dim> elements;
+  Dune::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
 
   Dune::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
@@ -271,10 +272,11 @@ void testVertexOrderByIdSimplices(int &result) {
 template<class Grid>
 void testVertexOrderByIdCubes(int &result) {
   static const std::size_t dim = Grid::dimension;
+  static const std::size_t dimworld = Grid::dimensionworld;
   typedef typename Grid::ctype DF;
-  typedef Dune::FieldVector<DF, dim> Domain;
+  typedef Dune::FieldVector<DF, dimworld> Domain;
 
-  Dune::array<unsigned, dim> elements;
+  Dune::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
 
   Dune::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
