@@ -241,7 +241,11 @@ namespace Dune
        between the different grid implementations.
 
      */
-    int boundaryId () const DUNE_DEPRECATED
+    int boundaryId () const
+    // allow to use boundary id without warning when experimental is enabled
+#if ! DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+    DUNE_DEPRECATED
+#endif
     {
       return this->real.boundaryId();
     }
