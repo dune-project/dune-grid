@@ -415,7 +415,7 @@ namespace Dune
         {
           info->block(bsimplex);
           nofelements += bsimplex.get( elements, elParams, nofelparams );
-          if( dimgrid == 2 )
+          if( dimgrid == 2 && dimw == 2)
           {
             for( size_t i = 0; i < elements.size(); ++i )
               testTriang( i );
