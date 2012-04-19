@@ -229,7 +229,6 @@ namespace Dune
       outptr = & temp;
     else
     {
-      abort();
       outfile.open( filename.c_str() , std::ios::out );
       outptr = & outfile;
     }
