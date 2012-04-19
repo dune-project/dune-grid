@@ -434,7 +434,7 @@ namespace Dune
           result[ i ] *= factor;
       }
 
-    }
+    } // namespace Expr
 
 
 
@@ -447,7 +447,7 @@ namespace Dune
     {
       while( getnextline() )
       {
-        //std::cout << "Projection line:" << std::flush;
+        //std::cout << "Projection line:" << line.str() << std::endl;
         nextToken();
 
         if( token.type == Token::functionKeyword )
@@ -466,7 +466,7 @@ namespace Dune
           parseSegment();
         }
         else if( token.type != Token::endOfLine )
-          DUNE_THROW( DGFException, "Error in " << *this << ": Invalid token." );
+          DUNE_THROW( DGFException, "Error in " << *this << ": Invalid token (" << token << ")." );
         matchToken( Token::endOfLine, "trailing tokens on line." );
       }
     }
@@ -733,7 +733,7 @@ namespace Dune
       int c;
 
       // eat white space
-      while( ((c = line.peek()) == ' ') || (c == '\t') )
+      while( ((c = line.peek()) == ' ') || (c == '\t') || (c == '\r') )
         line.get();
 
       // parse string literals
@@ -820,6 +820,8 @@ namespace Dune
       // parse end of line
       else if( c == std::stringstream::traits_type::eof() )
         token.type = Token::endOfLine;
+      else
+        DUNE_THROW( DGFException, "Invalid character parsed: code=0x" << std::hex << c << "." );
 
       //std::cout << " " << token << std::flush;
     }
@@ -874,6 +876,6 @@ namespace Dune
       }
     }
 
-  }
+  } // namespace dgf
 
-}
+} // namespace Dune
