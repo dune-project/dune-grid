@@ -22,6 +22,8 @@
 
 #include <dune/geometry/mockgeometry.hh>
 
+#include <dune/grid/common/mcmgmapper.hh>
+
 namespace Dune {
 
   //! Structure to hold statistical information about one type of entity
@@ -44,6 +46,13 @@ namespace Dune {
      */
     ctype volumeMax;
 
+    //! sum of volumes of all entities in the set.
+    /**
+     * If the set is empty, this is 0.  If the volume of the entities cannot
+     * be determined (some instance of the none GeometryType) this is NaN.
+     */
+    ctype volumeSum;
+
     //! initialize the structure
     /**
      * This assumes an empty set of entities so that information can be added
@@ -52,7 +61,7 @@ namespace Dune {
      */
     EntityInfo() :
       count(0), volumeMin(std::numeric_limits<ctype>::infinity()),
-      volumeMax(-std::numeric_limits<ctype>::infinity())
+      volumeMax(-std::numeric_limits<ctype>::infinity()), volumeSum(0)
     { }
   };
 
@@ -137,7 +146,8 @@ namespace Dune {
         stream << prefix << "  " << it->first << ": Count = "
                << it->second.count << ", Volume range = "
                << "(" << it->second.volumeMin << ".."
-               << it->second.volumeMax << ")\n";
+               << it->second.volumeMax << "), Total volume = "
+               << it->second.volumeSum << "\n";
       }
     }
   };
@@ -160,15 +170,22 @@ namespace Dune {
   //! operation for ForLoop Internally used by fillGridViewInfoSerial
   template<int codim>
   struct FillGridInfoOperation {
-    template<class Geometry, class RefElem>
-    static void apply(const Geometry &geo, const RefElem &refelem,
-                      GridViewInfo<typename Geometry::ctype> &gridViewInfo)
+    template<class Entity, class Mapper, class Visited, class RefElem>
+    static void apply(const Entity &e, const Mapper &mapper, Visited &visited,
+                      const typename Entity::Geometry &geo,
+                      const RefElem &refelem,
+                      GridViewInfo<typename Entity::ctype> &gridViewInfo)
     {
-      typedef typename Geometry::ctype ctype;
-      static const std::size_t dimw = Geometry::coorddimension;
-      static const std::size_t dim = Geometry::mydimension;
+      typedef typename Entity::ctype ctype;
+      static const std::size_t dimw = Entity::dimensionworld;
+      static const std::size_t dim = Entity::dimension;
       std::vector<FieldVector<ctype, dimw> > coords;
       for(int i = 0; i < refelem.size(codim); ++i) {
+        int index = mapper.map(e, i, codim);
+        if(visited[index])
+          continue;
+        visited[index] = true;
+
         GeometryType gt = refelem.type(i, codim);
         coords.clear();
         coords.resize( refelem.size(i, codim, dim) );
@@ -180,8 +197,14 @@ namespace Dune {
         EntityInfo<ctype> &ei = gridViewInfo[mygeo.type()];
         ei.volumeMin = std::min(ei.volumeMin, volume);
         ei.volumeMax = std::max(ei.volumeMax, volume);
+        ei.volumeSum += volume;
       }
     }
+  };
+
+  template<int dimgrid>
+  struct MCMGNonElementLayout {
+    bool contains(GeometryType gt) const { return gt.dim() < dimgrid; }
   };
 #endif // !DOXYGEN
 
@@ -205,6 +228,9 @@ namespace Dune {
 
     typedef GenericReferenceElements<ctype, dim> RefElems;
 
+    MultipleCodimMultipleGeomTypeMapper<GV, MCMGNonElementLayout> mapper(gv);
+    std::vector<bool> visited(mapper.size(), false);
+
     gridViewInfo.gridName = className<typename GV::Grid>();
     gridViewInfo.gridViewName = className<GV>();
     gridViewInfo.partitionName = "";
@@ -216,11 +242,13 @@ namespace Dune {
       EntityInfo<ctype> &ei = gridViewInfo[eit->type()];
       ei.volumeMin = std::min(ei.volumeMin, volume);
       ei.volumeMax = std::max(ei.volumeMax, volume);
+      ei.volumeSum += volume;
 
       if(!eit->type().isNone()) {
         const EGeometry &geo = eit->geometry();
         ForLoop<FillGridInfoOperation, 1, dim>::
-        apply(geo, RefElems::general(eit->type()), gridViewInfo);
+        apply(*eit, mapper, visited, geo, RefElems::general(eit->type()),
+              gridViewInfo);
       }
     }
 
@@ -230,11 +258,12 @@ namespace Dune {
       for(std::size_t codim = 0; codim < dim; ++codim) {
         gt.makeNone(dim-codim);
         EntityInfo<ctype> & ei = gridViewInfo[gt];
-        ei.volumeMin = ei.volumeMax = std::numeric_limits<ctype>::quiet_NaN();
+        ei.volumeMin = ei.volumeMax = ei.volumeSum =
+                                        std::numeric_limits<ctype>::quiet_NaN();
       }
       gt.makeNone(0);
       EntityInfo<ctype> & ei = gridViewInfo[gt];
-      ei.volumeMin = ei.volumeMax = 0;
+      ei.volumeMin = ei.volumeMax = ei.volumeSum = 0;
     }
 
     const InfoIterator &end = gridViewInfo.end();
