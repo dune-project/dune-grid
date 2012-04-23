@@ -24,12 +24,13 @@
 #include <dune/common/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/generalvertexorder.hh>
 
 #include <dune/grid/alugrid.hh>
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/uggrid.hh>
-#include <dune/grid/utility/structuredgridfactory.hh>
-#include <dune/grid/utility/vertexorder.hh>
+#include "../structuredgridfactory.hh"
+#include "../vertexorderfactory.hh"
 
 #ifdef ALUGRID_SURFACE_2D
 #define USE_ALUGRID_SURFACE_2D

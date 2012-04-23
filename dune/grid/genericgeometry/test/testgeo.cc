@@ -122,8 +122,8 @@ void test(const GridViewType& view) {
   typedef typename GridViewType :: IntersectionIterator IntersectionIterator;
   typedef typename GridViewType :: Intersection IntersectionType;
   typedef typename ElementIterator::Entity EntityType;
-  typedef typename EntityType::Geometry GeometryType;
-  typedef FieldVector<double, GeometryType::coorddimension> GlobalType;
+  typedef typename EntityType::Geometry EntitiyGeometryType;
+  typedef FieldVector<double, EntitiyGeometryType::coorddimension> GlobalType;
 
   phiErr = 0;
   jTinvJTErr = 0;
@@ -134,11 +134,11 @@ void test(const GridViewType& view) {
   ElementIterator eEndIt = view.template end<0>();
   ElementIterator eIt    = view.template begin<0>();
   for (; eIt!=eEndIt; ++eIt) {
-    const GeometryType& geoDune = eIt->geometry();
-    const unsigned int topologyId = GenericGeometry::topologyId( geoDune.type() );
-    GeoCoordVector< GeometryType > coordVector( geoDune );
+    const EntitiyGeometryType& geoDune = eIt->geometry();
+    const GeometryType gt = geoDune.type();
+    GeoCoordVector< EntitiyGeometryType > coordVector( geoDune );
     // GenericGeometryType genericMap(geoDune,typename GenericGeometryType::CachingType(geoDune) );
-    GenericGeometry::Geometry< GridType::dimension, GridType::dimensionworld, GridType > genericMap( topologyId, coordVector );
+    GenericGeometry::Geometry< GridType::dimension, GridType::dimensionworld, GridType > genericMap( gt, coordVector );
     testGeo( geoDune, genericMap );
 
     // typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
@@ -150,8 +150,8 @@ void test(const GridViewType& view) {
     const IntersectionIterator iend = view.iend( *eIt );
     for( IntersectionIterator iit = view.ibegin( *eIt ); iit != iend; ++ iit )
     {
-      typedef FieldVector<double, GeometryType::mydimension> LocalType;
-      typedef FieldVector<double, GeometryType::mydimension-1> LocalFaceType;
+      typedef FieldVector<double, EntitiyGeometryType::mydimension> LocalType;
+      typedef FieldVector<double, EntitiyGeometryType::mydimension-1> LocalFaceType;
 
       const int faceNr = iit->indexInInside();
 
