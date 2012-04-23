@@ -55,6 +55,9 @@ namespace Dune
     ~GenericReferenceElement ()
     {
       ForLoop< Destroy, 0, dim >::apply( mappings_ );
+      integral_constant< int, 0 > codim0Variable;
+      if(mappings_[  codim0Variable ].size())
+        delete mappings_[ codim0Variable ][ 0 ];
     }
 
     class SubEntityInfo;
