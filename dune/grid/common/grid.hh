@@ -477,7 +477,7 @@ namespace Dune {
       typedef typename GridFamily::Traits::template Codim<cd>::LeafIterator LeafIterator;
     };
 
-    /*! \brief A type that is a model of Dune::LeafIntersection, an
+    /*! \brief A type that is a model of Dune::Intersection, an
        intersections of two codimension 1 of two codimension 0 entities in the leaf view.
      */
     typedef typename GridFamily::Traits::LeafIntersection LeafIntersection;
