@@ -510,8 +510,9 @@ namespace Dune {
       return CORNERS_OF_ELEM(theElement);
     }
 
-    //! \todo Please doc me!
-    // Dummy implementation for vertices
+    /** \Brief the 'number of corners' of a vertex, i.e., 1.  Here for consistency
+        \return 1
+     */
     static int Corners_Of_Elem(const UG_NS< UG_DIM >::Node* theNode) {
       return 1;
     }
