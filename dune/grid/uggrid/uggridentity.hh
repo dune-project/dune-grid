@@ -540,6 +540,7 @@ namespace Dune {
     //! geometry for mapping into father's reference element
     mutable LocalGeometryImpl geometryInFather_;
 
+    /** \brief The corresponding UG-internal data structure */
     typename UG_NS<dim>::Element* target_;
 
     /** \brief Pointer to the grid that we are part of.
