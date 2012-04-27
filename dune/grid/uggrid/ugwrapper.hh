@@ -828,10 +828,10 @@ namespace Dune {
         \param co_global Coordinates of the corners of the face
         \param ip_local Local coordinates where integration element is to be evaluated
      */
-    static double SurfaceElement(int nc,
-                                 const double co_global[MAX_CORNERS_OF_ELEM][ UG_DIM ],
-                                 const double ip_local[ UG_DIM ]) {
-      double result;
+    static UG::DOUBLE SurfaceElement(int nc,
+                                     const UG::DOUBLE co_global[MAX_CORNERS_OF_ELEM][ UG_DIM ],
+                                     const UG::DOUBLE ip_local[ UG_DIM ]) {
+      UG::DOUBLE result;
       if (UG_NAMESPACE ::SurfaceElement(UG_DIM, nc, co_global, ip_local, &result))
         DUNE_THROW(GridError, "UG_D" << UG_DIM << "::SurfaceElement returned error code!");
       return result;
