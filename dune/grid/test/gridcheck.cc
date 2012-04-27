@@ -631,11 +631,11 @@ void iteratorEquals (Grid &g)
 
   assert(
     (g.levelIndexSet(0).index(*a) != g.levelIndexSet(0).index(*i)) // index equal
-    == (a != i) // entitpointer equal
+    == (a != i) // entitypointer equal
     );
   assert(
     (g.levelIndexSet(0).index(*a) == g.levelIndexSet(0).index(*i)) // index equal
-    == (a == i) // entitpointer equal
+    == (a == i) // entitypointer equal
     );
 
   HierarchicIterator h1 = l1->hbegin(99);
