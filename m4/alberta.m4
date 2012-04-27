@@ -163,10 +163,10 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     AS_IF([test "x$HAVE_ALBERTA" = "x1"],[
       AC_CACHE_CHECK([ALBERTA utilities library],[dune_grid_cv_lib_alberta_utils],[
         dune_grid_cv_lib_alberta_utils=no
-        for alberta_lib_dir in lib lib64; do
+        for alberta_lib_dir in lib lib64 ; do
           for lib_alberta_utils in alberta_utilities alberta_util ; do
-            ALBERTA_LIBPATHFLAGS='-L$(ALBERTAROOT)/$alberta_lib_dir'
-            DUNEALBERTA_LIBPATHFLAGS='-L$(top_builddir)/$alberta_lib_dir'
+            ALBERTA_LIBPATHFLAGS="-L$ALBERTAROOT/$alberta_lib_dir"
+            DUNEALBERTA_LIBPATHFLAGS="-L$top_builddir/$alberta_lib_dir"
             LDFLAGS="$LDFLAGS -L$ALBERTAROOT/$alberta_lib_dir"
             LIBS="-l$lib_alberta_utils $ALBERTA_EXTRA $ac_save_LIBS"
             AC_TRY_LINK_FUNC([alberta_calloc],[
