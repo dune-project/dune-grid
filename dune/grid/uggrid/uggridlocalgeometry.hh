@@ -34,6 +34,15 @@ namespace Dune {
 
   public:
 
+    /** \brief Default constructor.  Does nothing */
+    UGGridLocalGeometry()
+    {}
+
+    /** \brief Constructor from a given geometry type and a vector of corner coordinates */
+    UGGridLocalGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,coorddim> >& coordinates)
+      : Base(type, coordinates)
+    {}
+
     /** \brief Setup method with a geometry type and a set of corners
         \param coordinates The corner coordinates in DUNE numbering
      */

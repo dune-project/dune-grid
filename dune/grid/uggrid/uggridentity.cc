@@ -425,9 +425,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 
   }
 
-  geometryInFather_.setup(type(), cornerCoordinates);
-
-  return LocalGeometry( geometryInFather_ );
+  return LocalGeometry(LocalGeometryImpl(type(), cornerCoordinates));
 }
 
 template class Dune::UGGridEntity<2,2, const Dune::UGGrid<2> >;
