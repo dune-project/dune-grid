@@ -46,7 +46,9 @@ void testBasicGeometry(const TestGeometry& geometry,
 {
   typedef typename TestGeometry::ctype ctype;
 
-  if(expectedVolume == expectedVolume) {
+  // If expectedVolume is NaN that is a sign from above
+  // saying we are supposed to skip the test
+  if(not std::isnan(expectedVolume)) {
     ctype volume = geometry.volume();
     if(std::abs(volume - expectedVolume) > 1e-8) {
       std::cerr << "Volume: " << volume << ", but "
