@@ -644,10 +644,6 @@ void iteratorEquals (Grid &g)
   LeafIntersectionIterator i2 = leafView.ibegin( *l2 );
   EntityPointer e1( l1 );
   EntityPointer e2( h2 );
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  const EntityPointer & re1 = l1;
-  const EntityPointer & re2 = L2;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
   // assign
   l1 = l2;
@@ -655,10 +651,6 @@ void iteratorEquals (Grid &g)
   h1 = h2;
   i1 = i2;
   e1 = e2;
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  e1 = re1;
-  e2 = re2;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
   // equals
   #define TestEquals(i) { \

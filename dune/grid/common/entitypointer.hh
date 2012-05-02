@@ -120,11 +120,6 @@ namespace Dune
   protected:
     Implementation realIterator;
 
-    // autocheck whether imp is convertable into imp::base
-    typedef typename
-    Dune::EnableIfInterOperable<typename IteratorImp::EntityPointerImp,IteratorImp,
-        typename IteratorImp::EntityPointerImp>::type base;
-
   public:
     //! codimension of entity pointer
     enum { codimension = IteratorImp::codimension };
@@ -178,16 +173,6 @@ namespace Dune
     {
       realIterator = ep.realIterator;
       return *this;
-    }
-
-    /** \brief Cast to EntityPointer with const base class of implementation as engine.
-     *
-     *  \note  This cast is no longer needed to ensure assignability of iterators to
-     *         EntityPointer.
-     */
-    operator const EntityPointer< GridImp, base > & () const DUNE_DEPRECATED
-    {
-      return reinterpret_cast<const EntityPointer<GridImp,base>&>(*this);
     }
 
     //@}
