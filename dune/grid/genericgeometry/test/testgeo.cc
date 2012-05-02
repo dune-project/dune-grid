@@ -158,17 +158,6 @@ void test(const GridViewType& view) {
       LocalFaceType xf( 0.1 );
       LocalType xx( iit->geometryInInside().global( xf ) );
       const GlobalType &nG = iit->integrationOuterNormal( xf );
-      const GlobalType &nM = genericMap.normal( faceNr, xx );
-      if( (nG - nM).two_norm2() > 1e-10 )
-      {
-        std :: cout << "Error in normal: "
-                    << "|nG| = " << nG.two_norm() << ", "
-                    << "|nM| = " << nM.two_norm() << std :: endl;
-        std :: cout << "                 "
-                    << "nG = ( " << nG << " ), nM = ( " << nM << " )"
-                    << std :: endl;
-        ++normalErr;
-      }
 
       SubGeometryType subMap( genericMap, faceNr );
       testGeo( iit->geometry(), subMap );
