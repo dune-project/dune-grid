@@ -8,9 +8,9 @@ AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
 
 # run amiramesh test only if amiramesh was found
 if AMIRAMESH
-# if PSURFACE
+if PSURFACE
 ALLTESTS += amirameshtest
-# endif
+endif
 endif
 
 if ALBERTA
