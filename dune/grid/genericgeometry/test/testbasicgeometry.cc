@@ -45,12 +45,6 @@ void testBasicGeometry(const TestGeometry& geometry,
                        bool expectedAffine, int &result)
 {
   typedef typename TestGeometry::ctype ctype;
-  const int dim = TestGeometry::mydimension;
-
-  if(dim > 0) {
-    geometry.normal(0, FieldVector<double,dim>(0));
-    pass(result);
-  }
 
   if(expectedVolume == expectedVolume) {
     ctype volume = geometry.volume();
