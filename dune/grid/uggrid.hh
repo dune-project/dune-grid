@@ -982,6 +982,8 @@ namespace Dune {
         \param e, elementSide Grid face specified by an element and one of its sides
         \param maxl The finest level that should be traversed by the iterator
         \param[out] childElements For each subface: element index, elementSide, and level
+        \param[out] childElementSides Indices for transformation because Dune numbers the
+                                      faces of several elements differently than UG
      */
     void getChildrenOfSubface(const typename Traits::template Codim<0>::EntityPointer & e,
                               int elementSide,

@@ -216,6 +216,7 @@ namespace Dune
      *
      *  \param[in]  hostGrid       reference to the grid to wrap
      *  \param[in]  coordFunction  reference to the coordinate function
+     *  \param[in]  allocator      storage allocator
      */
     GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( &hostGrid ),
@@ -232,6 +233,7 @@ namespace Dune
      *
      *  \param[in]  hostGrid       pointer to the grid to wrap
      *  \param[in]  coordFunction  pointer to the coordinate function
+     *  \param[in]  allocator      storage allocator
      */
     GeometryGrid ( HostGrid *hostGrid, CoordFunction *coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( hostGrid ),
