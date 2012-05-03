@@ -121,8 +121,6 @@ namespace Dune {
           @param dimension_ Dimension of the refined hypercube
           @param CoordType  Coordinate type of the refined hypercube
 
-          We use @ref RefinementGrid as backend to do all the work.
-
           The interface is the same as for @ref Dune::StaticRefinement (apart
           from the template parameters).
        */

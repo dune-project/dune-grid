@@ -127,11 +127,11 @@ namespace Dune
 
 
     /** @brief Map subentity i of codim cc of a codim 0 entity to array index.
-
-       \param e Reference to codim 0 entity.
-       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
-       \param codim codimension of subenetity of e
-       \return An index in the range 0 ... Max number of entities in set - 1.
+     *
+     * \param e Reference to codim 0 entity.
+     * \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
+     * \param codim codimension of subenetity of e
+     * \return An index in the range 0 ... Max number of entities in set - 1.
      */
     int map (const typename G::Traits::template Codim<0>::Entity& e,
              int i,
