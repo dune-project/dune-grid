@@ -5,10 +5,8 @@ Makefile.in
 mcmgmappertest
 refinementtest
 scsgmappertest
-checkrefnumbering
 semantic.cache
 *.gcda
 *.gcno
 *.mw
 *.swp
-*_MAS.bak
