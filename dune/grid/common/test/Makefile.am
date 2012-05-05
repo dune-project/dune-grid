@@ -18,12 +18,10 @@ check_PROGRAMS = $(TESTS)
 mcmgmappertest_SOURCES = mcmgmappertest.cc
 mcmgmappertest_CPPFLAGS = $(AM_CPPFLAGS)	\
 	$(UG_CPPFLAGS)				\
-	$(AMIRAMESH_CPPFLAGS) $(DUNEMPICPPFLAGS)
+	$(DUNEMPICPPFLAGS)
 mcmgmappertest_LDFLAGS = $(AM_LDFLAGS)		\
-	$(UG_LDFLAGS)				\
-	$(AMIRAMESH_LDFLAGS)
+	$(UG_LDFLAGS)
 mcmgmappertest_LDADD =				\
-	$(AMIRAMESH_LIBS)			\
 	$(UG_LIBS)				\
 	$(LDADD)
 
