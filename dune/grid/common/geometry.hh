@@ -150,7 +150,7 @@ namespace Dune
      *  This method is for convenient access to the corners of the geometry. The
      *  same result could be achieved by by calling
      *  \code
-     *  global( genericReferenceElement.position( i, mydimension )
+     *  global( genericReferenceElement.position( i, mydimension ) )
      *  \endcode
      *
      *  \param[in]  i  number of the corner (with respect to the generic reference
