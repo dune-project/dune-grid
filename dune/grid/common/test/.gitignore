@@ -3,6 +3,7 @@ Makefile.in
 .deps
 .libs
 mcmgmappertest
+refinementtest
 scsgmappertest
 checkrefnumbering
 semantic.cache
