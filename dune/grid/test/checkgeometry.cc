@@ -12,6 +12,7 @@
 #include <dune/geometry/quadraturerules/gaussquadrature.hh>
 
 #include <dune/grid/common/geometry.hh>
+#include <dune/grid/common/entity.hh>
 #include <dune/grid/common/gridview.hh>
 
 namespace Dune
