@@ -589,32 +589,6 @@ namespace Dune {
     return RefinementBuilder<dimension, CoordType>::build( geometryType.id(), coerceTo.id() );
   }
 
-  /*! @brief return a reference to the VirtualRefinement according to
-             the parameters
-
-     @tparam dimension Dimension of the element to refine
-     @tparam CoordType C++ type of the coordinates
-
-     @deprecated Please use the buildRefinement() function which takes
-                full GeometryTypes as arguments instead.
-
-     @throws NotImplemented There is no Refinement implementation for
-                           the specified parameters.
-   */
-  template<int dimension, class CoordType>
-  DUNE_DEPRECATED
-  VirtualRefinement<dimension, CoordType> &
-  buildRefinement( //! geometry type of the refined element
-    GeometryType::BasicType geometryType,
-    //! geometry type of the subelements
-    GeometryType::BasicType coerceTo)
-  {
-    return buildRefinement<dimension, CoordType>
-             ( GeometryType(geometryType, dimension),
-             GeometryType(coerceTo, dimension) );
-  }
-
-
 
   // In principle the trick with the class is no longer neccessary,
   // but I'm keeping it in here so it will be easier to specialize
