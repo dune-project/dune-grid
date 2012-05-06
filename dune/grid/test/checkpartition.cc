@@ -11,6 +11,7 @@
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridenums.hh>
+#include <dune/grid/utility/entitycommhelper.hh>
 
 template< Dune::PartitionIteratorType pitype >
 struct PartitionFilter;
@@ -98,7 +99,7 @@ class CheckPartitionType
 public:
   static void apply ( const GridView &gridView )
   {
-    std::cout << "Checking partition iterators..." << std::endl;
+    std::cout << "Checking iterators for " << pitype << "..." << std::endl;
     Dune::ForLoop< CheckCodim, 0, GridView::dimension >::apply( gridView );
   }
 };
@@ -192,6 +193,140 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
 
 
 
+template< class GridView, Dune::InterfaceType iftype  >
+class CheckPartitionDataHandle
+  : public Dune::CommDataHandleIF< CheckPartitionDataHandle< GridView, iftype >, int >
+{
+  static const int dimension = GridView::dimension;
+
+  typedef typename GridView::Grid Grid;
+
+  template< int codim >
+  struct Contains
+  {
+    static void apply ( bool (&contains)[ dimension+1 ] )
+    {
+      contains[ codim ] = Dune::Capabilities::canCommunicate< Grid, codim >::v;
+    }
+  };
+
+public:
+  explicit CheckPartitionDataHandle ( const Grid &grid )
+    : grid_( grid ),
+      rank_( grid_.comm().rank() ),
+      invalidDimension_( false ),
+      invalidCodimension_( false ),
+      invalidEntity_( false ),
+      invalidSendEntity_( false ),
+      invalidReceiveEntity_( false ),
+      invalidSize_( false ),
+      selfReceive_( false ),
+      doubleInterior_( false )
+  {
+    Dune::ForLoop< Contains, 0, dimension >::apply( contains_ );
+  }
+
+  ~CheckPartitionDataHandle ()
+  {
+    if( invalidDimension_ )
+      std::cerr << "[ " << rank_ << " ] Error: Invalid dimension passed during communication." << std::endl;
+    if( invalidCodimension_ )
+      std::cerr << "[ " << rank_ << " ] Error: Invalid codimension passed during communication." << std::endl;
+    if( invalidEntity_ )
+      std::cerr << "[ " << rank_ << " ] Error: Uncontained entity passed during communication." << std::endl;
+    if( invalidSendEntity_ )
+      std::cerr << "[ " << rank_ << " ] Error: Sent data on entity not contained in communication interface." << std::endl;
+    if( invalidReceiveEntity_ )
+      std::cerr << "[ " << rank_ << " ] Error: Received data on entity not contained in communication interface." << std::endl;
+    if( invalidSize_ )
+      std::cerr << "[ " << rank_ << " ] Error: Wrong size passed during communication." << std::endl;
+    if( selfReceive_ )
+      std::cerr << "[ " << rank_ << " ] Warning: Received data from own process during communication." << std::endl;
+    if( doubleInterior_ )
+      std::cerr << "[ " << rank_ << " ] Error: Received interior data on interior entity." << std::endl;
+  }
+
+  bool contains ( int const dim, const int codim ) const
+  {
+    invalidDimension_ |= (dim != dimension);
+    invalidCodimension_ |= ((codim < 0) || (codim > dimension));
+    return ((codim >= 0) && (codim <= dimension) ? contains_[ codim ] : false);
+  }
+
+  bool fixedsize ( const int dim, const int codim ) const
+  {
+    invalidDimension_ |= (dim != dimension);
+    invalidCodimension_ |= ((codim < 0) || (codim > dimension));
+    return true;
+  }
+
+  template< class Entity >
+  size_t size ( const Entity &entity ) const
+  {
+    dune_static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
+    dune_static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
+    return (contains_[ Entity::codimension ] ? 2 : 0);
+  }
+
+  template< class Buffer, class Entity >
+  void gather ( Buffer &buffer, const Entity &entity ) const
+  {
+    dune_static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
+    dune_static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
+
+    invalidEntity_ |= !contains_[ Entity::codimension ];
+    invalidSendEntity_ |= !Dune::EntityCommHelper< iftype >::send( entity.partitionType() );
+
+    buffer.write( rank_ );
+    buffer.write( int( entity.partitionType() ) );
+  }
+
+  template< class Buffer, class Entity >
+  void scatter ( Buffer &buffer, const Entity &entity, size_t n )
+  {
+    dune_static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
+    dune_static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
+
+    invalidEntity_ |= !contains_[ Entity::codimension ];
+    invalidSize_ |= (n != size( entity ));
+    invalidSendEntity_ |= !Dune::EntityCommHelper< iftype >::receive( entity.partitionType() );
+
+    int rank, partitionType;
+    buffer.read( rank );
+    buffer.read( partitionType );
+
+    selfReceive_ |= (rank == rank_);
+    if( (partitionType == int( Dune::InteriorEntity )) && (entity.partitionType() == Dune::InteriorEntity) )
+    {
+      std::cout << "[ " << rank_ << " ] Error: Receive interior data from process " << rank
+                << " on interior entity " << grid_.globalIdSet().id( entity ) << "." << std::endl;
+      doubleInterior_ = true;
+    }
+  }
+
+  static void apply ( const GridView &gridView )
+  {
+    std::cout << "Checking communication for " << iftype << "..." << std::endl;
+    CheckPartitionDataHandle handle( gridView.grid() );
+    gridView.communicate( handle, iftype, Dune::ForwardCommunication );
+  }
+
+private:
+  const Grid &grid_;
+  const int rank_;
+  bool contains_[ dimension+1 ];
+  mutable bool invalidDimension_;
+  mutable bool invalidCodimension_;
+  mutable bool invalidEntity_;
+  mutable bool invalidSendEntity_;
+  bool invalidReceiveEntity_;
+  bool invalidSize_;
+  bool selfReceive_;
+  bool doubleInterior_;
+};
+
+
+
 template< class GridView >
 inline void checkPartitionType ( const GridView &gridView )
 {
@@ -200,6 +335,12 @@ inline void checkPartitionType ( const GridView &gridView )
   CheckPartitionType< GridView, Dune::Overlap_Partition >::apply( gridView );
   CheckPartitionType< GridView, Dune::OverlapFront_Partition >::apply( gridView );
   CheckPartitionType< GridView, Dune::Ghost_Partition >::apply( gridView );
+
+  CheckPartitionDataHandle< GridView, Dune::InteriorBorder_InteriorBorder_Interface >::apply( gridView );
+  CheckPartitionDataHandle< GridView, Dune::InteriorBorder_All_Interface >::apply( gridView );
+  CheckPartitionDataHandle< GridView, Dune::Overlap_OverlapFront_Interface >::apply( gridView );
+  CheckPartitionDataHandle< GridView, Dune::Overlap_All_Interface >::apply( gridView );
+  CheckPartitionDataHandle< GridView, Dune::All_All_Interface >::apply( gridView );
 }
 
 #endif // DUNE_GRID_TEST_CHECKPARTITION_CC
