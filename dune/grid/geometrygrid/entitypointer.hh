@@ -155,6 +155,14 @@ namespace Dune
       }
 
       template< class T >
+      const This &operator= ( const EntityPointer< T, fake > &other )
+      {
+        entityImpl() = other.entityImpl();
+        hostEntityIterator_ = other.hostEntityIterator_;
+        return *this;
+      }
+
+      template< class T >
       bool equals ( const EntityPointer< T, fake > &other ) const
       {
         return (hostIterator() == other.hostIterator());
@@ -259,6 +267,14 @@ namespace Dune
       {}
 
       const This &operator= ( const This &other )
+      {
+        entityImpl() = other.entityImpl();
+        hostElementIterator_ = other.hostElementIterator_;
+        return *this;
+      }
+
+      template< class T >
+      const This &operator= ( const EntityPointer< T, fake > &other )
       {
         entityImpl() = other.entityImpl();
         hostElementIterator_ = other.hostElementIterator_;
