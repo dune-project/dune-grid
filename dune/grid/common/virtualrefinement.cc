@@ -590,7 +590,7 @@ namespace Dune {
   }
 
 
-  // In principle the trick with the class is no longer neccessary,
+  // In principle the trick with the class is no longer necessary,
   // but I'm keeping it in here so it will be easier to specialize
   // buildRefinement when someone implements pyramids and prisms
   template<int dimension, class CoordType>
