@@ -154,9 +154,12 @@ namespace Dune
         return *this;
       }
 
-      operator const EntityPointerImp & () const
+      template< class T >
+      const This &operator= ( const EntityPointer< T, fake > &other )
       {
-        return reinterpret_cast< const EntityPointerImp & >( *this );
+        entityImpl() = other.entityImpl();
+        hostEntityIterator_ = other.hostEntityIterator_;
+        return *this;
       }
 
       template< class T >
@@ -270,9 +273,12 @@ namespace Dune
         return *this;
       }
 
-      operator const EntityPointerImp & () const
+      template< class T >
+      const This &operator= ( const EntityPointer< T, fake > &other )
       {
-        return reinterpret_cast< const EntityPointerImp & >( *this );
+        entityImpl() = other.entityImpl();
+        hostElementIterator_ = other.hostElementIterator_;
+        return *this;
       }
 
       template< class T >
