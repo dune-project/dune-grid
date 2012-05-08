@@ -41,7 +41,7 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef GenericReferenceElement< void, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -68,7 +68,7 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef GenericReferenceElement< void, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -87,7 +87,7 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef GenericReferenceElement< void, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -117,7 +117,7 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef GenericReferenceElement< void, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -136,7 +136,7 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef GenericReferenceElement< void, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -155,7 +155,7 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef GenericReferenceElement< void, dimension > ReferenceElement;
 
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
@@ -262,8 +262,8 @@ namespace Dune
         {
           const HostElement &hostElement = *hostElementIterator_;
 
-          const GenericReferenceElement< ctype, dimension > &refElement
-            = GenericReferenceElements< ctype, dimension >::general( hostElement.type() );
+          const GenericReferenceElement< void, dimension > &refElement
+            = GenericReferenceElements< void, dimension >::general( hostElement.type() );
 
           ++subEntity;
           const int count = refElement.size( codimension );
