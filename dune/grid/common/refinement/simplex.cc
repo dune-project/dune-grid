@@ -828,8 +828,7 @@ namespace Dune {
         FieldVector<ct, coorddimension> global(const FieldVector<ct, mydimension>& local) const
         {
           FieldVector<ct, mydimension> v = referenceToKuhn(local, getPermutation<mydimension>(kuhnIndex));
-          for(int i = 0; i < mydimension; ++i)
-            v[i] += origin[i];
+          v += origin;
           v /= (1<<level);
           return kuhnToReference(v, getPermutation<mydimension>(0));
         }
