@@ -27,6 +27,7 @@
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/grid/alugrid/common/bndprojection.hh>
 #include <dune/grid/alugrid/common/objectfactory.hh>
+#include <dune/grid/alugrid/common/backuprestore.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -160,6 +161,15 @@ namespace Dune
         return new GitterImplType ( macroName.c_str(), projection );
     }
 
+    GitterImplType *createALUGrid ( std::istream& stream, ALU3DSPACE ProjectVertex *projection )
+    {
+#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
+      return new GitterImplType ( stream, projection );
+#else
+      return 0;
+#endif
+    }
+
     static No_Comm defaultComm () { return No_Comm(); }
 
     static int getRank ( No_Comm comm ) { return 0; }
@@ -194,6 +204,15 @@ namespace Dune
     GitterImplType *createALUGrid ( const std::string &macroName, ALU3DSPACE ProjectVertex *projection )
     {
       return new GitterImplType( macroName.c_str(), mpAccess_, projection );
+    }
+
+    GitterImplType *createALUGrid ( std::istream& stream, ALU3DSPACE ProjectVertex *projection )
+    {
+#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
+      return new GitterImplType ( stream, mpAccess_, projection );
+#else
+      return 0;
+#endif
     }
 
     static MPI_Comm defaultComm () { return MPI_COMM_WORLD; }
@@ -785,6 +804,12 @@ namespace Dune
     template <GrapeIOFileFormatType ftype>
     bool readGrid( const std::string filename, alu3d_ctype & time );
 
+    /** \brief backup to ostream */
+    void backup( std::ostream& ) const ;
+
+    /** \brief restore from istream */
+    void restore( std::istream& ) ;
+
     // (no interface method) get hierarchic index set of the grid
     const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
 
@@ -830,6 +855,12 @@ namespace Dune
     {
       assert( communications_ );
       return communications_->createALUGrid( macroName, vertexProjection() );
+    }
+
+    virtual GitterImplType *createALUGrid ( std::istream& stream )
+    {
+      assert( communications_ );
+      return communications_->createALUGrid( stream, vertexProjection() );
     }
 
     ALUGridVertexProjectionType* vertexProjection() { return (ALUGridVertexProjectionType *) vertexProjection_; }

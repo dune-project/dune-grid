@@ -33,6 +33,8 @@
 
  */
 
+#include <dune/common/deprecated.hh>
+
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
 #include <dune/geometry/type.hh>
@@ -406,43 +408,52 @@ namespace Dune {
         { return mydimension + 1; }
 
         const FieldVector<ct, coorddimension>& operator[] (int i) const
+        DUNE_DEPRECATED_MSG("Please use method corner(i) instead of "
+                            "operator[](i)")
+        { return corner(i); }
+
+        const FieldVector<ct, coorddimension>& corner(int i) const
         {
           if(!builtCoords) {
             for(int i = 0; i < corners(); ++i)
-              coords[i] = referenceToKuhn(backend->geometry()[i], getPermutation<dimension>(kuhnIndex));
+              coords[i] =
+                referenceToKuhn(backend.geometry().corner(i),
+                                getPermutation<dimension>(kuhnIndex));
             builtCoords = true;
           }
           return coords[i];
+        }
+
+        /** \brief Simplex elements are always affine */
+        bool affine() const
+        {
+          return true;
         }
 
         FieldVector<ct, coorddimension> global(const FieldVector<ct, mydimension>& local) const
         { return referenceToKuhn(backend.geometry().global(local), getPermutation<dimension>(kuhnIndex)); }
 
         FieldVector<ct, mydimension> local(const FieldVector<ct, coorddimension>& global) const
-        { return backend->geometry().local(kuhnToReference(global, getPermutation<dimension>(kuhnIndex))); }
+        {
+          return backend.geometry().local
+                   (kuhnToReference(global, getPermutation<dimension>(kuhnIndex)));
+        }
 
         bool checkInside (const FieldVector<ct, mydimension>& local) const
         { return backend->geometry().checkInside(local); }
 
         ct integrationElement(const FieldVector<ct, mydimension>& local) const
-        { return backend->geometry().integrationElement(local) / Factorial<dimension>::factorial; }
+        { return backend.geometry().integrationElement(local); }
 
         const FieldMatrix<ct, mydimension, mydimension>& jacobianInverse(const FieldVector<ct, mydimension>& local) const
         {
           if(!builtJinv) {
-            // create unit vectors
-            FieldMatrix<int, mydimension, mydimension> M = 0;
-            for(int i = 0; i < mydimension; ++i)
-              M[i][i] = 1;
-            // transform them into local coordinates
-            for(int i = 0; i < mydimension; ++i)
-              M[i] = kuhnToReference(M[i], getPermutation<mydimension>(kuhnIndex));
+            jacobianInverseTransposed(local);
+
             // transpose the matrix
             for(int i = 0; i < mydimension; ++i)
               for(int j = 0; j < mydimension; ++j)
-                Jinv[i][j] = M[j][i];
-            // take the backends inverse Jacobian into account
-            Jinv.leftmultiply(backend->geometry().jacobianInverse(local));
+                Jinv[i][j] = jInvTransp[j][i];
 
             builtJinv = true;
           }
@@ -450,8 +461,54 @@ namespace Dune {
           return Jinv;
         }
 
+        const FieldMatrix<ct, mydimension, mydimension>&
+        jacobianInverseTransposed(const FieldVector<ct, mydimension>& local)
+        const
+        {
+          if(!builtJInvTransp) {
+            // create unit vectors
+            jInvTransp = 0;
+            for(int i = 0; i < mydimension; ++i)
+              jInvTransp[i][i] = 1;
+            // transform them into local coordinates
+            for(int i = 0; i < mydimension; ++i)
+              jInvTransp[i] =
+                kuhnToReference(jInvTransp[i],
+                                getPermutation<mydimension>(kuhnIndex));
+            // take the backends inverse Jacobian into account
+            jInvTransp.rightmultiply(backend.geometry().
+                                     jacobianInverseTransposed(local));
+
+            builtJInvTransp = true;
+          }
+
+          return jInvTransp;
+        }
+
+        /** \brief Compute transpose of the Jacobian matrix
+         *
+         * \todo This implementation is ridiculously bad.  We first compute
+         *       JacobianInverseTransposed by just calling that method, then
+         *       we invert it.  Rationale: apparently nobody is using it
+         *       currently, anyway, and I intend to replace all this by
+         *       BasicGeometry later.
+         */
+        const FieldMatrix<ct, mydimension, mydimension>&
+        jacobianTransposed(const FieldVector<ct, mydimension>& local) const
+        {
+          if(!builtJTransp) {
+            jTransp = jacobianInverseTransposed(local);
+            jTransp.invert();
+
+            builtJTransp = true;
+          }
+
+          return jTransp;
+        }
+
         Geometry(const BackendIterator &backend_)
           : coords(), builtCoords(false), Jinv(), builtJinv(false),
+            builtJTransp(false), builtJInvTransp(false),
             backend(backend_), kuhnIndex(0)
         {
           dune_static_assert(mydimension == coorddimension, "mydimension != coorddimension");
@@ -462,12 +519,18 @@ namespace Dune {
           kuhnIndex = kuhnIndex_;
           builtCoords = false;
           builtJinv = false;
+          builtJTransp = false;
+          builtJInvTransp = false;
         }
       private:
         mutable FieldVector<FieldVector<ct, coorddimension>, mydimension+1> coords;
         mutable bool builtCoords;
         mutable FieldMatrix<ct, mydimension, mydimension> Jinv;
+        mutable FieldMatrix<ct, mydimension, mydimension> jTransp;
+        mutable FieldMatrix<ct, mydimension, mydimension> jInvTransp;
         mutable bool builtJinv;
+        mutable bool builtJTransp;
+        mutable bool builtJInvTransp;
         const BackendIterator &backend;
         int kuhnIndex;
       };

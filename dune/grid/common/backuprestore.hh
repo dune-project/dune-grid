@@ -22,6 +22,7 @@ namespace Dune
    *  There are two pairs of backup / restore methods:
    *  - methods writing into one or more dedicated files,
    *  - methods operating on a std::stream.
+   *  .
    *
    *  These techniques may not be mixed, i.e., you cannot write the grid into
    *  files and read it back from a stream or vice versa.

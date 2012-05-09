@@ -709,6 +709,12 @@ namespace Dune {
     template <GrapeIOFileFormatType ftype>
     bool readGrid( const std::string filename, alu2d_ctype & time );
 
+    /** \brief backup to ostream */
+    void backup( std::ostream& ) const ;
+
+    /** \brief restore from istream */
+    void restore( std::istream& ) ;
+
   protected:
     //! return true if grid allows hanging nodes on leaf level
     //! i.e. returns true for ALUSimplexGrid and returns false for ALUConformGrid

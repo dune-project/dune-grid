@@ -769,26 +769,13 @@ namespace Dune
   inline bool
   ALU2dGrid< dim,dimworld, eltype >::readGrid( const std::string filename, alu2d_ctype & time )
   {
+    // not needed anymore
+    time = 0;
     {
       // if grid exists delete first
       if( mygrid_ ) delete mygrid_;
       mygrid_ = new HmeshType (filename.c_str());
       assert(mygrid_ != 0);
-    }
-    {
-      std::string extraName (filename);
-      extraName += ".extra";
-      std::ifstream in (extraName.c_str());
-      if(in)
-      {
-        in  >> std::scientific >> time;
-        in  >> maxLevel_;
-        in.close();
-      }
-      else
-      {
-        derr << "ALU3dGrid::readGrid: couldn't open <" << extraName << ">! \n";
-      }
     }
 
 #if ALU2DGRID_PARALLEL
@@ -803,6 +790,52 @@ namespace Dune
     // cleanup markers
     postAdapt();
     return true;
+  }
+
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline void ALU2dGrid< dim, dimworld, eltype >::
+  backup( std::ostream& stream ) const
+  {
+#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
+    // write grid to stream
+    myGrid().storeGrid( stream );
+#else
+    DUNE_THROW(NotImplemented,"ALUGrid::backup not implemented yet!");
+#endif
+
+#if ALU2DGRID_PARALLEL
+    // rankManager_.backup( filename );
+#endif
+  }
+
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  inline void ALU2dGrid< dim,dimworld, eltype >::
+  restore( std::istream& stream )
+  {
+    // if grid exists delete first
+    if( mygrid_ ) delete mygrid_;
+
+    // create new grid with given istream
+    mygrid_ = new HmeshType ( stream,
+                              nrOfHangingNodes_,
+                              ( nrOfHangingNodes_ == 0) ? ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart );
+
+    if( ! mygrid_ )
+    {
+      DUNE_THROW(InvalidStateException,"ALUGrid::restore failed");
+    }
+
+#if ALU2DGRID_PARALLEL
+    calcMaxlevel();
+    rankManager_.restore( filename );
+#endif
+
+    // calculate new maxlevel
+    // calculate indices
+    updateStatus();
+
+    // cleanup markers
+    postAdapt();
   }
 
 
