@@ -30,7 +30,7 @@ namespace Dune
    *  through a temporary file.
    *
    *  \note The backup and restore methods might not be implemented for each grid.
-   *        In this case one can catch the Dune::NotImplemented exception and
+   *        In this case one can catch the Dune::NotImplemented exception and do
    *        something else.
    *
    *  \tparam  Grid  type of grid
