@@ -22,12 +22,16 @@ namespace Dune
    *  There are two pairs of backup / restore methods:
    *  - methods writing into one or more dedicated files,
    *  - methods operating on a std::stream.
-   *  .
+   *
    *  These techniques may not be mixed, i.e., you cannot write the grid into
    *  files and read it back from a stream or vice versa.
    *  While operating on a std::stream might be convenient, a grid written in
    *  another language than C++ might need to emulate this method by writing
    *  through a temporary file.
+   *
+   *  \note The backup and restore methods might not be implemented for each grid.
+   *        In this case one can catch the Dune::NotImplemented exception and do
+   *        something else.
    *
    *  \tparam  Grid  type of grid
    */
