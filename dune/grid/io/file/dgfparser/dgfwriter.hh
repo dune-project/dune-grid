@@ -48,9 +48,6 @@ namespace Dune
 
     typedef typename IndexSet::IndexType Index;
 
-    typedef GenericReferenceElement< typename Grid::ctype, dimGrid > RefElement;
-    typedef GenericReferenceElements< typename Grid::ctype, dimGrid > RefElements;
-
   public:
     /** \brief constructor
      *
@@ -165,7 +162,8 @@ namespace Dune
       if( !it->hasBoundaryIntersections() )
         continue;
 
-      const RefElement &refElement = RefElements::general( element.type() );
+      const GenericReferenceElement< void, dimGrid > &refElement
+        = GenericReferenceElements< void, dimGrid >::general( element.type() );
 
       const IntersectionIterator iend = gridView_.iend( element ) ;
       for( IntersectionIterator iit = gridView_.ibegin( element ); iit != iend; ++iit )

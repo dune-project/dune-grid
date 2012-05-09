@@ -916,8 +916,8 @@ namespace Dune
     }
     else if (dimw==3)
     {
-      const GenericReferenceElement< double, 3 > &refElem
-        = GenericReferenceElements< double, 3 >::simplex();
+      const GenericReferenceElement< void, 3 > &refSimplex
+        = GenericReferenceElements< void, 3 >::simplex();
       for (int i=0; i<nofelements; i++)
       {
         if (elements[i].size()!=size_t(dimw+1))
@@ -942,15 +942,15 @@ namespace Dune
           elements[i][use2] = tmp;
 
           // for all faces, check reorient
-          for(int k=0; k<refElem.size(1); ++k)
+          for( int k = 0; k < refSimplex.size( 1 ); ++k )
           {
-            int numVerts = refElem.size(k,1,dimw);
-            std :: vector< unsigned int > face( numVerts );
             // get face vertices
-            for(int j=0; j<numVerts; ++j)
+            int numVertices = refSimplex.size( k, 1, dimw );
+            std::vector< unsigned int > face( numVertices );
+            for( int j = 0; j < numVertices; ++j )
             {
-              int vx = refElem.subEntity(k,1,j,dimw);
-              face[j] = elements[i][vx];
+              int vx = refSimplex.subEntity( k, 1, j, dimw );
+              face[ j ] = elements[ i ][ vx ];
             }
 
             {

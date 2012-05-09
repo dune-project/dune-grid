@@ -113,11 +113,9 @@ namespace Dune
 
   template< int dim >
   inline DGFEntityKey< unsigned int >
-  ElementFaceUtil::generateCubeFace
-    ( const std::vector< unsigned int > &element, int f )
+  ElementFaceUtil::generateCubeFace ( const std::vector< unsigned int > &element, int f )
   {
-    const GenericReferenceElement< double, dim > &refCube
-      = GenericReferenceElements< double, dim >::cube();
+    const GenericReferenceElement< void, dim > &refCube = GenericReferenceElements< void, dim >::cube();
     const unsigned int size = refCube.size( f, 1, dim );
     std::vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++ i )
@@ -128,13 +126,11 @@ namespace Dune
 
   template< int dim >
   inline DGFEntityKey< unsigned int >
-  ElementFaceUtil :: generateSimplexFace
-    ( const std :: vector< unsigned int > &element, int f )
+  ElementFaceUtil::generateSimplexFace ( const std::vector< unsigned int > &element, int f )
   {
-    const GenericReferenceElement< double, dim > &refSimplex
-      = GenericReferenceElements< double, dim >::simplex();
+    const GenericReferenceElement< void, dim > &refSimplex = GenericReferenceElements< void, dim >::simplex();
     const unsigned int size = refSimplex.size( f, 1, dim );
-    std :: vector< unsigned int > k( size );
+    std::vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++i )
       k[ i ] = element[ refSimplex.subEntity( f, 1, i, dim ) ];
     return DGFEntityKey< unsigned int >( k );

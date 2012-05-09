@@ -112,13 +112,13 @@ namespace Dune
       const typename Intersection::Entity & entity = *inside;
       const int face = intersection.indexInInside();
 
-      const GenericReferenceElement< double, dimension > & refElem =
-        GenericReferenceElements< double, dimension >::general( entity.type() );
-      int corners = refElem.size( face, 1, dimension );
+      const GenericReferenceElement< void, dimension > &refElement
+        = GenericReferenceElements< void, dimension >::general( entity.type() );
+      int corners = refElement.size( face, 1, dimension );
       std :: vector< unsigned int > bound( corners );
       for( int i=0; i < corners; ++i )
       {
-        const int k =  refElem.subEntity( face, 1, i, dimension );
+        const int k =  refElement.subEntity( face, 1, i, dimension );
         bound[ i ] = factory_.insertionIndex( *entity.template subEntity< dimension >( k ) );
       }
 
@@ -139,13 +139,13 @@ namespace Dune
       const typename Intersection::Entity & entity = *inside;
       const int face = intersection.indexInInside();
 
-      const GenericReferenceElement< double, dimension > & refElem =
-        GenericReferenceElements< double, dimension >::general( entity.type() );
-      int corners = refElem.size( face, 1, dimension );
+      const GenericReferenceElement< void, dimension > & refElement =
+        GenericReferenceElements< void, dimension >::general( entity.type() );
+      int corners = refElement.size( face, 1, dimension );
       std :: vector< unsigned int > bound( corners );
       for( int i=0; i < corners; ++i )
       {
-        const int k =  refElem.subEntity( face, 1, i, dimension );
+        const int k =  refElement.subEntity( face, 1, i, dimension );
         bound[ i ] = factory_.insertionIndex( *entity.template subEntity< dimension >( k ) );
       }
 
