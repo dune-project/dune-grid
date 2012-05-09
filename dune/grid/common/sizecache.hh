@@ -296,9 +296,6 @@ namespace Dune {
       typedef typename GridType :: LocalIdSet LocalIdSet ;
       typedef typename LocalIdSet :: IdType IdType ;
 
-      typedef GenericReferenceElement< ctype, dim > ReferenceElementType;
-      typedef GenericReferenceElements< ctype, dim > ReferenceElementContainerType;
-
       typedef std::set< IdType > CodimIdSetType ;
 
       typedef typename IteratorType :: Entity ElementType ;
@@ -316,16 +313,17 @@ namespace Dune {
       {
         // get entity
         const ElementType& element = *it ;
+
         // get reference element
-        const ReferenceElementType& refElem =
-          ReferenceElementContainerType :: general( element.type() );
+        const GenericReferenceElement< void, dim > &refElement
+          = GenericReferenceElements< void, dim >::general( element.type() );
 
         // count all sub entities of codimension codim
         const int count = element.template count< codim > ();
-        for( int i=0; i< count; ++ i )
+        for( int i=0; i < count; ++i )
         {
           // get geometry type
-          const GeometryType geomType = refElem.type( i, codim );
+          const GeometryType geomType = refElement.type( i, codim );
           // get id of sub entity
           const IdType id = idSet.subId( element, i, codim );
           // insert id into set
