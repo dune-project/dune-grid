@@ -790,30 +790,15 @@ namespace Dune {
         const FieldVector<ct, coorddimension>& operator[] (int i) const
         DUNE_DEPRECATED_MSG("Please use method corner(i) instead of "
                             "operator[](i)")
-        {
-          if(!builtCoords) {
-            FieldVector<ct, coorddimension> v = 0;
-            FieldVector<int, mydimension> perm = getPermutation<mydimension>(kuhnIndex);
-            for(int i = 0; i < mydimension; ++i) {
-              coords[i] = global(v);
-              v[perm[i]] += 1;
-            }
-            coords[mydimension] = global(v);
-            builtCoords = true;
-          }
-          return coords[i];
-        }
+        { return corner(i); }
 
         const FieldVector<ct, coorddimension>& corner (int i) const
         {
           if(!builtCoords) {
-            FieldVector<ct, coorddimension> v(0);
-            FieldVector<int, mydimension> perm = getPermutation<mydimension>(kuhnIndex);
-            for(int i = 0; i < mydimension; ++i) {
-              coords[i] = global(v);
-              v[perm[i]] += 1;
-            }
-            coords[mydimension] = global(v);
+            const GenericReferenceElement<ct,mydimension> &refelem =
+              GenericReferenceElements<ct,mydimension>::simplex();
+            for(int i = 0; i < corners(); ++i)
+              coords[i] = global(refelem.position(i,mydimension));
             builtCoords = true;
           }
           return coords[i];
