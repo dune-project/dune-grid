@@ -249,6 +249,7 @@
     - \f$x_{p_d}:=x_{p_d}-x_{p_{d+1}}\f$.
  */
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
 #include <dune/geometry/type.hh>
@@ -787,6 +788,8 @@ namespace Dune {
         { return mydimension + 1; }
 
         const FieldVector<ct, coorddimension>& operator[] (int i) const
+        DUNE_DEPRECATED_MSG("Please use method corner(i) instead of "
+                            "operator[](i)")
         {
           if(!builtCoords) {
             FieldVector<ct, coorddimension> v = 0;
