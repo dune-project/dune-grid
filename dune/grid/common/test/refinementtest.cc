@@ -7,22 +7,44 @@
 
 #include "config.h"
 
+#include <iostream>
+#include <ostream>
+
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/type.hh>
+
 #include <dune/grid/common/virtualrefinement.hh>
 #include <dune/grid/test/checkgeometry.cc>
 
 using namespace Dune;
 
+void pass(int &result) {
+  // 77 means 'SKIP'
+  if(result == 77) result = 0;
+}
+void fail(int &result) {
+  result = 1;
+}
+void collect(int &result, bool passed)
+{
+  if(passed) pass(result);else fail(result);
+}
+
 /** \brief Test virtual refinement for an element with a run-time type
  */
 template <class ct, int dim>
-void testVirtualRefinement(const Dune::GeometryType& elementType, int refinement)
+void testVirtualRefinement(int &result, const Dune::GeometryType& elementType,
+                           const Dune::GeometryType& coerceTo, int refinement)
 {
+  std::cout << "Checking virtual refinement " << elementType << " -> "
+            << coerceTo << " level " << refinement << std::endl;
+
   typedef Dune::VirtualRefinement<dim, ct> Refinement;
   typedef typename Refinement::ElementIterator eIterator;
 
   // Make a virtual refinement of the reference element
-  Refinement & elementRefinement = Dune::buildRefinement<dim, ct>(elementType,elementType);
+  Refinement & elementRefinement =
+    Dune::buildRefinement<dim, ct>(elementType,coerceTo);
 
   eIterator eSubEnd = elementRefinement.eEnd(refinement);
   eIterator eSubIt  = elementRefinement.eBegin(refinement);
@@ -30,17 +52,19 @@ void testVirtualRefinement(const Dune::GeometryType& elementType, int refinement
   for (; eSubIt != eSubEnd; ++eSubIt)
     std::cout << eSubIt.coords() << std::endl;
 
+  pass(result);
 }
 
 
-template <class ct, int dim>
-void testSimplexRefinement(int refinement)
+template <unsigned topologyId, class ct, unsigned coerceToId, int dim>
+void testStaticRefinementGeometry(int &result, int refinement)
 {
-  // Create a simplex-to-simplex refinement
-  typedef Dune::StaticRefinement<Dune::GenericGeometry::SimplexTopology<dim>::type::id,
-      ct,
-      Dune::GenericGeometry::SimplexTopology<dim>::type::id,
-      dim> Refinement;
+  std::cout << "Checking static refinement geometry "
+            << GeometryType(topologyId, dim) << " -> "
+            << GeometryType(coerceToId, dim) << " level " << refinement
+            << std::endl;
+
+  typedef Dune::StaticRefinement<topologyId, ct, coerceToId, dim> Refinement;
   typedef typename Refinement::ElementIterator eIterator;
 
   eIterator eSubEnd = Refinement::eEnd(refinement);
@@ -48,7 +72,7 @@ void testSimplexRefinement(int refinement)
 
   for (; eSubIt != eSubEnd; ++eSubIt)
     // Call the standard test for geometries
-    checkGeometry(eSubIt.geometry());
+    collect(result, checkGeometry(eSubIt.geometry()));
 
 }
 
@@ -56,36 +80,106 @@ void testSimplexRefinement(int refinement)
 
 int main(int argc, char** argv) try
 {
-  GeometryType simplex;
+  using GenericGeometry::Point;
+
+  typedef GenericGeometry::Prism  <Point>    Line;
+
+  typedef GenericGeometry::Prism  <Line>     Square;
+  typedef GenericGeometry::Pyramid<Line>     Triangle;
+
+  typedef GenericGeometry::Prism  <Square>   Cube;
+  typedef GenericGeometry::Pyramid<Square>   Pyramid;
+  typedef GenericGeometry::Prism  <Triangle> Prism;
+  typedef GenericGeometry::Pyramid<Triangle> Tet;
+
+  // 77 means 'SKIP'
+  int result = 77;
+
+  GeometryType gt1, gt2;
 
   // test segment
-  simplex.makeSimplex(1);
+  gt1.makeLine();
+  gt2.makeLine();
   for (int refinement=0; refinement<3; refinement++) {
-    testVirtualRefinement<double,1>(simplex,refinement);
-    testSimplexRefinement<double,1>(refinement);
+    testVirtualRefinement<double,1>(result, gt1, gt2, refinement);
+    testStaticRefinementGeometry<Line::id,double,Line::id,1>
+      (result, refinement);
   }
 
   // test triangle
-  simplex.makeSimplex(2);
+  gt1.makeTriangle();
+  gt2.makeTriangle();
   for (int refinement=0; refinement<3; refinement++) {
-    testVirtualRefinement<double,2>(simplex,refinement);
-    testSimplexRefinement<double,2>(refinement);
+    testVirtualRefinement<double,2>(result, gt1, gt2, refinement);
+    testStaticRefinementGeometry<Triangle::id,double,Triangle::id,2>
+      (result, refinement);
+  }
+
+  // test quadrilateral
+  gt1.makeQuadrilateral();
+  gt2.makeQuadrilateral();
+  for (int refinement=0; refinement<3; refinement++) {
+    testVirtualRefinement<double,2>(result, gt1, gt2, refinement);
+    // testStaticRefinementGeometry<Square::id,double,Square::id,2>
+    //     (result, refinement);
+  }
+  gt2.makeTriangle();
+  for (int refinement=0; refinement<3; refinement++) {
+    testVirtualRefinement<double,2>(result, gt1, gt2, refinement);
+    testStaticRefinementGeometry<Square::id,double,Triangle::id,2>
+      (result, refinement);
   }
 
   // test tetrahedron
-  simplex.makeSimplex(3);
+  gt1.makeTetrahedron();
+  gt2.makeTetrahedron();
   for (int refinement=0; refinement<3; refinement++) {
-    testVirtualRefinement<double,3>(simplex,refinement);
-    testSimplexRefinement<double,3>(refinement);
+    testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
+    testStaticRefinementGeometry<Tet::id,double,Tet::id,3>
+      (result, refinement);
   }
 
-  return 0;
+  // test pyramid
+  gt1.makePyramid();
+  gt2.makeTetrahedron();
+  for (int refinement=0; refinement<3; refinement++) {
+    testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
+    // testStaticRefinementGeometry<Pyramid::id,double,Tet::id,3>
+    //     (result, refinement);
+  }
+
+  // test prism
+  gt1.makePrism();
+  gt2.makeTetrahedron();
+  for (int refinement=0; refinement<3; refinement++) {
+    testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
+    // testStaticRefinementGeometry<Prism::id,double,Tet::id,3>
+    //     (result, refinement);
+  }
+
+  // test hexahedron
+  gt1.makeHexahedron();
+  gt2.makeHexahedron();
+  for (int refinement=0; refinement<3; refinement++) {
+    testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
+    // testStaticRefinementGeometry<Cube::id,double,Cube::id,3>
+    //    (result, refinement);
+  }
+  gt1.makeHexahedron();
+  gt2.makeTetrahedron();
+  for (int refinement=0; refinement<3; refinement++) {
+    testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
+    testStaticRefinementGeometry<Cube::id,double,Tet::id,3>
+      (result, refinement);
+  }
+
+  return result;
 
 }
 catch (Exception &e) {
   std::cerr << e << std::endl;
-  return 1;
+  throw;
 } catch (...) {
   std::cerr << "Generic exception!" << std::endl;
-  return 2;
+  throw;
 }
