@@ -355,6 +355,8 @@ namespace Dune
       if(level > testMaxLevel) testMaxLevel = level;
     }
     maxlevel_ = testMaxLevel;
+
+    //assert( maxlevel_ == comm().max( maxlevel_ ));
   }
 
 
@@ -363,6 +365,9 @@ namespace Dune
   alu_inline
   void ALU3dGrid< elType, Comm >::calcExtras ()
   {
+    // make sure maxLevel is the same on all processes ????
+    //assert( maxlevel_ == comm().max( maxlevel_ ));
+
     if(sizeCache_) delete sizeCache_;
     sizeCache_ = new SizeCacheType (*this);
 
@@ -702,24 +707,7 @@ namespace Dune
   bool ALU3dGrid< elType, Comm >
   ::writeGrid_Xdr ( const std::string filename, alu3d_ctype time ) const
   {
-    myGrid().duneBackup(filename.c_str());
-
-    // write time and maxlevel
-    {
-      std::string extraName(filename);
-      extraName += ".extra";
-      std::ofstream out (extraName.c_str());
-      if(out)
-      {
-        out << std::scientific << time << " ";
-        out << maxlevel_ << " ";
-        out.close();
-      }
-      else
-      {
-        derr << "ALU3dGrid::writeGrid: couldn't open <" << extraName << ">! \n";
-      }
-    }
+    myGrid().duneBackup( filename.c_str() );
     return true;
   }
 
@@ -781,21 +769,8 @@ namespace Dune
 
     myGrid().duneRestore(filename.c_str());
 
-    {
-      std::string extraName (filename);
-      extraName += ".extra";
-      std::ifstream in (extraName.c_str());
-      if(in)
-      {
-        in  >> std::scientific >> time;
-        in  >> maxlevel_;
-        in.close();
-      }
-      else
-      {
-        derr << "ALU3dGrid::readGrid: couldn't open <" << extraName << ">! \n";
-      }
-    }
+    // don't restore time
+    time = 0;
 
     // calculate new maxlevel
     // calculate indices
@@ -804,10 +779,50 @@ namespace Dune
     // reset refinement markers
     postAdapt();
 
-    // send time from proc 0 to all in case that some grids are empty
-    comm().broadcast(&time,1,0);
-
     return true;
+  }
+
+  template< ALU3dGridElementType elType, class Comm >
+  alu_inline
+  void ALU3dGrid< elType, Comm >::backup( std::ostream& stream ) const
+  {
+#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
+    // backup grid to given stream
+    myGrid().duneBackup( stream );
+#else
+    DUNE_THROW(NotImplemented,"ALUGrid::backup not implemented yet!");
+#endif
+  }
+
+  template< ALU3dGridElementType elType, class Comm >
+  alu_inline
+  void ALU3dGrid< elType, Comm >::restore( std::istream& stream )
+  {
+    // if grid exists delete first
+    if( mygrid_ ) delete mygrid_;
+    // create new grid from stream
+    mygrid_ = createALUGrid( stream );
+
+    // check for grid
+    if( ! mygrid_ )
+    {
+      DUNE_THROW(InvalidStateException,"ALUGrid::restore failed");
+    }
+
+    // check for element type
+    this->checkMacroGrid ();
+
+#ifdef ALUGRID_CONSTRUCTION_WITH_STREAMS
+    // restore hierarchy from given stream
+    myGrid().duneRestore( stream );
+#endif
+
+    // calculate new maxlevel
+    // calculate indices
+    updateStatus();
+
+    // reset refinement markers
+    postAdapt();
   }
 
 
