@@ -12,6 +12,7 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkpartition.cc"
+#include "checkiterators.cc"
 
 template<int d, int w>
 void runtest()
@@ -22,6 +23,7 @@ void runtest()
   std::cout << std::endl << "SGrid<" << d << "," << w << ">" << std::endl;
   Dune::SGrid<d,w> g(n, h);
   gridcheck(g);
+  checkHierarchicIterator( g );
 
   g.globalRefine(1);
   checkGeometryInFather(g);
@@ -29,6 +31,12 @@ void runtest()
   checkPartitionType( g.leafView() );
   // check geometry lifetime
   checkGeometryLifetime( g.leafView() );
+
+  for( int level = 0; level < g.maxLevel(); ++level )
+    checkIterators( g.levelView( level ) );
+  checkIterators( g.leafView() );
+
+  checkHierarchicIterator( g );
 
   std::cout << std::endl;
 }

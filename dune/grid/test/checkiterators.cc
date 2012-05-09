@@ -111,3 +111,51 @@ inline void checkIterators ( const GridView &gridView )
 {
   CheckIterators< GridView >::apply( gridView );
 }
+
+
+template< class Grid >
+inline void checkHierarchicIterator ( const Grid &grid )
+{
+  typedef typename Grid::LevelGridView MacroGridView;
+  typedef typename Grid::GlobalIdSet IdSet;
+  typedef typename Grid::HierarchicIterator HierarchicIterator;
+  typedef typename Grid::template Codim< 0 >::Entity Element;
+  typedef typename Grid::template Codim< 0 >::EntityPointer ElementPointer;
+
+  typedef typename MacroGridView::template Codim< 0 >::Iterator MacroIterator;
+
+  std::cout << "Checking hierarchic iterator..." << std::endl;
+
+  const MacroGridView macroView = grid.levelView( 0 );
+  const IdSet &idSet = grid.globalIdSet();
+  const int maxLevel = grid.maxLevel();
+
+  std::size_t errors = 0;
+  const MacroIterator mend = macroView.template end< 0 >();
+  for( MacroIterator mit = macroView.template begin< 0 >(); mit != mend; ++mit )
+  {
+    const Element &macroElement = *mit;
+    const typename IdSet::IdType macroId = idSet.id( macroElement );
+
+    const HierarchicIterator hend = macroElement.hend( maxLevel );
+    for( HierarchicIterator hit = macroElement.hbegin( maxLevel ); hit != hend; ++hit )
+    {
+      ElementPointer pElement( hit );
+      while( pElement->hasFather() )
+        pElement = pElement->father();
+      if( idSet.id( *pElement ) != macroId )
+      {
+        std::cout << "Error: Hierarchic iterator for macro Element " << macroId
+                  << " visits element " << idSet.id( *hit )
+                  << ", whose top level ancestor is " << idSet.id( *pElement )
+                  << "." << std::endl;
+        ++errors;
+      }
+    }
+  }
+  if( errors > 0 )
+  {
+    std::cerr << "Error: Hierarchic iterator visits children of other elements." << std::endl;
+    assert( false );
+  }
+}
