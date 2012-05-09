@@ -849,17 +849,12 @@ namespace Dune {
         const FieldMatrix<ct, mydimension, mydimension>& jacobianInverse(const FieldVector<ct, mydimension>& local) const
         {
           if(!builtJinv) {
-            // create unit vectors
-            FieldMatrix<int, mydimension, mydimension> M = 0;
-            for(int i = 0; i < mydimension; ++i)
-              M[i][i] = 1;
-            // transform them into local coordinates
-            for(int i = 0; i < mydimension; ++i)
-              M[i] = kuhnToReference(referenceToKuhn(M[i], getPermutation<mydimension>(0)), getPermutation<mydimension>(kuhnIndex));
-            // scale by the inverse size of the element and transpose the matrix
+            jacobianInverseTransposed(local);
+
+            // transpose the matrix
             for(int i = 0; i < mydimension; ++i)
               for(int j = 0; j < mydimension; ++j)
-                Jinv[i][j] = ct(1<<level) * M[j][i];
+                Jinv[i][j] = jInvTransp[j][i];
 
             builtJinv = true;
           }
@@ -869,50 +864,40 @@ namespace Dune {
 
         const FieldMatrix<ct, mydimension, mydimension>& jacobianInverseTransposed(const FieldVector<ct, mydimension>& local) const
         {
-          // create unit vectors
-          FieldMatrix<int, mydimension, mydimension> M(0);
-          for(int i = 0; i < mydimension; ++i)
-            M[i][i] = 1;
-          // transform them into local coordinates
-          for(int i = 0; i < mydimension; ++i)
-            M[i] = kuhnToReference(referenceToKuhn(M[i], getPermutation<mydimension>(0)), getPermutation<mydimension>(kuhnIndex));
-          // scale by the inverse size of the element and transpose the matrix
-          for(int i = 0; i < mydimension; ++i)
-            for(int j = 0; j < mydimension; ++j)
-              jInvTransp[j][i] = ct(1<<level) * M[j][i];
+          if(!builtJInvTransp) {
+            // create unit vectors
+            jInvTransp = 0;
+            for(int i = 0; i < mydimension; ++i)
+              jInvTransp[i][i] = 1;
+            // transform them into local coordinates
+            for(int i = 0; i < mydimension; ++i)
+              jInvTransp[i] = kuhnToReference
+                                (referenceToKuhn(jInvTransp[i],
+                                                 getPermutation<mydimension>(0)),
+                                getPermutation<mydimension>(kuhnIndex));
+            // scale by the inverse size of the element
+            jInvTransp *= ct(1<<level);
+
+            builtJInvTransp = true;
+          }
 
           return jInvTransp;
         }
 
         /** \brief Compute transpose of the Jacobian matrix
-         * \todo This implementation is ridiculously bad.  We first compute JacobianInverse by just copy'n'pasting
-         * the code from that method, then we invert it, then we transpose it.  Rationale: apparently nobody is using
+         * \todo This implementation is ridiculously bad.  We first compute
+         * JacobianInverseTransposed by just calling that method, then we
+         * invert it.  Rationale: apparently nobody is using
          * it currently, anyway, and I intend to replace all this by BasicGeometry later.
          */
         const FieldMatrix<ct, mydimension, mydimension>& jacobianTransposed(const FieldVector<ct, mydimension>& local) const
         {
-          if(!builtJinv) {
-            // create unit vectors
-            FieldMatrix<int, mydimension, mydimension> M(0);
-            for(int i = 0; i < mydimension; ++i)
-              M[i][i] = 1;
-            // transform them into local coordinates
-            for(int i = 0; i < mydimension; ++i)
-              M[i] = kuhnToReference(referenceToKuhn(M[i], getPermutation<mydimension>(0)), getPermutation<mydimension>(kuhnIndex));
-            // scale by the inverse size of the element and transpose the matrix
-            for(int i = 0; i < mydimension; ++i)
-              for(int j = 0; j < mydimension; ++j)
-                Jinv[i][j] = ct(1<<level) * M[j][i];
+          if(!builtJTransp) {
+            jTransp = jacobianInverseTransposed(local);
+            jTransp.invert();
 
-            builtJinv = true;
+            builtJTransp = true;
           }
-
-          jTransp = Jinv;
-          jTransp.invert();
-
-          for (int i=0; i<mydimension; i++)
-            for (int j=0; j<i; j++)
-              std::swap(jTransp[i][j], jTransp[j][i]);
 
           return jTransp;
         }
@@ -920,6 +905,7 @@ namespace Dune {
 
         Geometry(int level_)
           : coords(), builtCoords(false), Jinv(), builtJinv(false),
+            builtJTransp(false), builtJInvTransp(false),
             level(level_), kuhnIndex(0), origin()
         {
           dune_static_assert(mydimension == coorddimension, "mydimension != coorddimension");
@@ -931,6 +917,8 @@ namespace Dune {
           kuhnIndex = kuhnIndex_;
           builtCoords = false;
           builtJinv = false;
+          builtJTransp = false;
+          builtJInvTransp = false;
         }
       private:
         mutable FieldVector<FieldVector<ct, coorddimension>, mydimension+1> coords;
@@ -939,6 +927,8 @@ namespace Dune {
         mutable FieldMatrix<ct, mydimension, mydimension> jTransp;
         mutable FieldMatrix<ct, mydimension, mydimension> jInvTransp;
         mutable bool builtJinv;
+        mutable bool builtJTransp;
+        mutable bool builtJInvTransp;
         int level;
         int kuhnIndex;
         FieldVector<int, coorddimension> origin;
