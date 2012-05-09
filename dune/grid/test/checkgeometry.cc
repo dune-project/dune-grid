@@ -18,9 +18,14 @@
 namespace Dune
 {
 
+  /**
+   * \returns true if check passed
+   */
   template< int mydim, int cdim, class Grid, template< int, int, class > class Imp >
-  void checkGeometry ( const Geometry< mydim, cdim, Grid, Imp > &geometry )
+  bool checkGeometry ( const Geometry< mydim, cdim, Grid, Imp > &geometry )
   {
+    bool pass = true;
+
     typedef typename Grid :: ctype ctype ;
     typedef Dune::Geometry< mydim, cdim, Grid, Imp > Geometry;
     const GenericReferenceElement< ctype, mydim > &refElement = GenericReferenceElements< ctype, mydim >::general( geometry.type() );
@@ -28,12 +33,16 @@ namespace Dune
     {
       for( int i = 0; i < geometry.corners(); ++i )
       {
-        if( (geometry.corner( i ) - geometry.global( refElement.position( i, mydim ) )).two_norm() > 1e-8 )
+        if( (geometry.corner( i ) - geometry.global( refElement.position( i, mydim ) )).two_norm() > 1e-8 ) {
           std::cerr << "Error: Methods corner and global are inconsistent." << std::endl;
+          pass = false;
+        }
       }
     }
-    else
+    else {
       std::cerr << "Error: Incorrect number of corners (" << geometry.corners() << ", should be " << refElement.size( mydim ) << ")." << std::endl;
+      pass = false;
+    }
 
     typedef Dune::GenericGeometry::GaussPoints< ctype > Points;
     typedef Dune::GenericGeometry::GenericQuadratureFactory< mydim, ctype, Points > QuadratureFactory;
@@ -42,8 +51,10 @@ namespace Dune
     {
       const typename Geometry::LocalCoordinate &x = quadrature[ i ].position();
 
-      if( (x - geometry.local( geometry.global( x ) )).two_norm() > 1e-8 )
+      if( (x - geometry.local( geometry.global( x ) )).two_norm() > 1e-8 ) {
         std::cerr << "Error: global and local are not inverse to each other." << std::endl;
+        pass = false;
+      }
 
       const FieldMatrix< ctype, mydim, cdim > &jt = geometry.jacobianTransposed( x );
       const FieldMatrix< ctype, cdim, mydim > &jit = geometry.jacobianInverseTransposed( x );
@@ -61,21 +72,28 @@ namespace Dune
         for( int j = 0; j < mydim; ++j )
           std::cout << (j > 0 ? " | " : "") << id[ j ];
         std::cout << " ]" << std::endl;
+        pass = false;
       }
 
-      if( geometry.integrationElement( x ) < 0 )
+      if( geometry.integrationElement( x ) < 0 ) {
         std::cerr << "Error: Negative integrationElement found." << std::endl;
+        pass = false;
+      }
 
       FieldMatrix< ctype, mydim, mydim > jtj( 0 );
       for( int i = 0; i < mydim; ++i )
         for( int j = 0; j < mydim; ++j )
           for( int k = 0; k < cdim; ++k )
             jtj[ i ][ j ] += jt[ i ][ k ] * jt[ j ][ k ];
-      if( std::abs( std::sqrt( jtj.determinant() ) - geometry.integrationElement( x ) ) > 1e-8 )
+      if( std::abs( std::sqrt( jtj.determinant() ) - geometry.integrationElement( x ) ) > 1e-8 ) {
         std::cerr << "Error: integrationElement is not consistent with jacobianTransposed." << std::endl;
+        pass = false;
+      }
       if (geometry.affine())
-        if( std::abs( geometry.volume() - refElement.volume()*geometry.integrationElement( x ) ) > 1e-8 )
+        if( std::abs( geometry.volume() - refElement.volume()*geometry.integrationElement( x ) ) > 1e-8 ) {
           std::cerr << "Error: volume is not consistent with jacobianTransposed." << std::endl;
+          pass = false;
+        }
     }
     QuadratureFactory::release( &quadrature );
 
@@ -91,6 +109,8 @@ namespace Dune
       if( std::abs( (geometry.center() - center).two_norm() ) > 1e-8 )
         DUNE_THROW(Exception, "center() is not consistent with global(refElem.position(0,0)).");
     }
+
+    return pass;
   }
 
 
