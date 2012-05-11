@@ -58,8 +58,16 @@ namespace Dune
    * Writes arbitrary grid functions (living on cells or vertices of a grid)
    * to a file suitable for easy visualization with
    * <a href="http://public.kitware.com/VTK/">The Visualization Toolkit (VTK)</a>.
+   *
+   * \tparam GridView      The grid view to write.
+   * \tparam VTK_Partition The partition of the grid view to write.
+   *
+   * \note Normally, VTK_Partition should be left at the default of
+   *       InteriorBorder_Partition.  But it can be useful to set it to
+   *       e.g. All_Partition to debug communication problems.
    */
-  template< class GridView >
+  template< class GridView,
+      PartitionIteratorType VTK_Partition = InteriorBorder_Partition >
   class VTKWriter {
     // extract types
     typedef typename GridView::Grid Grid;
@@ -72,8 +80,6 @@ namespace Dune
     typedef Cell Entity;
 
     typedef typename GridView::IndexSet IndexSet;
-
-    static const PartitionIteratorType VTK_Partition = InteriorBorder_Partition;
 
     typedef typename GridView::template Codim< 0 >
     ::template Partition< VTK_Partition >::Iterator
