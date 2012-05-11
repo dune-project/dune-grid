@@ -15,7 +15,7 @@
 
 /** @file
     @author Peter Bastian, Christian Engwer
-    @brief Data array wrriters for the VTKWriter
+    @brief Data array writers for the VTKWriter
 
     This file contains classes to help writing data in the difeerent VTK
     output modes
