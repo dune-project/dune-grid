@@ -42,16 +42,20 @@ void entityinfoToVTK(const GV &gv, const std::string &vtkName,
   std::vector<typename GV::IndexSet::IndexType> eIndices(eMapper.size());
   std::vector<int> eMap(eMapper.size());
   std::vector<unsigned> eTopologyIds(eMapper.size());
+  std::vector<unsigned> eIterationOrder(eMapper.size());
   {
     typedef typename GV::template Codim<0>::
     template Partition<Partition>::Iterator Iterator;
     const Iterator &end = gv.template end<0, Partition>();
-    for(Iterator it = gv.template begin<0, Partition>(); it != end; ++it) {
+    unsigned i = 0;
+    for(Iterator it = gv.template begin<0, Partition>(); it != end; ++it, ++i)
+    {
       int map = eMapper.map(*it);
       ePartitionTypes[map] = partitionTypeToInt(it->partitionType());
       eIndices[map] = gv.indexSet().index(*it);
       eMap[map] = map;
       eTopologyIds[map] = it->type().id();
+      eIterationOrder[map] = i;
     }
   }
 
@@ -62,16 +66,21 @@ void entityinfoToVTK(const GV &gv, const std::string &vtkName,
   std::vector<int> vPartitionTypes(vMapper.size());
   std::vector<typename GV::IndexSet::IndexType> vIndices(vMapper.size());
   std::vector<int> vMap(vMapper.size());
+  std::vector<unsigned> vIterationOrder(vMapper.size());
   {
     static const std::size_t dim = GV::dimension;
     typedef typename GV::template Codim<dim>::
     template Partition<Partition>::Iterator Iterator;
     const Iterator &end = gv.template end<dim, Partition>();
-    for(Iterator it = gv.template begin<dim, Partition>(); it != end; ++it) {
+    unsigned i = 0;
+    for(Iterator it = gv.template begin<dim, Partition>(); it != end;
+        ++it, ++i)
+    {
       int map = vMapper.map(*it);
       vPartitionTypes[map] = partitionTypeToInt(it->partitionType());
       vIndices[map] = gv.indexSet().index(*it);
       vMap[map] = map;
+      vIterationOrder[map] = i;
     }
   }
 
@@ -106,11 +115,13 @@ void entityinfoToVTK(const GV &gv, const std::string &vtkName,
   vtkWriter.addCellData(eIndices, "eIndices");
   vtkWriter.addCellData(eMap, "eMap");
   vtkWriter.addCellData(eTopologyIds, "eTopologyIds");
+  vtkWriter.addCellData(eIterationOrder, "eIterationOrder");
 
   vtkWriter.addVertexData(vRanks, "vRanks");
   vtkWriter.addVertexData(vPartitionTypes, "vPartitionTypes");
   vtkWriter.addVertexData(vIndices, "vIndices");
   vtkWriter.addVertexData(vMap, "vMap");
+  vtkWriter.addVertexData(vIterationOrder, "vIterationOrder");
 
   vtkWriter.pwrite(basename, path, "", outputtype);
 }
