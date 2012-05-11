@@ -152,8 +152,7 @@ namespace Dune
     protected:
       void basicIncrement ()
       {
-        if( git == gend )
-          return;
+        assert( git != gend );
         ++cornerIndexDune;
         const int numCorners = git->template count< n >();
         if( cornerIndexDune == numCorners )
