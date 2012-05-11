@@ -160,8 +160,6 @@ namespace Dune
           cornerIndexDune = 0;
 
           ++git;
-          while( (git != gend) && (git->partitionType() != InteriorEntity) )
-            ++git;
         }
       }
     public:
@@ -284,8 +282,6 @@ namespace Dune
           cornerIndexVTK = 0;
 
           ++git;
-          while( (git != gend) && (git->partitionType() != InteriorEntity) )
-            ++git;
         }
       }
       bool equals (const CornerIterator & cit) const
