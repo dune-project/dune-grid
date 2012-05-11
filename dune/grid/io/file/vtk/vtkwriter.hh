@@ -249,7 +249,6 @@ namespace Dune
       public ForwardIteratorFacade<CornerIterator, const Entity, const Entity&, int>
     {
       GridCellIterator git;
-      GridCellIterator gend;
       VTK::DataMode datamode;
       // Index of the currently visited corner within the current element.
       // NOTE: this is in VTK-numbering, in contrast to VertexIterator.
@@ -265,17 +264,14 @@ namespace Dune
 
     public:
       CornerIterator(const GridCellIterator & x,
-                     const GridCellIterator & end,
                      const VTK::DataMode & dm,
                      const VertexMapper & vm,
                      const std::vector<int> & num) :
-        git(x), gend(end), datamode(dm), cornerIndexVTK(0),
+        git(x), datamode(dm), cornerIndexVTK(0),
         vertexmapper(vm),
         number(num), offset(0) {};
       void increment ()
       {
-        if( git == gend )
-          return;
         ++cornerIndexVTK;
         const int numCorners = git->template count< n >();
         if( cornerIndexVTK == numCorners )
@@ -320,14 +316,12 @@ namespace Dune
     CornerIterator cornerBegin () const
     {
       return CornerIterator( gridView_.template begin< 0, VTK_Partition >(),
-                             gridView_.template end< 0, VTK_Partition >(),
                              datamode, *vertexmapper, number );
     }
 
     CornerIterator cornerEnd () const
     {
       return CornerIterator( gridView_.template end< 0, VTK_Partition >(),
-                             gridView_.template end< 0, VTK_Partition >(),
                              datamode, *vertexmapper, number );
     }
 
