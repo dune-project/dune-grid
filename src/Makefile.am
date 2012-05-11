@@ -1,5 +1,6 @@
 SUBDIRS =					\
 	alu-to-vtk				\
+	entityinfo-to-vtk			\
 	gmsh-to-alu				\
 	gridinfo-gmsh				\
 	structured-to-alu

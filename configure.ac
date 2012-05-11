@@ -84,6 +84,7 @@ AC_CONFIG_FILES([Makefile
     dune-grid.pc
     src/Makefile
     src/alu-to-vtk/Makefile
+    src/entityinfo-to-vtk/Makefile
     src/gmsh-to-alu/Makefile
     src/gridinfo-gmsh/Makefile
     src/structured-to-alu/Makefile
