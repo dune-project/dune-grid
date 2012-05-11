@@ -43,6 +43,12 @@ namespace Dune
   public:
     typedef typename Grid::template Codim< codim >::Entity Entity;
 
+    typedef std::ptrdiff_t difference_type;
+    typedef const Entity value_type;
+    typedef value_type *pointer;
+    typedef value_type &reference;
+    typedef std::forward_iterator_tag iterator_category;
+
     /** \brief prefix increment operator */
     EntityIterator &operator++ ()
     {
@@ -63,20 +69,5 @@ namespace Dune
   };
 
 } // namespace Dune
-
-namespace std
-{
-
-  template< int codim, class Grid, class IteratorImp >
-  struct iterator_traits< Dune::EntityIterator< codim, Grid, IteratorImp > >
-  {
-    typedef ptrdiff_t difference_type;
-    typedef const typename Dune::EntityIterator< codim, Grid, IteratorImp >::Entity value_type;
-    typedef value_type *pointer;
-    typedef value_type &reference;
-    typedef forward_iterator_tag iterator_category;
-  };
-
-} // namespace std
 
 #endif // #ifndef DUNE_GRID_ENTITYITERATOR_HH
