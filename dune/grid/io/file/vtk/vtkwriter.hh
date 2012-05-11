@@ -4,8 +4,10 @@
 #ifndef DUNE_VTKWRITER_HH
 #define DUNE_VTKWRITER_HH
 
+#include <cassert>
 #include <cstring>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -882,6 +884,9 @@ namespace Dune
           }
         }
       }
+      assert(nvertices == std::distance(vertexBegin(), vertexEnd()));
+      assert(ncells == std::distance(cellBegin(), cellEnd()));
+      assert(ncorners == std::distance(cornerBegin(), cornerEnd()));
     }
 
     //! write cell data
