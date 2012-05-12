@@ -464,8 +464,7 @@ namespace Dune
   {
     const int face = (dimension > 1 ? oppVertex_ : 1-oppVertex_);
     const GlobalCoordReader coordReader( grid(), elementInfo(), face );
-    geo_.build( coordReader );
-    return Geometry( geo_ );
+    return Geometry( GeometryImpl( coordReader ) );
   }
 
 

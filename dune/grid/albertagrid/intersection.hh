@@ -170,7 +170,6 @@ namespace Dune
 
   private:
     mutable ElementInfo neighborInfo_;
-    mutable GeometryImpl geo_;
 #if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     mutable LocalGeometryImpl fakeNeighObj_;
     mutable LocalGeometryImpl fakeSelfObj_;

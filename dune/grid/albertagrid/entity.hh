@@ -146,12 +146,12 @@ namespace Dune
 
     // number of the subentity within the element (in ALBERTA numbering)
     int subEntity_;
-
-    // current geometry
-    GeometryImpl geo_;
   };
 
 
+
+  // AlbertaGridEntity for codimension 0
+  // -----------------------------------
 
   /*!
      A Grid is a container of grid entities. An entity is parametrized by the codimension.
@@ -377,11 +377,7 @@ namespace Dune
 
     // local coordinates within father
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
-
-    //! the cuurent geometry
-    mutable GeometryImpl geo_;
-    mutable bool builtgeometry_;  //!< true if geometry has been constructed
-  }; // end of AlbertaGridEntity codim = 0
+  };
 
 } // namespace Dune
 

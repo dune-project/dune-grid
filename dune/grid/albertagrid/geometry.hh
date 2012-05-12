@@ -136,12 +136,13 @@ namespace Dune
 
 
 
-  // template< int dim, int dimworld, int cdim >
-  template <class GridImp,int cdim>
+  // AlbertaGridGeometryTraits
+  // -------------------------
+
+  template< class GridImp, int cdim >
   struct AlbertaGridGeometryTraits
   {
-    // typedef AlbertaGrid< dim, dimworld > Grid;
-    typedef typename remove_const<GridImp>::type Grid;
+    typedef typename remove_const< GridImp >::type Grid;
 
     typedef GenericGeometry::DuneCoordTraits< Alberta::Real > CoordTraits;
 
@@ -166,10 +167,7 @@ namespace Dune
       static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::ComputeOnDemand;
     };
 
-    /** \brief type of additional user data to be stored in each mapping
-     */
     struct UserData {};
-
   };
 
 
@@ -702,7 +700,23 @@ namespace Dune
     const LocalFaceGeometry *faceGeometry_[ numFaces ][ numFaceTwists ];
   };
 
-}
+
+
+  // FacadeOptions
+  // -------------
+
+  namespace FacadeOptions
+  {
+
+    template< int mydim, int cdim, class Grid >
+    struct StoreGeometryReference< mydim, cdim, Grid, AlbertaGridGlobalGeometry >
+    {
+      static const bool v = false;
+    };
+
+  } // namespace FacadeOptions
+
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
