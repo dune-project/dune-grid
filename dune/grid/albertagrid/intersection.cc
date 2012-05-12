@@ -424,16 +424,10 @@ namespace Dune
   inline typename AlbertaGridLeafIntersection< GridImp >::LocalGeometry
   AlbertaGridLeafIntersection< GridImp >::geometryInInside () const
   {
-#if ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
     const int twist = elementInfo().template twist< 1 >( oppVertex_ );
     const int face = (dimension > 1 ? oppVertex_ : 1-oppVertex_);
     return LocalGeometry( LocalGeoProvider::instance().faceGeometry( face, twist ) );
-#else
-    const LocalCoordReader coordReader( inside()->geometry(), geometry() );
-    fakeSelfObj_.build( coordReader );
-    return LocalGeometry( fakeSelfObj_ );
-#endif
   }
 
 
@@ -443,18 +437,12 @@ namespace Dune
   {
     assert( neighbor() );
 
-#if ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
     const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
     const int oppVertex = elInfo.opp_vertex[ oppVertex_ ];
     const int twist = elementInfo().twistInNeighbor( oppVertex_ );
     const int face = (dimension > 1 ? oppVertex : 1-oppVertex);
     return LocalGeometry( LocalGeoProvider::instance().faceGeometry( face, twist ) );
-#else
-    const LocalCoordReader coordReader( outside()->geometry(), geometry() );
-    fakeNeighObj_.build( coordReader );
-    return LocalGeometry( fakeNeighObj_ );
-#endif
   }
 
 

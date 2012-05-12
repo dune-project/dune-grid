@@ -9,8 +9,6 @@
 #include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/geometry.hh>
 
-#define ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES 1
-
 #if HAVE_ALBERTA
 
 namespace Dune
@@ -170,10 +168,6 @@ namespace Dune
 
   private:
     mutable ElementInfo neighborInfo_;
-#if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
-    mutable LocalGeometryImpl fakeNeighObj_;
-    mutable LocalGeometryImpl fakeSelfObj_;
-#endif
   };
 
 } // namespace Dune
