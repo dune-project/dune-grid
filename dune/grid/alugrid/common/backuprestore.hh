@@ -85,6 +85,12 @@ namespace Dune
     }
   };
 
+  //- version taking const grid type and forwarding to the above implementation
+  template< int dim, int dimworld, ALUGridElementType elType, ALUGridRefinementType refineType, class Comm >
+  struct BackupRestoreFacility< const ALUGrid< dim, dimworld, elType, refineType, Comm > >
+    : public BackupRestoreFacility< ALUGrid< dim, dimworld, elType, refineType, Comm > >
+  {};
+
 } // namespace Dune
 
 #endif // #ifndef DUNE_GRID_ALUGRID_BACKUPRESTORE_HH
