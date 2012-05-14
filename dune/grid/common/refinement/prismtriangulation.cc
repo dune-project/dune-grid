@@ -403,6 +403,7 @@ namespace Dune {
         { return backend->geometry().local(kuhnToReference(global, getPermutation<dimension>(kuhnIndex))); }
 
         bool checkInside (const FieldVector<ct, mydimension>& local) const
+        DUNE_DEPRECATED_MSG("Use the checkInside method on the reference element instead!")
         { return backend->geometry().checkInside(local); }
 
         ct integrationElement(const FieldVector<ct, mydimension>& local) const
