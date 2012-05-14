@@ -61,7 +61,7 @@ namespace Dune
      *        written in another language than C++ might need to emulate this
      *        method by writing through a temporary file.
      */
-    static void backup ( const Grid &grid, const std::ostream &stream )
+    static void backup ( const Grid &grid, std::ostream &stream )
     {
       DUNE_THROW( NotImplemented, "backup / restore not implemented." );
     }
@@ -88,11 +88,19 @@ namespace Dune
      *        written in another language than C++ might need to emulate this
      *        method by writing through a temporary file.
      */
-    static Grid *restore ( const std::istream &stream )
+    static Grid *restore ( std::istream &stream )
     {
       DUNE_THROW( NotImplemented, "backup / restore not implemented." );
     }
   };
+
+  /** \brief BackupRestoreFacility taking const Grid as type and deriving from the
+             version with the const.
+   */
+  template< class Grid >
+  struct BackupRestoreFacility< const Grid >
+    : public BackupRestoreFacility< Grid >
+  {};
 
 } // namespace Dune
 
