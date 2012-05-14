@@ -424,7 +424,7 @@ namespace Dune {
           return coords[i];
         }
 
-        /** \brief Simplex elements are always affine */
+        /** \brief Axis-parallel hypercube elements are always affine */
         bool affine() const
         {
           return true;
