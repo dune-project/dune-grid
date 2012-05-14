@@ -830,6 +830,7 @@ namespace Dune {
         }
 
         bool checkInside (const FieldVector<ct, mydimension>& local) const
+        DUNE_DEPRECATED_MSG("Use the checkInside method on the reference element instead!")
         {
           for(int i = 0; i < mydimension; ++i)
             if(local[i] < 0)
