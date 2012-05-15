@@ -27,8 +27,11 @@ namespace Dune
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,path,fileprefix)  */
     static void backup ( const Grid &grid, const std::string &path, const std::string &fileprefix )
     {
-      const std::string filename( path + "/" + fileprefix );
-      grid.writeXdr( filename, 0.0 );
+      std::string filename ( path );
+      if( fileprefix != "" )
+        filename += "/" + fileprefix ;
+
+      grid.writeGridXdr( filename, 0.0 );
     }
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)
@@ -43,7 +46,10 @@ namespace Dune
     /** \copydoc Dune::BackupRestoreFacility::restore(path,fileprefix) */
     static Grid *restore ( const std::string &path, const std::string &fileprefix )
     {
-      const std::string filename( path + "/" + fileprefix );
+      std::string filename ( path );
+      if( fileprefix != "" )
+        filename += "/" + fileprefix ;
+
       Grid *grid = new Grid;
       double time; // ignore time
       grid->readGridXdr( filename, time );

@@ -551,6 +551,12 @@ namespace Dune
       return genericNumberingMap_.alberta2dune( codim, i );
     }
 
+    // write ALBERTA mesh file
+    bool writeGridXdr ( const std::string &filename, ctype time ) const;
+
+    //! reads ALBERTA mesh file
+    bool readGridXdr ( const std::string &filename, ctype &time );
+
   private:
     using Base::getRealImplementation;
 
@@ -562,17 +568,7 @@ namespace Dune
     // extra method because of Reihenfolge
     void calcExtras();
 
-    // write ALBERTA mesh file
-    bool writeGridXdr ( const std::string &filename, ctype time ) const;
-
-    //! reads ALBERTA mesh file
-    bool readGridXdr ( const std::string &filename, ctype &time );
-
-#if 0
-    //! reads ALBERTA macro file
-    bool readGridAscii ( const std::string &filename, ctype &time );
-#endif
-
+  private:
     // delete mesh and all vectors
     void removeMesh();
 
