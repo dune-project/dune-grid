@@ -24,13 +24,9 @@ namespace Dune
   {
     typedef AlbertaGrid< dim, dimworld > Grid;
 
-    /** \copydoc Dune::BackupRestoreFacility::backup(grid,path,fileprefix)  */
-    static void backup ( const Grid &grid, const std::string &path, const std::string &fileprefix )
+    /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
+    static void backup ( const Grid &grid, const std::string &filename )
     {
-      std::string filename ( path );
-      if( fileprefix != "" )
-        filename += "/" + fileprefix ;
-
       grid.writeGridXdr( filename, 0.0 );
     }
 
@@ -43,13 +39,9 @@ namespace Dune
       DUNE_THROW( NotImplemented, "backup / restore using streams not implemented." );
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::restore(path,fileprefix) */
-    static Grid *restore ( const std::string &path, const std::string &fileprefix )
+    /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
+    static Grid *restore ( const std::string &filename )
     {
-      std::string filename ( path );
-      if( fileprefix != "" )
-        filename += "/" + fileprefix ;
-
       Grid *grid = new Grid;
       double time; // ignore time
       grid->readGridXdr( filename, time );
