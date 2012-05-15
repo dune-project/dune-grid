@@ -42,12 +42,11 @@ namespace Dune
     /** \brief write a hierarchic grid to disk
      *
      *  \param[in]  grid        grid to write
-     *  \param[in]  path        path to write the file to
-     *  \param[in]  fileprefix  prefix of the file name
+     *  \param[in]  filename    filename of the file to create
      *
-     *  \note This method might create multiple files based on the file prefix.
+     *  \note This method might create multiple files based on the filename plus internal extension.
      */
-    static void backup ( const Grid &grid, const std::string &path, const std::string &fileprefix )
+    static void backup ( const Grid &grid, const std::string &filename )
     {
       DUNE_THROW( NotImplemented, "backup / restore not implemented." );
     }
@@ -57,7 +56,7 @@ namespace Dune
      *  \param[in]  grid        grid to write
      *  \param[in]  stream      std::stream to write the grid to
      *
-     *  \note While operating on a std::stream might be convenient, a grid
+     *  \note While operating on a std::ostream might be convenient, a grid
      *        written in another language than C++ might need to emulate this
      *        method by writing through a temporary file.
      */
@@ -68,14 +67,13 @@ namespace Dune
 
     /** \brief read a hierarchic grid from disk
      *
-     *  \param[in]  path        path to write the file to
-     *  \param[in]  fileprefix  prefix of the file name
+     *  \param[in]  filename    filename of the file to read
      *
      *  \returns a pointer to the grid (allocated by new)
      *
-     *  \note This method might require multiple files based on the file prefix.
+     *  \note This method might require multiple files based on the filename plus some extension.
      */
-    static Grid *restore ( const std::string &path, const std::string &fileprefix )
+    static Grid *restore ( const std::string &filename )
     {
       DUNE_THROW( NotImplemented, "backup / restore not implemented." );
     }
@@ -84,7 +82,7 @@ namespace Dune
      *
      *  \param[in]  stream      std::stream to read the grid from
      *
-     *  \note While operating on a std::stream might be convenient, a grid
+     *  \note While operating on a std::istream might be convenient, a grid
      *        written in another language than C++ might need to emulate this
      *        method by writing through a temporary file.
      */

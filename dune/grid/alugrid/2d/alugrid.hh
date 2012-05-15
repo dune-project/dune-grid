@@ -18,6 +18,7 @@ namespace Dune
       \brief [<em> provides \ref Dune::Grid </em>]
       \brief grid with support for cube mesh in 2d.
       \ingroup ALUCubeGrid
+      \deprecated Use ALUGrid< 2, dimw, cube, nonconforming > instead.
    */
   template<int dimw>
   class ALUCubeGrid< 2, dimw >
@@ -44,6 +45,8 @@ namespace Dune
     //!                   this pointer and will delete it in the desctructor
     //! \param verbose    Whether to write a notice about grid creation to
     //!                   stdout.
+    //! \deprecated Use ALUGrid< 2, dimw, cube, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUCubeGrid(const std::string macroName,
                 const DuneBoundaryProjectionType* bndProject  = 0,
                 const DuneBoundaryProjectionVector* bndVector = 0,
@@ -66,6 +69,8 @@ namespace Dune
     //!                   this pointer and will delete it in the desctructor
     //! \param verbose    Whether to write a notice about grid creation to
     //!                   stdout.
+    //! \deprecated Use ALUGrid< 2, dimw, cube, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUCubeGrid(const std::string macroName,
                 std::istream& macroFile,
                 const DuneBoundaryProjectionType* bndProject  = 0,
@@ -84,6 +89,8 @@ namespace Dune
     }
 
     //! constructor creating empty grid
+    //! \deprecated Use ALUGrid< 2, dimw, cube, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUCubeGrid( ) : BaseType(1)
     {
       std::cout << "\nCreated empty ALUCubeGrid<"<<dim<<","<<dimworld <<">. \n\n";
@@ -166,6 +173,7 @@ namespace Dune
       \brief [<em> provides \ref Dune::Grid </em>]
       \brief grid with support for simplicial mesh in 2d.
       \ingroup ALUSimplexGrid
+      \deprecated Use ALUGrid< 2, dimw, simplex, nonconforming > instead.
    */
   template<int dimw>
   class ALUSimplexGrid< 2, dimw >
@@ -192,6 +200,8 @@ namespace Dune
     //!                   this pointer and will delete it in the desctructor
     //! \param verbose    Whether to write a notice about grid creation to
     //!                   stdout.
+    //! \deprecated Use ALUGrid< 2, dimw, simplex, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUSimplexGrid(const std::string macroName,
                    const DuneBoundaryProjectionType* bndProject  = 0,
                    const DuneBoundaryProjectionVector* bndVector = 0,
@@ -214,6 +224,8 @@ namespace Dune
     //!                   this pointer and will delete it in the desctructor
     //! \param verbose    Whether to write a notice about grid creation to
     //!                   stdout.
+    //! \deprecated Use ALUGrid< 2, dimw, simplex, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUSimplexGrid(const std::string macroName,
                    std::istream& macroFile,
                    const DuneBoundaryProjectionType* bndProject  = 0,
@@ -232,6 +244,8 @@ namespace Dune
     }
 
     //! constructor creating empty grid
+    //! \deprecated Use ALUGrid< 2, dimw, simplex, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUSimplexGrid( ) : BaseType(1)
     {
       std::cout << "\nCreated empty ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
@@ -336,6 +350,7 @@ namespace Dune
      \note The unspecialized version of ALUConformGrid is defined for
            documentation purposes only, only the specializations can actually be
            used.
+     \deprecated Use ALUGrid instead.
    */
   template <int dim, int dimworld>
   class ALUConformGrid {
@@ -406,6 +421,7 @@ namespace Dune
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief grid with support for simplicial mesh in 2d.
      \ingroup ALUConformGrid
+     \deprecated Use ALUGrid< 2, dimw, simplex, conforming > instead.
    */
   template<int dimw>
   class ALUConformGrid< 2, dimw >
@@ -431,6 +447,8 @@ namespace Dune
     //!                   this pointer and will delete it in the desctructor
     //! \param verbose    Whether to write a notice about grid creation to
     //!                   stdout.
+    //! \deprecated Use ALUGrid< 2, dimw, simplex, conforming > instead.
+    DUNE_DEPRECATED
     ALUConformGrid(const std::string macroName,
                    const DuneBoundaryProjectionType* bndProject  = 0,
                    const DuneBoundaryProjectionVector* bndVector = 0,
@@ -453,6 +471,8 @@ namespace Dune
     //!                   this pointer and will delete it in the desctructor
     //! \param verbose    Whether to write a notice about grid creation to
     //!                   stdout.
+    //! \deprecated Use ALUGrid< 2, dimw, simplex, conforming > instead.
+    DUNE_DEPRECATED
     ALUConformGrid(const std::string macroName,
                    std::istream& macroFile,
                    const DuneBoundaryProjectionType* bndProject  = 0,
@@ -471,6 +491,8 @@ namespace Dune
     }
 
     //! constructor creating empty grid
+    //! \deprecated Use ALUGrid< 2, dimw, simplex, conforming > instead.
+    DUNE_DEPRECATED
     ALUConformGrid( ) : BaseType(0)
     {
       std::cout << "\nCreated empty ALUConformGrid<"<<dim<<","<<dimworld <<">. \n\n";

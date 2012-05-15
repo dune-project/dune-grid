@@ -41,7 +41,8 @@ namespace Dune
   /** @copydoc ALUCubeGrid
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief 3D grid with support for hexahedrons.
-     @ingroup ALUCubeGrid
+     \ingroup ALUCubeGrid
+     \deprecated Use ALUGrid< 3, 3, cube, nonconforming > instead.
    */
   template<>
   class ALUCubeGrid< 3, 3 >
@@ -72,6 +73,8 @@ namespace Dune
     //!                   this pointer and will delete it in the desctructor
     //! \param verb       Whether to write a notice about grid creation to
     //!                   stdout.
+    //! \deprecated Use ALUGrid< 3, 3, cube, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUCubeGrid(const std::string macroName,
                 const MPICommunicatorType mpiComm = BaseType::defaultCommunicator(),
                 const DuneBoundaryProjectionType* bndProject = 0,
@@ -96,6 +99,8 @@ namespace Dune
     //! \param macroName filename from which ALUGrid is being generated
     //! \param verb      Whether to write a notice about grid creation to
     //!                  stdout.
+    //! \deprecated Use ALUGrid< 3, 3, cube, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUCubeGrid(const MPICommunicatorType mpiComm,
                 const DuneBoundaryProjectionType* bndProject ,
                 const DuneBoundaryProjectionVector* bndVector,
@@ -112,6 +117,8 @@ namespace Dune
     }
 
     //! \brief constructor creating empty grid
+    //! \deprecated Use ALUGrid< 3, 3, cube, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUCubeGrid(const MPICommunicatorType mpiComm = BaseType::defaultCommunicator() ) :
       BaseType("", mpiComm,
                (const DuneBoundaryProjectionType *) 0,
@@ -204,6 +211,7 @@ namespace Dune
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief grid with support for simplicial mesh in 3d.
      \ingroup ALUSimplexGrid
+     \deprecated Use ALUGrid< 3, 3, simplex, nonconforming > instead.
    */
   template<>
   class ALUSimplexGrid< 3, 3 >
@@ -234,6 +242,8 @@ namespace Dune
     //!                   this pointer and will delete it in the desctructor
     //! \param verb       Whether to write a notice about grid creation to
     //!                   stdout.
+    //! \deprecated Use ALUGrid< 3, 3, simplex, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUSimplexGrid(const std::string macroName,
                    const MPICommunicatorType mpiComm = BaseType::defaultCommunicator(),
                    const DuneBoundaryProjectionType* bndProject = 0,
@@ -258,6 +268,8 @@ namespace Dune
     //! \param macroName filename from which ALUGrid is being generated
     //! \param verb       Whether to write a notice about grid creation to
     //!                   stdout.
+    //! \deprecated Use ALUGrid< 3, 3, simplex, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUSimplexGrid(const MPICommunicatorType mpiComm,
                    const DuneBoundaryProjectionType* bndProject ,
                    const DuneBoundaryProjectionVector* bndVector,
@@ -274,6 +286,8 @@ namespace Dune
     }
 
     //! constructor creating empty grid, empty string creates empty grid
+    //! \deprecated Use ALUGrid< 3, 3, simplex, nonconforming > instead.
+    DUNE_DEPRECATED
     ALUSimplexGrid(const MPICommunicatorType mpiComm = BaseType::defaultCommunicator()) :
       BaseType("", mpiComm,
                (const DuneBoundaryProjectionType *) 0,

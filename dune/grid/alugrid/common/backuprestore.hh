@@ -35,10 +35,9 @@ namespace Dune
       return filename;
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::backup(grid,path,fileprefix)  */
-    static void backup ( const Grid &grid, const std::string &path, const std::string &fileprefix )
+    /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
+    static void backup ( const Grid &grid, const std::string &filename )
     {
-      std::string filename ( createFilename( path, fileprefix ) );
       std::ofstream file( filename.c_str() );
       if( file )
       {
@@ -58,11 +57,10 @@ namespace Dune
       grid.backup( stream );
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::restore(path,fileprefix) */
-    static Grid *restore ( const std::string &path, const std::string &fileprefix )
+    /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
+    static Grid *restore ( const std::string &filename )
     {
       // Problem here: how to pass boundary projections
-      std::string filename( createFilename( path, fileprefix ) );
       std::ifstream file( filename.c_str() );
       if( file )
       {

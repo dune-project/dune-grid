@@ -556,13 +556,16 @@ int main (int argc , char **argv) {
 
 #ifndef NO_3D
     bool testALU3dSimplex = initialize ;
+    bool testALU3dConform = initialize ;
     bool testALU3dCube    = initialize ;
     if( key == "3d" )
     {
       testALU3dSimplex = true ;
+      testALU3dConform = true ;
       testALU3dCube    = true ;
     }
     if( key == "3dsimp" ) testALU3dSimplex = true ;
+    if( key == "3dconf" ) testALU3dConform = true ;
     if( key == "3dcube" ) testALU3dCube    = true ;
 #endif // #ifndef NO_3D
 
@@ -594,6 +597,7 @@ int main (int argc , char **argv) {
       if( testALU2dCube )
       {
         typedef ALUGrid<2,2, cube, nonconforming > GridType;
+        //typedef ALUCubeGrid<2,2> GridType;
         std::string filename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
@@ -605,6 +609,7 @@ int main (int argc , char **argv) {
         //checkALUSerial(grid,2);
 
         typedef ALUGrid< 2, 3, cube, nonconforming > SurfaceGridType;
+        //typedef ALUCubeGrid< 2, 3 > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
@@ -616,6 +621,7 @@ int main (int argc , char **argv) {
       if( testALU2dSimplex )
       {
         typedef ALUGrid< 2, 2, simplex, nonconforming > GridType;
+        //typedef ALUSimplexGrid< 2, 2 > GridType;
         std::string filename(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-2.dgf");
         std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
@@ -628,6 +634,7 @@ int main (int argc , char **argv) {
 
 #ifdef ALUGRID_SURFACE_2D
         typedef ALUGrid< 2, 3, simplex, nonconforming > SurfaceGridType;
+        //typedef ALUSimplexGrid< 2, 3 > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
@@ -640,6 +647,7 @@ int main (int argc , char **argv) {
       if( testALU2dConform )
       {
         typedef ALUGrid< 2, 2, simplex, conforming > GridType;
+        //typedef ALUConformGrid< 2, 2 > GridType;
         std::string filename(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-2.dgf");
         GridPtr<GridType> gridPtr(filename);
         checkCapabilities< true >( *gridPtr );
@@ -651,6 +659,7 @@ int main (int argc , char **argv) {
 
 #ifdef ALUGRID_SURFACE_2D
         typedef ALUGrid< 2, 3, simplex, conforming > SurfaceGridType;
+        //typedef ALUConformGrid< 2, 3 > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
@@ -670,9 +679,12 @@ int main (int argc , char **argv) {
           filename = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf";
 
         typedef ALUGrid<3,3, cube, nonconforming > GridType;
+        //typedef ALUCubeGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
-        checkCapabilities< false >( *gridPtr );
         GridType & grid = *gridPtr;
+        grid.loadBalance();
+
+        checkCapabilities< false >( grid );
 
         {
           std::cout << "Check serial grid" << std::endl;
@@ -700,9 +712,11 @@ int main (int argc , char **argv) {
           filename = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf";
 
         typedef ALUGrid<3,3, simplex, nonconforming > GridType;
+        //typedef ALUSimplexGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
-        checkCapabilities< false >( *gridPtr );
         GridType & grid = *gridPtr;
+        grid.loadBalance();
+        checkCapabilities< false >( grid );
 
         {
           std::cout << "Check serial grid" << std::endl;
@@ -720,6 +734,39 @@ int main (int argc , char **argv) {
           checkALUParallel(grid,0,2);  //1,3
         }
       }
+
+#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
+      if( false ) //testALU3dConform )
+      {
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf";
+
+        typedef ALUGrid<3,3, simplex, conforming > GridType;
+        GridPtr<GridType> gridPtr(filename);
+        GridType & grid = *gridPtr;
+        grid.loadBalance();
+        checkCapabilities< true >( grid );
+
+        {
+          std::cout << "Check serial grid" << std::endl;
+          checkALUSerial(grid,
+                         (mysize == 1) ? 1 : 0,
+                         (mysize == 1) ? display : false);
+        }
+
+        // perform parallel check only when more then one proc
+        if(mysize > 1)
+        {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+          checkALUParallel(grid,0,0);  //1,3
+          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+          checkALUParallel(grid,0,2);  //1,3
+        }
+      }
+#endif
 #endif
     };
 

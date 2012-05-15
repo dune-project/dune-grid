@@ -158,18 +158,19 @@ namespace Dune
   }
 
 
-  inline bool DGFGridFactory< ALUSimplexGrid< 3, 3 > >
+  template < int dimw >
+  inline bool DGFGridFactory< ALUSimplexGrid< 3, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
-    return DGFBaseFactory< ALUSimplexGrid< 3, 3 > > ::
+    return DGFBaseFactory< ALUSimplexGrid< 3, dimw > > ::
            generateALUGrid( simplex, file, communicator, filename );
   }
 
-
-  inline bool DGFGridFactory< ALUCubeGrid< 3, 3 > >
+  template < int dimw >
+  inline bool DGFGridFactory< ALUCubeGrid< 3, dimw > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
-    return DGFBaseFactory< ALUCubeGrid< 3, 3 > > ::
+    return DGFBaseFactory< ALUCubeGrid< 3, dimw > > ::
            generateALUGrid( cube, file, communicator, filename );
   }
 
