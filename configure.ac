@@ -6,8 +6,6 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([dune/grid/common/grid.hh])
 AM_CONFIG_HEADER([config.h])
 
-AC_DEFINE(DUNE_GRID_FLAVOR_MN, 1, [This is Martin's personal development version of dune-grid!])
-
 # --enable-extra-utils
 DUNE_EXTRA_UTILS
 

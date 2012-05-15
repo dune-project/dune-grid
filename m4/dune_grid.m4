@@ -1,5 +1,7 @@
 ## -*- autoconf -*-
 AC_DEFUN([DUNE_GRID_CHECKS],[
+  AC_DEFINE(DUNE_GRID_FLAVOR_MN, 1, [This is Martin's personal development version of dune-grid!])
+
   AC_REQUIRE([DUNE_GRID_DIMENSION])
   AC_REQUIRE([DUNE_PATH_GRAPE])
   AC_REQUIRE([DUNE_PATH_ALBERTA])
