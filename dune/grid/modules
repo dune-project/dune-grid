@@ -48,6 +48,9 @@
         @brief A list of the different Implementations of the Dune Grid Interface
   */
   
+	/** @defgroup ALUGrid ALUGrid 
+		@ingroup GridImplementations */
+
 	/** @defgroup ALUCubeGrid ALUCubeGrid 
 		@ingroup GridImplementations */
 
@@ -57,8 +60,8 @@
 	/** @defgroup ALUConformGrid ALUConformGrid 
 		@ingroup GridImplementations */
 
-        /** \defgroup GeoGrid GeometryGrid
-            \ingroup GridImplementations */
+  /** \defgroup GeoGrid GeometryGrid
+    \ingroup GridImplementations */
 
 	/** @defgroup OneDGrid OneDGrid 
 		@ingroup GridImplementations */
