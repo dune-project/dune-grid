@@ -333,18 +333,20 @@ namespace Dune
 
   /** \brief Specialization of the generic GridFactory for ALUSimplexGrid<3,3>
    *  \ingroup GridFactory
+   *  \note template parameter dimw is only added to avoid the ALUSimplexGrid
+   *        deprecation warning.
    */
-  template<>
-  class GridFactory< ALUSimplexGrid< 3, 3 > >
-    : public ALU3dGridFactory< ALUSimplexGrid< 3, 3 > >
+  template< int dimw >
+  class GridFactory< ALUSimplexGrid< 3, dimw > >
+    : public ALU3dGridFactory< ALUSimplexGrid< 3, dimw > >
   {
-    typedef GridFactory< ALUSimplexGrid< 3, 3 > > ThisType;
-    typedef ALU3dGridFactory< ALUSimplexGrid< 3, 3 > > BaseType;
+    typedef GridFactory< ALUSimplexGrid< 3, dimw > > ThisType;
+    typedef ALU3dGridFactory< ALUSimplexGrid< 3, dimw > > BaseType;
 
   public:
-    typedef BaseType::Grid Grid;
+    typedef typename BaseType::Grid Grid;
 
-    typedef BaseType::MPICommunicatorType MPICommunicatorType;
+    typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
 
     /** \brief Default constructor */
     explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
@@ -370,18 +372,20 @@ namespace Dune
 
   /** \brief Specialization of the generic GridFactory for ALUCubeGrid<3,3>
    *  \ingroup GridFactory
+   *  \note template parameter dimw is only added to avoid the ALUCubeGrid
+   *        deprecation warning.
    */
-  template<>
-  class GridFactory< ALUCubeGrid< 3, 3 > >
-    : public ALU3dGridFactory< ALUCubeGrid< 3, 3 > >
+  template< int dimw >
+  class GridFactory< ALUCubeGrid< 3, dimw > >
+    : public ALU3dGridFactory< ALUCubeGrid< 3, dimw > >
   {
-    typedef GridFactory< ALUCubeGrid< 3, 3 > > ThisType;
-    typedef ALU3dGridFactory< ALUCubeGrid< 3, 3 > > BaseType;
+    typedef GridFactory< ALUCubeGrid< 3, dimw > > ThisType;
+    typedef ALU3dGridFactory< ALUCubeGrid< 3, dimw > > BaseType;
 
   public:
-    typedef BaseType::Grid Grid;
+    typedef typename BaseType::Grid Grid;
 
-    typedef BaseType::MPICommunicatorType MPICommunicatorType;
+    typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
 
     /** \brief Default constructor */
     explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
