@@ -26,6 +26,12 @@ static COMBOBUTTON * partitionTypeButton = 0;
 
 static TIMESCENE * globalTsc = 0;
 
+void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene);
+void removeLeafButton(MANAGER *mgr, void *sc);
+void setDefaultIteratorValue(int val);
+
+#endif // end HAVE_GRAPE
+
 /* info about data on one mesh */
 typedef struct datainfo DATAINFO;
 struct datainfo
@@ -47,11 +53,4 @@ struct info
   DATAINFO * datinf;
   void  *tsc;
 };
-
-void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene);
-void removeLeafButton(MANAGER *mgr, void *sc);
-void setDefaultIteratorValue(int val);
-
-#endif
-
-#endif
+#endif // end DUNE_GRAPECOMMON_HH

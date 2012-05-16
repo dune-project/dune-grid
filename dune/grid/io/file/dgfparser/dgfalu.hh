@@ -26,15 +26,15 @@ namespace Dune
   // ----------------------------------------
 
   /** \cond */
-  template<>
-  struct DGFGridInfo< ALUCubeGrid< 3, 3 > >
+  template< int dimw >
+  struct DGFGridInfo< ALUCubeGrid< 3, dimw > >
   {
     static int refineStepsForHalf () { return 1; }
     static double refineWeight () { return 0.125; }
   };
 
-  template<>
-  struct DGFGridInfo< ALUSimplexGrid< 3, 3 > >
+  template< int dimw >
+  struct DGFGridInfo< ALUSimplexGrid< 3, dimw > >
   {
     static int refineStepsForHalf () { return 1; }
     static double refineWeight () { return 0.125; }
