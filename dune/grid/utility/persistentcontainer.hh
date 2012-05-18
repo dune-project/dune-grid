@@ -47,19 +47,13 @@ namespace Dune
   /** \brief An implementation for the PersistentContainer based on a container
    * satisfying the std::vector interface and using a class providing an IndexSet
    * for storing the Data*/
-  template <class Grid, class Index, class Vector>
+  template< class Grid, class IndexSet, class Vector >
   class PersistentContainerVector
   {
   public:
     typedef typename Vector::value_type Data;
     typedef Grid GridType;
-  protected:
-    const int codim_;
-    const Index& index_;
-    const double overEstimate_;
-    Vector data_;
 
-  public:
     //! \brief entity of codimension 0
     typedef typename GridType :: template Codim< 0 > :: Entity ElementType;
 
@@ -69,31 +63,23 @@ namespace Dune
     typedef typename Vector :: const_iterator ConstIterator ;
 
     //! \brief constructor creating vector container filled with default value
-    //         store data on entities of given codim using index to store data in vector.
+    //         store data on entities of given codim using indexSet to store data in vector.
     //         The overEstimate parameter can be used to allocate more memory than
     //         required to store the data.
-    PersistentContainerVector( const GridType& grid, const int codim,
-                               const Index& index,
-                               const double overEstimate,
-                               const typename Vector::allocator_type &allocator )
-      : codim_( codim )
-        , index_( index )
-        , overEstimate_( overEstimate ) // this is not yet the right approach - will be revised
-        , data_( index.size( codim ), Data(), allocator )
-    {}
-
-    //! \brief copy constructor
-    PersistentContainerVector( const PersistentContainerVector& other )
-      : codim_( other.codim_ )
-        , index_( other.index_ )
-        , overEstimate_( other.overEstimate_ )
-        , data_( other.data_ )
+    PersistentContainerVector ( const GridType &grid, const int codim,
+                                const IndexSet &indexSet,
+                                const double overEstimate,
+                                const typename Vector::allocator_type &allocator )
+      : codim_( codim ),
+        indexSet_( indexSet ),
+        overEstimate_( overEstimate ),   // this is not yet the right approach - will be revised
+        data_( indexSet_.size( codim ), Data(), allocator )
     {}
 
     //! pass on index set used for Container
-    const Index& index()
+    const IndexSet &indexSet ()
     {
-      return index_;
+      return indexSet_;
     }
 
     //! \brief random access to entity data with correct codimension
@@ -101,8 +87,8 @@ namespace Dune
     Data& operator [] (const Entity& entity )
     {
       assert( Entity :: codimension == codim_ );
-      assert( (typename Index::IndexType)index_.index( entity ) < (typename Index::IndexType)data_.size() );
-      return data_[ index_.index( entity ) ];
+      assert( (typename IndexSet::IndexType)indexSet_.index( entity ) < (typename IndexSet::IndexType)data_.size() );
+      return data_[ indexSet_.index( entity ) ];
     }
 
     //! \brief random access to entity data with correct codimension
@@ -110,22 +96,26 @@ namespace Dune
     const Data& operator [] (const Entity& entity ) const
     {
       assert( Entity :: codimension == codim_ );
-      assert( (typename Index::IndexType)index_.index( entity ) < (typename Index::IndexType)data_.size() );
-      return data_[ index_.index( entity ) ];
+      assert( (typename IndexSet::IndexType)indexSet_.index( entity ) < (typename IndexSet::IndexType)data_.size() );
+      return data_[ indexSet_.index( entity ) ];
     }
 
     //! \brief access for sub entity data
-    Data& operator () (const ElementType& element, const int subEntity )
+    template< class Entity >
+    Data &operator () ( const Entity &entity, const int subEntity )
     {
-      assert( (typename Index::IndexType)index_.subIndex( element, subEntity, codim_ ) < (typename Index::IndexType)data_.size() );
-      return data_[ index_.subIndex( element, subEntity, codim_ ) ];
+      const typename IndexSet::IndexType idx = indexSet_.subIndex( entity, subEntity, codim_ );
+      assert( idx < (typename IndexSet::IndexType)data_.size() );
+      return data_[ idx ];
     }
 
     //! \brief access for sub entity data
-    const Data& operator () (const ElementType& element, const int subEntity ) const
+    template< class Entity >
+    const Data &operator () ( const Entity &entity, const int subEntity ) const
     {
-      assert( (typename Index::IndexType)index_.subIndex( element, subEntity, codim_ ) < (typename Index::IndexType)data_.size() );
-      return data_[ index_.subIndex( element, subEntity, codim_ ) ];
+      const typename IndexSet::IndexType idx = indexSet_.subIndex( entity, subEntity, codim_ );
+      assert( idx < (typename IndexSet::IndexType)data_.size() );
+      return data_[ idx ];
     }
 
     //! \brief const iterator begin
@@ -158,7 +148,7 @@ namespace Dune
     //! \brief enlarge container, compress is not necessary but could be done
     void reserve( ) // need a better name
     {
-      if( (typename Index::IndexType)index_.size( codim_ ) > (typename Index::IndexType)data_.size() )
+      if( (typename IndexSet::IndexType)indexSet_.size( codim_ ) > (typename IndexSet::IndexType)data_.size() )
         update( );
     }
 
@@ -168,7 +158,7 @@ namespace Dune
       // clear all entries
       data_.clear();
       // resize with new default value
-      const size_t newSize = index_.size( codim_ );
+      const size_t newSize = indexSet_.size( codim_ );
       data_.resize( newSize, Data() );
     }
 
@@ -176,7 +166,7 @@ namespace Dune
     void update( )
     { // this could be more sophisticated (although std::vector is not stupid and
       // overestimated on its own...
-      const size_t newSize = index_.size( codim_ );
+      const size_t newSize = indexSet_.size( codim_ );
       if (newSize < data_.capacity())
         data_.resize(newSize, Data() );
       else
@@ -185,23 +175,29 @@ namespace Dune
         data_.resize(newSize, Data() );
       }
     }
+
+  protected:
+    const int codim_;
+    const IndexSet &indexSet_;
+    const double overEstimate_;
+    Vector data_;
   };
 
   /** \brief An implementation for the PersistentContainer based on a container
    * satisfying the std::map interface and using a class providing an IdSet
    * for storing the Data*/
-  template <class Grid, class Id, class Map>
+  template< class Grid, class IdSet, class Map >
   class PersistentContainerMap
   {
-    typedef PersistentContainerMap< Grid, Id, Map > ThisType;
+    typedef PersistentContainerMap< Grid, IdSet, Map > ThisType;
 
   protected:
     typedef typename Map :: mapped_type Data;
-    typedef typename Id :: IdType IdType;
+    typedef typename IdSet :: IdType IdType;
     typedef Grid GridType;
     const GridType& grid_;
     const int codim_;
-    const Id& id_;
+    const IdSet& idSet_;
     mutable Map data_;
 
     typedef typename Map :: iterator iterator ;
@@ -279,35 +275,18 @@ namespace Dune
     typedef MyIterator< iterator > Iterator;
     typedef MyIterator< const_iterator > ConstIterator;
 
+    typedef typename Map::key_compare Compare;
+    typedef typename Map::allocator_type Allocator;
+
     //! \brief constructor creating container filled with default values.
     //
-    //         Container is to be used to store data on entities of given codim using id to store data in map.
-    PersistentContainerMap( const GridType& grid, const int codim, const Id& id,
-                            const typename Map::key_compare& comp,
-                            const typename Map::allocator_type &allocator )
-      : grid_( grid )
-        , codim_( codim )
-        , id_( id )
-        , data_(comp,allocator)
-    {}
-    //! \brief constructor creating container filled with default values (for an
-    //  unordered_map the constructor taking only an allocator is not available that is
-    //  why this constructor is added)
-    //
-    //         Container is to be used to store data on entities of given codim using id to store data in map.
-    PersistentContainerMap( const GridType& grid, const int codim, const Id& id)
-      : grid_( grid )
-        , codim_( codim )
-        , id_( id )
-        , data_()
-    {}
-
-    //! \brief copy constructor
-    PersistentContainerMap( const PersistentContainerMap& other )
-      : grid_( other.grid_ )
-        , codim_( other.codim_ )
-        , id_( other.id_ )
-        , data_( other.data_ )
+    //         Container is to be used to store data on entities of given codim using idSet to store data in map.
+    PersistentContainerMap ( const GridType &grid, const int codim, const IdSet &idSet,
+                             const Compare &comp = Compare(), const Allocator &allocator = Allocator() )
+      : grid_( grid ),
+        codim_( codim ),
+        idSet_( idSet ),
+        data_( comp, allocator )
     {}
 
     //! \brief random access entity with correct codimension
@@ -315,7 +294,7 @@ namespace Dune
     Data& operator [] (const Entity& entity )
     {
       assert( Entity :: codimension == codim_ );
-      return data_[ id_.id( entity ) ];
+      return data_[ idSet_.id( entity ) ];
     }
 
     //! \brief random access entity with correct codimension
@@ -323,19 +302,21 @@ namespace Dune
     const Data& operator [] (const Entity& entity ) const
     {
       assert( Entity :: codimension == codim_ );
-      return data_[ id_.id( entity ) ];
+      return data_[ idSet_.id( entity ) ];
     }
 
     //! \brief access for sub entity data
-    Data& operator () (const ElementType& element, const int subEntity )
+    template< class Entity >
+    Data &operator () ( const Entity &entity, const int subEntity )
     {
-      return data_[ id_.subId( element, subEntity, codim_ ) ];
+      return data_[ idSet_.subId( entity, subEntity, codim_ ) ];
     }
 
     //! \brief access for sub entity data
-    const Data& operator () (const ElementType& element, const int subEntity ) const
+    template< class Entity >
+    const Data &operator () ( const Entity &entity, const int subEntity ) const
     {
-      return data_[ id_.subId( element, subEntity, codim_ ) ];
+      return data_[ idSet_.subId( entity, subEntity, codim_ ) ];
     }
 
     //! \brief iterator begin for iterating over data actually stored in container
@@ -405,7 +386,7 @@ namespace Dune
         for( LevelIterator it = grid_.template lbegin< codim > ( l ); it != endit; ++ it )
         {
           const Entity& entity = * it ;
-          const IdType id = id_.id( entity );
+          const IdType id = idSet_.id( entity );
           Data& data = data_[ id ];
           iterator entry = oldData.find( id );
           if( entry != olddataend )
