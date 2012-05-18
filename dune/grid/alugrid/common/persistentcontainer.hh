@@ -120,7 +120,6 @@ namespace Dune
     typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
 
   protected:
-    using BaseType :: index_;
     using BaseType :: data_;
 
   public:
