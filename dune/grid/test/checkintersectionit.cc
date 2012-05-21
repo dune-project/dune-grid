@@ -474,9 +474,29 @@ void checkIntersectionIterator(const GridViewType& view,
           typename IntersectionGeometry::GlobalCoordinate globalPos = geometry.global(quad[i].position());
           typename IntersectionGeometry::GlobalCoordinate localPos  = iIt->outside()->geometry().global(geometryInOutside.global(quad[i].position()));
 
-          if ( (globalPos - localPos).infinity_norm() > 1e-6)
-            DUNE_THROW(GridError, "global( geometryInOutside(global() ) is not the same as geometry.global() at " << quad[i].position() << "!");
+          if( (globalPos - localPos).infinity_norm() > 1e-6 )
+          {
+            std::cerr << "Error: outside()->geometry().global( intersection.geometryInOutside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
 
+            std::cerr << "       x = " << quad[ i ].position() << std::endl;
+
+            std::cerr << "       interesction.geometry() = " << geometry.corner( 0 );
+            for( int i = 1; i < geometry.corners(); ++i )
+              std::cerr << " | " << geometry.corner( i );
+            std::cerr << std::endl;
+
+            std::cerr << "       intersection.geometryInOutside() = " << geometryInOutside.corner( 0 );
+            for( int i = 1; i < geometryInOutside.corners(); ++i )
+              std::cerr << " | " << geometryInOutside.corner( i );
+            std::cerr << std::endl;
+
+            std::cerr << "       outside()->geometry() = " << iIt->outside()->geometry().corner( 0 );
+            for( int i = 1; i < iIt->outside()->geometry().corners(); ++i )
+              std::cerr << " | " << iIt->outside()->geometry().corner( i );
+            std::cerr << std::endl;
+
+            assert( false );
+          }
         }
         QuadratureFactory::release( &quad );
       }
