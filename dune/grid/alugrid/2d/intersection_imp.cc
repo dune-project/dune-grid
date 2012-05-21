@@ -270,7 +270,7 @@ namespace Dune
     assert( current.inside() && current.outside() );
 
     // only in non-conform situation we use default method
-    if( (current.nFaces() != 3) || !conforming() )
+    if( !conforming() )
     {
       if( !intersectionNeighborLocal_.valid() )
         intersectionNeighborLocal_.buildLocalGeom( outside()->geometry(), geometry() );
