@@ -191,11 +191,15 @@ namespace Dune
   template< class GridImp >
   inline int ALU2dGridIntersectionBase< GridImp >::twistInOutside () const
   {
-    // twist is either 0 or 1 depending on the edge numbers
+    const int i = current.index_;
+    const int o = current.opposite();
+    // The twist is either 0 or 1, depending on the edge numbers.
+    // The edge is always twisted with respect to the ALU reference element.
     if( (eltype == ALU2DSPACE triangle) || ((eltype == ALU2DSPACE mixed) && (current.nFaces() == 3)) )
-      return (1 + current.index_ + current.opposite()) % 2;
+      //return (1 + i + o) % 2;
+      return 1 ^ ((i^o) & 1);
     else
-      return (current.index_ + current.opposite()) % 2;
+      return 1 ^ ((i^o) & 1) ^ ((i^o) >> 1);
   }
 
   template< class GridImp >
