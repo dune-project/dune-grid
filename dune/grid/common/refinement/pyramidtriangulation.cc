@@ -6,6 +6,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
+#include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
@@ -477,16 +478,20 @@ namespace Dune {
     // The refinement traits
     //
 
-    template<class CoordType>
+#ifndef DOXYGEN
+    template<unsigned topologyId, class CoordType, unsigned coerceToId>
     struct Traits<
-        GenericGeometry::PyramidTopology<3>::type::id & ~1
-        , CoordType
-        , GenericGeometry::SimplexTopology<3>::type::id & ~1
-        , 3
-        >
+        topologyId, CoordType, coerceToId, 3,
+        typename enable_if<
+            (GenericGeometry::PyramidTopology<3>::type::id >> 1) ==
+            (topologyId >> 1) &&
+            (GenericGeometry::SimplexTopology<3>::type::id >> 1) ==
+            (coerceToId >> 1)
+            >::type>
     {
       typedef PyramidTriangulation::RefinementImp<3, CoordType> Imp;
     };
+#endif
 
   }   // namespace RefinementImp
 
