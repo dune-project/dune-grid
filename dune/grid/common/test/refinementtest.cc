@@ -5,6 +5,8 @@
  * \brief Unit tests for the virtual refinement code
  */
 
+#define DUNE_REFINEMENT_DISABLE_GEOMETRY_DEPRECATION_WARNING
+
 #include "config.h"
 
 #include <iostream>
