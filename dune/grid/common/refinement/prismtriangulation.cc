@@ -3,12 +3,12 @@
 #ifndef DUNE_GRID_COMMON_REFINEMENT_PRISMTRIANGULATION_CC
 #define DUNE_GRID_COMMON_REFINEMENT_PRISMTRIANGULATION_CC
 
-
-
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
-#include <dune/geometry/type.hh>
+
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
+
 #include "base.cc"
 #include "simplex.cc"
 
