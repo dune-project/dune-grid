@@ -117,7 +117,6 @@ namespace Dune {
       typedef Dune :: Intersection< const GridImp, LeafIntersectionWrapper > LeafIntersection;
       typedef Dune :: Intersection< const GridImp, LevelIntersectionWrapper > LevelIntersection;
 
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > IntersectionIterator;
       typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > LeafIntersectionIterator;
       typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper, LevelIntersectionWrapper > LevelIntersectionIterator;
 
