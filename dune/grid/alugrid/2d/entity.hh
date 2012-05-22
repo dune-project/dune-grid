@@ -7,7 +7,6 @@
 
 // Dune includes
 #include <dune/grid/common/entity.hh>
-//#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 // Local includes
 #include <dune/grid/alugrid/2d/intersection.hh>
@@ -248,10 +247,10 @@ namespace Dune {
     //! typedef of my type
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
 
-    //! tpye of intersection iterator
-    typedef LeafIntersectionIteratorWrapper< GridImp > ALU2dGridLeafIntersectionIteratorType;
-    typedef LevelIntersectionIteratorWrapper< GridImp > ALU2dGridLevelIntersectionIteratorType;
-    typedef ALU2dGridLeafIntersectionIteratorType ALU2dGridIntersectionIteratorType;
+    //! type of leaf intersection iterator
+    typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
+    //! type of level intersection iterator
+    typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
 
     //! type of entity interface
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -305,32 +304,28 @@ namespace Dune {
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
 
-    // As ibegin() and iend() are deprecated these methods will deliver a LeafIntersectionIterator
-    ALU2dGridIntersectionIteratorType ibegin () const
+    LevelIntersectionIterator ilevelbegin () const
     {
-      return ileafbegin();
-    }
-    //! Reference to one past the last intersection with neighbor
-    ALU2dGridIntersectionIteratorType iend () const
-    {
-      return ileafend();
+      typedef ALU2dGridLevelIntersectionIterator< GridImp > Impl;
+      return LevelIntersectionIterator( Impl( factory(), item_, level(), false ) );
     }
 
-    ALU2dGridLevelIntersectionIteratorType ilevelbegin () const
+    LevelIntersectionIterator ilevelend () const
     {
-      return ALU2dGridLevelIntersectionIteratorType( *this, this->level(),false);
+      typedef ALU2dGridLevelIntersectionIterator< GridImp > Impl;
+      return LevelIntersectionIterator( Impl( factory(), item_, level(), true ) );
     }
-    ALU2dGridLevelIntersectionIteratorType ilevelend () const
+
+    LeafIntersectionIterator ileafbegin () const
     {
-      return ALU2dGridLevelIntersectionIteratorType( *this, this->level(),true);
+      typedef ALU2dGridLeafIntersectionIterator< GridImp > Impl;
+      return LeafIntersectionIterator( Impl( factory(), item_, level(), false ) );
     }
-    ALU2dGridLeafIntersectionIteratorType ileafbegin () const
+
+    LeafIntersectionIterator ileafend () const
     {
-      return ALU2dGridLeafIntersectionIteratorType( *this, this->level(), false);
-    }
-    ALU2dGridLeafIntersectionIteratorType ileafend () const
-    {
-      return ALU2dGridLeafIntersectionIteratorType( *this, this->level(),true);
+      typedef ALU2dGridLeafIntersectionIterator< GridImp > Impl;
+      return LeafIntersectionIterator( Impl( factory(), item_, level(), true ) );
     }
 
     //! returns true if Entity is leaf (i.e. has no children)

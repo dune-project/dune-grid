@@ -22,8 +22,6 @@
 #include <dune/grid/common/defaultgridview.hh>
 #include <dune/common/mpihelper.hh>
 
-#include <dune/grid/alugrid/common/intersectioniteratorwrapper.hh>
-
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/grid/alugrid/2d/bndprojection.hh>
@@ -33,7 +31,8 @@
 #include <dune/grid/alugrid/common/objectfactory.hh>
 #include "datahandle.hh"
 
-namespace Dune {
+namespace Dune
+{
 
   // Forward declarations
   template<int cd, int dim, class GridImp>
@@ -114,11 +113,11 @@ namespace Dune {
     {
       typedef GridImp Grid;
 
-      typedef Dune :: Intersection< const GridImp, LeafIntersectionWrapper > LeafIntersection;
-      typedef Dune :: Intersection< const GridImp, LevelIntersectionWrapper > LevelIntersection;
+      typedef Dune::Intersection< const GridImp, ALU2dGridIntersectionBase > LeafIntersection;
+      typedef Dune::Intersection< const GridImp, ALU2dGridIntersectionBase > LevelIntersection;
 
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper, LevelIntersectionWrapper > LevelIntersectionIterator;
+      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLeafIntersectionIterator, ALU2dGridIntersectionBase > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLevelIntersectionIterator, ALU2dGridIntersectionBase > LevelIntersectionIterator;
 
       typedef Dune::EntityIterator< 0, const GridImp, ALU2dGridHierarchicIterator< const GridImp > > HierarchicIterator;
 
@@ -222,7 +221,7 @@ namespace Dune {
 
     typedef typename ALU2dGridFamily< dim, dimworld, elementType >::Traits Traits;
 
-    // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
+    // these typedefs are needed for ALUGridObjectFactory
     typedef ALU2dGridLeafIntersectionIterator <const ThisType>  LeafIntersectionIteratorImp;
     typedef ALU2dGridLevelIntersectionIterator<const ThisType>  LevelIntersectionIteratorImp;
 
@@ -656,10 +655,6 @@ namespace Dune {
   protected:
     // max level of grid
     int maxlevel_;
-    friend class IntersectionIteratorWrapper < const ThisType, LeafIntersectionIteratorImp > ;
-    friend class IntersectionIteratorWrapper < const ThisType, LevelIntersectionIteratorImp > ;
-    friend class LeafIntersectionIteratorWrapper < const ThisType > ;
-    friend class LevelIntersectionIteratorWrapper< const ThisType > ;
 
     mutable ALU2dGridMarkerVector marker_[MAXL];
   public:
@@ -790,7 +785,7 @@ namespace Dune {
 
   } // end namespace Capabilities
 
-} // end namespace Dune
+} // namespace Dune
 
 #include "entity.hh"
 #include "geometry.hh"
@@ -799,4 +794,4 @@ namespace Dune {
 
 #include "grid_imp.cc"
 
-#endif
+#endif // #ifndef DUNE_ALU2DGRIDGRID_HH
