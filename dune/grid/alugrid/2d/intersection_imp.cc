@@ -75,18 +75,6 @@ namespace Dune
   }
 
 
-  //! reset IntersectionIterator to first neighbour
-  template<class GridImp>
-  inline void ALU2dGridIntersectionBase<GridImp> ::
-  first ( const EntityImp &en, int wLevel )
-  {
-    setFirstItem(en.getItem(),wLevel);
-#if ALU2DGRID_PARALLEL
-    checkValid();
-#endif
-  }
-
-
   //! return true if intersection is with boundary
   template<class GridImp>
   inline void ALU2dGridIntersectionBase<GridImp> :: checkValid ()

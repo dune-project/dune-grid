@@ -207,8 +207,6 @@ namespace Dune
     //! The copy constructor
     ALU2dGridIntersectionBase(const ThisType & org);
 
-    virtual ~ALU2dGridIntersectionBase() {}
-
     //! The copy constructor
     void assign (const ThisType & org);
 
@@ -280,12 +278,6 @@ namespace Dune
 
     // invalidate status of internal objects
     void unsetUp2Date() ;
-
-    // reset IntersectionIterator to first neighbour
-    void first ( const EntityImp &en, int wLevel );
-
-    // reset IntersectionIterator to first neighbour
-    virtual void setFirstItem ( const HElementType &elem, int wLevel ) = 0;
 
     // the local geometries
     mutable GeometryImpl intersectionGlobal_;
