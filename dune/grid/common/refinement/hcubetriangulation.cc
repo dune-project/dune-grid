@@ -33,12 +33,15 @@
 
  */
 
-#include <dune/common/deprecated.hh>
-#include <dune/common/fvector.hh>
+#include <dune/common/array.hh>
 #include <dune/common/misc.hh>
 
+#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/geometry/genericgeometry/geometrytraits.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/type.hh>
+
+#include <dune/grid/common/geometry.hh>
 
 #include "base.cc"
 #include "simplex.cc"
@@ -71,9 +74,6 @@ namespace Dune {
       //  Refine a hypercube with simplices
       //
 
-      template<int mydimension, int coorddimension, class GridImp>
-      class Geometry;
-
       // forward declaration of the iterator base
       template<int dimension, class CoordType, int codimension>
       class RefinementIteratorSpecial;
@@ -81,8 +81,6 @@ namespace Dune {
       template<int dimension_, class CoordType>
       class RefinementImp
       {
-        friend class Geometry<dimension_, dimension_, RefinementImp>;
-
       public:
         enum { dimension = dimension_ };
         // to make Dune::Geometry work:
@@ -116,7 +114,9 @@ namespace Dune {
       struct RefinementImp<dimension, CoordType>::Codim
       {
         class SubEntityIterator;
-        typedef Dune::Geometry<dimension-codimension, dimension, RefinementImp<dimension, CoordType>, Geometry> Geometry;
+        typedef Dune::Geometry<dimension-codimension, dimension,
+            RefinementImp<dimension, CoordType>,
+            GenericGeometry::Geometry> Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -269,9 +269,6 @@ namespace Dune {
         int kuhnIndex;
         BackendIterator backend;
         const BackendIterator backendEnd;
-      private:
-        mutable bool builtGeometry;
-        mutable HCubeTriangulation::Geometry< dimension, dimension, RefinementImp< dimension, CoordType > > geometry_;
       };
 
       template<int dimension, class CoordType>
@@ -279,8 +276,7 @@ namespace Dune {
       RefinementIteratorSpecial(int level_, bool end)
         : level(level_), kuhnIndex(0),
           backend(BackendRefinement::eBegin(level)),
-          backendEnd(BackendRefinement::eEnd(level)),
-          builtGeometry(false), geometry_(backend)
+          backendEnd(BackendRefinement::eEnd(level))
       {
         if(end)
           kuhnIndex = nKuhnSimplices;
@@ -290,8 +286,7 @@ namespace Dune {
       RefinementIteratorSpecial(const RefinementIteratorSpecial<dimension, CoordType, 0> &other)
         : level(other.level), kuhnIndex(other.kuhnIndex),
           backend(other.backend),
-          backendEnd(other.backendEnd),
-          builtGeometry(false), geometry_(backend)
+          backendEnd(other.backendEnd)
       {}
 
       template<int dimension, class CoordType>
@@ -300,7 +295,6 @@ namespace Dune {
       increment()
       {
         ++backend;
-        builtGeometry = false;
         if(backend == backendEnd) {
           backend = BackendRefinement::eBegin(level);
           ++kuhnIndex;
@@ -342,12 +336,15 @@ namespace Dune {
       typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry
       RefinementIteratorSpecial<dimension, CoordType, 0>::geometry () const
       {
-        if(!builtGeometry) {
-          geometry_.make(kuhnIndex);
-          builtGeometry = true;
-        }
+        const typename BackendIterator::Geometry &bgeo = backend.geometry();
+        Dune::array<CoordVector, dimension+1> corners;
+        for(int i = 0; i <= dimension; ++i)
+          corners[i] = referenceToKuhn(bgeo.corner(i),
+                                       getPermutation<dimension>(kuhnIndex));
 
-        return Geometry( geometry_ );
+        return Geometry(GenericGeometry::Geometry
+                        <dimension, dimension, Refinement>
+                          (bgeo.type(), corners));
       }
 
       // common
@@ -388,19 +385,34 @@ namespace Dune {
 
 #endif // DOXYGEN
 
-      // ///////////
-      //
-      //  Geometry
-      //
-
     } // namespace HCubeTriangulation
+
   } // namespace RefinementImp
+
+  namespace GenericGeometry {
+
+    template< int dimension, class CoordType >
+    struct GlobalGeometryTraits
+    < RefinementImp::HCubeTriangulation::RefinementImp<dimension,
+            CoordType> > :
+      public DefaultGeometryTraits<CoordType, dimension, dimension>
+    {
+      //   hybrid   [ true if Codim 0 is hybrid ]
+      static const bool hybrid = false;
+      //   topologyId [ for Codim 0, needed for (hybrid=false) ]
+      static const unsigned topologyId =
+        SimplexTopology< dimension >::type::id;
+    };
+
+  } // namespace GenericGeometry
 
   namespace FacadeOptions {
 
-    template<int mydimension, int coorddimension, class GridImp>
-    struct StoreGeometryReference<mydimension, coorddimension, GridImp,
-        RefinementImp::HCubeTriangulation::Geometry>
+    template<int dimension, class CoordType>
+    struct StoreGeometryReference
+    < dimension, dimension,
+        RefinementImp::HCubeTriangulation::RefinementImp<dimension, CoordType>,
+        GenericGeometry::Geometry>
     {
       //! Whether to store by reference or by reference.
       static const bool v = false;
@@ -409,153 +421,6 @@ namespace Dune {
   } // namespace FacadeOptions
 
   namespace RefinementImp {
-    namespace HCubeTriangulation {
-
-      template<int mydimension, int coorddimension, class GridImp>
-      class Geometry : public GeometryDefaultImplementation<mydimension, coorddimension, GridImp, Geometry>
-      {
-        typedef typename GridImp::ctype ct;
-        enum { dimension = GridImp::dimension };
-
-        typedef typename GridImp::BackendRefinement BackendRefinement;
-        typedef typename BackendRefinement::template Codim<dimension-mydimension>::SubEntityIterator BackendIterator;
-      public:
-        GeometryType type() const
-        { return GeometryType(GeometryType::simplex, mydimension); }
-
-        int corners() const
-        { return mydimension + 1; }
-
-        const FieldVector<ct, coorddimension>& operator[] (int i) const
-        DUNE_DEPRECATED_MSG("Please use method corner(i) instead of "
-                            "operator[](i)")
-        { return corner(i); }
-
-        const FieldVector<ct, coorddimension>& corner(int i) const
-        {
-          if(!builtCoords) {
-            for(int i = 0; i < corners(); ++i)
-              coords[i] =
-                referenceToKuhn(backend.geometry().corner(i),
-                                getPermutation<dimension>(kuhnIndex));
-            builtCoords = true;
-          }
-          return coords[i];
-        }
-
-        /** \brief Axis-parallel hypercube elements are always affine */
-        bool affine() const
-        {
-          return true;
-        }
-
-        FieldVector<ct, coorddimension> global(const FieldVector<ct, mydimension>& local) const
-        { return referenceToKuhn(backend.geometry().global(local), getPermutation<dimension>(kuhnIndex)); }
-
-        FieldVector<ct, mydimension> local(const FieldVector<ct, coorddimension>& global) const
-        {
-          return backend.geometry().local
-                   (kuhnToReference(global, getPermutation<dimension>(kuhnIndex)));
-        }
-
-        bool checkInside (const FieldVector<ct, mydimension>& local) const
-        DUNE_DEPRECATED_MSG("Use the checkInside method on the reference element instead!")
-        { return backend->geometry().checkInside(local); }
-
-        ct integrationElement(const FieldVector<ct, mydimension>& local) const
-        { return backend.geometry().integrationElement(local); }
-
-        const FieldMatrix<ct, mydimension, mydimension>& jacobianInverse(const FieldVector<ct, mydimension>& local) const
-        {
-          if(!builtJinv) {
-            jacobianInverseTransposed(local);
-
-            // transpose the matrix
-            for(int i = 0; i < mydimension; ++i)
-              for(int j = 0; j < mydimension; ++j)
-                Jinv[i][j] = jInvTransp[j][i];
-
-            builtJinv = true;
-          }
-
-          return Jinv;
-        }
-
-        const FieldMatrix<ct, mydimension, mydimension>&
-        jacobianInverseTransposed(const FieldVector<ct, mydimension>& local)
-        const
-        {
-          if(!builtJInvTransp) {
-            // create unit vectors
-            jInvTransp = 0;
-            for(int i = 0; i < mydimension; ++i)
-              jInvTransp[i][i] = 1;
-            // transform them into local coordinates
-            for(int i = 0; i < mydimension; ++i)
-              jInvTransp[i] =
-                kuhnToReference(jInvTransp[i],
-                                getPermutation<mydimension>(kuhnIndex));
-            // take the backends inverse Jacobian into account
-            jInvTransp.rightmultiply(backend.geometry().
-                                     jacobianInverseTransposed(local));
-
-            builtJInvTransp = true;
-          }
-
-          return jInvTransp;
-        }
-
-        /** \brief Compute transpose of the Jacobian matrix
-         *
-         * \todo This implementation is ridiculously bad.  We first compute
-         *       JacobianInverseTransposed by just calling that method, then
-         *       we invert it.  Rationale: apparently nobody is using it
-         *       currently, anyway, and I intend to replace all this by
-         *       BasicGeometry later.
-         */
-        const FieldMatrix<ct, mydimension, mydimension>&
-        jacobianTransposed(const FieldVector<ct, mydimension>& local) const
-        {
-          if(!builtJTransp) {
-            jTransp = jacobianInverseTransposed(local);
-            jTransp.invert();
-
-            builtJTransp = true;
-          }
-
-          return jTransp;
-        }
-
-        Geometry(const BackendIterator &backend_)
-          : coords(), builtCoords(false), Jinv(), builtJinv(false),
-            builtJTransp(false), builtJInvTransp(false),
-            backend(backend_), kuhnIndex(0)
-        {
-          dune_static_assert(mydimension == coorddimension, "mydimension != coorddimension");
-        }
-
-        void make(int kuhnIndex_)
-        {
-          kuhnIndex = kuhnIndex_;
-          builtCoords = false;
-          builtJinv = false;
-          builtJTransp = false;
-          builtJInvTransp = false;
-        }
-      private:
-        mutable FieldVector<FieldVector<ct, coorddimension>, mydimension+1> coords;
-        mutable bool builtCoords;
-        mutable FieldMatrix<ct, mydimension, mydimension> Jinv;
-        mutable FieldMatrix<ct, mydimension, mydimension> jTransp;
-        mutable FieldMatrix<ct, mydimension, mydimension> jInvTransp;
-        mutable bool builtJinv;
-        mutable bool builtJTransp;
-        mutable bool builtJInvTransp;
-        const BackendIterator &backend;
-        int kuhnIndex;
-      };
-
-    } // namespace HCubeTriangulation
 
     // ///////////////////////
     //

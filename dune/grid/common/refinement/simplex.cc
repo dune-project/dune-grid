@@ -249,11 +249,17 @@
     - \f$x_{p_d}:=x_{p_d}-x_{p_{d+1}}\f$.
  */
 
-#include <dune/common/deprecated.hh>
+#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
-#include <dune/geometry/type.hh>
+
+#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/geometry/genericgeometry/geometrytraits.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/referenceelements.hh>
+
+#include <dune/grid/common/geometry.hh>
+
 #include "base.cc"
 
 namespace Dune {
@@ -418,9 +424,6 @@ namespace Dune {
       // refinement implementation for simplices
       //
 
-      template<int mydimension, int coorddimension, class GridImp>
-      class Geometry;
-
       template<int dimension_, class CoordType>
       class RefinementImp
       {
@@ -452,7 +455,9 @@ namespace Dune {
       struct RefinementImp<dimension, CoordType>::Codim
       {
         class SubEntityIterator;
-        typedef Dune::Geometry<dimension-codimension, dimension, RefinementImp<dimension, CoordType>, Geometry> Geometry;
+        typedef Dune::Geometry<dimension-codimension, dimension,
+            RefinementImp<dimension, CoordType>,
+            GenericGeometry::Geometry> Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -621,16 +626,12 @@ namespace Dune {
         int kuhnIndex;
         int size;
         int index_;
-      private:
-        mutable bool builtGeometry;
-        mutable Simplex::Geometry< dimension, dimension, RefinementImp< dimension, CoordType > > geometry_;
       };
 
       template<int dimension, class CoordType>
       RefinementIteratorSpecial<dimension, CoordType, 0>::
       RefinementIteratorSpecial(int level, bool end)
-        : kuhnIndex(0), size(1<<level), index_(0),
-          builtGeometry(false), geometry_(level)
+        : kuhnIndex(0), size(1<<level), index_(0)
       {
         for(int i = 0; i < dimension; ++i)
           origin[i] = 0;
@@ -648,7 +649,6 @@ namespace Dune {
         assert(origin[0] < size);
 
         ++index_;
-        builtGeometry = false;
 
         while(1) {
           ++kuhnIndex;
@@ -734,12 +734,20 @@ namespace Dune {
       typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry
       RefinementIteratorSpecial<dimension, CoordType, 0>::geometry () const
       {
-        if(!builtGeometry) {
-          geometry_.make(origin, kuhnIndex);
-          builtGeometry = true;
+        Dune::array<CoordVector, dimension+1> corners;
+        CoordVector v;
+        const GenericReferenceElement<CoordType, dimension> &refelem =
+          GenericReferenceElements<CoordType, dimension>::simplex();
+        for(int i = 0; i <= dimension; ++i) {
+          v = referenceToKuhn(refelem.position(i, dimension),
+                              getPermutation<dimension>(kuhnIndex));
+          v += origin;
+          v /= size;
+          corners[i] = kuhnToReference(v, getPermutation<dimension>(0));
         }
-
-        return Geometry( geometry_ );
+        return Geometry(GenericGeometry::Geometry
+                        <dimension, dimension, Refinement>
+                          (refelem.type(), corners));
       }
 
       // common
@@ -767,19 +775,33 @@ namespace Dune {
 
 #endif
 
-      // ///////////////
-      //
-      //  The Geometry
-      //
-
     } // namespace Simplex
+
   } // namespace RefinementImp
+
+  namespace GenericGeometry {
+
+    template< int dimension, class CoordType >
+    struct GlobalGeometryTraits
+    < RefinementImp::Simplex::RefinementImp<dimension, CoordType> > :
+      public DefaultGeometryTraits<CoordType, dimension, dimension>
+    {
+      //   hybrid   [ true if Codim 0 is hybrid ]
+      static const bool hybrid = false;
+      //   topologyId [ for Codim 0, needed for (hybrid=false) ]
+      static const unsigned topologyId =
+        SimplexTopology< dimension >::type::id;
+    };
+
+  } // namespace GenericGeometry
 
   namespace FacadeOptions {
 
-    template<int mydimension, int coorddimension, class GridImp>
-    struct StoreGeometryReference<mydimension, coorddimension, GridImp,
-        RefinementImp::Simplex::Geometry>
+    template<int dimension, class CoordType>
+    struct StoreGeometryReference
+    < dimension, dimension,
+        RefinementImp::Simplex::RefinementImp<dimension, CoordType>,
+        GenericGeometry::Geometry>
     {
       //! Whether to store by reference or by reference.
       static const bool v = false;
@@ -788,189 +810,6 @@ namespace Dune {
   } // namespace FacadeOptions
 
   namespace RefinementImp {
-    namespace Simplex {
-
-      template<int mydimension, class GridImp>
-      class ReferenceGeometryInstance;
-
-      template<int mydimension, int coorddimension, class GridImp>
-      class Geometry : public GeometryDefaultImplementation<mydimension, coorddimension, GridImp, Geometry>
-      {
-        typedef typename GridImp::ctype ct;
-        typedef Dune::Geometry<mydimension, mydimension, GridImp, Simplex::Geometry> ReferenceGeometry;
-      public:
-        GeometryType type() const
-        { return GeometryType(GeometryType::simplex, mydimension); }
-
-        int corners() const
-        { return mydimension + 1; }
-
-        const FieldVector<ct, coorddimension>& operator[] (int i) const
-        DUNE_DEPRECATED_MSG("Please use method corner(i) instead of "
-                            "operator[](i)")
-        { return corner(i); }
-
-        const FieldVector<ct, coorddimension>& corner (int i) const
-        {
-          if(!builtCoords) {
-            const GenericReferenceElement<ct,mydimension> &refelem =
-              GenericReferenceElements<ct,mydimension>::simplex();
-            for(int i = 0; i < corners(); ++i)
-              coords[i] = global(refelem.position(i,mydimension));
-            builtCoords = true;
-          }
-          return coords[i];
-        }
-
-        /** \brief Simplex elements are always affine */
-        bool affine() const
-        {
-          return true;
-        }
-
-        static const ReferenceGeometry& refelem()
-        { return ReferenceGeometryInstance<mydimension, GridImp>::instance(); }
-
-        FieldVector<ct, coorddimension> global(const FieldVector<ct, mydimension>& local) const
-        {
-          FieldVector<ct, mydimension> v = referenceToKuhn(local, getPermutation<mydimension>(kuhnIndex));
-          v += origin;
-          v /= (1<<level);
-          return kuhnToReference(v, getPermutation<mydimension>(0));
-        }
-
-        FieldVector<ct, mydimension> local(const FieldVector<ct, coorddimension>& global) const
-        {
-          FieldVector<ct, mydimension> v = referenceToKuhn(global, getPermutation<mydimension>(0));
-          v *= (1<<level);
-          v -= origin;
-          return kuhnToReference(v, getPermutation<mydimension>(kuhnIndex));
-        }
-
-        bool checkInside (const FieldVector<ct, mydimension>& local) const
-        DUNE_DEPRECATED_MSG("Use the checkInside method on the reference element instead!")
-        {
-          for(int i = 0; i < mydimension; ++i)
-            if(local[i] < 0)
-              return false;
-
-          ct sum = 0;
-          for(int i = 0; i < mydimension; ++i)
-            sum += local[i];
-          return sum <= 1;
-        }
-
-        ct integrationElement(const FieldVector<ct, mydimension>& local) const
-        {
-          return ct(1) / RefinementImp<mydimension, ct>::nElements(level);
-        }
-
-        const FieldMatrix<ct, mydimension, mydimension>& jacobianInverse(const FieldVector<ct, mydimension>& local) const
-        {
-          if(!builtJinv) {
-            jacobianInverseTransposed(local);
-
-            // transpose the matrix
-            for(int i = 0; i < mydimension; ++i)
-              for(int j = 0; j < mydimension; ++j)
-                Jinv[i][j] = jInvTransp[j][i];
-
-            builtJinv = true;
-          }
-
-          return Jinv;
-        }
-
-        const FieldMatrix<ct, mydimension, mydimension>& jacobianInverseTransposed(const FieldVector<ct, mydimension>& local) const
-        {
-          if(!builtJInvTransp) {
-            // create unit vectors
-            jInvTransp = 0;
-            for(int i = 0; i < mydimension; ++i)
-              jInvTransp[i][i] = 1;
-            // transform them into local coordinates
-            for(int i = 0; i < mydimension; ++i)
-              jInvTransp[i] = kuhnToReference
-                                (referenceToKuhn(jInvTransp[i],
-                                                 getPermutation<mydimension>(0)),
-                                getPermutation<mydimension>(kuhnIndex));
-            // scale by the inverse size of the element
-            jInvTransp *= ct(1<<level);
-
-            builtJInvTransp = true;
-          }
-
-          return jInvTransp;
-        }
-
-        /** \brief Compute transpose of the Jacobian matrix
-         * \todo This implementation is ridiculously bad.  We first compute
-         * JacobianInverseTransposed by just calling that method, then we
-         * invert it.  Rationale: apparently nobody is using
-         * it currently, anyway, and I intend to replace all this by BasicGeometry later.
-         */
-        const FieldMatrix<ct, mydimension, mydimension>& jacobianTransposed(const FieldVector<ct, mydimension>& local) const
-        {
-          if(!builtJTransp) {
-            jTransp = jacobianInverseTransposed(local);
-            jTransp.invert();
-
-            builtJTransp = true;
-          }
-
-          return jTransp;
-        }
-
-
-        Geometry(int level_)
-          : coords(), builtCoords(false), Jinv(), builtJinv(false),
-            builtJTransp(false), builtJInvTransp(false),
-            level(level_), kuhnIndex(0), origin()
-        {
-          dune_static_assert(mydimension == coorddimension, "mydimension != coorddimension");
-        }
-
-        void make(const FieldVector<int, coorddimension> &origin_, int kuhnIndex_)
-        {
-          origin = origin_;
-          kuhnIndex = kuhnIndex_;
-          builtCoords = false;
-          builtJinv = false;
-          builtJTransp = false;
-          builtJInvTransp = false;
-        }
-      private:
-        mutable FieldVector<FieldVector<ct, coorddimension>, mydimension+1> coords;
-        mutable bool builtCoords;
-        mutable FieldMatrix<ct, mydimension, mydimension> Jinv;
-        mutable FieldMatrix<ct, mydimension, mydimension> jTransp;
-        mutable FieldMatrix<ct, mydimension, mydimension> jInvTransp;
-        mutable bool builtJinv;
-        mutable bool builtJTransp;
-        mutable bool builtJInvTransp;
-        int level;
-        int kuhnIndex;
-        FieldVector<int, coorddimension> origin;
-      };
-
-      template<int mydimension, class GridImp>
-      class ReferenceGeometryInstance
-      {
-        typedef Dune::Geometry<mydimension, mydimension, GridImp, Geometry> ReferenceGeometry;
-      public:
-        static ReferenceGeometry &instance()
-        {
-          if(instance_ == 0)
-            instance = new ReferenceGeometry(Geometry<mydimension, mydimension, GridImp>(0));
-          return *instance;
-        }
-      private:
-        static ReferenceGeometry *instance_;
-      };
-      template<int mydimension, class GridImp>
-      Dune::Geometry<mydimension, mydimension, GridImp, Geometry> *ReferenceGeometryInstance<mydimension, GridImp>::instance_ = 0;
-
-    } // namespace Simplex
 
     // ///////////////////////
     //
