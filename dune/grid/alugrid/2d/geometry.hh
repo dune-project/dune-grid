@@ -704,7 +704,7 @@ namespace Dune
     bool buildLocalGeom(const GeometryType & geo , const LocalGeomType & lg);
 
     //! build local geometry given local face number
-    bool buildLocalGeometry(const int faceNumber, const int twist,const int coorns);
+    bool buildLocalGeometry ( int aluFace, int twist, int corners );
 
     //! return non-const reference to coord vecs
     GlobalCoordinate& getCoordVec (int i);

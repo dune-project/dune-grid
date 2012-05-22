@@ -258,13 +258,13 @@ namespace Dune
     return std::make_pair( refCoord, lengths );
   }
 
-  // built Geometry (faceNumber is in generic numbering)
-  template <int mydim, int cdim, class GridImp>
-  inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildLocalGeometry(const int aluFace, const int twist, const int corners)
+
+  template< int mydim, int cdim, class GridImp >
+  inline bool ALU2dGridGeometry< mydim, cdim, GridImp >
+  ::buildLocalGeometry ( int aluFace, int twist, int corners )
   {
-    assert( twist == 0 || twist == 1 );
     assert( mydim == 1 );
+    assert( (twist == 0) || (twist == 1) );
 
     // get coordinates of reference element
     typedef std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > > RefCoord;
