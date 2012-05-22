@@ -90,7 +90,12 @@ namespace Dune
      function calls to corresponding members of this class. In that sense Geometry
      defines the interface and GeometryImp supplies the implementation.
 
-
+     The grid manager can instruct this facade class to either itself store an
+     instance of the implementation class or keep a reference to an instance
+     stored elsewhere as determined by FacadeOptions::StoreGeometryReference.
+     In any case it is guaranteed that instances of Geometry are valid until
+     the grid is changed (via any of adapt(), loadBalance() or
+     globalRefine()).
 
      \ingroup GIGeometry
    */
