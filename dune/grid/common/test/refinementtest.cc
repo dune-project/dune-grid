@@ -144,8 +144,8 @@ int main(int argc, char** argv) try
   gt2.makeTetrahedron();
   for (int refinement=0; refinement<3; refinement++) {
     testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
-    // testStaticRefinementGeometry<Pyramid::id,double,Tet::id,3>
-    //     (result, refinement);
+    testStaticRefinementGeometry<Pyramid::id,double,Tet::id,3>
+      (result, refinement);
   }
 
   // test prism
@@ -153,8 +153,8 @@ int main(int argc, char** argv) try
   gt2.makeTetrahedron();
   for (int refinement=0; refinement<3; refinement++) {
     testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
-    // testStaticRefinementGeometry<Prism::id,double,Tet::id,3>
-    //     (result, refinement);
+    testStaticRefinementGeometry<Prism::id,double,Tet::id,3>
+      (result, refinement);
   }
 
   // test hexahedron
