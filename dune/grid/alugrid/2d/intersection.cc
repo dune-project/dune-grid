@@ -147,7 +147,10 @@ namespace Dune
       current.useOutside_ = (nbStack_.size() > 1);
 
       if( nbStack_.empty() )
+      {
+        current.conforming_ = true;
         return current.setOutside( 0, -1 );
+      }
     }
 
     setupIntersection();
@@ -184,6 +187,7 @@ namespace Dune
 
     IntersectionInfo &info = nbStack_.top();
     current.setOutside( info.first, info.second );
+    current.conforming_ = (this->grid().nonConform() || isConform());
     nbStack_.pop();
   }
 
@@ -221,6 +225,7 @@ namespace Dune
       if( bndel->type() != HBndElType::periodic )
       {
         current.useOutside_ = false;
+        current.conforming_ = true;
         return current.setOutside( 0, -1 );
       }
 
@@ -246,10 +251,14 @@ namespace Dune
         info.second = right->opposite( 0 );
         nbStack_.push( info );
 
+        current.conforming_ = false;
         setupIntersection();
       }
       else
+      {
         current.setOutside( (HElementType *)bndnb->neighbour( 0 ), bndnb->opposite( 0 ) );
+        current.conforming_ = (!this->grid().nonConform() || (current.inside()->level() == current.outside()->level()));
+      }
     }
     else
     {
@@ -275,10 +284,14 @@ namespace Dune
         assert( info.first->leaf() );
         nbStack_.push( info );
 
+        current.conforming_ = false;
         setupIntersection();
       }
       else
+      {
         current.setOutside( (HElementType *)current.inside()->neighbour( current.index_ ), opposite );
+        current.conforming_ = (!this->grid().nonConform() || (current.inside()->level() == current.outside()->level()));
+      }
     }
   }
 

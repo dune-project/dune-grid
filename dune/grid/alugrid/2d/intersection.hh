@@ -197,6 +197,7 @@ namespace Dune
     public:
       mutable int index_;
       mutable bool useOutside_;
+      bool conforming_;
     } current;
 
   public:
@@ -268,7 +269,7 @@ namespace Dune
   protected:
     const GridImp& grid() const { return factory_.grid(); }
 
-    virtual bool conforming() const = 0;
+    bool conforming () const { return current.conforming_; }
 
     //! return true if intersection is with boundary
     void checkValid () ;
@@ -362,14 +363,6 @@ namespace Dune
     //! increment iterator
     void increment ();
 
-  public:
-    //! level is conforming when non-conform grid used
-    //! otherwise might not be conform
-    bool conforming () const
-    {
-      return (this->grid().nonConform() || isConform());
-    }
-
   protected:
     bool isConform() const
     {
@@ -386,7 +379,7 @@ namespace Dune
     template <class EntityType>
     void first(const EntityType & en, int wLevel);
 
-    void addNeighboursToStack();
+    void addNeighboursToStack ();
 
     static int getOppositeInFather ( int nrInChild, int nrOfChild );
     static int getOppositeInChild ( int nrInFather, int nrOfChild );
@@ -466,19 +459,6 @@ namespace Dune
 
     //! increment iterator
     void increment ();
-
-  public:
-    //! leaf is conforming, when conform grid version used
-    bool conforming () const
-    {
-      return (!this->grid().nonConform() || isConform());
-    }
-
-  protected:
-    bool isConform() const
-    {
-      return (!current.outside() || (current.outside()->level() == current.inside()->level()) );
-    }
 
   private:
     void doIncrement ();
