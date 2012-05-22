@@ -45,6 +45,7 @@ void testVirtualRefinement(int &result, const Dune::GeometryType& elementType,
 
   typedef Dune::VirtualRefinement<dim, ct> Refinement;
   typedef typename Refinement::ElementIterator eIterator;
+  typedef typename Refinement::VertexIterator vIterator;
 
   // Make a virtual refinement of the reference element
   Refinement & elementRefinement =
@@ -57,8 +58,20 @@ void testVirtualRefinement(int &result, const Dune::GeometryType& elementType,
     if(refelem.checkInside(eSubIt.coords()))
       pass(result);
     else {
-      std::cerr << "Error: Coordinate (" << eSubIt.coords() << ") is "
-                << "outside of the reference element" << std::endl;
+      std::cerr << "Error: Sub-element position (" << eSubIt.coords()
+                << ") is outside of the reference element" << std::endl;
+      fail(result);
+    }
+
+  vIterator vSubEnd = elementRefinement.vEnd(refinement);
+  vIterator vSubIt  = elementRefinement.vBegin(refinement);
+
+  for (; vSubIt != vSubEnd; ++vSubIt)
+    if(refelem.checkInside(vSubIt.coords()))
+      pass(result);
+    else {
+      std::cerr << "Error: Sub-vertex position (" << vSubIt.coords()
+                << ") is outside of the reference element" << std::endl;
       fail(result);
     }
 }
