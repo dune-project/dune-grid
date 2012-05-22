@@ -11,6 +11,7 @@
 #include <ostream>
 
 #include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
 
 #include <dune/grid/common/virtualrefinement.hh>
@@ -39,6 +40,9 @@ void testVirtualRefinement(int &result, const Dune::GeometryType& elementType,
   std::cout << "Checking virtual refinement " << elementType << " -> "
             << coerceTo << " level " << refinement << std::endl;
 
+  const GenericReferenceElement<ct, dim> &refelem =
+    GenericReferenceElements<ct, dim>::general(elementType);
+
   typedef Dune::VirtualRefinement<dim, ct> Refinement;
   typedef typename Refinement::ElementIterator eIterator;
 
@@ -50,9 +54,13 @@ void testVirtualRefinement(int &result, const Dune::GeometryType& elementType,
   eIterator eSubIt  = elementRefinement.eBegin(refinement);
 
   for (; eSubIt != eSubEnd; ++eSubIt)
-    std::cout << eSubIt.coords() << std::endl;
-
-  pass(result);
+    if(refelem.checkInside(eSubIt.coords()))
+      pass(result);
+    else {
+      std::cerr << "Error: Coordinate (" << eSubIt.coords() << ") is "
+                << "outside of the reference element" << std::endl;
+      fail(result);
+    }
 }
 
 
