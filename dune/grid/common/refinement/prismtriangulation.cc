@@ -371,6 +371,24 @@ namespace Dune {
       //  Geometry
       //
 
+    } // namespace PrismTriangulation
+  } // namespace RefinementImp
+
+  namespace FacadeOptions {
+
+    template<int mydimension, int coorddimension, class GridImp>
+    struct StoreGeometryReference<mydimension, coorddimension, GridImp,
+        RefinementImp::PrismTriangulation::Geometry>
+    {
+      //! Whether to store by reference or by reference.
+      static const bool v = false;
+    };
+
+  } // namespace FacadeOptions
+
+  namespace RefinementImp {
+    namespace PrismTriangulation {
+
       template<int mydimension, int coorddimension, class GridImp>
       class Geometry : public GeometryDefaultImplementation<mydimension, coorddimension, GridImp, Geometry>
       {
