@@ -389,19 +389,6 @@ namespace Dune
   }
 
 
-  //! reset IntersectionIterator to first neighbour
-  template<class Grid>
-  template<class EntityType>
-  inline void ALU2dGridLevelIntersectionIterator<Grid> ::
-  first(const EntityType & en, int wLevel)
-  {
-    setFirstItem(en.getItem(),wLevel);
-  #if ALU2DGRID_PARALLEL
-    this->checkValid();
-  #endif
-  }
-
-
 
   // Implementation of ALU2dGridLeafIntersectionIterator
   // ---------------------------------------------------
@@ -465,19 +452,6 @@ namespace Dune
   #endif
   }
 
-  //! reset IntersectionIterator to first neighbour
-  template<class Grid>
-  template<class EntityType>
-  inline void ALU2dGridLeafIntersectionIterator<Grid> ::
-  first(const EntityType & en, int wLevel)
-  {
-    // if called on non-leaf, just return end iterator
-    if( en.isLeaf() )
-      setFirstItem( en.getItem(), wLevel );
-    else
-      done( &en.getItem() );
-  }
-
-} //end namespace Dune
+} // namespace Dune
 
 #endif // #ifndef DUNE_ALU2DGRID_INTERSECTION_IMP_CC

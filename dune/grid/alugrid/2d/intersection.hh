@@ -370,15 +370,6 @@ namespace Dune
   private:
     void doIncrement ();
 
-#if 0
-    // reset IntersectionIterator to first neighbour
-    void setFirstItem(const HElementType & elem, int wLevel);
-#endif
-
-    // reset IntersectionIterator to first neighbour
-    template <class EntityType>
-    void first(const EntityType & en, int wLevel);
-
     void addNeighboursToStack ();
 
     static int getOppositeInFather ( int nrInChild, int nrOfChild );
@@ -475,14 +466,6 @@ namespace Dune
 
   private:
     void doIncrement ();
-#if 0
-    // reset IntersectionIterator to first neighbour
-    void setFirstItem(const HElementType & elem, int wLevel);
-#endif
-
-    // reset IntersectionIterator to first neighbour
-    template <class EntityType>
-    void first(const EntityType & en, int wLevel);
 
     void setupIntersection ();
 

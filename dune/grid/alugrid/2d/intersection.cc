@@ -159,28 +159,6 @@ namespace Dune
   }
 
 
-#if 0
-  template< class GridImp >
-  alu2d_inline
-  void ALU2dGridLevelIntersectionIterator< GridImp >::setFirstItem ( const HElementType &elem, int wLevel )
-  {
-    // empty stack first
-    while( !nbStack_.empty() )
-      nbStack_.pop();
-
-    current.setInside( const_cast< HElementType * >( &elem ) );
-    current.index_ = -1;
-    current.setOutside( 0, -1 );
-
-    walkLevel_ = wLevel;
-
-    assert( current.inside() );
-
-    increment();
-  }
-#endif
-
-
   template< class GridImp >
   alu2d_inline
   void ALU2dGridLevelIntersectionIterator< GridImp >::setupIntersection ()
@@ -296,23 +274,6 @@ namespace Dune
       }
     }
   }
-
-
-#if 0
-  template< class GridImp >
-  alu2d_inline
-  void ALU2dGridLeafIntersectionIterator< GridImp >::setFirstItem ( const HElementType &elem, int wLevel )
-  {
-    while( !nbStack_.empty() )
-      nbStack_.pop();
-
-    current.setInside( const_cast< HElementType * >( &elem ) );
-    current.index_ = -1;
-    assert( current.inside() );
-    walkLevel_ = wLevel;
-    increment();
-  }
-#endif
 
 
   template< class GridImp >
