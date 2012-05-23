@@ -380,16 +380,6 @@ namespace Dune
     typedef typename Grid::GridObjectFactoryType Factory;
     typedef ALUMemoryProvider< This > StorageType;
 
-    typedef typename Grid::template Codim<0>::Entity Entity;
-
-    typedef typename Grid::template Codim<1>::Geometry Geometry;
-    typedef typename Grid::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef ALU2dGridEntity<0,dimension,Grid> EntityImp;
-    typedef ALU2dGridGeometry<dimension-1,dimensionworld,Grid> GeometryImp;
-    typedef ALU2dGridGeometry<dimension-1,dimension,Grid> LocalGeometryImp;
-    typedef FieldVector<alu2d_ctype, dimensionworld> NormalType;
-    typedef ALU2dGridEntityPointer<0,Grid> EntityPointer;
-
     /** \brief constructor
      *
      *  \param[in]  factory  factory for grid objects
@@ -473,15 +463,6 @@ namespace Dune
 
     //! type of the intersection
     typedef Dune::Intersection< Grid, Dune::ALU2dGridLeafIntersection > Intersection;
-
-    typedef typename Grid::template Codim<0>::Entity Entity;
-    typedef typename Grid::template Codim<1>::Geometry Geometry;
-    typedef typename Grid::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef ALU2dGridEntity<0,dimension,Grid> EntityImp;
-    typedef ALU2dGridGeometry<dimension-1,dimensionworld,Grid> GeometryImp;
-    typedef ALU2dGridGeometry<dimension-1,dimension,Grid> LocalGeometryImp;
-    typedef FieldVector<alu2d_ctype, dimensionworld> NormalType;
-    typedef ALU2dGridEntityPointer<0,Grid> EntityPointer;
 
     /** \brief constructor
      *
