@@ -170,7 +170,7 @@ namespace Dune
       inside()->geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
       outerNormal *= inside()->geometry().integrationElement( xInside );
     }
-    if( current.useOutside_ )
+    if( current.useOutside() )
       outerNormal *= 0.5;
     return outerNormal;
   }
@@ -212,7 +212,7 @@ namespace Dune
     assert( (current.inside() != 0) && (i < current.nFaces()) );
 
     // only in non-conform situation we use default method
-    if( current.useOutside_ )
+    if( current.useOutside() )
     {
       if( !intersectionSelfLocal_.valid() )
         intersectionSelfLocal_.buildLocalGeom( inside()->geometry(), geometry() );
@@ -259,7 +259,7 @@ namespace Dune
 
     if( !intersectionGlobal_.valid() )
     {
-      if( current.useOutside_ )
+      if( current.useOutside() )
         intersectionGlobal_.buildGeom( *current.outside(), current.opposite() );
       else
         intersectionGlobal_.buildGeom( *current.inside(), current.index() );

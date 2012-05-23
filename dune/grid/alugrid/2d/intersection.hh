@@ -227,6 +227,9 @@ namespace Dune
     static const int dimension = Grid::dimension;
     static const int dimensionworld  = Grid::dimensionworld;
 
+    friend class ALU2dGridLeafIntersectionIterator< Grid >;
+    friend class ALU2dGridLevelIntersectionIterator< Grid >;
+
   public:
     typedef typename ALU2dImplTraits< dimensionworld, elementType >::HElementType HElement;
     typedef typename ALU2dImplTraits< dimensionworld, elementType >::ThinelementType ThinElement;
@@ -238,6 +241,8 @@ namespace Dune
       setInside( inside );
       setOutside( nullptr, -1 );
     }
+
+    // interface methods for ALU2dIntersectionBase
 
     HElement *inside () const { return inside_; }
 
@@ -263,6 +268,8 @@ namespace Dune
 
     bool conforming () const { return conforming_; }
 
+    bool useOutside () const { return useOutside_; }
+
     int walkLevel () const { return walkLevel_; }
 
     bool equals ( const This &other ) const
@@ -270,6 +277,8 @@ namespace Dune
       // is this really sufficient?
       return (inside() == other.inside()) && (index() == other.index());
     }
+
+    // setup methods
 
     void setInside ( HElement *inside )
     {
@@ -294,10 +303,8 @@ namespace Dune
     HElement *outside_;
     int nFaces_;
     int opposite_;
-
-  public:
-    mutable int index_;
-    mutable bool useOutside_;
+    int index_;
+    bool useOutside_;
     bool conforming_;
     int walkLevel_;
   };
