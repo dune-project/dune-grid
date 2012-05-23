@@ -771,6 +771,24 @@ namespace Dune {
       //  The Geometry
       //
 
+    } // namespace Simplex
+  } // namespace RefinementImp
+
+  namespace FacadeOptions {
+
+    template<int mydimension, int coorddimension, class GridImp>
+    struct StoreGeometryReference<mydimension, coorddimension, GridImp,
+        RefinementImp::Simplex::Geometry>
+    {
+      //! Whether to store by reference or by reference.
+      static const bool v = false;
+    };
+
+  } // namespace FacadeOptions
+
+  namespace RefinementImp {
+    namespace Simplex {
+
       template<int mydimension, class GridImp>
       class ReferenceGeometryInstance;
 

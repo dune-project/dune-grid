@@ -34,11 +34,12 @@
  */
 
 #include <dune/common/deprecated.hh>
-
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
-#include <dune/geometry/type.hh>
+
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
+
 #include "base.cc"
 #include "simplex.cc"
 
@@ -391,6 +392,24 @@ namespace Dune {
       //
       //  Geometry
       //
+
+    } // namespace HCubeTriangulation
+  } // namespace RefinementImp
+
+  namespace FacadeOptions {
+
+    template<int mydimension, int coorddimension, class GridImp>
+    struct StoreGeometryReference<mydimension, coorddimension, GridImp,
+        RefinementImp::HCubeTriangulation::Geometry>
+    {
+      //! Whether to store by reference or by reference.
+      static const bool v = false;
+    };
+
+  } // namespace FacadeOptions
+
+  namespace RefinementImp {
+    namespace HCubeTriangulation {
 
       template<int mydimension, int coorddimension, class GridImp>
       class Geometry : public GeometryDefaultImplementation<mydimension, coorddimension, GridImp, Geometry>
