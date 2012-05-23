@@ -284,10 +284,6 @@ namespace Dune
     //! return true if intersection is with boundary
     void checkValid () ;
 
-    // set interator to end iterator
-    //void done ( const EntityImp &en ) { done( &en.getItem() ); }
-
-
     // the local geometries
     mutable GeometryImpl intersectionGlobal_;
     mutable LocalGeometryImpl intersectionSelfLocal_;
