@@ -334,11 +334,6 @@ namespace Dune
     typedef FieldVector<alu2d_ctype, dimensionworld> NormalType;
     typedef ALU2dGridEntityPointer<0,Grid> EntityPointer;
 
-#if 0
-    //! The default Constructor , creating an empty ALU2dGridIntersectionIterator
-    ALU2dGridLevelIntersectionIterator ( const Factory &factory, int wLevel );
-#endif
-
     /** \brief constructor
      *
      *  \param[in]  factory  factory for grid objects
@@ -436,11 +431,6 @@ namespace Dune
     typedef ALU2dGridGeometry<dimension-1,dimension,Grid> LocalGeometryImp;
     typedef FieldVector<alu2d_ctype, dimensionworld> NormalType;
     typedef ALU2dGridEntityPointer<0,Grid> EntityPointer;
-
-#if 0
-    //! The default Constructor , createing an empty ALU2dGridIntersectionIterator
-    ALU2dGridLeafIntersectionIterator ( const Factory &factory, int wLevel );
-#endif
 
     /** \brief constructor
      *

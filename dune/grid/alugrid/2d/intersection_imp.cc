@@ -351,15 +351,6 @@ namespace Dune
   }
 
 
-#if 0
-  template<class Grid>
-  inline ALU2dGridLevelIntersectionIterator<Grid> ::
-  ALU2dGridLevelIntersectionIterator(const FactoryType& factory, int wLevel) :
-    ALU2dGridIntersectionBase<Grid>::ALU2dGridIntersectionBase(factory, wLevel)
-  {}
-#endif
-
-
   template< class Grid >
   inline ALU2dGridLevelIntersectionIterator< Grid >
   ::ALU2dGridLevelIntersectionIterator ( const This &other )
@@ -413,15 +404,6 @@ namespace Dune
     else
       intersectionImpl().done( el );
   }
-
-
-#if 0
-  template<class Grid>
-  inline ALU2dGridLeafIntersectionIterator<Grid> ::
-  ALU2dGridLeafIntersectionIterator(const FactoryType& factory, int wLevel) :
-    ALU2dGridIntersectionBase<Grid>::ALU2dGridIntersectionBase(factory, wLevel)
-  {}
-#endif
 
 
   template< class Grid >
