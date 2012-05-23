@@ -56,7 +56,7 @@ namespace Dune
   inline bool ALU2dGridIntersectionBase< Grid, Info >
   ::equals ( const ALU2dGridIntersectionBase< Grid, Info > &other ) const
   {
-    return ((current.inside() == other.current.inside()) && (current.index_ == other.current.index_));
+    return ((current.inside() == other.current.inside()) && (current.index() == other.current.index()));
   }
 
 
@@ -119,7 +119,7 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< Grid, Info >::EntityPointer
   ALU2dGridIntersectionBase< Grid, Info >::inside() const
   {
-    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
+    assert( (current.inside() != 0) && (current.index() < current.nFaces()) );
     return EntityPointerImp( factory_, *current.inside(), -1, walkLevel_ );
   }
 
@@ -129,7 +129,7 @@ namespace Dune
   {
     current.setInside( inside );
     current.setOutside( 0, -1 );
-    current.index_= current.nFaces();
+    current.index_ = current.nFaces();
   }
 
 
@@ -144,7 +144,7 @@ namespace Dune
   template< class Grid, class Info >
   inline int ALU2dGridIntersectionBase< Grid, Info >::indexInInside () const
   {
-    const int i = current.index_;
+    const int i = current.index();
     if( (eltype == ALU2DSPACE triangle) || ((eltype == ALU2DSPACE mixed) && (current.nFaces() == 3)) )
       return 2 - i;
     else
@@ -173,7 +173,7 @@ namespace Dune
   template< class Grid, class Info >
   inline int ALU2dGridIntersectionBase< Grid, Info >::twistInOutside () const
   {
-    const int i = current.index_;
+    const int i = current.index();
     const int o = current.opposite();
     // The twist is either 0 or 1, depending on the edge numbers.
     // The edge is always twisted with respect to the ALU reference element.
@@ -189,13 +189,13 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< Grid, Info >::NormalType
   ALU2dGridIntersectionBase< Grid, Info >::outerNormal ( const LocalCoordinate &local ) const
   {
-    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
+    assert( (current.inside() != 0) && (current.index() < current.nFaces()) );
 
     typedef double (&normal_t)[dimensionworld];
 
     NormalType outerNormal;
     if ( dimensionworld == 2 || current.inside()->numvertices() == 3 ) // current.inside()->affine()
-      current.inside()->outernormal( current.index_, (normal_t)(&outerNormal)[0] );
+      current.inside()->outernormal( current.index(), (normal_t)(&outerNormal)[0] );
     else
     {
       const GenericReferenceElement< alu2d_ctype, dimension > &refElement =
@@ -243,7 +243,8 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< Grid, Info >::LocalGeometry
   ALU2dGridIntersectionBase< Grid, Info >::geometryInInside () const
   {
-    assert( (current.inside() != 0) && (current.index_ < current.nFaces()) );
+    const int i = current.index();
+    assert( (current.inside() != 0) && (i < current.nFaces()) );
 
     // only in non-conform situation we use default method
     if( current.useOutside_ )
@@ -256,9 +257,9 @@ namespace Dune
     else
     {
       // parameters are face and twist
-      const int localTwist = (current.nFaces() == 3) ? (current.index_ % 2) : (current.index_>>1)^(current.index_&1);
+      const int localTwist = (current.nFaces() == 3) ? (i % 2) : (i >> 1)^(i & 1);
       const int twist = (twistInInside() + localTwist) % 2;
-      return LocalGeometry( localGeomStorage_.localGeom( current.index_, twist, current.nFaces() ) );
+      return LocalGeometry( localGeomStorage_.localGeom( i, twist, current.nFaces() ) );
     }
   }
 
@@ -296,7 +297,7 @@ namespace Dune
       if( current.useOutside_ )
         intersectionGlobal_.buildGeom( *current.outside(), current.opposite() );
       else
-        intersectionGlobal_.buildGeom( *current.inside(), current.index_ );
+        intersectionGlobal_.buildGeom( *current.inside(), current.index() );
     }
 
     assert( intersectionGlobal_.valid() );

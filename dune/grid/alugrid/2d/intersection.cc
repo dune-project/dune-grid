@@ -64,12 +64,13 @@ namespace Dune
   alu2d_inline
   void ALU2dGridLevelIntersectionIterator< GridImp >::addNeighboursToStack ()
   {
-    assert( current().index_ < current().nFaces() );
+    const int i = current().index();
+    assert( i < current().nFaces() );
 
-    ThinelementType *neighbor = current().inside()->neighbour( current().index_ );
+    ThinelementType *neighbor = current().inside()->neighbour( i );
     assert( neighbor );
 
-    IntersectionInfo info;
+    OutsideInfo info;
     if( neighbor->thinis( ThinelementType::bndel_like ) )
     {
       HBndElType *bndel = (HBndElType *)neighbor;
@@ -85,7 +86,7 @@ namespace Dune
     {
       assert( neighbor->thinis( ThinelementType::element_like ) );
       info.first = (HElementType *)neighbor;
-      info.second = current().inside()->opposite( current().index_ );
+      info.second = current().inside()->opposite( i );
     }
     assert( info.first );
 
@@ -165,7 +166,7 @@ namespace Dune
   {
     assert( !nbStack_.empty() );
 
-    IntersectionInfo &info = nbStack_.top();
+    OutsideInfo &info = nbStack_.top();
     current().setOutside( info.first, info.second );
     current().conforming_ = (intersectionImpl().grid().nonConform() || isConform());
     nbStack_.pop();
@@ -214,7 +215,7 @@ namespace Dune
       current().useOutside_ = !bndnb->leaf();
       if( current().useOutside_ )
       {
-        IntersectionInfo info;
+        OutsideInfo info;
 
         // insert left intersection
         HBndElType *left = bndnb->down();
@@ -246,7 +247,7 @@ namespace Dune
       const int opposite = current().inside()->opposite( current().index_ );
       if( current().useOutside_ )
       {
-        IntersectionInfo info;
+        OutsideInfo info;
 
         // insert left intersection
         ThinelementType *left = current().inside()->getLeftIntersection( current().index_ );
@@ -282,7 +283,7 @@ namespace Dune
   {
     assert( !nbStack_.empty() );
 
-    IntersectionInfo &info = nbStack_.top();
+    OutsideInfo &info = nbStack_.top();
     current().setOutside( info.first, info.second );
     nbStack_.pop();
   }

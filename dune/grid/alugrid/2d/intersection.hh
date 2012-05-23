@@ -3,11 +3,11 @@
 #ifndef DUNE_ALU2DGRID_INTERSECTION_HH
 #define DUNE_ALU2DGRID_INTERSECTION_HH
 
-// System includes
 #include <stack>
 #include <utility>
 
-// Dune includes
+#include <dune/common/nullptr.hh>
+
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
@@ -108,6 +108,8 @@ namespace Dune
     typedef typename Grid::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
 
   public:
+    typedef Info IntersectionInfo;
+
     typedef alu2d_ctype ctype;
 
     static const int dimension = Grid::dimension;
@@ -134,74 +136,6 @@ namespace Dune
     // type of local geometry storage
     typedef ALU2DIntersectionGeometryStorage< LocalGeometryImpl > LocalGeometryStorageType;
 
-  public:
-    struct impl
-    {
-      explicit impl( HElementType *inside = 0 )
-        : index_(0), useOutside_(false)
-      {
-        setInside( inside );
-        setOutside( 0, -1 );
-      }
-
-      HElementType *inside () const
-      {
-        return inside_;
-      }
-
-      int nFaces () const
-      {
-        return nFaces_;
-      }
-
-      bool isBoundary () const
-      {
-        assert( inside() && (index_ < nFaces()) && inside()->neighbour( index_ ) );
-        return inside()->neighbour( index_ )->thinis( ThinelementType::bndel_like );
-      }
-
-      HBndElType *boundary () const
-      {
-        assert( isBoundary() );
-        return (HBndElType *)inside()->neighbour( index_ );
-      }
-
-      HElementType *outside () const
-      {
-        return outside_;
-      }
-
-      int opposite () const
-      {
-        return opposite_;
-      }
-
-      void setInside ( HElementType *inside )
-      {
-        inside_ = inside;
-        nFaces_ = (inside != 0 ? inside->numfaces() : 0);
-      }
-
-      void setOutside ( HElementType *outside, int opposite )
-      {
-        outside_ = outside;
-        opposite_ = opposite;
-      }
-
-    private:
-      // current element from which we started the intersection iterator
-      HElementType *inside_;
-      HElementType *outside_;
-      int nFaces_;
-      int opposite_;
-
-    public:
-      mutable int index_;
-      mutable bool useOutside_;
-      bool conforming_;
-    } current;
-
-  public:
     //! constructor creating an empty ALU2dGridIntersectionIterator
     ALU2dGridIntersectionBase ( const Factory &factory, int wLevel );
 
@@ -273,6 +207,10 @@ namespace Dune
     //! return true if intersection is with boundary
     void checkValid () ;
 
+  public:
+    IntersectionInfo current;
+
+  protected:
     // the local geometries
     mutable GeometryImpl intersectionGlobal_;
     mutable LocalGeometryImpl intersectionSelfLocal_;
@@ -282,7 +220,79 @@ namespace Dune
     const Factory &factory_;
     const LocalGeometryStorageType &localGeomStorage_;
     int walkLevel_;
-  }; // end ALU2dGridIntersectionBase
+  };
+
+
+
+  // ALU2dGridIntersectionInfo
+  // -------------------------
+
+  template< class Grid >
+  struct ALU2dGridIntersectionInfo
+  {
+    static const ALU2DSPACE ElementType elementType = Grid::elementType;
+
+    static const int dimension = Grid::dimension;
+    static const int dimensionworld  = Grid::dimensionworld;
+
+    typedef typename ALU2dImplTraits< dimensionworld, elementType >::HElementType HElement;
+    typedef typename ALU2dImplTraits< dimensionworld, elementType >::ThinelementType ThinElement;
+    typedef typename ALU2dImplTraits< dimensionworld, elementType >::HBndElType HBndElement;
+
+    explicit ALU2dGridIntersectionInfo ( HElement *inside = nullptr )
+      : index_( 0 ), useOutside_( false )
+    {
+      setInside( inside );
+      setOutside( nullptr, -1 );
+    }
+
+    HElement *inside () const { return inside_; }
+
+    int nFaces () const { return nFaces_; }
+
+    bool isBoundary () const
+    {
+      assert( inside() && (index() < nFaces()) && inside()->neighbour( index() ) );
+      return inside()->neighbour( index() )->thinis( ThinElement::bndel_like );
+    }
+
+    HBndElement *boundary () const
+    {
+      assert( isBoundary() );
+      return (HBndElement *)inside()->neighbour( index() );
+    }
+
+    HElement *outside () const { return outside_; }
+
+    int index () const { return index_; }
+
+    int opposite () const { return opposite_; }
+
+    bool conforming () const { return conforming_; }
+
+    void setInside ( HElement *inside )
+    {
+      inside_ = inside;
+      nFaces_ = (inside ? inside->numfaces() : 0);
+    }
+
+    void setOutside ( HElement *outside, int opposite )
+    {
+      outside_ = outside;
+      opposite_ = opposite;
+    }
+
+  private:
+    HElement *inside_;
+    HElement *outside_;
+    int nFaces_;
+    int opposite_;
+
+  public:
+    mutable int index_;
+    mutable bool useOutside_;
+    bool conforming_;
+  };
 
 
 
@@ -291,10 +301,10 @@ namespace Dune
 
   template< class Grid >
   class ALU2dGridLeafIntersection
-    : public ALU2dGridIntersectionBase< Grid, void >
+    : public ALU2dGridIntersectionBase< Grid, ALU2dGridIntersectionInfo< Grid > >
   {
     typedef ALU2dGridLeafIntersection< Grid > This;
-    typedef ALU2dGridIntersectionBase< Grid, void > Base;
+    typedef ALU2dGridIntersectionBase< Grid, ALU2dGridIntersectionInfo< Grid > > Base;
 
   public:
     typedef typename Base::Factory Factory;
@@ -311,10 +321,10 @@ namespace Dune
 
   template< class Grid >
   class ALU2dGridLevelIntersection
-    : public ALU2dGridIntersectionBase< Grid, void >
+    : public ALU2dGridIntersectionBase< Grid, ALU2dGridIntersectionInfo< Grid > >
   {
     typedef ALU2dGridLevelIntersection< Grid > This;
-    typedef ALU2dGridIntersectionBase< Grid, void > Base;
+    typedef ALU2dGridIntersectionBase< Grid, ALU2dGridIntersectionInfo< Grid > > Base;
 
   public:
     typedef typename Base::Factory Factory;
@@ -346,9 +356,10 @@ namespace Dune
     typedef typename ALU2dImplTraits< dimensionworld, eltype >::PeriodicBndElType PeriodicBndElType;
 
     typedef ALU2dGridLevelIntersection< Grid > IntersectionImpl;
+    typedef typename IntersectionImpl::IntersectionInfo IntersectionInfo;
 
     typedef typename IntersectionImpl::HElementType HElementType;
-    typedef std::pair< HElementType *, int > IntersectionInfo;
+    typedef std::pair< HElementType *, int > OutsideInfo;
 
   public:
     //! type of the intersection
@@ -392,7 +403,7 @@ namespace Dune
   protected:
     bool isConform () const
     {
-      return (!current().outside() || (current().outside() == current().inside()->neighbour( current().index_ )));
+      return (!current().outside() || (current().outside() == current().inside()->neighbour( current().index() )));
     }
 
   private:
@@ -409,24 +420,20 @@ namespace Dune
     const IntersectionImpl &intersectionImpl () const { return Grid::getRealImplementation( intersection_ ); }
     IntersectionImpl &intersectionImpl () { return Grid::getRealImplementation( intersection_ ); }
 
-    const typename IntersectionImpl::impl &current () const { return intersectionImpl().current; }
-    typename IntersectionImpl::impl &current () { return intersectionImpl().current; }
+    const IntersectionInfo &current () const { return intersectionImpl().current; }
+    IntersectionInfo &current () { return intersectionImpl().current; }
 
     int walkLevel () const { return intersectionImpl().walkLevel(); }
 
   private:
     Intersection intersection_;
-    std::stack<IntersectionInfo> nbStack_;
-  }; // end ALU2dGridLevelIntersectionIterator
+    std::stack< OutsideInfo > nbStack_;
+  };
 
 
 
-  //********************************************************************
-  //
-  //  --ALU2dGridLeafIntersectionIterator
-  //
-  //
-  //********************************************************************
+  // ALU2dGridLeafIntersectionIterator
+  // ---------------------------------
 
   template< class Grid >
   class ALU2dGridLeafIntersectionIterator
@@ -436,9 +443,10 @@ namespace Dune
     static const ALU2DSPACE ElementType eltype = Grid::elementType;
 
     typedef ALU2dGridLeafIntersection< Grid > IntersectionImpl;
+    typedef typename IntersectionImpl::IntersectionInfo IntersectionInfo;
 
     typedef typename IntersectionImpl::HElementType HElementType;
-    typedef std::pair< HElementType *, int > IntersectionInfo;
+    typedef std::pair< HElementType *, int > OutsideInfo;
 
   public:
     static const int dimension = Grid::dimension;
@@ -496,15 +504,15 @@ namespace Dune
     const IntersectionImpl &intersectionImpl () const { return Grid::getRealImplementation( intersection_ ); }
     IntersectionImpl &intersectionImpl () { return Grid::getRealImplementation( intersection_ ); }
 
-    const typename IntersectionImpl::impl &current () const { return intersectionImpl().current; }
-    typename IntersectionImpl::impl &current () { return intersectionImpl().current; }
+    const IntersectionInfo &current () const { return intersectionImpl().current; }
+    IntersectionInfo &current () { return intersectionImpl().current; }
 
     int walkLevel () const { return intersectionImpl().walkLevel(); }
 
   private:
     Intersection intersection_;
-    std::stack<IntersectionInfo> nbStack_;
-  }; // end ALU2dGridLeafIntersectionIterator
+    std::stack< OutsideInfo > nbStack_;
+  };
 
 } // namespace Dune
 
