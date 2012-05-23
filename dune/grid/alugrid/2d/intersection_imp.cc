@@ -24,9 +24,7 @@ namespace Dune
     : factory_( factory ),
       localGeomStorage_( LocalGeometryStorageType::instance() ),
       walkLevel_( wLevel )
-  {
-    this->done( 0 );
-  }
+  {}
 
 
   template< class Grid, class Info >
@@ -121,15 +119,6 @@ namespace Dune
   {
     assert( (current.inside() != 0) && (current.index() < current.nFaces()) );
     return EntityPointerImp( factory_, *current.inside(), -1, walkLevel_ );
-  }
-
-
-  template< class Grid, class Info >
-  inline void ALU2dGridIntersectionBase< Grid, Info >::done ( HElementType *inside )
-  {
-    current.setInside( inside );
-    current.setOutside( 0, -1 );
-    current.index_ = current.nFaces();
   }
 
 
@@ -331,20 +320,19 @@ namespace Dune
   ::ALU2dGridLevelIntersectionIterator ( const Factory &factory, HElementType *el, int wLevel, bool end )
     : intersection_( IntersectionImpl( factory, wLevel ) )
   {
+    current().setInside( el );
     if( !end )
     {
       assert( walkLevel() >= 0 );
+      assert( current().inside() );
 
-      current().setInside( el );
       current().index_ = -1;
       current().setOutside( 0, -1 );
-
-      assert( current().inside() );
 
       increment();
     }
     else
-      intersectionImpl().done( el );
+      current().done();
   }
 
 
@@ -386,20 +374,19 @@ namespace Dune
   ::ALU2dGridLeafIntersectionIterator ( const Factory &factory, HElementType *el, int wLevel, bool end )
     : intersection_( IntersectionImpl( factory, wLevel ) )
   {
+    current().setInside( el );
     if( !end )
     {
       assert( walkLevel() >= 0 );
+      assert( current().inside() );
 
-      current().setInside( el );
       current().index_ = -1;
       current().setOutside( 0, -1 );
-
-      assert( current().inside() );
 
       increment();
     }
     else
-      intersectionImpl().done( el );
+      current().done();
   }
 
 

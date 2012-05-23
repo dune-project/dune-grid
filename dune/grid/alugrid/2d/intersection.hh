@@ -145,7 +145,7 @@ namespace Dune
     //! assignment operator
     const This &operator= ( const This &other );
 
-    //! check whether entities are the same or whether iterator is done
+    //! check whether intersections equal
     bool equals ( const This &other ) const;
 
     //! return level of inside(entity)
@@ -200,7 +200,6 @@ namespace Dune
     const Grid &grid () const { return factory_.grid(); }
 
     void invalidate ();
-    void done ( HElementType *inside );
 
     int walkLevel () const { return walkLevel_; }
 
@@ -280,6 +279,12 @@ namespace Dune
     {
       outside_ = outside;
       opposite_ = opposite;
+    }
+
+    void done ()
+    {
+      setOutside( 0, -1 );
+      index_ = nFaces();
     }
 
   private:
