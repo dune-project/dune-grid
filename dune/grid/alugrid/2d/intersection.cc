@@ -326,7 +326,7 @@ namespace Dune
     nbStack_.pop();
   }
 
-}
+} // namespace Dune
 
 
 #if COMPILE_ALU2DGRID_LIB

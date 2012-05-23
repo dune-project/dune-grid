@@ -215,11 +215,6 @@ namespace Dune
     //! assignment operator
     const This &operator= ( const This &other );
 
-#if 0
-    //! The copy constructor
-    void assign (const This & org);
-#endif
-
     //! check whether entities are the same or whether iterator is done
     bool equals ( const This &other ) const;
 
@@ -255,10 +250,8 @@ namespace Dune
     int twistInInside () const;
     int twistInOutside () const;
 
-    // deprecated methods
-    int twistInSelf () const { return twistInInside(); }
-    // deprecated methods
-    int twistInNeighbor () const { return twistInOutside(); }
+    int twistInSelf () const DUNE_DEPRECATED { return twistInInside(); }
+    int twistInNeighbor () const DUNE_DEPRECATED { return twistInOutside(); }
 
     NormalType outerNormal ( const LocalCoordinate &local ) const;
     NormalType integrationOuterNormal ( const LocalCoordinate &local ) const;
@@ -294,7 +287,6 @@ namespace Dune
     const LocalGeometryStorageType &localGeomStorage_;
     int walkLevel_;
   }; // end ALU2dGridIntersectionBase
-
 
 
 
@@ -361,10 +353,6 @@ namespace Dune
 
     //! assignment operator
     const This &operator= ( const This &other );
-
-#if 0
-    void assign (const ALU2dGridLevelIntersectionIterator<Grid> & org);
-#endif
 
     //! increment iterator
     void increment ();
@@ -477,10 +465,6 @@ namespace Dune
 
     //! assignment operator
     const This &operator= ( const This &other );
-
-#if 0
-    void assign (const ALU2dGridLeafIntersectionIterator<Grid> & org);
-#endif
 
     //! increment iterator
     void increment ();

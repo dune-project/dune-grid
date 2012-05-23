@@ -56,22 +56,6 @@ namespace Dune
   }
 
 
-#if 0
-  template<class Grid>
-  inline void
-  ALU2dGridIntersectionBase<Grid> ::
-  assign(const ALU2dGridIntersectionBase<Grid> & org)
-  {
-    assert( &factory_ == &org.factory_ );
-    walkLevel_ = org.walkLevel_;
-    current = org.current;
-
-    // unset geometry information
-    invalidate();
-  }
-#endif
-
-  //! check whether entities are the same or whether iterator is done
   template<class Grid>
   inline bool ALU2dGridIntersectionBase< Grid >
   ::equals ( const ALU2dGridIntersectionBase< Grid > &other ) const
@@ -80,7 +64,6 @@ namespace Dune
   }
 
 
-  //! return level of inside() entitiy
   template<class Grid>
   inline int ALU2dGridIntersectionBase<Grid> :: level () const
   {
@@ -89,7 +72,6 @@ namespace Dune
   }
 
 
-  //! return true if intersection is with boundary
   template<class Grid>
   inline void ALU2dGridIntersectionBase<Grid> :: checkValid ()
   {
@@ -396,17 +378,6 @@ namespace Dune
   }
 
 
-#if 0
-  template<class Grid>
-  inline void
-  ALU2dGridLevelIntersectionIterator<Grid> ::
-  assign(const ALU2dGridLevelIntersectionIterator<Grid> & org) {
-    ALU2dGridIntersectionBase<Grid>:: ALU2dGridIntersectionBase::assign(org);
-    nbStack_ = org.nbStack_;
-  }
-#endif
-
-
   //! increment iterator
   template<class Grid>
   inline void ALU2dGridLevelIntersectionIterator<Grid> :: increment ()
@@ -482,17 +453,6 @@ namespace Dune
     nbStack_ = other.nbStack_;
     return *this;
   }
-
-#if 0
-  //! The copy constructor
-  template<class Grid>
-  inline void
-  ALU2dGridLeafIntersectionIterator<Grid> ::
-  assign(const ALU2dGridLeafIntersectionIterator<Grid> & org){
-    ALU2dGridIntersectionBase<Grid>::ALU2dGridIntersectionBase::assign(org);
-    nbStack_ = org.nbStack_;
-  }
-#endif
 
 
   //! increment iterator
