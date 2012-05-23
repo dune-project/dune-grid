@@ -242,7 +242,16 @@ namespace Dune {
         IndexVector vertexIndices() const;
         int index() const;
         CoordVector coords() const;
+
+        DUNE_REFINEMENT_DEPRECATED("The geometries for the "
+                                   "Refinements have deprecated.  If "
+                                   "you have a case where they are "
+                                   "useful, please complain...")
         Geometry geometry() const;
+
+      private:
+        CoordVector global(const CoordVector &local) const;
+
       protected:
         typedef typename Refinement::BackendRefinement BackendRefinement;
         typedef typename BackendRefinement::template Codim<0>::SubEntityIterator BackendIterator;
@@ -304,9 +313,7 @@ namespace Dune {
       RefinementIteratorSpecial<dimension, CoordType, 0>::
       coords() const
       {
-        return geometry()
-               .global(GenericReferenceElements<CoordType, dimension>
-                       ::simplex().position(0,0));
+        return global(backend.coords());
       }
 
       template<int dimension, class CoordType>
@@ -315,16 +322,23 @@ namespace Dune {
       geometry() const
       {
         const typename BackendIterator::Geometry &
-        bgeo = backend.geometry();
+        bgeo = backend.deprecatedGeometry();
         Dune::array<CoordVector, dimension+1> corners;
         for(int i = 0; i <= dimension; ++i)
-          corners[i] =
-            referenceToKuhn(bgeo.corner(i),
-                            getPermutation<dimension>(kuhnIndex));
+          corners[i] = global(bgeo.corner(i));
 
         return Geometry(GenericGeometry::Geometry
                         <dimension, dimension, Refinement>
                           (bgeo.type(), corners));
+      }
+
+      template<int dimension, class CoordType>
+      typename RefinementIteratorSpecial<dimension, CoordType, 0>::
+      CoordVector
+      RefinementIteratorSpecial<dimension, CoordType, 0>::
+      global(const CoordVector &local) const {
+        return referenceToKuhn(local,
+                               getPermutation<dimension>(kuhnIndex));
       }
 
       // common

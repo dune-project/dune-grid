@@ -617,7 +617,19 @@ namespace Dune {
         IndexVector vertexIndices() const;
         int index() const;
         CoordVector coords() const;
+
+        DUNE_REFINEMENT_DEPRECATED("The geometries for the Refinements have "
+                                   "deprecated.  If you have a case where "
+                                   "they are useful, please complain...")
         Geometry geometry () const;
+        // As the name says, this method is deprecated, but it doesn't have
+        // the deprecated attibute.  This is so other deprecated methods can
+        // call this method without producing multiple deprecation warnings.
+        Geometry deprecatedGeometry () const;
+
+      private:
+        CoordVector global(const CoordVector &local) const;
+
       protected:
         typedef FieldVector<int, dimension> Vertex;
         enum { nKuhnSimplices = Factorial<dimension>::factorial };
@@ -725,29 +737,45 @@ namespace Dune {
       RefinementIteratorSpecial<dimension, CoordType, 0>::
       coords() const
       {
-        return geometry()
-               .global(GenericReferenceElements<CoordType, dimension>
-                       ::simplex().position(0,0));
+        return global(GenericReferenceElements<CoordType, dimension>
+                      ::simplex().position(0,0));
       }
 
       template<int dimension, class CoordType>
       typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry
       RefinementIteratorSpecial<dimension, CoordType, 0>::geometry () const
       {
+        return deprecatedGeometry();
+      }
+
+      // As the name says, this method is deprecated, but it doesn't have the
+      // deprecated attibute.  This is so other deprecated methods can call
+      // this method without producing multiple deprecation warnings.
+      template<int dimension, class CoordType>
+      typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry
+      RefinementIteratorSpecial<dimension, CoordType, 0>::
+      deprecatedGeometry () const
+      {
         Dune::array<CoordVector, dimension+1> corners;
         CoordVector v;
         const GenericReferenceElement<CoordType, dimension> &refelem =
           GenericReferenceElements<CoordType, dimension>::simplex();
-        for(int i = 0; i <= dimension; ++i) {
-          v = referenceToKuhn(refelem.position(i, dimension),
-                              getPermutation<dimension>(kuhnIndex));
-          v += origin;
-          v /= size;
-          corners[i] = kuhnToReference(v, getPermutation<dimension>(0));
-        }
+        for(int i = 0; i <= dimension; ++i)
+          corners[i] = global(refelem.position(i, dimension));
         return Geometry(GenericGeometry::Geometry
                         <dimension, dimension, Refinement>
                           (refelem.type(), corners));
+      }
+
+      template<int dimension, class CoordType>
+      typename RefinementIteratorSpecial<dimension, CoordType, 0>::CoordVector
+      RefinementIteratorSpecial<dimension, CoordType, 0>::
+      global(const CoordVector &local) const {
+        CoordVector v =
+          referenceToKuhn(local, getPermutation<dimension>(kuhnIndex));
+        v += origin;
+        v /= size;
+        return kuhnToReference(v, getPermutation<dimension>(0));
       }
 
       // common
