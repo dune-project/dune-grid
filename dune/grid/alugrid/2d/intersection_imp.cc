@@ -20,10 +20,10 @@ namespace Dune
 
   template< class Grid, class Info >
   inline ALU2dGridIntersectionBase< Grid, Info >
-  ::ALU2dGridIntersectionBase ( const Factory &factory, int wLevel )
-    : factory_( factory ),
-      localGeomStorage_( LocalGeometryStorageType::instance() ),
-      walkLevel_( wLevel )
+  ::ALU2dGridIntersectionBase ( const Factory &factory, const IntersectionInfo &info )
+    : current( info ),
+      factory_( factory ),
+      localGeomStorage_( LocalGeometryStorageType::instance() )
   {}
 
 
@@ -32,8 +32,7 @@ namespace Dune
   ::ALU2dGridIntersectionBase ( const This &other )
     : current( other.current ),
       factory_( other.factory_ ),
-      localGeomStorage_( LocalGeometryStorageType::instance() ),
-      walkLevel_( other.walkLevel_ )
+      localGeomStorage_( LocalGeometryStorageType::instance() )
   {}
 
 
@@ -43,7 +42,6 @@ namespace Dune
   {
     current = other.current;
     assert( &factory_ == &other.factory_ );
-    walkLevel_ = other.walkLevel_;
 
     invalidate();
     return *this;
@@ -55,14 +53,6 @@ namespace Dune
   ::equals ( const ALU2dGridIntersectionBase< Grid, Info > &other ) const
   {
     return ((current.inside() == other.current.inside()) && (current.index() == other.current.index()));
-  }
-
-
-  template< class Grid, class Info >
-  inline int ALU2dGridIntersectionBase< Grid, Info > :: level () const
-  {
-    assert( current.inside() );
-    return current.inside()->level();
   }
 
 
@@ -118,7 +108,7 @@ namespace Dune
   ALU2dGridIntersectionBase< Grid, Info >::inside() const
   {
     assert( (current.inside() != 0) && (current.index() < current.nFaces()) );
-    return EntityPointerImp( factory_, *current.inside(), -1, walkLevel_ );
+    return EntityPointerImp( factory_, *current.inside(), -1, current.walkLevel() );
   }
 
 
@@ -127,7 +117,7 @@ namespace Dune
   ALU2dGridIntersectionBase< Grid, Info >::outside() const
   {
     assert( current.inside() && current.outside() );
-    return EntityPointerImp( factory_, *current.outside(), -1, walkLevel_ );
+    return EntityPointerImp( factory_, *current.outside(), -1, current.walkLevel() );
   }
 
   template< class Grid, class Info >
@@ -318,12 +308,13 @@ namespace Dune
   template< class Grid >
   inline ALU2dGridLevelIntersectionIterator< Grid >
   ::ALU2dGridLevelIntersectionIterator ( const Factory &factory, HElementType *el, int wLevel, bool end )
-    : intersection_( IntersectionImpl( factory, wLevel ) )
+    : intersection_( IntersectionImpl( factory ) )
   {
     current().setInside( el );
+    current().walkLevel_ = wLevel;
     if( !end )
     {
-      assert( walkLevel() >= 0 );
+      assert( current().walkLevel() >= 0 );
       assert( current().inside() );
 
       current().index_ = -1;
@@ -372,12 +363,13 @@ namespace Dune
   template< class Grid >
   inline ALU2dGridLeafIntersectionIterator< Grid >
   ::ALU2dGridLeafIntersectionIterator ( const Factory &factory, HElementType *el, int wLevel, bool end )
-    : intersection_( IntersectionImpl( factory, wLevel ) )
+    : intersection_( IntersectionImpl( factory ) )
   {
     current().setInside( el );
+    current().walkLevel_ = wLevel;
     if( !end )
     {
-      assert( walkLevel() >= 0 );
+      assert( current().walkLevel() >= 0 );
       assert( current().inside() );
 
       current().index_ = -1;

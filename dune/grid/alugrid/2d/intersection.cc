@@ -90,21 +90,21 @@ namespace Dune
     }
     assert( info.first );
 
-    while( info.first->level() > walkLevel() )
+    while( info.first->level() > current().walkLevel() )
     {
       info.second = getOppositeInFather( info.second, info.first->childNr() );
       assert( (info.second >= 0) && (info.second < current().nFaces()) );
       info.first = info.first->father();
     }
 
-    if( info.first->level() >= walkLevel() )
+    if( info.first->level() >= current().walkLevel() )
     {
       nbStack_.push( info );
       return;
     }
 
     // why should we go up, here?
-    while( info.first && (info.first->level() < walkLevel() - 1) )
+    while( info.first && (info.first->level() < current().walkLevel() - 1) )
     {
       info.second = getOppositeInFather( info.second, info.first->childNr() );
       assert( (info.second >= 0) && (info.second < current().nFaces()) );
@@ -113,7 +113,7 @@ namespace Dune
 
     if( info.first )
     {
-      assert( info.first->level() == walkLevel() - 1 );
+      assert( info.first->level() == current().walkLevel() - 1 );
 
       const int opposite = info.second;
       for( info.first = info.first->down(); info.first; info.first = info.first->next() )
@@ -156,7 +156,7 @@ namespace Dune
 
     setupIntersection();
 
-    assert( !current().outside() || (current().outside()->level() == walkLevel()) );
+    assert( !current().outside() || (current().outside()->level() == current().walkLevel()) );
   }
 
 

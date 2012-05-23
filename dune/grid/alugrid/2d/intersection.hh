@@ -137,7 +137,7 @@ namespace Dune
     typedef ALU2DIntersectionGeometryStorage< LocalGeometryImpl > LocalGeometryStorageType;
 
     //! constructor creating an empty ALU2dGridIntersectionIterator
-    ALU2dGridIntersectionBase ( const Factory &factory, int wLevel );
+    explicit ALU2dGridIntersectionBase ( const Factory &factory, const IntersectionInfo &info = IntersectionInfo() );
 
     //! copy constructor
     ALU2dGridIntersectionBase ( const This &other );
@@ -148,9 +148,6 @@ namespace Dune
     //! check whether intersections equal
     bool equals ( const This &other ) const;
 
-    //! return level of inside(entity)
-    int level () const;
-
     //! return true if intersection is with boundary
     bool boundary() const;
 
@@ -158,9 +155,9 @@ namespace Dune
     int boundaryId () const;
 
     //! return the boundary segment index
-    size_t boundarySegmentIndex() const;
+    std::size_t boundarySegmentIndex () const;
 
-    bool conforming () const { return current.conforming_; }
+    bool conforming () const { return current.conforming(); }
 
     //! return true if intersection is with neighbor on this level
     bool neighbor () const;
@@ -201,8 +198,6 @@ namespace Dune
 
     void invalidate ();
 
-    int walkLevel () const { return walkLevel_; }
-
     //! return true if intersection is with boundary
     void checkValid () ;
 
@@ -218,7 +213,6 @@ namespace Dune
     // reference to factory
     const Factory &factory_;
     const LocalGeometryStorageType &localGeomStorage_;
-    int walkLevel_;
   };
 
 
@@ -269,6 +263,8 @@ namespace Dune
 
     bool conforming () const { return conforming_; }
 
+    int walkLevel () const { return walkLevel_; }
+
     void setInside ( HElement *inside )
     {
       inside_ = inside;
@@ -297,6 +293,7 @@ namespace Dune
     mutable int index_;
     mutable bool useOutside_;
     bool conforming_;
+    int walkLevel_;
   };
 
 
@@ -313,9 +310,10 @@ namespace Dune
 
   public:
     typedef typename Base::Factory Factory;
+    typedef typename Base::IntersectionInfo IntersectionInfo;
 
-    ALU2dGridLeafIntersection ( const Factory &factory, int wLevel )
-      : Base( factory, wLevel )
+    explicit ALU2dGridLeafIntersection ( const Factory &factory, const IntersectionInfo &info = IntersectionInfo() )
+      : Base( factory, info )
     {}
   };
 
@@ -333,9 +331,10 @@ namespace Dune
 
   public:
     typedef typename Base::Factory Factory;
+    typedef typename Base::IntersectionInfo IntersectionInfo;
 
-    ALU2dGridLevelIntersection ( const Factory &factory, int wLevel )
-      : Base( factory, wLevel )
+    explicit ALU2dGridLevelIntersection ( const Factory &factory, const IntersectionInfo &info = IntersectionInfo() )
+      : Base( factory, info )
     {}
   };
 
@@ -428,8 +427,6 @@ namespace Dune
     const IntersectionInfo &current () const { return intersectionImpl().current; }
     IntersectionInfo &current () { return intersectionImpl().current; }
 
-    int walkLevel () const { return intersectionImpl().walkLevel(); }
-
   private:
     Intersection intersection_;
     std::stack< OutsideInfo > nbStack_;
@@ -511,8 +508,6 @@ namespace Dune
 
     const IntersectionInfo &current () const { return intersectionImpl().current; }
     IntersectionInfo &current () { return intersectionImpl().current; }
-
-    int walkLevel () const { return intersectionImpl().walkLevel(); }
 
   private:
     Intersection intersection_;
