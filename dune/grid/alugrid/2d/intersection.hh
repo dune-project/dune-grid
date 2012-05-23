@@ -66,7 +66,6 @@ namespace Dune
 
     // one geometry for each face and twist 0 and 1
     LocalGeometryImpl geoms_[ 2 ][ 4 ][ 2 ];
-    //std::vector< LocalGeometryImpl > geoms_[ 2 ][ 4 ];
 
   private:
     ALU2DIntersectionGeometryStorage ();
@@ -128,10 +127,6 @@ namespace Dune
     typedef FieldVector< ctype, dimension-1 > LocalCoordinate;
 
     typedef ALU2dGridEntityPointer<0,Grid> EntityPointerImp;
-
-    typedef typename ALU2dImplTraits< dimensionworld, eltype >::ThinelementType ThinelementType;
-    typedef typename ALU2dImplTraits< dimensionworld, eltype >::HElementType HElementType;
-    typedef typename ALU2dImplTraits< dimensionworld, eltype >::HBndElType HBndElType;
 
     // type of local geometry storage
     typedef ALU2DIntersectionGeometryStorage< LocalGeometryImpl > LocalGeometryStorageType;
@@ -363,19 +358,19 @@ namespace Dune
 
     static const ALU2DSPACE ElementType eltype = Grid::elementType;
 
+    typedef ALU2dGridLevelIntersection< Grid > IntersectionImpl;
+    typedef typename IntersectionImpl::IntersectionInfo IntersectionInfo;
+
   public:
     static const int dimension = Grid::dimension;
     static const int dimensionworld  = Grid::dimensionworld;
 
   private:
+    typedef typename ALU2dImplTraits< dimensionworld, eltype >::HElementType HElementType;
     typedef typename ALU2dImplTraits< dimensionworld, eltype >::ThinelementType ThinelementType;
     typedef typename ALU2dImplTraits< dimensionworld, eltype >::HBndElType HBndElType;
     typedef typename ALU2dImplTraits< dimensionworld, eltype >::PeriodicBndElType PeriodicBndElType;
 
-    typedef ALU2dGridLevelIntersection< Grid > IntersectionImpl;
-    typedef typename IntersectionImpl::IntersectionInfo IntersectionInfo;
-
-    typedef typename IntersectionImpl::HElementType HElementType;
     typedef std::pair< HElementType *, int > OutsideInfo;
 
   public:
@@ -460,22 +455,22 @@ namespace Dune
     typedef ALU2dGridLeafIntersection< Grid > IntersectionImpl;
     typedef typename IntersectionImpl::IntersectionInfo IntersectionInfo;
 
-    typedef typename IntersectionImpl::HElementType HElementType;
-    typedef std::pair< HElementType *, int > OutsideInfo;
-
   public:
     static const int dimension = Grid::dimension;
     static const int dimensionworld  = Grid::dimensionworld;
 
-    typedef typename Grid::GridObjectFactoryType Factory;
-    typedef ALUMemoryProvider< This > StorageType;
-
   private:
+    typedef typename ALU2dImplTraits< dimensionworld, eltype >::HElementType HElementType;
     typedef typename ALU2dImplTraits< dimensionworld, eltype >::ThinelementType ThinelementType;
     typedef typename ALU2dImplTraits< dimensionworld, eltype >::HBndElType HBndElType;
     typedef typename ALU2dImplTraits< dimensionworld, eltype >::PeriodicBndElType PeriodicBndElType;
 
+    typedef std::pair< HElementType *, int > OutsideInfo;
+
   public:
+    typedef typename Grid::GridObjectFactoryType Factory;
+    typedef ALUMemoryProvider< This > StorageType;
+
     //! type of the intersection
     typedef Dune::Intersection< Grid, Dune::ALU2dGridLeafIntersection > Intersection;
 
