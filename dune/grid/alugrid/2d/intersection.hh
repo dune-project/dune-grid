@@ -39,8 +39,14 @@ namespace Dune
   // Internal Forward Declarations
   // -----------------------------
 
-  template< class Grid >
+  template< class Grid, class Info >
   class ALU2dGridIntersectionBase;
+
+  template< class Grid >
+  class ALU2dGridLeafIntersection;
+
+  template< class Grid >
+  class ALU2dGridLevelIntersection;
 
   template< class Grid >
   class ALU2dGridLeafIntersectionIterator;
@@ -85,23 +91,13 @@ namespace Dune
 
 
 
-  //**********************************************************************
-  //
-  // --ALU2dGridIntersectionBase
-  // --IntersectionBase
-  //**********************************************************************
-  /*!
-     Mesh entities of codimension 0 ("elements") allow to visit all neighbors, wh
-     a neighbor is an entity of codimension 0 which has a common entity of codimens
-     These neighbors are accessed via a IntersectionIterator. This allows the implement
-     non-matching meshes. The number of neigbors may be different from the number o
-     of an element!
-   */
+  // ALU2dGridIntersectionBase
+  // -------------------------
 
-  template< class Grid >
+  template< class Grid, class Info >
   class ALU2dGridIntersectionBase
   {
-    typedef ALU2dGridIntersectionBase< Grid > This;
+    typedef ALU2dGridIntersectionBase< Grid, Info > This;
 
     friend class ALU2dGridLeafIntersectionIterator< Grid >;
     friend class ALU2dGridLevelIntersectionIterator< Grid >;
@@ -206,7 +202,7 @@ namespace Dune
     } current;
 
   public:
-    //! The default Constructor , creating an empty ALU2dGridIntersectionIterator
+    //! constructor creating an empty ALU2dGridIntersectionIterator
     ALU2dGridIntersectionBase ( const Factory &factory, int wLevel );
 
     //! copy constructor
@@ -290,11 +286,48 @@ namespace Dune
 
 
 
-  //**********************************************************************
-  //
-  // --ALU2dGridLevelIntersectionIterator
-  // --IntersectionLevelIterator
-  //**********************************************************************
+  // ALU2dGridLeafIntersection
+  // -------------------------
+
+  template< class Grid >
+  class ALU2dGridLeafIntersection
+    : public ALU2dGridIntersectionBase< Grid, void >
+  {
+    typedef ALU2dGridLeafIntersection< Grid > This;
+    typedef ALU2dGridIntersectionBase< Grid, void > Base;
+
+  public:
+    typedef typename Base::Factory Factory;
+
+    ALU2dGridLeafIntersection ( const Factory &factory, int wLevel )
+      : Base( factory, wLevel )
+    {}
+  };
+
+
+
+  // ALU2dGridLevelIntersection
+  // --------------------------
+
+  template< class Grid >
+  class ALU2dGridLevelIntersection
+    : public ALU2dGridIntersectionBase< Grid, void >
+  {
+    typedef ALU2dGridLevelIntersection< Grid > This;
+    typedef ALU2dGridIntersectionBase< Grid, void > Base;
+
+  public:
+    typedef typename Base::Factory Factory;
+
+    ALU2dGridLevelIntersection ( const Factory &factory, int wLevel )
+      : Base( factory, wLevel )
+    {}
+  };
+
+
+
+  // ALU2dGridLevelIntersectionIterator
+  // ----------------------------------
 
   template< class Grid >
   class ALU2dGridLevelIntersectionIterator
@@ -312,14 +345,14 @@ namespace Dune
     typedef typename ALU2dImplTraits< dimensionworld, eltype >::HBndElType HBndElType;
     typedef typename ALU2dImplTraits< dimensionworld, eltype >::PeriodicBndElType PeriodicBndElType;
 
-    typedef ALU2dGridIntersectionBase< Grid > IntersectionImpl;
+    typedef ALU2dGridLevelIntersection< Grid > IntersectionImpl;
 
     typedef typename IntersectionImpl::HElementType HElementType;
     typedef std::pair< HElementType *, int > IntersectionInfo;
 
   public:
     //! type of the intersection
-    typedef Dune::Intersection< Grid, ALU2dGridIntersectionBase > Intersection;
+    typedef Dune::Intersection< Grid, ALU2dGridLevelIntersection > Intersection;
 
     typedef typename Grid::GridObjectFactoryType Factory;
     typedef ALUMemoryProvider< This > StorageType;
@@ -402,7 +435,7 @@ namespace Dune
 
     static const ALU2DSPACE ElementType eltype = Grid::elementType;
 
-    typedef ALU2dGridIntersectionBase< Grid > IntersectionImpl;
+    typedef ALU2dGridLeafIntersection< Grid > IntersectionImpl;
 
     typedef typename IntersectionImpl::HElementType HElementType;
     typedef std::pair< HElementType *, int > IntersectionInfo;
@@ -421,7 +454,7 @@ namespace Dune
 
   public:
     //! type of the intersection
-    typedef Dune::Intersection< Grid, Dune::ALU2dGridIntersectionBase > Intersection;
+    typedef Dune::Intersection< Grid, Dune::ALU2dGridLeafIntersection > Intersection;
 
     typedef typename Grid::template Codim<0>::Entity Entity;
     typedef typename Grid::template Codim<1>::Geometry Geometry;

@@ -25,12 +25,6 @@ namespace Dune {
   class ALU2dGridGeometry;
   template<class GridImp>
   class ALU2dGridHierarchicIterator;
-  template<class GridImp>
-  class ALU2dGridIntersectionBase;
-  template<class GridImp>
-  class ALU2dGridLeafIntersectionIterator;
-  template<class GridImp>
-  class ALU2dGridLevelIntersectionIterator;
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class ALU2dGridLeafIterator;
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >

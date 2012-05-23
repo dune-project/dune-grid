@@ -34,7 +34,9 @@
 namespace Dune
 {
 
-  // Forward declarations
+  // External Forward Declarations
+  // -----------------------------
+
   template<int cd, int dim, class GridImp>
   class ALU2dGridEntity;
   template<int cd, PartitionIteratorType pitype, class GridImp >
@@ -49,8 +51,16 @@ namespace Dune
   class ALU2dGridGeometry;
   template<class GridImp>
   class ALU2dGridHierarchicIterator;
-  template<class GridImp>
+
+  template< class Grid, class Info >
   class ALU2dGridIntersectionBase;
+
+  template< class Grid >
+  class ALU2dGridLeafIntersection;
+
+  template< class Grid >
+  class ALU2dGridLevelIntersection;
+
   template<class GridImp>
   class ALU2dGridLevelIntersectionIterator;
   template<class GridImp>
@@ -74,6 +84,8 @@ namespace Dune
 
   class ALU2dObjectStream;
 
+
+
   // Internal Forward Declarations
   // -----------------------------
 
@@ -90,11 +102,10 @@ namespace Dune
   };
 
 
-  //
-  // --ALU2dGrid
-  // --Grid
-  //
-  //**********************************************************************
+
+  // ALU2dGridFamily
+  // ---------------
+
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   struct ALU2dGridFamily
   {
@@ -113,11 +124,11 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune::Intersection< const GridImp, ALU2dGridIntersectionBase > LeafIntersection;
-      typedef Dune::Intersection< const GridImp, ALU2dGridIntersectionBase > LevelIntersection;
+      typedef Dune::Intersection< const GridImp, ALU2dGridLeafIntersection > LeafIntersection;
+      typedef Dune::Intersection< const GridImp, ALU2dGridLevelIntersection > LevelIntersection;
 
-      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLeafIntersectionIterator, ALU2dGridIntersectionBase > LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLevelIntersectionIterator, ALU2dGridIntersectionBase > LevelIntersectionIterator;
+      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLeafIntersectionIterator, ALU2dGridLeafIntersection > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLevelIntersectionIterator, ALU2dGridLevelIntersection > LevelIntersectionIterator;
 
       typedef Dune::EntityIterator< 0, const GridImp, ALU2dGridHierarchicIterator< const GridImp > > HierarchicIterator;
 
@@ -210,8 +221,12 @@ namespace Dune
       public HasObjectStream,
       public HasHierarchicIndexSet
   {
-    typedef ALU2dGrid< dim, dimworld, eltype > ThisType;
-    typedef GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > > BaseType;
+    typedef ALU2dGrid< dim, dimworld, eltype > This;
+    typedef GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > > Base;
+
+    // old typedefs to keep code compiling
+    typedef This ThisType;
+    typedef Base BaseType;
 
     dune_static_assert( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
     dune_static_assert( dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3." );
@@ -248,9 +263,9 @@ namespace Dune
 
     friend class ALU2dGridHierarchicIndexSet<dim,dimworld,elementType>;
 
-    friend class ALU2dGridIntersectionBase < const ThisType > ;
-    friend class ALU2dGridLevelIntersectionIterator< const ThisType > ;
-    friend class ALU2dGridLeafIntersectionIterator< const ThisType > ;
+    //friend class ALU2dGridIntersectionBase< const This, void >;
+    friend class ALU2dGridLevelIntersectionIterator< const This >;
+    friend class ALU2dGridLeafIntersectionIterator< const This >;
 
     //**********************************************************
     // The Interface Methods
