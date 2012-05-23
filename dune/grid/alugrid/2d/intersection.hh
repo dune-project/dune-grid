@@ -145,11 +145,8 @@ namespace Dune
     //! assignment operator
     const This &operator= ( const This &other );
 
-    //! check whether intersections equal
-    bool equals ( const This &other ) const;
-
-    //! return true if intersection is with boundary
-    bool boundary() const;
+    //! return whether this is an intersection with the domain boundary
+    bool boundary () const { return current.isBoundary(); }
 
     //! return boundary type
     int boundaryId () const;
@@ -221,13 +218,16 @@ namespace Dune
   // -------------------------
 
   template< class Grid >
-  struct ALU2dGridIntersectionInfo
+  class ALU2dGridIntersectionInfo
   {
+    typedef ALU2dGridIntersectionInfo< Grid > This;
+
     static const ALU2DSPACE ElementType elementType = Grid::elementType;
 
     static const int dimension = Grid::dimension;
     static const int dimensionworld  = Grid::dimensionworld;
 
+  public:
     typedef typename ALU2dImplTraits< dimensionworld, elementType >::HElementType HElement;
     typedef typename ALU2dImplTraits< dimensionworld, elementType >::ThinelementType ThinElement;
     typedef typename ALU2dImplTraits< dimensionworld, elementType >::HBndElType HBndElement;
@@ -264,6 +264,12 @@ namespace Dune
     bool conforming () const { return conforming_; }
 
     int walkLevel () const { return walkLevel_; }
+
+    bool equals ( const This &other ) const
+    {
+      // is this really sufficient?
+      return (inside() == other.inside()) && (index() == other.index());
+    }
 
     void setInside ( HElement *inside )
     {
@@ -400,7 +406,7 @@ namespace Dune
     //! increment iterator
     void increment ();
 
-    bool equals ( const This &other ) const { return intersectionImpl().equals( other.intersectionImpl() ); }
+    bool equals ( const This &other ) const { return current().equals( other.current() ); }
 
     const Intersection &dereference () const { return intersection_; }
 
@@ -493,7 +499,7 @@ namespace Dune
     //! increment iterator
     void increment ();
 
-    bool equals ( const This &other ) const { return intersectionImpl().equals( other.intersectionImpl() ); }
+    bool equals ( const This &other ) const { return current().equals( other.current() ); }
 
     const Intersection &dereference () const { return intersection_; }
 

@@ -49,14 +49,6 @@ namespace Dune
 
 
   template< class Grid, class Info >
-  inline bool ALU2dGridIntersectionBase< Grid, Info >
-  ::equals ( const ALU2dGridIntersectionBase< Grid, Info > &other ) const
-  {
-    return ((current.inside() == other.current.inside()) && (current.index() == other.current.index()));
-  }
-
-
-  template< class Grid, class Info >
   inline void ALU2dGridIntersectionBase< Grid, Info > :: checkValid ()
   {
     if( current.outside() )
@@ -67,12 +59,6 @@ namespace Dune
     }
   }
 
-  //! return true if intersection is with boundary
-  template< class Grid, class Info >
-  inline bool ALU2dGridIntersectionBase< Grid, Info > :: boundary() const
-  {
-    return current.isBoundary();
-  }
 
   template< class Grid, class Info >
   inline int ALU2dGridIntersectionBase< Grid, Info > :: boundaryId() const
