@@ -191,9 +191,8 @@ namespace Dune {
     {
       // to be improved, when we using not the refine 8 rule
       // see dune/grid/alugrid/common/geostrage.hh for implementation
-      static ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 8 > geoms( type(), true );
-      assert( geoms.geomCreated( child ) );
-      return LocalGeometry( geoms[ child ] );
+      typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 8 > GeometryStroage ;
+      return LocalGeometry( GeometryStroage::geom( type(), true, child ) );
     }
   }
 
