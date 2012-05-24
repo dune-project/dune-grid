@@ -246,6 +246,8 @@ namespace Dune
     {
       // create static variable on heap
       static std::auto_ptr< ThisType > instance( new ThisType( type, nonConforming ) );
+      // make sure the geometry type is the same
+      assert( type == (*instance)[ child ].type() );
       return (*instance)[ child ];
     }
   };

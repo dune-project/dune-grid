@@ -218,20 +218,20 @@ namespace Dune {
     if( (GridImp::elementType != ALU2DSPACE triangle) && myType.isCube() )
     {
       assert( grid().nonConform() );
-      static ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 > geoms( myType, true );
-      return LocalGeometry( geoms[ nChild() ] );
+      typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 >  GeometryStorage;
+      return LocalGeometry( GeometryStorage::geom( myType, true, nChild() ) );
     }
     else
     {
       if( grid().nonConform() )
       {
-        static ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 > geoms( myType, true );
-        return LocalGeometry( geoms[ nChild() ] );
+        typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 >  GeometryStorage;
+        return LocalGeometry( GeometryStorage::geom( myType, true, nChild() ) );
       }
       else
       {
-        static ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 2 > geoms( myType, false );
-        return LocalGeometry( geoms[ nChild() ] );
+        typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 2 >  GeometryStorage;
+        return LocalGeometry( GeometryStorage::geom( myType, false, nChild() ) );
       }
     }
   }
