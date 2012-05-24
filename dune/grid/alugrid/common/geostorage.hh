@@ -28,6 +28,8 @@ namespace Dune
   template< class GridImp, class GeometryImpl, int nChild >
   class ALULocalGeometryStorage
   {
+    typedef ALULocalGeometryStorage< GridImp, GeometryImpl, nChild > ThisType;
+
     // array with pointers to the geometries
     Dune::array< GeometryImpl *, nChild > geoms_;
 
@@ -131,13 +133,6 @@ namespace Dune
       ::createGeometries(*this, type, nonConform);
     }
 
-    // desctructor deleteing geometries
-    ~ALULocalGeometryStorage ()
-    {
-      for(size_t i=0; i<geoms_.size(); ++i)
-        if(geoms_[i]) delete geoms_[i];
-    }
-
     // check if geometry has been created
     bool geomCreated(int child) const { return geoms_[child] != 0; }
 
@@ -222,7 +217,6 @@ namespace Dune
       delete gridPtr;
     }
 
-  protected:
     // create local geometry
     template< class Geometry >
     void create ( const Geometry &father,
@@ -237,6 +231,22 @@ namespace Dune
 
       geoms_[ child ] = new GeometryImpl();
       geoms_[ child ]->buildGeomInFather( father, son );
+    }
+
+  public:
+    // desctructor deleteing geometries
+    ~ALULocalGeometryStorage ()
+    {
+      for(size_t i=0; i<geoms_.size(); ++i)
+        if(geoms_[i]) delete geoms_[i];
+    }
+
+    //! access local geometries
+    static const GeometryImpl& geom( const GeometryType type, const bool nonConforming, const int child )
+    {
+      // create static variable on heap
+      static std::auto_ptr< ThisType > instance( new ThisType( type, nonConforming ) );
+      return (*instance)[ child ];
     }
   };
 
