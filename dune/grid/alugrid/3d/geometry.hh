@@ -396,7 +396,6 @@ namespace Dune
 
       //! conpy constructor
       GeometryImpl(const GeometryImpl& other) :
-        coordPtr_( other.coordPtr_ ),
         triMap_(other.triMap_),
         fatherCoord_(0),
         status_(other.status_)
