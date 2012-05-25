@@ -132,11 +132,6 @@ namespace Dune {
     //! assignment of iterators
     void assign(const ALU3dGridIntersectionIterator<GridImp> & org);
 
-    const Intersection &dereference () const
-    {
-      return reinterpret_cast< const Intersection & >( *this );
-    }
-
     //! The copy constructor
     bool equals (const ALU3dGridIntersectionIterator<GridImp> & i) const;
 
