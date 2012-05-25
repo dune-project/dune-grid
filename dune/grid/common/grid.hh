@@ -1164,21 +1164,6 @@ namespace Dune {
       return false;
     }
 
-    /** \deprecated default implementation of generation of EntityPointer from EntitySeed.
-        This has to be implemented by each grid */
-    template < class EntitySeed >
-    DUNE_DEPRECATED
-    typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
-    entityPointer( const EntitySeed& seed ) const
-    {
-      typedef typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer EntityPointer ;
-
-      // the default implementation is only available
-      // if the type of entity seed is EntityPointer
-      return EntitySeedHelper ::
-             EntityPointerReturner< EntitySeed, EntityPointer > :: generatePointer( seed );
-    }
-
   protected:
     /**
      * @brief Helper class to choose correct implementation return type for getRealImplementation
