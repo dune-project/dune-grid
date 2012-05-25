@@ -81,7 +81,8 @@ namespace Dune
 
       ElementInfo &operator= ( const ElementInfo &other );
 
-      bool operator! () const;
+      operator bool () const { return (instance_ != null()); }
+
       bool operator== ( const ElementInfo &other ) const;
       bool operator!= ( const ElementInfo &other ) const;
 
@@ -389,13 +390,6 @@ namespace Dune
       removeReference();
       instance_ = other.instance_;
       return *this;
-    }
-
-
-    template< int dim >
-    inline bool ElementInfo< dim >::operator! () const
-    {
-      return (instance_ == null());
     }
 
 

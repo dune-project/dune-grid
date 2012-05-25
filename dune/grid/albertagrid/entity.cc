@@ -15,14 +15,7 @@ namespace Dune
     : grid_( &grid ),
       elementInfo_( elementInfo ),
       subEntity_( subEntity )
-  {
-    if( !elementInfo_ == false )
-    {
-      typedef AlbertaGridCoordinateReader< codim, GridImp > CoordReader;
-      const CoordReader coordReader( grid, elementInfo_, subEntity_ );
-      geo_.build( coordReader );
-    }
-  }
+  {}
 
   template<int codim, int dim, class GridImp>
   inline AlbertaGridEntity< codim, dim, GridImp >
@@ -76,18 +69,12 @@ namespace Dune
   {
     elementInfo_ = elementInfo;
     subEntity_ = subEntity;
-    if( !elementInfo_ == false )
-    {
-      typedef AlbertaGridCoordinateReader< codim, GridImp > CoordReader;
-      const CoordReader coordReader( grid(), elementInfo_, subEntity_ );
-      geo_.build( coordReader );
-    }
   }
 
 
   template< int codim, int dim, class GridImp >
   inline void
-  AlbertaGridEntity< codim, dim, GridImp >::setEntity( const This &other )
+  AlbertaGridEntity< codim, dim, GridImp >::setEntity ( const This &other )
   {
     setElement( other.elementInfo_, other.subEntity_ );
   }
@@ -101,12 +88,15 @@ namespace Dune
   }
 
 
-  template< int cd, int dim, class GridImp >
-  inline typename AlbertaGridEntity< cd, dim, GridImp >::Geometry
-  AlbertaGridEntity< cd, dim, GridImp>::geometry () const
+  template< int codim, int dim, class GridImp >
+  inline typename AlbertaGridEntity< codim, dim, GridImp >::Geometry
+  AlbertaGridEntity< codim, dim, GridImp >::geometry () const
   {
-    assert( !elementInfo_ == false);
-    return Geometry( geo_ );
+    typedef AlbertaGridCoordinateReader< codim, GridImp > CoordReader;
+
+    assert( elementInfo_ );
+    const CoordReader coordReader( grid(), elementInfo_, subEntity_ );
+    return Geometry( GeometryImpl( coordReader ) );
   }
 
 
@@ -126,8 +116,7 @@ namespace Dune
   inline AlbertaGridEntity< 0, dim, GridImp >
   ::AlbertaGridEntity ( const GridImp &grid, const ElementInfo &elementInfo, int subEntity )
     : grid_( &grid ),
-      elementInfo_( elementInfo ),
-      builtgeometry_( false )
+      elementInfo_( elementInfo )
   {
     assert( subEntity == 0 );
   }
@@ -136,8 +125,7 @@ namespace Dune
   inline AlbertaGridEntity< 0, dim, GridImp >
   ::AlbertaGridEntity( const GridImp &grid )
     : grid_( &grid ),
-      elementInfo_(),
-      builtgeometry_( false )
+      elementInfo_()
   {}
 
 
@@ -167,7 +155,7 @@ namespace Dune
   inline bool
   AlbertaGridEntity< 0, dim, GridImp >::hasBoundaryIntersections () const
   {
-    assert( !elementInfo_ == false );
+    assert( elementInfo_ );
     bool isBoundary = false;
     for( int i = 0; i < dim+1; ++i )
       isBoundary |= elementInfo_.isBoundary( i );
@@ -230,7 +218,6 @@ namespace Dune
   AlbertaGridEntity< 0, dim, GridImp >::clearElement ()
   {
     elementInfo_ = ElementInfo();
-    builtgeometry_ = false;
   }
 
 
@@ -239,7 +226,6 @@ namespace Dune
   ::setElement ( const ElementInfo &elementInfo, int subEntity )
   {
     elementInfo_ = elementInfo;
-    builtgeometry_ = false;
   }
 
 
@@ -255,17 +241,11 @@ namespace Dune
   inline typename AlbertaGridEntity< 0, dim, GridImp >::Geometry
   AlbertaGridEntity< 0, dim, GridImp >::geometry () const
   {
-    assert( !elementInfo_ == false );
-    // geometry is only build on demand
-    if( !builtgeometry_ )
-    {
-      typedef AlbertaGridCoordinateReader< 0, GridImp > CoordReader;
-      const CoordReader coordReader( grid(), elementInfo_, 0 );
-      geo_.build( coordReader );
-      builtgeometry_ = true;
-    }
-    assert( builtgeometry_ );
-    return Geometry( geo_ );
+    typedef AlbertaGridCoordinateReader< 0, GridImp > CoordReader;
+
+    assert( elementInfo_ );
+    const CoordReader coordReader( grid(), elementInfo_, 0 );
+    return Geometry( GeometryImpl( coordReader ) );
   }
 
 
@@ -283,7 +263,7 @@ namespace Dune
   {
     typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImpl;
 
-    assert( !elementInfo_ == false );
+    assert( elementInfo_ );
     const ElementInfo fatherInfo = elementInfo_.father();
 
     return EntityPointerImpl( grid(), fatherInfo, 0 );
@@ -312,7 +292,7 @@ namespace Dune
   inline typename AlbertaGridEntity< 0, dim, GridImp >::HierarchicIterator
   AlbertaGridEntity< 0, dim, GridImp >::hbegin( int maxlevel ) const
   {
-    assert( !elementInfo_ == false );
+    assert( elementInfo_ );
     typedef AlbertaGridHierarchicIterator< GridImp > IteratorImp;
     return IteratorImp( grid(), elementInfo_, maxlevel );
   }
@@ -322,7 +302,7 @@ namespace Dune
   inline typename AlbertaGridEntity< 0, dim, GridImp >::HierarchicIterator
   AlbertaGridEntity< 0, dim, GridImp>::hend( int maxlevel ) const
   {
-    assert( !elementInfo_ == false );
+    assert( elementInfo_ );
     typedef AlbertaGridHierarchicIterator< GridImp > IteratorImp;
     return IteratorImp( grid(), level(), maxlevel );
   }
@@ -332,7 +312,7 @@ namespace Dune
   inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIterator
   AlbertaGridEntity< 0, dim, GridImp >::ileafbegin() const
   {
-    assert( !!elementInfo_ );
+    assert( elementInfo_ );
 
 #ifndef NDEBUG
     for( int i = 0; i <= dimension; ++i )
@@ -357,7 +337,7 @@ namespace Dune
   inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIterator
   AlbertaGridEntity< 0, dim, GridImp >::ileafend() const
   {
-    assert( !!elementInfo_ );
+    assert( elementInfo_ );
     typename AlbertaGridLeafIntersectionIterator::End end;
     return AlbertaGridLeafIntersectionIterator( *this, end );
   }
