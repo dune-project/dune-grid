@@ -597,14 +597,6 @@ namespace Dune
      */
     GeometryType type () const { return asImp().geometry().type(); };
 
-    /** \deprecated Implement this method in each grid,
-        default implementation of method seed (only when seed == entity pointer) */
-    EntitySeed seed () const DUNE_DEPRECATED
-    {
-      return EntitySeedHelper :: SeedReturner<
-          EntitySeed,  EntityPointer >::generateSeed ( asImp() );
-    }
-
   private:
     //!  Barton-Nackman trick
     EntityImp<cd,dim,GridImp>& asImp ()
@@ -662,14 +654,6 @@ namespace Dune
         be used to access the Dune::GenericReferenceElement.
      */
     GeometryType type () const { return asImp().geometry().type(); };
-
-    /** \deprecated Implement this method in each grid,
-        default implementation of method seed (only when seed == entity pointer) */
-    EntitySeed seed () const DUNE_DEPRECATED
-    {
-      return EntitySeedHelper :: SeedReturner<
-          EntitySeed,  EntityPointer >::generateSeed ( asImp() );
-    }
 
     /* maybe in later versions
      * \brief Default implementation for access to boundaryId of sub entities

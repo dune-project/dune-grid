@@ -38,7 +38,10 @@ namespace Dune
   public:
     typedef FieldVector<alu3d_ctype, cdim> CoordinateVectorType;
 
-    enum { invalid = -1, updated = 0, buildmapping = 1 };
+    static const char invalid      = -1; // means geometry is not meaningfull
+    static const char updated      =  0; // means the point values have been set
+    static const char buildmapping =  1; // means updated and mapping was build
+
     struct CoordVecCopy
     {
 
