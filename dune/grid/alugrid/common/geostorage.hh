@@ -245,10 +245,10 @@ namespace Dune
     static const GeometryImpl& geom( const GeometryType type, const bool nonConforming, const int child )
     {
       // create static variable on heap
-      static std::auto_ptr< ThisType > instance( new ThisType( type, nonConforming ) );
+      static ThisType instance( type, nonConforming );
       // make sure the geometry type is the same
-      assert( type == (*instance)[ child ].type() );
-      return (*instance)[ child ];
+      assert( type == instance[ child ].type() );
+      return instance[ child ];
     }
   };
 
