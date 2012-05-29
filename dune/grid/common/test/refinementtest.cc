@@ -10,6 +10,7 @@
 #include <ostream>
 
 #include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
 
 #include <dune/grid/common/virtualrefinement.hh>
@@ -38,8 +39,12 @@ void testVirtualRefinement(int &result, const Dune::GeometryType& elementType,
   std::cout << "Checking virtual refinement " << elementType << " -> "
             << coerceTo << " level " << refinement << std::endl;
 
+  const GenericReferenceElement<ct, dim> &refelem =
+    GenericReferenceElements<ct, dim>::general(elementType);
+
   typedef Dune::VirtualRefinement<dim, ct> Refinement;
   typedef typename Refinement::ElementIterator eIterator;
+  typedef typename Refinement::VertexIterator vIterator;
 
   // Make a virtual refinement of the reference element
   Refinement & elementRefinement =
@@ -49,9 +54,25 @@ void testVirtualRefinement(int &result, const Dune::GeometryType& elementType,
   eIterator eSubIt  = elementRefinement.eBegin(refinement);
 
   for (; eSubIt != eSubEnd; ++eSubIt)
-    std::cout << eSubIt.coords() << std::endl;
+    if(refelem.checkInside(eSubIt.coords()))
+      pass(result);
+    else {
+      std::cerr << "Error: Sub-element position (" << eSubIt.coords()
+                << ") is outside of the reference element" << std::endl;
+      fail(result);
+    }
 
-  pass(result);
+  vIterator vSubEnd = elementRefinement.vEnd(refinement);
+  vIterator vSubIt  = elementRefinement.vBegin(refinement);
+
+  for (; vSubIt != vSubEnd; ++vSubIt)
+    if(refelem.checkInside(vSubIt.coords()))
+      pass(result);
+    else {
+      std::cerr << "Error: Sub-vertex position (" << vSubIt.coords()
+                << ") is outside of the reference element" << std::endl;
+      fail(result);
+    }
 }
 
 
