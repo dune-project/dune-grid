@@ -99,21 +99,16 @@ namespace Dune
     GeometryType type () const;
 
     //! obtain entity seed
-    EntitySeed seed () const
-    {
-      return EntitySeed( elementInfo(), subEntity() );
-    }
+    EntitySeed seed () const { return EntitySeed( elementInfo(), subEntity() ); }
 
     //***********************************************
-    //  End of Interface methods
+    // end of interface methods
     //***********************************************
+
     //! needed for the LevelIterator and LeafIterator
     ALBERTA EL_INFO *getElInfo () const;
 
-    const ElementInfo &elementInfo () const
-    {
-      return elementInfo_;
-    }
+    const ElementInfo &elementInfo () const { return elementInfo_; }
 
     //! equality of entities
     bool equals ( const This &other ) const;
@@ -151,12 +146,12 @@ namespace Dune
 
     // number of the subentity within the element (in ALBERTA numbering)
     int subEntity_;
-
-    // current geometry
-    GeometryImpl geo_;
   };
 
 
+
+  // AlbertaGridEntity for codimension 0
+  // -----------------------------------
 
   /*!
      A Grid is a container of grid entities. An entity is parametrized by the codimension.
@@ -201,7 +196,6 @@ namespace Dune
     typedef typename GridImp::template Codim< 0 >::EntitySeed EntitySeed;
     typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
     typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
-    //typedef AlbertaGridGlobalGeometry< dimension, dimworld, GridImp > GeometryImp;
     typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
 
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
@@ -232,10 +226,7 @@ namespace Dune
     GeometryType type () const;
 
     //! obtain entity seed
-    EntitySeed seed () const
-    {
-      return EntitySeed( elementInfo() );
-    }
+    EntitySeed seed () const { return EntitySeed( elementInfo() ); }
 
     /** obtain the number of subentities of a codimension
      *
@@ -386,13 +377,9 @@ namespace Dune
 
     // local coordinates within father
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
+  };
 
-    //! the cuurent geometry
-    mutable GeometryImpl geo_;
-    mutable bool builtgeometry_;  //!< true if geometry has been constructed
-  }; // end of AlbertaGridEntity codim = 0
-
-}
+} // namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
