@@ -38,7 +38,10 @@ namespace Dune
   public:
     typedef FieldVector<alu3d_ctype, cdim> CoordinateVectorType;
 
-    enum { invalid = -1, updated = 0, buildmapping = 1 };
+    static const signed char invalid      = -1; // means geometry is not meaningfull
+    static const signed char updated      =  0; // means the point values have been set
+    static const signed char buildmapping =  1; // means updated and mapping was build
+
     struct CoordVecCopy
     {
 
@@ -102,7 +105,7 @@ namespace Dune
 
       CoordinateMatrixType coord_;
       MappingType liMap_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -167,7 +170,7 @@ namespace Dune
 
       CoordinateMatrixType coord_;
       MappingType liMap_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -231,7 +234,7 @@ namespace Dune
       CoordinateMatrixType coord_;
 
       MappingType liMap_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -305,7 +308,7 @@ namespace Dune
       CoordinateMatrixType coord_;
 
       MappingType biMap_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -377,7 +380,7 @@ namespace Dune
       const alu3d_ctype* coordPtr_[ corners_ ];
       MappingType triMap_;
       CoordinateMatrixType* fatherCoord_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -528,7 +531,7 @@ namespace Dune
       const alu3d_ctype* coordPtr_[ corners_ ];
       MappingType liMap_;
       CoordinateMatrixType* fatherCoord_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
