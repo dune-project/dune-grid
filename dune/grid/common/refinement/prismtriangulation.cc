@@ -35,11 +35,8 @@ namespace Dune {
       //  Utilities
       //
 
-      using Simplex::factorial;
-      using Simplex::binomial;
       using Simplex::getPermutation;
       using Simplex::referenceToKuhn;
-      using Simplex::kuhnToReference;
 
       // ////////////////////////////////////
       //
@@ -50,21 +47,26 @@ namespace Dune {
       template<int dimension, class CoordType, int codimension>
       class RefinementIteratorSpecial;
 
-
-      //need coordinate transformation so that i can use the permutations with index 0 , 1 , 2 to triangulate the prism
-      template<int dimension, class CoordType> FieldVector<CoordType, dimension> transformCoordinate(          //! Point to transform
-        FieldVector<CoordType, dimension> point) {
+      /*
+       * The permutations 0,2 and 3 of the Kuhn-decomposition of a cube into simplices form a prism.
+       * The resulting prism is not oriented the same as the reference prism and so the Kuhn-coordinates
+       * have to be transformed using the method below.
+       */
+      template<int dimension, class CoordType> FieldVector<CoordType, dimension> transformCoordinate(FieldVector<CoordType, dimension> point)
+      {
         FieldVector<CoordType, dimension> transform;
-        transform[0]=point[2];
-        transform[1]=point[0]-point[2];
-        transform[2]=point[1];
+        transform[0]=point[1];
+        transform[1]=1-point[0];
+        transform[2]=point[2];
         return transform;
       }
 
-
-
-
-
+      /** \brief Implementation of the refinement of a prism into simplices.
+       *
+       * Note that the virtual vertices of two intersecting simplices might have copies, i.e.
+       * by running over all vertices using the VertexIterator you might run over some twice.
+       *
+       */
       template<int dimension_, class CoordType>
       class RefinementImp {
       public:
@@ -215,8 +217,9 @@ namespace Dune {
       RefinementIteratorSpecial<dimension, CoordType, dimension>::
       coords() const
       {
+        // while the kuhnIndex runs from 0,1,2 the actual permutations we need are 0,2,3
         return transformCoordinate(referenceToKuhn(backend.coords(),
-                                                   getPermutation<dimension>(kuhnIndex)));
+                                                   getPermutation<dimension>((kuhnIndex+2)%4)));
 
       }
 
@@ -338,7 +341,8 @@ namespace Dune {
       typename RefinementIteratorSpecial<dimension, CoordType, 0>::CoordVector
       RefinementIteratorSpecial<dimension, CoordType, 0>::
       global(const CoordVector &local) const {
-        return referenceToKuhn(local, getPermutation<dimension>(kuhnIndex));
+        // while the kuhnIndex runs from 0,1,2 the actual permutations we need are 0,2,3
+        return transformCoordinate(referenceToKuhn(local, getPermutation<dimension>((kuhnIndex+2)%4)));
       }
 
       // common
