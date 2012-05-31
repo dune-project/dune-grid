@@ -42,11 +42,13 @@ struct subIndexCheck
     {
       typedef typename Grid::template Codim< Entity::codimension >::EntityPointer EntityPointer;
       typedef typename Grid::template Codim< Entity::codimension >::EntitySeed EntitySeed;
+      #ifndef NDEBUG
       EntitySeed seed = e.seed();
 
       EntityPointer ep1 ( e );
       // regain entity pointer and check equality
       EntityPointer ep2 = g.entityPointer( seed );
+      #endif
       assert( ep1 == ep2 );
     }
 
@@ -58,11 +60,13 @@ struct subIndexCheck
       EntityPointer ep( *(e.template subEntity< cd >( i ) ) );
       assert( ep == e.template subEntity< cd >( i ) );
 
+      #ifndef NDEBUG
       typedef typename Grid::template Codim< cd >::EntitySeed EntitySeed;
       EntitySeed seed = ep->seed();
 
       // regain entity pointer and check equality
       EntityPointer ep2 = g.entityPointer( seed );
+      #endif
       assert( ep == ep2 );
 
       const typename Grid::LevelGridView &levelGridView = g.levelView(e.level());

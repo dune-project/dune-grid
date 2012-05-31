@@ -406,7 +406,9 @@ namespace Dune
     {
       typedef typename GridView :: template Codim< 0 > :: Iterator Iterator;
       // choose the right reference element
+    #ifndef NDEBUG
       const Iterator refend = view.template end< 0 >();
+    #endif
       Iterator refit = view.template begin< 0 >();
       assert( refit != refend );
 
