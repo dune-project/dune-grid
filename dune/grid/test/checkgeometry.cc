@@ -183,8 +183,10 @@ namespace Dune
     enum { dimw = GV::dimensionworld };
 
     const FieldVector<ctype, dim> pos(0.2);
+    #ifndef NDEBUG
     const FieldVector<ctype, dimw> glob =
       gridView.template begin<0>()->geometry().global(pos);
+    #endif
 
     Iterator it = gridView.template begin<0>();
     const Geometry geomCopy = it->geometry();
