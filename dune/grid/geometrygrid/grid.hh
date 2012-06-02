@@ -71,7 +71,7 @@ namespace Dune
    *
    *  \nosubgrouping
    */
-  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid >, class Allocator = std::allocator< void > >
+  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid >, class Allocator = std::allocator< char > >
   class GeometryGrid
   /** \cond */
     : public GridDefaultImplementation
