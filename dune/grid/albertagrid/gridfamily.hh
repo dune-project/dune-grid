@@ -10,10 +10,10 @@
 
 #include <dune/common/collectivecommunication.hh>
 
-#include <dune/grid/common/geometry.hh>
-
 #include <dune/grid/common/entity.hh>
 #include <dune/grid/common/entitypointer.hh>
+#include <dune/grid/common/geometry.hh>
+#include <dune/grid/common/geometryreference.hh>
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/common/intersectioniterator.hh>
 #include <dune/grid/common/entityiterator.hh>
@@ -114,11 +114,10 @@ namespace Dune
       template< int cd >
       struct Codim
       {
-        // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
-        typedef AlbertaGridGlobalGeometry< dim-cd, dimworld, const GridImp > GeometryImpl;
-        typedef AlbertaGridGeometry< dim-cd, dim, const GridImp > LocalGeometryImpl;
-        typedef Dune::Geometry< dim-cd, dimworld, const GridImp, AlbertaGridGlobalGeometry > Geometry;
-        typedef Dune::Geometry< dim-cd, dim, const GridImp, AlbertaGridGeometry > LocalGeometry;
+        typedef AlbertaGridGlobalGeometry< dim-cd, dimworld, const Grid > GeometryImpl;
+        typedef AlbertaGridGeometry< dim-cd, dim, const Grid > LocalGeometryImpl;
+        typedef Dune::Geometry< dim-cd, dimworld, const Grid, AlbertaGridGlobalGeometry > Geometry;
+        typedef Dune::Geometry< dim-cd, dim, const Grid, LocalGeometryReference > LocalGeometry;
 
         typedef Dune::Entity< cd, dim, const GridImp, AlbertaGridEntity > Entity;
 
