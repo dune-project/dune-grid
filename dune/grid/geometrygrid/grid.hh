@@ -702,7 +702,7 @@ namespace Dune
     HostGrid *const hostGrid_;
     CoordFunction &coordFunction_;
     bool removeHostGrid_;
-    mutable std::vector< LevelIndexSet *, Allocator > levelIndexSets_;
+    mutable std::vector< LevelIndexSet *, typename Allocator::template rebind< LevelIndexSet * >::other > levelIndexSets_;
     mutable LeafIndexSet leafIndexSet_;
     mutable GlobalIdSet globalIdSet_;
     mutable LocalIdSet localIdSet_;
