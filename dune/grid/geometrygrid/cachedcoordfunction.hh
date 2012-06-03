@@ -90,7 +90,7 @@ namespace Dune
   // CachedCoordFunction
   // -------------------
 
-  template< class HostGrid, class CoordFunction, class Allocator = std::allocator< char > >
+  template< class HostGrid, class CoordFunction, class Allocator = std::allocator< void > >
   class CachedCoordFunction
     : public DiscreteCoordFunction< typename CoordFunction::ctype, CoordFunction::dimRange, CachedCoordFunction< HostGrid, CoordFunction > >
   {
