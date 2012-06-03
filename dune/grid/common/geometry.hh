@@ -14,7 +14,6 @@
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/conversion.hh>
 
 namespace Dune
 {
@@ -317,7 +316,7 @@ namespace Dune
   // GEOMETRY Default Implementations
   //*************************************************************************
   //
-  // --GeometryDefault
+  // --GeometryDefaultImplementation
   //
   //! Default implementation for class Geometry
   template<int mydim, int cdim, class GridImp, template<int,int,class> class GeometryImp>
@@ -376,7 +375,7 @@ namespace Dune
     //!  Barton-Nackman trick
     GeometryImp<mydim,cdim,GridImp>& asImp () {return static_cast<GeometryImp<mydim,cdim,GridImp>&>(*this);}
     const GeometryImp<mydim,cdim,GridImp>& asImp () const {return static_cast<const GeometryImp<mydim,cdim,GridImp>&>(*this);}
-  }; // end GeometryDefault
+  }; // end GeometryDefaultImplementation
 
   template<int cdim, class GridImp, template<int,int,class> class GeometryImp>
   class GeometryDefaultImplementation<0,cdim,GridImp,GeometryImp>
@@ -434,7 +433,7 @@ namespace Dune
     // Barton-Nackman trick
     GeometryImp<mydim,cdim,GridImp>& asImp () {return static_cast<GeometryImp<mydim,cdim,GridImp>&>(*this);}
     const GeometryImp<mydim,cdim,GridImp>& asImp () const {return static_cast<const GeometryImp<mydim,cdim,GridImp>&>(*this);}
-  }; // end GeometryDefault
+  }; // end GeometryDefaultImplementation
 
 } // namespace Dune
 
