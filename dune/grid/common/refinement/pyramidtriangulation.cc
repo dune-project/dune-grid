@@ -251,7 +251,7 @@ namespace Dune {
         CoordVector coords() const;
 
         DUNE_REFINEMENT_DEPRECATED("The geometries for the "
-                                   "Refinements have deprecated.  If "
+                                   "Refinements have been deprecated.  If "
                                    "you have a case where they are "
                                    "useful, please complain...")
         Geometry geometry() const;
