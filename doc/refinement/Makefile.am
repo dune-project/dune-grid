@@ -2,9 +2,11 @@
 
 #refinementdir = $(includedir)/dune/grid/common/refinement
 
-PICS = referencetokuhn0.svg referencetokuhn0.png \
-	     simplexvertexindex.svg simplexvertexindex.png \
-	     kuhntriangulation.svg
+dist_noinst_DATA =								\
+	kuhntriangulation.svg kuhntriangulation.png kuhntriangulation.eps	\
+	referencetokuhn0.svg referencetokuhn0.png referencetokuhn0.eps		\
+	refinement.tex								\
+	simplexvertexindex.svg simplexvertexindex.png simplexvertexindex.eps
 
 if BUILD_DOCS
  DOCS = referencetokuhn0.png simplexvertexindex.png

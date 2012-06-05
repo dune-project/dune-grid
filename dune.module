@@ -1,4 +1,4 @@
 Module: dune-grid
-Version: 2.2-mn
+Version: 2.3-mn
 Maintainer: dune@dune-project.org
-Depends: dune-common (>= 2.2) dune-geometry (>= 2.2)
+Depends: dune-common (>= 2.3) dune-geometry (>= 2.3)
