@@ -388,8 +388,9 @@ namespace Dune {
 
   //! Non-conforming face mappings for tetrahedra
   template< class Comm >
-  struct NonConformingFaceMapping< tetra, Comm >
+  class NonConformingFaceMapping< tetra, Comm >
   {
+  public:
     typedef FieldVector< alu3d_ctype, 3 > CoordinateType;
     typedef typename ALU3dImplTraits< tetra, Comm >::HfaceRuleType RefinementRuleType;
 
@@ -420,8 +421,9 @@ namespace Dune {
 
   //! Non-conforming face mappings for hexahedra
   template< class Comm >
-  struct NonConformingFaceMapping< hexa, Comm >
+  class NonConformingFaceMapping< hexa, Comm >
   {
+  public:
     typedef FieldVector< alu3d_ctype, 2 > CoordinateType;
     typedef typename ALU3dImplTraits< hexa, Comm >::HfaceRuleType RefinementRuleType;
 

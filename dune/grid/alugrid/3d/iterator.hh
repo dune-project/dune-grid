@@ -414,14 +414,16 @@ namespace Dune {
   //
   //////////////////////////////////////////////////////////////////////////////
   template <class InternalIteratorType >
-  struct ALU3dGridTreeIterator
+  class ALU3dGridTreeIterator
   {
+  public:
     typedef typename InternalIteratorType :: val_t val_t;
 
     // here the items level will do
     template <class GridImp, int codim>
-    struct GetLevel
+    class GetLevel
     {
+    public:
       template <class ItemType>
       static int getLevel(const GridImp & grid, const ItemType & item, int level )
       {
@@ -432,8 +434,9 @@ namespace Dune {
 
     // level is not needed for codim = 0
     template <class GridImp>
-    struct GetLevel<GridImp,0>
+    class GetLevel<GridImp,0>
     {
+    public:
       template <class ItemType>
       static int getLevel(const GridImp & grid, const ItemType & item, int level )
       {
@@ -442,8 +445,9 @@ namespace Dune {
     };
 
     template <class GridImp>
-    struct GetLevel<GridImp,3>
+    class GetLevel<GridImp,3>
     {
+    public:
       template <class ItemType>
       static int getLevel(const GridImp & grid, const ItemType & item, int level)
       {
@@ -684,8 +688,9 @@ namespace Dune {
 
     //! empty implementation for
     template < class PointerType >
-    struct GhostElementStorage< PointerType, No_Comm >
+    class GhostElementStorage< PointerType, No_Comm >
     {
+    public:
       GhostElementStorage() {}
       explicit GhostElementStorage( const PointerType& ) {}
       PointerType& operator * () {  PointerType* p = 0; assert( false ); abort(); return *p; }
@@ -702,7 +707,7 @@ namespace Dune {
 #if ALU3DGRID_PARALLEL
     //! implementation holding two ghost pointer
     template < class PointerType >
-    struct GhostElementStorage< PointerType, MPI_Comm >
+    class GhostElementStorage< PointerType, MPI_Comm >
     {
     private:
       // pointers to ghost and current ghost

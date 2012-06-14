@@ -235,7 +235,7 @@ namespace Dune {
     typedef typename ALU2dImplTraits<dimworld, elementType >::HElementType HElementType ;
     typedef typename ALU2dImplTraits<dimworld, elementType >::ElementType ElementType ;
 
-    template< class > friend class DGFBaseFactory;
+    template< class > friend struct DGFBaseFactory;
 
     template< int, int, class > friend class ALU2dGridEntity;
 

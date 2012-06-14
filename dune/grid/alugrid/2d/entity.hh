@@ -374,9 +374,8 @@ namespace Dune {
       int j = i;
       // apply mapping for codim 1
       // dune to alu
-      switch (codim)
+      if( codim == 1 )
       {
-      case 1 :
         if( item_->numvertices() == 3 )
           j = 2 - i;
         else
@@ -384,14 +383,16 @@ namespace Dune {
                      case 1 : j=0;break;
                      case 2 : j=3;break;
                      case 3 : j=1;break;}
-        break;
-      case 2 :
+      }
+      else if ( codim == 2 )
+      {
         if( item_->numvertices() == 4 )
+        {
           switch (i) { case 0 : j=0;break;
                      case 1 : j=1;break;
                      case 2 : j=3;break;
                      case 3 : j=2;break;}
-        break;
+        }
       }
       return entity< codim >( j );
     }

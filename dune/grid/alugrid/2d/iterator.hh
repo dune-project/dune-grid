@@ -451,7 +451,7 @@ namespace Dune {
       maxlevel_= org.maxlevel_;
       endIter_ = org.endIter_;
       return *this;
-    };
+    }
 
   private:
 

@@ -216,7 +216,7 @@ namespace Dune
 
     const MacroKeyImp & getKey() const { return key_; }
     int nChild() const { return nChild_; }
-    int codim() const { return codim_; };
+    int codim() const { return codim_; }
 
     bool isValid () const
     {

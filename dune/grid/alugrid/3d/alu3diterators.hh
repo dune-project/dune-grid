@@ -61,9 +61,10 @@ namespace ALUGridSpace
   //  LevelIterator Wrapper
   //*********************************************************
   template< class val_t >
-  struct IteratorWrapperInterface
+  class IteratorWrapperInterface
     : public IteratorSTI< val_t >
   {
+  public:
     virtual ~IteratorWrapperInterface () {}
 
     virtual int size  () = 0;
@@ -595,9 +596,10 @@ namespace ALUGridSpace
   //  --GhostIterator
   //
   //****************************
-  struct ALU3dGridGhostIterator
+  class ALU3dGridGhostIterator
     : public IteratorWrapperInterface< LeafValType >
   {
+  public:
     typedef Dune::ALU3dBasicImplTraits< MPI_Comm >::GitterImplType GitterImplType;
 
     typedef Dune::ALU3dBasicImplTraits< MPI_Comm >::HElementType HElementType;
@@ -991,9 +993,10 @@ namespace ALUGridSpace
 
   //! Ghost Iterator
   template< int codim >
-  struct ALU3dGridGhostIteratorHigherCodim
+  class ALU3dGridGhostIteratorHigherCodim
     : public IteratorWrapperInterface< typename IteratorElType< codim, MPI_Comm >::val_t >
   {
+  public:
     typedef typename Dune::ALU3dBasicImplTraits< MPI_Comm >::HElementType HElementType;
     typedef typename Dune::ALU3dBasicImplTraits< MPI_Comm >::HBndSegType HBndSegType;
     typedef typename Dune::ALU3dBasicImplTraits< MPI_Comm >::GhostPairType GhostPairType;
@@ -1387,9 +1390,10 @@ namespace ALUGridSpace
   // placed here because we need ALU3dGridLevelIteratorWrapper<0,Dune::All_Partition> here
   // the edge level iterator
   template< PartitionIteratorType pitype, class Comm >
-  struct ALU3dGridLevelIteratorWrapper< 2, pitype, Comm >
+  class ALU3dGridLevelIteratorWrapper< 2, pitype, Comm >
     : public IteratorWrapperInterface< typename IteratorElType< 2, Comm >::val_t >
   {
+  public:
     typedef typename ALUHElementType< 2, Comm >::ElementType ElType;
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HBndSegType HBndSegType;
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::GEOEdgeType GEOEdgeType;
