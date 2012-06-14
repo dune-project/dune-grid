@@ -8,7 +8,7 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   virtualrefinement.hh genericreferenceelements.hh \
   boundarysegment.hh gridinfo.hh indexidset.hh mapper.hh \
   mcmgmapper.hh scsgmapper.hh universalmapper.hh sizecache.hh \
-  intersectioniteratorwrapper.hh quadraturerules.hh \
+  intersectioniteratorwrapper.hh \
   datahandleif.hh gridfactory.hh \
   gridview.hh defaultgridview.hh \
   gridenums.hh adaptcallback.hh \
@@ -16,7 +16,7 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   topologyfactory.hh exceptions.hh backuprestore.hh \
   geometryreference.hh
 
-SUBDIRS = refinement test quadraturerules
+SUBDIRS = refinement test
 
 dist_noinst_DATA = cube-to-tet-6.png
 

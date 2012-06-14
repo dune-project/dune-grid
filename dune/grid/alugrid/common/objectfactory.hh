@@ -26,7 +26,7 @@ namespace Dune
   class ALUGridObjectFactory
   {
     template <class OF, int codim>
-    struct ALUGridEntityFactory;
+    class ALUGridEntityFactory;
 
     /////////////////////////////////////////////////////
     //
@@ -34,8 +34,9 @@ namespace Dune
     //
     /////////////////////////////////////////////////////
     template <class GridObjectFactory>
-    struct ALUGridEntityFactory<GridObjectFactory,0>
+    class ALUGridEntityFactory<GridObjectFactory,0>
     {
+    public:
       enum { codim = 0 };
       typedef typename GridImp :: template Codim<codim> :: Entity Entity;
       typedef MakeableInterfaceObject<Entity> EntityObject;
@@ -54,8 +55,9 @@ namespace Dune
     };
 
     template <class GridObjectFactory>
-    struct ALUGridEntityFactory<GridObjectFactory,1>
+    class ALUGridEntityFactory<GridObjectFactory,1>
     {
+    public:
       enum { codim = 1 };
       typedef typename GridImp :: template Codim<codim> :: Entity Entity;
       typedef MakeableInterfaceObject<Entity> EntityObject;
@@ -74,8 +76,9 @@ namespace Dune
     };
 
     template <class GridObjectFactory>
-    struct ALUGridEntityFactory<GridObjectFactory,2>
+    class ALUGridEntityFactory<GridObjectFactory,2>
     {
+    public:
       enum { codim = 2 };
       typedef typename GridImp :: template Codim<codim> :: Entity Entity;
       typedef MakeableInterfaceObject<Entity> EntityObject;
@@ -94,8 +97,9 @@ namespace Dune
     };
 
     template <class GridObjectFactory>
-    struct ALUGridEntityFactory<GridObjectFactory,3>
+    class ALUGridEntityFactory<GridObjectFactory,3>
     {
+    public:
       enum { codim = 3 };
       typedef typename GridImp :: template Codim<codim> :: Entity Entity;
       typedef MakeableInterfaceObject<Entity> EntityObject;

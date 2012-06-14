@@ -50,7 +50,6 @@ AC_CONFIG_FILES([Makefile
     dune/grid/Makefile
     dune/grid/test/Makefile
     dune/grid/common/test/Makefile
-    dune/grid/common/quadraturerules/Makefile
     dune/grid/common/refinement/Makefile
     dune/grid/common/Makefile
     dune/grid/uggrid/Makefile
