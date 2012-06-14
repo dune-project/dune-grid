@@ -25,3 +25,5 @@ gmshtest-alberta3d
 gmshtest-alugrid
 conformvolumevtktest
 nonconformboundaryvtktest
+mpivtktest
+config.log
