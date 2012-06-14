@@ -1,14 +1,12 @@
 testmapping
 testgeo
-
 Makefile
 Makefile.in
-
 .deps
 .libs
-
 *.dgf.*
 *.log
 *.so.*
 *.swp
 *.tmp*
+testbasicgeometry
