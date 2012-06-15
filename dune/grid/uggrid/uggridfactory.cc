@@ -585,10 +585,6 @@ createBegin()
   }
 
   // Delete levelIndexSets if there are any
-  for (unsigned int i=0; i<grid_->levelIndexSets_.size(); i++)
-    if (grid_->levelIndexSets_[i])
-      delete grid_->levelIndexSets_[i];
-
   grid_->levelIndexSets_.resize(0);
 
   // //////////////////////////////////////////////////////////

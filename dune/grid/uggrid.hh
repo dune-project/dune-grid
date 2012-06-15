@@ -659,7 +659,7 @@ namespace Dune {
     {
       if (level<0 || level>maxLevel())
         DUNE_THROW(GridError, "levelIndexSet of nonexisting level " << level << " requested!");
-      return *levelIndexSets_[level];
+      return levelIndexSets_[level];
     }
 
     /** \brief Access to the LeafIndexSet */
@@ -1071,7 +1071,7 @@ namespace Dune {
     std::string name_;
 
     // Our set of level indices
-    std::vector<UGGridLevelIndexSet<const UGGrid<dim> >*> levelIndexSets_;
+    std::vector<UGGridLevelIndexSet<const UGGrid<dim> > > levelIndexSets_;
 
     UGGridLeafIndexSet<const UGGrid<dim> > leafIndexSet_;
 
