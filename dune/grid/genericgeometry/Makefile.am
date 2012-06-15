@@ -1,11 +1,5 @@
 genericgeometrydir = $(includedir)/dune/grid/genericgeometry
-genericgeometry_HEADERS = cachedmapping.hh  codimtable.hh  conversion.hh \
-                          cornermapping.hh  genericreferenceelement.hh \
-                          geometry.hh  geometrytraits.hh  hybridmapping.hh \
-                          mapping.hh  mappingprovider.hh  matrixhelper.hh \
-                          maximum.hh  referencedomain.hh  referenceelements.hh \
-                          referencetopologies.hh  subtopologies.hh \
-                          topologytypes.hh  traceprovider.hh
+genericgeometry_HEADERS = geometrytraits.hh  referencetopologies.hh
 
 SUBDIRS = test
 
