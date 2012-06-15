@@ -258,7 +258,7 @@ namespace Dune
        or EntityPointer.
      */
     EntityPointer(const IteratorImp & i) :
-      realIterator(i) {};
+      realIterator(i) {}
 
     /** @brief Forward equality check to realIterator */
     template< class ItImp >

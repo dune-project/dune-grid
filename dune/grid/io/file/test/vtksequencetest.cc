@@ -39,7 +39,7 @@ public:
     time_ = time;
   }
   //! return number of components
-  virtual int ncomps () const { return n; };
+  virtual int ncomps () const { return n; }
 
   //! evaluate single component comp in the entity e at local coordinates xi
   /*! Evaluate the function in an entity at local coordinates.
@@ -59,7 +59,7 @@ public:
     char _name[256];
     snprintf(_name, 256, "vector-%iD", ncomps());
     return std::string(_name);
-  };
+  }
 };
 
 template< class GridView >

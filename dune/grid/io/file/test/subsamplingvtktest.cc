@@ -36,7 +36,7 @@ public:
   { }
 
   //! return number of components
-  virtual int ncomps () const { return n; };
+  virtual int ncomps () const { return n; }
 
   //! evaluate single component comp in the entity e at local coordinates xi
   /*! Evaluate the function in an entity at local coordinates.
@@ -57,7 +57,7 @@ public:
     char _name[256];
     snprintf(_name, 256, "%s-vector-%iD", type, ncomps());
     return std::string(_name);
-  };
+  }
 
 
 };

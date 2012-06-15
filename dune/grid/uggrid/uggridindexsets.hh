@@ -31,6 +31,25 @@ namespace Dune {
      */
     UGGridLevelIndexSet () {}
 
+    /** \brief Copy constructor
+     *
+     * As far as I can tell this is only called when the vector of all
+     * level index sets is resized, to create the new entries
+     */
+    UGGridLevelIndexSet(const UGGridLevelIndexSet& other)
+      : grid_(other.grid_),
+        level_(other.level_),
+        numSimplices_(other.numSimplices_),
+        numPyramids_(other.numPyramids_),
+        numPrisms_(other.numPrisms_),
+        numCubes_(other.numCubes_),
+        numVertices_(other.numVertices_),
+        numEdges_(other.numEdges_),
+        numTriFaces_(other.numTriFaces_),
+        numQuadFaces_(other.numQuadFaces_),
+        myTypes_(other.myTypes_)
+    {}
+
     //! get index of an entity
     template<int cd>
     unsigned int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const
