@@ -160,7 +160,7 @@ namespace Dune
     //===========================================================
 
     //! Copy constructor from EntityImp
-    explicit Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {};
+    explicit Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {}
 
     /* not part of the interface but maybe in later versions
        \brief Id of the boundary which is associated with the entity,
@@ -186,7 +186,7 @@ namespace Dune
 
   protected:
     /** hide copy constructor */
-    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
+    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {}
     /** hide assignment operator */
     Entity & operator = (const Entity& rhs) {
       realEntity = rhs.realEntity;
@@ -510,7 +510,7 @@ namespace Dune
     bool hasBoundaryIntersections () const { return realEntity.hasBoundaryIntersections(); }
 
     //! Copy constructor from EntityImp
-    explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {};
+    explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {}
 
     // @copydoc Dune::Entity::boundaryId()
     // maybe available in later versions
@@ -546,12 +546,12 @@ namespace Dune
 
   protected:
     /** hide copy constructor */
-    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
+    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {}
     /** hide assignement operator */
     Entity & operator = (const Entity& rhs) {
       realEntity = rhs.realEntity;
       return *this;
-    };
+    }
     //@}
   };
 
@@ -595,7 +595,7 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::GenericReferenceElement.
      */
-    GeometryType type () const { return asImp().geometry().type(); };
+    GeometryType type () const { return asImp().geometry().type(); }
 
   private:
     //!  Barton-Nackman trick
@@ -653,7 +653,7 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::GenericReferenceElement.
      */
-    GeometryType type () const { return asImp().geometry().type(); };
+    GeometryType type () const { return asImp().geometry().type(); }
 
     /* maybe in later versions
      * \brief Default implementation for access to boundaryId of sub entities

@@ -574,10 +574,10 @@ namespace Dune {
 
     YaspSpecialEntity(const GridImp* yg, const YGLI& g, const TSI& it) :
       GridImp::template Codim<codim>::Entity (YaspEntity<codim, dim, GridImp>(yg,g,it))
-    {};
+    {}
     YaspSpecialEntity(const YaspEntity<codim, dim, GridImp>& e) :
       GridImp::template Codim<codim>::Entity (e)
-    {};
+    {}
     const TSI& transformingsubiterator () const
     {
       return this->realEntity.transformingsubiterator();

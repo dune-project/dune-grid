@@ -244,7 +244,7 @@ namespace Dune {
         const Common & asCommon() const
         {
           return *static_cast<const Common*>(this);
-        };
+        }
       };
 
       template<int dimension, class CoordType>
@@ -279,7 +279,7 @@ namespace Dune {
         const Common & asCommon() const
         {
           return *static_cast<const Common*>(this);
-        };
+        }
       };
 
       template<int dimension, class CoordType>
