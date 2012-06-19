@@ -153,13 +153,13 @@ void test(const GridViewType& view) {
       typedef FieldVector<double, EntitiyGeometryType::mydimension> LocalType;
       typedef FieldVector<double, EntitiyGeometryType::mydimension-1> LocalFaceType;
 
-      const int faceNr = iit->indexInInside();
+      const int faceNo = iit->indexInInside();
 
       LocalFaceType xf( 0.1 );
       LocalType xx( iit->geometryInInside().global( xf ) );
       const GlobalType &nG = iit->integrationOuterNormal( xf );
 
-      SubGeometryType subMap( genericMap, faceNr );
+      SubGeometryType subMap( genericMap, faceNo );
       testGeo( iit->geometry(), subMap );
     }
   }
