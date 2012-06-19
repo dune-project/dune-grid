@@ -5,7 +5,7 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   entity.hh entitypointer.hh geometry.hh grid.hh \
   hierarchiciterator.hh intersection.hh intersectioniterator.hh \
   leafiterator.hh leveliterator.hh entityiterator.hh refinement.hh \
-  virtualrefinement.hh genericreferenceelements.hh \
+  virtualrefinement.hh \
   boundarysegment.hh gridinfo.hh indexidset.hh mapper.hh \
   mcmgmapper.hh scsgmapper.hh universalmapper.hh sizecache.hh \
   intersectioniteratorwrapper.hh \
@@ -13,7 +13,7 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   gridview.hh defaultgridview.hh \
   gridenums.hh adaptcallback.hh \
   dynamicsubindexid.hh boundaryprojection.hh \
-  topologyfactory.hh exceptions.hh backuprestore.hh \
+  exceptions.hh backuprestore.hh \
   geometryreference.hh
 
 SUBDIRS = refinement test
