@@ -316,7 +316,7 @@ namespace Dune
     GeometryType type () const { return realEntity.type(); }
 
     /** \brief Return the entity seed which contains sufficient information
-     *  to generate the entity again and uses as less memory as possible
+     *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const { return realEntity.seed(); }
 
