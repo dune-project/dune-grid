@@ -658,12 +658,12 @@ void iteratorEquals (Grid &g)
 
   // equals
   #define TestEquals(i) { \
-    i == e2; \
-    i == l2; \
-    i == h2; \
-    i == L2; \
-    if (i2 != leafView.iend( *l2 )) i == i2->inside(); \
-    if (i2 != leafView.iend( *l2 ) && i2->neighbor()) i == i2->outside(); \
+    { bool DUNE_UNUSED tmp = (i == e2); }                         \
+    { bool DUNE_UNUSED tmp = (i == l2); }                         \
+    { bool DUNE_UNUSED tmp = (i == h2); }                         \
+    { bool DUNE_UNUSED tmp = (i == L2); }                         \
+    if (i2 != leafView.iend( *l2 )) bool DUNE_UNUSED tmp = (i == i2->inside()); \
+    if (i2 != leafView.iend( *l2 ) && i2->neighbor()) bool DUNE_UNUSED tmp = (i == i2->outside()); \
 }
   TestEquals(e1);
   TestEquals(l1);
