@@ -207,7 +207,7 @@ namespace Dune {
         \param boundarySegment Class implementing the geometry of the boundary segment.
      */
     void insertBoundarySegment(const std::vector<unsigned int>& vertices,
-                               const shared_ptr<BoundarySegment<dimworld> > boundarySegment);
+                               const shared_ptr<BoundarySegment<dimworld> > &boundarySegment);
 
 
     /** \brief Finalize grid creation and hand over the grid
