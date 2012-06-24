@@ -230,7 +230,7 @@ namespace Dune {
     }
 
     //! Return new SubYGrid of self which is the intersection of self and another YGrid
-    virtual SubYGrid<d,ct> intersection ( YGrid<d,ct>& r) const
+    virtual SubYGrid<d,ct> intersection (const YGrid<d,ct>& r) const
     {
       // check if the two grids can be intersected, must have same mesh size and shift
       for (int i=0; i<d; i++)

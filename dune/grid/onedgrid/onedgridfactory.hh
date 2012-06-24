@@ -73,7 +73,7 @@ namespace Dune {
         The BoundarySegment object does not actually have any effect.
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices,
-                                       const shared_ptr<BoundarySegment<1> > boundarySegment);
+                                       const shared_ptr<BoundarySegment<1> >& boundarySegment);
 
 
     /** \brief Finalize grid creation and hand over the grid
