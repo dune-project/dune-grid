@@ -1552,37 +1552,36 @@ namespace Dune {
     //! global sum
     double global_sum (double x) const
     {
-      double res;
-
       if (_procs==1) return x;
+      double res = 0.0;
 #if HAVE_MPI
       MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_SUM,_comm);
-      return res;
 #endif
+      return res;
     }
 
     //! global max
     double global_max (double x) const
     {
-      double res;
+      double res = 0.0;
 
       if (_procs==1) return x;
 #if HAVE_MPI
       MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_MAX,_comm);
-      return res;
 #endif
+      return res;
     }
 
     //! global min
     double global_min (double x) const
     {
-      double res;
+      double res = 0.0;
 
       if (_procs==1) return x;
 #if HAVE_MPI
       MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_MIN,_comm);
-      return res;
 #endif
+      return res;
     }
 
 
