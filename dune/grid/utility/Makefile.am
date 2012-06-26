@@ -11,7 +11,6 @@ gridutility_HEADERS =				\
 	gridtype.hh				\
 	hierarchicsearch.hh			\
 	hostgridaccess.hh			\
-	mockgeometry.hh				\
 	persistentcontainer.hh			\
 	persistentcontainerwrapper.hh		\
 	structuredgridfactory.hh		\
