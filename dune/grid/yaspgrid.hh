@@ -2767,7 +2767,7 @@ namespace Dune {
     typename Traits::template Codim<Seed::codimension>::EntityPointer
     entityPointer(const Seed& seed) const
     {
-      static const int codim = Seed::codimension;
+      const int codim = Seed::codimension;
       YGLI g = MultiYGrid<dim,ctype>::begin(seed.level());
       switch (codim)
       {

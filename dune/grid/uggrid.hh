@@ -159,9 +159,9 @@ namespace Dune {
       if (codim == 0) {
         /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
          * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        UGMakeableEntity<0, dim, UGGrid<dim> > e((typename UG_NS<dim>::Element*)obj,nullptr);
+        UGMakeableEntity<0, dim, UGGrid<dim> > e(reinterpret_cast<typename UG_NS<dim>::Element*>(obj),nullptr);
         // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Element*)obj)) || e.level() == level)
+        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Element*>(obj))) || e.level() == level)
         {
           ThisType msgBuf(static_cast<DataType*>(data));
           if (!duneDataHandle_->fixedsize(dim, codim))
@@ -172,9 +172,9 @@ namespace Dune {
       else if (codim == dim) {
         /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
          * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Node*)obj,nullptr);
+        UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e(reinterpret_cast<typename UG_NS<dim>::Node*>(obj),nullptr);
         // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Node*)obj)) || e.level() == level)
+        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Node*>(obj))) || e.level() == level)
         {
           ThisType msgBuf(static_cast<DataType*>(data));
           if (!duneDataHandle_->fixedsize(dim, codim))
@@ -185,9 +185,9 @@ namespace Dune {
       else if (codim == dim - 1) {
         /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
          * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Edge*)obj,nullptr);
+        UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > e(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj),nullptr);
         // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Edge*)obj)) || e.level() == level)
+        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj))) || e.level() == level)
         {
           ThisType msgBuf(static_cast<DataType*>(data));
           if (!duneDataHandle_->fixedsize(dim, codim))
@@ -213,9 +213,9 @@ namespace Dune {
         typedef UGMakeableEntity<0, dim, UGGrid<dim> > Entity;
         /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
          * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        Entity e((typename UG_NS<dim>::Element*)obj,nullptr);
+        Entity e(reinterpret_cast<typename UG_NS<dim>::Element*>(obj),nullptr);
         // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Element*)obj)) || e.level() == level)
+        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Element*>(obj))) || e.level() == level)
         {
           ThisType msgBuf(static_cast<DataType*>(data));
           int n;
@@ -231,9 +231,9 @@ namespace Dune {
         typedef UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > Entity;
         /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
          * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        Entity e((typename UG_NS<dim>::Node*)obj,nullptr);
+        Entity e(reinterpret_cast<typename UG_NS<dim>::Node*>(obj),nullptr);
         // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Node*)obj)) || e.level() == level)
+        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Node*>(obj))) || e.level() == level)
         {
           ThisType msgBuf(static_cast<DataType*>(data));
           int n;
@@ -249,9 +249,9 @@ namespace Dune {
         typedef UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > Entity;
         /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
          * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        Entity e((typename UG_NS<dim>::Edge*)obj,nullptr);
+        Entity e(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj),nullptr);
         // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf((typename UG_NS<dim>::Edge*)obj)) || e.level() == level)
+        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj))) || e.level() == level)
         {
           ThisType msgBuf(static_cast<DataType*>(data));
           int n;
