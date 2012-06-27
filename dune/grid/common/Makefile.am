@@ -8,11 +8,10 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   virtualrefinement.hh \
   boundarysegment.hh gridinfo.hh indexidset.hh mapper.hh \
   mcmgmapper.hh scsgmapper.hh universalmapper.hh sizecache.hh \
-  intersectioniteratorwrapper.hh \
   datahandleif.hh gridfactory.hh \
   gridview.hh defaultgridview.hh \
   gridenums.hh adaptcallback.hh \
-  dynamicsubindexid.hh boundaryprojection.hh \
+  boundaryprojection.hh \
   exceptions.hh backuprestore.hh
 
 SUBDIRS = refinement test
