@@ -9,7 +9,7 @@ DIMENSION = 3
 
 check_HEADERS = testgeo.hh
 
-check_PROGRAMS = testmapping testgeo
+check_PROGRAMS = testgeo
 TESTS = testmapping testgeo
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS) $(DUNEMPICPPFLAGS)
@@ -18,8 +18,6 @@ LDADD = $(ALL_PKG_LIBS) @LDADD@ $(DUNEMPILDFLAGS)
 
 # The directory where the example grid files used for testing are located
 AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
-
-testmapping_SOURCES = testmapping.cc testgeo.hh
 
 testgeo_SOURCES = testgeo.cc testgeo.hh
 

@@ -122,8 +122,8 @@ void test(const GridViewType& view) {
   typedef typename GridViewType :: IntersectionIterator IntersectionIterator;
   typedef typename GridViewType :: Intersection IntersectionType;
   typedef typename ElementIterator::Entity EntityType;
-  typedef typename EntityType::Geometry EntitiyGeometryType;
-  typedef FieldVector<double, EntitiyGeometryType::coorddimension> GlobalType;
+  typedef typename EntityType::Geometry EntityGeometryType;
+  typedef FieldVector<double, EntityGeometryType::coorddimension> GlobalType;
 
   phiErr = 0;
   jTinvJTErr = 0;
@@ -134,9 +134,9 @@ void test(const GridViewType& view) {
   ElementIterator eEndIt = view.template end<0>();
   ElementIterator eIt    = view.template begin<0>();
   for (; eIt!=eEndIt; ++eIt) {
-    const EntitiyGeometryType& geoDune = eIt->geometry();
+    const EntityGeometryType& geoDune = eIt->geometry();
     const GeometryType gt = geoDune.type();
-    GeoCoordVector< EntitiyGeometryType > coordVector( geoDune );
+    GeoCoordVector< EntityGeometryType > coordVector( geoDune );
     // GenericGeometryType genericMap(geoDune,typename GenericGeometryType::CachingType(geoDune) );
     GenericGeometry::Geometry< GridType::dimension, GridType::dimensionworld, GridType > genericMap( gt, coordVector );
     testGeo( geoDune, genericMap );
@@ -150,8 +150,8 @@ void test(const GridViewType& view) {
     const IntersectionIterator iend = view.iend( *eIt );
     for( IntersectionIterator iit = view.ibegin( *eIt ); iit != iend; ++ iit )
     {
-      typedef FieldVector<double, EntitiyGeometryType::mydimension> LocalType;
-      typedef FieldVector<double, EntitiyGeometryType::mydimension-1> LocalFaceType;
+      typedef FieldVector<double, EntityGeometryType::mydimension> LocalType;
+      typedef FieldVector<double, EntityGeometryType::mydimension-1> LocalFaceType;
 
       const int faceNo = iit->indexInInside();
 
