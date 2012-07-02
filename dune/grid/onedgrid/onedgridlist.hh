@@ -3,8 +3,6 @@
 #ifndef DUNE_ONEDGRID_LIST_HH
 #define DUNE_ONEDGRID_LIST_HH
 
-#include <dune/common/deprecated.hh>
-#include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
 
 namespace Dune {
@@ -56,28 +54,10 @@ namespace Dune {
   {
 
   public:
-
-    //typedef OneDGridListIterator<T> iterator;
     typedef T* iterator;
     typedef const T* const_iterator;
 
     OneDGridList() : numelements(0), begin_(0), rbegin_(0) {}
-
-#if 0
-    ~OneDGridList() {
-      // Delete all elements
-      iterator e = begin();
-
-      while (e) {
-
-        iterator eSucc = e->succ_;
-        erase(e);
-        e = eSucc;
-        return;
-      }
-
-    }
-#endif
 
     int size() const {return numelements;}
 
