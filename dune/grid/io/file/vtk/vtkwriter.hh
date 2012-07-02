@@ -622,6 +622,8 @@ namespace Dune
 
       // write process data
       std::ofstream file;
+      file.exceptions(std::ios_base::badbit | std::ios_base::failbit |
+                      std::ios_base::eofbit);
       file.open( pieceName.c_str(), std::ios::binary );
       if (! file.is_open())
         DUNE_THROW(IOError, "Could not write to piece file " << pieceName);
@@ -665,6 +667,8 @@ namespace Dune
 
       // do some magic because paraview can only cope with relative pathes to piece files
       std::ofstream file;
+      file.exceptions(std::ios_base::badbit | std::ios_base::failbit |
+                      std::ios_base::eofbit);
       std::string piecepath = concatPaths(path, extendpath);
       std::string relpiecepath = relativePath(path, piecepath);
 

@@ -35,6 +35,8 @@ namespace Dune {
         count_(0),
         seqFile_()
     {
+      seqFile_.exceptions(std::ios_base::badbit | std::ios_base::failbit |
+                          std::ios_base::eofbit);
       if (gridView.comm().rank()==0) {
         std::stringstream pvdname;
         pvdname << name << ".pvd";
