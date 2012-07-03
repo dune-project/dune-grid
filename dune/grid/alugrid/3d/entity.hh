@@ -297,6 +297,7 @@ namespace Dune
     template <int codim>
     typename Codim< codim >::EntityPointer entity (int i) const
     {
+#warning GenericGeometry::MapNumberingProvider is deprecated!  Use the proper numbering natively!
       typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
       const unsigned int tid = type().id();
       const int j = Numbering::template dune2generic< codim >( tid, i );
