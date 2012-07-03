@@ -137,27 +137,6 @@ namespace Dune
 
   }
 
-
-
-  // GeoCoordVector
-  // --------------
-
-  template< class Geo >
-  struct GeoCoordVector
-  {
-    explicit GeoCoordVector( const Geo &geo )
-      : geo_( geo )
-    {}
-
-    typename Geo::GlobalCoordinate operator[] ( const int i ) const
-    {
-      return geo_.corner( i );
-    }
-
-  private:
-    const Geo &geo_;
-  };
-
 }
 
 #endif // #ifndef TESTGEO_HH

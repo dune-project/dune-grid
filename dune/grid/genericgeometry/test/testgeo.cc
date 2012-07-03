@@ -136,7 +136,9 @@ void test(const GridViewType& view) {
   for (; eIt!=eEndIt; ++eIt) {
     const EntityGeometryType& geoDune = eIt->geometry();
     const GeometryType gt = geoDune.type();
-    GeoCoordVector< EntityGeometryType > coordVector( geoDune );
+    std::vector<GlobalType> coordVector( geoDune.corners() );
+    for (size_t i=0; i<geoDune.corners(); i++)
+      coordVector[i] = geoDune.corner(i);
     // GenericGeometryType genericMap(geoDune,typename GenericGeometryType::CachingType(geoDune) );
     GenericGeometry::Geometry< GridType::dimension, GridType::dimensionworld, GridType > genericMap( gt, coordVector );
     testGeo( geoDune, genericMap );
