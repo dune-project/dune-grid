@@ -8,7 +8,6 @@
 //#define DUNE_THROW(E, m) assert(0)
 #include <dune/common/exceptions.hh>
 
-#include <dune/geometry/genericgeometry/conversion.hh>
 #include <dune/geometry/genericgeometry/geometry.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>

@@ -10,6 +10,8 @@
 #include <dune/common/stdstreams.hh>
 #include <dune/common/typetraits.hh>
 
+#include <dune/geometry/genericgeometry/conversion.hh>
+
 namespace Dune {
 
 

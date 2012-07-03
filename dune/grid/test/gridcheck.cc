@@ -15,7 +15,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/conversion.hh>
 #include <dune/grid/common/gridinfo.hh>
 #include <dune/grid/common/capabilities.hh>
 
