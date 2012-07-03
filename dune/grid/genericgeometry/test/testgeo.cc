@@ -5,16 +5,12 @@
 #include <config.h>
 #endif
 
-//#define DUNE_THROW(E, m) assert(0)
 #include <dune/common/exceptions.hh>
-
-#include <dune/geometry/genericgeometry/geometry.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>
 
-#if HAVE_GRAPE
-#include <dune/grid/io/visual/grapegriddisplay.hh>
-#endif
+#include <dune/geometry/genericgeometry/geometry.hh>
+
 #if HAVE_UG
 #include <dune/grid/uggrid.hh>
 #endif
@@ -217,29 +213,33 @@ try
     test(grid->leafView());
   }
 
-  if ( phiErr>0) {
+  if (phiErr > 0)
     std::cout << phiErr << " errors occured in mapping.phi?" << std::endl;
-  }
-  else std::cout << "ZERO ERRORS in mapping.phi!!!!!!!" << std::endl;
-  if ( detErr>0) {
+  else
+    std::cout << "passed: mapping.phi" << std::endl;
+
+  if (detErr > 0)
     std::cout << detErr << " errors occured in mapping.det?" << std::endl;
-  }
-  else std::cout << "ZERO ERRORS in mapping.det!!!!!!!" << std::endl;
-  if ( jTinvJTErr>0) {
+  else
+    std::cout << "passed: mapping.det" << std::endl;
+
+  if (jTinvJTErr > 0)
     std::cout << jTinvJTErr
               << " errors occured in mapping.jacobianT?" << std::endl;
-  }
-  else std::cout << "ZERO ERRORS in mapping.jacobianT!!!!!!!" << std::endl;
-  if ( volErr>0) {
+  else
+    std::cout << "passed: mapping.jacobianT" << std::endl;
+
+  if (volErr > 0)
     std::cout << volErr
               << " errors occured in mapping.volume?" << std::endl;
-  }
-  else std::cout << "ZERO ERRORS in mapping.volume!!!!!!!" << std::endl;
-  if ( normalErr>0) {
+  else
+    std::cout << "passed: mapping.volume" << std::endl;
+
+  if (normalErr > 0)
     std::cout << normalErr
               << " errors occured in mapping.normal?" << std::endl;
-  }
-  else std::cout << "ZERO ERRORS in mapping.normal!!!!!!!" << std::endl;
+  else
+    std::cout << "passed: mapping.normal" << std::endl;
 }
 catch( const Exception &e )
 {
