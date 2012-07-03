@@ -10,7 +10,7 @@ DIMENSION = 3
 check_HEADERS = testgeo.hh
 
 check_PROGRAMS = testgeo
-TESTS = testmapping testgeo
+TESTS = testgeo
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS) $(DUNEMPICPPFLAGS)
 AM_LDFLAGS = @AM_LDFLAGS@ $(ALL_PKG_LDFLAGS) $(DUNEMPILIBS)
