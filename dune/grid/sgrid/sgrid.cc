@@ -871,6 +871,7 @@ namespace Dune {
     static const GeometryType cubeType(GeometryType::cube, dim);
 
     // map to old numbering
+#warning GenericGeometry::MapNumberingProvider is deprecated!  Use the proper numbering natively!
     typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
     const unsigned int cubeid = cubeType.id();
     const int j = Numbering::generic2dune( cubeid, i, codim );
