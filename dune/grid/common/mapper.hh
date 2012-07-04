@@ -6,7 +6,6 @@
 #define DUNE_MAPPER2_HH
 
 #include <iostream>
-#include <dune/common/exceptions.hh>
 
 #include <dune/common/bartonnackmanifcheck.hh>
 
