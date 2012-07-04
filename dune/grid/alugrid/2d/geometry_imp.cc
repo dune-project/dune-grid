@@ -44,18 +44,6 @@ namespace Dune
 
 
   //! access to coordinates of corners. Index is the number of the corner
-  template <int mydim, int cdim, class GridImp>
-  inline const typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate &
-  ALU2dGridGeometry< mydim, cdim, GridImp >::operator[] ( int i ) const
-  {
-    typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
-    const unsigned int tid = type().id();
-    static GlobalCoordinate c;
-    return (c = corner( Numbering::template dune2generic< mydim >( tid, i ) ));
-  }
-
-
-  //! access to coordinates of corners. Index is the number of the corner
   template< int mydim, int cdim, class GridImp >
   inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
   ALU2dGridGeometry< mydim, cdim, GridImp >::corner ( int i ) const

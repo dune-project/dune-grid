@@ -714,9 +714,6 @@ namespace Dune
     int corners () const;
 
     //! access to coordinates of corners. Index is the number of the corner
-    const GlobalCoordinate& operator[] (int i) const;
-
-    //! access to coordinates of corners. Index is the number of the corner
     GlobalCoordinate corner (int i) const;
 
     //! maps a local coordinate within reference element to
