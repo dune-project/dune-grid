@@ -189,11 +189,6 @@ namespace Dune
         return hostEntity().type();
       }
 
-      unsigned int topologyId () const DUNE_DEPRECATED
-      {
-        return type().id();
-      }
-
       /** \brief obtain the level of this entity */
       int level () const
       {
@@ -449,13 +444,6 @@ namespace Dune
         const GenericReferenceElement< ctype, dimension > &refElement
           = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
         return refElement.type( subEntity_, codimension );
-      }
-
-      unsigned int topologyId () const DUNE_DEPRECATED
-      {
-        const GenericReferenceElement< ctype, dimension > &refElement
-          = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
-        return refElement.topologyId( subEntity_, codimension );
       }
 
       /** \brief obtain the level of this entity */

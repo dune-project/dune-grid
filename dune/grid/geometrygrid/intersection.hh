@@ -123,11 +123,6 @@ namespace Dune
 
       GeometryType type () const { return hostIntersection().type(); }
 
-      unsigned int topologyId () const DUNE_DEPRECATED
-      {
-        return type().id();
-      }
-
       int indexInInside () const
       {
         return hostIntersection().indexInInside();
