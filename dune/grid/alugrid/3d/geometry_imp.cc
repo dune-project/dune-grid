@@ -3,7 +3,6 @@
 #ifndef DUNE_ALUGRID_GEOMETRY_IMP_CC
 #define DUNE_ALUGRID_GEOMETRY_IMP_CC
 
-#include <dune/geometry/genericgeometry/conversion.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
 #include "grid.hh"
@@ -49,17 +48,6 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::corners() const
   {
     return corners_;
-  }
-
-  template< int mydim, int cdim, class GridImp>
-  inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate&
-  ALU3dGridGeometry<mydim, cdim, GridImp >::
-  operator[] (int i) const
-  {
-    typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
-    const unsigned int tid = type().id();
-    const int j = Numbering::template dune2generic< mydim >( tid, i );
-    return geoImpl_[ j ];
   }
 
   template< int mydim, int cdim, class GridImp>

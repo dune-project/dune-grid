@@ -3,8 +3,6 @@
 #ifndef DUNE_ONEDGRID_LIST_HH
 #define DUNE_ONEDGRID_LIST_HH
 
-#include <dune/common/deprecated.hh>
-#include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
 
 namespace Dune {
@@ -56,28 +54,10 @@ namespace Dune {
   {
 
   public:
-
-    //typedef OneDGridListIterator<T> iterator;
     typedef T* iterator;
     typedef const T* const_iterator;
 
     OneDGridList() : numelements(0), begin_(0), rbegin_(0) {}
-
-#if 0
-    ~OneDGridList() {
-      // Delete all elements
-      iterator e = begin();
-
-      while (e) {
-
-        iterator eSucc = e->succ_;
-        erase(e);
-        e = eSucc;
-        return;
-      }
-
-    }
-#endif
 
     int size() const {return numelements;}
 
@@ -90,13 +70,13 @@ namespace Dune {
 
       // einfuegen
       if (begin_==0) {
-        // einfuegen in leere Liste
+        // insert in empty list
         begin_ = t;
         rbegin_ = t;
       }
       else
       {
-        // nach Element i.p einsetzen
+        // insert after element i
         t->pred_ = i;
         t->succ_ = i->succ_;
         i->succ_ = t;
@@ -104,14 +84,13 @@ namespace Dune {
         if (t->succ_!=0)
           t->succ_->pred_ = t;
 
-        // tail neu ?
+        // new tail?
         if (rbegin_==i)
           rbegin_ = t;
       }
 
-      // Groesse und Rueckgabeiterator
+      // adjust size, return iterator
       numelements = numelements+1;
-
       return t;
     }
 
@@ -124,39 +103,39 @@ namespace Dune {
       // New list element by copy construction
       T* t = new T(value);
 
-      // einfuegen
+      // insert
       if (begin_==0)
       {
-        // einfuegen in leere Liste
+        // insert in empty list
         begin_=t;
         rbegin_=t;
       }
       else
       {
-        // vor Element i.p einsetzen
+        // insert before element i
         t->succ_ = i;
         t->pred_ = i->pred_;
         i->pred_ = t;
 
         if (t->pred_!=0)
           t->pred_->succ_ = t;
-        // head neu ?
+        // new head?
         if (begin_==i)
           begin_ = t;
       }
 
-      // Groesse und Rueckgabeiterator
+      // adjust size, return iterator
       numelements = numelements+1;
       return t;
     }
 
     void erase (iterator& i)
     {
-      // Teste Eingabe
+      // test argument
       if (i==0)
         return;
 
-      // Ausfaedeln
+      // handle pointers to predecessor and succesor
       if (i->succ_!=0)
         i->succ_->pred_ = i->pred_;
       if (i->pred_!=0)
@@ -168,7 +147,7 @@ namespace Dune {
       if (rbegin_==i)
         rbegin_ = i->pred_;
 
-      // Groesse
+      // adjust size
       numelements = numelements-1;
 
       // Actually delete the object

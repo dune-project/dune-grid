@@ -15,7 +15,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/conversion.hh>
 #include <dune/grid/common/gridinfo.hh>
 #include <dune/grid/common/capabilities.hh>
 
@@ -98,26 +97,6 @@ struct subIndexCheck
         assert( false );
       }
 
-#if 0  // should this be removed?
-      typedef Dune::GenericGeometry::MapNumberingProvider< Entity::dimension > Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
-      const int oldi = Numbering::template generic2dune< cd >( tid, i );
-
-      if( levelIndexSet.subIndex( e, i, cd ) != levelIndexSet.template subIndex< cd >( e, oldi ) )
-      {
-        int id_e = levelIndexSet.index( e );
-        int subid_e_i = levelIndexSet.template subIndex< cd >( e, oldi );
-        int subid_e_i_cd = levelIndexSet.subIndex( e, i, cd );
-
-        std::cerr << "Error: levelIndexSet.subIndex( e, i, cd ) "
-                  << "!= levelIndexSet.subIndex< cd >( e, generic2dune( i ) )  "
-                  << "[with cd=" << cd << ", i=" << i << "]" << std::endl;
-        std::cerr << "       ... index(e)=" << id_e << std::endl;
-        std::cerr << "       ... subIndex<cd>(e,i)=" << subid_e_i << std::endl;
-        std::cerr << "       ... subIndex(e,dune2generic(i),cd)=" << subid_e_i_cd << std::endl;
-        assert( false );
-      }
-#endif
     }
 
     subIndexCheck< cd-1, Grid, Entity, Dune::Capabilities::hasEntity< Grid, cd-1 >::v > sick( g, e );

@@ -10,7 +10,6 @@
 #include <cassert>
 
 #include <dune/common/fmatrix.hh>
-#include <dune/common/exceptions.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>
