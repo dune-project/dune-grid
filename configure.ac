@@ -76,8 +76,6 @@ AC_CONFIG_FILES([Makefile
     dune/grid/io/visual/grape/Makefile
     dune/grid/io/visual/Makefile
     dune/grid/io/Makefile
-    dune/grid/genericgeometry/Makefile
-    dune/grid/genericgeometry/test/Makefile
     dune/grid/geometrygrid/Makefile
     m4/Makefile
     dune-grid.pc
