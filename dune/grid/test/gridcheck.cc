@@ -15,7 +15,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/conversion.hh>
 #include <dune/grid/common/gridinfo.hh>
 #include <dune/grid/common/capabilities.hh>
 
@@ -42,11 +41,13 @@ struct subIndexCheck
     {
       typedef typename Grid::template Codim< Entity::codimension >::EntityPointer EntityPointer;
       typedef typename Grid::template Codim< Entity::codimension >::EntitySeed EntitySeed;
+      #ifndef NDEBUG
       EntitySeed seed = e.seed();
 
       EntityPointer ep1 ( e );
       // regain entity pointer and check equality
       EntityPointer ep2 = g.entityPointer( seed );
+      #endif
       assert( ep1 == ep2 );
     }
 
@@ -58,11 +59,13 @@ struct subIndexCheck
       EntityPointer ep( *(e.template subEntity< cd >( i ) ) );
       assert( ep == e.template subEntity< cd >( i ) );
 
+      #ifndef NDEBUG
       typedef typename Grid::template Codim< cd >::EntitySeed EntitySeed;
       EntitySeed seed = ep->seed();
 
       // regain entity pointer and check equality
       EntityPointer ep2 = g.entityPointer( seed );
+      #endif
       assert( ep == ep2 );
 
       const typename Grid::LevelGridView &levelGridView = g.levelView(e.level());
@@ -94,26 +97,6 @@ struct subIndexCheck
         assert( false );
       }
 
-#if 0  // should this be removed?
-      typedef Dune::GenericGeometry::MapNumberingProvider< Entity::dimension > Numbering;
-      const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
-      const int oldi = Numbering::template generic2dune< cd >( tid, i );
-
-      if( levelIndexSet.subIndex( e, i, cd ) != levelIndexSet.template subIndex< cd >( e, oldi ) )
-      {
-        int id_e = levelIndexSet.index( e );
-        int subid_e_i = levelIndexSet.template subIndex< cd >( e, oldi );
-        int subid_e_i_cd = levelIndexSet.subIndex( e, i, cd );
-
-        std::cerr << "Error: levelIndexSet.subIndex( e, i, cd ) "
-                  << "!= levelIndexSet.subIndex< cd >( e, generic2dune( i ) )  "
-                  << "[with cd=" << cd << ", i=" << i << "]" << std::endl;
-        std::cerr << "       ... index(e)=" << id_e << std::endl;
-        std::cerr << "       ... subIndex<cd>(e,i)=" << subid_e_i << std::endl;
-        std::cerr << "       ... subIndex(e,dune2generic(i),cd)=" << subid_e_i_cd << std::endl;
-        assert( false );
-      }
-#endif
     }
 
     subIndexCheck< cd-1, Grid, Entity, Dune::Capabilities::hasEntity< Grid, cd-1 >::v > sick( g, e );
@@ -654,12 +637,12 @@ void iteratorEquals (Grid &g)
 
   // equals
   #define TestEquals(i) { \
-    i == e2; \
-    i == l2; \
-    i == h2; \
-    i == L2; \
-    if (i2 != leafView.iend( *l2 )) i == i2->inside(); \
-    if (i2 != leafView.iend( *l2 ) && i2->neighbor()) i == i2->outside(); \
+    { bool DUNE_UNUSED tmp = (i == e2); }                         \
+    { bool DUNE_UNUSED tmp = (i == l2); }                         \
+    { bool DUNE_UNUSED tmp = (i == h2); }                         \
+    { bool DUNE_UNUSED tmp = (i == L2); }                         \
+    if (i2 != leafView.iend( *l2 )) bool DUNE_UNUSED tmp = (i == i2->inside()); \
+    if (i2 != leafView.iend( *l2 ) && i2->neighbor()) bool DUNE_UNUSED tmp = (i == i2->outside()); \
 }
   TestEquals(e1);
   TestEquals(l1);

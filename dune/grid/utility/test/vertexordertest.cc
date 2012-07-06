@@ -294,7 +294,7 @@ int main (int argc , char **argv)
 try {
 
   // this method calls MPI_Init, if MPI is enabled
-  Dune::MPIHelper & mpihelper = Dune::MPIHelper::instance(argc,argv);
+  Dune::MPIHelper::instance(argc,argv);
 
   int result = 77;
 

@@ -5,7 +5,7 @@
  *  \brief a small program converting a DGF file into a DGF file
  *
  *  dgf2dgf is a small example program for the DGFWriter. It reads a DGF file
- *  into any grid (selected by dgfgridtype.hh), optionally refining the grid
+ *  into any grid, optionally refining the grid
  *  globally. The leaf grid is then written back as a DGF file.
  *
  *  The program's usage is as follows:

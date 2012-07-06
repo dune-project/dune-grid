@@ -50,7 +50,6 @@ AC_CONFIG_FILES([Makefile
     dune/grid/Makefile
     dune/grid/test/Makefile
     dune/grid/common/test/Makefile
-    dune/grid/common/quadraturerules/Makefile
     dune/grid/common/refinement/Makefile
     dune/grid/common/Makefile
     dune/grid/uggrid/Makefile
@@ -77,8 +76,6 @@ AC_CONFIG_FILES([Makefile
     dune/grid/io/visual/grape/Makefile
     dune/grid/io/visual/Makefile
     dune/grid/io/Makefile
-    dune/grid/genericgeometry/Makefile
-    dune/grid/genericgeometry/test/Makefile
     dune/grid/geometrygrid/Makefile
     m4/Makefile
     dune-grid.pc

@@ -186,7 +186,7 @@ insertBoundarySegment(const std::vector<unsigned int>& vertices)
 template <int dimworld>
 void Dune::GridFactory<Dune::UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int>& vertices,
-                      const shared_ptr<BoundarySegment<dimworld> > boundarySegment)
+                      const shared_ptr<BoundarySegment<dimworld> > &boundarySegment)
 {
   array<int, dimworld*2-2> segmentVertices;
 

@@ -926,62 +926,6 @@ namespace Dune {
 #undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
 
 
-  //************************************************************************
-  //
-  //  Default Methods of Grid
-  //
-  //************************************************************************
-  //
-
-  //- helper class for entity seed implementation to provide a default
-  //  implementation based on entity pointer until entity is implemented
-  //  in every grid
-  struct EntitySeedHelper {
-
-    template <class S, class EP>
-    struct SeedReturner
-    {
-      typedef S EntitySeed ;
-      template <class E>
-      static const EntitySeed& generateSeed ( const E& entity )
-      {
-        DUNE_THROW(NotImplemented,"Method EntityImp::seed() not implemented");
-        return *((EntitySeed *)0);
-      }
-    };
-
-    template <class EP>
-    struct SeedReturner< EP, EP >
-    {
-      template <class E>
-      static EP generateSeed ( const E& entity )
-      {
-        return EP( entity );
-      }
-    };
-
-    template <class Seed, class EP>
-    struct EntityPointerReturner
-    {
-      static const EP& generatePointer ( const Seed& seed )
-      {
-        DUNE_THROW(NotImplemented,"Method Grid::entityPointer( seed ) not implemented");
-        return *((EP *)0);
-      }
-    };
-
-    template <class EP>
-    struct EntityPointerReturner< EP, EP >
-    {
-      static const EP& generatePointer ( const EP& seed )
-      {
-        return seed ;
-      }
-    };
-  };
-
-
-
   /**
      \ingroup GridDevel
      @{
@@ -1162,21 +1106,6 @@ namespace Dune {
     bool loadBalance (DataHandle& data)
     {
       return false;
-    }
-
-    /** \deprecated default implementation of generation of EntityPointer from EntitySeed.
-        This has to be implemented by each grid */
-    template < class EntitySeed >
-    DUNE_DEPRECATED
-    typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
-    entityPointer( const EntitySeed& seed ) const
-    {
-      typedef typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer EntityPointer ;
-
-      // the default implementation is only available
-      // if the type of entity seed is EntityPointer
-      return EntitySeedHelper ::
-             EntityPointerReturner< EntitySeed, EntityPointer > :: generatePointer( seed );
     }
 
   protected:

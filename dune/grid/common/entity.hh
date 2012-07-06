@@ -160,7 +160,7 @@ namespace Dune
     //===========================================================
 
     //! Copy constructor from EntityImp
-    explicit Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {};
+    explicit Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {}
 
     /* not part of the interface but maybe in later versions
        \brief Id of the boundary which is associated with the entity,
@@ -186,7 +186,7 @@ namespace Dune
 
   protected:
     /** hide copy constructor */
-    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
+    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {}
     /** hide assignment operator */
     Entity & operator = (const Entity& rhs) {
       realEntity = rhs.realEntity;
@@ -316,7 +316,7 @@ namespace Dune
     GeometryType type () const { return realEntity.type(); }
 
     /** \brief Return the entity seed which contains sufficient information
-     *  to generate the entity again and uses as less memory as possible
+     *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const { return realEntity.seed(); }
 
@@ -510,7 +510,7 @@ namespace Dune
     bool hasBoundaryIntersections () const { return realEntity.hasBoundaryIntersections(); }
 
     //! Copy constructor from EntityImp
-    explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {};
+    explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {}
 
     // @copydoc Dune::Entity::boundaryId()
     // maybe available in later versions
@@ -546,12 +546,12 @@ namespace Dune
 
   protected:
     /** hide copy constructor */
-    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
+    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {}
     /** hide assignement operator */
     Entity & operator = (const Entity& rhs) {
       realEntity = rhs.realEntity;
       return *this;
-    };
+    }
     //@}
   };
 
@@ -595,15 +595,7 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::GenericReferenceElement.
      */
-    GeometryType type () const { return asImp().geometry().type(); };
-
-    /** \deprecated Implement this method in each grid,
-        default implementation of method seed (only when seed == entity pointer) */
-    EntitySeed seed () const DUNE_DEPRECATED
-    {
-      return EntitySeedHelper :: SeedReturner<
-          EntitySeed,  EntityPointer >::generateSeed ( asImp() );
-    }
+    GeometryType type () const { return asImp().geometry().type(); }
 
   private:
     //!  Barton-Nackman trick
@@ -661,15 +653,7 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::GenericReferenceElement.
      */
-    GeometryType type () const { return asImp().geometry().type(); };
-
-    /** \deprecated Implement this method in each grid,
-        default implementation of method seed (only when seed == entity pointer) */
-    EntitySeed seed () const DUNE_DEPRECATED
-    {
-      return EntitySeedHelper :: SeedReturner<
-          EntitySeed,  EntityPointer >::generateSeed ( asImp() );
-    }
+    GeometryType type () const { return asImp().geometry().type(); }
 
     /* maybe in later versions
      * \brief Default implementation for access to boundaryId of sub entities

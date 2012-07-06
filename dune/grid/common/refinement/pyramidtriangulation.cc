@@ -4,10 +4,19 @@
 #define DUNE_GRID_COMMON_REFINEMENT_PYRAMIDTRIANGULATION_CC
 
 
+#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
-#include <dune/geometry/type.hh>
+#include <dune/common/typetraits.hh>
+
+#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/geometry/genericgeometry/geometrytraits.hh>
+#include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
+
+#include <dune/grid/common/geometry.hh>
+
 #include "base.cc"
 #include "simplex.cc"
 
@@ -26,38 +35,40 @@ namespace Dune {
       //  Utilities
       //
 
-      using Simplex::factorial;
-      using Simplex::binomial;
       using Simplex::getPermutation;
       using Simplex::referenceToKuhn;
-      using Simplex::kuhnToReference;
 
       // ////////////////////////////////////
       //
       //  Refine a pyramid with simplices
       //
 
-      template<int mydimension, int coorddimension, class GridImp>
-      class Geometry;
-
       // forward declaration of the iterator base
       template<int dimension, class CoordType, int codimension>
       class RefinementIteratorSpecial;
 
-      //need coordinate transformation so that i can use the permutations with index 0 , 1 , 2 to triangulate the pyramid
+      /*
+       * The permutations 0 and 1 of the Kuhn-decomposition of a cube into simplices form a pyramid.
+       * The resulting pyramid is not oriented the same as the reference pyramid and so the Kuhn-coordinates
+       * have to be transformed using the method below.
+       */
       template<int dimension, class CoordType> FieldVector<CoordType, dimension> transformCoordinate(      //! Point to transform
         FieldVector<CoordType, dimension> point) {
         FieldVector<CoordType, dimension> transform;
-        transform[0]=point[0]-point[2];
-        transform[1]=point[1]-point[2];
+        transform[0]=1-point[0];
+        transform[1]=1-point[1];
         transform[2]=point[2];
         return transform;
       }
 
+      /** \brief Implementation of the refinement of a pyramid into simplices.
+       *
+       * Note that the virtual vertices of two intersecting simplices might have copies, i.e.
+       * by running over all vertices using the VertexIterator you might run over some twice.
+       *
+       */
       template<int dimension_, class CoordType>
       class RefinementImp {
-        friend class Geometry<dimension_, dimension_, RefinementImp>;
-
       public:
         enum {dimension = dimension_};
 
@@ -95,7 +106,9 @@ namespace Dune {
       struct RefinementImp<dimension, CoordType>::Codim
       {
         class SubEntityIterator;
-        typedef Dune::Geometry<dimension-codimension, dimension, RefinementImp<dimension, CoordType>, Geometry> Geometry;
+        typedef Dune::Geometry<dimension-codimension, dimension,
+            RefinementImp<dimension, CoordType>,
+            GenericGeometry::Geometry> Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -236,7 +249,16 @@ namespace Dune {
         IndexVector vertexIndices() const;
         int index() const;
         CoordVector coords() const;
+
+        DUNE_REFINEMENT_DEPRECATED("The geometries for the "
+                                   "Refinements have been deprecated.  If "
+                                   "you have a case where they are "
+                                   "useful, please complain...")
         Geometry geometry() const;
+
+      private:
+        CoordVector global(const CoordVector &local) const;
+
       protected:
         typedef typename Refinement::BackendRefinement BackendRefinement;
         typedef typename BackendRefinement::template Codim<0>::SubEntityIterator BackendIterator;
@@ -247,9 +269,6 @@ namespace Dune {
         int kuhnIndex;
         BackendIterator backend;
         const BackendIterator backendEnd;
-      private:
-        mutable bool builtGeometry;
-        mutable PyramidTriangulation::Geometry< dimension, dimension, RefinementImp< dimension, CoordType > > geometry_;
       };
 
       template<int dimension, class CoordType>
@@ -257,8 +276,7 @@ namespace Dune {
       RefinementIteratorSpecial(int level_, bool end)
         : level(level_), kuhnIndex(0),
           backend(BackendRefinement::eBegin(level)),
-          backendEnd(BackendRefinement::eEnd(level)),
-          builtGeometry(false), geometry_(backend)
+          backendEnd(BackendRefinement::eEnd(level))
       {
         if(end)
           kuhnIndex = nKuhnSimplices;
@@ -270,7 +288,6 @@ namespace Dune {
       increment()
       {
         ++backend;
-        builtGeometry = false;
         if(backend == backendEnd) {
           backend = BackendRefinement::eBegin(level);
           ++kuhnIndex;
@@ -303,9 +320,7 @@ namespace Dune {
       RefinementIteratorSpecial<dimension, CoordType, 0>::
       coords() const
       {
-        return geometry()
-               .global(GenericReferenceElements<CoordType, dimension>
-                       ::simplex().position(0,0));
+        return global(backend.coords());
       }
 
       template<int dimension, class CoordType>
@@ -313,12 +328,24 @@ namespace Dune {
       RefinementIteratorSpecial<dimension, CoordType, 0>::
       geometry() const
       {
-        if(!builtGeometry) {
-          geometry_.make(kuhnIndex);
-          builtGeometry = true;
-        }
+        const typename BackendIterator::Geometry &
+        bgeo = backend.deprecatedGeometry();
+        Dune::array<CoordVector, dimension+1> corners;
+        for(int i = 0; i <= dimension; ++i)
+          corners[i] = global(bgeo.corner(i));
 
-        return Geometry( geometry_ );
+        return Geometry(GenericGeometry::Geometry
+                        <dimension, dimension, Refinement>
+                          (bgeo.type(), corners));
+      }
+
+      template<int dimension, class CoordType>
+      typename RefinementIteratorSpecial<dimension, CoordType, 0>::
+      CoordVector
+      RefinementIteratorSpecial<dimension, CoordType, 0>::
+      global(const CoordVector &local) const {
+        return transformCoordinate(referenceToKuhn(local,
+                                                   getPermutation<dimension>(kuhnIndex)));
       }
 
       // common
@@ -361,110 +388,63 @@ namespace Dune {
 
 #endif
 
-      // ///////////
-      //
-      //  Geometry
-      //
-
-      template<int mydimension, int coorddimension, class GridImp>
-      class Geometry : public GeometryDefaultImplementation<mydimension, coorddimension, GridImp, Geometry>
-      {
-        typedef typename GridImp::ctype ct;
-        enum { dimension = GridImp::dimension };
-
-        typedef typename GridImp::BackendRefinement BackendRefinement;
-        typedef typename BackendRefinement::template Codim<dimension-mydimension>::SubEntityIterator BackendIterator;
-      public:
-        GeometryType type() const
-        { return GeometryType(GeometryType::simplex, mydimension); }
-
-        int corners() const
-        { return mydimension + 1; }
-
-        const FieldVector<ct, coorddimension>& operator[] (int i) const
-        {
-          if(!builtCoords) {
-            for(int i = 0; i < corners(); ++i)
-              coords[i] = referenceToKuhn(backend->geometry()[i], getPermutation<dimension>(kuhnIndex));
-            builtCoords = true;
-          }
-          return coords[i];
-        }
-
-        FieldVector<ct, coorddimension> global(const FieldVector<ct, mydimension>& local) const
-        { return referenceToKuhn(backend.geometry().global(local), getPermutation<dimension>(kuhnIndex)); }
-
-        FieldVector<ct, mydimension> local(const FieldVector<ct, coorddimension>& global) const
-        { return backend->geometry().local(kuhnToReference(global, getPermutation<dimension>(kuhnIndex))); }
-
-        bool checkInside (const FieldVector<ct, mydimension>& local) const
-        { return backend->geometry().checkInside(local); }
-
-        ct integrationElement(const FieldVector<ct, mydimension>& local) const
-        { return backend->geometry().integrationElement(local) / Factorial<dimension>::factorial; }
-
-        const FieldMatrix<ct, mydimension, mydimension>& jacobianInverse(const FieldVector<ct, mydimension>& local) const
-        {
-          if(!builtJinv) {
-            // create unit vectors
-            FieldMatrix<int, mydimension, mydimension> M = 0;
-            for(int i = 0; i < mydimension; ++i)
-              M[i][i] = 1;
-            // transform them into local coordinates
-            for(int i = 0; i < mydimension; ++i)
-              M[i] = kuhnToReference(M[i], getPermutation<mydimension>(kuhnIndex));
-            // transpose the matrix
-            for(int i = 0; i < mydimension; ++i)
-              for(int j = 0; j < mydimension; ++j)
-                Jinv[i][j] = M[j][i];
-            // take the backends inverse Jacobian into account
-            Jinv.leftmultiply(backend->geometry().jacobianInverse(local));
-
-            builtJinv = true;
-          }
-
-          return Jinv;
-        }
-
-        Geometry(const BackendIterator &backend_)
-          : coords(), builtCoords(false), Jinv(), builtJinv(false),
-            backend(backend_), kuhnIndex(0)
-        {
-          dune_static_assert(mydimension == coorddimension, "mydimension != coorddimension");
-        }
-
-        void make(int kuhnIndex_)
-        {
-          kuhnIndex = kuhnIndex_;
-          builtCoords = false;
-          builtJinv = false;
-        }
-      private:
-        mutable FieldVector<FieldVector<ct, coorddimension>, mydimension+1> coords;
-        mutable bool builtCoords;
-        mutable FieldMatrix<ct, mydimension, mydimension> Jinv;
-        mutable bool builtJinv;
-        const BackendIterator &backend;
-        int kuhnIndex;
-      };
-
     }     // namespace PyramidTriangulation
+
+  }   // namespace RefinementImp
+
+  namespace GenericGeometry {
+
+    template< int dimension, class CoordType >
+    struct GlobalGeometryTraits
+    < RefinementImp::PyramidTriangulation::RefinementImp<dimension,
+            CoordType> > :
+      public DefaultGeometryTraits<CoordType, dimension, dimension>
+    {
+      //   hybrid   [ true if Codim 0 is hybrid ]
+      static const bool hybrid = false;
+      //   topologyId [ for Codim 0, needed for (hybrid=false) ]
+      static const unsigned topologyId =
+        SimplexTopology< dimension >::type::id;
+    };
+
+  }   // namespace GenericGeometry
+
+  namespace FacadeOptions {
+
+    template<int dimension, class CoordType>
+    struct StoreGeometryReference
+    < dimension, dimension,
+        RefinementImp::PyramidTriangulation::RefinementImp<dimension,
+            CoordType>,
+        GenericGeometry::Geometry>
+    {
+      //! Whether to store by reference or by reference.
+      static const bool v = false;
+    };
+
+  }   // namespace FacadeOptions
+
+  namespace RefinementImp {
 
     // ///////////////////////
     //
     // The refinement traits
     //
 
-    template<class CoordType>
+#ifndef DOXYGEN
+    template<unsigned topologyId, class CoordType, unsigned coerceToId>
     struct Traits<
-        GenericGeometry::PyramidTopology<3>::type::id & ~1
-        , CoordType
-        , GenericGeometry::SimplexTopology<3>::type::id & ~1
-        , 3
-        >
+        topologyId, CoordType, coerceToId, 3,
+        typename enable_if<
+            (GenericGeometry::PyramidTopology<3>::type::id >> 1) ==
+            (topologyId >> 1) &&
+            (GenericGeometry::SimplexTopology<3>::type::id >> 1) ==
+            (coerceToId >> 1)
+            >::type>
     {
       typedef PyramidTriangulation::RefinementImp<3, CoordType> Imp;
     };
+#endif
 
   }   // namespace RefinementImp
 

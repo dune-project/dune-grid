@@ -655,35 +655,6 @@ namespace Dune
   }
 
 
-#if 0
-  template < int dim, int dimworld >
-  inline bool AlbertaGrid< dim, dimworld >
-  ::readGridAscii ( const std::string &filename, ctype &time )
-  {
-    removeMesh(); // delete all objects
-
-    mesh_.create( "AlbertaGrid", filename.c_str() );
-
-    time = 0.0;
-
-    // unset up2Dat status, if lbegin is called then this status is updated
-    for( int l = 0; l < MAXL; l++ )
-      levelMarkerVector_[ l ].unsetUp2Date();
-
-    // unset up2Dat status, if leafbegin is called then this status is updated
-    leafMarkerVector_.unsetUp2Date();
-
-    setup();
-    hIndexSet_.create( dofNumbering_ );
-
-    calcExtras();
-
-    return true;
-  }
-#endif
-
-
-
   // AlbertaGrid::AdaptationCallback
   // -------------------------------
 

@@ -16,7 +16,6 @@
 #include <vector>
 #include <list>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/indent.hh>
 #include <dune/common/iteratorfacades.hh>
@@ -107,7 +106,7 @@ namespace Dune
     {
     public:
       //! construct a CellIterator from the gridview's Iterator.
-      CellIterator(const GridCellIterator & x) : GridCellIterator(x) {};
+      CellIterator(const GridCellIterator & x) : GridCellIterator(x) {}
       //! get the position of the center of the element, in element-local
       //! coordinates
       const FieldVector<DT,n> position() const
@@ -180,7 +179,7 @@ namespace Dune
       {
         if (datamode == VTK::conforming && git != gend)
           visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
-      };
+      }
       void increment ()
       {
         switch (datamode)
@@ -274,7 +273,7 @@ namespace Dune
                      const std::vector<int> & num) :
         git(x), datamode(dm), cornerIndexVTK(0),
         vertexmapper(vm),
-        number(num), offset(0) {};
+        number(num), offset(0) {}
       void increment ()
       {
         ++cornerIndexVTK;
@@ -358,7 +357,7 @@ namespace Dune
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addCellData (VTKFunction* p)   // DUNE_DEPRECATED
+    void addCellData (VTKFunction* p)
     {
       celldata.push_back(VTKFunctionPtr(p));
     }
@@ -397,7 +396,7 @@ namespace Dune
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addVertexData (VTKFunction* p)   // DUNE_DEPRECATED
+    void addVertexData (VTKFunction* p)
     {
       vertexdata.push_back(VTKFunctionPtr(p));
     }
@@ -620,6 +619,8 @@ namespace Dune
 
       // write process data
       std::ofstream file;
+      file.exceptions(std::ios_base::badbit | std::ios_base::failbit |
+                      std::ios_base::eofbit);
       file.open( pieceName.c_str(), std::ios::binary );
       if (! file.is_open())
         DUNE_THROW(IOError, "Could not write to piece file " << pieceName);
@@ -663,6 +664,8 @@ namespace Dune
 
       // do some magic because paraview can only cope with relative pathes to piece files
       std::ofstream file;
+      file.exceptions(std::ios_base::badbit | std::ios_base::failbit |
+                      std::ios_base::eofbit);
       std::string piecepath = concatPaths(path, extendpath);
       std::string relpiecepath = relativePath(path, piecepath);
 

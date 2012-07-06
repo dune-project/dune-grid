@@ -8,7 +8,6 @@
 #include <sstream>
 #include <string>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/geometry/type.hh>
 #include <dune/common/typetraits.hh>
@@ -78,78 +77,6 @@ namespace Dune
        */
       nonconforming
     };
-
-  } // namespace VTK
-
-  //! options for VTK output
-  /**
-   * \code
-   *#include <dune/grid/io/file/vtk/common.hh>
-   * \endcode
-   *
-   * \deprecated Use the enums from the namespace VTK instead
-   */
-  struct DUNE_DEPRECATED VTKOptions {
-    //! How the bulk data should be stored in the file
-    /**
-     * \deprecated Use the enum from the namespace VTK instead.  When
-     *             converting your code, look for any occurances of
-     *             VTKOptions::ascii, VTKOptions::binary, and
-     *             VTKOptions::binaryappended, and convert them es well.
-     *             Unfortunately, marking the compatibility constants here as
-     *             deprecated seems to have no effect.
-     */
-    typedef DUNE_DEPRECATED VTK::OutputType OutputType;
-    //! Output to the file is in ascii.
-    /**
-     * \deprecated Use VTK::ascii instead
-     */
-    static const VTK::OutputType ascii = VTK::ascii;
-    //! Output to the file is inline binary.
-    /**
-     * \deprecated Use VTK::base64 instead
-     */
-    static const VTK::OutputType binary = VTK::base64;
-    //! Ouput is appended binary to the file.
-    /**
-     * \deprecated Use VTK::appendedraw instead
-     */
-    static const VTK::OutputType binaryappended = VTK::appendedraw;
-    //! Whether to produce conforming or non-conforming output.
-    /**
-     * This applies to the conformity of the data; a non-conforming grid can
-     * still be written in conforming data mode, and it is quite possible for
-     * data to be non-conforming on a conforming grid.
-     *
-     * \deprecated Use the enum from the namespace VTK instead.  When
-     *             converting your code, look for any occurances of
-     *             VTKOptions::conforming or VTKOptions::nonconforming, and
-     *             convert them es well.  Unfortunately, marking the
-     *             compatibility constants here as deprecated seems to have no
-     *             effect.
-     */
-    typedef DUNE_DEPRECATED VTK::DataMode DataMode;
-    //! Output conforming data.
-    /**
-     * Neighboring elements share common vertices and thus have a common DoF
-     * on that vertex.
-     *
-     * \deprecated Use the value from the namespace VTK instead
-     */
-    static const VTK::DataMode conforming = VTK::conforming;
-    //! Output non-conforming data.
-    /**
-     * Each element has it's own set of vertices.  The position of a vertex of
-     * one element will concide with the position of the corresponding vertex
-     * on another element.  This allows for multiple DoFs (one per element) on
-     * the "same" vertex.
-     *
-     * \deprecated Use the value from the namespace VTK instead
-     */
-    static const VTK::DataMode nonconforming = VTK::nonconforming;
-  };
-
-  namespace VTK {
 
     //////////////////////////////////////////////////////////////////////
     //

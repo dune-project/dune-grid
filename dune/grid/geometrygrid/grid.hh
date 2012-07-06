@@ -98,12 +98,12 @@ namespace Dune
     template< class > friend class GeoGrid::IntersectionIterator;
     template< class, class > friend class GeoGrid::IdSet;
     template< class, class > friend class GeoGrid::IndexSet;
-    template< class > friend class HostGridAccess;
+    template< class > friend struct HostGridAccess;
 
     template< class, class > friend class GeoGrid::CommDataHandle;
 
-    template< int, PartitionIteratorType, class > friend class GeoGrid::LevelIteratorTraits;
-    template< int, PartitionIteratorType, class > friend class GeoGrid::LeafIteratorTraits;
+    template< int, PartitionIteratorType, class > friend struct GeoGrid::LevelIteratorTraits;
+    template< int, PartitionIteratorType, class > friend struct GeoGrid::LeafIteratorTraits;
 
     template< class, class, class > friend class PersistentContainer;
 
@@ -702,7 +702,7 @@ namespace Dune
     HostGrid *const hostGrid_;
     CoordFunction &coordFunction_;
     bool removeHostGrid_;
-    mutable std::vector< LevelIndexSet *, Allocator > levelIndexSets_;
+    mutable std::vector< LevelIndexSet *, typename Allocator::template rebind< LevelIndexSet * >::other > levelIndexSets_;
     mutable LeafIndexSet leafIndexSet_;
     mutable GlobalIdSet globalIdSet_;
     mutable LocalIdSet localIdSet_;

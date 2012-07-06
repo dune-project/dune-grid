@@ -6,11 +6,8 @@
 #define DUNE_MAPPER2_HH
 
 #include <iostream>
-#include <dune/common/exceptions.hh>
 
 #include <dune/common/bartonnackmanifcheck.hh>
-
-#include <dune/geometry/genericgeometry/conversion.hh>
 
 /** @file
  * @author Peter Bastian

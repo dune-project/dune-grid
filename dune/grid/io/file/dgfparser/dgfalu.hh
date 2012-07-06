@@ -26,15 +26,15 @@ namespace Dune
   // ----------------------------------------
 
   /** \cond */
-  template<>
-  struct DGFGridInfo< ALUCubeGrid< 3, 3 > >
+  template< int dimw >
+  struct DGFGridInfo< ALUCubeGrid< 3, dimw > >
   {
     static int refineStepsForHalf () { return 1; }
     static double refineWeight () { return 0.125; }
   };
 
-  template<>
-  struct DGFGridInfo< ALUSimplexGrid< 3, 3 > >
+  template< int dimw >
+  struct DGFGridInfo< ALUSimplexGrid< 3, dimw > >
   {
     static int refineStepsForHalf () { return 1; }
     static double refineWeight () { return 0.125; }
@@ -266,13 +266,21 @@ namespace Dune
     DuneGridFormatParser dgf_;
   };
 
-  template <>
-  struct DGFGridFactory< ALUSimplexGrid<3,3> > :
-    public DGFBaseFactory< ALUSimplexGrid<3,3> >
+  // note: template parameter dimw is only added to avoid ALUSimplexGrid deprecation warning
+  template < int dimw >
+  struct DGFGridFactory< ALUSimplexGrid<3,dimw> > :
+    public DGFBaseFactory< ALUSimplexGrid<3,dimw> >
   {
+    typedef ALUSimplexGrid<3,dimw> DGFGridType;
+    typedef DGFBaseFactory< DGFGridType > BaseType;
+    typedef typename BaseType :: MPICommunicatorType MPICommunicatorType;
+  protected:
+    using BaseType :: grid_;
+    using BaseType :: callDirectly;
+  public:
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
-      : DGFBaseFactory< ALUSimplexGrid<3,3> >( comm )
+      : DGFBaseFactory< DGFGridType >( comm )
     {
       input.clear();
       input.seekg( 0 );
@@ -283,7 +291,7 @@ namespace Dune
 
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
-      : DGFBaseFactory< ALUSimplexGrid<3,3> >( comm )
+      : DGFBaseFactory< DGFGridType >( comm )
     {
       std::ifstream input( filename.c_str() );
 
@@ -299,13 +307,21 @@ namespace Dune
     bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
   };
 
-  template <>
-  struct DGFGridFactory< ALUCubeGrid<3,3> > :
-    public DGFBaseFactory< ALUCubeGrid<3,3> >
+  // note: template parameter dimw is only added to avoid ALUCubeGrid deprecation warning
+  template < int dimw >
+  struct DGFGridFactory< ALUCubeGrid<3, dimw> > :
+    public DGFBaseFactory< ALUCubeGrid<3, dimw> >
   {
+    typedef ALUCubeGrid<3,dimw> DGFGridType;
+    typedef DGFBaseFactory< DGFGridType > BaseType;
+    typedef typename BaseType :: MPICommunicatorType MPICommunicatorType;
+  protected:
+    using BaseType :: grid_;
+    using BaseType :: callDirectly;
+  public:
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
-      : DGFBaseFactory< ALUCubeGrid<3,3> >( comm )
+      : DGFBaseFactory< DGFGridType >( comm )
     {
       input.clear();
       input.seekg( 0 );
@@ -316,7 +332,7 @@ namespace Dune
 
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
-      : DGFBaseFactory< ALUCubeGrid<3,3> >( comm )
+      : DGFBaseFactory< DGFGridType >( comm )
     {
       std::ifstream input( filename.c_str() );
       bool fileFound = input.is_open() ;

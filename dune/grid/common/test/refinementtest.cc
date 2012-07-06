@@ -5,12 +5,15 @@
  * \brief Unit tests for the virtual refinement code
  */
 
+#define DUNE_REFINEMENT_DISABLE_GEOMETRY_DEPRECATION_WARNING
+
 #include "config.h"
 
 #include <iostream>
 #include <ostream>
 
 #include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
 
 #include <dune/grid/common/virtualrefinement.hh>
@@ -39,8 +42,12 @@ void testVirtualRefinement(int &result, const Dune::GeometryType& elementType,
   std::cout << "Checking virtual refinement " << elementType << " -> "
             << coerceTo << " level " << refinement << std::endl;
 
+  const GenericReferenceElement<ct, dim> &refelem =
+    GenericReferenceElements<ct, dim>::general(elementType);
+
   typedef Dune::VirtualRefinement<dim, ct> Refinement;
   typedef typename Refinement::ElementIterator eIterator;
+  typedef typename Refinement::VertexIterator vIterator;
 
   // Make a virtual refinement of the reference element
   Refinement & elementRefinement =
@@ -50,9 +57,25 @@ void testVirtualRefinement(int &result, const Dune::GeometryType& elementType,
   eIterator eSubIt  = elementRefinement.eBegin(refinement);
 
   for (; eSubIt != eSubEnd; ++eSubIt)
-    std::cout << eSubIt.coords() << std::endl;
+    if(refelem.checkInside(eSubIt.coords()))
+      pass(result);
+    else {
+      std::cerr << "Error: Sub-element position (" << eSubIt.coords()
+                << ") is outside of the reference element" << std::endl;
+      fail(result);
+    }
 
-  pass(result);
+  vIterator vSubEnd = elementRefinement.vEnd(refinement);
+  vIterator vSubIt  = elementRefinement.vBegin(refinement);
+
+  for (; vSubIt != vSubEnd; ++vSubIt)
+    if(refelem.checkInside(vSubIt.coords()))
+      pass(result);
+    else {
+      std::cerr << "Error: Sub-vertex position (" << vSubIt.coords()
+                << ") is outside of the reference element" << std::endl;
+      fail(result);
+    }
 }
 
 
@@ -144,8 +167,8 @@ int main(int argc, char** argv) try
   gt2.makeTetrahedron();
   for (int refinement=0; refinement<3; refinement++) {
     testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
-    // testStaticRefinementGeometry<Pyramid::id,double,Tet::id,3>
-    //     (result, refinement);
+    testStaticRefinementGeometry<Pyramid::id,double,Tet::id,3>
+      (result, refinement);
   }
 
   // test prism
@@ -153,8 +176,8 @@ int main(int argc, char** argv) try
   gt2.makeTetrahedron();
   for (int refinement=0; refinement<3; refinement++) {
     testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
-    // testStaticRefinementGeometry<Prism::id,double,Tet::id,3>
-    //     (result, refinement);
+    testStaticRefinementGeometry<Prism::id,double,Tet::id,3>
+      (result, refinement);
   }
 
   // test hexahedron

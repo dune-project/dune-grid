@@ -1,0 +1,11 @@
+Makefile
+Makefile.in
+*.html
+semantic.cache
+refinement.pdf
+refinement.log
+refinement.ps
+refinement.dvi
+refinement.aux
+*.eps
+kuhntriangulation.png

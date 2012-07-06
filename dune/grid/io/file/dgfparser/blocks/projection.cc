@@ -804,7 +804,7 @@ namespace Dune
         token.setSymbol( Token::normDelim, line.get() );
       else if( (c == '+') || (c == '-') )
         token.setSymbol( Token::additiveOperator, line.get() );
-      else if( (c == '*') )
+      else if( c == '*' )
       {
         c = line.get();
         if( (line.peek() == '*') )

@@ -20,7 +20,7 @@ namespace Dune
     : protected DuneGridFormatParser
   {
     template< class GridType >
-    friend class DGFGridFactory;
+    friend struct DGFGridFactory;
 
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
@@ -79,7 +79,7 @@ namespace Dune
                                 const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
       {
         // make assertion depend on the template argument but always evaluate to false
-        dune_static_assert( GridType::dimension<0,"dgf grid factory missing - did you forget to add the corresponding dgf header or dgfgridtype.hh ?");
+        dune_static_assert( GridType::dimension<0,"DGF grid factory missing. Did you forget to add the corresponding dgf header or config.h?");
       }
     };
 

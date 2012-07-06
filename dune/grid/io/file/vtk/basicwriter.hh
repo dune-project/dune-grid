@@ -194,9 +194,10 @@ namespace Dune
 
     public:
       void writePiece(const std::string& filename, OutputType outputType) {
-        std::ofstream stream(filename.c_str(), std::ios::binary);
+        std::ofstream stream;
         stream.exceptions(std::ios_base::badbit | std::ios_base::failbit |
                           std::ios_base::eofbit);
+        stream.open(filename.c_str(), std::ios::binary);
 
         VTUWriter vtuWriter(stream, outputType, fileType);
 
@@ -238,9 +239,11 @@ namespace Dune
                            const std::string& piecename,
                            const std::string& piecepath)
       {
-        std::ofstream stream(name.c_str(), std::ios::binary);
+        std::ofstream stream;
         stream.exceptions(std::ios_base::badbit | std::ios_base::failbit |
                           std::ios_base::eofbit);
+        stream.open(name.c_str(), std::ios::binary);
+
         PVTUWriter writer(stream, fileType);
 
         writer.beginMain();
@@ -394,6 +397,8 @@ namespace Dune
         // do some magic because paraview can only cope with relative pathes to
         // piece files
         std::ofstream file;
+        file.exceptions(std::ios_base::badbit | std::ios_base::failbit |
+                        std::ios_base::eofbit);
         std::string piecepath = concatPaths(path, extendpath);
         std::string relpiecepath = relativePath(path, piecepath);
 

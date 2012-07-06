@@ -88,11 +88,6 @@ namespace Dune
      */
     bool readDuneGrid( std::istream &input, int dimG, int dimW );
 
-    bool readDuneGrid( std::istream &input, int dimG = -1 ) DUNE_DEPRECATED
-    {
-      return readDuneGrid( input, dimG, -1 );
-    }
-
     //! method to write in Tetgen/Triangle Poly Format
     void writeTetgenPoly ( const std::string &, std::string &, std::string & );
 
@@ -178,10 +173,10 @@ namespace Dune
     int size_;
 
     template< class GridType >
-    friend class DGFGridFactory;
+    friend struct DGFGridFactory;
 
     template< class GridType >
-    friend class DGFBaseFactory;
+    friend struct DGFBaseFactory;
 
   };
 

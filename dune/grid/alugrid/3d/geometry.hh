@@ -38,7 +38,10 @@ namespace Dune
   public:
     typedef FieldVector<alu3d_ctype, cdim> CoordinateVectorType;
 
-    enum { invalid = -1, updated = 0, buildmapping = 1 };
+    static const signed char invalid      = -1; // means geometry is not meaningfull
+    static const signed char updated      =  0; // means the point values have been set
+    static const signed char buildmapping =  1; // means updated and mapping was build
+
     struct CoordVecCopy
     {
 
@@ -102,7 +105,7 @@ namespace Dune
 
       CoordinateMatrixType coord_;
       MappingType liMap_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -167,7 +170,7 @@ namespace Dune
 
       CoordinateMatrixType coord_;
       MappingType liMap_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -231,7 +234,7 @@ namespace Dune
       CoordinateMatrixType coord_;
 
       MappingType liMap_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -305,7 +308,7 @@ namespace Dune
       CoordinateMatrixType coord_;
 
       MappingType biMap_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
@@ -374,28 +377,36 @@ namespace Dune
       typedef TrilinearMapping MappingType;
 
       // coordinate pointer vector
-      FieldVector<const CoordPtrType*, corners_ > coordPtr_;
+      const alu3d_ctype* coordPtr_[ corners_ ];
       MappingType triMap_;
       CoordinateMatrixType* fatherCoord_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
+      using CoordVecCopy :: copy ;
 
       //! constructor creating geo impl
-      GeometryImpl() : coordPtr_((CoordPtrType*) 0), triMap_(),
+      GeometryImpl() : triMap_(),
                        fatherCoord_(0),
                        status_( invalid )
-      {}
+      {
+        // set initialize coord pointers
+        for( int i=0; i<corners_; ++i )
+          coordPtr_[ i ] = 0;
+      }
 
 
       //! conpy constructor
       GeometryImpl(const GeometryImpl& other) :
-        coordPtr_(other.coordPtr_),
         triMap_(other.triMap_),
         fatherCoord_(0),
         status_(other.status_)
       {
+        // copy coord pointers
+        for( int i=0; i<corners_; ++i )
+          coordPtr_[ i ] = other.coordPtr_[ i ];
+
         // if father coords are set, then reset coordPtr
         if( other.fatherCoord_ )
         {
@@ -403,7 +414,7 @@ namespace Dune
           CoordinateMatrixType& coord = *fatherCoord_;
           for(int i=0; i<corners_; ++i)
           {
-            coordPtr_[i] = reinterpret_cast<const CoordPtrType*> (&(coord[i][0]));
+            coordPtr_[i] = (&(coord[i][0]));
           }
         }
       }
@@ -414,12 +425,20 @@ namespace Dune
         if( fatherCoord_ ) delete fatherCoord_;
       }
 
-      // return coordinates
-      inline const CoordinateVectorType& operator [] (const int i) const
+      const alu3d_ctype* point( const int i ) const
       {
         assert( valid() );
         assert( i>=0 && i<corners_ );
-        return reinterpret_cast<const CoordinateVectorType&> (*(coordPtr_[i]));
+        assert( coordPtr_[i] );
+        return coordPtr_[ i ];
+      }
+
+      // return coordinates
+      inline CoordinateVectorType operator [] (const int i) const
+      {
+        CoordinateVectorType coord ;
+        copy( point( i ), coord );
+        return coord ;
       }
 
       // update geometry coordinates
@@ -432,21 +451,21 @@ namespace Dune
                          const CoordPtrType& p6,
                          const CoordPtrType& p7)
       {
-        coordPtr_[0] = &p0;
-        coordPtr_[1] = &p1;
-        coordPtr_[2] = &p2;
-        coordPtr_[3] = &p3;
-        coordPtr_[4] = &p4;
-        coordPtr_[5] = &p5;
-        coordPtr_[6] = &p6;
-        coordPtr_[7] = &p7;
+        coordPtr_[0] = &p0[ 0 ];
+        coordPtr_[1] = &p1[ 0 ];
+        coordPtr_[2] = &p2[ 0 ];
+        coordPtr_[3] = &p3[ 0 ];
+        coordPtr_[4] = &p4[ 0 ];
+        coordPtr_[5] = &p5[ 0 ];
+        coordPtr_[6] = &p6[ 0 ];
+        coordPtr_[7] = &p7[ 0 ];
         status_ = updated;
       }
 
       // update geometry in father coordinates
       template <class GeometryImp>
       inline void updateInFather(const GeometryImp &fatherGeom ,
-                                 const GeometryImp & myGeom)
+                                 const GeometryImp &myGeom)
       {
         if( fatherCoord_ == 0 )
         {
@@ -461,7 +480,7 @@ namespace Dune
           coord[i] = fatherGeom.local( myGeom.corner( i ) );
 
           // set pointer
-          coordPtr_[i] = reinterpret_cast<const CoordPtrType*> (&(coord[i][0]));
+          coordPtr_[i] = (&(coord[i][0]));
 
           // to avoid rounding errors
           for(int j=0; j<cdim; ++j)
@@ -479,8 +498,8 @@ namespace Dune
         assert( valid() );
         if( status_ == buildmapping ) return triMap_;
 
-        triMap_.buildMapping( (*this)[0], (*this)[1], (*this)[2], (*this)[3],
-                              (*this)[4], (*this)[5], (*this)[6], (*this)[7] );
+        triMap_.buildMapping( point( 0 ), point( 1 ), point( 2 ), point( 3 ),
+                              point( 4 ), point( 5 ), point( 6 ), point( 7 ) );
 
         status_ = buildmapping;
         return triMap_;
@@ -509,27 +528,35 @@ namespace Dune
       typedef LinearMapping<cdim, cdim> MappingType;
 
       // coordinate pointer vector
-      FieldVector<const CoordPtrType*, corners_ > coordPtr_;
+      const alu3d_ctype* coordPtr_[ corners_ ];
       MappingType liMap_;
       CoordinateMatrixType* fatherCoord_;
-      char status_;
+      signed char status_;
 
     public:
       using CoordVecCopy :: update ;
+      using CoordVecCopy :: copy ;
 
       // default constructor
-      GeometryImpl() : coordPtr_((CoordPtrType*) 0), liMap_(),
+      GeometryImpl() : liMap_(),
                        fatherCoord_(0),
                        status_( invalid )
-      {}
+      {
+        // set initialize coord pointers
+        for( int i=0; i<corners_; ++i )
+          coordPtr_[ i ] = 0;
+      }
 
       // copy constructor
       GeometryImpl(const GeometryImpl& other) :
-        coordPtr_(other.coordPtr_),
         liMap_(other.liMap_),
         fatherCoord_(0),
         status_(other.status_)
       {
+        // copy coord pointers
+        for( int i=0; i<corners_; ++i )
+          coordPtr_[ i ] = other.coordPtr_[ i ];
+
         // if father coords are set, then reset coordPtr
         if( other.fatherCoord_ )
         {
@@ -537,7 +564,7 @@ namespace Dune
           CoordinateMatrixType& coord = *fatherCoord_;
           for(int i=0; i<corners_; ++i)
           {
-            coordPtr_[i] = reinterpret_cast<const CoordPtrType*> (&(coord[i][0]));
+            coordPtr_[i] = (&(coord[i][0]));
           }
         }
       }
@@ -548,12 +575,20 @@ namespace Dune
         if( fatherCoord_ ) delete fatherCoord_;
       }
 
-      // return coordinate vector
-      inline const CoordinateVectorType& operator [] (const int i) const
+      const alu3d_ctype* point( const int i ) const
       {
         assert( valid() );
         assert( i>=0 && i<corners_ );
-        return reinterpret_cast<const CoordinateVectorType&> (*(coordPtr_[i]));
+        assert( coordPtr_[ i ] );
+        return coordPtr_[ i ];
+      }
+
+      // return coordinate vector
+      inline CoordinateVectorType operator [] (const int i) const
+      {
+        CoordinateVectorType coord ;
+        copy( point( i ), coord );
+        return coord ;
       }
 
       // update geometry coordinates
@@ -562,10 +597,10 @@ namespace Dune
                          const CoordPtrType& p2,
                          const CoordPtrType& p3)
       {
-        coordPtr_[0] = &p0;
-        coordPtr_[1] = &p1;
-        coordPtr_[2] = &p2;
-        coordPtr_[3] = &p3;
+        coordPtr_[0] = &p0[ 0 ];
+        coordPtr_[1] = &p1[ 0 ];
+        coordPtr_[2] = &p2[ 0 ];
+        coordPtr_[3] = &p3[ 0 ];
         status_ = updated;
       }
 
@@ -587,7 +622,7 @@ namespace Dune
           coord[i] = fatherGeom.local( myGeom.corner( i ) );
 
           // set pointer
-          coordPtr_[i] = reinterpret_cast<const CoordPtrType*> (&(coord[i][0]));
+          coordPtr_[i] = (&(coord[i][0]));
 
           // to avoid rounding errors
           for(int j=0; j<cdim; ++j)
@@ -605,7 +640,7 @@ namespace Dune
         assert( valid() );
         if( status_ == buildmapping ) return liMap_;
 
-        liMap_.buildMapping( (*this)[0], (*this)[1], (*this)[2], (*this)[3] );
+        liMap_.buildMapping( point( 0 ), point( 1 ), point( 2 ), point( 3 ) );
 
         status_ = buildmapping;
         return liMap_;
@@ -677,9 +712,6 @@ namespace Dune
 
     //! return the number of corners of this element. Corners are numbered 0..n-1
     int corners () const;
-
-    //! access to coordinates of corners. Index is the number of the corner
-    const GlobalCoordinate& operator[] (int i) const;
 
     //! access to coordinates of corners. Index is the number of the corner
     GlobalCoordinate corner (int i) const;

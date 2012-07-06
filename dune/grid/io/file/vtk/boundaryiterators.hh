@@ -149,7 +149,7 @@ namespace Dune {
 
     public:
       IntersectionIndexSet(const ElementIndexSet& eis_)
-        : eis(eis)
+        : eis(eis_)
       { }
     };
 
