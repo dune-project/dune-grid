@@ -30,8 +30,10 @@ int normalErr;
 
 typedef Topology< GridSelector::GridType > ConversionType;
 
+/** \brief Test whether two objects implement the same geometry
+ */
 template <class Geo1,class Geo2>
-void testGeo(const Geo1& geo1, const Geo2& geo2) {
+void isEqual(const Geo1& geo1, const Geo2& geo2) {
   typedef FieldVector<double, Geo1::mydimension> LocalType;
   typedef FieldVector<double, Geo1::coorddimension> GlobalType;
   typedef FieldMatrix<double, Geo1::mydimension, Geo1::coorddimension> JacobianTType;
@@ -108,6 +110,15 @@ void testGeo(const Geo1& geo1, const Geo2& geo2) {
 }
 // ****************************************************************
 //
+/** \brief Loop over all elements and check whether they have
+ *  (bi-)linear geometries
+ *
+ * Additionally, check whether the intersection geometries have
+ * (bi-)linear geometries as well.
+ *
+ * Obviously this test should only be called for grids which really
+ * have (bi-)linear geometries.
+ */
 template <class GridViewType>
 void test(const GridViewType& view) {
   typedef typename GridViewType::Grid GridType;
@@ -136,7 +147,7 @@ void test(const GridViewType& view) {
       coordVector[i] = geoDune.corner(i);
     // GenericGeometryType genericMap(geoDune,typename GenericGeometryType::CachingType(geoDune) );
     GenericGeometry::Geometry< GridType::dimension, GridType::dimensionworld, GridType > genericMap( gt, coordVector );
-    testGeo( geoDune, genericMap );
+    isEqual( geoDune, genericMap );
 
     // typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
     //  SubGeometryType;
@@ -157,7 +168,7 @@ void test(const GridViewType& view) {
       const GlobalType &nG = iit->integrationOuterNormal( xf );
 
       SubGeometryType subMap( genericMap, faceNo );
-      testGeo( iit->geometry(), subMap );
+      isEqual( iit->geometry(), subMap );
     }
   }
 }
