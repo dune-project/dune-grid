@@ -3,7 +3,6 @@
 #ifndef DUNE_ALUGRID_GEOMETRY_IMP_CC
 #define DUNE_ALUGRID_GEOMETRY_IMP_CC
 
-#include <dune/geometry/genericgeometry/conversion.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
 #include "grid.hh"
