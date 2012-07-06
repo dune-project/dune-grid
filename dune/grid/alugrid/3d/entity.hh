@@ -294,16 +294,6 @@ namespace Dune
 
     //! Provide access to mesh entity i of given codimension. Entities
     //!  are numbered 0 ... count<cc>()-1
-    template <int codim>
-    typename Codim< codim >::EntityPointer entity (int i) const
-    {
-#warning GenericGeometry::MapNumberingProvider is deprecated!  Use the proper numbering natively!
-      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
-      const unsigned int tid = type().id();
-      const int j = Numbering::template dune2generic< codim >( tid, i );
-      return subEntity< codim >( j );
-    }
-
     template< int codim >
     typename Codim< codim >::EntityPointer subEntity ( int i ) const;
 
