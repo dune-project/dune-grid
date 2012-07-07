@@ -4,8 +4,8 @@
 EXTRA_DIST=dune.module
 
 # don't follow the full GNU-standard
-# need automake >= 1.5
-AUTOMAKE_OPTIONS = foreign 1.5
+# we need automake 1.9 or newer
+AUTOMAKE_OPTIONS = foreign 1.9
 
 # All subdirectories that must (or can) be handled before the library is built
 SUBDIRS =					\
