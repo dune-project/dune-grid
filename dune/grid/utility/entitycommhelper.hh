@@ -92,6 +92,6 @@ namespace Dune
     }
   };
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_ENTITYCOMMHELPER_HH
