@@ -10,7 +10,7 @@
 #include <dune/common/stdstreams.hh>
 #include <dune/common/typetraits.hh>
 
-#include <dune/geometry/genericgeometry/conversion.hh>
+#include <dune/grid/sgrid/generic2dune.hh>
 
 namespace Dune {
 
@@ -873,8 +873,7 @@ namespace Dune {
     static const GeometryType cubeType(GeometryType::cube, dim);
 
     // map to old numbering
-#warning GenericGeometry::MapNumberingProvider is deprecated!  Use the proper numbering natively!
-    typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
+    typedef SGridInternal::MapNumberingProvider< dim > Numbering;
     const unsigned int cubeid = cubeType.id();
     const int j = Numbering::generic2dune( cubeid, i, codim );
 

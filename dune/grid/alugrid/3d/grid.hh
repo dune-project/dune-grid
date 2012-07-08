@@ -11,7 +11,6 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/alugrid/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
-#include <dune/common/deprecated.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/geometry/referenceelements.hh>

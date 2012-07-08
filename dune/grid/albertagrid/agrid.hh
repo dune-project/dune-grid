@@ -12,7 +12,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <dune/common/deprecated.hh>
 
 #include <algorithm>
 #include <cassert>
