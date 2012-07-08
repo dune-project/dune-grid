@@ -304,14 +304,17 @@ namespace Dune {
        which has an entity of codimension 1 in commen with this entity. Access to neighbors
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
-
+    //! \deprecated Use ileafbegin() instead. This method will be removed after Dune 2.3
     // As ibegin() and iend() are deprecated these methods will deliver a LeafIntersectionIterator
     ALU2dGridIntersectionIteratorType ibegin () const
+    DUNE_DEPRECATED_MSG("Use ileafbegin() instead.")
     {
       return ileafbegin();
     }
     //! Reference to one past the last intersection with neighbor
+    //! \deprecated Use ileafend() instead. This method will be removed after Dune 2.3
     ALU2dGridIntersectionIteratorType iend () const
+    DUNE_DEPRECATED_MSG("Use ileafend() instead.")
     {
       return ileafend();
     }

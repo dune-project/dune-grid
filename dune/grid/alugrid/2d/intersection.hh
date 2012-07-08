@@ -249,10 +249,15 @@ namespace Dune
     int twistInInside () const;
     int twistInOutside () const;
 
-    // deprecated methods
-    int twistInSelf () const { return twistInInside(); }
-    // deprecated methods
-    int twistInNeighbor () const { return twistInOutside(); }
+    //! \deprecated Use twistInInside() instead. This method will be removed after Dune 2.3.
+    int twistInSelf () const
+    DUNE_DEPRECATED_MSG("Use twistInInside() instead.")
+    { return twistInInside(); }
+
+    //! \deprecated Use twistInOutside() instead. This method will be removed after Dune 2.3.
+    int twistInNeighbor () const
+    DUNE_DEPRECATED_MSG("Use twistInOutside() instead.")
+    { return twistInOutside(); }
 
     NormalType outerNormal ( const LocalCoordinate &local ) const;
     NormalType integrationOuterNormal ( const LocalCoordinate &local ) const;
