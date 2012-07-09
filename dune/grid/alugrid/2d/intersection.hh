@@ -169,9 +169,6 @@ namespace Dune
     int twistInInside () const;
     int twistInOutside () const;
 
-    int twistInSelf () const DUNE_DEPRECATED { return twistInInside(); }
-    int twistInNeighbor () const DUNE_DEPRECATED { return twistInOutside(); }
-
     NormalType outerNormal ( const LocalCoordinate &local ) const;
     NormalType integrationOuterNormal ( const LocalCoordinate &local ) const;
     NormalType unitOuterNormal ( const LocalCoordinate &local ) const;
