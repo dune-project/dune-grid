@@ -20,14 +20,6 @@ namespace Dune
      - <tt>IntersectionIteratorImp</tt> Class template that is a model of
      Dune::IntersectionIterator
 
-     @warning the IntersectionIterator used to be both, Intersection and IntersectionIterator,
-     at the same time. The two concepts are now properly separated. The IntersectionIterator
-     still offers the old methods, but these are forwarded to the Intersection. All these methods
-     are now marked deprecated.
-
-     \deprecated All Intersection methods on the IntersectionIterator are deprecated,
-       dereference IntersectionIterator to get the Intersection and call methods there.
-
      @warning The number of neigbors may be different from the number of
      faces/edges of an element!
 
