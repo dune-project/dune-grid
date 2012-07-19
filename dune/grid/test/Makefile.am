@@ -206,7 +206,7 @@ test_dgfalu_uggrid_combination_LDADD =		\
 	$(LDADD)
 
 ## distribution tarball
-SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc
+SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc checkentityseed.cc
 
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = $(SOURCES)

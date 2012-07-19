@@ -21,6 +21,8 @@
 #include "staticcheck.hh"
 #include "checkindexset.cc"
 #include "checkgeometry.cc"
+#include "checkentityseed.cc"
+
 
 #include <limits>
 
@@ -820,6 +822,11 @@ void gridcheck (Grid &g)
   // check geometries of macro level and leaf level
   checkGeometry( g.levelView( 0 ) );
   checkGeometry( g.leafView() );
+
+  // check entity seeds
+  Dune::checkEntitySeed( g.leafView(), std::cerr );
+  for( int level = 0; level <= g.maxLevel(); ++level )
+    Dune::checkEntitySeed( g.levelView( level ), std::cerr );
 
   // note that for some grid this might fail
   // then un comment this test

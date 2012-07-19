@@ -425,7 +425,7 @@ namespace Dune
     friend class Conversion< ThisType, HasHierarchicIndexSet >;
     friend class Conversion< const ThisType, HasHierarchicIndexSet >;
 
-    friend class ALU3dGridCommHelper< elType, Comm >;
+    friend struct ALU3dGridCommHelper< elType, Comm >;
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
