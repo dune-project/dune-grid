@@ -232,25 +232,26 @@ namespace Dune {
   }
 
   // buildFaceGeom
-  template <int mydim, int cdim, class GridImp>
+  template< int mydim, int cdim, class GridImp >
   inline bool
-  ALU3dGridGeometry<mydim, cdim, GridImp >::
-  buildGeom(const HFaceType & item, int twist, int duneFace )
+  ALU3dGridGeometry< mydim, cdim, GridImp >
+  ::buildGeom ( const HFaceType &item, int twist, int duneFace )
   {
     // get geo face
-    const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
+    const GEOFaceType &face = static_cast< const GEOFaceType & >( item );
 
     // if face was not set, set it to zero
-    if( duneFace < 0 ) duneFace = 0;
+    if( duneFace < 0 )
+      duneFace = 0;
 
-    enum { numVertices = ElementTopo::numVerticesPerFace };
+    const int numVertices = ElementTopo::numVerticesPerFace;
     // for all vertices of this face get rotatedIndex
     int rotatedALUIndex[ numVertices ];
     for (int i = 0; i < numVertices; ++i)
     {
       // Transform Dune index to ALU index and apply twist
-      const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-      rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
+      const int localALUIndex = ElementTopo::dune2aluFaceVertex( duneFace, i );
+      rotatedALUIndex[ i ] = FaceTopo::twist( localALUIndex, twist );
     }
 
     if( elementType == hexa )
@@ -261,7 +262,7 @@ namespace Dune {
                        face.myvertex(rotatedALUIndex[2])->Point(),
                        face.myvertex(rotatedALUIndex[3])->Point() );
     }
-    else if ( elementType == tetra )
+    else if( elementType == tetra )
     {
       // update geometry implementation
       geoImpl_.update( face.myvertex(rotatedALUIndex[0])->Point(),

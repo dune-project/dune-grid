@@ -22,37 +22,41 @@
 #define alu_inline
 #endif
 
-namespace Dune {
+namespace Dune
+{
 
-  // --Entity
-  template <int cd, int dim, class GridImp>
-  ALU3dGridEntity<cd,dim,GridImp> ::
-  ALU3dGridEntity(const FactoryType& factory, int level) :
-    factory_( factory ),
-    item_(0),
-    level_(0),
-    gIndex_(-1),
-    twist_(0),
-    face_(-1),
-    partitionType_(InteriorEntity)
+  // Implementation of ALU3dGridEntity
+  // ---------------------------------
+
+  template< int cd, int dim, class GridImp >
+  alu_inline ALU3dGridEntity< cd, dim, GridImp >
+  ::ALU3dGridEntity ( const FactoryType &factory, int level )
+    : factory_( factory ),
+      item_(0),
+      level_(0),
+      gIndex_(-1),
+      twist_(0),
+      face_(-1),
+      partitionType_(InteriorEntity)
   {}
 
-  // --Entity
-  template <int cd, int dim, class GridImp>
-  alu_inline ALU3dGridEntity<cd,dim,GridImp> ::
-  ALU3dGridEntity(const ALU3dGridEntity<cd,dim,GridImp> & org) :
-    factory_(org.factory_),
-    item_(org.item_),
-    level_(org.level_),
-    gIndex_(org.gIndex_),
-    twist_(org.twist_),
-    face_(org.face_),
-    partitionType_(org.partitionType_)
+
+  template< int cd, int dim, class GridImp >
+  alu_inline ALU3dGridEntity< cd, dim, GridImp >
+  ::ALU3dGridEntity ( const ALU3dGridEntity< cd, dim, GridImp > &org )
+    : factory_(org.factory_),
+      item_(org.item_),
+      level_(org.level_),
+      gIndex_(org.gIndex_),
+      twist_(org.twist_),
+      face_(org.face_),
+      partitionType_(org.partitionType_)
   {}
 
-  template<int cd, int dim, class GridImp>
-  alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setEntity(const ALU3dGridEntity<cd,dim,GridImp> & org)
+
+  template< int cd, int dim, class GridImp >
+  alu_inline void ALU3dGridEntity< cd, dim, GridImp > ::
+  setEntity(const ALU3dGridEntity< cd, dim, GridImp > & org)
   {
     item_   = org.item_;
     gIndex_ = org.gIndex_;
@@ -62,26 +66,30 @@ namespace Dune {
     partitionType_ = org.partitionType_;
   }
 
-  template<int cd, int dim, class GridImp>
-  alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const HItemType & item)
+
+  template< int cd, int dim, class GridImp >
+  alu_inline void
+  ALU3dGridEntity< cd, dim, GridImp >::setElement ( const HItemType &item )
   {
-    setElement(item,GetLevel<GridImp,cd>::getLevel(grid(),item));
+    setElement( item, ALU3dGridGetLevel< GridImp, cd >::getLevel( grid(), item ) );
   }
 
-  template<int cd, int dim, class GridImp>
-  alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const EntitySeed& seed )
+
+  template< int cd, int dim, class GridImp >
+  alu_inline void
+  ALU3dGridEntity< cd, dim, GridImp >::setElement ( const EntitySeed &seed )
   {
-    setElement(*seed.item(), seed.level(), seed.twist(), seed.face());
+    setElement( *seed.item(), seed.level(), seed.twist(), seed.face() );
   }
 
-  template<int cd, int dim, class GridImp>
-  alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const HItemType & item, const int level, int twist , int face )
+
+  template< int cd, int dim, class GridImp >
+  alu_inline void
+  ALU3dGridEntity< cd, dim, GridImp >
+  ::setElement ( const HItemType &item, const int level, int twist, int face )
   {
     // cast interface to implementation
-    item_   = static_cast<const ItemType *> (&item);
+    item_   = static_cast< const ItemType * >( &item );
     gIndex_ = (*item_).getIndex();
     twist_  = twist;
     level_  = level;
@@ -92,8 +100,9 @@ namespace Dune {
     geo_.invalidate();
   }
 
-  template<int cd, int dim, class GridImp>
-  alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
+
+  template< int cd, int dim, class GridImp >
+  alu_inline void ALU3dGridEntity< cd, dim, GridImp > ::
   setGhost(const HBndSegType &ghost)
   {
     // this method only exists, that we don't have to specialize the
@@ -102,9 +111,10 @@ namespace Dune {
     DUNE_THROW(GridError,"This method should not be called!");
   }
 
-  template<int cd, int dim, class GridImp>
-  alu_inline PartitionType ALU3dGridEntity<cd,dim,GridImp> ::
-  convertBndId(const HItemType & item) const
+
+  template< int cd, int dim, class GridImp >
+  alu_inline PartitionType
+  ALU3dGridEntity< cd, dim, GridImp >::convertBndId ( const HItemType &item ) const
   {
     if(item.isGhost())
     {
@@ -121,6 +131,7 @@ namespace Dune {
     }
   }
 
+
   template< int cd, int dim, class GridImp >
   alu_inline typename ALU3dGridEntity< cd, dim, GridImp >::Geometry
   ALU3dGridEntity< cd, dim, GridImp >::geometry () const
@@ -131,14 +142,12 @@ namespace Dune {
     return Geometry( geo_ );
   }
 
-  /////////////////////////////////////////////////
-  //
-  //  --Entity0
-  //  --Codim0Entity
-  //
-  /////////////////////////////////////////////////
 
-  template<int dim, class GridImp>
+
+  // Implementation of ALU3dGridEntity (for cd = 0)
+  // ----------------------------------------------
+
+  template< int dim, class GridImp >
   alu_inline ALU3dGridEntity<0,dim,GridImp> ::
   ALU3dGridEntity(const FactoryType &factory, int wLevel)
     : factory_( factory )
@@ -148,7 +157,7 @@ namespace Dune {
       , isLeaf_ (false)
   {  }
 
-  template<int dim, class GridImp>
+  template< int dim, class GridImp >
   alu_inline ALU3dGridEntity<0,dim,GridImp> ::
   ALU3dGridEntity(const ALU3dGridEntity<0,dim,GridImp> & org)
     : factory_(org.factory_)
@@ -249,7 +258,7 @@ namespace Dune {
     }
   };
 
-  template<int dim, class GridImp>
+  template< int dim, class GridImp >
   template<int cc>
   alu_inline int ALU3dGridEntity<0,dim,GridImp> :: getSubIndex (int i) const
   {
@@ -258,7 +267,7 @@ namespace Dune {
     return IndexWrapper<IMPLElType,GridImp::elementType,cc>::subIndex ( *item_, i);
   }
 
-  template<int dim, class GridImp>
+  template< int dim, class GridImp >
   alu_inline int ALU3dGridEntity<0,dim,GridImp> :: subIndex (int i, unsigned int codim ) const
   {
     typedef ElementTopologyMapping<GridImp::elementType> ElemTopo;
@@ -388,7 +397,7 @@ namespace Dune {
     }
   };
 
-  template<int dim, class GridImp>
+  template< int dim, class GridImp >
   template<int cc>
   typename ALU3dGridEntity<0,dim,GridImp>::template Codim<cc>:: EntityPointer
   ALU3dGridEntity<0,dim,GridImp> :: subEntity (int i) const
@@ -397,7 +406,7 @@ namespace Dune {
   }
   //**** end method entity *********
 
-  template<int dim, class GridImp>
+  template< int dim, class GridImp >
   typename ALU3dGridEntity<0,dim,GridImp> :: EntityPointer
   ALU3dGridEntity<0,dim,GridImp> :: father() const
   {
@@ -417,7 +426,7 @@ namespace Dune {
   }
 
   // Adaptation methods
-  template<int dim, class GridImp>
+  template< int dim, class GridImp >
   bool ALU3dGridEntity<0,dim,GridImp> :: mark (int ref) const
   {
     assert(item_ != 0);
@@ -458,7 +467,7 @@ namespace Dune {
   }
 
   // return mark of entity
-  template<int dim, class GridImp>
+  template< int dim, class GridImp >
   alu_inline int ALU3dGridEntity<0,dim,GridImp> :: getMark () const
   {
     assert(item_ != 0);
@@ -472,7 +481,7 @@ namespace Dune {
   }
 
 
-  template<int dim, class GridImp>
+  template< int dim, class GridImp >
   bool ALU3dGridEntity<0,dim,GridImp> :: hasBoundaryIntersections () const
   {
     // on ghost elements return false

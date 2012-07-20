@@ -35,6 +35,36 @@ namespace Dune
   template< ALU3dGridElementType, class >
   class ALU3dGrid;
 
+
+
+  // ALU3dGridGetLevel
+  // -----------------
+
+  template< class Grid, int cd >
+  struct ALU3dGridGetLevel
+  {
+    // default just returns level
+    template< class Item >
+    static int getLevel ( const Grid &grid, const Item &item )
+    {
+      return item.level();
+    }
+  };
+
+  template< class Grid >
+  struct ALU3dGridGetLevel< Grid, 3 >
+  {
+    // for leaf vertices the level is somewhat difficult to obtain, because
+    // this the maximum of levels of elements that have this vertex as sub
+    // entity
+    template< class Item >
+    static int getLevel ( const Grid &grid, const Item &item )
+    {
+      return (item.isLeafEntity() ? grid.getLevelOfLeafVertex( item ) : item.level());
+    }
+  };
+
+
   /*!
      A Grid is a container of grid entities. An entity is parametrized by the codimension.
      An entity of codimension c in dimension d is a d-c dimensional object.
@@ -45,30 +75,6 @@ namespace Dune
   class ALU3dGridEntity :
     public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
   {
-    // default just returns level
-    template <class GridType, int cdim>
-    struct GetLevel
-    {
-      template <class ItemType>
-      static int getLevel(const GridType & grid, const ItemType & item )
-      {
-        return item.level();
-      }
-    };
-
-    // for leaf vertices the level is somewhat difficult to obtain, because
-    // this the maximum of levels of elements that have this vertex as sub
-    // entity
-    template <class GridType>
-    struct GetLevel<GridType,3>
-    {
-      template <class ItemType>
-      static int getLevel(const GridType & grid, const ItemType & item)
-      {
-        return (item.isLeafEntity()) ? grid.getLevelOfLeafVertex(item) : item.level();
-      }
-    };
-
     enum { dimworld = GridImp::dimensionworld };
 
     typedef typename GridImp::MPICommunicatorType Comm;
@@ -87,8 +93,8 @@ namespace Dune
     typedef typename GridImp::GridObjectFactoryType FactoryType;
 
     typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim<cd>::InterfaceType HItemType;
-    typedef typename ImplTraits::template Codim<cd>::ImplementationType ItemType;
+    typedef typename ImplTraits::template Codim< cd >::InterfaceType HItemType;
+    typedef typename ImplTraits::template Codim< cd >::ImplementationType ItemType;
     typedef typename ImplTraits::VertexType VertexType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
 
@@ -119,11 +125,11 @@ namespace Dune
     GeometryType type () const;
 
     // set element as normal entity
-    void setElement(const HItemType & item);
-    void setElement(const HItemType & item, const int level, int twist=0, int face = -1);
+    void setElement ( const HItemType &item );
+    void setElement ( const HItemType &item, const int level, int twist = 0, int face = -1 );
 
     /* set entity from seed */
-    void setElement(const EntitySeed& seed);
+    void setElement ( const EntitySeed &seed );
 
     //! setGhost is not valid for this codim
     void setGhost(const HBndSegType  &ghost);

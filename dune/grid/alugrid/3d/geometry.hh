@@ -744,10 +744,10 @@ namespace Dune
     //!  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
     //! generate the geometry out of a given ALU3dGridElement
-    bool buildGeom(const IMPLElementType & item);
-    bool buildGeom(const HFaceType & item, int twist, int faceNum);
-    bool buildGeom(const HEdgeType & item, int twist, int);
-    bool buildGeom(const VertexType & item, int twist, int);
+    bool buildGeom ( const IMPLElementType &item );
+    bool buildGeom ( const HFaceType &item, int twist, int duneFace );
+    bool buildGeom ( const HEdgeType &item, int twist, int );
+    bool buildGeom ( const VertexType &item, int twist, int );
 
     // this method is used by the intersection iterator
     bool buildGeom(const FaceCoordinatesType& coords);
