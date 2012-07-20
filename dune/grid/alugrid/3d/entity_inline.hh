@@ -101,20 +101,17 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline void
-  ALU3dGridEntity<0,dim,GridImp>::
-  setElement(const EntitySeed& key )
+  inline void ALU3dGridEntity< 0, dim, GridImp >::setElement ( const EntitySeed &seed )
   {
-    if( ! key.isGhost() )
-      setElement( *key.interior() );
+    if( !seed.isGhost() )
+      setElement( *seed.interior() );
     else
-      setGhost( *key.ghost() );
+      setGhost( *seed.ghost() );
   }
 
-  template<int dim, class GridImp>
-  inline void
-  ALU3dGridEntity<0,dim,GridImp>::
-  setElement(HElementType & element)
+  template< int dim, class GridImp >
+  inline void ALU3dGridEntity< 0, dim, GridImp >
+  ::setElement ( HElementType &element )
   {
     item_ = static_cast<IMPLElementType *> (&element);
     assert( item_ );
@@ -128,9 +125,9 @@ namespace Dune {
     geo_.invalidate();
   }
 
+
   template<int dim, class GridImp>
-  inline void
-  ALU3dGridEntity<0,dim,GridImp> :: setGhost(HBndSegType & ghost)
+  inline void ALU3dGridEntity< 0, dim, GridImp >::setGhost ( HBndSegType &ghost )
   {
     // use element as ghost
     item_  = static_cast<IMPLElementType *> ( ghost.getGhost().first );
@@ -374,36 +371,34 @@ namespace Dune {
     }
   }
 
-  template<int codim, class GridImp >
-  inline ALU3dGridEntityPointerBase<codim,GridImp> &
-  ALU3dGridEntityPointerBase<codim,GridImp> ::
-  operator = (const ALU3dGridEntityPointerType & org)
+  template< int codim, class GridImp >
+  inline const typename ALU3dGridEntityPointerBase< codim,GridImp >::This &
+  ALU3dGridEntityPointerBase< codim, GridImp >::operator= ( const This &other )
   {
-    clone( org );
+    clone( other );
     return *this;
   }
 
-  template<int codim, class GridImp >
+  template< int codim, class GridImp >
   inline void
-  ALU3dGridEntityPointerBase<codim,GridImp> ::
-  clone (const ALU3dGridEntityPointerType & org)
+  ALU3dGridEntityPointerBase< codim, GridImp >::clone ( const This &other )
   {
-    assert( &factory_ == &org.factory_ );
+    assert( &factory_ == &other.factory_ );
 
     // set item
-    seed_ = org.seed_;
+    seed_ = other.seed_;
 
     HElementType* item = seed_.item();
     // copy locked info
-    locked_ = org.locked_;
+    locked_ = other.locked_;
 
     if( item )
     {
-      // if no entity check org entity
-      // if no org entity then nothing is done
+      // if no entity check other entity
+      // if no other entity then nothing is done
       if( !entity_ )
       {
-        getEntity(org);
+        getEntity( other );
       }
       else
       {
@@ -411,8 +406,8 @@ namespace Dune {
         if( item->isGhost() )
         {
           // on ghosts entity pointers entity always exists
-          assert( org.entity_ );
-          entityImp().setEntity( org.entityImp() );
+          assert( other.entity_ );
+          entityImp().setEntity( other.entityImp() );
           locked_ = true ;
         }
         else
@@ -457,12 +452,12 @@ namespace Dune {
     }
   }
 
-  template<int codim, class GridImp >
-  inline bool ALU3dGridEntityPointerBase<codim,GridImp>::
-  equals (const ALU3dGridEntityPointerBase<codim,GridImp>& i) const
+  template< int codim, class GridImp >
+  inline bool ALU3dGridEntityPointerBase< codim, GridImp >
+  ::equals ( const This &other ) const
   {
     // check equality of underlying items
-    return (seed_.equals( i.seed_ ));
+    return seed_.equals( other.seed_ );
   }
 
   template<int codim, class GridImp >

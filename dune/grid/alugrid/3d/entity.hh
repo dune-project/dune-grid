@@ -455,21 +455,20 @@ namespace Dune
 
     int level_;  //!< level of element
     bool isLeaf_; //!< is true if entity is leaf entity
+  };
 
-  }; // end of ALU3dGridEntity codim = 0
-     //**********************************************************************
-     //
-     // --ALU3dGridEntityPointer
-     // --EntityPointer
-     // --EnPointer
-     /*!
-        Enables iteration over all entities of a given codimension and level of a grid.
-      */
+
+  // ALU3dGridEntityPointerBase
+  // --------------------------
+
+  /*!
+     Enables iteration over all entities of a given codimension and level of a grid.
+   */
   template< int codim, class GridImp >
   class ALU3dGridEntityPointerBase
-  //: public EntityPointerDefaultImplementation <codim, GridImp, ALU3dGridEntityPointer<cd,GridImp> >
   {
-    typedef ALU3dGridEntityPointerBase< codim, GridImp > ThisType;
+    typedef ALU3dGridEntityPointerBase< codim, GridImp > This;
+
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
@@ -484,6 +483,7 @@ namespace Dune
 
     typedef typename ImplTraits::HBndSegType HBndSegType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
+
   public:
     typedef typename GridImp::GridObjectFactoryType FactoryType;
 
@@ -496,7 +496,7 @@ namespace Dune
     typedef typename EntityObject :: ImplementationType EntityImp;
 
     //! typedef of my type
-    typedef ThisType ALU3dGridEntityPointerType;
+    typedef This ALU3dGridEntityPointerType;
 
     //! make type of entity pointer implementation available in derived classes
     typedef ALU3dGridEntityPointer<codimension,GridImp> EntityPointerImp;
@@ -531,10 +531,10 @@ namespace Dune
     ~ALU3dGridEntityPointerBase();
 
     //! equality
-    bool equals (const ALU3dGridEntityPointerType& i) const;
+    bool equals ( const This &other ) const;
 
     //! assignment operator
-    ThisType & operator = (const ThisType & org);
+    const This &operator = ( const This &other );
 
     //! dereferencing
     Entity & dereference () const ;
@@ -544,7 +544,7 @@ namespace Dune
 
   protected:
     // clones object
-    void clone (const ALU3dGridEntityPointerType & org);
+    void clone ( const This &other );
 
     // get entity and assign from org.entity
     void getEntity (const ALU3dGridEntityPointerType & org);
