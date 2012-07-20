@@ -455,7 +455,7 @@ namespace Dune
       twist_( twist ),
       face_( duneFace )
   {
-    assert( (codim != 1) || (face_ >= 0) );
+    //assert( (codim != 1) || (face_ >= 0) );
   }
 
 
