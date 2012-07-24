@@ -37,7 +37,8 @@ namespace Dune
       in.seekg(0);
     }
 
-
+    // read the current block which is ended by a line starting
+    // with a # symbol.
     void BasicBlock :: getblock ( std :: istream &in )
     {
       linecount = 0;
@@ -82,7 +83,8 @@ namespace Dune
         ++linecount;
         block << line << std :: endl;
       }
-      DUNE_THROW( DGFException, "Error reading from stream." );
+      DUNE_THROW( DGFException,
+                  "Error reading from stream, expected \"#\" to end the block." );
     }
 
 

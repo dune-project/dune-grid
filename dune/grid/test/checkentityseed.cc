@@ -202,7 +202,7 @@ namespace Dune
   {
     const int dimension = GridView< VT >::dimension;
     ForLoop< CheckEntitySeed::IfHasEntitySeed, 0, dimension >::apply( gridView, output );
-  };
+  }
 
 } // namespace Dune
 
