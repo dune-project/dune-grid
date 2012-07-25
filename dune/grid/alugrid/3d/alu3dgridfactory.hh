@@ -17,7 +17,6 @@
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/boundaryprojection.hh>
 
-#include <dune/grid/alugrid/common/persistentcontainer.hh>
 #include <dune/grid/alugrid/common/transformation.hh>
 #include <dune/grid/alugrid/3d/alugrid.hh>
 
