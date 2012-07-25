@@ -71,6 +71,7 @@ AC_CONFIG_FILES([Makefile
     dune/grid/io/file/dgfparser/test/Makefile
     dune/grid/io/file/dgfparser/utils/Makefile
     dune/grid/io/file/gnuplot/Makefile
+    dune/grid/io/file/test/mpivtktest
     dune/grid/io/file/vtk/Makefile
     dune/grid/io/file/Makefile
     dune/grid/io/visual/grape/Makefile
@@ -84,5 +85,6 @@ AC_CONFIG_FILES([Makefile
     src/gmsh-to-alu/Makefile
     src/gridinfo-gmsh/Makefile
     src/structured-to-alu/Makefile
-    ])
+    ],
+    [chmod +x dune/grid/io/file/test/mpivtktest])
 AC_OUTPUT
