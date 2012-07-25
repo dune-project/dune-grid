@@ -13,6 +13,7 @@
 
 #include <dune/grid/common/gridfactory.hh>
 
+#include <dune/grid/alugrid/common/persistentcontainer.hh>
 #include <dune/grid/alugrid/common/transformation.hh>
 #include <dune/grid/alugrid/2d/grid.hh>
 
