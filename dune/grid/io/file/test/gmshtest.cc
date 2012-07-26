@@ -146,6 +146,10 @@ catch ( Dune::Exception &e )
   std::cerr << e << std::endl;
   return 1;
 }
+catch (std::exception &e) {
+  std::cerr << e.what << std::endl;
+  return 1;
+}
 catch ( ... )
 {
   std::cerr << "Generic exception!" << std::endl;

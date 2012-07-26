@@ -70,8 +70,7 @@ namespace Dune
 
       Now you can compare Dune::LevelIterator with Dune::EntityPointer and
       Dune::LeafIterator with Dune::HierarchicIterator. And you can assign
-      Dune::EntityPointer from any Dune::XxxIterator class. Even more, you can
-      cast an Iterator refence to a reference pointing to Dune::EntityPointer.
+      Dune::EntityPointer from any Dune::XxxIterator class.
 
       The compiler takes care that you only assign/compare Iterators from the same
       Grid.

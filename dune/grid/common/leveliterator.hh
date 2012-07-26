@@ -41,18 +41,6 @@ namespace Dune
       return *this;
     }
 
-    //===========================================================
-    /** @name Implementor interface
-     */
-    //@{
-    //===========================================================
-
-    /** @brief copy constructor from LevelIteratorImp
-     */
-    LevelIterator(const LevelIteratorImp<codim,pitype,const GridImp> & i) DUNE_DEPRECATED
-      : Base( i )
-    {}
-    //@}
   };
 
 }
