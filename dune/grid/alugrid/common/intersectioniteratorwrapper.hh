@@ -178,8 +178,8 @@ namespace Dune {
     const NormalType centerUnitOuterNormal ( ) const
     {
       GeometryType type = geometry().type();
-      const GenericReferenceElement<ctype, dim-1> & refElement =
-        GenericReferenceElements<ctype, dim-1>::general(type);
+      const ReferenceElement<ctype, dim-1> & refElement =
+        ReferenceElements<ctype, dim-1>::general(type);
       return unitOuterNormal(refElement.position(0,0));
     }
 

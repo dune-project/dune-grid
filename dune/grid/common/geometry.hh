@@ -75,7 +75,7 @@ namespace Dune
      \f$D\subseteq\mathbf{R}^\textrm{mydim}\f$ and
      \f$W\subseteq\mathbf{R}^\textrm{cdim}\f$.
      The domain \f$D\f$ is one of a set of predefined convex polytopes, the
-     so-called reference elements (\see Dune::GenericReferenceElement). The dimensionality
+     so-called reference elements (\see Dune::ReferenceElement). The dimensionality
      of \f$D\f$ is <tt>mydim</tt>.
      In general \f$\textrm{mydim}\leq\textrm{cdim}\f$, i.e.
      the convex polytope may be mapped to a manifold. Moreover, we require that
@@ -148,7 +148,7 @@ namespace Dune
     //typedef typename Implementation :: JacobianTransposed  JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
-       be used to access the Dune::GenericReferenceElement.
+       be used to access the Dune::ReferenceElement.
      */
     GeometryType type () const { return impl().type(); }
 
@@ -343,8 +343,8 @@ namespace Dune
       GeometryType type = asImp().type();
 
       // get corresponding reference element
-      const GenericReferenceElement< ctype , mydim > & refElement =
-        GenericReferenceElements< ctype, mydim >::general(type);
+      const ReferenceElement< ctype , mydim > & refElement =
+        ReferenceElements< ctype, mydim >::general(type);
 
       LocalCoordinate localBaryCenter ( 0 );
       // calculate local bary center
@@ -362,8 +362,8 @@ namespace Dune
       GeometryType type = asImp().type();
 
       // get corresponding reference element
-      const GenericReferenceElement< ctype , mydim > & refElement =
-        GenericReferenceElements< ctype, mydim >::general(type);
+      const ReferenceElement< ctype , mydim > & refElement =
+        ReferenceElements< ctype, mydim >::general(type);
 
       // center is (for now) the centroid of the reference element mapped to
       // this geometry.

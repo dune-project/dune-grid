@@ -103,7 +103,7 @@ namespace Dune
       //! coordinates
       const FieldVector<DT,n> position() const
       {
-        return GenericReferenceElements<DT,n>::general((*this)->type()).position(0,0);
+        return ReferenceElements<DT,n>::general((*this)->type()).position(0,0);
       }
     };
 
@@ -210,7 +210,7 @@ namespace Dune
       //! position of vertex inside the entity
       const FieldVector<DT,n> & position () const
       {
-        return GenericReferenceElements<DT,n>::general(git->type())
+        return ReferenceElements<DT,n>::general(git->type())
                .position(cornerIndexDune,n);
       }
     };

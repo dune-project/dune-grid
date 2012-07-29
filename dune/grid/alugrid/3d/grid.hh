@@ -472,7 +472,7 @@ namespace Dune
     typedef typename GridFamily::LeafIndexSetImp LeafIndexSetImp;
 
     //! reference element type
-    typedef GenericReferenceElement< alu3d_ctype, dimension > ReferenceElementType;
+    typedef ReferenceElement< alu3d_ctype, dimension > ReferenceElementType;
 
     //! \brief boundary projection type
     typedef typename Traits::DuneBoundaryProjectionType DuneBoundaryProjectionType;

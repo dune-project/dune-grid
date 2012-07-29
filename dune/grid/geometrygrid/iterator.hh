@@ -41,9 +41,9 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef ReferenceElement< ctype, dimension > RefElement;
 
-      static bool apply ( const ReferenceElement &refElement,
+      static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
       {
         const int size = refElement.size( subEntity, codim, dimension );
@@ -68,9 +68,9 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef ReferenceElement< ctype, dimension > RefElement;
 
-      static bool apply ( const ReferenceElement &refElement,
+      static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
       {
         return true;
@@ -87,9 +87,9 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef ReferenceElement< ctype, dimension > RefElement;
 
-      static bool apply ( const ReferenceElement &refElement,
+      static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
       {
         if( element.partitionType() == InteriorEntity )
@@ -117,9 +117,9 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef ReferenceElement< ctype, dimension > RefElement;
 
-      static bool apply ( const ReferenceElement &refElement,
+      static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
       {
         return true;
@@ -136,9 +136,9 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef ReferenceElement< ctype, dimension > RefElement;
 
-      static bool apply ( const ReferenceElement &refElement,
+      static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
       {
         return true;
@@ -155,9 +155,9 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef GenericReferenceElement< ctype, dimension > ReferenceElement;
+      typedef ReferenceElement< ctype, dimension > RefElement;
 
-      static bool apply ( const ReferenceElement &refElement,
+      static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
       {
         const int size = refElement.size( subEntity, codim, dimension );
@@ -262,8 +262,8 @@ namespace Dune
         {
           const HostElement &hostElement = *hostElementIterator_;
 
-          const GenericReferenceElement< ctype, dimension > &refElement
-            = GenericReferenceElements< ctype, dimension >::general( hostElement.type() );
+          const ReferenceElement< ctype, dimension > &refElement
+            = ReferenceElements< ctype, dimension >::general( hostElement.type() );
 
           ++subEntity;
           const int count = refElement.size( codimension );

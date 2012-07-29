@@ -500,8 +500,8 @@ namespace Dune
     {
       // For now, we do this...
       GeometryType type = asImp().geometry().type();
-      const GenericReferenceElement<ct, dim-1> & refElement =
-        GenericReferenceElements<ct, dim-1>::general(type);
+      const ReferenceElement<ct, dim-1> & refElement =
+        ReferenceElements<ct, dim-1>::general(type);
       return asImp().unitOuterNormal(refElement.position(0,0));
       // But later, if we change the meaning of center(),
       // we may have to change to this...

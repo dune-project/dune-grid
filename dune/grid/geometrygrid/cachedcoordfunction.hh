@@ -188,8 +188,8 @@ namespace Dune
     CoordFunctionCaller;
 
     CoordFunctionCaller coordFunctionCaller( hostEntity, coordFunction_ );
-    const GenericReferenceElement< ctype, HostEntity::dimension > &refElement
-      = GenericReferenceElements< ctype, HostEntity::dimension >::general( hostEntity.type() );
+    const ReferenceElement< ctype, HostEntity::dimension > &refElement
+      = ReferenceElements< ctype, HostEntity::dimension >::general( hostEntity.type() );
 
     const unsigned int numCorners = refElement.size( HostEntity::dimension );
     for( unsigned int i = 0; i < numCorners; ++i )

@@ -144,7 +144,7 @@ namespace Dune
     //@}
 
     /** \brief Return the name of the reference element. The type can
-       be used to access the Dune::GenericReferenceElement.
+       be used to access the Dune::ReferenceElement.
      */
     GeometryType type () const { return realEntity.type(); }
 
@@ -311,7 +311,7 @@ namespace Dune
     //@}
 
     /** \brief Return the name of the reference element. The type can
-        be used to access the Dune::GenericReferenceElement.
+        be used to access the Dune::ReferenceElement.
      */
     GeometryType type () const { return realEntity.type(); }
 
@@ -593,7 +593,7 @@ namespace Dune
     typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
 
     /** \brief Return the name of the reference element. The type can
-        be used to access the Dune::GenericReferenceElement.
+        be used to access the Dune::ReferenceElement.
      */
     GeometryType type () const { return asImp().geometry().type(); }
 
@@ -651,7 +651,7 @@ namespace Dune
     bool isRegular() const { return true; }
 
     /** \brief Return the name of the reference element. The type can
-        be used to access the Dune::GenericReferenceElement.
+        be used to access the Dune::ReferenceElement.
      */
     GeometryType type () const { return asImp().geometry().type(); }
 

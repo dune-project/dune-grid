@@ -102,8 +102,8 @@ namespace Dune
       int k = i;
       if( cc > 0 )
       {
-        const GenericReferenceElement< Alberta::Real, dimension > &refElement
-          = GenericReferenceElements< Alberta::Real, dimension >::simplex();
+        const ReferenceElement< Alberta::Real, dimension > &refElement
+          = ReferenceElements< Alberta::Real, dimension >::simplex();
         k = refElement.subEntity( entityImp.subEntity(), cc, i, codim );
       }
 
@@ -395,8 +395,8 @@ namespace Dune
       int k = i;
       if( cc > 0 )
       {
-        const GenericReferenceElement< Alberta::Real, dimension > &refElement
-          = GenericReferenceElements< Alberta::Real, dimension >::simplex();
+        const ReferenceElement< Alberta::Real, dimension > &refElement
+          = ReferenceElements< Alberta::Real, dimension >::simplex();
         k = refElement.subEntity( entityImp.subEntity(), cc, i, codim );
       }
 

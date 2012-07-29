@@ -60,7 +60,7 @@ namespace Dune {
     template<typename Element>
     typename VertexOrder<Element::mydimension>::type
     make(const Element &e) const {
-      typedef GenericReferenceElements<
+      typedef ReferenceElements<
           typename Element::ctype,
           Element::mydimension
           > RefElems;

@@ -93,8 +93,8 @@ namespace Dune
       void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
         const GeometryType type = coordFunctionCaller_.type();
-        const GenericReferenceElement< ctype, dimension > &refElement
-          = GenericReferenceElements< ctype, dimension >::general( type );
+        const ReferenceElement< ctype, dimension > &refElement
+          = ReferenceElements< ctype, dimension >::general( type );
         assert( numCorners == refElement.size( subEntity_, codimension, dimension ) );
 
         for( unsigned int i = 0; i < numCorners; ++i )

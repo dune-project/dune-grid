@@ -46,7 +46,7 @@ namespace Dune
 
       typedef typename Cell::ctype ctype;
       static const unsigned celldim = Cell::mydimension;
-      typedef GenericReferenceElements<ctype, celldim> Refelems;
+      typedef ReferenceElements<ctype, celldim> Refelems;
 
       static const FileType fileType = celldim == 1
                                        ? polyData : unstructuredGrid;

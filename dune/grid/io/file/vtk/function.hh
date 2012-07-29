@@ -228,7 +228,7 @@ namespace Dune
       for (int i=0; i<e.template count<dim>(); ++i)
       {
         Dune::FieldVector<ctype,dim> local =
-          Dune::GenericReferenceElements<ctype,dim>::general(gt)
+          Dune::ReferenceElements<ctype,dim>::general(gt)
           .position(i,dim);
         local -= xi;
         if (local.infinity_norm()<min)

@@ -49,7 +49,7 @@ namespace Dune
       ctype;
       static const unsigned dim = std::iterator_traits<CellIterator>::
                                   value_type::mydimension;
-      typedef GenericReferenceElements<ctype, dim> Refelems;
+      typedef ReferenceElements<ctype, dim> Refelems;
 
     private:
       typedef ForwardIteratorFacade<DerivedType, Value, Reference,

@@ -123,7 +123,7 @@ namespace Dune
                 << " leaf=" << it->isLeaf()
                 << " partition=" << PartitionName(it->partitionType())
                 << " center=("
-                << it->geometry().global(Dune::GenericReferenceElements<ct,dim>::general(it->type()).position(0,0))
+                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->type()).position(0,0))
                 << ")"
                 << " first=(" << it->geometry().corner(0) << ")"
                 << std::endl;
@@ -207,7 +207,7 @@ namespace Dune
                 << " leaf=" << it->isLeaf()
                 << " partition=" << PartitionName(it->partitionType())
                 << " center=("
-                << it->geometry().global(Dune::GenericReferenceElements<ct,dim>::general(it->type()).position(0,0))
+                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->type()).position(0,0))
                 << ")"
                 << " first=(" << it->geometry().corner(0) << ")"
                 << std::endl;

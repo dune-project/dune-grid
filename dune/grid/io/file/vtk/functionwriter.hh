@@ -32,7 +32,7 @@ namespace Dune
     class FunctionWriterBase {
       typedef typename Cell_::ctype DF;
       static const unsigned mydim = Cell_::mydimension;
-      typedef GenericReferenceElements<DF, mydim> Refelems;
+      typedef ReferenceElements<DF, mydim> Refelems;
 
     public:
       typedef FieldVector<DF, mydim> Domain;

@@ -296,8 +296,8 @@ namespace Dune {
       typedef typename GridType :: LocalIdSet LocalIdSet ;
       typedef typename LocalIdSet :: IdType IdType ;
 
-      typedef GenericReferenceElement< ctype, dim > ReferenceElementType;
-      typedef GenericReferenceElements< ctype, dim > ReferenceElementContainerType;
+      typedef ReferenceElement< ctype, dim > ReferenceElementType;
+      typedef ReferenceElements< ctype, dim > ReferenceElementContainerType;
 
       typedef std::set< IdType > CodimIdSetType ;
 
