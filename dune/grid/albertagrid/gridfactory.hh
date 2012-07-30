@@ -223,8 +223,8 @@ namespace Dune
     insertBoundarySegment ( const std::vector< unsigned int > &vertices,
                             const shared_ptr< BoundarySegment > &boundarySegment )
     {
-      const GenericReferenceElement< ctype, dimension-1 > &refSimplex
-        = GenericReferenceElements< ctype, dimension-1 >::simplex();
+      const ReferenceElement< ctype, dimension-1 > &refSimplex
+        = ReferenceElements< ctype, dimension-1 >::simplex();
 
       if( !boundarySegment )
         DUNE_THROW( GridError, "Trying to insert null as a boundary segment." );

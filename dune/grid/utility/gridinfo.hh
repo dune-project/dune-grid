@@ -226,7 +226,7 @@ namespace Dune {
 
     typedef typename GridViewInfo<ctype>::iterator InfoIterator;
 
-    typedef GenericReferenceElements<ctype, dim> RefElems;
+    typedef ReferenceElements<ctype, dim> RefElems;
 
     MultipleCodimMultipleGeomTypeMapper<GV, MCMGNonElementLayout> mapper(gv);
     std::vector<bool> visited(mapper.size(), false);

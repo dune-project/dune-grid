@@ -1,6 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 #include "config.h"
+#include <iostream>
+#include <ostream>
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/io/file/gnuplot.hh>
 
@@ -38,11 +40,8 @@ int main()
 
     testIO(sgrid.leafView<Dune::InteriorBorder_Partition>(), "sgrid-leaf.data");
     testIO(sgrid.levelView<Dune::InteriorBorder_Partition>(0), "sgrid-level.data");
-  } catch (Dune::Exception &e) {
-    std::cerr << e << std::endl;
-    return 1;
   } catch (std::exception &e) {
-    std::cerr << e.what << std::endl;
+    std::cerr << e.what() << std::endl;
     return 1;
   } catch (...) {
     std::cerr << "Generic exception!" << std::endl;

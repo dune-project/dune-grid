@@ -441,8 +441,8 @@ namespace Dune
        */
       GeometryType type () const
       {
-        const GenericReferenceElement< void, dimension > &refElement
-          = GenericReferenceElements< void, dimension >::general( hostElement().type() );
+        const ReferenceElement< void, dimension > &refElement
+          = ReferenceElements< void, dimension >::general( hostElement().type() );
         return refElement.type( subEntity_, codimension );
       }
 
@@ -458,8 +458,8 @@ namespace Dune
         if( !(Capabilities::isParallel< HostGrid >::v) )
           return InteriorEntity;
 
-        const GenericReferenceElement< void, dimension > &refElement
-          = GenericReferenceElements< void, dimension >::general( hostElement().type() );
+        const ReferenceElement< void, dimension > &refElement
+          = ReferenceElements< void, dimension >::general( hostElement().type() );
 
         PartitionType type = vertexPartitionType( refElement, 0 );
         if( (type != BorderEntity) && (type != FrontEntity) )
@@ -559,8 +559,8 @@ namespace Dune
       typename HostIndexSet::IndexType
       subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
       {
-        const GenericReferenceElement< void, dimension > &refElement
-          = GenericReferenceElements< void, dimension >::general( hostElement().type() );
+        const ReferenceElement< void, dimension > &refElement
+          = ReferenceElements< void, dimension >::general( hostElement().type() );
         const int j = refElement.subEntity( subEntity_, codimension, i, codimension+cd );
         return indexSet.subIndex( hostElement(), j, codimension+cd );
       }
@@ -594,7 +594,7 @@ namespace Dune
 
     private:
       PartitionType
-      vertexPartitionType ( const GenericReferenceElement< void, dimension > &refElement, int i ) const
+      vertexPartitionType ( const ReferenceElement< void, dimension > &refElement, int i ) const
       {
         const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
         return hostElement().template subEntity< dimension >( j )->partitionType();

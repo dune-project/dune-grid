@@ -149,8 +149,8 @@ namespace Dune
       // create factory without verbosity
       GridFactory< Grid > factory( false );
 
-      const Dune::GenericReferenceElement< ctype, dimension > &refElem
-        = Dune::GenericReferenceElements< ctype, dimension >::general( type );
+      const Dune::ReferenceElement< ctype, dimension > &refElem
+        = Dune::ReferenceElements< ctype, dimension >::general( type );
 
       // insert vertices
       FieldVector<ctype, dimensionworld> pos( 0 );

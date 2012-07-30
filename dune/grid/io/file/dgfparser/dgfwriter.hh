@@ -165,8 +165,8 @@ namespace Dune
       if( !it->hasBoundaryIntersections() )
         continue;
 
-      const GenericReferenceElement< void, dimGrid > &refElement
-        = GenericReferenceElements< void, dimGrid >::general( element.type() );
+      const ReferenceElement< void, dimGrid > &refElement
+        = ReferenceElements< void, dimGrid >::general( element.type() );
 
       const IntersectionIterator iend = gridView_.iend( element ) ;
       for( IntersectionIterator iit = gridView_.ibegin( element ); iit != iend; ++iit )

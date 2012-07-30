@@ -102,8 +102,7 @@ namespace Dune
       int k = i;
       if( cc > 0 )
       {
-        const GenericReferenceElement< void, dimension > &refElement
-          = GenericReferenceElements< void, dimension >::simplex();
+        const ReferenceElement< void, dimension > &refElement = ReferenceElements< void, dimension >::simplex();
         k = refElement.subEntity( entityImp.subEntity(), cc, i, codim );
       }
 
@@ -395,8 +394,7 @@ namespace Dune
       int k = i;
       if( cc > 0 )
       {
-        const GenericReferenceElement< void, dimension > &refElement
-          = GenericReferenceElements<void, dimension >::simplex();
+        const ReferenceElement< void, dimension > &refElement = ReferenceElements<void, dimension >::simplex();
         k = refElement.subEntity( entityImp.subEntity(), cc, i, codim );
       }
 

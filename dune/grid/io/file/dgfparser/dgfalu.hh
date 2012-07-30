@@ -112,8 +112,8 @@ namespace Dune
       const typename Intersection::Entity & entity = *inside;
       const int face = intersection.indexInInside();
 
-      const GenericReferenceElement< void, dimension > &refElement
-        = GenericReferenceElements< void, dimension >::general( entity.type() );
+      const ReferenceElement< void, dimension > &refElement
+        = ReferenceElements< void, dimension >::general( entity.type() );
       int corners = refElement.size( face, 1, dimension );
       std :: vector< unsigned int > bound( corners );
       for( int i=0; i < corners; ++i )
@@ -139,8 +139,8 @@ namespace Dune
       const typename Intersection::Entity & entity = *inside;
       const int face = intersection.indexInInside();
 
-      const GenericReferenceElement< void, dimension > & refElement =
-        GenericReferenceElements< void, dimension >::general( entity.type() );
+      const ReferenceElement< void, dimension > &refElement
+        = ReferenceElements< void, dimension >::general( entity.type() );
       int corners = refElement.size( face, 1, dimension );
       std :: vector< unsigned int > bound( corners );
       for( int i=0; i < corners; ++i )

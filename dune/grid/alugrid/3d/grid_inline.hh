@@ -33,8 +33,8 @@ namespace Dune
       , localIdSet_( *this )
       , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
       , referenceElement_( elType == tetra
-                           ? GenericReferenceElements< alu3d_ctype, dimension > :: simplex()
-                           : GenericReferenceElements< alu3d_ctype, dimension > :: cube() )
+                           ? ReferenceElements< alu3d_ctype, dimension > :: simplex()
+                           : ReferenceElements< alu3d_ctype, dimension > :: cube() )
       , sizeCache_ ( 0 )
 #ifdef USE_SMP_PARALLEL
       , factoryVec_( GridObjectFactoryType :: maxThreads(), GridObjectFactoryType( *this ) )

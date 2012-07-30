@@ -79,7 +79,7 @@ namespace Dune
       for( HierarchicIterator it = e.hbegin( e.level()+1 ); it != end; ++it )
       {
         FieldVector<ct,dim> local = it->geometry().local(global);
-        if (GenericReferenceElements<double, dim>::general(it->type()).checkInside(local))
+        if (ReferenceElements<double, dim>::general(it->type()).checkInside(local))
         {
           // return if we found the leaf, else search through the child entites
           if( is.contains( *it ) )
@@ -144,7 +144,7 @@ namespace Dune
         const typename Entity::Geometry &geo = e.geometry();
 
         FieldVector< ct, dim > local = geo.local( global );
-        if( !GenericReferenceElements< double, dim >::general( geo.type() ).checkInside( local ) )
+        if( !ReferenceElements< double, dim >::general( geo.type() ).checkInside( local ) )
           continue;
 
         if( (int(dim) != int(dimw)) && ((geo.global( local ) - global).two_norm() > 1e-8) )

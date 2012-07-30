@@ -115,7 +115,7 @@ namespace Dune
   inline DGFEntityKey< unsigned int >
   ElementFaceUtil::generateCubeFace ( const std::vector< unsigned int > &element, int f )
   {
-    const GenericReferenceElement< void, dim > &refCube = GenericReferenceElements< void, dim >::cube();
+    const ReferenceElement< void, dim > &refCube = ReferenceElements< void, dim >::cube();
     const unsigned int size = refCube.size( f, 1, dim );
     std::vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++ i )
@@ -128,7 +128,7 @@ namespace Dune
   inline DGFEntityKey< unsigned int >
   ElementFaceUtil::generateSimplexFace ( const std::vector< unsigned int > &element, int f )
   {
-    const GenericReferenceElement< void, dim > &refSimplex = GenericReferenceElements< void, dim >::simplex();
+    const ReferenceElement< void, dim > &refSimplex = ReferenceElements< void, dim >::simplex();
     const unsigned int size = refSimplex.size( f, 1, dim );
     std::vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++i )

@@ -315,8 +315,8 @@ namespace Dune {
         const ElementType& element = *it ;
 
         // get reference element
-        const GenericReferenceElement< void, dim > &refElement
-          = GenericReferenceElements< void, dim >::general( element.type() );
+        const ReferenceElement< void, dim > &refElement
+          = ReferenceElements< void, dim >::general( element.type() );
 
         // count all sub entities of codimension codim
         const int count = element.template count< codim > ();

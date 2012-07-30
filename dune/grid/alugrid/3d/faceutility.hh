@@ -232,14 +232,14 @@ namespace Dune
     typedef NonConformingFaceMapping< type, Comm > NonConformingMappingType;
 
     // type of container for reference elements
-    typedef GenericReferenceElements< alu3d_ctype, 3 > ReferenceElementContainerType;
+    typedef ReferenceElements< alu3d_ctype, 3 > ReferenceElementContainerType;
     // type of container for reference faces
-    typedef GenericReferenceElements< alu3d_ctype, 2 > ReferenceFaceContainerType;
+    typedef ReferenceElements< alu3d_ctype, 2 > ReferenceFaceContainerType;
 
     // type of reference element
-    typedef GenericReferenceElement<alu3d_ctype, 3> ReferenceElementType;
+    typedef ReferenceElement<alu3d_ctype, 3> ReferenceElementType;
     // type of reference face
-    typedef GenericReferenceElement<alu3d_ctype, 2> ReferenceFaceType;
+    typedef ReferenceElement<alu3d_ctype, 2> ReferenceFaceType;
 
     enum SideIdentifier { INNER, OUTER };
     enum { dimworld = 3 }; // ALU is a pure 3d grid

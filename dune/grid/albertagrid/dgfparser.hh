@@ -75,8 +75,7 @@ namespace Dune
       const typename Intersection::Entity & entity = *inside;
       const int face = intersection.indexInInside();
 
-      const GenericReferenceElement< void, dimension > &refSimplex
-        = GenericReferenceElements< void, dimension >::simplex();
+      const ReferenceElement< void, dimension > &refSimplex = ReferenceElements< void, dimension >::simplex();
       int corners = refSimplex.size( face, 1, dimension );
       std :: vector< unsigned int > bound( corners );
       for( int i=0; i < corners; ++i )
