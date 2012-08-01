@@ -916,8 +916,7 @@ namespace Dune
     }
     else if (dimw==3)
     {
-      const GenericReferenceElement< void, 3 > &refSimplex
-        = GenericReferenceElements< void, 3 >::simplex();
+      const ReferenceElement< void, 3 > &refSimplex = ReferenceElements< void, 3 >::simplex();
       for (int i=0; i<nofelements; i++)
       {
         if (elements[i].size()!=size_t(dimw+1))
