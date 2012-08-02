@@ -339,7 +339,7 @@ namespace Dune {
       RefinementIteratorSpecial<dimension, CoordType, 0>::geometry () const
       {
         const typename BackendIterator::Geometry &bgeo =
-          backend.deprecatedGeometry();
+          backend.geometry();
         Dune::array<CoordVector, dimension+1> corners;
         for(int i = 0; i <= dimension; ++i)
           corners[i] = global(bgeo.corner(i));

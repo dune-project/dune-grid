@@ -619,10 +619,6 @@ namespace Dune {
         CoordVector coords() const;
 
         Geometry geometry () const;
-        // As the name says, this method is deprecated, but it doesn't have
-        // the deprecated attibute.  This is so other deprecated methods can
-        // call this method without producing multiple deprecation warnings.
-        Geometry deprecatedGeometry () const;
 
       private:
         CoordVector global(const CoordVector &local) const;
@@ -741,17 +737,6 @@ namespace Dune {
       template<int dimension, class CoordType>
       typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry
       RefinementIteratorSpecial<dimension, CoordType, 0>::geometry () const
-      {
-        return deprecatedGeometry();
-      }
-
-      // As the name says, this method is deprecated, but it doesn't have the
-      // deprecated attibute.  This is so other deprecated methods can call
-      // this method without producing multiple deprecation warnings.
-      template<int dimension, class CoordType>
-      typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry
-      RefinementIteratorSpecial<dimension, CoordType, 0>::
-      deprecatedGeometry () const
       {
         Dune::array<CoordVector, dimension+1> corners;
         CoordVector v;
