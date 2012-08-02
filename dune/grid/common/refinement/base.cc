@@ -19,16 +19,8 @@
    @endverbatim
  */
 
-#include <dune/common/deprecated.hh>
-
 #include <dune/geometry/type.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
-
-#ifdef DUNE_REFINEMENT_DISABLE_GEOMETRY_DEPRECATION_WARNING
-#define DUNE_REFINEMENT_DEPRECATED(msg)
-#else
-#define DUNE_REFINEMENT_DEPRECATED(msg) DUNE_DEPRECATED_MSG(msg)
-#endif
 
 namespace Dune {
 
