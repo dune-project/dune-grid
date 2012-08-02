@@ -153,7 +153,12 @@ namespace Dune {
       struct RefinementImp<dimension, CoordType>::Codim
       {
         class SubEntityIterator;
-        typedef Dune::Geometry<dimension-codimension, dimension, RefinementImp<dimension, CoordType>, GenericGeometry::Geometry> Geometry;
+        /** \todo Returning a generic BasicGeometry is not very efficient.
+         *    Better solutions would include:
+         *     - use a custom traits class (short term)
+         *     - write a special-purpose geometry implementation for axis-aligned cubes
+         */
+        typedef Dune::GenericGeometry::BasicGeometry<dimension,Dune::GenericGeometry::DefaultGeometryTraits<CoordType,dimension-codimension,dimension,true> > Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -445,7 +450,27 @@ namespace Dune {
       typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::geometry () const
       {
-        assert(false && "Not Implemented");
+        // Construct the list of corners of the geometry
+        std::size_t numCorners = 1<<dimension;
+        std::vector<Dune::FieldVector<CoordType,dimension> > corners(numCorners);
+
+        array<unsigned int,dimension> intCoords = idx2coord(_index,1<<_level);
+
+        for (size_t i=0; i<numCorners; i++) {
+
+          for (size_t j=0; j<dimension; j++) {
+
+            int cornerIdx = intCoords[j] + ((i&(1<<j)) != 0);
+            corners[i][j] = double(cornerIdx) / double(1<<_level);
+
+          }
+
+        }
+
+        GeometryType type(GeometryType::BasicType::cube,dimension);
+
+        // return a BasicGeometry with the correct set of corners
+        return typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry(type,corners);
       }
 
 #endif // DOXYGEN
