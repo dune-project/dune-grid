@@ -63,7 +63,6 @@ namespace Dune {
       //  Utilities
       //
 
-      using Simplex::factorial;
       using Simplex::getPermutation;
       using Simplex::referenceToKuhn;
 
