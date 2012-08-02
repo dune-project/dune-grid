@@ -64,10 +64,8 @@ namespace Dune {
       //
 
       using Simplex::factorial;
-      using Simplex::binomial;
       using Simplex::getPermutation;
       using Simplex::referenceToKuhn;
-      using Simplex::kuhnToReference;
 
       // ////////////////////////////////////
       //
