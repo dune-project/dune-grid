@@ -143,8 +143,8 @@ int main(int argc, char** argv) try
   gt2.makeQuadrilateral();
   for (int refinement=0; refinement<3; refinement++) {
     testVirtualRefinement<double,2>(result, gt1, gt2, refinement);
-    // testStaticRefinementGeometry<Square::id,double,Square::id,2>
-    //     (result, refinement);
+    testStaticRefinementGeometry<Square::id,double,Square::id,2>
+      (result, refinement);
   }
   gt2.makeTriangle();
   for (int refinement=0; refinement<3; refinement++) {
@@ -185,8 +185,8 @@ int main(int argc, char** argv) try
   gt2.makeHexahedron();
   for (int refinement=0; refinement<3; refinement++) {
     testVirtualRefinement<double,3>(result, gt1, gt2, refinement);
-    // testStaticRefinementGeometry<Cube::id,double,Cube::id,3>
-    //    (result, refinement);
+    testStaticRefinementGeometry<Cube::id,double,Cube::id,3>
+      (result, refinement);
   }
   gt1.makeHexahedron();
   gt2.makeTetrahedron();
