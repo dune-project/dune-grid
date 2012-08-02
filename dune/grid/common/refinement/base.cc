@@ -180,43 +180,6 @@ namespace Dune {
     using typename RefinementImp::IndexVector;
   };
 
-  namespace RefinementImp {
-#ifndef DOXYGEN
-    template<GeometryType::BasicType basicType, unsigned dim>
-    struct BasicTypeToTopologyId;
-
-    template<unsigned dim>
-    struct BasicTypeToTopologyId<GeometryType::simplex, dim> {
-      static const unsigned value =
-        GenericGeometry::SimplexTopology<dim>::type::id;
-    };
-
-    template<unsigned dim>
-    struct BasicTypeToTopologyId<GeometryType::cube, dim> {
-      static const unsigned value =
-        GenericGeometry::CubeTopology<dim>::type::id;
-    };
-
-    template<>
-    struct BasicTypeToTopologyId<GeometryType::pyramid, 3> {
-      static const unsigned value = GenericGeometry::Pyramid<
-          GenericGeometry::Prism<
-              GenericGeometry::Pyramid<GenericGeometry::Point>
-              >
-          >::id;
-    };
-
-    template<>
-    struct BasicTypeToTopologyId<GeometryType::prism, 3> {
-      static const unsigned value = GenericGeometry::Prism<
-          GenericGeometry::Pyramid<
-              GenericGeometry::Pyramid<GenericGeometry::Point>
-              >
-          >::id;
-    };
-#endif // !DOXYGEN
-  } // namespace RefinementImp
-
   /*! @} */
 
 } // namespace Dune
