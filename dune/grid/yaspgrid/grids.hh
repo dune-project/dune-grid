@@ -2304,6 +2304,19 @@ namespace Dune {
     }
 
 
+    struct mpifriendly_ygrid {
+      mpifriendly_ygrid ()
+        : origin(0), size(0), h(0.0), r(0.0)
+      {}
+      mpifriendly_ygrid (const YGrid<d,ct>& grid)
+        : origin(grid.origin()), size(grid.size()), h(grid.meshsize()), r(grid.shift())
+      {}
+      iTupel origin;
+      iTupel size;
+      fTupel h;
+      fTupel r;
+    };
+
     // construct list of intersections with neighboring processors:
     //   recvgrid: the grid stored in this processor
     //   sendgrid:  the subgrid to be sent to neighboring processors
@@ -2318,6 +2331,12 @@ namespace Dune {
       std::vector<YGrid<d,ct> > recv_recvgrid(_torus.neighbors());
       std::vector<YGrid<d,ct> > send_sendgrid(_torus.neighbors());
       std::vector<YGrid<d,ct> > recv_sendgrid(_torus.neighbors());
+
+      // new exchange buffers to send simple struct without virtual functions
+      std::vector<mpifriendly_ygrid> mpifriendly_send_recvgrid(_torus.neighbors());
+      std::vector<mpifriendly_ygrid> mpifriendly_recv_recvgrid(_torus.neighbors());
+      std::vector<mpifriendly_ygrid> mpifriendly_send_sendgrid(_torus.neighbors());
+      std::vector<mpifriendly_ygrid> mpifriendly_recv_sendgrid(_torus.neighbors());
 
       // fill send buffers; iterate over all neighboring processes
       // non-periodic case is handled automatically because intersection will be zero
@@ -2365,22 +2384,28 @@ namespace Dune {
 
       // issue send requests for sendgrid being sent to all neighbors
       for (typename Torus<d>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
-        _torus.send(i.rank(), &send_sendgrid[i.index()], sizeof(YGrid<d,ct>));
+      {
+        mpifriendly_send_sendgrid[i.index()] = mpifriendly_ygrid(send_sendgrid[i.index()]);
+        _torus.send(i.rank(), &mpifriendly_send_sendgrid[i.index()], sizeof(mpifriendly_ygrid));
+      }
 
       // issue recv requests for sendgrids of neighbors
       for (typename Torus<d>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
-        _torus.recv(i.rank(), &recv_sendgrid[i.index()], sizeof(YGrid<d,ct>));
+        _torus.recv(i.rank(), &mpifriendly_recv_sendgrid[i.index()], sizeof(mpifriendly_ygrid));
 
       // exchange the sendgrids
       _torus.exchange();
 
       // issue send requests for recvgrid being sent to all neighbors
       for (typename Torus<d>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
-        _torus.send(i.rank(), &send_recvgrid[i.index()], sizeof(YGrid<d,ct>));
+      {
+        mpifriendly_send_recvgrid[i.index()] = mpifriendly_ygrid(send_recvgrid[i.index()]);
+        _torus.send(i.rank(), &mpifriendly_send_recvgrid[i.index()], sizeof(mpifriendly_ygrid));
+      }
 
       // issue recv requests for recvgrid of neighbors
       for (typename Torus<d>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
-        _torus.recv(i.rank(), &recv_recvgrid[i.index()], sizeof(YGrid<d,ct>));
+        _torus.recv(i.rank(), &mpifriendly_recv_recvgrid[i.index()], sizeof(mpifriendly_ygrid));
 
       // exchange the recvgrid
       _torus.exchange();
@@ -2390,6 +2415,8 @@ namespace Dune {
       {
         // what must be sent to this neighbor
         Intersection send_intersection;
+        mpifriendly_ygrid yg = mpifriendly_recv_recvgrid[i.index()];
+        recv_recvgrid[i.index()] = YGrid<d,ct>(yg.origin,yg.size,yg.h,yg.r);
         send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
         //        std::cout << "[" << _torus.rank() << "]:   " << "sendgrid=" << sendgrid << std::endl;
         //        std::cout << "[" << _torus.rank() << "]:   " << "recved recvgrid=" << recv_recvgrid[i.index()] << std::endl;
@@ -2399,6 +2426,8 @@ namespace Dune {
         if (!send_intersection.grid.empty()) sendlist.push_front(send_intersection);
 
         Intersection recv_intersection;
+        yg = mpifriendly_recv_sendgrid[i.index()];
+        recv_sendgrid[i.index()] = YGrid<d,ct>(yg.origin,yg.size,yg.h,yg.r);
         recv_intersection.grid = recvgrid.intersection(recv_sendgrid[i.index()]);
         //        std::cout << "[" << _torus.rank() << "]:   " << "recvgrid=" << recvgrid << std::endl;
         //        std::cout << "[" << _torus.rank() << "]:   " << "recved sendgrid=" << recv_sendgrid[i.index()] << std::endl;
