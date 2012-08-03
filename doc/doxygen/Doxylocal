@@ -6,7 +6,6 @@ INPUT                 += @srcdir@/mainpage \
                          @top_srcdir@/dune/grid/alugrid.hh \
                          @top_srcdir@/dune/grid/alugrid \
                          @top_srcdir@/dune/grid/common \
-                         @top_srcdir@/dune/grid/genericgeometry \
                          @top_srcdir@/dune/grid/geometrygrid.hh \
                          @top_srcdir@/dune/grid/geometrygrid \
                          @top_srcdir@/dune/grid/io \

@@ -19,16 +19,8 @@
    @endverbatim
  */
 
-#include <dune/common/deprecated.hh>
-
 #include <dune/geometry/type.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
-
-#ifdef DUNE_REFINEMENT_DISABLE_GEOMETRY_DEPRECATION_WARNING
-#define DUNE_REFINEMENT_DEPRECATED(msg)
-#else
-#define DUNE_REFINEMENT_DEPRECATED(msg) DUNE_DEPRECATED_MSG(msg)
-#endif
 
 namespace Dune {
 
@@ -187,43 +179,6 @@ namespace Dune {
     using typename RefinementImp::ElementIterator;
     using typename RefinementImp::IndexVector;
   };
-
-  namespace RefinementImp {
-#ifndef DOXYGEN
-    template<GeometryType::BasicType basicType, unsigned dim>
-    struct BasicTypeToTopologyId;
-
-    template<unsigned dim>
-    struct BasicTypeToTopologyId<GeometryType::simplex, dim> {
-      static const unsigned value =
-        GenericGeometry::SimplexTopology<dim>::type::id;
-    };
-
-    template<unsigned dim>
-    struct BasicTypeToTopologyId<GeometryType::cube, dim> {
-      static const unsigned value =
-        GenericGeometry::CubeTopology<dim>::type::id;
-    };
-
-    template<>
-    struct BasicTypeToTopologyId<GeometryType::pyramid, 3> {
-      static const unsigned value = GenericGeometry::Pyramid<
-          GenericGeometry::Prism<
-              GenericGeometry::Pyramid<GenericGeometry::Point>
-              >
-          >::id;
-    };
-
-    template<>
-    struct BasicTypeToTopologyId<GeometryType::prism, 3> {
-      static const unsigned value = GenericGeometry::Prism<
-          GenericGeometry::Pyramid<
-              GenericGeometry::Pyramid<GenericGeometry::Point>
-              >
-          >::id;
-    };
-#endif // !DOXYGEN
-  } // namespace RefinementImp
 
   /*! @} */
 
