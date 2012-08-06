@@ -8,7 +8,7 @@
  */
 
 #include "uggridrenumberer.hh"
-#include <dune/common/array.hh>
+#include <dune/common/container/array.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/geometry/genericgeometry/geometry.hh>
 

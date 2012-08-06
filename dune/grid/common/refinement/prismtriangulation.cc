@@ -3,7 +3,7 @@
 #ifndef DUNE_GRID_COMMON_REFINEMENT_PRISMTRIANGULATION_CC
 #define DUNE_GRID_COMMON_REFINEMENT_PRISMTRIANGULATION_CC
 
-#include <dune/common/array.hh>
+#include <dune/common/container/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
 #include <dune/common/typetraits.hh>

@@ -3,7 +3,7 @@
 #ifndef DUNE_ONE_D_GRID_ENTITY_HH
 #define DUNE_ONE_D_GRID_ENTITY_HH
 
-#include <dune/common/array.hh>
+#include <dune/common/container/array.hh>
 #include <dune/common/fvector.hh>
 
 #include <dune/grid/common/gridenums.hh>

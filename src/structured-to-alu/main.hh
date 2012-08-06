@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-#include <dune/common/array.hh>
+#include <dune/common/container/array.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/mpihelper.hh>

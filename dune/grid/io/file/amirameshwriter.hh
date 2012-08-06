@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <dune/common/array.hh>
+#include <dune/common/container/array.hh>
 
 #if HAVE_AMIRAMESH
 #include <amiramesh/AmiraMesh.h>

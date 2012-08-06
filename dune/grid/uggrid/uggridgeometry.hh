@@ -7,7 +7,7 @@
  * \brief The UGGridGeometry class and its specializations
  */
 
-#include <dune/common/array.hh>
+#include <dune/common/container/array.hh>
 #include <dune/common/fmatrix.hh>
 
 #include <dune/geometry/genericgeometry/geometry.hh>

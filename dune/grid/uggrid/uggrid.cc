@@ -8,7 +8,7 @@
 #include <dune/grid/uggrid.hh>
 
 /** \todo Remove the following include once getAllSubfaces... is gone */
-#include <dune/common/sllist.hh>
+#include <dune/common/container/sllist.hh>
 #include <dune/common/stdstreams.hh>
 
 

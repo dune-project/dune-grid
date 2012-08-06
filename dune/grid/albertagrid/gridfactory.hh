@@ -13,7 +13,7 @@
 #include <limits>
 #include <map>
 
-#include <dune/common/array.hh>
+#include <dune/common/container/array.hh>
 
 #include <dune/geometry/referenceelements.hh>
 

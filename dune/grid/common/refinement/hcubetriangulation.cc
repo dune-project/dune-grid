@@ -33,7 +33,7 @@
 
  */
 
-#include <dune/common/array.hh>
+#include <dune/common/container/array.hh>
 #include <dune/common/misc.hh>
 
 #include <dune/geometry/genericgeometry/geometry.hh>
