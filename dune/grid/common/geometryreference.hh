@@ -31,6 +31,9 @@ namespace Dune
   namespace FacadeOptions
   {
 
+    template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
+    struct StoreGeometryReference;
+
     template< int mydim, int cdim, class Grid >
     struct StoreGeometryReference< mydim, cdim, Grid, GlobalGeometryReference >
     {
