@@ -290,8 +290,8 @@ namespace Dune
     if( dimR == 1 )
     {
       typedef typename GridView::template Codim< 0 >::Iterator Iterator;
-      typedef GenericReferenceElement< typename GridView::Grid::ctype, dimDomain > ReferenceElement;
-      typedef GenericReferenceElements< typename GridView::Grid::ctype, dimDomain > ReferenceElements;
+      typedef Dune::ReferenceElement< typename GridView::Grid::ctype, dimDomain > ReferenceElement;
+      typedef Dune::ReferenceElements< typename GridView::Grid::ctype, dimDomain > ReferenceElements;
 
       const Iterator end = gridView.template end< 0 >();
       for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )

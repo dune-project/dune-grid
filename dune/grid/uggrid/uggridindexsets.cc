@@ -25,8 +25,8 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
     for (int i=0; i<eIt->template count<dim-1>(); i++)
     {
       GeometryType gt = eIt->type();
-      int a=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
-      int b=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
+      int a=ReferenceElements< void, dim >::general(gt).subEntity(i,dim-1,0,dim);
+      int b=ReferenceElements< void, dim >::general(gt).subEntity(i,dim-1,1,dim);
       int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                               UG_NS<dim>::Corner(target_,
@@ -76,8 +76,8 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
     // codim dim-1 (edges)
     for (int i=0; i<eIt->template count<dim-1>(); i++)
     {
-      int a=GenericReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,0,dim);
-      int b=GenericReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,1,dim);
+      int a=ReferenceElements< void, dim >::general(eType).subEntity(i,dim-1,0,dim);
+      int b=ReferenceElements< void, dim >::general(eType).subEntity(i,dim-1,1,dim);
       int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target,
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,eType)),
                                                               UG_NS<dim>::Corner(target,
@@ -92,7 +92,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
       {
         UG::UINT& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target,UGGridRenumberer<dim>::facesDUNEtoUG(i,eType)));
         if (index == std::numeric_limits<UG::UINT>::max()) {             // not visited yet
-          GeometryType gtType = GenericReferenceElements<double,dim>::general(eType).type(i,1);
+          GeometryType gtType = ReferenceElements< void, dim >::general(eType).type(i,1);
           if (gtType.isSimplex()) {
             index = numTriFaces_++;
           } else if (gtType.isCube()) {
@@ -176,8 +176,8 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
       for (int i=0; i<eIt->template count<dim-1>(); i++)
       {
         GeometryType gt = eIt->type();
-        int a=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
-        int b=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
+        int a=ReferenceElements< void, dim >::general(gt).subEntity(i,dim-1,0,dim);
+        int b=ReferenceElements< void, dim >::general(gt).subEntity(i,dim-1,1,dim);
         int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
                                                                                   UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                                UG_NS<dim>::Corner(target_,
@@ -236,8 +236,8 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
       for (int i=0; i<eIt->template count<dim-1>(); i++)
       {
         GeometryType gt = eIt->type();
-        int a=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
-        int b=GenericReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
+        int a=ReferenceElements< void, dim >::general(gt).subEntity(i,dim-1,0,dim);
+        int b=ReferenceElements< void, dim >::general(gt).subEntity(i,dim-1,1,dim);
         int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
                                                                                   UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                                UG_NS<dim>::Corner(target_,
@@ -269,7 +269,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
           if (index==std::numeric_limits<UG::UINT>::max())                       // not visited yet
           {
             // get new index and assign
-            GeometryType gtType = GenericReferenceElements<double,dim>::general(gt).type(i,1);
+            GeometryType gtType = ReferenceElements< void, dim >::general(gt).type(i,1);
             if (gtType.isSimplex())
               index = numTriFaces_++;
             else if (gtType.isCube())

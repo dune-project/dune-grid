@@ -156,8 +156,8 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
   typedef FaceTopologyMapping<hexa>  CubeFaceMapping;
 
   // get reference element
-  const GenericReferenceElement< ctype, dim > &refElem =
-    GenericReferenceElements< ctype, dim >::general( en.type() );
+  const ReferenceElement< ctype, dim > &refElem
+    = ReferenceElements< ctype, dim >::general( en.type() );
 
   const int vxSize = refElem.size( face, 1, dim );
   typedef  FieldVector<ctype,dim> CoordinateVectorType;

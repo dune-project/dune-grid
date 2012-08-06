@@ -47,8 +47,8 @@ namespace Dune
   inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
   ALU2dGridGeometry< mydim, cdim, GridImp >::corner ( int i ) const
   {
-    const GenericReferenceElement< alu2d_ctype, mydim > &refElement
-      = GenericReferenceElements< alu2d_ctype, mydim >::general( type() );
+    const ReferenceElement< alu2d_ctype, mydim > &refElement
+      = ReferenceElements< alu2d_ctype, mydim >::general( type() );
     return global( refElement.position( i, mydim ) );
   }
 

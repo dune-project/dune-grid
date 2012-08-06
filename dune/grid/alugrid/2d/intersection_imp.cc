@@ -163,8 +163,8 @@ namespace Dune
       current.inside()->outernormal( current.index(), (normal_t)(&outerNormal)[0] );
     else
     {
-      const GenericReferenceElement< alu2d_ctype, dimension > &refElement =
-        GenericReferenceElements< alu2d_ctype, dimension >::cube();
+      const ReferenceElement< alu2d_ctype, dimension > &refElement =
+        ReferenceElements< alu2d_ctype, dimension >::cube();
       typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
       typename LocalGeometry::GlobalCoordinate refNormal = refElement.volumeOuterNormal( indexInInside() );
       inside()->geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
@@ -198,8 +198,8 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< Grid, Info >::NormalType
   ALU2dGridIntersectionBase< Grid, Info >::centerUnitOuterNormal () const
   {
-    const GenericReferenceElement< ctype, dimension-1 > &refElement
-      = GenericReferenceElements< ctype, dimension-1 >::general( type() );
+    const ReferenceElement< ctype, dimension-1 > &refElement
+      = ReferenceElements< ctype, dimension-1 >::general( type() );
     return unitOuterNormal( refElement.position( 0, 0 ) );
   }
 

@@ -122,7 +122,7 @@ void checkIntersectionIterator(const GridViewType& view,
 
   typedef typename GridViewType::template Codim< 0 >::Geometry ElementGeometry;
   const ElementGeometry &geoInside = eIt->geometry();
-  const GenericReferenceElement< ctype, dim > &refElement = GenericReferenceElements< ctype, dim >::general( eIt->type() );
+  const ReferenceElement< ctype, dim > &refElement = ReferenceElements< ctype, dim >::general( eIt->type() );
 
   typename ElementGeometry::GlobalCoordinate sumNormal( ctype( 0 ) );
 
@@ -154,7 +154,7 @@ void checkIntersectionIterator(const GridViewType& view,
   {
     const int indexInInside  = iIt->indexInInside();
 
-    const GenericReferenceElement< ctype, dim-1 > &refFace = GenericReferenceElements< ctype, dim-1 >::general( iIt->type() );
+    const ReferenceElement< ctype, dim-1 > &refFace = ReferenceElements< ctype, dim-1 >::general( iIt->type() );
 
     // //////////////////////////////////////////////////////////////////////
     //   Compute the integral of the outer normal over the whole element.

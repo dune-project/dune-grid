@@ -355,8 +355,8 @@ public:
           const typename Element::Geometry& geometry = it->geometry();
           Dune::GeometryType gt = geometry.type();
 
-          const typename Dune::GenericReferenceElementContainer<double, dim>::value_type&
-          referenceElement = Dune::GenericReferenceElements<double, dim>::general(gt);
+          const typename Dune::ReferenceElementContainer<double, dim>::value_type&
+          referenceElement = Dune::ReferenceElements<double, dim>::general(gt);
           const Dune::FieldVector<double, dim>&
           entityGlobal = geometry.global(referenceElement.position(k, commCodim));
           std::cout << gridView.comm().rank()+1 << ": border codim "

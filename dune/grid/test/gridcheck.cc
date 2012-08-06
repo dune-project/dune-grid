@@ -670,8 +670,8 @@ void checkBoundarySegmentIndexProlongation ( const Grid &grid, const Entity &ent
   for( HierarchicIterator hit = entity.hbegin( entity.level()+1 ); hit != hend; ++hit )
   {
     GeometryInFather geoInFather = hit->geometryInFather();
-    const Dune::GenericReferenceElement< typename Grid::ctype, Grid::dimension > &refElement
-      = Dune::GenericReferenceElements< typename Grid::ctype, Grid::dimension >::general( geoInFather.type() );
+    const Dune::ReferenceElement< typename Grid::ctype, Grid::dimension > &refElement
+      = Dune::ReferenceElements< typename Grid::ctype, Grid::dimension >::general( geoInFather.type() );
 
     const IntersectionIterator iend = gridView.iend( *hit );
     for( IntersectionIterator iit = gridView.ibegin( *hit ); iit != iend; ++iit )
