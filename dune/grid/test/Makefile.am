@@ -16,11 +16,7 @@ if ALUGRID
 endif
 
 if UG
-if UG_LGMDOMAIN
-  UPROG = test-ug-lgm
-else
   UPROG = test-ug test-parallel-ug
-endif
 if ALUGRID
   DGFALU_UGGRID = test-dgfalu-uggrid-combination
 else
@@ -180,18 +176,6 @@ test_parallel_ug_LDFLAGS = $(AM_LDFLAGS)	\
 	$(DUNEMPILDFLAGS)			\
 	$(UG_LDFLAGS)
 test_parallel_ug_LDADD =			\
-	$(UG_LIBS)				\
-	$(DUNEMPILIBS)				\
-	$(LDADD)
-
-test_ug_lgm_SOURCES = test-ug-lgm.cc
-test_ug_lgm_CPPFLAGS = $(AM_CPPFLAGS)		\
-	$(DUNEMPICPPFLAGS)			\
-	$(UG_CPPFLAGS)
-test_ug_lgm_LDFLAGS = $(AM_LDFLAGS)		\
-	$(DUNEMPILDFLAGS)			\
-	$(UG_LDFLAGS)
-test_ug_lgm_LDADD =				\
 	$(UG_LIBS)				\
 	$(DUNEMPILIBS)				\
 	$(LDADD)

@@ -218,11 +218,6 @@ createGrid()
   if (grid_==NULL)
     return NULL;
 
-  // finalize grid creation
-#ifdef UG_LGMDOMAIN
-  DUNE_THROW(GridError, "You cannot call createEnd() when your UGGrid has been configured for LGM!");
-#else
-
   // ///////////////////////////////////////////////////////////////////////////////
   //  Communicate the grid information from the master to all other processes
   // ///////////////////////////////////////////////////////////////////////////////
@@ -411,7 +406,6 @@ createGrid()
     for (int j=0; j<thisSegment.numVertices(); j++)
       vertices_c_style[j] = isBoundaryNode[thisSegment[j]];
 
-#ifndef UG_LGMDOMAIN
     // Create some boundary segment name
     char segmentName[20];
     if(sprintf(segmentName, "BS %d", i) < 0)
@@ -431,8 +425,6 @@ createGrid()
                                              segmentCoordinates
                                              )==NULL)
       DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-
-#endif
 
   }
 
@@ -549,8 +541,6 @@ createGrid()
 
   for (; eIt!=eEndIt; ++eIt)
     UG_NS<dimworld>::WriteCW(grid_->getRealImplementation(*eIt).target_, UG_NS<dimworld>::NEWEL_CE, 0);
-
-#endif
 
 
   // ///////////////////////////////////////////////////
