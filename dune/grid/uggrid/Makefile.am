@@ -33,7 +33,7 @@ uggrid_HEADERS = uggridfactory.hh uggridentitypointer.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
   uggridintersections.hh uggridintersectioniterators.hh uggridindexsets.hh \
   uggridleafiterator.hh uggridrenumberer.hh \
-  ug_undefs.hh ug_undefs_lgm_seq.hh ugwrapper.hh
+  ug_undefs.hh ugwrapper.hh
 
 # tricks like undefAllMacros.pl don't have to be shipped, have they?
 # Oliver Sander: It depends. undefAllMacros.pl creates the file ug_undefs.hh

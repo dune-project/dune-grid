@@ -54,9 +54,7 @@ namespace Dune {
 
     typedef UG_NAMESPACE ::UserProcPtr UserProcPtr;
 
-#ifndef UG_LGMDOMAIN
     typedef UG_NAMESPACE ::BndSegFuncPtr BndSegFuncPtr;
-#endif
 
     /** \brief This is actually a type of the UG algebra, not the grid.
      * We need it to implement face indices and ids in 3d, since UG
@@ -920,7 +918,6 @@ namespace Dune {
       return UG_NAMESPACE ::DisposeMultiGrid(mg);
     }
 
-#ifndef UG_LGMDOMAIN
     //! \todo Please doc me!
     static void* CreateBoundaryValueProblem(const char* BVPname,
                                             int numOfCoeffFunc,
@@ -930,7 +927,6 @@ namespace Dune {
       return UG_NAMESPACE ::CreateBoundaryValueProblem(BVPname, 0, numOfCoeffFunc, coeffs,
                                                        numOfUserFct, userfct);
     }
-#endif
 
     //! Set the current boundary value problem
     static void Set_Current_BVP(void** thisBVP) {
@@ -994,12 +990,10 @@ namespace Dune {
       return UG_NAMESPACE ::CreateFormatCmd(argc, argv);
     }
 
-#ifndef UG_LGMDOMAIN
     static void* CreateDomain(const char* name, const double* midPoint, double radius,
                               int segments, int corners, int convex) {
       return UG_NAMESPACE ::CreateDomain(name, midPoint, radius, segments, corners, convex);
     }
-#endif
 
     static void RemoveDomain(const char* name) {
       UG_NAMESPACE ::RemoveDomain(name);
@@ -1009,7 +1003,6 @@ namespace Dune {
       return UG_NAMESPACE ::InsertInnerNode(grid, pos);
     }
 
-#ifndef UG_LGMDOMAIN
     static void* CreateBoundarySegment(const char *name, int left, int right,
                                        int index, int res,
                                        int *point,
@@ -1043,7 +1036,6 @@ namespace Dune {
                                                 cornerIndices,
                                                 cornerCoordinates);
     }
-#endif
 
   };
 

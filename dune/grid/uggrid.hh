@@ -53,11 +53,7 @@
 
 // UG defines a whole load of preprocessor macros.  ug_undefs.hh undefines
 // them all, so we don't get name clashes.
-#ifdef UG_LGMDOMAIN
-#include "uggrid/ug_undefs_lgm_seq.hh"
-#else
 #include "uggrid/ug_undefs.hh"
-#endif
 #undef _2
 
 /* Now we're done with 2d, and we can do the whole thing over again for 3d */
@@ -83,11 +79,7 @@
 #undef UG_DIM
 
 // undef all macros defined by UG
-#ifdef UG_LGMDOMAIN
-#include "uggrid/ug_undefs_lgm_seq.hh"
-#else
 #include "uggrid/ug_undefs.hh"
-#endif
 
 #undef _3
 #undef FOR_DUNE
@@ -967,16 +959,6 @@ namespace Dune {
     // **********************************************************
     // End of Interface Methods
     // **********************************************************
-
-    /** @name Coarse Grid Creation Methods */
-    /*@{*/
-
-    /** \brief When UGGrid has been configured to use the LGM domain manager,
-        this routine sets up a grid from an LGM and an NG file
-     */
-    void createLGMGrid(const std::string& name);
-
-    /*@}*/
 
     /** \brief Rudimentary substitute for a hierarchic iterator on faces
         \param e, elementSide Grid face specified by an element and one of its sides
