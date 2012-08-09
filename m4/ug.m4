@@ -16,8 +16,6 @@
 #       1 or 0 or undefined
 #   with_ug
 #       "no" or "yes" with stuff appended
-#   enable_ug_lgmdomain
-#       yes or no
 #
 # configure substitutions/makefile variables:
 #   UG_CPPFLAGS
@@ -27,12 +25,9 @@
 # preprocessor defines:
 #   HAVE_UG
 #     undefined or ENABLE_UG
-#   UG_LGMDOMAIN
-#     undefined or 1
 #
 # automake conditionals:
 #   UG
-#   UG_LGMDOMAIN
 AC_DEFUN([DUNE_PATH_UG],[
   AC_REQUIRE([AC_PROG_CC])
   AC_REQUIRE([AC_PATH_XTRA])
@@ -71,15 +66,8 @@ AC_DEFUN([DUNE_PATH_UG],[
 
       UG_LDFLAGS=""
 
-      AC_ARG_ENABLE(ug-lgmdomain,
-        AC_HELP_STRING([--enable-ug-lgmdomain],[use UG LGM domain (default is standard domain)]))
-      if test x"$enable_ug_lgmdomain" = xyes ; then
-        UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugL2 -lugL3 -ldevS"
-        direct_UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugL2 -lugL3 -ldevS"
-      else
-        UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
-        direct_UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
-      fi
+      UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
+      direct_UG_LIBS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --libs-only-L libug` -lugS2 -lugS3 -ldevS"
       
       AC_MSG_CHECKING([for UG])
 
@@ -190,14 +178,10 @@ AC_DEFUN([DUNE_PATH_UG],[
       AC_DEFINE(HAVE_UG, ENABLE_UG, 
         [This is only true if UG was found by configure 
          _and_ if the application uses the UG_CPPFLAGS])
-      if test x"$enable_ug_lgmdomain" = xyes ; then
-        AC_DEFINE(UG_LGMDOMAIN, 1, [use UG LGM domain])
-      fi
   fi 
       
   # tell automake   
   AM_CONDITIONAL(UG, test x$HAVE_UG = x1)
-  AM_CONDITIONAL(UG_LGMDOMAIN, test x$HAVE_UG = x1 && test x$UG_LGMDOMAIN = x1)
   
   # restore variables
   LDFLAGS="$ac_save_LDFLAGS"
