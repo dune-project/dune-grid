@@ -467,7 +467,8 @@ namespace Dune {
 
         }
 
-        GeometryType type(GeometryType::BasicType::cube,dimension);
+        GeometryType type;
+        type.makeCube( dimension );
 
         // return a BasicGeometry with the correct set of corners
         return typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry(type,corners);
