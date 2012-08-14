@@ -85,15 +85,14 @@ namespace Dune
     const FieldVector< ctype, dimension > &localInInside = refElement.position( indexInInside(), 1 );
     return Grid::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
 #else
-    typedef typename GenericGeometry::SimplexTopology< dimension >::type Topology;
-    typedef GenericGeometry::ReferenceElement< Topology, ctype > ReferenceElement;
     typedef FieldMatrix< ctype, dimensionworld, dimension > Jacobian;
 
     const EntityPointer ep = inside();
     const typename Entity::Geometry &geoInside = ep->geometry();
 
     const Jacobian &jInvT = Grid::getRealImplementation( geoInside ).jacobianInverseTransposed();
-    const FieldVector< ctype, dimension > &refNormal = ReferenceElement::integrationOuterNormal( indexInInside() );
+    const ReferenceElement< ctype, dimension > &refSimplex = ReferenceElements< ctype, dimension >::simplex();
+    const FieldVector< ctype, dimension > &refNormal = refSimplex.integrationOuterNormal( indexInInside() );
 
     NormalVector n;
     jInvT.mv( refNormal, n );
