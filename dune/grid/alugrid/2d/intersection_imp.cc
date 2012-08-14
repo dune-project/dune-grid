@@ -166,7 +166,7 @@ namespace Dune
       const ReferenceElement< alu2d_ctype, dimension > &refElement =
         ReferenceElements< alu2d_ctype, dimension >::cube();
       typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
-      typename LocalGeometry::GlobalCoordinate refNormal = refElement.volumeOuterNormal( indexInInside() );
+      typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
       inside()->geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
       outerNormal *= inside()->geometry().integrationElement( xInside );
     }

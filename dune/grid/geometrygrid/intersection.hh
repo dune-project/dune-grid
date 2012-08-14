@@ -141,7 +141,7 @@ namespace Dune
 
         FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
         const typename ElementGeometryImpl::JacobianInverseTransposed &jit = insideGeo_.jacobianInverseTransposed( x );
-        const FieldVector< ctype, dimension > &refNormal = refElement.volumeOuterNormal( indexInInside() );
+        const FieldVector< ctype, dimension > &refNormal = refElement.integrationOuterNormal( indexInInside() );
 
         FieldVector< ctype, dimensionworld > normal;
         jit.mv( refNormal, normal );
@@ -158,7 +158,7 @@ namespace Dune
 
         FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
         const typename ElementGeometryImpl::JacobianInverseTransposed &jit = insideGeo_.jacobianInverseTransposed( x );
-        const FieldVector< ctype, dimension > &refNormal = refElement.volumeOuterNormal( indexInInside() );
+        const FieldVector< ctype, dimension > &refNormal = refElement.integrationOuterNormal( indexInInside() );
 
         FieldVector< ctype, dimensionworld > normal;
         jit.mv( refNormal, normal );
