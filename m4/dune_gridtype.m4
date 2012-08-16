@@ -8,7 +8,7 @@ m4_if($#,1,[],[DUNE_DEFINE_GRIDTYPE_INCLUDE(m4_shift($@))])dnl
 
 # DUNE_DEFINE_GRIDTYPE([GRIDTYPE],[ASSERTION],[DUNETYPE],[HEADER],...)
 #
-# Add a new GRIDTYPE target DUNE's preprocessor magic.
+# Add a new GRIDTYPE target to DUNE's preprocessor magic.
 # 
 # Parameters: GRIDTYPE   name of the new target
 #             ASSERTION  condition to be checked by the preprocessor
