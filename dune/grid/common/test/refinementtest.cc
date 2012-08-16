@@ -12,7 +12,7 @@
 #include <iostream>
 #include <ostream>
 
-#include <dune/geometry/genericgeometry/topologytypes.hh>
+//#include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
 
