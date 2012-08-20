@@ -683,19 +683,19 @@ namespace Dune
     template< int codim >
     char *allocateMappingStorage ( const GeometryType &gt ) const
     {
-      assert( gt.dim() == Traits::dimension - codim );
-      typedef GeoGrid::MappingFamily< Traits::dimensionworld, const Grid > MappingFamily;
-      typedef typename MappingFamily::template Codim< codim >::MappingProvider MappingProvider;
-      return storageAllocator_.allocate( MappingProvider::mappingSize( gt.id() ) );
+      static const unsigned int mydimension = Traits::dimension - codim;
+      assert( gt.dim() == mydimension );
+      typedef GeoGrid::MappingFamily< mydimension, Traits::dimensionworld, const Grid > MappingFamily;
+      return storageAllocator_.allocate( MappingFamily::Factory::mappingSize( gt.id() ) );
     }
 
     template< int codim >
     void deallocateMappingStorage ( const GeometryType &gt, char *p ) const
     {
-      assert( gt.dim() == Traits::dimension - codim );
-      typedef GeoGrid::MappingFamily< Traits::dimensionworld, const Grid > MappingFamily;
-      typedef typename MappingFamily::template Codim< codim >::MappingProvider MappingProvider;
-      storageAllocator_.deallocate( p, MappingProvider::mappingSize( gt.id() ) );
+      static const unsigned int mydimension = Traits::dimension - codim;
+      assert( gt.dim() == mydimension );
+      typedef GeoGrid::MappingFamily< mydimension, Traits::dimensionworld, const Grid > MappingFamily;
+      storageAllocator_.deallocate( p, MappingFamily::Factory::mappingSize( gt.id() ) );
     }
 
   private:

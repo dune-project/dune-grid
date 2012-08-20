@@ -7,7 +7,7 @@
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/mappingprovider.hh>
+#include <dune/geometry/genericgeometry/hybridmappingfactory.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
@@ -62,7 +62,7 @@ namespace Dune
     // MappingFamily
     // -------------
 
-    template< int cdim, class Grid >
+    template< int mydim, int cdim, class Grid >
     class MappingFamily
     {
       typedef typename remove_const< Grid >::type::Traits Traits;
@@ -70,34 +70,27 @@ namespace Dune
     public:
       typedef GeoGrid::GeometryTraits< cdim, Grid > GeometryTraits;
 
+      static const int mydimension = mydim;
       static const int dimension = Traits::dimension;
+      static const int codimension = dimension - mydimension;
 
     private:
       template< bool >
       struct Hybrid
       {
-        typedef GenericGeometry::HybridMapping< dimension, GeometryTraits > ElementMapping;
+        typedef GenericGeometry::VirtualMappingFactory< mydimension, GeometryTraits > Factory;
       };
 
       template< bool >
       struct NonHybrid
       {
-        static const unsigned int topologyId = Capabilities::hasSingleGeometryType< Grid >::topologyId;
-        typedef typename GenericGeometry::Topology< topologyId, dimension >::type Topology;
-        typedef GenericGeometry::NonHybridMapping< Topology, GeometryTraits > ElementMapping;
+        typedef typename GenericGeometry::Topology< Capabilities::hasSingleGeometryType< Grid >::topologyId, dimension >::type ElementTopology;
+        typedef typename GenericGeometry::SubTopology< ElementTopology, codimension, 0 >::type Topology;
+        typedef GenericGeometry::NonHybridMappingFactory< Topology, GeometryTraits > Factory;
       };
 
     public:
-      typedef typename SelectType< Capabilities::hasSingleGeometryType< Grid >::v, NonHybrid< true >, Hybrid< false > >::Type::ElementMapping ElementMapping;
-
-      template< int codim >
-      struct Codim
-      {
-        typedef GenericGeometry::MappingProvider< ElementMapping, codim > MappingProvider;
-        typedef typename MappingProvider::Mapping Mapping;
-
-        static const unsigned int maxMappingSize = MappingProvider::maxMappingSize;
-      };
+      typedef typename SelectType< Capabilities::hasSingleGeometryType< Grid >::v, NonHybrid< true >, Hybrid< false > >::Type::Factory Factory;
     };
 
 
@@ -110,20 +103,20 @@ namespace Dune
     {
       typedef Geometry< mydim, cdim, Grid > This;
 
-      typedef GeoGrid::MappingFamily< cdim, Grid > MappingFamily;
+      typedef GeoGrid::MappingFamily< mydim, cdim, Grid > MappingFamily;
       typedef typename remove_const< Grid >::type::Traits Traits;
 
       template< int, int, class > friend class Geometry;
 
     public:
-      static const int mydimension = mydim;
+      static const int mydimension = MappingFamily::mydimension;
       static const int coorddimension = cdim;
       static const int dimension = MappingFamily::dimension;
       static const int codimension = dimension - mydimension;
 
     protected:
-      typedef typename MappingFamily::template Codim< codimension >::MappingProvider MappingProvider;
-      typedef typename MappingFamily::template Codim< codimension >::Mapping Mapping;
+      typedef typename MappingFamily::Factory MappingFactory;
+      typedef typename MappingFactory::Mapping Mapping;
 
     public:
       typedef typename Mapping::FieldType ctype;
@@ -147,7 +140,7 @@ namespace Dune
         : grid_( &grid )
       {
         char *mappingStorage = grid.template allocateMappingStorage< codimension >( type );
-        mapping_ = MappingProvider::construct( type.id(), coords, mappingStorage );
+        mapping_ = MappingFactory::construct( type.id(), coords, mappingStorage );
         mapping_->userData().addReference();
       }
 
