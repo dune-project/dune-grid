@@ -22,18 +22,18 @@ endforeach(_test ${TESTS})
 
 if(ALUGRID_FOUND)
   add_dune_alugrid_flags(testalu)
-  set_property(TARGET testalu APPEND_STRING
-    COMPILE_DEFINITIONS "-DALUGRID_CUBE -DGRIDDIM=3")
+  set_property(TARGET testalu APPEND PROPERTY
+    COMPILE_DEFINITIONS ALUGRID_CUBE GRIDDIM=3)
 endif(ALUGRID_FOUND)
 
 if(ALBERTA_FOUND)
   add_dune_alberta_flags(testalberta GRID_DIM 2)
-  set_property(TARGET testalberta APPEND_STRING
-    COMPILE_DEFINITIONS "-DALBERTAGRID -DGRIDDIM=2 -DWORLDIM=3")
+  set_property(TARGET testalberta APPEND PROPERTY
+    COMPILE_DEFINITIONS ALBERTAGRID GRIDDIM=2 WORLDIM=3)
 endif(ALBERTA_FOUND)
 
 if(UG_FOUND)
   add_dune_ug_flags(testug)
-  set_property(TARGET testug APPEND_STRING
-    COMPILE_DEFINITIONS "-DUGGRID -DGRIDDIM=3")
+  set_property(TARGET testug APPEND PROPERTY
+    COMPILE_DEFINITIONS UGGRID GRIDDIM=3)
 endif(UG_FOUND)

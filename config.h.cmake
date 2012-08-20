@@ -39,6 +39,16 @@
 /* Define to the revision of dune-grid */
 #define DUNE_GRID_VERSION_REVISION ${DUNE_GRID_VERSION_REVISION}
 
+/* This is only true if alugrid-library was found by configure _and_ if the
+   application uses the ALUGRID_CPPFLAGS */
+#cmakedefine HAVE_ALUGRID ENABLE_ALUGRID
+
+/* Define to 1 if you have the <alugrid_parallel.h> header file. */
+#cmakedefine HAVE_ALUGRID_PARALLEL_H @HAVE_ALUGRID_PARALLEL_H@
+
+/* Define to 1 if you have the <alugrid_serial.h> header file. */
+#cmakedefine HAVE_ALUGRID_SERIAL_H @HAVE_ALUGRID_SERIAL_H@
+
 /* Grid type magic for DGF parser */
 @GRID_CONFIG_H_BOTTOM@
 /* end dune-grid */
