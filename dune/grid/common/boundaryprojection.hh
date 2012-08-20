@@ -87,11 +87,9 @@ namespace Dune
     BoundarySegmentWrapper ( const GeometryType &type,
                              const std::vector< CoordinateType > &vertices,
                              const shared_ptr< BoundarySegment > &boundarySegment )
-      : faceMapping_( static_cast< FaceMapping * >( operator new( FaceMappingFactory::mappingSize( type.id() ) ) ) ),
+      : faceMapping_( createFaceMapping( type, vertices ) ),
         boundarySegment_( boundarySegment )
-    {
-      FaceMappingFactory::construct( type.id(), vertices, faceMapping_ );
-    }
+    {}
 
     CoordinateType operator() ( const CoordinateType &global ) const
     {
@@ -104,6 +102,12 @@ namespace Dune
     }
 
   private:
+    FaceMapping *createFaceMapping ( const GeometryType &type, const std::vector< CoordinateType > &vertices )
+    {
+      const std::size_t faceMappingSize = FaceMappingFactory::mappingSize( type.id() );
+      return FaceMappingFactory::construct( type.id(), vertices, operator new( faceMappingSize ) );
+    }
+
     shared_ptr< FaceMapping > faceMapping_;
     const shared_ptr< BoundarySegment > boundarySegment_;
   };
