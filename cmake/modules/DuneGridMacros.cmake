@@ -4,7 +4,7 @@ set(DUNE_GRID_EXTRA_UTILS "" CACHE BOOL
 
 find_package(ALUGrid)
 find_package(Alberta)
-find_package(UG)
+include(UseUG)
 find_package(Grape)
 find_package(psurface)
 
