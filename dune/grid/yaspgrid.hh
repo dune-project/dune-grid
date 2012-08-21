@@ -645,19 +645,37 @@ namespace Dune {
     //! globally unique, persistent index
     PersistentIndexType persistentIndex () const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
+      DUNE_THROW( NotImplemented, "YaspEntity not implemented" );
     }
 
     //! consecutive, codim-wise, level-wise index
     int compressedIndex () const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
+      DUNE_THROW( NotImplemented, "YaspEntity not implemented" );
     }
 
     //! consecutive, codim-wise, level-wise index
     int compressedLeafIndex () const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
+      DUNE_THROW( NotImplemented, "YaspEntity not implemented" );
+    }
+
+    //! subentity persistent index
+    PersistentIndexType subPersistentIndex ( int i, int cc ) const
+    {
+      DUNE_THROW( NotImplemented, "YaspEntity not implemented" );
+    }
+
+    //! subentity compressed index
+    int subCompressedIndex ( int i, int cc ) const
+    {
+      DUNE_THROW( NotImplemented, "YaspEntity not implemented" );
+    }
+
+    //! subentity compressed index
+    int subCompressedLeafIndex ( int i, int cc ) const
+    {
+      DUNE_THROW( NotImplemented, "YaspEntity not implemented" );
     }
   };
 
@@ -1443,6 +1461,27 @@ namespace Dune {
       return index;
     }
 
+    //! subentity persistent index
+    PersistentIndexType subPersistentIndex ( int i, int cc ) const
+    {
+      assert( (i == 0) && (cc == dim) );
+      return persistentIndex();
+    }
+
+    //! subentity compressed index
+    int subCompressedIndex ( int i, int cc ) const
+    {
+      assert( (i == 0) && (cc == dim) );
+      return compressedIndex();
+    }
+
+    //! subentity compressed index
+    int subCompressedLeafIndex ( int i, int cc ) const
+    {
+      assert( (i == 0) && (cc == dim) );
+      return compressedLeafIndex();
+    }
+
   public:
     const TSI& transformingsubiterator() const { return _it; }
     const YGLI& gridlevel() const { return _g; }
@@ -2191,7 +2230,7 @@ namespace Dune {
    */
   //========================================================================
 
-  template<class GridImp>
+  template< class GridImp >
   class YaspLevelIndexSet
     : public IndexSet< GridImp, YaspLevelIndexSet< GridImp >, unsigned int >
   {
@@ -2226,11 +2265,7 @@ namespace Dune {
     IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
-      assert( cc == 0 || cc == GridImp::dimension );
-      if( cc == GridImp::dimension )
-        return grid.getRealImplementation(e).compressedIndex();
-      else
-        return grid.getRealImplementation(e).subCompressedIndex(i,codim);
+      return grid.getRealImplementation ( e).subCompressedIndex(i,codim);
     }
 
     //! get number of entities of given type and level (the level is known to the object)
@@ -2301,11 +2336,7 @@ namespace Dune {
     IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
-      assert( cc == 0 || cc == GridImp::dimension );
-      if( cc == GridImp::dimension )
-        return grid.getRealImplementation(e).compressedIndex();
-      else
-        return grid.getRealImplementation(e).subCompressedIndex(i,codim);
+      return grid.getRealImplementation( e ).subCompressedIndex( i, codim );
     }
 
     //! get number of entities of given type
@@ -2350,51 +2381,33 @@ namespace Dune {
    */
   //========================================================================
 
-  template<class GridImp>
-  class YaspGlobalIdSet : public IdSet<GridImp,YaspGlobalIdSet<GridImp>,
-                              typename remove_const<GridImp>::type::PersistentIndexType >
-                          /*
-                             We used the remove_const to extract the Type from the mutable class,
-                             because the const class is not instantiated yet.
-                           */
+  template< class GridImp >
+  class YaspGlobalIdSet
+    : public IdSet< GridImp, YaspGlobalIdSet< GridImp >, typename remove_const< GridImp >::type::PersistentIndexType >
   {
     typedef YaspGlobalIdSet< GridImp > This;
+    typedef IdSet< GridImp, This, typename remove_const< GridImp >::type::PersistentIndexType > Base;
 
   public:
     //! define the type used for persisitent indices
-    typedef typename remove_const<GridImp>::type::PersistentIndexType IdType;
+    typedef typename Base::IdType IdType;
 
-    using IdSet<GridImp, This, IdType>::subId;
-
-    //! constructor stores reference to a grid
-    explicit YaspGlobalIdSet ( const GridImp &g )
-      : grid( g )
-    {}
+    using Base::subId;
 
     //! get id of an entity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cd>
-    IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    template< int cd >
+    IdType id ( const typename remove_const< GridImp >::type::Traits::template Codim< cd >::Entity &e ) const
     {
-      return grid.getRealImplementation(e).persistentIndex();
+      return GridImp::getRealImplementation( e ).persistentIndex();
     }
 
     //! get id of subentity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
-                  int i, unsigned int codim ) const
+    template< int cc >
+    IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
+                   int i, unsigned int codim ) const
     {
-      return grid.getRealImplementation(e).subPersistentIndex(i,codim);
+      return GridImp::getRealImplementation( e ).subPersistentIndex( i, codim );
     }
-
-  private:
-    const GridImp& grid;
   };
 
 
@@ -2491,7 +2504,6 @@ namespace Dune {
       setsizes();
       indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,0) );
       theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim> >(*this) );
-      theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim> >(*this) );
       boundarysegmentssize();
     }
 
@@ -2611,7 +2623,6 @@ namespace Dune {
     {
       deallocatePointers(indexsets);
       deallocatePointers(theleafindexset);
-      deallocatePointers(theglobalidset);
     }
 
   private:
@@ -3131,12 +3142,12 @@ namespace Dune {
     // The new index sets from DDM 11.07.2005
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
-      return *(theglobalidset[0]);
+      return globalidset;
     }
 
     const typename Traits::LocalIdSet& localIdSet() const
     {
-      return *(theglobalidset[0]);
+      return globalidset;
     }
 
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
@@ -3188,7 +3199,7 @@ namespace Dune {
 
     std::vector<YaspLevelIndexSet<const YaspGrid<dim> >*> indexsets;
     std::vector<YaspLeafIndexSet<const YaspGrid<dim> >*> theleafindexset;
-    std::vector<YaspGlobalIdSet<const YaspGrid<dim> >*> theglobalidset;
+    YaspGlobalIdSet< const YaspGrid< dim > > globalidset;
     int nBSegments;
 
     // Index classes need access to the real entity
