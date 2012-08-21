@@ -8,10 +8,6 @@ find_package(UG)
 find_package(Grape)
 find_package(psurface)
 
-message(AUTHOR_WARNING "Using dumb grid macros with fixed includes. TODO: Implement all tests!")
-#add_definitions("-DGRIDDIM=\$(GRIDDIM)" "-DWORLDDIM=\$(WORLDDIM)" "-D\$(GRIDTYPE)")
-#add_definitions("-DGRIDDIM=1" "-DWORLDDIM=1" "-DONEDGRID")
-
 set(DEFAULT_DGF_GRIDDIM 1)
 set(DEFAULT_DGF_WORLDDIM 1)
 set(DEFAULT_DGF_GRIDTYPE ONEDGRID)
