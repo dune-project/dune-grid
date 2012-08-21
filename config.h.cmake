@@ -55,6 +55,11 @@
 /* This is only true if alberta-library was found by configure _and_ if the
    application uses the ALBERTA_CPPFLAGS */
 #cmakedefine HAVE_ALBERTA ENABLE_ALBERTA
+
+/* This is only true if UG was found by configure _and_ if the application
+   uses the UG_CPPFLAGS */
+#cmakedefine HAVE_UG ENABLE_UG
+
 /* Grid type magic for DGF parser */
 @GRID_CONFIG_H_BOTTOM@
 /* end dune-grid */

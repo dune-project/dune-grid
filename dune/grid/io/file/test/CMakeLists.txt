@@ -30,7 +30,7 @@ if(UG_FOUND)
   set(UG_TESTS starcdreadertest)
 endif(UG_FOUND)
 
-set(BUILDTESTS ${TESTS} ${UG_TESTS} ${CONSISTENT_VTK_TESTS})
+set(BUILD_TESTS ${TESTS} ${UG_TESTS} ${CONSISTENT_VTK_TESTS})
 set(ALLTESTS ${BUILD_TESTS}  ${ALUGRID_TESTS} ${ALBERTA_TESTS} mpivtktest)
 
 foreach(_test ${BUILD_TESTS})

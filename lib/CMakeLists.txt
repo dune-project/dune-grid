@@ -6,11 +6,13 @@ else(ALUGRID_FOUND)
   set(ALULIBS $<TARGET_OBJECTS:alu3d>)
 endif(ALUGRID_FOUND)
 
-message("ALULIBS=${ALULIBS}")
+if(UG_FOUND)
+  set(UGLIB $<TARGET_OBJECTS:uggrid>)
+endif(UG_FOUND)
+
 dune_add_library(dunegrid $<TARGET_OBJECTS:onedgrid> ${UGLIB} ${ALULIBS}
   $<TARGET_OBJECTS:dgfparser>  $<TARGET_OBJECTS:dgfparserblocks> ADD_LIBS ${DUNE_LIBS})
 
-message("DIMS=\"${ALBERTA_WORLD_DIMS}\"")
 foreach(_dim ${ALBERTA_WORLD_DIMS})
   dune_add_library(dunealbertagrid_${_dim}d $<TARGET_OBJECTS:albertagrid_${_dim}d>
     $<TARGET_OBJECTS:onedgrid> ${UGLIB} ${ALULIBS}
