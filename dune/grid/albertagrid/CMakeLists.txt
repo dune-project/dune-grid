@@ -1,4 +1,5 @@
 add_subdirectory(test EXCLUDE_FROM_ALL)
+
 if(ALBERTA_FOUND)
   set(ALBERTAGRID_SOURCES
     dgfparser.cc
@@ -6,20 +7,14 @@ if(ALBERTA_FOUND)
     indexsets.cc
     macrodata.cc
     meshpointer.cc)
-  add_library(albertagrid OBJECT ${ALBERTAGRID_SOURCES})
-  add_dune_alberta_flags(albertagrid)
 endif(ALBERTA_FOUND)
-
 # create dimension dependant alberta libraries
-foreach(_dim RANGE 1 9)
-  if(ALBERTA_${_dim}D_FOUND)
-    list(APPEND ALBERTAGRID_LIBS albertagrid_${_dim}d)
-    add_library(albertagrid_${_dim}d OBJECT ${ALBERTAGRID_SOURCES})
-    target_link_libraries(albertagrid_${_dim}d
-      ${ALBERTA_BASE_LIBS} alberta_${_dim}d ${DUNE_LIBS})
-    set_property(TARGET albertagrid_${_dim}d APPEND_STRING
-      COMPILE_DEFINITIONS "-DALBERTA_DIM=${_dim}")
-  endif(ALBERTA_${_dim}D_FOUND)
+foreach(_dim ${ALBERTA_WORLD_DIMS})
+  message("lib albertagrid_${_dim}d")
+  list(APPEND ALBERTAGRID_LIBS albertagrid_${_dim}d)
+  add_library(albertagrid_${_dim}d OBJECT ${ALBERTAGRID_SOURCES})
+  #add_dune_alberta_flags(${ALBERTAGRID_SOURCES} SOURCE_ONLY GRIDDIM ${_dim})
+  add_dune_alberta_flags(albertagrid_${_dim}d OBJECT GRIDDIM ${_dim})
 endforeach(_dim RANGE 1 9)
 
 #install header

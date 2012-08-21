@@ -8,12 +8,12 @@ endif(ALUGRID_FOUND)
 
 message("ALULIBS=${ALULIBS}")
 dune_add_library(dunegrid $<TARGET_OBJECTS:onedgrid> ${UGLIB} ${ALULIBS}
-  $<TARGET_OBJECTS:dgfparser>  $<TARGET_OBJECTS:dgfparserblocks>)
+  $<TARGET_OBJECTS:dgfparser>  $<TARGET_OBJECTS:dgfparserblocks> ADD_LIBS ${DUNE_LIBS})
 
-message("DIMS=\"${ALBERTA_DIMS}\"")
-foreach(_dim ${ALBERTA_DIMS})
+message("DIMS=\"${ALBERTA_WORLD_DIMS}\"")
+foreach(_dim ${ALBERTA_WORLD_DIMS})
   dune_add_library(dunealbertagrid_${_dim}d $<TARGET_OBJECTS:albertagrid_${_dim}d>
     $<TARGET_OBJECTS:onedgrid> ${UGLIB} ${ALULIBS}
-  $<TARGET_OBJECTS:dgfparser>  $<TARGET_OBJECTS:dgfparserblocks> ADD_LIBS dunecommon)
+  $<TARGET_OBJECTS:dgfparser>  $<TARGET_OBJECTS:dgfparserblocks> ADD_LIBS ${DUNE_LIBS})
   list(APPEND DUNE_ALBERTA_LIBS dunealbertagrid_${dim}d)
 endforeach(_dim "${ALBERTA_DIMS}")

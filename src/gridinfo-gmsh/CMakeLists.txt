@@ -1,12 +1,12 @@
 if(ALBERTA_2D_FOUND)
   add_executable(dune-gridinfo-gmsh-alberta-2d ridinfo-gmsh-alberta-2d.cc)
-  add_dune_alberta_flags(dune-gridinfo-gmsh-alberta-2d)
+  add_dune_alberta_flags(dune-gridinfo-gmsh-alberta-2d GRIDDIM 2)
   install(dune-gridinfo-gmsh-alberta-2d ${CMAKE_INSTALL_BINDIR})
 endif(ALBERTA_FOUND)
 
 if(ALBERTA_3D_FOUND)
   add_executable(dune-gridinfo-gmsh-alberta-3d ridinfo-gmsh-alberta-3d.cc)
-  add_dune_alberta_flags(dune-gridinfo-gmsh-alberta-3d)
+  add_dune_alberta_flags(dune-gridinfo-gmsh-alberta-3d GRIDDIM 3)
   install(dune-gridinfo-gmsh-alberta-2d ${CMAKE_INSTALL_BINDIR})
 endif(ALBERTA_FOUND)
 
