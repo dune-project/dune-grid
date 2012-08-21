@@ -1,7 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 // $Id$
-
 #ifndef DUNE_INDEXIDSET_HH
 #define DUNE_INDEXIDSET_HH
 
@@ -10,7 +9,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/forloop.hh>
 #include <dune/grid/common/grid.hh>
-
 
 /** @file
         @author Peter Bastian
@@ -99,16 +97,11 @@ namespace Dune
             \param e Reference to codim cc entity, where cc is the template parameter of the function.
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cc>
-    IndexType index (const typename remove_const<GridImp>::type::
-                     Traits::template Codim<cc>::Entity& e) const
+    template< int cc >
+    IndexType index ( const typename Traits::template Codim< cc >::Entity &e ) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
-      return asImp().template index<cc>(e);
+      CHECK_INTERFACE_IMPLEMENTATION( (asImp().template index< cc >( e )) );
+      return asImp().template index< cc >( e );
     }
 
     /** @brief Map entity to index. Easier to use than the above because codimension template
@@ -120,12 +113,12 @@ namespace Dune
            entity knows its codimension, automatic extraction is possible.
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    template<class EntityType>
-    IndexType index (const EntityType& e) const
+    template< class Entity >
+    IndexType index ( const Entity &e ) const
     {
-      enum { cc = EntityType::codimension };
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
-      return asImp().template index<cc>(e);
+      const int cc = Entity::codimension;
+      CHECK_INTERFACE_IMPLEMENTATION( (asImp().template index< cc >( e )) );
+      return asImp().template index< cc >( e );
     }
 
     /** \brief Map a subentity to an index.
@@ -146,8 +139,8 @@ namespace Dune
     IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex< cc >(e,i,codim)));
-      return asImp().template subIndex< cc >(e,i,codim);
+      CHECK_INTERFACE_IMPLEMENTATION( (asImp().template subIndex< cc >( e, i, codim )) );
+      return asImp().template subIndex< cc >( e, i, codim );
     }
 
     /** \brief Map a subentity to an index.
@@ -171,7 +164,7 @@ namespace Dune
     template< class Entity >
     IndexType subIndex ( const Entity &e, int i, unsigned int codim ) const
     {
-      static const int cc = Entity::codimension;
+      const int cc = Entity::codimension;
       return asImp().template subIndex< cc >( e, i, codim );
     }
     //@}
@@ -399,36 +392,43 @@ namespace Dune
   template<class GridImp, class IdSetImp, class IdTypeImp>
   class IdSet
   {
+    /* We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet. */
+    typedef typename remove_const< GridImp >::type::Traits Traits;
+
   public:
     //! Type used to represent an id.
     typedef IdTypeImp IdType;
 
     //! Get id of an entity. This method is simpler to use than the one below.
-    template<class EntityType>
-    IdType id (const EntityType& e) const
+    template< class Entity >
+    IdType id ( const Entity &e ) const
     {
-      enum { cc = EntityType::codimension };
-      return asImp().template id<cc>(e);
+      const int cc = Entity::codimension;
+      return asImp().template id< cc >( e );
     }
 
     //! Get id of an entity of codim cc. Unhandy because template parameter must be supplied explicitely.
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cc>
-    IdType id (const typename remove_const<GridImp>::type::
-               Traits::template Codim<cc>::Entity& e) const
+    template< int cc >
+    IdType id ( const typename Traits::template Codim< cc >::Entity &e ) const
     {
-      return asImp().template id<cc>(e);
+      return asImp().template id< cc >( e );
     }
 
     /** \brief Get id of subentity i of codim cc of a codim 0 entity.
      */
-    IdType subId (const typename remove_const<GridImp>::type::
-                  Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    template< int cc >
+    IdType subId ( const typename Traits::template Codim< cc >::Entity &e,
+                   int i, unsigned int codim ) const
     {
-      return asImp().subId(e,i,codim);
+      return asImp().template subId< cc >( e, i, codim );
+    }
+
+    template< class Entity >
+    IdType subId ( const Entity &e, int i, unsigned int codim ) const
+    {
+      const int cc = Entity::codimension;
+      return asImp().template subId< cc >( e, i, codim );
     }
 
     // Default constructor (is not provided automatically because copy constructor is private)
@@ -446,6 +446,6 @@ namespace Dune
     const IdSetImp& asImp () const {return static_cast<const IdSetImp &>(*this);}
   };
 
-}
+} // namespace Dune
 
-#endif
+#endif // #ifndef DUNE_INDEXIDSET_HH
