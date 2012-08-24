@@ -13,7 +13,7 @@
 #include <dune/grid/uggrid.hh>
 #include "../../../../doc/grids/gridfactory/hybridtestgrids.hh"
 #include <dune/grid/common/mcmgmapper.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 using namespace Dune;
 

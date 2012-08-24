@@ -9,9 +9,9 @@
  */
 
 #include <dune/common/classname.hh>
-#include <dune/common/collectivecommunication.hh>
 #include <dune/common/exceptions.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
@@ -21,7 +21,7 @@
 #if HAVE_UG
 
 #ifdef ModelP
-#include <dune/common/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicollectivecommunication.hh>
 #endif
 
 /* The following lines including the necessary UG headers are somewhat

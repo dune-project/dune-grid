@@ -22,7 +22,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/stdstreams.hh>
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>

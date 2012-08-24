@@ -10,7 +10,7 @@
 #ifdef ENABLE_ALUGRID
 
 #include <dune/common/container/array.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
 

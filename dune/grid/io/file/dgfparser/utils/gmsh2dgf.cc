@@ -17,7 +17,7 @@
 
 #include <iostream>
 
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/io/file/gmshreader.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>

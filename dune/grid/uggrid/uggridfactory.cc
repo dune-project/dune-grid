@@ -3,7 +3,7 @@
 
 #include <config.h>
 
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"

@@ -15,7 +15,7 @@
 #include <vector>
 
 #include <dune/common/exceptions.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/io/file/vtk/common.hh>

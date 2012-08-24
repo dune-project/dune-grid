@@ -7,7 +7,7 @@
 #include <list>
 
 #include <dune/common/misc.hh>
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/tuples.hh>
 
 #include <dune/grid/common/capabilities.hh>

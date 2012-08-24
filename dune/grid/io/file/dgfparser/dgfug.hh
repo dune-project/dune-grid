@@ -12,7 +12,7 @@
 //- dune-common includes
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 //- dune-grid includes
 #include <dune/grid/common/intersection.hh>
