@@ -240,7 +240,8 @@ namespace Dune {
     // get geo face
     const GEOFaceType &face = static_cast< const GEOFaceType & >( item );
 
-    // if face was not set, set it to zero
+    // if face was not set (when face comes from face iteration),
+    // then set it to zero
     if( duneFace < 0 )
       duneFace = 0;
 

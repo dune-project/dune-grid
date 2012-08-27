@@ -136,7 +136,6 @@ namespace Dune
   alu_inline typename ALU3dGridEntity< cd, dim, GridImp >::Geometry
   ALU3dGridEntity< cd, dim, GridImp >::geometry () const
   {
-    //assert( (cd != 1) || (face_ >= 0) );
     if( ! geo_.valid() )
       geo_.buildGeom( *item_, twist_, face_ );
     return Geometry( geo_ );

@@ -453,10 +453,8 @@ namespace Dune
     : Base( item ),
       level_( level ),
       twist_( twist ),
-      face_( duneFace )
-  {
-    //assert( (codim != 1) || (face_ >= 0) );
-  }
+      face_( duneFace ) // duneFace can be -1 when face was created by face iterator
+  {}
 
 
   template< int codim, class GridImp >
