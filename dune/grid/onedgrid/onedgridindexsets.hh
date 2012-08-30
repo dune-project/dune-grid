@@ -14,17 +14,19 @@
 #include <dune/grid/onedgrid/onedgridlist.hh>
 #include <dune/grid/onedgrid/onedgridentity.hh>
 
-namespace Dune {
+namespace Dune
+{
 
-  template<class GridImp>
-  class OneDGridLevelIndexSet : public IndexSet<GridImp,OneDGridLevelIndexSet<GridImp> >
+  template< class GridImp >
+  class OneDGridLevelIndexSet
+    : public IndexSet< GridImp, OneDGridLevelIndexSet< GridImp > >
   {
   public:
-
     /** \brief Constructor for a given level of a given grid
      */
-    OneDGridLevelIndexSet (const GridImp& grid, int level)
-      : grid_(&grid), level_(level)
+    OneDGridLevelIndexSet ( const GridImp &grid, int level )
+      : grid_( &grid ),
+        level_( level )
     {}
 
     //! get index of an entity
@@ -79,8 +81,7 @@ namespace Dune {
       enum { cd = EntityType::codimension };
       typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LevelIterator IteratorType;
       IteratorType iend = grid_->template lend<cd,All_Partition>(level_);
-      for (IteratorType it = grid_->template lbegin<cd,All_Partition>(level_);
-           it != iend; ++it)
+      for (IteratorType it = grid_->template lbegin<cd,All_Partition>(level_); it != iend; ++it)
       {
         if (this->template index<cd>(*it) == this->template index<cd>(e))
           return true;
@@ -89,39 +90,44 @@ namespace Dune {
     }
 
     /** \brief Sets the corresponding internal fields.  Used by the GridFactory */
-    void setSizesAndTypes(unsigned int numVertices, unsigned int numElements) {
-
+    void setSizesAndTypes(unsigned int numVertices, unsigned int numElements)
+    {
       numVertices_ = numVertices;
       numElements_ = numElements;
 
       // ///////////////////////////////////////////////
       //   Update the list of geometry types present
       // ///////////////////////////////////////////////
-      if (numElements_>0) {
+      if (numElements_>0)
+      {
         myTypes_[0].resize(1);
         myTypes_[0][0] = GeometryType(1);
-      } else
+      }
+      else
         myTypes_[0].resize(0);
 
-      if (numVertices_>0) {
+      if (numVertices_>0)
+      {
         myTypes_[1].resize(1);
         myTypes_[1][0] = GeometryType(0);
-      } else
+      }
+      else
         myTypes_[1].resize(0);
-
     }
 
     /** \todo Should be private */
-    void update() {
-
+    void update ()
+    {
       // ///////////////////////////////
       //   Init the element indices
       // ///////////////////////////////
       numElements_ = 0;
       OneDGridList<OneDEntityImp<1> >::const_iterator eIt;
       for (eIt = grid_->elements(level_).begin(); eIt != grid_->elements(level_).end(); eIt = eIt->succ_)
+      {
         /** \todo Remove this const cast */
         const_cast<OneDEntityImp<1>*>(eIt)->levelIndex_ = numElements_++;
+      }
 
       // //////////////////////////////
       //   Init the vertex indices
@@ -130,8 +136,10 @@ namespace Dune {
       numVertices_ = 0;
       OneDGridList<OneDEntityImp<0> >::const_iterator vIt;
       for (vIt = grid_->vertices(level_).begin(); vIt != grid_->vertices(level_).end(); vIt = vIt->succ_)
+      {
         /** \todo Remove this const cast */
         const_cast<OneDEntityImp<0>*>(vIt)->levelIndex_ = numVertices_++;
+      }
 
       // set the list of geometry types
       setSizesAndTypes(numVertices_, numElements_);
@@ -148,13 +156,16 @@ namespace Dune {
     std::vector<GeometryType> myTypes_[2];
   };
 
-  template<class GridImp>
-  class OneDGridLeafIndexSet :
-    public IndexSet<GridImp,OneDGridLeafIndexSet<GridImp> >
+
+
+  template< class GridImp >
+  class OneDGridLeafIndexSet
+    : public IndexSet< GridImp, OneDGridLeafIndexSet< GridImp > >
   {
   public:
     //! constructor stores reference to a grid and level
-    OneDGridLeafIndexSet (const GridImp& g) : grid_(g)
+    OneDGridLeafIndexSet ( const GridImp &g )
+      : grid_( g )
     {}
 
     //! get index of an entity
@@ -181,41 +192,36 @@ namespace Dune {
     }
 
     //! get number of entities of given codim, type on the leaf level
-    int size (GeometryType type) const
+    int size ( GeometryType type ) const
     {
-      if (type.isVertex()) {
-
+      if( type.isVertex() )
         return numVertices_;
-
-      } else if (type.isLine()) {
-
+      else if( type.isLine() )
         return numElements_;
-
-      }
-
-      return 0;
+      else
+        return 0;
     }
 
     //! get number of entities of given codim, type on the leaf level
-    int size(int codim) const
+    int size ( int codim ) const
     {
-      if (codim==1) {
-
-        return numVertices_;
-
-      } else if (codim==0) {
-
+      switch( codim )
+      {
+      case 0 :
         return numElements_;
 
-      }
+      case 1 :
+        return numVertices_;
 
-      return 0;
+      default :
+        return 0;
+      }
     }
 
     /** deliver all geometry types used in this grid */
-    const std::vector<GeometryType>& geomTypes (int codim) const
+    const std::vector< GeometryType > &geomTypes ( int codim ) const
     {
-      return myTypes_[codim];
+      return myTypes_[ codim ];
     }
 
     /** \brief Return true if e is contained in the index set.
@@ -229,8 +235,7 @@ namespace Dune {
       enum { cd = EntityType::codimension };
       typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LeafIterator IteratorType;
       IteratorType iend = grid_.template leafend<cd,All_Partition>();
-      for (IteratorType it = grid_.template leafbegin<cd,All_Partition>();
-           it != iend; ++it)
+      for( IteratorType it = grid_.template leafbegin<cd,All_Partition>(); it != iend; ++it )
       {
         if (it->level() == e.level() && this->template index<cd>(*it) == this->template index<cd>(e))
           return true;
@@ -239,8 +244,8 @@ namespace Dune {
     }
 
     /** \brief Sets the corresponding internal fields.  Used by the GridFactory */
-    void setSizesAndTypes(unsigned int numVertices, unsigned int numElements) {
-
+    void setSizesAndTypes(unsigned int numVertices, unsigned int numElements)
+    {
       numVertices_ = numVertices;
       numElements_ = numElements;
 
@@ -258,12 +263,11 @@ namespace Dune {
         myTypes_[1][0] = GeometryType(0);
       } else
         myTypes_[1].resize(0);
-
     }
 
     /** \todo Should be private */
-    void update() {
-
+    void update ()
+    {
       // ///////////////////////////////
       //   Init the element indices
       // ///////////////////////////////
@@ -283,8 +287,8 @@ namespace Dune {
 
       numVertices_ = 0;
 
-      for (int i=grid_.maxLevel(); i>=0; i--) {
-
+      for (int i=grid_.maxLevel(); i>=0; i--)
+      {
         const OneDEntityImp<0>* vIt;
         for (vIt = grid_.vertices(i).begin(); vIt != grid_.vertices(i).end(); vIt = vIt->succ_) {
 
@@ -293,19 +297,15 @@ namespace Dune {
             const_cast<OneDEntityImp<0>*>(vIt)->leafIndex_ = numVertices_++;
           else
             const_cast<OneDEntityImp<0>*>(vIt)->leafIndex_ = vIt->son_->leafIndex_;
-
         }
-
       }
 
       // set the list of geometry types
       setSizesAndTypes(numVertices_, numElements_);
-
     }
 
   private:
-
-    const GridImp& grid_;
+    const GridImp &grid_;
 
     int numElements_;
     int numVertices_;
@@ -315,41 +315,38 @@ namespace Dune {
   };
 
 
-  template<class GridImp>
-  class OneDGridIdSet : public IdSet<GridImp,OneDGridIdSet<GridImp>,unsigned int>
+
+  template< class Grid >
+  class OneDGridIdSet
+    : public IdSet< Grid, OneDGridIdSet< Grid >, unsigned int >
   {
+    typedef OneDGridIdSet< Grid > This;
+    typedef IdSet< Grid, This, unsigned int > Base;
+
+    /* We use the remove_const to extract the Type from the mutable class,
+     * because the const class is not instantiated yet.
+     */
+    typedef typename remove_const< Grid >::type::Traits Traits;
+
   public:
     //! define the type used for persistent indices
-    typedef unsigned int IdType;
-
-    //! constructor stores reference to a grid
-    OneDGridIdSet (const GridImp& g) : grid_(g) {}
+    typedef typename Base::IdType IdType;
 
     //! get id of an entity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cd>
-    IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    template< int cd >
+    IdType id ( const typename Traits::template Codim< cd >::Entity &e ) const
     {
-      return grid_.getRealImplementation(e).globalId();
+      return Grid::getRealImplementation( e ).globalId();
     }
 
     //! get id of subentity
-    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
-                  int i,
-                  unsigned int codim) const
+    template< int cd >
+    IdType subId ( const typename Traits::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
     {
-      return grid_.getRealImplementation(e).subId(i,codim);
+      return Grid::getRealImplementation( e ).subId( i, codim );
     }
-
-  private:
-
-    const GridImp& grid_;
   };
 
 }  // namespace Dune
 
-
-#endif
+#endif // #ifndef DUNE_ONEDGRID_INDEXSETS_HH
