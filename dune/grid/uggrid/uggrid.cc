@@ -32,8 +32,6 @@ template <int dim>
 Dune::UGGrid < dim >::UGGrid()
   : multigrid_(NULL),
     leafIndexSet_(*this),
-    globalIdSet_(*this),
-    localIdSet_(*this),
     refinementType_(LOCAL),
     closureType_(GREEN),
     someElementHasBeenMarkedForRefinement_(false),

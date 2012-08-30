@@ -8,7 +8,6 @@
 Dune::OneDGrid::OneDGrid()
   : refinementType_(LOCAL),
     leafIndexSet_(*this),
-    idSet_(*this),
     freeVertexIdCounter_(0),
     freeElementIdCounter_(0),
     reversedBoundarySegmentNumbering_(false)
@@ -17,7 +16,6 @@ Dune::OneDGrid::OneDGrid()
 Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype& rightBoundary)
   : refinementType_(LOCAL),
     leafIndexSet_(*this),
-    idSet_(*this),
     freeVertexIdCounter_(0),
     freeElementIdCounter_(0),
     reversedBoundarySegmentNumbering_(false)
@@ -60,7 +58,6 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
 Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
   : refinementType_(LOCAL),
     leafIndexSet_(*this),
-    idSet_(*this),
     freeVertexIdCounter_(0),
     freeElementIdCounter_(0),
     reversedBoundarySegmentNumbering_(false)
