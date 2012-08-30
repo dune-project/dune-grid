@@ -85,9 +85,7 @@ namespace Dune {
     }
 
     //! return information about the Boundary
-    int boundaryId () const DUNE_DEPRECATED {
-      return boundarySegmentIndex();
-    }
+    int boundaryId () const { return boundarySegmentIndex(); }
 
     /** \brief return index of the corresponding coarse grid boundary segment */
     size_t boundarySegmentIndex () const {
@@ -282,9 +280,7 @@ namespace Dune {
     }
 
     //! return information about the Boundary
-    int boundaryId () const DUNE_DEPRECATED {
-      return boundarySegmentIndex();
-    }
+    int boundaryId () const { return boundarySegmentIndex(); }
 
     /** \brief Return index of corresponding coarse grid boundary segment */
     size_t boundarySegmentIndex () const {
