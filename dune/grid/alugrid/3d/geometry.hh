@@ -692,8 +692,8 @@ namespace Dune
     //! type of the global coordinates
     typedef FieldVector<ctype, cdim > GlobalCoordinate;
 
-    //! type of jacobian (also of jacobian inverse transposed)
-    typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
+    //! type of jacobian inverse transposed
+    typedef FieldMatrix<ctype,cdim,mydim> JacobianInverseTransposed;
 
     //! type of jacobian transposed
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
@@ -729,7 +729,7 @@ namespace Dune
 
     //! can only be called for dim=dimworld! (Trivially true, since there is no
     //! other specialization...)
-    const Jacobian& jacobianInverseTransposed (const LocalCoordinate& local) const;
+    const JacobianInverseTransposed &jacobianInverseTransposed (const LocalCoordinate& local) const;
 
     //! jacobian transposed
     const JacobianTransposed& jacobianTransposed (const LocalCoordinate& local) const;

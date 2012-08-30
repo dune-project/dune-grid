@@ -67,7 +67,7 @@ namespace Dune
     typedef typename Implementation::LocalCoordinate LocalCoordinate;
     typedef typename Implementation::GlobalCoordinate GlobalCoordinate;
 
-    typedef typename Implementation::Jacobian Jacobian;
+    typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
     explicit GeometryReference ( const Implementation &impl )
@@ -104,7 +104,7 @@ namespace Dune
       return impl().jacobianTransposed( local );
     }
 
-    const Jacobian &jacobianInverseTransposed ( const LocalCoordinate &local ) const
+    const JacobianInverseTransposed &jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianInverseTransposed( local );
     }

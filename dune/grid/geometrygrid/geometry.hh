@@ -127,9 +127,6 @@ namespace Dune
       typedef typename Mapping::JacobianTransposed JacobianTransposed;
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
 
-      // for cenvencience: Jacobian is the name of the type in the geometry interface
-      typedef JacobianInverseTransposed Jacobian;
-
       Geometry ( const Grid &grid )
         : grid_( &grid ),
           mapping_( nullptr )

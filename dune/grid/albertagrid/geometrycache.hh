@@ -25,7 +25,7 @@ namespace Dune
       static const unsigned int flagJacobianInverseTransposed = (1 << 2);
 
     public:
-      typedef FieldMatrix< Real, dimWorld, dim > Jacobian;
+      typedef FieldMatrix< Real, dimWorld, dim > JacobianInverseTransposed;
       typedef FieldMatrix< Real, dim, dimWorld > JacobianTransposed;
 
       GeometryCache ()
@@ -43,7 +43,8 @@ namespace Dune
         return integrationElement_;
       }
 
-      const JacobianTransposed &jacobianTransposed ( const ALBERTA EL_INFO &elInfo )
+      const JacobianTransposed &
+      jacobianTransposed ( const ALBERTA EL_INFO &elInfo )
       {
         if( (flags_ & flagJacobianTransposed) == 0 )
         {
@@ -60,7 +61,8 @@ namespace Dune
         return jacobianTransposed_;
       }
 
-      const Jacobian &jacobianInverseTransposed ( const ALBERTA EL_INFO &elInfo )
+      const JacobianInverseTransposed &
+      jacobianInverseTransposed ( const ALBERTA EL_INFO &elInfo )
       {
         if( (flags_ & flagJacobianInverseTransposed) == 0 )
         {
@@ -86,7 +88,7 @@ namespace Dune
     template< int dim >
     struct GeometryCacheProxy
     {
-      typedef FieldMatrix< Real, dimWorld, dim > Jacobian;
+      typedef FieldMatrix< Real, dimWorld, dim > JacobianInverseTransposed;
       typedef FieldMatrix< Real, dim, dimWorld > JacobianTransposed;
 
       GeometryCacheProxy ( GeometryCache< dim > &geometryCache, const ALBERTA EL_INFO &elInfo )
@@ -104,7 +106,7 @@ namespace Dune
         return geometryCache_.jacobianTransposed( elInfo_ );
       }
 
-      const Jacobian &jacobianInverseTransposed ()
+      const JacobianInverseTransposed &jacobianInverseTransposed ()
       {
         return geometryCache_.jacobianInverseTransposed( elInfo_ );
       }

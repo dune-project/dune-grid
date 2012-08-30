@@ -100,16 +100,16 @@ namespace Dune
   template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
   class Geometry
   {
-  #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-  #else
+#else
   protected:
     // give the GridDefaultImplementation class access to the realImp
     friend class GridDefaultImplementation<
         GridImp::dimension, GridImp::dimensionworld,
         typename GridImp::ctype,
         typename GridImp::GridFamily> ;
-  #endif
+#endif
     // type of underlying implementation, for internal use only
     typedef GeometryImp< mydim, cdim, GridImp > Implementation;
 
@@ -139,13 +139,13 @@ namespace Dune
     //! type of the global coordinates
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
-    //! type of jacobian (also of jacobian inverse transposed)
-    typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
-    //typedef typename Implementation :: Jacobian   Jacobian;
+    //! type of jacobian inverse transposed
+    //typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
+    typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
 
     //! type of jacobian transposed
-    typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
-    //typedef typename Implementation :: JacobianTransposed  JacobianTransposed;
+    //typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
+    typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::ReferenceElement.
@@ -281,7 +281,8 @@ namespace Dune
      *        This means that it is inverse for all tangential vectors in
      *        \f$g(x)\f$ while mapping all normal vectors to zero.
      */
-    const Jacobian& jacobianInverseTransposed (const LocalCoordinate& local) const
+    const JacobianInverseTransposed &
+    jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianInverseTransposed(local);
     }
@@ -331,8 +332,8 @@ namespace Dune
     typedef FieldVector< ctype, mydim > LocalCoordinate;
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
-    //! type of jacobian (also of jacobian inverse transposed)
-    typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
+    //! type of jacobian inverse transposed
+    typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
 
     //! type of jacobian transposed
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
@@ -392,8 +393,8 @@ namespace Dune
     typedef FieldVector< ctype, mydim > LocalCoordinate;
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
-    //! type of jacobian (also of jacobian inverse transposed)
-    typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
+    //! type of jacobian inverse transposed
+    typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
 
     //! type of jacobian transposed
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;

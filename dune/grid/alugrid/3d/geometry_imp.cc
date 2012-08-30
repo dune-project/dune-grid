@@ -125,10 +125,10 @@ namespace Dune {
     return geoImpl_.mapping().affine();
   }
 
-  template< int mydim, int cdim, class GridImp>
-  inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::Jacobian&
-  ALU3dGridGeometry<mydim, cdim, GridImp >::
-  jacobianInverseTransposed (const LocalCoordinate & local) const
+  template< int mydim, int cdim, class GridImp >
+  inline const typename ALU3dGridGeometry< mydim, cdim, GridImp >::JacobianInverseTransposed &
+  ALU3dGridGeometry< mydim, cdim, GridImp >
+  ::jacobianInverseTransposed ( const LocalCoordinate &local ) const
   {
     return geoImpl_.mapping().jacobianInverseTransposed( local );
   }

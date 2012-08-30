@@ -248,11 +248,8 @@ namespace Dune
     typedef FieldVector< ctype, mydimension > LocalCoordinate;
     typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
 
-    typedef FieldMatrix< ctype, mydimension, coorddimension >
-    JacobianTransposed;
-    typedef FieldMatrix< ctype, coorddimension, mydimension >
-    JacobianInverseTransposed;
-    typedef JacobianInverseTransposed Jacobian;
+    typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
+    typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
 
   private:
     static const int numCorners = mydimension + 1;
@@ -465,11 +462,8 @@ namespace Dune
     typedef FieldVector< ctype, mydimension > LocalCoordinate;
     typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
 
-    typedef FieldMatrix< ctype, mydimension, coorddimension >
-    JacobianTransposed;
-    typedef FieldMatrix< ctype, coorddimension, mydimension >
-    JacobianInverseTransposed;
-    typedef JacobianInverseTransposed Jacobian;
+    typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
+    typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
 
   private:
     static const int numCorners = mydimension + 1;
