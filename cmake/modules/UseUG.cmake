@@ -37,15 +37,10 @@ function(add_dune_ug_flags)
       else(ADD_UG_OBJECT)
 	foreach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
 	  target_link_libraries(${_target} ${UG_LIBRARIES} ${DUNE_LIBS})
-	  message("set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND
-	    PROPERTY LINK_FLAGS ${UG_LIBRARY_FLAGS})
-	endforeach(_target ${ADD_UG_UNPARSED_ARGUMENTS})")
-	  set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND
-	    PROPERTY LINK_FLAGS ${UG_LIBRARY_FLAGS})
 	endforeach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
+	set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND_STRING
+	  PROPERTY LINK_FLAGS ${UG_LIBRARY_FLAGS})
       endif(ADD_UG_OBJECT)
-      message("set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND
-	PROPERTY INCLUDE_DIRECTORIES ${UG_INCLUDES})")
       set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND
 	PROPERTY INCLUDE_DIRECTORIES ${UG_INCLUDES})
     endif()
