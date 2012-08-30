@@ -22,11 +22,10 @@ if(UG_FOUND)
 endif(UG_FOUND)
 
 if(UG_FOUND AND ALUGRID_FOUND)
-  set(DGFALUGRID_UG_PROGRAMS test-dgfalu-uggrid-combination)
+  set(DGFALUGRID_UG_PROGRAMS test_dgfalu_uggrid_combination)
 endif(UG_FOUND AND ALUGRID_FOUND)
 set(GRIDDIM 2)
 set(WORLDDIM 2)
-#set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
 
 #
 ## Some parameters for the geogrid test
