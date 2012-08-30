@@ -20,7 +20,7 @@ dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == W
     DUNETYPE "Dune::UGGrid< dimgrid >"
     HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
 
-#Overwrite flags by hand (like for autoconf.
+#Overwrite flags by hand (like for autoconf).
 set(UG_LIBRARIES dunegrid -lugS2 -lugS3 -ldevS)
 
 function(add_dune_ug_flags)
@@ -33,13 +33,13 @@ function(add_dune_ug_flags)
     else()
       set(_prefix TARGET)
       if(ADD_UG_OBJECT)
-	set(_object OBJECT)
+	set(_prefix TARGET)
       else(ADD_UG_OBJECT)
 	foreach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
 	  target_link_libraries(${_target} ${UG_LIBRARIES} ${DUNE_LIBS})
 	endforeach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
 	set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND_STRING
-	  PROPERTY LINK_FLAGS ${UG_LIBRARY_FLAGS})
+	  PROPERTY LINK_FLAGS " ${UG_LIBRARY_FLAGS}")
       endif(ADD_UG_OBJECT)
       set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND
 	PROPERTY INCLUDE_DIRECTORIES ${UG_INCLUDES})

@@ -30,7 +30,7 @@ dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE YASPGRID
   DUNETYPE "Dune::YaspGrid< dimgrid >"
   HEADERS "dune/grid/yaspgrid.hh" "dune/grid/io/file/dgfparser/dgfyasp.hh")
 
-macro(add_dgf_executable target)
+macro(add_dgf_flags target)
   cmake_parse_arguments(DGF "" "GRIDDIM;WORLDDIM;GRIDTYPE" "" ${ARGN})
   if(NOT DGF_GRIDDIM)
     set(DGF_GRIDDIM ${DEFAULT_DGF_GRIDDIM})
@@ -42,13 +42,19 @@ macro(add_dgf_executable target)
     set(DGF_GRIDTYPE ${DEFAULT_DGF_GRIDTYPE})
   endif(NOT DGF_GRIDTYPE)
 
-   set(replace_args "GRIDDIM.*" "GRIDDIM=${DGF_GRIDDIM}"
-     "WORLDDIM.*" "WORLDDIM=${DGF_WORLDDIM}")
-   foreach(grid ${DGF_GRIDTYPES})
+  set(replace_args "GRIDDIM.*" "GRIDDIM=${DGF_GRIDDIM}"
+    "WORLDDIM.*" "WORLDDIM=${DGF_WORLDDIM}")
+  foreach(grid ${DGF_GRIDTYPES})
     list(APPEND replace_args ${grid} ${DGF_GRIDTYPE})
   endforeach(grid ${DGF_GRIDTYPES})
-  add_executable(${target} ${DGF_UNPARSED_ARGUMENTS})
+  message("${target} ${replace_args}")
   replace_properties(TARGET ${target}
     PROPERTY COMPILE_DEFINITIONS
     ${replace_args})
+endmacro(add_dgf_flags target)
+
+macro(add_dgf_executable target)
+  cmake_parse_arguments(DGF "" "GRIDDIM;WORLDDIM;GRIDTYPE" "" ${ARGN})
+  add_executable(${target} ${DGF_UNPARSED_ARGUMENTS})
+  add_dgf_flags(${target} ${ARGN})
 endmacro(add_dgf_executable target)

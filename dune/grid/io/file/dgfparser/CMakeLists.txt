@@ -4,7 +4,10 @@ add_subdirectory(utils)
 
 add_library(dgfparser OBJECT dgfparser.cc dgfug.cc)
 
-#add_dune_ug_flags(dgfparser)
+#add_dune_ug_flags(dgfug.cc SOURCE_ONLY)
+add_dune_ug_flags(dgfparser OBJECT)
+#get_property(prop DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
+#message("INCLUDE_DIRECTORIES=${props}")
 #add_dune_mpi_flags(dgfparser)
 
 set(HEADERS
