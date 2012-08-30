@@ -107,78 +107,77 @@ namespace Dune
     const GridType & grid_;
   };
 
-  //***********************************************************
-  //
-  //  --LocalIdSet
-  //
-  //***********************************************************
 
-  //! hierarchic index set of ALU3dGrid
-  template <int dim, int dimworld, ALU2DSPACE ElementType eltype>
-  class ALU2dGridLocalIdSet :
-    public IdSet < ALU2dGrid< dim, dimworld, eltype >,
-        ALU2dGridLocalIdSet< dim, dimworld, eltype >, int >
+
+  // ALU2dGridLocalIdSet
+  // -------------------
+
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  class ALU2dGridLocalIdSet
+    : public IdSet< ALU2dGrid< dim, dimworld, eltype >, ALU2dGridLocalIdSet< dim, dimworld, eltype >, int >
   {
-    typedef ALU2dGrid< dim, dimworld, eltype > GridType;
-    typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
+    typedef ALU2dGridLocalIdSet< dim, dimworld, eltype > This;
+    typedef IdSet< ALU2dGrid< dim, dimworld, eltype >, This, int > Base;
 
     friend class ALU2dGrid< dim, dimworld, eltype >;
 
-    // this means that only up to 300000000 entities are allowed
-    enum { codimMultiplier = 300000000 };
-    typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
-
-    // create local id set , only for the grid allowed
-    ALU2dGridLocalIdSet(const GridType & grid) : hset_(grid.hierarchicIndexSet())
-    {
-      for(int i=0; i<dim+1; i++)
-        codimStart_[i] = i*codimMultiplier;
-    }
-
-    // fake method to have the same method like GlobalIdSet
-    void updateIdSet() {}
+    typedef ALU2dGrid< dim, dimworld, eltype > Grid;
 
   public:
     //! export type of id
-    typedef int IdType;
+    typedef typename Base::IdType IdType;
 
-    //! import default implementation of subId<cc>
-    //! \todo remove after next release
-    using IdSet < GridType , ALU2dGridLocalIdSet, IdType > :: subId;
+  private:
+    typedef typename Grid::HierarchicIndexSet HierarchicIndexSet;
+
+    // this means that only up to 536,870,912 entities are allowed
+    static const IdType codimMultiplier = 1 << 29;
+
+    // create local id set , only for the grid allowed
+    ALU2dGridLocalIdSet ( const Grid &grid )
+      : hset_( grid.hierarchicIndexSet() )
+    {}
+
+    // fake method to have the same method like GlobalIdSet
+    void updateIdSet () {}
+
+  public:
 
     //! return global id of given entity
-    template <class EntityType>
-    int id (const EntityType & ep) const
+    template< class Entity >
+    IdType id ( const Entity &e ) const
     {
-      enum { cd = EntityType :: codimension };
-      assert( hset_.size(cd) < codimMultiplier );
-      return codimStart_[cd] + hset_.index(ep);
+      return id< Entity::codimension >( e );
     }
 
     //! return global id of given entity
-    template <int codim>
-    int id (const typename GridType:: template Codim<codim> :: Entity & ep) const
+    template< int cd >
+    IdType id ( const typename Grid::template Codim< cd >::Entity &e ) const
     {
-      //enum { cd = EntityType :: codimension };
-      assert( hset_.size(codim) < codimMultiplier );
-      return codimStart_[codim] + hset_.index(ep);
+      assert( hset_.size( cd ) < codimMultiplier );
+      return cd*codimMultiplier + hset_.index( e );
     }
 
     //! return subId of given entity
-    int subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
+    template< class Entity >
+    IdType subId ( const Entity &e, int i, unsigned int codim ) const
     {
-      assert( hset_.size( codim ) < codimMultiplier );
-      return codimStart_[ codim ] + hset_.subIndex( e, i, codim );
+      return subId< Entity::codimension >( e, i, codim );
+    }
+
+    //! return subId of given entity
+    template< int cd >
+    IdType subId ( const typename Grid::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
+    {
+      const int realCodim = cd+codim;
+      assert( hset_.size( realCodim ) < codimMultiplier );
+      return realCodim*codimMultiplier + hset_.subIndex( e, i, codim );
     }
 
   private:
-    // our HierarchicIndexSet
-    const HierarchicIndexSetType & hset_;
-
-    // store start of each codim numbers
-    int codimStart_[dim+1];
+    const HierarchicIndexSet &hset_;
   };
 
 } // end namespace Dune
 
-#endif
+#endif // #ifndef DUNE_ALU2DGRIDINDEXSETS_HH
