@@ -315,9 +315,12 @@ namespace Dune {
      the <tt>Local</tt> template parameter.
      \tparam Local false for GlobalIdSet, true for LocalIdSet
    */
-  template <class GridImp, bool Local>
-  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp,Local>,unsigned int>
+  template< class GridImp, bool Local >
+  class UGGridIdSet
+    : public IdSet< GridImp, UGGridIdSet< GridImp, Local >, unsigned int >
   {
+    typedef typename remove_const< GridImp >::type::Traits Traits;
+
     enum {dim = remove_const<GridImp>::type::dimension};
 
     typedef typename std::pair<const typename UG_NS<dim>::Element*, int> Face;
@@ -368,22 +371,15 @@ namespace Dune {
     }
 
   public:
-    //! constructor stores reference to a grid
-    UGGridIdSet (const GridImp& g) : grid_(g) {}
-
     //! get id of an entity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cd>
-    unsigned int id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    template< int cd >
+    unsigned int id ( const typename Traits::template Codim< cd >::Entity &e ) const
     {
       if (cd==0) {
         // If we're asked for the id of an element, and that element is a copy of its father, then
         // we return the id of the lowest ancestor that the element is a copy from.  That way copies
         // of elements have the same id
-        const typename UG_NS<dim>::Element* ancestor = (typename UG_NS<dim>::Element* const)(grid_.getRealImplementation(e).target_);
+        const typename UG_NS<dim>::Element* ancestor = (typename UG_NS<dim>::Element* const)( GridImp::getRealImplementation( e ).target_ );
         /** \todo We should really be using an isCopy() method rather than hasCopy() */
         while (UG_NS<dim>::EFather(ancestor) && UG_NS<dim>::hasCopy(UG_NS<dim>::EFather(ancestor)))
           ancestor = UG_NS<dim>::EFather(ancestor);
@@ -398,7 +394,7 @@ namespace Dune {
 #if defined ModelP
       if (cd == dim) {
         typename UG_NS<dim>::Node *node =
-          reinterpret_cast<typename UG_NS<dim>::Node *>(grid_.getRealImplementation(e).target_);
+          reinterpret_cast<typename UG_NS<dim>::Node *>( GridImp::getRealImplementation( e ).target_ );
 
         return node->ddd.gid;
       }
@@ -408,47 +404,45 @@ namespace Dune {
                    " persistent index for entities which are neither nodes nor elements.");
       }
 #else
-      return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
+      return UG_NS<dim>::id( GridImp::getRealImplementation( e ).target_ );
 #endif
 
     }
 
     //! get id of subEntity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    unsigned int subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
-                        int i,
-                        unsigned int codim) const
+    template< int cd >
+    unsigned int subId ( const typename Traits::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
     {
-      if (codim==0)
-        return id<0>(e);
+      if( codim == 0 )
+        return id< cd >( e );
 
-      const typename UG_NS<dim>::Element* target = grid_.getRealImplementation(e).target_;
+      const typename UG_NS< dim >::Element *target = GridImp::getRealImplementation( e ).target_;
       GeometryType type = e.type();
 
-      if (dim-codim==1) {
+      // handle edges
+      if( dim-codim == 1 )
+      {
+        const ReferenceElement< void, dim > &refElement = ReferenceElements< void, dim >::general( type );
+        const int aDUNE = refElement.subEntity( i, dim-1, 0, dim );
+        const int bDUNE = refElement.subEntity( i, dim-1, 1, dim );
+        const int aUG = UGGridRenumberer< dim >::verticesDUNEtoUG( aDUNE, type );
+        const int bUG = UGGridRenumberer< dim >::verticesDUNEtoUG( bDUNE, type );
 
-        int a=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,0,dim);
-        int b=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,1,dim);
-        const typename UG_NS<dim>::Edge* edge = UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
-                                                                    UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(b,type)));
+        const typename UG_NS< dim >::Edge *edge
+          = UG_NS< dim >::GetEdge( UG_NS< dim >::Corner( target, aUG ), UG_NS<dim>::Corner( target, bUG ) );
 
         // If this edge is the copy of an edge on a lower level we return the id of that lower
         // edge, because Dune wants entities which are copies of each other to have the same id.
-        const typename UG_NS<dim>::Edge* fatherEdge;
-        fatherEdge = GetFatherEdge(edge);
-
-        while (fatherEdge   // fatherEdge exists
+        const typename UG_NS< dim >::Edge *fatherEdge = GetFatherEdge( edge );
+        while( fatherEdge // fatherEdge exists
                // ... and it must be a true copy father
-               && ( (fatherEdge->links[0].nbnode->myvertex == edge->links[0].nbnode->myvertex
-                     && fatherEdge->links[1].nbnode->myvertex == edge->links[1].nbnode->myvertex)
-                    ||
-                    (fatherEdge->links[0].nbnode->myvertex == edge->links[1].nbnode->myvertex
-                     && fatherEdge->links[1].nbnode->myvertex == edge->links[0].nbnode->myvertex) ) ) {
+               && (  (  (fatherEdge->links[0].nbnode->myvertex == edge->links[0].nbnode->myvertex)
+                        && (fatherEdge->links[1].nbnode->myvertex == edge->links[1].nbnode->myvertex) )
+                     || (  (fatherEdge->links[0].nbnode->myvertex == edge->links[1].nbnode->myvertex)
+                           && (fatherEdge->links[1].nbnode->myvertex == edge->links[0].nbnode->myvertex) ) ) )
+        {
           edge = fatherEdge;
-          fatherEdge = GetFatherEdge(edge);
+          fatherEdge = GetFatherEdge( edge );
         }
 
 #ifdef ModelP
@@ -459,46 +453,43 @@ namespace Dune {
 #endif
       }
 
-      if (codim==1) {  // Faces
-
-        Face face(target, UGGridRenumberer<dim>::facesDUNEtoUG(i,type));
+      // handle faces (only 3d)
+      if( codim == 1 )
+      {
+        Face face( target, UGGridRenumberer< dim >::facesDUNEtoUG( i, type ) );
 
         // If this face is the copy of a face on a lower level we return the id of that lower
         // face, because Dune wants entities which are copies of each other to have the same id.
         Face fatherFace;
-        fatherFace = getFatherFace(face);
-        while (fatherFace.first) {
+        fatherFace = getFatherFace( face );
+        while( fatherFace.first )
+        {
           face = fatherFace;
-          fatherFace = getFatherFace(face);
+          fatherFace = getFatherFace( face );
         }
 
 #ifdef ModelP
-        return (Local)
-               ? UG_NS<dim>::SideVector(face.first, face.second)->id
-               : UG_NS<dim>::SideVector(face.first, face.second)->ddd.gid;
-#else
-        return UG_NS<dim>::SideVector(face.first, face.second)->id;
-#endif
+        if( !Local )
+          return UG_NS< dim >::SideVector( face.first, face.second )->ddd.gid;
+        else
+#endif // #ifdef ModelP
+        return UG_NS< dim >::SideVector( face.first, face.second )->id;
       }
 
-      if (codim==dim) {
+      if( codim == dim )
+      {
 #ifdef ModelP
-        return (Local)
-               ? UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)))
-               : UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(i,type))->ddd.gid;
-#else
-        return UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
-#endif
+        if( !Local )
+          return UG_NS< dim >::Corner( target, UGGridRenumberer< dim >::verticesDUNEtoUG( i,type ) )->ddd.gid;
+        else
+#endif // #ifdef ModelP
+        return UG_NS< dim >::id( UG_NS< dim >::Corner( target, UGGridRenumberer< dim >::verticesDUNEtoUG( i, type ) ) );
       }
 
-      DUNE_THROW(GridError, "UGGrid<" << dim << ">::subId isn't implemented for codim==" << codim );
+      DUNE_THROW( GridError, "UGGrid< " << dim << " >::subId isn't implemented for codim == " << codim );
     }
-
-    //private:
-
-    const GridImp& grid_;
   };
 
-}  // namespace Dune
+} // namespace Dune
 
-#endif
+#endif // #ifndef DUNE_UGGRID_INDEXSETS_HH
