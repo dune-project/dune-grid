@@ -45,11 +45,11 @@ namespace Dune {
     /** \brief Set face entity from center element and side number
      * \param side Side number in Dune numbering
      */
-    UGMakeableEntity(typename UG_NS<dim>::Element* center, unsigned int side, const GridImp* gridImp) :
+    UGMakeableEntity(typename UG_NS<dim>::Element* center, unsigned int side) :
       GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
     {
       // The following cast is the identity whenever the code is actually run
-      reinterpret_cast<UGGridEntity<1,dim,GridImp>*>(&this->realEntity)->setToTarget(center,side,gridImp);
+      reinterpret_cast<UGGridEntity<1,dim,GridImp>*>(&this->realEntity)->setToTarget(center,side);
     }
 
     UGMakeableEntity() :
@@ -290,23 +290,17 @@ namespace Dune {
     /** \brief Set edge object to a UG edge object */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       target_ = target;
-      gridImp_ = gridImp;
     }
   public:
     /** \brief Set edge object to a UG edge object using the center element and the side number
      * \note This method is only here to please the compiler, it should never actually be called!
      */
-    void setToTarget(typename UG_NS<dim>::Element* target, unsigned int side, const GridImp* gridImp) {
+    void setToTarget(typename UG_NS<dim>::Element* target, unsigned int side) {
       DUNE_THROW(Dune::Exception, "Programming error, this method should never be called!");
     }
 
   protected:
     typename UG_NS<dim>::template Entity<codim>::T* target_;
-
-    /** \brief gridImp Not actually used, only the codim-0 specialization needs it
-     * But code is simpler if we just keep it everywhere.
-     */
-    const GridImp* gridImp_;
   };
 
   /*! \brief Specialization for edge in 2D
@@ -371,10 +365,9 @@ namespace Dune {
     /** \brief Set this object to a UG object
      * \param side Side number in DUNE numbering
      */
-    void setToTarget(typename UG_NS<dim>::Element* target, unsigned int side, const GridImp* gridImp) {
+    void setToTarget(typename UG_NS<dim>::Element* target, unsigned int side) {
       target_  = target;
       side_    = side;
-      gridImp_ = gridImp;
     }
 
     /** \brief Dummy method, should never be called */
@@ -387,11 +380,6 @@ namespace Dune {
 
     /** \brief The number of the side of 'target_' that we are.  In DUNE numbering */
     unsigned int side_;
-
-    /** \brief gridImp Not actually used, only the codim-0 specialization needs it
-     * But code is simpler if we just keep it everywhere.
-     */
-    const GridImp* gridImp_;
   };
 
   /*! \brief Specialization for faces in 3D

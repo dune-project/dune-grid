@@ -42,7 +42,7 @@ namespace Dune {
      * Only used if dim==3 and codim==1
      */
     UGGridEntityPointer (const UGGridEntity<0,dim,GridImp>& centerEntity, unsigned int side)
-      : virtualEntity_(centerEntity.target_, side, centerEntity.gridImp_)
+      : virtualEntity_(centerEntity.target_, side)
     {}
 
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
