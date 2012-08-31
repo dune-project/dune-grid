@@ -9,8 +9,6 @@
 
 #include <dune/grid/common/gridenums.hh>
 
-#include "uggridrenumberer.hh"
-
 
 namespace Dune {
 
