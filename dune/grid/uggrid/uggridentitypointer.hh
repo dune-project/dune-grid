@@ -37,6 +37,14 @@ namespace Dune {
       : virtualEntity_(entity.target_,entity.gridImp_)
     {}
 
+    /** \brief Construct face entity pointer from given element and side number
+     *
+     * Only used if dim==3 and codim==1
+     */
+    UGGridEntityPointer (const UGGridEntity<0,dim,GridImp>& centerEntity, unsigned int side)
+      : virtualEntity_(centerEntity.target_, side)
+    {}
+
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       virtualEntity_.setToTarget(target,gridImp);
     }

@@ -156,8 +156,7 @@ Dune::UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
   }
   else if (dim==3 and cc==1)
   {
-    typename UG_NS<dim>::Vector* subEntity = UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i, this->type()));
-    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity,gridImp_));
+    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>(*this, i));
   }
   else
     DUNE_THROW(GridError, "subEntity for nonexisting codimension requested!" );
