@@ -143,6 +143,9 @@ namespace Dune
     //typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
 
+    // deprecated typedef for backward compatibility
+    typedef JacobianInverseTransposed Jacobian DUNE_DEPRECATED_MSG ( "type Geometry::Jacobian is deprecated, use Geometry::JacobianInverseTransposed instead." );
+
     //! type of jacobian transposed
     //typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
