@@ -29,6 +29,8 @@ namespace Dune {
   class UGGridLeafIntersectionIterator;
   template<class GridImp>
   class UGGridHierarchicIterator;
+  template <class GridType>
+  class GridFactory;
 
   template<int codim, int dim, class GridImp>
   class UGMakeableEntity :
@@ -105,6 +107,9 @@ namespace Dune {
     typedef typename GridImp::ctype UGCtype;
 
     typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
+
+    template <class GridType>
+    friend class GridFactory;
 
   public:
     UGGridEntity()
