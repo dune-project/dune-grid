@@ -338,7 +338,7 @@ namespace Dune {
     /** \brief Return the entity type identifier */
     GeometryType type() const
     {
-      switch (UG_NS<dim>::Tag(target_)) {
+      switch (UG_NS<dim>::Tag(center_)) {
 
       case UG::D3::TETRAHEDRON :
         return GeometryType(GeometryType::simplex,2);
@@ -354,7 +354,7 @@ namespace Dune {
         return GeometryType(GeometryType::cube,2);
       default :
         DUNE_THROW(GridError, "UGFaceEntity::type():  ERROR:  Unknown type "
-                   << UG_NS<dim>::Tag(target_) << " found!");
+                   << UG_NS<dim>::Tag(center_) << " found!");
 
       }
 
@@ -368,10 +368,11 @@ namespace Dune {
     }
 
     /** \brief Set this object to a UG object
+     * \param center A UG element that this face is a side of
      * \param side Side number in DUNE numbering
      */
-    void setToTarget(typename UG_NS<dim>::Element* target, unsigned int side) {
-      target_  = target;
+    void setToTarget(typename UG_NS<dim>::Element* center, unsigned int side) {
+      center_  = center;
       side_    = side;
     }
 
@@ -381,7 +382,7 @@ namespace Dune {
     }
 
     /** \brief The UG object for one element that the side is part of */
-    typename UG_NS<dim>::Element* target_;
+    typename UG_NS<dim>::Element* center_;
 
     /** \brief The number of the side of 'target_' that we are.  In DUNE numbering */
     unsigned int side_;
