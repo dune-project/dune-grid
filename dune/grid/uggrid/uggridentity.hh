@@ -29,6 +29,8 @@ namespace Dune {
   class UGGridLeafIntersectionIterator;
   template<class GridImp>
   class UGGridHierarchicIterator;
+  template <class GridType>
+  class GridFactory;
 
   template<int codim, int dim, class GridImp>
   class UGMakeableEntity :
@@ -60,8 +62,8 @@ namespace Dune {
       this->realEntity.setToTarget(target,gridImp);
     }
 
-    typename UG_NS<dim>::template Entity<codim>::T* getTarget() {
-      return this->realEntity.target_;
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const {
+      return this->realEntity.getTarget();
     }
 
   };
@@ -105,6 +107,9 @@ namespace Dune {
     typedef typename GridImp::ctype UGCtype;
 
     typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
+
+    template <class GridType>
+    friend class GridFactory;
 
   public:
     UGGridEntity()
@@ -176,6 +181,11 @@ namespace Dune {
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
+
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
+    {
+      return target_;
+    }
 
   private:
     /** \brief Set this entity to a particular UG entity */
@@ -299,6 +309,11 @@ namespace Dune {
       DUNE_THROW(Dune::Exception, "Programming error, this method should never be called!");
     }
 
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
+    {
+      return target_;
+    }
+
   protected:
     typename UG_NS<dim>::template Entity<codim>::T* target_;
   };
@@ -333,7 +348,7 @@ namespace Dune {
     /** \brief Return the entity type identifier */
     GeometryType type() const
     {
-      switch (UG_NS<dim>::Tag(target_)) {
+      switch (UG_NS<dim>::Tag(center_)) {
 
       case UG::D3::TETRAHEDRON :
         return GeometryType(GeometryType::simplex,2);
@@ -349,7 +364,7 @@ namespace Dune {
         return GeometryType(GeometryType::cube,2);
       default :
         DUNE_THROW(GridError, "UGFaceEntity::type():  ERROR:  Unknown type "
-                   << UG_NS<dim>::Tag(target_) << " found!");
+                   << UG_NS<dim>::Tag(center_) << " found!");
 
       }
 
@@ -363,10 +378,11 @@ namespace Dune {
     }
 
     /** \brief Set this object to a UG object
+     * \param center A UG element that this face is a side of
      * \param side Side number in DUNE numbering
      */
-    void setToTarget(typename UG_NS<dim>::Element* target, unsigned int side) {
-      target_  = target;
+    void setToTarget(typename UG_NS<dim>::Element* center, unsigned int side) {
+      center_  = center;
       side_    = side;
     }
 
@@ -375,10 +391,33 @@ namespace Dune {
       DUNE_THROW(Dune::Exception, "Programming error, this method should never be called!");
     }
 
-    /** \brief The UG object for one element that the side is part of */
-    typename UG_NS<dim>::Element* target_;
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
+    {
+      int ugSide;
+      switch (UG_NS<dim>::Tag(center_)) {
+      case UG::D3::TETRAHEDRON :
+        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::simplex,3));
+        break;
+      case UG::D3::PYRAMID :
+        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::pyramid,3));
+        break;
+      case UG::D3::PRISM :
+        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::prism,3));
+        break;
+      case UG::D3::HEXAHEDRON :
+        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::cube,3));
+        break;
+      default :
+        DUNE_THROW(NotImplemented, "for element type " << UG_NS<dim>::Tag(center_));
+      }
 
-    /** \brief The number of the side of 'target_' that we are.  In DUNE numbering */
+      return UG_NS<dim>::SideVector(center_, ugSide);
+    }
+
+    /** \brief The UG object for one element that the side is part of */
+    typename UG_NS<dim>::Element* center_;
+
+    /** \brief The number of the side of 'center_' that we are.  In DUNE numbering */
     unsigned int side_;
   };
 
@@ -563,6 +602,11 @@ namespace Dune {
 
     //!
     void setToTarget(typename UG_NS<dim>::Element* target, const GridImp* gridImp);
+
+    typename UG_NS<dim>::template Entity<0>::T* getTarget() const
+    {
+      return target_;
+    }
 
     //! the current geometry
     GeometryImpl geo_;

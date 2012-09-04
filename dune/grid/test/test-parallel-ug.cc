@@ -458,16 +458,16 @@ void testParallelUG()
   testCommunication<typename GridType::LevelGridView, dim>(level0GridView, false);
   EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(level0GridView);
   // not testing faces yet, because the implementation is still missing
-  //     if (dim == 3)
-  //         EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(level0GridView);
+  if (dim == 3 and false)
+    EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(level0GridView);
 
   // Test element and node communication on leaf view
   testCommunication<typename GridType::LeafGridView, 0>(leafGridView, true);
   testCommunication<typename GridType::LeafGridView, dim>(leafGridView, true);
   EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(leafGridView);
   // not testing faces yet, because the implementation is still missing
-  //     if (dim == 3)
-  //         EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(leafGridView);
+  if (dim == 3 and false)
+    EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(leafGridView);
 
   ////////////////////////////////////////////////////
   //  Refine globally and test again
@@ -496,15 +496,15 @@ void testParallelUG()
     testCommunication<typename GridType::LevelGridView, dim>(grid->levelView(i), false);
     EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(grid->levelView(i));
     // not testing faces yet, because the implementation is still missing
-    //         if (dim == 3)
-    //             EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(grid->levelView(i));
+    if (dim == 3 and false)
+      EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(grid->levelView(i));
   }
   testCommunication<typename GridType::LeafGridView, 0>(grid->leafView(), true);
   testCommunication<typename GridType::LeafGridView, dim>(grid->leafView(), true);
   EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(grid->leafView());
   // not testing faces yet, because the implementation is still missing
-  //     if (dim == 3)
-  //         EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(grid->leafView());
+  if (dim == 3 and false)
+    EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(grid->leafView());
 
 };
 
