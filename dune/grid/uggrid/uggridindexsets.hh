@@ -35,7 +35,7 @@ namespace Dune {
     template<int cd>
     unsigned int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const
     {
-      return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).target_);
+      return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
     }
 
     //! get index of subEntity of a codim 0 entity
@@ -45,27 +45,27 @@ namespace Dune {
                            unsigned int codim) const
     {
       if (cc==dim)
-        return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).target_);
+        return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
 
       if (codim==dim)
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
+        return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
                                                          UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
 
       if (codim==0)
-        return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).target_);
+        return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
 
       if (codim==dim-1) {
 
         int a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
         int b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
+        return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
                                                                              UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                          UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
+                                                          UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
                                                                              UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
       }
 
       if (codim==1)
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(grid_->getRealImplementation(e).target_,
+        return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(grid_->getRealImplementation(e).getTarget(),
                                                              UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
 
       DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subIndex isn't implemented for codim==" << codim );
@@ -181,7 +181,7 @@ namespace Dune {
     template<int cd>
     int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).target_);
+      return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
     }
 
     //! get index of subEntity of a codim 0 entity
@@ -195,29 +195,29 @@ namespace Dune {
                            unsigned int codim) const
     {
       if (cc==dim)
-        return UG_NS<dim>::levelIndex(grid_.getRealImplementation(e).target_);
+        return UG_NS<dim>::levelIndex(grid_.getRealImplementation(e).getTarget());
 
       if (codim==0)
-        return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).target_);
+        return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
 
       const GeometryType type = e.type();
 
       if (codim==dim)
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
+        return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
                                                         UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
 
       if (codim==dim-1) {
 
         int a=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,0,dim);
         int b=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,1,dim);
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
+        return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
-                                                         UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
+                                                         UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(b,type))));
       }
 
       if (codim==1)
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(grid_.getRealImplementation(e).target_,
+        return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(grid_.getRealImplementation(e).getTarget(),
                                                             UGGridRenumberer<dim>::facesDUNEtoUG(i,type)));
 
       DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLeafIndex isn't implemented for codim==" << codim );
@@ -276,7 +276,7 @@ namespace Dune {
     template <class EntityType>
     bool contains (const EntityType& entity) const
     {
-      return UG_NS<dim>::isLeaf(GridImp::getRealImplementation(entity).target_);
+      return UG_NS<dim>::isLeaf(GridImp::getRealImplementation(entity).getTarget());
     }
 
 
@@ -383,7 +383,7 @@ namespace Dune {
         // If we're asked for the id of an element, and that element is a copy of its father, then
         // we return the id of the lowest ancestor that the element is a copy from.  That way copies
         // of elements have the same id
-        const typename UG_NS<dim>::Element* ancestor = (typename UG_NS<dim>::Element* const)(grid_.getRealImplementation(e).target_);
+        const typename UG_NS<dim>::Element* ancestor = (typename UG_NS<dim>::Element* const)(grid_.getRealImplementation(e).getTarget());
         /** \todo We should really be using an isCopy() method rather than hasCopy() */
         while (UG_NS<dim>::EFather(ancestor) && UG_NS<dim>::hasCopy(UG_NS<dim>::EFather(ancestor)))
           ancestor = UG_NS<dim>::EFather(ancestor);
@@ -398,7 +398,7 @@ namespace Dune {
 #if defined ModelP
       if (cd == dim) {
         typename UG_NS<dim>::Node *node =
-          reinterpret_cast<typename UG_NS<dim>::Node *>(grid_.getRealImplementation(e).target_);
+          reinterpret_cast<typename UG_NS<dim>::Node *>(grid_.getRealImplementation(e).getTarget());
 
         return node->ddd.gid;
       }
@@ -408,7 +408,7 @@ namespace Dune {
                    " persistent index for entities which are neither nodes nor elements.");
       }
 #else
-      return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
+      return UG_NS<dim>::id(grid_.getRealImplementation(e).getTarget());
 #endif
 
     }
@@ -425,7 +425,7 @@ namespace Dune {
       if (codim==0)
         return id<0>(e);
 
-      const typename UG_NS<dim>::Element* target = grid_.getRealImplementation(e).target_;
+      const typename UG_NS<dim>::Element* target = grid_.getRealImplementation(e).getTarget();
       GeometryType type = e.type();
 
       if (dim-codim==1) {
