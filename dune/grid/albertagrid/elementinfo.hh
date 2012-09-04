@@ -263,7 +263,7 @@ namespace Dune
         const bool me = (macroIndex() == other.macroIndex());
         const bool ll = (level() < other.level());
         const bool le = (level() == other.level());
-        const bool pl = (path < other.path());
+        const bool pl = (path() < other.path());
         return ml | (me & (ll | (le & pl)));
       }
 
@@ -490,7 +490,7 @@ namespace Dune
         DUNE_THROW( NotImplemented, "Seed for fake elements not implemented." );
 
       return Seed( macroElement().index, level, path );
-    };
+    }
 
 
     template< int dim >
