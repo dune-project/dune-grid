@@ -216,6 +216,34 @@ namespace Dune {
      */
     virtual UGGrid<dimworld>* createGrid();
 
+    static const int dimension = UGGrid<dimworld>::dimension;
+
+    template< int codim >
+    struct Codim
+    {
+      typedef typename UGGrid<dimworld>::template Codim< codim >::Entity Entity;
+    };
+
+    /** \brief Return the number of the element in the order of insertion into the factory
+     *
+     * For UGGrid elements this number is the same as the element level index
+     */
+    virtual unsigned int
+    insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
+    {
+      return UG_NS<dimension>::levelIndex(grid_->getRealImplementation(entity).target_);
+    }
+
+    /** \brief Return the number of the vertex in the order of insertion into the factory
+     *
+     * For UGGrid vertices this number is the same as the vertex level index
+     */
+    virtual unsigned int
+    insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
+    {
+      return UG_NS<dimension>::levelIndex(grid_->getRealImplementation(entity).target_);
+    }
+
   private:
 
     // Initialize the grid structure in UG

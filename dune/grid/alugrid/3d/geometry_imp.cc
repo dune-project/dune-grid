@@ -126,7 +126,7 @@ namespace Dune {
   }
 
   template< int mydim, int cdim, class GridImp>
-  inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::Jacobian&
+  inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::JacobianInverseTransposed&
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   jacobianInverseTransposed (const LocalCoordinate & local) const
   {

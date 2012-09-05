@@ -9,8 +9,6 @@
 
 #include <dune/grid/common/gridenums.hh>
 
-#include "uggridrenumberer.hh"
-
 
 namespace Dune {
 
@@ -31,6 +29,8 @@ namespace Dune {
   class UGGridLeafIntersectionIterator;
   template<class GridImp>
   class UGGridHierarchicIterator;
+  template <class GridType>
+  class GridFactory;
 
   template<int codim, int dim, class GridImp>
   class UGMakeableEntity :
@@ -44,6 +44,16 @@ namespace Dune {
       this->realEntity.setToTarget(target,gridImp);
     }
 
+    /** \brief Set face entity from center element and side number
+     * \param side Side number in Dune numbering
+     */
+    UGMakeableEntity(typename UG_NS<dim>::Element* center, unsigned int side) :
+      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
+    {
+      // The following cast is the identity whenever the code is actually run
+      reinterpret_cast<UGGridEntity<1,dim,GridImp>*>(&this->realEntity)->setToTarget(center,side);
+    }
+
     UGMakeableEntity() :
       GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
     {}
@@ -52,8 +62,8 @@ namespace Dune {
       this->realEntity.setToTarget(target,gridImp);
     }
 
-    typename UG_NS<dim>::template Entity<codim>::T* getTarget() {
-      return this->realEntity.target_;
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const {
+      return this->realEntity.getTarget();
     }
 
   };
@@ -97,6 +107,9 @@ namespace Dune {
     typedef typename GridImp::ctype UGCtype;
 
     typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
+
+    template <class GridType>
+    friend class GridFactory;
 
   public:
     UGGridEntity()
@@ -168,6 +181,11 @@ namespace Dune {
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
+
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
+    {
+      return target_;
+    }
 
   private:
     /** \brief Set this entity to a particular UG entity */
@@ -279,17 +297,25 @@ namespace Dune {
     }
 #endif
 
+    /** \brief Set edge object to a UG edge object */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       target_ = target;
-      gridImp_ = gridImp;
+    }
+  public:
+    /** \brief Set edge object to a UG edge object using the center element and the side number
+     * \note This method is only here to please the compiler, it should never actually be called!
+     */
+    void setToTarget(typename UG_NS<dim>::Element* target, unsigned int side) {
+      DUNE_THROW(Dune::Exception, "Programming error, this method should never be called!");
     }
 
-    typename UG_NS<dim>::template Entity<codim>::T* target_;
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
+    {
+      return target_;
+    }
 
-    /** \brief gridImp Not actually used, only the codim-0 specialization needs it
-     * But code is simpler if we just keep it everywhere.
-     */
-    const GridImp* gridImp_;
+  protected:
+    typename UG_NS<dim>::template Entity<codim>::T* target_;
   };
 
   /*! \brief Specialization for edge in 2D
@@ -322,34 +348,77 @@ namespace Dune {
     /** \brief Return the entity type identifier */
     GeometryType type() const
     {
-      DUNE_THROW(NotImplemented, "UGGridEntity::type() for faces");
+      switch (UG_NS<dim>::Tag(center_)) {
+
+      case UG::D3::TETRAHEDRON :
+        return GeometryType(GeometryType::simplex,2);
+      case UG::D3::PYRAMID :
+        return (side_==0)
+               ? GeometryType(GeometryType::cube,2)
+               : GeometryType(GeometryType::simplex,2);
+      case UG::D3::PRISM :
+        return (side_==0 or side_==4)
+               ? GeometryType(GeometryType::simplex,2)
+               : GeometryType(GeometryType::cube,2);
+      case UG::D3::HEXAHEDRON :
+        return GeometryType(GeometryType::cube,2);
+      default :
+        DUNE_THROW(GridError, "UGFaceEntity::type():  ERROR:  Unknown type "
+                   << UG_NS<dim>::Tag(center_) << " found!");
+
+      }
+
     }
 
     /** \brief The partition type for parallel computing
-     * \todo So far it always returns InteriorEntity */
+     * \todo Not implemented yet */
     PartitionType partitionType () const
     {
       DUNE_THROW(NotImplemented, "UGGridEntity::partitionType() for faces");
     }
 
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
-      target_  = target;
-      gridImp_ = gridImp;
+    /** \brief Set this object to a UG object
+     * \param center A UG element that this face is a side of
+     * \param side Side number in DUNE numbering
+     */
+    void setToTarget(typename UG_NS<dim>::Element* center, unsigned int side) {
+      center_  = center;
+      side_    = side;
     }
 
-    /** \brief The corresponding UG object */
-    typename UG_NS<dim>::template Entity<codim>::T* target_;
+    /** \brief Dummy method, should never be called */
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
+      DUNE_THROW(Dune::Exception, "Programming error, this method should never be called!");
+    }
 
-    /** \brief The geometry type cannot be retrieved from the UG object.
-     * We have to store it separately.
-     * \bug This member isn't initialized yet
-     */
-    GeometryType type_;
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
+    {
+      int ugSide;
+      switch (UG_NS<dim>::Tag(center_)) {
+      case UG::D3::TETRAHEDRON :
+        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::simplex,3));
+        break;
+      case UG::D3::PYRAMID :
+        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::pyramid,3));
+        break;
+      case UG::D3::PRISM :
+        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::prism,3));
+        break;
+      case UG::D3::HEXAHEDRON :
+        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::cube,3));
+        break;
+      default :
+        DUNE_THROW(NotImplemented, "for element type " << UG_NS<dim>::Tag(center_));
+      }
 
-    /** \brief gridImp Not actually used, only the codim-0 specialization needs it
-     * But code is simpler if we just keep it everywhere.
-     */
-    const GridImp* gridImp_;
+      return UG_NS<dim>::SideVector(center_, ugSide);
+    }
+
+    /** \brief The UG object for one element that the side is part of */
+    typename UG_NS<dim>::Element* center_;
+
+    /** \brief The number of the side of 'center_' that we are.  In DUNE numbering */
+    unsigned int side_;
   };
 
   /*! \brief Specialization for faces in 3D
@@ -533,6 +602,11 @@ namespace Dune {
 
     //!
     void setToTarget(typename UG_NS<dim>::Element* target, const GridImp* gridImp);
+
+    typename UG_NS<dim>::template Entity<0>::T* getTarget() const
+    {
+      return target_;
+    }
 
     //! the current geometry
     GeometryImpl geo_;

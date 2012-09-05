@@ -8,7 +8,7 @@ find_package(ALUGrid)
 find_package(Alberta)
 include(UseUG)
 find_package(Grape)
-find_package(psurface)
+find_package(Psurface)
 find_package(AmiraMesh)
 
 set(DEFAULT_DGF_GRIDDIM 1)

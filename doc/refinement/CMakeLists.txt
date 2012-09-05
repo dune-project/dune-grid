@@ -1,17 +1,20 @@
 
-if(LATEX_USABLE)
+if(LATEX_USABLE AND INKSCAPE)
+  set(DOCS ${DOCS} referencetokuhn0.png simplexvertexindex.png)
   set(EPS_IMGS simplexvertexindex.eps referencetokuhn0.eps kuhntriangulation.eps)
+  inkscape_generate_eps_from_svg(DPI 180
+    OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
+    INPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} ${EPS_IMGS})
   ADD_LATEX_DOCUMENT(refinement.tex FATHER_TARGET doc
-    DEFAULT_SAFEPDF INPUTS poosc08_test.cc
-    IMAGES ${EPS_IMGS})
-  set(PDFDOC refinement.pdf)
-endif(LATEX_USABLE)
+    DEFAULT_SAFEPDF
+    DEPENDS ${EPS_IMGS})
+  set(PDFDOCS ${CMAKE_CURRENT_BINARY_DIR}/refinement.pdf)
+endif(LATEX_USABLE AND INKSCAPE)
 
 set(DOCS  referencetokuhn0.png simplexvertexindex.png)
 
-if(INKSCAPE_FOUND)
-  set(DOCS ${DOCS} referencetokuhn0.png simplexvertexindex.png)
-  inkscape_generate_eps_from_png(DPI 180 OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${EPS_IMGS})
-endif(INKSCAPE_FOUND)
+if(INKSCAPE)
+
+endif(INKSCAPE)
 
 install(FILES ${PDFDOCS} DESTINATION ${CMAKE_INSTALL_DOCDIR}/refinement)
