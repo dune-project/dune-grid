@@ -871,6 +871,18 @@ namespace Dune {
 #endif
     }
 
+    //! Access element from side vector
+    static void GetElementAndSideFromSideVector(const UG_NS< UG_DIM >::Vector* theVector,
+                                                UG_NS< UG_DIM >::Element*& theElement,
+                                                unsigned int& side)
+    {
+      using UG_NAMESPACE ::VECTOR;
+      using UG::UINT;
+
+      theElement = (UG_NS< UG_DIM >::Element*)VOBJECT(theVector);
+      side = VECTORSIDE(theVector);
+    }
+
     /** \brief Return a pointer to the father of the given element */
     static UG_NS< UG_DIM >::Element* EFather(const UG_NS< UG_DIM >::Element* theElement) {
       using UG_NAMESPACE ::ELEMENT;
