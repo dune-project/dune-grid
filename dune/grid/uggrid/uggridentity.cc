@@ -137,30 +137,20 @@ Dune::UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
 {
   assert(i>=0 && i<count<cc>());
 
+  typename UG_NS<dim>::template Entity<cc>::T* subEntity;
+
   if (cc==dim)
-  {
-    typename UG_NS<dim>::Node* subEntity = UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i, this->type()));
-    // The following cast is here to make the code compile for all cc.
-    // When it gets actually called, cc==dim, and the cast is nonexisting.
-    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity,gridImp_));
-  }
+    subEntity = reinterpret_cast<typename UG_NS<dim>::template Entity<cc>::T*>( UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i, this->type())) );
   else if (cc==dim - 1)
-  {
-    typename UG_NS<dim>::Edge* subEntity = UG_NS<dim>::ElementEdge(target_,UGGridRenumberer<dim>::edgesDUNEtoUG(i, this->type()));
-    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity,gridImp_));
-  }
+    subEntity = reinterpret_cast<typename UG_NS<dim>::template Entity<cc>::T*>( UG_NS<dim>::ElementEdge(target_,UGGridRenumberer<dim>::edgesDUNEtoUG(i, this->type())) );
   else if (cc==0)
-  {
-    typename UG_NS<dim>::template Entity<cc>::T* myself = (typename UG_NS<dim>::template Entity<cc>::T*)target_;
-    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>(myself,gridImp_));
-  }
+    subEntity = reinterpret_cast<typename UG_NS<dim>::template Entity<cc>::T*>( target_ );
   else if (dim==3 and cc==1)
-  {
-    typename UG_NS<dim>::Vector* subEntity = UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i, this->type()));
-    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity, gridImp_));
-  }
+    subEntity = reinterpret_cast<typename UG_NS<dim>::template Entity<cc>::T*>( UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i, this->type())) );
   else
     DUNE_THROW(GridError, "subEntity for nonexisting codimension requested!" );
+
+  return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity, gridImp_));
 }
 
 template<int dim, class GridImp>
