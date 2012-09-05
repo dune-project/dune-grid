@@ -473,6 +473,12 @@ createGrid()
     if (CreateAlgebra(grid_->multigrid_) != UG_NS<dimworld>::GM_OK)
       DUNE_THROW(IOError, "Call of 'UG::D" << dimworld << "::CreateAlgebra' failed!");
 
+    // Create an empty levelIndexSet for level 0.
+    // Even though it's empty until the first load balancing
+    // it should still be there in case someone wants to access it.
+    grid_->levelIndexSets_.resize(1);
+    grid_->levelIndexSets_[0] = new UGGridLevelIndexSet<const UGGrid<dimworld> >();
+
     /* here all temp memory since CreateMultiGrid is released */
     Release(grid_->multigrid_->theHeap, UG::FROM_TOP, grid_->multigrid_->MarkKey);
     grid_->multigrid_->MarkKey = 0;
