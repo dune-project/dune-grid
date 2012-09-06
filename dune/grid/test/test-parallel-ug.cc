@@ -203,7 +203,7 @@ void checkMappers(const GridView &gridView)
   };
 };
 
-// specializations for non-implementet cases
+// specializations for non-implemented cases
 template <int dim, int codim, class GridView>
 struct checkMappersWrapper
 {
