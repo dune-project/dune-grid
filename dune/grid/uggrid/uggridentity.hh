@@ -364,12 +364,43 @@ namespace Dune {
 
     }
 
-    /** \brief The partition type for parallel computing
-     * \todo Not implemented yet */
+    //! level of the face
+    int level () const {
+      return UG_NS<dim>::myLevel(target_);
+    }
+
+    /** \brief The partition type for parallel computing */
     PartitionType partitionType () const
     {
-      DUNE_THROW(NotImplemented, "UGGridEntity::partitionType() for faces");
+#ifndef ModelP
+      return InteriorEntity;
+#else
+
+      typename UG_NS<dim>::Vector *face = getTarget();
+
+      if (UG_NS<dim>::Priority(face)    == UG_NS<dim>::PrioHGhost
+          || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioVGhost
+          || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioVHGhost)
+        return GhostEntity;
+      else if (UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioBorder || hasBorderCopy_(face))
+        return BorderEntity;
+      else if (UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioNone)
+        return InteriorEntity;
+      else
+        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(face));
+#endif
     }
+
+#ifdef ModelP
+    bool hasBorderCopy_(typename UG_NS<dim>::Vector *face) const {
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(face));
+      for (int i = 0; plist[i] >= 0; i += 2)
+        if (plist[i + 1] == UG_NS<dim>::PrioBorder)
+          return true;
+
+      return false;
+    }
+#endif
 
     /** \brief Set to a UG side vector object
         \param target The UG side vector to point to
