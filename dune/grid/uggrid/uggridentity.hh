@@ -124,8 +124,7 @@ namespace Dune {
 #ifndef ModelP
       return InteriorEntity;
 #else
-      if (codim != dim) {
-        /** \todo faces (elements and edges are done below) */
+      if (codim != dim) {   // other codims are done below
         return InteriorEntity;
       }
 
@@ -231,7 +230,7 @@ namespace Dune {
     /** \brief The type of UGGrid Entity seeds */
     typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
 
-    //! level of this element
+    //! level of the edge
     int level () const {
       return UG_NS<dim>::myLevel(target_);
     }
@@ -372,7 +371,10 @@ namespace Dune {
       DUNE_THROW(NotImplemented, "UGGridEntity::partitionType() for faces");
     }
 
-    /** \brief Dummy method, should never be called */
+    /** \brief Set to a UG side vector object
+        \param target The UG side vector to point to
+        \param gridImp Dummy argument, only for consistency with codim-0 entities
+     */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       target_ = target;
     }
