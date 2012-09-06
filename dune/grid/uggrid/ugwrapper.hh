@@ -265,13 +265,13 @@ namespace Dune {
       return EPRIO(element);
     }
 
-    /** \brief Encapsulates the UG EPRIO macro */
+    /** \brief Returns the priority of the edge (the UG EPRIO macro) */
     static int Priority(const UG_NS< UG_DIM >::Edge* edge)
     {
       return PARHDR(edge)->prio;
     }
 
-    /** \brief Encapsulates the UG EPRIO macro */
+    /** \brief Returns the priority of the node (the UG EPRIO macro) */
     static int Priority(const UG_NS< UG_DIM >::Node* node)
     {
       return PARHDR(node)->prio;
