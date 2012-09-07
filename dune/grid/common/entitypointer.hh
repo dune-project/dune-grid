@@ -183,16 +183,10 @@ namespace Dune
     //===========================================================
 
     /** \brief Dereferencing operator. */
-    Entity & operator*() const
-    {
-      return realIterator.dereference();
-    }
+    const Entity &operator* () const { return realIterator.dereference(); }
 
     /** \brief Pointer operator. */
-    Entity * operator->() const
-    {
-      return & realIterator.dereference();
-    }
+    const Entity *operator-> () const { return &realIterator.dereference(); }
     //@}
 
     //===========================================================

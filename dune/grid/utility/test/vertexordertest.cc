@@ -16,12 +16,12 @@
 #include <ostream>
 #include <vector>
 
-#include <dune/common/container/array.hh>
+#include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/shared_ptr.hh>
 #include <dune/common/typetraits.hh>
-#include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/generalvertexorder.hh>

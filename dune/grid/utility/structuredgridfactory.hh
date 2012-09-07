@@ -11,11 +11,11 @@
 #include <cstddef>
 #include <cstdlib>
 
-#include <dune/common/container/array.hh>
+#include <dune/common/array.hh>
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/mpihelper.hh>
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/gridfactory.hh>

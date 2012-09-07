@@ -4,7 +4,7 @@
 #include "config.h"
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 
-#include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/mpihelper.hh>
 
 // dune grid includes
 #if HAVE_UG

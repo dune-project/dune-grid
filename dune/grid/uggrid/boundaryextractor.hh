@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <set>
-#include <dune/common/container/array.hh>
+#include <dune/common/array.hh>
 
 
 namespace Dune {

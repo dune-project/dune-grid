@@ -59,26 +59,17 @@ namespace Dune
     //! make entity pointer from entity
     AlbertaGridEntityPointer ( const EntityImp &entity );
 
-#if 0
     //! copy constructor
     AlbertaGridEntityPointer ( const This &other );
-#endif
 
-#if 0
-    //! Destructor
-    ~AlbertaGridEntityPointer();
-#endif
-
-#if 0
     //! assignment operator
-    This &operator= ( const This &other );
-#endif
+    const This &operator= ( const This &other );
 
     //! equality
     bool equals ( const This &other ) const;
 
     //! dereferencing
-    Entity &dereference () const;
+    const Entity &dereference () const;
 
     //! ask for level of entities
     int level () const;
@@ -94,7 +85,7 @@ namespace Dune
     const GridImp &grid () const;
 
   private:
-    mutable EntityObject entity_;
+    Entity entity_;
   };
 
 
@@ -122,31 +113,20 @@ namespace Dune
   {}
 
 
-#if 0
   template< int codim, class GridImp >
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const This &other )
-    : entity_( other.entity_ )
+    : entity_( other.entityImp() )
   {}
-#endif
 
 
-#if 0
-  template<int codim, class GridImp >
-  inline AlbertaGridEntityPointer< codim, GridImp >::~AlbertaGridEntityPointer ()
-  {}
-#endif
-
-
-#if 0
   template< int codim, class GridImp >
-  inline typename AlbertaGridEntityPointer< codim, GridImp >::This &
+  inline const typename AlbertaGridEntityPointer< codim, GridImp >::This &
   AlbertaGridEntityPointer< codim, GridImp >::operator= ( const This &other )
   {
     entityImp().setEntity( other.entityImp() );
     return *this;
   }
-#endif
 
 
   template<int codim, class GridImp >
@@ -158,7 +138,7 @@ namespace Dune
 
 
   template<int codim, class GridImp >
-  inline typename AlbertaGridEntityPointer< codim, GridImp >::Entity &
+  inline const typename AlbertaGridEntityPointer< codim, GridImp >::Entity &
   AlbertaGridEntityPointer< codim, GridImp >::dereference () const
   {
     return entity_;

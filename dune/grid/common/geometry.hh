@@ -291,7 +291,7 @@ namespace Dune
     explicit Geometry ( const Implementation &impl )
       : realGeometry( impl )
     {
-      deprecationWarning ( integral_constant< bool, storeReference >() );
+      // deprecationWarning ( integral_constant< bool, storeReference >() );
     }
 
   private:

@@ -36,12 +36,12 @@
 
 #include <dune/grid/alugrid/3d/lbdatahandle.hh>
 
-#include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/mpihelper.hh>
 
 #if ALU3DGRID_PARALLEL
-#include <dune/common/parallel/mpicollectivecommunication.hh>
+#include <dune/common/mpicollectivecommunication.hh>
 #else
-#include <dune/common/parallel/collectivecommunication.hh>
+#include <dune/common/collectivecommunication.hh>
 #endif
 
 namespace Dune
