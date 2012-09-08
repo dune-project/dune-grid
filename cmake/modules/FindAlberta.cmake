@@ -13,12 +13,13 @@ find_path(ALBERTA_INCLUDE_DIR name alberta/alberta.h PATHS ${ALBERTA_DIR}
 find_path(ALBERTA_INCLUDE_DIR name alberta/alberta.h PATHS /usr/local /opt
   PATH_SUFFIXES alberta)
 
-set(ALBERTA_INCLUDES ${ALBERTA_INCLUDE_DIR})
+set(ALBERTA_INCLUDES ${ALBERTA_INCLUDE_DIR} ${ALBERTA_INCLUDE_DIR}/alberta)
 set(ALBERTA_VERSION 2.0)
 
 cmake_push_check_state()
 set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DDIM_OF_WORLD=3 -DDEL_INDEX=0)
-set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${ALBERTA_INCLUDE_DIR})
+set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${ALBERTA_INCLUDES})
+
 check_include_files(alberta/alberta.h ALBERTA_FOUND)
 
 # check version, Alberta 2 or 3
@@ -29,7 +30,7 @@ if(ALBERTA_FOUND)
     message(WARNING "Alberta version 3 not found. Checking for version 2.")
   endif(!ALBERTA_IS_VERSION_3)
 else(ALBERTA_FOUND)
-  message(WARNING "Could not check alberta.h usability.")
+  message(WARNING "Could not check alberta version.")
   cmake_pop_check_state()
   _dune_set_alberta(False)
 endif(ALBERTA_FOUND)
@@ -51,10 +52,12 @@ if(ALBERTA_UTIL_LIB)
     _dune_set_alberta(FALSE)
   endif(NOT _ALBERTA_UTIL_LIB_FUNCTIONAL)
 else(ALBERTA_UTIL_LIB)
-  message(WARNING "Could not find library alberta_util")
+  message(WARNING "Could not find library alberta_util or alberta_utilities")
   cmake_pop_check_state()
   _dune_set_alberta(FALSE)
 endif(ALBERTA_UTIL_LIB)
+
+set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALBERTA_UTIL_LIB} ltdl m)
 
 if(ALBERTA_LIBCHECK)
   foreach(dim RANGE 1 9)
@@ -62,7 +65,7 @@ if(ALBERTA_LIBCHECK)
       Cache FILEPATH DOC "Alberta lib for ${dim}D" NO_DEFAULT_PATH)
     find_library(ALBERTA_${dim}D_LIB alberta_${dim}d  PATH_SUFFIXES lib lib32 lib64)
     if(ALBERTA_${dim}D_LIB)
-      set(CMAKE_REQUIRED_LIBRARIES ${_CMAKE_REQUIRED_LIBRARIES_OLD} ${ALBERTA_${dim}D_LIB} ${ALBERTA_UTIL_LIB} ${DUNE_LIBS})
+      #set(CMAKE_REQUIRED_LIBRARIES ${_CMAKE_REQUIRED_LIBRARIES_OLD} ${ALBERTA_${dim}D_LIB} ${ALBERTA_UTIL_LIB} ${DUNE_LIBS})
       check_library_exists(${ALBERTA_${dim}D_LIB} mesh_traverse "" ALBERTA_${dim}D_LIB_FOUND)
       if(ALBERTA_${dim}D_LIB_FOUND)
         list(APPEND ALBERTA_WORLD_DIMS ${dim})
@@ -96,10 +99,6 @@ if(ALBERTA_FOUND)
   _dune_set_alberta(TRUE)
 endif(ALBERTA_FOUND)
 
-#set(AUTHOR_WARNING "Alberta test not yet finished. Disabling Alberta until test is complete")
-#set(ALBERTA_FOUND ALBERTA_FOUND-NOTFOUND)
-#set(HAVE_ALBERTA FALSE)
-
 macro(add_dune_alberta_flags)
   if(ALBERTA_FOUND)
     include(CMakeParseArguments)
@@ -130,7 +129,7 @@ macro(add_dune_alberta_flags)
         # link to ALUGRID libraries
         foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
           target_link_libraries(${_target} dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d
-            ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB}
+            ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB ${ALBERTA_UTIL_LIB} ltdl m}
             dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
         endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
       endif(NOT ADD_ALBERTA_OBJECT)
