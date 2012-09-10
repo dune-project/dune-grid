@@ -576,9 +576,6 @@ namespace Dune
     // entity that this EntityPointer points to
     mutable EntityObject * entity_;
 
-    // is true if entity must not be released
-    bool locked_;
-
     // return reference to internal entity implementation
     EntityImp & entityImp () const {
       assert( entity_ );
@@ -652,9 +649,6 @@ namespace Dune
         entity_ = factory_.template getNewEntity<0> ();
         assert( entity_ );
         entityImp().setGhost( *seed.ghost() );
-
-        // don't free on compactify, otherwise ghost info is lost
-        this->locked_ = true ;
       }
     }
 
@@ -670,9 +664,6 @@ namespace Dune
         entity_ = factory_.template getNewEntity<0> ();
         assert( entity_ );
         entityImp().setEntity( entity );
-
-        // don't free on compactify, otherwise ghost info is lost
-        this->locked_ = true ;
       }
     }
 
