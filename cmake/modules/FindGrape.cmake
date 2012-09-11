@@ -40,7 +40,8 @@ function(add_dune_grape_flags)
         PROPERTY
         COMPILE_DEFINITIONS -DENABLE_GRAPE=1
         INCLUDE_DIRECTORIES ${GRAPE_INCLUDE_DIRS})
-    endif(GRAPE_FOUND)
+    endif(ADD_GRAPE_SOURCE_ONLY)
+  endif(GRAPE_FOUND)
 endfunction(add_dune_grape_flags)
 
 find_package(X11)
