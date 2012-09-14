@@ -625,8 +625,6 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
     //! type of our Geometry implementation
     typedef ALU2dGridGeometry<mydim,cdim,GridImp> GeometryImp;
-    //! know dimension of barycentric coordinates
-    enum { dimbary=mydim+1};
 
     typedef typename ALU2dImplTraits< GridImp::dimensionworld, eltype >::HElementType HElementType ;
     typedef typename ALU2dImplInterface< 0, GridImp::dimensionworld, eltype >::Type VertexType;
