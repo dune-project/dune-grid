@@ -100,13 +100,16 @@ namespace Dune {
     return Geometry( geoObj_ );
   }
 
-  //! geometry type of geometry of this entity
-  template<int cd, int dim, class GridImp>
-  inline GeometryType
-  ALU2dGridEntity<cd, dim, GridImp> :: type () const
+
+  template< int cd, int dim, class GridImp >
+  inline GeometryType ALU2dGridEntity< cd, dim, GridImp >::type () const
   {
-    return geoObj_.type();
+    if( eltype == ALU2DSPACE triangle )
+      return GeometryType( typename GenericGeometry::CubeTopology< 2-cd >::type() );
+    else
+      return GeometryType( typename GenericGeometry::SimplexTopology< 2-cd >::type() );
   }
+
 
   template<int cd, int dim, class GridImp>
   inline int ALU2dGridEntity<cd,dim,GridImp > :: getIndex() const
@@ -176,13 +179,27 @@ namespace Dune {
     return Geometry( geoObj_ );
   }
 
-  //! geometry type of geometry of this entity
-  template<int dim, class GridImp>
-  inline GeometryType
-  ALU2dGridEntity<0, dim, GridImp> :: type () const
+
+  template< int dim, class GridImp >
+  inline GeometryType ALU2dGridEntity< 0, dim, GridImp >::type () const
   {
-    return geoObj_.type();
+    switch( eltype )
+    {
+    case ALU2DSPACE triangle :
+      return GeometryType( typename GenericGeometry::SimplexTopology< 2 >::type() );
+
+    case ALU2DSPACE quadrilateral :
+      return GeometryType( typename GenericGeometry::CubeTopology< 2 >::type() );
+
+    case ALU2DSPACE mixed :
+      assert( item_ );
+      if( item_->numvertices() == 3 )
+        return GeometryType( typename GenericGeometry::SimplexTopology< 2 >::type() );
+      else
+        return GeometryType( typename GenericGeometry::CubeTopology< 2 >::type() );
+    }
   }
+
 
   //! returns true if Entity is leaf (i.e. has no children)
   template<int dim, class GridImp>
