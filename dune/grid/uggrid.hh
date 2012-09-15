@@ -148,50 +148,23 @@ namespace Dune {
     // be send
     static int ugGather_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
-      if (codim == 0) {
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        UGMakeableEntity<0, dim, UGGrid<dim> > e(reinterpret_cast<typename UG_NS<dim>::Element*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Element*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
-          duneDataHandle_->gather(msgBuf, e);
-        }
-      }
-      else if (codim == dim) {
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e(reinterpret_cast<typename UG_NS<dim>::Node*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Node*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
-          duneDataHandle_->gather(msgBuf, e);
-        }
-      }
-      else if (codim == dim - 1) {
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > e(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
-          duneDataHandle_->gather(msgBuf, e);
-        }
-      }
-      else {
-        DUNE_THROW(GridError,
-                   "Only node and element wise "
-                   "communication is currently "
-                   "supported by UGGrid");
+      // cast the DDD object to a UG entity pointer
+      typedef typename Dune::UG_NS<dim>::template Entity<codim>::T* UGEntityPointer;
+      UGEntityPointer ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);
+
+      // construct a DUNE makeable entity from the UG entity pointer
+      /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
+       * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
+      typedef UGMakeableEntity<codim, dim, UGGrid<dim> > DuneMakeableEntity;
+      DuneMakeableEntity entity(ugEP, nullptr);
+
+      // safety check to only communicate what is needed
+      if ((level == -1 && UG_NS<dim>::isLeaf(ugEP)) || entity.level() == level)
+      {
+        ThisType msgBuf(static_cast<DataType*>(data));
+        if (!duneDataHandle_->fixedsize(dim, codim))
+          msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(entity));
+        duneDataHandle_->gather(msgBuf, entity);
       }
 
       return 0;
@@ -201,74 +174,36 @@ namespace Dune {
     // that has been received
     static int ugScatter_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
-      if (codim == 0) {
-        typedef UGMakeableEntity<0, dim, UGGrid<dim> > Entity;
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        Entity e(reinterpret_cast<typename UG_NS<dim>::Element*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Element*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          int n;
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.readRaw_(n);
-          else
-            n = duneDataHandle_->template size<Entity>(e);
-          if (n > 0)
-            duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
-        }
-      }
-      else if (codim == dim) {
-        typedef UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > Entity;
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        Entity e(reinterpret_cast<typename UG_NS<dim>::Node*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Node*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          int n;
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.readRaw_(n);
-          else
-            n = duneDataHandle_->template size<Entity>(e);
-          if (n > 0)
-            duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
-        }
-      }
-      else if (codim == dim - 1) {        // !!!ALEX!!! Is it possible to send codim 1 in UG<2>?
-        typedef UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > Entity;
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        Entity e(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          int n;
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.readRaw_(n);
-          else
-            n = duneDataHandle_->template size<Entity>(e);
-          if (n > 0)
-            duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
-        }
-      }
-      else {
-        DUNE_THROW(GridError,
-                   "Only node and element wise "
-                   "communication is currently "
-                   "supported by UGGrid");
+      // cast the DDD object to a UG entity pointer
+      typedef typename Dune::UG_NS<dim>::template Entity<codim>::T* UGEntityPointer;
+      UGEntityPointer ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);
+
+      // construct a DUNE makeable entity from the UG entity pointer
+      /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
+       * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
+      typedef UGMakeableEntity<codim, dim, UGGrid<dim> > DuneMakeableEntity;
+      DuneMakeableEntity entity(ugEP, nullptr);
+
+      // safety check to only communicate what is needed
+      if ((level == -1 && UG_NS<dim>::isLeaf(ugEP)) || entity.level() == level)
+      {
+        ThisType msgBuf(static_cast<DataType*>(data));
+        int size;
+        if (!duneDataHandle_->fixedsize(dim, codim))
+          msgBuf.readRaw_(size);
+        else
+          size = duneDataHandle_->template size<DuneMakeableEntity>(entity);
+        if (size > 0)
+          duneDataHandle_->template scatter<ThisType, DuneMakeableEntity>(msgBuf, entity, size);
+
       }
 
       return 0;
     }
+
     static DataHandle *duneDataHandle_;
-
     static int level;
-
-    char              *ugData_;
+    char *ugData_;
   };
 
   template <class DataHandle, int GridDim, int codim>
@@ -324,18 +259,17 @@ namespace Dune {
     }
   };
 
-  template <class DataHandle, int GridDim>
-  class UGEdgeMessageBuffer
-    : public UGMessageBufferBase<DataHandle, GridDim, GridDim-1>
+  template <class DataHandle, int GridDim, int codim>
+  class UGEdgeAndFaceMessageBuffer
+    : public UGMessageBufferBase<DataHandle, GridDim, codim>
   {
-    enum {codim = GridDim-1,
-          dim = GridDim};
+    enum {dim = GridDim};
     typedef typename DataHandle::DataType DataType;
     typedef UGMessageBufferBase<DataHandle, GridDim, codim> Base;
   protected:
     friend class Dune::UGGrid<dim>;
 
-    UGEdgeMessageBuffer(void *ugData)
+    UGEdgeAndFaceMessageBuffer(void *ugData)
       : Base(ugData)
     {}
 
@@ -363,15 +297,15 @@ namespace Dune {
       Iterator it = gv.template begin<0, Dune::All_Partition>();
       const Iterator endIt = gv.template end<0, Dune::All_Partition>();
       for (; it != endIt; ++it) {
-        int numberOfEdges = it->template count<codim>();
-        for (int k = 0; k < numberOfEdges; k++)
+        int numberOfSubentities = it->template count<codim>();
+        for (int k = 0; k < numberOfSubentities; k++)
         {
           typedef typename GridView::template Codim<0>::Entity Element;
-          typedef typename Element::template Codim<codim>::EntityPointer EdgePointer;
-          const EdgePointer edgePointer(it->template subEntity<codim>(k));
+          typedef typename Element::template Codim<codim>::EntityPointer EntityPointer;
+          const EntityPointer entityPointer(it->template subEntity<codim>(k));
 
           maxSize = std::max((int) maxSize,
-                             (int) Base::duneDataHandle_->size(*edgePointer));
+                             (int) Base::duneDataHandle_->size(*entityPointer));
         }
       }
 
@@ -389,12 +323,17 @@ namespace Dune {
 
   template <class DataHandle>
   class UGMessageBuffer<DataHandle, 2, 1>
-    : public UGEdgeMessageBuffer<DataHandle, 2>
+    : public UGEdgeAndFaceMessageBuffer<DataHandle, 2, 1>
   {};
 
   template <class DataHandle>
   class UGMessageBuffer<DataHandle, 3, 2>
-    : public UGEdgeMessageBuffer<DataHandle, 3>
+    : public UGEdgeAndFaceMessageBuffer<DataHandle, 3, 2>
+  {};
+
+  template <class DataHandle>
+  class UGMessageBuffer<DataHandle, 3, 1>
+    : public UGEdgeAndFaceMessageBuffer<DataHandle, 3, 1>
   {};
 
 }   // end namespace Dune
@@ -785,12 +724,12 @@ namespace Dune {
           communicateUG_<LevelGridView, DataHandle, dim>(this->levelView(level), level, dataHandle, iftype, dir);
         else if (curCodim == dim - 1)
           communicateUG_<LevelGridView, DataHandle, dim-1>(this->levelView(level), level, dataHandle, iftype, dir);
+        else if (curCodim == 1)
+          communicateUG_<LevelGridView, DataHandle, 1>(this->levelView(level), level, dataHandle, iftype, dir);
         else
           DUNE_THROW(NotImplemented,
-                     className(*this) << "::communicate(): Only "
-                     "supported for codim=0 and "
-                     "codim=dim(=" << dim << "), but "
-                     "codim=" << curCodim << " was requested");
+                     className(*this) << "::communicate(): Not "
+                     "supported for dim " << dim << " and codim " << curCodim);
       }
 #endif // ModelP
     }
@@ -805,9 +744,7 @@ namespace Dune {
        the protocol. Therefore P is called the "protocol class".
      */
     template<class DataHandle>
-    void communicate(DataHandle& dataHandle,
-                     InterfaceType iftype,
-                     CommunicationDirection dir) const
+    void communicate(DataHandle& dataHandle, InterfaceType iftype, CommunicationDirection dir) const
     {
 #ifdef ModelP
       typedef typename UGGrid::LeafGridView LeafGridView;
@@ -820,16 +757,14 @@ namespace Dune {
           communicateUG_<LeafGridView, DataHandle, 0>(this->leafView(), level, dataHandle, iftype, dir);
         else if (curCodim == dim)
           communicateUG_<LeafGridView, DataHandle, dim>(this->leafView(), level, dataHandle, iftype, dir);
-        else if (curCodim == dim - 1)   // !!!ALEX!!! Is it possible to send codim 1 in UG<2>?
-        {
+        else if (curCodim == dim - 1)
           communicateUG_<LeafGridView, DataHandle, dim-1>(this->leafView(), level, dataHandle, iftype, dir);
-        }
+        else if (curCodim == 1)
+          communicateUG_<LeafGridView, DataHandle, 1>(this->leafView(), level, dataHandle, iftype, dir);
         else
           DUNE_THROW(NotImplemented,
-                     className(*this) << "::communicate(): Only "
-                     "supported for codim=0 and "
-                     "codim=dim(=" << dim << "), but "
-                     "codim=" << curCodim << " was requested");
+                     className(*this) << "::communicate(): Not "
+                     "supported for dim " << dim << " and codim " << curCodim);
       }
 #endif // ModelP
     }
@@ -879,9 +814,8 @@ namespace Dune {
                             int codim) const
     {
       dddIfaces.clear();
-      switch (codim)
+      if (codim == 0)
       {
-      case 0 :
         switch (iftype) {
         case InteriorBorder_InteriorBorder_Interface :
           // do not communicate anything: Elements can not be in
@@ -906,8 +840,9 @@ namespace Dune {
                      "interfaces of type  "
                      << iftype);
         }
-
-      case dim :
+      }
+      else if (codim == dim)
+      {
         switch (iftype)
         {
         case InteriorBorder_InteriorBorder_Interface :
@@ -926,8 +861,9 @@ namespace Dune {
                      "interfaces of type  "
                      << iftype);
         }
-
-      case dim-1 :
+      }
+      else if (codim == dim-1)
+      {
         switch (iftype)
         {
         case InteriorBorder_InteriorBorder_Interface :
@@ -944,8 +880,24 @@ namespace Dune {
                      "interfaces of type  "
                      << iftype);
         }
-
-      default :
+      }
+      else if (codim == 1)
+      {
+        switch (iftype)
+        {
+        case InteriorBorder_InteriorBorder_Interface :
+        case InteriorBorder_All_Interface :
+          dddIfaces.push_back(UG_NS<dim>::BorderVectorSymmIF());
+          return;
+        default :
+          DUNE_THROW(GridError,
+                     "Face communication not supported for "
+                     "interfaces of type  "
+                     << iftype);
+        }
+      }
+      else
+      {
         DUNE_THROW(GridError,
                    "Communication for codim "
                    << codim

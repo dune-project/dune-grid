@@ -265,16 +265,27 @@ namespace Dune {
       return EPRIO(element);
     }
 
-    /** \brief Encapsulates the UG EPRIO macro */
+    /** \brief Returns the priority of the side vector */
+    static int Priority(const UG_NS< UG_DIM >::Vector* side)
+    {
+      return PARHDR(side)->prio;
+    }
+
+    /** \brief Returns the priority of the edge (the UG EPRIO macro) */
     static int Priority(const UG_NS< UG_DIM >::Edge* edge)
     {
       return PARHDR(edge)->prio;
     }
 
-    /** \brief Encapsulates the UG EPRIO macro */
+    /** \brief Returns the priority of the node (the UG EPRIO macro) */
     static int Priority(const UG_NS< UG_DIM >::Node* node)
     {
       return PARHDR(node)->prio;
+    }
+
+    static DDD_HEADER* ParHdr(UG_NS< UG_DIM >::Vector *side)
+    {
+      return PARHDR(side);
     }
 
     static DDD_HEADER* ParHdr(UG_NS< UG_DIM >::Edge *edge)
@@ -431,6 +442,10 @@ namespace Dune {
     static int myLevel (const UG_NS< UG_DIM >::Edge* theEdge) {
       using UG::UINT;
       return LEVEL(theEdge);
+    }
+
+    static int myLevel (const UG_NS< UG_DIM >::Vector* theVector) {
+      return myLevel((UG_NS< UG_DIM >::Element*)VOBJECT(theVector));
     }
 
     //! return true if element has an exact copy on the next level
@@ -641,6 +656,14 @@ namespace Dune {
       return theEdge->leafIndex > -1;
     }
 
+    //! Return true if the side vector is a leaf side vector
+    static bool isLeaf(const UG_NS< UG_DIM >::Vector* theVector) {
+      using UG_NAMESPACE ::VECTOR;
+      using UG::UINT;
+      // Since the vector cannot be asked directly,
+      // the corresponding element is asked.
+      return isLeaf((UG_NS< UG_DIM >::Element*)VOBJECT(theVector));
+    }
     // /////////////////////////////////////////////
     //   Level indices
     // /////////////////////////////////////////////
@@ -869,6 +892,18 @@ namespace Dune {
       using UG::UINT;
       return SVECTOR(theElement,i);
 #endif
+    }
+
+    //! Access element from side vector
+    static void GetElementAndSideFromSideVector(const UG_NS< UG_DIM >::Vector* theVector,
+                                                UG_NS< UG_DIM >::Element*& theElement,
+                                                unsigned int& side)
+    {
+      using UG_NAMESPACE ::VECTOR;
+      using UG::UINT;
+
+      theElement = (UG_NS< UG_DIM >::Element*)VOBJECT(theVector);
+      side = VECTORSIDE(theVector);
     }
 
     /** \brief Return a pointer to the father of the given element */
