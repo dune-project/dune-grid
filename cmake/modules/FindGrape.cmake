@@ -50,27 +50,33 @@ set(GRAPE_PREFIX "/usr/local/grape/" CACHE FILEPATH "Prefix directory, where GRA
 
 if(X11_FOUND)
    # find header in user supplied directory
-  find_file(GRAPE_INCLUDE_DIRS grape.h PATHS ${GRAPE_PREFIX}
+  find_path(GRAPE_INCLUDE_DIRS grape.h PATHS ${GRAPE_PREFIX}
     DOC "Include directory with Grape header files" NO_DEFAULT_PATH)
-  find_file(GRAPE_INCLUDE_DIRS grape.h) #standard directories
+  find_path(GRAPE_INCLUDE_DIRS grape.h) #standard directories
 
   # check header usability
   include(CMakePushCheckState)
   cmake_push_check_state()
-  set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ENABLE_GRAPE)
-  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${OPENGL_INCLUDE_DIR} ${GRAPE_INCLUDE_DIR})
+  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DENABLE_GRAPE")
+  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${OPENGL_INCLUDE_DIR} ${GRAPE_INCLUDE_DIRS})
   set(CMAKE_REQUIRED_LIBRARIES ${OPENGL_LIBRARIES} ${XEXT_LIB} ${CMAKE_REQUIRED_LIBRARIES})
   check_include_files(grape.h _GRAPE_HEADER_USABLE)
 
-  find_library(GRAPE_LIBRARY NAMES grape PATHS ${GRAPE_PREFIX} DOC "Full path to grape library." NO_DEFAULT_PATH)
+  # find library
+  find_library(GRAPE_LIBRARY NAMES grape
+    PATHS ${GRAPE_PREFIX} NO_DEFAULT_PATH
+    DOC "Full path to grape library.")
   find_library(GRAPE_LIBRARY NAMES grape)
 
-  check_library_exists(${GRAPE_LIBRARY} gr _GRAPE_LIB_FUNCTIONAL)
+  find_path(GRAPE_LIBRARY_PATH GRAPE_LIBRARY NO_DEFAULT_PATH)
+
+  include(CheckLibraryExists)
+  check_library_exists(gr grape GRAPE_PREFIX _GRAPE_LIB_FUNCTIONAL)
+  cmake_pop_check_state()
+
   if(_GRAPE_LIB_FUNCTIONAL)
     set(GRAPE_LIBRARIES ${GRAPE_LIBRARY} ${OPENGL_LIBRARIES} ${XEXT_LIB})
   endif(_GRAPE_LIB_FUNCTIONAL)
-
-  cmake_pop_check_state()
 else(X11_FOUND)
   message(WARNING "[X libraries were not found and therefore not Grape check possible!")
 endif(X11_FOUND)
