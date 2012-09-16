@@ -1,4 +1,4 @@
-message(AUTHOR_WARNING "TODO: Check whether dunealbertagrid library is correctly built ftomm the albertagridlibs")
+message(AUTHOR_WARNING "TODO: Check whether dunealbertagrid library is correctly built from the albertagridlibs")
 
 if(ALUGRID_FOUND)
   set(ALULIBS $<TARGET_OBJECTS:alu2d> $<TARGET_OBJECTS:alu3d>)

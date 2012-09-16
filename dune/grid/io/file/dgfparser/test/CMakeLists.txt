@@ -34,7 +34,7 @@ if(ALUGRID_FOUND)
 endif(ALUGRID_FOUND)
 
 if(ALBERTA_FOUND)
-  add_dune_alberta_flags(testalberta GRIDDIM 2)
+  add_dune_alberta_flags(testalberta GRIDDIM 2 DWORLDDIM 2)
   set_property(TARGET testalberta APPEND PROPERTY
     COMPILE_DEFINITIONS ALBERTAGRID)
 endif(ALBERTA_FOUND)
