@@ -167,7 +167,6 @@ namespace Dune
       static const GenericGeometry::EvaluationType evaluateJacobianTransposed = GenericGeometry::ComputeOnDemand;
       static const GenericGeometry::EvaluationType evaluateJacobianInverseTransposed = GenericGeometry::ComputeOnDemand;
       static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::ComputeOnDemand;
-      static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::ComputeOnDemand;
     };
 
     struct UserData {};
