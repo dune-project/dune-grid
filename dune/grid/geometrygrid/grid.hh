@@ -680,22 +680,32 @@ namespace Dune
       return getRealImplementation( entity ).hostEntity();
     }
 
-    template< int codim >
-    char *allocateMappingStorage ( const GeometryType &gt ) const
+    void *allocateStorage ( std::size_t size ) const
     {
-      static const unsigned int mydimension = Traits::dimension - codim;
-      assert( gt.dim() == mydimension );
-      typedef GeoGrid::MappingFamily< mydimension, Traits::dimensionworld, const Grid > MappingFamily;
-      return storageAllocator_.allocate( MappingFamily::Factory::mappingSize( gt.id() ) );
+      return storageAllocator_.allocate( size );
+    }
+
+    void deallocateStorage ( void *p, std::size_t size ) const
+    {
+      storageAllocator_.deallocate( (char *)p, size );
     }
 
     template< int codim >
-    void deallocateMappingStorage ( const GeometryType &gt, char *p ) const
+    void *allocateMappingStorage ( const GeometryType &gt ) const
     {
       static const unsigned int mydimension = Traits::dimension - codim;
       assert( gt.dim() == mydimension );
       typedef GeoGrid::MappingFamily< mydimension, Traits::dimensionworld, const Grid > MappingFamily;
-      storageAllocator_.deallocate( p, MappingFamily::Factory::mappingSize( gt.id() ) );
+      return allocateStorage( MappingFamily::Factory::mappingSize( gt.id() ) );
+    }
+
+    template< int codim >
+    void deallocateMappingStorage ( const GeometryType &gt, void *p ) const
+    {
+      static const unsigned int mydimension = Traits::dimension - codim;
+      assert( gt.dim() == mydimension );
+      typedef GeoGrid::MappingFamily< mydimension, Traits::dimensionworld, const Grid > MappingFamily;
+      deallocateStorage( p, MappingFamily::Factory::mappingSize( gt.id() ) );
     }
 
   private:
