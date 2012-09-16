@@ -135,18 +135,9 @@ namespace Dune
       Geometry ( const Grid &grid, const GeometryType &type, const CoordVector &coords )
         : grid_( &grid )
       {
-        void *mappingStorage = grid.template allocateMappingStorage< codimension >( type );
+        assert( int( type.dim() ) == mydimension );
+        void *mappingStorage = grid.allocateStorage( MappingFamily::Factory::mappingSize( type.id() ) );
         mapping_ = MappingFactory::construct( type.id(), coords, mappingStorage );
-        mapping_->userData().addReference();
-      }
-
-      template< int fatherdim >
-      Geometry ( const Geometry< fatherdim, cdim, Grid > &father, int i )
-        : grid_( father.grid_ )
-      {
-        const unsigned int codim = fatherdim - mydim;
-        void *mappingStorage = grid().template allocateMappingStorage< codimension >( type );
-        mapping_ = father.mapping_->template trace< codim >( i, mappingStorage );
         mapping_->userData().addReference();
       }
 
@@ -198,9 +189,8 @@ namespace Dune
     private:
       void destroyMapping ()
       {
-        const GeometryType gt = type();
         mapping_->~Mapping();
-        grid().template deallocateMappingStorage< codimension >( gt, mapping_ );
+        grid().deallocateStorage( mapping_, MappingFamily::Factory::mappingSize( type().id() ) );
       }
 
       const Grid *grid_;

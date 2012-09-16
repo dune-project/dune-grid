@@ -690,24 +690,6 @@ namespace Dune
       storageAllocator_.deallocate( (char *)p, size );
     }
 
-    template< int codim >
-    void *allocateMappingStorage ( const GeometryType &gt ) const
-    {
-      static const unsigned int mydimension = Traits::dimension - codim;
-      assert( gt.dim() == mydimension );
-      typedef GeoGrid::MappingFamily< mydimension, Traits::dimensionworld, const Grid > MappingFamily;
-      return allocateStorage( MappingFamily::Factory::mappingSize( gt.id() ) );
-    }
-
-    template< int codim >
-    void deallocateMappingStorage ( const GeometryType &gt, void *p ) const
-    {
-      static const unsigned int mydimension = Traits::dimension - codim;
-      assert( gt.dim() == mydimension );
-      typedef GeoGrid::MappingFamily< mydimension, Traits::dimensionworld, const Grid > MappingFamily;
-      deallocateStorage( p, MappingFamily::Factory::mappingSize( gt.id() ) );
-    }
-
   private:
     HostGrid *const hostGrid_;
     CoordFunction &coordFunction_;
