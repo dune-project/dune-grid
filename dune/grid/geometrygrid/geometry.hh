@@ -7,7 +7,7 @@
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/hybridmappingfactory.hh>
+#include <dune/geometry/mapping/cornermapping.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
@@ -18,30 +18,22 @@ namespace Dune
   namespace GeoGrid
   {
 
-    // GeometryTraits
-    // --------------
+    // MappingTraits
+    // -------------
 
-    template< int cdim, class Grid >
-    struct GeometryTraits
+    template< class Grid >
+    struct MappingTraits
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename remove_const< Grid >::type::Traits::ctype ctype;
 
-      typedef GenericGeometry::DuneCoordTraits< typename Traits::ctype > CoordTraits;
+      typedef GenericGeometry::MatrixHelper< GenericGeometry::DuneCoordTraits< ctype > > MatrixHelper;
 
-      static const int dimWorld = cdim;
+      static ctype tolerance () { return 16 * std::numeric_limits< ctype >::epsilon(); }
 
-      template< class Topology >
-      struct Mapping
+      template< int mydim, int cdim >
+      struct CornerStorage
       {
-        typedef GeoGrid::CornerStorage< Topology, const Grid > CornerStorage;
-        typedef GenericGeometry::CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage > type;
-      };
-
-      struct Caching
-      {
-        static const GenericGeometry::EvaluationType evaluateJacobianTransposed = GenericGeometry::ComputeOnDemand;
-        static const GenericGeometry::EvaluationType evaluateJacobianInverseTransposed = GenericGeometry::ComputeOnDemand;
-        static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::ComputeOnDemand;
+        typedef GeoGrid::CornerStorage< mydim, cdim, Grid > Type;
       };
 
       struct UserData
@@ -58,42 +50,6 @@ namespace Dune
 
 
 
-    // MappingFamily
-    // -------------
-
-    template< int mydim, int cdim, class Grid >
-    class MappingFamily
-    {
-      typedef typename remove_const< Grid >::type::Traits Traits;
-
-    public:
-      typedef GeoGrid::GeometryTraits< cdim, Grid > GeometryTraits;
-
-      static const int mydimension = mydim;
-      static const int dimension = Traits::dimension;
-      static const int codimension = dimension - mydimension;
-
-    private:
-      template< bool >
-      struct Hybrid
-      {
-        typedef GenericGeometry::VirtualMappingFactory< mydimension, GeometryTraits > Factory;
-      };
-
-      template< bool >
-      struct NonHybrid
-      {
-        typedef typename GenericGeometry::Topology< Capabilities::hasSingleGeometryType< Grid >::topologyId, dimension >::type ElementTopology;
-        typedef typename GenericGeometry::SubTopology< ElementTopology, codimension, 0 >::type Topology;
-        typedef GenericGeometry::NonHybridMappingFactory< Topology, GeometryTraits > Factory;
-      };
-
-    public:
-      typedef typename SelectType< Capabilities::hasSingleGeometryType< Grid >::v, NonHybrid< true >, Hybrid< false > >::Type::Factory Factory;
-    };
-
-
-
     // Geometry
     // --------
 
@@ -102,26 +58,24 @@ namespace Dune
     {
       typedef Geometry< mydim, cdim, Grid > This;
 
-      typedef GeoGrid::MappingFamily< mydim, cdim, Grid > MappingFamily;
       typedef typename remove_const< Grid >::type::Traits Traits;
 
       template< int, int, class > friend class Geometry;
 
     public:
-      static const int mydimension = MappingFamily::mydimension;
+      typedef typename Traits::ctype ctype;
+
+      static const int mydimension = mydim;
       static const int coorddimension = cdim;
-      static const int dimension = MappingFamily::dimension;
+      static const int dimension = Traits::dimension;
       static const int codimension = dimension - mydimension;
 
     protected:
-      typedef typename MappingFamily::Factory MappingFactory;
-      typedef typename MappingFactory::Mapping Mapping;
+      typedef CachedCornerMapping< ctype, mydimension, coorddimension, MappingTraits< Grid > > Mapping;
 
     public:
-      typedef typename Mapping::FieldType ctype;
-
-      typedef FieldVector< ctype, mydimension > LocalCoordinate;
-      typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
+      typedef typename Mapping::LocalCoordinate LocalCoordinate;
+      typedef typename Mapping::GlobalCoordinate GlobalCoordinate;
 
       typedef typename Mapping::JacobianTransposed JacobianTransposed;
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
@@ -136,8 +90,8 @@ namespace Dune
         : grid_( &grid )
       {
         assert( int( type.dim() ) == mydimension );
-        void *mappingStorage = grid.allocateStorage( MappingFamily::Factory::mappingSize( type.id() ) );
-        mapping_ = MappingFactory::construct( type.id(), coords, mappingStorage );
+        void *mappingStorage = grid.allocateStorage( sizeof( Mapping ) );
+        mapping_ = new( mappingStorage ) Mapping( type, coords );
         mapping_->userData().addReference();
       }
 
@@ -171,7 +125,7 @@ namespace Dune
       bool affine () const { return mapping_->affine(); }
       GeometryType type () const { return mapping_->type(); }
 
-      int corners () const { return mapping_->numCorners(); }
+      int corners () const { return mapping_->corners(); }
       GlobalCoordinate corner ( const int i ) const { return mapping_->corner( i ); }
       GlobalCoordinate center () const { return mapping_->center(); }
 
@@ -190,7 +144,7 @@ namespace Dune
       void destroyMapping ()
       {
         mapping_->~Mapping();
-        grid().deallocateStorage( mapping_, MappingFamily::Factory::mappingSize( type().id() ) );
+        grid().deallocateStorage( mapping_, sizeof( Mapping ) );
       }
 
       const Grid *grid_;
