@@ -18,13 +18,46 @@ namespace Dune
   namespace GeoGrid
   {
 
+    // InferHasSingleGeometryType
+    // --------------------------
+
+    template< class hasSingleGeometryType, int dim, int mydim >
+    struct InferHasSingleGeometryType
+    {
+    private:
+      static const unsigned int id = hasSingleGeometryType::topologyId;
+      static const unsigned int idMask = (1u << mydim) - 1u;
+
+    public:
+      static const bool v = hasSingleGeometryType::v && ((mydim == dim) || ((id | 1u) == 1u) || ((id | 1u) == idMask));
+      static const unsigned int topologyId = (v ? id & idMask : ~0u);
+    };
+
+    template< class hasSingleGeometryType, int dim >
+    struct InferHasSingleGeometryType< hasSingleGeometryType, dim, 1 >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry::CubeTopology< 1 >::type::id;
+    };
+
+    template< class hasSingleGeometryType, int dim >
+    struct InferHasSingleGeometryType< hasSingleGeometryType, dim, 0 >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry::CubeTopology< 0 >::type::id;
+    };
+
+
+
     // MappingTraits
     // -------------
 
     template< class Grid >
     struct MappingTraits
     {
-      typedef typename remove_const< Grid >::type::Traits::ctype ctype;
+      typedef typename remove_const< Grid >::type::Traits Traits;
+
+      typedef typename Traits::ctype ctype;
 
       typedef GenericGeometry::MatrixHelper< GenericGeometry::DuneCoordTraits< ctype > > MatrixHelper;
 
@@ -35,6 +68,11 @@ namespace Dune
       {
         typedef GeoGrid::CornerStorage< mydim, cdim, Grid > Type;
       };
+
+      template< int mydim >
+      struct hasSingleGeometryType
+        : public InferHasSingleGeometryType< Capabilities::hasSingleGeometryType< Grid >, Traits::dimension, mydim >
+      {};
 
       struct UserData
       {
