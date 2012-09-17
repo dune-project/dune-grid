@@ -158,7 +158,7 @@ void testNeighborDim(const Dune::integral_constant<std::size_t, mydim>&,
       refelem_s.subEntity(index_s, 1, subentity_s, codim);
     DomainW subpos = geo_s.global(refelem_s.position(subindex_s, codim));
     int subentity_n = 0;
-    std::size_t subindex_n;
+    std::size_t subindex_n = 0;
     for(; subentity_n < refelem_n.size(index_n, 1, codim); ++subentity_n) {
       subindex_n = refelem_n.subEntity(index_n, 1, subentity_n, codim);
       if((subpos - geo_n.global(refelem_s.position(subindex_n, codim))
