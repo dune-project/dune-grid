@@ -175,7 +175,11 @@ namespace Dune
       typedef typename Traits::ctype ctype;
       typedef FieldVector< ctype, cdim > Coordinate;
 
+      typedef array< Coordinate, (1 << mydim) > Coords;
+
     public:
+      typedef typename Coords::const_iterator const_iterator;
+
       template< bool fake >
       explicit CornerStorage ( const CoordVector< mydim, Grid, fake > &coords )
       {
@@ -192,8 +196,11 @@ namespace Dune
         return coords_[ i ];
       }
 
+      const_iterator begin () const { return coords_.begin(); }
+      const_iterator end () const { return coords_.end(); }
+
     private:
-      array< Coordinate, (1 << mydim) > coords_;
+      Coords coords_;
     };
 
   } // namespace GeoGrid
