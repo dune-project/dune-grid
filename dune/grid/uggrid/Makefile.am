@@ -30,6 +30,7 @@ uggriddir = $(includedir)/dune/grid/uggrid/
 uggrid_HEADERS = uggridfactory.hh uggridentitypointer.hh \
   uggridentityseed.hh uggridentity.hh uggridgeometry.hh \
   uggridlocalgeometry.hh \
+  ugmessagebuffer.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
   uggridintersections.hh uggridintersectioniterators.hh uggridindexsets.hh \
   uggridleafiterator.hh uggridrenumberer.hh \
