@@ -242,7 +242,7 @@ namespace Dune {
     }
 
     /** \brief The partition type for parallel computing
-     * \todo So far it always returns InteriorEntity */
+     */
     PartitionType partitionType () const
     {
 #ifndef ModelP
