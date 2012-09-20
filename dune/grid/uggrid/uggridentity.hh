@@ -256,7 +256,7 @@ namespace Dune {
           || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVGhost
           || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
-      else if (UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioBorder || hasBorderCopy_(edge))
+      else if (hasBorderCopy_(edge))
         return BorderEntity;
       else if (UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
@@ -276,6 +276,7 @@ namespace Dune {
 
   protected:
 #ifdef ModelP
+    /** \brief Return true if at least one copy of the edge on another processor is marked as 'border' */
     bool hasBorderCopy_(typename UG_NS<dim>::Edge *edge) const {
       int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(edge));
       for (int i = 0; plist[i] >= 0; i += 2)
@@ -382,7 +383,7 @@ namespace Dune {
           || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioVGhost
           || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
-      else if (UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioBorder || hasBorderCopy_(face))
+      else if (hasBorderCopy_(face))
         return BorderEntity;
       else if (UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
