@@ -220,28 +220,7 @@ Dune::UGGrid < dim >::lend (int level) const
 template < int dim >
 int Dune::UGGrid < dim >::size (int level, int codim) const
 {
-  if(codim == 0)
-  {
-    return levelIndexSet(level).size(GeometryType(GeometryType::simplex,dim))
-           + levelIndexSet(level).size(GeometryType(GeometryType::cube,dim))
-           + levelIndexSet(level).size(GeometryType(GeometryType::pyramid,dim))
-           + levelIndexSet(level).size(GeometryType(GeometryType::prism,dim));
-  }
-  if(codim == dim)
-  {
-    return this->levelIndexSet(level).size(GeometryType(0));
-  }
-  if (codim == dim-1)
-  {
-    return this->levelIndexSet(level).size(GeometryType(1));
-  }
-  if (codim == 1)
-  {
-    return levelIndexSet(level).size(GeometryType(GeometryType::cube,dim-1))
-           + levelIndexSet(level).size(GeometryType(GeometryType::simplex,dim-1));
-  }
-  DUNE_THROW(GridError, "UGGrid<" << dim << ">::size(int level, int codim) is only implemented"
-                                  << " for codim==0 and codim==dim!");
+  return levelIndexSet(level).size(codim);
 }
 
 
