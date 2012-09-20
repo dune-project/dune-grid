@@ -16,5 +16,4 @@ set(DOCS  referencetokuhn0.png simplexvertexindex.png)
 if(INKSCAPE)
 
 endif(INKSCAPE)
-
-install(FILES ${PDFDOCS} DESTINATION ${CMAKE_INSTALL_DOCDIR}/refinement)
+create_doc_install(${CMAKE_CURRENT_BINARY_DIR}/refinement.pdf ${CMAKE_INSTALL_DOCDIR}/refinement)
