@@ -1,5 +1,5 @@
 if(UG_FOUND)
-  add_library("uggrid" OBJECT
+  dune_add_library("uggrid" OBJECT
     uggridintersections.cc
     uggrid.cc
     uggridentity.cc
@@ -9,7 +9,6 @@ if(UG_FOUND)
     uggridfactory.cc
     uggridgeometry.cc
     uggridhieriterator.cc)
-  add_dune_ug_flags(uggrid OBJECT)
 endif(UG_FOUND)
 
 set(HEADERCHECK_IGNORE

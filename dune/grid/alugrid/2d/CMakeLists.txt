@@ -24,10 +24,5 @@ install(FILES ${HEADERS}
 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/alugrid/2d)
 
 if(ALUGRID_FOUND)
-  get_property(prop SOURCE intersection.cc PROPERTY INCLUDE_DIRECTORIES)
-  message("--property INCLUDE_DIRECTORIES=${prop} for intersection.cc")
-  add_dune_alugrid_flags(SOURCE_ONLY intersection.cc  alu2dgridfactory.cc)
-  get_property(prop SOURCE intersection.cc PROPERTY INCLUDE_DIRECTORIES)
-  message("--property INCLUDE_DIRECTORIES=${prop} for intersection.cc")
-  add_library(alu2d OBJECT intersection.cc  alu2dgridfactory.cc)
+  dune_add_library(alu2d OBJECT intersection.cc  alu2dgridfactory.cc)
 endif(ALUGRID_FOUND)

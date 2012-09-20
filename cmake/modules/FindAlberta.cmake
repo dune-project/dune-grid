@@ -22,19 +22,29 @@ macro(add_dune_alberta_flags)
     if(ADD_ALBERTA_SOURCE_ONLY)
       set(_prefix SOURCE)
       set(_source_only SOURCE_ONLY)
-      set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES ${ALBERTA_INCLUDES})
+      include_directories(${ALBERTA_INCLUDES})
     else()
-      if(NOT ADD_ALBERTA_OBJECT)
-        # link to ALUGRID libraries
+      if(ADD_ALBERTA_OBJECT)
+	# This a dune object libraries. Therefore we need to set the options
+	# on the source files directly
+	set(_all_sources "")
+	foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
+	  get_property(_sources GLOBAL PROPERTY DUNE_LIB_${_target}_SOURCES)
+	  include_directories(${ALBERTA_INCLUDES})
+	  list(APPEND _all_sources ${_sources})
+	endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
+	set(ADD_ALBERTA_UNPARSED_ARGUMENTS ${_all_sources}) #override unparsed arguments
+      set(_prefix SOURCE)
+      else(ADD_ALBERTA_OBJECT)
+        # link to ALBERTA libraries
         foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
           target_link_libraries(${_target} dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d
             ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB}
             dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
         endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
-      endif(NOT ADD_ALBERTA_OBJECT)
       set(_prefix TARGET)
-      set_property(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS} APPEND
-        PROPERTY INCLUDE_DIRECTORIES ${ALBERTA_INCLUDES})
+      include_directories(${ALBERTA_INCLUDES})
+      endif(ADD_ALBERTA_OBJECT)
     endif(ADD_ALBERTA_SOURCE_ONLY)
 
     replace_properties(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS}

@@ -47,7 +47,6 @@ macro(add_dgf_flags target)
   foreach(grid ${DGF_GRIDTYPES})
     list(APPEND replace_args ${grid} ${DGF_GRIDTYPE})
   endforeach(grid ${DGF_GRIDTYPES})
-  message("${target} ${replace_args}")
   replace_properties(TARGET ${target}
     PROPERTY COMPILE_DEFINITIONS
     ${replace_args})
