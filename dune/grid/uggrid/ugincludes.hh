@@ -47,7 +47,9 @@
 #include <ugm.h>
 #include <rm.h>
 #if defined ModelP
-#include "parallel.h"
+#include <parallel.h>
+#endif
+
 #endif
 
 #endif
