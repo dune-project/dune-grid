@@ -680,22 +680,14 @@ namespace Dune
       return getRealImplementation( entity ).hostEntity();
     }
 
-    template< int codim >
-    char *allocateMappingStorage ( const GeometryType &gt ) const
+    void *allocateStorage ( std::size_t size ) const
     {
-      assert( gt.dim() == Traits::dimension - codim );
-      typedef GeoGrid::MappingFamily< Traits::dimensionworld, const Grid > MappingFamily;
-      typedef typename MappingFamily::template Codim< codim >::MappingProvider MappingProvider;
-      return storageAllocator_.allocate( MappingProvider::mappingSize( gt.id() ) );
+      return storageAllocator_.allocate( size );
     }
 
-    template< int codim >
-    void deallocateMappingStorage ( const GeometryType &gt, char *p ) const
+    void deallocateStorage ( void *p, std::size_t size ) const
     {
-      assert( gt.dim() == Traits::dimension - codim );
-      typedef GeoGrid::MappingFamily< Traits::dimensionworld, const Grid > MappingFamily;
-      typedef typename MappingFamily::template Codim< codim >::MappingProvider MappingProvider;
-      storageAllocator_.deallocate( p, MappingProvider::mappingSize( gt.id() ) );
+      storageAllocator_.deallocate( (char *)p, size );
     }
 
   private:

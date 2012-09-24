@@ -96,309 +96,15 @@
 #include "uggrid/uggridleafiterator.hh"
 #include "uggrid/uggridhieriterator.hh"
 #include "uggrid/uggridindexsets.hh"
+#ifdef ModelP
+#include "uggrid/ugmessagebuffer.hh"
+#endif
 
 // Not needed here, but included for user convenience
 #include "uggrid/uggridfactory.hh"
 
+
 #ifdef ModelP
-namespace Dune {
-
-  // converts the UG speak message buffers to DUNE speak and vice-versa
-  template <class DataHandle, int GridDim, int codim>
-  class UGMessageBufferBase {
-  protected:
-    typedef UGMessageBufferBase<DataHandle, GridDim, codim>  ThisType;
-    typedef UGGrid<GridDim>                              GridType;
-    typedef typename DataHandle::DataType DataType;
-
-    enum {
-      dim = GridDim
-    };
-
-    UGMessageBufferBase(void *ugData)
-    {
-      ugData_ = static_cast<char*>(ugData);
-    };
-
-  public:
-    void write(const DataType &t)
-    { this->writeRaw_<DataType>(t);  }
-
-    void read(DataType &t)
-    { this->readRaw_<DataType>(t);  }
-
-  protected:
-    friend class Dune::UGGrid<dim>;
-
-    template <class ValueType>
-    void writeRaw_(const ValueType &v)
-    {
-      *reinterpret_cast<ValueType*>(ugData_) = v;
-      ugData_ += sizeof(ValueType);
-    }
-
-    template <class ValueType>
-    void readRaw_(ValueType &v)
-    {
-      v = *reinterpret_cast<ValueType*>(ugData_);
-      ugData_ += sizeof(ValueType);
-    }
-
-    // called by DDD_IFOneway to serialize the data structure to
-    // be send
-    static int ugGather_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
-    {
-      if (codim == 0) {
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        UGMakeableEntity<0, dim, UGGrid<dim> > e(reinterpret_cast<typename UG_NS<dim>::Element*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Element*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
-          duneDataHandle_->gather(msgBuf, e);
-        }
-      }
-      else if (codim == dim) {
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e(reinterpret_cast<typename UG_NS<dim>::Node*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Node*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
-          duneDataHandle_->gather(msgBuf, e);
-        }
-      }
-      else if (codim == dim - 1) {
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > e(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
-          duneDataHandle_->gather(msgBuf, e);
-        }
-      }
-      else {
-        DUNE_THROW(GridError,
-                   "Only node and element wise "
-                   "communication is currently "
-                   "supported by UGGrid");
-      }
-
-      return 0;
-    }
-
-    // called by DDD_IFOneway to deserialize the data structure
-    // that has been received
-    static int ugScatter_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
-    {
-      if (codim == 0) {
-        typedef UGMakeableEntity<0, dim, UGGrid<dim> > Entity;
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        Entity e(reinterpret_cast<typename UG_NS<dim>::Element*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Element*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          int n;
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.readRaw_(n);
-          else
-            n = duneDataHandle_->template size<Entity>(e);
-          if (n > 0)
-            duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
-        }
-      }
-      else if (codim == dim) {
-        typedef UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > Entity;
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        Entity e(reinterpret_cast<typename UG_NS<dim>::Node*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Node*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          int n;
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.readRaw_(n);
-          else
-            n = duneDataHandle_->template size<Entity>(e);
-          if (n > 0)
-            duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
-        }
-      }
-      else if (codim == dim - 1) {        // !!!ALEX!!! Is it possible to send codim 1 in UG<2>?
-        typedef UGMakeableEntity<dim-1, dim, Dune::UGGrid<dim> > Entity;
-        /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
-         * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-        Entity e(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj),nullptr);
-        // safety check to only communicate what is needed
-        if ((level == -1 && UG_NS<dim>::isLeaf(reinterpret_cast<typename UG_NS<dim>::Edge*>(obj))) || e.level() == level)
-        {
-          ThisType msgBuf(static_cast<DataType*>(data));
-          int n;
-          if (!duneDataHandle_->fixedsize(dim, codim))
-            msgBuf.readRaw_(n);
-          else
-            n = duneDataHandle_->template size<Entity>(e);
-          if (n > 0)
-            duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
-        }
-      }
-      else {
-        DUNE_THROW(GridError,
-                   "Only node and element wise "
-                   "communication is currently "
-                   "supported by UGGrid");
-      }
-
-      return 0;
-    }
-    static DataHandle *duneDataHandle_;
-
-    static int level;
-
-    char              *ugData_;
-  };
-
-  template <class DataHandle, int GridDim, int codim>
-  class UGMessageBuffer
-    : public UGMessageBufferBase<DataHandle, GridDim, codim>
-  {
-    typedef typename DataHandle::DataType DataType;
-    typedef UGMessageBufferBase<DataHandle, GridDim, codim> Base;
-    enum { dim = GridDim };
-
-  protected:
-    friend class Dune::UGGrid<dim>;
-
-    UGMessageBuffer(void *ugData)
-      : Base(ugData)
-    {}
-
-    // returns number of bytes required for the UG message buffer
-    template <class GridView>
-    static unsigned ugBufferSize_(const GridView &gv)
-    {
-      if (Base::duneDataHandle_->fixedsize(dim, codim)) {
-        return sizeof(DataType)
-               * Base::duneDataHandle_->size(*gv.template begin<codim,InteriorBorder_Partition>());
-      }
-
-      typedef typename GridView::template Codim<codim>::Entity Entity;
-
-      // iterate over all entities, find the maximum size for
-      // the current rank
-      int maxSize = 0;
-      typedef typename
-      GridView
-      ::template Codim<codim>
-      ::template Partition<Dune::All_Partition>
-      ::Iterator Iterator;
-      Iterator it = gv.template begin<codim, Dune::All_Partition>();
-      const Iterator endIt = gv.template end<codim, Dune::All_Partition>();
-      for (; it != endIt; ++it) {
-        maxSize = std::max((int) maxSize,
-                           (int) Base::duneDataHandle_->size(*it));
-      }
-
-      // find maximum size for all ranks
-      maxSize = MPIHelper::getCollectiveCommunication().max(maxSize);
-      if (!maxSize)
-        return 0;
-
-      // add the size of an unsigned integer to the actual
-      // buffer size. (we somewhere have to store the actual
-      // number of objects for each entity.)
-      return sizeof(unsigned) + sizeof(DataType)*maxSize;
-    }
-  };
-
-  template <class DataHandle, int GridDim>
-  class UGEdgeMessageBuffer
-    : public UGMessageBufferBase<DataHandle, GridDim, GridDim-1>
-  {
-    enum {codim = GridDim-1,
-          dim = GridDim};
-    typedef typename DataHandle::DataType DataType;
-    typedef UGMessageBufferBase<DataHandle, GridDim, codim> Base;
-  protected:
-    friend class Dune::UGGrid<dim>;
-
-    UGEdgeMessageBuffer(void *ugData)
-      : Base(ugData)
-    {}
-
-    // returns number of bytes required for the UG message buffer
-    template <class GridView>
-    static unsigned ugBufferSize_(const GridView &gv)
-    {
-      if (Base::duneDataHandle_->fixedsize(dim, codim)) {
-        typedef typename GridView::template Codim<0>::Entity Element;
-        const Element& element = *gv.template begin<0, InteriorBorder_Partition>();
-        return sizeof(DataType)
-               * Base::duneDataHandle_->size(*element.template subEntity<codim>(0));
-      }
-
-      typedef typename GridView::template Codim<codim>::Entity Entity;
-
-      // iterate over all entities, find the maximum size for
-      // the current rank
-      int maxSize = 0;
-      typedef typename
-      GridView
-      ::template Codim<0>
-      ::template Partition<Dune::All_Partition>
-      ::Iterator Iterator;
-      Iterator it = gv.template begin<0, Dune::All_Partition>();
-      const Iterator endIt = gv.template end<0, Dune::All_Partition>();
-      for (; it != endIt; ++it) {
-        int numberOfEdges = it->template count<codim>();
-        for (int k = 0; k < numberOfEdges; k++)
-        {
-          typedef typename GridView::template Codim<0>::Entity Element;
-          typedef typename Element::template Codim<codim>::EntityPointer EdgePointer;
-          const EdgePointer edgePointer(it->template subEntity<codim>(k));
-
-          maxSize = std::max((int) maxSize,
-                             (int) Base::duneDataHandle_->size(*edgePointer));
-        }
-      }
-
-      // find maximum size for all ranks
-      maxSize = MPIHelper::getCollectiveCommunication().max(maxSize);
-      if (!maxSize)
-        return 0;
-
-      // add the size of an unsigned integer to the actual
-      // buffer size. (we somewhere have to store the actual
-      // number of objects for each entity.)
-      return sizeof(unsigned) + sizeof(DataType)*maxSize;
-    }
-  };
-
-  template <class DataHandle>
-  class UGMessageBuffer<DataHandle, 2, 1>
-    : public UGEdgeMessageBuffer<DataHandle, 2>
-  {};
-
-  template <class DataHandle>
-  class UGMessageBuffer<DataHandle, 3, 2>
-    : public UGEdgeMessageBuffer<DataHandle, 3>
-  {};
-
-}   // end namespace Dune
-
 template <class DataHandle, int GridDim, int codim>
 DataHandle *Dune::UGMessageBufferBase<DataHandle,GridDim,codim>::duneDataHandle_ = 0;
 
@@ -785,12 +491,12 @@ namespace Dune {
           communicateUG_<LevelGridView, DataHandle, dim>(this->levelView(level), level, dataHandle, iftype, dir);
         else if (curCodim == dim - 1)
           communicateUG_<LevelGridView, DataHandle, dim-1>(this->levelView(level), level, dataHandle, iftype, dir);
+        else if (curCodim == 1)
+          communicateUG_<LevelGridView, DataHandle, 1>(this->levelView(level), level, dataHandle, iftype, dir);
         else
           DUNE_THROW(NotImplemented,
-                     className(*this) << "::communicate(): Only "
-                     "supported for codim=0 and "
-                     "codim=dim(=" << dim << "), but "
-                     "codim=" << curCodim << " was requested");
+                     className(*this) << "::communicate(): Not "
+                     "supported for dim " << dim << " and codim " << curCodim);
       }
 #endif // ModelP
     }
@@ -805,9 +511,7 @@ namespace Dune {
        the protocol. Therefore P is called the "protocol class".
      */
     template<class DataHandle>
-    void communicate(DataHandle& dataHandle,
-                     InterfaceType iftype,
-                     CommunicationDirection dir) const
+    void communicate(DataHandle& dataHandle, InterfaceType iftype, CommunicationDirection dir) const
     {
 #ifdef ModelP
       typedef typename UGGrid::LeafGridView LeafGridView;
@@ -820,16 +524,14 @@ namespace Dune {
           communicateUG_<LeafGridView, DataHandle, 0>(this->leafView(), level, dataHandle, iftype, dir);
         else if (curCodim == dim)
           communicateUG_<LeafGridView, DataHandle, dim>(this->leafView(), level, dataHandle, iftype, dir);
-        else if (curCodim == dim - 1)   // !!!ALEX!!! Is it possible to send codim 1 in UG<2>?
-        {
+        else if (curCodim == dim - 1)
           communicateUG_<LeafGridView, DataHandle, dim-1>(this->leafView(), level, dataHandle, iftype, dir);
-        }
+        else if (curCodim == 1)
+          communicateUG_<LeafGridView, DataHandle, 1>(this->leafView(), level, dataHandle, iftype, dir);
         else
           DUNE_THROW(NotImplemented,
-                     className(*this) << "::communicate(): Only "
-                     "supported for codim=0 and "
-                     "codim=dim(=" << dim << "), but "
-                     "codim=" << curCodim << " was requested");
+                     className(*this) << "::communicate(): Not "
+                     "supported for dim " << dim << " and codim " << curCodim);
       }
 #endif // ModelP
     }
@@ -879,9 +581,8 @@ namespace Dune {
                             int codim) const
     {
       dddIfaces.clear();
-      switch (codim)
+      if (codim == 0)
       {
-      case 0 :
         switch (iftype) {
         case InteriorBorder_InteriorBorder_Interface :
           // do not communicate anything: Elements can not be in
@@ -906,8 +607,9 @@ namespace Dune {
                      "interfaces of type  "
                      << iftype);
         }
-
-      case dim :
+      }
+      else if (codim == dim)
+      {
         switch (iftype)
         {
         case InteriorBorder_InteriorBorder_Interface :
@@ -926,8 +628,9 @@ namespace Dune {
                      "interfaces of type  "
                      << iftype);
         }
-
-      case dim-1 :
+      }
+      else if (codim == dim-1)
+      {
         switch (iftype)
         {
         case InteriorBorder_InteriorBorder_Interface :
@@ -944,8 +647,24 @@ namespace Dune {
                      "interfaces of type  "
                      << iftype);
         }
-
-      default :
+      }
+      else if (codim == 1)
+      {
+        switch (iftype)
+        {
+        case InteriorBorder_InteriorBorder_Interface :
+        case InteriorBorder_All_Interface :
+          dddIfaces.push_back(UG_NS<dim>::BorderVectorSymmIF());
+          return;
+        default :
+          DUNE_THROW(GridError,
+                     "Face communication not supported for "
+                     "interfaces of type  "
+                     << iftype);
+        }
+      }
+      else
+      {
         DUNE_THROW(GridError,
                    "Communication for codim "
                    << codim

@@ -63,7 +63,7 @@ namespace Dune {
           this->virtualEntity_.setToTarget(0,nullptr);
       }
       else
-        DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);
+        DUNE_THROW(NotImplemented, "UGGrid level iterators for codimension " << codim);
 
       if (this->virtualEntity_.getTarget() && !entityOK_())
         increment();

@@ -96,6 +96,18 @@ AC_DEFUN([DUNE_PATH_UG],[
               AC_MSG_RESULT(no)
               AC_MSG_WARN([UG version is too old (you need at least $NEEDEDUG_VERSION)])
           fi
+          
+          # The following code is temporary: starting with UG-3.9.1-patch9,
+          # the include path provided by pkg-config changes from /usr/include/ug to /usr/include
+          # The missing '/ug' needs to be added in the c++-code.
+          # This is a backward-incompatible change.  To ease the transition we provide
+          # a cpp flag that marks whether the UG version found is 'old' or 'new'
+          if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=3.9.1-patch9 libug; then
+              HAVE_UG_PATCH9="1"
+          else
+              HAVE_UG_PATCH9="0"
+              AC_MSG_WARN([Please consider updating to at least UG-3.9.1-patch9 (will be mandatory for dune-grid 2.4)])
+          fi
       fi
 
       # pre-set variable for summary
@@ -178,6 +190,15 @@ AC_DEFUN([DUNE_PATH_UG],[
       AC_DEFINE(HAVE_UG, ENABLE_UG, 
         [This is only true if UG was found by configure 
          _and_ if the application uses the UG_CPPFLAGS])
+         
+      # Remove the following as soon as we absolutely require patch9 or higher
+      if test x$HAVE_UG_PATCH9 = x1 ; then
+      
+        AC_DEFINE(HAVE_UG_PATCH9, 1,
+            [Do we have UG in at least version 3.9.1-patch9?])
+            
+      fi
+
   fi 
       
   # tell automake   

@@ -173,9 +173,10 @@ void checkMappers(const GridView &gridView)
     ++ numEntities;
   if (numEntities != gridView.size(codim)) {
     DUNE_THROW(InvalidStateException,
-               "Number of codim " << codim
-                                  << " entities is inconsistent (iterator: " << numEntities
-                                  << " grid view: " << gridView.size(codim) << ")");
+               gridView.comm().rank() + 1
+               << ": Number of codim " << codim
+               << " entities is inconsistent (iterator: " << numEntities
+               << " grid view: " << gridView.size(codim) << ")");
   };
 
   typedef Dune::MultipleCodimMultipleGeomTypeMapper
@@ -189,21 +190,23 @@ void checkMappers(const GridView &gridView)
     int i = mapper.map(*it);
     if (i < 0 || i >= numEntities) {
       DUNE_THROW(InvalidStateException,
-                 "Mapper returns an invalid index for codim " << codim
-                                                              << " entities: " << i
-                                                              << " should be in range [0,"
-                                                              << numEntities -1 <<  "]");
+                 gridView.comm().rank() + 1
+                 << ": Mapper returns an invalid index for codim " << codim
+                 << " entities: " << i
+                 << " should be in range [0,"
+                 << numEntities -1 <<  "]");
     };
     if (indices[i] >= 0) {
       DUNE_THROW(InvalidStateException,
-                 "Mapper returns index " << i << " twice for codim " << codim
-                                         << " entities.");
+                 gridView.comm().rank() + 1
+                 << ": Mapper returns index " << i << " twice for codim " << codim
+                 << " entities.");
     }
     indices[i] = i;
   };
 };
 
-// specializations for non-implementet cases
+// specializations for non-implemented cases
 template <int dim, int codim, class GridView>
 struct checkMappersWrapper
 {
@@ -382,7 +385,7 @@ public:
 
 
 template <int dim>
-void testParallelUG()
+void testParallelUG(bool localRefinement)
 {
   std::cout << "Testing parallel UGGrid for " << dim << "D\n";
 
@@ -397,7 +400,7 @@ void testParallelUG()
   Dune::FieldVector<double,dim> lowerLeft(0);
   Dune::FieldVector<double,dim> upperRight(1);
   Dune::array<unsigned int, dim> elements;
-  std::fill(elements.begin(), elements.end(), 4);
+  std::fill(elements.begin(), elements.end(), 2);
   shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
 
   //////////////////////////////////////////////////////
@@ -457,24 +460,51 @@ void testParallelUG()
   testCommunication<typename GridType::LevelGridView, 0>(level0GridView, false);
   testCommunication<typename GridType::LevelGridView, dim>(level0GridView, false);
   EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(level0GridView);
-  // not testing faces yet, because the implementation is still missing
-  if (dim == 3 and false)
+  if (dim == 3)
     EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(level0GridView);
 
   // Test element and node communication on leaf view
   testCommunication<typename GridType::LeafGridView, 0>(leafGridView, true);
   testCommunication<typename GridType::LeafGridView, dim>(leafGridView, true);
   EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(leafGridView);
-  // not testing faces yet, because the implementation is still missing
-  if (dim == 3 and false)
+  if (dim == 3)
     EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(leafGridView);
 
   ////////////////////////////////////////////////////
   //  Refine globally and test again
   ////////////////////////////////////////////////////
 
-  std::cout << "Global refinement\n";
-  grid->globalRefine(1);
+  if (!localRefinement)
+  {
+    std::cout << "Global refinement\n";
+    grid->globalRefine(1);
+  }
+  else
+  {
+    std::cout << "Local refinement\n";
+
+    // mark all elements with x-coordinate < 0.5 for refinement
+    typename LeafGV::template Codim<0>::Iterator
+    it = grid->leafView().template begin<0>();
+    const typename LeafGV::template Codim<0>::Iterator
+    &endIt = grid->leafView().template end<0>();
+    for (; it != endIt; ++it) {
+      int nRefine = 1;
+      if (it->geometry().center()[0] < 0.5)
+        grid->mark(nRefine, *it);
+    }
+
+    // adapt the grid
+    grid->preAdapt();
+    grid->adapt();
+    grid->postAdapt();
+
+    // write the adapted grid to VTK
+    Dune::VTKWriter<LeafGV> writer(grid->leafView());
+    char fileName[1024];
+    sprintf(fileName, "adapted-grid-dim=%d", dim);
+    writer.write(fileName, Dune::VTK::ascii);
+  }
 
   for (int i=0; i<=grid->maxLevel(); i++) {
     checkIntersections(grid->levelView(i));
@@ -495,15 +525,13 @@ void testParallelUG()
     testCommunication<typename GridType::LevelGridView, 0>(grid->levelView(i), false);
     testCommunication<typename GridType::LevelGridView, dim>(grid->levelView(i), false);
     EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(grid->levelView(i));
-    // not testing faces yet, because the implementation is still missing
-    if (dim == 3 and false)
+    if (dim == 3)
       EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(grid->levelView(i));
   }
   testCommunication<typename GridType::LeafGridView, 0>(grid->leafView(), true);
   testCommunication<typename GridType::LeafGridView, dim>(grid->leafView(), true);
   EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(grid->leafView());
-  // not testing faces yet, because the implementation is still missing
-  if (dim == 3 and false)
+  if (dim == 3)
     EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(grid->leafView());
 
 };
@@ -522,11 +550,19 @@ int main (int argc , char **argv) try
             << getpid()
             << " .\n";
 
-  // test 2D grid
-  testParallelUG<2>();
+  // test 2D grid with uniform refinement
+  testParallelUG<2>(false);
 
-  // test 3D grid
-  testParallelUG<3>();
+  // test 3D grid with uniform refinement
+  testParallelUG<3>(false);
+
+  // test 2D grid with adaptive refinement
+  // out-commented, because not working yet
+  //testParallelUG<2>(true);
+
+  // test 3D grid with adaptive refinement
+  // out-commented, because not working yet
+  //testParallelUG<3>(true);
 
   return 0;
 }

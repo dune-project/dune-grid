@@ -220,6 +220,17 @@ createGrid()
 
   // ///////////////////////////////////////////////////////////////////////////////
   //  Communicate the grid information from the master to all other processes
+  //
+  // Rationale: Parallel Dune grids that are set up by providing a coarse grid
+  // on rank 0 and then loadbalancing should not require that the grid be
+  // provided to all processes directly. Usually UGGrid does that, because
+  // it needs the grid only on rank 0, but the grid _boundary_ on all processes.
+  // This patch makes the rank 0 process broadcast the entire coarse
+  // grid information from rank 0 to all other processes before
+  // starting the actual grid creation.  That way, the user has to
+  // supply the coarse grid only on rank 0 (as the specification says),
+  // but still the UGGridFactory has all relevant information available
+  // on all processes.
   // ///////////////////////////////////////////////////////////////////////////////
 
   // Broadcast the vertex positions
@@ -472,6 +483,12 @@ createGrid()
     // so we would be out of sync if we don't do this here...)
     if (CreateAlgebra(grid_->multigrid_) != UG_NS<dimworld>::GM_OK)
       DUNE_THROW(IOError, "Call of 'UG::D" << dimworld << "::CreateAlgebra' failed!");
+
+    // Create an empty levelIndexSet for level 0.
+    // Even though it's empty until the first load balancing
+    // it should still be there in case someone wants to access it.
+    grid_->levelIndexSets_.resize(1);
+    grid_->levelIndexSets_[0] = new UGGridLevelIndexSet<const UGGrid<dimworld> >();
 
     /* here all temp memory since CreateMultiGrid is released */
     Release(grid_->multigrid_->theHeap, UG::FROM_TOP, grid_->multigrid_->MarkKey);

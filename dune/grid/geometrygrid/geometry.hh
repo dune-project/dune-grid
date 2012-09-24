@@ -42,7 +42,6 @@ namespace Dune
         static const GenericGeometry::EvaluationType evaluateJacobianTransposed = GenericGeometry::ComputeOnDemand;
         static const GenericGeometry::EvaluationType evaluateJacobianInverseTransposed = GenericGeometry::ComputeOnDemand;
         static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::ComputeOnDemand;
-        static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::ComputeOnDemand;
       };
 
       struct UserData
@@ -143,18 +142,9 @@ namespace Dune
       Geometry ( const Grid &grid, const GeometryType &type, const CoordVector &coords )
         : grid_( &grid )
       {
-        char *mappingStorage = grid.template allocateMappingStorage< codimension >( type );
-        mapping_ = MappingProvider::construct( type.id(), coords, mappingStorage );
-        mapping_->userData().addReference();
-      }
-
-      template< int fatherdim >
-      Geometry ( const Geometry< fatherdim, cdim, Grid > &father, int i )
-        : grid_( father.grid_ )
-      {
-        const unsigned int codim = fatherdim - mydim;
-        char *mappingStorage = grid().template allocateMappingStorage< codimension >( type );
-        mapping_ = father.mapping_->template trace< codim >( i, mappingStorage );
+        assert( int( type.dim() ) == mydimension );
+        void *mappingStorage = grid.allocateStorage( MappingProvider::mappingSize( type.id() ) );
+        mapping_ = MappingProvider::construct( type.id(), coords, (char *)mappingStorage );
         mapping_->userData().addReference();
       }
 
@@ -206,9 +196,8 @@ namespace Dune
     private:
       void destroyMapping ()
       {
-        const GeometryType gt = type();
         mapping_->~Mapping();
-        grid().template deallocateMappingStorage< codimension >( gt, (char *)mapping_ );
+        grid().deallocateStorage( mapping_, MappingProvider::mappingSize( type().id() ) );
       }
 
       const Grid *grid_;

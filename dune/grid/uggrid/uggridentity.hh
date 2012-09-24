@@ -44,16 +44,6 @@ namespace Dune {
       this->realEntity.setToTarget(target,gridImp);
     }
 
-    /** \brief Set face entity from center element and side number
-     * \param side Side number in Dune numbering
-     */
-    UGMakeableEntity(typename UG_NS<dim>::Element* center, unsigned int side) :
-      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
-    {
-      // The following cast is the identity whenever the code is actually run
-      reinterpret_cast<UGGridEntity<1,dim,GridImp>*>(&this->realEntity)->setToTarget(center,side);
-    }
-
     UGMakeableEntity() :
       GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
     {}
@@ -134,8 +124,7 @@ namespace Dune {
 #ifndef ModelP
       return InteriorEntity;
 #else
-      if (codim != dim) {
-        /** \todo faces (elements and edges are done below) */
+      if (codim != dim) {   // other codims are done below
         return InteriorEntity;
       }
 
@@ -241,7 +230,7 @@ namespace Dune {
     /** \brief The type of UGGrid Entity seeds */
     typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
 
-    //! level of this element
+    //! level of the edge
     int level () const {
       return UG_NS<dim>::myLevel(target_);
     }
@@ -253,7 +242,7 @@ namespace Dune {
     }
 
     /** \brief The partition type for parallel computing
-     * \todo So far it always returns InteriorEntity */
+     */
     PartitionType partitionType () const
     {
 #ifndef ModelP
@@ -267,7 +256,7 @@ namespace Dune {
           || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVGhost
           || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
-      else if (UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioBorder || hasBorderCopy_(edge))
+      else if (hasBorderCopy_(edge))
         return BorderEntity;
       else if (UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
@@ -287,6 +276,7 @@ namespace Dune {
 
   protected:
 #ifdef ModelP
+    /** \brief Return true if at least one copy of the edge on another processor is marked as 'border' */
     bool hasBorderCopy_(typename UG_NS<dim>::Edge *edge) const {
       int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(edge));
       for (int i = 0; plist[i] >= 0; i += 2)
@@ -348,77 +338,87 @@ namespace Dune {
     /** \brief Return the entity type identifier */
     GeometryType type() const
     {
-      switch (UG_NS<dim>::Tag(center_)) {
+      // retrieve an element that this face is a side of, and retrieve the side number
+      typename UG_NS<dim>::Element* center;
+      unsigned int side;
+      UG_NS<dim>::GetElementAndSideFromSideVector(target_, center, side);
+
+      switch (UG_NS<dim>::Tag(center)) {
 
       case UG::D3::TETRAHEDRON :
         return GeometryType(GeometryType::simplex,2);
       case UG::D3::PYRAMID :
-        return (side_==0)
+        return (side==0)
                ? GeometryType(GeometryType::cube,2)
                : GeometryType(GeometryType::simplex,2);
       case UG::D3::PRISM :
-        return (side_==0 or side_==4)
+        return (side==0 or side==4)
                ? GeometryType(GeometryType::simplex,2)
                : GeometryType(GeometryType::cube,2);
       case UG::D3::HEXAHEDRON :
         return GeometryType(GeometryType::cube,2);
       default :
         DUNE_THROW(GridError, "UGFaceEntity::type():  ERROR:  Unknown type "
-                   << UG_NS<dim>::Tag(center_) << " found!");
+                   << UG_NS<dim>::Tag(center) << " found!");
 
       }
 
     }
 
-    /** \brief The partition type for parallel computing
-     * \todo Not implemented yet */
+    //! level of the face
+    int level () const {
+      return UG_NS<dim>::myLevel(target_);
+    }
+
+    /** \brief The partition type for parallel computing */
     PartitionType partitionType () const
     {
-      DUNE_THROW(NotImplemented, "UGGridEntity::partitionType() for faces");
+#ifndef ModelP
+      return InteriorEntity;
+#else
+
+      typename UG_NS<dim>::Vector *face = getTarget();
+
+      if (UG_NS<dim>::Priority(face)    == UG_NS<dim>::PrioHGhost
+          || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioVGhost
+          || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioVHGhost)
+        return GhostEntity;
+      else if (hasBorderCopy_(face))
+        return BorderEntity;
+      else if (UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioNone)
+        return InteriorEntity;
+      else
+        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(face));
+#endif
     }
 
-    /** \brief Set this object to a UG object
-     * \param center A UG element that this face is a side of
-     * \param side Side number in DUNE numbering
+#ifdef ModelP
+    bool hasBorderCopy_(typename UG_NS<dim>::Vector *face) const {
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(face));
+      for (int i = 0; plist[i] >= 0; i += 2)
+        if (plist[i + 1] == UG_NS<dim>::PrioBorder)
+          return true;
+
+      return false;
+    }
+#endif
+
+    /** \brief Set to a UG side vector object
+        \param target The UG side vector to point to
+        \param gridImp Dummy argument, only for consistency with codim-0 entities
      */
-    void setToTarget(typename UG_NS<dim>::Element* center, unsigned int side) {
-      center_  = center;
-      side_    = side;
-    }
-
-    /** \brief Dummy method, should never be called */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
-      DUNE_THROW(Dune::Exception, "Programming error, this method should never be called!");
+      target_ = target;
     }
 
     typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
     {
-      int ugSide;
-      switch (UG_NS<dim>::Tag(center_)) {
-      case UG::D3::TETRAHEDRON :
-        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::simplex,3));
-        break;
-      case UG::D3::PYRAMID :
-        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::pyramid,3));
-        break;
-      case UG::D3::PRISM :
-        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::prism,3));
-        break;
-      case UG::D3::HEXAHEDRON :
-        ugSide = UGGridRenumberer<dim>::facesDUNEtoUG(side_, GeometryType(GeometryType::cube,3));
-        break;
-      default :
-        DUNE_THROW(NotImplemented, "for element type " << UG_NS<dim>::Tag(center_));
-      }
-
-      return UG_NS<dim>::SideVector(center_, ugSide);
+      return target_;
     }
 
-    /** \brief The UG object for one element that the side is part of */
-    typename UG_NS<dim>::Element* center_;
+    /** \brief The UG object (a side vector) that represents this face */
+    typename UG_NS<dim>::template Entity<codim>::T* target_;
 
-    /** \brief The number of the side of 'center_' that we are.  In DUNE numbering */
-    unsigned int side_;
   };
 
   /*! \brief Specialization for faces in 3D
