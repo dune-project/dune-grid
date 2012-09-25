@@ -3,10 +3,12 @@
 #ifndef DUNE_ALUGRID_2D_GEOMETRY_HH
 #define DUNE_ALUGRID_2D_GEOMETRY_HH
 
+#include <dune/common/array.hh>
 #include <dune/common/misc.hh>
-#include <dune/grid/common/grid.hh>
+
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
+#include <dune/grid/common/grid.hh>
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/alugrid/3d/mappings.hh>
 
@@ -198,25 +200,6 @@ namespace Dune
     ctype det ( const map_t &m ) const
     {
       return mapping().det( m );
-    }
-
-    // update geometry in father coordinates
-    template< class Geo, class LocalGeo >
-    void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
-    {
-      assert( localGeo.corners() == ncorners );
-      // compute the local coordinates in father refelem
-      FieldMatrix< alu2d_ctype, ncorners, cdim > coord;
-      for( int i = 0; i < ncorners; ++i )
-      {
-        // calculate coordinate
-        coord[ i ] = geo.local( localGeo.corner( i ) );
-        // to avoid rounding errors
-        for( int j = 0; j < cdim; ++j )
-          coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
-      }
-      mapping_.buildMapping( coord[ 0 ], coord[ 1 ] );
-      valid_ = true ;
     }
 
     // update geometry coordinates
@@ -685,13 +668,7 @@ namespace Dune
     // method for vertices
     bool buildGeom(const VertexType & item, const int );
 
-    //! build geometry for intersectionSelfLocal and
-    //! intersectionNeighborLocal
-    template <class GeometryType, class LocalGeomType >
-    bool buildLocalGeom(const GeometryType & geo , const LocalGeomType & lg);
-
-    //! build local geometry given local face number
-    bool buildLocalGeometry ( int aluFace, int twist, int corners );
+    bool buildGeometry ( const array< GlobalCoordinate, 2 > &corners );
 
     //! return non-const reference to coord vecs
     GlobalCoordinate& getCoordVec (int i);
@@ -710,10 +687,6 @@ namespace Dune
     inline void invalidate() const { geoImpl_.invalidate(); }
 
   protected:
-    // return reference coordinates of the alu triangle
-    static std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > >
-    calculateReferenceCoords ( const int corners );
-
     // implementation of coord and mapping
     mutable GeometryImplType geoImpl_;
 
@@ -899,70 +872,18 @@ namespace Dune
     return true;
   }
 
-  template <int mydim, int cdim, class GridImp>
-  template <class GeometryType, class LocalGeometryType >
-  inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom)
-  {
-    // update geometry
-    geoImpl_.updateLocal( geo, localGeom );
-
-    // calculate volume
-    LocalCoordinate local( 0.25 );
-    det_ = geoImpl_.det( local );
-
-    // geometry built
-    return true;
-  }
-
-  // built Geometry (faceNumber is in generic numbering)
-  template< int mydim, int cdim, class GridImp >
-  inline std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > >
-  ALU2dGridGeometry< mydim, cdim, GridImp >::calculateReferenceCoords ( const int corners )
-  {
-    // calculate reference coordinates of aLUGrid reference triangle
-
-    FieldMatrix< alu2d_ctype, 4, 2 > refCoord( 0. );
-    FieldVector< alu2d_ctype, 4 > lengths( 1. );
-
-    // point 1
-    refCoord[1][0] = 1.0;
-    // point (corners-1)
-    refCoord[corners-1][1] = 1.0;
-    if( corners == 3 )
-    {
-      lengths[0] = M_SQRT2;
-    }
-    else
-    {
-      // point 2
-      refCoord[2][0] = 1.0;
-      refCoord[2][1] = 1.0;
-    }
-    return std::make_pair( refCoord, lengths );
-  }
-
 
   template< int mydim, int cdim, class GridImp >
   inline bool ALU2dGridGeometry< mydim, cdim, GridImp >
-  ::buildLocalGeometry ( int aluFace, int twist, int corners )
+  ::buildGeometry ( const array< GlobalCoordinate, 2 > &corners )
   {
     assert( mydim == 1 );
-    assert( (twist == 0) || (twist == 1) );
-
-    // get coordinates of reference element
-    typedef std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > > RefCoord;
-    RefCoord refCoord( calculateReferenceCoords( corners ) );
-
-    geoImpl_.update( refCoord.first[ ( aluFace + 1+twist ) % corners ],
-                     refCoord.first[ ( aluFace + 2-twist ) % corners ] );
-
-    // get length of faces
-    det_ = refCoord.second[ aluFace ];
-
-    // geometry built
+    geoImpl_.update( corners[ 0 ], corners[ 1 ] );
+    LocalCoordinate local( 0.5 );
+    det_ = geoImpl_.det( local );
     return true;
   }
+
 
   // built Geometry
   template <int mydim, int cdim, class GridImp >

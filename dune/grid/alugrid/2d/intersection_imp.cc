@@ -215,7 +215,23 @@ namespace Dune
     if( current.useOutside() )
     {
       if( !intersectionSelfLocal_.valid() )
-        intersectionSelfLocal_.buildLocalGeom( inside()->geometry(), geometry() );
+      {
+        EntityPointer insidePtr = inside();
+        const typename Entity::Geometry &insideGeo = insidePtr->geometry();
+        const Geometry iGeo = geometry();
+
+        assert( iGeo.corners() == 2 );
+        array< FieldVector< alu2d_ctype, dimension >, 2 > coords;
+        for( int i = 0; i < 2; ++i )
+        {
+          // calculate coordinates
+          coords[ i ] = insideGeo.local( iGeo.corner( i ) );
+          // avoid round-off errors
+          for( int j = 0; j < dimension; ++j )
+            coords[ i ][ j ] = (coords[ i ][ j ] < 1e-14 ? 0.0 : coords[ i ][ j ]);
+        }
+        intersectionSelfLocal_.buildGeometry( coords );
+      }
       assert( intersectionSelfLocal_.valid() );
       return LocalGeometry( intersectionSelfLocal_ );
     }
@@ -238,7 +254,23 @@ namespace Dune
     if( !conforming() )
     {
       if( !intersectionNeighborLocal_.valid() )
-        intersectionNeighborLocal_.buildLocalGeom( outside()->geometry(), geometry() );
+      {
+        EntityPointer outsidePtr = outside();
+        const typename Entity::Geometry &outsideGeo = outsidePtr->geometry();
+        const Geometry iGeo = geometry();
+
+        assert( iGeo.corners() == 2 );
+        array< FieldVector< alu2d_ctype, dimension >, 2 > coords;
+        for( int i = 0; i < 2; ++i )
+        {
+          // calculate coordinates
+          coords[ i ] = outsideGeo.local( iGeo.corner( i ) );
+          // avoid round-off errors
+          for( int j = 0; j < dimension; ++j )
+            coords[ i ][ j ] = (coords[ i ][ j ] < 1e-14 ? 0.0 : coords[ i ][ j ]);
+        }
+        intersectionNeighborLocal_.buildGeometry( coords );
+      }
       assert( intersectionNeighborLocal_.valid() );
       return LocalGeometry( intersectionNeighborLocal_ );
     }

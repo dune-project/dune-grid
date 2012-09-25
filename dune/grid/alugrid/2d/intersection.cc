@@ -21,13 +21,24 @@ namespace Dune
   ALU2DIntersectionGeometryStorage< LocalGeometryImpl >
   ::ALU2DIntersectionGeometryStorage ()
   {
-    for( int i = 0; i < 4; ++i )
+    for( int corners = 3; corners <= 4; ++corners )
     {
-      for( int twist = 0; twist < 2; ++twist )
+      FieldMatrix< alu2d_ctype, 4, 2 > refCoords( 0.0 );
+      refCoords[ 1 ][ 0 ] = 1.0;
+      refCoords[ corners-1 ][ 1 ] = 1.0;
+      if( corners == 4 )
+        refCoords[ 2 ][ 0 ] = refCoords[ 2 ][ 1 ] = 1.0;
+
+      // i = face number (in ALU numbering)
+      for( int i = 0; i < corners; ++i )
       {
-        if ( i < 3 )
-          geoms_[ 0 ][ i ][ twist ].buildLocalGeometry( i, twist, 3 );
-        geoms_[ 1 ][ i ][ twist ].buildLocalGeometry( i, twist, 4 );
+        for( int twist = 0; twist < 2; ++twist )
+        {
+          array< FieldVector< alu2d_ctype, 2 >, 2 > coords;
+          coords[ 0 ] = refCoords[ (i + 1 + twist) % corners ];
+          coords[ 1 ] = refCoords[ (i + 2 - twist) % corners ];
+          geoms_[ corners - 3 ][ i ][ twist ].buildGeometry( coords );
+        }
       }
     }
   }
