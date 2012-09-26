@@ -8,6 +8,7 @@ alucommon_HEADERS = backuprestore.hh \
                     geostorage.hh \
                     intersectioniteratorwrapper.hh \
                     interfaces.hh \
+                    matrixhelper.hh \
                     memory.hh \
                     objectfactory.hh \
                     persistentcontainer.hh \
