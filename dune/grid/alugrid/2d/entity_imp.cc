@@ -7,10 +7,8 @@
 #include "grid.hh"
 #include <dune/common/exceptions.hh>
 
-#include <dune/grid/alugrid/common/geostorage.hh>
-
-namespace Dune {
-
+namespace Dune
+{
 
   //**********************************************************************
   //
