@@ -80,25 +80,30 @@ namespace Dune
   inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
   AlbertaGridIntersectionBase< Grid >::centerIntegrationOuterNormal () const
   {
-#if DUNE_ALBERTA_USE_GENERICGEOMETRY
-    const ReferenceElement< ctype, dimension > &refElement = ReferenceElements< ctype, dimension >::simplex();
-    const FieldVector< ctype, dimension > &localInInside = refElement.position( indexInInside(), 1 );
-    return Grid::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
-#else
-    typedef FieldMatrix< ctype, dimensionworld, dimension > JacobianInverseTransposed;
-
     const EntityPointer ep = inside();
     const typename Entity::Geometry &geoInside = ep->geometry();
 
-    const JacobianInverseTransposed &jInvT = Grid::getRealImplementation( geoInside ).jacobianInverseTransposed();
+    const int face = indexInInside();
     const ReferenceElement< ctype, dimension > &refSimplex = ReferenceElements< ctype, dimension >::simplex();
-    const FieldVector< ctype, dimension > &refNormal = refSimplex.integrationOuterNormal( indexInInside() );
+    const FieldVector< ctype, dimension > &refNormal = refSimplex.integrationOuterNormal( face );
 
-    NormalVector n;
-    jInvT.mv( refNormal, n );
-    n *= Grid::getRealImplementation( geoInside ).integrationElement();
-    return n;
+    const typename Entity::Geometry::JacobianInverseTransposed &jInvT
+#if DUNE_ALBERTA_USE_GENERICGEOMETRY
+      = geoInside.jacobianInverseTransposed( refSimplex.position( face, 1 ) );
+#else // #if DUNE_ALBERTA_USE_GENERICGEOMETRY
+      = Grid::getRealImplementation( geoInside ).jacobianInverseTransposed();
+#endif // #else // #if DUNE_ALBERTA_USE_GENERICGEOMETRY
+
+    NormalVector normal;
+    jInvT.mv( refNormal, normal );
+
+#if DUNE_ALBERTA_USE_GENERICGEOMETRY
+    normal /= jInvT.det();
+#else // #if DUNE_ALBERTA_USE_GENERICGEOMETRY
+    normal *= Grid::getRealImplementation( geoInside ).integrationElement();
 #endif // #if DUNE_ALBERTA_USE_GENERICGEOMETRY
+
+    return normal;
   }
 
   template<>
@@ -107,9 +112,9 @@ namespace Dune
   {
     const Alberta::GlobalVector &oppCoord = grid().getCoord( elementInfo(), oppVertex_ );
     const Alberta::GlobalVector &myCoord = grid().getCoord( elementInfo(), 1-oppVertex_ );
-    NormalVector n;
-    n[ 0 ] = (myCoord[ 0 ] > oppCoord[ 0 ] ? ctype( 1 ) : -ctype( 1 ));
-    return n;
+    NormalVector normal;
+    normal[ 0 ] = (myCoord[ 0 ] > oppCoord[ 0 ] ? ctype( 1 ) : -ctype( 1 ));
+    return normal;
   }
 
   template<>
@@ -119,10 +124,10 @@ namespace Dune
     const Alberta::GlobalVector &coordOne = grid().getCoord( elementInfo(), (oppVertex_+1)%3 );
     const Alberta::GlobalVector &coordTwo = grid().getCoord( elementInfo(), (oppVertex_+2)%3 );
 
-    NormalVector n;
-    n[ 0 ] = -(coordOne[ 1 ] - coordTwo[ 1 ]);
-    n[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
-    return n;
+    NormalVector normal;
+    normal[ 0 ] = -(coordOne[ 1 ] - coordTwo[ 1 ]);
+    normal[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
+    return normal;
   }
 
   template<>
@@ -149,14 +154,14 @@ namespace Dune
       u[ i ] = coord2[ i ] - coord1[ i ];
     }
 
-    NormalVector n;
+    NormalVector normal;
     for( int i = 0; i < dimension; ++i )
     {
       const int j = (i+1)%dimension;
       const int k = (i+2)%dimension;
-      n[ i ] = val * (u[ j ] * v[ k ] - u[ k ] * v[ j ]);
+      normal[ i ] = val * (u[ j ] * v[ k ] - u[ k ] * v[ j ]);
     }
-    return n;
+    return normal;
   }
 
 
