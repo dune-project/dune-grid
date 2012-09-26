@@ -28,6 +28,7 @@
 //- Local includes
 #include "indexsets.hh"
 #include <dune/grid/alugrid/common/objectfactory.hh>
+#include <dune/grid/alugrid/2d/geoinfather.hh>
 #include "datahandle.hh"
 
 namespace Dune
@@ -781,7 +782,13 @@ namespace Dune
 #endif
     }
 
+    ALU2DGeometryInFatherStorage< elementType, typename Traits::template Codim< 0 >::LocalGeometryImpl > geoInFather;
   }; // end class ALU2dGrid
+
+
+
+  // Capabilities
+  // ------------
 
   namespace Capabilities
   {

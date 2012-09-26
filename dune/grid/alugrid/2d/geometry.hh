@@ -207,7 +207,15 @@ namespace Dune
     void update ( const Vector &p0, const Vector &p1 )
     {
       mapping_.buildMapping( p0, p1 );
-      valid_ = true ;
+      valid_ = true;
+    }
+
+    // update geometry coordinates
+    template< class Vector >
+    void update ( const array< Vector, 2 > &p )
+    {
+      mapping_.buildMapping( p[ 0 ], p[ 1 ] );
+      valid_ = true;
     }
   };
 
@@ -285,23 +293,11 @@ namespace Dune
       return mapping().det( m );
     }
 
-    // update geometry in father coordinates
-    template< class Geo, class LocalGeo >
-    void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
+    template< class Vector >
+    void update ( const array< Vector, 3 > &p )
     {
-      assert( localGeo.corners() == ncorners );
-      // compute the local coordinates in father refelem
-      FieldMatrix< alu2d_ctype, ncorners, cdim > coord;
-      for( int i = 0; i < ncorners; ++i )
-      {
-        // calculate coordinate
-        coord[ i ] = geo.local( localGeo.corner( i ) );
-        // to avoid rounding errors
-        for( int j = 0; j < cdim; ++j )
-          coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
-      }
-      mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
-      valid_ = true ;
+      mapping_.buildMapping( p[ 0 ], p[ 1 ], p[ 2 ] );
+      valid_ = true;
     }
 
     template< class HElement >
@@ -309,7 +305,7 @@ namespace Dune
     {
       mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
                              item.getVertex( 2 )->coord() );
-      valid_ = true ;
+      valid_ = true;
     }
   };
 
@@ -387,23 +383,11 @@ namespace Dune
       return mapping().det( m );
     }
 
-    // update geometry in father coordinates
-    template< class Geo, class LocalGeo >
-    void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
+    template< class Vector >
+    void update ( const array< Vector, 4 > &p )
     {
-      assert( localGeo.corners() == ncorners );
-      // compute the local coordinates in father refelem
-      FieldMatrix< alu2d_ctype, ncorners, cdim > coord;
-      for( int i = 0; i < ncorners; ++i )
-      {
-        // calculate coordinate
-        coord[ i ] = geo.local( localGeo.corner( i ) );
-        // to avoid rounding errors
-        for( int j = 0; j < cdim; ++j )
-          coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
-      }
-      mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
-      valid_ = true ;
+      mapping_.buildMapping( p[ 0 ], p[ 1 ], p[ 2 ], p[ 3 ] );
+      valid_ = true;
     }
 
     template< class HElement >
@@ -503,30 +487,18 @@ namespace Dune
       return (corners() == 3 ? linearMapping().det( m ) : bilinearMapping().det( m ));
     }
 
-    // update geometry in father coordinates
-    template< class Geo, class LocalGeo >
-    void updateLocal ( const Geo &geo, const LocalGeo &localGeo )
+    template< class Vector >
+    void update ( const array< Vector, 3 > &p )
     {
-      const int corners = localGeo.corners();
+      linearMapping().buildMapping( p[ 0 ], p[ 1 ], p[ 2 ] );
+      valid_ = true;
+    }
 
-      // compute the local coordinates in father refelem
-      FieldMatrix< alu2d_ctype, 4, cdim > coord;
-      for( int i = 0; i < corners; ++i )
-      {
-        // calculate coordinate
-        coord[ i ] = geo.local( localGeo.corner( i ) );
-        // to avoid rounding errors
-        for( int j = 0; j < cdim; ++j )
-          coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
-      }
-
-      updateMapping( corners );
-      if( corners == 3 )
-        linearMapping().buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
-      else
-        bilinearMapping().buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
-
-      valid_ = true ;
+    template< class Vector >
+    void update ( const array< Vector, 4 > &p )
+    {
+      bilinearMapping().buildMapping( p[ 0 ], p[ 1 ], p[ 2 ], p[ 3 ] );
+      valid_ = true;
     }
 
     template< class HElement >
@@ -668,17 +640,14 @@ namespace Dune
     // method for vertices
     bool buildGeom(const VertexType & item, const int );
 
-    bool buildGeometry ( const array< GlobalCoordinate, 2 > &corners );
+    template< std::size_t N >
+    bool buildGeometry ( const array< GlobalCoordinate, N > &corners );
 
     //! return non-const reference to coord vecs
     GlobalCoordinate& getCoordVec (int i);
 
     //! print internal data
     void print (std::ostream& ss) const;
-
-    //! build geometry with local coords of child in reference element
-    inline bool buildGeomInFather(const Geometry &fatherGeom,
-                                  const Geometry & myGeom );
 
     // returns true if geometry information is valid
     inline bool valid() const { return geoImpl_.valid(); }
@@ -874,30 +843,13 @@ namespace Dune
 
 
   template< int mydim, int cdim, class GridImp >
+  template< std::size_t N >
   inline bool ALU2dGridGeometry< mydim, cdim, GridImp >
-  ::buildGeometry ( const array< GlobalCoordinate, 2 > &corners )
+  ::buildGeometry ( const array< GlobalCoordinate, N > &corners )
   {
-    assert( mydim == 1 );
-    geoImpl_.update( corners[ 0 ], corners[ 1 ] );
+    geoImpl_.update( corners );
     LocalCoordinate local( 0.5 );
     det_ = geoImpl_.det( local );
-    return true;
-  }
-
-
-  // built Geometry
-  template <int mydim, int cdim, class GridImp >
-  inline bool ALU2dGridGeometry<mydim, cdim,GridImp>::
-  buildGeomInFather(const Geometry & fatherGeom ,
-                    const Geometry & myGeom)
-  {
-    // update geometry
-    geoImpl_.updateLocal( fatherGeom, myGeom );
-
-    // store volume which is a part of one
-    det_ = myGeom.volume() / fatherGeom.volume();
-    assert( (det_ > 0.0) && (det_ < 1.0) );
-
     return true;
   }
 

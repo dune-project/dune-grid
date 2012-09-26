@@ -229,27 +229,19 @@ namespace Dune {
   {
     assert( level() > 0 );
 
-    const GeometryType myType = type();
-    // we need to storages in case of cube grid,
-    // one for quadrilaterals and one for triangles
-    if( (GridImp::elementType != ALU2DSPACE triangle) && myType.isCube() )
+    switch( eltype )
     {
+    case ALU2DSPACE triangle :
+      return LocalGeometry( grid().geoInFather( 3, !grid().nonConform(), nChild() ) );
+
+    case ALU2DSPACE quadrilateral :
       assert( grid().nonConform() );
-      typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 >  GeometryStorage;
-      return LocalGeometry( GeometryStorage::geom( myType, true, nChild() ) );
-    }
-    else
-    {
-      if( grid().nonConform() )
-      {
-        typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 4 >  GeometryStorage;
-        return LocalGeometry( GeometryStorage::geom( myType, true, nChild() ) );
-      }
-      else
-      {
-        typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 2 >  GeometryStorage;
-        return LocalGeometry( GeometryStorage::geom( myType, false, nChild() ) );
-      }
+      return LocalGeometry( grid().geoInFather( 4, false, nChild() ) );
+
+    case ALU2DSPACE mixed :
+      assert( grid().nonConform() );
+      assert( item_ );
+      return LocalGeometry( grid().geoInFather( item_->numvertices(), false, nChild() ) );
     }
   }
 
