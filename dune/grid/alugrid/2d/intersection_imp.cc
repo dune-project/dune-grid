@@ -163,8 +163,8 @@ namespace Dune
       current.inside()->outernormal( current.index(), (normal_t)(&outerNormal)[0] );
     else
     {
-      const ReferenceElement< alu2d_ctype, dimension > &refElement =
-        ReferenceElements< alu2d_ctype, dimension >::cube();
+      const ReferenceElement< alu2d_ctype, dimension > &refElement
+        = ReferenceElements< alu2d_ctype, dimension >::cube();
       typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
       typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
       inside()->geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );

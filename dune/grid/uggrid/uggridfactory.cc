@@ -220,6 +220,17 @@ createGrid()
 
   // ///////////////////////////////////////////////////////////////////////////////
   //  Communicate the grid information from the master to all other processes
+  //
+  // Rationale: Parallel Dune grids that are set up by providing a coarse grid
+  // on rank 0 and then loadbalancing should not require that the grid be
+  // provided to all processes directly. Usually UGGrid does that, because
+  // it needs the grid only on rank 0, but the grid _boundary_ on all processes.
+  // This patch makes the rank 0 process broadcast the entire coarse
+  // grid information from rank 0 to all other processes before
+  // starting the actual grid creation.  That way, the user has to
+  // supply the coarse grid only on rank 0 (as the specification says),
+  // but still the UGGridFactory has all relevant information available
+  // on all processes.
   // ///////////////////////////////////////////////////////////////////////////////
 
   // Broadcast the vertex positions

@@ -105,7 +105,7 @@ namespace Dune
     }
 
     /** @brief Map entity to index. Easier to use than the above because codimension template
-            parameter need not be supplied explicitely.
+            parameter need not be supplied explicitly.
             The result of calling this method with an entity that is not
             in the index set is undefined.
 

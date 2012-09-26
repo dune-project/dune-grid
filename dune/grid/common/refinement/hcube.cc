@@ -51,7 +51,7 @@
 #include <dune/common/iteratorfacades.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/geometry/axisalignedcubegeometry.hh>
 
 #include <dune/grid/common/geometry.hh>
 #include "base.cc" // for RefinementTraits
@@ -153,12 +153,7 @@ namespace Dune {
       struct RefinementImp<dimension, CoordType>::Codim
       {
         class SubEntityIterator;
-        /** \todo Returning a generic BasicGeometry is not very efficient.
-         *    Better solutions would include:
-         *     - use a custom traits class (short term)
-         *     - write a special-purpose geometry implementation for axis-aligned cubes
-         */
-        typedef Dune::GenericGeometry::BasicGeometry<dimension,Dune::GenericGeometry::DefaultGeometryTraits<CoordType,dimension-codimension,dimension,true> > Geometry;
+        typedef Dune::AxisAlignedCubeGeometry<CoordType,dimension-codimension,dimension> Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -450,28 +445,21 @@ namespace Dune {
       typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::geometry () const
       {
-        // Construct the list of corners of the geometry
-        std::size_t numCorners = 1<<dimension;
-        std::vector<Dune::FieldVector<CoordType,dimension> > corners(numCorners);
-
         array<unsigned int,dimension> intCoords = idx2coord(_index,1<<_level);
 
-        for (size_t i=0; i<numCorners; i++) {
+        Dune::FieldVector<CoordType,dimension> lower;
+        Dune::FieldVector<CoordType,dimension> upper;
 
-          for (size_t j=0; j<dimension; j++) {
+        for (size_t j=0; j<dimension; j++) {
 
-            int cornerIdx = intCoords[j] + ((i&(1<<j)) != 0);
-            corners[i][j] = double(cornerIdx) / double(1<<_level);
-
-          }
+          lower[j] = double(intCoords[j])     / double(1<<_level);
+          upper[j] = double(intCoords[j] + 1) / double(1<<_level);
 
         }
 
-        GeometryType type;
-        type.makeCube( dimension );
-
-        // return a BasicGeometry with the correct set of corners
-        return typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry(type,corners);
+        // The implementation for codimension>0 is still missing (or not needed?)
+        assert(codimension==0);
+        return typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry(lower,upper);
       }
 
 #endif // DOXYGEN
