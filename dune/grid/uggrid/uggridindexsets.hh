@@ -29,7 +29,17 @@ namespace Dune {
        \todo I want to make this constructor private, but I can't, because
        it is called by UGGrid through a std::vector::resize()
      */
-    UGGridLevelIndexSet () {}
+    UGGridLevelIndexSet ()
+      : level_(0),
+        numSimplices_(0),
+        numPyramids_(0),
+        numPrisms_(0),
+        numCubes_(0),
+        numVertices_(0),
+        numEdges_(0),
+        numTriFaces_(0),
+        numQuadFaces_(0)
+    {}
 
     //! get index of an entity
     template<int cd>
