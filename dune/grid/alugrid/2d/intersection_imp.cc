@@ -392,9 +392,6 @@ namespace Dune
   inline void ALU2dGridLevelIntersectionIterator<Grid> :: increment ()
   {
     doIncrement();
-  #if ALU2DGRID_PARALLEL
-    this->checkValid();
-  #endif
   }
 
 
@@ -447,9 +444,6 @@ namespace Dune
   inline void ALU2dGridLeafIntersectionIterator<Grid> :: increment ()
   {
     doIncrement();
-  #if ALU2DGRID_PARALLEL
-    this->checkValid();
-  #endif
   }
 
 } // namespace Dune

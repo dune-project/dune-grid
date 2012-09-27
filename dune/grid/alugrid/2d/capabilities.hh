@@ -59,30 +59,6 @@ namespace Dune
       static const bool v = true;
     };
 
-#if ALU2DGRID_PARALLEL
-    /** \brief ALUSimplexGrid is parallel
-       \ingroup ALUSimplexGrid
-     */
-    //- default is false
-    template< int dimworld >
-    struct isParallel< ALUSimplexGrid< 2, dimworld > >
-    {
-      static const bool v = true;
-    };
-#endif // #if ALU2DGRID_PARALLEL
-
-#if ALU2DGRID_PARALLEL
-    /** \brief ALUSimplexGrid can communicate
-       \ingroup ALUSimplexGrid
-     */
-    //- default is false
-    template< int dimworld >
-    struct canCommunicate< ALUSimplexGrid< 2, dimworld >, 0 >
-    {
-      static const bool v = true;
-    };
-#endif // #if ALU2DGRID_PARALLEL
-
     /** \brief ALUSimplexGrid has conforming level grids
        \ingroup ALUSimplexGrid
      */
@@ -125,30 +101,6 @@ namespace Dune
       static const bool v = true;
     };
 
-#if ALU2DGRID_PARALLEL
-    /** \brief ALUCubeGrid is parallel
-       \ingroup ALUCubeGrid
-     */
-    //- default is false
-    template< int dimworld >
-    struct isParallel< ALUCubeGrid< 2, dimworld > >
-    {
-      static const bool v = true;
-    };
-#endif // #if ALU2DGRID_PARALLEL
-
-#if ALU2DGRID_PARALLEL
-    /** \brief ALUCubeGrid can communicate
-       \ingroup ALUCubeGrid
-     */
-    //- default is false
-    template< int dimworld >
-    struct canCommunicate< ALUCubeGrid< 2, dimworld >, 0 >
-    {
-      static const bool v = true;
-    };
-#endif // #if ALU2DGRID_PARALLEL
-
     /** \brief ALUCubeGrid has conforming level grids
        \ingroup ALUCubeGrid
      */
@@ -190,30 +142,6 @@ namespace Dune
     {
       static const bool v = true;
     };
-
-#if ALU2DGRID_PARALLEL
-    /** \brief ALUConformGrid is parallel
-       \ingroup ALUConformGrid
-     */
-    //- default is false
-    template< int dimworld >
-    struct isParallel< ALUConformGrid< 2, dimworld > >
-    {
-      static const bool v = true;
-    };
-#endif // #if ALU2DGRID_PARALLEL
-
-#if ALU2DGRID_PARALLEL
-    /** \brief ALUConformGrid can communicate
-       \ingroup ALUConformGrid
-     */
-    //- default is false
-    template< int dimworld >
-    struct canCommunicate< ALUConformGrid< 2, dimworld >, 0 >
-    {
-      static const bool v = true;
-    };
-#endif // #if ALU2DGRID_PARALLEL
 
     /** \brief ALUConformGrid has a conforming leaf grid
        \ingroup ALUConformGrid

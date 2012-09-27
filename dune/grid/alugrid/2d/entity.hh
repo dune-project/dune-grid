@@ -384,14 +384,7 @@ namespace Dune {
     }
 
     //! return partition type of this entity ( see grid.hh )
-    PartitionType partitionType() const
-    {
-#if ALU2DGRID_PARALLEL
-      return grid().rankManager().partitionType( item_->getIndex() );
-#else
-      return InteriorEntity;
-#endif
-    }
+    PartitionType partitionType () const { return InteriorEntity; }
 
     /**
        \brief The boundaryId of the i-th subentity of codimension <tt>cc</tt>

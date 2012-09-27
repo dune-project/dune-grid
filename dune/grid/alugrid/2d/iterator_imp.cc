@@ -45,24 +45,7 @@ namespace Dune
       {
         elem_ = &(iter_->getitem());
 
-#if ALU2DGRID_PARALLEL
-        const bool valid = (cdim == 0) ?
-                           (this->grid().rankManager().isValid( elem_->getIndex(), pitype )) :
-                           marker_.isValidVertex( elem_->getIndex() );
-#else
-        const bool valid = true;
-#endif
-
-        // if we found valid item, call update
-        if( valid )
-        {
-          this->updateEntityPointer(elem_, -1,
-                                    GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
-        }
-        else
-        {
-          increment();
-        }
+        this->updateEntityPointer(elem_, -1, GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
       }
     }
     else
@@ -119,31 +102,6 @@ namespace Dune
 
     // get element pointer
     elem_ = &(iter_->getitem());
-
-#if ALU2DGRID_PARALLEL
-    bool valid = (cdim == 0) ?
-                 (this->grid().rankManager().isValid( elem_->getIndex(), pitype )) :
-                 marker_.isValidVertex( elem_->getIndex() );
-
-    while ( ! valid )
-    {
-      // go to next item
-      iter_->next();
-
-      if(iter_->done())
-      {
-        endIter_ = true;
-        this->done();
-        return ;
-      }
-
-      // get element pointer
-      elem_ = &(iter_->getitem());
-      valid = (cdim == 0) ?
-              (this->grid().rankManager().isValid( elem_->getIndex(), pitype )) :
-              marker_.isValidVertex( elem_->getIndex() );
-    }
-#endif
 
     this->updateEntityPointer(elem_, -1,
                               GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
@@ -249,21 +207,6 @@ namespace Dune
       }
       // get new element
       elem_ = &(iter->getitem());
-#if ALU2DGRID_PARALLEL
-      while ( ! this->grid().rankManager().isValid( elem_->getIndex(), pitype ) )
-      {
-        // go to next item
-        iter->next();
-        if(iter->done())
-        {
-          endIter_=true;
-          face_= -1;
-          this->done();
-          return ;
-        }
-        elem_ = &(iter->getitem());
-      }
-#endif
 
       face_=0;
       // whatever this is good for
@@ -332,12 +275,6 @@ namespace Dune
       {
         item_ = &(iter_->getitem());
         this->updateEntityPointer(item_, -1 , level_);
-#if ALU2DGRID_PARALLEL
-        if ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-        {
-          increment();
-        }
-#endif
       }
 
     }
@@ -388,23 +325,6 @@ namespace Dune
       return ;
     }
     item_ = &iter->getitem();
-
-#if ALU2DGRID_PARALLEL
-    while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-    {
-      // go to next item
-      iter_->next();
-
-      if(iter_->done()) {
-        endIter_ = true;
-        this->done();
-        return ;
-      }
-
-      // get element pointer
-      item_ = &(iter_->getitem());
-    }
-#endif
 
     this->updateEntityPointer(item_, -1 , level_);
     return;
@@ -532,20 +452,6 @@ namespace Dune
 
       // get new element
       item_ = &iter->getitem();
-#if ALU2DGRID_PARALLEL
-      while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-      {
-        iter->next();
-        if(iter->done())
-        {
-          endIter_ = true;
-          myFace_= 0;
-          this->done();
-          return ;
-        }
-        item_ = &iter->getitem();
-      }
-#endif
 
       myFace_= 0;
       // whatever this does
@@ -598,20 +504,6 @@ namespace Dune
       if((!iter_->done()))
       {
         item_ = &iter_->getitem();
-#if ALU2DGRID_PARALLEL
-        while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-        {
-          iter_->next();
-          if(iter_->done())
-          {
-            endIter_ = true;
-            myFace_= 0;
-            this->done();
-            return ;
-          }
-          item_ = &iter_->getitem();
-        }
-#endif
         vertex_ = item_->getVertex(myFace_);
         this->updateEntityPointer(vertex_, myFace_, level_);
         increment();
@@ -703,21 +595,6 @@ namespace Dune
         return ;
       }
       item_ = &iter->getitem();
-
-#if ALU2DGRID_PARALLEL
-      while ( ! this->grid().rankManager().isValid( item_->getIndex(), pitype ) )
-      {
-        iter->next();
-        if(iter->done())
-        {
-          endIter_ = true;
-          myFace_= 0;
-          this->done();
-          return ;
-        }
-        item_ = &iter->getitem();
-      }
-#endif
 
       myFace_ = 0;
       vertex_ = item_->getVertex(myFace_);

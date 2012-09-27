@@ -26,28 +26,12 @@
 #endif
 /////////////////////////////////////////////////////////////////////
 
-// fix for ALUGrid 1.22, where ALUGRID_VERTEX_PROJECTION is defined only in alugrid_serial.h
-#ifndef ALUGRID_VERTEX_PROJECTION
-#include <alugrid_serial.h>
-#endif
-
 #define ALU2DSPACE ALU2DSPACENAME ::
 
 #define ALU2DSPACENAME ALU2DGrid
 #define ALU2DDIMWORLD(dimw,eltype) < dimw,(eltype == ALU2DSPACE triangle ? 3 : 4) >
 
-// use the ALU3dGrid Parallel detection
-#include <dune/grid/alugrid/common/checkparallel.hh>
-//#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
-#define ALU2DGRID_PARALLEL 0
-
 #include <dune/common/collectivecommunication.hh>
-
-#if ALU2DGRID_PARALLEL
-//#include "communicator.hh"
-#warning "Using ALU2dGrid in parallel"
-#endif
-
 
 namespace ALU2DSPACENAME
 {
@@ -160,9 +144,6 @@ namespace Dune
         int elIdx = elem.getIndex();
 
         // if element is not valid, go to next
-#if ALU2DGRID_PARALLEL
-        if( ! grid.rankManager().isValid( elIdx , All_Partition ) ) continue;
-#endif
         for(int i=0; i<elem.numvertices(); ++i)
         {
           enum { vxCodim = 1 };
@@ -241,10 +222,6 @@ namespace Dune
         ElementType & elem = iter->getitem();
         int elIdx = elem.getIndex();
 
-#if ALU2DGRID_PARALLEL
-        // is element is not valid, go to next
-        if( ! grid.rankManager().isValid( elIdx , All_Partition ) ) continue;
-#endif
         int level = elem.level();
 
         for(int i=0; i<elem.numvertices(); ++i)

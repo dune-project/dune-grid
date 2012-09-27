@@ -187,13 +187,7 @@ namespace Dune
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
       typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
 
-#if ALU2DGRID_PARALLEL
-      typedef Dune :: CollectiveCommunication< MPI_Comm >
-      CollectiveCommunication;
-#else
-      typedef Dune :: CollectiveCommunication< GridImp >
-      CollectiveCommunication;
-#endif
+      typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
     };
 
     //! Type of the level index set implementation
@@ -735,16 +729,6 @@ namespace Dune
       return (nrOfHangingNodes_ > 0);
     }
 
-#if ALU2DGRID_PARALLEL
-    typedef RankManager<ThisType> RankManagerType;
-    RankManagerType rankManager_;
-  public:
-    const RankManagerType& rankManager() const
-    {
-      return rankManager_;
-    }
-#endif
-
   public:
     /** \brief @copydoc Dune::Grid::communicate */
     template<class DataHandleImp,class DataTypeImp>
@@ -763,14 +747,7 @@ namespace Dune
       return ghostSize( codim );
     }
 
-    int ghostSize ( int codim ) const
-    {
-#if ALU2DGRID_PARALLEL
-      return 1;
-#else
-      return 0;
-#endif
-    }
+    int ghostSize ( int codim ) const { return 0; }
 
     /** \brief @copydoc Dune::Grid::loadBalance */
     bool loadBalance() ;
@@ -778,12 +755,6 @@ namespace Dune
     /** \brief @copydoc Dune::Grid::loadBalance */
     template<class DataHandle>
     bool loadBalance(DataHandle& data) ;
-
-    void checkManager() {
-#if ALU2DGRID_PARALLEL
-      rankManager_.notifyMarking () ;
-#endif
-    }
 
     ALU2DGeometryInFatherStorage< elementType, typename Traits::template Codim< 0 >::LocalGeometryImpl > geoInFather;
   }; // end class ALU2dGrid
