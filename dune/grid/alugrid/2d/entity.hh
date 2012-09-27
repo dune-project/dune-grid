@@ -138,15 +138,6 @@ namespace Dune {
      */
     int boundaryId () const;
 
-    /*! Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
-       This can speed up on-the-fly interpolation for linear conforming elements
-       Possibly this is sufficient for all applications we want on-the-fly.
-     */
-    EntityPointer ownersFather () const;
-
-    //! my position in local coordinates of the owners father
-    FieldVector<alu2d_ctype, dim>& positionInOwnersFather () const;
-
     //! return reference to grid
     const GridImp& grid() const { return factory_.grid(); }
 
