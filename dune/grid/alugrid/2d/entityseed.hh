@@ -1,19 +1,35 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef ALU2DGRID_ENTITYKEY_HH
-#define ALU2DGRID_ENTITYKEY_HH
+#ifndef ALU2DGRID_ENTITYSEED_HH
+#define ALU2DGRID_ENTITYSEED_HH
+
+#include <dune/grid/alugrid/2d/alu2dinclude.hh>
+#include <dune/grid/common/grid.hh>
 
 namespace Dune
 {
 
-  template<int cd, class GridImp>
-  class ALU2dGridEntitySeed ;
+  // External Forward Declarations
+  // -----------------------------
 
-  //**********************************************************************
-  //
-  // --ALU2dGridEntitySeed
-  // --EntitySeed
-  //**********************************************************************
+  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
+  class ALU2dGrid;
+  template<int cd, int dim, class Grid>
+  class ALU2dGridEntity;
+
+
+
+  // Internal Forward Declarations
+  // -----------------------------
+
+  template< int cd, class GridImp >
+  class ALU2dGridEntitySeed;
+
+
+
+  // ALU2dGridEntitySeed
+  // -------------------
+
   template< int codim, class GridImp >
   class ALU2dGridEntitySeedBase
   {
@@ -25,7 +41,7 @@ namespace Dune
 
     friend class ALU2dGridEntity<codim,dim,GridImp>;
     friend class ALU2dGridEntity< 0,dim,GridImp>;
-    friend class ALU2dGrid <GridImp :: dimension, GridImp::dimensionworld, GridImp::elementType >;
+    friend class ALU2dGrid <GridImp::dimension, GridImp::dimensionworld, GridImp::elementType >;
 
     typedef ALU2dImplTraits< GridImp::dimensionworld, GridImp::elementType > ImplTraits;
     typedef typename ImplTraits::template Codim<codim>::InterfaceType ImplementationType;
@@ -41,7 +57,7 @@ namespace Dune
     typedef typename GridImp::template Codim<codimension>::Entity Entity;
     //! underlying EntityImplementation
     typedef MakeableInterfaceObject<Entity> EntityObject;
-    typedef typename EntityObject :: ImplementationType EntityImp;
+    typedef typename EntityObject::ImplementationType EntityImp;
 
     //! typedef of my type
     typedef ThisType ALU2dGridEntitySeedType;
@@ -134,7 +150,7 @@ namespace Dune
 
     friend class ALU2dGridEntity<cd,dim,GridImp>;
     friend class ALU2dGridEntity< 0,dim,GridImp>;
-    friend class ALU2dGrid <GridImp :: dimension, GridImp::dimensionworld, GridImp::elementType >;
+    friend class ALU2dGrid <GridImp::dimension, GridImp::dimensionworld, GridImp::elementType >;
 
     typedef ALU2dImplTraits< GridImp::dimensionworld, GridImp::elementType > ImplTraits;
     typedef typename ImplTraits::template Codim<cd>::InterfaceType ImplementationType;
@@ -143,7 +159,7 @@ namespace Dune
     typedef ALU2dGridEntity<cd,dim,GridImp> ALU2dGridEntityType;
 
   public:
-    using BaseType :: defaultValue ;
+    using BaseType::defaultValue ;
 
     //! type of Entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
@@ -187,7 +203,7 @@ namespace Dune
     //! set element and level
     void set(const HElementType & item, const int level, const int duneFace )
     {
-      BaseType :: set( item );
+      BaseType::set( item );
       level_ = level ;
       face_  = duneFace ;
     }
@@ -197,7 +213,7 @@ namespace Dune
     //! return face
     int face  () const { return face_ ; }
 
-    using BaseType :: set ;
+    using BaseType::set ;
 
     bool operator == (const ALU2dGridEntitySeedType& i) const
     {
@@ -213,7 +229,7 @@ namespace Dune
     bool equals (const ALU2dGridEntitySeedType& key) const
     {
       // only compare the item pointer, this is the real key
-      return BaseType :: equals( key ) && (level() == key.level());
+      return BaseType::equals( key ) && (level() == key.level());
     }
 
   protected:
@@ -240,7 +256,7 @@ namespace Dune
 
     friend class ALU2dGridEntity<cd,dim,GridImp>;
     friend class ALU2dGridEntity< 0,dim,GridImp>;
-    friend class ALU2dGrid <GridImp :: dimension, GridImp::dimensionworld, GridImp::elementType >;
+    friend class ALU2dGrid <GridImp::dimension, GridImp::dimensionworld, GridImp::elementType >;
 
     typedef ALU2dImplTraits< GridImp::dimensionworld, GridImp::elementType > ImplTraits;
     typedef typename ImplTraits::template Codim<cd>::InterfaceType ImplementationType;
@@ -249,7 +265,7 @@ namespace Dune
     typedef ALU2dGridEntity< 0,dim,GridImp> ALU2dGridEntityType ;
 
   public:
-    using BaseType :: defaultValue ;
+    using BaseType::defaultValue ;
 
     //! type of Entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
@@ -277,8 +293,8 @@ namespace Dune
 
   //! print alugrid entity key to std::stream
   template <int cd, class GridImp>
-  inline std :: ostream &operator<< ( std :: ostream &out,
-                                      const ALU2dGridEntitySeed<cd,GridImp>& key)
+  inline std::ostream &operator<< ( std::ostream &out,
+                                    const ALU2dGridEntitySeed<cd,GridImp>& key)
   {
     out << key.item() << " " << key.level() << " " << key.face();
     return out;
@@ -291,26 +307,26 @@ namespace Dune
   //
   //*******************************************************************
   template<int codim, class GridImp >
-  inline ALU2dGridEntitySeedBase<codim,GridImp> ::
+  inline ALU2dGridEntitySeedBase<codim,GridImp>::
   ALU2dGridEntitySeedBase()
     : item_( 0 )
   {}
 
   template<int codim, class GridImp >
-  inline ALU2dGridEntitySeedBase<codim,GridImp> ::
+  inline ALU2dGridEntitySeedBase<codim,GridImp>::
   ALU2dGridEntitySeedBase(const HElementType &item)
     : item_( toKey(&item) )
   {}
 
   template<int codim, class GridImp >
-  inline ALU2dGridEntitySeedBase<codim,GridImp> ::
+  inline ALU2dGridEntitySeedBase<codim,GridImp>::
   ALU2dGridEntitySeedBase(const ALU2dGridEntitySeedType & org)
     : item_(org.item_)
   {}
 
   template<int codim, class GridImp >
   inline ALU2dGridEntitySeedBase<codim,GridImp> &
-  ALU2dGridEntitySeedBase<codim,GridImp> ::
+  ALU2dGridEntitySeedBase<codim,GridImp>::
   operator = (const ALU2dGridEntitySeedType & org)
   {
     item_  = org.item_;
@@ -332,7 +348,7 @@ namespace Dune
   ///////////////////////////////////////////////////////////////////
 
   template<int codim, class GridImp >
-  inline ALU2dGridEntitySeed<codim,GridImp> ::
+  inline ALU2dGridEntitySeed<codim,GridImp>::
   ALU2dGridEntitySeed(const HElementType &item,
                       const int level,
                       const int duneFace )
@@ -344,7 +360,7 @@ namespace Dune
   }
 
   template<int codim, class GridImp >
-  inline ALU2dGridEntitySeed<codim,GridImp> ::
+  inline ALU2dGridEntitySeed<codim,GridImp>::
   ALU2dGridEntitySeed(const ALU2dGridEntitySeedType & org)
     : ALU2dGridEntitySeedBase<codim,GridImp>(org)
       , level_(org.level_)
@@ -357,7 +373,7 @@ namespace Dune
   operator = (const ALU2dGridEntitySeedType & org)
   {
     // docu and cleanup
-    BaseType :: operator = ( org );
+    BaseType::operator = ( org );
 
     // clone other stuff
     level_ = org.level_;
@@ -369,10 +385,11 @@ namespace Dune
   inline void
   ALU2dGridEntitySeed<codim,GridImp>::clear ()
   {
-    BaseType :: clear();
+    BaseType::clear();
     level_ = defaultValue ;
     face_  = defaultValue ;
   }
 
-} // end namespace Dune
-#endif
+} // namespace Dune
+
+#endif // #ifndef ALU2DGRID_ENTITYSEED_HH

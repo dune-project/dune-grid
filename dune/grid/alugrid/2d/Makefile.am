@@ -5,8 +5,6 @@ alu2dgrid_HEADERS = alu2dinclude.hh  entity_imp.cc  geoinfather.hh \
   alu2dgridfactory.hh  alugrid.hh capabilities.hh  bndprojection.hh \
   intersection.cc  alu2dgridfactory.cc  entityseed.hh  localgeometry.hh
 
-headercheck_IGNORE = $(alu2dgrid_HEADERS)
-
 if ALUGRID
 ALU2DLIBS = libalu2d.la
 endif

@@ -33,6 +33,8 @@ namespace Dune
   class ALU2dGridLeafIterator;
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid;
+  template <class EntityImp>
+  class ALUMemoryProvider;
 
 
 

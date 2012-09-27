@@ -6,14 +6,14 @@
 //- system includes
 #include <iostream>
 
+//- dune-grid includes
+#include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/common/adaptcallback.hh>
+#include <dune/grid/common/grid.hh>
 
-//- local includes
-#include "alu2dinclude.hh"
-
-using std::endl;
-using std::cout;
-using std::flush;
+//using std::endl;
+//using std::cout;
+//using std::flush;
 
 namespace ALU2DSPACENAME
 {
