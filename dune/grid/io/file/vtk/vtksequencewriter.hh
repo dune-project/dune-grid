@@ -14,7 +14,7 @@ namespace Dune {
    *
    * Writes arbitrary grid functions (living on cells or vertices of a grid)
    * to a file suitable for easy visualization with
-   * <a href="http://public.kitware.com/VTK/">The Visualization Toolkit (VTK)</a>.
+   * <a href="http://www.vtk.org/">The Visualization Toolkit (VTK)</a>.
    */
   template< class GridView >
   class VTKSequenceWriter : public VTKWriter<GridView> {
@@ -52,6 +52,12 @@ namespace Dune {
                  << "</VTKFile> \n" << std::flush;
       }
     }
+
+    /**
+     * \brief Writes VTK data for the given time.
+     * \param time The time(step) for the data to be written.
+     * \param ot VTK output type.
+     */
     void write (double time, VTK::OutputType ot = VTK::ascii)
     {
       std::stringstream name;
