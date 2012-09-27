@@ -640,15 +640,6 @@ namespace Dune
     // method for vertices
     bool buildGeom(const VertexType & item, const int );
 
-    template< std::size_t N >
-    bool buildGeometry ( const array< GlobalCoordinate, N > &corners );
-
-    //! return non-const reference to coord vecs
-    GlobalCoordinate& getCoordVec (int i);
-
-    //! print internal data
-    void print (std::ostream& ss) const;
-
     // returns true if geometry information is valid
     inline bool valid() const { return geoImpl_.valid(); }
 
@@ -673,20 +664,6 @@ namespace Dune
     : geoImpl_(),
       det_( 1.0 )
   {}
-
-
-  template< int mydim, int cdim, class GridImp >
-  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::print ( std::ostream &out ) const
-  {
-    out << "ALU2dGridGeometry< " << mydim << ", " << cdim << " > = ";
-    char c = '{';
-    for( int i = 0; i < corners(); ++i )
-    {
-      out << c << " (" << corner( i ) << ")";
-      c = ',';
-    }
-    out << " }" << std::endl;
-  }
 
 
   template< int mydim, int cdim, class GridImp >
@@ -838,18 +815,6 @@ namespace Dune
 
     // volume is already 1.0
 
-    return true;
-  }
-
-
-  template< int mydim, int cdim, class GridImp >
-  template< std::size_t N >
-  inline bool ALU2dGridGeometry< mydim, cdim, GridImp >
-  ::buildGeometry ( const array< GlobalCoordinate, N > &corners )
-  {
-    geoImpl_.update( corners );
-    LocalCoordinate local( 0.5 );
-    det_ = geoImpl_.det( local );
     return true;
   }
 
