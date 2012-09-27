@@ -44,11 +44,6 @@ namespace Dune {
     //! return the number of corners of this element (==1)
     int corners () const {return 1;}
 
-    //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<typename GridImp::ctype, 1>& operator[] (int i) const {
-      return (storeCoordsLocally_) ? pos_ : target_->pos_;
-    }
-
     /** \brief access to coordinates of a corner */
     const FieldVector< typename GridImp::ctype, 1 > corner ( const int i ) const
     {
@@ -144,12 +139,6 @@ namespace Dune {
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
     int corners () const {return 2;}
-
-    //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<typename GridImp::ctype, coorddim>& operator[](int i) const {
-      assert(i==0 || i==1);
-      return (storeCoordsLocally_) ? pos_[i] : target_->vertex_[i]->pos_;
-    }
 
     /** \brief access to coordinates of a corner */
     const FieldVector< typename GridImp::ctype, coorddim > corner ( const int i ) const

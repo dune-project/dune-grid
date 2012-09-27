@@ -211,10 +211,10 @@ namespace Dune
       current.inside()->outernormal( current.index_, (normal_t)(&outerNormal)[0] );
     else
     {
-      const GenericReferenceElement< alu2d_ctype, dim > &refElement =
-        GenericReferenceElements< alu2d_ctype, dim >::cube();
+      const ReferenceElement< alu2d_ctype, dim > &refElement =
+        ReferenceElements< alu2d_ctype, dim >::cube();
       typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
-      typename LocalGeometry::GlobalCoordinate refNormal = refElement.volumeOuterNormal( indexInInside() );
+      typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
       inside()->geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
       outerNormal *= inside()->geometry().integrationElement( xInside );
     }
