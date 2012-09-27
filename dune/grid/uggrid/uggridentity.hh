@@ -135,7 +135,7 @@ namespace Dune {
           || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioVGhost
           || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
-      else if (UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioBorder || hasBorderCopy_(node))
+      else if (hasBorderCopy_(node))
         return BorderEntity;
       else if (UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
