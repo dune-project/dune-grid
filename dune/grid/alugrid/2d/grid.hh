@@ -15,6 +15,7 @@
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/geometryreference.hh>
 #include <dune/grid/alugrid/common/declaration.hh>
 #include <dune/grid/alugrid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
@@ -29,6 +30,7 @@
 #include "indexsets.hh"
 #include <dune/grid/alugrid/common/objectfactory.hh>
 #include <dune/grid/alugrid/2d/geoinfather.hh>
+#include <dune/grid/alugrid/2d/localgeometry.hh>
 #include "datahandle.hh"
 
 namespace Dune
@@ -140,9 +142,10 @@ namespace Dune
       {
         // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
         typedef ALU2dGridGeometry< dim-cd, dimworld, const GridImp > GeometryImpl;
-        typedef ALU2dGridGeometry< dim-cd, dim, const GridImp > LocalGeometryImpl;
         typedef Dune::Geometry< dim-cd, dimworld, const GridImp, ALU2dGridGeometry > Geometry;
-        typedef Dune::Geometry< dim-cd, dim, const GridImp, ALU2dGridGeometry > LocalGeometry;
+
+        typedef ALU2dGridLocalGeometry< dim-cd, dim, const GridImp > LocalGeometryImpl;
+        typedef Dune::Geometry< dim-cd, dim, const GridImp, LocalGeometryReference > LocalGeometry;
 
         // we could - if needed - introduce an other struct for dimglobal of Geometry
         typedef Dune::Entity<cd, dim, const GridImp, ALU2dGridEntity> Entity;

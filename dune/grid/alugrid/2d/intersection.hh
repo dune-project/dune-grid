@@ -65,10 +65,14 @@ namespace Dune
     typedef ALU2DIntersectionGeometryStorage< LocalGeometryImpl > This;
 
     // one geometry for each face and twist 0 and 1
-    LocalGeometryImpl geoms_[ 2 ][ 4 ][ 2 ];
+    const LocalGeometryImpl *geoms_[ 2 ][ 4 ][ 2 ];
 
   private:
     ALU2DIntersectionGeometryStorage ();
+    ~ALU2DIntersectionGeometryStorage ();
+
+    ALU2DIntersectionGeometryStorage ( const This &other );
+    const This &operator= ( const This &other );
 
   public:
     // return reference to local geometry
@@ -77,7 +81,8 @@ namespace Dune
       assert( corners == 3 || corners == 4 );
       assert( 0 <= aluFace && aluFace < corners );
       assert( twist == 0 || twist == 1 );
-      return geoms_[ corners-3 ][ aluFace ][ twist ];
+      assert( geoms_[ corners-3 ][ aluFace ][ twist ] );
+      return *geoms_[ corners-3 ][ aluFace ][ twist ];
     }
 
     // return static instance
@@ -136,6 +141,9 @@ namespace Dune
 
     //! copy constructor
     ALU2dGridIntersectionBase ( const This &other );
+
+    //! destructor
+    ~ALU2dGridIntersectionBase ();
 
     //! assignment operator
     const This &operator= ( const This &other );
@@ -196,8 +204,8 @@ namespace Dune
   protected:
     // the local geometries
     mutable GeometryImpl intersectionGlobal_;
-    mutable LocalGeometryImpl intersectionSelfLocal_;
-    mutable LocalGeometryImpl intersectionNeighborLocal_;
+    mutable LocalGeometryImpl *geometryInInside_;
+    mutable LocalGeometryImpl *geometryInOutside_;
 
     // reference to factory
     const Factory &factory_;

@@ -3,7 +3,11 @@
 #ifndef DUNE_ALU2DGRID_GEOINFATHER_HH
 #define DUNE_ALU2DGRID_GEOINFATHER_HH
 
-#include <dune/grid/alugrid/2d/geometry.hh>
+#include <dune/common/array.hh>
+
+#include <dune/geometry/genericgeometry/topologytypes.hh>
+
+#include <dune/grid/alugrid/2d/localgeometry.hh>
 
 namespace Dune
 {
@@ -102,18 +106,17 @@ namespace Dune
   inline ALU2DGeometryInFatherStorage< ALU2DSPACE triangle, LocalGeometryImpl >
   ::ALU2DGeometryInFatherStorage ()
   {
+    GeometryType triangle( GenericGeometry::SimplexTopology< 2 >::type::id, 2 );
     array< FieldVector< alu2d_ctype, 2 >, 3 > corners;
     for( int child = 0; child < 2; ++child )
     {
       getALU2DGeometryInFather( true, child, corners );
-      geo_[ child ] = new LocalGeometryImpl();
-      geo_[ child ]->buildGeometry( corners );
+      geo_[ child ] = new LocalGeometryImpl( triangle, corners );
     }
     for( int child = 0; child < 4; ++child )
     {
       getALU2DGeometryInFather( false, child, corners );
-      geo_[ 2+child ] = new LocalGeometryImpl();
-      geo_[ 2+child ]->buildGeometry( corners );
+      geo_[ 2+child ] = new LocalGeometryImpl( triangle, corners );
     }
   }
 
@@ -130,12 +133,12 @@ namespace Dune
   inline ALU2DGeometryInFatherStorage< ALU2DSPACE quadrilateral, LocalGeometryImpl >
   ::ALU2DGeometryInFatherStorage ()
   {
+    GeometryType quadrilateral( GenericGeometry::CubeTopology< 2 >::type::id, 2 );
     array< FieldVector< alu2d_ctype, 2 >, 4 > corners;
     for( int child = 0; child < 4; ++child )
     {
       getALU2DGeometryInFather( child, corners );
-      geo_[ child ] = new LocalGeometryImpl();
-      geo_[ child ]->buildGeometry( corners );
+      geo_[ child ] = new LocalGeometryImpl( quadrilateral, corners );
     }
   }
 
@@ -152,17 +155,17 @@ namespace Dune
   inline ALU2DGeometryInFatherStorage< ALU2DSPACE mixed, LocalGeometryImpl >
   ::ALU2DGeometryInFatherStorage ()
   {
+    GeometryType triangle( GenericGeometry::SimplexTopology< 2 >::type::id, 2 );
+    GeometryType quadrilateral( GenericGeometry::CubeTopology< 2 >::type::id, 2 );
     array< FieldVector< alu2d_ctype, 2 >, 3 > corners3;
     array< FieldVector< alu2d_ctype, 2 >, 4 > corners4;
     for( int child = 0; child < 4; ++child )
     {
       getALU2DGeometryInFather( false, child, corners3 );
-      geo_[ 0 ][ child ] = new LocalGeometryImpl();
-      geo_[ 0 ][ child ]->buildGeometry( corners3 );
+      geo_[ 0 ][ child ] = new LocalGeometryImpl( triangle, corners3 );
 
       getALU2DGeometryInFather( child, corners4 );
-      geo_[ 1 ][ child ] = new LocalGeometryImpl();
-      geo_[ 1 ][ child ]->buildGeometry( corners4 );
+      geo_[ 1 ][ child ] = new LocalGeometryImpl( quadrilateral, corners4 );
     }
   }
 

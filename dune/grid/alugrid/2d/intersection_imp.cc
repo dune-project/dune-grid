@@ -6,6 +6,8 @@
 #include <stack>
 #include <utility>
 
+#include <dune/common/nullptr.hh>
+
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/alugrid/2d/geometry.hh>
@@ -22,6 +24,8 @@ namespace Dune
   inline ALU2dGridIntersectionBase< Grid, Info >
   ::ALU2dGridIntersectionBase ( const Factory &factory, const IntersectionInfo &info )
     : current( info ),
+      geometryInInside_( nullptr ),
+      geometryInOutside_( nullptr ),
       factory_( factory ),
       localGeomStorage_( LocalGeometryStorageType::instance() )
   {}
@@ -31,9 +35,21 @@ namespace Dune
   inline ALU2dGridIntersectionBase< Grid, Info >
   ::ALU2dGridIntersectionBase ( const This &other )
     : current( other.current ),
+      geometryInInside_( nullptr ),
+      geometryInOutside_( nullptr ),
       factory_( other.factory_ ),
       localGeomStorage_( LocalGeometryStorageType::instance() )
   {}
+
+
+  template< class Grid, class Info >
+  inline ALU2dGridIntersectionBase< Grid, Info >::~ALU2dGridIntersectionBase ()
+  {
+    if( geometryInInside_ )
+      delete geometryInInside_;
+    if( geometryInOutside_ )
+      delete geometryInOutside_;
+  }
 
 
   template< class Grid, class Info >
@@ -214,7 +230,7 @@ namespace Dune
     // only in non-conform situation we use default method
     if( current.useOutside() )
     {
-      if( !intersectionSelfLocal_.valid() )
+      if( !geometryInInside_ )
       {
         EntityPointer insidePtr = inside();
         const typename Entity::Geometry &insideGeo = insidePtr->geometry();
@@ -230,10 +246,10 @@ namespace Dune
           for( int j = 0; j < dimension; ++j )
             coords[ i ][ j ] = (coords[ i ][ j ] < 1e-14 ? 0.0 : coords[ i ][ j ]);
         }
-        intersectionSelfLocal_.buildGeometry( coords );
+        geometryInInside_ = new LocalGeometryImpl( type(), coords );
       }
-      assert( intersectionSelfLocal_.valid() );
-      return LocalGeometry( intersectionSelfLocal_ );
+      assert( geometryInInside_ );
+      return LocalGeometry( *geometryInInside_ );
     }
     else
     {
@@ -253,7 +269,7 @@ namespace Dune
     // only in non-conform situation we use default method
     if( !conforming() )
     {
-      if( !intersectionNeighborLocal_.valid() )
+      if( !geometryInOutside_ )
       {
         EntityPointer outsidePtr = outside();
         const typename Entity::Geometry &outsideGeo = outsidePtr->geometry();
@@ -269,10 +285,10 @@ namespace Dune
           for( int j = 0; j < dimension; ++j )
             coords[ i ][ j ] = (coords[ i ][ j ] < 1e-14 ? 0.0 : coords[ i ][ j ]);
         }
-        intersectionNeighborLocal_.buildGeometry( coords );
+        geometryInOutside_ = new LocalGeometryImpl( type(), coords );
       }
-      assert( intersectionNeighborLocal_.valid() );
-      return LocalGeometry( intersectionNeighborLocal_ );
+      assert( geometryInOutside_ );
+      return LocalGeometry( *geometryInOutside_ );
     }
     else
     {
@@ -314,8 +330,16 @@ namespace Dune
   inline void ALU2dGridIntersectionBase< Grid, Info >::invalidate ()
   {
     intersectionGlobal_.invalidate();
-    intersectionSelfLocal_.invalidate();
-    intersectionNeighborLocal_.invalidate();
+    if( geometryInInside_ )
+    {
+      delete geometryInInside_;
+      geometryInInside_ = nullptr;
+    }
+    if( geometryInOutside_ )
+    {
+      delete geometryInOutside_;
+      geometryInOutside_ = nullptr;
+    }
   }
 
 

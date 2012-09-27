@@ -7,6 +7,8 @@
 #include <config.h>
 #endif
 
+#include <dune/geometry/genericgeometry/topologytypes.hh>
+
 #include <dune/grid/alugrid/2d/geometry.hh>
 #include <dune/grid/alugrid/2d/intersection.hh>
 
@@ -21,6 +23,11 @@ namespace Dune
   ALU2DIntersectionGeometryStorage< LocalGeometryImpl >
   ::ALU2DIntersectionGeometryStorage ()
   {
+    // initialize non-existing face 3 of a triangle to nullptr
+    geoms_[ 0 ][ 3 ][ 0 ] = nullptr;
+    geoms_[ 0 ][ 3 ][ 1 ] = nullptr;
+
+    GeometryType line( GenericGeometry::CubeTopology< 1 >::type::id, 1 );
     for( int corners = 3; corners <= 4; ++corners )
     {
       FieldMatrix< alu2d_ctype, 4, 2 > refCoords( 0.0 );
@@ -37,8 +44,23 @@ namespace Dune
           array< FieldVector< alu2d_ctype, 2 >, 2 > coords;
           coords[ 0 ] = refCoords[ (i + 1 + twist) % corners ];
           coords[ 1 ] = refCoords[ (i + 2 - twist) % corners ];
-          geoms_[ corners - 3 ][ i ][ twist ].buildGeometry( coords );
+          geoms_[ corners - 3 ][ i ][ twist ] = new LocalGeometryImpl( line, coords );
         }
+      }
+    }
+  }
+
+  template< class LocalGeometryImpl >
+  alu2d_inline
+  ALU2DIntersectionGeometryStorage< LocalGeometryImpl >
+  ::~ALU2DIntersectionGeometryStorage ()
+  {
+    for( int corners = 3; corners <= 4; ++corners )
+    {
+      for( int i = 0; i < corners; ++i )
+      {
+        for( int twist = 0; twist < 2; ++twist )
+          delete geoms_[ corners - 3 ][ i ][ twist ];
       }
     }
   }
