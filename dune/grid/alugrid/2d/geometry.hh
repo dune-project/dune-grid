@@ -115,12 +115,11 @@ namespace Dune
       return mapping().det( m );
     }
 
-    // update geometry coordinates
-    template< class Vector >
-    void update ( const Vector &p0 )
+    template< class CoordVector >
+    void update ( const CoordVector &coordVector )
     {
-      mapping_.buildMapping( p0 );
-      valid_ = true ;
+      mapping_.buildMapping( coordVector[ 0 ] );
+      valid_ = true;
     }
   };
 
@@ -211,10 +210,10 @@ namespace Dune
     }
 
     // update geometry coordinates
-    template< class Vector >
-    void update ( const array< Vector, 2 > &p )
+    template< class CoordVector >
+    void update ( const CoordVector &coordVector )
     {
-      mapping_.buildMapping( p[ 0 ], p[ 1 ] );
+      mapping_.buildMapping( coordVector[ 0 ], coordVector[ 1 ] );
       valid_ = true;
     }
   };
@@ -293,18 +292,10 @@ namespace Dune
       return mapping().det( m );
     }
 
-    template< class Vector >
-    void update ( const array< Vector, 3 > &p )
+    template< class CoordVector >
+    void update ( const CoordVector &coordVector )
     {
-      mapping_.buildMapping( p[ 0 ], p[ 1 ], p[ 2 ] );
-      valid_ = true;
-    }
-
-    template< class HElement >
-    void update ( const HElement &item )
-    {
-      mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
-                             item.getVertex( 2 )->coord() );
+      mapping_.buildMapping( coordVector[ 0 ], coordVector[ 1 ], coordVector[ 2 ] );
       valid_ = true;
     }
   };
@@ -383,19 +374,11 @@ namespace Dune
       return mapping().det( m );
     }
 
-    template< class Vector >
-    void update ( const array< Vector, 4 > &p )
+    template< class CoordVector >
+    void update ( const CoordVector &coordVector )
     {
-      mapping_.buildMapping( p[ 0 ], p[ 1 ], p[ 2 ], p[ 3 ] );
+      mapping_.buildMapping( coordVector[ 0 ], coordVector[ 1 ], coordVector[ 2 ], coordVector[ 3 ] );
       valid_ = true;
-    }
-
-    template< class HElement >
-    void update ( const HElement &item )
-    {
-      mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
-                             item.getVertex( 3 )->coord(), item.getVertex( 2 )->coord() );
-      valid_ = true ;
     }
   };
 
@@ -487,9 +470,22 @@ namespace Dune
       return (corners() == 3 ? linearMapping().det( m ) : bilinearMapping().det( m ));
     }
 
+    template< class CoordVector >
+    void update ( const CoordVector &coordVector )
+    {
+      const int corners = coordVector.corners();
+      updateMapping( corners );
+      if( corners == 3 )
+        linearMapping().buildMapping( coordVector[ 0 ], coordVector[ 1 ], coordVector[ 2 ] );
+      else
+        bilinearMapping().buildMapping( coordVector[ 0 ], coordVector[ 1 ], coordVector[ 2 ], coordVector[ 3 ] );
+      valid_ = true;
+    }
+
     template< class Vector >
     void update ( const array< Vector, 3 > &p )
     {
+      updateMapping( 3 );
       linearMapping().buildMapping( p[ 0 ], p[ 1 ], p[ 2 ] );
       valid_ = true;
     }
@@ -497,23 +493,9 @@ namespace Dune
     template< class Vector >
     void update ( const array< Vector, 4 > &p )
     {
+      updateMapping( 4 );
       bilinearMapping().buildMapping( p[ 0 ], p[ 1 ], p[ 2 ], p[ 3 ] );
       valid_ = true;
-    }
-
-    template< class HElement >
-    void update ( const HElement &item )
-    {
-      const int corners = item.numvertices();
-      updateMapping( corners );
-      if( corners == 3 )
-        linearMapping().buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
-                                      item.getVertex( 2 )->coord() );
-      else
-        bilinearMapping().buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
-                                        item.getVertex( 3 )->coord(), item.getVertex( 2 )->coord() );
-
-      valid_ = true ;
     }
 
   private:
@@ -633,12 +615,9 @@ namespace Dune
     //!  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
     //! generate the geometry for out of given ALU2dGridElement
-    // method for elements
-    bool buildGeom(const HElementType & item);
-    // method for edges
-    bool buildGeom(const HElementType & item, const int aluFace);
-    // method for vertices
-    bool buildGeom(const VertexType & item, const int );
+
+    template< class CoordVector >
+    bool buildGeom( const CoordVector &coordVector );
 
     // returns true if geometry information is valid
     inline bool valid() const { return geoImpl_.valid(); }
@@ -752,71 +731,152 @@ namespace Dune
   }
 
 
-  //! built Geometry for triangles
   template< int mydim, int cdim, class GridImp >
+  template< class CoordVector >
   inline bool
-  ALU2dGridGeometry< mydim, cdim, GridImp >::buildGeom( const HElementType &item )
+  ALU2dGridGeometry< mydim, cdim, GridImp >::buildGeom( const CoordVector &coordVector )
   {
-    // check item
-    assert( &item );
-    assert( mydim == 2 );
-
-    // update geometry impl
-    geoImpl_.update( item );
-
-    // store volume
-    det_ = (geoImpl_.corners() == 3 ? 2 * item.area() : item.area());
-
-    // geometry built
+    geoImpl_.update( coordVector );
+    det_ = (coordVector.corners() == 3 ? 2 : 1) * coordVector.volume();
     return true;
   }
 
 
-  template <int mydim, int cdim, class GridImp>
-  inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildGeom(const HElementType & item, const int aluFace)
+
+  // ALU2dGridCoordVector
+  // --------------------
+
+  template< class Grid >
+  struct ALU2dGridCoordVectorBase
   {
-    assert( mydim == 1 );
-    // face 1 is twisted
-    const int nf = item.numfaces();
+    static const int dimensionworld = remove_const< Grid >::type::dimensionworld;
+    static const ALU2DSPACE ElementType elementType = remove_const< Grid >::type::elementType;
 
-    // for triangles face 1 is twisted and for quatrilaterals faces 1 and 2
-    const int twist = (nf == 3) ? (aluFace % 2) : (aluFace>>1)^(aluFace&1);
-    // std::cout << nf << " " << aluFace << " " << twist << std::endl;
-    //           << " ( " item.getVertex( (aluFace + 1 + twist ) % nf )->coord() ,
-    //           << " , " item.getVertex( (aluFace + 2 - twist ) % nf )->coord()
-    //           << " ) " << std::endl;
+    typedef typename remove_const< Grid >::type::ctype ctype;
+    typedef FieldVector< ctype, dimensionworld > GlobalCoordinate;
 
-    // check item
-    assert( &item );
+  protected:
+    template< class Vector >
+    static GlobalCoordinate convert ( const Vector &x )
+    {
+      GlobalCoordinate y;
+      for( int i = 0; i < dimensionworld; ++i )
+        y[ i ] = x[ i ];
+      return y;
+    }
+  };
 
 
-    // update geometry impl
-    geoImpl_.update( item.getVertex( (aluFace + 1 + twist ) % nf )->coord() ,
-                     item.getVertex( (aluFace + 2 - twist ) % nf )->coord() );
 
-    // store volume
-    det_ = item.sidelength( aluFace );
-    //assert( std::abs( det_ - geoImpl_.det( LocalCoordinate(0.5) ) ) < 1e-14 );
+  // ALU2dGridCoordVector
+  // --------------------
 
-    // geometry built
-    return true;
-  }
+  template< int mydim, class Grid >
+  class ALU2dGridCoordVector;
 
-  template <int mydim, int cdim, class GridImp>
-  inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildGeom(const VertexType & item , const int )
+  template< class Grid >
+  class ALU2dGridCoordVector< 2, Grid >
+    : public ALU2dGridCoordVectorBase< Grid >
   {
-    assert( mydim == 0 );
+    typedef ALU2dGridCoordVectorBase< Grid > Base;
 
-    assert( &item );
-    // update geometry impl
-    geoImpl_.update( item.coord() );
+  public:
+    typedef typename ALU2dImplInterface< 2, Base::dimensionworld, Base::elementType >::Type Item;
 
-    // volume is already 1.0
+    ALU2dGridCoordVector ( const Item &item )
+      : item_( item )
+    {}
 
-    return true;
-  }
+    int corners () const
+    {
+      switch( Base::elementType )
+      {
+      case ALU2DSPACE triangle :
+        return 3;
+
+      case ALU2DSPACE quadrilateral :
+        return 4;
+
+      case ALU2DSPACE mixed :
+        return item_.numvertices();
+      }
+    }
+
+    typename Base::GlobalCoordinate operator[] ( int i ) const
+    {
+      assert( (i >= 0) && (i < corners()) );
+      // for cubes: exchange corners 2 and 3
+      const int j = (corners() == 4 ? i^(i >> 1) : i);
+      return Base::convert( item_.getVertex( j )->coord() );
+    }
+
+    typename Base::ctype volume () const { return item_.area(); }
+
+  private:
+    const Item &item_;
+  };
+
+  template< class Grid >
+  class ALU2dGridCoordVector< 1, Grid >
+    : public ALU2dGridCoordVectorBase< Grid >
+  {
+    typedef ALU2dGridCoordVectorBase< Grid > Base;
+
+  public:
+    typedef typename ALU2dImplInterface< 1, Base::dimensionworld, Base::elementType >::Type Item;
+
+    ALU2dGridCoordVector ( const Item &item, int aluFace )
+      : item_( item ),
+        aluFace_( aluFace ),
+        numFaces_( item_.numfaces() )
+    {}
+
+    int corners () const { return 2; }
+
+    typename Base::GlobalCoordinate operator[] ( int i ) const
+    {
+      assert( (i >= 0) && (i < corners()) );
+
+      // for triangles face 1 is twisted and for quatrilaterals faces 1 and 2
+      const int twist = (numFaces_ == 3 ? (aluFace_ % 2) : (aluFace_ >> 1)^(aluFace_ & 1));
+      const int j = (i + twist) & 1;
+
+      return Base::convert( item_.getVertex( (aluFace_ + 1 + j) % numFaces_ )->coord() );
+    }
+
+    typename Base::ctype volume () const { return item_.sidelength( aluFace_ ); }
+
+  private:
+    const Item &item_;
+    int aluFace_, numFaces_;
+  };
+
+  template< class Grid >
+  class ALU2dGridCoordVector< 0, Grid >
+    : public ALU2dGridCoordVectorBase< Grid >
+  {
+    typedef ALU2dGridCoordVectorBase< Grid > Base;
+
+  public:
+    typedef typename ALU2dImplInterface< 0, Base::dimensionworld, Base::elementType >::Type Item;
+
+    ALU2dGridCoordVector ( const Item &item, int )
+      : item_( item )
+    {}
+
+    int corners () const { return 1; }
+
+    typename Base::GlobalCoordinate operator[] ( int i ) const
+    {
+      assert( (i >= 0) && (i < corners()) );
+      return Base::convert( item_.coord() );
+    }
+
+    typename Base::ctype volume () const { return 1; }
+
+  private:
+    const Item &item_;
+  };
 
 } // namespace Dune
 

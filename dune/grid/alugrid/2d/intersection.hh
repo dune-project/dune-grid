@@ -119,6 +119,8 @@ namespace Dune
     typedef alu2d_ctype ctype;
 
     static const int dimension = Grid::dimension;
+    static const int codimension = 1;
+    static const int mydimension = dimension - codimension;
     static const int dimensionworld  = Grid::dimensionworld;
 
     typedef typename Grid::GridObjectFactoryType Factory;
@@ -131,7 +133,7 @@ namespace Dune
     typedef ALU2dGridEntity<0,dimension,Grid> EntityImp;
 
     typedef FieldVector< ctype, dimensionworld > NormalType;
-    typedef FieldVector< ctype, dimension-1 > LocalCoordinate;
+    typedef FieldVector< ctype, mydimension > LocalCoordinate;
 
     typedef ALU2dGridEntityPointer<0,Grid> EntityPointerImp;
 

@@ -91,8 +91,9 @@ namespace Dune
   inline typename ALU2dGridEntity< cd, dim, GridImp >::Geometry
   ALU2dGridEntity< cd, dim, GridImp >::geometry () const
   {
+    typedef ALU2dGridCoordVector< dim-cd, GridImp > CoordVector;
     if( !geoObj_.valid() )
-      geoObj_.buildGeom( *item_,face_ );
+      geoObj_.buildGeom( CoordVector( *item_, face_ ) );
 
     assert( geoObj_.valid() );
     return Geometry( geoObj_ );
@@ -169,9 +170,10 @@ namespace Dune
   inline typename ALU2dGridEntity< 0, dim, GridImp >::Geometry
   ALU2dGridEntity< 0, dim, GridImp >::geometry () const
   {
-    assert( item_ != 0 );
+    typedef ALU2dGridCoordVector< dim, GridImp > CoordVector;
+    assert( item_ );
     if( !geoObj_.valid() )
-      geoObj_.buildGeom( *item_ );
+      geoObj_.buildGeom( CoordVector( *item_ ) );
 
     assert( geoObj_.valid() );
     return Geometry( geoObj_ );

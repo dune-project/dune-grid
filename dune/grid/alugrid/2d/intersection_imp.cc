@@ -303,14 +303,15 @@ namespace Dune
   inline typename ALU2dGridIntersectionBase< Grid, Info >::Geometry
   ALU2dGridIntersectionBase< Grid, Info >::geometry () const
   {
+    typedef ALU2dGridCoordVector< mydimension, Grid > CoordVector;
     assert( current.inside() );
 
     if( !intersectionGlobal_.valid() )
     {
       if( current.useOutside() )
-        intersectionGlobal_.buildGeom( *current.outside(), current.opposite() );
+        intersectionGlobal_.buildGeom( CoordVector( *current.outside(), current.opposite() ) );
       else
-        intersectionGlobal_.buildGeom( *current.inside(), current.index() );
+        intersectionGlobal_.buildGeom( CoordVector( *current.inside(), current.index() ) );
     }
 
     assert( intersectionGlobal_.valid() );
