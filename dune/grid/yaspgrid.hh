@@ -342,8 +342,8 @@ namespace Dune {
     //! access to coordinates of corners. Index is the number of the corner
     FieldVector< ctype, mydim > corner ( const int i ) const
     {
-      assert( i >= 0 && i < (int) coord_.N() );
-      FieldVector<ctype, mydim>& c = coord_[i];
+      assert( (i >= 0 && i < Power_m_p<2,mydim>::power) );
+      FieldVector<ctype, mydim> c;
       for (int k=0; k<mydim; k++)
         if (i&(1<<k))
           c[k] = midpoint[k]+0.5*extension[k]; // kth bit is 1 in i
@@ -452,7 +452,6 @@ namespace Dune {
     // In addition we need memory in order to return references.
     // Possibly we should change this in the interface ...
     mutable FieldMatrix<ctype, mydim, mydim> Jinv,JT; // the transpose of the jacobian and its inverse inverse
-    mutable FieldMatrix<ctype, Power_m_p<2,mydim>::power, mydim> coord_; // the coordinates
   };
 
   //! specialization for dim=0, this is a vertex
