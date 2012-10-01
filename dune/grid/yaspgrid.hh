@@ -24,6 +24,7 @@ typedef unsigned char uint8_t;
 #include <dune/common/collectivecommunication.hh>
 #include <dune/common/mpihelper.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/axisalignedcubegeometry.hh>
 #include <dune/grid/common/indexidset.hh>
 #include <dune/grid/common/datahandleif.hh>
 
@@ -313,117 +314,31 @@ namespace Dune {
 
   //! specialize for dim=dimworld, i.e. a volume element
   template<int mydim, class GridImp>
-  class YaspGeometry<mydim,mydim,GridImp> : public GeometryDefaultImplementation<mydim,mydim,GridImp,YaspGeometry>
+  class YaspGeometry<mydim,mydim,GridImp> : public AxisAlignedCubeGeometry<typename GridImp::ctype,mydim,mydim>
   {
   public:
     typedef typename GridImp::ctype ctype;
 
-    //! return the element type identifier
-    GeometryType type () const
-    {
-      return GeometryType(GeometryType::cube,mydim);
-    }
-
-    //! here we have always an affine geometry
-    bool affine() const { return true; }
-
-    //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const
-    {
-      return 1<<mydim;
-    }
-
-    //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<ctype, mydim>& operator[] (int i) const
-    {
-      return corner(i);
-    }
-
-    //! access to coordinates of corners. Index is the number of the corner
-    FieldVector< ctype, mydim > corner ( const int i ) const
-    {
-      assert( (i >= 0 && i < Power_m_p<2,mydim>::power) );
-      FieldVector<ctype, mydim> c;
-      for (int k=0; k<mydim; k++)
-        if (i&(1<<k))
-          c[k] = midpoint[k]+0.5*extension[k]; // kth bit is 1 in i
-        else
-          c[k] = midpoint[k]-0.5*extension[k]; // kth bit is 0 in i
-      return c;
-    }
-
-    //! access to the center/centroid
-    FieldVector< ctype, mydim > center ( ) const
-    {
-      return midpoint;
-    }
-
-    //! maps a local coordinate within reference element to global coordinate in element
-    FieldVector<ctype, mydim> global (const FieldVector<ctype, mydim>& local) const
-    {
-      FieldVector<ctype,mydim> g;
-      for (int k=0; k<mydim; k++)
-        g[k] = midpoint[k] + (local[k]-0.5)*extension[k];
-      return g;
-    }
-
-    //! maps a global coordinate within the element to a local coordinate in its reference element
-    FieldVector<ctype, mydim> local (const FieldVector<ctype,mydim>& global) const
-    {
-      FieldVector<ctype, mydim> l; // result
-      for (int k=0; k<mydim; k++)
-        l[k] = (global[k]-midpoint[k])/extension[k] + 0.5;
-      return l;
-    }
-
-    /*! determinant of the jacobian of the mapping
-     */
-    ctype integrationElement (const FieldVector<ctype, mydim>& local) const
-    {
-      return volume();
-    }
-
-    //! return volume of geometry
-    ctype volume () const
-    {
-      ctype vol=1.0;
-      for (int k=0; k<mydim; k++) vol *= extension[k];
-      return vol;
-    }
-
-    //! Compute the transposed of the jacobi matrix
-    FieldMatrix<ctype,mydim,mydim>& jacobianTransposed (const FieldVector<ctype, mydim>& local) const
-    {
-      for (int i=0; i<mydim; ++i)
-      {
-        JT[i] = 0.0;              // set column to zero
-        JT[i][i] = extension[i]; // set diagonal element
-      }
-      return JT;
-    }
-    //! Compute the transposed of the inverse jacobi matrix
-    FieldMatrix<ctype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<ctype, mydim>& local) const
-    {
-      for (int i=0; i<mydim; ++i)
-      {
-        Jinv[i] = 0.0;              // set column to zero
-        Jinv[i][i] = 1.0/extension[i]; // set diagonal element
-      }
-      return Jinv;
-    }
-
     //! default constructor
-    YaspGeometry () {}
+    YaspGeometry ()
+      : AxisAlignedCubeGeometry<ctype,mydim,mydim>(FieldVector<ctype,mydim>(0),FieldVector<ctype,mydim>(0)) // anything
+    {}
 
     //! constructor from midpoint and extension
     YaspGeometry (const FieldVector<ctype, mydim>& p, const FieldVector<ctype, mydim>& h)
-      : midpoint(p), extension(h)
-    {}
+      : AxisAlignedCubeGeometry<ctype,mydim,mydim>(FieldVector<ctype,mydim>(0),FieldVector<ctype,mydim>(0)) // anything
+    {
+      FieldVector<ctype, mydim> lower = p;
+      FieldVector<ctype, mydim> upper = p;
+      lower.axpy(-0.5,h);
+      upper.axpy( 0.5,h);
+      // set up base class
+      static_cast< AxisAlignedCubeGeometry<ctype,mydim,mydim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,mydim>(lower, upper);
+    }
 
     //! copy constructor (skipping temporary variables)
     YaspGeometry (const YaspGeometry& other)
-      : midpoint(other.midpoint),
-        extension(other.extension)
+      : AxisAlignedCubeGeometry<ctype,mydim,mydim>(other)
     {}
 
     //! print function
@@ -432,26 +347,12 @@ namespace Dune {
       s << "YaspGeometry<"<<mydim<<","<<mydim<< "> ";
       s << "midpoint";
       for (int i=0; i<mydim; i++)
-        s << " " << midpoint[i];
+        s << " " << 0.5 * (this->lower_[i] + this->upper_[i]);
       s << " extension";
       for (int i=0; i<mydim; i++)
-        s << " " << extension[i];
+        s << " " << (this->upper_[i] + this->lower_[i]);
     }
 
-    // const YaspGeometry<mydim,mydim,GridImp>&
-    // operator = (const YaspGeometry<mydim,mydim,GridImp>& g);
-
-  private:
-    // the element is fully defined by midpoint and the extension
-    // in each direction.
-    // Note mydim==cdim
-
-    FieldVector<ctype, mydim> midpoint; // the midpoint
-    FieldVector<ctype, mydim> extension; // the extension
-
-    // In addition we need memory in order to return references.
-    // Possibly we should change this in the interface ...
-    mutable FieldMatrix<ctype, mydim, mydim> Jinv,JT; // the transpose of the jacobian and its inverse inverse
   };
 
   //! specialization for dim=0, this is a vertex
