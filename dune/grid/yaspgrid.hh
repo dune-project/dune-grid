@@ -443,8 +443,7 @@ namespace Dune {
 
   private:
     // the element is fully defined by midpoint and the extension
-    // in each direction. References are used because this information
-    // is known outside the element in many cases.
+    // in each direction.
     // Note mydim==cdim
 
     FieldVector<ctype, mydim> midpoint; // the midpoint
