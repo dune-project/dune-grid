@@ -1223,8 +1223,6 @@ namespace Dune {
     const GridImp * _yg;          // access to YaspGrid
     const TSI& _it;               // position in the grid level
     const YGLI& _g;               // access to grid level
-    // temporary object
-    mutable FieldVector<ctype, dim> loc; // always computed before being returned
   };
 
   //========================================================================
