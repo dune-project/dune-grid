@@ -7,7 +7,7 @@
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/mapping/cornermapping.hh>
+#include <dune/geometry/multilineargeometry.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
@@ -49,11 +49,11 @@ namespace Dune
 
 
 
-    // MappingTraits
-    // -------------
+    // GeometryTraits
+    // --------------
 
     template< class Grid >
-    struct MappingTraits
+    struct GeometryTraits
     {
       typedef typename remove_const< Grid >::type::Traits Traits;
 
@@ -109,7 +109,7 @@ namespace Dune
       static const int codimension = dimension - mydimension;
 
     protected:
-      typedef CachedCornerMapping< ctype, mydimension, coorddimension, MappingTraits< Grid > > Mapping;
+      typedef CachedMultiLinearGeometry< ctype, mydimension, coorddimension, GeometryTraits< Grid > > Mapping;
 
     public:
       typedef typename Mapping::LocalCoordinate LocalCoordinate;

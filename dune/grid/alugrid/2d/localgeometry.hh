@@ -3,7 +3,7 @@
 #ifndef DUNE_ALUGRID_2D_LOCALGEOMETRY_HH
 #define DUNE_ALUGRID_2D_LOCALGEOMETRY_HH
 
-#include <dune/geometry/mapping/affinemapping.hh>
+#include <dune/geometry/affinegeometry.hh>
 
 //#include <dune/grid/alugrid/common/matrixhelper.hh>
 #include <dune/grid/alugrid/2d/geometry.hh>
@@ -29,9 +29,9 @@ namespace Dune
 
   template< int mydim, int cdim, class Grid >
   class ALU2dGridLocalGeometry
-    : public AffineMapping< alu2d_ctype, mydim, cdim, ALU2dGridLocalGeometryTraits >
+    : public AffineGeometry< alu2d_ctype, mydim, cdim, ALU2dGridLocalGeometryTraits >
   {
-    typedef AffineMapping< alu2d_ctype, mydim, cdim, ALU2dGridLocalGeometryTraits > Base;
+    typedef AffineGeometry< alu2d_ctype, mydim, cdim, ALU2dGridLocalGeometryTraits > Base;
 
   public:
     template< class CoordVector >
