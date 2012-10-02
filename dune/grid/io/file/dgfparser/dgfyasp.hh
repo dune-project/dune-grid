@@ -206,7 +206,7 @@ namespace Dune
     {
       DUNE_THROW( DGFException,
                   "Cannot read an interval of dimension " << intervalBlock.dimw()
-                                                          << "into a YaspGrid< " << dim << " >." );
+                                                          << " into a YaspGrid< " << dim << " >." );
     }
 
     const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
