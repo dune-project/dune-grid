@@ -238,13 +238,15 @@ struct checkMappersWrapper<2, 1, GridView>
 template <class GridView, int commCodim>
 void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=false)
 {
-  std::cout << "Testing communication for codim " << commCodim << " entities\n";
+  std::cout << gridView.comm().rank() + 1
+            << ": Testing communication for codim " << commCodim << " entities\n";
 
   typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, LayoutWrapper<commCodim>::template Layout>
   MapperType;
   MapperType mapper(gridView);
 
-  std::cout << "Index set has " << mapper.size() << " codim " << commCodim << " entities\n";
+  std::cout << gridView.comm().rank() + 1
+            << ": Index set has " << mapper.size() << " codim " << commCodim << " entities\n";
 
   const int dim = GridView::dimension;
 
@@ -321,7 +323,8 @@ public:
   {
     const int dim = GridView::dimension;
 
-    std::cout << "Testing communication for codim " << commCodim << " entities\n";
+    std::cout << gridView.comm().rank() + 1
+              << ": Testing communication for codim " << commCodim << " entities\n";
 
     typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, LayoutWrapper<commCodim>::template Layout>
     MapperType;
@@ -380,6 +383,9 @@ public:
     // communicate the entities at the interior border to all other
     // processes
     gridView.communicate(datahandle, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
+
+    std::cout << gridView.comm().rank() + 1
+              << ": Finished testing communication for codim " << commCodim << " entities\n";
   }
 };
 
@@ -406,12 +412,6 @@ void testParallelUG(bool localRefinement)
   //////////////////////////////////////////////////////
   // Distribute the grid
   //////////////////////////////////////////////////////
-  /*    grid.loadBalance(0,   // strategy
-                       0,   // minlevel
-                       2,   // depth
-                       32,   // maxlevel
-                       1);   // minelement
-   */
   grid->loadBalance();
 
 
@@ -557,12 +557,10 @@ int main (int argc , char **argv) try
   testParallelUG<3>(false);
 
   // test 2D grid with adaptive refinement
-  // out-commented, because not working yet
-  //testParallelUG<2>(true);
+  testParallelUG<2>(true);
 
   // test 3D grid with adaptive refinement
-  // out-commented, because not working yet
-  //testParallelUG<3>(true);
+  testParallelUG<3>(true);
 
   return 0;
 }
