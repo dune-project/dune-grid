@@ -1,10 +1,23 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #ifdef COORDFUNCTION
 
+#if defined __GNUC__ and not defined __clang__ and not defined __ICC
+  #define GCCPOOL
+#endif
+
+#include <dune/common/timer.hh>
+
 #include <dune/common/poolallocator.hh>
+#include <dune/common/debugallocator.hh>
+#ifdef GCCPOOL
+#include <ext/pool_allocator.h>
+#endif
+
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/geometrygrid/cachedcoordfunction.hh>
 #include <dune/grid/io/file/dgfparser/dgfgeogrid.hh>
@@ -18,7 +31,6 @@
 #include "checkiterators.cc"
 #include "checkpartition.cc"
 #include "checkgeometry.cc"
-
 
 namespace Dune
 {
@@ -54,7 +66,10 @@ typedef AnalyticalCoordFunction CoordFunction;
 
 typedef Dune::GeometryGrid< Grid, CoordFunction > GeometryGrid;
 typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::PoolAllocator< char, 16384 > > GeometryGridWithPoolAllocator;
-
+#ifdef GCCPOOL
+typedef Dune::GeometryGrid< Grid, CoordFunction, __gnu_cxx::__pool_alloc<char> > GeometryGridWithGCCPoolAllocator;
+#endif
+typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::DebugAllocator<char> > GeometryGridWithDebugAllocator;
 
 template <class GeometryGridType>
 void test(const std::string& gridfile)
@@ -110,17 +125,40 @@ try
     gridfile = argv[1];
   }
 
+  Dune::Timer watch;
+
+  watch.reset();
   test<GeometryGrid>(gridfile);
+  std::cout << "=== GeometryGrid took " << watch.elapsed() << " seconds\n";
 
   // compile, but do not actually call, because it is not working yet
   if (false)
+  {
+    watch.reset();
     test<GeometryGridWithPoolAllocator>(gridfile);
+    std::cout << "=== GeometryGridWithPoolAllocator took " << watch.elapsed() << " seconds\n";
+  }
+
+#ifdef GCCPOOL
+  watch.reset();
+  test<GeometryGridWithGCCPoolAllocator>(gridfile);
+  std::cout << "=== GeometryGridWithGCCPoolAllocator took " << watch.elapsed() << " seconds\n";
+#endif
+
+  watch.reset();
+  test<GeometryGridWithDebugAllocator>(gridfile);
+  std::cout << "=== GeometryGridWithDebugAllocator took " << watch.elapsed() << " seconds\n";
 
   return 0;
 }
 catch( const Dune::Exception &e )
 {
   std::cerr << e << std::endl;
+  return 1;
+}
+catch( const std::exception &e )
+{
+  std::cerr << e.what() << std::endl;
   return 1;
 }
 catch( ... )
