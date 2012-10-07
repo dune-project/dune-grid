@@ -120,6 +120,131 @@ private:
   UserDataType &userDataReceive_;
 };
 
+/** \brief Data handle to test dynamic load balancing with
+ *
+ * Obtained by copy'n'paste from the DGF internals.  Will be improved eventually.
+ */
+template <class GridType>
+struct UGGridTestDataHandle
+  : public CommDataHandleIF<UGGridTestDataHandle<GridType>,double>
+{
+  UGGridTestDataHandle( GridType& grid)
+    : idSet_(grid.localIdSet())
+  {
+#if 0
+    typedef typename GridType::LevelGridView GridView;
+    GridView gridView = gridPtr_->levelView( 0 );
+    const typename GridView::IndexSet &indexSet = gridView.indexSet();
+
+    const PartitionIteratorType partType = Interior_Partition;
+    typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
+    const Iterator enditer = gridView.template end< 0, partType >();
+    for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
+    {
+      const typename Iterator::Entity &el = *iter;
+      if ( gridPtr_.nofElParam_ > 0 )
+        std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
+      if ( gridPtr_.nofVtxParam_ > 0 )
+      {
+        for ( int v = 0; v < el.template count<dimension>(); ++v)
+        {
+          typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
+          if ( ! gridPtr_.vtxParam_[ index ].empty() )
+            std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId(el,v,dimension) ] );
+        }
+      }
+    }
+#endif
+  }
+
+#if 0
+  ~DataHandle()
+  {
+    typedef typename GridType::LevelGridView GridView;
+    GridView gridView = gridPtr_->levelView( 0 );
+    const typename GridView::IndexSet &indexSet = gridView.indexSet();
+
+    if ( gridPtr_.nofElParam_ > 0 )
+      gridPtr_.elParam_.resize( indexSet.size(0) );
+    if ( gridPtr_.nofVtxParam_ > 0 )
+      gridPtr_.vtxParam_.resize( indexSet.size(dimension) );
+
+    const PartitionIteratorType partType = All_Partition;
+    typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
+    const Iterator enditer = gridView.template end< 0, partType >();
+    for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
+    {
+      const typename Iterator::Entity &el = *iter;
+      if ( gridPtr_.nofElParam_ > 0 )
+      {
+        std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
+        assert( gridPtr_.elParam_[ indexSet.index(el) ].size() == (unsigned int)gridPtr_.nofElParam_ );
+      }
+      if ( gridPtr_.nofVtxParam_ > 0 )
+      {
+        for ( int v = 0; v < el.template count<dimension>(); ++v)
+        {
+          typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
+          if ( gridPtr_.vtxParam_[ index ].empty() )
+            std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId(el,v,dimension) ] );
+          assert( gridPtr_.vtxParam_[ index ].size() == (unsigned int)gridPtr_.nofVtxParam_ );
+        }
+      }
+    }
+  }
+#endif
+  CommDataHandleIF<UGGridTestDataHandle,double> &interface()
+  {
+    return *this;
+  }
+
+  bool contains (int dim, int codim) const
+  {
+    return (codim==dim || codim==0);
+  }
+
+  bool fixedsize (int dim, int codim) const
+  {
+    return false;
+  }
+
+  template<class EntityType>
+  size_t size (const EntityType& e) const
+  {
+    //return gridPtr_.nofParameters( (int) e.codimension);
+    return 1;
+  }
+
+  template<class MessageBufferImp, class EntityType>
+  void gather (MessageBufferImp& buff, const EntityType& e) const
+  {
+    const std::vector<double> &v = (e.codimension==0) ? elData_[idSet_.id(e)] : vtxData_[idSet_.id(e)];
+    const size_t s = v.size();
+    for (size_t i=0; i<s; ++i)
+      buff.write( v[i] );
+    //assert( s == (size_t)gridPtr_.nofParameters(e.codimension) );
+  }
+
+  template<class MessageBufferImp, class EntityType>
+  void scatter (MessageBufferImp& buff, const EntityType& e, size_t n)
+  {
+    std::vector<double> &v = (e.codimension==0) ? elData_[idSet_.id(e)] : vtxData_[idSet_.id(e)];
+    v.resize( n );
+    //gridPtr_.setNofParams( e.codimension, n );
+    for (size_t i=0; i<n; ++i)
+      buff.read( v[i] );
+  }
+
+private:
+  typedef typename GridType::LocalIdSet IdSet;
+  const IdSet &idSet_;
+  mutable std::map< typename IdSet::IdType, std::vector<double> > elData_, vtxData_;
+};
+
+
+
+
+
 template <class GridView>
 void checkIntersections(const GridView &gv)
 {
@@ -412,7 +537,19 @@ void testParallelUG(bool localRefinement)
   //////////////////////////////////////////////////////
   // Distribute the grid
   //////////////////////////////////////////////////////
-  grid->loadBalance();
+
+  // Compile the load balancing with a data handle, but don't run it yet
+  if (true)
+    grid->loadBalance();
+  else {
+    UGGridTestDataHandle<GridType> dataHandle(*grid);
+    grid->loadBalance(dataHandle);
+  }
+
+  std::cout << "Process " << grid->comm().rank() + 1
+            << " has " << grid->size(0)
+            << " elements and " << grid->size(dim)
+            << " nodes.\n";
 
 
   std::cout << "Process " << grid->comm().rank() + 1

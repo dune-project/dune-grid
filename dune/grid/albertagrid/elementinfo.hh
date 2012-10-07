@@ -28,7 +28,7 @@ namespace Dune
     template< int dim >
     class MeshPointer;
 
-    class BasicNodeProjection;
+    struct BasicNodeProjection;
 
 
 
@@ -38,7 +38,7 @@ namespace Dune
     template< int dim >
     class ElementInfo
     {
-      class Instance;
+      struct Instance;
       class Stack;
 
       template< int >

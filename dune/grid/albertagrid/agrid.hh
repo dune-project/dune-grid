@@ -64,7 +64,7 @@ namespace Dune
   // -----------------------------
 
   template< class Grid >
-  class DGFGridFactory;
+  struct DGFGridFactory;
 
 
 
@@ -150,7 +150,7 @@ namespace Dune
     template< class, PartitionIteratorType > friend class AlbertaLeafGridView;
 
     friend class GridFactory< This >;
-    friend class DGFGridFactory< This >;
+    friend struct DGFGridFactory< This >;
 
     friend class AlbertaGridHierarchicIterator< This >;
 
