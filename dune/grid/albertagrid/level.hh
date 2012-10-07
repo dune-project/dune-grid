@@ -33,8 +33,8 @@ namespace Dune
     static const Level isNewFlag = (1 << 7);
     static const Level levelMask = (1 << 7) - 1;
 
-    struct SetLocal;
-    struct CalcMaxLevel;
+    class SetLocal;
+    class CalcMaxLevel;
 
     template< Level flags >
     struct ClearFlags;

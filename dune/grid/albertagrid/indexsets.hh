@@ -63,10 +63,10 @@ namespace Dune
     struct CreateEntityNumbers;
 
     template< int codim >
-    class RefineNumbering;
+    struct RefineNumbering;
 
     template< int codim >
-    class CoarsenNumbering;
+    struct CoarsenNumbering;
 
     explicit AlbertaGridHierarchicIndexSet ( const DofNumbering &dofNumbering );
 
