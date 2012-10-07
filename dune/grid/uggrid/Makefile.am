@@ -25,7 +25,7 @@ headercheck_IGNORE = uggridentity.hh uggridentitypointer.hh uggridentityseed.hh 
                      uggridleveliterator.hh uggridlocalgeometry.hh uggridrenumberer.hh \
                      ugincludes.hh uggridintersections.hh \
                      ugmessagebuffer.hh \
-                     uggridintersectioniterators.hh ugwrapper.hh
+                     uggridintersectioniterators.hh ugwrapper.hh uglbgatherscatter.hh
 
 uggriddir = $(includedir)/dune/grid/uggrid/
 uggrid_HEADERS = uggridfactory.hh uggridentitypointer.hh \
@@ -35,6 +35,7 @@ uggrid_HEADERS = uggridfactory.hh uggridentitypointer.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
   uggridintersections.hh uggridintersectioniterators.hh uggridindexsets.hh \
   uggridleafiterator.hh uggridrenumberer.hh \
+  uglbgatherscatter.hh \
   ug_undefs.hh ugwrapper.hh
 
 # tricks like undefAllMacros.pl don't have to be shipped, have they?
