@@ -73,7 +73,7 @@ namespace Dune {
       ++count_;
     }
   private:
-    // do not inherite pwrite
+    // do not inherit pwrite
     void pwrite();
   };
 }
