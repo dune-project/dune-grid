@@ -302,7 +302,7 @@ try {
   //   Test 1d grids
   //////////////////////////////////////////////////////////////////////
 
-  std::cout << "= Testding 1D" << std::endl;
+  std::cout << "= Testing 1D" << std::endl;
 
   std::cout << "== Testing OneDGrid" << std::endl;
   testVertexOrderByIdCubes<Dune::OneDGrid>(result);
@@ -311,7 +311,7 @@ try {
   //   Test 2d grids
   //////////////////////////////////////////////////////////////////////
 
-  std::cout << "= Testding 2D" << std::endl;
+  std::cout << "= Testing 2D" << std::endl;
 
 #if HAVE_UG
   std::cout << "== Testing UGGrid<2> with simplices" << std::endl;
@@ -347,7 +347,7 @@ try {
   //   Test 3d grids
   //////////////////////////////////////////////////////////////////////
 
-  std::cout << "= Testding 3D" << std::endl;
+  std::cout << "= Testing 3D" << std::endl;
 
 #if HAVE_UG
   std::cout << "== Testing UGGrid<3> with simplices" << std::endl;
