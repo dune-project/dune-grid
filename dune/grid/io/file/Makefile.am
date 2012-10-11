@@ -9,6 +9,7 @@ iofile_HEADERS =				\
 	dgfparser.hh				\
 	gmshreader.hh				\
 	gnuplot.hh				\
-	starcdreader.hh
+	starcdreader.hh				\
+	vtk.hh
 
 include $(top_srcdir)/am/global-rules
