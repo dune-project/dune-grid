@@ -145,7 +145,7 @@ namespace Dune
 
         FieldVector< ctype, dimensionworld > normal;
         jit.mv( refNormal, normal );
-        normal *= ctype( 1 ) / jit.det();
+        normal *= jit.detInv();
         //normal *= insideGeo_.integrationElement( x );
         return normal;
       }
