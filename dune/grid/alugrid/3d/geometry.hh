@@ -677,7 +677,7 @@ namespace Dune
     typedef ElementTopologyMapping<elementType> ElementTopo;
     typedef FaceTopologyMapping<elementType> FaceTopo;
 
-    enum { corners_      = (elementType == hexa) ? Power_m_p<2,mydim>::power : mydim+1 };
+    enum { corners_      = (elementType == hexa) ? StaticPower<2,mydim>::power : mydim+1 };
 
     // type of specialized geometry implementation
     typedef typename MyALUGridGeometryImplementation<cdim> ::
