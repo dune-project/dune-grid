@@ -19,6 +19,7 @@
 // local includes
 #include <dune/common/fvector.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/common/power.hh>
 #include <dune/grid/common/grid.hh>
 
 /*! \file grids.hh
@@ -994,27 +995,6 @@ namespace Dune {
     return s;
   }
 
-  namespace
-  {
-    template<int dim>
-    struct power
-    {
-      static int eval(int s)
-      {
-        return s*power<dim-1>::eval(s);
-      }
-    };
-
-    template<>
-    struct power<0>
-    {
-      static int eval(int s)
-      {
-        return 1;
-      }
-    };
-  }
-
   /** \brief Implement the default load balance strategy of yaspgrid
    */
   template<int d>
@@ -1078,7 +1058,7 @@ namespace Dune {
     {
       bool found=false;
       for(int i=1; i<P; ++i)
-        if(power<d>::eval(i)==P) {
+        if(Power<d>::eval(i)==P) {
           for(int j=0; j<d; ++j)
             dims[j]=i;
           found=true;
