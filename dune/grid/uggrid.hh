@@ -772,7 +772,7 @@ namespace Dune {
     std::string name_;
 
     // Our set of level indices
-    std::vector<UGGridLevelIndexSet<const UGGrid<dim> >*> levelIndexSets_;
+    std::vector<shared_ptr<UGGridLevelIndexSet<const UGGrid<dim> > > > levelIndexSets_;
 
     UGGridLeafIndexSet<const UGGrid<dim> > leafIndexSet_;
 

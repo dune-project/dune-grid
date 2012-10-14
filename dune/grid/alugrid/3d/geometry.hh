@@ -6,7 +6,7 @@
 // System includes
 
 // Dune includes
-#include <dune/common/misc.hh>
+#include <dune/common/power.hh>
 #include <dune/grid/common/grid.hh>
 
 // Local includes
@@ -38,7 +38,7 @@ namespace Dune
   public:
     typedef FieldVector<alu3d_ctype, cdim> CoordinateVectorType;
 
-    static const signed char invalid      = -1; // means geometry is not meaningfull
+    static const signed char invalid      = -1; // means geometry is not meaningful
     static const signed char updated      =  0; // means the point values have been set
     static const signed char buildmapping =  1; // means updated and mapping was build
 
@@ -677,7 +677,7 @@ namespace Dune
     typedef ElementTopologyMapping<elementType> ElementTopo;
     typedef FaceTopologyMapping<elementType> FaceTopo;
 
-    enum { corners_      = (elementType == hexa) ? Power_m_p<2,mydim>::power : mydim+1 };
+    enum { corners_      = (elementType == hexa) ? StaticPower<2,mydim>::power : mydim+1 };
 
     // type of specialized geometry implementation
     typedef typename MyALUGridGeometryImplementation<cdim> ::

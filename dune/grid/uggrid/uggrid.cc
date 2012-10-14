@@ -155,11 +155,6 @@ Dune::UGGrid < dim >::~UGGrid()
   // Shut down UG if this was the last existing UGGrid object
   if (UGGrid<2>::numOfUGGrids + UGGrid<3>::numOfUGGrids == 0)
     UG_NS<dim>::ExitUg();
-
-  // Delete levelIndexSets
-  for (unsigned int i=0; i<levelIndexSets_.size(); i++)
-    if (levelIndexSets_[i])
-      delete levelIndexSets_[i];
 }
 
 template < int dim >
@@ -684,7 +679,7 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
   // Create new level index sets if necessary
   for (int i=levelIndexSets_.size(); i<=maxLevel(); i++)
-    levelIndexSets_.push_back(new UGGridLevelIndexSet<const UGGrid<dim> >());
+    levelIndexSets_.push_back(make_shared<UGGridLevelIndexSet<const UGGrid<dim> > >());
 
   // Update the zero level LevelIndexSet.  It is updated only once, at the time
   // of creation of the coarse grid.  After that it is not touched anymore.

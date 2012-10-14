@@ -381,7 +381,15 @@ namespace Dune {
     }
 
   public:
-    //! get id of an entity
+    /** \brief Get id of an entity
+     *
+     * \bug Since copies of different entities on different levels are supposed to have the
+     *      same id, we look for the ancestor on the coarsest level that is still a copy of
+     *      the entity we are interested in.  However, the current implementation only searches
+     *      on one processor, while with UG's vertical load balancing the ancestors of an entity
+     *      may be distributed across different processors.  This will lead to very-difficult-to-fix
+     *      bugs.  Unfortunately, the proper fix for this is not easy, either.
+     */
     template< int cd >
     unsigned int id ( const typename Traits::template Codim< cd >::Entity &e ) const
     {
@@ -416,10 +424,17 @@ namespace Dune {
 #else
       return UG_NS<dim>::id( GridImp::getRealImplementation( e ).getTarget() );
 #endif
-
     }
 
-    //! get id of subEntity
+    /** \brief Get id of subentity
+     *
+     *  \bug Since copies of different entities on different levels are supposed to have the
+     *       same id, we look for the ancestor on the coarsest level that is still a copy of
+     *       the entity we are interested in.  However, the current implementation only searches
+     *       on one processor, while with UG's vertical load balancing the ancestors of an entity
+     *       may be distributed across different processors.  This will lead to very-difficult-to-fix
+     *       bugs.  Unfortunately, the proper fix for this is not easy, either.
+     */
     template< int cd >
     unsigned int subId ( const typename Traits::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
     {
@@ -443,6 +458,8 @@ namespace Dune {
 
         // If this edge is the copy of an edge on a lower level we return the id of that lower
         // edge, because Dune wants entities which are copies of each other to have the same id.
+        // BUG: in the parallel setting, we only search on our own processor, but the lowest
+        // copy may actually be on a different processor!
         const typename UG_NS< dim >::Edge *fatherEdge = GetFatherEdge( edge );
         while( fatherEdge // fatherEdge exists
                // ... and it must be a true copy father
@@ -456,8 +473,7 @@ namespace Dune {
         }
 
 #ifdef ModelP
-        //return (Local) ? edge->id : edge->ddd.gid;
-        DUNE_THROW(NotImplemented, "!");
+        return (Local ? edge->id : edge->ddd.gid);
 #else
         return edge->id;
 #endif
@@ -470,6 +486,8 @@ namespace Dune {
 
         // If this face is the copy of a face on a lower level we return the id of that lower
         // face, because Dune wants entities which are copies of each other to have the same id.
+        // BUG: in the parallel setting, we only search on our own processor, but the lowest
+        // copy may actually be on a different processor!
         Face fatherFace;
         fatherFace = getFatherFace( face );
         while( fatherFace.first )
