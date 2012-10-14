@@ -128,6 +128,13 @@ namespace Dune {
 
     OneDGridGeometry() : storeCoordsLocally_(false) {}
 
+    OneDGridGeometry(const FieldVector<double,1>& left, const FieldVector<double,1>& right)
+      : storeCoordsLocally_(true)
+    {
+      pos_[0] = left;
+      pos_[1] = right;
+    }
+
     //! here we have always an affine geometry
     bool affine() const { return true; }
 

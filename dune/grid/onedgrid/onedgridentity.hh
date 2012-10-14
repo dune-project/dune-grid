@@ -283,7 +283,7 @@ namespace Dune {
     unsigned int globalId() const {return target_->id_;}
 
     //! Geometry of this entity
-    Geometry geometry () const { return Geometry( geo_ ); }
+    Geometry geometry () const { return Geometry( GeometryImpl(target_->vertex_[0]->pos_, target_->vertex_[1]->pos_) ); }
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
@@ -446,12 +446,7 @@ namespace Dune {
 
     void setToTarget(OneDEntityImp<1>* target) {
       target_ = target;
-      geo_.target_ = target;
     }
-
-
-    //! the current geometry
-    GeometryImpl geo_;
 
     mutable LocalGeometryImpl geometryInFather_;
 
