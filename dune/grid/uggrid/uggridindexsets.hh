@@ -381,10 +381,17 @@ namespace Dune {
     //! constructor stores reference to a grid
     UGGridIdSet (const GridImp& g) : grid_(g) {}
 
-    //! get id of an entity
-    /*
+    /** \brief Get id of an entity
+
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
+
+       \bug Since copies of different entities on different levels are supposed to have the
+       same id, we look for the ancestor on the coarsest level that is still a copy of
+       the entity we are interested in.  However, the current implementation only searches
+       on one processor, while with UG's vertical load balancing the ancestors of an entity
+       may be distributed across different processors.  This will lead to very-difficult-to-fix
+       bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
     template<int cd>
     unsigned int id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
@@ -423,10 +430,17 @@ namespace Dune {
 
     }
 
-    //! get id of subEntity
-    /*
+    /** \brief Get id of subentity
+
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
+
+       \bug Since copies of different entities on different levels are supposed to have the
+       same id, we look for the ancestor on the coarsest level that is still a copy of
+       the entity we are interested in.  However, the current implementation only searches
+       on one processor, while with UG's vertical load balancing the ancestors of an entity
+       may be distributed across different processors.  This will lead to very-difficult-to-fix
+       bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
     unsigned int subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
                         int i,
@@ -447,6 +461,8 @@ namespace Dune {
 
         // If this edge is the copy of an edge on a lower level we return the id of that lower
         // edge, because Dune wants entities which are copies of each other to have the same id.
+        // BUG: in the parallel setting, we only search on our own processor, but the lowest
+        // copy may actually be on a different processor!
         const typename UG_NS<dim>::Edge* fatherEdge;
         fatherEdge = GetFatherEdge(edge);
 
@@ -474,6 +490,8 @@ namespace Dune {
 
         // If this face is the copy of a face on a lower level we return the id of that lower
         // face, because Dune wants entities which are copies of each other to have the same id.
+        // BUG: in the parallel setting, we only search on our own processor, but the lowest
+        // copy may actually be on a different processor!
         Face fatherFace;
         fatherFace = getFatherFace(face);
         while (fatherFace.first) {
