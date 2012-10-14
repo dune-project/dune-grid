@@ -462,8 +462,7 @@ namespace Dune {
         }
 
 #ifdef ModelP
-        //return (Local) ? edge->id : edge->ddd.gid;
-        DUNE_THROW(NotImplemented, "!");
+        return (Local) ? edge->id : edge->ddd.gid;
 #else
         return edge->id;
 #endif
