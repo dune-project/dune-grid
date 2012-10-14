@@ -126,8 +126,6 @@ namespace Dune {
 
   public:
 
-    OneDGridGeometry() : storeCoordsLocally_(false) {}
-
     OneDGridGeometry(const FieldVector<double,1>& left, const FieldVector<double,1>& right)
       : storeCoordsLocally_(true)
     {
