@@ -391,16 +391,14 @@ namespace Dune {
 
       if (target_->father_->sons_[0] == target_ && target_->father_->sons_[1] == target_) {
         // Copied element?
-        geometryInFather_.setPositions(0,1);
+        return LocalGeometry(LocalGeometryImpl(FieldVector<double,1>(0), FieldVector<double,1>(1)));
       } else if (target_->father_->sons_[0] == target_) {
         // Left son?
-        geometryInFather_.setPositions(0,0.5);
-      } else {
-        // Right son!
-        geometryInFather_.setPositions(0.5,1);
+        return LocalGeometry(LocalGeometryImpl(FieldVector<double,1>(0), FieldVector<double,1>(0.5)));
       }
 
-      return LocalGeometry( geometryInFather_ );
+      // Right son!
+      return LocalGeometry(LocalGeometryImpl(FieldVector<double,1>(0.5), FieldVector<double,1>(1)));
     }
 
     /*! Inter-level access to son elements on higher levels<=maxlevel.
@@ -447,8 +445,6 @@ namespace Dune {
     void setToTarget(OneDEntityImp<1>* target) {
       target_ = target;
     }
-
-    mutable LocalGeometryImpl geometryInFather_;
 
     OneDEntityImp<1>* target_;
 
