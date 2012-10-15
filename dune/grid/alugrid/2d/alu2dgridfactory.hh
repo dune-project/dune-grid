@@ -236,6 +236,7 @@ namespace Dune
              new Grid( filename, globalProjection_ , bndProjections, grdVerbose_ );
     }
 
+  public:
     /** \brief set factory's verbosity
      *
      *  \param[in]  verbose  verbosity (true/flase)
