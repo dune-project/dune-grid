@@ -211,14 +211,20 @@ namespace Dune
       return false;
 
     int rank = 0;
-#if ALU2DGRID_PARALLEL
+#if HAVE_MPI
     MPI_Comm_rank( communicator, &rank );
 #endif
+
+    // set verbosity of factory only for rank = 0
+    factory_.setVerbosity( (rank == 0) );
 
     // only print warnings of ALU2dGridParameterBlock on rank = 0
     dgf::ALU2dGridParameterBlock parameter( file, (rank == 0) );
 
+#if ALU2DGRID_PARALLEL
+    // for a parallel ALUGrid implementation do the following only on rank 0
     if( rank == 0 )
+#endif
     {
       factory_.setTolerance( parameter.tolerance() );
 
@@ -290,7 +296,7 @@ namespace Dune
       factory_.insertFaceTransformation( matrix, shift );
     }
 
-    if ( ! parameter.dumpFileName().empty() )
+    if ( ! parameter.dumpFileName().empty() && (rank == 0) )
       grid_ = factory_.createGrid( dgf_.facemap.empty(), false, parameter.dumpFileName() );
     else
       grid_ = factory_.createGrid( dgf_.facemap.empty(), true, filename );
