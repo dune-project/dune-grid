@@ -10,7 +10,7 @@ namespace Dune
     struct ALU2dGridParameterBlock
       : public GridParameterBlock
     {
-      ALU2dGridParameterBlock( std::istream &in )
+      ALU2dGridParameterBlock( std::istream &in, const bool verbose )
         : GridParameterBlock( in ),
           tolerance_( 1e-8 )
       {
@@ -21,16 +21,22 @@ namespace Dune
             tolerance_ = x;
           else
           {
-            dwarn << "GridParameterBlock: found keyword `tolerance' but no value, "
-                  << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+            if( verbose )
+            {
+              dwarn << "GridParameterBlock: found keyword `tolerance' but no value, "
+                    << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+            }
           }
           if( tolerance_ <= 0 )
             DUNE_THROW( DGFException, "Nonpositive tolerance specified!" );
         }
         else
         {
-          dwarn << "GridParameterBlock: Parameter 'tolerance' not specified, "
-                << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+          if( verbose )
+          {
+            dwarn << "GridParameterBlock: Parameter 'tolerance' not specified, "
+                  << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+          }
         }
       }
 
@@ -209,7 +215,8 @@ namespace Dune
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    dgf::ALU2dGridParameterBlock parameter( file );
+    // only print warnings of ALU2dGridParameterBlock on rank = 0
+    dgf::ALU2dGridParameterBlock parameter( file, (rank == 0) );
 
     if( rank == 0 )
     {
