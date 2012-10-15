@@ -80,11 +80,11 @@ if test x$with_alugrid != xno ; then
   NEEDEDALUGRID_VERSION=1.50
 
   AC_MSG_CHECKING([ALUGrid version >= $NEEDEDALUGRID_VERSION])
-  if $PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid ; then 
-    ALUGRID_VERSION=`$PKG_CONFIG --modversion alugrid`
+  if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid ; then 
+    ALUGRID_VERSION=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --modversion alugrid`
     AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSION)])
-    ALUGRID_INCLUDE_PATH=`$PKG_CONFIG --variable=includedir alugrid`
-    ALUGRID_LIB_PATH=`$PKG_CONFIG --variable=libdir alugrid`
+    ALUGRID_INCLUDE_PATH=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=includedir alugrid`
+    ALUGRID_LIB_PATH=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=libdir alugrid`
     if test x"$with_alugrid_libdir" != x"" && test x"$with_alugrid_libdir" != x"no" ; then 
       AC_MSG_WARN([--with-alugrid-libdir option is obsolete!])
     fi 
