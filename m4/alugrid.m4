@@ -74,7 +74,7 @@ if test x$with_alugrid != xno ; then
   ])
 
   REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
-  PKG_CONFIG_PATH="$ALUGRIDROOT:$ALUGRIDROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
+  PKG_CONFIG_PATH="$ALUGRIDROOT:$ALUGRIDROOT/lib/pkgconfig:$ALUGRIDROOT/lib64/pkgconfig:$PKG_CONFIG_PATH"
 
   ## check version number 
   NEEDEDALUGRID_VERSION=1.50
