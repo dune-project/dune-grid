@@ -21,9 +21,9 @@ namespace Dune {
      \tparam mydim Dimension of the corresponding reference element
      \tparam coorddim Dimension of the coordinate space
 
-     I suppose I could use GenericGeometry::LocalGeometry instead of this class.
-     However several times I use that this UGGridLocalGeometry has a default constructor,
-     which GenericGeometry::LocalGeometry doesn't have.
+     This class is just an adaptor that allows to use MultiLinearGeometry as the implementation
+     for the UGGrid local geometries.  We cannot use MultiLinearGeometry directly, because the
+     template parameters are different.
    */
   template<int mydim, int coorddim, class GridImp>
   class UGGridLocalGeometry :
