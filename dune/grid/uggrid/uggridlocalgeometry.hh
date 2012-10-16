@@ -10,7 +10,7 @@
 #include "uggridrenumberer.hh"
 #include <dune/common/array.hh>
 #include <dune/common/fmatrix.hh>
-#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/geometry/multilineargeometry.hh>
 
 namespace Dune {
 
@@ -27,31 +27,17 @@ namespace Dune {
    */
   template<int mydim, int coorddim, class GridImp>
   class UGGridLocalGeometry :
-    public GenericGeometry::BasicGeometry<mydim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,mydim,coorddim> >
+    public MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim>
   {
 
-    typedef typename GenericGeometry::BasicGeometry<mydim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,mydim,coorddim> > Base;
+    typedef MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim> Base;
 
   public:
-
-    /** \brief Default constructor.  Does nothing */
-    UGGridLocalGeometry()
-    {}
 
     /** \brief Constructor from a given geometry type and a vector of corner coordinates */
     UGGridLocalGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,coorddim> >& coordinates)
       : Base(type, coordinates)
     {}
-
-    /** \brief Setup method with a geometry type and a set of corners
-        \param coordinates The corner coordinates in DUNE numbering
-     */
-    void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,coorddim> >& coordinates)
-    {
-      // set up base class
-      // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
-      static_cast< Base & >( *this ) = Base( type, coordinates );
-    }
 
   };
 
