@@ -48,9 +48,17 @@ namespace Dune {
       : geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),
         geometryInOutsideIsUpToDate_(false),
+        geometryInInside_(nullptr),
+        geometryInOutside_(nullptr),
         center_(center), neighborCount_(nb),
         gridImp_(gridImp)
     {}
+
+    ~UGGridLevelIntersection()
+    {
+      delete(geometryInInside_);
+      delete(geometryInOutside_);
+    }
 
     //! equality
     bool equals(const UGGridLevelIntersection<GridImp>& i) const {
@@ -175,10 +183,10 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
-    //! pointer to element holding the self_local and self_global information.
-    //! This element is created on demand.
-    mutable LocalGeometryImpl geometryInInside_;
-    mutable LocalGeometryImpl geometryInOutside_;
+    //! pointer to element holding the local geometries
+    //! \todo I should really be using an auto_ptr here, but I can't get it to compile
+    mutable LocalGeometryImpl* geometryInInside_;
+    mutable LocalGeometryImpl* geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
@@ -238,11 +246,19 @@ namespace Dune {
       : geometryIsUpToDate_(false),
         geometryInInsideIsUpToDate_(false),
         geometryInOutsideIsUpToDate_(false),
+        geometryInInside_(nullptr),
+        geometryInOutside_(nullptr),
         center_(center), neighborCount_(nb), subNeighborCount_(0),
         gridImp_(gridImp)
     {
       if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
         constructLeafSubfaces();
+    }
+
+    ~UGGridLeafIntersection()
+    {
+      delete(geometryInInside_);
+      delete(geometryInOutside_);
     }
 
     //! equality
@@ -439,10 +455,10 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
-    //! pointer to element holding the self_local and self_global information.
-    //! This element is created on demand.
-    mutable LocalGeometryImpl geometryInInside_;
-    mutable LocalGeometryImpl geometryInOutside_;
+    //! pointer to element holding the local intersection geometries
+    //! \todo I should really be using an auto_ptr here, but I can't get it to compile
+    mutable LocalGeometryImpl* geometryInInside_;
+    mutable LocalGeometryImpl* geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.

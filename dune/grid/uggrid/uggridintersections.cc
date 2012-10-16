@@ -110,13 +110,14 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
 
     }
 
-    geometryInInside_.setup(intersectionGeometryType, coordinates);
+    delete(geometryInInside_);
+    geometryInInside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
 
     geometryInInsideIsUpToDate_ = true;
 
   }
 
-  return LocalGeometry( geometryInInside_ );
+  return LocalGeometry( *geometryInInside_ );
 }
 
 template< class GridImp>
@@ -188,13 +189,14 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
 
     }
 
-    geometryInOutside_.setup(intersectionGeometryType, coordinates);
+    delete(geometryInOutside_);
+    geometryInOutside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
 
     geometryInOutsideIsUpToDate_ = true;
 
   }
 
-  return LocalGeometry( geometryInOutside_ );
+  return LocalGeometry( *geometryInOutside_ );
 }
 
 template< class GridImp>
@@ -339,7 +341,8 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_.setup(intersectionGeometryType, coordinates);
+      delete(geometryInInside_);
+      geometryInInside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -368,14 +371,15 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_.setup(intersectionGeometryType, coordinates);
+      delete(geometryInInside_);
+      geometryInInside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
     }
 
     geometryInInsideIsUpToDate_ = true;
 
   }
 
-  return LocalGeometry( geometryInInside_ );
+  return LocalGeometry( *geometryInInside_ );
 }
 
 template< class GridImp>
@@ -487,7 +491,8 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_.setup(intersectionGeometryType, coordinates);
+      delete(geometryInOutside_);
+      geometryInOutside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -505,7 +510,8 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_.setup(intersectionGeometryType, coordinates);
+      delete(geometryInOutside_);
+      geometryInOutside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
 
     }
 
@@ -513,7 +519,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
   }
 
-  return LocalGeometry( geometryInOutside_ );
+  return LocalGeometry( *geometryInOutside_ );
 }
 
 template< class GridImp>
