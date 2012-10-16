@@ -251,7 +251,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
   // Get the 'context' of the father element.  In UG-speak, the context is
   // the set of all nodes of an element's sons.  They appear in a fixed
   // order, therefore we can infer the local positions in the father element.
-  const int MAX_CORNERS_OF_ELEM = 8;  // this is two much in 2d, but UG is that way
+  const int MAX_CORNERS_OF_ELEM = 8;  // this is too much in 2d, but UG is that way
   const int MAX_NEW_CORNERS_DIM = (dim==2) ? 5 : 19;
   const typename UG_NS<dim>::Node* context[MAX_CORNERS_OF_ELEM + MAX_NEW_CORNERS_DIM];
   UG_NS<dim>::GetNodeContext(fatherElement, context);
