@@ -141,6 +141,26 @@ namespace Dune
 
     /** \} */
 
+    /** \name Grid View Types
+     *  \{ */
+
+    /** \brief Types for GridView */
+    template< PartitionIteratorType pitype >
+    struct Partition
+    {
+      typedef typename GridFamily::Traits::template Partition< pitype >::LevelGridView
+      LevelGridView;
+      typedef typename GridFamily::Traits::template Partition< pitype >::LeafGridView
+      LeafGridView;
+    };
+
+    /** \brief View types for All_Partition */
+    typedef typename Partition< All_Partition >::LevelGridView LevelGridView;
+    typedef typename Partition< All_Partition >::LeafGridView LeafGridView;
+
+    /** \} */
+
+
     /** \name Index and Id Set Types
      *  \{ */
 
@@ -622,6 +642,43 @@ namespace Dune
     {
       typedef typename Traits::template Codim< EntitySeed::codimension >::EntityPointerImpl EntityPointerImpl;
       return EntityPointerImpl( *this, seed );
+    }
+
+    /** \} */
+
+    /** \name Grid Views
+     *  \{ */
+
+    /** \brief View for a grid level */
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View( ViewImp( *this, level ) );
+    }
+
+    /** \brief View for the leaf grid */
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafView () const
+    {
+      typedef typename Traits::template Partition< pitype >::LeafGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View( ViewImp( *this ) );
+    }
+
+    /** \brief View for a grid level for All_Partition */
+    LevelGridView levelView ( int level ) const
+    {
+      typedef typename LevelGridView::GridViewImp ViewImp;
+      return LevelGridView( ViewImp( *this, level ) );
+    }
+
+    /** \brief View for the leaf grid for All_Partition*/
+    LeafGridView leafView() const
+    {
+      typedef typename LeafGridView::GridViewImp ViewImp;
+      return LeafGridView( ViewImp( *this ) );
     }
 
     /** \} */
