@@ -46,8 +46,6 @@ namespace Dune {
      */
     UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : geometryIsUpToDate_(false),
-        geometryInInsideIsUpToDate_(false),
-        geometryInOutsideIsUpToDate_(false),
         geometryInInside_(nullptr),
         geometryInOutside_(nullptr),
         center_(center), neighborCount_(nb),
@@ -195,8 +193,6 @@ namespace Dune {
     // The geometries are only constructed when necessary.  The following
     // flags store whether they have been constructed already.
     mutable bool geometryIsUpToDate_;
-    mutable bool geometryInInsideIsUpToDate_;
-    mutable bool geometryInOutsideIsUpToDate_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
@@ -244,8 +240,6 @@ namespace Dune {
 
     UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : geometryIsUpToDate_(false),
-        geometryInInsideIsUpToDate_(false),
-        geometryInOutsideIsUpToDate_(false),
         geometryInInside_(nullptr),
         geometryInOutside_(nullptr),
         center_(center), neighborCount_(nb), subNeighborCount_(0),
@@ -467,8 +461,6 @@ namespace Dune {
     // The geometries are only constructed when necessary.  The following
     // flags store whether they have been constructed already.
     mutable bool geometryIsUpToDate_;
-    mutable bool geometryInInsideIsUpToDate_;
-    mutable bool geometryInOutsideIsUpToDate_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
