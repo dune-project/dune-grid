@@ -52,12 +52,6 @@ namespace Dune {
         gridImp_(gridImp)
     {}
 
-    ~UGGridLevelIntersection()
-    {
-      delete(geometryInInside_);
-      delete(geometryInOutside_);
-    }
-
     //! equality
     bool equals(const UGGridLevelIntersection<GridImp>& i) const {
       return center_==i.center_ && neighborCount_ == i.neighborCount_;
@@ -182,9 +176,8 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
     //! pointer to element holding the local geometries
-    //! \todo I should really be using an auto_ptr here, but I can't get it to compile
-    mutable LocalGeometryImpl* geometryInInside_;
-    mutable LocalGeometryImpl* geometryInOutside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
@@ -247,12 +240,6 @@ namespace Dune {
     {
       if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
         constructLeafSubfaces();
-    }
-
-    ~UGGridLeafIntersection()
-    {
-      delete(geometryInInside_);
-      delete(geometryInOutside_);
     }
 
     //! equality
@@ -450,9 +437,8 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
     //! pointer to element holding the local intersection geometries
-    //! \todo I should really be using an auto_ptr here, but I can't get it to compile
-    mutable LocalGeometryImpl* geometryInInside_;
-    mutable LocalGeometryImpl* geometryInOutside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.

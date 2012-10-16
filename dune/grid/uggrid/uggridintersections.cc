@@ -110,7 +110,7 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
 
     }
 
-    geometryInInside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
+    geometryInInside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
   }
 
@@ -186,7 +186,7 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
 
     }
 
-    geometryInOutside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
+    geometryInOutside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
   }
 
@@ -335,7 +335,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
+      geometryInInside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -364,7 +364,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
+      geometryInInside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
     }
 
   }
@@ -481,7 +481,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
+      geometryInOutside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -499,7 +499,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_ = new LocalGeometryImpl(intersectionGeometryType, coordinates);
+      geometryInOutside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
     }
 
