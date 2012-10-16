@@ -159,10 +159,10 @@ void checkGeometryInFather(const GridType& grid)
           DUNE_THROW(GridError, "entity and geometryInFather have different number of corners!");
 
         // Compute the element center just to have an argument for the following methods
-        typename LocalGeometry::GlobalCoordinate center(0);
+        const Dune::ReferenceElement< ctype, Geometry::dimension > &refElement
+          = Dune::ReferenceElements< ctype, Geometry::dimension >::general( geometryInFather.type() );
 
-        for (int j=0; j<geometryInFather.corners(); j++)
-          center += geometryInFather.corner( j );
+        typename LocalGeometry::GlobalCoordinate center = refElement.position(0,0);
 
         if (geometryInFather.integrationElement(center) <=0)
           DUNE_THROW(GridError, "nonpositive integration element found!");
