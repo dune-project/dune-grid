@@ -4,12 +4,9 @@
 #define DUNE_UGGRID_LOCALGEOMETRY_HH
 
 /** \file
- * \brief The UGGridElement class and its specializations
+ * \brief The UGGridLocalGeometry class
  */
 
-#include "uggridrenumberer.hh"
-#include <dune/common/array.hh>
-#include <dune/common/fmatrix.hh>
 #include <dune/geometry/multilineargeometry.hh>
 
 namespace Dune {
@@ -29,14 +26,11 @@ namespace Dune {
   class UGGridLocalGeometry :
     public MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim>
   {
-
-    typedef MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim> Base;
-
   public:
 
     /** \brief Constructor from a given geometry type and a vector of corner coordinates */
     UGGridLocalGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,coorddim> >& coordinates)
-      : Base(type, coordinates)
+      : MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim>(type, coordinates)
     {}
 
   };
