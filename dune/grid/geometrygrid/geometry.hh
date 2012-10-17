@@ -141,6 +141,15 @@ namespace Dune
           mapping_->userData().addReference();
       }
 
+#if HAVE_RVALUE_REFERENCES
+      Geometry ( This &&other )
+        : grid_( other.grid_ ),
+          mapping_( other.mapping_ )
+      {
+        other.mapping_ = nullptr;
+      }
+#endif // #if HAVE_RVALUE_REFERENCES
+
       ~Geometry ()
       {
         if( mapping_ && mapping_->userData().removeReference() )
