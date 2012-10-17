@@ -146,25 +146,25 @@ namespace Dune
     /** \brief obtain a const reference to the underlying hierarchic grid */
     const Grid &grid () const
     {
-      return asImp().grid();
+      return impl().grid();
     }
 
     /** \brief obtain the index set */
     const IndexSet &indexSet () const
     {
-      return asImp().indexSet();
+      return impl().indexSet();
     }
 
     /** \brief obtain number of entities in a given codimension */
     int size ( int codim ) const
     {
-      return asImp().size( codim );
+      return impl().size( codim );
     }
 
     /** \brief obtain number of entities with a given geometry type */
     int size ( const GeometryType &type ) const
     {
-      return asImp().size( type );
+      return impl().size( type );
     }
 
     /** @brief Return true if the given entity is contained in this grid view
@@ -176,21 +176,21 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e) const
     {
-      return asImp().indexSet().contains(e);
+      return impl().indexSet().contains(e);
     }
 
     /** \brief obtain begin iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
     {
-      return asImp().template begin<cd>();
+      return impl().template begin<cd>();
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator end () const
     {
-      return asImp().template end<cd>();
+      return impl().template end<cd>();
     }
 
     /** \brief obtain begin iterator for this view */
@@ -198,7 +198,7 @@ namespace Dune
     typename Codim< cd > :: template Partition< pitype > :: Iterator
     begin () const
     {
-      return asImp().template begin<cd,pitype>();
+      return impl().template begin<cd,pitype>();
     }
 
     /** \brief obtain end iterator for this view */
@@ -206,39 +206,39 @@ namespace Dune
     typename Codim< cd > :: template Partition< pitype > :: Iterator
     end () const
     {
-      return asImp().template end<cd,pitype>();
+      return impl().template end<cd,pitype>();
     }
 
     /** \brief obtain begin intersection iterator with respect to this view */
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return asImp().ibegin(entity);
+      return impl().ibegin(entity);
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return asImp().iend(entity);
+      return impl().iend(entity);
     }
 
     /** \brief obtain collective communication object */
     const CollectiveCommunication &comm () const
     {
-      return asImp().comm();
+      return impl().comm();
     }
 
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
     int overlapSize(int codim) const
     {
-      return asImp().overlapSize(codim);
+      return impl().overlapSize(codim);
     }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
     int ghostSize(int codim) const
     {
-      return asImp().ghostSize(codim);
+      return impl().ghostSize(codim);
     }
 
     /** communicate data on this view */
@@ -247,7 +247,7 @@ namespace Dune
                        InterfaceType iftype,
                        CommunicationDirection dir ) const
     {
-      asImp().communicate(data,iftype,dir);
+      impl().communicate(data,iftype,dir);
     }
 
 #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
@@ -267,18 +267,8 @@ namespace Dune
 
   protected:
     Implementation impl_;
-
-    GridViewImp& asImp ()
-    {
-      return impl_;
-    }
-
-    const GridViewImp& asImp () const
-    {
-      return impl_;
-    }
   };
 
-}
+} // namespace Dune
 
-#endif
+#endif // #ifndef DUNE_GRIDVIEW_HH
