@@ -461,7 +461,6 @@ namespace Dune
       */
   template< int codim, class GridImp >
   class ALU3dGridEntityPointerBase
-  //: public EntityPointerDefaultImplementation <codim, GridImp, ALU3dGridEntityPointer<cd,GridImp> >
   {
     typedef ALU3dGridEntityPointerBase< codim, GridImp > ThisType;
     enum { dim       = GridImp::dimension };
