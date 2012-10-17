@@ -198,10 +198,6 @@ namespace Dune
       using Base::grid;
 
     public:
-      Iterator ( const Grid &grid, int level, IteratorType type )
-        : Base( grid, Traits::getHostEntityIterator( grid.hostGrid(), level, type ) )
-      {}
-
       template< class HostGridView >
       Iterator ( const Grid &grid, const HostGridView &hostGridView, IteratorType type )
         : Base( grid, (type == Traits::begin ? hostGridView.template begin< codimension, Traits::Entity_Partition >()
@@ -249,18 +245,6 @@ namespace Dune
       using Base::grid;
 
     public:
-      Iterator ( const Grid &grid, int level, IteratorType type )
-        : Base( grid, Traits::getHostElementIterator( grid.hostGrid(), level, type ), -1 ),
-          hostEnd_( Traits::getHostElementIterator( grid.hostGrid(), level, Traits::end ) ),
-          hostIndexSet_( &Traits::getHostIndexSet( grid.hostGrid(), level ) )
-      {
-        if( hostElementIterator_ != hostEnd_ )
-        {
-          visited_.resize( hostIndexSet_->size( codimension ), false );
-          increment();
-        }
-      }
-
       template< class HostGridView >
       Iterator ( const Grid &grid, const HostGridView &hostGridView, IteratorType type )
         : Base( grid, (type == Traits::begin ? hostGridView.template begin< 0, Traits::Element_Partition >()
@@ -340,29 +324,6 @@ namespace Dune
       typedef typename HostGrid::LeafIndexSet HostIndexSet;
 
       enum IteratorType { begin, end };
-
-      static HostEntityIterator
-      getHostEntityIterator ( const HostGrid &hostGrid, int level, IteratorType type )
-      {
-        if( type == begin )
-          return hostGrid.template leafbegin< codim, Entity_Partition >();
-        else
-          return hostGrid.template leafend< codim, Entity_Partition >();
-      }
-
-      static HostElementIterator
-      getHostElementIterator ( const HostGrid &hostGrid, int level, IteratorType type )
-      {
-        if( type == begin )
-          return hostGrid.template leafbegin< 0, Element_Partition >();
-        else
-          return hostGrid.template leafend< 0, Element_Partition >();
-      }
-
-      static const HostIndexSet &getHostIndexSet ( const HostGrid &hostGrid, int level )
-      {
-        return hostGrid.leafIndexSet();
-      }
     };
 
 
@@ -391,29 +352,6 @@ namespace Dune
       typedef typename HostGrid::LevelIndexSet HostIndexSet;
 
       enum IteratorType { begin, end };
-
-      static HostEntityIterator
-      getHostEntityIterator ( const HostGrid &hostGrid, int level, IteratorType type )
-      {
-        if( type == begin )
-          return hostGrid.template lbegin< codim, Entity_Partition >( level );
-        else
-          return hostGrid.template lend< codim, Entity_Partition >( level );
-      }
-
-      static HostElementIterator
-      getHostElementIterator ( const HostGrid &hostGrid, int level, IteratorType type )
-      {
-        if( type == begin )
-          return hostGrid.template lbegin< 0, Element_Partition >( level );
-        else
-          return hostGrid.template lend< 0, Element_Partition >( level );
-      }
-
-      static const HostIndexSet &getHostIndexSet ( const HostGrid &hostGrid, int level )
-      {
-        return hostGrid.levelIndexSet( level );
-      }
     };
 
 
