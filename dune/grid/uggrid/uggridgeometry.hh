@@ -7,12 +7,9 @@
  * \brief The UGGridGeometry class and its specializations
  */
 
-#include <dune/common/array.hh>
 #include <dune/common/fmatrix.hh>
 
-#include <dune/geometry/genericgeometry/geometry.hh>
-
-#include "uggridrenumberer.hh"
+#include <dune/geometry/multilineargeometry.hh>
 
 namespace Dune {
 
@@ -148,30 +145,14 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry<2, 3, GridImp> :
-    public GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> >
+    public MultiLinearGeometry<typename GridImp::ctype, 2, 3>
   {
-
-    template <int codim_, int dim_, class GridImp_>
-    friend class UGGridEntity;
-
-    template <class GridImp_>
-    friend class UGGridIntersectionIterator;
-
-    typedef typename GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> > Base;
-
   public:
-    static const int mydimension = 2;
-    static const int coorddimension = 3;
 
-    /** \brief Setup method with a geometry type and a set of corners
-        \param coordinates The corner coordinates in DUNE numbering
-     */
-    void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
-    {
-      // set up base class
-      // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
-      static_cast< Base & >( *this ) = Base( type, coordinates );
-    }
+    /** \brief Constructor from a given geometry type and a vector of corner coordinates */
+    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
+      : MultiLinearGeometry<typename GridImp::ctype, 2, 3>(type, coordinates)
+    {}
 
   };
 
@@ -184,28 +165,14 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry <1, 2, GridImp> :
-    public GenericGeometry::BasicGeometry<1, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> >
+    public MultiLinearGeometry<typename GridImp::ctype,1,2>
   {
-
-    template <int codim_, int dim_, class GridImp_>
-    friend class UGGridEntity;
-
-    template <class GridImp_>
-    friend class UGGridIntersectionIterator;
-
-    typedef typename GenericGeometry::BasicGeometry<1, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> > Base;
-
   public:
-    static const int mydimension = 1;
-    static const int coorddimension = 2;
 
-    /** \brief Constructor with a geometry type and a set of corners */
-    void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,2> >& coordinates)
-    {
-      // set up base class
-      // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
-      static_cast< Base & >( *this ) = Base( type, coordinates );
-    }
+    /** \brief Constructor from a given geometry type and a vector of corner coordinates */
+    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,2> >& coordinates)
+      : MultiLinearGeometry<typename GridImp::ctype, 1, 2>(type, coordinates)
+    {}
 
   };
 
