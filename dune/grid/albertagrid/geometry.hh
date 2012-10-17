@@ -191,10 +191,6 @@ namespace Dune
       : Base ()
     {}
 
-    AlbertaGridGeometry ( const This &other )
-      : Base ( other )
-    {}
-
     template< class CoordReader >
     AlbertaGridGeometry ( const CoordReader &coordReader )
       : Base( GeometryType( GenericGeometry::SimplexTopology< mydim >::type::id, mydim ), coordReader )
