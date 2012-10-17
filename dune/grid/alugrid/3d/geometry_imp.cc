@@ -15,22 +15,97 @@ namespace Dune {
   template <int mydim, int cdim, class GridImp>
   inline ALU3dGridGeometry<mydim, cdim, GridImp> ::
   ALU3dGridGeometry()
-    : geoImpl_(),
-      volume_(1.0)
-  {}
+  {
+    getObject();
+  }
+
+  template <int mydim, int cdim, class GridImp>
+  inline ALU3dGridGeometry<mydim, cdim, GridImp> ::
+  ALU3dGridGeometry( const ALU3dGridGeometry& other )
+  {
+    assign( other );
+  }
+
+  template <int mydim, int cdim, class GridImp>
+  inline void ALU3dGridGeometry<mydim, cdim, GridImp> ::
+  getObject ( )
+  {
+    geoImpl_ = geoProvider().getEmptyObject();
+    geoImpl().reset();
+  }
+
+  template <int mydim, int cdim, class GridImp>
+  inline void ALU3dGridGeometry<mydim, cdim, GridImp> ::
+  assign ( const ALU3dGridGeometry& other )
+  {
+    // copy pointer
+    geoImpl_ = other.geoImpl_ ;
+
+    // increase reference count
+    ++ geoImpl();
+  }
+
+  template <int mydim, int cdim, class GridImp>
+  inline void ALU3dGridGeometry<mydim, cdim, GridImp> ::
+  removeObj ()
+  {
+    if( geoImpl_ )
+    {
+      // decrease reference count
+      -- geoImpl();
+
+      // if reference count is zero free the object
+      if( ! geoImpl() )
+      {
+        geoProvider().freeObject( geoImpl_ );
+      }
+
+      // reset pointer
+      geoImpl_ = 0;
+    }
+  }
+
+  template <int mydim, int cdim, class GridImp>
+  inline ALU3dGridGeometry<mydim, cdim, GridImp>&
+  ALU3dGridGeometry<mydim, cdim, GridImp> :: operator = (const ALU3dGridGeometry& other )
+  {
+    removeObj();
+    assign( other );
+    return *this;
+  }
+
+  template <int mydim, int cdim, class GridImp>
+  inline ALU3dGridGeometry<mydim, cdim, GridImp> ::
+  ~ALU3dGridGeometry()
+  {
+    removeObj();
+  }
 
   template< int mydim, int cdim, class GridImp>
   inline void
   ALU3dGridGeometry< mydim, cdim, GridImp > :: invalidate ()
   {
-    geoImpl_.invalidate();
+    // if geometry is used elsewhere remove the pointer
+    // and get a new one
+    if( geoImpl().stillUsed() )
+    {
+      // remove old object
+      removeObj();
+      // get new object
+      getObject();
+    }
+    else
+    {
+      // otherwise invalidate object
+      geoImpl().invalidate();
+    }
   }
 
   template< int mydim, int cdim, class GridImp>
   inline bool
   ALU3dGridGeometry< mydim, cdim, GridImp > :: valid () const
   {
-    return geoImpl_.valid();
+    return geoImpl().valid();
   }
 
   template< int mydim, int cdim, class GridImp>
@@ -55,7 +130,7 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   corner (int i) const
   {
-    return geoImpl_[ i ];
+    return geoImpl()[ i ];
   }
 
 
@@ -65,7 +140,7 @@ namespace Dune {
   global (const LocalCoordinate& local) const
   {
     GlobalCoordinate global;
-    geoImpl_.mapping().map2world(local, global);
+    geoImpl().mapping().map2world(local, global);
     return global;
   }
 
@@ -75,7 +150,7 @@ namespace Dune {
   local (const GlobalCoordinate& global) const
   {
     LocalCoordinate local;
-    geoImpl_.mapping().world2map(global, local);
+    geoImpl().mapping().world2map(global, local);
     return local;
   }
 
@@ -87,11 +162,11 @@ namespace Dune {
     // this is the only case we need to specialize
     if( mydim == cdim && elementType == tetra )
     {
-      assert( geoImpl_.valid() );
-      return 6.0 * volume_;
+      assert( geoImpl().valid() );
+      return 6.0 * geoImpl().volume();
     }
     else
-      return geoImpl_.mapping().det( local );
+      return geoImpl().mapping().det( local );
   }
 
   template<int mydim, int cdim, class GridImp>
@@ -101,8 +176,8 @@ namespace Dune {
   {
     if( mydim == cdim )
     {
-      assert( geoImpl_.valid() );
-      return volume_ ;
+      assert( geoImpl().valid() );
+      return geoImpl().volume() ;
     }
     else if ( mydim == cdim - 1 && elementType == tetra )
     {
@@ -122,7 +197,7 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   affine() const
   {
-    return geoImpl_.mapping().affine();
+    return geoImpl().mapping().affine();
   }
 
   template< int mydim, int cdim, class GridImp>
@@ -130,7 +205,7 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   jacobianInverseTransposed (const LocalCoordinate & local) const
   {
-    return geoImpl_.mapping().jacobianInverseTransposed( local );
+    return geoImpl().mapping().jacobianInverseTransposed( local );
   }
 
   template< int mydim, int cdim, class GridImp>
@@ -138,7 +213,7 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   jacobianTransposed (const LocalCoordinate & local) const
   {
-    return geoImpl_.mapping().jacobianTransposed( local );
+    return geoImpl().mapping().jacobianTransposed( local );
   }
 
   template <int mydim, int cdim, class GridImp>
@@ -164,18 +239,21 @@ namespace Dune {
   buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
   {
     // update geo impl
-    geoImpl_.updateInFather( fatherGeom, myGeom );
+    geoImpl().updateInFather( fatherGeom, myGeom );
 
     // my volume is a part of 1 for hexas, for tetra adjust with factor
-    volume_ = myGeom.volume() / fatherGeom.volume();
+    double volume = myGeom.volume() / fatherGeom.volume() ;
     if( elementType == tetra )
     {
-      volume_ /= 6.0;
+      volume /= 6.0;
+      geoImpl().setVolume( volume );
 #ifndef NDEBUG
       LocalCoordinate local( 0.0 );
-      assert( std::abs( 6.0 * volume_ - integrationElement( local ) ) < 1e-12 );
+      assert( std::abs( 6.0 * geoImpl().volume() - integrationElement( local ) ) < 1e-12 );
 #endif
     }
+    else
+      geoImpl().setVolume( volume );
 
     return true;
   }
@@ -200,14 +278,14 @@ namespace Dune {
       assert( ElementTopo::dune2aluVertex(7) == 6 );
 
       // update geo impl
-      geoImpl_.update( item.myvertex(0)->Point(),
-                       item.myvertex(1)->Point(),
-                       item.myvertex(3)->Point(),
-                       item.myvertex(2)->Point(),
-                       item.myvertex(4)->Point(),
-                       item.myvertex(5)->Point(),
-                       item.myvertex(7)->Point(),
-                       item.myvertex(6)->Point() );
+      geoImpl().update( item.myvertex(0)->Point(),
+                        item.myvertex(1)->Point(),
+                        item.myvertex(3)->Point(),
+                        item.myvertex(2)->Point(),
+                        item.myvertex(4)->Point(),
+                        item.myvertex(5)->Point(),
+                        item.myvertex(7)->Point(),
+                        item.myvertex(6)->Point() );
     }
     else if( elementType == tetra )
     {
@@ -219,14 +297,14 @@ namespace Dune {
       assert( ElementTopo::dune2aluVertex(3) == 3 );
 
       // update geo impl
-      geoImpl_.update( item.myvertex(0)->Point(),
-                       item.myvertex(1)->Point(),
-                       item.myvertex(2)->Point(),
-                       item.myvertex(3)->Point() );
+      geoImpl().update( item.myvertex(0)->Point(),
+                        item.myvertex(1)->Point(),
+                        item.myvertex(2)->Point(),
+                        item.myvertex(3)->Point() );
     }
 
     // get volume of element
-    volume_ = item.volume();
+    geoImpl().setVolume( item.volume() );
 
     return true;
   }
@@ -257,17 +335,17 @@ namespace Dune {
     if( elementType == hexa )
     {
       // update geometry implementation
-      geoImpl_.update( face.myvertex(rotatedALUIndex[0])->Point(),
-                       face.myvertex(rotatedALUIndex[1])->Point(),
-                       face.myvertex(rotatedALUIndex[2])->Point(),
-                       face.myvertex(rotatedALUIndex[3])->Point() );
+      geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
+                        face.myvertex(rotatedALUIndex[1])->Point(),
+                        face.myvertex(rotatedALUIndex[2])->Point(),
+                        face.myvertex(rotatedALUIndex[3])->Point() );
     }
     else if ( elementType == tetra )
     {
       // update geometry implementation
-      geoImpl_.update( face.myvertex(rotatedALUIndex[0])->Point(),
-                       face.myvertex(rotatedALUIndex[1])->Point(),
-                       face.myvertex(rotatedALUIndex[2])->Point());
+      geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
+                        face.myvertex(rotatedALUIndex[1])->Point(),
+                        face.myvertex(rotatedALUIndex[2])->Point());
     }
 
     return true;
@@ -284,7 +362,7 @@ namespace Dune {
             const coord_t& p3)
   {
     // update geometry implementation
-    geoImpl_.update( p0, p1, p2, p3 );
+    geoImpl().update( p0, p1, p2, p3 );
     return true;
   }
 
@@ -298,7 +376,7 @@ namespace Dune {
             const coord_t& p2)
   {
     // update geometry implementation
-    geoImpl_.update( p0, p1, p2 );
+    geoImpl().update( p0, p1, p2 );
     return true;
   }
 
@@ -323,8 +401,8 @@ namespace Dune {
   {
     const GEOEdgeType & edge = static_cast<const GEOEdgeType &> (item);
     // update geometry implementation
-    geoImpl_.update( edge.myvertex((twist)  %2)->Point(),
-                     edge.myvertex((1+twist)%2)->Point() );
+    geoImpl().update( edge.myvertex((twist)  %2)->Point(),
+                      edge.myvertex((1+twist)%2)->Point() );
     return true;
   }
 
@@ -334,7 +412,7 @@ namespace Dune {
   buildGeom(const VertexType & item, int twist, int)
   {
     // update geometry implementation
-    geoImpl_.update( static_cast<const GEOVertexType &> (item).Point() );
+    geoImpl().update( static_cast<const GEOVertexType &> (item).Point() );
     return true;
   }
 

@@ -59,6 +59,9 @@ namespace Dune {
       }
     }
 
+    //! return object, if created default constructor is used
+    ObjectType * getEmptyObject ();
+
     //! i.e. return pointer to Entity
     ObjectType * getObjectCopy(const ObjectType & org);
 
@@ -104,6 +107,20 @@ namespace Dune {
     if( objStack().empty() )
     {
       return ( new Object (org) );
+    }
+    else
+    {
+      return stackObject();
+    }
+  }
+
+  template <class Object>
+  inline typename ALUMemoryProvider<Object>::ObjectType *
+  ALUMemoryProvider<Object>::getEmptyObject ()
+  {
+    if( objStack().empty() )
+    {
+      return new Object () ;
     }
     else
     {
