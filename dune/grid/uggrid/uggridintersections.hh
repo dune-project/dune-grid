@@ -46,8 +46,8 @@ namespace Dune {
      */
     UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : geometryIsUpToDate_(false),
-        geometryInInsideIsUpToDate_(false),
-        geometryInOutsideIsUpToDate_(false),
+        geometryInInside_(nullptr),
+        geometryInOutside_(nullptr),
         center_(center), neighborCount_(nb),
         gridImp_(gridImp)
     {}
@@ -173,10 +173,9 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
-    //! pointer to element holding the self_local and self_global information.
-    //! This element is created on demand.
-    mutable LocalGeometryImpl geometryInInside_;
-    mutable LocalGeometryImpl geometryInOutside_;
+    //! pointer to element holding the local geometries
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
@@ -185,8 +184,6 @@ namespace Dune {
     // The geometries are only constructed when necessary.  The following
     // flags store whether they have been constructed already.
     mutable bool geometryIsUpToDate_;
-    mutable bool geometryInInsideIsUpToDate_;
-    mutable bool geometryInOutsideIsUpToDate_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
@@ -234,8 +231,8 @@ namespace Dune {
 
     UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : geometryIsUpToDate_(false),
-        geometryInInsideIsUpToDate_(false),
-        geometryInOutsideIsUpToDate_(false),
+        geometryInInside_(nullptr),
+        geometryInOutside_(nullptr),
         center_(center), neighborCount_(nb), subNeighborCount_(0),
         gridImp_(gridImp)
     {
@@ -435,10 +432,9 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
-    //! pointer to element holding the self_local and self_global information.
-    //! This element is created on demand.
-    mutable LocalGeometryImpl geometryInInside_;
-    mutable LocalGeometryImpl geometryInOutside_;
+    //! pointer to element holding the local intersection geometries
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
@@ -447,8 +443,6 @@ namespace Dune {
     // The geometries are only constructed when necessary.  The following
     // flags store whether they have been constructed already.
     mutable bool geometryIsUpToDate_;
-    mutable bool geometryInInsideIsUpToDate_;
-    mutable bool geometryInOutsideIsUpToDate_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
