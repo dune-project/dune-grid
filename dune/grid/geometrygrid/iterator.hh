@@ -188,6 +188,8 @@ namespace Dune
     public:
       typedef typename Traits::IteratorType IteratorType;
 
+      using Base::codimension;
+
     protected:
       typedef typename Base::EntityImpl EntityImpl;
 
@@ -198,6 +200,12 @@ namespace Dune
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
         : Base( grid, Traits::getHostEntityIterator( grid.hostGrid(), level, type ) )
+      {}
+
+      template< class HostGridView >
+      Iterator ( const Grid &grid, const HostGridView &hostGridView, IteratorType type )
+        : Base( grid, (type == Traits::begin ? hostGridView.template begin< codimension, Traits::Entity_Partition >()
+                       : hostGridView.template end< codimension, Traits::Entity_Partition >()) )
       {}
 
       void increment ()
@@ -245,6 +253,20 @@ namespace Dune
         : Base( grid, Traits::getHostElementIterator( grid.hostGrid(), level, type ), -1 ),
           hostEnd_( Traits::getHostElementIterator( grid.hostGrid(), level, Traits::end ) ),
           hostIndexSet_( &Traits::getHostIndexSet( grid.hostGrid(), level ) )
+      {
+        if( hostElementIterator_ != hostEnd_ )
+        {
+          visited_.resize( hostIndexSet_->size( codimension ), false );
+          increment();
+        }
+      }
+
+      template< class HostGridView >
+      Iterator ( const Grid &grid, const HostGridView &hostGridView, IteratorType type )
+        : Base( grid, (type == Traits::begin ? hostGridView.template begin< 0, Traits::Element_Partition >()
+                       : hostGridView.template end< 0, Traits::Element_Partition >()), -1 ),
+          hostEnd_( hostGridView.template end< 0, Traits::Element_Partition >() ),
+          hostIndexSet_( &hostGridView.indexSet() )
       {
         if( hostElementIterator_ != hostEnd_ )
         {

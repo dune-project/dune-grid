@@ -94,6 +94,8 @@ namespace Dune
     template< class, bool > friend class GeoGrid::EntityPointer;
     template< int, class > friend class GeoGrid::EntityProxy;
     template< int, int, class > friend class GeoGrid::Geometry;
+    template< class, class, class, PartitionIteratorType > friend class GeoGrid::LeafGridView;
+    template< class, class, class, PartitionIteratorType > friend class GeoGrid::LevelGridView;
     template< class, class > friend class GeoGrid::Intersection;
     template< class > friend class GeoGrid::IntersectionIterator;
     template< class, class > friend class GeoGrid::IdSet;
@@ -525,7 +527,7 @@ namespace Dune
 
     /** \brief communicate information on a grid level
      *
-     *  \param      datahandle  communication data handle (user defined)
+     *  \param      dataHandle  communication data handle (user defined)
      *  \param[in]  interface   communication interface (one of
      *                          InteriorBorder_InteriorBorder_Interface,
      *                          InteriorBorder_All_Interface,
@@ -537,7 +539,7 @@ namespace Dune
      *  \param[in]  level       grid level to communicate
      */
     template< class DataHandle, class Data >
-    void communicate ( CommDataHandleIF< DataHandle, Data > &datahandle,
+    void communicate ( CommDataHandleIF< DataHandle, Data > &dataHandle,
                        InterfaceType interface,
                        CommunicationDirection direction,
                        int level ) const
@@ -545,13 +547,13 @@ namespace Dune
       typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
       typedef GeoGrid::CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
-      WrappedDataHandle wrappedDataHandle( *this, datahandle );
+      WrappedDataHandle wrappedDataHandle( *this, dataHandle );
       hostGrid().communicate( wrappedDataHandle, interface, direction, level );
     }
 
     /** \brief communicate information on leaf entities
      *
-     *  \param      datahandle  communication data handle (user defined)
+     *  \param      dataHandle  communication data handle (user defined)
      *  \param[in]  interface   communication interface (one of
      *                          InteriorBorder_InteriorBorder_Interface,
      *                          InteriorBorder_All_Interface,
@@ -562,14 +564,14 @@ namespace Dune
      *                          ForwardCommunication, BackwardCommunication)
      */
     template< class DataHandle, class Data >
-    void communicate ( CommDataHandleIF< DataHandle, Data > &datahandle,
+    void communicate ( CommDataHandleIF< DataHandle, Data > &dataHandle,
                        InterfaceType interface,
                        CommunicationDirection direction ) const
     {
       typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
       typedef GeoGrid::CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
-      WrappedDataHandle wrappedDataHandle( *this, datahandle );
+      WrappedDataHandle wrappedDataHandle( *this, dataHandle );
       hostGrid().communicate( wrappedDataHandle, interface, direction );
     }
 
@@ -655,7 +657,7 @@ namespace Dune
     {
       typedef typename Partition< pitype >::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, level ) );
+      return View( ViewImp( *this, hostGrid().template levelView< pitype >( level ) ) );
     }
 
     /** \brief View for the leaf grid */
@@ -664,21 +666,21 @@ namespace Dune
     {
       typedef typename Traits::template Partition< pitype >::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this ) );
+      return View( ViewImp( *this, hostGrid().template leafView< pitype >() ) );
     }
 
     /** \brief View for a grid level for All_Partition */
     LevelGridView levelView ( int level ) const
     {
       typedef typename LevelGridView::GridViewImp ViewImp;
-      return LevelGridView( ViewImp( *this, level ) );
+      return LevelGridView( ViewImp( *this, hostGrid().levelView( level ) ) );
     }
 
     /** \brief View for the leaf grid for All_Partition*/
     LeafGridView leafView() const
     {
       typedef typename LeafGridView::GridViewImp ViewImp;
-      return LeafGridView( ViewImp( *this ) );
+      return LeafGridView( ViewImp( *this, hostGrid().leafView() ) );
     }
 
     /** \} */
