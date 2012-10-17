@@ -6,6 +6,8 @@
 #include <dune/common/sllist.hh>
 #include <dune/common/shared_ptr.hh>
 
+#include <dune/grid/uggrid/uggridrenumberer.hh>
+
 /** \file
  * \brief The UGGridLeafIntersection and UGGridLevelIntersection classes
  */
