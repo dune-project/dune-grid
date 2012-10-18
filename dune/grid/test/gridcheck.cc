@@ -295,9 +295,6 @@ void assertNeighbor (Grid &g)
       p = g.template lbegin<0>(1);
       LevelIterator it = g.template lbegin<0>(0);
       ++it;
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-      p->ilevelbegin();
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     }
 
     // iterate over level
@@ -309,16 +306,6 @@ void assertNeighbor (Grid &g)
 
       // call global id
       globalid.id( entity );
-
-      if( !entity.isLeaf() )
-      {
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-        if( entity.ileafbegin() != entity.ileafend() )
-        {
-          DUNE_THROW(CheckError, "On non-leaf entities ileafbegin should be equal to ileafend!");
-        }
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
-      }
 
       const int numFaces = entity.template count< 1 >();
       // flag vector for elements faces
