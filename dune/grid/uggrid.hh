@@ -198,9 +198,12 @@ namespace Dune {
 
      For installation instructions see http://www.dune-project.org/external_libraries/install_ug.html .
    */
-  template <int dim>
-  class UGGrid : public GridDefaultImplementation  <dim, dim, double, UGGridFamily<dim,dim> >
+  template< int dim >
+  class UGGrid
+    : public GridDefaultImplementation< dim, dim, double, UGGridFamily< dim, dim > >
   {
+    typedef GridDefaultImplementation< dim, dim, double, UGGridFamily< dim, dim > > Base;
+
     friend class UGGridGeometry<0,dim,const UGGrid<dim> >;
     friend class UGGridGeometry<dim,dim,const UGGrid<dim> >;
     friend class UGGridGeometry<1,2,const UGGrid<dim> >;
