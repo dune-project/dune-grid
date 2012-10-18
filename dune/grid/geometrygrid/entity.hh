@@ -714,30 +714,6 @@ namespace Dune
         return EntityPointerImpl( grid(), hostEntity(), i );
       }
 
-      LevelIntersectionIterator ilevelbegin () const
-      {
-        typedef GeoGrid::LevelIntersectionIterator< Grid > LevelIntersectionIteratorImpl;
-        return LevelIntersectionIteratorImpl( *this, hostEntity().ilevelbegin() );
-      }
-
-      LevelIntersectionIterator ilevelend () const
-      {
-        typedef GeoGrid::LevelIntersectionIterator< Grid > LevelIntersectionIteratorImpl;
-        return LevelIntersectionIteratorImpl( *this, hostEntity().ilevelend() );
-      }
-
-      LeafIntersectionIterator ileafbegin () const
-      {
-        typedef GeoGrid::LeafIntersectionIterator< Grid > LeafIntersectionIteratorImpl;
-        return LeafIntersectionIteratorImpl( *this, hostEntity().ileafbegin() );
-      }
-
-      LeafIntersectionIterator ileafend () const
-      {
-        typedef GeoGrid::LeafIntersectionIterator< Grid > LeafIntersectionIteratorImpl;
-        return LeafIntersectionIteratorImpl( *this, hostEntity().ileafend() );
-      }
-
       bool hasBoundaryIntersections () const
       {
         return hostEntity().hasBoundaryIntersections();
