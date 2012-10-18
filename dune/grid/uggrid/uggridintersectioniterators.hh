@@ -38,7 +38,7 @@ namespace Dune {
     void increment() {
       GridImp::getRealImplementation(intersection_).neighborCount_++;
 
-      GridImp::getRealImplementation(intersection_).geometryIsUpToDate_          = false;
+      GridImp::getRealImplementation(intersection_).geometry_.reset();
       GridImp::getRealImplementation(intersection_).geometryInInside_.reset();
       GridImp::getRealImplementation(intersection_).geometryInOutside_.reset();
     }
@@ -108,7 +108,7 @@ namespace Dune {
 
       // make sure geometries are not taken from the cache the next time
       // the geometry{|InInside|InOutside} methods are called.
-      intersectionImp.geometryIsUpToDate_          = false;
+      intersectionImp.geometry_.reset();
       intersectionImp.geometryInInside_.reset();
       intersectionImp.geometryInOutside_.reset();
     }

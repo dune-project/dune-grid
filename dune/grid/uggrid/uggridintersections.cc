@@ -121,7 +121,7 @@ template< class GridImp>
 typename Dune::UGGridLevelIntersection<GridImp>::Geometry
 Dune::UGGridLevelIntersection<GridImp>::geometry () const
 {
-  if (!geometryIsUpToDate_) {
+  if (!geometry_) {
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
@@ -138,13 +138,11 @@ Dune::UGGridLevelIntersection<GridImp>::geometry () const
 
     }
 
-    geometry_.setup(intersectionGeometryType, coordinates);
-
-    geometryIsUpToDate_ = true;
+    geometry_ = make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
 
   }
 
-  return Geometry( geometry_ );
+  return Geometry( *geometry_ );
 }
 
 template<class GridImp>
@@ -376,7 +374,7 @@ template< class GridImp>
 typename Dune::UGGridLeafIntersection<GridImp>::Geometry
 Dune::UGGridLeafIntersection< GridImp >::geometry () const
 {
-  if (!geometryIsUpToDate_) {
+  if (!geometry_) {
 
     if (leafSubFaces_[0].first == NULL       // boundary intersection
         // or if this face is the intersection
@@ -403,7 +401,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      geometry_.setup(intersectionGeometryType, coordinates);
+      geometry_ = make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -427,15 +425,13 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      geometry_.setup(intersectionGeometryType, coordinates);
+      geometry_ = make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
 
     }
 
-    geometryIsUpToDate_ = true;
-
   }
 
-  return Geometry( geometry_ );
+  return Geometry( *geometry_ );
 }
 
 /** \todo Needs to be checked for the nonconforming case */

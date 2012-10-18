@@ -42,8 +42,81 @@ namespace Dune
     static const signed char updated      =  0; // means the point values have been set
     static const signed char buildmapping =  1; // means updated and mapping was build
 
-    struct CoordVecCopy
+    template <int dim, int corners, class Mapping>
+    class GeometryImplBase
     {
+    private:
+      // prohibited due to reference counting
+      GeometryImplBase( const GeometryImplBase& );
+
+    protected:
+      //! number of corners
+      static const int corners_ = corners ;
+
+      //! the vertex coordinates
+      typedef FieldMatrix<alu3d_ctype, corners , cdim>  CoordinateMatrixType;
+
+      template <int dummy, int dimused>
+      struct CoordTypeExtractorType
+      {
+        typedef CoordinateMatrixType Type;
+      };
+
+      template <int dummy>
+      struct CoordTypeExtractorType< dummy, 3 >
+      {
+        typedef CoordinateMatrixType* Type;
+      };
+
+      typedef typename CoordTypeExtractorType< 0, dim > :: Type CoordinateStorageType ;
+
+      //! the type of the mapping
+      typedef Mapping MappingType;
+
+      //! to coordinates
+      CoordinateStorageType coord_ ;
+
+      //! the mapping
+      MappingType map_;
+
+      //! volume of element
+      double volume_ ;
+
+      //! the reference counter
+      mutable unsigned int refCount_;
+
+      //! the status (see different status above)
+      signed char status_ ;
+    public:
+      //! default constructor
+      GeometryImplBase()
+        : coord_( 0 ),
+          map_(),
+          volume_( 1.0 )
+      {
+        reset();
+      }
+
+      //! reset status and reference count
+      void reset()
+      {
+        // reset reference counter
+        refCount_ = 1;
+        // reset status
+        status_   = invalid ;
+      }
+
+      //! increase reference count
+      void operator ++ () { ++ refCount_; }
+
+      //! decrease reference count
+      void operator -- () { assert( refCount_ > 0 ); --refCount_; }
+
+      //! return true if object has no references anymore
+      bool operator ! () const { return refCount_ == 0; }
+
+      //! return true if there exists more then on reference
+      bool stillUsed () const { return refCount_ > 1 ; }
 
       // copy coordinate vector from field vector or alu3d_ctype[cdim]
       template <class CoordPtrType>
@@ -85,6 +158,18 @@ namespace Dune
       {
         DUNE_THROW(InvalidStateException,"This method should not be called!");
       }
+
+      // set status to invalid
+      void invalidate () { status_ = invalid ; }
+
+      // return true if geometry is valid
+      bool valid () const { return status_ != invalid ; }
+
+      // set volume
+      void setVolume( const double volume ) { volume_ = volume ; }
+
+      // return volume
+      double volume() const { return volume_; }
     };
 
     //! general type of geometry implementation
@@ -93,29 +178,20 @@ namespace Dune
   public:
     // geometry implementation for edges and vertices
     template <int dummy, int dim, ALU3dGridElementType eltype>
-    class GeometryImpl : public CoordVecCopy
+    class GeometryImpl : public GeometryImplBase< dim, dim+1, LinearMapping<cdim, dim> >
     {
-      using CoordVecCopy :: copy ;
+      typedef GeometryImplBase< dim, dim+1, LinearMapping<cdim, dim> > BaseType;
 
-      enum { corners_ = dim+1 };
-      //! the vertex coordinates
-      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
+      using BaseType :: corners_ ;
+      using BaseType :: copy ;
+      using BaseType :: coord_ ;
+      using BaseType :: map_ ;
+      using BaseType :: status_ ;
 
-      typedef LinearMapping<cdim, dim> MappingType;
-
-      CoordinateMatrixType coord_;
-      MappingType liMap_;
-      signed char status_;
-
+      typedef typename BaseType :: MappingType MappingType ;
     public:
-      using CoordVecCopy :: update ;
-
-      GeometryImpl() : coord_() , liMap_() , status_( invalid ) {}
-      GeometryImpl(const GeometryImpl& other)
-        : coord_(other.coord_),
-          liMap_(other.liMap_),
-          status_(other.status_)
-      {}
+      using BaseType :: update ;
+      using BaseType :: valid ;
 
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
@@ -128,11 +204,11 @@ namespace Dune
       inline MappingType& mapping()
       {
         assert( valid() );
-        if( status_ == buildmapping ) return liMap_;
+        if( status_ == buildmapping ) return map_;
 
-        liMap_.buildMapping( coord_[0] );
+        map_.buildMapping( coord_[0] );
         status_ = buildmapping ;
-        return liMap_;
+        return map_;
       }
 
       // update vertex
@@ -144,43 +220,26 @@ namespace Dune
         // we need to update the mapping
         status_ = updated ;
       }
-
-      // set status to invalid
-      void invalidate () { status_ = invalid ; }
-
-      // return true if geometry is valid
-      bool valid () const { return status_ != invalid ; }
     };
 
     // geometry implementation for edges and vertices
     template <int dummy, ALU3dGridElementType eltype>
-    class GeometryImpl<dummy,1,eltype> : public CoordVecCopy
+    class GeometryImpl<dummy,1,eltype>
+      : public GeometryImplBase< 1, 2, LinearMapping<cdim, 1> >
     {
-      using CoordVecCopy :: copy ;
-
       enum { dim = 1 };
-      enum { corners_ = dim+1 };
-      //! the vertex coordinates
-      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
+      typedef GeometryImplBase< dim, dim+1, LinearMapping<cdim, dim> > BaseType;
 
-      typedef LinearMapping<cdim, dim> MappingType;
+      using BaseType :: corners_ ;
+      using BaseType :: copy ;
+      using BaseType :: coord_ ;
+      using BaseType :: map_ ;
+      using BaseType :: status_ ;
 
-      // for edges use LinearMapping<cdim, 1> here that has all features
-      // implemented
-
-      CoordinateMatrixType coord_;
-      MappingType liMap_;
-      signed char status_;
-
+      typedef typename BaseType :: MappingType MappingType;
     public:
-      using CoordVecCopy :: update ;
-
-      GeometryImpl() : coord_() , liMap_() , status_( invalid ) {}
-      GeometryImpl(const GeometryImpl& other)
-        : coord_(other.coord_),
-          liMap_(other.liMap_),
-          status_(other.status_)
-      {}
+      using BaseType :: update ;
+      using BaseType :: valid ;
 
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
@@ -193,11 +252,11 @@ namespace Dune
       inline MappingType& mapping()
       {
         assert( valid() );
-        if( status_ == buildmapping ) return liMap_;
+        if( status_ == buildmapping ) return map_;
 
-        liMap_.buildMapping( coord_[0], coord_[1] );
+        map_.buildMapping( coord_[0], coord_[1] );
         status_ = buildmapping ;
-        return liMap_;
+        return map_;
       }
 
       // update edge
@@ -210,43 +269,26 @@ namespace Dune
         copy( p1, coord_[1] );
         status_ = updated;
       }
-
-      // set status to invalid
-      void invalidate () { status_ = invalid ; }
-
-      // return true if geometry is valid
-      bool valid () const { return status_ != invalid ; }
     };
 
     // geom impl for simplex faces (triangles)
     template <int dummy>
-    class GeometryImpl<dummy,2, tetra> : public CoordVecCopy
+    class GeometryImpl<dummy, 2, tetra>
+      : public GeometryImplBase< 2, 3, LinearMapping<cdim, 2> >
     {
-      using CoordVecCopy :: copy ;
+      // dim = 2, corners = 3
+      typedef GeometryImplBase< 2, 3, LinearMapping<cdim, 2> > BaseType;
 
-      enum { corners_ = 3 };
+      using BaseType :: corners_ ;
+      using BaseType :: copy ;
+      using BaseType :: coord_ ;
+      using BaseType :: map_ ;
+      using BaseType :: status_ ;
 
-      //! the vertex coordinates
-      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
-      typedef LinearMapping<cdim, 2>   MappingType;
-
-      //! the coordinates (for dim = 3 only a pointer)
-      CoordinateMatrixType coord_;
-
-      MappingType liMap_;
-      signed char status_;
-
+      typedef typename BaseType :: MappingType MappingType ;
     public:
-      using CoordVecCopy :: update ;
-
-      // constructor
-      GeometryImpl() : coord_(), liMap_(), status_( invalid ) {}
-      // copy constructor
-      GeometryImpl(const GeometryImpl& other) :
-        coord_(other.coord_),
-        liMap_(other.liMap_),
-        status_(other.status_)
-      {}
+      using BaseType :: update ;
+      using BaseType :: valid ;
 
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
@@ -272,18 +314,12 @@ namespace Dune
       inline MappingType& mapping()
       {
         assert( valid() );
-        if( status_ == buildmapping ) return liMap_;
+        if( status_ == buildmapping ) return map_;
 
-        liMap_.buildMapping( coord_[0], coord_[1], coord_[2] );
+        map_.buildMapping( coord_[0], coord_[1], coord_[2] );
         status_ = buildmapping ;
-        return liMap_;
+        return map_;
       }
-
-      // set status to invalid
-      void invalidate () { status_ = invalid ; }
-
-      // return true if geometry is valid
-      bool valid () const { return status_ != invalid ; }
     };
 
     ///////////////////////////////////////////////////////////////
@@ -294,33 +330,22 @@ namespace Dune
 
     // geom impl for cube faces (quadrilaterals)
     template <int dummy>
-    class GeometryImpl<dummy,2, hexa> : public CoordVecCopy
+    class GeometryImpl<dummy, 2, hexa>
+      : public GeometryImplBase< 2, 4, BilinearSurfaceMapping >
     {
-      using CoordVecCopy :: copy ;
+      // dim = 2, corners = 4
+      typedef GeometryImplBase< 2, 4, BilinearSurfaceMapping > BaseType;
 
-      enum { corners_ = 4 };
+      using BaseType :: corners_ ;
+      using BaseType :: copy ;
+      using BaseType :: coord_ ;
+      using BaseType :: map_ ;
+      using BaseType :: status_ ;
 
-      //! the vertex coordinates
-      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
-      typedef BilinearSurfaceMapping MappingType;
-
-      //! the coordinates (for dim = 3 only a pointer)
-      CoordinateMatrixType coord_;
-
-      MappingType biMap_;
-      signed char status_;
-
+      typedef typename BaseType :: MappingType MappingType ;
     public:
-      using CoordVecCopy :: update ;
-
-      // constructor
-      GeometryImpl() : coord_(), biMap_(), status_( invalid ) {}
-      // copy constructor
-      GeometryImpl(const GeometryImpl& other) :
-        coord_(other.coord_),
-        biMap_(other.biMap_),
-        status_(other.status_)
-      {}
+      using BaseType :: update ;
+      using BaseType :: valid ;
 
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
@@ -348,81 +373,51 @@ namespace Dune
       inline MappingType& mapping()
       {
         assert( valid() );
-        if( status_ == buildmapping ) return biMap_;
+        if( status_ == buildmapping ) return map_;
 
-        biMap_.buildMapping( coord_[0], coord_[1], coord_[2], coord_[3] );
+        map_.buildMapping( coord_[0], coord_[1], coord_[2], coord_[3] );
         status_ = buildmapping ;
-        return biMap_;
+        return map_;
       }
-
-      // set status to invalid
-      void invalidate () { status_ = invalid ; }
-
-      // return true if geometry is valid
-      bool valid () const { return status_ != invalid ; }
     };
 
     // geometry impl for hexahedrons
     template <int dummy>
-    class GeometryImpl<dummy,3, hexa> : public CoordVecCopy
+    class GeometryImpl<dummy,3, hexa>
+      : public GeometryImplBase< 3, 8, TrilinearMapping >
     {
-      enum { corners_ = 8 };
+      // dim = 3, corners = 8
+      typedef GeometryImplBase< 3, 8, TrilinearMapping > BaseType;
 
-      //! the vertex coordinates
+      using BaseType :: corners_ ;
+      using BaseType :: copy ;
+      using BaseType :: coord_ ;
+      using BaseType :: map_ ;
+      using BaseType :: status_ ;
+
+      typedef typename BaseType :: MappingType MappingType ;
+      typedef typename BaseType :: CoordinateMatrixType CoordinateMatrixType;
+
       typedef alu3d_ctype CoordPtrType[cdim];
-
-      //! the vertex coordinates
-      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
-
-      typedef TrilinearMapping MappingType;
 
       // coordinate pointer vector
       const alu3d_ctype* coordPtr_[ corners_ ];
-      MappingType triMap_;
-      CoordinateMatrixType* fatherCoord_;
-      signed char status_;
-
     public:
-      using CoordVecCopy :: update ;
-      using CoordVecCopy :: copy ;
+      using BaseType :: update ;
+      using BaseType :: valid ;
 
       //! constructor creating geo impl
-      GeometryImpl() : triMap_(),
-                       fatherCoord_(0),
-                       status_( invalid )
+      GeometryImpl() : BaseType()
       {
         // set initialize coord pointers
         for( int i=0; i<corners_; ++i )
           coordPtr_[ i ] = 0;
       }
 
-
-      //! conpy constructor
-      GeometryImpl(const GeometryImpl& other) :
-        triMap_(other.triMap_),
-        fatherCoord_(0),
-        status_(other.status_)
-      {
-        // copy coord pointers
-        for( int i=0; i<corners_; ++i )
-          coordPtr_[ i ] = other.coordPtr_[ i ];
-
-        // if father coords are set, then reset coordPtr
-        if( other.fatherCoord_ )
-        {
-          fatherCoord_ = new CoordinateMatrixType(*other.fatherCoord_);
-          CoordinateMatrixType& coord = *fatherCoord_;
-          for(int i=0; i<corners_; ++i)
-          {
-            coordPtr_[i] = (&(coord[i][0]));
-          }
-        }
-      }
-
       // desctructor
       ~GeometryImpl()
       {
-        if( fatherCoord_ ) delete fatherCoord_;
+        if( coord_ ) delete coord_;
       }
 
       const alu3d_ctype* point( const int i ) const
@@ -467,12 +462,12 @@ namespace Dune
       inline void updateInFather(const GeometryImp &fatherGeom ,
                                  const GeometryImp &myGeom)
       {
-        if( fatherCoord_ == 0 )
+        if( coord_ == 0 )
         {
-          fatherCoord_ = new CoordinateMatrixType();
+          coord_ = new CoordinateMatrixType();
         }
 
-        CoordinateMatrixType& coord = *fatherCoord_;
+        CoordinateMatrixType& coord = *coord_;
         // compute the local coordinates in father refelem
         for(int i=0; i < myGeom.corners() ; ++i)
         {
@@ -496,13 +491,13 @@ namespace Dune
       inline MappingType& mapping()
       {
         assert( valid() );
-        if( status_ == buildmapping ) return triMap_;
+        if( status_ == buildmapping ) return map_;
 
-        triMap_.buildMapping( point( 0 ), point( 1 ), point( 2 ), point( 3 ),
-                              point( 4 ), point( 5 ), point( 6 ), point( 7 ) );
+        map_.buildMapping( point( 0 ), point( 1 ), point( 2 ), point( 3 ),
+                           point( 4 ), point( 5 ), point( 6 ), point( 7 ) );
 
         status_ = buildmapping;
-        return triMap_;
+        return map_;
       }
 
       // set status to invalid
@@ -515,64 +510,41 @@ namespace Dune
 
     // geometry impl for hexahedrons
     template <int dummy>
-    class GeometryImpl<dummy,3, tetra> : public CoordVecCopy
+    class GeometryImpl<dummy,3, tetra>
+      : public GeometryImplBase< 3, 4, LinearMapping<cdim, cdim> >
     {
-      enum { corners_ = 4 };
+      // dim = 3, corners = 8
+      typedef GeometryImplBase< 3, 4, LinearMapping<cdim, cdim> > BaseType;
 
-      //! the vertex coordinates
+      using BaseType :: corners_ ;
+      using BaseType :: copy ;
+      using BaseType :: coord_ ;
+      using BaseType :: map_ ;
+      using BaseType :: status_ ;
+
+      typedef typename BaseType :: MappingType MappingType ;
+      typedef typename BaseType :: CoordinateMatrixType CoordinateMatrixType;
+
       typedef alu3d_ctype CoordPtrType[cdim];
-
-      //! the vertex coordinates
-      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
-
-      typedef LinearMapping<cdim, cdim> MappingType;
 
       // coordinate pointer vector
       const alu3d_ctype* coordPtr_[ corners_ ];
-      MappingType liMap_;
-      CoordinateMatrixType* fatherCoord_;
-      signed char status_;
-
     public:
-      using CoordVecCopy :: update ;
-      using CoordVecCopy :: copy ;
+      using BaseType :: update ;
+      using BaseType :: valid ;
 
       // default constructor
-      GeometryImpl() : liMap_(),
-                       fatherCoord_(0),
-                       status_( invalid )
+      GeometryImpl() : BaseType()
       {
         // set initialize coord pointers
         for( int i=0; i<corners_; ++i )
           coordPtr_[ i ] = 0;
       }
 
-      // copy constructor
-      GeometryImpl(const GeometryImpl& other) :
-        liMap_(other.liMap_),
-        fatherCoord_(0),
-        status_(other.status_)
-      {
-        // copy coord pointers
-        for( int i=0; i<corners_; ++i )
-          coordPtr_[ i ] = other.coordPtr_[ i ];
-
-        // if father coords are set, then reset coordPtr
-        if( other.fatherCoord_ )
-        {
-          fatherCoord_ = new CoordinateMatrixType(*other.fatherCoord_);
-          CoordinateMatrixType& coord = *fatherCoord_;
-          for(int i=0; i<corners_; ++i)
-          {
-            coordPtr_[i] = (&(coord[i][0]));
-          }
-        }
-      }
-
       // destructor
       ~GeometryImpl()
       {
-        if( fatherCoord_ ) delete fatherCoord_;
+        if( coord_ ) delete coord_;
       }
 
       const alu3d_ctype* point( const int i ) const
@@ -609,12 +581,12 @@ namespace Dune
       inline void updateInFather(const GeometryImp &fatherGeom ,
                                  const GeometryImp & myGeom)
       {
-        if( fatherCoord_ == 0 )
+        if( coord_ == 0 )
         {
-          fatherCoord_ = new CoordinateMatrixType();
+          coord_ = new CoordinateMatrixType();
         }
 
-        CoordinateMatrixType& coord = *fatherCoord_;
+        CoordinateMatrixType& coord = *coord_;
         // compute the local coordinates in father refelem
         for(int i=0; i < myGeom.corners() ; ++i)
         {
@@ -638,19 +610,13 @@ namespace Dune
       inline MappingType& mapping()
       {
         assert( valid() );
-        if( status_ == buildmapping ) return liMap_;
+        if( status_ == buildmapping ) return map_;
 
-        liMap_.buildMapping( point( 0 ), point( 1 ), point( 2 ), point( 3 ) );
+        map_.buildMapping( point( 0 ), point( 1 ), point( 2 ), point( 3 ) );
 
         status_ = buildmapping;
-        return liMap_;
+        return map_;
       }
-
-      // set status to invalid
-      void invalidate () { status_ = invalid ; }
-
-      // return true if geometry is valid
-      bool valid () const { return status_ != invalid ; }
     };
   }; // end of class ALUGridGeometryImplementation
 
@@ -705,6 +671,15 @@ namespace Dune
     //! for makeRefGeometry == true a Geometry with the coordinates of the
     //! reference element is made
     ALU3dGridGeometry();
+
+    //! copy constructor copying pointer and increasing reference count
+    ALU3dGridGeometry( const ALU3dGridGeometry& );
+
+    //! copy constructor copying pointer and increasing reference count
+    ALU3dGridGeometry& operator = ( const ALU3dGridGeometry& );
+
+    //! destructor decreasing reference count and freeing object
+    ~ALU3dGridGeometry( );
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
@@ -779,12 +754,45 @@ namespace Dune
     //! invalidate geometry implementation to avoid errors
     bool valid () const ;
 
-  private:
-    // implementation of coord and mapping
-    mutable GeometryImplType geoImpl_;
-    // volume
-    mutable ctype volume_;
+  protected:
+    //! assign pointer
+    void assign( const ALU3dGridGeometry& other );
+    //! remove pointer object
+    void removeObj();
+    //! get a new pointer object
+    void getObject();
+
+    // type of object provider
+    typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
+
+    //! return storage provider for geometry objects
+    static GeometryProviderType& geoProvider()
+    {
+      static GeometryProviderType storage;
+      return storage;
+    }
+
+    // return reference to geometry implementation
+    GeometryImplType& geoImpl() const
+    {
+      assert( geoImpl_ );
+      return *geoImpl_;
+    }
+
+    // implementation of the coordinates and mapping
+    GeometryImplType* geoImpl_;
   };
+
+  namespace FacadeOptions
+  {
+    //! geometry can be stored as an object
+    template< int mydim, int cdim, class GridImp >
+    struct StoreGeometryReference< mydim, cdim, GridImp, ALU3dGridGeometry >
+    {
+      //! Whether to store by reference.
+      static const bool v = false;
+    };
+  }
 
 } // end namespace Dune
 

@@ -6,6 +6,8 @@
 #include <dune/common/sllist.hh>
 #include <dune/common/shared_ptr.hh>
 
+#include <dune/grid/uggrid/uggridrenumberer.hh>
+
 /** \file
  * \brief The UGGridLeafIntersection and UGGridLevelIntersection classes
  */
@@ -45,7 +47,7 @@ namespace Dune {
         \todo Should be private
      */
     UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
-      : geometryIsUpToDate_(false),
+      : geometry_(nullptr),
         geometryInInside_(nullptr),
         geometryInOutside_(nullptr),
         center_(center), neighborCount_(nb),
@@ -177,13 +179,10 @@ namespace Dune {
     // flags store whether they have been constructed already.
     mutable bool geometryIsUpToDate_;
 
-    //! pointer to element holding the local geometries
+    //! pointers holding the global and local geometries
+    mutable std::shared_ptr<GeometryImpl>      geometry_;
     mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
     mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
-
-    //! pointer to element holding the neighbor_global and neighbor_local
-    //! information.
-    mutable GeometryImpl geometry_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
@@ -230,7 +229,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
-      : geometryIsUpToDate_(false),
+      : geometry_(nullptr),
         geometryInInside_(nullptr),
         geometryInOutside_(nullptr),
         center_(center), neighborCount_(nb), subNeighborCount_(0),
@@ -432,17 +431,10 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
-    // The geometries are only constructed when necessary.  The following
-    // flags store whether they have been constructed already.
-    mutable bool geometryIsUpToDate_;
-
-    //! pointer to element holding the local intersection geometries
+    //! pointer to global and local intersection geometries
+    mutable std::shared_ptr<GeometryImpl>      geometry_;
     mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
     mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
-
-    //! pointer to element holding the neighbor_global and neighbor_local
-    //! information.
-    mutable GeometryImpl geometry_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
