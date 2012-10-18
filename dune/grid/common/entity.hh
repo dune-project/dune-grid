@@ -67,6 +67,10 @@ namespace Dune
         GridImp::dimension, GridImp::dimensionworld,
         typename GridImp::ctype,
         typename GridImp::GridFamily> ;
+
+    // Default*GridView classes need access to intersection iterators
+    template< class, PartitionIteratorType > friend class DefaultLevelGridView;
+    template< class, PartitionIteratorType > friend class DefaultLeafGridView;
 #endif
     // type of underlying implementation, for internal use only
     typedef EntityImp< cd, dim, GridImp > Implementation;
@@ -341,58 +345,6 @@ namespace Dune
     typename Codim< codim >::EntityPointer subEntity ( int i ) const
     {
       return realEntity.template subEntity< codim >( i );
-    }
-
-    /**\brief Access to intersections with neighboring leaf elements.
-       A neighbor is an entity of codimension 0
-       which has an intersection of codimension 1 in common with this entity.
-       Access to those neighbors is provided using the IntersectionIterator.
-       This method returns an iterator refering to the first neighbor.
-
-       \note If the partitionType of the Entity is GhostEntity,
-             this method might give you only one neighbor, which is the
-             interior Entity the GhostEntity is connected to.
-     */
-    LeafIntersectionIterator ileafbegin () const
-    {
-      return realEntity.ileafbegin();
-    }
-
-    /**\brief Reference to an IntersectionIterator one past the last intersection
-
-       \note If the partitionType of the Entity is GhostEntity,
-             this method might give you only one neighbor, which is the
-             interior Entity the GhostEntity is connected to.
-     */
-    LeafIntersectionIterator ileafend () const
-    {
-      return realEntity.ileafend();
-    }
-
-    /**\brief Intra-level access to intersections with neighboring elements.
-       A neighbor is an entity of codimension 0
-       which has an intersection of codimension 1 in common with this entity.
-       Access to those neighbors is provided using the IntersectionIterator.
-       This method returns an iterator refering to the first neighbor.
-
-       \note If the partitionType of the Entity is GhostEntity,
-             this method might give you only one neighbor, which is the
-             interior Entity the GhostEntity is connected to.
-     */
-    LevelIntersectionIterator ilevelbegin () const
-    {
-      return realEntity.ilevelbegin();
-    }
-
-    /**\brief Reference to an IntersectionIterator one past the last intersection
-
-       \note If the partitionType of the Entity is GhostEntity,
-             this method might give you only one neighbor, which is the
-             interior Entity the GhostEntity is connected to.
-     */
-    LevelIntersectionIterator ilevelend () const
-    {
-      return realEntity.ilevelend();
     }
 
     /**\brief Inter-level access to father entity on the next-coarser grid.
