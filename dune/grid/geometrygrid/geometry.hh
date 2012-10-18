@@ -167,6 +167,18 @@ namespace Dune
         return *this;
       }
 
+#if HAVE_RVALUE_REFERENCES
+      const This &operator= ( This &&other )
+      {
+        if( mapping_ && mapping_->userData().removeReference() )
+          destroyMapping();
+        grid_ = other.grid_;
+        mapping_ = other.mapping_;
+        other.mapping_ = nullptr;
+        return *this;
+      }
+#endif // #if HAVE_RVALUE_REFERENCES
+
       operator bool () const { return bool( mapping_ ); }
 
       bool affine () const { return mapping_->affine(); }
