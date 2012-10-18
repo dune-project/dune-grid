@@ -291,8 +291,17 @@ namespace Dune
     explicit Geometry ( const Implementation &impl )
       : realGeometry( impl )
     {
-      // deprecationWarning ( integral_constant< bool, storeReference >() );
+      deprecationWarning ( integral_constant< bool, storeReference >() );
     }
+
+#if HAVE_RVALUE_REFERENCES
+    //! move constructor from implementation
+    explicit Geometry ( Implementation &&impl )
+      : realGeometry( std::move( impl ) )
+    {
+      deprecationWarning ( integral_constant< bool, storeReference >() );
+    }
+#endif // #if HAVE_RVALUE_REFERENCES
 
   private:
     /** hide assignment operator */

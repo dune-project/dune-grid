@@ -148,6 +148,13 @@ namespace Dune
       : realIterator( ep.realIterator )
     {}
 
+#if HAVE_RVALUE_REFERENCES
+    template< class ItImp >
+    explicit EntityPointer ( const EntityPointer< GridImp, ItImp > &&ep )
+      : realIterator( std::move( ep.realIterator ) )
+    {}
+#endif // #if HAVE_RVALUE_REFERENCES
+
     /** \brief Templatized constructor from type of entity that
         this entity pointer points to. This constructor can be used to
         create an entity pointer from an entity in order to store an
@@ -168,11 +175,20 @@ namespace Dune
     {}
 
     template< class ItImp >
-    EntityPointer &operator= ( const EntityPointer< GridImp, ItImp > &ep )
+    const EntityPointer &operator= ( const EntityPointer< GridImp, ItImp > &ep )
     {
       realIterator = ep.realIterator;
       return *this;
     }
+
+#if HAVE_RVALUE_REFERENCES
+    template< class ItImp >
+    const EntityPointer &operator= ( const EntityPointer< GridImp, ItImp > &&ep )
+    {
+      realIterator = std::move( ep.realIterator );
+      return *this;
+    }
+#endif // #if HAVE_RVALUE_REFERENCES
 
     //@}
 
@@ -245,13 +261,17 @@ namespace Dune
     //===========================================================
 
 
-    /** \brief Copy Constructor from an Iterator implementation.
+    //! copy constructor from implementation
+    EntityPointer ( const Implementation &impl )
+      : realIterator( impl )
+    {}
 
-       You can supply LeafIterator, LevelIterator, HierarchicIterator
-       or EntityPointer.
-     */
-    EntityPointer(const IteratorImp & i) :
-      realIterator(i) {}
+#if HAVE_RVALUE_REFERENCES
+    //! move constructor from implementation
+    EntityPointer ( Implementation &&impl )
+      : realIterator( std::move( impl ) )
+    {}
+#endif // #if HAVE_RVALUE_REFERENCES
 
     /** @brief Forward equality check to realIterator */
     template< class ItImp >
@@ -262,6 +282,6 @@ namespace Dune
     //@}
   };
 
-}
+} // namespace Dune
 
 #endif // DUNE_GRID_ENTITYPOINTER_HH
