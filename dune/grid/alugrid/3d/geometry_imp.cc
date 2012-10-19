@@ -49,20 +49,17 @@ namespace Dune {
   inline void ALU3dGridGeometry<mydim, cdim, GridImp> ::
   removeObj ()
   {
-    if( geoImpl_ )
+    // decrease reference count
+    -- geoImpl();
+
+    // if reference count is zero free the object
+    if( ! geoImpl() )
     {
-      // decrease reference count
-      -- geoImpl();
-
-      // if reference count is zero free the object
-      if( ! geoImpl() )
-      {
-        geoProvider().freeObject( geoImpl_ );
-      }
-
-      // reset pointer
-      geoImpl_ = 0;
+      geoProvider().freeObject( geoImpl_ );
     }
+
+    // reset pointer
+    geoImpl_ = 0;
   }
 
   template <int mydim, int cdim, class GridImp>
