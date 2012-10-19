@@ -60,8 +60,8 @@ namespace Dune
     //! reference element
     const ReferenceElementType& referenceElement_ ;
 
-    //! determinant of mapping
-    double det_ ;
+    //! volume of element
+    double volume_ ;
 
     //! the reference counter
     mutable unsigned int refCount_;
@@ -80,7 +80,7 @@ namespace Dune
     MyALU2dGridGeometryImplBase( const GeometryType type )
       : mapping_(),
         referenceElement_( GenericReferenceElements< ctype, mydim >::general( type ) ),
-        det_( 1.0 )
+        volume_( 1.0 )
     {
       reset();
     }
@@ -112,11 +112,8 @@ namespace Dune
     // return true if geometry is valid
     bool valid () const { return valid_; }
 
-    // set volume
-    void setVolume( const double volume ) { det_ = volume ; }
-
     // return volume
-    double volume() const { return det_; }
+    double volume() const { return volume_; }
 
     // return true if geometry is affine
     bool affine() const
@@ -179,6 +176,9 @@ namespace Dune
     using BaseType :: invalidate ;
     using BaseType :: corners ;
 
+    typedef typename BaseType :: ctype ctype ;
+    typedef typename BaseType :: map_t map_t ;
+
     // default constructor
     MyALU2dGridGeometryImpl () : BaseType( type() ) {}
 
@@ -198,6 +198,9 @@ namespace Dune
       mapping_.buildMapping( p0 );
       valid_ = true ;
     }
+
+    // return determinante of mapping
+    ctype det ( const map_t &m ) const {  return 1.0;  }
   };
 
   // geometry implementation for lines
@@ -209,12 +212,16 @@ namespace Dune
   protected:
     using BaseType :: mapping_ ;
     using BaseType :: valid_ ;
+    using BaseType :: volume_ ;
     using BaseType :: corners_ ;
 
   public:
     using BaseType :: valid ;
     using BaseType :: invalidate ;
     using BaseType :: corners ;
+
+    typedef typename BaseType :: ctype ctype ;
+    typedef typename BaseType :: map_t map_t ;
 
     // default constructor
     MyALU2dGridGeometryImpl () : BaseType( type() ) {}
@@ -244,16 +251,22 @@ namespace Dune
           coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
       }
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ] );
+      volume_ = localGeo.volume() / geo.volume();
+      assert( (volume_ > 0.0) && (volume_ < 1.0) );
       valid_ = true ;
     }
 
     // update geometry coordinates
     template< class Vector >
-    void update ( const Vector &p0, const Vector &p1 )
+    void update ( const Vector &p0, const Vector &p1, const double volume )
     {
       mapping_.buildMapping( p0, p1 );
+      volume_ = volume ;
       valid_ = true ;
     }
+
+    // return determinante of mapping
+    ctype det ( const map_t &m ) const { return volume_; }
   };
 
   // geometry implementation for triangles
@@ -265,12 +278,16 @@ namespace Dune
   protected:
     using BaseType :: mapping_ ;
     using BaseType :: valid_ ;
+    using BaseType :: volume_ ;
     using BaseType :: corners_ ;
 
   public:
     using BaseType :: valid ;
     using BaseType :: invalidate ;
     using BaseType :: corners ;
+
+    typedef typename BaseType :: ctype ctype ;
+    typedef typename BaseType :: map_t map_t ;
 
     // default constructor
     MyALU2dGridGeometryImpl () : BaseType( type() ) {}
@@ -296,7 +313,9 @@ namespace Dune
           coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
       }
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ] );
-      valid_ = true ;
+      volume_ = localGeo.volume() / geo.volume();
+      assert( (volume_ > 0.0) && (volume_ < 1.0) );
+      valid_  = true ;
     }
 
     template< class HElement >
@@ -304,8 +323,12 @@ namespace Dune
     {
       mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
                              item.getVertex( 2 )->coord() );
+      volume_ = item.area();
       valid_ = true ;
     }
+
+    // return determinante of mapping
+    ctype det ( const map_t &m ) const { return 2.0 * volume_; }
   };
 
   // geometry implementation for quadrilaterals
@@ -317,6 +340,7 @@ namespace Dune
   protected:
     using BaseType :: mapping_ ;
     using BaseType :: valid_ ;
+    using BaseType :: volume_ ;
     using BaseType :: corners_ ;
 
   public:
@@ -348,6 +372,8 @@ namespace Dune
           coord[ i ][ j ] = (coord[ i ][ j ] < 1e-14 ? 0 : coord[ i ][ j ]);
       }
       mapping_.buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
+      volume_ = localGeo.volume() / geo.volume();
+      assert( (volume_ > 0.0) && (volume_ < 1.0) );
       valid_ = true ;
     }
 
@@ -356,6 +382,7 @@ namespace Dune
     {
       mapping_.buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
                              item.getVertex( 3 )->coord(), item.getVertex( 2 )->coord() );
+      volume_ = item.area();
       valid_ = true ;
     }
   };
@@ -371,6 +398,7 @@ namespace Dune
     typedef Dune :: LinearMapping< cdim, 2 >  LinearMappingType;
 
     using BaseType :: mapping_ ;
+    using BaseType :: volume_ ;
     using BaseType :: valid_ ;
     using BaseType :: referenceElement_ ;
 
@@ -490,6 +518,8 @@ namespace Dune
       else
         bilinearMapping().buildMapping( coord[ 0 ], coord[ 1 ], coord[ 2 ], coord[ 3 ] );
 
+      volume_ = localGeo.volume() / geo.volume();
+      assert( (volume_ > 0.0) && (volume_ < 1.0) );
       valid_ = true ;
     }
 
@@ -505,7 +535,8 @@ namespace Dune
         bilinearMapping().buildMapping( item.getVertex( 0 )->coord(), item.getVertex( 1 )->coord(),
                                         item.getVertex( 3 )->coord(), item.getVertex( 2 )->coord() );
 
-      valid_ = true ;
+      volume_ = item.area();
+      valid_  = true ;
     }
 
   private:
@@ -681,9 +712,6 @@ namespace Dune
 
     // implementation of coord and mapping
     mutable GeometryImplType geoImpl_;
-
-    // determinant
-    mutable alu2d_ctype det_;
   };
 
 } // end namespace Dune

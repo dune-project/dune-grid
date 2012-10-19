@@ -19,8 +19,7 @@ namespace Dune
 
   template< int mydim, int cdim, class GridImp >
   inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ()
-    : geoImpl_(),
-      det_( 1.0 )
+    : geoImpl_()
   {}
 
 
@@ -82,13 +81,8 @@ namespace Dune
   inline alu2d_ctype
   ALU2dGridGeometry< mydim, cdim, GridImp >::integrationElement ( const LocalCoordinate &local ) const
   {
-    if ( eltype == ALU2DSPACE triangle || mydim < 2 )
-    {
-      assert( geoImpl_.valid() );
-      return (mydim == 0 ? 1.0 : det_);
-    }
-    else
-      return geoImpl_.det(local);
+    assert( geoImpl_.valid() );
+    return geoImpl_.det( local );
   }
 
 
@@ -96,22 +90,7 @@ namespace Dune
   inline alu2d_ctype ALU2dGridGeometry< mydim, cdim, GridImp >::volume () const
   {
     assert( geoImpl_.valid() );
-    if( mydim == 2 )
-    {
-      switch( GridImp::elementType )
-      {
-      case ALU2DSPACE triangle :
-        return 0.5 * det_;
-
-      case ALU2DSPACE quadrilateral :
-        return det_;
-
-      case ALU2DSPACE mixed :
-        DUNE_THROW( NotImplemented, "Geometry::volume() not implemented for ElementType mixed." );
-      }
-    }
-    else
-      return (mydim == 0 ? 1.0 : det_);
+    return geoImpl_.volume();
   }
 
 
@@ -143,9 +122,6 @@ namespace Dune
     // update geometry impl
     geoImpl_.update( item );
 
-    // store volume
-    det_ = (geoImpl_.corners() == 3 ? 2 * item.area() : item.area());
-
     // geometry built
     return true;
   }
@@ -173,11 +149,9 @@ namespace Dune
 
     // update geometry impl
     geoImpl_.update( item.getVertex( (aluFace + 1 + twist ) % nf )->coord() ,
-                     item.getVertex( (aluFace + 2 - twist ) % nf )->coord() );
-
-    // store volume
-    det_ = item.sidelength( aluFace );
-    //assert( std::abs( det_ - geoImpl_.det( LocalCoordinate(0.5) ) ) < 1e-14 );
+                     item.getVertex( (aluFace + 2 - twist ) % nf )->coord() ,
+                     item.sidelength( aluFace )
+                     );
 
     // geometry built
     return true;
@@ -192,9 +166,8 @@ namespace Dune
 
     assert( &item );
     // update geometry impl
-    geoImpl_.update( item.coord() );
-
     // volume is already 1.0
+    geoImpl_.update( item.coord() );
 
     return true;
   }
@@ -210,7 +183,6 @@ namespace Dune
 
     // calculate volume
     LocalCoordinate local( 0.25 );
-    det_ = geoImpl_.det( local );
 
     // geometry built
     return true;
@@ -256,10 +228,9 @@ namespace Dune
     RefCoord refCoord( calculateReferenceCoords( corners ) );
 
     geoImpl_.update( refCoord.first[ ( aluFace + 1+twist ) % corners ],
-                     refCoord.first[ ( aluFace + 2-twist ) % corners ] );
-
-    // get length of faces
-    det_ = refCoord.second[ aluFace ];
+                     refCoord.first[ ( aluFace + 2-twist ) % corners ],
+                     refCoord.second[ aluFace ]
+                     );
 
     // geometry built
     return true;
@@ -273,10 +244,6 @@ namespace Dune
   {
     // update geometry
     geoImpl_.updateLocal( fatherGeom, myGeom );
-
-    // store volume which is a part of one
-    det_ = myGeom.volume() / fatherGeom.volume();
-    assert( (det_ > 0.0) && (det_ < 1.0) );
 
     return true;
   }
