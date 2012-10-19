@@ -10,6 +10,7 @@
 
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/alugrid/3d/mappings.hh>
+#include <dune/grid/alugrid/common/memory.hh>
 
 namespace Dune
 {
