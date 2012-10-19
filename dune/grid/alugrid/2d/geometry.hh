@@ -821,7 +821,7 @@ namespace Dune
   inline bool
   ALU2dGridGeometry< mydim, cdim, GridImp >::buildGeom ( const CoordVector &coordVector )
   {
-    geoImpl_.update( coordVector );
+    geoImpl().update( coordVector );
     return true;
   }
 
