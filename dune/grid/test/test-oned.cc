@@ -100,10 +100,13 @@ OneDGrid* testFactory()
   //   Test whether the boundary segment numbering is in insertion order
   // /////////////////////////////////////////////////////////////////////////
 
-  for (eIt = grid->lbegin<0>(0); eIt!=eEndIt; ++eIt) {
+  typedef  OneDGrid::LeafGridView GridView;
+  typedef  GridView::IntersectionIterator IntersectionIterator;
+  const GridView gridView = grid->leafView();
 
-    OneDGrid::LevelGridView::IntersectionIterator iIt    = eIt->ilevelbegin();
-    OneDGrid::LevelGridView::IntersectionIterator iEndIt = eIt->ilevelend();
+  for (eIt = grid->lbegin<0>(0); eIt!=eEndIt; ++eIt) {
+    IntersectionIterator iIt = gridView.ibegin(*eIt);
+    const IntersectionIterator iEndIt = gridView.iend(*eIt);
 
     for (; iIt!=iEndIt; ++iIt) {
 
