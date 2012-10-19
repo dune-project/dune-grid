@@ -755,8 +755,6 @@ namespace Dune
     bool valid () const ;
 
   protected:
-    //! assign pointer
-    void assign( const ALU3dGridGeometry& other );
     //! remove pointer object
     void removeObj();
     //! get a new pointer object

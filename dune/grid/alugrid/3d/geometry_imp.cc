@@ -21,9 +21,10 @@ namespace Dune {
 
   template <int mydim, int cdim, class GridImp>
   inline ALU3dGridGeometry<mydim, cdim, GridImp> ::
-  ALU3dGridGeometry( const ALU3dGridGeometry& other )
+  ALU3dGridGeometry ( const ALU3dGridGeometry &other )
+    : geoImpl_( other.geoImpl_ )
   {
-    assign( other );
+    ++geoImpl();
   }
 
   template <int mydim, int cdim, class GridImp>
@@ -32,17 +33,6 @@ namespace Dune {
   {
     geoImpl_ = geoProvider().getEmptyObject();
     geoImpl().reset();
-  }
-
-  template <int mydim, int cdim, class GridImp>
-  inline void ALU3dGridGeometry<mydim, cdim, GridImp> ::
-  assign ( const ALU3dGridGeometry& other )
-  {
-    // copy pointer
-    geoImpl_ = other.geoImpl_ ;
-
-    // increase reference count
-    ++ geoImpl();
   }
 
   template <int mydim, int cdim, class GridImp>
@@ -66,8 +56,9 @@ namespace Dune {
   inline ALU3dGridGeometry<mydim, cdim, GridImp>&
   ALU3dGridGeometry<mydim, cdim, GridImp> :: operator = (const ALU3dGridGeometry& other )
   {
+    ++other.geoImpl();
     removeObj();
-    assign( other );
+    geoImpl_ = other.geoImpl_;
     return *this;
   }
 
