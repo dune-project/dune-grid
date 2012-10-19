@@ -102,16 +102,13 @@ namespace Dune
     }
 
     //! increase reference count
-    void operator ++ () { ++ refCount_; }
+    void operator++ () { ++refCount_; }
 
     //! decrease reference count
-    void operator -- () { assert( refCount_ > 0 ); --refCount_; }
+    void operator-- () { assert( refCount_ > 0 ); --refCount_; }
 
     //! return true if object has no references anymore
-    bool operator ! () const { return refCount_ == 0; }
-
-    //! return true if there exists more then on reference
-    bool stillUsed () const { return refCount_ > 1 ; }
+    bool operator ! () const { return (refCount_ == 0); }
 
     // set status to invalid
     void invalidate () { valid_ = false ; }
@@ -617,10 +614,6 @@ namespace Dune
     void invalidate () ;
 
   protected:
-    //! assign pointer
-    void assign( const ALU2dGridGeometry& other );
-    //! remove pointer object
-    void removeObj();
     //! get a new pointer object
     void getObject();
 
@@ -635,7 +628,7 @@ namespace Dune
     }
 
     // return reference to geometry implementation
-    GeometryImplType& geoImpl() const
+    GeometryImplType &geoImpl () const
     {
       assert( geoImpl_ );
       return *geoImpl_;
@@ -669,15 +662,18 @@ namespace Dune
 
   template< int mydim, int cdim, class GridImp >
   inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ( const ALU2dGridGeometry &other )
+    : geoImpl_( other.geoImpl_ )
   {
-    assign( other );
+    ++geoImpl();
   }
 
 
   template< int mydim, int cdim, class GridImp >
   inline ALU2dGridGeometry< mydim, cdim, GridImp >::~ALU2dGridGeometry ()
   {
-    removeObj();
+    --geoImpl();
+    if( !geoImpl() )
+      geoProvider().freeObject( geoImpl_ );
   }
 
 
@@ -685,8 +681,11 @@ namespace Dune
   inline const ALU2dGridGeometry< mydim, cdim, GridImp > &
   ALU2dGridGeometry< mydim, cdim, GridImp >::operator= ( const ALU2dGridGeometry &other )
   {
-    removeObj();
-    assign( other );
+    ++other.geoImpl();
+    --geoImpl();
+    if( !geoImpl() )
+      geoProvider().freeObject( geoImpl_ );
+    geoImpl_ = other.geoImpl_;
     return *this;
   }
 
@@ -700,49 +699,16 @@ namespace Dune
 
 
   template< int mydim, int cdim, class GridImp >
-  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::assign ( const ALU2dGridGeometry &other )
-  {
-    // copy pointer
-    geoImpl_ = other.geoImpl_;
-
-    // increase reference count
-    ++geoImpl();
-  }
-
-
-  template< int mydim, int cdim, class GridImp >
-  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::removeObj ()
-  {
-    // decrease reference count
-    --geoImpl();
-
-    // if reference count is zero free the object
-    if( !geoImpl() )
-      geoProvider().freeObject( geoImpl_ );
-
-    // reset pointer
-    geoImpl_ = nullptr;
-  }
-
-
-  template< int mydim, int cdim, class GridImp >
   inline void ALU2dGridGeometry< mydim, cdim, GridImp >::invalidate ()
   {
-    // if geometry is used elsewhere remove the pointer
-    // and get a new one
-    if( geoImpl().stillUsed() )
+    --geoImpl();
+    if( !geoImpl() )
     {
-      // remove old object
-      removeObj();
-
-      // get new object
-      getObject();
-    }
-    else
-    {
-      // otherwise invalidate object
+      ++geoImpl();
       geoImpl().invalidate();
     }
+    else
+      getObject();
   }
 
 
