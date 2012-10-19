@@ -5,30 +5,168 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/misc.hh>
+#include <dune/common/nullptr.hh>
 
 #include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/alugrid/2d/alu2dinclude.hh>
 #include <dune/grid/alugrid/3d/mappings.hh>
+#include <dune/grid/alugrid/common/memory.hh>
 
 namespace Dune
 {
 
-  // External Forward declarations
+  // External Forward Declarations
   // -----------------------------
 
-  template< int cd, int dim, class GridImp >
+  template<int cd, int dim, class GridImp>
   class ALU2dGridEntity;
-
   template<int cd, class GridImp >
   class ALU2dGridEntityPointer;
-
-  template< int mydim, int cdim, class GridImp >
+  template<int mydim, int cdim, class GridImp>
   class ALU2dGridGeometry;
-
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid;
+
+
+
+  // MyALU2dGridGeometryImplBase
+  // ---------------------------
+
+  template< int ncorners, class Mapping >
+  class MyALU2dGridGeometryImplBase
+  {
+  private:
+    // prohibited due to reference counting
+    MyALU2dGridGeometryImplBase( const MyALU2dGridGeometryImplBase& );
+
+  protected:
+    //! number of corners
+    static const int corners_ = ncorners;
+
+    //! the type of the mapping
+    typedef Mapping MappingType;
+
+    typedef typename MappingType::ctype ctype;
+
+    typedef typename MappingType::map_t map_t;
+    typedef typename MappingType::world_t world_t;
+
+    typedef typename MappingType::matrix_t matrix_t;
+    typedef typename MappingType::inv_t inv_t;
+
+    // get my dimension
+    enum { mydim = ncorners < 3 ? ncorners-1 : 2 };
+    typedef Dune::ReferenceElement< ctype, mydim > ReferenceElementType;
+
+    //! the mapping
+    MappingType mapping_;
+
+    //! reference element
+    const ReferenceElementType& referenceElement_;
+
+    //! volume of element
+    ctype volume_;
+
+    //! the reference counter
+    mutable unsigned int refCount_;
+
+    //! valid flag, true if mapping was built
+    bool valid_ ;
+
+    const MappingType& mapping() const
+    {
+      assert( valid() );
+      return mapping_;
+    }
+
+  public:
+    //! default constructor
+    MyALU2dGridGeometryImplBase( const GeometryType type )
+      : mapping_(),
+        referenceElement_( Dune::ReferenceElements< ctype, mydim >::general( type ) ),
+        volume_( 1.0 )
+    {
+      reset();
+    }
+
+    //! reset status and reference count
+    void reset ()
+    {
+      // reset reference counter
+      refCount_ = 1;
+      // reset status
+      valid_ = false;
+    }
+
+    //! increase reference count
+    void operator ++ () { ++ refCount_; }
+
+    //! decrease reference count
+    void operator -- () { assert( refCount_ > 0 ); --refCount_; }
+
+    //! return true if object has no references anymore
+    bool operator ! () const { return refCount_ == 0; }
+
+    //! return true if there exists more then on reference
+    bool stillUsed () const { return refCount_ > 1 ; }
+
+    // set status to invalid
+    void invalidate () { valid_ = false ; }
+
+    // return true if geometry is valid
+    bool valid () const { return valid_; }
+
+    // return volume
+    double volume() const { return volume_; }
+
+    // return true if geometry is affine
+    bool affine() const
+    {
+      assert( valid() );
+      return mapping().affine();
+    }
+
+    // return number of corners
+    int corners () const { return corners_ ; }
+
+    // return coordinate of the i-th corner
+    world_t corner( int i ) const
+    {
+      world_t coordinate;
+      map2world( referenceElement_.position( i, mydim ), coordinate );
+      return coordinate;
+    }
+
+    // map from reference to global coordinates
+    void map2world ( const map_t &m, world_t &w ) const
+    {
+      return mapping().map2world( m, w );
+    }
+
+    // map from global to reference coordinates
+    void world2map ( const world_t &w, map_t &m ) const
+    {
+      return mapping().world2map( w, m );
+    }
+
+    // return jacobian transposed
+    const matrix_t &jacobianTransposed ( const map_t &m ) const
+    {
+      return mapping().jacobianTransposed( m );
+    }
+
+    // return jacobian inverse transposed
+    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
+    {
+      return mapping().jacobianInverseTransposed( m );
+    }
+
+    // return determinante of mapping
+    ctype det ( const map_t &m ) const {  return mapping().det( m );  }
+  };
 
 
 
@@ -41,45 +179,25 @@ namespace Dune
   // geometry implementation for vertices
   template< int cdim, ALU2DSPACE ElementType eltype >
   class MyALU2dGridGeometryImpl< 0, cdim, eltype >
+    : public MyALU2dGridGeometryImplBase< 1, LinearMapping< cdim, 0 > >
   {
-    typedef LinearMapping< cdim, 0 > MappingType;
+    typedef MyALU2dGridGeometryImplBase< 1, LinearMapping< cdim, 0 > > BaseType;
 
-    typedef typename MappingType::ctype ctype;
-
-    typedef typename MappingType::map_t map_t;
-    typedef typename MappingType::world_t world_t;
-
-    typedef typename MappingType::matrix_t matrix_t;
-    typedef typename MappingType::inv_t inv_t;
-
-    MappingType mapping_;
-    bool valid_ ;
-
-    const MappingType& mapping() const
-    {
-      assert( valid() );
-      return mapping_;
-    }
+  protected:
+    using BaseType::mapping_;
+    using BaseType::valid_;
+    using BaseType::volume_;
 
   public:
-    MyALU2dGridGeometryImpl() : mapping_(), valid_( false ) {}
+    using BaseType :: valid ;
+    using BaseType :: invalidate ;
+    using BaseType :: corners ;
 
-    // returns true if goemetry info is valid
-    bool valid () const { return valid_; }
+    typedef typename BaseType :: ctype ctype ;
+    typedef typename BaseType :: map_t map_t ;
 
-    // reset geometry status
-    void invalidate() { valid_ = false ; }
-
-    bool affine() const
-    {
-      assert( valid() );
-      return mapping().affine();
-    }
-
-    int corners () const
-    {
-      return 1;
-    }
+    // default constructor
+    MyALU2dGridGeometryImpl () : BaseType( type() ) {}
 
     GeometryType type () const
     {
@@ -90,82 +208,41 @@ namespace Dune
                0 );
     }
 
-    void map2world ( const map_t &m, world_t &w ) const
-    {
-      return mapping().map2world( m, w );
-    }
-
-    void world2map ( const world_t &w, map_t &m ) const
-    {
-      return mapping().world2map( w, m );
-    }
-
-    const matrix_t &jacobianTransposed ( const map_t &m ) const
-    {
-      return mapping().jacobianTransposed( m );
-    }
-
-    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
-    {
-      return mapping().jacobianInverseTransposed( m );
-    }
-
-    ctype det ( const map_t &m ) const
-    {
-      return mapping().det( m );
-    }
-
+    // update geometry coordinates
     template< class CoordVector >
     void update ( const CoordVector &coordVector )
     {
       mapping_.buildMapping( coordVector[ 0 ] );
+      volume_ = coordVector.volume();
       valid_ = true;
     }
+
+    // return determinante of mapping
+    ctype det ( const map_t &m ) const { return volume_; }
   };
 
   // geometry implementation for lines
   template< int cdim, ALU2DSPACE ElementType eltype >
   class MyALU2dGridGeometryImpl< 1, cdim, eltype >
+    : public MyALU2dGridGeometryImplBase< 2, LinearMapping< cdim, 1 > >
   {
-    static const int ncorners = 2;
-
-    typedef LinearMapping< cdim, 1 > MappingType;
-
-    typedef typename MappingType::ctype ctype;
-
-    typedef typename MappingType::map_t map_t;
-    typedef typename MappingType::world_t world_t;
-
-    typedef typename MappingType::matrix_t matrix_t;
-    typedef typename MappingType::inv_t inv_t;
-
-    MappingType mapping_;
-    bool valid_;
-
-    const MappingType& mapping() const
-    {
-      assert( valid() );
-      return mapping_;
-    }
+    typedef MyALU2dGridGeometryImplBase< 2, LinearMapping< cdim, 1 > > BaseType;
+  protected:
+    using BaseType :: mapping_ ;
+    using BaseType :: valid_ ;
+    using BaseType :: volume_ ;
+    using BaseType :: corners_ ;
 
   public:
-    MyALU2dGridGeometryImpl() : mapping_(), valid_( false ) {}
+    using BaseType :: valid ;
+    using BaseType :: invalidate ;
+    using BaseType :: corners ;
 
-    // returns true if goemetry info is valid
-    bool valid () const { return valid_; }
+    typedef typename BaseType :: ctype ctype ;
+    typedef typename BaseType :: map_t map_t ;
 
-    // reset geometry status
-    void invalidate() { valid_ = false ; }
-
-    bool affine() const
-    {
-      return mapping().affine();
-    }
-
-    int corners () const
-    {
-      return ncorners;
-    }
+    // default constructor
+    MyALU2dGridGeometryImpl () : BaseType( type() ) {}
 
     GeometryType type () const
     {
@@ -176,90 +253,53 @@ namespace Dune
                1 );
     }
 
-    void map2world ( const map_t &m, world_t &w ) const
-    {
-      return mapping().map2world( m, w );
-    }
-
-    void world2map ( const world_t &w, map_t &m ) const
-    {
-      return mapping().world2map( w, m );
-    }
-
-    const matrix_t &jacobianTransposed ( const map_t &m ) const
-    {
-      return mapping().jacobianTransposed( m );
-    }
-
-    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
-    {
-      return mapping().jacobianInverseTransposed( m );
-    }
-
-    ctype det ( const map_t &m ) const
-    {
-      return mapping().det( m );
-    }
-
     // update geometry coordinates
     template< class Vector >
-    void update ( const Vector &p0, const Vector &p1 )
+    void update ( const Vector &p0, const Vector &p1, ctype volume )
     {
       mapping_.buildMapping( p0, p1 );
+      volume_ = volume;
       valid_ = true;
     }
 
-    // update geometry coordinates
     template< class CoordVector >
     void update ( const CoordVector &coordVector )
     {
       mapping_.buildMapping( coordVector[ 0 ], coordVector[ 1 ] );
+      volume_ = coordVector.volume();
       valid_ = true;
     }
+
+    // return determinant of mapping
+    ctype det ( const map_t &m ) const { return volume_; }
   };
 
   // geometry implementation for triangles
   template< int cdim >
   class MyALU2dGridGeometryImpl< 2, cdim, ALU2DSPACE triangle >
+    : public MyALU2dGridGeometryImplBase< 3, LinearMapping< cdim, 2 > >
   {
-    static const int ncorners = 3;
-
-    typedef LinearMapping< cdim, 2 > MappingType;
-
-    typedef typename MappingType::ctype ctype;
-
-    typedef typename MappingType::map_t map_t;
-    typedef typename MappingType::world_t world_t;
-
-    typedef typename MappingType::matrix_t matrix_t;
-    typedef typename MappingType::inv_t inv_t;
-
-    MappingType mapping_;
-    bool valid_;
-
-    const MappingType& mapping() const
-    {
-      assert( valid() );
-      return mapping_;
-    }
+    typedef MyALU2dGridGeometryImplBase< 3, LinearMapping< cdim, 2 > > BaseType;
+  protected:
+    using BaseType :: mapping_ ;
+    using BaseType :: valid_ ;
+    using BaseType :: volume_ ;
+    using BaseType :: corners_ ;
+    using BaseType :: referenceElement_;
 
   public:
-    MyALU2dGridGeometryImpl() : mapping_(), valid_( false ) {}
+    using BaseType :: valid ;
+    using BaseType :: invalidate ;
+    using BaseType :: corners ;
 
-    // returns true if goemetry info is valid
-    bool valid () const { return valid_; }
+    typedef typename BaseType :: ctype ctype ;
+    typedef typename BaseType :: map_t map_t ;
 
-    // reset geometry status
-    void invalidate() { valid_ = false ; }
-
-    bool affine () const
+    // default constructor
+    MyALU2dGridGeometryImpl () : BaseType( type() )
     {
-      return mapping().affine();
-    }
-
-    int corners () const
-    {
-      return ncorners;
+      // if this assertion fails change factor in method det below
+      assert( std::abs( referenceElement_.volume() - 0.5 ) < 1e-10 );
     }
 
     GeometryType type () const
@@ -267,117 +307,52 @@ namespace Dune
       return GeometryType( GenericGeometry :: SimplexTopology< 2 > :: type :: id , 2 );
     }
 
-    void map2world ( const map_t &m, world_t &w ) const
-    {
-      return mapping().map2world( m, w );
-    }
-
-    void world2map ( const world_t &w, map_t &m ) const
-    {
-      return mapping().world2map( w, m );
-    }
-
-    const matrix_t &jacobianTransposed ( const map_t &m ) const
-    {
-      return mapping().jacobianTransposed( m );
-    }
-
-    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
-    {
-      return mapping().jacobianInverseTransposed( m );
-    }
-
-    ctype det ( const map_t &m ) const
-    {
-      return mapping().det( m );
-    }
-
     template< class CoordVector >
     void update ( const CoordVector &coordVector )
     {
       mapping_.buildMapping( coordVector[ 0 ], coordVector[ 1 ], coordVector[ 2 ] );
+      volume_ = coordVector.volume();
       valid_ = true;
+    }
+
+    // return determinante of mapping
+    ctype det ( const map_t &m ) const
+    {
+      return 2.0 * volume_;
     }
   };
 
   // geometry implementation for quadrilaterals
   template< int cdim >
   class MyALU2dGridGeometryImpl< 2, cdim, ALU2DSPACE quadrilateral >
+    : public MyALU2dGridGeometryImplBase< 4, BilinearMapping< cdim > >
   {
-    static const int ncorners = 4;
-
-    typedef BilinearMapping< cdim > MappingType;
-
-    typedef typename MappingType::ctype ctype;
-
-    typedef typename MappingType::map_t map_t;
-    typedef typename MappingType::world_t world_t;
-
-    typedef typename MappingType::matrix_t matrix_t;
-    typedef typename MappingType::inv_t inv_t;
-
-    MappingType mapping_;
-    bool valid_ ;
-
-    const MappingType& mapping() const
-    {
-      assert( valid() );
-      return mapping_;
-    }
+    typedef MyALU2dGridGeometryImplBase< 4, BilinearMapping< cdim > > BaseType;
+  protected:
+    using BaseType :: mapping_ ;
+    using BaseType :: valid_ ;
+    using BaseType :: volume_ ;
+    using BaseType :: corners_ ;
+    using BaseType :: referenceElement_;
 
   public:
-    MyALU2dGridGeometryImpl() : mapping_(), valid_( false ) {}
+    using BaseType :: valid ;
+    using BaseType :: invalidate ;
+    using BaseType :: corners ;
 
-    // returns true if goemetry info is valid
-    bool valid () const { return valid_; }
-
-    // reset geometry status
-    void invalidate() { valid_ = false ; }
-
-    bool affine () const
-    {
-      return mapping().affine();
-    }
-
-    int corners () const
-    {
-      return ncorners;
-    }
+    // default constructor
+    MyALU2dGridGeometryImpl () : BaseType( type() ) {}
 
     GeometryType type () const
     {
-      return GeometryType( GeometryType::cube, 2 );
-    }
-
-    void map2world ( const map_t &m, world_t &w ) const
-    {
-      return mapping().map2world( m, w );
-    }
-
-    void world2map ( const world_t &w, map_t &m ) const
-    {
-      return mapping().world2map( w, m );
-    }
-
-    const matrix_t &jacobianTransposed ( const map_t &m ) const
-    {
-      return mapping().jacobianTransposed( m );
-    }
-
-    const inv_t &jacobianInverseTransposed ( const map_t &m ) const
-    {
-      return mapping().jacobianInverseTransposed( m );
-    }
-
-    ctype det ( const map_t &m ) const
-    {
-      return mapping().det( m );
+      return GeometryType( GenericGeometry :: CubeTopology< 2 > :: type :: id, 2 ) ;
     }
 
     template< class CoordVector >
     void update ( const CoordVector &coordVector )
     {
       mapping_.buildMapping( coordVector[ 0 ], coordVector[ 1 ], coordVector[ 2 ], coordVector[ 3 ] );
+      volume_ = coordVector.volume();
       valid_ = true;
     }
   };
@@ -385,60 +360,82 @@ namespace Dune
   // geometry implementation for triangles
   template< int cdim >
   class MyALU2dGridGeometryImpl< 2, cdim, ALU2DSPACE mixed >
+    : public MyALU2dGridGeometryImplBase< 4, BilinearMapping< cdim > >
   {
-    typedef Dune::LinearMapping< cdim, 2 > LinearMapping;
-    typedef Dune::BilinearMapping< cdim > BilinearMapping;
+    typedef MyALU2dGridGeometryImplBase< 4, BilinearMapping< cdim > > BaseType;
+  protected:
+    typedef typename BaseType :: MappingType BilinearMappingType;
+    typedef Dune :: LinearMapping< cdim, 2 >  LinearMappingType;
 
-    typedef typename LinearMapping::ctype ctype;
+    using BaseType :: mapping_ ;
+    using BaseType :: volume_ ;
+    using BaseType :: valid_ ;
+    using BaseType :: referenceElement_ ;
 
-    typedef typename LinearMapping::map_t map_t;
-    typedef typename LinearMapping::world_t world_t;
+    typedef typename LinearMappingType::ctype ctype;
 
-    typedef typename LinearMapping::matrix_t matrix_t;
-    typedef typename LinearMapping::inv_t inv_t;
+    typedef typename LinearMappingType::map_t map_t;
+    typedef typename LinearMappingType::world_t world_t;
 
-    static const int lms = sizeof( LinearMapping );
-    static const int bms = sizeof( BilinearMapping );
+    typedef typename LinearMappingType::matrix_t matrix_t;
+    typedef typename LinearMappingType::inv_t inv_t;
 
-    char mapping_[ lms > bms ? lms : bms ];
-    int corners_;
-    bool valid_ ;
+    typedef typename BaseType :: ReferenceElementType ReferenceElementType;
+
+    //! reference element
+    const ReferenceElementType& simplexReferenceElement_ ;
+
+    // for the mixed geometry the number of corners can vary
+    int myCorners_;
 
   public:
-    MyALU2dGridGeometryImpl () : corners_( 0 ), valid_( false ) {}
+    using BaseType :: valid ;
+    using BaseType :: invalidate ;
 
-    MyALU2dGridGeometryImpl ( const MyALU2dGridGeometryImpl &other )
-      : corners_( other.corners() ), valid_( other.valid_ )
+    // default constructor
+    MyALU2dGridGeometryImpl ()
+      : BaseType( type( 4 ) ),
+        simplexReferenceElement_( Dune::ReferenceElements< ctype, 2 >::general( type( 3 ) ) ),
+        myCorners_( 0 )
     {
-      if( corners_ == 3 )
-        new( &mapping_ )LinearMapping( other.linearMapping() );
-      if( corners_ == 4 )
-        new( &mapping_ )BilinearMapping( other.bilinearMapping() );
+      // make sure that bilinear mapping reserves more memory, othersize change
+      assert( sizeof( BilinearMappingType ) >= sizeof( LinearMappingType ) );
     }
 
-    // returns true if goemetry info is valid
-    bool valid () const { return valid_; }
-
-    // reset geometry status
-    void invalidate() { valid_ = false ; }
-
+  public:
+    // return true if current mapping is affine
     bool affine () const
     {
       return (corners() == 3 ? linearMapping().affine() : bilinearMapping().affine());
     }
 
-    int corners () const
+    // return current number of corners
+    int corners () const { return myCorners_; }
+
+    // return coordinate of the i-th corner
+    world_t corner( int i ) const
     {
-      return corners_;
+      world_t coordinate;
+      if( corners() == 3 )
+        linearMapping().map2world( simplexReferenceElement_.position( i, 2 ), coordinate );
+      else
+        bilinearMapping().map2world( referenceElement_.position( i, 2 ), coordinate );
+      return coordinate;
     }
 
-    GeometryType type () const
+    // return current type of geometry
+    GeometryType type () const { return type( corners() ); }
+
+  protected:
+    // return type of geometry depending on number of corners
+    GeometryType type ( const int corners ) const
     {
-      return GeometryType( (corners_ == 3 ?
+      return GeometryType( (corners == 3 ?
                             GenericGeometry :: SimplexTopology< 2 > :: type :: id :
                             GenericGeometry :: CubeTopology   < 2 > :: type :: id), 2);
     }
 
+  public:
     void map2world ( const map_t &m, world_t &w ) const
     {
       if( corners() == 3 )
@@ -479,74 +476,60 @@ namespace Dune
         linearMapping().buildMapping( coordVector[ 0 ], coordVector[ 1 ], coordVector[ 2 ] );
       else
         bilinearMapping().buildMapping( coordVector[ 0 ], coordVector[ 1 ], coordVector[ 2 ], coordVector[ 3 ] );
-      valid_ = true;
-    }
-
-    template< class Vector >
-    void update ( const array< Vector, 3 > &p )
-    {
-      updateMapping( 3 );
-      linearMapping().buildMapping( p[ 0 ], p[ 1 ], p[ 2 ] );
-      valid_ = true;
-    }
-
-    template< class Vector >
-    void update ( const array< Vector, 4 > &p )
-    {
-      updateMapping( 4 );
-      bilinearMapping().buildMapping( p[ 0 ], p[ 1 ], p[ 2 ], p[ 3 ] );
+      volume_ = coordVector.volume();
       valid_ = true;
     }
 
   private:
     MyALU2dGridGeometryImpl &operator= ( const MyALU2dGridGeometryImpl &other );
 
-    const LinearMapping &linearMapping () const
+    const LinearMappingType &linearMapping () const
     {
       assert( valid() );
-      return static_cast< const LinearMapping * >( &mapping_ );
+      return static_cast< const LinearMappingType * >( &mapping_ );
     }
 
-    LinearMapping &linearMapping ()
+    LinearMappingType &linearMapping ()
     {
       assert( valid() );
-      return static_cast< LinearMapping * >( &mapping_ );
+      return static_cast< LinearMappingType * >( &mapping_ );
     }
 
-    const BilinearMapping &bilinearMapping () const
+    const BilinearMappingType &bilinearMapping () const
     {
       assert( valid() );
-      return static_cast< const BilinearMapping * >( &mapping_ );
+      return static_cast< const BilinearMappingType * >( &mapping_ );
     }
 
-    BilinearMapping &bilinearMapping ()
+    BilinearMappingType &bilinearMapping ()
     {
       assert( valid() );
-      return static_cast< BilinearMapping * >( &mapping_ );
+      return static_cast< BilinearMappingType * >( &mapping_ );
     }
 
     void updateMapping ( const int corners )
     {
       assert( (corners == 3) || (corners == 4) );
-      if( corners != corners_ )
+      if( corners != myCorners_ )
       {
         destroyMapping();
-        corners = corners_;
+        corners = myCorners_;
         if( corners == 3 )
-          new( &mapping_ )LinearMapping;
+          new( &mapping_ )LinearMappingType;
         else
-          new( &mapping_ )BilinearMapping;
+          new( &mapping_ )BilinearMappingType;
       }
     }
 
     void destroyMapping ()
     {
       if( corners() == 3 )
-        linearMapping().~LinearMapping();
+        linearMapping().~LinearMappingType();
       else if( corners() == 4 )
-        bilinearMapping().~BilinearMapping();
+        bilinearMapping().~BilinearMappingType();
     }
   };
+
 
 
   // ALU2dGridGeometry
@@ -576,14 +559,23 @@ namespace Dune
   public:
     //! for makeRefGeometry == true a Geometry with the coordinates of the
     //! reference element is made
-    ALU2dGridGeometry();
+    ALU2dGridGeometry ();
+
+    //! copy constructor copying pointer and increasing reference counter
+    ALU2dGridGeometry ( const ALU2dGridGeometry & );
+
+    //! destructor releasing object
+    ~ALU2dGridGeometry ();
+
+    //! assigment operator
+    const ALU2dGridGeometry &operator= ( const ALU2dGridGeometry & );
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
-    const GeometryType type () const { return geoImpl_.type(); }
+    const GeometryType type () const { return geoImpl().type(); }
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const { return geoImpl_.corners(); }
+    int corners () const { return geoImpl().corners(); }
 
     //! access to coordinates of corners. Index is the number of the corner
     GlobalCoordinate corner ( int i ) const;
@@ -603,7 +595,7 @@ namespace Dune
     alu2d_ctype volume () const;
 
     //! return true if geometry has affine mapping
-    bool affine() const { return geoImpl_.affine(); }
+    bool affine() const { return geoImpl().affine(); }
 
     //! jacobian inverse transposed
     const FieldMatrix<alu2d_ctype,cdim,mydim>& jacobianInverseTransposed (const LocalCoordinate& local) const;
@@ -615,23 +607,53 @@ namespace Dune
     //!  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
     //! generate the geometry for out of given ALU2dGridElement
-
     template< class CoordVector >
-    bool buildGeom( const CoordVector &coordVector );
+    bool buildGeom ( const CoordVector &coordVector );
 
     // returns true if geometry information is valid
-    inline bool valid() const { return geoImpl_.valid(); }
+    inline bool valid() const { return geoImpl().valid(); }
 
-    // invalidate geometry information
-    inline void invalidate() const { geoImpl_.invalidate(); }
+    // invalidate geometry implementation
+    void invalidate () ;
 
   protected:
-    // implementation of coord and mapping
-    mutable GeometryImplType geoImpl_;
+    //! assign pointer
+    void assign( const ALU2dGridGeometry& other );
+    //! remove pointer object
+    void removeObj();
+    //! get a new pointer object
+    void getObject();
 
-    // determinant
-    mutable alu2d_ctype det_;
+    // type of object provider
+    typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
+
+    //! return storage provider for geometry objects
+    static GeometryProviderType& geoProvider()
+    {
+      static GeometryProviderType storage;
+      return storage;
+    }
+
+    // return reference to geometry implementation
+    GeometryImplType& geoImpl() const
+    {
+      assert( geoImpl_ );
+      return *geoImpl_;
+    }
+
+    // implementation of the coordinates and mapping
+    GeometryImplType* geoImpl_;
   };
+
+  namespace FacadeOptions
+  {
+    //! geometry can be stored as an object
+    template< int mydim, int cdim, class GridImp >
+    struct StoreGeometryReference< mydim, cdim, GridImp, ALU2dGridGeometry >
+    {
+      static const bool v = false;
+    };
+  }
 
 
 
@@ -640,31 +662,113 @@ namespace Dune
 
   template< int mydim, int cdim, class GridImp >
   inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ()
-    : geoImpl_(),
-      det_( 1.0 )
-  {}
+  {
+    getObject();
+  }
 
 
+  template< int mydim, int cdim, class GridImp >
+  inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ( const ALU2dGridGeometry &other )
+  {
+    assign( other );
+  }
+
+
+  template< int mydim, int cdim, class GridImp >
+  inline ALU2dGridGeometry< mydim, cdim, GridImp >::~ALU2dGridGeometry ()
+  {
+    removeObj();
+  }
+
+
+  template< int mydim, int cdim, class GridImp >
+  inline const ALU2dGridGeometry< mydim, cdim, GridImp > &
+  ALU2dGridGeometry< mydim, cdim, GridImp >::operator= ( const ALU2dGridGeometry &other )
+  {
+    removeObj();
+    assign( other );
+    return *this;
+  }
+
+
+  template< int mydim, int cdim, class GridImp >
+  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::getObject ()
+  {
+    geoImpl_ = geoProvider().getEmptyObject();
+    geoImpl().reset();
+  }
+
+
+  template< int mydim, int cdim, class GridImp >
+  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::assign ( const ALU2dGridGeometry &other )
+  {
+    // copy pointer
+    geoImpl_ = other.geoImpl_;
+
+    // increase reference count
+    ++geoImpl();
+  }
+
+
+  template< int mydim, int cdim, class GridImp >
+  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::removeObj ()
+  {
+    // decrease reference count
+    --geoImpl();
+
+    // if reference count is zero free the object
+    if( !geoImpl() )
+      geoProvider().freeObject( geoImpl_ );
+
+    // reset pointer
+    geoImpl_ = nullptr;
+  }
+
+
+  template< int mydim, int cdim, class GridImp >
+  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::invalidate ()
+  {
+    // if geometry is used elsewhere remove the pointer
+    // and get a new one
+    if( geoImpl().stillUsed() )
+    {
+      // remove old object
+      removeObj();
+
+      // get new object
+      getObject();
+    }
+    else
+    {
+      // otherwise invalidate object
+      geoImpl().invalidate();
+    }
+  }
+
+
+  //! access to coordinates of corners. Index is the number of the corner
   template< int mydim, int cdim, class GridImp >
   inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
   ALU2dGridGeometry< mydim, cdim, GridImp >::corner ( int i ) const
   {
-    const ReferenceElement< alu2d_ctype, mydim > &refElement
-      = ReferenceElements< alu2d_ctype, mydim >::general( type() );
-    return global( refElement.position( i, mydim ) );
+    return geoImpl().corner( i );
   }
 
 
+  //! maps a local coordinate within reference element to
+  //! global coordinate in element
   template< int mydim, int cdim, class GridImp >
   inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
   ALU2dGridGeometry< mydim, cdim, GridImp >::global ( const LocalCoordinate &local ) const
   {
     GlobalCoordinate global;
-    geoImpl_.map2world( local, global );
+    geoImpl().map2world( local, global );
     return global;
   }
 
 
+  //! maps a global coordinate within the element to a
+  //! local coordinate in its reference element
   template< int mydim, int cdim, class GridImp >
   inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::LocalCoordinate
   ALU2dGridGeometry< mydim, cdim, GridImp >::local ( const GlobalCoordinate &global ) const
@@ -673,7 +777,7 @@ namespace Dune
       return LocalCoordinate( 1 );
 
     LocalCoordinate local;
-    geoImpl_.world2map( global, local );
+    geoImpl().world2map( global, local );
     return local;
   }
 
@@ -682,36 +786,16 @@ namespace Dune
   inline alu2d_ctype
   ALU2dGridGeometry< mydim, cdim, GridImp >::integrationElement ( const LocalCoordinate &local ) const
   {
-    if ( eltype == ALU2DSPACE triangle || mydim < 2 )
-    {
-      assert( geoImpl_.valid() );
-      return (mydim == 0 ? 1.0 : det_);
-    }
-    else
-      return geoImpl_.det(local);
+    assert( geoImpl().valid() );
+    return geoImpl().det( local );
   }
 
 
   template< int mydim, int cdim, class GridImp >
   inline alu2d_ctype ALU2dGridGeometry< mydim, cdim, GridImp >::volume () const
   {
-    assert( geoImpl_.valid() );
-    if( mydim == 2 )
-    {
-      switch( GridImp::elementType )
-      {
-      case ALU2DSPACE triangle :
-        return 0.5 * det_;
-
-      case ALU2DSPACE quadrilateral :
-        return det_;
-
-      case ALU2DSPACE mixed :
-        DUNE_THROW( NotImplemented, "Geometry::volume() not implemented for ElementType mixed." );
-      }
-    }
-    else
-      return (mydim == 0 ? 1.0 : det_);
+    assert( geoImpl().valid() );
+    return geoImpl().volume();
   }
 
 
@@ -719,7 +803,7 @@ namespace Dune
   inline const FieldMatrix<alu2d_ctype,mydim,cdim>&
   ALU2dGridGeometry< mydim, cdim, GridImp>::jacobianTransposed ( const LocalCoordinate &local ) const
   {
-    return geoImpl_.jacobianTransposed( local );
+    return geoImpl().jacobianTransposed( local );
   }
 
 
@@ -727,24 +811,24 @@ namespace Dune
   inline const FieldMatrix<alu2d_ctype,cdim,mydim>&
   ALU2dGridGeometry< mydim, cdim, GridImp >::jacobianInverseTransposed ( const LocalCoordinate &local ) const
   {
-    return geoImpl_.jacobianInverseTransposed( local );
+    return geoImpl().jacobianInverseTransposed( local );
   }
 
 
+  //! built Geometry for triangles
   template< int mydim, int cdim, class GridImp >
   template< class CoordVector >
   inline bool
-  ALU2dGridGeometry< mydim, cdim, GridImp >::buildGeom( const CoordVector &coordVector )
+  ALU2dGridGeometry< mydim, cdim, GridImp >::buildGeom ( const CoordVector &coordVector )
   {
     geoImpl_.update( coordVector );
-    det_ = (coordVector.corners() == 3 ? 2 : 1) * coordVector.volume();
     return true;
   }
 
 
 
-  // ALU2dGridCoordVector
-  // --------------------
+  // ALU2dGridCoordVectorBase
+  // ------------------------
 
   template< class Grid >
   struct ALU2dGridCoordVectorBase
