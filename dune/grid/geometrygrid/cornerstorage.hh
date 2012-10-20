@@ -151,12 +151,6 @@ namespace Dune
           corners[ i ] = elementGeometry_.global( hostLocalGeometry_.corner( i ) );
       }
 
-      template< unsigned int numCorners >
-      void calculate ( Coordinate (&corners)[ numCorners ] ) const
-      {
-        assert( numCorners == hostLocalGeometry_.corners() );
-      }
-
     private:
       const ElementGeometryImpl &elementGeometry_;
       HostLocalGeometry hostLocalGeometry_;
