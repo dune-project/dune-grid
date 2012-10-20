@@ -479,6 +479,10 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   // check level index sets on nonconforming grids
   checkLevelIndexNonConform(grid);
 
+  // check life time of geometry implementation
+  std::cout << "  CHECKING: geometry lifetime" << std::endl;
+  checkGeometryLifetime( grid.leafView() );
+
   // check persistent container
   checkPersistentContainer( grid );
 
