@@ -47,10 +47,7 @@ namespace Dune {
         \todo Should be private
      */
     UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
-      : geometry_(nullptr),
-        geometryInInside_(nullptr),
-        geometryInOutside_(nullptr),
-        center_(center), neighborCount_(nb),
+      : center_(center), neighborCount_(nb),
         gridImp_(gridImp)
     {}
 
@@ -231,10 +228,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
-      : geometry_(nullptr),
-        geometryInInside_(nullptr),
-        geometryInOutside_(nullptr),
-        center_(center), neighborCount_(nb), subNeighborCount_(0),
+      : center_(center), neighborCount_(nb), subNeighborCount_(0),
         gridImp_(gridImp)
     {
       if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
