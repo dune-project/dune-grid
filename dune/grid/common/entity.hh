@@ -360,8 +360,12 @@ namespace Dune
        \note If the partitionType of the Entity is GhostEntity,
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
+
+       \deprecated This method is deprecated and will be removed after
+                   Dune 2.3. Use LeafGridView.ibegin(Entity) instead.
      */
     LeafIntersectionIterator ileafbegin () const
+    DUNE_DEPRECATED_MSG("Use LeafGridView.ibegin(Entity) instead.")
     {
       return realEntity.ileafbegin();
     }
@@ -371,8 +375,12 @@ namespace Dune
        \note If the partitionType of the Entity is GhostEntity,
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
+
+       \deprecated This method is deprecated and will be removed after
+                   Dune 2.3. Use LeafGridView.iend(Entity) instead.
      */
     LeafIntersectionIterator ileafend () const
+    DUNE_DEPRECATED_MSG("Use LeafGridView.iend(Entity) instead.")
     {
       return realEntity.ileafend();
     }
@@ -386,8 +394,12 @@ namespace Dune
        \note If the partitionType of the Entity is GhostEntity,
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
+
+       \deprecated This method is deprecated and will be removed after
+                   Dune 2.3. Use LevelGridView.ibegin(Entity) instead.
      */
     LevelIntersectionIterator ilevelbegin () const
+    DUNE_DEPRECATED_MSG("Use LevelGridView.ibegin(Entity) instead.")
     {
       return realEntity.ilevelbegin();
     }
@@ -397,8 +409,12 @@ namespace Dune
        \note If the partitionType of the Entity is GhostEntity,
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
+
+       \deprecated This method is deprecated and will be removed after
+                   Dune 2.3. Use LevelGridView.iend(Entity) instead.
      */
     LevelIntersectionIterator ilevelend () const
+    DUNE_DEPRECATED_MSG("Use LevelGridView.iend(Entity) instead.")
     {
       return realEntity.ilevelend();
     }
