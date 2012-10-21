@@ -94,6 +94,8 @@ namespace Dune
     template< class, bool > friend class GeoGrid::EntityPointer;
     template< int, class > friend class GeoGrid::EntityProxy;
     template< int, int, class > friend class GeoGrid::Geometry;
+    template< class, class, class, PartitionIteratorType > friend class GeoGrid::LeafGridView;
+    template< class, class, class, PartitionIteratorType > friend class GeoGrid::LevelGridView;
     template< class, class > friend class GeoGrid::Intersection;
     template< class > friend class GeoGrid::IntersectionIterator;
     template< class, class > friend class GeoGrid::IdSet;
@@ -140,6 +142,26 @@ namespace Dune
     typedef typename Traits::LevelIntersectionIterator LevelIntersectionIterator;
 
     /** \} */
+
+    /** \name Grid View Types
+     *  \{ */
+
+    /** \brief Types for GridView */
+    template< PartitionIteratorType pitype >
+    struct Partition
+    {
+      typedef typename GridFamily::Traits::template Partition< pitype >::LevelGridView
+      LevelGridView;
+      typedef typename GridFamily::Traits::template Partition< pitype >::LeafGridView
+      LeafGridView;
+    };
+
+    /** \brief View types for All_Partition */
+    typedef typename Partition< All_Partition >::LevelGridView LevelGridView;
+    typedef typename Partition< All_Partition >::LeafGridView LeafGridView;
+
+    /** \} */
+
 
     /** \name Index and Id Set Types
      *  \{ */
@@ -287,7 +309,7 @@ namespace Dune
      */
     int size ( int level, int codim ) const
     {
-      return hostGrid().size( level, codim );
+      return levelView( level ).size( codim );
     }
 
     /** \brief obtain number of leaf entities
@@ -298,7 +320,7 @@ namespace Dune
      */
     int size ( int codim ) const
     {
-      return hostGrid().size( codim );
+      return leafView().size( codim );
     }
 
     /** \brief obtain number of entites on a level
@@ -311,21 +333,21 @@ namespace Dune
      */
     int size ( int level, GeometryType type ) const
     {
-      return hostGrid().size( level, type );
-    }
-
-    /** \brief returns the number of boundary segments within the macro grid
-     *
-     *  \returns number of boundary segments within the macro grid
-     */
-    int size ( GeometryType type ) const
-    {
-      return hostGrid().size( type );
+      return levelView( level ).size( type );
     }
 
     /** \brief obtain number of leaf entities
      *
      *  \returns number of leaf entities with a geometry of type \em type
+     */
+    int size ( GeometryType type ) const
+    {
+      return leafView().size( type );
+    }
+
+    /** \brief returns the number of boundary segments within the macro grid
+     *
+     *  \returns number of boundary segments within the macro grid
      */
     size_t numBoundarySegments () const
     {
@@ -336,57 +358,53 @@ namespace Dune
     template< int codim >
     typename Codim< codim >::LevelIterator lbegin ( int level ) const
     {
-      return lbegin< codim, All_Partition >( level );
+      return levelView( level ).template begin< codim >();
     }
 
     template< int codim >
     typename Codim< codim >::LevelIterator lend ( int level ) const
     {
-      return lend< codim, All_Partition >( level );
+      return levelView( level ).template end< codim >();
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LevelIterator
     lbegin ( int level ) const
     {
-      typedef typename Traits::template Codim< codim >::template Partition< pitype >::LevelIteratorTraits IteratorTraits;
-      return GeoGrid::Iterator< IteratorTraits >( *this, level, IteratorTraits::begin );
+      return levelView( level ).template begin< codim, pitype >();
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LevelIterator
     lend ( int level ) const
     {
-      typedef typename Traits::template Codim< codim >::template Partition< pitype >::LevelIteratorTraits IteratorTraits;
-      return GeoGrid::Iterator< IteratorTraits >( *this, level, IteratorTraits::end );
+      return levelView( level ).template end< codim, pitype >();
     }
 
     template< int codim >
     typename Codim< codim >::LeafIterator leafbegin () const
     {
-      return leafbegin< codim, All_Partition >();
+      return leafView().template begin< codim >();
     }
 
     template< int codim >
     typename Codim< codim >::LeafIterator leafend () const
     {
-      return leafend< codim, All_Partition >();
+      return leafView().template end< codim >();
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LeafIterator
     leafbegin () const
     {
-      typedef typename Traits::template Codim< codim >::template Partition< pitype >::LeafIteratorTraits IteratorTraits;
-      return GeoGrid::Iterator< IteratorTraits >( *this, -1, IteratorTraits::begin );
+      return leafView().template begin< codim, pitype >();
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LeafIterator
     leafend () const
     {
-      typedef typename Traits::template Codim< codim >::template Partition< pitype >::LeafIteratorTraits IteratorTraits;
-      return GeoGrid::Iterator< IteratorTraits >( *this, -1, IteratorTraits::end );
+      return leafView().template end< codim, pitype >();
     }
 
     const GlobalIdSet &globalIdSet () const
@@ -471,7 +489,7 @@ namespace Dune
      */
     int overlapSize ( int codim ) const
     {
-      return hostGrid().overlapSize( codim );
+      return leafView().overlapSize( codim );
     }
 
     /** \brief obtain size of ghost region for the leaf grid
@@ -480,7 +498,7 @@ namespace Dune
      */
     int ghostSize( int codim ) const
     {
-      return hostGrid().ghostSize( codim );
+      return leafView().ghostSize( codim );
     }
 
     /** \brief obtain size of overlap region for a grid level
@@ -490,7 +508,7 @@ namespace Dune
      */
     int overlapSize ( int level, int codim ) const
     {
-      return hostGrid().overlapSize( level, codim );
+      return levelView( level ).overlapSize( codim );
     }
 
     /** \brief obtain size of ghost region for a grid level
@@ -500,12 +518,12 @@ namespace Dune
      */
     int ghostSize ( int level, int codim ) const
     {
-      return hostGrid().ghostSize( level, codim );
+      return levelView( level ).ghostSize( codim );
     }
 
     /** \brief communicate information on a grid level
      *
-     *  \param      datahandle  communication data handle (user defined)
+     *  \param      dataHandle  communication data handle (user defined)
      *  \param[in]  interface   communication interface (one of
      *                          InteriorBorder_InteriorBorder_Interface,
      *                          InteriorBorder_All_Interface,
@@ -517,21 +535,17 @@ namespace Dune
      *  \param[in]  level       grid level to communicate
      */
     template< class DataHandle, class Data >
-    void communicate ( CommDataHandleIF< DataHandle, Data > &datahandle,
+    void communicate ( CommDataHandleIF< DataHandle, Data > &dataHandle,
                        InterfaceType interface,
                        CommunicationDirection direction,
                        int level ) const
     {
-      typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
-      typedef GeoGrid::CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
-
-      WrappedDataHandle wrappedDataHandle( *this, datahandle );
-      hostGrid().communicate( wrappedDataHandle, interface, direction, level );
+      levelView( level ).communicate( dataHandle, interface, direction );
     }
 
     /** \brief communicate information on leaf entities
      *
-     *  \param      datahandle  communication data handle (user defined)
+     *  \param      dataHandle  communication data handle (user defined)
      *  \param[in]  interface   communication interface (one of
      *                          InteriorBorder_InteriorBorder_Interface,
      *                          InteriorBorder_All_Interface,
@@ -542,15 +556,11 @@ namespace Dune
      *                          ForwardCommunication, BackwardCommunication)
      */
     template< class DataHandle, class Data >
-    void communicate ( CommDataHandleIF< DataHandle, Data > &datahandle,
+    void communicate ( CommDataHandleIF< DataHandle, Data > &dataHandle,
                        InterfaceType interface,
                        CommunicationDirection direction ) const
     {
-      typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
-      typedef GeoGrid::CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
-
-      WrappedDataHandle wrappedDataHandle( *this, datahandle );
-      hostGrid().communicate( wrappedDataHandle, interface, direction );
+      leafView().communicate( dataHandle, interface, direction );
     }
 
     /** \brief obtain CollectiveCommunication object
@@ -622,6 +632,43 @@ namespace Dune
     {
       typedef typename Traits::template Codim< EntitySeed::codimension >::EntityPointerImpl EntityPointerImpl;
       return EntityPointerImpl( *this, seed );
+    }
+
+    /** \} */
+
+    /** \name Grid Views
+     *  \{ */
+
+    /** \brief View for a grid level */
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View( ViewImp( *this, hostGrid().template levelView< pitype >( level ) ) );
+    }
+
+    /** \brief View for the leaf grid */
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafView () const
+    {
+      typedef typename Traits::template Partition< pitype >::LeafGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View( ViewImp( *this, hostGrid().template leafView< pitype >() ) );
+    }
+
+    /** \brief View for a grid level for All_Partition */
+    LevelGridView levelView ( int level ) const
+    {
+      typedef typename LevelGridView::GridViewImp ViewImp;
+      return LevelGridView( ViewImp( *this, hostGrid().levelView( level ) ) );
+    }
+
+    /** \brief View for the leaf grid for All_Partition*/
+    LeafGridView leafView() const
+    {
+      typedef typename LeafGridView::GridViewImp ViewImp;
+      return LeafGridView( ViewImp( *this, hostGrid().leafView() ) );
     }
 
     /** \} */

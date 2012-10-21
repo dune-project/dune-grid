@@ -12,6 +12,7 @@
 #include <dune/grid/geometrygrid/entityseed.hh>
 #include <dune/grid/geometrygrid/entitypointer.hh>
 #include <dune/grid/geometrygrid/geometry.hh>
+#include <dune/grid/geometrygrid/gridview.hh>
 #include <dune/grid/geometrygrid/intersection.hh>
 #include <dune/grid/geometrygrid/intersectioniterator.hh>
 #include <dune/grid/geometrygrid/iterator.hh>
@@ -117,9 +118,9 @@ namespace Dune
         template< PartitionIteratorType pitype >
         struct Partition
         {
-          typedef Dune::GridView< DefaultLeafGridViewTraits< const Grid, pitype > >
+          typedef Dune::GridView< GeoGrid::LeafGridViewTraits< HostGrid, CoordFunction, Allocator, pitype > >
           LeafGridView;
-          typedef Dune::GridView< DefaultLevelGridViewTraits< const Grid, pitype > >
+          typedef Dune::GridView< GeoGrid::LevelGridViewTraits< HostGrid, CoordFunction, Allocator, pitype > >
           LevelGridView;
         };
       };
