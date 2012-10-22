@@ -167,15 +167,8 @@ namespace Dune
     inline void el_update_base (Entity& en , DUNE_ELEM *) ;
 
     // update element from entity
-    template <class EntityPointerType>
-    inline int el_update (EntityPointerType *, DUNE_ELEM *) ;
-
-    // update element from entity
-    template <class EntityPointerType, class GridPartType>
-    inline int el_update (EntityPointerType *, DUNE_ELEM *, GridPartType& );
-
-    template< class EntityPointer, class VT >
-    int el_update ( EntityPointer *, DUNE_ELEM *, const GridView< VT > & );
+    template <class EntityPointerType, class GridView>
+    inline int el_update (EntityPointerType *, DUNE_ELEM *, const GridView& );
 
     // update child element
     template <class EntityPointerType>
