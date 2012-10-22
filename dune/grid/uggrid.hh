@@ -98,11 +98,11 @@
 #include "uggrid/uggridindexsets.hh"
 #ifdef ModelP
 #include "uggrid/ugmessagebuffer.hh"
+#include "uggrid/uglbgatherscatter.hh"
 #endif
 
 // Not needed here, but included for user convenience
 #include "uggrid/uggridfactory.hh"
-
 
 #ifdef ModelP
 template <class DataHandle, int GridDim, int codim>
@@ -441,12 +441,37 @@ namespace Dune {
     /** \brief Re-balances the load each process has to handle for a parallel grid,
         the DataHandle data works like the data handle for the communicate
         methods. If grid has changed , true is returned.
-        \bug Not implemented yet!
      */
     template<class DataHandle>
-    bool loadBalance (DataHandle& data)
+    bool loadBalance (DataHandle& dataHandle)
     {
-      DUNE_THROW(NotImplemented, "load balancing with data attached");
+#ifdef ModelP
+      // gather element data
+      std::vector<double> elementData;
+      UGLBGatherScatter<dim>::template gather<0>(this->leafView(),
+                                                 dataHandle, elementData);
+
+      // gather node data
+      std::vector<double> nodeData;
+      UGLBGatherScatter<dim>::template gather<dim>(this->leafView(),
+                                                   dataHandle, nodeData);
+#endif
+
+      // the load balancing step now also
+      // distributes the macrogrid indices
+      loadBalance();
+
+#ifdef ModelP
+      // scatter element data
+      UGLBGatherScatter<dim>::template scatter<0>(this->leafView(),
+                                                  dataHandle, elementData);
+
+      // scatter node data
+      UGLBGatherScatter<dim>::template scatter<dim>(this->leafView(),
+                                                    dataHandle, nodeData);
+#endif
+
+      return true;
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine
