@@ -334,9 +334,7 @@ namespace Dune {
 
     /** \brief Look for copy of a face on the next-lower grid level.
 
-       \todo This method is not implemented very efficiently, but I will not put
-       further work into it as long as the much-awaited face objects are not included
-       in UG.
+       \todo This method is not implemented very efficiently
      */
     static Face getFatherFace(const Face& face) {
 
