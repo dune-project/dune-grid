@@ -342,7 +342,7 @@ namespace Dune
      \code
      bool operator== ( const Id &, const Id & );
      bool operator!= ( const Id &, const Id & );
-     bool opreator<  ( const Id &, const Id & );
+     bool operator<  ( const Id &, const Id & );
 
      template< class C, class T >
      std::basic_ostream< C, T > &operator<< ( std::basic_ostream< C, T > &, const Id & );
