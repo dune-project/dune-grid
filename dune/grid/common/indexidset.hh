@@ -382,7 +382,7 @@ namespace Dune
 
      <H3>Global id set</H3>
 
-     A global id set provides ids that are unique over all processes over wich the
+     A global id set provides ids that are unique over all processes over which the
      grid is distributed.
      All grid implementations provide a global id set.
 
