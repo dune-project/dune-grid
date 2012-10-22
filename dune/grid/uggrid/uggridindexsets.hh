@@ -476,7 +476,7 @@ namespace Dune {
         }
 
 #ifdef ModelP
-        return (Local) ? edge->id : edge->ddd.gid;
+        return edge->ddd.gid;
 #else
         return edge->id;
 #endif
@@ -498,9 +498,7 @@ namespace Dune {
         }
 
 #ifdef ModelP
-        return (Local)
-               ? UG_NS<dim>::SideVector(face.first, face.second)->id
-               : UG_NS<dim>::SideVector(face.first, face.second)->ddd.gid;
+        return UG_NS<dim>::SideVector(face.first, face.second)->ddd.gid;
 #else
         return UG_NS<dim>::SideVector(face.first, face.second)->id;
 #endif
@@ -508,9 +506,7 @@ namespace Dune {
 
       if (codim==dim) {
 #ifdef ModelP
-        return (Local)
-               ? UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)))
-               : UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(i,type))->ddd.gid;
+        return UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(i,type))->ddd.gid;
 #else
         return UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
 #endif
