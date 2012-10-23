@@ -320,13 +320,11 @@ namespace Dune {
 
   /** \brief Implementation class for the UGGrid Id sets
 
-     The UGGridGlobalIdSet and the UGGridLocalIdSet are virtually identical. This
-     class implements them both at once.  You can select the one you want using
-     the <tt>Local</tt> template parameter.
-     \tparam Local false for GlobalIdSet, true for LocalIdSet
+     The UGGridGlobalIdSet and the UGGridLocalIdSet are identical. This
+     class implements them both at once.
    */
-  template <class GridImp, bool Local>
-  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp,Local>,unsigned int>
+  template <class GridImp>
+  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp>,unsigned int>
   {
     enum {dim = remove_const<GridImp>::type::dimension};
 
@@ -419,8 +417,7 @@ namespace Dune {
       }
       else {
         DUNE_THROW(NotImplemented,
-                   (Local ? "Local" : "Global") <<
-                   " persistent index for entities which are neither nodes nor elements.");
+                   "persistent ids for entities which are neither nodes nor elements.");
       }
 #else
       return UG_NS<dim>::id(grid_.getRealImplementation(e).getTarget());

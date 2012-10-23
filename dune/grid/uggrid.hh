@@ -143,9 +143,9 @@ namespace Dune {
         UGGridLeafIterator,
         UGGridLevelIndexSet< const UGGrid<dim> >,
         UGGridLeafIndexSet< const UGGrid<dim> >,
-        UGGridIdSet< const UGGrid<dim>, false >,
+        UGGridIdSet< const UGGrid<dim> >,
         unsigned int,
-        UGGridIdSet< const UGGrid<dim>, true >,
+        UGGridIdSet< const UGGrid<dim> >,
         unsigned int,
         CollectiveCommunication<Dune::UGGrid<dim> >,
         DefaultLevelGridViewTraits,
@@ -218,8 +218,7 @@ namespace Dune {
 
     friend class UGGridLevelIndexSet<const UGGrid<dim> >;
     friend class UGGridLeafIndexSet<const UGGrid<dim> >;
-    friend class UGGridIdSet<const UGGrid<dim>, false >;
-    friend class UGGridIdSet<const UGGrid<dim>, true >;
+    friend class UGGridIdSet<const UGGrid<dim> >;
 
     friend class GridFactory<UGGrid<dim> >;
 
@@ -349,13 +348,13 @@ namespace Dune {
     /** \brief Access to the GlobalIdSet */
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
-      return globalIdSet_;
+      return idSet_;
     }
 
     /** \brief Access to the LocalIdSet */
     const typename Traits::LocalIdSet& localIdSet() const
     {
-      return localIdSet_;
+      return idSet_;
     }
 
     /** \brief Access to the LevelIndexSets */
@@ -807,9 +806,9 @@ namespace Dune {
 
     UGGridLeafIndexSet<const UGGrid<dim> > leafIndexSet_;
 
-    UGGridIdSet<const UGGrid<dim>, false > globalIdSet_;
-
-    UGGridIdSet<const UGGrid<dim>, true > localIdSet_;
+    // One id set implementation
+    // Used for both the local and the global UGGrid id sets
+    UGGridIdSet<const UGGrid<dim> > idSet_;
 
     //! The type of grid refinement currently in use
     RefinementType refinementType_;
