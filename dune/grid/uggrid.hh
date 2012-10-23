@@ -223,6 +223,10 @@ namespace Dune {
 
     friend class GridFactory<UGGrid<dim> >;
 
+#ifdef ModelP
+    friend class UGLBGatherScatter<dim>;
+#endif
+
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class UGGridLeafIterator;
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
