@@ -294,7 +294,6 @@ namespace Dune {
     : factory_(factory)
       , seed_( item )
       , entity_( 0 )
-      , locked_ ( false ) // entity can be released
   {}
 
   template<int codim, class GridImp >
@@ -304,7 +303,6 @@ namespace Dune {
     : factory_(factory)
       , seed_( ghostFace )
       , entity_ ( factory_.template getNewEntity<codim> ( ghostFace.level() ))
-      , locked_( true ) // entity should not be released, otherwise is ghost info lost
   {
     // sets entity and item pointer
     updateGhostPointer( const_cast<HBndSegType &> (ghostFace) );
@@ -317,7 +315,6 @@ namespace Dune {
     : factory_(factory)
       , seed_( key )
       , entity_ ( 0 )
-      , locked_( false )
   {}
 
   // constructor Level,Leaf and HierarchicIterator
@@ -327,7 +324,6 @@ namespace Dune {
     : factory_(factory)
       , seed_()
       , entity_ ( factory_.template getNewEntity<codim> ( level ) )
-      , locked_ ( false ) // entity can be released
   {
     // this needs to be called
     // have to investigate why
@@ -345,7 +341,6 @@ namespace Dune {
     : factory_(factory)
       , seed_( item, level, twist, duneFace )
       , entity_( 0 )
-      , locked_ ( false ) // entity can be released
   {}
 
   template<int codim, class GridImp >
@@ -354,7 +349,6 @@ namespace Dune {
     : factory_(org.factory_)
       , seed_( org.seed_ )
       , entity_( 0 )
-      , locked_( org.locked_ )
   {
     // if entity exists then copy entity
     getEntity( org );
@@ -394,8 +388,6 @@ namespace Dune {
     seed_ = org.seed_;
 
     HElementType* item = seed_.item();
-    // copy locked info
-    locked_ = org.locked_;
 
     if( item )
     {
@@ -413,7 +405,6 @@ namespace Dune {
           // on ghosts entity pointers entity always exists
           assert( org.entity_ );
           entityImp().setEntity( org.entityImp() );
-          locked_ = true ;
         }
         else
         {
@@ -440,7 +431,6 @@ namespace Dune {
   inline void ALU3dGridEntityPointerBase<codim,GridImp>::done ()
   {
     seed_.clear();
-    locked_ = false;
     // free entity
     freeEntity();
   }
@@ -471,8 +461,6 @@ namespace Dune {
   {
     // don't dereference empty entity pointer
     assert( seed_.item() );
-    assert( (seed_.item()->isGhost()) ? locked_ : true );
-    assert( (locked_) ? (entity_ != 0) : true);
     if( ! entity_ )
     {
       entity_ = factory_.template getNewEntity<codim> ();
@@ -552,8 +540,6 @@ namespace Dune {
     seed_ = org.seed_;
 
     assert( &factory_ == &org.factory_ );
-    // copy lock status
-    this->locked_ = org.locked_;
 
     // if entity exists, just remove item pointer
     if( seed_.item() )
