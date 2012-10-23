@@ -66,8 +66,11 @@ namespace Dune {
   inline ALU3dGridGeometry<mydim, cdim, GridImp>&
   ALU3dGridGeometry<mydim, cdim, GridImp> :: operator = (const ALU3dGridGeometry& other )
   {
-    removeObj();
-    assign( other );
+    if( &other != this )
+    {
+      removeObj();
+      assign( other );
+    }
     return *this;
   }
 

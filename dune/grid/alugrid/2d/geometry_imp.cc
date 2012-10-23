@@ -27,13 +27,11 @@ namespace Dune
   inline ALU2dGridGeometry< mydim, cdim, GridImp >&
   ALU2dGridGeometry< mydim, cdim, GridImp >::operator = ( const ALU2dGridGeometry& other )
   {
-    // increase reference counter ( must be done first, in case &other == this )
-    ++other.geoImpl();
-    // decrese reference counter, free object if reference counter is 0
-    removeObj();
-    // copy geometry
-    geoImpl_ = other.geoImpl_;
-
+    if( &other != this )
+    {
+      removeObj();
+      assign( other );
+    }
     return *this;
   }
 
