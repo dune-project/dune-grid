@@ -747,7 +747,11 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
 
   if (error)
   {
-    DUNE_THROW(Dune::Exception, "Error encountered during checkBoundarySegmentIndex.");
+    std::string msg("Error encountered during checkBoundarySegmentIndex.");
+    if( gridView.grid().comm().size() > 1 )
+      std::cerr << msg << std::endl;
+    else
+      DUNE_THROW(Dune::Exception, msg );
   }
 }
 

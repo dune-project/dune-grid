@@ -32,6 +32,7 @@ template <int dim>
 Dune::UGGrid < dim >::UGGrid()
   : multigrid_(NULL),
     leafIndexSet_(*this),
+    idSet_(*this),
     refinementType_(LOCAL),
     closureType_(GREEN),
     someElementHasBeenMarkedForRefinement_(false),
@@ -96,26 +97,51 @@ Dune::UGGrid < dim >::UGGrid()
 
     if (dim==2)
     {
-      char* nfarg = strdup("newformat DuneFormat2d");
-      if (UG_NS<dim>::CreateFormatCmd(1, &nfarg))
+#ifdef ModelP
+      const int nArgs = 3;
+#else
+      const int nArgs = 1;
+#endif
+      char* newArgs[nArgs];
+      for (int i=0; i<nArgs; i++)
+        newArgs[i] = (char*)::malloc(50*sizeof(char));
+
+      sprintf(newArgs[0], "newformat DuneFormat2d" );
+#ifdef ModelP
+      // generate element and node vectors for load
+      // balancing of element and node data
+      sprintf(newArgs[1], "V e1 : vt 1" );   // generates element vectors
+      sprintf(newArgs[2], "V n1 : vt 1" );   // generates node vectors
+#endif
+      if (UG_NS<dim>::CreateFormatCmd(nArgs, newArgs))
         DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
-      free(nfarg);
+      for (int i=0; i<nArgs; i++)
+        free(newArgs[i]);
     }
     if (dim==3)
     {
-      char* newArgs[2];
-      for (int i=0; i<2; i++)
+#ifdef ModelP
+      const int nArgs = 4;
+#else
+      const int nArgs = 2;
+#endif
+      char* newArgs[nArgs];
+      for (int i=0; i<nArgs; i++)
         newArgs[i] = (char*)::malloc(50*sizeof(char));
 
       sprintf(newArgs[0], "newformat DuneFormat3d" );
       sprintf(newArgs[1], "V s1 : vt 1" ); // generates side vectors in 3D
-
-      if (UG_NS<dim>::CreateFormatCmd(2, newArgs))
+#ifdef ModelP
+      // generate element and node vectors for load
+      // balancing of element and node data
+      sprintf(newArgs[2], "V e1 : vt 1" ); // generates element vectors
+      sprintf(newArgs[3], "V n1 : vt 1" ); // generates node vectors
+#endif
+      if (UG_NS<dim>::CreateFormatCmd(nArgs, newArgs))
         DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
 
-      for (int i=0; i<2; i++)
+      for (int i=0; i<nArgs; i++)
         free(newArgs[i]);
-
     }
   }
 

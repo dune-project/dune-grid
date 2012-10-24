@@ -315,7 +315,6 @@ namespace Dune {
   {
     if( ! end )
     {
-      // lock entity pointer
       ghostElem_ = const_cast<HBndSegType *> (ghost.down());
 
       // we have children and they lie in the disired level range

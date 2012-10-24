@@ -320,14 +320,12 @@ namespace Dune {
 
   /** \brief Implementation class for the UGGrid Id sets
 
-     The UGGridGlobalIdSet and the UGGridLocalIdSet are virtually identical. This
-     class implements them both at once.  You can select the one you want using
-     the <tt>Local</tt> template parameter.
-     \tparam Local false for GlobalIdSet, true for LocalIdSet
+     The UGGridGlobalIdSet and the UGGridLocalIdSet are identical. This
+     class implements them both at once.
    */
-  template< class GridImp, bool Local >
+  template< class GridImp >
   class UGGridIdSet
-    : public IdSet< GridImp, UGGridIdSet< GridImp, Local >, unsigned int >
+    : public IdSet< GridImp, UGGridIdSet< GridImp >, unsigned int >
   {
     typedef typename remove_const< GridImp >::type::Traits Traits;
 
@@ -336,13 +334,11 @@ namespace Dune {
     typedef typename std::pair<const typename UG_NS<dim>::Element*, int> Face;
 
     /** \brief Look for copy of a face on the next-lower grid level.
-
-       \todo This method is not implemented very efficiently, but I will not put
-       further work into it as long as the much-awaited face objects are not included
-       in UG.
+     *
+     *  \todo This method is not implemented very efficiently.
      */
-    static Face getFatherFace(const Face& face) {
-
+    static Face getFatherFace ( const Face &face )
+    {
       // set up result object
       Face resultFace;
       resultFace.first = UG_NS<dim>::EFather(face.first);
@@ -418,8 +414,7 @@ namespace Dune {
       }
       else {
         DUNE_THROW(NotImplemented,
-                   (Local ? "Local" : "Global") <<
-                   " persistent index for entities which are neither nodes nor elements.");
+                   "persistent ids for entities which are neither nodes nor elements.");
       }
 #else
       return UG_NS<dim>::id( GridImp::getRealImplementation( e ).getTarget() );
@@ -473,7 +468,7 @@ namespace Dune {
         }
 
 #ifdef ModelP
-        return (Local ? edge->id : edge->ddd.gid);
+        return edge->ddd.gid;
 #else
         return edge->id;
 #endif
@@ -497,21 +492,19 @@ namespace Dune {
         }
 
 #ifdef ModelP
-        if( !Local )
-          return UG_NS< dim >::SideVector( face.first, face.second )->ddd.gid;
-        else
-#endif // #ifdef ModelP
+        return UG_NS< dim >::SideVector( face.first, face.second )->ddd.gid;
+#else // #ifdef ModelP
         return UG_NS< dim >::SideVector( face.first, face.second )->id;
+#endif // #else // #ifdef ModelP
       }
 
       if( codim == dim )
       {
 #ifdef ModelP
-        if( !Local )
-          return UG_NS< dim >::Corner( target, UGGridRenumberer< dim >::verticesDUNEtoUG( i,type ) )->ddd.gid;
-        else
-#endif // #ifdef ModelP
+        return UG_NS< dim >::Corner( target, UGGridRenumberer< dim >::verticesDUNEtoUG( i,type ) )->ddd.gid;
+#else // #ifdef ModelP
         return UG_NS< dim >::id( UG_NS< dim >::Corner( target, UGGridRenumberer< dim >::verticesDUNEtoUG( i, type ) ) );
+#endif // #else // #ifdef ModelP
       }
 
       DUNE_THROW( GridError, "UGGrid< " << dim << " >::subId isn't implemented for codim == " << codim );

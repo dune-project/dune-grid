@@ -98,11 +98,11 @@
 #include "uggrid/uggridindexsets.hh"
 #ifdef ModelP
 #include "uggrid/ugmessagebuffer.hh"
+#include "uggrid/uglbgatherscatter.hh"
 #endif
 
 // Not needed here, but included for user convenience
 #include "uggrid/uggridfactory.hh"
-
 
 #ifdef ModelP
 template <class DataHandle, int GridDim, int codim>
@@ -143,9 +143,9 @@ namespace Dune {
         UGGridLeafIterator,
         UGGridLevelIndexSet< const UGGrid<dim> >,
         UGGridLeafIndexSet< const UGGrid<dim> >,
-        UGGridIdSet< const UGGrid<dim>, false >,
+        UGGridIdSet< const UGGrid<dim> >,
         unsigned int,
-        UGGridIdSet< const UGGrid<dim>, true >,
+        UGGridIdSet< const UGGrid<dim> >,
         unsigned int,
         CollectiveCommunication<Dune::UGGrid<dim> >,
         DefaultLevelGridViewTraits,
@@ -219,10 +219,13 @@ namespace Dune {
 
     friend class UGGridLevelIndexSet<const UGGrid<dim> >;
     friend class UGGridLeafIndexSet<const UGGrid<dim> >;
-    friend class UGGridIdSet<const UGGrid<dim>, false >;
-    friend class UGGridIdSet<const UGGrid<dim>, true >;
+    friend class UGGridIdSet<const UGGrid<dim> >;
 
     friend class GridFactory<UGGrid<dim> >;
+
+#ifdef ModelP
+    friend class UGLBGatherScatter<dim>;
+#endif
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class UGGridLeafIterator;
@@ -346,13 +349,13 @@ namespace Dune {
     /** \brief Access to the GlobalIdSet */
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
-      return globalIdSet_;
+      return idSet_;
     }
 
     /** \brief Access to the LocalIdSet */
     const typename Traits::LocalIdSet& localIdSet() const
     {
-      return localIdSet_;
+      return idSet_;
     }
 
     /** \brief Access to the LevelIndexSets */
@@ -442,12 +445,37 @@ namespace Dune {
     /** \brief Re-balances the load each process has to handle for a parallel grid,
         the DataHandle data works like the data handle for the communicate
         methods. If grid has changed , true is returned.
-        \bug Not implemented yet!
      */
     template<class DataHandle>
-    bool loadBalance (DataHandle& data)
+    bool loadBalance (DataHandle& dataHandle)
     {
-      DUNE_THROW(NotImplemented, "load balancing with data attached");
+#ifdef ModelP
+      // gather element data
+      std::vector<double> elementData;
+      UGLBGatherScatter<dim>::template gather<0>(this->leafView(),
+                                                 dataHandle, elementData);
+
+      // gather node data
+      std::vector<double> nodeData;
+      UGLBGatherScatter<dim>::template gather<dim>(this->leafView(),
+                                                   dataHandle, nodeData);
+#endif
+
+      // the load balancing step now also
+      // distributes the macrogrid indices
+      loadBalance();
+
+#ifdef ModelP
+      // scatter element data
+      UGLBGatherScatter<dim>::template scatter<0>(this->leafView(),
+                                                  dataHandle, elementData);
+
+      // scatter node data
+      UGLBGatherScatter<dim>::template scatter<dim>(this->leafView(),
+                                                    dataHandle, nodeData);
+#endif
+
+      return true;
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine
@@ -779,9 +807,9 @@ namespace Dune {
 
     UGGridLeafIndexSet<const UGGrid<dim> > leafIndexSet_;
 
-    UGGridIdSet<const UGGrid<dim>, false > globalIdSet_;
-
-    UGGridIdSet<const UGGrid<dim>, true > localIdSet_;
+    // One id set implementation
+    // Used for both the local and the global UGGrid id sets
+    UGGridIdSet<const UGGrid<dim> > idSet_;
 
     //! The type of grid refinement currently in use
     RefinementType refinementType_;

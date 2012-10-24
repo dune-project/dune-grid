@@ -316,11 +316,9 @@ namespace Dune
      This class template is used as a base class for all id set implementations.
      It uses the Barton-Nackman trick to ensure conformity to the interface.
 
-     Template parameters are:
-
-     - <tt>GridImp</tt> Type that is a model of Dune::Grid.
-     - <tt>IdSetImp</tt> Type that is a model of Dune::IdSet.
-     - <tt>IdTypeImp</tt> Traits class containing return types depending on implementation.
+     \tparam GridImp Type that is a model of Dune::Grid.
+     \tparam IdSetImp Type that is a model of Dune::IdSet.
+     \tparam IdTypeImp Type used for ids
 
      <H3>Overview</H3>
 
@@ -335,7 +333,7 @@ namespace Dune
      \code
      bool operator== ( const Id &, const Id & );
      bool operator!= ( const Id &, const Id & );
-     bool opreator<  ( const Id &, const Id & );
+     bool operator<  ( const Id &, const Id & );
 
      template< class C, class T >
      std::basic_ostream< C, T > &operator<< ( std::basic_ostream< C, T > &, const Id & );
@@ -375,7 +373,7 @@ namespace Dune
 
      <H3>Global id set</H3>
 
-     A global id set provides ids that are unique over all processes over wich the
+     A global id set provides ids that are unique over all processes over which the
      grid is distributed.
      All grid implementations provide a global id set.
 

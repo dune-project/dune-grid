@@ -213,72 +213,9 @@ namespace Dune
   }
 
   template<class GridType>
-  template <class EntityPointerType>
+  template <class EntityPointerType, class GridView>
   inline int GrapeGridDisplay<GridType>::
-  el_update (EntityPointerType * it, DUNE_ELEM * he)
-  {
-    typedef typename GridType::Traits::template Codim<0>::Entity Entity;
-    typedef typename Entity::Geometry DuneGeometryType;
-    typedef typename DuneGeometryType :: ctype ctype;
-
-    enum { dim      = Entity::dimension };
-    enum { dimworld = Entity::dimensionworld };
-
-    typedef FieldVector<ctype, dimworld> CoordinateType;
-
-    Entity &en = (*it[0]);
-
-    // only for debuging, becsaue normaly references are != NULL
-    if(&en)
-    {
-      el_update_base( en, he );
-
-      {
-        if( en.hasBoundaryIntersections() )
-        {
-          // reset the boundary information
-          for(int i=0; i < MAX_EL_FACE; ++i) he->bnd[i] = -1;
-
-          if( en.isLeaf() )
-          {
-            typedef typename Entity::LeafIntersectionIterator IntersectionIterator;
-            IntersectionIterator endnit = en.ileafend();
-            IntersectionIterator nit    = en.ileafbegin();
-
-            checkNeighbors(nit,endnit,he);
-          }
-          else if(hasLevelIntersections_)
-          {
-            typedef typename Entity::LevelIntersectionIterator IntersectionIterator;
-            IntersectionIterator endnit = en.ilevelend();
-            IntersectionIterator nit    = en.ilevelbegin();
-
-            checkNeighbors(nit,endnit,he);
-          }
-        }
-        else
-        {
-          // if no boundary intersections, then all faces are interior
-          for(int i=0; i < MAX_EL_FACE; ++i) he->bnd[i] = 0;
-        }
-      }
-
-      // for data displaying
-      he->actElement = it;
-      return 1;
-
-    } // end if(&en)
-    else
-    {
-      he->actElement = 0;
-      return 0;
-    }
-  }
-
-  template<class GridType>
-  template <class EntityPointerType, class GridPartType>
-  inline int GrapeGridDisplay<GridType>::
-  el_update (EntityPointerType * it, DUNE_ELEM * he, GridPartType& gridPart)
+  el_update (EntityPointerType * it, DUNE_ELEM * he, const GridView& gridView )
   {
     typedef typename GridType::Traits::template Codim<0>::Entity Entity;
     typedef typename Entity::Geometry DuneGeometryType;
@@ -297,12 +234,12 @@ namespace Dune
       el_update_base ( en , he );
 
       {
-        typedef typename GridPartType :: IntersectionIteratorType IntersectionIteratorType;
+        typedef typename GridView :: IntersectionIterator IntersectionIterator;
         // reset the boundary information
         for(int i=0; i < MAX_EL_FACE; ++i) he->bnd[i] = -1;
 
-        IntersectionIteratorType endnit = gridPart.iend(en);
-        IntersectionIteratorType nit = gridPart.ibegin(en);
+        IntersectionIterator endnit = gridView.iend(en);
+        IntersectionIterator nit = gridView.ibegin(en);
 
         checkNeighbors(nit,endnit,he);
       }
@@ -320,41 +257,6 @@ namespace Dune
   }
 
 
-  template< class GridType >
-  template< class EntityPointer, class VT >
-  inline int GrapeGridDisplay< GridType >
-  ::el_update ( EntityPointer *it, DUNE_ELEM *he, const GridView< VT > &gridView )
-  {
-    typedef typename GridView< VT >::template Codim< 0 >::Entity Entity;
-    typedef typename Entity::Geometry DuneGeometryType;
-    typedef typename DuneGeometryType::ctype ctype;
-
-    //const int dim      = Entity::dimension;
-    const int dimworld = Entity::dimensionworld;
-
-    typedef FieldVector< ctype, dimworld > CoordinateType;
-
-    Entity &entity = **it;
-    assert( &entity != 0 );
-
-    el_update_base ( entity, he );
-
-    typedef typename GridView< VT >::IntersectionIterator IntersectionIterator;
-    // reset the boundary information
-    for( int i = 0; i < MAX_EL_FACE; ++i )
-      he->bnd[ i ] = -1;
-
-    IntersectionIterator iend = gridView.iend( entity );
-    IntersectionIterator iit  = gridView.ibegin( entity );
-
-    checkNeighbors( iit, iend, he );
-
-    // for data displaying
-    he->actElement = it;
-    return 1;
-  }
-
-
   template<class GridType>
   template<PartitionIteratorType pitype>
   inline int GrapeGridDisplay<GridType>::
@@ -368,8 +270,11 @@ namespace Dune
     he->liter   = 0;
     he->enditer = 0;
 
-    LeafIteratorType * it    = new LeafIteratorType ( grid_.leafView().template begin<0, pitype> () );
-    LeafIteratorType * endit = new LeafIteratorType ( grid_.leafView().template end  <0, pitype> () );
+    typedef typename GridType :: LeafGridView LeafGridView ;
+    LeafGridView leafView = grid_.leafView() ;
+
+    LeafIteratorType * it    = new LeafIteratorType ( leafView.template begin<0, pitype> () );
+    LeafIteratorType * endit = new LeafIteratorType ( leafView.template end  <0, pitype> () );
 
     he->liter   = (void *) it;
     he->enditer = (void *) endit;
@@ -380,7 +285,7 @@ namespace Dune
       return 0;
     }
 
-    return el_update(it,he);
+    return el_update(it, he, leafView);
   }
 
   template<class GridType>
@@ -391,6 +296,9 @@ namespace Dune
     typedef typename GridType :: template Codim<0> ::
     template Partition<pitype> :: LeafIterator LeafIteratorType;
 
+    typedef typename GridType :: LeafGridView LeafGridView ;
+    LeafGridView leafView = grid_.leafView() ;
+
     LeafIteratorType * it    = (LeafIteratorType *) he->liter;
     LeafIteratorType * endit = (LeafIteratorType *) he->enditer;
     assert( it );
@@ -398,7 +306,7 @@ namespace Dune
 
     if( ++it[0] != endit[0] )
     {
-      return el_update(it,he);
+      return el_update(it, he, leafView);
     }
     else
     {
@@ -434,7 +342,7 @@ namespace Dune
       return 0;
     }
 
-    return el_update(it,he,gridPart);
+    return el_update(it, he, gridPart.gridView());
   }
 
   template<class GridType>
@@ -454,7 +362,7 @@ namespace Dune
 
     if( ++it[0] != endit[0] )
     {
-      return el_update(it,he,gridPart);
+      return el_update(it, he, gridPart.gridView());
     }
     else
     {
@@ -479,9 +387,12 @@ namespace Dune
     typedef typename GridType :: template Codim<0> ::
     template Partition<pitype> :: LevelIterator LevelIteratorType;
 
+    typedef typename GridType :: LevelGridView LevelGridView ;
+    LevelGridView levelView = grid_.levelView( level ) ;
+
     // class copy constructor
-    LevelIteratorType * it    = new LevelIteratorType( grid_.levelView( level ).template begin<0,pitype> () );
-    LevelIteratorType * endit = new LevelIteratorType( grid_.levelView( level ).template end<0,pitype>   () );
+    LevelIteratorType * it    = new LevelIteratorType( levelView.template begin<0,pitype> () );
+    LevelIteratorType * endit = new LevelIteratorType( levelView.template end<0,pitype>   () );
 
     he->liter   = (void *) it;
     he->enditer = (void *) endit;
@@ -492,7 +403,7 @@ namespace Dune
       return 0;
     }
 
-    return el_update(it,he);
+    return el_update(it, he, levelView);
   }
 
 
@@ -504,6 +415,9 @@ namespace Dune
     typedef typename GridType :: template Codim<0> ::
     template Partition<pitype> :: LevelIterator LevelIteratorType;
 
+    typedef typename GridType :: LevelGridView LevelGridView ;
+    LevelGridView levelView = grid_.levelView( he->level ) ;
+
     LevelIteratorType * it    = ((LevelIteratorType *) he->liter);
     LevelIteratorType * endit = ((LevelIteratorType *) he->enditer);
 
@@ -511,7 +425,7 @@ namespace Dune
     assert( endit );
     if( ++it[0] != endit[0] )
     {
-      return el_update(it,he);
+      return el_update(it, he, levelView);
     }
     else
     {
@@ -560,7 +474,7 @@ namespace Dune
     if( hit[0] != newEn->hend( childLevel ) )
     {
       he->hiter = (void *) hit;
-      return el_update( hit, he);
+      return el_update( hit, he, grid_.leafView() );
     }
     else
     {
@@ -587,7 +501,7 @@ namespace Dune
     HierarchicIteratorType ehit = en.hend(childLevel);
     if( ++hit[0] != ehit )
     {
-      return el_update(hit,he);
+      return el_update(hit, he, grid_.leafView());
     }
 
     hierList_.remove( hit );
