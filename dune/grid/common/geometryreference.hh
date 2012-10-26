@@ -11,6 +11,8 @@
 
 #include <dune/geometry/type.hh>
 
+#include <dune/grid/common/geometry.hh>
+
 namespace Dune
 {
 
