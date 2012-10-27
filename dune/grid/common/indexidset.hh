@@ -285,10 +285,24 @@ namespace Dune
      *  \endcode
      *  It does only work for cc=0 since the subEntity method is not present otherwise.
      */
+    IndexType subIndex ( const typename Traits::template Codim< 0 >::Entity &e, int i, unsigned int codim ) const
+    {
+      return index( *(e.subEntity( i, codim )) );
+    }
+
+    /** \copydoc Dune::IndexSet::subIndex(const typename Traits::template Codim< cc >::Entity &e,int i,unsigned int codim) const
+     *
+     *  The default implementation is as follows:
+     *  \code
+     *  index( *(e.subEntity( i, codim )) );
+     *  \endcode
+     *  It does only work for cc=0 since the subEntity method is not present otherwise.
+     */
     template< int cc >
     IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &e, int i, unsigned int codim ) const
     {
-      return index( *(e.subEntity( i, codim )) );
+      DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
+      return -1;
     }
     //@}
 
