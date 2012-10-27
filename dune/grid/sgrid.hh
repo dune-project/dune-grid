@@ -423,6 +423,20 @@ namespace Dune {
       return grid->n(grid->maxLevel(),coord);
     }
 
+    //! subentity compressed index (not available here)
+    int subCompressedIndex (int cd, int i) const
+    {
+      DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
+      return -1;
+    }
+
+    //! subentity compressed leaf index (not available here)
+    int subCompressedLeafIndex (int cd, int i) const
+    {
+      DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
+      return -1;
+    }
+
   protected:
     // this is how we implement our elements
     GridImp* grid;       //!< grid containes mapper, geometry, etc.
