@@ -372,6 +372,7 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
+
     //! level of this element
     int level () const
     {
@@ -430,6 +431,20 @@ namespace Dune {
     int compressedLeafIndex () const
     {
       DUNE_THROW(GridError, "YaspEntity not implemented");
+    }
+
+    //! subentity compressed index (not available here)
+    int subCompressedIndex (int, unsigned int ) const
+    {
+      DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
+      return -1;
+    }
+
+    //! subentity compressed leaf index (not available here)
+    int subCompressedLeafIndex (int, unsigned int ) const
+    {
+      DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
+      return -1;
     }
   };
 
@@ -1134,6 +1149,18 @@ namespace Dune {
       if (_g.vertex_overlap().inside(_it.coord())) return OverlapEntity;
       if (_g.vertex_overlapfront().inside(_it.coord())) return FrontEntity;
       return GhostEntity;
+    }
+
+    //! subentity compressed index simply returns compressedIndex
+    int subCompressedIndex (int, unsigned int ) const
+    {
+      return compressedIndex();
+    }
+
+    //! subentity compressed leaf index simply returns compressedLeafIndex
+    int subCompressedLeafIndex (int, unsigned int ) const
+    {
+      return compressedLeafIndex();
     }
 
   private:
