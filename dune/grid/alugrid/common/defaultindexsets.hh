@@ -109,7 +109,7 @@ namespace Dune {
     typedef DefaultIndexSet<GridType, IteratorType > ThisType;
 
     template <class EntityType, int codim>
-    struct InsertEntity
+    struct EntitySpec
     {
       template <class SizeVector>
       static void insert(const EntityType & en,
@@ -126,12 +126,20 @@ namespace Dune {
             ++ sizes[ codim ];
           }
         }
-        InsertEntity<EntityType,codim-1>::insert(en, indexContainer, sizes);
+        EntitySpec<EntityType,codim-1>::insert(en, indexContainer, sizes);
+      }
+
+      static IndexType subIndex( const PersistentContainerType& indexContainer,
+                                 const EntityType & e,
+                                 int i )
+      {
+        DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
+        return IndexType(-1);
       }
     };
 
     template <class EntityType>
-    struct InsertEntity<EntityType,0>
+    struct EntitySpec<EntityType,0>
     {
       template <class SizeVector>
       static void insert(const EntityType & en,
@@ -146,6 +154,14 @@ namespace Dune {
           idx.set( sizes[codim] );
           ++ sizes[ codim ];
         }
+      }
+
+      static IndexType subIndex( const PersistentContainerType& indexContainer,
+                                 const EntityType & e,
+                                 int i )
+      {
+        assert( indexContainer( e, i ).index() >= 0 );
+        return indexContainer( e, i ).index();
       }
     };
 
@@ -229,8 +245,8 @@ namespace Dune {
                          int i, unsigned int codim ) const
     {
       assert( (codim != 0) || (level_ < 0) || ( level_ == e.level() ) );
-      assert( indexContainer( codim ) ( e, i ).index() >= 0 );
-      return indexContainer( codim ) ( e, i ).index();
+      typedef typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity Entity;
+      return EntitySpec< Entity, cc > :: subIndex( indexContainer( codim ), e, i );
     }
 
     //! returns true if this set provides an index for given entity
@@ -317,7 +333,7 @@ namespace Dune {
     template <class EntityType, class SizeVector>
     void insertEntity(EntityType & en, SizeVector& sizes)
     {
-      InsertEntity<EntityType,dim>::insert( en, indexContainers_, sizes);
+      EntitySpec<EntityType,dim>::insert( en, indexContainers_, sizes);
     }
 
     // grid this index set belongs to
