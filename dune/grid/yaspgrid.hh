@@ -372,6 +372,7 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
+
     //! level of this element
     int level () const
     {
