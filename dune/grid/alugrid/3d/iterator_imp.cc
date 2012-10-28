@@ -35,8 +35,7 @@ namespace Dune {
     factory_( factory ),
     item_(0),
     ghost_(0),
-    index_(0),
-    done_(true)
+    index_(-1)
   {}
 
   // --IntersectionIterator
@@ -50,10 +49,9 @@ namespace Dune {
     factory_( factory ),
     item_(0),
     ghost_(0),
-    index_(0),
-    done_(end)
+    index_(-1)
   {
-    if (!end)
+    if( ! end )
     {
       setFirstItem(*el,wLevel);
     }
@@ -67,9 +65,10 @@ namespace Dune {
   inline void
   ALU3dGridIntersectionIterator<GridImp> :: done ()
   {
-    done_  = true;
     item_  = 0;
     ghost_ = 0;
+    // index < 0 indicates end iterator
+    index_ = -1;
   }
 
   template<class GridImp>
@@ -121,7 +120,6 @@ namespace Dune {
       return ;
     }
 
-    done_   = false;
     innerLevel_ = en.level();
     index_  = 0;
 
@@ -144,8 +142,7 @@ namespace Dune {
     geoProvider_(connector_),
     factory_( org.factory_ ),
     item_(org.item_),
-    ghost_(org.ghost_),
-    done_(org.done_)
+    ghost_(org.ghost_)
   {
     if(org.item_)
     { // else it's a end iterator
@@ -172,7 +169,6 @@ namespace Dune {
       ghost_      = org.ghost_;
       innerLevel_ = org.innerLevel_;
       index_      = org.index_;
-      done_       = org.done_;
       connector_.updateFaceInfo(org.connector_.face(),innerLevel_,
                                 item_->twist(ElementTopo::dune2aluFace(index_)));
       geoProvider_.resetFaceGeom();
@@ -190,8 +186,8 @@ namespace Dune {
   {
     // this method is only to check equality of real iterators and end
     // iterators
-    return ((item_ == i.item_) &&
-            (done_ == i.done_)
+    return ((item_  == i.item_) &&
+            (index_ == i.index_ )
             );
   }
 
@@ -526,7 +522,6 @@ namespace Dune {
   first (const EntityType & en, int wLevel)
   {
     // if given Entity is not leaf, we create an end iterator
-    done_   = false;
     index_  = 0;
     isLeafItem_   = en.isLeaf();
 

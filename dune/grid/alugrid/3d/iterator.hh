@@ -293,9 +293,6 @@ namespace Dune {
 
     // unit outer normal
     mutable NormalType unitOuterNormal_;
-
-    // true if end iterator
-    bool done_;
   };
 
   template<class GridImp>
@@ -345,7 +342,6 @@ namespace Dune {
     using BaseType :: connector_;
     using BaseType :: geoProvider_;
     using BaseType :: factory_;
-    using BaseType :: done_;
     using BaseType :: boundary;
     using BaseType :: done ;
     using BaseType :: getFace;
