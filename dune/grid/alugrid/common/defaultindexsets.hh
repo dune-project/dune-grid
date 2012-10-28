@@ -133,6 +133,10 @@ namespace Dune {
                                  const EntityType & e,
                                  int i )
       {
+        // if the codimension equals that of the entity simply return the index
+        if( codim == EntityType :: codimension )
+          return indexContainer[ e ].index();
+
         DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
         return IndexType(-1);
       }
