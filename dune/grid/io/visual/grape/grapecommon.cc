@@ -228,7 +228,6 @@ inline void timeSceneInit(INFO *info, const int n_info,
   return;
 }
 
-#if 0
 /* add scene with combined object at the end of scene tree */
 inline SCENE * combine_scenes_send ()
 {
@@ -293,7 +292,6 @@ inline void displayTimeScene ( INFO *info, int procs )
     GRAPE_CALL(mgr,"handle") (tsc);
   }
 }
-#endif
 
 
 #undef MINIMUM
