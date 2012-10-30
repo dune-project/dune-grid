@@ -205,7 +205,7 @@ namespace Dune {
                            unsigned int codim) const
     {
       if (cc==dim)
-        return UG_NS<dim>::levelIndex(grid_.getRealImplementation(e).getTarget());
+        return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
 
       if (codim==0)
         return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
@@ -410,7 +410,7 @@ namespace Dune {
         typename UG_NS<dim>::Node *node =
           reinterpret_cast<typename UG_NS<dim>::Node *>( GridImp::getRealImplementation( e ).getTarget() );
 
-        return node->ddd.gid;
+        return node->myvertex->iv.ddd.gid;
       }
       else {
         DUNE_THROW(NotImplemented,
@@ -501,7 +501,7 @@ namespace Dune {
       if( codim == dim )
       {
 #ifdef ModelP
-        return UG_NS< dim >::Corner( target, UGGridRenumberer< dim >::verticesDUNEtoUG( i,type ) )->ddd.gid;
+        return UG_NS< dim >::Corner( target, UGGridRenumberer< dim >::verticesDUNEtoUG( i,type ) )->myvertex->iv.ddd.gid;
 #else // #ifdef ModelP
         return UG_NS< dim >::id( UG_NS< dim >::Corner( target, UGGridRenumberer< dim >::verticesDUNEtoUG( i, type ) ) );
 #endif // #else // #ifdef ModelP
