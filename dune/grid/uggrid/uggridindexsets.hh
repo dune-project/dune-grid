@@ -205,7 +205,7 @@ namespace Dune {
                            unsigned int codim) const
     {
       if (cc==dim)
-        return UG_NS<dim>::levelIndex(grid_.getRealImplementation(e).getTarget());
+        return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
 
       if (codim==0)
         return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
