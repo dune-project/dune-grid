@@ -36,6 +36,12 @@
 
 using namespace Dune;
 
+template<>
+struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid<3, 3, simplex, conforming> >
+{
+  static const bool v = false;
+};
+
 template <bool leafconform, class Grid>
 void checkCapabilities(const Grid& grid)
 {
@@ -398,6 +404,7 @@ void writeFile( const GridView& gridView )
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 {
+  const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
   {
     GridType* gr = new GridType();
     assert( gr );
@@ -416,7 +423,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   std::cout << "  CHECKING: Macro" << std::endl;
   gridcheck(grid);
   std::cout << "  CHECKING: Macro-intersections" << std::endl;
-  checkIntersectionIterator(grid);
+  checkIntersectionIterator(grid, skipLevelIntersections);
 
   if( GridType :: dimension == 3 )
   {
@@ -437,7 +444,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     std::cout << "  CHECKING: Refined" << std::endl;
     gridcheck(grid);
     std::cout << "  CHECKING: intersections" << std::endl;
-    checkIntersectionIterator(grid);
+    checkIntersectionIterator(grid, skipLevelIntersections);
     // if( checkTwist )
     //  checkTwists( grid.leafView(), NoMapTwist() );
 
@@ -471,7 +478,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   checkGeometryInFather(grid);
   // check the intersection iterator and the geometries it returns
   std::cout << "  CHECKING: intersections" << std::endl;
-  checkIntersectionIterator(grid);
+  checkIntersectionIterator(grid, skipLevelIntersections);
 
   // some checks for assignment of iterators
   checkIteratorAssignment(grid);
