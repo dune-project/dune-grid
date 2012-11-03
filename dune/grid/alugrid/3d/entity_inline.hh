@@ -239,7 +239,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ileafbegin () const
   {
     assert(item_ != 0);
-    return ALU3dGridIntersectionIteratorType (*this, this->level(), false );
+    return ALU3dGridIntersectionIteratorType (*this, this->level(), false);
   }
 
   template<int dim, class GridImp>
@@ -255,7 +255,8 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ilevelbegin () const
   {
     assert(item_ != 0);
-    return ALU3dGridLevelIntersectionIteratorType (*this, this->level(), false );
+    // disable level intersection iterator for conforming refinement
+    return ALU3dGridLevelIntersectionIteratorType (*this, this->level(), grid().conformingRefinement() );
   }
 
   template<int dim, class GridImp>
@@ -263,7 +264,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ilevelend () const
   {
     assert(item_ != 0);
-    return ALU3dGridLevelIntersectionIteratorType (*this, this->level(),true);
+    return ALU3dGridLevelIntersectionIteratorType (*this, this->level(), true);
   }
 
   // Adaptation methods
