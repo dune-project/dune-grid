@@ -303,7 +303,7 @@ namespace Dune {
         const int mySize = size_[cd];
         if( mySize > gridSize )
         {
-          std::cout << mySize << " s | g " << gridSize << std::endl;
+          std::cout << "DefaultIndexSet[ " << level_ << " ]: " << mySize << " s | g " << gridSize << std::endl;
         }
         assert( mySize <= gridSize );
 #endif
