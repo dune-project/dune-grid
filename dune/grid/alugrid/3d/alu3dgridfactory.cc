@@ -336,7 +336,8 @@ namespace Dune
 
       typedef typename ElementVector::iterator ElementIteratorType;
       const ElementIteratorType endE = elements_.end();
-      for( ElementIteratorType it = elements_.begin(); it != endE; ++it )
+      unsigned int elemIndex = 0;
+      for( ElementIteratorType it = elements_.begin(); it != endE; ++it, ++elemIndex )
       {
         if( elementType == hexa )
         {
@@ -356,7 +357,7 @@ namespace Dune
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
             element[ j ] = globalId( (*it)[ i ] );
           }
-          mgb.InsertUniqueTetra( element );
+          mgb.InsertUniqueTetra( element, (elemIndex % 2) );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
