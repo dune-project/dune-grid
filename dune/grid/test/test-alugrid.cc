@@ -739,8 +739,8 @@ int main (int argc , char **argv) {
         }
       }
 
-#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
-      if( false ) //testALU3dConform )
+#ifdef ALUGRID_3D_CONFORMING_REFINEMENT
+      if( testALU3dConform )
       {
         std::string filename;
         if( newfilename )
