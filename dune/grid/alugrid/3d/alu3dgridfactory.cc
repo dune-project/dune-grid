@@ -357,7 +357,11 @@ namespace Dune
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
             element[ j ] = globalId( (*it)[ i ] );
           }
-          mgb.InsertUniqueTetra( element, (elemIndex % 2) );
+          mgb.InsertUniqueTetra( element
+#ifdef ALUGRID_3D_CONFORMING_REFINEMENT
+                                 , (elemIndex % 2)
+#endif
+                                 );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
