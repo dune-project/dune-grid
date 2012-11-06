@@ -419,6 +419,8 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     grape.display();
   }
 
+  std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
+
   // be careful, each global refine create 8 x maxlevel elements
   std::cout << "  CHECKING: Macro" << std::endl;
   gridcheck(grid);
