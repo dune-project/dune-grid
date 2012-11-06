@@ -394,6 +394,55 @@ namespace Dune {
        \param rule One of the UG refinement rules
        \param side If rule==UG::%D2::%BLUE (one quadrilateral is split into two rectangles)
        you can choose the orientation of the cut by setting side==0 or side==1
+
+       The available values for RefinementRule are:  (see the RefinementRule enum in ug/gm/gm.h)
+       <h3>2D</h3>
+
+       - NO_REFINEMENT
+       - COPY
+       - RED
+       - BLUE
+       - COARSE
+       - BISECTION_1
+       - BISECTION_2_Q
+       - BISECTION_2_T1
+       - BISECTION_2_T2
+       - BISECTION_3
+
+       <h3>3D</h3>
+
+       - NO_REFINEMENT
+       - COPY
+       - RED
+       - BLUE
+       - COARSE
+
+       - TETRA_RED_HEX
+
+       - PRISM_BISECT_1_2
+       - PRISM_QUADSECT
+       - PRISM_BISECT_HEX0
+       - PRISM_BISECT_HEX1
+       - PRISM_BISECT_HEX2
+       - PRISM_ROTATE_LEFT
+       - PRISM_ROTATE_RGHT
+       - PRISM_QUADSECT_HEXPRI0
+       - PRISM_RED_HEX
+       - PRISM_BISECT_0_1
+       - PRISM_BISECT_0_2
+       - PRISM_BISECT_0_3
+
+       - HEX_BISECT_0_1
+       - HEX_BISECT_0_2
+       - HEX_BISECT_0_3
+       - HEX_TRISECT_0
+       - HEX_TRISECT_5
+       - HEX_QUADSECT_0
+       - HEX_QUADSECT_1
+       - HEX_QUADSECT_2
+       - HEX_BISECT_HEXPRI0
+       - HEX_BISECT_HEXPRI1
+
      */
     bool mark(const typename Traits::template Codim<0>::Entity & e,
               typename UG_NS<dim>::RefinementRule rule,
