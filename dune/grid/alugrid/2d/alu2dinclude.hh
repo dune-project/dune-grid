@@ -41,7 +41,7 @@
 //#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
 #define ALU2DGRID_PARALLEL 0
 
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 
 #if ALU2DGRID_PARALLEL
 //#include "communicator.hh"

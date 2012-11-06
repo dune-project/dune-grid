@@ -8,7 +8,7 @@
  *  \brief  provides the GridFamily for AlbertaGrid
  */
 
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 
 #include <dune/grid/common/entity.hh>
 #include <dune/grid/common/entitypointer.hh>

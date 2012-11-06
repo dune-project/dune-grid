@@ -21,8 +21,8 @@ typedef unsigned char uint8_t;
 #include <dune/common/misc.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/typetraits.hh>
-#include <dune/common/collectivecommunication.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/axisalignedcubegeometry.hh>
 #include <dune/grid/common/indexidset.hh>
@@ -30,7 +30,7 @@ typedef unsigned char uint8_t;
 
 
 #if HAVE_MPI
-#include <dune/common/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicollectivecommunication.hh>
 #endif
 
 /*! \file yaspgrid.hh

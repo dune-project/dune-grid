@@ -20,7 +20,7 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 using namespace Dune;
 

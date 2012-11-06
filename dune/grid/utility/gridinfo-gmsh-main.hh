@@ -16,7 +16,7 @@
 
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/io/file/gmshreader.hh>

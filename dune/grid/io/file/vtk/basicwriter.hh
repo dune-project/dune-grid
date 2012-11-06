@@ -11,7 +11,7 @@
 #include <sstream>
 #include <string>
 
-#include <dune/common/mpiguard.hh>
+#include <dune/common/parallel/mpiguard.hh>
 #include <dune/common/path.hh>
 #include <dune/common/shared_ptr.hh>
 

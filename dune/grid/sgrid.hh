@@ -10,7 +10,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/bigunsignedint.hh>
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/reservedvector.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/grid/common/capabilities.hh>
