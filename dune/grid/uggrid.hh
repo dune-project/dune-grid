@@ -490,9 +490,12 @@ namespace Dune {
       return loadBalance(0,0,2,32,1);
     }
 
-    /** \brief Re-balances the load each process has to handle for a parallel grid,
-        the DataHandle data works like the data handle for the communicate
-        methods. If grid has changed , true is returned.
+    /** \brief Distributes the grid and some data over the available nodes in a distributed machine
+
+        \tparam DataHandle works like the data handle for the communicate
+        methods.
+
+        \return True, if grid has changed, false otherwise
      */
     template<class DataHandle>
     bool loadBalance (DataHandle& dataHandle)
