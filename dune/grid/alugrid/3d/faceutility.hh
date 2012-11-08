@@ -57,7 +57,7 @@ namespace Dune
 
   public:
     //! constructor creating empty face info
-    ALU3dGridFaceInfo();
+    explicit ALU3dGridFaceInfo( const bool conformingRefinement );
     void updateFaceInfo(const GEOFaceType& face, int innerLevel, int innerTwist);
 
     //- constructors and destructors
@@ -137,6 +137,9 @@ namespace Dune
       return ! Conversion< Comm, No_Comm > :: sameType ;
     }
 
+    //! return true if conforming refinement is enabled
+    bool conformingRefinement () const { return conformingRefinement_; }
+
   private:
     //! Description of conformance on the face
     ConformanceState getConformanceState(const int innerLevel) const;
@@ -170,6 +173,7 @@ namespace Dune
     boundary_t bndType_;
 
     ConformanceState conformanceState_;
+    const bool conformingRefinement_ ; // true if conforming refinement is enabled
   };
 
 

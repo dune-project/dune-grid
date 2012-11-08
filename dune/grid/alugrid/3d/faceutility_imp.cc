@@ -8,7 +8,7 @@ namespace Dune
 
 
   template< ALU3dGridElementType type, class Comm >
-  inline ALU3dGridFaceInfo< type, Comm >::ALU3dGridFaceInfo() :
+  inline ALU3dGridFaceInfo< type, Comm >::ALU3dGridFaceInfo( const bool conformingRefinement ) :
     face_(0),
     innerElement_(0),
     outerElement_(0),
@@ -19,7 +19,8 @@ namespace Dune
     segmentIndex_( -1 ),
     bndId_( -1 ),
     bndType_( noBoundary ),
-    conformanceState_(UNDEFINED)
+    conformanceState_(UNDEFINED),
+    conformingRefinement_( conformingRefinement )
   {}
 
   // points face from inner element away?
@@ -43,16 +44,16 @@ namespace Dune
     // points face from inner element away?
     if (innerTwist < 0)
     {
-      innerElement_ = face.nb.rear().first;
+      innerElement_    = face.nb.rear().first;
       innerFaceNumber_ = face.nb.rear().second;
-      outerElement_ = face.nb.front().first;
+      outerElement_    = face.nb.front().first;
       outerFaceNumber_ = face.nb.front().second;
     }
     else
     {
-      innerElement_ = face.nb.front().first;
+      innerElement_    = face.nb.front().first;
       innerFaceNumber_ = face.nb.front().second;
-      outerElement_ = face.nb.rear().first;
+      outerElement_    = face.nb.rear().first;
       outerFaceNumber_ = face.nb.rear().second;
     } // end if
 
@@ -244,7 +245,8 @@ namespace Dune
       segmentIndex_( orig.segmentIndex_ ),
       bndId_( orig.bndId_ ),
       bndType_( orig.bndType_ ),
-      conformanceState_(orig.conformanceState_)
+      conformanceState_(orig.conformanceState_),
+      conformingRefinement_( orig.conformingRefinement_ )
   {}
 
   template< ALU3dGridElementType type, class Comm >
@@ -403,18 +405,22 @@ namespace Dune
   {
     ConformanceState result = CONFORMING;
 
-    // A boundary is always unrefined
-    int levelDifference = 0 ;
-    if ( isElementLike() )
-      levelDifference = innerLevel - outerEntity().level();
-    else
-      levelDifference = innerLevel - boundaryFace().level();
+    // in case of non-conforming refinement check level difference
+    if( ! conformingRefinement_ )
+    {
+      // A boundary is always unrefined
+      int levelDifference = 0 ;
+      if ( isElementLike() )
+        levelDifference = innerLevel - outerEntity().level();
+      else
+        levelDifference = innerLevel - boundaryFace().level();
 
-    if (levelDifference < 0) {
-      result = REFINED_OUTER;
-    }
-    else if (levelDifference > 0) {
-      result = REFINED_INNER;
+      if (levelDifference < 0) {
+        result = REFINED_OUTER;
+      }
+      else if (levelDifference > 0) {
+        result = REFINED_INNER;
+      }
     }
 
     return result;

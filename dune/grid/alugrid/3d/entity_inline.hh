@@ -247,7 +247,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ileafend () const
   {
     assert(item_ != 0);
-    return ALU3dGridLeafIntersectionIteratorType (*this , this->level(), true);
+    return ALU3dGridLeafIntersectionIteratorType (*this, this->level(), true);
   }
 
   template<int dim, class GridImp>
