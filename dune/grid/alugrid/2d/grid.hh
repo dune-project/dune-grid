@@ -714,6 +714,12 @@ namespace Dune {
     /** \brief restore from istream */
     void restore( std::istream& ) ;
 
+    //! return true if grid uses conforming refinement
+    bool conformingRefinement () const
+    {
+      return ! nonConform ();
+    }
+
   protected:
     //! return true if grid allows hanging nodes on leaf level
     //! i.e. returns true for ALUSimplexGrid and returns false for ALUConformGrid
