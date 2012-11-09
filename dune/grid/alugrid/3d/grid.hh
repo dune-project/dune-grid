@@ -144,6 +144,7 @@ namespace Dune
       if( grid && conformingRefinement )
       {
         grid->enableConformingClosure();
+        grid->disableGhostCells();
       }
 #endif
     }
