@@ -168,7 +168,7 @@ namespace Dune
                       periodicBoundary    = 1, // periodic boundary
                       innerGhostBoundary  = 2, // process boundary, inside is ghost, outside is normal element
                       domainBoundary      = 3, // boundary with domain, no outside
-                      outerGhostBoundary  = 4}; // process boundary, outside is ghost
+                      outerGhostBoundary  = 4}; // process boundary, outside might be ghost
 
     boundary_t bndType_;
 
