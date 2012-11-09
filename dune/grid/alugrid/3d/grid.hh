@@ -1032,9 +1032,20 @@ namespace Dune
     }
 
   public:
+    // return true if conforming refinement is enabled
     bool conformingRefinement() const
     {
       return (refinementType_ == conforming) ;
+    }
+
+    // return true if ghost cells are available
+    bool ghostCellsEnabled () const
+    {
+#ifdef ALUGRID_3D_CONFORMING_REFINEMENT
+      return myGrid().ghostCellsEnabled();
+#else
+      return true ;
+#endif
     }
   protected:
     /////////////////////////////////////////////////////////////////

@@ -8,7 +8,8 @@ namespace Dune
 
 
   template< ALU3dGridElementType type, class Comm >
-  inline ALU3dGridFaceInfo< type, Comm >::ALU3dGridFaceInfo( const bool conformingRefinement ) :
+  inline ALU3dGridFaceInfo< type, Comm >::
+  ALU3dGridFaceInfo( const bool conformingRefinement, const bool ghostCellsEnabled ) :
     face_(0),
     innerElement_(0),
     outerElement_(0),
@@ -20,7 +21,8 @@ namespace Dune
     bndId_( -1 ),
     bndType_( noBoundary ),
     conformanceState_(UNDEFINED),
-    conformingRefinement_( conformingRefinement )
+    conformingRefinement_( conformingRefinement ),
+    ghostCellsEnabled_( ghostCellsEnabled )
   {}
 
   // points face from inner element away?
@@ -175,7 +177,7 @@ namespace Dune
         // if this cast is valid we have either
         // a boundary or a ghost element
         // the ghost element case
-        if( parallel() && bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
+        if( parallel() && ghostCellsEnabled_ && bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
         {
           // if nonconformity occurs then go up one level
           if( bnd->level () != bnd->ghostLevel() )
@@ -193,8 +195,7 @@ namespace Dune
           bndType_ = outerGhostBoundary ;
 
           const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
-          assert(ghost);
-
+          assert( ghost );
           outerTwist_ = ghost->twist(outerFaceNumber_);
         }
         else // the normal boundary case
@@ -246,7 +247,8 @@ namespace Dune
       bndId_( orig.bndId_ ),
       bndType_( orig.bndType_ ),
       conformanceState_(orig.conformanceState_),
-      conformingRefinement_( orig.conformingRefinement_ )
+      conformingRefinement_( orig.conformingRefinement_ ),
+      ghostCellsEnabled_( orig.ghostCellsEnabled_ )
   {}
 
   template< ALU3dGridElementType type, class Comm >
@@ -272,7 +274,7 @@ namespace Dune
   template< ALU3dGridElementType type, class Comm >
   inline bool ALU3dGridFaceInfo< type, Comm >::neighbor() const
   {
-    return isElementLike() || ghostBoundary();
+    return isElementLike() || ( ghostBoundary() && ghostCellsEnabled_ );
   }
 
   template< ALU3dGridElementType type, class Comm >
