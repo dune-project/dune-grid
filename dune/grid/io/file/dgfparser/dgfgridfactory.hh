@@ -9,7 +9,7 @@
 #include <map>
 #include <assert.h>
 
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/io/file/dgfparser/dgfexception.hh>
 #include <dune/grid/io/file/dgfparser/macrogrid.hh>
 

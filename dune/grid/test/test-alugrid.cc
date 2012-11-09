@@ -14,7 +14,7 @@
 #include <dune/common/tupleutility.hh>
 #include <dune/common/tuples.hh>
 #include <dune/common/static_assert.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/genericgeometry/codimtable.hh>
 
@@ -35,6 +35,12 @@
 #endif
 
 using namespace Dune;
+
+template<>
+struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid<3, 3, simplex, conforming> >
+{
+  static const bool v = false;
+};
 
 template <bool leafconform, class Grid>
 void checkCapabilities(const Grid& grid)
@@ -398,6 +404,7 @@ void writeFile( const GridView& gridView )
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 {
+  const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
   {
     GridType* gr = new GridType();
     assert( gr );
@@ -412,11 +419,13 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     grape.display();
   }
 
+  std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
+
   // be careful, each global refine create 8 x maxlevel elements
   std::cout << "  CHECKING: Macro" << std::endl;
   gridcheck(grid);
   std::cout << "  CHECKING: Macro-intersections" << std::endl;
-  checkIntersectionIterator(grid);
+  checkIntersectionIterator(grid, skipLevelIntersections);
 
   if( GridType :: dimension == 3 )
   {
@@ -437,7 +446,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     std::cout << "  CHECKING: Refined" << std::endl;
     gridcheck(grid);
     std::cout << "  CHECKING: intersections" << std::endl;
-    checkIntersectionIterator(grid);
+    checkIntersectionIterator(grid, skipLevelIntersections);
     // if( checkTwist )
     //  checkTwists( grid.leafView(), NoMapTwist() );
 
@@ -471,7 +480,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   checkGeometryInFather(grid);
   // check the intersection iterator and the geometries it returns
   std::cout << "  CHECKING: intersections" << std::endl;
-  checkIntersectionIterator(grid);
+  checkIntersectionIterator(grid, skipLevelIntersections);
 
   // some checks for assignment of iterators
   checkIteratorAssignment(grid);
@@ -568,6 +577,11 @@ int main (int argc , char **argv) {
       testALU3dConform = true ;
       testALU3dCube    = true ;
     }
+    if( key == "3dnonc" )
+    {
+      testALU3dSimplex = true ;
+      testALU3dCube    = true ;
+    }
     if( key == "3dsimp" ) testALU3dSimplex = true ;
     if( key == "3dconf" ) testALU3dConform = true ;
     if( key == "3dcube" ) testALU3dCube    = true ;
@@ -591,6 +605,12 @@ int main (int argc , char **argv) {
       if( testALU3dSimplex )
       {
         ALUGrid<3,3, simplex, nonconforming > grid;
+        checkALUSerial(grid);
+      }
+
+      if( testALU3dConform )
+      {
+        ALUGrid<3,3, simplex, conforming > grid;
         checkALUSerial(grid);
       }
 #endif
@@ -739,8 +759,8 @@ int main (int argc , char **argv) {
         }
       }
 
-#ifdef ALUGRID_PERIODIC_BOUNDARY_PARALLEL
-      if( false ) //testALU3dConform )
+#ifdef ALUGRID_3D_CONFORMING_REFINEMENT
+      if( testALU3dConform )
       {
         std::string filename;
         if( newfilename )

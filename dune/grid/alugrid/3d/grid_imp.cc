@@ -292,9 +292,7 @@ namespace Dune
   alu_inline
   int ALU3dGrid< elType, Comm >::ghostSize ( int codim ) const
   {
-    assert( codim >= 0 );
-    assert( codim <= dimension );
-    return ( codim == 0 ) ? 1 : 0;
+    return ( ghostCellsEnabled() && codim == 0 ) ? 1 : 0 ;
   }
 
 
@@ -302,10 +300,7 @@ namespace Dune
   alu_inline
   int ALU3dGrid< elType, Comm >::ghostSize ( int level, int codim ) const
   {
-    assert( codim >= 0 );
-    assert( codim <= dimension );
-    assert( level >= 0);
-    return ( codim == 0 ) ? 1 : 0;
+    return ghostSize( codim );
   }
 
   // calc all necessary things that might have changed

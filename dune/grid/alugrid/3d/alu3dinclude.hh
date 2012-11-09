@@ -25,7 +25,7 @@
 // all methods and classes of the ALUGrid are defined in the namespace
 #define ALU3DSPACE ALUGridSpace ::
 
-#include <dune/common/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicollectivecommunication.hh>
 
 #include <dune/grid/alugrid/common/checkparallel.hh>
 

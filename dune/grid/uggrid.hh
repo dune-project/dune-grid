@@ -10,8 +10,8 @@
 
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
-#include <dune/common/collectivecommunication.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
@@ -21,7 +21,7 @@
 #if HAVE_UG
 
 #ifdef ModelP
-#include <dune/common/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicollectivecommunication.hh>
 #endif
 
 /* The following lines including the necessary UG headers are somewhat
@@ -395,6 +395,55 @@ namespace Dune {
        \param rule One of the UG refinement rules
        \param side If rule==UG::%D2::%BLUE (one quadrilateral is split into two rectangles)
        you can choose the orientation of the cut by setting side==0 or side==1
+
+       The available values for RefinementRule are:  (see the RefinementRule enum in ug/gm/gm.h)
+       <h3>2D</h3>
+
+       - NO_REFINEMENT
+       - COPY
+       - RED
+       - BLUE
+       - COARSE
+       - BISECTION_1
+       - BISECTION_2_Q
+       - BISECTION_2_T1
+       - BISECTION_2_T2
+       - BISECTION_3
+
+       <h3>3D</h3>
+
+       - NO_REFINEMENT
+       - COPY
+       - RED
+       - BLUE
+       - COARSE
+
+       - TETRA_RED_HEX
+
+       - PRISM_BISECT_1_2
+       - PRISM_QUADSECT
+       - PRISM_BISECT_HEX0
+       - PRISM_BISECT_HEX1
+       - PRISM_BISECT_HEX2
+       - PRISM_ROTATE_LEFT
+       - PRISM_ROTATE_RGHT
+       - PRISM_QUADSECT_HEXPRI0
+       - PRISM_RED_HEX
+       - PRISM_BISECT_0_1
+       - PRISM_BISECT_0_2
+       - PRISM_BISECT_0_3
+
+       - HEX_BISECT_0_1
+       - HEX_BISECT_0_2
+       - HEX_BISECT_0_3
+       - HEX_TRISECT_0
+       - HEX_TRISECT_5
+       - HEX_QUADSECT_0
+       - HEX_QUADSECT_1
+       - HEX_QUADSECT_2
+       - HEX_BISECT_HEXPRI0
+       - HEX_BISECT_HEXPRI1
+
      */
     bool mark(const typename Traits::template Codim<0>::Entity & e,
               typename UG_NS<dim>::RefinementRule rule,
@@ -442,9 +491,12 @@ namespace Dune {
       return loadBalance(0,0,2,32,1);
     }
 
-    /** \brief Re-balances the load each process has to handle for a parallel grid,
-        the DataHandle data works like the data handle for the communicate
-        methods. If grid has changed , true is returned.
+    /** \brief Distributes the grid and some data over the available nodes in a distributed machine
+
+        \tparam DataHandle works like the data handle for the communicate
+        methods.
+
+        \return True, if grid has changed, false otherwise
      */
     template<class DataHandle>
     bool loadBalance (DataHandle& dataHandle)

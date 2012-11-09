@@ -31,7 +31,7 @@
 #define ALU2DSPACENAME ALU2DGrid
 #define ALU2DDIMWORLD(dimw,eltype) < dimw,(eltype == ALU2DSPACE triangle ? 3 : 4) >
 
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 
 namespace ALU2DSPACENAME
 {

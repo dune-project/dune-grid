@@ -630,6 +630,8 @@ namespace ALUGridSpace
   private:
     // the pair of elementand boundary face
     mutable val_t elem_;
+    // true if ghost cells are enabled
+    const bool ghostCellsEnabled_ ;
   public:
     typedef ElementPllXIF_t ItemType;
 
@@ -640,7 +642,8 @@ namespace ALUGridSpace
         it_( 0 ),
         nl_( nlinks ),
         link_( nlinks ), // makes default status == done
-        elem_( (HElementType *) 0, (HBndSegType *) 0 )
+        elem_( (HElementType *) 0, (HBndSegType *) 0 ),
+        ghostCellsEnabled_( grid.ghostCellsEnabled() )
     {}
 
     ALU3dGridGhostIterator (const ALU3dGridGhostIterator & org)
@@ -650,6 +653,7 @@ namespace ALUGridSpace
         , link_(org.link_)
         , usingInner_(false)
         , elem_(org.elem_)
+        , ghostCellsEnabled_( org.ghostCellsEnabled_ )
     {
       if( org.iterTT_ )
       {
@@ -789,12 +793,15 @@ namespace ALUGridSpace
 
     void first()
     {
-      link_ = -1;
-      usingInner_ = false;
-      // create iterator calls also first of iterators
-      createIterator();
-      checkLeafEntity();
-      if( it_ ) assert( !it_->done());
+      if( ghostCellsEnabled_ )
+      {
+        link_ = -1;
+        usingInner_ = false;
+        // create iterator calls also first of iterators
+        createIterator();
+        checkLeafEntity();
+        if( it_ ) assert( !it_->done());
+      }
     }
 
     int done () const
@@ -1047,7 +1054,8 @@ namespace ALUGridSpace
     IteratorType curr_;
     IteratorType end_;
     mutable val_t elem_;
-    mutable int count_;
+    mutable size_t count_;
+    const bool ghostCellsEnabled_ ;
 
   public:
     template< class GhostElementIteratorImp, class GridImp >
@@ -1055,8 +1063,15 @@ namespace ALUGridSpace
                                         int level, const int nlinks, GhostItemListType &ghList )
       : ghList_( ghList ),
         elem_( (ElType *) 0, (HBndSegType *) 0 ),
-        count_( 0 )
+        count_( 0 ),
+        ghostCellsEnabled_( grid.ghostCellsEnabled() )
     {
+      if( ! ghostCellsEnabled_ )
+      {
+        count_ = ghList_.getItemList().size() ;
+        return ;
+      }
+
       if( ! ghList_.up2Date() )
       {
         GhostElementIteratorImp ghostIter(grid,level,nlinks);
@@ -1068,12 +1083,13 @@ namespace ALUGridSpace
       : ghList_( org.ghList_ )
         , elem_(org.elem_)
         , count_(org.count_)
+        , ghostCellsEnabled_(org.ghostCellsEnabled_)
     {}
 
     int size  () { return ghList_.getItemList().size(); }
-    void first() { count_ = 0; }
+    void first() { if( ghostCellsEnabled_ ) count_ = 0;}
     void next () { ++count_; }
-    int done () const { return (count_ >= (int) ghList_.getItemList().size() ? 1 : 0); }
+    int done () const { return (count_ >= ghList_.getItemList().size() ? 1 : 0); }
     val_t & item () const
     {
       assert( ! done() );

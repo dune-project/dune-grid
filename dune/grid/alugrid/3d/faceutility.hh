@@ -57,7 +57,7 @@ namespace Dune
 
   public:
     //! constructor creating empty face info
-    ALU3dGridFaceInfo();
+    ALU3dGridFaceInfo( const bool conformingRefinement, const bool ghostCellsEnabled );
     void updateFaceInfo(const GEOFaceType& face, int innerLevel, int innerTwist);
 
     //- constructors and destructors
@@ -65,8 +65,8 @@ namespace Dune
     //! element
     //! \note: The user is responsible for the consistency of the input data
     //! as well as for choosing the appropriate (i.e. most refined) face
-    ALU3dGridFaceInfo(const GEOFaceType& face, int innerTwist);
     //! Copy constructor
+    ALU3dGridFaceInfo(const GEOFaceType& face, int innerTwist);
     ALU3dGridFaceInfo(const ALU3dGridFaceInfo &orig);
     //! Destructor
     ~ALU3dGridFaceInfo();
@@ -137,6 +137,9 @@ namespace Dune
       return ! Conversion< Comm, No_Comm > :: sameType ;
     }
 
+    //! return true if conforming refinement is enabled
+    bool conformingRefinement () const { return conformingRefinement_; }
+
   private:
     //! Description of conformance on the face
     ConformanceState getConformanceState(const int innerLevel) const;
@@ -165,11 +168,13 @@ namespace Dune
                       periodicBoundary    = 1, // periodic boundary
                       innerGhostBoundary  = 2, // process boundary, inside is ghost, outside is normal element
                       domainBoundary      = 3, // boundary with domain, no outside
-                      outerGhostBoundary  = 4}; // process boundary, outside is ghost
+                      outerGhostBoundary  = 4}; // process boundary, outside might be ghost
 
     boundary_t bndType_;
 
     ConformanceState conformanceState_;
+    const bool conformingRefinement_ ; // true if conforming refinement is enabled
+    const bool ghostCellsEnabled_ ;    // true if ghost cells are present
   };
 
 

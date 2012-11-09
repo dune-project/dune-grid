@@ -386,8 +386,12 @@ namespace Dune {
     //! return true if intersection is conforming
     bool conforming () const
     {
-      assert( !neighbor() || this->connector_.conformanceState() == FaceInfoType::CONFORMING );
-      return true;
+      assert( ( ! connector_.conformingRefinement() ) ?
+              ( !neighbor() || this->connector_.conformanceState() == FaceInfoType::CONFORMING ) : true );
+      // for conforming refinement use base implementation
+      // otherwise its true
+      return connector_.conformingRefinement() ?
+             BaseType :: conforming() : true ;
     }
   private:
     // set new face

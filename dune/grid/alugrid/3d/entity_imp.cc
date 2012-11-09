@@ -473,10 +473,14 @@ namespace Dune
 
     const MarkRuleType rule = (*item_).requestrule();
 
-    if(rule == refine_element_t) return 1;
     if(rule == coarse_element_t) return -1;
-    assert( rule == nosplit_element_t );
-    return 0;
+    else if(rule == nosplit_element_t ) return 0;
+    else
+    {
+      // rule == refine_element_t is not true for bisection
+      // since we have different refinement rules in this case
+      return 1;
+    }
   }
 
 

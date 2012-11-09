@@ -20,7 +20,7 @@
 #include <dune/grid/alugrid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/defaultgridview.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
@@ -720,6 +720,12 @@ namespace Dune
 
     /** \brief restore from istream */
     void restore( std::istream& ) ;
+
+    //! return true if grid uses conforming refinement
+    bool conformingRefinement () const
+    {
+      return ! nonConform ();
+    }
 
   protected:
     //! return true if grid allows hanging nodes on leaf level

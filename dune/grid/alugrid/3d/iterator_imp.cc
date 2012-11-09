@@ -31,6 +31,7 @@ namespace Dune {
   inline ALU3dGridIntersectionIterator<GridImp> ::
   ALU3dGridIntersectionIterator(const FactoryType& factory,
                                 int wLevel) :
+    connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled() ),
     geoProvider_(connector_),
     factory_( factory ),
     item_(0),
@@ -44,7 +45,7 @@ namespace Dune {
   ALU3dGridIntersectionIterator(const FactoryType& factory,
                                 HElementType *el,
                                 int wLevel,bool end) :
-    connector_(),
+    connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled() ),
     geoProvider_(connector_),
     factory_( factory ),
     item_(0),
