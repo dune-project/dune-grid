@@ -487,57 +487,6 @@ namespace ALUGridSpace
     }
   };
 
-  /*
-     template <PartitionIteratorType pitype>
-     class ALU3dGridLeafIteratorWrapper<3,pitype>
-     : public IteratorWrapperInterface < typename IteratorElType<3>::val_t >
-     {
-     typedef IteratorElType<3>::ElType ElType;
-     typedef typename LeafStopRule< ElType, pitype > :: StopRule_t StopRule_t;
-     // ElType is vertex_STI
-     typedef LeafIterator < ElType > IteratorType;
-
-     // the vertex iterator
-     IteratorType it_;
-
-     public:
-     typedef IteratorElType<3>::val_t val_t;
-     private:
-     mutable val_t elem_;
-     const StopRule_t rule_;
-     public:
-     // constructor creating Iterator
-     template <class GridImp>
-     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
-      : it_(grid.myGrid()), elem_(0,0) , rule_ () {}
-
-     // constructor copying iterator
-     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
-      : it_( org.it_ ), elem_(org.elem_) , rule_() {}
-
-     int size  ()    { return it_->size(); }
-
-     void next ()
-     {
-      it_->next();
-      if (!it_->done())
-      {
-        // take standard walk rule to cehck vertices again, see walk.h
-        if(! rule_(it_->item()) ) next();
-      }
-     }
-
-     void first()     { it_->first(); }
-     int done () const{ return it_->done(); }
-     val_t & item () const
-     {
-      assert( ! done () );
-      elem_.first  = & it_->item();
-      return elem_;
-     }
-     };
-   */
-
 #if ALU3DGRID_PARALLEL
   template< int codim >
   class LeafLevelIteratorTTProxy
@@ -586,7 +535,6 @@ namespace ALUGridSpace
     IteratorType & inner () { assert(inner_); return *inner_; }
     IteratorType & outer () { assert(outer_); return *outer_; }
   };
-
 
 
   typedef pair< ALUHElementType< 0, MPI_Comm >::ElementType *, Dune::ALU3dBasicImplTraits< MPI_Comm >::HBndSegType * > LeafValType;
@@ -1116,6 +1064,7 @@ namespace ALUGridSpace
       ghList.getItemList().resize(0);
       map< int , int > visited;
 
+      const map<int,int>::iterator visitedEnd = visited.end();
       for( ghostIter.first(); !ghostIter.done(); ghostIter.next() )
       {
         GhostPairType ghPair = ghostIter.item().second->getGhost();
@@ -1125,7 +1074,7 @@ namespace ALUGridSpace
         {
           ElType * item = GetItem<GridImp,codim>::getItem( *(ghPair.first) , notOnFace[i] );
           int idx = item->getIndex();
-          if( visited.find(idx) == visited.end() )
+          if( visited.find(idx) == visitedEnd )
           {
             ghList.getItemList().push_back( (void *) item );
             visited[idx] = 1;
