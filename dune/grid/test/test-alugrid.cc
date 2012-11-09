@@ -577,6 +577,11 @@ int main (int argc , char **argv) {
       testALU3dConform = true ;
       testALU3dCube    = true ;
     }
+    if( key == "3dnonc" )
+    {
+      testALU3dSimplex = true ;
+      testALU3dCube    = true ;
+    }
     if( key == "3dsimp" ) testALU3dSimplex = true ;
     if( key == "3dconf" ) testALU3dConform = true ;
     if( key == "3dcube" ) testALU3dCube    = true ;
@@ -600,6 +605,12 @@ int main (int argc , char **argv) {
       if( testALU3dSimplex )
       {
         ALUGrid<3,3, simplex, nonconforming > grid;
+        checkALUSerial(grid);
+      }
+
+      if( testALU3dConform )
+      {
+        ALUGrid<3,3, simplex, conforming > grid;
         checkALUSerial(grid);
       }
 #endif
