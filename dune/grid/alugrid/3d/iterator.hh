@@ -147,14 +147,8 @@ namespace Dune {
     //! return true if intersection is with boundary.
     bool boundary () const;
 
-    //! return true if across the edge an neighbor on this level exists
+    //! return true if across the face an neighbor on leaf exists
     bool neighbor () const;
-
-    //! return true if across the edge an neighbor on this level exists
-    bool levelNeighbor () const;
-
-    //! return true if across the edge an neighbor on leaf level exists
-    bool leafNeighbor () const;
 
     //! return information about the Boundary
     int boundaryId () const;
@@ -376,12 +370,6 @@ namespace Dune {
 
     //! return true if across the edge an neighbor on this level exists
     bool neighbor () const;
-
-    //! return true if across the edge an neighbor on this level exists
-    bool levelNeighbor () const;
-
-    //! return true if across the edge an neighbor on leaf level exists
-    bool leafNeighbor () const;
 
     //! return true if intersection is conforming
     bool conforming () const
