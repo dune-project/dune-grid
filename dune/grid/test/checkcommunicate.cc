@@ -102,7 +102,8 @@ public:
   size_t size (EntityType& e) const
   {
     // flag+data+coordinates
-    return 2+e.geometry().corners()*e.geometry().dimensionworld;
+    typedef typename EntityType::Geometry Geometry;
+    return 2+e.geometry().corners() * Geometry::dimensionworld;
   }
 
   //! pack data from user to message buffer
@@ -486,7 +487,15 @@ public:
       indexSet_( gridView_.indexSet() ),
       level_( level )
   {
-    if( !checkCommunication() )
+    // if no overlap and ghost is available we skip the check
+    const bool skipCheck = ( cdim == 0 ) ? (gridView_.overlapSize(0) == 0 && gridView_.ghostSize(0) == 0) : false ;
+
+    if( skipCheck )
+    {
+      std :: cerr << "Test skiped because of empty set of overlap and ghosts "
+                  << cdim << "!" << std :: endl;
+    }
+    else if ( ! checkCommunication() )
     {
       std :: cerr << "Error in communication test for codim "
                   << cdim << "!" << std :: endl;
