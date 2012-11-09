@@ -177,7 +177,7 @@ namespace Dune
         // if this cast is valid we have either
         // a boundary or a ghost element
         // the ghost element case
-        if( parallel() && ghostCellsEnabled_ && bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
+        if( parallel() && bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
         {
           // if nonconformity occurs then go up one level
           if( bnd->level () != bnd->ghostLevel() )
@@ -187,16 +187,20 @@ namespace Dune
             outerElement_ = static_cast<const HasFaceType*> (bnd);
           }
 
-          // get ghost and internal number
-          GhostPairType p  = bnd->getGhost();
-          outerFaceNumber_ = p.second;
-
           // set boundary type to ghost boundary
           bndType_ = outerGhostBoundary ;
 
-          const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
-          assert( ghost );
-          outerTwist_ = ghost->twist(outerFaceNumber_);
+          // access ghost only when ghost cells are enabled
+          if( ghostCellsEnabled_ )
+          {
+            // get ghost and internal number
+            GhostPairType p  = bnd->getGhost();
+            outerFaceNumber_ = p.second;
+
+            const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
+            assert( ghost );
+            outerTwist_ = ghost->twist(outerFaceNumber_);
+          }
         }
         else // the normal boundary case
         {
