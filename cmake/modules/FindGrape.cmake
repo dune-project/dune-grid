@@ -15,9 +15,6 @@
 # add_dune_grape_flags( [OBJECT | SOURCE_ONLY] target1 ...)
 #   that sets all necessary flags needed for compilation and linking.
 #
-
-
-message(AUTHOR_WARNING "TODO: Test Grape test and macros")
 set(GRAPE_FOUND GRAPE_FOUND-NOTFOUND)
 
 function(add_dune_grape_flags)
@@ -44,52 +41,54 @@ function(add_dune_grape_flags)
   endif(GRAPE_FOUND)
 endfunction(add_dune_grape_flags)
 
-find_package(X11)
-find_package(OpenGL)
-set(GRAPE_PREFIX "/usr/local/grape/" CACHE FILEPATH "Prefix directory, where GRAPE is installed")
+find_package(X11 QUIET REQUIRED)
+find_package(OpenGL QUIET REQUIRED)
 
-if(X11_FOUND)
-   # find header in user supplied directory
-  find_path(GRAPE_INCLUDE_DIRS grape.h PATHS ${GRAPE_PREFIX}
-    DOC "Include directory with Grape header files" NO_DEFAULT_PATH)
-  find_path(GRAPE_INCLUDE_DIRS grape.h) #standard directories
+# find header in user supplied directory
+find_path(GRAPE_INCLUDE_DIR grape.h
+  PATHS ${GRAPE_PREFIX}
+  NO_DEFAULT_PATH
+  DOC "Include directory with Grape header files")
+find_path(GRAPE_INCLUDE_DIR grape.h
+  PATHS "/usr/local/grape/") #standard directories
 
-  # check header usability
-  include(CMakePushCheckState)
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DENABLE_GRAPE")
-  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${OPENGL_INCLUDE_DIR} ${GRAPE_INCLUDE_DIRS})
-  set(CMAKE_REQUIRED_LIBRARIES ${OPENGL_LIBRARIES} ${XEXT_LIB} ${CMAKE_REQUIRED_LIBRARIES})
-  check_include_files(grape.h _GRAPE_HEADER_USABLE)
+# check header usability
+include(CMakePushCheckState)
+cmake_push_check_state()
+set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DENABLE_GRAPE")
+set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${OPENGL_INCLUDE_DIR} ${GRAPE_INCLUDE_DIR})
+set(CMAKE_REQUIRED_LIBRARIES ${OPENGL_LIBRARIES} ${XEXT_LIBS} ${CMAKE_REQUIRED_LIBRARIES} dl m)
+check_include_files(grape.h _GRAPE_HEADER_USABLE)
 
-  # find library
-  find_library(GRAPE_LIBRARY NAMES grape
-    PATHS ${GRAPE_PREFIX} NO_DEFAULT_PATH
-    DOC "Full path to grape library.")
-  find_library(GRAPE_LIBRARY NAMES grape)
+# find library
+find_library(GRAPE_LIBRARY
+  NAMES gr
+  PATHS ${GRAPE_PREFIX}
+  NO_DEFAULT_PATH
+  DOC "Full path to grape library.")
+find_library(GRAPE_LIBRARY
+  NAMES gr
+  PATHS "/usr/local/grape/")
 
-  find_path(GRAPE_LIBRARY_PATH GRAPE_LIBRARY NO_DEFAULT_PATH)
+include(CheckLibraryExists)
+get_filename_component(GRAPE_LIBRARY_PATH ${GRAPE_LIBRARY} PATH)
+check_library_exists(gr grape ${GRAPE_LIBRARY_PATH} _GRAPE_LIB_FUNCTIONAL)
+cmake_pop_check_state()
 
-  include(CheckLibraryExists)
-  check_library_exists(gr grape GRAPE_PREFIX _GRAPE_LIB_FUNCTIONAL)
-  cmake_pop_check_state()
-
-  if(_GRAPE_LIB_FUNCTIONAL)
-    set(GRAPE_LIBRARIES ${GRAPE_LIBRARY} ${OPENGL_LIBRARIES} ${XEXT_LIB})
-  endif(_GRAPE_LIB_FUNCTIONAL)
-else(X11_FOUND)
-  message(WARNING "[X libraries were not found and therefore not Grape check possible!")
-endif(X11_FOUND)
+if(_GRAPE_LIB_FUNCTIONAL)
+  set(GRAPE_INCLUDE_DIRS ${GRAPE_INCLUDE_DIR})
+  set(GRAPE_LIBRARIES ${GRAPE_LIBRARY} ${OPENGL_LIBRARIES} ${XEXT_LIB} dl m)
+endif(_GRAPE_LIB_FUNCTIONAL)
 
 # behave like a CMake module is supposed to behave
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-  "GRAPE"
+  "Grape"
   DEFAULT_MSG
-  GRAPE_INCLUDE_DIRS
-  GRAPE_LIBRARIES
+  GRAPE_INCLUDE_DIR
+  GRAPE_LIBRARY
   _GRAPE_LIB_FUNCTIONAL
   _GRAPE_HEADER_USABLE
 )
 set(HAVE_GRAPE ${GRAPE_FOUND})
-mark_as_advanced(GRAPE_INCLUDE_DIRS GRAPE_LIBRARIES)
+mark_as_advanced(GRAPE_INCLUDE_DIR GRAPE_LIBRARY _GRAPE_LIB_FUNCTIONAL _GRAPE_HEADER_USABLE)
