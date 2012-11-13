@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_YASPGRIDINDEXSETS_HH
-#define DUNE_GRID_YASPGRIDINDEXSETS_HH
+#ifndef DUNE_GRID_YASPGRIDINDEXSET_HH
+#define DUNE_GRID_YASPGRIDINDEXSET_HH
 
 /** \file
  *
@@ -12,10 +12,10 @@
 namespace Dune {
 
   template<class GridImp>
-  class YaspLevelIndexSet
-    : public IndexSet< GridImp, YaspLevelIndexSet< GridImp >, unsigned int >
+  class YaspIndexSet
+    : public IndexSet< GridImp, YaspIndexSet< GridImp >, unsigned int >
   {
-    typedef YaspLevelIndexSet< GridImp > This;
+    typedef YaspIndexSet< GridImp > This;
     typedef IndexSet< GridImp, This, unsigned int > Base;
 
   public:
@@ -24,7 +24,7 @@ namespace Dune {
     using Base::subIndex;
 
     //! constructor stores reference to a grid and level
-    YaspLevelIndexSet ( const GridImp &g, int l )
+    YaspIndexSet ( const GridImp &g, int l )
       : grid( g ),
         level( l )
     {
@@ -86,4 +86,4 @@ namespace Dune {
 
 }   // namespace Dune
 
-#endif  // DUNE_GRID_YASPGRIDINDEXSETS_HH
+#endif  // DUNE_GRID_YASPGRIDINDEXSET_HH

@@ -69,7 +69,7 @@ namespace Dune {
   template<class GridImp>            class YaspIntersectionIterator;
   template<class GridImp>            class YaspIntersection;
   template<class GridImp>            class YaspHierarchicIterator;
-  template<class GridImp>            class YaspLevelIndexSet;
+  template<class GridImp>            class YaspIndexSet;
   template<class GridImp>            class YaspLeafIndexSet;
   template<class GridImp>            class YaspGlobalIdSet;
 
@@ -930,8 +930,8 @@ namespace Dune {
         YaspIntersectionIterator,              // level intersection iter
         YaspHierarchicIterator,
         YaspLevelIterator,
-        YaspLevelIndexSet< const YaspGrid< dim > >,
-        YaspLevelIndexSet< const YaspGrid< dim > >,
+        YaspIndexSet< const YaspGrid< dim > >,                  // level index set
+        YaspIndexSet< const YaspGrid< dim > >,                  // leaf index set
         YaspGlobalIdSet<const YaspGrid<dim> >,
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
         YaspGlobalIdSet<const YaspGrid<dim> >,
@@ -1003,7 +1003,7 @@ namespace Dune {
     void init()
     {
       setsizes();
-      indexsets.push_back( make_shared< YaspLevelIndexSet<const YaspGrid<dim> > >(*this,0) );
+      indexsets.push_back( make_shared< YaspIndexSet<const YaspGrid<dim> > >(*this,0) );
       theglobalidset  = make_shared< YaspGlobalIdSet<const YaspGrid<dim> > >(*this);
       boundarysegmentssize();
     }
@@ -1054,8 +1054,8 @@ namespace Dune {
     typedef typename YaspGridFamily<dim,dim>::Traits Traits;
 
     // need for friend declarations in entity
-    typedef YaspLevelIndexSet<YaspGrid<dim> > LevelIndexSetType;
-    typedef YaspLeafIndexSet<YaspGrid<dim> > LeafIndexSetType;
+    typedef YaspIndexSet<YaspGrid<dim> > LevelIndexSetType;
+    typedef YaspIndexSet<YaspGrid<dim> > LeafIndexSetType;
     typedef YaspGlobalIdSet<YaspGrid<dim> > GlobalIdSetType;
 
     //! maximum number of levels allowed
@@ -1147,7 +1147,7 @@ namespace Dune {
       {
         MultiYGrid<dim,ctype>::refine(keep_ovlp);
         setsizes();
-        indexsets.push_back( make_shared<YaspLevelIndexSet<const YaspGrid<dim> > >(*this,maxLevel()) );
+        indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim> > >(*this,maxLevel()) );
       }
     }
 
@@ -1692,13 +1692,12 @@ namespace Dune {
     CollectiveCommunication<YaspGrid> ccobj;
 #endif
 
-    std::vector< shared_ptr< YaspLevelIndexSet<const YaspGrid<dim> > > > indexsets;
+    std::vector< shared_ptr< YaspIndexSet<const YaspGrid<dim> > > > indexsets;
     shared_ptr< YaspGlobalIdSet<const YaspGrid<dim> > > theglobalidset;
     int nBSegments;
 
     // Index classes need access to the real entity
-    friend class Dune::YaspLevelIndexSet<const Dune::YaspGrid<dim> >;
-    friend class Dune::YaspLeafIndexSet<const Dune::YaspGrid<dim> >;
+    friend class Dune::YaspIndexSet<const Dune::YaspGrid<dim> >;
     friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim> >;
 
     friend class Dune::YaspIntersectionIterator<const Dune::YaspGrid<dim> >;

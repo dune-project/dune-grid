@@ -92,8 +92,7 @@ namespace Dune {
     }
 
     // IndexSets needs access to the private index methods
-    friend class Dune::YaspLevelIndexSet<GridImp>;
-    friend class Dune::YaspLeafIndexSet<GridImp>;
+    friend class Dune::YaspIndexSet<GridImp>;
     friend class Dune::YaspGlobalIdSet<GridImp>;
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
@@ -373,7 +372,7 @@ namespace Dune {
 
   private:
     // IndexSets needs access to the private index methods
-    friend class Dune::YaspLevelIndexSet<GridImp>;
+    friend class Dune::YaspIndexSet<GridImp>;
     friend class Dune::YaspLeafIndexSet<GridImp>;
     friend class Dune::YaspGlobalIdSet<GridImp>;
 
@@ -847,7 +846,7 @@ namespace Dune {
 
   private:
     // IndexSets needs access to the private index methods
-    friend class Dune::YaspLevelIndexSet<GridImp>;
+    friend class Dune::YaspIndexSet<GridImp>;
     friend class Dune::YaspLeafIndexSet<GridImp>;
     friend class Dune::YaspGlobalIdSet<GridImp>;
 
