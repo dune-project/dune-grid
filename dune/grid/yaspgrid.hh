@@ -951,7 +951,6 @@ namespace Dune {
     {
       setsizes();
       indexsets.push_back( make_shared< YaspIndexSet<const YaspGrid<dim> > >(*this,0) );
-      theglobalidset  = make_shared< YaspGlobalIdSet<const YaspGrid<dim> > >();
       boundarysegmentssize();
     }
 
@@ -1584,12 +1583,12 @@ namespace Dune {
     // The new index sets from DDM 11.07.2005
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
-      return *theglobalidset;
+      return theglobalidset;
     }
 
     const typename Traits::LocalIdSet& localIdSet() const
     {
-      return *theglobalidset;
+      return theglobalidset;
     }
 
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
@@ -1640,7 +1639,7 @@ namespace Dune {
 #endif
 
     std::vector< shared_ptr< YaspIndexSet<const YaspGrid<dim> > > > indexsets;
-    shared_ptr< YaspGlobalIdSet<const YaspGrid<dim> > > theglobalidset;
+    YaspGlobalIdSet<const YaspGrid<dim> > theglobalidset;
     int nBSegments;
 
     // Index classes need access to the real entity
