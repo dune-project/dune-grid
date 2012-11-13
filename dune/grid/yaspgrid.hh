@@ -910,7 +910,7 @@ namespace Dune {
   };
 
 
-  template<int dim, int dimworld>
+  template<int dim>
   struct YaspGridFamily
   {
 #if HAVE_MPI
@@ -919,7 +919,9 @@ namespace Dune {
     typedef CollectiveCommunication<Dune::YaspGrid<dim> > CCType;
 #endif
 
-    typedef GridTraits<dim,dimworld,Dune::YaspGrid<dim>,
+    typedef GridTraits<dim,                                     // dimension of the grid
+        dim,                                                    // dimension of the world space
+        Dune::YaspGrid<dim>,
         YaspGeometry,YaspEntity,
         YaspEntityPointer,
         YaspLevelIterator,                                      // type used for the level iterator
@@ -994,7 +996,7 @@ namespace Dune {
    */
   template<int dim>
   class YaspGrid :
-    public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim,dim> >,
+    public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim> >,
     public MultiYGrid<dim,yaspgrid_ctype>
   {
     typedef const YaspGrid<dim> GridImp;
@@ -1048,9 +1050,9 @@ namespace Dune {
     typedef bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits> PersistentIndexType;
 
     //! the GridFamily of this grid
-    typedef YaspGridFamily<dim,dim> GridFamily;
+    typedef YaspGridFamily<dim> GridFamily;
     // the Traits
-    typedef typename YaspGridFamily<dim,dim>::Traits Traits;
+    typedef typename YaspGridFamily<dim>::Traits Traits;
 
     // need for friend declarations in entity
     typedef YaspIndexSet<YaspGrid<dim> > LevelIndexSetType;
