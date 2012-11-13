@@ -570,7 +570,6 @@ namespace Dune {
     typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef YaspSpecialEntity<0,dim,GridImp> SpecialEntity;
 
     //! define type used for coordinates in grid module
     typedef typename YGrid<dim,ctype>::iTupel iTupel;
