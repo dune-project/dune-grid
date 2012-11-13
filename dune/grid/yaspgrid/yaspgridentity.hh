@@ -14,37 +14,11 @@
  */
 //========================================================================
 
+
+
+
 namespace Dune {
 
-  template<int codim, int dim, class GridImp>
-  class YaspSpecialEntity :
-    public GridImp::template Codim<codim>::Entity
-  {
-  public:
-    typedef typename GridImp::ctype ctype;
-
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
-
-    YaspSpecialEntity(const GridImp* yg, const YGLI& g, const TSI& it) :
-      GridImp::template Codim<codim>::Entity (YaspEntity<codim, dim, GridImp>(yg,g,it))
-    {}
-    YaspSpecialEntity(const YaspEntity<codim, dim, GridImp>& e) :
-      GridImp::template Codim<codim>::Entity (e)
-    {}
-    const TSI& transformingsubiterator () const
-    {
-      return this->realEntity.transformingsubiterator();
-    }
-    const YGLI& gridlevel () const
-    {
-      return this->realEntity.gridlevel();
-    }
-    const GridImp * yaspgrid() const
-    {
-      return this->realEntity.yaspgrid();
-    }
-  };
 
   template<int codim, int dim, class GridImp>
   class YaspEntity
