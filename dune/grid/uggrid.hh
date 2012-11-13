@@ -127,10 +127,10 @@ namespace Dune {
   };
 #endif // ModelP
 
-  template<int dim, int dimworld>
+  template<int dim>
   struct UGGridFamily
   {
-    typedef GridTraits<dim,dimworld,Dune::UGGrid<dim>,
+    typedef GridTraits<dim,dim,Dune::UGGrid<dim>,
         UGGridGeometry,
         UGGridEntity,
         UGGridEntityPointer,
@@ -200,9 +200,9 @@ namespace Dune {
    */
   template< int dim >
   class UGGrid
-    : public GridDefaultImplementation< dim, dim, double, UGGridFamily< dim, dim > >
+    : public GridDefaultImplementation< dim, dim, double, UGGridFamily< dim > >
   {
-    typedef GridDefaultImplementation< dim, dim, double, UGGridFamily< dim, dim > > Base;
+    typedef GridDefaultImplementation< dim, dim, double, UGGridFamily< dim > > Base;
 
     friend class UGGridGeometry<0,dim,const UGGrid<dim> >;
     friend class UGGridGeometry<dim,dim,const UGGrid<dim> >;
@@ -247,10 +247,10 @@ namespace Dune {
     //**********************************************************
   public:
     //! type of the used GridFamily for this grid
-    typedef UGGridFamily<dim,dim>  GridFamily;
+    typedef UGGridFamily<dim>  GridFamily;
 
     // the Traits
-    typedef typename UGGridFamily<dim,dim>::Traits Traits;
+    typedef typename UGGridFamily<dim>::Traits Traits;
 
     //! The type used to store coordinates
     typedef UG::DOUBLE ctype;

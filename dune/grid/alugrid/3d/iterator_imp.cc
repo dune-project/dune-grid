@@ -292,19 +292,6 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline bool ALU3dGridIntersectionIterator<GridImp>::levelNeighbor () const
-  {
-    return false;
-  }
-
-  template<class GridImp>
-  inline bool ALU3dGridIntersectionIterator<GridImp>::leafNeighbor () const
-  {
-    return neighbor();
-  }
-
-
-  template<class GridImp>
   inline int
   ALU3dGridIntersectionIterator< GridImp >::indexInInside () const
   {
@@ -617,21 +604,8 @@ namespace Dune {
   template<class GridImp>
   inline bool ALU3dGridLevelIntersectionIterator<GridImp>::neighbor () const
   {
-    return levelNeighbor();
+    return levelNeighbor_ && (BaseType :: neighbor());
   }
-
-  template<class GridImp>
-  inline bool ALU3dGridLevelIntersectionIterator<GridImp>::levelNeighbor () const
-  {
-    return levelNeighbor_ && (! boundary());
-  }
-
-  template<class GridImp>
-  inline bool ALU3dGridLevelIntersectionIterator<GridImp>::leafNeighbor () const
-  {
-    return false;
-  }
-
 
   template <class GridImp>
   inline void ALU3dGridLevelIntersectionIterator<GridImp>::
