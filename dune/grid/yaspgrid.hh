@@ -702,10 +702,6 @@ namespace Dune {
      YaspEntityPointer serves as a Reference or Pointer to a YaspGrid::Entity.
      It can also be initialized from Yasp::LevelIterator, Yasp::LeafIterator,
      Yasp::HierarchicIterator and Yasp::IntersectionIterator.
-
-     We have specializations for codim==0 (elements) and
-     codim=dim (vertices).
-     The general version throws a GridError.
    */
   //========================================================================
   template<int codim, class GridImp>
