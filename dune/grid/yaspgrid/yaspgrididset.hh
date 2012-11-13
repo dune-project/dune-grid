@@ -29,9 +29,8 @@ namespace Dune {
 
     using IdSet<GridImp, This, IdType>::subId;
 
-    //! constructor stores reference to a grid
-    explicit YaspGlobalIdSet ( const GridImp &g )
-      : grid( g )
+    //! Only default-constructible
+    YaspGlobalIdSet()
     {}
 
     //! get id of an entity
@@ -42,7 +41,7 @@ namespace Dune {
     template<int cd>
     IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid.getRealImplementation(e).persistentIndex();
+      return GridImp::getRealImplementation(e).persistentIndex();
     }
 
     //! get id of subentity
@@ -53,11 +52,9 @@ namespace Dune {
     IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
                   int i, unsigned int codim ) const
     {
-      return grid.getRealImplementation(e).subPersistentIndex(i,codim);
+      return GridImp::getRealImplementation(e).subPersistentIndex(i,codim);
     }
 
-  private:
-    const GridImp& grid;
   };
 
 } // namespace Dune

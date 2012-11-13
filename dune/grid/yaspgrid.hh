@@ -951,7 +951,7 @@ namespace Dune {
     {
       setsizes();
       indexsets.push_back( make_shared< YaspIndexSet<const YaspGrid<dim> > >(*this,0) );
-      theglobalidset  = make_shared< YaspGlobalIdSet<const YaspGrid<dim> > >(*this);
+      theglobalidset  = make_shared< YaspGlobalIdSet<const YaspGrid<dim> > >();
       boundarysegmentssize();
     }
 
