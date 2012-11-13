@@ -70,7 +70,6 @@ namespace Dune {
   template<class GridImp>            class YaspIntersection;
   template<class GridImp>            class YaspHierarchicIterator;
   template<class GridImp>            class YaspIndexSet;
-  template<class GridImp>            class YaspLeafIndexSet;
   template<class GridImp>            class YaspGlobalIdSet;
 
   namespace FacadeOptions
