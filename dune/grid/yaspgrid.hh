@@ -931,7 +931,7 @@ namespace Dune {
         YaspHierarchicIterator,
         YaspLevelIterator,
         YaspLevelIndexSet< const YaspGrid< dim > >,
-        YaspLeafIndexSet< const YaspGrid< dim > >,
+        YaspLevelIndexSet< const YaspGrid< dim > >,
         YaspGlobalIdSet<const YaspGrid<dim> >,
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
         YaspGlobalIdSet<const YaspGrid<dim> >,
@@ -1004,7 +1004,6 @@ namespace Dune {
     {
       setsizes();
       indexsets.push_back( make_shared< YaspLevelIndexSet<const YaspGrid<dim> > >(*this,0) );
-      theleafindexset = make_shared< YaspLeafIndexSet<const YaspGrid<dim> > > (*this);
       theglobalidset  = make_shared< YaspGlobalIdSet<const YaspGrid<dim> > >(*this);
       boundarysegmentssize();
     }
@@ -1654,7 +1653,7 @@ namespace Dune {
 
     const typename Traits::LeafIndexSet& leafIndexSet() const
     {
-      return *theleafindexset;
+      return *indexsets.back();
     }
 
 #if HAVE_MPI
@@ -1694,7 +1693,6 @@ namespace Dune {
 #endif
 
     std::vector< shared_ptr< YaspLevelIndexSet<const YaspGrid<dim> > > > indexsets;
-    shared_ptr< YaspLeafIndexSet<const YaspGrid<dim> > > theleafindexset;
     shared_ptr< YaspGlobalIdSet<const YaspGrid<dim> > > theglobalidset;
     int nBSegments;
 
