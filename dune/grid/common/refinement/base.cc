@@ -40,34 +40,34 @@ namespace Dune {
 #ifdef DOXYGEN
     // This is just for Doxygen
     /*!
-       @brief Mapping from geometryType, CoordType and coerceTo to a
-              particular @ref Refinement implementation.
-
-       @tparam topologyId The topology id of the element to refine
-       @tparam CoordType  The C++ type of the coordinates
-       @tparam coerceToId The topologyId of the subelements
-       @tparam dimension  The dimension of the refinement.
-       @tparam Dummy      Dummy parameter which can be used for SFINAE, should
-                          always be void.
-
-       Each @ref Refinement implementation has to define one or more
-       specialisations of this struct to declare what it implements.
-       Template class Refinement uses this struct to know which
-       implementation it should inherit from.  Since non-type template
-       arguments of specializations may not involve template parameters, it is
-       often impossible to specify the specialization for all cases directly.
-       As the workaround, the template parameter \c Dummy can be used for
-       SFINAE with \ref enable_if.
-
-       Each specialisation should contain a single member typedef Imp,
-       e.g.:
-       @code
-       template<class CoordType>
-       struct Traits<sphereTopologyId, CoordType, GenericGeometry::CubeToplogy<2>::id, 2>
-       {
-       typedef SquaringTheCircle::Refinement Imp;
-       };
-       @endcode
+     * @brief Mapping from geometryType, CoordType and coerceTo to a
+     *        particular @ref Refinement implementation.
+     *
+     * @tparam topologyId The topology id of the element to refine
+     * @tparam CoordType  The C++ type of the coordinates
+     * @tparam coerceToId The topologyId of the subelements
+     * @tparam dimension  The dimension of the refinement.
+     * @tparam Dummy      Dummy parameter which can be used for SFINAE, should
+     *                    always be void.
+     *
+     * Each @ref Refinement implementation has to define one or more
+     * specialisations of this struct to declare what it implements.
+     * Template class Refinement uses this struct to know which
+     * implementation it should inherit from.  Since non-type template
+     * arguments of specializations may not involve template parameters, it is
+     * often impossible to specify the specialization for all cases directly.
+     * As the workaround, the template parameter \c Dummy can be used for
+     * SFINAE with \ref enable_if.
+     *
+     * Each specialisation should contain a single member typedef Imp,
+     * e.g.:
+     * @code
+     * template<class CoordType>
+     * struct Traits<sphereTopologyId, CoordType, GenericGeometry::CubeToplogy<2>::id, 2>
+     * {
+     *   typedef SquaringTheCircle::Refinement Imp;
+     * };
+     * @endcode
      */
     template<unsigned topologyId, class CoordType,
         unsigned coerceToId, int dimension, class Dummy = void>
