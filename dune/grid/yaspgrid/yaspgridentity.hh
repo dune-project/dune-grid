@@ -279,19 +279,13 @@ namespace Dune {
      */
     LocalGeometry geometryInFather () const
     {
-      // determine which son we are
-      int son = 0;
-      for (int k=0; k<dim; k++)
-        if (_it.coord(k)%2)
-          son += (1<<k);
-
+      // configure one of the 2^dim transformations
       FieldVector<yaspgrid_ctype,dim> midpoint;
       FieldVector<yaspgrid_ctype,dim> extension(0.5);
 
       for (int k=0; k<dim; k++)
-        midpoint[k] = (son&(1<<k)) ? 0.75 : 0.25;
+        midpoint[k] = (_it.coord(k)%2) ? 0.75 : 0.25;
 
-      // configure one of the 2^dim transformations
       return LocalGeometry( YaspGeometry<dim,dim,GridImp>(midpoint,extension) );
     }
 
