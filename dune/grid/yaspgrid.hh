@@ -89,33 +89,6 @@ namespace Dune {
 
   }
 
-  //========================================================================
-  // The transformation describing the refinement rule
-
-  template<int dim, class GridImp>
-  struct YaspFatherRelativeLocalElement {
-    static const array<YaspGeometry<dim,dim,GridImp>, (1<<dim) > _geo;
-    static array<YaspGeometry<dim,dim,GridImp>, (1<<dim) > initSons()
-    {
-      array<YaspGeometry<dim,dim,GridImp>, (1<<dim) > geo;
-      FieldVector<yaspgrid_ctype,dim> midpoint(0.25);
-      FieldVector<yaspgrid_ctype,dim> extension(0.5);
-      for (int i=0; i<(1<<dim); i++)
-      {
-        for (int k=0; k<dim; k++)
-          midpoint[k] = (i&(1<<k)) ? 0.75 : 0.25;
-
-        geo[i] = YaspGeometry<dim,dim,GridImp>(midpoint, extension);
-      }
-      return geo;
-    }
-  };
-
-  template<int dim, class GridImp>
-  const array<YaspGeometry<dim,dim,GridImp>, (1<<dim)>
-  YaspFatherRelativeLocalElement<dim, GridImp>::_geo =
-    YaspFatherRelativeLocalElement<dim, GridImp>::initSons();
-
 } // namespace Dune
 
 #include <dune/grid/yaspgrid/yaspgridgeometry.hh>

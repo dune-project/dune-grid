@@ -285,8 +285,14 @@ namespace Dune {
         if (_it.coord(k)%2)
           son += (1<<k);
 
+      FieldVector<yaspgrid_ctype,dim> midpoint;
+      FieldVector<yaspgrid_ctype,dim> extension(0.5);
+
+      for (int k=0; k<dim; k++)
+        midpoint[k] = (son&(1<<k)) ? 0.75 : 0.25;
+
       // configure one of the 2^dim transformations
-      return LocalGeometry( YaspFatherRelativeLocalElement<dim,GridImp>::_geo[son] );
+      return LocalGeometry( YaspGeometry<dim,dim,GridImp>(midpoint,extension) );
     }
 
     const TSI& transformingsubiterator () const
