@@ -102,12 +102,9 @@ namespace Dune {
       FieldVector<yaspgrid_ctype,dim> extension(0.5);
       for (int i=0; i<(1<<dim); i++)
       {
-        midpoint = 0.25;
         for (int k=0; k<dim; k++)
-        {
-          if (i&(1<<k))
-            midpoint[k] = 0.75;
-        }
+          midpoint[k] = (i&(1<<k)) ? 0.75 : 0.25;
+
         geo[i] = YaspGeometry<dim,dim,GridImp>(midpoint, extension);
       }
       return geo;
