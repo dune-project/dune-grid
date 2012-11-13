@@ -1529,17 +1529,6 @@ namespace Dune {
 #endif
     }
 
-    //! global sum
-    double global_sum (double x) const
-    {
-      if (_procs==1) return x;
-      double res = 0.0;
-#if HAVE_MPI
-      MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_SUM,_comm);
-#endif
-      return res;
-    }
-
     //! global max
     double global_max (double x) const
     {
@@ -1551,19 +1540,6 @@ namespace Dune {
 #endif
       return res;
     }
-
-    //! global min
-    double global_min (double x) const
-    {
-      double res = 0.0;
-
-      if (_procs==1) return x;
-#if HAVE_MPI
-      MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_MIN,_comm);
-#endif
-      return res;
-    }
-
 
     //! print contents of torus object
     void print (std::ostream& s) const
