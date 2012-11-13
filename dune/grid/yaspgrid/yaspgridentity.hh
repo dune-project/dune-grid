@@ -280,8 +280,8 @@ namespace Dune {
     LocalGeometry geometryInFather () const
     {
       // configure one of the 2^dim transformations
-      FieldVector<yaspgrid_ctype,dim> midpoint;
-      FieldVector<yaspgrid_ctype,dim> extension(0.5);
+      FieldVector<ctype,dim> midpoint;
+      FieldVector<ctype,dim> extension(0.5);
 
       for (int k=0; k<dim; k++)
         midpoint[k] = (_it.coord(k)%2) ? 0.75 : 0.25;
