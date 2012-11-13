@@ -4,6 +4,7 @@ yaspgriddir = $(includedir)/dune/grid/yaspgrid/
 yaspgrid_HEADERS = grids.hh \
                    yaspgridentity.hh \
                    yaspgridgeometry.hh \
+                   yaspgrididset.hh \
                    yaspgridindexsets.hh
 
 EXTRA_DIST = grid.fig grid.eps grid.png subgrid.fig subgrid.eps subgrid.png
