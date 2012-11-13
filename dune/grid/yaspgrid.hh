@@ -19,6 +19,7 @@ typedef unsigned char uint8_t;
 #include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
 #include <dune/grid/common/capabilities.hh> // the capabilities
 #include <dune/common/misc.hh>
+#include <dune/common/shared_ptr.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
@@ -1003,7 +1004,7 @@ namespace Dune {
     {
       setsizes();
       indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,0) );
-      theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim> >(*this) );
+      theleafindexset = make_shared< YaspLeafIndexSet<const YaspGrid<dim> > > (*this);
       theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim> >(*this) );
       boundarysegmentssize();
     }
@@ -1123,7 +1124,6 @@ namespace Dune {
     ~YaspGrid()
     {
       deallocatePointers(indexsets);
-      deallocatePointers(theleafindexset);
       deallocatePointers(theglobalidset);
     }
 
@@ -1660,7 +1660,7 @@ namespace Dune {
 
     const typename Traits::LeafIndexSet& leafIndexSet() const
     {
-      return *(theleafindexset[0]);
+      return *theleafindexset;
     }
 
 #if HAVE_MPI
@@ -1700,7 +1700,7 @@ namespace Dune {
 #endif
 
     std::vector<YaspLevelIndexSet<const YaspGrid<dim> >*> indexsets;
-    std::vector<YaspLeafIndexSet<const YaspGrid<dim> >*> theleafindexset;
+    shared_ptr< YaspLeafIndexSet<const YaspGrid<dim> > > theleafindexset;
     std::vector<YaspGlobalIdSet<const YaspGrid<dim> >*> theglobalidset;
     int nBSegments;
 
