@@ -1003,8 +1003,7 @@ namespace Dune {
 
   private:
     const GridImp& grid;
-    enum { ncodim = remove_const<GridImp>::type::dimension+1 };
-    std::vector<GeometryType> mytypes[ncodim];
+    std::vector<GeometryType> mytypes[GridImp::dimension+1];
   };
 
 
