@@ -1003,9 +1003,9 @@ namespace Dune {
     void init()
     {
       setsizes();
-      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,0) );
+      indexsets.push_back( make_shared< YaspLevelIndexSet<const YaspGrid<dim> > >(*this,0) );
       theleafindexset = make_shared< YaspLeafIndexSet<const YaspGrid<dim> > > (*this);
-      theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim> >(*this) );
+      theglobalidset  = make_shared< YaspGlobalIdSet<const YaspGrid<dim> > >(*this);
       boundarysegmentssize();
     }
 
@@ -1121,12 +1121,6 @@ namespace Dune {
       init();
     }
 
-    ~YaspGrid()
-    {
-      deallocatePointers(indexsets);
-      deallocatePointers(theglobalidset);
-    }
-
   private:
     // do not copy this class
     YaspGrid(const YaspGrid&);
@@ -1154,7 +1148,7 @@ namespace Dune {
       {
         MultiYGrid<dim,ctype>::refine(keep_ovlp);
         setsizes();
-        indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,maxLevel()) );
+        indexsets.push_back( make_shared<YaspLevelIndexSet<const YaspGrid<dim> > >(*this,maxLevel()) );
       }
     }
 
@@ -1644,12 +1638,12 @@ namespace Dune {
     // The new index sets from DDM 11.07.2005
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
-      return *(theglobalidset[0]);
+      return *theglobalidset;
     }
 
     const typename Traits::LocalIdSet& localIdSet() const
     {
-      return *(theglobalidset[0]);
+      return *theglobalidset;
     }
 
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
@@ -1699,9 +1693,9 @@ namespace Dune {
     CollectiveCommunication<YaspGrid> ccobj;
 #endif
 
-    std::vector<YaspLevelIndexSet<const YaspGrid<dim> >*> indexsets;
+    std::vector< shared_ptr< YaspLevelIndexSet<const YaspGrid<dim> > > > indexsets;
     shared_ptr< YaspLeafIndexSet<const YaspGrid<dim> > > theleafindexset;
-    std::vector<YaspGlobalIdSet<const YaspGrid<dim> >*> theglobalidset;
+    shared_ptr< YaspGlobalIdSet<const YaspGrid<dim> > > theglobalidset;
     int nBSegments;
 
     // Index classes need access to the real entity
@@ -1712,15 +1706,6 @@ namespace Dune {
     friend class Dune::YaspIntersectionIterator<const Dune::YaspGrid<dim> >;
     friend class Dune::YaspIntersection<const Dune::YaspGrid<dim> >;
     friend class Dune::YaspEntity<0, dim, const Dune::YaspGrid<dim> >;
-
-    template<class T>
-    void deallocatePointers(T& container)
-    {
-      typedef typename T::iterator Iterator;
-
-      for(Iterator entry=container.begin(); entry != container.end(); ++entry)
-        delete (*entry);
-    }
 
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;
