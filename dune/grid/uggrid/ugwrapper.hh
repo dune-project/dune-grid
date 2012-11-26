@@ -86,7 +86,7 @@ namespace Dune {
 #ifdef ModelP
     typedef UG_NAMESPACE::DDD_GID UG_ID_TYPE;
 #else
-    typedef UG_NAMESPACE::INT UG_ID_TYPE;
+    typedef UG::INT UG_ID_TYPE;
 #endif
 
 #ifdef ModelP
