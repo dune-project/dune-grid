@@ -8,6 +8,7 @@
 
 #include <dune/common/stdstreams.hh>
 #include <dune/common/bigunsignedint.hh>
+#include <dune/common/hash.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
@@ -146,6 +147,21 @@ namespace Dune
     {
       out << "[" << this->_a << "," << this->_b << "," << this->_c << "," << this->_d << "]";
     }
+
+#ifdef HAVE_DUNE_HASH
+
+    inline friend std::size_t hash_value(const ALUMacroKey& arg)
+    {
+      std::size_t seed = 0;
+      hash_combine(seed,arg._a);
+      hash_combine(seed,arg._b);
+      hash_combine(seed,arg._c);
+      hash_combine(seed,arg._d);
+      return seed;
+    }
+
+#endif // HAVE_DUNE_HASH
+
   };
 
   template <class MacroKeyImp>
@@ -154,6 +170,7 @@ namespace Dune
     MacroKeyImp key_;
     int nChild_;
     int codim_;
+
   public:
     ALUGridId() : key_()
                   , nChild_(-1)
@@ -231,6 +248,18 @@ namespace Dune
       out << "(" << getKey() << "," << nChild_ << "," << codim_ << ")";
     }
 
+#ifdef HAVE_DUNE_HASH
+
+    inline friend std::size_t hash_value(const ALUGridId& arg)
+    {
+      std::size_t seed = hash<MacroKeyImp>() (arg.getKey());
+      hash_combine(seed,arg.nChild());
+      hash_combine(seed,arg.codim());
+      return seed;
+    }
+
+#endif // HAVE_DUNE_HASH
+
   protected:
     // returns true is the id is lesser then org
     bool lesser(const ALUGridId & org) const
@@ -257,6 +286,13 @@ namespace Dune
                && (codim_ == org.codim_) );
     }
   };
+
+} // drop out of namespace Dune, as hash definitions have to be done in global namespace
+
+DUNE_DEFINE_HASH(DUNE_HASH_TEMPLATE_ARGS(),DUNE_HASH_TYPE(Dune::ALUMacroKey))
+DUNE_DEFINE_HASH(DUNE_HASH_TEMPLATE_ARGS(typename MacroKeyImp),DUNE_HASH_TYPE(Dune::ALUGridId<MacroKeyImp>))
+
+namespace Dune {
 
   inline std::ostream& operator<< (std::ostream& s, const ALUMacroKey & key)
   {

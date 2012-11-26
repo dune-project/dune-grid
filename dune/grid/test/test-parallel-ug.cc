@@ -302,7 +302,7 @@ void checkMappers(const GridView &gridView)
                << ": Number of codim " << codim
                << " entities is inconsistent (iterator: " << numEntities
                << " grid view: " << gridView.size(codim) << ")");
-  };
+  }
 
   typedef Dune::MultipleCodimMultipleGeomTypeMapper
   <GridView, LayoutWrapper<codim>::template Layout> MapperType;
@@ -320,7 +320,7 @@ void checkMappers(const GridView &gridView)
                  << " entities: " << i
                  << " should be in range [0,"
                  << numEntities -1 <<  "]");
-    };
+    }
     if (indices[i] >= 0) {
       DUNE_THROW(InvalidStateException,
                  gridView.comm().rank() + 1
@@ -328,8 +328,8 @@ void checkMappers(const GridView &gridView)
                  << " entities.");
     }
     indices[i] = i;
-  };
-};
+  }
+}
 
 // specializations for non-implemented cases
 template <int dim, int codim, class GridView>
@@ -391,7 +391,7 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
   for (; it != endIt; ++it) {
     entityIndex[mapper.map(*it)]   = mapper.map(*it);
     partitionType[mapper.map(*it)] = it->partitionType();
-  };
+  }
 
   // initialize data handle (marks the nodes where some data was
   // send or received)
@@ -671,7 +671,7 @@ void testParallelUG(bool localRefinement)
   if (dim == 3)
     EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(grid->leafView());
 
-};
+}
 
 int main (int argc , char **argv) try
 {
