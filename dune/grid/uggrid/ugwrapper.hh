@@ -82,6 +82,13 @@ namespace Dune {
     template <int codim>
     class Entity;
 
+    // Type used for local and global ids
+#ifdef ModelP
+    typedef UG_NAMESPACE::DDD_GID UG_ID_TYPE;
+#else
+    typedef UG_NAMESPACE::INT UG_ID_TYPE;
+#endif
+
 #ifdef ModelP
     /* DDD Interfaces */
     typedef UG_NAMESPACE::DDD_IF_DIR DDD_IF_DIR;

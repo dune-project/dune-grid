@@ -324,7 +324,7 @@ namespace Dune {
      class implements them both at once.
    */
   template <class GridImp>
-  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp>,unsigned int>
+  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp>,typename UG_NS<GridImp::dimension>::UG_ID_TYPE>
   {
     enum {dim = remove_const<GridImp>::type::dimension};
 
@@ -390,7 +390,7 @@ namespace Dune {
        bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
     template<int cd>
-    unsigned int id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    typename UG_NS<dim>::UG_ID_TYPE id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       if (cd==0) {
         // If we're asked for the id of an element, and that element is a copy of its father, then
@@ -437,9 +437,9 @@ namespace Dune {
        may be distributed across different processors.  This will lead to very-difficult-to-fix
        bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
-    unsigned int subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
-                        int i,
-                        unsigned int codim) const
+    typename UG_NS<dim>::UG_ID_TYPE subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
+                                           int i,
+                                           unsigned int codim) const
     {
       if (codim==0)
         return id<0>(e);
