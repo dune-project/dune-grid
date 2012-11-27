@@ -347,7 +347,7 @@ class CheckCommunication
 
     // check whether there is an overlap or ghost region of
     // cells for the current grid view.
-    if (size > 1 &&
+    if (size > 1 && cdim == 0 &&
         gridView_.overlapSize(0) == 0 &&
         gridView_.ghostSize(0) == 0)
     {
@@ -492,8 +492,7 @@ public:
 
     if( skipCheck )
     {
-      std :: cerr << "Test skiped because of empty set of overlap and ghosts "
-                  << cdim << "!" << std :: endl;
+      std :: cerr << "Codim " << cdim << ": Test skiped because of empty set of overlap and ghosts !" << std :: endl;
     }
     else if ( ! checkCommunication() )
     {
