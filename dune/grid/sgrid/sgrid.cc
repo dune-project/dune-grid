@@ -659,8 +659,8 @@ namespace Dune {
     }
 #endif
 
-    N = new array<int,dim>[MAXL];
-    h = new FieldVector<ctype, dim>[MAXL];
+    N.resize(MAXL);
+    h.resize(MAXL);
     mapper = new CubeMapper<dim>[MAXL];
 
     indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
@@ -761,8 +761,6 @@ namespace Dune {
     for (size_t i=0; i<indexsets.size(); i++)
       delete indexsets[i];
 
-    delete[] N;
-    delete[] h;
     delete[] mapper;
   }
 

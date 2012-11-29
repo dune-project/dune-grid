@@ -1858,8 +1858,8 @@ namespace Dune {
     int L;                        // number of levels in hierarchic mesh 0<=level<L
     FieldVector<ctype, dim> low;  // lower left corner of the grid
     FieldVector<ctype, dim> H;    // length of cube per direction
-    array<int,dim> *N;            // number of elements per direction
-    FieldVector<ctype, dim> *h;   // mesh size per direction
+    std::vector<array<int,dim> > N;            // number of elements per direction for each level
+    std::vector<FieldVector<ctype, dim> > h;   // mesh size per direction for each level
     mutable CubeMapper<dim> *mapper; // a mapper for each level
 
     // boundary segement index set
