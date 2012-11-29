@@ -1865,10 +1865,6 @@ namespace Dune {
     // boundary segement index set
     array<CubeMapper<dim-1>, dim> boundarymapper; // a mapper for each coarse grid face
     int boundarysize;
-
-    // faster implementation of subIndex
-    mutable array <int,dim> zrefStatic;   // for subIndex of SEntity
-    mutable array <int,dim> zentityStatic; // for subIndex of SEntity
   };
 
   namespace Capabilities
