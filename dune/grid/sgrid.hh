@@ -112,7 +112,7 @@ namespace Dune {
        Column dim is the position vector. This format allows a consistent
        treatment of all dimensions, including 0 (the vertex).
      */
-    void make (FieldMatrix<ctype,mydim+1,cdim>& __As);
+    void make (const FieldMatrix<ctype,mydim+1,cdim>& __As);
 
     //! constructor
     SGeometry ()

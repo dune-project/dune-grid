@@ -19,7 +19,7 @@ namespace Dune {
   // SGeometry
 
   template<int mydim, int cdim, class GridImp>
-  void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<typename GridImp::ctype,mydim+1,cdim>& __As)
+  void SGeometry<mydim,cdim,GridImp>::make(const FieldMatrix<typename GridImp::ctype,mydim+1,cdim>& __As)
   {
     FieldVector<ctype, cdim> s = __As[mydim];
 
