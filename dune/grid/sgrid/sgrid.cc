@@ -21,114 +21,24 @@ namespace Dune {
   template<int mydim, int cdim, class GridImp>
   void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<typename GridImp::ctype,mydim+1,cdim>& __As)
   {
-    // clear jacobian
-    builtinverse = false;
+    FieldVector<ctype, cdim> s = __As[mydim];
 
-    // copy arguments
-    s = __As[mydim];
-    for (int j=0; j<mydim; j++) A[j] = __As[j];
+    // construct the upper right corner of the cube geometry
+    FieldVector<ctype, cdim> upper = s;
+    for (int i=0; i<mydim; i++)
+      upper += __As[i];
 
-    // make corners
-    for (int i=0; i<(1<<mydim); i++)     // there are 2^d corners
-    {
-      // use binary representation of corner number to assign corner coordinates
-      int mask = 1;
-      c[i] = s;
-      for (int k=0; k<cdim; k++)
-      {
-        if (i&mask) c[i] = c[i]+A[k];
-        mask = mask<<1;
-      }
-    }
+    // look for the directions where the cube is actually extended
+    std::bitset<cdim> axes(0);
 
-    // compute centroid
-    centroid = 0.0;
-    for (int i=0; i<(1<<mydim); i++)
-      centroid += c[i];
-    centroid *= 1.0/(1<<mydim);
+    for (size_t i=0; i<s.size(); i++)
+      if ((upper[i] - s[i]) > 1e-10)
+        axes[i] = true;
+
+    // set up base class
+    static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(s, upper, axes);
   }
 
-  template<int mydim, int cdim, class GridImp>
-  inline FieldVector<typename GridImp::ctype, cdim> SGeometry<mydim,cdim,GridImp>::global (const FieldVector<typename GridImp::ctype, mydim>& local) const
-  {
-    FieldVector<ctype, cdim> global = s;
-    // global += A^t * local
-    A.umtv(local,global);
-
-    return global;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline FieldVector<typename GridImp::ctype, mydim> SGeometry<mydim,cdim,GridImp>::local (const FieldVector<typename GridImp::ctype, cdim>& global) const
-  {
-    FieldVector<ctype, mydim> l;     // result
-    FieldVector<ctype, cdim> rhs = global-s;
-    for (int k=0; k<mydim; k++)
-      l[k] = (rhs*A[k]) / (A[k]*A[k]);
-    return l;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline typename GridImp::ctype SGeometry<mydim,cdim,GridImp>::volume () const
-  {
-    sgrid_ctype s = 1.0;
-    for (int j=0; j<mydim; j++) s *= A[j].one_norm();
-
-    return s;
-  }
-
-  template< int mydim, int cdim, class GridImp >
-  inline const FieldMatrix< typename GridImp::ctype, mydim, cdim > &
-  SGeometry< mydim, cdim, GridImp >::jacobianTransposed ( const FieldVector< typename GridImp::ctype, mydim > &local ) const
-  {
-    return A;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<typename GridImp::ctype,cdim,mydim>& SGeometry<mydim,cdim,GridImp>::jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const
-  {
-    if (!builtinverse)
-    {
-      // transpose A and invert non-zero entries
-      for (int j=0; j<cdim; ++j)
-      {
-        for (int i=0; i<mydim; ++i)
-        {
-          if (j<i || std::abs(A[i][j]) < 1e-15)
-            Jinv[j][i] = 0.0;
-          else
-            Jinv[j][i] = 1.0/A[i][j];
-        }
-      }
-      builtinverse = true;
-    }
-    return Jinv;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline void SGeometry<mydim,cdim,GridImp>::print (std::ostream& ss, int indent) const
-  {
-    for (int k=0; k<indent; k++) ss << " ";ss << "SGeometry<" << mydim << "," << cdim << ">" << std::endl;
-    for (int k=0; k<indent; k++) ss << " ";ss << "{" << std::endl;
-    for (int k=0; k<indent+2; k++) ss << " ";ss << "Position: " << s << std::endl;
-    for (int j=0; j<mydim; j++)
-    {
-      for (int k=0; k<indent+2; k++) ss << " ";
-      ss << "direction " << j << "  " << A(j) << std::endl;
-    }
-    for (int j=0; j<1<<mydim; j++)
-    {
-      for (int k=0; k<indent+2; k++) ss << " ";
-      ss << "corner " << j << "  " << c[j] << std::endl;
-    }
-    if (builtinverse)
-    {
-      for (int k=0; k<indent+2; k++) ss << " ";ss << "Jinv ";
-      Jinv.print(ss,indent+2);
-    }
-    for (int k=0; k<indent+2; k++) ss << " ";ss << "builtinverse " << builtinverse << std::endl;
-    for (int k=0; k<indent; k++) ss << " ";ss << "}";
-  }
 
   template<int cdim, class GridImp>
   inline void SGeometry<0,cdim,GridImp>::make (FieldMatrix<typename GridImp::ctype,1,cdim>& __As)

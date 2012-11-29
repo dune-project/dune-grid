@@ -13,6 +13,7 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/reservedvector.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/axisalignedcubegeometry.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/sgrid/numbering.hh>
@@ -101,95 +102,22 @@ namespace Dune {
    */
   template<int mydim, int cdim, class GridImp>
   class SGeometry
-    : public GeometryDefaultImplementation<mydim,cdim,GridImp,SGeometry>
+    : public AxisAlignedCubeGeometry<typename GridImp::ctype,mydim,cdim>
   {
   public:
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
 
-    //! return the element type identifier
-    GeometryType type () const
-    {
-      static const GeometryType cubeType(GeometryType::cube,mydim);
-      return cubeType;
-    }
-
-    //! here we have always an affine geometry
-    bool affine() const { return true ; }
-
-    //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const
-    {
-      return 1<<mydim;
-    }
-
-    //! return i'th corner of the geometry
-    FieldVector< ctype, cdim > corner ( const int i ) const
-    {
-      return c[i];
-    }
-
-    //! return center of the geometry
-    FieldVector<ctype, cdim > center ( ) const
-    {
-      return centroid;
-    }
-
-    //! maps a local coordinate within reference element to global coordinate in element
-    FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const;
-
-    //! maps a global coordinate within the element to a local coordinate in its reference element
-    FieldVector<ctype, mydim> local (const FieldVector<ctype, cdim>& global) const;
-
-    /*! Integration over a general element is done by integrating over the reference element
-       and using the transformation from the reference element to the global element as follows:
-       \f[\int\limits_{\Omega_e} f(x) dx = \int\limits_{\Omega_{ref}} f(g(l)) A(l) dl \f] where
-       \f$g\f$ is the local to global mapping and \f$A(l)\f$ is the integration element.
-
-       For a general map \f$g(l)\f$ involves partial derivatives of the map (surface element of
-       the first kind if \f$d=2,w=3\f$, determinant of the Jacobian of the transformation for
-       \f$d=w\f$, \f$\|dg/dl\|\f$ for \f$d=1\f$).
-
-       For linear elements, the derivatives of the map with respect to local coordinates
-       do not depend on the local coordinates and are the same over the whole element.
-
-       For a structured mesh where all edges are parallel to the coordinate axes, the
-       computation is the length, area or volume of the element is very simple to compute.
-
-       Each grid module implements the integration element with optimal efficieny. This
-       will directly translate in substantial savings in the computation of finite element
-       stiffness matrices.
-     */
-    ctype integrationElement (const FieldVector<ctype, mydim>& local) const
-    {
-      return volume();
-    }
-
-    /** \brief return volume of geometry */
-    ctype volume() const;
-
-    const FieldMatrix<ctype, mydim, cdim > &jacobianTransposed ( const FieldVector< ctype, mydim > &local ) const;
-    const FieldMatrix<ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<ctype, mydim>& local) const;
-
-    //! print internal data
-    void print (std::ostream& ss, int indent) const;
-
     /*! The first dim columns of As contain the dim direction vectors.
        Column dim is the position vector. This format allows a consistent
-       treatement of all dimensions, including 0 (the vertex).
+       treatment of all dimensions, including 0 (the vertex).
      */
     void make (FieldMatrix<ctype,mydim+1,cdim>& __As);
 
     //! constructor
-    SGeometry () : builtinverse(false) {}
-
-  private:
-    FieldVector<ctype, cdim> s;              //!< position of element
-    FieldVector<ctype, cdim> centroid;       //!< centroid of element
-    FieldMatrix<ctype,mydim,cdim> A;         //!< direction vectors as matrix
-    array<FieldVector<ctype, cdim>, 1<<mydim> c;     //!< coordinate vectors of corners
-    mutable FieldMatrix<ctype,cdim,mydim> Jinv;           //!< storage for inverse of jacobian
-    mutable bool builtinverse;
+    SGeometry ()
+      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0))    // anything
+    {}
   };
 
   //! specialization for dim=0, this is a vertex
