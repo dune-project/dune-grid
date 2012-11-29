@@ -116,89 +116,31 @@ namespace Dune {
 
   //! specialization for dim=0, this is a vertex
   template<int cdim, class GridImp>
-  class YaspGeometry<0,cdim,GridImp> : public GeometryDefaultImplementation<0,cdim,GridImp,YaspGeometry>
+  class YaspGeometry<0,cdim,GridImp> : public AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>
   {
   public:
     typedef typename GridImp::ctype ctype;
 
-    //! return the element type identifier
-    GeometryType type () const
-    {
-      return GeometryType(GeometryType::cube,0);
-    }
-
-    //! here we have always an affine geometry
-    bool affine() const { return true; }
-
-    //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const
-    {
-      return 1;
-    }
-
-    //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<ctype, cdim>& operator[] (int i) const
-    {
-      return position;
-    }
-
-    //! access to coordinates of corners. Index is the number of the corner
-    FieldVector< ctype, cdim > corner ( const int i ) const
-    {
-      return position;
-    }
-
-    //! access to the center/centroid
-    FieldVector< ctype, cdim > center ( ) const
-    {
-      return position;
-    }
-
-    /*! determinant of the jacobian of the mapping
-     */
-    ctype integrationElement (const FieldVector<ctype, 0>& local) const
-    {
-      return 1.0;
-    }
-
-    //! Compute the transposed of the jacobi matrix
-    FieldMatrix<ctype,0,cdim>& jacobianTransposed (const FieldVector<ctype, 0>& local) const
-    {
-      static FieldMatrix<ctype,0,cdim> JT(0.0);
-      return JT;
-    }
-    //! Compute the transposed of the inverse jacobi matrix
-    FieldMatrix<ctype,cdim,0>& jacobianInverseTransposed (const FieldVector<ctype, 0>& local) const
-    {
-      static FieldMatrix<ctype,cdim,0> Jinv(0.0);
-      return Jinv;
-    }
-
     //! default constructor
     YaspGeometry ()
+      : AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>(FieldVector<ctype,cdim>(0)) // anything
     {}
 
     //! constructor
     explicit YaspGeometry ( const FieldVector< ctype, cdim > &p )
-      : position( p )
+      : AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>( p )
     {}
 
     YaspGeometry ( const FieldVector< ctype, cdim > &p, const FieldVector< ctype, cdim > &, uint8_t &)
-      : position( p )
+      : AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>( p )
     {}
 
     //! print function
     void print (std::ostream& s) const
     {
       s << "YaspGeometry<"<<0<<","<<cdim<< "> ";
-      s << "position " << position;
+      s << "position " << this->lower_;
     }
-
-    // const YaspGeometry<0,cdim,GridImp>&
-    // operator = (const YaspGeometry<0,cdim,GridImp>& g);
-
-  private:
-    FieldVector<ctype, cdim> position; //!< position of the vertex
   };
 
   // operator<< for all YaspGeometrys
