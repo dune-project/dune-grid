@@ -1404,7 +1404,7 @@ namespace Dune {
     //! \todo remove after next release
     using IdSet<GridImp,SGridGlobalIdSet<GridImp>, typename remove_const<GridImp>::type::PersistentIndexType>::subId;
 
-    //! define the type used for persisitent indices
+    //! define the type used for persistent indices
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
