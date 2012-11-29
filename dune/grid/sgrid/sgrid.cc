@@ -16,38 +16,6 @@ namespace Dune {
 
 
   //************************************************************************
-  // SGeometry
-
-  template<int mydim, int cdim, class GridImp>
-  void SGeometry<mydim,cdim,GridImp>::make(const FieldVector<ctype,cdim>& lower,
-                                           const FieldMatrix<ctype,mydim,cdim>& A)
-  {
-    // construct the upper right corner of the cube geometry
-    FieldVector<ctype, cdim> upper = lower;
-    for (int i=0; i<mydim; i++)
-      upper += A[i];
-
-    // look for the directions where the cube is actually extended
-    std::bitset<cdim> axes(0);
-
-    for (size_t i=0; i<cdim; i++)
-      if ((upper[i] - lower[i]) > 1e-10)
-        axes[i] = true;
-
-    // set up base class
-    static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(lower, upper, axes);
-  }
-
-
-  template<int cdim, class GridImp>
-  inline void SGeometry<0,cdim,GridImp>::make (const FieldVector<typename GridImp::ctype,cdim>& lower,
-                                               const FieldMatrix<typename GridImp::ctype,0,cdim>& A)
-  {
-    // set up base class
-    static_cast< AxisAlignedCubeGeometry<ctype,0,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,0,cdim>(lower);
-  }
-
-  //************************************************************************
   // inline methods for SEntityBase
 
   template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>

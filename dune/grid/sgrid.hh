@@ -116,7 +116,29 @@ namespace Dune {
      * Allows a consistent treatment of all dimensions, including 0 (the vertex).
      */
     void make (const FieldVector<ctype,cdim>& lower,
-               const FieldMatrix<ctype,mydim,cdim>& A);
+               const FieldMatrix<ctype,mydim,cdim>& A)
+    {
+      if (mydim==0) {
+        // set up base class
+        static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(lower);
+        return;
+      }
+
+      // construct the upper right corner of the cube geometry
+      FieldVector<ctype, cdim> upper = lower;
+      for (int i=0; i<mydim; i++)
+        upper += A[i];
+
+      // look for the directions where the cube is actually extended
+      std::bitset<cdim> axes(0);
+
+      for (size_t i=0; i<cdim; i++)
+        if ((upper[i] - lower[i]) > 1e-10)
+          axes[i] = true;
+
+      // set up base class
+      static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(lower, upper, axes);
+    }
 
     //! constructor
     SGeometry ()
@@ -124,23 +146,6 @@ namespace Dune {
     {}
   };
 
-  //! specialization for dim=0, this is a vertex
-  template<int cdim, class GridImp>
-  class SGeometry<0,cdim,GridImp>
-    : public AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>
-  {
-  public:
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
-
-    //! constructor, makes element from position and direction vectors
-    void make (const FieldVector<ctype,cdim>& lower,
-               const FieldMatrix<ctype,0,cdim>& A);
-
-    SGeometry ()
-      : AxisAlignedCubeGeometry<ctype,0,cdim>(FieldVector<ctype,cdim>(0))    // anything
-    {}
-  };
 
   //************************************************************************
   /*! SEntityBase contains the part of SEntity that can be defined
