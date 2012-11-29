@@ -632,9 +632,6 @@ namespace Dune {
     //! return true if intersection is with boundary.
     bool boundary () const;
 
-    //! return true if intersection is conform.
-    bool conforming () const;
-
     int boundaryId () const {
       if (boundary()) return count + 1;
       return 0;
@@ -793,7 +790,7 @@ namespace Dune {
     /*! @brief return true if intersection is conform. */
     bool conforming () const
     {
-      return is.conforming();
+      return true;
     }
 
     /*! @brief geometrical information about this intersection in local coordinates of the inside() entity. */

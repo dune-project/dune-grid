@@ -353,12 +353,6 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline bool SIntersectionIterator<GridImp>::conforming () const
-  {
-    return true;
-  }
-
-  template<class GridImp>
   void SIntersectionIterator<GridImp>::makeintersections () const
   {
     // compute direction and value in direction
