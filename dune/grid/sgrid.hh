@@ -127,118 +127,20 @@ namespace Dune {
   //! specialization for dim=0, this is a vertex
   template<int cdim, class GridImp>
   class SGeometry<0,cdim,GridImp>
-    : public GeometryDefaultImplementation<0,cdim,GridImp,SGeometry>
+    : public AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>
   {
   public:
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
 
-    //! return the element type identifier
-    GeometryType type () const
-    {
-      static const GeometryType cubeType(GeometryType::cube,0);
-      return cubeType;
-    }
-
-    //! here we have always an affine geometry
-    bool affine() const { return true ; }
-
-    //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const
-    {
-      return 1;
-    }
-
-    //! return i'th corner of the geometry
-    FieldVector<ctype, cdim > corner ( const int i ) const
-    {
-      return s;
-    }
-
-    //! return center of the geometry
-    FieldVector<ctype, cdim > center ( ) const
-    {
-      return s;
-    }
-
-    //! print internal data
-    void print (std::ostream& ss, int indent) const;
-
     //! constructor, makes element from position and direction vectors
     void make (const FieldVector<ctype,cdim>& lower,
                const FieldMatrix<ctype,0,cdim>& A);
 
-    //! maps a local coordinate within reference element to global coordinate in element
-    FieldVector<ctype, cdim> global (const FieldVector<ctype, 0>& local) const { return corner(0); }
-
-    //! maps a global coordinate within the element to a local coordinate in its reference element
-    FieldVector<ctype, 0> local (const FieldVector<ctype, cdim>& global) const { return FieldVector<ctype,0> (0.0); }
-
-    /*! Integration over a general element is done by integrating over the reference element
-       and using the transformation from the reference element to the global element as follows:
-       \f[\int\limits_{\Omega_e} f(x) dx = \int\limits_{\Omega_{ref}} f(g(l)) A(l) dl \f] where
-       \f$g\f$ is the local to global mapping and \f$A(l)\f$ is the integration element.
-
-       For a general map \f$g(l)\f$ involves partial derivatives of the map (surface element of
-       the first kind if \f$d=2,w=3\f$, determinant of the Jacobian of the transformation for
-       \f$d=w\f$, \f$\|dg/dl\|\f$ for \f$d=1\f$).
-
-       For linear elements, the derivatives of the map with respect to local coordinates
-       do not depend on the local coordinates and are the same over the whole element.
-
-       For a structured mesh where all edges are parallel to the coordinate axes, the
-       computation is the length, area or volume of the element is very simple to compute.
-
-       Each grid module implements the integration element with optimal efficieny. This
-       will directly translate in substantial savings in the computation of finite element
-       stiffness matrices.
-       For this specialisation the integrationElement is always 1.
-     */
-
-    //! constructor with bool argument makes reference element if true, uninitialized else
-    SGeometry () {}
-
-    /** \brief This dummy routine always returns 1.0.
-     *
-     * This routine exists so that algorithms that integrate over grid
-     * boundaries can also be compiled for 1d-grids.
-     */
-    ctype volume() const
-    {
-      return 1;
-    }
-
-    /** \brief This dummy routine always returns 1.0.
-     *
-     * This routine exists so that algorithms that integrate over grid
-     * boundaries can also be compiled for 1d-grids.
-     */
-    ctype integrationElement(const FieldVector<ctype, 0>& local) const {
-      return volume();
-    }
-
-    const FieldMatrix<ctype, 0, cdim > &jacobianTransposed ( const FieldVector<ctype, 0 > &local ) const
-    {
-      static const FieldMatrix<ctype, 0, cdim > dummy ( ctype( 0 ) );
-      return dummy;
-    }
-
-    const FieldMatrix<ctype,cdim,0>& jacobianInverseTransposed (const FieldVector<ctype, 0>& local) const
-    {
-      static const FieldMatrix<ctype,cdim,0> dummy( ctype(0) );
-      return dummy;
-    }
-
-  protected:
-    FieldVector<ctype, cdim> s;             //!< position of element
+    SGeometry ()
+      : AxisAlignedCubeGeometry<ctype,0,cdim>(FieldVector<ctype,cdim>(0))    // anything
+    {}
   };
-
-  template <int mydim, int cdim, class GridImp>
-  inline std::ostream& operator<< (std::ostream& s, SGeometry<mydim,cdim,GridImp>& e)
-  {
-    e.print(s,0);
-    return s;
-  }
 
   //************************************************************************
   /*! SEntityBase contains the part of SEntity that can be defined

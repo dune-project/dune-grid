@@ -43,14 +43,8 @@ namespace Dune {
   inline void SGeometry<0,cdim,GridImp>::make (const FieldVector<typename GridImp::ctype,cdim>& lower,
                                                const FieldMatrix<typename GridImp::ctype,0,cdim>& A)
   {
-    s = lower;
-  }
-
-  template<int cdim, class GridImp>
-  inline void SGeometry<0,cdim,GridImp>::print (std::ostream& ss, int indent) const
-  {
-    for (int i=0; i<indent; i++) ss << " ";
-    ss << "SGeometry<0," << cdim << "> at position " << s;
+    // set up base class
+    static_cast< AxisAlignedCubeGeometry<ctype,0,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,0,cdim>(lower);
   }
 
   //************************************************************************
