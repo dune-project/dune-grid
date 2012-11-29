@@ -1750,8 +1750,7 @@ namespace Dune {
       for (int i=0; i<d; i++) s[i] = 2*cg.cell_global.size(i);
 
       // compute overlap
-      int overlap;
-      if (keep_overlap) overlap = 2*cg.overlap;else overlap = cg.overlap;
+      int overlap = (keep_overlap) ? 2*cg.overlap : cg.overlap;
 
       // output
       //    if (_torus.rank()==0) std::cout << "MultiYGrid<" // changed dinfo to cout
