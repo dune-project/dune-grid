@@ -23,8 +23,8 @@
 #include <dune/common/power.hh>
 #include <dune/grid/common/grid.hh>
 
-/*! \file grids.hh
-   This is the basis for the yaspgrid implementation of the Dune grid interface.
+/** \file
+    \brief This is the basis for the yaspgrid implementation of the Dune grid interface.
  */
 
 namespace Dune {
