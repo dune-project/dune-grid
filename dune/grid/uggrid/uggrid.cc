@@ -31,8 +31,6 @@ template<> unsigned int Dune::UGGrid<3>::heapSize_ = 500;
 template <int dim>
 Dune::UGGrid < dim >::UGGrid()
   : multigrid_(NULL),
-    leafIndexSet_(*this),
-    idSet_(*this),
     refinementType_(LOCAL),
     closureType_(GREEN),
     someElementHasBeenMarkedForRefinement_(false),
@@ -728,7 +726,7 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
     if (levelIndexSets_[i])
       levelIndexSets_[i]->update(*this, i);
 
-  leafIndexSet_.update(nodePermutation);
+  leafIndexSet_.update( *this, nodePermutation );
 
   // id sets don't need updating
 }

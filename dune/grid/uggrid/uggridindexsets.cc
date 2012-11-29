@@ -5,22 +5,22 @@
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/uggrid/uggridindexsets.hh>
 
-template <class GridImp>
-void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::vector<unsigned int>* nodePermutation) {
-
+template< class Grid >
+void Dune::UGGridLevelIndexSet< Grid >::update ( const Grid &grid, int level, std::vector<unsigned int>* nodePermutation )
+{
   // Commit the index set to a specific level of a specific grid
-  grid_ = &grid;
   level_ = level;
 
   // ///////////////////////////////////
   //   clear index for codim dim-1 and 1
   // ///////////////////////////////////
 
-  typename GridImp::Traits::template Codim<0>::LevelIterator eIt    = grid_->template lbegin<0>(level_);
-  typename GridImp::Traits::template Codim<0>::LevelIterator eEndIt = grid_->template lend<0>(level_);
+  typename Grid::Traits::template Codim<0>::LevelIterator eIt    = grid.template lbegin< 0 >( level_ );
+  typename Grid::Traits::template Codim<0>::LevelIterator eEndIt = grid.template lend< 0 >( level_ );
 
-  for (; eIt!=eEndIt; ++eIt) {
-    typename UG_NS<dim>::Element* target_ = grid_->getRealImplementation(*eIt).target_;
+  for( ; eIt != eEndIt; ++eIt )
+  {
+    typename UG_NS<dim>::Element* target_ = Grid::getRealImplementation(*eIt).target_;
     // codim dim-1
     for (int i=0; i<eIt->template count<dim-1>(); i++)
     {
@@ -51,12 +51,12 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
   numTriFaces_  = 0;
   numQuadFaces_ = 0;
 
-  eIt    = grid_->template lbegin<0>(level_);
-  eEndIt = grid_->template lend<0>(level_);
+  eIt    = grid.template lbegin< 0 >( level_ );
+  eEndIt = grid.template lend< 0 >( level_ );
 
-  for (; eIt!=eEndIt; ++eIt) {
-
-    typename UG_NS<dim>::Element* target = grid_->getRealImplementation(*eIt).target_;
+  for( ; eIt != eEndIt; ++eIt )
+  {
+    typename UG_NS< dim >::Element *target = Grid::getRealImplementation( *eIt ).target_;
 
     // codim 0 (elements)
     GeometryType eType = eIt->type();
@@ -131,46 +131,44 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
   //   Init the vertex indices
   // //////////////////////////////
 
-  typename GridImp::Traits::template Codim<dim>::LevelIterator vIt    = grid_->template lbegin<dim>(level_);
-  typename GridImp::Traits::template Codim<dim>::LevelIterator vEndIt = grid_->template lend<dim>(level_);
+  typename Grid::Traits::template Codim<dim>::LevelIterator vIt    = grid.template lbegin< dim >( level_ );
+  typename Grid::Traits::template Codim<dim>::LevelIterator vEndIt = grid.template lend< dim >( level_ );
 
   numVertices_ = 0;
 
-  if (nodePermutation!=0 and level==0)
+  if( nodePermutation && (level==0) )
   {
-    for (; vIt!=vEndIt; ++vIt)
-      UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = (*nodePermutation)[numVertices_++];
+    for( ; vIt != vEndIt; ++vIt )
+      UG_NS< dim >::levelIndex( Grid::getRealImplementation( *vIt ).target_) = (*nodePermutation)[ numVertices_++ ];
   }
   else
   {
-    for (; vIt!=vEndIt; ++vIt)
-      UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = numVertices_++;
+    for( ; vIt != vEndIt; ++vIt )
+      UG_NS< dim >::levelIndex( Grid::getRealImplementation( *vIt ).target_) = numVertices_++;
   }
 
-  /*    for (; vIt!=vEndIt; ++vIt)
-          UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = numVertices_++;*/
-
-  myTypes_[dim].resize(0);
-  myTypes_[dim].push_back(GeometryType(GeometryType::cube,0));
+  myTypes_[ dim ].clear();
+  myTypes_[ dim ].push_back( GeometryType( GeometryType::cube, 0 ) );
 }
 
-template <class GridImp>
-void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutation) {
 
+template< class Grid >
+void Dune::UGGridLeafIndexSet< Grid >::update( const Grid &grid, std::vector< unsigned int > *nodePermutation )
+{
   // //////////////////////////////////////////////////////
   // Handle codim 1 and dim-1: levelwise from top to bottom
   // //////////////////////////////////////////////////////
 
   // first loop : clear indices
-  for (int level_=grid_.maxLevel(); level_>=0; level_--)
+  for( int level_ = grid.maxLevel(); level_>=0; level_-- )
   {
-    typename GridImp::Traits::template Codim<0>::LevelIterator eIt    = grid_.template lbegin<0>(level_);
-    typename GridImp::Traits::template Codim<0>::LevelIterator eEndIt = grid_.template lend<0>(level_);
+    typename Grid::Traits::template Codim<0>::LevelIterator eIt    = grid.template lbegin<0>(level_);
+    typename Grid::Traits::template Codim<0>::LevelIterator eEndIt = grid.template lend<0>(level_);
 
     for (; eIt!=eEndIt; ++eIt)
     {
       // get pointer to UG object
-      typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(*eIt).target_;
+      typename UG_NS<dim>::Element* target_ = Grid::getRealImplementation(*eIt).target_;
 
       // codim dim-1
       for (int i=0; i<eIt->template count<dim-1>(); i++)
@@ -209,7 +207,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
   numQuadFaces_ = 0;
 
   // second loop : set indices
-  for (int level_=grid_.maxLevel(); level_>=0; level_--)
+  for( int level_ = grid.maxLevel(); level_ >= 0; --level_ )
   {
 
     // used to compute the coarsest level with leaf elements
@@ -218,8 +216,8 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
     // this value is used in the parallel case, when a local grid may not contain any elements at all
     coarsestLevelWithLeafElements_ = 0;
 
-    typename GridImp::Traits::template Codim<0>::LevelIterator eIt    = grid_.template lbegin<0>(level_);
-    typename GridImp::Traits::template Codim<0>::LevelIterator eEndIt = grid_.template lend<0>(level_);
+    typename Grid::Traits::template Codim<0>::LevelIterator eIt    = grid.template lbegin<0>(level_);
+    typename Grid::Traits::template Codim<0>::LevelIterator eEndIt = grid.template lend<0>(level_);
 
     for (; eIt!=eEndIt; ++eIt)
     {
@@ -230,7 +228,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
         containsLeafElements = true;
 
       // get pointer to UG object
-      typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(*eIt).target_;
+      typename UG_NS<dim>::Element* target_ = Grid::getRealImplementation(*eIt).target_;
 
       // codim dim-1 (edges)
       for (int i=0; i<eIt->template count<dim-1>(); i++)
@@ -325,21 +323,21 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
   numPrisms_    = 0;
   numCubes_     = 0;
 
-  typename GridImp::Traits::template Codim<0>::LeafIterator eIt    = grid_.template leafbegin<0>();
-  typename GridImp::Traits::template Codim<0>::LeafIterator eEndIt = grid_.template leafend<0>();
+  typename Grid::Traits::template Codim<0>::LeafIterator eIt    = grid.template leafbegin<0>();
+  typename Grid::Traits::template Codim<0>::LeafIterator eEndIt = grid.template leafend<0>();
 
   for (; eIt!=eEndIt; ++eIt) {
 
     GeometryType eType = eIt->type();
 
     if (eType.isSimplex())
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(*eIt).target_) = numSimplices_++;
+      UG_NS<dim>::leafIndex(Grid::getRealImplementation(*eIt).target_) = numSimplices_++;
     else if (eType.isPyramid())
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(*eIt).target_) = numPyramids_++;
+      UG_NS<dim>::leafIndex(Grid::getRealImplementation(*eIt).target_) = numPyramids_++;
     else if (eType.isPrism())
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(*eIt).target_) = numPrisms_++;
+      UG_NS<dim>::leafIndex(Grid::getRealImplementation(*eIt).target_) = numPrisms_++;
     else if (eType.isCube())
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(*eIt).target_) = numCubes_++;
+      UG_NS<dim>::leafIndex(Grid::getRealImplementation(*eIt).target_) = numCubes_++;
     else {
       DUNE_THROW(GridError, "Found the GeometryType " << eType
                                                       << ", which should never occur in a UGGrid!");
@@ -361,26 +359,25 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
   // //////////////////////////////
   //   Init the vertex indices
   // //////////////////////////////
-  typename GridImp::Traits::template Codim<dim>::LeafIterator vIt    = grid_.template leafbegin<dim>();
-  typename GridImp::Traits::template Codim<dim>::LeafIterator vEndIt = grid_.template leafend<dim>();
+  typename Grid::Traits::template Codim<dim>::LeafIterator vIt    = grid.template leafbegin<dim>();
+  typename Grid::Traits::template Codim<dim>::LeafIterator vEndIt = grid.template leafend<dim>();
 
   // leaf index in node writes through to vertex !
   numVertices_ = 0;
 
-  if (nodePermutation!=0 and grid_.maxLevel()==0)
+  if (nodePermutation!=0 and grid.maxLevel()==0)
   {
-    for (; vIt!=vEndIt; ++vIt)
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(*vIt).target_) = (*nodePermutation)[numVertices_++];
+    for( ; vIt != vEndIt; ++vIt )
+      UG_NS<dim>::leafIndex( Grid::getRealImplementation(*vIt).target_) = (*nodePermutation)[numVertices_++];
   }
   else
   {
-    for (; vIt!=vEndIt; ++vIt)
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(*vIt).target_) = numVertices_++;
+    for( ; vIt != vEndIt; ++vIt )
+      UG_NS<dim>::leafIndex( Grid::getRealImplementation(*vIt).target_) = numVertices_++;
   }
 
   myTypes_[dim].resize(0);
   myTypes_[dim].push_back(GeometryType(0));
-
 }
 
 // Explicit template instantiations to compile the stuff in this file

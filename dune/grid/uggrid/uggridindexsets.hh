@@ -10,20 +10,30 @@
 #include <vector>
 #include <set>
 
+#include <dune/common/nullptr.hh>
+
 #include <dune/grid/common/grid.hh>
 
-namespace Dune {
+namespace Dune
+{
 
-  template<class GridImp>
-  class UGGridLevelIndexSet : public IndexSet<GridImp,UGGridLevelIndexSet<GridImp>, UG::UINT>
+  // UGGridLevelIndexSet
+  // -------------------
+
+  template< class Grid >
+  class UGGridLevelIndexSet
+    : public IndexSet< Grid, UGGridLevelIndexSet< Grid >, UG::UINT >
   {
-    enum {dim = GridImp::dimension};
+    typedef IndexSet< Grid, UGGridLevelIndexSet< Grid >, UG::UINT > Base;
+
+    enum {dim = Grid::dimension};
 
   public:
+    typedef typename Base::IndexType IndexType;
 
     /** \brief Default constructor
 
-       Unfortunately we can't force the user to init grid_ and level_, because
+       Unfortunately we can't force the user to init level_, because
        UGGridLevelIndexSets are meant to be stored in an array.
 
        \todo I want to make this constructor private, but I can't, because
@@ -42,48 +52,47 @@ namespace Dune {
     {}
 
     //! get index of an entity
-    template<int cd>
-    unsigned int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const
+    template< int cd >
+    IndexType index ( const typename Grid::Traits::template Codim< cd >::Entity &e ) const
     {
-      return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
+      return UG_NS< dim >::levelIndex( Grid::getRealImplementation( e ).getTarget() );
     }
 
     //! get index of subEntity of a codim 0 entity
-    template<int cc>
-    unsigned int subIndex (const typename GridImp::Traits::template Codim<cc>::Entity& e,
-                           int i,
-                           unsigned int codim) const
+    template< int cc >
+    IndexType subIndex ( const typename Grid::Traits::template Codim< cc >::Entity &e, int i, unsigned int codim ) const
     {
       if (cc==dim)
-        return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
+        return UG_NS<dim>::levelIndex( Grid::getRealImplementation(e).getTarget() );
 
       if (codim==dim)
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
-                                                         UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
+        return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner( Grid::getRealImplementation( e ).getTarget(),
+                                                          UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
 
       if (codim==0)
-        return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
+        return UG_NS<dim>::levelIndex( Grid::getRealImplementation( e ).getTarget());
 
-      if (codim==dim-1) {
-
+      if (codim==dim-1)
+      {
         int a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
         int b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
-                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                          UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
-                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
+        return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner( Grid::getRealImplementation( e ).getTarget(),
+                                                                              UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
+                                                          UG_NS<dim>::Corner( Grid::getRealImplementation( e ).getTarget(),
+                                                                              UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
       }
 
       if (codim==1)
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(grid_->getRealImplementation(e).getTarget(),
-                                                             UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
+        return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector( Grid::getRealImplementation( e ).getTarget(),
+                                                              UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
 
       DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subIndex isn't implemented for codim==" << codim );
     }
 
 
     //! get number of entities of given codim, type and on this level
-    int size (int codim) const {
+    IndexType size ( int codim ) const
+    {
       if (codim==0)
         return numSimplices_+numPyramids_+numPrisms_+numCubes_;
       if (codim==dim)
@@ -96,11 +105,12 @@ namespace Dune {
     }
 
     //! get number of entities of given codim, type and on this level
-    int size (GeometryType type) const
+    IndexType size (GeometryType type) const
     {
-      int codim = GridImp::dimension-type.dim();
+      int codim = Grid::dimension-type.dim();
 
-      if (codim==0) {
+      if( codim == 0 )
+      {
         if (type.isSimplex())
           return numSimplices_;
         else if (type.isPyramid())
@@ -111,19 +121,19 @@ namespace Dune {
           return numCubes_;
         else
           return 0;
-
       }
 
-      if (codim==dim) {
+      if (codim==dim)
         return numVertices_;
-      }
-      if (codim==dim-1) {
+
+      if (codim==dim-1)
         return numEdges_;
-      }
-      if (codim==1) {
-        if (type.isSimplex())
+
+      if( codim == 1 )
+      {
+        if( type.isSimplex() )
           return numTriFaces_;
-        else if (type.isCube())
+        else if( type.isCube() )
           return numQuadFaces_;
         else
           return 0;
@@ -150,37 +160,45 @@ namespace Dune {
     }
 
     /** \brief Update the level indices.  This method is called after each grid change */
-    void update(const GridImp& grid, int level, std::vector<unsigned int>* nodePermutation=0);
+    void update ( const Grid &grid, int level, std::vector< unsigned int > *nodePermutation = nullptr );
 
-    const GridImp* grid_;
     int level_;
 
-    int numSimplices_;
-    int numPyramids_;
-    int numPrisms_;
-    int numCubes_;
-    int numVertices_;
-    int numEdges_;
-    int numTriFaces_;
-    int numQuadFaces_;
+    IndexType numSimplices_;
+    IndexType numPyramids_;
+    IndexType numPrisms_;
+    IndexType numCubes_;
+    IndexType numVertices_;
+    IndexType numEdges_;
+    IndexType numTriFaces_;
+    IndexType numQuadFaces_;
 
-    std::vector<GeometryType> myTypes_[dim+1];
+    std::vector< GeometryType > myTypes_[ dim+1 ];
   };
 
-  template<class GridImp>
-  class UGGridLeafIndexSet : public IndexSet<GridImp,UGGridLeafIndexSet<GridImp>, UG::UINT>
+
+
+  // UGGridLeafIndexSet
+  // ------------------
+
+  template< class Grid >
+  class UGGridLeafIndexSet
+    : public IndexSet< Grid, UGGridLeafIndexSet< Grid >, UG::UINT >
   {
+    typedef IndexSet< Grid, UGGridLeafIndexSet< Grid >, UG::UINT > Base;
+
   public:
+    typedef typename Base::IndexType IndexType;
 
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    enum {dim = remove_const<GridImp>::type::dimension};
+    enum {dim = remove_const<Grid>::type::dimension};
 
     //! constructor stores reference to a grid and level
-    UGGridLeafIndexSet (const GridImp& g)
-      : grid_(g), coarsestLevelWithLeafElements_(0)
+    UGGridLeafIndexSet ()
+      : coarsestLevelWithLeafElements_( 0 )
     {}
 
     //! get index of an entity
@@ -189,9 +207,9 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cd>
-    int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    IndexType index (const typename remove_const<Grid>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
+      return UG_NS<dim>::leafIndex( Grid::getRealImplementation( e ).getTarget());
     }
 
     //! get index of subEntity of a codim 0 entity
@@ -199,44 +217,43 @@ namespace Dune {
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    template<int cc>
-    unsigned int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e,
-                           int i,
-                           unsigned int codim) const
+    template< int cc >
+    IndexType subIndex ( const typename remove_const< Grid >::type::Traits::template Codim< cc >::Entity &e,
+                         int i, unsigned int codim ) const
     {
       if (cc==dim)
-        return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
+        return UG_NS<dim>::leafIndex( Grid::getRealImplementation( e ).getTarget());
 
       if (codim==0)
-        return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
+        return UG_NS<dim>::leafIndex( Grid::getRealImplementation( e ).getTarget());
 
       const GeometryType type = e.type();
 
       if (codim==dim)
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
-                                                        UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
+        return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner( Grid::getRealImplementation( e ).getTarget(),
+                                                         UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
 
       if (codim==dim-1) {
 
         int a=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,0,dim);
         int b=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,1,dim);
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
-                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
-                                                         UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
-                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(b,type))));
+        return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner( Grid::getRealImplementation( e ).getTarget(),
+                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
+                                                         UG_NS<dim>::Corner( Grid::getRealImplementation( e ).getTarget(),
+                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(b,type))));
       }
 
       if (codim==1)
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(grid_.getRealImplementation(e).getTarget(),
-                                                            UGGridRenumberer<dim>::facesDUNEtoUG(i,type)));
+        return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector( Grid::getRealImplementation( e ).getTarget(),
+                                                             UGGridRenumberer<dim>::facesDUNEtoUG(i,type)));
 
       DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLeafIndex isn't implemented for codim==" << codim );
     }
 
     //! get number of entities of given codim and type
-    int size (GeometryType type) const
+    IndexType size (GeometryType type) const
     {
-      if (type.dim()==GridImp::dimension) {
+      if (type.dim()==Grid::dimension) {
         if (type.isSimplex())
           return numSimplices_;
         else if (type.isPyramid())
@@ -263,7 +280,7 @@ namespace Dune {
     }
 
     //! get number of entities of given codim
-    int size (int codim) const
+    IndexType size (int codim) const
     {
       int s=0;
       const std::vector<GeometryType>& geomTs = geomTypes(codim);
@@ -286,14 +303,12 @@ namespace Dune {
     template <class EntityType>
     bool contains (const EntityType& entity) const
     {
-      return UG_NS<dim>::isLeaf(GridImp::getRealImplementation(entity).getTarget());
+      return UG_NS<dim>::isLeaf(Grid::getRealImplementation(entity).getTarget());
     }
 
 
     /** \brief Update the leaf indices.  This method is called after each grid change. */
-    void update(std::vector<unsigned int>* nodePermutation=0);
-
-    const GridImp& grid_;
+    void update ( const Grid &grid, std::vector< unsigned int > *nodePermutation = nullptr );
 
     /** \brief The lowest level that contains leaf elements
 
@@ -303,35 +318,37 @@ namespace Dune {
      */
     unsigned int coarsestLevelWithLeafElements_;
 
+    IndexType numSimplices_;
+    IndexType numPyramids_;
+    IndexType numPrisms_;
+    IndexType numCubes_;
+    IndexType numVertices_;
+    IndexType numEdges_;
+    IndexType numTriFaces_;
+    IndexType numQuadFaces_;
 
-
-    int numSimplices_;
-    int numPyramids_;
-    int numPrisms_;
-    int numCubes_;
-    int numVertices_;
-    int numEdges_;
-    int numTriFaces_;
-    int numQuadFaces_;
-
-    std::vector<GeometryType> myTypes_[dim+1];
+    std::vector< GeometryType > myTypes_[ dim+1 ];
   };
 
+
+
+  // UGGridIdSet
+  // -----------
 
   /** \brief Implementation class for the UGGrid Id sets
 
      The UGGridGlobalIdSet and the UGGridLocalIdSet are identical. This
      class implements them both at once.
    */
-  template< class GridImp >
+  template< class Grid >
   class UGGridIdSet
-    : public IdSet< GridImp, UGGridIdSet< GridImp >, typename UG_NS< GridImp::dimension >::UG_ID_TYPE >
+    : public IdSet< Grid, UGGridIdSet< Grid >, typename UG_NS< Grid::dimension >::UG_ID_TYPE >
   {
-    typedef IdSet< GridImp, UGGridIdSet< GridImp >, typename UG_NS< GridImp::dimension >::UG_ID_TYPE > Base;
+    typedef IdSet< Grid, UGGridIdSet< Grid >, typename UG_NS< Grid::dimension >::UG_ID_TYPE > Base;
 
-    typedef typename remove_const< GridImp >::type::Traits Traits;
+    typedef typename remove_const< Grid >::type::Traits Traits;
 
-    enum {dim = remove_const<GridImp>::type::dimension};
+    enum {dim = remove_const<Grid>::type::dimension};
 
     typedef typename std::pair<const typename UG_NS<dim>::Element*, int> Face;
 
@@ -397,7 +414,7 @@ namespace Dune {
         // If we're asked for the id of an element, and that element is a copy of its father, then
         // we return the id of the lowest ancestor that the element is a copy from.  That way copies
         // of elements have the same id
-        const typename UG_NS<dim>::Element* ancestor = (typename UG_NS<dim>::Element* const)( GridImp::getRealImplementation( e ).getTarget() );
+        const typename UG_NS<dim>::Element* ancestor = (typename UG_NS<dim>::Element* const)( Grid::getRealImplementation( e ).getTarget() );
         /** \todo We should really be using an isCopy() method rather than hasCopy() */
         while (UG_NS<dim>::EFather(ancestor) && UG_NS<dim>::hasCopy(UG_NS<dim>::EFather(ancestor)))
           ancestor = UG_NS<dim>::EFather(ancestor);
@@ -412,7 +429,7 @@ namespace Dune {
 #if defined ModelP
       if (cd == dim) {
         typename UG_NS<dim>::Node *node =
-          reinterpret_cast<typename UG_NS<dim>::Node *>( GridImp::getRealImplementation( e ).getTarget() );
+          reinterpret_cast<typename UG_NS<dim>::Node *>( Grid::getRealImplementation( e ).getTarget() );
 
         return node->myvertex->iv.ddd.gid;
       }
@@ -421,7 +438,7 @@ namespace Dune {
                    "persistent ids for entities which are neither nodes nor elements.");
       }
 #else
-      return UG_NS<dim>::id( GridImp::getRealImplementation( e ).getTarget() );
+      return UG_NS<dim>::id( Grid::getRealImplementation( e ).getTarget() );
 #endif
     }
 
@@ -440,7 +457,7 @@ namespace Dune {
       if( codim == 0 )
         return id< cd >( e );
 
-      const typename UG_NS< dim >::Element *target = GridImp::getRealImplementation( e ).getTarget();
+      const typename UG_NS< dim >::Element *target = Grid::getRealImplementation( e ).getTarget();
       GeometryType type = e.type();
 
       // handle edges
