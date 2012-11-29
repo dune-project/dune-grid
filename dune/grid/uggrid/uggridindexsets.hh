@@ -325,8 +325,10 @@ namespace Dune {
    */
   template< class GridImp >
   class UGGridIdSet
-    : public IdSet< GridImp, UGGridIdSet< GridImp >, unsigned int >
+    : public IdSet< GridImp, UGGridIdSet< GridImp >, typename UG_NS< GridImp::dimension >::UG_ID_TYPE >
   {
+    typedef IdSet< GridImp, UGGridIdSet< GridImp >, typename UG_NS< GridImp::dimension >::UG_ID_TYPE > Base;
+
     typedef typename remove_const< GridImp >::type::Traits Traits;
 
     enum {dim = remove_const<GridImp>::type::dimension};
@@ -377,6 +379,8 @@ namespace Dune {
     }
 
   public:
+    typedef typename Base::IdType IdType;
+
     /** \brief Get id of an entity
      *
      * \bug Since copies of different entities on different levels are supposed to have the
@@ -387,7 +391,7 @@ namespace Dune {
      *      bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
     template< int cd >
-    unsigned int id ( const typename Traits::template Codim< cd >::Entity &e ) const
+    IdType id ( const typename Traits::template Codim< cd >::Entity &e ) const
     {
       if (cd==0) {
         // If we're asked for the id of an element, and that element is a copy of its father, then
@@ -431,7 +435,7 @@ namespace Dune {
      *       bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
     template< int cd >
-    unsigned int subId ( const typename Traits::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
+    IdType subId ( const typename Traits::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
     {
       if( codim == 0 )
         return id< cd >( e );

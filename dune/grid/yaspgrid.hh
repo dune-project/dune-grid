@@ -275,13 +275,16 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(comm,L,s,periodic,overlap,lb), ccobj(comm),
+      : YMG(comm,L,s,std::bitset<dim>(0),overlap,lb), ccobj(comm),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
-      : YMG(L,s,periodic,overlap,lb),
+      : YMG(L,s,std::bitset<dim>(0),overlap,lb),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
+      // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
+      for (size_t i=0; i<dim; i++)
+        this->_periodic[i] = periodic[i];
       init();
     }
 
@@ -303,13 +306,16 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(MPI_COMM_SELF,L,s,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
+      : YMG(MPI_COMM_SELF,L,s,std::bitset<dim>(0),overlap,lb), ccobj(MPI_COMM_SELF),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
-      : YMG(L,s,periodic,overlap,lb),
+      : YMG(L,s,std::bitset<dim>(0),overlap,lb),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
+      // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
+      for (size_t i=0; i<dim; i++)
+        this->_periodic[i] = periodic[i];
       init();
     }
 
