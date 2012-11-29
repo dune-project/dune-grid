@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <vector>
 #include <deque>
+#include <bitset>
 
 // C includes
 #if HAVE_MPI
@@ -73,7 +74,6 @@ namespace Dune {
     //! define types used for arguments
     typedef FieldVector<int, d>  iTupel;
     typedef FieldVector<ct, d> fTupel;
-    typedef FieldVector<bool, d> bTupel;
 
     //! Destructor
     virtual ~YGrid()
@@ -585,7 +585,6 @@ namespace Dune {
   public:
     typedef typename YGrid<d,ct>::iTupel iTupel;
     typedef typename YGrid<d,ct>::fTupel fTupel;
-    typedef typename YGrid<d,ct>::bTupel bTupel;
 
     //! Destructor
     virtual ~SubYGrid()
@@ -1086,7 +1085,6 @@ namespace Dune {
   public:
     //! type used to pass tupels in and out
     typedef FieldVector<int, d> iTupel;
-    typedef FieldVector<bool, d> bTupel;
 
 
   private:
@@ -1271,7 +1269,7 @@ namespace Dune {
     }
 
     //! return true if neighbor with given delta is a neighbor under the given periodicity
-    bool is_neighbor (iTupel delta, bTupel periodic) const
+    bool is_neighbor (iTupel delta, std::bitset<d> periodic) const
     {
       iTupel coord = rank_to_coord(_rank); // my own coordinate with 0 <= c_i < dims_i
 
@@ -1695,14 +1693,13 @@ namespace Dune {
     //! define types used for arguments
     typedef FieldVector<int, d> iTupel;
     typedef FieldVector<ct, d> fTupel;
-    typedef FieldVector<bool, d> bTupel;
 
     // communication tag used by multigrid
     enum { tag = 17 };
 
     //! constructor making a grid
 #if HAVE_MPI
-    MultiYGrid (MPI_Comm comm, fTupel L, iTupel s, bTupel periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
+    MultiYGrid (MPI_Comm comm, fTupel L, iTupel s, std::bitset<d> periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
       : _LL(L), _s(s), _periodic(periodic), _maxlevel(0), _overlap(overlap),
         _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
     {
@@ -1723,7 +1720,7 @@ namespace Dune {
       //      print(std::cout);
     }
 #else
-    MultiYGrid (fTupel L, iTupel s, bTupel periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
+    MultiYGrid (fTupel L, iTupel s, std::bitset<d> periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
       : _LL(L), _s(s), _periodic(periodic), _maxlevel(0), _overlap(overlap),
         _torus(tag,s,lb) // torus gets s to compute procs/direction
     {
@@ -2124,7 +2121,7 @@ namespace Dune {
     // o_interior  origin of interior (non-overlapping) cell decomposition
     // s_interior  size of interior cell decomposition
     // overlap     to be used on this grid level
-    YGridLevel makelevel (fTupel L, iTupel s, bTupel periodic, iTupel o_interior, iTupel s_interior, int overlap)
+    YGridLevel makelevel (fTupel L, iTupel s, std::bitset<d> periodic, iTupel o_interior, iTupel s_interior, int overlap)
     {
       // first, lets allocate a new structure
       YGridLevel g;
@@ -2397,7 +2394,9 @@ namespace Dune {
     // private data of multigrid
     fTupel _LL;
     iTupel _s;
-    bTupel _periodic;
+  protected:
+    std::bitset<d> _periodic;
+  private:
     int _maxlevel;
     YGridLevel _levels[32];
     int _overlap;
