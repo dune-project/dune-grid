@@ -19,31 +19,31 @@ namespace Dune {
   // SGeometry
 
   template<int mydim, int cdim, class GridImp>
-  void SGeometry<mydim,cdim,GridImp>::make(const FieldMatrix<typename GridImp::ctype,mydim+1,cdim>& __As)
+  void SGeometry<mydim,cdim,GridImp>::make(const FieldVector<ctype,cdim>& lower,
+                                           const FieldMatrix<ctype,mydim,cdim>& A)
   {
-    FieldVector<ctype, cdim> s = __As[mydim];
-
     // construct the upper right corner of the cube geometry
-    FieldVector<ctype, cdim> upper = s;
+    FieldVector<ctype, cdim> upper = lower;
     for (int i=0; i<mydim; i++)
-      upper += __As[i];
+      upper += A[i];
 
     // look for the directions where the cube is actually extended
     std::bitset<cdim> axes(0);
 
-    for (size_t i=0; i<s.size(); i++)
-      if ((upper[i] - s[i]) > 1e-10)
+    for (size_t i=0; i<cdim; i++)
+      if ((upper[i] - lower[i]) > 1e-10)
         axes[i] = true;
 
     // set up base class
-    static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(s, upper, axes);
+    static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(lower, upper, axes);
   }
 
 
   template<int cdim, class GridImp>
-  inline void SGeometry<0,cdim,GridImp>::make (FieldMatrix<typename GridImp::ctype,1,cdim>& __As)
+  inline void SGeometry<0,cdim,GridImp>::make (const FieldVector<typename GridImp::ctype,cdim>& lower,
+                                               const FieldMatrix<typename GridImp::ctype,0,cdim>& A)
   {
-    s = __As[0];
+    s = lower;
   }
 
   template<int cdim, class GridImp>
@@ -88,7 +88,7 @@ namespace Dune {
   void SEntityBase<codim,dim,GridImp,EntityImp>::makegeometry () const
   {
     // find dim-codim direction vectors and reference point
-    FieldMatrix<ctype,dim-codim+1,dimworld> __As(0);
+    FieldMatrix<ctype,dim-codim,dimworld> A(0);
 
     // count number of direction vectors found
     int dir=0;
@@ -105,17 +105,16 @@ namespace Dune {
         t[i] -= 2;                 // direction i => even
         p1 = grid->pos(l,t);
         t[i] += 1;                 // revert t to original state
-        __As[dir] = p2-p1;
+        A[dir] = p2-p1;
         dir++;
       }
 
     // find reference point, subtract 1 from all odd directions
     for (int i=0; i<dim; i++)
       t[i] -= t[i]%2;
-    __As[dir] =grid->pos(l,t);     // all components of t are even
 
     // make element
-    geo.make(__As);
+    geo.make(grid->pos(l,t),A);
     builtgeometry = true;
   }
 
@@ -213,16 +212,16 @@ namespace Dune {
     father_index = this->grid->n((this->l)-1,this->grid->expand((this->l)-1,zz,partition));
 
     // now make a subcube of size 1/2 in each direction
-    FieldMatrix<ctype,dim+1,dim> __As;
+    FieldMatrix<ctype,dim,dim> A;
     FieldVector<ctype, dim> v;
     for (int i=0; i<dim; i++)
     {
       v = 0.0; v[i] = 0.5;
-      __As[i] = v;
+      A[i] = v;
     }
     for (int i=0; i<dim; i++) v[i] = 0.5*delta[i];
-    __As[dim] =v;
-    in_father_local.make(__As);     // build geometry
+
+    in_father_local.make(v,A);     // build geometry
 
     built_father = true;
   }
@@ -413,7 +412,7 @@ namespace Dune {
       z1[dir] -= 1;   // even
 
     // z1 is even in direction dir, all others must be odd because it is codim 1
-    FieldMatrix<ctype,dim,dim> __AsLocal;
+    FieldMatrix<ctype,dim-1,dim> __AsLocal;
     FieldVector<ctype, dim> p1Local,p2Local;
 
     int t;
@@ -421,7 +420,6 @@ namespace Dune {
     // local coordinates in self
     p1Local = 0.0;
     p1Local[dir] = c;    // all points have p[dir]=c in entity
-    __AsLocal[dim-1] = p1Local; // position vector
     t = 0;
     for (int i=0; i<dim; ++i) // this loop makes dim-1 direction vectors
       if (i!=dir)
@@ -433,12 +431,11 @@ namespace Dune {
         ++t;
       }
     // update geometry
-    is_self_local.make(__AsLocal);
+    is_self_local.make(p1Local,__AsLocal);
 
     // local coordinates in neighbor
     p1Local = 0.0;
     p1Local[dir] = 1-c;    // all points have p[dir]=1-c in entity
-    __AsLocal[dim-1] = p1Local;   // position vector
     t = 0;
     for (int i=0; i<dim; ++i) // this loop makes dim-1 direction vectors
       if (i!=dir)
@@ -450,10 +447,10 @@ namespace Dune {
         ++t;
       }
     // update geometry
-    is_nb_local.make(__AsLocal);
+    is_nb_local.make(p1Local,__AsLocal);
 
     // global coordinates
-    FieldMatrix<ctype,dim,dimworld> __As;
+    FieldMatrix<ctype,dim-1,dimworld> A;
     FieldVector<ctype, dimworld> p1,p2;
     t = 0;
     for (int i=0; i<dim; i++)
@@ -465,15 +462,15 @@ namespace Dune {
         z1[i] -= 2;     // direction i => even
         p1 = grid->pos(self.level(),z1);
         z1[i] += 1;     // revert t to original state
-        __As[t] = p2-p1;
+        A[t] = p2-p1;
         ++t;
       }
     for (int i=0; i<dim; i++)
       if (i!=dir)
         z1[i] -= 1;
-    __As[t] = grid->pos(self.level(),z1);
+
     // update geometry
-    is_global.make(__As);
+    is_global.make(grid->pos(self.level(),z1), A);
 
     built_intersections = true;
   }

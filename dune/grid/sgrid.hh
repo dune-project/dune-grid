@@ -108,11 +108,15 @@ namespace Dune {
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
 
-    /*! The first dim columns of As contain the dim direction vectors.
-       Column dim is the position vector. This format allows a consistent
-       treatment of all dimensions, including 0 (the vertex).
+    /** \brief Set up the geometry
+     *
+     * \param lower The lower left corner
+     * \param A The direction vectors
+     *
+     * Allows a consistent treatment of all dimensions, including 0 (the vertex).
      */
-    void make (const FieldMatrix<ctype,mydim+1,cdim>& __As);
+    void make (const FieldVector<ctype,cdim>& lower,
+               const FieldMatrix<ctype,mydim,cdim>& A);
 
     //! constructor
     SGeometry ()
@@ -161,7 +165,8 @@ namespace Dune {
     void print (std::ostream& ss, int indent) const;
 
     //! constructor, makes element from position and direction vectors
-    void make (FieldMatrix<ctype,1,cdim>& __As);
+    void make (const FieldVector<ctype,cdim>& lower,
+               const FieldMatrix<ctype,0,cdim>& A);
 
     //! maps a local coordinate within reference element to global coordinate in element
     FieldVector<ctype, cdim> global (const FieldVector<ctype, 0>& local) const { return corner(0); }
