@@ -664,7 +664,6 @@ namespace Dune {
     mapper = new CubeMapper<dim>[MAXL];
 
     indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
-    theleafindexset = new SGridLeafIndexSet<const SGrid<dim,dimworld> >(*this);
 
     L = 1;
     low = L_;
@@ -761,9 +760,6 @@ namespace Dune {
   {
     for (size_t i=0; i<indexsets.size(); i++)
       delete indexsets[i];
-
-    delete theleafindexset;
-
 
     delete[] N;
     delete[] h;

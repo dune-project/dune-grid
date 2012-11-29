@@ -1307,78 +1307,6 @@ namespace Dune {
     std::vector<GeometryType> mytypes[GridImp::dimension+1];
   };
 
-  // Leaf Index Set
-
-  template<class GridImp>
-  class SGridLeafIndexSet : public IndexSet<GridImp,SGridLeafIndexSet<GridImp> >
-  {
-    typedef SGridLeafIndexSet< GridImp > This;
-    typedef IndexSet< GridImp, This > Base;
-
-    enum { dim = GridImp::dimension };
-
-  public:
-
-    //! constructor stores reference to a grid and level
-    explicit SGridLeafIndexSet ( const GridImp &g )
-      : grid( g )
-    {
-      // TODO move list of geometrytypes to grid, can be computed static (singleton)
-      // contains a single element type;
-      for (int codim=0; codim<=dim; codim++)
-        mytypes[codim].push_back(GeometryType(GeometryType::cube,dim-codim));
-    }
-
-    //! get index of an entity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cd>
-    int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
-    {
-      return grid.getRealImplementation(e).compressedLeafIndex();
-    }
-
-    template< int cc >
-    int subIndex ( const typename GridImp::Traits::template Codim< cc >::Entity &e,
-                   int i, unsigned int codim ) const
-    {
-      if( cc == 0 )
-        return grid.getRealImplementation(e).subCompressedIndex(codim, i);
-      else
-        DUNE_THROW( NotImplemented, "subIndex for higher codimension entity not implemented for SGrid." );
-    }
-
-    //! get number of entities of given type
-    int size (GeometryType type) const
-    {
-      return grid.size( grid.maxLevel(), type );
-    }
-
-    //! return size of set for a given codim
-    int size (int codim) const
-    {
-      return grid.size( grid.maxLevel(), codim );
-    }
-
-    // return true if the given entity is contained in \f$E\f$.
-    template< class EntityType >
-    bool contains ( const EntityType &e ) const
-    {
-      return (e.level() == grid.maxLevel());
-    }
-
-    //! deliver all geometry types used in this grid
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return mytypes[codim];
-    }
-
-  private:
-    const GridImp& grid;
-    std::vector<GeometryType> mytypes[dim+1];
-  };
 
 
   //========================================================================
@@ -1448,7 +1376,7 @@ namespace Dune {
         SHierarchicIterator,
         SLevelIterator,
         SGridLevelIndexSet<const SGrid<dim,dimworld,ctype> >,
-        SGridLeafIndexSet<const SGrid<dim,dimworld,ctype> >,
+        SGridLevelIndexSet<const SGrid<dim,dimworld,ctype> >,
         SGridGlobalIdSet<const SGrid<dim,dimworld,ctype> >,
         bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits>,
         SGridGlobalIdSet<const SGrid<dim,dimworld,ctype> >,
@@ -1523,7 +1451,7 @@ namespace Dune {
 
     // need for friend declarations in entity
     typedef SGridLevelIndexSet<SGrid<dim,dimworld> > LevelIndexSetType;
-    typedef SGridLeafIndexSet<SGrid<dim,dimworld> > LeafIndexSetType;
+    typedef SGridLevelIndexSet<SGrid<dim,dimworld> > LeafIndexSetType;
     typedef SGridGlobalIdSet<SGrid<dim,dimworld> > GlobalIdSetType;
 
     typedef typename SGridFamily<dim,dimworld,_ctype>::Traits Traits;
@@ -1736,7 +1664,7 @@ namespace Dune {
 
     const typename Traits::LeafIndexSet& leafIndexSet() const
     {
-      return *theleafindexset;
+      return *indexsets.back();
     }
 
     /*!
@@ -1789,14 +1717,12 @@ namespace Dune {
        Make associated classes friends to grant access to the real entity
      */
     friend class Dune::SGridLevelIndexSet<Dune::SGrid<dim,dimworld> >;
-    friend class Dune::SGridLeafIndexSet<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SGridGlobalIdSet<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SIntersectionIterator<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SHierarchicIterator<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SEntity<0,dim,Dune::SGrid<dim,dimworld> >;
 
     friend class Dune::SGridLevelIndexSet<const Dune::SGrid<dim,dimworld> >;
-    friend class Dune::SGridLeafIndexSet<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SGridGlobalIdSet<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SIntersectionIterator<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SHierarchicIterator<const Dune::SGrid<dim,dimworld> >;
@@ -1931,7 +1857,6 @@ namespace Dune {
     CollectiveCommunication<SGrid> ccobj;
 
     ReservedVector<SGridLevelIndexSet<const SGrid<dim,dimworld> >*, MAXL> indexsets;
-    SGridLeafIndexSet<const SGrid<dim,dimworld> > *theleafindexset;
     SGridGlobalIdSet<const SGrid<dim,dimworld> > theglobalidset;
 
     int L;                        // number of levels in hierarchic mesh 0<=level<L
