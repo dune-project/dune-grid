@@ -1720,12 +1720,12 @@ namespace Dune {
     // The new index sets from DDM 11.07.2005
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
-      return *theglobalidset;
+      return theglobalidset;
     }
 
     const typename Traits::LocalIdSet& localIdSet() const
     {
-      return *theglobalidset;
+      return theglobalidset;
     }
 
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
@@ -1932,7 +1932,7 @@ namespace Dune {
 
     ReservedVector<SGridLevelIndexSet<const SGrid<dim,dimworld> >*, MAXL> indexsets;
     SGridLeafIndexSet<const SGrid<dim,dimworld> > *theleafindexset;
-    SGridGlobalIdSet<const SGrid<dim,dimworld> > *theglobalidset;
+    SGridGlobalIdSet<const SGrid<dim,dimworld> > theglobalidset;
 
     int L;                        // number of levels in hierarchic mesh 0<=level<L
     FieldVector<ctype, dim> low;  // lower left corner of the grid

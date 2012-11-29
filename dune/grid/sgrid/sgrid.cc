@@ -665,7 +665,6 @@ namespace Dune {
 
     indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
     theleafindexset = new SGridLeafIndexSet<const SGrid<dim,dimworld> >(*this);
-    theglobalidset = new SGridGlobalIdSet<const SGrid<dim,dimworld> >;
 
     L = 1;
     low = L_;
@@ -764,7 +763,6 @@ namespace Dune {
       delete indexsets[i];
 
     delete theleafindexset;
-    delete theglobalidset;
 
 
     delete[] N;
