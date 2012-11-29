@@ -594,6 +594,8 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
     typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
 
+    friend class SIntersection<GridImp>;
+
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
@@ -646,36 +648,6 @@ namespace Dune {
 
     //! return true if neighbor on this level exists
     bool neighbor () const;
-
-    //! return outer normal
-    FieldVector<ctype, GridImp::dimensionworld> outerNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
-    {
-      return unitOuterNormal(local);
-    }
-    //! return unit outer normal
-    FieldVector<ctype, GridImp::dimensionworld> unitOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
-    {
-      return centerUnitOuterNormal();
-    }
-    //! return unit outer normal at center of intersection geometry
-    FieldVector<ctype, GridImp::dimensionworld> centerUnitOuterNormal () const
-    {
-      // while we are at it, compute normal direction
-      FieldVector<ctype, dimworld> normal(0.0);
-      if (count%2)
-        normal[count/2] =  1.0; // odd
-      else
-        normal[count/2] = -1.0; // even
-
-      return normal;
-    }
-    //! return integration outer normal
-    FieldVector<ctype, GridImp::dimensionworld> integrationOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
-    {
-      FieldVector<ctype, dimworld> n = unitOuterNormal(local);
-      n *= geometry().integrationElement(local);
-      return n;
-    }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in LOCAL coordinates of the element where iteration started.
@@ -863,25 +835,29 @@ namespace Dune {
     /*! @brief Return an outer normal (length not necessarily 1) */
     GlobalCoordinate outerNormal (const LocalCoordinate& local) const
     {
-      return is.outerNormal(local);
+      return centerUnitOuterNormal();
     }
 
     /*! @brief return outer normal scaled with the integration element */
     GlobalCoordinate integrationOuterNormal (const LocalCoordinate& local) const
     {
-      return is.integrationOuterNormal(local);
+      FieldVector<ctype, dimworld> n = centerUnitOuterNormal();
+      n *= is.geometry().integrationElement(local);
+      return n;
     }
 
     /*! @brief Return unit outer normal (length == 1)  */
     GlobalCoordinate unitOuterNormal (const LocalCoordinate& local) const
     {
-      return is.unitOuterNormal(local);
+      return centerUnitOuterNormal();
     }
 
     /*! @brief Return unit outer normal (length == 1) */
     GlobalCoordinate centerUnitOuterNormal () const
     {
-      return is.centerUnitOuterNormal();
+      FieldVector<ctype, dimworld> normal(0.0);
+      normal[is.count/2] =  (is.count%2) ? 1.0 : -1.0;
+      return normal;
     }
 
     //! constructor
