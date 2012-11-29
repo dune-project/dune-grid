@@ -65,32 +65,48 @@ void testFS940()
   std::cout<<"i1: \n";
   std::cout<<" has neighbor "<<i1->neighbor()<<std::endl;
   std::cout<<" boundary "<<i1->boundary()<<std::endl;
+#if !DISABLE_DEPRECATED_METHOD_CHECK
   std::cout<<" boundaryId "<<i1->boundaryId()<<std::endl;
+#endif
 
   if (i1->neighbor() != res1[0]
       || i1->boundary() != res1[1]
-      || i1->boundaryId() != res1[2])
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+      || i1->boundaryId() != res1[2]
+#endif
+      )
   {
     DUNE_THROW(Dune::Exception,
                "Wrong intersection information for i1: "
                << " has neighbor/boundary/boundaryId "
-               << i1->neighbor() << "/" << i1->boundary() << "/" << i1->boundaryId()
+               << i1->neighbor() << "/" << i1->boundary()
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+               << "/" << i1->boundaryId()
+#endif
                << "expected " << res1[0] << "/" << res1[1] << "/" << res1[2]);
   }
 
   std::cout<<"i2: \n";
   std::cout<<" has neighbor "<<i2->neighbor()<<std::endl;
   std::cout<<" boundary "<<i2->boundary()<<std::endl;
+#if !DISABLE_DEPRECATED_METHOD_CHECK
   std::cout<<" boundaryId "<<i2->boundaryId()<<std::endl;
+#endif
 
   if (i2->neighbor() != res2[0]
       || i2->boundary() != res2[1]
-      || i2->boundaryId() != res2[2])
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+      || i2->boundaryId() != res2[2]
+#endif
+      )
   {
     DUNE_THROW(Dune::Exception,
                "Wrong intersection information for i2: "
                << " has neighbor/boundary/boundaryId "
-               << i2->neighbor() << "/" << i2->boundary() << "/" << i2->boundaryId()
+               << i2->neighbor() << "/" << i2->boundary()
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+               << "/" << i2->boundaryId()
+#endif
                << "expected " << res2[0] << "/" << res2[1] << "/" << res2[2]);
   }
 
@@ -99,19 +115,26 @@ void testFS940()
   std::cout<<"i1 after i1=i2: \n";
   std::cout<<" has neighbor "<<i1->neighbor()<<std::endl;
   std::cout<<" boundary "<<i1->boundary()<<std::endl;
+#if !DISABLE_DEPRECATED_METHOD_CHECK
   std::cout<<" boundaryId "<<i1->boundaryId()<<std::endl;
+#endif
 
   if (i1->neighbor() != res2[0]
       || i1->boundary() != res2[1]
-      || i1->boundaryId() != res2[2])
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+      || i1->boundaryId() != res2[2]
+#endif
+      )
   {
     DUNE_THROW(Dune::Exception,
                "Wrong intersection information for i1 after assignment: "
                << " has neighbor/boundary/boundaryId "
-               << i1->neighbor() << "/" << i1->boundary() << "/" << i1->boundaryId()
+               << i1->neighbor() << "/" << i1->boundary()
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+               << "/" << i1->boundaryId()
+#endif
                << "expected " << res2[0] << "/" << res2[1] << "/" << res2[2]);
   }
-
 }
 
 int main () {
