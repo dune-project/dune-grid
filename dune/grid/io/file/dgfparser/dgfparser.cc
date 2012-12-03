@@ -384,13 +384,17 @@ namespace Dune
         nofelements = bcube.get( elements, elParams, nofelparams );
         if( bsimplex.isactive() && (element == General) )
         {
-          // make simplex grid
-          /*
-             info->cube2simplex( element );
-             nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
-             simplexgrid = true;
-           */
-          nofelements += bsimplex.get( elements, elParams, nofelparams );
+          size_t nofsimplex = bsimplex.get( elements, elParams, nofelparams );
+
+          // if no simplices found but simplex block active, convert cubes to simplices
+          if( nofsimplex == 0 )
+          {
+            // make simplex grid
+            info->cube2simplex( element );
+            nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
+            simplexgrid = true;
+            nofelements += bsimplex.get( elements, elParams, nofelparams );
+          }
         }
       }
 #ifdef EXPERIMENTAL_GRID_EXTENSIONS
