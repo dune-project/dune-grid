@@ -275,10 +275,10 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(comm,L,s,std::bitset<dim>(0),overlap,lb), ccobj(comm),
+      : YMG(comm,L,s,std::bitset<dim>(),overlap,lb), ccobj(comm),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
-      : YMG(L,s,std::bitset<dim>(0),overlap,lb),
+      : YMG(L,s,std::bitset<dim>(),overlap,lb),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
@@ -306,10 +306,10 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(MPI_COMM_SELF,L,s,std::bitset<dim>(0),overlap,lb), ccobj(MPI_COMM_SELF),
+      : YMG(MPI_COMM_SELF,L,s,std::bitset<dim>(),overlap,lb), ccobj(MPI_COMM_SELF),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
-      : YMG(L,s,std::bitset<dim>(0),overlap,lb),
+      : YMG(L,s,std::bitset<dim>(),overlap,lb),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
