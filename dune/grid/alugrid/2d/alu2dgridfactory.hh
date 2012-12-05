@@ -4,7 +4,7 @@
 #ifndef DUNE_ALU2DGRID_FACTORY_HH
 #define DUNE_ALU2DGRID_FACTORY_HH
 
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 
 #include <dune/common/array.hh>
 #include <dune/common/parallel/mpihelper.hh>
@@ -464,6 +464,6 @@ namespace Dune
 
 }
 
-#endif // #ifdef ENABLE_ALUGRID
+#endif // #if HAVE_ALUGRID
 
 #endif // #ifndef DUNE_ALU2DGRID_FACTORY_HH
