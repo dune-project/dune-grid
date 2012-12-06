@@ -130,7 +130,7 @@ namespace Dune {
         upper += A[i];
 
       // look for the directions where the cube is actually extended
-      std::bitset<cdim> axes(0);
+      std::bitset<cdim> axes;
 
       for (size_t i=0; i<cdim; i++)
         if ((upper[i] - lower[i]) > 1e-10)
