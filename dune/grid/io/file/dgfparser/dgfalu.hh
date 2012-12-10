@@ -4,7 +4,7 @@
 #define DUNE_DGFPARSERALU_HH
 
 // only include if ALUGrid is used
-#if defined ENABLE_ALUGRID
+#if HAVE_ALUGRID
 
 #include <dune/grid/alugrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
@@ -566,6 +566,6 @@ namespace Dune
 
 #include "dgfalu.cc"
 
-#endif // #if defined ENABLE_ALUGRID
+#endif // #if HAVE_ALUGRID
 
 #endif // #ifndef DUNE_DGFPARSERALU_HH
