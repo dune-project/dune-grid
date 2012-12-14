@@ -296,7 +296,7 @@ namespace Dune
   {
     // empty vector means no new ordering
     std::vector< Index > noNewOrdering ;
-    write( gridout, addParams, noNewOrdering );
+    write( gridout, noNewOrdering, addParams );
   }
 
   template< class GV >
