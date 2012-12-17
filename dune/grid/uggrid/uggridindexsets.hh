@@ -324,7 +324,7 @@ namespace Dune {
      class implements them both at once.
    */
   template <class GridImp>
-  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp>,typename UG_NS<GridImp::dimension>::UG_ID_TYPE>
+  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp>,typename UG_NS<remove_const<GridImp>::type::dimension>::UG_ID_TYPE>
   {
     enum {dim = remove_const<GridImp>::type::dimension};
 
