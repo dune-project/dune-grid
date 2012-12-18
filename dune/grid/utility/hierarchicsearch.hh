@@ -64,32 +64,41 @@ namespace Dune
     /**
        internal helper method
 
-       @param[in] e      EntityPointer whos children should be searched
+       @param[in] entity Entity whos children should be searched
        @param[in] global Point you are searching for
 
        Search the child entity containing point global. Recursively
        recursively continue until we found an entity that is part of
        the IndexSet.
      */
-    EntityPointer hFindEntity ( const Entity &e,
+    EntityPointer hFindEntity ( const Entity &entity,
                                 const FieldVector<ct,dimw>& global) const
     {
+      // type of element geometry
+      typedef typename Entity::Geometry Geometry;
+      // type of local coordinate
+      typedef typename Geometry::LocalCoordinate LocalCoordinate;
+
+      const int childLevel = entity.level()+1 ;
       // loop over all child Entities
-      const HierarchicIterator end = e.hend(e.level()+1);
-      for( HierarchicIterator it = e.hbegin( e.level()+1 ); it != end; ++it )
+      const HierarchicIterator end = entity.hend( childLevel );
+      for( HierarchicIterator it = entity.hbegin( childLevel ); it != end; ++it )
       {
-        FieldVector<ct,dim> local = it->geometry().local(global);
-        if (ReferenceElements<double, dim>::general(it->type()).checkInside(local))
+        const Entity &child = *it;
+        const Geometry &geo = child.geometry();
+
+        LocalCoordinate local = geo.local(global);
+        if (ReferenceElements<double, dim>::general( child.type() ).checkInside(local))
         {
           // return if we found the leaf, else search through the child entites
-          if( is.contains( *it ) )
-            return EntityPointer( it );
+          if( indexSet_.contains( child ) )
+            return EntityPointer( child );
           else
-            return hFindEntity( *it, global );
+            return hFindEntity( child, global );
         }
       }
       std::ostringstream children;
-      HierarchicIterator it = e.hbegin( e.level()+1 );
+      HierarchicIterator it = entity.hbegin( childLevel );
       if(it != end) {
         children << "{" << formatEntityInformation(*it) << "}";
         for( ++it; it != end; ++it )
@@ -97,7 +106,7 @@ namespace Dune
       }
       DUNE_THROW(Exception, "{" << className(*this) << "} Unexpected "
                  "internal Error: none of the children of the entity "
-                 "{" << formatEntityInformation(e) << "} contains "
+                 "{" << formatEntityInformation(entity) << "} contains "
                  "coordinate (" << global << ").  Children are: "
                  "[" << children.str() << "].");
     }
@@ -106,7 +115,7 @@ namespace Dune
     /**
        @brief Construct a HierarchicSearch object from a Grid and an IndexSet
      */
-    HierarchicSearch(const Grid & _g, const IS & _is) : g(_g), is(_is) {};
+    HierarchicSearch(const Grid & g, const IS & is) : grid_(g), indexSet_(is) {}
 
     /**
        @brief Search the IndexSet of this HierarchicSearch for an Entity
@@ -130,20 +139,25 @@ namespace Dune
     {
       typedef typename Grid::template Partition<partition>::LevelGridView
       LevelGV;
-      const LevelGV &gv = g.template levelView<partition>(0);
+      const LevelGV &gv = grid_.template levelView<partition>(0);
 
       //! type of LevelIterator
       typedef typename LevelGV::template Codim<0>::Iterator LevelIterator;
+
+      // type of element geometry
+      typedef typename Entity::Geometry Geometry;
+      // type of local coordinate
+      typedef typename Geometry::LocalCoordinate LocalCoordinate;
 
       // loop over macro level
       LevelIterator it = gv.template begin<0>();
       LevelIterator end = gv.template end<0>();
       for (; it != end; ++it)
       {
-        const Entity &e = *it;
-        const typename Entity::Geometry &geo = e.geometry();
+        const Entity &entity = *it;
+        const Geometry &geo = entity.geometry();
 
-        FieldVector< ct, dim > local = geo.local( global );
+        LocalCoordinate local = geo.local( global );
         if( !ReferenceElements< double, dim >::general( geo.type() ).checkInside( local ) )
           continue;
 
@@ -151,17 +165,17 @@ namespace Dune
           continue;
 
         // return if we found the leaf, else search through the child entites
-        if( is.contains( *it ) )
-          return EntityPointer( it );
+        if( indexSet_.contains( entity ) )
+          return EntityPointer( entity );
         else
-          return hFindEntity( *it, global );
+          return hFindEntity( entity, global );
       }
       DUNE_THROW( GridError, "Coordinate " << global << " is outside the grid." );
     }
 
   private:
-    const Grid& g;
-    const IS& is;
+    const Grid& grid_;
+    const IS&   indexSet_;
   };
 
 } // end namespace Dune
