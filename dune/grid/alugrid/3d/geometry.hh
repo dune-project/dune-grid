@@ -13,6 +13,7 @@
 #include "alu3dinclude.hh"
 #include "topology.hh"
 #include "mappings.hh"
+#include <dune/grid/alugrid/common/objectfactory.hh>
 
 namespace Dune
 {
@@ -766,8 +767,14 @@ namespace Dune
     //! return storage provider for geometry objects
     static GeometryProviderType& geoProvider()
     {
+#ifdef USE_SMP_PARALLEL
+      typedef ALUGridObjectFactory< GridImp >  GridObjectFactoryType;
+      static std::vector< GeometryProviderType > storage( GridObjectFactoryType :: maxThreads() );
+      return storage[ GridObjectFactoryType :: threadNumber () ];
+#else
       static GeometryProviderType storage;
       return storage;
+#endif
     }
 
     // return reference to geometry implementation

@@ -336,19 +336,19 @@ namespace Dune
   // -----------
 
   /** \brief Implementation class for the UGGrid Id sets
-
-     The UGGridGlobalIdSet and the UGGridLocalIdSet are identical. This
-     class implements them both at once.
+   *
+   *  The UGGridGlobalIdSet and the UGGridLocalIdSet are identical. This class
+   *  implements them both at once.
    */
   template< class Grid >
   class UGGridIdSet
-    : public IdSet< Grid, UGGridIdSet< Grid >, typename UG_NS< Grid::dimension >::UG_ID_TYPE >
+    : public IdSet< Grid, UGGridIdSet< Grid >, typename UG_NS< remove_const< Grid >::type::dimension >::UG_ID_TYPE >
   {
-    typedef IdSet< Grid, UGGridIdSet< Grid >, typename UG_NS< Grid::dimension >::UG_ID_TYPE > Base;
+    typedef IdSet< Grid, UGGridIdSet< Grid >, typename UG_NS< remove_const< Grid >::type::dimension >::UG_ID_TYPE > Base;
 
     typedef typename remove_const< Grid >::type::Traits Traits;
 
-    enum {dim = remove_const<Grid>::type::dimension};
+    static const int dim = remove_const< Grid >::type::dimension;
 
     typedef typename std::pair<const typename UG_NS<dim>::Element*, int> Face;
 
