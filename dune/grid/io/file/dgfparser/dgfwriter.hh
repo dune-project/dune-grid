@@ -174,13 +174,18 @@ namespace Dune
     const size_t orderSize = newElemOrder.size() ;
     if( orderSize == indexSet.size( 0 ) )
     {
-      elementSeeds.resize( indexSet.size( 0 ), ElementSeed() ) ;
       const ElementIterator end = gridView_.template end< 0 >();
-      for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
+      ElementIterator it = gridView_.template begin< 0 >();
+
+      if( it != end )
       {
-        const Element& element = *it ;
-        assert( newElemOrder[ indexSet.index( element ) ] < orderSize );
-        elementSeeds[ newElemOrder[ indexSet.index( element ) ] ] = element.seed();
+        elementSeeds.resize( indexSet.size( 0 ), (*it).seed() ) ;
+        for( ; it != end; ++it )
+        {
+          const Element& element = *it ;
+          assert( newElemOrder[ indexSet.index( element ) ] < orderSize );
+          elementSeeds[ newElemOrder[ indexSet.index( element ) ] ] = element.seed();
+        }
       }
     }
 
