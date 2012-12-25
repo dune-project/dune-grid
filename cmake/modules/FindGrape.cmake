@@ -72,7 +72,7 @@ find_library(GRAPE_LIBRARY
 
 include(CheckLibraryExists)
 get_filename_component(GRAPE_LIBRARY_PATH ${GRAPE_LIBRARY} PATH)
-check_library_exists(gr grape ${GRAPE_LIBRARY_PATH} _GRAPE_LIB_FUNCTIONAL)
+check_library_exists(gr grape "${GRAPE_LIBRARY_PATH}" _GRAPE_LIB_FUNCTIONAL)
 cmake_pop_check_state()
 
 if(_GRAPE_LIB_FUNCTIONAL)
