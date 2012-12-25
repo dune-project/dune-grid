@@ -32,8 +32,7 @@ template <int dim>
 Dune::UGGrid < dim >::UGGrid()
   : multigrid_(NULL),
     leafIndexSet_(*this),
-    globalIdSet_(*this),
-    localIdSet_(*this),
+    idSet_(*this),
     refinementType_(LOCAL),
     closureType_(GREEN),
     someElementHasBeenMarkedForRefinement_(false),
@@ -98,26 +97,51 @@ Dune::UGGrid < dim >::UGGrid()
 
     if (dim==2)
     {
-      char* nfarg = strdup("newformat DuneFormat2d");
-      if (UG_NS<dim>::CreateFormatCmd(1, &nfarg))
+#ifdef ModelP
+      const int nArgs = 3;
+#else
+      const int nArgs = 1;
+#endif
+      char* newArgs[nArgs];
+      for (int i=0; i<nArgs; i++)
+        newArgs[i] = (char*)::malloc(50*sizeof(char));
+
+      sprintf(newArgs[0], "newformat DuneFormat2d" );
+#ifdef ModelP
+      // generate element and node vectors for load
+      // balancing of element and node data
+      sprintf(newArgs[1], "V e1 : vt 1" );   // generates element vectors
+      sprintf(newArgs[2], "V n1 : vt 1" );   // generates node vectors
+#endif
+      if (UG_NS<dim>::CreateFormatCmd(nArgs, newArgs))
         DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
-      free(nfarg);
+      for (int i=0; i<nArgs; i++)
+        free(newArgs[i]);
     }
     if (dim==3)
     {
-      char* newArgs[2];
-      for (int i=0; i<2; i++)
+#ifdef ModelP
+      const int nArgs = 4;
+#else
+      const int nArgs = 2;
+#endif
+      char* newArgs[nArgs];
+      for (int i=0; i<nArgs; i++)
         newArgs[i] = (char*)::malloc(50*sizeof(char));
 
       sprintf(newArgs[0], "newformat DuneFormat3d" );
       sprintf(newArgs[1], "V s1 : vt 1" ); // generates side vectors in 3D
-
-      if (UG_NS<dim>::CreateFormatCmd(2, newArgs))
+#ifdef ModelP
+      // generate element and node vectors for load
+      // balancing of element and node data
+      sprintf(newArgs[2], "V e1 : vt 1" ); // generates element vectors
+      sprintf(newArgs[3], "V n1 : vt 1" ); // generates node vectors
+#endif
+      if (UG_NS<dim>::CreateFormatCmd(nArgs, newArgs))
         DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
 
-      for (int i=0; i<2; i++)
+      for (int i=0; i<nArgs; i++)
         free(newArgs[i]);
-
     }
   }
 
@@ -157,11 +181,6 @@ Dune::UGGrid < dim >::~UGGrid()
   // Shut down UG if this was the last existing UGGrid object
   if (UGGrid<2>::numOfUGGrids + UGGrid<3>::numOfUGGrids == 0)
     UG_NS<dim>::ExitUg();
-
-  // Delete levelIndexSets
-  for (unsigned int i=0; i<levelIndexSets_.size(); i++)
-    if (levelIndexSets_[i])
-      delete levelIndexSets_[i];
 }
 
 template < int dim >
@@ -639,26 +658,35 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
   if (dim==3) {
 
     for (int i=0; i<=maxLevel(); i++) {
+      typedef typename Base::LevelGridView GridView;
+      GridView gridView = this->levelView( i );
 
-      typename Traits::template Codim<0>::LevelIterator eIt = lbegin<0>(i);
-      typename Traits::template Codim<0>::LevelIterator eEndIt = lend<0>(i);
+      typedef typename GridView::template Codim<0>::Iterator Iterator;
+      const Iterator end = gridView.template end<0>();
+      for (Iterator it = gridView.template begin<0>(); it != end; ++it) {
+        const typename GridView::template Codim<0>::Entity &entity = *it;
+        const GeometryType gt = entity.type();
 
-      for (; eIt!=eEndIt; ++eIt) {
+        typename UG_NS<dim>::Element* elem0 = this->getRealImplementation(entity).target_;
 
-        typename UG_NS<dim>::Element* elem0 = this->getRealImplementation(*eIt).target_;
+        typedef typename GridView::IntersectionIterator IntersectionIterator;
+        const IntersectionIterator iend = gridView.iend(entity);
+        for (IntersectionIterator iit = gridView.ibegin(entity); iit != iend; ++iit) {
+          const typename GridView::Intersection& intersection = *iit;
 
-        typename Traits::template Codim<0>::Entity::LevelIntersectionIterator nIt = eIt->ilevelbegin();
-        typename Traits::template Codim<0>::Entity::LevelIntersectionIterator nEndIt = eIt->ilevelend();
+          const int indexInInside = intersection.indexInInside();
 
-        for (; nIt!=nEndIt; ++nIt) {
+          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(indexInInside, gt);
 
-          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt->indexInInside(), eIt->type());
+          if (intersection.neighbor()) {
+            const typename GridView::template Codim<0>::EntityPointer pOutside = intersection.outside();
+            const typename GridView::template Codim<0>::Entity& outside = *pOutside;
 
-          if (nIt->neighbor()) {
+            const int indexInOutside = intersection.indexInOutside();
 
-            typename UG_NS<dim>::Element* elem1 = this->getRealImplementation(*nIt->outside()).target_;
+            typename UG_NS<dim>::Element* elem1 = this->getRealImplementation(outside).target_;
 
-            int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt->indexInOutside(), nIt->outside()->type());
+            int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(indexInOutside, outside.type());
 
             // If there are two SideVector objects instead of only one (as there should be),
             // delete one of them.
@@ -668,14 +696,12 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
                                              side0,
                                              (typename UG_NS<3>::Element*)elem1,
                                              side1);
-
           }
 
           // Set the correct value for the VCOUNT field:
           // the number of elements adjacent to this face.
           // This method may not be called before DisposeDoubledSideVector
-          UG_NS<dim>::setVCount(elem0,side0, (nIt->neighbor() ? 2 : 1));
-
+          UG_NS<dim>::setVCount(elem0, side0, (intersection.neighbor() ? 2 : 1));
         }
 
       }
@@ -686,7 +712,7 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
   // Create new level index sets if necessary
   for (int i=levelIndexSets_.size(); i<=maxLevel(); i++)
-    levelIndexSets_.push_back(new UGGridLevelIndexSet<const UGGrid<dim> >());
+    levelIndexSets_.push_back(make_shared<UGGridLevelIndexSet<const UGGrid<dim> > >());
 
   // Update the zero level LevelIndexSet.  It is updated only once, at the time
   // of creation of the coarse grid.  After that it is not touched anymore.

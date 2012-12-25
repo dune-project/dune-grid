@@ -25,7 +25,7 @@ macro(dune_define_gridtype output)
    also integer constants dimgrid and dimworld are set in this namespace.
    The required headers for this grid implementation are also included.
 */
-#if defined ${GRIDTYPE_GRIDTYPE} && ! defined USED_${GRIDTYPE_GRIDTYPE}_GRIDTYPE
+#if HAVE_DUNE_GRID && defined ${GRIDTYPE_GRIDTYPE} && ! defined USED_${GRIDTYPE_GRIDTYPE}_GRIDTYPE
   #if HAVE_GRIDTYPE
    #error \"Ambiguous definition of GRIDTYPE.\"
   #endif
@@ -61,6 +61,6 @@ macro(dune_define_gridtype output)
   }
   #define HAVE_GRIDTYPE 1
   #define USED_${GRIDTYPE_GRIDTYPE}_GRIDTYPE 1
-#endif // #if defined ${GRIDTYPE_GRIDTYPE}")
+#endif // #if HAVE_DUNE_GRID && defined ${GRIDTYPE_GRIDTYPE} && ..")
 endmacro(dune_define_gridtype output)
 

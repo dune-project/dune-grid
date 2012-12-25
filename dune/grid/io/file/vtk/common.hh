@@ -34,7 +34,7 @@ namespace Dune
     //! How the bulk data should be stored in the file
     /**
      * \code
-     *#include <dune/grid/io/file/vtk/common.hh>
+     * #include <dune/grid/io/file/vtk/common.hh>
      * \endcode
      */
     enum OutputType {
@@ -54,7 +54,7 @@ namespace Dune
     //! Whether to produce conforming or non-conforming output.
     /**
      * \code
-     *#include <dune/grid/io/file/vtk/common.hh>
+     * #include <dune/grid/io/file/vtk/common.hh>
      * \endcode
      *
      * This applies to the conformity of the data; a non-conforming grid can
@@ -168,7 +168,7 @@ namespace Dune
     //! Type representing VTK's entity geometry types
     /**
      * \code
-     *#include <dune/grid/io/file/vtk/common.hh>
+     * #include <dune/grid/io/file/vtk/common.hh>
      * \endcode
      *
      * Only the types which have a corresponding Dune::GeometryType have been
@@ -189,7 +189,7 @@ namespace Dune
     //! mapping from GeometryType to VTKGeometryType
     /**
      * \code
-     *#include <dune/grid/io/file/vtk/common.hh>
+     * #include <dune/grid/io/file/vtk/common.hh>
      * \endcode
      */
     inline GeometryType geometryType(const Dune::GeometryType& t)
@@ -215,7 +215,7 @@ namespace Dune
     //! renumber VTK <-> Dune
     /**
      * \code
-     *#include <dune/grid/io/file/vtk/common.hh>
+     * #include <dune/grid/io/file/vtk/common.hh>
      * \endcode
      *
      * Since the renumbering never does anything more complex than exchanging
@@ -239,7 +239,7 @@ namespace Dune
     //! renumber VTK <-> Dune
     /**
      * \code
-     *#include <dune/grid/io/file/vtk/common.hh>
+     * #include <dune/grid/io/file/vtk/common.hh>
      * \endcode
      *
      * This function is just a convenience shortcut function wrapping
@@ -284,7 +284,7 @@ namespace Dune
     //! which type of VTK file to write
     /**
      * \code
-     *#include <dune/grid/io/file/vtk/common.hh>
+     * #include <dune/grid/io/file/vtk/common.hh>
      * \endcode
      */
     enum FileType {

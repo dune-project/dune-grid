@@ -114,7 +114,7 @@ namespace Dune {
      *
      * Sample output:
      * \verbatim
-       prefix>
+     * prefix>
      * \endverbatim
      *
      * If \c gridName, \c gridViewName, or \c partitionName is emtpy, the

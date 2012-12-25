@@ -174,12 +174,12 @@ namespace Dune
   // Instantiation
   // -------------
 
-  template struct AlbertaGridHierarchicIndexSet< 1, Alberta::dimWorld >;
+  template class AlbertaGridHierarchicIndexSet< 1, Alberta::dimWorld >;
 #if ALBERTA_DIM >= 2
-  template struct AlbertaGridHierarchicIndexSet< 2, Alberta::dimWorld >;
+  template class AlbertaGridHierarchicIndexSet< 2, Alberta::dimWorld >;
 #endif // #if ALBERTA_DIM >= 2
 #if ALBERTA_DIM >= 3
-  template struct AlbertaGridHierarchicIndexSet< 3, Alberta::dimWorld >;
+  template class AlbertaGridHierarchicIndexSet< 3, Alberta::dimWorld >;
 #endif // #if ALBERTA_DIM >= 3
 
 } // namespace Dune

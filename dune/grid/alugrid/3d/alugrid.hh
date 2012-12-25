@@ -4,7 +4,7 @@
 #define DUNE_ALU3DGRID_ALUGRID_HH
 
 // only include this code, if ENABLE_ALUGRID is defined
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 
 // 3d version
 #include <dune/grid/alugrid/common/capabilities.hh>
@@ -561,7 +561,7 @@ namespace Dune
 
 } //end  namespace Dune
 
-#endif // #ifdef ENABLE_ALUGRID
+#endif // #if HAVE_ALUGRID
 
 #undef alu_inline
 #endif

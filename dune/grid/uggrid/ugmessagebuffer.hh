@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/common/gridenums.hh>
 

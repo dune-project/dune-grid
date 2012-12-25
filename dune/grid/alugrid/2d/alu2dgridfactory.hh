@@ -4,10 +4,10 @@
 #ifndef DUNE_ALU2DGRID_FACTORY_HH
 #define DUNE_ALU2DGRID_FACTORY_HH
 
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 
 #include <dune/common/array.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -236,6 +236,7 @@ namespace Dune
              new Grid( filename, globalProjection_ , bndProjections, grdVerbose_ );
     }
 
+  public:
     /** \brief set factory's verbosity
      *
      *  \param[in]  verbose  verbosity (true/flase)
@@ -463,6 +464,6 @@ namespace Dune
 
 }
 
-#endif // #ifdef ENABLE_ALUGRID
+#endif // #if HAVE_ALUGRID
 
 #endif // #ifndef DUNE_ALU2DGRID_FACTORY_HH

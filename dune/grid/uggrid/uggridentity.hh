@@ -88,7 +88,7 @@ namespace Dune {
     template <class GridImp_>
     friend class UGGridLeafIndexSet;
 
-    template <class GridImp_, bool Local>
+    template <class GridImp_>
     friend class UGGridIdSet;
 
     friend class UGGridEntityPointer<codim, GridImp>;
@@ -216,7 +216,7 @@ namespace Dune {
     template <class GridImp_>
     friend class UGGridLeafIndexSet;
 
-    template <class GridImp_, bool Local>
+    template <class GridImp_>
     friend class UGGridIdSet;
 
     friend class UGGridEntityPointer<codim, GridImp>;

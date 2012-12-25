@@ -4,9 +4,9 @@
 #define DUNE_ALUGRID_FORWARDDECLARATION
 
 //- common includes
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 #if HAVE_MPI
-#include <dune/common/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicollectivecommunication.hh>
 #endif
 
 //- ALUGrid includes

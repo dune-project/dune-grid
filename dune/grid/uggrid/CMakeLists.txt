@@ -23,9 +23,10 @@ set(HEADERCHECK_IGNORE
   uggridleveliterator.hh
   uggridlocalgeometry.hh
   uggridrenumberer.hh
-  ugincludes.hh
   uggridintersections.hh
   uggridintersectioniterators.hh
+  ugincludes.hh
+  uglbgatherscatter.hh
   ugwrapper.hh)
 
 set(HEADERS

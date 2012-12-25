@@ -4,7 +4,7 @@
 #define DUNE_ALUGRID_CAPABILITIES_HH
 
 // only include this code, if ENABLE_ALUGRID is defined
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/alugrid/common/declaration.hh>
@@ -117,6 +117,6 @@ namespace Dune
 
 } //end  namespace Dune
 
-#endif // #ifdef ENABLE_ALUGRID
+#endif // #if HAVE_ALUGRID
 
 #endif // #ifdef DUNE_ALUGRID_CAPABILITIES_HH

@@ -147,14 +147,8 @@ namespace Dune {
     //! return true if intersection is with boundary.
     bool boundary () const;
 
-    //! return true if across the edge an neighbor on this level exists
+    //! return true if across the face an neighbor on leaf exists
     bool neighbor () const;
-
-    //! return true if across the edge an neighbor on this level exists
-    bool levelNeighbor () const;
-
-    //! return true if across the edge an neighbor on leaf level exists
-    bool leafNeighbor () const;
 
     //! return information about the Boundary
     int boundaryId () const;
@@ -293,9 +287,6 @@ namespace Dune {
 
     // unit outer normal
     mutable NormalType unitOuterNormal_;
-
-    // true if end iterator
-    bool done_;
   };
 
   template<class GridImp>
@@ -345,7 +336,6 @@ namespace Dune {
     using BaseType :: connector_;
     using BaseType :: geoProvider_;
     using BaseType :: factory_;
-    using BaseType :: done_;
     using BaseType :: boundary;
     using BaseType :: done ;
     using BaseType :: getFace;
@@ -381,17 +371,15 @@ namespace Dune {
     //! return true if across the edge an neighbor on this level exists
     bool neighbor () const;
 
-    //! return true if across the edge an neighbor on this level exists
-    bool levelNeighbor () const;
-
-    //! return true if across the edge an neighbor on leaf level exists
-    bool leafNeighbor () const;
-
     //! return true if intersection is conforming
     bool conforming () const
     {
-      assert( !neighbor() || this->connector_.conformanceState() == FaceInfoType::CONFORMING );
-      return true;
+      assert( ( ! connector_.conformingRefinement() ) ?
+              ( !neighbor() || this->connector_.conformanceState() == FaceInfoType::CONFORMING ) : true );
+      // for conforming refinement use base implementation
+      // otherwise its true
+      return connector_.conformingRefinement() ?
+             BaseType :: conforming() : true ;
     }
   private:
     // set new face

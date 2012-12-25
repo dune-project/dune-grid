@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <vector>
 #include <deque>
+#include <bitset>
 
 // C includes
 #if HAVE_MPI
@@ -19,10 +20,11 @@
 // local includes
 #include <dune/common/fvector.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/common/power.hh>
 #include <dune/grid/common/grid.hh>
 
-/*! \file grids.hh
-   This is the basis for the yaspgrid implementation of the Dune grid interface.
+/** \file
+    \brief This is the basis for the yaspgrid implementation of the Dune grid interface.
  */
 
 namespace Dune {
@@ -42,7 +44,7 @@ namespace Dune {
      The YGrid considered here describes a finite set \f$d\f$-tupels of the form
      \f[ G = \{ (k_0,\ldots,k_{d-1}) | o_i \leq k_i < o_i+s_i \}  \f]
 
-     togehter with an affine mapping
+     together with an affine mapping
 
      \f[ t : G \to R^d, \ \ \ t(k)_i = k_i h_i + r_i \f].
 
@@ -72,7 +74,6 @@ namespace Dune {
     //! define types used for arguments
     typedef FieldVector<int, d>  iTupel;
     typedef FieldVector<ct, d> fTupel;
-    typedef FieldVector<bool, d> bTupel;
 
     //! Destructor
     virtual ~YGrid()
@@ -584,7 +585,6 @@ namespace Dune {
   public:
     typedef typename YGrid<d,ct>::iTupel iTupel;
     typedef typename YGrid<d,ct>::fTupel fTupel;
-    typedef typename YGrid<d,ct>::bTupel bTupel;
 
     //! Destructor
     virtual ~SubYGrid()
@@ -994,27 +994,6 @@ namespace Dune {
     return s;
   }
 
-  namespace
-  {
-    template<int dim>
-    struct power
-    {
-      static int eval(int s)
-      {
-        return s*power<dim-1>::eval(s);
-      }
-    };
-
-    template<>
-    struct power<0>
-    {
-      static int eval(int s)
-      {
-        return 1;
-      }
-    };
-  }
-
   /** \brief Implement the default load balance strategy of yaspgrid
    */
   template<int d>
@@ -1078,7 +1057,7 @@ namespace Dune {
     {
       bool found=false;
       for(int i=1; i<P; ++i)
-        if(power<d>::eval(i)==P) {
+        if(Power<d>::eval(i)==P) {
           for(int j=0; j<d; ++j)
             dims[j]=i;
           found=true;
@@ -1106,7 +1085,6 @@ namespace Dune {
   public:
     //! type used to pass tupels in and out
     typedef FieldVector<int, d> iTupel;
-    typedef FieldVector<bool, d> bTupel;
 
 
   private:
@@ -1291,7 +1269,7 @@ namespace Dune {
     }
 
     //! return true if neighbor with given delta is a neighbor under the given periodicity
-    bool is_neighbor (iTupel delta, bTupel periodic) const
+    bool is_neighbor (iTupel delta, std::bitset<d> periodic) const
     {
       iTupel coord = rank_to_coord(_rank); // my own coordinate with 0 <= c_i < dims_i
 
@@ -1549,17 +1527,6 @@ namespace Dune {
 #endif
     }
 
-    //! global sum
-    double global_sum (double x) const
-    {
-      if (_procs==1) return x;
-      double res = 0.0;
-#if HAVE_MPI
-      MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_SUM,_comm);
-#endif
-      return res;
-    }
-
     //! global max
     double global_max (double x) const
     {
@@ -1571,19 +1538,6 @@ namespace Dune {
 #endif
       return res;
     }
-
-    //! global min
-    double global_min (double x) const
-    {
-      double res = 0.0;
-
-      if (_procs==1) return x;
-#if HAVE_MPI
-      MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_MIN,_comm);
-#endif
-      return res;
-    }
-
 
     //! print contents of torus object
     void print (std::ostream& s) const
@@ -1739,14 +1693,13 @@ namespace Dune {
     //! define types used for arguments
     typedef FieldVector<int, d> iTupel;
     typedef FieldVector<ct, d> fTupel;
-    typedef FieldVector<bool, d> bTupel;
 
     // communication tag used by multigrid
     enum { tag = 17 };
 
     //! constructor making a grid
 #if HAVE_MPI
-    MultiYGrid (MPI_Comm comm, fTupel L, iTupel s, bTupel periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
+    MultiYGrid (MPI_Comm comm, fTupel L, iTupel s, std::bitset<d> periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
       : _LL(L), _s(s), _periodic(periodic), _maxlevel(0), _overlap(overlap),
         _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
     {
@@ -1767,7 +1720,7 @@ namespace Dune {
       //      print(std::cout);
     }
 #else
-    MultiYGrid (fTupel L, iTupel s, bTupel periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
+    MultiYGrid (fTupel L, iTupel s, std::bitset<d> periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
       : _LL(L), _s(s), _periodic(periodic), _maxlevel(0), _overlap(overlap),
         _torus(tag,s,lb) // torus gets s to compute procs/direction
     {
@@ -1797,8 +1750,7 @@ namespace Dune {
       for (int i=0; i<d; i++) s[i] = 2*cg.cell_global.size(i);
 
       // compute overlap
-      int overlap;
-      if (keep_overlap) overlap = 2*cg.overlap;else overlap = cg.overlap;
+      int overlap = (keep_overlap) ? 2*cg.overlap : cg.overlap;
 
       // output
       //    if (_torus.rank()==0) std::cout << "MultiYGrid<" // changed dinfo to cout
@@ -2168,7 +2120,7 @@ namespace Dune {
     // o_interior  origin of interior (non-overlapping) cell decomposition
     // s_interior  size of interior cell decomposition
     // overlap     to be used on this grid level
-    YGridLevel makelevel (fTupel L, iTupel s, bTupel periodic, iTupel o_interior, iTupel s_interior, int overlap)
+    YGridLevel makelevel (fTupel L, iTupel s, std::bitset<d> periodic, iTupel o_interior, iTupel s_interior, int overlap)
     {
       // first, lets allocate a new structure
       YGridLevel g;
@@ -2441,7 +2393,9 @@ namespace Dune {
     // private data of multigrid
     fTupel _LL;
     iTupel _s;
-    bTupel _periodic;
+  protected:
+    std::bitset<d> _periodic;
+  private:
     int _maxlevel;
     YGridLevel _levels[32];
     int _overlap;

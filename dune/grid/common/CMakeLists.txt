@@ -1,4 +1,3 @@
-
 set(HEADERS
   adaptcallback.hh
   backuprestore.hh
@@ -12,6 +11,7 @@ set(HEADERS
   entitypointer.hh
   exceptions.hh
   geometry.hh
+  geometryreference.hh
   grid.hh
   gridenums.hh
   gridfactory.hh

@@ -9,7 +9,7 @@
 #include <iostream>
 #include <cassert>
 
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/onedgrid.hh>
 #if HAVE_UG
 #include <dune/grid/uggrid.hh>

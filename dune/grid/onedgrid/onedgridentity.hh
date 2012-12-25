@@ -283,7 +283,7 @@ namespace Dune {
     unsigned int globalId() const {return target_->id_;}
 
     //! Geometry of this entity
-    Geometry geometry () const { return Geometry( geo_ ); }
+    Geometry geometry () const { return Geometry( GeometryImpl(target_->vertex_[0]->pos_, target_->vertex_[1]->pos_) ); }
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
@@ -391,16 +391,14 @@ namespace Dune {
 
       if (target_->father_->sons_[0] == target_ && target_->father_->sons_[1] == target_) {
         // Copied element?
-        geometryInFather_.setPositions(0,1);
+        return LocalGeometry(LocalGeometryImpl(FieldVector<double,1>(0), FieldVector<double,1>(1)));
       } else if (target_->father_->sons_[0] == target_) {
         // Left son?
-        geometryInFather_.setPositions(0,0.5);
-      } else {
-        // Right son!
-        geometryInFather_.setPositions(0.5,1);
+        return LocalGeometry(LocalGeometryImpl(FieldVector<double,1>(0), FieldVector<double,1>(0.5)));
       }
 
-      return LocalGeometry( geometryInFather_ );
+      // Right son!
+      return LocalGeometry(LocalGeometryImpl(FieldVector<double,1>(0.5), FieldVector<double,1>(1)));
     }
 
     /*! Inter-level access to son elements on higher levels<=maxlevel.
@@ -446,14 +444,7 @@ namespace Dune {
 
     void setToTarget(OneDEntityImp<1>* target) {
       target_ = target;
-      geo_.target_ = target;
     }
-
-
-    //! the current geometry
-    GeometryImpl geo_;
-
-    mutable LocalGeometryImpl geometryInFather_;
 
     OneDEntityImp<1>* target_;
 

@@ -7,7 +7,7 @@
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/mappingprovider.hh>
+#include <dune/geometry/multilineargeometry.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
@@ -18,31 +18,61 @@ namespace Dune
   namespace GeoGrid
   {
 
+    // InferHasSingleGeometryType
+    // --------------------------
+
+    template< class hasSingleGeometryType, int dim, int mydim >
+    struct InferHasSingleGeometryType
+    {
+    private:
+      static const unsigned int id = hasSingleGeometryType::topologyId;
+      static const unsigned int idMask = (1u << mydim) - 1u;
+
+    public:
+      static const bool v = hasSingleGeometryType::v && ((mydim == dim) || ((id | 1u) == 1u) || ((id | 1u) == idMask));
+      static const unsigned int topologyId = (v ? id & idMask : ~0u);
+    };
+
+    template< class hasSingleGeometryType, int dim >
+    struct InferHasSingleGeometryType< hasSingleGeometryType, dim, 1 >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry::CubeTopology< 1 >::type::id;
+    };
+
+    template< class hasSingleGeometryType, int dim >
+    struct InferHasSingleGeometryType< hasSingleGeometryType, dim, 0 >
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry::CubeTopology< 0 >::type::id;
+    };
+
+
+
     // GeometryTraits
     // --------------
 
-    template< int cdim, class Grid >
+    template< class Grid >
     struct GeometryTraits
     {
       typedef typename remove_const< Grid >::type::Traits Traits;
 
-      typedef GenericGeometry::DuneCoordTraits< typename Traits::ctype > CoordTraits;
+      typedef typename Traits::ctype ctype;
 
-      static const int dimWorld = cdim;
+      typedef GenericGeometry::MatrixHelper< GenericGeometry::DuneCoordTraits< ctype > > MatrixHelper;
 
-      template< class Topology >
-      struct Mapping
+      static ctype tolerance () { return 16 * std::numeric_limits< ctype >::epsilon(); }
+
+      template< int mydim, int cdim >
+      struct CornerStorage
       {
-        typedef GeoGrid::CornerStorage< Topology, const Grid > CornerStorage;
-        typedef GenericGeometry::CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage > type;
+        typedef GeoGrid::CornerStorage< mydim, cdim, Grid > Type;
       };
 
-      struct Caching
-      {
-        static const GenericGeometry::EvaluationType evaluateJacobianTransposed = GenericGeometry::ComputeOnDemand;
-        static const GenericGeometry::EvaluationType evaluateJacobianInverseTransposed = GenericGeometry::ComputeOnDemand;
-        static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::ComputeOnDemand;
-      };
+      template< int mydim >
+      struct hasSingleGeometryType
+        : public InferHasSingleGeometryType< Capabilities::hasSingleGeometryType< Grid >, Traits::dimension, mydim >
+      {};
 
       struct UserData
       {
@@ -58,49 +88,6 @@ namespace Dune
 
 
 
-    // MappingFamily
-    // -------------
-
-    template< int cdim, class Grid >
-    class MappingFamily
-    {
-      typedef typename remove_const< Grid >::type::Traits Traits;
-
-    public:
-      typedef GeoGrid::GeometryTraits< cdim, Grid > GeometryTraits;
-
-      static const int dimension = Traits::dimension;
-
-    private:
-      template< bool >
-      struct Hybrid
-      {
-        typedef GenericGeometry::HybridMapping< dimension, GeometryTraits > ElementMapping;
-      };
-
-      template< bool >
-      struct NonHybrid
-      {
-        static const unsigned int topologyId = Capabilities::hasSingleGeometryType< Grid >::topologyId;
-        typedef typename GenericGeometry::Topology< topologyId, dimension >::type Topology;
-        typedef GenericGeometry::NonHybridMapping< Topology, GeometryTraits > ElementMapping;
-      };
-
-    public:
-      typedef typename SelectType< Capabilities::hasSingleGeometryType< Grid >::v, NonHybrid< true >, Hybrid< false > >::Type::ElementMapping ElementMapping;
-
-      template< int codim >
-      struct Codim
-      {
-        typedef GenericGeometry::MappingProvider< ElementMapping, codim > MappingProvider;
-        typedef typename MappingProvider::Mapping Mapping;
-
-        static const unsigned int maxMappingSize = MappingProvider::maxMappingSize;
-      };
-    };
-
-
-
     // Geometry
     // --------
 
@@ -109,26 +96,24 @@ namespace Dune
     {
       typedef Geometry< mydim, cdim, Grid > This;
 
-      typedef GeoGrid::MappingFamily< cdim, Grid > MappingFamily;
       typedef typename remove_const< Grid >::type::Traits Traits;
 
       template< int, int, class > friend class Geometry;
 
     public:
+      typedef typename Traits::ctype ctype;
+
       static const int mydimension = mydim;
       static const int coorddimension = cdim;
-      static const int dimension = MappingFamily::dimension;
+      static const int dimension = Traits::dimension;
       static const int codimension = dimension - mydimension;
 
     protected:
-      typedef typename MappingFamily::template Codim< codimension >::MappingProvider MappingProvider;
-      typedef typename MappingFamily::template Codim< codimension >::Mapping Mapping;
+      typedef CachedMultiLinearGeometry< ctype, mydimension, coorddimension, GeometryTraits< Grid > > Mapping;
 
     public:
-      typedef typename Mapping::FieldType ctype;
-
-      typedef FieldVector< ctype, mydimension > LocalCoordinate;
-      typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
+      typedef typename Mapping::LocalCoordinate LocalCoordinate;
+      typedef typename Mapping::GlobalCoordinate GlobalCoordinate;
 
       typedef typename Mapping::JacobianTransposed JacobianTransposed;
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
@@ -143,8 +128,8 @@ namespace Dune
         : grid_( &grid )
       {
         assert( int( type.dim() ) == mydimension );
-        void *mappingStorage = grid.allocateStorage( MappingProvider::mappingSize( type.id() ) );
-        mapping_ = MappingProvider::construct( type.id(), coords, (char *)mappingStorage );
+        void *mappingStorage = grid.allocateStorage( sizeof( Mapping ) );
+        mapping_ = new( mappingStorage ) Mapping( type, coords );
         mapping_->userData().addReference();
       }
 
@@ -178,7 +163,7 @@ namespace Dune
       bool affine () const { return mapping_->affine(); }
       GeometryType type () const { return mapping_->type(); }
 
-      int corners () const { return mapping_->numCorners(); }
+      int corners () const { return mapping_->corners(); }
       GlobalCoordinate corner ( const int i ) const { return mapping_->corner( i ); }
       GlobalCoordinate center () const { return mapping_->center(); }
 
@@ -197,7 +182,7 @@ namespace Dune
       void destroyMapping ()
       {
         mapping_->~Mapping();
-        grid().deallocateStorage( mapping_, MappingProvider::mappingSize( type().id() ) );
+        grid().deallocateStorage( mapping_, sizeof( Mapping ) );
       }
 
       const Grid *grid_;

@@ -16,134 +16,6 @@ namespace Dune {
 
 
   //************************************************************************
-  // SGeometry
-
-  template<int mydim, int cdim, class GridImp>
-  void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<typename GridImp::ctype,mydim+1,cdim>& __As)
-  {
-    // clear jacobian
-    builtinverse = false;
-
-    // copy arguments
-    s = __As[mydim];
-    for (int j=0; j<mydim; j++) A[j] = __As[j];
-
-    // make corners
-    for (int i=0; i<(1<<mydim); i++)     // there are 2^d corners
-    {
-      // use binary representation of corner number to assign corner coordinates
-      int mask = 1;
-      c[i] = s;
-      for (int k=0; k<cdim; k++)
-      {
-        if (i&mask) c[i] = c[i]+A[k];
-        mask = mask<<1;
-      }
-    }
-
-    // compute centroid
-    centroid = 0.0;
-    for (int i=0; i<(1<<mydim); i++)
-      centroid += c[i];
-    centroid *= 1.0/(1<<mydim);
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline FieldVector<typename GridImp::ctype, cdim> SGeometry<mydim,cdim,GridImp>::global (const FieldVector<typename GridImp::ctype, mydim>& local) const
-  {
-    FieldVector<ctype, cdim> global = s;
-    // global += A^t * local
-    A.umtv(local,global);
-
-    return global;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline FieldVector<typename GridImp::ctype, mydim> SGeometry<mydim,cdim,GridImp>::local (const FieldVector<typename GridImp::ctype, cdim>& global) const
-  {
-    FieldVector<ctype, mydim> l;     // result
-    FieldVector<ctype, cdim> rhs = global-s;
-    for (int k=0; k<mydim; k++)
-      l[k] = (rhs*A[k]) / (A[k]*A[k]);
-    return l;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline typename GridImp::ctype SGeometry<mydim,cdim,GridImp>::volume () const
-  {
-    sgrid_ctype s = 1.0;
-    for (int j=0; j<mydim; j++) s *= A[j].one_norm();
-
-    return s;
-  }
-
-  template< int mydim, int cdim, class GridImp >
-  inline const FieldMatrix< typename GridImp::ctype, mydim, cdim > &
-  SGeometry< mydim, cdim, GridImp >::jacobianTransposed ( const FieldVector< typename GridImp::ctype, mydim > &local ) const
-  {
-    return A;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<typename GridImp::ctype,cdim,mydim>& SGeometry<mydim,cdim,GridImp>::jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const
-  {
-    if (!builtinverse)
-    {
-      // transpose A and invert non-zero entries
-      for (int j=0; j<cdim; ++j)
-      {
-        for (int i=0; i<mydim; ++i)
-        {
-          if (j<i || std::abs(A[i][j]) < 1e-15)
-            Jinv[j][i] = 0.0;
-          else
-            Jinv[j][i] = 1.0/A[i][j];
-        }
-      }
-      builtinverse = true;
-    }
-    return Jinv;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline void SGeometry<mydim,cdim,GridImp>::print (std::ostream& ss, int indent) const
-  {
-    for (int k=0; k<indent; k++) ss << " ";ss << "SGeometry<" << mydim << "," << cdim << ">" << std::endl;
-    for (int k=0; k<indent; k++) ss << " ";ss << "{" << std::endl;
-    for (int k=0; k<indent+2; k++) ss << " ";ss << "Position: " << s << std::endl;
-    for (int j=0; j<mydim; j++)
-    {
-      for (int k=0; k<indent+2; k++) ss << " ";
-      ss << "direction " << j << "  " << A(j) << std::endl;
-    }
-    for (int j=0; j<1<<mydim; j++)
-    {
-      for (int k=0; k<indent+2; k++) ss << " ";
-      ss << "corner " << j << "  " << c[j] << std::endl;
-    }
-    if (builtinverse)
-    {
-      for (int k=0; k<indent+2; k++) ss << " ";ss << "Jinv ";
-      Jinv.print(ss,indent+2);
-    }
-    for (int k=0; k<indent+2; k++) ss << " ";ss << "builtinverse " << builtinverse << std::endl;
-    for (int k=0; k<indent; k++) ss << " ";ss << "}";
-  }
-
-  template<int cdim, class GridImp>
-  inline void SGeometry<0,cdim,GridImp>::make (FieldMatrix<typename GridImp::ctype,1,cdim>& __As)
-  {
-    s = __As[0];
-  }
-
-  template<int cdim, class GridImp>
-  inline void SGeometry<0,cdim,GridImp>::print (std::ostream& ss, int indent) const
-  {
-    for (int i=0; i<indent; i++) ss << " ";
-    ss << "SGeometry<0," << cdim << "> at position " << s;
-  }
-
-  //************************************************************************
   // inline methods for SEntityBase
 
   template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
@@ -178,7 +50,7 @@ namespace Dune {
   void SEntityBase<codim,dim,GridImp,EntityImp>::makegeometry () const
   {
     // find dim-codim direction vectors and reference point
-    FieldMatrix<ctype,dim-codim+1,dimworld> __As(0);
+    FieldMatrix<ctype,dim-codim,dimworld> A(0);
 
     // count number of direction vectors found
     int dir=0;
@@ -195,17 +67,16 @@ namespace Dune {
         t[i] -= 2;                 // direction i => even
         p1 = grid->pos(l,t);
         t[i] += 1;                 // revert t to original state
-        __As[dir] = p2-p1;
+        A[dir] = p2-p1;
         dir++;
       }
 
     // find reference point, subtract 1 from all odd directions
     for (int i=0; i<dim; i++)
       t[i] -= t[i]%2;
-    __As[dir] =grid->pos(l,t);     // all components of t are even
 
     // make element
-    geo.make(__As);
+    geo.make(grid->pos(l,t),A);
     builtgeometry = true;
   }
 
@@ -303,16 +174,16 @@ namespace Dune {
     father_index = this->grid->n((this->l)-1,this->grid->expand((this->l)-1,zz,partition));
 
     // now make a subcube of size 1/2 in each direction
-    FieldMatrix<ctype,dim+1,dim> __As;
+    FieldMatrix<ctype,dim,dim> A;
     FieldVector<ctype, dim> v;
     for (int i=0; i<dim; i++)
     {
       v = 0.0; v[i] = 0.5;
-      __As[i] = v;
+      A[i] = v;
     }
     for (int i=0; i<dim; i++) v[i] = 0.5*delta[i];
-    __As[dim] =v;
-    in_father_local.make(__As);     // build geometry
+
+    in_father_local.make(v,A);     // build geometry
 
     built_father = true;
   }
@@ -482,12 +353,6 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline bool SIntersectionIterator<GridImp>::conforming () const
-  {
-    return true;
-  }
-
-  template<class GridImp>
   void SIntersectionIterator<GridImp>::makeintersections () const
   {
     // compute direction and value in direction
@@ -503,7 +368,7 @@ namespace Dune {
       z1[dir] -= 1;   // even
 
     // z1 is even in direction dir, all others must be odd because it is codim 1
-    FieldMatrix<ctype,dim,dim> __AsLocal;
+    FieldMatrix<ctype,dim-1,dim> __AsLocal;
     FieldVector<ctype, dim> p1Local,p2Local;
 
     int t;
@@ -511,7 +376,6 @@ namespace Dune {
     // local coordinates in self
     p1Local = 0.0;
     p1Local[dir] = c;    // all points have p[dir]=c in entity
-    __AsLocal[dim-1] = p1Local; // position vector
     t = 0;
     for (int i=0; i<dim; ++i) // this loop makes dim-1 direction vectors
       if (i!=dir)
@@ -523,12 +387,11 @@ namespace Dune {
         ++t;
       }
     // update geometry
-    is_self_local.make(__AsLocal);
+    is_self_local.make(p1Local,__AsLocal);
 
     // local coordinates in neighbor
     p1Local = 0.0;
     p1Local[dir] = 1-c;    // all points have p[dir]=1-c in entity
-    __AsLocal[dim-1] = p1Local;   // position vector
     t = 0;
     for (int i=0; i<dim; ++i) // this loop makes dim-1 direction vectors
       if (i!=dir)
@@ -540,10 +403,10 @@ namespace Dune {
         ++t;
       }
     // update geometry
-    is_nb_local.make(__AsLocal);
+    is_nb_local.make(p1Local,__AsLocal);
 
     // global coordinates
-    FieldMatrix<ctype,dim,dimworld> __As;
+    FieldMatrix<ctype,dim-1,dimworld> A;
     FieldVector<ctype, dimworld> p1,p2;
     t = 0;
     for (int i=0; i<dim; i++)
@@ -555,15 +418,15 @@ namespace Dune {
         z1[i] -= 2;     // direction i => even
         p1 = grid->pos(self.level(),z1);
         z1[i] += 1;     // revert t to original state
-        __As[t] = p2-p1;
+        A[t] = p2-p1;
         ++t;
       }
     for (int i=0; i<dim; i++)
       if (i!=dir)
         z1[i] -= 1;
-    __As[t] = grid->pos(self.level(),z1);
+
     // update geometry
-    is_global.make(__As);
+    is_global.make(grid->pos(self.level(),z1), A);
 
     built_intersections = true;
   }
@@ -659,13 +522,11 @@ namespace Dune {
     }
 #endif
 
-    N = new array<int,dim>[MAXL];
-    h = new FieldVector<ctype, dim>[MAXL];
+    N.resize(MAXL);
+    h.resize(MAXL);
     mapper = new CubeMapper<dim>[MAXL];
 
     indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
-    theleafindexset = new SGridLeafIndexSet<const SGrid<dim,dimworld> >(*this);
-    theglobalidset = new SGridGlobalIdSet<const SGrid<dim,dimworld> >(*this);
 
     L = 1;
     low = L_;
@@ -763,12 +624,6 @@ namespace Dune {
     for (size_t i=0; i<indexsets.size(); i++)
       delete indexsets[i];
 
-    delete theleafindexset;
-    delete theglobalidset;
-
-
-    delete[] N;
-    delete[] h;
     delete[] mapper;
   }
 

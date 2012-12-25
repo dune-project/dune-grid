@@ -251,7 +251,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
   // Get the 'context' of the father element.  In UG-speak, the context is
   // the set of all nodes of an element's sons.  They appear in a fixed
   // order, therefore we can infer the local positions in the father element.
-  const int MAX_CORNERS_OF_ELEM = 8;  // this is two much in 2d, but UG is that way
+  const int MAX_CORNERS_OF_ELEM = 8;  // this is too much in 2d, but UG is that way
   const int MAX_NEW_CORNERS_DIM = (dim==2) ? 5 : 19;
   const typename UG_NS<dim>::Node* context[MAX_CORNERS_OF_ELEM + MAX_NEW_CORNERS_DIM];
   UG_NS<dim>::GetNodeContext(fatherElement, context);
@@ -437,23 +437,23 @@ template int Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::count<2>() const;
 template int Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::count<3>() const;
 
 
-template Dune::Grid<2, 2, double, Dune::UGGridFamily<2, 2> >::Codim<0>::EntityPointer
+template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<0>::EntityPointer
 Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<0>(int) const;
 
-template Dune::Grid<2, 2, double, Dune::UGGridFamily<2, 2> >::Codim<1>::EntityPointer
+template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<1>::EntityPointer
 Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<1>(int) const;
 
-template Dune::Grid<2, 2, double, Dune::UGGridFamily<2, 2> >::Codim<2>::EntityPointer
+template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<2>::EntityPointer
 Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<2>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<0>::EntityPointer
+template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<0>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<0>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<1>::EntityPointer
+template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<1>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<1>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<2>::EntityPointer
+template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<2>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<2>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3, 3> >::Codim<3>::EntityPointer
+template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<3>::EntityPointer
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<3>(int) const;

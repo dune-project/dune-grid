@@ -9,9 +9,9 @@
  */
 
 #include <dune/common/classname.hh>
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/exceptions.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
@@ -21,7 +21,7 @@
 #if HAVE_UG
 
 #ifdef ModelP
-#include <dune/common/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicollectivecommunication.hh>
 #endif
 
 /* The following lines including the necessary UG headers are somewhat
@@ -98,11 +98,11 @@
 #include "uggrid/uggridindexsets.hh"
 #ifdef ModelP
 #include "uggrid/ugmessagebuffer.hh"
+#include "uggrid/uglbgatherscatter.hh"
 #endif
 
 // Not needed here, but included for user convenience
 #include "uggrid/uggridfactory.hh"
-
 
 #ifdef ModelP
 template <class DataHandle, int GridDim, int codim>
@@ -127,10 +127,10 @@ namespace Dune {
   };
 #endif // ModelP
 
-  template<int dim, int dimworld>
+  template<int dim>
   struct UGGridFamily
   {
-    typedef GridTraits<dim,dimworld,Dune::UGGrid<dim>,
+    typedef GridTraits<dim,dim,Dune::UGGrid<dim>,
         UGGridGeometry,
         UGGridEntity,
         UGGridEntityPointer,
@@ -143,10 +143,10 @@ namespace Dune {
         UGGridLeafIterator,
         UGGridLevelIndexSet< const UGGrid<dim> >,
         UGGridLeafIndexSet< const UGGrid<dim> >,
-        UGGridIdSet< const UGGrid<dim>, false >,
-        unsigned int,
-        UGGridIdSet< const UGGrid<dim>, true >,
-        unsigned int,
+        UGGridIdSet< const UGGrid<dim> >,
+        typename UG_NS<dim>::UG_ID_TYPE,
+        UGGridIdSet< const UGGrid<dim> >,
+        typename UG_NS<dim>::UG_ID_TYPE,
         CollectiveCommunication<Dune::UGGrid<dim> >,
         DefaultLevelGridViewTraits,
         DefaultLeafGridViewTraits,
@@ -199,8 +199,10 @@ namespace Dune {
      For installation instructions see http://www.dune-project.org/external_libraries/install_ug.html .
    */
   template <int dim>
-  class UGGrid : public GridDefaultImplementation  <dim, dim, double, UGGridFamily<dim,dim> >
+  class UGGrid : public GridDefaultImplementation  <dim, dim, double, UGGridFamily<dim> >
   {
+    typedef GridDefaultImplementation <dim, dim, double, UGGridFamily<dim> > Base;
+
     friend class UGGridGeometry<0,dim,const UGGrid<dim> >;
     friend class UGGridGeometry<dim,dim,const UGGrid<dim> >;
     friend class UGGridGeometry<1,2,const UGGrid<dim> >;
@@ -216,10 +218,13 @@ namespace Dune {
 
     friend class UGGridLevelIndexSet<const UGGrid<dim> >;
     friend class UGGridLeafIndexSet<const UGGrid<dim> >;
-    friend class UGGridIdSet<const UGGrid<dim>, false >;
-    friend class UGGridIdSet<const UGGrid<dim>, true >;
+    friend class UGGridIdSet<const UGGrid<dim> >;
 
     friend class GridFactory<UGGrid<dim> >;
+
+#ifdef ModelP
+    friend class UGLBGatherScatter<dim>;
+#endif
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class UGGridLeafIterator;
@@ -241,10 +246,10 @@ namespace Dune {
     //**********************************************************
   public:
     //! type of the used GridFamily for this grid
-    typedef UGGridFamily<dim,dim>  GridFamily;
+    typedef UGGridFamily<dim>  GridFamily;
 
     // the Traits
-    typedef typename UGGridFamily<dim,dim>::Traits Traits;
+    typedef typename UGGridFamily<dim>::Traits Traits;
 
     //! The type used to store coordinates
     typedef UG::DOUBLE ctype;
@@ -343,13 +348,13 @@ namespace Dune {
     /** \brief Access to the GlobalIdSet */
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
-      return globalIdSet_;
+      return idSet_;
     }
 
     /** \brief Access to the LocalIdSet */
     const typename Traits::LocalIdSet& localIdSet() const
     {
-      return localIdSet_;
+      return idSet_;
     }
 
     /** \brief Access to the LevelIndexSets */
@@ -389,6 +394,55 @@ namespace Dune {
        \param rule One of the UG refinement rules
        \param side If rule==UG::%D2::%BLUE (one quadrilateral is split into two rectangles)
        you can choose the orientation of the cut by setting side==0 or side==1
+
+       The available values for RefinementRule are:  (see the RefinementRule enum in ug/gm/gm.h)
+       <h3>2D</h3>
+
+       - NO_REFINEMENT
+       - COPY
+       - RED
+       - BLUE
+       - COARSE
+       - BISECTION_1
+       - BISECTION_2_Q
+       - BISECTION_2_T1
+       - BISECTION_2_T2
+       - BISECTION_3
+
+       <h3>3D</h3>
+
+       - NO_REFINEMENT
+       - COPY
+       - RED
+       - BLUE
+       - COARSE
+
+       - TETRA_RED_HEX
+
+       - PRISM_BISECT_1_2
+       - PRISM_QUADSECT
+       - PRISM_BISECT_HEX0
+       - PRISM_BISECT_HEX1
+       - PRISM_BISECT_HEX2
+       - PRISM_ROTATE_LEFT
+       - PRISM_ROTATE_RGHT
+       - PRISM_QUADSECT_HEXPRI0
+       - PRISM_RED_HEX
+       - PRISM_BISECT_0_1
+       - PRISM_BISECT_0_2
+       - PRISM_BISECT_0_3
+
+       - HEX_BISECT_0_1
+       - HEX_BISECT_0_2
+       - HEX_BISECT_0_3
+       - HEX_TRISECT_0
+       - HEX_TRISECT_5
+       - HEX_QUADSECT_0
+       - HEX_QUADSECT_1
+       - HEX_QUADSECT_2
+       - HEX_BISECT_HEXPRI0
+       - HEX_BISECT_HEXPRI1
+
      */
     bool mark(const typename Traits::template Codim<0>::Entity & e,
               typename UG_NS<dim>::RefinementRule rule,
@@ -436,15 +490,43 @@ namespace Dune {
       return loadBalance(0,0,2,32,1);
     }
 
-    /** \brief Re-balances the load each process has to handle for a parallel grid,
-        the DataHandle data works like the data handle for the communicate
-        methods. If grid has changed , true is returned.
-        \bug Not implemented yet!
+    /** \brief Distributes the grid and some data over the available nodes in a distributed machine
+
+        \tparam DataHandle works like the data handle for the communicate
+        methods.
+
+        \return True, if grid has changed, false otherwise
      */
     template<class DataHandle>
-    bool loadBalance (DataHandle& data)
+    bool loadBalance (DataHandle& dataHandle)
     {
-      DUNE_THROW(NotImplemented, "load balancing with data attached");
+#ifdef ModelP
+      // gather element data
+      std::vector<double> elementData;
+      UGLBGatherScatter<dim>::template gather<0>(this->leafView(),
+                                                 dataHandle, elementData);
+
+      // gather node data
+      std::vector<double> nodeData;
+      UGLBGatherScatter<dim>::template gather<dim>(this->leafView(),
+                                                   dataHandle, nodeData);
+#endif
+
+      // the load balancing step now also
+      // distributes the macrogrid indices
+      loadBalance();
+
+#ifdef ModelP
+      // scatter element data
+      UGLBGatherScatter<dim>::template scatter<0>(this->leafView(),
+                                                  dataHandle, elementData);
+
+      // scatter node data
+      UGLBGatherScatter<dim>::template scatter<dim>(this->leafView(),
+                                                    dataHandle, nodeData);
+#endif
+
+      return true;
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine
@@ -772,13 +854,13 @@ namespace Dune {
     std::string name_;
 
     // Our set of level indices
-    std::vector<UGGridLevelIndexSet<const UGGrid<dim> >*> levelIndexSets_;
+    std::vector<shared_ptr<UGGridLevelIndexSet<const UGGrid<dim> > > > levelIndexSets_;
 
     UGGridLeafIndexSet<const UGGrid<dim> > leafIndexSet_;
 
-    UGGridIdSet<const UGGrid<dim>, false > globalIdSet_;
-
-    UGGridIdSet<const UGGrid<dim>, true > localIdSet_;
+    // One id set implementation
+    // Used for both the local and the global UGGrid id sets
+    UGGridIdSet<const UGGrid<dim> > idSet_;
 
     //! The type of grid refinement currently in use
     RefinementType refinementType_;

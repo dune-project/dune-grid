@@ -67,6 +67,10 @@ namespace Dune
         GridImp::dimension, GridImp::dimensionworld,
         typename GridImp::ctype,
         typename GridImp::GridFamily> ;
+
+    // Default*GridView classes need access to intersection iterators
+    template< class, PartitionIteratorType > friend class DefaultLevelGridView;
+    template< class, PartitionIteratorType > friend class DefaultLeafGridView;
 #endif
     // type of underlying implementation, for internal use only
     typedef EntityImp< cd, dim, GridImp > Implementation;
@@ -162,12 +166,6 @@ namespace Dune
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {}
 
-    /* not part of the interface but maybe in later versions
-       \brief Id of the boundary which is associated with the entity,
-       returns 0 for inner entities, arbitrary int otherwise
-     */
-    //int boundaryId () const { return realEntity.boundaryId(); }
-
     //@}
 
   protected:
@@ -217,6 +215,10 @@ namespace Dune
         GridImp::dimension, GridImp::dimensionworld,
         typename GridImp::ctype,
         typename GridImp::GridFamily> ;
+
+    // Default*GridView classes need access to intersection iterators
+    template< class, PartitionIteratorType > friend class DefaultLevelGridView;
+    template< class, PartitionIteratorType > friend class DefaultLeafGridView;
 #endif
     // type of underlying implementation, for internal use only
     typedef EntityImp< 0, dim, GridImp > Implementation;
@@ -358,8 +360,12 @@ namespace Dune
        \note If the partitionType of the Entity is GhostEntity,
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
+
+       \deprecated This method is deprecated and will be removed after
+                   Dune 2.3. Use LeafGridView.ibegin(Entity) instead.
      */
     LeafIntersectionIterator ileafbegin () const
+    DUNE_DEPRECATED_MSG("Use LeafGridView.ibegin(Entity) instead.")
     {
       return realEntity.ileafbegin();
     }
@@ -369,8 +375,12 @@ namespace Dune
        \note If the partitionType of the Entity is GhostEntity,
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
+
+       \deprecated This method is deprecated and will be removed after
+                   Dune 2.3. Use LeafGridView.iend(Entity) instead.
      */
     LeafIntersectionIterator ileafend () const
+    DUNE_DEPRECATED_MSG("Use LeafGridView.iend(Entity) instead.")
     {
       return realEntity.ileafend();
     }
@@ -384,8 +394,12 @@ namespace Dune
        \note If the partitionType of the Entity is GhostEntity,
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
+
+       \deprecated This method is deprecated and will be removed after
+                   Dune 2.3. Use LevelGridView.ibegin(Entity) instead.
      */
     LevelIntersectionIterator ilevelbegin () const
+    DUNE_DEPRECATED_MSG("Use LevelGridView.ibegin(Entity) instead.")
     {
       return realEntity.ilevelbegin();
     }
@@ -395,8 +409,12 @@ namespace Dune
        \note If the partitionType of the Entity is GhostEntity,
              this method might give you only one neighbor, which is the
              interior Entity the GhostEntity is connected to.
+
+       \deprecated This method is deprecated and will be removed after
+                   Dune 2.3. Use LevelGridView.iend(Entity) instead.
      */
     LevelIntersectionIterator ilevelend () const
+    DUNE_DEPRECATED_MSG("Use LevelGridView.iend(Entity) instead.")
     {
       return realEntity.ilevelend();
     }
@@ -511,23 +529,6 @@ namespace Dune
 
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {}
-
-    // @copydoc Dune::Entity::boundaryId()
-    // maybe available in later versions
-    //int boundaryId () const { return realEntity.boundaryId(); }
-
-    /* not part of the interface, mybe in later versions
-       \brief The boundaryId of the i-th subentity of codimension <tt>cc</tt>
-
-       This does the same as <code>entity<cc>(i).boundaryId()</code>, but it is
-       usually a lot faster.
-     */
-    /*
-       template <int cc> int subBoundaryId  ( int i ) const
-       {
-        return realEntity.subBoundaryId<cc>(i);
-       }
-     */
 
     //@}
 
@@ -654,20 +655,6 @@ namespace Dune
         be used to access the Dune::ReferenceElement.
      */
     GeometryType type () const { return asImp().geometry().type(); }
-
-    /* maybe in later versions
-     * \brief Default implementation for access to boundaryId of sub entities
-     *
-     * Default implementation for access to boundaryId via interface method
-     * entity<codim>.boundaryId(), default is very slow, but works, can be
-     * overloaded be the actual grid implementation.
-     */
-    /*
-       template <int cc> int subBoundaryId  ( int i ) const
-       {
-        return (asImp().template entity<cc>(i))->boundaryId();
-       }
-     */
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
      */

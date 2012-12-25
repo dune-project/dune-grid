@@ -3,6 +3,8 @@
 #ifndef DUNE_ONE_D_GEOMETRY_HH
 #define DUNE_ONE_D_GEOMETRY_HH
 
+#include <dune/geometry/axisalignedcubegeometry.hh>
+
 #include <dune/grid/common/geometry.hh>
 
 #include <dune/grid/onedgrid/onedgridentity.hh>
@@ -109,117 +111,12 @@ namespace Dune {
    */
   template<int mydim, int coorddim, class GridImp>
   class OneDGridGeometry :
-    public GeometryDefaultImplementation <mydim, coorddim, GridImp, OneDGridGeometry>
+    public AxisAlignedCubeGeometry<typename GridImp::ctype, mydim, coorddim>
   {
-    template <int codim_, int dim_, class GridImp_>
-    friend class OneDGridEntity;
-
-    friend class OneDGrid;
-
-    template <int cc_, int dim_, class GridImp_>
-    friend class OneDGridSubEntityFactory;
-
-    template <class GridImp_>
-    friend class OneDGridLevelIntersectionIterator;
-    template <class GridImp_>
-    friend class OneDGridLeafIntersectionIterator;
-
   public:
-
-    OneDGridGeometry() : storeCoordsLocally_(false) {}
-
-    //! here we have always an affine geometry
-    bool affine() const { return true; }
-
-    /** \brief Return the element type identifier
-     *
-     * OneDGrid obviously supports only lines
-     */
-    GeometryType type () const {return GeometryType(1);}
-
-    //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const {return 2;}
-
-    /** \brief access to coordinates of a corner */
-    const FieldVector< typename GridImp::ctype, coorddim > corner ( const int i ) const
-    {
-      assert( (i == 0) || (i == 1) );
-      return (storeCoordsLocally_ ? pos_[ i ] : target_->vertex_[ i ]->pos_);
-    }
-
-    /** \brief Maps a local coordinate within reference element to
-     * global coordinate in element  */
-    FieldVector<typename GridImp::ctype, coorddim> global (const FieldVector<typename GridImp::ctype, mydim>& local) const {
-      FieldVector<typename GridImp::ctype, coorddim> g;
-      g[0] = (storeCoordsLocally_)
-             ? pos_[0][0] * (1-local[0]) + pos_[1][0] * local[0]
-             : target_->vertex_[0]->pos_[0] * (1-local[0]) + target_->vertex_[1]->pos_[0] * local[0];
-      return g;
-    }
-
-    /** \brief Maps a global coordinate within the element to a
-     * local coordinate in its reference element */
-    FieldVector<typename GridImp::ctype, mydim> local (const FieldVector<typename GridImp::ctype, coorddim>& global) const {
-      FieldVector<typename GridImp::ctype, mydim> l;
-      if (storeCoordsLocally_) {
-        l[0] = (global[0] - pos_[0][0]) / (pos_[1][0] - pos_[0][0]);
-      } else {
-        const typename GridImp::ctype& v0 = target_->vertex_[0]->pos_[0];
-        const typename GridImp::ctype& v1 = target_->vertex_[1]->pos_[0];
-        l[0] = (global[0] - v0) / (v1 - v0);
-      }
-      return l;
-    }
-
-    /** ???
-     */
-    typename GridImp::ctype integrationElement (const FieldVector<typename GridImp::ctype, mydim>& local) const {
-      return (storeCoordsLocally_)
-             ? pos_[1][0] - pos_[0][0]
-             : target_->vertex_[1]->pos_[0] - target_->vertex_[0]->pos_[0];
-    }
-
-    //! The Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix< typename GridImp::ctype, mydim, mydim > &
-    jacobianTransposed ( const FieldVector< typename GridImp::ctype, mydim > &local ) const
-    {
-      if( storeCoordsLocally_ )
-        jacTransposed_[ 0 ][ 0 ] = (pos_[ 1 ][ 0 ] - pos_[ 0 ][ 0 ] );
-      else
-        jacTransposed_[ 0 ][ 0 ] = target_->vertex_[ 1 ]->pos_[ 0 ] - target_->vertex_[ 0 ]->pos_[ 0 ];
-
-      return jacTransposed_;
-    }
-
-    //! The Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<typename GridImp::ctype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const {
-      if (storeCoordsLocally_)
-        jacInverse_[0][0] = 1 / (pos_[1][0] - pos_[0][0]);
-      else
-        jacInverse_[0][0] = 1 / (target_->vertex_[1]->pos_[0] - target_->vertex_[0]->pos_[0]);
-
-      return jacInverse_;
-    }
-
-    void setPositions(const typename GridImp::ctype& p1, const typename GridImp::ctype& p2) {
-      storeCoordsLocally_ = true;
-      pos_[0][0] = p1;
-      pos_[1][0] = p2;
-    }
-
-    //private:
-    OneDEntityImp<1>* target_;
-
-    bool storeCoordsLocally_;
-
-    // Stores the element corner positions if it is returned as geometryInFather
-    FieldVector<typename GridImp::ctype,coorddim> pos_[2];
-
-    //! jacobian transposed
-    mutable FieldMatrix< typename GridImp::ctype, coorddim, coorddim > jacTransposed_;
-    //! jacobian inverse
-    mutable FieldMatrix<typename GridImp::ctype,coorddim,coorddim> jacInverse_;
-
+    OneDGridGeometry(const FieldVector<double,1>& left, const FieldVector<double,1>& right)
+      : AxisAlignedCubeGeometry<typename GridImp::ctype, mydim, coorddim>(left,right)
+    {}
   };
 
   namespace FacadeOptions

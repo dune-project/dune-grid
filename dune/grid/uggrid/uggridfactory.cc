@@ -3,7 +3,7 @@
 
 #include <config.h>
 
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
@@ -488,7 +488,7 @@ createGrid()
     // Even though it's empty until the first load balancing
     // it should still be there in case someone wants to access it.
     grid_->levelIndexSets_.resize(1);
-    grid_->levelIndexSets_[0] = new UGGridLevelIndexSet<const UGGrid<dimworld> >();
+    grid_->levelIndexSets_[0] = make_shared<UGGridLevelIndexSet<const UGGrid<dimworld> > >();
 
     /* here all temp memory since CreateMultiGrid is released */
     Release(grid_->multigrid_->theHeap, UG::FROM_TOP, grid_->multigrid_->MarkKey);
@@ -592,10 +592,6 @@ createBegin()
   }
 
   // Delete levelIndexSets if there are any
-  for (unsigned int i=0; i<grid_->levelIndexSets_.size(); i++)
-    if (grid_->levelIndexSets_[i])
-      delete grid_->levelIndexSets_[i];
-
   grid_->levelIndexSets_.resize(0);
 
   // //////////////////////////////////////////////////////////

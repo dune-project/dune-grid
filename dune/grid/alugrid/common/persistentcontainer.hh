@@ -3,7 +3,7 @@
 #ifndef DUNE_ALU_PERSISTENTCONTAINER_HH
 #define DUNE_ALU_PERSISTENTCONTAINER_HH
 
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 #include <dune/grid/utility/persistentcontainer.hh>
 #include <dune/grid/alugrid.hh>
 

@@ -4,13 +4,10 @@
 #define DUNE_UGGRID_LOCALGEOMETRY_HH
 
 /** \file
- * \brief The UGGridElement class and its specializations
+ * \brief The UGGridLocalGeometry class
  */
 
-#include "uggridrenumberer.hh"
-#include <dune/common/array.hh>
-#include <dune/common/fmatrix.hh>
-#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/geometry/multilineargeometry.hh>
 
 namespace Dune {
 
@@ -21,37 +18,20 @@ namespace Dune {
      \tparam mydim Dimension of the corresponding reference element
      \tparam coorddim Dimension of the coordinate space
 
-     I suppose I could use GenericGeometry::LocalGeometry instead of this class.
-     However several times I use that this UGGridLocalGeometry has a default constructor,
-     which GenericGeometry::LocalGeometry doesn't have.
+     This class is just an adaptor that allows to use MultiLinearGeometry as the implementation
+     for the UGGrid local geometries.  We cannot use MultiLinearGeometry directly, because the
+     template parameters are different.
    */
   template<int mydim, int coorddim, class GridImp>
   class UGGridLocalGeometry :
-    public GenericGeometry::BasicGeometry<mydim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,mydim,coorddim> >
+    public MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim>
   {
-
-    typedef typename GenericGeometry::BasicGeometry<mydim, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,mydim,coorddim> > Base;
-
   public:
-
-    /** \brief Default constructor.  Does nothing */
-    UGGridLocalGeometry()
-    {}
 
     /** \brief Constructor from a given geometry type and a vector of corner coordinates */
     UGGridLocalGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,coorddim> >& coordinates)
-      : Base(type, coordinates)
+      : MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim>(type, coordinates)
     {}
-
-    /** \brief Setup method with a geometry type and a set of corners
-        \param coordinates The corner coordinates in DUNE numbering
-     */
-    void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,coorddim> >& coordinates)
-    {
-      // set up base class
-      // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
-      static_cast< Base & >( *this ) = Base( type, coordinates );
-    }
 
   };
 

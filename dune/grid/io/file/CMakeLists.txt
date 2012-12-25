@@ -10,7 +10,8 @@ set(HEADERS
   dgfparser.hh
   gmshreader.hh
   gnuplot.hh
-  starcdreader.hh)
+  starcdreader.hh
+  vtk.hh)
 
 install(FILES ${HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/io/file)

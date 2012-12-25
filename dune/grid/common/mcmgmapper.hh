@@ -93,7 +93,7 @@ namespace Dune
    * dimgrid=GV::%dimension).  In this case the layout class should be copy
    * constructible.
    *
-   * Thare are to predefined Layout class templates For the common cases that
+   * There are two predefined Layout class templates for the common cases that
    * only elements or only vertices should be mapped: MCMGElementLayout and
    * MCMGVertexLayout.
    */

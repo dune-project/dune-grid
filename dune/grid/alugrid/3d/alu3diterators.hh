@@ -487,57 +487,6 @@ namespace ALUGridSpace
     }
   };
 
-  /*
-     template <PartitionIteratorType pitype>
-     class ALU3dGridLeafIteratorWrapper<3,pitype>
-     : public IteratorWrapperInterface < typename IteratorElType<3>::val_t >
-     {
-     typedef IteratorElType<3>::ElType ElType;
-     typedef typename LeafStopRule< ElType, pitype > :: StopRule_t StopRule_t;
-     // ElType is vertex_STI
-     typedef LeafIterator < ElType > IteratorType;
-
-     // the vertex iterator
-     IteratorType it_;
-
-     public:
-     typedef IteratorElType<3>::val_t val_t;
-     private:
-     mutable val_t elem_;
-     const StopRule_t rule_;
-     public:
-     // constructor creating Iterator
-     template <class GridImp>
-     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
-      : it_(grid.myGrid()), elem_(0,0) , rule_ () {}
-
-     // constructor copying iterator
-     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
-      : it_( org.it_ ), elem_(org.elem_) , rule_() {}
-
-     int size  ()    { return it_->size(); }
-
-     void next ()
-     {
-      it_->next();
-      if (!it_->done())
-      {
-        // take standard walk rule to cehck vertices again, see walk.h
-        if(! rule_(it_->item()) ) next();
-      }
-     }
-
-     void first()     { it_->first(); }
-     int done () const{ return it_->done(); }
-     val_t & item () const
-     {
-      assert( ! done () );
-      elem_.first  = & it_->item();
-      return elem_;
-     }
-     };
-   */
-
 #if ALU3DGRID_PARALLEL
   template< int codim >
   class LeafLevelIteratorTTProxy
@@ -588,7 +537,6 @@ namespace ALUGridSpace
   };
 
 
-
   typedef pair< ALUHElementType< 0, MPI_Comm >::ElementType *, Dune::ALU3dBasicImplTraits< MPI_Comm >::HBndSegType * > LeafValType;
 
   //****************************
@@ -630,6 +578,8 @@ namespace ALUGridSpace
   private:
     // the pair of elementand boundary face
     mutable val_t elem_;
+    // true if ghost cells are enabled
+    const bool ghostCellsEnabled_ ;
   public:
     typedef ElementPllXIF_t ItemType;
 
@@ -640,7 +590,8 @@ namespace ALUGridSpace
         it_( 0 ),
         nl_( nlinks ),
         link_( nlinks ), // makes default status == done
-        elem_( (HElementType *) 0, (HBndSegType *) 0 )
+        elem_( (HElementType *) 0, (HBndSegType *) 0 ),
+        ghostCellsEnabled_( grid.ghostCellsEnabled() )
     {}
 
     ALU3dGridGhostIterator (const ALU3dGridGhostIterator & org)
@@ -650,6 +601,7 @@ namespace ALUGridSpace
         , link_(org.link_)
         , usingInner_(false)
         , elem_(org.elem_)
+        , ghostCellsEnabled_( org.ghostCellsEnabled_ )
     {
       if( org.iterTT_ )
       {
@@ -789,12 +741,15 @@ namespace ALUGridSpace
 
     void first()
     {
-      link_ = -1;
-      usingInner_ = false;
-      // create iterator calls also first of iterators
-      createIterator();
-      checkLeafEntity();
-      if( it_ ) assert( !it_->done());
+      if( ghostCellsEnabled_ )
+      {
+        link_ = -1;
+        usingInner_ = false;
+        // create iterator calls also first of iterators
+        createIterator();
+        checkLeafEntity();
+        if( it_ ) assert( !it_->done());
+      }
     }
 
     int done () const
@@ -1047,7 +1002,8 @@ namespace ALUGridSpace
     IteratorType curr_;
     IteratorType end_;
     mutable val_t elem_;
-    mutable int count_;
+    mutable size_t count_;
+    const bool ghostCellsEnabled_ ;
 
   public:
     template< class GhostElementIteratorImp, class GridImp >
@@ -1055,8 +1011,15 @@ namespace ALUGridSpace
                                         int level, const int nlinks, GhostItemListType &ghList )
       : ghList_( ghList ),
         elem_( (ElType *) 0, (HBndSegType *) 0 ),
-        count_( 0 )
+        count_( 0 ),
+        ghostCellsEnabled_( grid.ghostCellsEnabled() )
     {
+      if( ! ghostCellsEnabled_ )
+      {
+        count_ = ghList_.getItemList().size() ;
+        return ;
+      }
+
       if( ! ghList_.up2Date() )
       {
         GhostElementIteratorImp ghostIter(grid,level,nlinks);
@@ -1068,12 +1031,13 @@ namespace ALUGridSpace
       : ghList_( org.ghList_ )
         , elem_(org.elem_)
         , count_(org.count_)
+        , ghostCellsEnabled_(org.ghostCellsEnabled_)
     {}
 
     int size  () { return ghList_.getItemList().size(); }
-    void first() { count_ = 0; }
+    void first() { if( ghostCellsEnabled_ ) count_ = 0;}
     void next () { ++count_; }
-    int done () const { return (count_ >= (int) ghList_.getItemList().size() ? 1 : 0); }
+    int done () const { return (count_ >= ghList_.getItemList().size() ? 1 : 0); }
     val_t & item () const
     {
       assert( ! done() );
@@ -1100,6 +1064,7 @@ namespace ALUGridSpace
       ghList.getItemList().resize(0);
       map< int , int > visited;
 
+      const map<int,int>::iterator visitedEnd = visited.end();
       for( ghostIter.first(); !ghostIter.done(); ghostIter.next() )
       {
         GhostPairType ghPair = ghostIter.item().second->getGhost();
@@ -1109,7 +1074,7 @@ namespace ALUGridSpace
         {
           ElType * item = GetItem<GridImp,codim>::getItem( *(ghPair.first) , notOnFace[i] );
           int idx = item->getIndex();
-          if( visited.find(idx) == visited.end() )
+          if( visited.find(idx) == visitedEnd )
           {
             ghList.getItemList().push_back( (void *) item );
             visited[idx] = 1;

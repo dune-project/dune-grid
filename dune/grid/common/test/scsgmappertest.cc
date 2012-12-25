@@ -16,7 +16,7 @@
 #include <dune/grid/common/scsgmapper.hh>
 
 #include <dune/common/exceptions.hh>
-#include <dune/common/mpihelper.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 using namespace Dune;
 

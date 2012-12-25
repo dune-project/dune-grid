@@ -19,10 +19,86 @@ namespace Dune
 
   template< int mydim, int cdim, class GridImp >
   inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ()
-    : geoImpl_(),
-      det_( 1.0 )
-  {}
+  {
+    getObject();
+  }
 
+  template< int mydim, int cdim, class GridImp >
+  inline ALU2dGridGeometry< mydim, cdim, GridImp >&
+  ALU2dGridGeometry< mydim, cdim, GridImp >::operator = ( const ALU2dGridGeometry& other )
+  {
+    if( &other != this )
+    {
+      removeObj();
+      assign( other );
+    }
+    return *this;
+  }
+
+  template< int mydim, int cdim, class GridImp >
+  inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ( const ALU2dGridGeometry& other )
+  {
+    assign( other );
+  }
+
+  template< int mydim, int cdim, class GridImp >
+  inline ALU2dGridGeometry< mydim, cdim, GridImp >::~ALU2dGridGeometry ()
+  {
+    removeObj();
+  }
+
+  template< int mydim, int cdim, class GridImp >
+  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::getObject()
+  {
+    geoImpl_ = geoProvider().getEmptyObject();
+    geoImpl().reset();
+  }
+
+  template< int mydim, int cdim, class GridImp >
+  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::assign( const ALU2dGridGeometry& other )
+  {
+    // copy pointer
+    geoImpl_ = other.geoImpl_ ;
+
+    // increase reference count
+    ++ geoImpl();
+  }
+
+  template< int mydim, int cdim, class GridImp >
+  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::removeObj()
+  {
+    // decrease reference count
+    -- geoImpl();
+
+    // if reference count is zero free the object
+    if( ! geoImpl() )
+    {
+      geoProvider().freeObject( geoImpl_ );
+    }
+
+    // reset pointer
+    geoImpl_ = 0;
+  }
+
+  template< int mydim, int cdim, class GridImp >
+  inline void ALU2dGridGeometry< mydim, cdim, GridImp >::invalidate()
+  {
+    // if geometry is used elsewhere remove the pointer
+    // and get a new one
+    if( geoImpl().stillUsed() )
+    {
+      // remove old object
+      removeObj();
+
+      // get new object
+      getObject();
+    }
+    else
+    {
+      // otherwise invalidate object
+      geoImpl().invalidate();
+    }
+  }
 
   //! print the GeometryInformation
   template< int mydim, int cdim, class GridImp >
@@ -47,9 +123,7 @@ namespace Dune
   inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
   ALU2dGridGeometry< mydim, cdim, GridImp >::corner ( int i ) const
   {
-    const GenericReferenceElement< alu2d_ctype, mydim > &refElement
-      = GenericReferenceElements< alu2d_ctype, mydim >::general( type() );
-    return global( refElement.position( i, mydim ) );
+    return geoImpl().corner( i );
   }
 
 
@@ -60,7 +134,7 @@ namespace Dune
   ALU2dGridGeometry< mydim, cdim, GridImp >::global ( const LocalCoordinate &local ) const
   {
     GlobalCoordinate global;
-    geoImpl_.map2world( local, global );
+    geoImpl().map2world( local, global );
     return global;
   }
 
@@ -75,7 +149,7 @@ namespace Dune
       return LocalCoordinate( 1 );
 
     LocalCoordinate local;
-    geoImpl_.world2map( global, local );
+    geoImpl().world2map( global, local );
     return local;
   }
 
@@ -84,36 +158,25 @@ namespace Dune
   inline alu2d_ctype
   ALU2dGridGeometry< mydim, cdim, GridImp >::integrationElement ( const LocalCoordinate &local ) const
   {
-    if ( eltype == ALU2DSPACE triangle || mydim < 2 )
+    assert( geoImpl().valid() );
+    if( mydim == cdim )
     {
-      assert( geoImpl_.valid() );
-      return (mydim == 0 ? 1.0 : det_);
+      if( std::abs( geoImpl().det( local ) - jacobianTransposed( local
+                                                                 ).determinant() ) > 1e-8 )
+        std::cout << "det = " << geoImpl().det( local ) << "  inv.det " <<
+        jacobianTransposed( local ).determinant() << std::endl;
+      assert( std::abs( geoImpl().det( local ) - jacobianTransposed( local
+                                                                     ).determinant() ) < 1e-8 );
     }
-    else
-      return geoImpl_.det(local);
+    return geoImpl().det( local );
   }
 
 
   template< int mydim, int cdim, class GridImp >
   inline alu2d_ctype ALU2dGridGeometry< mydim, cdim, GridImp >::volume () const
   {
-    assert( geoImpl_.valid() );
-    if( mydim == 2 )
-    {
-      switch( GridImp::elementType )
-      {
-      case ALU2DSPACE triangle :
-        return 0.5 * det_;
-
-      case ALU2DSPACE quadrilateral :
-        return det_;
-
-      case ALU2DSPACE mixed :
-        DUNE_THROW( NotImplemented, "Geometry::volume() not implemented for ElementType mixed." );
-      }
-    }
-    else
-      return (mydim == 0 ? 1.0 : det_);
+    assert( geoImpl().valid() );
+    return geoImpl().volume();
   }
 
 
@@ -121,7 +184,7 @@ namespace Dune
   inline const FieldMatrix<alu2d_ctype,mydim,cdim>&
   ALU2dGridGeometry< mydim, cdim, GridImp>::jacobianTransposed ( const LocalCoordinate &local ) const
   {
-    return geoImpl_.jacobianTransposed( local );
+    return geoImpl().jacobianTransposed( local );
   }
 
 
@@ -129,7 +192,7 @@ namespace Dune
   inline const FieldMatrix<alu2d_ctype,cdim,mydim>&
   ALU2dGridGeometry< mydim, cdim, GridImp >::jacobianInverseTransposed ( const LocalCoordinate &local ) const
   {
-    return geoImpl_.jacobianInverseTransposed( local );
+    return geoImpl().jacobianInverseTransposed( local );
   }
 
 
@@ -143,10 +206,7 @@ namespace Dune
     assert( mydim == 2 );
 
     // update geometry impl
-    geoImpl_.update( item );
-
-    // store volume
-    det_ = (geoImpl_.corners() == 3 ? 2 * item.area() : item.area());
+    geoImpl().update( item );
 
     // geometry built
     return true;
@@ -174,12 +234,10 @@ namespace Dune
 
 
     // update geometry impl
-    geoImpl_.update( item.getVertex( (aluFace + 1 + twist ) % nf )->coord() ,
-                     item.getVertex( (aluFace + 2 - twist ) % nf )->coord() );
-
-    // store volume
-    det_ = item.sidelength( aluFace );
-    //assert( std::abs( det_ - geoImpl_.det( LocalCoordinate(0.5) ) ) < 1e-14 );
+    geoImpl().update( item.getVertex( (aluFace + 1 + twist ) % nf )->coord() ,
+                      item.getVertex( (aluFace + 2 - twist ) % nf )->coord() ,
+                      item.sidelength( aluFace )
+                      );
 
     // geometry built
     return true;
@@ -194,10 +252,10 @@ namespace Dune
 
     assert( &item );
     // update geometry impl
-    geoImpl_.update( item.coord() );
-
     // volume is already 1.0
+    geoImpl().update( item.coord() );
 
+    // geometry built
     return true;
   }
 
@@ -208,12 +266,7 @@ namespace Dune
   buildLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom)
   {
     // update geometry
-    geoImpl_.updateLocal( geo, localGeom );
-
-    // calculate volume
-    LocalCoordinate local( 0.25 );
-    det_ = geoImpl_.det( local );
-
+    geoImpl().updateLocal( geo, localGeom );
     // geometry built
     return true;
   }
@@ -257,11 +310,10 @@ namespace Dune
     typedef std::pair< FieldMatrix< alu2d_ctype, 4, 2 >, FieldVector< alu2d_ctype, 4 > > RefCoord;
     RefCoord refCoord( calculateReferenceCoords( corners ) );
 
-    geoImpl_.update( refCoord.first[ ( aluFace + 1+twist ) % corners ],
-                     refCoord.first[ ( aluFace + 2-twist ) % corners ] );
-
-    // get length of faces
-    det_ = refCoord.second[ aluFace ];
+    geoImpl().update( refCoord.first[ ( aluFace + 1+twist ) % corners ],
+                      refCoord.first[ ( aluFace + 2-twist ) % corners ],
+                      refCoord.second[ aluFace ]
+                      );
 
     // geometry built
     return true;
@@ -274,12 +326,8 @@ namespace Dune
                     const Geometry & myGeom)
   {
     // update geometry
-    geoImpl_.updateLocal( fatherGeom, myGeom );
-
-    // store volume which is a part of one
-    det_ = myGeom.volume() / fatherGeom.volume();
-    assert( (det_ > 0.0) && (det_ < 1.0) );
-
+    geoImpl().updateLocal( fatherGeom, myGeom );
+    // geometry built
     return true;
   }
 

@@ -10,9 +10,10 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/bigunsignedint.hh>
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/reservedvector.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/axisalignedcubegeometry.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/sgrid/numbering.hh>
@@ -101,211 +102,50 @@ namespace Dune {
    */
   template<int mydim, int cdim, class GridImp>
   class SGeometry
-    : public GeometryDefaultImplementation<mydim,cdim,GridImp,SGeometry>
+    : public AxisAlignedCubeGeometry<typename GridImp::ctype,mydim,cdim>
   {
   public:
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
 
-    //! return the element type identifier
-    GeometryType type () const
-    {
-      static const GeometryType cubeType(GeometryType::cube,mydim);
-      return cubeType;
-    }
-
-    //! here we have always an affine geometry
-    bool affine() const { return true ; }
-
-    //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const
-    {
-      return 1<<mydim;
-    }
-
-    //! return i'th corner of the geometry
-    FieldVector< ctype, cdim > corner ( const int i ) const
-    {
-      return c[i];
-    }
-
-    //! return center of the geometry
-    FieldVector<ctype, cdim > center ( ) const
-    {
-      return centroid;
-    }
-
-    //! maps a local coordinate within reference element to global coordinate in element
-    FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const;
-
-    //! maps a global coordinate within the element to a local coordinate in its reference element
-    FieldVector<ctype, mydim> local (const FieldVector<ctype, cdim>& global) const;
-
-    /*! Integration over a general element is done by integrating over the reference element
-       and using the transformation from the reference element to the global element as follows:
-       \f[\int\limits_{\Omega_e} f(x) dx = \int\limits_{\Omega_{ref}} f(g(l)) A(l) dl \f] where
-       \f$g\f$ is the local to global mapping and \f$A(l)\f$ is the integration element.
-
-       For a general map \f$g(l)\f$ involves partial derivatives of the map (surface element of
-       the first kind if \f$d=2,w=3\f$, determinant of the Jacobian of the transformation for
-       \f$d=w\f$, \f$\|dg/dl\|\f$ for \f$d=1\f$).
-
-       For linear elements, the derivatives of the map with respect to local coordinates
-       do not depend on the local coordinates and are the same over the whole element.
-
-       For a structured mesh where all edges are parallel to the coordinate axes, the
-       computation is the length, area or volume of the element is very simple to compute.
-
-       Each grid module implements the integration element with optimal efficieny. This
-       will directly translate in substantial savings in the computation of finite element
-       stiffness matrices.
+    /** \brief Set up the geometry
+     *
+     * \param lower The lower left corner
+     * \param A The direction vectors
+     *
+     * Allows a consistent treatment of all dimensions, including 0 (the vertex).
      */
-    ctype integrationElement (const FieldVector<ctype, mydim>& local) const
+    void make (const FieldVector<ctype,cdim>& lower,
+               const FieldMatrix<ctype,mydim,cdim>& A)
     {
-      return volume();
+      if (mydim==0) {
+        // set up base class
+        static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(lower);
+        return;
+      }
+
+      // construct the upper right corner of the cube geometry
+      FieldVector<ctype, cdim> upper = lower;
+      for (int i=0; i<mydim; i++)
+        upper += A[i];
+
+      // look for the directions where the cube is actually extended
+      std::bitset<cdim> axes;
+
+      for (size_t i=0; i<cdim; i++)
+        if ((upper[i] - lower[i]) > 1e-10)
+          axes[i] = true;
+
+      // set up base class
+      static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(lower, upper, axes);
     }
-
-    /** \brief return volume of geometry */
-    ctype volume() const;
-
-    const FieldMatrix<ctype, mydim, cdim > &jacobianTransposed ( const FieldVector< ctype, mydim > &local ) const;
-    const FieldMatrix<ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<ctype, mydim>& local) const;
-
-    //! print internal data
-    void print (std::ostream& ss, int indent) const;
-
-    /*! The first dim columns of As contain the dim direction vectors.
-       Column dim is the position vector. This format allows a consistent
-       treatement of all dimensions, including 0 (the vertex).
-     */
-    void make (FieldMatrix<ctype,mydim+1,cdim>& __As);
 
     //! constructor
-    SGeometry () : builtinverse(false) {}
-
-  private:
-    FieldVector<ctype, cdim> s;              //!< position of element
-    FieldVector<ctype, cdim> centroid;       //!< centroid of element
-    FieldMatrix<ctype,mydim,cdim> A;         //!< direction vectors as matrix
-    array<FieldVector<ctype, cdim>, 1<<mydim> c;     //!< coordinate vectors of corners
-    mutable FieldMatrix<ctype,cdim,mydim> Jinv;           //!< storage for inverse of jacobian
-    mutable bool builtinverse;
+    SGeometry ()
+      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0))    // anything
+    {}
   };
 
-  //! specialization for dim=0, this is a vertex
-  template<int cdim, class GridImp>
-  class SGeometry<0,cdim,GridImp>
-    : public GeometryDefaultImplementation<0,cdim,GridImp,SGeometry>
-  {
-  public:
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
-
-    //! return the element type identifier
-    GeometryType type () const
-    {
-      static const GeometryType cubeType(GeometryType::cube,0);
-      return cubeType;
-    }
-
-    //! here we have always an affine geometry
-    bool affine() const { return true ; }
-
-    //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const
-    {
-      return 1;
-    }
-
-    //! return i'th corner of the geometry
-    FieldVector<ctype, cdim > corner ( const int i ) const
-    {
-      return s;
-    }
-
-    //! return center of the geometry
-    FieldVector<ctype, cdim > center ( ) const
-    {
-      return s;
-    }
-
-    //! print internal data
-    void print (std::ostream& ss, int indent) const;
-
-    //! constructor, makes element from position and direction vectors
-    void make (FieldMatrix<ctype,1,cdim>& __As);
-
-    //! maps a local coordinate within reference element to global coordinate in element
-    FieldVector<ctype, cdim> global (const FieldVector<ctype, 0>& local) const { return corner(0); }
-
-    //! maps a global coordinate within the element to a local coordinate in its reference element
-    FieldVector<ctype, 0> local (const FieldVector<ctype, cdim>& global) const { return FieldVector<ctype,0> (0.0); }
-
-    /*! Integration over a general element is done by integrating over the reference element
-       and using the transformation from the reference element to the global element as follows:
-       \f[\int\limits_{\Omega_e} f(x) dx = \int\limits_{\Omega_{ref}} f(g(l)) A(l) dl \f] where
-       \f$g\f$ is the local to global mapping and \f$A(l)\f$ is the integration element.
-
-       For a general map \f$g(l)\f$ involves partial derivatives of the map (surface element of
-       the first kind if \f$d=2,w=3\f$, determinant of the Jacobian of the transformation for
-       \f$d=w\f$, \f$\|dg/dl\|\f$ for \f$d=1\f$).
-
-       For linear elements, the derivatives of the map with respect to local coordinates
-       do not depend on the local coordinates and are the same over the whole element.
-
-       For a structured mesh where all edges are parallel to the coordinate axes, the
-       computation is the length, area or volume of the element is very simple to compute.
-
-       Each grid module implements the integration element with optimal efficieny. This
-       will directly translate in substantial savings in the computation of finite element
-       stiffness matrices.
-       For this specialisation the integrationElement is always 1.
-     */
-
-    //! constructor with bool argument makes reference element if true, uninitialized else
-    SGeometry () {}
-
-    /** \brief This dummy routine always returns 1.0.
-     *
-     * This routine exists so that algorithms that integrate over grid
-     * boundaries can also be compiled for 1d-grids.
-     */
-    ctype volume() const
-    {
-      return 1;
-    }
-
-    /** \brief This dummy routine always returns 1.0.
-     *
-     * This routine exists so that algorithms that integrate over grid
-     * boundaries can also be compiled for 1d-grids.
-     */
-    ctype integrationElement(const FieldVector<ctype, 0>& local) const {
-      return volume();
-    }
-
-    const FieldMatrix<ctype, 0, cdim > &jacobianTransposed ( const FieldVector<ctype, 0 > &local ) const
-    {
-      static const FieldMatrix<ctype, 0, cdim > dummy ( ctype( 0 ) );
-      return dummy;
-    }
-
-    const FieldMatrix<ctype,cdim,0>& jacobianInverseTransposed (const FieldVector<ctype, 0>& local) const
-    {
-      static const FieldMatrix<ctype,cdim,0> dummy( ctype(0) );
-      return dummy;
-    }
-
-  protected:
-    FieldVector<ctype, cdim> s;             //!< position of element
-  };
-
-  template <int mydim, int cdim, class GridImp>
-  inline std::ostream& operator<< (std::ostream& s, SGeometry<mydim,cdim,GridImp>& e)
-  {
-    e.print(s,0);
-    return s;
-  }
 
   //************************************************************************
   /*! SEntityBase contains the part of SEntity that can be defined
@@ -421,6 +261,20 @@ namespace Dune {
 
       // compute number with respect to maxLevel
       return grid->n(grid->maxLevel(),coord);
+    }
+
+    //! subentity compressed index (not available here)
+    int subCompressedIndex (int cd, int i) const
+    {
+      DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
+      return -1;
+    }
+
+    //! subentity compressed leaf index (not available here)
+    int subCompressedLeafIndex (int cd, int i) const
+    {
+      DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
+      return -1;
     }
 
   protected:
@@ -740,6 +594,8 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
     typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
 
+    friend class SIntersection<GridImp>;
+
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
@@ -776,9 +632,6 @@ namespace Dune {
     //! return true if intersection is with boundary.
     bool boundary () const;
 
-    //! return true if intersection is conform.
-    bool conforming () const;
-
     int boundaryId () const {
       if (boundary()) return count + 1;
       return 0;
@@ -792,36 +645,6 @@ namespace Dune {
 
     //! return true if neighbor on this level exists
     bool neighbor () const;
-
-    //! return outer normal
-    FieldVector<ctype, GridImp::dimensionworld> outerNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
-    {
-      return unitOuterNormal(local);
-    }
-    //! return unit outer normal
-    FieldVector<ctype, GridImp::dimensionworld> unitOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
-    {
-      return centerUnitOuterNormal();
-    }
-    //! return unit outer normal at center of intersection geometry
-    FieldVector<ctype, GridImp::dimensionworld> centerUnitOuterNormal () const
-    {
-      // while we are at it, compute normal direction
-      FieldVector<ctype, dimworld> normal(0.0);
-      if (count%2)
-        normal[count/2] =  1.0; // odd
-      else
-        normal[count/2] = -1.0; // even
-
-      return normal;
-    }
-    //! return integration outer normal
-    FieldVector<ctype, GridImp::dimensionworld> integrationOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
-    {
-      FieldVector<ctype, dimworld> n = unitOuterNormal(local);
-      n *= geometry().integrationElement(local);
-      return n;
-    }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in LOCAL coordinates of the element where iteration started.
@@ -967,7 +790,7 @@ namespace Dune {
     /*! @brief return true if intersection is conform. */
     bool conforming () const
     {
-      return is.conforming();
+      return true;
     }
 
     /*! @brief geometrical information about this intersection in local coordinates of the inside() entity. */
@@ -1009,25 +832,29 @@ namespace Dune {
     /*! @brief Return an outer normal (length not necessarily 1) */
     GlobalCoordinate outerNormal (const LocalCoordinate& local) const
     {
-      return is.outerNormal(local);
+      return centerUnitOuterNormal();
     }
 
     /*! @brief return outer normal scaled with the integration element */
     GlobalCoordinate integrationOuterNormal (const LocalCoordinate& local) const
     {
-      return is.integrationOuterNormal(local);
+      FieldVector<ctype, dimworld> n = centerUnitOuterNormal();
+      n *= is.geometry().integrationElement(local);
+      return n;
     }
 
     /*! @brief Return unit outer normal (length == 1)  */
     GlobalCoordinate unitOuterNormal (const LocalCoordinate& local) const
     {
-      return is.unitOuterNormal(local);
+      return centerUnitOuterNormal();
     }
 
     /*! @brief Return unit outer normal (length == 1) */
     GlobalCoordinate centerUnitOuterNormal () const
     {
-      return is.centerUnitOuterNormal();
+      FieldVector<ctype, dimworld> normal(0.0);
+      normal[is.count/2] =  (is.count%2) ? 1.0 : -1.0;
+      return normal;
     }
 
     //! constructor
@@ -1293,78 +1120,6 @@ namespace Dune {
     std::vector<GeometryType> mytypes[GridImp::dimension+1];
   };
 
-  // Leaf Index Set
-
-  template<class GridImp>
-  class SGridLeafIndexSet : public IndexSet<GridImp,SGridLeafIndexSet<GridImp> >
-  {
-    typedef SGridLeafIndexSet< GridImp > This;
-    typedef IndexSet< GridImp, This > Base;
-
-    enum { dim = GridImp::dimension };
-
-  public:
-
-    //! constructor stores reference to a grid and level
-    explicit SGridLeafIndexSet ( const GridImp &g )
-      : grid( g )
-    {
-      // TODO move list of geometrytypes to grid, can be computed static (singleton)
-      // contains a single element type;
-      for (int codim=0; codim<=dim; codim++)
-        mytypes[codim].push_back(GeometryType(GeometryType::cube,dim-codim));
-    }
-
-    //! get index of an entity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cd>
-    int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
-    {
-      return grid.getRealImplementation(e).compressedLeafIndex();
-    }
-
-    template< int cc >
-    int subIndex ( const typename GridImp::Traits::template Codim< cc >::Entity &e,
-                   int i, unsigned int codim ) const
-    {
-      if( cc == 0 )
-        return grid.getRealImplementation(e).subCompressedIndex(codim, i);
-      else
-        DUNE_THROW( NotImplemented, "subIndex for higher codimension entity not implemented for SGrid." );
-    }
-
-    //! get number of entities of given type
-    int size (GeometryType type) const
-    {
-      return grid.size( grid.maxLevel(), type );
-    }
-
-    //! return size of set for a given codim
-    int size (int codim) const
-    {
-      return grid.size( grid.maxLevel(), codim );
-    }
-
-    // return true if the given entity is contained in \f$E\f$.
-    template< class EntityType >
-    bool contains ( const EntityType &e ) const
-    {
-      return (e.level() == grid.maxLevel());
-    }
-
-    //! deliver all geometry types used in this grid
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return mytypes[codim];
-    }
-
-  private:
-    const GridImp& grid;
-    std::vector<GeometryType> mytypes[dim+1];
-  };
 
 
   //========================================================================
@@ -1386,21 +1141,12 @@ namespace Dune {
 
   public:
 
-    //! import default implementation of subId<cc>
-    //! \todo remove after next release
-    using IdSet<GridImp,SGridGlobalIdSet<GridImp>, typename remove_const<GridImp>::type::PersistentIndexType>::subId;
-
-    //! define the type used for persisitent indices
+    //! define the type used for persistent indices
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
     typedef typename remove_const<GridImp>::type::PersistentIndexType IdType;
-
-    //! constructor stores reference to a grid
-    explicit SGridGlobalIdSet ( const GridImp &g )
-      : grid( g )
-    {}
 
     //! get id of an entity
     /*
@@ -1410,7 +1156,7 @@ namespace Dune {
     template<int cd>
     IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid.getRealImplementation(e).persistentIndex();
+      return GridImp::getRealImplementation(e).persistentIndex();
     }
 
     //! get id of subentity
@@ -1421,11 +1167,8 @@ namespace Dune {
     IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< 0 >::Entity &e,
                    int i, unsigned int codim ) const
     {
-      return grid.getRealImplementation(e).subPersistentIndex(codim, i);
+      return GridImp::getRealImplementation(e).subPersistentIndex(codim, i);
     }
-
-  private:
-    const GridImp& grid;
   };
 
 
@@ -1442,7 +1185,7 @@ namespace Dune {
         SHierarchicIterator,
         SLevelIterator,
         SGridLevelIndexSet<const SGrid<dim,dimworld,ctype> >,
-        SGridLeafIndexSet<const SGrid<dim,dimworld,ctype> >,
+        SGridLevelIndexSet<const SGrid<dim,dimworld,ctype> >,
         SGridGlobalIdSet<const SGrid<dim,dimworld,ctype> >,
         bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits>,
         SGridGlobalIdSet<const SGrid<dim,dimworld,ctype> >,
@@ -1517,7 +1260,7 @@ namespace Dune {
 
     // need for friend declarations in entity
     typedef SGridLevelIndexSet<SGrid<dim,dimworld> > LevelIndexSetType;
-    typedef SGridLeafIndexSet<SGrid<dim,dimworld> > LeafIndexSetType;
+    typedef SGridLevelIndexSet<SGrid<dim,dimworld> > LeafIndexSetType;
     typedef SGridGlobalIdSet<SGrid<dim,dimworld> > GlobalIdSetType;
 
     typedef typename SGridFamily<dim,dimworld,_ctype>::Traits Traits;
@@ -1714,12 +1457,12 @@ namespace Dune {
     // The new index sets from DDM 11.07.2005
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
-      return *theglobalidset;
+      return theglobalidset;
     }
 
     const typename Traits::LocalIdSet& localIdSet() const
     {
-      return *theglobalidset;
+      return theglobalidset;
     }
 
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
@@ -1730,7 +1473,7 @@ namespace Dune {
 
     const typename Traits::LeafIndexSet& leafIndexSet() const
     {
-      return *theleafindexset;
+      return *indexsets.back();
     }
 
     /*!
@@ -1783,14 +1526,12 @@ namespace Dune {
        Make associated classes friends to grant access to the real entity
      */
     friend class Dune::SGridLevelIndexSet<Dune::SGrid<dim,dimworld> >;
-    friend class Dune::SGridLeafIndexSet<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SGridGlobalIdSet<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SIntersectionIterator<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SHierarchicIterator<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SEntity<0,dim,Dune::SGrid<dim,dimworld> >;
 
     friend class Dune::SGridLevelIndexSet<const Dune::SGrid<dim,dimworld> >;
-    friend class Dune::SGridLeafIndexSet<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SGridGlobalIdSet<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SIntersectionIterator<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SHierarchicIterator<const Dune::SGrid<dim,dimworld> >;
@@ -1925,23 +1666,18 @@ namespace Dune {
     CollectiveCommunication<SGrid> ccobj;
 
     ReservedVector<SGridLevelIndexSet<const SGrid<dim,dimworld> >*, MAXL> indexsets;
-    SGridLeafIndexSet<const SGrid<dim,dimworld> > *theleafindexset;
-    SGridGlobalIdSet<const SGrid<dim,dimworld> > *theglobalidset;
+    SGridGlobalIdSet<const SGrid<dim,dimworld> > theglobalidset;
 
     int L;                        // number of levels in hierarchic mesh 0<=level<L
     FieldVector<ctype, dim> low;  // lower left corner of the grid
     FieldVector<ctype, dim> H;    // length of cube per direction
-    array<int,dim> *N;            // number of elements per direction
-    FieldVector<ctype, dim> *h;   // mesh size per direction
+    std::vector<array<int,dim> > N;            // number of elements per direction for each level
+    std::vector<FieldVector<ctype, dim> > h;   // mesh size per direction for each level
     mutable CubeMapper<dim> *mapper; // a mapper for each level
 
     // boundary segement index set
     array<CubeMapper<dim-1>, dim> boundarymapper; // a mapper for each coarse grid face
     int boundarysize;
-
-    // faster implementation of subIndex
-    mutable array <int,dim> zrefStatic;   // for subIndex of SEntity
-    mutable array <int,dim> zentityStatic; // for subIndex of SEntity
   };
 
   namespace Capabilities

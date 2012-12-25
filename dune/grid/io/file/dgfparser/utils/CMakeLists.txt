@@ -12,7 +12,11 @@ if(ALUGRID_FOUND)
   add_dgf_executable(gmsh2dgfalusimplex gmsh2dgf.cc GRIDDIM 2 WORLDDIM 2
     GRIDTYPE ALUGRID_SIMPLEX)
   add_dune_alugrid_flags(gmsh2dgfalusimplex)
+  set(EXTRA_PROGRAMS ${EXTRA_PROGRAMS} gmsh2dgfalusimplex)
 endif(ALUGRID_FOUND)
 
+# define HAVE_DUNE_GRID for the dgfparser
+set_property(TARGET ${EXTRA_PROGRAMS} APPEND PROPERTY
+  COMPILE_DEFINITIONS HAVE_DUNE_GRID=1)
 
 message(AUTHOR_WARNING "TODO: Build ${EXTRA_PROGRAMS} only on demand")

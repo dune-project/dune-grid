@@ -13,6 +13,7 @@ set(HEADERS
   geometry.hh
   grid.hh
   gridfamily.hh
+  gridview.hh
   hostcorners.hh
   identity.hh
   idset.hh

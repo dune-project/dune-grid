@@ -108,6 +108,10 @@ endforeach(_exe ${TESTS})
 add_directory_test_target(_test_target)
 add_dependencies(${_test_target} ${TESTS})
 
+# define HAVE_DUNE_GRID for the dgfparser
+set_property(TARGET ${TESTS} APPEND PROPERTY COMPILE_DEFINITIONS
+  HAVE_DUNE_GRID=1)
+
 set(SOURCES gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc checkentityseed.cc)
 message(AUTHOR_WARNING "Make sure that ${SOURCES} are shipped")
 

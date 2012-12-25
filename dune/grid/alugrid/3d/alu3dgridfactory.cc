@@ -16,7 +16,7 @@
 
 #include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
 
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline
@@ -336,7 +336,8 @@ namespace Dune
 
       typedef typename ElementVector::iterator ElementIteratorType;
       const ElementIteratorType endE = elements_.end();
-      for( ElementIteratorType it = elements_.begin(); it != endE; ++it )
+      unsigned int elemIndex = 0;
+      for( ElementIteratorType it = elements_.begin(); it != endE; ++it, ++elemIndex )
       {
         if( elementType == hexa )
         {
@@ -356,7 +357,11 @@ namespace Dune
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
             element[ j ] = globalId( (*it)[ i ] );
           }
-          mgb.InsertUniqueTetra( element );
+          mgb.InsertUniqueTetra( element
+#ifdef ALUGRID_3D_CONFORMING_REFINEMENT
+                                 , (elemIndex % 2)
+#endif
+                                 );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");

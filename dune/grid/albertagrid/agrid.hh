@@ -22,7 +22,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/stdstreams.hh>
-#include <dune/common/collectivecommunication.hh>
+#include <dune/common/parallel/collectivecommunication.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
@@ -64,7 +64,7 @@ namespace Dune
   // -----------------------------
 
   template< class Grid >
-  class DGFGridFactory;
+  struct DGFGridFactory;
 
 
 
@@ -150,7 +150,7 @@ namespace Dune
     template< class, PartitionIteratorType > friend class AlbertaLeafGridView;
 
     friend class GridFactory< This >;
-    friend class DGFGridFactory< This >;
+    friend struct DGFGridFactory< This >;
 
     friend class AlbertaGridHierarchicIterator< This >;
 

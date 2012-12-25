@@ -93,7 +93,7 @@ template< class GridImp>
 typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry
 Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
 {
-  if (!geometryInInsideIsUpToDate_) {
+  if (!geometryInInside_) {
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
@@ -110,20 +110,18 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
 
     }
 
-    geometryInInside_.setup(intersectionGeometryType, coordinates);
-
-    geometryInInsideIsUpToDate_ = true;
+    geometryInInside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
   }
 
-  return LocalGeometry( geometryInInside_ );
+  return LocalGeometry( *geometryInInside_ );
 }
 
 template< class GridImp>
 typename Dune::UGGridLevelIntersection<GridImp>::Geometry
 Dune::UGGridLevelIntersection<GridImp>::geometry () const
 {
-  if (!geometryIsUpToDate_) {
+  if (!geometry_) {
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
@@ -140,20 +138,18 @@ Dune::UGGridLevelIntersection<GridImp>::geometry () const
 
     }
 
-    geometry_.setup(intersectionGeometryType, coordinates);
-
-    geometryIsUpToDate_ = true;
+    geometry_ = make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
 
   }
 
-  return Geometry( geometry_ );
+  return Geometry( *geometry_ );
 }
 
 template<class GridImp>
 typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry
 Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
 {
-  if (!geometryInOutsideIsUpToDate_) {
+  if (!geometryInOutside_) {
 
     typename UG_NS<dim>::Element *other;
 
@@ -188,13 +184,11 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
 
     }
 
-    geometryInOutside_.setup(intersectionGeometryType, coordinates);
-
-    geometryInOutsideIsUpToDate_ = true;
+    geometryInOutside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
   }
 
-  return LocalGeometry( geometryInOutside_ );
+  return LocalGeometry( *geometryInOutside_ );
 }
 
 template< class GridImp>
@@ -312,7 +306,7 @@ template< class GridImp>
 typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry
 Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 {
-  if (!geometryInInsideIsUpToDate_) {
+  if (!geometryInInside_) {
 
     if (leafSubFaces_[0].first == NULL       // boundary intersection
         // or if this face is the intersection
@@ -339,7 +333,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_.setup(intersectionGeometryType, coordinates);
+      geometryInInside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -368,21 +362,19 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_.setup(intersectionGeometryType, coordinates);
+      geometryInInside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
     }
-
-    geometryInInsideIsUpToDate_ = true;
 
   }
 
-  return LocalGeometry( geometryInInside_ );
+  return LocalGeometry( *geometryInInside_ );
 }
 
 template< class GridImp>
 typename Dune::UGGridLeafIntersection<GridImp>::Geometry
 Dune::UGGridLeafIntersection< GridImp >::geometry () const
 {
-  if (!geometryIsUpToDate_) {
+  if (!geometry_) {
 
     if (leafSubFaces_[0].first == NULL       // boundary intersection
         // or if this face is the intersection
@@ -409,7 +401,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      geometry_.setup(intersectionGeometryType, coordinates);
+      geometry_ = make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -433,15 +425,13 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      geometry_.setup(intersectionGeometryType, coordinates);
+      geometry_ = make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
 
     }
 
-    geometryIsUpToDate_ = true;
-
   }
 
-  return Geometry( geometry_ );
+  return Geometry( *geometry_ );
 }
 
 /** \todo Needs to be checked for the nonconforming case */
@@ -449,7 +439,7 @@ template< class GridImp>
 typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry
 Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 {
-  if (!geometryInOutsideIsUpToDate_) {
+  if (!geometryInOutside_) {
 
     if (leafSubFaces_[0].first == NULL)
       DUNE_THROW(GridError, "There is no neighbor!");
@@ -487,7 +477,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_.setup(intersectionGeometryType, coordinates);
+      geometryInOutside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -505,15 +495,13 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_.setup(intersectionGeometryType, coordinates);
+      geometryInOutside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
     }
 
-    geometryInOutsideIsUpToDate_ = true;
-
   }
 
-  return LocalGeometry( geometryInOutside_ );
+  return LocalGeometry( *geometryInOutside_ );
 }
 
 template< class GridImp>

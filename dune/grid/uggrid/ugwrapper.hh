@@ -82,6 +82,13 @@ namespace Dune {
     template <int codim>
     class Entity;
 
+    // Type used for local and global ids
+#ifdef ModelP
+    typedef UG_NAMESPACE::DDD_GID UG_ID_TYPE;
+#else
+    typedef UG::INT UG_ID_TYPE;
+#endif
+
 #ifdef ModelP
     /* DDD Interfaces */
     typedef UG_NAMESPACE::DDD_IF_DIR DDD_IF_DIR;
@@ -257,6 +264,30 @@ namespace Dune {
     static DDD_IF &EdgeSymmVHIF()
     {
       return UG_NAMESPACE::EdgeSymmVHIF;
+    }
+
+    /** \brief Encapsulates the UG EVECTOR macro
+     *  \note This is only used for the initial load balancing implementation
+     *        (with all-to-all communication), and will become obsolete once
+     *        'real' load balancing has been implemented.
+     */
+    static Vector* EntityVector(const UG_NS< UG_DIM >::Element* element)
+    {
+      using UG_NAMESPACE::evector_offset;
+      using UG_NAMESPACE::VECTOR;
+      using UG::UINT;
+      return EVECTOR(element);
+    }
+
+    /** \brief Encapsulates the UG NVECTOR macro
+     *  \note This is only used for the initial load balancing implementation
+     *        (with all-to-all communication), and will become obsolete once
+     *        'real' load balancing has been implemented.
+     */
+    static Vector* EntityVector(const UG_NS< UG_DIM >::Node* node)
+    {
+      using UG_NAMESPACE::VECTOR;
+      return NVECTOR(node);
     }
 
     /** \brief Encapsulates the UG EPRIO macro */

@@ -205,7 +205,7 @@ namespace Dune {
                            unsigned int codim) const
     {
       if (cc==dim)
-        return UG_NS<dim>::levelIndex(grid_.getRealImplementation(e).getTarget());
+        return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
 
       if (codim==0)
         return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
@@ -320,13 +320,11 @@ namespace Dune {
 
   /** \brief Implementation class for the UGGrid Id sets
 
-     The UGGridGlobalIdSet and the UGGridLocalIdSet are virtually identical. This
-     class implements them both at once.  You can select the one you want using
-     the <tt>Local</tt> template parameter.
-     \tparam Local false for GlobalIdSet, true for LocalIdSet
+     The UGGridGlobalIdSet and the UGGridLocalIdSet are identical. This
+     class implements them both at once.
    */
-  template <class GridImp, bool Local>
-  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp,Local>,unsigned int>
+  template <class GridImp>
+  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp>,typename UG_NS<remove_const<GridImp>::type::dimension>::UG_ID_TYPE>
   {
     enum {dim = remove_const<GridImp>::type::dimension};
 
@@ -334,9 +332,7 @@ namespace Dune {
 
     /** \brief Look for copy of a face on the next-lower grid level.
 
-       \todo This method is not implemented very efficiently, but I will not put
-       further work into it as long as the much-awaited face objects are not included
-       in UG.
+       \todo This method is not implemented very efficiently
      */
     static Face getFatherFace(const Face& face) {
 
@@ -381,13 +377,20 @@ namespace Dune {
     //! constructor stores reference to a grid
     UGGridIdSet (const GridImp& g) : grid_(g) {}
 
-    //! get id of an entity
-    /*
+    /** \brief Get id of an entity
+
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
+
+       \bug Since copies of different entities on different levels are supposed to have the
+       same id, we look for the ancestor on the coarsest level that is still a copy of
+       the entity we are interested in.  However, the current implementation only searches
+       on one processor, while with UG's vertical load balancing the ancestors of an entity
+       may be distributed across different processors.  This will lead to very-difficult-to-fix
+       bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
     template<int cd>
-    unsigned int id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    typename UG_NS<dim>::UG_ID_TYPE id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       if (cd==0) {
         // If we're asked for the id of an element, and that element is a copy of its father, then
@@ -410,12 +413,11 @@ namespace Dune {
         typename UG_NS<dim>::Node *node =
           reinterpret_cast<typename UG_NS<dim>::Node *>(grid_.getRealImplementation(e).getTarget());
 
-        return node->ddd.gid;
+        return node->myvertex->iv.ddd.gid;
       }
       else {
         DUNE_THROW(NotImplemented,
-                   (Local ? "Local" : "Global") <<
-                   " persistent index for entities which are neither nodes nor elements.");
+                   "persistent ids for entities which are neither nodes nor elements.");
       }
 #else
       return UG_NS<dim>::id(grid_.getRealImplementation(e).getTarget());
@@ -423,14 +425,21 @@ namespace Dune {
 
     }
 
-    //! get id of subEntity
-    /*
+    /** \brief Get id of subentity
+
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
+
+       \bug Since copies of different entities on different levels are supposed to have the
+       same id, we look for the ancestor on the coarsest level that is still a copy of
+       the entity we are interested in.  However, the current implementation only searches
+       on one processor, while with UG's vertical load balancing the ancestors of an entity
+       may be distributed across different processors.  This will lead to very-difficult-to-fix
+       bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
-    unsigned int subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
-                        int i,
-                        unsigned int codim) const
+    typename UG_NS<dim>::UG_ID_TYPE subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
+                                           int i,
+                                           unsigned int codim) const
     {
       if (codim==0)
         return id<0>(e);
@@ -447,6 +456,8 @@ namespace Dune {
 
         // If this edge is the copy of an edge on a lower level we return the id of that lower
         // edge, because Dune wants entities which are copies of each other to have the same id.
+        // BUG: in the parallel setting, we only search on our own processor, but the lowest
+        // copy may actually be on a different processor!
         const typename UG_NS<dim>::Edge* fatherEdge;
         fatherEdge = GetFatherEdge(edge);
 
@@ -462,8 +473,7 @@ namespace Dune {
         }
 
 #ifdef ModelP
-        //return (Local) ? edge->id : edge->ddd.gid;
-        DUNE_THROW(NotImplemented, "!");
+        return edge->ddd.gid;
 #else
         return edge->id;
 #endif
@@ -475,6 +485,8 @@ namespace Dune {
 
         // If this face is the copy of a face on a lower level we return the id of that lower
         // face, because Dune wants entities which are copies of each other to have the same id.
+        // BUG: in the parallel setting, we only search on our own processor, but the lowest
+        // copy may actually be on a different processor!
         Face fatherFace;
         fatherFace = getFatherFace(face);
         while (fatherFace.first) {
@@ -483,9 +495,7 @@ namespace Dune {
         }
 
 #ifdef ModelP
-        return (Local)
-               ? UG_NS<dim>::SideVector(face.first, face.second)->id
-               : UG_NS<dim>::SideVector(face.first, face.second)->ddd.gid;
+        return UG_NS<dim>::SideVector(face.first, face.second)->ddd.gid;
 #else
         return UG_NS<dim>::SideVector(face.first, face.second)->id;
 #endif
@@ -493,9 +503,7 @@ namespace Dune {
 
       if (codim==dim) {
 #ifdef ModelP
-        return (Local)
-               ? UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)))
-               : UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(i,type))->ddd.gid;
+        return UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(i,type))->myvertex->iv.ddd.gid;
 #else
         return UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
 #endif

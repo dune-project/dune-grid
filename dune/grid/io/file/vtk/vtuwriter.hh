@@ -24,75 +24,74 @@ namespace Dune {
     /**
      * This will help generating a .vtu/.vtp file.  Typical use is like this:
      * \code
-       {
-       // create writer, writes begin tag
-       VTUWriter writer(std::cout, appendedraw, VTUWriter::polyData);
-
-       // write the main header
-       writer.beginMain(ncells, nvertices);
-       dumpEverything(writer);
-       writer.endMain();
-
-       // write the appended section, if required by the outputtype
-       if(writer.beginAppended())
-       dumpEverything(writer);
-       writer.endAppended();
-
-       // end scope so the destructor gets called and the closing tag is written
-       }
+     * {
+     *   // create writer, writes begin tag
+     *   VTUWriter writer(std::cout, appendedraw, VTUWriter::polyData);
+     *
+     *   // write the main header
+     *   writer.beginMain(ncells, nvertices);
+     *   dumpEverything(writer);
+     *   writer.endMain();
+     *
+     *   // write the appended section, if required by the outputtype
+     *   if(writer.beginAppended())
+     *     dumpEverything(writer);
+     *   writer.endAppended();
+     *
+     *   // end scope so the destructor gets called and the closing tag is written
+     * }
      * \endcode
      * The method dumpEverything() then looks something like this:
      * \code
-       void dumpEverything(VTUWriter& writer)
-       {
-       // dump cell data (optional)
-       writer.beginCellData();
-       for(each cell data field) {
-       shared_ptr<DataArrayWriter<T> > arraywriter
-       (writer.makeArrayWriter(field.name, field.ncomps, ncells));
-       // iterate over the points and write data for each
-       }
-       writer.endCellData();
-
-       // dump point data (optional)
-       writer.beginPointData();
-       for(each point data field) {
-       shared_ptr<DataArrayWriter<T> > arraywriter
-       (writer.makeArrayWriter(field.name, field.ncomps, npoints));
-       // iterate over the points and write data for each
-       }
-       writer.endPointData();
-
-       // dump point coordinates
-       writer.beginPoints();
-       {
-       shared_ptr<DataArrayWriter<float> > arraywriter
-       (writer.makeArrayWriter("Coordinates", 3, npoints));
-       // iterate over the points and write data for each
-       }
-       writer.endPoints();
-
-       // dump cells
-       writer.beginCells();
-       { // connectivity
-       shared_ptr<DataArrayWriter<int> > arraywriter
-       (writer.makeArrayWriter("connectivity", 1, ncorners));
-       // iterate over the cells and write data for each
-       }
-       { // connectivity
-       shared_ptr<DataArrayWriter<int> > arraywriter
-       (writer.makeArrayWriter("offsets", 1, ncells));
-       // iterate over the cells and write data for each
-       }
-       if(fileType == unstructuredGrid) { // types
-       shared_ptr<DataArrayWriter<unsigned char> > arraywriter
-       (writer.makeArrayWriter("types", 1, ncells));
-       // iterate over the cells and write data for each
-       }
-       writer.endCells();
-       }
-     * \endcode
+     * void dumpEverything(VTUWriter& writer)
+     * {
+     *   // dump cell data (optional)
+     *   writer.beginCellData();
+     *   for(each cell data field) {
+     *     shared_ptr<DataArrayWriter<T> > arraywriter
+     *       (writer.makeArrayWriter(field.name, field.ncomps, ncells));
+     *     // iterate over the points and write data for each
+     *   }
+     *   writer.endCellData();
      *
+     *   // dump point data (optional)
+     *   writer.beginPointData();
+     *   for(each point data field) {
+     *     shared_ptr<DataArrayWriter<T> > arraywriter
+     *       (writer.makeArrayWriter(field.name, field.ncomps, npoints));
+     *     // iterate over the points and write data for each
+     *   }
+     *   writer.endPointData();
+     *
+     *   // dump point coordinates
+     *   writer.beginPoints();
+     *   {
+     *     shared_ptr<DataArrayWriter<float> > arraywriter
+     *       (writer.makeArrayWriter("Coordinates", 3, npoints));
+     *     // iterate over the points and write data for each
+     *   }
+     *   writer.endPoints();
+     *
+     *   // dump cells
+     *   writer.beginCells();
+     *   { // connectivity
+     *     shared_ptr<DataArrayWriter<int> > arraywriter
+     *       (writer.makeArrayWriter("connectivity", 1, ncorners));
+     *     // iterate over the cells and write data for each
+     *   }
+     *   { // connectivity
+     *     shared_ptr<DataArrayWriter<int> > arraywriter
+     *       (writer.makeArrayWriter("offsets", 1, ncells));
+     *     // iterate over the cells and write data for each
+     *   }
+     *   if(fileType == unstructuredGrid) { // types
+     *     shared_ptr<DataArrayWriter<unsigned char> > arraywriter
+     *       (writer.makeArrayWriter("types", 1, ncells));
+     *     // iterate over the cells and write data for each
+     *   }
+     *   writer.endCells();
+     * }
+     * \endcode
      */
     class VTUWriter {
     public:
