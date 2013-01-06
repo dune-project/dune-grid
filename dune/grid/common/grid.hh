@@ -352,8 +352,8 @@ namespace Dune {
   template<int codim, int dim, class GridImp,template<int,int,class> class EntityImp> class Entity;
   template<class GridImp, class EntityPointerImp> class EntityPointer;
   template< int codim, class Grid, class IteratorImp > class EntityIterator;
-  template<class GridImp, template<class> class IntersectionImp> class Intersection;
-  template<class GridImp, template<class> class IntersectionIteratorImp, template<class> class IntersectionImp> class IntersectionIterator;
+  template< class GridImp, class IntersectionImp > class Intersection;
+  template< class GridImp, class IntersectionIteratorImp, class IntersectionImp > class IntersectionIterator;
   template<class GridImp> class GenericLeafIterator;
   template<class GridImp, class IndexSetImp, class IndexTypeImp=unsigned int> class IndexSet;
   template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
@@ -1184,13 +1184,13 @@ namespace Dune {
     typedef GridImp Grid;
 
     /** \brief The type of the intersection at the leafs of the grid. */
-    typedef Dune::Intersection<const GridImp, LeafIntersectionImp>  LeafIntersection;
+    typedef Dune::Intersection< const GridImp, LeafIntersectionImp< const GridImp > >  LeafIntersection;
     /** \brief The type of the intersection at the levels of the grid. */
-    typedef Dune::Intersection<const GridImp, LevelIntersectionImp> LevelIntersection;
+    typedef Dune::Intersection< const GridImp, LevelIntersectionImp< const GridImp > > LevelIntersection;
     /** \brief The type of the intersection iterator at the leafs of the grid. */
-    typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorImp, LeafIntersectionImp>   LeafIntersectionIterator;
+    typedef Dune::IntersectionIterator< const GridImp, LeafIntersectionIteratorImp< const GridImp >, LeafIntersectionImp< const GridImp > > LeafIntersectionIterator;
     /** \brief The type of the intersection iterator at the levels of the grid. */
-    typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorImp, LevelIntersectionImp> LevelIntersectionIterator;
+    typedef Dune::IntersectionIterator< const GridImp, LevelIntersectionIteratorImp< const GridImp >, LevelIntersectionImp< const GridImp > > LevelIntersectionIterator;
 
     /** \brief The type of the  hierarchic iterator. */
     typedef Dune::EntityIterator< 0, const GridImp, HierarchicIteratorImp< const GridImp > > HierarchicIterator;

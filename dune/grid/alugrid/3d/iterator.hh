@@ -111,7 +111,7 @@ namespace Dune {
 
     typedef ALU3dGridIntersectionIterator< GridImp > ImplementationType;
     //! type of the intersection
-    typedef Dune::Intersection< GridImp, Dune::ALU3dGridIntersectionIterator > Intersection;
+    typedef Dune::Intersection< GridImp, Dune::ALU3dGridIntersectionIterator< GridImp > > Intersection;
 
     typedef FieldVector<alu3d_ctype, dimworld> NormalType;
     typedef ALU3dGridEntityPointer<0,GridImp> EntityPointer;
@@ -344,7 +344,6 @@ namespace Dune {
   public:
     typedef typename GridImp::GridObjectFactoryType FactoryType;
 
-    //typedef Dune :: Intersection< const GridImp, ThisType >
     typedef ALUMemoryProvider< ThisType > StorageType;
 
     //! The default Constructor , level tells on which level we want

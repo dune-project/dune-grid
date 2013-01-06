@@ -384,7 +384,7 @@ namespace Dune
 
   public:
     //! type of the intersection
-    typedef Dune::Intersection< Grid, ALU2dGridLevelIntersection > Intersection;
+    typedef Dune::Intersection< Grid, ALU2dGridLevelIntersection< Grid > > Intersection;
 
     typedef typename Grid::GridObjectFactoryType Factory;
     typedef ALUMemoryProvider< This > StorageType;
@@ -471,7 +471,7 @@ namespace Dune
     typedef ALUMemoryProvider< This > StorageType;
 
     //! type of the intersection
-    typedef Dune::Intersection< Grid, Dune::ALU2dGridLeafIntersection > Intersection;
+    typedef Dune::Intersection< Grid, Dune::ALU2dGridLeafIntersection< Grid > > Intersection;
 
     /** \brief constructor
      *

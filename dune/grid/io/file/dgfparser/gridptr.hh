@@ -23,13 +23,20 @@
 
 namespace Dune
 {
-  // forward declarations
-  // --------------------
+
+  // External Forward Declarations
+  // -----------------------------
+
   template < class G >
   struct DGFGridFactory;
 
-  template< class GridImp, template < class > class IntersectionImp >
+  template< class GridImp, class IntersectionImp >
   class Intersection;
+
+
+
+  // GridPtr
+  // -------
 
   //! \brief Class for constructing grids from DGF files.
   //!
@@ -196,7 +203,7 @@ namespace Dune
     }
 
     //! get number of parameters defined for a given intersection
-    template< class GridImp, template< class > class IntersectionImp >
+    template< class GridImp, class IntersectionImp >
     int nofParameters ( const Intersection< GridImp, IntersectionImp > & intersection ) const
     {
       return parameters( intersection ).size();
@@ -229,7 +236,7 @@ namespace Dune
     }
 
     //! get parameters for intersection
-    template< class GridImp, template< class > class IntersectionImp >
+    template< class GridImp, class IntersectionImp >
     const DGFBoundaryParameter::type & parameters ( const Intersection< GridImp, IntersectionImp > & intersection ) const
     {
       // if no parameters given return empty vecto

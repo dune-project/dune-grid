@@ -47,7 +47,7 @@ namespace Dune
 
       typedef GeoGrid::IndexSet< const Grid, typename HostGridView::IndexSet > IndexSet;
 
-      typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection > Intersection;
+      typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection< const Grid > > Intersection;
 
       typedef Dune::IntersectionIterator
       < const Grid, GeoGrid::LevelIntersectionIterator, GeoGrid::LevelIntersection >
@@ -232,7 +232,7 @@ namespace Dune
 
       typedef GeoGrid::IndexSet< const Grid, typename HostGridView::IndexSet > IndexSet;
 
-      typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection > Intersection;
+      typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection< const Grid > > Intersection;
 
       typedef Dune::IntersectionIterator
       < const Grid, GeoGrid::LeafIntersectionIterator, GeoGrid::LeafIntersection >

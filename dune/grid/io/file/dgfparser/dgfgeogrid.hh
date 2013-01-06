@@ -16,6 +16,7 @@
 
 namespace Dune
 {
+
   /************************************************************************
   * Warning:
   * Reading DGF files directly into a GeometryGrid is a dirty hack for
@@ -25,10 +26,13 @@ namespace Dune
   *   2) The coordinate function has to provide a default constructor
   ************************************************************************/
 
-  // forward declaration
-  // -------------------
-  template < class GridImp, template < class > class IntersectionImp >
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class GridImp, class IntersectionImp >
   class Intersection;
+
+
 
   // DGFCoordFunction
   // ----------------
@@ -180,7 +184,7 @@ namespace Dune
       return dgfHostFactory_.haveBoundaryParameters();
     }
 
-    template< class GG, template< class > class II >
+    template< class GG, class II >
     const typename DGFBoundaryParameter::type &
     boundaryParameter ( const Dune::Intersection< GG, II > & intersection ) const
     {

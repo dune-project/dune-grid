@@ -62,8 +62,8 @@ namespace Dune
         static const int dimension = HostGrid::dimension;
         static const int dimensionworld = CoordFunction::dimRange;
 
-        typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection > LeafIntersection;
-        typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection > LevelIntersection;
+        typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection< const Grid > > LeafIntersection;
+        typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection< const Grid > > LevelIntersection;
 
         typedef Dune::IntersectionIterator
         < const Grid, GeoGrid::LeafIntersectionIterator, GeoGrid::LeafIntersection >

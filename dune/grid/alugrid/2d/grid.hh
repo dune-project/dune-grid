@@ -126,11 +126,11 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune::Intersection< const GridImp, ALU2dGridLeafIntersection > LeafIntersection;
-      typedef Dune::Intersection< const GridImp, ALU2dGridLevelIntersection > LevelIntersection;
+      typedef Dune::Intersection< const GridImp, ALU2dGridLeafIntersection< const GridImp > > LeafIntersection;
+      typedef Dune::Intersection< const GridImp, ALU2dGridLevelIntersection< const GridImp > > LevelIntersection;
 
-      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLeafIntersectionIterator, ALU2dGridLeafIntersection > LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLevelIntersectionIterator, ALU2dGridLevelIntersection > LevelIntersectionIterator;
+      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLeafIntersectionIterator< const GridImp >, ALU2dGridLeafIntersection< const GridImp > > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator< const GridImp, ALU2dGridLevelIntersectionIterator< const GridImp >, ALU2dGridLevelIntersection< const GridImp > > LevelIntersectionIterator;
 
       typedef Dune::EntityIterator< 0, const GridImp, ALU2dGridHierarchicIterator< const GridImp > > HierarchicIterator;
 

@@ -16,11 +16,13 @@
 namespace Dune
 {
 
-  // forward declaration
-  // -------------------
+  // External Forward Declarations
+  // -----------------------------
 
-  template< class GridImp, template< class > class IntersectionImp >
+  template< class GridImp, class IntersectionImp >
   class Intersection;
+
+
 
   // DGFGridInfo (specialization for ALUGrid)
   // ----------------------------------------
@@ -104,7 +106,7 @@ namespace Dune
       return factory_.wasInserted( intersection );
     }
 
-    template < class GG, template < class > class II >
+    template< class GG, class II >
     int boundaryId ( const Intersection< GG, II > & intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;
@@ -130,7 +132,7 @@ namespace Dune
         return (intersection.boundary() ? 1 : 0);
     }
 
-    template < class GG, template < class > class II >
+    template< class GG, class II >
     const typename DGFBoundaryParameter::type &
     boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {

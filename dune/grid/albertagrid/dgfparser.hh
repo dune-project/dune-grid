@@ -19,11 +19,13 @@
 namespace Dune
 {
 
-  // forward declaration
-  // -------------------
+  // External Forward Declarations
+  // -----------------------------
 
-  template < class GridImp, template < class > class IntersectionImp >
+  template< class GridImp, class IntersectionImp >
   class Intersection;
+
+
 
   // DGFGridFactory for AlbertaGrid
   // ------------------------------
@@ -66,7 +68,7 @@ namespace Dune
       return dgf_.haveBndParameters;
     }
 
-    template < class GG, template < class > class II >
+    template < class GG, class II >
     const DGFBoundaryParameter::type &
     boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {

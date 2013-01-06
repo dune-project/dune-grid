@@ -9,12 +9,17 @@
 
 namespace Dune
 {
-  // forward declaration
-  // -------------------
 
-  template< class GridImp, template< class > class IntersectionImp >
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class GridImp, class IntersectionImp >
   class Intersection;
 
+
+
+  // DGFGridFactory for SGrid
+  // ------------------------
 
   template< int dim, int dimworld, class ctype >
   struct DGFGridFactory< SGrid< dim, dimworld, ctype > >
@@ -84,7 +89,7 @@ namespace Dune
       return boundaryDomainBlock_->isactive();
     }
 
-    template < class GG, template < class > class II >
+    template< class GG, class II >
     const typename DGFBoundaryParameter::type &
     boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
