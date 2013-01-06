@@ -50,7 +50,7 @@ namespace Dune
       typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection< const Grid > > Intersection;
 
       typedef Dune::IntersectionIterator
-      < const Grid, GeoGrid::LevelIntersectionIterator, GeoGrid::LevelIntersection >
+      < const Grid, GeoGrid::LevelIntersectionIterator< const Grid >, GeoGrid::LevelIntersection< const Grid > >
       IntersectionIterator;
 
       typedef typename HostGridView::CollectiveCommunication CollectiveCommunication;
@@ -235,7 +235,7 @@ namespace Dune
       typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection< const Grid > > Intersection;
 
       typedef Dune::IntersectionIterator
-      < const Grid, GeoGrid::LeafIntersectionIterator, GeoGrid::LeafIntersection >
+      < const Grid, GeoGrid::LeafIntersectionIterator< const Grid >, GeoGrid::LeafIntersection< const Grid > >
       IntersectionIterator;
 
       typedef typename HostGridView::CollectiveCommunication CollectiveCommunication;
