@@ -176,13 +176,19 @@ namespace Dune
 
       if( it != end )
       {
-        elementSeeds.resize( indexSet.size( 0 ), (*it).seed() ) ;
-        for( ; it != end; ++it )
+        elementSeeds.resize( orderSize, (*it).seed() ) ;
+        size_t countElements = 0 ;
+        for( ; it != end; ++it, ++countElements )
         {
           const Element& element = *it ;
           assert( newElemOrder[ indexSet.index( element ) ] < orderSize );
           elementSeeds[ newElemOrder[ indexSet.index( element ) ] ] = element.seed();
         }
+
+        // make sure that the size of the index set is equal
+        // to the number of counted elements
+        if( countElements != orderSize )
+          DUNE_THROW(InvalidStateException,"DGFWriter::write: IndexSet not consecutive");
       }
     }
 
