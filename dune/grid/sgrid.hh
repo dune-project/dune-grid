@@ -1164,7 +1164,8 @@ namespace Dune {
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< 0 >::Entity &e,
+    template< int cd >
+    IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< cd >::Entity &e,
                    int i, unsigned int codim ) const
     {
       return GridImp::getRealImplementation(e).subPersistentIndex(codim, i);
