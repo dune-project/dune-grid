@@ -39,7 +39,6 @@ namespace Dune
 
       static const PartitionIteratorType Element_Partition = Interior_Partition;
 
-      typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
       typedef Dune::ReferenceElement< void, dimension > RefElement;
 
@@ -66,7 +65,6 @@ namespace Dune
 
       static const PartitionIteratorType Element_Partition = Interior_Partition;
 
-      typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
       typedef Dune::ReferenceElement< void, dimension > RefElement;
 
@@ -85,7 +83,6 @@ namespace Dune
 
       static const PartitionIteratorType Element_Partition = Overlap_Partition;
 
-      typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
       typedef Dune::ReferenceElement< void, dimension > RefElement;
 
@@ -115,7 +112,6 @@ namespace Dune
 
       static const PartitionIteratorType Element_Partition = Overlap_Partition;
 
-      typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
       typedef Dune::ReferenceElement< void, dimension > RefElement;
 
@@ -134,7 +130,6 @@ namespace Dune
 
       static const PartitionIteratorType Element_Partition = All_Partition;
 
-      typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
       typedef Dune::ReferenceElement< void, dimension > RefElement;
 
@@ -153,7 +148,6 @@ namespace Dune
 
       static const PartitionIteratorType Element_Partition = Ghost_Partition;
 
-      typedef typename remove_const< Grid >::type::ctype ctype;
       typedef typename remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
       typedef Dune::ReferenceElement< void, dimension > RefElement;
 
@@ -261,8 +255,6 @@ namespace Dune
 
       void increment ()
       {
-        typedef typename Traits::ctype ctype;
-
         int subEntity = this->subEntity();
         while( hostElementIterator_ != hostEnd_ )
         {
