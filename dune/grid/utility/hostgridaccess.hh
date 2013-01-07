@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include <dune/grid/geometrygrid/intersection.hh>
+
 namespace Dune
 {
 
