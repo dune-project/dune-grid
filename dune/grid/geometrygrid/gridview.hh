@@ -11,6 +11,7 @@
 #include <dune/grid/geometrygrid/datahandle.hh>
 #include <dune/grid/geometrygrid/indexsets.hh>
 #include <dune/grid/geometrygrid/intersection.hh>
+#include <dune/grid/geometrygrid/intersectioniterator.hh>
 #include <dune/grid/geometrygrid/iterator.hh>
 
 namespace Dune
@@ -40,6 +41,9 @@ namespace Dune
 
       typedef typename HostGrid::template Partition< pitype >::LevelGridView HostGridView;
 
+      typedef typename HostGridView::Intersection HostIntersection;
+      typedef typename HostGridView::IntersectionIterator HostIntersectionIterator;
+
     public:
       typedef LevelGridView< HostGrid, CoordFunction, Allocator, pitype > GridViewImp;
 
@@ -47,10 +51,10 @@ namespace Dune
 
       typedef GeoGrid::IndexSet< const Grid, typename HostGridView::IndexSet > IndexSet;
 
-      typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection< const Grid > > Intersection;
+      typedef Dune::Intersection< const Grid, GeoGrid::Intersection< const Grid, HostIntersection > > Intersection;
 
       typedef Dune::IntersectionIterator
-      < const Grid, GeoGrid::LevelIntersectionIterator< const Grid >, GeoGrid::LevelIntersection< const Grid > >
+      < const Grid, GeoGrid::IntersectionIterator< const Grid, HostIntersectionIterator >, GeoGrid::Intersection< const Grid, HostIntersection > >
       IntersectionIterator;
 
       typedef typename HostGridView::CollectiveCommunication CollectiveCommunication;
@@ -168,13 +172,13 @@ namespace Dune
 
       IntersectionIterator ibegin ( const typename Codim< 0 >::Entity &entity ) const
       {
-        typedef GeoGrid::LevelIntersectionIterator< const Grid > IntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< const Grid, typename HostGridView::IntersectionIterator > IntersectionIteratorImpl;
         return IntersectionIteratorImpl( entity, hostGridView().ibegin( Grid::getRealImplementation( entity ).hostEntity() ) );
       }
 
       IntersectionIterator iend ( const typename Codim< 0 >::Entity &entity ) const
       {
-        typedef GeoGrid::LevelIntersectionIterator< const Grid > IntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< const Grid, typename HostGridView::IntersectionIterator > IntersectionIteratorImpl;
         return IntersectionIteratorImpl( entity, hostGridView().iend( Grid::getRealImplementation( entity ).hostEntity() ) );
       }
 
@@ -225,6 +229,9 @@ namespace Dune
 
       typedef typename HostGrid::template Partition< pitype >::LeafGridView HostGridView;
 
+      typedef typename HostGridView::Intersection HostIntersection;
+      typedef typename HostGridView::IntersectionIterator HostIntersectionIterator;
+
     public:
       typedef LeafGridView< HostGrid, CoordFunction, Allocator, pitype > GridViewImp;
 
@@ -232,10 +239,10 @@ namespace Dune
 
       typedef GeoGrid::IndexSet< const Grid, typename HostGridView::IndexSet > IndexSet;
 
-      typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection< const Grid > > Intersection;
+      typedef Dune::Intersection< const Grid, GeoGrid::Intersection< const Grid, HostIntersection > > Intersection;
 
       typedef Dune::IntersectionIterator
-      < const Grid, GeoGrid::LeafIntersectionIterator< const Grid >, GeoGrid::LeafIntersection< const Grid > >
+      < const Grid, GeoGrid::IntersectionIterator< const Grid, HostIntersectionIterator >, GeoGrid::Intersection< const Grid, HostIntersection > >
       IntersectionIterator;
 
       typedef typename HostGridView::CollectiveCommunication CollectiveCommunication;
@@ -352,13 +359,13 @@ namespace Dune
 
       IntersectionIterator ibegin ( const typename Codim< 0 >::Entity &entity ) const
       {
-        typedef GeoGrid::LeafIntersectionIterator< const Grid > IntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< const Grid, typename HostGridView::IntersectionIterator > IntersectionIteratorImpl;
         return IntersectionIteratorImpl( entity, hostGridView().ibegin( Grid::getRealImplementation( entity ).hostEntity() ) );
       }
 
       IntersectionIterator iend ( const typename Codim< 0 >::Entity &entity ) const
       {
-        typedef GeoGrid::LeafIntersectionIterator< const Grid > IntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< const Grid, typename HostGridView::IntersectionIterator > IntersectionIteratorImpl;
         return IntersectionIteratorImpl( entity, hostGridView().iend( Grid::getRealImplementation( entity ).hostEntity() ) );
       }
 

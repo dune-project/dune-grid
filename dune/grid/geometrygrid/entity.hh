@@ -54,12 +54,6 @@ namespace Dune
     // -----------------------------
 
     template< class Grid >
-    class LevelIntersectionIterator;
-
-    template< class Grid >
-    class LeafIntersectionIterator;
-
-    template< class Grid >
     class HierarchicIterator;
 
 

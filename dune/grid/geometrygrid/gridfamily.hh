@@ -62,14 +62,14 @@ namespace Dune
         static const int dimension = HostGrid::dimension;
         static const int dimensionworld = CoordFunction::dimRange;
 
-        typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection< const Grid > > LeafIntersection;
-        typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection< const Grid > > LevelIntersection;
+        typedef Dune::Intersection< const Grid, GeoGrid::Intersection< const Grid, typename HostGrid::LeafIntersection > > LeafIntersection;
+        typedef Dune::Intersection< const Grid, GeoGrid::Intersection< const Grid, typename HostGrid::LevelIntersection > > LevelIntersection;
 
         typedef Dune::IntersectionIterator
-        < const Grid, GeoGrid::LeafIntersectionIterator< const Grid >, GeoGrid::LeafIntersection< const Grid > >
+        < const Grid, GeoGrid::IntersectionIterator< const Grid, typename HostGrid::LeafIntersectionIterator >, GeoGrid::Intersection< const Grid, typename HostGrid::LeafIntersection > >
         LeafIntersectionIterator;
         typedef Dune::IntersectionIterator
-        < const Grid, GeoGrid::LevelIntersectionIterator< const Grid >, GeoGrid::LevelIntersection< const Grid > >
+        < const Grid, GeoGrid::IntersectionIterator< const Grid, typename HostGrid::LevelIntersectionIterator >, GeoGrid::Intersection< const Grid, typename HostGrid::LevelIntersection > >
         LevelIntersectionIterator;
 
         typedef Dune::EntityIterator< 0, const Grid, GeoGrid::HierarchicIterator< const Grid > >
