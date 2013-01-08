@@ -116,9 +116,9 @@ namespace Dune
         template< PartitionIteratorType pitype >
         struct Partition
         {
-          typedef Dune::GridView< GeoGrid::LeafGridViewTraits< HostGrid, CoordFunction, Allocator, pitype > >
+          typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LeafGridView, CoordFunction, Allocator, pitype > >
           LeafGridView;
-          typedef Dune::GridView< GeoGrid::LevelGridViewTraits< HostGrid, CoordFunction, Allocator, pitype > >
+          typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LevelGridView, CoordFunction, Allocator, pitype > >
           LevelGridView;
         };
       };

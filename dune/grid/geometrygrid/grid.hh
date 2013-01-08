@@ -94,8 +94,7 @@ namespace Dune
     template< class, bool > friend class GeoGrid::EntityPointer;
     template< int, class > friend class GeoGrid::EntityProxy;
     template< int, int, class > friend class GeoGrid::Geometry;
-    template< class, class, class, PartitionIteratorType > friend class GeoGrid::LeafGridView;
-    template< class, class, class, PartitionIteratorType > friend class GeoGrid::LevelGridView;
+    template< class, class, class, PartitionIteratorType > friend class GeoGrid::GridView;
     template< class, class > friend class GeoGrid::Intersection;
     template< class > friend class GeoGrid::IntersectionIterator;
     template< class, class > friend class GeoGrid::IdSet;
