@@ -231,28 +231,36 @@ namespace Dune
       // type of element to write
       GeometryType simplex( GeometryType::simplex, dimGrid );
 
-      // write all simplices to the "simplex" block
-      gridout << std::endl << "SIMPLEX" << std::endl;
+      // only write simplex block if grid view contains simplices
+      if( indexSet.size( simplex ) > 0 )
+      {
+        // write all simplices to the "simplex" block
+        gridout << std::endl << "SIMPLEX" << std::endl;
 
-      // write all simplex elements
-      writeAllElements( elementSeeds, indexSet, simplex, vertexIndex, gridout );
+        // write all simplex elements
+        writeAllElements( elementSeeds, indexSet, simplex, vertexIndex, gridout );
 
-      // write end marker for block
-      gridout << "#" << std::endl;
+        // write end marker for block
+        gridout << "#" << std::endl;
+      }
     }
 
     {
       // cube geometry type
       GeometryType cube( GeometryType::cube, dimGrid );
 
-      // write all cubes to the "cube" block
-      gridout << std::endl << "CUBE" << std::endl;
+      // only write cube block if grid view contains cubes
+      if( indexSet.size( cube ) > 0 )
+      {
+        // write all cubes to the "cube" block
+        gridout << std::endl << "CUBE" << std::endl;
 
-      // write all simplex elements
-      writeAllElements( elementSeeds, indexSet, cube, vertexIndex, gridout );
+        // write all simplex elements
+        writeAllElements( elementSeeds, indexSet, cube, vertexIndex, gridout );
 
-      // write end marker for block
-      gridout << "#" << std::endl;
+        // write end marker for block
+        gridout << "#" << std::endl;
+      }
     }
 
     // write all boundaries to the "boundarysegments" block
