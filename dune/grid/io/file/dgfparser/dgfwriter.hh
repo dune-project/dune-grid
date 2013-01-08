@@ -223,41 +223,22 @@ namespace Dune
     if( vertexCount != vxSize )
       DUNE_THROW( GridError, "Index set reports wrong number of vertices." );
 
-    if( dimGrid > 1 )
+    // write "simplex" block if grid view contains simplices
+    GeometryType simplex( GeometryType::simplex, dimGrid );
+    if( (dimGrid > 1) && (indexSet.size( simplex ) > 0) )
     {
-      // type of element to write
-      GeometryType simplex( GeometryType::simplex, dimGrid );
-
-      // only write simplex block if grid view contains simplices
-      if( indexSet.size( simplex ) > 0 )
-      {
-        // write all simplices to the "simplex" block
-        gridout << std::endl << "SIMPLEX" << std::endl;
-
-        // write all simplex elements
-        writeAllElements( elementSeeds, indexSet, simplex, vertexIndex, gridout );
-
-        // write end marker for block
-        gridout << "#" << std::endl;
-      }
+      gridout << std::endl << "SIMPLEX" << std::endl;
+      writeAllElements( elementSeeds, indexSet, simplex, vertexIndex, gridout );
+      gridout << "#" << std::endl;
     }
 
+    // write "cube" block if grid view contains cubes
+    GeometryType cube( GeometryType::cube, dimGrid );
+    if( indexSet.size( cube ) > 0 )
     {
-      // cube geometry type
-      GeometryType cube( GeometryType::cube, dimGrid );
-
-      // only write cube block if grid view contains cubes
-      if( indexSet.size( cube ) > 0 )
-      {
-        // write all cubes to the "cube" block
-        gridout << std::endl << "CUBE" << std::endl;
-
-        // write all simplex elements
-        writeAllElements( elementSeeds, indexSet, cube, vertexIndex, gridout );
-
-        // write end marker for block
-        gridout << "#" << std::endl;
-      }
+      gridout << std::endl << "CUBE" << std::endl;
+      writeAllElements( elementSeeds, indexSet, cube, vertexIndex, gridout );
+      gridout << "#" << std::endl;
     }
 
     // write all boundaries to the "boundarysegments" block
