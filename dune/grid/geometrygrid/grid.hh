@@ -104,9 +104,6 @@ namespace Dune
 
     template< class, class > friend class GeoGrid::CommDataHandle;
 
-    template< int, PartitionIteratorType, class > friend struct GeoGrid::LevelIteratorTraits;
-    template< int, PartitionIteratorType, class > friend struct GeoGrid::LeafIteratorTraits;
-
     template< class, class, class > friend class PersistentContainer;
 
   public:

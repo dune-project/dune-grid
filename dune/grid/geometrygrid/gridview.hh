@@ -62,7 +62,7 @@ namespace Dune
       template< int codim >
       struct Codim
       {
-        typedef GeoGrid::LevelIteratorTraits< codim, pitype, const Grid > IteratorTraits;
+        typedef GeoGrid::IteratorTraits< HostGridView, codim, pitype, const Grid > IteratorTraits;
         typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< IteratorTraits > > Iterator;
 
         typedef typename Grid::Traits::template Codim< codim >::Entity Entity;
@@ -74,7 +74,7 @@ namespace Dune
         template< PartitionIteratorType pit >
         struct Partition
         {
-          typedef GeoGrid::LevelIteratorTraits< codim, pit, const Grid > IteratorTraits;
+          typedef GeoGrid::IteratorTraits< HostGridView, codim, pit, const Grid > IteratorTraits;
           typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< IteratorTraits > > Iterator;
         };
       };
@@ -250,7 +250,7 @@ namespace Dune
       template< int codim >
       struct Codim
       {
-        typedef GeoGrid::LeafIteratorTraits< codim, pitype, const Grid > IteratorTraits;
+        typedef GeoGrid::IteratorTraits< HostGridView, codim, pitype, const Grid > IteratorTraits;
         typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< IteratorTraits > > Iterator;
 
         typedef typename Grid::Traits::template Codim< codim >::Entity Entity;
@@ -262,7 +262,7 @@ namespace Dune
         template< PartitionIteratorType pit >
         struct Partition
         {
-          typedef GeoGrid::LeafIteratorTraits< codim, pit, const Grid > IteratorTraits;
+          typedef GeoGrid::IteratorTraits< HostGridView, codim, pit, const Grid > IteratorTraits;
           typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< IteratorTraits > > Iterator;
         };
       };

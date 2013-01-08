@@ -92,10 +92,10 @@ namespace Dune
           template< PartitionIteratorType pitype >
           struct Partition
           {
-            typedef GeoGrid::LeafIteratorTraits< codim, pitype, const Grid > LeafIteratorTraits;
+            typedef GeoGrid::IteratorTraits< typename HostGrid::LeafGridView, codim, pitype, const Grid > LeafIteratorTraits;
             typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< LeafIteratorTraits > > LeafIterator;
 
-            typedef GeoGrid::LevelIteratorTraits< codim, pitype, const Grid > LevelIteratorTraits;
+            typedef GeoGrid::IteratorTraits< typename HostGrid::LevelGridView, codim, pitype, const Grid > LevelIteratorTraits;
             typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< LevelIteratorTraits > > LevelIterator;
           };
 
@@ -103,10 +103,8 @@ namespace Dune
           typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
         };
 
-        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LeafIndexSet >
-        LeafIndexSet;
-        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LevelIndexSet >
-        LevelIndexSet;
+        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LeafIndexSet > LeafIndexSet;
+        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LevelIndexSet > LevelIndexSet;
 
         typedef GeoGrid::IdSet< const Grid, typename HostGrid::Traits::GlobalIdSet >
         GlobalIdSet;

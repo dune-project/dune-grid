@@ -168,6 +168,34 @@ namespace Dune
 
 
 
+    // IteratorTraits
+    // --------------
+
+    template< class HostGridView, int codim, PartitionIteratorType pitype, class Grid >
+    struct IteratorTraits
+      : public EntityPointerTraits< codim, Grid >
+    {
+      typedef typename EntityPointerTraits< codim, Grid >::HostGrid HostGrid;
+
+      typedef PartitionIteratorFilter< codim, pitype, HostGrid > Filter;
+
+      static const PartitionIteratorType Entity_Partition = pitype;
+      static const PartitionIteratorType Element_Partition = Filter::Element_Partition;
+
+      typedef typename HostGridView::template Codim< codim >
+      ::template Partition< Entity_Partition >::Iterator
+      HostEntityIterator;
+      typedef typename HostGridView::template Codim< 0 >
+      ::template Partition< Element_Partition >::Iterator
+      HostElementIterator;
+
+      typedef typename HostGridView::IndexSet HostIndexSet;
+
+      enum IteratorType { begin, end };
+    };
+
+
+
     // Iterator (real)
     // ---------------
 
@@ -288,62 +316,6 @@ namespace Dune
       HostElementIterator hostEnd_;
       const HostIndexSet *hostIndexSet_;
       std::vector< bool > visited_;
-    };
-
-
-
-    // LeafIteratorTraits
-    // ------------------
-
-    template< int codim, PartitionIteratorType pitype, class Grid >
-    struct LeafIteratorTraits
-      : public EntityPointerTraits< codim, Grid >
-    {
-      typedef typename EntityPointerTraits< codim, Grid >::HostGrid HostGrid;
-
-      typedef PartitionIteratorFilter< codim, pitype, HostGrid > Filter;
-
-      static const PartitionIteratorType Entity_Partition = pitype;
-      static const PartitionIteratorType Element_Partition = Filter::Element_Partition;
-
-      typedef typename HostGrid::template Codim< codim >
-      ::template Partition< Entity_Partition >::LeafIterator
-      HostEntityIterator;
-      typedef typename HostGrid::template Codim< 0 >
-      ::template Partition< Element_Partition >::LeafIterator
-      HostElementIterator;
-
-      typedef typename HostGrid::LeafIndexSet HostIndexSet;
-
-      enum IteratorType { begin, end };
-    };
-
-
-
-    // LevelIteratorTraits
-    // -------------------
-
-    template< int codim, PartitionIteratorType pitype, class Grid >
-    struct LevelIteratorTraits
-      : public EntityPointerTraits< codim, Grid >
-    {
-      typedef typename EntityPointerTraits< codim, Grid >::HostGrid HostGrid;
-
-      typedef PartitionIteratorFilter< codim, pitype, HostGrid > Filter;
-
-      static const PartitionIteratorType Entity_Partition = pitype;
-      static const PartitionIteratorType Element_Partition = Filter::Element_Partition;
-
-      typedef typename HostGrid::template Codim< codim >
-      ::template Partition< Entity_Partition >::LevelIterator
-      HostEntityIterator;
-      typedef typename HostGrid::template Codim< 0 >
-      ::template Partition< Element_Partition >::LevelIterator
-      HostElementIterator;
-
-      typedef typename HostGrid::LevelIndexSet HostIndexSet;
-
-      enum IteratorType { begin, end };
     };
 
 
