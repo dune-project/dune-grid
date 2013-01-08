@@ -39,7 +39,7 @@ namespace Dune
     {
       friend class LevelGridView< HostGrid, CoordFunction, Allocator, pitype >;
 
-      typedef typename HostGrid::template Partition< pitype >::LevelGridView HostGridView;
+      typedef typename HostGrid::LevelGridView HostGridView;
 
       typedef typename HostGridView::Intersection HostIntersection;
       typedef typename HostGridView::IntersectionIterator HostIntersectionIterator;
@@ -227,7 +227,7 @@ namespace Dune
     {
       friend class LeafGridView< HostGrid, CoordFunction, Allocator, pitype >;
 
-      typedef typename HostGrid::template Partition< pitype >::LeafGridView HostGridView;
+      typedef typename HostGrid::LeafGridView HostGridView;
 
       typedef typename HostGridView::Intersection HostIntersection;
       typedef typename HostGridView::IntersectionIterator HostIntersectionIterator;

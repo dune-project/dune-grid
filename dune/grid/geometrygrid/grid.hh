@@ -645,7 +645,7 @@ namespace Dune
     {
       typedef typename Partition< pitype >::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, hostGrid().template levelView< pitype >( level ) ) );
+      return View( ViewImp( *this, hostGrid().levelView( level ) ) );
     }
 
     /** \brief View for the leaf grid */
@@ -654,7 +654,7 @@ namespace Dune
     {
       typedef typename Traits::template Partition< pitype >::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, hostGrid().template leafView< pitype >() ) );
+      return View( ViewImp( *this, hostGrid().leafView() ) );
     }
 
     /** \brief View for a grid level for All_Partition */
@@ -665,7 +665,7 @@ namespace Dune
     }
 
     /** \brief View for the leaf grid for All_Partition*/
-    LeafGridView leafView() const
+    LeafGridView leafView () const
     {
       typedef typename LeafGridView::GridViewImp ViewImp;
       return LeafGridView( ViewImp( *this, hostGrid().leafView() ) );
