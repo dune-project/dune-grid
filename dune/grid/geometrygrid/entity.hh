@@ -672,10 +672,6 @@ namespace Dune
 
       //! type of hierarchic iterator
       typedef typename Traits::HierarchicIterator HierarchicIterator;
-      //! type of leaf intersection iterator
-      typedef typename Traits::LeafIntersectionIterator LeafIntersectionIterator;
-      //! type of level intersection iterator
-      typedef typename Traits::LevelIntersectionIterator LevelIntersectionIterator;
 
       /** \} */
 
