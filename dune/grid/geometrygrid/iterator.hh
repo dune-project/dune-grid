@@ -171,11 +171,13 @@ namespace Dune
     // IteratorTraits
     // --------------
 
-    template< class HostGridView, int codim, PartitionIteratorType pitype, class Grid >
+    template< class HGV, int codim, PartitionIteratorType pitype, class Grid >
     struct IteratorTraits
       : public EntityPointerTraits< codim, Grid >
     {
       typedef typename EntityPointerTraits< codim, Grid >::HostGrid HostGrid;
+
+      typedef HGV HostGridView;
 
       typedef PartitionIteratorFilter< codim, pitype, HostGrid > Filter;
 
@@ -188,8 +190,6 @@ namespace Dune
       typedef typename HostGridView::template Codim< 0 >
       ::template Partition< Element_Partition >::Iterator
       HostElementIterator;
-
-      typedef typename HostGridView::IndexSet HostIndexSet;
 
       enum IteratorType { begin, end };
     };
@@ -213,6 +213,8 @@ namespace Dune
       using Base::codimension;
 
     protected:
+      typedef typename Traits::HostGridView HostGridView;
+
       typedef typename Base::EntityImpl EntityImpl;
 
       using Base::hostEntityIterator_;
@@ -220,7 +222,6 @@ namespace Dune
       using Base::grid;
 
     public:
-      template< class HostGridView >
       Iterator ( const Grid &grid, const HostGridView &hostGridView, IteratorType type )
         : Base( grid, (type == Traits::begin ? hostGridView.template begin< codimension, Traits::Entity_Partition >()
                        : hostGridView.template end< codimension, Traits::Entity_Partition >()) )
@@ -255,9 +256,12 @@ namespace Dune
     private:
       typedef typename Traits::Filter Filter;
 
+      typedef typename Traits::HostGridView HostGridView;
+
       typedef typename Traits::HostElement HostElement;
       typedef typename Traits::HostElementIterator HostElementIterator;
-      typedef typename Traits::HostIndexSet HostIndexSet;
+
+      typedef typename HostGridView::IndexSet HostIndexSet;
 
     protected:
       typedef typename Base::EntityImpl EntityImpl;
@@ -267,7 +271,6 @@ namespace Dune
       using Base::grid;
 
     public:
-      template< class HostGridView >
       Iterator ( const Grid &grid, const HostGridView &hostGridView, IteratorType type )
         : Base( grid, (type == Traits::begin ? hostGridView.template begin< 0, Traits::Element_Partition >()
                        : hostGridView.template end< 0, Traits::Element_Partition >()), -1 ),
