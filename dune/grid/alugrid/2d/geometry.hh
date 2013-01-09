@@ -53,7 +53,7 @@ namespace Dune
 
     // get my dimension
     enum { mydim = ncorners < 3 ? ncorners-1 : 2 };
-    typedef GenericReferenceElement< ctype, mydim > ReferenceElementType ;
+    typedef ReferenceElement< ctype, mydim > ReferenceElementType ;
 
     //! the mapping
     MappingType mapping_;
@@ -80,7 +80,7 @@ namespace Dune
     //! default constructor
     MyALU2dGridGeometryImplBase( const GeometryType type )
       : mapping_(),
-        referenceElement_( GenericReferenceElements< ctype, mydim >::general( type ) ),
+        referenceElement_( ReferenceElements< ctype, mydim >::general( type ) ),
         volume_( 1.0 )
     {
       reset();
@@ -435,7 +435,7 @@ namespace Dune
     // default constructor
     MyALU2dGridGeometryImpl ()
       : BaseType( type( 4 ) ),
-        simplexReferenceElement_( GenericReferenceElements< ctype, 2 >::general( type( 3 ) ) ),
+        simplexReferenceElement_( ReferenceElements< ctype, 2 >::general( type( 3 ) ) ),
         myCorners_( 0 )
     {
       // make sure that bilinear mapping reserves more memory, othersize change
