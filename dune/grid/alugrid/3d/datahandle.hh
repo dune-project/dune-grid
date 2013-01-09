@@ -47,6 +47,12 @@ namespace ALUGridSpace
     typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
 
     typedef typename DataCollectorType:: DataType DataType;
+
+    using GatherScatter :: setData ;
+    using GatherScatter :: sendData ;
+    using GatherScatter :: recvData ;
+    using GatherScatter :: containsItem ;
+
   public:
     //! Constructor
     GatherScatterBaseImpl(const GridType & grid, MakeableEntityType & en,
@@ -163,6 +169,11 @@ namespace ALUGridSpace
 
     // used MessageBuffer
     typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
+
+    // use all other containsItem from the base class
+    using GatherScatter :: setData ;
+    using GatherScatter :: sendData ;
+    using GatherScatter :: recvData ;
 
   public:
     // use all other containsItem from the base class
@@ -510,6 +521,9 @@ namespace ALUGridSpace
     // used MessageBuffer
     typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
 
+    using GatherScatter :: inlineData ;
+    using GatherScatter :: xtractData ;
+
   public:
     //! Constructor
     GatherScatterLoadBalance(GridType & grid, MakeableEntityType & en,
@@ -590,6 +604,9 @@ namespace ALUGridSpace
     typedef typename ImplTraits::HElementType HElementType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
+
+    using AdaptRestrictProlongType :: postRefinement ;
+    using AdaptRestrictProlongType :: preCoarsening ;
 
   public:
     //! Constructor
@@ -676,6 +693,9 @@ namespace ALUGridSpace
     typedef typename ImplTraits::HElementType HElementType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
 
+    using AdaptRestrictProlongType :: postRefinement ;
+    using AdaptRestrictProlongType :: preCoarsening ;
+
   public:
     //! Constructor
     AdaptRestrictProlongGlSet ( GridType &grid,
@@ -724,6 +744,10 @@ namespace ALUGridSpace
     typedef typename ImplTraits::HBndSegType HBndSegType;
 
     int newMemSize_;
+
+    using AdaptRestrictProlongType :: postRefinement ;
+    using AdaptRestrictProlongType :: preCoarsening ;
+
   public:
     //! Constructor
     LoadBalanceElementCount (GridType & grid,
