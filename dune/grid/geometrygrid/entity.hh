@@ -56,6 +56,9 @@ namespace Dune
     template< class Grid >
     class HierarchicIterator;
 
+    template< class Grid, class HostIntersectionIterator >
+    class IntersectionIterator;
+
 
 
     // EntityBase (real)
@@ -644,6 +647,8 @@ namespace Dune
       typedef EntityBase< 0, Grid > Base;
 
       typedef typename remove_const< Grid >::type::Traits Traits;
+
+      typedef typename Traits::HostGrid HostGrid;
 
     public:
       /** \name Attributes
