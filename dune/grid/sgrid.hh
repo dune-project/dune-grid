@@ -602,7 +602,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef Dune::SIntersection<GridImp> IntersectionImp;
-    typedef Dune::Intersection<const GridImp, Dune::SIntersection> Intersection;
+    typedef Dune::Intersection< const GridImp, Dune::SIntersection< const GridImp > > Intersection;
     //! know your own dimension
     enum { dimension=dim };
     //! know your own dimension of world
@@ -744,7 +744,7 @@ namespace Dune {
     typedef typename Geometry::LocalCoordinate LocalCoordinate;
     typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef Dune::Intersection<const GridImp, Dune::SIntersectionIterator> Intersection;
+    typedef Dune::Intersection< const GridImp, Dune::SIntersectionIterator< const GridImp > > Intersection;
     //! know your own dimension
     enum { dimension=dim };
     //! know your own dimension of world

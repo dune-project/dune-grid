@@ -54,13 +54,10 @@ namespace Dune
     // -----------------------------
 
     template< class Grid >
-    class LevelIntersectionIterator;
-
-    template< class Grid >
-    class LeafIntersectionIterator;
-
-    template< class Grid >
     class HierarchicIterator;
+
+    template< class Grid, class HostIntersectionIterator >
+    class IntersectionIterator;
 
 
 
@@ -652,6 +649,8 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::Traits Traits;
 
+      typedef typename Traits::HostGrid HostGrid;
+
     public:
       /** \name Attributes
        *  \{ */
@@ -717,25 +716,25 @@ namespace Dune
 
       LevelIntersectionIterator ilevelbegin () const
       {
-        typedef GeoGrid::LevelIntersectionIterator< Grid > LevelIntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< Grid, typename HostGrid::LevelIntersectionIterator > LevelIntersectionIteratorImpl;
         return LevelIntersectionIteratorImpl( *this, hostEntity().ilevelbegin() );
       }
 
       LevelIntersectionIterator ilevelend () const
       {
-        typedef GeoGrid::LevelIntersectionIterator< Grid > LevelIntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< Grid, typename HostGrid::LevelIntersectionIterator > LevelIntersectionIteratorImpl;
         return LevelIntersectionIteratorImpl( *this, hostEntity().ilevelend() );
       }
 
       LeafIntersectionIterator ileafbegin () const
       {
-        typedef GeoGrid::LeafIntersectionIterator< Grid > LeafIntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< Grid, typename HostGrid::LeafIntersectionIterator > LeafIntersectionIteratorImpl;
         return LeafIntersectionIteratorImpl( *this, hostEntity().ileafbegin() );
       }
 
       LeafIntersectionIterator ileafend () const
       {
-        typedef GeoGrid::LeafIntersectionIterator< Grid > LeafIntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< Grid, typename HostGrid::LeafIntersectionIterator > LeafIntersectionIteratorImpl;
         return LeafIntersectionIteratorImpl( *this, hostEntity().ileafend() );
       }
 

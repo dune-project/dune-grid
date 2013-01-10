@@ -20,8 +20,7 @@ namespace Dune {
     friend class UGGridEntity<0,dim,GridImp>;
 
   public:
-
-    typedef Dune::Intersection<const GridImp, Dune::UGGridLevelIntersection> Intersection;
+    typedef Dune::Intersection< GridImp, Dune::UGGridLevelIntersection< GridImp > > Intersection;
 
     /** The default Constructor makes empty Iterator
      */
@@ -67,7 +66,7 @@ namespace Dune {
 
   public:
 
-    typedef Dune::Intersection<const GridImp, Dune::UGGridLeafIntersection> Intersection;
+    typedef Dune::Intersection< GridImp, Dune::UGGridLeafIntersection< GridImp > > Intersection;
 
     UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : intersection_(UGGridLeafIntersection<GridImp>(center,nb,gridImp))

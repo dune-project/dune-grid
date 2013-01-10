@@ -159,7 +159,7 @@ namespace Dune
 
      @ingroup GIIntersectionIterator
    */
-  template<class GridImp, template<class> class IntersectionImp>
+  template< class GridImp, class IntersectionImp >
   class Intersection
   {
 #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
@@ -173,7 +173,7 @@ namespace Dune
         typename GridImp::GridFamily> ;
 #endif
     // type of underlying implementation, for internal use only
-    typedef IntersectionImp< const GridImp > Implementation;
+    typedef IntersectionImp Implementation;
 
     //! return reference to the real implementation
     Implementation &impl () { return real; }
@@ -440,8 +440,9 @@ namespace Dune
     //===========================================================
 
     /** Copy Constructor from IntersectionImp */
-    Intersection(const IntersectionImp<const GridImp> & i) :
-      real(i) {}
+    Intersection ( const Implementation &impl )
+      : real( impl )
+    {}
     //@}
 
     typedef typename remove_const<GridImp>::type mutableGridImp;
@@ -469,7 +470,7 @@ namespace Dune
 
      @ingroup GridDevel
    */
-  template<class GridImp, template<class> class IntersectionImp>
+  template< class GridImp, class IntersectionImp >
   class IntersectionDefaultNormalVectors
   {
     enum { dim=GridImp::dimension };
@@ -509,11 +510,9 @@ namespace Dune
     }
 
   private:
-    //!  Barton-Nackman trick
-    IntersectionImp<GridImp>& asImp ()
-    {return static_cast<IntersectionImp<GridImp>&>(*this);}
-    const IntersectionImp<GridImp>& asImp () const
-    {return static_cast<const IntersectionImp<GridImp>&>(*this);}
+    // CRTP (curiously recurring template pattern)
+    IntersectionImp &asImp () { return static_cast< IntersectionImp & >( *this ); }
+    const IntersectionImp &asImp () const { return static_cast< const IntersectionImp & >( *this ); }
   };
 
 } // namespace Dune

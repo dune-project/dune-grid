@@ -113,12 +113,12 @@ namespace Dune {
     {
       typedef GridImp Grid;
 
-      typedef Dune :: Intersection< const GridImp, LeafIntersectionWrapper > LeafIntersection;
-      typedef Dune :: Intersection< const GridImp, LevelIntersectionWrapper > LevelIntersection;
+      typedef Dune::Intersection< const GridImp, LeafIntersectionWrapper< const GridImp > > LeafIntersection;
+      typedef Dune::Intersection< const GridImp, LevelIntersectionWrapper< const GridImp > > LevelIntersection;
 
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > IntersectionIterator;
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper, LevelIntersectionWrapper > LevelIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper< const GridImp >, LeafIntersectionWrapper< const GridImp > > IntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper< const GridImp >, LeafIntersectionWrapper< const GridImp > > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper< const GridImp >, LevelIntersectionWrapper< const GridImp > > LevelIntersectionIterator;
 
       typedef Dune::EntityIterator< 0, const GridImp, ALU2dGridHierarchicIterator< const GridImp > > HierarchicIterator;
 

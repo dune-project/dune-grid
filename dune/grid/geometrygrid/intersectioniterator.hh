@@ -9,46 +9,27 @@
 namespace Dune
 {
 
-  // External Forward Declataions
-  // ----------------------------
-
   namespace GeoGrid
   {
-
-    // Internal Forward Declarations
-    // -----------------------------
-
-    template< class Grid >
-    class LeafIntersectionIterator;
-
-    template< class Grid >
-    class LevelIntersectionIterator;
-
-
 
     // IntersectionIterator
     // --------------------
 
-    template< class Traits >
+    template< class Grid, class HostIntersectionIterator >
     class IntersectionIterator
     {
-      typedef typename Traits::HostIntersectionIterator HostIntersectionIterator;
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
-      typedef typename Traits::GridTraits GridTraits;
+      typedef GeoGrid::Intersection< Grid, typename HostIntersectionIterator::Intersection > IntersectionImpl;
 
-    public:
-      typedef typename Traits::Intersection Intersection;
-      typedef typename GridTraits::Grid Grid;
-
-      typedef typename GridTraits::template Codim< 0 >::EntityPointer EntityPointer;
-
-    private:
-      typedef typename Traits::IntersectionImpl IntersectionImpl;
-
-      typedef typename GridTraits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
-      typedef typename GridTraits::template Codim< 0 >::Geometry ElementGeometry;
+      typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
+      typedef typename Traits::template Codim< 0 >::Geometry ElementGeometry;
 
     public:
+      typedef Dune::Intersection< Grid, IntersectionImpl > Intersection;
+
+      typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
+
       template< class Entity >
       IntersectionIterator ( const Entity &inside,
                              const HostIntersectionIterator &hostIterator )
@@ -94,90 +75,6 @@ namespace Dune
 
       HostIntersectionIterator hostIterator_;
       mutable Intersection intersection_;
-    };
-
-
-
-    // LeafIntersectionIteratorTraits
-    // ------------------------------
-
-    template< class Grid >
-    struct LeafIntersectionIteratorTraits
-    {
-      typedef typename remove_const< Grid >::type::Traits GridTraits;
-
-      typedef typename GridTraits::LeafIntersection Intersection;
-      typedef LeafIntersection< const Grid > IntersectionImpl;
-
-      typedef typename GridTraits::HostGrid::Traits::LeafIntersectionIterator
-      HostIntersectionIterator;
-    };
-
-
-
-    // LeafIntersectionIterator
-    // ------------------------
-
-    template< class Grid >
-    class LeafIntersectionIterator
-      : public IntersectionIterator< LeafIntersectionIteratorTraits< Grid > >
-    {
-      typedef LeafIntersectionIteratorTraits< Grid > Traits;
-      typedef IntersectionIterator< Traits > Base;
-
-      typedef typename Traits :: HostIntersectionIterator HostIntersectionIterator;
-
-    public:
-      typedef typename Traits :: Intersection Intersection;
-
-    public:
-      template< class Entity >
-      LeafIntersectionIterator ( const Entity &inside,
-                                 const HostIntersectionIterator &hostIterator )
-        : Base( inside, hostIterator )
-      {}
-    };
-
-
-
-    // LevelIntersectionIteratorTraits
-    // -------------------------------
-
-    template< class Grid >
-    struct LevelIntersectionIteratorTraits
-    {
-      typedef typename remove_const< Grid >::type::Traits GridTraits;
-
-      typedef typename GridTraits::LevelIntersection Intersection;
-      typedef LevelIntersection< const Grid > IntersectionImpl;
-
-      typedef typename GridTraits::HostGrid::Traits::LevelIntersectionIterator
-      HostIntersectionIterator;
-    };
-
-
-
-    // LevelIntersectionIterator
-    // -------------------------
-
-    template< class Grid >
-    class LevelIntersectionIterator
-      : public IntersectionIterator< LevelIntersectionIteratorTraits< Grid > >
-    {
-      typedef LevelIntersectionIteratorTraits< Grid > Traits;
-      typedef IntersectionIterator< Traits > Base;
-
-      typedef typename Traits :: HostIntersectionIterator HostIntersectionIterator;
-
-    public:
-      typedef typename Traits :: Intersection Intersection;
-
-    public:
-      template< class Entity >
-      LevelIntersectionIterator ( const Entity &inside,
-                                  const HostIntersectionIterator &hostIterator )
-        : Base( inside, hostIterator )
-      {}
     };
 
   } // namespace GeoGrid

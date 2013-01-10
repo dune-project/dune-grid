@@ -13,17 +13,6 @@ namespace Dune
   namespace GeoGrid
   {
 
-    // Internal Forward Declarations
-    // -----------------------------
-
-    template< class Grid >
-    class LeafIntersection;
-
-    template< class Grid >
-    class LevelIntersection;
-
-
-
     // Intersection
     // ------------
 
@@ -204,54 +193,6 @@ namespace Dune
       ElementGeometryImpl insideGeo_;
       const HostIntersection *hostIntersection_;
       mutable GeometryImpl geo_;
-    };
-
-
-
-    // LeafIntersection
-    // ----------------
-
-    template< class HostGrid, class CoordFunction, class Allocator >
-    class LeafIntersection< const GeometryGrid< HostGrid, CoordFunction, Allocator > >
-      : public Intersection
-        < const GeometryGrid< HostGrid, CoordFunction, Allocator >,
-            typename HostGrid::Traits::LeafIntersection >
-    {
-      typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
-      typedef typename HostGrid::Traits::LeafIntersection HostIntersection;
-
-      typedef Intersection< const Grid, HostIntersection > Base;
-
-    public:
-      typedef typename Base::ElementGeometry ElementGeometry;
-
-      explicit LeafIntersection ( const ElementGeometry &insideGeo )
-        : Base( insideGeo )
-      {}
-    };
-
-
-
-    // LevelIntersection
-    // -----------------
-
-    template< class HostGrid, class CoordFunction, class Allocator >
-    class LevelIntersection< const GeometryGrid< HostGrid, CoordFunction, Allocator > >
-      : public Intersection
-        < const GeometryGrid< HostGrid, CoordFunction, Allocator >,
-            typename HostGrid::Traits::LevelIntersection >
-    {
-      typedef GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
-      typedef typename HostGrid::Traits::LevelIntersection HostIntersection;
-
-      typedef Intersection< const Grid, HostIntersection > Base;
-
-    public:
-      typedef typename Base::ElementGeometry ElementGeometry;
-
-      explicit LevelIntersection ( const ElementGeometry &insideGeo )
-        : Base( insideGeo )
-      {}
     };
 
   } // namespace GeoGrid

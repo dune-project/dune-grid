@@ -104,7 +104,7 @@ namespace Dune
 
     typedef ALU2dGridIntersectionBase< GridImp > ImplementationType;
     //! type of the intersection
-    typedef Dune::Intersection< GridImp, Dune::ALU2dGridIntersectionBase > Intersection;
+    typedef Dune::Intersection< GridImp, Dune::ALU2dGridIntersectionBase< GridImp > > Intersection;
 
     enum { dimension       = GridImp::dimension };
     enum { dimensionworld  = GridImp::dimensionworld };

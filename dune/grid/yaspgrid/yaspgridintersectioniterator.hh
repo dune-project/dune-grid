@@ -22,7 +22,7 @@ namespace Dune {
     YaspIntersectionIterator();
   public:
     // types used from grids
-    typedef Dune::Intersection<const GridImp, Dune::YaspIntersection> Intersection;
+    typedef Dune::Intersection< GridImp, Dune::YaspIntersection< GridImp > > Intersection;
     typedef MakeableInterfaceObject<Intersection> MakeableIntersection;
 
     //! increment
