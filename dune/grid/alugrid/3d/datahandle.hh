@@ -605,8 +605,8 @@ namespace ALUGridSpace
     typedef typename ImplTraits::HBndSegType HBndSegType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
-    using AdaptRestrictProlongType :: postRefinement ;
-    using AdaptRestrictProlongType :: preCoarsening ;
+    //using AdaptRestrictProlongType :: postRefinement ;
+    //using AdaptRestrictProlongType :: preCoarsening ;
 
   public:
     //! Constructor
