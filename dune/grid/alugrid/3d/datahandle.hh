@@ -651,27 +651,11 @@ namespace ALUGridSpace
     }
 
     //! restrict data for ghost elements
-    int preCoarsening ( HBndSegType & ghost )
-    {
-      /*
-         assert( ghost.bndtype() == ALU3DSPACE ProcessorBoundary_t );
-         realFather_.setGhost( ghost );
-         rp_.preCoarsening( reFather_ );
-       */
-      return 0;
-    }
+    int preCoarsening ( HBndSegType & ghost ) { return 0; }
 
 
     //! prolong data for ghost elements
-    int postRefinement ( HBndSegType & ghost )
-    {
-      /*
-         assert( ghost.bndtype() == ALU3DSPACE ProcessorBoundary_t );
-         realFather_.setGhost( ghost );
-         rp_.postRefinement( reFather_ );
-       */
-      return 0;
-    }
+    int postRefinement ( HBndSegType & ghost ) { return 0; }
   };
 
 
