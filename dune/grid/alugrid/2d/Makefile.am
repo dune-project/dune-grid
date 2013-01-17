@@ -7,13 +7,12 @@ alu2dgrid_HEADERS = alu2dinclude.hh  entity_imp.cc  geometry_imp.cc \
 
 headercheck_IGNORE = $(alu2dgrid_HEADERS)
 
+noinst_LTLIBRARIES = libalu2d.la
 if ALUGRID
-ALU2DLIBS = libalu2d.la
+  libalu2d_la_SOURCES = intersection.cc  alu2dgridfactory.cc
+else
+  libalu2d_la_SOURCES =
 endif
-
-noinst_LTLIBRARIES = $(ALU2DLIBS)
-
-libalu2d_la_SOURCES = intersection.cc  alu2dgridfactory.cc
 libalu2d_la_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS)
 libalu2d_la_LDFLAGS = $(AM_LDFLAGS) $(ALUGRID_LDFLAGS)
 libalu2d_la_LIBADD = $(ALUGRID_LIBS) $(DUNE_LIBS)
