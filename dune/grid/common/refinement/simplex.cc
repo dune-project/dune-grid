@@ -427,8 +427,6 @@ namespace Dune {
       {
       public:
         enum { dimension = dimension_ };
-        // to make Dune::Geometry work:
-        struct GridFamily;
         typedef CoordType ctype;
         enum { dimensionworld = dimension };
 
