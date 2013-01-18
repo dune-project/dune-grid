@@ -54,7 +54,6 @@
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/axisalignedcubegeometry.hh>
 
-#include <dune/grid/common/geometry.hh>
 #include "base.cc" // for RefinementTraits
 
 namespace Dune {
