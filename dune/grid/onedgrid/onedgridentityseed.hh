@@ -20,6 +20,8 @@ namespace Dune {
     enum { dim = GridImp::dimension };
   public:
 
+    enum { codimension = codim };
+
     //! construct entity seed from entity
     OneDGridEntitySeed (const OneDGridEntity<codim,dim,GridImp>& entity)
       : target_(entity.target_)
