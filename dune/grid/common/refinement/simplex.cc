@@ -540,10 +540,7 @@ namespace Dune {
       RefinementIteratorSpecial(int level, bool end)
         : size(1<<level)
       {
-        if(end)
-          vertex[0] = size + 1;
-        else
-          vertex[0] = 0;
+        vertex[0] = (end) ? size + 1 : 0;
         for(int i = 1; i < dimension; ++ i)
           vertex[i] = 0;
       }
