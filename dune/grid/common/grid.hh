@@ -1202,21 +1202,6 @@ namespace Dune {
     template <int cd>
     struct Codim
     {
-    protected:
-      // class to extract whether we are using the default seed type or not
-      template <class Seed, class EPImpl >
-      struct SeedDefault
-      {
-        typedef Seed EntitySeed ;
-      };
-
-      // the default seed type is entity pointer until its implemented
-      template <class EPImpl>
-      struct SeedDefault< EPImpl, EPImpl >
-      {
-        typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntitySeed ;
-      };
-
     public:
       typedef GeometryImp<dim-cd, dimw, const GridImp> GeometryImpl;
       typedef LocalGeometryImp<dim-cd, dim, const GridImp> LocalGeometryImpl;
@@ -1233,7 +1218,7 @@ namespace Dune {
       typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
 
       /** \brief The type of the entity seed of this codim.*/
-      typedef typename SeedDefault< EntitySeedImp<cd, const GridImp>, EntityPointerImp<cd,const GridImp> > :: EntitySeed EntitySeed;
+      typedef EntitySeedImp<cd, const GridImp> EntitySeed;
 
       /**
        * \brief Traits associated with a specific grid partition type.
