@@ -303,19 +303,6 @@ namespace Dune
       : grid_( &grid )
     {}
 
-    // use default implementation of copy constructor and assignment operator
-#if 0
-    DefaultLeafGridView ( const ThisType &other )
-      : grid_( other.grid_ )
-    {}
-
-    /** \brief assignment from other GridView on the same grid */
-    ThisType &operator= ( const ThisType & other)
-    {
-      grid_ = other.grid_;
-    }
-#endif
-
     /** \brief obtain a const reference to the underlying hierarchic grid */
     const Grid &grid () const
     {
