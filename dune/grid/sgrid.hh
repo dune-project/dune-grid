@@ -177,7 +177,7 @@ namespace Dune {
     int globalIndex() const;
 
     /** \brief Return the entity seed which contains sufficient information
-     *  to generate the entity again and uses as less memory as possible
+     *  to generate the entity again and uses as little memory as possible
      */
     SEntitySeed<codim, GridImp> seed () const {
       return SEntitySeed<codim, GridImp>(l, index);
