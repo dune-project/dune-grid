@@ -41,8 +41,6 @@
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/referenceelements.hh>
 
-#include <dune/grid/common/geometry.hh>
-
 #include "base.cc"
 #include "simplex.cc"
 
@@ -80,8 +78,7 @@ namespace Dune {
       {
       public:
         enum { dimension = dimension_ };
-        // to make Dune::Geometry work:
-        struct GridFamily;
+
         typedef CoordType ctype;
         enum { dimensionworld = dimension };
 
@@ -111,9 +108,7 @@ namespace Dune {
       struct RefinementImp<dimension, CoordType>::Codim
       {
         class SubEntityIterator;
-        typedef Dune::Geometry<dimension-codimension, dimension,
-            RefinementImp<dimension, CoordType>,
-            GenericGeometry::Geometry> Geometry;
+        typedef Dune::MultiLinearGeometry<CoordType,dimension-codimension,dimension> Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -337,13 +332,11 @@ namespace Dune {
       {
         const typename BackendIterator::Geometry &bgeo =
           backend.geometry();
-        Dune::array<CoordVector, dimension+1> corners;
+        std::vector<CoordVector> corners(dimension+1);
         for(int i = 0; i <= dimension; ++i)
           corners[i] = global(bgeo.corner(i));
 
-        return Geometry(GenericGeometry::Geometry
-                        <dimension, dimension, Refinement>
-                          (bgeo.type(), corners));
+        return Geometry(bgeo.type(), corners);
       }
 
       template<int dimension, class CoordType>
@@ -394,37 +387,6 @@ namespace Dune {
     } // namespace HCubeTriangulation
 
   } // namespace RefinementImp
-
-  namespace GenericGeometry {
-
-    template< int dimension, class CoordType >
-    struct GlobalGeometryTraits
-    < RefinementImp::HCubeTriangulation::RefinementImp<dimension,
-            CoordType> > :
-      public DefaultGeometryTraits<CoordType, dimension, dimension>
-    {
-      //   hybrid   [ true if Codim 0 is hybrid ]
-      static const bool hybrid = false;
-      //   topologyId [ for Codim 0, needed for (hybrid=false) ]
-      static const unsigned topologyId =
-        SimplexTopology< dimension >::type::id;
-    };
-
-  } // namespace GenericGeometry
-
-  namespace FacadeOptions {
-
-    template<int dimension, class CoordType>
-    struct StoreGeometryReference
-    < dimension, dimension,
-        RefinementImp::HCubeTriangulation::RefinementImp<dimension, CoordType>,
-        GenericGeometry::Geometry>
-    {
-      //! Whether to store by reference or by reference.
-      static const bool v = false;
-    };
-
-  } // namespace FacadeOptions
 
   namespace RefinementImp {
 
