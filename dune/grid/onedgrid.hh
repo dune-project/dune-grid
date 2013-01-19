@@ -186,11 +186,12 @@ namespace Dune {
     typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const;
 
     /** \brief Create an EntityPointer from an EntitySeed */
-    template <int codim>
-    static typename Traits::template Codim<codim>::EntityPointer
-    entityPointer(const OneDGridEntitySeed<codim, const OneDGrid>& seed)
+    template <typename Seed>
+    static typename Traits::template Codim<Seed::codimension>::EntityPointer
+    entityPointer(const Seed& seed)
     {
-      return typename Traits::template Codim<codim>::EntityPointer(seed.target());
+      enum {codim = Seed::codimension};
+      return typename Traits::template Codim<codim>::EntityPointer(OneDGridEntityPointer<codim,const OneDGrid>(seed.target()));
     }
 
 
