@@ -441,7 +441,7 @@ namespace Dune
 
     /** Copy Constructor from IntersectionImp */
     Intersection(const IntersectionImp<const GridImp> & i) :
-      real(i) {};
+      real(i) {}
     //@}
 
     typedef typename remove_const<GridImp>::type mutableGridImp;

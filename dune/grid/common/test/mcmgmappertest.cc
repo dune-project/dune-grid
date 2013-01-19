@@ -165,18 +165,15 @@ int main(int argc, char** argv) try
   // ////////////////////////////////////////////////////////////////////////
   {
     typedef UGGrid<2> GridType;
-    typedef GridType::Traits::LeafIndexSet LeafIndexSetType;
-    typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
-    std::auto_ptr< GridType > gridptr(make2DHybridTestGrid< GridType >());
-    GridType & grid = *gridptr;
+    std::auto_ptr< GridType > grid(make2DHybridTestGrid< GridType >());
 
     // create hybrid grid
-    grid.mark(1, * grid.leafbegin<0>());
-    grid.adapt();
-    grid.globalRefine(1);
+    grid->mark(1, * grid->leafbegin<0>());
+    grid->adapt();
+    grid->globalRefine(1);
 
-    checkGrid(grid);
+    checkGrid(*grid);
   }
 
   // ////////////////////////////////////////////////////////////////////////
@@ -184,18 +181,15 @@ int main(int argc, char** argv) try
   // ////////////////////////////////////////////////////////////////////////
   {
     typedef UGGrid<3> GridType;
-    typedef GridType::Traits::LeafIndexSet LeafIndexSetType;
-    typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
-    std::auto_ptr< GridType > gridptr(make3DHybridTestGrid< GridType >());
-    GridType & grid = *gridptr;
+    std::auto_ptr< GridType > grid(make3DHybridTestGrid< GridType >());
 
     // create hybrid grid
-    grid.mark(1, * grid.leafbegin<0>());
-    grid.adapt();
-    grid.globalRefine(1);
+    grid->mark(1, * grid->leafbegin<0>());
+    grid->adapt();
+    grid->globalRefine(1);
 
-    checkGrid(grid);
+    checkGrid(*grid);
   }
 
   return 0;

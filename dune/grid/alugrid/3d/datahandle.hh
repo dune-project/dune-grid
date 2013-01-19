@@ -165,6 +165,9 @@ namespace ALUGridSpace
     typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
 
   public:
+    // use all other containsItem from the base class
+    using GatherScatter :: containsItem ;
+
     //! Constructor
     GatherScatterBaseImpl(const GridType & grid, MakeableEntityType & en,
                           RealEntityType & realEntity , DataCollectorType & dc)
@@ -216,7 +219,7 @@ namespace ALUGridSpace
     //! read Data of one element from stream
     void recvData ( ObjectStreamType & str , HElementType & elem )
     {
-      assert( this->containsItem( elem ) );
+      // assert( this->containsItem( elem ) );
       realEntity_.setElement( elem );
 
       size_t size = getSize(str, entity_);
@@ -287,6 +290,9 @@ namespace ALUGridSpace
     typedef typename ImplTraits::PllElementType PllElementType;
 
   public:
+    // use all other containsItem methods from the base class
+    using BaseType :: containsItem ;
+
     //! Constructor
     GatherScatterLeafData(const GridType & grid, MakeableEntityType & en,
                           RealEntityType & realEntity , DataCollectorType & dc)
@@ -364,6 +370,9 @@ namespace ALUGridSpace
     const LevelIndexSetImp & levelSet_;
     const int level_;
   public:
+    // use containsItem for ghost element from BaseType
+    using BaseType :: containsItem ;
+
     //! Constructor
     GatherScatterLevelData(const GridType & grid, MakeableEntityType & en,
                            RealEntityType & realEntity , DataCollectorType & dc,

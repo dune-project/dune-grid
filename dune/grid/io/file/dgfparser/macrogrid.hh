@@ -20,7 +20,7 @@ namespace Dune
     : protected DuneGridFormatParser
   {
     template< class GridType >
-    friend class DGFGridFactory;
+    friend struct DGFGridFactory;
 
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;

@@ -181,7 +181,7 @@ namespace Dune {
     void make (FieldMatrix<ctype,mydim+1,cdim>& __As);
 
     //! constructor
-    SGeometry () : builtinverse(false) {};
+    SGeometry () : builtinverse(false) {}
 
   private:
     FieldVector<ctype, cdim> s;              //!< position of element
@@ -263,7 +263,7 @@ namespace Dune {
      */
 
     //! constructor with bool argument makes reference element if true, uninitialized else
-    SGeometry () {};
+    SGeometry () {}
 
     /** \brief This dummy routine always returns 1.0.
      *
@@ -448,7 +448,7 @@ namespace Dune {
   public:
     //! constructor
     SEntity (GridImp* _grid, int _l, int _id) :
-      SEntityBase(_grid,_l,_id) {};
+      SEntityBase(_grid,_l,_id) {}
   };
 
   /**
@@ -782,13 +782,13 @@ namespace Dune {
     int boundaryId () const {
       if (boundary()) return count + 1;
       return 0;
-    };
+    }
 
     int boundarySegmentIndex () const {
       if (boundary())
         return grid->boundarySegmentIndex(self.level(), count, zred);
       return -1;
-    };
+    }
 
     //! return true if neighbor on this level exists
     bool neighbor () const;
@@ -1914,8 +1914,8 @@ namespace Dune {
     }
 
     // disable copy and assign
-    SGrid(const SGrid &) {};
-    SGrid & operator = (const SGrid &) { return *this; };
+    SGrid(const SGrid &) {}
+    SGrid & operator = (const SGrid &) { return *this; }
     // generate SGrid
     void makeSGrid (const array<int,dim>& N_, const FieldVector<ctype, dim>& L_, const FieldVector<ctype, dim>& H_);
 

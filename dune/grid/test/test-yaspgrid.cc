@@ -59,7 +59,7 @@ void check_yasp(bool p0=false) {
   // check grid adaptation interface
   checkAdaptRefinement(grid);
   checkPartitionType( grid.leafView() );
-};
+}
 
 int main (int argc , char **argv) {
   try {

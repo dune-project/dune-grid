@@ -178,10 +178,10 @@ namespace Dune
     int size_;
 
     template< class GridType >
-    friend class DGFGridFactory;
+    friend struct DGFGridFactory;
 
     template< class GridType >
-    friend class DGFBaseFactory;
+    friend struct DGFBaseFactory;
 
   };
 

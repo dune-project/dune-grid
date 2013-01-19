@@ -166,7 +166,11 @@ namespace Dune
 
     static typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder ( GitterImplType &grid )
     {
-      return dynamic_cast< ALU3DSPACE Gitter::Geometric::BuilderIF & >( grid.container() );
+      ALU3DSPACE Gitter::Geometric::BuilderIF* builder =
+        dynamic_cast< ALU3DSPACE Gitter::Geometric::BuilderIF* >( &grid.container() );
+      if( ! builder )
+        DUNE_THROW(InvalidStateException,"dynamic_cast of ALUGrid builder failed");
+      return *builder;
     }
 
     static void duneNotifyMacroGridChanges ( GitterImplType &gird ) {}
@@ -207,7 +211,11 @@ namespace Dune
 
     static typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder ( GitterImplType &grid )
     {
-      return dynamic_cast< ALU3DSPACE Gitter::Geometric::BuilderIF & >( grid.containerPll() );
+      ALU3DSPACE Gitter::Geometric::BuilderIF* builder =
+        dynamic_cast< ALU3DSPACE Gitter::Geometric::BuilderIF* >( &grid.containerPll() );
+      if( ! builder )
+        DUNE_THROW(InvalidStateException,"dynamic_cast of ALUGrid builder failed");
+      return *builder;
     }
 
     static void duneNotifyMacroGridChanges ( GitterImplType &grid )
@@ -399,7 +407,7 @@ namespace Dune
     friend class Conversion< ThisType, HasHierarchicIndexSet >;
     friend class Conversion< const ThisType, HasHierarchicIndexSet >;
 
-    friend class ALU3dGridCommHelper< elType, Comm >;
+    friend struct ALU3dGridCommHelper< elType, Comm >;
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:

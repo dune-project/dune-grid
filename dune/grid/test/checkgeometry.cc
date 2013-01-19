@@ -183,17 +183,21 @@ namespace Dune
     enum { dimw = GV::dimensionworld };
 
     const FieldVector<ctype, dim> pos(0.2);
-    const FieldVector<ctype, dimw> glob =
-      gridView.template begin<0>()->geometry().global(pos);
 
     Iterator it = gridView.template begin<0>();
-    const Geometry geomCopy = it->geometry();
-
     const Iterator end = gridView.template end<0>();
+
+    // check that it != end otherwise the following is not valid
+    if( it == end ) return ;
+
+    #ifndef NDEBUG
+    const FieldVector<ctype, dimw> glob = it->geometry().global(pos);
+    #endif
+
+    const Geometry geomCopy = it->geometry();
     checkGeometry ( geomCopy );
 
-    for(it = gridView.template begin<0>();
-        it != end; ++it )
+    for( ; it != end; ++it )
     {
       // due to register/memory differences we might have
       // errors < 1e-16

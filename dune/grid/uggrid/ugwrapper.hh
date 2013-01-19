@@ -44,7 +44,7 @@ namespace Dune {
 
       PrioHGhost = UG_NAMESPACE::PrioHGhost,
       PrioVGhost = UG_NAMESPACE::PrioVGhost,
-      PrioVHGhost = UG_NAMESPACE::PrioVHGhost,
+      PrioVHGhost = UG_NAMESPACE::PrioVHGhost
     };
 
 

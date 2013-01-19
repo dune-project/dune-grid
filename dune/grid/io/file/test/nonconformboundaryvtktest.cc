@@ -27,7 +27,7 @@ public:
   Traits;
 
   //! return number of components
-  unsigned dimRange() const { return 1; };
+  unsigned dimRange() const { return 1; }
 
   void evaluate(const typename Traits::Cell& c,
                 const typename Traits::Domain& xl,
@@ -45,7 +45,7 @@ public:
   Traits;
 
   //! return number of components
-  unsigned dimRange() const { return GridView::dimensionworld; };
+  unsigned dimRange() const { return GridView::dimensionworld; }
 
   void evaluate(const typename Traits::Cell& c,
                 const typename Traits::Domain& xl,

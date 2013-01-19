@@ -8,7 +8,7 @@ m4_if($#,1,[],[DUNE_DEFINE_GRIDTYPE_INCLUDE(m4_shift($@))])dnl
 
 # DUNE_DEFINE_GRIDTYPE([GRIDTYPE],[ASSERTION],[DUNETYPE],[HEADER],...)
 #
-# Add a new GRIDTYPE target DUNE's preprocessor magic.
+# Add a new GRIDTYPE target to DUNE's preprocessor magic.
 # 
 # Parameters: GRIDTYPE   name of the new target
 #             ASSERTION  condition to be checked by the preprocessor
@@ -23,7 +23,7 @@ AC_DEFUN([DUNE_DEFINE_GRIDTYPE],[AH_BOTTOM(dnl
     also integer constants dimgrid and dimworld are set in this namespace.
     The required headers for this grid implementation are also included.
   */
- #if defined $1 && ! defined USED_$1_GRIDTYPE
+ #if HAVE_DUNE_GRID && defined $1 && ! defined USED_$1_GRIDTYPE
   #if HAVE_GRIDTYPE
    #error "Ambiguous definition of GRIDTYPE."
   #endif 
@@ -53,5 +53,5 @@ DUNE_DEFINE_GRIDTYPE_INCLUDE(m4_shift(m4_shift(m4_shift($@))))dnl
   }
   #define HAVE_GRIDTYPE 1
   #define USED_$1_GRIDTYPE 1
-#endif // #if defined $1]dnl
+#endif // #if HAVE_DUNE_GRID && defined $1 && ..]dnl
 )])

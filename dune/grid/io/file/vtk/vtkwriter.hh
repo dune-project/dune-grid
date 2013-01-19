@@ -99,7 +99,7 @@ namespace Dune
     {
     public:
       //! construct a CellIterator from the gridview's Iterator.
-      CellIterator(const GridCellIterator & x) : GridCellIterator(x) {};
+      CellIterator(const GridCellIterator & x) : GridCellIterator(x) {}
       //! get the position of the center of the element, in element-local
       //! coordinates
       const FieldVector<DT,n> position() const
@@ -175,7 +175,7 @@ namespace Dune
       {
         if (datamode == VTK::conforming && git != gend)
           visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
-      };
+      }
       void increment ()
       {
         switch (datamode)
@@ -271,7 +271,7 @@ namespace Dune
                      const std::vector<int> & num) :
         git(x), gend(end), datamode(dm), cornerIndexVTK(0),
         vertexmapper(vm),
-        number(num), offset(0) {};
+        number(num), offset(0) {}
       void increment ()
       {
         if( git == gend )

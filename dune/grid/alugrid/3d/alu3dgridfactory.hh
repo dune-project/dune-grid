@@ -7,7 +7,7 @@
 #include <map>
 #include <vector>
 
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 
 #include <dune/common/array.hh>
 #include <dune/common/mpihelper.hh>
@@ -17,6 +17,7 @@
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/boundaryprojection.hh>
 
+#include <dune/grid/alugrid/common/persistentcontainer.hh>
 #include <dune/grid/alugrid/common/transformation.hh>
 #include <dune/grid/alugrid/3d/alugrid.hh>
 
@@ -578,7 +579,7 @@ namespace Dune
 
 } // end namespace Dune
 
-#endif // #ifdef ENABLE_ALUGRID
+#endif // #if HAVE_ALUGRID
 
 #if COMPILE_ALUGRID_INLINE
   #include "alu3dgridfactory.cc"

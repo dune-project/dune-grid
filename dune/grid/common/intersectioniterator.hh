@@ -182,7 +182,7 @@ namespace Dune
 
     /** Copy Constructor from IntersectionIteratorImp */
     IntersectionIterator(const IntersectionIteratorImp<const GridImp> & i) :
-      realIterator(i) {};
+      realIterator(i) {}
 
     /** Copy constructor */
     IntersectionIterator(const IntersectionIterator& i) :

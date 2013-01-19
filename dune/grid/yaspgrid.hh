@@ -574,10 +574,10 @@ namespace Dune {
 
     YaspSpecialEntity(const GridImp* yg, const YGLI& g, const TSI& it) :
       GridImp::template Codim<codim>::Entity (YaspEntity<codim, dim, GridImp>(yg,g,it))
-    {};
+    {}
     YaspSpecialEntity(const YaspEntity<codim, dim, GridImp>& e) :
       GridImp::template Codim<codim>::Entity (e)
-    {};
+    {}
     const TSI& transformingsubiterator () const
     {
       return this->realEntity.transformingsubiterator();
@@ -2767,7 +2767,7 @@ namespace Dune {
     typename Traits::template Codim<Seed::codimension>::EntityPointer
     entityPointer(const Seed& seed) const
     {
-      static const int codim = Seed::codimension;
+      const int codim = Seed::codimension;
       YGLI g = MultiYGrid<dim,ctype>::begin(seed.level());
       switch (codim)
       {

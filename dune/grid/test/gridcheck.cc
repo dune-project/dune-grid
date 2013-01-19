@@ -42,11 +42,13 @@ struct subIndexCheck
     {
       typedef typename Grid::template Codim< Entity::codimension >::EntityPointer EntityPointer;
       typedef typename Grid::template Codim< Entity::codimension >::EntitySeed EntitySeed;
+      #ifndef NDEBUG
       EntitySeed seed = e.seed();
 
       EntityPointer ep1 ( e );
       // regain entity pointer and check equality
       EntityPointer ep2 = g.entityPointer( seed );
+      #endif
       assert( ep1 == ep2 );
     }
 
@@ -58,11 +60,13 @@ struct subIndexCheck
       EntityPointer ep( *(e.template subEntity< cd >( i ) ) );
       assert( ep == e.template subEntity< cd >( i ) );
 
+      #ifndef NDEBUG
       typedef typename Grid::template Codim< cd >::EntitySeed EntitySeed;
       EntitySeed seed = ep->seed();
 
       // regain entity pointer and check equality
       EntityPointer ep2 = g.entityPointer( seed );
+      #endif
       assert( ep == ep2 );
 
       const typename Grid::LevelGridView &levelGridView = g.levelView(e.level());
@@ -654,12 +658,12 @@ void iteratorEquals (Grid &g)
 
   // equals
   #define TestEquals(i) { \
-    i == e2; \
-    i == l2; \
-    i == h2; \
-    i == L2; \
-    if (i2 != leafView.iend( *l2 )) i == i2->inside(); \
-    if (i2 != leafView.iend( *l2 ) && i2->neighbor()) i == i2->outside(); \
+    { bool DUNE_UNUSED tmp = (i == e2); }                         \
+    { bool DUNE_UNUSED tmp = (i == l2); }                         \
+    { bool DUNE_UNUSED tmp = (i == h2); }                         \
+    { bool DUNE_UNUSED tmp = (i == L2); }                         \
+    if (i2 != leafView.iend( *l2 )) bool DUNE_UNUSED tmp = (i == i2->inside()); \
+    if (i2 != leafView.iend( *l2 ) && i2->neighbor()) bool DUNE_UNUSED tmp = (i == i2->outside()); \
 }
   TestEquals(e1);
   TestEquals(l1);

@@ -114,7 +114,7 @@ int main (int argc , char **argv)
 try {
 
   // this method calls MPI_Init, if MPI is enabled
-  MPIHelper & mpihelper = MPIHelper::instance(argc,argv);
+  MPIHelper::instance(argc,argv);
 
   // /////////////////////////////////////////////////////////////////////////////
   //   Test YaspGrid

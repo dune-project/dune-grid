@@ -10,7 +10,7 @@ namespace Dune
     struct ALU2dGridParameterBlock
       : public GridParameterBlock
     {
-      ALU2dGridParameterBlock( std::istream &in )
+      ALU2dGridParameterBlock( std::istream &in, const bool verbose )
         : GridParameterBlock( in ),
           tolerance_( 1e-8 )
       {
@@ -21,16 +21,22 @@ namespace Dune
             tolerance_ = x;
           else
           {
-            dwarn << "GridParameterBlock: found keyword `tolerance' but no value, "
-                  << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+            if( verbose )
+            {
+              dwarn << "GridParameterBlock: found keyword `tolerance' but no value, "
+                    << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+            }
           }
           if( tolerance_ <= 0 )
             DUNE_THROW( DGFException, "Nonpositive tolerance specified!" );
         }
         else
         {
-          dwarn << "GridParameterBlock: Parameter 'tolerance' not specified, "
-                << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+          if( verbose )
+          {
+            dwarn << "GridParameterBlock: Parameter 'tolerance' not specified, "
+                  << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
+          }
         }
       }
 
@@ -204,13 +210,20 @@ namespace Dune
       return false;
 
     int rank = 0;
-#if ALU2DGRID_PARALLEL
+#if HAVE_MPI
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    dgf::ALU2dGridParameterBlock parameter( file );
+    // set verbosity of factory only for rank = 0
+    factory_.setVerbosity( (rank == 0) );
 
+    // only print warnings of ALU2dGridParameterBlock on rank = 0
+    dgf::ALU2dGridParameterBlock parameter( file, (rank == 0) );
+
+#if ALU2DGRID_PARALLEL
+    // for a parallel ALUGrid implementation do the following only on rank 0
     if( rank == 0 )
+#endif
     {
       factory_.setTolerance( parameter.tolerance() );
 
@@ -282,7 +295,7 @@ namespace Dune
       factory_.insertFaceTransformation( matrix, shift );
     }
 
-    if ( ! parameter.dumpFileName().empty() )
+    if ( ! parameter.dumpFileName().empty() && (rank == 0) )
       grid_ = factory_.createGrid( dgf_.facemap.empty(), false, parameter.dumpFileName() );
     else
       grid_ = factory_.createGrid( dgf_.facemap.empty(), true, filename );

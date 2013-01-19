@@ -55,7 +55,7 @@ namespace Dune
 
     private:
       template< int dimworld >
-      struct BoundaryProjection;
+      class BoundaryProjection;
 
     public:
       ProjectionBlock ( std::istream &in, int dimworld );

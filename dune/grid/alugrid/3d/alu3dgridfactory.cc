@@ -16,7 +16,7 @@
 
 #include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
 
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline

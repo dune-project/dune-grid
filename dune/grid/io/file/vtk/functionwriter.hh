@@ -60,7 +60,7 @@ namespace Dune
                    typeid(*this).name() << " failed to implement this method "
                    "or this method is not meant to be called on the derived "
                    "class and was called in error.");
-      };
+      }
       //! write at the given corner
       /**
        * This default method forwards the writing to write(const Cell&, const
@@ -73,7 +73,7 @@ namespace Dune
       //! signal end of writing
       virtual void endWrite() = 0;
       //! destructor
-      virtual ~FunctionWriterBase() {};
+      virtual ~FunctionWriterBase() {}
     };
 
     //////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ namespace Dune
           arraywriter->write(xg[d]);
         for(unsigned d = Base::Cell::dimensionworld; d < 3; ++d)
           arraywriter->write(0);
-      };
+      }
       //! signal end of writing
       virtual void endWrite() {
         arraywriter.reset();
@@ -318,7 +318,7 @@ namespace Dune
       virtual void write(const Cell& cell, const typename Base::Domain&) {
         offset += cell.geometry().corners();
         arraywriter->write(offset);
-      };
+      }
       //! signal end of writing
       virtual void endWrite() {
         arraywriter.reset();
@@ -355,7 +355,7 @@ namespace Dune
       //! write at the given position
       virtual void write(const Cell& cell, const typename Base::Domain&) {
         arraywriter->write(geometryType(cell.type()));
-      };
+      }
       //! signal end of writing
       virtual void endWrite() {
         arraywriter.reset();

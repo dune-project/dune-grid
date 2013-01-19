@@ -22,7 +22,7 @@ namespace Dune
     class Entity;
 
     template< class, class >
-    struct ExportParams;
+    class ExportParams;
 
 
 

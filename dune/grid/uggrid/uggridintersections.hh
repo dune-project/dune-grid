@@ -6,6 +6,8 @@
 #include <dune/common/sllist.hh>
 #include <dune/common/shared_ptr.hh>
 
+#include <dune/grid/uggrid/uggridrenumberer.hh>
+
 /** \file
  * \brief The UGGridLeafIntersection and UGGridLevelIntersection classes
  */
@@ -175,6 +177,12 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
+    // The geometries are only constructed when necessary.  The following
+    // flags store whether they have been constructed already.
+    mutable bool geometryIsUpToDate_;
+    mutable bool geometryInInsideIsUpToDate_;
+    mutable bool geometryInOutsideIsUpToDate_;
+
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
     mutable LocalGeometryImpl geometryInInside_;
@@ -183,12 +191,6 @@ namespace Dune {
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
     mutable GeometryImpl geometry_;
-
-    // The geometries are only constructed when necessary.  The following
-    // flags store whether they have been constructed already.
-    mutable bool geometryIsUpToDate_;
-    mutable bool geometryInInsideIsUpToDate_;
-    mutable bool geometryInOutsideIsUpToDate_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
@@ -439,6 +441,12 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
+    // The geometries are only constructed when necessary.  The following
+    // flags store whether they have been constructed already.
+    mutable bool geometryIsUpToDate_;
+    mutable bool geometryInInsideIsUpToDate_;
+    mutable bool geometryInOutsideIsUpToDate_;
+
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
     mutable LocalGeometryImpl geometryInInside_;
@@ -447,12 +455,6 @@ namespace Dune {
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
     mutable GeometryImpl geometry_;
-
-    // The geometries are only constructed when necessary.  The following
-    // flags store whether they have been constructed already.
-    mutable bool geometryIsUpToDate_;
-    mutable bool geometryInInsideIsUpToDate_;
-    mutable bool geometryInOutsideIsUpToDate_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;

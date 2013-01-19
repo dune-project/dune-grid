@@ -178,8 +178,8 @@ struct IntersectionIteratorInterface
     // increment / equality / ...
     IntersectionIterator j = i;
     ++j;
-    i == j;
-    i != j;
+    { bool DUNE_UNUSED tmp = (i == j); }
+    { bool DUNE_UNUSED tmp = (i != j); }
     j = i;
 
     // state

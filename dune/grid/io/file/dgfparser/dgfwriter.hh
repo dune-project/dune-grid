@@ -119,24 +119,27 @@ namespace Dune
     if( vertexCount != vxSize )
       DUNE_THROW( GridError, "Index set reports wrong number of vertices." );
 
-    // write all simplices to the "simplex" block
-    gridout << std::endl << "SIMPLEX" << std::endl;
-    for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
+    if( dimGrid > 1 )
     {
-      const Element& element = *it ;
-      if( ! element.type().isSimplex() )
-        continue;
+      // write all simplices to the "simplex" block
+      gridout << std::endl << "SIMPLEX" << std::endl;
+      for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
+      {
+        const Element& element = *it ;
+        if( !element.type().isSimplex() )
+          continue;
 
-      std::vector< Index > vertices( dimGrid+1 );
-      for( size_t i = 0; i < vertices.size(); ++i )
-        vertices[ i ] = vertexIndex[ indexSet.subIndex( element, i, dimGrid ) ];
+        std::vector< Index > vertices( dimGrid+1 );
+        for( size_t i = 0; i < vertices.size(); ++i )
+          vertices[ i ] = vertexIndex[ indexSet.subIndex( element, i, dimGrid ) ];
 
-      gridout << vertices[ 0 ];
-      for( size_t i = 1; i < vertices.size(); ++i )
-        gridout << " " << vertices[ i ];
-      gridout << std::endl;
+        gridout << vertices[ 0 ];
+        for( size_t i = 1; i < vertices.size(); ++i )
+          gridout << " " << vertices[ i ];
+        gridout << std::endl;
+      }
+      gridout << "#" << std::endl;
     }
-    gridout << "#" << std::endl;
 
     // write all cubes to the "cube" block
     gridout << std::endl << "CUBE" << std::endl;

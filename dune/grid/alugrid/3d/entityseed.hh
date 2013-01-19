@@ -444,10 +444,8 @@ namespace Dune
     : ALU3dGridEntitySeedBase<codim,GridImp> (item)
       , level_(level)
       , twist_ (twist)
-      , face_(duneFace)
-  {
-    assert( (codim == 1) ? (face_ >= 0) : 1 );
-  }
+      , face_(duneFace) // duneFace can be -1 when face was created by Face Iterator
+  {}
 
   template<int codim, class GridImp >
   inline ALU3dGridEntitySeed<codim,GridImp> ::

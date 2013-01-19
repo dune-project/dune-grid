@@ -57,7 +57,7 @@ namespace Dune {
       : virtualEntity_(OneDGridEntity<codim, dim, GridImp>())
     {
       GridImp::getRealImplementation(virtualEntity_).setToTarget(it);
-    };
+    }
 
   protected:
 
