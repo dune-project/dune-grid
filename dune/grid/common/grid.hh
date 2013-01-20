@@ -24,6 +24,7 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/defaultgridview.hh>
+#include <dune/grid/common/entityseed.hh>
 
 // include this file after all other, because other files might undef the
 // macros that are defined in that file
@@ -1218,7 +1219,7 @@ namespace Dune {
       typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
 
       /** \brief The type of the entity seed of this codim.*/
-      typedef EntitySeedImp<cd, const GridImp> EntitySeed;
+      typedef Dune::EntitySeed<EntitySeedImp<cd, const GridImp> > EntitySeed;
 
       /**
        * \brief Traits associated with a specific grid partition type.
