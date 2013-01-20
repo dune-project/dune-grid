@@ -1362,7 +1362,9 @@ namespace Dune {
     entityPointer(const Seed& seed) const
     {
       enum { codim = Seed::codimension };
-      return SEntityPointer<codim,const SGrid<dim,dimworld> >(this,seed.level(),seed.index());
+      return SEntityPointer<codim,const SGrid<dim,dimworld> >(this,
+                                                              this->getRealImplementation(seed).level(),
+                                                              this->getRealImplementation(seed).index());
     }
 
     /*! The communication interface

@@ -99,7 +99,7 @@ namespace Dune
     GeometryType type () const;
 
     //! obtain entity seed
-    EntitySeed seed () const { return EntitySeed( elementInfo(), subEntity() ); }
+    EntitySeed seed () const { return EntitySeed( AlbertaGridEntitySeed<codim,GridImp>(elementInfo(), subEntity() )); }
 
     //***********************************************
     // end of interface methods
@@ -226,7 +226,7 @@ namespace Dune
     GeometryType type () const;
 
     //! obtain entity seed
-    EntitySeed seed () const { return EntitySeed( elementInfo() ); }
+    EntitySeed seed () const { return EntitySeed( AlbertaGridEntitySeed<0,GridImp>(elementInfo() )); }
 
     /** obtain the number of subentities of a codimension
      *

@@ -191,7 +191,7 @@ namespace Dune {
     entityPointer(const Seed& seed)
     {
       enum {codim = Seed::codimension};
-      return typename Traits::template Codim<codim>::EntityPointer(OneDGridEntityPointer<codim,const OneDGrid>(seed.target()));
+      return typename Traits::template Codim<codim>::EntityPointer(OneDGridEntityPointer<codim,const OneDGrid>(OneDGrid::getRealImplementation(seed).target()));
     }
 
 

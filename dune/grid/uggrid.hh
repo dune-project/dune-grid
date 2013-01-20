@@ -314,7 +314,7 @@ namespace Dune {
     entityPointer(const Seed& seed) const
     {
       enum {codim = Seed::codimension};
-      return typename Traits::template Codim<codim>::EntityPointer(UGGridEntityPointer<codim,const UGGrid<dim> >(seed.target(),this));
+      return typename Traits::template Codim<codim>::EntityPointer(UGGridEntityPointer<codim,const UGGrid<dim> >(this->getRealImplementation(seed).target(),this));
     }
 
     /** \brief Number of grid entities per level and codim

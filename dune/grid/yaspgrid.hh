@@ -473,15 +473,15 @@ namespace Dune {
     entityPointer(const Seed& seed) const
     {
       const int codim = Seed::codimension;
-      YGLI g = MultiYGrid<dim,ctype>::begin(seed.level());
+      YGLI g = MultiYGrid<dim,ctype>::begin(this->getRealImplementation(seed).level());
       switch (codim)
       {
       case 0 :
         return YaspEntityPointer<codim,GridImp>(this,g,
-                                                TSI(g.cell_overlap(), seed.coord()));
+                                                TSI(g.cell_overlap(), this->getRealImplementation(seed).coord()));
       case dim :
         return YaspEntityPointer<codim,GridImp>(this,g,
-                                                TSI(g.vertex_overlap(), seed.coord()));
+                                                TSI(g.vertex_overlap(), this->getRealImplementation(seed).coord()));
       default :
         DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
       }

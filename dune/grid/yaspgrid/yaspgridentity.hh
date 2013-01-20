@@ -161,7 +161,7 @@ namespace Dune {
      *  to generate the entity again and uses as less memory as possible
      */
     EntitySeed seed () const {
-      return EntitySeed(_g.level(), _it.coord());
+      return EntitySeed(YaspEntitySeed<0,GridImp>(_g.level(), _it.coord()));
     }
 
     //! return partition type attribute
@@ -786,7 +786,7 @@ namespace Dune {
      *  to generate the entity again and uses as less memory as possible
      */
     EntitySeed seed () const {
-      return EntitySeed(_g.level(), _it.coord());
+      return EntitySeed(YaspEntitySeed<dim,GridImp>(_g.level(), _it.coord()));
     }
 
     //! geometry of this entity
