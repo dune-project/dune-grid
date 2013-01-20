@@ -1370,7 +1370,7 @@ namespace Dune {
           @tparam P type used to gather/scatter data in and out of the message buffer
           @tparam codim communicate entites of given codim
           @param t array holding data associated with the entities
-          @param iftype one of the predifined interface types, throws error if it is not implemented
+          @param iftype one of the predefined interface types, throws error if it is not implemented
           @param dir choose beetween forward and backward communication
           @param level communicate for entities on the given level
 

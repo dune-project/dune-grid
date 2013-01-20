@@ -25,7 +25,7 @@
 #include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/defaultgridview.hh>
 
-// inlcude this file after all other, because other files might undef the
+// include this file after all other, because other files might undef the
 // macros that are defined in that file
 #include <dune/common/bartonnackmanifcheck.hh>
 
