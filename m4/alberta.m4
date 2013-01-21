@@ -188,7 +188,10 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
           dune_grid_cv_alberta_world_dims=
           for N in 1 2 3 4 5 6 7 8 9; do
             LIBS="-lalberta_${N}d -l$dune_grid_cv_lib_alberta_utils $ALBERTA_EXTRA $ac_save_LIBS"
-            AC_TRY_LINK_FUNC([mesh_traverse],[dune_grid_cv_alberta_world_dims="$dune_grid_cv_alberta_world_dims $N"])
+            AC_TRY_LINK_FUNC([mesh_traverse],[dune_grid_cv_alberta_world_dims="$dune_grid_cv_alberta_world_dims $N"],[
+	    LIBS="-lalberta_${N}d -l$dune_grid_cv_lib_alberta_utils $ALBERTA_EXTRA -lltdl $ac_save_LIBS"
+	    AC_TRY_LINK_FUNC([mesh_traverse],[dune_grid_cv_alberta_world_dims="$dune_grid_cv_alberta_world_dims $N"
+	    ALBERTA_EXTRA="$ALBERTA_EXTRA -lltdl"])])
           done
         ])
         ALBERTA_WORLD_DIMS="$dune_grid_cv_alberta_world_dims"
