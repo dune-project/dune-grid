@@ -89,6 +89,10 @@ namespace Dune
     {}
   };
 
+  template< int dim, int dimworld, ALU2DSPACE ElementType elType>
+  class ALU2dGrid;
+
+
   template< int dim, int dimworld, ALU2DSPACE ElementType elType, class Data, class Allocator >
   class PersistentContainer< ALU2dGrid< dim, dimworld, elType >, Data, Allocator >
     : public PersistentContainerVector< ALU2dGrid< dim, dimworld, elType >,
