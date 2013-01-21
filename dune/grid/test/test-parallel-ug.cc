@@ -5,6 +5,9 @@
 
 #include <config.h>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <iostream>
 #include <vector>
 
