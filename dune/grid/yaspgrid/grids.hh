@@ -1712,12 +1712,6 @@ namespace Dune {
 
       // add level
       _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
-
-      // output
-      //    if (_torus.rank()==0) std::cout << "MultiYGrid<" << d // changed dinfo to cout
-      //                                    << ">: coarse grid with size " << s
-      //                                    << " imbalance=" << (imbal-1)*100 << "%" << std::endl;
-      //      print(std::cout);
     }
 #else
     MultiYGrid (fTupel L, iTupel s, std::bitset<d> periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
@@ -1731,11 +1725,6 @@ namespace Dune {
 
       // add level
       _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
-      // output
-      //    if (_torus.rank()==0) std::cout << "MultiYGrid<" << d // changed dinfo to cout
-      //                                    << ">: coarse grid with size " << s
-      //                                    << " imbalance=" << (imbal-1)*100 << "%" << std::endl;
-      //      print(std::cout);
     }
 #endif
 
