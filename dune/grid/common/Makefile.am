@@ -12,6 +12,7 @@ common_HEADERS = \
 	entity.hh \
 	entityiterator.hh \
 	entitypointer.hh \
+	entityseed.hh \
 	exceptions.hh \
 	geometry.hh \
 	geometryreference.hh \
