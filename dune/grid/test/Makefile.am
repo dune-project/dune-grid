@@ -47,7 +47,8 @@ CACHECOORDFUNCTION = 0
 #
 
 # tests where program to build and program to run are equal
-NORMALTESTS = test-sgrid test-oned test-yaspgrid test-geogrid $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID)
+NORMALTESTS = test-sgrid test-oned test-yaspgrid test-geogrid $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID) \
+              test-mcmg-geogrid
 
 # list of tests to run
 TESTS = $(NORMALTESTS)
@@ -153,6 +154,11 @@ test_geogrid_LDFLAGS = $(AM_LDFLAGS)		\
 test_geogrid_LDADD =				\
 	$(ALL_PKG_LIBS)				\
 	$(LDADD)
+
+test_mcmg_geogrid_SOURCES = test-mcmg-geogrid.cc
+test_mcmg_geogrid_CPPFLAGS = $(AM_CPPFLAGS)
+test_mcmg_geogrid_LDFLAGS = $(AM_LDFLAGS)
+test_mcmg_geogrid_LDADD = $(LDADD)
 
 # libdune contains both libugX2 and libugX3, always test both dimensions
 test_ug_SOURCES = test-ug.cc
