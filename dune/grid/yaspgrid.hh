@@ -329,7 +329,7 @@ namespace Dune {
      */
     YaspGrid (Dune::MPIHelper::MPICommunicator comm,
               Dune::FieldVector<ctype, dim> L,
-              Dune::FieldVector<int, dim> s,
+              Dune::array<int, dim> s,
               std::bitset<dim> periodic,
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
@@ -358,7 +358,7 @@ namespace Dune {
        @param lb pointer to an overloaded YLoadBalance instance
      */
     YaspGrid (Dune::FieldVector<ctype, dim> L,
-              Dune::FieldVector<int, dim> s,
+              Dune::array<int, dim> s,
               std::bitset<dim> periodic,
               int overlap,
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())

@@ -19,7 +19,6 @@ int rank;
 
 template <int dim>
 void check_yasp(bool p0=false) {
-  typedef Dune::FieldVector<int,dim> iTupel;
   typedef Dune::FieldVector<double,dim> fTupel;
 
   std::cout << std::endl << "YaspGrid<" << dim << ">";
@@ -27,7 +26,9 @@ void check_yasp(bool p0=false) {
   std::cout << std::endl << std::endl;
 
   fTupel Len; Len = 1.0;
-  iTupel s; s = 2; s[0] = 6;
+  Dune::array<int,dim> s;
+  std::fill(s.begin(), s.end(), 2);
+  s[0] = 6;
   std::bitset<dim> p(0);
   p[0] = p0;
   int overlap = 1;
