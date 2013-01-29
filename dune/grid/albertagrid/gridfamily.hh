@@ -123,7 +123,7 @@ namespace Dune
 
         typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
         typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
-        typedef AlbertaGridEntitySeed< cd, const GridImp > EntitySeed;
+        typedef Dune::EntitySeed<AlbertaGridEntitySeed< cd, const GridImp > > EntitySeed;
 
         template <PartitionIteratorType pitype>
         struct Partition

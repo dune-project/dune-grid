@@ -207,8 +207,8 @@ if test x$HAVE_ALUGRID = x1 ; then
      _and_ if the application uses the ALUGRID_CPPFLAGS])
 
   # add to global list
-  DUNE_ADD_ALL_PKG([ALUGrid], [$ALUGRID_CPPFLAGS],
-                   [$ALUGRID_LDFLAGS], [$ALUGRID_LIBS])
+  DUNE_ADD_ALL_PKG([ALUGrid], [\${ALUGRID_CPPFLAGS}],
+                   [\${ALUGRID_LDFLAGS}], [\${ALUGRID_LIBS}])
 
   DUNE_DEFINE_GRIDTYPE([ALUGRID_CONFORM],[],[Dune::ALUGrid< dimgrid, dimworld, simplex, conforming >],[dune/grid/alugrid.hh],[dune/grid/io/file/dgfparser/dgfalu.hh])
   DUNE_DEFINE_GRIDTYPE([ALUGRID_CUBE],[],[Dune::ALUGrid< dimgrid, dimworld, cube, nonconforming >],[dune/grid/alugrid.hh],[dune/grid/io/file/dgfparser/dgfalu.hh])

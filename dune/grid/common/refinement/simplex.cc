@@ -253,12 +253,10 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
 
-#include <dune/geometry/genericgeometry/geometry.hh>
+#include <dune/geometry/multilineargeometry.hh>
 #include <dune/geometry/genericgeometry/geometrytraits.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/referenceelements.hh>
-
-#include <dune/grid/common/geometry.hh>
 
 #include "base.cc"
 
@@ -429,8 +427,6 @@ namespace Dune {
       {
       public:
         enum { dimension = dimension_ };
-        // to make Dune::Geometry work:
-        struct GridFamily;
         typedef CoordType ctype;
         enum { dimensionworld = dimension };
 
@@ -455,9 +451,8 @@ namespace Dune {
       struct RefinementImp<dimension, CoordType>::Codim
       {
         class SubEntityIterator;
-        typedef Dune::Geometry<dimension-codimension, dimension,
-            RefinementImp<dimension, CoordType>,
-            GenericGeometry::Geometry> Geometry;
+        // We don't need the caching, but the uncached MultiLinearGeometry has bug FS#1209
+        typedef Dune::CachedMultiLinearGeometry<CoordType,dimension-codimension,dimension> Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -545,10 +540,7 @@ namespace Dune {
       RefinementIteratorSpecial(int level, bool end)
         : size(1<<level)
       {
-        if(end)
-          vertex[0] = size + 1;
-        else
-          vertex[0] = 0;
+        vertex[0] = (end) ? size + 1 : 0;
         for(int i = 1; i < dimension; ++ i)
           vertex[i] = 0;
       }
@@ -738,15 +730,13 @@ namespace Dune {
       typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry
       RefinementIteratorSpecial<dimension, CoordType, 0>::geometry () const
       {
-        Dune::array<CoordVector, dimension+1> corners;
+        std::vector<CoordVector> corners(dimension+1);
         CoordVector v;
         const ReferenceElement<CoordType, dimension> &refelem =
           ReferenceElements<CoordType, dimension>::simplex();
         for(int i = 0; i <= dimension; ++i)
           corners[i] = global(refelem.position(i, dimension));
-        return Geometry(GenericGeometry::Geometry
-                        <dimension, dimension, Refinement>
-                          (refelem.type(), corners));
+        return Geometry(refelem.type(), corners);
       }
 
       template<int dimension, class CoordType>
@@ -789,35 +779,6 @@ namespace Dune {
 
   } // namespace RefinementImp
 
-  namespace GenericGeometry {
-
-    template< int dimension, class CoordType >
-    struct GlobalGeometryTraits
-    < RefinementImp::Simplex::RefinementImp<dimension, CoordType> > :
-      public DefaultGeometryTraits<CoordType, dimension, dimension>
-    {
-      //   hybrid   [ true if Codim 0 is hybrid ]
-      static const bool hybrid = false;
-      //   topologyId [ for Codim 0, needed for (hybrid=false) ]
-      static const unsigned topologyId =
-        SimplexTopology< dimension >::type::id;
-    };
-
-  } // namespace GenericGeometry
-
-  namespace FacadeOptions {
-
-    template<int dimension, class CoordType>
-    struct StoreGeometryReference
-    < dimension, dimension,
-        RefinementImp::Simplex::RefinementImp<dimension, CoordType>,
-        GenericGeometry::Geometry>
-    {
-      //! Whether to store by reference or by reference.
-      static const bool v = false;
-    };
-
-  } // namespace FacadeOptions
 
   namespace RefinementImp {
 

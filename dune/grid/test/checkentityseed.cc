@@ -134,6 +134,9 @@ namespace CheckEntitySeed // don't blur namespace Dune
     // type of entity seed (not available on GridView)
     typedef typename Grid::template Codim< codim >::EntitySeed EntitySeed;
 
+    // Check whether EntitySeed reports the correct codimension
+    dune_static_assert(EntitySeed::codimension==codim, "Codimension exported by EntitySeed is incorrect!");
+
     static void apply ( const GridView &gridView, std::ostream &output )
     {
       // get grid, as method entityPointer() is missing on GridViews
