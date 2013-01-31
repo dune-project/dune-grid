@@ -223,7 +223,7 @@ namespace Dune
       }
 
       /** \brief return EntitySeed of host grid entity */
-      EntitySeed seed () const { return EntitySeed( hostEntity().seed() ); }
+      EntitySeed seed () const { return typename EntitySeed::Implementation( hostEntity().seed() ); }
       /** \} */
 
 
@@ -500,7 +500,7 @@ namespace Dune
       }
 
       /** \brief return EntitySeed of host grid entity */
-      EntitySeed seed () const { return EntitySeed( hostElement().seed(), subEntity_ ); }
+      EntitySeed seed () const { return typename EntitySeed::Implementation( hostElement().seed(), subEntity_ ); }
       /** \} */
 
       /** \name Methods Supporting the Grid Implementation

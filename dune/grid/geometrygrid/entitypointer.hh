@@ -65,7 +65,7 @@ namespace Dune
       static const int codimension = codim;
 
       typedef Dune::Entity< codimension, dimension, const Grid, GeoGrid::Entity > Entity;
-      typedef GeoGrid::EntitySeed< codimension, const Grid > EntitySeed;
+      typedef Dune::EntitySeed< GeoGrid::EntitySeed< codimension, const Grid > > EntitySeed;
 
       typedef typename HostGrid::template Codim< codim >::Entity HostEntity;
       typedef typename HostGrid::template Codim< codim >::EntityPointer HostEntityPointer;
@@ -128,7 +128,7 @@ namespace Dune
 
       EntityPointer ( const Grid &grid, const EntitySeed &seed )
         : entity_( EntityImpl( grid ) ),
-          hostEntityIterator_( grid.hostGrid().entityPointer( seed.hostEntitySeed() ) )
+          hostEntityIterator_( grid.hostGrid().entityPointer( seed.impl().hostEntitySeed() ) )
       {}
 
       explicit EntityPointer ( const EntityImpl &entity )
@@ -246,8 +246,8 @@ namespace Dune
       {}
 
       EntityPointer ( const Grid &grid, const EntitySeed &seed )
-        : entity_( EntityImpl( grid, seed.subEntity() ) ),
-          hostElementIterator_( grid.hostGrid().entityPointer( seed.hostElementSeed() ) )
+        : entity_( EntityImpl( grid, seed.impl().subEntity() ) ),
+          hostElementIterator_( grid.hostGrid().entityPointer( seed.impl().hostElementSeed() ) )
       {}
 
       explicit EntityPointer ( const EntityImpl &entity )

@@ -87,7 +87,7 @@ namespace Dune
           typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
           typedef typename EntityPointerTraits::Entity Entity;
 
-          typedef GeoGrid::EntitySeed< codim, const Grid > EntitySeed;
+          typedef Dune::EntitySeed< GeoGrid::EntitySeed< codim, const Grid > > EntitySeed;
 
           template< PartitionIteratorType pitype >
           struct Partition
