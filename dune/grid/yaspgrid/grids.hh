@@ -1327,7 +1327,7 @@ namespace Dune {
     }
 
     //! partition the given grid onto the torus and return the piece of the process with given rank; returns load imbalance
-    double partition (int rank, iTupel origin_in, iTupel size_in, iTupel& origin_out, iTupel& size_out) const
+    double partition (int rank, iTupel origin_in, Dune::array<int,d> size_in, iTupel& origin_out, iTupel& size_out) const
     {
       iTupel coord = rank_to_coord(rank);
       double maxsize = 1;
@@ -1743,7 +1743,9 @@ namespace Dune {
       iTupel o_interior;
       iTupel s_interior;
       iTupel o = iTupel(0);
-      double imbal = _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
+      array<int,d> sArray;
+      std::copy(s.begin(), s.end(), sArray.begin());
+      double imbal = _torus.partition(_torus.rank(),o,sArray,o_interior,s_interior);
       imbal = _torus.global_max(imbal);
 
       // add level
