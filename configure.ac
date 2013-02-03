@@ -35,7 +35,6 @@ DUNE_SUMMARY_ALL
 # write output
 AC_CONFIG_FILES([Makefile
     lib/Makefile
-    doc/refinement/Makefile
     doc/doxygen/Makefile
     doc/doxygen/Doxyfile
     doc/grids/Makefile
@@ -50,7 +49,6 @@ AC_CONFIG_FILES([Makefile
     dune/grid/Makefile
     dune/grid/test/Makefile
     dune/grid/common/test/Makefile
-    dune/grid/common/refinement/Makefile
     dune/grid/common/Makefile
     dune/grid/uggrid/Makefile
     dune/grid/sgrid/Makefile

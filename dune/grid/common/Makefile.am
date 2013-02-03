@@ -33,10 +33,9 @@ common_HEADERS = \
 	sizecache.hh \
 	scsgmapper.hh \
 	universalmapper.hh \
-	virtualrefinement.hh \
-	virtualrefinement.cc
+	virtualrefinement.hh
 
-SUBDIRS = refinement test
+SUBDIRS = test
 
 dist_noinst_DATA = cube-to-tet-6.png
 

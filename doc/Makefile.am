@@ -1,9 +1,5 @@
-# $Id$
 
-if INKSCAPE
-INKSCAPE_SUBDIRS = refinement
-endif INKSCAPE
-SUBDIRS = $(INKSCAPE_SUBDIRS) doxygen grids
+SUBDIRS = doxygen grids
 
 # setting like in dune-web
 CURDIR=doc

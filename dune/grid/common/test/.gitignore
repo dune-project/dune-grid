@@ -3,7 +3,6 @@ Makefile.in
 .deps
 .libs
 mcmgmappertest
-refinementtest
 scsgmappertest
 semantic.cache
 *.gcda
