@@ -6,7 +6,7 @@
 #include <fstream>
 #include <limits>
 #include <dune/common/stdstreams.hh>
-#include <dune/grid/common/virtualrefinement.hh>
+#include <dune/geometry/virtualrefinement.hh>
 
 template<class GridView>
 void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,

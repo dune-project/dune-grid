@@ -5,6 +5,7 @@
 
 #include <dune/common/typetraits.hh>
 
+#include <dune/grid/common/entityseed.hh>
 #include <dune/grid/geometrygrid/capabilities.hh>
 
 namespace Dune
