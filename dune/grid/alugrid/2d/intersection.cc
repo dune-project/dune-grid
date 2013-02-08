@@ -16,9 +16,9 @@ namespace Dune
   // Implementation of ALU2DIntersectionGeometryStorage
   // --------------------------------------------------
 
-  template< class LocalGeometryImpl >
+  template< class GridImp, class LocalGeometryImpl >
   alu2d_inline
-  ALU2DIntersectionGeometryStorage< LocalGeometryImpl >
+  ALU2DIntersectionGeometryStorage< GridImp, LocalGeometryImpl >
   ::ALU2DIntersectionGeometryStorage ()
   {
     for( int i = 0; i < 4; ++i )

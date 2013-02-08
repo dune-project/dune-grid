@@ -25,7 +25,10 @@ namespace Dune
   class ALU2dGridFactory
     : public GridFactoryInterface< GridImp >
   {
+    typedef GridFactoryInterface< GridImp > Base ;
   public:
+    using Base :: insertElement ;
+
     typedef GridImp Grid;
 
     static const int dimension = Grid::dimension;

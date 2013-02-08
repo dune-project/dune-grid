@@ -54,13 +54,10 @@ namespace Dune
     // -----------------------------
 
     template< class Grid >
-    class LevelIntersectionIterator;
-
-    template< class Grid >
-    class LeafIntersectionIterator;
-
-    template< class Grid >
     class HierarchicIterator;
+
+    template< class Grid, class HostIntersectionIterator >
+    class IntersectionIterator;
 
 
 
@@ -226,7 +223,7 @@ namespace Dune
       }
 
       /** \brief return EntitySeed of host grid entity */
-      EntitySeed seed () const { return EntitySeed( hostEntity().seed() ); }
+      EntitySeed seed () const { return typename EntitySeed::Implementation( hostEntity().seed() ); }
       /** \} */
 
 
@@ -503,7 +500,7 @@ namespace Dune
       }
 
       /** \brief return EntitySeed of host grid entity */
-      EntitySeed seed () const { return EntitySeed( hostElement().seed(), subEntity_ ); }
+      EntitySeed seed () const { return typename EntitySeed::Implementation( hostElement().seed(), subEntity_ ); }
       /** \} */
 
       /** \name Methods Supporting the Grid Implementation
@@ -652,6 +649,8 @@ namespace Dune
 
       typedef typename remove_const< Grid >::type::Traits Traits;
 
+      typedef typename Traits::HostGrid HostGrid;
+
     public:
       /** \name Attributes
        *  \{ */
@@ -717,25 +716,25 @@ namespace Dune
 
       LevelIntersectionIterator ilevelbegin () const
       {
-        typedef GeoGrid::LevelIntersectionIterator< Grid > LevelIntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< Grid, typename HostGrid::LevelIntersectionIterator > LevelIntersectionIteratorImpl;
         return LevelIntersectionIteratorImpl( *this, hostEntity().ilevelbegin() );
       }
 
       LevelIntersectionIterator ilevelend () const
       {
-        typedef GeoGrid::LevelIntersectionIterator< Grid > LevelIntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< Grid, typename HostGrid::LevelIntersectionIterator > LevelIntersectionIteratorImpl;
         return LevelIntersectionIteratorImpl( *this, hostEntity().ilevelend() );
       }
 
       LeafIntersectionIterator ileafbegin () const
       {
-        typedef GeoGrid::LeafIntersectionIterator< Grid > LeafIntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< Grid, typename HostGrid::LeafIntersectionIterator > LeafIntersectionIteratorImpl;
         return LeafIntersectionIteratorImpl( *this, hostEntity().ileafbegin() );
       }
 
       LeafIntersectionIterator ileafend () const
       {
-        typedef GeoGrid::LeafIntersectionIterator< Grid > LeafIntersectionIteratorImpl;
+        typedef GeoGrid::IntersectionIterator< Grid, typename HostGrid::LeafIntersectionIterator > LeafIntersectionIteratorImpl;
         return LeafIntersectionIteratorImpl( *this, hostEntity().ileafend() );
       }
 

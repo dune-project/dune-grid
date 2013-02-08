@@ -32,7 +32,7 @@ namespace Dune {
 
   public:
 
-    typedef Dune::Intersection<const GridImp, Dune::OneDGridLevelIntersection> Intersection;
+    typedef Dune::Intersection< GridImp, Dune::OneDGridLevelIntersection< GridImp > > Intersection;
 
     //! equality
     bool equals(const OneDGridLevelIntersectionIterator<GridImp>& other) const {
@@ -77,7 +77,7 @@ namespace Dune {
 
   public:
 
-    typedef Dune::Intersection<const GridImp, Dune::OneDGridLeafIntersection> Intersection;
+    typedef Dune::Intersection< GridImp, Dune::OneDGridLeafIntersection< GridImp > > Intersection;
 
     //! equality
     bool equals(const OneDGridLeafIntersectionIterator<GridImp>& other) const {

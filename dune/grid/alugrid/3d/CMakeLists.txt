@@ -1,7 +1,7 @@
 if(ALUGRID_FOUND)
   set(SOURCES mappings.cc topology.cc faceutility.cc)
 else(ALUGRID_FOUND)
-  set(SOURCES topology.cc)
+  set(SOURCES "")
 endif(ALUGRID_FOUND)
 add_dune_alugrid_flags(SOURCE_ONLY ${SOURCES})
 dune_add_library(alu3d OBJECT ${SOURCES})

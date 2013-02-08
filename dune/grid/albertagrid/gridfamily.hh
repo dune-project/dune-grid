@@ -97,13 +97,13 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune::Intersection< const GridImp, AlbertaGridLeafIntersection > LeafIntersection;
-      typedef Dune::Intersection< const GridImp, AlbertaGridLeafIntersection > LevelIntersection;
+      typedef Dune::Intersection< const GridImp, AlbertaGridLeafIntersection< const GridImp > > LeafIntersection;
+      typedef Dune::Intersection< const GridImp, AlbertaGridLeafIntersection< const GridImp > > LevelIntersection;
       typedef Dune::IntersectionIterator
-      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridLeafIntersection >
+      < const GridImp, AlbertaGridLeafIntersectionIterator< const GridImp >, AlbertaGridLeafIntersection< const GridImp > >
       LeafIntersectionIterator;
       typedef Dune::IntersectionIterator
-      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridLeafIntersection >
+      < const GridImp, AlbertaGridLeafIntersectionIterator< const GridImp >, AlbertaGridLeafIntersection< const GridImp > >
       LevelIntersectionIterator;
 
       typedef Dune::EntityIterator< 0, const GridImp, AlbertaGridHierarchicIterator< const GridImp > > HierarchicIterator;
@@ -123,7 +123,7 @@ namespace Dune
 
         typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
         typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
-        typedef AlbertaGridEntitySeed< cd, const GridImp > EntitySeed;
+        typedef Dune::EntitySeed<AlbertaGridEntitySeed< cd, const GridImp > > EntitySeed;
 
         template <PartitionIteratorType pitype>
         struct Partition

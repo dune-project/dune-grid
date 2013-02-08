@@ -6,12 +6,7 @@ SUBDIRS = common 2d 3d
 
 noinst_LTLIBRARIES = libalu.la
 
-# 3d/libalu3d.la also contains items independent of ALUGrid
-if ALUGRID
-  ALULIB = 2d/libalu2d.la 3d/libalu3d.la
-else
-  ALULIB = 3d/libalu3d.la
-endif
+ALULIB = 2d/libalu2d.la 3d/libalu3d.la
 
 # construct only from sub-libraries
 libalu_la_SOURCES =

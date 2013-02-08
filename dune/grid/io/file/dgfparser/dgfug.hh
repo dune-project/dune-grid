@@ -115,14 +115,14 @@ namespace Dune
     }
 
     /** \brief please doc me */
-    template< class GG, template< class > class II >
+    template< class GG, class II >
     bool wasInserted ( const Dune::Intersection< GG, II > &intersection ) const
     {
       return factory_.wasInserted( intersection );
     }
 
     /** \brief will return boundary segment index */
-    template < class GG, template< class > class II >
+    template< class GG, class II >
     int boundaryId ( const Dune::Intersection< GG, II > &intersection ) const
     {
       return intersection.boundarySegmentIndex();
@@ -176,7 +176,7 @@ namespace Dune
     }
 
     /** \brief return invalid value */
-    template < class GG, template< class > class II >
+    template< class GG, class II >
     const DGFBoundaryParameter::type &boundaryParameter ( const Dune::Intersection< GG, II > &intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;

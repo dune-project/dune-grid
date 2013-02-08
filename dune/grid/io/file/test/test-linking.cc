@@ -6,9 +6,10 @@
 
 #include <iostream>
 
+#include <dune/geometry/virtualrefinement.hh>
+
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
-#include <dune/grid/common/virtualrefinement.hh>
 
 /*
    #include "gridcheck.cc"

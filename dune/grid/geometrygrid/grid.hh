@@ -94,18 +94,14 @@ namespace Dune
     template< class, bool > friend class GeoGrid::EntityPointer;
     template< int, class > friend class GeoGrid::EntityProxy;
     template< int, int, class > friend class GeoGrid::Geometry;
-    template< class, class, class, PartitionIteratorType > friend class GeoGrid::LeafGridView;
-    template< class, class, class, PartitionIteratorType > friend class GeoGrid::LevelGridView;
+    template< class, class, class, PartitionIteratorType > friend class GeoGrid::GridView;
     template< class, class > friend class GeoGrid::Intersection;
-    template< class > friend class GeoGrid::IntersectionIterator;
+    template< class, class > friend class GeoGrid::IntersectionIterator;
     template< class, class > friend class GeoGrid::IdSet;
     template< class, class > friend class GeoGrid::IndexSet;
     template< class > friend struct HostGridAccess;
 
     template< class, class > friend class GeoGrid::CommDataHandle;
-
-    template< int, PartitionIteratorType, class > friend struct GeoGrid::LevelIteratorTraits;
-    template< int, PartitionIteratorType, class > friend struct GeoGrid::LeafIteratorTraits;
 
     template< class, class, class > friend class PersistentContainer;
 
@@ -645,7 +641,7 @@ namespace Dune
     {
       typedef typename Partition< pitype >::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, hostGrid().template levelView< pitype >( level ) ) );
+      return View( ViewImp( *this, hostGrid().levelView( level ) ) );
     }
 
     /** \brief View for the leaf grid */
@@ -654,7 +650,7 @@ namespace Dune
     {
       typedef typename Traits::template Partition< pitype >::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, hostGrid().template leafView< pitype >() ) );
+      return View( ViewImp( *this, hostGrid().leafView() ) );
     }
 
     /** \brief View for a grid level for All_Partition */
@@ -665,7 +661,7 @@ namespace Dune
     }
 
     /** \brief View for the leaf grid for All_Partition*/
-    LeafGridView leafView() const
+    LeafGridView leafView () const
     {
       typedef typename LeafGridView::GridViewImp ViewImp;
       return LeafGridView( ViewImp( *this, hostGrid().leafView() ) );

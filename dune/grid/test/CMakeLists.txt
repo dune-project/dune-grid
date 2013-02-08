@@ -44,7 +44,7 @@ set(CACHECOORDFUNCTION 0)
 # tests where program to build and program to run are equal
 set(TESTS test_sgrid test_oned test_yaspgrid test_geogrid
   ${ALBERTA_PROGRAMS} ${UG_PROGRAMS} ${ALUGRID_PROGAMS}
-  ${DGFALUGRID_UG_PROGRAMS})
+  ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid)
 
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_DEVEL_MODE")
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${CMAKE_SOURCE_DIR}/doc/grids/\"")
@@ -97,6 +97,8 @@ if(ALUGRID_FOUND AND UG_FOUND)
   add_dune_ug_flags(test_dgfalu_uggrid_combination)
   add_dune_alugrid_flags(test_dgfalu_uggrid_combination)
 endif(ALUGRID_FOUND AND UG_FOUND)
+
+add_executable(test_mcmg_geogrid test-mcmg-geogrid)
 
 foreach(_exe ${TESTS})
   target_link_libraries(${_exe} "dunegrid" ${DUNE_LIBS})

@@ -5,7 +5,7 @@ TESTPROGS = mcmgmappertest
 endif
 
 # which tests to run
-TESTS = scsgmappertest $(TESTPROGS) refinementtest
+TESTS = scsgmappertest $(TESTPROGS)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTS)
@@ -26,7 +26,5 @@ mcmgmappertest_LDADD =				\
 	$(LDADD)
 
 scsgmappertest_SOURCES = scsgmappertest.cc
-
-refinementtest_SOURCES = refinementtest.cc
 
 include $(top_srcdir)/am/global-rules

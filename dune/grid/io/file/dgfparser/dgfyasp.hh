@@ -9,10 +9,11 @@
 
 namespace Dune
 {
-  // forward declaration
-  // -------------------
 
-  template< class GridImp, template< class > class IntersectionImp >
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class GridImp, class IntersectionImp >
   class Intersection;
 
 
@@ -146,7 +147,7 @@ namespace Dune
       return boundaryDomainBlock_->hasParameter();
     }
 
-    template < class GG, template < class > class II >
+    template< class GG, class II >
     const typename DGFBoundaryParameter::type &
     boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {

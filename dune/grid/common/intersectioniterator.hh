@@ -78,7 +78,7 @@ namespace Dune
 
      @ingroup GIIntersectionIterator
    */
-  template<class GridImp, template<class> class IntersectionIteratorImp, template<class> class IntersectionImp>
+  template< class GridImp, class IntersectionIteratorImp, class IntersectionImp >
   class IntersectionIterator
   {
 #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
@@ -92,7 +92,7 @@ namespace Dune
         typename GridImp::GridFamily> ;
 #endif
     // type of underlying implementation, for internal use only
-    typedef IntersectionIteratorImp< const GridImp > Implementation;
+    typedef IntersectionIteratorImp Implementation;
 
     //! return reference to the real implementation
     Implementation &impl () { return realIterator; }
@@ -104,7 +104,7 @@ namespace Dune
 
   public:
     /** \brief Type of Intersection this IntersectionIterator points to */
-    typedef Dune::Intersection< const GridImp, IntersectionImp > Intersection;
+    typedef Dune::Intersection< GridImp, IntersectionImp > Intersection;
 
     //===========================================================
     /** @name Dereferencing
@@ -173,8 +173,9 @@ namespace Dune
     }
 
     /** Copy Constructor from IntersectionIteratorImp */
-    IntersectionIterator(const IntersectionIteratorImp<const GridImp> & i) :
-      realIterator(i) {}
+    IntersectionIterator ( const Implementation &impl )
+      : realIterator( impl )
+    {}
 
     /** Copy constructor */
     IntersectionIterator(const IntersectionIterator& i) :

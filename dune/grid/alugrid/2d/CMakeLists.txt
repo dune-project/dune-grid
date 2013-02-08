@@ -25,4 +25,6 @@ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/alugrid/2d)
 
 if(ALUGRID_FOUND)
   dune_add_library(alu2d OBJECT intersection.cc  alu2dgridfactory.cc)
+else(ALUGRID_FOUND)
+  dune_add_library(alu2d OBJECT "")
 endif(ALUGRID_FOUND)

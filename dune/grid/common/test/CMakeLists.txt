@@ -3,7 +3,7 @@ if(UG_FOUND)
     mcmgmappertest)
 endif(UG_FOUND)
 
-set(TESTS ${TESTS} scsgmappertest refinementtest)
+set(TESTS ${TESTS})
 
 # We do not want want to build the tests during make all,
 # but just build them on demand

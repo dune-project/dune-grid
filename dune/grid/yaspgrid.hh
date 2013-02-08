@@ -319,6 +319,60 @@ namespace Dune {
       init();
     }
 
+    /*! Constructor for a YaspGrid, they are all forwarded to the base class
+       @param comm MPI communicator where this mesh is distributed to
+       @param L extension of the domain
+       @param s number of cells on coarse mesh in each direction
+       @param periodic tells if direction is periodic or not
+       @param overlap size of overlap on coarsest grid (same in all directions)
+       @param lb pointer to an overloaded YLoadBalance instance
+     */
+    YaspGrid (Dune::MPIHelper::MPICommunicator comm,
+              Dune::FieldVector<ctype, dim> L,
+              Dune::array<int, dim> s,
+              std::bitset<dim> periodic,
+              int overlap,
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
+#if HAVE_MPI
+      : YMG(comm,L,s,periodic,overlap,lb), ccobj(comm),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+#else
+      : YMG(L,s,periodic,overlap,lb),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+#endif
+    {
+      init();
+    }
+
+
+    /*! Constructor for a sequential YaspGrid, they are all forwarded to the base class.
+
+       Sequential here means that the whole grid is living on one process even if your program is running
+       in parallel.
+       @see YaspGrid(Dune::MPIHelper::MPICommunicator, Dune::FieldVector<ctype, dim>, Dune::FieldVector<int, dim>,  Dune::FieldVector<bool, dim>, int)
+       for constructing one parallel grid decomposed between the processors.
+       @param L extension of the domain
+       @param s number of cells on coarse mesh in each direction
+       @param periodic tells if direction is periodic or not
+       @param overlap size of overlap on coarsest grid (same in all directions)
+       @param lb pointer to an overloaded YLoadBalance instance
+     */
+    YaspGrid (Dune::FieldVector<ctype, dim> L,
+              Dune::array<int, dim> s,
+              std::bitset<dim> periodic,
+              int overlap,
+              const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
+#if HAVE_MPI
+      : YMG(MPI_COMM_SELF,L,s,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+#else
+      : YMG(L,s,periodic,overlap,lb),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+#endif
+    {
+      init();
+    }
+
   private:
     // do not copy this class
     YaspGrid(const YaspGrid&);
@@ -473,15 +527,15 @@ namespace Dune {
     entityPointer(const Seed& seed) const
     {
       const int codim = Seed::codimension;
-      YGLI g = MultiYGrid<dim,ctype>::begin(seed.level());
+      YGLI g = MultiYGrid<dim,ctype>::begin(this->getRealImplementation(seed).level());
       switch (codim)
       {
       case 0 :
         return YaspEntityPointer<codim,GridImp>(this,g,
-                                                TSI(g.cell_overlap(), seed.coord()));
+                                                TSI(g.cell_overlap(), this->getRealImplementation(seed).coord()));
       case dim :
         return YaspEntityPointer<codim,GridImp>(this,g,
-                                                TSI(g.vertex_overlap(), seed.coord()));
+                                                TSI(g.vertex_overlap(), this->getRealImplementation(seed).coord()));
       default :
         DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
       }

@@ -9,6 +9,7 @@ set(HEADERS
   entity.hh
   entityiterator.hh
   entitypointer.hh
+  entityseed.hh
   exceptions.hh
   geometry.hh
   geometryreference.hh
@@ -29,10 +30,8 @@ set(HEADERS
   sizecache.hh
   scsgmapper.hh
   universalmapper.hh
-  virtualrefinement.hh
-  virtualrefinement.cc)
+  virtualrefinement.hh)
 
-add_subdirectory(refinement)
 add_subdirectory(test EXCLUDE_FROM_ALL)
 
 set(NOINST_DATA cube-to-tet-6.png)

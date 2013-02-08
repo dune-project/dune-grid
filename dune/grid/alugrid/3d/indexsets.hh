@@ -341,6 +341,9 @@ namespace Dune {
 
     typedef EntityCount< elType > EntityCountType;
 
+    using ALU3DSPACE AdaptRestrictProlongType :: postRefinement ;
+    using ALU3DSPACE AdaptRestrictProlongType :: preCoarsening ;
+
   public:
     //! export type of id
     typedef typename GridType::Traits::GlobalIdType IdType;
@@ -997,6 +1000,9 @@ namespace Dune {
 
     // fake method to have the same method like GlobalIdSet
     void updateIdSet() {}
+
+    using ALU3DSPACE AdaptRestrictProlongType :: postRefinement ;
+    using ALU3DSPACE AdaptRestrictProlongType :: preCoarsening ;
 
   public:
     //! export type of id

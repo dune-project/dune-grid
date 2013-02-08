@@ -24,8 +24,9 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/defaultgridview.hh>
+#include <dune/grid/common/entityseed.hh>
 
-// inlcude this file after all other, because other files might undef the
+// include this file after all other, because other files might undef the
 // macros that are defined in that file
 #include <dune/common/bartonnackmanifcheck.hh>
 
@@ -352,8 +353,8 @@ namespace Dune {
   template<int codim, int dim, class GridImp,template<int,int,class> class EntityImp> class Entity;
   template<class GridImp, class EntityPointerImp> class EntityPointer;
   template< int codim, class Grid, class IteratorImp > class EntityIterator;
-  template<class GridImp, template<class> class IntersectionImp> class Intersection;
-  template<class GridImp, template<class> class IntersectionIteratorImp, template<class> class IntersectionImp> class IntersectionIterator;
+  template< class GridImp, class IntersectionImp > class Intersection;
+  template< class GridImp, class IntersectionIteratorImp, class IntersectionImp > class IntersectionIterator;
   template<class GridImp> class GenericLeafIterator;
   template<class GridImp, class IndexSetImp, class IndexTypeImp=unsigned int> class IndexSet;
   template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
@@ -1173,9 +1174,9 @@ namespace Dune {
       template<int,PartitionIteratorType,class> class LeafIteratorImp,
       class LevelIndexSetImp, class LeafIndexSetImp,
       class GlobalIdSetImp, class GIDType, class LocalIdSetImp, class LIDType, class CCType,
-      template<class,PartitionIteratorType> class LevelGridViewTraits = DefaultLevelGridViewTraits,
-      template<class,PartitionIteratorType> class LeafGridViewTraits = DefaultLeafGridViewTraits,
-      template<int,class> class EntitySeedImp = EntityPointerImp,
+      template<class,PartitionIteratorType> class LevelGridViewTraits,
+      template<class,PartitionIteratorType> class LeafGridViewTraits,
+      template<int,class> class EntitySeedImp,
       template<int,int,class> class LocalGeometryImp = GeometryImp
       >
   struct GridTraits
@@ -1184,13 +1185,13 @@ namespace Dune {
     typedef GridImp Grid;
 
     /** \brief The type of the intersection at the leafs of the grid. */
-    typedef Dune::Intersection<const GridImp, LeafIntersectionImp>  LeafIntersection;
+    typedef Dune::Intersection< const GridImp, LeafIntersectionImp< const GridImp > >  LeafIntersection;
     /** \brief The type of the intersection at the levels of the grid. */
-    typedef Dune::Intersection<const GridImp, LevelIntersectionImp> LevelIntersection;
+    typedef Dune::Intersection< const GridImp, LevelIntersectionImp< const GridImp > > LevelIntersection;
     /** \brief The type of the intersection iterator at the leafs of the grid. */
-    typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorImp, LeafIntersectionImp>   LeafIntersectionIterator;
+    typedef Dune::IntersectionIterator< const GridImp, LeafIntersectionIteratorImp< const GridImp >, LeafIntersectionImp< const GridImp > > LeafIntersectionIterator;
     /** \brief The type of the intersection iterator at the levels of the grid. */
-    typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorImp, LevelIntersectionImp> LevelIntersectionIterator;
+    typedef Dune::IntersectionIterator< const GridImp, LevelIntersectionIteratorImp< const GridImp >, LevelIntersectionImp< const GridImp > > LevelIntersectionIterator;
 
     /** \brief The type of the  hierarchic iterator. */
     typedef Dune::EntityIterator< 0, const GridImp, HierarchicIteratorImp< const GridImp > > HierarchicIterator;
@@ -1202,21 +1203,6 @@ namespace Dune {
     template <int cd>
     struct Codim
     {
-    protected:
-      // class to extract whether we are using the default seed type or not
-      template <class Seed, class EPImpl >
-      struct SeedDefault
-      {
-        typedef Seed EntitySeed ;
-      };
-
-      // the default seed type is entity pointer until its implemented
-      template <class EPImpl>
-      struct SeedDefault< EPImpl, EPImpl >
-      {
-        typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntitySeed ;
-      };
-
     public:
       typedef GeometryImp<dim-cd, dimw, const GridImp> GeometryImpl;
       typedef LocalGeometryImp<dim-cd, dim, const GridImp> LocalGeometryImpl;
@@ -1233,7 +1219,7 @@ namespace Dune {
       typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
 
       /** \brief The type of the entity seed of this codim.*/
-      typedef typename SeedDefault< EntitySeedImp<cd, const GridImp>, EntityPointerImp<cd,const GridImp> > :: EntitySeed EntitySeed;
+      typedef Dune::EntitySeed<EntitySeedImp<cd, const GridImp> > EntitySeed;
 
       /**
        * \brief Traits associated with a specific grid partition type.

@@ -474,7 +474,7 @@ namespace Dune
     entityPointer ( const EntitySeed &seed ) const
     {
       typedef typename Traits::template Codim< EntitySeed::codimension >::EntityPointerImpl EntityPointerImpl;
-      return EntityPointerImpl( *this, seed.elementInfo( meshPointer() ), seed.subEntity() );
+      return EntityPointerImpl( *this, this->getRealImplementation(seed).elementInfo( meshPointer() ), this->getRealImplementation(seed).subEntity() );
     }
 
     //**********************************************************

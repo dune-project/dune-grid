@@ -177,7 +177,7 @@ namespace Dune {
     int globalIndex() const;
 
     /** \brief Return the entity seed which contains sufficient information
-     *  to generate the entity again and uses as less memory as possible
+     *  to generate the entity again and uses as little memory as possible
      */
     SEntitySeed<codim, GridImp> seed () const {
       return SEntitySeed<codim, GridImp>(l, index);
@@ -602,7 +602,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef Dune::SIntersection<GridImp> IntersectionImp;
-    typedef Dune::Intersection<const GridImp, Dune::SIntersection> Intersection;
+    typedef Dune::Intersection< const GridImp, Dune::SIntersection< const GridImp > > Intersection;
     //! know your own dimension
     enum { dimension=dim };
     //! know your own dimension of world
@@ -744,7 +744,7 @@ namespace Dune {
     typedef typename Geometry::LocalCoordinate LocalCoordinate;
     typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef Dune::Intersection<const GridImp, Dune::SIntersectionIterator> Intersection;
+    typedef Dune::Intersection< const GridImp, Dune::SIntersectionIterator< const GridImp > > Intersection;
     //! know your own dimension
     enum { dimension=dim };
     //! know your own dimension of world
@@ -1362,7 +1362,9 @@ namespace Dune {
     entityPointer(const Seed& seed) const
     {
       enum { codim = Seed::codimension };
-      return SEntityPointer<codim,const SGrid<dim,dimworld> >(this,seed.level(),seed.index());
+      return SEntityPointer<codim,const SGrid<dim,dimworld> >(this,
+                                                              this->getRealImplementation(seed).level(),
+                                                              this->getRealImplementation(seed).index());
     }
 
     /*! The communication interface
@@ -1370,7 +1372,7 @@ namespace Dune {
           @tparam P type used to gather/scatter data in and out of the message buffer
           @tparam codim communicate entites of given codim
           @param t array holding data associated with the entities
-          @param iftype one of the predifined interface types, throws error if it is not implemented
+          @param iftype one of the predefined interface types, throws error if it is not implemented
           @param dir choose beetween forward and backward communication
           @param level communicate for entities on the given level
 

@@ -1148,6 +1148,42 @@ namespace Dune {
       proclists();
     }
 
+    //! make partitioner from communicator and coarse mesh size
+#if HAVE_MPI
+    Torus (MPI_Comm comm, int tag, Dune::array<int,d> size, const YLoadBalance<d>* lb) :
+#else
+    Torus (int tag, Dune::array<int,d> size, const YLoadBalance<d>* lb) :
+#endif
+      _loadbalancer(lb)
+    {
+      // MPI stuff
+#if HAVE_MPI
+      _comm = comm;
+      MPI_Comm_size(comm,&_procs);
+      MPI_Comm_rank(comm,&_rank);
+#else
+      _procs=1; _rank=0;
+#endif
+      _tag = tag;
+
+      // determine dimensions
+      iTupel sizeITupel;
+      std::copy(size.begin(), size.end(), sizeITupel.begin());
+      _loadbalancer->loadbalance(sizeITupel, _procs, _dims);
+
+      // compute increments for lexicographic ordering
+      int inc = 1;
+      for (int i=0; i<d; i++)
+      {
+        _increment[i] = inc;
+        inc *= _dims[i];
+      }
+
+      // make full schedule
+      proclists();
+    }
+
+
     //! return own rank
     int rank () const
     {
@@ -1291,7 +1327,7 @@ namespace Dune {
     }
 
     //! partition the given grid onto the torus and return the piece of the process with given rank; returns load imbalance
-    double partition (int rank, iTupel origin_in, iTupel size_in, iTupel& origin_out, iTupel& size_out) const
+    double partition (int rank, iTupel origin_in, Dune::array<int,d> size_in, iTupel& origin_out, iTupel& size_out) const
     {
       iTupel coord = rank_to_coord(rank);
       double maxsize = 1;
@@ -1707,17 +1743,13 @@ namespace Dune {
       iTupel o_interior;
       iTupel s_interior;
       iTupel o = iTupel(0);
-      double imbal = _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
+      array<int,d> sArray;
+      std::copy(s.begin(), s.end(), sArray.begin());
+      double imbal = _torus.partition(_torus.rank(),o,sArray,o_interior,s_interior);
       imbal = _torus.global_max(imbal);
 
       // add level
       _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
-
-      // output
-      //    if (_torus.rank()==0) std::cout << "MultiYGrid<" << d // changed dinfo to cout
-      //                                    << ">: coarse grid with size " << s
-      //                                    << " imbalance=" << (imbal-1)*100 << "%" << std::endl;
-      //      print(std::cout);
     }
 #else
     MultiYGrid (fTupel L, iTupel s, std::bitset<d> periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
@@ -1731,13 +1763,41 @@ namespace Dune {
 
       // add level
       _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
-      // output
-      //    if (_torus.rank()==0) std::cout << "MultiYGrid<" << d // changed dinfo to cout
-      //                                    << ">: coarse grid with size " << s
-      //                                    << " imbalance=" << (imbal-1)*100 << "%" << std::endl;
-      //      print(std::cout);
     }
 #endif
+
+    //! constructor making a grid
+    MultiYGrid (
+#if HAVE_MPI
+      MPI_Comm comm,
+#endif
+      fTupel L,
+      Dune::array<int,d> s,
+      std::bitset<d> periodic,
+      int overlap,
+      const YLoadBalance<d>* lb = defaultLoadbalancer())
+      : _LL(L), _periodic(periodic), _maxlevel(0), _overlap(overlap),
+#if HAVE_MPI
+        _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
+#else
+        _torus(tag,s,lb) // torus gets s to compute procs/direction
+#endif
+    {
+      std::copy(s.begin(), s.end(), _s.begin());
+
+      // coarse cell interior grid obtained through partitioning of global grid
+      iTupel o = iTupel(0);
+      iTupel o_interior(o);
+      iTupel s_interior;
+      std::copy(s.begin(), s.end(), s_interior.begin());
+#if HAVE_MPI
+      double imbal = _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
+      imbal = _torus.global_max(imbal);
+#endif
+
+      // add level
+      _levels[_maxlevel] = makelevel(L,_s,periodic,o_interior,s_interior,overlap);
+    }
 
     //! do a global mesh refinement; true: keep overlap in absolute size; false: keep overlap in mesh cells
     void refine (bool keep_overlap)

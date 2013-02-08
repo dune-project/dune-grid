@@ -62,14 +62,14 @@ namespace Dune
         static const int dimension = HostGrid::dimension;
         static const int dimensionworld = CoordFunction::dimRange;
 
-        typedef Dune::Intersection< const Grid, GeoGrid::LeafIntersection > LeafIntersection;
-        typedef Dune::Intersection< const Grid, GeoGrid::LevelIntersection > LevelIntersection;
+        typedef Dune::Intersection< const Grid, GeoGrid::Intersection< const Grid, typename HostGrid::LeafIntersection > > LeafIntersection;
+        typedef Dune::Intersection< const Grid, GeoGrid::Intersection< const Grid, typename HostGrid::LevelIntersection > > LevelIntersection;
 
         typedef Dune::IntersectionIterator
-        < const Grid, GeoGrid::LeafIntersectionIterator, GeoGrid::LeafIntersection >
+        < const Grid, GeoGrid::IntersectionIterator< const Grid, typename HostGrid::LeafIntersectionIterator >, GeoGrid::Intersection< const Grid, typename HostGrid::LeafIntersection > >
         LeafIntersectionIterator;
         typedef Dune::IntersectionIterator
-        < const Grid, GeoGrid::LevelIntersectionIterator, GeoGrid::LevelIntersection >
+        < const Grid, GeoGrid::IntersectionIterator< const Grid, typename HostGrid::LevelIntersectionIterator >, GeoGrid::Intersection< const Grid, typename HostGrid::LevelIntersection > >
         LevelIntersectionIterator;
 
         typedef Dune::EntityIterator< 0, const Grid, GeoGrid::HierarchicIterator< const Grid > >
@@ -87,15 +87,15 @@ namespace Dune
           typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
           typedef typename EntityPointerTraits::Entity Entity;
 
-          typedef GeoGrid::EntitySeed< codim, const Grid > EntitySeed;
+          typedef Dune::EntitySeed< GeoGrid::EntitySeed< codim, const Grid > > EntitySeed;
 
           template< PartitionIteratorType pitype >
           struct Partition
           {
-            typedef GeoGrid::LeafIteratorTraits< codim, pitype, const Grid > LeafIteratorTraits;
+            typedef GeoGrid::IteratorTraits< typename HostGrid::LeafGridView, codim, pitype, const Grid > LeafIteratorTraits;
             typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< LeafIteratorTraits > > LeafIterator;
 
-            typedef GeoGrid::LevelIteratorTraits< codim, pitype, const Grid > LevelIteratorTraits;
+            typedef GeoGrid::IteratorTraits< typename HostGrid::LevelGridView, codim, pitype, const Grid > LevelIteratorTraits;
             typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< LevelIteratorTraits > > LevelIterator;
           };
 
@@ -103,10 +103,8 @@ namespace Dune
           typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
         };
 
-        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LeafIndexSet >
-        LeafIndexSet;
-        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LevelIndexSet >
-        LevelIndexSet;
+        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LeafIndexSet > LeafIndexSet;
+        typedef GeoGrid::IndexSet< const Grid, typename HostGrid::Traits::LevelIndexSet > LevelIndexSet;
 
         typedef GeoGrid::IdSet< const Grid, typename HostGrid::Traits::GlobalIdSet >
         GlobalIdSet;
@@ -118,9 +116,9 @@ namespace Dune
         template< PartitionIteratorType pitype >
         struct Partition
         {
-          typedef Dune::GridView< GeoGrid::LeafGridViewTraits< HostGrid, CoordFunction, Allocator, pitype > >
+          typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LeafGridView, CoordFunction, Allocator, pitype > >
           LeafGridView;
-          typedef Dune::GridView< GeoGrid::LevelGridViewTraits< HostGrid, CoordFunction, Allocator, pitype > >
+          typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LevelGridView, CoordFunction, Allocator, pitype > >
           LevelGridView;
         };
       };

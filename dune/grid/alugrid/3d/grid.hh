@@ -316,13 +316,13 @@ namespace Dune
 
       typedef typename GridFamily::GridImp Grid;
 
-      typedef Dune::Intersection< const Grid, LeafIntersectionWrapper > LeafIntersection;
-      typedef Dune::Intersection< const Grid, LevelIntersectionWrapper > LevelIntersection;
+      typedef Dune::Intersection< const Grid, LeafIntersectionWrapper< const Grid > > LeafIntersection;
+      typedef Dune::Intersection< const Grid, LevelIntersectionWrapper< const Grid > > LevelIntersection;
 
-      typedef Dune::IntersectionIterator< const Grid, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > IntersectionIterator;
+      typedef Dune::IntersectionIterator< const Grid, LeafIntersectionIteratorWrapper< const Grid >, LeafIntersectionWrapper< const Grid > > IntersectionIterator;
 
-      typedef Dune::IntersectionIterator< const Grid, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator< const Grid, LevelIntersectionIteratorWrapper, LevelIntersectionWrapper > LevelIntersectionIterator;
+      typedef Dune::IntersectionIterator< const Grid, LeafIntersectionIteratorWrapper< const Grid >, LeafIntersectionWrapper< const Grid > > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator< const Grid, LevelIntersectionIteratorWrapper< const Grid >, LevelIntersectionWrapper< const Grid > > LevelIntersectionIterator;
 
       typedef Dune::EntityIterator< 0, const Grid, ALU3dGridHierarchicIterator< const Grid > > HierarchicIterator;
 

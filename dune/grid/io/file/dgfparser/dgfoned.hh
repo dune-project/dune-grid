@@ -93,13 +93,13 @@ namespace Dune
     }
 
     /** \brief always returns false */
-    template < class GG, template< class > class II >
+    template< class GG, class II >
     bool wasInserted ( const Dune::Intersection< GG, II > &intersection ) const
     {
       return false;
     }
 
-    template < class GG, template< class > class II >
+    template< class GG, class II >
     int boundaryId ( const Dune::Intersection< GG, II > &intersection ) const
     {
       // OneDGrid returns boundary segment index;
@@ -141,7 +141,7 @@ namespace Dune
     }
 
     /** \brief return invalid default value */
-    template < class GG, template< class > class II >
+    template< class GG, class II >
     const DGFBoundaryParameter::type &boundaryParameter ( const Dune::Intersection< GG, II > &intersection ) const
     {
       return DGFBoundaryParameter::defaultValue();

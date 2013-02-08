@@ -1,10 +1,6 @@
 message(AUTHOR_WARNING "TODO: Check whether dunealbertagrid library is correctly built from the albertagridlibs")
 
-if(ALUGRID_FOUND)
-  set(ALULIBS _DUNE_TARGET_OBJECTS:alu2d_ _DUNE_TARGET_OBJECTS:alu3d_)
-else(ALUGRID_FOUND)
-  set(ALULIBS _DUNE_TARGET_OBJECTS:alu3d_)
-endif(ALUGRID_FOUND)
+set(ALULIBS _DUNE_TARGET_OBJECTS:alu2d_ _DUNE_TARGET_OBJECTS:alu3d_)
 
 if(UG_FOUND)
   set(UGLIB _DUNE_TARGET_OBJECTS:uggrid_)

@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include <dune/grid/geometrygrid/intersection.hh>
+
 namespace Dune
 {
 
@@ -95,19 +97,14 @@ namespace Dune
       return Grid::getRealImplementation( entity ).hostEntity();
     }
 
-    static const HostLeafIntersection &
-    hostIntersection ( const LeafIntersection &intersection )
-    {
-      return Grid::getRealImplementation( intersection ).hostIntersection();
-    }
-
-    static const HostLevelIntersection &
-    hostIntersection ( const LevelIntersection &intersection )
+    template< class HostIntersection >
+    static const HostIntersection &
+    hostIntersection ( const Intersection< const Grid, GeoGrid::Intersection< const Grid, HostIntersection > > &intersection )
     {
       return Grid::getRealImplementation( intersection ).hostIntersection();
     }
   };
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_GRID_HOSTGRIDACCESS_HH
