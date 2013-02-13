@@ -17,3 +17,5 @@ sourcescheck_DUMMY = dummy.cc
 libalu_la_LIBADD = $(ALULIB) $(DUNE_LIBS)
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

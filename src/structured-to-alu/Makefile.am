@@ -19,3 +19,5 @@ dune_structured_to_alusimplex_3d_LDADD =	\
 endif ALUGRID
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

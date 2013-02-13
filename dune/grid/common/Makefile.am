@@ -41,3 +41,5 @@ dist_noinst_DATA = cube-to-tet-6.png
 
 include $(top_srcdir)/am/global-rules
 include $(top_srcdir)/am/inkscape.am
+
+EXTRA_DIST = CMakeLists.txt

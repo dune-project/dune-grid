@@ -27,3 +27,5 @@ dgfparser_HEADERS = dgfalu.cc  dgfexception.hh  \
 		    macrogrid.hh  gridptr.hh  parser.hh
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt
