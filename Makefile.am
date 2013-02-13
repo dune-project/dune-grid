@@ -9,6 +9,7 @@ AUTOMAKE_OPTIONS = foreign 1.9
 
 # All subdirectories that must (or can) be handled before the library is built
 SUBDIRS =					\
+        cmake                                   \
 	doc					\
 	dune					\
 	m4
