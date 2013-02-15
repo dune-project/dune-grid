@@ -4,7 +4,7 @@
 DUNE_AC_INIT # gets module version from dune.module file
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([dune/grid/common/grid.hh])
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 
 # --enable-extra-utils
 DUNE_EXTRA_UTILS
