@@ -9,7 +9,7 @@ MODULES =              \
   UseUG.cmake
 
 modulesdir = $(datadir)/cmake/modules
-modules_DATA = ${MODULES}
+dist_modules_DATA = ${MODULES}
 
 include $(top_srcdir)/am/global-rules
 EXTRA_DIST = CMakeLists.txt
