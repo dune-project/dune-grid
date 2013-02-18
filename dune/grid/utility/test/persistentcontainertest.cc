@@ -72,7 +72,7 @@ bool test(GridType &grid)
         ret = false;
         break;
       }
-      typename EIterator::EntityPointer::Entity::EntityPointer up = eit->father();
+      typename GridType::template Codim<0>::EntityPointer up = eit->father();
       while ( !container0[*up].used )
       {
         if (up->level() == 0)

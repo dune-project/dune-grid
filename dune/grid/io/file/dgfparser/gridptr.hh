@@ -6,11 +6,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <memory>
+//#include <memory>
 #include <map>
 #include <assert.h>
 
 //- Dune includes
+#include <dune/common/shared_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/datahandleif.hh>
@@ -53,13 +54,67 @@ namespace Dune
   template< class GridType >
   struct GridPtr
   {
+    class mygrid_ptr : public shared_ptr< GridType >
+    {
+      typedef shared_ptr< GridType > base_t ;
+      // empty deleter to avoid deletion on release
+      typedef null_deleter< GridType > emptydeleter_t ;
+
+      void removeObj()
+      {
+        // if use count is only 1 delete object
+        if( use_count() == 1 )
+        {
+          // delete point here, since we use the empty deleter
+          GridType* grd = release();
+          if( grd ) delete grd ;
+        }
+      }
+
+      void assignObj( const mygrid_ptr& other )
+      {
+        removeObj();
+        base_t :: operator = ( other );
+      }
+    public:
+      using base_t :: get ;
+      using base_t :: swap ;
+      using base_t :: use_count  ;
+
+      // default constructor
+      mygrid_ptr() : base_t( ( GridType * ) 0, emptydeleter_t() ) {}
+      // copy constructor
+      mygrid_ptr( const mygrid_ptr& other ) { assignObj( other ); }
+      // constructor taking pointer
+      explicit mygrid_ptr( GridType* grd ) : base_t( grd, emptydeleter_t() ) {}
+
+      // destructor
+      ~mygrid_ptr() { removeObj(); }
+
+      // assigment operator
+      mygrid_ptr& operator = ( const mygrid_ptr& other )
+      {
+        assignObj( other );
+        return *this;
+      }
+
+      // release pointer
+      GridType* release()
+      {
+        GridType* grd = this->get();
+        base_t ptr(( GridType * ) 0, emptydeleter_t() );
+        this->swap( ptr );
+        return grd ;
+      }
+    };
+
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
     static const int dimension = GridType::dimension;
 
     //! constructor given the name of a DGF file
     explicit GridPtr ( const std::string &filename,
                        MPICommunicatorType comm = MPIHelper::getCommunicator() )
-      : gridPtr_( 0 ),
+      : gridPtr_(),
         elParam_(),
         vtxParam_(),
         bndParam_(),
@@ -76,7 +131,7 @@ namespace Dune
     //! constructor given a std::istream
     explicit GridPtr ( std::istream &input,
                        MPICommunicatorType comm = MPIHelper::getCommunicator() )
-      : gridPtr_( 0 ),
+      : gridPtr_(),
         elParam_(),
         vtxParam_(),
         bndParam_(),
@@ -92,7 +147,7 @@ namespace Dune
 
     //! Default constructor, creating empty GridPtr
     GridPtr()
-      : gridPtr_(0),
+      : gridPtr_(),
         elParam_(),
         vtxParam_(),
         bndParam_(),
@@ -130,7 +185,7 @@ namespace Dune
     {}
 
     //! assignment of grid pointer
-    GridPtr &operator= ( const GridPtr &org )
+    GridPtr& operator= ( const GridPtr &org )
     {
       gridPtr_    = org.gridPtr_;
       elParam_    = org.elParam_;
@@ -146,9 +201,9 @@ namespace Dune
     }
 
     //! assignment of pointer to internal auto pointer
-    GridPtr & operator = (GridType * grd)
+    GridPtr& operator = (GridType * grd)
     {
-      gridPtr_ = std::auto_ptr<GridType>(grd);
+      gridPtr_ = mygrid_ptr( grd );
       elParam_.resize(0);
       vtxParam_.resize(0);
       bndParam_.resize(0);
@@ -182,9 +237,7 @@ namespace Dune
     }
 
     //! release pointer from internal ownership
-    GridType* release () {
-      return gridPtr_.release();
-    }
+    GridType* release () { return gridPtr_.release();  }
 
     //! get number of parameters defined for a given codimension
     int nofParameters(int cdim) const {
@@ -267,7 +320,7 @@ namespace Dune
   protected:
     void initialize ( DGFGridFactory< GridType > &dgfFactory )
     {
-      gridPtr_ = std::auto_ptr< GridType >( dgfFactory.grid() );
+      gridPtr_ = mygrid_ptr( dgfFactory.grid() );
 
       typedef typename GridType::LevelGridView GridView;
       GridView gridView = gridPtr_->levelView( 0 );
@@ -472,7 +525,7 @@ namespace Dune
     };
 
     // grid auto pointer
-    mutable std::auto_ptr<GridType> gridPtr_;
+    mutable mygrid_ptr gridPtr_;
     // element and vertex parameters
     std::vector< std::vector< double > > elParam_;
     std::vector< std::vector< double > > vtxParam_;
