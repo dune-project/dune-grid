@@ -146,11 +146,14 @@ namespace Dune
 
     typedef GenericGeometry::DuneCoordTraits< Alberta::Real > CoordTraits;
 
-    static const int dimGrid = Grid::dimension;
     static const int dimWorld = cdim;
 
-    static const bool hybrid = false;
-    static const unsigned int topologyId = GenericGeometry::SimplexTopology< dimGrid >::type::id;
+    template< int dim >
+    struct hasSingleGeometryType
+    {
+      static const bool v = true;
+      static const unsigned int topologyId = GenericGeometry::SimplexTopology< dim >::type::id;
+    };
 
     template< class Topology >
     struct Mapping
