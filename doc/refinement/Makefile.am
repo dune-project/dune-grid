@@ -16,7 +16,7 @@ EXTRAINSTALL = refinement.pdf
 
 docdir=$(datadir)/doc/dune-grid/refinement
 DOCFILES = $(PDFDOC)
-EXTRA_DIST = $(PDFDOC)
+EXTRA_DIST = $(PDFDOC) CMakeLists.txt
 
 refinement.dvi: refinement.tex simplexvertexindex.eps referencetokuhn0.eps kuhntriangulation.eps
 
