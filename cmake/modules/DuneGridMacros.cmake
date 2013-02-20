@@ -1,4 +1,6 @@
 
+include(GridType)
+
 set(DUNE_GRID_EXTRA_UTILS "" CACHE BOOL
   "Enable compilation and installation of extra utilities from the \"src\" subdirectory.")
 
@@ -7,13 +9,13 @@ find_package(Alberta)
 include(UseUG)
 find_package(Grape)
 find_package(psurface)
+find_package(AmiraMesh)
 
 set(DEFAULT_DGF_GRIDDIM 1)
 set(DEFAULT_DGF_WORLDDIM 1)
 set(DEFAULT_DGF_GRIDTYPE ONEDGRID)
 set(DGF_GRIDTYPES ONEDGRID ALUGRID_CONFORM ALUGRID_SIMPLEX ALBERTAGRID SGRID GEOGRID UGGRID)
 
-include(GridType)
 dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ONEDGRID
   ASSERTION "(GRIDDIM == 1) && (WORLDDIM == 1)"
   DUNETYPE "Dune::OneDGrid"
