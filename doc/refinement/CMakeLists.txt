@@ -12,6 +12,6 @@ set(DOCS  referencetokuhn0.png simplexvertexindex.png)
 if(INKSCAPE_FOUND)
   set(DOCS ${DOCS} referencetokuhn0.png simplexvertexindex.png)
   inkscape_generate_eps_from_png(DPI 180 OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${EPS_IMGS})
+create_doc_install(${CMAKE_CURRENT_BINARY_DIR}/refinement.pdf ${CMAKE_INSTALL_DOCDIR}/refinement)
 endif(INKSCAPE_FOUND)
 
-install(FILES ${PDFDOCS} DESTINATION ${CMAKE_INSTALL_DOCDIR}/refinement)
