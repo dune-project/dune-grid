@@ -1,18 +1,18 @@
 if(ALBERTA_FOUND)
   set(ALBERTA_PROGRAMS
-    test-alberta-1-1
-    test-alberta-1-2
-    test-alberta-2-2
-    test-alberta-1-3
-    test-alberta-2-3
-    test-alberta-3-3
-    test-alberta-generic)
-  set(ALBERTA_EXTRA_PRGRAMS test-alberta)
-  message(AUTHOR_WARNING "TODO: Check whether test-alberta is treated correctly.")
+    test_alberta_1_1
+    test_alberta_1_2
+    test_alberta_2_2
+    test_alberta_1_3
+    test_alberta_2_3
+    test_alberta_3_3
+    test_alberta_generic)
+  set(ALBERTA_EXTRA_PRGRAMS test_alberta)
+  message(AUTHOR_WARNING "TODO: Check whether test_alberta is treated correctly.")
  endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
-  set(ALUGRID_PROGRAMS test-alugrid)
+  set(ALUGRID_PROGRAMS test_alugrid)
 endif(ALUGRID_FOUND)
 
 if(UG_FOUND)
@@ -24,21 +24,13 @@ endif(UG_FOUND)
 if(UG_FOUND AND ALUGRID_FOUND)
   set(DGFALUGRID_UG_PROGRAMS test-dgfalu-uggrid-combination)
 endif(UG_FOUND AND ALUGRID_FOUND)
-
-set(GRIDTYPE "YASPGRID")
 set(GRIDDIM 2)
-set(ALBERTA_DIM $(WORLDDIM))
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
 
-set(replargs "GRIDDIM.*" "GRIDDIM=2" "WORLDDIM.*" "WORLDDIM=2")
-foreach(grid ONEDGRID ALUGRID ALBERTAGRID SGRID GEOGRID)
-  list(APPEND replargs ${grid} "YASPGRID")
-endforeach()
-replace_current_dir_properties(PROPERTY COMPILE_DEFINITIONS
-  ${replargs})
 #
 ## Some parameters for the geogrid test
 #
-set(COORDFUNCTION "IdenticalCoordFunction\\<double,${GRIDDIM}\\>")
+set(COORDFUNCTION "IdenticalCoordFunction<double,${GRIDDIM}>")
 # set(COORDFUNCTION "Helix")
 # set(COORDFUNCTION  "ThickHelix")
 # set(COORDFUNCTION "DGFCoordFunction\\<${GRIDDIM},${GRIDDIM}\\>")
@@ -84,13 +76,13 @@ if(ALBERTA_FOUND)
 endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
-  add_executable(test_alugrid test-algrid.cc)
-  add_dune_alugrid_flags(test_alugrid STATIC)
+  add_executable(test_alugrid test-alugrid.cc)
+  add_dune_alugrid_flags(test_alugrid)
 endif(ALUGRID_FOUND)
 
 add_executable(test_geogrid test-geogrid.cc)
-set_property(TARGET test_geogrid APPEND_STRING PROPERTY COMPILE_FLAGS
-  "-DCOORDFUNCTION=${COORDFUNCTION} -DCACHECOORDFUNCTION=${CACHECOORDFUNCTION}")
+set_property(TARGET test_geogrid APPEND PROPERTY COMPILE_DEFINITIONS
+  COORDFUNCTION=${COORDFUNCTION} CACHECOORDFUNCTION=${CACHECOORDFUNCTION})
 
 if(UG_FOUND)
   add_executable(test_ug test-ug.cc)

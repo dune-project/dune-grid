@@ -3,9 +3,8 @@ if(ALUGRID_FOUND)
 else(ALUGRID_FOUND)
   set(SOURCES topology.cc)
 endif(ALUGRID_FOUND)
+add_dune_alugrid_flags(SOURCE_ONLY ${SOURCES})
 add_library(alu3d OBJECT ${SOURCES})
-set_property(SOURCE ${SOURCES} APPEND_STRING
-  PROPERTY COMPILE_FLAGS ${ALUGRID_COMPILE_FLAGS})
 
 set(HEADERS
   alu3dinclude.hh
