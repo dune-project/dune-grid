@@ -35,11 +35,11 @@ else(ALBERTA_FOUND)
 endif(ALBERTA_FOUND)
 
 # look for libraries
-find_library(ALBERTA_UTIL_LIB alberta_util alberta_utilities
+find_library(ALBERTA_UTIL_LIB NAMES alberta_util alberta_utilities
   PATH ${ALBERTA_DIR}
   PATH_SUFFIXES lib lib32 lib64
   NO_DEFAULT_PATH)
-find_library(ALBERTA_UTIL_LIB alberta_util alberta_utilities
+find_library(ALBERTA_UTIL_LIB NAMES alberta_util alberta_utilities
   PATH PATH_SUFFIXES lib lib32 lib64)
 if(ALBERTA_UTIL_LIB)
   set(_CMAKE_REQUIRED_LIBRARIES_SAVE ${CMAKE_REQUIRED_LIBRARIES})
