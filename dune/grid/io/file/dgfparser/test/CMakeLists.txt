@@ -1,4 +1,4 @@
-add_definitions(-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"${CMAKE_SOURCE_DIR}/doc/grids/\")
+add_definitions(-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
 
 set(TESTS testsgrid testyasp testoned)
 

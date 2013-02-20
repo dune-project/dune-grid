@@ -47,7 +47,7 @@ set(TESTS test_sgrid test_oned test_yaspgrid test_geogrid
   ${DGFALUGRID_UG_PROGRAMS})
 
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_DEVEL_MODE")
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${CMAKE_SOURCE_DIR}/doc/grids/\"")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
 
 add_executable(test_sgrid test-sgrid.cc)
 add_executable(test_oned test-oned.cc)
