@@ -3,143 +3,129 @@
 #ifndef DUNE_ALU_PERSISTENTCONTAINER_HH
 #define DUNE_ALU_PERSISTENTCONTAINER_HH
 
-#if HAVE_ALUGRID
 #include <dune/grid/utility/persistentcontainer.hh>
+
+#if HAVE_ALUGRID
 #include <dune/grid/alugrid.hh>
+#include <dune/grid/utility/persistentcontainervector.hh>
 
 namespace Dune
 {
+
+  // ALUGridPersistentContainer
+  // --------------------------
+
+  template< class G, class T >
+  class ALUGridPersistentContainer
+    : public PersistentContainerVector< G, typename G::HierarchicIndexSet, std::vector< T > >
+  {
+    typedef PersistentContainerVector< G, typename G::HierarchicIndexSet, std::vector< T > > Base;
+
+  public:
+    typedef typename Base::Grid Grid;
+    typedef typename Base::Value Value;
+
+    ALUGridPersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
+      : Base( grid.hierarchicIndexSet(), codim, value )
+    {}
+  };
+
+
   // PersistentContainer for ALUGrid
   // -------------------------------
 
-  template< int dim, int dimworld, class Data, class Allocator >
-  class PersistentContainer< ALUConformGrid< dim, dimworld >, Data, Allocator >
-    : public PersistentContainerVector< ALUConformGrid< dim, dimworld >,
-          typename ALUConformGrid< dim, dimworld >::HierarchicIndexSet,
-          std::vector<Data,Allocator> >
+  template< int dim, int dimworld, class T >
+  class PersistentContainer< ALUConformGrid< dim, dimworld >, T >
+    : public ALUGridPersistentContainer< ALUConformGrid< dim, dimworld >, T >
   {
-  public:
-    typedef ALUConformGrid< dim, dimworld > GridType;
-  private:
-    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
+    typedef ALUGridPersistentContainer< ALUConformGrid< dim, dimworld >, T > Base;
 
   public:
-    //! Constructor filling the container with values using the default constructor
-    //! Depending on the implementation this could be achieved without allocating memory
-    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
-      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    typedef typename Base::Grid Grid;
+    typedef typename Base::Value Value;
+
+    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
+      : Base( grid, codim, value )
     {}
   };
 
-  template< int dim, int dimworld, class Data, class Allocator >
-  class PersistentContainer< ALUCubeGrid< dim, dimworld >, Data, Allocator >
-    : public PersistentContainerVector< ALUCubeGrid< dim, dimworld >,
-          typename ALUCubeGrid< dim, dimworld >::HierarchicIndexSet,
-          std::vector<Data,Allocator> >
+  template< int dim, int dimworld, class T >
+  class PersistentContainer< ALUCubeGrid< dim, dimworld >, T >
+    : public ALUGridPersistentContainer< ALUCubeGrid< dim, dimworld >, T >
   {
-  public:
-    typedef ALUCubeGrid< dim, dimworld > GridType;
-  private:
-    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
+    typedef ALUGridPersistentContainer< ALUCubeGrid< dim, dimworld >, T > Base;
 
   public:
-    //! Constructor filling the container with values using the default constructor
-    //! Depending on the implementation this could be achieved without allocating memory
-    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
-      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    typedef typename Base::Grid Grid;
+    typedef typename Base::Value Value;
+
+    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
+      : Base( grid, codim, value )
     {}
   };
 
-  template< int dim, int dimworld, class Data, class Allocator >
-  class PersistentContainer< ALUSimplexGrid< dim, dimworld >, Data, Allocator >
-    : public PersistentContainerVector< ALUSimplexGrid< dim, dimworld >,
-          typename ALUSimplexGrid< dim, dimworld >::HierarchicIndexSet,
-          std::vector<Data,Allocator> >
+  template< int dim, int dimworld, class T >
+  class PersistentContainer< ALUSimplexGrid< dim, dimworld >, T >
+    : public ALUGridPersistentContainer< ALUSimplexGrid< dim, dimworld >, T >
   {
-  public:
-    typedef ALUSimplexGrid< dim, dimworld > GridType;
-  private:
-    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
+    typedef ALUGridPersistentContainer< ALUSimplexGrid< dim, dimworld >, T > Base;
 
   public:
-    //! Constructor filling the container with values using the default constructor
-    //! Depending on the implementation this could be achieved without allocating memory
-    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
-      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    typedef typename Base::Grid Grid;
+    typedef typename Base::Value Value;
+
+    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
+      : Base( grid, codim, value )
     {}
   };
 
-  template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm,
-      class Data, class Allocator >
-  class PersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, Data, Allocator >
-    : public PersistentContainerVector< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >,
-          typename ALUGrid< dim, dimworld, eltype, refinementtype, Comm >::HierarchicIndexSet,
-          std::vector<Data,Allocator> >
+  template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm, class T >
+  class PersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, T >
+    : public ALUGridPersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, T >
   {
-  public:
-    typedef ALUGrid< dim, dimworld, eltype, refinementtype, Comm > GridType;
-  private:
-    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
+    typedef ALUGridPersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, T > Base;
 
   public:
-    //! Constructor filling the container with values using the default constructor
-    //! Depending on the implementation this could be achieved without allocating memory
-    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
-      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    typedef typename Base::Grid Grid;
+    typedef typename Base::Value Value;
+
+    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
+      : Base( grid, codim, value )
     {}
   };
 
-  template< int dim, int dimworld, ALU2DSPACE ElementType elType, class Data, class Allocator >
-  class PersistentContainer< ALU2dGrid< dim, dimworld, elType >, Data, Allocator >
-    : public PersistentContainerVector< ALU2dGrid< dim, dimworld, elType >,
-          typename ALU2dGrid< dim, dimworld, elType >::HierarchicIndexSet,
-          std::vector<Data,Allocator> >
+  template< int dim, int dimworld, ALU2DSPACE ElementType elType, class T >
+  class PersistentContainer< ALU2dGrid< dim, dimworld, elType >, T >
+    : public ALUGridPersistentContainer< ALU2dGrid< dim, dimworld, elType >, T >
   {
-  public:
-    typedef ALU2dGrid< dim, dimworld, elType >  GridType;
-  private:
-    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
+    typedef ALUGridPersistentContainer< ALU2dGrid< dim, dimworld, elType >, T > Base;
 
   public:
-    //! Constructor filling the container with values using the default constructor
-    //! Depending on the implementation this could be achieved without allocating memory
-    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
-      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    typedef typename Base::Grid Grid;
+    typedef typename Base::Value Value;
+
+    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
+      : Base( grid, codim, value )
     {}
   };
 
-  template< ALU3dGridElementType elType, class Comm, class Data, class Allocator >
-  class PersistentContainer< ALU3dGrid< elType, Comm >, Data, Allocator >
-    : public PersistentContainerVector< ALU3dGrid< elType, Comm >,
-          typename ALU3dGrid< elType, Comm >::HierarchicIndexSet,
-          std::vector<Data,Allocator> >
+  template< ALU3dGridElementType elType, class Comm, class T >
+  class PersistentContainer< ALU3dGrid< elType, Comm >, T >
+    : public ALUGridPersistentContainer< ALU3dGrid< elType, Comm >, T >
   {
-  public:
-    typedef ALU3dGrid< elType, Comm >  GridType;
-  private:
-    typedef PersistentContainerVector< GridType, typename GridType::HierarchicIndexSet, std::vector<Data,Allocator> > BaseType;
-
-  protected:
-    using BaseType :: index_;
-    using BaseType :: data_;
+    typedef ALUGridPersistentContainer< ALU3dGrid< elType, Comm >, T > Base;
 
   public:
-    //! Constructor filling the container with values using the default constructor
-    //! Depending on the implementation this could be achieved without allocating memory
-    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
-      : BaseType( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    typedef typename Base::Grid Grid;
+    typedef typename Base::Value Value;
+
+    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
+      : Base( grid, codim, value )
     {}
-
-    //! this method is needed for the level communication
-    //! of ALU3dGrid, see datahandle.hh
-    const Data& getData ( const size_t idx ) const
-    {
-      assert( idx < data_.size() );
-      return data_[ idx ];
-    }
   };
 
-} // end namespace Dune
-#endif // ENABLE_ALU
+} // namespace Dune
 
-#endif // end DUNE_ALU_PERSISTENTCONTAINER_HH
+#endif // #if HAVE_ALUGRID
+
+#endif // #ifndef DUNE_ALU_PERSISTENTCONTAINER_HH

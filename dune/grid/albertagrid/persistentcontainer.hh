@@ -6,6 +6,7 @@
 #include <dune/grid/utility/persistentcontainer.hh>
 
 #if HAVE_ALBERTA
+#include <dune/grid/utility/persistentcontainervector.hh>
 
 namespace Dune
 {
@@ -13,19 +14,18 @@ namespace Dune
   // PersistentContainer for AlbertaGrid
   // -----------------------------------
 
-  template< int dim, int dimworld, class Data, class Allocator >
-  class PersistentContainer< AlbertaGrid< dim, dimworld >, Data, Allocator >
-    : public PersistentContainerVector< AlbertaGrid< dim, dimworld >, typename AlbertaGrid< dim, dimworld >::HierarchicIndexSet, std::vector< Data, Allocator > >
+  template< int dim, int dimworld, class T >
+  class PersistentContainer< AlbertaGrid< dim, dimworld >, T >
+    : public PersistentContainerVector< AlbertaGrid< dim, dimworld >, typename AlbertaGrid< dim, dimworld >::HierarchicIndexSet, std::vector< T > >
   {
-    typedef PersistentContainerVector< AlbertaGrid< dim, dimworld >, typename AlbertaGrid< dim, dimworld >::HierarchicIndexSet, std::vector< Data, Allocator > > Base;
+    typedef PersistentContainerVector< AlbertaGrid< dim, dimworld >, typename AlbertaGrid< dim, dimworld >::HierarchicIndexSet, std::vector< T > > Base;
 
   public:
-    typedef AlbertaGrid< dim, dimworld > GridType;
+    typedef typename Base::Grid Grid;
+    typedef typename Base::Value Value;
 
-    //! Constructor filling the container with values using the default constructor
-    //! Depending on the implementation this could be achieved without allocating memory
-    PersistentContainer ( const GridType &grid, const int codim, const Allocator &allocator = Allocator() )
-      : Base( grid, codim, grid.hierarchicIndexSet(), 1.1, allocator )
+    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
+      : Base( grid.hierarchicIndexSet(), codim, value )
     {}
   };
 
