@@ -12,4 +12,4 @@ set(HEADERS
   vertexorderfactory.hh)
 
 install(FILES ${HEADERS}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/utility})
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/utility)
