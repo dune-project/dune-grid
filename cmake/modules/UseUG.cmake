@@ -10,9 +10,11 @@
 # The option SOURCE_ONLY indicates that the targets are source files.
 # The option OBJECT indicates that the targets are object libraries.
 #
-message(AUTHOR_WARNING "CMake will only find the most current UG")
 
 find_package(UG 3.9.1)
+if(NOT UG_FOUND)
+  message(WARNING "CMake will only find the most current UG. Maybe you need to upgrade?")
+endif(NOT UG_FOUND)
 message(AUTHOR_WARNING "We need to test for the patch level, too!")
 set(HAVE_UG ${UG_FOUND})
 
