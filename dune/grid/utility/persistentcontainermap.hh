@@ -111,6 +111,7 @@ namespace Dune
 
     // deprecated stuff
 
+    typedef Grid GridType DUNE_DEPRECATED;
     typedef Value Data DUNE_DEPRECATED;
 
     void reserve () DUNE_DEPRECATED { return resize(); }
