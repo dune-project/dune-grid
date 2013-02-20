@@ -1,4 +1,4 @@
-add_library(dgfparserblocks
+dune_add_library(dgfparserblocks
   OBJECT basic.cc  boundarydom.cc  boundaryseg.cc
     cube.cc  dim.cc  general.cc  gridparameter.cc
     interval.cc  periodicfacetrans.cc  projection.cc

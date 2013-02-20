@@ -7,15 +7,12 @@ if(ALBERTA_FOUND)
     indexsets.cc
     macrodata.cc
     meshpointer.cc)
+  # create dimension dependant alberta libraries
+  foreach(_dim ${ALBERTA_WORLD_DIMS})
+    list(APPEND ALBERTAGRID_LIBS albertagrid_${_dim}d)
+    dune_add_library(albertagrid_${_dim}d OBJECT ${ALBERTAGRID_SOURCES})
+  endforeach(_dim RANGE 1 9)
 endif(ALBERTA_FOUND)
-# create dimension dependant alberta libraries
-foreach(_dim ${ALBERTA_WORLD_DIMS})
-  message("lib albertagrid_${_dim}d")
-  list(APPEND ALBERTAGRID_LIBS albertagrid_${_dim}d)
-  add_library(albertagrid_${_dim}d OBJECT ${ALBERTAGRID_SOURCES})
-  #add_dune_alberta_flags(${ALBERTAGRID_SOURCES} SOURCE_ONLY GRIDDIM ${_dim})
-  add_dune_alberta_flags(albertagrid_${_dim}d OBJECT GRIDDIM ${_dim})
-endforeach(_dim RANGE 1 9)
 
 #install header
 set(HEADERS
