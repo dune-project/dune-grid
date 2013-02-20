@@ -14,5 +14,4 @@ if(ALUGRID_FOUND)
   add_dune_alugrid_flags(gmsh2dgfalusimplex)
 endif(ALUGRID_FOUND)
 
-
 message(AUTHOR_WARNING "TODO: Build ${EXTRA_PROGRAMS} only on demand")
