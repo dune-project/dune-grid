@@ -1,6 +1,5 @@
 Makefile
 Makefile.in
-config.*
 configure
 dependencies.m4
 aclocal.m4
