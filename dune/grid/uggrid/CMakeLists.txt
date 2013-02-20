@@ -9,7 +9,7 @@ if(UG_FOUND)
     uggridfactory.cc
     uggridgeometry.cc
     uggridhieriterator.cc)
-  add_dune_ug_flags(uggrid)
+  add_dune_ug_flags(uggrid OBJECT)
 endif(UG_FOUND)
 
 set(HEADERCHECK_IGNORE

@@ -17,8 +17,8 @@ endif(ALUGRID_FOUND)
 
 if(UG_FOUND)
   set(UG_PROGRAMS
-    test-ug
-    test-parallel-ug)
+    test_ug
+    test_parallel_ug)
 endif(UG_FOUND)
 
 if(UG_FOUND AND ALUGRID_FOUND)
