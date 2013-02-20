@@ -38,8 +38,7 @@ namespace Dune
     typedef IteratorWrapper< const Value, typename Map::const_iterator > ConstIterator;
     typedef IteratorWrapper< Value, typename Map::iterator > Iterator;
 
-    PersistentContainerMap ( const Grid &grid, int codim, const Value &value,
-                             const IdSet &idSet )
+    PersistentContainerMap ( const Grid &grid, int codim, const IdSet &idSet, const Value &value )
       : grid_( &grid ),
         codim_( codim ),
         idSet_( &idSet ),
@@ -147,7 +146,7 @@ namespace Dune
                                Map &oldData, Map &newData );
 
   protected:
-    const IdSet &idSet () const { return *idSet(); }
+    const IdSet &idSet () const { return *idSet_; }
 
     const Grid *grid_;
     int codim_;
@@ -239,7 +238,7 @@ namespace Dune
   template< int codim >
   inline void PersistentContainerMap< G, IdSet, Map >::resize ( const Value &value )
   {
-    typedef integral_constant< bool, Capabilities::hasEntity< Grid, codim >::v > hasEntity;
+    integral_constant< bool, Capabilities::hasEntity< Grid, codim >::v > hasEntity;
     assert( codim == codimension() );
 
     // create empty map and swap it with current map (no need to copy twice)
@@ -249,7 +248,7 @@ namespace Dune
     // copy all data from old map into new one (adding new entries, if necessary)
     const int maxLevel = grid().maxLevel();
     for ( int level = 0; level <= maxLevel; ++level )
-      migrateLevel( level, value, data, hasEntity() );
+      migrateLevel< codim >( level, value, data, hasEntity );
   }
 
 

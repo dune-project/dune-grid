@@ -40,9 +40,9 @@ namespace Dune
    */
   template< class G, class T >
   class PersistentContainer
-    : public PersistentContainerMap< G, typename G::LocalIdSet, std::map< const typename G::LocalIdSet::IdType, T > >
+    : public PersistentContainerMap< G, typename G::LocalIdSet, std::map< typename G::LocalIdSet::IdType, T > >
   {
-    typedef PersistentContainerMap< G, typename G::LocalIdSet, std::map< const typename G::LocalIdSet::IdType, T > > Base;
+    typedef PersistentContainerMap< G, typename G::LocalIdSet, std::map< typename G::LocalIdSet::IdType, T > > Base;
 
   public:
     typedef typename Base::Grid Grid;
