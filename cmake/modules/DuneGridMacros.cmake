@@ -41,7 +41,7 @@ macro(add_dgf_flags target)
   if(NOT DGF_GRIDTYPE)
     set(DGF_GRIDTYPE ${DEFAULT_DGF_GRIDTYPE})
   endif(NOT DGF_GRIDTYPE)
-  message("${DGF_GRIDTYPE} ${DGF_GRIDDIM} ${DGF_WORLDDIM}")
+
   set(replace_args "GRIDDIM.*" "GRIDDIM=${DGF_GRIDDIM}"
     "WORLDDIM.*" "WORLDDIM=${DGF_WORLDDIM}")
   foreach(grid ${DGF_GRIDTYPES})
@@ -53,7 +53,6 @@ macro(add_dgf_flags target)
 endmacro(add_dgf_flags target)
 
 macro(add_dgf_executable target)
-  message("add dgf ${target}")
   cmake_parse_arguments(DGF "" "GRIDDIM;WORLDDIM;GRIDTYPE" "" ${ARGN})
   add_executable(${target} ${DGF_UNPARSED_ARGUMENTS})
   add_dgf_flags(${target} ${ARGN})
