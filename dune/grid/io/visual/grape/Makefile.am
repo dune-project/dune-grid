@@ -9,3 +9,5 @@ grape_HEADERS = geldesc.hh ghmesh.cc ghmesh.hh grapecommon.cc \
   grape_undefs.hh
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

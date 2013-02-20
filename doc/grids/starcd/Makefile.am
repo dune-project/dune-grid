@@ -3,7 +3,7 @@ GRIDS = star.vrt  tets.vrt       withprism.vrt    withpyramid.vrt \
 
 starcdgridsdir=$(includedir)/dune/doc/grids/starcd
 starcdgrids_DATA = $(GRIDS)
-EXTRA_DIST = $(GRIDS)
+EXTRA_DIST = CMakeLists.txt $(GRIDS)
 
 include $(top_srcdir)/am/webstuff
 include $(top_srcdir)/am/global-rules

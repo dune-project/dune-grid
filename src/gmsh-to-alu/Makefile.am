@@ -28,3 +28,5 @@ dune_gmsh_to_alucube_3d_LDADD =		\
 endif ALUGRID
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

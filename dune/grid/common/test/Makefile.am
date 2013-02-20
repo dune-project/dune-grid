@@ -30,3 +30,5 @@ scsgmappertest_SOURCES = scsgmappertest.cc
 refinementtest_SOURCES = refinementtest.cc
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

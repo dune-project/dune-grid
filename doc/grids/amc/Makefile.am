@@ -8,7 +8,7 @@ GRIDS = grid-1-1.amc \
 
 amcdir=$(includedir)/dune/doc/grids/amc
 amc_DATA = $(GRIDS)
-EXTRA_DIST = $(GRIDS)
+EXTRA_DIST = CMakeLists.txt $(GRIDS)
 
 include $(top_srcdir)/am/webstuff
 include $(top_srcdir)/am/global-rules
