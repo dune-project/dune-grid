@@ -1,4 +1,7 @@
 
+set(DUNE_GRID_EXTRA_UTILS "" CACHE BOOL
+  "Enable compilation and installation of extra utilities from the \"src\" subdirectory.")
+
 find_package(ALUGrid)
 find_package(Alberta)
 find_package(UG)
