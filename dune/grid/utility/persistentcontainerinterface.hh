@@ -31,6 +31,11 @@ namespace Dune
    *  It is explicitly possible that the grid adapts any persistent containers
    *  directly during the adaptation process.
    *
+   *  The containers are also be persistent over backup / restore of the grid.
+   *  After 'shrinkToFit', the entries in the container (and their order) must
+   *  match those of a newly created container, even after a backup and restore
+   *  of the grid.
+   *
    *  There is a default implementation based on std::map but a grid
    *  implementation may provide a specialized implementation.
    *  Grids with a hashable id type can use std::unordered_map to store
@@ -131,6 +136,10 @@ namespace Dune
      *
      *  This method will remove entries from the container that can no longer
      *  be accessed from the grid.
+     *
+     *  The entries in the container (and their order) must match those of a
+     *  newly created container.
+     *  This property must be persistent over backup / restore of the grid.
      *
      *  \note This method is merely a hint to the container.
      *        According to the container's internal addressing rules, some
