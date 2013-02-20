@@ -26,7 +26,7 @@ if(UG_FOUND AND ALUGRID_FOUND)
 endif(UG_FOUND AND ALUGRID_FOUND)
 set(GRIDDIM 2)
 set(WORLDDIM 2)
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
+#set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
 
 #
 ## Some parameters for the geogrid test
@@ -55,6 +55,13 @@ message("props=${props}")
 add_executable(test_sgrid test-sgrid.cc)
 add_executable(test_oned test-oned.cc)
 add_executable(test_yaspgrid test-yaspgrid.cc)
+add_executable(test_geogrid test-geogrid.cc)
+
+set_property(TARGET test_sgrid test_oned test_yaspgrid test_geogrid APPEND
+  PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
+
+set_property(TARGET test_geogrid APPEND PROPERTY COMPILE_DEFINITIONS
+  COORDFUNCTION=${COORDFUNCTION} CACHECOORDFUNCTION=${CACHECOORDFUNCTION})
 add_dune_mpi_flags(test_yaspgrid)
 
 if(ALBERTA_FOUND)
@@ -73,17 +80,13 @@ if(ALBERTA_FOUND)
   add_executable(test_alberta_3_3 test-alberta.cc)
   add_dune_alberta_flags(test_alberta_3_3 GRIDDIM 3 WORLDDIM 3)
   add_executable(test_alberta_generic test-alberta.cc)
-  add_dune_alberta_flags(test_alberta_generic USE_GENERIC)
+  add_dune_alberta_flags(test_alberta_generic USE_GENERIC GRIDDIM 2)
 endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
   add_executable(test_alugrid test-alugrid.cc)
   add_dune_alugrid_flags(test_alugrid)
 endif(ALUGRID_FOUND)
-
-add_executable(test_geogrid test-geogrid.cc)
-set_property(TARGET test_geogrid APPEND PROPERTY COMPILE_DEFINITIONS
-  COORDFUNCTION=${COORDFUNCTION} CACHECOORDFUNCTION=${CACHECOORDFUNCTION})
 
 if(UG_FOUND)
   add_executable(test_ug test-ug.cc)

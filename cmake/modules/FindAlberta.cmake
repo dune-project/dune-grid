@@ -118,13 +118,13 @@ macro(add_dune_alberta_flags)
       set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES ${ALBERTA_INCLUDES})
     else()
       if(NOT ADD_ALBERTA_OBJECT)
-      # link to ALUGRID libraries
-      foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
-	target_link_libraries(${_target} dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d
-	  ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB}
-	  dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
-      endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
-      endif(NOT OBJECT)
+	# link to ALUGRID libraries
+	foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
+	  target_link_libraries(${_target} dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d
+	    ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB}
+	    dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
+	endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
+      endif(NOT ADD_ALBERTA_OBJECT)
       set(_prefix TARGET)
       set_property(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS} APPEND
 	PROPERTY INCLUDE_DIRECTORIES ${ALBERTA_INCLUDES})
