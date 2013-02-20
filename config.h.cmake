@@ -49,6 +49,12 @@
 /* Define to 1 if you have the <alugrid_serial.h> header file. */
 #cmakedefine HAVE_ALUGRID_SERIAL_H @HAVE_ALUGRID_SERIAL_H@
 
+/* Alberta version found by configure, either 0x200 for 2.0 or 0x300 for 3.0 */
+#cmakedefine DUNE_ALBERTA_VERSION @DUNE_ALBERTA_VERSION@
+
+/* This is only true if alberta-library was found by configure _and_ if the
+   application uses the ALBERTA_CPPFLAGS */
+#cmakedefine HAVE_ALBERTA ENABLE_ALBERTA
 /* Grid type magic for DGF parser */
 @GRID_CONFIG_H_BOTTOM@
 /* end dune-grid */
