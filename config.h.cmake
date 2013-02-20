@@ -39,6 +39,10 @@
 /* Define to the revision of dune-grid */
 #define DUNE_GRID_VERSION_REVISION ${DUNE_GRID_VERSION_REVISION}
 
+/* This is only true if grape was found by configure _and_ if the
+   application uses the flags set by add_dune_grape_flags */
+#cmakedefine HAVE_GRAPE ENABLE_GRAPE
+
 /* This is only true if alugrid-library was found by configure _and_ if the
    application uses the ALUGRID_CPPFLAGS */
 #cmakedefine HAVE_ALUGRID ENABLE_ALUGRID
