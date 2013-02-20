@@ -2,7 +2,7 @@
 
 macro(_dune_set_alugrid val)
   set(ALUGRID_FOUND ${val})
-  set(HAVE_ALUGRID $val})
+  set(HAVE_ALUGRID ${val})
 endmacro(_dune_set_alugrid val)
 
 message(AUTHOR_WARNING "Apparently ALUGrid needs METIS, which is non-free software. Therefore
