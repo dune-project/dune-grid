@@ -1,0 +1,24 @@
+add_library(dgfparserblocks
+  OBJECT basic.cc  boundarydom.cc  boundaryseg.cc
+    cube.cc  dim.cc  general.cc  gridparameter.cc
+    interval.cc  periodicfacetrans.cc  projection.cc
+    simplex.cc  simplexgeneration.cc  vertex.cc)
+#add_dune_mpi_flags(dgfparserblocks)
+
+set(HEADERS
+  basic.hh
+  boundarydom.hh
+  boundaryseg.hh
+  cube.hh
+  dim.hh
+  general.hh
+  gridparameter.hh
+  interval.hh
+  periodicfacetrans.hh
+  projection.hh
+  simplex.hh
+  simplexgeneration.hh
+  vertex.hh)
+
+install(FILES ${HEADERS}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/io/file/dgfparser/blocks)
