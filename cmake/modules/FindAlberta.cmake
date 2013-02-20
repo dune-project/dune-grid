@@ -5,7 +5,7 @@ endmacro(_dune_set_alberta val)
 
 set(ALBERTA_LIBCHECK ON CACHE BOOL "Whether to try to link against libalberta_Nd.")
 set(ALBERTA_DIR "" CACHE FILEPATH "Root directory of Alberta installation.")
-set(ALBERTA_EXTRA_LIBS "" CACHE FILEPATH "Extra libraries needed by alberta for linking.")
+set(ALBERTA_EXTRA_LIBS "ltdl;m" CACHE FILEPATH "Extra libraries needed by alberta for linking.")
 
 # look for header alberta/alberta.h
 find_path(ALBERTA_INCLUDE_DIR name alberta/alberta.h PATHS ${ALBERTA_DIR}
@@ -57,7 +57,7 @@ else(ALBERTA_UTIL_LIB)
   _dune_set_alberta(FALSE)
 endif(ALBERTA_UTIL_LIB)
 
-set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALBERTA_UTIL_LIB} ltdl m)
+set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
 
 if(ALBERTA_LIBCHECK)
   foreach(dim RANGE 1 9)
@@ -129,7 +129,7 @@ macro(add_dune_alberta_flags)
         # link to ALUGRID libraries
         foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
           target_link_libraries(${_target} dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d
-            ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB ${ALBERTA_UTIL_LIB} ltdl m}
+            ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB}
             dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
         endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
       endif(NOT ADD_ALBERTA_OBJECT)
