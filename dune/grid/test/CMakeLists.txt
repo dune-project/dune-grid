@@ -106,6 +106,10 @@ foreach(_exe ${TESTS})
   add_test(${_exe} ${_exe})
 endforeach(_exe ${TESTS})
 
+# We do not want want to build the tests during make all,
+# but just build them on demand
+add_directory_test_target(_test_target)
+add_dependencies(${_test_target} ${TESTS})
 
 set(SOURCES gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc checkentityseed.cc)
 message(AUTHOR_WARNING "Make sure that ${SOURCES} are shipped")
