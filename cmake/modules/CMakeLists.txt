@@ -8,4 +8,4 @@ set(modules
   GridType.cmake
   UseUG.cmake)
 include(GNUInstallDirs)
-install(FILES ${modules} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake/modules)
+install(FILES ${modules} DESTINATION ${DUNE_INSTALL_MODULEDIR})
