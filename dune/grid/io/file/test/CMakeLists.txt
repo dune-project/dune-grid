@@ -47,7 +47,7 @@ foreach(_test ${AMIRAMESH_TESTS})
   add_dune_amiramesh_flags(${_test})
   add_dune_ug_flags(${_test})
   add_dune_alugrid_flags(${_test})
-  add_dune_alberta_flags(${_test})
+  add_dune_alberta_flags(${_test} GRIDDIM 2)
   add_dune_psurface_flags(${_test})
 endforeach(_test ${AMIRAMESH_TESTS})
 
@@ -57,13 +57,13 @@ add_executable(gmshtest_alugrid gmshtest.cc)
 add_dune_alugrid_flags(gmshtest_alugrid)
 
 add_executable(gmshtest_alberta2d gmshtest.cc)
-add_dune_alberta_flags(gmshtest_alberta2d)
+add_dune_alberta_flags(gmshtest_alberta2d WORLDDIM 2)
 add_dune_grape_flags(gmshtest_alberta2d)
 set_property(TARGET gmshtest_alberta2d APPEND_STRING
   PROPERTY COMPILE_FLAGS "-DGRIDDIM=${ALBERTA_DIM}")
 
 add_executable(gmshtest_alberta3d gmshtest.cc)
-add_dune_alberta_flags(gmshtest_alberta3d GRID_DIM 3)
+add_dune_alberta_flags(gmshtest_alberta3d WORLDDIM 3)
 add_dune_grape_flags(gmshtest_alberta3d)
 
 foreach(_test ${UG_TESTS})
