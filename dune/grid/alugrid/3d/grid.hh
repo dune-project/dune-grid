@@ -517,16 +517,16 @@ namespace Dune
     //! Type of the local id set
     typedef typename GridFamily::LocalIdSetImp LocalIdSetImp;
 
-    //! Type of the global id set
     typedef typename GridFamily::GlobalIdSetImp GlobalIdSetImp;
 
+  public:
     //! Type of the global id set
     typedef typename Traits::GlobalIdSet GlobalIdSet;
 
     //! Type of the local id set
     typedef typename Traits::LocalIdSet LocalIdSet;
 
-    //! a standard leaf iterator
+  protected:
     typedef ALU3dGridLeafIterator< 0, All_Partition, const ThisType > LeafIteratorImp;
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIteratorType;
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIterator;
