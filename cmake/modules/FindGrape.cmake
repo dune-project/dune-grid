@@ -41,8 +41,8 @@ function(add_dune_grape_flags)
   endif(GRAPE_FOUND)
 endfunction(add_dune_grape_flags)
 
-find_package(X11 QUIET REQUIRED)
-find_package(OpenGL QUIET REQUIRED)
+find_package(X11)
+find_package(OpenGL)
 
 # find header in user supplied directory
 find_path(GRAPE_INCLUDE_DIR grape.h
