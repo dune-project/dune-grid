@@ -4,6 +4,7 @@
 #define DUNE_GEOGRID_PERSISTENTCONTAINER_HH
 
 #include <dune/grid/geometrygrid/declaration.hh>
+#include <dune/grid/utility/persistentcontainer.hh>
 #include <dune/grid/utility/persistentcontainerwrapper.hh>
 
 namespace Dune
@@ -12,17 +13,18 @@ namespace Dune
   // PersistentContainer for GeometryGrid
   // ------------------------------------
 
-  template< class HostGrid, class CoordFunction, class Data, class Allocator >
-  class PersistentContainer< GeometryGrid< HostGrid, CoordFunction, Allocator >, Data, Allocator >
-    : public PersistentContainerWrapper< GeometryGrid< HostGrid, CoordFunction, Allocator >, Data, Allocator >
+  template< class HostGrid, class CoordFunction, class Allocator, class T >
+  class PersistentContainer< GeometryGrid< HostGrid, CoordFunction, Allocator >, T >
+    : public PersistentContainerWrapper< GeometryGrid< HostGrid, CoordFunction, Allocator >, T >
   {
-    typedef PersistentContainerWrapper< GeometryGrid< HostGrid, CoordFunction, Allocator >, Data, Allocator > Base;
+    typedef PersistentContainerWrapper< GeometryGrid< HostGrid, CoordFunction, Allocator >, T > Base;
 
   public:
     typedef typename Base::Grid Grid;
+    typedef typename Base::Value Value;
 
-    PersistentContainer ( const Grid &grid, const int codim, const Allocator &allocator = Allocator() )
-      : Base( grid, codim, allocator )
+    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
+      : Base( grid, codim, value )
     {}
   };
 

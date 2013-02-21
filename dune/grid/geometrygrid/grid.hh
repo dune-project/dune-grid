@@ -103,8 +103,6 @@ namespace Dune
 
     template< class, class > friend class GeoGrid::CommDataHandle;
 
-    template< class, class, class > friend class PersistentContainer;
-
   public:
     /** \cond */
     typedef GeoGrid::GridFamily< HostGrid, CoordFunction, Allocator > GridFamily;

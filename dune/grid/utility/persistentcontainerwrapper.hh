@@ -12,65 +12,93 @@ namespace Dune
   // PersistentContainerWrapper
   // --------------------------
 
-  template< class G, class T, class Allocator >
+  template< class G, class T >
   class PersistentContainerWrapper
   {
-    typedef PersistentContainerWrapper< G, T, Allocator > This;
+    typedef PersistentContainerWrapper< G, T > This;
 
     typedef Dune::HostGridAccess< G > HostGridAccess;
 
     typedef typename HostGridAccess::HostGrid HostGrid;
-    typedef PersistentContainer< HostGrid, T, Allocator > PersistentContainerHostGrid;
+    typedef PersistentContainer< HostGrid, T > PersistentContainerHostGrid;
 
   public:
     typedef G Grid;
-    typedef T Data;
 
-    typedef typename PersistentContainerHostGrid::Iterator Iterator;
-    typedef typename PersistentContainerHostGrid::ConstIterator ConstIterator;
+    typedef typename PersistentContainer< HostGrid, T >::Value Value;
+    typedef typename PersistentContainer< HostGrid, T >::Size Size;
 
-    PersistentContainerWrapper ( const Grid &grid, const int codim, const Allocator &allocator = Allocator() )
-      : hostContainer_( HostGridAccess::hostGrid( grid ), codim, allocator )
+    typedef typename PersistentContainer< HostGrid, T >::Iterator Iterator;
+    typedef typename PersistentContainer< HostGrid, T >::ConstIterator ConstIterator;
+
+    PersistentContainerWrapper ( const Grid &grid, int codim, const Value &value = Value() )
+      : hostContainer_( HostGridAccess::hostGrid( grid ), codim, value )
     {}
 
     template< class Entity >
-    Data &operator[] ( const Entity &entity )
+    const Value &operator[] ( const Entity &entity ) const
     {
       return hostContainer_[ HostGridAccess::hostEntity( entity ) ];
     }
 
     template< class Entity >
-    const Data &operator[] ( const Entity &entity ) const
+    Value &operator[] ( const Entity &entity )
     {
       return hostContainer_[ HostGridAccess::hostEntity( entity ) ];
     }
 
     template< class Entity >
-    Data &operator() ( const Entity &entity, const int subEntity )
+    const Value &operator() ( const Entity &entity, int subEntity ) const
     {
       return hostContainer_( HostGridAccess::hostEntity( entity ), subEntity );
     }
 
     template< class Entity >
-    const Data &operator() ( const Entity &entity, const int subEntity ) const
+    Value &operator() ( const Entity &entity, int subEntity )
     {
       return hostContainer_( HostGridAccess::hostEntity( entity ), subEntity );
     }
 
-    Iterator begin () { return hostContainer_.begin(); }
+    Size size () const { return hostContainer_.size(); }
+
+    void resize ( const Value &value = Value() ) { hostContainer_.resize( value ); }
+    void shrinkToFit () { return hostContainer_.shrinkToFit(); }
+
+    void fill ( const Value &value = Value() ) { hostContainer_.fill( value ); }
+
+    void swap ( This &other ) { hostContainer_.swap( other ); }
+
     ConstIterator begin () const { return hostContainer_.begin(); }
+    Iterator begin () { return hostContainer_.begin(); }
 
-    Iterator end () { return hostContainer_.end(); }
     ConstIterator end () const { return hostContainer_.end(); }
+    Iterator end () { return hostContainer_.end(); }
 
-    size_t size () const { return hostContainer_.size(); }
+    int codimension () const { return hostContainer_.codimension(); }
 
-    void clear () { hostContainer_.clear(); }
-    void reserve () { hostContainer_.reserve(); }
-    void update () { hostContainer_.update(); }
 
-  private:
-    PersistentContainerHostGrid hostContainer_ ;
+    // deprecated stuff
+
+    typedef Grid GridType DUNE_DEPRECATED;
+    typedef Value Data DUNE_DEPRECATED;
+
+    void reserve () DUNE_DEPRECATED { return resize(); }
+
+    void clear () DUNE_DEPRECATED
+    {
+      resize( Value() );
+      shrinkToFit();
+      fill( Value() );
+    }
+
+    void update () DUNE_DEPRECATED
+    {
+      resize( Value() );
+      shrinkToFit();
+    }
+
+  protected:
+    PersistentContainer< HostGrid, T > hostContainer_;
   };
 
 } // namespace Dune
