@@ -1054,12 +1054,10 @@ namespace Dune
     std::list<VTKFunctionPtr> celldata;
     std::list<VTKFunctionPtr> vertexdata;
 
-  private:
     // the grid
     GridView gridView_;
 
     // temporary grid information
-  protected:
     int ncells;
     int nvertices;
     int ncorners;
