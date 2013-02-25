@@ -735,7 +735,6 @@ namespace Dune
   ::readGrid ( const std::string filename, alu3d_ctype & time )
   {
     {
-      typedef std::ostringstream StreamType;
       std::string mName(filename);
       mName += ".macro";
       const char * macroName = mName.c_str();
