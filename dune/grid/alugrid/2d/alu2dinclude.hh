@@ -138,7 +138,6 @@ namespace Dune
       static const ALU2DSPACE ElementType eltype = GridType::elementType;
 
       typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<0>::InterfaceType ElementType;
-      typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<2>::InterfaceType VertexType;
       typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
 
       // resize
@@ -210,7 +209,6 @@ namespace Dune
       static const ALU2DSPACE ElementType eltype = GridType::elementType;
 
       typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<0>::InterfaceType ElementType;
-      typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<2>::InterfaceType VertexType;
       typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
 
       // resize edge marker
