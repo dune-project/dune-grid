@@ -9,7 +9,6 @@
 #include <dune/common/forloop.hh>
 #include <dune/common/typetraits.hh>
 
-#include <dune/geometry/quadraturerules.hh>
 #include <dune/geometry/test/checkgeometry.hh>
 
 #include <dune/grid/common/geometry.hh>
