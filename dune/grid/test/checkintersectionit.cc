@@ -308,7 +308,6 @@ void checkIntersectionIterator(const GridViewType& view,
       DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left hand side and global view!");
 
     // Use a quadrature rule as a set of test points
-    typedef Dune::QuadraturePoint< ctype, interDim > Points;
     Dune::QuadratureType::Enum qt = Dune::QuadratureType::Gauss;
     const Dune::QuadratureRule< ctype, interDim > &quad =
       Dune::QuadratureRules< ctype, interDim >::rule(iIt->type(), 3, qt);
@@ -466,7 +465,6 @@ void checkIntersectionIterator(const GridViewType& view,
       {
         // (Ab)use a quadrature rule as a set of test point
         const int interDim = Intersection::LocalGeometry::mydimension;
-        typedef Dune::QuadraturePoint< ctype, interDim > Points;
         Dune::QuadratureType::Enum qt = Dune::QuadratureType::Gauss;
         const Dune::QuadratureRule< ctype, interDim > &quad =
           Dune::QuadratureRules< ctype, interDim >::rule(iIt->type(), 3, qt);
