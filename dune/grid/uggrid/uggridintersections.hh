@@ -179,9 +179,9 @@ namespace Dune {
     mutable bool geometryIsUpToDate_;
 
     //! pointers holding the global and local geometries
-    mutable std::shared_ptr<GeometryImpl>      geometry_;
-    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
-    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
+    mutable Dune::shared_ptr<GeometryImpl>      geometry_;
+    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
@@ -430,9 +430,9 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
     //! pointer to global and local intersection geometries
-    mutable std::shared_ptr<GeometryImpl>      geometry_;
-    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
-    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
+    mutable Dune::shared_ptr<GeometryImpl>      geometry_;
+    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
