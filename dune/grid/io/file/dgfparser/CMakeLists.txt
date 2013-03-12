@@ -6,12 +6,14 @@ dune_add_library(dgfparser OBJECT dgfparser.cc dgfug.cc)
 
 
 set(HEADERS
+  dgfalberta.hh
   dgfalu.cc
   dgfexception.hh
   dgfalu.hh
   dgfug.hh
   dgfparser.hh
   dgfgeogrid.hh
+  dgfgridtype.hh
   dgfwriter.hh
   dgfyasp.hh
   entitykey.hh
