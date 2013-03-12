@@ -1,5 +1,4 @@
 set(HEADERS
-  backuprestore.hh
   bndprojection.hh
   checkparallel.hh
   capabilities.hh

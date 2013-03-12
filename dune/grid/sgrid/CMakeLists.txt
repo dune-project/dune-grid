@@ -1,5 +1,4 @@
 set(HEADERS
-  generic2dune.hh
   numbering.cc
   numbering.hh
   sgrid.cc)
