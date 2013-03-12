@@ -1,3 +1,4 @@
+add_subdirectory(genericgeometry)
 add_subdirectory(common)
 add_subdirectory(alugrid)
 add_subdirectory(onedgrid)

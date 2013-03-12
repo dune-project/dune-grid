@@ -8,5 +8,6 @@ genericgeometry_HEADERS = cachedmapping.hh  codimtable.hh  conversion.hh \
                           topologytypes.hh  traceprovider.hh
 
 SUBDIRS = test
+EXTRA_DIST = CMakeLists.txt
 
 include $(top_srcdir)/am/global-rules

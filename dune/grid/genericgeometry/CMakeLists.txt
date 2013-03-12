@@ -1,0 +1,20 @@
+install(FILES
+  cachedmapping.hh
+  codimtable.hh
+  conversion.hh
+  cornermapping.hh
+  genericreferenceelement.hh
+  geometry.hh
+  geometrytraits.hh
+  hybridmapping.hh
+  mapping.hh
+  mappingprovider.hh
+  matrixhelper.hh
+  maximum.hh
+  referencedomain.hh
+  referenceelements.hh
+  referencetopologies.hh
+  subtopologies.hh
+  topologytypes.hh
+  traceprovider.hh
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/genericgeometry)
