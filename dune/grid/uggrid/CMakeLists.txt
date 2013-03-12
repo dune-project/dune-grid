@@ -44,6 +44,7 @@ set(HEADERS
   uggridleafiterator.hh
   uggridrenumberer.hh
   ug_undefs.hh
+  ug_undefs_lgm_seq.hh
   ugwrapper.hh)
 
 install(FILES ${HEADERS}
