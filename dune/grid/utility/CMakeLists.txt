@@ -1,11 +1,13 @@
 add_subdirectory(test EXCLUDE_FROM_ALL)
 set(HEADERS
   grapedataioformattypes.hh
+  griddim.hh
   gridinfo-gmsh-main.hh
   gridinfo.hh
   gridtype.hh
   hierarchicsearch.hh
   hostgridaccess.hh
+  mockgeometry.hh
   persistentcontainer.hh
   persistentcontainerwrapper.hh
   structuredgridfactory.hh
