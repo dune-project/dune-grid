@@ -1,7 +1,7 @@
 # Module that checks whether Grape is available
 #
 # Accepts the following input variable
-# GRAPE_PREFIX: Prefix under which Grape is installed
+# GRAPE_ROOT: Prefix under which Grape is installed
 # GRAPE_INCLUDE_DIRS: Include directories for Grape
 # GRAPE_LIBRARY: Full path to Grape library
 #
@@ -46,7 +46,7 @@ find_package(OpenGL QUIET REQUIRED)
 
 # find header in user supplied directory
 find_path(GRAPE_INCLUDE_DIR grape.h
-  PATHS ${GRAPE_PREFIX}
+  PATHS ${GRAPE_ROOT}
   NO_DEFAULT_PATH
   DOC "Include directory with Grape header files")
 find_path(GRAPE_INCLUDE_DIR grape.h
@@ -63,7 +63,7 @@ check_include_files(grape.h _GRAPE_HEADER_USABLE)
 # find library
 find_library(GRAPE_LIBRARY
   NAMES gr
-  PATHS ${GRAPE_PREFIX}
+  PATHS ${GRAPE_ROOT}
   NO_DEFAULT_PATH
   DOC "Full path to grape library.")
 find_library(GRAPE_LIBRARY
