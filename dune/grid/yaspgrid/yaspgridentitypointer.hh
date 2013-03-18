@@ -46,7 +46,7 @@ namespace Dune {
     YaspEntityPointer (const YaspEntityImp& entity)
       : _g(entity.gridlevel()),
         _it(entity.transformingsubiterator()),
-        _entity(MakeableInterfaceObject<Entity>(entity))
+        _entity(MakeableInterfaceObject<Entity>(YaspEntity<codim,dim,GridImp>(entity.yaspgrid(), _g,_it)))
     {
       if (codim>0 && codim<dim)
       {

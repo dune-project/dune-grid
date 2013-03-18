@@ -100,7 +100,6 @@ namespace Dune
     : mygrid_ (0)
       , maxLevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)
-      , geomTypes_(dim+1,1)
       , hIndexSet_(*this)
       , localIdSet_ (*this)
       , levelIndexVec_( MAXL, (LevelIndexSetImp *) 0 )

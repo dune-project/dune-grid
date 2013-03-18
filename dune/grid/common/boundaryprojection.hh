@@ -10,8 +10,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/shared_ptr.hh>
 
-#include <dune/geometry/genericgeometry/hybridmappingfactory.hh>
-#include <dune/geometry/genericgeometry/geometrytraits.hh>
+#include <dune/geometry/multilineargeometry.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 
@@ -61,16 +60,14 @@ namespace Dune
   // BoundarySegmentWrapper
   // ----------------------
 
+  /** \tparam dim Dimension of the grid */
   template< int dim, int dimworld >
   class BoundarySegmentWrapper
     : public DuneBoundaryProjection< dimworld >
   {
-    typedef BoundarySegmentWrapper< dim, dimworld > This;
     typedef DuneBoundaryProjection< dimworld > Base;
 
-    typedef GenericGeometry::DefaultGeometryTraits< double, dim-1, dimworld > GeometryTraits;
-    typedef GenericGeometry::VirtualMappingFactory< dim-1, GeometryTraits > FaceMappingFactory;
-    typedef typename FaceMappingFactory::Mapping FaceMapping;
+    typedef MultiLinearGeometry< typename Base::CoordinateType::value_type, dim-1, dimworld > FaceMapping;
 
   public:
     typedef typename Base::CoordinateType CoordinateType;
@@ -87,13 +84,13 @@ namespace Dune
     BoundarySegmentWrapper ( const GeometryType &type,
                              const std::vector< CoordinateType > &vertices,
                              const shared_ptr< BoundarySegment > &boundarySegment )
-      : faceMapping_( createFaceMapping( type, vertices ) ),
+      : faceMapping_( FaceMapping( type, vertices ) ),
         boundarySegment_( boundarySegment )
     {}
 
     CoordinateType operator() ( const CoordinateType &global ) const
     {
-      return boundarySegment() ( faceMapping_->local( global ) );
+      return boundarySegment() ( faceMapping_.local( global ) );
     }
 
     const BoundarySegment &boundarySegment () const
@@ -102,13 +99,7 @@ namespace Dune
     }
 
   private:
-    FaceMapping *createFaceMapping ( const GeometryType &type, const std::vector< CoordinateType > &vertices )
-    {
-      const std::size_t faceMappingSize = FaceMappingFactory::mappingSize( type.id() );
-      return FaceMappingFactory::construct( type.id(), vertices, operator new( faceMappingSize ) );
-    }
-
-    shared_ptr< FaceMapping > faceMapping_;
+    FaceMapping faceMapping_;
     const shared_ptr< BoundarySegment > boundarySegment_;
   };
 

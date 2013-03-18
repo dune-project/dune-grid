@@ -148,16 +148,19 @@ if test x$with_alugrid != xno ; then
   HAVE_ALUGRID_PARALLEL="0"
   # if the serial header was found then also check for the parallel header
   if test x"$HAVE_ALUGRID" != "x0" ; then
-    AC_TRY_COMPILE([#include <alugrid_defineparallel.h> 
-                    #if ALU3DGRID_BUILD_FOR_PARALLEL == 0 
-                    #error
-                    #endif
-                   ],
-                   [],
-                   [HAVE_ALUGRID_PARALLEL="1"],
-                   [HAVE_ALUGRID_PARALLEL="0"
-                   AC_MSG_WARN("ALUGRID was not built for parallel support!")
-                  ])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+          #include <alugrid_defineparallel.h>
+          #if ALU3DGRID_BUILD_FOR_PARALLEL == 0
+          #error
+          #endif
+        ]],
+        [])
+      ],
+      [HAVE_ALUGRID_PARALLEL="1"],
+      [HAVE_ALUGRID_PARALLEL="0"
+        AC_MSG_WARN("ALUGRID was not built for parallel support!")
+      ])
 
     # only check for parallel header when ALUGrid was build for parallel support
     if test x"$HAVE_ALUGRID_PARALLEL" != "x0" ; then 

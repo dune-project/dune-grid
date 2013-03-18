@@ -9,11 +9,14 @@ TESTS += structuredgridfactorytest
 check_PROGRAMS += structuredgridfactorytest
 structuredgridfactorytest_SOURCES = structuredgridfactorytest.cc
 structuredgridfactorytest_CPPFLAGS = $(AM_CPPFLAGS) \
-	                             $(UG_CPPFLAGS)
+	                            $(DUNEMPICPPFLAGS) \
+	                            $(UG_CPPFLAGS)
 structuredgridfactorytest_LDFLAGS = $(AM_LDFLAGS) \
+	                            $(DUNEMPILDFLAGS) \
 	                            $(UG_LDFLAGS)
-structuredgridfactorytest_LDADD = $(LDADD) \
-                                  $(UG_LIBS)
+structuredgridfactorytest_LDADD = $(UG_LIBS) \
+	                            $(DUNEMPILIBS) \
+                                $(LDADD)
 
 TESTS += vertexordertest
 check_PROGRAMS += vertexordertest

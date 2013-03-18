@@ -16,8 +16,6 @@
 #include <dune/common/static_assert.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
-#include <dune/geometry/genericgeometry/codimtable.hh>
-
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 

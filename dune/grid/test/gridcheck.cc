@@ -683,6 +683,75 @@ void checkBoundarySegmentIndexProlongation ( const Grid &grid, const Entity &ent
 }
 
 
+// check for consistency of hasFather(), father(), and father().level()
+template< class Grid >
+void checkFatherLevel ( Grid &grid )
+{
+  for(int level=0; level<=grid.maxLevel(); ++level)
+  {
+    typedef typename Grid::LevelGridView GridView;
+    typedef typename GridView::template Codim<0>::Iterator Iterator;
+    typedef typename GridView::template Codim<0>::EntityPointer EntityPointer;
+
+    GridView gv = grid.levelView(level);
+    Iterator it = gv.template begin<0>();
+    Iterator end = gv.template end<0>();
+    for(; it!=end; ++it)
+    {
+      if (level==0)
+      {
+        if (it->hasFather())
+        {
+          std::cerr << "Error: hasFather() is true for element " << gv.indexSet().index(*it)
+                    << " on level 0"
+                    << std::endl;
+          assert(false);
+        }
+      }
+      else
+      {
+        if (it->hasFather())
+        {
+          // check level of father for newly created entitypointer
+          {
+            EntityPointer f = it->father();
+            if (f.level() != level-1)
+            {
+              std::cerr << "Error: father().level()=" << f.level()
+                        << " for element on level " << level << std::endl;
+              assert(false);
+            }
+            if (f->level() != level-1)
+            {
+              std::cerr << "Error: father()->level()=" << f.level()
+                        << " for element on level " << level << std::endl;
+              assert(false);
+            }
+          }
+          // check level of father after reassignment
+          {
+            EntityPointer f(*it);
+            f = it->father();
+            if (f.level() != level-1)
+            {
+              std::cerr << "Error: father().level()=" << f.level()
+                        << " for element on level " << level << " with reassigned father pointer" << std::endl;
+              assert(false);
+            }
+            if (f->level() != level-1)
+            {
+              std::cerr << "Error: father()->level()=" << f.level()
+                        << " for element on level " << level << " with reassigned father pointer" << std::endl;
+              assert(false);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
 template< class GridView >
 void checkBoundarySegmentIndex ( const GridView &gridView )
 {
@@ -809,6 +878,8 @@ void gridcheck (Grid &g)
   zeroEntityConsistency(cg);
   assertNeighbor(g);
   assertNeighbor(cg);
+  checkFatherLevel(g);
+  checkFatherLevel(cg);
 
   // check geometries of macro level and leaf level
   checkGeometry( g.levelView( 0 ) );
