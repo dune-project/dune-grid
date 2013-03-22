@@ -373,6 +373,27 @@ namespace Dune {
       init();
     }
 
+    /*! Constructor for a sequential YaspGrid without periodicity
+
+       Sequential here means that the whole grid is living on one process even if your program is running
+       in parallel.
+       @see YaspGrid(Dune::MPIHelper::MPICommunicator, Dune::FieldVector<ctype, dim>, Dune::FieldVector<int, dim>,  Dune::FieldVector<bool, dim>, int)
+       for constructing one parallel grid decomposed between the processors.
+       @param L extension of the domain (lower left is always (0,...,0)
+       @param elements number of cells on coarse mesh in each direction
+     */
+    YaspGrid (Dune::FieldVector<ctype, dim> L,
+              Dune::array<int, dim> elements)
+#if HAVE_MPI
+      : YMG(MPI_COMM_SELF,L,elements,std::bitset<dim>(0),0), ccobj(MPI_COMM_SELF),
+#else
+      : YMG(L,elements,std::bitset<dim>(0),0),
+#endif
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+    {
+      init();
+    }
+
   private:
     // do not copy this class
     YaspGrid(const YaspGrid&);

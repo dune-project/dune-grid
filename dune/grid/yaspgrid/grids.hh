@@ -1108,17 +1108,15 @@ namespace Dune {
 
   public:
     //! constructor making uninitialized object
-    Torus () :
-      _loadbalancer(0)
+    Torus ()
     {}
 
     //! make partitioner from communicator and coarse mesh size
 #if HAVE_MPI
-    Torus (MPI_Comm comm, int tag, iTupel size, const YLoadBalance<d>* lb) :
+    Torus (MPI_Comm comm, int tag, iTupel size, const YLoadBalance<d>* lb)
 #else
-    Torus (int tag, iTupel size, const YLoadBalance<d>* lb) :
+    Torus (int tag, iTupel size, const YLoadBalance<d>* lb)
 #endif
-      _loadbalancer(lb)
     {
       // MPI stuff
 #if HAVE_MPI
@@ -1131,7 +1129,7 @@ namespace Dune {
       _tag = tag;
 
       // determine dimensions
-      _loadbalancer->loadbalance(size, _procs, _dims);
+      lb->loadbalance(size, _procs, _dims);
       // if (_rank==0) std::cout << "Torus<" << d
       //                         << ">: mapping " << _procs << " processes onto "
       //                         << _dims << " torus." << std::endl;
@@ -1150,11 +1148,10 @@ namespace Dune {
 
     //! make partitioner from communicator and coarse mesh size
 #if HAVE_MPI
-    Torus (MPI_Comm comm, int tag, Dune::array<int,d> size, const YLoadBalance<d>* lb) :
+    Torus (MPI_Comm comm, int tag, Dune::array<int,d> size, const YLoadBalance<d>* lb)
 #else
-    Torus (int tag, Dune::array<int,d> size, const YLoadBalance<d>* lb) :
+    Torus (int tag, Dune::array<int,d> size, const YLoadBalance<d>* lb)
 #endif
-      _loadbalancer(lb)
     {
       // MPI stuff
 #if HAVE_MPI
@@ -1169,7 +1166,7 @@ namespace Dune {
       // determine dimensions
       iTupel sizeITupel;
       std::copy(size.begin(), size.end(), sizeITupel.begin());
-      _loadbalancer->loadbalance(sizeITupel, _procs, _dims);
+      lb->loadbalance(sizeITupel, _procs, _dims);
 
       // compute increments for lexicographic ordering
       int inc = 1;
@@ -1665,8 +1662,6 @@ namespace Dune {
     mutable std::vector<CommTask> _localsendrequests;
     mutable std::vector<CommTask> _localrecvrequests;
 
-    //! pointer to the load balancer
-    const YLoadBalance<d>* _loadbalancer;
   };
 
   //! Output operator for Torus

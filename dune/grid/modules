@@ -125,7 +125,3 @@
         GenericGeometry from \ref dune-geometry.
   */
 
-  /**
-     @defgroup Refinement Refinement
-     @ingroup Grid
-   */
