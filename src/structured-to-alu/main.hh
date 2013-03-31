@@ -56,7 +56,7 @@ void help(std::ostream &s) {
   "  LOWER, UPPER Lower and upper world coordinates of the box to create the\n"
   "    structured mesh in.  Seperate individual components with spaces, but\n"
   "    make sure to escape them from the shell.\n"
-  "  ELEMS Space seperated list of size dimgrid.  Each list entry gives the\n"
+  "  ELEMS Space separated list of size dimgrid.  Each list entry gives the\n"
   "    number elements to split the mesh into for the corresponding coordinate\n"
   "    direction.\n"
   << std::flush;
