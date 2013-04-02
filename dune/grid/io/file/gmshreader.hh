@@ -229,7 +229,7 @@ namespace Dune
     // don't use something like
     //   readfile(file, 1, "%s\n", buf);
     // to skip the rest of of the line -- that will only skip the next
-    // whitespace-seperated word!  Use skipline() instead.
+    // whitespace-separated word!  Use skipline() instead.
     void readfile(FILE * file, int cnt, const char * format,
                   void* t1, void* t2 = 0, void* t3 = 0, void* t4 = 0,
                   void* t5 = 0, void* t6 = 0, void* t7 = 0, void* t8 = 0,

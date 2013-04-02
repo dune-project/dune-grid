@@ -176,9 +176,13 @@ Dune::UGGrid < dim >::~UGGrid()
 
   numOfUGGrids--;
 
-  // Shut down UG if this was the last existing UGGrid object
-  if (UGGrid<2>::numOfUGGrids + UGGrid<3>::numOfUGGrids == 0)
-    UG_NS<dim>::ExitUg();
+  // Shut down UG if this was the last existing UGGrid object.
+  // Since we started both 2d and 3d versions of UG even if we don't need both,
+  // we have to shut them down both, too.
+  if (UGGrid<2>::numOfUGGrids + UGGrid<3>::numOfUGGrids == 0) {
+    UG_NS<2>::ExitUg();
+    UG_NS<3>::ExitUg();
+  }
 }
 
 template < int dim >
