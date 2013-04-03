@@ -1,6 +1,6 @@
 # $Id$
 
-SUBDIRS = common alugrid onedgrid sgrid uggrid utility \
+SUBDIRS = common onedgrid sgrid uggrid utility \
           yaspgrid io albertagrid geometrygrid test
 noinst_LTLIBRARIES = libgrid.la
 
@@ -13,17 +13,13 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
-# the ALUGrid lib contains items that are needed
-# in any case, so no dependency from ALUGRID flag
-ALULIB = alugrid/libalu.la
-
 # construct only from sub-libraries
 libgrid_la_SOURCES =
 # This forces automake to use the C++ linker
 # (see the automake manual, section "Libtool Convenience Libraries")
 nodist_EXTRA_libgrid_la_SOURCES = dummy.cc
 sourcescheck_DUMMY = dummy.cc
-libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
+libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) 	\
 	$(DGFPARSERLIB)				\
         $(AMIRAMESHLIB)                         \
 	$(DUNE_LIBS)
@@ -31,7 +27,6 @@ libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
 # These libraries do not need other libraries besides lcommon
 griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \
-               alugrid.hh \
                sgrid.hh \
                uggrid.hh \
                yaspgrid.hh \

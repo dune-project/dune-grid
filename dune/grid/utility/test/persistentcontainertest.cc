@@ -11,9 +11,6 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
-#if HAVE_ALUGRID
-#include <dune/grid/alugrid.hh>
-#endif
 
 #include <dune/grid/utility/persistentcontainer.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
@@ -129,18 +126,6 @@ try {
     std::cout << "Testing YaspGrid" << std::endl;
     test(grid);
   }
-
-#if HAVE_ALUGRID
-  {
-    typedef ALUCubeGrid<2,2> GridType;
-    array<unsigned int,2> elements2d;
-    elements2d.fill(4);
-    shared_ptr<GridType> grid = StructuredGridFactory<GridType>::createCubeGrid(FieldVector<double,2>(0),
-                                                                                FieldVector<double,2>(1), elements2d);
-    std::cout << "Testing ALUGrid" << std::endl;
-    test(*grid);
-  }
-#endif
 
   return 0;
 

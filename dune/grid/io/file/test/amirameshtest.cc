@@ -9,9 +9,6 @@
 #if HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #endif
-#if HAVE_ALUGRID
-#include <dune/grid/alugrid.hh>
-#endif
 
 #include <dune/grid/io/file/amirameshreader.hh>
 #include <dune/grid/io/file/amirameshwriter.hh>
@@ -101,17 +98,6 @@ int main() try {
 #if HAVE_ALBERTA
   std::cout << "reading AlbertaGrid<2>" << std::endl;
   testReadingUnstructuredGrid<AlbertaGrid<2> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-2d.am");
-#endif
-
-#if HAVE_ALUGRID
-  std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
-  testReadingUnstructuredGrid<ALUSimplexGrid<2,2> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-2d.am");
-
-  std::cout << "reading ALUSimplexGrid<3,3>" << std::endl;
-  testReadingUnstructuredGrid<ALUSimplexGrid<3,3> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-3d.am");
-
-  std::cout << "reading ALUCubeGrid<3,3>" << std::endl;
-  testReadingUnstructuredGrid<ALUCubeGrid<3,3> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/cube-testgrid-3d.am");
 #endif
 
   // Test whether writing uniform data works

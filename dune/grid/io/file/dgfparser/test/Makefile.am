@@ -9,10 +9,6 @@ LDADD = 					\
 # The directory where the example grid files used for testing are located
 AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
 
-if ALUGRID
-  TESTALU = testalu
-endif
-
 if ALBERTA
   TESTALBERTA = testalberta
 endif
@@ -50,18 +46,6 @@ viewdgf_LDFLAGS = $(AM_LDFLAGS)			\
 viewdgf_LDADD =					\
 	$(ALL_PKG_LIBS)				\
 	$(LDADD)
-
-if ALUGRID
-testalu_SOURCES = main.cc
-testalu_CPPFLAGS = $(AM_CPPFLAGS)		\
-	$(ALUGRID_CPPFLAGS)			\
-	-DALUGRID_CUBE -DGRIDDIM=3
-testalu_LDFLAGS = $(AM_LDFLAGS)			\
-	$(ALUGRID_LDFLAGS)
-testalu_LDADD =					\
-	$(ALUGRID_LIBS)				\
-	$(LDADD)
-endif
 
 if ALBERTA
 testalberta_SOURCES = main.cc

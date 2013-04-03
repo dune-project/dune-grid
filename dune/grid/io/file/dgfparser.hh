@@ -6,7 +6,6 @@
 #include "dgfparser/dgfparser.hh"
 /* include the implementations */
 #include <dune/grid/albertagrid/dgfparser.hh>
-#include "dgfparser/dgfalu.hh"
 #include "dgfparser/dgfug.hh"
 #include "dgfparser/dgfoned.hh"
 #include "dgfparser/dgfyasp.hh"

@@ -58,10 +58,6 @@ AC_CONFIG_FILES([Makefile
     dune/grid/onedgrid/Makefile
     dune/grid/utility/Makefile
     dune/grid/utility/test/Makefile
-    dune/grid/alugrid/common/Makefile
-    dune/grid/alugrid/2d/Makefile
-    dune/grid/alugrid/3d/Makefile
-    dune/grid/alugrid/Makefile
     dune/grid/io/file/test/Makefile
     dune/grid/io/file/amiramesh/Makefile
     dune/grid/io/file/dgfparser/Makefile
@@ -78,10 +74,7 @@ AC_CONFIG_FILES([Makefile
     m4/Makefile
     dune-grid.pc
     src/Makefile
-    src/alu-to-vtk/Makefile
-    src/gmsh-to-alu/Makefile
     src/gridinfo-gmsh/Makefile
-    src/structured-to-alu/Makefile
     ])
 AC_CONFIG_FILES([dune/grid/io/file/test/mpivtktest],
     [chmod +x dune/grid/io/file/test/mpivtktest])

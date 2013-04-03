@@ -13,9 +13,6 @@
 #if HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #endif
-#if HAVE_ALUGRID
-#include <dune/grid/alugrid.hh>
-#endif
 #include <dune/grid/onedgrid.hh>
 
 // alberta related stuff
@@ -125,14 +122,6 @@ try
   std::cout << "reading AlbertaGrid<3>" << std::endl;
   testReadingGrid<AlbertaGrid<3> >( pyramid, refinements );
 #endif
-#endif
-
-#if HAVE_ALUGRID
-  std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
-  testReadingGrid<ALUSimplexGrid<2,2> >( curved2d, refinements );
-
-  std::cout << "reading ALUSimplexGrid<3,3>" << std::endl;
-  testReadingGrid<ALUSimplexGrid<3,3> >( pyramid, refinements );
 #endif
 
   std::cout << "reading OneDGrid" << std::endl;

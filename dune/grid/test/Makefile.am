@@ -11,17 +11,8 @@ if ALBERTA
   ALBERTA_EXTRA_PROGS = test-alberta
 endif
 
-if ALUGRID
-  ALUPROG = test-alugrid
-endif
-
 if UG
   UPROG = test-ug test-parallel-ug
-if ALUGRID
-  DGFALU_UGGRID = test-dgfalu-uggrid-combination
-else
-  DGFALU_UGGRID =
-endif
 endif
 
 #
@@ -47,7 +38,7 @@ CACHECOORDFUNCTION = 0
 #
 
 # tests where program to build and program to run are equal
-NORMALTESTS = test-sgrid test-oned test-yaspgrid test-geogrid $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID) \
+NORMALTESTS = test-sgrid test-oned test-yaspgrid test-geogrid $(APROG) $(UPROG) \
               test-mcmg-geogrid
 
 # list of tests to run
@@ -133,17 +124,6 @@ test_alberta_generic_CPPFLAGS = $(test_alberta_CPPFLAGS) -DDUNE_ALBERTA_USE_GENE
 test_alberta_generic_LDFLAGS = $(test_alberta_LDFLAGS)
 test_alberta_generic_LDADD = $(test_alberta_LDADD)
 
-# files for alugrid
-test_alugrid_SOURCES = test-alugrid.cc
-test_alugrid_CPPFLAGS = $(AM_CPPFLAGS)		\
-	$(ALL_PKG_CPPFLAGS)
-test_alugrid_LDFLAGS = $(AM_LDFLAGS)		\
-	$(ALL_PKG_LDFLAGS)			\
-	-static
-test_alugrid_LDADD =				\
-	$(ALL_PKG_LIBS)				\
-	$(LDADD)
-
 test_geogrid_SOURCES = test-geogrid.cc functions.hh
 test_geogrid_CPPFLAGS = $(AM_CPPFLAGS)			\
 	$(ALL_PKG_CPPFLAGS)				\
@@ -184,15 +164,6 @@ test_parallel_ug_LDFLAGS = $(AM_LDFLAGS)	\
 test_parallel_ug_LDADD =			\
 	$(UG_LIBS)				\
 	$(DUNEMPILIBS)				\
-	$(LDADD)
-
-# Test whether you can combine the different implementations in one file
-test_dgfalu_uggrid_combination_SOURCES = test-dgfalu-uggrid-combination.cc
-test_dgfalu_uggrid_combination_CPPFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(ALUGRID_CPPFLAGS)
-test_dgfalu_uggrid_combination_LDFLAGS = $(AM_LDFLAGS) $(UG_LDFLAGS) $(ALUGRID_LDFLAGS)
-test_dgfalu_uggrid_combination_LDADD =		\
-	$(ALUGRID_LIBS)				\
-	$(UG_LIBS)				\
 	$(LDADD)
 
 ## distribution tarball

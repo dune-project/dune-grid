@@ -26,15 +26,10 @@
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/generalvertexorder.hh>
 
-#include <dune/grid/alugrid.hh>
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/uggrid.hh>
 #include "../structuredgridfactory.hh"
 #include "../vertexorderfactory.hh"
-
-#ifdef ALUGRID_SURFACE_2D
-#define USE_ALUGRID_SURFACE_2D
-#endif
 
 void fail(int &result) {
   result = 1;
@@ -320,29 +315,6 @@ try {
   testVertexOrderByIdSimplices<Dune::UGGrid<2> >(result);
 #endif // HAVE_UG
 
-#if HAVE_ALUGRID
-  std::cout << "== Testing ALUConformGrid<2,2> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUConformGrid<2, 2> >(result);
-#ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUConformGrid<2,3> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUConformGrid<2, 3> >(result);
-#endif // USE_ALUGRID_SURFACE_2D
-
-#ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUCubeGrid<2,2> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUCubeGrid<2, 2> >(result);
-  std::cout << "== Testing ALUCubeGrid<2,3> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUCubeGrid<2, 3> >(result);
-#endif // USE_ALUGRID_SURFACE_2D
-
-  std::cout << "== Testing ALUSimplexGrid<2,2> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUSimplexGrid<2, 2> >(result);
-#ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUSimplexGrid<2,3> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUSimplexGrid<2, 3> >(result);
-#endif // USE_ALUGRID_SURFACE_2D
-#endif // HAVE_ALUGRID
-
   //////////////////////////////////////////////////////////////////////
   //   Test 3d grids
   //////////////////////////////////////////////////////////////////////
@@ -355,13 +327,6 @@ try {
   std::cout << "== Testing UGGrid<3> with cubes" << std::endl;
   testVertexOrderByIdSimplices<Dune::UGGrid<3> >(result);
 #endif // HAVE_UG
-
-#if HAVE_ALUGRID
-  std::cout << "== Testing ALUCubeGrid<3,3> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUCubeGrid<3, 3> >(result);
-  std::cout << "== Testing ALUSimplexGrid<3,3> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUSimplexGrid<3, 3> >(result);
-#endif // HAVE_ALUGRID
 
   return result;
 
