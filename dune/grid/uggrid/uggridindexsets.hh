@@ -519,7 +519,7 @@ namespace Dune
 #endif // #else // #ifdef ModelP
       }
 
-      if( codim == dim )
+      if( int( codim ) == dim )
       {
 #ifdef ModelP
         return UG_NS< dim >::Corner( target, UGGridRenumberer< dim >::verticesDUNEtoUG( i,type ) )->myvertex->iv.ddd.gid;
