@@ -292,7 +292,7 @@ namespace Dune
     template< class GridImp, class IntersectionImp >
     const DGFBoundaryParameter::type & parameters ( const Intersection< GridImp, IntersectionImp > & intersection ) const
     {
-      // if no parameters given return empty vecto
+      // if no parameters given return empty vector
       if ( !haveBndParam_ )
         return DGFBoundaryParameter::defaultValue();
 

@@ -12,6 +12,9 @@ gridutility_HEADERS =				\
 	hierarchicsearch.hh			\
 	hostgridaccess.hh			\
 	persistentcontainer.hh			\
+	persistentcontainerinterface.hh		\
+	persistentcontainermap.hh		\
+	persistentcontainervector.hh		\
 	persistentcontainerwrapper.hh		\
 	structuredgridfactory.hh		\
 	vertexorderfactory.hh

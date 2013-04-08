@@ -725,12 +725,8 @@ namespace Dune {
   template<int dim, int dimworld, typename ctype>
   inline array<int,dim> SGrid<dim,dimworld,ctype>::subz (const array<int,dim> & z, int i, int codim) const
   {
-    static const GeometryType cubeType(GeometryType::cube, dim);
-
     // map to old numbering
-    typedef SGridInternal::MapNumberingProvider< dim > Numbering;
-    const unsigned int cubeid = cubeType.id();
-    const int j = Numbering::generic2dune( cubeid, i, codim );
+    const int j = SGridInternal::CubeNumberingTable<dim>::generic2dune( i, codim );
 
     // find expanded coordinates of entity in reference cube
     // has components in {0,1,2}

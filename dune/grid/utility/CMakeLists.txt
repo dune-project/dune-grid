@@ -7,6 +7,8 @@ set(HEADERS
   hierarchicsearch.hh
   hostgridaccess.hh
   persistentcontainer.hh
+  persistentcontainermap.hh
+  persistentcontainervector.hh
   persistentcontainerwrapper.hh
   structuredgridfactory.hh
   vertexorderfactory.hh)

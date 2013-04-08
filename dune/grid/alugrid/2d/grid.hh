@@ -674,7 +674,6 @@ namespace Dune {
     entityPointer( const EntitySeed& seed ) const
     {
       enum { codim = EntitySeed :: codimension };
-      typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
       typedef ALU2dGridEntityPointer < codim, const ThisType > ALUPointer ;
       return ALUPointer( factory(), seed ) ;
     }

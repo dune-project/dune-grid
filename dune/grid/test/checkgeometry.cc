@@ -9,8 +9,7 @@
 #include <dune/common/forloop.hh>
 #include <dune/common/typetraits.hh>
 
-#include <dune/geometry/quadraturerules/gaussquadrature.hh>
-#include <dune/geometry/genericgeometry/test/checkgeometry.hh>
+#include <dune/geometry/test/checkgeometry.hh>
 
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/entity.hh>

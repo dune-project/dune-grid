@@ -21,8 +21,7 @@ namespace Dune {
     typedef VTKWriter<GridView> BaseType;
     typedef VTKSequenceWriter<GridView> ThisType;
     std::string name_,path_,extendpath_;
-    unsigned int count_;
-    std::ofstream seqFile_;
+    std::vector<double> timesteps_;
   public:
     explicit VTKSequenceWriter ( const GridView &gridView,
                                  const std::string& name,
@@ -31,27 +30,9 @@ namespace Dune {
                                  VTK::DataMode dm = VTK::conforming )
       : BaseType(gridView,dm),
         name_(name), path_(path),
-        extendpath_(extendpath),
-        count_(0),
-        seqFile_()
-    {
-      seqFile_.exceptions(std::ios_base::badbit | std::ios_base::failbit |
-                          std::ios_base::eofbit);
-      if (gridView.comm().rank()==0) {
-        std::stringstream pvdname;
-        pvdname << name << ".pvd";
-        seqFile_.open(pvdname.str().c_str());
-        seqFile_ << "<?xml version=\"1.0\"?> \n"
-                 << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\"> \n"
-                 << "<Collection> \n" << std::flush;
-      }
-    }
-    ~VTKSequenceWriter() {
-      if (seqFile_.is_open()) {
-        seqFile_ << "</Collection> \n"
-                 << "</VTKFile> \n" << std::flush;
-      }
-    }
+        extendpath_(extendpath)
+    {}
+    ~VTKSequenceWriter() {}
 
     /**
      * \brief Writes VTK data for the given time.
@@ -60,21 +41,58 @@ namespace Dune {
      */
     void write (double time, VTK::OutputType ot = VTK::ascii)
     {
-      std::stringstream name;
-      name.fill('0');
-      name << name_ << "-" << std::setw(5) << count_;
-      std::string pvtuName = BaseType::pwrite(name.str().c_str(),
-                                              path_.c_str(),extendpath_.c_str(),ot);
-      if (seqFile_.is_open()) {
-        seqFile_ << "<DataSet timestep=\"" << time
-                 << "\" group=\"\" part=\"0\" name=\"\" file=\""
-                 << pvtuName << "\"/> \n" << std::flush;
+      /* remember current time step */
+      unsigned int count = timesteps_.size();
+      timesteps_.push_back(time);
+
+      /* make sure the directory exists */
+      // mkdir("vtk", 777);
+
+      /* write VTK file */
+      std::string pvtuName = BaseType::pwrite(seqName(count), path_,extendpath_,ot);
+
+      /* write pvd file ... only on rank 0 */
+      if (this->gridView_.comm().rank()==0) {
+        std::ofstream pvdFile;
+        pvdFile.exceptions(std::ios_base::badbit | std::ios_base::failbit |
+                           std::ios_base::eofbit);
+        std::string pvdname = name_ + ".pvd";
+        pvdFile.open(pvdname.c_str());
+        pvdFile << "<?xml version=\"1.0\"?> \n"
+                << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\"> \n"
+                << "<Collection> \n";
+        for (unsigned int i=0; i<=count; i++)
+        {
+          // filename
+          std::string piecepath = concatPaths(path_, extendpath_);
+          std::string fullname =
+            this->getParallelPieceName(seqName(i), piecepath,
+                                       this->gridView_.comm().rank(),
+                                       this->gridView_.comm().size());
+          pvdFile << "<DataSet timestep=\"" << timesteps_[i]
+                  << "\" group=\"\" part=\"0\" name=\"\" file=\""
+                  << fullname << "\"/> \n";
+        }
+        pvdFile << "</Collection> \n"
+                << "</VTKFile> \n" << std::flush;
+        pvdFile.close();
       }
-      ++count_;
     }
   private:
+
+    // create sequence name
+    std::string seqName(unsigned int count) const
+    {
+      std::stringstream n;
+      n.fill('0');
+      n << name_ << "-" << std::setw(5) << count;
+      return n.str();
+    }
+
     // do not inherit pwrite
     void pwrite();
   };
-}
+
+} // end namespace Dune
+
 #endif

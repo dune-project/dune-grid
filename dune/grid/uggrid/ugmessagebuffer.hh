@@ -138,8 +138,6 @@ namespace Dune {
                * Base::duneDataHandle_->size(*gv.template begin<codim,InteriorBorder_Partition>());
       }
 
-      typedef typename GridView::template Codim<codim>::Entity Entity;
-
       // iterate over all entities, find the maximum size for
       // the current rank
       int maxSize = 0;
@@ -191,8 +189,6 @@ namespace Dune {
         return sizeof(DataType)
                * Base::duneDataHandle_->size(*element.template subEntity<codim>(0));
       }
-
-      typedef typename GridView::template Codim<codim>::Entity Entity;
 
       // iterate over all entities, find the maximum size for
       // the current rank

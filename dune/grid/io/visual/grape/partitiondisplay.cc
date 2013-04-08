@@ -572,7 +572,7 @@ inline static int hm3_partition_draw_element (HELEMENT3D* helement,
   center[1] /= descr->number_of_vertices;
   center[2] /= descr->number_of_vertices;
 
-  /* draw each face of the element seperately */
+  /* draw each face of the element separately */
   for (h=0; h<descr->number_of_polygons; h++) {
 
     /* calculate shrinked coordinates */
