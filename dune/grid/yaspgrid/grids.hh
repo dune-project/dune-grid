@@ -1259,7 +1259,7 @@ namespace Dune {
     int rank_relative (int rank, int dir, int cnt) const
     {
       iTupel coord = rank_to_coord(rank);
-      coord[dir] = (coord[dir]+dims[dir]+cnt)%dims[dir];
+      coord[dir] = (coord[dir]+_dims[dir]+cnt)%_dims[dir];
       return coord_to_rank(coord);
     }
 
