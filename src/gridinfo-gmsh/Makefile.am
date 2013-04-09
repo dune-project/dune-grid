@@ -80,3 +80,5 @@ dune_gridinfo_gmsh_ug_3d_LDADD =		\
 endif UG
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

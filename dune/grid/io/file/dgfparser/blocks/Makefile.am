@@ -22,3 +22,5 @@ blocks_HEADERS = basic.hh  boundarydom.hh  boundaryseg.hh \
 		 simplex.hh  simplexgeneration.hh  vertex.hh
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

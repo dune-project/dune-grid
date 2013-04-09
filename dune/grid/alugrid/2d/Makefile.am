@@ -18,3 +18,5 @@ libalu2d_la_LDFLAGS = $(AM_LDFLAGS) $(ALUGRID_LDFLAGS)
 libalu2d_la_LIBADD = $(ALUGRID_LIBS) $(DUNE_LIBS)
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

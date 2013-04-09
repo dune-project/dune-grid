@@ -6,7 +6,7 @@ sphere.msh  oned-testgrid.msh
 
 gmshdir=$(includedir)/dune/doc/grids/gmsh
 gmsh_DATA = $(GRIDS)
-EXTRA_DIST = $(GRIDS)
+EXTRA_DIST = CMakeLists.txt $(GRIDS)
 
 include $(top_srcdir)/am/webstuff
 include $(top_srcdir)/am/global-rules

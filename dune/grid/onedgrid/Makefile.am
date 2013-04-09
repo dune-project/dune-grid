@@ -12,3 +12,5 @@ onedgrid_HEADERS = nulliteratorfactory.hh  onedgridentity.hh \
    onedgridlist.hh  onedgridintersections.hh onedgridintersectioniterators.hh
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

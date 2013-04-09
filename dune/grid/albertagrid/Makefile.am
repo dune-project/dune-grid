@@ -91,3 +91,5 @@ libalbertagrid_9d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=9
 libalbertagrid_9d_la_LIBADD =-L$(ALBERTAROOT)/lib $(ALBERTA_BASE_LIBS) -lalberta_9d $(DUNE_LIBS)
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

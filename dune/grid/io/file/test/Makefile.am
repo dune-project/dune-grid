@@ -114,3 +114,5 @@ starcdreadertest_LDADD =			\
 include $(top_srcdir)/am/global-rules
 
 CLEANFILES = *.vtu *.vtp *.data sgrid*.am *.pvtu *.pvtp *.pvd
+
+EXTRA_DIST = CMakeLists.txt

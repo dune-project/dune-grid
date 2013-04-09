@@ -1,7 +1,7 @@
 # $Id$
 
 # we need the module file to be able to build via dunecontrol
-EXTRA_DIST=dune.module
+EXTRA_DIST= CMakeLists.txt dune.module dune-grid-config.cmake.in  dune-grid-version.cmake.in
 
 # don't follow the full GNU-standard
 # we need automake 1.9 or newer
@@ -9,6 +9,7 @@ AUTOMAKE_OPTIONS = foreign 1.9
 
 # All subdirectories that must (or can) be handled before the library is built
 SUBDIRS =					\
+        cmake                                   \
 	doc					\
 	dune					\
 	m4
@@ -28,3 +29,7 @@ DISTCHECK_CONFIGURE_FLAGS = --with-dune-common="$(DUNE_COMMON_ROOT)" --with-dune
 
 include $(top_srcdir)/am/global-rules
 include $(top_srcdir)/am/top-rules
+
+# Distribute and install config.h.cmake
+configdir = $(datadir)/dune-grid
+dist_config_DATA = config.h.cmake

@@ -28,3 +28,5 @@ dune_alucube_3d_to_vtk_volume_LDADD =	\
 endif ALUGRID
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt
