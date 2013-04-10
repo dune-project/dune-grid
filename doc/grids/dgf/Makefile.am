@@ -43,7 +43,7 @@ GRIDS = basicunitcube-2d.dgf \
 
 dgfdir=$(includedir)/dune/doc/grids/dgf
 dgf_DATA = $(GRIDS)
-EXTRA_DIST = $(GRIDS)
+EXTRA_DIST = CMakeLists.txt $(GRIDS)
 
 include $(top_srcdir)/am/webstuff
 include $(top_srcdir)/am/global-rules

@@ -170,7 +170,7 @@ test_parallel_ug_LDADD =			\
 SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc checkentityseed.cc
 
 # gridcheck not used explicitly, we should still ship it :)
-EXTRA_DIST = $(SOURCES)
+EXTRA_DIST = CMakeLists.txt $(SOURCES)
 
 CLEANFILES = *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log
 

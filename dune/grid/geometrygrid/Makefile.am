@@ -8,3 +8,5 @@ geometrygrid_HEADERS = backuprestore.hh  cachedcoordfunction.hh  capabilities.hh
                        iterator.hh  persistentcontainer.hh
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

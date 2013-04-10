@@ -28,3 +28,5 @@ mcmgmappertest_LDADD =				\
 scsgmappertest_SOURCES = scsgmappertest.cc
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt

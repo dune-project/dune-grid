@@ -14,3 +14,5 @@ gmsh2dgf_SOURCES = gmsh2dgf.cc
 gmsh2dgf_CPPFLAGS = $(AM_CPPFLAGS) $(ALL_PKG_CPPFLAGS) -DHAVE_DUNE_GRID=1
 
 include $(top_srcdir)/am/global-rules
+
+EXTRA_DIST = CMakeLists.txt
