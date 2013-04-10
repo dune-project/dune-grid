@@ -1,7 +1,6 @@
 MODULES =              \
   DuneGridMacros.cmake \
   FindAlberta.cmake    \
-  FindALUGrid.cmake    \
   FindAmiraMesh.cmake  \
   FindGrape.cmake      \
   FindPsurface.cmake   \
