@@ -360,7 +360,7 @@ namespace Dune
     //******************************************************************
 
     typedef std::pair < int , GeometryType > SubEntityKeyType;
-    typedef std::map < int , std::pair<int,int> > subEntitymapType;
+    //typedef std::map < int , std::pair<int,int> > subEntitymapType;
     std::map < SubEntityKeyType , std::vector<int> > setOfVerticesPerSubEntity;
     std::map < std::vector<int> , SubEntityKeyType > subEntityPerSetOfVertices;
 

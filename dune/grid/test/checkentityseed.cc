@@ -71,7 +71,7 @@ namespace CheckEntitySeed // don't blur namespace Dune
 
     static bool apply ( const Type &t1, const Type &t2, const double eps = 1e-10 )
     {
-      typedef typename Type::GlobalCoordinate GlobalCooridinate;
+      //typedef typename Type::GlobalCoordinate GlobalCooridinate;
 
       // check geometry type
       if( t1.type() != t2.type() )

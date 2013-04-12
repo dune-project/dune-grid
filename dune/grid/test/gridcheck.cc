@@ -260,7 +260,7 @@ void assertNeighbor (Grid &g)
 
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   enum { dim = Grid::dimension };
-  typedef typename Grid::ctype ct;
+  //typedef typename Grid::ctype ct DUNE_UNUSED;
 
   typedef typename Grid::GlobalIdSet GlobalIdSet;
   const GlobalIdSet & globalid = g.globalIdSet();
@@ -502,8 +502,8 @@ template <bool checkMark , class Grid>
 void iterate(Grid &g)
 {
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
-  typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-  typedef typename Grid::HierarchicIterator HierarchicIterator;
+  //typedef typename Grid::template Codim<0>::EntityPointer EntityPointer DUNE_UNUSED;
+  //typedef typename Grid::HierarchicIterator HierarchicIterator DUNE_UNUSED;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
   int l = g.maxLevel();
   LevelIterator it = g.template lbegin<0>(l);
