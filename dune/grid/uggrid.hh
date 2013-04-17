@@ -502,6 +502,9 @@ namespace Dune {
     template<class DataHandle>
     bool loadBalance (DataHandle& dataHandle)
     {
+#ifndef DUNE_UGGRID_HACKY_DYNAMIC_LOADBALANCING
+      DUNE_THROW(NotImplemented, "load balancing with data attached");
+#else
 #ifdef ModelP
       // gather element data
       std::vector<double> elementData;
@@ -529,6 +532,7 @@ namespace Dune {
 #endif
 
       return true;
+#endif  // DUNE_UGGRID_HACKY_DYNAMIC_LOADBALANCING
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine

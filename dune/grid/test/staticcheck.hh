@@ -24,7 +24,7 @@ struct GeometryInterface
     dune_static_assert( (Geometry::mydimension == dim-codim), "" );
     dune_static_assert( (Geometry::dimension == dim), "" );
 
-    typedef typename Geometry::ctype ctype;
+    typedef typename Geometry::ctype ctype DUNE_UNUSED;
 
     geo.type();
     geo.affine();
@@ -56,7 +56,7 @@ template <class Entity>
 void DoEntityInterfaceCheck (Entity &e)
 {
   // exported types
-  typedef typename Entity::ctype ctype;
+  typedef typename Entity::ctype ctype DUNE_UNUSED;
 
   // methods on each entity
   e.level();
@@ -75,10 +75,10 @@ struct ZeroEntityMethodCheck
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator;
-    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator;
-    typedef typename Entity::HierarchicIterator HierarchicIterator;
-    typedef typename Entity::EntityPointer EntityPointer;
+    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator DUNE_UNUSED;
+    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator DUNE_UNUSED;
+    typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
+    typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
     e.template count<cd>();
     e.template subEntity<cd>(0);
@@ -102,10 +102,10 @@ struct ZeroEntityMethodCheck<Grid, cd, false>
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator;
-    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator;
-    typedef typename Entity::HierarchicIterator HierarchicIterator;
-    typedef typename Entity::EntityPointer EntityPointer;
+    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator DUNE_UNUSED;
+    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator DUNE_UNUSED;
+    typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
+    typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
     // recursively check on
     ZeroEntityMethodCheck<Grid, cd - 1,
@@ -126,10 +126,10 @@ struct ZeroEntityMethodCheck<Grid, 0, true>
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator;
-    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator;
-    typedef typename Entity::HierarchicIterator HierarchicIterator;
-    typedef typename Entity::EntityPointer EntityPointer;
+    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator DUNE_UNUSED;
+    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator DUNE_UNUSED;
+    typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
+    typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
     e.template count<0>();
     e.template subEntity<0>(0);
@@ -151,10 +151,10 @@ struct ZeroEntityMethodCheck<Grid, 0, false>
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator;
-    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator;
-    typedef typename Entity::HierarchicIterator HierarchicIterator;
-    typedef typename Entity::EntityPointer EntityPointer;
+    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator DUNE_UNUSED;
+    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator DUNE_UNUSED;
+    typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
+    typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
     e.template count<0>();
     e.template subEntity<0>(0);
@@ -410,10 +410,10 @@ struct GridInterface
   static void check (const Grid &g)
   {
     // check for exported types
-    typedef typename Grid::ctype ctype;
-    typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
-    typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-    typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
+    typedef typename Grid::ctype ctype DUNE_UNUSED;
+    typedef typename Grid::template Codim<0>::LevelIterator LevelIterator DUNE_UNUSED;
+    typedef typename Grid::template Codim<0>::EntityPointer EntityPointer DUNE_UNUSED;
+    typedef typename Grid::template Codim<0>::LeafIterator LeafIterator DUNE_UNUSED;
 
     // check for member functions
     g.maxLevel();
@@ -441,10 +441,10 @@ struct GridInterface
     LeafInterface< Grid>();
 
     // Check for index sets
-    typedef typename Grid::LevelIndexSet LevelIndexSet;
-    typedef typename Grid::LeafIndexSet LeafIndexSet;
-    typedef typename Grid::LocalIdSet LocalIdSet;
-    typedef typename Grid::GlobalIdSet GlobalIdSet;
+    typedef typename Grid::LevelIndexSet LevelIndexSet DUNE_UNUSED;
+    typedef typename Grid::LeafIndexSet LeafIndexSet DUNE_UNUSED;
+    typedef typename Grid::LocalIdSet LocalIdSet DUNE_UNUSED;
+    typedef typename Grid::GlobalIdSet GlobalIdSet DUNE_UNUSED;
 
     g.levelIndexSet(0);
     if (g.template lbegin<0>(0) !=g.template lend<0>(0) ) {

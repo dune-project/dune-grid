@@ -113,7 +113,6 @@ namespace Dune
   void checkGeometry ( const GridView< VT > &gridView )
   {
     typedef typename GridView< VT >::template Codim<0>::Iterator Iterator;
-    typedef typename GridView< VT >::template Codim<0>::Geometry Geometry;
 
     const Iterator end = gridView.template end<0>();
     Iterator it = gridView.template begin<0>();
@@ -122,9 +121,8 @@ namespace Dune
     {
       ForLoop<CheckSubEntityGeometry,0,GridView<VT>::dimension>::apply(*it);
     }
-
   }
 
-}
+} // namespace Dune
 
 #endif // #ifndef DUNE_CHECK_GEOMETRY_CC

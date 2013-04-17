@@ -322,7 +322,7 @@ void checkIntersectionIterator(const GridViewType& view,
       const typename LocalGeometry::GlobalCoordinate &refNormal = refElement.integrationOuterNormal( indexInInside );
       typename IntersectionGeometry::GlobalCoordinate refIntNormal;
       geoInside.jacobianInverseTransposed( xInside ).mv( refNormal, refIntNormal );
-      // note: refElement.template mapping< 1 >( indexInInside ) is affine,
+      // note: refElement.template geometry< 1 >( indexInInside ) is affine,
       //       hence we may use any point to obtain the integrationElement
       refIntNormal *= geoInside.integrationElement( xInside ) * geometryInInside.integrationElement( pt )
                       / refElement.template geometry< 1 >( indexInInside ).integrationElement( pt );
