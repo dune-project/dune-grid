@@ -266,6 +266,7 @@ namespace Dune {
       return UG_NAMESPACE::EdgeSymmVHIF;
     }
 
+#ifdef DUNE_UGGRID_HACKY_DYNAMIC_LOADBALANCING
     /** \brief Encapsulates the UG EVECTOR macro
      *  \note This is only used for the initial load balancing implementation
      *        (with all-to-all communication), and will become obsolete once
@@ -289,6 +290,7 @@ namespace Dune {
       using UG_NAMESPACE::VECTOR;
       return NVECTOR(node);
     }
+#endif
 
     /** \brief Encapsulates the UG EPRIO macro */
     static int EPriority(const UG_NS< UG_DIM >::Element* element)
