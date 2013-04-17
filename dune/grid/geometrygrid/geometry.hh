@@ -73,17 +73,6 @@ namespace Dune
       struct hasSingleGeometryType
         : public InferHasSingleGeometryType< Capabilities::hasSingleGeometryType< Grid >, Traits::dimension, mydim >
       {};
-
-      struct UserData
-      {
-        UserData () : refCount_( 0 ) {}
-
-        void addReference () { ++refCount_; }
-        bool removeReference () { return (--refCount_ == 0); }
-
-      private:
-        unsigned int refCount_;
-      };
     };
 
 
@@ -109,7 +98,23 @@ namespace Dune
       static const int codimension = dimension - mydimension;
 
     protected:
-      typedef CachedMultiLinearGeometry< ctype, mydimension, coorddimension, GeometryTraits< Grid > > Mapping;
+      typedef CachedMultiLinearGeometry< ctype, mydimension, coorddimension, GeometryTraits< Grid > > BasicMapping;
+
+      struct Mapping
+        : public BasicMapping
+      {
+        template< class CoordVector >
+        Mapping ( const GeometryType &type, const CoordVector &coords )
+          : BasicMapping( type, coords ),
+            refCount_( 0 )
+        {}
+
+        void addReference () { ++refCount_; }
+        bool removeReference () { return (--refCount_ == 0); }
+
+      private:
+        unsigned int refCount_;
+      };
 
     public:
       typedef typename Mapping::LocalCoordinate LocalCoordinate;
@@ -130,7 +135,7 @@ namespace Dune
         assert( int( type.dim() ) == mydimension );
         void *mappingStorage = grid.allocateStorage( sizeof( Mapping ) );
         mapping_ = new( mappingStorage ) Mapping( type, coords );
-        mapping_->userData().addReference();
+        mapping_->addReference();
       }
 
       Geometry ( const This &other )
@@ -138,20 +143,20 @@ namespace Dune
           mapping_( other.mapping_ )
       {
         if( mapping_ )
-          mapping_->userData().addReference();
+          mapping_->addReference();
       }
 
       ~Geometry ()
       {
-        if( mapping_ && mapping_->userData().removeReference() )
+        if( mapping_ && mapping_->removeReference() )
           destroyMapping();
       }
 
       const This &operator= ( const This &other )
       {
         if( other.mapping_ )
-          other.mapping_->userData().addReference();
-        if( mapping_ && mapping_->userData().removeReference() )
+          other.mapping_->addReference();
+        if( mapping_ && mapping_->removeReference() )
           destroyMapping();
         grid_ = other.grid_;
         mapping_ = other.mapping_;
