@@ -20,18 +20,19 @@ namespace Dune {
       template <class DataType>
       void read(DataType& x)
       {
-        x = data_[0];
-        data_.erase(data_.begin());
+        memcpy(&x, data_, sizeof(DataType));
+        free(data_);
       }
 
       template <class DataType>
       void write(const DataType& x)
       {
-        data_.push_back(x);
+        data_ = (char*)malloc(sizeof(DataType));
+        memcpy(data_, &x, sizeof(DataType));
       }
 
     private:
-      std::vector<double> data_;
+      char* data_;
     };
 
     template <int commCodim>
@@ -50,10 +51,9 @@ namespace Dune {
     /** \brief Gather data before load balancing
      * \param dataVector global vector to be filled
      */
-    template <int codim, class GridView, class DataHandle, class DataVector>
+    template <int codim, class GridView, class DataHandle>
     static void gather(const GridView& gridView,
-                       DataHandle& dataHandle,
-                       DataVector& dataVector)
+                       DataHandle& dataHandle)
     {
       typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView,
           LayoutWrapper<codim>::template Layout
@@ -62,69 +62,71 @@ namespace Dune {
 
       typedef typename GridView::template Codim<codim>::Iterator Iterator;
       Iterator it = gridView.template begin<codim>();
+      const Iterator& endIt = gridView.template end<codim>();
       // obtain size of the data handle
-      int numberOfParams = dataHandle.size(*it);
+      int numberOfParams = 0;
+      if (it != endIt && dataHandle.contains(dim, codim))
+        numberOfParams = dataHandle.size(*it);
 
       // do nothing if nothing has to be done
       if (gridView.comm().max(numberOfParams) == 0)
         return;
 
-      // resize the data vector according to the data handle
-      dataVector.resize(gridView.size(codim)*numberOfParams);
-
       // write the data into a global vector on process 0
       // write the macrogrid index of each entity into the corresponding UG vector
-      const Iterator& endIt = gridView.template end<codim>();
       for (; it != endIt; ++it) {
         // obtain data from handle
         // and write it into the message buffer
         LBMessageBuffer lbMessageBuffer;
         dataHandle.gather(lbMessageBuffer, *it);
 
-        // assign data to the global vector
-        int macroIdx = mapper.map(*it);
-        for (int i = 0; i < numberOfParams; i++)
-          lbMessageBuffer.read(dataVector[macroIdx*numberOfParams + i]);
+        char*& buffer = gridView.grid().getRealImplementation(*it).getTarget()->message_buffer;
+        assert(not buffer);
 
-        // set value of UG entity vector to the macro grid index
-        UG_NS<dim>::EntityVector(GridView::Grid::getRealImplementation(*it).getTarget())->value[0] = macroIdx;
+        typedef typename DataHandle::DataType DataType;
+        buffer = (char*)malloc(sizeof(int) + numberOfParams*sizeof(DataType));
+        *((int*)buffer) = numberOfParams*sizeof(DataType);       // Size of the actual payload
+
+        DataType dummy;
+        lbMessageBuffer.read(dummy);
+        // Copy the data into the message buffer
+        memcpy(buffer+sizeof(int), &dummy, sizeof(DataType));
       }
-
-      // broadcast the global data vector
-      int dataSize = dataVector.size();
-      gridView.comm().broadcast(&dataSize, 1, 0);
-      dataVector.resize(dataSize);
-      gridView.comm().broadcast(&dataVector[0], dataVector.size(), 0);
     }
 
     /** \brief Scatter data after load balancing
      * \param dataVector global vector with data
      */
-    template <int codim, class GridView, class DataHandle, class DataVector>
+    template <int codim, class GridView, class DataHandle>
     static void scatter(const GridView& gridView,
-                        DataHandle& dataHandle,
-                        const DataVector& dataVector)
+                        DataHandle& dataHandle)
     {
       typedef typename GridView::template Codim<codim>::Iterator Iterator;
       Iterator it = gridView.template begin<codim>();
+      const Iterator& endIt = gridView.template end<codim>();
+
       // obtain size of the data handle
-      int numberOfParams = dataHandle.size(*it);
+      int numberOfParams = 0;
+      if (it != endIt && dataHandle.contains(dim, codim))
+        numberOfParams = dataHandle.size(*it);
 
       // do nothing if nothing has to be done
       if (gridView.comm().max(numberOfParams) == 0)
         return;
 
-      // write the data into a global vector on process 0
-      // write the macrogrid index of each entity into the corresponding UG vector
-      const Iterator& endIt = gridView.template end<codim>();
+      // obtain the data from the global vector with help of
+      // the macro index and scatter it
       for (; it != endIt; ++it) {
-        // get macrogrid index from element vector
-        int macroIdx = UG_NS<dim>::EntityVector(GridView::Grid::getRealImplementation(*it).getTarget())->value[0];
+        char* buffer = gridView.grid().getRealImplementation(*it).getTarget()->message_buffer;
+        assert(buffer);
 
         // get data from global vector and write to message buffer
+        typedef typename DataHandle::DataType DataType;
+        DataType dummy;
+        memcpy(&dummy, buffer+sizeof(int), sizeof(DataType));
+
         LBMessageBuffer lbMessageBuffer;
-        for (int i = 0; i < numberOfParams; i++)
-          lbMessageBuffer.write(dataVector[macroIdx*numberOfParams + i]);
+        lbMessageBuffer.write(dummy);
 
         // provide the data handle with the message buffer
         dataHandle.scatter(lbMessageBuffer, *it, numberOfParams);

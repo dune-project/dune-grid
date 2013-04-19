@@ -501,19 +501,17 @@ namespace Dune {
     template<class DataHandle>
     bool loadBalance (DataHandle& dataHandle)
     {
-#ifndef DUNE_UGGRID_HACKY_DYNAMIC_LOADBALANCING
+#if !HAVE_UG_PATCH10
       DUNE_THROW(NotImplemented, "load balancing with data attached");
 #else
 #ifdef ModelP
       // gather element data
-      std::vector<double> elementData;
-      UGLBGatherScatter<dim>::template gather<0>(this->leafView(),
-                                                 dataHandle, elementData);
+      //         UGLBGatherScatter<dim>::template gather<0>(this->leafView(),
+      //                                               dataHandle, elementData);
 
       // gather node data
-      std::vector<double> nodeData;
       UGLBGatherScatter<dim>::template gather<dim>(this->leafView(),
-                                                   dataHandle, nodeData);
+                                                   dataHandle);
 #endif
 
       // the load balancing step now also
@@ -522,12 +520,12 @@ namespace Dune {
 
 #ifdef ModelP
       // scatter element data
-      UGLBGatherScatter<dim>::template scatter<0>(this->leafView(),
-                                                  dataHandle, elementData);
+      //         UGLBGatherScatter<dim>::template scatter<0>(this->leafView(),
+      //                                                     dataHandle);
 
       // scatter node data
       UGLBGatherScatter<dim>::template scatter<dim>(this->leafView(),
-                                                    dataHandle, nodeData);
+                                                    dataHandle);
 #endif
 
       return true;
