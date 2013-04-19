@@ -97,73 +97,25 @@ Dune::UGGrid < dim >::UGGrid()
 
     if (dim==2)
     {
-#ifndef DUNE_UGGRID_HACKY_DYNAMIC_LOADBALANCING
       char* nfarg = strdup("newformat DuneFormat2d");
       if (UG_NS<dim>::CreateFormatCmd(1, &nfarg))
         DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
       free(nfarg);
-#else
-#ifdef ModelP
-      const int nArgs = 3;
-#else
-      const int nArgs = 1;
-#endif
-      char* newArgs[nArgs];
-      for (int i=0; i<nArgs; i++)
-        newArgs[i] = (char*)::malloc(50*sizeof(char));
-
-      sprintf(newArgs[0], "newformat DuneFormat2d" );
-#ifdef ModelP
-      // generate element and node vectors for load
-      // balancing of element and node data
-      sprintf(newArgs[1], "V e1 : vt 1" );   // generates element vectors
-      sprintf(newArgs[2], "V n1 : vt 1" );   // generates node vectors
-#endif
-      if (UG_NS<dim>::CreateFormatCmd(nArgs, newArgs))
-        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
-      for (int i=0; i<nArgs; i++)
-        free(newArgs[i]);
-#endif
     }
     if (dim==3)
     {
-#ifndef DUNE_UGGRID_HACKY_DYNAMIC_LOADBALANCING
       char* newArgs[2];
       for (int i=0; i<2; i++)
         newArgs[i] = (char*)::malloc(50*sizeof(char));
-#else
-#ifdef ModelP
-      const int nArgs = 4;
-#else
-      const int nArgs = 2;
-#endif
-      char* newArgs[nArgs];
-      for (int i=0; i<nArgs; i++)
-        newArgs[i] = (char*)::malloc(50*sizeof(char));
-#endif
 
       sprintf(newArgs[0], "newformat DuneFormat3d" );
       sprintf(newArgs[1], "V s1 : vt 1" ); // generates side vectors in 3D
 
-#ifndef DUNE_UGGRID_HACKY_DYNAMIC_LOADBALANCING
       if (UG_NS<dim>::CreateFormatCmd(2, newArgs))
         DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
 
       for (int i=0; i<2; i++)
         free(newArgs[i]);
-#else
-#ifdef ModelP
-      // generate element and node vectors for load
-      // balancing of element and node data
-      sprintf(newArgs[2], "V e1 : vt 1" ); // generates element vectors
-      sprintf(newArgs[3], "V n1 : vt 1" ); // generates node vectors
-#endif
-      if (UG_NS<dim>::CreateFormatCmd(nArgs, newArgs))
-        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
-
-      for (int i=0; i<nArgs; i++)
-        free(newArgs[i]);
-#endif
     }
   }
 

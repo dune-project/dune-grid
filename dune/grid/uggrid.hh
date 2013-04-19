@@ -529,7 +529,7 @@ namespace Dune {
 #endif
 
       return true;
-#endif  // DUNE_UGGRID_HACKY_DYNAMIC_LOADBALANCING
+#endif
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine
