@@ -117,7 +117,7 @@ namespace Dune {
       // obtain the data from the global vector with help of
       // the macro index and scatter it
       for (; it != endIt; ++it) {
-        char* buffer = gridView.grid().getRealImplementation(*it).getTarget()->message_buffer;
+        char*& buffer = gridView.grid().getRealImplementation(*it).getTarget()->message_buffer;
         assert(buffer);
 
         // get data from global vector and write to message buffer
@@ -130,6 +130,10 @@ namespace Dune {
 
         // provide the data handle with the message buffer
         dataHandle.scatter(lbMessageBuffer, *it, numberOfParams);
+
+        // free object's local message buffer
+        free (buffer);
+        buffer = nullptr;
       }
     }
   };
