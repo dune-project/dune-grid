@@ -82,7 +82,7 @@ AC_DEFUN([DUNE_PATH_UG],[
       fi
 
       ## check version number 
-      NEEDEDUG_VERSION=3.9.1-patch7
+      NEEDEDUG_VERSION=3.9.1-patch9
 
       if test x$HAVE_UG = x1; then
           
@@ -97,16 +97,14 @@ AC_DEFUN([DUNE_PATH_UG],[
               AC_MSG_WARN([UG version is too old (you need at least $NEEDEDUG_VERSION)])
           fi
           
-          # The following code is temporary: starting with UG-3.9.1-patch9,
-          # the include path provided by pkg-config changes from /usr/include/ug to /usr/include
-          # The missing '/ug' needs to be added in the c++-code.
-          # This is a backward-incompatible change.  To ease the transition we provide
-          # a cpp flag that marks whether the UG version found is 'old' or 'new'
-          if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=3.9.1-patch9 libug; then
-              HAVE_UG_PATCH9="1"
+          # The following code is temporary: starting with UG-3.9.1-patch10,
+          # UG exposes some extra infrastructure for dynamic load-balancing.
+          # We only want to use it if people have patch10 installed.
+          if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=3.9.1-patch10 libug; then
+              HAVE_UG_PATCH10="1"
           else
-              HAVE_UG_PATCH9="0"
-              AC_MSG_WARN([Please consider updating to at least UG-3.9.1-patch9 (will be mandatory for dune-grid 2.4)])
+              HAVE_UG_PATCH10="0"
+              AC_MSG_WARN([Please consider updating to at least UG-3.9.1-patch10 (will be mandatory for dune-grid 2.4)])
           fi
       fi
 
@@ -191,11 +189,11 @@ AC_DEFUN([DUNE_PATH_UG],[
         [This is only true if UG was found by configure 
          _and_ if the application uses the UG_CPPFLAGS])
          
-      # Remove the following as soon as we absolutely require patch9 or higher
-      if test x$HAVE_UG_PATCH9 = x1 ; then
+      # Remove the following as soon as we absolutely require patch10 or higher
+      if test x$HAVE_UG_PATCH10 = x1 ; then
       
-        AC_DEFINE(HAVE_UG_PATCH9, 1,
-            [Do we have UG in at least version 3.9.1-patch9?])
+        AC_DEFINE(HAVE_UG_PATCH10, 1,
+            [Do we have UG in at least version 3.9.1-patch10?])
             
       fi
 
