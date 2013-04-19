@@ -13,6 +13,7 @@
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/float_cmp.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
 #include <dune/geometry/referenceelements.hh>
@@ -119,131 +120,6 @@ private:
   UserDataType &userDataSend_;
   UserDataType &userDataReceive_;
 };
-
-/** \brief Data handle to test dynamic load balancing with
- *
- * Obtained by copy'n'paste from the DGF internals.  Will be improved eventually.
- */
-template <class GridType>
-struct UGGridTestDataHandle
-  : public CommDataHandleIF<UGGridTestDataHandle<GridType>,double>
-{
-  UGGridTestDataHandle( GridType& grid)
-    : idSet_(grid.localIdSet())
-  {
-#if 0
-    typedef typename GridType::LevelGridView GridView;
-    GridView gridView = gridPtr_->levelView( 0 );
-    const typename GridView::IndexSet &indexSet = gridView.indexSet();
-
-    const PartitionIteratorType partType = Interior_Partition;
-    typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
-    const Iterator enditer = gridView.template end< 0, partType >();
-    for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
-    {
-      const typename Iterator::Entity &el = *iter;
-      if ( gridPtr_.nofElParam_ > 0 )
-        std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
-      if ( gridPtr_.nofVtxParam_ > 0 )
-      {
-        for ( int v = 0; v < el.template count<dimension>(); ++v)
-        {
-          typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
-          if ( ! gridPtr_.vtxParam_[ index ].empty() )
-            std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId(el,v,dimension) ] );
-        }
-      }
-    }
-#endif
-  }
-
-#if 0
-  ~DataHandle()
-  {
-    typedef typename GridType::LevelGridView GridView;
-    GridView gridView = gridPtr_->levelView( 0 );
-    const typename GridView::IndexSet &indexSet = gridView.indexSet();
-
-    if ( gridPtr_.nofElParam_ > 0 )
-      gridPtr_.elParam_.resize( indexSet.size(0) );
-    if ( gridPtr_.nofVtxParam_ > 0 )
-      gridPtr_.vtxParam_.resize( indexSet.size(dimension) );
-
-    const PartitionIteratorType partType = All_Partition;
-    typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
-    const Iterator enditer = gridView.template end< 0, partType >();
-    for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
-    {
-      const typename Iterator::Entity &el = *iter;
-      if ( gridPtr_.nofElParam_ > 0 )
-      {
-        std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
-        assert( gridPtr_.elParam_[ indexSet.index(el) ].size() == (unsigned int)gridPtr_.nofElParam_ );
-      }
-      if ( gridPtr_.nofVtxParam_ > 0 )
-      {
-        for ( int v = 0; v < el.template count<dimension>(); ++v)
-        {
-          typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
-          if ( gridPtr_.vtxParam_[ index ].empty() )
-            std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId(el,v,dimension) ] );
-          assert( gridPtr_.vtxParam_[ index ].size() == (unsigned int)gridPtr_.nofVtxParam_ );
-        }
-      }
-    }
-  }
-#endif
-  CommDataHandleIF<UGGridTestDataHandle,double> &interface()
-  {
-    return *this;
-  }
-
-  bool contains (int dim, int codim) const
-  {
-    return (codim==dim || codim==0);
-  }
-
-  bool fixedsize (int dim, int codim) const
-  {
-    return false;
-  }
-
-  template<class EntityType>
-  size_t size (const EntityType& e) const
-  {
-    //return gridPtr_.nofParameters( (int) e.codimension);
-    return 1;
-  }
-
-  template<class MessageBufferImp, class EntityType>
-  void gather (MessageBufferImp& buff, const EntityType& e) const
-  {
-    const std::vector<double> &v = (e.codimension==0) ? elData_[idSet_.id(e)] : vtxData_[idSet_.id(e)];
-    const size_t s = v.size();
-    for (size_t i=0; i<s; ++i)
-      buff.write( v[i] );
-    //assert( s == (size_t)gridPtr_.nofParameters(e.codimension) );
-  }
-
-  template<class MessageBufferImp, class EntityType>
-  void scatter (MessageBufferImp& buff, const EntityType& e, size_t n)
-  {
-    std::vector<double> &v = (e.codimension==0) ? elData_[idSet_.id(e)] : vtxData_[idSet_.id(e)];
-    v.resize( n );
-    //gridPtr_.setNofParams( e.codimension, n );
-    for (size_t i=0; i<n; ++i)
-      buff.read( v[i] );
-  }
-
-private:
-  typedef typename GridType::LocalIdSet IdSet;
-  const IdSet &idSet_;
-  mutable std::map< typename IdSet::IdType, std::vector<double> > elData_, vtxData_;
-};
-
-
-
-
 
 template <class GridView>
 void checkIntersections(const GridView &gv)
@@ -514,6 +390,140 @@ public:
   }
 };
 
+class LoadBalance
+{
+  template<class Grid, class Vector, int commCodim>
+  class LBDataHandle
+    : public Dune::CommDataHandleIF<LBDataHandle<Grid, Vector, commCodim>,
+          typename Vector::value_type>
+  {
+    typedef typename Grid::GlobalIdSet IdSet;
+    typedef typename IdSet::IdType IdType;
+    typedef typename Grid::LeafGridView LeafGV;
+    typedef typename LeafGV::template Codim<commCodim>::template Partition
+    <Dune::InteriorBorder_Partition>::Iterator Iterator;
+
+  public:
+    typedef typename Vector::value_type DataType;
+    typedef Dune::CommDataHandleIF<LBDataHandle<Grid, Vector, commCodim>,
+        DataType> ParentType;
+
+    bool contains (int dim, int codim) const
+    { return (codim == commCodim); }
+
+    bool fixedsize (int dim, int codim) const
+    { return true; }
+
+    template<class Entity>
+    size_t size (Entity& entity) const
+    {
+      return 1;
+    }
+
+    template<class MessageBuffer, class Entity>
+    void gather (MessageBuffer& buff, const Entity& entity) const
+    {
+      const IdType id = grid_.globalIdSet().id(entity);
+      buff.write(idToDataMap_.at(id));
+    }
+
+    template<class MessageBuffer, class Entity>
+    void scatter (MessageBuffer& buff, const Entity& entity, size_t n)
+    {
+      const IdType id = grid_.globalIdSet().id(entity);
+      buff.read(idToDataMap_[id]);
+    }
+
+    void postProcess()
+    {
+      dataVector_.resize(grid_.leafView().size(commCodim));
+
+      const LeafGV& gv = grid_.leafView();
+      Iterator it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();
+      const Iterator& endIt = gv.template end<commCodim, Dune::InteriorBorder_Partition>();
+      for (; it != endIt; ++it) {
+        IdType id = grid_.globalIdSet().id(*it);
+        dataVector_[gv.indexSet().index(*it)]= idToDataMap_[id];
+      }
+    }
+
+    LBDataHandle (Grid& grid, Vector& dataVector)
+      : grid_(grid), dataVector_(dataVector)
+    {
+      const LeafGV& gv = grid.leafView();
+      Iterator it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();
+      const Iterator& endIt = gv.template end<commCodim, Dune::InteriorBorder_Partition>();
+      for (; it != endIt; ++it) {
+        IdType id = grid.globalIdSet().id(*it);
+        idToDataMap_[id] = dataVector_[gv.indexSet().index(*it)];
+      }
+    }
+
+  private:
+    Grid& grid_;
+    Vector& dataVector_;
+    std::map<IdType, typename Vector::value_type> idToDataMap_;
+  };
+
+public:
+  template <class Grid>
+  static void test(Grid& grid)
+  {
+#if !HAVE_UG_PATCH10
+    grid.loadBalance();
+#else
+    const int dim = Grid::dimension;
+    const int commCodim = dim;
+    typedef typename Grid::ctype ctype;
+
+    // define the vector containing the data to be balanced
+    typedef Dune::FieldVector<ctype, dim> Position;
+    std::vector<Position> dataVector(grid.leafView().size(commCodim));
+
+    // fill the data vector
+    typedef typename Grid::LeafGridView LeafGV;
+    typedef typename LeafGV::template Codim<commCodim>::template Partition
+    <Dune::InteriorBorder_Partition>::Iterator Iterator;
+    const LeafGV& gv = grid.leafView();
+    Iterator it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();
+    const Iterator& endIt = gv.template end<commCodim, Dune::InteriorBorder_Partition>();
+    for (; it != endIt; ++it) {
+      int index = gv.indexSet().index(*it);
+
+      // assign the position of the entity to the entry in the vector
+      dataVector[index] = it->geometry().center();
+    }
+
+    // balance the grid and the data
+    LBDataHandle<Grid, std::vector<Position>, commCodim> dataHandle(grid, dataVector);
+    grid.loadBalance(dataHandle);
+    dataHandle.postProcess();
+
+    // check for correctness
+    it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();
+    for (; it != endIt; ++it) {
+      int index = gv.indexSet().index(*it);
+
+      const Position& position = it->geometry().center();
+
+      // compare the position with the balanced data
+      for (int k = 0; k < dim; k++)
+      {
+        if (Dune::FloatCmp::ne(dataVector[index][k], position[k]))
+        {
+          DUNE_THROW(Dune::ParallelError,
+                     gv.comm().rank() << ": position " << position
+                                      << " does not coincide with communicated data "
+                                      << dataVector[index]);
+        }
+      }
+    }
+
+    std::cout << gv.comm().rank()
+              << ": load balancing with data was successful." << std::endl;
+#endif
+  }
+};
 
 template <int dim>
 void testParallelUG(bool localRefinement)
@@ -531,20 +541,13 @@ void testParallelUG(bool localRefinement)
   Dune::FieldVector<double,dim> lowerLeft(0);
   Dune::FieldVector<double,dim> upperRight(1);
   Dune::array<unsigned int, dim> elements;
-  std::fill(elements.begin(), elements.end(), 2);
+  std::fill(elements.begin(), elements.end(), 4);
   shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
 
   //////////////////////////////////////////////////////
   // Distribute the grid
   //////////////////////////////////////////////////////
-
-  // Compile the load balancing with a data handle, but don't run it yet
-  if (true)
-    grid->loadBalance();
-  else {
-    UGGridTestDataHandle<GridType> dataHandle(*grid);
-    grid->loadBalance(dataHandle);
-  }
+  LoadBalance::test(*grid);
 
   std::cout << "Process " << grid->comm().rank() + 1
             << " has " << grid->size(0)
