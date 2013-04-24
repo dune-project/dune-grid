@@ -862,7 +862,10 @@ void gridcheck (Grid &g)
     {
       assert(g.size(i)>0);
       for (int j=0; j<=g.maxLevel(); j++)
-        assert(g.size(j,i)>0);
+        if (g.comm().size() == 0)
+          assert(g.size(j,i)>0);
+        else
+          assert(g.size(j,i)>=0);   // in parallel this could be zero (depends on definition of maxLevel() method in parallel)
     }
   }
 

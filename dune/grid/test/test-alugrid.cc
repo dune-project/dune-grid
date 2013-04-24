@@ -138,11 +138,13 @@ void checkIteratorAssignment(GridType & grid)
       if( grid.maxLevel() > 0 )
       {
         it = grid.template lbegin<dim>(1);
-        p = it;
-
-        assert( it->level() == 1 );
-        assert( p.level()   == 1 );
-        assert( p->level()  == 1 );
+        if (grid.size(1,0)>0)
+        {
+          p = it;
+          assert( it->level() == 1 );
+          assert( p.level()   == 1 );
+          assert( p->level()  == 1 );
+        }
       }
     }
   }
