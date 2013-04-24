@@ -223,7 +223,7 @@ namespace Dune {
     friend class GridFactory<UGGrid<dim> >;
 
 #ifdef ModelP
-    friend class UGLBGatherScatter<dim>;
+    friend class UGLBGatherScatter;
 #endif
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
@@ -506,30 +506,26 @@ namespace Dune {
 #else
 #ifdef ModelP
       // gather element data
-      //         UGLBGatherScatter<dim>::template gather<0>(this->leafView(),
-      //                                               dataHandle, elementData);
+      //        UGLBGatherScatter::template gather<0>(this->leafView(), dataHandle);
 
       // gather node data
-      UGLBGatherScatter<dim>::template gather<dim>(this->leafView(),
-                                                   dataHandle);
+      UGLBGatherScatter::template gather<dim>(this->leafView(), dataHandle);
 #endif
 
-      // the load balancing step now also
-      // distributes the macrogrid indices
+      // the load balancing step now also attaches
+      // the data to the entities and distributes it
       loadBalance();
 
 #ifdef ModelP
       // scatter element data
-      //         UGLBGatherScatter<dim>::template scatter<0>(this->leafView(),
-      //                                                     dataHandle);
+      //        UGLBGatherScatter::template scatter<0>(this->leafView(), dataHandle);
 
       // scatter node data
-      UGLBGatherScatter<dim>::template scatter<dim>(this->leafView(),
-                                                    dataHandle);
+      UGLBGatherScatter::template scatter<dim>(this->leafView(), dataHandle);
 #endif
 
       return true;
-#endif
+#endif  // HAVE_UG_PATCH10
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine

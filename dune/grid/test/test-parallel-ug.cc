@@ -397,12 +397,6 @@ class LoadBalance
     : public Dune::CommDataHandleIF<LBDataHandle<Grid, Vector, commCodim>,
           typename Vector::value_type>
   {
-    typedef typename Grid::GlobalIdSet IdSet;
-    typedef typename IdSet::IdType IdType;
-    typedef typename Grid::LeafGridView LeafGV;
-    typedef typename LeafGV::template Codim<commCodim>::template Partition
-    <Dune::InteriorBorder_Partition>::Iterator Iterator;
-
   public:
     typedef typename Vector::value_type DataType;
     typedef Dune::CommDataHandleIF<LBDataHandle<Grid, Vector, commCodim>,
@@ -423,46 +417,27 @@ class LoadBalance
     template<class MessageBuffer, class Entity>
     void gather (MessageBuffer& buff, const Entity& entity) const
     {
-      const IdType id = grid_.globalIdSet().id(entity);
-      buff.write(idToDataMap_.at(id));
+      int index = grid_.leafView().indexSet().index(entity);
+      buff.write(dataVector_[index]);
     }
 
     template<class MessageBuffer, class Entity>
     void scatter (MessageBuffer& buff, const Entity& entity, size_t n)
     {
-      const IdType id = grid_.globalIdSet().id(entity);
-      buff.read(idToDataMap_[id]);
-    }
+      if (dataVector_.size() != grid_.leafView().size(commCodim))
+        dataVector_.resize(grid_.leafView().size(commCodim));
 
-    void postProcess()
-    {
-      dataVector_.resize(grid_.leafView().size(commCodim));
-
-      const LeafGV& gv = grid_.leafView();
-      Iterator it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();
-      const Iterator& endIt = gv.template end<commCodim, Dune::InteriorBorder_Partition>();
-      for (; it != endIt; ++it) {
-        IdType id = grid_.globalIdSet().id(*it);
-        dataVector_[gv.indexSet().index(*it)]= idToDataMap_[id];
-      }
+      int index = grid_.leafView().indexSet().index(entity);
+      buff.read(dataVector_[index]);
     }
 
     LBDataHandle (Grid& grid, Vector& dataVector)
       : grid_(grid), dataVector_(dataVector)
-    {
-      const LeafGV& gv = grid.leafView();
-      Iterator it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();
-      const Iterator& endIt = gv.template end<commCodim, Dune::InteriorBorder_Partition>();
-      for (; it != endIt; ++it) {
-        IdType id = grid.globalIdSet().id(*it);
-        idToDataMap_[id] = dataVector_[gv.indexSet().index(*it)];
-      }
-    }
+    {}
 
   private:
     Grid& grid_;
     Vector& dataVector_;
-    std::map<IdType, typename Vector::value_type> idToDataMap_;
   };
 
 public:
@@ -497,7 +472,6 @@ public:
     // balance the grid and the data
     LBDataHandle<Grid, std::vector<Position>, commCodim> dataHandle(grid, dataVector);
     grid.loadBalance(dataHandle);
-    dataHandle.postProcess();
 
     // check for correctness
     it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();

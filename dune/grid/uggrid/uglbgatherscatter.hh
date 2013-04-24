@@ -3,15 +3,10 @@
 #ifndef DUNE_UGLBGATHERSCATTER_HH
 #define DUNE_UGLBGATHERSCATTER_HH
 
-#include <dune/grid/common/mcmgmapper.hh>
-
 namespace Dune {
 
   /** \brief Gather/scatter methods for dynamic loadbalancing with UGGrid
-   *
-   * \tparam dim Grid dimension (2 or 3)
    */
-  template<int dim>
   class UGLBGatherScatter
   {
     class LBMessageBuffer
@@ -20,63 +15,55 @@ namespace Dune {
       template <class DataType>
       void read(DataType& x)
       {
-        memcpy(&x, data_, sizeof(DataType));
-        free(data_);
+        count_--;
+        memcpy(&x, data_ + count_*sizeof(DataType), sizeof(DataType));
+        if (!count_)
+          free(data_);
       }
 
       template <class DataType>
       void write(const DataType& x)
       {
-        data_ = (char*)malloc(sizeof(DataType));
-        memcpy(data_, &x, sizeof(DataType));
+        count_++;
+        char* moreData_ = (char*)realloc(data_, count_*sizeof(DataType));
+        if (moreData_)
+          data_ = moreData_;
+        memcpy(data_ + (count_-1)*sizeof(DataType), &x, sizeof(DataType));
       }
 
-    private:
-      char* data_;
-    };
+      LBMessageBuffer()
+        : count_(0), data_(0)
+      {}
 
-    template <int commCodim>
-    struct LayoutWrapper
-    {
-      template <int dimension>
-      struct Layout
-      {
-        bool contains(Dune::GeometryType gt)
-        { return gt.dim() == dimension - commCodim;  }
-      };
+    private:
+      int count_;
+      char* data_;
     };
 
   public:
 
     /** \brief Gather data before load balancing
-     * \param dataVector global vector to be filled
      */
     template <int codim, class GridView, class DataHandle>
-    static void gather(const GridView& gridView,
-                       DataHandle& dataHandle)
+    static void gather(const GridView& gridView, DataHandle& dataHandle)
     {
-      typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView,
-          LayoutWrapper<codim>::template Layout
-          > MapperType;
-      MapperType mapper(gridView);
-
-      typedef typename GridView::template Codim<codim>::Iterator Iterator;
-      Iterator it = gridView.template begin<codim>();
-      const Iterator& endIt = gridView.template end<codim>();
-      // obtain size of the data handle
-      int numberOfParams = 0;
-      if (it != endIt && dataHandle.contains(dim, codim))
-        numberOfParams = dataHandle.size(*it);
+      const int dim = GridView::dimension;
 
       // do nothing if nothing has to be done
-      if (gridView.comm().max(numberOfParams) == 0)
+      if (!dataHandle.contains(dim, codim))
         return;
 
       // write the data into a global vector on process 0
       // write the macrogrid index of each entity into the corresponding UG vector
+      typedef typename GridView::template Codim<codim>::Iterator Iterator;
+      Iterator it = gridView.template begin<codim>();
+      const Iterator& endIt = gridView.template end<codim>();
       for (; it != endIt; ++it) {
-        // obtain data from handle
-        // and write it into the message buffer
+        int numberOfParams = dataHandle.size(*it);
+        if (!numberOfParams)
+          continue;
+
+        // obtain data from DUNE handle and write it into the UG message buffer
         LBMessageBuffer lbMessageBuffer;
         dataHandle.gather(lbMessageBuffer, *it);
 
@@ -87,48 +74,49 @@ namespace Dune {
         buffer = (char*)malloc(sizeof(int) + numberOfParams*sizeof(DataType));
         *((int*)buffer) = numberOfParams*sizeof(DataType);       // Size of the actual payload
 
-        DataType dummy;
-        lbMessageBuffer.read(dummy);
-        // Copy the data into the message buffer
-        memcpy(buffer+sizeof(int), &dummy, sizeof(DataType));
+        for (int paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
+        {
+          DataType *dataPointer = (DataType*)(buffer + sizeof(int) + paramIdx*sizeof(DataType));
+          lbMessageBuffer.read(*dataPointer);
+        }
       }
     }
 
     /** \brief Scatter data after load balancing
-     * \param dataVector global vector with data
      */
     template <int codim, class GridView, class DataHandle>
-    static void scatter(const GridView& gridView,
-                        DataHandle& dataHandle)
+    static void scatter(const GridView& gridView, DataHandle& dataHandle)
     {
-      typedef typename GridView::template Codim<codim>::Iterator Iterator;
-      Iterator it = gridView.template begin<codim>();
-      const Iterator& endIt = gridView.template end<codim>();
-
-      // obtain size of the data handle
-      int numberOfParams = 0;
-      if (it != endIt && dataHandle.contains(dim, codim))
-        numberOfParams = dataHandle.size(*it);
+      const int dim = GridView::dimension;
 
       // do nothing if nothing has to be done
-      if (gridView.comm().max(numberOfParams) == 0)
+      if (!dataHandle.contains(dim, codim))
         return;
 
       // obtain the data from the global vector with help of
       // the macro index and scatter it
+      typedef typename GridView::template Codim<codim>::Iterator Iterator;
+      Iterator it = gridView.template begin<codim>();
+      const Iterator& endIt = gridView.template end<codim>();
       for (; it != endIt; ++it) {
+        int numberOfParams = dataHandle.size(*it);
+        if (!numberOfParams)
+          continue;
+
+        // get data from UG message buffer and write to DUNE message buffer
         char*& buffer = gridView.grid().getRealImplementation(*it).getTarget()->message_buffer;
         assert(buffer);
 
-        // get data from global vector and write to message buffer
-        typedef typename DataHandle::DataType DataType;
-        DataType dummy;
-        memcpy(&dummy, buffer+sizeof(int), sizeof(DataType));
-
         LBMessageBuffer lbMessageBuffer;
-        lbMessageBuffer.write(dummy);
 
-        // provide the data handle with the message buffer
+        for(int paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
+        {
+          typedef typename DataHandle::DataType DataType;
+          DataType *dataPointer = (DataType*)(buffer + sizeof(int) + paramIdx*sizeof(DataType));
+          lbMessageBuffer.write(*dataPointer);
+        }
+
+        // call the data handle with the message buffer
         dataHandle.scatter(lbMessageBuffer, *it, numberOfParams);
 
         // free object's local message buffer
