@@ -12,6 +12,25 @@
    therein.
  */
 
+#ifdef HAVE_UG_PATCH9
+
+#include <ug/gm.h>
+#include <ug/std_domain.h>
+#include <ug/initug.h>
+#include <ug/commands.h>
+#include <ug/formats.h>
+#include <ug/elements.h>
+#include <ug/shapes.h>
+#include <ug/algebra.h>
+#include <ug/refine.h>
+#include <ug/ugm.h>
+#include <ug/rm.h>
+#if defined ModelP
+#include <ug/parallel.h>
+#endif
+
+#else  // for backwart-compatibility
+
 #include <gm.h>
 #ifdef UG_LGMDOMAIN
 #include <lgm_domain.h>
@@ -29,6 +48,8 @@
 #include <rm.h>
 #if defined ModelP
 #include "parallel.h"
+#endif
+
 #endif
 
 #endif
