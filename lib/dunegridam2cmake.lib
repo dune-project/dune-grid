@@ -1,0 +1,19 @@
+# -*-sh-*-
+
+##########################################
+###
+### Function for converting configure options
+### to CMake options for dune-grid
+###
+##########################################
+
+# CMake Packages are case sensitive
+# This is a list of packages whose names converted
+# to lower case are used for configures
+# --with-<package> or without-<package> options
+#
+
+dune_grid_options_am2cmake(){
+    CMAKE_PACKAGES="AmiraMesh ALUGrid Alberta Grape Psurface UG"
+    default_am2cmake_options $CMAKE_PACKAGES
+}

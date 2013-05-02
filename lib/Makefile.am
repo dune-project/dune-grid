@@ -83,6 +83,9 @@ libdunealbertagrid_9d_la_SOURCES =
 nodist_EXTRA_libdunealbertagrid_9d_la_SOURCES = dummy.cc
 libdunealbertagrid_9d_la_LIBADD = ../dune/grid/albertagrid/libalbertagrid_9d.la	libdunegrid.la
 
+dunemodulelibdir=$(libdir)
+dunemodulelib_DATA = dunegridam2cmake.lib
+
 include $(top_srcdir)/am/global-rules
 
 EXTRA_DIST = CMakeLists.txt
