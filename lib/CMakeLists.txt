@@ -1,4 +1,3 @@
-message(AUTHOR_WARNING "TODO: Check whether dunealbertagrid library is correctly built from the albertagridlibs")
 
 set(ALULIBS _DUNE_TARGET_OBJECTS:alu2d_ _DUNE_TARGET_OBJECTS:alu3d_)
 
@@ -17,3 +16,6 @@ foreach(_dim ${ALBERTA_WORLD_DIMS})
   add_dune_alberta_flags(dunealbertagrid_${_dim}d GRIDDIM ${_dim})
   list(APPEND DUNE_ALBERTA_LIBS dunealbertagrid_${dim}d)
 endforeach(_dim "${ALBERTA_DIMS}")
+
+install(FILES dunegridam2cmake.lib
+  DESTINATION ${CMAKE_INSTALL_BINDIR}/../lib)
