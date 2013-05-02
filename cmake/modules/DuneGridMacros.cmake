@@ -5,11 +5,16 @@ set(DUNE_GRID_EXTRA_UTILS "" CACHE BOOL
   "Enable compilation and installation of extra utilities from the \"src\" subdirectory.")
 
 find_package(ALUGrid)
+include(AddALUGridFlags)
 find_package(Alberta)
+include(AddAlbertaFlags)
 include(UseUG)
 find_package(Grape)
+include(AddGrapeFlags)
 find_package(Psurface)
+include(AddPsurfaceFlags)
 find_package(AmiraMesh)
+include(AddAmiraMeshFlags)
 
 set(DEFAULT_DGF_GRIDDIM 1)
 set(DEFAULT_DGF_WORLDDIM 1)
