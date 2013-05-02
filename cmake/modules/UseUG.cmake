@@ -12,10 +12,12 @@
 #
 
 find_package(UG 3.9.1)
-if(NOT UG_FOUND)
-  message(WARNING "CMake will only find the most current UG. Maybe you need to upgrade?")
-endif(NOT UG_FOUND)
-message(AUTHOR_WARNING "We need to test for the patch level, too!")
+if(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
+  if(NOT UG_FOUND)
+    message(WARNING "CMake will only find the most current UG. Maybe you need to upgrade?")
+  endif(NOT UG_FOUND)
+  message(AUTHOR_WARNING "We need to test for the patch level, too!")
+endif(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
 set(HAVE_UG ${UG_FOUND})
 
 dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
