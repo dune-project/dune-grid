@@ -86,6 +86,6 @@ libdunealbertagrid_9d_la_LIBADD = ../dune/grid/albertagrid/libalbertagrid_9d.la	
 dunemodulelibdir=$(libdir)
 dunemodulelib_DATA = dunegridam2cmake.lib
 
-include $(top_srcdir)/am/global-rules
+EXTRA_DIST = CMakeLists.txt dunegridam2cmake.lib
 
-EXTRA_DIST = CMakeLists.txt
+include $(top_srcdir)/am/global-rules
