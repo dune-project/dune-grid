@@ -516,17 +516,19 @@ namespace Dune
   //  element types, see dune/grid/common/grid.hh
   // and also geldesc.hh for GR_ElementTypes
   enum GRAPE_ElementType
-  {  g_vertex         = GrapeInterface_three_three::gr_vertex
-     ,  g_line           = GrapeInterface_three_three::gr_line
-     ,  g_triangle       = GrapeInterface_three_three::gr_triangle
-     ,  g_quadrilateral  = GrapeInterface_three_three::gr_quadrilateral
-     ,  g_tetrahedron    = GrapeInterface_three_three::gr_tetrahedron
-     ,  g_pyramid        = GrapeInterface_three_three::gr_pyramid
-     ,  g_prism          = GrapeInterface_three_three::gr_prism
-     ,  g_hexahedron     = GrapeInterface_three_three::gr_hexahedron
-     ,  g_iso_triangle   = GrapeInterface_three_three::gr_iso_triangle
-     ,  g_iso_quadrilateral  = GrapeInterface_three_three::gr_iso_quadrilateral
-     ,  g_unknown            = GrapeInterface_three_three::gr_unknown};
+  {
+    g_vertex              = GrapeInterface_three_three::gr_vertex
+    , g_line              = GrapeInterface_three_three::gr_line
+    , g_triangle          = GrapeInterface_three_three::gr_triangle
+    , g_quadrilateral     = GrapeInterface_three_three::gr_quadrilateral
+    , g_tetrahedron       = GrapeInterface_three_three::gr_tetrahedron
+    , g_pyramid           = GrapeInterface_three_three::gr_pyramid
+    , g_prism             = GrapeInterface_three_three::gr_prism
+    , g_hexahedron        = GrapeInterface_three_three::gr_hexahedron
+    , g_iso_triangle      = GrapeInterface_three_three::gr_iso_triangle
+    , g_iso_quadrilateral = GrapeInterface_three_three::gr_iso_quadrilateral
+    , g_unknown           = GrapeInterface_three_three::gr_unknown
+  };
 
   //! convert dune geometry types to grape geometry types with numbers
   static inline GRAPE_ElementType convertToGrapeType ( GeometryType duneType , int dim )

@@ -52,13 +52,13 @@ inline GENMESHnD* genmesh3d_switch_part_light_model_on_off ()
   GENMESHnD*          hmesh = (GENMESHnD*) START_METHOD (G_INSTANCE);
   GRAPE_ALERT (hmesh, "genmesh3d-switch-part-light-model-on-off: No hmesh!", END_METHOD(NULL));
 
-  if( light_on )
-  { light_on = FALSE;
-    GRAPE_CALL(light_ctl,"set-state") (PRESSED);}
-  else
-  { light_on = TRUE;
-    GRAPE_CALL(light_ctl,"set-state") (UNPRESSED);}
-
+  if( light_on ) {
+    light_on = FALSE;
+    GRAPE_CALL(light_ctl,"set-state") (PRESSED);
+  } else {
+    light_on = TRUE;
+    GRAPE_CALL(light_ctl,"set-state") (UNPRESSED);
+  }
   END_METHOD (hmesh);
 }
 
@@ -67,12 +67,13 @@ inline GENMESHnD* genmesh3d_switch_part_diagnostic_on_off ()
   GENMESHnD*   hmesh = (GENMESHnD*) START_METHOD (G_INSTANCE);
   GRAPE_ALERT (hmesh, "genmesh3d-switch-part-diagnostic-on-off: No hmesh!", END_METHOD(NULL));
 
-  if( diag_on )
-  { diag_on = FALSE;
-    GRAPE_CALL(diagnostic_ctl,"set-state") (PRESSED);}
-  else
-  { diag_on = TRUE;
-    GRAPE_CALL(diagnostic_ctl,"set-state") (UNPRESSED);}
+  if( diag_on ) {
+    diag_on = FALSE;
+    GRAPE_CALL(diagnostic_ctl,"set-state") (PRESSED);
+  } else {
+    diag_on = TRUE;
+    GRAPE_CALL(diagnostic_ctl,"set-state") (UNPRESSED);
+  }
   END_METHOD (hmesh);
 }
 
@@ -81,12 +82,13 @@ inline GENMESHnD* genmesh3d_switch_part_displaybar_on_off ()
   GENMESHnD*   hmesh = (GENMESHnD*) START_METHOD (G_INSTANCE);
   GRAPE_ALERT (hmesh, "genmesh3d-switch-part-displaybar-on-off: No hmesh!", END_METHOD(NULL));
 
-  if( bar_on )
-  { bar_on = FALSE;
-    GRAPE_CALL(bar_ctl,"set-state") (PRESSED);}
-  else
-  { bar_on = TRUE;
-    GRAPE_CALL(bar_ctl,"set-state") (UNPRESSED);}
+  if( bar_on ) {
+    bar_on = FALSE;
+    GRAPE_CALL(bar_ctl,"set-state") (PRESSED);
+  } else {
+    bar_on = TRUE;
+    GRAPE_CALL(bar_ctl,"set-state") (UNPRESSED);
+  }
   END_METHOD (hmesh);
 }
 
@@ -605,9 +607,8 @@ inline static int hm3_partition_draw_element (HELEMENT3D* helement,
       g_vec3_get_normal_to_plane (normal,
                                   shrinked_coord[0], shrinked_coord[1], shrinked_coord[2]);
 
-      if( light_on )
-      { if( thread != last_element )
-        {
+      if( light_on ) {
+        if( thread != last_element ) {
           suprop.emission[0] = color[thread][0];
           suprop.emission[1] = color[thread][1];
           suprop.emission[2] = color[thread][2];
@@ -615,10 +616,11 @@ inline static int hm3_partition_draw_element (HELEMENT3D* helement,
           dev->attribute (G_MODE_SET, G_PATCH_SUPROP, &suprop);
 
           last_element = thread;
-        }}
-      else
-      { dev->attribute (G_MODE_GET, G_LIGHT_MODEL, &light_model);
-        dev->attribute (G_MODE_SET, G_LIGHT_MODEL, &off);}
+        }
+      } else {
+        dev->attribute (G_MODE_GET, G_LIGHT_MODEL, &light_model);
+        dev->attribute (G_MODE_SET, G_LIGHT_MODEL, &off);
+      }
 
       dev->begin_patch  ();
       if( !light_on )
