@@ -100,6 +100,11 @@ try {
     sfilename << DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-" << GridType::dimension << "-"
               << std::min( dimWorld, 3) << ".dgf";
     filename = sfilename.str();
+
+#if ALBERTA_DIM == 3 && GRIDDIM == 3
+    // FS#1234: The recursive bisection exhausts the execution stack using the other grid.
+    filename = std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/grid3Y.dgf");
+#endif
   }
   else
     filename = argv[ 1 ];
