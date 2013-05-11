@@ -46,7 +46,6 @@ set(TESTS test_sgrid test_oned test_yaspgrid test_geogrid
   ${ALBERTA_PROGRAMS} ${UG_PROGRAMS} ${ALUGRID_PROGAMS}
   ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid)
 
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_DEVEL_MODE")
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
 
 add_executable(test_sgrid test-sgrid.cc)
