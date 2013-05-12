@@ -64,6 +64,9 @@
    uses the UG_CPPFLAGS */
 #cmakedefine HAVE_UG ENABLE_UG
 
+/* Do we have UG in at least version 3.9.1-patch10? */
+#define HAVE_UG_PATCH10 ${HAVE_UG_PATCH10}
+
 /* Grid type magic for DGF parser */
 @GRID_CONFIG_H_BOTTOM@
 /* end dune-grid */

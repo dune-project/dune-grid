@@ -16,13 +16,21 @@ if(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
   if(NOT UG_FOUND)
     message(WARNING "CMake will only find UG 3.9.1-patch10 or newer. Maybe you need to upgrade?")
   endif(NOT UG_FOUND)
-  message(AUTHOR_WARNING "We need to test for the patch level, too!")
 endif(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
 set(HAVE_UG ${UG_FOUND})
+# parse patch level: last number in UG version string is DUNE patch level
+string(REGEX MATCH "[0-9]*$" UG_DUNE_PATCHLEVEL ${UG_VERSION})
 
 dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
     DUNETYPE "Dune::UGGrid< dimgrid >"
     HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
+
+# Remove the following as soon as we absolutely require patch10 or higher
+if(${UG_DUNE_PATCHLEVEL} GREATER 9)
+  set(HAVE_UG_PATCH10 1)
+else()
+  set(HAVE_UG_PATCH10 0)
+endif(${UG_DUNE_PATCHLEVEL} GREATER 9)
 
 #Overwrite flags by hand (like for autoconf).
 set(UG_LIBRARIES dunegrid)
