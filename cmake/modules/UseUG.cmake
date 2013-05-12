@@ -14,7 +14,7 @@
 find_package(UG 3.9.1)
 if(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
   if(NOT UG_FOUND)
-    message(WARNING "CMake will only find the most current UG. Maybe you need to upgrade?")
+    message(WARNING "CMake will only find UG 3.9.1-patch10 or newer. Maybe you need to upgrade?")
   endif(NOT UG_FOUND)
   message(AUTHOR_WARNING "We need to test for the patch level, too!")
 endif(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
@@ -26,7 +26,7 @@ dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == W
 
 #Overwrite flags by hand (like for autoconf).
 set(UG_LIBRARIES dunegrid)
-set(paths "/home/mblatt/src/dune/3rdParty/grids/ug-install")
+set(paths "${prefix}")
 
 #Find out the full path to the libs.
 foreach(entry ${UG_LIBRARY_FLAGS} -L/bla)
