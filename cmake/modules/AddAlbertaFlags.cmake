@@ -36,15 +36,15 @@ macro(add_dune_alberta_flags)
       include_directories(${ALBERTA_INCLUDES})
     else()
       if(ADD_ALBERTA_OBJECT)
-	# This a dune object libraries. Therefore we need to set the options
-	# on the source files directly
-	set(_all_sources "")
-	foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
-	  get_property(_sources GLOBAL PROPERTY DUNE_LIB_${_target}_SOURCES)
-	  include_directories(${ALBERTA_INCLUDES})
-	  list(APPEND _all_sources ${_sources})
-	endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
-	set(ADD_ALBERTA_UNPARSED_ARGUMENTS ${_all_sources}) #override unparsed arguments
+        # This a dune object libraries. Therefore we need to set the options
+        # on the source files directly
+        set(_all_sources "")
+        foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
+          get_property(_sources GLOBAL PROPERTY DUNE_LIB_${_target}_SOURCES)
+          include_directories(${ALBERTA_INCLUDES})
+          list(APPEND _all_sources ${_sources})
+        endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
+        set(ADD_ALBERTA_UNPARSED_ARGUMENTS ${_all_sources}) #override unparsed arguments
       set(_prefix SOURCE)
       else(ADD_ALBERTA_OBJECT)
         # link to ALBERTA libraries
