@@ -43,6 +43,12 @@
    application uses the flags set by add_dune_grape_flags */
 #cmakedefine HAVE_GRAPE ENABLE_GRAPE
 
+/* Define to 1 if psurface library is found */
+#define HAVE_PSURFACE ${HAVE_PSURFACE}
+
+/* The namespace prefix of the psurface library */
+#define PSURFACE_NAMESPACE ${PSURFACE_NAMESPACE}
+
 /* This is only true if alugrid-library was found by configure _and_ if the
    application uses the ALUGRID_CPPFLAGS */
 #cmakedefine HAVE_ALUGRID ENABLE_ALUGRID
