@@ -24,3 +24,4 @@ am
 *.lo
 *.o
 test-driver
+build-cmake/
