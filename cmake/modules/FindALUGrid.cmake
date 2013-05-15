@@ -7,25 +7,25 @@ endmacro(_dune_set_alugrid val)
 
 find_package(METIS)
 
-if(ALUGRID_DIR)
-find_path(ALUGRID_PKGCONFIG_DIR alugrid.pc PATH ${ALUGRID_DIR}
+if(ALUGRID_ROOT)
+find_path(ALUGRID_PKGCONFIG_DIR alugrid.pc PATHS ${ALUGRID_ROOT}
   PATH_SUFFIXES lib/pkgconfig/ alugrid/lib/pkgconfig NO_DEFAULT_DIR)
-endif(ALUGRID_DIR)
+endif(ALUGRID_ROOT)
 
 find_path(ALUGRID_PKGCONFIG_DIR alugrid.pc PATH_SUFFIXES lib/pkgconfig/ alugrid/lib/pkgconfig)
 
-get_filename_component(_GUESSED_ALUGRID_DIR ${ALUGRID_PKGCONFIG_DIR}/../../ ABSOLUTE)
-find_file(ALUGRID_VERSION alugridversion PATH ${_GUESSED_ALUGRID_DIR}/bin
+get_filename_component(_GUESSED_ALUGRID_ROOT ${ALUGRID_PKGCONFIG_DIR}/../../ ABSOLUTE)
+find_file(ALUGRID_VERSION alugridversion PATHS ${_GUESSED_ALUGRID_ROOT}/bin
   NO_DEFAULT_PATH)
 
 if(ALUGRID_VERSION)
-  set(ALUGRID_DIR ${_GUESSED_ALUGRID_DIR})
+  set(ALUGRID_ROOT ${_GUESSED_ALUGRID_ROOT})
 else(ALUGRID_VERSION_PATH)
-  get_filename_component(_GUESSED_ALUGRID_DIR ${ALUGRID_PKGCONFIG_DIR}/../../.. ABSOLUTE)
-  find_file(ALUGRID_VERSION alugridversion PATH ${_GUESSED_ALUGRID_DIR} PATH_SUFFIXES bin
+  get_filename_component(_GUESSED_ALUGRID_ROOT ${ALUGRID_PKGCONFIG_DIR}/../../.. ABSOLUTE)
+  find_file(ALUGRID_VERSION alugridversion PATHS ${_GUESSED_ALUGRID_ROOT} PATH_SUFFIXES bin
     NO_DEFAULT_PATH)
   if(ALUGRID_VERSION)
-    set(ALUGRID_DIR ${_GUESSED_ALUGRID_DIR})
+    set(ALUGRID_ROOT ${_GUESSED_ALUGRID_ROOT})
   endif(ALUGRID_VERSION)
 endif(ALUGRID_VERSION)
 
@@ -53,10 +53,10 @@ else(ALUGRID_VERSION)
 endif(ALUGRID_VERSION)
 
 
-find_path(ALUGRID_INCLUDE_PATH alugrid_serial.h PATH ${ALUGRID_DIR} PATH_SUFFIXES include include/serial NO_DEFAULT_PATH DOC "Include path of serial alugrid headers.")
+find_path(ALUGRID_INCLUDE_PATH alugrid_serial.h PATHS ${ALUGRID_ROOT} PATH_SUFFIXES include include/serial NO_DEFAULT_PATH DOC "Include path of serial alugrid headers.")
 find_path(ALUGRID_INCLUDE_PATH alugrid_serial.h PATH_SUFFIXES include include/serial)
 
-find_library(ALUGRID_LIB alugrid PATH ${ALUGRID_DIR} PATH_SUFFIXES lib lib32 lib64
+find_library(ALUGRID_LIB alugrid PATHS ${ALUGRID_ROOT} PATH_SUFFIXES lib lib32 lib64
   DOC "ALUGrid library" NO_DEFAULT_PATH)
 find_library(ALUGRID_LIB alugrid PATH_SUFFIXES lib lib32 lib64)
 
@@ -93,7 +93,7 @@ endif(ALUGRID_INCLUDE_PATH)
 
 if(ALUGRID_PARALLEL_FOUND AND MPI_FOUND)
   # check for parallel ALUGrid
-  find_path(ALUGRID_PARALLEL_INCLUDE_PATH alugrid_parallel.h PATH ${ALUGRID_DIR} PATH_SUFFIXES include include/parallel NO_DEFAULT_PATH)
+  find_path(ALUGRID_PARALLEL_INCLUDE_PATH alugrid_parallel.h PATHS ${ALUGRID_ROOT} PATH_SUFFIXES include include/parallel NO_DEFAULT_PATH)
   find_path(ALUGRID_PARALLEL_INCLUDE_PATH alugrid_parallel.h PATH_SUFFIXES include include/parallel)
 
   if(ALUGRID_PARALLEL_INCLUDE_PATH)
