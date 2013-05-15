@@ -18,37 +18,41 @@ if(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
   endif(NOT UG_FOUND)
 endif(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
 set(HAVE_UG ${UG_FOUND})
-# parse patch level: last number in UG version string is DUNE patch level
-string(REGEX MATCH "[0-9]*$" UG_DUNE_PATCHLEVEL ${UG_VERSION})
 
-dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
-    DUNETYPE "Dune::UGGrid< dimgrid >"
-    HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
+if(${UG_FOUND})
 
-# Remove the following as soon as we absolutely require patch10 or higher
-if(${UG_DUNE_PATCHLEVEL} GREATER 9)
-  set(HAVE_UG_PATCH10 1)
-else()
-  set(HAVE_UG_PATCH10 0)
-endif(${UG_DUNE_PATCHLEVEL} GREATER 9)
+  # parse patch level: last number in UG version string is DUNE patch level
+  string(REGEX MATCH "[0-9]*$" UG_DUNE_PATCHLEVEL ${UG_VERSION})
 
-#Overwrite flags by hand (like for autoconf).
-set(UG_LIBRARIES dunegrid)
-set(paths "${prefix}")
+  dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
+      DUNETYPE "Dune::UGGrid< dimgrid >"
+      HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
 
-#Find out the full path to the libs.
-foreach(entry ${UG_LIBRARY_FLAGS} -L/bla)
-  string(REGEX REPLACE "^-L([a-zA-Z/-_]+)" "\\1" _path ${entry})
-  list(APPEND _paths ${_path})
-endforeach(entry {UG_LIBRARY_FLAGS})
+  # Remove the following as soon as we absolutely require patch10 or higher
+  if(${UG_DUNE_PATCHLEVEL} GREATER 9)
+    set(HAVE_UG_PATCH10 1)
+  else()
+    set(HAVE_UG_PATCH10 0)
+  endif(${UG_DUNE_PATCHLEVEL} GREATER 9)
 
-foreach(lib ugS2 ugS3 devS)
-    set(full_path "full_path-NOTFOUND")
-    find_library(full_path ${lib} PATHS ${_paths} NO_DEFAULT_PATH)
-    if(full_path)
-      list(APPEND UG_LIBRARIES ${full_path})
-    endif(full_path)
-endforeach(lib ugS2 ugS3 devS)
+  #Overwrite flags by hand (like for autoconf).
+  set(UG_LIBRARIES dunegrid)
+  set(paths "${prefix}")
+
+  #Find out the full path to the libs.
+  foreach(entry ${UG_LIBRARY_FLAGS} -L/bla)
+    string(REGEX REPLACE "^-L([a-zA-Z/-_]+)" "\\1" _path ${entry})
+    list(APPEND _paths ${_path})
+  endforeach(entry {UG_LIBRARY_FLAGS})
+
+  foreach(lib ugS2 ugS3 devS)
+      set(full_path "full_path-NOTFOUND")
+      find_library(full_path ${lib} PATHS ${_paths} NO_DEFAULT_PATH)
+      if(full_path)
+        list(APPEND UG_LIBRARIES ${full_path})
+      endif(full_path)
+  endforeach(lib ugS2 ugS3 devS)
+endif(${UG_FOUND})
 
 function(add_dune_ug_flags)
   if(UG_FOUND)
