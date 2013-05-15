@@ -1,5 +1,5 @@
+# If we do have pkgconfig, ask it for its information
 find_package(PkgConfig)
-
 if( PKG_CONFIG_FOUND AND NOT ALUGRID_ROOT )
   pkg_check_modules( PKG_ALUGRID "alugrid" )
 endif()
@@ -9,8 +9,7 @@ macro(_dune_set_alugrid val)
   set(HAVE_ALUGRID ${val})
 endmacro(_dune_set_alugrid val)
 
-find_package(METIS)
-
+# first, search and execute alugridversion
 find_file(ALUGRID_VERSION alugridversion
   PATHS
     ${ALUGRID_ROOT}
@@ -19,42 +18,42 @@ find_file(ALUGRID_VERSION alugridversion
   PATH_SUFFIXES bin
   NO_DEFAULT_PATH)
 
-if(ALUGRID_VERSION)
-  get_filename_component(ALUGRID_VERSION_DIR ${ALUGRID_VERSION} PATH)
-  set(ALUGRID_ROOT ${ALUGRID_VERSION_DIR}/..)
-endif(ALUGRID_VERSION)
-
-set(ALUGRID_VERSION_REQUIRED 1.50)
-
+# exit if we did not find alugridversion
 if(NOT ALUGRID_VERSION)
   message( WARNING "Could not find ALUGrid.")
   _dune_set_alugrid(FALSE)
   return()
 endif(NOT ALUGRID_VERSION)
 
-if(ALUGRID_VERSION)
-  execute_process(COMMAND ${ALUGRID_VERSION} -c ${ALUGRID_VERSION_REQUIRED} OUTPUT_VARIABLE ALUGRID_VERSION)
-  if(ALUGRID_VERSION LESS 0)
-    message(STATUS "ALUGrid version is less then ${ALUGRID_VERSION_REQUIRED}")
-    _dune_set_alugrid(FALSE)
-    return()
-  else(ALUGRID_VERSION LESS 0)
-    message(STATUS "ALUGrid version is compatible")
-  endif(ALUGRID_VERSION LESS 0)
-else(ALUGRID_VERSION)
-  message(WARNING "Cannot determine ALUGrid version. Giving up.")
+# we found alugrid, check if it is recent:
+set(ALUGRID_VERSION_REQUIRED 1.50)
+
+# here we know we have ALUGRID_VERSION, otherwise we exit above
+execute_process(COMMAND ${ALUGRID_VERSION} -c ${ALUGRID_VERSION_REQUIRED} OUTPUT_VARIABLE ALUGRID_VERSION)
+if(ALUGRID_VERSION LESS 0)
+  message(STATUS "ALUGrid version is less then ${ALUGRID_VERSION_REQUIRED}")
   _dune_set_alugrid(FALSE)
-    return()
-endif(ALUGRID_VERSION)
+  return()
+else(ALUGRID_VERSION LESS 0)
+  message(STATUS "ALUGrid version is compatible")
+endif(ALUGRID_VERSION LESS 0)
 
+# looking for include path
+find_path(ALUGRID_INCLUDE_PATH alugrid_serial.h
+  PATHS
+    ${ALUGRID_ROOT}
+    ${PKG_ALUGRID_INCLUDE_DIRS}
+  PATH_SUFFIXES
+    include
+    include/serial
+  DOC "Include path of serial alugrid headers.")
 
-find_path(ALUGRID_INCLUDE_PATH alugrid_serial.h PATHS ${ALUGRID_ROOT} PATH_SUFFIXES include include/serial NO_DEFAULT_PATH DOC "Include path of serial alugrid headers.")
-find_path(ALUGRID_INCLUDE_PATH alugrid_serial.h PATH_SUFFIXES include include/serial)
-
-find_library(ALUGRID_LIB alugrid PATHS ${ALUGRID_ROOT} PATH_SUFFIXES lib lib32 lib64
-  DOC "ALUGrid library" NO_DEFAULT_PATH)
-find_library(ALUGRID_LIB alugrid PATH_SUFFIXES lib lib32 lib64)
-
+find_library(ALUGRID_LIB alugrid
+  PATHS
+    ${ALUGRID_ROOT}
+    ${PKG_ALUGRID_LIBRARY_DIRS}
+  PATH_SUFFIXES lib lib32 lib64
+  DOC "ALUGrid library")
 
 if(NOT ALUGRID_LIB)
   message(WARNING "ALUGrid library not found.")
@@ -113,19 +112,20 @@ endif(ALUGRID_PARALLEL_FOUND AND MPI_FOUND)
 
 check_library_exists(${ALUGRID_LIB} malloc "" _ALULIB_FUNCTIONAL)
 
+# everything is fine
 if(HAVE_ALUGRID_SERIAL_H)
-  set(ALUGRID_FOUND TRUE)
-  set(HAVE_ALUGRID TRUE)
+  _dune_set_alugrid(TRUE)
 endif(HAVE_ALUGRID_SERIAL_H)
 
+# check if metis is present
+find_package(METIS)
 if(NOT METIS_LIBRARIES AND ALUGRID_FOUND)
   message(WARNING "Metis library not found but needed for linking with ALUGrid.")
-
-  set(ALUGRID_FOUND FALSE)
-  set(HAVE_ALUGRID FALSE)
+  _dune_set_alugrid(FALSE)
   return()
 endif(NOT METIS_LIBRARIES AND ALUGRID_FOUND)
 
+# finally set all variables
 if(ALUGRID_FOUND)
   include(GridType)
   dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_CONFORM
