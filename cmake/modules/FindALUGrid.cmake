@@ -1,4 +1,8 @@
-#find_package(PkgConfig)
+find_package(PkgConfig)
+
+if( PKG_CONFIG_FOUND AND NOT ALUGRID_ROOT )
+  pkg_check_modules( PKG_ALUGRID "alugrid" )
+endif()
 
 macro(_dune_set_alugrid val)
   set(ALUGRID_FOUND ${val})
@@ -7,26 +11,17 @@ endmacro(_dune_set_alugrid val)
 
 find_package(METIS)
 
-if(ALUGRID_ROOT)
-find_path(ALUGRID_PKGCONFIG_DIR alugrid.pc PATHS ${ALUGRID_ROOT}
-  PATH_SUFFIXES lib/pkgconfig/ alugrid/lib/pkgconfig NO_DEFAULT_DIR)
-endif(ALUGRID_ROOT)
-
-find_path(ALUGRID_PKGCONFIG_DIR alugrid.pc PATH_SUFFIXES lib/pkgconfig/ alugrid/lib/pkgconfig)
-
-get_filename_component(_GUESSED_ALUGRID_ROOT ${ALUGRID_PKGCONFIG_DIR}/../../ ABSOLUTE)
-find_file(ALUGRID_VERSION alugridversion PATHS ${_GUESSED_ALUGRID_ROOT}/bin
+find_file(ALUGRID_VERSION alugridversion
+  PATHS
+    ${ALUGRID_ROOT}
+    ${PKG_ALUGRID_LIBRARY_DIRS}/..
+    ${PKG_ALUGRID_INCLUDE_DIRS}/..
+  PATH_SUFFIXES bin
   NO_DEFAULT_PATH)
 
 if(ALUGRID_VERSION)
-  set(ALUGRID_ROOT ${_GUESSED_ALUGRID_ROOT})
-else(ALUGRID_VERSION_PATH)
-  get_filename_component(_GUESSED_ALUGRID_ROOT ${ALUGRID_PKGCONFIG_DIR}/../../.. ABSOLUTE)
-  find_file(ALUGRID_VERSION alugridversion PATHS ${_GUESSED_ALUGRID_ROOT} PATH_SUFFIXES bin
-    NO_DEFAULT_PATH)
-  if(ALUGRID_VERSION)
-    set(ALUGRID_ROOT ${_GUESSED_ALUGRID_ROOT})
-  endif(ALUGRID_VERSION)
+  get_filename_component(ALUGRID_VERSION_DIR ${ALUGRID_VERSION} PATH)
+  set(ALUGRID_ROOT ${ALUGRID_VERSION_DIR}/..)
 endif(ALUGRID_VERSION)
 
 set(ALUGRID_VERSION_REQUIRED 1.50)
