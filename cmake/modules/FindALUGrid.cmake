@@ -15,8 +15,7 @@ find_file(ALUGRID_VERSION alugridversion
     ${ALUGRID_ROOT}
     ${PKG_ALUGRID_LIBRARY_DIRS}/..
     ${PKG_ALUGRID_INCLUDE_DIRS}/..
-  PATH_SUFFIXES bin
-  NO_DEFAULT_PATH)
+  PATH_SUFFIXES bin)
 
 # exit if we did not find alugridversion
 if(NOT ALUGRID_VERSION)
