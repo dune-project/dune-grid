@@ -1,12 +1,8 @@
-Makefile
-Makefile.in
-.deps
-.libs
 mcmgmappertest
 scsgmappertest
-semantic.cache
 *.gcda
 *.gcno
 *.mw
 *.swp
-
+*.log
+*.trs

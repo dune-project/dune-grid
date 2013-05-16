@@ -18,4 +18,10 @@ dune-grid-*.tar.gz
 dune-grid-?.?
 ltmain.sh
 am
-.libs
+.libs/
+.deps/
+*.la
+*.lo
+*.o
+test-driver
+build-cmake/
