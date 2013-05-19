@@ -18,8 +18,29 @@ if(NOT ALUGRID_ROOT)
   pkg_check_modules(PKG_ALUGRID "alugrid")
 endif(NOT ALUGRID_ROOT)
 
+# try manually, if ALUGrid's pkg-config file not found
+if(NOT PKG_ALUGRID_FOUND)
+  # first only at positions given by the user
+  find_file(PATH_PKG_ALUGRID
+    NAMES "alugrid.pc"
+    PATHS ${ALUGRID_ROOT}
+    PATH_SUFFIXES lib/pkgconfig lib32/pkgconfig lib64/pkgconfig
+    NO_DEFAULT_PATH)
+  # including default paths
+  find_file(PATH_PKG_ALUGRID
+    NAMES "alugrid.pc"
+    PATH_SUFFIXES lib/pkgconfig lib32/pkgconfig lib64/pkgconfig)
+
+  # try again with path temporarilly added to PKG_CONFIG_PATH
+  set(REM_PKG_CONFIG_PATH PKG_CONFIG_PATH)
+  get_filename_component(DIR_PKG_ALUGRID ${PATH_PKG_ALUGRID} PATH)
+  set(ENV{PKG_CONFIG_PATH} "${ALUGRID_ROOT}:${DIR_PKG_ALUGRID}:${PKG_CONFIG_PATH}")
+  pkg_check_modules(PKG_ALUGRID "alugrid")
+  set(ENV{PKG_CONFIG_PATH} REM_PKG_CONFIG_PATH)
+endif(NOT PKG_ALUGRID_FOUND)
+
 # search and execute alugridversion, first only at positions given by the user
-find_file(ALUGRID_VERSION_
+find_file(ALUGRID_VERSION
   NAMES alugridversion
   PATHS
     ${ALUGRID_ROOT}
@@ -107,7 +128,7 @@ if(ALUGRID_PARALLEL_FOUND AND MPI_FOUND)
     PATH_SUFFIXES include include/parallel)
 
   if(ALUGRID_PARALLEL_INCLUDE_PATH)
-    cmake_push_check_state() # store rquired flags
+    cmake_push_check_state()
     list(APPEND ALUGRID_INCLUDES ${ALUGRID_INCLUDE_PATH}/parallel)
     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${ALUGRID_INCLUDES})
     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALUGRID_LIB})
@@ -127,24 +148,24 @@ the check produces linker errors.")
   endif(ALUGRID_PARALLEL_INCLUDE_PATH)
 endif(ALUGRID_PARALLEL_FOUND AND MPI_FOUND)
 
-check_library_exists(${ALUGRID_LIB} malloc "" ALULIB_FUNCTIONAL)
+get_filename_component(ALUGRID_LIB_PATH ${ALUGRID_LIB} PATH)
+check_library_exists(alugrid malloc ${ALUGRID_LIB_PATH} ALULIB_FUNCTIONAL)
 
 # behave like a CMake module is supposed to behave
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   "ALUGrid"
   DEFAULT_MSG
-  ALULIB_FUNCTIONALY
+  ALULIB_FUNCTIONAL
   HAVE_ALUGRID_SERIAL_H)
 
-mark_as_advanced(ALULIB_FUNCTIONALY)
+mark_as_advanced(ALUGRID_LIB_PATH ALULIB_FUNCTIONAL)
 
-# if both headers and library are found, store results
+# set HAVE_ALUGRID for config.h
+set(HAVE_ALUGRID ${ALUGRID_FOUND})
 
 # finally set all variables
 if(ALUGRID_FOUND)
-  set(HAVE_ALUGRID TRUE)
-
   include(GridType)
   dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_CONFORM
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, conforming >"
