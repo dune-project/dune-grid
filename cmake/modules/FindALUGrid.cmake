@@ -40,7 +40,7 @@ if(NOT PKG_ALUGRID_FOUND)
 endif(NOT PKG_ALUGRID_FOUND)
 
 if(PKG_ALUGRID_FOUND)
-  # search and execute alugridversion, first only at positions given by the user
+  # search alugridversion, first only at positions given by the user
   find_file(ALUGRID_VERSION_CMD
     NAMES alugridversion
     PATHS
@@ -49,8 +49,8 @@ if(PKG_ALUGRID_FOUND)
       ${PKG_ALUGRID_INCLUDE_DIRS}/..
     PATH_SUFFIXES bin
     NO_DEFAULT_PATH)
-  # search and execute alugridversion, including default paths
-  find_file(ALUGRID_VERSION
+  # search alugridversion, including default paths
+  find_file(ALUGRID_VERSION_CMD
     NAMES alugridversion
     PATH_SUFFIXES bin)
 endif(PKG_ALUGRID_FOUND)
@@ -148,7 +148,7 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   "ALUGrid"
   DEFAULT_MSG
-  PATH_PKG_ALUGRID REM_PKG_CONFIG_PATH ALUGRID_VERSION_CMD
+  ALUGRID_VERSION_CMD
   ALUGRID_INCLUDE_PATH ALUGRID_LIB ALUGRID_LIB_PATH ALULIB_FUNCTIONAL
   HAVE_ALUGRID_SERIAL_H)
 
