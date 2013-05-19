@@ -42,16 +42,18 @@ set(CACHECOORDFUNCTION 0)
 #
 
 # tests where program to build and program to run are equal
-set(TESTS test_sgrid test_oned test_yaspgrid test_geogrid
-  ${ALBERTA_PROGRAMS} ${UG_PROGRAMS} ${ALUGRID_PROGAMS}
+set(TESTS
+  test_geogrid test_oned test_sgrid test_yaspgrid
+  ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
   ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid)
 
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
+set_property(DIRECTORY APPEND PROPERTY
+  COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
 
-add_executable(test_sgrid test-sgrid.cc)
-add_executable(test_oned test-oned.cc)
-add_executable(test_yaspgrid test-yaspgrid.cc)
 add_executable(test_geogrid test-geogrid.cc)
+add_executable(test_oned test-oned.cc)
+add_executable(test_sgrid test-sgrid.cc)
+add_executable(test_yaspgrid test-yaspgrid.cc)
 
 set_property(TARGET test_sgrid test_oned test_yaspgrid test_geogrid APPEND
   PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
@@ -110,10 +112,24 @@ add_directory_test_target(_test_target)
 add_dependencies(${_test_target} ${TESTS})
 
 # define HAVE_DUNE_GRID for the dgfparser
-set_property(TARGET ${TESTS} APPEND PROPERTY COMPILE_DEFINITIONS
-  HAVE_DUNE_GRID=1)
+set_property(TARGET ${TESTS} APPEND PROPERTY
+  COMPILE_DEFINITIONS HAVE_DUNE_GRID=1)
 
-set(SOURCES gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc checkentityseed.cc)
+set(SOURCES
+  basicunitcube.hh
+  check-albertareader.cc
+  checkadaptation.cc
+  checkcommunicate.cc
+  checkentityseed.cc
+  checkgeometry.cc
+  checkgeometryinfather.cc
+  checkindexset.cc
+  checkintersectionit.cc
+  checkiterators.cc
+  checkpartition.cc
+  checktwists.cc
+  gridcheck.cc
+  staticcheck.hh)
 message(AUTHOR_WARNING "Make sure that ${SOURCES} are shipped")
 
 set(CLEANFILES *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log)
