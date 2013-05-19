@@ -39,87 +39,87 @@ if(NOT PKG_ALUGRID_FOUND)
   set(ENV{PKG_CONFIG_PATH} REM_PKG_CONFIG_PATH)
 endif(NOT PKG_ALUGRID_FOUND)
 
-# search and execute alugridversion, first only at positions given by the user
-find_file(ALUGRID_VERSION
-  NAMES alugridversion
-  PATHS
-    ${ALUGRID_ROOT}
-    ${PKG_ALUGRID_LIBRARY_DIRS}/..
-    ${PKG_ALUGRID_INCLUDE_DIRS}/..
-  PATH_SUFFIXES bin
-  NO_DEFAULT_PATH)
-# search and execute alugridversion, including default paths
-find_file(ALUGRID_VERSION
-  NAMES alugridversion
-  PATH_SUFFIXES bin)
+if(PKG_ALUGRID_FOUND)
+  # search and execute alugridversion, first only at positions given by the user
+  find_file(ALUGRID_VERSION_CMD
+    NAMES alugridversion
+    PATHS
+      ${ALUGRID_ROOT}
+      ${PKG_ALUGRID_LIBRARY_DIRS}/..
+      ${PKG_ALUGRID_INCLUDE_DIRS}/..
+    PATH_SUFFIXES bin
+    NO_DEFAULT_PATH)
+  # search and execute alugridversion, including default paths
+  find_file(ALUGRID_VERSION
+    NAMES alugridversion
+    PATH_SUFFIXES bin)
+endif(PKG_ALUGRID_FOUND)
 
-# exit if we did not find alugridversion
-if(NOT ALUGRID_VERSION)
-  message("Could not find ALUGrid.")
-  return()
-endif(NOT ALUGRID_VERSION)
+# check whether ALUGrid version is recent enough
+if(ALUGRID_VERSION_CMD)
+  execute_process(COMMAND ${ALUGRID_VERSION_CMD} -c ${ALUGRID_VERSION_REQUIRED}
+    OUTPUT_VARIABLE ALUGRID_VERSION)
+  if(ALUGRID_VERSION LESS 0)
+    message(STATUS "Found ALUGrid ${ALUGRID_VERSION}, but version ${ALUGRID_VERSION_REQUIRED} is required")
+  endif(ALUGRID_VERSION LESS 0)
+endif(ALUGRID_VERSION_CMD)
 
-# we found alugrid, check if it is recent
-# here we know we have ALUGRID_VERSION, otherwise we exit above
-execute_process(COMMAND ${ALUGRID_VERSION} -c ${ALUGRID_VERSION_REQUIRED}
-  OUTPUT_VARIABLE ALUGRID_VERSION)
-if(ALUGRID_VERSION LESS 0)
-  message(STATUS "ALUGrid version is less then ${ALUGRID_VERSION_REQUIRED}")
-  _dune_set_alugrid(FALSE)
-  return()
-else(ALUGRID_VERSION LESS 0)
-  message(STATUS "ALUGrid version is compatible")
-endif(ALUGRID_VERSION LESS 0)
+# look for include path
+if(NOT (ALUGRID_VERSION LESS 0))
+  find_path(ALUGRID_INCLUDE_PATH alugrid_serial.h
+    PATHS
+      ${ALUGRID_ROOT}
+      ${PKG_ALUGRID_INCLUDE_DIRS}
+    PATH_SUFFIXES
+      include
+      include/serial
+    DOC "Include path of serial alugrid headers.")
+endif(NOT (ALUGRID_VERSION LESS 0))
 
-# looking for include path
-find_path(ALUGRID_INCLUDE_PATH alugrid_serial.h
-  PATHS
-    ${ALUGRID_ROOT}
-    ${PKG_ALUGRID_INCLUDE_DIRS}
-  PATH_SUFFIXES
-    include
-    include/serial
-  DOC "Include path of serial alugrid headers.")
-
-find_library(ALUGRID_LIB alugrid
-  PATHS
-    ${ALUGRID_ROOT}
-    ${PKG_ALUGRID_LIBRARY_DIRS}
-  PATH_SUFFIXES lib lib32 lib64
-  DOC "ALUGrid library")
-
-if(NOT ALUGRID_LIB)
-  message("ALUGrid library not found.")
-  return()
-endif(NOT ALUGRID_LIB)
-
+# look for library path
 if(ALUGRID_INCLUDE_PATH)
-  cmake_push_check_state() # store required flags
-  set(ALUGRID_INCLUDES ${ALUGRID_INCLUDE_PATH} ${ALUGRID_INCLUDE_PATH}/serial
-    ${ALUGRID_INCLUDE_PATH}/duneinterface)
-  set(ALUGRID_DEFINITIONS -DENABLE_ALUGRID)
-  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${ALUGRID_INCLUDES})
-  set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALUGRID_LIB})
-  set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${ALUGRID_DEFINITIONS})
-  check_include_file_cxx(stlheaders.h HAVE_ALUGRID_SERIAL_H)
-  if(HAVE_ALUGRID_SERIAL_H)
-    check_cxx_source_compiles("
-      #include <alugrid_defineparallel.h>
-      #if ALU3DGRID_BUILD_FOR_PARALLEL == 0
-      #error
-      #endif
-      int main(){}"
-      ALUGRID_PARALLEL_FOUND)
-  else(HAVE_ALUGRID_SERIAL_H)
-    message("ALUGrid header not found")
-  endif(HAVE_ALUGRID_SERIAL_H)
-  cmake_pop_check_state()
-else(ALUGRID_INCLUDE_PATH)
-  message("alugrid_serial.h not found in ${ALUGRID_INCLUDE_PATH}.")
+  find_library(ALUGRID_LIB alugrid
+    PATHS
+      ${ALUGRID_ROOT}
+      ${PKG_ALUGRID_LIBRARY_DIRS}
+    PATH_SUFFIXES lib lib32 lib64
+    DOC "ALUGrid library")
 endif(ALUGRID_INCLUDE_PATH)
 
+# check whether library works
+if(ALUGRID_LIB)
+  get_filename_component(ALUGRID_LIB_PATH ${ALUGRID_LIB} PATH)
+  check_library_exists(alugrid malloc ${ALUGRID_LIB_PATH} ALULIB_FUNCTIONAL)
+endif(ALUGRID_LIB)
+
+set(ALUGRID_INCLUDES ${ALUGRID_INCLUDE_PATH} ${ALUGRID_INCLUDE_PATH}/serial
+  ${ALUGRID_INCLUDE_PATH}/duneinterface)
+set(ALUGRID_DEFINITIONS -DENABLE_ALUGRID)
+
+cmake_push_check_state()
+set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${ALUGRID_INCLUDES})
+set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALUGRID_LIB})
+set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${ALUGRID_DEFINITIONS})
+
+# try to use a header
+if(ALUGRID_LIB)
+  check_include_file_cxx(stlheaders.h HAVE_ALUGRID_SERIAL_H)
+endif(ALUGRID_LIB)
+
+# check whether it is parallel ALUGrid
+if(HAVE_ALUGRID_SERIAL_H AND MPI_FOUND)
+  check_cxx_source_compiles("
+    #include <alugrid_defineparallel.h>
+    #if ALU3DGRID_BUILD_FOR_PARALLEL == 0
+    #error
+    #endif
+    int main(){}"
+    ALUGRID_PARALLEL_FOUND)
+endif(HAVE_ALUGRID_SERIAL_H AND MPI_FOUND)
+
+# try to use parallel ALUGrid
 if(ALUGRID_PARALLEL_FOUND AND MPI_FOUND)
-  # check for parallel ALUGrid
+  # find path to parallel headers
   find_path(ALUGRID_PARALLEL_INCLUDE_PATH alugrid_parallel.h
     PATHS ${ALUGRID_ROOT}
     PATH_SUFFIXES include include/parallel
@@ -128,7 +128,6 @@ if(ALUGRID_PARALLEL_FOUND AND MPI_FOUND)
     PATH_SUFFIXES include include/parallel)
 
   if(ALUGRID_PARALLEL_INCLUDE_PATH)
-    cmake_push_check_state()
     list(APPEND ALUGRID_INCLUDES ${ALUGRID_INCLUDE_PATH}/parallel)
     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${ALUGRID_INCLUDES})
     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALUGRID_LIB})
@@ -138,28 +137,24 @@ if(ALUGRID_PARALLEL_FOUND AND MPI_FOUND)
 the check produces linker errors.")
 
     set(HAVE_ALUGRID_PARALLEL_H 1
-      CACHE INTERNAL "Have include alugrid_parallel.h ")
-    cmake_pop_check_state()
-    if(NOT HAVE_ALUGRID_PARALLEL_H)
-      message("alugrid_parallel.h not found in ${ALUGRID_PARALLEL_INCLUDE_PATH}")
-    endif(NOT HAVE_ALUGRID_PARALLEL_H)
-  else(ALUGRID_PARALLEL_INCLUDE_PATH)
-    message("alugrid_parallel.h not found.")
+      CACHE INTERNAL "Have include alugrid_parallel.h")
   endif(ALUGRID_PARALLEL_INCLUDE_PATH)
 endif(ALUGRID_PARALLEL_FOUND AND MPI_FOUND)
 
-get_filename_component(ALUGRID_LIB_PATH ${ALUGRID_LIB} PATH)
-check_library_exists(alugrid malloc ${ALUGRID_LIB_PATH} ALULIB_FUNCTIONAL)
+cmake_pop_check_state()
 
 # behave like a CMake module is supposed to behave
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   "ALUGrid"
   DEFAULT_MSG
-  ALULIB_FUNCTIONAL
+  PATH_PKG_ALUGRID REM_PKG_CONFIG_PATH ALUGRID_VERSION_CMD
+  ALUGRID_INCLUDE_PATH ALUGRID_LIB ALUGRID_LIB_PATH ALULIB_FUNCTIONAL
   HAVE_ALUGRID_SERIAL_H)
 
-mark_as_advanced(ALUGRID_LIB_PATH ALULIB_FUNCTIONAL)
+mark_as_advanced(PATH_PKG_ALUGRID REM_PKG_CONFIG_PATH ALUGRID_VERSION_CMD
+  ALUGRID_INCLUDE_PATH ALUGRID_LIB ALUGRID_LIB_PATH ALULIB_FUNCTIONAL
+  ALUGRID_PARALLEL_INCLUDE_PATH)
 
 # set HAVE_ALUGRID for config.h
 set(HAVE_ALUGRID ${ALUGRID_FOUND})
