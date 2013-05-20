@@ -121,7 +121,9 @@ endif(HAVE_ALUGRID_SERIAL_H AND MPI_FOUND)
 if(ALUGRID_PARALLEL_FOUND AND MPI_FOUND)
   # find path to parallel headers
   find_path(ALUGRID_PARALLEL_INCLUDE_PATH alugrid_parallel.h
-    PATHS ${ALUGRID_ROOT}
+    PATHS
+      ${ALUGRID_ROOT}
+      ${PKG_ALUGRID_INCLUDE_DIRS}
     PATH_SUFFIXES include include/parallel
     NO_DEFAULT_PATH)
   find_path(ALUGRID_PARALLEL_INCLUDE_PATH alugrid_parallel.h
