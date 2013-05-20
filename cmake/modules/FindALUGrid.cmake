@@ -9,6 +9,8 @@
 #
 # ALUGRID_FOUND           True if ALUGrid available.
 # HAVE_ALUGRID            True if ALUGrid available.
+# HAVE_ALUGRID_SERIAL_H   1 if serial header found.
+# HAVE_ALUGRID_PARALLEL_H 1 if parallel header found, too.
 #
 
 set(ALUGRID_VERSION_REQUIRED 1.50)
@@ -100,7 +102,6 @@ include(CMakePushCheckState)
 cmake_push_check_state()
 set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${ALUGRID_INCLUDES})
 set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALUGRID_LIB})
-message("das ist drin: ${CMAKE_REQUIRED_LIBRARIES}")
 set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${ALUGRID_DEFINITIONS})
 
 # try to use a header
