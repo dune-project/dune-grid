@@ -14,7 +14,7 @@
 #endif
 
 #if HAVE_DUNE_FEM
-#include <dune/fem/misc/threadmanager.hh>
+#include <dune/fem/misc/threads/threadmanager.hh>
 #endif
 
 namespace Dune
