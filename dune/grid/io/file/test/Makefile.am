@@ -57,7 +57,9 @@ TESTS += mpivtktest
 EXTRA_DIST += mpivtktest.in
 CLEANFILES += mpivtktest
 mpivtktest: mpivtktest.in
-	$(top_builddir)/config.status --file=mpivtktest
+	cd $(top_builddir) && \
+	./config.status --file=$(subdir)/mpivtktest && \
+	cd $(VPATH)
 	chmod +x mpivtktest
 
 vtksequencetest_SOURCES = vtksequencetest.cc
