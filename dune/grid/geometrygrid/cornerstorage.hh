@@ -51,7 +51,7 @@ namespace Dune
       template< std::size_t size >
       void calculate ( array< Coordinate, size > (&corners) ) const
       {
-        const std::size_t numCorners = coordFunctionCaller_.numCorners();
+        const std::size_t numCorners = coordFunctionCaller_.size();
         assert( size >= numCorners );
         for( std::size_t i = 0; i < numCorners; ++i )
           coordFunctionCaller_.evaluate( i, corners[ i ] );

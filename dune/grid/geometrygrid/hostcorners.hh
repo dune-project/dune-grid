@@ -37,7 +37,7 @@ namespace Dune
       typedef typename HostGeometry::GlobalCoordinate Coordinate;
 
       explicit HostCorners ( const HostEntity &hostEntity )
-        : hostGeometry_( hostEntity.geometry() )
+      : hostGeometry_( hostEntity.geometry() )
       {}
 
       GeometryType type () const
@@ -45,12 +45,12 @@ namespace Dune
         return hostGeometry_.type();
       }
 
-      Coordinate corner ( const int i ) const
+      Coordinate operator[] ( int i ) const
       {
         return hostGeometry_.corner( i );
       }
 
-      unsigned int numCorners () const
+      std::size_t size () const
       {
         return hostGeometry_.corners();
       }
@@ -82,7 +82,7 @@ namespace Dune
       typedef FieldVector< double, 3 > Coordinate;
 
       explicit HostCorners ( const HostEntity &hostEntity )
-        : item_( hostEntity.impl().getItem() )
+      : item_( hostEntity.impl().getItem() )
       {}
 
       GeometryType type () const
@@ -93,7 +93,7 @@ namespace Dune
           return GeometryType( GenericGeometry::CubeTopology< dim >::type::id, dim );
       }
 
-      Coordinate corner ( const int i ) const
+      Coordinate operator[] ( int i ) const
       {
         const int j = ElementTopologyMapping::dune2aluVertex( i );
         const ALUCoordinate &point = item_.myvertex( j )->Point();
@@ -104,7 +104,7 @@ namespace Dune
         return corner;
       }
 
-      unsigned int numCorners () const
+      std::size_t size () const
       {
         return (elementType == tetra ? dim+1 : (1 << dim));
       }

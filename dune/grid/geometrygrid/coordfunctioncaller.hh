@@ -31,13 +31,13 @@ namespace Dune
 
       CoordFunctionCaller ( const HostEntity &hostEntity,
                             const CoordFunctionInterface &coordFunction )
-        : hostCorners_( hostEntity ),
-          coordFunction_( coordFunction )
+      : hostCorners_( hostEntity ),
+        coordFunction_( coordFunction )
       {}
 
       void evaluate ( unsigned int i, RangeVector &y ) const
       {
-        coordFunction_.evaluate( hostCorners_.corner( i ), y );
+        coordFunction_.evaluate( hostCorners_[ i ], y );
       }
 
       GeometryType type () const
@@ -45,9 +45,9 @@ namespace Dune
         return hostCorners_.type();
       }
 
-      unsigned int numCorners () const
+      std::size_t size () const
       {
-        return hostCorners_.numCorners();
+        return hostCorners_.size();
       }
 
     private:
@@ -66,8 +66,8 @@ namespace Dune
     public:
       CoordFunctionCaller ( const HostEntity &hostEntity,
                             const CoordFunctionInterface &coordFunction )
-        : hostEntity_( hostEntity ),
-          coordFunction_( coordFunction )
+      : hostEntity_( hostEntity ),
+        coordFunction_( coordFunction )
       {}
 
       void evaluate ( unsigned int i, RangeVector &y ) const
@@ -80,9 +80,11 @@ namespace Dune
         return hostEntity_.type();
       }
 
-      unsigned int numCorners () const
+      std::size_t size () const
       {
-        return hostEntity_.geometry().corners();
+        const Dune::ReferenceElement< ct, HostEntity::mydimension > &refElement
+          = Dune::ReferenceElements< ct, HostEntity::mydimension >::general( type() );
+        return refElement.size( HostEntity::mydimension );
       }
 
     private:

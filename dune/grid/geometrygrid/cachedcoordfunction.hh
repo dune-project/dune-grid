@@ -182,7 +182,7 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   template< class HostEntity >
   inline void CachedCoordFunction< HostGrid, CoordFunction >
-  ::insertEntity ( const HostEntity &hostEntity )
+    ::insertEntity ( const HostEntity &hostEntity )
   {
     typedef GeoGrid::CoordFunctionCaller< HostEntity, typename CoordFunction::Interface >
     CoordFunctionCaller;
