@@ -78,11 +78,17 @@ namespace Dune
     /** \brief write the GridView into a std::ostream
      *
      *  \param  gridout    std::ostream to write the grid to
+     */
+    void write ( std::ostream &gridout ) const;
+
+    /** \brief write the GridView into a std::ostream
+     *
+     *  \param  gridout    std::ostream to write the grid to
      *  \param  addParams  additional data to write to dgf file, such as projections
      *                     etc. (defaults to an emoty data stream)
      */
     void write ( std::ostream &gridout,
-                 const std::stringstream& addParams = std::stringstream() ) const;
+                 const std::stringstream& addParams ) const;
 
     /** \brief write the GridView to a file
      *
@@ -307,6 +313,16 @@ namespace Dune
     gridout << addParams.str() << std::endl;
 
     gridout << std::endl << "#" << std::endl;
+  }
+
+  template< class GV >
+  inline void DGFWriter< GV >::
+  write ( std::ostream &gridout) const
+  {
+    // empty vector means no new ordering
+    std::vector< Index > noNewOrdering ;
+    std::stringstream addParams;
+    write( gridout, noNewOrdering, addParams );
   }
 
   template< class GV >
