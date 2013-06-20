@@ -60,7 +60,7 @@ namespace Dune
       bool getnextentry( ENTRY &entry )
       {
         line >> entry;
-        return line;
+        return static_cast< bool >( line );
       }
 
       bool gettokenparam ( std :: string token, std :: string &entry );
