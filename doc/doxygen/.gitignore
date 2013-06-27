@@ -1,2 +1,8 @@
 Doxyfile
 Doxyfile.in
+
+doxyerr.log
+doxygen.log
+doxygen-tag
+
+html
