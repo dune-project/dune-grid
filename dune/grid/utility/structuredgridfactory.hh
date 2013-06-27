@@ -300,7 +300,7 @@ namespace Dune {
                      << "::createCubeGrid(): The lower coordinates "
                      "must be at the origin for YaspGrid.");
 
-      FieldVector<int, dim> elements_;
+      FieldVector<int, dim> elements_(0);
       std::copy(elements.begin(), elements.end(), elements_.begin());
 
       return shared_ptr<GridType>
