@@ -1273,7 +1273,7 @@ namespace Dune {
     typedef CCType CollectiveCommunication;
   };
 
-  // define of capabilties for the interface class
+  // Definition of capabilities for the interface class
   namespace Capabilities
   {
     // capabilities for the interface class depend on the implementation
