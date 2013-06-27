@@ -355,7 +355,6 @@ namespace Dune {
   template< int codim, class Grid, class IteratorImp > class EntityIterator;
   template< class GridImp, class IntersectionImp > class Intersection;
   template< class GridImp, class IntersectionIteratorImp, class IntersectionImp > class IntersectionIterator;
-  template<class GridImp> class GenericLeafIterator;
   template<class GridImp, class IndexSetImp, class IndexTypeImp=unsigned int> class IndexSet;
   template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
 
