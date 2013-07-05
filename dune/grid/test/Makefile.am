@@ -194,7 +194,8 @@ test_dgfalu_uggrid_combination_LDADD =		\
 	$(LDADD)
 
 ## distribution tarball
-SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc checkentityseed.cc
+SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc checkentityseed.cc basicunitcube.hh functions.hh staticcheck.hh
+
 
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = CMakeLists.txt $(SOURCES)
