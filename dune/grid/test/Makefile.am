@@ -194,7 +194,21 @@ test_dgfalu_uggrid_combination_LDADD =		\
 	$(LDADD)
 
 ## distribution tarball
-SOURCES = gridcheck.cc staticcheck.hh checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc checkentityseed.cc basicunitcube.hh functions.hh staticcheck.hh
+SOURCES = basicunitcube.hh                      \
+          check-albertareader.cc                \
+          checkadaptation.cc                    \
+          checkcommunicate.cc                   \
+          checkentityseed.cc                    \
+          checkgeometry.cc                      \
+          checkgeometryinfather.cc              \
+          checkindexset.cc                      \
+          checkintersectionit.cc                \
+          checkiterators.cc                     \
+          checkpartition.cc                     \
+          checktwists.cc                        \
+          functions.hh                          \
+          gridcheck.cc                          \
+          staticcheck.hh
 
 
 # gridcheck not used explicitly, we should still ship it :)
