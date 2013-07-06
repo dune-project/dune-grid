@@ -128,6 +128,7 @@ set(SOURCES
   checkiterators.cc
   checkpartition.cc
   checktwists.cc
+  functions.hh
   gridcheck.cc
   staticcheck.hh)
 message(AUTHOR_WARNING "Make sure that ${SOURCES} are shipped")
