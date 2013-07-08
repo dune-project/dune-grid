@@ -20,6 +20,19 @@ set(GRAPE_FOUND GRAPE_FOUND-NOTFOUND)
 find_package(X11)
 find_package(OpenGL)
 
+if(NOT (X11_FOUND AND OPENGL_FOUND))
+  find_package_handle_standard_args(
+    "Grape"
+    DEFAULT_MSG
+    X11_FOUND
+    OPENGL_FOUND
+    GRAPE_INCLUDE_DIR
+    GRAPE_LIBRARY
+    _GRAPE_LIB_FUNCTIONAL
+    _GRAPE_HEADER_USABLE
+    )
+  return()
+endif(NOT (X11_FOUND AND OpenGL_FOUND))
 # find header in user supplied directory
 find_path(GRAPE_INCLUDE_DIR grape.h
   PATHS ${GRAPE_PREFIX}
@@ -61,6 +74,8 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   "Grape"
   DEFAULT_MSG
+  X11_FOUND
+  OPENGL_FOUND
   GRAPE_INCLUDE_DIR
   GRAPE_LIBRARY
   _GRAPE_LIB_FUNCTIONAL
