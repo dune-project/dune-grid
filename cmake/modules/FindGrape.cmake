@@ -44,7 +44,7 @@ endfunction(add_dune_grape_flags)
 find_package(X11 QUIET)
 find_package(OpenGL QUIET)
 
-if(NOT X11_FOUND AND NOT OPENGL_FOUND)
+if(NOT (X11_FOUND AND OPENGL_FOUND))
   find_package_handle_standard_args(
     "Grape"
     DEFAULT_MSG
@@ -56,7 +56,7 @@ if(NOT X11_FOUND AND NOT OPENGL_FOUND)
     _GRAPE_HEADER_USABLE
     )
   return()
-endif(NOT X11_FOUND AND NOT OpenGL_FOUND)
+endif(NOT (X11_FOUND AND OpenGL_FOUND))
 # find header in user supplied directory
 find_path(GRAPE_INCLUDE_DIR grape.h
   PATHS ${GRAPE_ROOT}
