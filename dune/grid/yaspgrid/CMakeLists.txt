@@ -7,7 +7,7 @@ set(HEADERS
   yaspgridhierarchiciterator.hh
   yaspgridindexsets.hh
   yaspgridintersection.hh
-  aspgridintersectioniterator.hh
+  yaspgridintersectioniterator.hh
   yaspgrididset.hh
   yaspgridleveliterator.hh)
 
