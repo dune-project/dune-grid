@@ -153,7 +153,7 @@ namespace Dune
      intersectionSelfLocal and intersectionNeighborLocal return geometries
      mapping the intersection into the reference elements of the
      originating entity and the neighboring entity, respectively.
-     The numberInSelf and numberInNeighbor methods return the codim one
+     The indexInInside and indexInOutside methods return the codim one
      subentities which contain the intersection.
 
 
@@ -295,8 +295,8 @@ namespace Dune
 
         This method returns true, if
         @code
-        inside()->entity<1>(numberInSelf()) ==
-            outside()->entity<1>(numberInNeighbor()) ||
+        inside()->entity<1>(indexInInside()) ==
+            outside()->entity<1>(indexInOutside()) ||
         boundary()
         @endcode
         holds.
