@@ -108,7 +108,8 @@ namespace Dune
                                        << "      second coordinate smaller than first coordinate: "
                                        << right.at(n-dimworld_)
                                        << " read but expected value larger or equal to "
-                                       << left.at(n-dimworld_));
+                                       << left.at(n-dimworld_)
+                                       << std::endl << "Line was: '" << line.str() << "'");
               }
             }
             n++;
@@ -119,7 +120,8 @@ namespace Dune
             DUNE_THROW(DGFException,
                        "ERROR in " << *this
                                    << "      wrong number of coordinates: "
-                                   << n << " read but expected " << dimworld_);
+                                   << n << " read but expected 2*" << dimworld_
+                                   << std::endl << "Line was: '" << line.str() << "'");
           }
 
           Domain domain( left, right, data );
