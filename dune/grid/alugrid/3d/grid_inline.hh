@@ -347,8 +347,8 @@ namespace Dune
     typedef AdaptDataHandleInterface< GridImp, DataHandle > AdaptDataHandle;
 
     typedef typename EntityObject::ImplementationType EntityImp;
-    EntityObject father( EntityImp( *this, this->maxLevel() ) );
-    EntityObject son( EntityImp( *this, this->maxLevel() ) );
+    EntityObject father( EntityImp( factory(), this->maxLevel() ) );
+    EntityObject son   ( EntityImp( factory(), this->maxLevel() ) );
 
     int defaultChunk = newElementsChunk_;
     int actChunk     = refineEstimate_ * refineMarked_;
@@ -482,9 +482,9 @@ namespace Dune
 
       typedef typename Grid :: EntityObject EntityObject;
       typedef typename EntityObject::ImplementationType EntityImp;
-      EntityObject en     ( EntityImp( grid, grid.maxLevel()) );
-      EntityObject father ( EntityImp( grid, grid.maxLevel()) );
-      EntityObject son    ( EntityImp( grid, grid.maxLevel()) );
+      EntityObject en     ( EntityImp( grid.factory(), grid.maxLevel()) );
+      EntityObject father ( EntityImp( grid.factory(), grid.maxLevel()) );
+      EntityObject son    ( EntityImp( grid.factory(), grid.maxLevel()) );
 
       typedef ALU3DSPACE LoadBalanceElementCount< Grid, DataHandle > LDBElCountType;
 
@@ -554,19 +554,19 @@ namespace Dune
         else
           levelISet = grid.levelIndexVec_[ level ];
 
-        VertexObject vx( VertexImp( grid, level ) );
+        VertexObject vx( VertexImp( grid.factory(), level ) );
         ALU3DSPACE GatherScatterLevelData< Grid, DataHandleType, 3 >
         vertexData( grid, vx, Grid::getRealImplementation( vx ), data, *levelISet, level );
 
-        EdgeObject edge( EdgeImp( grid, level ) );
+        EdgeObject edge( EdgeImp( grid.factory(), level ) );
         ALU3DSPACE GatherScatterLevelData< Grid, DataHandleType, 2 >
         edgeData( grid, edge, Grid::getRealImplementation( edge ), data, *levelISet, level );
 
-        FaceObject face( FaceImp( grid, level ) );
+        FaceObject face( FaceImp( grid.factory(), level ) );
         ALU3DSPACE GatherScatterLevelData< Grid, DataHandleType, 1 >
         faceData( grid, face, Grid::getRealImplementation( face ), data, *levelISet, level );
 
-        ElementObject element( ElementImp( grid, level ) );
+        ElementObject element( ElementImp( grid.factory(), level ) );
         ALU3DSPACE GatherScatterLevelData< Grid, DataHandleType, 0 >
         elementData( grid, element, Grid::getRealImplementation( element ), data, *levelISet, level );
 
@@ -595,19 +595,19 @@ namespace Dune
 
       if( grid.comm().size() > 1 )
       {
-        VertexObject vx( VertexImp( grid, grid.maxLevel() ) );
+        VertexObject vx( VertexImp( grid.factory(), grid.maxLevel() ) );
         ALU3DSPACE GatherScatterLeafData< Grid, DataHandleType, 3 >
         vertexData( grid, vx, Grid::getRealImplementation( vx ), data );
 
-        EdgeObject edge( EdgeImp( grid, grid.maxLevel() ) );
+        EdgeObject edge( EdgeImp( grid.factory(), grid.maxLevel() ) );
         ALU3DSPACE GatherScatterLeafData< Grid, DataHandleType, 2 >
         edgeData( grid, edge, Grid::getRealImplementation( edge ), data );
 
-        FaceObject face( FaceImp( grid, grid.maxLevel()) );
+        FaceObject face( FaceImp( grid.factory(), grid.maxLevel()) );
         ALU3DSPACE GatherScatterLeafData< Grid, DataHandleType, 1 >
         faceData( grid, face, Grid::getRealImplementation( face ), data );
 
-        ElementObject element( ElementImp( grid, grid.maxLevel() ) );
+        ElementObject element( ElementImp( grid.factory(), grid.maxLevel() ) );
         ALU3DSPACE GatherScatterLeafData< Grid, DataHandleType, 0 >
         elementData( grid, element, Grid::getRealImplementation( element ), data );
 

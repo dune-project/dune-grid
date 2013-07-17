@@ -549,8 +549,8 @@ namespace Dune
     typedef AdaptDataHandleInterface< GridImp, DataHandle > AdaptDataHandle;
 
     typedef typename EntityObject::ImplementationType EntityImp;
-    EntityObject father( EntityImp(*this, this->maxLevel()) );
-    EntityObject son( EntityImp(*this, this->maxLevel()) );
+    EntityObject father( EntityImp( factory(), this->maxLevel()) );
+    EntityObject son   ( EntityImp( factory(), this->maxLevel()) );
 
     int defaultChunk = newElementsChunk_;
     int actChunk     = refineEstimate_ * refineMarked_;
