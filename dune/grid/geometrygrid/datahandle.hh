@@ -44,7 +44,7 @@ namespace Dune
       };
 
       static const bool hasHostEntity = Capabilities::hasHostEntity< Grid, codim >::v;
-      typedef typename SelectType< hasHostEntity, InitReal< true >, InitFake< false > >::Type Init;
+      typedef typename conditional< hasHostEntity, InitReal< true >, InitFake< false > >::type Init;
 
     public:
       EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
