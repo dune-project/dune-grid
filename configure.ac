@@ -12,6 +12,10 @@ DUNE_EXTRA_UTILS
 # check all dune-module stuff
 DUNE_CHECK_ALL
 
+# std::thread is currently only used in the tests, so no requirement for
+# dependent modules to check for it
+DUNE_STD_THREAD
+
 # set up flags for the automated test system
 DUNE_AUTOBUILD_FLAGS
 

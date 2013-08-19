@@ -18,6 +18,8 @@ check_HEADERS =					\
 	transportproblem2.hh			\
 	vtkout.hh
 
+if STD_THREAD
+
 if ALUGRID
 
 TESTS += finitevolume_alusimplex.sh
@@ -44,5 +46,7 @@ finitevolume_yasp_SOURCES = finitevolume_yasp.cc
 CLEANFILES +=					\
 	yasp_*_concentration-*.vtu		\
 	yasp_*_concentration.series
+
+endif STD_THREAD
 
 include $(top_srcdir)/am/global-rules
