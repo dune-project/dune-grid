@@ -1,6 +1,7 @@
 # $Id$
 
-SUBDIRS = test
+SUBDIRS =					\
+	test
 
 gridutilitydir =  $(includedir)/dune/grid/utility
 gridutility_HEADERS =				\
