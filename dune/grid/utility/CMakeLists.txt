@@ -1,5 +1,7 @@
+add_subdirectory(gridviewpartitioning)
 add_subdirectory(test EXCLUDE_FROM_ALL)
 set(HEADERS
+  entityfilter.hh
   grapedataioformattypes.hh
   gridinfo-gmsh-main.hh
   gridinfo.hh

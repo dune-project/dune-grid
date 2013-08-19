@@ -1,0 +1,10 @@
+/alusimplex_*_concentration-*.vtu
+/alusimplex_*_concentration.series
+/yasp_*_concentration-*.vtu
+/yasp_*_concentration.series
+/.deps/
+/.libs/
+/finitevolume_alusimplex
+/finitevolume_yasp
+/Makefile
+/Makefile.in

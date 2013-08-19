@@ -59,6 +59,8 @@ AC_CONFIG_FILES([Makefile
     dune/grid/albertagrid/test/Makefile
     dune/grid/yaspgrid/Makefile
     dune/grid/onedgrid/Makefile
+    dune/grid/utility/gridviewpartitioning/Makefile
+    dune/grid/utility/gridviewpartitioning/test/Makefile
     dune/grid/utility/Makefile
     dune/grid/utility/test/Makefile
     dune/grid/alugrid/common/Makefile
