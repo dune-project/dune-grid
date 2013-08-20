@@ -1,6 +1,7 @@
 SUBDIRS =					\
 	doxygen					\
-	grids
+	grids					\
+	latex
 
 # setting like in dune-web
 CURDIR=doc
