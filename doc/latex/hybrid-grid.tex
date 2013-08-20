@@ -177,7 +177,7 @@ applications where it is useful to split the traversal of a higher codimension
 among multiple threads.  In particular, whether there is any relation needed
 between the partitioning for different codimensions.
 
-\subsection{The Interface}
+\subsection{The Interface of Partitioned Grid Views}
 
 When building GridView adapters that iterate only over parts of the GridView
 there are some things that need clarification.  Let us consider the GridView
@@ -351,6 +351,74 @@ for the next release of ALUGrid, which will be available
 soonish.\footnote{This statement was brought to you 2013-07-30} SGrid was also
 tried, but turned out not to be thread safe, and not attempt was made to make
 it thread safe.
+
+\subsection{The Interface of Grid View Partitionings}
+
+A partitioned grid view is usually obtained from a grid view partitioning.
+This is a simple class of the following form:
+\begin{lstlisting}
+class GridViewPartitioning
+{
+public:
+  typedef ImplementationDefined GridView;
+  std::size_t partitions() const;
+  GridView gridview(std::size_t partition) const;
+};
+\end{lstlisting}
+
+{\tt partitions()} returns the number of partitions in this partitioning.
+{\tt gridview()} returns a grid view for a particular partition.  Partitions
+are numbered sequentially from {\tt 0} to {\tt partitions()-1}.  Both methods
+may be called concurrently from different threads, and there is no restriction
+(other than resource limits) on how many grid views (of the same partition or
+not) may be active at any given time.  The grid views obtained from this
+partitioning become invalid once the partitioning is destroyed or becomes
+invalid itself.  The only valid operation on an invalid grid view is
+assignment of a valid grid view (if assignment is supported at all) and
+destruction.
+
+\subsection{The Interface of Grid View Colorings}
+
+In some situations it is beneficial to split the host grid view into more than
+one group of partitions.  Each such group is called a color, and when we say
+that a partition is ``of a certain color'', we mean that it is a member of the
+corresponding group.  The coloring is usually chosen such that partitions of
+the same color do not touch each other, for some definition of ``to touch''.
+This allows to operate on all partitions of the same color simultaneously,
+without the need to take special care when accessing data of neighboring
+partitions.
+
+We represent each color by its own partitioning object, and collect these
+partitioning objects into a coloring object of the following form:
+\begin{lstlisting}
+class GridViewColoring
+{
+public:
+  typedef ImplementationDefined Partitioning;
+  std::size_t colors() const;
+  std::size_t maxPartitions() const;
+  Partitioning partioning(std::size_t color) const;
+};
+\end{lstlisting}
+
+{\tt colors()} returns the number of colors in this coloring.  {\tt
+  partitioning()} returns the partitioning for a particular color.  Colors are
+numbered sequentially from {\tt 0} to {\tt colors()-1}.  {\tt maxPartitions()}
+returns the maximum value of {\tt partitions()} for any color.  All three
+methods may be called concurrently from different threads, and there is no
+restriction (other than resource limits) on how many partitionings (of the
+same color or not) may be active at any given time.  The partitionings
+obtained from this coloring become invalid once the coloring is destroyed or
+becomes invalid itself.  The only valid operation on an invalid partitioning
+is assignment of a valid partitioning (if assignment is supported at all) and
+destruction.
+
+{\tt maxPartitions()} is intended for thread pool managers such that the
+necessary size of the pool is known beforehand, so adjusting the pool size in
+between handling of different colors can be avoided.  In principle, all
+partionings obtained from the same coloring should have same value for {\tt
+  partitions()}.
+
 
 \bibliographystyle{plain}
 \bibliography{hybrid-grid}
