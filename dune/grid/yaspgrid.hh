@@ -556,7 +556,7 @@ namespace Dune {
                                                 TSI(g.cell_overlap(), this->getRealImplementation(seed).coord()));
       case dim :
         return YaspEntityPointer<codim,GridImp>(this,g,
-                                                TSI(g.vertex_overlap(), this->getRealImplementation(seed).coord()));
+                                                TSI(g.vertex_overlapfront(), this->getRealImplementation(seed).coord()));
       default :
         DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
       }
