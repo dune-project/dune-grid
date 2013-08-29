@@ -33,8 +33,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
   typedef typename Intersection::LocalGeometry LocalGeometry;
 
-  typedef Dune::GenericReferenceElement< ctype, dimension > ReferenceElement;
-  typedef Dune::GenericReferenceElements< ctype, dimension > ReferenceElements;
+  typedef Dune::ReferenceElement< ctype, dimension > ReferenceElement;
+  typedef Dune::ReferenceElements< ctype, dimension > ReferenceElements;
 
   typedef Dune::FieldVector< typename Geometry::ctype, Geometry::coorddimension >
   WorldVector;
