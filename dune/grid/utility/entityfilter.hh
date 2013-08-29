@@ -28,6 +28,7 @@ namespace Dune {
     const IndexSet *is_;
     typename IndexSet::IndexType stride_;
     typename IndexSet::IndexType offset_;
+    typename IndexSet::IndexType maxStride_;
 
     typename IndexSet::IndexType sizePerGT(const Dune::GeometryType &gt) const
     {
@@ -40,12 +41,14 @@ namespace Dune {
 
     StridedEntityFilter(const IndexSet &is,
                         typename IndexSet::IndexType stride,
-                        typename IndexSet::IndexType offset) :
-      is_(&is), stride_(stride), offset_(offset)
+                        typename IndexSet::IndexType offset,
+                        typename IndexSet::IndexType maxStride = 0) :
+      is_(&is), stride_(stride), offset_(offset), maxStride_(maxStride)
     { }
 
-    StridedEntityFilter(const IndexSet &is) :
-      is_(&is), stride_(1), offset_(0)
+    StridedEntityFilter(const IndexSet &is,
+                        typename IndexSet::IndexType maxStride = 0) :
+      is_(&is), stride_(1), offset_(0), maxStride_(maxStride)
     { }
 
     bool contains(const Entity &e) const
@@ -64,7 +67,7 @@ namespace Dune {
     // construct second half of set, update other to represent first half
     StridedEntityFilter(StridedEntityFilter &other, tbb::split) :
       is_(other.is_), stride_(other.stride_*2),
-      offset_(other.offset_+other.stride_)
+      offset_(other.offset_+other.stride_), maxStride_(other.maxStride_)
     {
       other.stride_ *= 2;
     }
@@ -74,6 +77,8 @@ namespace Dune {
     }
     bool is_divisible() const
     {
+      if(maxStride_ && 2 * stride_ > maxStride_)
+        return false;
       for(auto gt : is_->geomTypes(Entity::codimension))
         if(sizePerGT(gt) > 1)
           return true;

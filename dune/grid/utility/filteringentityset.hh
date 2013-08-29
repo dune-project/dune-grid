@@ -111,8 +111,9 @@ namespace Dune {
     typedef FilteringEntitySet<Filter, GV> Base;
 
   public:
-    StridedEntitySet(const GV &gv) :
-      Base(Filter(gv.indexSet()), gv)
+    StridedEntitySet(const GV &gv,
+                     typename GV::IndexSet::IndexType maxStride = 0) :
+      Base(Filter(gv.indexSet(), maxStride), gv)
     { }
     StridedEntitySet(StridedEntitySet &other, tbb::split split) :
       Base(other, split)

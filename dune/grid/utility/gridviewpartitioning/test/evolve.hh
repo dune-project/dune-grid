@@ -184,8 +184,15 @@ struct SeqEvolve
 
 #if HAVE_TBB
 // evolve with the help of TBB.
-struct TBBEvolve
+class TBBEvolve
 {
+  std::size_t maxStride_;
+
+public:
+  TBBEvolve(std::size_t maxStride = 0) :
+    maxStride_(maxStride)
+  { }
+
   template<class G, class M, class V, class EvolveOnInteriorIntersection>
   void operator()(const G& grid, const M& mapper, V& c, double t,
                   double& dt,
@@ -202,7 +209,7 @@ struct TBBEvolve
     V update(c.size(), 0);                                  /*@\label{evh:update}@*/
 
     dt = tbb::parallel_reduce
-      ( EntitySet(gridView),
+      ( EntitySet(gridView, maxStride_),
         std::numeric_limits<double>::infinity(),
         [&](const EntitySet &entitySet, double mydt)
         {

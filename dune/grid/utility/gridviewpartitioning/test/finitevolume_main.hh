@@ -153,11 +153,11 @@ int main (int argc , char ** argv)
 #if HAVE_TBB
     // do time loop until end time 0.5
     timeloop(gridDescription+", TBB(2)/Plain",
-             gridPrefix+"_tbb_plain_concentration", grid, TBBEvolve(), 0.5,
+             gridPrefix+"_tbb_plain_concentration", grid, TBBEvolve(2), 0.5,
              EvolveOnInteriorIntersectionPlain());
     // do time loop until end time 0.5
     timeloop(gridDescription+", TBB(2)/Opt",
-             gridPrefix+"_tbb_opt_concentration", grid, TBBEvolve(), 0.5,
+             gridPrefix+"_tbb_opt_concentration", grid, TBBEvolve(2), 0.5,
              EvolveOnInteriorIntersectionOptimized());
 #endif // HAVE_TBB
   }
