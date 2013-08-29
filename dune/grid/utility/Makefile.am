@@ -9,6 +9,7 @@ gridutility_HEADERS =				\
 	entitycommhelper.hh			\
 	entityfilter.hh				\
 	filteringentityiterator.hh		\
+	filteringentityset.hh			\
 	filteringgridview.hh			\
 	grapedataioformattypes.hh		\
 	gridinfo-gmsh-main.hh			\
