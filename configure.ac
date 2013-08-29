@@ -52,7 +52,6 @@ AC_CONFIG_FILES([Makefile
     doc/grids/gmsh/Makefile
     doc/grids/starcd/Makefile
     doc/Makefile
-    doc/latex/Makefile
     dune/Makefile
     dune/grid/Makefile
     dune/grid/test/Makefile
