@@ -15,13 +15,14 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 
-#include <dune/grid/utility/gridviewpartitioning/strided.hh>
+#include <dune/grid/utility/filteringentityset.hh>
 
 struct EvolveOnInteriorIntersectionPlain
 {
-  template<class Intersection, class GV, class Mapper, class V>
-  void operator()(const Intersection &is, const GV &gv, const Mapper &mapper,
-                  int indexi, double factor, double normalFlux, const V &c,
+  template<class EntitySet, class Mapper, class V>
+  void operator()(const typename EntitySet::GridView::Intersection &is,
+                  const EntitySet &entiySet, const Mapper &mapper, int indexi,
+                  double factor, double normalFlux, const V &c,
                   V &update) const
   {
     // access neighbor
@@ -36,13 +37,14 @@ struct EvolveOnInteriorIntersectionPlain
 
 struct EvolveOnInteriorIntersectionOptimized
 {
-  template<class Intersection, class GV, class Mapper, class V>
-  void operator()(const Intersection &is, const GV &gv, const Mapper &mapper,
-                  int indexi, double factor, double normalFlux, const V &c,
+  template<class EntitySet, class Mapper, class V>
+  void operator()(const typename EntitySet::GridView::Intersection &is,
+                  const EntitySet &entitySet, const Mapper &mapper, int indexi,
+                  double factor, double normalFlux, const V &c,
                   V &update) const
   {
     // access neighbor
-    typename GV::template Codim<0>::EntityPointer outside = is.outside();
+    auto outside = is.outside();
     int indexj = mapper.map(*outside);
     double upwindc;
     if(normalFlux < 0)
@@ -50,7 +52,7 @@ struct EvolveOnInteriorIntersectionOptimized
     else
       upwindc = c[indexi];
 
-    if(gv.contains(*outside)) {
+    if(entitySet.contains(*outside)) {
       // optimized
       if(indexi < indexj)
       {
@@ -69,25 +71,20 @@ struct EvolveOnInteriorIntersectionOptimized
   }
 };
 
-template<class Intersection, class GV, class Entity, class Mapper, class V,
+template<class EntitySet, class Mapper, class V,
          class EvolveOnInteriorIntersection>
-void evolveOnIntersection(const Intersection &is, const GV &gv,
-                          const Mapper &mapper, const Entity &e, int indexi,
+void evolveOnIntersection(const typename EntitySet::GridView::Intersection &is,
+                          const EntitySet &entitySet, const Mapper &mapper,
+                          const typename EntitySet::Element &e, int indexi,
                           double volume, double &sumfactor, double t,
                           const V &c, V &update,
                           const EvolveOnInteriorIntersection &evolveOnII)
 {
-  // intersection geometry
-  typedef typename Intersection::Geometry IntersectionGeometry;
-
-  typedef typename IntersectionGeometry::ctype ct;
-  static const std::size_t dimworld = IntersectionGeometry::dimensionworld;
-
-  // get geometry type of face
-  const IntersectionGeometry &igeo = is.geometry();
+  // get geometry of face
+  const auto &igeo = is.geometry();
 
   // center of face in global coordinates
-  Dune::FieldVector<ct,dimworld> faceglobal = igeo.center();
+  auto faceglobal = igeo.center();
 
   // evaluate velocity at face center
   double normalFlux =
@@ -101,7 +98,7 @@ void evolveOnIntersection(const Intersection &is, const GV &gv,
 
   // handle interior face
   if (is.neighbor())             // "correct" version /*@\label{evh:neighbor}@*/
-    evolveOnII(is, gv, mapper, indexi, factor, normalFlux, c, update);
+    evolveOnII(is, entitySet, mapper, indexi, factor, normalFlux, c, update);
 
   // handle boundary face
   if (is.boundary())                               /*@\label{evh:bndry}@*/
@@ -113,15 +110,19 @@ void evolveOnIntersection(const Intersection &is, const GV &gv,
   }
 }             // end all intersections             /*@\label{evh:flux1}@*/
 
-template<class Entity, class GridView, class Mapper, class V,
+template<class EntitySet, class Mapper, class V,
          class EvolveOnInteriorIntersection>
-void evolveOnEntity(const Entity &e, const GridView &gridView,
-                    const Mapper &mapper, double t, const V &c, V &update,
-                    double &dt, const EvolveOnInteriorIntersection &evolveOnII)
+void evolveOnEntity(const typename EntitySet::Element &e,
+                    const EntitySet &entitySet, const Mapper &mapper, double t,
+                    const V &c, V &update, double &dt,
+                    const EvolveOnInteriorIntersection &evolveOnII)
 {
-  // cell geometry
-  const typename Entity::Geometry geo = e.geometry();
+  typedef typename EntitySet::Element Entity;
+  typedef typename EntitySet::GridView GridView;
+  const GridView &gridView = entitySet.gridView();
 
+  // cell geometry
+  const typename Entity::Geometry& geo = e.geometry();
 
   // cell volume, assume linear map here
   double volume = geo.volume();
@@ -136,7 +137,7 @@ void evolveOnEntity(const Entity &e, const GridView &gridView,
   typedef typename GridView::IntersectionIterator IntersectionIterator;
   IntersectionIterator isend = gridView.iend(e);       /*@\label{evh:flux0}@*/
   for (IntersectionIterator is = gridView.ibegin(e); is!=isend; ++is)
-    evolveOnIntersection(*is, gridView, mapper, e, indexi, volume, sumfactor,
+    evolveOnIntersection(*is, entitySet, mapper, e, indexi, volume, sumfactor,
                          t, c, update, evolveOnII);
 
   // compute dt restriction
@@ -153,12 +154,11 @@ struct SeqEvolve
   {
     // type of grid view on leaf part
     typedef typename G::LeafGridView GridView;
-
-    // element iterator type
-    typedef typename GridView::template Codim<0>::Iterator Iterator;
+    typedef Dune::StridedEntitySet<GridView, 0> EntitySet;
 
     // get grid view on leaf part
     GridView gridView = grid.leafView();
+    EntitySet entitySet(gridView);
 
     // allocate a temporary vector for the update
     V update(c.size());                                  /*@\label{evh:update}@*/
@@ -168,9 +168,8 @@ struct SeqEvolve
     dt = 1E100;
 
     // compute update vector and optimum dt in one grid traversal
-    Iterator endit = gridView.template end<0>();     /*@\label{evh:loop0}@*/
-    for (Iterator it = gridView.template begin<0>(); it!=endit; ++it)
-      evolveOnEntity(*it, gridView, mapper, t, c, update, dt, evolveOnII);
+    for (const auto &e : entitySet)
+      evolveOnEntity(e, entitySet, mapper, t, c, update, dt, evolveOnII);
 
     // scale dt with safety factor
     dt *= 0.99;                                          /*@\label{evh:.99}@*/
@@ -184,7 +183,7 @@ struct SeqEvolve
 };
 
 #if HAVE_TBB
-// evolve with the help of TBB.  Use up to 2 threads.
+// evolve with the help of TBB.
 struct TBBEvolve
 {
   template<class G, class M, class V, class EvolveOnInteriorIntersection>
@@ -193,31 +192,24 @@ struct TBBEvolve
                   const EvolveOnInteriorIntersection &evolveOnII) const
   {
     // type of grid view on leaf part
-    typedef typename G::LeafGridView HostView;
-    typedef Dune::StridedGridViewPartitioning<HostView> Partitioning;
+    typedef typename G::LeafGridView GridView;
+    typedef Dune::StridedEntitySet<GridView, 0> EntitySet;
 
     // get grid view on leaf part
-    HostView hostView = grid.leafView();
-    Partitioning partitioning(hostView, 2);
+    GridView gridView = grid.leafView();
 
     // allocate a temporary vector for the update
     V update(c.size(), 0);                                  /*@\label{evh:update}@*/
 
     dt = tbb::parallel_reduce
-      ( tbb::blocked_range<int>(0,2),
+      ( EntitySet(gridView),
         std::numeric_limits<double>::infinity(),
-        [&](const tbb::blocked_range<int> &range, double mydt)
+        [&](const EntitySet &entitySet, double mydt)
         {
-          for(int workerId = range.begin(); workerId != range.end();
-              ++workerId)
-          {
-            // compute update vector and optimum dt in one grid traversal
-            auto gridView = partitioning.gridView(workerId);
-            auto endit = gridView.template end<0>();
-            for (auto it = gridView.template begin<0>(); it!=endit; ++it)
-              evolveOnEntity(*it, gridView, mapper, t, c, update, mydt,
-                             evolveOnII);
-          }
+          // compute update vector and optimum dt in one grid traversal
+          for (const auto &e : entitySet)
+            evolveOnEntity(e, entitySet, mapper, t, c, update, mydt,
+                           evolveOnII);
           return mydt;
         },
         [](double a, double b) { return std::min(a,b); });
