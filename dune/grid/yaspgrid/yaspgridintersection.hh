@@ -63,9 +63,9 @@ namespace Dune {
      */
     bool boundary () const
     {
-      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 < _inside.gridlevel()->cell_global.min(_count/2)
+      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 < 0
               ||
-              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 > _inside.gridlevel()->cell_global.max(_count/2));
+              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 > _inside.gridlevel().mg()->template levelSize<0>(_inside.gridlevel().level(),_count/2)- 1) ;
     }
 
     //! return true if neighbor across intersection exists in this processor
@@ -90,7 +90,6 @@ namespace Dune {
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
-    //! (that is the neighboring Entity)
     EntityPointer outside() const
     {
       update();
@@ -122,12 +121,13 @@ namespace Dune {
         for (int i=0; i<dim; i++)
         {
           sides[i] =
-            ((_inside.gridlevel()->mg->begin()->cell_overlap.origin(i)
-              == _inside.gridlevel()->mg->begin()->cell_global.origin(i))+
-             (_inside.gridlevel()->mg->begin()->cell_overlap.origin(i) +
-                      _inside.gridlevel()->mg->begin()->cell_overlap.size(i)
-                      == _inside.gridlevel()->mg->begin()->cell_global.origin(i) +
-                      _inside.gridlevel()->mg->begin()->cell_global.size(i)));
+            ((_inside.gridlevel().mg()->begin().cell_overlap().origin(i)
+              == 0)+
+             (_inside.gridlevel().mg()->begin().cell_overlap().origin(i) +
+                      _inside.gridlevel().mg()->begin().cell_overlap().size(i)
+                      ==
+                      _inside.gridlevel().mg()->template levelSize<0>(0,i)));
+
         }
       }
       // global position of the cell on macro grid

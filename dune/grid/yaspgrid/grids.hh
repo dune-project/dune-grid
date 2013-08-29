@@ -35,7 +35,24 @@ namespace Dune {
 
   static const double Ytolerance=1E-13;
 
-  /**
+  /** @returns an array containing the sizes of the grids associated with vectors in given array.
+   *  Needed in this form due to the need of such functionality in the initializer list of MultiYGrid.
+   *  @param v the array of vectors to examine
+   *  @param r the shift vector to determine grid type
+   */
+  template<typename ct, int d>
+  Dune::FieldVector<int,d> sizeArray(Dune::array<std::vector<ct>,d> v, Dune::FieldVector<ct,d> r)
+  {
+    Dune::FieldVector<int,d> tmp;
+    for (int i=0; i<d; ++i)
+      if (r[i] < Ytolerance)
+        tmp[i] = v[i].size();
+      else
+        tmp[i] = v[i].size() - 1;
+    return tmp;
+  }
+
+  /** //TODO change this text accordingly
      This is the basis of a parallel implementation of the dune grid interface
      supporting codim 0 and dim.
 
@@ -81,29 +98,18 @@ namespace Dune {
 
     //! Make an empty YGrid with origin 0
     YGrid () :
-      _origin(0), _size(0), _h(0.0), _r(0.0)
+      _origin(0), _coords(), _r(0.0)
     {}
 
-    //! Make YGrid from origin and size arrays
-    YGrid (iTupel o, iTupel s, fTupel h, fTupel r) :
-      _origin(o), _size(s), _h(h), _r(r)
-    {
-#ifndef NDEBUG
-      for (int i=0; i<d; ++i)
-        assert (_size[i] >= 0);
-#endif
-    }
+    //! Make YGrid from coordinate vectors
+    YGrid (iTupel o, Dune::array<std::vector<ct>,d> coords, fTupel r) :
+      _origin(o), _coords(coords), _r(r)
+    {}
 
     //! Return origin in direction i
     int origin (int i) const
     {
       return _origin[i];
-    }
-
-    //! Set origin in direction i
-    void origin (int i, int oi) const
-    {
-      _origin[i] = oi;
     }
 
     //! return reference to origin
@@ -112,30 +118,48 @@ namespace Dune {
       return _origin;
     }
 
-    //! Return size in direction i
+    //! get coordinate vector in direction i
+    const std::vector<ct>& getCoords (int i) const
+    {
+      return _coords[i];
+    }
+
+    //! get the array of coordinate vectors
+    const Dune::array<std::vector<ct>,d>& getCoords () const
+    {
+      return _coords;
+    }
+
+    /** Return size (number of grid entities) in direction i.
+    *   This depends on the last entry of the coord vector to define a entity itself or only a gridwith.
+    *   Disambiguition is done via the shift in that direction.
+    */
     int size (int i) const
     {
-      return _size[i];
+      if (fabs(_r[i]) < Ytolerance)
+        return _coords[i].size();
+      else
+        return _coords[i].size() - 1;
     }
 
-    //! Set size in direction i
-    void size (int i, int si) const
+    /** Return size  vector (number of grid entities).
+    *   This depends on the last entry of the coord vector to define a entity itself or only a gridwith.
+    *   Disambiguition is done via the shift in that direction.
+    */
+    iTupel size () const
     {
-      _size[i] = si;
-      if (_size[i]<0) _size[i] = 0;
-    }
-
-    //! Return reference to size tupel
-    const iTupel& size () const
-    {
-      return _size;
+      iTupel result;
+      for (int i=0; i<d; i++)
+        result[i] = size(i);
+      return result;
     }
 
     //! Return total size of index set which is the product of all size per direction.
     int totalsize () const
     {
       int s=1;
-      for (int i=0; i<d; ++i) s=s*_size[i];
+      for (int i=0; i<d; ++i)
+        s *= size(i);
       return s;
     }
 
@@ -145,43 +169,10 @@ namespace Dune {
       return _origin[i];
     }
 
-    //! Set minimum index in direction i
-    void min (int i, int mi) const
-    {
-      _size[i] = max(i)-mi+1;
-      _origin[i] = mi;
-      if (_size[i]<0) _size[i] = 0;
-    }
-
     //! Return maximum index in direction i
     int max (int i) const
     {
-      return _origin[i]+_size[i]-1;
-    }
-
-    //! Set maximum index in direction i
-    void max (int i, int mi) const
-    {
-      _size[i] = mi-min(i)+1;
-      if (_size[i]<0) _size[i] = 0;
-    }
-
-    //! Return reference to mesh size tupel for read write access
-    const fTupel& meshsize () const
-    {
-      return _h;
-    }
-
-    //! Return mesh size in direction i
-    ct meshsize (int i) const
-    {
-      return _h[i];
-    }
-
-    //! Set mesh size in direction i
-    void meshsize (int i, int hi) const
-    {
-      _h[i] = hi;
+      return _origin[i] + size(i) - 1;
     }
 
     //! Return shift tupel
@@ -196,16 +187,22 @@ namespace Dune {
       return _r[i];
     }
 
-    //! Set shift in direction i
-    void shift (int i, int ri) const
-    {
-      _r[i] = ri;
-    }
-
     //! Return true if YGrid is empty, i.e. has size 0 in all directions.
     bool empty () const
     {
-      for (int i=0; i<d; ++i) if (_size[i]<=0) return true;
+      for (int i=0; i<d; ++i)
+      {
+        if (_r[i] > Ytolerance)
+        {
+          if (_coords[i].size() < 2)
+            return true;
+        }
+        else
+        {
+          if (_coords[i].empty())
+            return true;
+        }
+      }
       return false;
     }
 
@@ -215,7 +212,7 @@ namespace Dune {
       int index = (coord[d-1]-_origin[d-1]);
 
       for (int i=d-2; i>=0; i--)
-        index = index*_size[i] + (coord[i]-_origin[i]);
+        index = index*size(i) + (coord[i]-_origin[i]);
 
       return index;
     }
@@ -235,17 +232,19 @@ namespace Dune {
     bool inside (const iTupel& coord) const
     {
       for (int i=0; i<d; i++)
-      {
-        if (coord[i]<_origin[i] || coord[i]>=_origin[i]+_size[i]) return false;
-      }
+        if (coord[i]<_origin[i] || coord[i]>=_origin[i]+size(i))
+          return false;
       return true;
     }
 
     //! return grid moved by the vector v
+    //TODO ist dies hier nur ein Indexmove? Alles andere wuerde wohl eine mittlere Katastrophe werden. bzw ist nicht definiert!
+    //TODO im zusammenhang mit periodic hierher zurueckkehren
     YGrid<d,ct> move (iTupel v) const
     {
-      for (int i=0; i<d; i++) v[i] += _origin[i];
-      return YGrid<d,ct>(v,_size,_h,_r);
+      for (int i=0; i<d; i++)
+        v[i] += _origin[i];
+      return YGrid<d,ct>(v,_coords,_r);
     }
 
     /*! Iterator class allows one to run over all cells of a grid.
@@ -406,9 +405,10 @@ namespace Dune {
       //! Print position of iterator
       void print (std::ostream& s) const
       {
-        s << index() << " : [";
+        s << "Consecutive Index: "<< index() << std::endl << "Coordinate: [";
         for (int i=0; i<d-1; i++) s << coord(i) << ",";
         s << coord(d-1) << "]";
+        s << std::endl;
       }
 
     protected:
@@ -438,22 +438,39 @@ namespace Dune {
        of the coordinates of the grid in the form \f$ y_i = x_i h_i + s_i \f$.
        This can be used to interpret the grid cells as vertices, edges, faces, etc.
      */
+    //TODO wird nie benutzt!
     class TransformingIterator : public Iterator {
     public:
       //! Make iterator pointing to first cell in a grid.
       TransformingIterator (const YGrid<d,ct>& r) : Iterator(r)
       {
-        for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-        for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-        for (int i=0; i<d; ++i) _position[i] = _begin[i];
+        _r = r.shift();
+        for (int i=0; i<d; ++i)
+        {
+          _c[i] = r.getCoords(i);
+          if (!r.empty())
+            _begin[i] = _c[i][0];
+          if ((_c[i].size() > 1) && (r.shift(i) > Ytolerance))
+            _begin[i] += r.shift(i)*(_c[i][1]-_c[i][0]);
+          _position[i] = _begin[i];
+        }
       }
 
       //! Make iterator pointing to given cell in a grid.
       TransformingIterator (const YGrid<d,ct>& r, iTupel& coord) : Iterator(r,coord)
       {
-        for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-        for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-        for (int i=0; i<d; ++i) _position[i] = coord[i]*r.meshsize(i)+r.shift(i);
+        _r = r.shift();
+        for (int i=0; i<d; ++i)
+        {
+          _c[i] = r.getCoords(i);
+          if (!r.empty())
+            _begin[i] = _c[i][0];
+          if ((_c[i].size() > 1) && (r.shift(i) > Ytolerance))
+            _begin[i] += r.shift(i)*(_c[i][1]-_c[i][0]);
+          _position[i] = _c[i][coord[i]];
+          if (r.shift(i) > Ytolerance)
+            _position[i] += r.shift(i)*(_c[i][coord[i]+1 - this->_origin[i]] - _c[i][coord[i] - this->_origin[i]]);
+        }
       }
 
       //! Make transforming iterator from iterator (used for automatic conversion of end)
@@ -467,7 +484,9 @@ namespace Dune {
         for (int i=0; i<d; i++)
           if (++(this->_coord[i])<=this->_end[i])
           {
-            _position[i] += _h[i];
+            _position[i] = _c[i][this->_coord[i] - this->_origin[i]];
+            if (_r[i] > Ytolerance)
+              _position[i] += _r[i]*(_c[i][this->_coord[i]+1-this->_origin[i]] - _c[i][this->_coord[i]-this->_origin[i]]);
             return *this;
           }
           else
@@ -493,20 +512,25 @@ namespace Dune {
       //! Return meshsize in direction i
       ct meshsize (int i) const
       {
-        return _h[i];
+        return _c[i][this->_coord[i]+1-this->_origin[i]] - _c[i][this->_coord[i]-this->_origin[i]];
       }
 
       //! Return meshsize of current cell as reference.
-      const fTupel& meshsize () const
+      fTupel meshsize () const
       {
-        return _h;
+        fTupel h;
+        for (int i=0; i<d; i++)
+          h[i] = _c[i][this->_coord[i]+1-this->_origin[i]] - _c[i][this->_coord[i]-this->_origin[i]];
+        return h;
       }
 
       //! Move cell position by dist cells in direction i.
       void move (int i, int dist)
       {
         Iterator::move(i,dist);
-        _position[i] += dist*_h[i];
+        _position[i] = _c[i][this->_coord[i] - this->_origin[i]];
+        if (_r[i] > Ytolerance)
+          _position[i] += _r[i] * (_c[i][this->_coord[i]+1-this->_origin[i]] - _c[i][this->_coord[i]-this->_origin[i]]);
       }
 
       //! Print contents of iterator
@@ -517,7 +541,8 @@ namespace Dune {
       }
 
     private:
-      fTupel _h;        //!< mesh size per direction
+      Dune::array<std::vector<ct>&,d> _c;
+      fTupel _r;       //!< shift
       fTupel _begin;    //!< position of origin of grid
       fTupel _position; //!< current position
     };
@@ -540,9 +565,8 @@ namespace Dune {
   protected:
     //! internal representation uses origin/size
     iTupel _origin;
-    iTupel _size;
-    fTupel _h;        //!< mesh size per direction
-    fTupel _r;        //!< shift per direction
+    Dune::array<std::vector<ct>,d> _coords;
+    fTupel _r; //! shift on a unit cell, to be multiplied with actual cell width
   };
 
   //! Output operator for grids
@@ -600,9 +624,77 @@ namespace Dune {
     //! make uninitialized subgrid
     SubYGrid () {}
 
-    //! Make SubYGrid from origin, size, offset and supersize
-    SubYGrid (iTupel origin, iTupel size, iTupel offset, iTupel supersize, fTupel h, fTupel r)
-      : YGrid<d,ct>::YGrid(origin,size,h,r), _offset(offset), _supersize(supersize)
+    /** @brief make grid without coordinate information
+     *  @param origin origin of the grid in global coordinates
+     *  @param size size of the grid
+     *  @param shift shift vector to be used for this grid
+     *  Such grid has no coordinate information stored but can be
+     *  used to determine an intersection with a grid with coordinate
+     *  information. This avoids sending coordinates in the parallel case.
+     */
+    SubYGrid(iTupel origin, iTupel size, fTupel shift)
+      : YGrid<d,ct>::YGrid(origin, Dune::array<std::vector<ct>,d >(), shift)
+    {
+      iTupel cSize(size);
+      for (int i=0; i<d; i++)
+      {
+        if (shift[i] > Ytolerance)
+          cSize[i]++;
+        this->_coords[i].resize(cSize[i]);
+        _offset[i] = 0;
+        _supersize[i] = cSize[i];
+      }
+    }
+
+    /** @brief cut coordinates from a larger grid
+     *  @param origin origin of the grid to be constructed
+     *  @param size size of the grid to be constructed
+     *  @param enclosing the grid to take coordinates from
+     */
+    Dune::array<std::vector<ct>,d> cutCoords(iTupel origin, iTupel size, YGrid<d,ct>& enclosing)
+    {
+      Dune::array<std::vector<ct>,d> result;
+      for (int i=0; i<d; i++)
+      {
+        typename std::vector<ct>::const_iterator begin = enclosing.getCoords(i).begin();
+        typename std::vector<ct>::const_iterator end = enclosing.getCoords(i).end();
+        int offset = origin[i] - enclosing.origin(i);
+        int endOffset = enclosing.size(i) - size[i] - offset;
+        begin = begin + offset;
+        end = end - endOffset;
+        if (end-begin>0)
+        {
+          result[i].resize(end-begin);
+          std::copy(begin, end, result[i].begin());
+        }
+      }
+      return result;
+    }
+
+    /** @brief make a subgrid by taking coordinates from a larger grid
+     *  @param origin origin of the grid to be constructed
+     *  @param size size of the grid to be constructed
+     *  @param enclosing the grid to take coordinates and shift vector from
+     */
+    SubYGrid (iTupel origin, iTupel size, SubYGrid<d,ct>& enclosing)
+      :  YGrid<d,ct>::YGrid(origin, cutCoords(origin, size, enclosing), enclosing.shift())
+    {
+      for (int i=0; i<d; i++)
+      {
+        _offset[i] = origin[i] - enclosing.origin(i) + enclosing.offset(i);
+        _supersize[i] = enclosing.supersize(i);
+      }
+    }
+
+    /** @brief Make SubYgrid
+     *  @param origin the origin of the grid in global coordinates
+     *  @param offset the offset in the enclosing grid
+     *  @param supersize size of the enclosing grid
+     *  @param coords the coordinate vectors to be used
+     *  @param r the shift vector
+     */
+    SubYGrid (iTupel origin, iTupel offset, iTupel supersize, Dune::array<std::vector<ct>,d> coords, fTupel r)
+      : YGrid<d,ct>::YGrid(origin, coords, r), _offset(offset), _supersize(supersize)
     {
       for (int i=0; i<d; ++i)
       {
@@ -610,7 +702,7 @@ namespace Dune {
           std::cout << "warning: offset["
           << i <<"] negative in SubYGrid"
           << std::endl;
-        if (-offset[i]+supersize[i]<size[i])
+        if (-offset[i]+supersize[i]<this->size(i))
           std::cout << "warning: subgrid larger than enclosing grid in direction "
           << i <<" in SubYGrid"
           << std::endl;
@@ -654,30 +746,49 @@ namespace Dune {
     //! Return SubYGrid of supergrid of self which is the intersection of self and another YGrid
     virtual SubYGrid<d,ct> intersection (const YGrid<d,ct>& r) const
     {
-      // check if the two grids can be intersected, must have same mesh size and shift
       for (int i=0; i<d; i++)
-        if (fabs(this->meshsize(i)-r.meshsize(i))>Ytolerance) return SubYGrid<d,ct>();
-      for (int i=0; i<d; i++)
-        if (fabs(this->shift(i)-r.shift(i))>Ytolerance) return SubYGrid<d,ct>();
+      {
+        //empty coordinate vectors result in empty intersections
+        if (this->empty() || r.empty())
+          return SubYGrid<d,ct>();
+
+        //intersectable grids must have the same shift
+        if (fabs(this->shift(i)-r.shift(i)) > Ytolerance)
+          return SubYGrid<d,ct>();
+      }
 
       iTupel neworigin;
       iTupel newsize;
       iTupel offset;
+      iTupel cOffset;
 
       for (int i=0; i<d; ++i)
       {
         // intersect
         neworigin[i] = std::max(this->min(i),r.min(i));
-        newsize[i] = std::min(this->max(i),r.max(i))-neworigin[i]+1;
-        if (newsize[i]<0) {
+        newsize[i] = std::min(this->max(i),r.max(i)) - neworigin[i] + 1;
+        if (this->shift(i) > Ytolerance)
+          newsize[i]++;
+        if (newsize[i]<0)
+        {
           newsize[i] = 0;
           neworigin[i] = this->min(i);
         }
 
-        // offset to my supergrid
-        offset[i] = _offset[i]+neworigin[i]-this->origin(i);
+        // offset to own origin
+        offset[i] = _offset[i] + neworigin[i] - this->origin(i);
+        cOffset[i] = neworigin[i] - this->origin(i);
       }
-      return SubYGrid<d,ct>(neworigin,newsize,offset,_supersize,this->meshsize(),this->shift());
+
+      //copy the coordinates
+      Dune::array<std::vector<ct>,d> newcoords;
+      for (int i=0; i<d; ++i)
+      {
+        newcoords[i].resize(newsize[i]);
+        std::copy(this->_coords[i].begin() + cOffset[i], this->_coords[i].begin() + cOffset[i] + newsize[i], newcoords[i].begin());
+      }
+
+      return SubYGrid<d,ct>(neworigin, offset, _supersize, newcoords, this->shift());
     }
 
     /*! SubIterator is an Iterator that provides in addition the consecutive
@@ -845,9 +956,8 @@ namespace Dune {
       void print (std::ostream& s) const
       {
         YGrid<d,ct>::Iterator::print(s);
-        s << " super=" << superindex();
+        s << " Superindex = " << superindex() << std::endl;
       }
-
     protected:
       int _superindex;        //!< consecutive index in enclosing grid
       iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
@@ -867,7 +977,7 @@ namespace Dune {
     }
 
     /*! TransformingSubIterator is a SubIterator providing in addition a linear transformation
-       of the coordinates of the grid in the form \f$ y_i = x_i h_i + s_i \f$.
+       of the coordinates of the grid in the form \f$ y_i = x_i + h_i * (x_{i+1} - x_i) \f$.
        This can be used to interpret the grid cells as vertices, edges, faces, etc.
      */
     class TransformingSubIterator : public SubIterator {
@@ -875,17 +985,33 @@ namespace Dune {
       //! Make iterator pointing to first cell in a grid.
       TransformingSubIterator (const SubYGrid<d,ct>& r) : SubIterator(r)
       {
-        for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-        for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-        for (int i=0; i<d; ++i) _position[i] = _begin[i];
+        _r = r.shift();
+        for (int i=0; i<d; ++i)
+        {
+          _c[i] = r.getCoords(i);
+          if (!r.empty())
+            _begin[i] = _c[i][0];
+          if ((_c[i].size() > 1) && (r.shift(i) > Ytolerance))
+            _begin[i] += r.shift(i)*(_c[i][1]-_c[i][0]);
+          _position[i] = _begin[i];
+        }
       }
 
       //! Make iterator pointing to given cell in a grid.
       TransformingSubIterator (const SubYGrid<d,ct>& r, const iTupel& coord) : SubIterator(r,coord)
       {
-        for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-        for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-        for (int i=0; i<d; ++i) _position[i] = coord[i]*r.meshsize(i)+r.shift(i);
+        _r = r.shift();
+        for (int i=0; i<d; ++i)
+        {
+          _c[i] = r.getCoords(i);
+          if (!r.empty())
+            _begin[i] = _c[i][0];
+          if ((_c[i].size() > 1) && (r.shift(i) > Ytolerance))
+            _begin[i] += r.shift(i)*(_c[i][1]-_c[i][0]);
+          _position[i] = _c[i][coord[i] - this->_origin[i]];
+          if ((_c[i].size() > 1) && (r.shift(i) > Ytolerance))
+            _position[i] += r.shift(i)*(_c[i][coord[i]+1 - this->_origin[i]] - _c[i][coord[i] - this->_origin[i]]);
+        }
       }
 
       //! Make transforming iterator from iterator (used for automatic conversion of end)
@@ -894,16 +1020,24 @@ namespace Dune {
       {}
 
       TransformingSubIterator (const TransformingSubIterator & t) :
-        SubIterator(t), _h(t._h), _begin(t._begin), _position(t._position)
+        SubIterator(t), _c(t._c), _begin(t._begin), _position(t._position), _r(t._r)
       {}
 
       //! Make iterator pointing to given cell in a grid.
       void reinit (const SubYGrid<d,ct>& r, const iTupel& coord)
       {
         SubIterator::reinit(r,coord);
-        for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-        for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-        for (int i=0; i<d; ++i) _position[i] = coord[i]*r.meshsize(i)+r.shift(i);
+        for (int i=0; i<d; ++i)
+        {
+          _c[i] = r.getCoords(i);
+          if (!r.empty())
+            _begin[i] = this->_c[i][0];
+          if ((this->_c[i].size() > 1) && (r.shift(i) > Ytolerance))
+            _begin[i] += r.shift(i)*(this->_c[i][1]-this->_c[i][0]);
+          _position[i] = _c[i][coord[i] - this->_origin[i]];
+          if ((this->_c[i].size() > 1) && (r.shift(i) > Ytolerance))
+            _position[i] += r.shift(i)*(this->_c[i][coord[i]+1 - this->_origin[i]] - this->_c[i][coord[i] - this->_origin[i]]);
+        }
       }
 
       //! Make iterator pointing to given cell in a grid.
@@ -924,7 +1058,9 @@ namespace Dune {
           this->_superindex += this->_superincrement[i];   // move on cell in direction i
           if (++(this->_coord[i])<=this->_end[i])
           {
-            _position[i] += _h[i];
+            this->_position[i] = this->_c[i][this->_coord[i] - this->_origin[i]];
+            if (_r[i] > Ytolerance)
+              this->_position[i] += this->_r[i]*(this->_c[i][this->_coord[i]+1 - this->_origin[i]] - this->_c[i][this->_coord[i] - this->_origin[i]]);
             return *this;
           }
           else
@@ -959,35 +1095,45 @@ namespace Dune {
       //! Return meshsize in direction i
       ct meshsize (int i) const
       {
-        return _h[i];
+        return _c[i][this->_coord[i]+1 - this->_origin[i]] - _c[i][this->_coord[i] - this->_origin[i]];
       }
 
       //! Return meshsize of current cell as reference.
-      const fTupel& meshsize () const
+      fTupel meshsize () const
       {
-        return _h;
+        fTupel h;
+        for (int i=0; i<d; i++)
+          h[i] = meshsize(i);
+        return h;
       }
 
       //! Move cell position by dist cells in direction i.
       void move (int i, int dist)
       {
         SubIterator::move(i,dist);
-        _position[i] += dist*_h[i];
+        _position[i] = _c[i][this->_coord[i] - this->_origin[i]];
+        if (_r[i] > Ytolerance)
+          _position[i] += _r[i] * (_c[i][this->_coord[i]+1 - this->_origin[i]] - _c[i][this->_coord[i] - this->_origin[i]]);
       }
 
       //! Print contents of iterator
       void print (std::ostream& s) const
       {
         SubIterator::print(s);
+        s << "Position: ";
         s << " [";
         for (int i=0; i<d-1; i++) s << position(i) << ",";
-        s << position(d-1) << "]";
+        s << position(d-1) << "]" << std::endl;
+        s << "Meshsize: ";
+        for (int i=0; i<d-1; i++) s << meshsize(i) << ",";
+        s << meshsize(d-1) << "]" << std::endl << std::endl;
       }
 
     private:
-      fTupel _h;        //!< mesh size per direction
+      Dune::array<std::vector<ct>,d> _c; //TODO hier sollen eher referenzen sein als kopien
       fTupel _begin;    //!< position of origin of grid
       fTupel _position; //!< current position
+      fTupel _r;
     };
 
     //! return iterator to first element of index set
@@ -1038,7 +1184,8 @@ namespace Dune {
   class YLoadBalance
   {
   public:
-    typedef FieldVector<int, d>  iTupel;
+   //typedef Dune::array<int, d>  iTupel;
+    typedef Dune::FieldVector<int, d> iTupel;
     virtual ~YLoadBalance() {}
     virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
     {
@@ -1090,7 +1237,8 @@ namespace Dune {
   class YLoadBalancePowerD : public YLoadBalance<d>
   {
   public:
-    typedef FieldVector<int, d>  iTupel;
+   // typedef Dune::array<int, d>  iTupel;
+    typedef Dune::FieldVector<int, d> iTupel;
     virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
     {
       bool found=false;
@@ -1122,7 +1270,8 @@ namespace Dune {
   class Torus {
   public:
     //! type used to pass tupels in and out
-    typedef FieldVector<int, d> iTupel;
+    //typedef Dune::array<int, d> iTupel;
+    typedef Dune::FieldVector<int, d> iTupel;
 
 
   private:
@@ -1183,12 +1332,12 @@ namespace Dune {
       // make full schedule
       proclists();
     }
-
+/*
     //! make partitioner from communicator and coarse mesh size
 #if HAVE_MPI
-    Torus (MPI_Comm comm, int tag, Dune::array<int,d> size, const YLoadBalance<d>* lb)
+    Torus (MPI_Comm comm, int tag, iTupel size, const YLoadBalance<d>* lb)
 #else
-    Torus (int tag, Dune::array<int,d> size, const YLoadBalance<d>* lb)
+    Torus (int tag, iTupel size, const YLoadBalance<d>* lb)
 #endif
     {
       // MPI stuff
@@ -1216,7 +1365,7 @@ namespace Dune {
 
       // make full schedule
       proclists();
-    }
+    }*/
 
 
     //! return own rank
@@ -1361,8 +1510,14 @@ namespace Dune {
       return true;
     }
 
-    //! partition the given grid onto the torus and return the piece of the process with given rank; returns load imbalance
-    double partition (int rank, iTupel origin_in, Dune::array<int,d> size_in, iTupel& origin_out, iTupel& size_out) const
+    /** \brief partition the given grid onto the torus and return the piece of the process with given rank; returns load imbalance
+     * @param rank rank of our processor
+     * @param origin_in global origin
+     * @param size_in global size
+     * @param origin_out origin of this processors interior
+     * @param size_out size of this processors interior
+     */
+    double partition (int rank, iTupel origin_in, iTupel size_in, iTupel& origin_out, iTupel& size_out) const
     {
       iTupel coord = rank_to_coord(rank);
       double maxsize = 1;
