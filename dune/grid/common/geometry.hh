@@ -310,7 +310,7 @@ namespace Dune
   protected:
     static const bool storeReference = FacadeOptions::StoreGeometryReference< mydim, cdim, GridImp, GeometryImp >::v;
 
-    typename SelectType< storeReference, const Implementation &, Implementation >::Type realGeometry;
+    typename conditional< storeReference, const Implementation &, Implementation >::type realGeometry;
   };
 
 

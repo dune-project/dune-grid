@@ -10,6 +10,6 @@
 #include <dune/grid/alugrid.hh>
 
 const std::string programName = "dune-gridinfo-gmsh-alucube-3d";
-typedef Dune::ALUCubeGrid<3, 3> Grid;
+typedef Dune::ALUGrid<3, 3, Dune::cube, Dune::nonconforming> Grid;
 
 #include <dune/grid/utility/gridinfo-gmsh-main.hh>

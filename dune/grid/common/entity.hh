@@ -75,9 +75,9 @@ namespace Dune
     // type of underlying implementation, for internal use only
     typedef EntityImp< cd, dim, GridImp > Implementation;
 
-    //! return reference to the real implementation
+    //! Return reference to the real implementation
     Implementation &impl () { return realEntity; }
-    //! return reference to the real implementation
+    //! Return const reference to the real implementation
     const Implementation &impl () const { return realEntity; }
 
   protected:
@@ -223,9 +223,9 @@ namespace Dune
     // type of underlying implementation, for internal use only
     typedef EntityImp< 0, dim, GridImp > Implementation;
 
-    //! return reference to the real implementation
+    //! Return reference to the real implementation
     Implementation &impl () { return realEntity; }
-    //! return reference to the real implementation
+    //! Return const reference to the real implementation
     const Implementation &impl () const { return realEntity; }
 
   protected:
