@@ -149,14 +149,17 @@ int main (int argc , char ** argv)
     timeloop(gridDescription+", Seqential/Opt",
              gridPrefix+"_seq_opt_concentration", grid, SeqEvolve(), 0.5,
              EvolveOnInteriorIntersectionOptimized());
+
+#if HAVE_TBB
     // do time loop until end time 0.5
-    timeloop(gridDescription+", OSThreads(2)/Plain",
-             gridPrefix+"_ost_plain_concentration", grid, OSThreadsEvolve(), 0.5,
+    timeloop(gridDescription+", TBB(2)/Plain",
+             gridPrefix+"_tbb_plain_concentration", grid, TBBEvolve(), 0.5,
              EvolveOnInteriorIntersectionPlain());
     // do time loop until end time 0.5
-    timeloop(gridDescription+", OSThreads(2)/Opt",
-             gridPrefix+"_ost_opt_concentration", grid, OSThreadsEvolve(), 0.5,
+    timeloop(gridDescription+", TBB(2)/Opt",
+             gridPrefix+"_tbb_opt_concentration", grid, TBBEvolve(), 0.5,
              EvolveOnInteriorIntersectionOptimized());
+#endif // HAVE_TBB
   }
   catch (std::exception & e) {
     std::cout << "STL ERROR: " << e.what() << std::endl;

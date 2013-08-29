@@ -4,12 +4,15 @@ TESTS =
 CLEANFILES =
 
 AM_CPPFLAGS = @AM_CPPFLAGS@			\
-	$(DUNEMPICPPFLAGS)
+	$(DUNEMPICPPFLAGS)			\
+	$(TBB_CPPFLAGS)
 LDADD =						\
+	$(TBB_LIBS)				\
 	$(DUNEMPILIBS)				\
 	@LDADD@
 AM_LDFLAGS = @AM_LDFLAGS@			\
-	$(DUNEMPILDFLAGS)
+	$(DUNEMPILDFLAGS)			\
+	$(TBB_LDFLAGS)
 
 check_HEADERS =					\
 	evolve.hh				\
@@ -18,7 +21,7 @@ check_HEADERS =					\
 	transportproblem2.hh			\
 	vtkout.hh
 
-if STD_THREAD
+if TBB
 
 if ALUGRID
 
@@ -47,6 +50,6 @@ CLEANFILES +=					\
 	yasp_*_concentration-*.vtu		\
 	yasp_*_concentration.series
 
-endif STD_THREAD
+endif TBB
 
 include $(top_srcdir)/am/global-rules

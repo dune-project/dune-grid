@@ -6,7 +6,7 @@
 
 #include <dune/grid/alugrid.hh>
 
-typedef Dune::ALUSimplexGrid<2, 2> Grid;
+typedef Dune::ALUGrid<2, 2, Dune::simplex, Dune::nonconforming> Grid;
 
 static const std::string gridDescription = "ALUSimplex<2,2>";
 static const std::string gridPrefix = "alusimplex";

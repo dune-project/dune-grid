@@ -9,6 +9,9 @@
 #include <limits>
 #include <thread>
 
+#include <tbb/blocked_range.h>
+#include <tbb/parallel_reduce.h>
+
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 
@@ -180,8 +183,9 @@ struct SeqEvolve
   }
 };
 
-// evolve with the help of C++11-threads.  Use 2 threads, always.
-struct OSThreadsEvolve
+#if HAVE_TBB
+// evolve with the help of TBB.  Use up to 2 threads.
+struct TBBEvolve
 {
   template<class G, class M, class V, class EvolveOnInteriorIntersection>
   void operator()(const G& grid, const M& mapper, V& c, double t,
@@ -199,19 +203,24 @@ struct OSThreadsEvolve
     // allocate a temporary vector for the update
     V update(c.size(), 0);                                  /*@\label{evh:update}@*/
 
-    auto worker = [&](int workerId) {
-      double mydt = std::numeric_limits<double>::infinity();
-      // compute update vector and optimum dt in one grid traversal
-      auto gridView = partitioning.gridView(workerId);
-      auto endit = gridView.template end<0>();     /*@\label{evh:loop0}@*/
-      for (auto it = gridView.template begin<0>(); it!=endit; ++it)
-        evolveOnEntity(*it, gridView, mapper, t, c, update, mydt, evolveOnII);
-      return mydt;
-    };
-
-    auto handle = std::async(std::launch::async, worker, 1);
-    dt = worker(0);
-    dt = std::min(dt, handle.get());
+    dt = tbb::parallel_reduce
+      ( tbb::blocked_range<int>(0,2),
+        std::numeric_limits<double>::infinity(),
+        [&](const tbb::blocked_range<int> &range, double mydt)
+        {
+          for(int workerId = range.begin(); workerId != range.end();
+              ++workerId)
+          {
+            // compute update vector and optimum dt in one grid traversal
+            auto gridView = partitioning.gridView(workerId);
+            auto endit = gridView.template end<0>();
+            for (auto it = gridView.template begin<0>(); it!=endit; ++it)
+              evolveOnEntity(*it, gridView, mapper, t, c, update, mydt,
+                             evolveOnII);
+          }
+          return mydt;
+        },
+        [](double a, double b) { return std::min(a,b); });
 
     // scale dt with safety factor
     dt *= 0.99;                                          /*@\label{evh:.99}@*/
@@ -221,5 +230,6 @@ struct OSThreadsEvolve
       c[i] += dt*update[i];                              /*@\label{evh:updc}@*/
   }
 };
+#endif // HAVE_TBB
 
 #endif // DUNE_GRID_UTILITY_GRIDVIEWPARTITIONING_TEST_EVOLVE_HH
