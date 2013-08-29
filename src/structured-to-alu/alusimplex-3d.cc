@@ -11,6 +11,6 @@
 
 const std::string programName = "dune-structured-to-alusimplex-3d";
 static const bool useCube = false;
-typedef Dune::ALUSimplexGrid<3, 3> Grid;
+typedef Dune::ALUGrid<3, 3, Dune::simplex, Dune::nonconforming> Grid;
 
 #include "main.hh"

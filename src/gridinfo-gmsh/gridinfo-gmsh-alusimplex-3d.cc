@@ -10,6 +10,6 @@
 #include <dune/grid/alugrid.hh>
 
 const std::string programName = "dune-gridinfo-gmsh-alusimplex-3d";
-typedef Dune::ALUSimplexGrid<3, 3> Grid;
+typedef Dune::ALUGrid<3, 3, Dune::simplex, Dune::nonconforming> Grid;
 
 #include <dune/grid/utility/gridinfo-gmsh-main.hh>
