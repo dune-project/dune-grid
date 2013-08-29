@@ -15,7 +15,9 @@ namespace Dune {
   template<class HostView>
   class StridedGridViewPartitioning
   {
-    typedef StridedEntityFilter<typename HostView::IndexSet> Filter;
+    typedef StridedEntityFilter<
+      typename HostView::IndexSet,
+      typename HostView::template Codim<0>::Entity> Filter;
 
     HostView host_;
     std::size_t partitions_;
