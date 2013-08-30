@@ -983,60 +983,56 @@ namespace Dune {
     class TransformingSubIterator : public SubIterator {
     public:
       //! Make iterator pointing to first cell in a grid.
-      TransformingSubIterator (const SubYGrid<d,ct>& r) : SubIterator(r)
+      TransformingSubIterator (const SubYGrid<d,ct>& r) : SubIterator(r), _grid(&r)
       {
-        _r = r.shift();
         for (int i=0; i<d; ++i)
         {
-          _c[i] = r.getCoords(i);
-          if (!r.empty())
-            _begin[i] = _c[i][0];
-          if ((_c[i].size() > 1) && (r.shift(i) > Ytolerance))
-            _begin[i] += r.shift(i)*(_c[i][1]-_c[i][0]);
+          if (!_grid->empty())
+            _begin[i] = _grid->getCoords(i)[0];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
           _position[i] = _begin[i];
         }
       }
 
       //! Make iterator pointing to given cell in a grid.
-      TransformingSubIterator (const SubYGrid<d,ct>& r, const iTupel& coord) : SubIterator(r,coord)
+      TransformingSubIterator (const SubYGrid<d,ct>& r, const iTupel& coord) : SubIterator(r,coord), _grid(&r)
       {
-        _r = r.shift();
         for (int i=0; i<d; ++i)
         {
-          _c[i] = r.getCoords(i);
-          if (!r.empty())
-            _begin[i] = _c[i][0];
-          if ((_c[i].size() > 1) && (r.shift(i) > Ytolerance))
-            _begin[i] += r.shift(i)*(_c[i][1]-_c[i][0]);
-          _position[i] = _c[i][coord[i] - this->_origin[i]];
-          if ((_c[i].size() > 1) && (r.shift(i) > Ytolerance))
-            _position[i] += r.shift(i)*(_c[i][coord[i]+1 - this->_origin[i]] - _c[i][coord[i] - this->_origin[i]]);
+          if (!_grid->empty())
+            _begin[i] = _grid->getCoords(i)[0];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
+          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i]] -_grid->getCoords(i)[coord[i] - this->_origin[i]]);
         }
       }
 
       //! Make transforming iterator from iterator (used for automatic conversion of end)
-      TransformingSubIterator (const SubIterator& i) :
-        SubIterator(i)
+      TransformingSubIterator (const SubYGrid<d,ct>& r, const SubIterator& i) :
+        SubIterator(i), _grid(&r)
       {}
 
       TransformingSubIterator (const TransformingSubIterator & t) :
-        SubIterator(t), _c(t._c), _begin(t._begin), _position(t._position), _r(t._r)
+        SubIterator(t), _begin(t._begin), _position(t._position), _grid(t._grid)
       {}
 
       //! Make iterator pointing to given cell in a grid.
       void reinit (const SubYGrid<d,ct>& r, const iTupel& coord)
       {
         SubIterator::reinit(r,coord);
+        _grid = &r;
         for (int i=0; i<d; ++i)
         {
-          _c[i] = r.getCoords(i);
-          if (!r.empty())
-            _begin[i] = this->_c[i][0];
-          if ((this->_c[i].size() > 1) && (r.shift(i) > Ytolerance))
-            _begin[i] += r.shift(i)*(this->_c[i][1]-this->_c[i][0]);
-          _position[i] = _c[i][coord[i] - this->_origin[i]];
-          if ((this->_c[i].size() > 1) && (r.shift(i) > Ytolerance))
-            _position[i] += r.shift(i)*(this->_c[i][coord[i]+1 - this->_origin[i]] - this->_c[i][coord[i] - this->_origin[i]]);
+          if (!_grid->empty())
+            _begin[i] = _grid->getCoords(i)[0];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
+          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]];
+          if ((this->_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i]] - _grid->getCoords(i)[coord[i] - this->_origin[i]]);
         }
       }
 
@@ -1058,9 +1054,9 @@ namespace Dune {
           this->_superindex += this->_superincrement[i];   // move on cell in direction i
           if (++(this->_coord[i])<=this->_end[i])
           {
-            this->_position[i] = this->_c[i][this->_coord[i] - this->_origin[i]];
-            if (_r[i] > Ytolerance)
-              this->_position[i] += this->_r[i]*(this->_c[i][this->_coord[i]+1 - this->_origin[i]] - this->_c[i][this->_coord[i] - this->_origin[i]]);
+            _position[i] = _grid->getCoords(i)[this->_coord[i] - this->_origin[i]];
+            if (_grid->shift(i) > Ytolerance)
+              _position[i] += _grid->shift(i)*(_grid->getCoords(i)[this->_coord[i]+1 - this->_origin[i]] - _grid->getCoords(i)[this->_coord[i] - this->_origin[i]]);
             return *this;
           }
           else
@@ -1095,7 +1091,7 @@ namespace Dune {
       //! Return meshsize in direction i
       ct meshsize (int i) const
       {
-        return _c[i][this->_coord[i]+1 - this->_origin[i]] - _c[i][this->_coord[i] - this->_origin[i]];
+        return _grid->getCoords(i)[this->_coord[i]+1 - this->_origin[i]] - _grid->getCoords(i)[this->_coord[i] - this->_origin[i]];
       }
 
       //! Return meshsize of current cell as reference.
@@ -1111,9 +1107,9 @@ namespace Dune {
       void move (int i, int dist)
       {
         SubIterator::move(i,dist);
-        _position[i] = _c[i][this->_coord[i] - this->_origin[i]];
-        if (_r[i] > Ytolerance)
-          _position[i] += _r[i] * (_c[i][this->_coord[i]+1 - this->_origin[i]] - _c[i][this->_coord[i] - this->_origin[i]]);
+        _position[i] = _grid->getCoords(i)[this->_coord[i] - this->_origin[i]];
+        if (_grid->shift(i) > Ytolerance)
+          _position[i] += _grid->shift(i) * meshsize(i);
       }
 
       //! Print contents of iterator
@@ -1130,10 +1126,9 @@ namespace Dune {
       }
 
     private:
-      Dune::array<std::vector<ct>,d> _c; //TODO hier sollen eher referenzen sein als kopien
+      const SubYGrid<d,ct>* _grid;
       fTupel _begin;    //!< position of origin of grid
       fTupel _position; //!< current position
-      fTupel _r;
     };
 
     //! return iterator to first element of index set
@@ -1152,7 +1147,7 @@ namespace Dune {
     TransformingSubIterator tsubend () const
     {
       SubIterator endit = subend();
-      return TransformingSubIterator(endit);
+      return TransformingSubIterator(*this,endit);
     }
 
   private:
