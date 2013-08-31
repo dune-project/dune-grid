@@ -134,44 +134,6 @@ namespace Dune
 
 
 
-  // AlbertaGridGeometryTraits
-  // -------------------------
-
-  template< class GridImp, int cdim >
-  struct AlbertaGridGeometryTraits
-  {
-    typedef typename remove_const< GridImp >::type Grid;
-
-    typedef GenericGeometry::DuneCoordTraits< Alberta::Real > CoordTraits;
-
-    static const int dimWorld = cdim;
-
-    template< int dim >
-    struct hasSingleGeometryType
-    {
-      static const bool v = true;
-      static const unsigned int topologyId = GenericGeometry::SimplexTopology< dim >::type::id;
-    };
-
-    template< class Topology >
-    struct Mapping
-    {
-      typedef AlbertaGridCornerStorage< CoordTraits, Topology, dimWorld > CornerStorage;
-      typedef GenericGeometry::CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage > type;
-    };
-
-    struct Caching
-    {
-      static const GenericGeometry::EvaluationType evaluateJacobianTransposed = GenericGeometry::ComputeOnDemand;
-      static const GenericGeometry::EvaluationType evaluateJacobianInverseTransposed = GenericGeometry::ComputeOnDemand;
-      static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::ComputeOnDemand;
-    };
-
-    struct UserData {};
-  };
-
-
-
   // AlbertaGridGeometry
   // -------------------
 
