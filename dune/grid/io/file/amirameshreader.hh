@@ -72,9 +72,14 @@ namespace Dune {
 
        @param filename The name of the grid file
        @param domainFilename The name of the psurface boundary file
+
+       \deprecated [In 2.3] Use the corresponding method taking a filename and a shared pointer
+           to a PSurfaceBoundary object instead!
      */
     static GridType* read(const std::string& filename,
-                          const std::string& domainFilename);
+                          const std::string& domainFilename)
+                          DUNE_DEPRECATED_MSG("Use the corresponding method taking a filename and a shared pointer \
+                                               to a PSurfaceBoundary object instead!");
 
     /** \brief Read a domain boundary description in the psurface format
 
@@ -104,10 +109,15 @@ namespace Dune {
        @param grid The grid objects that is to be read
        @param filename The name of the grid file
        @param domainFilename The name of the psurface boundary file
+
+       \deprecated [In 2.3] Use the corresponding method taking a filename and a shared pointer
+           to a PSurfaceBoundary object instead!
      */
     static void read(GridType& grid,
                      const std::string& filename,
-                     const std::string& domainFilename);
+                     const std::string& domainFilename)
+                     DUNE_DEPRECATED_MSG("Use the corresponding method taking a filename and a shared pointer \
+                                          to a PSurfaceBoundary object instead!");
 
   private:
     /** \brief Read a grid with a parametrized boundary into a given grid object
