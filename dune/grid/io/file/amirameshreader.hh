@@ -68,7 +68,7 @@ namespace Dune {
 
        To use this feature you
        have to have the psurface library and build Dune with --with-psurface.
-       Ask Oliver sander@mi.fu-berlin.de for help.
+       Ask Oliver sander@igpm.rwth-aachen.de for help.
 
        @param filename The name of the grid file
        @param domainFilename The name of the psurface boundary file
@@ -90,7 +90,7 @@ namespace Dune {
 
        To use this feature you
        have to have the psurface library and build Dune with --with-psurface.
-       Ask Oliver sander@mi.fu-berlin.de for help.
+       Ask Oliver sander@igpm.rwth-aachen.de for help.
 
        @param filename The name of the psurface boundary file
      */
