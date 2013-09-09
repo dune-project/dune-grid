@@ -63,6 +63,7 @@ if(${UG_FOUND})
   endforeach(lib ugS2 ugS3 devS)
 endif(${UG_FOUND})
 
+# Add flags to targets
 function(add_dune_ug_flags)
   if(UG_FOUND)
     cmake_parse_arguments(ADD_UG "SOURCE_ONLY;OBJECT" "" "" ${ARGN})
@@ -82,11 +83,15 @@ function(add_dune_ug_flags)
       include_directories(${UG_INCLUDES})
     endif()
 
+    # Add compiler flags
     set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND PROPERTY COMPILE_DEFINITIONS ENABLE_UG)
+    # Add linker arguments
     if(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
       set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND PROPERTY LINK_LIBRARIES ${UG_LIBRARIES} dunegrid ${DUNE_LIBS})
     endif(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
     if(UG_PARALLEL STREQUAL "yes")
+      # Add modelp
+      set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND PROPERTY COMPILE_DEFINITIONS ModelP)
       # Add mpi flags.
       add_dune_mpi_flags(${ADD_UG_UNPARSED_ARGUMENTS} ${_source_only})
     endif(UG_PARALLEL STREQUAL "yes")
