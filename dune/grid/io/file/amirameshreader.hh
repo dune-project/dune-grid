@@ -101,6 +101,18 @@ namespace Dune {
      */
     static shared_ptr<PSurfaceBoundary<GridType::dimension-1> > readPSurfaceBoundary(const std::string& filename);
 
+    /** \brief Read a grid with a parametrized boundary
+
+       Several grid managers support parametrized boundary segments, which carry
+       functions describing the true shape of the boundary segment.
+       This information will the be considered when refining the grid.
+
+       @param filename The name of the grid file
+       @param boundary Pointer to an object holding the description of the grid domain boundary
+
+       \deprecated [In 2.3] Use the corresponding method taking a filename and a shared pointer
+           to a PSurfaceBoundary object instead!
+     */
     static GridType* read(const std::string& filename,
                           const shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
 
