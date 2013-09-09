@@ -106,7 +106,7 @@ namespace Dune {
 
     /** \brief Read a grid with a parametrized boundary into a given grid object
 
-       @param grid The grid objects that is to be read
+       @param grid The grid object that is to be read
        @param filename The name of the grid file
        @param domainFilename The name of the psurface boundary file
 
