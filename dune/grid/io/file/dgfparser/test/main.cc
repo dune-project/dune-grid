@@ -153,10 +153,14 @@ try {
       }
     }
 
+    grid = gridPtr.release();
+
+#ifndef ModelP  // parallel UGGrid can only have one grid at a time. defined ModelP => parallel UG
     // does a second construction of the grid work?
     GridPtr< GridType > gridPtr1( filename.c_str(), mpiHelper.getCommunicator() );
 
     grid = gridPtr.release();
+#endif
   }
 
   GridView gridView = grid->leafView();
