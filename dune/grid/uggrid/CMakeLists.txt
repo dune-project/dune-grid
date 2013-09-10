@@ -45,6 +45,8 @@ set(HEADERS
   uggridleafiterator.hh
   uggridrenumberer.hh
   ug_undefs.hh
+  uglbgatherscatter.hh
+  ugmessagebuffer.hh
   ugwrapper.hh)
 
 install(FILES ${HEADERS}
