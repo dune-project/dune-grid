@@ -98,8 +98,11 @@ namespace Dune {
        Ask Oliver sander@igpm.rwth-aachen.de for help.
 
        @param filename The name of the psurface boundary file
+
+       \deprecated Use the corresponding static method from the PSurfaceBoundary class instead!
      */
-    static shared_ptr<PSurfaceBoundary<GridType::dimension-1> > readPSurfaceBoundary(const std::string& filename);
+    static shared_ptr<PSurfaceBoundary<GridType::dimension-1> > readPSurfaceBoundary(const std::string& filename)
+        DUNE_DEPRECATED_MSG("Use the corresponding static method from the PSurfaceBoundary class instead!");
 
     /** \brief Read a grid with a parametrized boundary
 
