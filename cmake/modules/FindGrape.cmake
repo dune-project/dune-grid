@@ -32,7 +32,7 @@ if(NOT (X11_FOUND AND OPENGL_FOUND))
     _GRAPE_HEADER_USABLE
     )
   return()
-endif(NOT (X11_FOUND AND OpenGL_FOUND))
+endif(NOT (X11_FOUND AND OPENGL_FOUND))
 # find header in user supplied directory
 find_path(GRAPE_INCLUDE_DIR grape.h
   PATHS ${GRAPE_PREFIX}
