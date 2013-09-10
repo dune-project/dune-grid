@@ -10,8 +10,17 @@
 # The option SOURCE_ONLY indicates that the targets are source files.
 # The option OBJECT indicates that the targets are object libraries.
 #
+if(UG_ROOT AND NOT UG_DIR)
+  # define the directory where the config file resides
+  set(UG_DIR ${UG_ROOT}/lib/cmake/ug)
+endif(UG_ROOT AND NOT UG_DIR)
 
 find_package(UG 3.9.1)
+
+if(NOT UG_FOR_DUNE STREQUAL "yes")
+  message(WARNING "UG was not configured for DUNE. Did pass --enable-dune to its configure?")
+  set(UG_FOUND)
+endif(NOT UG_FOR_DUNE STREQUAL "yes")
 if(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
   if(NOT UG_FOUND)
     message(WARNING "CMake will only find UG 3.9.1-patch10 or newer. Maybe you need to upgrade?")
@@ -77,5 +86,9 @@ function(add_dune_ug_flags)
     if(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
       set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND PROPERTY LINK_LIBRARIES ${UG_LIBRARIES} dunegrid ${DUNE_LIBS})
     endif(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
+    if(UG_PARALLEL STREQUAL "yes")
+      # Add mpi flags.
+      add_dune_mpi_flags(${ADD_UG_UNPARSED_ARGUMENTS} ${_source_only})
+    endif(UG_PARALLEL STREQUAL "yes")
   endif(UG_FOUND)
 endfunction(add_dune_ug_flags)
