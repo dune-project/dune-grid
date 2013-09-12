@@ -5,7 +5,9 @@
 
 #include <cstddef>
 
+#if HAVE_TBB
 #include <tbb/tbb_stddef.h>
+#endif
 
 #include <dune/grid/common/entityiterator.hh>
 
@@ -81,6 +83,7 @@ namespace Dune {
       return gridView_;
     }
 
+#if HAVE_TBB
     // TBB range support
     FilteringEntitySet(FilteringEntitySet &other, tbb::split split) :
       filter_(other.filter_, split), gridView_(other.gridView_)
@@ -93,6 +96,7 @@ namespace Dune {
     {
       return filter_.is_divisible();
     }
+#endif // HAVE_TBB
 
   private:
     Filter filter_;
@@ -117,9 +121,11 @@ namespace Dune {
                      typename GV::IndexSet::IndexType maxStride = 0) :
       Base(Filter(gv.indexSet(), maxStride), gv)
     { }
+#if HAVE_TBB
     StridedEntitySet(StridedEntitySet &other, tbb::split split) :
       Base(other, split)
     { }
+#endif // HAVE_TBB
   };
 
   template<class GridView, int codim>

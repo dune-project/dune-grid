@@ -3,7 +3,9 @@
 #ifndef DUNE_GRID_UTILITY_ENTITYFILTER_HH
 #define DUNE_GRID_UTILITY_ENTITYFILTER_HH
 
+#if HAVE_TBB
 #include <tbb/tbb_stddef.h>
+#endif
 
 #include <dune/geometry/type.hh>
 
@@ -16,10 +18,12 @@ namespace Dune {
     typedef E Entity;
 
     bool contains(const Entity &e) const;
+#if HAVE_TBB
     // TBB range support
     EntityFilterInterface(EntityFilterInterface &, tbb::split);
     bool empty() const;
     bool is_divisible() const;
+#endif // HAVE_TBB
   };
 
   template<class IndexSet, class E>
@@ -63,6 +67,7 @@ namespace Dune {
         total += sizePerGT(gt);
       return total;
     }
+#if HAVE_TBB
     // TBB range support
     // construct second half of set, update other to represent first half
     StridedEntityFilter(StridedEntityFilter &other, tbb::split) :
@@ -84,6 +89,7 @@ namespace Dune {
           return true;
       return false;
     }
+#endif // HAVE_TBB
   };
 
 } // namespace Dune

@@ -7,7 +7,9 @@
 #include <iterator>
 #include <vector>
 
+#if HAVE_TBB
 #include <tbb/tbb_stddef.h>
+#endif
 
 namespace Dune {
 
@@ -138,6 +140,7 @@ namespace Dune {
       return partitioning_.gv_;
     }
 
+#if HAVE_TBB
     // TBB range support
     EntitySet(EntitySet &other, tbb::split) :
       partitioning_(other.partitioning_)
@@ -154,6 +157,7 @@ namespace Dune {
     {
       return lastPartition_ - firstPartition_ > 1;
     }
+#endif // HAVE_TBB
 
   private:
     RangedPartitioning partitioning_;
