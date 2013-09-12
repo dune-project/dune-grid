@@ -205,7 +205,7 @@ namespace Dune {
     {
       // sizes of local macro grid
       const FieldVector<int, dim> & size = MultiYGrid<dim,ctype>::begin().cell_overlap().size();
-      FieldVector<int, dim> sides;
+      Dune::array<int, dim> sides;
       {
         for (int i=0; i<dim; i++)
         {
