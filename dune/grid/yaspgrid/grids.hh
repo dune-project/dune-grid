@@ -367,7 +367,8 @@ namespace Dune {
         for (int i=0; i<d; i++)
           if (++(_coord[i])<=_end[i])
             return *this;
-          else { _coord[i]=_origin[i]; }
+          else
+            _coord[i]=_origin[i];
         return *this;
       }
 
@@ -388,12 +389,16 @@ namespace Dune {
     };
 
     //! return iterator to first element of index set
-    Iterator begin () const { return Iterator(*this); }
+    Iterator begin () const
+    {
+      return Iterator(*this);
+    }
 
     //! return iterator to one past the last element of index set
     Iterator end () const {
       iTupel last;
-      for (int i=0; i<d; i++) last[i] = max(i);
+      for (int i=0; i<d; i++)
+        last[i] = max(i);
       last[0] += 1;
       return Iterator(*this,last);
     }
@@ -422,7 +427,7 @@ namespace Dune {
 
       //! Make transforming iterator from iterator (used for automatic conversion of end)
       TransformingIterator (Iterator i) : Iterator(i)
-      {       }
+      {}
 
       //! Increment iterator to next cell with position.
       TransformingIterator& operator++ ()
