@@ -230,35 +230,6 @@ namespace Dune {
       return true;
     }
 
-    //! Return new SubYGrid of self which is the intersection of self and another YGrid
-    virtual SubYGrid<d,ct> intersection (const YGrid<d,ct>& r) const
-    {
-      // check if the two grids can be intersected, must have same mesh size and shift
-      for (int i=0; i<d; i++)
-        if (fabs(meshsize(i)-r.meshsize(i))>Ytolerance) return SubYGrid<d,ct>();
-      for (int i=0; i<d; i++)
-        if (fabs(shift(i)-r.shift(i))>Ytolerance) return SubYGrid<d,ct>();
-
-      iTupel neworigin;
-      iTupel newsize;
-      iTupel offset;
-
-      for (int i=0; i<d; ++i)
-      {
-        // intersect
-        neworigin[i] = std::max(min(i),r.min(i));
-        newsize[i] = std::min(max(i),r.max(i))-neworigin[i]+1;
-        if (newsize[i]<0) {
-          newsize[i] = 0;
-          neworigin[i] = min(i);
-        }
-
-        // offset to own origin
-        offset[i] = neworigin[i]-_origin[i];
-      }
-      return SubYGrid<d,ct>(neworigin,newsize,offset,_size,_h,_r);
-    }
-
     //! return grid moved by the vector v
     YGrid<d,ct> move (iTupel v) const
     {
