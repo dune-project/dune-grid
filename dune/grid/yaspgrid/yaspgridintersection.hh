@@ -38,9 +38,6 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
-    // void update() const {
-    //     const_cast<YaspIntersection*>(this)->update();
-    // }
     void update() const {
       if (_count == 2*_dir + _face || _count >= 2*dim)
         return;
@@ -83,16 +80,9 @@ namespace Dune {
     //! return true if neighbor across intersection exists in this processor
     bool neighbor () const
     {
-#if 1
       return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 >= _inside.gridlevel().cell_overlap().min(_count/2)
               &&
               _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 <= _inside.gridlevel().cell_overlap().max(_count/2));
-#else
-      update();
-      return (_outside.transformingsubiterator().coord(_dir) >= _inside.gridlevel().cell_overlap().min(_dir)
-              &&
-              _outside.transformingsubiterator().coord(_dir) <= _inside.gridlevel().cell_overlap().max(_dir));
-#endif
     }
 
     //! Yasp is always conform
