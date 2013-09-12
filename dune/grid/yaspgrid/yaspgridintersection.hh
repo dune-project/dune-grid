@@ -63,18 +63,9 @@ namespace Dune {
      */
     bool boundary () const
     {
-#if 1
       return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 < _inside.gridlevel().cell_global().min(_count/2)
               ||
               _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 > _inside.gridlevel().cell_global().max(_count/2));
-#else
-      update();
-      // The transforming iterator can be safely moved beyond the boundary.
-      // So we only have to compare against the cell_global grid
-      return (_outside.transformingsubiterator().coord(_dir) < _inside.gridlevel().cell_global().min(_dir)
-              ||
-              _outside.transformingsubiterator().coord(_dir) > _inside.gridlevel().cell_global().max(_dir));
-#endif
     }
 
     //! return true if neighbor across intersection exists in this processor
