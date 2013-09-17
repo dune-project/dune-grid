@@ -11,6 +11,8 @@ set(HEADERS
   yaspgrididset.hh
   yaspgridleveliterator.hh)
 
+exclude_all_but_from_headercheck(grids.hh)
+
 install(FILES ${HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/yaspgrid/)
 
