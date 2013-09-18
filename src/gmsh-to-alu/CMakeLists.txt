@@ -1,6 +1,6 @@
 message(AUTHOR_WARNING "TODO: Make sure that header man.hh is in the tarball")
 
-#set(HEADERCHECK_IGNORE man.hh)
+exclude_from_headercheck(main.hh)
 
 if(ALUGRID_FOUND)
 add_executable(dune-gmsh-to-alusimplex-3d alusimplex-3d.cc)

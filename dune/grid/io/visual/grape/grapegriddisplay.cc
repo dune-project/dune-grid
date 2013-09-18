@@ -622,8 +622,8 @@ namespace Dune
 
     // see hmesh doc page 32, if point is inside, -1 has to be returned
     // otherwise local face , grrrr
-    const GenericReferenceElement< double, dim > &refElement
-      = GenericReferenceElements< double, dim >::general( entity.type() );
+    const ReferenceElement< double, dim > &refElement
+      = ReferenceElements< double, dim >::general( entity.type() );
     return (refElement.checkInside( local ) ? -1 : 0);
   }
 
@@ -685,8 +685,8 @@ namespace Dune
     for( int i = 0; i < dim; ++i )
       c[ i ] = local[ i ];
 
-    const GenericReferenceElement< double, dim > &refElement
-      = GenericReferenceElements< double, dim >::general( geometry.type() );
+    const ReferenceElement< double, dim > &refElement
+      = ReferenceElements< double, dim >::general( geometry.type() );
     return (refElement.checkInside( local ) ? -1 : 0);
   }
 

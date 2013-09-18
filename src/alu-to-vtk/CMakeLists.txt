@@ -1,6 +1,6 @@
 message(AUTHOR_WARNING "TODO: Make sure that header man-volume.hh is in the tarball")
 
-#set(HEADERCHECK_IGNORE man.hh)
+exclude_from_headercheck(main-volume.hh)
 
 if(ALUGRID_FOUND)
 add_executable(dune-alusimplex-3d-to-vtk-volume alusimplex-3d-volume.cc)

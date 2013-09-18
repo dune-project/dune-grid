@@ -147,8 +147,6 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
                                                    const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if HAVE_PSURFACE
-  int point[3] = {-1, -1, -1};
-
   if (dim!=3)
     DUNE_THROW(NotImplemented, "AmiraMeshReader with PSurface support only for 3d grids");
 

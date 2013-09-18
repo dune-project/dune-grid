@@ -25,6 +25,7 @@ add_subdirectory("m4")
 add_subdirectory("dune")
 add_subdirectory("doc")
 add_subdirectory("lib")
+add_subdirectory("src")
 add_subdirectory("cmake/modules")
 
 # finalize the dune project, e.g. generating config.h etc.

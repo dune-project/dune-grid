@@ -34,5 +34,7 @@ set(HEADERS
   alugrid.hh
   capabilities.hh)
 
+exclude_dir_from_headercheck()
+
 install(FILES ${HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/alugrid/3d)

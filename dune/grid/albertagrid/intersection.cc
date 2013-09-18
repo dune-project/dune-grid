@@ -81,7 +81,7 @@ namespace Dune
   AlbertaGridIntersectionBase< Grid >::centerIntegrationOuterNormal () const
   {
 #if DUNE_ALBERTA_USE_GENERICGEOMETRY
-    const GenericReferenceElement< ctype, dimension > &refElement = GenericReferenceElements< ctype, dimension >::simplex();
+    const ReferenceElement< ctype, dimension > &refElement = ReferenceElements< ctype, dimension >::simplex();
     const FieldVector< ctype, dimension > &localInInside = refElement.position( indexInInside(), 1 );
     return Grid::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
 #else

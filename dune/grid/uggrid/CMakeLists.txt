@@ -11,23 +11,9 @@ if(UG_FOUND)
     uggridhieriterator.cc)
 endif(UG_FOUND)
 
-set(HEADERCHECK_IGNORE
-  uggridentity.hh
-  uggridentitypointer.hh
-  uggridentityseed.hh
-  uggridfactory.hh
-  uggridgeometry.hh
-  uggridhieriterator.hh
-  uggridindexsets.hh
-  uggridleafiterator.hh
-  uggridleveliterator.hh
-  uggridlocalgeometry.hh
-  uggridrenumberer.hh
-  uggridintersections.hh
-  uggridintersectioniterators.hh
-  ugincludes.hh
-  uglbgatherscatter.hh
-  ugwrapper.hh)
+exclude_all_but_from_headercheck(
+  boundaryextractor.hh
+  ug_undefs.hh)
 
 set(HEADERS
   uggridfactory.hh
@@ -45,6 +31,8 @@ set(HEADERS
   uggridleafiterator.hh
   uggridrenumberer.hh
   ug_undefs.hh
+  uglbgatherscatter.hh
+  ugmessagebuffer.hh
   ugwrapper.hh)
 
 install(FILES ${HEADERS}
