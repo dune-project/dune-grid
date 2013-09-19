@@ -70,13 +70,10 @@ namespace Dune
     typedef typename GridImp::template Codim< codim >::Entity Entity;
     typedef typename GridImp::template Codim< codim >::EntitySeed EntitySeed;
     typedef typename GridImp::template Codim< codim >::Geometry Geometry;
-    typedef typename GridImp::template Codim< codim >::LevelIterator LevelIterator;
 
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
   private:
-    //typedef MakeableInterfaceObject< Geometry > GeometryObject;
-    //typedef typename GeometryObject::ImplementationType GeometryImp;
     typedef typename GridImp::Traits::template Codim< codim >::GeometryImpl GeometryImpl;
 
   public:
@@ -89,7 +86,7 @@ namespace Dune
     //! level of this element
     int level () const;
 
-    //! return partition type of this entity ( see grid.hh )
+    //! return partition type of this entity
     PartitionType partitionType() const;
 
     //! geometry of this entity
@@ -198,7 +195,6 @@ namespace Dune
     typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
     typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
 
-    typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
@@ -320,7 +316,7 @@ namespace Dune
      */
     bool hasBoundaryIntersections () const ;
 
-    //! return partition type of this entity ( see grid.hh )
+    //! return partition type of this entity
     PartitionType partitionType() const;
 
     //! equality of entities
@@ -374,9 +370,6 @@ namespace Dune
 
     // Alberta element info
     ElementInfo elementInfo_;
-
-    // local coordinates within father
-    typedef MakeableInterfaceObject< Geometry > GeometryObject;
   };
 
 } // namespace Dune
