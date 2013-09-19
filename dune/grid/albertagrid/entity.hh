@@ -38,10 +38,8 @@ namespace Dune
   // -----------------
 
   /*!
-     A Grid is a container of grid entities. An entity is parametrized by the codimension.
+     A grid is a container of grid entities. An entity is parametrized by the codimension.
      An entity of codimension c in dimension d is a d-c dimensional object.
-
-     Here: the general template
    */
   template< int codim, int dim, class GridImp >
   class AlbertaGridEntity
@@ -151,17 +149,11 @@ namespace Dune
   // -----------------------------------
 
   /*!
-     A Grid is a container of grid entities. An entity is parametrized by the codimension.
+     A grid is a container of grid entities. An entity is parametrized by the codimension.
      An entity of codimension c in dimension d is a d-c dimensional object.
 
      Entities of codimension 0 ("elements") are defined through template specialization. Note
      that this specialization has an extended interface compared to the general case
-
-     Entities of codimension 0  allow to visit all neighbors, where
-     a neighbor is an entity of codimension 0 which has a common entity of codimension 1 with the
-     These neighbors are accessed via an iterator. This allows the implementation of
-     non-matching meshes. The number of neigbors may be different from the number of faces/edges
-     of an element!
    */
   template< int dim, class GridImp >
   class AlbertaGridEntity< 0, dim, GridImp >
