@@ -68,7 +68,7 @@ namespace Dune {
   template<class GridImp>            class YaspIntersectionIterator;
   template<class GridImp>            class YaspIntersection;
   template<class GridImp>            class YaspHierarchicIterator;
-  template<class GridImp>            class YaspIndexSet;
+  template<class GridImp, bool isLeafIndexSet>                     class YaspIndexSet;
   template<class GridImp>            class YaspGlobalIdSet;
 
   namespace FacadeOptions
@@ -124,8 +124,8 @@ namespace Dune {
         YaspIntersectionIterator,              // level intersection iter
         YaspHierarchicIterator,
         YaspLevelIterator,                                      // type used for the leaf(!) iterator
-        YaspIndexSet< const YaspGrid< dim > >,                  // level index set
-        YaspIndexSet< const YaspGrid< dim > >,                  // leaf index set
+        YaspIndexSet< const YaspGrid< dim >, false >,                  // level index set
+        YaspIndexSet< const YaspGrid< dim >, true >,                  // leaf index set
         YaspGlobalIdSet<const YaspGrid<dim> >,
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
         YaspGlobalIdSet<const YaspGrid<dim> >,
@@ -197,7 +197,7 @@ namespace Dune {
     void init()
     {
       setsizes();
-      indexsets.push_back( make_shared< YaspIndexSet<const YaspGrid<dim> > >(*this,0) );
+      indexsets.push_back( make_shared< YaspIndexSet<const YaspGrid<dim>, false > >(*this,0) );
       boundarysegmentssize();
     }
 
@@ -247,8 +247,8 @@ namespace Dune {
     typedef typename YaspGridFamily<dim>::Traits Traits;
 
     // need for friend declarations in entity
-    typedef YaspIndexSet<YaspGrid<dim> > LevelIndexSetType;
-    typedef YaspIndexSet<YaspGrid<dim> > LeafIndexSetType;
+    typedef YaspIndexSet<YaspGrid<dim>, false > LevelIndexSetType;
+    typedef YaspIndexSet<YaspGrid<dim>, true > LeafIndexSetType;
     typedef YaspGlobalIdSet<YaspGrid<dim> > GlobalIdSetType;
 
     //! maximum number of levels allowed
@@ -276,9 +276,11 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
       : YMG(comm,L,s,std::bitset<dim>(),overlap,lb), ccobj(comm),
+        leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
       : YMG(L,s,std::bitset<dim>(),overlap,lb),
+        leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
@@ -307,9 +309,11 @@ namespace Dune {
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
       : YMG(MPI_COMM_SELF,L,s,std::bitset<dim>(),overlap,lb), ccobj(MPI_COMM_SELF),
+        leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
       : YMG(L,s,std::bitset<dim>(),overlap,lb),
+        leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
@@ -335,9 +339,11 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
       : YMG(comm,L,s,periodic,overlap,lb), ccobj(comm),
+        leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
       : YMG(L,s,periodic,overlap,lb),
+        leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
@@ -364,9 +370,11 @@ namespace Dune {
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
       : YMG(MPI_COMM_SELF,L,s,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
+        leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
       : YMG(L,s,periodic,overlap,lb),
+        leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
@@ -389,7 +397,9 @@ namespace Dune {
 #else
       : YMG(L,elements,std::bitset<dim>(0),0),
 #endif
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+        keep_ovlp(true),
+        leafIndexSet_(*this),
+        adaptRefCount(0), adaptActive(false)
     {
       init();
     }
@@ -421,7 +431,7 @@ namespace Dune {
       {
         MultiYGrid<dim,ctype>::refine(keep_ovlp);
         setsizes();
-        indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim> > >(*this,maxLevel()) );
+        indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
       }
     }
 
@@ -927,7 +937,7 @@ namespace Dune {
 
     const typename Traits::LeafIndexSet& leafIndexSet() const
     {
-      return *indexsets.back();
+      return leafIndexSet_;
     }
 
 #if HAVE_MPI
@@ -954,14 +964,16 @@ namespace Dune {
     CollectiveCommunication<YaspGrid> ccobj;
 #endif
 
-    std::vector< shared_ptr< YaspIndexSet<const YaspGrid<dim> > > > indexsets;
+    std::vector< shared_ptr< YaspIndexSet<const YaspGrid<dim>, false > > > indexsets;
+    YaspIndexSet<const YaspGrid<dim>, true> leafIndexSet_;
     YaspGlobalIdSet<const YaspGrid<dim> > theglobalidset;
 
     // number of boundary segments of the level 0 grid
     int nBSegments;
 
     // Index classes need access to the real entity
-    friend class Dune::YaspIndexSet<const Dune::YaspGrid<dim> >;
+    friend class Dune::YaspIndexSet<const Dune::YaspGrid<dim>, true >;
+    friend class Dune::YaspIndexSet<const Dune::YaspGrid<dim>, false >;
     friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim> >;
 
     friend class Dune::YaspIntersectionIterator<const Dune::YaspGrid<dim> >;

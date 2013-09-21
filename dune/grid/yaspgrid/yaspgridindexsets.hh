@@ -11,11 +11,17 @@
 
 namespace Dune {
 
-  template<class GridImp>
+  /** \brief Implementation of Level- and LeafIndexSets for YaspGrid
+   *
+   * \tparam GridImp The YaspGrid class we are an index set for
+   * \tparam isLeafIndexSet false: class functions as level index set,
+   *         true: class functions as leaf index set
+   */
+  template<class GridImp, bool isLeafIndexSet>
   class YaspIndexSet
-    : public IndexSet< GridImp, YaspIndexSet< GridImp >, unsigned int >
+    : public IndexSet< GridImp, YaspIndexSet< GridImp, isLeafIndexSet >, unsigned int >
   {
-    typedef YaspIndexSet< GridImp > This;
+    typedef YaspIndexSet< GridImp, isLeafIndexSet > This;
     typedef IndexSet< GridImp, This, unsigned int > Base;
 
   public:
@@ -23,11 +29,24 @@ namespace Dune {
 
     using Base::subIndex;
 
-    //! constructor stores reference to a grid and level
+    /** \brief Level grid view constructor stores reference to a grid and level */
     YaspIndexSet ( const GridImp &g, int l )
       : grid( g ),
         level( l )
     {
+      assert(not isLeafIndexSet);
+
+      // contains a single element type;
+      for (int codim=0; codim<=GridImp::dimension; codim++)
+        mytypes[codim].push_back(GeometryType(GeometryType::cube,GridImp::dimension-codim));
+    }
+
+    /** \brief Level grid view constructor stores reference to a grid and level */
+    YaspIndexSet ( const GridImp &g )
+      : grid( g )
+    {
+      assert(isLeafIndexSet);
+
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
         mytypes[codim].push_back(GeometryType(GeometryType::cube,GridImp::dimension-codim));
@@ -56,20 +75,26 @@ namespace Dune {
     //! get number of entities of given type and level (the level is known to the object)
     int size (GeometryType type) const
     {
-      return grid.size( level, type );
+      return (isLeafIndexSet)
+        ? grid.size( type )
+        : grid.size( level, type );
     }
 
     //! return size of set for a given codim
     int size (int codim) const
     {
-      return grid.size( level, codim );
+      return (isLeafIndexSet)
+        ? grid.size( codim )
+        : grid.size( level, codim );
     }
 
     //! return true if the given entity is contained in \f$E\f$.
     template<class EntityType>
     bool contains (const EntityType& e) const
     {
-      return e.level() == level;
+      return (isLeafIndexSet)
+        ? e.level() == grid.maxLevel()
+        : e.level() == level;
     }
 
     //! deliver all geometry types used in this grid
