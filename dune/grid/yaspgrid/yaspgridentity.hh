@@ -836,8 +836,10 @@ namespace Dune {
       for (int i=0; i<dim; i++)
       {
         coord[i] = _it.coord(i);
-        if (coord[i]<0) coord[i] += size[i];
-        if (coord[i]>=size[i]) coord[i] -= size[i];
+        if (coord[i]<0)
+          coord[i] += size[i];
+        if (coord[i]>=size[i])
+          coord[i] -= size[i];
       }
 
       // determine min number of trailing zeroes
