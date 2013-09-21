@@ -71,6 +71,7 @@ namespace Dune
     typedef typename GridView::IndexSet IndexSet;
 
     static const PartitionIteratorType VTK_Partition = InteriorBorder_Partition;
+    //static const PartitionIteratorType VTK_Partition = All_Partition;
 
     typedef typename GridView::template Codim< 0 >
     ::template Partition< VTK_Partition >::Iterator
@@ -80,6 +81,19 @@ namespace Dune
     GridVertexIterator;
 
     typedef MultipleCodimMultipleGeomTypeMapper< GridView, MCMGVertexLayout > VertexMapper;
+
+    // return true if entity should be skipped in Vertex and Corner iterator
+    static bool skipEntity( const PartitionType entityType )
+    {
+      switch( VTK_Partition )
+      {
+        // for All_Partition no entity has to be skipped
+        case All_Partition:             return false;
+        case InteriorBorder_Partition:  return ( entityType != InteriorEntity );
+        default: DUNE_THROW(NotImplemented,"Add check for this partition type");
+      }
+      return false ;
+    }
 
   public:
     typedef Dune::VTKFunction< GridView > VTKFunction;
@@ -159,7 +173,7 @@ namespace Dune
           cornerIndexDune = 0;
 
           ++git;
-          while( (git != gend) && (git->partitionType() != InteriorEntity) )
+          while( (git != gend) && skipEntity( git->partitionType() ) )
             ++git;
         }
       }
@@ -283,7 +297,7 @@ namespace Dune
           cornerIndexVTK = 0;
 
           ++git;
-          while( (git != gend) && (git->partitionType() != InteriorEntity) )
+          while( (git != gend) && skipEntity( git->partitionType() ) )
             ++git;
         }
       }
