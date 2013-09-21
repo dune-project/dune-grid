@@ -192,3 +192,10 @@ else()
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determing location of ALUGrid failed.\n\n")
 endif(ALUGRID_FOUND)
+
+#add all alugrid related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_alugrid_flags
+if(ALUGRID_FOUND)
+  foreach(dir ${ALUGRID_INCLUDES})
+    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
+  endforeach()
+endif()

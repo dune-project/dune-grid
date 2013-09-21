@@ -9,33 +9,33 @@ namespace Dune
   // AlbertaGridEntity (for codim > 0)
   // ---------------------------------
 
-  template<int codim, int dim, class GridImp>
-  inline AlbertaGridEntity< codim, dim, GridImp >
-  ::AlbertaGridEntity ( const GridImp &grid, const ElementInfo &elementInfo, int subEntity )
-    : grid_( &grid ),
-      elementInfo_( elementInfo ),
-      subEntity_( subEntity )
+  template<int codim, int dim, class Grid>
+  inline AlbertaGridEntity< codim, dim, Grid >
+    ::AlbertaGridEntity ( const Grid &grid, const ElementInfo &elementInfo, int subEntity )
+  : grid_( &grid ),
+    elementInfo_( elementInfo ),
+    subEntity_( subEntity )
   {}
 
-  template<int codim, int dim, class GridImp>
-  inline AlbertaGridEntity< codim, dim, GridImp >
-  ::AlbertaGridEntity ( const GridImp &grid )
-    : grid_( &grid ),
-      elementInfo_(),
-      subEntity_( -1 )
+  template<int codim, int dim, class Grid>
+  inline AlbertaGridEntity< codim, dim, Grid >
+    ::AlbertaGridEntity ( const Grid &grid )
+  : grid_( &grid ),
+    elementInfo_(),
+    subEntity_( -1 )
   {}
 
-  template<int codim, int dim, class GridImp>
-  inline PartitionType AlbertaGridEntity <codim,dim,GridImp>::
-  partitionType () const
+  template< int codim, int dim, class Grid >
+  inline PartitionType
+  AlbertaGridEntity< codim,dim,Grid >::partitionType () const
   {
     return InteriorEntity;
   }
 
 
-  template< int codim, int dim, class GridImp >
+  template< int codim, int dim, class Grid >
   inline bool
-  AlbertaGridEntity< codim, dim, GridImp >::equals ( const This &other ) const
+  AlbertaGridEntity< codim, dim, Grid >::equals ( const This &other ) const
   {
     const Alberta::Element *e1 = elementInfo().el();
     const Alberta::Element *e2 = other.elementInfo().el();
@@ -47,52 +47,52 @@ namespace Dune
   }
 
 
-  template<int codim, int dim, class GridImp>
+  template< int codim, int dim, class Grid >
   inline ALBERTA EL_INFO *
-  AlbertaGridEntity< codim, dim, GridImp >::getElInfo () const
+  AlbertaGridEntity< codim, dim, Grid >::getElInfo () const
   {
     return &(elementInfo_.elInfo());
   }
 
 
-  template< int codim, int dim, class GridImp >
+  template< int codim, int dim, class Grid >
   inline void
-  AlbertaGridEntity< codim, dim, GridImp >::clearElement ()
+  AlbertaGridEntity< codim, dim, Grid >::clearElement ()
   {
     elementInfo_ = ElementInfo();
   }
 
 
-  template< int codim, int dim, class GridImp >
-  inline void AlbertaGridEntity< codim, dim, GridImp >
-  ::setElement ( const ElementInfo &elementInfo, int subEntity )
+  template< int codim, int dim, class Grid >
+  inline void AlbertaGridEntity< codim, dim, Grid >
+    ::setElement ( const ElementInfo &elementInfo, int subEntity )
   {
     elementInfo_ = elementInfo;
     subEntity_ = subEntity;
   }
 
 
-  template< int codim, int dim, class GridImp >
+  template< int codim, int dim, class Grid >
   inline void
-  AlbertaGridEntity< codim, dim, GridImp >::setEntity ( const This &other )
+  AlbertaGridEntity< codim, dim, Grid >::setEntity ( const This &other )
   {
     setElement( other.elementInfo_, other.subEntity_ );
   }
 
 
-  template<int codim, int dim, class GridImp>
-  inline int AlbertaGridEntity<codim,dim,GridImp>::level() const
+  template< int codim, int dim, class Grid >
+  inline int AlbertaGridEntity< codim, dim, Grid >::level() const
   {
     assert( elementInfo_.level() == grid().levelProvider() ( elementInfo_ ) );
     return elementInfo_.level();
   }
 
 
-  template< int codim, int dim, class GridImp >
-  inline typename AlbertaGridEntity< codim, dim, GridImp >::Geometry
-  AlbertaGridEntity< codim, dim, GridImp >::geometry () const
+  template< int codim, int dim, class Grid >
+  inline typename AlbertaGridEntity< codim, dim, Grid >::Geometry
+  AlbertaGridEntity< codim, dim, Grid >::geometry () const
   {
-    typedef AlbertaGridCoordinateReader< codim, GridImp > CoordReader;
+    typedef AlbertaGridCoordinateReader< codim, Grid > CoordReader;
 
     assert( elementInfo_ );
     const CoordReader coordReader( grid(), elementInfo_, subEntity_ );
@@ -100,8 +100,8 @@ namespace Dune
   }
 
 
-  template< int codim, int dim, class GridImp >
-  inline GeometryType AlbertaGridEntity< codim, dim, GridImp >::type () const
+  template< int codim, int dim, class Grid >
+  inline GeometryType AlbertaGridEntity< codim, dim, Grid >::type () const
   {
     typedef typename GenericGeometry::SimplexTopology< mydimension >::type Topology;
     return GeometryType( Topology() );
@@ -112,48 +112,48 @@ namespace Dune
   // AlbertaGridEntity (for codim = 0)
   // ---------------------------------
 
-  template< int dim, class GridImp >
-  inline AlbertaGridEntity< 0, dim, GridImp >
-  ::AlbertaGridEntity ( const GridImp &grid, const ElementInfo &elementInfo, int subEntity )
-    : grid_( &grid ),
-      elementInfo_( elementInfo )
+  template< int dim, class Grid >
+  inline AlbertaGridEntity< 0, dim, Grid >
+    ::AlbertaGridEntity ( const Grid &grid, const ElementInfo &elementInfo, int subEntity )
+  : grid_( &grid ),
+    elementInfo_( elementInfo )
   {
     assert( subEntity == 0 );
   }
 
-  template< int dim, class GridImp >
-  inline AlbertaGridEntity< 0, dim, GridImp >
-  ::AlbertaGridEntity( const GridImp &grid )
-    : grid_( &grid ),
-      elementInfo_()
+  template< int dim, class Grid >
+  inline AlbertaGridEntity< 0, dim, Grid >
+    ::AlbertaGridEntity( const Grid &grid )
+  : grid_( &grid ),
+    elementInfo_()
   {}
 
 
-  template< int dim, class GridImp >
-  inline int AlbertaGridEntity< 0, dim, GridImp >::boundaryId() const
+  template< int dim, class Grid >
+  inline int AlbertaGridEntity< 0, dim, Grid >::boundaryId() const
   {
     // elements are always inside of our Domain
     return 0;
   }
 
 
-  template< int dim, class GridImp >
-  inline bool AlbertaGridEntity< 0, dim,GridImp >::isNew () const
+  template< int dim, class Grid >
+  inline bool AlbertaGridEntity< 0, dim, Grid >::isNew () const
   {
     return grid().levelProvider().isNew( elementInfo_ );
   }
 
 
-  template< int dim, class GridImp >
-  inline bool AlbertaGridEntity< 0, dim, GridImp>::mightVanish () const
+  template< int dim, class Grid >
+  inline bool AlbertaGridEntity< 0, dim, Grid >::mightVanish () const
   {
     return elementInfo_.mightVanish();
   }
 
 
-  template< int dim, class GridImp >
+  template< int dim, class Grid >
   inline bool
-  AlbertaGridEntity< 0, dim, GridImp >::hasBoundaryIntersections () const
+  AlbertaGridEntity< 0, dim, Grid >::hasBoundaryIntersections () const
   {
     assert( elementInfo_ );
     bool isBoundary = false;
@@ -163,85 +163,85 @@ namespace Dune
   }
 
 
-  template< int dim, class GridImp >
+  template< int dim, class Grid >
   inline PartitionType
-  AlbertaGridEntity< 0, dim, GridImp >::partitionType () const
+  AlbertaGridEntity< 0, dim, Grid >::partitionType () const
   {
     return InteriorEntity;
   }
 
 
-  template< int dim, class GridImp >
-  inline bool AlbertaGridEntity< 0, dim,GridImp >::isLeaf () const
+  template< int dim, class Grid >
+  inline bool AlbertaGridEntity< 0, dim,Grid >::isLeaf () const
   {
     return elementInfo_.isLeaf();
   }
 
 
-  template< int dim, class GridImp >
+  template< int dim, class Grid >
   inline bool
-  AlbertaGridEntity< 0, dim, GridImp >::equals ( const This &other ) const
+  AlbertaGridEntity< 0, dim, Grid >::equals ( const This &other ) const
   {
     // element pointers are unique
     return (elementInfo().el() == other.elementInfo().el());
   }
 
 
-  template< int dim, class GridImp >
+  template< int dim, class Grid >
   template< int codim >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::template Codim< codim >::EntityPointer
-  AlbertaGridEntity< 0, dim, GridImp >::subEntity ( int i ) const
+  inline typename AlbertaGridEntity< 0, dim, Grid >::template Codim< codim >::EntityPointer
+  AlbertaGridEntity< 0, dim, Grid >::subEntity ( int i ) const
   {
-    typedef AlbertaGridEntityPointer< codim, GridImp > EntityPointerImpl;
+    typedef AlbertaGridEntityPointer< codim, Grid > EntityPointerImpl;
     return EntityPointerImpl( grid(), elementInfo_, grid().generic2alberta( codim, i ) );
   }
 
 
-  template< int dim, class GridImp >
+  template< int dim, class Grid >
   inline ALBERTA EL_INFO *
-  AlbertaGridEntity< 0, dim, GridImp >::getElInfo () const
+  AlbertaGridEntity< 0, dim, Grid >::getElInfo () const
   {
     return &(elementInfo_.elInfo());
   }
 
 
-  template< int dim, class GridImp >
-  inline int AlbertaGridEntity< 0, dim, GridImp >::level () const
+  template< int dim, class Grid >
+  inline int AlbertaGridEntity< 0, dim, Grid >::level () const
   {
     assert( elementInfo_.level() == grid().levelProvider() ( elementInfo_ ) );
     return elementInfo_.level();
   }
 
 
-  template< int dim, class GridImp >
+  template< int dim, class Grid >
   inline void
-  AlbertaGridEntity< 0, dim, GridImp >::clearElement ()
+  AlbertaGridEntity< 0, dim, Grid >::clearElement ()
   {
     elementInfo_ = ElementInfo();
   }
 
 
-  template< int dim, class GridImp >
-  inline void AlbertaGridEntity< 0, dim, GridImp >
-  ::setElement ( const ElementInfo &elementInfo, int subEntity )
+  template< int dim, class Grid >
+  inline void AlbertaGridEntity< 0, dim, Grid >
+    ::setElement ( const ElementInfo &elementInfo, int subEntity )
   {
     elementInfo_ = elementInfo;
   }
 
 
-  template< int dim, class GridImp >
+  template< int dim, class Grid >
   inline void
-  AlbertaGridEntity< 0, dim, GridImp >::setEntity( const This &other )
+  AlbertaGridEntity< 0, dim, Grid >::setEntity( const This &other )
   {
     setElement( other.elementInfo_, 0 );
   }
 
 
-  template< int dim, class GridImp >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::Geometry
-  AlbertaGridEntity< 0, dim, GridImp >::geometry () const
+  template< int dim, class Grid >
+  inline typename AlbertaGridEntity< 0, dim, Grid >::Geometry
+  AlbertaGridEntity< 0, dim, Grid >::geometry () const
   {
-    typedef AlbertaGridCoordinateReader< 0, GridImp > CoordReader;
+    typedef AlbertaGridCoordinateReader< 0, Grid > CoordReader;
 
     assert( elementInfo_ );
     const CoordReader coordReader( grid(), elementInfo_, 0 );
@@ -249,19 +249,19 @@ namespace Dune
   }
 
 
-  template< int dim, class GridImp >
-  inline GeometryType AlbertaGridEntity< 0, dim, GridImp>::type () const
+  template< int dim, class Grid >
+  inline GeometryType AlbertaGridEntity< 0, dim, Grid>::type () const
   {
     typedef typename GenericGeometry::SimplexTopology< mydimension >::type Topology;
     return GeometryType( Topology() );
   }
 
 
-  template< int dim, class GridImp >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::EntityPointer
-  AlbertaGridEntity< 0, dim, GridImp >::father () const
+  template< int dim, class Grid >
+  inline typename AlbertaGridEntity< 0, dim, Grid >::EntityPointer
+  AlbertaGridEntity< 0, dim, Grid >::father () const
   {
-    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImpl;
+    typedef AlbertaGridEntityPointer< 0, Grid > EntityPointerImpl;
 
     assert( elementInfo_ );
     const ElementInfo fatherInfo = elementInfo_.father();
@@ -270,47 +270,47 @@ namespace Dune
   }
 
 
-  template< int dim, class GridImp >
-  inline int AlbertaGridEntity< 0, dim, GridImp >::nChild () const
+  template< int dim, class Grid >
+  inline int AlbertaGridEntity< 0, dim, Grid >::nChild () const
   {
     return elementInfo_.indexInFather();
   }
 
 
-  template< int dim, class GridImp >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::LocalGeometry
-  AlbertaGridEntity< 0, dim, GridImp >::geometryInFather() const
+  template< int dim, class Grid >
+  inline typename AlbertaGridEntity< 0, dim, Grid >::LocalGeometry
+  AlbertaGridEntity< 0, dim, Grid >::geometryInFather() const
   {
-    typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
+    typedef AlbertaGridLocalGeometryProvider< Grid > LocalGeoProvider;
     const int indexInFather = elementInfo_.indexInFather();
     const int orientation = (elementInfo_.type() == 1 ? -1 : 1);
     return LocalGeometry( LocalGeoProvider::instance().geometryInFather( indexInFather, orientation ) );
   }
 
 
-  template< int dim, class GridImp >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::HierarchicIterator
-  AlbertaGridEntity< 0, dim, GridImp >::hbegin( int maxlevel ) const
+  template< int dim, class Grid >
+  inline typename AlbertaGridEntity< 0, dim, Grid >::HierarchicIterator
+  AlbertaGridEntity< 0, dim, Grid >::hbegin( int maxlevel ) const
   {
     assert( elementInfo_ );
-    typedef AlbertaGridHierarchicIterator< GridImp > IteratorImp;
+    typedef AlbertaGridHierarchicIterator< Grid > IteratorImp;
     return IteratorImp( grid(), elementInfo_, maxlevel );
   }
 
 
-  template< int dim, class GridImp >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::HierarchicIterator
-  AlbertaGridEntity< 0, dim, GridImp>::hend( int maxlevel ) const
+  template< int dim, class Grid >
+  inline typename AlbertaGridEntity< 0, dim, Grid >::HierarchicIterator
+  AlbertaGridEntity< 0, dim, Grid>::hend( int maxlevel ) const
   {
     assert( elementInfo_ );
-    typedef AlbertaGridHierarchicIterator< GridImp > IteratorImp;
+    typedef AlbertaGridHierarchicIterator< Grid > IteratorImp;
     return IteratorImp( grid(), level(), maxlevel );
   }
 
 
-  template< int dim, class GridImp >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIterator
-  AlbertaGridEntity< 0, dim, GridImp >::ileafbegin() const
+  template< int dim, class Grid >
+  inline typename AlbertaGridEntity< 0, dim, Grid >::AlbertaGridLeafIntersectionIterator
+  AlbertaGridEntity< 0, dim, Grid >::ileafbegin() const
   {
     assert( elementInfo_ );
 
@@ -333,9 +333,9 @@ namespace Dune
   }
 
 
-  template< int dim, class GridImp >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIterator
-  AlbertaGridEntity< 0, dim, GridImp >::ileafend() const
+  template< int dim, class Grid >
+  inline typename AlbertaGridEntity< 0, dim, Grid >::AlbertaGridLeafIntersectionIterator
+  AlbertaGridEntity< 0, dim, Grid >::ileafend() const
   {
     assert( elementInfo_ );
     typename AlbertaGridLeafIntersectionIterator::End end;
