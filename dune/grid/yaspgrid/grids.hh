@@ -1783,10 +1783,6 @@ namespace Dune {
       // compute overlap
       int overlap = (keep_overlap) ? 2*cg.overlap : cg.overlap;
 
-      // output
-      //    if (_torus.rank()==0) std::cout << "MultiYGrid<" // changed dinfo to cout
-      //                                    << d << ">: refined to size "
-      //                                    << s << std::endl;
 
       // the cell interior grid obtained from coarse cell interior grid
       iTupel o_interior;
@@ -2401,9 +2397,6 @@ namespace Dune {
         mpifriendly_ygrid yg = mpifriendly_recv_recvgrid[i.index()];
         recv_recvgrid[i.index()] = YGrid<d,ct>(yg.origin,yg.size,yg.h,yg.r);
         send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
-        //        std::cout << "[" << _torus.rank() << "]:   " << "sendgrid=" << sendgrid << std::endl;
-        //        std::cout << "[" << _torus.rank() << "]:   " << "recved recvgrid=" << recv_recvgrid[i.index()] << std::endl;
-        //        std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << send_intersection.grid << std::endl;
         send_intersection.rank = i.rank();
         send_intersection.distance = i.distance();
         if (!send_intersection.grid.empty()) sendlist.push_front(send_intersection);
@@ -2412,9 +2405,6 @@ namespace Dune {
         yg = mpifriendly_recv_sendgrid[i.index()];
         recv_sendgrid[i.index()] = YGrid<d,ct>(yg.origin,yg.size,yg.h,yg.r);
         recv_intersection.grid = recvgrid.intersection(recv_sendgrid[i.index()]);
-        //        std::cout << "[" << _torus.rank() << "]:   " << "recvgrid=" << recvgrid << std::endl;
-        //        std::cout << "[" << _torus.rank() << "]:   " << "recved sendgrid=" << recv_sendgrid[i.index()] << std::endl;
-        //        std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << recv_intersection.grid << std::endl;
         recv_intersection.rank = i.rank();
         recv_intersection.distance = i.distance();
         if(!recv_intersection.grid.empty()) recvlist.push_back(recv_intersection);
