@@ -13,11 +13,8 @@ namespace Dune
       with a "neighboring" element or with the domain
       boundary.
 
-     Template parameters are:
-
-     - <tt>GridImp</tt> Type that is a model of Dune::Grid
-     - <tt>IntersectionImp</tt> Class template that is a model of
-     Dune::Intersection
+     \tparam GridImp Type that is a model of Dune::Grid
+     \tparam IntersectionImp Class template that is a model of Dune::Intersection
 
      <h2>Overview</h2>
 
