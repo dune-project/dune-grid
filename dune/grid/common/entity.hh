@@ -13,13 +13,10 @@ namespace Dune
   /**
      @brief Wrapper class for entities
 
-
-     Template parameters are:
-
-     - <tt>cd</tt> Codimension of the entity
-     - <tt>dim</tt> Dimension of the grid
-     - <tt>GridImp</tt> Type that is a model of Dune::Grid
-     - <tt>EntityImp</tt> Class template that is a model of Dune::Entity
+     \tparam cd Codimension of the entity
+     \tparam dim Dimension of the grid
+     \tparam GridImp Type that is a model of Dune::Grid
+     \tparam EntityImp Class template that is a model of Dune::Entity
 
 
      <H3>Engine Concept</H3>
