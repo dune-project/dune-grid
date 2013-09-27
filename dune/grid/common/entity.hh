@@ -538,8 +538,6 @@ namespace Dune
     //===========================================================
 
     // need to make copy constructor of EntityPointer work for any iterator
-    //friend class Dune::EntityPointer<GridImp,
-    //                                 typename GridImp::GridFamily::Traits::template Codim<0>::EntityPointerImpl>;
     template< class, class > friend class Dune::EntityPointer;
 
   protected:
