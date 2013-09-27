@@ -564,7 +564,7 @@ namespace Dune
     //! know your own codimension
     enum { codimension=cd };
 
-    //! know your own dimension
+    //! Dimension of the grid
     enum { dimension=dim };
 
     /** \brief Know dimension of the entity */
@@ -617,7 +617,7 @@ namespace Dune
     //! know your own codimension
     enum { codimension=0 };
 
-    //! know your own dimension
+    //! Dimension of the grid
     enum { dimension=dim };
 
     /** \brief Know dimension of the entity */
