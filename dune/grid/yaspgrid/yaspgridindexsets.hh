@@ -54,7 +54,7 @@ namespace Dune {
 
     //! get index of an entity
     template<int cc>
-    IndexType index (const typename GridImp::Traits::template Codim<cc>::Entity& e) const
+    IndexType index (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e) const
     {
       assert( cc == 0 || cc == GridImp::dimension );
       return grid.getRealImplementation(e).compressedIndex();
@@ -106,7 +106,7 @@ namespace Dune {
   private:
     const GridImp& grid;
     int level;
-    std::vector<GeometryType> mytypes[GridImp::dimension+1];
+    std::vector<GeometryType> mytypes[remove_const<GridImp>::type::dimension+1];
   };
 
 }   // namespace Dune
