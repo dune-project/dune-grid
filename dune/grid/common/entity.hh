@@ -169,7 +169,6 @@ namespace Dune
     //@}
 
   protected:
-    typedef typename remove_const<GridImp>::type mutableGridImp;
 
     //===========================================================
     /** @name Protected methods
@@ -230,8 +229,6 @@ namespace Dune
 
   protected:
     Implementation realEntity;
-
-    typedef typename remove_const<GridImp>::type mutableGridImp;
 
   public:
 

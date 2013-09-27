@@ -434,7 +434,6 @@ namespace Dune
     {}
     //@}
 
-    typedef typename remove_const<GridImp>::type mutableGridImp;
   protected:
     //! give the pseudo IntersectionIterator class access to the realImp
     //! \todo cleanup this hack
