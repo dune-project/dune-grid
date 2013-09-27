@@ -292,14 +292,6 @@ namespace Dune
     }
 
     /*! @brief Return true if intersection is conforming.
-
-        This method returns true, if
-        @code
-        inside()->entity<1>(indexInInside()) ==
-            outside()->entity<1>(indexInOutside()) ||
-        boundary()
-        @endcode
-        holds.
      */
     bool conforming () const
     {
