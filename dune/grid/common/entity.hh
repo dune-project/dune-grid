@@ -531,16 +531,9 @@ namespace Dune
 
 
   protected:
-    //===========================================================
-    /** @name Protected methods
-     */
-    //@{
-    //===========================================================
-
     // need to make copy constructor of EntityPointer work for any iterator
     template< class, class > friend class Dune::EntityPointer;
 
-  protected:
     /** hide copy constructor */
     Entity(const Entity& rhs) : realEntity(rhs.realEntity) {}
     /** hide assignment operator */
@@ -548,7 +541,7 @@ namespace Dune
       realEntity = rhs.realEntity;
       return *this;
     }
-    //@}
+
   };
 
 
