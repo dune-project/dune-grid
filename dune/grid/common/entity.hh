@@ -192,6 +192,10 @@ namespace Dune
   /**
      @brief Template specialization of Dune::Entity for Elements (codim==0)
 
+     \tparam dim Dimension of the grid
+     \tparam GridImp Type that is a model of Dune::Grid
+     \tparam EntityImp Class template that is a model of Dune::Entity
+
      @see Dune::Entity (general version) for the full documentation
 
      \extends Entity<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
