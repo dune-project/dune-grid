@@ -106,13 +106,11 @@ namespace Dune
       //! \brief Dimensionality of the reference element of the entity.
       mydimension=dim-cd
     };
-    enum {
-      //! \brief Know the dimension of world.
-      dimensionworld=GridImp::dimensionworld
-    };
+    //! \brief Know the dimension of world.
+    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
 
     //! @brief coordinate type of the Grid
-    typedef typename GridImp::ctype ctype;
+    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
     //@}
 
 
@@ -276,12 +274,11 @@ namespace Dune
       /** \brief Know dimension of the entity */
       mydimension=dim
     };
-    enum {
-      //! Know the world dimension
-      dimensionworld=GridImp::dimensionworld
-    };
+    //! Know the world dimension
+    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
+
     //! Type used for coordinates
-    typedef typename GridImp::ctype ctype;
+    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
     //@}
 
 
@@ -562,10 +559,10 @@ namespace Dune
     enum { mydimension=dim-cd };
 
     //! know your own dimension of world
-    enum { dimensionworld=GridImp::dimensionworld };
+    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
 
     //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
+    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
 
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
@@ -615,10 +612,10 @@ namespace Dune
     enum { mydimension=dim };
 
     //! know your own dimension of world
-    enum { dimensionworld=GridImp::dimensionworld };
+    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
 
     //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
+    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
 
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
