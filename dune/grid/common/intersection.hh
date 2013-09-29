@@ -223,7 +223,7 @@ namespace Dune
       return this->real.boundary();
     }
 
-#if ! DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
     /**
        \brief Identifier for boundary segment from macro grid.
 
