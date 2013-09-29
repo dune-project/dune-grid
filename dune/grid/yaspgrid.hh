@@ -18,7 +18,6 @@ typedef unsigned char uint8_t;
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
 #include <dune/grid/common/capabilities.hh> // the capabilities
-#include <dune/common/misc.hh>
 #include <dune/common/shared_ptr.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/typetraits.hh>
