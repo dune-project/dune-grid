@@ -17,7 +17,7 @@ namespace Dune {
    * On the grid, there is the method entityPointer(const EntitySeed&), which
    * gives you an EntityPointer in exchange for an EntitySeed.
    */
-  template<class EntitySeedImp>
+  template<class GridImp, class EntitySeedImp>
   class EntitySeed
   {
   public:
@@ -44,6 +44,12 @@ namespace Dune {
     }
 
   protected:
+    // give the GridDefaultImplementation class access to the impl
+    friend class GridDefaultImplementation<
+        GridImp::dimension, GridImp::dimensionworld,
+        typename GridImp::ctype,
+        typename GridImp::GridFamily> ;
+
     /** \brief Access to the actual implementation */
     const Implementation& impl() const
     {
