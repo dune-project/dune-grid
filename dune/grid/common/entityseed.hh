@@ -37,6 +37,13 @@ namespace Dune {
       : implementation_(implementation)
     {}
 
+    /** \brief check whether it is safe to create an Entity from this Seed */
+    bool isValid() const
+    {
+      return implementation_.isValid();
+    }
+
+  protected:
     /** \brief Access to the actual implementation */
     const Implementation& impl() const
     {
