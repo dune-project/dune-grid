@@ -145,7 +145,7 @@ namespace CheckEntitySeed // don't blur namespace Dune
       const Iterator end = gridView.template end< codim >();
       for( Iterator it = gridView.template begin< codim >(); it != end; ++it )
       {
-        // get entity and entity seed
+        // get entity
         const Entity &entity = *it;
         EntitySeed seed = entity.seed();
 
@@ -153,9 +153,15 @@ namespace CheckEntitySeed // don't blur namespace Dune
         EntityPointer entityPointer = grid.entityPointer( seed );
         compare( entityPointer, EntityPointer( it ), output );
 
+        // test default constructor
+        EntitySeed seed2;
+        assert(! seed.isValid());
+
         // create copy of seed and compare again
+        seed2 = seed;
+        assert(seed.isValid());
+
         // we might like to check the assignment operator as well
-        EntitySeed seed2( seed );
         compare( entityPointer, grid.entityPointer( seed2 ), output );
       }
     }
