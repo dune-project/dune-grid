@@ -55,6 +55,11 @@ namespace Dune {
 #endif
 
     /** \brief Access to the actual implementation */
+    Implementation& impl()
+    {
+      return implementation_;
+    }
+    /** \brief const Access to the actual implementation */
     const Implementation& impl() const
     {
       return implementation_;
