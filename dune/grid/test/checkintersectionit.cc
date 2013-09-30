@@ -148,11 +148,6 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   if( intersection.boundary() )
   {
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    if( intersection.boundaryId() < 0 )
-      DUNE_THROW( Dune::GridError, "Boundary id has negative value (" << intersection.boundaryId() << ")." );
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
-
     if( !intersection.conforming() && !intersection.neighbor() )
       DUNE_THROW( Dune::GridError, "Boundary intersections must be conforming." );
   }
