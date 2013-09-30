@@ -28,6 +28,10 @@ namespace Dune {
     //! Export the implementation type
     typedef EntitySeedImp Implementation;
 
+    /** \brief Construct an empty (i.e. isValid() == false) seed */
+    EntitySeed()
+    {}
+
     /** \brief Construct from implementation class */
     EntitySeed(const EntitySeedImp& implementation)
       : implementation_(implementation)
