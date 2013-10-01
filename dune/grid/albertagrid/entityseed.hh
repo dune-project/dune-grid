@@ -47,10 +47,18 @@ namespace Dune
 
     typedef typename Grid::template Codim< codimension >::Entity Entity;
 
+    AlbertaGridEntitySeed ( )
+    {}
+
     AlbertaGridEntitySeed ( const ElementInfo &elementInfo, int subEntity )
       : seed_( elementInfo.seed() ),
         subEntity_( subEntity )
     {}
+
+    bool isValid () const
+    {
+      seed_.isValid();
+    }
 
     ElementInfo elementInfo ( const MeshPointer &mesh ) const { return ElementInfo( mesh, seed_ ); }
     int subEntity () const { return subEntity_; }
@@ -82,9 +90,17 @@ namespace Dune
 
     typedef typename Grid::template Codim< codimension >::Entity Entity;
 
+    AlbertaGridEntitySeed ( )
+    {}
+
     explicit AlbertaGridEntitySeed ( const ElementInfo &elementInfo )
       : seed_( elementInfo.seed() )
     {}
+
+    bool isValid () const
+    {
+      seed_.isValid();
+    }
 
     ElementInfo elementInfo ( const MeshPointer &mesh ) const { return ElementInfo( mesh, seed_ ); }
     int subEntity () const { return 0; }
