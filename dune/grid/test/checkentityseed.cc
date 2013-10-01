@@ -155,11 +155,11 @@ namespace CheckEntitySeed // don't blur namespace Dune
 
         // test default constructor
         EntitySeed seed2;
-        assert(! seed.isValid());
+        assert(! seed2.isValid());
 
         // create copy of seed and compare again
         seed2 = seed;
-        assert(seed.isValid());
+        assert( seed2.isValid());
 
         // we might like to check the assignment operator as well
         compare( entityPointer, grid.entityPointer( seed2 ), output );
