@@ -7,6 +7,8 @@
  *  \brief Implementation of EntitySeed for the UGGrid grid manager
  */
 
+#include <dune/common/nullptr.hh>
+
 namespace Dune {
 
   /** \brief Store a reference to an entity with a minimal memory footprint (one pointer)
@@ -21,10 +23,21 @@ namespace Dune {
     //! codimension of underlying entity
     enum { codimension = codim };
 
+    //! default construct an invalid entity seed
+    UGGridEntitySeed ()
+      : target_(nullptr)
+    {}
+
     //! construct entity seed from entity
     UGGridEntitySeed (const UGGridEntity<codim,dim,GridImp>& entity)
       : target_(entity.target_)
     {}
+
+    //! check whether the EntitySeed refers to a valid Entity
+    bool isValid() const
+    {
+      return target_ != nullptr;
+    }
 
     /** \brief Access to the underlying UG data structure */
     typename UG_NS<dim>::template Entity<codim>::T* target() const
