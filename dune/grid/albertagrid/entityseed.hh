@@ -57,7 +57,7 @@ namespace Dune
 
     bool isValid () const
     {
-      seed_.isValid();
+      return seed_.isValid();
     }
 
     ElementInfo elementInfo ( const MeshPointer &mesh ) const { return ElementInfo( mesh, seed_ ); }
@@ -99,7 +99,7 @@ namespace Dune
 
     bool isValid () const
     {
-      seed_.isValid();
+      return seed_.isValid();
     }
 
     ElementInfo elementInfo ( const MeshPointer &mesh ) const { return ElementInfo( mesh, seed_ ); }
