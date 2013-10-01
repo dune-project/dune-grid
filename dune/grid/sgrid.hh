@@ -1017,7 +1017,7 @@ namespace Dune {
     //! check whether the EntitySeed refers to a valid Entity
     bool isValid() const
     {
-      return _l == -1;
+      return _l != -1;
     }
 
     int level () const { return this->_l; }
