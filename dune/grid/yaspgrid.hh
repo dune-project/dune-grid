@@ -1600,11 +1600,6 @@ namespace Dune {
       cnt=0;
       for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
       {
-        //      std::cout << "[" << this->comm().rank() << "] "
-        //                << " send " << " dest=" << is->rank
-        //                << " size=" << send_size[cnt]
-        //                << std::endl;
-
         // allocate send buffer
         DataType *buf = new DataType[send_size[cnt]];
 
@@ -1632,11 +1627,6 @@ namespace Dune {
       cnt=0;
       for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
       {
-        //      std::cout << "[" << this->comm().rank() << "] "
-        //                << " recv " << "  src=" << is->rank
-        //                << " size=" << recv_size[cnt]
-        //                << std::endl;
-
         // allocate recv buffer
         DataType *buf = new DataType[recv_size[cnt]];
 
