@@ -9,7 +9,6 @@
 
 //- Dune includes
 #include <dune/common/forloop.hh>
-#include <dune/common/misc.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/adaptcallback.hh> // for compatibility only
