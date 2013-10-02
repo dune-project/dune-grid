@@ -553,105 +553,6 @@ namespace Dune {
       return YGridLevelIterator(_levels-1,-1);
     }
 
-    //! print function for multigrids
-    inline void print (std::ostream& s) const
-    {
-      int rank = torus().rank();
-
-      s << "[" << rank << "]:" << " MultiYGrid maxlevel=" << maxlevel() << std::endl;
-
-      for (YGridLevelIterator g=begin(); g!=end(); ++g)
-      {
-        s << "[" << rank << "]:   " << std::endl;
-        s << "[" << rank << "]:   " << "==========================================" << std::endl;
-        s << "[" << rank << "]:   " << "level=" << g.level() << std::endl;
-        s << "[" << rank << "]:   " << "cell_global=" << g.cell_global() << std::endl;
-        s << "[" << rank << "]:   " << "cell_overlap=" << g.cell_overlap() << std::endl;
-        s << "[" << rank << "]:   " << "cell_interior=" << g.cell_interior() << std::endl;
-        for (typename std::deque<Intersection>::const_iterator i=g.send_cell_overlap_overlap().begin();
-             i!=g.send_cell_overlap_overlap().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " s_c_o_o "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.recv_cell_overlap_overlap().begin();
-             i!=g.recv_cell_overlap_overlap().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " r_c_o_o "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.send_cell_interior_overlap().begin();
-             i!=g.send_cell_interior_overlap().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " s_c_i_o "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.recv_cell_overlap_interior().begin();
-             i!=g.recv_cell_overlap_interior().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " r_c_o_i "
-          << i->rank << " " << i->grid << std::endl;
-        }
-
-        s << "[" << rank << "]:   " << "-----------------------------------------------"  << std::endl;
-        s << "[" << rank << "]:   " << "vertex_global="         << g.vertex_global() << std::endl;
-        s << "[" << rank << "]:   " << "vertex_overlapfront="   << g.vertex_overlapfront() << std::endl;
-        s << "[" << rank << "]:   " << "vertex_overlap="        << g.vertex_overlap() << std::endl;
-        s << "[" << rank << "]:   " << "vertex_interiorborder=" << g.vertex_interiorborder() << std::endl;
-        s << "[" << rank << "]:   " << "vertex_interior="       << g.vertex_interior() << std::endl;
-        for (typename std::deque<Intersection>::const_iterator i=g.send_vertex_overlapfront_overlapfront().begin();
-             i!=g.send_vertex_overlapfront_overlapfront().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " s_v_of_of "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.recv_vertex_overlapfront_overlapfront().begin();
-             i!=g.recv_vertex_overlapfront_overlapfront().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " r_v_of_of "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.send_vertex_overlap_overlapfront().begin();
-             i!=g.send_vertex_overlap_overlapfront().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " s_v_o_of "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.recv_vertex_overlapfront_overlap().begin();
-             i!=g.recv_vertex_overlapfront_overlap().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " r_v_of_o "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.send_vertex_interiorborder_interiorborder().begin();
-             i!=g.send_vertex_interiorborder_interiorborder().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " s_v_ib_ib "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.recv_vertex_interiorborder_interiorborder().begin();
-             i!=g.recv_vertex_interiorborder_interiorborder().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " r_v_ib_ib "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.send_vertex_interiorborder_overlapfront().begin();
-             i!=g.send_vertex_interiorborder_overlapfront().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " s_v_ib_of "
-          << i->rank << " " << i->grid << std::endl;
-        }
-        for (typename std::deque<Intersection>::const_iterator i=g.recv_vertex_overlapfront_interiorborder().begin();
-             i!=g.recv_vertex_overlapfront_interiorborder().end(); ++i)
-        {
-          s << "[" << rank << "]:    " << " s_v_of_ib "
-          << i->rank << " " << i->grid << std::endl;
-        }
-      }
-
-      s << std::endl;
-    }
-
     // static method to create the default load balance strategy
     static const YLoadBalance<d>* defaultLoadbalancer()
     {
@@ -942,15 +843,6 @@ namespace Dune {
     int _overlap;
     Torus<d> _torus;
   };
-
-  //! Output operator for multigrids
-  template <int d, class ct>
-  inline std::ostream& operator<< (std::ostream& s, MultiYGrid<d,ct>& mg)
-  {
-    mg.print(s);
-    s << std::endl;
-    return s;
-  }
 
 
   //************************************************************************
@@ -1900,6 +1792,109 @@ namespace Dune {
     int adaptRefCount;
     bool adaptActive;
   };
+
+  //! Output operator for multigrids
+
+  template <int d>
+  inline std::ostream& operator<< (std::ostream& s, YaspGrid<d>& grid)
+  {
+    int rank = grid.torus().rank();
+
+    s << "[" << rank << "]:" << " YaspGrid maxlevel=" << grid.maxlevel() << std::endl;
+
+    for (typename YaspGrid<d>::YGridLevelIterator g=grid.begin(); g!=grid.end(); ++g)
+    {
+      s << "[" << rank << "]:   " << std::endl;
+      s << "[" << rank << "]:   " << "==========================================" << std::endl;
+      s << "[" << rank << "]:   " << "level=" << g.level() << std::endl;
+      s << "[" << rank << "]:   " << "cell_global=" << g.cell_global() << std::endl;
+      s << "[" << rank << "]:   " << "cell_overlap=" << g.cell_overlap() << std::endl;
+      s << "[" << rank << "]:   " << "cell_interior=" << g.cell_interior() << std::endl;
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_cell_overlap_overlap().begin();
+           i!=g.send_cell_overlap_overlap().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " s_c_o_o "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_cell_overlap_overlap().begin();
+           i!=g.recv_cell_overlap_overlap().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " r_c_o_o "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_cell_interior_overlap().begin();
+           i!=g.send_cell_interior_overlap().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " s_c_i_o "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_cell_overlap_interior().begin();
+           i!=g.recv_cell_overlap_interior().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " r_c_o_i "
+          << i->rank << " " << i->grid << std::endl;
+      }
+
+      s << "[" << rank << "]:   " << "-----------------------------------------------"  << std::endl;
+      s << "[" << rank << "]:   " << "vertex_global="         << g.vertex_global() << std::endl;
+      s << "[" << rank << "]:   " << "vertex_overlapfront="   << g.vertex_overlapfront() << std::endl;
+      s << "[" << rank << "]:   " << "vertex_overlap="        << g.vertex_overlap() << std::endl;
+      s << "[" << rank << "]:   " << "vertex_interiorborder=" << g.vertex_interiorborder() << std::endl;
+      s << "[" << rank << "]:   " << "vertex_interior="       << g.vertex_interior() << std::endl;
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_vertex_overlapfront_overlapfront().begin();
+           i!=g.send_vertex_overlapfront_overlapfront().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " s_v_of_of "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_vertex_overlapfront_overlapfront().begin();
+           i!=g.recv_vertex_overlapfront_overlapfront().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " r_v_of_of "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_vertex_overlap_overlapfront().begin();
+           i!=g.send_vertex_overlap_overlapfront().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " s_v_o_of "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_vertex_overlapfront_overlap().begin();
+           i!=g.recv_vertex_overlapfront_overlap().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " r_v_of_o "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_vertex_interiorborder_interiorborder().begin();
+           i!=g.send_vertex_interiorborder_interiorborder().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " s_v_ib_ib "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_vertex_interiorborder_interiorborder().begin();
+           i!=g.recv_vertex_interiorborder_interiorborder().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " r_v_ib_ib "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_vertex_interiorborder_overlapfront().begin();
+           i!=g.send_vertex_interiorborder_overlapfront().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " s_v_ib_of "
+          << i->rank << " " << i->grid << std::endl;
+      }
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_vertex_overlapfront_interiorborder().begin();
+           i!=g.recv_vertex_overlapfront_interiorborder().end(); ++i)
+      {
+        s << "[" << rank << "]:    " << " s_v_of_ib "
+          << i->rank << " " << i->grid << std::endl;
+      }
+    }
+
+    s << std::endl;
+
+    return s;
+  }
 
   namespace Capabilities
   {
