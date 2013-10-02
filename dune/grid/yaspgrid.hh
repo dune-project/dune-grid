@@ -225,72 +225,6 @@ namespace Dune {
     enum { tag = 17 };
 
     //! constructor making a grid
-#if HAVE_MPI
-    MultiYGrid (MPI_Comm comm, fTupel L, iTupel s, std::bitset<d> periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
-      : _LL(L), _s(s), _periodic(periodic), _maxlevel(0), _overlap(overlap),
-        _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
-    {
-      // coarse cell interior  grid obtained through partitioning of global grid
-      iTupel o_interior;
-      iTupel s_interior;
-      iTupel o = iTupel(0);
-      array<int,d> sArray;
-      std::copy(s.begin(), s.end(), sArray.begin());
-      double imbal = _torus.partition(_torus.rank(),o,sArray,o_interior,s_interior);
-      imbal = _torus.global_max(imbal);
-
-      // add level
-      _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
-    }
-#else
-    MultiYGrid (fTupel L, iTupel s, std::bitset<d> periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
-      : _LL(L), _s(s), _periodic(periodic), _maxlevel(0), _overlap(overlap),
-        _torus(tag,s,lb) // torus gets s to compute procs/direction
-    {
-      // coarse cell interior  grid obtained through partitioning of global grid
-      iTupel o = iTupel(0);
-      iTupel o_interior(o);
-      iTupel s_interior(s);
-
-      // add level
-      _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
-    }
-#endif
-
-    //! constructor making a grid
-    MultiYGrid (
-#if HAVE_MPI
-      MPI_Comm comm,
-#endif
-      fTupel L,
-      Dune::array<int,d> s,
-      std::bitset<d> periodic,
-      int overlap,
-      const YLoadBalance<d>* lb = defaultLoadbalancer())
-      : _LL(L), _periodic(periodic), _maxlevel(0), _overlap(overlap),
-#if HAVE_MPI
-        _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
-#else
-        _torus(tag,s,lb) // torus gets s to compute procs/direction
-#endif
-    {
-      std::copy(s.begin(), s.end(), _s.begin());
-
-      // coarse cell interior grid obtained through partitioning of global grid
-      iTupel o = iTupel(0);
-      iTupel o_interior(o);
-      iTupel s_interior;
-      std::copy(s.begin(), s.end(), s_interior.begin());
-#if HAVE_MPI
-      double imbal = _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
-      imbal = _torus.global_max(imbal);
-#endif
-
-      // add level
-      _levels[_maxlevel] = makelevel(L,_s,periodic,o_interior,s_interior,overlap);
-    }
-
-        //! constructor making a grid
     MultiYGrid (
 #if HAVE_MPI
       MPI_Comm comm,
@@ -575,7 +509,7 @@ namespace Dune {
       return & lb;
     }
 
-  private:
+  protected:
     // make a new YGridLevel structure. For that we need
     // L           size of the whole domain in each direction
     // s           number of cells in each direction
@@ -847,12 +781,11 @@ namespace Dune {
       }
     }
 
-    // private data of multigrid
+    // protected data of multigrid
+  protected:
     fTupel _LL;
     iTupel _s;
-  protected:
     std::bitset<d> _periodic;
-  private:
     int _maxlevel;
     YGridLevel _levels[32];
     int _overlap;
@@ -1014,7 +947,7 @@ namespace Dune {
 #endif
 
       // add level
-      this->_levels[this->_maxlevel] = makelevel(L,this->_s,periodic,o_interior,s_interior,overlap);
+      this->_levels[this->_maxlevel] = this->makelevel(L,this->_s,periodic,o_interior,s_interior,overlap);
     }
 
     /*! Constructor for a YaspGrid, they are all forwarded to the base class
@@ -1070,15 +1003,19 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(MPI_COMM_SELF,L,s,std::bitset<dim>(),overlap,lb), ccobj(MPI_COMM_SELF),
-        leafIndexSet_(*this),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+      : YMG(MPI_COMM_SELF,s,lb),
+        ccobj(MPI_COMM_SELF),
 #else
-      : YMG(L,s,std::bitset<dim>(),overlap,lb),
+      : YMG(s,lb),
+#endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
-#endif
     {
+#if HAVE_MPI
+      MultiYGridSetup(MPI_COMM_SELF,L,s,std::bitset<dim>(),overlap,lb);
+#else
+      MultiYGridSetup(L,s,std::bitset<dim>(),overlap,lb);
+#endif
       // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
       for (size_t i=0; i<dim; i++)
         this->_periodic[i] = periodic[i];
@@ -1100,20 +1037,24 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(comm,L,s,periodic,overlap,lb), ccobj(comm),
-        leafIndexSet_(*this),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+      : YMG(comm,s,lb),
+        ccobj(comm),
 #else
-      : YMG(L,s,periodic,overlap,lb),
+      : YMG(s,lb),
+#endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
-#endif
     {
+#if HAVE_MPI
+      MultiYGridSetup(comm,L,s,periodic,overlap,lb);
+#else
+      MultiYGridSetup(L,s,periodic,overlap,lb);
+#endif
       init();
     }
 
 
-    /*! Constructor for a sequential YaspGrid, they are all forwarded to the base class.
+    /*! Constructor for a sequential YaspGrid
 
        Sequential here means that the whole grid is living on one process even if your program is running
        in parallel.
@@ -1131,15 +1072,19 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(MPI_COMM_SELF,L,s,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
-        leafIndexSet_(*this),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+      : YMG(MPI_COMM_SELF,s,lb),
+        ccobj(MPI_COMM_SELF),
 #else
-      : YMG(L,s,periodic,overlap,lb),
+      : YMG(s,lb),
+#endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
-#endif
     {
+#if HAVE_MPI
+      MultiYGridSetup(MPI_COMM_SELF,L,s,periodic,overlap,lb);
+#else
+      MultiYGridSetup(L,s,periodic,overlap,lb);
+#endif
       init();
     }
 
@@ -1155,14 +1100,20 @@ namespace Dune {
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::array<int, dim> elements)
 #if HAVE_MPI
-      : YMG(MPI_COMM_SELF,L,elements,std::bitset<dim>(0),0), ccobj(MPI_COMM_SELF),
+      : YMG(MPI_COMM_SELF,elements),
+        ccobj(MPI_COMM_SELF),
 #else
-      : YMG(L,elements,std::bitset<dim>(0),0),
+      : YMG(elements),
 #endif
         keep_ovlp(true),
         leafIndexSet_(*this),
         adaptRefCount(0), adaptActive(false)
     {
+#if HAVE_MPI
+      MultiYGridSetup(MPI_COMM_SELF,L,elements,std::bitset<dim>(0),0);
+#else
+      MultiYGridSetup(L,elements,std::bitset<dim>(0),0);
+#endif
       init();
     }
 
