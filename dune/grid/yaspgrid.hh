@@ -290,6 +290,21 @@ namespace Dune {
       _levels[_maxlevel] = makelevel(L,_s,periodic,o_interior,s_interior,overlap);
     }
 
+        //! constructor making a grid
+    MultiYGrid (
+#if HAVE_MPI
+      MPI_Comm comm,
+#endif
+      Dune::array<int,d> s,
+      const YLoadBalance<d>* lb = defaultLoadbalancer())
+      :
+#if HAVE_MPI
+        _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
+#else
+        _torus(tag,s,lb) // torus gets s to compute procs/direction
+#endif
+    {}
+
     //! do a global mesh refinement; true: keep overlap in absolute size; false: keep overlap in mesh cells
     void refine (bool keep_overlap)
     {
@@ -935,6 +950,73 @@ namespace Dune {
     typedef typename MultiYGrid<dim,ctype>::Intersection IS;
     typedef typename std::deque<IS>::const_iterator ISIT;
 
+    //! define types used for arguments
+    typedef FieldVector<int, dim> iTupel;
+    typedef FieldVector<ctype, dim> fTupel;
+
+    //! The constructor of the old MultiYGrid class
+    void MultiYGridSetup (
+#if HAVE_MPI
+                MPI_Comm comm,
+#endif
+                fTupel L, iTupel s, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
+    {
+      this->_LL = L;
+      this->_s = s;
+      this->_periodic = periodic;
+      this->_maxlevel = 0;
+      this->_overlap = overlap;
+
+      // coarse cell interior  grid obtained through partitioning of global grid
+#if HAVE_MPI
+      iTupel o_interior;
+      iTupel s_interior;
+      iTupel o = iTupel(0);
+      array<int,d> sArray;
+      std::copy(s.begin(), s.end(), sArray.begin());
+      double imbal = _torus.partition(_torus.rank(),o,sArray,o_interior,s_interior);
+      imbal = _torus.global_max(imbal);
+#else
+      iTupel o = iTupel(0);
+      iTupel o_interior(o);
+      iTupel s_interior(s);
+#endif
+      // add level
+      this->_levels[this->_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
+    }
+
+    //! The constructor of the old MultiYGrid class
+    void MultiYGridSetup (
+#if HAVE_MPI
+      MPI_Comm comm,
+#endif
+      fTupel L,
+      Dune::array<int,dim> s,
+      std::bitset<dim> periodic,
+      int overlap,
+      const YLoadBalance<dim>* lb = defaultLoadbalancer())
+    {
+      this->_LL = L;
+      this->_periodic = periodic;
+      this->_maxlevel = 0;
+      this->_overlap = overlap;
+
+      std::copy(s.begin(), s.end(), this->_s.begin());
+
+      // coarse cell interior grid obtained through partitioning of global grid
+      iTupel o = iTupel(0);
+      iTupel o_interior(o);
+      iTupel s_interior;
+      std::copy(s.begin(), s.end(), s_interior.begin());
+#if HAVE_MPI
+      double imbal = _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
+      imbal = _torus.global_max(imbal);
+#endif
+
+      // add level
+      this->_levels[this->_maxlevel] = makelevel(L,this->_s,periodic,o_interior,s_interior,overlap);
+    }
+
     /*! Constructor for a YaspGrid, they are all forwarded to the base class
        @param comm MPI communicator where this mesh is distributed to
        @param L extension of the domain
@@ -949,15 +1031,21 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(comm,L,s,std::bitset<dim>(),overlap,lb), ccobj(comm),
+      : YMG(comm,s,lb),
+        ccobj(comm),
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
-      : YMG(L,s,std::bitset<dim>(),overlap,lb),
+      : YMG(s,lb),
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #endif
     {
+#if HAVE_MPI
+      MultiYGridSetup(comm,L,s,std::bitset<dim>(),overlap,lb);
+#else
+      MultiYGridSetup(L,s,std::bitset<dim>(),overlap,lb);
+#endif
       // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
       for (size_t i=0; i<dim; i++)
         this->_periodic[i] = periodic[i];
