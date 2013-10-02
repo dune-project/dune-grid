@@ -264,16 +264,6 @@ namespace Dune {
       _levels[_maxlevel] = makelevel(_LL,s,_periodic,o_interior,s_interior,overlap);
     }
 
-    //! do a global mesh coarsening; delete _maxlevel level
-    void coarsen ()
-    {
-      // create an empty grid level
-      YGridLevel empty;
-      _levels[_maxlevel] = empty;
-      // reduce maxlevel
-      _maxlevel--;
-    }
-
     //! return reference to torus
     const Torus<d>& torus () const
     {
@@ -1136,7 +1126,12 @@ namespace Dune {
                    "Coarsening " << -refCount << " levels requested!");
       for (int k=refCount; k<0; k++)
       {
-        MultiYGrid<dim,ctype>::coarsen();
+        // create an empty grid level
+        typename MultiYGrid<dim,ctype>::YGridLevel empty;
+        this->_levels[this->_maxlevel] = empty;
+        // reduce maxlevel
+        this->_maxlevel--;
+
         setsizes();
         indexsets.pop_back();
       }
