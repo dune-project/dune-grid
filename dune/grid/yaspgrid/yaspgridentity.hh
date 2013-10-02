@@ -58,7 +58,7 @@ namespace Dune {
       DUNE_THROW(GridError, "YaspEntity not implemented");
     }
 
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     YaspEntity (const GridImp* yg, const YGLI& g, const TSI& it)
     {
@@ -117,7 +117,7 @@ namespace Dune {
   public:
     typedef typename GridImp::ctype ctype;
 
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
 
     typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
@@ -750,7 +750,7 @@ namespace Dune {
   public:
     typedef typename GridImp::ctype ctype;
 
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
 
     typedef typename GridImp::template Codim<dim>::Geometry Geometry;

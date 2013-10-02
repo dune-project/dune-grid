@@ -23,7 +23,7 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
 
     //! constructor
