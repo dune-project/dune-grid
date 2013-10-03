@@ -281,12 +281,12 @@ namespace Dune {
 
     bool isLeaf() const
     {
-      return (_g.level() == _g.mg()->maxLevel());
+      return (_g.level() == _yg->maxLevel());
     }
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
      */
-    bool isNew () const { return _yg->adaptRefCount > 0 && _g.mg()->maxLevel() < _g.level() + _yg->adaptRefCount; }
+    bool isNew () const { return _yg->adaptRefCount > 0 && _yg->maxLevel() < _g.level() + _yg->adaptRefCount; }
 
     /**\brief Returns true, if entity might disappear during the next call to adapt()
      */
