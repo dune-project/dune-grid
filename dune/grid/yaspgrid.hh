@@ -801,10 +801,8 @@ namespace Dune {
     enum { MAXL=64 };
 
     //! shorthand for base class data types
-    typedef YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
-    typedef Intersection IS;
-    typedef typename std::deque<IS>::const_iterator ISIT;
+    typedef typename std::deque<Intersection>::const_iterator ISIT;
 
     //! The constructor of the old MultiYGrid class
     void MultiYGridSetup (
@@ -1222,7 +1220,7 @@ namespace Dune {
     entityPointer(const Seed& seed) const
     {
       const int codim = Seed::codimension;
-      YGLI g = begin(this->getRealImplementation(seed).level());
+      YGridLevelIterator g = begin(this->getRealImplementation(seed).level());
       switch (codim)
       {
       case 0 :
@@ -1239,14 +1237,14 @@ namespace Dune {
     //! return size (= distance in graph) of overlap region
     int overlapSize (int level, int codim) const
     {
-      YGLI g = begin(level);
+      YGridLevelIterator g = begin(level);
       return g.overlap();
     }
 
     //! return size (= distance in graph) of overlap region
     int overlapSize (int codim) const
     {
-      YGLI g = begin(maxLevel());
+      YGridLevelIterator g = begin(maxLevel());
       return g.overlap();
     }
 
@@ -1326,11 +1324,11 @@ namespace Dune {
       typedef typename DataHandle::DataType DataType;
 
       // access to grid level
-      YGLI g = begin(level);
+      YGridLevelIterator g = begin(level);
 
       // find send/recv lists or throw error
-      const std::deque<IS>* sendlist=0;
-      const std::deque<IS>* recvlist=0;
+      const std::deque<Intersection>* sendlist=0;
+      const std::deque<Intersection>* recvlist=0;
       if (codim==0) // the elements
       {
         if (iftype==InteriorBorder_InteriorBorder_Interface)
@@ -1675,7 +1673,7 @@ namespace Dune {
 
     void setsizes ()
     {
-      for (YGLI g=begin(); g!=end(); ++g)
+      for (YGridLevelIterator g=begin(); g!=end(); ++g)
       {
         // codim 0 (elements)
         sizes[g.level()][0] = 1;
@@ -1723,7 +1721,7 @@ namespace Dune {
     {
       dune_static_assert( cd == dim || cd == 0 ,
                           "YaspGrid only supports Entities with codim=dim and codim=0");
-      YGLI g = begin(level);
+      YGridLevelIterator g = begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (pitype==Ghost_Partition)
         return levelend <cd, pitype> (level);
@@ -1754,7 +1752,7 @@ namespace Dune {
     {
       dune_static_assert( cd == dim || cd == 0 ,
                           "YaspGrid only supports Entities with codim=dim and codim=0");
-      YGLI g = begin(level);
+      YGridLevelIterator g = begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (cd==0)   // the elements
       {
