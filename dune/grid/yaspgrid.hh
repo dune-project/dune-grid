@@ -832,7 +832,7 @@ namespace Dune {
       iTupel s_interior(s);
 #endif
       // add level
-      this->_levels[this->_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
+      _levels[0] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
     }
 
     //! The constructor of the old MultiYGrid class
@@ -864,7 +864,7 @@ namespace Dune {
 #endif
 
       // add level
-      this->_levels[this->_maxlevel] = this->makelevel(L,this->_s,periodic,o_interior,s_interior,overlap);
+      _levels[0] = makelevel(L,_s,periodic,o_interior,s_interior,overlap);
     }
 
     /*! Constructor for a YaspGrid, they are all forwarded to the base class
