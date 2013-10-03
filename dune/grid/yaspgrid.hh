@@ -272,7 +272,7 @@ namespace Dune {
         i=start; l=level;
       }
 
-      //! make iterator pointing to level k (no check made)
+      //! Copy constructor
       YGridLevelIterator (const YGridLevelIterator & it)
         : l(it.l), i(it.i)
       {}
