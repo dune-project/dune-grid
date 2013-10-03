@@ -172,7 +172,9 @@ namespace Dune {
     /*! MultiYGrid manages a d-dimensional grid mapped to a set of processes.
    */
   template<int d, typename ct>
-  class MultiYGrid {
+  class MultiYGrid
+    : public GridDefaultImplementation<d,d,ct,YaspGridFamily<d> >
+  {
   public:
     // some data types
     struct Intersection {
@@ -801,7 +803,6 @@ namespace Dune {
    */
   template<int dim>
   class YaspGrid :
-    public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim> >,
     public MultiYGrid<dim,yaspgrid_ctype>
   {
     typedef const YaspGrid<dim> GridImp;
