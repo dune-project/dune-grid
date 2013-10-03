@@ -241,31 +241,6 @@ namespace Dune {
 #endif
     {}
 
-    //! do a global mesh refinement; true: keep overlap in absolute size; false: keep overlap in mesh cells
-    void refine (bool keep_overlap)
-    {
-      // access to coarser grid level
-      YGridLevel& cg = _levels[maxlevel()];
-
-      // compute size of new global grid
-      iTupel s;
-      for (int i=0; i<dim; i++) s[i] = 2*cg.cell_global.size(i);
-
-      // compute overlap
-      int overlap = (keep_overlap) ? 2*cg.overlap : cg.overlap;
-
-
-      // the cell interior grid obtained from coarse cell interior grid
-      iTupel o_interior;
-      iTupel s_interior;
-      for (int i=0; i<dim; i++) o_interior[i] = 2*cg.cell_interior.origin(i);
-      for (int i=0; i<dim; i++) s_interior[i] = 2*cg.cell_interior.size(i);
-
-      // add level
-      _maxlevel++;
-      _levels[_maxlevel] = makelevel(_LL,s,_periodic,o_interior,s_interior,overlap);
-    }
-
     //! return reference to torus
     const Torus<dim>& torus () const
     {
@@ -1125,6 +1100,8 @@ namespace Dune {
       if (refCount < -maxLevel())
         DUNE_THROW(GridError, "Only " << maxLevel() << " levels left. " <<
                    "Coarsening " << -refCount << " levels requested!");
+
+      // If refCount is negative then coarsen the grid
       for (int k=refCount; k<0; k++)
       {
         // create an empty grid level
@@ -1136,9 +1113,33 @@ namespace Dune {
         setsizes();
         indexsets.pop_back();
       }
+
+      // If refCount is positive refine the grid
       for (int k=0; k<refCount; k++)
       {
-        MultiYGrid<dim,ctype>::refine(keep_ovlp);
+        // access to coarser grid level
+        typename YMG::YGridLevel& cg = this->_levels[maxLevel()];
+
+        // compute size of new global grid
+        iTupel s;
+        for (int i=0; i<dim; i++)
+          s[i] = 2*cg.cell_global.size(i);
+
+        // compute overlap
+        int overlap = (keep_ovlp) ? 2*cg.overlap : cg.overlap;
+
+        // the cell interior grid obtained from coarse cell interior grid
+        iTupel o_interior;
+        iTupel s_interior;
+        for (int i=0; i<dim; i++)
+          o_interior[i] = 2*cg.cell_interior.origin(i);
+        for (int i=0; i<dim; i++)
+          s_interior[i] = 2*cg.cell_interior.size(i);
+
+        // add level
+        this->_maxlevel++;
+        this->_levels[this->maxLevel()] = this->makelevel(this->_LL,s,this->_periodic,o_interior,s_interior,overlap);
+
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
       }
