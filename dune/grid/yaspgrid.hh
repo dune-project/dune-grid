@@ -453,18 +453,6 @@ namespace Dune {
       return YGridLevelIterator(_levels+(_maxlevel+1),_maxlevel+1);
     }
 
-    //! return iterator pointing to the finest level
-    YGridLevelIterator rbegin () const
-    {
-      return YGridLevelIterator(_levels+_maxlevel,_maxlevel);
-    }
-
-    //! return iterator pointing to one before the coarsest level
-    YGridLevelIterator rend () const
-    {
-      return YGridLevelIterator(_levels-1,-1);
-    }
-
     // static method to create the default load balance strategy
     static const YLoadBalance<dim>* defaultLoadbalancer()
     {
