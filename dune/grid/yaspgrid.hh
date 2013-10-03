@@ -21,6 +21,7 @@ typedef unsigned char uint8_t;
 #include <dune/common/shared_ptr.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/typetraits.hh>
+#include <dune/common/reservedvector.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
@@ -436,7 +437,7 @@ namespace Dune {
     //! return iterator pointing to coarsest level
     YGridLevelIterator begin () const
     {
-      return YGridLevelIterator(_levels,0);
+      return YGridLevelIterator(&_levels[0],0);
     }
 
     //! return iterator pointing to given level
@@ -444,13 +445,13 @@ namespace Dune {
     {
       if (i<0 || i>maxLevel())
         DUNE_THROW(GridError, "level not existing");
-      return YGridLevelIterator(_levels+i,i);
+      return YGridLevelIterator((&_levels[0])+i,i);
     }
 
     //! return iterator pointing to one past the finest level
     YGridLevelIterator end () const
     {
-      return YGridLevelIterator(_levels+(_maxlevel+1),_maxlevel+1);
+      return YGridLevelIterator((&_levels[0])+(maxLevel()+1),maxLevel()+1);
     }
 
     // static method to create the default load balance strategy
@@ -802,7 +803,7 @@ namespace Dune {
       _LL = L;
       _s = s;
       _periodic = periodic;
-      _maxlevel = 0;
+      _levels.resize(1);
       _overlap = overlap;
 
       // coarse cell interior  grid obtained through partitioning of global grid
@@ -836,7 +837,7 @@ namespace Dune {
     {
       _LL = L;
       _periodic = periodic;
-      _maxlevel = 0;
+      _levels.resize(1);
       _overlap = overlap;
 
       std::copy(s.begin(), s.end(), this->_s.begin());
@@ -1031,7 +1032,7 @@ namespace Dune {
      */
     int maxLevel() const
     {
-      return _maxlevel;
+      return _levels.size()-1;
     }
 
     //! refine the grid refCount times. What about overlap?
@@ -1046,9 +1047,9 @@ namespace Dune {
       {
         // create an empty grid level
         YGridLevel empty;
-        this->_levels[_maxlevel] = empty;
+        _levels.back() = empty;
         // reduce maxlevel
-        this->_maxlevel--;
+        _levels.pop_back();
 
         setsizes();
         indexsets.pop_back();
@@ -1077,8 +1078,7 @@ namespace Dune {
           s_interior[i] = 2*cg.cell_interior.size(i);
 
         // add level
-        _maxlevel++;
-        _levels[maxLevel()] = makelevel(_LL,s,_periodic,o_interior,s_interior,overlap);
+        _levels.push_back( makelevel(_LL,s,_periodic,o_interior,s_interior,overlap) );
 
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
@@ -1766,8 +1766,7 @@ namespace Dune {
     fTupel _LL;
     iTupel _s;
     std::bitset<dim> _periodic;
-    int _maxlevel;
-    YGridLevel _levels[32];
+    ReservedVector<YGridLevel,32> _levels;
     int _overlap;
     Torus<dim> _torus;
     int sizes[MAXL][dim+1]; // total number of entities per level and codim
