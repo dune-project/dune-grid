@@ -171,23 +171,23 @@ namespace Dune {
 
     /*! MultiYGrid manages a d-dimensional grid mapped to a set of processes.
    */
-  template<int d, typename ct>
+  template<int dim, typename ctype>
   class MultiYGrid
-    : public GridDefaultImplementation<d,d,ct,YaspGridFamily<d> >
+    : public GridDefaultImplementation<dim,dim,ctype,YaspGridFamily<dim> >
   {
   public:
     // some data types
     struct Intersection {
-      SubYGrid<d,ct> grid; // the intersection as a subgrid of local grid
+      SubYGrid<dim,ctype> grid; // the intersection as a subgrid of local grid
       int rank;            // rank of process where other grid is stored
       int distance;        // manhattan distance to other grid
     };
 
     struct YGridLevel {        // This stores all the information on one grid level
       // cell (codim 0) data
-      YGrid<d,ct> cell_global;         // the whole cell grid on that level
-      SubYGrid<d,ct> cell_overlap;     // we have no ghost cells, so our part is overlap completely
-      SubYGrid<d,ct> cell_interior;    // interior cells are a subgrid of all cells
+      YGrid<dim,ctype> cell_global;         // the whole cell grid on that level
+      SubYGrid<dim,ctype> cell_overlap;     // we have no ghost cells, so our part is overlap completely
+      SubYGrid<dim,ctype> cell_interior;    // interior cells are a subgrid of all cells
 
       std::deque<Intersection> send_cell_overlap_overlap;  // each intersection is a subgrid of overlap
       std::deque<Intersection> recv_cell_overlap_overlap;  // each intersection is a subgrid of overlap
@@ -196,11 +196,11 @@ namespace Dune {
       std::deque<Intersection> recv_cell_overlap_interior; // each intersection is a subgrid of overlap
 
       // vertex (codim dim) data
-      YGrid<d,ct> vertex_global;           // the whole vertex grid on that level
-      SubYGrid<d,ct> vertex_overlapfront;  // all our vertices are overlap and front
-      SubYGrid<d,ct> vertex_overlap;       // subgrid containing only overlap
-      SubYGrid<d,ct> vertex_interiorborder; // subgrid containing only interior and border
-      SubYGrid<d,ct> vertex_interior;      // subgrid containing only interior
+      YGrid<dim,ctype> vertex_global;           // the whole vertex grid on that level
+      SubYGrid<dim,ctype> vertex_overlapfront;  // all our vertices are overlap and front
+      SubYGrid<dim,ctype> vertex_overlap;       // subgrid containing only overlap
+      SubYGrid<dim,ctype> vertex_interiorborder; // subgrid containing only interior and border
+      SubYGrid<dim,ctype> vertex_interior;      // subgrid containing only interior
 
       std::deque<Intersection> send_vertex_overlapfront_overlapfront; // each intersection is a subgrid of overlapfront
       std::deque<Intersection> recv_vertex_overlapfront_overlapfront; // each intersection is a subgrid of overlapfront
@@ -215,13 +215,13 @@ namespace Dune {
       std::deque<Intersection> recv_vertex_overlapfront_interiorborder; // each intersection is a subgrid of overlapfront
 
       // general
-      MultiYGrid<d,ct>* mg;  // each grid level knows its multigrid
+      MultiYGrid<dim,ctype>* mg;  // each grid level knows its multigrid
       int overlap;           // in mesh cells on this level
     };
 
     //! define types used for arguments
-    typedef FieldVector<int, d> iTupel;
-    typedef FieldVector<ct, d> fTupel;
+    typedef FieldVector<int, dim> iTupel;
+    typedef FieldVector<ctype, dim> fTupel;
 
     // communication tag used by multigrid
     enum { tag = 17 };
@@ -231,8 +231,8 @@ namespace Dune {
 #if HAVE_MPI
       MPI_Comm comm,
 #endif
-      Dune::array<int,d> s,
-      const YLoadBalance<d>* lb = defaultLoadbalancer())
+      Dune::array<int,dim> s,
+      const YLoadBalance<dim>* lb = defaultLoadbalancer())
       :
 #if HAVE_MPI
         _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
@@ -249,7 +249,7 @@ namespace Dune {
 
       // compute size of new global grid
       iTupel s;
-      for (int i=0; i<d; i++) s[i] = 2*cg.cell_global.size(i);
+      for (int i=0; i<dim; i++) s[i] = 2*cg.cell_global.size(i);
 
       // compute overlap
       int overlap = (keep_overlap) ? 2*cg.overlap : cg.overlap;
@@ -258,8 +258,8 @@ namespace Dune {
       // the cell interior grid obtained from coarse cell interior grid
       iTupel o_interior;
       iTupel s_interior;
-      for (int i=0; i<d; i++) o_interior[i] = 2*cg.cell_interior.origin(i);
-      for (int i=0; i<d; i++) s_interior[i] = 2*cg.cell_interior.size(i);
+      for (int i=0; i<dim; i++) o_interior[i] = 2*cg.cell_interior.origin(i);
+      for (int i=0; i<dim; i++) s_interior[i] = 2*cg.cell_interior.size(i);
 
       // add level
       _maxlevel++;
@@ -267,7 +267,7 @@ namespace Dune {
     }
 
     //! return reference to torus
-    const Torus<d>& torus () const
+    const Torus<dim>& torus () const
     {
       return _torus;
     }
@@ -318,7 +318,7 @@ namespace Dune {
       }
 
       //! return pointer to multigrid object that contains this level
-      const MultiYGrid<d,ct>* mg () const
+      const MultiYGrid<dim,ctype>* mg () const
       {
         return i->mg;
       }
@@ -364,19 +364,19 @@ namespace Dune {
       }
 
       //! reference to global cell grid
-      const YGrid<d,ct>& cell_global () const
+      const YGrid<dim,ctype>& cell_global () const
       {
         return i->cell_global;
       }
 
       //! reference to local cell grid which is a subgrid of the global cell grid
-      const SubYGrid<d,ct>& cell_overlap () const
+      const SubYGrid<dim,ctype>& cell_overlap () const
       {
         return i->cell_overlap;
       }
 
       //! reference to cell master grid which is a subgrid of the local cell grid
-      const SubYGrid<d,ct>& cell_interior () const
+      const SubYGrid<dim,ctype>& cell_interior () const
       {
         return i->cell_interior;
       }
@@ -402,27 +402,27 @@ namespace Dune {
 
 
       //! reference to global vertex grid
-      const YGrid<d,ct>& vertex_global () const
+      const YGrid<dim,ctype>& vertex_global () const
       {
         return i->vertex_global;
       }
       //! reference to vertex grid, up to front; there are no ghosts in this implementation
-      const SubYGrid<d,ct>& vertex_overlapfront () const
+      const SubYGrid<dim,ctype>& vertex_overlapfront () const
       {
         return i->vertex_overlapfront;
       }
       //! reference to overlap vertex grid; is subgrid of overlapfront vertex grid
-      const SubYGrid<d,ct>& vertex_overlap () const
+      const SubYGrid<dim,ctype>& vertex_overlap () const
       {
         return i->vertex_overlap;
       }
       //! reference to interiorborder vertex grid; is subgrid of overlapfront vertex grid
-      const SubYGrid<d,ct>& vertex_interiorborder () const
+      const SubYGrid<dim,ctype>& vertex_interiorborder () const
       {
         return i->vertex_interiorborder;
       }
       //! reference to interior vertex grid; is subgrid of overlapfront vertex grid
-      const SubYGrid<d,ct>& vertex_interior () const
+      const SubYGrid<dim,ctype>& vertex_interior () const
       {
         return i->vertex_interior;
       }
@@ -495,9 +495,9 @@ namespace Dune {
     }
 
     // static method to create the default load balance strategy
-    static const YLoadBalance<d>* defaultLoadbalancer()
+    static const YLoadBalance<dim>* defaultLoadbalancer()
     {
-      static YLoadBalance<d> lb;
+      static YLoadBalance<dim> lb;
       return & lb;
     }
 
@@ -509,7 +509,7 @@ namespace Dune {
     // o_interior  origin of interior (non-overlapping) cell decomposition
     // s_interior  size of interior cell decomposition
     // overlap     to be used on this grid level
-    YGridLevel makelevel (fTupel L, iTupel s, std::bitset<d> periodic, iTupel o_interior, iTupel s_interior, int overlap)
+    YGridLevel makelevel (fTupel L, iTupel s, std::bitset<dim> periodic, iTupel o_interior, iTupel s_interior, int overlap)
     {
       // first, lets allocate a new structure
       YGridLevel g;
@@ -520,14 +520,14 @@ namespace Dune {
       iTupel o = iTupel(0); // logical origin is always 0, that is not a restriction
       fTupel h;
       fTupel r;
-      for (int i=0; i<d; i++) h[i] = L[i]/s[i]; // the mesh size in each direction
-      for (int i=0; i<d; i++) r[i] = 0.5*h[i];  // the shift for cell centers
-      g.cell_global = YGrid<d,ct>(o,s,h,r);     // this is the global cell grid
+      for (int i=0; i<dim; i++) h[i] = L[i]/s[i]; // the mesh size in each direction
+      for (int i=0; i<dim; i++) r[i] = 0.5*h[i];  // the shift for cell centers
+      g.cell_global = YGrid<dim,ctype>(o,s,h,r);     // this is the global cell grid
 
       // extend the cell interior grid by overlap considering periodicity
       iTupel o_overlap;
       iTupel s_overlap;
-      for (int i=0; i<d; i++)
+      for (int i=0; i<dim; i++)
       {
         if (periodic[i])
         {
@@ -544,12 +544,12 @@ namespace Dune {
           s_overlap[i] = max-min+1;
         }
       }
-      g.cell_overlap = SubYGrid<d,ct>(YGrid<d,ct>(o_overlap,s_overlap,h,r));
+      g.cell_overlap = SubYGrid<dim,ctype>(YGrid<dim,ctype>(o_overlap,s_overlap,h,r));
 
       // now make the interior grid a subgrid of the overlapping grid
       iTupel offset;
-      for (int i=0; i<d; i++) offset[i] = o_interior[i]-o_overlap[i];
-      g.cell_interior = SubYGrid<d,ct>(o_interior,s_interior,offset,s_overlap,h,r);
+      for (int i=0; i<dim; i++) offset[i] = o_interior[i]-o_overlap[i];
+      g.cell_interior = SubYGrid<dim,ctype>(o_interior,s_interior,offset,s_overlap,h,r);
 
       // compute cell intersections
       intersections(g.cell_overlap,g.cell_overlap,g.cell_global.size(),g.send_cell_overlap_overlap,g.recv_cell_overlap_overlap);
@@ -557,24 +557,24 @@ namespace Dune {
 
       // now we can do the vertex grids. They are derived completely from the cell grids
       iTupel o_vertex_global, s_vertex_global;
-      for (int i=0; i<d; i++) r[i] = 0.0;  // the shift for vertices is zero, and the mesh size is same as for cells
+      for (int i=0; i<dim; i++) r[i] = 0.0;  // the shift for vertices is zero, and the mesh size is same as for cells
 
       // first let's make the global grid
-      for (int i=0; i<d; i++) o_vertex_global[i] = g.cell_global.origin(i);
-      for (int i=0; i<d; i++) s_vertex_global[i] = g.cell_global.size(i)+1; // one more vertices than cells ...
-      g.vertex_global = YGrid<d,ct>(o_vertex_global,s_vertex_global,h,r);
+      for (int i=0; i<dim; i++) o_vertex_global[i] = g.cell_global.origin(i);
+      for (int i=0; i<dim; i++) s_vertex_global[i] = g.cell_global.size(i)+1; // one more vertices than cells ...
+      g.vertex_global = YGrid<dim,ctype>(o_vertex_global,s_vertex_global,h,r);
 
       // now the local grid stored in this processor. All other grids are subgrids of this
       iTupel o_vertex_overlapfront;
       iTupel s_vertex_overlapfront;
-      for (int i=0; i<d; i++) o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
-      for (int i=0; i<d; i++) s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1; // one more vertices than cells ...
-      g.vertex_overlapfront = SubYGrid<d,ct>(YGrid<d,ct>(o_vertex_overlapfront,s_vertex_overlapfront,h,r));
+      for (int i=0; i<dim; i++) o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
+      for (int i=0; i<dim; i++) s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1; // one more vertices than cells ...
+      g.vertex_overlapfront = SubYGrid<dim,ctype>(YGrid<dim,ctype>(o_vertex_overlapfront,s_vertex_overlapfront,h,r));
 
       // now overlap only (i.e. without front), is subgrid of overlapfront
       iTupel o_vertex_overlap;
       iTupel s_vertex_overlap;
-      for (int i=0; i<d; i++)
+      for (int i=0; i<dim; i++)
       {
         o_vertex_overlap[i] = g.cell_overlap.origin(i);
         s_vertex_overlap[i] = g.cell_overlap.size(i)+1;
@@ -595,20 +595,20 @@ namespace Dune {
 
         offset[i] = o_vertex_overlap[i]-o_vertex_overlapfront[i];
       }
-      g.vertex_overlap = SubYGrid<d,ct>(o_vertex_overlap,s_vertex_overlap,offset,s_vertex_overlapfront,h,r);
+      g.vertex_overlap = SubYGrid<dim,ctype>(o_vertex_overlap,s_vertex_overlap,offset,s_vertex_overlapfront,h,r);
 
       // now interior with border
       iTupel o_vertex_interiorborder;
       iTupel s_vertex_interiorborder;
-      for (int i=0; i<d; i++) o_vertex_interiorborder[i] = g.cell_interior.origin(i);
-      for (int i=0; i<d; i++) s_vertex_interiorborder[i] = g.cell_interior.size(i)+1;
-      for (int i=0; i<d; i++) offset[i] = o_vertex_interiorborder[i]-o_vertex_overlapfront[i];
-      g.vertex_interiorborder = SubYGrid<d,ct>(o_vertex_interiorborder,s_vertex_interiorborder,offset,s_vertex_overlapfront,h,r);
+      for (int i=0; i<dim; i++) o_vertex_interiorborder[i] = g.cell_interior.origin(i);
+      for (int i=0; i<dim; i++) s_vertex_interiorborder[i] = g.cell_interior.size(i)+1;
+      for (int i=0; i<dim; i++) offset[i] = o_vertex_interiorborder[i]-o_vertex_overlapfront[i];
+      g.vertex_interiorborder = SubYGrid<dim,ctype>(o_vertex_interiorborder,s_vertex_interiorborder,offset,s_vertex_overlapfront,h,r);
 
       // now only interior
       iTupel o_vertex_interior;
       iTupel s_vertex_interior;
-      for (int i=0; i<d; i++)
+      for (int i=0; i<dim; i++)
       {
         o_vertex_interior[i] = g.cell_interior.origin(i);
         s_vertex_interior[i] = g.cell_interior.size(i)+1;
@@ -628,7 +628,7 @@ namespace Dune {
 
         offset[i] = o_vertex_interior[i]-o_vertex_overlapfront[i];
       }
-      g.vertex_interior = SubYGrid<d,ct>(o_vertex_interior,s_vertex_interior,offset,s_vertex_overlapfront,h,r);
+      g.vertex_interior = SubYGrid<dim,ctype>(o_vertex_interior,s_vertex_interior,offset,s_vertex_overlapfront,h,r);
 
       // compute vertex intersections
       intersections(g.vertex_overlapfront,g.vertex_overlapfront,g.cell_global.size(),
@@ -649,7 +649,7 @@ namespace Dune {
       mpifriendly_ygrid ()
         : origin(0), size(0), h(0.0), r(0.0)
       {}
-      mpifriendly_ygrid (const YGrid<d,ct>& grid)
+      mpifriendly_ygrid (const YGrid<dim,ctype>& grid)
         : origin(grid.origin()), size(grid.size()), h(grid.meshsize()), r(grid.shift())
       {}
       iTupel origin;
@@ -664,14 +664,14 @@ namespace Dune {
     //   size: needed to shift local grid in periodic case
     //   returns two lists: Intersections to be sent and Intersections to be received
     // Note: sendgrid/recvgrid may be SubYGrids. Since intersection method is virtual it should work properly
-    void intersections (const SubYGrid<d,ct>& sendgrid, const SubYGrid<d,ct>& recvgrid, const iTupel& size,
+    void intersections (const SubYGrid<dim,ctype>& sendgrid, const SubYGrid<dim,ctype>& recvgrid, const iTupel& size,
                         std::deque<Intersection>& sendlist, std::deque<Intersection>& recvlist)
     {
       // the exchange buffers
-      std::vector<YGrid<d,ct> > send_recvgrid(_torus.neighbors());
-      std::vector<YGrid<d,ct> > recv_recvgrid(_torus.neighbors());
-      std::vector<YGrid<d,ct> > send_sendgrid(_torus.neighbors());
-      std::vector<YGrid<d,ct> > recv_sendgrid(_torus.neighbors());
+      std::vector<YGrid<dim,ctype> > send_recvgrid(_torus.neighbors());
+      std::vector<YGrid<dim,ctype> > recv_recvgrid(_torus.neighbors());
+      std::vector<YGrid<dim,ctype> > send_sendgrid(_torus.neighbors());
+      std::vector<YGrid<dim,ctype> > recv_sendgrid(_torus.neighbors());
 
       // new exchange buffers to send simple struct without virtual functions
       std::vector<mpifriendly_ygrid> mpifriendly_send_recvgrid(_torus.neighbors());
@@ -681,17 +681,17 @@ namespace Dune {
 
       // fill send buffers; iterate over all neighboring processes
       // non-periodic case is handled automatically because intersection will be zero
-      for (typename Torus<d>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
+      for (typename Torus<dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
       {
         // determine if we communicate with this neighbor (and what)
         bool skip = false;
         iTupel coord = _torus.coord();   // my coordinates
         iTupel delta = i.delta();        // delta to neighbor
         iTupel nb = coord;               // the neighbor
-        for (int k=0; k<d; k++) nb[k] += delta[k];
+        for (int k=0; k<dim; k++) nb[k] += delta[k];
         iTupel v = iTupel(0);                    // grid movement
 
-        for (int k=0; k<d; k++)
+        for (int k=0; k<dim; k++)
         {
           if (nb[k]<0)
           {
@@ -718,46 +718,46 @@ namespace Dune {
         }
         else
         {
-          send_sendgrid[i.index()] = YGrid<d,ct>(iTupel(0),iTupel(0),fTupel(0.0),fTupel(0.0));
-          send_recvgrid[i.index()] = YGrid<d,ct>(iTupel(0),iTupel(0),fTupel(0.0),fTupel(0.0));
+          send_sendgrid[i.index()] = YGrid<dim,ctype>(iTupel(0),iTupel(0),fTupel(0.0),fTupel(0.0));
+          send_recvgrid[i.index()] = YGrid<dim,ctype>(iTupel(0),iTupel(0),fTupel(0.0),fTupel(0.0));
         }
       }
 
       // issue send requests for sendgrid being sent to all neighbors
-      for (typename Torus<d>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
+      for (typename Torus<dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
       {
         mpifriendly_send_sendgrid[i.index()] = mpifriendly_ygrid(send_sendgrid[i.index()]);
         _torus.send(i.rank(), &mpifriendly_send_sendgrid[i.index()], sizeof(mpifriendly_ygrid));
       }
 
       // issue recv requests for sendgrids of neighbors
-      for (typename Torus<d>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
+      for (typename Torus<dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
         _torus.recv(i.rank(), &mpifriendly_recv_sendgrid[i.index()], sizeof(mpifriendly_ygrid));
 
       // exchange the sendgrids
       _torus.exchange();
 
       // issue send requests for recvgrid being sent to all neighbors
-      for (typename Torus<d>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
+      for (typename Torus<dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
       {
         mpifriendly_send_recvgrid[i.index()] = mpifriendly_ygrid(send_recvgrid[i.index()]);
         _torus.send(i.rank(), &mpifriendly_send_recvgrid[i.index()], sizeof(mpifriendly_ygrid));
       }
 
       // issue recv requests for recvgrid of neighbors
-      for (typename Torus<d>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
+      for (typename Torus<dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
         _torus.recv(i.rank(), &mpifriendly_recv_recvgrid[i.index()], sizeof(mpifriendly_ygrid));
 
       // exchange the recvgrid
       _torus.exchange();
 
       // process receive buffers and compute intersections
-      for (typename Torus<d>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
+      for (typename Torus<dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
       {
         // what must be sent to this neighbor
         Intersection send_intersection;
         mpifriendly_ygrid yg = mpifriendly_recv_recvgrid[i.index()];
-        recv_recvgrid[i.index()] = YGrid<d,ct>(yg.origin,yg.size,yg.h,yg.r);
+        recv_recvgrid[i.index()] = YGrid<dim,ctype>(yg.origin,yg.size,yg.h,yg.r);
         send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
         send_intersection.rank = i.rank();
         send_intersection.distance = i.distance();
@@ -765,7 +765,7 @@ namespace Dune {
 
         Intersection recv_intersection;
         yg = mpifriendly_recv_sendgrid[i.index()];
-        recv_sendgrid[i.index()] = YGrid<d,ct>(yg.origin,yg.size,yg.h,yg.r);
+        recv_sendgrid[i.index()] = YGrid<dim,ctype>(yg.origin,yg.size,yg.h,yg.r);
         recv_intersection.grid = recvgrid.intersection(recv_sendgrid[i.index()]);
         recv_intersection.rank = i.rank();
         recv_intersection.distance = i.distance();
@@ -777,11 +777,11 @@ namespace Dune {
   protected:
     fTupel _LL;
     iTupel _s;
-    std::bitset<d> _periodic;
+    std::bitset<dim> _periodic;
     int _maxlevel;
     YGridLevel _levels[32];
     int _overlap;
-    Torus<d> _torus;
+    Torus<dim> _torus;
   };
 
 
