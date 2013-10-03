@@ -786,9 +786,6 @@ namespace Dune {
     typedef YaspIndexSet<YaspGrid<dim>, true > LeafIndexSetType;
     typedef YaspGlobalIdSet<YaspGrid<dim> > GlobalIdSetType;
 
-    //! maximum number of levels allowed
-    enum { MAXL=64 };
-
     //! shorthand for base class data types
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     typedef typename std::deque<Intersection>::const_iterator ISIT;
@@ -1769,7 +1766,7 @@ namespace Dune {
     ReservedVector<YGridLevel,32> _levels;
     int _overlap;
     Torus<dim> _torus;
-    int sizes[MAXL][dim+1]; // total number of entities per level and codim
+    int sizes[32][dim+1]; // total number of entities per level and codim
     bool keep_ovlp;
     int adaptRefCount;
     bool adaptActive;
