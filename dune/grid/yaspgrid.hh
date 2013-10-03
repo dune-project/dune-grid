@@ -260,22 +260,29 @@ namespace Dune {
     class YGridLevelIterator {
     private:
       int l;
-      const YGridLevel* i;
+      typename ReservedVector<YGridLevel,32>::const_iterator i;
     public:
       //! empty constructor, use with care
       YGridLevelIterator ()
       {}
 
       //! make iterator pointing to level k (no check made)
-      YGridLevelIterator (const YGridLevel* start, int level)
+      YGridLevelIterator (const ReservedVector<YGridLevel,32>& levels, int level)
       {
-        i=start; l=level;
+        i=typename ReservedVector<YGridLevel,32>::const_iterator(levels,level);
+        l=level;
       }
 
       //! Copy constructor
       YGridLevelIterator (const YGridLevelIterator & it)
         : l(it.l), i(it.i)
       {}
+
+      YGridLevelIterator& operator=(const YGridLevelIterator& other)
+      {
+        l = other.l;
+        i = other.i;
+      }
 
       //! return number of this grid level
       int level () const
@@ -326,13 +333,17 @@ namespace Dune {
       //! get iterator to next finer grid level
       YGridLevelIterator finer () const
       {
-        return YGridLevelIterator(i+1,l+1);
+        YGridLevelIterator result = *this;
+        ++result;
+        return result;
       }
 
       //! get iterator to next coarser grid level
       YGridLevelIterator coarser () const
       {
-        return YGridLevelIterator(i-1,l-1);
+        YGridLevelIterator result = *this;
+        --result;
+        return result;
       }
 
       //! reference to global cell grid
@@ -437,7 +448,7 @@ namespace Dune {
     //! return iterator pointing to coarsest level
     YGridLevelIterator begin () const
     {
-      return YGridLevelIterator(&_levels[0],0);
+      return YGridLevelIterator(_levels,0);
     }
 
     //! return iterator pointing to given level
@@ -445,13 +456,13 @@ namespace Dune {
     {
       if (i<0 || i>maxLevel())
         DUNE_THROW(GridError, "level not existing");
-      return YGridLevelIterator((&_levels[0])+i,i);
+      return YGridLevelIterator(_levels,i);
     }
 
     //! return iterator pointing to one past the finest level
     YGridLevelIterator end () const
     {
-      return YGridLevelIterator((&_levels[0])+(maxLevel()+1),maxLevel()+1);
+      return YGridLevelIterator(_levels,maxLevel()+1);
     }
 
     // static method to create the default load balance strategy
