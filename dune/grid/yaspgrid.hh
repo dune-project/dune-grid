@@ -169,13 +169,30 @@ namespace Dune {
     }
   };
 
-    /*! MultiYGrid manages a d-dimensional grid mapped to a set of processes.
+  //************************************************************************
+  /*!
+     \brief [<em> provides \ref Dune::Grid </em>]
+     \brief Provides a distributed structured cube mesh.
+     \ingroup GridImplementations
+
+     YaspGrid stands for yet another structured parallel grid.
+     It implements the dune grid interface for structured grids with codim 0
+     and dim, with arbitrary overlap (including zero),
+     periodic boundaries and fast implementation allowing on-the-fly computations.
+
+     \tparam dim The dimension of the grid and its surrounding world
+
+     \par History:
+     \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
    */
-  template<int dim, typename ctype>
-  class MultiYGrid
-    : public GridDefaultImplementation<dim,dim,ctype,YaspGridFamily<dim> >
+  template<int dim>
+  class YaspGrid
+    : public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim> >
   {
   public:
+    //! define type used for coordinates
+    typedef yaspgrid_ctype ctype;
+
     // some data types
     struct Intersection {
       SubYGrid<dim,ctype> grid; // the intersection as a subgrid of local grid
@@ -215,7 +232,7 @@ namespace Dune {
       std::deque<Intersection> recv_vertex_overlapfront_interiorborder; // each intersection is a subgrid of overlapfront
 
       // general
-      MultiYGrid<dim,ctype>* mg;  // each grid level knows its multigrid
+      YaspGrid<dim>* mg;  // each grid level knows its multigrid
       int overlap;           // in mesh cells on this level
     };
 
@@ -226,31 +243,10 @@ namespace Dune {
     // communication tag used by multigrid
     enum { tag = 17 };
 
-    //! constructor making a grid
-    MultiYGrid (
-#if HAVE_MPI
-      MPI_Comm comm,
-#endif
-      Dune::array<int,dim> s,
-      const YLoadBalance<dim>* lb = defaultLoadbalancer())
-      :
-#if HAVE_MPI
-        _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
-#else
-        _torus(tag,s,lb) // torus gets s to compute procs/direction
-#endif
-    {}
-
     //! return reference to torus
     const Torus<dim>& torus () const
     {
       return _torus;
-    }
-
-    //! return the maximum level index (number of levels is maxlevel()+1)
-    int maxlevel () const
-    {
-      return _maxlevel;
     }
 
     //! return true if grid is periodic in given direction
@@ -293,7 +289,7 @@ namespace Dune {
       }
 
       //! return pointer to multigrid object that contains this level
-      const MultiYGrid<dim,ctype>* mg () const
+      const YaspGrid<dim>* mg () const
       {
         return i->mg;
       }
@@ -446,7 +442,7 @@ namespace Dune {
     //! return iterator pointing to given level
     YGridLevelIterator begin (int i) const
     {
-      if (i<0 || i>maxlevel())
+      if (i<0 || i>maxLevel())
         DUNE_THROW(GridError, "level not existing");
       return YGridLevelIterator(_levels+i,i);
     }
@@ -748,38 +744,8 @@ namespace Dune {
       }
     }
 
-    // protected data of multigrid
   protected:
-    fTupel _LL;
-    iTupel _s;
-    std::bitset<dim> _periodic;
-    int _maxlevel;
-    YGridLevel _levels[32];
-    int _overlap;
-    Torus<dim> _torus;
-  };
 
-
-  //************************************************************************
-  /*!
-     \brief [<em> provides \ref Dune::Grid </em>]
-     \brief Provides a distributed structured cube mesh.
-     \ingroup GridImplementations
-
-     YaspGrid stands for yet another structured parallel grid.
-     It implements the dune grid interface for structured grids with codim 0
-     and dim, with arbitrary overlap (including zero),
-     periodic boundaries and fast implementation allowing on-the-fly computations.
-
-     \tparam dim The dimension of the grid and its surrounding world
-
-     \par History:
-     \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
-   */
-  template<int dim>
-  class YaspGrid :
-    public MultiYGrid<dim,yaspgrid_ctype>
-  {
     typedef const YaspGrid<dim> GridImp;
 
     void init()
@@ -792,18 +758,15 @@ namespace Dune {
     void boundarysegmentssize()
     {
       // sizes of local macro grid
-      const FieldVector<int, dim> & size = MultiYGrid<dim,ctype>::begin().cell_overlap().size();
+      const FieldVector<int, dim> & size = begin().cell_overlap().size();
       Dune::array<int, dim> sides;
       {
         for (int i=0; i<dim; i++)
         {
           sides[i] =
-            ((MultiYGrid<dim,ctype>::begin().cell_overlap().origin(i)
-              == MultiYGrid<dim,ctype>::begin().cell_global().origin(i))+
-             (MultiYGrid<dim,ctype>::begin().cell_overlap().origin(i) +
-                    MultiYGrid<dim,ctype>::begin().cell_overlap().size(i)
-                    == MultiYGrid<dim,ctype>::begin().cell_global().origin(i) +
-                    MultiYGrid<dim,ctype>::begin().cell_global().size(i)));
+            ((begin().cell_overlap().origin(i) == begin().cell_global().origin(i))+
+             (begin().cell_overlap().origin(i) + begin().cell_overlap().size(i)
+                    == begin().cell_global().origin(i) + begin().cell_global().size(i)));
         }
       }
       nBSegments = 0;
@@ -820,11 +783,6 @@ namespace Dune {
     }
 
   public:
-
-    using MultiYGrid<dim,yaspgrid_ctype>::defaultLoadbalancer;
-
-    //! define type used for coordinates in grid module
-    typedef yaspgrid_ctype ctype;
 
     // define the persistent index type
     typedef bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits> PersistentIndexType;
@@ -843,15 +801,10 @@ namespace Dune {
     enum { MAXL=64 };
 
     //! shorthand for base class data types
-    typedef MultiYGrid<dim,ctype> YMG;
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
-    typedef typename MultiYGrid<dim,ctype>::Intersection IS;
+    typedef Intersection IS;
     typedef typename std::deque<IS>::const_iterator ISIT;
-
-    //! define types used for arguments
-    typedef FieldVector<int, dim> iTupel;
-    typedef FieldVector<ctype, dim> fTupel;
 
     //! The constructor of the old MultiYGrid class
     void MultiYGridSetup (
@@ -860,11 +813,11 @@ namespace Dune {
 #endif
                 fTupel L, iTupel s, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
     {
-      this->_LL = L;
-      this->_s = s;
-      this->_periodic = periodic;
-      this->_maxlevel = 0;
-      this->_overlap = overlap;
+      _LL = L;
+      _s = s;
+      _periodic = periodic;
+      _maxlevel = 0;
+      _overlap = overlap;
 
       // coarse cell interior  grid obtained through partitioning of global grid
 #if HAVE_MPI
@@ -895,10 +848,10 @@ namespace Dune {
       int overlap,
       const YLoadBalance<dim>* lb = defaultLoadbalancer())
     {
-      this->_LL = L;
-      this->_periodic = periodic;
-      this->_maxlevel = 0;
-      this->_overlap = overlap;
+      _LL = L;
+      _periodic = periodic;
+      _maxlevel = 0;
+      _overlap = overlap;
 
       std::copy(s.begin(), s.end(), this->_s.begin());
 
@@ -930,15 +883,13 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(comm,s,lb),
+      : _torus(comm,tag,s,lb),
         ccobj(comm),
-        leafIndexSet_(*this),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
 #else
-      : YMG(s,lb),
+      : _torus(tag,s,lb),
+#endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
-#endif
     {
 #if HAVE_MPI
       MultiYGridSetup(comm,L,s,std::bitset<dim>(),overlap,lb);
@@ -967,12 +918,12 @@ namespace Dune {
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap,
-              const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(MPI_COMM_SELF,s,lb),
+      : _torus(MPI_COMM_SELF,tag,s,lb),
         ccobj(MPI_COMM_SELF),
 #else
-      : YMG(s,lb),
+      : _torus(tag,s,lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
@@ -1003,10 +954,10 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(comm,s,lb),
+      : _torus(comm,tag,s,lb),
         ccobj(comm),
 #else
-      : YMG(s,lb),
+      : _torus(tag,s,lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
@@ -1036,12 +987,12 @@ namespace Dune {
               Dune::array<int, dim> s,
               std::bitset<dim> periodic,
               int overlap,
-              const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(MPI_COMM_SELF,s,lb),
+      : _torus(MPI_COMM_SELF,tag,s,lb),
         ccobj(MPI_COMM_SELF),
 #else
-      : YMG(s,lb),
+      : _torus(tag,s,lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
@@ -1066,10 +1017,10 @@ namespace Dune {
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::array<int, dim> elements)
 #if HAVE_MPI
-      : YMG(MPI_COMM_SELF,elements),
+      : _torus(MPI_COMM_SELF,tag,elements),
         ccobj(MPI_COMM_SELF),
 #else
-      : YMG(elements),
+      : _torus(elements),
 #endif
         keep_ovlp(true),
         leafIndexSet_(*this),
@@ -1092,7 +1043,10 @@ namespace Dune {
     /*! Return maximum level defined in this grid. Levels are numbered
           0 ... maxlevel with 0 the coarsest level.
      */
-    int maxLevel() const {return MultiYGrid<dim,ctype>::maxlevel();} // delegate
+    int maxLevel() const
+    {
+      return _maxlevel;
+    }
 
     //! refine the grid refCount times. What about overlap?
     void globalRefine (int refCount)
@@ -1105,8 +1059,8 @@ namespace Dune {
       for (int k=refCount; k<0; k++)
       {
         // create an empty grid level
-        typename MultiYGrid<dim,ctype>::YGridLevel empty;
-        this->_levels[this->_maxlevel] = empty;
+        YGridLevel empty;
+        this->_levels[_maxlevel] = empty;
         // reduce maxlevel
         this->_maxlevel--;
 
@@ -1118,7 +1072,7 @@ namespace Dune {
       for (int k=0; k<refCount; k++)
       {
         // access to coarser grid level
-        typename YMG::YGridLevel& cg = this->_levels[maxLevel()];
+        YGridLevel& cg = _levels[maxLevel()];
 
         // compute size of new global grid
         iTupel s;
@@ -1137,8 +1091,8 @@ namespace Dune {
           s_interior[i] = 2*cg.cell_interior.size(i);
 
         // add level
-        this->_maxlevel++;
-        this->_levels[this->maxLevel()] = this->makelevel(this->_LL,s,this->_periodic,o_interior,s_interior,overlap);
+        _maxlevel++;
+        _levels[maxLevel()] = makelevel(_LL,s,_periodic,o_interior,s_interior,overlap);
 
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
@@ -1268,7 +1222,7 @@ namespace Dune {
     entityPointer(const Seed& seed) const
     {
       const int codim = Seed::codimension;
-      YGLI g = MultiYGrid<dim,ctype>::begin(this->getRealImplementation(seed).level());
+      YGLI g = begin(this->getRealImplementation(seed).level());
       switch (codim)
       {
       case 0 :
@@ -1285,14 +1239,14 @@ namespace Dune {
     //! return size (= distance in graph) of overlap region
     int overlapSize (int level, int codim) const
     {
-      YGLI g = MultiYGrid<dim,ctype>::begin(level);
+      YGLI g = begin(level);
       return g.overlap();
     }
 
     //! return size (= distance in graph) of overlap region
     int overlapSize (int codim) const
     {
-      YGLI g = MultiYGrid<dim,ctype>::begin(maxLevel());
+      YGLI g = begin(maxLevel());
       return g.overlap();
     }
 
@@ -1372,7 +1326,7 @@ namespace Dune {
       typedef typename DataHandle::DataType DataType;
 
       // access to grid level
-      YGLI g = MultiYGrid<dim,ctype>::begin(level);
+      YGLI g = begin(level);
 
       // find send/recv lists or throw error
       const std::deque<IS>* sendlist=0;
@@ -1475,7 +1429,7 @@ namespace Dune {
           send_size[cnt] = n;
 
           // hand over send request to torus class
-          MultiYGrid<dim,ctype>::torus().send(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
+          torus().send(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
           cnt++;
         }
 
@@ -1488,12 +1442,12 @@ namespace Dune {
           recv_sizes[cnt] = buf;
 
           // hand over recv request to torus class
-          MultiYGrid<dim,ctype>::torus().recv(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
+          torus().recv(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
           cnt++;
         }
 
         // exchange all size buffers now
-        MultiYGrid<dim,ctype>::torus().exchange();
+        torus().exchange();
 
         // release send size buffers
         cnt=0;
@@ -1546,7 +1500,7 @@ namespace Dune {
           data.gather(mb,*it);
 
         // hand over send request to torus class
-        MultiYGrid<dim,ctype>::torus().send(is->rank,buf,send_size[cnt]*sizeof(DataType));
+        torus().send(is->rank,buf,send_size[cnt]*sizeof(DataType));
         cnt++;
       }
 
@@ -1562,12 +1516,12 @@ namespace Dune {
         recvs[cnt] = buf;
 
         // hand over recv request to torus class
-        MultiYGrid<dim,ctype>::torus().recv(is->rank,buf,recv_size[cnt]*sizeof(DataType));
+        torus().recv(is->rank,buf,recv_size[cnt]*sizeof(DataType));
         cnt++;
       }
 
       // exchange all buffers now
-      MultiYGrid<dim,ctype>::torus().exchange();
+      torus().exchange();
 
       // release send buffers
       cnt=0;
@@ -1721,7 +1675,7 @@ namespace Dune {
 
     void setsizes ()
     {
-      for (YGLI g=MultiYGrid<dim,ctype>::begin(); g!=MultiYGrid<dim,ctype>::end(); ++g)
+      for (YGLI g=begin(); g!=end(); ++g)
       {
         // codim 0 (elements)
         sizes[g.level()][0] = 1;
@@ -1769,7 +1723,7 @@ namespace Dune {
     {
       dune_static_assert( cd == dim || cd == 0 ,
                           "YaspGrid only supports Entities with codim=dim and codim=0");
-      YGLI g = MultiYGrid<dim,ctype>::begin(level);
+      YGLI g = begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (pitype==Ghost_Partition)
         return levelend <cd, pitype> (level);
@@ -1800,7 +1754,7 @@ namespace Dune {
     {
       dune_static_assert( cd == dim || cd == 0 ,
                           "YaspGrid only supports Entities with codim=dim and codim=0");
-      YGLI g = MultiYGrid<dim,ctype>::begin(level);
+      YGLI g = begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (cd==0)   // the elements
       {
@@ -1823,6 +1777,13 @@ namespace Dune {
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }
 
+    fTupel _LL;
+    iTupel _s;
+    std::bitset<dim> _periodic;
+    int _maxlevel;
+    YGridLevel _levels[32];
+    int _overlap;
+    Torus<dim> _torus;
     int sizes[MAXL][dim+1]; // total number of entities per level and codim
     bool keep_ovlp;
     int adaptRefCount;
@@ -1836,7 +1797,7 @@ namespace Dune {
   {
     int rank = grid.torus().rank();
 
-    s << "[" << rank << "]:" << " YaspGrid maxlevel=" << grid.maxlevel() << std::endl;
+    s << "[" << rank << "]:" << " YaspGrid maxlevel=" << grid.maxLevel() << std::endl;
 
     for (typename YaspGrid<d>::YGridLevelIterator g=grid.begin(); g!=grid.end(); ++g)
     {

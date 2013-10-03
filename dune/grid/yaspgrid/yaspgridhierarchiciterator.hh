@@ -39,7 +39,7 @@ namespace Dune {
       stack.push(se);
 
       // determine maximum level
-      _maxlevel = std::min(maxlevel,this->_g.mg()->maxlevel());
+      _maxlevel = std::min(maxlevel,this->_g.mg()->maxLevel());
 
       // if maxlevel not reached then push yourself and sons
       if (this->_g.level()<_maxlevel)
