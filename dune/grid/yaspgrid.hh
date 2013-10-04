@@ -257,10 +257,11 @@ namespace Dune {
     }
 
     //! provides access to a given grid level
-    class YGridLevelIterator {
+    class YGridLevelIterator
+      : public ReservedVector<YGridLevel,32>::const_iterator
+    {
     private:
       int l;
-      typename ReservedVector<YGridLevel,32>::const_iterator i;
     public:
       //! empty constructor, use with care
       YGridLevelIterator ()
@@ -268,21 +269,15 @@ namespace Dune {
 
       //! make iterator pointing to level k (no check made)
       YGridLevelIterator (const ReservedVector<YGridLevel,32>& levels, int level)
+        : ReservedVector<YGridLevel,32>::const_iterator(levels,level)
       {
-        i=typename ReservedVector<YGridLevel,32>::const_iterator(levels,level);
         l=level;
       }
 
       //! Copy constructor
       YGridLevelIterator (const YGridLevelIterator & it)
-        : l(it.l), i(it.i)
+        : l(it.l), ReservedVector<YGridLevel,32>::const_iterator(it)
       {}
-
-      YGridLevelIterator& operator=(const YGridLevelIterator& other)
-      {
-        l = other.l;
-        i = other.i;
-      }
 
       //! return number of this grid level
       int level () const
@@ -293,31 +288,19 @@ namespace Dune {
       //! return size of overlap on this level
       int overlap () const
       {
-        return i->overlap;
+        return this->operator*().overlap;
       }
 
       //! return pointer to multigrid object that contains this level
       const YaspGrid<dim>* mg () const
       {
-        return i->mg;
-      }
-
-      //! Return true when two iterators point to same member
-      bool operator== (const YGridLevelIterator& iter) const
-      {
-        return i == iter.i;
-      }
-
-      //! Return true when two iterators do not point to same member
-      bool operator!= (const YGridLevelIterator& iter) const
-      {
-        return i != iter.i;
+        return this->operator*().mg;
       }
 
       //! Increment iterator to next finer grid level
       YGridLevelIterator& operator++ ()
       {
-        ++i; // assumes built-in array
+        ReservedVector<YGridLevel,32>::const_iterator::operator++();
         ++l;
         return *this;
       }
@@ -325,7 +308,7 @@ namespace Dune {
       //! Increment iterator to coarser grid level
       YGridLevelIterator& operator-- ()
       {
-        --i;
+        ReservedVector<YGridLevel,32>::const_iterator::operator--();
         --l;
         return *this;
       }
@@ -349,100 +332,101 @@ namespace Dune {
       //! reference to global cell grid
       const YGrid<dim,ctype>& cell_global () const
       {
-        return i->cell_global;
+        return this->operator*().cell_global;
       }
 
       //! reference to local cell grid which is a subgrid of the global cell grid
       const SubYGrid<dim,ctype>& cell_overlap () const
       {
-        return i->cell_overlap;
+        return this->operator*().cell_overlap;
       }
 
       //! reference to cell master grid which is a subgrid of the local cell grid
       const SubYGrid<dim,ctype>& cell_interior () const
       {
-        return i->cell_interior;
+        return this->operator*().cell_interior;
       }
 
 
       //! access to intersection lists
       const std::deque<Intersection>& send_cell_overlap_overlap () const
       {
-        return i->send_cell_overlap_overlap;
+        return this->operator*().send_cell_overlap_overlap;
       }
       const std::deque<Intersection>& recv_cell_overlap_overlap () const
       {
-        return i->recv_cell_overlap_overlap;
+        return this->operator*().recv_cell_overlap_overlap;
       }
       const std::deque<Intersection>& send_cell_interior_overlap () const
       {
-        return i->send_cell_interior_overlap;
+        return this->operator*().send_cell_interior_overlap;
       }
       const std::deque<Intersection>& recv_cell_overlap_interior () const
       {
-        return i->recv_cell_overlap_interior;
+        return this->operator*().recv_cell_overlap_interior;
       }
 
 
       //! reference to global vertex grid
       const YGrid<dim,ctype>& vertex_global () const
       {
-        return i->vertex_global;
+        return this->operator*().vertex_global;
       }
       //! reference to vertex grid, up to front; there are no ghosts in this implementation
       const SubYGrid<dim,ctype>& vertex_overlapfront () const
       {
-        return i->vertex_overlapfront;
+        return this->operator*().vertex_overlapfront;
       }
       //! reference to overlap vertex grid; is subgrid of overlapfront vertex grid
       const SubYGrid<dim,ctype>& vertex_overlap () const
       {
-        return i->vertex_overlap;
+        return this->operator*().vertex_overlap;
       }
       //! reference to interiorborder vertex grid; is subgrid of overlapfront vertex grid
       const SubYGrid<dim,ctype>& vertex_interiorborder () const
       {
-        return i->vertex_interiorborder;
+        return this->operator*().vertex_interiorborder;
       }
       //! reference to interior vertex grid; is subgrid of overlapfront vertex grid
       const SubYGrid<dim,ctype>& vertex_interior () const
       {
-        return i->vertex_interior;
+        return this->operator*().vertex_interior;
       }
 
       //! access to intersection lists
       const std::deque<Intersection>& send_vertex_overlapfront_overlapfront () const
       {
-        return i->send_vertex_overlapfront_overlapfront;
+        return this->operator*().send_vertex_overlapfront_overlapfront;
       }
       const std::deque<Intersection>& recv_vertex_overlapfront_overlapfront () const
       {
-        return i->recv_vertex_overlapfront_overlapfront;
+        return this->operator*().recv_vertex_overlapfront_overlapfront;
       }
       const std::deque<Intersection>& send_vertex_overlap_overlapfront () const
       {
-        return i->send_vertex_overlap_overlapfront;
+        return this->operator*().send_vertex_overlap_overlapfront;
       }
       const std::deque<Intersection>& recv_vertex_overlapfront_overlap () const
       {
-        return i->recv_vertex_overlapfront_overlap;
+        return this->operator*().recv_vertex_overlapfront_overlap;
       }
       const std::deque<Intersection>& send_vertex_interiorborder_interiorborder () const
       {
-        return i->send_vertex_interiorborder_interiorborder;
+        return this->operator*().send_vertex_interiorborder_interiorborder;
       }
       const std::deque<Intersection>& recv_vertex_interiorborder_interiorborder () const
       {
-        return i->recv_vertex_interiorborder_interiorborder;
+        return this->operator*().recv_vertex_interiorborder_interiorborder;
       }
       const std::deque<Intersection>& send_vertex_interiorborder_overlapfront () const
       {
-        return i->send_vertex_interiorborder_overlapfront;
+        return this->operator*().send_vertex_interiorborder_overlapfront;
       }
       const std::deque<Intersection>& recv_vertex_overlapfront_interiorborder () const
       {
-        return i->recv_vertex_overlapfront_interiorborder;
+        return this->operator*().recv_vertex_overlapfront_interiorborder;
       }
+
     };
 
     //! return iterator pointing to coarsest level
