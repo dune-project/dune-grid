@@ -159,7 +159,7 @@ namespace Dune {
     }
 
     /** \brief Return the entity seed which contains sufficient information
-     *  to generate the entity again and uses as less memory as possible
+     *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const {
       return EntitySeed(YaspEntitySeed<0,GridImp>(_g.level(), _it.coord()));
