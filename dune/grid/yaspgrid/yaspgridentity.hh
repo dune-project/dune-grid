@@ -228,7 +228,8 @@ namespace Dune {
         DUNE_THROW(GridError, "tried to call father on level 0");
 
       // yes, get iterator to it
-      YGLI cg = _g.coarser();
+      YGLI cg = _g;
+      --cg;
 
       // coordinates of the cell
       iTupel coord = _it.coord();

@@ -300,22 +300,6 @@ namespace Dune {
         --l;
         return *this;
       }
-
-      //! get iterator to next finer grid level
-      YGridLevelIterator finer () const
-      {
-        YGridLevelIterator result = *this;
-        ++result;
-        return result;
-      }
-
-      //! get iterator to next coarser grid level
-      YGridLevelIterator coarser () const
-      {
-        YGridLevelIterator result = *this;
-        --result;
-        return result;
-      }
     };
 
     //! return iterator pointing to coarsest level

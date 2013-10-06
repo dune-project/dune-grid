@@ -96,7 +96,9 @@ namespace Dune {
     void push_sons ()
     {
       // yes, process all 1<<dim sons
-      StackElem se(this->_g.finer());
+      YGLI finer = this->_g;
+      ++finer;
+      StackElem se(finer);
       for (int i=0; i<(1<<dim); i++)
       {
         for (int k=0; k<dim; k++)
