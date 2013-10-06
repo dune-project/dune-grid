@@ -39,7 +39,7 @@ namespace Dune {
       stack.push(se);
 
       // determine maximum level
-      _maxlevel = std::min(maxlevel,this->_g.mg()->maxLevel());
+      _maxlevel = std::min(maxlevel,this->_g->mg->maxLevel());
 
       // if maxlevel not reached then push yourself and sons
       if (this->_g.level()<_maxlevel)
@@ -114,7 +114,7 @@ namespace Dune {
       StackElem se = stack.top();
       stack.pop();
       this->_g = se.g;
-      this->_it.reinit(this->_g.cell_overlap(),se.coord);
+      this->_it.reinit(this->_g->cell_overlap,se.coord);
     }
   };
 

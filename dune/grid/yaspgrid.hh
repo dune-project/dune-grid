@@ -285,18 +285,6 @@ namespace Dune {
         return l;
       }
 
-      //! return size of overlap on this level
-      int overlap () const
-      {
-        return this->operator*().overlap;
-      }
-
-      //! return pointer to multigrid object that contains this level
-      const YaspGrid<dim>* mg () const
-      {
-        return this->operator*().mg;
-      }
-
       //! Increment iterator to next finer grid level
       YGridLevelIterator& operator++ ()
       {
@@ -328,105 +316,6 @@ namespace Dune {
         --result;
         return result;
       }
-
-      //! reference to global cell grid
-      const YGrid<dim,ctype>& cell_global () const
-      {
-        return this->operator*().cell_global;
-      }
-
-      //! reference to local cell grid which is a subgrid of the global cell grid
-      const SubYGrid<dim,ctype>& cell_overlap () const
-      {
-        return this->operator*().cell_overlap;
-      }
-
-      //! reference to cell master grid which is a subgrid of the local cell grid
-      const SubYGrid<dim,ctype>& cell_interior () const
-      {
-        return this->operator*().cell_interior;
-      }
-
-
-      //! access to intersection lists
-      const std::deque<Intersection>& send_cell_overlap_overlap () const
-      {
-        return this->operator*().send_cell_overlap_overlap;
-      }
-      const std::deque<Intersection>& recv_cell_overlap_overlap () const
-      {
-        return this->operator*().recv_cell_overlap_overlap;
-      }
-      const std::deque<Intersection>& send_cell_interior_overlap () const
-      {
-        return this->operator*().send_cell_interior_overlap;
-      }
-      const std::deque<Intersection>& recv_cell_overlap_interior () const
-      {
-        return this->operator*().recv_cell_overlap_interior;
-      }
-
-
-      //! reference to global vertex grid
-      const YGrid<dim,ctype>& vertex_global () const
-      {
-        return this->operator*().vertex_global;
-      }
-      //! reference to vertex grid, up to front; there are no ghosts in this implementation
-      const SubYGrid<dim,ctype>& vertex_overlapfront () const
-      {
-        return this->operator*().vertex_overlapfront;
-      }
-      //! reference to overlap vertex grid; is subgrid of overlapfront vertex grid
-      const SubYGrid<dim,ctype>& vertex_overlap () const
-      {
-        return this->operator*().vertex_overlap;
-      }
-      //! reference to interiorborder vertex grid; is subgrid of overlapfront vertex grid
-      const SubYGrid<dim,ctype>& vertex_interiorborder () const
-      {
-        return this->operator*().vertex_interiorborder;
-      }
-      //! reference to interior vertex grid; is subgrid of overlapfront vertex grid
-      const SubYGrid<dim,ctype>& vertex_interior () const
-      {
-        return this->operator*().vertex_interior;
-      }
-
-      //! access to intersection lists
-      const std::deque<Intersection>& send_vertex_overlapfront_overlapfront () const
-      {
-        return this->operator*().send_vertex_overlapfront_overlapfront;
-      }
-      const std::deque<Intersection>& recv_vertex_overlapfront_overlapfront () const
-      {
-        return this->operator*().recv_vertex_overlapfront_overlapfront;
-      }
-      const std::deque<Intersection>& send_vertex_overlap_overlapfront () const
-      {
-        return this->operator*().send_vertex_overlap_overlapfront;
-      }
-      const std::deque<Intersection>& recv_vertex_overlapfront_overlap () const
-      {
-        return this->operator*().recv_vertex_overlapfront_overlap;
-      }
-      const std::deque<Intersection>& send_vertex_interiorborder_interiorborder () const
-      {
-        return this->operator*().send_vertex_interiorborder_interiorborder;
-      }
-      const std::deque<Intersection>& recv_vertex_interiorborder_interiorborder () const
-      {
-        return this->operator*().recv_vertex_interiorborder_interiorborder;
-      }
-      const std::deque<Intersection>& send_vertex_interiorborder_overlapfront () const
-      {
-        return this->operator*().send_vertex_interiorborder_overlapfront;
-      }
-      const std::deque<Intersection>& recv_vertex_overlapfront_interiorborder () const
-      {
-        return this->operator*().recv_vertex_overlapfront_interiorborder;
-      }
-
     };
 
     //! return iterator pointing to coarsest level
@@ -742,15 +631,15 @@ namespace Dune {
     void boundarysegmentssize()
     {
       // sizes of local macro grid
-      const FieldVector<int, dim> & size = begin().cell_overlap().size();
+      const FieldVector<int, dim> & size = begin()->cell_overlap.size();
       Dune::array<int, dim> sides;
       {
         for (int i=0; i<dim; i++)
         {
           sides[i] =
-            ((begin().cell_overlap().origin(i) == begin().cell_global().origin(i))+
-             (begin().cell_overlap().origin(i) + begin().cell_overlap().size(i)
-                    == begin().cell_global().origin(i) + begin().cell_global().size(i)));
+            ((begin()->cell_overlap.origin(i) == begin()->cell_global.origin(i))+
+             (begin()->cell_overlap.origin(i) + begin()->cell_overlap.size(i)
+                    == begin()->cell_global.origin(i) + begin()->cell_global.size(i)));
         }
       }
       nBSegments = 0;
@@ -1205,10 +1094,10 @@ namespace Dune {
       {
       case 0 :
         return YaspEntityPointer<codim,GridImp>(this,g,
-                                                TSI(g.cell_overlap(), this->getRealImplementation(seed).coord()));
+                                                TSI(g->cell_overlap, this->getRealImplementation(seed).coord()));
       case dim :
         return YaspEntityPointer<codim,GridImp>(this,g,
-                                                TSI(g.vertex_overlap(), this->getRealImplementation(seed).coord()));
+                                                TSI(g->vertex_overlap, this->getRealImplementation(seed).coord()));
       default :
         DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
       }
@@ -1218,14 +1107,14 @@ namespace Dune {
     int overlapSize (int level, int codim) const
     {
       YGridLevelIterator g = begin(level);
-      return g.overlap();
+      return g->overlap;
     }
 
     //! return size (= distance in graph) of overlap region
     int overlapSize (int codim) const
     {
       YGridLevelIterator g = begin(maxLevel());
-      return g.overlap();
+      return g->overlap;
     }
 
     //! return size (= distance in graph) of ghost region
@@ -1315,37 +1204,37 @@ namespace Dune {
           return; // there is nothing to do in this case
         if (iftype==InteriorBorder_All_Interface)
         {
-          sendlist = &g.send_cell_interior_overlap();
-          recvlist = &g.recv_cell_overlap_interior();
+          sendlist = &g->send_cell_interior_overlap;
+          recvlist = &g->recv_cell_overlap_interior;
         }
         if (iftype==Overlap_OverlapFront_Interface || iftype==Overlap_All_Interface || iftype==All_All_Interface)
         {
-          sendlist = &g.send_cell_overlap_overlap();
-          recvlist = &g.recv_cell_overlap_overlap();
+          sendlist = &g->send_cell_overlap_overlap;
+          recvlist = &g->recv_cell_overlap_overlap;
         }
       }
       if (codim==dim) // the vertices
       {
         if (iftype==InteriorBorder_InteriorBorder_Interface)
         {
-          sendlist = &g.send_vertex_interiorborder_interiorborder();
-          recvlist = &g.recv_vertex_interiorborder_interiorborder();
+          sendlist = &g->send_vertex_interiorborder_interiorborder;
+          recvlist = &g->recv_vertex_interiorborder_interiorborder;
         }
 
         if (iftype==InteriorBorder_All_Interface)
         {
-          sendlist = &g.send_vertex_interiorborder_overlapfront();
-          recvlist = &g.recv_vertex_overlapfront_interiorborder();
+          sendlist = &g->send_vertex_interiorborder_overlapfront;
+          recvlist = &g->recv_vertex_overlapfront_interiorborder;
         }
         if (iftype==Overlap_OverlapFront_Interface || iftype==Overlap_All_Interface)
         {
-          sendlist = &g.send_vertex_overlap_overlapfront();
-          recvlist = &g.recv_vertex_overlapfront_overlap();
+          sendlist = &g->send_vertex_overlap_overlapfront;
+          recvlist = &g->recv_vertex_overlapfront_overlap;
         }
         if (iftype==All_All_Interface)
         {
-          sendlist = &g.send_vertex_overlapfront_overlapfront();
-          recvlist = &g.recv_vertex_overlapfront_overlapfront();
+          sendlist = &g->send_vertex_overlapfront_overlapfront;
+          recvlist = &g->recv_vertex_overlapfront_overlapfront;
         }
       }
 
@@ -1658,7 +1547,7 @@ namespace Dune {
         // codim 0 (elements)
         sizes[g.level()][0] = 1;
         for (int i=0; i<dim; ++i)
-          sizes[g.level()][0] *= g.cell_overlap().size(i);
+          sizes[g.level()][0] *= g->cell_overlap.size(i);
 
         // codim 1 (faces)
         if (dim>1)
@@ -1666,10 +1555,10 @@ namespace Dune {
           sizes[g.level()][1] = 0;
           for (int i=0; i<dim; ++i)
           {
-            int s=g.cell_overlap().size(i)+1;
+            int s=g->cell_overlap.size(i)+1;
             for (int j=0; j<dim; ++j)
               if (j!=i)
-                s *= g.cell_overlap().size(j);
+                s *= g->cell_overlap.size(j);
             sizes[g.level()][1] += s;
           }
         }
@@ -1680,10 +1569,10 @@ namespace Dune {
           sizes[g.level()][dim-1] = 0;
           for (int i=0; i<dim; ++i)
           {
-            int s=g.cell_overlap().size(i);
+            int s=g->cell_overlap.size(i);
             for (int j=0; j<dim; ++j)
               if (j!=i)
-                s *= g.cell_overlap().size(j)+1;
+                s *= g->cell_overlap.size(j)+1;
             sizes[g.level()][dim-1] += s;
           }
         }
@@ -1691,7 +1580,7 @@ namespace Dune {
         // codim dim (vertices)
         sizes[g.level()][dim] = 1;
         for (int i=0; i<dim; ++i)
-          sizes[g.level()][dim] *= g.vertex_overlapfront().size(i);
+          sizes[g.level()][dim] *= g->vertex_overlapfront.size(i);
       }
     }
 
@@ -1708,20 +1597,20 @@ namespace Dune {
       if (cd==0)   // the elements
       {
         if (pitype<=InteriorBorder_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.cell_interior().tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_interior.tsubbegin());
         if (pitype<=All_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.cell_overlap().tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_overlap.tsubbegin());
       }
       if (cd==dim)   // the vertices
       {
         if (pitype==Interior_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.vertex_interior().tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interior.tsubbegin());
         if (pitype==InteriorBorder_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.vertex_interiorborder().tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interiorborder.tsubbegin());
         if (pitype==Overlap_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.vertex_overlap().tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlap.tsubbegin());
         if (pitype<=All_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.vertex_overlapfront().tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlapfront.tsubbegin());
       }
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }
@@ -1737,20 +1626,20 @@ namespace Dune {
       if (cd==0)   // the elements
       {
         if (pitype<=InteriorBorder_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.cell_interior().tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_interior.tsubend());
         if (pitype<=All_Partition || pitype == Ghost_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.cell_overlap().tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_overlap.tsubend());
       }
       if (cd==dim)   // the vertices
       {
         if (pitype==Interior_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.vertex_interior().tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interior.tsubend());
         if (pitype==InteriorBorder_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.vertex_interiorborder().tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interiorborder.tsubend());
         if (pitype==Overlap_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.vertex_overlap().tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlap.tsubend());
         if (pitype<=All_Partition || pitype == Ghost_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g.vertex_overlapfront().tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlapfront.tsubend());
       }
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }
@@ -1781,84 +1670,84 @@ namespace Dune {
       s << "[" << rank << "]:   " << std::endl;
       s << "[" << rank << "]:   " << "==========================================" << std::endl;
       s << "[" << rank << "]:   " << "level=" << g.level() << std::endl;
-      s << "[" << rank << "]:   " << "cell_global=" << g.cell_global() << std::endl;
-      s << "[" << rank << "]:   " << "cell_overlap=" << g.cell_overlap() << std::endl;
-      s << "[" << rank << "]:   " << "cell_interior=" << g.cell_interior() << std::endl;
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_cell_overlap_overlap().begin();
-           i!=g.send_cell_overlap_overlap().end(); ++i)
+      s << "[" << rank << "]:   " << "cell_global=" << g->cell_global << std::endl;
+      s << "[" << rank << "]:   " << "cell_overlap=" << g->cell_overlap << std::endl;
+      s << "[" << rank << "]:   " << "cell_interior=" << g->cell_interior << std::endl;
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->send_cell_overlap_overlap.begin();
+           i!=g->send_cell_overlap_overlap.end(); ++i)
       {
         s << "[" << rank << "]:    " << " s_c_o_o "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_cell_overlap_overlap().begin();
-           i!=g.recv_cell_overlap_overlap().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->recv_cell_overlap_overlap.begin();
+           i!=g->recv_cell_overlap_overlap.end(); ++i)
       {
         s << "[" << rank << "]:    " << " r_c_o_o "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_cell_interior_overlap().begin();
-           i!=g.send_cell_interior_overlap().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->send_cell_interior_overlap.begin();
+           i!=g->send_cell_interior_overlap.end(); ++i)
       {
         s << "[" << rank << "]:    " << " s_c_i_o "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_cell_overlap_interior().begin();
-           i!=g.recv_cell_overlap_interior().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->recv_cell_overlap_interior.begin();
+           i!=g->recv_cell_overlap_interior.end(); ++i)
       {
         s << "[" << rank << "]:    " << " r_c_o_i "
           << i->rank << " " << i->grid << std::endl;
       }
 
       s << "[" << rank << "]:   " << "-----------------------------------------------"  << std::endl;
-      s << "[" << rank << "]:   " << "vertex_global="         << g.vertex_global() << std::endl;
-      s << "[" << rank << "]:   " << "vertex_overlapfront="   << g.vertex_overlapfront() << std::endl;
-      s << "[" << rank << "]:   " << "vertex_overlap="        << g.vertex_overlap() << std::endl;
-      s << "[" << rank << "]:   " << "vertex_interiorborder=" << g.vertex_interiorborder() << std::endl;
-      s << "[" << rank << "]:   " << "vertex_interior="       << g.vertex_interior() << std::endl;
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_vertex_overlapfront_overlapfront().begin();
-           i!=g.send_vertex_overlapfront_overlapfront().end(); ++i)
+      s << "[" << rank << "]:   " << "vertex_global="         << g->vertex_global << std::endl;
+      s << "[" << rank << "]:   " << "vertex_overlapfront="   << g->vertex_overlapfront << std::endl;
+      s << "[" << rank << "]:   " << "vertex_overlap="        << g->vertex_overlap << std::endl;
+      s << "[" << rank << "]:   " << "vertex_interiorborder=" << g->vertex_interiorborder << std::endl;
+      s << "[" << rank << "]:   " << "vertex_interior="       << g->vertex_interior << std::endl;
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->send_vertex_overlapfront_overlapfront.begin();
+           i!=g->send_vertex_overlapfront_overlapfront.end(); ++i)
       {
         s << "[" << rank << "]:    " << " s_v_of_of "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_vertex_overlapfront_overlapfront().begin();
-           i!=g.recv_vertex_overlapfront_overlapfront().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->recv_vertex_overlapfront_overlapfront.begin();
+           i!=g->recv_vertex_overlapfront_overlapfront.end(); ++i)
       {
         s << "[" << rank << "]:    " << " r_v_of_of "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_vertex_overlap_overlapfront().begin();
-           i!=g.send_vertex_overlap_overlapfront().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->send_vertex_overlap_overlapfront.begin();
+           i!=g->send_vertex_overlap_overlapfront.end(); ++i)
       {
         s << "[" << rank << "]:    " << " s_v_o_of "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_vertex_overlapfront_overlap().begin();
-           i!=g.recv_vertex_overlapfront_overlap().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->recv_vertex_overlapfront_overlap.begin();
+           i!=g->recv_vertex_overlapfront_overlap.end(); ++i)
       {
         s << "[" << rank << "]:    " << " r_v_of_o "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_vertex_interiorborder_interiorborder().begin();
-           i!=g.send_vertex_interiorborder_interiorborder().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->send_vertex_interiorborder_interiorborder.begin();
+           i!=g->send_vertex_interiorborder_interiorborder.end(); ++i)
       {
         s << "[" << rank << "]:    " << " s_v_ib_ib "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_vertex_interiorborder_interiorborder().begin();
-           i!=g.recv_vertex_interiorborder_interiorborder().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->recv_vertex_interiorborder_interiorborder.begin();
+           i!=g->recv_vertex_interiorborder_interiorborder.end(); ++i)
       {
         s << "[" << rank << "]:    " << " r_v_ib_ib "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.send_vertex_interiorborder_overlapfront().begin();
-           i!=g.send_vertex_interiorborder_overlapfront().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->send_vertex_interiorborder_overlapfront.begin();
+           i!=g->send_vertex_interiorborder_overlapfront.end(); ++i)
       {
         s << "[" << rank << "]:    " << " s_v_ib_of "
           << i->rank << " " << i->grid << std::endl;
       }
-      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g.recv_vertex_overlapfront_interiorborder().begin();
-           i!=g.recv_vertex_overlapfront_interiorborder().end(); ++i)
+      for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->recv_vertex_overlapfront_interiorborder.begin();
+           i!=g->recv_vertex_overlapfront_interiorborder.end(); ++i)
       {
         s << "[" << rank << "]:    " << " s_v_of_ib "
           << i->rank << " " << i->grid << std::endl;
