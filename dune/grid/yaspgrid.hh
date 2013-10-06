@@ -250,12 +250,6 @@ namespace Dune {
       return _torus;
     }
 
-    //! return true if grid is periodic in given direction
-    bool periodic (int i) const
-    {
-      return _periodic[i];
-    }
-
     //! provides access to a given grid level
     class YGridLevelIterator
       : public ReservedVector<YGridLevel,32>::const_iterator
