@@ -86,7 +86,7 @@ namespace Dune {
       _it = rhs._it;
       /* _entity = i._entity
        * is done implicitely, as the entity is completely
-       * defined via the interator it belongs to
+       * defined via the iterator it belongs to
        */
       return *this;
     }
