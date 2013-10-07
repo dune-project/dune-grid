@@ -77,7 +77,7 @@ namespace Dune {
     }
 
     //! ask for level of entity
-    int level () const {return _g.level();}
+    int level () const {return _g->level();}
 
     const YaspEntityPointer&
     operator = (const YaspEntityPointer& rhs)

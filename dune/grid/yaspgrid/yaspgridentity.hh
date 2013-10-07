@@ -148,7 +148,7 @@ namespace Dune {
     {}
 
     //! level of this element
-    int level () const { return _g.level(); }
+    int level () const { return _g->level(); }
 
     //! index is unique and consecutive per level
     int index () const { return _it.superindex(); } // superindex works also for iteration over subgrids
@@ -162,7 +162,7 @@ namespace Dune {
      *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const {
-      return EntitySeed(YaspEntitySeed<0,GridImp>(_g.level(), _it.coord()));
+      return EntitySeed(YaspEntitySeed<0,GridImp>(_g->level(), _it.coord()));
     }
 
     //! return partition type attribute
@@ -224,7 +224,7 @@ namespace Dune {
     EntityPointer father () const
     {
       // check if coarse level exists
-      if (_g.level()<=0)
+      if (_g->level()<=0)
         DUNE_THROW(GridError, "tried to call father on level 0");
 
       // yes, get iterator to it
@@ -243,7 +243,7 @@ namespace Dune {
     //! returns true if father entity exists
     bool hasFather () const
     {
-      return (_g.level()>0);
+      return (_g->level()>0);
     }
 
     /*! Location of this element relative to the reference element of its father
@@ -277,12 +277,12 @@ namespace Dune {
 
     bool isLeaf() const
     {
-      return (_g.level() == _yg->maxLevel());
+      return (_g->level() == _yg->maxLevel());
     }
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
      */
-    bool isNew () const { return _yg->adaptRefCount > 0 && _yg->maxLevel() < _g.level() + _yg->adaptRefCount; }
+    bool isNew () const { return _yg->adaptRefCount > 0 && _yg->maxLevel() < _g->level() + _yg->adaptRefCount; }
 
     /**\brief Returns true, if entity might disappear during the next call to adapt()
      */
@@ -338,7 +338,7 @@ namespace Dune {
     //! Returns iterator to one past the last son
     HierarchicIterator hend (int maxlevel) const
     {
-      return YaspHierarchicIterator<GridImp>(_yg,_g,_it,_g.level());
+      return YaspHierarchicIterator<GridImp>(_yg,_g,_it,_g->level());
     }
 
   private:
@@ -367,7 +367,7 @@ namespace Dune {
 
       // encode level
       id = id << yaspgrid_level_bits;
-      id = id+PersistentIndexType(_g.level());
+      id = id+PersistentIndexType(_g->level());
 
 
       // encode coordinates
@@ -422,7 +422,7 @@ namespace Dune {
         {
           // count trailing zeros
           int zeros = 0;
-          for (int j=0; j<_g.level(); j++)
+          for (int j=0; j<_g->level(); j++)
             if (coord[i]&(1<<j))
               break;
             else
@@ -431,7 +431,7 @@ namespace Dune {
         }
 
         // determine the level of this vertex
-        int level = _g.level()-trailing;
+        int level = _g->level()-trailing;
 
         // encode codim
         PersistentIndexType id(dim);
@@ -470,7 +470,7 @@ namespace Dune {
 
         // encode level
         id = id << yaspgrid_level_bits;
-        id = id+PersistentIndexType(_g.level());
+        id = id+PersistentIndexType(_g->level());
 
         // encode coordinates
         for (int i=dim-1; i>=0; i--)
@@ -511,7 +511,7 @@ namespace Dune {
 
         // encode level
         id = id << yaspgrid_level_bits;
-        id = id+PersistentIndexType(_g.level());
+        id = id+PersistentIndexType(_g->level());
 
         // encode coordinates
         for (int i=dim-1; i>=0; i--)
@@ -774,7 +774,7 @@ namespace Dune {
     {}
 
     //! level of this element
-    int level () const {return _g.level();}
+    int level () const {return _g->level();}
 
     //! index is unique and consecutive per level
     int index () const {return _it.superindex();}
@@ -786,7 +786,7 @@ namespace Dune {
      *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const {
-      return EntitySeed(YaspEntitySeed<dim,GridImp>(_g.level(), _it.coord()));
+      return EntitySeed(YaspEntitySeed<dim,GridImp>(_g->level(), _it.coord()));
     }
 
     //! geometry of this entity
@@ -850,7 +850,7 @@ namespace Dune {
       {
         // count trailing zeros
         int zeros = 0;
-        for (int j=0; j<_g.level(); j++)
+        for (int j=0; j<_g->level(); j++)
           if (coord[i]&(1<<j))
             break;
           else
@@ -859,7 +859,7 @@ namespace Dune {
       }
 
       // determine the level of this vertex
-      int level = _g.level()-trailing;
+      int level = _g->level()-trailing;
 
       // encode codim
       PersistentIndexType id(dim);

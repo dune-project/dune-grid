@@ -208,6 +208,13 @@ namespace Dune {
     /** \brief A single grid level within a YaspGrid
      */
     struct YGridLevel {
+
+      /** \brief Level number of this level grid */
+      int level() const
+      {
+        return level_;
+      }
+
       // cell (codim 0) data
       YGrid<dim,ctype> cell_global;         // the whole cell grid on that level
       SubYGrid<dim,ctype> cell_overlap;     // we have no ghost cells, so our part is overlap completely
@@ -241,6 +248,8 @@ namespace Dune {
       // general
       YaspGrid<dim>* mg;  // each grid level knows its multigrid
       int overlap;           // in mesh cells on this level
+      /** \brief The level number within the YaspGrid level hierarchy */
+      int level_;
     };
 
     //! define types used for arguments
@@ -256,51 +265,8 @@ namespace Dune {
       return _torus;
     }
 
-    //! provides access to a given grid level
-    class YGridLevelIterator
-      : public ReservedVector<YGridLevel,32>::const_iterator
-    {
-    private:
-      int l;
-    public:
-      //! empty constructor, use with care
-      YGridLevelIterator ()
-      {}
-
-      //! make iterator pointing to level k (no check made)
-      YGridLevelIterator (const ReservedVector<YGridLevel,32>& levels, int level)
-        : ReservedVector<YGridLevel,32>::const_iterator(levels,level)
-      {
-        l=level;
-      }
-
-      //! Copy constructor
-      YGridLevelIterator (const YGridLevelIterator & it)
-        : l(it.l), ReservedVector<YGridLevel,32>::const_iterator(it)
-      {}
-
-      //! return number of this grid level
-      int level () const
-      {
-        return l;
-      }
-
-      //! Increment iterator to next finer grid level
-      YGridLevelIterator& operator++ ()
-      {
-        ReservedVector<YGridLevel,32>::const_iterator::operator++();
-        ++l;
-        return *this;
-      }
-
-      //! Increment iterator to coarser grid level
-      YGridLevelIterator& operator-- ()
-      {
-        ReservedVector<YGridLevel,32>::const_iterator::operator--();
-        --l;
-        return *this;
-      }
-    };
+    //! Iterator over the grid levels
+    typedef typename ReservedVector<YGridLevel,32>::const_iterator YGridLevelIterator;
 
     //! return iterator pointing to coarsest level
     YGridLevelIterator begin () const
@@ -339,12 +305,13 @@ namespace Dune {
      * \param s_interior  size of interior cell decomposition
      * \param overlap     to be used on this grid level
      */
-    YGridLevel makelevel (fTupel L, iTupel s, std::bitset<dim> periodic, iTupel o_interior, iTupel s_interior, int overlap)
+    YGridLevel makelevel (int level, fTupel L, iTupel s, std::bitset<dim> periodic, iTupel o_interior, iTupel s_interior, int overlap)
     {
       // first, lets allocate a new structure
       YGridLevel g;
       g.overlap = overlap;
       g.mg = this;
+      g.level_ = level;
 
       // the global cell grid
       iTupel o = iTupel(0); // logical origin is always 0, that is not a restriction
@@ -690,7 +657,7 @@ namespace Dune {
       iTupel s_interior(s);
 #endif
       // add level
-      _levels[0] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
+      _levels[0] = makelevel(0,L,s,periodic,o_interior,s_interior,overlap);
     }
 
     //! The constructor of the old MultiYGrid class
@@ -722,7 +689,7 @@ namespace Dune {
 #endif
 
       // add level
-      _levels[0] = makelevel(L,_s,periodic,o_interior,s_interior,overlap);
+      _levels[0] = makelevel(0,L,_s,periodic,o_interior,s_interior,overlap);
     }
 
     /*! Constructor
@@ -947,7 +914,7 @@ namespace Dune {
           s_interior[i] = 2*cg.cell_interior.size(i);
 
         // add level
-        _levels.push_back( makelevel(_LL,s,_periodic,o_interior,s_interior,overlap) );
+        _levels.push_back( makelevel(_levels.size(),_LL,s,_periodic,o_interior,s_interior,overlap) );
 
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
@@ -1533,42 +1500,42 @@ namespace Dune {
       for (YGridLevelIterator g=begin(); g!=end(); ++g)
       {
         // codim 0 (elements)
-        sizes[g.level()][0] = 1;
+        sizes[g->level()][0] = 1;
         for (int i=0; i<dim; ++i)
-          sizes[g.level()][0] *= g->cell_overlap.size(i);
+          sizes[g->level()][0] *= g->cell_overlap.size(i);
 
         // codim 1 (faces)
         if (dim>1)
         {
-          sizes[g.level()][1] = 0;
+          sizes[g->level()][1] = 0;
           for (int i=0; i<dim; ++i)
           {
             int s=g->cell_overlap.size(i)+1;
             for (int j=0; j<dim; ++j)
               if (j!=i)
                 s *= g->cell_overlap.size(j);
-            sizes[g.level()][1] += s;
+            sizes[g->level()][1] += s;
           }
         }
 
         // codim dim-1 (edges)
         if (dim>2)
         {
-          sizes[g.level()][dim-1] = 0;
+          sizes[g->level()][dim-1] = 0;
           for (int i=0; i<dim; ++i)
           {
             int s=g->cell_overlap.size(i);
             for (int j=0; j<dim; ++j)
               if (j!=i)
                 s *= g->cell_overlap.size(j)+1;
-            sizes[g.level()][dim-1] += s;
+            sizes[g->level()][dim-1] += s;
           }
         }
 
         // codim dim (vertices)
-        sizes[g.level()][dim] = 1;
+        sizes[g->level()][dim] = 1;
         for (int i=0; i<dim; ++i)
-          sizes[g.level()][dim] *= g->vertex_overlapfront.size(i);
+          sizes[g->level()][dim] *= g->vertex_overlapfront.size(i);
       }
     }
 
@@ -1657,7 +1624,7 @@ namespace Dune {
     {
       s << "[" << rank << "]:   " << std::endl;
       s << "[" << rank << "]:   " << "==========================================" << std::endl;
-      s << "[" << rank << "]:   " << "level=" << g.level() << std::endl;
+      s << "[" << rank << "]:   " << "level=" << g->level() << std::endl;
       s << "[" << rank << "]:   " << "cell_global=" << g->cell_global << std::endl;
       s << "[" << rank << "]:   " << "cell_overlap=" << g->cell_overlap << std::endl;
       s << "[" << rank << "]:   " << "cell_interior=" << g->cell_interior << std::endl;

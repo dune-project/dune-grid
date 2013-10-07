@@ -42,7 +42,7 @@ namespace Dune {
       _maxlevel = std::min(maxlevel,this->_g->mg->maxLevel());
 
       // if maxlevel not reached then push yourself and sons
-      if (this->_g.level()<_maxlevel)
+      if (this->_g->level()<_maxlevel)
       {
         push_sons();
       }
@@ -65,7 +65,7 @@ namespace Dune {
       if (stack.empty()) return;
 
       // if maxlevel not reached then push sons
-      if (this->_g.level()<_maxlevel)
+      if (this->_g->level()<_maxlevel)
         push_sons();
 
       // in any case pop one element
