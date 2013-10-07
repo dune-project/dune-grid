@@ -18,12 +18,10 @@ namespace Dune {
     public YaspEntityPointer<0,GridImp>
   {
     enum { dim=GridImp::dimension };
-    enum { dimworld=GridImp::dimensionworld };
-    typedef typename GridImp::ctype ctype;
   public:
     // types used from grids
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename SubYGrid<dim,typename GridImp::ctype>::TransformingSubIterator TSI;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! constructor
