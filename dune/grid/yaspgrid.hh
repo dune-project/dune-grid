@@ -845,15 +845,30 @@ namespace Dune {
 #else
       : _torus(tag,elements,defaultLoadbalancer()),
 #endif
+        _LL(L),
+        _periodic(std::bitset<dim>(0)),
+        _overlap(0),
         keep_ovlp(true),
         leafIndexSet_(*this),
         adaptRefCount(0), adaptActive(false)
     {
+      _levels.resize(1);
+
+      std::copy(elements.begin(), elements.end(), _s.begin());
+
+      // coarse cell interior grid obtained through partitioning of global grid
+      iTupel o = iTupel(0);
+      iTupel o_interior(o);
+      iTupel s_interior;
+      std::copy(elements.begin(), elements.end(), s_interior.begin());
 #if HAVE_MPI
-      MultiYGridSetup(MPI_COMM_SELF,L,elements,std::bitset<dim>(0),0);
-#else
-      MultiYGridSetup(L,elements,std::bitset<dim>(0),0);
+      double imbal = _torus.partition(_torus.rank(),o,elements,o_interior,s_interior);
+      imbal = _torus.global_max(imbal);
 #endif
+
+      // add level
+      _levels[0] = makelevel(0,L,_s,_periodic,o_interior,s_interior,0);
+
       init();
     }
 
