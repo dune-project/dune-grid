@@ -18,7 +18,6 @@
 #include <vector>
 
 // Dune includes
-#include <dune/common/misc.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/stdstreams.hh>
