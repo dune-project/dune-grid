@@ -644,7 +644,7 @@ namespace Dune {
       iTupel o_interior;
       iTupel s_interior;
       iTupel o = iTupel(0);
-      array<int,d> sArray;
+      array<int,dim> sArray;
       std::copy(s.begin(), s.end(), sArray.begin());
       double imbal = _torus.partition(_torus.rank(),o,sArray,o_interior,s_interior);
       imbal = _torus.global_max(imbal);
