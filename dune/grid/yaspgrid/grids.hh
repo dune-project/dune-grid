@@ -220,6 +220,17 @@ namespace Dune {
       return index;
     }
 
+    //! given a tupel compute its index in the lexicographic numbering
+    int index (const array<int,d>& coord) const
+    {
+      int index = (coord[d-1]-_origin[d-1]);
+
+      for (int i=d-2; i>=0; i--)
+        index = index*_size[i] + (coord[i]-_origin[i]);
+
+      return index;
+    }
+
     //! given a coordinate, return true if it is in the grid
     bool inside (const iTupel& coord) const
     {
@@ -287,6 +298,26 @@ namespace Dune {
 
       //! reinitialize iterator to given position
       void reinit (const YGrid<d,ct>& r, const iTupel& coord)
+      {
+        // copy data coming from grid to iterate over
+        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
+        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
+
+        // compute increments;
+        int inc = 1;
+        for (int i=0; i<d; ++i)
+        {
+          _increment[i] = inc;
+          inc *= r.size(i);
+        }
+
+        // initialize to given position in index set
+        for (int i=0; i<d; ++i) _coord[i] = coord[i];
+        _index = r.index(coord);
+      }
+
+      //! reinitialize iterator to given position
+      void reinit (const YGrid<d,ct>& r, const array<int,d>& coord)
       {
         // copy data coming from grid to iterate over
         for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
@@ -720,6 +751,28 @@ namespace Dune {
           _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
       }
 
+      //! Make iterator pointing to given cell in subgrid.
+      void reinit (const SubYGrid<d,ct>& r, const array<int,d>& coord)
+      {
+        YGrid<d,ct>::Iterator::reinit(r,coord);
+
+        //! store some grid information
+        for (int i=0; i<d; ++i) _size[i] = r.size(i);
+
+        // compute superincrements
+        int inc = 1;
+        for (int i=0; i<d; ++i)
+        {
+          _superincrement[i] = inc;
+          inc *= r.supersize(i);
+        }
+
+        // move superindex to first cell in subgrid
+        _superindex = 0;
+        for (int i=0; i<d; ++i)
+          _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
+      }
+
       //! Return true when two iterators over the same grid are equal (!).
       bool operator== (const SubIterator& i) const
       {
@@ -846,6 +899,15 @@ namespace Dune {
 
       //! Make iterator pointing to given cell in a grid.
       void reinit (const SubYGrid<d,ct>& r, const iTupel& coord)
+      {
+        SubIterator::reinit(r,coord);
+        for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
+        for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
+        for (int i=0; i<d; ++i) _position[i] = coord[i]*r.meshsize(i)+r.shift(i);
+      }
+
+      //! Make iterator pointing to given cell in a grid.
+      void reinit (const SubYGrid<d,ct>& r, const array<int,d>& coord)
       {
         SubIterator::reinit(r,coord);
         for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);

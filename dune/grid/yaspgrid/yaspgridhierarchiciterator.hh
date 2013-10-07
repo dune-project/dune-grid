@@ -26,16 +26,13 @@ namespace Dune {
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
-    //! define type used for coordinates in grid module
-    typedef typename YGrid<dim,ctype>::iTupel iTupel;
-
     //! constructor
     YaspHierarchicIterator (const GridImp* yg, const YGLI& g, const TSI& it, int maxlevel) :
       YaspEntityPointer<0,GridImp>(yg,g,it)
     {
       // now iterator points to current cell
       StackElem se(this->_g);
-      se.coord = this->_it.coord();
+      std::copy(this->_it.coord().begin(), this->_it.coord().end(), se.coord.begin());
       stack.push(se);
 
       // determine maximum level
@@ -87,7 +84,7 @@ namespace Dune {
 
     struct StackElem {
       YGLI g;         // grid level of the element
-      iTupel coord;   // and the coordinates
+      array<int,dim> coord;   // and the coordinates
       StackElem(YGLI gg) : g(gg) {}
     };
     std::stack<StackElem> stack;    //!< stack holding elements to be processed
