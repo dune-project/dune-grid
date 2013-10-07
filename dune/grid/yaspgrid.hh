@@ -191,17 +191,23 @@ namespace Dune {
     : public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim> >
   {
   public:
-    //! define type used for coordinates
+    //! Type used for coordinates
     typedef yaspgrid_ctype ctype;
 
-    // some data types
     struct Intersection {
-      SubYGrid<dim,ctype> grid; // the intersection as a subgrid of local grid
-      int rank;            // rank of process where other grid is stored
-      int distance;        // manhattan distance to other grid
+      /** \brief The intersection as a subgrid of the local grid */
+      SubYGrid<dim,ctype> grid;
+
+      /** \brief Rank of the process where the other grid is stored */
+      int rank;
+
+      /** \brief Manhattan distance to the other grid */
+      int distance;
     };
 
-    struct YGridLevel {        // This stores all the information on one grid level
+    /** \brief A single grid level within a YaspGrid
+     */
+    struct YGridLevel {
       // cell (codim 0) data
       YGrid<dim,ctype> cell_global;         // the whole cell grid on that level
       SubYGrid<dim,ctype> cell_overlap;     // we have no ghost cells, so our part is overlap completely
@@ -324,13 +330,15 @@ namespace Dune {
     }
 
   protected:
-    // make a new YGridLevel structure. For that we need
-    // L           size of the whole domain in each direction
-    // s           number of cells in each direction
-    // periodic    boolean indication periodicity in each direction
-    // o_interior  origin of interior (non-overlapping) cell decomposition
-    // s_interior  size of interior cell decomposition
-    // overlap     to be used on this grid level
+    /** \brief Make a new YGridLevel structure
+     *
+     * \param L           size of the whole domain in each direction
+     * \param s           number of cells in each direction
+     * \param periodic    indicate periodicity for each direction
+     * \param o_interior  origin of interior (non-overlapping) cell decomposition
+     * \param s_interior  size of interior cell decomposition
+     * \param overlap     to be used on this grid level
+     */
     YGridLevel makelevel (fTupel L, iTupel s, std::bitset<dim> periodic, iTupel o_interior, iTupel s_interior, int overlap)
     {
       // first, lets allocate a new structure
@@ -480,12 +488,14 @@ namespace Dune {
       fTupel r;
     };
 
-    // construct list of intersections with neighboring processors:
-    //   recvgrid: the grid stored in this processor
-    //   sendgrid:  the subgrid to be sent to neighboring processors
-    //   size: needed to shift local grid in periodic case
-    //   returns two lists: Intersections to be sent and Intersections to be received
-    // Note: sendgrid/recvgrid may be SubYGrids. Since intersection method is virtual it should work properly
+    /** \brief Construct list of intersections with neighboring processors
+     *
+     * \param recvgrid the grid stored in this processor
+     * \param sendgrid  the subgrid to be sent to neighboring processors
+     * \param size needed to shift local grid in periodic case
+     * \returns two lists: Intersections to be sent and Intersections to be received
+     * \note sendgrid/recvgrid may be SubYGrids. Since intersection method is virtual it should work properly
+     */
     void intersections (const SubYGrid<dim,ctype>& sendgrid, const SubYGrid<dim,ctype>& recvgrid, const iTupel& size,
                         std::deque<Intersection>& sendlist, std::deque<Intersection>& recvlist)
     {
@@ -648,7 +658,7 @@ namespace Dune {
     typedef YaspIndexSet<YaspGrid<dim>, true > LeafIndexSetType;
     typedef YaspGlobalIdSet<YaspGrid<dim> > GlobalIdSetType;
 
-    //! shorthand for base class data types
+    //! shorthand for some data types
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     typedef typename std::deque<Intersection>::const_iterator ISIT;
 
@@ -715,7 +725,7 @@ namespace Dune {
       _levels[0] = makelevel(L,_s,periodic,o_interior,s_interior,overlap);
     }
 
-    /*! Constructor for a YaspGrid, they are all forwarded to the base class
+    /*! Constructor
        @param comm MPI communicator where this mesh is distributed to
        @param L extension of the domain
        @param s number of cells on coarse mesh in each direction
@@ -749,7 +759,7 @@ namespace Dune {
     }
 
 
-    /*! Constructor for a sequential YaspGrid, they are all forwarded to the base class.
+    /*! Constructor for a sequential YaspGrid
 
        Sequential here means that the whole grid is living on one process even if your program is running
        in parallel.
@@ -785,7 +795,7 @@ namespace Dune {
       init();
     }
 
-    /*! Constructor for a YaspGrid, they are all forwarded to the base class
+    /*! Constructor
        @param comm MPI communicator where this mesh is distributed to
        @param L extension of the domain
        @param s number of cells on coarse mesh in each direction
