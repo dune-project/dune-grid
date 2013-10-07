@@ -631,9 +631,6 @@ namespace Dune {
 
     //! The constructor of the old MultiYGrid class
     void MultiYGridSetup (
-#if HAVE_MPI
-                MPI_Comm comm,
-#endif
                 fTupel L, iTupel s, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
     {
       _LL = L;
@@ -662,9 +659,6 @@ namespace Dune {
 
     //! The constructor of the old MultiYGrid class
     void MultiYGridSetup (
-#if HAVE_MPI
-      MPI_Comm comm,
-#endif
       fTupel L,
       Dune::array<int,dim> s,
       std::bitset<dim> periodic,
@@ -714,11 +708,8 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-#if HAVE_MPI
-      MultiYGridSetup(comm,L,s,std::bitset<dim>(),overlap,lb);
-#else
       MultiYGridSetup(L,s,std::bitset<dim>(),overlap,lb);
-#endif
+
       // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
       for (size_t i=0; i<dim; i++)
         this->_periodic[i] = periodic[i];
@@ -751,11 +742,8 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-#if HAVE_MPI
-      MultiYGridSetup(MPI_COMM_SELF,L,s,std::bitset<dim>(),overlap,lb);
-#else
       MultiYGridSetup(L,s,std::bitset<dim>(),overlap,lb);
-#endif
+
       // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
       for (size_t i=0; i<dim; i++)
         this->_periodic[i] = periodic[i];
@@ -785,11 +773,8 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-#if HAVE_MPI
-      MultiYGridSetup(comm,L,s,periodic,overlap,lb);
-#else
       MultiYGridSetup(L,s,periodic,overlap,lb);
-#endif
+
       init();
     }
 
@@ -820,11 +805,8 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-#if HAVE_MPI
-      MultiYGridSetup(MPI_COMM_SELF,L,s,periodic,overlap,lb);
-#else
       MultiYGridSetup(L,s,periodic,overlap,lb);
-#endif
+
       init();
     }
 
