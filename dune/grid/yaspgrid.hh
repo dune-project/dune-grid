@@ -840,10 +840,10 @@ namespace Dune {
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::array<int, dim> elements)
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,elements),
+      : _torus(MPI_COMM_SELF,tag,elements,defaultLoadbalancer()),
         ccobj(MPI_COMM_SELF),
 #else
-      : _torus(elements),
+      : _torus(tag,elements,defaultLoadbalancer()),
 #endif
         keep_ovlp(true),
         leafIndexSet_(*this),
