@@ -703,7 +703,7 @@ namespace Dune {
       : ccobj(comm),
         _torus(comm,tag,s,lb),
 #else
-        _torus(tag,s,lb),
+      :  _torus(tag,s,lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
