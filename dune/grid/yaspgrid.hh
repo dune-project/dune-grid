@@ -700,10 +700,10 @@ namespace Dune {
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(comm,tag,s,lb),
-        ccobj(comm),
+      : ccobj(comm),
+        _torus(comm,tag,s,lb),
 #else
-      : _torus(tag,s,lb),
+        _torus(tag,s,lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
@@ -1431,16 +1431,6 @@ namespace Dune {
 
   private:
 
-#if HAVE_MPI
-    CollectiveCommunication<MPI_Comm> ccobj;
-#else
-    CollectiveCommunication<YaspGrid> ccobj;
-#endif
-
-    std::vector< shared_ptr< YaspIndexSet<const YaspGrid<dim>, false > > > indexsets;
-    YaspIndexSet<const YaspGrid<dim>, true> leafIndexSet_;
-    YaspGlobalIdSet<const YaspGrid<dim> > theglobalidset;
-
     // number of boundary segments of the level 0 grid
     int nBSegments;
 
@@ -1596,12 +1586,23 @@ namespace Dune {
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }
 
+#if HAVE_MPI
+    CollectiveCommunication<MPI_Comm> ccobj;
+#else
+    CollectiveCommunication<YaspGrid> ccobj;
+#endif
+
+    Torus<dim> _torus;
+
+    std::vector< shared_ptr< YaspIndexSet<const YaspGrid<dim>, false > > > indexsets;
+    YaspIndexSet<const YaspGrid<dim>, true> leafIndexSet_;
+    YaspGlobalIdSet<const YaspGrid<dim> > theglobalidset;
+
     fTupel _LL;
     iTupel _s;
     std::bitset<dim> _periodic;
     ReservedVector<YGridLevel,32> _levels;
     int _overlap;
-    Torus<dim> _torus;
     int sizes[32][dim+1]; // total number of entities per level and codim
     bool keep_ovlp;
     int adaptRefCount;
