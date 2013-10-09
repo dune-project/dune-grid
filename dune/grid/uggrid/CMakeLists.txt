@@ -38,11 +38,10 @@ set(HEADERS
 install(FILES ${HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/uggrid)
 
-message(AUTHOR_WARNING
-  " tricks like undefAllMacros.pl don't have to be shipped, have they?
- Oliver Sander: It depends. undefAllMacros.pl creates the file ug_undefs.hh
- which contains an undef line for each macro encountered in the UG
- headers which DUNE includes.  This should be redone every time UG
- changes, and currently I do it and then check in the new ug_undefs.hh.
- An alternative would be to have the DUNE-build system call undefAllMacros
- for the UG it is configured with.  Then it needed to be shipped.")
+# tricks like undefAllMacros.pl don't have to be shipped, have they?
+# Oliver Sander: It depends. undefAllMacros.pl creates the file ug_undefs.hh
+# which contains an undef line for each macro encountered in the UG
+# headers which DUNE includes.  This should be redone every time UG
+# changes, and currently I do it and then check in the new ug_undefs.hh.
+# An alternative would be to have the DUNE-build system call undefAllMacros
+# for the UG it is configured with.  Then it needed to be shipped.")

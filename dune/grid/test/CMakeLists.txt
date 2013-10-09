@@ -131,7 +131,9 @@ set(SOURCES
   functions.hh
   gridcheck.cc
   staticcheck.hh)
-message(AUTHOR_WARNING "Make sure that ${SOURCES} are shipped")
 
-set(CLEANFILES *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log)
-message(AUTHOR_WARNING "TODO: Make sure that ${CLEANFILES} are cleaned during make clean")
+# clean up additional files during make clean. Unfortunately it is not possible with
+# cmake to use search patterns here. Automake wanted to clean the following files:
+# *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log
+# add files to the list as they appear.
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "semantic.cache;dgfparser.log")
