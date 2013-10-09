@@ -827,11 +827,11 @@ namespace Dune {
 #else
       : _torus(tag,elements,defaultLoadbalancer()),
 #endif
+        leafIndexSet_(*this),
         _LL(L),
         _periodic(std::bitset<dim>(0)),
         _overlap(0),
         keep_ovlp(true),
-        leafIndexSet_(*this),
         adaptRefCount(0), adaptActive(false)
     {
       _levels.resize(1);
