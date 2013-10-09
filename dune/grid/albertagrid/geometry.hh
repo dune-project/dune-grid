@@ -86,54 +86,6 @@ namespace Dune
 
 
 
-  // AlbertaGridCoordStorage
-  // -----------------------
-
-  template< class CoordTraits, class Topology, unsigned int dimW >
-  class AlbertaGridCornerStorage
-  {
-    typedef AlbertaGridCornerStorage< CoordTraits, Topology, dimW > This;
-
-  public:
-    static const unsigned int size = Topology::numCorners;
-
-    static const unsigned int dimWorld = dimW;
-
-    typedef typename CoordTraits::template Vector< dimWorld >::type
-    GlobalCoordinate;
-
-    template< class SubTopology >
-    struct SubStorage
-    {
-      typedef AlbertaGridCornerStorage< CoordTraits, SubTopology, dimWorld > type;
-    };
-
-  private:
-    GlobalCoordinate coords_[ size ];
-
-  public:
-    template< class CoordReader >
-    explicit AlbertaGridCornerStorage ( const CoordReader &coordReader )
-    {
-      for( unsigned int i = 0; i < size; ++i )
-        coordReader.coordinate( i, coords_[ i ] );
-    }
-
-    template< class Mapping, unsigned int codim >
-    explicit AlbertaGridCornerStorage ( const GenericGeometry::SubMappingCoords< Mapping, codim > &coords )
-    {
-      for( unsigned int i = 0; i < size; ++i )
-        coords_[ i ] = coords[ i ];
-    }
-
-    const GlobalCoordinate &operator[] ( unsigned int i ) const
-    {
-      return coords_[ i ];
-    }
-  };
-
-
-
   // AlbertaGridGeometry
   // -------------------
 
