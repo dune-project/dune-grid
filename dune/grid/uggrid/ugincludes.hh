@@ -12,7 +12,7 @@
    therein.
  */
 
-#ifdef HAVE_UG_PATCH9
+#if 1
 
 #include <ug/gm.h>
 #include <ug/std_domain.h>
@@ -48,8 +48,6 @@
 #include <rm.h>
 #if defined ModelP
 #include <parallel.h>
-#endif
-
 #endif
 
 #endif
