@@ -693,12 +693,16 @@ namespace Dune {
        @param periodic tells if direction is periodic or not
        @param overlap size of overlap on coarsest grid (same in all directions)
        @param lb pointer to an overloaded YLoadBalance instance
+
+       \deprecated Will be removed after dune-grid 2.3.
+         Use the corresponding constructor taking array<int> and std::bitset instead.
      */
     YaspGrid (Dune::MPIHelper::MPICommunicator comm,
               Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
+    DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
       : ccobj(comm),
         _torus(comm,tag,s,lb),
@@ -728,11 +732,15 @@ namespace Dune {
        @param periodic tells if direction is periodic or not
        @param overlap size of overlap on coarsest grid (same in all directions)
        @param lb pointer to an overloaded YLoadBalance instance
+
+       \deprecated Will be removed after dune-grid 2.3.
+         Use the corresponding constructor taking array<int> and std::bitset instead.
      */
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
+    DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
       : _torus(MPI_COMM_SELF,tag,s,lb),
         ccobj(MPI_COMM_SELF),
