@@ -59,6 +59,9 @@ void check_yasp(bool p0=false) {
   // check grid adaptation interface
   checkAdaptRefinement(grid);
   checkPartitionType( grid.leafView() );
+
+  // test operator<<
+  std::cout << grid << std::endl;
 }
 
 int main (int argc , char **argv) {

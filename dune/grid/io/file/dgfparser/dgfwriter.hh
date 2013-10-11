@@ -270,6 +270,7 @@ namespace Dune
     }
 
     // write all boundaries to the "boundarysegments" block
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
     gridout << std::endl << "BOUNDARYSEGMENTS" << std::endl;
     for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
     {
@@ -308,6 +309,7 @@ namespace Dune
       }
     }
     gridout << "#" << std::endl << std::endl;
+#endif // #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
 
     // add additional parameters given by the user
     gridout << addParams.str() << std::endl;
