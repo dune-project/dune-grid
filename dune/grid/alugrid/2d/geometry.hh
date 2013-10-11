@@ -4,7 +4,6 @@
 #define DUNE_ALU2DGRIDGEOMETRY_HH
 
 // Dune includes
-#include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 

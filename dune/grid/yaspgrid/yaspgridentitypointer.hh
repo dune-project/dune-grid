@@ -21,7 +21,7 @@ namespace Dune {
 
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     typedef YaspEntityPointer<codim,GridImp> EntityPointerImp;
   protected:
@@ -77,7 +77,7 @@ namespace Dune {
     }
 
     //! ask for level of entity
-    int level () const {return _g.level();}
+    int level () const {return _g->level();}
 
     const YaspEntityPointer&
     operator = (const YaspEntityPointer& rhs)
@@ -86,7 +86,7 @@ namespace Dune {
       _it = rhs._it;
       /* _entity = i._entity
        * is done implicitely, as the entity is completely
-       * defined via the interator it belongs to
+       * defined via the iterator it belongs to
        */
       return *this;
     }

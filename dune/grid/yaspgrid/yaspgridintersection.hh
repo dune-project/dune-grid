@@ -31,7 +31,7 @@ namespace Dune {
 
   public:
     // types used from grids
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
@@ -63,17 +63,17 @@ namespace Dune {
      */
     bool boundary () const
     {
-      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 < _inside.gridlevel().cell_global().min(_count/2)
+      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 < _inside.gridlevel()->cell_global.min(_count/2)
               ||
-              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 > _inside.gridlevel().cell_global().max(_count/2));
+              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 > _inside.gridlevel()->cell_global.max(_count/2));
     }
 
     //! return true if neighbor across intersection exists in this processor
     bool neighbor () const
     {
-      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 >= _inside.gridlevel().cell_overlap().min(_count/2)
+      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 >= _inside.gridlevel()->cell_overlap.min(_count/2)
               &&
-              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 <= _inside.gridlevel().cell_overlap().max(_count/2));
+              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 <= _inside.gridlevel()->cell_overlap.max(_count/2));
     }
 
     //! Yasp is always conform
@@ -97,6 +97,7 @@ namespace Dune {
       return _outside;
     }
 
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
     //! identifier for boundary segment from macro grid
     //! (attach your boundary condition as needed)
     int boundaryId() const
@@ -104,6 +105,7 @@ namespace Dune {
       if(boundary()) return indexInInside()+1;
       return 0;
     }
+#endif
 
     //! identifier for boundary segment from macro grid
     //! (attach your boundary condition as needed)
@@ -113,19 +115,19 @@ namespace Dune {
         DUNE_THROW(GridError, "called boundarySegmentIndex while boundary() == false");
       update();
       // size of local macro grid
-      const FieldVector<int, dim> & size = _inside.gridlevel().mg()->begin().cell_overlap().size();
-      const FieldVector<int, dim> & origin = _inside.gridlevel().mg()->begin().cell_overlap().origin();
+      const FieldVector<int, dim> & size = _inside.gridlevel()->mg->begin()->cell_overlap.size();
+      const FieldVector<int, dim> & origin = _inside.gridlevel()->mg->begin()->cell_overlap.origin();
       FieldVector<int, dim> sides;
       {
         for (int i=0; i<dim; i++)
         {
           sides[i] =
-            ((_inside.gridlevel().mg()->begin().cell_overlap().origin(i)
-              == _inside.gridlevel().mg()->begin().cell_global().origin(i))+
-             (_inside.gridlevel().mg()->begin().cell_overlap().origin(i) +
-                      _inside.gridlevel().mg()->begin().cell_overlap().size(i)
-                      == _inside.gridlevel().mg()->begin().cell_global().origin(i) +
-                      _inside.gridlevel().mg()->begin().cell_global().size(i)));
+            ((_inside.gridlevel()->mg->begin()->cell_overlap.origin(i)
+              == _inside.gridlevel()->mg->begin()->cell_global.origin(i))+
+             (_inside.gridlevel()->mg->begin()->cell_overlap.origin(i) +
+                      _inside.gridlevel()->mg->begin()->cell_overlap.size(i)
+                      == _inside.gridlevel()->mg->begin()->cell_global.origin(i) +
+                      _inside.gridlevel()->mg->begin()->cell_global.size(i)));
         }
       }
       // global position of the cell on macro grid

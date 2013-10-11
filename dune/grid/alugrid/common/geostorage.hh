@@ -4,7 +4,6 @@
 #define DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 
 // Dune includes
-#include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
 

@@ -58,7 +58,7 @@ namespace Dune {
       DUNE_THROW(GridError, "YaspEntity not implemented");
     }
 
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     YaspEntity (const GridImp* yg, const YGLI& g, const TSI& it)
     {
@@ -117,7 +117,7 @@ namespace Dune {
   public:
     typedef typename GridImp::ctype ctype;
 
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
 
     typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
@@ -148,7 +148,7 @@ namespace Dune {
     {}
 
     //! level of this element
-    int level () const { return _g.level(); }
+    int level () const { return _g->level(); }
 
     //! index is unique and consecutive per level
     int index () const { return _it.superindex(); } // superindex works also for iteration over subgrids
@@ -159,19 +159,21 @@ namespace Dune {
     }
 
     /** \brief Return the entity seed which contains sufficient information
-     *  to generate the entity again and uses as less memory as possible
+     *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const {
-      return EntitySeed(YaspEntitySeed<0,GridImp>(_g.level(), _it.coord()));
+      return EntitySeed(YaspEntitySeed<0,GridImp>(_g->level(), _it.coord()));
     }
 
     //! return partition type attribute
     PartitionType partitionType () const
     {
-      if (_g.cell_interior().inside(_it.coord())) return InteriorEntity;
-      if (_g.cell_overlap().inside(_it.coord())) return OverlapEntity;
+      if (_g->cell_interior.inside(_it.coord()))
+        return InteriorEntity;
+      if (_g->cell_overlap.inside(_it.coord()))
+        return OverlapEntity;
       DUNE_THROW(GridError, "Impossible GhostEntity " << _it.coord() << "\t"
-                                                      << _g.cell_interior().origin() << "/" << _g.cell_interior().size());
+                                                      << _g->cell_interior.origin() << "/" << _g->cell_interior.size());
       return GhostEntity;
     }
 
@@ -209,7 +211,7 @@ namespace Dune {
         for (int k=0; k<dim; k++)
           if (i&(1<<k)) (coord[k])++;
 
-        return YaspEntityPointer<cc,GridImp>(_yg,_g,_g.vertex_overlapfront().tsubbegin(coord));
+        return YaspEntityPointer<cc,GridImp>(_yg,_g,_g->vertex_overlapfront.tsubbegin(coord));
       }
       if (cc==0)
       {
@@ -222,11 +224,12 @@ namespace Dune {
     EntityPointer father () const
     {
       // check if coarse level exists
-      if (_g.level()<=0)
+      if (_g->level()<=0)
         DUNE_THROW(GridError, "tried to call father on level 0");
 
       // yes, get iterator to it
-      YGLI cg = _g.coarser();
+      YGLI cg = _g;
+      --cg;
 
       // coordinates of the cell
       iTupel coord = _it.coord();
@@ -234,23 +237,16 @@ namespace Dune {
       // get coordinates on next coarser level
       for (int k=0; k<dim; k++) coord[k] = coord[k]/2;
 
-      return YaspEntityPointer<0,GridImp>(_yg,cg,cg.cell_overlap().tsubbegin(coord));
+      return YaspEntityPointer<0,GridImp>(_yg,cg,cg->cell_overlap.tsubbegin(coord));
     }
 
     //! returns true if father entity exists
     bool hasFather () const
     {
-      return (_g.level()>0);
+      return (_g->level()>0);
     }
 
-    /*! Location of this element relative to the reference element element of the father.
-          This is sufficient to interpolate all dofs in conforming case.
-          Nonconforming case may require access to neighbors of father and
-          computations with local coordinates.
-          On the fly case is somewhat inefficient since dofs  are visited several times.
-          If we store interpolation matrices, this is tolerable. We assume that on-the-fly
-          implementation of numerical algorithms is only done for simple discretizations.
-          Assumes that meshes are nested.
+    /*! Location of this element relative to the reference element of its father
      */
     LocalGeometry geometryInFather () const
     {
@@ -281,12 +277,12 @@ namespace Dune {
 
     bool isLeaf() const
     {
-      return (_g.level() == _g.mg()->maxlevel());
+      return (_g->level() == _yg->maxLevel());
     }
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
      */
-    bool isNew () const { return _yg->adaptRefCount > 0 && _g.mg()->maxlevel() < _g.level() + _yg->adaptRefCount; }
+    bool isNew () const { return _yg->adaptRefCount > 0 && _yg->maxLevel() < _g->level() + _yg->adaptRefCount; }
 
     /**\brief Returns true, if entity might disappear during the next call to adapt()
      */
@@ -342,7 +338,7 @@ namespace Dune {
     //! Returns iterator to one past the last son
     HierarchicIterator hend (int maxlevel) const
     {
-      return YaspHierarchicIterator<GridImp>(_yg,_g,_it,_g.level());
+      return YaspHierarchicIterator<GridImp>(_yg,_g,_it,_g->level());
     }
 
   private:
@@ -355,7 +351,7 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get size of global grid
-      const iTupel& size =  _g.cell_global().size();
+      const iTupel& size =  _g->cell_global.size();
 
       // get coordinate correction for periodic boundaries
       int coord[dim];
@@ -371,7 +367,7 @@ namespace Dune {
 
       // encode level
       id = id << yaspgrid_level_bits;
-      id = id+PersistentIndexType(_g.level());
+      id = id+PersistentIndexType(_g->level());
 
 
       // encode coordinates
@@ -408,8 +404,10 @@ namespace Dune {
       for (int k=0; k<dim; k++)
       {
         coord[k] = _it.coord(k);
-        if (coord[k]<0) coord[k] += _g.cell_global().size(k);
-        if (coord[k]>=_g.cell_global().size(k)) coord[k] -= _g.cell_global().size(k);
+        if (coord[k]<0)
+          coord[k] += _g->cell_global.size(k);
+        if (coord[k]>=_g->cell_global.size(k))
+          coord[k] -= _g->cell_global.size(k);
       }
 
       if (cc==dim)
@@ -424,7 +422,7 @@ namespace Dune {
         {
           // count trailing zeros
           int zeros = 0;
-          for (int j=0; j<_g.level(); j++)
+          for (int j=0; j<_g->level(); j++)
             if (coord[i]&(1<<j))
               break;
             else
@@ -433,7 +431,7 @@ namespace Dune {
         }
 
         // determine the level of this vertex
-        int level = _g.level()-trailing;
+        int level = _g->level()-trailing;
 
         // encode codim
         PersistentIndexType id(dim);
@@ -472,7 +470,7 @@ namespace Dune {
 
         // encode level
         id = id << yaspgrid_level_bits;
-        id = id+PersistentIndexType(_g.level());
+        id = id+PersistentIndexType(_g->level());
 
         // encode coordinates
         for (int i=dim-1; i>=0; i--)
@@ -513,7 +511,7 @@ namespace Dune {
 
         // encode level
         id = id << yaspgrid_level_bits;
-        id = id+PersistentIndexType(_g.level());
+        id = id+PersistentIndexType(_g->level());
 
         // encode coordinates
         for (int i=dim-1; i>=0; i--)
@@ -537,7 +535,7 @@ namespace Dune {
       // get cell position relative to origin of local cell grid
       iTupel coord;
       for (int k=0; k<dim; ++k)
-        coord[k] = _it.coord(k)-_g.cell_overlap().origin(k);
+        coord[k] = _it.coord(k)-_g->cell_overlap.origin(k);
 
       if (cc==dim) // vertices
       {
@@ -548,7 +546,7 @@ namespace Dune {
         // do lexicographic numbering
         int index = coord[dim-1];
         for (int k=dim-2; k>=0; --k)
-          index = (index*(_g.cell_overlap().size(k)+1))+coord[k];
+          index = (index*(_g->cell_overlap.size(k)+1))+coord[k];
         return index;
       }
 
@@ -566,16 +564,16 @@ namespace Dune {
         int index = coord[dim-1];
         for (int k=dim-2; k>=0; --k)
           if (k==ivar)
-            index = (index*(_g.cell_overlap().size(k)+1))+coord[k]; // one more
+            index = (index*(_g->cell_overlap.size(k)+1))+coord[k]; // one more
           else
-            index = (index*(_g.cell_overlap().size(k)))+coord[k];
+            index = (index*(_g->cell_overlap.size(k)))+coord[k];
 
         // add size of all subsets for smaller directions
         for (int j=0; j<ivar; j++)
         {
-          int n=_g.cell_overlap().size(j)+1;
+          int n=_g->cell_overlap.size(j)+1;
           for (int l=0; l<dim; l++)
-            if (l!=j) n *= _g.cell_overlap().size(l);
+            if (l!=j) n *= _g->cell_overlap.size(l);
           index += n;
         }
 
@@ -609,16 +607,16 @@ namespace Dune {
         int index = coord[dim-1];
         for (int k=dim-2; k>=0; --k)
           if (k!=ifix)
-            index = (index*(_g.cell_overlap().size(k)+1))+coord[k]; // one more
+            index = (index*(_g->cell_overlap.size(k)+1))+coord[k]; // one more
           else
-            index = (index*(_g.cell_overlap().size(k)))+coord[k];
+            index = (index*(_g->cell_overlap.size(k)))+coord[k];
 
         // add size of all subsets for smaller directions
         for (int j=dim-1; j>ifix; j--)
         {
-          int n=_g.cell_overlap().size(j);
+          int n=_g->cell_overlap.size(j);
           for (int l=0; l<dim; l++)
-            if (l!=j) n *= _g.cell_overlap().size(l)+1;
+            if (l!=j) n *= _g->cell_overlap.size(l)+1;
           index += n;
         }
 
@@ -750,7 +748,7 @@ namespace Dune {
   public:
     typedef typename GridImp::ctype ctype;
 
-    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
 
     typedef typename GridImp::template Codim<dim>::Geometry Geometry;
@@ -776,7 +774,7 @@ namespace Dune {
     {}
 
     //! level of this element
-    int level () const {return _g.level();}
+    int level () const {return _g->level();}
 
     //! index is unique and consecutive per level
     int index () const {return _it.superindex();}
@@ -788,7 +786,7 @@ namespace Dune {
      *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const {
-      return EntitySeed(YaspEntitySeed<dim,GridImp>(_g.level(), _it.coord()));
+      return EntitySeed(YaspEntitySeed<dim,GridImp>(_g->level(), _it.coord()));
     }
 
     //! geometry of this entity
@@ -800,10 +798,14 @@ namespace Dune {
     //! return partition type attribute
     PartitionType partitionType () const
     {
-      if (_g.vertex_interior().inside(_it.coord())) return InteriorEntity;
-      if (_g.vertex_interiorborder().inside(_it.coord())) return BorderEntity;
-      if (_g.vertex_overlap().inside(_it.coord())) return OverlapEntity;
-      if (_g.vertex_overlapfront().inside(_it.coord())) return FrontEntity;
+      if (_g->vertex_interior.inside(_it.coord()))
+        return InteriorEntity;
+      if (_g->vertex_interiorborder.inside(_it.coord()))
+        return BorderEntity;
+      if (_g->vertex_overlap.inside(_it.coord()))
+        return OverlapEntity;
+      if (_g->vertex_overlapfront.inside(_it.coord()))
+        return FrontEntity;
       return GhostEntity;
     }
 
@@ -829,7 +831,7 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get coordinate and size of global grid
-      const iTupel& size =  _g.vertex_global().size();
+      const iTupel& size =  _g->vertex_global.size();
       int coord[dim];
 
       // correction for periodic boundaries
@@ -848,7 +850,7 @@ namespace Dune {
       {
         // count trailing zeros
         int zeros = 0;
-        for (int j=0; j<_g.level(); j++)
+        for (int j=0; j<_g->level(); j++)
           if (coord[i]&(1<<j))
             break;
           else
@@ -857,7 +859,7 @@ namespace Dune {
       }
 
       // determine the level of this vertex
-      int level = _g.level()-trailing;
+      int level = _g->level()-trailing;
 
       // encode codim
       PersistentIndexType id(dim);
