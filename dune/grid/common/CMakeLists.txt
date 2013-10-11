@@ -34,8 +34,4 @@ set(HEADERS
 
 add_subdirectory(test EXCLUDE_FROM_ALL)
 
-set(NOINST_DATA cube-to-tet-6.png)
-
-message(AUTHOR_WARNING "Check wether ${NOINST_DATA} ends up in the tarball")
-
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/common)

@@ -506,6 +506,10 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 template < int dim >
 bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, int maxLevel, int minelement)
 {
+  // Do nothing if we are on a single process
+  if (comm().size()==1)
+    return true;
+
   /** \todo Test for valid arguments */
   std::string argStrings[4];
   std::stringstream numberAsAscii[4];
@@ -533,6 +537,8 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
     DUNE_THROW(GridError, "UG" << dim << "d::LBCommand returned error code " << errCode);
 
   // Renumber everything.
+  // Note: this must not be called when on a single process, because it renumbers the zero-level
+  // elements and vertices.
   setIndices(true, NULL);
 
   return true;

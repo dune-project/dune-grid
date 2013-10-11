@@ -113,9 +113,9 @@ int main (int argc, char** argv) try
     typedef GridType::LevelIndexSet LevelIndexSetType;
 
     Dune::FieldVector<ctype, dim> L(1.0);
-    Dune::FieldVector<int, dim> s(1);
-    Dune::FieldVector<bool, dim> periodic(false);
-    GridType grid(L,s,periodic,0);
+    Dune::array<int, dim> s;
+    std::fill(s.begin(), s.end(), 1);
+    GridType grid(L,s);
 
     // create hybrid grid
     grid.mark(1, * grid.leafbegin<0>());

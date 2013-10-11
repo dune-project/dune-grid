@@ -32,7 +32,7 @@ if(NOT (X11_FOUND AND OPENGL_FOUND))
     _GRAPE_HEADER_USABLE
     )
   return()
-endif(NOT (X11_FOUND AND OpenGL_FOUND))
+endif(NOT (X11_FOUND AND OPENGL_FOUND))
 # find header in user supplied directory
 find_path(GRAPE_INCLUDE_DIR grape.h
   PATHS ${GRAPE_PREFIX}
@@ -83,3 +83,10 @@ find_package_handle_standard_args(
 )
 set(HAVE_GRAPE ${GRAPE_FOUND})
 mark_as_advanced(GRAPE_INCLUDE_DIR GRAPE_LIBRARY _GRAPE_LIB_FUNCTIONAL _GRAPE_HEADER_USABLE)
+
+#add all grape related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_grape_flags
+if(GRAPE_FOUND)
+  foreach(dir ${GRAPE_INCLUDE_DIR})
+    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
+  endforeach()
+endif()

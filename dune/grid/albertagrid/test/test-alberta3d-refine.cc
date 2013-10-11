@@ -77,6 +77,7 @@ public:
     vid[0] = 0; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
     vid[0] = 0; vid[1] = 1; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
 
+    gf.markLongestEdge();
     return Dune::shared_ptr<Grid>(gf.createGrid());
   }
 };
@@ -115,6 +116,7 @@ public:
     // tet at vertex 6
     vid[0] = 2; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
 
+    gf.markLongestEdge();
     return Dune::shared_ptr<Grid>(gf.createGrid());
   }
 };

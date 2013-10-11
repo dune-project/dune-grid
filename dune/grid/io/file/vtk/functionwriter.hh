@@ -30,7 +30,7 @@ namespace Dune
     //! Base class for function writers
     template<typename Cell_>
     class FunctionWriterBase {
-      typedef typename Cell_::ctype DF;
+      typedef typename Cell_::Geometry::ctype DF;
       static const unsigned mydim = Cell_::mydimension;
       typedef ReferenceElements<DF, mydim> Refelems;
 
@@ -167,11 +167,11 @@ namespace Dune
       //! write at the given position
       virtual void write(const typename Base::Cell& cell,
                          const typename Base::Domain& xl) {
-        FieldVector<typename Base::Cell::ctype, Base::Cell::dimensionworld> xg
+        FieldVector<typename Base::Cell::Geometry::ctype, Base::Cell::Geometry::coorddimension> xg
           = cell.geometry().global(xl);
-        for(unsigned d = 0; d < 3 && d < Base::Cell::dimensionworld; ++d)
+        for(unsigned d = 0; d < 3 && d < Base::Cell::Geometry::coorddimension; ++d)
           arraywriter->write(xg[d]);
-        for(unsigned d = Base::Cell::dimensionworld; d < 3; ++d)
+        for(unsigned d = Base::Cell::Geometry::coorddimension; d < 3; ++d)
           arraywriter->write(0);
       }
       //! signal end of writing

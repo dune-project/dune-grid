@@ -3,7 +3,6 @@
 #ifndef DUNE_ALBERTA_ALGEBRA_HH
 #define DUNE_ALBERTA_ALGEBRA_HH
 
-#include <dune/common/misc.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 
@@ -40,9 +39,9 @@ namespace Dune
     template< class K, int m >
     inline static K determinant ( const FieldMatrix< K, 1, m > &matrix )
     {
-      K sum = SQR( matrix[ 0 ][ 0 ] );
+      K sum = matrix[ 0 ][ 0 ] * matrix[ 0 ][ 0 ];
       for( int i = 1; i < m; ++i )
-        sum += SQR( matrix[ 0 ][ i ] );
+        sum += matrix[ 0 ][ i ] * matrix[ 0 ][ i ];
       return sqrt( sum );
     }
 
@@ -64,7 +63,7 @@ namespace Dune
       const K tmpA = matrix[ 0 ].two_norm2();
       const K tmpB = matrix[ 1 ].two_norm2();
       const K tmpC = matrix[ 0 ] * matrix[ 1 ];
-      return sqrt( tmpA * tmpB - SQR( tmpC ) );
+      return sqrt( tmpA * tmpB - tmpC * tmpC );
     }
 
     template< class K >
@@ -120,7 +119,7 @@ namespace Dune
       const K tmpA = matrix[ 0 ].two_norm2();
       const K tmpB = matrix[ 1 ].two_norm2();
       const K tmpC = matrix[ 0 ] * matrix[ 1 ];
-      const K detSqr = tmpA * tmpB - SQR( tmpC );
+      const K detSqr = tmpA * tmpB - tmpC * tmpC;
       const K invDetSqr = K( 1 ) / detSqr;
       for( int i = 0; i < m; ++i )
       {

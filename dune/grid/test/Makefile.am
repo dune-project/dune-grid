@@ -204,6 +204,7 @@ SOURCES = basicunitcube.hh                      \
           checkindexset.cc                      \
           checkintersectionit.cc                \
           checkiterators.cc                     \
+          checkjacobians.cc                     \
           checkpartition.cc                     \
           checktwists.cc                        \
           functions.hh                          \

@@ -6,7 +6,6 @@
 #include <vector>
 #include <list>
 
-#include <dune/common/misc.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/tuples.hh>
 
