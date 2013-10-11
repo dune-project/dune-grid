@@ -253,18 +253,26 @@ int main (int argc , char **argv) try
   //   Test whether I can create a grid with explict boundary segment ordering,
   //   but not parametrization functions (only 2d, so far)
   // ////////////////////////////////////////////////////////////////////////////
-
+#ifdef ModelP
+  {  // Force destruction of test grid right after the next test,
+     // because for parallel UG there can be only one (2d-)grid at once.
+#endif
   Dune::UGGrid<2> gridWithOrderedBoundarySegments;
   makeHalfCircleQuad(gridWithOrderedBoundarySegments, true, false);
 
   gridWithOrderedBoundarySegments.globalRefine(1);
   gridcheck(gridWithOrderedBoundarySegments);
-
+#ifdef ModelP
+  }
+#endif
   // ////////////////////////////////////////////////////////////////////////
   //   Check whether geometryInFather returns equal results with and
   //   without parametrized boundaries
   // ////////////////////////////////////////////////////////////////////////
 
+  // Only the sequential UG can provide more than one 2d- or 3d-grid at once.
+  // Therefore we do not perform the following test for parallel UGGrid.
+#if ! defined ModelP
   Dune::UGGrid<2> gridWithParametrization, gridWithoutParametrization;
 
   // make grids
@@ -297,7 +305,7 @@ int main (int argc , char **argv) try
     }
 
   }
-
+#endif
   // ////////////////////////////////////////////////////////////////////////
   //   Check whether copies of elements have the same global ID
   // ////////////////////////////////////////////////////////////////////////

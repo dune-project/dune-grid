@@ -13,13 +13,10 @@ namespace Dune
   /**
      @brief Wrapper class for entities
 
-
-     Template parameters are:
-
-     - <tt>cd</tt> Codimension of the entity
-     - <tt>dim</tt> Dimension of the grid
-     - <tt>GridImp</tt> Type that is a model of Dune::Grid
-     - <tt>EntityImp</tt> Class template that is a model of Dune::Entity
+     \tparam cd Codimension of the entity
+     \tparam dim Dimension of the grid
+     \tparam GridImp Type that is a model of Dune::Grid
+     \tparam EntityImp Class template that is a model of Dune::Entity
 
 
      <H3>Engine Concept</H3>
@@ -109,13 +106,11 @@ namespace Dune
       //! \brief Dimensionality of the reference element of the entity.
       mydimension=dim-cd
     };
-    enum {
-      //! \brief Know the dimension of world.
-      dimensionworld=GridImp::dimensionworld
-    };
+    //! \brief Know the dimension of world.
+    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
 
     //! @brief coordinate type of the Grid
-    typedef typename GridImp::ctype ctype;
+    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
     //@}
 
 
@@ -169,20 +164,10 @@ namespace Dune
     //@}
 
   protected:
-    typedef typename remove_const<GridImp>::type mutableGridImp;
-
-    //===========================================================
-    /** @name Protected methods
-     */
-    //@{
-    //===========================================================
 
     // need to make copy constructor of EntityPointer work for any iterator
-    //friend class Dune::EntityPointer<GridImp,
-    //                                 typename GridImp::GridFamily::Traits::template Codim<cd>::EntityPointerImpl>;
     template< class, class > friend class Dune::EntityPointer;
 
-  protected:
     /** hide copy constructor */
     Entity(const Entity& rhs) : realEntity(rhs.realEntity) {}
     /** hide assignment operator */
@@ -190,11 +175,15 @@ namespace Dune
       realEntity = rhs.realEntity;
       return *this;
     }
-    //@}
+
   };
 
   /**
      @brief Template specialization of Dune::Entity for Elements (codim==0)
+
+     \tparam dim Dimension of the grid
+     \tparam GridImp Type that is a model of Dune::Grid
+     \tparam EntityImp Class template that is a model of Dune::Entity
 
      @see Dune::Entity (general version) for the full documentation
 
@@ -230,8 +219,6 @@ namespace Dune
 
   protected:
     Implementation realEntity;
-
-    typedef typename remove_const<GridImp>::type mutableGridImp;
 
   public:
 
@@ -287,12 +274,11 @@ namespace Dune
       /** \brief Know dimension of the entity */
       mydimension=dim
     };
-    enum {
-      //! Know the world dimension
-      dimensionworld=GridImp::dimensionworld
-    };
+    //! Know the world dimension
+    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
+
     //! Type used for coordinates
-    typedef typename GridImp::ctype ctype;
+    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
     //@}
 
 
@@ -534,26 +520,17 @@ namespace Dune
 
 
   protected:
-    //===========================================================
-    /** @name Protected methods
-     */
-    //@{
-    //===========================================================
-
     // need to make copy constructor of EntityPointer work for any iterator
-    //friend class Dune::EntityPointer<GridImp,
-    //                                 typename GridImp::GridFamily::Traits::template Codim<0>::EntityPointerImpl>;
     template< class, class > friend class Dune::EntityPointer;
 
-  protected:
     /** hide copy constructor */
     Entity(const Entity& rhs) : realEntity(rhs.realEntity) {}
-    /** hide assignement operator */
+    /** hide assignment operator */
     Entity & operator = (const Entity& rhs) {
       realEntity = rhs.realEntity;
       return *this;
     }
-    //@}
+
   };
 
 
@@ -575,17 +552,17 @@ namespace Dune
     //! know your own codimension
     enum { codimension=cd };
 
-    //! know your own dimension
+    //! Dimension of the grid
     enum { dimension=dim };
 
     /** \brief Know dimension of the entity */
     enum { mydimension=dim-cd };
 
     //! know your own dimension of world
-    enum { dimensionworld=GridImp::dimensionworld };
+    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
 
     //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
+    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
 
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
@@ -628,17 +605,17 @@ namespace Dune
     //! know your own codimension
     enum { codimension=0 };
 
-    //! know your own dimension
+    //! Dimension of the grid
     enum { dimension=dim };
 
     /** \brief Know dimension of the entity */
     enum { mydimension=dim };
 
     //! know your own dimension of world
-    enum { dimensionworld=GridImp::dimensionworld };
+    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
 
     //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
+    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
 
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;

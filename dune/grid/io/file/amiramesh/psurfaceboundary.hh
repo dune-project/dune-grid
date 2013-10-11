@@ -10,6 +10,12 @@
 
 #if HAVE_PSURFACE
 #include <psurface/PSurface.h>
+#include "psurface/AmiraMeshIO.h"
+
+#if HAVE_AMIRAMESH
+#include <amiramesh/AmiraMesh.h>
+#endif
+
 
 namespace Dune {
 
@@ -92,6 +98,31 @@ namespace Dune {
     PSURFACE_NAMESPACE PSurface<dim,float>* getPSurfaceObject()
     {
       return psurface_.get();
+    }
+
+    /** \brief Read a PSurface boundary description from a file
+     *
+     * The file format is determined automatically.  Currently, only AmiraMesh
+     * is supported.
+     */
+    static shared_ptr<PSurfaceBoundary<dim> > read(const std::string& filename)
+    {
+#if HAVE_AMIRAMESH
+      std::auto_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
+
+      if (!am.get())
+        DUNE_THROW(IOError, "An error has occured while reading " << filename);
+
+      PSURFACE_NAMESPACE PSurface<dim,float>* newDomain
+        = (PSURFACE_NAMESPACE PSurface<dim,float>*) PSURFACE_NAMESPACE AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
+
+      if (!newDomain)
+        DUNE_THROW(IOError, "An error has occured while reading " << filename);
+
+      return make_shared<PSurfaceBoundary<dim> >(newDomain);
+#else
+      DUNE_THROW(IOError, "The given file is not in a supported format!");
+#endif
     }
 
   private:

@@ -76,6 +76,9 @@ try {
   assert(quadrilateralGrid->size(0) == numCubes2d);
 
   gridcheck(*quadrilateralGrid);
+#ifdef ModelP  // parallel UGGrid can only have one grid at a time
+  quadrilateralGrid.reset();
+#endif
 #else
   std::cout << "WARNING: 2d cube grids not tested because no suitable grid implementation is available!" << std::endl;
 #endif
@@ -93,6 +96,9 @@ try {
   assert(triangleGrid->size(0) == 2*numCubes2d);    // each cube gets split into 2 triangles
 
   gridcheck(*triangleGrid);
+#ifdef ModelP  // parallel UGGrid can only have one grid at a time
+  triangleGrid.reset();
+#endif
 #else
   std::cout << "WARNING: 2d simplicial grids not tested because no suitable grid implementation is available!" << std::endl;
 #endif
@@ -118,6 +124,9 @@ try {
   assert(hexahedralGrid->size(0) == numCubes3d);
 
   gridcheck(*hexahedralGrid);
+#ifdef ModelP  // parallel UGGrid can only have one grid at a time
+  hexahedralGrid.reset();
+#endif
 #else
   std::cout << "WARNING: 3d cube grids not tested because no suitable grid implementation is available!" << std::endl;
 #endif
@@ -134,6 +143,9 @@ try {
   assert(tetrahedralGrid->size(0) == 6*numCubes3d);    // each cube gets split into 6 tetrahedra
 
   gridcheck(*tetrahedralGrid);
+#ifdef ModelP  // parallel UGGrid can only have one grid at a time
+  tetrahedralGrid.reset();
+#endif
 #else
   std::cout << "WARNING: 3d simplicial grids not tested because no suitable grid implementation is available!" << std::endl;
 #endif

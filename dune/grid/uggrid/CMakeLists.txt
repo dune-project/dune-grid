@@ -11,23 +11,9 @@ if(UG_FOUND)
     uggridhieriterator.cc)
 endif(UG_FOUND)
 
-set(HEADERCHECK_IGNORE
-  uggridentity.hh
-  uggridentitypointer.hh
-  uggridentityseed.hh
-  uggridfactory.hh
-  uggridgeometry.hh
-  uggridhieriterator.hh
-  uggridindexsets.hh
-  uggridleafiterator.hh
-  uggridleveliterator.hh
-  uggridlocalgeometry.hh
-  uggridrenumberer.hh
-  uggridintersections.hh
-  uggridintersectioniterators.hh
-  ugincludes.hh
-  uglbgatherscatter.hh
-  ugwrapper.hh)
+exclude_all_but_from_headercheck(
+  boundaryextractor.hh
+  ug_undefs.hh)
 
 set(HEADERS
   uggridfactory.hh
@@ -45,16 +31,17 @@ set(HEADERS
   uggridleafiterator.hh
   uggridrenumberer.hh
   ug_undefs.hh
+  uglbgatherscatter.hh
+  ugmessagebuffer.hh
   ugwrapper.hh)
 
 install(FILES ${HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/uggrid)
 
-message(AUTHOR_WARNING
-  " tricks like undefAllMacros.pl don't have to be shipped, have they?
- Oliver Sander: It depends. undefAllMacros.pl creates the file ug_undefs.hh
- which contains an undef line for each macro encountered in the UG
- headers which DUNE includes.  This should be redone every time UG
- changes, and currently I do it and then check in the new ug_undefs.hh.
- An alternative would be to have the DUNE-build system call undefAllMacros
- for the UG it is configured with.  Then it needed to be shipped.")
+# tricks like undefAllMacros.pl don't have to be shipped, have they?
+# Oliver Sander: It depends. undefAllMacros.pl creates the file ug_undefs.hh
+# which contains an undef line for each macro encountered in the UG
+# headers which DUNE includes.  This should be redone every time UG
+# changes, and currently I do it and then check in the new ug_undefs.hh.
+# An alternative would be to have the DUNE-build system call undefAllMacros
+# for the UG it is configured with.  Then it needed to be shipped.")

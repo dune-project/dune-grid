@@ -425,7 +425,7 @@ namespace Dune
       return asImp().template id<cc>(e);
     }
 
-    /** \brief Get id of subentity i of codim cc of a codim 0 entity.
+    /** \brief Get id of subentity i of co-dimension codim of a co-dimension 0 entity.
      */
     IdType subId (const typename remove_const<GridImp>::type::
                   Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
