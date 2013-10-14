@@ -742,8 +742,8 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
     DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,s,lb),
-        ccobj(MPI_COMM_SELF),
+      : ccobj(MPI_COMM_SELF),
+        _torus(MPI_COMM_SELF,tag,s,lb),
 #else
       : _torus(tag,s,lb),
 #endif
@@ -773,8 +773,8 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(comm,tag,s,lb),
-        ccobj(comm),
+      : ccobj(comm),
+        _torus(comm,tag,s,lb),
 #else
       : _torus(tag,s,lb),
 #endif
