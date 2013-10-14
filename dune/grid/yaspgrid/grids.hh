@@ -223,7 +223,7 @@ namespace Dune {
       int index = (coord[d-1]-_origin[d-1]);
 
       for (int i=d-2; i>=0; i--)
-        index = index*_size[i] + (coord[i]-_origin[i]);
+        index = index*size(i) + (coord[i]-_origin[i]);
 
       return index;
     }
@@ -582,9 +582,9 @@ namespace Dune {
     s << e.origin(d-1) << "]x[";
     for (int i=0; i<d-1; i++) s << e.size(i) << ",";
     s << e.size(d-1) << "]";
-    s << " h=[";
-    for (int i=0; i<d-1; i++) s << e.meshsize(i) << ",";
-    s << e.meshsize(d-1) << "]";
+//     s << " h=[";
+//     for (int i=0; i<d-1; i++) s << e.meshsize(i) << ",";
+//     s << e.meshsize(d-1) << "]";
     s << " r=[";
     for (int i=0; i<d-1; i++) s << e.shift(i) << ",";
     s << e.shift(d-1) << "]";
@@ -1037,12 +1037,20 @@ namespace Dune {
       }
 
       //! Make iterator pointing to given cell in a grid.
-      void reinit (const SubYGrid<d,ct>& r, const array<int,d>& coord)
+      void reinit (const SubYGrid<d,ct>& r, const std::array<int,d>& coord)
       {
         SubIterator::reinit(r,coord);
-        for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-        for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-        for (int i=0; i<d; ++i) _position[i] = coord[i]*r.meshsize(i)+r.shift(i);
+        _grid = &r;
+        for (int i=0; i<d; ++i)
+        {
+          if (!_grid->empty())
+            _begin[i] = _grid->getCoords(i)[0];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
+          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]];
+          if ((this->_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i]] - _grid->getCoords(i)[coord[i] - this->_origin[i]]);
+        }
       }
 
       //! Increment iterator to next cell with position.

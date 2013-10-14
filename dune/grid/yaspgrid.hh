@@ -296,6 +296,40 @@ namespace Dune {
       return _torus;
     }
 
+    //! return number of cells on finest level in given direction on all processors
+    template<int codim>
+    int globalSize(int i) const
+    {
+      return levelSize<codim>(maxLevel(),i);
+    }
+
+    //! return number of cells on finest level on all processors
+    template<int codim>
+    iTupel globalSize() const
+    {
+      return levelSize<codim>(maxLevel());
+    }
+
+    //! return size of the grid in codim codim on level l in direction i
+    template<int codim>
+    int levelSize(int l, int i) const
+    {
+      int result = _coarseSize[i] * (1 << l);
+      if (codim == dim)
+        result++;
+      return result;
+    }
+
+    //! return size vector of the grid in codim codim on level l
+    template<int codim>
+    iTupel levelSize(int l) const
+    {
+      iTupel s;
+      for (int i=0; i<dim; ++i)
+        s[i] = levelSize<codim>(l,i);
+      return s;
+    }
+
     //! Iterator over the grid levels
     typedef typename ReservedVector<YGridLevel,32>::const_iterator YGridLevelIterator;
 
@@ -336,7 +370,7 @@ namespace Dune {
      * \param s_interior  size of interior cell decomposition
      * \param overlap     to be used on this grid level
      */
-    YGridLevel makelevel (int level, fTupel L, iTupel s, std::bitset<dim> periodic, iTupel o_interior, iTupel s_interior, int overlap)
+    YGridLevel makelevel (int level, Dune::array<std::vector<ctype>,dim> coords, std::bitset<dim> periodic, iTupel o_interior, int overlap)
     {
       // first, lets allocate a new structure
       YGridLevel g;
@@ -344,128 +378,126 @@ namespace Dune {
       g.mg = this;
       g.level_ = level;
 
-      // the global cell grid
-      iTupel o = iTupel(0); // logical origin is always 0, that is not a restriction
-      fTupel h;
-      fTupel r;
-      for (int i=0; i<dim; i++) h[i] = L[i]/s[i]; // the mesh size in each direction
-      for (int i=0; i<dim; i++) r[i] = 0.5*h[i];  // the shift for cell centers
-      g.cell_global = YGrid<dim,ctype>(o,s,h,r);     // this is the global cell grid
+      // r_i = 0.5, because we are interested in cell centers. Multiplication with h_i happens later on.
+      fTupel r(0.5);
 
-      // extend the cell interior grid by overlap considering periodicity
+      // determine origin of the grid with overlap and store whether an overlap area exists in direction i.
+      Dune::FieldVector<bool,dim> ovlp_low(false);
+      Dune::FieldVector<bool,dim> ovlp_up(false);
+
       iTupel o_overlap;
-      iTupel s_overlap;
       for (int i=0; i<dim; i++)
       {
+        //in the periodic case there is always overlap
         if (periodic[i])
         {
-          // easy case, extend by 2 overlaps in total
-          o_overlap[i] = o_interior[i]-overlap;      // Note: origin might be negative now
-          s_overlap[i] = s_interior[i]+2*overlap;    // Note: might be larger than global size
+          o_overlap[i] = o_interior[i]-overlap;
+          ovlp_low[i] = true;
+          ovlp_up[i] = true;
         }
         else
         {
-          // nonperiodic case, intersect with global size
-          int min = std::max(0,o_interior[i]-overlap);
-          int max = std::min(s[i]-1,o_interior[i]+s_interior[i]-1+overlap);
-          o_overlap[i] = min;
-          s_overlap[i] = max-min+1;
+          //check lower boundary
+          if (o_interior[i] - overlap < 0)
+            o_overlap[i] = 0;
+          else
+          {
+            o_overlap[i] = o_interior[i] - overlap;
+            ovlp_low[i] = true;
+          }
+
+          //check upper boundary
+          if (o_overlap[i] + coords[i].size() - 1 < globalSize<0>(i))
+            ovlp_up[i] = true;
         }
       }
-      g.cell_overlap = SubYGrid<dim,ctype>(YGrid<dim,ctype>(o_overlap,s_overlap,h,r));
+
+      //build the cell grid with overlap
+      g.cell_overlap = SubYGrid<dim,ctype>(YGrid<dim,ctype>(o_overlap, coords, r));
 
       // now make the interior grid a subgrid of the overlapping grid
-      iTupel offset;
-      for (int i=0; i<dim; i++) offset[i] = o_interior[i]-o_overlap[i];
-      g.cell_interior = SubYGrid<dim,ctype>(o_interior,s_interior,offset,s_overlap,h,r);
+      iTupel sizeInterior;
+      for (int i=0; i<dim; i++)
+      {
+        sizeInterior[i] = coords[i].size() - 1;
+        if (ovlp_low[i])
+          sizeInterior[i] -= overlap;
+        if (ovlp_up[i])
+          sizeInterior[i] -= overlap;
+      }
+      g.cell_interior = SubYGrid<dim,ctype>(o_interior, sizeInterior, g.cell_overlap);
 
       // compute cell intersections
-      intersections(g.cell_overlap,g.cell_overlap,g.cell_global.size(),g.send_cell_overlap_overlap,g.recv_cell_overlap_overlap);
-      intersections(g.cell_interior,g.cell_overlap,g.cell_global.size(),g.send_cell_interior_overlap,g.recv_cell_overlap_interior);
+      intersections(g.cell_overlap,g.cell_overlap,g.send_cell_overlap_overlap,g.recv_cell_overlap_overlap);
+      intersections(g.cell_interior,g.cell_overlap,g.send_cell_interior_overlap,g.recv_cell_overlap_interior);
 
-      // now we can do the vertex grids. They are derived completely from the cell grids
-      iTupel o_vertex_global, s_vertex_global;
-      for (int i=0; i<dim; i++) r[i] = 0.0;  // the shift for vertices is zero, and the mesh size is same as for cells
+      // the shift for the vertex grids is zero, this also manages the size increase by 1
+      for (int i=0; i<dim; i++)
+        r[i] = 0.0;
 
-      // first let's make the global grid
-      for (int i=0; i<dim; i++) o_vertex_global[i] = g.cell_global.origin(i);
-      for (int i=0; i<dim; i++) s_vertex_global[i] = g.cell_global.size(i)+1; // one more vertices than cells ...
-      g.vertex_global = YGrid<dim,ctype>(o_vertex_global,s_vertex_global,h,r);
-
-      // now the local grid stored in this processor. All other grids are subgrids of this
+      // now the vertex grid stored in this processor. All other vertex grids are subgrids of this
       iTupel o_vertex_overlapfront;
-      iTupel s_vertex_overlapfront;
-      for (int i=0; i<dim; i++) o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
-      for (int i=0; i<dim; i++) s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1; // one more vertices than cells ...
-      g.vertex_overlapfront = SubYGrid<dim,ctype>(YGrid<dim,ctype>(o_vertex_overlapfront,s_vertex_overlapfront,h,r));
+      for (int i=0; i<dim; i++)
+        o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
+      g.vertex_overlapfront = SubYGrid<dim,ctype>(YGrid<dim,ctype>(o_vertex_overlapfront,coords,r));
 
       // now overlap only (i.e. without front), is subgrid of overlapfront
       iTupel o_vertex_overlap;
       iTupel s_vertex_overlap;
       for (int i=0; i<dim; i++)
       {
-        o_vertex_overlap[i] = g.cell_overlap.origin(i);
-        s_vertex_overlap[i] = g.cell_overlap.size(i)+1;
-
-        if (!periodic[i] && g.cell_overlap.origin(i)>g.cell_global.origin(i))
+        o_vertex_overlap[i] = o_vertex_overlapfront[i];
+        s_vertex_overlap[i] = g.vertex_overlapfront.size(i);
+        if (ovlp_low[i])
         {
-          // not at the lower boundary
-          o_vertex_overlap[i] += 1;
-          s_vertex_overlap[i] -= 1;
+          s_vertex_overlap[i]--;
+          o_vertex_overlap[i]++;
         }
-
-        if (!periodic[i] && g.cell_overlap.origin(i)+g.cell_overlap.size(i)<g.cell_global.origin(i)+g.cell_global.size(i))
-        {
-          // not at the upper boundary
-          s_vertex_overlap[i] -= 1;
-        }
-
-
-        offset[i] = o_vertex_overlap[i]-o_vertex_overlapfront[i];
+        if (ovlp_up[i])
+          s_vertex_overlap[i]--;
       }
-      g.vertex_overlap = SubYGrid<dim,ctype>(o_vertex_overlap,s_vertex_overlap,offset,s_vertex_overlapfront,h,r);
+      g.vertex_overlap = SubYGrid<dim,ctype>(o_vertex_overlap, s_vertex_overlap, g.vertex_overlapfront);
 
       // now interior with border
       iTupel o_vertex_interiorborder;
       iTupel s_vertex_interiorborder;
-      for (int i=0; i<dim; i++) o_vertex_interiorborder[i] = g.cell_interior.origin(i);
-      for (int i=0; i<dim; i++) s_vertex_interiorborder[i] = g.cell_interior.size(i)+1;
-      for (int i=0; i<dim; i++) offset[i] = o_vertex_interiorborder[i]-o_vertex_overlapfront[i];
-      g.vertex_interiorborder = SubYGrid<dim,ctype>(o_vertex_interiorborder,s_vertex_interiorborder,offset,s_vertex_overlapfront,h,r);
-
-      // now only interior
-      iTupel o_vertex_interior;
-      iTupel s_vertex_interior;
       for (int i=0; i<dim; i++)
       {
-        o_vertex_interior[i] = g.cell_interior.origin(i);
-        s_vertex_interior[i] = g.cell_interior.size(i)+1;
-
-        if (!periodic[i] && g.cell_interior.origin(i)>g.cell_global.origin(i))
+        o_vertex_interiorborder[i] = o_vertex_overlapfront[i];
+        s_vertex_interiorborder[i] = g.vertex_overlapfront.size(i);
+        if (ovlp_low[i])
         {
-          // not at the lower boundary
-          o_vertex_interior[i] += 1;
-          s_vertex_interior[i] -= 1;
+          s_vertex_interiorborder[i] -= overlap;
+          o_vertex_interiorborder[i] += overlap;
         }
-
-        if (!periodic[i] && g.cell_interior.origin(i)+g.cell_interior.size(i)<g.cell_global.origin(i)+g.cell_global.size(i))
-        {
-          // not at the upper boundary
-          s_vertex_interior[i] -= 1;
-        }
-
-        offset[i] = o_vertex_interior[i]-o_vertex_overlapfront[i];
+        if (ovlp_up[i])
+          s_vertex_interiorborder[i] -= overlap;
       }
-      g.vertex_interior = SubYGrid<dim,ctype>(o_vertex_interior,s_vertex_interior,offset,s_vertex_overlapfront,h,r);
+      g.vertex_interiorborder = SubYGrid<dim,ctype>(o_vertex_interiorborder,s_vertex_interiorborder,g.vertex_overlapfront);
+
+      // now only interior
+      iTupel o_vertex_interior(o_vertex_interiorborder);
+      iTupel s_vertex_interior(s_vertex_interiorborder);
+      for (int i=0; i<dim; i++)
+      {
+        if (ovlp_low[i])
+        {
+          o_vertex_interior[i] = o_vertex_interior[i] + 1;
+          s_vertex_interior[i] = s_vertex_interior[i] - 1;
+        }
+        if (ovlp_up[i])
+          s_vertex_interior[i] = s_vertex_interior[i] - 1;
+      }
+      g.vertex_interior = SubYGrid<dim,ctype>(o_vertex_interior, s_vertex_interior, g.vertex_overlapfront);
 
       // compute vertex intersections
-      intersections(g.vertex_overlapfront,g.vertex_overlapfront,g.cell_global.size(),
+      intersections(g.vertex_overlapfront,g.vertex_overlapfront,
                     g.send_vertex_overlapfront_overlapfront,g.recv_vertex_overlapfront_overlapfront);
-      intersections(g.vertex_overlap,g.vertex_overlapfront,g.cell_global.size(),
+      intersections(g.vertex_overlap,g.vertex_overlapfront,
                     g.send_vertex_overlap_overlapfront,g.recv_vertex_overlapfront_overlap);
-      intersections(g.vertex_interiorborder,g.vertex_interiorborder,g.cell_global.size(),
+      intersections(g.vertex_interiorborder,g.vertex_interiorborder,
                     g.send_vertex_interiorborder_interiorborder,g.recv_vertex_interiorborder_interiorborder);
-      intersections(g.vertex_interiorborder,g.vertex_overlapfront,g.cell_global.size(),
+      intersections(g.vertex_interiorborder,g.vertex_overlapfront,
                     g.send_vertex_interiorborder_overlapfront,g.recv_vertex_overlapfront_interiorborder);
 
       // return the whole thing
@@ -478,11 +510,11 @@ namespace Dune {
         : origin(0), size(0), h(0.0), r(0.0)
       {}
       mpifriendly_ygrid (const YGrid<dim,ctype>& grid)
-        : origin(grid.origin()), size(grid.size()), h(grid.meshsize()), r(grid.shift())
+        : origin(grid.origin()), size(Dune::template sizeArray<ctype,dim>(grid.getCoords(),grid.shift())), h(grid.shift()), r(grid.shift())
       {}
       iTupel origin;
       iTupel size;
-      fTupel h;
+      fTupel h; //this is kept here only to leave mpifriendly_ygrid untouched.
       fTupel r;
     };
 
@@ -490,13 +522,14 @@ namespace Dune {
      *
      * \param recvgrid the grid stored in this processor
      * \param sendgrid  the subgrid to be sent to neighboring processors
-     * \param size needed to shift local grid in periodic case
      * \returns two lists: Intersections to be sent and Intersections to be received
      * \note sendgrid/recvgrid may be SubYGrids. Since intersection method is virtual it should work properly
      */
-    void intersections (const SubYGrid<dim,ctype>& sendgrid, const SubYGrid<dim,ctype>& recvgrid, const iTupel& size,
+    void intersections (const SubYGrid<dim,ctype>& sendgrid, const SubYGrid<dim,ctype>& recvgrid,
                         std::deque<Intersection>& sendlist, std::deque<Intersection>& recvlist)
     {
+      iTupel size = this->template globalSize<0>();
+
       // the exchange buffers
       std::vector<YGrid<dim,ctype> > send_recvgrid(_torus.neighbors());
       std::vector<YGrid<dim,ctype> > recv_recvgrid(_torus.neighbors());
@@ -519,7 +552,7 @@ namespace Dune {
         iTupel delta = i.delta();        // delta to neighbor
         iTupel nb = coord;               // the neighbor
         for (int k=0; k<dim; k++) nb[k] += delta[k];
-        iTupel v = iTupel(0);                    // grid movement
+        iTupel v(0);                    // grid movement
 
         for (int k=0; k<dim; k++)
         {
@@ -539,17 +572,16 @@ namespace Dune {
           }
           // neither might be true, then v=0
         }
-
         // store moved grids in send buffers
         if (!skip)
         {
-          send_sendgrid[i.index()] = sendgrid.move(v);
-          send_recvgrid[i.index()] = recvgrid.move(v);
+          //send_sendgrid[i.index()] = sendgrid.move(v); //TODO laesst sich auskommentieren so lange non-periodic
+          //send_recvgrid[i.index()] = recvgrid.move(v);
         }
         else
         {
-          send_sendgrid[i.index()] = YGrid<dim,ctype>(iTupel(0),iTupel(0),fTupel(0.0),fTupel(0.0));
-          send_recvgrid[i.index()] = YGrid<dim,ctype>(iTupel(0),iTupel(0),fTupel(0.0),fTupel(0.0));
+          send_sendgrid[i.index()] = YGrid<dim,ctype>();
+          send_recvgrid[i.index()] = YGrid<dim,ctype>();
         }
       }
 
@@ -587,7 +619,7 @@ namespace Dune {
         // what must be sent to this neighbor
         Intersection send_intersection;
         mpifriendly_ygrid yg = mpifriendly_recv_recvgrid[i.index()];
-        recv_recvgrid[i.index()] = YGrid<dim,ctype>(yg.origin,yg.size,yg.h,yg.r);
+        recv_recvgrid[i.index()] = SubYGrid<dim,ctype>(yg.origin,yg.size,yg.r);
         send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
         send_intersection.rank = i.rank();
         send_intersection.distance = i.distance();
@@ -595,7 +627,7 @@ namespace Dune {
 
         Intersection recv_intersection;
         yg = mpifriendly_recv_sendgrid[i.index()];
-        recv_sendgrid[i.index()] = YGrid<dim,ctype>(yg.origin,yg.size,yg.h,yg.r);
+        recv_sendgrid[i.index()] = SubYGrid<dim,ctype>(yg.origin,yg.size,yg.r);
         recv_intersection.grid = recvgrid.intersection(recv_sendgrid[i.index()]);
         recv_intersection.rank = i.rank();
         recv_intersection.distance = i.distance();
@@ -622,10 +654,8 @@ namespace Dune {
         for (int i=0; i<dim; i++)
         {
           sides[i] =
-            ((MultiYGrid<dim,ctype>::begin().cell_overlap().origin(i)
-              == 0)+
-             (MultiYGrid<dim,ctype>::begin().cell_overlap().origin(i) +
-                    MultiYGrid<dim,ctype>::begin().cell_overlap().size(i)
+            ((begin()->cell_overlap.origin(i) == 0)+
+             (begin()->cell_overlap.origin(i) + begin()->cell_overlap.size(i)
                     == this->template levelSize<0>(0,i)));
         }
       }
@@ -636,7 +666,7 @@ namespace Dune {
         for (int l=0; l<dim; l++)
         {
           if (l==k) continue;
-          offset *= begin().cell_overlap().size(l);
+          offset *= begin()->cell_overlap.size(l);
         }
         nBSegments += sides[k]*offset;
       }
@@ -663,29 +693,14 @@ namespace Dune {
 
     //! The constructor of the old MultiYGrid class
     void MultiYGridSetup (
-                Dune::array<std::vector<ct>,d> coords, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
+                Dune::array<std::vector<ctype>,dim> coords, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
     {
       _periodic = periodic;
       _levels.resize(1);
       _overlap = overlap;
 
-      // coarse cell interior  grid obtained through partitioning of global grid
-#if HAVE_MPI
-      iTupel o_interior;
-      iTupel s_interior;
-      iTupel o = iTupel(0);
-      array<int,dim> sArray;
-      std::copy(s.begin(), s.end(), sArray.begin());
-      double imbal = _torus.partition(_torus.rank(),o,sArray,o_interior,s_interior);
-      imbal = _torus.global_max(imbal);
-#else
-      iTupel o = iTupel(0);
-      iTupel o_interior(o);
-      iTupel s_interior(s);
-#endif
-
-            //determine sizes of vector to correctly construct torus structure and store for later size requests
-      for (int i=0; i<d; i++)
+      //determine sizes of vector to correctly construct torus structure and store for later size requests
+      for (int i=0; i<dim; i++)
         _coarseSize[i] = coords[i].size() - 1;
 
       iTupel o(0);
@@ -697,15 +712,15 @@ namespace Dune {
       imbal = _torus.global_max(imbal);
 #endif
 
-      Dune::array<std::vector<ct>,d> newcoords;
+      Dune::array<std::vector<ctype>,dim> newcoords;
 
       // find the relevant part of the coords vector for this processor and copy it to newcoords
-      for (int i=0; i<d; ++i)
+      for (int i=0; i<dim; ++i)
       {
         //expand the coord vectors in the periodic case
         if (periodic[i])
         {
-          const ct avg = 0.5 * (coords[i].back() - coords[i][coords[i].size()-2] + coords[i][1] - coords[i][0]);
+          const ctype avg = 0.5 * (coords[i].back() - coords[i][coords[i].size()-2] + coords[i][1] - coords[i][0]);
           const int size = coords[i].size();
           coords[i].resize(coords[i].size()+2*overlap);
           std::copy(coords[i].begin(),coords[i].end(),coords[i].begin()+overlap);
@@ -717,10 +732,10 @@ namespace Dune {
         }
 
         //define iterators on coords that specify the coordinate range to be used
-        typename std::vector<ct>::iterator begin = coords[i].begin() + o_interior[i];
+        typename std::vector<ctype>::iterator begin = coords[i].begin() + o_interior[i];
         if (periodic[i])
           begin = begin + overlap;
-        typename std::vector<ct>::iterator end = begin + s_interior[i] + 1;
+        typename std::vector<ctype>::iterator end = begin + s_interior[i] + 1;
 
         //check whether we are at the physical boundary
         if (((periodic[i]) && (o_interior[i] - overlap <=0)) || (o_interior[i] - overlap > 0))
@@ -756,9 +771,9 @@ namespace Dune {
     DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
       : ccobj(comm),
-        _torus(comm,tag,Dune::sizeArray<ct,d>(coordVector(L,s),fTupel(0.5)),lb),
+        _torus(comm,tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
 #else
-      :  _torus(tag,Dune::sizeArray<ct,d>(coordVector(L,s),fTupel(0.5)),lb),
+      :  _torus(tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
@@ -794,9 +809,9 @@ namespace Dune {
     DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
       : ccobj(MPI_COMM_SELF),
-        _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ct,d>(coordVector(L,s),fTupel(0.5)),lb),
+        _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
 #else
-      : _torus(tag,Dune::sizeArray<ct,d>(coordVector(L,s),fTupel(0.5)),lb),
+      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
@@ -825,9 +840,9 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
       : ccobj(comm),
-        _torus(comm,tag,Dune::sizeArray<ct,d>(coordVector(L,s),fTupel(0.5)),lb),
+        _torus(comm,tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
 #else
-      : _torus(tag,Dune::sizeArray<ct,d>(coordVector(L,s),fTupel(0.5)),lb),
+      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
@@ -856,15 +871,15 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ct,d>(coordVector(L,s),fTupel(0.5)),lb),
+      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
         ccobj(MPI_COMM_SELF),
 #else
-      : _torus(tag,Dune::sizeArray<ct,d>(coordVector(L,s),fTupel(0.5)),lb),
+      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector<ctype,dim>(L,s),fTupel(0.5)),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(L,s,periodic,overlap,lb);
+      MultiYGridSetup(coordVector<ctype,dim>(L,s),periodic,overlap,lb);
 
       init();
     }
@@ -881,10 +896,10 @@ namespace Dune {
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::array<int, dim> elements)
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ct,d>(coordVector(L,elements),fTupel(0.5)),defaultLoadbalancer()),
+      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ctype,dim>(coordVector(L,elements),fTupel(0.5)),defaultLoadbalancer()),
         ccobj(MPI_COMM_SELF),
 #else
-      : _torus(tag,Dune::sizeArray<ct,d>(coordVector(L,elements),fTupel(0.5)),defaultLoadbalancer()),
+      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector(L,elements),fTupel(0.5)),defaultLoadbalancer()),
 #endif
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
@@ -923,7 +938,6 @@ namespace Dune {
       : _torus(tag,coords,defaultLoadbalancer()),
 #endif
         leafIndexSet_(*this),
-        _LL(L),
         _periodic(std::bitset<dim>(0)),
         _overlap(0),
         keep_ovlp(true),
@@ -931,20 +945,57 @@ namespace Dune {
     {
       _levels.resize(1);
 
-      std::copy(elements.begin(), elements.end(), _s.begin());
+      //determine sizes of vector to correctly construct torus structure and store for later size requests
+      for (int i=0; i<dim; i++)
+        _coarseSize[i] = coords[i].size() - 1;
 
-      // coarse cell interior grid obtained through partitioning of global grid
-      iTupel o = iTupel(0);
+      iTupel o(0);
       iTupel o_interior(o);
-      iTupel s_interior;
-      std::copy(elements.begin(), elements.end(), s_interior.begin());
+      iTupel s_interior(_coarseSize);
+
 #if HAVE_MPI
-      double imbal = _torus.partition(_torus.rank(),o,elements,o_interior,s_interior);
+      double imbal = _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
       imbal = _torus.global_max(imbal);
 #endif
 
+      Dune::array<std::vector<ctype>,dim> newcoords;
+
+      // find the relevant part of the coords vector for this processor and copy it to newcoords
+      for (int i=0; i<dim; ++i)
+      {
+        //expand the coord vectors in the periodic case
+        if (_periodic[i])
+        {
+          const ctype avg = 0.5 * (coords[i].back() - coords[i][coords[i].size()-2] + coords[i][1] - coords[i][0]);
+          const int size = coords[i].size();
+          coords[i].resize(coords[i].size()+2*_overlap);
+          std::copy(coords[i].begin(),coords[i].end(),coords[i].begin()+_overlap);
+          for (int j=0; j<_overlap; j++)
+          {
+            coords[i][j] = coords[i][_overlap] - (_overlap-j)*avg;
+            coords[i][_overlap+size+j] = coords[i][_overlap+size-1] + (j+1)*avg;
+          }
+        }
+
+        //define iterators on coords that specify the coordinate range to be used
+        typename std::vector<ctype>::iterator begin = coords[i].begin() + o_interior[i];
+        if (_periodic[i])
+          begin = begin + _overlap;
+        typename std::vector<ctype>::iterator end = begin + s_interior[i] + 1;
+
+        //check whether we are at the physical boundary
+        if (((_periodic[i]) && (o_interior[i] - _overlap <=0)) || (o_interior[i] - _overlap > 0))
+          begin = begin - _overlap;
+        if (((_periodic[i]) && (o_interior[i] + s_interior[i] + _overlap >= _coarseSize[i])) || (o_interior[i] + s_interior[i] + _overlap < _coarseSize[i]))
+          end = end + _overlap;
+
+        //copy this part in the new coord vector
+        newcoords[i].resize(end-begin);
+        std::copy(begin, end, newcoords[i].begin());
+      }
+
       // add level
-      _levels[0] = makelevel(0,L,_s,_periodic,o_interior,s_interior,0);
+      _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
 
       init();
     }
@@ -961,13 +1012,71 @@ namespace Dune {
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(comm,coords,periodic,overlap,lb), ccobj(comm),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+      : _torus(comm,tag,coords,defaultLoadbalancer()),
+        ccobj(comm),
 #else
-      : YMG(coords,periodic,overlap,lb),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+      : _torus(tag,coords,defaultLoadbalancer()),
 #endif
+        leafIndexSet_(*this),
+        _periodic(std::bitset<dim>(0)),
+        _overlap(overlap),
+        keep_ovlp(true),
+        adaptRefCount(0), adaptActive(false)
     {
+      _levels.resize(1);
+
+      //determine sizes of vector to correctly construct torus structure and store for later size requests
+      for (int i=0; i<dim; i++)
+        _coarseSize[i] = coords[i].size() - 1;
+
+      iTupel o(0);
+      iTupel o_interior(o);
+      iTupel s_interior(_coarseSize);
+
+#if HAVE_MPI
+      double imbal = _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
+      imbal = _torus.global_max(imbal);
+#endif
+
+      Dune::array<std::vector<ctype>,dim> newcoords;
+
+      // find the relevant part of the coords vector for this processor and copy it to newcoords
+      for (int i=0; i<dim; ++i)
+      {
+        //expand the coord vectors in the periodic case
+        if (_periodic[i])
+        {
+          const ctype avg = 0.5 * (coords[i].back() - coords[i][coords[i].size()-2] + coords[i][1] - coords[i][0]);
+          const int size = coords[i].size();
+          coords[i].resize(coords[i].size()+2*_overlap);
+          std::copy(coords[i].begin(),coords[i].end(),coords[i].begin()+_overlap);
+          for (int j=0; j<_overlap; j++)
+          {
+            coords[i][j] = coords[i][_overlap] - (_overlap-j)*avg;
+            coords[i][_overlap+size+j] = coords[i][_overlap+size-1] + (j+1)*avg;
+          }
+        }
+
+        //define iterators on coords that specify the coordinate range to be used
+        typename std::vector<ctype>::iterator begin = coords[i].begin() + o_interior[i];
+        if (_periodic[i])
+          begin = begin + _overlap;
+        typename std::vector<ctype>::iterator end = begin + s_interior[i] + 1;
+
+        //check whether we are at the physical boundary
+        if (((_periodic[i]) && (o_interior[i] - _overlap <=0)) || (o_interior[i] - _overlap > 0))
+          begin = begin - _overlap;
+        if (((_periodic[i]) && (o_interior[i] + s_interior[i] + _overlap >= _coarseSize[i])) || (o_interior[i] + s_interior[i] + _overlap < _coarseSize[i]))
+          end = end + _overlap;
+
+        //copy this part in the new coord vector
+        newcoords[i].resize(end-begin);
+        std::copy(begin, end, newcoords[i].begin());
+      }
+
+      // add level
+      _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
+
       init();
     }
 
@@ -983,15 +1092,73 @@ namespace Dune {
      */
     YaspGrid (Dune::array<std::vector<ctype>, dim> coords,
               std::bitset<dim> periodic, int overlap,
-              const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : YMG(MPI_COMM_SELF,coords,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+      : _torus(comm,tag,coords,defaultLoadbalancer()),
+        ccobj(comm),
 #else
-      : YMG(coords,periodic,overlap,lb),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+      : _torus(tag,coords,defaultLoadbalancer()),
 #endif
+        leafIndexSet_(*this),
+        _periodic(std::bitset<dim>(0)),
+        _overlap(overlap),
+        keep_ovlp(true),
+        adaptRefCount(0), adaptActive(false)
     {
+      _levels.resize(1);
+
+      //determine sizes of vector to correctly construct torus structure and store for later size requests
+      for (int i=0; i<dim; i++)
+        _coarseSize[i] = coords[i].size() - 1;
+
+      iTupel o(0);
+      iTupel o_interior(o);
+      iTupel s_interior(_coarseSize);
+
+#if HAVE_MPI
+      double imbal = _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
+      imbal = _torus.global_max(imbal);
+#endif
+
+      Dune::array<std::vector<ctype>,dim> newcoords;
+
+      // find the relevant part of the coords vector for this processor and copy it to newcoords
+      for (int i=0; i<dim; ++i)
+      {
+        //expand the coord vectors in the periodic case
+        if (_periodic[i])
+        {
+          const ctype avg = 0.5 * (coords[i].back() - coords[i][coords[i].size()-2] + coords[i][1] - coords[i][0]);
+          const int size = coords[i].size();
+          coords[i].resize(coords[i].size()+2*_overlap);
+          std::copy(coords[i].begin(),coords[i].end(),coords[i].begin()+_overlap);
+          for (int j=0; j<_overlap; j++)
+          {
+            coords[i][j] = coords[i][_overlap] - (_overlap-j)*avg;
+            coords[i][_overlap+size+j] = coords[i][_overlap+size-1] + (j+1)*avg;
+          }
+        }
+
+        //define iterators on coords that specify the coordinate range to be used
+        typename std::vector<ctype>::iterator begin = coords[i].begin() + o_interior[i];
+        if (_periodic[i])
+          begin = begin + _overlap;
+        typename std::vector<ctype>::iterator end = begin + s_interior[i] + 1;
+
+        //check whether we are at the physical boundary
+        if (((_periodic[i]) && (o_interior[i] - _overlap <=0)) || (o_interior[i] - _overlap > 0))
+          begin = begin - _overlap;
+        if (((_periodic[i]) && (o_interior[i] + s_interior[i] + _overlap >= _coarseSize[i])) || (o_interior[i] + s_interior[i] + _overlap < _coarseSize[i]))
+          end = end + _overlap;
+
+        //copy this part in the new coord vector
+        newcoords[i].resize(end-begin);
+        std::copy(begin, end, newcoords[i].begin());
+      }
+
+      // add level
+      _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
+
       init();
     }
 
@@ -1036,23 +1203,60 @@ namespace Dune {
         YGridLevel& cg = _levels[maxLevel()];
 
         // compute size of new global grid
-        iTupel s;
-        for (int i=0; i<dim; i++)
-          s[i] = 2*cg.cell_global.size(i);
+        Dune::array<std::vector<ctype>,dim> newcoords;
+        for (int i=0; i<dim; ++i)
+        {
+          // resize coord vector to the correct new size
+          int newsize = 2*cg.cell_overlap.getCoords(i).size() - 1;
+          if (!keep_ovlp)
+          {
+            if (cg.cell_overlap.origin(i) > 0)
+              newsize -= cg.overlap;
+            if (cg.cell_overlap.max(i) + 1 < this->template globalSize<0>(i))
+              newsize -= cg.overlap;
+          }
+          newcoords[i].resize(newsize);
 
-        // compute overlap
+          // get iterator to the first element of the old coordinate vector to be used
+          typename std::vector<ctype>::const_iterator it = cg.cell_overlap.getCoords(i).begin();
+          typename std::vector<ctype>::const_iterator end = cg.cell_overlap.getCoords(i).end()-1;
+          typename std::vector<ctype>::iterator iit = newcoords[i].begin()-1;
+
+          // treat alternative refinement in the beginning
+          if (!keep_ovlp)
+          {
+            if (cg.cell_overlap.origin(i) > 0)
+            {
+              it += cg.overlap/2;
+              if (cg.overlap%2)
+              *(++iit) = (*it + *(++it)) / 2.;
+            }
+            if (cg.cell_overlap.max(i) + 1 < this->template globalSize<0>(i))
+              end -= cg.overlap/2;
+          }
+
+          // fill the new vector with old values and averages
+          for (;it != end;)
+          {
+            *(++iit) = *it;
+            *(++iit) = (*it + *(++it)) / 2.;
+          }
+
+          // determine whether one value is missing
+          if (++iit != newcoords[i].end())
+            *iit = *it;
+        }
+
+        //determine new overlap
         int overlap = (keep_ovlp) ? 2*cg.overlap : cg.overlap;
 
-        // the cell interior grid obtained from coarse cell interior grid
+        //determine new origin
         iTupel o_interior;
-        iTupel s_interior;
         for (int i=0; i<dim; i++)
           o_interior[i] = 2*cg.cell_interior.origin(i);
-        for (int i=0; i<dim; i++)
-          s_interior[i] = 2*cg.cell_interior.size(i);
 
         // add level
-        _levels.push_back( makelevel(_levels.size(),_LL,s,_periodic,o_interior,s_interior,overlap) );
+        _levels.push_back( makelevel(_levels.size(),newcoords,_periodic,o_interior,overlap) );
 
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
@@ -1742,6 +1946,7 @@ namespace Dune {
     fTupel _LL;
     iTupel _s;
     std::bitset<dim> _periodic;
+    iTupel _coarseSize;
     ReservedVector<YGridLevel,32> _levels;
     int _overlap;
     int sizes[32][dim+1]; // total number of entities per level and codim

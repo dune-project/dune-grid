@@ -351,7 +351,7 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get size of global grid
-      const iTupel& size =  _g.mg()->template levelSize<0>(_g.level());
+      const iTupel& size =  _g->mg->template levelSize<0>(_g->level());
 
       // get coordinate correction for periodic boundaries
       int coord[dim];
@@ -405,9 +405,9 @@ namespace Dune {
       {
         coord[k] = _it.coord(k);
         if (coord[k]<0)
-          coord[k] += _g.mg()->template levelSize<0>(_g.level(), k);
-        if (coord[k]>=_g.mg()->template levelSize<0>(_g.level(),k))
-          coord[k] -= _g.mg()->template levelSize<0>(_g.level(),k);
+          coord[k] += _g->mg->template levelSize<0>(_g->level(), k);
+        if (coord[k]>=_g->mg->template levelSize<0>(_g->level(),k))
+          coord[k] -= _g->mg->template levelSize<0>(_g->level(),k);
       }
 
       if (cc==dim)
@@ -831,7 +831,7 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get coordinate and size of global grid //TODO this implements global vertex size
-      iTupel size =  _g.mg()->template levelSize<dim>(_g.level());
+      iTupel size =  _g->mg->template levelSize<dim>(_g->level());
 
       int coord[dim];
 
