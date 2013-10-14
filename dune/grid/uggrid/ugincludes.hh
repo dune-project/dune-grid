@@ -12,7 +12,7 @@
    therein.
  */
 
-#if 1
+#ifdef HAVE_UG_PATCH9
 
 #include <ug/gm.h>
 #include <ug/std_domain.h>
