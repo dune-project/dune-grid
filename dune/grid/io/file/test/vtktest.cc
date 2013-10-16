@@ -122,7 +122,7 @@ void vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
   std::copy(n, n+dim, s.begin());
 
   Dune::YaspGrid<dim> g(mpiHelper.getCommunicator(), L, s,
-                        std::bitset<dim>(0), 0);
+                        std::bitset<dim>(), 0);
   g.globalRefine(1);
 
   doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::conforming );

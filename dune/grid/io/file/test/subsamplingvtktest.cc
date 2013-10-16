@@ -95,7 +95,7 @@ void vtkCheck(int* n, double* h)
   std::copy(h, h+dim, L.begin());
   Dune::array<int, dim> s;
   std::copy(n, n+dim, s.begin());
-  std::bitset<dim> periodic(0);
+  std::bitset<dim> periodic;
 
   Dune::YaspGrid<dim> g(
 #if HAVE_MPI
