@@ -1218,7 +1218,7 @@ namespace Dune {
       typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
 
       /** \brief The type of the entity seed of this codim.*/
-      typedef Dune::EntitySeed<EntitySeedImp<cd, const GridImp> > EntitySeed;
+      typedef Dune::EntitySeed<const GridImp, EntitySeedImp<cd, const GridImp> > EntitySeed;
 
       /**
        * \brief Traits associated with a specific grid partition type.

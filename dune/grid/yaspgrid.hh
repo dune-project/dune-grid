@@ -837,7 +837,6 @@ namespace Dune {
 #endif
         leafIndexSet_(*this),
         _LL(L),
-        _periodic(std::bitset<dim>(0)),
         _overlap(0),
         keep_ovlp(true),
         adaptRefCount(0), adaptActive(false)

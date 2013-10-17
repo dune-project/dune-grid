@@ -29,7 +29,7 @@ void check_yasp(bool p0=false) {
   Dune::array<int,dim> s;
   std::fill(s.begin(), s.end(), 2);
   s[0] = 6;
-  std::bitset<dim> p(0);
+  std::bitset<dim> p;
   p[0] = p0;
   int overlap = 1;
 

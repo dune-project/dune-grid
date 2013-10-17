@@ -123,7 +123,7 @@ try {
     typedef YaspGrid<2> GridType;
     Dune::FieldVector<double,2> Len; Len = 1.0;
     Dune::array<int,2> s = {2,6};
-    std::bitset<2> p(0);
+    std::bitset<2> p;
     int overlap = 1;
     GridType grid(Len,s,p,overlap);
     std::cout << "Testing YaspGrid" << std::endl;

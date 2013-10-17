@@ -9,10 +9,15 @@ set(ALBERTA_DIR "" CACHE FILEPATH "Root directory of Alberta installation.")
 set(ALBERTA_EXTRA_LIBS "ltdl;m" CACHE FILEPATH "Extra libraries needed by alberta for linking.")
 
 # look for header alberta/alberta.h
-find_path(ALBERTA_INCLUDE_DIR name alberta/alberta.h PATHS ${ALBERTA_DIR}
+find_path(ALBERTA_INCLUDE_DIR
+  NAMES alberta/alberta.h
+  PATHS ${ALBERTA_DIR}
   PATH_SUFFIXES alberta include NO_DEFAULT_PATH
   DOC "Include path of Alberta")
-find_path(ALBERTA_INCLUDE_DIR name alberta/alberta.h PATHS /usr/local /opt
+find_path(ALBERTA_INCLUDE_DIR
+  NAMES
+  alberta/alberta.h
+  PATHS /usr/local /opt
   PATH_SUFFIXES alberta)
 
 if(NOT ALBERTA_INCLUDE_DIR)
