@@ -1,0 +1,168 @@
+* Coloring
+  Purpose of coloring here is to to distribute work to threads in such a
+  manner that many threads can operate concurrently without stepping on each
+  other's toes.  Simple partitioning is not enough, since thread A may need to
+  update data on the boundary, and thus update dofs "belonging" to thread B,
+  or dofs with shared ownership.  Coloring attempts to solve this by grouping
+  the partitions into colors, such that two partitions of the same color do
+  not touch (for some definition of "touch").
+
+* Challenges
+  The coloring/partitioning algorithm should be quite simple.  It does not
+  need to find a perfect result, it just needs to be reasonable.  It must
+  however deal with certain requirements:
+  - It should be reasonably parallelizable,
+  - It must deal with localized masses,
+  - It should not result in too many colors,
+  - It must have the potential to deal with overlap.
+
+* Tripartit Algorithm
+  This is an algorithm I pulled out of thin air after realizing that
+  bipartition would result in a general graph coloring problem and
+  partitioning in as many slices as possible in one direction would not fare
+  well with localized masses, and would probably not be parallelizable.
+
+** Algorithm Overview
+   Hmm.  If I do tri-partitioning instead of bi-partitioning I might get
+   somwhere.  Lets say I have a domain like this:
+ 
+     : |                 A                 |
+ 
+   This domain starts out as one color "A".  First Tri-partition would result
+   in
+ 
+     : |     A     |     B     |     A     |
+ 
+   i.e. I added one color "B" in the middle.  Lets assume the partition in the
+   middle can/must be further subdivided, then I end up with
+ 
+     : |     A     | B | A | B |     A     |
+ 
+   I.e. I can refine my partitioning towards regions with more weight.  The
+   beauty of this is that this works in two (and more dimensions) as well.  In
+   2D this may look like this:
+ 
+     : +--------------------------------------------+
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                     A0                     |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : |                                            |
+     : +--------------------------------------------+
+   
+   First step is tripartit partitioning in x-direction:
+ 
+     : +--------------+--------------+--------------+
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |      A0      |      B0      |      A0      |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : |              |              |              |
+     : +--------------+--------------+--------------+
+   
+   Then in y-direction:
+ 
+     : +--------------+--------------+--------------+
+     : |              |              |              |
+     : |              |              |              |
+     : |      A0      |      B0      |      A0      |
+     : |              |              |              |
+     : |              |              |              |
+     : +--------------+--------------+--------------+
+     : |              |              |              |
+     : |              |              |              |
+     : |      A1      |      B1      |      A1      |
+     : |              |              |              |
+     : |              |              |              |
+     : +--------------+--------------+--------------+
+     : |              |              |              |
+     : |              |              |              |
+     : |      A0      |      B0      |      A0      |
+     : |              |              |              |
+     : |              |              |              |
+     : +--------------+--------------+--------------+
+   
+   Then again in x-direction, locally where it is needed/possible:
+ 
+     : +--------------+--------------+--------------+
+     : |              |              |              |
+     : |              |              |              |
+     : |      A0      |      B0      |      A0      |
+     : |              |              |              |
+     : |              |              |              |
+     : +--------------+----+----+----+--------------+
+     : |              |    |    |    |              |
+     : |              |    |    |    |              |
+     : |      A1      | B1 | A1 | B1 |      A1      |
+     : |              |    |    |    |              |
+     : |              |    |    |    |              |
+     : +--------------+----+----+----+----+----+----+
+     : |              |    |    |    |    |    |    |
+     : |              |    |    |    |    |    |    |
+     : |      A0      | B0 | A0 | B0 | A0 | B0 | A0 |
+     : |              |    |    |    |    |    |    |
+     : |              |    |    |    |    |    |    |
+     : +--------------+----+----+----+----+----+----+
+   
+   And again in y-direction.
+ 
+     : +--------------+--------------+--------------+
+     : |              |              |              |
+     : |              |              |              |
+     : |      A0      |      B0      |      A0      |
+     : |              |              |              |
+     : |              |              |              |
+     : +--------------+----+----+----+--------------+
+     : |              | B1 | A1 | B1 |              |
+     : |              +----+----+----+              |
+     : |      A1      | B0 | A0 | B0 |      A1      |
+     : |              +----+----+----+              |
+     : |              | B1 | A1 | B1 |              |
+     : +--------------+----+----+----+----+----+----+
+     : |              |    |    |    |    | B0 |    |
+     : |              |    |    |    |    +----+    |
+     : |      A0      | B0 | A0 | B0 | A0 | B1 | A0 |
+     : |              |    |    |    |    +----+    |
+     : |              |    |    |    |    | B0 |    |
+     : +--------------+----+----+----+----+----+----+
+   
+   This results in 4 colors: A0, A1, B0, B1.  In general this results in 2^dim
+   colors.
+
+** Actual Tripartitioning
+   How can I do the actual tripartitioning?  It is probably simples to do this
+   based on the positions of the cell centers -- i.e. I don't try to
+   incorporate masses here but deal with them in the recursion
+
+   Classification into the three partitions is simple, the tricky part is
+   overlap.  I will deal with it by first doing the partitioning, then
+   checking whether the resulting partitioning fulfills the overlap
+   requirement.  If the requirement is not met I discard the partitioning.  I
+   may try the partitioning again in a different direction, after all
+   directions have been tried unsuccessfully no further partitioning is
+   possible.
+
