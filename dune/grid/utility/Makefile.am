@@ -24,6 +24,7 @@ gridutility_HEADERS =				\
 	persistentcontainerwrapper.hh		\
 	rangedentityset.hh			\
 	structuredgridfactory.hh		\
+	tripartit.hh				\
 	vertexorderfactory.hh
 
 include $(top_srcdir)/am/global-rules

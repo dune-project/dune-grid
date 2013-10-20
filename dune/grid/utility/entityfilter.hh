@@ -3,6 +3,9 @@
 #ifndef DUNE_GRID_UTILITY_ENTITYFILTER_HH
 #define DUNE_GRID_UTILITY_ENTITYFILTER_HH
 
+#include <algorithm>
+#include <cstddef>
+
 #if HAVE_TBB
 #include <tbb/tbb_stddef.h>
 #endif
@@ -90,6 +93,31 @@ namespace Dune {
       return false;
     }
 #endif // HAVE_TBB
+  };
+
+  template<class E, class Mapper, class Vector, class ID>
+  class GeneralEntityFilter
+  {
+    const Mapper &mapper_;
+    const Vector &data_;
+    ID id_;
+
+  public:
+    typedef E Entity;
+
+    GeneralEntityFilter(const Mapper &mapper, const Vector &data, ID id) :
+      mapper_(mapper), data_(data), id_(id)
+    { }
+
+    bool contains(const Entity &e) const
+    {
+      return data_[mapper_.map(e)] == id_;
+    }
+
+    std::size_t size() const
+    {
+      return std::count(data_.begin(), data_.end(), id_);
+    }
   };
 
 } // namespace Dune
