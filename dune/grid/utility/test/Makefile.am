@@ -18,6 +18,17 @@ structuredgridfactorytest_LDADD = $(UG_LIBS) \
 	                            $(DUNEMPILIBS) \
                                 $(LDADD)
 
+TESTS += tripartittest
+check_PROGRAMS += tripartittest
+tripartittest_SOURCES = tripartittest.cc
+tripartittest_CPPFLAGS = $(AM_CPPFLAGS)		\
+	$(ALBERTA2D_CPPFLAGS)
+tripartittest_LDFLAGS = $(AM_LDFLAGS)		\
+	$(ALBERTA2D_LDFLAGS)
+tripartittest_LDADD =				\
+	$(ALBERTA2D_LIBS)			\
+	$(LDADD)
+
 TESTS += vertexordertest
 check_PROGRAMS += vertexordertest
 vertexordertest_SOURCES = vertexordertest.cc

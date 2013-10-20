@@ -2,6 +2,7 @@ Makefile.in
 Makefile
 .deps
 
+/tripartittest
 persistentcontainertest
 structuredgridfactorytest
 vertexordertest
