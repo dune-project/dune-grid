@@ -1256,7 +1256,8 @@ namespace Dune {
           o_interior[i] = 2*cg.cell_interior.origin(i);
 
         // add level
-        _levels.push_back( makelevel(_levels.size(),newcoords,_periodic,o_interior,overlap) );
+        _levels.resize(_levels.size()+1);
+        _levels.back() = makelevel(_levels.size()-1,newcoords,_periodic,o_interior,overlap);
 
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
