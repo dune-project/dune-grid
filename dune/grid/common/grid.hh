@@ -633,6 +633,32 @@ namespace Dune {
       return asImp().leafView();
     }
 
+    //! View for a grid level
+    template<PartitionIteratorType pitype>
+    typename Partition<pitype>::LevelGridView levelGridView(int level) const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template levelGridView<pitype>(level)));
+      return asImp().template levelGridView<pitype>(level);
+    }
+
+    //! View for the leaf grid
+    template<PartitionIteratorType pitype>
+    typename Partition<pitype>::LeafGridView leafGridView() const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafGridView<pitype>()));
+      return asImp().template leafGridView<pitype>();
+    }
+
+    //! View for a grid level for All_Partition
+    LevelGridView levelGridView(int level) const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().levelGridView(level)));
+      return asImp().levelGridView(level);
+    }
+
+    //! View for the leaf grid for All_Partition
+    LeafGridView leafGridView() const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().leafGridView()));
+      return asImp().leafGridView();
+    }
+
     //@}
 
 
