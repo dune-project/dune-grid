@@ -210,14 +210,29 @@ namespace Dune {
         }
       };
 
+      void checkNonempty(const std::vector<std::size_t> &pSizes)
+      {
+        for(auto size : pSizes)
+          if(size == 0)
+            DUNE_THROW(OverlapError,
+                       "Subpartioning results in empty partition");
+      }
+
       void checkOverlap()
       {
+        std::vector<std::size_t> pSizes(newPartitionIds_.size(), 0);
         if(overlap_ == 0)
+        {
+          for(const auto &e : entitySet_)
+            ++pSizes[pIndex(e)];
+          checkNonempty(pSizes);
           return;
+        }
         try {
           for(const auto &e : entitySet_)
           {
             auto myPIndex = pIndex(e);
+            ++pSizes[myPIndex];
             // check that we are either in the first or the last subpartition,
             // or outside the coarse overlap.  This avoids cases where the
             // first or last subpartition ends up empty, but the double
@@ -231,6 +246,7 @@ namespace Dune {
             }
             markneighbors(e, myPIndex);
           }
+          checkNonempty(pSizes);
 
           for(std::size_t o = 1; o < overlap_; ++o)
             for(const auto &e : entitySet_) {
