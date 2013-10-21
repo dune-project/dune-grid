@@ -135,7 +135,7 @@ namespace Dune
         \note that the communicate method can only be called by one individual thread,
         as the whole Dune parallel components are (i.e. can not be) not thread safe.
 
-        \note the methods leafView(), levelView(level) on the Grid can only be called single-threaded
+        \note the methods leafGridView(), levelGridView(level) on the Grid can only be called single-threaded
 
         \note calling the methods indexSet(), idSet(), globalIdSet() on the Grid or the GridView xis only allowed,
         if they were called once before starting the threads.
