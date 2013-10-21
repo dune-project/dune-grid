@@ -124,6 +124,41 @@ void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
     writer.addCellData(new ColoringVTKAdaptor<GV, Partitioner>(partitioner));
     writer.write(vtkPrefix);
   }
+
+  std::size_t partitions = partitioning.partitions();
+  std::vector<std::size_t> pSize(partitions, 0);
+
+  auto end = gv.template end<0>();
+  for(auto it = gv.template begin<0>(); it != end; ++it)
+    ++pSize[partitioning.getPartition(*it)];
+  std::size_t max = 0;
+  for(auto size : pSize)
+    max = std::max(max, size);
+  std::size_t colors = 1 << GV::dimensionworld;
+  std::vector<std::size_t> minSize(colors, max);
+  std::vector<std::size_t> maxSize(colors, 0);
+  std::vector<std::size_t> pCount(colors, 0);
+  std::vector<std::size_t> cSize(colors, 0);
+  std::vector<std::vector<std::size_t> >
+    sizeHist(colors, std::vector<std::size_t>(max+1, 0));
+  for(std::size_t p = 0; p < pSize.size(); ++p)
+  {
+    std::size_t color = partitioner.color(p);
+    minSize[color] = std::min(minSize[color], pSize[p]);
+    maxSize[color] = std::max(maxSize[color], pSize[p]);
+    ++pCount[color];
+    cSize[color] += pSize[p];
+    ++sizeHist[color][pSize[p]];
+  }
+  for(std::size_t c = 0; c < colors; ++c)
+  {
+    std::cout << "Color " << c << ": cSize = " << cSize[c] << ", pCount = "
+              << pCount[c] << ", pSize = " << minSize[c] << ".." << maxSize[c]
+              << ", sizes = [ ";
+    for(std::size_t s = 1; s <= max; ++s)
+      std::cout << s << ": " << sizeHist[c][s] << ", ";
+    std::cout << "]" << std::endl;
+  }
 }
 
 template<int dim>
