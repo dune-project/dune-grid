@@ -405,7 +405,8 @@ namespace Dune {
           }
 
           //check upper boundary
-          if (o_overlap[i] + coords[i].size() - 1 < globalSize<0>(i))
+          //globalSize may not be used here, as in some cases (push_back) the wrong level is taken
+          if (o_overlap[i] + coords[i].size() - 1 < _coarseSize[i] * (1<<level))
             ovlp_up[i] = true;
         }
       }
@@ -1254,8 +1255,7 @@ namespace Dune {
           o_interior[i] = 2*cg.cell_interior.origin(i);
 
         // add level
-        _levels.resize(_levels.size()+1);
-        _levels.back() = makelevel(_levels.size()-1,newcoords,_periodic,o_interior,overlap);
+        _levels.push_back(makelevel(_levels.size(),newcoords,_periodic,o_interior,overlap));
 
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
