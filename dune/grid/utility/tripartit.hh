@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstddef>
 #include <limits>
+#include <list>
 #include <vector>
 
 #include <dune/common/exceptions.hh>
@@ -14,6 +15,7 @@
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/utility/entityfilter.hh>
 #include <dune/grid/utility/filteringentityset.hh>
+#include <dune/grid/utility/seedentityset.hh>
 
 namespace Dune {
 
@@ -117,9 +119,83 @@ namespace Dune {
     std::vector<std::vector<std::size_t> > color_partitions;
   };
 
+  class RepartitionPolicyInterface {
+  public:
+    void setNumSubpartitions(std::size_t npartitions);
+
+    template<class Entity>
+    void addToSubPartition(std::size_t subpartition, const Entity &e);
+  };
+
+  template<class SeedPartitioning, class MapPartitioning>
+  class HybridRepartitionPolicy {
+    typedef typename SeedPartitioning::EntitySet::Entity::EntitySeed Seed;
+
+    SeedPartitioning &seedPartitioning_;
+    MapPartitioning &mapPartitioning_;
+    std::size_t oldPartition_;
+    std::vector<std::size_t> &newPartitions_;
+    std::vector<std::list<Seed> > data_;
+
+  public:
+    HybridRepartitionPolicy(SeedPartitioning &seedPartitioning,
+                            MapPartitioning &mapPartitioning,
+                            std::size_t oldPartition,
+                            std::vector<std::size_t> &newPartitions) :
+      seedPartitioning_(seedPartitioning), mapPartitioning_(mapPartitioning),
+      oldPartition_(oldPartition), newPartitions_(newPartitions)
+    { }
+
+    void setNumSubPartitions(std::size_t npartitions)
+    {
+      data_.resize(npartitions);
+    }
+
+    template<class Entity>
+    void addToSubPartition(std::size_t subpartition, const Entity &e)
+    {
+      data_[subpartition].push_back(e.seed());
+    }
+
+    void commit() {
+      newPartitions_ = seedPartitioning_.splitPartition(oldPartition_, data_);
+      for(std::size_t partition : newPartitions_)
+        for(const auto &e : seedPartitioning_.entitySet(partition))
+          mapPartitioning_.setPartition(e, partition);
+    }
+  };
+
+  template<class Filter, class Range>
+  class HybridEntitySet
+  {
+    Filter filter_;
+    Range range_;
+  public:
+    typedef typename Range::const_iterator const_iterator;
+    typedef typename Range::Entity Entity;
+
+    HybridEntitySet(const Filter &filter, const Range &range) :
+      filter_(filter), range_(range)
+    { }
+
+    const_iterator begin() const
+    {
+      return range_.begin();
+    }
+    const_iterator end() const
+    {
+      return range_.end();
+    }
+    template<class Entity>
+    bool contains(const Entity &e) const
+    {
+      return filter_.contains(e);
+    }
+  };
+
   struct OverlapError : Exception {};
 
-  template<class GV, class Partitioning, class Mapper>
+  template<class GV, class Mapper>
   class EquidistantPartitioner
   {
     static const std::size_t nooverlap =
@@ -127,25 +203,24 @@ namespace Dune {
     static const std::size_t someoverlap = nooverlap - 1;
 
     const GV &gv_;
-    Partitioning &partitioning_;
     const Mapper &mapper_;
     std::vector<std::size_t> overlapMap_;
     std::size_t direction_;
     std::size_t overlap_;
 
-    template<class EntitySet>
+    template<class EntitySet, class RepartitionPolicy>
     class PartitioningContext {
       typedef typename EntitySet::Entity Entity;
       typedef typename Entity::ctype ctype;
 
       const GV &gv_;
-      Partitioning &partitioning_;
       const Mapper &mapper_;
+      const EntitySet &entitySet_;
+      RepartitionPolicy repartitionPolicy_;
       std::vector<std::size_t> &overlapMap_;
       std::size_t direction_;
       std::size_t overlap_;
-      const EntitySet &entitySet_;
-      const std::vector<std::size_t> &newPartitionIds_;
+      std::size_t divisor_;
 
       ctype minc_;
       ctype maxc_;
@@ -171,10 +246,10 @@ namespace Dune {
         ctype tmp = e.geometry().center()[direction_];
         tmp -= minc_;
         tmp /= maxc_ - minc_;
-        tmp *= newPartitionIds_.size();
+        tmp *= divisor_;
         tmp = std::floor(tmp);
         tmp = max(ctype(0), tmp);
-        return min(newPartitionIds_.size()-1, std::size_t(tmp));
+        return min(divisor_-1, std::size_t(tmp));
       };
 
       void markneighbors(const Entity &e, std::size_t myPIndex) {
@@ -220,7 +295,7 @@ namespace Dune {
 
       void checkOverlap()
       {
-        std::vector<std::size_t> pSizes(newPartitionIds_.size(), 0);
+        std::vector<std::size_t> pSizes(divisor_, 0);
         if(overlap_ == 0)
         {
           for(const auto &e : entitySet_)
@@ -238,7 +313,7 @@ namespace Dune {
             // first or last subpartition ends up empty, but the double
             // overlap between coarse border and the next subpartition goes
             // undetected.
-            if(myPIndex > 0 && myPIndex + 1 < newPartitionIds_.size() &&
+            if(myPIndex > 0 && myPIndex + 1 < divisor_ &&
                overlapMap_[mapper_.map(e)] == someoverlap)
             {
               DUNE_THROW(OverlapError, "Inner subpartition intersects coarse "
@@ -252,7 +327,7 @@ namespace Dune {
             for(const auto &e : entitySet_) {
               std::size_t mark =
                 overlapMap_[mapper_.map(e)];
-              if(mark < newPartitionIds_.size())
+              if(mark < divisor_)
                 markneighbors(e, mark);
             }
         }
@@ -271,6 +346,7 @@ namespace Dune {
 
       void finalize()
       {
+        repartitionPolicy_.setNumSubPartitions(divisor_);
         for(const auto &e : entitySet_) {
           auto &mark = overlapMap_[mapper_.map(e)];
           // translate overlap marks
@@ -280,18 +356,21 @@ namespace Dune {
           // be very careful here: Setting a new partition number may remove
           // the entity from the partition we are currently iterating over, so
           // the entitySet must not let itself confuse by this.
-          partitioning_.setPartition(e, newPartitionIds_[pIndex(e)]);
+          repartitionPolicy_.addToSubPartition(pIndex(e), e);
         }
+        repartitionPolicy_.commit();
       }
 
     public:
       PartitioningContext(EquidistantPartitioner &partitioner,
                           const EntitySet &entitySet,
-                          const std::vector<std::size_t> &newPartitionIds) :
-        gv_(partitioner.gv_), partitioning_(partitioner.partitioning_),
-        mapper_(partitioner.mapper_), overlapMap_(partitioner.overlapMap_),
+                          const RepartitionPolicy &repartitionPolicy,
+                          std::size_t divisor) :
+        gv_(partitioner.gv_), mapper_(partitioner.mapper_),
+        entitySet_(entitySet), repartitionPolicy_(repartitionPolicy),
+        overlapMap_(partitioner.overlapMap_),
         direction_(partitioner.direction_), overlap_(partitioner.overlap_),
-        entitySet_(entitySet), newPartitionIds_(newPartitionIds)
+        divisor_(divisor)
       {
         initMinMax();
         checkOverlap();
@@ -300,51 +379,51 @@ namespace Dune {
 
     };
   public:
-    EquidistantPartitioner(const GV &gv, Partitioning &partitioning,
-                           const Mapper &mapper, std::size_t direction,
-                           std::size_t overlap = 1) :
-      gv_(gv), partitioning_(partitioning), mapper_(mapper),
+    EquidistantPartitioner(const GV &gv, const Mapper &mapper,
+                           std::size_t direction, std::size_t overlap = 1) :
+      gv_(gv), mapper_(mapper),
       overlapMap_(mapper_.size(), std::size_t(nooverlap)),
       direction_(direction), overlap_(overlap)
     { }
 
-    template<class EntitySet>
+    template<class EntitySet, class RepartitionPolicy>
     void partition(const EntitySet &entitySet,
-                   const std::vector<std::size_t> &newPartitionIds)
+                   const RepartitionPolicy &repartitionPolicy,
+                   std::size_t divisor)
     {
       // Constructor of temporary does all the work
-      PartitioningContext<EntitySet>(*this, entitySet, newPartitionIds);
+      PartitioningContext<EntitySet, RepartitionPolicy>(*this, entitySet,
+                                                        repartitionPolicy,
+                                                        divisor);
     }
   };
 
-  template<class GV, class Partitioning>
+  template<class GV, class SeedPartitioning, class MapPartitioning>
   class RecursiveEquidistantPartitioner {
     typedef MultipleCodimMultipleGeomTypeMapper<GV, MCMGElementLayout> Mapper;
-    typedef EquidistantPartitioner<GV, Partitioning, Mapper> DirPartitioner;
+    typedef EquidistantPartitioner<GV, Mapper> DirPartitioner;
 
     const GV &gv_;
-    Partitioning &partitioning_;
     Mapper mapper_;
+    SeedPartitioning &seedPartitioning_;
+    MapPartitioning &mapPartitioning_;
     std::vector<DirPartitioner> dirPartitioners_;
-    std::size_t partitions_;
     std::vector<std::size_t> lastDir_;
     std::vector<std::size_t> failCount_;
     std::vector<std::size_t> color_;
 
   public:
-    RecursiveEquidistantPartitioner(const GV &gv, Partitioning &partitioning,
+    RecursiveEquidistantPartitioner(const GV &gv,
+                                    SeedPartitioning &seedPartitioning,
+                                    MapPartitioning &mapPartitioning,
                                     std::size_t overlap = 1) :
-      gv_(gv), partitioning_(partitioning), mapper_(gv_), partitions_(1),
-      lastDir_(1, GV::dimension-1), failCount_(1, 0), color_(1, 0)
+      gv_(gv), mapper_(gv_), seedPartitioning_(seedPartitioning),
+      mapPartitioning_(mapPartitioning), lastDir_(1, GV::dimension-1),
+      failCount_(1, 0), color_(1, 0)
     {
       dirPartitioners_.reserve(GV::dimensionworld);
       for(std::size_t d = 0; d < GV::dimensionworld; ++d)
-        dirPartitioners_.emplace_back(gv_, partitioning_, mapper_, d, overlap);
-    }
-
-    const Partitioning &partitioning() const
-    {
-      return partitioning_;
+        dirPartitioners_.emplace_back(gv_, mapper_, d, overlap);
     }
 
     std::size_t color(std::size_t partition) const
@@ -352,22 +431,30 @@ namespace Dune {
       return color_[partition];
     }
 
+    std::size_t color(const typename GV::template Codim<0>::Entity &e) const
+    {
+      return color_[mapPartitioning_.getPartition(e)];
+    }
+
     std::vector<std::size_t> tryRefine(std::size_t pId, std::size_t dir,
                                        std::size_t divisor)
     {
+      typedef HybridEntitySet<typename MapPartitioning::EntitySet,
+                              typename SeedPartitioning::EntitySet> EntitySet;
+      typedef HybridRepartitionPolicy<SeedPartitioning,
+                                      MapPartitioning> RepartitionPolicy;
       std::vector<std::size_t> newPartitionIds;
-      newPartitionIds.reserve(divisor);
-      newPartitionIds.push_back(pId);
-      for(std::size_t p = partitions_; newPartitionIds.size() < divisor; ++p)
-        newPartitionIds.push_back(p);
-      dirPartitioners_[dir].partition(partitioning_.entitySet(pId),
-                                      newPartitionIds);
-      partitions_ += divisor-1;
-      lastDir_.resize(partitions_, dir);
+      dirPartitioners_[dir].partition
+        (EntitySet(mapPartitioning_.entitySet(pId),
+                   seedPartitioning_.entitySet(pId)),
+         RepartitionPolicy(seedPartitioning_, mapPartitioning_, pId,
+                           newPartitionIds),
+         divisor);
+      lastDir_.resize(seedPartitioning_.partitions(), dir);
       lastDir_[pId] = dir;
-      failCount_.resize(partitions_, 0);
+      failCount_.resize(seedPartitioning_.partitions(), 0);
       failCount_[pId] = 0;
-      color_.resize(partitions_);
+      color_.resize(seedPartitioning_.partitions());
       for(std::size_t i = 1; i < divisor; ++i)
         color_[newPartitionIds[i]] = color_[pId] ^ ((i & 1) << dir);
 
@@ -376,7 +463,9 @@ namespace Dune {
 
     bool globalRefine() {
       bool result = false;
-      std::size_t oldPartitions = partitions_;
+      // new partitions are added at the end; remember the old limit so we
+      // don't try to refine partitions we just added.
+      std::size_t oldPartitions = seedPartitioning_.partitions();
       for(std::size_t p = 0; p < oldPartitions; ++p)
         if(failCount_[p] < GV::dimensionworld)
           try {

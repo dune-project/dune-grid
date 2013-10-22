@@ -92,7 +92,7 @@ public:
   double evaluate(int comp, const Entity &e,
                   const Dune::FieldVector< ctype, dim > &xi) const
   {
-    return partitioner_.color(partitioner_.partitioning().getPartition(e));
+    return partitioner_.color(e);
   }
   std::string name() const
   {
@@ -106,31 +106,34 @@ void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
 {
   pass(result);
 
-  typedef Dune::GeneralFilteredPartitioning<GV> Partitioning;
-  Partitioning partitioning(gv);
+  typedef Dune::GeneralFilteredPartitioning<GV> MapPartitioning;
+  MapPartitioning mapPartitioning(gv);
 
-  typedef Dune::RecursiveEquidistantPartitioner<GV, Partitioning> Partitioner;
-  Partitioner partitioner(gv, partitioning, overlap);
+  typedef Dune::SeedListPartitioning<typename GV::Grid, 0> SeedPartitioning;
+  SeedPartitioning seedPartitioning(gv);
+
+  typedef Dune::RecursiveEquidistantPartitioner<GV, SeedPartitioning,
+                                                MapPartitioning> Partitioner;
+  Partitioner partitioner(gv, seedPartitioning, mapPartitioning, overlap);
 
   while(partitioner.globalRefine())
-    std::cout << "Number of Partitions: " << partitioning.partitions()
+    std::cout << "Number of Partitions: " << seedPartitioning.partitions()
               << std::endl;
 
   if(vtkPrefix != "")
   {
     Dune::VTKWriter<GV> writer(gv);
     writer.addCellData
-      (new PartitioningVTKAdaptor<GV, Partitioning>(partitioning));
+      (new PartitioningVTKAdaptor<GV, MapPartitioning>(mapPartitioning));
     writer.addCellData(new ColoringVTKAdaptor<GV, Partitioner>(partitioner));
     writer.write(vtkPrefix);
   }
 
-  std::size_t partitions = partitioning.partitions();
-  std::vector<std::size_t> pSize(partitions, 0);
+  std::size_t partitions = seedPartitioning.partitions();
+  std::vector<std::size_t> pSize(partitions);
 
-  auto end = gv.template end<0>();
-  for(auto it = gv.template begin<0>(); it != end; ++it)
-    ++pSize[partitioning.getPartition(*it)];
+  for(std::size_t p = 0; p < partitions; ++p)
+    pSize[p] = seedPartitioning.size(p);
   std::size_t max = 0;
   for(auto size : pSize)
     max = std::max(max, size);
