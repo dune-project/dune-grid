@@ -23,6 +23,7 @@ gridutility_HEADERS =				\
 	persistentcontainervector.hh		\
 	persistentcontainerwrapper.hh		\
 	rangedentityset.hh			\
+	seednetityset.hh			\
 	structuredgridfactory.hh		\
 	tripartit.hh				\
 	vertexorderfactory.hh
