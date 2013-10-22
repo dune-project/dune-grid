@@ -185,11 +185,11 @@ namespace Dune {
     return result;
   }
   //TODO avoid this crap!
-  template<typename ct, int d>
-  Dune::array<std::vector<ct>,d> coordVector(Dune::FieldVector<ct,d>& L, Dune::array<int,d>& s)
+  template<typename ct, int d1, std::size_t d2>
+  Dune::array<std::vector<ct>,d2> coordVector(Dune::FieldVector<ct,d1>& L, Dune::array<int,d2>& s)
   {
-    Dune::array<std::vector<ct>,d> result;
-    for (int i=0; i<d; i++)
+    Dune::array<std::vector<ct>,d2> result;
+    for (int i=0; i<d2; i++)
     {
       result[i].resize(s[i]+1);
       const ct h = L[i]/s[i];
@@ -816,7 +816,7 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(L,s,std::bitset<dim>(),overlap,lb);
+      MultiYGridSetup(coordVector(L,s),std::bitset<dim>(),overlap,lb);
 
       // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
       for (size_t i=0; i<dim; i++)
@@ -847,7 +847,7 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(L,s,periodic,overlap,lb);
+      MultiYGridSetup(coordVector(L,s),periodic,overlap,lb);
 
       init();
     }
