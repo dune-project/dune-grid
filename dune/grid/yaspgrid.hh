@@ -247,7 +247,6 @@ namespace Dune {
       }
 
       // cell (codim 0) data
-      YGrid<dim,ctype> cell_global;         // the whole cell grid on that level
       SubYGrid<dim,ctype> cell_overlap;     // we have no ghost cells, so our part is overlap completely
       SubYGrid<dim,ctype> cell_interior;    // interior cells are a subgrid of all cells
 
@@ -258,7 +257,6 @@ namespace Dune {
       std::deque<Intersection> recv_cell_overlap_interior; // each intersection is a subgrid of overlap
 
       // vertex (codim dim) data
-      YGrid<dim,ctype> vertex_global;           // the whole vertex grid on that level
       SubYGrid<dim,ctype> vertex_overlapfront;  // all our vertices are overlap and front
       SubYGrid<dim,ctype> vertex_overlap;       // subgrid containing only overlap
       SubYGrid<dim,ctype> vertex_interiorborder; // subgrid containing only interior and border
@@ -1970,7 +1968,6 @@ namespace Dune {
       s << "[" << rank << "]:   " << std::endl;
       s << "[" << rank << "]:   " << "==========================================" << std::endl;
       s << "[" << rank << "]:   " << "level=" << g->level() << std::endl;
-      s << "[" << rank << "]:   " << "cell_global=" << g->cell_global << std::endl;
       s << "[" << rank << "]:   " << "cell_overlap=" << g->cell_overlap << std::endl;
       s << "[" << rank << "]:   " << "cell_interior=" << g->cell_interior << std::endl;
       for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->send_cell_overlap_overlap.begin();
@@ -1999,7 +1996,6 @@ namespace Dune {
       }
 
       s << "[" << rank << "]:   " << "-----------------------------------------------"  << std::endl;
-      s << "[" << rank << "]:   " << "vertex_global="         << g->vertex_global << std::endl;
       s << "[" << rank << "]:   " << "vertex_overlapfront="   << g->vertex_overlapfront << std::endl;
       s << "[" << rank << "]:   " << "vertex_overlap="        << g->vertex_overlap << std::endl;
       s << "[" << rank << "]:   " << "vertex_interiorborder=" << g->vertex_interiorborder << std::endl;
