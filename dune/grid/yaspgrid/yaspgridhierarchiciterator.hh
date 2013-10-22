@@ -97,8 +97,7 @@ namespace Dune {
       for (int i=0; i<(1<<dim); i++)
       {
         for (int k=0; k<dim; k++)
-          // not all entities have 2^d subentities due to refineOptions with keep_ovlp==false
-          if ((i&(1<<k)) && (this->_it.coord(k)*2+1 < finer->cell_overlap.origin(k)+finer->cell_overlap.size(k)))
+          if (i&(1<<k))
             se.coord[k] = this->_it.coord(k)*2+1;
           else
             se.coord[k] = this->_it.coord(k)*2;
