@@ -406,7 +406,7 @@ namespace Dune {
 
           //check upper boundary
           //globalSize may not be used here, as in some cases (push_back) the wrong level is taken
-          if (o_overlap[i] + coords[i].size() - 1 < _coarseSize[i] * (1<<level))
+          if (o_overlap[i] + coords[i].size() - 1 < globalSize<0>(i))
             ovlp_up[i] = true;
         }
       }
@@ -527,7 +527,7 @@ namespace Dune {
     void intersections (const SubYGrid<dim,ctype>& sendgrid, const SubYGrid<dim,ctype>& recvgrid,
                         std::deque<Intersection>& sendlist, std::deque<Intersection>& recvlist)
     {
-      iTupel size = this->template globalSize<0>();
+      iTupel size = globalSize<0>();
 
       // the exchange buffers
       std::vector<YGrid<dim,ctype> > send_recvgrid(_torus.neighbors());
@@ -1255,7 +1255,9 @@ namespace Dune {
           o_interior[i] = 2*cg.cell_interior.origin(i);
 
         // add level
-        _levels.push_back(makelevel(_levels.size(),newcoords,_periodic,o_interior,overlap));
+        // push_back() may not be used here, because makelevel relies on _levels to have specific size
+        _levels.resize(_levels.size() + 1);
+        _levels.back() = makelevel(_levels.size() - 1,newcoords,_periodic,o_interior,overlap);
 
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
