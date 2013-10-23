@@ -12,6 +12,8 @@
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/static_assert.hh>
 
+#include <dune/grid/utility/entityrange.hh>
+
 namespace Dune {
 
   template<class Grid, int codim, class SeedIterator,
@@ -194,29 +196,6 @@ namespace Dune {
     return EntitySeedIteratorAdapter<EntityIterator>(eIt);
   }
 
-  template<class I>
-  class IteratorRangeEntitySet {
-    I begin_;
-    I end_;
-
-  public:
-    typedef I const_iterator;
-    typedef typename I::Entity Entity;
-
-    IteratorRangeEntitySet(const I &begin, const I &end) :
-      begin_(begin), end_(end)
-    { }
-
-    const I &begin() const
-    {
-      return begin_;
-    }
-    const I &end() const
-    {
-      return end_;
-    }
-  };
-
   template<class Grid, int codim>
   class SeedListPartitioning
   {
@@ -231,7 +210,7 @@ namespace Dune {
     std::vector<std::size_t> pEnd_;
 
   public:
-    typedef IteratorRangeEntitySet<Iterator> EntitySet;
+    typedef IteratorEntityRange<Iterator> EntitySet;
 
     template<class GV>
     SeedListPartitioning(const GV &gv) :

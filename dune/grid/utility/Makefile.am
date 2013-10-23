@@ -8,6 +8,7 @@ gridutilitydir =  $(includedir)/dune/grid/utility
 gridutility_HEADERS =				\
 	entitycommhelper.hh			\
 	entityfilter.hh				\
+	entityrange.hh				\
 	filteringentityiterator.hh		\
 	filteringentityset.hh			\
 	filteringgridview.hh			\

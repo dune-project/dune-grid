@@ -171,7 +171,7 @@ namespace Dune {
     Filter filter_;
     Range range_;
   public:
-    typedef typename Range::const_iterator const_iterator;
+    typedef typename Range::Iterator const_iterator;
     typedef typename Range::Entity Entity;
 
     HybridEntitySet(const Filter &filter, const Range &range) :
