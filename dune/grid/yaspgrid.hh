@@ -571,11 +571,12 @@ namespace Dune {
           }
           // neither might be true, then v=0
         }
+
         // store moved grids in send buffers
         if (!skip)
         {
-          //send_sendgrid[i.index()] = sendgrid.move(v); //TODO laesst sich auskommentieren so lange non-periodic
-          //send_recvgrid[i.index()] = recvgrid.move(v);
+          send_sendgrid[i.index()] = sendgrid.move(v);
+          send_recvgrid[i.index()] = recvgrid.move(v);
         }
         else
         {
