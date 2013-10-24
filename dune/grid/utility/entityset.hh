@@ -11,11 +11,8 @@
 #endif
 
 #include <dune/common/documentation.hh>
-#include <dune/common/typetraits.hh>
 
 #include <dune/geometry/type.hh>
-
-#include <dune/grid/utility/entityrange.hh>
 
 namespace Dune {
 
@@ -57,30 +54,6 @@ namespace Dune {
 
     //! return number of entites in the set
     Size size() const;
-  };
-
-  //! EntitySet category for entity sets supporting \c size().
-  struct IterableEntitySetTag : SizableEntitySetTag {};
-
-  //! Interface for IterableEntitySets
-  /**
-   * This basically merges the interface of EntitySets and entityRanges.  \c
-   * contains() should return true for every entity visited by iteration, and
-   * no other entities.  \c size() should be equal to \c
-   * std::distance(begin(),end()).  \c Size should be the same type as \c
-   * std::iterator_traits<Iterator>::difference_type.
-   */
-  template<class Iterator_>
-  class IterableEntitySetInterface :
-    public SizableEntitySetInterface<
-      typename remove_const<typename Iterator_::value_type>::type>,
-    public EntityRangeInterface<Iterator_>
-  {
-  public:
-    //! category
-    typedef IterableEntitySetTag EntitySetCategory;
-
-    using EntityRangeInterface<Iterator_>::Entity;
   };
 
   //! EntitySet selecting entity based on the index
