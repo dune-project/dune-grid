@@ -11,7 +11,7 @@
 
 #include <dune/grid/common/entityiterator.hh>
 
-#include "entityfilter.hh"
+#include "entityset.hh"
 #include "filteringentityiterator.hh"
 
 namespace Dune {
@@ -106,12 +106,12 @@ namespace Dune {
   template<class GV, int codim>
   class StridedEntitySet :
     public FilteringEntitySet<
-      StridedEntityFilter<
+      StridedIndexEntitySet<
         typename GV::IndexSet,
         typename GV::template Codim<codim>::Entity>,
       GV>
   {
-    typedef StridedEntityFilter<
+    typedef StridedIndexEntitySet<
       typename GV::IndexSet,
       typename GV::template Codim<codim>::Entity> Filter;
     typedef FilteringEntitySet<Filter, GV> Base;

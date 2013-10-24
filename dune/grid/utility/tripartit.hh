@@ -13,7 +13,7 @@
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
-#include <dune/grid/utility/entityfilter.hh>
+#include <dune/grid/utility/entityset.hh>
 #include <dune/grid/utility/filteringentityset.hh>
 #include <dune/grid/utility/seedentityset.hh>
 
@@ -24,15 +24,15 @@ namespace Dune {
                             <GV, MCMGElementLayout> >
   class GeneralFilteredEntitySet :
     public FilteringEntitySet<
-      GeneralEntityFilter<typename GV::template Codim<0>::Entity,
-                          Mapper, Vector, ID>,
+      PartitionMapEntitySet<typename GV::template Codim<0>::Entity,
+                            Mapper, Vector, ID>,
       GV>
   {
   public:
     typedef typename GV::template Codim<0>::Entity Entity;
 
   private:
-    typedef GeneralEntityFilter<Entity, Mapper, Vector, ID> Filter;
+    typedef PartitionMapEntitySet<Entity, Mapper, Vector, ID> Filter;
     typedef FilteringEntitySet<Filter, GV> Base;
 
   public:
