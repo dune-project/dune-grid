@@ -23,22 +23,24 @@ namespace Dune {
            class Mapper = MultipleCodimMultipleGeomTypeMapper
                             <GV, MCMGElementLayout> >
   class GeneralFilteredEntitySet :
-    public FilteringEntitySet<
+    public IterableEntitySet<
       PartitionMapEntitySet<typename GV::template Codim<0>::Entity,
                             Mapper, Vector, ID>,
-      GV>
+      typename GV::template Codim<0>::Iterator>
   {
   public:
     typedef typename GV::template Codim<0>::Entity Entity;
 
   private:
     typedef PartitionMapEntitySet<Entity, Mapper, Vector, ID> Filter;
-    typedef FilteringEntitySet<Filter, GV> Base;
+    typedef IterableEntitySet<Filter,
+                              typename GV::template Codim<0>::Iterator> Base;
 
   public:
     GeneralFilteredEntitySet(const GV &gv, const Vector &data, ID id,
                              const Mapper &mapper) :
-      Base(Filter(mapper, data, id), gv)
+      Base(Filter(mapper, data, id), gv.template begin<0>(),
+           gv.template end<0>())
     { }
   };
 
