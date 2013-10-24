@@ -9,7 +9,6 @@ gridutility_HEADERS =				\
 	entitycommhelper.hh			\
 	entityrange.hh				\
 	entityset.hh				\
-	filteringentityiterator.hh		\
 	filteringentityset.hh			\
 	filteringgridview.hh			\
 	grapedataioformattypes.hh		\
@@ -19,6 +18,7 @@ gridutility_HEADERS =				\
 	hierarchicsearch.hh			\
 	hostgridaccess.hh			\
 	iterableentityset.hh			\
+	iteratoradapters.hh			\
 	persistentcontainer.hh			\
 	persistentcontainerinterface.hh		\
 	persistentcontainermap.hh		\

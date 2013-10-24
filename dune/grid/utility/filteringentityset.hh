@@ -9,10 +9,9 @@
 #include <tbb/tbb_stddef.h>
 #endif
 
-#include <dune/grid/common/entityiterator.hh>
+#include <dune/grid/utility/iteratoradapters.hh>
 
 #include "entityset.hh"
-#include "filteringentityiterator.hh"
 
 namespace Dune {
 
@@ -26,12 +25,6 @@ namespace Dune {
       codim = Filter::Entity::codimension
     };
 
-  private:
-    typedef FilteringEntityIteratorImpl<
-      Filter,
-      typename GridView::template Codim<codim>::Iterator> IteratorImpl;
-
-  public:
     //! Type of Elements contained in this EntitySet
     typedef typename Filter::Entity Element;
 
@@ -42,8 +35,9 @@ namespace Dune {
     typedef Element value_type;
 
     //! A forward iterator
-    typedef EntityIterator<codim, typename GridView::Grid, IteratorImpl>
-      const_iterator;
+    typedef EntitySetIterator<
+      Filter,
+      typename GridView::template Codim<codim>::Iterator> const_iterator;
 
     //! Same as const_iterator
     typedef const_iterator iterator;
@@ -68,14 +62,14 @@ namespace Dune {
     //! Create a begin iterator
     const_iterator begin() const
     {
-      return IteratorImpl(filter_, gridView_.template begin<codim>(),
-                          gridView_.template end<codim>());
+      return const_iterator(filter_, gridView_.template begin<codim>(),
+                            gridView_.template end<codim>());
     }
 
     //! Create a end iterator
     const_iterator end() const
     {
-      return IteratorImpl(filter_, gridView_.template end<codim>());
+      return const_iterator(filter_, gridView_.template end<codim>());
     }
 
     const GridView& gridView() const
