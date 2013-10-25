@@ -3,150 +3,17 @@
 #ifndef DUNE_GRID_UTILITY_SEEDENTITYSET_HH
 #define DUNE_GRID_UTILITY_SEEDENTITYSET_HH
 
-#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <utility>
 #include <vector>
 
 #include <dune/common/iteratorfacades.hh>
-#include <dune/common/static_assert.hh>
 
 #include <dune/grid/utility/entityrange.hh>
+#include <dune/grid/utility/iteratoradapters.hh>
 
 namespace Dune {
-
-  template<class Grid, int codim, class SeedIterator,
-           class Category =
-             typename std::iterator_traits<SeedIterator>::iterator_category>
-  class SeedEntityIterator :
-    public ForwardIteratorFacade<
-    SeedEntityIterator<Grid, codim, SeedIterator, Category>,
-      const typename Grid::template Codim<codim>::Entity,
-      const typename Grid::template Codim<codim>::Entity &,
-      typename std::iterator_traits<SeedIterator>::difference_type>
-  {
-    typedef const typename Grid::template Codim<codim>::Entity Entity;
-    typedef ForwardIteratorFacade<
-      SeedEntityIterator, const Entity, const Entity &,
-      typename std::iterator_traits<SeedIterator>::difference_type
-      > Base;
-    friend Base;
-
-    typedef typename Grid::template Codim<codim>::EntityPointer EntityPointer;
-    const Grid *gridp_;
-    SeedIterator seedIt_;
-    mutable EntityPointer ep_;
-    mutable bool valid_;
-
-  public:
-    typedef typename Base::Reference Reference;
-
-    SeedEntityIterator(const Grid &grid, const SeedIterator &seedIt) :
-      gridp_(&grid), seedIt_(seedIt), ep_(), valid_(false)
-    { }
-
-  private:
-    Reference dereference() const
-    {
-      if(!valid_) {
-        ep_ = gridp_->entityPointer(*seedIt_);
-        valid_ = true;
-      }
-      return *ep_;
-    }
-
-    bool equals(const SeedEntityIterator &other) const
-    {
-      return seedIt_ == other.seedIt_;
-    }
-
-    void increment()
-    {
-      ++seedIt_;
-      valid_ = false;
-    }
-
-  };
-
-  template<class Grid, int codim, class SeedIterator>
-  class SeedEntityIterator<Grid, codim, SeedIterator,
-                           std::random_access_iterator_tag> :
-    public RandomAccessIteratorFacade<
-      SeedEntityIterator<Grid, codim, SeedIterator,
-                         std::random_access_iterator_tag>,
-      const typename Grid::template Codim<codim>::Entity,
-      const typename Grid::template Codim<codim>::Entity &,
-      typename std::iterator_traits<SeedIterator>::difference_type>
-  {
-  public:
-    typedef typename Grid::template Codim<codim>::Entity Entity;
-
-  private:
-    typedef RandomAccessIteratorFacade<
-      SeedEntityIterator, const Entity, const Entity &,
-      typename std::iterator_traits<SeedIterator>::difference_type
-      > Base;
-
-    typedef typename Grid::template Codim<codim>::EntityPointer EntityPointer;
-    const Grid *gridp_;
-    SeedIterator seedIt_;
-    mutable EntityPointer ep_;
-    mutable bool valid_;
-
-  public:
-    typedef typename Base::Reference Reference;
-    typedef typename Base::DifferenceType DifferenceType;
-
-    SeedEntityIterator(const Grid &grid, const SeedIterator &seedIt) :
-      gridp_(&grid), seedIt_(seedIt),
-      ep_(gridp_->levelView(0).template end<codim>()), valid_(false)
-    { }
-
-    Reference dereference() const
-    {
-      if(!valid_) {
-        ep_ = gridp_->entityPointer(*seedIt_);
-        valid_ = true;
-      }
-      return *ep_;
-    }
-
-    Reference elementAt(DifferenceType n) const
-    {
-      dune_static_assert(AlwaysFalse<Grid>::value, "Subscription not "
-                         "implemented for random-access SeedEntityIterator");
-    }
-
-    bool equals(const SeedEntityIterator &other) const
-    {
-      return seedIt_ == other.seedIt_;
-    }
-
-    void increment()
-    {
-      ++seedIt_;
-      valid_ = false;
-    }
-
-    void decrement()
-    {
-      --seedIt_;
-      valid_ = false;
-    }
-
-    void advance(DifferenceType n)
-    {
-      std::advance(seedIt_, n);
-      valid_ = false;
-    }
-
-    DifferenceType distanceTo(const SeedEntityIterator &other) const
-    {
-      assert(grid_ == other.grid_);
-      return std::distance(seedIt_, other.seedIt_);
-    }
-  };
 
   template<class EntityIterator,
            class Category =
@@ -200,9 +67,8 @@ namespace Dune {
   class SeedListPartitioning
   {
     typedef typename Grid::template Codim<codim>::EntitySeed Seed;
-    typedef SeedEntityIterator<Grid, codim,
-                               typename std::vector<Seed>::const_iterator>
-      Iterator;
+    typedef SeedToEntityIteratorAdapter<
+      Grid, typename std::vector<Seed>::const_iterator> Iterator;
 
     const Grid *gridp_;
     std::vector<Seed> seedLists_;
