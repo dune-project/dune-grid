@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_UTILITY_SEEDENTITYSET_HH
-#define DUNE_GRID_UTILITY_SEEDENTITYSET_HH
+#ifndef DUNE_GRID_UTILITY_PARTITIONING_SEEDLIST_HH
+#define DUNE_GRID_UTILITY_PARTITIONING_SEEDLIST_HH
 
 #include <cstddef>
 #include <iterator>
@@ -13,6 +13,7 @@
 
 namespace Dune {
 
+  //! partitioning data structure based on lists of seeds for each partition
   template<class Grid, int codim>
   class SeedListPartitioning
   {
@@ -20,14 +21,15 @@ namespace Dune {
     typedef SeedToEntityIteratorAdapter<
       Grid, typename std::vector<Seed>::const_iterator> Iterator;
 
-    const Grid *gridp_;
-    std::vector<Seed> seedLists_;
-    std::vector<std::size_t> pBegin_;
-    std::vector<std::size_t> pEnd_;
-
   public:
-    typedef IteratorEntityRange<Iterator> EntitySet;
+    //! type of partitions
+    typedef IteratorEntityRange<Iterator> Partition;
+    //! type used to count partitions
+    typedef typename std::iterator_traits<
+      typename std::vector<Seed>::iterator
+      >::difference_type Size;
 
+    //! construct
     template<class GV>
     SeedListPartitioning(const GV &gv) :
       gridp_(&gv.grid()),
@@ -36,27 +38,24 @@ namespace Dune {
       pBegin_(1, 0), pEnd_(1, seedLists_.size())
     { }
 
-    std::size_t partitions() const
+    //! return maximum number of partitions
+    Size partitions() const
     {
       return pBegin_.size();
     }
-    // return number of elements visited by partition
-    std::size_t size(std::size_t partition) const
+
+    //! return a particular partition
+    Partition partition(Size pId) const
     {
-      return pEnd_[partition] - pBegin_[partition];
-    }
-    // entityset for a particular partition
-    EntitySet entitySet(std::size_t partition) const
-    {
-      return EntitySet(Iterator(*gridp_,
-                                seedLists_.begin() + pBegin_[partition]),
+      return Partition(Iterator(*gridp_,
+                                seedLists_.begin() + pBegin_[pId]),
                        Iterator(*gridp_,
-                                seedLists_.begin() + pEnd_[partition]));
+                                seedLists_.begin() + pEnd_[pId]));
     }
 
     //! split a partition
     /**
-     * \param partition    Numer of partition to replace.
+     * \param pId          Numer of partition to replace.
      * \param newSeedLists Container of containers with seeds.  One
      *                     subcontainer for each thread.  The total number of
      *                     seeds in all subcontainer better be equal to the
@@ -67,19 +66,18 @@ namespace Dune {
      *          to \c seedLists.size().
      */
     template<class SeedLists>
-    std::vector<std::size_t> splitPartition(std::size_t partition,
-                                            const SeedLists &newSeedLists)
+    std::vector<Size> splitPartition(Size pId, const SeedLists &newSeedLists)
     {
-      std::size_t npartitions = std::distance(newSeedLists.begin(),
-                                              newSeedLists.end());
-      std::vector<std::size_t> newPartitions(npartitions);
-      newPartitions[0] = partition;
-      for(std::size_t i = 1; i < npartitions; ++i)
+      Size npartitions = std::distance(newSeedLists.begin(),
+                                       newSeedLists.end());
+      std::vector<Size> newPartitions(npartitions);
+      newPartitions[0] = pId;
+      for(Size i = 1; i < npartitions; ++i)
         newPartitions[i] = pBegin_.size() + i - 1;
       pBegin_.resize(pBegin_.size() + npartitions - 1);
       pEnd_.resize(pEnd_.size() + npartitions - 1);
 
-      std::size_t pos = pBegin_[partition];
+      Size pos = pBegin_[pId];
       std::size_t p = 0;
       for(const auto &seedList : newSeedLists)
       {
@@ -92,8 +90,14 @@ namespace Dune {
 
       return std::move(newPartitions);
     }
+
+  private:
+    const Grid *gridp_;
+    std::vector<Seed> seedLists_;
+    std::vector<Size> pBegin_;
+    std::vector<Size> pEnd_;
   };
 
 } // namespace Dune
 
-#endif // DUNE_GRID_UTILITY_SEEDENTITYSET_HH
+#endif // DUNE_GRID_UTILITY_PARTITIONING_SEEDLIST_HH

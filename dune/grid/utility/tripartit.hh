@@ -15,7 +15,7 @@
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/utility/entityset.hh>
 #include <dune/grid/utility/iterableentityset.hh>
-#include <dune/grid/utility/seedentityset.hh>
+#include <dune/grid/utility/partitioning/seedlist.hh>
 
 namespace Dune {
 
@@ -131,19 +131,19 @@ namespace Dune {
 
   template<class SeedPartitioning, class MapPartitioning>
   class HybridRepartitionPolicy {
-    typedef typename SeedPartitioning::EntitySet::Entity::EntitySeed Seed;
+    typedef typename SeedPartitioning::Partition::Entity::EntitySeed Seed;
 
     SeedPartitioning &seedPartitioning_;
     MapPartitioning &mapPartitioning_;
     std::size_t oldPartition_;
-    std::vector<std::size_t> &newPartitions_;
+    std::vector<typename SeedPartitioning::Size> &newPartitions_;
     std::vector<std::list<Seed> > data_;
 
   public:
     HybridRepartitionPolicy(SeedPartitioning &seedPartitioning,
                             MapPartitioning &mapPartitioning,
                             std::size_t oldPartition,
-                            std::vector<std::size_t> &newPartitions) :
+                            std::vector<typename SeedPartitioning::Size> &newPartitions) :
       seedPartitioning_(seedPartitioning), mapPartitioning_(mapPartitioning),
       oldPartition_(oldPartition), newPartitions_(newPartitions)
     { }
@@ -162,7 +162,7 @@ namespace Dune {
     void commit() {
       newPartitions_ = seedPartitioning_.splitPartition(oldPartition_, data_);
       for(std::size_t partition : newPartitions_)
-        for(const auto &e : seedPartitioning_.entitySet(partition))
+        for(const auto &e : seedPartitioning_.partition(partition))
           mapPartitioning_.setPartition(e, partition);
     }
   };
@@ -438,17 +438,17 @@ namespace Dune {
       return color_[mapPartitioning_.getPartition(e)];
     }
 
-    std::vector<std::size_t> tryRefine(std::size_t pId, std::size_t dir,
-                                       std::size_t divisor)
+    std::vector<typename SeedPartitioning::Size>
+    tryRefine(std::size_t pId, std::size_t dir, std::size_t divisor)
     {
       typedef HybridEntitySet<typename MapPartitioning::EntitySet,
-                              typename SeedPartitioning::EntitySet> EntitySet;
+                              typename SeedPartitioning::Partition> EntitySet;
       typedef HybridRepartitionPolicy<SeedPartitioning,
                                       MapPartitioning> RepartitionPolicy;
-      std::vector<std::size_t> newPartitionIds;
+      std::vector<typename SeedPartitioning::Size> newPartitionIds;
       dirPartitioners_[dir].partition
         (EntitySet(mapPartitioning_.entitySet(pId),
-                   seedPartitioning_.entitySet(pId)),
+                   seedPartitioning_.partition(pId)),
          RepartitionPolicy(seedPartitioning_, mapPartitioning_, pId,
                            newPartitionIds),
          divisor);

@@ -133,7 +133,7 @@ void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
   std::vector<std::size_t> pSize(partitions);
 
   for(std::size_t p = 0; p < partitions; ++p)
-    pSize[p] = seedPartitioning.size(p);
+    pSize[p] = seedPartitioning.partition(p).size();
   std::size_t max = 0;
   for(auto size : pSize)
     max = std::max(max, size);
