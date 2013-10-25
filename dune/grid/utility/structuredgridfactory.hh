@@ -8,6 +8,7 @@
  */
 
 #include <algorithm>
+#include <bitset>
 #include <cstddef>
 #include <cstdlib>
 
@@ -300,12 +301,11 @@ namespace Dune {
                      << "::createCubeGrid(): The lower coordinates "
                      "must be at the origin for YaspGrid.");
 
-      FieldVector<int, dim> elements_(0);
+      array<int, dim> elements_;
       std::copy(elements.begin(), elements.end(), elements_.begin());
 
-      return shared_ptr<GridType>
-               (new GridType(upperRight, elements_,
-                             FieldVector<bool,dim>(false), 0));
+      return shared_ptr<GridType>(new GridType(upperRight, elements_,
+                                               std::bitset<dim>(), 0));
     }
 
     /** \brief Create a structured simplex grid
