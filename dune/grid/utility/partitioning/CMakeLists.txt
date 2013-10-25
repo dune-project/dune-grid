@@ -1,6 +1,10 @@
 add_subdirectory(test EXCLUDE_FROM_ALL)
 
 set(HEADERS
+  interface.hh
+  mapped.hh
+  ranged.hh
+  seedlist.hh
   strided.hh)
 
 install(FILES ${HEADERS}
