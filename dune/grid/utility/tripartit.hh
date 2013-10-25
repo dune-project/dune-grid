@@ -13,6 +13,7 @@
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
+#include <dune/grid/utility/iterableentityset.hh>
 #include <dune/grid/utility/partitioning/seedlist.hh>
 
 namespace Dune {
@@ -86,34 +87,6 @@ namespace Dune {
       for(std::size_t partition : newPartitions_)
         for(const auto &e : seedPartitioning_.partition(partition))
           mapPartitioning_.setPartitionId(e, partition);
-    }
-  };
-
-  template<class Filter, class Range>
-  class HybridEntitySet
-  {
-    Filter filter_;
-    Range range_;
-  public:
-    typedef typename Range::Iterator const_iterator;
-    typedef typename Range::Entity Entity;
-
-    HybridEntitySet(const Filter &filter, const Range &range) :
-      filter_(filter), range_(range)
-    { }
-
-    const_iterator begin() const
-    {
-      return range_.begin();
-    }
-    const_iterator end() const
-    {
-      return range_.end();
-    }
-    template<class Entity>
-    bool contains(const Entity &e) const
-    {
-      return filter_.contains(e);
     }
   };
 

@@ -9,6 +9,7 @@
 #include <tbb/tbb_stddef.h>
 #endif
 
+#include <dune/common/static_assert.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/grid/utility/entityrange.hh>
@@ -123,6 +124,64 @@ namespace Dune {
     EntitySet entitySet_;
     HostIterator begin_;
     HostIterator end_;
+  };
+
+  //! combine an EntitySet and an EntityRange into an IterableEntitySet
+  /**
+   * This combines a set and a range of entities into an IterableEntitySet.
+   * \c contains() is forwarded to the set, everything else to the range.
+   */
+  template<class Set, class Range>
+  class HybridEntitySet
+  {
+    dune_static_assert
+    ( (is_same<typename Set::Entity, typename Range::Entity>::value),
+      "Type of Set::Entity and Range::Entity must match");
+
+  public:
+    //! category
+    typedef IterableEntitySetTag EntitySetCategory;
+    //! type of entity
+    typedef typename Range::Entity Entity;
+    //! Iterator
+    typedef typename Range::Iterator Iterator;
+    //! type of Size
+    typedef typename Range::Size Size;
+
+    //! Construct
+    /**
+     * This stores copies of the passed-in values.
+     */
+    HybridEntitySet(const Set &set, const Range &range) :
+      set_(set), range_(range)
+    { }
+
+    //! Returns true if e is contained in the Set
+    bool contains(const Entity &e) const
+    {
+      return set_.contains(e);
+    }
+
+    //! Number of Elements visited by an iterator
+    Size size() const
+    {
+      return range_.size();
+    }
+
+    //! Create a begin iterator
+    Iterator begin() const
+    {
+      return range_.begin();
+    }
+    //! Create a end iterator
+    Iterator end() const
+    {
+      return range_.end();
+    }
+
+  private:
+    Set set_;
+    Range range_;
   };
 
 } // namespace Dune
