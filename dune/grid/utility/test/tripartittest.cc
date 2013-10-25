@@ -24,6 +24,7 @@
 #include <dune/grid/io/file/gmshreader.hh>
 #include <dune/grid/io/file/vtk/function.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
+#include <dune/grid/utility/partitioning/mapped.hh>
 #include <dune/grid/utility/tripartit.hh>
 #include <dune/grid/yaspgrid.hh>
 
@@ -59,7 +60,7 @@ public:
   double evaluate(int comp, const Entity &e,
                   const Dune::FieldVector< ctype, dim > &xi) const
   {
-    return partitioning_.getPartition(e);
+    return partitioning_.getPartitionId(e);
   }
   std::string name() const
   {
@@ -106,7 +107,7 @@ void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
 {
   pass(result);
 
-  typedef Dune::GeneralFilteredPartitioning<GV> MapPartitioning;
+  typedef Dune::MappedPartitioning<GV, 0> MapPartitioning;
   MapPartitioning mapPartitioning(gv);
 
   typedef Dune::SeedListPartitioning<typename GV::Grid, 0> SeedPartitioning;

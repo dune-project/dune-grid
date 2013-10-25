@@ -13,66 +13,9 @@
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
-#include <dune/grid/utility/entityset.hh>
-#include <dune/grid/utility/iterableentityset.hh>
 #include <dune/grid/utility/partitioning/seedlist.hh>
 
 namespace Dune {
-
-  template<class GridView>
-  class GeneralFilteredPartitioning
-  {
-    typedef MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout>
-      Mapper;
-    typedef std::vector<std::size_t> Vector;
-    typedef PartitionMapEntitySet<typename GridView::template Codim<0>::Entity,
-                                  Mapper, Vector, std::size_t> Filter;
-
-  public:
-    typedef IterableEntitySet<
-      Filter,
-      typename GridView::template Codim<0>::Iterator> EntitySet;
-    typedef typename EntitySet::Entity Element;
-
-    GeneralFilteredPartitioning(const GridView &gv) :
-      gv_(gv), mapper_(gv_), data_(mapper_.size(), 0)
-    { }
-
-    std::size_t getPartition(const Element &e) const
-    {
-      return data_[mapper_.map(e)];
-    }
-
-    void setPartition(const Element &e, std::size_t p)
-    {
-      data_[mapper_.map(e)] = p;
-    }
-
-    std::size_t partitions() const
-    {
-      if(data_.size() == 0)
-        return 0;
-      else
-        return *std::max_element(data_.begin(), data_.end())+1;
-    }
-    // return number of elements visited by partition
-    std::size_t size(std::size_t partition) const
-    {
-      return std::count(data_.begin(), data_.end(), partition);
-    }
-
-    // entityset for whole partitioning
-    EntitySet entitySet(std::size_t partition) const
-    {
-      return EntitySet(Filter(mapper_, data_, partition),
-                       gv_.template begin<0>(), gv_.template end<0>());
-    }
-
-  private:
-    GridView gv_;
-    Mapper mapper_;
-    std::vector<std::size_t> data_;
-  };
 
   class Coloring
   {
@@ -142,7 +85,7 @@ namespace Dune {
       newPartitions_ = seedPartitioning_.splitPartition(oldPartition_, data_);
       for(std::size_t partition : newPartitions_)
         for(const auto &e : seedPartitioning_.partition(partition))
-          mapPartitioning_.setPartition(e, partition);
+          mapPartitioning_.setPartitionId(e, partition);
     }
   };
 
@@ -414,19 +357,19 @@ namespace Dune {
 
     std::size_t color(const typename GV::template Codim<0>::Entity &e) const
     {
-      return color_[mapPartitioning_.getPartition(e)];
+      return color_[mapPartitioning_.getPartitionId(e)];
     }
 
     std::vector<typename SeedPartitioning::Size>
     tryRefine(std::size_t pId, std::size_t dir, std::size_t divisor)
     {
-      typedef HybridEntitySet<typename MapPartitioning::EntitySet,
+      typedef HybridEntitySet<typename MapPartitioning::Partition,
                               typename SeedPartitioning::Partition> EntitySet;
       typedef HybridRepartitionPolicy<SeedPartitioning,
                                       MapPartitioning> RepartitionPolicy;
       std::vector<typename SeedPartitioning::Size> newPartitionIds;
       dirPartitioners_[dir].partition
-        (EntitySet(mapPartitioning_.entitySet(pId),
+        (EntitySet(mapPartitioning_.partition(pId),
                    seedPartitioning_.partition(pId)),
          RepartitionPolicy(seedPartitioning_, mapPartitioning_, pId,
                            newPartitionIds),

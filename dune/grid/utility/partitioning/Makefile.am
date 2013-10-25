@@ -6,6 +6,7 @@ SUBDIRS =					\
 mydir =  $(includedir)/dune/grid/utility/gridviewpartitioning
 my_HEADERS =					\
 	interface.hh				\
+	mapped.hh				\
 	ranged.hh				\
 	seedlist.hh				\
 	strided.hh
