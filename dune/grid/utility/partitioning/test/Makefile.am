@@ -3,6 +3,8 @@ check_SCRIPTS =
 TESTS =
 CLEANFILES =
 
+headercheck_IGNORE = finitevolume_main.hh
+
 AM_CPPFLAGS = @AM_CPPFLAGS@			\
 	$(DUNEMPICPPFLAGS)			\
 	$(TBB_CPPFLAGS)
