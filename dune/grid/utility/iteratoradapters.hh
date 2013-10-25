@@ -245,6 +245,140 @@ namespace Dune {
     }
   };
 
+  //////////////////////////////////////////////////////////////////////
+  //
+  // EntityToSeedIteratorAdapter
+  //
+
+  //! adapt an iterator over entities into an iterator over seeds
+  template<class EntityIterator,
+           class Category =
+             typename std::iterator_traits<EntityIterator>::iterator_category>
+  class EntityToSeedIteratorAdapter :
+    public ForwardIteratorFacade<
+      EntityToSeedIteratorAdapter<EntityIterator, Category>,
+      const typename std::iterator_traits<EntityIterator>::value_type::
+        EntitySeed,
+      typename std::iterator_traits<EntityIterator>::value_type::EntitySeed,
+      typename std::iterator_traits<EntityIterator>::difference_type>
+  {
+    typedef typename std::iterator_traits<EntityIterator>::value_type::
+      EntitySeed Seed;
+    typedef ForwardIteratorFacade<
+      EntityToSeedIteratorAdapter, const Seed, Seed,
+      typename std::iterator_traits<EntityIterator>::difference_type
+      > Base;
+
+    EntityIterator eIt_;
+  public:
+    typedef typename Base::Reference Reference;
+
+    //! construct
+    EntityToSeedIteratorAdapter(const EntityIterator &eIt) :
+      eIt_(eIt)
+    { }
+
+    //! For Iteratorfacade
+    Reference dereference() const
+    {
+      return eIt_->seed();
+    }
+
+    //! For Iteratorfacade
+    bool equals(const EntityToSeedIteratorAdapter &other) const
+    {
+      return eIt_ == other.eIt_;
+    }
+
+    //! For Iteratorfacade
+    void increment()
+    {
+      ++eIt_;
+    }
+  };
+
+  //! adapt an iterator over entities into an iterator over seeds
+  /**
+   * This is the specialization for random-access iterators.
+   */
+  template<class EntityIterator>
+  class EntityToSeedIteratorAdapter<EntityIterator,
+                                    std::random_access_iterator_tag> :
+    public ForwardIteratorFacade<
+      EntityToSeedIteratorAdapter<EntityIterator,
+                                  std::random_access_iterator_tag>,
+      const typename std::iterator_traits<EntityIterator>::value_type::
+        EntitySeed,
+      typename std::iterator_traits<EntityIterator>::value_type::EntitySeed,
+      typename std::iterator_traits<EntityIterator>::difference_type>
+  {
+    typedef typename std::iterator_traits<EntityIterator>::value_type::
+      EntitySeed Seed;
+    typedef ForwardIteratorFacade<
+      EntityToSeedIteratorAdapter, const Seed, Seed,
+      typename std::iterator_traits<EntityIterator>::difference_type
+      > Base;
+
+    EntityIterator eIt_;
+  public:
+    typedef typename Base::Reference Reference;
+    typedef typename Base::DifferenceType DifferenceType;
+
+    //! construct
+    EntityToSeedIteratorAdapter(const EntityIterator &eIt) :
+      eIt_(eIt)
+    { }
+
+    //! For Iteratorfacade
+    Reference dereference() const
+    {
+      return eIt_->seed();
+    }
+
+    //! For Iteratorfacade
+    Reference elementAt(DifferenceType n) const
+    {
+      return (eIt_ + n)->seed();
+    }
+
+    //! For Iteratorfacade
+    bool equals(const EntityToSeedIteratorAdapter &other) const
+    {
+      return eIt_ == other.eIt_;
+    }
+
+    //! For Iteratorfacade
+    void increment()
+    {
+      ++eIt_;
+    }
+
+    //! For Iteratorfacade
+    void decrement()
+    {
+      --eIt_;
+    }
+
+    //! For Iteratorfacade
+    void advance(DifferenceType n)
+    {
+      std::advance(eIt_, n);
+    }
+
+    //! For Iteratorfacade
+    DifferenceType distanceTo(const EntityToSeedIteratorAdapter &other) const
+    {
+      return std::distance(eIt_, other.eIt_);
+    }
+  };
+
+  template<class EntityIterator>
+  EntityToSeedIteratorAdapter<EntityIterator>
+  makeEntityToSeedIteratorAdaptor(const EntityIterator &eIt)
+  {
+    return EntityToSeedIteratorAdapter<EntityIterator>(eIt);
+  }
+
 } // namespace Dune
 
 #endif // DUNE_GRID_UTILITY_ITERATORADAPTERS_HH

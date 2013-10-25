@@ -8,60 +8,10 @@
 #include <utility>
 #include <vector>
 
-#include <dune/common/iteratorfacades.hh>
-
 #include <dune/grid/utility/entityrange.hh>
 #include <dune/grid/utility/iteratoradapters.hh>
 
 namespace Dune {
-
-  template<class EntityIterator,
-           class Category =
-             typename std::iterator_traits<EntityIterator>::iterator_category>
-  class EntitySeedIteratorAdapter :
-    public ForwardIteratorFacade<
-      EntitySeedIteratorAdapter<EntityIterator, Category>,
-      const typename EntityIterator::Entity::EntitySeed,
-      typename EntityIterator::Entity::EntitySeed,
-      typename std::iterator_traits<EntityIterator>::difference_type>
-  {
-    typedef typename EntityIterator::Entity::EntitySeed Seed;
-    typedef ForwardIteratorFacade<
-      EntitySeedIteratorAdapter, const Seed, Seed,
-      typename std::iterator_traits<EntityIterator>::difference_type
-      > Base;
-
-    EntityIterator eIt_;
-  public:
-    typedef typename Base::Reference Reference;
-
-    EntitySeedIteratorAdapter(const EntityIterator &eIt) :
-      eIt_(eIt)
-    { }
-
-    Seed dereference() const
-    {
-      return eIt_->seed();
-    }
-
-    bool equals(const EntitySeedIteratorAdapter &other) const
-    {
-      return eIt_ == other.eIt_;
-    }
-
-    void increment()
-    {
-      ++eIt_;
-    }
-
-  };
-
-  template<class EntityIterator>
-  EntitySeedIteratorAdapter<EntityIterator>
-  makeSeedIteratorAdaptor(const EntityIterator &eIt)
-  {
-    return EntitySeedIteratorAdapter<EntityIterator>(eIt);
-  }
 
   template<class Grid, int codim>
   class SeedListPartitioning
@@ -81,8 +31,8 @@ namespace Dune {
     template<class GV>
     SeedListPartitioning(const GV &gv) :
       gridp_(&gv.grid()),
-      seedLists_(makeSeedIteratorAdaptor(gv.template begin<codim>()),
-                 makeSeedIteratorAdaptor(gv.template end<codim>())),
+      seedLists_(makeEntityToSeedIteratorAdaptor(gv.template begin<codim>()),
+                 makeEntityToSeedIteratorAdaptor(gv.template end<codim>())),
       pBegin_(1, 0), pEnd_(1, seedLists_.size())
     { }
 
