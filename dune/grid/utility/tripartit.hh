@@ -14,7 +14,7 @@
 
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/utility/entityset.hh>
-#include <dune/grid/utility/filteringentityset.hh>
+#include <dune/grid/utility/iterableentityset.hh>
 #include <dune/grid/utility/seedentityset.hh>
 
 namespace Dune {

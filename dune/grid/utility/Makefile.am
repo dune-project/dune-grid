@@ -1,7 +1,7 @@
 # $Id$
 
 SUBDIRS =					\
-	gridviewpartitioning			\
+	partitioning				\
 	test
 
 gridutilitydir =  $(includedir)/dune/grid/utility
@@ -9,7 +9,6 @@ gridutility_HEADERS =				\
 	entitycommhelper.hh			\
 	entityrange.hh				\
 	entityset.hh				\
-	filteringentityset.hh			\
 	filteringgridview.hh			\
 	grapedataioformattypes.hh		\
 	gridinfo-gmsh-main.hh			\
