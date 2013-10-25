@@ -19,41 +19,19 @@
 
 namespace Dune {
 
-  template<class GV, class Vector, class ID,
-           class Mapper = MultipleCodimMultipleGeomTypeMapper
-                            <GV, MCMGElementLayout> >
-  class GeneralFilteredEntitySet :
-    public IterableEntitySet<
-      PartitionMapEntitySet<typename GV::template Codim<0>::Entity,
-                            Mapper, Vector, ID>,
-      typename GV::template Codim<0>::Iterator>
-  {
-  public:
-    typedef typename GV::template Codim<0>::Entity Entity;
-
-  private:
-    typedef PartitionMapEntitySet<Entity, Mapper, Vector, ID> Filter;
-    typedef IterableEntitySet<Filter,
-                              typename GV::template Codim<0>::Iterator> Base;
-
-  public:
-    GeneralFilteredEntitySet(const GV &gv, const Vector &data, ID id,
-                             const Mapper &mapper) :
-      Base(Filter(mapper, data, id), gv.template begin<0>(),
-           gv.template end<0>())
-    { }
-  };
-
   template<class GridView>
   class GeneralFilteredPartitioning
   {
     typedef MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout>
       Mapper;
     typedef std::vector<std::size_t> Vector;
+    typedef PartitionMapEntitySet<typename GridView::template Codim<0>::Entity,
+                                  Mapper, Vector, std::size_t> Filter;
 
   public:
-    typedef GeneralFilteredEntitySet<GridView, Vector, std::size_t,
-                                     Mapper> EntitySet;
+    typedef IterableEntitySet<
+      Filter,
+      typename GridView::template Codim<0>::Iterator> EntitySet;
     typedef typename EntitySet::Entity Element;
 
     GeneralFilteredPartitioning(const GridView &gv) :
@@ -86,7 +64,8 @@ namespace Dune {
     // entityset for whole partitioning
     EntitySet entitySet(std::size_t partition) const
     {
-      return EntitySet(gv_, data_, partition, mapper_);
+      return EntitySet(Filter(mapper_, data_, partition),
+                       gv_.template begin<0>(), gv_.template end<0>());
     }
 
   private:
