@@ -3,7 +3,7 @@
 #ifndef DUNE_ALBERTA_LEAFITERATOR_HH
 #define DUNE_ALBERTA_LEAFITERATOR_HH
 
-#include <dune/grid/common/leafiterator.hh>
+#include <dune/grid/common/entityiterator.hh>
 
 #include <dune/grid/albertagrid/treeiterator.hh>
 
