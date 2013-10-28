@@ -177,7 +177,7 @@ namespace Dune {
                       GridViewInfo<typename Entity::ctype> &gridViewInfo)
     {
       typedef typename Entity::ctype ctype;
-      static const std::size_t dimw = Entity::dimensionworld;
+      static const std::size_t dimw = Entity::Geometry::dimensionworld;
       static const std::size_t dim = Entity::dimension;
       std::vector<FieldVector<ctype, dimw> > coords;
       for(int i = 0; i < refelem.size(codim); ++i) {
