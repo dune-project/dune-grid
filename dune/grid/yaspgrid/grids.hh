@@ -31,7 +31,6 @@ namespace Dune {
 
   // forward declarations
   template<int d, typename ct> class YGrid;
-  template<int d, typename ct> class SubYGrid;
 
   static const double Ytolerance=1E-13;
 
@@ -88,47 +87,6 @@ namespace Dune {
   template<int d, typename ct>
   class YGrid {
   public:
-    //! define types used for arguments
-    typedef FieldVector<int, d>  iTupel;
-    typedef FieldVector<ct, d> fTupel;
-
-    //! Destructor
-    virtual ~YGrid()
-    {}
-
-    //! Make an empty YGrid with origin 0
-    YGrid () :
-      _origin(0), _coords(), _r(0.0)
-    {}
-
-    //! Make YGrid from coordinate vectors
-    YGrid (iTupel o, Dune::array<std::vector<ct>,d> coords, fTupel r) :
-      _origin(o), _coords(coords), _r(r)
-    {}
-
-    //! Return origin in direction i
-    int origin (int i) const
-    {
-      return _origin[i];
-    }
-
-    //! return reference to origin
-    const iTupel& origin () const
-    {
-      return _origin;
-    }
-
-    //! get coordinate vector in direction i
-    const std::vector<ct>& getCoords (int i) const
-    {
-      return _coords[i];
-    }
-
-    //! get the array of coordinate vectors
-    const Dune::array<std::vector<ct>,d>& getCoords () const
-    {
-      return _coords;
-    }
 
     /** Return size (number of grid entities) in direction i.
     *   This depends on the last entry of the coord vector to define a entity itself or only a gridwith.
@@ -173,18 +131,6 @@ namespace Dune {
     int max (int i) const
     {
       return _origin[i] + size(i) - 1;
-    }
-
-    //! Return shift tupel
-    const fTupel& shift () const
-    {
-      return _r;
-    }
-
-    //! Return shift in direction i
-    ct shift (int i) const
-    {
-      return _r[i];
     }
 
     //! Return true if YGrid is empty, i.e. has size 0 in all directions.
@@ -238,8 +184,6 @@ namespace Dune {
     }
 
     //! return grid moved by the vector v
-    //TODO ist dies hier nur ein Indexmove? Alles andere wuerde wohl eine mittlere Katastrophe werden. bzw ist nicht definiert!
-    //TODO im zusammenhang mit periodic hierher zurueckkehren
     YGrid<d,ct> move (iTupel v) const
     {
       for (int i=0; i<d; i++)
@@ -484,17 +428,15 @@ namespace Dune {
      the consecutive index in the enclosing grid.
    */
   template<int d, typename ct>
-  class SubYGrid : public YGrid<d,ct> {
+  class SubYGrid
+  {
   public:
-    typedef typename YGrid<d,ct>::iTupel iTupel;
-    typedef typename YGrid<d,ct>::fTupel fTupel;
-
-    //! Destructor
-    virtual ~SubYGrid()
-    {}
+    typedef FieldVector<int, d> iTupel;
+    typedef FieldVector<ct,d> fTupel;
 
     //! make uninitialized subgrid
-    SubYGrid () {}
+    SubYGrid () : _origin(0), _r(0.0), _offset(0), _supersize(0)
+    {}
 
     /** @brief make grid without coordinate information
      *  @param origin origin of the grid in global coordinates
@@ -505,7 +447,6 @@ namespace Dune {
      *  information. This avoids sending coordinates in the parallel case.
      */
     SubYGrid(iTupel origin, iTupel size, fTupel shift)
-      : YGrid<d,ct>::YGrid(origin, Dune::array<std::vector<ct>,d >(), shift)
     {
       iTupel cSize(size);
       for (int i=0; i<d; i++)
@@ -518,30 +459,31 @@ namespace Dune {
       }
     }
 
-    /** @brief cut coordinates from a larger grid
-     *  @param origin origin of the grid to be constructed
-     *  @param size size of the grid to be constructed
-     *  @param enclosing the grid to take coordinates from
-     */
-    Dune::array<std::vector<ct>,d> cutCoords(iTupel origin, iTupel size, YGrid<d,ct>& enclosing)
-    {
-      Dune::array<std::vector<ct>,d> result;
-      for (int i=0; i<d; i++)
-      {
-        typename std::vector<ct>::const_iterator begin = enclosing.getCoords(i).begin();
-        typename std::vector<ct>::const_iterator end = enclosing.getCoords(i).end();
-        int offset = origin[i] - enclosing.origin(i);
-        int endOffset = enclosing.size(i) - size[i] - offset;
-        begin = begin + offset;
-        end = end - endOffset;
-        if (end-begin>0)
-        {
-          result[i].resize(end-begin);
-          std::copy(begin, end, result[i].begin());
-        }
-      }
-      return result;
-    }
+    //TODO evaluate necessity when used
+//     /** @brief cut coordinates from a larger grid
+//      *  @param origin origin of the grid to be constructed
+//      *  @param size size of the grid to be constructed
+//      *  @param enclosing the grid to take coordinates from
+//      */
+//     Dune::array<std::vector<ct>,d> cutCoords(iTupel origin, iTupel size, YGrid<d,ct>& enclosing)
+//     {
+//       Dune::array<std::vector<ct>,d> result;
+//       for (int i=0; i<d; i++)
+//       {
+//         typename std::vector<ct>::const_iterator begin = enclosing.getCoords(i).begin();
+//         typename std::vector<ct>::const_iterator end = enclosing.getCoords(i).end();
+//         int offset = origin[i] - enclosing.origin(i);
+//         int endOffset = enclosing.size(i) - size[i] - offset;
+//         begin = begin + offset;
+//         end = end - endOffset;
+//         if (end-begin>0)
+//         {
+//           result[i].resize(end-begin);
+//           std::copy(begin, end, result[i].begin());
+//         }
+//       }
+//       return result;
+//     }
 
     /** @brief make a subgrid by taking coordinates from a larger grid
      *  @param origin origin of the grid to be constructed
@@ -549,11 +491,12 @@ namespace Dune {
      *  @param enclosing the grid to take coordinates and shift vector from
      */
     SubYGrid (iTupel origin, iTupel size, SubYGrid<d,ct>& enclosing)
-      :  YGrid<d,ct>::YGrid(origin, cutCoords(origin, size, enclosing), enclosing.shift())
+      :  _origin(origin), _shift(enclosing.shift()), _coords(enclosing.getCoords()), _size(size)
     {
       for (int i=0; i<d; i++)
       {
         _offset[i] = origin[i] - enclosing.origin(i) + enclosing.offset(i);
+        _coordOffset[i] = enclosing.coordOffset(i) + _offset[i];
         _supersize[i] = enclosing.supersize(i);
       }
     }
@@ -565,30 +508,45 @@ namespace Dune {
      *  @param coords the coordinate vectors to be used
      *  @param r the shift vector
      */
-    SubYGrid (iTupel origin, iTupel offset, iTupel supersize, Dune::array<std::vector<ct>,d> coords, fTupel r)
-      : YGrid<d,ct>::YGrid(origin, coords, r), _offset(offset), _supersize(supersize)
+    SubYGrid (iTupel origin,  fTupel shift, Dune::array<std::vector<ct>,d>* coords, iTupel coordOffset, iTupel size, iTupel offset, iTupel supersize)
+      : _origin(origin), _shift(shift), _coords(coords), _coordOffset(coordOffset), _size(size), _offset(offset), _supersize(supersize)
+    {}
+
+    //! Return origin in direction i
+    int origin (int i) const
     {
-      for (int i=0; i<d; ++i)
-      {
-        if (offset[i]<0)
-          std::cout << "warning: offset["
-          << i <<"] negative in SubYGrid"
-          << std::endl;
-        if (-offset[i]+supersize[i]<this->size(i))
-          std::cout << "warning: subgrid larger than enclosing grid in direction "
-          << i <<" in SubYGrid"
-          << std::endl;
-      }
+      return _origin[i];
     }
 
-    //! Make SubYGrid from YGrid
-    SubYGrid (YGrid<d,ct> base) : YGrid<d,ct>(base)
+    //! return reference to origin
+    const iTupel& origin () const
     {
-      for (int i=0; i<d; ++i)
-      {
-        _offset[i] = 0;
-        _supersize[i] = this->size(i);
-      }
+      return _origin;
+    }
+
+    //! Return shift tupel
+    const fTupel& shift () const
+    {
+      return _shift;
+    }
+
+    //! Return shift in direction i
+    ct shift (int i) const
+    {
+      return _shift[i];
+    }
+
+
+    //! get coordinate vector in direction i
+    std::vector<ct>* const getCoords (int i) const
+    {
+      return _coords[i];
+    }
+
+    //! get the array of coordinate vectors
+    Dune::array<std::vector<ct>,d>* const getCoords () const
+    {
+      return _coords;
     }
 
     //! Return offset to origin of enclosing grid
@@ -615,8 +573,52 @@ namespace Dune {
       return _supersize;
     }
 
+    //! return size in direction i
+    int size (int i) const
+    {
+      return _size[i];
+    }
+
+    //! retrun size
+    iTupel size () const
+    {
+      return _size;
+    }
+
+    //! Return total size of index set which is the product of all size per direction.
+    int totalsize () const
+    {
+      int s=1;
+      for (int i=0; i<d; ++i)
+        s *= size(i);
+      return s;
+    }
+
+    //! Return minimum index in direction i
+    int min (int i) const
+    {
+      return _origin[i];
+    }
+
+    //! Return maximum index in direction i
+    int max (int i) const
+    {
+      return _origin[i] + size(i) - 1;
+    }
+
+    //! Return true if YGrid is empty, i.e. has size 0 in all directions.
+    bool empty () const
+    {
+      for (int i=0; i<d; ++i)
+      {
+        if (size(i) == 0)
+          return true;
+      }
+      return false;
+    }
+
     //! Return SubYGrid of supergrid of self which is the intersection of self and another YGrid
-    virtual SubYGrid<d,ct> intersection (const YGrid<d,ct>& r) const
+    SubYGrid<d,ct> intersection (const SubYGrid<d,ct>& r) const
     {
       for (int i=0; i<d; i++)
       {
@@ -631,36 +633,17 @@ namespace Dune {
 
       iTupel neworigin;
       iTupel newsize;
-      iTupel offset;
-      iTupel cOffset;
-
+      iTupel newcoordOffset;
+      iTupel newoffset;
       for (int i=0; i<d; ++i)
       {
-        // intersect
-        neworigin[i] = std::max(this->min(i),r.min(i));
-        newsize[i] = std::min(this->max(i),r.max(i)) - neworigin[i] + 1;
-        if (this->shift(i) > Ytolerance)
-          newsize[i]++;
-        if (newsize[i]<0)
-        {
-          newsize[i] = 0;
-          neworigin[i] = this->min(i);
-        }
-
-        // offset to own origin
-        offset[i] = _offset[i] + neworigin[i] - this->origin(i);
-        cOffset[i] = neworigin[i] - this->origin(i);
+        neworigin[i] = std::max(origin(i),r.origin(i));
+        newsize[i] = std::min(max(i),r.max(i)) - neworigin[i] + 1;
+        newCoordOffset[i] = coordOffset(i) + neworigin[i] - origin(i);
+        offset[i] = offset(i) + neworigin[i] - origin(i);
       }
 
-      //copy the coordinates
-      Dune::array<std::vector<ct>,d> newcoords;
-      for (int i=0; i<d; ++i)
-      {
-        newcoords[i].resize(newsize[i]);
-        std::copy(this->_coords[i].begin() + cOffset[i], this->_coords[i].begin() + cOffset[i] + newsize[i], newcoords[i].begin());
-      }
-
-      return SubYGrid<d,ct>(neworigin, offset, _supersize, newcoords, this->shift());
+      return SubYGrid<d,ct>(neworigin, shift(), getCoords(), newcoordOffset, newsize, newoffset, _supersize);
     }
 
     /*! SubIterator is an Iterator that provides in addition the consecutive
@@ -1031,6 +1014,11 @@ namespace Dune {
     }
 
   private:
+    iTupel _origin;
+    fTupel _shift;
+    Dune::array<std::vector<ct>,d>* _coords;
+    iTupel _coordOffset;
+    iTupel _size;
     iTupel _offset;    //!< offset to origin of the enclosing grid
     iTupel _supersize; //!< size of the enclosing grid
   };

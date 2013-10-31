@@ -246,6 +246,8 @@ namespace Dune {
         return level_;
       }
 
+      Dune::array<std::vector<ctype>,dim> coords;
+
       // cell (codim 0) data
       SubYGrid<dim,ctype> cell_overlap;     // we have no ghost cells, so our part is overlap completely
       SubYGrid<dim,ctype> cell_interior;    // interior cells are a subgrid of all cells
@@ -375,6 +377,7 @@ namespace Dune {
       g.overlap = overlap;
       g.mg = this;
       g.level_ = level;
+      g.coords = coords;
 
       // r_i = 0.5, because we are interested in cell centers. Multiplication with h_i happens later on.
       fTupel r(0.5);
@@ -384,8 +387,10 @@ namespace Dune {
       Dune::FieldVector<bool,dim> ovlp_up(false);
 
       iTupel o_overlap;
+      iTupel s_overlap;
       for (int i=0; i<dim; i++)
       {
+        s_overlap[i] = coords[i].size()-1;
         //in the periodic case there is always overlap
         if (periodic[i])
         {
@@ -412,7 +417,7 @@ namespace Dune {
       }
 
       //build the cell grid with overlap
-      g.cell_overlap = SubYGrid<dim,ctype>(YGrid<dim,ctype>(o_overlap, coords, r));
+      g.cell_overlap = SubYGrid<dim,ctype>(o_overlap, r, &coords, iTupel(0), s_overlap, iTupel(0), s_overlap);
 
       // now make the interior grid a subgrid of the overlapping grid
       iTupel sizeInterior;
@@ -436,9 +441,13 @@ namespace Dune {
 
       // now the vertex grid stored in this processor. All other vertex grids are subgrids of this
       iTupel o_vertex_overlapfront;
+      iTupel s_vertex_overlapfront;
       for (int i=0; i<dim; i++)
+      {
         o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
-      g.vertex_overlapfront = SubYGrid<dim,ctype>(YGrid<dim,ctype>(o_vertex_overlapfront,coords,r));
+        s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1;
+      }
+      g.vertex_overlapfront = SubYGrid<dim,ctype>(o_vertex_overlapfront,r,&coords,iTupel(0),s_vertex_overlapfront, iTupel(0), s_vertex_overlapfront);
 
       // now overlap only (i.e. without front), is subgrid of overlapfront
       iTupel o_vertex_overlap;
@@ -446,7 +455,7 @@ namespace Dune {
       for (int i=0; i<dim; i++)
       {
         o_vertex_overlap[i] = o_vertex_overlapfront[i];
-        s_vertex_overlap[i] = g.vertex_overlapfront.size(i);
+        s_vertex_overlap[i] = s_vertex_overlapfront[i];
         if (ovlp_low[i])
         {
           s_vertex_overlap[i]--;
