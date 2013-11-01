@@ -444,7 +444,6 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
 {
   typedef typename GridView::Grid::ctype ct;
   static const int dimworld = GridView::dimensionworld;
-  typedef Dune::VirtualRefinement<dim, ct> Refinement;
 
 
   const typename GridView::IndexSet& indexSet = gridView.indexSet();
