@@ -136,10 +136,12 @@ namespace Dune
       update();
     }
 
-    /** @brief Map entity to array index.
-
-                \param e Reference to codim cc entity, where cc is the template parameter of the function.
-                \return An index in the range 0 ... Max number of entities in set - 1.
+    /*!
+     * \brief Map entity to array index.
+     *
+     * \tparam EntityType
+     * \param e Reference to codim \a EntityType entity.
+     * \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
     int map (const EntityType& e) const
@@ -155,7 +157,7 @@ namespace Dune
 
        \param e Reference to codim 0 entity.
        \param i Number of subentity of e
-       \param codim Codimension of the subendity
+       \param codim Codimension of the subentity
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
     int map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
