@@ -143,9 +143,9 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
 
     // handle edges
     size_t numEdges = eIt->template count<dim - 1>();
-    for (size_t numEdges = 0; numEdges < numVertices; ++numEdges)
+    for (size_t curEdge = 0; curEdge < numEdges; ++curEdge)
     {
-      index = mapper.map(*eIt, numEdges, dim - 1);
+      index = mapper.map(*eIt, curEdge, dim - 1);
       min = std::min(min, index);
       max = std::max(max, index);
       indices.insert(index);
