@@ -10,6 +10,6 @@
 #include <dune/grid/alugrid.hh>
 
 const std::string programName = "dune-alusimplex-3d-to-vtk-volume";
-typedef Dune::ALUSimplexGrid<3, 3> Grid;
+typedef Dune::ALUGrid<3, 3, Dune::simplex, Dune::nonconforming> Grid;
 
 #include "main-volume.hh"

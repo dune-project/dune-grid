@@ -164,6 +164,7 @@ namespace Dune
     int map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
       GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
+      assert(GlobalGeometryTypeIndex::index(gt) < n);
       return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 

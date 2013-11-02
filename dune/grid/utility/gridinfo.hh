@@ -20,7 +20,7 @@
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
 
-#include <dune/geometry/mockgeometry.hh>
+#include <dune/geometry/multilineargeometry.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
 
@@ -177,7 +177,7 @@ namespace Dune {
                       GridViewInfo<typename Entity::ctype> &gridViewInfo)
     {
       typedef typename Entity::ctype ctype;
-      static const std::size_t dimw = Entity::dimensionworld;
+      static const std::size_t dimw = Entity::Geometry::dimensionworld;
       static const std::size_t dim = Entity::dimension;
       std::vector<FieldVector<ctype, dimw> > coords;
       for(int i = 0; i < refelem.size(codim); ++i) {
@@ -191,7 +191,7 @@ namespace Dune {
         coords.resize( refelem.size(i, codim, dim) );
         for(std::size_t corner = 0; corner < coords.size(); ++corner)
           coords[ corner ] = geo.corner( refelem.subEntity( i, codim, corner, dim ) );
-        MockGeometry<ctype, dim-codim, dimw> mygeo(gt, coords);
+        MultiLinearGeometry<ctype, dim-codim, dimw> mygeo(gt, coords);
 
         ctype volume = mygeo.volume();
         EntityInfo<ctype> &ei = gridViewInfo[mygeo.type()];

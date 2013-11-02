@@ -724,8 +724,8 @@ void Dune::AmiraMeshWriter<GridView>::writeSurfaceGrid(const GridView& gridView,
 
   for (; it!=endIt; ++it) {
 
-    const Dune::GenericReferenceElement<double,dim>& refElement =
-      Dune::GenericReferenceElements<double, dim>::general(it->type());
+    const Dune::ReferenceElement<double,dim>& refElement =
+      Dune::ReferenceElements<double, dim>::general(it->type());
 
     int n = refElement.size(dim);
 

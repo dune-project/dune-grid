@@ -181,8 +181,6 @@ namespace Dune
     IntersectionIterator(const IntersectionIterator& i) :
       realIterator(i.realIterator) {}
     //@}
-
-    typedef typename remove_const<GridImp>::type mutableGridImp;
   };
 
 } // namespace Dune

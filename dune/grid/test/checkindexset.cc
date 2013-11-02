@@ -69,8 +69,8 @@ namespace Dune
     const GeometryType type = en.type();
     assert( type == en.geometry().type() );
 
-    const GenericReferenceElement< coordType, dim > &refElem
-      = GenericReferenceElements< coordType, dim >::general( type );
+    const ReferenceElement< coordType, dim > &refElem
+      = ReferenceElements< coordType, dim >::general( type );
 
     // check whether the element has the number of codim-subentities mandated by the reference element
     if(en.template count<codim>() != refElem.size(0,0,codim))
@@ -414,8 +414,8 @@ namespace Dune
 
       GeometryType type = refit->type();
 
-      const GenericReferenceElement< coordType, dim > &refElem
-        = GenericReferenceElements< coordType, dim >::general( type );
+      const ReferenceElement< coordType, dim > &refElem
+        = ReferenceElements< coordType, dim >::general( type );
 
       // print dune reference element
       sout << "Dune reference element provides: \n";

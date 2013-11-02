@@ -29,7 +29,7 @@ void check_yasp(bool p0=false) {
   Dune::array<int,dim> s;
   std::fill(s.begin(), s.end(), 2);
   s[0] = 6;
-  std::bitset<dim> p(0);
+  std::bitset<dim> p;
   p[0] = p0;
   int overlap = 1;
 
@@ -59,6 +59,9 @@ void check_yasp(bool p0=false) {
   // check grid adaptation interface
   checkAdaptRefinement(grid);
   checkPartitionType( grid.leafView() );
+
+  // test operator<<
+  std::cout << grid << std::endl;
 }
 
 int main (int argc , char **argv) {

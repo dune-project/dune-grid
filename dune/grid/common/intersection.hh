@@ -13,11 +13,8 @@ namespace Dune
       with a "neighboring" element or with the domain
       boundary.
 
-     Template parameters are:
-
-     - <tt>GridImp</tt> Type that is a model of Dune::Grid
-     - <tt>IntersectionImp</tt> Class template that is a model of
-     Dune::Intersection
+     \tparam GridImp Type that is a model of Dune::Grid
+     \tparam IntersectionImp Class template that is a model of Dune::Intersection
 
      <h2>Overview</h2>
 
@@ -196,10 +193,10 @@ namespace Dune
     /** \brief Codim 1 geometry returned by geometry() */
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
 
-    /** \brief local coordinate type used as parameter for the normals */
+    /** \brief Type for vectors of coordinates on the intersection */
     typedef typename Geometry::LocalCoordinate LocalCoordinate;
 
-    /** \brief global coordinate type used as parameter for the normals */
+    /** \brief Type for normal vectors */
     typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
 
     /** \brief Codim 1 geometry returned by geometryInInside and geometryInOutside() */
@@ -217,15 +214,16 @@ namespace Dune
     //! @brief Export dimension of world
     enum { dimensionworld=dimworld /*!< dimension of world */ };
 
-    //! define type used for coordinates in grid module
+    //! Type of individual coefficients of coordinate vectors
     typedef typename GridImp::ctype ctype;
 
-    //! return true if intersection is with interior or exterior boundary (see the cases above)
+    //! Return true if intersection is with interior or exterior boundary (see the cases above)
     bool boundary () const
     {
       return this->real.boundary();
     }
 
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
     /**
        \brief Identifier for boundary segment from macro grid.
 
@@ -242,13 +240,10 @@ namespace Dune
 
      */
     int boundaryId () const
-    // allow to use boundary id without warning when experimental is enabled
-#if ! DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-    DUNE_DEPRECATED
-#endif
     {
       return this->real.boundaryId();
     }
+#endif
 
     /** \brief index of the boundary segment within the macro grid
      *
@@ -291,15 +286,7 @@ namespace Dune
       return this->real.outside();
     }
 
-    /*! @brief return true if intersection is conform.
-
-        This method returns true, if
-        @code
-        inside()->entity<1>(indexInInside()) ==
-            outside()->entity<1>(indexInOutside()) ||
-        boundary()
-        @endcode
-        holds.
+    /*! @brief Return true if intersection is conforming.
      */
     bool conforming () const
     {
@@ -445,7 +432,6 @@ namespace Dune
     {}
     //@}
 
-    typedef typename remove_const<GridImp>::type mutableGridImp;
   protected:
     //! give the pseudo IntersectionIterator class access to the realImp
     //! \todo cleanup this hack

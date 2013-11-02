@@ -93,9 +93,9 @@ void vtkCheck(int* n, double* h)
 {
   Dune::FieldVector<double, dim> L(0);
   std::copy(h, h+dim, L.begin());
-  Dune::FieldVector<int, dim> s(0);
+  Dune::array<int, dim> s;
   std::copy(n, n+dim, s.begin());
-  Dune::FieldVector<bool, dim> periodic(false);
+  std::bitset<dim> periodic;
 
   Dune::YaspGrid<dim> g(
 #if HAVE_MPI

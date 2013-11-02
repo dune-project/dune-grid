@@ -1,4 +1,10 @@
 set(modules
+  AddAlbertaFlags.cmake
+  AddALUGridFlags.cmake
+  AddAmiraMeshFlags.cmake
+  AddGrapeFlags.cmake
+  AddPsurfaceFlags.cmake
+  CheckExperimentalGridExtensions.cmake
   DuneGridMacros.cmake
   FindAlberta.cmake
   FindALUGrid.cmake

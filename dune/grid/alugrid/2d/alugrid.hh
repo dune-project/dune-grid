@@ -151,6 +151,34 @@ namespace Dune
       return LeafGridView( LeafGridViewImp( *this ) );
     }
 
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafGridView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafGridView () const
+    {
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
   private:
     friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
     friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
@@ -301,6 +329,34 @@ namespace Dune
     }
 
     LeafGridView leafView () const
+    {
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafGridView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafGridView () const
     {
       typedef typename LeafGridView::GridViewImp LeafGridViewImp;
       return LeafGridView( LeafGridViewImp( *this ) );
@@ -556,6 +612,34 @@ namespace Dune
       return LeafGridView( LeafGridViewImp( *this ) );
     }
 
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafGridView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafGridView () const
+    {
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
   private:
     friend class Conversion< ALUConformGrid<dimension,dimensionworld> , HasObjectStream > ;
     friend class Conversion< const ALUConformGrid<dimension,dimensionworld> , HasObjectStream > ;
@@ -714,6 +798,34 @@ namespace Dune
     }
 
     LeafGridView leafView () const
+    {
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafGridView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafGridView () const
     {
       typedef typename LeafGridView::GridViewImp LeafGridViewImp;
       return LeafGridView( LeafGridViewImp( *this ) );

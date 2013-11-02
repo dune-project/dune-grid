@@ -80,25 +80,23 @@ namespace Dune
   inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
   AlbertaGridIntersectionBase< Grid >::centerIntegrationOuterNormal () const
   {
-#if DUNE_ALBERTA_USE_GENERICGEOMETRY
-    const GenericReferenceElement< ctype, dimension > &refElement = GenericReferenceElements< ctype, dimension >::simplex();
-    const FieldVector< ctype, dimension > &localInInside = refElement.position( indexInInside(), 1 );
-    return Grid::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
-#else
     typedef FieldMatrix< ctype, dimensionworld, dimension > JacobianInverseTransposed;
 
     const EntityPointer ep = inside();
     const typename Entity::Geometry &geoInside = ep->geometry();
 
-    const JacobianInverseTransposed &jInvT = Grid::getRealImplementation( geoInside ).jacobianInverseTransposed();
+    const int face = indexInInside();
     const ReferenceElement< ctype, dimension > &refSimplex = ReferenceElements< ctype, dimension >::simplex();
-    const FieldVector< ctype, dimension > &refNormal = refSimplex.integrationOuterNormal( indexInInside() );
+    const FieldVector< ctype, dimension > &refNormal = refSimplex.integrationOuterNormal( face );
 
-    NormalVector n;
-    jInvT.mv( refNormal, n );
-    n *= Grid::getRealImplementation( geoInside ).integrationElement();
-    return n;
-#endif // #if DUNE_ALBERTA_USE_GENERICGEOMETRY
+    const typename Entity::Geometry::JacobianInverseTransposed &jInvT
+      = Grid::getRealImplementation( geoInside ).jacobianInverseTransposed();
+
+    NormalVector normal;
+    jInvT.mv( refNormal, normal );
+    normal *= Grid::getRealImplementation( geoInside ).integrationElement();
+
+    return normal;
   }
 
   template<>

@@ -9,10 +9,15 @@ set(ALBERTA_DIR "" CACHE FILEPATH "Root directory of Alberta installation.")
 set(ALBERTA_EXTRA_LIBS "ltdl;m" CACHE FILEPATH "Extra libraries needed by alberta for linking.")
 
 # look for header alberta/alberta.h
-find_path(ALBERTA_INCLUDE_DIR name alberta/alberta.h PATHS ${ALBERTA_DIR}
+find_path(ALBERTA_INCLUDE_DIR
+  NAMES alberta/alberta.h
+  PATHS ${ALBERTA_DIR}
   PATH_SUFFIXES alberta include NO_DEFAULT_PATH
   DOC "Include path of Alberta")
-find_path(ALBERTA_INCLUDE_DIR name alberta/alberta.h PATHS /usr/local /opt
+find_path(ALBERTA_INCLUDE_DIR
+  NAMES
+  alberta/alberta.h
+  PATHS /usr/local /opt
   PATH_SUFFIXES alberta)
 
 if(NOT ALBERTA_INCLUDE_DIR)
@@ -113,3 +118,10 @@ if(ALBERTA_FOUND)
     HEADERS dune/grid/albertagrid.hh dune/grid/albertagrid/dgfparser.hh)
   _dune_set_alberta(TRUE)
 endif(ALBERTA_FOUND)
+
+#add all alberta grid related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_alberta_flags
+if(ALBERTA_FOUND)
+  foreach(dir ${ALBERTA_INCLUDES})
+    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
+  endforeach()
+endif()

@@ -17,19 +17,19 @@ namespace Dune
   // Forward Declarations
   // --------------------
 
-  template< int codim, class GridImp >
+  template< int codim, class Grid >
   class AlbertaGridEntityPointer;
 
-  template< int codim, class GridImp, bool leafIterator >
+  template< int codim, class Grid, bool leafIterator >
   class AlbertaGridTreeIterator;
 
-  template< class GridImp >
+  template< class Grid >
   class AlbertaGridHierarchicIterator;
 
-  template< class GridImp >
+  template< class Grid >
   class AlbertaGridLeafIntersection;
 
-  template< class GridImp >
+  template< class Grid >
   class AlbertaGridLeafIntersectionIterator;
 
 
@@ -38,23 +38,21 @@ namespace Dune
   // -----------------
 
   /*!
-     A Grid is a container of grid entities. An entity is parametrized by the codimension.
+     A grid is a container of grid entities. An entity is parametrized by the codimension.
      An entity of codimension c in dimension d is a d-c dimensional object.
-
-     Here: the general template
    */
-  template< int codim, int dim, class GridImp >
+  template< int codim, int dim, class Grid >
   class AlbertaGridEntity
-    : public EntityDefaultImplementation< codim, dim, GridImp, AlbertaGridEntity >
+    : public EntityDefaultImplementation< codim, dim, Grid, AlbertaGridEntity >
   {
-    typedef AlbertaGridEntity< codim, dim, GridImp > This;
+    typedef AlbertaGridEntity< codim, dim, Grid > This;
 
-    enum { dimworld = GridImp::dimensionworld };
-    friend class AlbertaGrid< dim , dimworld >;
-    friend class AlbertaGridEntity< 0, dim, GridImp>;
+    enum { dimworld = Grid::dimensionworld };
+    friend class AlbertaGrid< dim, dimworld >;
+    friend class AlbertaGridEntity< 0, dim, Grid >;
 
     template< int, class, bool > friend class AlbertaGridTreeIterator;
-    friend class AlbertaGridEntityPointer< codim, GridImp >;
+    friend class AlbertaGridEntityPointer< codim, Grid >;
 
   public:
     static const int dimension = dim;
@@ -64,32 +62,29 @@ namespace Dune
     template< int cd >
     struct Codim
     {
-      typedef typename GridImp::template Codim< cd >::EntityPointer EntityPointer;
+      typedef typename Grid::template Codim< cd >::EntityPointer EntityPointer;
     };
 
-    typedef typename GridImp::template Codim< codim >::Entity Entity;
-    typedef typename GridImp::template Codim< codim >::EntitySeed EntitySeed;
-    typedef typename GridImp::template Codim< codim >::Geometry Geometry;
-    typedef typename GridImp::template Codim< codim >::LevelIterator LevelIterator;
+    typedef typename Grid::template Codim< codim >::Entity Entity;
+    typedef typename Grid::template Codim< codim >::EntitySeed EntitySeed;
+    typedef typename Grid::template Codim< codim >::Geometry Geometry;
 
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
   private:
-    //typedef MakeableInterfaceObject< Geometry > GeometryObject;
-    //typedef typename GeometryObject::ImplementationType GeometryImp;
-    typedef typename GridImp::Traits::template Codim< codim >::GeometryImpl GeometryImpl;
+    typedef typename Grid::Traits::template Codim< codim >::GeometryImpl GeometryImpl;
 
   public:
     //! constructor
-    explicit AlbertaGridEntity ( const GridImp &grid );
+    explicit AlbertaGridEntity ( const Grid &grid );
 
     //! contructor
-    AlbertaGridEntity ( const GridImp &grid, const ElementInfo &elementInfo, int subEntity );
+    AlbertaGridEntity ( const Grid &grid, const ElementInfo &elementInfo, int subEntity );
 
     //! level of this element
     int level () const;
 
-    //! return partition type of this entity ( see grid.hh )
+    //! return partition type of this entity
     PartitionType partitionType() const;
 
     //! geometry of this entity
@@ -99,7 +94,7 @@ namespace Dune
     GeometryType type () const;
 
     //! obtain entity seed
-    EntitySeed seed () const { return EntitySeed( AlbertaGridEntitySeed<codim,GridImp>(elementInfo(), subEntity() )); }
+    EntitySeed seed () const { return EntitySeed( AlbertaGridEntitySeed< codim, Grid >( elementInfo(), subEntity() ) ); }
 
     //***********************************************
     // end of interface methods
@@ -120,7 +115,7 @@ namespace Dune
     void setEntity ( const This &other );
 
     //! obtain a reference to the grid
-    const GridImp &grid () const
+    const Grid &grid () const
     {
       return *grid_;
     }
@@ -139,7 +134,7 @@ namespace Dune
 
   private:
     // grid this entity belong to
-    const GridImp *grid_;
+    const Grid *grid_;
 
     // ALBERTA element info
     ElementInfo elementInfo_;
@@ -154,31 +149,25 @@ namespace Dune
   // -----------------------------------
 
   /*!
-     A Grid is a container of grid entities. An entity is parametrized by the codimension.
+     A grid is a container of grid entities. An entity is parametrized by the codimension.
      An entity of codimension c in dimension d is a d-c dimensional object.
 
      Entities of codimension 0 ("elements") are defined through template specialization. Note
      that this specialization has an extended interface compared to the general case
-
-     Entities of codimension 0  allow to visit all neighbors, where
-     a neighbor is an entity of codimension 0 which has a common entity of codimension 1 with the
-     These neighbors are accessed via an iterator. This allows the implementation of
-     non-matching meshes. The number of neigbors may be different from the number of faces/edges
-     of an element!
    */
-  template< int dim, class GridImp >
-  class AlbertaGridEntity< 0, dim, GridImp >
-    : public EntityDefaultImplementation< 0, dim, GridImp, AlbertaGridEntity >
+  template< int dim, class Grid >
+  class AlbertaGridEntity< 0, dim, Grid >
+    : public EntityDefaultImplementation< 0, dim, Grid, AlbertaGridEntity >
   {
-    typedef AlbertaGridEntity< 0, dim, GridImp > This;
+    typedef AlbertaGridEntity< 0, dim, Grid > This;
 
-    static const int dimworld = GridImp::dimensionworld;
+    static const int dimworld = Grid::dimensionworld;
 
     friend class AlbertaGrid< dim, dimworld >;
-    friend class AlbertaGridLeafIntersection< GridImp >;
-    friend class AlbertaGridHierarchicIterator< GridImp >;
+    friend class AlbertaGridLeafIntersection< Grid >;
+    friend class AlbertaGridHierarchicIterator< Grid >;
     template< int, class, bool > friend class AlbertaGridTreeIterator;
-    friend class AlbertaGridEntityPointer<0,GridImp>;
+    friend class AlbertaGridEntityPointer< 0, Grid >;
 
   public:
     static const int dimension = dim;
@@ -188,30 +177,29 @@ namespace Dune
     template< int codim >
     struct Codim
     {
-      typedef typename GridImp::template Codim< codim >::EntityPointer
+      typedef typename Grid::template Codim< codim >::EntityPointer
       EntityPointer;
     };
 
-    typedef typename GridImp::template Codim< 0 >::Entity Entity;
-    typedef typename GridImp::template Codim< 0 >::EntitySeed EntitySeed;
-    typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
-    typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
-    typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
+    typedef typename Grid::template Codim< 0 >::Entity Entity;
+    typedef typename Grid::template Codim< 0 >::EntitySeed EntitySeed;
+    typedef typename Grid::template Codim< 0 >::Geometry Geometry;
+    typedef typename Grid::template Codim< 0 >::LocalGeometry LocalGeometry;
+    typedef typename Grid::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
 
-    typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
-    typedef typename GridImp::HierarchicIterator HierarchicIterator;
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+    typedef typename Grid::HierarchicIterator HierarchicIterator;
+    typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
 
-    typedef Dune::AlbertaGridLeafIntersectionIterator< GridImp > AlbertaGridLeafIntersectionIterator;
+    typedef Dune::AlbertaGridLeafIntersectionIterator< Grid > AlbertaGridLeafIntersectionIterator;
     typedef AlbertaGridLeafIntersectionIterator AlbertaGridLevelIntersectionIterator;
 
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
     //! constructor
-    explicit AlbertaGridEntity ( const GridImp &grid );
+    explicit AlbertaGridEntity ( const Grid &grid );
 
     //! constructor
-    AlbertaGridEntity ( const GridImp &grid, const ElementInfo &elementInfo, int subEntity );
+    AlbertaGridEntity ( const Grid &grid, const ElementInfo &elementInfo, int subEntity );
 
     //! level of this element
     int level () const;
@@ -226,7 +214,7 @@ namespace Dune
     GeometryType type () const;
 
     //! obtain entity seed
-    EntitySeed seed () const { return EntitySeed( AlbertaGridEntitySeed<0,GridImp>(elementInfo() )); }
+    EntitySeed seed () const { return EntitySeed( AlbertaGridEntitySeed< 0, Grid >(elementInfo() )); }
 
     /** obtain the number of subentities of a codimension
      *
@@ -320,11 +308,11 @@ namespace Dune
      */
     bool hasBoundaryIntersections () const ;
 
-    //! return partition type of this entity ( see grid.hh )
+    //! return partition type of this entity
     PartitionType partitionType() const;
 
     //! equality of entities
-    bool equals ( const AlbertaGridEntity<0,dim,GridImp> & i) const;
+    bool equals ( const This &i ) const;
 
     // needed for LevelIterator to compare
     ALBERTA EL_INFO *getElInfo () const;
@@ -341,7 +329,7 @@ namespace Dune
     void setEntity ( const This &other );
 
     //! obtain a reference to the grid
-    const GridImp &grid () const
+    const Grid &grid () const
     {
       return *grid_;
     }
@@ -370,13 +358,10 @@ namespace Dune
     int nChild () const;
 
     //! the corresponding grid
-    const GridImp *grid_;
+    const Grid *grid_;
 
     // Alberta element info
     ElementInfo elementInfo_;
-
-    // local coordinates within father
-    typedef MakeableInterfaceObject< Geometry > GeometryObject;
   };
 
 } // namespace Dune

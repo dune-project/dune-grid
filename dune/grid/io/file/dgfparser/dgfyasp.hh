@@ -213,7 +213,7 @@ namespace Dune
     const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
 
     FieldVector<double,dim> lang;
-    FieldVector<int,dim>    anz;
+    array<int,dim>    anz;
     for( int i = 0; i < dim; ++i )
     {
       // check that start point is 0.0
@@ -229,7 +229,7 @@ namespace Dune
 
     typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
     dgf::PeriodicFaceTransformationBlock trafoBlock( gridin, dim );
-    FieldVector< bool, dim > per( false );
+    std::bitset< dim > per;
     const int numTrafos = trafoBlock.numTransformations();
     for( int k = 0; k < numTrafos; ++k )
     {

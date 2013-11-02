@@ -48,8 +48,8 @@ bool test(GridType &grid)
     for(EIterator eit = view.template begin<0>(); eit != eend; ++eit)
     {
       container0[*eit] = eit->geometry().center();
-      const Dune::GenericReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
-        = Dune::GenericReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
+      const Dune::ReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
+        = Dune::ReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
       for (int i=0; i<eit->template count<1>(); ++i)
         container1(*eit,i) = eit->geometry().global( refElement.position(i,1) );
       for (int i=0; i<eit->template count<2>(); ++i)
@@ -89,8 +89,8 @@ bool test(GridType &grid)
         ret = false;
         break;
       }
-      const Dune::GenericReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
-        = Dune::GenericReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
+      const Dune::ReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
+        = Dune::ReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
       for (int i=0; i<eit->template count<1>(); ++i)
         if ( ( container1(*up,i).coord - up->geometry().global( refElement.position(i,1) ) ).two_norm() > 1e-8 )
         {
@@ -122,8 +122,8 @@ try {
   {
     typedef YaspGrid<2> GridType;
     Dune::FieldVector<double,2> Len; Len = 1.0;
-    Dune::FieldVector<int,2> s; s = 2; s[0] = 6;
-    Dune::FieldVector<bool,2> p; p = false;
+    Dune::array<int,2> s = {2,6};
+    std::bitset<2> p;
     int overlap = 1;
     GridType grid(Len,s,p,overlap);
     std::cout << "Testing YaspGrid" << std::endl;
