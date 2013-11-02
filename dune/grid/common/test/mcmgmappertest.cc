@@ -10,18 +10,17 @@
 #include <iostream>
 #include <set>
 
+#include <dune/common/parallel/mpihelper.hh>
+#include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/uggrid.hh>
 #include "../../../../doc/grids/gridfactory/hybridtestgrids.hh"
-#include <dune/grid/common/mcmgmapper.hh>
-#include <dune/common/parallel/mpihelper.hh>
 
 using namespace Dune;
 
-
-// /////////////////////////////////////////////////////////////////////////////////
-//   Check whether the index created for element data is unique, consecutive
-//   and starting from zero.
-// /////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \brief Check whether the index created for element data is unique,
+ * consecutive and starting from zero.
+ */
 template <class Mapper, class GridView>
 void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
 {
@@ -34,37 +33,22 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
   size_t max = 0;
   std::set<int> indices;
 
-  for (; eIt!=eEndIt; ++eIt) {
-
+  for (; eIt!=eEndIt; ++eIt)
+  {
     size_t index = mapper.map(*eIt);
-
     min = std::min(min, index);
     max = std::max(max, index);
-
-    // typedef typename GridView::IntersectionIterator IntersectionIterator;
-
-    // IntersectionIterator iIt    = gridView.ibegin(*eIt);
-    // IntersectionIterator iEndIt = gridView.iend(*eIt);
-
-    // for (; iIt!=iEndIt; ++iIt) {
-
-    //     int oldindex = mapper.template map<1>(*eIt, iIt->numberInSelf());
-    //     int index = mapper.map(*eIt, iIt->indexInInside(), 1);
-    //     assert(oldindex == index);
-    // }
-
     std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
 
     if (!status.second)       // not inserted because already existing
       DUNE_THROW(GridError, "Mapper element index is not unique!");
   }
 
-  if (min!=0)
+  if (min != 0)
     DUNE_THROW(GridError, "Mapper element index is not starting from zero!");
 
-  if (max!=gridView.indexSet().size(0)-1)
+  if (max != gridView.indexSet().size(0) - 1)
     DUNE_THROW(GridError, "Mapper element index is not consecutive!");
-
 }
 
 // /////////////////////////////////////////////////////////////////////////////////
@@ -119,12 +103,16 @@ void checkFaceDataMapper(const Mapper& mapper, const IndexSet& indexSet)
 #endif
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//   Run all the checks for a given grid.
-//////////////////////////////////////////////////////////////////////////////
+/*!
+ * \brief Run checks for a given grid.
+ *
+ * \param grid Grid to perform the checks.
+ */
 template<typename Grid>
-void checkGrid(const Grid& grid) {
-  static const unsigned dimg = Grid::dimension;
+void checkGrid(const Grid& grid)
+{
+  static const unsigned dim = Grid::dimension;
+  // check leafMCMGMapper
   {   // check constructor without layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
     leafMCMGMapper(grid);
@@ -132,11 +120,13 @@ void checkGrid(const Grid& grid) {
   }
   {   // check constructor with layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
-    leafMCMGMapper(grid, MCMGElementLayout<dimg>());
+    leafMCMGMapper(grid, MCMGElementLayout<dim>());
     checkElementDataMapper(leafMCMGMapper, grid.leafView());
   }
 
-  for (int i=2; i<=grid.maxLevel(); i++) {
+  // check levelMCMGMapper
+  for (int i = 2; i <= grid.maxLevel(); i++)
+  {
     {     // check constructor without layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
       levelMCMGMapper(grid, i);
@@ -144,29 +134,25 @@ void checkGrid(const Grid& grid) {
     }
     {     // check constructor with layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
-      levelMCMGMapper(grid, i, MCMGElementLayout<dimg>());
+      levelMCMGMapper(grid, i, MCMGElementLayout<dim>());
       checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
     }
   }
 }
 
-/*
-   The MultipleGeometryMultipleCodimMapper only does something helpful on grids with more
-   than one element type.  So far only UGGrids do this, so we use them to test the mapper.
- */
-
-int main(int argc, char** argv) try
+int main(int argc, char** argv)
+try
 {
   // initialize MPI if neccessary
   Dune::MPIHelper::instance(argc, argv);
 
-  // ////////////////////////////////////////////////////////////////////////
+  // Check grids with more than one element type.
+  // So far only UGGrid does this, so we use them to test the mapper.
+
   //  Do the test for a 2d UGGrid
-  // ////////////////////////////////////////////////////////////////////////
   {
-    typedef UGGrid<2> GridType;
-
-    std::auto_ptr< GridType > grid(make2DHybridTestGrid< GridType >());
+    typedef UGGrid<2> Grid;
+    std::auto_ptr<Grid> grid(make2DHybridTestGrid<Grid>());
 
     // create hybrid grid
     grid->mark(1, * grid->leafbegin<0>());
@@ -176,13 +162,10 @@ int main(int argc, char** argv) try
     checkGrid(*grid);
   }
 
-  // ////////////////////////////////////////////////////////////////////////
   //  Do the  test for a 3d UGGrid
-  // ////////////////////////////////////////////////////////////////////////
   {
-    typedef UGGrid<3> GridType;
-
-    std::auto_ptr< GridType > grid(make3DHybridTestGrid< GridType >());
+    typedef UGGrid<3> Grid;
+    std::auto_ptr<Grid> grid(make3DHybridTestGrid<Grid>());
 
     // create hybrid grid
     grid->mark(1, * grid->leafbegin<0>());
@@ -192,7 +175,7 @@ int main(int argc, char** argv) try
     checkGrid(*grid);
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 
 }
 catch (Exception &e) {
