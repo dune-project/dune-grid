@@ -7,8 +7,9 @@
 #include <iostream>
 #include <map>
 
-#include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
+#include <dune/geometry/typeindex.hh>
 
 #include "mapper.hh"
 
@@ -121,7 +122,9 @@ namespace Dune
      * \param layout A layout object.
      */
     MultipleCodimMultipleGeomTypeMapper (const GV& gridView, const Layout<GV::dimension> layout)
-      : is(gridView.indexSet()), offset(GV::dimension + 1), layout(layout)
+      : is(gridView.indexSet()),
+        offset(GlobalGeometryTypeIndex::size(GV::dimension)),
+        layout(layout)
     {
       update();
     }
@@ -131,7 +134,8 @@ namespace Dune
        \param gridView A Dune GridView object.
      */
     MultipleCodimMultipleGeomTypeMapper (const GV& gridView)
-      : is(gridView.indexSet()), offset(GV::dimension + 1)
+      : is(gridView.indexSet()),
+        offset(GlobalGeometryTypeIndex::size(GV::dimension))
     {
       update();
     }
@@ -147,10 +151,7 @@ namespace Dune
     int map (const EntityType& e) const
     {
       const GeometryType gt = e.type();
-      if (gt.isNone())
-        return is.index(e) + offset[EntityType::codimension].second;
-      else
-        return is.index(e) + offset[EntityType::codimension].first[gt.id() >> 1];
+      return is.index(e) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 
     /** @brief Map subentity of codim 0 entity to array index.
@@ -163,10 +164,7 @@ namespace Dune
     int map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
       GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
-      if (gt.isNone())
-        return is.subIndex(e, i, codim) + offset[codim].second;
-      else
-        return is.subIndex(e, i, codim) + offset[codim].first[gt.id() >> 1];
+      return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -214,36 +212,23 @@ namespace Dune
       return true;
     }
 
-
     /** @brief Recalculates map after mesh adaptation
      */
     void update ()
     {
-      // clear all maps, set size to 0
       n = 0;
+
       for (unsigned int codim = 0; codim <= GV::dimension; ++codim)
       {
-        const int mydim = GV::dimension - codim;
-
-        // resize offset array to number of different topologies in the codimension
-        const size_t size = ((1 << mydim) + 1) / 2;
-        offset[codim].first.resize(size);
-
-        // clear offsets (to the invalid value -1)
-        std::fill(offset[codim].first.begin(), offset[codim].first.end(), -1);
-        offset[codim].second = -1;
-
         // walk over all geometry types in the codimension
         typedef std::vector<GeometryType> GTV;
         const GTV &gtv = is.geomTypes(codim);
         for (typename GTV::const_iterator it = gtv.begin(); it != gtv.end(); ++it)
         {
-          // if the geometry type is contained in the layout, generate an index
+          // if the geometry type is contained in the layout, increment offset
           if (layout.contains(*it))
           {
-            int &o = (it->isNone() ? offset[codim].second : offset[codim].first[it->id() >> 1 ]);
-            assert(o == -1); // make sure we did not already assign an index
-            o = n;
+            offset[GlobalGeometryTypeIndex::index(*it)] = n;
             n += is.size(*it);
           }
         }
@@ -251,9 +236,11 @@ namespace Dune
     }
 
   private:
-    int n;     // number of data elements required
+    // number of data elements required
+    unsigned int n;
     const typename GV::IndexSet& is;
-    std::vector<std::pair<std::vector<int>, int> > offset; // provide an array for the offsets
+    // provide an array for the offsets
+    std::vector<int> offset;
     mutable Layout<GV::dimension> layout;     // get layout object
   };
 
