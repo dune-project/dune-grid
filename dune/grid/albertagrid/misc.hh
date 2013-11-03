@@ -18,11 +18,6 @@
 #define DUNE_ALBERTA_CACHE_COORDINATES 1
 #endif
 
-// set to 1 to use generic geometries in AlbertaGrid
-#ifndef DUNE_ALBERTA_USE_GENERICGEOMETRY
-#define DUNE_ALBERTA_USE_GENERICGEOMETRY 0
-#endif
-
 namespace Dune
 {
 
