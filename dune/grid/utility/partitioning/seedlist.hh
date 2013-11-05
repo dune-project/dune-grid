@@ -40,7 +40,12 @@ namespace Dune {
       pBegin_(1, 0), pEnd_(1, seedLists_.size())
     { }
 
-    //! construct
+    //! construct from a partitioner
+    /**
+     * The partitioner should support the two functions \c partition(entity)
+     * and \c partitions().  The reference to the partitioner is not stored
+     * internally, so may be a temporary.
+     */
     template<class GV, class Partitioner>
     SeedListPartitioning(const GV &gv, const Partitioner &partitioner) :
       gridp_(&gv.grid()),
