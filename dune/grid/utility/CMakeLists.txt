@@ -1,3 +1,4 @@
+add_subdirectory(partitioner)
 add_subdirectory(partitioning)
 add_subdirectory(test EXCLUDE_FROM_ALL)
 set(HEADERS

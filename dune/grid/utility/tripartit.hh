@@ -3,8 +3,6 @@
 #ifndef DUNE_GRID_UTILITY_TRIPARTIT_HH
 #define DUNE_GRID_UTILITY_TRIPARTIT_HH
 
-#include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <limits>
 #include <list>
@@ -14,6 +12,7 @@
 
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/utility/iterableentityset.hh>
+#include <dune/grid/utility/partitioner/equidistant.hh>
 #include <dune/grid/utility/partitioning/seedlist.hh>
 
 namespace Dune {
@@ -93,7 +92,7 @@ namespace Dune {
   struct OverlapError : Exception {};
 
   template<class GV, class Mapper>
-  class EquidistantPartitioner
+  class OverlappedEquidistantPartitioner
   {
     static const std::size_t nooverlap =
       std::numeric_limits<std::size_t>::max();
@@ -115,39 +114,8 @@ namespace Dune {
       const EntitySet &entitySet_;
       RepartitionPolicy repartitionPolicy_;
       std::vector<std::size_t> &overlapMap_;
-      std::size_t direction_;
       std::size_t overlap_;
-      std::size_t divisor_;
-
-      ctype minc_;
-      ctype maxc_;
-
-      void initMinMax()
-      {
-        using std::min;
-        using std::max;
-        minc_ = std::numeric_limits<ctype>::infinity();
-        maxc_ = -minc_;
-        for(const auto &e : entitySet_)
-        {
-          ctype p = e.geometry().center()[direction_];
-          minc_ = min(minc_, p);
-          maxc_ = max(maxc_, p);
-        }
-      }
-
-      std::size_t pIndex(const Entity &e) const
-      {
-        using std::min;
-        using std::max;
-        ctype tmp = e.geometry().center()[direction_];
-        tmp -= minc_;
-        tmp /= maxc_ - minc_;
-        tmp *= divisor_;
-        tmp = std::floor(tmp);
-        tmp = max(ctype(0), tmp);
-        return min(divisor_-1, std::size_t(tmp));
-      };
+      EquidistantPartitioner<ctype> basePartitioner_;
 
       void markneighbors(const Entity &e, std::size_t myPIndex) {
         auto iend = gv_.iend(e);
@@ -162,7 +130,7 @@ namespace Dune {
             // These were marked previously in a coarser partitioning
             continue;
           // Now it is legal to obtain the local index for this partition
-          std::size_t outPIndex = pIndex(outside);
+          std::size_t outPIndex = basePartitioner_.partition(outside);
           if(outPIndex == myPIndex)
             // Only mark our overlap in other partitions
             continue;
@@ -192,25 +160,25 @@ namespace Dune {
 
       void checkOverlap()
       {
-        std::vector<std::size_t> pSizes(divisor_, 0);
+        std::vector<std::size_t> pSizes(basePartitioner_.partitions(), 0);
         if(overlap_ == 0)
         {
           for(const auto &e : entitySet_)
-            ++pSizes[pIndex(e)];
+            ++pSizes[basePartitioner_.partition(e)];
           checkNonempty(pSizes);
           return;
         }
         try {
           for(const auto &e : entitySet_)
           {
-            auto myPIndex = pIndex(e);
+            auto myPIndex = basePartitioner_.partition(e);
             ++pSizes[myPIndex];
             // check that we are either in the first or the last subpartition,
             // or outside the coarse overlap.  This avoids cases where the
             // first or last subpartition ends up empty, but the double
             // overlap between coarse border and the next subpartition goes
             // undetected.
-            if(myPIndex > 0 && myPIndex + 1 < divisor_ &&
+            if(myPIndex > 0 && myPIndex + 1 < basePartitioner_.partitions() &&
                overlapMap_[mapper_.map(e)] == someoverlap)
             {
               DUNE_THROW(OverlapError, "Inner subpartition intersects coarse "
@@ -224,7 +192,7 @@ namespace Dune {
             for(const auto &e : entitySet_) {
               std::size_t mark =
                 overlapMap_[mapper_.map(e)];
-              if(mark < divisor_)
+              if(mark < basePartitioner_.partitions())
                 markneighbors(e, mark);
             }
         }
@@ -243,7 +211,7 @@ namespace Dune {
 
       void finalize()
       {
-        repartitionPolicy_.setNumSubPartitions(divisor_);
+        repartitionPolicy_.setNumSubPartitions(basePartitioner_.partitions());
         for(const auto &e : entitySet_) {
           auto &mark = overlapMap_[mapper_.map(e)];
           // translate overlap marks
@@ -253,31 +221,31 @@ namespace Dune {
           // be very careful here: Setting a new partition number may remove
           // the entity from the partition we are currently iterating over, so
           // the entitySet must not let itself confuse by this.
-          repartitionPolicy_.addToSubPartition(pIndex(e), e);
+          repartitionPolicy_.addToSubPartition(basePartitioner_.partition(e),
+                                               e);
         }
         repartitionPolicy_.commit();
       }
 
     public:
-      PartitioningContext(EquidistantPartitioner &partitioner,
+      PartitioningContext(OverlappedEquidistantPartitioner &partitioner,
                           const EntitySet &entitySet,
                           const RepartitionPolicy &repartitionPolicy,
                           std::size_t divisor) :
         gv_(partitioner.gv_), mapper_(partitioner.mapper_),
         entitySet_(entitySet), repartitionPolicy_(repartitionPolicy),
-        overlapMap_(partitioner.overlapMap_),
-        direction_(partitioner.direction_), overlap_(partitioner.overlap_),
-        divisor_(divisor)
+        overlapMap_(partitioner.overlapMap_), overlap_(partitioner.overlap_),
+        basePartitioner_(entitySet, partitioner.direction_, divisor)
       {
-        initMinMax();
         checkOverlap();
         finalize();
       }
 
     };
   public:
-    EquidistantPartitioner(const GV &gv, const Mapper &mapper,
-                           std::size_t direction, std::size_t overlap = 1) :
+    OverlappedEquidistantPartitioner(const GV &gv, const Mapper &mapper,
+                                     std::size_t direction,
+                                     std::size_t overlap = 1) :
       gv_(gv), mapper_(mapper),
       overlapMap_(mapper_.size(), std::size_t(nooverlap)),
       direction_(direction), overlap_(overlap)
@@ -298,7 +266,7 @@ namespace Dune {
   template<class GV, class SeedPartitioning, class MapPartitioning>
   class RecursiveEquidistantPartitioner {
     typedef MultipleCodimMultipleGeomTypeMapper<GV, MCMGElementLayout> Mapper;
-    typedef EquidistantPartitioner<GV, Mapper> DirPartitioner;
+    typedef OverlappedEquidistantPartitioner<GV, Mapper> DirPartitioner;
 
     const GV &gv_;
     Mapper mapper_;

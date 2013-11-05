@@ -1,6 +1,7 @@
 # $Id$
 
 SUBDIRS =					\
+	partitioner				\
 	partitioning				\
 	test
 
