@@ -773,8 +773,8 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(comm,tag,s,lb),
-        ccobj(comm),
+      : ccobj(comm),
+        _torus(comm,tag,s,lb),
 #else
       : _torus(tag,s,lb),
 #endif
