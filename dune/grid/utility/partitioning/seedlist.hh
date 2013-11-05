@@ -3,8 +3,10 @@
 #ifndef DUNE_GRID_UTILITY_PARTITIONING_SEEDLIST_HH
 #define DUNE_GRID_UTILITY_PARTITIONING_SEEDLIST_HH
 
+#include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <numeric>
 #include <utility>
 #include <vector>
 
@@ -37,6 +39,38 @@ namespace Dune {
                  makeEntityToSeedIteratorAdaptor(gv.template end<codim>())),
       pBegin_(1, 0), pEnd_(1, seedLists_.size())
     { }
+
+    //! construct
+    template<class GV, class Partitioner>
+    SeedListPartitioning(const GV &gv, const Partitioner &partitioner) :
+      gridp_(&gv.grid()),
+      pBegin_(partitioner.partitions()), pEnd_(partitioner.partitions(), 0)
+    {
+      // Initialize seed lists.  We arbitrarily use the seed of the first
+      // entity for this.  Make certain not to dereference gv.begin() when the
+      // gridview is empty
+      if(gv.size(codim))
+        seedLists_.assign(gv.size(codim), gv.template begin<0>()->seed());
+
+      // compute end indices
+      for(const auto &e : entities<codim>(gv))
+        ++pEnd_[partitioner.partition(e)];
+      std::partial_sum(pEnd_.begin(), pEnd_.end(), pEnd_.begin());
+
+      // construct begin indices
+      pBegin_[0] = 0;
+      std::copy(pEnd_.begin(), pEnd_.end()-1, pBegin_.begin()+1);
+
+      // Vector of running indices, one for each partition
+      auto pIndex = pBegin_;
+      // fill the seed lists with the correct seeds
+      for(const auto &e : entities<codim>(gv))
+      {
+        auto &index = pIndex[partitioner.partition(e)];
+        seedLists_[index] = e.seed();
+        ++index;
+      }
+    }
 
     //! return maximum number of partitions
     Size partitions() const
