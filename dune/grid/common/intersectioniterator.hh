@@ -185,6 +185,28 @@ namespace Dune
 
 } // namespace Dune
 
+namespace std {
+
+  template<class Iterator>
+  struct iterator_traits;
+
+  template< class GridImp, class IntersectionIteratorImp,
+            class IntersectionImp >
+  struct iterator_traits< Dune::IntersectionIterator< GridImp,
+                                                      IntersectionIteratorImp,
+                                                      IntersectionImp > >
+  {
+    typedef ptrdiff_t difference_type;
+    typedef const typename Dune::IntersectionIterator
+      < GridImp, IntersectionIteratorImp, IntersectionImp >::Intersection
+      value_type;
+    typedef value_type *pointer;
+    typedef value_type &reference;
+    typedef forward_iterator_tag iterator_category;
+  };
+
+} // namespace std
+
 #include "intersection.hh"
 
 #endif // DUNE_GRID_INTERSECTIONITERATOR_HH
