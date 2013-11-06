@@ -693,7 +693,7 @@ namespace Dune {
     typedef YaspGlobalIdSet<YaspGrid<dim> > GlobalIdSetType;
 
     //! shorthand for some data types
-    typedef typename YGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename YGrid<dim,ctype>::Iterator I;
     typedef typename std::deque<Intersection>::const_iterator ISIT;
 
     //! The constructor of the old MultiYGrid class
@@ -1398,10 +1398,10 @@ namespace Dune {
       {
       case 0 :
         return YaspEntityPointer<codim,GridImp>(this,g,
-                                                TSI(g->cell_overlap, this->getRealImplementation(seed).coord()));
+                                                I(g->cell_overlap, this->getRealImplementation(seed).coord()));
       case dim :
         return YaspEntityPointer<codim,GridImp>(this,g,
-                                                TSI(g->vertex_overlapfront, this->getRealImplementation(seed).coord()));
+                                                I(g->vertex_overlapfront, this->getRealImplementation(seed).coord()));
       default :
         DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
       }
@@ -1560,7 +1560,7 @@ namespace Dune {
         for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubbegin()));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.begin()));
           send_size[cnt] = is->grid.totalsize() * data.size(*it);
           cnt++;
         }
@@ -1568,7 +1568,7 @@ namespace Dune {
         for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubbegin()));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.begin()));
           recv_size[cnt] = is->grid.totalsize() * data.size(*it);
           cnt++;
         }
@@ -1586,10 +1586,10 @@ namespace Dune {
           // loop over entities and ask for size
           int i=0; size_t n=0;
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubbegin()));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.begin()));
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          tsubend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubend()));
-          for ( ; it!=tsubend; ++it)
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.end()));
+          for ( ; it!=itend; ++it)
           {
             buf[i] = data.size(*it);
             n += buf[i];
@@ -1664,10 +1664,10 @@ namespace Dune {
 
         // fill send buffer; iterate over cells in intersection
         typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-        it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubbegin()));
+        it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.begin()));
         typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-        tsubend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubend()));
-        for ( ; it!=tsubend; ++it)
+        itend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.end()));
+        for ( ; it!=itend; ++it)
           data.gather(mb,*it);
 
         // hand over send request to torus class
@@ -1717,11 +1717,11 @@ namespace Dune {
         if (data.fixedsize(dim,codim))
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubbegin()));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.begin()));
           size_t n=data.size(*it);
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          tsubend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubend()));
-          for ( ; it!=tsubend; ++it)
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.end()));
+          for ( ; it!=itend; ++it)
             data.scatter(mb,*it,n);
         }
         else
@@ -1729,10 +1729,10 @@ namespace Dune {
           int i=0;
           size_t *sbuf = recv_sizes[cnt];
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubbegin()));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.begin()));
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          tsubend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.tsubend()));
-          for ( ; it!=tsubend; ++it)
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g,is->grid.end()));
+          for ( ; it!=itend; ++it)
             data.scatter(mb,*it,sbuf[i++]);
           delete[] sbuf;
         }
@@ -1891,20 +1891,20 @@ namespace Dune {
       if (cd==0)   // the elements
       {
         if (pitype<=InteriorBorder_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_interior.tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_interior.begin());
         if (pitype<=All_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_overlap.tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_overlap.begin());
       }
       if (cd==dim)   // the vertices
       {
         if (pitype==Interior_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interior.tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interior.begin());
         if (pitype==InteriorBorder_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interiorborder.tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interiorborder.begin());
         if (pitype==Overlap_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlap.tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlap.begin());
         if (pitype<=All_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlapfront.tsubbegin());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlapfront.begin());
       }
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }
@@ -1920,20 +1920,20 @@ namespace Dune {
       if (cd==0)   // the elements
       {
         if (pitype<=InteriorBorder_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_interior.tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_interior.end());
         if (pitype<=All_Partition || pitype == Ghost_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_overlap.tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->cell_overlap.end());
       }
       if (cd==dim)   // the vertices
       {
         if (pitype==Interior_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interior.tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interior.end());
         if (pitype==InteriorBorder_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interiorborder.tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_interiorborder.end());
         if (pitype==Overlap_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlap.tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlap.end());
         if (pitype<=All_Partition || pitype == Ghost_Partition)
-          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlapfront.tsubend());
+          return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlapfront.end());
       }
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }

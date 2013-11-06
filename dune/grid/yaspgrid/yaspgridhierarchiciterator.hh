@@ -21,11 +21,11 @@ namespace Dune {
   public:
     // types used from grids
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename YGrid<dim,typename GridImp::ctype>::TransformingSubIterator TSI;
+    typedef typename YGrid<dim,typename GridImp::ctype>::Iterator I;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! constructor
-    YaspHierarchicIterator (const GridImp* yg, const YGLI& g, const TSI& it, int maxlevel) :
+    YaspHierarchicIterator (const GridImp* yg, const YGLI& g, const I& it, int maxlevel) :
       YaspEntityPointer<0,GridImp>(yg,g,it)
     {
       // now iterator points to current cell

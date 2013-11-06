@@ -324,10 +324,10 @@ namespace Dune {
        cells of the grid to a one-dimensional array. The number of entries
        in this array must be the size of the grid.
      */
-    class TransformingSubIterator {
+    class Iterator {
     public:
       //! Make iterator pointing to first cell in a grid.
-      TransformingSubIterator (const YGrid<d,ct>& r) : _grid(&r)
+      Iterator (const YGrid<d,ct>& r) : _grid(&r)
       {
         // copy data coming from grid to iterate over
         for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
@@ -372,7 +372,7 @@ namespace Dune {
       }
 
       //! Make iterator pointing to given cell in a grid.
-      TransformingSubIterator (const YGrid<d,ct>& r, const iTupel& coord) : _grid(&r)
+      Iterator (const YGrid<d,ct>& r, const iTupel& coord) : _grid(&r)
       {
         // copy data coming from grid to iterate over
         for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
@@ -518,13 +518,13 @@ namespace Dune {
 
       //TODO note iterator compared _index, subiterator _superindex. is it okay to totally skip _index?
       //! Return true when two iterators over the same grid are equal (!).
-      bool operator== (const TransformingSubIterator& i) const
+      bool operator== (const Iterator& i) const
       {
         return _superindex == i._superindex;
       }
 
       //! Return true when two iterators over the same grid are not equal (!).
-      bool operator!= (const TransformingSubIterator& i) const
+      bool operator!= (const Iterator& i) const
       {
         return _superindex != i._superindex;
       }
@@ -616,7 +616,7 @@ namespace Dune {
 //       }
 
       //! Increment iterator to next cell with position.
-      TransformingSubIterator& operator++ ()
+      Iterator& operator++ ()
       {
         ++(this->_index);               // update consecutive index in subgrid
         for (int i=0; i<d; i++)         // check for wrap around
@@ -705,25 +705,25 @@ namespace Dune {
     };
 
     //! return iterator to first element of index set
-    TransformingSubIterator tsubbegin () const
+    Iterator begin () const
     {
-      return TransformingSubIterator(*this);
+      return Iterator(*this);
     }
 
     //! return iterator to given element of index set
-    TransformingSubIterator tsubbegin (iTupel& co) const
+    Iterator begin (iTupel& co) const
     {
-      return TransformingSubIterator(*this,co);
+      return Iterator(*this,co);
     }
 
     //! return subiterator to last element of index set
-    TransformingSubIterator tsubend () const
+    Iterator end () const
     {
       iTupel last;
       for (int i=0; i<d; i++)
         last[i] = this->max(i);
       last[0] += 1;
-      return TransformingSubIterator(*this,last);
+      return Iterator(*this,last);
     }
 
   private:
@@ -751,7 +751,7 @@ namespace Dune {
 
   //! Output operator for ygrids
   template <int d, typename ct>
-  inline std::ostream& operator<< (std::ostream& s, typename YGrid<d,ct>::TransformingSubIterator& e)
+  inline std::ostream& operator<< (std::ostream& s, typename YGrid<d,ct>::Iterator& e)
   {
     s << "please reimplement this" << std::endl;
     return s;
