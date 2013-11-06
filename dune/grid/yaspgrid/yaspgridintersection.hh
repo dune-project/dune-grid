@@ -114,9 +114,9 @@ namespace Dune {
         DUNE_THROW(GridError, "called boundarySegmentIndex while boundary() == false");
       update();
       // size of local macro grid
-      const FieldVector<int, dim> & size = _inside.gridlevel()->mg->begin()->cell_overlap.size();
-      const FieldVector<int, dim> & origin = _inside.gridlevel()->mg->begin()->cell_overlap.origin();
-      FieldVector<int, dim> sides;
+      const Dune::array<int, dim> & size = _inside.gridlevel()->mg->begin()->cell_overlap.size();
+      const Dune::array<int, dim> & origin = _inside.gridlevel()->mg->begin()->cell_overlap.origin();
+      Dune::array<int, dim> sides;
       {
         for (int i=0; i<dim; i++)
         {
@@ -131,11 +131,14 @@ namespace Dune {
         }
       }
       // global position of the cell on macro grid
-      FieldVector<int, dim> pos = _inside.transformingsubiterator().coord();
-      pos /= (1<<_inside.level());
-      pos -= origin;
+      Dune::array<int, dim> pos = _inside.transformingsubiterator().coord();
+      for(int i=0; i<dim; i++)
+      {
+        pos[i] = pos[i] / (1<<_inside.level());
+        pos[i] = pos[i] - origin[i];
+      }
       // compute unit-cube-face-sizes
-      FieldVector<int, dim> fsize;
+      Dune::array<int, dim> fsize;
       {
         int vol = 1;
         for (int k=0; k<dim; k++)

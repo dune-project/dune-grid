@@ -284,7 +284,7 @@ namespace Dune {
     };
 
     //! define types used for arguments
-    typedef FieldVector<int, dim> iTupel;
+    typedef Dune::array<int, dim> iTupel;
     typedef FieldVector<ctype, dim> fTupel;
 
     // communication tag used by multigrid
@@ -379,6 +379,9 @@ namespace Dune {
       g.level_ = maxLevel();
       g.coords = coords;
 
+      iTupel n;
+      std::fill(n.begin(), n.end(), 0);
+
       // r_i = 0.5, because we are interested in cell centers. Multiplication with h_i happens later on.
       fTupel r(0.5);
 
@@ -417,7 +420,7 @@ namespace Dune {
       }
 
       //build the cell grid with overlap
-      g.cell_overlap = YGrid<dim,ctype>(o_overlap, r, &g.coords, s_overlap, iTupel(0), s_overlap);
+      g.cell_overlap = YGrid<dim,ctype>(o_overlap, r, &g.coords, s_overlap, n, s_overlap);
 
       // now make the interior grid a subgrid of the overlapping grid
       iTupel sizeInterior;
@@ -447,7 +450,7 @@ namespace Dune {
         o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
         s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1;
       }
-      g.vertex_overlapfront = YGrid<dim,ctype>(o_vertex_overlapfront,r,&g.coords,s_vertex_overlapfront, iTupel(0), s_vertex_overlapfront);
+      g.vertex_overlapfront = YGrid<dim,ctype>(o_vertex_overlapfront,r,&g.coords,s_vertex_overlapfront, n, s_vertex_overlapfront);
 
       // now overlap only (i.e. without front), is subgrid of overlapfront
       iTupel o_vertex_overlap;
@@ -512,8 +515,11 @@ namespace Dune {
 
     struct mpifriendly_ygrid {
       mpifriendly_ygrid ()
-        : origin(0), size(0), h(0.0), r(0.0)
-      {}
+        : h(0.0), r(0.0)
+      {
+        std::fill(origin.begin(), origin.end(), 0);
+        std::fill(size.begin(), size.end(), 0);
+      }
       mpifriendly_ygrid (const YGrid<dim,ctype>& grid)
         : origin(grid.origin()), size(grid.size()), h(grid.shift()), r(grid.shift())
       {}
@@ -556,7 +562,8 @@ namespace Dune {
         iTupel delta = i.delta();        // delta to neighbor
         iTupel nb = coord;               // the neighbor
         for (int k=0; k<dim; k++) nb[k] += delta[k];
-        iTupel v(0);                    // grid movement
+        iTupel v;                    // grid movement
+        std::fill(v.begin(), v.end(), 0);
 
         for (int k=0; k<dim; k++)
         {
@@ -708,7 +715,8 @@ namespace Dune {
       for (int i=0; i<dim; i++)
         _coarseSize[i] = coords[i].size() - 1;
 
-      iTupel o(0);
+      iTupel o;
+      std::fill(o.begin(), o.end(), 0);
       iTupel o_interior(o);
       iTupel s_interior(_coarseSize);
 
@@ -1580,6 +1588,7 @@ namespace Dune {
         for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
         {
           // allocate send buffer for sizes per entitiy
+          std::cout << is->grid.totalsize() << std::endl;
           size_t *buf = new size_t[is->grid.totalsize()];
           send_sizes[cnt] = buf;
 

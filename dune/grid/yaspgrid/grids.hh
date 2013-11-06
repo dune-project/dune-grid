@@ -40,9 +40,9 @@ namespace Dune {
    *  @param r the shift vector to determine grid type
    */
   template<typename ct, int d>
-  Dune::FieldVector<int,d> sizeArray(Dune::array<std::vector<ct>,d> v, Dune::FieldVector<ct,d> r)
+  Dune::array<int,d> sizeArray(Dune::array<std::vector<ct>,d> v, Dune::FieldVector<ct,d> r)
   {
-    Dune::FieldVector<int,d> tmp;
+    Dune::array<int,d> tmp;
     for (int i=0; i<d; ++i)
       if (r[i] < Ytolerance)
         tmp[i] = v[i].size();
@@ -100,12 +100,16 @@ namespace Dune {
   class YGrid
   {
   public:
-    typedef FieldVector<int, d> iTupel;
+    typedef Dune::array<int, d> iTupel;
     typedef FieldVector<ct,d> fTupel;
 
     //! make uninitialized ygrid
-    YGrid () : _origin(0), _shift(0.0), _offset(0), _supersize(0)
-    {}
+    YGrid () : _shift(0.0)
+    {
+      std::fill(_origin.begin(), _origin.end(), 0);
+      std::fill(_offset.begin(), _offset.end(), 0);
+      std::fill(_size.begin(), _size.end(), 0);
+    }
 
     /** @brief make ygrid without coordinate information
      *  @param origin origin of the grid in global coordinates
@@ -116,7 +120,7 @@ namespace Dune {
      *  information. This avoids sending coordinates in the parallel case.
      */
     YGrid(iTupel origin, iTupel size, fTupel shift)
-      : origin(_origin), size(_size), shift(_shift)
+      : _origin(origin), _size(size), _shift(shift)
     {}
 
     /** @brief make a subgrid by taking coordinates from a larger grid
@@ -260,17 +264,6 @@ namespace Dune {
 
     //! given a tupel compute its index in the lexicographic numbering
     int index (const iTupel& coord) const
-    {
-      int index = (coord[d-1]-_origin[d-1]);
-
-      for (int i=d-2; i>=0; i--)
-        index = index*_size[i] + (coord[i]-_origin[i]);
-
-      return index;
-    }
-
-    //! given a tupel compute its index in the lexicographic numbering
-    int index (const array<int,d>& coord) const
     {
       int index = (coord[d-1]-_origin[d-1]);
 
@@ -463,55 +456,6 @@ namespace Dune {
         }
       }
 
-      //TODO get rid of this nonsense.
-      //! reinitialize iterator to given position
-      void reinit (const YGrid<d,ct>& r, const array<int,d>& coord)
-      {
-        // copy data coming from grid to iterate over
-        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
-        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
-
-        // compute increments;
-        int inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _increment[i] = inc;
-          inc *= r.size(i);
-        }
-
-        // initialize to given position in index set
-        for (int i=0; i<d; ++i) _coord[i] = coord[i];
-        _index = r.index(coord);
-
-                //! store some grid information
-        for (int i=0; i<d; ++i) _size[i] = r.size(i);
-
-        // compute superincrements
-        inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _superincrement[i] = inc;
-          inc *= r.supersize(i);
-        }
-
-        // move superindex to first cell in subgrid
-        _superindex = 0;
-        for (int i=0; i<d; ++i)
-          _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
-
-        _grid = &r;
-        for (int i=0; i<d; ++i)
-        {
-          if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[_grid->offset(i)];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->offset(i)+1]-_grid->getCoords(i)[_grid->offset(i)]);
-          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->offset(i)];
-          if ((this->_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i] + _grid->offset(i)] - _grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->offset(i)]);
-        }
-      }
-
       //! Return true when two iterators over the same grid are equal (!).
       bool operator== (const Iterator& i) const
       {
@@ -691,7 +635,7 @@ namespace Dune {
   {
   public:
    //typedef Dune::array<int, d>  iTupel;
-    typedef Dune::FieldVector<int, d> iTupel;
+    typedef Dune::array<int, d> iTupel;
     virtual ~YLoadBalance() {}
     virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
     {
@@ -744,7 +688,7 @@ namespace Dune {
   {
   public:
    // typedef Dune::array<int, d>  iTupel;
-    typedef Dune::FieldVector<int, d> iTupel;
+    typedef Dune::array<int, d> iTupel;
     virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
     {
       bool found=false;
@@ -776,8 +720,7 @@ namespace Dune {
   class Torus {
   public:
     //! type used to pass tupels in and out
-    //typedef Dune::array<int, d> iTupel;
-    typedef Dune::FieldVector<int, d> iTupel;
+    typedef Dune::array<int, d> iTupel;
 
 
   private:
@@ -1299,7 +1242,7 @@ namespace Dune {
       CommPartner cp;
       iTupel delta;
 
-      delta = -1;
+      std::fill(delta.begin(), delta.end(), -1);
       bool ready = false;
       iTupel me, nb;
       me = rank_to_coord(_rank);
