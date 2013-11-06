@@ -170,8 +170,8 @@ namespace Dune {
     }
   };
 
-  template<typename ct, int d>
-  Dune::array<std::vector<ct>,d> coordVector(Dune::FieldVector<ct,d>& L, Dune::FieldVector<int,d>& s)
+  template<int d, typename ct>
+  Dune::array<std::vector<ct>,d> coordVector(Dune::FieldVector<ct,d>& L, Dune::array<int,d>& s)
   {
     Dune::array<std::vector<ct>,d> result;
     for (int i=0; i<d; i++)
@@ -184,22 +184,6 @@ namespace Dune {
     }
     return result;
   }
-  //TODO avoid this crap!
-  template<typename ct, int d1, std::size_t d2>
-  Dune::array<std::vector<ct>,d2> coordVector(Dune::FieldVector<ct,d1>& L, Dune::array<int,d2>& s)
-  {
-    Dune::array<std::vector<ct>,d2> result;
-    for (int i=0; i<d2; i++)
-    {
-      result[i].resize(s[i]+1);
-      const ct h = L[i]/s[i];
-      result[i][0] = 0.0;
-      for (int j=0; j<s[i]; j++)
-        result[i][j+1] = result[i][j] + h;
-    }
-    return result;
-  }
-
 
   //************************************************************************
   /*!
@@ -785,14 +769,14 @@ namespace Dune {
     DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
       : ccobj(comm),
-        _torus(comm,tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
+        _torus(comm,tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,s),fTupel(0.5)),lb),
 #else
-      :  _torus(tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
+      :  _torus(tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,s),fTupel(0.5)),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(coordVector(L,s),std::bitset<dim>(),overlap,lb);
+      MultiYGridSetup(coordVector<dim>(L,s),std::bitset<dim>(),overlap,lb);
 
       // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
       for (size_t i=0; i<dim; i++)
@@ -823,14 +807,14 @@ namespace Dune {
     DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
       : ccobj(MPI_COMM_SELF),
-        _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
+        _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,s),fTupel(0.5)),lb),
 #else
-      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
+      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,s),fTupel(0.5)),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(coordVector(L,s),std::bitset<dim>(),overlap,lb);
+      MultiYGridSetup(coordVector<dim>(L,s),std::bitset<dim>(),overlap,lb);
 
       // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
       for (size_t i=0; i<dim; i++)
@@ -854,14 +838,14 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
       : ccobj(comm),
-        _torus(comm,tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
+        _torus(comm,tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,s),fTupel(0.5)),lb),
 #else
-      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
+      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,s),fTupel(0.5)),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(coordVector(L,s),periodic,overlap,lb);
+      MultiYGridSetup(coordVector<dim>(L,s),periodic,overlap,lb);
 
       init();
     }
@@ -885,15 +869,15 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ctype,dim>(coordVector(L,s),fTupel(0.5)),lb),
+      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,s),fTupel(0.5)),lb),
         ccobj(MPI_COMM_SELF),
 #else
-      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector<ctype,dim>(L,s),fTupel(0.5)),lb),
+      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,s),fTupel(0.5)),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(coordVector<ctype,dim>(L,s),periodic,overlap,lb);
+      MultiYGridSetup(coordVector<dim>(L,s),periodic,overlap,lb);
 
       init();
     }
@@ -910,10 +894,10 @@ namespace Dune {
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::array<int, dim> elements)
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ctype,dim>(coordVector(L,elements),fTupel(0.5)),defaultLoadbalancer()),
+      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,elements),fTupel(0.5)),defaultLoadbalancer()),
         ccobj(MPI_COMM_SELF),
 #else
-      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector(L,elements),fTupel(0.5)),defaultLoadbalancer()),
+      : _torus(tag,Dune::sizeArray<ctype,dim>(coordVector<dim>(L,elements),fTupel(0.5)),defaultLoadbalancer()),
 #endif
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
@@ -932,7 +916,7 @@ namespace Dune {
 #endif
 
       // add level
-      makelevel(coordVector(L,_s),_periodic,o_interior,s_interior,0);
+      makelevel(coordVector<dim>(L,_s),_periodic,o_interior,s_interior,0);
 
       init();
     }
