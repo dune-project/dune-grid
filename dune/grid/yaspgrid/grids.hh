@@ -103,11 +103,11 @@ namespace Dune {
     typedef FieldVector<int, d> iTupel;
     typedef FieldVector<ct,d> fTupel;
 
-    //! make uninitialized subgrid
+    //! make uninitialized ygrid
     YGrid () : _origin(0), _shift(0.0), _offset(0), _supersize(0)
     {}
 
-    /** @brief make grid without coordinate information
+    /** @brief make ygrid without coordinate information
      *  @param origin origin of the grid in global coordinates
      *  @param size size of the grid
      *  @param shift shift vector to be used for this grid
@@ -116,11 +116,8 @@ namespace Dune {
      *  information. This avoids sending coordinates in the parallel case.
      */
     YGrid(iTupel origin, iTupel size, fTupel shift)
-    {
-      _origin = origin;
-      _size = size;
-      _shift = shift;
-    }
+      : origin(_origin), size(_size), shift(_shift)
+    {}
 
     /** @brief make a subgrid by taking coordinates from a larger grid
      *  @param origin origin of the grid to be constructed
@@ -141,7 +138,6 @@ namespace Dune {
      *  @param size the size vector
      *  @param offset the offset in the enclosing grid
      *  @param supersize size of the enclosing grid
-
      */
     YGrid (iTupel origin,  fTupel shift, Dune::array<std::vector<ct>,d>* coords, iTupel size, iTupel offset, iTupel supersize)
       : _origin(origin), _shift(shift), _coords(coords), _size(size), _offset(offset), _supersize(supersize)
@@ -516,7 +512,6 @@ namespace Dune {
         }
       }
 
-      //TODO note iterator compared _index, subiterator _superindex. is it okay to totally skip _index?
       //! Return true when two iterators over the same grid are equal (!).
       bool operator== (const Iterator& i) const
       {
@@ -553,44 +548,6 @@ namespace Dune {
         return _coord;
       }
 
-      //TODO this seems not needed anzmore
-//       //! Get index of cell which is dist cells away in direction i.
-//       int neighbor (int i, int dist) const
-//       {
-//         return _index+dist*_increment[i];
-//       }
-//
-//       //! Get index of neighboring cell which is -1 away in direction i.
-//       int down (int i) const
-//       {
-//         return _index-_increment[i];
-//       }
-//
-//       //! Get index of neighboring cell which is +1 away in direction i.
-//       int up (int i) const
-//       {
-//         return _index+_increment[i];
-//       }
-
-      //! Get index of cell which is dist cells away in direction i in enclosing grid.
-      int superneighbor (int i, int dist) const
-      {
-        return _superindex+dist*_superincrement[i];
-      }
-
-      //! Get index of neighboring cell which is -1 away in direction i in enclosing grid.
-      int superdown (int i) const
-      {
-        return _superindex-_superincrement[i];
-      }
-
-      //! Get index of neighboring cell which is +1 away in direction i in enclosing grid.
-      int superup (int i) const
-      {
-        return _superindex+_superincrement[i];
-      }
-
-
       //! move this iterator dist cells in direction i
       void move (int i, int dist)
       {
@@ -601,19 +558,6 @@ namespace Dune {
         if (_grid->shift(i) > Ytolerance)
           _position[i] += _grid->shift(i) * meshsize(i);
       }
-
-      //TODO check back this is reallz not needed anymore
-//       //! Increment iterator to next cell.
-//       Iterator& operator++ ()
-//       {
-//         ++_index;
-//         for (int i=0; i<d; i++)
-//           if (++(_coord[i])<=_end[i])
-//             return *this;
-//           else
-//             _coord[i]=_origin[i];
-//         return *this;
-//       }
 
       //! Increment iterator to next cell with position.
       Iterator& operator++ ()
@@ -671,23 +615,6 @@ namespace Dune {
         for (int i=0; i<d; i++)
           h[i] = meshsize(i);
         return h;
-      }
-
-      //! Print position of iterator
-      void print (std::ostream& s) const
-      {
-        s << "Consecutive Index: "<< index() << std::endl << "Coordinate: [";
-        for (int i=0; i<d-1; i++) s << coord(i) << ",";
-        s << coord(d-1) << "]";
-        s << std::endl;
-        s << " Superindex = " << superindex() << std::endl;
-                s << "Position: ";
-        s << " [";
-        for (int i=0; i<d-1; i++) s << position(i) << ",";
-        s << position(d-1) << "]" << std::endl;
-        s << "Meshsize: ";
-        for (int i=0; i<d-1; i++) s << meshsize(i) << ",";
-        s << meshsize(d-1) << "]" << std::endl << std::endl;
       }
 
     protected:
