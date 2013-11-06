@@ -131,24 +131,20 @@ namespace Dune {
       :  _origin(origin), _shift(enclosing.shift()), _coords(enclosing.getCoords()), _size(size), _supersize(enclosing.supersize())
     {
       for (int i=0; i<d; i++)
-      {
         _offset[i] = origin[i] - enclosing.origin(i) + enclosing.offset(i);
-        _coordOffset[i] = enclosing.coordOffset(i) + _offset[i] - enclosing.offset(i);
-      }
     }
 
     /** @brief Make YGrid by giving all parameters
      *  @param origin the origin of the grid in global coordinates
      *  @param shift the shift vector
      *  @param coords the coordinate vectors to be used
-     *  @param coordOffset the offset in the coordinate vector
      *  @param size the size vector
      *  @param offset the offset in the enclosing grid
      *  @param supersize size of the enclosing grid
 
      */
-    YGrid (iTupel origin,  fTupel shift, Dune::array<std::vector<ct>,d>* coords, iTupel coordOffset, iTupel size, iTupel offset, iTupel supersize)
-      : _origin(origin), _shift(shift), _coords(coords), _coordOffset(coordOffset), _size(size), _offset(offset), _supersize(supersize)
+    YGrid (iTupel origin,  fTupel shift, Dune::array<std::vector<ct>,d>* coords, iTupel size, iTupel offset, iTupel supersize)
+      : _origin(origin), _shift(shift), _coords(coords), _size(size), _offset(offset), _supersize(supersize)
     {}
 
     //! Return origin in direction i
@@ -197,16 +193,6 @@ namespace Dune {
     const iTupel & offset () const
     {
       return _offset;
-    }
-
-    int coordOffset (int i) const
-    {
-      return _coordOffset[i];
-    }
-
-    const iTupel& coordOffset () const
-    {
-      return _coordOffset;
     }
 
     //! return size of enclosing grid
@@ -337,9 +323,9 @@ namespace Dune {
         for (int i=0; i<d; ++i)
         {
           if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[_grid->coordOffset(i)];
+            _begin[i] = _grid->getCoords(i)[_grid->offset(i)];
           if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->coordOffset(i)+1]-_grid->getCoords(i)[_grid->coordOffset(i)]);
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->offset(i)+1]-_grid->getCoords(i)[_grid->offset(i)]);
           _position[i] = _begin[i];
         }
       }
@@ -382,12 +368,12 @@ namespace Dune {
         for (int i=0; i<d; ++i)
         {
           if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[_grid->coordOffset(i)];
+            _begin[i] = _grid->getCoords(i)[_grid->offset(i)];
           if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->coordOffset(i)+1]-_grid->getCoords(i)[_grid->coordOffset(i)]);
-          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->coordOffset(i)];
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->offset(i)+1]-_grid->getCoords(i)[_grid->offset(i)]);
+          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->offset(i)];
           if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i] + _grid->coordOffset(i)] -_grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->coordOffset(i)]);
+            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i] + _grid->offset(i)] -_grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->offset(i)]);
         }
       }
 
@@ -433,10 +419,10 @@ namespace Dune {
           if (!_grid->empty())
             _begin[i] = _grid->getCoords(i)[0];
           if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->coordOffset(i)+1]-_grid->getCoords(i)[_grid->coordOffset(i)]);
-          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]+_grid->coordOffset(i)];
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->offset(i)+1]-_grid->getCoords(i)[_grid->offset(i)]);
+          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]+_grid->offset(i)];
           if ((this->_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i] + _grid->coordOffset(i)] - _grid->getCoords(i)[coord[i] - this->_origin[i]+_grid->coordOffset(i)]);
+            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i] + _grid->offset(i)] - _grid->getCoords(i)[coord[i] - this->_origin[i]+_grid->offset(i)]);
         }
       }
 
@@ -480,12 +466,12 @@ namespace Dune {
         for (int i=0; i<d; ++i)
         {
           if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[_grid->coordOffset(i)];
+            _begin[i] = _grid->getCoords(i)[_grid->offset(i)];
           if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->coordOffset(i)+1]-_grid->getCoords(i)[_grid->coordOffset(i)]);
-          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->coordOffset(i)];
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->offset(i)+1]-_grid->getCoords(i)[_grid->offset(i)]);
+          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->offset(i)];
           if ((this->_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i] + _grid->coordOffset(i)] - _grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->coordOffset(i)]);
+            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i] + _grid->offset(i)] - _grid->getCoords(i)[coord[i] - this->_origin[i] + _grid->offset(i)]);
         }
       }
 
@@ -570,7 +556,7 @@ namespace Dune {
         _coord[i] += dist;
         _index += dist*_increment[i];
         _superindex += dist*_superincrement[i];
-        _position[i] = _grid->getCoords(i)[this->_coord[i] - this->_origin[i] + _grid->coordOffset(i)];
+        _position[i] = _grid->getCoords(i)[this->_coord[i] - this->_origin[i] + _grid->offset(i)];
         if (_grid->shift(i) > Ytolerance)
           _position[i] += _grid->shift(i) * meshsize(i);
       }
@@ -597,9 +583,9 @@ namespace Dune {
           this->_superindex += this->_superincrement[i];   // move on cell in direction i
           if (++(this->_coord[i])<=this->_end[i])
           {
-            _position[i] = _grid->getCoords(i)[this->_coord[i] - this->_origin[i] + _grid->coordOffset(i)];
+            _position[i] = _grid->getCoords(i)[this->_coord[i] - this->_origin[i] + _grid->offset(i)];
             if (_grid->shift(i) > Ytolerance)
-              _position[i] += _grid->shift(i)*(_grid->getCoords(i)[this->_coord[i]+1 - this->_origin[i] + _grid->coordOffset(i)] - _grid->getCoords(i)[this->_coord[i] - this->_origin[i] + _grid->coordOffset(i)]);
+              _position[i] += _grid->shift(i)*(_grid->getCoords(i)[this->_coord[i]+1 - this->_origin[i] + _grid->offset(i)] - _grid->getCoords(i)[this->_coord[i] - this->_origin[i] + _grid->offset(i)]);
             return *this;
           }
           else
@@ -634,7 +620,7 @@ namespace Dune {
       //! Return meshsize in direction i
       ct meshsize (int i) const
       {
-        return _grid->getCoords(i)[this->_coord[i]+1 - this->_origin[i] + _grid->coordOffset(i)] - _grid->getCoords(i)[this->_coord[i] - this->_origin[i] + _grid->coordOffset(i)];
+        return _grid->getCoords(i)[this->_coord[i]+1 - this->_origin[i] + _grid->offset(i)] - _grid->getCoords(i)[this->_coord[i] - this->_origin[i] + _grid->offset(i)];
       }
 
       //! Return meshsize of current cell as reference.
@@ -743,7 +729,6 @@ namespace Dune {
     iTupel _origin;
     fTupel _shift;
     Dune::array<std::vector<ct>,d>* _coords;
-    iTupel _coordOffset;
     iTupel _size;
     iTupel _offset;    //!< offset to origin of the enclosing grid
     iTupel _supersize; //!< size of the enclosing grid
@@ -757,7 +742,6 @@ namespace Dune {
     s << "Printing YGrid structure:" << std::endl;
     s << "Origin: " << e.origin() << std::endl;
     s << "Shift: " << e.shift() << std::endl;
-    s << "CoordOffset: " << e.coordOffset() << std::endl;
     s << "Size: " << e.size() << std::endl;
     s << "Offset: " << e.offset() << std::endl;
     s << "Supersize: " << e.supersize() << std::endl;

@@ -417,7 +417,7 @@ namespace Dune {
       }
 
       //build the cell grid with overlap
-      g.cell_overlap = YGrid<dim,ctype>(o_overlap, r, &g.coords, iTupel(0), s_overlap, iTupel(0), s_overlap);
+      g.cell_overlap = YGrid<dim,ctype>(o_overlap, r, &g.coords, s_overlap, iTupel(0), s_overlap);
 
       // now make the interior grid a subgrid of the overlapping grid
       iTupel sizeInterior;
@@ -447,7 +447,7 @@ namespace Dune {
         o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
         s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1;
       }
-      g.vertex_overlapfront = YGrid<dim,ctype>(o_vertex_overlapfront,r,&g.coords,iTupel(0),s_vertex_overlapfront, iTupel(0), s_vertex_overlapfront);
+      g.vertex_overlapfront = YGrid<dim,ctype>(o_vertex_overlapfront,r,&g.coords,s_vertex_overlapfront, iTupel(0), s_vertex_overlapfront);
 
       // now overlap only (i.e. without front), is subgrid of overlapfront
       iTupel o_vertex_overlap;
