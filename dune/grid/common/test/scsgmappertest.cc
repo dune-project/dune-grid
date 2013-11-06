@@ -1,8 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-// $Id: mcmgmappertest.cc 5518 2009-09-26 12:00:21Z christi $
-
 /** \file
     \brief A unit test for the SingleCodimSingleGeomTypeMapper
  */
@@ -109,8 +107,6 @@ int main (int argc, char** argv) try
     static const int dim = 2;
     typedef YaspGrid<dim> GridType;
     typedef GridType::ctype ctype;
-    typedef GridType::LeafIndexSet LeafIndexSetType;
-    typedef GridType::LevelIndexSet LevelIndexSetType;
 
     Dune::FieldVector<ctype, dim> L(1.0);
     Dune::array<int, dim> s;

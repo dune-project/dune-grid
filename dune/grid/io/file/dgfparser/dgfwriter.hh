@@ -149,7 +149,7 @@ namespace Dune
 
       // get vertex numbers of the element
       const size_t vxSize = element.template count< Element::dimension > ();
-      Index vertices[ vxSize ];
+      std::vector<Index> vertices(vxSize);
       for( size_t i = 0; i < vxSize; ++i )
         vertices[ i ] = vertexIndex[ indexSet.subIndex( element, i, dimGrid ) ];
 

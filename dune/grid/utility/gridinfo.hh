@@ -221,7 +221,6 @@ namespace Dune {
     static const std::size_t dim = GV::dimension;
     typedef typename GV::template Codim<0>::Iterator EIterator;
     typedef typename GV::template Codim<0>::Geometry EGeometry;
-    typedef typename GV::IntersectionIterator IIterator;
     typedef typename GV::IndexSet IndexSet;
 
     typedef typename GridViewInfo<ctype>::iterator InfoIterator;
