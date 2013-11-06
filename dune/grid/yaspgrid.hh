@@ -227,7 +227,7 @@ namespace Dune {
 
     struct Intersection {
       /** \brief The intersection as a subgrid of the local grid */
-      SubYGrid<dim,ctype> grid;
+      YGrid<dim,ctype> grid;
 
       /** \brief Rank of the process where the other grid is stored */
       int rank;
@@ -249,8 +249,8 @@ namespace Dune {
       Dune::array<std::vector<ctype>,dim> coords;
 
       // cell (codim 0) data
-      SubYGrid<dim,ctype> cell_overlap;     // we have no ghost cells, so our part is overlap completely
-      SubYGrid<dim,ctype> cell_interior;    // interior cells are a subgrid of all cells
+      YGrid<dim,ctype> cell_overlap;     // we have no ghost cells, so our part is overlap completely
+      YGrid<dim,ctype> cell_interior;    // interior cells are a subgrid of all cells
 
       std::deque<Intersection> send_cell_overlap_overlap;  // each intersection is a subgrid of overlap
       std::deque<Intersection> recv_cell_overlap_overlap;  // each intersection is a subgrid of overlap
@@ -259,10 +259,10 @@ namespace Dune {
       std::deque<Intersection> recv_cell_overlap_interior; // each intersection is a subgrid of overlap
 
       // vertex (codim dim) data
-      SubYGrid<dim,ctype> vertex_overlapfront;  // all our vertices are overlap and front
-      SubYGrid<dim,ctype> vertex_overlap;       // subgrid containing only overlap
-      SubYGrid<dim,ctype> vertex_interiorborder; // subgrid containing only interior and border
-      SubYGrid<dim,ctype> vertex_interior;      // subgrid containing only interior
+      YGrid<dim,ctype> vertex_overlapfront;  // all our vertices are overlap and front
+      YGrid<dim,ctype> vertex_overlap;       // subgrid containing only overlap
+      YGrid<dim,ctype> vertex_interiorborder; // subgrid containing only interior and border
+      YGrid<dim,ctype> vertex_interior;      // subgrid containing only interior
 
       std::deque<Intersection> send_vertex_overlapfront_overlapfront; // each intersection is a subgrid of overlapfront
       std::deque<Intersection> recv_vertex_overlapfront_overlapfront; // each intersection is a subgrid of overlapfront
@@ -370,14 +370,20 @@ namespace Dune {
      * \param s_interior  size of interior cell decomposition
      * \param overlap     to be used on this grid level
      */
-    YGridLevel makelevel (int level, Dune::array<std::vector<ctype>,dim> coords, std::bitset<dim> periodic, iTupel o_interior, int overlap)
+    void makelevel (YGridLevel& g, int level, Dune::array<std::vector<ctype>,dim> coords, std::bitset<dim> periodic, iTupel o_interior, int overlap)
     {
       // first, lets allocate a new structure
-      YGridLevel g;
+     // YGridLevel g;
       g.overlap = overlap;
       g.mg = this;
       g.level_ = level;
-      g.coords = coords;
+      //g.coords = coords;
+      for (int i=0; i<dim; i++)
+      {
+        g.coords[i].resize(coords[i].size());
+        for (int j=0; j< coords[i].size(); j++)
+          g.coords[i][j] = coords[i][j];
+      }
 
       // r_i = 0.5, because we are interested in cell centers. Multiplication with h_i happens later on.
       fTupel r(0.5);
@@ -417,7 +423,7 @@ namespace Dune {
       }
 
       //build the cell grid with overlap
-      g.cell_overlap = SubYGrid<dim,ctype>(o_overlap, r, &coords, iTupel(0), s_overlap, iTupel(0), s_overlap);
+      g.cell_overlap = YGrid<dim,ctype>(o_overlap, r, &g.coords, iTupel(0), s_overlap, iTupel(0), s_overlap);
 
       // now make the interior grid a subgrid of the overlapping grid
       iTupel sizeInterior;
@@ -429,11 +435,11 @@ namespace Dune {
         if (ovlp_up[i])
           sizeInterior[i] -= overlap;
       }
-      g.cell_interior = SubYGrid<dim,ctype>(o_interior, sizeInterior, g.cell_overlap);
+      g.cell_interior = YGrid<dim,ctype>(o_interior, sizeInterior, g.cell_overlap);
 
       // compute cell intersections
-      intersections(g.cell_overlap,g.cell_overlap,g.send_cell_overlap_overlap,g.recv_cell_overlap_overlap);
-      intersections(g.cell_interior,g.cell_overlap,g.send_cell_interior_overlap,g.recv_cell_overlap_interior);
+     intersections(g.cell_overlap,g.cell_overlap,g.send_cell_overlap_overlap,g.recv_cell_overlap_overlap);
+     intersections(g.cell_interior,g.cell_overlap,g.send_cell_interior_overlap,g.recv_cell_overlap_interior);
 
       // the shift for the vertex grids is zero, this also manages the size increase by 1
       for (int i=0; i<dim; i++)
@@ -447,7 +453,7 @@ namespace Dune {
         o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
         s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1;
       }
-      g.vertex_overlapfront = SubYGrid<dim,ctype>(o_vertex_overlapfront,r,&coords,iTupel(0),s_vertex_overlapfront, iTupel(0), s_vertex_overlapfront);
+      g.vertex_overlapfront = YGrid<dim,ctype>(o_vertex_overlapfront,r,&g.coords,iTupel(0),s_vertex_overlapfront, iTupel(0), s_vertex_overlapfront);
 
       // now overlap only (i.e. without front), is subgrid of overlapfront
       iTupel o_vertex_overlap;
@@ -464,7 +470,7 @@ namespace Dune {
         if (ovlp_up[i])
           s_vertex_overlap[i]--;
       }
-      g.vertex_overlap = SubYGrid<dim,ctype>(o_vertex_overlap, s_vertex_overlap, g.vertex_overlapfront);
+      g.vertex_overlap = YGrid<dim,ctype>(o_vertex_overlap, s_vertex_overlap, g.vertex_overlapfront);
 
       // now interior with border
       iTupel o_vertex_interiorborder;
@@ -481,7 +487,7 @@ namespace Dune {
         if (ovlp_up[i])
           s_vertex_interiorborder[i] -= overlap;
       }
-      g.vertex_interiorborder = SubYGrid<dim,ctype>(o_vertex_interiorborder,s_vertex_interiorborder,g.vertex_overlapfront);
+      g.vertex_interiorborder = YGrid<dim,ctype>(o_vertex_interiorborder,s_vertex_interiorborder,g.vertex_overlapfront);
 
       // now only interior
       iTupel o_vertex_interior(o_vertex_interiorborder);
@@ -496,7 +502,7 @@ namespace Dune {
         if (ovlp_up[i])
           s_vertex_interior[i] = s_vertex_interior[i] - 1;
       }
-      g.vertex_interior = SubYGrid<dim,ctype>(o_vertex_interior, s_vertex_interior, g.vertex_overlapfront);
+      g.vertex_interior = YGrid<dim,ctype>(o_vertex_interior, s_vertex_interior, g.vertex_overlapfront);
 
       // compute vertex intersections
       intersections(g.vertex_overlapfront,g.vertex_overlapfront,
@@ -507,9 +513,6 @@ namespace Dune {
                     g.send_vertex_interiorborder_interiorborder,g.recv_vertex_interiorborder_interiorborder);
       intersections(g.vertex_interiorborder,g.vertex_overlapfront,
                     g.send_vertex_interiorborder_overlapfront,g.recv_vertex_overlapfront_interiorborder);
-
-      // return the whole thing
-      return g;
     }
 
 
@@ -518,7 +521,7 @@ namespace Dune {
         : origin(0), size(0), h(0.0), r(0.0)
       {}
       mpifriendly_ygrid (const YGrid<dim,ctype>& grid)
-        : origin(grid.origin()), size(Dune::template sizeArray<ctype,dim>(grid.getCoords(),grid.shift())), h(grid.shift()), r(grid.shift())
+        : origin(grid.origin()), size(grid.size()), h(grid.shift()), r(grid.shift())
       {}
       iTupel origin;
       iTupel size;
@@ -533,7 +536,7 @@ namespace Dune {
      * \returns two lists: Intersections to be sent and Intersections to be received
      * \note sendgrid/recvgrid may be SubYGrids. Since intersection method is virtual it should work properly
      */
-    void intersections (const SubYGrid<dim,ctype>& sendgrid, const SubYGrid<dim,ctype>& recvgrid,
+    void intersections (const YGrid<dim,ctype>& sendgrid, const YGrid<dim,ctype>& recvgrid,
                         std::deque<Intersection>& sendlist, std::deque<Intersection>& recvlist)
     {
       iTupel size = globalSize<0>();
@@ -628,7 +631,13 @@ namespace Dune {
         // what must be sent to this neighbor
         Intersection send_intersection;
         mpifriendly_ygrid yg = mpifriendly_recv_recvgrid[i.index()];
-        recv_recvgrid[i.index()] = SubYGrid<dim,ctype>(yg.origin,yg.size,yg.r);
+        recv_recvgrid[i.index()] = YGrid<dim,ctype>(yg.origin,yg.size,yg.r);
+        if (_torus.rank() == 1)
+        {
+          std::cout << "computing an intersection of base grid" << std::endl;
+          std::cout << sendgrid << std::endl << " with argument " << recv_recvgrid[i.index()];
+          std::cout << std::endl << "Result:" << std::endl << sendgrid.intersection(recv_recvgrid[i.index()]) << std::endl;
+        }
         send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
         send_intersection.rank = i.rank();
         send_intersection.distance = i.distance();
@@ -636,7 +645,7 @@ namespace Dune {
 
         Intersection recv_intersection;
         yg = mpifriendly_recv_sendgrid[i.index()];
-        recv_sendgrid[i.index()] = SubYGrid<dim,ctype>(yg.origin,yg.size,yg.r);
+        recv_sendgrid[i.index()] = YGrid<dim,ctype>(yg.origin,yg.size,yg.r);
         recv_intersection.grid = recvgrid.intersection(recv_sendgrid[i.index()]);
         recv_intersection.rank = i.rank();
         recv_intersection.distance = i.distance();
@@ -697,7 +706,7 @@ namespace Dune {
     typedef YaspGlobalIdSet<YaspGrid<dim> > GlobalIdSetType;
 
     //! shorthand for some data types
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename YGrid<dim,ctype>::TransformingSubIterator TSI;
     typedef typename std::deque<Intersection>::const_iterator ISIT;
 
     //! The constructor of the old MultiYGrid class
@@ -758,7 +767,8 @@ namespace Dune {
       }
 
       // add level
-      _levels[0] = makelevel(0,newcoords,periodic,o_interior,overlap);
+//       _levels[0] = makelevel(0,newcoords,periodic,o_interior,overlap);
+      makelevel(_levels[0],0,newcoords,periodic,o_interior,overlap);
     }
 
     /*! Constructor
@@ -927,7 +937,8 @@ namespace Dune {
 #endif
 
       // add level
-      _levels[0] = makelevel(0,coordVector(L,_s),_periodic,o_interior,s_interior,0);
+//       _levels[0] = makelevel(0,coordVector(L,_s),_periodic,o_interior,s_interior,0);
+      makelevel(_levels[0],0,coordVector(L,_s),_periodic,o_interior,s_interior,0);
 
       init();
     }
@@ -1004,7 +1015,7 @@ namespace Dune {
       }
 
       // add level
-      _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
+      makelevel(_levels[0],0,newcoords,_periodic,o_interior,_overlap);
 
       init();
     }
@@ -1084,7 +1095,8 @@ namespace Dune {
       }
 
       // add level
-      _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
+//       _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
+      makelevel(_levels[0], 0,newcoords,_periodic,o_interior,_overlap);
 
       init();
     }
@@ -1166,7 +1178,8 @@ namespace Dune {
       }
 
       // add level
-      _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
+//       _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
+      makelevel(_levels[0],0,newcoords,_periodic,o_interior,_overlap);
 
       init();
     }
@@ -1185,7 +1198,7 @@ namespace Dune {
       return _levels.size()-1;
     }
 
-    //! refine the grid refCount times. What about overlap?
+    //! refine the grid refCount times.
     void globalRefine (int refCount)
     {
       if (refCount < -maxLevel())
@@ -1267,7 +1280,7 @@ namespace Dune {
         // add level
         // push_back() may not be used here, because makelevel relies on _levels to have specific size
         _levels.resize(_levels.size() + 1);
-        _levels.back() = makelevel(_levels.size() - 1,newcoords,_periodic,o_interior,overlap);
+        makelevel(_levels.back(), _levels.size() - 1,newcoords,_periodic,o_interior,overlap);
 
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );
@@ -1980,6 +1993,14 @@ namespace Dune {
       s << "[" << rank << "]:   " << std::endl;
       s << "[" << rank << "]:   " << "==========================================" << std::endl;
       s << "[" << rank << "]:   " << "level=" << g->level() << std::endl;
+      s << "[" << rank << "]:   " << "coordinate vector of the level:" << std::endl;
+      for (int i=0; i<d; i++)
+      {
+        s << "direction " << i << ": ";
+        for (int j=0; j<g->coords[i].size(); j++)
+          s << g->coords[i][j] << " ";
+        s << std::endl;
+      }
       s << "[" << rank << "]:   " << "cell_overlap=" << g->cell_overlap << std::endl;
       s << "[" << rank << "]:   " << "cell_interior=" << g->cell_interior << std::endl;
       for (typename std::deque<typename YaspGrid<d>::Intersection>::const_iterator i=g->send_cell_overlap_overlap.begin();

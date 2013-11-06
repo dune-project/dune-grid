@@ -84,337 +84,6 @@ namespace Dune {
 
      A YGrid allows to iterate over all its cells with an Iterator class.
    */
-  template<int d, typename ct>
-  class YGrid {
-  public:
-
-    /** Return size (number of grid entities) in direction i.
-    *   This depends on the last entry of the coord vector to define a entity itself or only a gridwith.
-    *   Disambiguition is done via the shift in that direction.
-    */
-    int size (int i) const
-    {
-      if (fabs(_r[i]) < Ytolerance)
-        return _coords[i].size();
-      else
-        return _coords[i].size() - 1;
-    }
-
-    /** Return size  vector (number of grid entities).
-    *   This depends on the last entry of the coord vector to define a entity itself or only a gridwith.
-    *   Disambiguition is done via the shift in that direction.
-    */
-    iTupel size () const
-    {
-      iTupel result;
-      for (int i=0; i<d; i++)
-        result[i] = size(i);
-      return result;
-    }
-
-    //! Return total size of index set which is the product of all size per direction.
-    int totalsize () const
-    {
-      int s=1;
-      for (int i=0; i<d; ++i)
-        s *= size(i);
-      return s;
-    }
-
-    //! Return minimum index in direction i
-    int min (int i) const
-    {
-      return _origin[i];
-    }
-
-    //! Return maximum index in direction i
-    int max (int i) const
-    {
-      return _origin[i] + size(i) - 1;
-    }
-
-    //! Return true if YGrid is empty, i.e. has size 0 in all directions.
-    bool empty () const
-    {
-      for (int i=0; i<d; ++i)
-      {
-        if (_r[i] > Ytolerance)
-        {
-          if (_coords[i].size() < 2)
-            return true;
-        }
-        else
-        {
-          if (_coords[i].empty())
-            return true;
-        }
-      }
-      return false;
-    }
-
-    //! given a tupel compute its index in the lexicographic numbering
-    int index (const iTupel& coord) const
-    {
-      int index = (coord[d-1]-_origin[d-1]);
-
-      for (int i=d-2; i>=0; i--)
-        index = index*size(i) + (coord[i]-_origin[i]);
-
-      return index;
-    }
-
-    //! given a tupel compute its index in the lexicographic numbering
-    int index (const array<int,d>& coord) const
-    {
-      int index = (coord[d-1]-_origin[d-1]);
-
-      for (int i=d-2; i>=0; i--)
-        index = index*size(i) + (coord[i]-_origin[i]);
-
-      return index;
-    }
-
-    //! given a coordinate, return true if it is in the grid
-    bool inside (const iTupel& coord) const
-    {
-      for (int i=0; i<d; i++)
-        if (coord[i]<_origin[i] || coord[i]>=_origin[i]+size(i))
-          return false;
-      return true;
-    }
-
-    //! return grid moved by the vector v
-    YGrid<d,ct> move (iTupel v) const
-    {
-      for (int i=0; i<d; i++)
-        v[i] += _origin[i];
-      return YGrid<d,ct>(v,_coords,_r);
-    }
-
-    /*! Iterator class allows one to run over all cells of a grid.
-       The cells of the grid to iterate over are numbered consecutively starting
-       with zero. Via the index() method the iterator provides a mapping of the
-       cells of the grid to a one-dimensional array. The number of entries
-       in this array must be the size of the grid.
-     */
-    class Iterator {
-    public:
-      //! Make iterator pointing to first cell in a grid.
-      Iterator (const YGrid<d,ct>& r)
-      {
-        // copy data coming from grid to iterate over
-        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
-        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
-
-        // initialize to first position in index set
-        for (int i=0; i<d; ++i) _coord[i] = _origin[i];
-        _index = 0;
-
-        // compute increments;
-        int inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _increment[i] = inc;
-          inc *= r.size(i);
-        }
-      }
-
-      //! Make iterator pointing to given cell in a grid.
-      Iterator (const YGrid<d,ct>& r, const iTupel& coord)
-      {
-        // copy data coming from grid to iterate over
-        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
-        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
-
-        // compute increments;
-        int inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _increment[i] = inc;
-          inc *= r.size(i);
-        }
-
-        // initialize to given position in index set
-        for (int i=0; i<d; ++i) _coord[i] = coord[i];
-        _index = r.index(coord);
-      }
-
-      //! reinitialize iterator to given position
-      void reinit (const YGrid<d,ct>& r, const iTupel& coord)
-      {
-        // copy data coming from grid to iterate over
-        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
-        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
-
-        // compute increments;
-        int inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _increment[i] = inc;
-          inc *= r.size(i);
-        }
-
-        // initialize to given position in index set
-        for (int i=0; i<d; ++i) _coord[i] = coord[i];
-        _index = r.index(coord);
-      }
-
-      //! reinitialize iterator to given position
-      void reinit (const YGrid<d,ct>& r, const array<int,d>& coord)
-      {
-        // copy data coming from grid to iterate over
-        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
-        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
-
-        // compute increments;
-        int inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _increment[i] = inc;
-          inc *= r.size(i);
-        }
-
-        // initialize to given position in index set
-        for (int i=0; i<d; ++i) _coord[i] = coord[i];
-        _index = r.index(coord);
-      }
-
-      //! Return true when two iterators over the same grid are equal (!).
-      bool operator== (const Iterator& i) const
-      {
-        return _index == i._index;
-      }
-
-      //! Return true when two iterators over the same grid are not equal (!).
-      bool operator!= (const Iterator& i) const
-      {
-        return _index != i._index;
-      }
-
-      //! Return index of the current cell in the consecutive numbering.
-      int index () const
-      {
-        return _index;
-      }
-
-      //! Return coordinate of the cell in direction i.
-      int coord (int i) const
-      {
-        return _coord[i];
-      }
-
-      //! Return coordinate of the cell as reference (do not modify).
-      const iTupel& coord () const
-      {
-        return _coord;
-      }
-
-      //! Get index of cell which is dist cells away in direction i.
-      int neighbor (int i, int dist) const
-      {
-        return _index+dist*_increment[i];
-      }
-
-      //! Get index of neighboring cell which is -1 away in direction i.
-      int down (int i) const
-      {
-        return _index-_increment[i];
-      }
-
-      //! Get index of neighboring cell which is +1 away in direction i.
-      int up (int i) const
-      {
-        return _index+_increment[i];
-      }
-
-      //! move this iterator dist cells in direction i
-      void move (int i, int dist)
-      {
-        _coord[i] += dist;
-        _index += dist*_increment[i];
-      }
-
-      //! Increment iterator to next cell.
-      Iterator& operator++ ()
-      {
-        ++_index;
-        for (int i=0; i<d; i++)
-          if (++(_coord[i])<=_end[i])
-            return *this;
-          else
-            _coord[i]=_origin[i];
-        return *this;
-      }
-
-      //! Print position of iterator
-      void print (std::ostream& s) const
-      {
-        s << "Consecutive Index: "<< index() << std::endl << "Coordinate: [";
-        for (int i=0; i<d-1; i++) s << coord(i) << ",";
-        s << coord(d-1) << "]";
-        s << std::endl;
-      }
-
-    protected:
-      int _index;          //< current lexicographic position in index set
-      iTupel _coord;       //< current position in index set
-      iTupel _increment;   //< increment for next neighbor in direction i
-      iTupel _origin;      //< origin and
-      iTupel _end;         //< last index in direction i
-    };
-
-    //! return iterator to first element of index set
-    Iterator begin () const
-    {
-      return Iterator(*this);
-    }
-
-    //! return iterator to one past the last element of index set
-    Iterator end () const {
-      iTupel last;
-      for (int i=0; i<d; i++)
-        last[i] = max(i);
-      last[0] += 1;
-      return Iterator(*this,last);
-    }
-
-  protected:
-    //! internal representation uses origin/size
-    iTupel _origin;
-    Dune::array<std::vector<ct>,d> _coords;
-    fTupel _r; //! shift on a unit cell, to be multiplied with actual cell width
-  };
-
-  //! Output operator for grids
-  template <int d, typename ct>
-  inline std::ostream& operator<< (std::ostream& s, YGrid<d,ct> e)
-  {
-    s << "{";
-    for (int i=0; i<d-1; i++)
-      s << "[" << e.min(i) << "," << e.max(i) << "]x";
-    s << "[" << e.min(d-1) << "," << e.max(d-1) << "]";
-    s << " = [";
-    for (int i=0; i<d-1; i++) s << e.origin(i) << ",";
-    s << e.origin(d-1) << "]x[";
-    for (int i=0; i<d-1; i++) s << e.size(i) << ",";
-    s << e.size(d-1) << "]";
-//     s << " h=[";
-//     for (int i=0; i<d-1; i++) s << e.meshsize(i) << ",";
-//     s << e.meshsize(d-1) << "]";
-    s << " r=[";
-    for (int i=0; i<d-1; i++) s << e.shift(i) << ",";
-    s << e.shift(d-1) << "]";
-    s << "}";
-    return s;
-  }
-
-  //! Output operator for Iterators
-  template <int d, typename ct>
-  inline std::ostream& operator<< (std::ostream& s, typename YGrid<d,ct>::Iterator& e)
-  {
-    e.print(s);
-    return s;
-  }
 
 
   /*! A SubYGrid is a grid that is embedded in a larger grid
@@ -428,14 +97,14 @@ namespace Dune {
      the consecutive index in the enclosing grid.
    */
   template<int d, typename ct>
-  class SubYGrid
+  class YGrid
   {
   public:
     typedef FieldVector<int, d> iTupel;
     typedef FieldVector<ct,d> fTupel;
 
     //! make uninitialized subgrid
-    SubYGrid () : _origin(0), _r(0.0), _offset(0), _supersize(0)
+    YGrid () : _origin(0), _shift(0.0), _offset(0), _supersize(0)
     {}
 
     /** @brief make grid without coordinate information
@@ -446,69 +115,39 @@ namespace Dune {
      *  used to determine an intersection with a grid with coordinate
      *  information. This avoids sending coordinates in the parallel case.
      */
-    SubYGrid(iTupel origin, iTupel size, fTupel shift)
+    YGrid(iTupel origin, iTupel size, fTupel shift)
     {
-      iTupel cSize(size);
-      for (int i=0; i<d; i++)
-      {
-        if (shift[i] > Ytolerance)
-          cSize[i]++;
-        this->_coords[i].resize(cSize[i]);
-        _offset[i] = 0;
-        _supersize[i] = cSize[i];
-      }
+      _origin = origin;
+      _size = size;
+      _shift = shift;
     }
-
-    //TODO evaluate necessity when used
-//     /** @brief cut coordinates from a larger grid
-//      *  @param origin origin of the grid to be constructed
-//      *  @param size size of the grid to be constructed
-//      *  @param enclosing the grid to take coordinates from
-//      */
-//     Dune::array<std::vector<ct>,d> cutCoords(iTupel origin, iTupel size, YGrid<d,ct>& enclosing)
-//     {
-//       Dune::array<std::vector<ct>,d> result;
-//       for (int i=0; i<d; i++)
-//       {
-//         typename std::vector<ct>::const_iterator begin = enclosing.getCoords(i).begin();
-//         typename std::vector<ct>::const_iterator end = enclosing.getCoords(i).end();
-//         int offset = origin[i] - enclosing.origin(i);
-//         int endOffset = enclosing.size(i) - size[i] - offset;
-//         begin = begin + offset;
-//         end = end - endOffset;
-//         if (end-begin>0)
-//         {
-//           result[i].resize(end-begin);
-//           std::copy(begin, end, result[i].begin());
-//         }
-//       }
-//       return result;
-//     }
 
     /** @brief make a subgrid by taking coordinates from a larger grid
      *  @param origin origin of the grid to be constructed
      *  @param size size of the grid to be constructed
      *  @param enclosing the grid to take coordinates and shift vector from
      */
-    SubYGrid (iTupel origin, iTupel size, SubYGrid<d,ct>& enclosing)
-      :  _origin(origin), _shift(enclosing.shift()), _coords(enclosing.getCoords()), _size(size)
+    YGrid (iTupel origin, iTupel size, const YGrid<d,ct>& enclosing)
+      :  _origin(origin), _shift(enclosing.shift()), _coords(enclosing.getCoords()), _size(size), _supersize(enclosing.supersize())
     {
       for (int i=0; i<d; i++)
       {
         _offset[i] = origin[i] - enclosing.origin(i) + enclosing.offset(i);
-        _coordOffset[i] = enclosing.coordOffset(i) + _offset[i];
-        _supersize[i] = enclosing.supersize(i);
+        _coordOffset[i] = enclosing.coordOffset(i) + _offset[i] - enclosing.offset(i); //TODO check
       }
     }
 
     /** @brief Make SubYgrid
      *  @param origin the origin of the grid in global coordinates
+     *  @param shift the shift vector
+     *  @param coords the coordinate vectors to be used
+     *  @param coordOffset the offset in the coordinate vector
+     *  @param size the size vector
      *  @param offset the offset in the enclosing grid
      *  @param supersize size of the enclosing grid
-     *  @param coords the coordinate vectors to be used
-     *  @param r the shift vector
+
      */
-    SubYGrid (iTupel origin,  fTupel shift, Dune::array<std::vector<ct>,d>* coords, iTupel coordOffset, iTupel size, iTupel offset, iTupel supersize)
+    YGrid (iTupel origin,  fTupel shift, Dune::array<std::vector<ct>,d>* coords, iTupel coordOffset, iTupel size, iTupel offset, iTupel supersize)
       : _origin(origin), _shift(shift), _coords(coords), _coordOffset(coordOffset), _size(size), _offset(offset), _supersize(supersize)
     {}
 
@@ -536,11 +175,10 @@ namespace Dune {
       return _shift[i];
     }
 
-
     //! get coordinate vector in direction i
-    std::vector<ct>* const getCoords (int i) const
+    const std::vector<ct>& getCoords (int i) const
     {
-      return _coords[i];
+      return (*_coords)[i];
     }
 
     //! get the array of coordinate vectors
@@ -559,6 +197,16 @@ namespace Dune {
     const iTupel & offset () const
     {
       return _offset;
+    }
+
+    int coordOffset (int i) const
+    {
+      return _coordOffset[i];
+    }
+
+    const iTupel& coordOffset () const
+    {
+      return _coordOffset;
     }
 
     //! return size of enclosing grid
@@ -618,47 +266,63 @@ namespace Dune {
     }
 
     //! Return SubYGrid of supergrid of self which is the intersection of self and another YGrid
-    SubYGrid<d,ct> intersection (const SubYGrid<d,ct>& r) const
+    YGrid<d,ct> intersection (const YGrid<d,ct>& r) const
     {
       for (int i=0; i<d; i++)
       {
         //empty coordinate vectors result in empty intersections
         if (this->empty() || r.empty())
-          return SubYGrid<d,ct>();
+          return YGrid<d,ct>();
 
         //intersectable grids must have the same shift
         if (fabs(this->shift(i)-r.shift(i)) > Ytolerance)
-          return SubYGrid<d,ct>();
+          return YGrid<d,ct>();
       }
 
       iTupel neworigin;
       iTupel newsize;
-      iTupel newcoordOffset;
-      iTupel newoffset;
       for (int i=0; i<d; ++i)
       {
         neworigin[i] = std::max(origin(i),r.origin(i));
         newsize[i] = std::min(max(i),r.max(i)) - neworigin[i] + 1;
-        newCoordOffset[i] = coordOffset(i) + neworigin[i] - origin(i);
-        offset[i] = offset(i) + neworigin[i] - origin(i);
       }
 
-      return SubYGrid<d,ct>(neworigin, shift(), getCoords(), newcoordOffset, newsize, newoffset, _supersize);
+      return YGrid<d,ct>(neworigin,newsize,*this);
     }
 
-    /*! SubIterator is an Iterator that provides in addition the consecutive
-       index in the enclosing grid.
+
+ /*! Iterator class allows one to run over all cells of a grid.
+       The cells of the grid to iterate over are numbered consecutively starting
+       with zero. Via the index() method the iterator provides a mapping of the
+       cells of the grid to a one-dimensional array. The number of entries
+       in this array must be the size of the grid.
      */
-    class SubIterator : public YGrid<d,ct>::Iterator {
+    class TransformingSubIterator {
     public:
-      //! Make iterator pointing to first cell in subgrid.
-      SubIterator (const SubYGrid<d,ct>& r) : YGrid<d,ct>::Iterator::Iterator (r)
+      //! Make iterator pointing to first cell in a grid.
+      TransformingSubIterator (const YGrid<d,ct>& r) : _grid(&r)
       {
+        // copy data coming from grid to iterate over
+        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
+        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
+
+        // initialize to first position in index set
+        for (int i=0; i<d; ++i) _coord[i] = _origin[i];
+        _index = 0;
+
+        // compute increments;
+        int inc = 1;
+        for (int i=0; i<d; ++i)
+        {
+          _increment[i] = inc;
+          inc *= r.size(i);
+        }
+
         //! store some grid information
         for (int i=0; i<d; ++i) _size[i] = r.size(i);
 
         // compute superincrements
-        int inc = 1;
+        inc = 1;
         for (int i=0; i<d; ++i)
         {
           _superincrement[i] = inc;
@@ -669,16 +333,41 @@ namespace Dune {
         _superindex = 0;
         for (int i=0; i<d; ++i)
           _superindex += r.offset(i)*_superincrement[i];
+
+        for (int i=0; i<d; ++i)
+        {
+          if (!_grid->empty())
+            _begin[i] = _grid->getCoords(i)[0];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
+          _position[i] = _begin[i];
+        }
       }
 
-      //! Make iterator pointing to given cell in subgrid.
-      SubIterator (const SubYGrid<d,ct>& r, const iTupel& coord) : YGrid<d,ct>::Iterator::Iterator (r,coord)
+      //! Make iterator pointing to given cell in a grid.
+      TransformingSubIterator (const YGrid<d,ct>& r, const iTupel& coord) : _grid(&r)
       {
+        // copy data coming from grid to iterate over
+        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
+        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
+
+        // compute increments;
+        int inc = 1;
+        for (int i=0; i<d; ++i)
+        {
+          _increment[i] = inc;
+          inc *= r.size(i);
+        }
+
+        // initialize to given position in index set
+        for (int i=0; i<d; ++i) _coord[i] = coord[i];
+        _index = r.index(coord);
+
         //! store some grid information
         for (int i=0; i<d; ++i) _size[i] = r.size(i);
 
         // compute superincrements
-        int inc = 1;
+        inc = 1;
         for (int i=0; i<d; ++i)
         {
           _superincrement[i] = inc;
@@ -689,22 +378,44 @@ namespace Dune {
         _superindex = 0;
         for (int i=0; i<d; ++i)
           _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
+
+        for (int i=0; i<d; ++i)
+        {
+          if (!_grid->empty())
+            _begin[i] = _grid->getCoords(i)[0];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
+          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i]] -_grid->getCoords(i)[coord[i] - this->_origin[i]]);
+        }
       }
 
-      //! Make transforming iterator from iterator (used for automatic conversion of end)
-      SubIterator (const typename YGrid<d,ct>::Iterator& i) : YGrid<d,ct>::Iterator::Iterator(i)
-      {}
-
-      //! Make iterator pointing to given cell in subgrid.
-      void reinit (const SubYGrid<d,ct>& r, const iTupel& coord)
+      //TODO avoid code duplication: can the constructor simply call this????
+      //! reinitialize iterator to given position
+      void reinit (const YGrid<d,ct>& r, const iTupel& coord)
       {
-        YGrid<d,ct>::Iterator::reinit(r,coord);
+        // copy data coming from grid to iterate over
+        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
+        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
 
-        //! store some grid information
+        // compute increments;
+        int inc = 1;
+        for (int i=0; i<d; ++i)
+        {
+          _increment[i] = inc;
+          inc *= r.size(i);
+        }
+
+        // initialize to given position in index set
+        for (int i=0; i<d; ++i) _coord[i] = coord[i];
+        _index = r.index(coord);
+
+                //! store some grid information
         for (int i=0; i<d; ++i) _size[i] = r.size(i);
 
         // compute superincrements
-        int inc = 1;
+        inc = 1;
         for (int i=0; i<d; ++i)
         {
           _superincrement[i] = inc;
@@ -715,18 +426,45 @@ namespace Dune {
         _superindex = 0;
         for (int i=0; i<d; ++i)
           _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
+
+        _grid = &r;
+        for (int i=0; i<d; ++i)
+        {
+          if (!_grid->empty())
+            _begin[i] = _grid->getCoords(i)[0];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
+          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]];
+          if ((this->_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i]] - _grid->getCoords(i)[coord[i] - this->_origin[i]]);
+        }
       }
 
-      //! Make iterator pointing to given cell in subgrid.
-      void reinit (const SubYGrid<d,ct>& r, const array<int,d>& coord)
+      //TODO get rid of this nonsense.
+      //! reinitialize iterator to given position
+      void reinit (const YGrid<d,ct>& r, const array<int,d>& coord)
       {
-        YGrid<d,ct>::Iterator::reinit(r,coord);
+        // copy data coming from grid to iterate over
+        for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
+        for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
 
-        //! store some grid information
+        // compute increments;
+        int inc = 1;
+        for (int i=0; i<d; ++i)
+        {
+          _increment[i] = inc;
+          inc *= r.size(i);
+        }
+
+        // initialize to given position in index set
+        for (int i=0; i<d; ++i) _coord[i] = coord[i];
+        _index = r.index(coord);
+
+                //! store some grid information
         for (int i=0; i<d; ++i) _size[i] = r.size(i);
 
         // compute superincrements
-        int inc = 1;
+        inc = 1;
         for (int i=0; i<d; ++i)
         {
           _superincrement[i] = inc;
@@ -737,18 +475,37 @@ namespace Dune {
         _superindex = 0;
         for (int i=0; i<d; ++i)
           _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
+
+        _grid = &r;
+        for (int i=0; i<d; ++i)
+        {
+          if (!_grid->empty())
+            _begin[i] = _grid->getCoords(i)[0];
+          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
+          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]];
+          if ((this->_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
+            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i]] - _grid->getCoords(i)[coord[i] - this->_origin[i]]);
+        }
       }
 
+      //TODO note iterator compared _index, subiterator _superindex. is it okay to totally skip _index?
       //! Return true when two iterators over the same grid are equal (!).
-      bool operator== (const SubIterator& i) const
+      bool operator== (const TransformingSubIterator& i) const
       {
         return _superindex == i._superindex;
       }
 
       //! Return true when two iterators over the same grid are not equal (!).
-      bool operator!= (const SubIterator& i) const
+      bool operator!= (const TransformingSubIterator& i) const
       {
         return _superindex != i._superindex;
+      }
+
+      //! Return index of the current cell in the consecutive numbering.
+      int index () const
+      {
+        return _index;
       }
 
       //! Return consecutive index in enclosing grid
@@ -756,6 +513,37 @@ namespace Dune {
       {
         return _superindex;
       }
+
+      //! Return coordinate of the cell in direction i.
+      int coord (int i) const
+      {
+        return _coord[i];
+      }
+
+      //! Return coordinate of the cell as reference (do not modify).
+      const iTupel& coord () const
+      {
+        return _coord;
+      }
+
+      //TODO this seems not needed anzmore
+//       //! Get index of cell which is dist cells away in direction i.
+//       int neighbor (int i, int dist) const
+//       {
+//         return _index+dist*_increment[i];
+//       }
+//
+//       //! Get index of neighboring cell which is -1 away in direction i.
+//       int down (int i) const
+//       {
+//         return _index-_increment[i];
+//       }
+//
+//       //! Get index of neighboring cell which is +1 away in direction i.
+//       int up (int i) const
+//       {
+//         return _index+_increment[i];
+//       }
 
       //! Get index of cell which is dist cells away in direction i in enclosing grid.
       int superneighbor (int i, int dist) const
@@ -775,138 +563,30 @@ namespace Dune {
         return _superindex+_superincrement[i];
       }
 
+
       //! move this iterator dist cells in direction i
       void move (int i, int dist)
       {
-        YGrid<d,ct>::Iterator::move(i,dist);    // move base iterator
-        _superindex += dist*_superincrement[i]; // move superindex
+        _coord[i] += dist;
+        _index += dist*_increment[i];
+        _superindex += dist*_superincrement[i];
+        _position[i] = _grid->getCoords(i)[this->_coord[i] - this->_origin[i]];
+        if (_grid->shift(i) > Ytolerance)
+          _position[i] += _grid->shift(i) * meshsize(i);
       }
 
-      //! Increment iterator to next cell in subgrid
-      SubIterator& operator++ ()
-      {
-        ++(this->_index);               // update consecutive index in grid
-        for (int i=0; i<d; i++)         // check for wrap around
-        {
-          _superindex += _superincrement[i];   // move on cell in direction i
-          if (++(this->_coord[i])<=this->_end[i])
-            return *this;
-          else
-          {
-            this->_coord[i]=this->_origin[i];         // move back to origin in direction i
-            _superindex -= _size[i]*_superincrement[i];
-          }
-        }
-        // if we wrapped around, back to to begin(), we must put the iterator to end()
-        if (this->_coord == this->_origin)
-        {
-          for (int i=0; i<d; i++)
-            this->_superindex += (this->_size[i]-1)*this->_superincrement[i];
-          this->_superindex += this->_superincrement[0];
-        }
-        return *this;
-      }
-
-      //! Print position of iterator
-      void print (std::ostream& s) const
-      {
-        YGrid<d,ct>::Iterator::print(s);
-        s << " Superindex = " << superindex() << std::endl;
-      }
-    protected:
-      int _superindex;        //!< consecutive index in enclosing grid
-      iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
-      iTupel _size;           //!< size of subgrid
-    };
-
-    //! return subiterator to first element of index set
-    SubIterator subbegin () const { return SubIterator(*this); }
-
-    //! return subiterator to last element of index set
-    SubIterator subend () const
-    {
-      iTupel last;
-      for (int i=0; i<d; i++) last[i] = this->max(i);
-      last[0] += 1;
-      return SubIterator(*this,last);
-    }
-
-    /*! TransformingSubIterator is a SubIterator providing in addition a linear transformation
-       of the coordinates of the grid in the form \f$ y_i = x_i + h_i * (x_{i+1} - x_i) \f$.
-       This can be used to interpret the grid cells as vertices, edges, faces, etc.
-     */
-    class TransformingSubIterator : public SubIterator {
-    public:
-      //! Make iterator pointing to first cell in a grid.
-      TransformingSubIterator (const SubYGrid<d,ct>& r) : SubIterator(r), _grid(&r)
-      {
-        for (int i=0; i<d; ++i)
-        {
-          if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[0];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
-          _position[i] = _begin[i];
-        }
-      }
-
-      //! Make iterator pointing to given cell in a grid.
-      TransformingSubIterator (const SubYGrid<d,ct>& r, const iTupel& coord) : SubIterator(r,coord), _grid(&r)
-      {
-        for (int i=0; i<d; ++i)
-        {
-          if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[0];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
-          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i]] -_grid->getCoords(i)[coord[i] - this->_origin[i]]);
-        }
-      }
-
-      //! Make transforming iterator from iterator (used for automatic conversion of end)
-      TransformingSubIterator (const SubYGrid<d,ct>& r, const SubIterator& i) :
-        SubIterator(i), _grid(&r)
-      {}
-
-      TransformingSubIterator (const TransformingSubIterator & t) :
-        SubIterator(t), _begin(t._begin), _position(t._position), _grid(t._grid)
-      {}
-
-      //! Make iterator pointing to given cell in a grid.
-      void reinit (const SubYGrid<d,ct>& r, const iTupel& coord)
-      {
-        SubIterator::reinit(r,coord);
-        _grid = &r;
-        for (int i=0; i<d; ++i)
-        {
-          if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[0];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
-          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]];
-          if ((this->_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i]] - _grid->getCoords(i)[coord[i] - this->_origin[i]]);
-        }
-      }
-
-      //! Make iterator pointing to given cell in a grid.
-      void reinit (const SubYGrid<d,ct>& r, const std::array<int,d>& coord)
-      {
-        SubIterator::reinit(r,coord);
-        _grid = &r;
-        for (int i=0; i<d; ++i)
-        {
-          if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[0];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[1]-_grid->getCoords(i)[0]);
-          _position[i] = _grid->getCoords(i)[coord[i] - this->_origin[i]];
-          if ((this->_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - this->_origin[i]] - _grid->getCoords(i)[coord[i] - this->_origin[i]]);
-        }
-      }
+      //TODO check back this is reallz not needed anymore
+//       //! Increment iterator to next cell.
+//       Iterator& operator++ ()
+//       {
+//         ++_index;
+//         for (int i=0; i<d; i++)
+//           if (++(_coord[i])<=_end[i])
+//             return *this;
+//           else
+//             _coord[i]=_origin[i];
+//         return *this;
+//       }
 
       //! Increment iterator to next cell with position.
       TransformingSubIterator& operator++ ()
@@ -966,20 +646,15 @@ namespace Dune {
         return h;
       }
 
-      //! Move cell position by dist cells in direction i.
-      void move (int i, int dist)
-      {
-        SubIterator::move(i,dist);
-        _position[i] = _grid->getCoords(i)[this->_coord[i] - this->_origin[i]];
-        if (_grid->shift(i) > Ytolerance)
-          _position[i] += _grid->shift(i) * meshsize(i);
-      }
-
-      //! Print contents of iterator
+      //! Print position of iterator
       void print (std::ostream& s) const
       {
-        SubIterator::print(s);
-        s << "Position: ";
+        s << "Consecutive Index: "<< index() << std::endl << "Coordinate: [";
+        for (int i=0; i<d-1; i++) s << coord(i) << ",";
+        s << coord(d-1) << "]";
+        s << std::endl;
+        s << " Superindex = " << superindex() << std::endl;
+                s << "Position: ";
         s << " [";
         for (int i=0; i<d-1; i++) s << position(i) << ",";
         s << position(d-1) << "]" << std::endl;
@@ -988,8 +663,16 @@ namespace Dune {
         s << meshsize(d-1) << "]" << std::endl << std::endl;
       }
 
-    private:
-      const SubYGrid<d,ct>* _grid;
+    protected:
+      int _index;          //!< current lexicographic position in index set
+      iTupel _coord;       //!< current position in index set
+      iTupel _increment;   //!< increment for next neighbor in direction i
+      iTupel _origin;      //!< origin and
+      iTupel _end;         //!< last index in direction i
+      int _superindex;        //!< consecutive index in enclosing grid
+      iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
+      iTupel _size;           //!< size of subgrid
+      const YGrid<d,ct>* _grid;
       fTupel _begin;    //!< position of origin of grid
       fTupel _position; //!< current position
     };
@@ -1009,8 +692,51 @@ namespace Dune {
     //! return subiterator to last element of index set
     TransformingSubIterator tsubend () const
     {
-      SubIterator endit = subend();
-      return TransformingSubIterator(*this,endit);
+      iTupel last;
+      for (int i=0; i<d; i++) last[i] = this->max(i);
+      last[0] += 1;
+      return TransformingSubIterator(*this,last);
+    }
+
+    //! return grid moved by the vector v
+    YGrid<d,ct> move (iTupel v) const
+    {
+      for (int i=0; i<d; i++)
+        v[i] += _origin[i];
+      return YGrid<d,ct>(v,_size,*this);
+    }
+
+    //! given a coordinate, return true if it is in the grid
+    bool inside (const iTupel& coord) const
+    {
+      for (int i=0; i<d; i++)
+      {
+        if ((coord[i]<_origin[i]) || (coord[i]>=_origin[i]+_size[i]))
+          return false;
+      }
+      return true;
+    }
+
+        //! given a tupel compute its index in the lexicographic numbering
+    int index (const iTupel& coord) const
+    {
+      int index = (coord[d-1]-_origin[d-1]);
+
+      for (int i=d-2; i>=0; i--)
+        index = index*_size[i] + (coord[i]-_origin[i]);
+
+      return index;
+    }
+
+    //! given a tupel compute its index in the lexicographic numbering
+    int index (const array<int,d>& coord) const
+    {
+      int index = (coord[d-1]-_origin[d-1]);
+
+      for (int i=d-2; i>=0; i--)
+        index = index*_size[i] + (coord[i]-_origin[i]);
+
+      return index;
     }
 
   private:
@@ -1026,18 +752,23 @@ namespace Dune {
 
   //! Output operator for subgrids
   template <int d, typename ct>
-  inline std::ostream& operator<< (std::ostream& s, SubYGrid<d,ct> e)
+  inline std::ostream& operator<< (std::ostream& s, YGrid<d,ct> e)
   {
-    YGrid<d,ct> x = e;
-    s << x << " ofs=" << e.offset() << " ss=" << e.supersize();
+    s << "Printing YGrid structure:" << std::endl;
+    s << "Origin: " << e.origin() << std::endl;
+    s << "Shift: " << e.shift() << std::endl;
+    s << "CoordOffset: " << e.coordOffset() << std::endl;
+    s << "Size: " << e.size() << std::endl;
+    s << "Offset: " << e.offset() << std::endl;
+    s << "Supersize: " << e.supersize() << std::endl;
     return s;
   }
 
   //! Output operator for subgrids
   template <int d, typename ct>
-  inline std::ostream& operator<< (std::ostream& s, typename SubYGrid<d,ct>::TransformingSubIterator& e)
+  inline std::ostream& operator<< (std::ostream& s, typename YGrid<d,ct>::TransformingSubIterator& e)
   {
-    e.print(s);
+    s << "please reimplement this" << std::endl;
     return s;
   }
 
