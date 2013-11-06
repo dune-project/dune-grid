@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_ENTITY_SEED_HH
 #define DUNE_GRID_ENTITY_SEED_HH
 
+#include <dune/grid/common/grid.hh>
+
 /** \file
  *  \brief Interface class EntitySeed
  */

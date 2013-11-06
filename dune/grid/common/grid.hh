@@ -353,6 +353,7 @@ namespace Dune {
   template<int codim, int dim, class GridImp,template<int,int,class> class EntityImp> class Entity;
   template<class GridImp, class EntityPointerImp> class EntityPointer;
   template< int codim, class Grid, class IteratorImp > class EntityIterator;
+  template<class GridImp, class EntitySeedImp> class EntitySeed;
   template< class GridImp, class IntersectionImp > class Intersection;
   template< class GridImp, class IntersectionIteratorImp, class IntersectionImp > class IntersectionIterator;
   template<class GridImp, class IndexSetImp, class IndexTypeImp=unsigned int> class IndexSet;
