@@ -363,6 +363,7 @@ namespace Dune {
   protected:
     /** \brief Make a new YGridLevel structure
      *
+     * \param g           the YGridLevel to build
      * \param L           size of the whole domain in each direction
      * \param s           number of cells in each direction
      * \param periodic    indicate periodicity for each direction
@@ -370,20 +371,13 @@ namespace Dune {
      * \param s_interior  size of interior cell decomposition
      * \param overlap     to be used on this grid level
      */
-    void makelevel (YGridLevel& g, int level, Dune::array<std::vector<ctype>,dim> coords, std::bitset<dim> periodic, iTupel o_interior, int overlap)
+    void makelevel (const Dune::array<std::vector<ctype>,dim>& coords, std::bitset<dim> periodic, iTupel o_interior, int overlap)
     {
-      // first, lets allocate a new structure
-     // YGridLevel g;
+      YGridLevel& g = _levels.back();
       g.overlap = overlap;
       g.mg = this;
-      g.level_ = level;
-      //g.coords = coords;
-      for (int i=0; i<dim; i++)
-      {
-        g.coords[i].resize(coords[i].size());
-        for (int j=0; j< coords[i].size(); j++)
-          g.coords[i][j] = coords[i][j];
-      }
+      g.level_ = maxLevel();
+      g.coords = coords;
 
       // r_i = 0.5, because we are interested in cell centers. Multiplication with h_i happens later on.
       fTupel r(0.5);
@@ -397,6 +391,7 @@ namespace Dune {
       for (int i=0; i<dim; i++)
       {
         s_overlap[i] = coords[i].size()-1;
+
         //in the periodic case there is always overlap
         if (periodic[i])
         {
@@ -416,7 +411,6 @@ namespace Dune {
           }
 
           //check upper boundary
-          //globalSize may not be used here, as in some cases (push_back) the wrong level is taken
           if (o_overlap[i] + coords[i].size() - 1 < globalSize<0>(i))
             ovlp_up[i] = true;
         }
@@ -534,7 +528,6 @@ namespace Dune {
      * \param recvgrid the grid stored in this processor
      * \param sendgrid  the subgrid to be sent to neighboring processors
      * \returns two lists: Intersections to be sent and Intersections to be received
-     * \note sendgrid/recvgrid may be SubYGrids. Since intersection method is virtual it should work properly
      */
     void intersections (const YGrid<dim,ctype>& sendgrid, const YGrid<dim,ctype>& recvgrid,
                         std::deque<Intersection>& sendlist, std::deque<Intersection>& recvlist)
@@ -632,12 +625,6 @@ namespace Dune {
         Intersection send_intersection;
         mpifriendly_ygrid yg = mpifriendly_recv_recvgrid[i.index()];
         recv_recvgrid[i.index()] = YGrid<dim,ctype>(yg.origin,yg.size,yg.r);
-        if (_torus.rank() == 1)
-        {
-          std::cout << "computing an intersection of base grid" << std::endl;
-          std::cout << sendgrid << std::endl << " with argument " << recv_recvgrid[i.index()];
-          std::cout << std::endl << "Result:" << std::endl << sendgrid.intersection(recv_recvgrid[i.index()]) << std::endl;
-        }
         send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
         send_intersection.rank = i.rank();
         send_intersection.distance = i.distance();
@@ -738,6 +725,7 @@ namespace Dune {
         //expand the coord vectors in the periodic case
         if (periodic[i])
         {
+          //TODO this is crap
           const ctype avg = 0.5 * (coords[i].back() - coords[i][coords[i].size()-2] + coords[i][1] - coords[i][0]);
           const int size = coords[i].size();
           coords[i].resize(coords[i].size()+2*overlap);
@@ -767,8 +755,7 @@ namespace Dune {
       }
 
       // add level
-//       _levels[0] = makelevel(0,newcoords,periodic,o_interior,overlap);
-      makelevel(_levels[0],0,newcoords,periodic,o_interior,overlap);
+      makelevel(newcoords,periodic,o_interior,overlap);
     }
 
     /*! Constructor
@@ -937,8 +924,7 @@ namespace Dune {
 #endif
 
       // add level
-//       _levels[0] = makelevel(0,coordVector(L,_s),_periodic,o_interior,s_interior,0);
-      makelevel(_levels[0],0,coordVector(L,_s),_periodic,o_interior,s_interior,0);
+      makelevel(coordVector(L,_s),_periodic,o_interior,s_interior,0);
 
       init();
     }
@@ -1015,7 +1001,7 @@ namespace Dune {
       }
 
       // add level
-      makelevel(_levels[0],0,newcoords,_periodic,o_interior,_overlap);
+      makelevel(newcoords,_periodic,o_interior,_overlap);
 
       init();
     }
@@ -1095,8 +1081,7 @@ namespace Dune {
       }
 
       // add level
-//       _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
-      makelevel(_levels[0], 0,newcoords,_periodic,o_interior,_overlap);
+      makelevel(newcoords,_periodic,o_interior,_overlap);
 
       init();
     }
@@ -1178,8 +1163,7 @@ namespace Dune {
       }
 
       // add level
-//       _levels[0] = makelevel(0,newcoords,_periodic,o_interior,_overlap);
-      makelevel(_levels[0],0,newcoords,_periodic,o_interior,_overlap);
+      makelevel(newcoords,_periodic,o_interior,_overlap);
 
       init();
     }
@@ -1278,9 +1262,8 @@ namespace Dune {
           o_interior[i] = 2*cg.cell_interior.origin(i);
 
         // add level
-        // push_back() may not be used here, because makelevel relies on _levels to have specific size
         _levels.resize(_levels.size() + 1);
-        makelevel(_levels.back(), _levels.size() - 1,newcoords,_periodic,o_interior,overlap);
+        makelevel(newcoords,_periodic,o_interior,overlap);
 
         setsizes();
         indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim>, false > >(*this,maxLevel()) );

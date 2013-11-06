@@ -133,11 +133,11 @@ namespace Dune {
       for (int i=0; i<d; i++)
       {
         _offset[i] = origin[i] - enclosing.origin(i) + enclosing.offset(i);
-        _coordOffset[i] = enclosing.coordOffset(i) + _offset[i] - enclosing.offset(i); //TODO check
+        _coordOffset[i] = enclosing.coordOffset(i) + _offset[i] - enclosing.offset(i);
       }
     }
 
-    /** @brief Make SubYgrid
+    /** @brief Make YGrid by giving all parameters
      *  @param origin the origin of the grid in global coordinates
      *  @param shift the shift vector
      *  @param coords the coordinate vectors to be used
