@@ -159,16 +159,16 @@ namespace Dune {
       return _origin;
     }
 
-    //! Return shift tupel
-    const fTupel& shift () const
-    {
-      return _shift;
-    }
-
     //! Return shift in direction i
     ct shift (int i) const
     {
       return _shift[i];
+    }
+
+    //! Return shift tupel
+    const fTupel& shift () const
+    {
+      return _shift;
     }
 
     //! get coordinate vector in direction i
@@ -177,7 +177,7 @@ namespace Dune {
       return (*_coords)[i];
     }
 
-    //! get the array of coordinate vectors
+    //! get pointer to the array of coordinate vectors
     Dune::array<std::vector<ct>,d>* const getCoords () const
     {
       return _coords;
@@ -249,6 +249,47 @@ namespace Dune {
           return true;
       }
       return false;
+    }
+
+    //! given a coordinate, return true if it is in the grid
+    bool inside (const iTupel& coord) const
+    {
+      for (int i=0; i<d; i++)
+      {
+        if ((coord[i]<_origin[i]) || (coord[i]>=_origin[i]+_size[i]))
+          return false;
+      }
+      return true;
+    }
+
+    //! given a tupel compute its index in the lexicographic numbering
+    int index (const iTupel& coord) const
+    {
+      int index = (coord[d-1]-_origin[d-1]);
+
+      for (int i=d-2; i>=0; i--)
+        index = index*_size[i] + (coord[i]-_origin[i]);
+
+      return index;
+    }
+
+    //! given a tupel compute its index in the lexicographic numbering
+    int index (const array<int,d>& coord) const
+    {
+      int index = (coord[d-1]-_origin[d-1]);
+
+      for (int i=d-2; i>=0; i--)
+        index = index*_size[i] + (coord[i]-_origin[i]);
+
+      return index;
+    }
+
+    //! return grid moved by the vector v
+    YGrid<d,ct> move (iTupel v) const
+    {
+      for (int i=0; i<d; i++)
+        v[i] += _origin[i];
+      return YGrid<d,ct>(v,_size,*this);
     }
 
     //! Return SubYGrid of supergrid of self which is the intersection of self and another YGrid
@@ -679,50 +720,10 @@ namespace Dune {
     TransformingSubIterator tsubend () const
     {
       iTupel last;
-      for (int i=0; i<d; i++) last[i] = this->max(i);
+      for (int i=0; i<d; i++)
+        last[i] = this->max(i);
       last[0] += 1;
       return TransformingSubIterator(*this,last);
-    }
-
-    //! return grid moved by the vector v
-    YGrid<d,ct> move (iTupel v) const
-    {
-      for (int i=0; i<d; i++)
-        v[i] += _origin[i];
-      return YGrid<d,ct>(v,_size,*this);
-    }
-
-    //! given a coordinate, return true if it is in the grid
-    bool inside (const iTupel& coord) const
-    {
-      for (int i=0; i<d; i++)
-      {
-        if ((coord[i]<_origin[i]) || (coord[i]>=_origin[i]+_size[i]))
-          return false;
-      }
-      return true;
-    }
-
-        //! given a tupel compute its index in the lexicographic numbering
-    int index (const iTupel& coord) const
-    {
-      int index = (coord[d-1]-_origin[d-1]);
-
-      for (int i=d-2; i>=0; i--)
-        index = index*_size[i] + (coord[i]-_origin[i]);
-
-      return index;
-    }
-
-    //! given a tupel compute its index in the lexicographic numbering
-    int index (const array<int,d>& coord) const
-    {
-      int index = (coord[d-1]-_origin[d-1]);
-
-      for (int i=d-2; i>=0; i--)
-        index = index*_size[i] + (coord[i]-_origin[i]);
-
-      return index;
     }
 
   private:
@@ -735,7 +736,7 @@ namespace Dune {
   };
 
 
-  //! Output operator for subgrids
+  //! Output operator for ygrids
   template <int d, typename ct>
   inline std::ostream& operator<< (std::ostream& s, YGrid<d,ct> e)
   {
@@ -748,7 +749,7 @@ namespace Dune {
     return s;
   }
 
-  //! Output operator for subgrids
+  //! Output operator for ygrids
   template <int d, typename ct>
   inline std::ostream& operator<< (std::ostream& s, typename YGrid<d,ct>::TransformingSubIterator& e)
   {
