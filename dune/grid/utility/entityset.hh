@@ -56,6 +56,44 @@ namespace Dune {
     Size size() const;
   };
 
+  // sizable entity set adapted from an index set
+  template<class IndexSet, class Entity_>
+  class IndexSetEntitySet
+  {
+  public:
+    //! category
+    typedef SizableEntitySetTag EntitySetCategory;
+
+    //! type of entity handled by this set.
+    typedef Entity_ Entity;
+
+    //! type used for the size
+    typedef typename IndexSet::IndexType Size;
+
+    //! construct
+    /**
+     * The reference to the index set is stored internally.
+     */
+    IndexSetEntitySet(const IndexSet &is) :
+      is_(is)
+    { }
+
+    //! check whether an entity is contained in the set
+    bool contains(const Entity &e) const
+    {
+      return is_.contains(e);
+    }
+
+    //! return number of entites in the set
+    Size size() const
+    {
+      return is_.size(Entity::codimension);
+    }
+
+  private:
+    const IndexSet &is_;
+  };
+
   //! EntitySet selecting entity based on the index
   /**
    * Given an index set \c is, an offset \c offset and a stride \c stride,

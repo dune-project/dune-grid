@@ -99,7 +99,7 @@ namespace Dune {
 
   template<int codim, class GV>
   IteratorEntityRange<typename GV::template Codim<codim>::Iterator>
-  entities(const GV &gv)
+  entityRange(const GV &gv)
   {
     return IteratorEntityRange<typename GV::template Codim<codim>::Iterator>
       (gv.template begin<codim>(), gv.template end<codim>());

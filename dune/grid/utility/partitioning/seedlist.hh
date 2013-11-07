@@ -58,7 +58,7 @@ namespace Dune {
         seedLists_.assign(gv.size(codim), gv.template begin<0>()->seed());
 
       // compute end indices
-      for(const auto &e : entities<codim>(gv))
+      for(const auto &e : entityRange<codim>(gv))
         ++pEnd_[partitioner.partition(e)];
       std::partial_sum(pEnd_.begin(), pEnd_.end(), pEnd_.begin());
 
@@ -69,7 +69,7 @@ namespace Dune {
       // Vector of running indices, one for each partition
       auto pIndex = pBegin_;
       // fill the seed lists with the correct seeds
-      for(const auto &e : entities<codim>(gv))
+      for(const auto &e : entityRange<codim>(gv))
       {
         auto &index = pIndex[partitioner.partition(e)];
         seedLists_[index] = e.seed();

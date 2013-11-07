@@ -184,6 +184,25 @@ namespace Dune {
     Range range_;
   };
 
+
+  template<int codim, class GV>
+  HybridEntitySet<
+    IndexSetEntitySet<typename GV::IndexSet,
+                      typename GV::template Codim<codim>::Entity>,
+    IteratorEntityRange<typename GV::template Codim<codim>::Iterator> >
+  entities(const GV &gv)
+  {
+    typedef IndexSetEntitySet<typename GV::IndexSet,
+                              typename GV::template Codim<codim>::Entity> Set;
+    typedef IteratorEntityRange<typename GV::template Codim<codim>::Iterator>
+      Range;
+    typedef HybridEntitySet<Set, Range> IterableSet;
+
+    return IterableSet(Set(gv.indexSet()),
+                       Range(gv.template begin<codim>(),
+                             gv.template end<codim>()));
+  }
+
 } // namespace Dune
 
 #endif // DUNE_GRID_UTILITY_ITERABLEENTITYSET_HH
