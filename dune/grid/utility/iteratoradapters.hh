@@ -240,7 +240,7 @@ namespace Dune {
     //! For Iteratorfacade
     DifferenceType distanceTo(const SeedToEntityIteratorAdapter &other) const
     {
-      assert(grid_ == other.grid_);
+      assert(gridp_ == other.gridp_);
       return std::distance(seedIt_, other.seedIt_);
     }
   };
