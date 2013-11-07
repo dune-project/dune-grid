@@ -59,7 +59,7 @@ namespace Dune {
   //************************************************************************
   // forward declaration of templates
 
-  template<int dim>                             class YaspGrid;
+  template<int dim, class CoordCont>                             class YaspGrid;
   template<int mydim, int cdim, class GridImp>  class YaspGeometry;
   template<int codim, int dim, class GridImp>   class YaspEntity;
   template<int codim, class GridImp>            class YaspEntityPointer;
@@ -74,14 +74,14 @@ namespace Dune {
   namespace FacadeOptions
   {
 
-    template<int dim, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim, YaspGrid<dim>, YaspGeometry>
+    template<int dim, class CoordCont, int mydim, int cdim>
+    struct StoreGeometryReference<mydim, cdim, YaspGrid<dim,CoordCont>, YaspGeometry>
     {
       static const bool v = false;
     };
 
-    template<int dim, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim, const YaspGrid<dim>, YaspGeometry>
+    template<int dim, class CoordCont, int mydim, int cdim>
+    struct StoreGeometryReference<mydim, cdim, const YaspGrid<dim,CoordCont>, YaspGeometry>
     {
       static const bool v = false;
     };
@@ -103,7 +103,7 @@ namespace Dune {
 
 namespace Dune {
 
-  template<int dim>
+  template<int dim, class CoordCont>
   struct YaspGridFamily
   {
 #if HAVE_MPI
@@ -114,7 +114,7 @@ namespace Dune {
 
     typedef GridTraits<dim,                                     // dimension of the grid
         dim,                                                    // dimension of the world space
-        Dune::YaspGrid<dim>,
+        Dune::YaspGrid<dim, CoordCont>,
         YaspGeometry,YaspEntity,
         YaspEntityPointer,
         YaspLevelIterator,                                      // type used for the level iterator
@@ -124,11 +124,11 @@ namespace Dune {
         YaspIntersectionIterator,              // level intersection iter
         YaspHierarchicIterator,
         YaspLevelIterator,                                      // type used for the leaf(!) iterator
-        YaspIndexSet< const YaspGrid< dim >, false >,                  // level index set
-        YaspIndexSet< const YaspGrid< dim >, true >,                  // leaf index set
-        YaspGlobalIdSet<const YaspGrid<dim> >,
+        YaspIndexSet< const YaspGrid< dim, CoordCont >, false >,                  // level index set
+        YaspIndexSet< const YaspGrid< dim, CoordCont >, true >,                  // leaf index set
+        YaspGlobalIdSet<const YaspGrid<dim, CoordCont> >,
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
-        YaspGlobalIdSet<const YaspGrid<dim> >,
+        YaspGlobalIdSet<const YaspGrid<dim, CoordCont> >,
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
         CCType,
         DefaultLevelGridViewTraits, DefaultLeafGridViewTraits,
@@ -185,6 +185,47 @@ namespace Dune {
     return result;
   }
 
+  template<class ct, int dim>
+  class EquidistantCoordinateContainer
+  {
+    public:
+    EquidistantCoordinateContainer(const Dune::FieldVector<ct,dim>& h) : _h(h) {}
+
+    inline ct meshsize(int d, int i)
+    {
+      return _h[d];
+    }
+
+    inline ct coordinate(int d, int i)
+    {
+      return i*_h[d];
+    }
+
+    private:
+    Dune::FieldVector<ct,dim> _h;
+  };
+
+  template<class ct, int dim>
+  class TensorProductCoordinateContainer
+  {
+    public:
+    TensorProductCoordinateContainer(const Dune::array<std::vector<ct>,dim>& c) : _c(c) {}
+
+    inline ct meshsize(int d, int i)
+    {
+      return _c[d][i+1] - _c[d][i];
+    }
+
+    inline ct coordinate(int d, int i)
+    {
+      return _c[d][i];
+    }
+
+    private:
+    Dune::array<std::vector<ct>,dim> _c;
+  };
+
+
   //************************************************************************
   /*!
      \brief [<em> provides \ref Dune::Grid </em>]
@@ -201,9 +242,9 @@ namespace Dune {
      \par History:
      \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
    */
-  template<int dim>
+  template<int dim, class CoordCont = EquidistantCoordinateContainer<yaspgrid_ctype, dim> >
   class YaspGrid
-    : public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim> >
+    : public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim, CoordCont> >
   {
   public:
     //! Type used for coordinates
@@ -674,9 +715,9 @@ namespace Dune {
     typedef bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits> PersistentIndexType;
 
     //! the GridFamily of this grid
-    typedef YaspGridFamily<dim> GridFamily;
+    typedef YaspGridFamily<dim, CoordCont> GridFamily;
     // the Traits
-    typedef typename YaspGridFamily<dim>::Traits Traits;
+    typedef typename YaspGridFamily<dim, CoordCont>::Traits Traits;
 
     // need for friend declarations in entity
     typedef YaspIndexSet<YaspGrid<dim>, false > LevelIndexSetType;
