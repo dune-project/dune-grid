@@ -886,8 +886,16 @@ namespace Dune {
       return asImp().ghostSize(codim);
     }
 
-    /*! \brief Communicate information on distributed entities on a given level
-          Template parameter is a model of Dune::CommDataHandleIF
+    /**
+     * \brief Communicate information on distributed entities on a given level
+     * Template parameter is a model of Dune::CommDataHandleIF
+     * \param data A data handle telling the method what data is communicated
+     * and how this should be done.
+     * \param interface The communication interface to use.
+     * \param dir The direction of the communication along the interface (forward
+     * or backward.
+     * \param level The index of the grid level where the communication should
+     * happen.
      */
     template<class DataHandleImp, class DataTypeImp>
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
@@ -896,8 +904,15 @@ namespace Dune {
       return;
     }
 
-    /*! \brief Communicate information on distributed entities on the leaf grid
-          Template parameter is a model of Dune::CommDataHandleIF
+    /**
+     * \brief Communicate information on distributed entities on the leaf grid
+     * Template parameter is a model of Dune::CommDataHandleIF
+     *
+     * \param data A data handle telling the method what data is communicated
+     * and how this should be done.
+     * \param interface The communication interface to use.
+     * \param dir The direction of the communication along the interface
+     * (forward or backward).
      */
     template<class DataHandleImp, class DataTypeImp>
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir) const
@@ -915,7 +930,7 @@ namespace Dune {
     //@}
 
     /*! \brief Re-balances the load each process has to handle for a parallel grid,
-     *  if grid has changed , true is returned
+     *  \return True if the grid has changed.
      */
     bool loadBalance()
     {
@@ -923,9 +938,12 @@ namespace Dune {
       return asImp().loadBalance();
     }
 
-    /*! \brief Re-balances the load each process has to handle for a parallel grid,
-     * the DataHandle data works like the data handle for the communicate
-     * methods. If grid has changed , true is returned.
+    /*! \brief Re-balances the load each process has to handle for a parallel grid and moves the data.
+     * \param data A data handle telling the method which data should be communicated
+     * and how. Has to adhere to the interface describe by CommDataHandleIf
+     * just like the data handle for the communicate
+     * methods.
+     * \return True if the grid has changed.
      */
     template<class DataHandle>
     bool loadBalance (DataHandle& data)
