@@ -19,7 +19,6 @@ set(HEADERS
   persistentcontainervector.hh
   persistentcontainerwrapper.hh
   structuredgridfactory.hh
-  tripartit.hh
   vertexorderfactory.hh)
 
 install(FILES ${HEADERS}

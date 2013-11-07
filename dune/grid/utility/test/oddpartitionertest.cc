@@ -25,7 +25,9 @@
 #include <dune/grid/io/file/vtk/function.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/utility/partitioning/mapped.hh>
-#include <dune/grid/utility/tripartit.hh>
+#include <dune/grid/utility/partitioning/seedlist.hh>
+#include <dune/grid/utility/partitioner/recursive-equidistant.hh>
+#include <dune/grid/utility/partitioner/recursive-odd.hh>
 #include <dune/grid/yaspgrid.hh>
 
 void fail(int &result) {
@@ -93,7 +95,8 @@ public:
   double evaluate(int comp, const Entity &e,
                   const Dune::FieldVector< ctype, dim > &xi) const
   {
-    return partitioner_.color(e);
+    return partitioner_.color
+      (partitioner_.mapPartitioning().getPartitionId(e));
   }
   std::string name() const
   {
@@ -113,13 +116,15 @@ void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
   typedef Dune::SeedListPartitioning<typename GV::Grid, 0> SeedPartitioning;
   SeedPartitioning seedPartitioning(gv);
 
-  typedef Dune::RecursiveEquidistantPartitioner<GV, SeedPartitioning,
-                                                MapPartitioning> Partitioner;
+  typedef Dune::RecursiveOddPartitioner<GV, SeedPartitioning, MapPartitioning>
+    Partitioner;
   Partitioner partitioner(gv, seedPartitioning, mapPartitioning, overlap);
 
-  while(partitioner.globalRefine())
-    std::cout << "Number of Partitions: " << seedPartitioning.partitions()
-              << std::endl;
+  typedef Dune::RecursiveIsotropicRefiner<Partitioner> Refiner;
+  Refiner refiner(partitioner, 3);
+  while(refiner.tryRefine()) { }
+  std::cout << "Number of Partitions: " << seedPartitioning.partitions()
+            << std::endl;
 
   if(vtkPrefix != "")
   {
@@ -138,6 +143,9 @@ void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
   std::size_t max = 0;
   for(auto size : pSize)
     max = std::max(max, size);
+  std::size_t min = max;
+  for(auto size : pSize)
+    min = std::min(min, size);
   std::size_t colors = 1 << GV::dimensionworld;
   std::vector<std::size_t> minSize(colors, max);
   std::vector<std::size_t> maxSize(colors, 0);
@@ -159,7 +167,7 @@ void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
     std::cout << "Color " << c << ": cSize = " << cSize[c] << ", pCount = "
               << pCount[c] << ", pSize = " << minSize[c] << ".." << maxSize[c]
               << ", sizes = [ ";
-    for(std::size_t s = 1; s <= max; ++s)
+    for(std::size_t s = min; s <= max; ++s)
       std::cout << s << ": " << sizeHist[c][s] << ", ";
     std::cout << "]" << std::endl;
   }
