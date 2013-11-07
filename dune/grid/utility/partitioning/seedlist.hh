@@ -94,38 +94,51 @@ namespace Dune {
 
     //! split a partition
     /**
-     * \param pId          Numer of partition to replace.
-     * \param newSeedLists Container of containers with seeds.  One
-     *                     subcontainer for each thread.  The total number of
-     *                     seeds in all subcontainer better be equal to the
-     *                     size of the old partition.
+     * \param pId         Numer of partition to replace.
+     * \param partitioner A partitioner object that supports the methods \c
+     *                    partition(entity) and \c partitions().
      *
      * \returns Vector of new partition numbers.  The first entry will be
-     *          equal to \c partition, and the number of entries will be equal
-     *          to \c seedLists.size().
+     *          equal to \c pId, and the number of entries will be equal to \c
+     *          partitioner.partitions().
      */
-    template<class SeedLists>
-    std::vector<Size> splitPartition(Size pId, const SeedLists &newSeedLists)
+    template<class Partitioner>
+    std::vector<Size> splitPartition(Size pId, const Partitioner &partitioner)
     {
-      Size npartitions = std::distance(newSeedLists.begin(),
-                                       newSeedLists.end());
-      std::vector<Size> newPartitions(npartitions);
-      newPartitions[0] = pId;
-      for(Size i = 1; i < npartitions; ++i)
-        newPartitions[i] = pBegin_.size() + i - 1;
-      pBegin_.resize(pBegin_.size() + npartitions - 1);
-      pEnd_.resize(pEnd_.size() + npartitions - 1);
+      // copy of the old partition
+      std::vector<Seed> tmpLists(seedLists_.begin()+pBegin_[pId],
+                                 seedLists_.begin()+pEnd_[pId]);
 
-      Size pos = pBegin_[pId];
-      std::size_t p = 0;
-      for(const auto &seedList : newSeedLists)
-      {
-        pBegin_[newPartitions[p]] = pos;
-        for(auto seed : seedList)
-          seedLists_[pos++] = seed;
-        pEnd_[newPartitions[p]] = pos;
-        ++p;
+      // compute new partition numbers
+      std::vector<Size> newPartitions(partitioner.partitions());
+      newPartitions[0] = pId;
+      for(std::size_t i = 1; i < newPartitions.size(); ++i)
+        newPartitions[i] = pBegin_.size() + i - 1;
+
+      // compute partition size
+      std::vector<std::size_t> pSize(partitioner.partitions(), 0);
+      for(const auto &seed : tmpLists)
+        ++pSize[partitioner.partition(*gridp_->entityPointer(seed))];
+
+      // set begin indices of new partition
+      pBegin_.resize(pBegin_.size() + newPartitions.size() - 1);
+      for(std::size_t i = 1; i < newPartitions.size(); ++i)
+        pBegin_[newPartitions[i]] =
+          pBegin_[newPartitions[i-1]] + pSize[i-1];
+      // set end indices of new partition to begin indices...
+      pEnd_.resize(pEnd_.size() + newPartitions.size() - 1);
+      for(auto p : newPartitions)
+        pEnd_[p] = pBegin_[p];
+
+      // ...and use them as per-partition running variables when copying the
+      // seed back
+      for(const auto &seed : tmpLists) {
+        auto &index = pEnd_[newPartitions[partitioner.partition
+                                          (*gridp_->entityPointer(seed))]];
+        seedLists_[index] = seed;
+        ++index;
       }
+      // now the end indices should be correct
 
       return std::move(newPartitions);
     }
