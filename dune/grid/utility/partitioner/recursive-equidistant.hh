@@ -92,7 +92,7 @@ namespace Dune {
 
       // partition in the desired direction
       DirPartitioner dirPartitioner(gv_, es, direction, subPartitions,
-                                    overlapSize_);
+                                    overlapSize_, overlapMaps_[direction]);
 
       // update seed partitioning
       auto newPartitionIds =
