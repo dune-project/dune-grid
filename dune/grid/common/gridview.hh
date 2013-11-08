@@ -149,7 +149,12 @@ namespace Dune
       return impl().grid();
     }
 
-    /** \brief obtain the index set */
+    /** \brief obtain the index set
+     *
+     * The lifetime of the returned index set is bound to the lifetime of the
+     * grid view. Keep a copy of the grid view to prevent the index set from
+     * becoming a dangling reference.
+     */
     const IndexSet &indexSet () const
     {
       return impl().indexSet();
