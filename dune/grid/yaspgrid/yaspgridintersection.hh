@@ -32,7 +32,7 @@ namespace Dune {
   public:
     // types used from grids
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename YGrid<dim,ctype>::Iterator I;
+    typedef typename GridImp::YGrid::Iterator I;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;

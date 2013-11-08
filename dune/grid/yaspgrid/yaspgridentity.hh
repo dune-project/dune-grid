@@ -59,7 +59,7 @@ namespace Dune {
     }
 
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename YGrid<dim,ctype>::Iterator I;
+    typedef typename GridImp::YGrid::Iterator I;
     YaspEntity (const GridImp* yg, const YGLI& g, const I& it)
     {
       DUNE_THROW(GridError, "YaspEntity not implemented");
@@ -118,7 +118,7 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename YGrid<dim,ctype>::Iterator I;
+    typedef typename GridImp::YGrid::Iterator I;
 
     typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
     typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
@@ -140,7 +140,7 @@ namespace Dune {
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
     //! define type used for coordinates in grid module
-    typedef typename YGrid<dim,ctype>::iTupel iTupel;
+    typedef typename GridImp::YGrid::iTupel iTupel;
 
     // constructor
     YaspEntity (const GridImp * yg, const YGLI& g, const I& it)
@@ -749,7 +749,7 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename YGrid<dim,ctype>::Iterator I;
+    typedef typename GridImp::YGrid::Iterator I;
 
     typedef typename GridImp::template Codim<dim>::Geometry Geometry;
 
@@ -766,7 +766,7 @@ namespace Dune {
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
     //! define type used for coordinates in grid module
-    typedef typename YGrid<dim,ctype>::iTupel iTupel;
+    typedef typename GridImp::YGrid::iTupel iTupel;
 
     // constructor
     YaspEntity (const GridImp* yg, const YGLI& g, const I& it)

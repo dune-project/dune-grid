@@ -30,7 +30,7 @@
 namespace Dune {
 
   // forward declarations
-  template<int d, typename ct> class YGrid;
+  template<class CC, int d, typename ct> class YGrid;
 
   static const double Ytolerance=1E-13;
 
@@ -39,11 +39,11 @@ namespace Dune {
    *  @param v the array of vectors to examine
    *  @param r the shift vector to determine grid type
    */
-  template<typename ct, int d>
-  Dune::array<int,d> sizeArray(Dune::array<std::vector<ct>,d> v, Dune::FieldVector<ct,d> r)
+  template<typename ct, std::size_t d1, int d2>
+  Dune::array<int,d1> sizeArray(Dune::array<std::vector<ct>,d1> v, Dune::FieldVector<ct,d2> r)
   {
-    Dune::array<int,d> tmp;
-    for (int i=0; i<d; ++i)
+    Dune::array<int,d1> tmp;
+    for (int i=0; i<d1; ++i)
       if (r[i] < Ytolerance)
         tmp[i] = v[i].size();
       else
@@ -96,7 +96,7 @@ namespace Dune {
      SubYGrid has additional iterators that provide a mapping to
      the consecutive index in the enclosing grid.
    */
-  template<int d, typename ct>
+  template<class CC, int d, typename ct>
   class YGrid
   {
   public:
@@ -128,7 +128,7 @@ namespace Dune {
      *  @param size size of the grid to be constructed
      *  @param enclosing the grid to take coordinates and shift vector from
      */
-    YGrid (iTupel origin, iTupel size, const YGrid<d,ct>& enclosing)
+    YGrid (iTupel origin, iTupel size, const YGrid<CC,d,ct>& enclosing)
       :  _origin(origin), _shift(enclosing.shift()), _coords(enclosing.getCoords()), _size(size), _supersize(enclosing.supersize())
     {
       for (int i=0; i<d; i++)
@@ -143,7 +143,7 @@ namespace Dune {
      *  @param offset the offset in the enclosing grid
      *  @param supersize size of the enclosing grid
      */
-    YGrid (iTupel origin,  fTupel shift, Dune::array<std::vector<ct>,d>* coords, iTupel size, iTupel offset, iTupel supersize)
+    YGrid (iTupel origin,  fTupel shift, CC* coords, iTupel size, iTupel offset, iTupel supersize)
       : _origin(origin), _shift(shift), _coords(coords), _size(size), _offset(offset), _supersize(supersize)
     {}
 
@@ -171,14 +171,7 @@ namespace Dune {
       return _shift;
     }
 
-    //! get coordinate vector in direction i
-    const std::vector<ct>& getCoords (int i) const
-    {
-      return (*_coords)[i];
-    }
-
-    //! get pointer to the array of coordinate vectors
-    Dune::array<std::vector<ct>,d>* const getCoords () const
+    CC* getCoords() const
     {
       return _coords;
     }
@@ -274,25 +267,25 @@ namespace Dune {
     }
 
     //! return grid moved by the vector v
-    YGrid<d,ct> move (iTupel v) const
+    YGrid<CC,d,ct> move (iTupel v) const
     {
       for (int i=0; i<d; i++)
         v[i] += _origin[i];
-      return YGrid<d,ct>(v,_size,*this);
+      return YGrid<CC,d,ct>(v,_size,*this);
     }
 
     //! Return SubYGrid of supergrid of self which is the intersection of self and another YGrid
-    YGrid<d,ct> intersection (const YGrid<d,ct>& r) const
+    YGrid<CC,d,ct> intersection (const YGrid<CC,d,ct>& r) const
     {
       for (int i=0; i<d; i++)
       {
         //empty coordinate vectors result in empty intersections
         if (empty() || r.empty())
-          return YGrid<d,ct>();
+          return YGrid<CC,d,ct>();
 
         //intersectable grids must have the same shift
         if (fabs(shift(i)-r.shift(i)) > Ytolerance)
-          return YGrid<d,ct>();
+          return YGrid<CC,d,ct>();
       }
 
       iTupel neworigin;
@@ -303,7 +296,7 @@ namespace Dune {
         newsize[i] = std::min(max(i),r.max(i)) - neworigin[i] + 1;
       }
 
-      return YGrid<d,ct>(neworigin,newsize,*this);
+      return YGrid<CC,d,ct>(neworigin,newsize,*this);
     }
 
 
@@ -316,88 +309,20 @@ namespace Dune {
     class Iterator {
     public:
       //! Make iterator pointing to first cell in a grid.
-      Iterator (const YGrid<d,ct>& r) : _grid(&r)
+      Iterator (const YGrid<CC,d,ct>& r) : _grid(&r)
       {
-        // initialize to first position in index set
-        for (int i=0; i<d; ++i)
-          _coord[i] = r.origin(i);
-        _index = 0;
-
-        // compute increments;
-        int inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _increment[i] = inc;
-          inc *= r.size(i);
-        }
-
-        // compute superincrements
-        inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _superincrement[i] = inc;
-          inc *= r.supersize(i);
-        }
-
-        // move superindex to first cell in subgrid
-        _superindex = 0;
-        for (int i=0; i<d; ++i)
-          _superindex += r.offset(i)*_superincrement[i];
-
-        for (int i=0; i<d; ++i)
-        {
-          if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[_grid->offset(i)];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->offset(i)+1]-_grid->getCoords(i)[_grid->offset(i)]);
-          _position[i] = _begin[i];
-        }
+        iTupel coord(r.origin());
+        reinit(r,coord);
       }
 
       //! Make iterator pointing to given cell in a grid.
-      Iterator (const YGrid<d,ct>& r, const iTupel& coord) : _grid(&r)
+      Iterator (const YGrid<CC,d,ct>& r, const iTupel& coord)
       {
-        // compute increments;
-        int inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _increment[i] = inc;
-          inc *= r.size(i);
-        }
-
-        // initialize to given position in index set
-        for (int i=0; i<d; ++i)
-          _coord[i] = coord[i];
-        _index = r.index(coord);
-
-        // compute superincrements
-        inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _superincrement[i] = inc;
-          inc *= r.supersize(i);
-        }
-
-        // move superindex to first cell in subgrid
-        _superindex = 0;
-        for (int i=0; i<d; ++i)
-          _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
-
-        for (int i=0; i<d; ++i)
-        {
-          if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[_grid->offset(i)];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->offset(i)+1]-_grid->getCoords(i)[_grid->offset(i)]);
-          _position[i] = _grid->getCoords(i)[coord[i] - _grid->origin(i) + _grid->offset(i)];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - _grid->origin(i) + _grid->offset(i)] -_grid->getCoords(i)[coord[i] - _grid->origin(i) + _grid->offset(i)]);
-        }
+        reinit(r,coord);
       }
 
-      //TODO avoid code duplication: can the constructor simply call this????
       //! reinitialize iterator to given position
-      void reinit (const YGrid<d,ct>& r, const iTupel& coord)
+      void reinit (const YGrid<CC,d,ct>& r, const iTupel& coord)
       {
         // compute increments;
         int inc = 1;
@@ -429,12 +354,12 @@ namespace Dune {
         for (int i=0; i<d; ++i)
         {
           if (!_grid->empty())
-            _begin[i] = _grid->getCoords(i)[0];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _begin[i] += _grid->shift(i)*(_grid->getCoords(i)[_grid->offset(i)+1]-_grid->getCoords(i)[_grid->offset(i)]);
-          _position[i] = _grid->getCoords(i)[coord[i] - _grid->origin(i)+_grid->offset(i)];
-          if ((_grid->getCoords(i).size() > 1) && (_grid->shift(i) > Ytolerance))
-            _position[i] += _grid->shift(i)*(_grid->getCoords(i)[coord[i]+1 - _grid->origin(i) + _grid->offset(i)] - _grid->getCoords(i)[coord[i] - _grid->origin(i)+_grid->offset(i)]);
+            _begin[i] = _grid->getCoords()->coordinate(i,_grid->origin(i));
+          if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i) > Ytolerance))
+            _begin[i] += _grid->shift(i) * _grid->getCoords()->meshsize(i,_grid->origin(i));
+          _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
+          if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i) > Ytolerance))
+            _position[i] += _grid->shift(i)* _grid->getCoords()->meshsize(i,_coord[i]);
         }
       }
 
@@ -480,7 +405,7 @@ namespace Dune {
         _coord[i] += dist;
         _index += dist*_increment[i];
         _superindex += dist*_superincrement[i];
-        _position[i] = _grid->getCoords(i)[_coord[i] - _grid->origin(i) + _grid->offset(i)];
+        _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
         if (_grid->shift(i) > Ytolerance)
           _position[i] += _grid->shift(i) * meshsize(i);
       }
@@ -494,9 +419,9 @@ namespace Dune {
           _superindex += _superincrement[i];   // move on cell in direction i
           if (++_coord[i] <= _grid->max(i))
           {
-            _position[i] = _grid->getCoords(i)[_coord[i] - _grid->origin(i) + _grid->offset(i)];
+            _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
             if (_grid->shift(i) > Ytolerance)
-              _position[i] += _grid->shift(i)*(_grid->getCoords(i)[_coord[i]+1 - _grid->origin(i) + _grid->offset(i)] - _grid->getCoords(i)[_coord[i] - _grid->origin(i) + _grid->offset(i)]);
+              _position[i] += _grid->shift(i) * _grid->getCoords()->meshsize(i,_coord[i]);
             return *this;
           }
           else
@@ -531,7 +456,7 @@ namespace Dune {
       //! Return meshsize in direction i
       ct meshsize (int i) const
       {
-        return _grid->getCoords(i)[_coord[i]+1 - _grid->origin(i) + _grid->offset(i)] - _grid->getCoords(i)[_coord[i] - _grid->origin(i) + _grid->offset(i)];
+        return _grid->getCoords()->meshsize(i,_coord[i]);
       }
 
       //! Return meshsize of current cell as reference.
@@ -549,7 +474,7 @@ namespace Dune {
       iTupel _increment;   //!< increment for next neighbor in direction i
       int _superindex;        //!< consecutive index in enclosing grid
       iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
-      const YGrid<d,ct>* _grid;
+      const YGrid<CC,d,ct>* _grid;
       fTupel _begin;    //!< position of origin of grid
       fTupel _position; //!< current position
     };
@@ -579,7 +504,7 @@ namespace Dune {
   private:
     iTupel _origin;
     fTupel _shift;
-    Dune::array<std::vector<ct>,d>* _coords;
+    CC* _coords;
     iTupel _size;
     iTupel _offset;    //!< offset to origin of the enclosing grid
     iTupel _supersize; //!< size of the enclosing grid
@@ -587,8 +512,8 @@ namespace Dune {
 
 
   //! Output operator for ygrids
-  template <int d, typename ct>
-  inline std::ostream& operator<< (std::ostream& s, YGrid<d,ct> e)
+  template <class CC, int d, typename ct>
+  inline std::ostream& operator<< (std::ostream& s, YGrid<CC,d,ct> e)
   {
     s << "Printing YGrid structure:" << std::endl;
     s << "Origin: " << e.origin() << std::endl;
@@ -600,8 +525,8 @@ namespace Dune {
   }
 
   //! Output operator for ygrids
-  template <int d, typename ct>
-  inline std::ostream& operator<< (std::ostream& s, typename YGrid<d,ct>::Iterator& e)
+  template <class CC, int d, typename ct>
+  inline std::ostream& operator<< (std::ostream& s, typename YGrid<CC,d,ct>::Iterator& e)
   {
     s << "please reimplement this" << std::endl;
     return s;

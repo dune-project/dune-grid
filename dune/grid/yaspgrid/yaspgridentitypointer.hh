@@ -22,7 +22,7 @@ namespace Dune {
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename YGrid<dim,ctype>::Iterator I;
+    typedef typename GridImp::YGrid::Iterator I;
     typedef YaspEntityPointer<codim,GridImp> EntityPointerImp;
   protected:
     typedef YaspEntity<codim, dim, GridImp> YaspEntityImp;
