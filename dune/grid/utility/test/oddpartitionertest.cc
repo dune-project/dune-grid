@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <iostream>
 #include <ostream>
+#include <sstream>
 #include <string>
 
 #include <dune/common/exceptions.hh>
@@ -105,7 +106,8 @@ public:
 };
 
 template<class GV>
-void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
+void testTripartitColoring(const GV &gv, std::size_t overlap,
+                           std::size_t targetPartitions, int &result,
                            const std::string &vtkPrefix = "")
 {
   pass(result);
@@ -122,7 +124,10 @@ void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
 
   typedef Dune::RecursiveIsotropicRefiner<Partitioner> Refiner;
   Refiner refiner(partitioner, 3);
-  while(refiner.tryRefine()) { }
+  if(targetPartitions == 0)
+    while(refiner.tryRefine()) { }
+  else
+    refiner.refine(targetPartitions);
   std::cout << "Number of Partitions: " << seedPartitioning.partitions()
             << std::endl;
 
@@ -174,7 +179,7 @@ void testTripartitColoring(const GV &gv, std::size_t overlap, int &result,
 }
 
 template<int dim>
-void testYasp(int &result) {
+void testYasp(std::size_t targetPartitions, int &result) {
   typedef Dune::YaspGrid<dim> Grid;
 
   Dune::array<int, dim> s;
@@ -183,7 +188,8 @@ void testYasp(int &result) {
   Grid grid(Dune::FieldVector<typename Grid::ctype, dim>(1),
             s, std::bitset<dim>(), 0);
   grid.globalRefine(8);
-  testTripartitColoring(grid.leafView(), 1, result, "tripartit-yasp");
+  testTripartitColoring(grid.leafView(), 1, targetPartitions, result,
+                        "oddpartitionertest-yasp");
 }
 
 std::string removeSuffix(const std::string &str, const std::string &suffix)
@@ -197,16 +203,19 @@ std::string removeSuffix(const std::string &str, const std::string &suffix)
 
 #if HAVE_ALUGRID || HAVE_ALBERTA
 template<int dim>
-void testGmsh(const std::string &fname, int &result) {
+void testGmsh(const std::string &vtkPrefix, std::size_t targetPartitions,
+              int &result)
+{
 #if HAVE_ALUGRID
   typedef Dune::ALUSimplexGrid<dim, dim> Grid;
 #else // HAVE_ALBERTA
   typedef Dune::AlbertaGrid<dim, dim> Grid;
 #endif
 
-  Dune::shared_ptr<Grid> gridp(Dune::GmshReader<Grid>::read(fname));
-  testTripartitColoring(gridp->leafView(), 1, result,
-                        removeSuffix(fname, ".msh"));
+  Dune::shared_ptr<Grid>
+    gridp(Dune::GmshReader<Grid>::read(vtkPrefix + ".msh"));
+  testTripartitColoring(gridp->leafView(), 1, targetPartitions, result,
+                        vtkPrefix);
 }
 #endif // HAVE_ALUGRID || HAVE_ALBERTA
 
@@ -218,14 +227,48 @@ try {
 
   int result = 77;
 
-  if(argc > 1)
+  ++argv;
+  std::string vtkPrefix;
+  if(*argv) {
+    vtkPrefix = removeSuffix(*argv, ".msh");
+    if(vtkPrefix == *argv)
+      vtkPrefix = "";
+    else
+      ++argv;
+  }
+  std::size_t target_partitions = 0;
+  bool good = true;
+  if(*argv) {
+    std::istringstream str(*argv);
+    str >> target_partitions;
+    good = !str.fail();
+    if(good) {
+      char dummy;
+      str >> dummy;
+      good = str.fail() && str.eof();
+    }
+    ++argv;
+  }
+  if(*argv)
+    good = false;
+  if(!good) {
+    std::cerr << "Usage: oddpartitionertest [MSH-FILE] "
+              << "[TARGET-PARTITION-COUNT]" << std::endl;
+    return 2;
+  }
+
+  if(vtkPrefix != "")
   {
 #if HAVE_ALUGRID || HAVE_ALBERTA
-    testGmsh<2>(argv[1], result);
+    testGmsh<2>(vtkPrefix, target_partitions, result);
+#else
+    std::cerr << "Neither ALUGrid nor Alberta available, can't test .msh "
+              << "files." << std::endl;
+    return 2;
 #endif // HAVE_ALUGRID
   }
   else
-    testYasp<2>(result);
+    testYasp<2>(target_partitions, result);
 
   return result;
 }
