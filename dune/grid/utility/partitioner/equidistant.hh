@@ -71,6 +71,21 @@ namespace Dune {
       return partitions_;
     }
 
+    //! get the color of a partition
+    std::size_t color(std::size_t partition) const
+    {
+      return partition % 2;
+    }
+
+    //! get the number of colors in the partitioner
+    /**
+     * \returns 1 if there is just one partition, 2 otherwise.
+     */
+    std::size_t colors() const
+    {
+      return 1 + (partitions() > 1);
+    }
+
   private:
     ctype minc_;
     ctype maxc_;

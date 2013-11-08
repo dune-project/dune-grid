@@ -82,6 +82,35 @@ namespace Dune {
       return prod;
     }
 
+    //! get the color of a partition
+    std::size_t color(std::size_t partition) const
+    {
+      std::size_t base = 1;
+      std::size_t color = 0;
+      for(const auto &p : dirPartitioners_)
+      {
+        auto partitions = p.partitions();
+        auto dPartition = partition % partitions;
+        partition /= partitions;
+        color += p.color(dPartition) * p.colors();
+        base *= p.colors();
+      }
+
+      return color;
+    }
+
+    //! get the number of colors in the partitioner
+    /**
+     * \returns 1 if there is just one partition, 2 otherwise.
+     */
+    std::size_t colors() const
+    {
+      std::size_t prod = 1;
+      for(const auto &p : dirPartitioners_)
+        prod *= p.colors();
+      return prod;
+    }
+
   private:
     std::vector<DirPartitioner> dirPartitioners_;
   };
