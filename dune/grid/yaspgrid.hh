@@ -175,6 +175,7 @@ namespace Dune {
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief Provides a distributed structured cube mesh.
      \ingroup GridImplementations
+     \ingroup YaspGrid
 
      YaspGrid stands for yet another structured parallel grid.
      It implements the dune grid interface for structured grids with codim 0

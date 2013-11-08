@@ -18,7 +18,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 
-#if HAVE_UG
+#if HAVE_UG || DOXYGEN
 
 #ifdef ModelP
 #include <dune/common/parallel/mpicollectivecommunication.hh>
@@ -975,5 +975,5 @@ namespace Dune {
 
 } // namespace Dune
 
-#endif   // HAVE_UG
+#endif   // HAVE_UG || DOXYGEN
 #endif   // DUNE_UGGRID_HH
