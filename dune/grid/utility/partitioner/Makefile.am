@@ -4,6 +4,7 @@ mydir =  $(includedir)/dune/grid/utility/gridviewpartitioner
 my_HEADERS =					\
 	equidistant.hh				\
 	recursive-equidistant.hh		\
-	recursive-odd.hh
+	recursive-odd.hh			\
+	tensor-equidistant.hh
 
 include $(top_srcdir)/am/global-rules
