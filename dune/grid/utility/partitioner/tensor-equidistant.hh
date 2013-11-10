@@ -92,7 +92,7 @@ namespace Dune {
         auto partitions = p.partitions();
         auto dPartition = partition % partitions;
         partition /= partitions;
-        color += p.color(dPartition) * p.colors();
+        color += p.color(dPartition) * base;
         base *= p.colors();
       }
 
