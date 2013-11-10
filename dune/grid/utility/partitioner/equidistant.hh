@@ -165,8 +165,10 @@ namespace Dune {
                        const typename GV::template Codim<0>::Entity &e,
                        std::size_t myPIndex) const
     {
-      for(const auto &is : intersections(gv, e))
+      const auto &irange = intersections(gv, e);
+      for(auto iit = irange.begin(); iit != irange.end(); ++iit)
       {
+        const auto &is = *iit;
         if(!is.neighbor())
           continue;
         auto outsidep = is.outside();
