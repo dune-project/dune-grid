@@ -220,7 +220,7 @@ namespace Dune
       for (int i=0; i<dim; i++)
       {
         s << "Direction " << i << ": ";
-        for (int j=0; j<_c[i].size(); j++)
+        for (std::size_t j=0; j<_c[i].size(); j++)
           s << _c[i][j] << " ";
         s << std::endl;
       }

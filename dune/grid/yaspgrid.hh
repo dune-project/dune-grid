@@ -967,8 +967,7 @@ namespace Dune {
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(comm,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
-        ccobj(comm),
+      : ccobj(comm), _torus(comm,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
 #else
       : _torus(tag,Dune::sizeArray(coords,fTupel(0.5)),defaultLoadbalancer()),
 #endif
@@ -1061,9 +1060,6 @@ namespace Dune {
         }
 
         CoordCont newcont(cg.coords.refine(ovlp_low, ovlp_up, keep_ovlp, cg.overlap));
-
-        std::cout << "print da container" << std::endl;
-        std::cout << newcont <<std::endl;
 
         int overlap = (keep_ovlp) ? 2*cg.overlap : cg.overlap;
 
