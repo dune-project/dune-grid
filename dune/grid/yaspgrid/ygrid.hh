@@ -3,24 +3,10 @@
 #ifndef DUNE_GRID_YASPGRID_YGRID_HH
 #define DUNE_GRID_YASPGRID_YGRID_HH
 
-// C++ includes
-#include <iostream>
-#include <cstdlib>
-#include <algorithm>
 #include <vector>
-#include <deque>
-#include <bitset>
 
-// C includes
-#if HAVE_MPI
-#include <mpi.h>
-#endif
-#include <string.h>
-
-// local includes
+#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/stdstreams.hh>
-#include <dune/grid/common/grid.hh>
 
 /** \file
     \brief This provides a YGrid, the elemental component of the yaspgrid implementation

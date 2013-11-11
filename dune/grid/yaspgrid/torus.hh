@@ -6,7 +6,6 @@
 #include <bitset>
 #include <cmath>
 #include <deque>
-#include <iostream>
 #include <vector>
 
 #if HAVE_MPI
@@ -15,7 +14,6 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/power.hh>
-#include <dune/common/stdstreams.hh>
 #include <dune/grid/common/exceptions.hh>
 
 /** \file
@@ -177,41 +175,6 @@ namespace Dune
       // make full schedule
       proclists();
     }
-/*
-    //! make partitioner from communicator and coarse mesh size
-#if HAVE_MPI
-    Torus (MPI_Comm comm, int tag, iTupel size, const YLoadBalance<d>* lb)
-#else
-    Torus (int tag, iTupel size, const YLoadBalance<d>* lb)
-#endif
-    {
-      // MPI stuff
-#if HAVE_MPI
-      _comm = comm;
-      MPI_Comm_size(comm,&_procs);
-      MPI_Comm_rank(comm,&_rank);
-#else
-      _procs=1; _rank=0;
-#endif
-      _tag = tag;
-
-      // determine dimensions
-      iTupel sizeITupel;
-      std::copy(size.begin(), size.end(), sizeITupel.begin());
-      lb->loadbalance(sizeITupel, _procs, _dims);
-
-      // compute increments for lexicographic ordering
-      int inc = 1;
-      for (int i=0; i<d; i++)
-      {
-        _increment[i] = inc;
-        inc *= _dims[i];
-      }
-
-      // make full schedule
-      proclists();
-    }*/
-
 
     //! return own rank
     int rank () const
