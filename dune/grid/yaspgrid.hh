@@ -1003,8 +1003,8 @@ namespace Dune {
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(comm,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
-        ccobj(comm),
+      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
+        ccobj(MPI_COMM_SELF),
 #else
       : _torus(tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
 #endif
