@@ -797,18 +797,22 @@ namespace Dune {
     DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
       : ccobj(comm),
-        _torus(comm,tag,s,lb),
+        _torus(comm,tag,convertFieldVectorToArray(s),lb),
 #else
-      :  _torus(tag,s,lb),
+      :  _torus(tag,convertFieldVectorToArray(s),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
+      Dune::array<int,dim> sArr;
       for (size_t i=0; i<dim; i++)
+      {
         _periodic[i] = periodic[i];
+        sArr[i] = s[i];
+      }
 
-      MultiYGridSetup(L,s,_periodic,overlap,lb);
+      MultiYGridSetup(L,sArr,_periodic,overlap,lb);
       init();
     }
 
@@ -835,18 +839,22 @@ namespace Dune {
     DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
       : ccobj(MPI_COMM_SELF),
-        _torus(MPI_COMM_SELF,tag,s,lb),
+        _torus(MPI_COMM_SELF,tag,convertFieldVectorToArray(s),lb),
 #else
-      : _torus(tag,s,lb),
+      : _torus(tag,convertFieldVectorToArray(s),lb),
 #endif
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
+      Dune::array<int,dim> sArr;
       for (size_t i=0; i<dim; i++)
+      {
+        sArr[i] = s[i];
         _periodic[i] = periodic[i];
+      }
 
-      MultiYGridSetup(L,s,_periodic,overlap,lb);
+      MultiYGridSetup(L,sArr,_periodic,overlap,lb);
       init();
     }
 
@@ -1743,6 +1751,16 @@ namespace Dune {
           return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlapfront.end());
       }
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
+    }
+
+    // allow use of FV arguments in initializer lists
+    Dune::array<int,dim> convertFieldVectorToArray(Dune::FieldVector<int,dim> x)
+    DUNE_DEPRECATED_MSG("This is only needed for compatibility until the change is completed.")
+    {
+      Dune::array<int,dim> a;
+      for (std::size_t i=0; i<dim; i++)
+        a[i] = x[i];
+      return a;
     }
 
 #if HAVE_MPI
