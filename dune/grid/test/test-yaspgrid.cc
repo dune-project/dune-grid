@@ -84,13 +84,8 @@ void check_yasp(bool p0=false) {
 
   Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid(p0);
 
-  std::ofstream file;
-  file.open("output"+std::to_string(rank));
-  file << *grid << std::endl;
-  file.close();
-
   gridcheck(*grid);
-   grid->globalRefine(2);
+  grid->globalRefine(2);
 
   gridcheck(*grid);
 
@@ -109,7 +104,12 @@ void check_yasp(bool p0=false) {
   checkAdaptRefinement(*grid);
   checkPartitionType( grid->leafView() );
 
-   delete grid;
+  std::ofstream file;
+  file.open("output"+std::to_string(rank));
+  file << *grid << std::endl;
+  file.close();
+
+  delete grid;
 }
 
 int main (int argc , char **argv) {
