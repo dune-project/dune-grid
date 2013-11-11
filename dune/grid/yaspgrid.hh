@@ -16,9 +16,6 @@ typedef unsigned char uint8_t;
 #endif
 
 #include <dune/grid/common/grid.hh>     // the grid base classes
-#include <dune/grid/yaspgrid/coordinates.hh>
-#include <dune/grid/yaspgrid/torus.hh>
-#include <dune/grid/yaspgrid/ygrid.hh>
 #include <dune/grid/common/capabilities.hh> // the capabilities
 #include <dune/common/shared_ptr.hh>
 #include <dune/common/bigunsignedint.hh>
@@ -92,6 +89,9 @@ namespace Dune {
 
 } // namespace Dune
 
+#include <dune/grid/yaspgrid/coordinates.hh>
+#include <dune/grid/yaspgrid/torus.hh>
+#include <dune/grid/yaspgrid/ygrid.hh>
 #include <dune/grid/yaspgrid/yaspgridgeometry.hh>
 #include <dune/grid/yaspgrid/yaspgridentity.hh>
 #include <dune/grid/yaspgrid/yaspgridintersection.hh>
