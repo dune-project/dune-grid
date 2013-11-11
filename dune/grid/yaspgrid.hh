@@ -16,7 +16,9 @@ typedef unsigned char uint8_t;
 #endif
 
 #include <dune/grid/common/grid.hh>     // the grid base classes
-#include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
+#include <dune/grid/yaspgrid/coordinates.hh>
+#include <dune/grid/yaspgrid/torus.hh>
+#include <dune/grid/yaspgrid/ygrid.hh>
 #include <dune/grid/common/capabilities.hh> // the capabilities
 #include <dune/common/shared_ptr.hh>
 #include <dune/common/bigunsignedint.hh>
@@ -169,181 +171,6 @@ namespace Dune {
         g.template communicateCodim<DataHandle,0>(data,iftype,dir,level);
     }
   };
-
-//   template<int d, typename ct>
-//   Dune::array<std::vector<ct>,d> coordVector(Dune::FieldVector<ct,d>& L, Dune::array<int,d>& s)
-//   {
-//     Dune::array<std::vector<ct>,d> result;
-//     for (int i=0; i<d; i++)
-//     {
-//       result[i].resize(s[i]+1);
-//       const ct h = L[i]/s[i];
-//       result[i][0] = 0.0;
-//       for (int j=0; j<s[i]; j++)
-//         result[i][j+1] = result[i][j] + h;
-//     }
-//     return result;
-//   }
-
-  template<class ct, int dim>
-  class EquidistantCoordinateContainer
-  {
-    public:
-    EquidistantCoordinateContainer() {}
-    EquidistantCoordinateContainer(Dune::FieldVector<ct,dim> h, Dune::array<int,dim> s) : _h(h), _s(s) {}
-
-    inline ct meshsize(int d, int i)
-    {
-      return _h[d];
-    }
-
-    inline ct coordinate(int d, int i)
-    {
-      return i*_h[d];
-    }
-
-    inline int size(int d)
-    {
-      return _s[d];
-    }
-
-    EquidistantCoordinateContainer<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp)
-    {
-      //determine new size and meshsize
-      Dune::array<int,dim> news;
-      Dune::FieldVector<ct,dim> newh;
-
-      for (int i=0; i<dim; i++)
-      {
-        news[i] = 2 * _s[i];
-        if (!keep_ovlp)
-        {
-          if (ovlp_low[i])
-            news[i] -= overlap;
-          if (ovlp_up[i])
-            news[i] -= overlap;
-        }
-
-        newh[i] = _h[i] / 2.;
-      }
-      return EquidistantCoordinateContainer<ct,dim>(newh,news);
-    }
-
-    void print(std::ostream& s) const
-    {
-      s << "Printing equidistant coordinate container:" << std::endl;
-      s << "Meshsize = " << _h << "  size = " << _s << std::endl;
-    }
-
-    private:
-    Dune::FieldVector<ct,dim> _h;
-    Dune::array<int,dim> _s;
-  };
-
-  template<class ct, int dim>
-  inline std::ostream& operator<< (std::ostream& s, EquidistantCoordinateContainer<ct,dim>& c)
-  {
-    c.print(s);
-    return s;
-  }
-
-  template<class ct, int dim>
-  class TensorProductCoordinateContainer
-  {
-    public:
-    TensorProductCoordinateContainer() {}
-    TensorProductCoordinateContainer(Dune::array<std::vector<ct>,dim> c, Dune::array<int,dim> offset)
-      : _c(c),_offset(offset)
-    {}
-
-    inline ct meshsize(int d, int i)
-    {
-      return _c[d][i+1-_offset[d]] - _c[d][i-_offset[d]];
-    }
-
-    inline ct coordinate(int d, int i)
-    {
-      return _c[d][i-_offset[d]];
-    }
-
-    inline int size(int d)
-    {
-      return _c[d].size() - 1;
-    }
-
-    TensorProductCoordinateContainer<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp)
-    {
-      Dune::array<std::vector<ct>,dim> newcoords;
-      Dune::array<int,dim> newoffset(_offset);
-      for (int i=0; i<dim; i++)
-      {
-        newoffset[i] *= 2;
-
-        //determine new size
-        int newsize = 2 * _c[i].size() - 1;
-        if (!keep_ovlp)
-        {
-          if (ovlp_low[i])
-          {
-            newoffset[i] += overlap;
-            newsize -= overlap;
-          }
-          if (ovlp_up[i])
-            newsize -= overlap;
-        }
-        newcoords[i].resize(newsize);
-
-        typename std::vector<ct>::const_iterator it = _c[i].begin();
-        typename std::vector<ct>::const_iterator end = _c[i].end()-1;
-        typename std::vector<ct>::iterator iit = newcoords[i].begin() - 1;
-        if (!keep_ovlp)
-        {
-          if (ovlp_low[i])
-          {
-            it += overlap/2;
-            if (overlap%2)
-              *(++iit) = (*it + *(++it)) / 2.;
-          }
-          if (ovlp_up[i])
-            end -= overlap/2;
-        }
-
-        for (;it!=end;)
-        {
-          *(++iit) = *it;
-          *(++iit) = (*it + *(++it)) / 2.;
-        }
-
-        if (++iit != newcoords[i].end())
-          *iit = *it;
-      }
-      std::cout << "Return TPCC" << std::endl;
-      return TensorProductCoordinateContainer<ct,dim>(newcoords, newoffset);
-    }
-
-    void print(std::ostream& s) const
-    {
-      s << "Printing Tensor Product Coordinate Container information:" << std::endl;
-      for (int i=0; i<dim; i++)
-      {
-        s << "Direction " << i << ": ";
-        for (int j=0; j<_c[i].size(); j++)
-          s << _c[i][j] << " ";
-        s << std::endl;
-      }
-    }
-
-    private:
-    Dune::array<std::vector<ct>,dim> _c;
-    Dune::array<int,dim> _offset; //! offset to global coordinates
-  };
-
-  template<class ct, int dim>
-  inline std::ostream& operator<< (std::ostream& s, TensorProductCoordinateContainer<ct,dim>& c)
-  {
-    c.print(s);
-    return s;
-  }
 
 
   //************************************************************************
@@ -1140,10 +967,10 @@ namespace Dune {
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(comm,tag,Dune::sizeArray(coords,fTupel(0.5)),defaultLoadbalancer()),
+      : _torus(comm,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
         ccobj(comm),
 #else
-      : _torus(tag,Dune::sizeArray(coords,fTugpel(0.5)),defaultLoadbalancer()),
+      : _torus(tag,Dune::sizeArray(coords,fTupel(0.5)),defaultLoadbalancer()),
 #endif
         leafIndexSet_(*this),
         _periodic(std::bitset<dim>(0)),
@@ -1169,10 +996,10 @@ namespace Dune {
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(comm,tag,coords,defaultLoadbalancer()),
+      : _torus(comm,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
         ccobj(comm),
 #else
-      : _torus(tag,coords,defaultLoadbalancer()),
+      : _torus(tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
 #endif
         leafIndexSet_(*this),
         _periodic(std::bitset<dim>(0)),
@@ -1198,7 +1025,6 @@ namespace Dune {
       return _levels.size()-1;
     }
 
-    //TODO put part of refinement into the coords container
     //! refine the grid refCount times.
     void globalRefine (int refCount)
     {
@@ -1225,7 +1051,6 @@ namespace Dune {
         // access to coarser grid level
         YGridLevel& cg = _levels[maxLevel()];
 
-        //new code
         std::bitset<dim> ovlp_low(0), ovlp_up(0);
         for (int i=0; i<dim; i++)
         {
@@ -1246,60 +1071,6 @@ namespace Dune {
         iTupel o_interior;
         for (int i=0; i<dim; i++)
           o_interior[i] = 2*cg.cell_interior.origin(i);
-        //end new code
-
-//         // compute size of new global grid
-//         Dune::array<std::vector<ctype>,dim> newcoords;
-//         for (int i=0; i<dim; ++i)
-//         {
-//           // resize coord vector to the correct new size
-//           int newsize = 2*cg.cell_overlap.getCoords(i).size() - 1;
-//           if (!keep_ovlp)
-//           {
-//             if (cg.cell_overlap.origin(i) > 0)
-//               newsize -= cg.overlap;
-//             if (cg.cell_overlap.max(i) + 1 < this->template globalSize<0>(i))
-//               newsize -= cg.overlap;
-//           }
-//           newcoords[i].resize(newsize);
-//
-//           // get iterator to the first element of the old coordinate vector to be used
-//           typename std::vector<ctype>::const_iterator it = cg.cell_overlap.getCoords(i).begin();
-//           typename std::vector<ctype>::const_iterator end = cg.cell_overlap.getCoords(i).end()-1;
-//           typename std::vector<ctype>::iterator iit = newcoords[i].begin()-1;
-//
-//           // treat alternative refinement in the beginning
-//           if (!keep_ovlp)
-//           {
-//             if (cg.cell_overlap.origin(i) > 0)
-//             {
-//               it += cg.overlap/2;
-//               if (cg.overlap%2)
-//               *(++iit) = (*it + *(++it)) / 2.;
-//             }
-//             if (cg.cell_overlap.max(i) + 1 < this->template globalSize<0>(i))
-//               end -= cg.overlap/2;
-//           }
-//
-//           // fill the new vector with old values and averages
-//           for (;it != end;)
-//           {
-//             *(++iit) = *it;
-//             *(++iit) = (*it + *(++it)) / 2.;
-//           }
-//
-//           // determine whether one value is missing
-//           if (++iit != newcoords[i].end())
-//             *iit = *it;
-//         }
-/*
-//         //determine new overlap
-//         int overlap = (keep_ovlp) ? 2*cg.overlap : cg.overlap;*/
-//
-//         //determine new origin
-//         iTupel o_interior;
-//         for (int i=0; i<dim; i++)
-//           o_interior[i] = 2*cg.cell_interior.origin(i);
 
         // add level
         _levels.resize(_levels.size() + 1);
