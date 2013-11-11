@@ -3,10 +3,20 @@
 #ifndef DUNE_GRID_YASPGRID_TORUS_HH
 #define DUNE_GRID_YASPGRID_TORUS_HH
 
+#include <bitset>
+#include <cmath>
+#include <deque>
 #include <iostream>
 #include <vector>
 
+#if HAVE_MPI
+#include <mpi.h>
+#endif
+
+#include <dune/common/array.hh>
 #include <dune/common/power.hh>
+#include <dune/common/stdstreams.hh>
+#include <dune/grid/common/exceptions.hh>
 
 /** \file
  *  \brief This file provides the infrastructure for toroidal communication and load balancing in YaspGrid.
@@ -21,7 +31,6 @@ namespace Dune
   class YLoadBalance
   {
   public:
-   //typedef Dune::array<int, d>  iTupel;
     typedef Dune::array<int, d> iTupel;
     virtual ~YLoadBalance() {}
     virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const

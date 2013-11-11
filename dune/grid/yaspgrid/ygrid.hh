@@ -23,7 +23,7 @@
 #include <dune/grid/common/grid.hh>
 
 /** \file
-    \brief This provides a YGrid, the elemental ingredient of the yaspgrid implementation
+    \brief This provides a YGrid, the elemental component of the yaspgrid implementation
  */
 
 namespace Dune {
@@ -402,9 +402,12 @@ namespace Dune {
         _coord[i] += dist;
         _index += dist*_increment[i];
         _superindex += dist*_superincrement[i];
-        _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-        if (_grid->shift(i) > Ytolerance)
-          _position[i] += _grid->shift(i) * meshsize(i);
+        if (_grid->inside(_coord))
+        {
+          _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
+          if (_grid->shift(i) > Ytolerance)
+            _position[i] += _grid->shift(i) * meshsize(i);
+        }
       }
 
       //! Increment iterator to next cell with position.

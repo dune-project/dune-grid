@@ -4,6 +4,10 @@
 #define DUNE_GRID_YASPGRID_COORDINATES_HH
 
 #include <bitset>
+#include <vector>
+
+#include <dune/common/array.hh>
+#include <dune/common/fvector.hh>
 
 /** \file
  *  \brief This provides container classes for the coordinates to be used in YaspGrid

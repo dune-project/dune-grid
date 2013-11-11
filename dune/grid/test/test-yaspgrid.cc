@@ -85,35 +85,35 @@ void check_yasp(bool p0=false) {
   Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid(p0);
 
   std::ofstream file;
-  file.open("tensor"+std::to_string(rank));
+  file.open("output"+std::to_string(rank));
   file << *grid << std::endl;
   file.close();
 
   gridcheck(*grid);
    grid->globalRefine(2);
-//
-//   gridcheck(*grid);
-//
-//   // check communication interface
-//   checkCommunication(*grid,-1,Dune::dvverb);
-//   for(int l=0; l<=grid->maxLevel(); ++l)
-//     checkCommunication(*grid,l,Dune::dvverb);
-//
-//   // check geometry lifetime
-//   checkGeometryLifetime( grid->leafView() );
-//   // check the method geometryInFather()
-//   checkGeometryInFather(*grid);
-//   // check the intersection iterator and the geometries it returns
-//   checkIntersectionIterator(*grid);
-//   // check grid adaptation interface
-//   checkAdaptRefinement(*grid);
-//   checkPartitionType( grid->leafView() );
+
+  gridcheck(*grid);
+
+  // check communication interface
+  checkCommunication(*grid,-1,Dune::dvverb);
+  for(int l=0; l<=grid->maxLevel(); ++l)
+    checkCommunication(*grid,l,Dune::dvverb);
+
+  // check geometry lifetime
+  checkGeometryLifetime( grid->leafView() );
+  // check the method geometryInFather()
+  checkGeometryInFather(*grid);
+  // check the intersection iterator and the geometries it returns
+  checkIntersectionIterator(*grid);
+  // check grid adaptation interface
+  checkAdaptRefinement(*grid);
+  checkPartitionType( grid->leafView() );
 
    delete grid;
 }
 
 int main (int argc , char **argv) {
-//   try {
+  try {
 #if HAVE_MPI
     // initialize MPI
     MPI_Init(&argc,&argv);
@@ -122,21 +122,25 @@ int main (int argc , char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif
 
-//     check_yasp<1>();
+    check_yasp<1>();
+    check_yasp<1, Dune::TensorProductCoordinateContainer<double,1> >();
     //check_yasp<1>(true);
-    check_yasp<2, Dune::TensorProductCoordinateContainer<double,2> >();
-//      check_yasp<2>();
-//     check_yasp<3>();
-    //check_yasp<3>(true);
-    //check_yasp<4>();
 
-//   } catch (Dune::Exception &e) {
-//     std::cerr << e << std::endl;
-//     return 1;
-//   } catch (...) {
-//     std::cerr << "Generic exception!" << std::endl;
-//     return 2;
-//   }
+//     check_yasp<2>();
+//     check_yasp<2, Dune::TensorProductCoordinateContainer<double,2> >();
+//     //check_yasp<2>(true);
+//
+//     check_yasp<3>();
+//     check_yasp<3, Dune::TensorProductCoordinateContainer<double,3> >();
+//     //check_yasp<3>(true);
+
+  } catch (Dune::Exception &e) {
+    std::cerr << e << std::endl;
+    return 1;
+  } catch (...) {
+    std::cerr << "Generic exception!" << std::endl;
+    return 2;
+  }
 
 #if HAVE_MPI
   // Terminate MPI
