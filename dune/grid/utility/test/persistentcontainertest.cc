@@ -40,7 +40,7 @@ bool test(GridType &grid)
   PersistentContainer<GridType,DataType> container2(grid,2);
 
   typedef typename GridType::LeafGridView GridView;
-  const GridView &view = grid.leafView();
+  const GridView &view = grid.leafGridView();
   typedef typename GridView::template Codim<0>::Iterator EIterator;
 
   {

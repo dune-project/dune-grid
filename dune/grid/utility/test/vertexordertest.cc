@@ -267,7 +267,7 @@ void testVertexOrderByIdSimplices(int &result) {
   typedef Dune::VertexOrderByIdFactory<IdSet> VOFactory;
   VOFactory voFactory(gridp->globalIdSet());
 
-  testVertexOrder<0>(gridp->leafView(), voFactory, result);
+  testVertexOrder<0>(gridp->leafGridView(), voFactory, result);
 }
 
 template<class Grid>
@@ -287,7 +287,7 @@ void testVertexOrderByIdCubes(int &result) {
   typedef Dune::VertexOrderByIdFactory<IdSet> VOFactory;
   VOFactory voFactory(gridp->globalIdSet());
 
-  testVertexOrder<0>(gridp->leafView(), voFactory, result);
+  testVertexOrder<0>(gridp->leafGridView(), voFactory, result);
 }
 
 int main (int argc , char **argv)

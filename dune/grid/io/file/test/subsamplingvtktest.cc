@@ -110,11 +110,11 @@ void vtkCheck(int* n, double* h)
 
   g.globalRefine(1);
 
-  doWrite( g.leafView(), false);
+  doWrite( g.leafGridView(), false);
   doWrite( g.levelView( 0 ), false);
   doWrite( g.levelView( g.maxLevel() ), false);
 
-  doWrite( g.leafView(), true);
+  doWrite( g.leafGridView(), true);
   doWrite( g.levelView( 0 ), true);
   doWrite( g.levelView( g.maxLevel() ), true);
 }

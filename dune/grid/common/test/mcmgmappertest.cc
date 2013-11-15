@@ -179,12 +179,12 @@ void checkGrid(const Grid& grid)
   {   // check constructor without layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
     leafMCMGMapper(grid);
-    checkElementDataMapper(leafMCMGMapper, grid.leafView());
+    checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
   }
   {   // check constructor with layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
     leafMCMGMapper(grid, MCMGElementLayout<dim>());
-    checkElementDataMapper(leafMCMGMapper, grid.leafView());
+    checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
   }
 
   // check levelMCMGMapper
@@ -207,12 +207,12 @@ void checkGrid(const Grid& grid)
   {   // check constructor without layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
     leafMCMGMapper(grid);
-    checkVertexDataMapper(leafMCMGMapper, grid.leafView());
+    checkVertexDataMapper(leafMCMGMapper, grid.leafGridView());
   }
   {   // check constructor with layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
     leafMCMGMapper(grid, MCMGVertexLayout<dim>());
-    checkVertexDataMapper(leafMCMGMapper, grid.leafView());
+    checkVertexDataMapper(leafMCMGMapper, grid.leafGridView());
   }
 
   // check levelMCMGMapper
@@ -235,12 +235,12 @@ void checkGrid(const Grid& grid)
   {   // check constructor without layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
     leafMCMGMapper(grid);
-    checkMixedDataMapper(leafMCMGMapper, grid.leafView());
+    checkMixedDataMapper(leafMCMGMapper, grid.leafGridView());
   }
   {   // check constructor with layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
     leafMCMGMapper(grid, MCMGElementEdgeLayout<dim>());
-    checkMixedDataMapper(leafMCMGMapper, grid.leafView());
+    checkMixedDataMapper(leafMCMGMapper, grid.leafGridView());
   }
 
   // check levelMCMGMapper

@@ -219,8 +219,8 @@ void generalTests(bool greenClosure)
     checkCommunication(*grid3d,l,Dune::dvverb);
 
   // check geometry lifetime
-  checkGeometryLifetime( grid2d->leafView() );
-  checkGeometryLifetime( grid3d->leafView() );
+  checkGeometryLifetime( grid2d->leafGridView() );
+  checkGeometryLifetime( grid3d->leafGridView() );
 
   // check the method geometryInFather()
   checkGeometryInFather(*grid2d);

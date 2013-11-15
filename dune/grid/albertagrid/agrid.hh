@@ -397,7 +397,7 @@ namespace Dune
 
     //! View for the leaf grid
     template< PartitionIteratorType pitype >
-    typename Traits::template Partition< pitype >::LeafGridView leafView () const
+    typename Traits::template Partition< pitype >::LeafGridView leafGridView () const
     {
       typedef typename Traits::template Partition< pitype >::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
@@ -414,7 +414,7 @@ namespace Dune
     }
 
     //! View for the leaf grid for All_Partition
-    typename Traits::template Partition< All_Partition >::LeafGridView leafView () const
+    typename Traits::template Partition< All_Partition >::LeafGridView leafGridView () const
     {
       typedef typename Traits::template Partition< All_Partition >::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;

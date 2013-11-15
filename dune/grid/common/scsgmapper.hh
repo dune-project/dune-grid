@@ -184,7 +184,7 @@ namespace Dune
        @param grid A reference to a grid.
      */
     LeafSingleCodimSingleGeomTypeMapper (const G& grid)
-      : SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c>(grid.leafView())
+      : SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c>(grid.leafGridView())
     {}
   };
 

@@ -191,7 +191,7 @@ int main(int argc, char **argv) {
 
     // collect information
     Dune::GridViewInfo<Grid::ctype> gridViewInfo;
-    Dune::fillGridViewInfoSerial(gridp->leafView(), gridViewInfo);
+    Dune::fillGridViewInfoSerial(gridp->leafGridView(), gridViewInfo);
 
     // print it
     std::cout << gridViewInfo << std::flush;

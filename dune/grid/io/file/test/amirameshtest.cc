@@ -58,7 +58,7 @@ void testWritingUniformData() {
 
   // write data
   AmiraMeshWriter<SGrid<2,2>::LeafGridView> amiramesh2d;
-  amiramesh2d.addUniformData(sgrid2d.leafView(), n2, vertexdata2d);
+  amiramesh2d.addUniformData(sgrid2d.leafGridView(), n2, vertexdata2d);
   amiramesh2d.write("sgrid2d.am");
 
   // /////////////////////////////////////
@@ -82,7 +82,7 @@ void testWritingUniformData() {
 
   // write data
   AmiraMeshWriter<SGrid<3,3>::LeafGridView> amiramesh3d;
-  amiramesh3d.addUniformData(sgrid3d.leafView(), n3, vertexdata3d);
+  amiramesh3d.addUniformData(sgrid3d.leafGridView(), n3, vertexdata3d);
   amiramesh3d.write("sgrid3d.am");
 
 }

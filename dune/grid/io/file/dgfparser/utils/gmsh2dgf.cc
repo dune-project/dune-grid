@@ -44,7 +44,7 @@ try
   Grid *grid = GmshReader< Grid  >::read( gmshFileName );
 
   typedef Grid::LeafGridView GridView;
-  GridView gridView = grid->leafView();
+  GridView gridView = grid->leafGridView();
 
   DGFWriter< GridView > dgfWriter( gridView );
   dgfWriter.write( dgfFileName );

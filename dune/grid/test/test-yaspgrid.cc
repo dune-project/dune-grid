@@ -51,14 +51,14 @@ void check_yasp(bool p0=false) {
     checkCommunication(grid,l,Dune::dvverb);
 
   // check geometry lifetime
-  checkGeometryLifetime( grid.leafView() );
+  checkGeometryLifetime( grid.leafGridView() );
   // check the method geometryInFather()
   checkGeometryInFather(grid);
   // check the intersection iterator and the geometries it returns
   checkIntersectionIterator(grid);
   // check grid adaptation interface
   checkAdaptRefinement(grid);
-  checkPartitionType( grid.leafView() );
+  checkPartitionType( grid.leafGridView() );
 
   // test operator<<
   std::cout << grid << std::endl;
