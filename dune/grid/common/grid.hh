@@ -1040,6 +1040,40 @@ namespace Dune {
       return View(ViewImp(asImp()));
     }
 
+    //! View for a grid level
+    template<PartitionIteratorType pitype>
+    typename Traits::template Partition<pitype>::LevelGridView
+    levelGridView(int level) const {
+      typedef typename Traits::template Partition<pitype>::LevelGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View(ViewImp(asImp(),level));
+    }
+
+    //! View for the leaf grid
+    template<PartitionIteratorType pitype>
+    typename Traits::template Partition<pitype>::LeafGridView
+    leafGridView() const {
+      typedef typename Traits::template Partition<pitype>::LeafGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View(ViewImp(asImp()));
+    }
+
+    //! View for a grid level for All_Partition
+    typename Traits::template Partition<All_Partition>::LevelGridView
+    levelGridView(int level) const {
+      typedef typename Traits::template Partition<All_Partition>::LevelGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View(ViewImp(asImp(),level));
+    }
+
+    //! View for the leaf grid for All_Partition
+    typename Traits::template Partition<All_Partition>::LeafGridView
+    leafGridView() const {
+      typedef typename Traits::template Partition<All_Partition>::LeafGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View(ViewImp(asImp()));
+    }
+
     //***************************************************************
     //  Interface for Adaptation
     //***************************************************************
