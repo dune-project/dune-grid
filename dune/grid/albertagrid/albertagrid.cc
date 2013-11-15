@@ -634,8 +634,6 @@ namespace Dune
   inline bool AlbertaGrid< dim, dimworld >
   ::readGridXdr ( const std::string &filename, ctype &time )
   {
-    typedef Alberta::FillFlags< dim > FillFlags;
-
     //removeMesh();
 
     if( filename.size() <= 0 )

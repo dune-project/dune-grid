@@ -80,8 +80,6 @@ namespace Dune
   inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
   AlbertaGridIntersectionBase< Grid >::centerIntegrationOuterNormal () const
   {
-    typedef FieldMatrix< ctype, dimensionworld, dimension > JacobianInverseTransposed;
-
     const EntityPointer ep = inside();
     const typename Entity::Geometry &geoInside = ep->geometry();
 
