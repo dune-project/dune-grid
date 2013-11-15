@@ -4,7 +4,7 @@
 #define DUNE_ALU2D_ALUGRID_HH
 
 // only include this code, if ENABLE_ALUGRID is defined
-#if HAVE_ALUGRID
+#if HAVE_ALUGRID || DOXYGEN
 
 #include <dune/grid/alugrid/common/declaration.hh>
 #include <dune/grid/alugrid/common/capabilities.hh>
@@ -867,6 +867,6 @@ namespace Dune
 
 #else
 #error "Trying to use <dune/grid/alugrid.hh> without ALUGRID_CPPFLAGS."
-#endif // #if HAVE_ALUGRID
+#endif // #if HAVE_ALUGRID || DOXYGEN
 
 #endif

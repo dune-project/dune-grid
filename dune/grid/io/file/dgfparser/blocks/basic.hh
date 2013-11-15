@@ -4,6 +4,7 @@
 #define DUNE_DGF_BASICBLOCK_HH
 
 #include <cassert>
+#include <cctype>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -21,7 +22,7 @@ namespace Dune
     inline void makeupcase( std :: string &s )
     {
       for (size_t i=0; i<s.size(); i++)
-        s[i]=toupper(s[i]);
+        s[i]=std::toupper(s[i]);
     }
 
     class BasicBlock

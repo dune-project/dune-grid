@@ -163,6 +163,7 @@ namespace Dune
   template< class G, class IdSet, class Map >
   template< class value, class iterator >
   class PersistentContainerMap< G, IdSet, Map >::IteratorWrapper
+    : public iterator
   {
     typedef IteratorWrapper< const value, typename Map::const_iterator > ConstWrapper;
 

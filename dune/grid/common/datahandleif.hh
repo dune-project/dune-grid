@@ -126,8 +126,7 @@ namespace Dune
       CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().gather(buffIF,e)));
     }
 
-    /*! unpack data from message buffer to user
-        n is the number of objects sent by the sender
+    /*! \brief unpack data from message buffer to user.
         @param buff message buffer provided by the grid
         @param e entity for which date should be unpacked from buffer
         @param n number of data written to buffer for this entity before

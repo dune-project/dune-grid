@@ -175,6 +175,7 @@ namespace Dune {
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief Provides a distributed structured cube mesh.
      \ingroup GridImplementations
+     \ingroup YaspGrid
 
      YaspGrid stands for yet another structured parallel grid.
      It implements the dune grid interface for structured grids with codim 0
@@ -704,8 +705,8 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
     DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
-      : _torus(comm,tag,s,lb),
-        ccobj(comm),
+      : ccobj(comm),
+        _torus(comm,tag,s,lb),
 #else
       :  _torus(tag,s,lb),
 #endif
@@ -742,8 +743,8 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
     DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,s,lb),
-        ccobj(MPI_COMM_SELF),
+      : ccobj(MPI_COMM_SELF),
+        _torus(MPI_COMM_SELF,tag,s,lb),
 #else
       : _torus(tag,s,lb),
 #endif
@@ -773,8 +774,8 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(comm,tag,s,lb),
-        ccobj(comm),
+      : ccobj(comm),
+        _torus(comm,tag,s,lb),
 #else
       : _torus(tag,s,lb),
 #endif
@@ -805,8 +806,8 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,s,lb),
-        ccobj(MPI_COMM_SELF),
+      : ccobj(MPI_COMM_SELF),
+        _torus(MPI_COMM_SELF,tag,s,lb),
 #else
       : _torus(tag,s,lb),
 #endif
@@ -830,8 +831,8 @@ namespace Dune {
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::array<int, dim> elements)
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,elements,defaultLoadbalancer()),
-        ccobj(MPI_COMM_SELF),
+      : ccobj(MPI_COMM_SELF),
+        _torus(MPI_COMM_SELF,tag,elements,defaultLoadbalancer()),
 #else
       : _torus(tag,elements,defaultLoadbalancer()),
 #endif

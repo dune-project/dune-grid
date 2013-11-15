@@ -118,11 +118,12 @@ namespace Dune
      * Use this constructor to provide a custom layout object e.g. not
      * using the default constructor.
      *
-     * \param gridView A Dune GridView object.
+     * \param gridView_ A Dune GridView object.
      * \param layout A layout object.
      */
-    MultipleCodimMultipleGeomTypeMapper (const GV& gridView, const Layout<GV::dimension> layout)
-      : is(gridView.indexSet()),
+    MultipleCodimMultipleGeomTypeMapper (const GV& gridView_, const Layout<GV::dimension> layout)
+      : gridView(gridView_),
+        is(gridView.indexSet()),
         offset(GlobalGeometryTypeIndex::size(GV::dimension)),
         layout(layout)
     {
@@ -130,11 +131,12 @@ namespace Dune
     }
 
     /** @brief Construct mapper from grid and one of its index sets.
-
-       \param gridView A Dune GridView object.
+     *
+     * \param gridView_ A Dune GridView object.
      */
-    MultipleCodimMultipleGeomTypeMapper (const GV& gridView)
-      : is(gridView.indexSet()),
+    MultipleCodimMultipleGeomTypeMapper (const GV& gridView_)
+      : gridView(gridView_),
+        is(gridView.indexSet()),
         offset(GlobalGeometryTypeIndex::size(GV::dimension))
     {
       update();
@@ -239,6 +241,8 @@ namespace Dune
   private:
     // number of data elements required
     unsigned int n;
+    // GridView is needed to keep the IndexSet valid
+    const GV gridView;
     const typename GV::IndexSet& is;
     // provide an array for the offsets
     std::vector<int> offset;

@@ -8,7 +8,7 @@
  *  \brief  provides the AlbertaGrid class
  */
 
-#if HAVE_ALBERTA
+#if HAVE_ALBERTA || DOXYGEN
 
 #include <iostream>
 #include <fstream>
@@ -820,6 +820,6 @@ namespace Dune
 
 #define _ALBERTA_H_
 
-#endif // HAVE_ALBERTA
+#endif // HAVE_ALBERTA || DOXYGEN
 
 #endif
