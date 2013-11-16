@@ -582,7 +582,7 @@ int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace
 
     // Get the nodes
     int nNodes = UG_NS<dim>::Corners_Of_Side(currentFace.first,currentFace.second);
-    const typename UG_NS<dim>::Node* n[nNodes];
+    std::vector<const typename UG_NS<dim>::Node*> n(nNodes);
     for (int i=0; i<nNodes; i++)
       n[i] = UG_NS<dim>::Corner(currentFace.first,UG_NS<dim>::Corner_Of_Side(currentFace.first, currentFace.second, i));
 
