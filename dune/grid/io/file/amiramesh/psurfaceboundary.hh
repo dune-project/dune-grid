@@ -6,7 +6,7 @@
 /** \file
  *  \brief A domain boundary implemented by the psurface library
  */
-#include "../../../common/gridfactory.hh"
+#include <dune/grid/common/gridfactory.hh>
 
 #if HAVE_PSURFACE
 #include <psurface/PSurface.h>
