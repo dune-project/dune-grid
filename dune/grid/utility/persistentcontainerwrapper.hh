@@ -77,21 +77,22 @@ namespace Dune
     int codimension () const { return hostContainer_.codimension(); }
 
 
-    // deprecated stuff
+    // deprecated stuff, will be removed after Dune 2.3
 
-    typedef Grid GridType DUNE_DEPRECATED;
-    typedef Value Data DUNE_DEPRECATED;
+    typedef Grid GridType DUNE_DEPRECATED_MSG("Use Grid instead.");
+    typedef Value Data DUNE_DEPRECATED_MSG("Use Value instead.");
 
-    void reserve () DUNE_DEPRECATED { return resize(); }
+    void reserve () DUNE_DEPRECATED_MSG("Use resize() instead.")
+    { return resize(); }
 
-    void clear () DUNE_DEPRECATED
+    void clear () DUNE_DEPRECATED_MSG("Use resize() instead.")
     {
       resize( Value() );
       shrinkToFit();
       fill( Value() );
     }
 
-    void update () DUNE_DEPRECATED
+    void update () DUNE_DEPRECATED_MSG("Use resize() instead.")
     {
       resize( Value() );
       shrinkToFit();

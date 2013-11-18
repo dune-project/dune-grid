@@ -7,7 +7,6 @@
 #include <config.h>
 
 #include <iostream>
-#include <cassert>
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
@@ -58,9 +57,9 @@ bool test(GridType &grid)
   }
 
   grid.globalRefine(1);
-  container0.update();
-  container1.update();
-  container2.update();
+  container0.resize();
+  container1.resize();
+  container2.resize();
 
   {
     const EIterator &eend = view.template end<0>();
