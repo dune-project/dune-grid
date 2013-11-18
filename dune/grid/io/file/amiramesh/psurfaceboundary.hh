@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef PSURFACE_BOUNDARY_HH
-#define PSURFACE_BOUNDARY_HH
+#ifndef DUNE_GRID_IO_FILE_AMIRAMESH_PSURFACE_BOUNDARY_HH
+#define DUNE_GRID_IO_FILE_AMIRAMESH_PSURFACE_BOUNDARY_HH
 
 /** \file
  *  \brief A domain boundary implemented by the psurface library
@@ -134,4 +134,4 @@ namespace Dune {
 }
 
 #endif // #if HAVE_PSURFACE
-#endif // #ifndef PSURFACE_BOUNDARY_HH
+#endif // #ifndef DUNE_GRID_IO_FILE_AMIRAMESH_PSURFACE_BOUNDARY_HH
