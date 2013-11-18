@@ -97,8 +97,8 @@ void vtkCheck(int* n, double* h)
   Dune::SGrid<dim,dim> g(n, h);
   g.globalRefine(1);
 
-  doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::conforming );
-  doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::nonconforming );
+  doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::conforming );
+  doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::nonconforming );
   doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::conforming );
   doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::nonconforming );
   doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune::VTK::conforming );

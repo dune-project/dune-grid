@@ -18,7 +18,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 
-#if HAVE_UG
+#if HAVE_UG || DOXYGEN
 
 #ifdef ModelP
 #include <dune/common/parallel/mpicollectivecommunication.hh>
@@ -506,10 +506,10 @@ namespace Dune {
 #else
 #ifdef ModelP
       // gather element data
-      //        UGLBGatherScatter::template gather<0>(this->leafView(), dataHandle);
+      //        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
 
       // gather node data
-      UGLBGatherScatter::template gather<dim>(this->leafView(), dataHandle);
+      UGLBGatherScatter::template gather<dim>(this->leafGridView(), dataHandle);
 #endif
 
       // the load balancing step now also attaches
@@ -518,10 +518,10 @@ namespace Dune {
 
 #ifdef ModelP
       // scatter element data
-      //        UGLBGatherScatter::template scatter<0>(this->leafView(), dataHandle);
+      //        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
 
       // scatter node data
-      UGLBGatherScatter::template scatter<dim>(this->leafView(), dataHandle);
+      UGLBGatherScatter::template scatter<dim>(this->leafGridView(), dataHandle);
 #endif
 
       return true;
@@ -602,13 +602,13 @@ namespace Dune {
           continue;
         int level = -1;
         if (curCodim == 0)
-          communicateUG_<LeafGridView, DataHandle, 0>(this->leafView(), level, dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, 0>(this->leafGridView(), level, dataHandle, iftype, dir);
         else if (curCodim == dim)
-          communicateUG_<LeafGridView, DataHandle, dim>(this->leafView(), level, dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, dim>(this->leafGridView(), level, dataHandle, iftype, dir);
         else if (curCodim == dim - 1)
-          communicateUG_<LeafGridView, DataHandle, dim-1>(this->leafView(), level, dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, dim-1>(this->leafGridView(), level, dataHandle, iftype, dir);
         else if (curCodim == 1)
-          communicateUG_<LeafGridView, DataHandle, 1>(this->leafView(), level, dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, 1>(this->leafGridView(), level, dataHandle, iftype, dir);
         else
           DUNE_THROW(NotImplemented,
                      className(*this) << "::communicate(): Not "
@@ -975,5 +975,5 @@ namespace Dune {
 
 } // namespace Dune
 
-#endif   // HAVE_UG
+#endif   // HAVE_UG || DOXYGEN
 #endif   // DUNE_UGGRID_HH

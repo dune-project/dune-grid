@@ -313,7 +313,7 @@ template<class GridView>
 template<class GridType2>
 void Dune::AmiraMeshWriter<GridView>::addLeafGrid(const GridType2& grid, bool splitAll)
 {
-  addGrid(grid.leafView(), splitAll);
+  addGrid(grid.leafGridView(), splitAll);
 }
 
 
@@ -444,7 +444,6 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
 {
   typedef typename GridView::Grid::ctype ct;
   static const int dimworld = GridView::dimensionworld;
-  typedef Dune::VirtualRefinement<dim, ct> Refinement;
 
 
   const typename GridView::IndexSet& indexSet = gridView.indexSet();

@@ -229,7 +229,7 @@ namespace Dune
 
     typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
     dgf::PeriodicFaceTransformationBlock trafoBlock( gridin, dim );
-    std::bitset< dim > per( 0 );
+    std::bitset< dim > per;
     const int numTrafos = trafoBlock.numTransformations();
     for( int k = 0; k < numTrafos; ++k )
     {

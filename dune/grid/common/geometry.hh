@@ -169,13 +169,13 @@ namespace Dune
     /** \brief Obtain a corner of the geometry
      *
      *  This method is for convenient access to the corners of the geometry. The
-     *  same result could be achieved by by calling
+     *  same result could be achieved by calling
      *  \code
-     *  global( genericReferenceElement.position( i, mydimension ) )
+     *  global( referenceElement.position( i, mydimension ) )
      *  \endcode
      *
-     *  \param[in]  i  number of the corner (with respect to the generic reference
-     *                 element)
+     *  \param[in]  i  number of the corner (with respect to the reference element)
+     *
      *  \returns position of the i-th corner
      */
     GlobalCoordinate corner ( int i ) const

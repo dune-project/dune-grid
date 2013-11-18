@@ -39,6 +39,7 @@ AC_DEFUN([DUNE_PATH_PSURFACE],[
 ac_save_LDFLAGS="$LDFLAGS"
 ac_save_CPPFLAGS="$CPPFLAGS"
 ac_save_LIBS="$LIBS"
+ac_save_PKG_CONFIG_PATH="$PKG_CONFIG_PATH"
 
 # initialize to sane value
 HAVE_PSURFACE=0
@@ -60,6 +61,26 @@ if test "x$PSURFACEROOT" = x; then
     PSURFACEROOT="/usr/local/psurface"
 fi
 
+    # Check for psurface using pkg-config
+    # This works for psurface-2.0 and later
+    export PKG_CONFIG_PATH="$PSURFACEROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
+    PKG_CHECK_MODULES([PSURFACE], [psurface], [
+        HAVE_PSURFACE="1"
+        AC_DEFINE(PSURFACE_NAMESPACE,
+                  psurface::,
+                  [The namespace prefix of the psurface library])
+        AC_MSG_RESULT([yes (by pkg-config)])
+    ], [
+        AC_MSG_WARN([PSurface >= 2.0 not found in $PSURFACEROOT])
+    ])
+
+    # PKG_CHECK_MODULES puts the stuff we would expect in PSURFACE_CPPFLAGS
+    # (namely, -I<path>) in PSURFACE_CFLAGS. We therefore copy it by hand.
+    PSURFACE_CPPFLAGS="$PSURFACE_CFLAGS"
+
+# If pkg-config didn't find psurface we may be dealing with an older version
+# of psurface (without pkg-config support).  We try to find that without pkg-config.
+if test x$HAVE_PSURFACE != x1 ; then
 PSURFACE_INCLUDE_PATH="$PSURFACEROOT/include"
 PSURFACE_LIB_PATH="$PSURFACEROOT/lib"
 AS_IF([test -d $PSURFACE_LIB_PATH],
@@ -124,6 +145,9 @@ fi
 
 AC_LANG_POP([C++])
 
+## end of the psurface check not using pkg-config
+fi
+
 ## end of psurface check (--without wasn't set)
 fi
 
@@ -154,6 +178,7 @@ AM_CONDITIONAL(PSURFACE, test x$HAVE_PSURFACE = x1)
 LIBS="$ac_save_LIBS"
 CPPFLAGS="$ac_save_CPPFLAGS"
 LDFLAGS="$ac_save_LDFLAGS"
+PKG_CONFIG_PATH="$ac_save_PKG_CONFIG_PATH"
 
 DUNE_ADD_SUMMARY_ENTRY([psurface],[$with_psurface])
 

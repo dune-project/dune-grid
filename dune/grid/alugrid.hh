@@ -4,7 +4,7 @@
 #define DUNE_ALUGRID_HH
 
 // only include this code, if HAVE_ALUGRID is true
-#if HAVE_ALUGRID
+#if HAVE_ALUGRID || DOXYGEN
 
 #include <dune/grid/alugrid/common/declaration.hh>
 
@@ -89,6 +89,6 @@ namespace Dune
 
 } //end  namespace Dune
 
-#endif // #ifdef HAVE_ALUGRID
+#endif // #ifdef HAVE_ALUGRID || DOXYGEN
 
 #endif

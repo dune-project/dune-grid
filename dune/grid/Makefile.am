@@ -13,9 +13,9 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
-# the ALUGrid lib contains items that are needed
-# in any case, so no dependency from ALUGRID flag
-ALULIB = alugrid/libalu.la
+if ALUGRID
+  ALULIB = alugrid/libalu.la
+endif
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =

@@ -177,7 +177,7 @@ namespace Dune {
                       GridViewInfo<typename Entity::ctype> &gridViewInfo)
     {
       typedef typename Entity::ctype ctype;
-      static const std::size_t dimw = Entity::dimensionworld;
+      static const std::size_t dimw = Entity::Geometry::dimensionworld;
       static const std::size_t dim = Entity::dimension;
       std::vector<FieldVector<ctype, dimw> > coords;
       for(int i = 0; i < refelem.size(codim); ++i) {
@@ -221,7 +221,6 @@ namespace Dune {
     static const std::size_t dim = GV::dimension;
     typedef typename GV::template Codim<0>::Iterator EIterator;
     typedef typename GV::template Codim<0>::Geometry EGeometry;
-    typedef typename GV::IntersectionIterator IIterator;
     typedef typename GV::IndexSet IndexSet;
 
     typedef typename GridViewInfo<ctype>::iterator InfoIterator;

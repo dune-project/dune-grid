@@ -141,6 +141,12 @@ namespace Dune
     //! assignment operator
     ThisType & operator = (const ThisType & org);
 
+    //! check for valid seed
+    bool isValid () const
+    {
+      return item_ != 0;
+    }
+
     //////////////////////////////////////////////////////
     //
     //  non-interface methods

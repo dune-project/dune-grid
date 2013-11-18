@@ -267,7 +267,7 @@ void testVertexOrderByIdSimplices(int &result) {
   typedef Dune::VertexOrderByIdFactory<IdSet> VOFactory;
   VOFactory voFactory(gridp->globalIdSet());
 
-  testVertexOrder<0>(gridp->leafView(), voFactory, result);
+  testVertexOrder<0>(gridp->leafGridView(), voFactory, result);
 }
 
 template<class Grid>
@@ -287,7 +287,7 @@ void testVertexOrderByIdCubes(int &result) {
   typedef Dune::VertexOrderByIdFactory<IdSet> VOFactory;
   VOFactory voFactory(gridp->globalIdSet());
 
-  testVertexOrder<0>(gridp->leafView(), voFactory, result);
+  testVertexOrder<0>(gridp->leafGridView(), voFactory, result);
 }
 
 int main (int argc , char **argv)
@@ -321,25 +321,25 @@ try {
 #endif // HAVE_UG
 
 #if HAVE_ALUGRID
-  std::cout << "== Testing ALUConformGrid<2,2> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUConformGrid<2, 2> >(result);
+  std::cout << "== Testing ALUGrid<2,2,simplex,conforming> with simplices" << std::endl;
+  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 3, Dune::simplex, Dune::conforming> >(result);
 #ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUConformGrid<2,3> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUConformGrid<2, 3> >(result);
+  std::cout << "== Testing ALUGrid<2,3,simplex,conforming> with simplices" << std::endl;
+  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 3, Dune::simplex, Dune::conforming> >(result);
 #endif // USE_ALUGRID_SURFACE_2D
 
 #ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUCubeGrid<2,2> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUCubeGrid<2, 2> >(result);
-  std::cout << "== Testing ALUCubeGrid<2,3> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUCubeGrid<2, 3> >(result);
+  std::cout << "== Testing Dune::ALUGrid<2,2,cube,nonconforming> with cubes" << std::endl;
+  testVertexOrderByIdCubes<Dune::ALUGrid<2, 3, Dune::cube, Dune::nonconforming> >(result);
+  std::cout << "== Testing Dune::ALUGrid<2,3,cube,nonconforming> with cubes" << std::endl;
+  testVertexOrderByIdCubes<Dune::ALUGrid<2, 3, Dune::cube, Dune::nonconforming> >(result);
 #endif // USE_ALUGRID_SURFACE_2D
 
-  std::cout << "== Testing ALUSimplexGrid<2,2> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUSimplexGrid<2, 2> >(result);
+  std::cout << "== Testing ALUGrid<2,2,simplex,nonconforming> with simplices with simplices" << std::endl;
+  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 2, Dune::simplex, Dune::nonconforming> >(result);
 #ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUSimplexGrid<2,3> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUSimplexGrid<2, 3> >(result);
+  std::cout << "== Testing ALUGrid<2,3,simplex,nonconforming> with simplices with simplices" << std::endl;
+  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 3, Dune::simplex, Dune::nonconforming> >(result);
 #endif // USE_ALUGRID_SURFACE_2D
 #endif // HAVE_ALUGRID
 
@@ -357,10 +357,10 @@ try {
 #endif // HAVE_UG
 
 #if HAVE_ALUGRID
-  std::cout << "== Testing ALUCubeGrid<3,3> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUCubeGrid<3, 3> >(result);
-  std::cout << "== Testing ALUSimplexGrid<3,3> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUSimplexGrid<3, 3> >(result);
+  std::cout << "== Testing Dune::ALUGrid<3,3,cube,nonconforming> with cubes" << std::endl;
+  testVertexOrderByIdCubes<Dune::ALUGrid<3, 3, Dune::cube, Dune::nonconforming> >(result);
+  std::cout << "== Testing ALUGrid<3,3,simplex,nonconforming> with simplices" << std::endl;
+  testVertexOrderByIdSimplices<Dune::ALUGrid<3, 3, Dune::simplex, Dune::nonconforming> >(result);
 #endif // HAVE_ALUGRID
 
   return result;

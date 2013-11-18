@@ -603,7 +603,7 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
 
   // test leaf intersection iterator
   {
-    checkViewIntersectionIterator(grid.leafView());
+    checkViewIntersectionIterator(grid.leafGridView());
   }
 
 }

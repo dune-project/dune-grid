@@ -296,8 +296,8 @@ namespace Dune {
 
        @subsection CONSTRSIMPL Simplex grids
        (Dune::AlbertaGrid, or
-        Dune::ALUSimplexGrid<3,3>, and
-        Dune::ALUSimplexGrid<2,2>)
+        Dune::ALUGrid<3,3,simplex,nonconforming>, and
+        Dune::ALUGrid<2,2,simplex,nonconforming>)
 
        The vertices and elements of the grid are constructed in the
        following three steps:
@@ -344,7 +344,7 @@ namespace Dune {
           the refinement edge is always chosen to be the longest edge.
 
        @subsection CONSTRCUBE Cube grids
-       (Dune::ALUCubeGrid<3,3>)
+       (Dune::ALUGrid<3,3,cube,nonconforming>)
 
        The grid is constructed using the information from the
        \b Interval  block, if present; otherwise the \b Vertex and \b Cube
@@ -634,8 +634,8 @@ namespace Dune {
 
      @include examplegrid6.dgf
 
-     \image html  examplegrid6c.png "The resulting grid using ALUCubeGrid<3,3>"
-     \image html  examplegrid6s.png "The resulting grid using ALUSimplexGrid<3,3>"
+     \image html  examplegrid6c.png "The resulting grid using ALUGrid<3,3,cube,nonconforming>"
+     \image html  examplegrid6s.png "The resulting grid using ALUGrid<3,3,simplex,nonconforming>"
 
      Now the vertices are still defined through the interval block; the simplicies
      are constructed using Tetgen (note the comment symbol \% in the
@@ -643,20 +643,20 @@ namespace Dune {
 
      @include examplegrid7.dgf
 
-     \image html  examplegrid7.png "The resulting grid using ALUSimplexGrid<3,3>"
+     \image html  examplegrid7.png "The resulting grid using ALUGrid<3,3,simplex,nonconforming>"
 
      Note that in the grid would be the same as in the above example if
-     ALUCubeGrid<3,3> where used.
+     ALUGrid<3,3,cube,nonconforming> where used.
 
      Now we can also include some quality enhancement:
 
      First: \b min-angle = 1.2
             (remove the first \% in the \b Simplexgenerator block)
-     \image html  examplegrid7angle.png "The resulting grid using ALUSimplexGrid<3,3>"
+     \image html  examplegrid7angle.png "The resulting grid using ALUGrid<3,3,simplex,nonconforming>"
 
      Second: \b min-angle = 1.2 and \b max-area = 0.1
              (remove both \% in the \b Simplexgenerator block)
-     \image html  examplegrid7area.png "The resulting grid using ALUSimplexGrid<3,3>"
+     \image html  examplegrid7area.png "The resulting grid using ALUGrid<3,3,simplex,nonconforming>"
        <!---------------------------------------------->
 
      This examples show different ways to define a grid for the following
@@ -724,13 +724,13 @@ namespace Dune {
 
      @include examplegrid9.dgf
 
-     \image html  BBEETH1M.d_cut.png "The resulting grid using ALUSimplexGrid<3,3>"
+     \image html  BBEETH1M.d_cut.png "The resulting grid using ALUGrid<3,3,simplex,nonconforming>"
 
-     \image html  Orb_cut.png "The resulting grid using ALUSimplexGrid<3,3>"
+     \image html  Orb_cut.png "The resulting grid using ALUGrid<3,3,simplex,nonconforming>"
 
-     \image html  bunny.p65.param_skin.png "The resulting grid using ALUSimplexGrid<3,3>"
+     \image html  bunny.p65.param_skin.png "The resulting grid using ALUGrid<3,3,simplex,nonconforming>"
 
-     \image html  pmdc.png "The resulting grid using ALUSimplexGrid<3,3>"
+     \image html  pmdc.png "The resulting grid using ALUGrid<3,3,simplex,nonconforming>"
 
    **/
   /*

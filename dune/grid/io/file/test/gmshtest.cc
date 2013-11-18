@@ -68,13 +68,13 @@ void testReadingAndWritingGrid( const std::string& filename, const std::string& 
 #endif // #if HAVE_GRAPE
 
   // Test writing
-  Dune::GmshWriter<typename GridType::LeafGridView> writer( grid->leafView() );
+  Dune::GmshWriter<typename GridType::LeafGridView> writer( grid->leafGridView() );
   writer.write( outFilename );
 
   // vtk output
   std::ostringstream vtkName;
   vtkName << filename << "-" << refinements;
-  Dune::VTKWriter<typename GridType::LeafGridView> vtkWriter( grid->leafView() );
+  Dune::VTKWriter<typename GridType::LeafGridView> vtkWriter( grid->leafGridView() );
   vtkWriter.write( vtkName.str() );
 }
 

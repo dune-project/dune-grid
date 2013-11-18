@@ -240,10 +240,10 @@
 #undef MSIZE_SHIFT
 #undef MSIZE_LEN
 #undef MSIZEMAX
-#undef MSIZE
+#undef UG_MSIZE
 #undef SETMSIZE
 #undef MSIZEMAX
-#undef MSIZE
+#undef UG_MSIZE
 #undef SETMSIZE
 #undef MTYPE
 #undef MUSED

@@ -301,11 +301,12 @@ namespace Dune {
                      << "::createCubeGrid(): The lower coordinates "
                      "must be at the origin for YaspGrid.");
 
-      array<int, dim> elements_;
+      Dune::array<int, dim> elements_;
       std::copy(elements.begin(), elements.end(), elements_.begin());
 
-      return shared_ptr<GridType>(new GridType(upperRight, elements_,
-                                               std::bitset<dim>(), 0));
+      return shared_ptr<GridType>
+               (new GridType(upperRight, elements_,
+                             std::bitset<dim>(false), 0));
     }
 
     /** \brief Create a structured simplex grid

@@ -4,7 +4,7 @@
 #define DUNE_ALU3DGRID_ALUGRID_HH
 
 // only include this code, if ENABLE_ALUGRID is defined
-#if HAVE_ALUGRID
+#if HAVE_ALUGRID || DOXYGEN
 
 // 3d version
 #include <dune/grid/alugrid/common/capabilities.hh>
@@ -188,6 +188,34 @@ namespace Dune
       return LeafGridView( LeafGridViewImp( *this ) );
     }
 
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafGridView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelGridView ( int level ) const
+    {
+      typedef LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafGridView () const
+    {
+      typedef LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
   private:
     friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
     friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
@@ -352,6 +380,34 @@ namespace Dune
     }
 
     LeafGridView leafView () const
+    {
+      typedef LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafGridView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelGridView ( int level ) const
+    {
+      typedef LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafGridView () const
     {
       typedef LeafGridView::GridViewImp LeafGridViewImp;
       return LeafGridView( LeafGridViewImp( *this ) );
@@ -543,6 +599,34 @@ namespace Dune
       return LeafGridView( LeafGridViewImp( *this ) );
     }
 
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafGridView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelGridView ( int level ) const
+    {
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafGridView () const
+    {
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
   private:
     friend class Conversion< This , HasObjectStream > ;
     friend class Conversion< const This, HasObjectStream > ;
@@ -561,7 +645,7 @@ namespace Dune
 
 } //end  namespace Dune
 
-#endif // #if HAVE_ALUGRID
+#endif // #if HAVE_ALUGRID || DOXYGEN
 
 #undef alu_inline
 #endif

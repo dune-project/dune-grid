@@ -3,7 +3,7 @@
 #ifndef DUNE_ALBERTA_HIERARCHICITERATOR_HH
 #define DUNE_ALBERTA_HIERARCHICITERATOR_HH
 
-#include <dune/grid/common/hierarchiciterator.hh>
+#include <dune/grid/common/entityiterator.hh>
 
 #include <dune/grid/albertagrid/entitypointer.hh>
 

@@ -55,7 +55,7 @@ OneDGrid* testFactory()
   OneDGrid::Codim<1>::LevelIterator vEndIt = grid->lend<1>(0);
 
   const OneDGrid::LevelGridView::IndexSet& levelIndexSet = grid->levelView(0).indexSet();
-  const OneDGrid::LeafGridView::IndexSet&  leafIndexSet  = grid->leafView().indexSet();
+  const OneDGrid::LeafGridView::IndexSet&  leafIndexSet  = grid->leafGridView().indexSet();
 
   for (; vIt!=vEndIt; ++vIt) {
     unsigned int idx = levelIndexSet.index(*vIt);
@@ -102,7 +102,7 @@ OneDGrid* testFactory()
 
   typedef  OneDGrid::LeafGridView GridView;
   typedef  GridView::IntersectionIterator IntersectionIterator;
-  const GridView gridView = grid->leafView();
+  const GridView gridView = grid->leafGridView();
 
   for (eIt = grid->lbegin<0>(0); eIt!=eEndIt; ++eIt) {
     IntersectionIterator iIt = gridView.ibegin(*eIt);
@@ -151,7 +151,7 @@ void testOneDGrid(OneDGrid& grid)
   gridcheck(grid);
 
   // check geometry lifetime
-  checkGeometryLifetime( grid.leafView() );
+  checkGeometryLifetime( grid.leafGridView() );
 
   // check the method geometryInFather()
   checkGeometryInFather(grid);

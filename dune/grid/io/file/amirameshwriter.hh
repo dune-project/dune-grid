@@ -208,9 +208,9 @@ namespace Dune {
                                  bool GridSplitUp = false) {
       LeafAmiraMeshWriter amiramesh;
       if (f.size()==grid.size(GridType::dimension))
-        amiramesh.addVertexData(f, grid.leafView(),GridSplitUp);
+        amiramesh.addVertexData(f, grid.leafGridView(),GridSplitUp);
       else
-        amiramesh.addCellData(f, grid.leafView(),GridSplitUp);
+        amiramesh.addCellData(f, grid.leafGridView(),GridSplitUp);
 
       amiramesh.write(filename);
     }

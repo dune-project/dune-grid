@@ -1430,8 +1430,8 @@ namespace Dune {
       {
         int dist = 0;
         iTupel delta=i->delta;
-        for (int i=0; i<d; ++i)
-          dist += std::abs(delta[i]);
+        for (int j=0; j<d; ++j)
+          dist += std::abs(delta[j]);
         return dist;
       }
 

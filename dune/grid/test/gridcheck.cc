@@ -595,7 +595,7 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::LeafGridView LeafGridView;
   typedef typename LeafGridView::IntersectionIterator LeafIntersectionIterator;
 
-  LeafGridView leafView = g.leafView();
+  LeafGridView leafGridView = g.leafView();
 
   // assignment tests
   LevelIterator l1 = g.template lbegin<0>(0);
@@ -622,8 +622,8 @@ void iteratorEquals (Grid &g)
 
   HierarchicIterator h1 = l1->hbegin(99);
   HierarchicIterator h2 = l2->hbegin(99);
-  LeafIntersectionIterator i1 = leafView.ibegin( *l1 );
-  LeafIntersectionIterator i2 = leafView.ibegin( *l2 );
+  LeafIntersectionIterator i1 = leafGridView.ibegin( *l1 );
+  LeafIntersectionIterator i2 = leafGridView.ibegin( *l2 );
   EntityPointer e1( l1 );
   EntityPointer e2( h2 );
 
@@ -640,15 +640,15 @@ void iteratorEquals (Grid &g)
     { bool DUNE_UNUSED tmp = (i == l2); }                         \
     { bool DUNE_UNUSED tmp = (i == h2); }                         \
     { bool DUNE_UNUSED tmp = (i == L2); }                         \
-    if (i2 != leafView.iend( *l2 )) bool DUNE_UNUSED tmp = (i == i2->inside()); \
-    if (i2 != leafView.iend( *l2 ) && i2->neighbor()) bool DUNE_UNUSED tmp = (i == i2->outside()); \
+    if (i2 != leafGridView.iend( *l2 )) bool DUNE_UNUSED tmp = (i == i2->inside()); \
+    if (i2 != leafGridView.iend( *l2 ) && i2->neighbor()) bool DUNE_UNUSED tmp = (i == i2->outside()); \
 }
   TestEquals(e1);
   TestEquals(l1);
   TestEquals(h1);
   TestEquals(L1);
-  if (i1 != leafView.iend( *l2 )) TestEquals(i1->inside());
-  if (i1 != leafView.iend( *l2 ) && i1->neighbor()) TestEquals(i1->outside());
+  if (i1 != leafGridView.iend( *l2 )) TestEquals(i1->inside());
+  if (i1 != leafGridView.iend( *l2 ) && i1->neighbor()) TestEquals(i1->outside());
 }
 
 
@@ -896,16 +896,16 @@ void gridcheck (Grid &g)
 
   // check geometries of macro level and leaf level
   checkGeometry( g.levelView( 0 ) );
-  checkGeometry( g.leafView() );
+  checkGeometry( g.leafGridView() );
 
   // check entity seeds
-  Dune::checkEntitySeed( g.leafView(), std::cerr );
+  Dune::checkEntitySeed( g.leafGridView(), std::cerr );
   for( int level = 0; level <= g.maxLevel(); ++level )
     Dune::checkEntitySeed( g.levelView( level ), std::cerr );
 
   // note that for some grid this might fail
   // then un comment this test
-  Dune :: checkIndexSet( g, g.leafView(), Dune :: dvverb );
+  Dune :: checkIndexSet( g, g.leafGridView(), Dune :: dvverb );
   for( int level = 0; level <= g.maxLevel(); ++level )
     Dune :: checkIndexSet( g, g.levelView( level ), Dune :: dvverb, true );
 
@@ -928,7 +928,7 @@ void gridcheck (Grid &g)
   if( EnableLevelIntersectionIteratorCheck< Grid >::v )
     checkBoundarySegmentIndex( g.levelView( 0 ) );
   else if( g.maxLevel() == 0 )
-    checkBoundarySegmentIndex( g.leafView() );
+    checkBoundarySegmentIndex( g.leafGridView() );
   else
     std::cout << "Warning: Skipping boundary segment index check (missing level intersection iterator)." << std::endl;
 }

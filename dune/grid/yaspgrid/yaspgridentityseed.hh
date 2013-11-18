@@ -21,6 +21,11 @@ namespace Dune {
     //! codimension of entity pointer
     enum { codimension = codim };
 
+    //! default construct an invalid entity seed
+    YaspEntitySeed ()
+      : _l(-1), _c(0)
+    {}
+
     //! constructor
     YaspEntitySeed (int level, FieldVector<int, dim> coord)
       : _l(level), _c(coord)
@@ -31,11 +36,17 @@ namespace Dune {
       : _l(rhs._l), _c(rhs._c)
     {}
 
+    //! check whether the EntitySeed refers to a valid Entity
+    bool isValid() const
+    {
+      return _l != -1;
+    }
+
     int level () const { return _l; }
     const FieldVector<int, dim> & coord() const { return _c; }
 
   protected:
-    int _l;                  // grid level
+    int _l;                   // grid level
     FieldVector<int, dim> _c; // coord in the global grid
   };
 

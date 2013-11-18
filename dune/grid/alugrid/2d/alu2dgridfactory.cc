@@ -464,7 +464,6 @@ namespace Dune
   void ALU2dGridFactory< GridImp >::recreateBoundaryIds ( const int defaultId )
   {
     typedef typename FaceMap::iterator FaceIterator;
-    typedef typename PeriodicNeighborMap::const_iterator PeriodicNbIterator;
 
     if( defaultId <= 0 )
       DUNE_THROW( GridError, "Boundary ids must be positive." );

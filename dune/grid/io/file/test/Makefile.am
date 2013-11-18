@@ -104,10 +104,13 @@ gmshtest_alugrid_LDADD    =	$(GRAPE_LIBS)	 $(ALUGRID_LIBS)		 $(LDADD)
 
 starcdreadertest_SOURCES = starcdreadertest.cc
 starcdreadertest_CPPFLAGS = $(AM_CPPFLAGS)	\
+	$(DUNEMPICPPFLAGS)			\
 	$(UG_CPPFLAGS)
 starcdreadertest_LDFLAGS = $(AM_LDFLAGS)	\
+	$(DUNEMPILDFLAGS)			\
 	$(UG_LDFLAGS)
 starcdreadertest_LDADD =			\
+	$(DUNEMPILIBS)				\
 	$(UG_LIBS)				\
 	$(LDADD)
 

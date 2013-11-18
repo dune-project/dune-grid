@@ -123,6 +123,9 @@ int Dune::UGGridEntity<0,dim,GridImp>::count() const
       return UG_NS<dim>::Edges_Of_Elem(target_);
     case 2 :
       return UG_NS<dim>::Corners_Of_Elem(target_);
+    default :
+      // do nothing for cc = 3
+      break;
     }
 
   }

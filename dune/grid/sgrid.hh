@@ -1004,10 +1004,21 @@ namespace Dune {
   public:
     enum { codimension = codim };
 
+    //! default constructor (invalid)
+    SEntitySeed () :
+      _l(-1), _index(0)
+    {}
+
     //! constructor
     SEntitySeed (int l, int index) :
       _l(l), _index(index)
     {}
+
+    //! check whether the EntitySeed refers to a valid Entity
+    bool isValid() const
+    {
+      return _l != -1;
+    }
 
     int level () const { return this->_l; }
     int index () const { return this->_index; }
@@ -1202,6 +1213,7 @@ namespace Dune {
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief A structured mesh in d dimensions consisting of "cubes" (pilot implementation of the %Dune grid interface, for debugging only).
      \ingroup GridImplementations
+     \ingroup SGrid
 
           This module describes the pilot implementation of the %Dune grid interface.
           It implements the grid interface for simple structured meshes.

@@ -55,18 +55,62 @@ try {
 
   gridcheck(*onedSimplexGrid);
 
+  // Test creation of 1d YaspGrid
+  shared_ptr<YaspGrid<1> > yaspGrid1d =
+    StructuredGridFactory<YaspGrid<1> >::createCubeGrid(FieldVector<double,1>(0),
+                                                        FieldVector<double,1>(1),
+                                                        elements1d);
+
+  assert(yaspGrid1d->size(1) == elements1d[0]+1);
+  assert(yaspGrid1d->size(0) == elements1d[0]);
+
+  gridcheck(*yaspGrid1d);
+
+  // Test creation of 1d SGrid
+  shared_ptr<SGrid<1, 1> > sGrid1d
+    = StructuredGridFactory<SGrid<1, 1> >::createCubeGrid(FieldVector<double,1>(0),
+                                                          FieldVector<double,1>(1),
+                                                          elements1d);
+
+  assert(sGrid1d->size(1) == elements1d[0]+1);
+  assert(sGrid1d->size(0) == elements1d[0]);
+
+  gridcheck(*sGrid1d);
+
   // /////////////////////////////////////////////////////////////////////////////
   //   Test 2d grids
   // /////////////////////////////////////////////////////////////////////////////
-
-  // Test creation of 2d cube grids
-#if HAVE_UG
-  typedef UGGrid<2> QuadrilateralGridType;
 
   array<unsigned int,2> elements2d;
   elements2d.fill(4);
   unsigned int numVertices2d = (elements2d[0]+1) * (elements2d[1]+1);
   unsigned int numCubes2d    = elements2d[0] * elements2d[1];
+
+  // Test creation of 2d YaspGrid
+  shared_ptr<YaspGrid<2> > yaspGrid2d
+    = StructuredGridFactory<YaspGrid<2> >::createCubeGrid(FieldVector<double,2>(0),
+                                                          FieldVector<double,2>(1),
+                                                          elements2d);
+
+  assert(yaspGrid2d->size(2) == numVertices2d);
+  assert(yaspGrid2d->size(0) == numCubes2d);
+
+  gridcheck(*yaspGrid2d);
+
+  // Test creation of 2d SGrid
+  shared_ptr<SGrid<2, 2> > sGrid2d
+    = StructuredGridFactory<SGrid<2, 2> >::createCubeGrid(FieldVector<double,2>(0),
+                                                          FieldVector<double,2>(1),
+                                                          elements2d);
+
+  assert(sGrid2d->size(2) == numVertices2d);
+  assert(sGrid2d->size(0) == numCubes2d);
+
+  gridcheck(*sGrid2d);
+
+  // Test creation of 2d cube grid using UG
+#if HAVE_UG
+  typedef UGGrid<2> QuadrilateralGridType;
 
   shared_ptr<QuadrilateralGridType> quadrilateralGrid = StructuredGridFactory<QuadrilateralGridType>::createCubeGrid(FieldVector<double,2>(0),
                                                                                                                      FieldVector<double,2>(1),
@@ -84,7 +128,7 @@ try {
 #endif
 
 
-  // Test creation of 2d triangle grids
+  // Test creation of 2d triangle grid using UG
 #if HAVE_UG
   typedef UGGrid<2> TriangleGridType;
 
