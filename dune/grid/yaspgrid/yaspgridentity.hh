@@ -185,14 +185,22 @@ namespace Dune {
     }
 
     /*! Return number of subentities with codimension cc.
+     *
+     * That number is (dim over (dim-codim)) times 2^codim
      */
     template<int cc> int count () const
     {
-      if (cc==dim) return 1<<dim;
-      if (cc==1) return 2*dim;
-      if (cc==dim-1) return dim*(1<<(dim-1));
-      if (cc==0) return 1;
-      DUNE_THROW(GridError, "codim " << cc << " (dim=" << dim << ") not (yet) implemented");
+      int n = dim;
+      int k = dim-cc;
+
+      // binomial: n over k
+      int binomial=1;
+      for (int i=n-k+1; i<=n; i++)
+        binomial *= i;
+      for (long i=2; i<=k; i++)
+        binomial /= i;
+
+      return binomial<<cc;
     }
 
     /*! Intra-element access to subentities of codimension cc > codim.
