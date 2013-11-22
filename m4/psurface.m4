@@ -69,6 +69,9 @@ fi
         AC_DEFINE(PSURFACE_NAMESPACE,
                   psurface::,
                   [The namespace prefix of the psurface library])
+        AC_DEFINE(HAVE_PSURFACE_2_0,
+                  1,
+                  [If set we have at least psurface version 2.0])
         AC_MSG_RESULT([yes (by pkg-config)])
     ], [
         AC_MSG_WARN([PSurface >= 2.0 not found in $PSURFACEROOT])
