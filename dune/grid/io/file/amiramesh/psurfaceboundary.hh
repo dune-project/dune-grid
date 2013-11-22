@@ -11,6 +11,9 @@
 #if HAVE_PSURFACE
 #include <psurface/PSurface.h>
 #include "psurface/AmiraMeshIO.h"
+#if HAVE_PSURFACE_2_0
+#include <psurface/Hdf5IO.h>
+#endif
 
 #if HAVE_AMIRAMESH
 #include <amiramesh/AmiraMesh.h>
@@ -102,18 +105,31 @@ namespace Dune {
 
     /** \brief Read a PSurface boundary description from a file
      *
-     * The file format is determined automatically.  Currently, only AmiraMesh
-     * is supported.
+     * Supported file formats are AmiraMesh, and hdf5 if you have psurface-2.0 or newer.
+     * Your psurface library needs to be specially configured to support those file formats.
+     * The format is determined by the filename suffix.  If it is .h5, then the file
+     * is assumed to be hdf5.  Otherwise it is assumed to be AmiraMesh.
      */
     static shared_ptr<PSurfaceBoundary<dim> > read(const std::string& filename)
     {
+      PSURFACE_NAMESPACE PSurface<dim,float>* newDomain;
+
+#if HAVE_PSURFACE_2_0
+      // Try to read the file as an hdf5 file
+      if (filename.find(".h5")==filename.length()-3) {
+        newDomain = psurface::Hdf5IO<float,dim>::read(filename);
+        if (newDomain)
+          return make_shared<PSurfaceBoundary<dim> >(newDomain);
+      }
+#endif
+
 #if HAVE_AMIRAMESH
       std::auto_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
       if (!am.get())
         DUNE_THROW(IOError, "An error has occured while reading " << filename);
 
-      PSURFACE_NAMESPACE PSurface<dim,float>* newDomain
+      newDomain
         = (PSURFACE_NAMESPACE PSurface<dim,float>*) PSURFACE_NAMESPACE AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
 
       if (!newDomain)
