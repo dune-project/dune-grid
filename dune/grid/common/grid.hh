@@ -1029,33 +1029,25 @@ namespace Dune {
     template<PartitionIteratorType pitype>
     typename Traits::template Partition<pitype>::LevelGridView
     levelView(int level) const {
-      typedef typename Traits::template Partition<pitype>::LevelGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View(ViewImp(asImp(),level));
+      return asImp().template levelGridView< pitype >( level );
     }
 
     //! View for the leaf grid
     template<PartitionIteratorType pitype>
     typename Traits::template Partition<pitype>::LeafGridView leafView() const {
-      typedef typename Traits::template Partition<pitype>::LeafGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View(ViewImp(asImp()));
+      return asImp().template leafGridView< pitype >();
     }
 
     //! View for a grid level for All_Partition
     typename Traits::template Partition<All_Partition>::LevelGridView
     levelView(int level) const {
-      typedef typename Traits::template Partition<All_Partition>::LevelGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View(ViewImp(asImp(),level));
+      return asImp().levelGridView( level );
     }
 
     //! View for the leaf grid for All_Partition
     typename Traits::template Partition<All_Partition>::LeafGridView
     leafView() const {
-      typedef typename Traits::template Partition<All_Partition>::LeafGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View(ViewImp(asImp()));
+      return asImp().leafGridView();
     }
 
     //! View for a grid level

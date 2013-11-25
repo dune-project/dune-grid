@@ -163,7 +163,7 @@ namespace Dune
 
     typedef typename MacroView::template Codim< 0 >::template Partition< All_Partition >::Iterator MacroIterator;
 
-    const MacroView macroView = hostGrid_.levelView( 0 );
+    const MacroView macroView = hostGrid_.levelGridView( 0 );
     const int maxLevel = hostGrid_.maxLevel();
 
     const MacroIterator mend = macroView.template end< 0, All_Partition >();
