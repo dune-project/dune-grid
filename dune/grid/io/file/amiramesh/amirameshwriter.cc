@@ -305,7 +305,7 @@ void Dune::AmiraMeshWriter<GridView>::addLevelGrid(const GridType2& grid,
                                                    int level,
                                                    bool splitAll)
 {
-  addGrid(grid.levelView(level), splitAll);
+  addGrid(grid.levelGridView(level), splitAll);
 }
 
 

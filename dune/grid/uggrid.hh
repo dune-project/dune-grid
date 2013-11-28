@@ -567,13 +567,13 @@ namespace Dune {
           continue;
 
         if (curCodim == 0)
-          communicateUG_<LevelGridView, DataHandle, 0>(this->levelView(level), level, dataHandle, iftype, dir);
+          communicateUG_<LevelGridView, DataHandle, 0>(this->levelGridView(level), level, dataHandle, iftype, dir);
         else if (curCodim == dim)
-          communicateUG_<LevelGridView, DataHandle, dim>(this->levelView(level), level, dataHandle, iftype, dir);
+          communicateUG_<LevelGridView, DataHandle, dim>(this->levelGridView(level), level, dataHandle, iftype, dir);
         else if (curCodim == dim - 1)
-          communicateUG_<LevelGridView, DataHandle, dim-1>(this->levelView(level), level, dataHandle, iftype, dir);
+          communicateUG_<LevelGridView, DataHandle, dim-1>(this->levelGridView(level), level, dataHandle, iftype, dir);
         else if (curCodim == 1)
-          communicateUG_<LevelGridView, DataHandle, 1>(this->levelView(level), level, dataHandle, iftype, dir);
+          communicateUG_<LevelGridView, DataHandle, 1>(this->levelGridView(level), level, dataHandle, iftype, dir);
         else
           DUNE_THROW(NotImplemented,
                      className(*this) << "::communicate(): Not "

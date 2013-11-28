@@ -209,7 +209,7 @@ namespace Dune
        @param level A valid level of the grid.
      */
     LevelSingleCodimSingleGeomTypeMapper (const G& grid, int level)
-      : SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c>(grid.levelView(level))
+      : SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c>(grid.levelGridView(level))
     {}
   };
 

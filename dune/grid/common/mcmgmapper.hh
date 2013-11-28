@@ -314,7 +314,7 @@ namespace Dune
          @param level A valid level of the grid.
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level)
-      : Base(grid.levelView(level))
+      : Base(grid.levelGridView(level))
     {}
 
     /** @brief The constructor
@@ -327,7 +327,7 @@ namespace Dune
      * @param layout A layout object
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const Layout<G::dimension> layout)
-      : Base(grid.levelView(level),layout)
+      : Base(grid.levelGridView(level),layout)
     {}
 
   };

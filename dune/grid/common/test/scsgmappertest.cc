@@ -123,7 +123,7 @@ int main (int argc, char** argv) try
 
     for (int i=2; i<=grid.maxLevel(); i++) {
       LevelSingleCodimSingleGeomTypeMapper<GridType, 0> levelMapper(grid, i);
-      checkElementDataMapper(levelMapper, grid.levelView(i));
+      checkElementDataMapper(levelMapper, grid.levelGridView(i));
     }
   }
 
