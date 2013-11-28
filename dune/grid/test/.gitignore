@@ -25,6 +25,8 @@ alugrid.cfg
 *.gcda
 *.gcno
 
+*.trs
+
 *.dgf.*
 *.log
 *.swp
