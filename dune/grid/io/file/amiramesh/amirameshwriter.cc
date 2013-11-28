@@ -313,7 +313,7 @@ template<class GridView>
 template<class GridType2>
 void Dune::AmiraMeshWriter<GridView>::addLeafGrid(const GridType2& grid, bool splitAll)
 {
-  addGrid(grid.leafGridView(), splitAll);
+  addGrid(grid.leafView(), splitAll);
 }
 
 

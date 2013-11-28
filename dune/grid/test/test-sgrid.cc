@@ -26,9 +26,9 @@ void runtest()
   g.globalRefine(1);
   checkGeometryInFather(g);
   checkIntersectionIterator(g);
-  checkPartitionType( g.leafGridView() );
+  checkPartitionType( g.leafView() );
   // check geometry lifetime
-  checkGeometryLifetime( g.leafGridView() );
+  checkGeometryLifetime( g.leafView() );
 
   std::cout << std::endl;
 }

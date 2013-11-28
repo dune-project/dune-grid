@@ -90,7 +90,7 @@ namespace Dune {
   public:
     /** \brief Construct a Gnuplot writer for the leaf level of a given grid */
     LeafGnuplotWriter (const G& grid)
-      : GnuplotWriter<typename G::LeafGridView>(grid.leafGridView())
+      : GnuplotWriter<typename G::LeafGridView>(grid.leafView())
     {}
   };
 

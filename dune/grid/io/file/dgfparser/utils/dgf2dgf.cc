@@ -56,7 +56,7 @@ try
     gridptr->globalRefine( level );
 
   typedef Grid::LeafGridView GridView;
-  GridView gridView = gridptr->leafGridView();
+  GridView gridView = gridptr->leafView();
 
   DGFWriter< GridView > dgfWriter( gridView );
   dgfWriter.write( std::cout );

@@ -38,7 +38,7 @@ int main()
     double h[] = { 1.0 };
     Dune::SGrid<1,1> sgrid(n,h);
 
-    testIO(sgrid.leafGridView<Dune::InteriorBorder_Partition>(), "sgrid-leaf.data");
+    testIO(sgrid.leafView<Dune::InteriorBorder_Partition>(), "sgrid-leaf.data");
     testIO(sgrid.levelView<Dune::InteriorBorder_Partition>(0), "sgrid-level.data");
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;

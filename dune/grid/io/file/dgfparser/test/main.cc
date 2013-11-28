@@ -108,7 +108,7 @@ try {
 
     gridPtr.loadBalance();
 
-    GridView gridView = gridPtr->leafGridView();
+    GridView gridView = gridPtr->leafView();
     const IndexSetType &indexSet = gridView.indexSet();
     nofElParams = gridPtr.nofParameters( 0 );
     if( nofElParams > 0 )
@@ -162,7 +162,7 @@ try {
     grid = gridPtr.release();
   }
 
-  GridView gridView = grid->leafGridView();
+  GridView gridView = grid->leafView();
   std::cout << "Grid size: " << grid->size(0) << std::endl;
   // display
   display( filename , gridView, eldat, nofElParams, vtxdat, nofVtxParams );

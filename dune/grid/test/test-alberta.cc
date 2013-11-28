@@ -125,19 +125,19 @@ try {
     // check grid adaptation interface
     checkAdaptation( grid );
 
-    checkPartitionType( grid.leafGridView() );
+    checkPartitionType( grid.leafView() );
 
-    checkIterators( grid.leafGridView() );
+    checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
-    checkTwists( grid.leafGridView(), NoMapTwist() );
+    checkTwists( grid.leafView(), NoMapTwist() );
     for(int i=0; i<1; i++)
     {
       std::cout << ">>> Refining grid and checking again..." << std::endl;
       grid.globalRefine( 1 );
       gridcheck(grid);
-      checkIterators( grid.leafGridView() );
+      checkIterators( grid.leafView() );
       checkIntersectionIterator(grid,true);
-      checkTwists( grid.leafGridView(), NoMapTwist() );
+      checkTwists( grid.leafView(), NoMapTwist() );
     }
 
     // check dgf grid width half refinement
@@ -146,21 +146,21 @@ try {
               << " times) and checking again..." << std::endl;
     grid.globalRefine( stepsForHalf );
     gridcheck(grid);
-    checkIterators( grid.leafGridView() );
+    checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
-    checkTwists( grid.leafGridView(), NoMapTwist() );
+    checkTwists( grid.leafView(), NoMapTwist() );
 
     for(int i=0; i<2; i++)
     {
       std::cout << ">>> Refining one element and checking again..." << std::endl;
       markOne(grid,0,dim);
       gridcheck(grid);
-      checkIterators( grid.leafGridView() );
+      checkIterators( grid.leafView() );
     }
 
     checkGeometryInFather(grid);
     checkIntersectionIterator(grid,true);
-    checkTwists( grid.leafGridView(), NoMapTwist() );
+    checkTwists( grid.leafView(), NoMapTwist() );
 
     checkCommunication(grid, -1, Dune::dvverb);
   };

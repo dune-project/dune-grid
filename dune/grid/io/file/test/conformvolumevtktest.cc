@@ -103,7 +103,7 @@ void vtkCheck(int* n, double* h)
   Dune::SGrid<dim,dim> g(n, h);
   g.globalRefine(1);
 
-  doWrite( g.template leafGridView< VTK_Partition >() );
+  doWrite( g.template leafView< VTK_Partition >() );
   doWrite( g.template levelView< VTK_Partition >( 0 ) );
   doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ) );
 }

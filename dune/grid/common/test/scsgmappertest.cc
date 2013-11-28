@@ -119,7 +119,7 @@ int main (int argc, char** argv) try
     grid.globalRefine(1);
 
     LeafSingleCodimSingleGeomTypeMapper<GridType, 0> leafMapper(grid);
-    checkElementDataMapper(leafMapper, grid.leafGridView());
+    checkElementDataMapper(leafMapper, grid.leafView());
 
     for (int i=2; i<=grid.maxLevel(); i++) {
       LevelSingleCodimSingleGeomTypeMapper<GridType, 0> levelMapper(grid, i);

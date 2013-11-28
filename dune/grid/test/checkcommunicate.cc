@@ -522,7 +522,7 @@ void checkCommunication( const Grid &grid, int level, OutputStream &sout )
   if( level < 0 )
   {
     typedef typename Grid::template Partition< Dune::All_Partition >::LeafGridView GridView;
-    GridView gridView = grid.leafGridView();
+    GridView gridView = grid.leafView();
     CheckCommunication< GridView, NextCodim< Grid >::v, OutputStream >
     test( gridView, sout, level );
   }

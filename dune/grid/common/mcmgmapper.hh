@@ -275,7 +275,7 @@ namespace Dune
          @param grid A reference to a grid.
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid)
-      : Base(grid.leafGridView())
+      : Base(grid.leafView())
     {}
 
     /** @brief The constructor
@@ -287,7 +287,7 @@ namespace Dune
      * @param layout A layout object
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const Layout<G::dimension> layout)
-      : Base(grid.leafGridView(),layout)
+      : Base(grid.leafView(),layout)
     {}
 
   };

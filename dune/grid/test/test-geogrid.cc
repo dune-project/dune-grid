@@ -84,7 +84,7 @@ void test(const std::string& gridfile)
   gridcheck( geogrid );
 
   std::cerr << "Checking geometry... " << std::endl;
-  checkGeometry( geogrid.leafGridView() );
+  checkGeometry( geogrid.leafView() );
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
     checkGeometry( geogrid.levelView( i ) );
 
@@ -93,16 +93,16 @@ void test(const std::string& gridfile)
   std::cerr << "Checking intersections..." << std::endl;
   checkIntersectionIterator( geogrid, !EnableLevelIntersectionIteratorCheck< Grid >::v );
 
-  checkIterators( geogrid.leafGridView() );
+  checkIterators( geogrid.leafView() );
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
     checkIterators( geogrid.levelView( i ) );
 
-  checkPartitionType( geogrid.leafGridView() );
+  checkPartitionType( geogrid.leafView() );
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
     checkPartitionType( geogrid.levelView( i ) );
 
   std::cerr << "Checking geometry lifetime..." << std::endl;
-  checkGeometryLifetime( geogrid.leafGridView() );
+  checkGeometryLifetime( geogrid.leafView() );
 
   std::cerr << "Checking communication..." << std::endl;
   checkCommunication( geogrid, -1, std::cout );

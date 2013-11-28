@@ -411,7 +411,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     delete gr;
   }
 
-  //writeFile( grid.leafGridView() );
+  //writeFile( grid.leafView() );
 
   if( display )
   {
@@ -431,14 +431,14 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   {
     // this only works for ALUGrid 3d
     std::cout << "  CHECKING: 3d Twists " << std::endl;
-    checkALUTwists( grid.leafGridView() );
+    checkALUTwists( grid.leafView() );
   }
 
   // only check twists for simplex grids
   // const bool checkTwist = grid.geomTypes(0)[0].isSimplex();
 
   //if( checkTwist )
-  //  checkTwists( grid.leafGridView(), NoMapTwist() );
+  //  checkTwists( grid.leafView(), NoMapTwist() );
 
   for(int i=0; i<mxl; i++)
   {
@@ -448,7 +448,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     std::cout << "  CHECKING: intersections" << std::endl;
     checkIntersectionIterator(grid, skipLevelIntersections);
     // if( checkTwist )
-    //  checkTwists( grid.leafGridView(), NoMapTwist() );
+    //  checkTwists( grid.leafView(), NoMapTwist() );
 
     if( display )
     {
@@ -473,7 +473,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   gridcheck(grid);
   std::cout << "  CHECKING: twists " << std::endl;
   // if( checkTwist )
-  //  checkTwists( grid.leafGridView(), NoMapTwist() );
+  //  checkTwists( grid.leafView(), NoMapTwist() );
 
   // check the method geometryInFather()
   std::cout << "  CHECKING: geometry in father" << std::endl;
@@ -490,7 +490,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 
   // check life time of geometry implementation
   std::cout << "  CHECKING: geometry lifetime" << std::endl;
-  checkGeometryLifetime( grid.leafGridView() );
+  checkGeometryLifetime( grid.leafView() );
 
   // check persistent container
   checkPersistentContainer( grid );

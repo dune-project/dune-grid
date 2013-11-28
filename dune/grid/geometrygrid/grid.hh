@@ -314,7 +314,7 @@ namespace Dune
      */
     int size ( int codim ) const
     {
-      return leafGridView().size( codim );
+      return leafView().size( codim );
     }
 
     /** \brief obtain number of entites on a level
@@ -336,7 +336,7 @@ namespace Dune
      */
     int size ( GeometryType type ) const
     {
-      return leafGridView().size( type );
+      return leafView().size( type );
     }
 
     /** \brief returns the number of boundary segments within the macro grid
@@ -378,27 +378,27 @@ namespace Dune
     template< int codim >
     typename Codim< codim >::LeafIterator leafbegin () const
     {
-      return leafGridView().template begin< codim >();
+      return leafView().template begin< codim >();
     }
 
     template< int codim >
     typename Codim< codim >::LeafIterator leafend () const
     {
-      return leafGridView().template end< codim >();
+      return leafView().template end< codim >();
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LeafIterator
     leafbegin () const
     {
-      return leafGridView().template begin< codim, pitype >();
+      return leafView().template begin< codim, pitype >();
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim >::template Partition< pitype >::LeafIterator
     leafend () const
     {
-      return leafGridView().template end< codim, pitype >();
+      return leafView().template end< codim, pitype >();
     }
 
     const GlobalIdSet &globalIdSet () const
@@ -483,7 +483,7 @@ namespace Dune
      */
     int overlapSize ( int codim ) const
     {
-      return leafGridView().overlapSize( codim );
+      return leafView().overlapSize( codim );
     }
 
     /** \brief obtain size of ghost region for the leaf grid
@@ -492,7 +492,7 @@ namespace Dune
      */
     int ghostSize( int codim ) const
     {
-      return leafGridView().ghostSize( codim );
+      return leafView().ghostSize( codim );
     }
 
     /** \brief obtain size of overlap region for a grid level
@@ -554,7 +554,7 @@ namespace Dune
                        InterfaceType interface,
                        CommunicationDirection direction ) const
     {
-      leafGridView().communicate( dataHandle, interface, direction );
+      leafView().communicate( dataHandle, interface, direction );
     }
 
     /** \brief obtain CollectiveCommunication object
@@ -644,11 +644,11 @@ namespace Dune
 
     /** \brief View for the leaf grid */
     template< PartitionIteratorType pitype >
-    typename Partition< pitype >::LeafGridView leafGridView () const
+    typename Partition< pitype >::LeafGridView leafView () const
     {
       typedef typename Traits::template Partition< pitype >::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, hostGrid().leafGridView() ) );
+      return View( ViewImp( *this, hostGrid().leafView() ) );
     }
 
     /** \brief View for a grid level for All_Partition */
@@ -659,10 +659,10 @@ namespace Dune
     }
 
     /** \brief View for the leaf grid for All_Partition*/
-    LeafGridView leafGridView () const
+    LeafGridView leafView () const
     {
       typedef typename LeafGridView::GridViewImp ViewImp;
-      return LeafGridView( ViewImp( *this, hostGrid().leafGridView() ) );
+      return LeafGridView( ViewImp( *this, hostGrid().leafView() ) );
     }
 
     /** \} */
