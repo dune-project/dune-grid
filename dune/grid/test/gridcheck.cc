@@ -70,7 +70,7 @@ struct subIndexCheck
       #endif
       assert( ep == ep2 );
 
-      const typename Grid::LevelGridView &levelGridView = g.levelView(e.level());
+      const typename Grid::LevelGridView &levelGridView = g.levelGridView(e.level());
 
       if( !levelGridView.contains( *ep ) )
       {
@@ -268,7 +268,7 @@ void assertNeighbor (Grid &g)
   typedef typename Grid::template Codim< 0 >::Entity Entity;
   typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
 
-  GridView gridView = g.levelView( 0 );
+  GridView gridView = g.levelGridView( 0 );
 
   LevelIterator e = g.template lbegin<0>(0);
   const LevelIterator eend = g.template lend<0>(0);
@@ -662,7 +662,7 @@ void checkBoundarySegmentIndexProlongation ( const Grid &grid, const Entity &ent
 
   const typename Intersection::LocalGeometry &geoInInside = intersection.geometryInInside();
 
-  const GridView gridView = grid.levelView( entity.level()+1 );
+  const GridView gridView = grid.levelGridView( entity.level()+1 );
   const HierarchicIterator hend = entity.hend( entity.level()+1 );
   for( HierarchicIterator hit = entity.hbegin( entity.level()+1 ); hit != hend; ++hit )
   {
@@ -703,7 +703,7 @@ void checkFatherLevel ( Grid &grid )
     typedef typename GridView::template Codim<0>::Iterator Iterator;
     typedef typename GridView::template Codim<0>::EntityPointer EntityPointer;
 
-    GridView gv = grid.levelView(level);
+    GridView gv = grid.levelGridView(level);
     Iterator it = gv.template begin<0>();
     Iterator end = gv.template end<0>();
     for(; it!=end; ++it)
@@ -895,19 +895,19 @@ void gridcheck (Grid &g)
   checkFatherLevel(cg);
 
   // check geometries of macro level and leaf level
-  checkGeometry( g.levelView( 0 ) );
+  checkGeometry( g.levelGridView( 0 ) );
   checkGeometry( g.leafGridView() );
 
   // check entity seeds
   Dune::checkEntitySeed( g.leafGridView(), std::cerr );
   for( int level = 0; level <= g.maxLevel(); ++level )
-    Dune::checkEntitySeed( g.levelView( level ), std::cerr );
+    Dune::checkEntitySeed( g.levelGridView( level ), std::cerr );
 
   // note that for some grid this might fail
   // then un comment this test
   Dune :: checkIndexSet( g, g.leafGridView(), Dune :: dvverb );
   for( int level = 0; level <= g.maxLevel(); ++level )
-    Dune :: checkIndexSet( g, g.levelView( level ), Dune :: dvverb, true );
+    Dune :: checkIndexSet( g, g.levelGridView( level ), Dune :: dvverb, true );
 
   // check at least if the subId method is there
   {
@@ -926,7 +926,7 @@ void gridcheck (Grid &g)
   }
 
   if( EnableLevelIntersectionIteratorCheck< Grid >::v )
-    checkBoundarySegmentIndex( g.levelView( 0 ) );
+    checkBoundarySegmentIndex( g.levelGridView( 0 ) );
   else if( g.maxLevel() == 0 )
     checkBoundarySegmentIndex( g.leafGridView() );
   else

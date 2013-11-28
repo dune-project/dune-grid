@@ -86,7 +86,7 @@ void test(const std::string& gridfile)
   std::cerr << "Checking geometry... " << std::endl;
   checkGeometry( geogrid.leafGridView() );
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
-    checkGeometry( geogrid.levelView( i ) );
+    checkGeometry( geogrid.levelGridView( i ) );
 
   std::cerr << "Checking geometry in father..." << std::endl;
   checkGeometryInFather( geogrid );
@@ -95,11 +95,11 @@ void test(const std::string& gridfile)
 
   checkIterators( geogrid.leafGridView() );
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
-    checkIterators( geogrid.levelView( i ) );
+    checkIterators( geogrid.levelGridView( i ) );
 
   checkPartitionType( geogrid.leafGridView() );
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
-    checkPartitionType( geogrid.levelView( i ) );
+    checkPartitionType( geogrid.levelGridView( i ) );
 
   std::cerr << "Checking geometry lifetime..." << std::endl;
   checkGeometryLifetime( geogrid.leafGridView() );

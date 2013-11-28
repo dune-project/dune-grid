@@ -111,12 +111,12 @@ void vtkCheck(int* n, double* h)
   g.globalRefine(1);
 
   doWrite( g.leafGridView(), false);
-  doWrite( g.levelView( 0 ), false);
-  doWrite( g.levelView( g.maxLevel() ), false);
+  doWrite( g.levelGridView( 0 ), false);
+  doWrite( g.levelGridView( g.maxLevel() ), false);
 
   doWrite( g.leafGridView(), true);
-  doWrite( g.levelView( 0 ), true);
-  doWrite( g.levelView( g.maxLevel() ), true);
+  doWrite( g.levelGridView( 0 ), true);
+  doWrite( g.levelGridView( g.maxLevel() ), true);
 }
 
 int main(int argc, char **argv)

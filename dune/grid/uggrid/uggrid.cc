@@ -643,7 +643,7 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
     for (int i=0; i<=maxLevel(); i++) {
       typedef typename Base::LevelGridView GridView;
-      GridView gridView = this->levelView( i );
+      GridView gridView = this->levelGridView( i );
 
       typedef typename GridView::template Codim<0>::Iterator Iterator;
       const Iterator end = gridView.template end<0>();

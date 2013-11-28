@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
                   << std::endl;
 
       typedef Grid::LevelGridView GV;
-      const GV &gv = gridp->levelView(0);
+      const GV &gv = gridp->levelGridView(0);
       const Grid::LocalIdSet &lis = gridp->localIdSet();
       const GV::Codim<0>::Iterator end = gv.end<0>();
       for(GV::Codim<0>::Iterator it = gv.begin<0>(); it != end; ++it)
@@ -219,7 +219,7 @@ int main(int argc, char **argv) {
       if(mpiHelper.rank() == 0)
         std::cout << "[" << timer.elapsed() << "] Communicating non-interior "
                   << "data" << std::endl;
-      gridp->levelView(0).communicate(dh, Dune::InteriorBorder_All_Interface,
+      gridp->levelGridView(0).communicate(dh, Dune::InteriorBorder_All_Interface,
                                       Dune::ForwardCommunication);
     }
 
@@ -272,7 +272,7 @@ int main(int argc, char **argv) {
                    "writing");
 
       typedef Grid::LevelGridView GV;
-      const GV &gv = gridp->levelView(0);
+      const GV &gv = gridp->levelGridView(0);
       const Grid::LocalIdSet &lis = gridp->localIdSet();
       const GV::Codim<0>::Iterator &end = gv.end<0>();
       for(GV::Codim<0>::Iterator it = gv.begin<0>(); it != end; ++it)

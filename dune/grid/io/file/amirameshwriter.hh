@@ -125,7 +125,7 @@ namespace Dune {
 
     /** \brief Constructor which initializes the AmiraMesh object with a given level grid */
     LevelAmiraMeshWriter(const GridType& grid, int level) {
-      this->addGrid(grid.levelView(level));
+      this->addGrid(grid.levelGridView(level));
     }
 
     /** \brief Write a grid in AmiraMesh format
@@ -157,9 +157,9 @@ namespace Dune {
                                  bool GridSplitUp=false) {
       LevelAmiraMeshWriter amiramesh;
       if (f.size()==grid.size(level,GridType::dimension))
-        amiramesh.addVertexData(f, grid.levelView(level),GridSplitUp);
+        amiramesh.addVertexData(f, grid.levelGridView(level),GridSplitUp);
       else
-        amiramesh.addCellData(f, grid.levelView(level),GridSplitUp);
+        amiramesh.addCellData(f, grid.levelGridView(level),GridSplitUp);
       amiramesh.write(filename);
     }
 

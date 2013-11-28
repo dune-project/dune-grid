@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 
     Grid grid(rankName.str());
     typedef Grid::LevelGridView GV;
-    const GV &gv = grid.levelView(0);
+    const GV &gv = grid.levelGridView(0);
 
     //////////////////////////////////////////////////////////////////////
     //

@@ -227,7 +227,7 @@ namespace Dune {
     {
       typedef typename GridType :: LevelGridView GridView ;
       typedef typename GridView :: template Codim< codim > :: template Partition<pitype>  :: Iterator Iterator ;
-      GridView gridView = grid_.levelView( level );
+      GridView gridView = grid_.levelGridView( level );
       Iterator it  = gridView.template begin<codim,pitype> ();
       Iterator end = gridView.template end<codim,pitype>   ();
       levelSizes_[codim][level] = countElements(it,end, levelTypeSizes_[codim][level]);
@@ -271,7 +271,7 @@ namespace Dune {
     {
       typedef typename GridType :: LevelGridView GridView ;
       typedef typename GridView :: template Codim< 0 > :: template Partition<pitype>  :: Iterator Iterator ;
-      GridView gridView = grid_.levelView( level );
+      GridView gridView = grid_.levelGridView( level );
       Iterator it  = gridView.template begin< 0, pitype> ();
       Iterator end = gridView.template end< 0, pitype>   ();
       levelSizes_[codim][level] = countElementsNoCodim< codim >(it,end, levelTypeSizes_[codim][level]);

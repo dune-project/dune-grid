@@ -193,12 +193,12 @@ void checkGrid(const Grid& grid)
     {     // check constructor without layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
       levelMCMGMapper(grid, i);
-      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
+      checkElementDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
     {     // check constructor with layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
       levelMCMGMapper(grid, i, MCMGElementLayout<dim>());
-      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
+      checkElementDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
   }
 
@@ -221,12 +221,12 @@ void checkGrid(const Grid& grid)
     {     // check constructor without layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
       levelMCMGMapper(grid, i);
-      checkVertexDataMapper(levelMCMGMapper, grid.levelView(i));
+      checkVertexDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
     {     // check constructor with layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
       levelMCMGMapper(grid, i, MCMGVertexLayout<dim>());
-      checkVertexDataMapper(levelMCMGMapper, grid.levelView(i));
+      checkVertexDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
   }
 
@@ -249,12 +249,12 @@ void checkGrid(const Grid& grid)
     {     // check constructor without layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
       levelMCMGMapper(grid, i);
-      checkMixedDataMapper(levelMCMGMapper, grid.levelView(i));
+      checkMixedDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
     {     // check constructor with layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
       levelMCMGMapper(grid, i, MCMGElementEdgeLayout<dim>());
-      checkMixedDataMapper(levelMCMGMapper, grid.levelView(i));
+      checkMixedDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
   }
 }
