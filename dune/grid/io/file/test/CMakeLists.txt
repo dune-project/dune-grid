@@ -28,7 +28,6 @@ endif(ALUGRID_FOUND)
 
 if(UG_FOUND)
   set(UG_TESTS starcdreadertest)
-  add_dune_mpi_flags(starcdreadertest)
 endif(UG_FOUND)
 
 set(BUILD_TESTS ${TESTS} ${UG_TESTS} ${CONSISTENT_VTK_TESTS})
