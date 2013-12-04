@@ -610,14 +610,14 @@ namespace Dune {
 
     //! View for a grid level
     template<PartitionIteratorType pitype>
-    typename Partition<pitype>::LevelGridView levelView(int level) const {
+    typename Partition<pitype>::LevelGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to levelGridView.") levelView(int level) const {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template levelView<pitype>(level)));
       return asImp().template levelView<pitype>(level);
     }
 
     //! View for the leaf grid
     template<PartitionIteratorType pitype>
-    typename Partition<pitype>::LeafGridView leafView() const {
+    typename Partition<pitype>::LeafGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to leafGridView.") leafView() const {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafView<pitype>()));
       return asImp().template leafView<pitype>();
     }
@@ -1027,7 +1027,7 @@ namespace Dune {
 
     //! View for a grid level
     template<PartitionIteratorType pitype>
-    typename Traits::template Partition<pitype>::LevelGridView
+    typename Traits::template Partition<pitype>::LevelGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to levelGridView.")
     levelView(int level) const {
       typedef typename Traits::template Partition<pitype>::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
@@ -1036,7 +1036,7 @@ namespace Dune {
 
     //! View for the leaf grid
     template<PartitionIteratorType pitype>
-    typename Traits::template Partition<pitype>::LeafGridView leafView() const {
+    typename Traits::template Partition<pitype>::LeafGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to leafGridView.") leafView() const {
       typedef typename Traits::template Partition<pitype>::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View(ViewImp(asImp()));
