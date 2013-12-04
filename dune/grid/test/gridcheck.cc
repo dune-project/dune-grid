@@ -595,7 +595,7 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::LeafGridView LeafGridView;
   typedef typename LeafGridView::IntersectionIterator LeafIntersectionIterator;
 
-  LeafGridView leafGridView = g.leafView();
+  LeafGridView leafGridView = g.leafGridView();
 
   // assignment tests
   LevelIterator l1 = g.template lbegin<0>(0);
