@@ -1087,14 +1087,14 @@ namespace Dune {
 
     //! View for a grid level
     template<PartitionIteratorType pitype>
-    typename Traits::template Partition<pitype>::LevelGridView
+    typename Traits::template Partition<pitype>::LevelGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to levelGridView.")
     levelView(int level) const {
       return asImp().template levelGridView< pitype >( level );
     }
 
     //! View for the leaf grid
     template<PartitionIteratorType pitype>
-    typename Traits::template Partition<pitype>::LeafGridView leafView() const {
+    typename Traits::template Partition<pitype>::LeafGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to leafGridView.") leafView() const {
       return asImp().template leafGridView< pitype >();
     }
 
