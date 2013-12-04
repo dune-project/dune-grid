@@ -608,8 +608,8 @@ void iteratorEquals (Grid &g)
     return;
 
   // check '==' consistency
-  EntityPointer a( g.template levelView<Dune::All_Partition>(0).template begin<0>() );
-  EntityPointer i( g.template levelView<Dune::Interior_Partition>(0).template begin<0>() );
+  EntityPointer a( g.template levelGridView<Dune::All_Partition>(0).template begin<0>() );
+  EntityPointer i( g.template levelGridView<Dune::Interior_Partition>(0).template begin<0>() );
 
   assert(
     (g.levelIndexSet(0).index(*a) != g.levelIndexSet(0).index(*i)) // index equal
