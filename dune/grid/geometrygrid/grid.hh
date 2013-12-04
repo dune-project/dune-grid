@@ -349,58 +349,6 @@ namespace Dune
     }
     /** \} */
 
-    template< int codim >
-    typename Codim< codim >::LevelIterator lbegin ( int level ) const
-    {
-      return levelGridView( level ).template begin< codim >();
-    }
-
-    template< int codim >
-    typename Codim< codim >::LevelIterator lend ( int level ) const
-    {
-      return levelGridView( level ).template end< codim >();
-    }
-
-    template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim >::template Partition< pitype >::LevelIterator
-    lbegin ( int level ) const
-    {
-      return levelGridView( level ).template begin< codim, pitype >();
-    }
-
-    template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim >::template Partition< pitype >::LevelIterator
-    lend ( int level ) const
-    {
-      return levelGridView( level ).template end< codim, pitype >();
-    }
-
-    template< int codim >
-    typename Codim< codim >::LeafIterator leafbegin () const
-    {
-      return leafGridView().template begin< codim >();
-    }
-
-    template< int codim >
-    typename Codim< codim >::LeafIterator leafend () const
-    {
-      return leafGridView().template end< codim >();
-    }
-
-    template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim >::template Partition< pitype >::LeafIterator
-    leafbegin () const
-    {
-      return leafGridView().template begin< codim, pitype >();
-    }
-
-    template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim >::template Partition< pitype >::LeafIterator
-    leafend () const
-    {
-      return leafGridView().template end< codim, pitype >();
-    }
-
     const GlobalIdSet &globalIdSet () const
     {
       if( !globalIdSet_ )

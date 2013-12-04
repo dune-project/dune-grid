@@ -1025,6 +1025,66 @@ namespace Dune {
      */
     typedef typename GridFamily::Traits Traits;
 
+    //! Iterator to first entity of given codim on level for PartitionType All_Partition
+    template< int codim >
+    typename Traits::template Codim< codim >::LevelIterator lbegin ( int level ) const
+    {
+      return asImp().levelGridView( level ).template begin< codim >();
+    }
+
+    //! one past the end on this level for PartitionType All_Partition
+    template< int codim >
+    typename Traits::template Codim< codim >::LevelIterator lend ( int level ) const
+    {
+      return asImp().levelGridView( level ).template end< codim >();
+    }
+
+    //! Iterator to first entity of given codim on level
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits::template Codim< codim >::template Partition< pitype >::LevelIterator
+    lbegin ( int level ) const
+    {
+      return asImp().levelGridView( level ).template begin< codim, pitype >();
+    }
+
+    //! one past the end on this level
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits::template Codim< codim >::template Partition< pitype >::LevelIterator
+    lend ( int level ) const
+    {
+      return asImp().levelGridView( level ).template end< codim, pitype >();
+    }
+
+    //! Iterator to first entity of given codim on leaf grid for PartitionType All_Partition
+    template< int codim >
+    typename Traits::template Codim< codim >::LeafIterator leafbegin () const
+    {
+      return asImp().leafGridView().template begin< codim >();
+    }
+
+    //! one past the end on the leaf grid for PartitionType All_Partition
+    template< int codim >
+    typename Traits::template Codim< codim >::LeafIterator leafend () const
+    {
+      return asImp().leafGridView().template end< codim >();
+    }
+
+    //! Iterator to first entity of given codim on leaf grid
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits::template Codim< codim >::template Partition< pitype >::LeafIterator
+    leafbegin () const
+    {
+      return asImp().leafGridView().template begin< codim, pitype >();
+    }
+
+    //! one past the end on the leaf level grid
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits::template Codim< codim >::template Partition< pitype >::LeafIterator
+    leafend () const
+    {
+      return asImp().leafGridView().template end< codim, pitype >();
+    }
+
     //! View for a grid level
     template<PartitionIteratorType pitype>
     typename Traits::template Partition<pitype>::LevelGridView
