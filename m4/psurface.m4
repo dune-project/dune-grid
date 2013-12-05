@@ -54,7 +54,7 @@ if test "x$with_psurface" != x ; then
       PSURFACEROOT=`cd $with_psurface && pwd`
     else
       AC_MSG_ERROR([directory $with_psurface does not exist])
-    fi      
+    fi
 fi
 if test "x$PSURFACEROOT" = x; then  
     # use some default value...
@@ -63,7 +63,7 @@ fi
 
     # Check for psurface using pkg-config
     # This works for psurface-2.0 and later
-    export PKG_CONFIG_PATH="$PSURFACEROOT/lib/pkgconfig:$PKG_CONFIG_PATH"
+    export PKG_CONFIG_PATH="$PSURFACEROOT/lib/pkgconfig:$PSURFACEROOT/lib64/pkgconfig:$PKG_CONFIG_PATH"
     PKG_CHECK_MODULES([PSURFACE], [psurface], [
         HAVE_PSURFACE="1"
         AC_DEFINE(PSURFACE_NAMESPACE,
@@ -173,7 +173,7 @@ else
   AC_SUBST(PSURFACE_LDFLAGS, "")
   AC_SUBST(PSURFACE_CPPFLAGS, "")
 fi
-  
+
 # also tell automake
 AM_CONDITIONAL(PSURFACE, test x$HAVE_PSURFACE = x1)
 
