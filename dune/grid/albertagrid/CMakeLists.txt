@@ -61,4 +61,4 @@ set(HEADERS
   backuprestore.hh)
 
 install(FILES ${HEADERS}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}//dune/grid/albertagrid/)
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/albertagrid/)
