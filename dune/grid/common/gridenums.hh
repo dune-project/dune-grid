@@ -130,8 +130,8 @@ namespace Dune {
   enum PartitionIteratorType {
     Interior_Partition=0,           //!< only interior entities
     InteriorBorder_Partition=1,     //!< interior and border entities
-    Overlap_Partition=2,            //!< only overlap entities
-    OverlapFront_Partition=3,       //!< overlap and front entities
+    Overlap_Partition=2,            //!< interior, border, and overlap entities
+    OverlapFront_Partition=3,       //!< interior, border, overlap and front entities
     All_Partition=4,                //!< all entities
     Ghost_Partition=5               //!< only ghost entities
   };
