@@ -113,10 +113,6 @@ namespace Dune
     // type of underlying implementation, for internal use only
     typedef GeometryImp< mydim, cdim, GridImp > Implementation;
 
-#if 0
-    //! return reference to the implementation
-    Implementation &impl () { return realGeometry; }
-#endif
     //! return reference to the implementation
     const Implementation &impl () const { return realGeometry; }
 
@@ -140,14 +136,12 @@ namespace Dune
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
     //! type of jacobian inverse transposed
-    //typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
 
     // deprecated typedef for backward compatibility
     typedef JacobianInverseTransposed Jacobian DUNE_DEPRECATED_MSG ( "type Geometry::Jacobian is deprecated, use Geometry::JacobianInverseTransposed instead." );
 
     //! type of jacobian transposed
-    //typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
