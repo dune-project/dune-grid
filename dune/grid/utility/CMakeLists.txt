@@ -1,5 +1,6 @@
 add_subdirectory(test EXCLUDE_FROM_ALL)
 set(HEADERS
+  entitycommhelper.hh
   grapedataioformattypes.hh
   gridinfo-gmsh-main.hh
   gridinfo.hh
@@ -7,6 +8,7 @@ set(HEADERS
   hierarchicsearch.hh
   hostgridaccess.hh
   persistentcontainer.hh
+  persistentcontainerinterface.hh
   persistentcontainermap.hh
   persistentcontainervector.hh
   persistentcontainerwrapper.hh
