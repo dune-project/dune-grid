@@ -4,7 +4,7 @@ telescope.geo circle.geo          pyramid1storder.msh  pyramid.msh \
 telescope.msh curved2d.geo        pyramid2ndorder.msh  telescope1storder.msh \
 sphere.msh  oned-testgrid.msh
 
-gmshdir=$(includedir)/dune/doc/grids/gmsh
+gmshdir=$(docdir)/grids/gmsh
 gmsh_DATA = $(GRIDS)
 EXTRA_DIST = CMakeLists.txt $(GRIDS)
 
