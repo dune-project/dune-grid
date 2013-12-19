@@ -12,8 +12,7 @@ SUBDIRS =					\
         cmake                                   \
 	doc					\
 	dune					\
-	m4                                      \
-	src
+	m4
 # The library subdirectory itself
 SUBDIRS += lib
 # All subdirectories that must (or can) be handled after the library is built
