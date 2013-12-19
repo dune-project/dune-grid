@@ -20,12 +20,12 @@ dune_grid_options_am2cmake(){
     # Check for --enable-experimental-grid-extensions
     echo $PARAMS | grep \\-\\-enable-experimental-grid-extensions > /dev/null
     if test "$?" -eq 0 ; then
-        CMAKE_PARAMS="$CMAKE_PARAMS -DENABLE_EXPERIMENTAL_GRID_EXTENSIONS:Bool=TRUE"
+        CMAKE_PARAMS="$CMAKE_PARAMS -DENABLE_EXPERIMENTAL_GRID_EXTENSIONS:BOOL=TRUE"
     fi
     
     # Check for --enable-experimental-grid-extensions
     echo $PARAMS | grep \\-\\-enable-extra-utils > /dev/null
     if test "$?" -eq 0 ; then
-        CMAKE_PARAMS="$CMAKE_PARAMS -DENABLE_GRID_EXTRA_UTILS:Bool=TRUE"
+        CMAKE_PARAMS="$CMAKE_PARAMS -DENABLE_GRID_EXTRA_UTILS:BOOL=TRUE"
     fi
 }
