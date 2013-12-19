@@ -6,7 +6,7 @@ GRIDS = grid-1-1.amc \
         macro.amc \
         periodic-torus.amc
 
-amcdir=$(includedir)/dune/doc/grids/amc
+amcdir=$(docdir)/grids/amc
 amc_DATA = $(GRIDS)
 EXTRA_DIST = CMakeLists.txt $(GRIDS)
 

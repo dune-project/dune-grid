@@ -6,4 +6,4 @@ set(AMIRA_GRIDS
   simplex-testgrid-3d.am)
 
 install(FILES ${AMIRA_GRIDS}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/doc/grids/amiramesh)
+  DESTINATION ${CMAKE_INSTALL_DOCDIR}/grids/amiramesh)

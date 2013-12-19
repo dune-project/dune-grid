@@ -9,4 +9,4 @@ set(GRIDS
   withpyramid.cel)
 
 install(FILES ${GRIDS}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/doc/grids/starcd)
+  DESTINATION ${CMAKE_INSTALL_DOCDIR}/grids/starcd)
