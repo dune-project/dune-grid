@@ -124,7 +124,7 @@ else(PSURFACE_FOUND)
 endif(PSURFACE_FOUND)
 
 # set HAVE_PSURFACE for config.h
-set(HAVE_PSURFACE PSURFACE_FOUND)
+set(HAVE_PSURFACE ${PSURFACE_FOUND})
 
 #add all psurface related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_psurface_flags
 if(PSURFACE_FOUND)
