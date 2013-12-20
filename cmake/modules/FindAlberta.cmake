@@ -1,7 +1,7 @@
 
 macro(_dune_set_alberta val)
   set(ALBERTA_FOUND ${val})
-  set(HAVE_ALBERTA $val})
+  set(HAVE_ALBERTA ${val})
 endmacro(_dune_set_alberta val)
 
 set(ALBERTA_LIBCHECK ON CACHE BOOL "Whether to try to link against libalberta_Nd.")
