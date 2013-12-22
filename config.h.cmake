@@ -48,13 +48,13 @@
 #cmakedefine HAVE_GRAPE ENABLE_GRAPE
 
 /* Define to 1 if psurface library is found */
-#cmakedefine01 HAVE_PSURFACE ${HAVE_PSURFACE}
+#cmakedefine HAVE_PSURFACE 1
 
 /* The namespace prefix of the psurface library */
 #cmakedefine PSURFACE_NAMESPACE ${PSURFACE_NAMESPACE}
 
 /* Define to 1 if you have at least psurface version 2.0 */
-#cmakedefine HAVE_PSURFACE_2_0 ${HAVE_PSURFACE_2_0}
+#cmakedefine HAVE_PSURFACE_2_0 1
 
 /* This is only true if alugrid-library was found by configure _and_ if the
    application uses the ALUGRID_CPPFLAGS */
