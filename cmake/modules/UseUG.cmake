@@ -12,7 +12,13 @@
 #
 if(UG_ROOT AND NOT UG_DIR)
   # define the directory where the config file resides
-  set(UG_DIR ${UG_ROOT}/lib/cmake/ug)
+  if(EXISTS "${UG_ROOT}/lib/cmake/ug/ug-config.cmake")
+    set(UG_DIR ${UG_ROOT}/lib/cmake/ug)
+  elseif(EXISTS "${UG_ROOT}/lib64/cmake/ug/ug-config.cmake")
+    set(UG_DIR ${UG_ROOT}/lib64/cmake/ug)
+  else()
+    message(WARNING "Could not find file ug-config.cmake relative to given UG_ROOT")
+  endif()
 endif(UG_ROOT AND NOT UG_DIR)
 
 find_package(UG 3.9.1)
