@@ -65,7 +65,7 @@ endif(${UG_FOUND})
 
 #add all ug related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_ug_flags
 if(UG_FOUND)
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-DHAVE_UG")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-DENABLE_UG")
   foreach(dir ${UG_INCLUDES})
     set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
   endforeach()
