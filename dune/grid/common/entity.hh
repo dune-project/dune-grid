@@ -503,14 +503,16 @@ namespace Dune
      */
     bool mightVanish () const { return realEntity.mightVanish(); }
 
+    /**\brief Returns true, if entity has intersections with boundary
+     */
+    bool hasBoundaryIntersections () const { return realEntity.hasBoundaryIntersections(); }
+
+
     //===========================================================
     /** @name Interface for the implementor
      */
     //@{
     //===========================================================
-    /**\brief Returns true, if entity has intersections with boundary
-     */
-    bool hasBoundaryIntersections () const { return realEntity.hasBoundaryIntersections(); }
 
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {}
