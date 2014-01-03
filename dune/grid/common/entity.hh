@@ -140,7 +140,6 @@ namespace Dune
      *        grid is modified (or deleted).
      */
     Geometry geometry () const { return realEntity.geometry(); }
-    //@}
 
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::ReferenceElement.
@@ -151,6 +150,7 @@ namespace Dune
      *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const { return realEntity.seed(); }
+    //@}
 
     //===========================================================
     /** @name Interface for the implementor
@@ -296,7 +296,6 @@ namespace Dune
 
     //! @copydoc Dune::Entity::geometry()
     Geometry geometry () const { return realEntity.geometry(); }
-    //@}
 
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::ReferenceElement.
@@ -307,6 +306,7 @@ namespace Dune
      *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const { return realEntity.seed(); }
+    //@}
 
     //===========================================================
     /** @name Extended interface of entities of codimension 0
