@@ -314,14 +314,14 @@ namespace Dune
     //@{
     //===========================================================
 
-    /**\brief Number of subentities with codimension <tt>cc</tt>. This method is in
-       principle redundant because this information can be obtained via the reference
-       element of the geometry. It is there for efficiency reasons and to make
-       the interface self-contained.
+    /**\brief Number of subentities with codimension <tt>cc</tt>.
+     *
+     * Strictly speaking this method is redundant, because the same information can be obtained
+     * from the corresponding reference element. It is here for efficiency reasons only.
      */
     template<int cc> int count () const { return realEntity.template count<cc>(); }
 
-    /** \brief obtain a pointer to a subentity
+    /** \brief Obtain a pointer to a subentity
      *
      *  \tparam  codim  codimension of the desired subentity
      *
@@ -508,8 +508,7 @@ namespace Dune
      */
     //@{
     //===========================================================
-    /**\brief Returns true, if entity has intersections with boundary, see
-         default implementation
+    /**\brief Returns true, if entity has intersections with boundary
      */
     bool hasBoundaryIntersections () const { return realEntity.hasBoundaryIntersections(); }
 
@@ -520,7 +519,7 @@ namespace Dune
 
 
   protected:
-    // need to make copy constructor of EntityPointer work for any iterator
+    // needed to make copy constructor from EntityPointer work for any iterator
     template< class, class > friend class Dune::EntityPointer;
 
     /** hide copy constructor */
