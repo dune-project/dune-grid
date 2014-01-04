@@ -253,10 +253,14 @@ namespace Dune
     /** \brief The codim==0 EntityPointer type */
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
-    /** \brief The Dune::IntersectionIterator type for the LeafGridView */
+    /** \brief The Dune::IntersectionIterator type for the LeafGridView
+      * \deprecated Will be removed in the release after dune-grid-2.3
+      */
     typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
 
-    /** \brief The Dune::IntersectionIterator type for the LevelGridView */
+    /** \brief The Dune::IntersectionIterator type for the LevelGridView
+      * \deprecated Will be removed in the release after dune-grid-2.3
+      */
     typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
 
     /** \brief The HierarchicIterator type*/
