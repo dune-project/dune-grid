@@ -30,4 +30,3 @@ add_subdirectory("cmake/modules")
 
 # finalize the dune project, e.g. generating config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
-message("CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
