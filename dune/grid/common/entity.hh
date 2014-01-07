@@ -480,9 +480,9 @@ namespace Dune
            or implemented in general.
            For some grids it might be available, though.
      */
-    HierarchicIterator hbegin (int maxlevel) const
+    HierarchicIterator hbegin (int maxLevel) const
     {
-      return realEntity.hbegin(maxlevel);
+      return realEntity.hbegin(maxLevel);
     }
 
     /** \brief Returns iterator to one past the last son element
@@ -492,9 +492,9 @@ namespace Dune
              or implemented in general.
              For some grids it might be available, though.
      */
-    HierarchicIterator hend (int maxlevel) const
+    HierarchicIterator hend (int maxLevel) const
     {
-      return realEntity.hend(maxlevel);
+      return realEntity.hend(maxLevel);
     }
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
