@@ -323,7 +323,7 @@ namespace Dune
      * Strictly speaking this method is redundant, because the same information can be obtained
      * from the corresponding reference element. It is here for efficiency reasons only.
      */
-    template<int cc> int count () const { return realEntity.template count<cc>(); }
+    template<int codim> int count () const { return realEntity.template count<codim>(); }
 
     /** \brief Obtain a pointer to a subentity
      *
