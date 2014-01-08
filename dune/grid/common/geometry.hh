@@ -284,6 +284,11 @@ namespace Dune
     {
       return impl().jacobianInverseTransposed(local);
     }
+    //===========================================================
+    /** @name Interface for grid implementers
+     */
+    //@{
+    //===========================================================
 
     //! copy constructor from implementation
     explicit Geometry ( const Implementation &impl )
@@ -291,6 +296,8 @@ namespace Dune
     {
       deprecationWarning ( integral_constant< bool, storeReference >() );
     }
+
+    //@}
 
   private:
     /** hide assignment operator */
