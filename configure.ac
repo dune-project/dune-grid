@@ -37,7 +37,6 @@ AC_CONFIG_FILES([Makefile
     lib/Makefile
     cmake/Makefile
     cmake/modules/Makefile
-    cmake/pkg/Makefile
     doc/doxygen/Makefile
     doc/doxygen/Doxyfile
     doc/grids/Makefile
