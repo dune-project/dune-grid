@@ -125,15 +125,15 @@ void vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
                         std::bitset<dim>(), 0);
   g.globalRefine(1);
 
-  doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::conforming );
-  doWrite( g.template leafView< VTK_Partition >(), Dune::VTK::nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ),
+  doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::conforming );
+  doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::nonconforming );
+  doWrite( g.template levelGridView< VTK_Partition >( 0 ),
            Dune::VTK::conforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ),
+  doWrite( g.template levelGridView< VTK_Partition >( 0 ),
            Dune::VTK::nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ),
+  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ),
            Dune::VTK::conforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ),
+  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ),
            Dune::VTK::nonconforming );
 }
 
