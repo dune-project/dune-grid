@@ -99,10 +99,10 @@ void vtkCheck(int* n, double* h)
 
   doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::conforming );
   doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::conforming );
-  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune::VTK::nonconforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune::VTK::conforming );
-  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune::VTK::nonconforming );
+  doWrite( g.template levelGridView< VTK_Partition >( 0 ), Dune::VTK::conforming );
+  doWrite( g.template levelGridView< VTK_Partition >( 0 ), Dune::VTK::nonconforming );
+  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ), Dune::VTK::conforming );
+  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ), Dune::VTK::nonconforming );
 }
 
 int main(int argc, char **argv)
