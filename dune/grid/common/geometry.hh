@@ -416,12 +416,6 @@ namespace Dune
       return FieldVector<ctype, mydim>();
     }
 
-    //! checkInside here returns true
-    bool checkInside (const FieldVector<ctype, mydim>& ) const
-    {
-      return true;
-    }
-
     //! return volume of the geometry
     ctype volume () const
     {
