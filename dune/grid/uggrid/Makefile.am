@@ -8,14 +8,11 @@ libuggrid_la_SOURCES  = uggridintersections.cc uggrid.cc uggridentity.cc boundar
                         uggridindexsets.cc uggridfactory.cc uggridgeometry.cc uggridhieriterator.cc
 
 libuggrid_la_CPPFLAGS = $(AM_CPPFLAGS)		\
-	$(UG_CPPFLAGS)				\
-	$(DUNEMPICPPFLAGS)
+	$(UG_CPPFLAGS)
 libuggrid_la_LDFLAGS = $(AM_LDFLAGS)		\
-	$(UG_LDFLAGS)				\
-	$(DUNEMPILDFLAGS)
+	$(UG_LDFLAGS)
 libuggrid_la_LIBADD =				\
 	$(UG_LIBS)				\
-	$(DUNEMPILIBS)				\
 	$(DUNE_LIBS)
 
 endif
