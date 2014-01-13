@@ -1,8 +1,25 @@
-GRIDS = circle1storder.msh  curved2d.msh         pyramid4.msh \
-telescope2ndorder.msh circle2ndorder.msh        pyramid.geo  \
-telescope.geo circle.geo          pyramid1storder.msh  pyramid.msh \
-telescope.msh curved2d.geo        pyramid2ndorder.msh  telescope1storder.msh \
-sphere.msh  oned-testgrid.msh
+GRIDS =	                           \
+	circle1storder.msh         \
+	circle2ndorder.msh         \
+	circle.geo                 \
+	curved2d.geo               \
+	curved2d.msh               \
+	hybrid-testgrid-2d.msh     \
+	hybrid-testgrid-3d.msh     \
+	oned-testgrid.msh          \
+        pyramid1storder.msh        \
+	pyramid2ndorder.msh        \
+	pyramid4.msh               \
+	pyramid.geo                \
+	pyramid.msh                \
+	sphere.msh                 \
+	telescope1storder.msh      \
+	telescope2ndorder.msh      \
+        telescope.geo              \
+	telescope.msh              \
+	twotets.geo                \
+        twotets.msh                \
+	unitsquare_quads_2x2.msh
 
 gmshdir=$(docdir)/grids/gmsh
 gmsh_DATA = $(GRIDS)
