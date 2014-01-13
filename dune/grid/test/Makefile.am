@@ -217,4 +217,8 @@ EXTRA_DIST = CMakeLists.txt $(SOURCES)
 
 CLEANFILES = *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log
 
+# install the tests as we want to support testing 3rdparty grids with installed dune-grid
+testgriddir = $(includedir)/dune/grid/test
+testgrid_HEADERS = $(SOURCES)
+
 include $(top_srcdir)/am/global-rules
