@@ -34,4 +34,4 @@ include $(top_srcdir)/am/top-rules
 configdir = $(datadir)/dune-grid
 dist_config_DATA = config.h.cmake
 
-include /am/cmake-pkg-config
+include $(top_srcdir)/am/cmake-pkg-config
