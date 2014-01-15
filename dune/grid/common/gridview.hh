@@ -109,7 +109,7 @@ namespace Dune
     }; //: public Traits :: template Codim<cd> {};
 
     enum {
-      //! \brief Export if this grid view is conforming */
+      /** \brief Export if this grid view is conforming */
       conforming = Traits :: conforming
     };
 
@@ -120,7 +120,7 @@ namespace Dune
       dimension = Grid :: dimension
     };
 
-    enum { //! \brief The dimension of the world the grid lives in.
+    enum { //! \brief The dimension of the world the grid lives in
       dimensionworld = Grid :: dimensionworld
     };
 
