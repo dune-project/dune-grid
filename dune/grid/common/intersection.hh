@@ -180,9 +180,6 @@ namespace Dune
   protected:
     Implementation real;
 
-    enum { dim=GridImp::dimension };
-    enum { dimworld=GridImp::dimensionworld };
-
   public:
     /** \brief Type of entity that this Intersection belongs to */
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -206,13 +203,13 @@ namespace Dune
     enum { codimension=1 /*!< codim of intersection in grid */ };
 
     //! @brief Export grid dimension
-    enum { dimension=dim /*!< grid dimension */ };
+    enum { dimension=GridImp::dimension /*!< grid dimension */ };
 
     //! @brief Export dimension of the intersection
-    enum { mydimension=dim-1 /*!< intersection's dimension */ };
+    enum { mydimension=GridImp::dimension-1 /*!< intersection's dimension */ };
 
     //! @brief Export dimension of world
-    enum { dimensionworld=dimworld /*!< dimension of world */ };
+    enum { dimensionworld=GridImp::dimensionworld /*!< dimension of world */ };
 
     //! Type of individual coefficients of coordinate vectors
     typedef typename GridImp::ctype ctype;
