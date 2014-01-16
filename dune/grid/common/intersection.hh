@@ -196,7 +196,7 @@ namespace Dune
     /** \brief Type for normal vectors */
     typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
 
-    /** \brief Codim 1 geometry returned by geometryInInside and geometryInOutside() */
+    /** \brief Codim 1 geometry returned by geometryInInside() and geometryInOutside() */
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
     //! @brief Export codim of intersection (always 1)
