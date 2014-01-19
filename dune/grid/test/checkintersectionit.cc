@@ -598,7 +598,7 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
   else
   {
     for (int i=0; i<=grid.maxLevel(); i++)
-      checkViewIntersectionIterator(grid.levelView(i));
+      checkViewIntersectionIterator(grid.levelGridView(i));
   }
 
   // test leaf intersection iterator

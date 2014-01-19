@@ -546,7 +546,7 @@ void testParallelUG(bool localRefinement)
   typedef typename GridType::LevelGridView LevelGV;
   typedef typename GridType::LeafGridView LeafGV;
   const LeafGV&  leafGridView = grid->leafGridView();
-  const LevelGV& level0GridView = grid->levelView(0);
+  const LevelGV& level0GridView = grid->levelGridView(0);
 
   std::cout << "LevelGridView for level 0 has " << level0GridView.size(0)
             << " elements "  << level0GridView.size(dim - 1)
@@ -621,11 +621,11 @@ void testParallelUG(bool localRefinement)
   }
 
   for (int i=0; i<=grid->maxLevel(); i++) {
-    checkIntersections(grid->levelView(i));
-    checkMappersWrapper<dim, 0, LevelGV>::check(grid->levelView(i));
-    checkMappersWrapper<dim, 1, LevelGV>::check(grid->levelView(i));
-    checkMappersWrapper<dim, 2, LevelGV>::check(grid->levelView(i));
-    checkMappersWrapper<dim, 3, LevelGV>::check(grid->levelView(i));
+    checkIntersections(grid->levelGridView(i));
+    checkMappersWrapper<dim, 0, LevelGV>::check(grid->levelGridView(i));
+    checkMappersWrapper<dim, 1, LevelGV>::check(grid->levelGridView(i));
+    checkMappersWrapper<dim, 2, LevelGV>::check(grid->levelGridView(i));
+    checkMappersWrapper<dim, 3, LevelGV>::check(grid->levelGridView(i));
   }
 
   checkIntersections(grid->leafGridView());
@@ -636,11 +636,11 @@ void testParallelUG(bool localRefinement)
 
   for (int i=0; i<=grid->maxLevel(); i++)
   {
-    testCommunication<typename GridType::LevelGridView, 0>(grid->levelView(i), false);
-    testCommunication<typename GridType::LevelGridView, dim>(grid->levelView(i), false);
-    EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(grid->levelView(i));
+    testCommunication<typename GridType::LevelGridView, 0>(grid->levelGridView(i), false);
+    testCommunication<typename GridType::LevelGridView, dim>(grid->levelGridView(i), false);
+    EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(grid->levelGridView(i));
     if (dim == 3)
-      EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(grid->levelView(i));
+      EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(grid->levelGridView(i));
   }
   testCommunication<typename GridType::LeafGridView, 0>(grid->leafGridView(), true);
   testCommunication<typename GridType::LeafGridView, dim>(grid->leafGridView(), true);

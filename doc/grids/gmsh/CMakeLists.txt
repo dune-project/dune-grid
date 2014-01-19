@@ -16,4 +16,4 @@ set(GRIDS
   sphere.msh
   oned-testgrid.msh)
 
-install(FILES ${GRIDS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/doc/grids/gmsh)
+install(FILES ${GRIDS} DESTINATION ${CMAKE_INSTALL_DOCDIR}/grids/gmsh)

@@ -54,7 +54,7 @@ OneDGrid* testFactory()
   OneDGrid::Codim<1>::LevelIterator vIt    = grid->lbegin<1>(0);
   OneDGrid::Codim<1>::LevelIterator vEndIt = grid->lend<1>(0);
 
-  const OneDGrid::LevelGridView::IndexSet& levelIndexSet = grid->levelView(0).indexSet();
+  const OneDGrid::LevelGridView::IndexSet& levelIndexSet = grid->levelGridView(0).indexSet();
   const OneDGrid::LeafGridView::IndexSet&  leafIndexSet  = grid->leafGridView().indexSet();
 
   for (; vIt!=vEndIt; ++vIt) {

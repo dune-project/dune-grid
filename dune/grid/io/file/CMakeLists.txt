@@ -9,6 +9,7 @@ set(HEADERS
   amirameshwriter.hh
   dgfparser.hh
   gmshreader.hh
+  gmshwriter.hh
   gnuplot.hh
   starcdreader.hh
   vtk.hh)

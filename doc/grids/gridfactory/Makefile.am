@@ -1,4 +1,4 @@
-gridfactorydir=$(includedir)/dune/doc/grids/gridfactory
+gridfactorydir=$(docdir)/grids/gridfactory
 gridfactory_HEADERS=hybridtestgrids.hh
 
 include $(top_srcdir)/am/webstuff

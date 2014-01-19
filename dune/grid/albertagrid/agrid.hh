@@ -388,7 +388,7 @@ namespace Dune
     //! View for a grid level
     template< PartitionIteratorType pitype >
     typename Traits::template Partition< pitype >::LevelGridView
-    levelView ( int level ) const
+    levelGridView ( int level ) const
     {
       typedef typename Traits::template Partition< pitype >::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
@@ -406,7 +406,7 @@ namespace Dune
 
     //! View for a grid level for All_Partition
     typename Traits::template Partition< All_Partition >::LevelGridView
-    levelView ( int level ) const
+    levelGridView ( int level ) const
     {
       typedef typename Traits::template Partition< All_Partition >::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;

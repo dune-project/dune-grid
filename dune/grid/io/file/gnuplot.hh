@@ -103,7 +103,7 @@ namespace Dune {
   public:
     /** \brief Construct a Gnuplot writer for a certain level of a given grid */
     LevelGnuplotWriter (const G& grid, int level)
-      : GnuplotWriter<typename G::LevelGridView>(grid.levelView(level))
+      : GnuplotWriter<typename G::LevelGridView>(grid.levelGridView(level))
     {}
   };
 

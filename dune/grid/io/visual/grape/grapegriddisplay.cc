@@ -388,7 +388,7 @@ namespace Dune
     template Partition<pitype> :: LevelIterator LevelIteratorType;
 
     typedef typename GridType :: LevelGridView LevelGridView ;
-    LevelGridView levelView = grid_.levelView( level ) ;
+    LevelGridView levelView = grid_.levelGridView( level ) ;
 
     // class copy constructor
     LevelIteratorType * it    = new LevelIteratorType( levelView.template begin<0,pitype> () );
@@ -416,7 +416,7 @@ namespace Dune
     template Partition<pitype> :: LevelIterator LevelIteratorType;
 
     typedef typename GridType :: LevelGridView LevelGridView ;
-    LevelGridView levelView = grid_.levelView( he->level ) ;
+    LevelGridView levelView = grid_.levelGridView( he->level ) ;
 
     LevelIteratorType * it    = ((LevelIteratorType *) he->liter);
     LevelIteratorType * endit = ((LevelIteratorType *) he->enditer);

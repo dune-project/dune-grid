@@ -80,6 +80,17 @@ else()
   set(PSURFACE_NAMESPACE "")
 endif(PSURFACE_MIN_VERSION_1_3)
 
+# Try to find psurface with pkg-config (for psurface 2.0 or newer)
+include(FindPkgConfig)
+pkg_search_module(PKG_PSURFACE psurface)
+if(${PKG_PSURFACE_FOUND})
+  set(HAVE_PSURFACE_2_0 1)
+  set(PSURFACE_WITH_VERSION "psurface >= 2.0" CACHE STRING
+    "Human readable string containing psurface version information.")
+endif(${PKG_PSURFACE_FOUND})
+# re-set PKG_CONFIG_PATH
+set(PKG_CONFIG_PATH ${PKG_CONFIG_PATH_STORE})
+
 # behave like a CMake module is supposed to behave
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
@@ -89,7 +100,7 @@ find_package_handle_standard_args(
   PSURFACE_LIBRARY
 )
 
-mark_as_advanced(PSURFACE_INCLUDE_DIR PSURFACE_LIBRARY)
+mark_as_advanced(PSURFACE_INCLUDE_DIR PSURFACE_LIBRARY PKG_PSURFACE_FOUND)
 
 # if both headers and library are found, store results
 if(PSURFACE_FOUND)
@@ -113,7 +124,7 @@ else(PSURFACE_FOUND)
 endif(PSURFACE_FOUND)
 
 # set HAVE_PSURFACE for config.h
-set(HAVE_PSURFACE PSURFACE_FOUND)
+set(HAVE_PSURFACE ${PSURFACE_FOUND})
 
 #add all psurface related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_psurface_flags
 if(PSURFACE_FOUND)

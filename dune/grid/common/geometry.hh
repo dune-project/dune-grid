@@ -113,10 +113,6 @@ namespace Dune
     // type of underlying implementation, for internal use only
     typedef GeometryImp< mydim, cdim, GridImp > Implementation;
 
-#if 0
-    //! return reference to the implementation
-    Implementation &impl () { return realGeometry; }
-#endif
     //! return reference to the implementation
     const Implementation &impl () const { return realGeometry; }
 
@@ -126,7 +122,7 @@ namespace Dune
     //! @brief export geometry dimension
     enum { mydimension=mydim /*!< geometry dimension */ };
     //! @brief export coordinate dimension
-    enum { coorddimension=cdim /*!< dimension of embedding coordsystem */ };
+    enum { coorddimension=cdim /*!< dimension of embedding coordinate system */ };
 
     //! @brief export dimension of world
     enum { dimensionworld=GridImp::dimensionworld /*!< dimension of world */ };
@@ -140,14 +136,13 @@ namespace Dune
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
     //! type of jacobian inverse transposed
-    //typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
 
-    // deprecated typedef for backward compatibility
+    //! typedef for backward compatibility
+    //! \deprecated
     typedef JacobianInverseTransposed Jacobian DUNE_DEPRECATED_MSG ( "type Geometry::Jacobian is deprecated, use Geometry::JacobianInverseTransposed instead." );
 
     //! type of jacobian transposed
-    //typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
@@ -221,7 +216,7 @@ namespace Dune
        \return    integration element \f$\mu(x)\f$
 
        \note Each implementation computes the integration element with optimal
-       efficieny. For example in an equidistant structured mesh it may be as
+       efficiency. For example in an equidistant structured mesh it may be as
        simple as \f$h^\textrm{mydim}\f$.
      */
     ctype integrationElement (const LocalCoordinate& local) const
@@ -279,7 +274,7 @@ namespace Dune
      *  When we set \f$\hat{f}(x) = f(g(x))\f$ and apply the chain rule we obtain
      *  \f[\nabla f(g(x)) = J_g^{-T}(x) \nabla \hat{f}(x).\f]
      *
-     *  \note In the non-symmetric case \f$\textrm{cdim} \neq \textrm{mydim}\f$, the
+     *  \note In the non-quadratic case \f$\textrm{cdim} \neq \textrm{mydim}\f$, the
      *        pseudoinverse of \f$J_g^T(x)\f$ is returned.
      *        This means that it is inverse for all tangential vectors in
      *        \f$g(x)\f$ while mapping all normal vectors to zero.

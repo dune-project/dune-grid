@@ -41,7 +41,7 @@ GRIDS = basicunitcube-2d.dgf \
         torus-3.dgf \
         unstr_cube.dgf
 
-dgfdir=$(includedir)/dune/doc/grids/dgf
+dgfdir=$(docdir)/grids/dgf
 dgf_DATA = $(GRIDS)
 EXTRA_DIST = CMakeLists.txt $(GRIDS)
 

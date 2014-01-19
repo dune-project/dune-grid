@@ -264,7 +264,7 @@ namespace Dune
     typedef typename Grid::LevelGridView LevelView;
     typedef typename LevelView::template Codim< codim >::Iterator LevelIterator;
 
-    const LevelView levelView = grid().levelView( level );
+    const LevelView levelView = grid().levelGridView( level );
     const LevelIterator end = levelView.template end< codim >();
     for( LevelIterator it = levelView.template begin< codim >(); it != end; ++it )
       migrateEntry( idSet().id( *it ), value, data, data_ );
@@ -280,7 +280,7 @@ namespace Dune
     typedef typename Grid::LevelGridView LevelView;
     typedef typename LevelView::template Codim< 0 >::Iterator LevelIterator;
 
-    const LevelView levelView = grid().levelView( level );
+    const LevelView levelView = grid().levelGridView( level );
     const LevelIterator end = levelView.template end< 0 >();
     for( LevelIterator it = levelView.template begin< 0 >(); it != end; ++it )
     {

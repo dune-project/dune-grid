@@ -8,4 +8,4 @@ set(GRIDS
   periodic-torus.amc)
 
 install(FILES ${GRIDS}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/doc/grids/amc)
+  DESTINATION ${CMAKE_INSTALL_DOCDIR}/grids/amc)

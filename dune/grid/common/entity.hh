@@ -140,7 +140,6 @@ namespace Dune
      *        grid is modified (or deleted).
      */
     Geometry geometry () const { return realEntity.geometry(); }
-    //@}
 
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::ReferenceElement.
@@ -148,9 +147,10 @@ namespace Dune
     GeometryType type () const { return realEntity.type(); }
 
     /** \brief Return the entity seed which contains sufficient information
-     *  to generate the entity again and uses as less memory as possible
+     *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const { return realEntity.seed(); }
+    //@}
 
     //===========================================================
     /** @name Interface for the implementor
@@ -253,10 +253,14 @@ namespace Dune
     /** \brief The codim==0 EntityPointer type */
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
-    /** \brief The Dune::IntersectionIterator type for the LeafGridView */
+    /** \brief The Dune::IntersectionIterator type for the LeafGridView
+      * \deprecated Will be removed in the release after dune-grid-2.3
+      */
     typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
 
-    /** \brief The Dune::IntersectionIterator type for the LevelGridView */
+    /** \brief The Dune::IntersectionIterator type for the LevelGridView
+      * \deprecated Will be removed in the release after dune-grid-2.3
+      */
     typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
 
     /** \brief The HierarchicIterator type*/
@@ -296,7 +300,6 @@ namespace Dune
 
     //! @copydoc Dune::Entity::geometry()
     Geometry geometry () const { return realEntity.geometry(); }
-    //@}
 
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::ReferenceElement.
@@ -307,6 +310,7 @@ namespace Dune
      *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const { return realEntity.seed(); }
+    //@}
 
     //===========================================================
     /** @name Extended interface of entities of codimension 0
@@ -314,14 +318,14 @@ namespace Dune
     //@{
     //===========================================================
 
-    /**\brief Number of subentities with codimension <tt>cc</tt>. This method is in
-       principle redundant because this information can be obtained via the reference
-       element of the geometry. It is there for efficiency reasons and to make
-       the interface self-contained.
+    /**\brief Number of subentities with codimension <tt>cc</tt>.
+     *
+     * Strictly speaking this method is redundant, because the same information can be obtained
+     * from the corresponding reference element. It is here for efficiency reasons only.
      */
-    template<int cc> int count () const { return realEntity.template count<cc>(); }
+    template<int codim> int count () const { return realEntity.template count<codim>(); }
 
-    /** \brief obtain a pointer to a subentity
+    /** \brief Obtain a pointer to a subentity
      *
      *  \tparam  codim  codimension of the desired subentity
      *
@@ -476,9 +480,9 @@ namespace Dune
            or implemented in general.
            For some grids it might be available, though.
      */
-    HierarchicIterator hbegin (int maxlevel) const
+    HierarchicIterator hbegin (int maxLevel) const
     {
-      return realEntity.hbegin(maxlevel);
+      return realEntity.hbegin(maxLevel);
     }
 
     /** \brief Returns iterator to one past the last son element
@@ -488,9 +492,9 @@ namespace Dune
              or implemented in general.
              For some grids it might be available, though.
      */
-    HierarchicIterator hend (int maxlevel) const
+    HierarchicIterator hend (int maxLevel) const
     {
-      return realEntity.hend(maxlevel);
+      return realEntity.hend(maxLevel);
     }
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
@@ -503,15 +507,16 @@ namespace Dune
      */
     bool mightVanish () const { return realEntity.mightVanish(); }
 
+    /**\brief Returns true, if entity has intersections with boundary
+     */
+    bool hasBoundaryIntersections () const { return realEntity.hasBoundaryIntersections(); }
+
+
     //===========================================================
     /** @name Interface for the implementor
      */
     //@{
     //===========================================================
-    /**\brief Returns true, if entity has intersections with boundary, see
-         default implementation
-     */
-    bool hasBoundaryIntersections () const { return realEntity.hasBoundaryIntersections(); }
 
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {}
@@ -520,7 +525,7 @@ namespace Dune
 
 
   protected:
-    // need to make copy constructor of EntityPointer work for any iterator
+    // needed to make copy constructor from EntityPointer work for any iterator
     template< class, class > friend class Dune::EntityPointer;
 
     /** hide copy constructor */

@@ -43,4 +43,4 @@ set(GRIDS
   unstr_cube.dgf)
 
 install(FILES ${GRIDS}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/doc/grids/dgf)
+  DESTINATION ${CMAKE_INSTALL_DOCDIR}/grids/dgf)
