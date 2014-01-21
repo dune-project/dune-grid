@@ -874,11 +874,9 @@ void gridcheck (Grid &g)
   Dune::gridleaflist(g, "GridLeafInfo");
 #endif
 
-  // type of GridInterface == GridDefaultImplementation
-  typedef Dune::GridDefaultImplementation<dim,dimworld,ctype,GridFamily> GridIF;
-  const GridIF & gridIF = g;
   // check functionality when grid is interpreted as reference to interface
-  GridInterface<GridIF>::check(gridIF);
+  GridInterface< Dune::Grid< dim, dimworld, ctype, GridFamily > >();
+
   /*
    * now the runtime-tests
    */
