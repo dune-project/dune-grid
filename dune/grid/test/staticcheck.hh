@@ -545,7 +545,6 @@ struct GridInterface
       g.levelIndexSet(0).geomTypes(codim);
 
 #if !DISABLE_DEPRECATED_METHOD_CHECK
-    if (g.template lbegin<0>(0) !=g.template lend<0>(0) ) {
     if (g.template leafbegin<0>() != g.template leafend<0>() )
     {
       // Instantiate all methods of LeafIndexSet
