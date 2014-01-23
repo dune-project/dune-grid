@@ -271,7 +271,7 @@ namespace Dune
     he->enditer = 0;
 
     typedef typename GridType :: LeafGridView LeafGridView ;
-    LeafGridView leafView = grid_.leafView() ;
+    LeafGridView leafView = grid_.leafGridView() ;
 
     LeafIteratorType * it    = new LeafIteratorType ( leafView.template begin<0, pitype> () );
     LeafIteratorType * endit = new LeafIteratorType ( leafView.template end  <0, pitype> () );
@@ -297,7 +297,7 @@ namespace Dune
     template Partition<pitype> :: LeafIterator LeafIteratorType;
 
     typedef typename GridType :: LeafGridView LeafGridView ;
-    LeafGridView leafView = grid_.leafView() ;
+    LeafGridView leafView = grid_.leafGridView() ;
 
     LeafIteratorType * it    = (LeafIteratorType *) he->liter;
     LeafIteratorType * endit = (LeafIteratorType *) he->enditer;
@@ -474,7 +474,7 @@ namespace Dune
     if( hit[0] != newEn->hend( childLevel ) )
     {
       he->hiter = (void *) hit;
-      return el_update( hit, he, grid_.leafView() );
+      return el_update( hit, he, grid_.leafGridView() );
     }
     else
     {
@@ -501,7 +501,7 @@ namespace Dune
     HierarchicIteratorType ehit = en.hend(childLevel);
     if( ++hit[0] != ehit )
     {
-      return el_update(hit, he, grid_.leafView());
+      return el_update(hit, he, grid_.leafGridView());
     }
 
     hierList_.remove( hit );
