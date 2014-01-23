@@ -399,14 +399,77 @@ struct LeafInterface
 {
   static void check(Grid &g)
   {
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     g.template leafbegin<0>();
     g.template leafend<0>();
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
   }
   LeafInterface()
   {
     c = check;
   }
   void (*c)(Grid&);
+};
+
+template< class GridView >
+struct GridViewInterface
+{
+  static void check ( const GridView &gv )
+  {
+    typedef typename GridView::Grid Grid DUNE_UNUSED;
+    typedef typename GridView::IndexSet IndexSet DUNE_UNUSED;
+
+    typedef typename GridView::template Codim< 0 >::Entity Entity DUNE_UNUSED;
+    typedef typename GridView::template Codim< 0 >::EntityPointer EntityPointer DUNE_UNUSED;
+    typedef typename GridView::template Codim< 0 >::Iterator Iterator DUNE_UNUSED;
+
+    typedef typename GridView::Intersection Intersection DUNE_UNUSED;
+    typedef typename GridView::IntersectionIterator IntersectionIterator DUNE_UNUSED;
+
+    gv.grid();
+
+    gv.size( 0 );
+    gv.size( Dune::GeometryType( Dune::GeometryType::cube, GridView::dimension ) );
+
+    gv.template begin< 0 >();
+    gv.template end< 0 >();
+
+    // index set
+    gv.indexSet();
+    if( gv.template begin< 0 >() !=gv.template end< 0 >() )
+    {
+      gv.indexSet().index( *gv.template begin< 0 >() );
+      gv.indexSet().subIndex( *gv.template begin< 0 >(), 0, 0u );
+      gv.indexSet().contains( *gv.template begin< 0 >() );
+    }
+    for( int codim = 0; codim < GridView::dimension; ++codim )
+      gv.indexSet().geomTypes( codim );
+
+    // intersections
+    if( gv.template begin< 0 >() != gv.template end< 0 >() )
+    {
+      gv.ibegin( *gv.template begin< 0 >() );
+      gv.iend( *gv.template begin< 0 >() );
+    }
+
+    IntersectionIteratorInterface< Grid, IntersectionIterator >();
+
+    // parallel interface
+    typedef typename GridView::template Codim< 0 >::template Partition< Dune::Ghost_Partition >::Iterator GhostIterator DUNE_UNUSED;
+    typedef typename GridView::CollectiveCommunication CollectiveCommunication;
+
+    gv.template begin< 0, Dune::Ghost_Partition >();
+    gv.template end< 0, Dune::Ghost_Partition >();
+
+    gv.overlapSize( 0 );
+    gv.ghostSize( 0 );
+
+    gv.comm();
+  }
+
+  GridViewInterface () : c( check ) {}
+
+  void (*c)( const GridView & );
 };
 
 /** \brief Instantiate this class for a full static interface check */
@@ -416,10 +479,20 @@ struct GridInterface
   static void check (const Grid &g)
   {
     // check for exported types
+    typedef typename Grid::LevelGridView LevelGridView DUNE_UNUSED;
+    typedef typename Grid::LeafGridView LeafGridView DUNE_UNUSED;
+
     typedef typename Grid::ctype ctype DUNE_UNUSED;
-    typedef typename Grid::template Codim<0>::LevelIterator LevelIterator DUNE_UNUSED;
+
     typedef typename Grid::template Codim<0>::EntityPointer EntityPointer DUNE_UNUSED;
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+    typedef typename Grid::template Codim<0>::LevelIterator LevelIterator DUNE_UNUSED;
     typedef typename Grid::template Codim<0>::LeafIterator LeafIterator DUNE_UNUSED;
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
+
+    // check for grid views
+    g.levelGridView( 0 );
+    g.leafGridView();
 
     // check for member functions
     g.maxLevel();
@@ -441,10 +514,15 @@ struct GridInterface
     g.ghostSize(0);
 
     // check for iterator functions
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     g.template lbegin<0>(0);
     g.template lend<0>(0);
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
-    LeafInterface< Grid>();
+    LeafInterface< Grid >();
+
+    GridViewInterface< LevelGridView >();
+    GridViewInterface< LeafGridView >();
 
     // Check for index sets
     typedef typename Grid::LevelIndexSet LevelIndexSet DUNE_UNUSED;
@@ -453,37 +531,42 @@ struct GridInterface
     typedef typename Grid::GlobalIdSet GlobalIdSet DUNE_UNUSED;
 
     g.levelIndexSet(0);
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     if (g.template lbegin<0>(0) !=g.template lend<0>(0) ) {
       // Instantiate all methods of LevelIndexSet
       g.levelIndexSet(0).index(*g.template lbegin<0>(0));
       /** \todo Test for subindex is missing, because I don't know yet
           how to test for the existence of certain codims */
     }
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     g.levelIndexSet(0).
     size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
     for (int codim = 0; codim < Grid::dimension; codim++)
       g.levelIndexSet(0).geomTypes(codim);
 
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     if (g.template leafbegin<0>() != g.template leafend<0>() )
     {
       // Instantiate all methods of LeafIndexSet
       g.leafIndexSet().index(*g.template leafbegin<0>());
     }
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     /** \todo Test for subindex is missing, because I don't know yet
        how to test for the existence of certain codims */
     g.leafIndexSet().size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
     for (int codim = 0; codim < Grid::dimension; codim++)
       g.leafIndexSet().geomTypes(codim);
 
-    if (g.template lbegin<0>(0) !=g.template lend<0>(0) ) {
+    if ( g.levelGridView( 0 ).template begin< 0 >() != g.levelGridView( 0 ).template end< 0 >() )
+    {
       // Instantiate all methods of LocalIdSet
       /** \todo Test for subindex is missing, because I don't know yet
           how to test for the existence of certain codims */
-      g.localIdSet().id(*g.template lbegin<0>(0));
+      g.localIdSet().id( *g.levelGridView( 0 ).template begin< 0 >() );
       // Instantiate all methods of GlobalIdSet
       /** \todo Test for subindex is missing, because I don't know yet
           how to test for the existence of certain codims */
-      g.globalIdSet().id(*g.template lbegin<0>(0));
+      g.globalIdSet().id( *g.levelGridView( 0 ).template begin< 0 >() );
     }
     // recursively check entity-interface
     // ... we only allow grids with codim 0 zero entites
@@ -493,8 +576,10 @@ struct GridInterface
     EntityInterface< Grid, 0, Grid::dimension, Dune::Capabilities::hasEntity< Grid, 0 >::v >();
 
     // !!! check for parallel grid?
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     g.template lbegin<0, Dune::Ghost_Partition>(0);
     g.template lend<0, Dune::Ghost_Partition>(0);
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
   }
   GridInterface()
   {
