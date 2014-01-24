@@ -117,10 +117,10 @@ namespace Dune
            entity knows its codimension, automatic extraction is possible.
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    template<class EntityType>
-    IndexType index (const EntityType& e) const
+    template<class Entity>
+    IndexType index (const Entity& e) const
     {
-      enum { cc = EntityType::codimension };
+      enum { cc = Entity::codimension };
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
       return asImp().template index<cc>(e);
     }
@@ -221,8 +221,8 @@ namespace Dune
      * \note If the input element e is not an element of the grid, then
      *       the result of contains() is undefined.
      */
-    template<class EntityType>
-    bool contains (const EntityType& e) const
+    template<class Entity>
+    bool contains (const Entity& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(e)));
       return asImp().contains(e);
@@ -378,10 +378,10 @@ namespace Dune
     typedef IdTypeImp IdType;
 
     //! Get id of an entity. This method is simpler to use than the one below.
-    template<class EntityType>
-    IdType id (const EntityType& e) const
+    template<class Entity>
+    IdType id (const Entity& e) const
     {
-      enum { cc = EntityType::codimension };
+      enum { cc = Entity::codimension };
       return asImp().template id<cc>(e);
     }
 
