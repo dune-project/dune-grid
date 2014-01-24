@@ -642,6 +642,12 @@ namespace Dune
       return View( ViewImp( *this, hostGrid().levelView( level ) ) );
     }
 
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
+    {
+      return levelView<pitype>(level);
+    }
+
     /** \brief View for the leaf grid */
     template< PartitionIteratorType pitype >
     typename Partition< pitype >::LeafGridView leafView () const
@@ -651,6 +657,12 @@ namespace Dune
       return View( ViewImp( *this, hostGrid().leafView() ) );
     }
 
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafGridView () const
+    {
+      return leafGridView<pitype>();
+    }
+
     /** \brief View for a grid level for All_Partition */
     LevelGridView levelView ( int level ) const
     {
@@ -658,11 +670,22 @@ namespace Dune
       return LevelGridView( ViewImp( *this, hostGrid().levelView( level ) ) );
     }
 
+
+    LevelGridView levelGridView ( int level ) const
+    {
+      return levelView(level);
+    }
+
     /** \brief View for the leaf grid for All_Partition*/
     LeafGridView leafView () const
     {
       typedef typename LeafGridView::GridViewImp ViewImp;
       return LeafGridView( ViewImp( *this, hostGrid().leafView() ) );
+    }
+
+    LeafGridView leafGridView () const
+    {
+      return leafView();
     }
 
     /** \} */
