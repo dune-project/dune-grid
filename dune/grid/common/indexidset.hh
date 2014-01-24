@@ -2,8 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 // $Id$
 
-#ifndef DUNE_INDEXIDSET_HH
-#define DUNE_INDEXIDSET_HH
+#ifndef DUNE_GRID_COMMON_INDEXIDSET_HH
+#define DUNE_GRID_COMMON_INDEXIDSET_HH
 
 #include <iostream>
 #include <vector>
@@ -450,4 +450,4 @@ namespace Dune
 
 }
 
-#endif
+#endif   // DUNE_GRID_COMMON_INDEXIDSET_HH
