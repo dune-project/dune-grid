@@ -134,7 +134,7 @@ namespace Dune
      *
      *  \tparam  cc  codimension of the entity
      *
-     *  \param[in]  e      reference to codimsion cc entity
+     *  \param[in]  e      reference to codimension cc entity
      *  \param[in]  i      number subentity of e within the codimension
      *  \param[in]  codim  codimension of the subentity we're interested in
      *                     (must satisfy cc <= codim <= dimension)
