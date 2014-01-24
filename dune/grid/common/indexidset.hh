@@ -5,10 +5,8 @@
 #ifndef DUNE_GRID_COMMON_INDEXIDSET_HH
 #define DUNE_GRID_COMMON_INDEXIDSET_HH
 
-#include <iostream>
 #include <vector>
 #include <dune/common/exceptions.hh>
-#include <dune/common/forloop.hh>
 #include <dune/grid/common/grid.hh>
 
 
