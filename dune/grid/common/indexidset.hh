@@ -104,8 +104,7 @@ namespace Dune
        because the const class is not instantiated yet.
      */
     template<int cc>
-    IndexType index (const typename remove_const<GridImp>::type::
-                     Traits::template Codim<cc>::Entity& e) const
+    IndexType index (const typename Traits::template Codim<cc>::Entity& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
       return asImp().template index<cc>(e);
