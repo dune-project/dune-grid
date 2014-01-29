@@ -139,7 +139,7 @@ namespace Dune
     {
       typedef typename Grid::template Partition<partition>::LevelGridView
       LevelGV;
-      const LevelGV &gv = grid_.template levelView<partition>(0);
+      const LevelGV &gv = grid_.template levelGridView<partition>(0);
 
       //! type of LevelIterator
       typedef typename LevelGV::template Codim<0>::Iterator LevelIterator;

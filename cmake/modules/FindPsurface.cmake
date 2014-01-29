@@ -6,9 +6,9 @@
 #
 # Sets the follwing variable:
 #
-# PSURFACE_FOUND          True if SuperLU available and usable.
-# PSURFACE_INCLUDE_DIRS    Path to the SuperLU include dirs.
-# PSURFACE_LIBRARIES       Name to the SuperLU library.
+# PSURFACE_FOUND          True if PSurface available and usable.
+# PSURFACE_INCLUDE_DIRS   Path to the PSurface include dirs.
+# PSURFACE_LIBRARIES      Name to the PSurface library.
 #
 message(AUTHOR_WARNING "TODO: Implement Amiramesh support for PSurface test")
 

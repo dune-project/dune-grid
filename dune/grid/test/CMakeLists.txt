@@ -50,10 +50,10 @@ set(TESTS
 set_property(DIRECTORY APPEND PROPERTY
   COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
 
-add_executable(test_geogrid test-geogrid.cc)
-add_executable(test_oned test-oned.cc)
-add_executable(test_sgrid test-sgrid.cc)
-add_executable(test_yaspgrid test-yaspgrid.cc)
+add_executable(test_geogrid EXCLUDE_FROM_ALL test-geogrid.cc)
+add_executable(test_oned EXCLUDE_FROM_ALL test-oned.cc)
+add_executable(test_sgrid EXCLUDE_FROM_ALL test-sgrid.cc)
+add_executable(test_yaspgrid EXCLUDE_FROM_ALL test-yaspgrid.cc)
 
 set_property(TARGET test_sgrid test_oned test_yaspgrid test_geogrid APPEND
   PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
@@ -63,43 +63,43 @@ set_property(TARGET test_geogrid APPEND PROPERTY COMPILE_DEFINITIONS
 add_dune_mpi_flags(test_yaspgrid)
 
 if(ALBERTA_FOUND)
-  add_executable(test_alberta test-alberta.cc)
+  add_executable(test_alberta EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test_alberta WORLDDIM ${GRIDDIM})
-  add_executable(test_alberta_1_1 test-alberta.cc)
+  add_executable(test_alberta_1_1 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test_alberta_1_1 GRIDDIM 1 WORLDDIM 1)
-  add_executable(test_alberta_1_2 test-alberta.cc)
+  add_executable(test_alberta_1_2 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test_alberta_1_2 GRIDDIM 1 WORLDDIM 2)
-  add_executable(test_alberta_2_2 test-alberta.cc)
+  add_executable(test_alberta_2_2 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test_alberta_2_2 GRIDDIM 2 WORLDDIM 2)
-  add_executable(test_alberta_1_3 test-alberta.cc)
+  add_executable(test_alberta_1_3 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test_alberta_1_3 GRIDDIM 1 WORLDDIM 3)
-  add_executable(test_alberta_2_3 test-alberta.cc)
+  add_executable(test_alberta_2_3 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test_alberta_2_3 GRIDDIM 2 WORLDDIM 3)
-  add_executable(test_alberta_3_3 test-alberta.cc)
+  add_executable(test_alberta_3_3 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test_alberta_3_3 GRIDDIM 3 WORLDDIM 3)
-  add_executable(test_alberta_generic test-alberta.cc)
+  add_executable(test_alberta_generic EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test_alberta_generic USE_GENERIC GRIDDIM 2)
 endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
-  add_executable(test_alugrid test-alugrid.cc)
+  add_executable(test_alugrid EXCLUDE_FROM_ALL test-alugrid.cc)
   add_dune_alugrid_flags(test_alugrid)
 endif(ALUGRID_FOUND)
 
 if(UG_FOUND)
-  add_executable(test_ug test-ug.cc)
+  add_executable(test_ug EXCLUDE_FROM_ALL test-ug.cc)
   add_dune_ug_flags(test_ug)
-  add_executable(test_parallel_ug test-parallel-ug.cc)
+  add_executable(test_parallel_ug EXCLUDE_FROM_ALL test-parallel-ug.cc)
   add_dune_ug_flags(test_parallel_ug)
 endif(UG_FOUND)
 
 if(ALUGRID_FOUND AND UG_FOUND)
-  add_executable(test_dgfalu_uggrid_combination test-dgfalu-uggrid-combination.cc)
+  add_executable(test_dgfalu_uggrid_combination EXCLUDE_FROM_ALL test-dgfalu-uggrid-combination.cc)
   add_dune_ug_flags(test_dgfalu_uggrid_combination)
   add_dune_alugrid_flags(test_dgfalu_uggrid_combination)
 endif(ALUGRID_FOUND AND UG_FOUND)
 
-add_executable(test_mcmg_geogrid test-mcmg-geogrid)
+add_executable(test_mcmg_geogrid EXCLUDE_FROM_ALL test-mcmg-geogrid)
 
 foreach(_exe ${TESTS})
   target_link_libraries(${_exe} "dunegrid" ${DUNE_LIBS})
@@ -131,6 +131,9 @@ set(SOURCES
   functions.hh
   gridcheck.cc
   staticcheck.hh)
+
+# install the tests as we want to support testing 3rdparty grids with installed dune-grid
+install(FILES ${SOURCES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/test)
 
 # clean up additional files during make clean. Unfortunately it is not possible with
 # cmake to use search patterns here. Automake wanted to clean the following files:

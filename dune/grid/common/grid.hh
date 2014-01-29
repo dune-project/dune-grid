@@ -1407,6 +1407,14 @@ namespace Dune {
   // Definition of capabilities for the interface class
   namespace Capabilities
   {
+
+    // capabilities for the interface class depend on the implementation
+    template< int dim, int dimworld, typename ct, class GridFamily , int codim >
+    struct hasEntity< Grid< dim, dimworld, ct, GridFamily >, codim >
+    {
+      static const bool v = hasEntity< typename GridFamily::Traits::Grid, codim >::v;
+    };
+
     // capabilities for the interface class depend on the implementation
     template< int dim, int dimworld, typename ct, class GridFamily , int cdim >
     struct hasEntity< GridDefaultImplementation<dim,dimworld,ct,GridFamily>, cdim >

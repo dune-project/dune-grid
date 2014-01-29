@@ -284,6 +284,11 @@ namespace Dune
     {
       return impl().jacobianInverseTransposed(local);
     }
+    //===========================================================
+    /** @name Interface for grid implementers
+     */
+    //@{
+    //===========================================================
 
     //! copy constructor from implementation
     explicit Geometry ( const Implementation &impl )
@@ -291,6 +296,8 @@ namespace Dune
     {
       deprecationWarning ( integral_constant< bool, storeReference >() );
     }
+
+    //@}
 
   private:
     /** hide assignment operator */
@@ -407,12 +414,6 @@ namespace Dune
     FieldVector<ctype, mydim> local (const FieldVector<ctype, cdim>& ) const
     {
       return FieldVector<ctype, mydim>();
-    }
-
-    //! checkInside here returns true
-    bool checkInside (const FieldVector<ctype, mydim>& ) const
-    {
-      return true;
     }
 
     //! return volume of the geometry

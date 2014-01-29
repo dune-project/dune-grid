@@ -8,7 +8,7 @@ add_subdirectory(yaspgrid)
 add_subdirectory(io)
 add_subdirectory(albertagrid)
 add_subdirectory(geometrygrid)
-add_subdirectory(test EXCLUDE_FROM_ALL)
+add_subdirectory(test)
 
 if(UG_FOUND)
   set(UGLIB $<TARGET_OBJECTS:uggrid>)

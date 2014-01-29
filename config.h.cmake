@@ -5,7 +5,7 @@
 */
 /* begin private */
 /* Name of package */
-#define PACKAGE "@DUNE_MOD_NAME"
+#define PACKAGE "@DUNE_MOD_NAME@"
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "@DUNE_MAINTAINER@"
@@ -49,6 +49,9 @@
 
 /* Define to 1 if psurface library is found */
 #cmakedefine HAVE_PSURFACE 1
+
+/* Define to 1 if AmiraMesh library is found */
+#cmakedefine HAVE_AMIRAMESH 1
 
 /* The namespace prefix of the psurface library */
 #cmakedefine PSURFACE_NAMESPACE ${PSURFACE_NAMESPACE}
