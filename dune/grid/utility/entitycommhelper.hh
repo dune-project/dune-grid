@@ -4,6 +4,7 @@
 #define DUNE_ENTITYCOMMHELPER_HH
 
 #include <dune/grid/common/gridenums.hh>
+#include <dune/common/unused.hh>
 
 namespace Dune
 {
@@ -73,6 +74,7 @@ namespace Dune
 
     static bool receive ( const PartitionType p )
     {
+      DUNE_UNUSED_PARAMETER(p);
       return true;
     }
   };
@@ -83,11 +85,13 @@ namespace Dune
   {
     static bool send ( const PartitionType p )
     {
+      DUNE_UNUSED_PARAMETER(p);
       return true;
     }
 
     static bool receive ( const PartitionType p )
     {
+      DUNE_UNUSED_PARAMETER(p);
       return true;
     }
   };
