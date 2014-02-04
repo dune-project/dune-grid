@@ -165,14 +165,6 @@ namespace Dune
             std::cerr << "ERROR map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx1 << "\n";
             assert( compareVec( vxcheck, vx1 ) );
           }
-
-          // Check again, but this time get the coordinate as a subEntity corner
-          FieldVector< coordType, dimworld > vx2 = subEntityPtr->geometry().corner( j );
-          if( ! compareVec( vxcheck, vx2 ) )
-          {
-            std::cerr << "Error map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx2 << "\n";
-            //assert( compareVec( vxcheck, vx ) );
-          }
         }
         sout << "vx[" << global[j] << "] = "  <<  subEntityPtr->geometry().corner( j ) << "\n";
       }
