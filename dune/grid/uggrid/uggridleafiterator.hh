@@ -25,6 +25,8 @@ namespace Dune {
 
   public:
 
+    /** \brief Constructor setting up a 'begin' iterator
+     */
     UGGridLeafIterator(const GridImp& grid) : grid_(&grid) {
       // Entities below this level are certainly not leaf entities
       const unsigned int startingLevel = grid.leafIndexSet_.coarsestLevelWithLeafElements_;
@@ -52,7 +54,8 @@ namespace Dune {
         increment();
     }
 
-    //! Constructor
+    /** \brief Constructor setting up an 'end' iterator
+     */
     UGGridLeafIterator()
     {
       this->virtualEntity_.setToTarget(nullptr,nullptr);
