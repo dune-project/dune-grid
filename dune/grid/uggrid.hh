@@ -573,6 +573,42 @@ namespace Dune {
      */
     bool loadBalance(const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel);
 
+    /** \brief Distributes the grid over the processes of a parallel machine, and sends data along with it
+     *
+     * \param[in] targetProcessors For each leaf element the rank of the process the element shall be sent to
+     * \param[in] fromLevel The lowest level that gets redistributed (set to 0 when in doubt)
+     * \param[in,out] dataHandle A data handle object that does the gathering and scattering of data
+     * \tparam DataHandle works like the data handle for the communicate methods.
+     *
+     * \return true
+     */
+    template<class DataHandle>
+    bool loadBalance (const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel, DataHandle& dataHandle)
+    {
+#ifdef ModelP
+      // gather element data
+      //        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
+
+      // gather node data
+      UGLBGatherScatter::template gather<dim>(this->leafGridView(), dataHandle);
+#endif
+
+      // the load balancing step now also attaches
+      // the data to the entities and distributes it
+      loadBalance(targetProcessors,fromLevel);
+
+#ifdef ModelP
+      // scatter element data
+      //        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
+
+      // scatter node data
+      UGLBGatherScatter::template scatter<dim>(this->leafGridView(), dataHandle);
+#endif
+
+      return true;
+    }
+
+
     /** \brief The communication interface for all codims on a given level
        @param dataHandle type used to gather/scatter data in and out of the message buffer
        @param iftype one of the predifined interface types, throws error if it is not implemented
