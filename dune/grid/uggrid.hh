@@ -546,6 +546,33 @@ namespace Dune {
      */
     bool loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
 
+    /** \brief Distribute this grid over a distributed machine
+     *
+     * \param[in] targetProcessors For each leaf element the rank of the process the element shall be sent to
+     * \param[in] fromLevel The lowest level that gets redistributed (set to 0 when in doubt)
+     *
+     * This method allows to (re-)distribute the grid controlled by an external grid repartitioning library.
+     * You need to get that library to assign a target rank to each element in the leaf grid.  With this
+     * information in a std::vector, call this method, and UG will do the actual repartitioning.
+     * Each leaf element will be sent to the assigned target rank.  For all other elements we look at
+     * where there children are being sent to.  The parent is then sent to where most of its children are
+     * (Familienzusammenfuehrung).
+     *
+     * In some cases you may also want to leave the lowest levels on one process, to have them all together
+     * for multigrid coarse grid corrections.  In that case, use the fromLevel parameter with a value other
+     * than zero, to redistribute only elements above a certain level.
+     *
+     * The fromLevel argument is also needed to allow the compiler to distinguish this method from
+     * the loadBalance method with a single template DataHandle argument.
+     *
+     * \note In theory you can assign a target rank to any element on any level, and UG will magically transfer
+     * the element to that rank and make everything come out right.  This is not supported by the UGGrid interface,
+     * because I didn't see a use case for it.  If you do need it please ask on the Dune mailing list.
+     *
+     * \return true
+     */
+    bool loadBalance(const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel);
+
     /** \brief The communication interface for all codims on a given level
        @param dataHandle type used to gather/scatter data in and out of the message buffer
        @param iftype one of the predifined interface types, throws error if it is not implemented

@@ -4,6 +4,7 @@
 #include <config.h>
 
 #include <set>
+#include <map>
 
 #include <dune/grid/uggrid.hh>
 
@@ -544,6 +545,74 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
   return true;
 }
 
+template < int dim >
+bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel)
+{
+  // Do nothing if we are on a single process
+  if (comm().size()==1)
+    return true;
+
+  assert(targetProcessors.size() == this->leafGridView().size(0));
+
+  const typename Base::LeafGridView::IndexSet& leafIndexSet = this->leafGridView().indexSet();
+
+  // Loop over all elements of all level, in decreasing level number.
+  // If the element is a leaf, take its target rank from the input targetProcessors array.
+  // If it is not, assign it to the processor most of its children are assigned to.
+  for (int i=maxLevel(); i>=0; i--) {
+
+    typename Base::LevelGridView levelGridView = this->levelGridView(i);
+
+    for (typename Base::LevelGridView::template Codim<0>::Iterator it = levelGridView.template begin<0>();
+         it != levelGridView.template end<0>();
+         ++it) {
+
+      if (it->isLeaf())
+        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = targetProcessors[leafIndexSet.index(*it)];
+      else {
+
+        std::map<int,int> rank;
+        unsigned int mostFrequentRank = 0;    // which rank occurred most often?
+        unsigned int mostFrequentCount = 0;   // how often did it occur?
+
+        // Loop over all children and collect the ranks they are assigned to
+        typename Base::LevelGridView::template Codim<0>::Entity::HierarchicIterator child    = it->hbegin(it->level()+1);
+        typename Base::LevelGridView::template Codim<0>::Entity::HierarchicIterator endChild = it->hend(it->level()+1);
+        for (; child !=  endChild; ++child) {
+
+          int childRank = UG_NS<dim>::Partition(this->getRealImplementation(*child).target_);
+          if (rank.find(childRank) == rank.end())
+            rank[childRank] = 1;
+          else
+            rank[childRank]++;
+
+          if (rank[childRank] > mostFrequentCount) {
+            mostFrequentRank = childRank;
+            mostFrequentCount = rank[childRank];
+          }
+
+        }
+
+        // Assign rank that occurred most often
+        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = mostFrequentRank;
+
+      }
+    }
+  }
+
+
+  int errCode = UG_NS<dim>::TransferGridFromLevel(multigrid_, fromLevel);
+
+  if (errCode)
+    DUNE_THROW(GridError, "UG" << dim << "d::TransferGridFromLevel returned error code " << errCode);
+
+  // Renumber everything.
+  // Note: this must not be called when on a single process, because it renumbers the zero-level
+  // elements and vertices.
+  setIndices(true, NULL);
+
+  return true;
+}
 
 template < int dim >
 void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,

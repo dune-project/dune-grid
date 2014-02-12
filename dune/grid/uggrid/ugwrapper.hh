@@ -304,6 +304,14 @@ namespace Dune {
     {
       return PARHDR(node);
     }
+
+    /** \brief This entry tells the UG load balancer what rank this particular element
+     * is supposed to be sent to.
+     */
+    static UG::INT& Partition(UG_NS< UG_DIM >::Element* element)
+    {
+      return PARTITION(element);
+    }
 #endif
 
     // //////////////////////////////////////////////
@@ -1017,6 +1025,11 @@ namespace Dune {
     static int LBCommand(int argc, const char** argv) {
       /** \todo Can we remove the cast? */
       return UG_NAMESPACE ::LBCommand(argc, (char**)argv);
+    }
+
+    //! An UG-internal load balancing method
+    static int TransferGridFromLevel(UG_NAMESPACE ::multigrid *theMG, int level) {
+      return UG_NAMESPACE ::TransferGridFromLevel(theMG,level);
     }
 
     static int ConfigureCommand(int argc, const char** argv) {
