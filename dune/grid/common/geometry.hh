@@ -46,7 +46,7 @@ namespace Dune
     struct StoreGeometryReference
     {
       //! Whether to store by reference.
-      static const bool v = true;
+      static const bool v = false;
     };
 
   }
