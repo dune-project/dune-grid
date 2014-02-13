@@ -196,22 +196,6 @@ namespace Dune
 
   } // namespace GeoGrid
 
-
-
-  // FacadeOptions
-  // -------------
-
-  namespace FacadeOptions
-  {
-
-    template< int mydim, int cdim, class Grid >
-    struct StoreGeometryReference< mydim, cdim, Grid, GeoGrid::Geometry >
-    {
-      static const bool v = false;
-    };
-
-  } // namespace FacadeOptions
-
 } // namespace Dune
 
 #endif // #ifndef DUNE_GEOGRID_GEOMETRY_HH

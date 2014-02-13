@@ -71,23 +71,6 @@ namespace Dune {
   template<class GridImp, bool isLeafIndexSet>                     class YaspIndexSet;
   template<class GridImp>            class YaspGlobalIdSet;
 
-  namespace FacadeOptions
-  {
-
-    template<int dim, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim, YaspGrid<dim>, YaspGeometry>
-    {
-      static const bool v = false;
-    };
-
-    template<int dim, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim, const YaspGrid<dim>, YaspGeometry>
-    {
-      static const bool v = false;
-    };
-
-  }
-
 } // namespace Dune
 
 #include <dune/grid/yaspgrid/yaspgridgeometry.hh>

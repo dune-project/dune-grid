@@ -576,22 +576,6 @@ namespace Dune
     const LocalFaceGeometry *faceGeometry_[ numFaces ][ numFaceTwists ];
   };
 
-
-
-  // FacadeOptions
-  // -------------
-
-  namespace FacadeOptions
-  {
-
-    template< int mydim, int cdim, class Grid >
-    struct StoreGeometryReference< mydim, cdim, Grid, AlbertaGridGlobalGeometry >
-    {
-      static const bool v = false;
-    };
-
-  } // namespace FacadeOptions
-
 } // namespace Dune
 
 #endif // #if HAVE_ALBERTA
