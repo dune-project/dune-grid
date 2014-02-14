@@ -28,15 +28,15 @@ common_HEADERS = \
 	leveliterator.hh \
 	mcmgmapper.hh \
 	mapper.hh \
-	refinement.hh \
 	sizecache.hh \
 	scsgmapper.hh \
-	universalmapper.hh \
-	virtualrefinement.hh
+	universalmapper.hh
 
 SUBDIRS = test
 
+if BUILD_DOCS
 dist_noinst_DATA = cube-to-tet-6.png
+endif
 
 include $(top_srcdir)/am/global-rules
 include $(top_srcdir)/am/inkscape.am
