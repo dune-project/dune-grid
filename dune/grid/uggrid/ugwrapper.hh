@@ -1029,7 +1029,11 @@ namespace Dune {
 
     //! An UG-internal load balancing method
     static int TransferGridFromLevel(UG_NAMESPACE ::multigrid *theMG, int level) {
+#ifdef ModelP
       return UG_NAMESPACE ::TransferGridFromLevel(theMG,level);
+#else
+      return 0;
+#endif
     }
 
     static int ConfigureCommand(int argc, const char** argv) {

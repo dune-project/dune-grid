@@ -552,6 +552,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
   if (comm().size()==1)
     return true;
 
+#ifdef ModelP  // The Partition field only exists if ModelP is set
   assert(targetProcessors.size() == this->leafGridView().size(0));
 
   const typename Base::LeafGridView::IndexSet& leafIndexSet = this->leafGridView().indexSet();
@@ -581,6 +582,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
         for (; child !=  endChild; ++child) {
 
           int childRank = UG_NS<dim>::Partition(this->getRealImplementation(*child).target_);
+
           if (rank.find(childRank) == rank.end())
             rank[childRank] = 1;
           else
@@ -599,7 +601,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
       }
     }
   }
-
+#endif
 
   int errCode = UG_NS<dim>::TransferGridFromLevel(multigrid_, fromLevel);
 
