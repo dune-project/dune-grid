@@ -25,11 +25,9 @@ set(HEADERS
   leveliterator.hh
   mcmgmapper.hh
   mapper.hh
-  refinement.hh
   sizecache.hh
   scsgmapper.hh
-  universalmapper.hh
-  virtualrefinement.hh)
+  universalmapper.hh)
 
 add_subdirectory(test EXCLUDE_FROM_ALL)
 
