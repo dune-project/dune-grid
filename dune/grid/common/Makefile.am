@@ -15,7 +15,6 @@ common_HEADERS = \
 	entityseed.hh \
 	exceptions.hh \
 	geometry.hh \
-	geometryreference.hh \
 	grid.hh \
 	gridenums.hh \
 	gridfactory.hh \
