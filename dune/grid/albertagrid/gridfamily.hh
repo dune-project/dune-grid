@@ -13,7 +13,6 @@
 #include <dune/grid/common/entity.hh>
 #include <dune/grid/common/entitypointer.hh>
 #include <dune/grid/common/geometry.hh>
-#include <dune/grid/common/geometryreference.hh>
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/common/intersectioniterator.hh>
 #include <dune/grid/common/entityiterator.hh>
