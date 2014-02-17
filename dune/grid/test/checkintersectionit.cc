@@ -132,7 +132,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   // create quadrature rule as a set of test points
 
-  const Dune::QuadratureType::Enum qt = Dune::QuadratureType::Gauss;
+  const Dune::QuadratureType::Enum qt = Dune::QuadratureType::GaussLegendre;
   const Dune::QuadratureRule< ctype, mydimension > &quadrature
     = Dune::QuadratureRules< ctype, mydimension >::rule( intersection.type(), 3, qt );
 
@@ -527,7 +527,7 @@ void checkIntersectionIterator ( const GridViewType &view,
     if( intersection.boundary() )
       hasBoundaryIntersection = true;
 
-    const Dune::QuadratureType::Enum qt = Dune::QuadratureType::Gauss;
+    const Dune::QuadratureType::Enum qt = Dune::QuadratureType::GaussLegendre;
     const Dune::QuadratureRule< ctype, Intersection::mydimension > &quadrature
       = Dune::QuadratureRules< ctype, Intersection::mydimension >::rule( intersection.type(), 3, qt );
     for( std::size_t i = 0; i < quadrature.size(); ++i )
