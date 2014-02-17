@@ -102,10 +102,6 @@ namespace Dune
     //! type of jacobian inverse transposed
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
 
-    //! typedef for backward compatibility
-    //! \deprecated
-    typedef JacobianInverseTransposed Jacobian DUNE_DEPRECATED_MSG ( "type Geometry::Jacobian is deprecated, use Geometry::JacobianInverseTransposed instead." );
-
     //! type of jacobian transposed
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
