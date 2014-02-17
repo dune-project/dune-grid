@@ -65,12 +65,12 @@ namespace Dune
 
     ctype volume () const { return impl().volume(); }
 
-    const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const
+    JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianTransposed( local );
     }
 
-    const JacobianInverseTransposed &jacobianInverseTransposed ( const LocalCoordinate &local ) const
+    JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianInverseTransposed( local );
     }

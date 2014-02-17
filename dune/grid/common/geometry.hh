@@ -214,8 +214,7 @@ namespace Dune
      *
      *  \return \f$J_g^T(x)\f$
      */
-    const JacobianTransposed &
-    jacobianTransposed ( const LocalCoordinate& local ) const
+    JacobianTransposed jacobianTransposed ( const LocalCoordinate& local ) const
     {
       return impl().jacobianTransposed( local );
     }
@@ -239,8 +238,7 @@ namespace Dune
      *        This means that it is inverse for all tangential vectors in
      *        \f$g(x)\f$ while mapping all normal vectors to zero.
      */
-    const JacobianInverseTransposed &
-    jacobianInverseTransposed ( const LocalCoordinate &local ) const
+    JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianInverseTransposed(local);
     }

@@ -178,8 +178,8 @@ namespace Dune
       ctype integrationElement ( const LocalCoordinate &local ) const { return mapping_->integrationElement( local ); }
       ctype volume () const { return mapping_->volume(); }
 
-      const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianTransposed( local ); }
-      const JacobianInverseTransposed &jacobianInverseTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianInverseTransposed( local ); }
+      JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianTransposed( local ); }
+      JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianInverseTransposed( local ); }
 
       const Grid &grid () const { return *grid_; }
 
