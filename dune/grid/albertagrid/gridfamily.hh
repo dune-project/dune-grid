@@ -19,6 +19,7 @@
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/gridview.hh>
+#include <dune/grid/albertagrid/geometryreference.hh>
 
 #if HAVE_ALBERTA
 

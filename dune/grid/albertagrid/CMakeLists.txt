@@ -58,7 +58,8 @@ set(HEADERS
   gridfamily.hh
   gridview.hh
   persistentcontainer.hh
-  backuprestore.hh)
+  backuprestore.hh
+  geometryreference.hh)
 
 install(FILES ${HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/albertagrid/)
