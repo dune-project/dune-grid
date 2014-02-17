@@ -232,12 +232,12 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
           std::cerr << "       outside()->geometry().global( intersection.geometryInOutside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
           std::cerr << "       x = " << pt << std::endl;
-          std::cerr << "       interesction.geometry() = " << geometry.corner( 0 );
+          std::cerr << "       intersection.geometry() = " << geometry.corner( 0 );
           for( int i = 1; i < geometry.corners(); ++i )
             std::cerr << " | " << geometry.corner( i );
           std::cerr << std::endl;
 
-          std::cerr << "       intersection.geometryOutInside() = " << geometryInOutside.corner( 0 );
+          std::cerr << "       intersection.geometryInOutside() = " << geometryInOutside.corner( 0 );
           for( int i = 1; i < geometryInOutside.corners(); ++i )
             std::cerr << " | " << geometryInOutside.corner( i );
           std::cerr << std::endl;
