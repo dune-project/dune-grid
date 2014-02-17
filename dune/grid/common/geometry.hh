@@ -99,10 +99,26 @@ namespace Dune
     //! type of the global coordinates
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
-    //! type of jacobian inverse transposed
+    /**
+     * \brief type of jacobian inverse transposed
+     *
+     * The exact type is implementation-dependent.
+     * However, it is guaranteed to have the following properties:
+     * - It satisfies the ConstMatrix interface.
+     * - It is copy construcable and copy assignable.
+     * .
+     */
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
 
-    //! type of jacobian transposed
+    /**
+     * \brief type of jacobian transposed
+     *
+     * The exact type is implementation-dependent.
+     * However, it is guaranteed to have the following properties:
+     * - It satisfies the ConstMatrix interface.
+     * - It is copy construcable and copy assignable.
+     * .
+     */
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
@@ -213,6 +229,8 @@ namespace Dune
      *  \param[in]  local  position \f$x\in D\f$
      *
      *  \return \f$J_g^T(x)\f$
+     *
+     *  \note The exact return type is implementation defined.
      */
     JacobianTransposed jacobianTransposed ( const LocalCoordinate& local ) const
     {
@@ -237,6 +255,8 @@ namespace Dune
      *        pseudoinverse of \f$J_g^T(x)\f$ is returned.
      *        This means that it is inverse for all tangential vectors in
      *        \f$g(x)\f$ while mapping all normal vectors to zero.
+     *
+     *  \note The exact return type is implementation defined.
      */
     JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
