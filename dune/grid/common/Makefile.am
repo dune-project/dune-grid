@@ -23,8 +23,6 @@ common_HEADERS = \
 	indexidset.hh \
 	intersection.hh \
 	intersectioniterator.hh \
-	leafiterator.hh \
-	leveliterator.hh \
 	mcmgmapper.hh \
 	mapper.hh \
 	sizecache.hh \
