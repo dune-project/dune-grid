@@ -272,26 +272,6 @@ namespace Dune
 
   protected:
     Implementation impl_;
-
-    /**
-     * \deprecated This method is deprecated and will be removed after
-     * Dune 2.3. Use impl() instead.
-     */
-    GridViewImp& asImp ()
-    DUNE_DEPRECATED_MSG("Use impl() instead.")
-    {
-      return impl_;
-    }
-
-    /**
-     * \deprecated This method is deprecated and will be removed after
-     * Dune 2.3. Use impl() instead.
-     */
-    const GridViewImp& asImp () const
-    DUNE_DEPRECATED_MSG("Use impl() instead.")
-    {
-      return impl_;
-    }
   };
 
 } // namespace Dune
