@@ -246,7 +246,7 @@ namespace Dune
       return impl().ghostSize(codim);
     }
 
-    /** communicate data on this view */
+    /** \brief Communicate data on this view */
     template< class DataHandleImp, class DataType >
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
