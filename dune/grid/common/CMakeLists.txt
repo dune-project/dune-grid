@@ -17,7 +17,6 @@ set(HEADERS
   gridfactory.hh
   gridinfo.hh
   gridview.hh
-  hierarchiciterator.hh
   indexidset.hh
   intersection.hh
   intersectioniterator.hh
