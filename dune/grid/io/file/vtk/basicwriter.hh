@@ -44,7 +44,7 @@ namespace Dune
       typedef std::list<shared_ptr<FunctionWriter> > WriterList;
       typedef typename WriterList::const_iterator WIterator;
 
-      typedef typename Cell::ctype ctype;
+      typedef typename Cell::Geometry::ctype ctype;
       static const unsigned celldim = Cell::mydimension;
       typedef ReferenceElements<ctype, celldim> Refelems;
 

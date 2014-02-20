@@ -45,7 +45,7 @@ namespace Dune
       typedef typename std::iterator_traits<CellIterator>::difference_type
       DifferenceType;
 
-      typedef typename std::iterator_traits<CellIterator>::value_type::ctype
+      typedef typename std::iterator_traits<CellIterator>::value_type::Geometry::ctype
       ctype;
       static const unsigned dim = std::iterator_traits<CellIterator>::
                                   value_type::mydimension;

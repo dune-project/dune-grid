@@ -55,11 +55,6 @@ private:
 template <class Entity>
 void DoEntityInterfaceCheck (Entity &e)
 {
-  // exported types
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  typedef typename Entity::ctype ctype DUNE_UNUSED;
-#endif // !DISABLE_DEPRECATED_METHOD_CHECK
-
   // methods on each entity
   e.level();
   e.partitionType();

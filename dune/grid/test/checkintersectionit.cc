@@ -113,7 +113,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   // check consistency of exported types
 
-  dune_static_assert( (Dune::is_same< ctype, typename Entity::ctype >::value),
+  dune_static_assert( (Dune::is_same< ctype, typename Entity::Geometry::ctype >::value),
                       "Type Intersection::ctype differs from Intersection::Entity::ctype." );
   dune_static_assert( (Dune::is_same< ctype, typename LocalGeometry::ctype >::value),
                       "Type Intersection::ctype differs from Intersection::LocalGeometry::ctype." );
