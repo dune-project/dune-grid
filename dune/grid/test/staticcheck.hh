@@ -55,6 +55,10 @@ private:
 template <class Entity>
 void DoEntityInterfaceCheck (Entity &e)
 {
+  // exported types
+  typedef typename Entity::Geometry Geometry DUNE_UNUSED;
+  typedef typename Entity::EntitySeed EntitySeed DUNE_UNUSED;
+
   // methods on each entity
   e.level();
   e.partitionType();
