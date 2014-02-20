@@ -106,11 +106,6 @@ namespace Dune
       //! \brief Dimensionality of the reference element of the entity.
       mydimension=dim-cd
     };
-    //! \brief Know the dimension of world.
-    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
-
-    //! @brief coordinate type of the Grid
-    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
     //@}
 
 
@@ -278,11 +273,6 @@ namespace Dune
       /** \brief Know dimension of the entity */
       mydimension=dim
     };
-    //! Know the world dimension
-    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
-
-    //! Type used for coordinates
-    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
     //@}
 
 
