@@ -34,40 +34,24 @@ if(NOT PKG_ALUGRID_FOUND)
     PATH_SUFFIXES lib/pkgconfig lib32/pkgconfig lib64/pkgconfig)
 
   # try again with path temporarilly added to PKG_CONFIG_PATH
-  set(REM_PKG_CONFIG_PATH PKG_CONFIG_PATH)
-  get_filename_component(DIR_PKG_ALUGRID ${PATH_PKG_ALUGRID} PATH)
+  set(REM_PKG_CONFIG_PATH "$ENV{PKG_CONFIG_PATH}")
+  get_filename_component(DIR_PKG_ALUGRID "${PATH_PKG_ALUGRID}" PATH)
   set(ENV{PKG_CONFIG_PATH} "${ALUGRID_ROOT}:${DIR_PKG_ALUGRID}:${PKG_CONFIG_PATH}")
   pkg_check_modules(PKG_ALUGRID "alugrid")
   set(ENV{PKG_CONFIG_PATH} REM_PKG_CONFIG_PATH)
 endif(NOT PKG_ALUGRID_FOUND)
 
+# check whether ALUGrid version is recent enough
 if(PKG_ALUGRID_FOUND)
-  # search alugridversion, first only at positions given by the user
-  find_file(ALUGRID_VERSION_CMD
-    NAMES alugridversion
-    PATHS
-      ${ALUGRID_ROOT}
-      ${PKG_ALUGRID_LIBRARY_DIRS}/..
-      ${PKG_ALUGRID_INCLUDE_DIRS}/..
-    PATH_SUFFIXES bin
-    NO_DEFAULT_PATH)
-  # search alugridversion, including default paths
-  find_file(ALUGRID_VERSION_CMD
-    NAMES alugridversion
-    PATH_SUFFIXES bin)
+  if(ALUGRID_VERSION_REQUIRED VERSION_GREATER "${PKG_ALUGRID_VERSION}")
+    message(STATUS "Found ALUGrid ${PKG_ALUGRID_VERSION}, but version ${ALUGRID_VERSION_REQUIRED} is required")
+  else()
+    set(ALUGRID_VERSION "${PKG_ALUGRID_VERSION}")
+  endif()
 endif(PKG_ALUGRID_FOUND)
 
-# check whether ALUGrid version is recent enough
-if(ALUGRID_VERSION_CMD)
-  execute_process(COMMAND ${ALUGRID_VERSION_CMD} -c ${ALUGRID_VERSION_REQUIRED}
-    OUTPUT_VARIABLE ALUGRID_VERSION)
-  if(ALUGRID_VERSION LESS 0)
-    message(STATUS "Found ALUGrid ${ALUGRID_VERSION}, but version ${ALUGRID_VERSION_REQUIRED} is required")
-  endif(ALUGRID_VERSION LESS 0)
-endif(ALUGRID_VERSION_CMD)
-
 # look for include path
-if(NOT (ALUGRID_VERSION LESS 0))
+if(PKG_ALUGRID_FOUND)
   find_path(ALUGRID_INCLUDE_PATH alugrid_serial.h
     PATHS
       ${ALUGRID_ROOT}
@@ -76,7 +60,7 @@ if(NOT (ALUGRID_VERSION LESS 0))
       include
       include/serial
     DOC "Include path of serial alugrid headers.")
-endif(NOT (ALUGRID_VERSION LESS 0))
+endif(PKG_ALUGRID_FOUND)
 
 # look for library path
 if(ALUGRID_INCLUDE_PATH)
@@ -156,11 +140,11 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   "ALUGrid"
   DEFAULT_MSG
-  ALUGRID_VERSION_CMD
+  ALUGRID_VERSION
   ALUGRID_INCLUDE_PATH ALUGRID_LIB ALUGRID_LIB_PATH ALULIB_FUNCTIONAL
   HAVE_ALUGRID_SERIAL_H)
 
-mark_as_advanced(PATH_PKG_ALUGRID REM_PKG_CONFIG_PATH ALUGRID_VERSION_CMD
+mark_as_advanced(PATH_PKG_ALUGRID REM_PKG_CONFIG_PATH
   ALUGRID_INCLUDE_PATH ALUGRID_LIB ALUGRID_LIB_PATH ALULIB_FUNCTIONAL
   ALUGRID_PARALLEL_INCLUDE_PATH ALUGRID_PARALLEL_WORKS)
 
