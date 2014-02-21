@@ -125,10 +125,17 @@ namespace Dune
     };
 
   public:
+
+    //===========================================================
+    /** @name Interface for the implementor
+     */
+    //@{
+    //===========================================================
     /** \brief constructor (engine concept) */
     GridView ( const GridViewImp &imp )
       : impl_( imp )
     {}
+    //@}
 
     /** \brief Copy constructor */
     GridView ( const ThisType &other )
