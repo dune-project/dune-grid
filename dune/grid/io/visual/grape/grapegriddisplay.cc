@@ -156,7 +156,7 @@ namespace Dune
         if( intersection.neighbor() )
         {
           if( intersection.outside()->partitionType() != InteriorEntity )
-            he->bnd[ number ] = 2*(Entity :: dimensionworld) + (number+1);
+            he->bnd[ number ] = 2*(Entity :: Geometry :: dimensionworld) + (number+1);
         }
         lastElNum = number;
       }
@@ -172,7 +172,7 @@ namespace Dune
     typedef typename DuneGeometryType :: ctype ctype;
 
     enum { dim      = Entity::dimension };
-    enum { dimworld = Entity::dimensionworld };
+    enum { dimworld = DuneGeometryType::dimensionworld };
 
     typedef FieldVector<ctype, dimworld> CoordinateType;
 
@@ -201,9 +201,9 @@ namespace Dune
       const int grapeVx = mapDune2GrapeVertex( geomType, i );
       he->vindex[ i ] = this->vertexIndex( indexSet_, en, grapeVx );
 
-      assert( Entity::dimensionworld <= 3 );
+      assert( DuneGeometryType::dimensionworld <= 3 );
       const CoordinateType coord = geometry.corner( grapeVx );
-      for( int j = 0; j < Entity::dimensionworld ; ++j )
+      for( int j = 0; j < DuneGeometryType::dimensionworld ; ++j )
       {
         // here the mapping from dune to grape elements is done
         // it's only different for quads and hexas
@@ -222,7 +222,7 @@ namespace Dune
     typedef typename DuneGeometryType :: ctype ctype;
 
     enum { dim      = Entity::dimension };
-    enum { dimworld = Entity::dimensionworld };
+    enum { dimworld = DuneGeometryType::dimensionworld };
 
     typedef FieldVector<ctype, dimworld> CoordinateType;
 
@@ -643,14 +643,17 @@ namespace Dune
   inline void GrapeGridDisplay<GridType>::
   local_to_world(const EntityType &en, const double * c, double * w)
   {
+    typedef typename EntityType::Geometry DuneGeometryType;
     const int dim = EntityType::dimension;
-    const int dimworld = EntityType::dimensionworld;
+    const int dimworld = DuneGeometryType::dimensionworld;
 
     FieldVector< double, dim > local;
     for( int i = 0; i < dim; ++i )
       local[ i ] = c[ i ];
 
-    FieldVector< double, dimworld > global = en.geometry().global( local );
+    DuneGeometryType geometry = en.geometry();
+
+    FieldVector< double, dimworld > global = geometry.global( local );
     for( int i = 0; i < dimworld; ++i )
       w[ i ] = global[ i ];
   }
@@ -673,10 +676,12 @@ namespace Dune
   inline int GrapeGridDisplay< GridType >
   ::world_to_local( const Entity &entity, const double *w, double *c )
   {
-    const int dim = Entity::dimension;
-    const int dimworld = Entity::dimensionworld;
+    typedef typename Entity::Geometry DuneGeometryType;
 
-    const typename Entity::Geometry &geometry = entity.geometry();
+    const int dim = Entity::dimension;
+    const int dimworld = DuneGeometryType::dimensionworld;
+
+    DuneGeometryType geometry = entity.geometry();
 
     FieldVector< double, dimworld > global;
     for( int i = 0; i < dimworld; ++i )
