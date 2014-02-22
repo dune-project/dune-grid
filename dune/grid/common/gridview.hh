@@ -57,6 +57,10 @@ namespace Dune
   {
     typedef GridView< ViewTraits > ThisType;
 
+  protected:
+    // type of underlying implementation, for internal use only
+    typedef typename ViewTraits :: GridViewImp Implementation;
+
   public:
     typedef typename ViewTraits :: GridViewImp GridViewImp;
 
@@ -132,7 +136,7 @@ namespace Dune
     //@{
     //===========================================================
     /** \brief constructor (engine concept) */
-    GridView ( const GridViewImp &imp )
+    GridView ( const Implementation &imp )
       : impl_( imp )
     {}
     //@}
@@ -269,9 +273,6 @@ namespace Dune
     // give the GridDefaultImplementation class access to the realImp
     friend class GridDefaultImplementation< Grid::dimension, Grid::dimensionworld, typename Grid::ctype, typename Grid::GridFamily >;
 #endif
-    // type of underlying implementation, for internal use only
-    typedef GridViewImp Implementation;
-
     //! return reference to the real implementation
     Implementation &impl () { return impl_; }
     //! return reference to the real implementation
