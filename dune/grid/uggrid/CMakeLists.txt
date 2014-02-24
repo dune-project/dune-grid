@@ -24,6 +24,7 @@ set(HEADERS
   uggridlocalgeometry.hh
   uggridhieriterator.hh
   uggridleveliterator.hh
+  uggridviews.hh
   ugincludes.hh
   uggridintersections.hh
   uggridintersectioniterators.hh

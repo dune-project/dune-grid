@@ -32,6 +32,7 @@ uggrid_HEADERS = uggridfactory.hh uggridentitypointer.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
   uggridintersections.hh uggridintersectioniterators.hh uggridindexsets.hh \
   uggridleafiterator.hh uggridrenumberer.hh \
+                 uggridviews.hh \
   uglbgatherscatter.hh \
   ug_undefs.hh ugwrapper.hh
 

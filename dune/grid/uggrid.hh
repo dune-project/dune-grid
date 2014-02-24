@@ -95,6 +95,7 @@
 #include "uggrid/uggridleafiterator.hh"
 #include "uggrid/uggridhieriterator.hh"
 #include "uggrid/uggridindexsets.hh"
+#include <dune/grid/uggrid/uggridviews.hh>
 #ifdef ModelP
 #include "uggrid/ugmessagebuffer.hh"
 #include "uggrid/uglbgatherscatter.hh"
@@ -147,8 +148,8 @@ namespace Dune {
         UGGridIdSet< const UGGrid<dim> >,
         typename UG_NS<dim>::UG_ID_TYPE,
         CollectiveCommunication<Dune::UGGrid<dim> >,
-        DefaultLevelGridViewTraits,
-        DefaultLeafGridViewTraits,
+        UGGridLevelGridViewTraits,
+        UGGridLeafGridViewTraits,
         UGGridEntitySeed,
         UGGridLocalGeometry>
     Traits;
@@ -218,6 +219,10 @@ namespace Dune {
     friend class UGGridLevelIndexSet<const UGGrid<dim> >;
     friend class UGGridLeafIndexSet<const UGGrid<dim> >;
     friend class UGGridIdSet<const UGGrid<dim> >;
+    template <class GridImp_, PartitionIteratorType PiType_>
+    friend class UGGridLeafGridView;
+    template <class GridImp_, PartitionIteratorType PiType_>
+    friend class UGGridLevelGridView;
 
     friend class GridFactory<UGGrid<dim> >;
 
