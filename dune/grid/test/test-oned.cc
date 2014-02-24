@@ -165,7 +165,7 @@ void testOneDGrid(OneDGrid& grid)
 int main () try
 {
   // Create a OneDGrid using the grid factory and test it
-  std::auto_ptr<Dune::OneDGrid> factoryGrid(testFactory());
+  std::unique_ptr<Dune::OneDGrid> factoryGrid(testFactory());
 
   testOneDGrid(*factoryGrid.get());
 

@@ -76,7 +76,7 @@ namespace Dune {
     typedef typename ALU3dImplTraits< hexa, Comm >::BNDFaceType GEOQuadBndType;
 
     typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
-    typedef typename std::auto_ptr< FaceInfoType > FaceInfoPointer;
+    typedef typename std::unique_ptr< FaceInfoType > FaceInfoPointer;
 
     typedef typename conditional<
         tetra == GridImp::elementType,
@@ -308,7 +308,7 @@ namespace Dune {
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
     typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
-    typedef typename std::auto_ptr< FaceInfoType > FaceInfoPointer;
+    typedef typename std::unique_ptr< FaceInfoType > FaceInfoPointer;
 
     typedef typename conditional<
         tetra == GridImp::elementType,

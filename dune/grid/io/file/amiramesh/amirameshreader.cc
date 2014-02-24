@@ -311,7 +311,7 @@ Dune::shared_ptr<Dune::PSurfaceBoundary<GridType::dimension-1> > Dune::AmiraMesh
  #if ! HAVE_PSURFACE
   DUNE_THROW(NotImplemented, "You have to have libpsurface installed in order to be able to use 'readPSurfaceBoundary'");
 #else
-  std::auto_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
   if (!am.get())
     DUNE_THROW(IOError, "An error has occured while reading " << filename);

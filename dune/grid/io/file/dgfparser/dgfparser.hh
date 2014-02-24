@@ -121,7 +121,7 @@ namespace Dune {
        @code
          GridType & grid = *gridptr;
        @endcode
-       Like in all auto_ptr like objects the grid instance is destroyed
+       Like in all unique_ptr like objects the grid instance is destroyed
        if the GridPtr goes out of scope. To be able to destruct the GridPtr
        object without losing the grid call the release method:
        @code

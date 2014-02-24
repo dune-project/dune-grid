@@ -271,7 +271,7 @@ try
   //  Do the test for a 2d UGGrid
   {
     typedef UGGrid<2> Grid;
-    std::auto_ptr<Grid> grid(make2DHybridTestGrid<Grid>());
+    std::unique_ptr<Grid> grid(make2DHybridTestGrid<Grid>());
 
     // create hybrid grid
     grid->mark(1, * grid->leafbegin<0>());
@@ -284,7 +284,7 @@ try
   //  Do the  test for a 3d UGGrid
   {
     typedef UGGrid<3> Grid;
-    std::auto_ptr<Grid> grid(make3DHybridTestGrid<Grid>());
+    std::unique_ptr<Grid> grid(make3DHybridTestGrid<Grid>());
 
     // create hybrid grid
     grid->mark(1, * grid->leafbegin<0>());

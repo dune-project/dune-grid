@@ -124,7 +124,7 @@ namespace Dune {
 #endif
 
 #if HAVE_AMIRAMESH
-      std::auto_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
+      std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
       if (!am.get())
         DUNE_THROW(IOError, "An error has occured while reading " << filename);
@@ -143,7 +143,7 @@ namespace Dune {
 
   private:
 
-    std::auto_ptr<PSURFACE_NAMESPACE PSurface<dim,float> > psurface_;
+    std::unique_ptr<PSURFACE_NAMESPACE PSurface<dim,float> > psurface_;
 
   };
 

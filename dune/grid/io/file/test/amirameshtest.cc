@@ -22,7 +22,7 @@ template <class GridType>
 void testReadingUnstructuredGrid(const std::string& filename) {
 
   // Read the grid
-  std::auto_ptr<GridType> grid(AmiraMeshReader<GridType>::read(filename));
+  std::unique_ptr<GridType> grid(AmiraMeshReader<GridType>::read(filename));
 
   // Write the grid into a tmp file
   LeafAmiraMeshWriter<GridType> amiramesh(*grid);

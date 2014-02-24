@@ -51,7 +51,7 @@ template <typename GridType>
 void testReadingAndWritingGrid( const std::string& filename, const std::string& outFilename, int refinements )
 {
   // Read the grid with insertion of boundary segments (they may be the default ones)
-  std::auto_ptr<GridType> grid( GmshReader<GridType>::read( filename, true, true ) );
+  std::unique_ptr<GridType> grid( GmshReader<GridType>::read( filename, true, true ) );
 
   // load balancing and refinement
   grid->loadBalance();
