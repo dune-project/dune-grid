@@ -568,9 +568,17 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
          it != levelGridView.template end<0>();
          ++it) {
 
-      if (it->isLeaf())
-        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = targetProcessors[leafIndexSet.index(*it)];
-      else {
+      if (it->isLeaf()) {
+
+        unsigned int targetRank = targetProcessors[leafIndexSet.index(*it)];
+
+        // sanity check
+        if (targetRank >= comm().size())
+          DUNE_THROW(GridError, "Requesting target processor " << targetRank <<
+                     ", but only " << comm().size() << " processors are available.");
+
+        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = targetRank;
+      } else {
 
         std::map<int,int> rank;
         unsigned int mostFrequentRank = 0;    // which rank occurred most often?
