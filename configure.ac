@@ -19,15 +19,8 @@ AC_SUBST(AM_CPPFLAGS, '$(DUNE_CPPFLAGS) -I$(top_srcdir)')
 AC_SUBST(AM_LDFLAGS, '$(DUNE_LDFLAGS)')
 AC_SUBST([LDADD], '$(top_builddir)/dune/grid/libgrid.la $(DUNE_LIBS)')
 
-# Fix Albertas idea of where the dunegrid and libalbertagrid_?d libraries are,
-# since it expects them in $(DUNE_GRID_LIBDIR) by default
-AS_IF([test x"$HAVE_ALBERTA" = x"1"],
-[
-  ALBERTA_LIBS='$(top_builddir)/lib/libdunealbertagrid_$(ALBERTA_DIM)d.la $(top_builddir)/lib/libdunegrid.la $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d $(ALBERTA_BASE_LIBS)'
-  ALBERTA1D_LIBS='$(top_builddir)/lib/libdunealbertagrid_1d.la $(top_builddir)/lib/libdunegrid.la $(ALBERTA_LIBPATHFLAGS) -lalberta_1d $(ALBERTA_BASE_LIBS)'
-  ALBERTA2D_LIBS='$(top_builddir)/lib/libdunealbertagrid_2d.la $(top_builddir)/lib/libdunegrid.la $(ALBERTA_LIBPATHFLAGS) -lalberta_2d $(ALBERTA_BASE_LIBS)'
-  ALBERTA3D_LIBS='$(top_builddir)/lib/libdunealbertagrid_3d.la $(top_builddir)/lib/libdunegrid.la $(ALBERTA_LIBPATHFLAGS) -lalberta_3d $(ALBERTA_BASE_LIBS)'
-])
+# make DUNE_GRID_LIBDIR available as it is needed for the alberta libs
+AC_SUBST(DUNE_GRID_LIBDIR, '$(top_builddir)/lib')
 
 DUNE_SUMMARY_ALL
 
