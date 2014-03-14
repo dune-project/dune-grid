@@ -513,7 +513,7 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel)
     return true;
 
   /** \todo Test for valid arguments */
-  std::string argStrings[4];
+  std::string argStrings[2];
   std::stringstream numberAsAscii[4];
 
   numberAsAscii[0] << strategy;
@@ -522,12 +522,10 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel)
   numberAsAscii[1] << minlevel;
   argStrings[1] = "c " + numberAsAscii[1].str();
 
-  const char* argv[4] = {argStrings[0].c_str(),
-                         argStrings[1].c_str(),
-                         argStrings[2].c_str(),
-                         argStrings[3].c_str()};
+  const char* argv[2] = {argStrings[0].c_str(),
+                         argStrings[1].c_str()};
 
-  int errCode = UG_NS<dim>::LBCommand(4, argv);
+  int errCode = UG_NS<dim>::LBCommand(2, argv);
 
   if (errCode)
     DUNE_THROW(GridError, "UG" << dim << "d::LBCommand returned error code " << errCode);
