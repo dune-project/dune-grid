@@ -553,7 +553,8 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
     return true;
 
 #ifdef ModelP  // The Partition field only exists if ModelP is set
-  assert(targetProcessors.size() == this->leafGridView().size(0));
+  if (targetProcessors.size() != this->leafGridView().size(0))
+    DUNE_THROW(Exception, "targetProcessors argument does not have the correct size");
 
   const typename Base::LeafGridView::IndexSet& leafIndexSet = this->leafGridView().indexSet();
 
