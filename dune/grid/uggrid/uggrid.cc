@@ -567,9 +567,10 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
   for (int i=maxLevel(); i>=0; i--) {
 
     typename Base::LevelGridView levelGridView = this->levelGridView(i);
+    typedef typename Base::LevelGridView::template Codim<0>::template Partition<Interior_Partition>::Iterator LevelElementIterator;
 
-    for (typename Base::LevelGridView::template Codim<0>::Iterator it = levelGridView.template begin<0>();
-         it != levelGridView.template end<0>();
+    for (LevelElementIterator it = levelGridView.template begin<0, Interior_Partition>();
+         it != levelGridView.template end<0, Interior_Partition>();
          ++it) {
 
       if (it->isLeaf()) {

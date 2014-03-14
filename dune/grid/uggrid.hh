@@ -561,7 +561,7 @@ namespace Dune {
      * The size of the input array targetProcessors is expected to be equal to the number of elements in
      * the 'all'-partition, i.e., the number Interior elements plus the number of Ghost elements.
      * To get the array entry corresponding to an Interior element, a MultipleCodimMultipleGeomTypeMapper
-     * with layout class MCMGElementLayout is used.
+     * with layout class MCMGElementLayout is used.  Array entries corresponding to Ghost elements are ignored.
      *
      * In some cases you may also want to leave the lowest levels on one process, to have them all together
      * for multigrid coarse grid corrections.  In that case, use the fromLevel parameter with a value other
