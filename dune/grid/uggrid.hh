@@ -552,11 +552,16 @@ namespace Dune {
      * \param[in] fromLevel The lowest level that gets redistributed (set to 0 when in doubt)
      *
      * This method allows to (re-)distribute the grid controlled by an external grid repartitioning library.
-     * You need to get that library to assign a target rank to each element in the leaf grid.  With this
+     * You need to get that library to assign a target rank to each interior element in the leaf grid.  With this
      * information in a std::vector, call this method, and UG will do the actual repartitioning.
      * Each leaf element will be sent to the assigned target rank.  For all other elements we look at
      * where there children are being sent to.  The parent is then sent to where most of its children are
      * (Familienzusammenfuehrung).
+     *
+     * The size of the input array targetProcessors is expected to be equal to the number of elements in
+     * the 'all'-partition, i.e., the number Interior elements plus the number of Ghost elements.
+     * To get the array entry corresponding to an Interior element, a MultipleCodimMultipleGeomTypeMapper
+     * with layout class MCMGElementLayout is used.
      *
      * In some cases you may also want to leave the lowest levels on one process, to have them all together
      * for multigrid coarse grid corrections.  In that case, use the fromLevel parameter with a value other

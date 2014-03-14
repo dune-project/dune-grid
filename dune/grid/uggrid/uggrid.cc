@@ -11,6 +11,7 @@
 /** \todo Remove the following include once getAllSubfaces... is gone */
 #include <dune/common/sllist.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/grid/common/mcmgmapper.hh>
 
 
 using namespace Dune;
@@ -556,7 +557,9 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
   if (targetProcessors.size() != this->leafGridView().size(0))
     DUNE_THROW(Exception, "targetProcessors argument does not have the correct size");
 
-  const typename Base::LeafGridView::IndexSet& leafIndexSet = this->leafGridView().indexSet();
+  // Get unique consecutive index across different element types
+  typedef MultipleCodimMultipleGeomTypeMapper<typename Base::LeafGridView, MCMGElementLayout> ElementMapper;
+  ElementMapper elementMapper(this->leafGridView());
 
   // Loop over all elements of all level, in decreasing level number.
   // If the element is a leaf, take its target rank from the input targetProcessors array.
@@ -571,7 +574,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
 
       if (it->isLeaf()) {
 
-        unsigned int targetRank = targetProcessors[leafIndexSet.index(*it)];
+        unsigned int targetRank = targetProcessors[elementMapper.map(*it)];
 
         // sanity check
         if (targetRank >= comm().size())
