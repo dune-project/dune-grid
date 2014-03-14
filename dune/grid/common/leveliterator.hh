@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_LEVELITERATOR_HH
 #define DUNE_GRID_LEVELITERATOR_HH
 
+#warning This file is deprecated, and will be removed in the release after dune-2.3
+
 #include <cstddef>
 #include <iterator>
 
