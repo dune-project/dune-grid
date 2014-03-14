@@ -488,7 +488,7 @@ namespace Dune {
         \return true if the grid has changed
      */
     bool loadBalance() {
-      return loadBalance(0,0,2,32,1);
+      return loadBalance(0,0);
     }
 
     /** \brief Distributes the grid and some data over the available nodes in a distributed machine
@@ -534,17 +534,13 @@ namespace Dune {
        <ul>
        <li>strategy = 0</li>
        <li>minlevel = 1</li>
-       <li>depth = 2</li>
-       <li>maxlevel = 32 </li>
-       <li>minelement = 1</li>
        </ul>
 
        \bug The return value is always 'true'
 
        \param minlevel The coarsest grid level that gets distributed
-       \param maxlevel does currently get ignored
      */
-    bool loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
+    bool loadBalance(int strategy, int minlevel);
 
     /** \brief Distribute this grid over a distributed machine
      *

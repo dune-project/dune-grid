@@ -506,7 +506,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 }
 
 template < int dim >
-bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, int maxLevel, int minelement)
+bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel)
 {
   // Do nothing if we are on a single process
   if (comm().size()==1)
@@ -521,12 +521,6 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
 
   numberAsAscii[1] << minlevel;
   argStrings[1] = "c " + numberAsAscii[1].str();
-
-  numberAsAscii[2] << depth;
-  argStrings[2] = "d " + numberAsAscii[2].str();
-
-  numberAsAscii[3] << minelement;
-  argStrings[3] = "e " + numberAsAscii[3].str();
 
   const char* argv[4] = {argStrings[0].c_str(),
                          argStrings[1].c_str(),
