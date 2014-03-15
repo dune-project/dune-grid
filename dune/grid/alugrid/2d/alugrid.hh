@@ -8,7 +8,6 @@
 
 #include <dune/grid/alugrid/common/declaration.hh>
 #include <dune/grid/alugrid/common/capabilities.hh>
-#include <dune/grid/alugrid/2d/capabilities.hh>
 #include <dune/grid/alugrid/2d/grid.hh>
 
 namespace Dune

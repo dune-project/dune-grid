@@ -8,7 +8,6 @@
 
 // 3d version
 #include <dune/grid/alugrid/common/capabilities.hh>
-#include <dune/grid/alugrid/3d/capabilities.hh>
 #include <dune/grid/alugrid/3d/indexsets.hh>
 #include <dune/grid/alugrid/3d/iterator.hh>
 #include <dune/grid/alugrid/3d/entity.hh>

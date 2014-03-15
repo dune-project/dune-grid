@@ -34,51 +34,6 @@ namespace Dune
   // PersistentContainer for ALUGrid
   // -------------------------------
 
-  template< int dim, int dimworld, class T >
-  class PersistentContainer< ALUConformGrid< dim, dimworld >, T >
-    : public ALUGridPersistentContainer< ALUConformGrid< dim, dimworld >, T >
-  {
-    typedef ALUGridPersistentContainer< ALUConformGrid< dim, dimworld >, T > Base;
-
-  public:
-    typedef typename Base::Grid Grid;
-    typedef typename Base::Value Value;
-
-    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
-      : Base( grid, codim, value )
-    {}
-  };
-
-  template< int dim, int dimworld, class T >
-  class PersistentContainer< ALUCubeGrid< dim, dimworld >, T >
-    : public ALUGridPersistentContainer< ALUCubeGrid< dim, dimworld >, T >
-  {
-    typedef ALUGridPersistentContainer< ALUCubeGrid< dim, dimworld >, T > Base;
-
-  public:
-    typedef typename Base::Grid Grid;
-    typedef typename Base::Value Value;
-
-    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
-      : Base( grid, codim, value )
-    {}
-  };
-
-  template< int dim, int dimworld, class T >
-  class PersistentContainer< ALUSimplexGrid< dim, dimworld >, T >
-    : public ALUGridPersistentContainer< ALUSimplexGrid< dim, dimworld >, T >
-  {
-    typedef ALUGridPersistentContainer< ALUSimplexGrid< dim, dimworld >, T > Base;
-
-  public:
-    typedef typename Base::Grid Grid;
-    typedef typename Base::Value Value;
-
-    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
-      : Base( grid, codim, value )
-    {}
-  };
-
   template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm, class T >
   class PersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, T >
     : public ALUGridPersistentContainer< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, T >
