@@ -37,7 +37,7 @@ AC_DEFUN([DUNE_PATH_ALUGRID],[
     AC_HELP_STRING([--with-alugrid=PATH],[directory where ALUGrid is installed]))
 
 
-# do not use alugrid debug lib 
+# do not use alugrid debug lib
 
 # store old values
 ac_save_LDFLAGS="$LDFLAGS"
@@ -72,17 +72,17 @@ if test x$with_alugrid != xno ; then
   REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
   PKG_CONFIG_PATH="$ALUGRIDROOT:$ALUGRIDROOT/lib/pkgconfig:$ALUGRIDROOT/lib64/pkgconfig:$PKG_CONFIG_PATH"
 
-  ## check version number 
+  ## check version number
   NEEDEDALUGRID_VERSION=1.52
 
   AC_MSG_CHECKING([ALUGrid version >= $NEEDEDALUGRID_VERSION])
-  if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid ; then 
+  if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=$NEEDEDALUGRID_VERSION alugrid ; then
     ALUGRID_VERSION=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --modversion alugrid`
     AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSION)])
     ALUGRID_INCLUDE_PATH=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=includedir alugrid`
     ALUGRID_LIB_PATH=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=libdir alugrid`
-  else   
-    # lib dir and include path 
+  else
+    # lib dir and include path
     ALUGRID_INCLUDE_PATH="$ALUGRIDROOT/include"
 
     ALUGRID_LIB_PATH="$ALUGRIDROOT/lib"
@@ -96,18 +96,18 @@ if test x$with_alugrid != xno ; then
       fi
     fi
 
-    # old check version 
+    # old check version
     ALUGRID_VERSIONCHECK=$ALUGRIDROOT/bin/alugridversion
-    if test -f $ALUGRID_VERSIONCHECK; then 
+    if test -f $ALUGRID_VERSIONCHECK; then
       ALUGRID_VERSION=`$ALUGRID_VERSIONCHECK -c $NEEDEDALUGRID_VERSION`
-      if test "x$ALUGRID_VERSION" != "x-1"; then 
+      if test "x$ALUGRID_VERSION" != "x-1"; then
         ALUGRID_VERSION=`$ALUGRID_VERSIONCHECK -v`
         AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSION)])
-      else 
+      else
         AC_MSG_RESULT([no])
         AC_MSG_ERROR([ALUGrid version is too old!])
       fi
-    else 
+    else
       AC_MSG_RESULT([no])
       AS_IF([test "x$ALUGRIDROOT" != "x"],[
         AC_MSG_ERROR([$PKG_CONFIG couldn't find alugrid.pc or wrong version! ALUGrid version is too old or ALUGrid is not installed in $ALUGRIDROOT! You need at least ALUGrid-$NEEDEDALUGRID_VERSION!])
@@ -115,7 +115,7 @@ if test x$with_alugrid != xno ; then
     fi
   fi
 
-  # restore PKG_CONFIG_PATH 
+  # restore PKG_CONFIG_PATH
   PKG_CONFIG_PATH=$REM_PKG_CONFIG_PATH
 
   AC_LANG_PUSH([C++])
@@ -124,13 +124,13 @@ if test x$with_alugrid != xno ; then
   ALU3D_INC_FLAG="-I$ALUGRID_INCLUDE_PATH -I$ALUGRID_INCLUDE_PATH/serial -I$ALUGRID_INCLUDE_PATH/duneinterface -DENABLE_ALUGRID"
   CPPFLAGS="$ac_save_CPPFLAGS $ALU3D_INC_FLAG"
   # check for header
-  AC_CHECK_HEADERS([alugrid_serial.h], 
+  AC_CHECK_HEADERS([alugrid_serial.h],
      [ALUGRID_CPPFLAGS="$ALU3D_INC_FLAG"
       ALUGRID_LDFLAGS=""
       ALUGRID_LIBS="-L$ALUGRID_LIB_PATH -lalugrid"
     HAVE_ALUGRID="1"],
     AC_MSG_WARN([alugrid_serial.h not found in $ALUGRID_INCLUDE_PATH]))
-   
+
   # Yes, we do check whether either alugrid_serial.h or alugrid_parallel.h
   # works.  Dune decides which one to use depending on how the
   # alugrid_defineparallel.h header defines ALU3DGRID_BUILD_FOR_PARALLEL.
@@ -156,9 +156,9 @@ if test x$with_alugrid != xno ; then
       ])
 
     # only check for parallel header when ALUGrid was build for parallel support
-    if test x"$HAVE_ALUGRID_PARALLEL" != "x0" ; then 
-      # check for parallel header 
-      AC_CHECK_HEADERS([alugrid_parallel.h], 
+    if test x"$HAVE_ALUGRID_PARALLEL" != "x0" ; then
+      # check for parallel header
+      AC_CHECK_HEADERS([alugrid_parallel.h],
          [ALUGRID_CPPFLAGS="\${DUNEMPICPPFLAGS} $ALU3D_INC_FLAG $ALU3D_INC_FLAG_PARA"
           ALUGRID_LDFLAGS="\${DUNEMPILDFLAGS}"
           ALUGRID_LIBS="-L$ALUGRID_LIB_PATH -lalugrid \${DUNEMPILIBS}"
@@ -167,7 +167,7 @@ if test x$with_alugrid != xno ; then
           LIBS="$DUNEMPILIBS $LIBS"
         HAVE_ALUGRID="1"],
         AC_MSG_WARN([alugrid_parallel.h not found in $ALUGRID_INCLUDE_PATH]))
-    fi 
+    fi
   fi
 
   # We check only whether linking with the library works, not for an actual
@@ -184,8 +184,8 @@ if test x$with_alugrid != xno ; then
     AC_SEARCH_LIBS([malloc],[alugrid],
       [: #dumy argument to avoid default action
       ],
-	  [HAVE_ALUGRID="0"
-	  AC_MSG_WARN(libalugrid not found!)])
+      [HAVE_ALUGRID="0"
+        AC_MSG_WARN(libalugrid not found!)])
   fi
 
   AC_LANG_POP([C++])
@@ -199,7 +199,7 @@ if test x$HAVE_ALUGRID = x1 ; then
   AC_SUBST(ALUGRID_LDFLAGS, $ALUGRID_LDFLAGS)
   AC_SUBST(ALUGRID_CPPFLAGS, $ALUGRID_CPPFLAGS)
   AC_DEFINE(HAVE_ALUGRID, ENABLE_ALUGRID,
-    [This is only true if alugrid-library was found by configure 
+    [This is only true if alugrid-library was found by configure
      _and_ if the application uses the ALUGRID_CPPFLAGS])
 
   # add to global list
@@ -211,11 +211,11 @@ if test x$HAVE_ALUGRID = x1 ; then
   DUNE_DEFINE_GRIDTYPE([ALUGRID_SIMPLEX],[],[Dune::ALUGrid< dimgrid, dimworld, simplex, nonconforming >],[dune/grid/alugrid.hh],[dune/grid/io/file/dgfparser/dgfalu.hh])
 
   # set variable for summary
-  if test x"$HAVE_ALUGRID_PARALLEL" != "x0" ; then 
+  if test x"$HAVE_ALUGRID_PARALLEL" != "x0" ; then
     with_alugrid_parallel="(parallel)"
-  else 
+  else
     with_alugrid_parallel="(serial)"
-  fi 
+  fi
   with_alugrid="version $ALUGRID_VERSION $with_alugrid_parallel"
   with_alugrid_long="$ALUGRIDROOT"
 else
@@ -227,7 +227,7 @@ else
   with_alugrid="no"
   with_alugrid_long=""
 fi
-  
+
 # also tell automake
 AM_CONDITIONAL(ALUGRID, test x$HAVE_ALUGRID = x1)
 
