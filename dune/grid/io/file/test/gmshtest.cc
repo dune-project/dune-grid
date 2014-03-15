@@ -137,11 +137,11 @@ try
 #endif
 
 #if HAVE_ALUGRID
-  std::cout << "reading and writing ALUSimplexGrid<2,2>" << std::endl;
-  testReadingAndWritingGrid<ALUSimplexGrid<2,2> >( curved2d, curved2d+".ALUSimplexGrid_2_2_-gmshtest-write.msh", refinements );
+  std::cout << "reading and writing ALUGrid<2,2,simplex,nonconforming>" << std::endl;
+  testReadingAndWritingGrid<ALUGrid<2,2,simplex,nonconforming> >( curved2d, curved2d+".ALUGrid_2_2_simplex-gmshtest-write.msh", refinements );
 
-  std::cout << "reading and writing ALUSimplexGrid<3,3>" << std::endl;
-  testReadingAndWritingGrid<ALUSimplexGrid<3,3> >( pyramid, pyramid+".ALUSimplexGrid_3_3_-gmshtest-write.msh", refinements );
+  std::cout << "reading and writing ALUGrid<3,3,simplex,nonconforming>" << std::endl;
+  testReadingAndWritingGrid<ALUGrid<3,3,simplex,nonconforming> >( pyramid, pyramid+".ALUGrid_3_3_simplex-gmshtest-write.msh", refinements );
 #endif
 
   std::cout << "reading and writing OneDGrid" << std::endl;
