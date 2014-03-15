@@ -834,23 +834,13 @@ namespace Dune
     }
 
     const std::string aluid((elType == tetra) ? "!Tetrahedra" : "!Hexahedra");
-    const std::string oldAluId((elType == tetra) ? "!Tetraeder" : "!Hexaeder");
     std::string idline;
     std::getline(file,idline);
     std::stringstream idstream(idline);
     std::string id;
     idstream >> id;
 
-    if(id == aluid )
-    {
-      return;
-    }
-    else if ( id == oldAluId )
-    {
-      derr << "\nKeyword '" << oldAluId << "' is deprecated! Change it to '" << aluid << "' in file '" << filename<<"'! \n";
-      return ;
-    }
-    else
+    if(id != aluid )
     {
       std::cerr << "Delivered file '"<<filename<<"' does not contain keyword '"
                 << aluid << "'. Found id '" <<id<< "'. Check the macro grid file! Bye." << std::endl;
