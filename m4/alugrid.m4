@@ -36,10 +36,6 @@ AC_DEFUN([DUNE_PATH_ALUGRID],[
   AC_ARG_WITH(alugrid,
     AC_HELP_STRING([--with-alugrid=PATH],[directory where ALUGrid is installed]))
 
-  AC_ARG_WITH([alugrid-libdir],dnl
-    AS_HELP_STRING([--with-alugrid-libdir=PATH],dnl
-      [Directory where ALUGrid library is installed (deprecated). Note that this will override library path detection, so use this parameter only if default library detection fails and you know exactly where your ALUGrid library is located.]))dnl
-
 
 # do not use alugrid debug lib 
 
@@ -85,9 +81,6 @@ if test x$with_alugrid != xno ; then
     AC_MSG_RESULT([yes (ALUGrid-$ALUGRID_VERSION)])
     ALUGRID_INCLUDE_PATH=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=includedir alugrid`
     ALUGRID_LIB_PATH=`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=libdir alugrid`
-    if test x"$with_alugrid_libdir" != x"" && test x"$with_alugrid_libdir" != x"no" ; then 
-      AC_MSG_WARN([--with-alugrid-libdir option is obsolete!])
-    fi 
   else   
     # lib dir and include path 
     ALUGRID_INCLUDE_PATH="$ALUGRIDROOT/include"
