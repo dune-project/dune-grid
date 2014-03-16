@@ -70,7 +70,7 @@ namespace Dune
     typedef typename BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
     //! \brief constructor for creating ALUGrid from given macro grid file
-    //! \param macroName  filename for macro grid in ALUGrid tetra format
+    //! \param macroName  filename for macro grid in ALUGrid tetra / cube format
     //! \param mpiComm    MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
     //!                   type MPI_Comm and the default value is MPI_COMM_WORLD)
     //! \param bndProject global boundary projection pointer
@@ -107,7 +107,7 @@ namespace Dune
 
 
     //! \brief constructor called from ALUGridFactory
-    //! for creating ALUConformGrid from given macro grid file
+    //! for creating ALUGrid with conforming refinement from given macro grid file
     //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of type MPI_Comm)
     //! \param bndProject global boundary projection pointer
     //! \param bndVector  pointer to vector holding boundary projection for each boundary segment

@@ -49,8 +49,8 @@ namespace Dune
     //! type of boundary projection
     typedef typename BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
-    //! \brief constructor for creating ALUSimplexGrid from given macro grid file
-    //! \param macroName filename for macro grid in ALUGrid triangle format
+    //! \brief constructor for creating ALUGrid from given macro grid file
+    //! \param macroName filename for macro grid in ALUGrid triangle / rectangle format
     //! \param bndProject global boundary projection pointer
     //! \param bndVector  pointer to vector holding boundary projection for
     //!                   each boundary segment.  ALUGrid takes ownership of
@@ -70,8 +70,8 @@ namespace Dune
       }
     }
 
-    //! \brief constructor for creating ALUSimplexGrid from given macro grid file
-    //! \param macroName filename for macro grid in ALUGrid triangle format
+    //! \brief constructor for creating ALUGrid from given macro grid file
+    //! \param macroName filename for macro grid in ALUGrid triangle / rectangle format
     //! \param macroFile  Stream to read macro grid file contents from.
     //! \param bndProject global boundary projection pointer
     //! \param bndVector  pointer to vector holding boundary projection for

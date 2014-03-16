@@ -51,15 +51,6 @@
 	/** @defgroup ALUGrid ALUGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup ALUCubeGrid ALUCubeGrid 
-		@ingroup GridImplementations */
-
-	/** @defgroup ALUSimplexGrid ALUSimplexGrid 
-		@ingroup GridImplementations */
-
-	/** @defgroup ALUConformGrid ALUConformGrid 
-		@ingroup GridImplementations */
-
   /** \defgroup GeoGrid GeometryGrid
     \ingroup GridImplementations */
 

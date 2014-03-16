@@ -994,8 +994,8 @@ namespace Dune {
          <i> Provides the simplicial meshes of the finite element tool box
              ALBERTA (http://www.alberta-fem.de/)
              written by Kunibert Siebert and Alfred Schmidt.</i>
-     \li Dune::ALUSimplexGrid and Dune::ALUCubeGrid and ALUConformGrid <br>
-         <i> 2d/3D grid with support for non-conform adaptation and dynamic load balancing </i>
+     \li Dune::ALUGrid <br>
+         <i> 2d/3d grid with support for non-conform adaptation and dynamic load balancing </i>
      \li Dune::OneDGrid <br>
          <i> Onedimensional adaptive grid</i>
      \li Dune::SGrid <br>
