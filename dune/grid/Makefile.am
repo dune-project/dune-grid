@@ -1,7 +1,16 @@
-# $Id$
-
-SUBDIRS = common alugrid onedgrid sgrid uggrid utility \
-          yaspgrid io albertagrid geometrygrid test
+SUBDIRS = \
+  albertagrid \
+  alugrid \
+  common \
+  geometrygrid \
+  identitygrid \
+  io \
+  onedgrid \
+  sgrid \
+  test \
+  uggrid \
+  utility \
+  yaspgrid
 noinst_LTLIBRARIES = libgrid.la
 
 # always part of lib:
@@ -32,6 +41,7 @@ libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
 griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \
                alugrid.hh \
+               identitygrid.hh \
                sgrid.hh \
                uggrid.hh \
                yaspgrid.hh \

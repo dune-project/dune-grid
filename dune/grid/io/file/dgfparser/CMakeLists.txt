@@ -4,11 +4,11 @@ add_subdirectory(utils)
 
 dune_add_library(dgfparser OBJECT dgfparser.cc dgfug.cc)
 
-
 set(HEADERS
   dgfalu.cc
   dgfexception.hh
   dgfalu.hh
+  dgfidentitygrid.hh
   dgfug.hh
   dgfparser.hh
   dgfgeogrid.hh

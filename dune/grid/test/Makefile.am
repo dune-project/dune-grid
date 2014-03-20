@@ -1,5 +1,3 @@
-# $Id$
-
 #
 ## Find out which tests can be built
 #
@@ -47,8 +45,9 @@ CACHECOORDFUNCTION = 0
 #
 
 # tests where program to build and program to run are equal
-NORMALTESTS = test-sgrid test-oned test-yaspgrid test-geogrid $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID) \
-              test-mcmg-geogrid
+NORMALTESTS = test-sgrid test-oned test-yaspgrid test-geogrid \
+              test-identitygrid test-mcmg-geogrid \
+              $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID)
 
 # list of tests to run
 TESTS = $(NORMALTESTS)
@@ -77,6 +76,8 @@ AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
 test_sgrid_SOURCES = test-sgrid.cc
 
 test_oned_SOURCES = test-oned.cc
+
+test_identitygrid_SOURCES = test-identitygrid.cc
 
 test_yaspgrid_SOURCES = test-yaspgrid.cc
 test_yaspgrid_CPPFLAGS = $(AM_CPPFLAGS)		\
