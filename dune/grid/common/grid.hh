@@ -1191,7 +1191,7 @@ namespace Dune {
         coarsen all negative marked entities if possible
         \return true if a least one entity was refined
 
-        - Note: this default implementation always returns false
+        \note this default implementation always returns false
           so grid with no adaptation doesn't need to implement these methods
      */
     bool adapt ()    { return false; }

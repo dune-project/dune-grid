@@ -43,6 +43,8 @@ int main (int argc, char *argv[]) try
   testDim<1>();
   testDim<2>();
   testDim<3>();
+
+  return 0;
 }
 // //////////////////////////////////
 //   Error handler

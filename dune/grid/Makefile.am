@@ -37,7 +37,7 @@ libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
         $(AMIRAMESHLIB)                         \
 	$(DUNE_LIBS)
 
-# These libraries do not need other libraries besides lcommon
+# These libraries do not need other libraries besides libdunecommon and libdunegeometry
 griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \
                alugrid.hh \

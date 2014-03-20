@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_IDENTITYGRID_HH
-#define DUNE_IDENTITYGRID_HH
+#ifndef DUNE_GRID_IDENTITYGRID_HH
+#define DUNE_GRID_IDENTITYGRID_HH
 
 /** \file
  * \brief The IdentityGrid class
@@ -13,9 +13,8 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
-#include <dune/common/timer.hh>
 
-// The components of the Identitygrid interface
+// The components of the IdentityGrid interface
 #include "identitygrid/identitygridgeometry.hh"
 #include "identitygrid/identitygridentity.hh"
 #include "identitygrid/identitygridentitypointer.hh"
@@ -26,12 +25,11 @@
 #include "identitygrid/identitygridhierarchiciterator.hh"
 #include "identitygrid/identitygridindexsets.hh"
 
-namespace Dune {
-
+namespace Dune
+{
   // Forward declaration
   template <class HostGrid>
   class IdentityGrid;
-
 
   // External forward declarations
   template< class Grid >
@@ -69,23 +67,23 @@ namespace Dune {
         > Traits;
   };
 
-
-
-
   //**********************************************************************
   //
   // --IdentityGrid
   //
-  //**********************************************************************
-
-  /** \brief [<em> provides <tt> Dune::Grid </tt> </em>]
+  //************************************************************************
+  /*!
+   * \brief Provides a meta grid that is identical to its host
+   * \ingroup GridImplementations
+   * \ingroup IdentityGrid
    *
+   * \tparam HostGrid The host grid type wrapped by the IdentityGrid
    */
   template <class HostGrid>
-  class IdentityGrid :
-    public GridDefaultImplementation  <HostGrid::dimension, HostGrid::dimensionworld, double, IdentityGridFamily<HostGrid::dimension,HostGrid> >
+  class IdentityGrid
+  : public GridDefaultImplementation<HostGrid::dimension, HostGrid::dimensionworld,
+      double, IdentityGridFamily<HostGrid::dimension, HostGrid> >
   {
-
     friend class IdentityGridLevelIndexSet<const IdentityGrid<HostGrid> >;
     friend class IdentityGridLeafIndexSet<const IdentityGrid<HostGrid> >;
     friend class IdentityGridGlobalIdSet<const IdentityGrid<HostGrid> >;
@@ -126,6 +124,8 @@ namespace Dune {
 
 
     /** \brief Constructor
+     *
+     * \param hostgrid The host grid wrapped by the IdentityGrid
      */
     explicit IdentityGrid(HostGrid& hostgrid) :
       hostgrid_(&hostgrid),
@@ -135,7 +135,6 @@ namespace Dune {
     {
       setIndices();
     }
-
 
     //! Desctructor
     ~IdentityGrid()
@@ -147,12 +146,13 @@ namespace Dune {
     }
 
 
-    //! Return maximum level defined in this grid. Levels are numbered
-    //! 0 ... maxlevel with 0 the coarsest level.
+    /** \brief Return maximum level defined in this grid.
+     *
+     * Levels are numbered 0 ... maxlevel with 0 the coarsest level.
+     */
     int maxLevel() const {
       return hostgrid_->maxLevel();
     }
-
 
     //! Iterator to first entity of given codim on level
     template<int codim>
@@ -256,8 +256,10 @@ namespace Dune {
     /** \brief Access to the LevelIndexSets */
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
     {
-      if (level<0 || level>maxLevel())
+      if (level < 0 || level > maxLevel())
+      {
         DUNE_THROW(GridError, "levelIndexSet of nonexisting level " << level << " requested!");
+      }
       return *levelIndexSets_[level];
     }
 
@@ -317,7 +319,7 @@ namespace Dune {
       return hostgrid_->getMark(*getHostEntityPointer<0>(*e));
     }
 
-    //! \todo Please doc me !
+    /** \brief returns true, if at least one entity is marked for adaption */
     bool preAdapt() {
       return hostgrid_->preAdapt();
     }
@@ -398,7 +400,7 @@ namespace Dune {
 #endif
 
 
-    /** dummy collective communication */
+    /** \brief dummy collective communication */
     const CollectiveCommunication<IdentityGrid>& comm () const
     {
       return ccobj;
@@ -476,38 +478,43 @@ namespace Dune {
 
   namespace Capabilities
   {
-    //! \todo Please doc me !
+    /** \brief has entities for some codimensions as host grid
+     * \ingroup IdentityGrid
+     */
     template<class HostGrid, int codim>
-    struct hasEntity< IdentityGrid<HostGrid>, codim>
+    struct hasEntity<IdentityGrid<HostGrid>, codim>
     {
       static const bool v = hasEntity<HostGrid,codim>::v;
     };
 
-
-    //! \todo Please doc me !
+    /** \brief is parallel when host grid is
+     * \ingroup IdentityGrid
+     */
     template<class HostGrid>
-    struct isParallel< IdentityGrid<HostGrid> >
+    struct isParallel<IdentityGrid<HostGrid> >
     {
       static const bool v = isParallel<HostGrid>::v;
     };
 
-
-    //! \todo Please doc me !
-    //! \todo Please doc me !
+    /** \brief has conforming level grids when host grid has
+     * \ingroup IdentityGrid
+     */
     template<class HostGrid>
-    struct isLevelwiseConforming< IdentityGrid<HostGrid> >
+    struct isLevelwiseConforming<IdentityGrid<HostGrid> >
     {
       static const bool v = isLevelwiseConforming<HostGrid>::v;
     };
 
-    //! \todo Please doc me !
+    /** \brief has conforming leaf grids when host grid has
+     * \ingroup IdentityGrid
+     */
     template<class HostGrid>
-    struct isLeafwiseConforming< IdentityGrid<HostGrid> >
+    struct isLeafwiseConforming<IdentityGrid<HostGrid> >
     {
       static const bool v = isLeafwiseConforming<HostGrid>::v;
     };
-  }
+  } // end namespace Capabilities
 
 } // namespace Dune
 
-#endif
+#endif // DUNE_GRID_IDENTITYGRID_HH
