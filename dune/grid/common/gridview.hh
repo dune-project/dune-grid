@@ -57,7 +57,11 @@ namespace Dune
   {
     typedef GridView< ViewTraits > ThisType;
 
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
   protected:
+#endif
     // type of underlying implementation, for internal use only
     typedef typename ViewTraits :: GridViewImp Implementation;
 
