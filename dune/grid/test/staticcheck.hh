@@ -21,8 +21,8 @@ struct GeometryInterface
 {
   static void check ( const Geometry &geo )
   {
-    dune_static_assert( (Geometry::mydimension == dim-codim), "" );
-    dune_static_assert( (Geometry::dimension == dim), "" );
+    static_assert( (Geometry::mydimension == dim-codim), "" );
+    static_assert( (Geometry::dimension == dim), "" );
 
     typedef typename Geometry::ctype ctype DUNE_UNUSED;
 
@@ -226,8 +226,8 @@ struct EntityInterface
   static void check ( const Entity &e )
   {
     // consistent?
-    dune_static_assert( (Entity::codimension == codim), "" );
-    dune_static_assert( (Entity::dimension == dim), "" );
+    static_assert( (Entity::codimension == codim), "" );
+    static_assert( (Entity::dimension == dim), "" );
 
     // do the checking
     DoEntityInterfaceCheck(e);
@@ -273,8 +273,8 @@ struct EntityInterface<Grid, 0, dim, true>
   static void check ( const Entity &e, bool checkLevelIter = true )
   {
     // consistent?
-    dune_static_assert( (Entity::codimension == 0), "" );
-    dune_static_assert( (Entity::dimension == dim), "" );
+    static_assert( (Entity::codimension == 0), "" );
+    static_assert( (Entity::dimension == dim), "" );
 
     // do the common checking
     DoEntityInterfaceCheck(e);
@@ -361,8 +361,8 @@ struct EntityInterface<Grid, dim, dim, true>
   static void check ( const Entity &e )
   {
     // consistent?
-    dune_static_assert( (Entity::codimension == dim), "" );
-    dune_static_assert( (Entity::dimension == dim), "" );
+    static_assert( (Entity::codimension == dim), "" );
+    static_assert( (Entity::dimension == dim), "" );
 
     // run common test
     DoEntityInterfaceCheck(e);
@@ -569,8 +569,8 @@ struct GridInterface
     }
     // recursively check entity-interface
     // ... we only allow grids with codim 0 zero entites
-    dune_static_assert((Dune::Capabilities::hasEntity<Grid, 0>::v),"Grid must have codim 0 entities");
-    dune_static_assert((Dune::Capabilities::hasEntity<const Grid, 0>::v),"Grid must have codim 0 entities");
+    static_assert((Dune::Capabilities::hasEntity<Grid, 0>::v),"Grid must have codim 0 entities");
+    static_assert((Dune::Capabilities::hasEntity<const Grid, 0>::v),"Grid must have codim 0 entities");
 
     EntityInterface< Grid, 0, Grid::dimension, Dune::Capabilities::hasEntity< Grid, 0 >::v >();
 

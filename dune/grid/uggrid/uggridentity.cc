@@ -34,7 +34,7 @@ int Dune::UGGridEntity<codim,dim,GridImp>::count () const
 template< int codim, int dim, class GridImp>
 Dune::GeometryType Dune::UGGridEntity<codim,dim,GridImp>::type() const
 {
-  dune_static_assert(codim!=0, "The code for codim==0 is in the corresponding class specialization");
+  static_assert(codim!=0, "The code for codim==0 is in the corresponding class specialization");
 
   // Vertex
   if (dim-codim == 0)

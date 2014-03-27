@@ -333,7 +333,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename)
   static const int dim      = GridType::dimension;
   static const int dimworld = GridType::dimensionworld;
 
-  dune_static_assert(dim==dimworld, "AmiraMesh can only be read for grids with dim==dimworld!");
+  static_assert(dim==dimworld, "AmiraMesh can only be read for grids with dim==dimworld!");
 
   // Create a grid factory
   GridFactory<GridType> factory;
@@ -367,7 +367,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   static const int dim      = GridType::dimension;
   static const int dimworld = GridType::dimensionworld;
 
-  dune_static_assert(dim==dimworld, "AmiraMesh can only be read for grids with dim==dimworld!");
+  static_assert(dim==dimworld, "AmiraMesh can only be read for grids with dim==dimworld!");
 
   dverb << "This is the AmiraMesh reader for file '" << filename << "'!" << std::endl;
 

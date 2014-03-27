@@ -24,8 +24,8 @@
 // single unit tet
 template<typename Grid>
 class UnitTetMaker {
-  dune_static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
-  dune_static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
+  static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
+  static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
 public:
   static Dune::shared_ptr<Grid> create() {
     Dune::GridFactory<Grid> gf;
@@ -50,8 +50,8 @@ public:
 // kuhn triangulation with 6 tets
 template<typename Grid>
 class KuhnTriangulatedUnitCubeMaker {
-  dune_static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
-  dune_static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
+  static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
+  static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
 public:
   static Dune::shared_ptr<Grid> create() {
     Dune::GridFactory<Grid> gf;
@@ -85,8 +85,8 @@ public:
 // minimal triangulation with 5 tets, contains unit tet
 template<typename Grid>
 class MinTriangulatedUnitCubeMaker {
-  dune_static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
-  dune_static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
+  static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
+  static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
 public:
   static Dune::shared_ptr<Grid> create() {
     Dune::GridFactory<Grid> gf;

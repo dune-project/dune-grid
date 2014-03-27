@@ -13,7 +13,6 @@
 
 #include <dune/common/tupleutility.hh>
 #include <dune/common/tuples.hh>
-#include <dune/common/static_assert.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
@@ -43,17 +42,16 @@ struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid<3, 3, simplex, confor
 template <bool leafconform, class Grid>
 void checkCapabilities(const Grid& grid)
 {
-  dune_static_assert( Dune::Capabilities::hasSingleGeometryType< Grid > :: v == true,
-                      "hasSingleGeometryType is not set correctly");
-  dune_static_assert( Dune::Capabilities::isLevelwiseConforming< Grid > :: v == ! leafconform,
-                      "isLevelwiseConforming is not set correctly");
-  dune_static_assert( Dune::Capabilities::isLeafwiseConforming< Grid > :: v == leafconform,
-                      "isLevelwiseConforming is not set correctly");
+  static_assert(Dune::Capabilities::hasSingleGeometryType< Grid > :: v == true,
+                "hasSingleGeometryType is not set correctly");
+  static_assert(Dune::Capabilities::isLevelwiseConforming< Grid > :: v == ! leafconform,
+                "isLevelwiseConforming is not set correctly");
+  static_assert(Dune::Capabilities::isLeafwiseConforming< Grid > :: v == leafconform,
+                "isLevelwiseConforming is not set correctly");
   static const bool hasEntity = Dune::Capabilities::hasEntity<Grid, 1> :: v == true;
-  dune_static_assert( hasEntity,
-                      "hasEntity is not set correctly");
-  dune_static_assert( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
-                      "hasBackupRestoreFacilities is not set correctly");
+  static_assert(hasEntity, "hasEntity is not set correctly");
+  static_assert(Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
+                "hasBackupRestoreFacilities is not set correctly");
 
   static const bool reallyParallel =
 #if ALU3DGRID_PARALLEL
@@ -61,8 +59,8 @@ void checkCapabilities(const Grid& grid)
 #else
     false ;
 #endif
-  dune_static_assert( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
-                      "isParallel is not set correctly");
+  static_assert(Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
+                "isParallel is not set correctly");
 
   static const bool reallyCanCommunicate =
 #if ALU3DGRID_PARALLEL
@@ -72,8 +70,7 @@ void checkCapabilities(const Grid& grid)
 #endif
   static const bool canCommunicate = Dune::Capabilities::canCommunicate< Grid, 1 > :: v
                                      == reallyCanCommunicate;
-  dune_static_assert( canCommunicate,
-                      "canCommunicate is not set correctly");
+  static_assert(canCommunicate, "canCommunicate is not set correctly");
 
 }
 

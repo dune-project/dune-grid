@@ -1383,7 +1383,7 @@ namespace Dune {
       template<class Y>
       void write (const Y& data)
       {
-        dune_static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
         a[i++] = data;
       }
 
@@ -1391,7 +1391,7 @@ namespace Dune {
       template<class Y>
       void read (Y& data) const
       {
-        dune_static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
         data = a[j++];
       }
 
@@ -1449,8 +1449,8 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     YaspLevelIterator<cd,pitype,GridImp> levelbegin (int level) const
     {
-      dune_static_assert( cd == dim || cd == 0 ,
-                          "YaspGrid only supports Entities with codim=dim and codim=0");
+      static_assert((cd == dim || cd == 0),
+                    "YaspGrid only supports Entities with codim=dim and codim=0");
       YGridLevelIterator g = begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (pitype==Ghost_Partition)
@@ -1480,8 +1480,8 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     YaspLevelIterator<cd,pitype,GridImp> levelend (int level) const
     {
-      dune_static_assert( cd == dim || cd == 0 ,
-                          "YaspGrid only supports Entities with codim=dim and codim=0");
+      static_assert((cd == dim || cd == 0),
+                    "YaspGrid only supports Entities with codim=dim and codim=0");
       YGridLevelIterator g = begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (cd==0)   // the elements

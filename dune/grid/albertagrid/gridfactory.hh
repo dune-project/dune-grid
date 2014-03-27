@@ -319,7 +319,7 @@ namespace Dune
     template< GrapeIOFileFormatType type >
     bool write ( const std::string &filename )
     {
-      dune_static_assert( type != pgm, "AlbertaGridFactory: writing pgm format is not supported." );
+      static_assert( type != pgm, "AlbertaGridFactory: writing pgm format is not supported." );
       macroData_.finalize();
       if( dimension < 3 )
         macroData_.setOrientation( Alberta::Real( 1 ) );

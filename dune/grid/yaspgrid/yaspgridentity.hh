@@ -208,8 +208,8 @@ namespace Dune {
     template<int cc>
     typename Codim<cc>::EntityPointer subEntity (int i) const
     {
-      dune_static_assert( cc == dim || cc == 0 ,
-                          "YaspGrid only supports Entities with codim=dim and codim=0");
+      static_assert((cc == dim || cc == 0),
+                    "YaspGrid only supports Entities with codim=dim and codim=0");
       // coordinates of the cell == coordinates of lower left corner
       if (cc==dim)
       {

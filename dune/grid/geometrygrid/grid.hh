@@ -4,7 +4,6 @@
 #define DUNE_GEOGRID_GRID_HH
 
 #include <dune/common/nullptr.hh>
-#include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
 

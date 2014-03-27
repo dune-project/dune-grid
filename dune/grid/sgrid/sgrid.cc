@@ -508,7 +508,7 @@ namespace Dune {
   inline void SGrid<dim,dimworld,ctype>::makeSGrid (const array<int,dim>& N_,
                                                     const FieldVector<ctype,dim>& L_, const FieldVector<ctype,dim>& H_)
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
+    static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
 #ifndef NDEBUG
     bool correct = true;
@@ -565,7 +565,7 @@ namespace Dune {
   template<int dim, int dimworld, typename ctype>
   inline SGrid<dim,dimworld,ctype>::SGrid (const int * const N_, const ctype * const H_)
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
+    static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
     array<int,dim> N;
     FieldVector<ctype,dim> L(0.0);
@@ -579,7 +579,7 @@ namespace Dune {
   template<int dim, int dimworld, typename ctype>
   inline SGrid<dim,dimworld,ctype>::SGrid (const int * const N_, const ctype * const L_, const ctype * const H_)
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
+    static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     array<int,dim> N;
     FieldVector<ctype,dim> L(0.0);
@@ -595,7 +595,7 @@ namespace Dune {
   inline SGrid<dim,dimworld,ctype>::SGrid (FieldVector<int,dim> N_, FieldVector<ctype,dim> L_,
                                            FieldVector<ctype,dim> H_)
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
+    static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     array<int,dim> N;
     for (int i=0; i<dim; i++ ) N[i] = N_[i];
@@ -606,7 +606,7 @@ namespace Dune {
   template<int dim, int dimworld, typename ctype>
   inline SGrid<dim,dimworld,ctype>::SGrid ()
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
+    static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     array<int,dim> N_;
     FieldVector<ctype,dim> L_(0.0);

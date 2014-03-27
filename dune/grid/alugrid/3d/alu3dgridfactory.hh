@@ -62,9 +62,9 @@ namespace Dune
     typedef typename Transformation::WorldMatrix WorldMatrix;
 
   private:
-    dune_static_assert( (elementType == tetra || elementType == hexa),
-                        "ALU3dGridFactory supports only grids containing "
-                        "tetrahedrons or hexahedrons exclusively." );
+    static_assert((elementType == tetra || elementType == hexa),
+                  "ALU3dGridFactory supports only grids containing "
+                  "tetrahedrons or hexahedrons exclusively.");
 
     typedef Dune::BoundarySegmentWrapper< dimension, dimensionworld > BoundarySegmentWrapperType;
 

@@ -38,8 +38,8 @@ namespace Dune
     {
       typedef Patch< dim > This;
 
-      dune_static_assert( ((dim >= 1) && (dim <= 3)),
-                          "Alberta supports only dimensions 1, 2, 3" );
+      static_assert(((dim >= 1) && (dim <= 3)),
+                    "Alberta supports only dimensions 1, 2, 3");
 
     public:
       static const int dimension = dim;

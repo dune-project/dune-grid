@@ -12,7 +12,6 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/capabilities.hh>
@@ -234,7 +233,7 @@ namespace Dune {
     friend class UGGridEntityPointer;
 
     /** \brief UGGrid is only implemented for 2 and 3 dimension */
-    dune_static_assert(dim==2 || dim==3, "Use UGGrid only for 2d and 3d!");
+    static_assert(dim==2 || dim==3, "Use UGGrid only for 2d and 3d!");
 
     // The different instantiations are mutual friends so they can access
     // each others numOfUGGrids field

@@ -126,7 +126,7 @@ namespace Dune
   inline int SingleCodimSingleGeomTypeMapper<GV,c>::map (const EntityType& e) const
   {
     enum { cc = EntityType::codimension };
-    dune_static_assert(cc == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
+    static_assert(cc == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
     return is.index(e);
   }
 

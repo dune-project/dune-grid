@@ -35,7 +35,7 @@ namespace Dune {
   template <int dim>
   class PSurfaceBoundary
   {
-    dune_static_assert((dim==1 or dim==2), "PSurfaceBoundaries can only have dimensions 1 or 2!");
+    static_assert((dim==1 or dim==2), "PSurfaceBoundaries can only have dimensions 1 or 2!");
 
   public:
 

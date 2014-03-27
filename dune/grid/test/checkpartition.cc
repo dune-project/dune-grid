@@ -269,16 +269,16 @@ public:
   size_t size ( const Entity &entity ) const
   {
     DUNE_UNUSED_PARAMETER(entity);
-    dune_static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
-    dune_static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
+    static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
+    static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
     return (contains_[ Entity::codimension ] ? 2 : 0);
   }
 
   template< class Buffer, class Entity >
   void gather ( Buffer &buffer, const Entity &entity ) const
   {
-    dune_static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
-    dune_static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
+    static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
+    static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
 
     invalidEntity_ |= !contains_[ Entity::codimension ];
     invalidSendEntity_ |= !Dune::EntityCommHelper< iftype >::send( entity.partitionType() );
@@ -290,8 +290,8 @@ public:
   template< class Buffer, class Entity >
   void scatter ( Buffer &buffer, const Entity &entity, size_t n )
   {
-    dune_static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
-    dune_static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
+    static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
+    static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
 
     invalidEntity_ |= !contains_[ Entity::codimension ];
     invalidSize_ |= (n != size( entity ));

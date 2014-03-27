@@ -34,7 +34,7 @@ namespace Dune {
   public:
     GnuplotWriter (const GridView & gv) : _is(gv.indexSet()), _gv(gv)
     {
-      dune_static_assert(dimworld==1 || dimworld==2, "GnuPlot export only works for worlddim==1 and worlddim==2");
+      static_assert(dimworld==1 || dimworld==2, "GnuPlot export only works for worlddim==1 and worlddim==2");
       // allocate _data buffer
       _data.resize(_is.size(0)*2);
     }

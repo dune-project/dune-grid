@@ -16,7 +16,6 @@
  * code from Dune numbering to SGrid numbering is still here.
  */
 
-#include <dune/common/static_assert.hh>
 #include <dune/common/singleton.hh>
 
 #include <dune/geometry/type.hh>

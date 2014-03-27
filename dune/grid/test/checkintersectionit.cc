@@ -113,14 +113,14 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   // check consistency of exported types
 
-  dune_static_assert( (Dune::is_same< ctype, typename Entity::Geometry::ctype >::value),
-                      "Type Intersection::ctype differs from Intersection::Entity::ctype." );
-  dune_static_assert( (Dune::is_same< ctype, typename LocalGeometry::ctype >::value),
-                      "Type Intersection::ctype differs from Intersection::LocalGeometry::ctype." );
-  dune_static_assert( (Dune::is_same< ctype, typename Geometry::ctype >::value),
-                      "Type Intersection::ctype differs from Intersection::Geometry::ctype." );
-  dune_static_assert( (Dune::is_same< Entity, typename EntityPointer::Entity >::value),
-                      "Type Intersection::EntityPointer::Entity differs from Intersection::Entity." );
+  static_assert((Dune::is_same< ctype, typename Entity::Geometry::ctype >::value),
+                "Type Intersection::ctype differs from Intersection::Entity::ctype.");
+  static_assert((Dune::is_same< ctype, typename LocalGeometry::ctype >::value),
+                "Type Intersection::ctype differs from Intersection::LocalGeometry::ctype.");
+  static_assert((Dune::is_same< ctype, typename Geometry::ctype >::value),
+                "Type Intersection::ctype differs from Intersection::Geometry::ctype.");
+  static_assert((Dune::is_same< Entity, typename EntityPointer::Entity >::value),
+                "Type Intersection::EntityPointer::Entity differs from Intersection::Entity.");
 
   // cache some information on the intersection
 
@@ -389,16 +389,16 @@ void checkIntersectionIterator ( const GridViewType &view,
 
   // check consistency of exported types
 
-  dune_static_assert( (Dune::is_same< ctype, typename Intersection::ctype >::value),
+  static_assert( (Dune::is_same< ctype, typename Intersection::ctype >::value),
                       "Type GridView::Grid::ctype differs from GridView::Intersection::ctype." );
 
-  dune_static_assert( (Dune::is_same< Intersection, typename IntersectionIterator::Intersection >::value),
+  static_assert( (Dune::is_same< Intersection, typename IntersectionIterator::Intersection >::value),
                       "Type GridView::Intersection differs from GridView::IntersectionIterator::Intersection." );
 
-  dune_static_assert((static_cast<int>(Intersection::dimension)
+  static_assert((static_cast<int>(Intersection::dimension)
                       == static_cast<int>(GridType::dimension)),"IntersectionIterator has wrong dimension");
 
-  dune_static_assert((static_cast<int>(Intersection::dimensionworld)
+  static_assert((static_cast<int>(Intersection::dimensionworld)
                       == static_cast<int>(GridType::dimensionworld)),"IntersectionIterator has wrong dimensionworld");
 
   // initialize variables for element checks
