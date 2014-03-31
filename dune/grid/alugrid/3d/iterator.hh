@@ -185,12 +185,6 @@ namespace Dune {
     int indexInOutside () const;
 
     //! returns twist of face compared to inner element
-    int twistInSelf() const { return twistInInside(); }
-
-    //! returns twist of face compared to outer element
-    int twistInNeighbor() const { return twistInOutside(); }
-
-    //! returns twist of face compared to inner element
     int twistInInside() const;
 
     //! returns twist of face compared to outer element

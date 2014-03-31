@@ -216,8 +216,8 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
 
   if( output )
   {
-    std::string twistIn( (neighbor) ? "twistInNeighbor()" : "twistInSelf" );
-    std::string numberIn( (neighbor) ? "indexInOutside()" : "indexInInside" );
+    std::string twistIn( (neighbor) ? "twistInOutside()" : "twistInInside()" );
+    std::string numberIn( (neighbor) ? "indexInOutside()" : "indexInInside()" );
     std::cout << "ERROR: Face "<< face << " : twist = "<< twistFound << std::endl;
     std::cout << "\nPut twist = "<< twistFound << " In TwistUtility::"<< twistIn << " for " << numberIn << " = " << face << " ! \n";
     std::cout << "******************************************\n";
