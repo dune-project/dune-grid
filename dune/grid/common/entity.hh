@@ -553,12 +553,6 @@ namespace Dune
     /** \brief Know dimension of the entity */
     enum { mydimension=dim-cd };
 
-    //! know your own dimension of world
-    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
-
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
-
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
 
@@ -605,12 +599,6 @@ namespace Dune
 
     /** \brief Know dimension of the entity */
     enum { mydimension=dim };
-
-    //! know your own dimension of world
-    static const int DUNE_DEPRECATED_MSG("Use Geometry::coorddimension instead!") dimensionworld=GridImp::dimensionworld;
-
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype DUNE_DEPRECATED_MSG("Use Geometry::ctype instead!");
 
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
