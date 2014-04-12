@@ -733,7 +733,7 @@ void checkFatherLevel ( Grid &grid )
             }
             if (f->level() != level-1)
             {
-              std::cerr << "Error: father()->level()=" << f.level()
+              std::cerr << "Error: father()->level()=" << f->level()
                         << " for element on level " << level << std::endl;
               assert(false);
             }
@@ -750,7 +750,7 @@ void checkFatherLevel ( Grid &grid )
             }
             if (f->level() != level-1)
             {
-              std::cerr << "Error: father()->level()=" << f.level()
+              std::cerr << "Error: father()->level()=" << f->level()
                         << " for element on level " << level << " with reassigned father pointer" << std::endl;
               assert(false);
             }
