@@ -144,7 +144,7 @@ namespace Dune
       }
 
       // assert that all sub entities have the same level
-      assert( subEntityPtr.level() == en.level() );
+      assert( subEntityPtr->level() == en.level() );
 
       // Loop over all vertices
       for( int j = 0; j < numVertices; ++j )

@@ -414,9 +414,9 @@ namespace Dune {
       {
         // each i!=dir gives one direction vector
         z1[i] += 1;     // direction i => even
-        p2 = grid->pos(self.level(),z1);
+        p2 = grid->pos(self->level(),z1);
         z1[i] -= 2;     // direction i => even
-        p1 = grid->pos(self.level(),z1);
+        p1 = grid->pos(self->level(),z1);
         z1[i] += 1;     // revert t to original state
         A[t] = p2-p1;
         ++t;
@@ -426,7 +426,7 @@ namespace Dune {
         z1[i] -= 1;
 
     // update geometry
-    is_global.make(grid->pos(self.level(),z1), A);
+    is_global.make(grid->pos(self->level(),z1), A);
 
     built_intersections = true;
   }
