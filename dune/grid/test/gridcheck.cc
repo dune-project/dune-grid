@@ -725,12 +725,14 @@ void checkFatherLevel ( Grid &grid )
           // check level of father for newly created entitypointer
           {
             EntityPointer f = it->father();
+#if !DISABLE_DEPRECATED_METHOD_CHECK
             if (f.level() != level-1)
             {
               std::cerr << "Error: father().level()=" << f.level()
                         << " for element on level " << level << std::endl;
               assert(false);
             }
+#endif
             if (f->level() != level-1)
             {
               std::cerr << "Error: father()->level()=" << f->level()
@@ -742,12 +744,14 @@ void checkFatherLevel ( Grid &grid )
           {
             EntityPointer f(*it);
             f = it->father();
+#if !DISABLE_DEPRECATED_METHOD_CHECK
             if (f.level() != level-1)
             {
               std::cerr << "Error: father().level()=" << f.level()
                         << " for element on level " << level << " with reassigned father pointer" << std::endl;
               assert(false);
             }
+#endif
             if (f->level() != level-1)
             {
               std::cerr << "Error: father()->level()=" << f->level()

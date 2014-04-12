@@ -129,7 +129,9 @@ void checkIteratorAssignment(GridType & grid)
       assert( it->level() == 0 );
       EntityPointerType p( it );
 
+#if !DISABLE_DEPRECATED_METHOD_CHECK
       assert( p.level()  == 0 );
+#endif
       assert( p->level() == 0 );
 
       if( grid.maxLevel() > 0 )
@@ -139,7 +141,9 @@ void checkIteratorAssignment(GridType & grid)
         {
           p = it;
           assert( it->level() == 1 );
+#if !DISABLE_DEPRECATED_METHOD_CHECK
           assert( p.level()   == 1 );
+#endif
           assert( p->level()  == 1 );
         }
       }
