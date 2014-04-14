@@ -115,7 +115,7 @@ namespace Dune
         \sa viewThreadSafe
 
         \note that the communicate method can only be called by one individual thread,
-        as the whole Dune parallel components are (i.e. can not be) not thread safe.
+        as the whole Dune parallel components are (i.e. cannot be) not thread safe.
 
         \ingroup GICapabilities
      */
@@ -133,11 +133,11 @@ namespace Dune
         \sa threadSafe
 
         \note that the communicate method can only be called by one individual thread,
-        as the whole Dune parallel components are (i.e. can not be) not thread safe.
+        as the whole Dune parallel components are (i.e. cannot be) not thread safe.
 
         \note the methods leafGridView(), levelGridView(level) on the Grid can only be called single-threaded
 
-        \note calling the methods indexSet(), idSet(), globalIdSet() on the Grid or the GridView xis only allowed,
+        \note calling the methods indexSet(), idSet(), globalIdSet() on the Grid or the GridView is only allowed,
         if they were called once before starting the threads.
 
         \code
