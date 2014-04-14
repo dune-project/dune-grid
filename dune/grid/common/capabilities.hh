@@ -31,12 +31,12 @@ namespace Dune
 
     /** \brief Specialize with 'true' if the grid is a Cartesian grid.
         Cartesian grids satisfy the following properties:
-          - all geometries are affine
-          - The unit outer normal for an intersection with indexInInside = face
+          - all geometries are axis-aligned hypercubes
+          - The unit outer normal for the i-th intersection
             can be computed by the following code:
           \code
              FieldVector< ctype, dim > n( 0 );
-             n[ face / 2 ] = ctype( 2*(face % 2) - 1 );
+             n[ i / 2 ] = ctype( 2*(i % 2) - 1 );
           \endcode
         (default=false).
         \ingroup GICapabilities
