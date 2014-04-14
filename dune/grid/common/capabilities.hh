@@ -115,7 +115,7 @@ namespace Dune
         \sa viewThreadSafe
 
         \note that the communicate method can only be called by one individual thread,
-        as the whole Dune parallel components are (i.e. cannot be) not thread safe.
+        as the whole Dune parallel components are not (i.e. cannot be) thread safe.
 
         \ingroup GICapabilities
      */
