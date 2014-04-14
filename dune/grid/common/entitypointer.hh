@@ -4,6 +4,7 @@
 #define DUNE_GRID_ENTITYPOINTER_HH
 
 #include <dune/common/iteratorfacades.hh>
+#include <dune/common/deprecated.hh>
 #include <dune/grid/common/grid.hh>
 
 /** \file
@@ -228,11 +229,14 @@ namespace Dune
     //===========================================================
 
     /** \brief Ask for level of entity.
+     *
             This method is redundant and is only there for efficiency reasons.
             It allows an implementation to return the level without actually
             constructing the entity.
+
+       \deprecated Will be removed after the release of dune-grid-2.4
      */
-    int level () const
+    int level () const DUNE_DEPRECATED_MSG("Will be removed after the release of dune-grid-2.4.")
     {
       return realIterator.level();
     }

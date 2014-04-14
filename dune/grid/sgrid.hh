@@ -620,7 +620,7 @@ namespace Dune {
 
     int boundarySegmentIndex () const {
       if (boundary())
-        return grid->boundarySegmentIndex(self.level(), count, zred);
+        return grid->boundarySegmentIndex(self->level(), count, zred);
       return -1;
     }
 

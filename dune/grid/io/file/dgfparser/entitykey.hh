@@ -83,7 +83,7 @@ namespace Dune
 
   struct ElementFaceUtil
   {
-    inline static int nofFaces ( int dim, std::vector< unsigned int > &element );
+    inline static int nofFaces ( int dim, const std::vector< unsigned int > &element );
     inline static int faceSize ( int dim, bool simpl );
 
     static DGFEntityKey< unsigned int >
@@ -100,7 +100,7 @@ namespace Dune
   };
 
 
-  inline int ElementFaceUtil::nofFaces ( int dim, std::vector< unsigned int > &element )
+  inline int ElementFaceUtil::nofFaces ( int dim, const std::vector< unsigned int > &element )
   {
     switch( dim )
     {
