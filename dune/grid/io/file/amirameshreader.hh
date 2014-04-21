@@ -112,9 +112,6 @@ namespace Dune {
 
        @param filename The name of the grid file
        @param boundary Pointer to an object holding the description of the grid domain boundary
-
-       \deprecated [In 2.3] Use the corresponding method taking a filename and a shared pointer
-           to a PSurfaceBoundary object instead!
      */
     static GridType* read(const std::string& filename,
                           const shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
