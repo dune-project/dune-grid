@@ -53,8 +53,8 @@
 /* Define to 1 if AmiraMesh library is found */
 #cmakedefine HAVE_AMIRAMESH 1
 
-/* The namespace prefix of the psurface library */
-#cmakedefine PSURFACE_NAMESPACE ${PSURFACE_NAMESPACE}
+/* The namespace prefix of the psurface library (deprecated) */
+#define PSURFACE_NAMESPACE psurface::
 
 /* Define to 1 if you have at least psurface version 2.0 */
 #cmakedefine HAVE_PSURFACE_2_0 1
