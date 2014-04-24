@@ -150,7 +150,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
   if (dim!=3)
     DUNE_THROW(NotImplemented, "AmiraMeshReader with PSurface support only for 3d grids");
 
-  PSURFACE_NAMESPACE PSurface<2,float>* psurface = reinterpret_cast<PSURFACE_NAMESPACE PSurface<2,float>* >(boundary->getPSurfaceObject());
+  psurface::PSurface<2,float>* psurface = reinterpret_cast<psurface::PSurface<2,float>* >(boundary->getPSurfaceObject());
 
   if (!psurface->hasUpToDatePointLocationStructure)
     psurface->createPointLocationStructure();
