@@ -163,13 +163,14 @@ namespace Dune {
   //**********************************************************************
 
   /**
-     \brief [<em> provides \ref Dune::Grid </em>]
-     \brief Provides the meshes of the finite element toolbox UG.
-     \brief (http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug).
+     \brief Front-end for the grid manager of the finite element toolbox
+            <a href="http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug">UG</a>.
+
      \ingroup GridImplementations
 
      This is the implementation of the grid interface
-     using the UG grid management system.  UG provides conforming grids
+     using the UG grid management system (http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug).
+     UG provides conforming grids
      in two and three space dimensions.  The grids can be mixed, i.e.
      2d grids can contain triangles and quadrilaterals and 3d grids can
      contain tetrahedra and hexahedra and also pyramids and prisms.
