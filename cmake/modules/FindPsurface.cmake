@@ -10,7 +10,6 @@
 # PSURFACE_INCLUDE_DIRS   Path to the PSurface include dirs.
 # PSURFACE_LIBRARIES      Name to the PSurface library.
 #
-message(AUTHOR_WARNING "TODO: Implement Amiramesh support for PSurface test")
 
 # look for header files, only at positions given by the user
 find_path(PSURFACE_INCLUDE_DIR
@@ -83,11 +82,32 @@ endif(PSURFACE_MIN_VERSION_1_3)
 # Try to find psurface with pkg-config (for psurface 2.0 or newer)
 include(FindPkgConfig)
 pkg_search_module(PKG_PSURFACE psurface)
-if(${PKG_PSURFACE_FOUND})
+
+if(NOT PKG_PSURFACE_FOUND)
+  # first only at positions given by the user
+  find_file(PATH_PKG_PSURFACE
+    NAMES "psurface.pc"
+    PATHS ${PSURFACE_ROOT}
+    PATH_SUFFIXES lib/pkgconfig lib32/pkgconfig lib64/pkgconfig
+    NO_DEFAULT_PATH)
+  # including default paths
+  find_file(PATH_PKG_PSURFACE
+    NAMES "psurface.pc"
+    PATH_SUFFIXES lib/pkgconfig lib32/pkgconfig lib64/pkgconfig)
+
+  # try again with path temporarilly added to PKG_CONFIG_PATH
+  set(REM_PKG_CONFIG_PATH "$ENV{PKG_CONFIG_PATH}")
+  get_filename_component(DIR_PKG_PSURFACE "${PATH_PKG_PSURFACE}" PATH)
+  set(ENV{PKG_CONFIG_PATH} "${PSURFACE_ROOT}:${DIR_PKG_PSURFACE}:${PKG_CONFIG_PATH}")
+  pkg_check_modules(PKG_PSURFACE psurface)
+  set(ENV{PKG_CONFIG_PATH} REM_PKG_CONFIG_PATH)
+endif()
+
+if(PKG_PSURFACE_FOUND)
   set(HAVE_PSURFACE_2_0 1)
   set(PSURFACE_WITH_VERSION "psurface >= 2.0" CACHE STRING
     "Human readable string containing psurface version information.")
-endif(${PKG_PSURFACE_FOUND})
+endif()
 # re-set PKG_CONFIG_PATH
 set(PKG_CONFIG_PATH ${PKG_CONFIG_PATH_STORE})
 
