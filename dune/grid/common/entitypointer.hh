@@ -234,9 +234,11 @@ namespace Dune
             It allows an implementation to return the level without actually
             constructing the entity.
 
-       \deprecated Will be removed after the release of dune-grid-2.4
+       \deprecated Will be removed after the release of dune-grid-2.4. Use the
+                   method level() from the dereferenced Entity instead.
      */
-    int level () const DUNE_DEPRECATED_MSG("Will be removed after the release of dune-grid-2.4.")
+    int level () const
+    DUNE_DEPRECATED_MSG("Will be removed after the release of dune-grid-2.4. Use level() from Entity instead.")
     {
       return realIterator.level();
     }
