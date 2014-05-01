@@ -72,6 +72,10 @@ add_executable(gmshtest_alberta3d gmshtest.cc)
 add_dune_alberta_flags(gmshtest_alberta3d WORLDDIM 3)
 add_dune_grape_flags(gmshtest_alberta3d)
 
+foreach(_test ${ALUGRID_TESTS} ${ALBERTA_TESTS})
+  target_link_libraries(${_test} dunegrid)
+endforeach()
+
 foreach(_test ${UG_TESTS})
   add_dune_ug_flags(${_test})
 endforeach(_test ${UG_TESTS})
