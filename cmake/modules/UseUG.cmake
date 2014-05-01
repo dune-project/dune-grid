@@ -51,7 +51,7 @@ if(${UG_FOUND})
   endif(${UG_DUNE_PATCHLEVEL} GREATER 9)
 
   #Overwrite flags by hand (like for autoconf).
-  set(UG_LIBRARIES dunegrid)
+  set(UG_LIBRARIES)
   set(paths "${prefix}")
 
   #Find out the full path to the libs.
@@ -98,14 +98,20 @@ function(add_dune_ug_flags)
     endif()
 
     # Add compiler flags
-    set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND PROPERTY COMPILE_DEFINITIONS ENABLE_UG)
+    set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
+      APPEND PROPERTY
+      COMPILE_DEFINITIONS ENABLE_UG)
     # Add linker arguments
     if(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
-      set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND PROPERTY LINK_LIBRARIES ${UG_LIBRARIES} dunegrid ${DUNE_LIBS})
+      set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
+        APPEND PROPERTY
+        LINK_LIBRARIES ${UG_LIBRARIES} ${DUNE_LIBS})
     endif(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
     if(UG_PARALLEL STREQUAL "yes")
       # Add modelp
-      set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS} APPEND PROPERTY COMPILE_DEFINITIONS ModelP)
+      set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
+        APPEND PROPERTY
+        COMPILE_DEFINITIONS ModelP)
       # Add mpi flags.
       add_dune_mpi_flags(${ADD_UG_UNPARSED_ARGUMENTS} ${_source_only})
     endif(UG_PARALLEL STREQUAL "yes")
