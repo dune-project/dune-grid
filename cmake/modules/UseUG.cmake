@@ -21,21 +21,16 @@ if(UG_ROOT AND NOT UG_DIR)
   endif()
 endif(UG_ROOT AND NOT UG_DIR)
 
-find_package(UG 3.9.1)
+find_package(UG 3.9.1 QUIET)
 
-if(NOT UG_FOR_DUNE STREQUAL "yes")
-  message(WARNING "UG was not configured for DUNE. Did pass --enable-dune to its configure?")
-  set(UG_FOUND)
-endif(NOT UG_FOR_DUNE STREQUAL "yes")
-if(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
-  if(NOT UG_FOUND)
-    message(WARNING "CMake will only find UG 3.9.1-patch10 or newer. Maybe you need to upgrade?")
-  endif(NOT UG_FOUND)
-endif(NOT CMAKE_DISABLE_FIND_PACKAGE_UG)
+if(UG_FOUND AND (NOT UG_FOR_DUNE STREQUAL "yes"))
+  message(WARNING "UG was not configured for DUNE. Did you pass --enable-dune to its configure?")
+  set(UG_FOUND "UG_FOUND-NOTFOUND")
+endif()
+
 set(HAVE_UG ${UG_FOUND})
 
-if(${UG_FOUND})
-
+if(UG_FOUND)
   # parse patch level: last number in UG version string is DUNE patch level
   string(REGEX MATCH "[0-9]*$" UG_DUNE_PATCHLEVEL ${UG_VERSION})
 
@@ -67,14 +62,24 @@ if(${UG_FOUND})
         list(APPEND UG_LIBRARIES ${full_path})
       endif(full_path)
   endforeach(lib ugS2 ugS3 devS)
-endif(${UG_FOUND})
 
-#add all ug related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_ug_flags
-if(UG_FOUND)
+  # add all UG related flags to ALL_PKG_FLAGS, this must happen
+  # regardless of a target using add_dune_ug_flags
   set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-DENABLE_UG")
   foreach(dir ${UG_INCLUDES})
     set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
   endforeach()
+  # log result
+  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    "Determining location of UG ${UG_VERSION} succeded:\n"
+    "Include directories: ${UG_INCLUDES}\n"
+    "Libraries: ${UG_LIBRARIES}\n\n")
+else()
+  # log errornous result
+  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    "Determining location of UG failed:\n"
+    "Include directories: ${UG_INCLUDES}\n"
+    "Libraries: ${UG_LIBRARIES}\n\n")
 endif()
 
 # Add flags to targets
