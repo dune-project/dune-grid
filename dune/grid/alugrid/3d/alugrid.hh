@@ -29,7 +29,7 @@ namespace Dune
   template< int dim, int dimworld >
   class ALUSimplexGrid;
 
-  static const char* ALUGridParallelSerial()
+  static inline const char* ALUGridParallelSerial()
   {
 #if ALU3DGRID_PARALLEL
     return "parallel";
