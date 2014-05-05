@@ -22,7 +22,7 @@
 namespace Dune
 {
 
-  static const char* ALUGridParallelSerial()
+  static inline const char* ALUGridParallelSerial()
   {
 #if ALU3DGRID_PARALLEL
     return "parallel";
