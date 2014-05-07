@@ -71,10 +71,14 @@ namespace Dune
      * The datamode is always nonconforming.
      */
     explicit SubsamplingVTKWriter (const GridView &gridView,
-                                   unsigned int level_, bool coerceToSimplex_ = false)
+                                   int level_, bool coerceToSimplex_ = false)
       : Base(gridView, VTK::nonconforming)
         , level(level_), coerceToSimplex(coerceToSimplex_)
-    { }
+    {
+      if(level_ < 0) {
+        DUNE_THROW(Dune::IOError,"SubsamplingVTKWriter: Negative Subsampling " << level_ << " must not be used!");
+      }
+    }
 
   private:
     GeometryType subsampledGeometryType(GeometryType geometryType) {
@@ -110,7 +114,7 @@ namespace Dune
     template<class V>
     void addVertexData (const V& v, const std::string &name, int ncomps=1);
 
-    unsigned int level;
+    int level;
     bool coerceToSimplex;
   };
 
