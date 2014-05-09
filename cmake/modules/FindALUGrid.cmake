@@ -23,20 +23,19 @@ endif(NOT ALUGRID_ROOT)
 # try manually, if ALUGrid's pkg-config file not found
 if(NOT PKG_ALUGRID_FOUND)
   # first only at positions given by the user
-  find_file(PATH_PKG_ALUGRID
+  find_path(PATH_PKG_ALUGRID
     NAMES "alugrid.pc"
     PATHS ${ALUGRID_ROOT}
     PATH_SUFFIXES lib/pkgconfig lib32/pkgconfig lib64/pkgconfig
     NO_DEFAULT_PATH)
   # including default paths
-  find_file(PATH_PKG_ALUGRID
+  find_path(PATH_PKG_ALUGRID
     NAMES "alugrid.pc"
     PATH_SUFFIXES lib/pkgconfig lib32/pkgconfig lib64/pkgconfig)
 
   # try again with path temporarilly added to PKG_CONFIG_PATH
   set(REM_PKG_CONFIG_PATH "$ENV{PKG_CONFIG_PATH}")
-  get_filename_component(DIR_PKG_ALUGRID "${PATH_PKG_ALUGRID}" PATH)
-  set(ENV{PKG_CONFIG_PATH} "${ALUGRID_ROOT}:${DIR_PKG_ALUGRID}:${PKG_CONFIG_PATH}")
+  set(ENV{PKG_CONFIG_PATH} "${ALUGRID_ROOT}:${PATH_PKG_ALUGRID}:${PKG_CONFIG_PATH}")
   pkg_check_modules(PKG_ALUGRID "alugrid")
   set(ENV{PKG_CONFIG_PATH} REM_PKG_CONFIG_PATH)
 endif(NOT PKG_ALUGRID_FOUND)
