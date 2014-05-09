@@ -21,7 +21,11 @@ if(UG_ROOT AND NOT UG_DIR)
   endif()
 endif(UG_ROOT AND NOT UG_DIR)
 
-find_package(UG 3.9.1 QUIET)
+find_package(UG 3.9.1
+  NO_MODULE QUIET
+  NO_DEFAULT_PATH)
+find_package(UG 3.9.1
+  NO_MODULE)
 
 if(UG_FOUND AND (NOT UG_FOR_DUNE STREQUAL "yes"))
   message(WARNING "UG was not configured for DUNE. Did you pass --enable-dune to its configure?")
@@ -81,6 +85,15 @@ else()
     "Include directories: ${UG_INCLUDES}\n"
     "Libraries: ${UG_LIBRARIES}\n\n")
 endif()
+
+# output whether UG found
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
+  "UG"
+  DEFAULT_MSG
+  UG_DIR
+  HAVE_UG
+)
 
 # Add flags to targets
 function(add_dune_ug_flags)
