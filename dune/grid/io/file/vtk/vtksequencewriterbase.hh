@@ -4,6 +4,15 @@
 #ifndef DUNE_VTKSEQUENCEBASE_HH
 #define DUNE_VTKSEQUENCEBASE_HH
 
+#include <vector>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <iomanip>
+
+#include <dune/grid/io/file/vtk/common.hh>
+#include <dune/common/path.hh>
+
 namespace Dune {
 
   /** \brief Base class to write pvd-files which contains a list of all collected vtk-files
