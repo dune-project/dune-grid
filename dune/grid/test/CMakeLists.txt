@@ -53,6 +53,7 @@ set_property(DIRECTORY APPEND PROPERTY
 add_executable(test_geogrid EXCLUDE_FROM_ALL test-geogrid.cc)
 add_executable(test_identitygrid EXCLUDE_FROM_ALL test-identitygrid.cc)
 add_executable(test_oned EXCLUDE_FROM_ALL test-oned.cc)
+add_executable(test_mcmg_geogrid EXCLUDE_FROM_ALL test-mcmg-geogrid.cc)
 add_executable(test_sgrid EXCLUDE_FROM_ALL test-sgrid.cc)
 add_executable(test_yaspgrid EXCLUDE_FROM_ALL test-yaspgrid.cc)
 
@@ -99,8 +100,6 @@ if(ALUGRID_FOUND AND UG_FOUND)
   add_dune_ug_flags(test_dgfalu_uggrid_combination)
   add_dune_alugrid_flags(test_dgfalu_uggrid_combination)
 endif(ALUGRID_FOUND AND UG_FOUND)
-
-add_executable(test_mcmg_geogrid EXCLUDE_FROM_ALL test-mcmg-geogrid)
 
 foreach(_exe ${TESTS})
   target_link_libraries(${_exe} "dunegrid" ${DUNE_LIBS})
