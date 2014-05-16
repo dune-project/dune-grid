@@ -40,11 +40,6 @@ namespace Dune
   {
   public:
 
-    //! import the base class implementation of map and contains (including the deprecated version)
-    //! \todo remove in after next release
-    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::map;
-    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::contains;
-
     /** @brief Construct mapper from grid and one of its index sets.
 
        \param gridView A Dune GridView object.

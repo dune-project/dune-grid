@@ -38,11 +38,6 @@ namespace Dune
     typedef typename IDS::IdType IdType;
   public:
 
-    //! import the base class implementation of map and contains (including the deprecated version)
-    //! \todo remove after next release
-    using Mapper< G, UniversalMapper >::map;
-    using Mapper< G, UniversalMapper >::contains;
-
     /** @brief Construct mapper from grid and one of its id sets
 
        \param grid A Dune grid object.
