@@ -455,7 +455,7 @@ struct GridViewInterface
 
     // parallel interface
     typedef typename GridView::template Codim< 0 >::template Partition< Dune::Ghost_Partition >::Iterator GhostIterator DUNE_UNUSED;
-    typedef typename GridView::CollectiveCommunication CollectiveCommunication;
+    typedef typename GridView::CollectiveCommunication CollectiveCommunication DUNE_UNUSED;
 
     gv.template begin< 0, Dune::Ghost_Partition >();
     gv.template end< 0, Dune::Ghost_Partition >();

@@ -327,8 +327,6 @@ void checkPersistentContainerCodim(GridType & grid)
   typedef typename GridType::template Codim<codim>::LeafIterator Iterator;
 
   typedef typename GridType::template Codim<codim>:: Entity Entity;
-  typedef typename GridType::template Codim<codim>:: Geometry Geometry ;
-  typedef typename GridType:: ctype ctype;
 
   /** Loop only over the interior elements, not over ghost elements. */
   const Iterator endIterator = grid.template leafend<codim>();
