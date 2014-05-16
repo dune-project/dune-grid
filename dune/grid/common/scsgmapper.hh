@@ -1,7 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id$
-
 #ifndef DUNE_SCSGMAPPER_HH
 #define DUNE_SCSGMAPPER_HH
 
@@ -172,16 +170,14 @@ namespace Dune
 
      Template parameters are:
 
-     \par G
-     A Dune grid type.
-     \par c
-     A valid codimension.
+   * \tparam G A Dune grid type.
+   * \tparam c A valid codimension.
    */
   template <typename G, int c>
   class LeafSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c> {
   public:
-    /* @brief The constructor
-       @param grid A reference to a grid.
+    /** \brief The constructor
+     * \param grid A reference to a grid.
      */
     LeafSingleCodimSingleGeomTypeMapper (const G& grid)
       : SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c>(grid.leafGridView())
@@ -196,10 +192,8 @@ namespace Dune
 
      Template parameters are:
 
-     \par G
-     A Dune grid type.
-     \par c
-     A valid codimension.
+   * \tparam G A Dune grid type.
+   * \tparam c A valid codimension.
    */
   template <typename G, int c>
   class LevelSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c> {
