@@ -11,8 +11,8 @@ dune_add_library(dunegrid
   _DUNE_TARGET_OBJECTS:dgfparserblocks_
   ${ALULIBS} ${UGLIB}
   ADD_LIBS ${DUNE_LIBS})
-add_dune_ug_flags(dunegrid)
-add_dune_alugrid_flags(dunegrid)
+add_dune_ug_flags(dunegrid OBJECT)
+add_dune_alugrid_flags(dunegrid OBJECT)
 
 foreach(_dim ${ALBERTA_WORLD_DIMS})
   dune_add_library(dunealbertagrid_${_dim}d
