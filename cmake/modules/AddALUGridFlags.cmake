@@ -13,7 +13,6 @@ function(add_dune_alugrid_flags )
     if(ADD_ALU_SOURCE_ONLY)
       set(_prefix SOURCE)
       set(_source_only SOURCE_ONLY)
-      include_directories(${ALUGRID_INCLUDES})
     else()
       if(ADD_ALU_OBJECT)
         set(_object OBJECT)
@@ -24,11 +23,13 @@ function(add_dune_alugrid_flags )
         endforeach(_target ${ADD_ALU_UNPARSED_ARGUMENTS})
       endif(ADD_ALU_OBJECT)
       set(_prefix TARGET)
-      include_directories(${ALUGRID_INCLUDES})
     endif()
 
+    include_directories(${ALUGRID_INCLUDES})
     set_property(${_prefix} ${ADD_ALU_UNPARSED_ARGUMENTS}
-      APPEND PROPERTY COMPILE_DEFINITIONS ENABLE_ALUGRID)
+      APPEND PROPERTY
+      COMPILE_DEFINITIONS ENABLE_ALUGRID)
+    # add linker arguments
     if(NOT (ADD_ALU_SOURCE_ONLY OR ADD_ALU_OBJECT))
       set_property(${_prefix} ${ADD_ALU_UNPARSED_ARGUMENTS}
         APPEND PROPERTY
