@@ -315,6 +315,16 @@ namespace Dune
      */
     template<int codim> int count () const { return realEntity.template count<codim>(); }
 
+    /**\brief Number of subentities with codimension <tt>codim</tt>.
+     *
+     * Strictly speaking this method is redundant, because the same information can be obtained
+     * from the corresponding reference element. It is here for efficiency reasons only.
+     */
+    unsigned int count(unsigned int codim) const
+    {
+      return realEntity.count(codim);
+    }
+
     /** \brief Obtain a pointer to a subentity
      *
      *  \tparam  codim  codimension of the desired subentity
