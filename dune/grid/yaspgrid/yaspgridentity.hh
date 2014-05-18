@@ -203,6 +203,25 @@ namespace Dune {
       return binomial<<cc;
     }
 
+    /*! Return number of subentities with codimension cc.
+     *
+     * That number is (dim over (dim-codim)) times 2^codim
+     */
+    unsigned int count (unsigned int codim) const
+    {
+      int n = dim;
+      int k = dim-codim;
+
+      // binomial: n over k
+      int binomial=1;
+      for (int i=n-k+1; i<=n; i++)
+        binomial *= i;
+      for (long i=2; i<=k; i++)
+        binomial /= i;
+
+      return binomial<<codim;
+    }
+
     /*! Intra-element access to subentities of codimension cc > codim.
      */
     template<int cc>

@@ -326,6 +326,14 @@ namespace Dune {
     }
 
 
+    /** \brief Return the number of subEntities of codimension codim.
+     */
+    unsigned int count (unsigned int codim) const
+    {
+      return hostEntity_->count(codim);
+    }
+
+
     /** \brief Provide access to sub entity i of given codimension. Entities
      *  are numbered 0 ... count<cc>()-1
      */

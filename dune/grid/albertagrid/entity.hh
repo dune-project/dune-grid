@@ -228,6 +228,29 @@ namespace Dune
       return Alberta::NumSubEntities< dimension, codim >::value;
     }
 
+    /** \brief Obtain the number of subentities of a given codimension
+     *
+     * That number is ((dim+1) over (dim-codim+1))
+     *
+     *  \param  codim  codimension
+     *
+     *  \returns the number of subentities of the given codimension
+     */
+    unsigned int count (unsigned int codim) const
+    {
+      int n = dimension+1;
+      int k = dimension-codim+1;
+
+      // binomial: n over k
+      int binomial=1;
+      for (int i=n-k+1; i<=n; i++)
+        binomial *= i;
+      for (long i=2; i<=k; i++)
+        binomial /= i;
+
+      return binomial;
+    }
+
     /** obtain a subentity
      *
      *  \tparam  codim  codimension of the desired subentity

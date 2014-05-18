@@ -519,6 +519,43 @@ namespace Dune {
     template<int cc>
     int count () const;
 
+    /** \brief Return the number of subEntities of codimension codim.
+     */
+    unsigned int count (unsigned int codim) const
+    {
+      if (dim==3) {
+
+        switch (codim) {
+        case 0 :
+          return 1;
+        case 1 :
+          return UG_NS<dim>::Sides_Of_Elem(target_);
+        case 2 :
+          return UG_NS<dim>::Edges_Of_Elem(target_);
+        case 3 :
+          return UG_NS<dim>::Corners_Of_Elem(target_);
+        }
+
+      } else {
+
+        switch (codim) {
+        case 0 :
+          return 1;
+        case 1 :
+          return UG_NS<dim>::Edges_Of_Elem(target_);
+        case 2 :
+          return UG_NS<dim>::Corners_Of_Elem(target_);
+        default :
+          // do nothing for codim = 3
+          break;
+        }
+
+      }
+      DUNE_THROW(GridError, "You can't call UGGridEntity<0,dim>::count "
+             << "with dim==" << dim << " and codim==" << codim << "!");
+    }
+
+
     /** \brief Provide access to sub entity i of given codimension. Entities
      *  are numbered 0 ... count<cc>()-1
      */

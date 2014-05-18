@@ -290,6 +290,15 @@ namespace Dune {
       return (cc==0) ? 1 : item_->numvertices();
     }
 
+    /*! Intra-element access to entities of codimension cc > codim. Return number of entities
+        with codimension cc.
+     */
+    unsigned int count (unsigned int codim) const
+    {
+      assert( item_ );
+      return (codim==0) ? 1 : item_->numvertices();
+    }
+
     /**
        \brief Id of the boundary which is associated with
        the entity, returns 0 for inner entities, arbitrary int otherwise
