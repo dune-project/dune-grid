@@ -43,7 +43,6 @@ namespace Dune
 
 
   /** \brief Grid view abstract base class
-   *  \ingroup GIGridView
    *
    *  Interface class for a view on grids. Grids return two types of view,
    *  a view of the leaf grid and of a level grid, which both satisfy
@@ -51,6 +50,8 @@ namespace Dune
    *  iterators, the intersections and the index set.
    *
    *  The interface is implemented using the engine concept.
+   *
+   *  \ingroup GIGridView
    */
   template< class ViewTraits >
   class GridView
