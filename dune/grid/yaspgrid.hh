@@ -615,34 +615,6 @@ namespace Dune {
 
     //! The constructor of the old MultiYGrid class
     void MultiYGridSetup (
-                fTupel L, iTupel s, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
-    {
-      _LL = L;
-      _s = s;
-      _periodic = periodic;
-      _levels.resize(1);
-      _overlap = overlap;
-
-      // coarse cell interior  grid obtained through partitioning of global grid
-#if HAVE_MPI
-      iTupel o_interior;
-      iTupel s_interior;
-      iTupel o = iTupel(0);
-      array<int,dim> sArray;
-      std::copy(s.begin(), s.end(), sArray.begin());
-      double imbal = _torus.partition(_torus.rank(),o,sArray,o_interior,s_interior);
-      imbal = _torus.global_max(imbal);
-#else
-      iTupel o = iTupel(0);
-      iTupel o_interior(o);
-      iTupel s_interior(s);
-#endif
-      // add level
-      _levels[0] = makelevel(0,L,s,periodic,o_interior,s_interior,overlap);
-    }
-
-    //! The constructor of the old MultiYGrid class
-    void MultiYGridSetup (
       fTupel L,
       Dune::array<int,dim> s,
       std::bitset<dim> periodic,
