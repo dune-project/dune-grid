@@ -29,8 +29,8 @@ namespace Dune
     static const int dimensionworld = Grid::dimensionworld;
 
   private:
-    dune_static_assert( dimensionworld == Alberta::dimWorld,
-                        "AlbertaReader: world dimension must match ALBERTA's world dimension." );
+    static_assert(dimensionworld == Alberta::dimWorld,
+                  "AlbertaReader: world dimension must match ALBERTA's world dimension.");
 
     typedef Alberta::MacroData< dimension > MacroData;
 
@@ -46,7 +46,7 @@ namespace Dune
     template< GrapeIOFileFormatType type >
     void readGrid ( const std::string &fileName, GridFactory &factory )
     {
-      dune_static_assert( type != pgm, "AlbertaReader: reading pgm format is not supported." );
+      static_assert(type != pgm, "AlbertaReader: reading pgm format is not supported.");
 
       // read ALBERTA macro triangulation
       macroData_.read( fileName, (type == xdr) );

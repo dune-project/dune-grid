@@ -5,7 +5,7 @@ alu3dgrid_HEADERS = alu3dinclude.hh alu3dgridfactory.hh alu3dgridfactory.cc \
   entity.hh entity_imp.cc entity_inline.hh entityseed.hh \
   faceutility.hh faceutility_imp.cc geometry.hh geometry_imp.cc \
   indexsets.hh iterator.hh iterator.cc iterator_imp.cc alu3diterators.hh \
-  lbdatahandle.hh alugrid.hh capabilities.hh
+  lbdatahandle.hh alugrid.hh
 
 headercheck_IGNORE = $(alu3dgrid_HEADERS)
 

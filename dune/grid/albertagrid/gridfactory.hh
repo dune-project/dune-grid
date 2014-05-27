@@ -143,6 +143,8 @@ namespace Dune
 
     /** \brief mark a face as boundary (and assign a boundary id)
      *
+     *  \internal
+     *
      *  \param[in]  element  index of the element, the face belongs to
      *  \param[in]  face     local number of the face within the element
      *  \param[in]  id       boundary id to assign to the face
@@ -157,6 +159,8 @@ namespace Dune
     }
 
     /** \brief insert a boundary projection into the macro grid
+     *
+     *  \internal
      *
      *  \param[in]  type        geometry type of boundary face
      *  \param[in]  vertices    vertices of the boundary face
@@ -190,6 +194,8 @@ namespace Dune
 
 
     /** \brief insert a global (boundary) projection into the macro grid
+     *
+     *  \internal
      *
      *  \param[in]  projection  global (boundary) projection
      *
@@ -319,7 +325,7 @@ namespace Dune
     template< GrapeIOFileFormatType type >
     bool write ( const std::string &filename )
     {
-      dune_static_assert( type != pgm, "AlbertaGridFactory: writing pgm format is not supported." );
+      static_assert( type != pgm, "AlbertaGridFactory: writing pgm format is not supported." );
       macroData_.finalize();
       if( dimension < 3 )
         macroData_.setOrientation( Alberta::Real( 1 ) );

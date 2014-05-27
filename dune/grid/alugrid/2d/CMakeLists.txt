@@ -14,7 +14,6 @@ set(HEADERS
   datahandle.hh
   alu2dgridfactory.hh
   alugrid.hh
-  capabilities.hh
   bndprojection.hh
   intersection.cc
   alu2dgridfactory.cc

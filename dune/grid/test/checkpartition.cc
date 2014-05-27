@@ -8,6 +8,7 @@
 
 #include <dune/common/forloop.hh>
 #include <dune/common/typetraits.hh>
+#include <dune/common/unused.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridenums.hh>
@@ -57,6 +58,7 @@ struct PartitionFilter< Dune::All_Partition >
 {
   static bool contains ( const Dune::PartitionType partitionType )
   {
+    DUNE_UNUSED_PARAMETER(partitionType);
     return true;
   }
 };
@@ -180,7 +182,10 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
 
   template< class IdSet >
   static void check ( const Dune::false_type &, const GridView &gridView, const IdSet &idSet )
-  {}
+  {
+    DUNE_UNUSED_PARAMETER(gridView);
+    DUNE_UNUSED_PARAMETER(idSet);
+  }
 
   static void apply ( const GridView &gridView )
   {
@@ -263,16 +268,17 @@ public:
   template< class Entity >
   size_t size ( const Entity &entity ) const
   {
-    dune_static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
-    dune_static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
+    DUNE_UNUSED_PARAMETER(entity);
+    static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
+    static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
     return (contains_[ Entity::codimension ] ? 2 : 0);
   }
 
   template< class Buffer, class Entity >
   void gather ( Buffer &buffer, const Entity &entity ) const
   {
-    dune_static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
-    dune_static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
+    static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
+    static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
 
     invalidEntity_ |= !contains_[ Entity::codimension ];
     invalidSendEntity_ |= !Dune::EntityCommHelper< iftype >::send( entity.partitionType() );
@@ -284,8 +290,8 @@ public:
   template< class Buffer, class Entity >
   void scatter ( Buffer &buffer, const Entity &entity, size_t n )
   {
-    dune_static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
-    dune_static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
+    static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
+    static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
 
     invalidEntity_ |= !contains_[ Entity::codimension ];
     invalidSize_ |= (n != size( entity ));

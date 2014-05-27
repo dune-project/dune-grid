@@ -13,24 +13,27 @@ function(add_dune_alugrid_flags )
     if(ADD_ALU_SOURCE_ONLY)
       set(_prefix SOURCE)
       set(_source_only SOURCE_ONLY)
-      include_directories(${ALUGRID_INCLUDES})
     else()
       if(ADD_ALU_OBJECT)
         set(_object OBJECT)
       else(ADD_ALU_OBJECT)
         foreach(_target ${ADD_ALU_UNPARSED_ARGUMENTS})
-          target_link_libraries(${_target} dunegrid ${ALUGRID_LIBRARIES} ${METIS_LIBRARIES} dunegeometry dunecommon)
+          target_link_libraries(${_target}
+            ${ALUGRID_LIBRARIES} ${METIS_LIBRARIES})
         endforeach(_target ${ADD_ALU_UNPARSED_ARGUMENTS})
       endif(ADD_ALU_OBJECT)
       set(_prefix TARGET)
-      include_directories(${ALUGRID_INCLUDES})
     endif()
 
+    include_directories(${ALUGRID_INCLUDES})
     set_property(${_prefix} ${ADD_ALU_UNPARSED_ARGUMENTS}
-      APPEND PROPERTY COMPILE_DEFINITIONS ENABLE_ALUGRID)
+      APPEND PROPERTY
+      COMPILE_DEFINITIONS ENABLE_ALUGRID)
+    # add linker arguments
     if(NOT (ADD_ALU_SOURCE_ONLY OR ADD_ALU_OBJECT))
       set_property(${_prefix} ${ADD_ALU_UNPARSED_ARGUMENTS}
-        APPEND PROPERTY LINK_LIBRARIES  dunegrid ${ALUGRID_LIBRARIES}  ${METIS_LIBRARIES} dunegeometry dunecommon)
+        APPEND PROPERTY
+        LINK_LIBRARIES ${ALUGRID_LIBRARIES} ${METIS_LIBRARIES})
     endif(NOT (ADD_ALU_SOURCE_ONLY OR ADD_ALU_OBJECT))
     if(HAVE_ALUGRID_PARALLEL_H)
       add_dune_mpi_flags(${ADD_ALU_UNPARSED_ARGUMENTS} ${_source_only} ${_object})

@@ -25,24 +25,38 @@ namespace Dune {
 
   public:
 
+    /** \brief Constructor setting up a 'begin' iterator
+     */
     UGGridLeafIterator(const GridImp& grid) : grid_(&grid) {
       // Entities below this level are certainly not leaf entities
-      const unsigned int startingLevel = grid.leafIndexSet_.coarsestLevelWithLeafElements_;
+      unsigned int levelCounter = grid.leafIndexSet_.coarsestLevelWithLeafElements_;
 
+      // If the grid is distributed, the grid on the 'coarsestLevelWithLeafElements_' may actually be empty, because
+      // it is all on other processors.  Therefore we have to also look at finer levels.
+      // In a sequential program, the while loops always iterate exactly once.
       if (codim==dim) {
-        if (pitype==All_Partition || pitype==Ghost_Partition)
-          this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]), grid_);
-        else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
-          this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]), grid_);
-        else     // overlap and overlap-front
+        if (pitype==All_Partition || pitype==Ghost_Partition) {
+          do {
+            this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[levelCounter++]), grid_);
+          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+        } else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition) {
+          do {
+            this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[levelCounter++]), grid_);
+          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+        } else     // overlap and overlap-front -- these don't exist in UG grids
           this->setToTarget(nullptr,nullptr);
 
       } else if (codim==0) {
-        if (pitype==All_Partition || pitype==Ghost_Partition)
-          this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]), grid_);
-        else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
-          this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]), grid_);
-        else     // overlap and overlap-front
+        if (pitype==All_Partition || pitype==Ghost_Partition) {
+          do {
+            this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[levelCounter++]), grid_);
+          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+        } else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition) {
+          do {
+            this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[levelCounter++]), grid_);
+          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+        }
+        else     // overlap and overlap-front -- these don't exist in UG grids
           this->setToTarget(nullptr,nullptr);
 
       } else
@@ -52,7 +66,8 @@ namespace Dune {
         increment();
     }
 
-    //! Constructor
+    /** \brief Constructor setting up an 'end' iterator
+     */
     UGGridLeafIterator()
     {
       this->virtualEntity_.setToTarget(nullptr,nullptr);

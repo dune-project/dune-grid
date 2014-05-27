@@ -313,7 +313,7 @@ namespace Dune
         return entity_;
       }
 
-      int level () const { return hostElementIterator().level(); }
+      int level () const { return hostElementIterator()->level(); }
 
       const Grid &grid () const { return entityImpl().grid(); }
       int subEntity () const { return entityImpl().subEntity(); }

@@ -124,7 +124,6 @@ private:
 template <class GridView>
 void checkIntersections(const GridView &gv)
 {
-  typedef typename GridView::template Codim<0>::Entity Element;
   typedef typename GridView::template Codim<0>::Iterator Iterator;
   typedef typename GridView::IntersectionIterator IntersectionIterator;
 

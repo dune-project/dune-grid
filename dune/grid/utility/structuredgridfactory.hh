@@ -306,7 +306,7 @@ namespace Dune {
 
       return shared_ptr<GridType>
                (new GridType(upperRight, elements_,
-                             std::bitset<dim>(false), 0));
+                             std::bitset<dim>(), 0));  // default constructor of bitset sets to zero
     }
 
     /** \brief Create a structured simplex grid

@@ -71,23 +71,6 @@ namespace Dune {
   template<class GridImp, bool isLeafIndexSet>                     class YaspIndexSet;
   template<class GridImp>            class YaspGlobalIdSet;
 
-  namespace FacadeOptions
-  {
-
-    template<int dim, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim, YaspGrid<dim>, YaspGeometry>
-    {
-      static const bool v = false;
-    };
-
-    template<int dim, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim, const YaspGrid<dim>, YaspGeometry>
-    {
-      static const bool v = false;
-    };
-
-  }
-
 } // namespace Dune
 
 #include <dune/grid/yaspgrid/yaspgridgeometry.hh>
@@ -632,34 +615,6 @@ namespace Dune {
 
     //! The constructor of the old MultiYGrid class
     void MultiYGridSetup (
-                fTupel L, iTupel s, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
-    {
-      _LL = L;
-      _s = s;
-      _periodic = periodic;
-      _levels.resize(1);
-      _overlap = overlap;
-
-      // coarse cell interior  grid obtained through partitioning of global grid
-#if HAVE_MPI
-      iTupel o_interior;
-      iTupel s_interior;
-      iTupel o = iTupel(0);
-      array<int,dim> sArray;
-      std::copy(s.begin(), s.end(), sArray.begin());
-      double imbal = _torus.partition(_torus.rank(),o,sArray,o_interior,s_interior);
-      imbal = _torus.global_max(imbal);
-#else
-      iTupel o = iTupel(0);
-      iTupel o_interior(o);
-      iTupel s_interior(s);
-#endif
-      // add level
-      _levels[0] = makelevel(0,L,s,periodic,o_interior,s_interior,overlap);
-    }
-
-    //! The constructor of the old MultiYGrid class
-    void MultiYGridSetup (
       fTupel L,
       Dune::array<int,dim> s,
       std::bitset<dim> periodic,
@@ -685,78 +640,6 @@ namespace Dune {
 
       // add level
       _levels[0] = makelevel(0,L,_s,periodic,o_interior,s_interior,overlap);
-    }
-
-    /*! Constructor
-       @param comm MPI communicator where this mesh is distributed to
-       @param L extension of the domain
-       @param s number of cells on coarse mesh in each direction
-       @param periodic tells if direction is periodic or not
-       @param overlap size of overlap on coarsest grid (same in all directions)
-       @param lb pointer to an overloaded YLoadBalance instance
-
-       \deprecated Will be removed after dune-grid 2.3.
-         Use the corresponding constructor taking array<int> and std::bitset instead.
-     */
-    YaspGrid (Dune::MPIHelper::MPICommunicator comm,
-              Dune::FieldVector<ctype, dim> L,
-              Dune::FieldVector<int, dim> s,
-              Dune::FieldVector<bool, dim> periodic, int overlap,
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
-    DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
-#if HAVE_MPI
-      : ccobj(comm),
-        _torus(comm,tag,s,lb),
-#else
-      :  _torus(tag,s,lb),
-#endif
-        leafIndexSet_(*this),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
-    {
-      MultiYGridSetup(L,s,std::bitset<dim>(),overlap,lb);
-
-      // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
-      for (size_t i=0; i<dim; i++)
-        this->_periodic[i] = periodic[i];
-      init();
-    }
-
-
-    /*! Constructor for a sequential YaspGrid
-
-       Sequential here means that the whole grid is living on one process even if your program is running
-       in parallel.
-       @see YaspGrid(Dune::MPIHelper::MPICommunicator, Dune::FieldVector<ctype, dim>, Dune::FieldVector<int, dim>,  Dune::FieldVector<bool, dim>, int)
-       for constructing one parallel grid decomposed between the processors.
-       @param L extension of the domain
-       @param s number of cells on coarse mesh in each direction
-       @param periodic tells if direction is periodic or not
-       @param overlap size of overlap on coarsest grid (same in all directions)
-       @param lb pointer to an overloaded YLoadBalance instance
-
-       \deprecated Will be removed after dune-grid 2.3.
-         Use the corresponding constructor taking array<int> and std::bitset instead.
-     */
-    YaspGrid (Dune::FieldVector<ctype, dim> L,
-              Dune::FieldVector<int, dim> s,
-              Dune::FieldVector<bool, dim> periodic, int overlap,
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
-    DUNE_DEPRECATED_MSG("Use the corresponding constructor taking array<int> and std::bitset")
-#if HAVE_MPI
-      : ccobj(MPI_COMM_SELF),
-        _torus(MPI_COMM_SELF,tag,s,lb),
-#else
-      : _torus(tag,s,lb),
-#endif
-        leafIndexSet_(*this),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
-    {
-      MultiYGridSetup(L,s,std::bitset<dim>(),overlap,lb);
-
-      // hack: copy input bitfield (in FieldVector<bool>) into std::bitset
-      for (size_t i=0; i<dim; i++)
-        this->_periodic[i] = periodic[i];
-      init();
     }
 
     /*! Constructor
@@ -1472,7 +1355,7 @@ namespace Dune {
       template<class Y>
       void write (const Y& data)
       {
-        dune_static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
         a[i++] = data;
       }
 
@@ -1480,7 +1363,7 @@ namespace Dune {
       template<class Y>
       void read (Y& data) const
       {
-        dune_static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
         data = a[j++];
       }
 
@@ -1538,8 +1421,8 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     YaspLevelIterator<cd,pitype,GridImp> levelbegin (int level) const
     {
-      dune_static_assert( cd == dim || cd == 0 ,
-                          "YaspGrid only supports Entities with codim=dim and codim=0");
+      static_assert((cd == dim || cd == 0),
+                    "YaspGrid only supports Entities with codim=dim and codim=0");
       YGridLevelIterator g = begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (pitype==Ghost_Partition)
@@ -1569,8 +1452,8 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     YaspLevelIterator<cd,pitype,GridImp> levelend (int level) const
     {
-      dune_static_assert( cd == dim || cd == 0 ,
-                          "YaspGrid only supports Entities with codim=dim and codim=0");
+      static_assert((cd == dim || cd == 0),
+                    "YaspGrid only supports Entities with codim=dim and codim=0");
       YGridLevelIterator g = begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (cd==0)   // the elements

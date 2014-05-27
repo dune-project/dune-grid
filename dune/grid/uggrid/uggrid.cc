@@ -4,12 +4,14 @@
 #include <config.h>
 
 #include <set>
+#include <map>
 
 #include <dune/grid/uggrid.hh>
 
 /** \todo Remove the following include once getAllSubfaces... is gone */
 #include <dune/common/sllist.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/grid/common/mcmgmapper.hh>
 
 
 using namespace Dune;
@@ -504,14 +506,14 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 }
 
 template < int dim >
-bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, int maxLevel, int minelement)
+bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel)
 {
   // Do nothing if we are on a single process
   if (comm().size()==1)
     return true;
 
   /** \todo Test for valid arguments */
-  std::string argStrings[4];
+  std::string argStrings[2];
   std::stringstream numberAsAscii[4];
 
   numberAsAscii[0] << strategy;
@@ -520,18 +522,10 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
   numberAsAscii[1] << minlevel;
   argStrings[1] = "c " + numberAsAscii[1].str();
 
-  numberAsAscii[2] << depth;
-  argStrings[2] = "d " + numberAsAscii[2].str();
+  const char* argv[2] = {argStrings[0].c_str(),
+                         argStrings[1].c_str()};
 
-  numberAsAscii[3] << minelement;
-  argStrings[3] = "e " + numberAsAscii[3].str();
-
-  const char* argv[4] = {argStrings[0].c_str(),
-                         argStrings[1].c_str(),
-                         argStrings[2].c_str(),
-                         argStrings[3].c_str()};
-
-  int errCode = UG_NS<dim>::LBCommand(4, argv);
+  int errCode = UG_NS<dim>::LBCommand(2, argv);
 
   if (errCode)
     DUNE_THROW(GridError, "UG" << dim << "d::LBCommand returned error code " << errCode);
@@ -544,6 +538,88 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
   return true;
 }
 
+template < int dim >
+bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel)
+{
+  // Do nothing if we are on a single process
+  if (comm().size()==1)
+    return true;
+
+#ifdef ModelP  // The Partition field only exists if ModelP is set
+  if (targetProcessors.size() != this->leafGridView().size(0))
+    DUNE_THROW(Exception, "targetProcessors argument does not have the correct size");
+
+  // Get unique consecutive index across different element types
+  typedef MultipleCodimMultipleGeomTypeMapper<typename Base::LeafGridView, MCMGElementLayout> ElementMapper;
+  ElementMapper elementMapper(this->leafGridView());
+
+  // Loop over all elements of all level, in decreasing level number.
+  // If the element is a leaf, take its target rank from the input targetProcessors array.
+  // If it is not, assign it to the processor most of its children are assigned to.
+  for (int i=maxLevel(); i>=0; i--) {
+
+    typename Base::LevelGridView levelGridView = this->levelGridView(i);
+    typedef typename Base::LevelGridView::template Codim<0>::template Partition<Interior_Partition>::Iterator LevelElementIterator;
+
+    for (LevelElementIterator it = levelGridView.template begin<0, Interior_Partition>();
+         it != levelGridView.template end<0, Interior_Partition>();
+         ++it) {
+
+      if (it->isLeaf()) {
+
+        unsigned int targetRank = targetProcessors[elementMapper.map(*it)];
+
+        // sanity check
+        if (targetRank >= comm().size())
+          DUNE_THROW(GridError, "Requesting target processor " << targetRank <<
+                     ", but only " << comm().size() << " processors are available.");
+
+        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = targetRank;
+      } else {
+
+        std::map<int,int> rank;
+        unsigned int mostFrequentRank = 0;    // which rank occurred most often?
+        unsigned int mostFrequentCount = 0;   // how often did it occur?
+
+        // Loop over all children and collect the ranks they are assigned to
+        typename Base::LevelGridView::template Codim<0>::Entity::HierarchicIterator child    = it->hbegin(it->level()+1);
+        typename Base::LevelGridView::template Codim<0>::Entity::HierarchicIterator endChild = it->hend(it->level()+1);
+        for (; child !=  endChild; ++child) {
+
+          int childRank = UG_NS<dim>::Partition(this->getRealImplementation(*child).target_);
+
+          if (rank.find(childRank) == rank.end())
+            rank[childRank] = 1;
+          else
+            rank[childRank]++;
+
+          if (rank[childRank] > mostFrequentCount) {
+            mostFrequentRank = childRank;
+            mostFrequentCount = rank[childRank];
+          }
+
+        }
+
+        // Assign rank that occurred most often
+        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = mostFrequentRank;
+
+      }
+    }
+  }
+#endif
+
+  int errCode = UG_NS<dim>::TransferGridFromLevel(multigrid_, fromLevel);
+
+  if (errCode)
+    DUNE_THROW(GridError, "UG" << dim << "d::TransferGridFromLevel returned error code " << errCode);
+
+  // Renumber everything.
+  // Note: this must not be called when on a single process, because it renumbers the zero-level
+  // elements and vertices.
+  setIndices(true, NULL);
+
+  return true;
+}
 
 template < int dim >
 void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,

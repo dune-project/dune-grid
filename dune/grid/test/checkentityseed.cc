@@ -135,7 +135,7 @@ namespace CheckEntitySeed // don't blur namespace Dune
     typedef typename Grid::template Codim< codim >::EntitySeed EntitySeed;
 
     // Check whether EntitySeed reports the correct codimension
-    dune_static_assert(EntitySeed::codimension==codim, "Codimension exported by EntitySeed is incorrect!");
+    static_assert(EntitySeed::codimension==codim, "Codimension exported by EntitySeed is incorrect!");
 
     static void apply ( const GridView &gridView, std::ostream &output )
     {

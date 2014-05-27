@@ -15,29 +15,25 @@ common_HEADERS = \
 	entityseed.hh \
 	exceptions.hh \
 	geometry.hh \
-	geometryreference.hh \
 	grid.hh \
 	gridenums.hh \
 	gridfactory.hh \
 	gridinfo.hh \
 	gridview.hh \
-	hierarchiciterator.hh \
 	indexidset.hh \
 	intersection.hh \
 	intersectioniterator.hh \
-	leafiterator.hh \
-	leveliterator.hh \
 	mcmgmapper.hh \
 	mapper.hh \
-	refinement.hh \
 	sizecache.hh \
 	scsgmapper.hh \
-	universalmapper.hh \
-	virtualrefinement.hh
+	universalmapper.hh
 
 SUBDIRS = test
 
+if BUILD_DOCS
 dist_noinst_DATA = cube-to-tet-6.png
+endif
 
 include $(top_srcdir)/am/global-rules
 include $(top_srcdir)/am/inkscape.am

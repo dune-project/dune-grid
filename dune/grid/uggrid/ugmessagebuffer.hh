@@ -184,10 +184,10 @@ namespace Dune {
     static unsigned ugBufferSize_(const GridView &gv)
     {
       if (Base::duneDataHandle_->fixedsize(dim, codim)) {
-        typedef typename GridView::template Codim<0>::Entity Element;
-        const Element& element = *gv.template begin<0, InteriorBorder_Partition>();
+        typedef typename GridView::template Codim<0>::template Partition<InteriorBorder_Partition>::Iterator ElementIterator;
+        ElementIterator element = gv.template begin<0, InteriorBorder_Partition>();
         return sizeof(DataType)
-               * Base::duneDataHandle_->size(*element.template subEntity<codim>(0));
+               * Base::duneDataHandle_->size(*element->template subEntity<codim>(0));
       }
 
       // iterate over all entities, find the maximum size for

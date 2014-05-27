@@ -178,8 +178,8 @@ namespace Dune
       ctype integrationElement ( const LocalCoordinate &local ) const { return mapping_->integrationElement( local ); }
       ctype volume () const { return mapping_->volume(); }
 
-      const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianTransposed( local ); }
-      const JacobianInverseTransposed &jacobianInverseTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianInverseTransposed( local ); }
+      JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianTransposed( local ); }
+      JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianInverseTransposed( local ); }
 
       const Grid &grid () const { return *grid_; }
 
@@ -195,22 +195,6 @@ namespace Dune
     };
 
   } // namespace GeoGrid
-
-
-
-  // FacadeOptions
-  // -------------
-
-  namespace FacadeOptions
-  {
-
-    template< int mydim, int cdim, class Grid >
-    struct StoreGeometryReference< mydim, cdim, Grid, GeoGrid::Geometry >
-    {
-      static const bool v = false;
-    };
-
-  } // namespace FacadeOptions
 
 } // namespace Dune
 

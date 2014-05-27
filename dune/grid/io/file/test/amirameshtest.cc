@@ -22,7 +22,7 @@ template <class GridType>
 void testReadingUnstructuredGrid(const std::string& filename) {
 
   // Read the grid
-  std::auto_ptr<GridType> grid(AmiraMeshReader<GridType>::read(filename));
+  std::unique_ptr<GridType> grid(AmiraMeshReader<GridType>::read(filename));
 
   // Write the grid into a tmp file
   LeafAmiraMeshWriter<GridType> amiramesh(*grid);
@@ -104,14 +104,14 @@ int main() try {
 #endif
 
 #if HAVE_ALUGRID
-  std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
-  testReadingUnstructuredGrid<ALUSimplexGrid<2,2> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-2d.am");
+  std::cout << "reading ALUGrid<2,2,simplex,nonconforming>" << std::endl;
+  testReadingUnstructuredGrid<ALUGrid<2,2,simplex,nonconforming> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-2d.am");
 
-  std::cout << "reading ALUSimplexGrid<3,3>" << std::endl;
-  testReadingUnstructuredGrid<ALUSimplexGrid<3,3> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-3d.am");
+  std::cout << "reading ALUGrid<3,3,simplex,nonconforming>" << std::endl;
+  testReadingUnstructuredGrid<ALUGrid<3,3,simplex,nonconforming> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-3d.am");
 
-  std::cout << "reading ALUCubeGrid<3,3>" << std::endl;
-  testReadingUnstructuredGrid<ALUCubeGrid<3,3> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/cube-testgrid-3d.am");
+  std::cout << "reading ALUGrid<3,3,cube,nonconforming>" << std::endl;
+  testReadingUnstructuredGrid<ALUGrid<3,3,cube,nonconforming> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/cube-testgrid-3d.am");
 #endif
 
   // Test whether writing uniform data works

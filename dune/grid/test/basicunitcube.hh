@@ -4,10 +4,6 @@
 #define  BASICUNITCUBE_HH
 
 // StructuredGridFactory cannot replace BasicUnitCube when creating a projected unit cube in test-alberta.cc
-/*
-   #warning The BasicUnitCube class is deprecated (since dune-grid 2.1).  Please use the StructuredGridFactory \
-         (in dune/grid/utility/structuredgridfactory.hh) instead!
- */
 
 #include <dune/grid/common/gridfactory.hh>
 

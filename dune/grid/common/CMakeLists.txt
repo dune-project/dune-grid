@@ -12,25 +12,19 @@ set(HEADERS
   entityseed.hh
   exceptions.hh
   geometry.hh
-  geometryreference.hh
   grid.hh
   gridenums.hh
   gridfactory.hh
   gridinfo.hh
   gridview.hh
-  hierarchiciterator.hh
   indexidset.hh
   intersection.hh
   intersectioniterator.hh
-  leafiterator.hh
-  leveliterator.hh
   mcmgmapper.hh
   mapper.hh
-  refinement.hh
   sizecache.hh
   scsgmapper.hh
-  universalmapper.hh
-  virtualrefinement.hh)
+  universalmapper.hh)
 
 add_subdirectory(test EXCLUDE_FROM_ALL)
 

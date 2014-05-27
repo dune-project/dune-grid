@@ -24,35 +24,6 @@ namespace Dune
   class GridDefaultImplementation;
 
 
-
-  namespace FacadeOptions
-  {
-
-    //! \brief Traits class determining whether the Dune::Geometry facade
-    //!        class stores the implementation object by reference or by value
-    /**
-     * \ingroup GIGeometry
-     *
-     * Storing by reference is appropriate for grid managers that keep an
-     * instance of each geometry around anyway.  Note that the reference to
-     * that instance must be valid at least until the next grid modification.
-     *
-     * \note Even grid managers that let the facade class store a copy must
-     *       take care to keep that copy valid until the next grid
-     *       modification, e.g. if the geometry implementation object does not
-     *       itself store the corner coordinates but only keeps references.
-     */
-    template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
-    struct StoreGeometryReference
-    {
-      //! Whether to store by reference.
-      static const bool v = true;
-    };
-
-  }
-
-
-
   //*****************************************************************************
   //
   // Geometry
@@ -87,13 +58,6 @@ namespace Dune
      The Geometry class template wraps an object of type GeometryImp and forwards all member
      function calls to corresponding members of this class. In that sense Geometry
      defines the interface and GeometryImp supplies the implementation.
-
-     The grid manager can instruct this facade class to either itself store an
-     instance of the implementation class or keep a reference to an instance
-     stored elsewhere as determined by FacadeOptions::StoreGeometryReference.
-     In any case it is guaranteed that instances of Geometry are valid until
-     the grid is changed (via any of adapt(), loadBalance() or
-     globalRefine()).
 
      \ingroup GIGeometry
    */
@@ -135,14 +99,26 @@ namespace Dune
     //! type of the global coordinates
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
-    //! type of jacobian inverse transposed
+    /**
+     * \brief type of jacobian inverse transposed
+     *
+     * The exact type is implementation-dependent.
+     * However, it is guaranteed to have the following properties:
+     * - It satisfies the ConstMatrix interface.
+     * - It is copy construcable and copy assignable.
+     * .
+     */
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
 
-    //! typedef for backward compatibility
-    //! \deprecated
-    typedef JacobianInverseTransposed Jacobian DUNE_DEPRECATED_MSG ( "type Geometry::Jacobian is deprecated, use Geometry::JacobianInverseTransposed instead." );
-
-    //! type of jacobian transposed
+    /**
+     * \brief type of jacobian transposed
+     *
+     * The exact type is implementation-dependent.
+     * However, it is guaranteed to have the following properties:
+     * - It satisfies the ConstMatrix interface.
+     * - It is copy construcable and copy assignable.
+     * .
+     */
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
@@ -253,9 +229,10 @@ namespace Dune
      *  \param[in]  local  position \f$x\in D\f$
      *
      *  \return \f$J_g^T(x)\f$
+     *
+     *  \note The exact return type is implementation defined.
      */
-    const JacobianTransposed &
-    jacobianTransposed ( const LocalCoordinate& local ) const
+    JacobianTransposed jacobianTransposed ( const LocalCoordinate& local ) const
     {
       return impl().jacobianTransposed( local );
     }
@@ -278,9 +255,10 @@ namespace Dune
      *        pseudoinverse of \f$J_g^T(x)\f$ is returned.
      *        This means that it is inverse for all tangential vectors in
      *        \f$g(x)\f$ while mapping all normal vectors to zero.
+     *
+     *  \note The exact return type is implementation defined.
      */
-    const JacobianInverseTransposed &
-    jacobianInverseTransposed ( const LocalCoordinate &local ) const
+    JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianInverseTransposed(local);
     }
@@ -293,9 +271,7 @@ namespace Dune
     //! copy constructor from implementation
     explicit Geometry ( const Implementation &impl )
       : realGeometry( impl )
-    {
-      deprecationWarning ( integral_constant< bool, storeReference >() );
-    }
+    {}
 
     //@}
 
@@ -303,16 +279,9 @@ namespace Dune
     /** hide assignment operator */
     const Geometry &operator= ( const Geometry &rhs );
 
-    void DUNE_DEPRECATED_MSG( "This Dune::Geometry is still a reference to its implementation." )
-    deprecationWarning ( integral_constant< bool, true > ) {}
-
-    void
-    deprecationWarning ( integral_constant< bool, false > ) {}
-
   protected:
-    static const bool storeReference = FacadeOptions::StoreGeometryReference< mydim, cdim, GridImp, GeometryImp >::v;
 
-    typename conditional< storeReference, const Implementation &, Implementation >::type realGeometry;
+    Implementation realGeometry;
   };
 
 

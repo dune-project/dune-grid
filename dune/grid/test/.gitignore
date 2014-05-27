@@ -13,6 +13,7 @@ test-alberta-3-3
 test-alberta-generic
 test-geogrid
 test-mcmg-geogrid
+test-identitygrid
 test-sgrid
 test-oned
 test-ug

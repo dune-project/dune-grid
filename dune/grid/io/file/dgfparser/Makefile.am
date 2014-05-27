@@ -19,6 +19,7 @@ libdgfparser_la_LIBADD = blocks/libdgfparserblocks.la \
 
 dgfparserdir = $(includedir)/dune/grid/io/file/dgfparser
 dgfparser_HEADERS = dgfalu.cc  dgfexception.hh  \
+		    dgfidentitygrid.hh \
 		    dgfalu.hh  dgfug.hh \
 		    dgfparser.hh  dgfgeogrid.hh \
 		    dgfwriter.hh  dgfyasp.hh \

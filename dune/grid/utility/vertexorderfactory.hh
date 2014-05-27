@@ -61,7 +61,7 @@ namespace Dune {
     typename VertexOrder<Element::mydimension>::type
     make(const Element &e) const {
       typedef ReferenceElements<
-          typename Element::ctype,
+          typename Element::Geometry::ctype,
           Element::mydimension
           > RefElems;
       std::size_t size =

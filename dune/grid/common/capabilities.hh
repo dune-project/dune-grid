@@ -31,12 +31,12 @@ namespace Dune
 
     /** \brief Specialize with 'true' if the grid is a Cartesian grid.
         Cartesian grids satisfy the following properties:
-          - all geometries are affine
-          - The unit outer normal for an intersection with indexInInside = face
+          - all geometries are axis-aligned hypercubes
+          - The unit outer normal for the i-th intersection
             can be computed by the following code:
           \code
              FieldVector< ctype, dim > n( 0 );
-             n[ face / 2 ] = ctype( 2*(face % 2) - 1 );
+             n[ i / 2 ] = ctype( 2*(i % 2) - 1 );
           \endcode
         (default=false).
         \ingroup GICapabilities
@@ -115,7 +115,7 @@ namespace Dune
         \sa viewThreadSafe
 
         \note that the communicate method can only be called by one individual thread,
-        as the whole Dune parallel components are (i.e. can not be) not thread safe.
+        as the whole Dune parallel components are not (i.e. cannot be) thread safe.
 
         \ingroup GICapabilities
      */
@@ -133,11 +133,11 @@ namespace Dune
         \sa threadSafe
 
         \note that the communicate method can only be called by one individual thread,
-        as the whole Dune parallel components are (i.e. can not be) not thread safe.
+        as the whole Dune parallel components are (i.e. cannot be) not thread safe.
 
         \note the methods leafGridView(), levelGridView(level) on the Grid can only be called single-threaded
 
-        \note calling the methods indexSet(), idSet(), globalIdSet() on the Grid or the GridView xis only allowed,
+        \note calling the methods indexSet(), idSet(), globalIdSet() on the Grid or the GridView is only allowed,
         if they were called once before starting the threads.
 
         \code

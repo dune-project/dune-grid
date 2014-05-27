@@ -36,7 +36,7 @@
 	  @ingroup GridInterface */
   /** @defgroup GICapabilities Capabilities
 	  @ingroup GridInterface */
-  
+
   /**
      @defgroup Mapper Mappers
      @ingroup Grid
@@ -47,20 +47,14 @@
 	 @ingroup Grid
         @brief A list of the different Implementations of the Dune Grid Interface
   */
-  
+
 	/** @defgroup ALUGrid ALUGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup ALUCubeGrid ALUCubeGrid 
-		@ingroup GridImplementations */
-
-	/** @defgroup ALUSimplexGrid ALUSimplexGrid 
-		@ingroup GridImplementations */
-
-	/** @defgroup ALUConformGrid ALUConformGrid 
-		@ingroup GridImplementations */
-
   /** \defgroup GeoGrid GeometryGrid
+    \ingroup GridImplementations */
+
+  /** \defgroup IdentityGrid IdentityGrid
     \ingroup GridImplementations */
 
 	/** @defgroup OneDGrid OneDGrid 
@@ -104,7 +98,7 @@
 
         /** @defgroup Gmsh Gmsh grid format
             @ingroup IO */
-        
+
         /** @defgroup Grape Grape
             @ingroup IO */
 

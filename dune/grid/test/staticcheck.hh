@@ -21,8 +21,8 @@ struct GeometryInterface
 {
   static void check ( const Geometry &geo )
   {
-    dune_static_assert( (Geometry::mydimension == dim-codim), "" );
-    dune_static_assert( (Geometry::dimension == dim), "" );
+    static_assert( (Geometry::mydimension == dim-codim), "" );
+    static_assert( (Geometry::dimension == dim), "" );
 
     typedef typename Geometry::ctype ctype DUNE_UNUSED;
 
@@ -56,9 +56,8 @@ template <class Entity>
 void DoEntityInterfaceCheck (Entity &e)
 {
   // exported types
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  typedef typename Entity::ctype ctype DUNE_UNUSED;
-#endif // !DISABLE_DEPRECATED_METHOD_CHECK
+  typedef typename Entity::Geometry Geometry DUNE_UNUSED;
+  typedef typename Entity::EntitySeed EntitySeed DUNE_UNUSED;
 
   // methods on each entity
   e.level();
@@ -227,8 +226,8 @@ struct EntityInterface
   static void check ( const Entity &e )
   {
     // consistent?
-    dune_static_assert( (Entity::codimension == codim), "" );
-    dune_static_assert( (Entity::dimension == dim), "" );
+    static_assert( (Entity::codimension == codim), "" );
+    static_assert( (Entity::dimension == dim), "" );
 
     // do the checking
     DoEntityInterfaceCheck(e);
@@ -274,8 +273,8 @@ struct EntityInterface<Grid, 0, dim, true>
   static void check ( const Entity &e, bool checkLevelIter = true )
   {
     // consistent?
-    dune_static_assert( (Entity::codimension == 0), "" );
-    dune_static_assert( (Entity::dimension == dim), "" );
+    static_assert( (Entity::codimension == 0), "" );
+    static_assert( (Entity::dimension == dim), "" );
 
     // do the common checking
     DoEntityInterfaceCheck(e);
@@ -362,8 +361,8 @@ struct EntityInterface<Grid, dim, dim, true>
   static void check ( const Entity &e )
   {
     // consistent?
-    dune_static_assert( (Entity::codimension == dim), "" );
-    dune_static_assert( (Entity::dimension == dim), "" );
+    static_assert( (Entity::codimension == dim), "" );
+    static_assert( (Entity::dimension == dim), "" );
 
     // run common test
     DoEntityInterfaceCheck(e);
@@ -456,7 +455,7 @@ struct GridViewInterface
 
     // parallel interface
     typedef typename GridView::template Codim< 0 >::template Partition< Dune::Ghost_Partition >::Iterator GhostIterator DUNE_UNUSED;
-    typedef typename GridView::CollectiveCommunication CollectiveCommunication;
+    typedef typename GridView::CollectiveCommunication CollectiveCommunication DUNE_UNUSED;
 
     gv.template begin< 0, Dune::Ghost_Partition >();
     gv.template end< 0, Dune::Ghost_Partition >();
@@ -570,8 +569,8 @@ struct GridInterface
     }
     // recursively check entity-interface
     // ... we only allow grids with codim 0 zero entites
-    dune_static_assert((Dune::Capabilities::hasEntity<Grid, 0>::v),"Grid must have codim 0 entities");
-    dune_static_assert((Dune::Capabilities::hasEntity<const Grid, 0>::v),"Grid must have codim 0 entities");
+    static_assert((Dune::Capabilities::hasEntity<Grid, 0>::v),"Grid must have codim 0 entities");
+    static_assert((Dune::Capabilities::hasEntity<const Grid, 0>::v),"Grid must have codim 0 entities");
 
     EntityInterface< Grid, 0, Grid::dimension, Dune::Capabilities::hasEntity< Grid, 0 >::v >();
 

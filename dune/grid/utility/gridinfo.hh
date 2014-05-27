@@ -174,9 +174,9 @@ namespace Dune {
     static void apply(const Entity &e, const Mapper &mapper, Visited &visited,
                       const typename Entity::Geometry &geo,
                       const RefElem &refelem,
-                      GridViewInfo<typename Entity::ctype> &gridViewInfo)
+                      GridViewInfo<typename Entity::Geometry::ctype> &gridViewInfo)
     {
-      typedef typename Entity::ctype ctype;
+      typedef typename Entity::Geometry::ctype ctype;
       static const std::size_t dimw = Entity::Geometry::dimensionworld;
       static const std::size_t dim = Entity::dimension;
       std::vector<FieldVector<ctype, dimw> > coords;

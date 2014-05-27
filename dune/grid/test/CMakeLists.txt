@@ -9,7 +9,7 @@ if(ALBERTA_FOUND)
     test_alberta_generic)
   set(ALBERTA_EXTRA_PRGRAMS test_alberta)
   message(AUTHOR_WARNING "TODO: Check whether test_alberta is treated correctly.")
- endif(ALBERTA_FOUND)
+endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
   set(ALUGRID_PROGRAMS test_alugrid)
@@ -43,7 +43,7 @@ set(CACHECOORDFUNCTION 0)
 
 # tests where program to build and program to run are equal
 set(TESTS
-  test_geogrid test_oned test_sgrid test_yaspgrid
+  test_geogrid test_identitygrid test_oned test_sgrid test_yaspgrid
   ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
   ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid)
 
@@ -51,7 +51,9 @@ set_property(DIRECTORY APPEND PROPERTY
   COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
 
 add_executable(test_geogrid EXCLUDE_FROM_ALL test-geogrid.cc)
+add_executable(test_identitygrid EXCLUDE_FROM_ALL test-identitygrid.cc)
 add_executable(test_oned EXCLUDE_FROM_ALL test-oned.cc)
+add_executable(test_mcmg_geogrid EXCLUDE_FROM_ALL test-mcmg-geogrid.cc)
 add_executable(test_sgrid EXCLUDE_FROM_ALL test-sgrid.cc)
 add_executable(test_yaspgrid EXCLUDE_FROM_ALL test-yaspgrid.cc)
 
@@ -98,8 +100,6 @@ if(ALUGRID_FOUND AND UG_FOUND)
   add_dune_ug_flags(test_dgfalu_uggrid_combination)
   add_dune_alugrid_flags(test_dgfalu_uggrid_combination)
 endif(ALUGRID_FOUND AND UG_FOUND)
-
-add_executable(test_mcmg_geogrid EXCLUDE_FROM_ALL test-mcmg-geogrid)
 
 foreach(_exe ${TESTS})
   target_link_libraries(${_exe} "dunegrid" ${DUNE_LIBS})

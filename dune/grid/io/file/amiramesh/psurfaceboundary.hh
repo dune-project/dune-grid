@@ -35,7 +35,7 @@ namespace Dune {
   template <int dim>
   class PSurfaceBoundary
   {
-    dune_static_assert((dim==1 or dim==2), "PSurfaceBoundaries can only have dimensions 1 or 2!");
+    static_assert((dim==1 or dim==2), "PSurfaceBoundaries can only have dimensions 1 or 2!");
 
   public:
 
@@ -60,7 +60,7 @@ namespace Dune {
         Dune::FieldVector<double, dim+1> result;
 
         // Transform local to barycentric coordinates
-        PSURFACE_NAMESPACE StaticVector<float,dim> barCoords;
+        psurface::StaticVector<float,dim> barCoords;
 
         if (dim==2) {
           barCoords[0] = 1 - local[0] - local[1];
@@ -69,7 +69,7 @@ namespace Dune {
           barCoords[0] = 1 - local[0];
         }
 
-        PSURFACE_NAMESPACE StaticVector<float,dim+1> r;
+        psurface::StaticVector<float,dim+1> r;
 
         if (!psurfaceBoundary_->getPSurfaceObject()->positionMap(segment_, barCoords, r))
           DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
@@ -87,7 +87,7 @@ namespace Dune {
 
 
     /** \brief Constructor from a given PSurface object */
-    PSurfaceBoundary(PSURFACE_NAMESPACE PSurface<dim,float>* psurface)
+    PSurfaceBoundary(psurface::PSurface<dim,float>* psurface)
       : psurface_(psurface)
     {}
 
@@ -98,7 +98,7 @@ namespace Dune {
      * This class retains control over the memory management.  Do not
      * delete the object you receive.
      */
-    PSURFACE_NAMESPACE PSurface<dim,float>* getPSurfaceObject()
+    psurface::PSurface<dim,float>* getPSurfaceObject()
     {
       return psurface_.get();
     }
@@ -112,7 +112,7 @@ namespace Dune {
      */
     static shared_ptr<PSurfaceBoundary<dim> > read(const std::string& filename)
     {
-      PSURFACE_NAMESPACE PSurface<dim,float>* newDomain;
+      psurface::PSurface<dim,float>* newDomain;
 
 #if HAVE_PSURFACE_2_0
       // Try to read the file as an hdf5 file
@@ -124,13 +124,13 @@ namespace Dune {
 #endif
 
 #if HAVE_AMIRAMESH
-      std::auto_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
+      std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
       if (!am.get())
         DUNE_THROW(IOError, "An error has occured while reading " << filename);
 
       newDomain
-        = (PSURFACE_NAMESPACE PSurface<dim,float>*) PSURFACE_NAMESPACE AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
+        = (psurface::PSurface<dim,float>*) psurface::AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
 
       if (!newDomain)
         DUNE_THROW(IOError, "An error has occured while reading " << filename);
@@ -143,7 +143,7 @@ namespace Dune {
 
   private:
 
-    std::auto_ptr<PSURFACE_NAMESPACE PSurface<dim,float> > psurface_;
+    std::unique_ptr<psurface::PSurface<dim,float> > psurface_;
 
   };
 

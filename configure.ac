@@ -1,8 +1,7 @@
-#! /bin/bash
-# $Id$
+# -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
+
 DUNE_AC_INIT # gets module version from dune.module file
-AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([dune/grid/common/grid.hh])
 AC_CONFIG_HEADERS([config.h])
 
@@ -67,6 +66,7 @@ AC_CONFIG_FILES([Makefile
     dune/grid/alugrid/2d/Makefile
     dune/grid/alugrid/3d/Makefile
     dune/grid/alugrid/Makefile
+    dune/grid/identitygrid/Makefile
     dune/grid/io/file/test/Makefile
     dune/grid/io/file/amiramesh/Makefile
     dune/grid/io/file/dgfparser/Makefile

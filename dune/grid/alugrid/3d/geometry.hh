@@ -790,17 +790,6 @@ namespace Dune
     GeometryImplType* geoImpl_;
   };
 
-  namespace FacadeOptions
-  {
-    //! geometry can be stored as an object
-    template< int mydim, int cdim, class GridImp >
-    struct StoreGeometryReference< mydim, cdim, GridImp, ALU3dGridGeometry >
-    {
-      //! Whether to store by reference.
-      static const bool v = false;
-    };
-  }
-
 } // end namespace Dune
 
 #include "geometry_imp.cc"

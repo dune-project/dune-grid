@@ -173,16 +173,6 @@ namespace Dune
       return centroid_;
     }
 
-    /** \brief deprecated way of obtaining the i-th corner
-     * \deprecated Use corner( int i) instead. This method will be removed after Dune 2.3.
-     */
-    const GlobalCoordinate &operator[] ( const int i ) const
-    DUNE_DEPRECATED_MSG("Use corner( int i) instead.")
-    {
-      assert( (i >= 0) && (i < corners()) );
-      return coord_[ i ];
-    }
-
     /** \brief map a point from the refence element to the geometry */
     GlobalCoordinate global ( const LocalCoordinate &local ) const;
 
@@ -380,15 +370,6 @@ namespace Dune
       return y;
     }
 
-    /** \brief deprecated way of obtaining the i-th corner
-     * \deprecated Use corner( int i) instead. This method will be removed after Dune 2.3.
-     */
-    const GlobalCoordinate &operator[] ( const int i ) const
-    DUNE_DEPRECATED_MSG("Use corner( int i) instead.")
-    {
-      return reinterpret_cast< const GlobalCoordinate & >( elementInfo_.coordinate( i ) );
-    }
-
     /** \brief return center of geometry */
     GlobalCoordinate center () const
     {
@@ -575,22 +556,6 @@ namespace Dune
     const LocalElementGeometry *geometryInFather_[ numChildren ][ 2 ];
     const LocalFaceGeometry *faceGeometry_[ numFaces ][ numFaceTwists ];
   };
-
-
-
-  // FacadeOptions
-  // -------------
-
-  namespace FacadeOptions
-  {
-
-    template< int mydim, int cdim, class Grid >
-    struct StoreGeometryReference< mydim, cdim, Grid, AlbertaGridGlobalGeometry >
-    {
-      static const bool v = false;
-    };
-
-  } // namespace FacadeOptions
 
 } // namespace Dune
 

@@ -706,6 +706,11 @@ namespace Dune
         return hostEntity().template count< codim >();
       }
 
+      unsigned int count (unsigned int codim) const
+      {
+        return hostEntity().count(codim);
+      }
+
       template< int codim >
       typename Grid::template Codim< codim >::EntityPointer
       subEntity ( int i ) const

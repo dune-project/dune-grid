@@ -521,9 +521,6 @@ namespace Dune
 // Template Instantiation
 // ----------------------
 
-template class Dune::ALU2dGridFactory< Dune::ALUConformGrid< 2, 2 > >;
-template class Dune::ALU2dGridFactory< Dune::ALUSimplexGrid< 2, 2 > >;
-
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming,    Dune::No_Comm > >;
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming, Dune::No_Comm > >;
 #if HAVE_MPI
@@ -531,14 +528,8 @@ template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune:
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming, MPI_Comm > >;
 #endif // #if HAVE_MPI
 
-template class Dune::ALU2dGridFactory< Dune::ALUCubeGrid< 2, 2 > >;
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming, Dune::No_Comm > >;
 
-template class Dune::ALU2dGridFactory< Dune::ALUConformGrid< 2, 3 > >;
-template class Dune::ALU2dGridFactory< Dune::ALUSimplexGrid< 2, 3 > >;
-template class Dune::ALU2dGridFactory< Dune::ALUCubeGrid< 2, 3 > >;
-
-// new versions
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming,    Dune::No_Comm > >;
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming, Dune::No_Comm > >;
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::cube,    Dune::nonconforming, Dune::No_Comm > >;

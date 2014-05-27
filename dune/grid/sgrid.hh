@@ -50,25 +50,6 @@ namespace Dune {
   template<class GridImp> class SIntersectionIterator;
   template<class GridImp> class SHierarchicIterator;
 
-  namespace FacadeOptions
-  {
-
-    template<int dim, int dimworld, class ctype, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim,
-        SGrid<dim,dimworld,ctype>, SGeometry>
-    {
-      static const bool v = false;
-    };
-
-    template<int dim, int dimworld, class ctype, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim,
-        const SGrid<dim,dimworld,ctype>, SGeometry>
-    {
-      static const bool v = false;
-    };
-
-  }
-
   //************************************************************************
   /*!
      SGeometry realizes the concept of the geometric part of a mesh entity.
@@ -370,6 +351,10 @@ namespace Dune {
      */
     template<int cc> int count () const;
 
+    /** \brief Return number of subentities with codimension codim.
+     */
+    unsigned int count (unsigned int codim) const;
+
     /**
        Provide access to mesh entity i of given codimension. Entities
        are numbered 0 ... count<cc>()-1
@@ -639,7 +624,7 @@ namespace Dune {
 
     int boundarySegmentIndex () const {
       if (boundary())
-        return grid->boundarySegmentIndex(self.level(), count, zred);
+        return grid->boundarySegmentIndex(self->level(), count, zred);
       return -1;
     }
 
