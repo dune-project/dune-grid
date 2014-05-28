@@ -20,7 +20,7 @@ foreach(_dim ${ALBERTA_WORLD_DIMS})
     _DUNE_TARGET_OBJECTS:dgfparser_
     _DUNE_TARGET_OBJECTS:dgfparserblocks_
     ADD_LIBS ${DUNE_LIBS})
-  add_dune_alberta_flags(dunealbertagrid_${_dim}d GRIDDIM ${_dim})
+  add_dune_alberta_flags(dunealbertagrid_${_dim}d OBJECT GRIDDIM ${_dim})
   list(APPEND DUNE_ALBERTA_LIBS dunealbertagrid_${dim}d)
 endforeach(_dim "${ALBERTA_DIMS}")
 
