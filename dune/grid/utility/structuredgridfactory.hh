@@ -97,8 +97,10 @@ namespace Dune {
 
         // scale the multiindex to obtain a world position
         FieldVector<double,dimworld> pos(0);
-        for (int j=0; j<dimworld; j++)
+        for (int j=0; j<dim; j++)
           pos[j] = lowerLeft[j] + index[j] * (upperRight[j]-lowerLeft[j])/(vertices[j]-1);
+        for (int j=dim; j<dimworld; j++)
+          pos[j] = lowerLeft[j];
 
         factory.insertVertex(pos);
 
@@ -123,6 +125,10 @@ namespace Dune {
   public:
 
     /** \brief Create a structured cube grid
+
+        If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
+        the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
+
         \param lowerLeft Lower left corner of the grid
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
@@ -193,8 +199,15 @@ namespace Dune {
     /** \brief Create a structured simplex grid
 
         This works in all dimensions.  The Coxeter-Freudenthal-Kuhn triangulation is
-        used, which splits each cube into dim! simplices.  See Allgower and Georg,
+        used, which splits each cube into dim! (i.e., dim faculty) simplices.  See Allgower and Georg,
         'Numerical Path Following' for a description.
+
+        If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
+        the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
+
+        \param lowerLeft Lower left corner of the grid
+        \param upperRight Upper right corner of the grid
+        \param elements Number of elements in each coordinate direction
      */
     static shared_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                                                   const FieldVector<ctype,dimworld>& upperRight,
