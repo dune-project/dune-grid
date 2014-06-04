@@ -74,8 +74,6 @@ namespace Dune
     template< class GridImp, PartitionIteratorType pitype >
     class UGGridLevelGridView
     {
-      typedef UGGridLevelGridView< GridImp, pitype > ThisType;
-
     public:
       typedef UGGridLevelGridViewTraits<GridImp,pitype> Traits;
 
@@ -260,8 +258,6 @@ namespace Dune
     template< class GridImp, PartitionIteratorType pitype >
     class UGGridLeafGridView
     {
-      typedef UGGridLeafGridView< GridImp, pitype > ThisType;
-
     public:
       typedef UGGridLeafGridViewTraits<GridImp,pitype> Traits;
 
