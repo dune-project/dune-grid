@@ -1022,9 +1022,9 @@ namespace Dune {
       return UG_NAMESPACE ::GetMultigrid(name);
     }
 
-    static int LBCommand(int argc, const char** argv) {
-      /** \todo Can we remove the cast? */
-      return UG_NAMESPACE ::LBCommand(argc, (char**)argv);
+    /** \brief Load-balance the grid by recursive coordinate bisection */
+    static void lbs(const char *argv, UG_NAMESPACE ::multigrid *theMG) {
+      return UG_NAMESPACE ::lbs(argv, theMG);
     }
 
     //! An UG-internal load balancing method

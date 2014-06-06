@@ -512,23 +512,9 @@ bool Dune::UGGrid < dim >::loadBalance(int minlevel)
   if (comm().size()==1)
     return true;
 
-  /** \todo Test for valid arguments */
-  std::string argStrings[2];
-  std::stringstream numberAsAscii[4];
-
-  numberAsAscii[0] << 0;
-  argStrings[0] = "lb " + numberAsAscii[0].str();
-
-  numberAsAscii[1] << minlevel;
-  argStrings[1] = "c " + numberAsAscii[1].str();
-
-  const char* argv[2] = {argStrings[0].c_str(),
-                         argStrings[1].c_str()};
-
-  int errCode = UG_NS<dim>::LBCommand(2, argv);
-
-  if (errCode)
-    DUNE_THROW(GridError, "UG" << dim << "d::LBCommand returned error code " << errCode);
+  std::stringstream levelarg;
+  levelarg << minlevel;
+  UG_NS<dim>::lbs(levelarg.str().c_str(), multigrid_);
 
   // Renumber everything.
   // Note: this must not be called when on a single process, because it renumbers the zero-level
