@@ -488,14 +488,6 @@ namespace Dune {
       return (codim==0) ? 1 : 0;
     }
 
-    /** \brief Default load balancing.
-        \bug The return value is always 'true'
-        \return true if the grid has changed
-     */
-    bool loadBalance() {
-      return loadBalance(0);
-    }
-
     /** \brief Distributes the grid and some data over the available nodes in a distributed machine
 
         \tparam DataHandle works like the data handle for the communicate
@@ -535,16 +527,11 @@ namespace Dune {
 
     /** \brief Distributes this grid over the available nodes in a distributed machine
 
-       If you want the UG default for the parameters pick
-       <ul>
-       <li>minlevel = 1</li>
-       </ul>
-
        \bug The return value is always 'true'
 
        \param minlevel The coarsest grid level that gets distributed
      */
-    bool loadBalance(int minlevel);
+    bool loadBalance(int minlevel=0);
 
     /** \brief Distribute this grid over a distributed machine
      *
