@@ -791,6 +791,9 @@ namespace Dune {
           // Is the following line needed or not?
           // dddIfaces.push_back(UG_NS<dim>::EdgeIF());
           return;
+        case All_All_Interface :
+          dddIfaces.push_back(UG_NS<dim>::EdgeSymmVHIF());
+          return;
         default :
           DUNE_THROW(GridError,
                      "Edge communication not supported for "
