@@ -493,7 +493,7 @@ namespace Dune {
         \return true if the grid has changed
      */
     bool loadBalance() {
-      return loadBalance(0,0);
+      return loadBalance(0);
     }
 
     /** \brief Distributes the grid and some data over the available nodes in a distributed machine
@@ -537,7 +537,6 @@ namespace Dune {
 
        If you want the UG default for the parameters pick
        <ul>
-       <li>strategy = 0</li>
        <li>minlevel = 1</li>
        </ul>
 
@@ -545,7 +544,7 @@ namespace Dune {
 
        \param minlevel The coarsest grid level that gets distributed
      */
-    bool loadBalance(int strategy, int minlevel);
+    bool loadBalance(int minlevel);
 
     /** \brief Distribute this grid over a distributed machine
      *
