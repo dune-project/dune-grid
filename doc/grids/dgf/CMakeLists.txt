@@ -29,7 +29,9 @@ set(GRIDS
   helix.dgf
   octahedron.dgf
   simplex-testgrid-1-1.dgf
+  simplex-testgrid-1-2.dgf
   simplex-testgrid-2-2.dgf
+  simplex-testgrid-1-3.dgf
   simplex-testgrid-2-3.dgf
   simplex-testgrid-3-3.dgf
   simplex-testgrid-3-3-large.dgf
