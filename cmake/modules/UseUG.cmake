@@ -106,7 +106,7 @@ function(add_dune_ug_flags)
       if(NOT ADD_UG_OBJECT)
         foreach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
           target_link_libraries(${_target}
-            dunegrid ${UG_LIBRARIES})
+            dunegrid ${UG_LIBRARIES} ${DUNE_LIBS})
         endforeach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
       endif()
       set(_prefix TARGET)
@@ -121,7 +121,7 @@ function(add_dune_ug_flags)
     if(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
       set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
         APPEND PROPERTY
-        LINK_LIBRARIES ${UG_LIBRARIES})
+        LINK_LIBRARIES dunegrid ${UG_LIBRARIES} ${DUNE_LIBS})
     endif(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
     if(UG_PARALLEL STREQUAL "yes")
       # Add modelp

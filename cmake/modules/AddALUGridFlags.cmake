@@ -19,7 +19,7 @@ function(add_dune_alugrid_flags )
       else(ADD_ALU_OBJECT)
         foreach(_target ${ADD_ALU_UNPARSED_ARGUMENTS})
           target_link_libraries(${_target}
-            ${ALUGRID_LIBRARIES} ${METIS_LIBRARIES})
+            dunegrid ${ALUGRID_LIBRARIES} ${METIS_LIBRARIES} ${DUNE_LIBS})
         endforeach(_target ${ADD_ALU_UNPARSED_ARGUMENTS})
       endif(ADD_ALU_OBJECT)
       set(_prefix TARGET)
@@ -33,7 +33,7 @@ function(add_dune_alugrid_flags )
     if(NOT (ADD_ALU_SOURCE_ONLY OR ADD_ALU_OBJECT))
       set_property(${_prefix} ${ADD_ALU_UNPARSED_ARGUMENTS}
         APPEND PROPERTY
-        LINK_LIBRARIES ${ALUGRID_LIBRARIES} ${METIS_LIBRARIES})
+        LINK_LIBRARIES dunegrid ${ALUGRID_LIBRARIES} ${METIS_LIBRARIES} ${DUNE_LIBS})
     endif(NOT (ADD_ALU_SOURCE_ONLY OR ADD_ALU_OBJECT))
     if(HAVE_ALUGRID_PARALLEL_H)
       add_dune_mpi_flags(${ADD_ALU_UNPARSED_ARGUMENTS} ${_source_only} ${_object})

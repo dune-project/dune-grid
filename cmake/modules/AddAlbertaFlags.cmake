@@ -43,7 +43,7 @@ macro(add_dune_alberta_flags)
           target_link_libraries(${_target}
             dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d
             ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB}
-            ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
+            dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
         endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
       endif()
     endif(ADD_ALBERTA_SOURCE_ONLY)
