@@ -25,7 +25,7 @@ function(add_dune_grape_flags)
 
       set_property(${_prefix}  ${ADD_GRAPE_UNPARSED_ARGUMENTS} APPEND
         PROPERTY
-        COMPILE_DEFINITIONS -DENABLE_GRAPE=1)
+        COMPILE_DEFINITIONS ENABLE_GRAPE=1)
       include_directories(${GRAPE_INCLUDE_DIRS})
     endif(ADD_GRAPE_SOURCE_ONLY)
   endif(GRAPE_FOUND)
