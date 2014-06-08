@@ -1024,7 +1024,9 @@ namespace Dune {
 
     /** \brief Load-balance the grid by recursive coordinate bisection */
     static void lbs(const char *argv, UG_NAMESPACE ::multigrid *theMG) {
+#ifdef ModelP
       return UG_NAMESPACE ::lbs(argv, theMG);
+#endif
     }
 
     //! An UG-internal load balancing method
