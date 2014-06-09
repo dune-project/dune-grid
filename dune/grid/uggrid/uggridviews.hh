@@ -254,7 +254,7 @@ namespace Dune
     };
 
 
-    /** \brief Implementation class of LevelGridViews for UGGrid */
+    /** \brief Implementation class of LeafGridViews for UGGrid */
     template< class GridImp, PartitionIteratorType pitype >
     class UGGridLeafGridView
     {
