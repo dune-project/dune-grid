@@ -409,6 +409,36 @@ namespace Dune {
       }
 
 #if defined ModelP
+      if (dim-cd==1) {
+
+        const typename UG_NS<dim>::Edge* edge = (typename UG_NS<dim>::Edge* const)(grid_.getRealImplementation(e).getTarget());
+
+        // If this edge is the copy of an edge on a lower level we return the id of that lower
+        // edge, because Dune wants entities which are copies of each other to have the same id.
+        // BUG: in the parallel setting, we only search on our own processor, but the lowest
+        // copy may actually be on a different processor!
+        const typename UG_NS<dim>::Edge* fatherEdge;
+        fatherEdge = GetFatherEdge(edge);
+
+        while (fatherEdge   // fatherEdge exists
+               // ... and it must be a true copy father
+               && ( (fatherEdge->links[0].nbnode->myvertex == edge->links[0].nbnode->myvertex
+                     && fatherEdge->links[1].nbnode->myvertex == edge->links[1].nbnode->myvertex)
+                    ||
+                    (fatherEdge->links[0].nbnode->myvertex == edge->links[1].nbnode->myvertex
+                     && fatherEdge->links[1].nbnode->myvertex == edge->links[0].nbnode->myvertex) ) ) {
+          edge = fatherEdge;
+          fatherEdge = GetFatherEdge(edge);
+        }
+
+#ifdef ModelP
+        return edge->ddd.gid;
+#else
+        return edge->id;
+#endif
+      }
+
+
       if (cd == dim) {
         typename UG_NS<dim>::Node *node =
           reinterpret_cast<typename UG_NS<dim>::Node *>(grid_.getRealImplementation(e).getTarget());
