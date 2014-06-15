@@ -61,7 +61,7 @@ AC_DEFUN([DUNE_PATH_UG],[
       # temporarily to PKG_CONFIG_PATH
       REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
       # The first additional path is for uninstalled UG, the second one for the installed UG
-	  UGLIBPKCONFIG=`echo $UGROOT/lib*/pkgconfig | sed -e 's/\s\+/:/g'`
+      UGLIBPKCONFIG=`echo $UGROOT/lib*/pkgconfig | sed -e 's/\s\+/:/g'`
       PKG_CONFIG_PATH="$UGROOT:$UGLIBPKCONFIG:$PKG_CONFIG_PATH"
 
       UG_LDFLAGS=""
@@ -73,12 +73,12 @@ AC_DEFUN([DUNE_PATH_UG],[
 
       # Check whether UG is installed at all
       if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --exists libug; then
-	    HAVE_UG="1"
+        HAVE_UG="1"
         AC_MSG_RESULT(yes)
-	  else
-		HAVE_UG="0"
+      else
+        HAVE_UG="0"
         AC_MSG_RESULT(no)
-		AC_MSG_WARN([UG not found])
+        AC_MSG_WARN([UG not found])
       fi
 
       ## check version number 
@@ -134,25 +134,25 @@ AC_DEFUN([DUNE_PATH_UG],[
       if test x$HAVE_UG = x1; then
 
         # Set the compiler flags
-		UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
+        UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
         direct_UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
 
-          if test x`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=parallel libug` == xyes; then
-			
+        if test x`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=parallel libug` == xyes; then
+
           # Add additional flags needed for parallel UG  
-		  UG_LDFLAGS="\${DUNEMPILDFLAGS} $UG_LDFLAGS"
+          UG_LDFLAGS="\${DUNEMPILDFLAGS} $UG_LDFLAGS"
           direct_UG_LDFLAGS="$DUNEMPILDFLAGS $direct_UG_LDFLAGS"
           UG_CPPFLAGS="\${DUNEMPICPPFLAGS} $UG_CPPFLAGS -DModelP"
           direct_UG_CPPFLAGS="$DUNEMPICPPFLAGS $direct_UG_CPPFLAGS -DModelP"
           UG_LIBS="$UG_LIBS \${DUNEMPILIBS}"
           direct_UG_LIBS="$direct_UG_LIBS $DUNEMPILIBS"
           with_ug="yes (parallel)"
-		   
-		else
-			
+
+        else
+
           with_ug="yes (sequential)"
-				   
-	    fi
+
+        fi
 
       fi
 
