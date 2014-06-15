@@ -928,7 +928,7 @@ namespace Dune {
     /** \brief Number of UGGrids currently in use.
      *
      * This counts the number of UGGrids currently instantiated.  All
-     * constructors of UGGrid look at this variable.  If it zero, they
+     * constructors of UGGrid look at this variable.  If it is zero, they
      * initialize UG before proceeding.  Destructors use the same mechanism
      * to safely shut down UG after deleting the last UGGrid object.
      */
