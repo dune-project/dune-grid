@@ -82,7 +82,7 @@ AC_DEFUN([DUNE_PATH_UG],[
       fi
 
       ## check version number 
-      NEEDEDUG_VERSION=3.9.1-patch9
+      NEEDEDUG_VERSION=3.11.0
 
       if test x$HAVE_UG = x1; then
           
