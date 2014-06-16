@@ -97,15 +97,6 @@ AC_DEFUN([DUNE_PATH_UG],[
               AC_MSG_WARN([UG version is too old (you need at least $NEEDEDUG_VERSION)])
           fi
           
-          # The following code is temporary: starting with UG-3.9.1-patch10,
-          # UG exposes some extra infrastructure for dynamic load-balancing.
-          # We only want to use it if people have patch10 installed.
-          if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=3.9.1-patch10 libug; then
-              HAVE_UG_PATCH10="1"
-          else
-              HAVE_UG_PATCH10="0"
-              AC_MSG_WARN([Please consider updating to at least UG-3.9.1-patch10 (will be mandatory for dune-grid 2.4)])
-          fi
       fi
 
       # pre-set variable for summary
@@ -189,14 +180,6 @@ AC_DEFUN([DUNE_PATH_UG],[
         [This is only true if UG was found by configure 
          _and_ if the application uses the UG_CPPFLAGS])
          
-      # Remove the following as soon as we absolutely require patch10 or higher
-      if test x$HAVE_UG_PATCH10 = x1 ; then
-      
-        AC_DEFINE(HAVE_UG_PATCH10, 1,
-            [Do we have UG in at least version 3.9.1-patch10?])
-            
-      fi
-
   fi 
       
   # tell automake   

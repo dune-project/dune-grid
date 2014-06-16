@@ -498,9 +498,6 @@ namespace Dune {
     template<class DataHandle>
     bool loadBalance (DataHandle& dataHandle)
     {
-#if !HAVE_UG_PATCH10
-      DUNE_THROW(NotImplemented, "load balancing with data attached");
-#else
 #ifdef ModelP
       // gather element data
       //        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
@@ -522,7 +519,6 @@ namespace Dune {
 #endif
 
       return true;
-#endif  // HAVE_UG_PATCH10
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine

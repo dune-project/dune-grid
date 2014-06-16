@@ -443,9 +443,6 @@ public:
   template <class Grid>
   static void test(Grid& grid)
   {
-#if !HAVE_UG_PATCH10
-    grid.loadBalance();
-#else
     const int dim = Grid::dimension;
     const int commCodim = dim;
     typedef typename Grid::ctype ctype;
@@ -494,7 +491,6 @@ public:
 
     std::cout << gv.comm().rank()
               << ": load balancing with data was successful." << std::endl;
-#endif
   }
 };
 
