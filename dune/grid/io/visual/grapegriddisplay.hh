@@ -480,9 +480,9 @@ namespace Dune
     setGridPartIterators_t * setGridPartIter_;
 
     // pointer to index method
-    const EntityIndexFuncType * entityIndex;
+    EntityIndexFuncType * const entityIndex;
     // pointer to vertex method
-    const VertexIndexFuncType * vertexIndex;
+    VertexIndexFuncType * const vertexIndex;
 
     StackEntryType stackEntry_;
 #endif // #if HAVE_GRAPE
