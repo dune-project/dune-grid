@@ -76,7 +76,7 @@ namespace Dune
     typedef DataTypeImp DataType;
 
   protected:
-    // one should not create an explicit instance of this inteface object
+    // one should not create an explicit instance of this interface object
     CommDataHandleIF() {}
 
   public:
@@ -104,7 +104,7 @@ namespace Dune
 
     /** @brief how many objects of type DataType have to be sent for a given entity
         @note Only the sender side needs to know this size.
-        @param e entity for which the size should be dertermined
+        @param e entity for which the size should be determined
      */
     template<class EntityType>
     size_t size (const EntityType& e) const
