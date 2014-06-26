@@ -656,9 +656,9 @@ namespace Dune {
     {
       // check if the two grids can be intersected, must have same mesh size and shift
       for (int i=0; i<d; i++)
-        if (fabs(this->meshsize(i)-r.meshsize(i))>Ytolerance) return SubYGrid<d,ct>();
+        if (std::abs(this->meshsize(i)-r.meshsize(i))>Ytolerance) return SubYGrid<d,ct>();
       for (int i=0; i<d; i++)
-        if (fabs(this->shift(i)-r.shift(i))>Ytolerance) return SubYGrid<d,ct>();
+        if (std::abs(this->shift(i)-r.shift(i))>Ytolerance) return SubYGrid<d,ct>();
 
       iTupel neworigin;
       iTupel newsize;

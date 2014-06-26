@@ -21,10 +21,10 @@ if(UG_ROOT AND NOT UG_DIR)
   endif()
 endif(UG_ROOT AND NOT UG_DIR)
 
-find_package(UG 3.9.1
+find_package(UG 3.11.0
   NO_MODULE QUIET
   NO_DEFAULT_PATH)
-find_package(UG 3.9.1
+find_package(UG 3.11.0
   NO_MODULE)
 
 if(UG_FOUND AND (NOT UG_FOR_DUNE STREQUAL "yes"))
@@ -41,13 +41,6 @@ if(UG_FOUND)
   dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
       DUNETYPE "Dune::UGGrid< dimgrid >"
       HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
-
-  # Remove the following as soon as we absolutely require patch10 or higher
-  if(${UG_DUNE_PATCHLEVEL} GREATER 9)
-    set(HAVE_UG_PATCH10 1)
-  else()
-    set(HAVE_UG_PATCH10 0)
-  endif(${UG_DUNE_PATCHLEVEL} GREATER 9)
 
   #Overwrite flags by hand (like for autoconf).
   set(UG_LIBRARIES)

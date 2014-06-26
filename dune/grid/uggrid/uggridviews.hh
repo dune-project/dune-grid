@@ -180,13 +180,13 @@ namespace Dune
       /** \brief Return size of the overlap region for a given codim on the grid view.  */
       int overlapSize(int codim) const
       {
-        return grid().overlapSize(level_, codim);
+        return 0;
       }
 
       /** \brief Return size of the ghost region for a given codim on the grid view.  */
       int ghostSize(int codim) const
       {
-        return grid().ghostSize(level_, codim);
+        return (codim==0) ? 1 : 0;
       }
 
       /** communicate data on this view */
@@ -254,7 +254,7 @@ namespace Dune
     };
 
 
-    /** \brief Implementation class of LevelGridViews for UGGrid */
+    /** \brief Implementation class of LeafGridViews for UGGrid */
     template< class GridImp, PartitionIteratorType pitype >
     class UGGridLeafGridView
     {
@@ -363,13 +363,13 @@ namespace Dune
       /** \brief Return size of the overlap region for a given codim on the grid view.  */
       int overlapSize(int codim) const
       {
-        return grid().overlapSize(codim);
+        return 0;
       }
 
       /** \brief Return size of the ghost region for a given codim on the grid view.  */
       int ghostSize(int codim) const
       {
-        return grid().ghostSize(codim);
+        return (codim==0) ? 1 : 0;
       }
 
       /** communicate data on this view */
