@@ -23,6 +23,9 @@ namespace Dune
   // AdaptDataHandleInterface
   // ------------------------
 
+  /** \brief Interface class for the Grid's adapt method where the
+            parameter is a AdaptDataHandleInterface.
+  */
   template< class Grid, class Impl >
   class AdaptDataHandleInterface
   {
@@ -41,46 +44,39 @@ namespace Dune
     This &operator= ( const This & );
 
   public:
-    void preAdapt ( const unsigned int estimateAdditionalElements )
-    {
-      asImp().preAdapt( estimateAdditionalElements );
-    }
+    /** \brief call back for activity to take place on father
+              and all decendants before the decendants are removed
 
-    void postAdapt ()
-    {
-      asImp().postAdapt();
-    }
-
-    void preCoarsening ( const Entity &father ) const
+       \param father  entity where all decendants are going to be removed
+    */
+    void preCoarsening ( const Entity &father )
     {
       asImp().preCoarsening( father );
     }
 
-    void postRefinement ( const Entity &father ) const
+    /** \brief call back for activity to take place on newly created
+              elements below the father element.
+
+       \param father  entity where all decendants were newly created
+    */
+    void postRefinement ( const Entity &father )
     {
       asImp().postRefinement( father );
     }
 
-    void restrictLocal( const Entity &father, const Entity& son, bool initialize ) const
+    void restrictLocal( const Entity &father, const Entity& son, bool initialize )
     {
       asImp().restrictLocal( father, son, initialize );
     }
 
-    void prolongLocal( const Entity &father, const Entity& son, bool initialize ) const
+    void prolongLocal( const Entity &father, const Entity& son, bool initialize )
     {
       asImp().prolongLocal( father, son, initialize );
     }
 
   protected:
-    const Impl &asImp () const
-    {
-      return static_cast< const Impl & >( *this );
-    }
-
-    Impl &asImp ()
-    {
-      return static_cast< Impl & >( *this );
-    }
+    const Impl &asImp () const { return static_cast< const Impl & >( *this ); }
+    Impl &asImp () { return static_cast< Impl & >( *this ); }
   };
 
 
@@ -106,10 +102,8 @@ namespace Dune
     AdaptDataHandle ( const This & );
     This &operator= ( const This & );
 
-    void preAdapt ( const unsigned int estimateAdditionalElements );
-    void postAdapt ();
-    void preCoarsening ( const Entity &father ) const;
-    void postRefinement ( const Entity &father ) const;
+    void preCoarsening ( const Entity &father );
+    void postRefinement ( const Entity &father );
   };
 
 
@@ -121,24 +115,24 @@ namespace Dune
   class CombinedAdaptProlongRestrict
   {
     //! space A and B
-    const A & _a;
-    const B & _b;
+    A& _a;
+    B& _b;
   public:
     //! constructor storing the two references
-    CombinedAdaptProlongRestrict ( const A & a, const B & b ) : _a ( a ) , _b ( b )
+    CombinedAdaptProlongRestrict ( A& a, B& b ) : _a ( a ) , _b ( b )
     {}
 
     //! restrict data to father
-    template <class EntityType>
-    void restrictLocal ( EntityType &father, EntityType &son, bool initialize ) const
+    template <class Entity>
+    void restrictLocal ( const Entity &father, const Entity &son, bool initialize )
     {
       _a.restrictLocal(father,son,initialize);
       _b.restrictLocal(father,son,initialize);
     }
 
     //! prolong data to children
-    template <class EntityType>
-    void prolongLocal ( EntityType &father, EntityType &son, bool initialize ) const
+    template <class Entity>
+    void prolongLocal ( const Entity &father, const Entity &son, bool initialize )
     {
       _a.prolongLocal(father,son,initialize);
       _b.prolongLocal(father,son,initialize);
