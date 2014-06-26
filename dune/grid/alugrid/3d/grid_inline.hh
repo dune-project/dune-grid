@@ -350,16 +350,8 @@ namespace Dune
     EntityObject father( EntityImp( factory(), this->maxLevel() ) );
     EntityObject son   ( EntityImp( factory(), this->maxLevel() ) );
 
-    int defaultChunk = newElementsChunk_;
-    int actChunk     = refineEstimate_ * refineMarked_;
-
-    // guess how many new elements we get
-    int newElements = std::max( actChunk , defaultChunk );
-
     // true if at least one element was marked for coarsening
     bool mightCoarse = preAdapt();
-    // reserve memory
-    handle.preAdapt( newElements );
 
     bool refined = false ;
     if(globalIdSet_)
@@ -395,13 +387,6 @@ namespace Dune
       // no need to call postAdapt here, because markers
       // are cleand during refinement callback
     }
-
-    // check whether we have balance
-    handle.postAdapt();
-
-    // here postAdapt is not called, because
-    // reset of refinedTag is done in preCoarsening and postRefinement
-    // methods of datahandle (see datahandle.hh)
 
     return refined;
   }
