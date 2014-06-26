@@ -23,9 +23,7 @@ namespace Dune
      wrap the message buffer call and make sure that the interface is
      fulfilled.
 
-     Template parameters:
-
-     - <tt>MessageBufferImp</tt> implementation of message buffer used by the grids communication method
+     \tparam MessageBufferImp Implementation of message buffer used by the grids' communication method
      \ingroup GICollectiveCommunication
    */
   template <class MessageBufferImp>
