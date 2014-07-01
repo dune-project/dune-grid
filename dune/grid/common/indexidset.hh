@@ -79,6 +79,13 @@ namespace Dune
     typedef typename remove_const< GridImp >::type::Traits Traits;
 
   public:
+    /** \brief Export the type of the entity used as parameter in the index(...) method */
+    template <int cc>
+    struct Codim
+    {
+      typedef typename Traits :: template Codim<cc> :: Entity Entity;
+    };
+
     /** \brief The type used for the indices */
     typedef IndexTypeImp IndexType;
 
