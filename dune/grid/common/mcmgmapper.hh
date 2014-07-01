@@ -153,6 +153,7 @@ namespace Dune
     int map (const EntityType& e) const
     {
       const GeometryType gt = e.type();
+      assert(layout.contains(gt));
       return is.index(e) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 
@@ -166,7 +167,7 @@ namespace Dune
     int map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
       GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
-      assert(GlobalGeometryTypeIndex::index(gt) < n);
+      assert(layout.contains(gt));
       return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 
