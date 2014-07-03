@@ -189,7 +189,7 @@ namespace Dune {
     //! construct
     SeedToEntityIteratorAdapter(const Grid &grid, const SeedIterator &seedIt) :
       gridp_(&grid), seedIt_(seedIt),
-      ep_(gridp_->levelView(0).template end<codim>()), valid_(false)
+      ep_(gridp_->levelGridView(0).template end<codim>()), valid_(false)
     { }
 
     //! For Iteratorfacade
