@@ -236,7 +236,7 @@ namespace Dune
      *
      *  \returns the number of subentities of the given codimension
      */
-    unsigned int count (unsigned int codim) const
+    unsigned int subEntities (unsigned int codim) const
     {
       int n = dimension+1;
       int k = dimension-codim+1;

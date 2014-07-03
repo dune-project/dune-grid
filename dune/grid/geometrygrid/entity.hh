@@ -706,9 +706,9 @@ namespace Dune
         return hostEntity().template count< codim >();
       }
 
-      unsigned int count (unsigned int codim) const
+      unsigned int subEntities (unsigned int codim) const
       {
-        return hostEntity().count(codim);
+        return hostEntity().subEntities(codim);
       }
 
       template< int codim >

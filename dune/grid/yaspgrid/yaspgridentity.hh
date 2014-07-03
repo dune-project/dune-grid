@@ -207,7 +207,7 @@ namespace Dune {
      *
      * That number is (dim over (dim-codim)) times 2^codim
      */
-    unsigned int count (unsigned int codim) const
+    unsigned int subEntities (unsigned int codim) const
     {
       int n = dim;
       int k = dim-codim;

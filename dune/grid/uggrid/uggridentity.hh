@@ -521,7 +521,7 @@ namespace Dune {
 
     /** \brief Return the number of subEntities of codimension codim.
      */
-    unsigned int count (unsigned int codim) const
+    unsigned int subEntities (unsigned int codim) const
     {
       if (dim==3) {
 

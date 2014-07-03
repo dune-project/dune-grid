@@ -353,7 +353,7 @@ namespace Dune {
 
     /** \brief Return number of subentities with codimension codim.
      */
-    unsigned int count (unsigned int codim) const;
+    unsigned int subEntities (unsigned int codim) const;
 
     /**
        Provide access to mesh entity i of given codimension. Entities

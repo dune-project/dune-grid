@@ -320,9 +320,9 @@ namespace Dune
      * Strictly speaking this method is redundant, because the same information can be obtained
      * from the corresponding reference element. It is here for efficiency reasons only.
      */
-    unsigned int count(unsigned int codim) const
+    unsigned int subEntities(unsigned int codim) const
     {
-      return realEntity.count(codim);
+      return realEntity.subEntities(codim);
     }
 
     /** \brief Obtain a pointer to a subentity

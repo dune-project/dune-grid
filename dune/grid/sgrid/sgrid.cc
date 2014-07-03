@@ -102,7 +102,7 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline unsigned int SEntity<0,dim,GridImp>::count (unsigned int codim) const
+  inline unsigned int SEntity<0,dim,GridImp>::subEntities (unsigned int codim) const
   {
     return SUnitCubeMapper<dim>::mapper.elements(codim);
   }

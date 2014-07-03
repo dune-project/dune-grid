@@ -301,7 +301,7 @@ namespace Dune {
 
     /** \brief Return the number of subentities of codimension codim.
      */
-    unsigned int count (unsigned int codim) const
+    unsigned int subEntities (unsigned int codim) const
     {
       assert(codim==0 || codim==1);
       return (codim==0) ? 1 : 2;
