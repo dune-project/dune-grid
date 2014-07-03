@@ -192,7 +192,13 @@ void zeroEntityConsistency (Grid &g)
 
     // Entity::count<dim>() == Entity::geometry().corners();
     // Entity::geometry()[c] == Entity::entity<dim>.geometry()[0];
-    const int numCorners = it->template count< dimGrid >();
+    const int numCornersOld = it->template count< dimGrid >();
+    const int numCorners = it->subEntities(dimGrid);
+    if( numCorners != numCornersOld )
+    {
+      std::cerr << "Error: Entity::count< dimGrid >() != Entity::subEntities(dimGrid)." << std::endl;
+      assert( false );
+    }
     if( numCorners != it->geometry().corners() )
     {
       std::cerr << "Error: Entity::count< dimGrid >() != Entity::geometry().corners()." << std::endl;
