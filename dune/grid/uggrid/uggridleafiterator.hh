@@ -38,11 +38,13 @@ namespace Dune {
         if (pitype==All_Partition || pitype==Ghost_Partition) {
           do {
             this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[levelCounter++]), grid_);
-          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+          } while (not this->virtualEntity_.getTarget()
+                   and levelCounter <= unsigned(grid.maxLevel()));
         } else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition) {
           do {
             this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[levelCounter++]), grid_);
-          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+          } while (not this->virtualEntity_.getTarget()
+                   and levelCounter <= unsigned(grid.maxLevel()));
         } else     // overlap and overlap-front -- these don't exist in UG grids
           this->setToTarget(nullptr,nullptr);
 
@@ -50,11 +52,13 @@ namespace Dune {
         if (pitype==All_Partition || pitype==Ghost_Partition) {
           do {
             this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[levelCounter++]), grid_);
-          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+          } while (not this->virtualEntity_.getTarget()
+                   and levelCounter <= unsigned(grid.maxLevel()));
         } else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition) {
           do {
             this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[levelCounter++]), grid_);
-          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+          } while (not this->virtualEntity_.getTarget()
+                   and levelCounter <= unsigned(grid.maxLevel()));
         }
         else     // overlap and overlap-front -- these don't exist in UG grids
           this->setToTarget(nullptr,nullptr);
