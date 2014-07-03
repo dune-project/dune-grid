@@ -7,7 +7,6 @@
 #include <iterator>
 
 #include <dune/common/iteratorfacades.hh>
-#include <dune/common/static_assert.hh>
 #include <dune/common/typetraits.hh>
 
 namespace Dune {
@@ -206,8 +205,8 @@ namespace Dune {
     //! For Iteratorfacade
     Reference elementAt(DifferenceType n) const
     {
-      dune_static_assert(AlwaysFalse<Grid>::value, "Subscription not "
-                         "implemented for random-access SeedEntityIterator");
+      static_assert(AlwaysFalse<Grid>::value, "Subscription not "
+                    "implemented for random-access SeedEntityIterator");
     }
 
     //! For Iteratorfacade

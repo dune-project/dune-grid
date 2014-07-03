@@ -9,7 +9,6 @@
 #include <tbb/tbb_stddef.h>
 #endif
 
-#include <dune/common/static_assert.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/grid/utility/entityrange.hh>
@@ -134,7 +133,7 @@ namespace Dune {
   template<class Set, class Range>
   class HybridEntitySet
   {
-    dune_static_assert
+    static_assert
     ( (is_same<typename Set::Entity, typename Range::Entity>::value),
       "Type of Set::Entity and Range::Entity must match");
 
