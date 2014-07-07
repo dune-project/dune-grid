@@ -73,10 +73,14 @@ namespace Dune {
      the functionality of former SubYGrid and SubYGrid::TransformingSubIterator. All other
      classes in the hierarchy have not been used.
    */
-  template<class CC, int d, typename ct>
+  template<class CC>
   class YGrid
   {
   public:
+    //extract coordinate type and dimension from the coordinate container
+    typedef typename CC::ctype ct;
+    static const int d = CC::dimension;
+
     typedef Dune::array<int, d> iTupel;
     typedef FieldVector<ct,d> fTupel;
 
@@ -105,7 +109,7 @@ namespace Dune {
      *  @param size size of the grid to be constructed
      *  @param enclosing the grid to take coordinates and shift vector from
      */
-    YGrid (iTupel origin, iTupel size, const YGrid<CC,d,ct>& enclosing)
+    YGrid (iTupel origin, iTupel size, const YGrid<CC>& enclosing)
       :  _origin(origin), _shift(enclosing.shift()), _coords(enclosing.getCoords()), _size(size), _supersize(enclosing.supersize())
     {
       for (int i=0; i<d; i++)
@@ -244,25 +248,25 @@ namespace Dune {
     }
 
     //! return grid moved by the vector v
-    YGrid<CC,d,ct> move (iTupel v) const
+    YGrid<CC> move (iTupel v) const
     {
       for (int i=0; i<d; i++)
         v[i] += _origin[i];
-      return YGrid<CC,d,ct>(v,_size,*this);
+      return YGrid<CC>(v,_size,*this);
     }
 
     //! Return SubYGrid of supergrid of self which is the intersection of self and another YGrid
-    YGrid<CC,d,ct> intersection (const YGrid<CC,d,ct>& r) const
+    YGrid<CC> intersection (const YGrid<CC>& r) const
     {
       for (int i=0; i<d; i++)
       {
         //empty coordinate vectors result in empty intersections
         if (empty() || r.empty())
-          return YGrid<CC,d,ct>();
+          return YGrid<CC>();
 
         //intersectable grids must have the same shift
         if (std::abs(shift(i)-r.shift(i)) > Ytolerance)
-          return YGrid<CC,d,ct>();
+          return YGrid<CC>();
       }
 
       iTupel neworigin;
@@ -273,7 +277,7 @@ namespace Dune {
         newsize[i] = std::min(max(i),r.max(i)) - neworigin[i] + 1;
       }
 
-      return YGrid<CC,d,ct>(neworigin,newsize,*this);
+      return YGrid<CC>(neworigin,newsize,*this);
     }
 
 
@@ -286,20 +290,20 @@ namespace Dune {
     class Iterator {
     public:
       //! Make iterator pointing to first cell in a grid.
-      Iterator (const YGrid<CC,d,ct>& r) : _grid(&r)
+      Iterator (const YGrid<CC>& r) : _grid(&r)
       {
         iTupel coord(r.origin());
         reinit(r,coord);
       }
 
       //! Make iterator pointing to given cell in a grid.
-      Iterator (const YGrid<CC,d,ct>& r, const iTupel& coord)
+      Iterator (const YGrid<CC>& r, const iTupel& coord)
       {
         reinit(r,coord);
       }
 
       //! reinitialize iterator to given position
-      void reinit (const YGrid<CC,d,ct>& r, const iTupel& coord)
+      void reinit (const YGrid<CC>& r, const iTupel& coord)
       {
         // compute increments;
         int inc = 1;
@@ -457,7 +461,7 @@ namespace Dune {
       iTupel _increment;   //!< increment for next neighbor in direction i
       int _superindex;        //!< consecutive index in enclosing grid
       iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
-      const YGrid<CC,d,ct>* _grid;
+      const YGrid<CC>* _grid;
       fTupel _begin;    //!< position of origin of grid
       fTupel _position; //!< current position
     };
@@ -495,8 +499,8 @@ namespace Dune {
 
 
   //! Output operator for ygrids
-  template <class CC, int d, typename ct>
-  inline std::ostream& operator<< (std::ostream& s, YGrid<CC,d,ct> e)
+  template <class CC>
+  inline std::ostream& operator<< (std::ostream& s, YGrid<CC> e)
   {
     s << "Printing YGrid structure:" << std::endl;
     s << "Origin: " << e.origin() << std::endl;
@@ -508,8 +512,8 @@ namespace Dune {
   }
 
   //! Output operator for ygrids
-  template <class CC, int d, typename ct>
-  inline std::ostream& operator<< (std::ostream& s, typename YGrid<CC,d,ct>::Iterator& e)
+  template <class CC>
+  inline std::ostream& operator<< (std::ostream& s, typename YGrid<CC>::Iterator& e)
   {
     s << "please reimplement this" << std::endl;
     return s;

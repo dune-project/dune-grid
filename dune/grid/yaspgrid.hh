@@ -173,7 +173,7 @@ namespace Dune {
   public:
     //! Type used for coordinates
     typedef typename CoordCont::ctype ctype;
-    typedef typename Dune::YGrid<CoordCont,dim,ctype> YGrid;
+    typedef typename Dune::YGrid<CoordCont> YGrid;
 
     struct Intersection {
       /** \brief The intersection as a subgrid of the local grid */

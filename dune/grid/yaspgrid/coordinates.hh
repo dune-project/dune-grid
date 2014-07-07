@@ -28,6 +28,8 @@ namespace Dune
     public:
     //! export the coordinate type
     typedef ct ctype;
+    //! export dimension
+    static const int dimension = dim;
 
     /** \brief default constructor */
     EquidistantCoordinateContainer() {}
@@ -124,6 +126,8 @@ namespace Dune
     public:
     //! export the coordinate type
     typedef ct ctype;
+    //! export dimension
+    static const int dimension = dim;
 
     /** \brief the default constructor */
     TensorProductCoordinateContainer() {}
