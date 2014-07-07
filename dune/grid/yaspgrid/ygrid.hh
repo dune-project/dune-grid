@@ -38,20 +38,16 @@ namespace Dune {
      The YGrid considered here describes a finite set \f$d\f$-tupels of the form
      \f[ G = \{ (k_0,\ldots,k_{d-1}) | o_i \leq k_i < o_i+s_i \}  \f]
 
-     together with an affine mapping
+     together with an affine mappin.g
 
-     \f[ t : G \to R^d, \ \ \ t(k)_i = k_i h_i + r_i \f].
-
-     Therefore a YGrid is characterized by the following quantities:
+     A YGrid is characterized by the following quantities:
 
      - The origin \f$ o=(o_0,\ldots,o_{d-1}) \in Z^d\f$,
      - the size \f$ s=(s_0,\ldots,s_{d-1}) \in Z^d\f$,
      - The shift \f$ r=(r_0,\ldots,r_{d-1}) \in R^d\f$.
-     - a coordinate container (see coordinates.hh)
+     - a coordinate container, that gives the mapping of the index to global coordinates (see coordinates.hh)
+
      The shift can be used to interpret the points of a grid as midpoints of cells, faces, edges, etc.
-
-
-     The YGrid can be parametrized by the dimension d and the type to be used for the coordinates.
 
      Here is a graphical illustration of a grid:
 
