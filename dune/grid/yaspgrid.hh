@@ -855,8 +855,8 @@ namespace Dune {
      */
     YaspGrid (Dune::array<std::vector<ctype>, dim> coords)
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,coords,defaultLoadbalancer()),
-        ccobj(MPI_COMM_SELF),
+      : ccobj(MPI_COMM_SELF),
+        _torus(MPI_COMM_SELF,tag,coords,defaultLoadbalancer()),
 #else
       : _torus(tag,coords,defaultLoadbalancer()),
 #endif
@@ -910,8 +910,8 @@ namespace Dune {
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
-        ccobj(MPI_COMM_SELF),
+      : ccobj(MPI_COMM_SELF),
+        _torus(MPI_COMM_SELF,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
 #else
       : _torus(tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
 #endif
