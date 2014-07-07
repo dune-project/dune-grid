@@ -188,7 +188,7 @@ void testYasp(std::size_t targetPartitions, int &result) {
   Grid grid(Dune::FieldVector<typename Grid::ctype, dim>(1),
             s, std::bitset<dim>(), 0);
   grid.globalRefine(8);
-  testTripartitColoring(grid.leafView(), 1, targetPartitions, result,
+  testTripartitColoring(grid.leafGridView(), 1, targetPartitions, result,
                         "oddpartitionertest-yasp");
 }
 
@@ -214,7 +214,7 @@ void testGmsh(const std::string &vtkPrefix, std::size_t targetPartitions,
 
   Dune::shared_ptr<Grid>
     gridp(Dune::GmshReader<Grid>::read(vtkPrefix + ".msh"));
-  testTripartitColoring(gridp->leafView(), 1, targetPartitions, result,
+  testTripartitColoring(gridp->leafGridView(), 1, targetPartitions, result,
                         vtkPrefix);
 }
 #endif // HAVE_ALUGRID || HAVE_ALBERTA
