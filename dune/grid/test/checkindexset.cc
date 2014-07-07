@@ -324,7 +324,7 @@ namespace Dune
       const LocalIdSetType &localIdSet = grid.localIdSet();
       for( ; it != endit; ++it )
       {
-        const typename Iterator::Entity &entity = *it;
+        const typename std::iterator_traits<Iterator>::value_type &entity = *it;
         if( !lset.contains( entity ) )
         {
           std::cerr << "Error: IndexSet does not contain all entities." << std::endl;
