@@ -264,7 +264,7 @@ namespace Dune {
           return YGrid<CC,d,ct>();
 
         //intersectable grids must have the same shift
-        if (fabs(shift(i)-r.shift(i)) > Ytolerance)
+        if (std::abs(shift(i)-r.shift(i)) > Ytolerance)
           return YGrid<CC,d,ct>();
       }
 
