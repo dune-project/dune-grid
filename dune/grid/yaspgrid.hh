@@ -340,8 +340,8 @@ namespace Dune {
       fTupel r(0.5);
 
       // determine origin of the grid with overlap and store whether an overlap area exists in direction i.
-      Dune::FieldVector<bool,dim> ovlp_low(false);
-      Dune::FieldVector<bool,dim> ovlp_up(false);
+      std::bitset<dim> ovlp_low(0);
+      std::bitset<dim> ovlp_up(0);
 
       iTupel o_overlap;
       iTupel s_overlap;
