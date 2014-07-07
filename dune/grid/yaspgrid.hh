@@ -700,39 +700,43 @@ namespace Dune {
       // find the relevant part of the coords vector for this processor and copy it to newcoords
       for (int i=0; i<dim; ++i)
       {
-        //expand the coord vectors in the periodic case
-//         if (periodic[i])
-//         {
-//           //TODO this is crap
-//           const ctype avg = 0.5 * (coords[i].back() - coords[i][coords[i].size()-2] + coords[i][1] - coords[i][0]);
-//           const int size = coords[i].size();
-//           coords[i].resize(coords[i].size()+2*overlap);
-//           std::copy(coords[i].begin(),coords[i].end(),coords[i].begin()+overlap);
-//           for (int j=0; j<overlap; j++)
-//           {
-//             coords[i][j] = coords[i][overlap] - (overlap-j)*avg;
-//             coords[i][overlap+size+j] = coords[i][overlap+size-1] + (j+1)*avg;
-//           }
-//         }
-
         //define iterators on coords that specify the coordinate range to be used
         typename std::vector<ctype>::iterator begin = coords[i].begin() + o_interior[i];
-//         if (periodic[i])
-//           begin = begin + overlap;
         typename std::vector<ctype>::iterator end = begin + s_interior[i] + 1;
 
-        //check whether we are at the physical boundary
-        if (((periodic[i]) && (o_interior[i] - overlap <=0)) || (o_interior[i] - overlap > 0))
+        // check whether we are not at the physical boundary. In that case overlap is a simple
+        // extension of the coordinate range to be used
+        if (o_interior[i] - overlap > 0)
         {
           begin = begin - overlap;
           offset[i] -= overlap;
         }
-        if (((periodic[i]) && (o_interior[i] + s_interior[i] + overlap >= _coarseSize[i])) || (o_interior[i] + s_interior[i] + overlap < _coarseSize[i]))
+        if (o_interior[i] + s_interior[i] + overlap < _coarseSize[i])
           end = end + overlap;
 
-        //copy this part in the new coord vector
+        //copy the selected part in the new coord vector
         newcoords[i].resize(end-begin);
         std::copy(begin, end, newcoords[i].begin());
+
+        // check whether we are at the physical boundary and a have a periodic grid.
+        // In this case the coordinate vector has to be tweaked manually.
+        if ((periodic[i]) && (o_interior[i] + s_interior[i] + overlap >= _coarseSize[i]))
+        {
+          // we need to add the first <overlap> cells to the end of newcoords
+          typename std::vector<ctype>::iterator it = coords[i].begin();
+          for (int j=0; j<overlap; ++j)
+            newcoords[i].push_back(newcoords[i].back() - *it + *(++it));
+        }
+
+        if ((periodic[i]) && (o_interior[i] - overlap <= 0))
+        {
+          offset[i] -= overlap;
+
+          // we need to add the last <overlap> cells to the begin of newcoords
+          typename std::vector<ctype>::iterator it = coords[i].end() - 1;
+          for (int j=0; j<overlap; ++j)
+            newcoords[i].insert(newcoords[i].begin(), newcoords[i].front() - *it + *(--it));
+        }
       }
 
       TensorProductCoordinateContainer<ctype,dim> cc(newcoords, offset);
@@ -766,9 +770,9 @@ namespace Dune {
       iTupel s_overlap(s_interior);
       for (int i=0; i<dim; i++)
       {
-        if (o_interior[i] - overlap > 0)
+        if ((o_interior[i] - overlap > 0) || (periodic[i]))
           s_overlap[i] += overlap;
-        if (o_interior[i] + s_interior[i] + overlap <= _coarseSize[i])
+        if ((o_interior[i] + s_interior[i] + overlap <= _coarseSize[i]) || (periodic[i]))
           s_overlap[i] += overlap;
       }
 
