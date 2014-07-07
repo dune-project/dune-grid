@@ -120,7 +120,7 @@ namespace Dune {
   class RecursiveIsotropicRefiner
   {
     static const std::size_t dim = RecursivePartitioner::SeedPartitioning::
-      Partition::Iterator::value_type::dimensionworld;
+      Partition::Iterator::value_type::Geometry::dimensionworld;
 
   public:
     //! type used to index partitions
