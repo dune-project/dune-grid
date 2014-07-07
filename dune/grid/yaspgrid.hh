@@ -70,23 +70,6 @@ namespace Dune {
   template<class GridImp, bool isLeafIndexSet>                     class YaspIndexSet;
   template<class GridImp>            class YaspGlobalIdSet;
 
-  namespace FacadeOptions
-  {
-
-    template<int dim, class CoordCont, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim, YaspGrid<dim,CoordCont>, YaspGeometry>
-    {
-      static const bool v = false;
-    };
-
-    template<int dim, class CoordCont, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim, const YaspGrid<dim,CoordCont>, YaspGeometry>
-    {
-      static const bool v = false;
-    };
-
-  }
-
 } // namespace Dune
 
 #include <dune/grid/yaspgrid/coordinates.hh>
