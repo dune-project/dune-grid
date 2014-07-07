@@ -466,6 +466,14 @@ namespace Dune {
                     g.send_vertex_interiorborder_overlapfront,g.recv_vertex_overlapfront_interiorborder);
     }
 
+    /** \brief special data structure to communicate ygrids
+     * Historically, this was needed because Ygrids had virtual functions and
+     * a communicated virtual function table pointer introduced a bug. After the
+     * change to tensorproductgrid, the dynamic polymorphism was removed, still this
+     * is kept because it allows to communicate ygrids, that only have index, but no
+     * coordinate information. This is sufficient, because all communicated YGrids are
+     * intersected with a local grid, which has coordinate information.
+     */
     struct mpifriendly_ygrid {
       mpifriendly_ygrid ()
         : h(0.0), r(0.0)
