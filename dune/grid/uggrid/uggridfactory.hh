@@ -162,7 +162,7 @@ namespace Dune {
     typedef typename UGGrid<dimworld>::ctype ctype;
 
     // UGGrid only in 2d and 3d
-    dune_static_assert(dimworld==2 || dimworld || 3, "UGGrid only in 2d and 3d");
+    static_assert(dimworld==2 || dimworld || 3, "UGGrid only in 2d and 3d");
 
   public:
 

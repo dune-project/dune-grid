@@ -10,7 +10,7 @@
 namespace Dune
 {
 
-  /** \brief persistent storage of data on all entities of a grid
+  /** \brief Persistent storage of data on all entities of a grid.
    *
    *  This container allows to store data which is to remain persistent
    *  even during adaptation cycles.
@@ -44,6 +44,9 @@ namespace Dune
    *  For grids providing an id set suitable addressing vector-like storages,
    *  i.e., the id is an integral type and a method size() is provided,
    *  Dune::PersistentContainerVector can be used.
+   *
+   * \tparam G Grid type
+   * \tparam T Container's value type
    */
   template< class G, class T >
   class PersistentContainerInterface

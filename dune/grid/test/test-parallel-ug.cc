@@ -124,7 +124,6 @@ private:
 template <class GridView>
 void checkIntersections(const GridView &gv)
 {
-  typedef typename GridView::template Codim<0>::Entity Element;
   typedef typename GridView::template Codim<0>::Iterator Iterator;
   typedef typename GridView::IntersectionIterator IntersectionIterator;
 
@@ -417,17 +416,17 @@ class LoadBalance
     template<class MessageBuffer, class Entity>
     void gather (MessageBuffer& buff, const Entity& entity) const
     {
-      int index = grid_.leafView().indexSet().index(entity);
+      int index = grid_.leafGridView().indexSet().index(entity);
       buff.write(dataVector_[index]);
     }
 
     template<class MessageBuffer, class Entity>
     void scatter (MessageBuffer& buff, const Entity& entity, size_t n)
     {
-      if (dataVector_.size() != grid_.leafView().size(commCodim))
-        dataVector_.resize(grid_.leafView().size(commCodim));
+      if (dataVector_.size() != grid_.leafGridView().size(commCodim))
+        dataVector_.resize(grid_.leafGridView().size(commCodim));
 
-      int index = grid_.leafView().indexSet().index(entity);
+      int index = grid_.leafGridView().indexSet().index(entity);
       buff.read(dataVector_[index]);
     }
 
@@ -444,22 +443,19 @@ public:
   template <class Grid>
   static void test(Grid& grid)
   {
-#if !HAVE_UG_PATCH10
-    grid.loadBalance();
-#else
     const int dim = Grid::dimension;
     const int commCodim = dim;
     typedef typename Grid::ctype ctype;
 
     // define the vector containing the data to be balanced
     typedef Dune::FieldVector<ctype, dim> Position;
-    std::vector<Position> dataVector(grid.leafView().size(commCodim));
+    std::vector<Position> dataVector(grid.leafGridView().size(commCodim));
 
     // fill the data vector
     typedef typename Grid::LeafGridView LeafGV;
     typedef typename LeafGV::template Codim<commCodim>::template Partition
     <Dune::InteriorBorder_Partition>::Iterator Iterator;
-    const LeafGV& gv = grid.leafView();
+    const LeafGV& gv = grid.leafGridView();
     Iterator it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();
     const Iterator& endIt = gv.template end<commCodim, Dune::InteriorBorder_Partition>();
     for (; it != endIt; ++it) {
@@ -495,7 +491,6 @@ public:
 
     std::cout << gv.comm().rank()
               << ": load balancing with data was successful." << std::endl;
-#endif
   }
 };
 
@@ -545,8 +540,8 @@ void testParallelUG(bool localRefinement)
 
   typedef typename GridType::LevelGridView LevelGV;
   typedef typename GridType::LeafGridView LeafGV;
-  const LeafGV&  leafGridView = grid->leafView();
-  const LevelGV& level0GridView = grid->levelView(0);
+  const LeafGV&  leafGridView = grid->leafGridView();
+  const LevelGV& level0GridView = grid->levelGridView(0);
 
   std::cout << "LevelGridView for level 0 has " << level0GridView.size(0)
             << " elements "  << level0GridView.size(dim - 1)
@@ -599,9 +594,9 @@ void testParallelUG(bool localRefinement)
 
     // mark all elements with x-coordinate < 0.5 for refinement
     typename LeafGV::template Codim<0>::Iterator
-    it = grid->leafView().template begin<0>();
+    it = grid->leafGridView().template begin<0>();
     const typename LeafGV::template Codim<0>::Iterator
-    &endIt = grid->leafView().template end<0>();
+    &endIt = grid->leafGridView().template end<0>();
     for (; it != endIt; ++it) {
       int nRefine = 1;
       if (it->geometry().center()[0] < 0.5)
@@ -614,39 +609,39 @@ void testParallelUG(bool localRefinement)
     grid->postAdapt();
 
     // write the adapted grid to VTK
-    Dune::VTKWriter<LeafGV> writer(grid->leafView());
+    Dune::VTKWriter<LeafGV> writer(grid->leafGridView());
     char fileName[1024];
     sprintf(fileName, "adapted-grid-dim=%d", dim);
     writer.write(fileName, Dune::VTK::ascii);
   }
 
   for (int i=0; i<=grid->maxLevel(); i++) {
-    checkIntersections(grid->levelView(i));
-    checkMappersWrapper<dim, 0, LevelGV>::check(grid->levelView(i));
-    checkMappersWrapper<dim, 1, LevelGV>::check(grid->levelView(i));
-    checkMappersWrapper<dim, 2, LevelGV>::check(grid->levelView(i));
-    checkMappersWrapper<dim, 3, LevelGV>::check(grid->levelView(i));
+    checkIntersections(grid->levelGridView(i));
+    checkMappersWrapper<dim, 0, LevelGV>::check(grid->levelGridView(i));
+    checkMappersWrapper<dim, 1, LevelGV>::check(grid->levelGridView(i));
+    checkMappersWrapper<dim, 2, LevelGV>::check(grid->levelGridView(i));
+    checkMappersWrapper<dim, 3, LevelGV>::check(grid->levelGridView(i));
   }
 
-  checkIntersections(grid->leafView());
-  checkMappersWrapper<dim, 0, LeafGV>::check(grid->leafView());
-  checkMappersWrapper<dim, 1, LeafGV>::check(grid->leafView());
-  checkMappersWrapper<dim, 2, LeafGV>::check(grid->leafView());
-  checkMappersWrapper<dim, 3, LeafGV>::check(grid->leafView());
+  checkIntersections(grid->leafGridView());
+  checkMappersWrapper<dim, 0, LeafGV>::check(grid->leafGridView());
+  checkMappersWrapper<dim, 1, LeafGV>::check(grid->leafGridView());
+  checkMappersWrapper<dim, 2, LeafGV>::check(grid->leafGridView());
+  checkMappersWrapper<dim, 3, LeafGV>::check(grid->leafGridView());
 
   for (int i=0; i<=grid->maxLevel(); i++)
   {
-    testCommunication<typename GridType::LevelGridView, 0>(grid->levelView(i), false);
-    testCommunication<typename GridType::LevelGridView, dim>(grid->levelView(i), false);
-    EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(grid->levelView(i));
+    testCommunication<typename GridType::LevelGridView, 0>(grid->levelGridView(i), false);
+    testCommunication<typename GridType::LevelGridView, dim>(grid->levelGridView(i), false);
+    EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(grid->levelGridView(i));
     if (dim == 3)
-      EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(grid->levelView(i));
+      EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(grid->levelGridView(i));
   }
-  testCommunication<typename GridType::LeafGridView, 0>(grid->leafView(), true);
-  testCommunication<typename GridType::LeafGridView, dim>(grid->leafView(), true);
-  EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(grid->leafView());
+  testCommunication<typename GridType::LeafGridView, 0>(grid->leafGridView(), true);
+  testCommunication<typename GridType::LeafGridView, dim>(grid->leafGridView(), true);
+  EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(grid->leafGridView());
   if (dim == 3)
-    EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(grid->leafView());
+    EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(grid->leafGridView());
 
 }
 

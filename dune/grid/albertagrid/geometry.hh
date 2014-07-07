@@ -3,8 +3,6 @@
 #ifndef DUNE_ALBERTA_GEOMETRY_HH
 #define DUNE_ALBERTA_GEOMETRY_HH
 
-#include <dune/geometry/genericgeometry/geometry.hh>
-
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
@@ -88,126 +86,9 @@ namespace Dune
 
 
 
-  // AlbertaGridCoordStorage
-  // -----------------------
-
-  template< class CoordTraits, class Topology, unsigned int dimW >
-  class AlbertaGridCornerStorage
-  {
-    typedef AlbertaGridCornerStorage< CoordTraits, Topology, dimW > This;
-
-  public:
-    static const unsigned int size = Topology::numCorners;
-
-    static const unsigned int dimWorld = dimW;
-
-    typedef typename CoordTraits::template Vector< dimWorld >::type
-    GlobalCoordinate;
-
-    template< class SubTopology >
-    struct SubStorage
-    {
-      typedef AlbertaGridCornerStorage< CoordTraits, SubTopology, dimWorld > type;
-    };
-
-  private:
-    GlobalCoordinate coords_[ size ];
-
-  public:
-    template< class CoordReader >
-    explicit AlbertaGridCornerStorage ( const CoordReader &coordReader )
-    {
-      for( unsigned int i = 0; i < size; ++i )
-        coordReader.coordinate( i, coords_[ i ] );
-    }
-
-    template< class Mapping, unsigned int codim >
-    explicit AlbertaGridCornerStorage ( const GenericGeometry::SubMappingCoords< Mapping, codim > &coords )
-    {
-      for( unsigned int i = 0; i < size; ++i )
-        coords_[ i ] = coords[ i ];
-    }
-
-    const GlobalCoordinate &operator[] ( unsigned int i ) const
-    {
-      return coords_[ i ];
-    }
-  };
-
-
-
-  // AlbertaGridGeometryTraits
-  // -------------------------
-
-  template< class GridImp, int cdim >
-  struct AlbertaGridGeometryTraits
-  {
-    typedef typename remove_const< GridImp >::type Grid;
-
-    typedef GenericGeometry::DuneCoordTraits< Alberta::Real > CoordTraits;
-
-    static const int dimWorld = cdim;
-
-    template< int dim >
-    struct hasSingleGeometryType
-    {
-      static const bool v = true;
-      static const unsigned int topologyId = GenericGeometry::SimplexTopology< dim >::type::id;
-    };
-
-    template< class Topology >
-    struct Mapping
-    {
-      typedef AlbertaGridCornerStorage< CoordTraits, Topology, dimWorld > CornerStorage;
-      typedef GenericGeometry::CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage > type;
-    };
-
-    struct Caching
-    {
-      static const GenericGeometry::EvaluationType evaluateJacobianTransposed = GenericGeometry::ComputeOnDemand;
-      static const GenericGeometry::EvaluationType evaluateJacobianInverseTransposed = GenericGeometry::ComputeOnDemand;
-      static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::ComputeOnDemand;
-    };
-
-    struct UserData {};
-  };
-
-
-
   // AlbertaGridGeometry
   // -------------------
 
-#if DUNE_ALBERTA_USE_GENERICGEOMETRY
-  template< int mydim, int cdim, class GridImp >
-  class AlbertaGridGeometry
-    : public GenericGeometry::BasicGeometry
-      < mydim, AlbertaGridGeometryTraits< GridImp, cdim > >
-  {
-    typedef AlbertaGridGeometry< mydim, cdim, GridImp > This;
-    typedef GenericGeometry::BasicGeometry
-    < mydim, AlbertaGridGeometryTraits< GridImp, cdim > >
-    Base;
-
-  public:
-    //! Default constructor
-    AlbertaGridGeometry ()
-      : Base ()
-    {}
-
-    template< class CoordReader >
-    AlbertaGridGeometry ( const CoordReader &coordReader )
-      : Base( GeometryType( GenericGeometry::SimplexTopology< mydim >::type::id, mydim ), coordReader )
-    {}
-
-    template< class CoordReader >
-    void build ( const CoordReader &coordReader )
-    {
-      (*this) = AlbertaGridGeometry( coordReader );
-    }
-  };
-#endif // #if DUNE_ALBERTA_USE_GENERICGEOMETRY
-
-#if !DUNE_ALBERTA_USE_GENERICGEOMETRY
   /** \class AlbertaGridGeometry
    *  \brief geometry implementation for AlbertaGrid
    *
@@ -290,16 +171,6 @@ namespace Dune
     GlobalCoordinate center () const
     {
       return centroid_;
-    }
-
-    /** \brief deprecated way of obtaining the i-th corner
-     * \deprecated Use corner( int i) instead. This method will be removed after Dune 2.3.
-     */
-    const GlobalCoordinate &operator[] ( const int i ) const
-    DUNE_DEPRECATED_MSG("Use corner( int i) instead.")
-    {
-      assert( (i >= 0) && (i < corners()) );
-      return coord_[ i ];
     }
 
     /** \brief map a point from the refence element to the geometry */
@@ -404,7 +275,6 @@ namespace Dune
     mutable bool calcedDet_; //!< true if determinant was calculated
     mutable ctype elDet_; //!< storage of element determinant
   };
-#endif // #if !DUNE_ALBERTA_USE_GENERICGEOMETRY
 
 
 
@@ -430,7 +300,6 @@ namespace Dune
   };
 
 
-#if !DUNE_ALBERTA_USE_GENERICGEOMETRY
 #if !DUNE_ALBERTA_CACHE_COORDINATES
   template< int dim, int cdim >
   class AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >
@@ -499,15 +368,6 @@ namespace Dune
       for( int j = 0; j < coorddimension; ++j )
         y[ j ] = x[ j ];
       return y;
-    }
-
-    /** \brief deprecated way of obtaining the i-th corner
-     * \deprecated Use corner( int i) instead. This method will be removed after Dune 2.3.
-     */
-    const GlobalCoordinate &operator[] ( const int i ) const
-    DUNE_DEPRECATED_MSG("Use corner( int i) instead.")
-    {
-      return reinterpret_cast< const GlobalCoordinate & >( elementInfo_.coordinate( i ) );
     }
 
     /** \brief return center of geometry */
@@ -603,7 +463,6 @@ namespace Dune
     ElementInfo elementInfo_;
   };
 #endif // #if !DUNE_ALBERTA_CACHE_COORDINATES
-#endif // #if !DUNE_ALBERTA_USE_GENERICGEOMETRY
 
 
 
@@ -697,22 +556,6 @@ namespace Dune
     const LocalElementGeometry *geometryInFather_[ numChildren ][ 2 ];
     const LocalFaceGeometry *faceGeometry_[ numFaces ][ numFaceTwists ];
   };
-
-
-
-  // FacadeOptions
-  // -------------
-
-  namespace FacadeOptions
-  {
-
-    template< int mydim, int cdim, class Grid >
-    struct StoreGeometryReference< mydim, cdim, Grid, AlbertaGridGlobalGeometry >
-    {
-      static const bool v = false;
-    };
-
-  } // namespace FacadeOptions
 
 } // namespace Dune
 

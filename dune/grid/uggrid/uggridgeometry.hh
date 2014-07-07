@@ -145,13 +145,13 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry<2, 3, GridImp> :
-    public MultiLinearGeometry<typename GridImp::ctype, 2, 3>
+    public CachedMultiLinearGeometry<typename GridImp::ctype, 2, 3>
   {
   public:
 
     /** \brief Constructor from a given geometry type and a vector of corner coordinates */
     UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
-      : MultiLinearGeometry<typename GridImp::ctype, 2, 3>(type, coordinates)
+      : CachedMultiLinearGeometry<typename GridImp::ctype, 2, 3>(type, coordinates)
     {}
 
   };
@@ -165,32 +165,16 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry <1, 2, GridImp> :
-    public MultiLinearGeometry<typename GridImp::ctype,1,2>
+    public CachedMultiLinearGeometry<typename GridImp::ctype,1,2>
   {
   public:
 
     /** \brief Constructor from a given geometry type and a vector of corner coordinates */
     UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,2> >& coordinates)
-      : MultiLinearGeometry<typename GridImp::ctype, 1, 2>(type, coordinates)
+      : CachedMultiLinearGeometry<typename GridImp::ctype, 1, 2>(type, coordinates)
     {}
 
   };
-
-  namespace FacadeOptions
-  {
-
-    /** \brief Switch on the new implementation for the Geometry interface class
-     * \deprecated Eventually the new implementation will be hardwired,
-     *             and this switch may disappear without prior warning!
-     */
-    template< int mydim, int cdim, class GridImp>
-    struct StoreGeometryReference<mydim,cdim,GridImp,UGGridGeometry>
-    {
-      static const bool v = false;
-    };
-
-  }
-
 
 }  // namespace Dune
 

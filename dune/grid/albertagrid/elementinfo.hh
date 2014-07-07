@@ -248,6 +248,10 @@ namespace Dune
     template< int dim >
     struct ElementInfo< dim >::Seed
     {
+      Seed ()
+        : macroIndex_( -1 ), level_( 0 ), path_( 0 )
+      {}
+
       Seed ( const int macroIndex, const int level, const unsigned long path )
         : macroIndex_( macroIndex ), level_( level ), path_( path )
       {}
@@ -271,6 +275,8 @@ namespace Dune
       bool operator<= ( const Seed &other ) const { return !(other < *this); }
       bool operator> ( const Seed &other ) const { return (other < *this); }
       bool operator>= ( const Seed &other ) const { return !(*this < other); }
+
+      bool isValid ( ) const { return macroIndex_ != -1; }
 
       int macroIndex () const { return macroIndex_; }
       int level () const { return level_; }

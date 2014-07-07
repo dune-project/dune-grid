@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_ENTITY_SEED_HH
 #define DUNE_GRID_ENTITY_SEED_HH
 
+#include <dune/grid/common/grid.hh>
+
 /** \file
  *  \brief Interface class EntitySeed
  */
@@ -17,7 +19,7 @@ namespace Dune {
    * On the grid, there is the method entityPointer(const EntitySeed&), which
    * gives you an EntityPointer in exchange for an EntitySeed.
    */
-  template<class EntitySeedImp>
+  template<class GridImp, class EntitySeedImp>
   class EntitySeed
   {
   public:
@@ -28,12 +30,38 @@ namespace Dune {
     //! Export the implementation type
     typedef EntitySeedImp Implementation;
 
+    /** \brief Construct an empty (i.e. isValid() == false) seed */
+    EntitySeed()
+    {}
+
     /** \brief Construct from implementation class */
     EntitySeed(const EntitySeedImp& implementation)
       : implementation_(implementation)
     {}
 
+    /** \brief check whether it is safe to create an Entity from this Seed */
+    bool isValid() const
+    {
+      return implementation_.isValid();
+    }
+
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
+  protected:
+    // give the GridDefaultImplementation class access to the impl
+    friend class GridDefaultImplementation<
+        GridImp::dimension, GridImp::dimensionworld,
+        typename GridImp::ctype,
+        typename GridImp::GridFamily> ;
+#endif
+
     /** \brief Access to the actual implementation */
+    Implementation& impl()
+    {
+      return implementation_;
+    }
+    /** \brief const Access to the actual implementation */
     const Implementation& impl() const
     {
       return implementation_;

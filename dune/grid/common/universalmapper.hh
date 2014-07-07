@@ -1,7 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id$
-
 #ifndef DUNE_UNIVERSALMAPPER_HH
 #define DUNE_UNIVERSALMAPPER_HH
 
@@ -30,10 +28,8 @@ namespace Dune
 
       Entities need to be registered in order to use them. If an entity is queried with map, the known index is returned or a new index is created. The method contains only return true, if the entites was queried via map already.
 
-          \par G
-          A Dune grid type.
-          \par IDS
-          An Id set for the given grid
+   * \tparam G   A Dune grid type.
+   * \tparam IDS An Id set type for the given grid.
    */
   template <typename G, typename IDS>
   class UniversalMapper :
@@ -41,11 +37,6 @@ namespace Dune
   {
     typedef typename IDS::IdType IdType;
   public:
-
-    //! import the base class implementation of map and contains (including the deprecated version)
-    //! \todo remove after next release
-    using Mapper< G, UniversalMapper >::map;
-    using Mapper< G, UniversalMapper >::contains;
 
     /** @brief Construct mapper from grid and one of its id sets
 
@@ -178,8 +169,7 @@ namespace Dune
 
      Template parameters are:
 
-     \par G
-     A Dune grid type.
+   * \tparam G A Dune grid type.
    */
   template <typename G>
   class GlobalUniversalMapper : public UniversalMapper<G,typename G::Traits::GlobalIdSet>
@@ -197,15 +187,15 @@ namespace Dune
 
      Template parameters are:
 
-     \par G
-     A Dune grid type.
+     \tparam G A Dune grid type.
    */
   template <typename G>
   class LocalUniversalMapper : public UniversalMapper<G,typename G::Traits::LocalIdSet>
   {
   public:
-    /* @brief The constructor
-       @param grid A reference to a grid.
+    /**
+     * \brief The constructor
+     * \param grid A reference to a grid.
      */
     LocalUniversalMapper (const G& grid)
       : UniversalMapper<G,typename G::Traits::LocalIdSet>(grid,grid.localIdSet())

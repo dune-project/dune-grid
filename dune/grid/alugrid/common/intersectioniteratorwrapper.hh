@@ -155,13 +155,7 @@ namespace Dune {
     }
 
     //! twist of the face seen from the inner element
-    int twistInSelf() const { return it().twistInSelf(); }
-
-    //! twist of the face seen from the inner element
     int twistInInside() const { return it().twistInInside(); }
-
-    //! twist of the face seen from the outer element
-    int twistInNeighbor() const { return it().twistInNeighbor(); }
 
     //! twist of the face seen from the outer element
     int twistInOutside() const { return it().twistInOutside(); }

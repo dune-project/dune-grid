@@ -2,13 +2,11 @@
 // vi: set et ts=4 sw=2 sts=2:
 // $Id$
 
-#ifndef DUNE_INDEXIDSET_HH
-#define DUNE_INDEXIDSET_HH
+#ifndef DUNE_GRID_COMMON_INDEXIDSET_HH
+#define DUNE_GRID_COMMON_INDEXIDSET_HH
 
-#include <iostream>
 #include <vector>
 #include <dune/common/exceptions.hh>
-#include <dune/common/forloop.hh>
 #include <dune/grid/common/grid.hh>
 
 
@@ -81,6 +79,13 @@ namespace Dune
     typedef typename remove_const< GridImp >::type::Traits Traits;
 
   public:
+    /** \brief Export the type of the entity used as parameter in the index(...) method */
+    template <int cc>
+    struct Codim
+    {
+      typedef typename Traits :: template Codim<cc> :: Entity Entity;
+    };
+
     /** \brief The type used for the indices */
     typedef IndexTypeImp IndexType;
 
@@ -104,8 +109,7 @@ namespace Dune
        because the const class is not instantiated yet.
      */
     template<int cc>
-    IndexType index (const typename remove_const<GridImp>::type::
-                     Traits::template Codim<cc>::Entity& e) const
+    IndexType index (const typename Traits::template Codim<cc>::Entity& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
       return asImp().template index<cc>(e);
@@ -120,10 +124,10 @@ namespace Dune
            entity knows its codimension, automatic extraction is possible.
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    template<class EntityType>
-    IndexType index (const EntityType& e) const
+    template<class Entity>
+    IndexType index (const Entity& e) const
     {
-      enum { cc = EntityType::codimension };
+      enum { cc = Entity::codimension };
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
       return asImp().template index<cc>(e);
     }
@@ -135,7 +139,7 @@ namespace Dune
      *
      *  \tparam  cc  codimension of the entity
      *
-     *  \param[in]  e      reference to codimsion cc entity
+     *  \param[in]  e      reference to codimension cc entity
      *  \param[in]  i      number subentity of e within the codimension
      *  \param[in]  codim  codimension of the subentity we're interested in
      *                     (must satisfy cc <= codim <= dimension)
@@ -224,8 +228,8 @@ namespace Dune
      * \note If the input element e is not an element of the grid, then
      *       the result of contains() is undefined.
      */
-    template<class EntityType>
-    bool contains (const EntityType& e) const
+    template<class Entity>
+    bool contains (const Entity& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(e)));
       return asImp().contains(e);
@@ -270,31 +274,6 @@ namespace Dune
 
     using Base::index;
     using Base::subIndex;
-
-    //===========================================================
-    /** @name Index access from entity
-     */
-    //@{
-    //===========================================================
-
-    /** \copydoc Dune::IndexSet::subIndex(const typename Traits::template Codim< cc >::Entity &e,int i,unsigned int codim) const
-     *
-     *  The default implementation is as follows:
-     *  \code
-     *  index( *(e.subEntity( i, codim )) );
-     *  \endcode
-     *  It does only work for cc=0 since the subEntity method is not present otherwise.
-     */
-    template< int cc >
-    IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &e, int i, unsigned int codim ) const
-    {
-      // this does not work, since subEntity is a template method requiring codim to be
-      // a template parameter
-      // return index( *(e.subEntity( i, codim )) );
-      DUNE_THROW(NotImplemented,"subIndex for entities is not is not implemented");
-      return -1;
-    }
-    //@}
 
     //===========================================================
     /** @name Access to entity set
@@ -406,10 +385,10 @@ namespace Dune
     typedef IdTypeImp IdType;
 
     //! Get id of an entity. This method is simpler to use than the one below.
-    template<class EntityType>
-    IdType id (const EntityType& e) const
+    template<class Entity>
+    IdType id (const Entity& e) const
     {
-      enum { cc = EntityType::codimension };
+      enum { cc = Entity::codimension };
       return asImp().template id<cc>(e);
     }
 
@@ -450,4 +429,4 @@ namespace Dune
 
 }
 
-#endif
+#endif   // DUNE_GRID_COMMON_INDEXIDSET_HH

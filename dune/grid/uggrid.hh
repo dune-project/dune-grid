@@ -12,13 +12,12 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 
-#if HAVE_UG
+#if HAVE_UG || DOXYGEN
 
 #ifdef ModelP
 #include <dune/common/parallel/mpicollectivecommunication.hh>
@@ -96,6 +95,7 @@
 #include "uggrid/uggridleafiterator.hh"
 #include "uggrid/uggridhieriterator.hh"
 #include "uggrid/uggridindexsets.hh"
+#include <dune/grid/uggrid/uggridviews.hh>
 #ifdef ModelP
 #include "uggrid/ugmessagebuffer.hh"
 #include "uggrid/uglbgatherscatter.hh"
@@ -148,8 +148,8 @@ namespace Dune {
         UGGridIdSet< const UGGrid<dim> >,
         typename UG_NS<dim>::UG_ID_TYPE,
         CollectiveCommunication<Dune::UGGrid<dim> >,
-        DefaultLevelGridViewTraits,
-        DefaultLeafGridViewTraits,
+        UGGridLevelGridViewTraits,
+        UGGridLeafGridViewTraits,
         UGGridEntitySeed,
         UGGridLocalGeometry>
     Traits;
@@ -163,13 +163,14 @@ namespace Dune {
   //**********************************************************************
 
   /**
-     \brief [<em> provides \ref Dune::Grid </em>]
-     \brief Provides the meshes of the finite element toolbox UG.
-     \brief (http://atlas.gcsc.uni-frankfurt.de/~ug/).
+     \brief Front-end for the grid manager of the finite element toolbox
+            <a href="http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug">UG</a>.
+
      \ingroup GridImplementations
 
      This is the implementation of the grid interface
-     using the UG grid management system.  UG provides conforming grids
+     using the UG grid management system (http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug).
+     UG provides conforming grids
      in two and three space dimensions.  The grids can be mixed, i.e.
      2d grids can contain triangles and quadrilaterals and 3d grids can
      contain tetrahedra and hexahedra and also pyramids and prisms.
@@ -219,6 +220,10 @@ namespace Dune {
     friend class UGGridLevelIndexSet<const UGGrid<dim> >;
     friend class UGGridLeafIndexSet<const UGGrid<dim> >;
     friend class UGGridIdSet<const UGGrid<dim> >;
+    template <class GridImp_, PartitionIteratorType PiType_>
+    friend class UGGridLeafGridView;
+    template <class GridImp_, PartitionIteratorType PiType_>
+    friend class UGGridLevelGridView;
 
     friend class GridFactory<UGGrid<dim> >;
 
@@ -234,7 +239,7 @@ namespace Dune {
     friend class UGGridEntityPointer;
 
     /** \brief UGGrid is only implemented for 2 and 3 dimension */
-    dune_static_assert(dim==2 || dim==3, "Use UGGrid only for 2d and 3d!");
+    static_assert(dim==2 || dim==3, "Use UGGrid only for 2d and 3d!");
 
     // The different instantiations are mutual friends so they can access
     // each others numOfUGGrids field
@@ -483,14 +488,6 @@ namespace Dune {
       return (codim==0) ? 1 : 0;
     }
 
-    /** \brief Default load balancing.
-        \bug The return value is always 'true'
-        \return true if the grid has changed
-     */
-    bool loadBalance() {
-      return loadBalance(0,0,2,32,1);
-    }
-
     /** \brief Distributes the grid and some data over the available nodes in a distributed machine
 
         \tparam DataHandle works like the data handle for the communicate
@@ -501,15 +498,12 @@ namespace Dune {
     template<class DataHandle>
     bool loadBalance (DataHandle& dataHandle)
     {
-#if !HAVE_UG_PATCH10
-      DUNE_THROW(NotImplemented, "load balancing with data attached");
-#else
 #ifdef ModelP
       // gather element data
-      //        UGLBGatherScatter::template gather<0>(this->leafView(), dataHandle);
+      //        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
 
       // gather node data
-      UGLBGatherScatter::template gather<dim>(this->leafView(), dataHandle);
+      UGLBGatherScatter::template gather<dim>(this->leafGridView(), dataHandle);
 #endif
 
       // the load balancing step now also attaches
@@ -518,33 +512,90 @@ namespace Dune {
 
 #ifdef ModelP
       // scatter element data
-      //        UGLBGatherScatter::template scatter<0>(this->leafView(), dataHandle);
+      //        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
 
       // scatter node data
-      UGLBGatherScatter::template scatter<dim>(this->leafView(), dataHandle);
+      UGLBGatherScatter::template scatter<dim>(this->leafGridView(), dataHandle);
 #endif
 
       return true;
-#endif  // HAVE_UG_PATCH10
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine
 
-       If you want the UG default for the parameters pick
-       <ul>
-       <li>strategy = 0</li>
-       <li>minlevel = 1</li>
-       <li>depth = 2</li>
-       <li>maxlevel = 32 </li>
-       <li>minelement = 1</li>
-       </ul>
-
        \bug The return value is always 'true'
 
        \param minlevel The coarsest grid level that gets distributed
-       \param maxlevel does currently get ignored
      */
-    bool loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
+    bool loadBalance(int minlevel=0);
+
+    /** \brief Distribute this grid over a distributed machine
+     *
+     * \param[in] targetProcessors For each leaf element the rank of the process the element shall be sent to
+     * \param[in] fromLevel The lowest level that gets redistributed (set to 0 when in doubt)
+     *
+     * This method allows to (re-)distribute the grid controlled by an external grid repartitioning library.
+     * You need to get that library to assign a target rank to each interior element in the leaf grid.  With this
+     * information in a std::vector, call this method, and UG will do the actual repartitioning.
+     * Each leaf element will be sent to the assigned target rank.  For all other elements we look at
+     * where there children are being sent to.  The parent is then sent to where most of its children are
+     * (Familienzusammenfuehrung).
+     *
+     * The size of the input array targetProcessors is expected to be equal to the number of elements in
+     * the 'all'-partition, i.e., the number Interior elements plus the number of Ghost elements.
+     * To get the array entry corresponding to an Interior element, a MultipleCodimMultipleGeomTypeMapper
+     * with layout class MCMGElementLayout is used.  Array entries corresponding to Ghost elements are ignored.
+     *
+     * In some cases you may also want to leave the lowest levels on one process, to have them all together
+     * for multigrid coarse grid corrections.  In that case, use the fromLevel parameter with a value other
+     * than zero, to redistribute only elements above a certain level.
+     *
+     * The fromLevel argument is also needed to allow the compiler to distinguish this method from
+     * the loadBalance method with a single template DataHandle argument.
+     *
+     * \note In theory you can assign a target rank to any element on any level, and UG will magically transfer
+     * the element to that rank and make everything come out right.  This is not supported by the UGGrid interface,
+     * because I didn't see a use case for it.  If you do need it please ask on the Dune mailing list.
+     *
+     * \return true
+     */
+    bool loadBalance(const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel);
+
+    /** \brief Distributes the grid over the processes of a parallel machine, and sends data along with it
+     *
+     * \param[in] targetProcessors For each leaf element the rank of the process the element shall be sent to
+     * \param[in] fromLevel The lowest level that gets redistributed (set to 0 when in doubt)
+     * \param[in,out] dataHandle A data handle object that does the gathering and scattering of data
+     * \tparam DataHandle works like the data handle for the communicate methods.
+     *
+     * \return true
+     */
+    template<class DataHandle>
+    bool loadBalance (const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel, DataHandle& dataHandle)
+    {
+#ifdef ModelP
+      // gather element data
+      //        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
+
+      // gather node data
+      UGLBGatherScatter::template gather<dim>(this->leafGridView(), dataHandle);
+#endif
+
+      // the load balancing step now also attaches
+      // the data to the entities and distributes it
+      loadBalance(targetProcessors,fromLevel);
+
+#ifdef ModelP
+      // scatter element data
+      //        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
+
+      // scatter node data
+      UGLBGatherScatter::template scatter<dim>(this->leafGridView(), dataHandle);
+#endif
+
+      return true;
+    }
+
 
     /** \brief The communication interface for all codims on a given level
        @param dataHandle type used to gather/scatter data in and out of the message buffer
@@ -567,13 +618,13 @@ namespace Dune {
           continue;
 
         if (curCodim == 0)
-          communicateUG_<LevelGridView, DataHandle, 0>(this->levelView(level), level, dataHandle, iftype, dir);
+          communicateUG_<LevelGridView, DataHandle, 0>(this->levelGridView(level), level, dataHandle, iftype, dir);
         else if (curCodim == dim)
-          communicateUG_<LevelGridView, DataHandle, dim>(this->levelView(level), level, dataHandle, iftype, dir);
+          communicateUG_<LevelGridView, DataHandle, dim>(this->levelGridView(level), level, dataHandle, iftype, dir);
         else if (curCodim == dim - 1)
-          communicateUG_<LevelGridView, DataHandle, dim-1>(this->levelView(level), level, dataHandle, iftype, dir);
+          communicateUG_<LevelGridView, DataHandle, dim-1>(this->levelGridView(level), level, dataHandle, iftype, dir);
         else if (curCodim == 1)
-          communicateUG_<LevelGridView, DataHandle, 1>(this->levelView(level), level, dataHandle, iftype, dir);
+          communicateUG_<LevelGridView, DataHandle, 1>(this->levelGridView(level), level, dataHandle, iftype, dir);
         else
           DUNE_THROW(NotImplemented,
                      className(*this) << "::communicate(): Not "
@@ -602,13 +653,13 @@ namespace Dune {
           continue;
         int level = -1;
         if (curCodim == 0)
-          communicateUG_<LeafGridView, DataHandle, 0>(this->leafView(), level, dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, 0>(this->leafGridView(), level, dataHandle, iftype, dir);
         else if (curCodim == dim)
-          communicateUG_<LeafGridView, DataHandle, dim>(this->leafView(), level, dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, dim>(this->leafGridView(), level, dataHandle, iftype, dir);
         else if (curCodim == dim - 1)
-          communicateUG_<LeafGridView, DataHandle, dim-1>(this->leafView(), level, dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, dim-1>(this->leafGridView(), level, dataHandle, iftype, dir);
         else if (curCodim == 1)
-          communicateUG_<LeafGridView, DataHandle, 1>(this->leafView(), level, dataHandle, iftype, dir);
+          communicateUG_<LeafGridView, DataHandle, 1>(this->leafGridView(), level, dataHandle, iftype, dir);
         else
           DUNE_THROW(NotImplemented,
                      className(*this) << "::communicate(): Not "
@@ -721,6 +772,9 @@ namespace Dune {
           dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF());
           // Is the following line needed or not?
           // dddIfaces.push_back(UG_NS<dim>::EdgeIF());
+          return;
+        case All_All_Interface :
+          dddIfaces.push_back(UG_NS<dim>::EdgeSymmVHIF());
           return;
         default :
           DUNE_THROW(GridError,
@@ -870,7 +924,7 @@ namespace Dune {
     /** \brief Number of UGGrids currently in use.
      *
      * This counts the number of UGGrids currently instantiated.  All
-     * constructors of UGGrid look at this variable.  If it zero, they
+     * constructors of UGGrid look at this variable.  If it is zero, they
      * initialize UG before proceeding.  Destructors use the same mechanism
      * to safely shut down UG after deleting the last UGGrid object.
      */
@@ -975,5 +1029,5 @@ namespace Dune {
 
 } // namespace Dune
 
-#endif   // HAVE_UG
+#endif   // HAVE_UG || DOXYGEN
 #endif   // DUNE_UGGRID_HH

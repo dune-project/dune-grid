@@ -38,12 +38,11 @@ namespace Dune
    *  .
    *
    *  The default GridViews can be obtained from the grid by calling one of the
-   *  levelView() or leafView() methods.
+   *  levelGridView() or leafGridView() methods.
    */
 
 
   /** \brief Grid view abstract base class
-   *  \ingroup GIGridView
    *
    *  Interface class for a view on grids. Grids return two types of view,
    *  a view of the leaf grid and of a level grid, which both satisfy
@@ -51,11 +50,21 @@ namespace Dune
    *  iterators, the intersections and the index set.
    *
    *  The interface is implemented using the engine concept.
+   *
+   *  \ingroup GIGridView
    */
   template< class ViewTraits >
   class GridView
   {
     typedef GridView< ViewTraits > ThisType;
+
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
+  protected:
+#endif
+    // type of underlying implementation, for internal use only
+    typedef typename ViewTraits :: GridViewImp Implementation;
 
   public:
     typedef typename ViewTraits :: GridViewImp GridViewImp;
@@ -109,7 +118,7 @@ namespace Dune
     }; //: public Traits :: template Codim<cd> {};
 
     enum {
-      //! \brief Export if this grid view is conforming */
+      /** \brief Export if this grid view is conforming */
       conforming = Traits :: conforming
     };
 
@@ -120,15 +129,22 @@ namespace Dune
       dimension = Grid :: dimension
     };
 
-    enum { //! \brief The dimension of the world the grid lives in.
+    enum { //! \brief The dimension of the world the grid lives in
       dimensionworld = Grid :: dimensionworld
     };
 
   public:
+
+    //===========================================================
+    /** @name Interface for the implementor
+     */
+    //@{
+    //===========================================================
     /** \brief constructor (engine concept) */
-    GridView ( const GridViewImp &imp )
+    GridView ( const Implementation &imp )
       : impl_( imp )
     {}
+    //@}
 
     /** \brief Copy constructor */
     GridView ( const ThisType &other )
@@ -149,7 +165,12 @@ namespace Dune
       return impl().grid();
     }
 
-    /** \brief obtain the index set */
+    /** \brief obtain the index set
+     *
+     * The lifetime of the returned index set is bound to the lifetime of the
+     * grid view. Keep a copy of the grid view to prevent the index set from
+     * becoming a dangling reference.
+     */
     const IndexSet &indexSet () const
     {
       return impl().indexSet();
@@ -241,7 +262,7 @@ namespace Dune
       return impl().ghostSize(codim);
     }
 
-    /** communicate data on this view */
+    /** \brief Communicate data on this view */
     template< class DataHandleImp, class DataType >
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
@@ -257,9 +278,6 @@ namespace Dune
     // give the GridDefaultImplementation class access to the realImp
     friend class GridDefaultImplementation< Grid::dimension, Grid::dimensionworld, typename Grid::ctype, typename Grid::GridFamily >;
 #endif
-    // type of underlying implementation, for internal use only
-    typedef GridViewImp Implementation;
-
     //! return reference to the real implementation
     Implementation &impl () { return impl_; }
     //! return reference to the real implementation
@@ -267,26 +285,6 @@ namespace Dune
 
   protected:
     Implementation impl_;
-
-    /**
-     * \deprecated This method is deprecated and will be removed after
-     * Dune 2.3. Use impl() instead.
-     */
-    GridViewImp& asImp ()
-    DUNE_DEPRECATED_MSG("Use impl() instead.")
-    {
-      return impl_;
-    }
-
-    /**
-     * \deprecated This method is deprecated and will be removed after
-     * Dune 2.3. Use impl() instead.
-     */
-    const GridViewImp& asImp () const
-    DUNE_DEPRECATED_MSG("Use impl() instead.")
-    {
-      return impl_;
-    }
   };
 
 } // namespace Dune

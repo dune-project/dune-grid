@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_GEOMETRYREFERENCE_HH
-#define DUNE_GRID_GEOMETRYREFERENCE_HH
+#ifndef DUNE_GRID_ALBERTAGRID_GEOMETRYREFERENCE_HH
+#define DUNE_GRID_ALBERTAGRID_GEOMETRYREFERENCE_HH
 
 /** \file
     \brief Wrapper and interface classes for element geometries
@@ -15,42 +15,6 @@
 
 namespace Dune
 {
-
-  // Internal Forward Declarations
-  // -----------------------------
-
-  template< int mydim, int cdim, class Grid >
-  class GlobalGeometryReference;
-
-  template< int mydim, int cdim, class Grid >
-  class LocalGeometryReference;
-
-
-
-  // FacadeOptions
-  // -------------
-
-  namespace FacadeOptions
-  {
-
-    template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
-    struct StoreGeometryReference;
-
-    template< int mydim, int cdim, class Grid >
-    struct StoreGeometryReference< mydim, cdim, Grid, GlobalGeometryReference >
-    {
-      static const bool v = false;
-    };
-
-    template< int mydim, int cdim, class Grid >
-    struct StoreGeometryReference< mydim, cdim, Grid, LocalGeometryReference >
-    {
-      static const bool v = false;
-    };
-
-  } // namespace FacadeOptions
-
-
 
   // GeometryReference
   // -----------------
@@ -101,12 +65,12 @@ namespace Dune
 
     ctype volume () const { return impl().volume(); }
 
-    const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const
+    JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianTransposed( local );
     }
 
-    const JacobianInverseTransposed &jacobianInverseTransposed ( const LocalCoordinate &local ) const
+    JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianInverseTransposed( local );
     }
@@ -116,24 +80,6 @@ namespace Dune
   private:
     const Implementation *impl_;
   };
-
-
-
-  // GlobalGeometryReference
-  // -----------------------
-
-  template< int mydim, int cdim, class Grid >
-  class GlobalGeometryReference
-    : public GeometryReference< typename remove_const< Grid >::type::Traits::template Codim< remove_const< Grid >::type::dimension - mydim >::GeometryImpl >
-  {
-    typedef typename remove_const< Grid >::type::Traits::template Codim< remove_const< Grid >::type::dimension - mydim >::GeometryImpl Implementation;
-
-  public:
-    GlobalGeometryReference ( const Implementation &impl )
-      : GeometryReference< Implementation >( impl )
-    {}
-  };
-
 
 
   // LocalGeometryReference
@@ -164,4 +110,4 @@ namespace Dune
 
 } // namespace Dune
 
-#endif // #ifndef DUNE_GRID_GEOMETRYREFERENCE_HH
+#endif // #ifndef DUNE_GRID_ALBERTAGRID_GEOMETRYREFERENCE_HH

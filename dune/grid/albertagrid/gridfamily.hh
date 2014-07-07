@@ -13,13 +13,13 @@
 #include <dune/grid/common/entity.hh>
 #include <dune/grid/common/entitypointer.hh>
 #include <dune/grid/common/geometry.hh>
-#include <dune/grid/common/geometryreference.hh>
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/common/intersectioniterator.hh>
 #include <dune/grid/common/entityiterator.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/gridview.hh>
+#include <dune/grid/albertagrid/geometryreference.hh>
 
 #if HAVE_ALBERTA
 
@@ -123,7 +123,7 @@ namespace Dune
 
         typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
         typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
-        typedef Dune::EntitySeed<AlbertaGridEntitySeed< cd, const GridImp > > EntitySeed;
+        typedef Dune::EntitySeed< const GridImp, AlbertaGridEntitySeed< cd, const GridImp > > EntitySeed;
 
         template <PartitionIteratorType pitype>
         struct Partition

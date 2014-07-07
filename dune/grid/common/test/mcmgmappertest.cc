@@ -10,18 +10,37 @@
 #include <iostream>
 #include <set>
 
+#include <dune/common/parallel/mpihelper.hh>
+#include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/uggrid.hh>
 #include "../../../../doc/grids/gridfactory/hybridtestgrids.hh"
-#include <dune/grid/common/mcmgmapper.hh>
-#include <dune/common/parallel/mpihelper.hh>
 
 using namespace Dune;
 
+/*!
+ * \brief Layout template for edges and elements
+ * This layout template is for use in the MultipleCodimMultipleGeomTypeMapper.
+ * It selects edges and elements (entities with dim=1 or dim=dimgrid).
+ *
+ * \tparam dimgrid The dimension of the grid.
+ */
+template<int dimgrid>
+struct MCMGElementEdgeLayout
+{
+  /*!
+   * \brief: test whether entities of the given geometry type should be included in
+   * the map
+   */
+  bool contains(GeometryType gt)
+  {
+    return (gt.dim() == dimgrid || gt.dim() == 1);
+  }
+};
 
-// /////////////////////////////////////////////////////////////////////////////////
-//   Check whether the index created for element data is unique, consecutive
-//   and starting from zero.
-// /////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \brief Check whether the index created for element data is unique,
+ * consecutive and starting from zero.
+ */
 template <class Mapper, class GridView>
 void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
 {
@@ -34,139 +53,225 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
   size_t max = 0;
   std::set<int> indices;
 
-  for (; eIt!=eEndIt; ++eIt) {
-
+  for (; eIt!=eEndIt; ++eIt)
+  {
     size_t index = mapper.map(*eIt);
-
     min = std::min(min, index);
     max = std::max(max, index);
-
-    // typedef typename GridView::IntersectionIterator IntersectionIterator;
-
-    // IntersectionIterator iIt    = gridView.ibegin(*eIt);
-    // IntersectionIterator iEndIt = gridView.iend(*eIt);
-
-    // for (; iIt!=iEndIt; ++iIt) {
-
-    //     int oldindex = mapper.template map<1>(*eIt, iIt->numberInSelf());
-    //     int index = mapper.map(*eIt, iIt->indexInInside(), 1);
-    //     assert(oldindex == index);
-    // }
-
     std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
 
     if (!status.second)       // not inserted because already existing
       DUNE_THROW(GridError, "Mapper element index is not unique!");
   }
 
-  if (min!=0)
+  if (min != 0)
     DUNE_THROW(GridError, "Mapper element index is not starting from zero!");
 
-  if (max!=gridView.indexSet().size(0)-1)
+  if (max != gridView.indexSet().size(0) - 1)
     DUNE_THROW(GridError, "Mapper element index is not consecutive!");
-
 }
 
-// /////////////////////////////////////////////////////////////////////////////////
-//   Check whether the index created for face data is unique, consecutive
-//   and starting from zero.
-// /////////////////////////////////////////////////////////////////////////////////
-template <class Mapper, class IndexSet>
-void checkFaceDataMapper(const Mapper& mapper, const IndexSet& indexSet)
+/*!
+ * \brief Check whether the index created for vertex data is consecutive
+ * and starting from zero.
+ */
+template <class Mapper, class GridView>
+void checkVertexDataMapper(const Mapper& mapper, const GridView& gridView)
 {
-#if 0
-  typedef typename IndexSet::template Codim<0>::template Partition<All_Partition>::Iterator Iterator;
+  const size_t dim = GridView::dimension;
+  typedef typename GridView::template Codim<0>::Iterator Iterator;
 
-  Iterator eIt    = indexSet.template begin<0,All_Partition>();
-  Iterator eEndIt = indexSet.template end<0,All_Partition>();
+  Iterator eIt    = gridView.template begin<0>();
+  Iterator eEndIt = gridView.template end<0>();
 
-  // Reset the counting variables
-  int min = 1;
-  int max = 0;
-  indices.clear();
+  size_t min = 1;
+  size_t max = 0;
+  std::set<int> indices;
 
-  for (; eIt!=eEndIt; ++eIt) {
-
-    typedef typename GridType::template Codim<0>::Entity::IntersectionIterator IntersectionIterator;
-
-    IntersectionIterator iIt    = eIt->ibegin();
-    IntersectionIterator iEndIt = eIt->iend();
-
-    for (; iIt!=iEndIt; ++iIt) {
-
-      int index = mapper.map(*eIt, iIt.numberInSelf());
-
-      //             std::cout << hostIndexSet.template subIndex<1>(*eIt, iIt.numberInSelf())
-      //                 << "  Index: " << index << "   type: " << eIt->type() << std::endl;
+  for (; eIt!=eEndIt; ++eIt)
+  {
+    size_t numVertices = eIt->template count<dim>();
+    for (size_t curVertex = 0; curVertex < numVertices; ++curVertex)
+    {
+      size_t index = mapper.map(*eIt, curVertex, dim);
       min = std::min(min, index);
       max = std::max(max, index);
-
-      std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
-
-      if (!status.second)         // not inserted because already existing
-        DUNE_THROW(GridError, "Mapper index is not unique!");
-
+      indices.insert(index);
     }
-
   }
 
-  if (min!=0)
-    DUNE_THROW(GridError, "Mapper index for codim 1 is not starting from zero!");
+  if (min != 0)
+    DUNE_THROW(GridError, "Mapper vertex index is not starting from zero!");
 
-  if (max!=indexSet.size(1))
-    DUNE_THROW(GridError, "Mapper index for codim 1 is not consecutive!");
+  if (max != gridView.indexSet().size(dim) - 1)
+    DUNE_THROW(GridError, "Mapper vertex index is not consecutive!");
 
-#endif
+  for (size_t i = 0; i < max; ++i)
+  {
+    if (indices.find(i) == indices.end())
+      DUNE_THROW(GridError, "Mapper vertex index is not consecutive!");
+  }
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//   Run all the checks for a given grid.
-//////////////////////////////////////////////////////////////////////////////
+/*!
+ * \brief Check whether the index created for element and edge data is
+ * unique, consecutive and starting from zero.
+ */
+template <class Mapper, class GridView>
+void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
+{
+  const size_t dim = GridView::dimension;
+  typedef typename GridView::template Codim<0>::Iterator Iterator;
+
+  Iterator eIt    = gridView.template begin<0>();
+  Iterator eEndIt = gridView.template end<0>();
+
+  size_t min = 1;
+  size_t max = 0;
+  std::set<int> indices;
+
+  for (; eIt!=eEndIt; ++eIt)
+  {
+    // handle elements
+    size_t index = mapper.map(*eIt);
+    min = std::min(min, index);
+    max = std::max(max, index);
+    std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
+
+    if (!status.second)       // not inserted because already existing
+      DUNE_THROW(GridError, "Mapper mixed index is not unique for elements!");
+
+    // handle edges
+    size_t numEdges = eIt->template count<dim - 1>();
+    for (size_t curEdge = 0; curEdge < numEdges; ++curEdge)
+    {
+      index = mapper.map(*eIt, curEdge, dim - 1);
+      min = std::min(min, index);
+      max = std::max(max, index);
+      indices.insert(index);
+    }
+  }
+
+  if (min != 0)
+    DUNE_THROW(GridError, "Mapper mixed index is not starting from zero!");
+
+  if (max != gridView.indexSet().size(0) + gridView.indexSet().size(dim - 1) - 1)
+    DUNE_THROW(GridError, "Mapper mixed index is not consecutive!");
+
+  for (size_t i = 0; i < max; ++i)
+  {
+    if (indices.find(i) == indices.end())
+      DUNE_THROW(GridError, "Mapper mixed index is not consecutive!");
+  }
+}
+
+/*!
+ * \brief Run checks for a given grid.
+ *
+ * \param grid Grid to perform the checks.
+ */
 template<typename Grid>
-void checkGrid(const Grid& grid) {
-  static const unsigned dimg = Grid::dimension;
+void checkGrid(const Grid& grid)
+{
+  static const unsigned dim = Grid::dimension;
+  // check element mapper
+  // check leafMCMGMapper
   {   // check constructor without layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
     leafMCMGMapper(grid);
-    checkElementDataMapper(leafMCMGMapper, grid.leafView());
+    checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
   }
   {   // check constructor with layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
-    leafMCMGMapper(grid, MCMGElementLayout<dimg>());
-    checkElementDataMapper(leafMCMGMapper, grid.leafView());
+    leafMCMGMapper(grid, MCMGElementLayout<dim>());
+    checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
   }
 
-  for (int i=2; i<=grid.maxLevel(); i++) {
+  // check levelMCMGMapper
+  for (int i = 2; i <= grid.maxLevel(); i++)
+  {
     {     // check constructor without layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
       levelMCMGMapper(grid, i);
-      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
+      checkElementDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
     {     // check constructor with layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
-      levelMCMGMapper(grid, i, MCMGElementLayout<dimg>());
-      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
+      levelMCMGMapper(grid, i, MCMGElementLayout<dim>());
+      checkElementDataMapper(levelMCMGMapper, grid.levelGridView(i));
+    }
+  }
+
+  // check vertex mapper
+  // check leafMCMGMapper
+  {   // check constructor without layout class
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
+    leafMCMGMapper(grid);
+    checkVertexDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
+  {   // check constructor with layout class
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
+    leafMCMGMapper(grid, MCMGVertexLayout<dim>());
+    checkVertexDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
+
+  // check levelMCMGMapper
+  for (int i = 2; i <= grid.maxLevel(); i++)
+  {
+    {     // check constructor without layout class
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
+      levelMCMGMapper(grid, i);
+      checkVertexDataMapper(levelMCMGMapper, grid.levelGridView(i));
+    }
+    {     // check constructor with layout class
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
+      levelMCMGMapper(grid, i, MCMGVertexLayout<dim>());
+      checkVertexDataMapper(levelMCMGMapper, grid.levelGridView(i));
+    }
+  }
+
+  // check mixed element and vertex mapper
+  // check leafMCMGMapper
+  {   // check constructor without layout class
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
+    leafMCMGMapper(grid);
+    checkMixedDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
+  {   // check constructor with layout class
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
+    leafMCMGMapper(grid, MCMGElementEdgeLayout<dim>());
+    checkMixedDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
+
+  // check levelMCMGMapper
+  for (int i = 2; i <= grid.maxLevel(); i++)
+  {
+    {     // check constructor without layout class
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
+      levelMCMGMapper(grid, i);
+      checkMixedDataMapper(levelMCMGMapper, grid.levelGridView(i));
+    }
+    {     // check constructor with layout class
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
+      levelMCMGMapper(grid, i, MCMGElementEdgeLayout<dim>());
+      checkMixedDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
   }
 }
 
-/*
-   The MultipleGeometryMultipleCodimMapper only does something helpful on grids with more
-   than one element type.  So far only UGGrids do this, so we use them to test the mapper.
- */
-
-int main(int argc, char** argv) try
+int main(int argc, char** argv)
+try
 {
   // initialize MPI if neccessary
   Dune::MPIHelper::instance(argc, argv);
 
-  // ////////////////////////////////////////////////////////////////////////
+  // Check grids with more than one element type.
+  // So far only UGGrid does this, so we use it to test the mappers.
+
   //  Do the test for a 2d UGGrid
-  // ////////////////////////////////////////////////////////////////////////
   {
-    typedef UGGrid<2> GridType;
-
-    std::auto_ptr< GridType > grid(make2DHybridTestGrid< GridType >());
+    typedef UGGrid<2> Grid;
+    std::unique_ptr<Grid> grid(make2DHybridTestGrid<Grid>());
 
     // create hybrid grid
     grid->mark(1, * grid->leafbegin<0>());
@@ -176,13 +281,10 @@ int main(int argc, char** argv) try
     checkGrid(*grid);
   }
 
-  // ////////////////////////////////////////////////////////////////////////
   //  Do the  test for a 3d UGGrid
-  // ////////////////////////////////////////////////////////////////////////
   {
-    typedef UGGrid<3> GridType;
-
-    std::auto_ptr< GridType > grid(make3DHybridTestGrid< GridType >());
+    typedef UGGrid<3> Grid;
+    std::unique_ptr<Grid> grid(make3DHybridTestGrid<Grid>());
 
     // create hybrid grid
     grid->mark(1, * grid->leafbegin<0>());
@@ -192,7 +294,7 @@ int main(int argc, char** argv) try
     checkGrid(*grid);
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 
 }
 catch (Exception &e) {

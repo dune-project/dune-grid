@@ -1,6 +1,8 @@
 Makefile.in
 Makefile
 .deps
+*.log
+*.trs
 
 persistentcontainertest
 structuredgridfactorytest

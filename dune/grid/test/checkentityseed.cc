@@ -135,7 +135,7 @@ namespace CheckEntitySeed // don't blur namespace Dune
     typedef typename Grid::template Codim< codim >::EntitySeed EntitySeed;
 
     // Check whether EntitySeed reports the correct codimension
-    dune_static_assert(EntitySeed::codimension==codim, "Codimension exported by EntitySeed is incorrect!");
+    static_assert(EntitySeed::codimension==codim, "Codimension exported by EntitySeed is incorrect!");
 
     static void apply ( const GridView &gridView, std::ostream &output )
     {
@@ -145,7 +145,7 @@ namespace CheckEntitySeed // don't blur namespace Dune
       const Iterator end = gridView.template end< codim >();
       for( Iterator it = gridView.template begin< codim >(); it != end; ++it )
       {
-        // get entity and entity seed
+        // get entity
         const Entity &entity = *it;
         EntitySeed seed = entity.seed();
 
@@ -153,9 +153,15 @@ namespace CheckEntitySeed // don't blur namespace Dune
         EntityPointer entityPointer = grid.entityPointer( seed );
         compare( entityPointer, EntityPointer( it ), output );
 
+        // test default constructor
+        EntitySeed seed2;
+        assert(! seed2.isValid());
+
         // create copy of seed and compare again
+        seed2 = seed;
+        assert( seed2.isValid());
+
         // we might like to check the assignment operator as well
-        EntitySeed seed2( seed );
         compare( entityPointer, grid.entityPointer( seed2 ), output );
       }
     }

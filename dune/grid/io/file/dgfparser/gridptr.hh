@@ -267,7 +267,7 @@ namespace Dune
     const std::vector< double > &parameters ( const Entity &entity ) const
     {
       typedef typename GridType::LevelGridView GridView;
-      GridView gridView = gridPtr_->levelView( 0 );
+      GridView gridView = gridPtr_->levelGridView( 0 );
       switch( (int)Entity::codimension )
       {
       case 0 :
@@ -323,7 +323,7 @@ namespace Dune
       gridPtr_ = mygrid_ptr( dgfFactory.grid() );
 
       typedef typename GridType::LevelGridView GridView;
-      GridView gridView = gridPtr_->levelView( 0 );
+      GridView gridView = gridPtr_->levelGridView( 0 );
       const typename GridView::IndexSet &indexSet = gridView.indexSet();
 
       nofElParam_ = dgfFactory.template numParameters< 0 >();
@@ -382,7 +382,7 @@ namespace Dune
     std::vector< double > &params ( const Entity &entity )
     {
       typedef typename GridType::LevelGridView GridView;
-      GridView gridView = gridPtr_->levelView( 0 );
+      GridView gridView = gridPtr_->levelGridView( 0 );
       switch( (int)Entity::codimension )
       {
       case 0 :
@@ -418,7 +418,7 @@ namespace Dune
         idSet_(gridPtr->localIdSet())
       {
         typedef typename GridType::LevelGridView GridView;
-        GridView gridView = gridPtr_->levelView( 0 );
+        GridView gridView = gridPtr_->levelGridView( 0 );
         const typename GridView::IndexSet &indexSet = gridView.indexSet();
 
         const PartitionIteratorType partType = Interior_Partition;
@@ -444,7 +444,7 @@ namespace Dune
       ~DataHandle()
       {
         typedef typename GridType::LevelGridView GridView;
-        GridView gridView = gridPtr_->levelView( 0 );
+        GridView gridView = gridPtr_->levelGridView( 0 );
         const typename GridView::IndexSet &indexSet = gridView.indexSet();
 
         if ( gridPtr_.nofElParam_ > 0 )

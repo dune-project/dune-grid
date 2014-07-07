@@ -17,6 +17,7 @@ set(HEADERS
   volumeiterators.hh
   volumewriter.hh
   vtksequencewriter.hh
+  vtksequencewriterbase.hh
   vtkwriter.hh
   vtuwriter.hh)
 

@@ -23,5 +23,6 @@ am
 *.la
 *.lo
 *.o
+compile
 test-driver
 build-cmake/

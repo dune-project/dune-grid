@@ -24,35 +24,6 @@ namespace Dune
   class GridDefaultImplementation;
 
 
-
-  namespace FacadeOptions
-  {
-
-    //! \brief Traits class determining whether the Dune::Geometry facade
-    //!        class stores the implementation object by reference or by value
-    /**
-     * \ingroup GIGeometry
-     *
-     * Storing by reference is appropriate for grid managers that keep an
-     * instance of each geometry around anyway.  Note that the reference to
-     * that instance must be valid at least until the next grid modification.
-     *
-     * \note Even grid managers that let the facade class store a copy must
-     *       take care to keep that copy valid until the next grid
-     *       modification, e.g. if the geometry implementation object does not
-     *       itself store the corner coordinates but only keeps references.
-     */
-    template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
-    struct StoreGeometryReference
-    {
-      //! Whether to store by reference.
-      static const bool v = true;
-    };
-
-  }
-
-
-
   //*****************************************************************************
   //
   // Geometry
@@ -88,13 +59,6 @@ namespace Dune
      function calls to corresponding members of this class. In that sense Geometry
      defines the interface and GeometryImp supplies the implementation.
 
-     The grid manager can instruct this facade class to either itself store an
-     instance of the implementation class or keep a reference to an instance
-     stored elsewhere as determined by FacadeOptions::StoreGeometryReference.
-     In any case it is guaranteed that instances of Geometry are valid until
-     the grid is changed (via any of adapt(), loadBalance() or
-     globalRefine()).
-
      \ingroup GIGeometry
    */
   template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
@@ -113,10 +77,6 @@ namespace Dune
     // type of underlying implementation, for internal use only
     typedef GeometryImp< mydim, cdim, GridImp > Implementation;
 
-#if 0
-    //! return reference to the implementation
-    Implementation &impl () { return realGeometry; }
-#endif
     //! return reference to the implementation
     const Implementation &impl () const { return realGeometry; }
 
@@ -126,7 +86,7 @@ namespace Dune
     //! @brief export geometry dimension
     enum { mydimension=mydim /*!< geometry dimension */ };
     //! @brief export coordinate dimension
-    enum { coorddimension=cdim /*!< dimension of embedding coordsystem */ };
+    enum { coorddimension=cdim /*!< dimension of embedding coordinate system */ };
 
     //! @brief export dimension of world
     enum { dimensionworld=GridImp::dimensionworld /*!< dimension of world */ };
@@ -139,15 +99,26 @@ namespace Dune
     //! type of the global coordinates
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
-    //! type of jacobian inverse transposed
-    //typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
+    /**
+     * \brief type of jacobian inverse transposed
+     *
+     * The exact type is implementation-dependent.
+     * However, it is guaranteed to have the following properties:
+     * - It satisfies the ConstMatrix interface.
+     * - It is copy construcable and copy assignable.
+     * .
+     */
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
 
-    // deprecated typedef for backward compatibility
-    typedef JacobianInverseTransposed Jacobian DUNE_DEPRECATED_MSG ( "type Geometry::Jacobian is deprecated, use Geometry::JacobianInverseTransposed instead." );
-
-    //! type of jacobian transposed
-    //typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
+    /**
+     * \brief type of jacobian transposed
+     *
+     * The exact type is implementation-dependent.
+     * However, it is guaranteed to have the following properties:
+     * - It satisfies the ConstMatrix interface.
+     * - It is copy construcable and copy assignable.
+     * .
+     */
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
@@ -169,13 +140,13 @@ namespace Dune
     /** \brief Obtain a corner of the geometry
      *
      *  This method is for convenient access to the corners of the geometry. The
-     *  same result could be achieved by by calling
+     *  same result could be achieved by calling
      *  \code
-     *  global( genericReferenceElement.position( i, mydimension ) )
+     *  global( referenceElement.position( i, mydimension ) )
      *  \endcode
      *
-     *  \param[in]  i  number of the corner (with respect to the generic reference
-     *                 element)
+     *  \param[in]  i  number of the corner (with respect to the reference element)
+     *
      *  \returns position of the i-th corner
      */
     GlobalCoordinate corner ( int i ) const
@@ -221,7 +192,7 @@ namespace Dune
        \return    integration element \f$\mu(x)\f$
 
        \note Each implementation computes the integration element with optimal
-       efficieny. For example in an equidistant structured mesh it may be as
+       efficiency. For example in an equidistant structured mesh it may be as
        simple as \f$h^\textrm{mydim}\f$.
      */
     ctype integrationElement (const LocalCoordinate& local) const
@@ -258,9 +229,10 @@ namespace Dune
      *  \param[in]  local  position \f$x\in D\f$
      *
      *  \return \f$J_g^T(x)\f$
+     *
+     *  \note The exact return type is implementation defined.
      */
-    const JacobianTransposed &
-    jacobianTransposed ( const LocalCoordinate& local ) const
+    JacobianTransposed jacobianTransposed ( const LocalCoordinate& local ) const
     {
       return impl().jacobianTransposed( local );
     }
@@ -279,38 +251,37 @@ namespace Dune
      *  When we set \f$\hat{f}(x) = f(g(x))\f$ and apply the chain rule we obtain
      *  \f[\nabla f(g(x)) = J_g^{-T}(x) \nabla \hat{f}(x).\f]
      *
-     *  \note In the non-symmetric case \f$\textrm{cdim} \neq \textrm{mydim}\f$, the
+     *  \note In the non-quadratic case \f$\textrm{cdim} \neq \textrm{mydim}\f$, the
      *        pseudoinverse of \f$J_g^T(x)\f$ is returned.
      *        This means that it is inverse for all tangential vectors in
      *        \f$g(x)\f$ while mapping all normal vectors to zero.
+     *
+     *  \note The exact return type is implementation defined.
      */
-    const JacobianInverseTransposed &
-    jacobianInverseTransposed ( const LocalCoordinate &local ) const
+    JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianInverseTransposed(local);
     }
+    //===========================================================
+    /** @name Interface for grid implementers
+     */
+    //@{
+    //===========================================================
 
     //! copy constructor from implementation
     explicit Geometry ( const Implementation &impl )
       : realGeometry( impl )
-    {
-      deprecationWarning ( integral_constant< bool, storeReference >() );
-    }
+    {}
+
+    //@}
 
   private:
     /** hide assignment operator */
     const Geometry &operator= ( const Geometry &rhs );
 
-    void DUNE_DEPRECATED_MSG( "This Dune::Geometry is still a reference to its implementation." )
-    deprecationWarning ( integral_constant< bool, true > ) {}
-
-    void
-    deprecationWarning ( integral_constant< bool, false > ) {}
-
   protected:
-    static const bool storeReference = FacadeOptions::StoreGeometryReference< mydim, cdim, GridImp, GeometryImp >::v;
 
-    typename conditional< storeReference, const Implementation &, Implementation >::type realGeometry;
+    Implementation realGeometry;
   };
 
 
@@ -412,12 +383,6 @@ namespace Dune
     FieldVector<ctype, mydim> local (const FieldVector<ctype, cdim>& ) const
     {
       return FieldVector<ctype, mydim>();
-    }
-
-    //! checkInside here returns true
-    bool checkInside (const FieldVector<ctype, mydim>& ) const
-    {
-      return true;
     }
 
     //! return volume of the geometry

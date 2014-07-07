@@ -27,9 +27,9 @@ namespace Dune
   static void checkAlbertaDimensions ()
   {
     // If this check fails, define ALBERTA_DIM accordingly
-    dune_static_assert( (dimworld == Alberta::dimWorld),
-                        "Template Parameter dimworld does not match "
-                        "ALBERTA's DIM_OF_WORLD setting." );
+    static_assert((dimworld == Alberta::dimWorld),
+                  "Template Parameter dimworld does not match "
+                  "ALBERTA's DIM_OF_WORLD setting.");
   }
 
 
@@ -435,12 +435,7 @@ namespace Dune
   inline bool AlbertaGrid < dim, dimworld >
   ::adapt ( AdaptDataHandleInterface< This, DataHandle > &handle )
   {
-    // minimum number of elements assumed to be created during adaptation
-    const int defaultElementChunk = 100;
-
     preAdapt();
-    const int refineMarked = adaptationState_.refineMarked();
-    handle.preAdapt( std::max( defaultElementChunk, 4*refineMarked ) );
 
     typedef Alberta::AdaptRestrictProlongHandler
     < This, AdaptDataHandleInterface< This, DataHandle > >
@@ -463,7 +458,6 @@ namespace Dune
       Alberta::adaptationDataHandler_ = 0;
     callbackVector.release();
 
-    handle.postAdapt();
     postAdapt();
     return refined;
   }
@@ -634,8 +628,6 @@ namespace Dune
   inline bool AlbertaGrid< dim, dimworld >
   ::readGridXdr ( const std::string &filename, ctype &time )
   {
-    typedef Alberta::FillFlags< dim > FillFlags;
-
     //removeMesh();
 
     if( filename.size() <= 0 )

@@ -108,27 +108,6 @@ namespace Dune
 
     int codimension () const { return codim_; }
 
-
-    // deprecated stuff
-
-    typedef Grid GridType DUNE_DEPRECATED;
-    typedef Value Data DUNE_DEPRECATED;
-
-    void reserve () DUNE_DEPRECATED { return resize(); }
-
-    void clear () DUNE_DEPRECATED
-    {
-      resize( Value() );
-      shrinkToFit();
-      fill( Value() );
-    }
-
-    void update () DUNE_DEPRECATED
-    {
-      resize( Value() );
-      shrinkToFit();
-    }
-
   protected:
     const Grid &grid () const { return *grid_; }
 
@@ -146,7 +125,6 @@ namespace Dune
     static void migrateEntry ( const typename IdSet::IdType &id, const Value &value,
                                Map &oldData, Map &newData );
 
-  protected:
     const IdSet &idSet () const { return *idSet_; }
 
     const Grid *grid_;
@@ -163,6 +141,7 @@ namespace Dune
   template< class G, class IdSet, class Map >
   template< class value, class iterator >
   class PersistentContainerMap< G, IdSet, Map >::IteratorWrapper
+    : public iterator
   {
     typedef IteratorWrapper< const value, typename Map::const_iterator > ConstWrapper;
 
@@ -262,7 +241,7 @@ namespace Dune
     typedef typename Grid::LevelGridView LevelView;
     typedef typename LevelView::template Codim< codim >::Iterator LevelIterator;
 
-    const LevelView levelView = grid().levelView( level );
+    const LevelView levelView = grid().levelGridView( level );
     const LevelIterator end = levelView.template end< codim >();
     for( LevelIterator it = levelView.template begin< codim >(); it != end; ++it )
       migrateEntry( idSet().id( *it ), value, data, data_ );
@@ -278,7 +257,7 @@ namespace Dune
     typedef typename Grid::LevelGridView LevelView;
     typedef typename LevelView::template Codim< 0 >::Iterator LevelIterator;
 
-    const LevelView levelView = grid().levelView( level );
+    const LevelView levelView = grid().levelGridView( level );
     const LevelIterator end = levelView.template end< 0 >();
     for( LevelIterator it = levelView.template begin< 0 >(); it != end; ++it )
     {

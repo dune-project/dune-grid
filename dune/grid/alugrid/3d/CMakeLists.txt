@@ -31,8 +31,7 @@ set(HEADERS
   iterator_imp.cc
   alu3diterators.hh
   lbdatahandle.hh
-  alugrid.hh
-  capabilities.hh)
+  alugrid.hh)
 
 exclude_dir_from_headercheck()
 

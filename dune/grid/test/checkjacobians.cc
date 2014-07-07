@@ -5,7 +5,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/static_assert.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/unused.hh>
 
@@ -93,16 +92,17 @@ namespace Dune
     {
       // field type
       typedef typename Jacobian::field_type field_type;
-      dune_static_assert( (Conversion< ctype, field_type >::isTwoWay), "Field type not compatible with geometry's coordinate type" );
+      static_assert((Conversion< ctype, field_type >::isTwoWay),
+                    "Field type not compatible with geometry's coordinate type");
       // size type
       typedef typename Jacobian::size_type size_type;
 
       // number of rows
       static const int rows = Jacobian::rows;
-      dune_static_assert( (rows == dimRange), "Number of rows and range dimension do not coincide" );
+      static_assert((rows == dimRange), "Number of rows and range dimension do not coincide");
       // number of cols
       static const int cols = Jacobian::cols;
-      dune_static_assert( (cols == dimDomain), "Number of columns and domain dimension do not coincide" );
+      static_assert((cols == dimDomain), "Number of columns and domain dimension do not coincide");
 
       static void apply ( const Jacobian &jacobian )
       {

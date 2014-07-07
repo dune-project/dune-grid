@@ -76,27 +76,6 @@ namespace Dune
 
     int codimension () const { return hostContainer_.codimension(); }
 
-
-    // deprecated stuff
-
-    typedef Grid GridType DUNE_DEPRECATED;
-    typedef Value Data DUNE_DEPRECATED;
-
-    void reserve () DUNE_DEPRECATED { return resize(); }
-
-    void clear () DUNE_DEPRECATED
-    {
-      resize( Value() );
-      shrinkToFit();
-      fill( Value() );
-    }
-
-    void update () DUNE_DEPRECATED
-    {
-      resize( Value() );
-      shrinkToFit();
-    }
-
   protected:
     PersistentContainer< HostGrid, T > hostContainer_;
   };

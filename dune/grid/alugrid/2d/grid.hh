@@ -12,7 +12,6 @@
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/alugrid/common/interfaces.hh>
-#include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/alugrid/common/declaration.hh>
@@ -214,8 +213,8 @@ namespace Dune {
     typedef ALU2dGrid< dim, dimworld, eltype > ThisType;
     typedef GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > > BaseType;
 
-    dune_static_assert( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
-    dune_static_assert( dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3." );
+    static_assert( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
+    static_assert( dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3." );
 
   public:
     static const ALU2DSPACE ElementType elementType = eltype;

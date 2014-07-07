@@ -386,7 +386,7 @@ namespace Dune
      * The container has to have random access via operator[] (e. g. std::vector). The
      * value of the grid function for an arbitrary element
      * will be accessed by calling operator[] with the index (corresponding
-     * with the grid view) of the element.
+     * to the index from the MGMC mapper on the grid view) of the element.
      * For vector valued data all components for an element are assumed to
      * be consecutive.
      *
@@ -434,7 +434,7 @@ namespace Dune
      * The container has to have random access via operator[] (e. g. std::vector). The value
      * of the grid function for an arbitrary element
      * will be accessed by calling operator[] with the index (corresponding
-     * to the grid view) of the vertex.
+     * to the index from the MGMC mapper on the grid view) of the vertex.
      * For vector valued data all components for a vertex are assumed to
      * be consecutive.
      *
@@ -638,7 +638,14 @@ namespace Dune
       std::ofstream file;
       file.exceptions(std::ios_base::badbit | std::ios_base::failbit |
                       std::ios_base::eofbit);
-      file.open( pieceName.c_str(), std::ios::binary );
+      // check if file can be opened
+      try {
+        file.open( pieceName.c_str(), std::ios::binary );
+      }
+      catch(...) {
+        std::cerr << "Filename: " << pieceName << " could not be opened" << std::endl;
+        throw;
+      }
       if (! file.is_open())
         DUNE_THROW(IOError, "Could not write to piece file " << pieceName);
       writeDataFile( file );
@@ -689,7 +696,14 @@ namespace Dune
       // write this processes .vtu/.vtp piece file
       std::string fullname = getParallelPieceName(name, piecepath, commRank,
                                                   commSize);
-      file.open(fullname.c_str(),std::ios::binary);
+      // check if file can be opened
+      try {
+        file.open(fullname.c_str(),std::ios::binary);
+      }
+      catch(...) {
+        std::cerr << "Filename: " << fullname << " could not be opened" << std::endl;
+        throw;
+      }
       if (! file.is_open())
         DUNE_THROW(IOError, "Could not write to piecefile file " << fullname);
       writeDataFile(file);

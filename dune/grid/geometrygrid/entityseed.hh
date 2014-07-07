@@ -44,9 +44,19 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename HostGrid::template Codim< codim >::EntitySeed HostEntitySeed;
 
+      //! default construct an invalid entity seed
+      EntitySeed ( )
+      {}
+
       explicit EntitySeed ( const HostEntitySeed &hostEntitySeed )
         : hostEntitySeed_( hostEntitySeed )
       {}
+
+      //! check whether the EntitySeed refers to a valid Entity
+      bool isValid() const
+      {
+        return hostEntitySeed_.isValid();
+      }
 
       const HostEntitySeed &hostEntitySeed () const { return hostEntitySeed_; }
 
@@ -78,10 +88,20 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
       typedef typename HostGrid::template Codim< 0 >::EntitySeed HostElementSeed;
 
+      //! default construct an invalid entity seed
+      EntitySeed ( )
+      {}
+
       explicit EntitySeed ( const HostElementSeed &hostElementSeed, unsigned int subEntity )
         : hostElementSeed_( hostElementSeed ),
           subEntity_( subEntity )
       {}
+
+      //! check whether the EntitySeed refers to a valid Entity
+      bool isValid() const
+      {
+        return hostElementSeed_.isValid();
+      }
 
       const HostElementSeed &hostElementSeed () const { return hostElementSeed_; }
       unsigned int subEntity () const { return subEntity_; }

@@ -113,14 +113,14 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   // check consistency of exported types
 
-  dune_static_assert( (Dune::is_same< ctype, typename Entity::ctype >::value),
-                      "Type Intersection::ctype differs from Intersection::Entity::ctype." );
-  dune_static_assert( (Dune::is_same< ctype, typename LocalGeometry::ctype >::value),
-                      "Type Intersection::ctype differs from Intersection::LocalGeometry::ctype." );
-  dune_static_assert( (Dune::is_same< ctype, typename Geometry::ctype >::value),
-                      "Type Intersection::ctype differs from Intersection::Geometry::ctype." );
-  dune_static_assert( (Dune::is_same< Entity, typename EntityPointer::Entity >::value),
-                      "Type Intersection::EntityPointer::Entity differs from Intersection::Entity." );
+  static_assert((Dune::is_same< ctype, typename Entity::Geometry::ctype >::value),
+                "Type Intersection::ctype differs from Intersection::Entity::ctype.");
+  static_assert((Dune::is_same< ctype, typename LocalGeometry::ctype >::value),
+                "Type Intersection::ctype differs from Intersection::LocalGeometry::ctype.");
+  static_assert((Dune::is_same< ctype, typename Geometry::ctype >::value),
+                "Type Intersection::ctype differs from Intersection::Geometry::ctype.");
+  static_assert((Dune::is_same< Entity, typename EntityPointer::Entity >::value),
+                "Type Intersection::EntityPointer::Entity differs from Intersection::Entity.");
 
   // cache some information on the intersection
 
@@ -132,7 +132,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   // create quadrature rule as a set of test points
 
-  const Dune::QuadratureType::Enum qt = Dune::QuadratureType::Gauss;
+  const Dune::QuadratureType::Enum qt = Dune::QuadratureType::GaussLegendre;
   const Dune::QuadratureRule< ctype, mydimension > &quadrature
     = Dune::QuadratureRules< ctype, mydimension >::rule( intersection.type(), 3, qt );
 
@@ -232,12 +232,12 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
           std::cerr << "       outside()->geometry().global( intersection.geometryInOutside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
           std::cerr << "       x = " << pt << std::endl;
-          std::cerr << "       interesction.geometry() = " << geometry.corner( 0 );
+          std::cerr << "       intersection.geometry() = " << geometry.corner( 0 );
           for( int i = 1; i < geometry.corners(); ++i )
             std::cerr << " | " << geometry.corner( i );
           std::cerr << std::endl;
 
-          std::cerr << "       intersection.geometryOutInside() = " << geometryInOutside.corner( 0 );
+          std::cerr << "       intersection.geometryInOutside() = " << geometryInOutside.corner( 0 );
           for( int i = 1; i < geometryInOutside.corners(); ++i )
             std::cerr << " | " << geometryInOutside.corner( i );
           std::cerr << std::endl;
@@ -389,16 +389,16 @@ void checkIntersectionIterator ( const GridViewType &view,
 
   // check consistency of exported types
 
-  dune_static_assert( (Dune::is_same< ctype, typename Intersection::ctype >::value),
+  static_assert( (Dune::is_same< ctype, typename Intersection::ctype >::value),
                       "Type GridView::Grid::ctype differs from GridView::Intersection::ctype." );
 
-  dune_static_assert( (Dune::is_same< Intersection, typename IntersectionIterator::Intersection >::value),
+  static_assert( (Dune::is_same< Intersection, typename IntersectionIterator::Intersection >::value),
                       "Type GridView::Intersection differs from GridView::IntersectionIterator::Intersection." );
 
-  dune_static_assert((static_cast<int>(Intersection::dimension)
+  static_assert((static_cast<int>(Intersection::dimension)
                       == static_cast<int>(GridType::dimension)),"IntersectionIterator has wrong dimension");
 
-  dune_static_assert((static_cast<int>(Intersection::dimensionworld)
+  static_assert((static_cast<int>(Intersection::dimensionworld)
                       == static_cast<int>(GridType::dimensionworld)),"IntersectionIterator has wrong dimensionworld");
 
   // initialize variables for element checks
@@ -527,7 +527,7 @@ void checkIntersectionIterator ( const GridViewType &view,
     if( intersection.boundary() )
       hasBoundaryIntersection = true;
 
-    const Dune::QuadratureType::Enum qt = Dune::QuadratureType::Gauss;
+    const Dune::QuadratureType::Enum qt = Dune::QuadratureType::GaussLegendre;
     const Dune::QuadratureRule< ctype, Intersection::mydimension > &quadrature
       = Dune::QuadratureRules< ctype, Intersection::mydimension >::rule( intersection.type(), 3, qt );
     for( std::size_t i = 0; i < quadrature.size(); ++i )
@@ -598,12 +598,12 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
   else
   {
     for (int i=0; i<=grid.maxLevel(); i++)
-      checkViewIntersectionIterator(grid.levelView(i));
+      checkViewIntersectionIterator(grid.levelGridView(i));
   }
 
   // test leaf intersection iterator
   {
-    checkViewIntersectionIterator(grid.leafView());
+    checkViewIntersectionIterator(grid.leafGridView());
   }
 
 }

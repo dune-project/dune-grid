@@ -70,7 +70,7 @@ struct subIndexCheck
       #endif
       assert( ep == ep2 );
 
-      const typename Grid::LevelGridView &levelGridView = g.levelView(e.level());
+      const typename Grid::LevelGridView &levelGridView = g.levelGridView(e.level());
 
       if( !levelGridView.contains( *ep ) )
       {
@@ -192,7 +192,13 @@ void zeroEntityConsistency (Grid &g)
 
     // Entity::count<dim>() == Entity::geometry().corners();
     // Entity::geometry()[c] == Entity::entity<dim>.geometry()[0];
-    const int numCorners = it->template count< dimGrid >();
+    const int numCornersOld = it->template count< dimGrid >();
+    const int numCorners = it->subEntities(dimGrid);
+    if( numCorners != numCornersOld )
+    {
+      std::cerr << "Error: Entity::count< dimGrid >() != Entity::subEntities(dimGrid)." << std::endl;
+      assert( false );
+    }
     if( numCorners != it->geometry().corners() )
     {
       std::cerr << "Error: Entity::count< dimGrid >() != Entity::geometry().corners()." << std::endl;
@@ -268,7 +274,7 @@ void assertNeighbor (Grid &g)
   typedef typename Grid::template Codim< 0 >::Entity Entity;
   typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
 
-  GridView gridView = g.levelView( 0 );
+  GridView gridView = g.levelGridView( 0 );
 
   LevelIterator e = g.template lbegin<0>(0);
   const LevelIterator eend = g.template lend<0>(0);
@@ -595,7 +601,7 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::LeafGridView LeafGridView;
   typedef typename LeafGridView::IntersectionIterator LeafIntersectionIterator;
 
-  LeafGridView leafView = g.leafView();
+  LeafGridView leafGridView = g.leafGridView();
 
   // assignment tests
   LevelIterator l1 = g.template lbegin<0>(0);
@@ -608,8 +614,8 @@ void iteratorEquals (Grid &g)
     return;
 
   // check '==' consistency
-  EntityPointer a( g.template levelView<Dune::All_Partition>(0).template begin<0>() );
-  EntityPointer i( g.template levelView<Dune::Interior_Partition>(0).template begin<0>() );
+  EntityPointer a( g.template levelGridView<Dune::All_Partition>(0).template begin<0>() );
+  EntityPointer i( g.template levelGridView<Dune::Interior_Partition>(0).template begin<0>() );
 
   assert(
     (g.levelIndexSet(0).index(*a) != g.levelIndexSet(0).index(*i)) // index equal
@@ -622,8 +628,8 @@ void iteratorEquals (Grid &g)
 
   HierarchicIterator h1 = l1->hbegin(99);
   HierarchicIterator h2 = l2->hbegin(99);
-  LeafIntersectionIterator i1 = leafView.ibegin( *l1 );
-  LeafIntersectionIterator i2 = leafView.ibegin( *l2 );
+  LeafIntersectionIterator i1 = leafGridView.ibegin( *l1 );
+  LeafIntersectionIterator i2 = leafGridView.ibegin( *l2 );
   EntityPointer e1( l1 );
   EntityPointer e2( h2 );
 
@@ -640,15 +646,15 @@ void iteratorEquals (Grid &g)
     { bool DUNE_UNUSED tmp = (i == l2); }                         \
     { bool DUNE_UNUSED tmp = (i == h2); }                         \
     { bool DUNE_UNUSED tmp = (i == L2); }                         \
-    if (i2 != leafView.iend( *l2 )) bool DUNE_UNUSED tmp = (i == i2->inside()); \
-    if (i2 != leafView.iend( *l2 ) && i2->neighbor()) bool DUNE_UNUSED tmp = (i == i2->outside()); \
+    if (i2 != leafGridView.iend( *l2 )) bool DUNE_UNUSED tmp = (i == i2->inside()); \
+    if (i2 != leafGridView.iend( *l2 ) && i2->neighbor()) bool DUNE_UNUSED tmp = (i == i2->outside()); \
 }
   TestEquals(e1);
   TestEquals(l1);
   TestEquals(h1);
   TestEquals(L1);
-  if (i1 != leafView.iend( *l2 )) TestEquals(i1->inside());
-  if (i1 != leafView.iend( *l2 ) && i1->neighbor()) TestEquals(i1->outside());
+  if (i1 != leafGridView.iend( *l2 )) TestEquals(i1->inside());
+  if (i1 != leafGridView.iend( *l2 ) && i1->neighbor()) TestEquals(i1->outside());
 }
 
 
@@ -662,7 +668,7 @@ void checkBoundarySegmentIndexProlongation ( const Grid &grid, const Entity &ent
 
   const typename Intersection::LocalGeometry &geoInInside = intersection.geometryInInside();
 
-  const GridView gridView = grid.levelView( entity.level()+1 );
+  const GridView gridView = grid.levelGridView( entity.level()+1 );
   const HierarchicIterator hend = entity.hend( entity.level()+1 );
   for( HierarchicIterator hit = entity.hbegin( entity.level()+1 ); hit != hend; ++hit )
   {
@@ -703,7 +709,7 @@ void checkFatherLevel ( Grid &grid )
     typedef typename GridView::template Codim<0>::Iterator Iterator;
     typedef typename GridView::template Codim<0>::EntityPointer EntityPointer;
 
-    GridView gv = grid.levelView(level);
+    GridView gv = grid.levelGridView(level);
     Iterator it = gv.template begin<0>();
     Iterator end = gv.template end<0>();
     for(; it!=end; ++it)
@@ -725,15 +731,17 @@ void checkFatherLevel ( Grid &grid )
           // check level of father for newly created entitypointer
           {
             EntityPointer f = it->father();
+#if !DISABLE_DEPRECATED_METHOD_CHECK
             if (f.level() != level-1)
             {
               std::cerr << "Error: father().level()=" << f.level()
                         << " for element on level " << level << std::endl;
               assert(false);
             }
+#endif
             if (f->level() != level-1)
             {
-              std::cerr << "Error: father()->level()=" << f.level()
+              std::cerr << "Error: father()->level()=" << f->level()
                         << " for element on level " << level << std::endl;
               assert(false);
             }
@@ -742,15 +750,17 @@ void checkFatherLevel ( Grid &grid )
           {
             EntityPointer f(*it);
             f = it->father();
+#if !DISABLE_DEPRECATED_METHOD_CHECK
             if (f.level() != level-1)
             {
               std::cerr << "Error: father().level()=" << f.level()
                         << " for element on level " << level << " with reassigned father pointer" << std::endl;
               assert(false);
             }
+#endif
             if (f->level() != level-1)
             {
-              std::cerr << "Error: father()->level()=" << f.level()
+              std::cerr << "Error: father()->level()=" << f->level()
                         << " for element on level " << level << " with reassigned father pointer" << std::endl;
               assert(false);
             }
@@ -874,11 +884,9 @@ void gridcheck (Grid &g)
   Dune::gridleaflist(g, "GridLeafInfo");
 #endif
 
-  // type of GridInterface == GridDefaultImplementation
-  typedef Dune::GridDefaultImplementation<dim,dimworld,ctype,GridFamily> GridIF;
-  const GridIF & gridIF = g;
   // check functionality when grid is interpreted as reference to interface
-  GridInterface<GridIF>::check(gridIF);
+  GridInterface< Dune::Grid< dim, dimworld, ctype, GridFamily > >();
+
   /*
    * now the runtime-tests
    */
@@ -895,19 +903,19 @@ void gridcheck (Grid &g)
   checkFatherLevel(cg);
 
   // check geometries of macro level and leaf level
-  checkGeometry( g.levelView( 0 ) );
-  checkGeometry( g.leafView() );
+  checkGeometry( g.levelGridView( 0 ) );
+  checkGeometry( g.leafGridView() );
 
   // check entity seeds
-  Dune::checkEntitySeed( g.leafView(), std::cerr );
+  Dune::checkEntitySeed( g.leafGridView(), std::cerr );
   for( int level = 0; level <= g.maxLevel(); ++level )
-    Dune::checkEntitySeed( g.levelView( level ), std::cerr );
+    Dune::checkEntitySeed( g.levelGridView( level ), std::cerr );
 
   // note that for some grid this might fail
   // then un comment this test
-  Dune :: checkIndexSet( g, g.leafView(), Dune :: dvverb );
+  Dune :: checkIndexSet( g, g.leafGridView(), Dune :: dvverb );
   for( int level = 0; level <= g.maxLevel(); ++level )
-    Dune :: checkIndexSet( g, g.levelView( level ), Dune :: dvverb, true );
+    Dune :: checkIndexSet( g, g.levelGridView( level ), Dune :: dvverb, true );
 
   // check at least if the subId method is there
   {
@@ -926,9 +934,9 @@ void gridcheck (Grid &g)
   }
 
   if( EnableLevelIntersectionIteratorCheck< Grid >::v )
-    checkBoundarySegmentIndex( g.levelView( 0 ) );
+    checkBoundarySegmentIndex( g.levelGridView( 0 ) );
   else if( g.maxLevel() == 0 )
-    checkBoundarySegmentIndex( g.leafView() );
+    checkBoundarySegmentIndex( g.leafGridView() );
   else
     std::cout << "Warning: Skipping boundary segment index check (missing level intersection iterator)." << std::endl;
 }

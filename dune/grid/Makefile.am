@@ -1,7 +1,16 @@
-# $Id$
-
-SUBDIRS = common alugrid onedgrid sgrid uggrid utility \
-          yaspgrid io albertagrid geometrygrid test
+SUBDIRS = \
+  albertagrid \
+  alugrid \
+  common \
+  geometrygrid \
+  identitygrid \
+  io \
+  onedgrid \
+  sgrid \
+  test \
+  uggrid \
+  utility \
+  yaspgrid
 noinst_LTLIBRARIES = libgrid.la
 
 # always part of lib:
@@ -13,9 +22,9 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
-# the ALUGrid lib contains items that are needed
-# in any case, so no dependency from ALUGRID flag
-ALULIB = alugrid/libalu.la
+if ALUGRID
+  ALULIB = alugrid/libalu.la
+endif
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
@@ -28,10 +37,11 @@ libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
         $(AMIRAMESHLIB)                         \
 	$(DUNE_LIBS)
 
-# These libraries do not need other libraries besides lcommon
+# These libraries do not need other libraries besides libdunecommon and libdunegeometry
 griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \
                alugrid.hh \
+               identitygrid.hh \
                sgrid.hh \
                uggrid.hh \
                yaspgrid.hh \

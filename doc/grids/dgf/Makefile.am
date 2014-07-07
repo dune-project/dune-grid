@@ -28,7 +28,9 @@ GRIDS = basicunitcube-2d.dgf \
         helix.dgf \
         octahedron.dgf \
         simplex-testgrid-1-1.dgf \
+        simplex-testgrid-1-2.dgf \
         simplex-testgrid-2-2.dgf \
+        simplex-testgrid-1-3.dgf \
         simplex-testgrid-2-3.dgf \
         simplex-testgrid-3-3.dgf \
         simplex-testgrid-3-3-large.dgf \
@@ -41,7 +43,7 @@ GRIDS = basicunitcube-2d.dgf \
         torus-3.dgf \
         unstr_cube.dgf
 
-dgfdir=$(includedir)/dune/doc/grids/dgf
+dgfdir=$(docdir)/grids/dgf
 dgf_DATA = $(GRIDS)
 EXTRA_DIST = CMakeLists.txt $(GRIDS)
 

@@ -50,25 +50,6 @@ namespace Dune {
   template<class GridImp> class SIntersectionIterator;
   template<class GridImp> class SHierarchicIterator;
 
-  namespace FacadeOptions
-  {
-
-    template<int dim, int dimworld, class ctype, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim,
-        SGrid<dim,dimworld,ctype>, SGeometry>
-    {
-      static const bool v = false;
-    };
-
-    template<int dim, int dimworld, class ctype, int mydim, int cdim>
-    struct StoreGeometryReference<mydim, cdim,
-        const SGrid<dim,dimworld,ctype>, SGeometry>
-    {
-      static const bool v = false;
-    };
-
-  }
-
   //************************************************************************
   /*!
      SGeometry realizes the concept of the geometric part of a mesh entity.
@@ -370,6 +351,10 @@ namespace Dune {
      */
     template<int cc> int count () const;
 
+    /** \brief Return number of subentities with codimension codim.
+     */
+    unsigned int subEntities (unsigned int codim) const;
+
     /**
        Provide access to mesh entity i of given codimension. Entities
        are numbered 0 ... count<cc>()-1
@@ -639,7 +624,7 @@ namespace Dune {
 
     int boundarySegmentIndex () const {
       if (boundary())
-        return grid->boundarySegmentIndex(self.level(), count, zred);
+        return grid->boundarySegmentIndex(self->level(), count, zred);
       return -1;
     }
 
@@ -1004,10 +989,21 @@ namespace Dune {
   public:
     enum { codimension = codim };
 
+    //! default constructor (invalid)
+    SEntitySeed () :
+      _l(-1), _index(0)
+    {}
+
     //! constructor
     SEntitySeed (int l, int index) :
       _l(l), _index(index)
     {}
+
+    //! check whether the EntitySeed refers to a valid Entity
+    bool isValid() const
+    {
+      return _l != -1;
+    }
 
     int level () const { return this->_l; }
     int index () const { return this->_index; }
@@ -1202,6 +1198,7 @@ namespace Dune {
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief A structured mesh in d dimensions consisting of "cubes" (pilot implementation of the %Dune grid interface, for debugging only).
      \ingroup GridImplementations
+     \ingroup SGrid
 
           This module describes the pilot implementation of the %Dune grid interface.
           It implements the grid interface for simple structured meshes.

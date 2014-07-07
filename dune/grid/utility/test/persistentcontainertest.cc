@@ -7,7 +7,6 @@
 #include <config.h>
 
 #include <iostream>
-#include <cassert>
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
@@ -40,7 +39,7 @@ bool test(GridType &grid)
   PersistentContainer<GridType,DataType> container2(grid,2);
 
   typedef typename GridType::LeafGridView GridView;
-  const GridView &view = grid.leafView();
+  const GridView &view = grid.leafGridView();
   typedef typename GridView::template Codim<0>::Iterator EIterator;
 
   {
@@ -58,9 +57,9 @@ bool test(GridType &grid)
   }
 
   grid.globalRefine(1);
-  container0.update();
-  container1.update();
-  container2.update();
+  container0.resize();
+  container1.resize();
+  container2.resize();
 
   {
     const EIterator &eend = view.template end<0>();
@@ -122,8 +121,8 @@ try {
   {
     typedef YaspGrid<2> GridType;
     Dune::FieldVector<double,2> Len; Len = 1.0;
-    Dune::array<int,2> s = {2,6};
-    std::bitset<2> p(0);
+    Dune::array<int,2> s = { {2, 6} };
+    std::bitset<2> p;
     int overlap = 1;
     GridType grid(Len,s,p,overlap);
     std::cout << "Testing YaspGrid" << std::endl;
@@ -132,7 +131,7 @@ try {
 
 #if HAVE_ALUGRID
   {
-    typedef ALUCubeGrid<2,2> GridType;
+    typedef Dune::ALUGrid<2, 2, cube, nonconforming> GridType;
     array<unsigned int,2> elements2d;
     elements2d.fill(4);
     shared_ptr<GridType> grid = StructuredGridFactory<GridType>::createCubeGrid(FieldVector<double,2>(0),

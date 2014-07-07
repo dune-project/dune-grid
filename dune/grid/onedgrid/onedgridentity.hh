@@ -299,6 +299,14 @@ namespace Dune {
       return (cc==0) ? 1 : 2;
     }
 
+    /** \brief Return the number of subentities of codimension codim.
+     */
+    unsigned int subEntities (unsigned int codim) const
+    {
+      assert(codim==0 || codim==1);
+      return (codim==0) ? 1 : 2;
+    }
+
     /** \brief Return index of sub entity with codim = cc and local number i
      */
     int subLevelIndex (int i,unsigned int codim) const {

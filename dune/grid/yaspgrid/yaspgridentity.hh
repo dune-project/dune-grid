@@ -207,7 +207,7 @@ namespace Dune {
      *
      * That number is (dim over (dim-codim)) times 2^codim
      */
-    unsigned int count (unsigned int codim) const
+    unsigned int subEntities (unsigned int codim) const
     {
       int n = dim;
       int k = dim-codim;
@@ -227,8 +227,8 @@ namespace Dune {
     template<int cc>
     typename Codim<cc>::EntityPointer subEntity (int i) const
     {
-      static_assert( cc == dim || cc == 0 ,
-                          "YaspGrid only supports Entities with codim=dim and codim=0");
+      static_assert((cc == dim || cc == 0),
+                    "YaspGrid only supports Entities with codim=dim and codim=0");
       // coordinates of the cell == coordinates of lower left corner
       if (cc==dim)
       {
@@ -857,7 +857,7 @@ namespace Dune {
     //! globally unique, persistent index
     PersistentIndexType persistentIndex () const
     {
-      // get coordinate and size of global grid //TODO this implements global vertex size
+      // get coordinate and size of global grid
       iTupel size =  _g->mg->template levelSize<dim>(_g->level());
 
       int coord[dim];

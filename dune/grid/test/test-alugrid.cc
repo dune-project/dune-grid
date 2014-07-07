@@ -13,7 +13,6 @@
 
 #include <dune/common/tupleutility.hh>
 #include <dune/common/tuples.hh>
-#include <dune/common/static_assert.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
@@ -43,17 +42,16 @@ struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid<3, 3, simplex, confor
 template <bool leafconform, class Grid>
 void checkCapabilities(const Grid& grid)
 {
-  dune_static_assert( Dune::Capabilities::hasSingleGeometryType< Grid > :: v == true,
-                      "hasSingleGeometryType is not set correctly");
-  dune_static_assert( Dune::Capabilities::isLevelwiseConforming< Grid > :: v == ! leafconform,
-                      "isLevelwiseConforming is not set correctly");
-  dune_static_assert( Dune::Capabilities::isLeafwiseConforming< Grid > :: v == leafconform,
-                      "isLevelwiseConforming is not set correctly");
+  static_assert(Dune::Capabilities::hasSingleGeometryType< Grid > :: v == true,
+                "hasSingleGeometryType is not set correctly");
+  static_assert(Dune::Capabilities::isLevelwiseConforming< Grid > :: v == ! leafconform,
+                "isLevelwiseConforming is not set correctly");
+  static_assert(Dune::Capabilities::isLeafwiseConforming< Grid > :: v == leafconform,
+                "isLevelwiseConforming is not set correctly");
   static const bool hasEntity = Dune::Capabilities::hasEntity<Grid, 1> :: v == true;
-  dune_static_assert( hasEntity,
-                      "hasEntity is not set correctly");
-  dune_static_assert( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
-                      "hasBackupRestoreFacilities is not set correctly");
+  static_assert(hasEntity, "hasEntity is not set correctly");
+  static_assert(Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
+                "hasBackupRestoreFacilities is not set correctly");
 
   static const bool reallyParallel =
 #if ALU3DGRID_PARALLEL
@@ -61,8 +59,8 @@ void checkCapabilities(const Grid& grid)
 #else
     false ;
 #endif
-  dune_static_assert( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
-                      "isParallel is not set correctly");
+  static_assert(Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
+                "isParallel is not set correctly");
 
   static const bool reallyCanCommunicate =
 #if ALU3DGRID_PARALLEL
@@ -72,8 +70,7 @@ void checkCapabilities(const Grid& grid)
 #endif
   static const bool canCommunicate = Dune::Capabilities::canCommunicate< Grid, 1 > :: v
                                      == reallyCanCommunicate;
-  dune_static_assert( canCommunicate,
-                      "canCommunicate is not set correctly");
+  static_assert(canCommunicate, "canCommunicate is not set correctly");
 
 }
 
@@ -132,7 +129,9 @@ void checkIteratorAssignment(GridType & grid)
       assert( it->level() == 0 );
       EntityPointerType p( it );
 
+#if !DISABLE_DEPRECATED_METHOD_CHECK
       assert( p.level()  == 0 );
+#endif
       assert( p->level() == 0 );
 
       if( grid.maxLevel() > 0 )
@@ -142,7 +141,9 @@ void checkIteratorAssignment(GridType & grid)
         {
           p = it;
           assert( it->level() == 1 );
+#if !DISABLE_DEPRECATED_METHOD_CHECK
           assert( p.level()   == 1 );
+#endif
           assert( p->level()  == 1 );
         }
       }
@@ -156,7 +157,7 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
                   const int face, const bool neighbor, const bool output )
 {
   enum { dim = EntityType :: dimension };
-  typedef typename EntityType :: ctype ctype;
+  typedef typename EntityType :: Geometry :: ctype ctype;
 
   typedef FaceTopologyMapping<tetra> SimplexFaceMapping;
   typedef FaceTopologyMapping<hexa>  CubeFaceMapping;
@@ -219,8 +220,8 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
 
   if( output )
   {
-    std::string twistIn( (neighbor) ? "twistInNeighbor()" : "twistInSelf" );
-    std::string numberIn( (neighbor) ? "indexInOutside()" : "indexInInside" );
+    std::string twistIn( (neighbor) ? "twistInOutside()" : "twistInInside()" );
+    std::string numberIn( (neighbor) ? "indexInOutside()" : "indexInInside()" );
     std::cout << "ERROR: Face "<< face << " : twist = "<< twistFound << std::endl;
     std::cout << "\nPut twist = "<< twistFound << " In TwistUtility::"<< twistIn << " for " << numberIn << " = " << face << " ! \n";
     std::cout << "******************************************\n";
@@ -326,8 +327,6 @@ void checkPersistentContainerCodim(GridType & grid)
   typedef typename GridType::template Codim<codim>::LeafIterator Iterator;
 
   typedef typename GridType::template Codim<codim>:: Entity Entity;
-  typedef typename GridType::template Codim<codim>:: Geometry Geometry ;
-  typedef typename GridType:: ctype ctype;
 
   /** Loop only over the interior elements, not over ghost elements. */
   const Iterator endIterator = grid.template leafend<codim>();
@@ -411,7 +410,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     delete gr;
   }
 
-  //writeFile( grid.leafView() );
+  //writeFile( grid.leafGridView() );
 
   if( display )
   {
@@ -431,14 +430,14 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   {
     // this only works for ALUGrid 3d
     std::cout << "  CHECKING: 3d Twists " << std::endl;
-    checkALUTwists( grid.leafView() );
+    checkALUTwists( grid.leafGridView() );
   }
 
   // only check twists for simplex grids
   // const bool checkTwist = grid.geomTypes(0)[0].isSimplex();
 
   //if( checkTwist )
-  //  checkTwists( grid.leafView(), NoMapTwist() );
+  //  checkTwists( grid.leafGridView(), NoMapTwist() );
 
   for(int i=0; i<mxl; i++)
   {
@@ -448,7 +447,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     std::cout << "  CHECKING: intersections" << std::endl;
     checkIntersectionIterator(grid, skipLevelIntersections);
     // if( checkTwist )
-    //  checkTwists( grid.leafView(), NoMapTwist() );
+    //  checkTwists( grid.leafGridView(), NoMapTwist() );
 
     if( display )
     {
@@ -473,7 +472,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   gridcheck(grid);
   std::cout << "  CHECKING: twists " << std::endl;
   // if( checkTwist )
-  //  checkTwists( grid.leafView(), NoMapTwist() );
+  //  checkTwists( grid.leafGridView(), NoMapTwist() );
 
   // check the method geometryInFather()
   std::cout << "  CHECKING: geometry in father" << std::endl;
@@ -490,7 +489,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 
   // check life time of geometry implementation
   std::cout << "  CHECKING: geometry lifetime" << std::endl;
-  checkGeometryLifetime( grid.leafView() );
+  checkGeometryLifetime( grid.leafGridView() );
 
   // check persistent container
   checkPersistentContainer( grid );
@@ -624,7 +623,6 @@ int main (int argc , char **argv) {
       if( testALU2dCube )
       {
         typedef ALUGrid<2,2, cube, nonconforming > GridType;
-        //typedef ALUCubeGrid<2,2> GridType;
         std::string filename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
@@ -636,7 +634,6 @@ int main (int argc , char **argv) {
         //checkALUSerial(grid,2);
 
         typedef ALUGrid< 2, 3, cube, nonconforming > SurfaceGridType;
-        //typedef ALUCubeGrid< 2, 3 > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
@@ -648,7 +645,6 @@ int main (int argc , char **argv) {
       if( testALU2dSimplex )
       {
         typedef ALUGrid< 2, 2, simplex, nonconforming > GridType;
-        //typedef ALUSimplexGrid< 2, 2 > GridType;
         std::string filename(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-2.dgf");
         std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
@@ -661,7 +657,6 @@ int main (int argc , char **argv) {
 
 #ifdef ALUGRID_SURFACE_2D
         typedef ALUGrid< 2, 3, simplex, nonconforming > SurfaceGridType;
-        //typedef ALUSimplexGrid< 2, 3 > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
@@ -674,7 +669,6 @@ int main (int argc , char **argv) {
       if( testALU2dConform )
       {
         typedef ALUGrid< 2, 2, simplex, conforming > GridType;
-        //typedef ALUConformGrid< 2, 2 > GridType;
         std::string filename(DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-2.dgf");
         GridPtr<GridType> gridPtr(filename);
         checkCapabilities< true >( *gridPtr );
@@ -686,7 +680,6 @@ int main (int argc , char **argv) {
 
 #ifdef ALUGRID_SURFACE_2D
         typedef ALUGrid< 2, 3, simplex, conforming > SurfaceGridType;
-        //typedef ALUConformGrid< 2, 3 > SurfaceGridType;
         std::string surfaceFilename( DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
@@ -706,7 +699,6 @@ int main (int argc , char **argv) {
           filename = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf";
 
         typedef ALUGrid<3,3, cube, nonconforming > GridType;
-        //typedef ALUCubeGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
         GridType & grid = *gridPtr;
         grid.loadBalance();
@@ -739,7 +731,6 @@ int main (int argc , char **argv) {
           filename = DUNE_GRID_EXAMPLE_GRIDS_PATH "dgf/simplex-testgrid-3-3.dgf";
 
         typedef ALUGrid<3,3, simplex, nonconforming > GridType;
-        //typedef ALUSimplexGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
         GridType & grid = *gridPtr;
         grid.loadBalance();
@@ -793,8 +784,8 @@ int main (int argc , char **argv) {
           checkALUParallel(grid,0,2);  //1,3
         }
       }
-#endif
-#endif
+#endif // #ifdef ALUGRID_3D_CONFORMING_REFINEMENT
+#endif // #ifndef NO_3D
     };
 
   } catch (Dune::Exception &e) {

@@ -169,8 +169,8 @@ void generalTests(bool greenClosure)
   //   Make some grids for testing
   // //////////////////////////////////////////////////////////
 
-  std::auto_ptr<Dune::UGGrid<2> > grid2d(make2DHybridTestGrid<Dune::UGGrid<2> >());
-  std::auto_ptr<Dune::UGGrid<3> > grid3d(make3DHybridTestGrid<Dune::UGGrid<3> >());
+  std::unique_ptr<Dune::UGGrid<2> > grid2d(make2DHybridTestGrid<Dune::UGGrid<2> >());
+  std::unique_ptr<Dune::UGGrid<3> > grid3d(make3DHybridTestGrid<Dune::UGGrid<3> >());
 
   // Switch of the green closure, if requested
   if (!greenClosure) {
@@ -219,8 +219,8 @@ void generalTests(bool greenClosure)
     checkCommunication(*grid3d,l,Dune::dvverb);
 
   // check geometry lifetime
-  checkGeometryLifetime( grid2d->leafView() );
-  checkGeometryLifetime( grid3d->leafView() );
+  checkGeometryLifetime( grid2d->leafGridView() );
+  checkGeometryLifetime( grid3d->leafGridView() );
 
   // check the method geometryInFather()
   checkGeometryInFather(*grid2d);

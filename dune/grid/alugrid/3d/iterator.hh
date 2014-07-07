@@ -76,7 +76,7 @@ namespace Dune {
     typedef typename ALU3dImplTraits< hexa, Comm >::BNDFaceType GEOQuadBndType;
 
     typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
-    typedef typename std::auto_ptr< FaceInfoType > FaceInfoPointer;
+    typedef typename std::unique_ptr< FaceInfoType > FaceInfoPointer;
 
     typedef typename conditional<
         tetra == GridImp::elementType,
@@ -183,12 +183,6 @@ namespace Dune {
     //! local index of codim 1 entity in neighbor where intersection is
     //! contained
     int indexInOutside () const;
-
-    //! returns twist of face compared to inner element
-    int twistInSelf() const { return twistInInside(); }
-
-    //! returns twist of face compared to outer element
-    int twistInNeighbor() const { return twistInOutside(); }
 
     //! returns twist of face compared to inner element
     int twistInInside() const;
@@ -308,7 +302,7 @@ namespace Dune {
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
     typedef ALU3dGridFaceInfo< GridImp::elementType, Comm > FaceInfoType;
-    typedef typename std::auto_ptr< FaceInfoType > FaceInfoPointer;
+    typedef typename std::unique_ptr< FaceInfoType > FaceInfoPointer;
 
     typedef typename conditional<
         tetra == GridImp::elementType,

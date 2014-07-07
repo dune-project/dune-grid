@@ -1,16 +1,19 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef PSURFACE_BOUNDARY_HH
-#define PSURFACE_BOUNDARY_HH
+#ifndef DUNE_GRID_IO_FILE_AMIRAMESH_PSURFACE_BOUNDARY_HH
+#define DUNE_GRID_IO_FILE_AMIRAMESH_PSURFACE_BOUNDARY_HH
 
 /** \file
  *  \brief A domain boundary implemented by the psurface library
  */
-#include "../../../common/gridfactory.hh"
+#include <dune/grid/common/gridfactory.hh>
 
 #if HAVE_PSURFACE
 #include <psurface/PSurface.h>
 #include "psurface/AmiraMeshIO.h"
+#if HAVE_PSURFACE_2_0
+#include <psurface/Hdf5IO.h>
+#endif
 
 #if HAVE_AMIRAMESH
 #include <amiramesh/AmiraMesh.h>
@@ -32,7 +35,7 @@ namespace Dune {
   template <int dim>
   class PSurfaceBoundary
   {
-    dune_static_assert((dim==1 or dim==2), "PSurfaceBoundaries can only have dimensions 1 or 2!");
+    static_assert((dim==1 or dim==2), "PSurfaceBoundaries can only have dimensions 1 or 2!");
 
   public:
 
@@ -57,7 +60,7 @@ namespace Dune {
         Dune::FieldVector<double, dim+1> result;
 
         // Transform local to barycentric coordinates
-        PSURFACE_NAMESPACE StaticVector<float,dim> barCoords;
+        psurface::StaticVector<float,dim> barCoords;
 
         if (dim==2) {
           barCoords[0] = 1 - local[0] - local[1];
@@ -66,7 +69,7 @@ namespace Dune {
           barCoords[0] = 1 - local[0];
         }
 
-        PSURFACE_NAMESPACE StaticVector<float,dim+1> r;
+        psurface::StaticVector<float,dim+1> r;
 
         if (!psurfaceBoundary_->getPSurfaceObject()->positionMap(segment_, barCoords, r))
           DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
@@ -84,7 +87,7 @@ namespace Dune {
 
 
     /** \brief Constructor from a given PSurface object */
-    PSurfaceBoundary(PSURFACE_NAMESPACE PSurface<dim,float>* psurface)
+    PSurfaceBoundary(psurface::PSurface<dim,float>* psurface)
       : psurface_(psurface)
     {}
 
@@ -95,26 +98,39 @@ namespace Dune {
      * This class retains control over the memory management.  Do not
      * delete the object you receive.
      */
-    PSURFACE_NAMESPACE PSurface<dim,float>* getPSurfaceObject()
+    psurface::PSurface<dim,float>* getPSurfaceObject()
     {
       return psurface_.get();
     }
 
     /** \brief Read a PSurface boundary description from a file
      *
-     * The file format is determined automatically.  Currently, only AmiraMesh
-     * is supported.
+     * Supported file formats are AmiraMesh, and hdf5 if you have psurface-2.0 or newer.
+     * Your psurface library needs to be specially configured to support those file formats.
+     * The format is determined by the filename suffix.  If it is .h5, then the file
+     * is assumed to be hdf5.  Otherwise it is assumed to be AmiraMesh.
      */
     static shared_ptr<PSurfaceBoundary<dim> > read(const std::string& filename)
     {
+      psurface::PSurface<dim,float>* newDomain;
+
+#if HAVE_PSURFACE_2_0
+      // Try to read the file as an hdf5 file
+      if (filename.find(".h5")==filename.length()-3) {
+        newDomain = psurface::Hdf5IO<float,dim>::read(filename);
+        if (newDomain)
+          return make_shared<PSurfaceBoundary<dim> >(newDomain);
+      }
+#endif
+
 #if HAVE_AMIRAMESH
-      std::auto_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
+      std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
       if (!am.get())
         DUNE_THROW(IOError, "An error has occured while reading " << filename);
 
-      PSURFACE_NAMESPACE PSurface<dim,float>* newDomain
-        = (PSURFACE_NAMESPACE PSurface<dim,float>*) PSURFACE_NAMESPACE AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
+      newDomain
+        = (psurface::PSurface<dim,float>*) psurface::AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
 
       if (!newDomain)
         DUNE_THROW(IOError, "An error has occured while reading " << filename);
@@ -127,11 +143,11 @@ namespace Dune {
 
   private:
 
-    std::auto_ptr<PSURFACE_NAMESPACE PSurface<dim,float> > psurface_;
+    std::unique_ptr<psurface::PSurface<dim,float> > psurface_;
 
   };
 
 }
 
 #endif // #if HAVE_PSURFACE
-#endif // #ifndef PSURFACE_BOUNDARY_HH
+#endif // #ifndef DUNE_GRID_IO_FILE_AMIRAMESH_PSURFACE_BOUNDARY_HH

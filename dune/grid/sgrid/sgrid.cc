@@ -101,6 +101,12 @@ namespace Dune {
     return SUnitCubeMapper<dim>::mapper.elements(cc);
   }
 
+  template<int dim, class GridImp>
+  inline unsigned int SEntity<0,dim,GridImp>::subEntities (unsigned int codim) const
+  {
+    return SUnitCubeMapper<dim>::mapper.elements(codim);
+  }
+
   // subentity construction
   template<int dim, class GridImp> template<int cc>
   inline typename SEntity<0,dim,GridImp>::template Codim<cc>::EntityPointer SEntity<0,dim,GridImp>::subEntity (int i) const
@@ -414,9 +420,9 @@ namespace Dune {
       {
         // each i!=dir gives one direction vector
         z1[i] += 1;     // direction i => even
-        p2 = grid->pos(self.level(),z1);
+        p2 = grid->pos(self->level(),z1);
         z1[i] -= 2;     // direction i => even
-        p1 = grid->pos(self.level(),z1);
+        p1 = grid->pos(self->level(),z1);
         z1[i] += 1;     // revert t to original state
         A[t] = p2-p1;
         ++t;
@@ -426,7 +432,7 @@ namespace Dune {
         z1[i] -= 1;
 
     // update geometry
-    is_global.make(grid->pos(self.level(),z1), A);
+    is_global.make(grid->pos(self->level(),z1), A);
 
     built_intersections = true;
   }
@@ -508,7 +514,7 @@ namespace Dune {
   inline void SGrid<dim,dimworld,ctype>::makeSGrid (const array<int,dim>& N_,
                                                     const FieldVector<ctype,dim>& L_, const FieldVector<ctype,dim>& H_)
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
+    static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
 #ifndef NDEBUG
     bool correct = true;
@@ -565,7 +571,7 @@ namespace Dune {
   template<int dim, int dimworld, typename ctype>
   inline SGrid<dim,dimworld,ctype>::SGrid (const int * const N_, const ctype * const H_)
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
+    static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
     array<int,dim> N;
     FieldVector<ctype,dim> L(0.0);
@@ -579,7 +585,7 @@ namespace Dune {
   template<int dim, int dimworld, typename ctype>
   inline SGrid<dim,dimworld,ctype>::SGrid (const int * const N_, const ctype * const L_, const ctype * const H_)
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
+    static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     array<int,dim> N;
     FieldVector<ctype,dim> L(0.0);
@@ -595,7 +601,7 @@ namespace Dune {
   inline SGrid<dim,dimworld,ctype>::SGrid (FieldVector<int,dim> N_, FieldVector<ctype,dim> L_,
                                            FieldVector<ctype,dim> H_)
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
+    static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     array<int,dim> N;
     for (int i=0; i<dim; i++ ) N[i] = N_[i];
@@ -606,7 +612,7 @@ namespace Dune {
   template<int dim, int dimworld, typename ctype>
   inline SGrid<dim,dimworld,ctype>::SGrid ()
   {
-    dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
+    static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     array<int,dim> N_;
     FieldVector<ctype,dim> L_(0.0);

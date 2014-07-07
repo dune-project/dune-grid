@@ -149,7 +149,6 @@ namespace Dune {
     }
   };
 
-
   //************************************************************************
   /*!
      \brief [<em> provides \ref Dune::Grid </em>]
@@ -813,8 +812,8 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,s,lb),
-        ccobj(MPI_COMM_SELF),
+      : ccobj(MPI_COMM_SELF),
+        _torus(MPI_COMM_SELF,tag,s,lb),
 #else
       : _torus(tag,s,lb),
 #endif
@@ -837,8 +836,8 @@ namespace Dune {
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::array<int, dim> elements)
 #if HAVE_MPI
-      : _torus(MPI_COMM_SELF,tag,elements,defaultLoadbalancer()),
-        ccobj(MPI_COMM_SELF),
+      : ccobj(MPI_COMM_SELF),
+        _torus(MPI_COMM_SELF,tag,elements,defaultLoadbalancer()),
 #else
       : _torus(tag,elements,defaultLoadbalancer()),
 #endif
@@ -1660,16 +1659,6 @@ namespace Dune {
           return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->vertex_overlapfront.end());
       }
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
-    }
-
-    // allow use of FV arguments in initializer lists
-    Dune::array<int,dim> convertFieldVectorToArray(Dune::FieldVector<int,dim> x)
-    DUNE_DEPRECATED_MSG("This is only needed for compatibility until the change is completed.")
-    {
-      Dune::array<int,dim> a;
-      for (std::size_t i=0; i<dim; i++)
-        a[i] = x[i];
-      return a;
     }
 
 #if HAVE_MPI

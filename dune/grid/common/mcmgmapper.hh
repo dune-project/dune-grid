@@ -7,8 +7,9 @@
 #include <iostream>
 #include <map>
 
-#include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
+#include <dune/geometry/typeindex.hh>
 
 #include "mapper.hh"
 
@@ -103,63 +104,62 @@ namespace Dune
   {
   public:
 
-    // the following lines need to be skipped for intel compilers, because they
-    // lead to ambiguous calls to methods
-#ifndef __INTEL_COMPILER
-    //! import the base class implementation of map and contains (including the deprecated version)
-    //! \todo remove in after next release
-    using Mapper< typename GV::Grid, MultipleCodimMultipleGeomTypeMapper >::map;
-    using Mapper< typename GV::Grid, MultipleCodimMultipleGeomTypeMapper >::contains;
-#endif
-
     /** @brief Construct mapper from grid and one of its index sets.
      *
      * Use this constructor to provide a custom layout object e.g. not
      * using the default constructor.
      *
-     * \param gridView A Dune GridView object.
+     * \param gridView_ A Dune GridView object.
      * \param layout A layout object.
      */
-    MultipleCodimMultipleGeomTypeMapper (const GV& gridView, const Layout<GV::dimension> layout)
-      : is(gridView.indexSet()), layout(layout)
+    MultipleCodimMultipleGeomTypeMapper (const GV& gridView_, const Layout<GV::dimension> layout)
+      : gridView(gridView_),
+        is(gridView.indexSet()),
+        offset(GlobalGeometryTypeIndex::size(GV::dimension)),
+        layout(layout)
     {
       update();
     }
 
     /** @brief Construct mapper from grid and one of its index sets.
-
-       \param gridView A Dune GridView object.
+     *
+     * \param gridView_ A Dune GridView object.
      */
-    MultipleCodimMultipleGeomTypeMapper (const GV& gridView)
-      : is(gridView.indexSet())
+    MultipleCodimMultipleGeomTypeMapper (const GV& gridView_)
+      : gridView(gridView_),
+        is(gridView.indexSet()),
+        offset(GlobalGeometryTypeIndex::size(GV::dimension))
     {
       update();
     }
 
-    /** @brief Map entity to array index.
-
-                \param e Reference to codim cc entity, where cc is the template parameter of the function.
-                \return An index in the range 0 ... Max number of entities in set - 1.
+    /*!
+     * \brief Map entity to array index.
+     *
+     * \tparam EntityType
+     * \param e Reference to codim \a EntityType entity.
+     * \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
     int map (const EntityType& e) const
     {
-      return is.index(e) + offset.find(e.type())->second;
+      const GeometryType gt = e.type();
+      assert(layout.contains(gt));
+      return is.index(e) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 
     /** @brief Map subentity of codim 0 entity to array index.
 
        \param e Reference to codim 0 entity.
        \param i Number of subentity of e
-       \param codim Codimension of the subendity
+       \param codim Codimension of the subentity
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
     int map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
       GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
-      std::map<GeometryType,int>::const_iterator it = offset.find(gt);
-      assert(it!=offset.end());
-      return is.subIndex(e,i,codim) + it->second;
+      assert(layout.contains(gt));
+      return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -207,30 +207,37 @@ namespace Dune
       return true;
     }
 
-
     /** @brief Recalculates map after mesh adaptation
      */
     void update ()
     {
-      n=0;     // zero data elements
-      for (int c=0; c<=GV::dimension; c++)
-        offset.clear();         // clear all maps
+      n = 0;
 
-      // Compute offsets for the different geometry types.
-      // Note that mapper becomes invalid when the grid is modified.
-      for (int c=0; c<=GV::dimension; c++)
-        for (size_t i=0; i<is.geomTypes(c).size(); i++)
-          if (layout.contains(is.geomTypes(c)[i]))
+      for (unsigned int codim = 0; codim <= GV::dimension; ++codim)
+      {
+        // walk over all geometry types in the codimension
+        typedef std::vector<GeometryType> GTV;
+        const GTV &gtv = is.geomTypes(codim);
+        for (typename GTV::const_iterator it = gtv.begin(); it != gtv.end(); ++it)
+        {
+          // if the geometry type is contained in the layout, increment offset
+          if (layout.contains(*it))
           {
-            offset[is.geomTypes(c)[i]] = n;
-            n += is.size(is.geomTypes(c)[i]);
+            offset[GlobalGeometryTypeIndex::index(*it)] = n;
+            n += is.size(*it);
           }
+        }
+      }
     }
 
   private:
-    int n;     // number of data elements required
+    // number of data elements required
+    unsigned int n;
+    // GridView is needed to keep the IndexSet valid
+    const GV gridView;
     const typename GV::IndexSet& is;
-    std::map<GeometryType,int> offset;     // provide a map with all geometry types
+    // provide an array for the offsets
+    std::vector<int> offset;
     mutable Layout<GV::dimension> layout;     // get layout object
   };
 
@@ -260,7 +267,7 @@ namespace Dune
          @param grid A reference to a grid.
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid)
-      : Base(grid.leafView())
+      : Base(grid.leafGridView())
     {}
 
     /** @brief The constructor
@@ -272,7 +279,7 @@ namespace Dune
      * @param layout A layout object
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const Layout<G::dimension> layout)
-      : Base(grid.leafView(),layout)
+      : Base(grid.leafGridView(),layout)
     {}
 
   };
@@ -299,7 +306,7 @@ namespace Dune
          @param level A valid level of the grid.
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level)
-      : Base(grid.levelView(level))
+      : Base(grid.levelGridView(level))
     {}
 
     /** @brief The constructor
@@ -312,7 +319,7 @@ namespace Dune
      * @param layout A layout object
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const Layout<G::dimension> layout)
-      : Base(grid.levelView(level),layout)
+      : Base(grid.levelGridView(level),layout)
     {}
 
   };

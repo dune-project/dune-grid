@@ -60,8 +60,8 @@ AC_DEFUN([DUNE_PATH_UG],[
       # If an explicit path has been provided it needs to be appended
       # temporarily to PKG_CONFIG_PATH
       REM_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
-      # The first additional path is for uninstalled UG, the second one for the installed UG
-	  UGLIBPKCONFIG=`echo $UGROOT/lib*/pkgconfig | sed -e 's/\s\+/:/g'`
+
+      UGLIBPKCONFIG=`echo $UGROOT/lib*/pkgconfig | sed -e 's/\s\+/:/g'`
       PKG_CONFIG_PATH="$UGROOT:$UGLIBPKCONFIG:$PKG_CONFIG_PATH"
 
       UG_LDFLAGS=""
@@ -73,16 +73,16 @@ AC_DEFUN([DUNE_PATH_UG],[
 
       # Check whether UG is installed at all
       if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --exists libug; then
-	    HAVE_UG="1"
+        HAVE_UG="1"
         AC_MSG_RESULT(yes)
-	  else
-		HAVE_UG="0"
+      else
+        HAVE_UG="0"
         AC_MSG_RESULT(no)
-		AC_MSG_WARN([UG not found])
+        AC_MSG_WARN([UG not found])
       fi
 
       ## check version number 
-      NEEDEDUG_VERSION=3.9.1-patch9
+      NEEDEDUG_VERSION=3.11.0
 
       if test x$HAVE_UG = x1; then
           
@@ -97,15 +97,6 @@ AC_DEFUN([DUNE_PATH_UG],[
               AC_MSG_WARN([UG version is too old (you need at least $NEEDEDUG_VERSION)])
           fi
           
-          # The following code is temporary: starting with UG-3.9.1-patch10,
-          # UG exposes some extra infrastructure for dynamic load-balancing.
-          # We only want to use it if people have patch10 installed.
-          if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=3.9.1-patch10 libug; then
-              HAVE_UG_PATCH10="1"
-          else
-              HAVE_UG_PATCH10="0"
-              AC_MSG_WARN([Please consider updating to at least UG-3.9.1-patch10 (will be mandatory for dune-grid 2.4)])
-          fi
       fi
 
       # pre-set variable for summary
@@ -134,25 +125,25 @@ AC_DEFUN([DUNE_PATH_UG],[
       if test x$HAVE_UG = x1; then
 
         # Set the compiler flags
-		UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
+        UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
         direct_UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
 
-          if test x`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=parallel libug` == xyes; then
-			
+        if test x`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=parallel libug` == xyes; then
+
           # Add additional flags needed for parallel UG  
-		  UG_LDFLAGS="\${DUNEMPILDFLAGS} $UG_LDFLAGS"
+          UG_LDFLAGS="\${DUNEMPILDFLAGS} $UG_LDFLAGS"
           direct_UG_LDFLAGS="$DUNEMPILDFLAGS $direct_UG_LDFLAGS"
           UG_CPPFLAGS="\${DUNEMPICPPFLAGS} $UG_CPPFLAGS -DModelP"
           direct_UG_CPPFLAGS="$DUNEMPICPPFLAGS $direct_UG_CPPFLAGS -DModelP"
           UG_LIBS="$UG_LIBS \${DUNEMPILIBS}"
           direct_UG_LIBS="$direct_UG_LIBS $DUNEMPILIBS"
           with_ug="yes (parallel)"
-		   
-		else
-			
+
+        else
+
           with_ug="yes (sequential)"
-				   
-	    fi
+
+        fi
 
       fi
 
@@ -189,14 +180,6 @@ AC_DEFUN([DUNE_PATH_UG],[
         [This is only true if UG was found by configure 
          _and_ if the application uses the UG_CPPFLAGS])
          
-      # Remove the following as soon as we absolutely require patch10 or higher
-      if test x$HAVE_UG_PATCH10 = x1 ; then
-      
-        AC_DEFINE(HAVE_UG_PATCH10, 1,
-            [Do we have UG in at least version 3.9.1-patch10?])
-            
-      fi
-
   fi 
       
   # tell automake   

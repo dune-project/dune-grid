@@ -51,7 +51,7 @@ template <typename GridType>
 void testReadingAndWritingGrid( const std::string& filename, const std::string& outFilename, int refinements )
 {
   // Read the grid with insertion of boundary segments (they may be the default ones)
-  std::auto_ptr<GridType> grid( GmshReader<GridType>::read( filename, true, true ) );
+  std::unique_ptr<GridType> grid( GmshReader<GridType>::read( filename, true, true ) );
 
   // load balancing and refinement
   grid->loadBalance();
@@ -68,13 +68,13 @@ void testReadingAndWritingGrid( const std::string& filename, const std::string& 
 #endif // #if HAVE_GRAPE
 
   // Test writing
-  Dune::GmshWriter<typename GridType::LeafGridView> writer( grid->leafView() );
+  Dune::GmshWriter<typename GridType::LeafGridView> writer( grid->leafGridView() );
   writer.write( outFilename );
 
   // vtk output
   std::ostringstream vtkName;
   vtkName << filename << "-" << refinements;
-  Dune::VTKWriter<typename GridType::LeafGridView> vtkWriter( grid->leafView() );
+  Dune::VTKWriter<typename GridType::LeafGridView> vtkWriter( grid->leafGridView() );
   vtkWriter.write( vtkName.str() );
 }
 
@@ -137,11 +137,11 @@ try
 #endif
 
 #if HAVE_ALUGRID
-  std::cout << "reading and writing ALUSimplexGrid<2,2>" << std::endl;
-  testReadingAndWritingGrid<ALUSimplexGrid<2,2> >( curved2d, curved2d+".ALUSimplexGrid_2_2_-gmshtest-write.msh", refinements );
+  std::cout << "reading and writing ALUGrid<2,2,simplex,nonconforming>" << std::endl;
+  testReadingAndWritingGrid<ALUGrid<2,2,simplex,nonconforming> >( curved2d, curved2d+".ALUGrid_2_2_simplex-gmshtest-write.msh", refinements );
 
-  std::cout << "reading and writing ALUSimplexGrid<3,3>" << std::endl;
-  testReadingAndWritingGrid<ALUSimplexGrid<3,3> >( pyramid, pyramid+".ALUSimplexGrid_3_3_-gmshtest-write.msh", refinements );
+  std::cout << "reading and writing ALUGrid<3,3,simplex,nonconforming>" << std::endl;
+  testReadingAndWritingGrid<ALUGrid<3,3,simplex,nonconforming> >( pyramid, pyramid+".ALUGrid_3_3_simplex-gmshtest-write.msh", refinements );
 #endif
 
   std::cout << "reading and writing OneDGrid" << std::endl;

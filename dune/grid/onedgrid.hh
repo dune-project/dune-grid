@@ -74,6 +74,7 @@ namespace Dune {
 
      [<em> provides \ref Dune::Grid </em>]
      \ingroup GridImplementations
+     \ingroup OneDGrid
 
      This implementation of the grid interface provides one-dimensional
      grids only. The OneDGrid can be nonuniform

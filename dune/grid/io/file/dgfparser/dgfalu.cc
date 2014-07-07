@@ -163,23 +163,6 @@ namespace Dune
     return true;
   }
 
-
-  template < int dimw >
-  inline bool DGFGridFactory< ALUSimplexGrid< 3, dimw > >
-  ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
-  {
-    return DGFBaseFactory< ALUSimplexGrid< 3, dimw > > ::
-           generateALUGrid( simplex, file, communicator, filename );
-  }
-
-  template < int dimw >
-  inline bool DGFGridFactory< ALUCubeGrid< 3, dimw > >
-  ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
-  {
-    return DGFBaseFactory< ALUCubeGrid< 3, dimw > > ::
-           generateALUGrid( cube, file, communicator, filename );
-  }
-
   template <ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm>
   inline bool DGFGridFactory< ALUGrid< 3, 3, eltype, refinementtype, Comm > >
   ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
@@ -311,28 +294,5 @@ namespace Dune
     return BaseType :: generateALU2dGrid( eltype, file, communicator, filename );
   }
 
-  template <int dimw>
-  inline bool DGFGridFactory< ALUSimplexGrid< 2, dimw > >
-  ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
-  {
-    return DGFBaseFactory< ALUSimplexGrid< 2, dimw > > ::
-           generateALU2dGrid( simplex, file, communicator, filename );
-  }
-
-  template <int dimw>
-  inline bool DGFGridFactory< ALUCubeGrid< 2, dimw > >
-  ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
-  {
-    return DGFBaseFactory< ALUCubeGrid< 2, dimw > > ::
-           generateALU2dGrid( cube, file, communicator, filename );
-  }
-
-  template <int dimw>
-  inline bool DGFGridFactory< ALUConformGrid< 2, dimw > >
-  ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
-  {
-    return DGFBaseFactory< ALUConformGrid< 2, dimw > > ::
-           generateALU2dGrid( simplex, file, communicator, filename );
-  }
 } // end namespace Dune
   /** \endcond */

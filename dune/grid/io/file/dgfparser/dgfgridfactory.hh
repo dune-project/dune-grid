@@ -44,54 +44,6 @@ namespace Dune
     typedef typename Grid::template Codim< dimension >::Entity Vertex;
 
   public:
-    explicit DGFGridFactory ( std::istream &input,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator() ) DUNE_DEPRECATED
-      : macroGrid_( comm )
-    {
-      DUNE_THROW( DGFException, "DGF factories using old MacroGrid implementation"
-                  "don't support creation from std::istream." );
-    }
-
-    explicit DGFGridFactory ( const std::string &filename,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator() ) DUNE_DEPRECATED
-      : macroGrid_( filename.c_str(), comm )
-    {
-      grid_ = macroGrid_.template createGrid< Grid >();
-
-      if( macroGrid_.nofelparams > 0 )
-      {
-        const size_t nofElements = macroGrid_.elements.size();
-        for( size_t i = 0; i < nofElements; ++i )
-        {
-          std::vector< double > coord;
-
-          DomainType p(0);
-          const size_t nofCorners = macroGrid_.elements[i].size();
-          for (size_t k=0; k<nofCorners; ++k)
-            for (int j=0; j<DomainType::dimension; ++j)
-              p[j]+=macroGrid_.vtx[macroGrid_.elements[i][k]][j];
-          p/=double(nofCorners);
-
-          elInsertOrder_.insert( std::make_pair( p, i ) );
-        }
-      }
-
-      if( macroGrid_.nofvtxparams > 0 )
-      {
-        const size_t nofVertices = macroGrid_.vtx.size();
-        for( size_t i = 0; i < nofVertices; ++i )
-        {
-          std::vector< double > coord;
-
-          DomainType p;
-          for( int k = 0; k < DomainType::dimension; ++k )
-            p[ k ] = macroGrid_.vtx[i][k];
-
-          vtxInsertOrder_.insert( std::make_pair( p, i ) );
-        }
-      }
-    }
-
     Grid *grid()
     {
       return grid_;

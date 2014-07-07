@@ -41,7 +41,7 @@ namespace Dune {
 
     static const int dim = GridView::dimension;
     static const int dimWorld = GridView::dimensionworld;
-    dune_static_assert( (dimWorld <= 3), "GmshWriter requires dimWorld <= 3." );
+    static_assert( (dimWorld <= 3), "GmshWriter requires dimWorld <= 3." );
 
     typedef typename GridView::template Codim<dim>::Iterator VertexIterator;
     typedef typename GridView::template Codim<0>::Iterator ElementIterator;

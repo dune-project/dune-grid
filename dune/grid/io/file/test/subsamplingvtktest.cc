@@ -95,7 +95,7 @@ void vtkCheck(int* n, double* h)
   std::copy(h, h+dim, L.begin());
   Dune::array<int, dim> s;
   std::copy(n, n+dim, s.begin());
-  std::bitset<dim> periodic(0);
+  std::bitset<dim> periodic;
 
   Dune::YaspGrid<dim> g(
 #if HAVE_MPI
@@ -110,13 +110,13 @@ void vtkCheck(int* n, double* h)
 
   g.globalRefine(1);
 
-  doWrite( g.leafView(), false);
-  doWrite( g.levelView( 0 ), false);
-  doWrite( g.levelView( g.maxLevel() ), false);
+  doWrite( g.leafGridView(), false);
+  doWrite( g.levelGridView( 0 ), false);
+  doWrite( g.levelGridView( g.maxLevel() ), false);
 
-  doWrite( g.leafView(), true);
-  doWrite( g.levelView( 0 ), true);
-  doWrite( g.levelView( g.maxLevel() ), true);
+  doWrite( g.leafGridView(), true);
+  doWrite( g.levelGridView( 0 ), true);
+  doWrite( g.levelGridView( g.maxLevel() ), true);
 }
 
 int main(int argc, char **argv)

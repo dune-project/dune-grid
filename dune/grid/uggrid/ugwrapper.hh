@@ -304,6 +304,14 @@ namespace Dune {
     {
       return PARHDR(node);
     }
+
+    /** \brief This entry tells the UG load balancer what rank this particular element
+     * is supposed to be sent to.
+     */
+    static UG::INT& Partition(UG_NS< UG_DIM >::Element* element)
+    {
+      return PARTITION(element);
+    }
 #endif
 
     // //////////////////////////////////////////////
@@ -617,19 +625,6 @@ namespace Dune {
     static void* succ(const void* theWhatever) {
       DUNE_THROW(NotImplemented, "No successor available for this kind of object");
       return 0;
-    }
-
-    /** \brief Set the vcount, which in a 3d UG grid, is the number of elements associated to
-     *         a SideVector (1 or 2)
-     *
-     *  This is needed for hacking around bugs in the UG handling of SideVectors
-     */
-    static void setVCount(const UG_NS< UG_DIM >::Element* theElement, int side, int count)
-    {
-      using UG::UINT;
-      typedef UG_NAMESPACE ::vector VECTOR;
-      using UG_NAMESPACE ::svector_offset;
-      SETVCOUNT(SVECTOR(theElement,side),count);
     }
 
     //! Return true if the element is a ghost element
@@ -1014,9 +1009,20 @@ namespace Dune {
       return UG_NAMESPACE ::GetMultigrid(name);
     }
 
-    static int LBCommand(int argc, const char** argv) {
-      /** \todo Can we remove the cast? */
-      return UG_NAMESPACE ::LBCommand(argc, (char**)argv);
+    /** \brief Load-balance the grid by recursive coordinate bisection */
+    static void lbs(const char *argv, UG_NAMESPACE ::multigrid *theMG) {
+#ifdef ModelP
+      return UG_NAMESPACE ::lbs(argv, theMG);
+#endif
+    }
+
+    //! An UG-internal load balancing method
+    static int TransferGridFromLevel(UG_NAMESPACE ::multigrid *theMG, int level) {
+#ifdef ModelP
+      return UG_NAMESPACE ::TransferGridFromLevel(theMG,level);
+#else
+      return 0;
+#endif
     }
 
     static int ConfigureCommand(int argc, const char** argv) {

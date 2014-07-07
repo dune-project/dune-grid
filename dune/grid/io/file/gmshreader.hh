@@ -221,7 +221,7 @@ namespace Dune
     // static data
     static const int dim = GridType::dimension;
     static const int dimWorld = GridType::dimensionworld;
-    dune_static_assert( (dimWorld <= 3), "GmshReader requires dimWorld <= 3." );
+    static_assert( (dimWorld <= 3), "GmshReader requires dimWorld <= 3." );
 
     // typedefs
     typedef FieldVector< double, dimWorld > GlobalVector;

@@ -9,7 +9,6 @@
         using the GridFactory.
  */
 
-#include <dune/common/static_assert.hh>
 #include <dune/grid/common/gridfactory.hh>
 
 namespace Dune {
@@ -17,8 +16,8 @@ namespace Dune {
   template <class GridType>
   GridType* make2DHybridTestGrid()
   {
-    dune_static_assert(GridType::dimension==2,
-                       "Instantiate make2dHybridTestGrid only for 2d grids!");
+    static_assert(GridType::dimension == 2,
+                  "Instantiate make2dHybridTestGrid only for 2d grids!");
 
     // Start grid creation
     GridFactory<GridType> factory;
@@ -90,8 +89,8 @@ namespace Dune {
   template <class GridType>
   GridType* make3DHybridTestGrid()
   {
-    dune_static_assert(GridType::dimension==3,
-                       "Instantiate make3DHybridTestGrid only for 3d grids!");
+    static_assert(GridType::dimension == 3,
+                  "Instantiate make3DHybridTestGrid only for 3d grids!");
 
     // Start grid creation
     GridFactory<GridType> factory;

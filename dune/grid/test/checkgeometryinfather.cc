@@ -133,21 +133,26 @@ void checkGeometryInFather(const GridType& grid)
         //   Check for types and constants
         // //////////////////////////////////////////////////////
 
-        dune_static_assert((is_same<
-                                typename Geometry::ctype,
-                                typename GridType::ctype>::value == true),"Geometry has wrong ctype");
+        static_assert((is_same<
+                         typename Geometry::ctype,
+                         typename GridType::ctype>::value == true),
+                      "Geometry has wrong ctype");
 
-        dune_static_assert((static_cast<int>(Geometry::dimension)
-                            == static_cast<int>(GridType::dimension)),"Geometry has wrong dimension");
+        static_assert((static_cast<int>(Geometry::dimension)
+                       == static_cast<int>(GridType::dimension)),
+                      "Geometry has wrong dimension");
 
-        dune_static_assert((static_cast<int>(Geometry::mydimension)
-                            == static_cast<int>(GridType::dimension)),"Geometry has wrong mydimension");
+        static_assert((static_cast<int>(Geometry::mydimension)
+                       == static_cast<int>(GridType::dimension)),
+                      "Geometry has wrong mydimension");
 
-        dune_static_assert((static_cast<int>(Geometry::coorddimension)
-                            == static_cast<int>(GridType::dimensionworld)),"Geometry has wrong coorddimension");
+        static_assert((static_cast<int>(Geometry::coorddimension)
+                       == static_cast<int>(GridType::dimensionworld)),
+                      "Geometry has wrong coorddimension");
 
-        dune_static_assert((static_cast<int>(Geometry::dimensionworld)
-                            == static_cast<int>(GridType::dimensionworld)),"Geometry has wrong dimensionworld");
+        static_assert((static_cast<int>(Geometry::dimensionworld)
+                       == static_cast<int>(GridType::dimensionworld)),
+                      "Geometry has wrong dimensionworld");
 
         // ///////////////////////////////////////////////////////
         //   Check the different methods

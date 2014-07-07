@@ -1,7 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id$
-
 #ifndef DUNE_SCSGMAPPER_HH
 #define DUNE_SCSGMAPPER_HH
 
@@ -41,11 +39,6 @@ namespace Dune
     public Mapper<typename GV::Grid,SingleCodimSingleGeomTypeMapper<GV,c> >
   {
   public:
-
-    //! import the base class implementation of map and contains (including the deprecated version)
-    //! \todo remove in after next release
-    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::map;
-    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::contains;
 
     /** @brief Construct mapper from grid and one of its index sets.
 
@@ -126,7 +119,7 @@ namespace Dune
   inline int SingleCodimSingleGeomTypeMapper<GV,c>::map (const EntityType& e) const
   {
     enum { cc = EntityType::codimension };
-    dune_static_assert(cc == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
+    static_assert(cc == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
     return is.index(e);
   }
 
@@ -172,19 +165,17 @@ namespace Dune
 
      Template parameters are:
 
-     \par G
-     A Dune grid type.
-     \par c
-     A valid codimension.
+   * \tparam G A Dune grid type.
+   * \tparam c A valid codimension.
    */
   template <typename G, int c>
   class LeafSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c> {
   public:
-    /* @brief The constructor
-       @param grid A reference to a grid.
+    /** \brief The constructor
+     * \param grid A reference to a grid.
      */
     LeafSingleCodimSingleGeomTypeMapper (const G& grid)
-      : SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c>(grid.leafView())
+      : SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c>(grid.leafGridView())
     {}
   };
 
@@ -196,10 +187,8 @@ namespace Dune
 
      Template parameters are:
 
-     \par G
-     A Dune grid type.
-     \par c
-     A valid codimension.
+   * \tparam G A Dune grid type.
+   * \tparam c A valid codimension.
    */
   template <typename G, int c>
   class LevelSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c> {
@@ -209,7 +198,7 @@ namespace Dune
        @param level A valid level of the grid.
      */
     LevelSingleCodimSingleGeomTypeMapper (const G& grid, int level)
-      : SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c>(grid.levelView(level))
+      : SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c>(grid.levelGridView(level))
     {}
   };
 

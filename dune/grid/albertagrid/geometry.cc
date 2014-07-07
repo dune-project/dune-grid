@@ -13,7 +13,6 @@ namespace Dune
   // AlbertaGridGeometry
   // -------------------
 
-#if !DUNE_ALBERTA_USE_GENERICGEOMETRY
   // print the GeometryInformation
   template <int mydim, int cdim, class GridImp>
   inline void AlbertaGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss) const
@@ -128,7 +127,6 @@ namespace Dune
     return x;
   }
 #endif // #if !DUNE_ALBERTA_CACHE_COORDINATES
-#endif // #if !DUNE_ALBERTA_USE_GENERICGEOMETRY
 
 
 

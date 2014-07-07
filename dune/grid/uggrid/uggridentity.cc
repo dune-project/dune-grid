@@ -34,7 +34,7 @@ int Dune::UGGridEntity<codim,dim,GridImp>::count () const
 template< int codim, int dim, class GridImp>
 Dune::GeometryType Dune::UGGridEntity<codim,dim,GridImp>::type() const
 {
-  dune_static_assert(codim!=0, "The code for codim==0 is in the corresponding class specialization");
+  static_assert(codim!=0, "The code for codim==0 is in the corresponding class specialization");
 
   // Vertex
   if (dim-codim == 0)
@@ -123,6 +123,9 @@ int Dune::UGGridEntity<0,dim,GridImp>::count() const
       return UG_NS<dim>::Edges_Of_Elem(target_);
     case 2 :
       return UG_NS<dim>::Corners_Of_Elem(target_);
+    default :
+      // do nothing for cc = 3
+      break;
     }
 
   }

@@ -8,14 +8,11 @@ libuggrid_la_SOURCES  = uggridintersections.cc uggrid.cc uggridentity.cc boundar
                         uggridindexsets.cc uggridfactory.cc uggridgeometry.cc uggridhieriterator.cc
 
 libuggrid_la_CPPFLAGS = $(AM_CPPFLAGS)		\
-	$(UG_CPPFLAGS)				\
-	$(DUNEMPICPPFLAGS)
+	$(UG_CPPFLAGS)
 libuggrid_la_LDFLAGS = $(AM_LDFLAGS)		\
-	$(UG_LDFLAGS)				\
-	$(DUNEMPILDFLAGS)
+	$(UG_LDFLAGS)
 libuggrid_la_LIBADD =				\
 	$(UG_LIBS)				\
-	$(DUNEMPILIBS)				\
 	$(DUNE_LIBS)
 
 endif
@@ -25,6 +22,7 @@ headercheck_IGNORE = uggridentity.hh uggridentitypointer.hh uggridentityseed.hh 
                      uggridleveliterator.hh uggridlocalgeometry.hh uggridrenumberer.hh \
                      ugincludes.hh uggridintersections.hh \
                      ugmessagebuffer.hh \
+                     uggridviews.hh \
                      uggridintersectioniterators.hh ugwrapper.hh uglbgatherscatter.hh
 
 uggriddir = $(includedir)/dune/grid/uggrid/
@@ -35,6 +33,7 @@ uggrid_HEADERS = uggridfactory.hh uggridentitypointer.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
   uggridintersections.hh uggridintersectioniterators.hh uggridindexsets.hh \
   uggridleafiterator.hh uggridrenumberer.hh \
+                 uggridviews.hh \
   uglbgatherscatter.hh \
   ug_undefs.hh ugwrapper.hh
 

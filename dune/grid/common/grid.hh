@@ -353,6 +353,7 @@ namespace Dune {
   template<int codim, int dim, class GridImp,template<int,int,class> class EntityImp> class Entity;
   template<class GridImp, class EntityPointerImp> class EntityPointer;
   template< int codim, class Grid, class IteratorImp > class EntityIterator;
+  template<class GridImp, class EntitySeedImp> class EntitySeed;
   template< class GridImp, class IntersectionImp > class Intersection;
   template< class GridImp, class IntersectionIteratorImp, class IntersectionImp > class IntersectionIterator;
   template<class GridImp, class IndexSetImp, class IndexTypeImp=unsigned int> class IndexSet;
@@ -622,15 +623,41 @@ namespace Dune {
     }
 
     //! View for a grid level for All_Partition
-    LevelGridView levelView(int level) const {
+    LevelGridView levelView(int level) const DUNE_DEPRECATED_MSG("The method levelView has been renamed to levelGridView.") {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().levelView(level)));
       return asImp().levelView(level);
     }
 
     //! View for the leaf grid for All_Partition
-    LeafGridView leafView() const {
+    LeafGridView leafView() const DUNE_DEPRECATED_MSG("The method leafView has been renamed to leafGridView.") {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().leafView()));
       return asImp().leafView();
+    }
+
+    //! View for a grid level
+    template<PartitionIteratorType pitype>
+    typename Partition<pitype>::LevelGridView levelGridView(int level) const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template levelGridView<pitype>(level)));
+      return asImp().template levelGridView<pitype>(level);
+    }
+
+    //! View for the leaf grid
+    template<PartitionIteratorType pitype>
+    typename Partition<pitype>::LeafGridView leafGridView() const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafGridView<pitype>()));
+      return asImp().template leafGridView<pitype>();
+    }
+
+    //! View for a grid level for All_Partition
+    LevelGridView levelGridView(int level) const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().levelGridView(level)));
+      return asImp().levelGridView(level);
+    }
+
+    //! View for the leaf grid for All_Partition
+    LeafGridView leafGridView() const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().leafGridView()));
+      return asImp().leafGridView();
     }
 
     //@}
@@ -644,7 +671,7 @@ namespace Dune {
 
     //! Iterator to first entity of given codim on level
     template<int cd, PartitionIteratorType pitype>
-    typename Codim<cd>::template Partition<pitype>::LevelIterator lbegin (int level) const
+    typename Codim<cd>::template Partition<pitype>::LevelIterator DUNE_DEPRECATED_MSG("The method lbegin( level ) is superseded by levelGridView( level ).begin.") lbegin (int level) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template lbegin<cd,pitype>(level)));
       return asImp().template lbegin<cd,pitype>(level);
@@ -652,7 +679,7 @@ namespace Dune {
 
     //! one past the end on this level
     template<int cd, PartitionIteratorType pitype>
-    typename Codim<cd>::template Partition<pitype>::LevelIterator lend (int level) const
+    typename Codim<cd>::template Partition<pitype>::LevelIterator DUNE_DEPRECATED_MSG("The method lend( level ) is superseded by levelGridView( level ).end.") lend (int level) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template lend<cd,pitype>(level)));
       return asImp().template lend<cd,pitype>(level);
@@ -660,7 +687,7 @@ namespace Dune {
 
     //! Iterator to first entity of given codim on level for PartitionType All_Partition
     template<int cd>
-    typename Codim<cd>::template Partition<All_Partition>::LevelIterator lbegin (int level) const
+    typename Codim<cd>::template Partition<All_Partition>::LevelIterator DUNE_DEPRECATED_MSG("The method lbegin( level ) is superseded by levelGridView( level ).begin.") lbegin (int level) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template lbegin<cd>(level)));
       return asImp().template lbegin<cd>(level);
@@ -668,7 +695,7 @@ namespace Dune {
 
     //! one past the end on this level for PartitionType All_Partition
     template<int cd>
-    typename Codim<cd>::template Partition<All_Partition>::LevelIterator lend (int level) const
+    typename Codim<cd>::template Partition<All_Partition>::LevelIterator DUNE_DEPRECATED_MSG("The method lend( level ) is superseded by levelGridView( level ).end.") lend (int level) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template lend<cd>(level)));
       return asImp().template lend<cd>(level);
@@ -676,7 +703,7 @@ namespace Dune {
 
     //! Iterator to first entity of given codim on leaf grid
     template<int cd, PartitionIteratorType pitype>
-    typename Codim<cd>::template Partition<pitype>::LeafIterator leafbegin () const
+    typename Codim<cd>::template Partition<pitype>::LeafIterator DUNE_DEPRECATED_MSG("The method leafbegin() is superseded by leafGridView().begin.") leafbegin () const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafbegin<cd,pitype>()));
       return asImp().template leafbegin<cd,pitype>();
@@ -684,7 +711,7 @@ namespace Dune {
 
     //! one past the end on the leaf level grid
     template<int cd, PartitionIteratorType pitype>
-    typename Codim<cd>::template Partition<pitype>::LeafIterator leafend () const
+    typename Codim<cd>::template Partition<pitype>::LeafIterator DUNE_DEPRECATED_MSG("The method leafend() is superseded by leafGridView().end.") leafend () const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafend<cd,pitype>()));
       return asImp().template leafend<cd,pitype>();
@@ -692,7 +719,7 @@ namespace Dune {
 
     //! Iterator to first entity of given codim on leaf grid for PartitionType All_Partition
     template<int cd>
-    typename Codim<cd>::template Partition<All_Partition>::LeafIterator leafbegin () const
+    typename Codim<cd>::template Partition<All_Partition>::LeafIterator DUNE_DEPRECATED_MSG("The method leafbegin() is superseded by leafGridView().begin.") leafbegin () const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafbegin<cd,All_Partition>()));
       return asImp().template leafbegin<cd,All_Partition>();
@@ -700,7 +727,7 @@ namespace Dune {
 
     //! one past the end on the leaf grid for PartitionType All_Partition
     template<int cd>
-    typename Codim<cd>::template Partition<All_Partition>::LeafIterator leafend () const
+    typename Codim<cd>::template Partition<All_Partition>::LeafIterator DUNE_DEPRECATED_MSG("The method leafend() is superseded by leafGridView().end.") leafend () const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafend<cd,All_Partition>()));
       return asImp().template leafend<cd,All_Partition>();
@@ -859,8 +886,16 @@ namespace Dune {
       return asImp().ghostSize(codim);
     }
 
-    /*! \brief Communicate information on distributed entities on a given level
-          Template parameter is a model of Dune::CommDataHandleIF
+    /**
+     * \brief Communicate information on distributed entities on a given level
+     * Template parameter is a model of Dune::CommDataHandleIF
+     * \param data A data handle telling the method what data is communicated
+     * and how this should be done.
+     * \param interface The communication interface to use.
+     * \param dir The direction of the communication along the interface (forward
+     * or backward.
+     * \param level The index of the grid level where the communication should
+     * happen.
      */
     template<class DataHandleImp, class DataTypeImp>
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
@@ -869,8 +904,15 @@ namespace Dune {
       return;
     }
 
-    /*! \brief Communicate information on distributed entities on the leaf grid
-          Template parameter is a model of Dune::CommDataHandleIF
+    /**
+     * \brief Communicate information on distributed entities on the leaf grid
+     * Template parameter is a model of Dune::CommDataHandleIF
+     *
+     * \param data A data handle telling the method what data is communicated
+     * and how this should be done.
+     * \param interface The communication interface to use.
+     * \param dir The direction of the communication along the interface
+     * (forward or backward).
      */
     template<class DataHandleImp, class DataTypeImp>
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir) const
@@ -888,7 +930,7 @@ namespace Dune {
     //@}
 
     /*! \brief Re-balances the load each process has to handle for a parallel grid,
-     *  if grid has changed , true is returned
+     *  \return True if the grid has changed.
      */
     bool loadBalance()
     {
@@ -896,9 +938,12 @@ namespace Dune {
       return asImp().loadBalance();
     }
 
-    /*! \brief Re-balances the load each process has to handle for a parallel grid,
-     * the DataHandle data works like the data handle for the communicate
-     * methods. If grid has changed , true is returned.
+    /*! \brief Re-balances the load each process has to handle for a parallel grid and moves the data.
+     * \param data A data handle telling the method which data should be communicated
+     * and how. Has to adhere to the interface describe by CommDataHandleIf
+     * just like the data handle for the communicate
+     * methods.
+     * \return True if the grid has changed.
      */
     template<class DataHandle>
     bool loadBalance (DataHandle& data)
@@ -949,8 +994,8 @@ namespace Dune {
          <i> Provides the simplicial meshes of the finite element tool box
              ALBERTA (http://www.alberta-fem.de/)
              written by Kunibert Siebert and Alfred Schmidt.</i>
-     \li Dune::ALUSimplexGrid and Dune::ALUCubeGrid and ALUConformGrid <br>
-         <i> 2d/3D grid with support for non-conform adaptation and dynamic load balancing </i>
+     \li Dune::ALUGrid <br>
+         <i> 2d/3d grid with support for non-conform adaptation and dynamic load balancing </i>
      \li Dune::OneDGrid <br>
          <i> Onedimensional adaptive grid</i>
      \li Dune::SGrid <br>
@@ -980,10 +1025,95 @@ namespace Dune {
      */
     typedef typename GridFamily::Traits Traits;
 
+    //! Iterator to first entity of given codim on level for PartitionType All_Partition
+    template< int codim >
+    typename Traits::template Codim< codim >::LevelIterator DUNE_DEPRECATED_MSG("The method lbegin( level ) is superseded by levelGridView( level ).begin.") lbegin ( int level ) const
+    {
+      return asImp().levelGridView( level ).template begin< codim >();
+    }
+
+    //! one past the end on this level for PartitionType All_Partition
+    template< int codim >
+    typename Traits::template Codim< codim >::LevelIterator DUNE_DEPRECATED_MSG("The method lend( level ) is superseded by levelGridView( level ).end.") lend ( int level ) const
+    {
+      return asImp().levelGridView( level ).template end< codim >();
+    }
+
+    //! Iterator to first entity of given codim on level
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits::template Codim< codim >::template Partition< pitype >::LevelIterator DUNE_DEPRECATED_MSG("The method lbegin( level ) is superseded by levelGridView( level ).begin.")
+    lbegin ( int level ) const
+    {
+      return asImp().levelGridView( level ).template begin< codim, pitype >();
+    }
+
+    //! one past the end on this level
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits::template Codim< codim >::template Partition< pitype >::LevelIterator DUNE_DEPRECATED_MSG("The method lend( level ) is superseded by levelGridView( level ).end.")
+    lend ( int level ) const
+    {
+      return asImp().levelGridView( level ).template end< codim, pitype >();
+    }
+
+    //! Iterator to first entity of given codim on leaf grid for PartitionType All_Partition
+    template< int codim >
+    typename Traits::template Codim< codim >::LeafIterator DUNE_DEPRECATED_MSG("The method leafbegin() is superseded by leafGridView().begin.") leafbegin () const
+    {
+      return asImp().leafGridView().template begin< codim >();
+    }
+
+    //! one past the end on the leaf grid for PartitionType All_Partition
+    template< int codim >
+    typename Traits::template Codim< codim >::LeafIterator DUNE_DEPRECATED_MSG("The method leafend() is superseded by leafGridView().end.") leafend () const
+    {
+      return asImp().leafGridView().template end< codim >();
+    }
+
+    //! Iterator to first entity of given codim on leaf grid
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits::template Codim< codim >::template Partition< pitype >::LeafIterator DUNE_DEPRECATED_MSG("The method leafbegin() is superseded by leafGridView().begin.")
+    leafbegin () const
+    {
+      return asImp().leafGridView().template begin< codim, pitype >();
+    }
+
+    //! one past the end on the leaf level grid
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits::template Codim< codim >::template Partition< pitype >::LeafIterator DUNE_DEPRECATED_MSG("The method leafend() is superseded by leafGridView().end.")
+    leafend () const
+    {
+      return asImp().leafGridView().template end< codim, pitype >();
+    }
+
+    //! View for a grid level
+    template<PartitionIteratorType pitype>
+    typename Traits::template Partition<pitype>::LevelGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to levelGridView.")
+    levelView(int level) const {
+      return asImp().template levelGridView< pitype >( level );
+    }
+
+    //! View for the leaf grid
+    template<PartitionIteratorType pitype>
+    typename Traits::template Partition<pitype>::LeafGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to leafGridView.") leafView() const {
+      return asImp().template leafGridView< pitype >();
+    }
+
+    //! View for a grid level for All_Partition
+    typename Traits::template Partition<All_Partition>::LevelGridView
+    levelView(int level) const DUNE_DEPRECATED_MSG("The method levelView has been renamed to levelGridView.") {
+      return asImp().levelGridView( level );
+    }
+
+    //! View for the leaf grid for All_Partition
+    typename Traits::template Partition<All_Partition>::LeafGridView
+    leafView() const DUNE_DEPRECATED_MSG("The method leafView has been renamed to leafGridView.") {
+      return asImp().leafGridView();
+    }
+
     //! View for a grid level
     template<PartitionIteratorType pitype>
     typename Traits::template Partition<pitype>::LevelGridView
-    levelView(int level) const {
+    levelGridView(int level) const {
       typedef typename Traits::template Partition<pitype>::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View(ViewImp(asImp(),level));
@@ -991,7 +1121,8 @@ namespace Dune {
 
     //! View for the leaf grid
     template<PartitionIteratorType pitype>
-    typename Traits::template Partition<pitype>::LeafGridView leafView() const {
+    typename Traits::template Partition<pitype>::LeafGridView
+    leafGridView() const {
       typedef typename Traits::template Partition<pitype>::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View(ViewImp(asImp()));
@@ -999,7 +1130,7 @@ namespace Dune {
 
     //! View for a grid level for All_Partition
     typename Traits::template Partition<All_Partition>::LevelGridView
-    levelView(int level) const {
+    levelGridView(int level) const {
       typedef typename Traits::template Partition<All_Partition>::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View(ViewImp(asImp(),level));
@@ -1007,7 +1138,7 @@ namespace Dune {
 
     //! View for the leaf grid for All_Partition
     typename Traits::template Partition<All_Partition>::LeafGridView
-    leafView() const {
+    leafGridView() const {
       typedef typename Traits::template Partition<All_Partition>::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View(ViewImp(asImp()));
@@ -1060,7 +1191,7 @@ namespace Dune {
         coarsen all negative marked entities if possible
         \return true if a least one entity was refined
 
-        - Note: this default implementation always returns false
+        \note this default implementation always returns false
           so grid with no adaptation doesn't need to implement these methods
      */
     bool adapt ()    { return false; }
@@ -1218,7 +1349,7 @@ namespace Dune {
       typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
 
       /** \brief The type of the entity seed of this codim.*/
-      typedef Dune::EntitySeed<EntitySeedImp<cd, const GridImp> > EntitySeed;
+      typedef Dune::EntitySeed<const GridImp, EntitySeedImp<cd, const GridImp> > EntitySeed;
 
       /**
        * \brief Traits associated with a specific grid partition type.
@@ -1276,6 +1407,14 @@ namespace Dune {
   // Definition of capabilities for the interface class
   namespace Capabilities
   {
+
+    // capabilities for the interface class depend on the implementation
+    template< int dim, int dimworld, typename ct, class GridFamily , int codim >
+    struct hasEntity< Grid< dim, dimworld, ct, GridFamily >, codim >
+    {
+      static const bool v = hasEntity< typename GridFamily::Traits::Grid, codim >::v;
+    };
+
     // capabilities for the interface class depend on the implementation
     template< int dim, int dimworld, typename ct, class GridFamily , int cdim >
     struct hasEntity< GridDefaultImplementation<dim,dimworld,ct,GridFamily>, cdim >

@@ -5,21 +5,18 @@ alu3dgrid_HEADERS = alu3dinclude.hh alu3dgridfactory.hh alu3dgridfactory.cc \
   entity.hh entity_imp.cc entity_inline.hh entityseed.hh \
   faceutility.hh faceutility_imp.cc geometry.hh geometry_imp.cc \
   indexsets.hh iterator.hh iterator.cc iterator_imp.cc alu3diterators.hh \
-  lbdatahandle.hh alugrid.hh capabilities.hh
+  lbdatahandle.hh alugrid.hh
 
 headercheck_IGNORE = $(alu3dgrid_HEADERS)
 
-noinst_LTLIBRARIES = libalu3d.la
 if ALUGRID
-#  libalu3d_la_SOURCES = mappings.cc mappings_imp.cc topology.cc faceutility.cc \
-#                        alu3dgridfactory.cc grid_imp.cc iterator.cc entity_imp.cc
+  noinst_LTLIBRARIES = libalu3d.la
   libalu3d_la_SOURCES = mappings.cc topology.cc faceutility.cc
-else
-  libalu3d_la_SOURCES =
+
+  libalu3d_la_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS)
+  libalu3d_la_LDFLAGS = $(AM_LDFLAGS) $(ALUGRID_LDFLAGS)
+  libalu3d_la_LIBADD = $(ALUGRID_LIBS) $(DUNE_LIBS)
 endif
-libalu3d_la_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS)
-libalu3d_la_LDFLAGS = $(AM_LDFLAGS) $(ALUGRID_LDFLAGS)
-libalu3d_la_LIBADD = $(ALUGRID_LIBS) $(DUNE_LIBS)
 
 include $(top_srcdir)/am/global-rules
 

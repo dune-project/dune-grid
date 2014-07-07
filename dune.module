@@ -1,5 +1,5 @@
 Module: dune-grid
-Version: 2.3-svn
+Version: 3.0-git
 Maintainer: dune-devel@dune-project.org
-Depends: dune-common (>= 2.3) dune-geometry (>= 2.3)
+Depends: dune-common (>= 3.0) dune-geometry (>= 3.0)
 Whitespace-Hook: Yes

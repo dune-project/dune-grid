@@ -8,6 +8,8 @@ INPUT                 += @srcdir@/mainpage \
                          @top_srcdir@/dune/grid/common \
                          @top_srcdir@/dune/grid/geometrygrid.hh \
                          @top_srcdir@/dune/grid/geometrygrid \
+                         @top_srcdir@/dune/grid/identitygrid.hh \
+                         @top_srcdir@/dune/grid/identitygrid \
                          @top_srcdir@/dune/grid/io \
                          @top_srcdir@/dune/grid/onedgrid.hh \
                          @top_srcdir@/dune/grid/sgrid.hh \
@@ -44,7 +46,6 @@ PREDEFINED            += ENABLE_ALUGRID \
                          HAVE_UG:=1
 
 EXCLUDE               += @top_srcdir@/dune/grid/io/visual/grape/grapewrapper.hh \
-                         @top_srcdir@/dune/grid/common/quadraturerules \
                          @top_srcdir@/dune/grid/alugrid/3d/mappings_imp.cc \
                          @top_srcdir@/dune/grid/alugrid/3d/faceutility_imp.cc \
                          @top_srcdir@/dune/grid/alugrid/3d/entity_imp.cc \

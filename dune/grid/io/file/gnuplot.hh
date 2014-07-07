@@ -34,7 +34,7 @@ namespace Dune {
   public:
     GnuplotWriter (const GridView & gv) : _is(gv.indexSet()), _gv(gv)
     {
-      dune_static_assert(dimworld==1 || dimworld==2, "GnuPlot export only works for worlddim==1 and worlddim==2");
+      static_assert(dimworld==1 || dimworld==2, "GnuPlot export only works for worlddim==1 and worlddim==2");
       // allocate _data buffer
       _data.resize(_is.size(0)*2);
     }
@@ -90,7 +90,7 @@ namespace Dune {
   public:
     /** \brief Construct a Gnuplot writer for the leaf level of a given grid */
     LeafGnuplotWriter (const G& grid)
-      : GnuplotWriter<typename G::LeafGridView>(grid.leafView())
+      : GnuplotWriter<typename G::LeafGridView>(grid.leafGridView())
     {}
   };
 
@@ -103,7 +103,7 @@ namespace Dune {
   public:
     /** \brief Construct a Gnuplot writer for a certain level of a given grid */
     LevelGnuplotWriter (const G& grid, int level)
-      : GnuplotWriter<typename G::LevelGridView>(grid.levelView(level))
+      : GnuplotWriter<typename G::LevelGridView>(grid.levelGridView(level))
     {}
   };
 

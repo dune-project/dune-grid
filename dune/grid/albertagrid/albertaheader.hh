@@ -70,12 +70,6 @@
 #undef nil
 #endif
 
-// Macro SQR may be defined by alberta_util.h.  If so, undefine it to avoid
-// clashes with Dune::SQR from dune/common/misc.hh
-#ifdef SQR
-#undef SQR
-#endif
-
 #endif // #if HAVE_ALBERTA
 
 #endif // #ifndef DUNE_ALBERTAHEADER_HH

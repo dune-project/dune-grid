@@ -1,18 +1,23 @@
 
 macro(_dune_set_alberta val)
   set(ALBERTA_FOUND ${val})
-  set(HAVE_ALBERTA $val})
+  set(HAVE_ALBERTA ${val})
 endmacro(_dune_set_alberta val)
 
 set(ALBERTA_LIBCHECK ON CACHE BOOL "Whether to try to link against libalberta_Nd.")
-set(ALBERTA_DIR "" CACHE FILEPATH "Root directory of Alberta installation.")
+set(ALBERTA_ROOT "" CACHE FILEPATH "Root directory of Alberta installation.")
 set(ALBERTA_EXTRA_LIBS "ltdl;m" CACHE FILEPATH "Extra libraries needed by alberta for linking.")
 
 # look for header alberta/alberta.h
-find_path(ALBERTA_INCLUDE_DIR name alberta/alberta.h PATHS ${ALBERTA_DIR}
+find_path(ALBERTA_INCLUDE_DIR
+  NAMES alberta/alberta.h
+  PATHS ${ALBERTA_ROOT}
   PATH_SUFFIXES alberta include NO_DEFAULT_PATH
   DOC "Include path of Alberta")
-find_path(ALBERTA_INCLUDE_DIR name alberta/alberta.h PATHS /usr/local /opt
+find_path(ALBERTA_INCLUDE_DIR
+  NAMES
+  alberta/alberta.h
+  PATHS /usr/local /opt
   PATH_SUFFIXES alberta)
 
 if(NOT ALBERTA_INCLUDE_DIR)
@@ -46,7 +51,7 @@ endif(ALBERTA_IS_VERSION_3)
 # look for libraries
 find_library(ALBERTA_UTIL_LIB
   NAMES alberta_util alberta_utilities
-  PATHS ${ALBERTA_DIR}
+  PATHS ${ALBERTA_ROOT}
   PATH_SUFFIXES lib lib32 lib64
   NO_DEFAULT_PATH)
 find_library(ALBERTA_UTIL_LIB
@@ -75,7 +80,7 @@ set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALBERTA_UTIL_LIB} ${A
 if(ALBERTA_LIBCHECK)
   foreach(dim RANGE 1 9)
     find_library(ALBERTA_${dim}D_LIB alberta_${dim}d
-      PATHS ${ALBERTA_DIR}
+      PATHS ${ALBERTA_ROOT}
       PATH_SUFFIXES lib lib32 lib64
       Cache FILEPATH DOC "Alberta lib for ${dim}D" NO_DEFAULT_PATH)
     find_library(ALBERTA_${dim}D_LIB alberta_${dim}d  PATH_SUFFIXES lib lib32 lib64)

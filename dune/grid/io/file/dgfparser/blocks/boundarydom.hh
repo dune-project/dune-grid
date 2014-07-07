@@ -169,14 +169,13 @@ namespace Dune
       // for error messages
       friend std::ostream & operator<< ( std :: ostream &os, const Domain & domain )
       {
-        const int dimensionworld = domain.dimensionworld;
         os << "domain: " << std::endl;
         os << "left = ";
-        for( int i = 0; i < dimensionworld; ++i )
+        for( int i = 0; i < domain.dimensionworld; ++i )
           os << domain.left_[ i ] << "  ";
         os << std::endl;
         os << "right = ";
-        for( int i = 0; i < dimensionworld; ++i )
+        for( int i = 0; i < domain.dimensionworld; ++i )
           os << domain.right_[ i ] << "  ";
         os << std::endl;
         os << domain.data();

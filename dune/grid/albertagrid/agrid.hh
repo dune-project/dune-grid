@@ -8,7 +8,7 @@
  *  \brief  provides the AlbertaGrid class
  */
 
-#if HAVE_ALBERTA
+#if HAVE_ALBERTA || DOXYGEN
 
 #include <iostream>
 #include <fstream>
@@ -388,7 +388,7 @@ namespace Dune
     //! View for a grid level
     template< PartitionIteratorType pitype >
     typename Traits::template Partition< pitype >::LevelGridView
-    levelView ( int level ) const
+    levelGridView ( int level ) const
     {
       typedef typename Traits::template Partition< pitype >::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
@@ -397,7 +397,7 @@ namespace Dune
 
     //! View for the leaf grid
     template< PartitionIteratorType pitype >
-    typename Traits::template Partition< pitype >::LeafGridView leafView () const
+    typename Traits::template Partition< pitype >::LeafGridView leafGridView () const
     {
       typedef typename Traits::template Partition< pitype >::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
@@ -406,7 +406,7 @@ namespace Dune
 
     //! View for a grid level for All_Partition
     typename Traits::template Partition< All_Partition >::LevelGridView
-    levelView ( int level ) const
+    levelGridView ( int level ) const
     {
       typedef typename Traits::template Partition< All_Partition >::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
@@ -414,7 +414,7 @@ namespace Dune
     }
 
     //! View for the leaf grid for All_Partition
-    typename Traits::template Partition< All_Partition >::LeafGridView leafView () const
+    typename Traits::template Partition< All_Partition >::LeafGridView leafGridView () const
     {
       typedef typename Traits::template Partition< All_Partition >::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
@@ -820,6 +820,6 @@ namespace Dune
 
 #define _ALBERTA_H_
 
-#endif // HAVE_ALBERTA
+#endif // HAVE_ALBERTA || DOXYGEN
 
 #endif
