@@ -46,7 +46,7 @@ namespace Dune
    * \f$x_1,\dots ,x_n\f$ such that \f$x_i=x_0+i*\frac{end-x_0}{n}\f$.
    */
   template<class ctype>
-  void fill_range(std::vector<ctype>& v, int n, ctype end);
+  void fill_range(std::vector<ctype>& v, int n, ctype end)
   {
     if (v.empty())
       v.push_back(static_cast<ctype>(0));
@@ -94,7 +94,7 @@ namespace Dune
     if (h0 < 1e-8)
     {
       if (v.size() < 2)
-        DUNE_THROW(GridError,"Not enough elements in coordinate container for geometric_fill_intervals");)
+        DUNE_THROW(GridError,"Not enough elements in coordinate container for geometric_fill_intervals");
       else
         h = (v.back() - v[v.size()-2]) * ratio;
     }
@@ -114,7 +114,7 @@ namespace Dune
     if (h0 < 1e-8)
     {
       if (v.size() < 2)
-        DUNE_THROW(GridError,"Not enough elements in coordinate container for geometric_fill_until");)
+        DUNE_THROW(GridError,"Not enough elements in coordinate container for geometric_fill_until");
       else
         h = (v.back() - v[v.size()-2]) * ratio;
     }
