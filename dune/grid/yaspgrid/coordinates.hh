@@ -26,6 +26,9 @@ namespace Dune
   class EquidistantCoordinateContainer
   {
     public:
+    //! export the coordinate type
+    typedef ct ctype;
+
     /** \brief default constructor */
     EquidistantCoordinateContainer() {}
 
@@ -119,6 +122,9 @@ namespace Dune
   class TensorProductCoordinateContainer
   {
     public:
+    //! export the coordinate type
+    typedef ct ctype;
+
     /** \brief the default constructor */
     TensorProductCoordinateContainer() {}
 

@@ -42,12 +42,6 @@ typedef unsigned char uint8_t;
 
 namespace Dune {
 
-  //************************************************************************
-  /*! define name for floating point type used for coordinates in yaspgrid.
-     You can change the type for coordinates by changing this single typedef.
-   */
-  typedef double yaspgrid_ctype;
-
   /* some sizes for building global ids
    */
   const int yaspgrid_dim_bits = 24; // bits for encoding each dimension
@@ -172,13 +166,13 @@ namespace Dune {
      \par History:
      \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
    */
-  template<int dim, class CoordCont = EquidistantCoordinateContainer<yaspgrid_ctype, dim> >
+  template<int dim, class CoordCont = EquidistantCoordinateContainer<double, dim> >
   class YaspGrid
-    : public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim, CoordCont> >
+    : public GridDefaultImplementation<dim,dim,typename CoordCont::ctype,YaspGridFamily<dim, CoordCont> >
   {
   public:
     //! Type used for coordinates
-    typedef yaspgrid_ctype ctype;
+    typedef typename CoordCont::ctype ctype;
     typedef typename Dune::YGrid<CoordCont,dim,ctype> YGrid;
 
     struct Intersection {
