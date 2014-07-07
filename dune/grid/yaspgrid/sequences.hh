@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include <dune/grid/common/exceptions.hh>
+
 /** \file
  *  \brief This file provides methods to fill std::vectors with
  *  monotonous sequences as needed for a tensorproduct grid. Apart
