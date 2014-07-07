@@ -656,8 +656,8 @@ namespace Dune {
     typedef typename YGrid::Iterator I;
     typedef typename std::deque<Intersection>::const_iterator ISIT;
 
-    //! The constructor of the old MultiYGrid class
-    void MultiYGridSetup(Dune::array<std::vector<ctype>,dim> coords, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
+    //! correctly initialize a tensorproduct Yaspgrid from information given in the constructor
+    void TensorProductSetup(Dune::array<std::vector<ctype>,dim> coords, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
     {
       _periodic = periodic;
       _levels.resize(1);
@@ -728,8 +728,8 @@ namespace Dune {
       makelevel(cc,periodic,o_interior,overlap);
     }
 
-    //! The constructor of the old MultiYGrid class
-    void MultiYGridSetup(fTupel L, iTupel s, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
+    //! correctly initialize an equidistant grid from the information given in the constructor
+    void EquidistantSetup(fTupel L, iTupel s, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
     {
       _periodic = periodic;
       _levels.resize(1);
@@ -788,7 +788,7 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(L,s,periodic,overlap,lb);
+      EquidistantSetup(L,s,periodic,overlap,lb);
       init();
     }
 
@@ -819,7 +819,7 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(L,s,periodic,overlap,lb);
+      EquidistantSetup(L,s,periodic,overlap,lb);
       init();
     }
 
@@ -842,7 +842,7 @@ namespace Dune {
 #endif
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(L,elements,std::bitset<dim>(0),0,defaultLoadbalancer());
+      EquidistantSetup(L,elements,std::bitset<dim>(0),0,defaultLoadbalancer());
       init();
     }
 
@@ -866,7 +866,7 @@ namespace Dune {
         keep_ovlp(true),
         adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(coords, std::bitset<dim>(0),0,defaultLoadbalancer());
+      TensorProductSetup(coords, std::bitset<dim>(0),0,defaultLoadbalancer());
       init();
     }
 
@@ -892,7 +892,7 @@ namespace Dune {
         keep_ovlp(true),
         adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(coords, periodic, overlap, lb);
+      TensorProductSetup(coords, periodic, overlap, lb);
       init();
     }
 
@@ -921,7 +921,7 @@ namespace Dune {
         keep_ovlp(true),
         adaptRefCount(0), adaptActive(false)
     {
-      MultiYGridSetup(coords, periodic, overlap, lb);
+      TensorProductSetup(coords, periodic, overlap, lb);
       init();
     }
 
