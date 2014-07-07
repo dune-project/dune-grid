@@ -14,9 +14,6 @@
 
 namespace Dune {
 
-  // forward declarations
-  template<class CC, int d, typename ct> class YGrid;
-
   //! define a tolerance value for coordinate comparisons
   static const double Ytolerance=1E-13;
 
