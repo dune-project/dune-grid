@@ -42,7 +42,7 @@ namespace Dune
      *  \param d the direction to be used
      *  \param i the global coordinate index where to return the meshsize
      */
-    inline ct meshsize(int d, int i)
+    inline ct meshsize(int d, int i) const
     {
       return _h[d];
     }
@@ -51,7 +51,7 @@ namespace Dune
      *  \param d the direction to be used
      *  \param i the global coordinate index
      */
-    inline ct coordinate(int d, int i)
+    inline ct coordinate(int d, int i) const
     {
       return i*_h[d];
     }
@@ -59,7 +59,7 @@ namespace Dune
     /** \returns the size in given direction
      *  \param d the direction to be used
      */
-    inline int size(int d)
+    inline int size(int d) const
     {
       return _s[d];
     }
@@ -70,7 +70,7 @@ namespace Dune
      *  \param overlap the size of the overlap region
      *  \param keep_ovlp the refinement option parameter to be used
      */
-    EquidistantCoordinateContainer<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp)
+    EquidistantCoordinateContainer<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp) const
     {
       //determine new size and meshsize
       Dune::array<int,dim> news;
