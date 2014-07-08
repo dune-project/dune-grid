@@ -876,6 +876,8 @@ namespace Dune {
         keep_ovlp(true),
         adaptRefCount(0), adaptActive(false)
     {
+      if (!checkIfMonotonous(coords))
+        DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
       TensorProductSetup(coords, std::bitset<dim>(0),0,defaultLoadbalancer());
       init();
     }
@@ -902,6 +904,8 @@ namespace Dune {
         keep_ovlp(true),
         adaptRefCount(0), adaptActive(false)
     {
+      if (!checkIfMonotonous(coords))
+        DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
       TensorProductSetup(coords, periodic, overlap, lb);
       init();
     }
@@ -931,6 +935,8 @@ namespace Dune {
         keep_ovlp(true),
         adaptRefCount(0), adaptActive(false)
     {
+      if (!checkIfMonotonous(coords))
+        DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
       TensorProductSetup(coords, periodic, overlap, lb);
       init();
     }
