@@ -123,11 +123,6 @@ namespace Dune
     /** \brief The Entity that this EntityPointer can point to */
     typedef typename IteratorImp::Entity Entity;
 
-    enum {
-      /** \brief The codimension of this EntityPointer */
-      codim = IteratorImp::codimension
-    };
-
     //===========================================================
     /** @name Constructor & conversion
      */
