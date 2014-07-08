@@ -318,7 +318,7 @@ namespace Dune {
      * \param s_interior  size of interior cell decomposition
      * \param overlap     to be used on this grid level
      */
-    void makelevel (CoordCont coords, std::bitset<dim> periodic, iTupel o_interior, int overlap)
+    void makelevel (const CoordCont& coords, std::bitset<dim> periodic, iTupel o_interior, int overlap)
     {
       YGridLevel& g = _levels.back();
       g.overlap = overlap;
