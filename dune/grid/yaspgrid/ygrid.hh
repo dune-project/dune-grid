@@ -511,7 +511,8 @@ namespace Dune {
   template <class CC>
   inline std::ostream& operator<< (std::ostream& s, typename YGrid<CC>::Iterator& e)
   {
-    s << "please reimplement this" << std::endl;
+    s << "Printing YGrid Iterator:" << std::endl << "Iterator at " << e.coord() << " (index ";
+    s << e.index() << "), position " << e.position():
     return s;
   }
 
