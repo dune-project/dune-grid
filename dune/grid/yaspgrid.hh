@@ -723,6 +723,10 @@ namespace Dune {
         }
       }
 
+      // check whether YaspGrid has been given the correct template parameter
+      static_assert(is_same<CoordCont,TensorProductCoordinateContainer<ctype,dim> >::value,
+        "YaspGrid coordinate container template parameter and given constructor values do not match!");
+
       TensorProductCoordinateContainer<ctype,dim> cc(newcoords, offset);
 
       // add level
@@ -759,6 +763,10 @@ namespace Dune {
         if ((o_interior[i] + s_interior[i] + overlap <= _coarseSize[i]) || (periodic[i]))
           s_overlap[i] += overlap;
       }
+
+      // check whether YaspGrid has been given the correct template parameter
+      static_assert(is_same<CoordCont,EquidistantCoordinateContainer<ctype,dim> >::value,
+        "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       EquidistantCoordinateContainer<ctype,dim> cc(h,s_overlap);
 
