@@ -27,6 +27,8 @@ struct YaspFactory<dim, Dune::EquidistantCoordinateContainer<double,dim> >
 {
   static Dune::YaspGrid<dim>* buildGrid(bool p0 = false)
   {
+    std::cout << " using equidistant coordinate container!" << std::endl << std::endl;
+
     Dune::FieldVector<double,dim> Len(1.0);
     Dune::array<int,dim> s;
     std::fill(s.begin(), s.end(), 8);
@@ -47,6 +49,8 @@ struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
 {
   static Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >* buildGrid(bool p0 = false)
   {
+    std::cout << " using tensorproduct coordinate container!" << std::endl << std::endl;
+
     std::bitset<dim> p(0);
     p[0] = p0;
     int overlap = 1;
@@ -80,7 +84,6 @@ void check_yasp(bool p0=false) {
 
   std::cout << std::endl << "YaspGrid<" << dim << ">";
   if (p0) std::cout << " periodic\n";
-  std::cout << std::endl << std::endl;
 
   Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid(p0);
 
