@@ -849,6 +849,7 @@ namespace Dune {
 #else
       : _torus(tag,elements,defaultLoadbalancer()),
 #endif
+        leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       EquidistantSetup(L,elements,std::bitset<dim>(0),0,defaultLoadbalancer());
