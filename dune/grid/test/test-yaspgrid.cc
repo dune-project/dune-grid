@@ -25,7 +25,7 @@ struct YaspFactory
 template<int dim>
 struct YaspFactory<dim, Dune::EquidistantCoordinateContainer<double,dim> >
 {
-  static Dune::YaspGrid<dim>* buildGrid(bool p0 = false)
+  static Dune::YaspGrid<dim>* buildGrid()
   {
     std::cout << " using equidistant coordinate container!" << std::endl << std::endl;
 
@@ -33,7 +33,6 @@ struct YaspFactory<dim, Dune::EquidistantCoordinateContainer<double,dim> >
     Dune::array<int,dim> s;
     std::fill(s.begin(), s.end(), 8);
     std::bitset<dim> p(0);
-    p[0] = p0;
     int overlap = 1;
 
 #if HAVE_MPI
@@ -47,12 +46,11 @@ struct YaspFactory<dim, Dune::EquidistantCoordinateContainer<double,dim> >
 template<int dim>
 struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
 {
-  static Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >* buildGrid(bool p0 = false)
+  static Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >* buildGrid()
   {
     std::cout << " using tensorproduct coordinate container!" << std::endl << std::endl;
 
     std::bitset<dim> p(0);
-    p[0] = p0;
     int overlap = 1;
 
     Dune::array<std::vector<double>,dim> coords;
@@ -127,15 +125,12 @@ int main (int argc , char **argv) {
 
     check_yasp<1>();
     check_yasp<1, Dune::TensorProductCoordinateContainer<double,1> >();
-    //check_yasp<1>(true);
 
-//     check_yasp<2>();
-//     check_yasp<2, Dune::TensorProductCoordinateContainer<double,2> >();
-//     //check_yasp<2>(true);
-//
-//     check_yasp<3>();
-//     check_yasp<3, Dune::TensorProductCoordinateContainer<double,3> >();
-//     //check_yasp<3>(true);
+    check_yasp<2>();
+    check_yasp<2, Dune::TensorProductCoordinateContainer<double,2> >();
+
+    check_yasp<3>();
+    check_yasp<3, Dune::TensorProductCoordinateContainer<double,3> >();
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
