@@ -248,10 +248,10 @@ namespace Dune
     return s;
   }
 
-  template<class ctype, unsigned long dim>
+  template<class ctype, std::size_t dim>
   bool checkIfMonotonous(Dune::array<std::vector<ctype>, dim>& coords)
   {
-    for (int i=0; i<dim; i++)
+    for (std::size_t i=0; i<dim; i++)
       for (int j=1; j<coords[i].size(); j++)
         if (coords[i][j] < coords[i][j-1])
           return false;
