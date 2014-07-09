@@ -146,7 +146,7 @@ namespace Dune
      *  \param d the direction to be used
      *  \param i the global coordinate index where to return the meshsize
      */
-    inline ct meshsize(int d, int i)
+    inline ct meshsize(int d, int i) const
     {
       return _c[d][i+1-_offset[d]] - _c[d][i-_offset[d]];
     }
@@ -155,7 +155,7 @@ namespace Dune
      *  \param d the direction to be used
      *  \param i the global coordinate index
      */
-    inline ct coordinate(int d, int i)
+    inline ct coordinate(int d, int i) const
     {
       return _c[d][i-_offset[d]];
     }
@@ -163,7 +163,7 @@ namespace Dune
     /** \returns the size in given direction
      *  \param d the direction to be used
      */
-    inline int size(int d)
+    inline int size(int d) const
     {
       return _c[d].size() - 1;
     }
@@ -174,7 +174,7 @@ namespace Dune
      *  \param overlap the size of the overlap region
      *  \param keep_ovlp the refinement option parameter to be used
      */
-    TensorProductCoordinateContainer<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp)
+    TensorProductCoordinateContainer<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp) const
     {
       Dune::array<std::vector<ct>,dim> newcoords;
       Dune::array<int,dim> newoffset(_offset);
