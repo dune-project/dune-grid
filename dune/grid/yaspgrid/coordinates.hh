@@ -40,7 +40,7 @@ namespace Dune
      *  the size information is kept with this container, because this is the natural
      *  way to handle this for a tensorproduct grid.
      */
-    EquidistantCoordinateContainer(Dune::FieldVector<ct,dim> h, Dune::array<int,dim> s)
+    EquidistantCoordinateContainer(const Dune::FieldVector<ct,dim>& h, const Dune::array<int,dim>& s)
       : _h(h), _s(s) {}
 
     /** \returns the meshsize in given direction at given position
@@ -138,7 +138,7 @@ namespace Dune
      *  the size information is deduced from c. Storing offset allows for use of
      *  global coordinates in the YaspGrid code.
      */
-    TensorProductCoordinateContainer(Dune::array<std::vector<ct>,dim> c, Dune::array<int,dim> offset)
+    TensorProductCoordinateContainer(const Dune::array<std::vector<ct>,dim>& c, const Dune::array<int,dim>& offset)
       : _c(c),_offset(offset)
     {}
 
@@ -249,7 +249,7 @@ namespace Dune
   }
 
   template<class ctype, std::size_t dim>
-  bool checkIfMonotonous(Dune::array<std::vector<ctype>, dim>& coords)
+  bool checkIfMonotonous(const Dune::array<std::vector<ctype>, dim>& coords)
   {
     for (std::size_t i=0; i<dim; i++)
       for (int j=1; j<coords[i].size(); j++)
