@@ -77,13 +77,12 @@ struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
 };
 
 template <int dim, class CC = Dune::EquidistantCoordinateContainer<double,dim> >
-void check_yasp(bool p0=false) {
+void check_yasp() {
   typedef Dune::FieldVector<double,dim> fTupel;
 
   std::cout << std::endl << "YaspGrid<" << dim << ">";
-  if (p0) std::cout << " periodic\n";
 
-  Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid(p0);
+  Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid();
 
   gridcheck(*grid);
   grid->globalRefine(2);
