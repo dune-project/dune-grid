@@ -512,7 +512,7 @@ namespace Dune {
   inline std::ostream& operator<< (std::ostream& s, typename YGrid<CC>::Iterator& e)
   {
     s << "Printing YGrid Iterator:" << std::endl << "Iterator at " << e.coord() << " (index ";
-    s << e.index() << "), position " << e.position():
+    s << e.index() << "), position " << e.position();
     return s;
   }
 
