@@ -1,5 +1,6 @@
 set(HEADERS
   coordinates.hh
+  sequences.hh
   torus.hh
   yaspgridentity.hh
   yaspgridentitypointer.hh
@@ -13,7 +14,7 @@ set(HEADERS
   yaspgridleveliterator.hh
   ygrid.hh)
 
-exclude_all_but_from_headercheck(torus.hh coordinates.hh ygrid.hh)
+exclude_all_but_from_headercheck(sequences.hh torus.hh coordinates.hh ygrid.hh)
 
 install(FILES ${HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/yaspgrid/)
