@@ -2,7 +2,6 @@
 
 yaspgriddir = $(includedir)/dune/grid/yaspgrid/
 yaspgrid_HEADERS = coordinates.hh \
-                   sequences.hh \
                    torus.hh \
                    yaspgridentity.hh \
                    yaspgridentityseed.hh \
