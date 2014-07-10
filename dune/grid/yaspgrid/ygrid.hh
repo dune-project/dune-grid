@@ -83,14 +83,13 @@ namespace Dune {
 
     /** @brief make ygrid without coordinate information
      *  @param origin origin of the grid in global coordinates
-     *  @param shift shift vector to be used for this grid
      *  @param size size of the grid
      *  Such grid has no coordinate information stored but can be
      *  used to determine an intersection with a grid with coordinate
      *  information. This avoids sending coordinates in the parallel case.
      */
-    YGrid(iTupel origin, iTupel size, fTupel shift)
-      : _origin(origin), _shift(shift), _size(size)
+    YGrid(iTupel origin, iTupel size)
+      : _origin(origin), _size(size)
     {}
 
     /** @brief make a subgrid by taking coordinates from a larger grid
@@ -251,10 +250,6 @@ namespace Dune {
       {
         //empty coordinate vectors result in empty intersections
         if (empty() || r.empty())
-          return YGrid<CC>();
-
-        //intersectable grids must have the same shift
-        if (std::abs(shift(i)-r.shift(i)) > Ytolerance)
           return YGrid<CC>();
       }
 

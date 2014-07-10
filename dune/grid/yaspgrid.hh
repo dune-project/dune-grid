@@ -469,18 +469,15 @@ namespace Dune {
      */
     struct mpifriendly_ygrid {
       mpifriendly_ygrid ()
-        : h(0.0), r(0.0)
       {
         std::fill(origin.begin(), origin.end(), 0);
         std::fill(size.begin(), size.end(), 0);
       }
       mpifriendly_ygrid (const YGrid& grid)
-        : origin(grid.origin()), size(grid.size()), h(grid.shift()), r(grid.shift())
+        : origin(grid.origin()), size(grid.size())
       {}
       iTupel origin;
       iTupel size;
-      fTupel h; //this is kept here only to leave mpifriendly_ygrid untouched.
-      fTupel r;
     };
 
     /** \brief Construct list of intersections with neighboring processors
@@ -585,7 +582,7 @@ namespace Dune {
         // what must be sent to this neighbor
         Intersection send_intersection;
         mpifriendly_ygrid yg = mpifriendly_recv_recvgrid[i.index()];
-        recv_recvgrid[i.index()] = YGrid(yg.origin,yg.size,yg.r);
+        recv_recvgrid[i.index()] = YGrid(yg.origin,yg.size);
         send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
         send_intersection.rank = i.rank();
         send_intersection.distance = i.distance();
@@ -593,7 +590,7 @@ namespace Dune {
 
         Intersection recv_intersection;
         yg = mpifriendly_recv_sendgrid[i.index()];
-        recv_sendgrid[i.index()] = YGrid(yg.origin,yg.size,yg.r);
+        recv_sendgrid[i.index()] = YGrid(yg.origin,yg.size);
         recv_intersection.grid = recvgrid.intersection(recv_sendgrid[i.index()]);
         recv_intersection.rank = i.rank();
         recv_intersection.distance = i.distance();
