@@ -14,23 +14,16 @@
 
 namespace Dune {
 
-  //! define a tolerance value for coordinate comparisons
-  static const double Ytolerance=1E-13;
-
   /** @returns an array containing the sizes of the grids associated with vectors in given array.
    *  Needed in this form due to the need of such functionality in class initializer lists.
    *  @param v the array of vectors to examine
-   *  @param r the shift vector to determine grid type
    */
   template<int d, typename ct>
-  Dune::array<int,d> sizeArray(Dune::array<std::vector<ct>,d> v, Dune::FieldVector<ct,d> r)
+  Dune::array<int,d> sizeArray(const Dune::array<std::vector<ct>,d>& v)
   {
     Dune::array<int,d> tmp;
     for (int i=0; i<d; ++i)
-      if (r[i] < Ytolerance)
-        tmp[i] = v[i].size();
-      else
-        tmp[i] = v[i].size() - 1;
+      tmp[i] = v[i].size() - 1;
     return tmp;
   }
 
@@ -81,7 +74,7 @@ namespace Dune {
     typedef FieldVector<ct,d> fTupel;
 
     //! make uninitialized ygrid
-    YGrid () : _shift(0.0)
+    YGrid () : _shift(0)
     {
       std::fill(_origin.begin(), _origin.end(), 0);
       std::fill(_offset.begin(), _offset.end(), 0);
@@ -120,7 +113,7 @@ namespace Dune {
      *  @param offset the offset in the enclosing grid
      *  @param supersize size of the enclosing grid
      */
-    YGrid (iTupel origin,  fTupel shift, CC* coords, iTupel size, iTupel offset, iTupel supersize)
+    YGrid (iTupel origin, std::bitset<d> shift, CC* coords, iTupel size, iTupel offset, iTupel supersize)
       : _origin(origin), _shift(shift), _coords(coords), _size(size), _offset(offset), _supersize(supersize)
     {}
 
@@ -137,13 +130,13 @@ namespace Dune {
     }
 
     //! Return shift in direction i
-    ct shift (int i) const
+    bool shift (int i) const
     {
       return _shift[i];
     }
 
     //! Return shift tupel
-    const fTupel& shift () const
+    const std::bitset<d>& shift () const
     {
       return _shift;
     }
@@ -334,11 +327,11 @@ namespace Dune {
           {
             if (!_grid->empty())
               _begin[i] = _grid->getCoords()->coordinate(i,_grid->origin(i));
-            if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i) > Ytolerance))
-              _begin[i] += _grid->shift(i) * _grid->getCoords()->meshsize(i,_grid->origin(i));
+            if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i)))
+              _begin[i] += 0.5 * _grid->getCoords()->meshsize(i,_grid->origin(i));
             _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-            if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i) > Ytolerance))
-              _position[i] += _grid->shift(i)* _grid->getCoords()->meshsize(i,_coord[i]);
+            if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i)))
+              _position[i] += 0.5 * _grid->getCoords()->meshsize(i,_coord[i]);
           }
         }
       }
@@ -388,8 +381,8 @@ namespace Dune {
         if (_grid->inside(_coord))
         {
           _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-          if (_grid->shift(i) > Ytolerance)
-            _position[i] += _grid->shift(i) * meshsize(i);
+          if (_grid->shift(i))
+            _position[i] += 0.5 * meshsize(i);
         }
       }
 
@@ -403,8 +396,8 @@ namespace Dune {
           if (++_coord[i] <= _grid->max(i))
           {
             _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-            if (_grid->shift(i) > Ytolerance)
-              _position[i] += _grid->shift(i) * _grid->getCoords()->meshsize(i,_coord[i]);
+            if (_grid->shift(i))
+              _position[i] += 0.5 * _grid->getCoords()->meshsize(i,_coord[i]);
             return *this;
           }
           else
@@ -486,7 +479,7 @@ namespace Dune {
 
   private:
     iTupel _origin;
-    fTupel _shift;
+    std::bitset<d> _shift;
     CC* _coords;
     iTupel _size;
     iTupel _offset;    //!< offset to origin of the enclosing grid

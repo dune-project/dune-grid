@@ -329,8 +329,9 @@ namespace Dune {
       iTupel n;
       std::fill(n.begin(), n.end(), 0);
 
-      // r_i = 0.5, because we are interested in cell centers. Multiplication with h_i happens later on.
-      fTupel r(0.5);
+      // r_i = 1, because we are interested in cell centers.
+      std::bitset<dim> r;
+      r.set();
 
       // determine origin of the grid with overlap and store whether an overlap area exists in direction i.
       std::bitset<dim> ovlp_low(0);
@@ -386,8 +387,7 @@ namespace Dune {
      intersections(g.cell_interior,g.cell_overlap,g.send_cell_interior_overlap,g.recv_cell_overlap_interior);
 
       // the shift for the vertex grids is zero, this also manages the size increase by 1
-      for (int i=0; i<dim; i++)
-        r[i] = 0.0;
+      r.reset();
 
       // now the vertex grid stored in this processor. All other vertex grids are subgrids of this
       iTupel o_vertex_overlapfront;
@@ -894,9 +894,9 @@ namespace Dune {
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : ccobj(comm), _torus(comm,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
+      : ccobj(comm), _torus(comm,tag,Dune::sizeArray<dim>(coords),defaultLoadbalancer()),
 #else
-      : _torus(tag,Dune::sizeArray(coords,fTupel(0.5)),defaultLoadbalancer()),
+      : _torus(tag,Dune::sizeArray(coords),defaultLoadbalancer()),
 #endif
         leafIndexSet_(*this),
         _periodic(std::bitset<dim>(0)),
@@ -925,9 +925,9 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
       : ccobj(MPI_COMM_SELF),
-        _torus(MPI_COMM_SELF,tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
+      _torus(MPI_COMM_SELF,tag,Dune::sizeArray<dim>(coords),defaultLoadbalancer()),
 #else
-      : _torus(tag,Dune::sizeArray<dim>(coords,fTupel(0.5)),defaultLoadbalancer()),
+      : _torus(tag,Dune::sizeArray<dim>(coords),defaultLoadbalancer()),
 #endif
         leafIndexSet_(*this),
         _periodic(std::bitset<dim>(0)),
