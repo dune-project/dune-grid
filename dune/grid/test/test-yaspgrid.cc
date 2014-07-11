@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
 
 #include "gridcheck.cc"
@@ -66,7 +67,7 @@ struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
       coords[i][8] =  1.0;
     }
 
-    #if HAVE_MPI
+#if HAVE_MPI
     return new Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >(MPI_COMM_WORLD,coords,p,overlap);
 #else
     return new Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >(coords,p,overlap);
@@ -110,10 +111,8 @@ void check_yasp() {
 
 int main (int argc , char **argv) {
   try {
-#if HAVE_MPI
-    // initialize MPI
-    MPI_Init(&argc,&argv);
-#endif
+    // Initialize MPI, if present
+    Dune::MPIHelper::instance(argc, argv);
 
     check_yasp<1>();
     check_yasp<1, Dune::TensorProductCoordinateContainer<double,1> >();
@@ -131,11 +130,6 @@ int main (int argc , char **argv) {
     std::cerr << "Generic exception!" << std::endl;
     return 2;
   }
-
-#if HAVE_MPI
-  // Terminate MPI
-  MPI_Finalize();
-#endif
 
   return 0;
 }
