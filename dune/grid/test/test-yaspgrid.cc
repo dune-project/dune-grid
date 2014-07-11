@@ -16,8 +16,6 @@
 #include "checkadaptation.cc"
 #include "checkpartition.cc"
 
-int rank;
-
 template<int dim, class CC>
 struct YaspFactory
 {};
@@ -103,7 +101,7 @@ void check_yasp() {
   checkPartitionType( grid->leafGridView() );
 
   std::ofstream file;
-  file.open("output"+std::to_string(rank));
+  file.open("output"+std::to_string(grid->comm().rank()));
   file << *grid << std::endl;
   file.close();
 
@@ -115,9 +113,6 @@ int main (int argc , char **argv) {
 #if HAVE_MPI
     // initialize MPI
     MPI_Init(&argc,&argv);
-
-    // get own rank
-    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif
 
     check_yasp<1>();
