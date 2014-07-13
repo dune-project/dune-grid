@@ -110,7 +110,7 @@ namespace Dune
         }
         else
         {
-          for( int i = 0; i < entity.template count< codim >(); ++i )
+          for( int i = 0; i < entity.subEntities(codim); ++i )
           {
             Index &idx = codimContainer( entity, i );
             if( idx.index() < 0 )

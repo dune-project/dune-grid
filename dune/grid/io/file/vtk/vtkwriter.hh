@@ -166,7 +166,7 @@ namespace Dune
         if( git == gend )
           return;
         ++cornerIndexDune;
-        const int numCorners = git->template count< n >();
+        const int numCorners = git->subEntities(n);
         if( cornerIndexDune == numCorners )
         {
           offset += numCorners;
@@ -290,7 +290,7 @@ namespace Dune
         if( git == gend )
           return;
         ++cornerIndexVTK;
-        const int numCorners = git->template count< n >();
+        const int numCorners = git->subEntities(n);
         if( cornerIndexVTK == numCorners )
         {
           offset += numCorners;
@@ -902,7 +902,7 @@ namespace Dune
         ncells++;
         // because of the use of vertexmapper->map(), this iteration must be
         // in the order of Dune's numbering.
-        for (int i=0; i<it->template count<n>(); ++i)
+        for (int i=0; i<it->subEntities(n); ++i)
         {
           ncorners++;
           if (datamode == VTK::conforming)
@@ -1055,7 +1055,7 @@ namespace Dune
           int offset = 0;
           for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
           {
-            offset += it->template count<n>();
+            offset += it->subEntities(n);
             p2->write(offset);
           }
         }

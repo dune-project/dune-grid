@@ -225,7 +225,7 @@ namespace Dune
       double min=1E100;
       int imin=-1;
       Dune::GeometryType gt = e.type();
-      for (int i=0; i<e.template count<dim>(); ++i)
+      for (int i=0; i<e.subEntities(dim); ++i)
       {
         Dune::FieldVector<ctype,dim> local =
           Dune::ReferenceElements<ctype,dim>::general(gt)
