@@ -250,7 +250,7 @@ class CheckCommunication
       if( cdim == 0 )
       {
         CoordinateVector mid( 0.0 );
-        const int numVertices = entity.template count< dim >();
+        const int numVertices = entity.subEntities(dim);
         for( int i = 0; i < numVertices; ++i )
           mid += entity.geometry().corner( i );
         mid /= double( numVertices );
@@ -367,7 +367,7 @@ class CheckCommunication
       const Entity &entity = *it;
 
       CoordinateVector mid( 0.0 );
-      const int numVertices = entity.template count< dim >();
+      const int numVertices = entity.subEntities(dim);
       for( int i = 0; i < numVertices; ++i )
         mid += entity.geometry().corner( i );
       mid /= double(numVertices);
@@ -389,7 +389,7 @@ class CheckCommunication
       }
       else
       {
-        const int numSubEntities = entity.template count< cdim >();
+        const int numSubEntities = entity.subEntities(cdim);
         for( int i=0; i < numSubEntities; ++i )
         {
           SubEntityPointer subEp = entity.template subEntity< cdim >( i );

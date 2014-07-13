@@ -68,7 +68,7 @@ void DoEntityInterfaceCheck (Entity &e)
   GeometryInterface< typename Entity::Geometry, Entity::codimension, Entity::dimension >();
 }
 
-// recursive check of codim-0-entity methods count(), entity()
+// recursive check of codim-0-entity methods subEntities(), entity()
 template <class Grid, int cd, bool hasEntity>
 struct ZeroEntityMethodCheck
 {
@@ -81,7 +81,7 @@ struct ZeroEntityMethodCheck
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
     typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
-    e.template count<cd>();
+    e.subEntities(cd);
     e.template subEntity<cd>(0);
 
     // recursively check on
@@ -132,7 +132,7 @@ struct ZeroEntityMethodCheck<Grid, 0, true>
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
     typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
-    e.template count<0>();
+    e.subEntities(0);
     e.template subEntity<0>(0);
 
   }

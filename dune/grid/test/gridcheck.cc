@@ -54,7 +54,7 @@ struct subIndexCheck
     }
 
     typedef typename Grid::template Codim< cd >::EntityPointer EntityPointer;
-    const int imax = e.template count<cd>();
+    const int imax = e.subEntities(cd);
     for( int i = 0; i < imax; ++i )
     {
       // check construction of entity pointers
@@ -326,7 +326,7 @@ void assertNeighbor (Grid &g)
 #endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
       }
 
-      const int numFaces = entity.template count< 1 >();
+      const int numFaces = entity.subEntities(1);
       // flag vector for elements faces
       std::vector< bool > visited( numFaces, false );
 
@@ -407,7 +407,7 @@ void assertNeighbor (Grid &g)
 
           // numbering
           const int indexInOutside = it->indexInOutside();
-          const int numFaces = outside.template count< 1 >();
+          const int numFaces = outside.subEntities(1);
           if( (indexInOutside < 0) || (indexInOutside >= numFaces) )
           {
             std :: cout << "Error: Invalid indexInOutside: " << indexInOutside
