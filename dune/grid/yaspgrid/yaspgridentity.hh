@@ -59,8 +59,8 @@ namespace Dune {
     }
 
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
-    YaspEntity (const GridImp* yg, const YGLI& g, const TSI& it)
+    typedef typename GridImp::YGrid::Iterator I;
+    YaspEntity (const GridImp* yg, const YGLI& g, const I& it)
     {
       DUNE_THROW(GridError, "YaspEntity not implemented");
     }
@@ -118,7 +118,7 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename GridImp::YGrid::Iterator I;
 
     typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
     typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
@@ -140,10 +140,10 @@ namespace Dune {
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
     //! define type used for coordinates in grid module
-    typedef typename YGrid<dim,ctype>::iTupel iTupel;
+    typedef typename GridImp::YGrid::iTupel iTupel;
 
     // constructor
-    YaspEntity (const GridImp * yg, const YGLI& g, const TSI& it)
+    YaspEntity (const GridImp * yg, const YGLI& g, const I& it)
       : _yg(yg), _it(it), _g(g)
     {}
 
@@ -238,7 +238,7 @@ namespace Dune {
         for (int k=0; k<dim; k++)
           if (i&(1<<k)) (coord[k])++;
 
-        return YaspEntityPointer<cc,GridImp>(_yg,_g,_g->vertex_overlapfront.tsubbegin(coord));
+        return YaspEntityPointer<cc,GridImp>(_yg,_g,_g->vertex_overlapfront.begin(coord));
       }
       if (cc==0)
       {
@@ -264,7 +264,7 @@ namespace Dune {
       // get coordinates on next coarser level
       for (int k=0; k<dim; k++) coord[k] = coord[k]/2;
 
-      return YaspEntityPointer<0,GridImp>(_yg,cg,cg->cell_overlap.tsubbegin(coord));
+      return YaspEntityPointer<0,GridImp>(_yg,cg,cg->cell_overlap.begin(coord));
     }
 
     //! returns true if father entity exists
@@ -287,7 +287,7 @@ namespace Dune {
       return LocalGeometry( YaspGeometry<dim,dim,GridImp>(midpoint,extension) );
     }
 
-    const TSI& transformingsubiterator () const
+    const I& transformingsubiterator () const
     {
       return _it;
     }
@@ -378,7 +378,7 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get size of global grid
-      const iTupel& size =  _g->cell_global.size();
+      const iTupel& size =  _g->mg->template levelSize<0>(_g->level());
 
       // get coordinate correction for periodic boundaries
       int coord[dim];
@@ -432,9 +432,9 @@ namespace Dune {
       {
         coord[k] = _it.coord(k);
         if (coord[k]<0)
-          coord[k] += _g->cell_global.size(k);
-        if (coord[k]>=_g->cell_global.size(k))
-          coord[k] -= _g->cell_global.size(k);
+          coord[k] += _g->mg->template levelSize<0>(_g->level(), k);
+        if (coord[k]>=_g->mg->template levelSize<0>(_g->level(),k))
+          coord[k] -= _g->mg->template levelSize<0>(_g->level(),k);
       }
 
       if (cc==dim)
@@ -758,7 +758,7 @@ namespace Dune {
     }
 
     const GridImp * _yg;    // access to YaspGrid
-    const TSI& _it;         // position in the grid level
+    const I& _it;         // position in the grid level
     const YGLI& _g;         // access to grid level
   };
 
@@ -776,7 +776,7 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename GridImp::YGrid::Iterator I;
 
     typedef typename GridImp::template Codim<dim>::Geometry Geometry;
 
@@ -793,10 +793,10 @@ namespace Dune {
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
     //! define type used for coordinates in grid module
-    typedef typename YGrid<dim,ctype>::iTupel iTupel;
+    typedef typename GridImp::YGrid::iTupel iTupel;
 
     // constructor
-    YaspEntity (const GridImp* yg, const YGLI& g, const TSI& it)
+    YaspEntity (const GridImp* yg, const YGLI& g, const I& it)
       : _yg(yg), _it(it), _g(g)
     {}
 
@@ -858,7 +858,8 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get coordinate and size of global grid
-      const iTupel& size =  _g->vertex_global.size();
+      iTupel size =  _g->mg->template levelSize<dim>(_g->level());
+
       int coord[dim];
 
       // correction for periodic boundaries
@@ -930,12 +931,12 @@ namespace Dune {
     }
 
   public:
-    const TSI& transformingsubiterator() const { return _it; }
+    const I& transformingsubiterator() const { return _it; }
     const YGLI& gridlevel() const { return _g; }
     const GridImp * yaspgrid() const { return _yg; }
   protected:
     const GridImp * _yg;          // access to YaspGrid
-    const TSI& _it;               // position in the grid level
+    const I& _it;               // position in the grid level
     const YGLI& _g;               // access to grid level
   };
 

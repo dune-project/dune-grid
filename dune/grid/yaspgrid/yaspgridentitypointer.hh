@@ -22,7 +22,7 @@ namespace Dune {
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename GridImp::YGrid::Iterator I;
     typedef YaspEntityPointer<codim,GridImp> EntityPointerImp;
   protected:
     typedef YaspEntity<codim, dim, GridImp> YaspEntityImp;
@@ -32,7 +32,7 @@ namespace Dune {
     enum { codimension = codim };
 
     //! constructor
-    YaspEntityPointer (const GridImp * yg, const YGLI & g, const TSI & it)
+    YaspEntityPointer (const GridImp * yg, const YGLI & g, const I& it)
       : _g(g), _it(it),
         _entity(MakeableInterfaceObject<Entity>(YaspEntity<codim,dim,GridImp>(yg, _g,_it)))
     {
@@ -91,7 +91,7 @@ namespace Dune {
       return *this;
     }
 
-    const TSI& transformingsubiterator () const
+    const I& transformingsubiterator () const
     {
       return _it;
     }
@@ -101,7 +101,7 @@ namespace Dune {
       return _g;
     }
 
-    TSI& transformingsubiterator ()
+    I& transformingsubiterator ()
     {
       return _it;
     }
@@ -113,7 +113,7 @@ namespace Dune {
 
   protected:
     YGLI _g;             // access to grid level
-    TSI _it;             // position in the grid level
+    I _it;             // position in the grid level
     mutable MakeableInterfaceObject<Entity> _entity; //!< virtual entity
   };
 

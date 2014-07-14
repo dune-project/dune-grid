@@ -21,11 +21,11 @@ namespace Dune {
   public:
     // types used from grids
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,typename GridImp::ctype>::TransformingSubIterator TSI;
+    typedef typename GridImp::YGrid::Iterator I;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! constructor
-    YaspHierarchicIterator (const GridImp* yg, const YGLI& g, const TSI& it, int maxlevel) :
+    YaspHierarchicIterator (const GridImp* yg, const YGLI& g, const I& it, int maxlevel) :
       YaspEntityPointer<0,GridImp>(yg,g,it)
     {
       // now iterator points to current cell
@@ -101,7 +101,13 @@ namespace Dune {
             se.coord[k] = this->_it.coord(k)*2+1;
           else
             se.coord[k] = this->_it.coord(k)*2;
-        stack.push(se);
+        // not all entities have 2^d subentities due to refineOptions with keep_ovlp==false
+        bool exists = true;
+        for (int k=0; k<dim; k++)
+          if ((se.coord[k] < finer->cell_overlap.origin(k)) || (se.coord[k] >= finer->cell_overlap.origin(k)+finer->cell_overlap.size(k)))
+            exists = false;
+        if (exists)
+          stack.push(se);
       }
     }
 
