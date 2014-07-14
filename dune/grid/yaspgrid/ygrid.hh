@@ -4,6 +4,7 @@
 #define DUNE_GRID_YASPGRID_YGRID_HH
 
 #include <vector>
+#include <bitset>
 
 #include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
