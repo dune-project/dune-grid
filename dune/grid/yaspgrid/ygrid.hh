@@ -75,7 +75,7 @@ namespace Dune {
     typedef FieldVector<ct,d> fTupel;
 
     //! make uninitialized ygrid
-    YGrid () : _shift(0)
+    YGrid () : _shift(0ULL)
     {
       std::fill(_origin.begin(), _origin.end(), 0);
       std::fill(_offset.begin(), _offset.end(), 0);

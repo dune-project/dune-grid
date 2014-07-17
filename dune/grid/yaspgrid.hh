@@ -334,8 +334,8 @@ namespace Dune {
       r.set();
 
       // determine origin of the grid with overlap and store whether an overlap area exists in direction i.
-      std::bitset<dim> ovlp_low(0);
-      std::bitset<dim> ovlp_up(0);
+      std::bitset<dim> ovlp_low(0ULL);
+      std::bitset<dim> ovlp_up(0ULL);
 
       iTupel o_overlap;
       iTupel s_overlap;
@@ -849,7 +849,7 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      EquidistantSetup(L,elements,std::bitset<dim>(0),0,defaultLoadbalancer());
+      EquidistantSetup(L,elements,std::bitset<dim>(0ULL),0,defaultLoadbalancer());
       init();
     }
 
@@ -875,7 +875,7 @@ namespace Dune {
     {
       if (!checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
-      TensorProductSetup(coords, std::bitset<dim>(0),0,defaultLoadbalancer());
+      TensorProductSetup(coords, std::bitset<dim>(0ULL),0,defaultLoadbalancer());
       init();
     }
 
@@ -978,7 +978,7 @@ namespace Dune {
         // access to coarser grid level
         YGridLevel& cg = _levels[maxLevel()];
 
-        std::bitset<dim> ovlp_low(0), ovlp_up(0);
+        std::bitset<dim> ovlp_low(0ULL), ovlp_up(0ULL);
         for (int i=0; i<dim; i++)
         {
           if (cg.cell_overlap.origin(i) > 0)
