@@ -148,7 +148,7 @@ namespace Dune
         return ;
 
       // get vertex numbers of the element
-      const size_t vxSize = element.template count< Element::dimension > ();
+      const size_t vxSize = element.subEntities( Element::dimension );
       std::vector<Index> vertices(vxSize);
       for( size_t i = 0; i < vxSize; ++i )
         vertices[ i ] = vertexIndex[ indexSet.subIndex( element, i, dimGrid ) ];
@@ -216,7 +216,7 @@ namespace Dune
     for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
     {
       const Element& element = *it ;
-      const int numCorners = element.template count< dimGrid > ();
+      const int numCorners = element.subEntities( dimGrid );
       for( int i=0; i<numCorners; ++i )
       {
         const Index vxIndex = indexSet.subIndex( element, i, dimGrid );
