@@ -157,7 +157,10 @@ struct ZeroEntityMethodCheck<Grid, 0, false>
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
     typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
+    e.subEntities(0);
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     e.template count<0>();
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     e.template subEntity<0>(0);
   }
   ZeroEntityMethodCheck ()
