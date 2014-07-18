@@ -32,7 +32,7 @@ namespace Dune {
      The YGrid considered here describes a finite set \f$d\f$-tupels of the form
      \f[ G = \{ (k_0,\ldots,k_{d-1}) | o_i \leq k_i < o_i+s_i \}  \f]
 
-     together with an affine mappin.g
+     together with an affine mapping.
 
      A YGrid is characterized by the following quantities:
 
