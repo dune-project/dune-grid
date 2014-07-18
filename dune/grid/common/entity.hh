@@ -3,7 +3,11 @@
 #ifndef DUNE_GRID_ENTITY_HH
 #define DUNE_GRID_ENTITY_HH
 
+#include <dune/common/iteratorrange.hh>
 #include <dune/common/typetraits.hh>
+
+#include <dune/geometry/dimension.hh>
+
 #include "grid.hh"
 #include "entitypointer.hh"
 
@@ -540,6 +544,20 @@ namespace Dune
     }
 
   };
+
+
+
+
+  //! Iterates over all child elements of the given element up to a maximum level.
+  /**
+   * \ingroup GIEntity
+   * \relates Entity<int dim, class GridImp, template<int,int,class> class EntityImp>
+   */
+  template<typename Entity>
+  IteratorRange<typename Entity::HierarchicIterator> childElements(const Entity& e, int maxLevel)
+  {
+    return {e.hbegin(maxLevel),e.hend(maxLevel)};
+  }
 
 
   //********************************************************************
