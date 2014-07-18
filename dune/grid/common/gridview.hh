@@ -3,7 +3,10 @@
 #ifndef DUNE_GRIDVIEW_HH
 #define DUNE_GRIDVIEW_HH
 
+#include <dune/common/iteratorrange.hh>
+
 #include <dune/geometry/type.hh>
+#include <dune/geometry/dimension.hh>
 
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridenums.hh>
@@ -17,7 +20,7 @@ namespace Dune
 
 
   /** \addtogroup GIGridView
-   *
+   *  @{
    *  Though a DUNE grid is hierarchic, one often only needs access to
    *  a certain subset of the entities in the grid, e.g., the all entities
    *  on a given level or the leaf entities in the hierarchy.
@@ -51,7 +54,6 @@ namespace Dune
    *
    *  The interface is implemented using the engine concept.
    *
-   *  \ingroup GIGridView
    */
   template< class ViewTraits >
   class GridView
@@ -286,6 +288,84 @@ namespace Dune
   protected:
     Implementation impl_;
   };
+
+
+
+  //! Iterates over all entities of a GridView with the given codimension.
+  /**
+   * \relates GridView
+   */
+  template<typename GV, int codim>
+  IteratorRange<typename GV::template Codim<codim>::Iterator> entities(const GV& gv, Codim<codim>)
+  {
+    static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
+    return {gv.template begin<codim>(),gv.template end<codim>()};
+  }
+
+  //! Iterates over all entities of a GridView with the given dimension.
+  /**
+   * \relates GridView
+   */
+  template<typename GV, int dim>
+  IteratorRange<typename GV::template Codim<GV::dimension - dim>::Iterator> entities(const GV& gv, Dim<dim>)
+  {
+    static_assert(0 <= dim && dim <= GV::dimension, "invalid dimension for given GridView");
+    return {gv.template begin<GV::dimension - dim>(),gv.template end<GV::dimension - dim>()};
+  }
+
+  //! Iterates over all elements (entities with codimension 0) of a GridView.
+  /**
+   * \relates GridView
+   */
+  template<typename GV>
+  IteratorRange<typename GV::template Codim<0>::Iterator> elements(const GV& gv)
+  {
+    return {gv.template begin<0>(),gv.template end<0>()};
+  }
+
+  //! Iterates over all faces (entities with codimension 1) of a GridView.
+  /**
+   * \relates GridView
+   */
+  template<typename GV>
+  IteratorRange<typename GV::template Codim<1>::Iterator> faces(const GV& gv)
+  {
+    return {gv.template begin<1>(),gv.template end<1>()};
+  }
+
+  //! Iterates over all edges (entities with dimension 1) of a GridView.
+  /**
+   * \relates GridView
+   */
+  template<typename GV>
+  IteratorRange<typename GV::template Codim<GV::dimension - 1>::Iterator> edges(const GV& gv)
+  {
+    return {gv.template begin<GV::dimension - 1>(),gv.template end<GV::dimension - 1>()};
+  }
+
+  //! Iterates over all vertices (entities with dimension 0) of a GridView.
+  /**
+   * \relates GridView
+   */
+  template<typename GV>
+  IteratorRange<typename GV::template Codim<GV::dimension>::Iterator> vertices(const GV& gv)
+  {
+    return {gv.template begin<GV::dimension>(),gv.template end<GV::dimension>()};
+  }
+
+  //! Iterates over all intersections of an Entity with respect to the given GridView.
+  /**
+   * \relates GridView
+   * \relates Entity
+   */
+  template<typename GV, typename Entity>
+  IteratorRange<typename GV::IntersectionIterator> intersections(const Entity& e, const GV& gv)
+  {
+    return {gv.ibegin(e),gv.iend(e)};
+  }
+
+  //! @} // group GIGridView
+
 
 } // namespace Dune
 
