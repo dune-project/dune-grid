@@ -222,4 +222,7 @@ CLEANFILES = *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*
 testgriddir = $(includedir)/dune/grid/test
 testgrid_HEADERS = $(SOURCES)
 
+NORMALTESTS += testiteratorranges
+testiteratorranges_SOURCES = testiteratorranges.cc
+
 include $(top_srcdir)/am/global-rules

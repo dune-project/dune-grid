@@ -43,13 +43,14 @@ set(CACHECOORDFUNCTION 0)
 
 # tests where program to build and program to run are equal
 set(TESTS
-  test_geogrid test_identitygrid test_oned test_sgrid test_yaspgrid
+  testiteratorranges test_geogrid test_identitygrid test_oned test_sgrid test_yaspgrid
   ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
   ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid)
 
 set_property(DIRECTORY APPEND PROPERTY
   COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
 
+add_executable(testiteratorranges EXCLUDE_FROM_ALL testentityrange.cc)
 add_executable(test_geogrid EXCLUDE_FROM_ALL test-geogrid.cc)
 add_executable(test_identitygrid EXCLUDE_FROM_ALL test-identitygrid.cc)
 add_executable(test_oned EXCLUDE_FROM_ALL test-oned.cc)
