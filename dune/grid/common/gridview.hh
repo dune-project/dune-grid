@@ -323,12 +323,12 @@ namespace Dune
     return {gv.template begin<0>(),gv.template end<0>()};
   }
 
-  //! Iterates over all faces (entities with codimension 1) of a GridView.
+  //! Iterates over all facets (entities with codimension 1) of a GridView.
   /**
    * \relates GridView
    */
   template<typename GV>
-  IteratorRange<typename GV::template Codim<1>::Iterator> faces(const GV& gv)
+  IteratorRange<typename GV::template Codim<1>::Iterator> facets(const GV& gv)
   {
     return {gv.template begin<1>(),gv.template end<1>()};
   }

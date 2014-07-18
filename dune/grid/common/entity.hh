@@ -548,13 +548,13 @@ namespace Dune
 
 
 
-  //! Iterates over all child elements of the given element up to a maximum level.
+  //! Iterates over all descendant elements of the given element up to a maximum level.
   /**
    * \ingroup GIEntity
    * \relates Entity<int dim, class GridImp, template<int,int,class> class EntityImp>
    */
   template<typename Entity>
-  IteratorRange<typename Entity::HierarchicIterator> childElements(const Entity& e, int maxLevel)
+  IteratorRange<typename Entity::HierarchicIterator> descendantElements(const Entity& e, int maxLevel)
   {
     return {e.hbegin(maxLevel),e.hend(maxLevel)};
   }
