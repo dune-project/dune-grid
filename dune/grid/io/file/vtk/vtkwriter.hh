@@ -902,7 +902,8 @@ namespace Dune
         ncells++;
         // because of the use of vertexmapper->map(), this iteration must be
         // in the order of Dune's numbering.
-        for (int i=0; i<it->subEntities(n); ++i)
+        const int subEntities = it->subEntities(n);
+        for (int i=0; i<subEntities; ++i)
         {
           ncorners++;
           if (datamode == VTK::conforming)
