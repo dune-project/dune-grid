@@ -879,7 +879,7 @@ namespace Dune {
       init();
     }
 
-     /** @brief Constructor for a tensorproduct YaspGrid, is forwarded to the base class
+     /** @brief Constructor for a tensorproduct YaspGrid
       *  @param comm MPI communicator where this mesh is distributed to
       *  @param coords coordinate vectors to be used for coarse grid
       *  @param periodic tells if direction is periodic or not
@@ -907,7 +907,8 @@ namespace Dune {
       init();
     }
 
-    /** @brief Constructor for a sequential tensorproduct YaspGrid, is forwarded to the base class.
+    /** @brief Constructor for a sequential tensorproduct YaspGrid
+     *
      *  Sequential here means that the whole grid is living on one process even if your program is running
      *  in parallel.
      *  @see YaspGrid(Dune::MPIHelper::MPICommunicator, Dune::array<std::vector<ctype>,dim>,  Dune::FieldVector<bool, dim>, int)
