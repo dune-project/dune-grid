@@ -73,7 +73,7 @@ namespace Dune
       = ReferenceElements< coordType, dim >::general( type );
 
     // check whether the element has the number of codim-subentities mandated by the reference element
-    if(en.subEntities(codim) != refElem.size(0,0,codim))
+    if(int(en.subEntities(codim)) != refElem.size(0,0,codim))
     {
       std::cerr << "entity index = " << lset.index(en)
                 << ", type = " << type
