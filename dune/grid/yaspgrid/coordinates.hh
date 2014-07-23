@@ -248,6 +248,7 @@ namespace Dune
     return s;
   }
 
+ namespace Yasp {
   template<class ctype, std::size_t dim>
   bool checkIfMonotonous(const Dune::array<std::vector<ctype>, dim>& coords)
   {
@@ -257,6 +258,7 @@ namespace Dune
           return false;
     return true;
   }
+ } // namespace Yasp
 } // namespace Dune
 
 #endif

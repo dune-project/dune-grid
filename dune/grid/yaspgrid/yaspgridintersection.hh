@@ -65,15 +65,15 @@ namespace Dune {
     {
       return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 < 0
               ||
-              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 > _inside.gridlevel()->mg->template levelSize<0>(_inside.gridlevel()->level(),_count/2)- 1) ;
+              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 > _inside.gridlevel()->mg->levelSize(_inside.gridlevel()->level(),_count/2)- 1) ;
     }
 
     //! return true if neighbor across intersection exists in this processor
     bool neighbor () const
     {
-      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 >= _inside.gridlevel()->cell_overlap.min(_count/2)
+      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 >= _inside.gridlevel()->overlap[0].dataBegin()->min(_count/2)
               &&
-              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 <= _inside.gridlevel()->cell_overlap.max(_count/2));
+              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 <= _inside.gridlevel()->overlap[0].dataBegin()->max(_count/2));
     }
 
     //! Yasp is always conform
@@ -114,19 +114,19 @@ namespace Dune {
         DUNE_THROW(GridError, "called boundarySegmentIndex while boundary() == false");
       update();
       // size of local macro grid
-      const Dune::array<int, dim> & size = _inside.gridlevel()->mg->begin()->cell_overlap.size();
-      const Dune::array<int, dim> & origin = _inside.gridlevel()->mg->begin()->cell_overlap.origin();
+      const Dune::array<int, dim> & size = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->size();
+      const Dune::array<int, dim> & origin = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->origin();
       Dune::array<int, dim> sides;
       {
         for (int i=0; i<dim; i++)
         {
           sides[i] =
-            ((_inside.gridlevel()->mg->begin()->cell_overlap.origin(i)
+            ((_inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->origin(i)
               == 0)+
-             (_inside.gridlevel()->mg->begin()->cell_overlap.origin(i) +
-                      _inside.gridlevel()->mg->begin()->cell_overlap.size(i)
+            (_inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->origin(i) +
+                      _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->size(i)
                       ==
-                      _inside.gridlevel()->mg->template levelSize<0>(0,i)));
+                      _inside.gridlevel()->mg->levelSize(0,i)));
 
         }
       }
@@ -224,8 +224,12 @@ namespace Dune {
     Geometry geometry () const
     {
       update();
+
+      std::bitset<dim> shift;
+      shift.set();
+      shift[_dir] = false;
       GeometryImpl
-      _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),_dir);
+      _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),shift);
       return Geometry( _is_global );
     }
 
@@ -334,14 +338,17 @@ namespace Dune {
         I[2*i].normal[i] = -1.0;
         I[2*i+1].normal[i] = +1.0;
         // geometries
+        std::bitset<dim> s;
+        s.set();
+        s[i] = false;
         I[2*i].geom_inside =
-          LocalGeometryImpl(a, ext_local, i);
+          LocalGeometryImpl(a, ext_local, s);
         I[2*i].geom_outside =
-          LocalGeometryImpl(b, ext_local, i);
+          LocalGeometryImpl(b, ext_local, s);
         I[2*i+1].geom_inside =
-          LocalGeometryImpl(b, ext_local, i);
+          LocalGeometryImpl(b, ext_local, s);
         I[2*i+1].geom_outside =
-          LocalGeometryImpl(a, ext_local, i);
+          LocalGeometryImpl(a, ext_local, s);
       }
       return I;
     }

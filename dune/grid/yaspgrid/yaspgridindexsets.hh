@@ -56,7 +56,6 @@ namespace Dune {
     template<int cc>
     IndexType index (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e) const
     {
-      assert( cc == 0 || cc == GridImp::dimension );
       return grid.getRealImplementation(e).compressedIndex();
     }
 

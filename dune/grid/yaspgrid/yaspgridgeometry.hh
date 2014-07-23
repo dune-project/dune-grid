@@ -9,13 +9,15 @@
    YaspGeometry realizes the concept of the geometric part of a mesh entity.
 
    We have specializations for dim == dimworld (elements) and dim == 0
-   (vertices).  The general version implements dim == dimworld-1 (faces)
-   and otherwise throws a GridError.
+   (vertices).  The general version implements all other codimensions.
  */
 
 namespace Dune {
 
-  //! The general version can do any dimension, but constructors currently exist only for dim==dimworld-1
+  /** \brief The general version that handles all codimensions but 0 and dim.
+   * \tparam mydim the codimension
+   * \tparam cdim the coordinate dimension (NOT codim)
+   */
   template<int mydim,int cdim, class GridImp>
   class YaspGeometry : public AxisAlignedCubeGeometry<typename GridImp::ctype,mydim,cdim>
   {
@@ -25,28 +27,29 @@ namespace Dune {
 
     //! default constructor
     YaspGeometry ()
-      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0)) // anything
+      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0))
     {}
 
-    //! constructor from midpoint and extension and missing direction number
-    YaspGeometry (const FieldVector<ctype, cdim>& p, const FieldVector<ctype, cdim>& h, uint8_t& m)
+    //! constructor from midpoint and extension and a bitset defining which unit vectors span the entity
+    YaspGeometry (const FieldVector<ctype, cdim>& p, const FieldVector<ctype, cdim>& h, const std::bitset<cdim>& shift)
       : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0)) // anything
     {
-      if (cdim!=mydim+1)
-        DUNE_THROW(GridError, "This YaspGeometry constructor assumes cdim=mydim+1");
+      assert(mydim == shift.count());
 
       FieldVector<ctype, cdim> lower = p;
       FieldVector<ctype, cdim> upper = p;
       lower.axpy(-0.5,h);
       upper.axpy( 0.5,h);
 
-      lower[m] = upper[m] = p[m];
-
-      std::bitset<cdim> axes((1<<cdim)-1);    // all bits set
-      axes[m] = false; // except the one at 'missing'
+      for (int i=0; i<cdim; i++)
+        if (!shift[i])
+        {
+          lower[i] = p[i];
+          upper[i] = p[i];
+        }
 
       // set up base class
-      static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(lower, upper, axes);
+      static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(lower, upper, shift);
     }
 
     //! copy constructor
@@ -131,7 +134,7 @@ namespace Dune {
       : AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>( p )
     {}
 
-    YaspGeometry ( const FieldVector< ctype, cdim > &p, const FieldVector< ctype, cdim > &, uint8_t &)
+    YaspGeometry ( const FieldVector< ctype, cdim > &p, const FieldVector< ctype, cdim > &, const std::bitset<cdim> &)
       : AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>( p )
     {}
 
