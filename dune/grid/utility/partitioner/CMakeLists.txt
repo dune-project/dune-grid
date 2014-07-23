@@ -1,5 +1,3 @@
-add_subdirectory(test EXCLUDE_FROM_ALL)
-
 set(HEADERS
   equidistant.hh
   recursive-equidistant.hh
