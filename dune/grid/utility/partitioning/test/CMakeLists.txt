@@ -19,12 +19,12 @@ set(CLEANFILES ${CLEANFILES}
 foreach(_T ${TESTS})
   target_link_libraries(${_T} dunegrid ${DUNE_LIBS})
   add_test(${_T} ${CMAKE_CURRENT_SOURCE_DIR}/${_T}.sh)
+  add_dependencies(${_test_target} ${_T})
 endforeach(_T ${TESTS})
 
 # We do not want want to build the tests during make all,
 # but just build them on demand
 add_directory_test_target(_test_target)
-add_dependencies(${_test_target} ${TESTS})
 
 file(GLOB CLEANFILES ${CLEANFILES})
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CLEANFILES}")
