@@ -22,9 +22,12 @@ foreach(_T ${TESTS})
 endforeach(_T ${TESTS})
 
 # We do not want want to build the tests during make all,
-# but just build them on demand
-add_directory_test_target(_test_target)
-add_dependencies(${_test_target} ${TESTS})
+# but just build them on demand and only if we've
+# actually created tests here
+if(${TESTS})
+  add_directory_test_target(_test_target)
+  add_dependencies(${_test_target} ${TESTS})
+endif(${TESTS})
 
 file(GLOB CLEANFILES ${CLEANFILES})
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CLEANFILES}")
