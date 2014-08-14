@@ -232,12 +232,12 @@ inline void timeSceneInit(INFO *info, const int n_info,
 inline SCENE * combine_scenes_send ()
 {
   SCENE* sc = (SCENE*) START_METHOD (G_INSTANCE);
-  TIMESCENE * newSc = NULL;
+  //TIMESCENE * newSc = NULL;
   MANAGER * mgr = NULL;
   GRAPE_ALERT( sc, (char *) "combine-scenes: No hmesh!", END_METHOD(NULL));
 
-  newSc = (TIMESCENE *) GRAPE_CALL(TimeScene,"new-instance") ("combined Scene");
-  assert(newSc);
+  //newSc = (TIMESCENE *) GRAPE_CALL(TimeScene,"new-instance") ("combined Scene");
+  //assert(newSc);
 
   while(sc)
   {
