@@ -582,7 +582,6 @@ namespace Dune
   {
     typedef typename DiscFuncType::DiscreteFunctionSpaceType DiscreteFunctionSpaceType;
     enum { polynomialOrder = DiscreteFunctionSpaceType :: polynomialOrder };
-    typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
 
     assert(dinf);
     std::string name(dinf->name);
