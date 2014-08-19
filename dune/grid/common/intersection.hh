@@ -331,6 +331,9 @@ namespace Dune
      *  This method returns a Geometry object that provides a mapping from
      *  local coordinates of the intersection to global (world) coordinates.
      *
+     *  \note If the returned geometry has type <b>none</b> then only a limited set of features
+     *        is availalbe for the geometry, i.e. center and volume.
+     *
      *  \note Previously, the geometry was encapsulated in the intersection object
      *        and a const reference was returned.
      *
