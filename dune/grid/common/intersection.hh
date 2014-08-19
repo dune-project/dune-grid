@@ -147,7 +147,7 @@ namespace Dune
 
      The method intersectionGlobal returns a geometry mapping the intersection
      as a codim one structure to global coordinates. The methods
-     intersectionSelfLocal and intersectionNeighborLocal return geometries
+     geometryInInside and geometryInOutside return geometries
      mapping the intersection into the reference elements of the
      originating entity and the neighboring entity, respectively.
      The indexInInside and indexInOutside methods return the codim one
