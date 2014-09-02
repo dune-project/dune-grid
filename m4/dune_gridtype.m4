@@ -24,9 +24,9 @@ AC_DEFUN([DUNE_DEFINE_GRIDTYPE],[AH_BOTTOM(dnl
     The required headers for this grid implementation are also included.
   */
  #if HAVE_DUNE_GRID && defined $1 && ! defined USED_$1_GRIDTYPE
-  #if HAVE_GRIDTYPE
+  #ifdef HAVE_GRIDTYPE
    #error "Ambiguous definition of GRIDTYPE."
-  #endif 
+  #endif
 
   #ifndef WORLDDIM
     #define WORLDDIM GRIDDIM

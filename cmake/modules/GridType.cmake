@@ -26,7 +26,7 @@ macro(dune_define_gridtype output)
    The required headers for this grid implementation are also included.
 */
 #if HAVE_DUNE_GRID && defined ${GRIDTYPE_GRIDTYPE} && ! defined USED_${GRIDTYPE_GRIDTYPE}_GRIDTYPE
-  #if HAVE_GRIDTYPE
+  #ifdef HAVE_GRIDTYPE
    #error \"Ambiguous definition of GRIDTYPE.\"
   #endif
 
