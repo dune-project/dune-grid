@@ -903,9 +903,9 @@ namespace Dune {
     YaspGrid (Dune::array<std::vector<ctype>, dim> coords)
 #if HAVE_MPI
       : ccobj(MPI_COMM_SELF),
-        _torus(MPI_COMM_SELF,tag,coords,defaultLoadbalancer()),
+        _torus(MPI_COMM_SELF,tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
 #else
-      : _torus(tag,coords,defaultLoadbalancer()),
+      : _torus(tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
 #endif
         leafIndexSet_(*this),
         _periodic(std::bitset<dim>(0)),
