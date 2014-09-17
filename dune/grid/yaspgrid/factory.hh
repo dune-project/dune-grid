@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_YASPGRID_SEQUENCES_HH
-#define DUNE_GRID_YASPGRID_SEQUENCES_HH
+#ifndef DUNE_GRID_YASPGRID_FACTORY_HH
+#define DUNE_GRID_YASPGRID_FACTORY_HH
 
 #include <vector>
 #include <dune/common/array.hh>
@@ -23,29 +23,25 @@
 namespace Dune
 {
   template<typename ctype, int dim>
-  class TensorYaspFactory
+  class TensorYaspGridFactory
   {
   public:
 
     //! initialize the factory with a set of default values
-    TensorYaspFactory ()
-  : _comm (MPI_COMM_SELF), _periodic (), _overlap (1)
-  {
-  }
+    TensorYaspGridFactory () : _comm (MPI_COMM_SELF), _periodic (), _overlap (1)
+    {}
 
     //! finalizes the factory and gives a pointer to the constructed grid
     YaspGrid<dim, TensorProductCoordinateContainer<ctype, dim> >* createGrid ()
-          {
-      if (!checkIfMonotonous (_coords))
-        DUNE_THROW(
-            Dune::Exception,
-            "TensorYaspFactory did not get enough coordinate information to construct a grid!");
-      return new YaspGrid<dim, TensorProductCoordinateContainer<ctype, dim> > (
-          _comm, _coords, _periodic, _overlap);
-          }
+    {
+      if (!Dune::Yasp::checkIfMonotonous (_coords))
+        DUNE_THROW( Dune::Exception,
+          "TensorYaspFactory did not get enough coordinate information to construct a grid!");
+      return new YaspGrid<dim, TensorProductCoordinateContainer<ctype, dim> > (_comm, _coords, _periodic, _overlap);
+    }
 
     //! set the communicator object
-    void setCommunicator (Dune::MPIHelper::MPICommunicator& comm)
+    void setCommunicator (Dune::MPIHelper::MPICommunicator comm)
     {
       _comm = comm;
     }
@@ -72,7 +68,7 @@ namespace Dune
      */
     void setStart (int d, ctype value)
     {
-      _coords[d].resize (1);
+      _coords[d].resize(1);
       _coords[d][0] = value;
     }
 
@@ -140,7 +136,7 @@ namespace Dune
     {
       emptyCheck (d);
       ctype h = h0;
-      if (h0 < 1e-8) //TODO bad comparison
+      if (h0 == static_cast<ctype>(0))
         h = lastInterval (d) * ratio;
       for (int i = 0; i < n; i++)
       {
@@ -166,7 +162,7 @@ namespace Dune
     {
       emptyCheck (d);
       ctype h = h0;
-      if (h0 < 1e-8)
+      if (h0 == static_cast<ctype>(0))
         h = lastInterval (d) * ratio;
       while (_coords[d].back () < end)
       {
@@ -208,6 +204,38 @@ namespace Dune
         h *= ratio;
       }
       _coords[d].push_back (end);
+    }
+
+    //! print the coordinate information given to the factory so far
+    void print()
+    {
+      for (int i=0; i<dim; i++)
+      {
+        std::cout << "Container in direction " << i << ":" << std::endl << "Coordinates: ";
+        for (auto it = _coords[i].begin(); it != _coords[i].end(); ++it)
+          std::cout << *it << "  ";
+        std::cout << std::endl << "Interval lengths: ";
+
+        std::vector<ctype> meshsize;
+        for (auto it = _coords[i].begin(); it != _coords[i].end()-1;)
+        {
+          meshsize.push_back(-1.*(*it));
+          ++it;
+          meshsize.back() += *it;
+        }
+
+        for (auto it = meshsize.begin(); it != meshsize.end(); ++it)
+          std::cout << *it << "  ";
+        std::cout << std::endl << "Ratios between interval lengths: ";
+
+        std::vector<ctype> ratios;
+        for (auto it = meshsize.begin(); it != meshsize.end() - 1 ;)
+          ratios.push_back((1./(*it)) * *(++it));
+
+        for (auto it = ratios.begin(); it != ratios.end(); ++it)
+          std::cout << *it << "  ";
+        std::cout << std::endl << std::endl << std::endl;
+      }
     }
 
   private:
@@ -260,7 +288,7 @@ namespace Dune
     }
 
     Dune::array<std::vector<ctype>, dim> _coords;
-    const Dune::MPIHelper::MPICommunicator& _comm;
+    Dune::MPIHelper::MPICommunicator _comm;
     std::bitset<dim> _periodic;
     int _overlap;
   };
