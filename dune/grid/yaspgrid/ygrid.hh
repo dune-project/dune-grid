@@ -323,15 +323,6 @@ namespace Dune {
           _superindex += (r.offset(i)+coord[i]-r.origin(i))*r.superincrement(i);
 
         _grid = &r;
-        if (_grid->inside(coord))
-        {
-          for (int i=0; i<d; ++i)
-          {
-            _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-            if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i)))
-              _position[i] += 0.5 * _grid->getCoords()->meshsize(i,_coord[i]);
-          }
-        }
       }
 
       //! Return true when two iterators over the same grid are equal (!).
@@ -369,12 +360,6 @@ namespace Dune {
       {
         _coord[i] += dist;
         _superindex += dist*_grid->superincrement(i);
-        if (_grid->inside(_coord))
-        {
-          _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-          if (_grid->shift(i))
-            _position[i] += 0.5 * meshsize(i);
-        }
       }
 
       //! Increment iterator to next cell with position.
@@ -384,19 +369,11 @@ namespace Dune {
         {
           _superindex += _grid->superincrement(i);   // move on cell in direction i
           if (++_coord[i] <= _grid->max(i))
-          {
-            _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-            if (_grid->shift(i))
-              _position[i] += 0.5 * _grid->getCoords()->meshsize(i,_coord[i]);
             return *this;
-          }
           else
           {
             _coord[i] = _grid->origin(i);         // move back to origin in direction i
             _superindex -= _grid->size(i) * _grid->superincrement(i);
-            _position[i] = _grid->getCoords()->coordinate(i,_grid->origin(i));
-            if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i)))
-              _position[i] += 0.5 * _grid->getCoords()->meshsize(i,_grid->origin(i));
           }
         }
         // if we wrapped around, back to to begin(), we must put the iterator to end()
@@ -409,16 +386,37 @@ namespace Dune {
         return *this;
       }
 
-      //! Return position of current cell in direction i.
-      ct position (int i) const
+      //! Return ith component of lower left corner of the entity associated with the current coordinates and shift.
+      ct lowerleft(int i) const
       {
-        return _position[i];
+        return _grid->getCoords()->coordinate(i,_coord[i]);
       }
 
-      //! Return position of current cell as reference.
-      const fTupel& position () const
+      //! Return lower left corner of the entity associated with the current coordinates and shift.
+      fTupel lowerleft() const
       {
-        return _position;
+        fTupel ll;
+        for (int i=0; i<d; i++)
+          ll[i] = lowerleft(i);
+        return ll;
+      }
+
+      //! Return ith component of upper right corder of the entity associated with the current coordinates and shift.
+      ct upperright(int i) const
+      {
+        ct c = _grid->getCoords()->coordinate(i,_coord[i]);
+        if (shift(i))
+          c += _grid->getCoords()->meshsize(i,_coord[i]);
+        return c;
+      }
+
+      //! Return upper right corder of the entity associated with the current coordinates and shift.
+      fTupel upperright() const
+      {
+        fTupel ur;
+        for (int i=0; i<d; i++)
+          ur[i] = upperright(i);
+        return ur;
       }
 
       //! Return meshsize in direction i
@@ -450,7 +448,6 @@ namespace Dune {
       iTupel _coord;       //!< current position in index set
       int _superindex;        //!< consecutive index in enclosing grid
       const YGridComponent<CC>* _grid;
-      fTupel _position; //!< current position
     };
 
 
@@ -621,16 +618,24 @@ namespace Dune {
         return _it.coord();
       }
 
-      //! return the current position (direction i)
-      typename CC::ctype position (int i) const
+      typename CC::ctype lowerleft(int i) const
       {
-        return _it.position(i);
+        return _it.lowerleft(i);
       }
 
-      //! return the current position
-      const Dune::FieldVector<typename CC::ctype,dim>& position () const
+      Dune::FieldVector<typename CC::ctype,dim> lowerleft() const
       {
-        return _it.position();
+        return _it.lowerleft();
+      }
+
+      typename CC::ctype upperright(int i) const
+      {
+        return _it.upperright(i);
+      }
+
+      Dune::FieldVector<typename CC::ctype,dim> upperright() const
+      {
+        return _it.upperright();
       }
 
       //! return the current meshsize in direction i

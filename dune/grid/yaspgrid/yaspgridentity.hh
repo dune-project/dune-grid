@@ -263,7 +263,7 @@ namespace Dune {
     //! geometry of this entity
     Geometry geometry () const
     {
-      GeometryImpl _geometry(_it.position(),_it.meshsize(),_it.shift());
+      GeometryImpl _geometry(_it.lowerleft(),_it.upperright(),_it.shift());
       return Geometry(_geometry);
     }
 
@@ -445,7 +445,7 @@ namespace Dune {
     //! geometry of this entity
     Geometry geometry () const {
       // the element geometry
-      GeometryImpl _geometry(_it.position(),_it.meshsize());
+      GeometryImpl _geometry(_it.lowerleft(),_it.upperright());
       return Geometry( _geometry );
     }
 
@@ -516,13 +516,18 @@ namespace Dune {
     LocalGeometry geometryInFather () const
     {
       // configure one of the 2^dim transformations
-      FieldVector<ctype,dim> midpoint;
-      FieldVector<ctype,dim> extension(0.5);
+      FieldVector<ctype,dim> ll(0.0),ur(0.5);
 
       for (int k=0; k<dim; k++)
-        midpoint[k] = (_it.coord(k)%2) ? 0.75 : 0.25;
+      {
+        if (_it.coord(k)%2)
+        {
+          ll[k] = 0.5;
+          ur[k] = 1.0;
+        }
+      }
 
-      return LocalGeometry( YaspGeometry<dim,dim,GridImp>(midpoint,extension) );
+      return LocalGeometry( YaspGeometry<dim,dim,GridImp>(ll,ur) );
     }
 
     const I& transformingsubiterator () const
@@ -784,7 +789,7 @@ namespace Dune {
 
     //! geometry of this entity
     Geometry geometry () const {
-      GeometryImpl _geometry(_it.position());
+      GeometryImpl _geometry(_it.lowerleft());
       return Geometry( _geometry );
     }
 
