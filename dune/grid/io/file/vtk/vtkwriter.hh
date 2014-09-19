@@ -446,7 +446,7 @@ namespace Dune
      * For vector valued data all components for a vertex are assumed to
      * be consecutive.
      *
-     * @param v The container with the values of the grid function for each cell.
+     * @param v The container with the values of the grid function for each vertex.
      * @param name A name to identify the grid function.
      * @param ncomps Number of components (default is 1).
      */
