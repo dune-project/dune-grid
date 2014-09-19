@@ -48,6 +48,10 @@
 
 namespace Dune
 {
+  // Forward-declaration here, so the class can be friend of VTKWriter
+  template <class GridView>
+  class VTKSequenceWriterBase;
+
   /**
    * @brief Writer for the ouput of grid functions in the vtk format.
    * @ingroup VTK
@@ -58,6 +62,10 @@ namespace Dune
    */
   template< class GridView >
   class VTKWriter {
+
+    // VTKSequenceWriterBase needs the getParallelHeaderName method
+    friend class VTKSequenceWriterBase<GridView>;
+
     // extract types
     typedef typename GridView::Grid Grid;
     typedef typename GridView::ctype DT;

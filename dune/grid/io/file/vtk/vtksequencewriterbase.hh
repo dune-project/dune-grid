@@ -12,6 +12,9 @@
 
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/common/path.hh>
+#include <dune/common/shared_ptr.hh>
+
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 namespace Dune {
 
@@ -21,23 +24,86 @@ namespace Dune {
    * <a href="http://www.vtk.org/">The Visualization Toolkit (VTK)</a>.
    * The derived class needs to inherit from the VTKWriter or the SubsamplingVTKWriter
    *
-   * \tparam Imp Type of the derived class (CRTP-trick)
+   * \tparam GridView Grid view of the grid we are writing
    *
    */
 
-  template<class Imp>
+  template<class GridView>
   class VTKSequenceWriterBase
   {
+    shared_ptr<VTKWriter<GridView> > vtkWriter_;
     std::vector<double> timesteps_;
     std::string name_,path_,extendpath_;
+    int rank_;
+    int size_;
   public:
-    explicit VTKSequenceWriterBase( const std::string& name,
+    /** \brief Set up the VTKSequenceWriterBase class
+     *
+     * \param vtkWriter Writer object used to write the individual time step data files
+     * \param rank Process number in a multi-process setting
+     * \param size Total number of processes
+     */
+    explicit VTKSequenceWriterBase( shared_ptr<VTKWriter<GridView> > vtkWriter,
+                                    const std::string& name,
                                     const std::string& path,
-                                    const std::string& extendpath)
-      : name_(name), path_(path),
-        extendpath_(extendpath)
+                                    const std::string& extendpath,
+                                    int rank,
+                                    int size)
+      : vtkWriter_(vtkWriter),
+        name_(name), path_(path),
+        extendpath_(extendpath),
+        rank_(rank),
+        size_(size)
     {}
+
     ~VTKSequenceWriterBase() {}
+
+    /** \brief Adds a field of cell data to the VTK file */
+    void addCellData (const shared_ptr<const typename VTKWriter<GridView>::VTKFunction> &p)
+    {
+      vtkWriter_->addCellData(p);
+    }
+
+    /** \brief Adds a field of cell data to the VTK file */
+    void addCellData (typename VTKWriter<GridView>::VTKFunction *p)
+    {
+      vtkWriter_->addCellData(p);
+    }
+
+    /** \brief Adds a field of cell data to the VTK file
+     * \param v The container with the values of the grid function for each cell
+     * \param name A name to identify the grid function
+     * \param ncomps Number of components (default is 1)
+     */
+    template<class V >
+    void addCellData (const V &v, const std::string &name, int ncomps=1)
+    {
+      vtkWriter_->addCellData(v, name, ncomps);
+    }
+
+    /** \brief Adds a field of vertex data to the VTK file */
+    void addVertexData (typename VTKWriter<GridView>::VTKFunction *p)
+    {
+      vtkWriter_->addVertexData(p);
+    }
+
+    /** \brief Adds a field of vertex data to the VTK file */
+    void addVertexData (const typename VTKWriter<GridView>::VTKFunctionPtr &p)
+    {
+      vtkWriter_->addVertexData(p);
+    }
+
+    /** \brief Adds a field of vertex data to the VTK file
+     * \param v The container with the values of the grid function for each vertex
+     * \param name A name to identify the grid function
+     * \param ncomps Number of components (default is 1)
+     */
+    template<class V >
+    void addVertexData (const V &v, const std::string &name, int ncomps=1)
+    {
+      vtkWriter_->addVertexData(v, name, ncomps);
+    }
+
 
     /**
      * \brief Writes VTK data for the given time,
@@ -51,10 +117,10 @@ namespace Dune {
       timesteps_.push_back(time);
 
       /* write VTK file */
-      std::string pvtuName = static_cast<Imp*>(this)->pwrite(seqName(count), path_,extendpath_,ot);
+      std::string pvtuName = vtkWriter_->pwrite(seqName(count), path_,extendpath_,ot);
 
       /* write pvd file ... only on rank 0 */
-      if (static_cast<Imp*>(this)->gridView_.comm().rank()==0) {
+      if (rank_==0) {
         std::ofstream pvdFile;
         pvdFile.exceptions(std::ios_base::badbit | std::ios_base::failbit |
                            std::ios_base::eofbit);
@@ -67,8 +133,7 @@ namespace Dune {
         {
           // filename
           std::string piecepath = concatPaths(path_, extendpath_);
-          std::string fullname =
-            static_cast<Imp*>(this)->getParallelHeaderName(seqName(i), piecepath);
+          std::string fullname = vtkWriter_->getParallelHeaderName(seqName(i), piecepath, size_);
           pvdFile << "<DataSet timestep=\"" << timesteps_[i]
                   << "\" group=\"\" part=\"0\" name=\"\" file=\""
                   << fullname << "\"/> \n";
