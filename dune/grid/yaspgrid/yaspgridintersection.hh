@@ -218,14 +218,19 @@ namespace Dune {
       shift.set();
       shift[_dir] = false;
 
-      Dune::FieldVector<ctype,dimworld> ll(_inside.transformingsubiterator().lowerleft());
-      Dune::FieldVector<ctype,dimworld> ur(_inside.transformingsubiterator().upperright());
+      Dune::FieldVector<ctype,dimworld> ll, ur;
 
-      if (_face > 0)
+      for (int i=0; i<dimworld; i++)
       {
-        ll = _outside.transformingsubiterator().lowerleft();
-        ur = _outside.transformingsubiterator().upperright();
+        int coord = _inside.transformingsubiterator().coord(i);
+        if ((i == _dir) and (_face))
+          coord++;
+        ll[i] = _inside.transformingsubiterator().coordCont()->coordinate(i,coord);
+        if (i != _dir)
+          coord++;
+        ur[i] = _inside.transformingsubiterator().coordCont()->coordinate(i,coord);
       }
+
       GeometryImpl _is_global(ll,ur,shift);
       return Geometry( _is_global );
     }

@@ -404,10 +404,10 @@ namespace Dune {
       //! Return ith component of upper right corder of the entity associated with the current coordinates and shift.
       ct upperright(int i) const
       {
-        ct c = _grid->getCoords()->coordinate(i,_coord[i]);
+        int coord = _coord[i];
         if (shift(i))
-          c += _grid->getCoords()->meshsize(i,_coord[i]);
-        return c;
+          coord++;
+        return _grid->getCoords()->coordinate(i,coord);
       }
 
       //! Return upper right corder of the entity associated with the current coordinates and shift.
@@ -442,6 +442,11 @@ namespace Dune {
       std::bitset<d> shift() const
       {
         return _grid->shift();
+      }
+
+      CC* coordCont() const
+      {
+        return _grid->getCoords();
       }
 
     protected:
@@ -704,6 +709,12 @@ namespace Dune {
       {
         _it.move(i,dist);
       }
+
+      CC* coordCont() const
+      {
+        return _it.coordCont();
+      }
+
 
       private:
       int _which;
