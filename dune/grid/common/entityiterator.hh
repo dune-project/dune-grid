@@ -50,9 +50,21 @@ namespace Dune
       return *this;
     }
 
+    /** \brief postfix increment operator */
+    EntityIterator operator++ (int)
+    {
+      EntityIterator tmp(*this);
+      realIterator.increment();
+      return tmp;
+    }
+
     /** \name Implementor's interface
      *  \{
      */
+
+    /** \brief default construct (undefined) iterator */
+    EntityIterator ( )
+    {}
 
     /** \brief copy constructor from implementaton */
     EntityIterator ( const IteratorImp &imp )

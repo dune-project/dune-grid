@@ -140,6 +140,10 @@ namespace Dune
       : realIterator( ep.realIterator )
     {}
 
+    /** \brief Default constructor of an empty (undefined) EntityPointer */
+    EntityPointer()
+    {}
+
     /** \brief Templatized constructor from type of entity that
         this entity pointer points to. This constructor can be used to
         create an entity pointer from an entity in order to store an
