@@ -607,7 +607,7 @@ namespace Dune {
       void reinit(const YGrid<CC>& yg, const Dune::array<int,dim>& coords, int which = 0)
       {
         _yg = &yg;
-        _which = _which;
+        _which = which;
         _it = typename YGridComponent<CC>::Iterator(*(_yg->dataBegin()+which),coords);
       }
 
