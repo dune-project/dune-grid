@@ -15,6 +15,7 @@
 #include "checkcommunicate.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkiterators.cc"
 #include "checkadaptation.cc"
 #include "checkpartition.cc"
 
@@ -86,6 +87,9 @@ void check_yasp() {
   grid->globalRefine(2);
 
   gridcheck(*grid);
+
+  checkIterators ( grid->leafGridView() );
+  checkIterators ( grid->levelGridView(0) );
 
   // check communication interface
   checkCommunication(*grid,-1,Dune::dvverb);
