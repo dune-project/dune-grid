@@ -31,6 +31,11 @@ namespace Dune {
     //! codimension of entity pointer
     enum { codimension = codim };
 
+    //! default constructor
+    YaspEntityPointer () :
+      _entity(YaspEntityImp())
+    {}
+
     //! constructor
     YaspEntityPointer (const GridImp * yg, const YGLI & g, const I& it)
       : _g(g), _it(it),

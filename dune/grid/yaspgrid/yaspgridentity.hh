@@ -283,6 +283,9 @@ namespace Dune {
 
     typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename GridImp::YGrid::Iterator I;
+    YaspEntity ()
+    {}
+
     YaspEntity (const GridImp* yg, const YGLI& g, const I& it)
       : _yg(yg), _it(it), _g(g)
     {}
@@ -374,8 +377,8 @@ namespace Dune {
     const GridImp * yaspgrid() const { return _yg; }
     protected:
     const GridImp * _yg;          // access to YaspGrid
-    const I& _it;               // position in the grid level
-    const YGLI& _g;               // access to grid level
+    const I _it;               // position in the grid level
+    const YGLI _g;               // access to grid level
   };
 
 
@@ -417,6 +420,9 @@ namespace Dune {
     typedef typename GridImp::YGrid::iTupel iTupel;
 
     // constructor
+    YaspEntity ()
+    {}
+
     YaspEntity (const GridImp * yg, const YGLI& g, const I& it)
       : _yg(yg), _it(it), _g(g)
     {}
@@ -735,8 +741,8 @@ namespace Dune {
     }
 
     const GridImp * _yg;    // access to YaspGrid
-    const I& _it;         // position in the grid level
-    const YGLI& _g;         // access to grid level
+    const I _it;         // position in the grid level
+    const YGLI _g;         // access to grid level
   };
 
 
@@ -773,6 +779,9 @@ namespace Dune {
     typedef typename GridImp::YGrid::iTupel iTupel;
 
     // constructor
+    YaspEntity ()
+    {}
+
     YaspEntity (const GridImp* yg, const YGLI& g, const I& it)
       : _yg(yg), _it(it), _g(g)
     {}
@@ -883,8 +892,8 @@ namespace Dune {
     const GridImp * yaspgrid() const { return _yg; }
   protected:
     const GridImp * _yg;          // access to YaspGrid
-    const I& _it;               // position in the grid level
-    const YGLI& _g;               // access to grid level
+    const I _it;               // position in the grid level
+    const YGLI _g;               // access to grid level
   };
 
 }   // namespace Dune
