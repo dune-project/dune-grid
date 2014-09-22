@@ -3,7 +3,14 @@
 #include <map>
 
 #include <dune/common/forloop.hh>
+#include <dune/common/test/iteratortest.hh>
 
+template<class T>
+class NoopFunctor {
+public:
+  NoopFunctor() {}
+  void operator()(const T& t){}
+};
 
 // CheckCodimIterators
 // -------------------
@@ -102,6 +109,14 @@ inline void CheckCodimIterators< GridView, codim, true >
       }
     }
   }
+
+  // check forward iterator semantics
+  typedef typename GridView::template Codim<codim>::Entity Entity;
+  NoopFunctor<Entity> op;
+  if(not testForwardIterator(gridView.template begin<codim>(),
+                               gridView.template end<codim>(), op))
+    DUNE_THROW(Dune::Exception, "Iterator does not fulfill the forward iterator concept");
+
 }
 
 
