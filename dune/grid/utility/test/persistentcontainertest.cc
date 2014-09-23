@@ -37,6 +37,9 @@ bool test(GridType &grid)
   PersistentContainer<GridType,DataType> container0(grid,0);
   PersistentContainer<GridType,DataType> container1(grid,1);
   PersistentContainer<GridType,DataType> container2(grid,2);
+  PersistentContainer<const GridType,DataType> ccontainer0(grid,0);
+  PersistentContainer<const GridType,DataType> ccontainer1(grid,1);
+  PersistentContainer<const GridType,DataType> ccontainer2(grid,2);
 
   typedef typename GridType::LeafGridView GridView;
   const GridView &view = grid.leafGridView();
@@ -46,11 +49,11 @@ bool test(GridType &grid)
     const EIterator &eend = view.template end<0>();
     for(EIterator eit = view.template begin<0>(); eit != eend; ++eit)
     {
-      container0[*eit] = eit->geometry().center();
+      ccontainer0[*eit] = container0[*eit] = eit->geometry().center();
       const Dune::ReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
         = Dune::ReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
       for (int i=0; i<eit->subEntities(1); ++i)
-        container1(*eit,i) = eit->geometry().global( refElement.position(i,1) );
+        ccontainer1(*eit,i) = container1(*eit,i) = eit->geometry().global( refElement.position(i,1) );
       for (int i=0; i<eit->subEntities(2); ++i)
         container2(*eit,i) = eit->geometry().global( refElement.position(i,2) );
     }
@@ -60,6 +63,9 @@ bool test(GridType &grid)
   container0.resize();
   container1.resize();
   container2.resize();
+  ccontainer0.resize();
+  ccontainer1.resize();
+  ccontainer2.resize();
 
   {
     const EIterator &eend = view.template end<0>();
@@ -68,6 +74,12 @@ bool test(GridType &grid)
       if (container0[*eit].used == true)
       {
         std::cout << "ERROR: a new element is marked as 'used' in the container - stop testing" << std::endl;
+        ret = false;
+        break;
+      }
+      if (ccontainer0[*eit].used == true)
+      {
+        std::cout << "ERROR: a new element is marked as 'used' in the const container - stop testing" << std::endl;
         ret = false;
         break;
       }
