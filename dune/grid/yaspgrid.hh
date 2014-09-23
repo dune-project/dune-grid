@@ -63,6 +63,7 @@ namespace Dune {
   template<class GridImp>            class YaspHierarchicIterator;
   template<class GridImp, bool isLeafIndexSet>                     class YaspIndexSet;
   template<class GridImp>            class YaspGlobalIdSet;
+  template<class GridImp>            class YaspPersistentContainerIndex;
 
 } // namespace Dune
 
@@ -79,6 +80,7 @@ namespace Dune {
 #include <dune/grid/yaspgrid/yaspgridleveliterator.hh>
 #include <dune/grid/yaspgrid/yaspgridindexsets.hh>
 #include <dune/grid/yaspgrid/yaspgrididset.hh>
+#include <dune/grid/yaspgrid/yaspgridpersistentcontainer.hh>
 
 namespace Dune {
 
@@ -1526,6 +1528,7 @@ namespace Dune {
     friend class Dune::YaspIndexSet<const Dune::YaspGrid<dim, CoordCont>, true >;
     friend class Dune::YaspIndexSet<const Dune::YaspGrid<dim, CoordCont>, false >;
     friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim, CoordCont> >;
+    friend class Dune::YaspPersistentContainerIndex<const Dune::YaspGrid<dim, CoordCont> >;
 
     friend class Dune::YaspIntersectionIterator<const Dune::YaspGrid<dim, CoordCont> >;
     friend class Dune::YaspIntersection<const Dune::YaspGrid<dim, CoordCont> >;
