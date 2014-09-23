@@ -113,7 +113,7 @@ inline void CheckCodimIterators< GridView, codim, true >
   // check forward iterator semantics
   typedef typename GridView::template Codim<codim>::Entity Entity;
   NoopFunctor<Entity> op;
-  if(not testForwardIterator(gridView.template begin<codim>(),
+  if(0 != testForwardIterator(gridView.template begin<codim>(),
                                gridView.template end<codim>(), op))
     DUNE_THROW(Dune::Exception, "Iterator does not fulfill the forward iterator concept");
 
