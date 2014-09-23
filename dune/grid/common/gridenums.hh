@@ -9,6 +9,10 @@
 
 namespace Dune {
 
+  /**
+   * \addtogroup gridpartitions Parallel Grid Partitions
+   * \{
+   */
 
   /** \brief Attributes used in the generic overlap model
    *
@@ -165,6 +169,11 @@ namespace Dune {
     ForwardCommunication,     //!< communicate as given in InterfaceType
     BackwardCommunication     //!< reverse communication direction
   };
+
+  /**
+   * \}
+   */
+
 
 }
 #endif
