@@ -33,14 +33,7 @@ namespace Dune
    */
   template< int codim, class Grid, class IteratorImp >
   class EntityIterator
-    : public EntityPointer< Grid, IteratorImp >,
-      public std::iterator< std::forward_iterator_tag,
-                            typename remove_const<
-                              typename Grid::template Codim< codim >::Entity
-                              >::type,                   // std::iterator needs mutable value type
-                            std::ptrdiff_t,
-                            typename Grid::template Codim< codim >::Entity*,
-                            typename Grid::template Codim< codim >::Entity&>
+    : public EntityPointer< Grid, IteratorImp >
   {
     typedef EntityPointer< Grid, IteratorImp > Base;
 
