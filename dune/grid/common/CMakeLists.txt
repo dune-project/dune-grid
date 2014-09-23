@@ -22,6 +22,7 @@ set(HEADERS
   intersectioniterator.hh
   mcmgmapper.hh
   mapper.hh
+  partitionset.hh
   sizecache.hh
   scsgmapper.hh
   universalmapper.hh)
