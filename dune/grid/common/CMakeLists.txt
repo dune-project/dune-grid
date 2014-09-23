@@ -9,6 +9,7 @@ set(HEADERS
   entity.hh
   entityiterator.hh
   entitypointer.hh
+  entityrangegenerators.hh
   entityseed.hh
   exceptions.hh
   geometry.hh
