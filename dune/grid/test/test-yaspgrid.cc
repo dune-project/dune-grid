@@ -24,7 +24,7 @@ struct YaspFactory
 {};
 
 template<int dim>
-struct YaspFactory<dim, Dune::EquidistantCoordinateContainer<double,dim> >
+struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 {
   static Dune::YaspGrid<dim>* buildGrid()
   {
@@ -45,9 +45,9 @@ struct YaspFactory<dim, Dune::EquidistantCoordinateContainer<double,dim> >
 };
 
 template<int dim>
-struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
+struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
 {
-  static Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >* buildGrid()
+  static Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >* buildGrid()
   {
     std::cout << " using tensorproduct coordinate container!" << std::endl << std::endl;
 
@@ -70,14 +70,14 @@ struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
     }
 
 #if HAVE_MPI
-    return new Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >(MPI_COMM_WORLD,coords,p,overlap);
+    return new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(MPI_COMM_WORLD,coords,p,overlap);
 #else
-    return new Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >(coords,p,overlap);
+    return new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(coords,p,overlap);
 #endif
   }
 };
 
-template <int dim, class CC = Dune::EquidistantCoordinateContainer<double,dim> >
+template <int dim, class CC = Dune::EquidistantCoordinates<double,dim> >
 void check_yasp() {
   std::cout << std::endl << "YaspGrid<" << dim << ">";
 
@@ -122,13 +122,13 @@ int main (int argc , char **argv) {
     Dune::MPIHelper::instance(argc, argv);
 
     check_yasp<1>();
-    check_yasp<1, Dune::TensorProductCoordinateContainer<double,1> >();
+    check_yasp<1, Dune::TensorProductCoordinates<double,1> >();
 
     check_yasp<2>();
-    check_yasp<2, Dune::TensorProductCoordinateContainer<double,2> >();
+    check_yasp<2, Dune::TensorProductCoordinates<double,2> >();
 
     check_yasp<3>();
-    check_yasp<3, Dune::TensorProductCoordinateContainer<double,3> >();
+    check_yasp<3, Dune::TensorProductCoordinates<double,3> >();
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;

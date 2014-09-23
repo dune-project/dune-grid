@@ -156,7 +156,7 @@ namespace Dune {
      \par History:
      \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
    */
-  template<int dim, class CoordCont = EquidistantCoordinateContainer<double, dim> >
+  template<int dim, class CoordCont = EquidistantCoordinates<double, dim> >
   class YaspGrid
     : public GridDefaultImplementation<dim,dim,typename CoordCont::ctype,YaspGridFamily<dim, CoordCont> >
   {
@@ -761,10 +761,10 @@ namespace Dune {
       }
 
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<CoordCont,TensorProductCoordinateContainer<ctype,dim> >::value,
+      static_assert(is_same<CoordCont,TensorProductCoordinates<ctype,dim> >::value,
         "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
-      TensorProductCoordinateContainer<ctype,dim> cc(newcoords, offset);
+      TensorProductCoordinates<ctype,dim> cc(newcoords, offset);
 
       // add level
       makelevel(cc,periodic,o_interior,overlap);
@@ -802,10 +802,10 @@ namespace Dune {
       }
 
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<CoordCont,EquidistantCoordinateContainer<ctype,dim> >::value,
+      static_assert(is_same<CoordCont,EquidistantCoordinates<ctype,dim> >::value,
         "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
-      EquidistantCoordinateContainer<ctype,dim> cc(h,s_overlap);
+      EquidistantCoordinates<ctype,dim> cc(h,s_overlap);
 
       // add level
       makelevel(cc,periodic,o_interior,overlap);
