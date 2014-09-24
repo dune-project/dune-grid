@@ -28,14 +28,16 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
   typedef typename GridView::IndexSet IndexSet;
   const IndexSet &is = gridView.indexSet();
 
+  typedef typename Mapper::Index Index;
+
   typedef typename GridView::template Codim<0>::Iterator Iterator;
 
   Iterator eIt    = gridView.template begin<0>();
   Iterator eEndIt = gridView.template end<0>();
 
-  int min = 1;
-  int max = 0;
-  std::set<int> indices;
+  Index min = 1;
+  Index max = 0;
+  std::set<Index> indices;
   int size = mapper.size();
 
   if (size != int(is.size(0)))
@@ -44,7 +46,7 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
 
   for (; eIt!=eEndIt; ++eIt) {
 
-    int index;
+    Index index;
     bool contained = mapper.contains(*eIt, index);
 
     if ((is.geomTypes(0)[0] == eIt->type()) != contained)
@@ -72,7 +74,7 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
     //     assert(oldindex == index);
     // }
 
-    std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
+    std::pair<typename std::set<Index>::iterator, bool> status = indices.insert(index);
 
     if (!status.second)       // not inserted because already existing
       DUNE_THROW(GridError, "Mapper element index is not unique!");
