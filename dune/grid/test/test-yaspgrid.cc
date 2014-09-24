@@ -19,6 +19,8 @@
 #include "checkadaptation.cc"
 #include "checkpartition.cc"
 
+#include "../yaspgrid/backuprestore.hh"
+
 template<int dim, class CC>
 struct YaspFactory
 {};
@@ -116,6 +118,19 @@ void check_yasp() {
   delete grid;
 }
 
+template <int dim, class CC = Dune::EquidistantCoordinates<double,dim> >
+void check_backuprestore()
+{
+   typedef Dune::YaspGrid<dim,CC> Grid;
+   Grid* grid = YaspFactory<dim,CC>::buildGrid();
+   grid->globalRefine(5);
+
+   Dune::BackupRestoreFacility<Grid>::backup(*grid, "testbackup");
+   Grid* restored = Dune::BackupRestoreFacility<Grid>::restore("testbackup");
+   delete restored;
+   delete grid;
+}
+
 int main (int argc , char **argv) {
   try {
     // Initialize MPI, if present
@@ -129,6 +144,8 @@ int main (int argc , char **argv) {
 
     check_yasp<3>();
     check_yasp<3, Dune::TensorProductCoordinates<double,3> >();
+
+    check_backuprestore<2>();
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
