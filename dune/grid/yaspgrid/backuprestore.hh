@@ -15,23 +15,30 @@ namespace Dune
 {
 
   /** \copydoc Dune::BackupRestoreFacility */
-  template<class ctype, int dim>
-  struct BackupRestoreFacility<YaspGrid<dim,EquidistantCoordinates<ctype,dim> > >
+  template<int dim, class CC>
+  struct BackupRestoreFacility<YaspGrid<dim,CC> >
   {
     // type of grid
-    typedef YaspGrid<dim,EquidistantCoordinates<ctype,dim> > Grid;
+    typedef YaspGrid<dim,CC> Grid;
+    typedef typename Grid::ctype ctype;
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
     static void backup ( const Grid &grid, const std::string &filename )
     {
-      std::ofstream file( filename.c_str() );
+      std::ostringstream filename_str;
+      filename_str << filename;
+      if (std::is_same<CC,Dune::TensorProductCoordinates<ctype,dim> >::value)
+        filename_str << grid.comm().rank();
+      std::ofstream file( filename_str.str() );
       if( file )
       {
-        backup(grid,file);
+        // only write something if this is a tensorproduct grid or we are on rank 0.
+        if ((std::is_same<CC,Dune::TensorProductCoordinates<ctype,dim> >::value) || (grid.comm().rank() == 0))
+          backup(grid,file);
         file.close();
       }
       else
-        std::cerr << "ERROR: BackupRestoreFacility::backup: couldn't open file `" << filename << "'" << std::endl;
+        std::cerr << "ERROR: BackupRestoreFacility::backup: couldn't open file `" << filename_str.str() << "'" << std::endl;
     }
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)  */
@@ -49,12 +56,22 @@ namespace Dune
     /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
     static Grid *restore ( const std::string &filename )
     {
-      std::ifstream file( filename.c_str() );
+      std::ostringstream filename_str;
+      filename_str << filename;
+#if HAVE_MPI
+      if (std::is_same<CC,Dune::TensorProductCoordinates<ctype,dim> >::value)
+      {
+        int rank;
+        MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+        filename_str << rank;
+      }
+#endif
+      std::ifstream file(filename_str.str());
       if( file )
         return restore(file);
       else
       {
-        std::cerr << "ERROR: BackupRestoreFacility::restore: couldn't open file `" << filename << "'" << std::endl;
+        std::cerr << "ERROR: BackupRestoreFacility::restore: couldn't open file `" << filename_str.str() << "'" << std::endl;
         return 0;
       }
     }
@@ -89,33 +106,40 @@ namespace Dune
       stream >> physicalOverlapSize;
       std::cout << "Keep physical overlap size: " << physicalOverlapSize << std::endl;
 
-      Dune::FieldVector<ctype,dim> h;
-      stream >> input >> input >> input >> input >> input;
-      for (int i=0; i<dim; i++)
-        stream >> h[i];
-      std::cout << "Meshsize: " << h << std::endl;
+      if (std::is_same<Dune::EquidistantCoordinates<ctype,dim>,CC>::value)
+      {
+        Dune::FieldVector<ctype,dim> h;
+        stream >> input >> input >> input >> input >> input;
+        for (int i=0; i<dim; i++)
+          stream >> h[i];
+        std::cout << "Meshsize: " << h << std::endl;
 
-      Dune::array<int,dim> s;
-      stream >> input;
-      for (int i=0; i<dim; i++)
-        stream >> s[i];
-      std::cout << "Size: " << s << std::endl;
+        Dune::array<int,dim> s;
+        stream >> input;
+        for (int i=0; i<dim; i++)
+          stream >> s[i];
+        std::cout << "Size: " << s << std::endl;
 
-      // the constructor takes the upper right corner...
-      Dune::FieldVector<ctype,dim> length(h);
-      for (int i=0; i<dim; i++)
-        h[i] *= s[i];
+        // the constructor takes the upper right corner...
+        Dune::FieldVector<ctype,dim> length(h);
+        for (int i=0; i<dim; i++)
+          h[i] *= s[i];
 
 #if HAVE_MPI
-      Grid* grid = new Dune::YaspGrid<dim>(MPI_COMM_WORLD,length, s, periodic, overlap);
+        Grid* grid = new Dune::YaspGrid<dim>(MPI_COMM_WORLD,length, s, periodic, overlap);
 #else
-      Grid* grid = new Dune::YaspGrid<dim>(length, s, periodic, overlap);
+        Grid* grid = new Dune::YaspGrid<dim>(length, s, periodic, overlap);
 #endif
 
-      grid->refineOptions(physicalOverlapSize);
-      grid->globalRefine(refinement);
+        grid->refineOptions(physicalOverlapSize);
+        grid->globalRefine(refinement);
 
-      return grid;
+        return grid;
+      }
+      else
+      {
+        // TODO
+      }
     }
   };
 
