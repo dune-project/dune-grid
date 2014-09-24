@@ -101,7 +101,13 @@ namespace Dune
     void print(std::ostream& s) const
     {
       s << "Printing equidistant coordinate container:" << std::endl;
-      s << "Meshsize = " << _h << "  size = " << _s << std::endl;
+      s << "Meshsize: " << _h << std::endl << "Size: ";
+      for (int i=0; i<dim; i++)
+        s << _s[i] << " ";
+      s << std::endl;
+      // the operator<< of std::array is not used on purpose in order to
+      // have the same output format for FieldVector and array. std::array would
+      // be formatted as [x,y].This is important for later parsing.
     }
 
     private:
