@@ -30,13 +30,17 @@ namespace Dune
 
    * \tparam G   A Dune grid type.
    * \tparam IDS An Id set type for the given grid.
+   * \tparam IndexType Number type used for the indices
    */
-  template <typename G, typename IDS>
+  template <typename G, typename IDS, typename IndexType=int>
   class UniversalMapper :
     public Mapper<G,UniversalMapper<G,IDS> >
   {
     typedef typename IDS::IdType IdType;
   public:
+
+    /** \brief Number type used for indices */
+    typedef IndexType Index;
 
     /** @brief Construct mapper from grid and one of its id sets
 
@@ -58,10 +62,10 @@ namespace Dune
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    int map (const EntityType& e) const
+    Index map (const EntityType& e) const
     {
       IdType id = ids.id(e);                                 // get id
-      typename std::map<IdType,int>::iterator it = index.find(id);    // look up in map
+      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
       if (it!=index.end()) return it->second;                // return index if found
       index[id] = n++;                                       // put next index in map
       return n-1;                                            // and return it
@@ -77,10 +81,10 @@ namespace Dune
        \param cc codim of the subentity
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    int map (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc) const
+    Index map (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc) const
     {
       IdType id = ids.subId(e,i,cc);           // get id
-      typename std::map<IdType,int>::iterator it = index.find(id);    // look up in map
+      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
       if (it!=index.end()) return it->second;                // return index if found
       index[id] = n++;                                       // put next index in map
       return n-1;                                            // and return it
@@ -108,10 +112,10 @@ namespace Dune
        \return true if entity is in entity set of the mapper
      */
     template<class EntityType>
-    bool contains (const EntityType& e, int& result) const
+    bool contains (const EntityType& e, Index& result) const
     {
       IdType id = ids.id(e);                                 // get id
-      typename std::map<IdType,int>::iterator it = index.find(id);    // look up in map
+      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
       if (it!=index.end())
       {
         result = it->second;
@@ -129,10 +133,10 @@ namespace Dune
        \param[out] result integer reference where corresponding index is stored if true
        \return true if entity is in entity set of the mapper
      */
-    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, int& result) const
+    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, Index& result) const
     {
       IdType id = ids.subId(e,i,cc);           // get id
-      typename std::map<IdType,int>::iterator it = index.find(id);    // look up in map
+      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
       if (it!=index.end())
       {
         result = it->second;
@@ -159,7 +163,7 @@ namespace Dune
     mutable int n;     // number of data elements required
     const G& g;
     const IDS& ids;
-    mutable std::map<IdType,int> index;
+    mutable std::map<IdType,Index> index;
   };
 
 
