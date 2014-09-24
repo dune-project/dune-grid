@@ -8,9 +8,13 @@
  *
    YaspEntity realizes the concept a mesh entity.
 
-   We have specializations for codim==0 (elements) and
-   codim=dim (vertices).
-   The general version throws a GridError.
+   We have specializations for
+    - codim==0 (elements), because they have an extended interface
+    - codim==dim (vertices), because they use a special constructor
+      of the AxisAlignedCubeGeometry and are the only entities in a
+      globally refined grid, that may also exist on another level.
+
+   The general version implements all other codimensions.
  */
 //========================================================================
 
@@ -19,6 +23,215 @@
 
 namespace Dune {
 
+  namespace Yasp {
+
+#ifndef DOXYGEN
+
+    // table for quick evaluation of binomial coefficients
+    template<int n>
+    struct BinomialTable
+    {
+      static void init()
+      {
+        if (_initialized)
+          return;
+        int offset = 0;
+        for (int d = 0; d <= n; ++d)
+          {
+            _offsets[d] = offset;
+            for (int c = 0; c <= d; ++c, ++offset)
+              _values[offset] = binomial(d,c);
+          }
+        _initialized = true;
+      }
+
+      // evaluation - note that in general d!=n, n is only the
+      // maximum value of d (in our case dimworld)
+      static int evaluate(int d, int c)
+      {
+        return _values[_offsets[d] + c];
+      }
+
+    private:
+      // prevent construction
+      BinomialTable();
+
+      static bool _initialized;
+      static std::array<int,(n+1)*(n+2)/2> _values;
+      static std::array<int,n+1> _offsets;
+
+    public:
+
+      // the actual implementation
+      static int binomial(int d, int c)
+      {
+        long binomial=1;
+        for (int i=d-c+1; i<=d; i++)
+          binomial *= i;
+        for (long i=2; i<=c; i++)
+          binomial /= i;
+        return binomial;
+      }
+    };
+
+    template<int n>
+    bool BinomialTable<n>::_initialized = false;
+    template<int n>
+    std::array<int,(n+1)*(n+2)/2> BinomialTable<n>::_values;
+    template<int n>
+    std::array<int,n+1> BinomialTable<n>::_offsets;
+
+    /** \returns number of subentities of given codim in a cube of dimension dim
+     *  \tparam dimworld the maximum dimension the table holds entries for
+     *  \param d the dimension of the cube
+     *  \param c the codimension we are interested in
+     *  That number is d choose c times 2^c.
+     */
+    template<int dimworld>
+    int subEnt(int d, int c)
+    {
+      return (d < c ? 0 : BinomialTable<dimworld>::evaluate(d,c) << c);
+    }
+
+    // Make a table mapping all subentities of a codim 0 entity to a value.
+    // F is the functor to be evaluated.
+    template<typename F, int dim>
+    struct EntityShiftTable
+    {
+
+      typedef std::bitset<dim> value_type;
+
+      static void init()
+      {
+        if (_initialized)
+          return;
+        F f;
+        int offset = 0;
+        for (int codim = 0; codim <= dim; ++codim)
+          {
+            _offsets[codim] = offset;
+            for (int i = 0; i < subEnt<dim>(dim,codim); ++i, ++offset)
+              _values[offset] = static_cast<unsigned char>(f(i,codim).to_ulong());
+          }
+        _initialized = true;
+      }
+
+      static value_type evaluate(int i, int codim)
+      {
+        return {_values[_offsets[codim] + i]};
+      }
+
+    private:
+
+      // prevent construction
+      EntityShiftTable();
+
+      static bool _initialized;
+      static std::array<int,dim+1> _offsets;
+      static std::array<unsigned char,StaticPower<3,dim>::power> _values;
+
+    };
+
+    template<typename F, int dim>
+    bool EntityShiftTable<F,dim>::_initialized = false;
+    template<typename F, int dim>
+    std::array<int,dim+1> EntityShiftTable<F,dim>::_offsets;
+    template<typename F, int dim>
+    std::array<unsigned char,StaticPower<3,dim>::power> EntityShiftTable<F,dim>::_values;
+
+    // functor for doing the actual entity shift calculation
+    template<int dim>
+    struct calculate_entity_shift
+    {
+      calculate_entity_shift()
+      {
+        BinomialTable<dim>::init();
+      }
+
+      std::bitset<dim> operator()(int index, int cc) const
+      {
+        std::bitset<dim> result(0);
+        for (int d = dim; d>0; d--)
+          {
+            if (cc == d)
+              return result;
+            if (index < subEnt<dim>(d-1,cc))
+              result[d-1]=true;
+            else
+              {
+                index = (index - subEnt<dim>(d-1, cc)) % subEnt<dim>(d-1,cc-1);
+                cc--;
+              }
+          }
+        return result;
+      }
+    };
+
+    /** \returns a shift vector as used by YGridComponent
+     * \param index subentity index
+     * \param cc the codimension
+     * This maps a subentity, given by its codimension and index, to
+     * a bitset which specifies the unit vectors which span the entity.
+     * The implementation unravels the construction of the generic
+     * reference elements.
+     */
+    template<int dim>
+    std::bitset<dim> entityShift(int index, int cc)
+    {
+      return EntityShiftTable<calculate_entity_shift<dim>,dim>::evaluate(index,cc);
+    }
+
+    // functor for doing the actual entity move calculation
+    template<int dim>
+    struct calculate_entity_move
+    {
+
+      calculate_entity_move()
+      {
+        BinomialTable<dim>::init();
+      }
+
+      std::bitset<dim> operator()(int index, int cc) const
+      {
+        std::bitset<dim> result(0);
+        for (int d = dim; d>0; d--)
+          {
+            if (d == cc)
+              {
+                result[d-1] = index & (1<<(d-1));
+                index &= ~(1<<(d-1));
+              }
+            if (index >= subEnt<dim>(d-1,cc))
+              {
+                if ((index - subEnt<dim>(d-1,cc)) / subEnt<dim>(d-1,cc-1) == 1)
+                  {
+                    result[d-1] = true;
+                  }
+                index = (index - subEnt<dim>(d-1, cc)) % subEnt<dim>(d-1,cc-1);
+                cc--;
+              }
+          }
+        return result;
+      }
+
+    };
+
+    /** \returns a bitset telling in which direction to move a cell to get
+     *    the cell a given entity is living on.
+     *  \param index subentity index
+     *  \param cc the codimension
+     *  In Yasp, all entities live on a cell. Its those that lie on the lower
+     *  / left / ... part of the cell.
+     */
+    template<int dim>
+    std::bitset<dim> entityMove(int index, int cc)
+    {
+      return EntityShiftTable<calculate_entity_move<dim>,dim>::evaluate(index,cc);
+    }
+
+#endif //DOXYGEN
+
+  } // namespace Yasp.
 
   template<int codim, int dim, class GridImp>
   class YaspEntity
@@ -28,42 +241,51 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
+    typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
+
+    typedef typename GridImp::template Codim<codim>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<codim>::EntitySeed EntitySeed;
 
     //! level of this element
     int level () const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
+      return _g->level();
     }
 
-    //! index is unique and consecutive per level and codim used for access to degrees of freedom
-    int index () const
+    /** \brief Return the entity seed which contains sufficient information
+     *  to generate the entity again and uses as little memory as possible
+     */
+    EntitySeed seed() const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
+      return EntitySeed(YaspEntitySeed<codim,GridImp>(_g->level(), _it.coord(), _it.which()));
     }
 
     //! geometry of this entity
     Geometry geometry () const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
+      GeometryImpl _geometry(_it.lowerleft(),_it.upperright(),_it.shift());
+      return Geometry(_geometry);
     }
 
     //! return partition type attribute
     PartitionType partitionType () const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
-    }
-
-    const GridImp * yaspgrid() const
-    {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
+      if (_g->interior[codim].inside(_it.coord(),_it.shift()))
+        return InteriorEntity;
+      if (_g->interiorborder[codim].inside(_it.coord(),_it.shift()))
+        return BorderEntity;
+      if (_g->overlap[codim].inside(_it.coord(),_it.shift()))
+        return OverlapEntity;
+      if (_g->overlapfront[codim].inside(_it.coord(),_it.shift()))
+        return FrontEntity;
+      return GhostEntity;
     }
 
     typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename GridImp::YGrid::Iterator I;
     YaspEntity (const GridImp* yg, const YGLI& g, const I& it)
-    {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
-    }
+      : _yg(yg), _it(it), _g(g)
+    {}
 
     // IndexSets needs access to the private index methods
     friend class Dune::YaspIndexSet<GridImp,true>;
@@ -74,34 +296,86 @@ namespace Dune {
     //! globally unique, persistent index
     PersistentIndexType persistentIndex () const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
+      // get size of global grid (in elements)
+      Dune::array<int,dim> size, coord;
+
+      for (int i=0; i<dim; i++)
+      {
+        // correct size according to shift
+        size[i] = _g->mg->levelSize(_g->level(), i);
+        if (!_it.shift(i))
+          size[i]++;
+        coord[i] = _it.coord(i);
+        if (coord[i]<0) coord[i] += size[i];
+        if (coord[i]>=size[i]) coord[i] -= size[i];
+      }
+
+      // encode codim
+      PersistentIndexType id(_it.shift().to_ulong());
+
+      // encode level
+      id = id << yaspgrid_level_bits;
+      id = id+PersistentIndexType(_g->level());
+
+      // encode coordinates
+      for (int i=dim-1; i>=0; i--)
+      {
+        id = id << yaspgrid_dim_bits;
+        id = id+PersistentIndexType(coord[i]);
+      }
+
+      return id;
     }
 
     //! consecutive, codim-wise, level-wise index
     int compressedIndex () const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
+      return _it.superindex();
     }
 
-    //! consecutive, codim-wise, level-wise index
-    int compressedLeafIndex () const
+    //! subentity compressed index
+    int subCompressedIndex (int i, unsigned int cc) const
     {
-      DUNE_THROW(GridError, "YaspEntity not implemented");
-    }
+      // get the shift of the entity and the subentity
+      // the subentity shift is only available in the space spanned by the entity
+      std::bitset<dim> ent_shift = _it->shift();
+      std::bitset<dim-codim> subent_shift = Dune::Yasp::entityShift<dim-codim>(i,cc);
+      std::bitset<dim-codim> subent_move = Dune::Yasp::entityMove<dim-codim>(i,cc);
+      // combine the shifts to get the global shift of the subentity
+      std::bitset<dim> shift,move;
+      for (int i=0,j=0; i<dim; i++)
+        if (ent_shift[i])
+        {
+          shift[i] = subent_shift[j];
+          move[i] = subent_move[j];
+          j++;
+        }
 
-    //! subentity compressed index (not available here)
-    int subCompressedIndex (int, unsigned int ) const
-    {
-      DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
-      return -1;
-    }
+      Dune::array<int, dim> size = _g->mg->levelSize(_g->level());
+      Dune::array<int, dim> coord = _it.coord();
+      for (int j=0; j<dim; j++)
+      {
+        if (!shift[j])
+          size[j]++;
+        if (move[j])
+          coord[j]++;
 
-    //! subentity compressed leaf index (not available here)
-    int subCompressedLeafIndex (int, unsigned int ) const
-    {
-      DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
-      return -1;
+        // do correction for periodic boundaries.
+        if (coord[j]<0) coord[j] += size[j];
+        if (coord[j]>=size[j]) coord[j] -= size[j];
+      }
+
+      int which = _g->overlapfront[cc].shiftmapping(shift);
+      return _g->overlapfront[cc].superindex(coord,which);
     }
+    public:
+    const I& transformingsubiterator() const { return _it; }
+    const YGLI& gridlevel() const { return _g; }
+    const GridImp * yaspgrid() const { return _yg; }
+    protected:
+    const GridImp * _yg;          // access to YaspGrid
+    const I& _it;               // position in the grid level
+    const YGLI& _g;               // access to grid level
   };
 
 
@@ -150,14 +424,6 @@ namespace Dune {
     //! level of this element
     int level () const { return _g->level(); }
 
-    //! index is unique and consecutive per level
-    int index () const { return _it.superindex(); } // superindex works also for iteration over subgrids
-
-    //! globalIndex is unique and consecutive per global level
-    int globalIndex () const {
-      return _g.cell_global().index(_it.coord());
-    }
-
     /** \brief Return the entity seed which contains sufficient information
      *  to generate the entity again and uses as little memory as possible
      */
@@ -168,19 +434,18 @@ namespace Dune {
     //! return partition type attribute
     PartitionType partitionType () const
     {
-      if (_g->cell_interior.inside(_it.coord()))
+      if (_g->interior[0].inside(_it.coord(),_it.shift()))
         return InteriorEntity;
-      if (_g->cell_overlap.inside(_it.coord()))
+      if (_g->overlap[0].inside(_it.coord(),_it.shift()))
         return OverlapEntity;
-      DUNE_THROW(GridError, "Impossible GhostEntity " << _it.coord() << "\t"
-                                                      << _g->cell_interior.origin() << "/" << _g->cell_interior.size());
+      DUNE_THROW(GridError, "Impossible GhostEntity");
       return GhostEntity;
     }
 
     //! geometry of this entity
     Geometry geometry () const {
       // the element geometry
-      GeometryImpl _geometry(_it.position(),_it.meshsize());
+      GeometryImpl _geometry(_it.lowerleft(),_it.upperright());
       return Geometry( _geometry );
     }
 
@@ -190,17 +455,7 @@ namespace Dune {
      */
     template<int cc> int count () const
     {
-      int n = dim;
-      int k = dim-cc;
-
-      // binomial: n over k
-      int binomial=1;
-      for (int i=n-k+1; i<=n; i++)
-        binomial *= i;
-      for (long i=2; i<=k; i++)
-        binomial /= i;
-
-      return binomial<<cc;
+      return Dune::Yasp::subEnt<dim>(dim,cc);
     }
 
     /*! Return number of subentities with codimension cc.
@@ -209,17 +464,7 @@ namespace Dune {
      */
     unsigned int subEntities (unsigned int codim) const
     {
-      int n = dim;
-      int k = dim-codim;
-
-      // binomial: n over k
-      int binomial=1;
-      for (int i=n-k+1; i<=n; i++)
-        binomial *= i;
-      for (long i=2; i<=k; i++)
-        binomial /= i;
-
-      return binomial<<codim;
+      return Dune::Yasp::subEnt<dim>(dim,codim);
     }
 
     /*! Intra-element access to subentities of codimension cc > codim.
@@ -227,24 +472,17 @@ namespace Dune {
     template<int cc>
     typename Codim<cc>::EntityPointer subEntity (int i) const
     {
-      static_assert((cc == dim || cc == 0),
-                    "YaspGrid only supports Entities with codim=dim and codim=0");
-      // coordinates of the cell == coordinates of lower left corner
-      if (cc==dim)
-      {
-        iTupel coord = _it.coord();
+      // calculate move bitset
+      std::bitset<dim> move = Dune::Yasp::entityMove<dim>(i,cc);
 
-        // get corner from there
-        for (int k=0; k<dim; k++)
-          if (i&(1<<k)) (coord[k])++;
+      // get the coordinate and modify it
+      iTupel coord = _it.coord();
+      for (int j=0; j<dim; j++)
+        if (move[j])
+          coord[j]++;
 
-        return YaspEntityPointer<cc,GridImp>(_yg,_g,_g->vertex_overlapfront.begin(coord));
-      }
-      if (cc==0)
-      {
-        return YaspEntityPointer<cc,GridImp>(_yg,_g,_it);
-      }
-      DUNE_THROW(GridError, "codim " << cc << " (dim=" << dim << ") not (yet) implemented");
+      int which = _g->overlapfront[cc].shiftmapping(Dune::Yasp::entityShift<dim>(i,cc));
+      return YaspEntityPointer<cc,GridImp>(_yg,_g,_g->overlapfront[cc].begin(coord, which));
     }
 
     //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
@@ -264,7 +502,7 @@ namespace Dune {
       // get coordinates on next coarser level
       for (int k=0; k<dim; k++) coord[k] = coord[k]/2;
 
-      return YaspEntityPointer<0,GridImp>(_yg,cg,cg->cell_overlap.begin(coord));
+      return YaspEntityPointer<0,GridImp>(_yg,cg,cg->overlap[0].begin(coord));
     }
 
     //! returns true if father entity exists
@@ -278,13 +516,18 @@ namespace Dune {
     LocalGeometry geometryInFather () const
     {
       // configure one of the 2^dim transformations
-      FieldVector<ctype,dim> midpoint;
-      FieldVector<ctype,dim> extension(0.5);
+      FieldVector<ctype,dim> ll(0.0),ur(0.5);
 
       for (int k=0; k<dim; k++)
-        midpoint[k] = (_it.coord(k)%2) ? 0.75 : 0.25;
+      {
+        if (_it.coord(k)%2)
+        {
+          ll[k] = 0.5;
+          ur[k] = 1.0;
+        }
+      }
 
-      return LocalGeometry( YaspGeometry<dim,dim,GridImp>(midpoint,extension) );
+      return LocalGeometry( YaspGeometry<dim,dim,GridImp>(ll,ur) );
     }
 
     const I& transformingsubiterator () const
@@ -314,7 +557,6 @@ namespace Dune {
     /**\brief Returns true, if entity might disappear during the next call to adapt()
      */
     bool mightVanish () const { return false; }
-    // { return _yg->adaptRefCount < 0 && _g.mg()->maxlevel() < _g.level() - _yg->adaptRefCount; }
 
     //! returns intersection iterator for first intersection
     IntersectionIterator ibegin () const
@@ -378,7 +620,7 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get size of global grid
-      const iTupel& size =  _g->mg->template levelSize<0>(_g->level());
+      const iTupel& size =  _g->mg->levelSize(_g->level());
 
       // get coordinate correction for periodic boundaries
       int coord[dim];
@@ -390,7 +632,7 @@ namespace Dune {
       }
 
       // encode codim
-      PersistentIndexType id(0);
+      PersistentIndexType id(_it.shift().to_ulong());
 
       // encode level
       id = id << yaspgrid_level_bits;
@@ -413,348 +655,83 @@ namespace Dune {
       return _it.superindex();
     }
 
-    //! consecutive, codim-wise, level-wise index
-    int compressedLeafIndex () const
-    {
-      return _it.superindex();
-    }
-
     //! subentity persistent index
     PersistentIndexType subPersistentIndex (int i, int cc) const
     {
-      if (cc==0)
-        return persistentIndex();
+      // calculate shift and move bitsets
+      std::bitset<dim> shift = Dune::Yasp::entityShift<dim>(i,cc);
+      std::bitset<dim> move = Dune::Yasp::entityMove<dim>(i,cc);
 
-      // get position of cell, note that global origin is zero
-      // adjust for periodic boundaries
-      int coord[dim];
-      for (int k=0; k<dim; k++)
+      int trailing = (cc == dim) ? 1000 : 0;
+
+      Dune::array<int,dim> size = _g->mg->levelSize(_g->level());
+      Dune::array<int, dim> coord = _it.coord();
+      for (int j=0; j<dim; j++)
       {
-        coord[k] = _it.coord(k);
-        if (coord[k]<0)
-          coord[k] += _g->mg->template levelSize<0>(_g->level(), k);
-        if (coord[k]>=_g->mg->template levelSize<0>(_g->level(),k))
-          coord[k] -= _g->mg->template levelSize<0>(_g->level(),k);
-      }
+        // correct size according to shift
+        if (!shift[j])
+          size[j]++;
 
-      if (cc==dim)
-      {
-        // transform to vertex coordinates
-        for (int k=0; k<dim; k++)
-          if (i&(1<<k)) (coord[k])++;
+        // move the coordinates to the cell on which the entity lives
+        if (move[j])
+          coord[j]++;
 
-        // determine min number of trailing zeroes
-        int trailing = 1000;
-        for (int i=0; i<dim; i++)
+        // do correction for periodic boundaries.
+        if (coord[j]<0) coord[j] += size[j];
+        if (coord[j]>=size[j]) coord[j] -= size[j];
+
+        // in the codim==dim case, count trailing zeroes.
+        if (cc == dim)
         {
-          // count trailing zeros
-          int zeros = 0;
-          for (int j=0; j<_g->level(); j++)
-            if (coord[i]&(1<<j))
+          int zeroes = 0;
+          for (int k=0; k<_g->level(); k++)
+            if (coord[j] & (1<<k))
               break;
             else
-              zeros++;
-          trailing = std::min(trailing,zeros);
+              zeroes++;
+          trailing = std::min(trailing,zeroes);
         }
-
-        // determine the level of this vertex
-        int level = _g->level()-trailing;
-
-        // encode codim
-        PersistentIndexType id(dim);
-
-        // encode level
-        id = id << yaspgrid_level_bits;
-        id = id+PersistentIndexType(level);
-
-        // encode coordinates
-        for (int i=dim-1; i>=0; i--)
-        {
-          id = id << yaspgrid_dim_bits;
-          id = id+PersistentIndexType(coord[i]>>trailing);
-        }
-
-        return id;
       }
 
-      if (cc==1) // faces, i.e. for dim=2 codim=1 is treated as a face
+      // encode codim
+      PersistentIndexType id(shift.to_ulong());
+
+      // encode level
+      id = id << yaspgrid_level_bits;
+      id = id+PersistentIndexType(_g->level()-trailing);
+
+      // encode coordinates
+      for (int j=dim-1; j>=0; j--)
       {
-        // Idea: Use the doubled grid to assign coordinates to faces
-
-        // ivar is the direction that varies
-        int ivar=i/2;
-
-        // compute position from cell position
-        for (int k=0; k<dim; k++)
-          coord[k] = coord[k]*2 + 1; // the doubled grid
-        if (i%2)
-          coord[ivar] += 1;
-        else
-          coord[ivar] -= 1;
-
-        // encode codim
-        PersistentIndexType id(1);
-
-        // encode level
-        id = id << yaspgrid_level_bits;
-        id = id+PersistentIndexType(_g->level());
-
-        // encode coordinates
-        for (int i=dim-1; i>=0; i--)
-        {
-          id = id << yaspgrid_dim_bits;
-          id = id+PersistentIndexType(coord[i]);
-        }
-
-        return id;
+        id = id << yaspgrid_dim_bits;
+        id = id+PersistentIndexType(coord[j]>>trailing);
       }
 
-      // map to old numbering
-      static unsigned int edge[ 12 ] = { 0, 1, 2, 3, 4, 5, 8, 9, 6, 7, 10, 11 };
-      i = edge[i];
-
-      if (cc==dim-1) // edges, exist only for dim>2
-      {
-        // Idea: direction i is fixed, all others are vary, i.e. 2^(dim-1) possibilities per direction
-
-        // number of entities per direction
-        int m=1<<(dim-1);
-
-        // ifix is the direction that is fixed
-        int ifix=(dim-1)-(i/m);
-
-        // compute position from cell position
-        int bit=1;
-        for (int k=0; k<dim; k++)
-        {
-          coord[k] = coord[k]*2+1;   // cell position in doubled grid
-          if (k==ifix) continue;
-          if ((i%m)&bit) coord[k] += 1;else coord[k] -= 1;
-          bit *= 2;
-        }
-
-        // encode codim
-        PersistentIndexType id(dim-1);
-
-        // encode level
-        id = id << yaspgrid_level_bits;
-        id = id+PersistentIndexType(_g->level());
-
-        // encode coordinates
-        for (int i=dim-1; i>=0; i--)
-        {
-          id = id << yaspgrid_dim_bits;
-          id = id+PersistentIndexType(coord[i]);
-        }
-
-        return id;
-      }
-
-      DUNE_THROW(GridError, "codim " << cc << " (dim=" << dim << ") not (yet) implemented");
+      return id;
     }
 
     //! subentity compressed index
     int subCompressedIndex (int i, int cc) const
     {
-      if (cc==0)
-        return compressedIndex();
+      // get shift and move of the subentity in question
+      std::bitset<dim> shift = Dune::Yasp::entityShift<dim>(i,cc);
+      std::bitset<dim> move = Dune::Yasp::entityMove<dim>(i,cc);
 
-      // get cell position relative to origin of local cell grid
-      iTupel coord;
-      for (int k=0; k<dim; ++k)
-        coord[k] = _it.coord(k)-_g->cell_overlap.origin(k);
-
-      if (cc==dim) // vertices
+      Dune::array<int,dim> size = _g->mg->levelSize(_g->level());
+      Dune::array<int, dim> coord = _it.coord();
+      for (int j=0; j<dim; j++)
       {
-        // transform cell coordinate to corner coordinate
-        for (int k=0; k<dim; k++)
-          if (i&(1<<k)) (coord[k])++;
 
-        // do lexicographic numbering
-        int index = coord[dim-1];
-        for (int k=dim-2; k>=0; --k)
-          index = (index*(_g->cell_overlap.size(k)+1))+coord[k];
-        return index;
+        size[j] += !shift[j];
+        coord[j] += move[j];
+
+        // do correction for periodic boundaries.
+        if (coord[j]<0) coord[j] += size[j];
+        if (coord[j]>=size[j]) coord[j] -= size[j];
       }
 
-      if (cc==1) // faces, i.e. for dim=2 codim=1 is treated as a face
-      {
-        // Idea: direction ivar varies, all others are fixed, i.e. 2 possibilities per direction
-
-        // ivar is the direction that varies
-        int ivar=i/2;
-
-        // compute position from cell position
-        if (i%2) coord[ivar] += 1;
-
-        // do lexicographic numbering
-        int index = coord[dim-1];
-        for (int k=dim-2; k>=0; --k)
-          if (k==ivar)
-            index = (index*(_g->cell_overlap.size(k)+1))+coord[k]; // one more
-          else
-            index = (index*(_g->cell_overlap.size(k)))+coord[k];
-
-        // add size of all subsets for smaller directions
-        for (int j=0; j<ivar; j++)
-        {
-          int n=_g->cell_overlap.size(j)+1;
-          for (int l=0; l<dim; l++)
-            if (l!=j) n *= _g->cell_overlap.size(l);
-          index += n;
-        }
-
-        return index;
-      }
-
-      // map to old numbering
-      static unsigned int edge[ 12 ] = { 0, 1, 2, 3, 4, 5, 8, 9, 6, 7, 10, 11 };
-      i = edge[i];
-
-      if (cc==dim-1) // edges, exist only for dim>2
-      {
-        // Idea: direction i is fixed, all others are vary, i.e. 2^(dim-1) possibilities per direction
-
-        // number of entities per direction
-        int m=1<<(dim-1);
-
-        // ifix is the direction that is fixed
-        int ifix=(dim-1)-(i/m);
-
-        // compute position from cell position
-        int bit=1;
-        for (int k=0; k<dim; k++)
-        {
-          if (k==ifix) continue;
-          if ((i%m)&bit) coord[k] += 1;
-          bit *= 2;
-        }
-
-        // do lexicographic numbering
-        int index = coord[dim-1];
-        for (int k=dim-2; k>=0; --k)
-          if (k!=ifix)
-            index = (index*(_g->cell_overlap.size(k)+1))+coord[k]; // one more
-          else
-            index = (index*(_g->cell_overlap.size(k)))+coord[k];
-
-        // add size of all subsets for smaller directions
-        for (int j=dim-1; j>ifix; j--)
-        {
-          int n=_g->cell_overlap.size(j);
-          for (int l=0; l<dim; l++)
-            if (l!=j) n *= _g->cell_overlap.size(l)+1;
-          index += n;
-        }
-
-        return index;
-      }
-
-      DUNE_THROW(GridError, "codim " << cc << " (dim=" << dim << ") not (yet) implemented");
-    }
-
-    //! subentity compressed index
-    int subCompressedLeafIndex (int i, int cc) const
-    {
-      if (cc==0)
-        return compressedIndex();
-
-      // get cell position relative to origin of local cell grid
-      iTupel coord;
-      for (int k=0; k<dim; ++k)
-        coord[k] = _it.coord(k)-_g.cell_overlap().origin(k);
-
-      if (cc==dim) // vertices
-      {
-        // transform cell coordinate to corner coordinate
-        for (int k=0; k<dim; k++)
-          if (i&(1<<k)) (coord[k])++;
-
-        // move coordinates up to maxlevel
-        for (int k=0; k<dim; k++)
-          coord[k] = coord[k]<<(_g.mg()->maxlevel()-_g.level());
-
-        // do lexicographic numbering
-        int index = coord[dim-1];
-        for (int k=dim-2; k>=0; --k)
-          index = (index*(_g.mg()->rbegin().cell_overlap().size(k)+1))+coord[k];
-        return index;
-      }
-
-      if (cc==1) // faces, i.e. for dim=2 codim=1 is treated as a face
-      {
-        // Idea: direction ivar varies, all others are fixed, i.e. 2 possibilities per direction
-
-        // ivar is the direction that varies
-        int ivar=i/2;
-
-        // compute position from cell position
-        if (i%2) coord[ivar] += 1;
-
-        // do lexicographic numbering
-        int index = coord[dim-1];
-        for (int k=dim-2; k>=0; --k)
-          if (k==ivar)
-            index = (index*(_g.cell_overlap().size(k)+1))+coord[k]; // one more
-          else
-            index = (index*(_g.cell_overlap().size(k)))+coord[k];
-
-        // add size of all subsets for smaller directions
-        for (int j=0; j<ivar; j++)
-        {
-          int n=_g.cell_overlap().size(j)+1;
-          for (int l=0; l<dim; l++)
-            if (l!=j) n *= _g.cell_overlap().size(l);
-          index += n;
-        }
-
-        return index;
-      }
-
-      // map to old numbering
-      static unsigned int edge[ 12 ] = { 0, 1, 2, 3, 4, 5, 8, 9, 6, 7, 10, 11 };
-      i = edge[i];
-
-      if (cc==dim-1) // edges, exist only for dim>2
-      {
-        // Idea: direction i is fixed, all others are vary, i.e. 2^(dim-1) possibilities per direction
-
-        // number of entities per direction
-        int m=1<<(dim-1);
-
-        // ifix is the direction that is fixed
-        int ifix=(dim-1)-(i/m);
-
-        // compute position from cell position
-        int bit=1;
-        for (int k=0; k<dim; k++)
-        {
-          if (k==ifix) continue;
-          if ((i%m)&bit) coord[k] += 1;
-          bit *= 2;
-        }
-
-        // do lexicographic numbering
-        int index = coord[dim-1];
-        for (int k=dim-2; k>=0; --k)
-          if (k!=ifix)
-            index = (index*(_g.cell_overlap().size(k)+1))+coord[k]; // one more
-          else
-            index = (index*(_g.cell_overlap().size(k)))+coord[k];
-
-        // add size of all subsets for smaller directions
-        for (int j=dim-1; j>ifix; j--)
-        {
-          int n=_g.cell_overlap().size(j);
-          for (int l=0; l<dim; l++)
-            if (l!=j) n *= _g.cell_overlap().size(l)+1;
-          index += n;
-        }
-
-        return index;
-      }
-
-      DUNE_THROW(GridError, "codim " << cc << " (dim=" << dim << ") not (yet) implemented");
+      int which = _g->overlapfront[cc].shiftmapping(shift);
+      return _g->overlapfront[cc].superindex(coord,which);
     }
 
     const GridImp * _yg;    // access to YaspGrid
@@ -803,35 +780,29 @@ namespace Dune {
     //! level of this element
     int level () const {return _g->level();}
 
-    //! index is unique and consecutive per level
-    int index () const {return _it.superindex();}
-
-    //! globally unique, persistent index
-    int globalIndex () const { return _g.cell_global().index(_it.coord()); }
-
     /** \brief Return the entity seed which contains sufficient information
      *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const {
-      return EntitySeed(YaspEntitySeed<dim,GridImp>(_g->level(), _it.coord()));
+      return EntitySeed(YaspEntitySeed<dim,GridImp>(_g->level(), _it.coord(), _it.which()));
     }
 
     //! geometry of this entity
     Geometry geometry () const {
-      GeometryImpl _geometry(_it.position());
+      GeometryImpl _geometry(_it.lowerleft());
       return Geometry( _geometry );
     }
 
     //! return partition type attribute
     PartitionType partitionType () const
     {
-      if (_g->vertex_interior.inside(_it.coord()))
+      if (_g->interior[dim].inside(_it.coord(),_it.shift()))
         return InteriorEntity;
-      if (_g->vertex_interiorborder.inside(_it.coord()))
+      if (_g->interiorborder[dim].inside(_it.coord(),_it.shift()))
         return BorderEntity;
-      if (_g->vertex_overlap.inside(_it.coord()))
+      if (_g->overlap[dim].inside(_it.coord(),_it.shift()))
         return OverlapEntity;
-      if (_g->vertex_overlapfront.inside(_it.coord()))
+      if (_g->overlapfront[dim].inside(_it.coord(),_it.shift()))
         return FrontEntity;
       return GhostEntity;
     }
@@ -840,12 +811,6 @@ namespace Dune {
     int subCompressedIndex (int, unsigned int ) const
     {
       return compressedIndex();
-    }
-
-    //! subentity compressed leaf index simply returns compressedLeafIndex
-    int subCompressedLeafIndex (int, unsigned int ) const
-    {
-      return compressedLeafIndex();
     }
 
   private:
@@ -858,13 +823,15 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get coordinate and size of global grid
-      iTupel size =  _g->mg->template levelSize<dim>(_g->level());
+      iTupel size =  _g->mg->levelSize(_g->level());
 
       int coord[dim];
 
       // correction for periodic boundaries
       for (int i=0; i<dim; i++)
       {
+        // we have vertices, add 1 size to all directions
+        size[i]++;
         coord[i] = _it.coord(i);
         if (coord[i]<0)
           coord[i] += size[i];
@@ -889,8 +856,8 @@ namespace Dune {
       // determine the level of this vertex
       int level = _g->level()-trailing;
 
-      // encode codim
-      PersistentIndexType id(dim);
+      // encode codim: shift vector of vertices is 0.
+      PersistentIndexType id(0);
 
       // encode level
       id = id << yaspgrid_level_bits;
@@ -909,26 +876,6 @@ namespace Dune {
     //! consecutive, codim-wise, level-wise index
     int compressedIndex () const { return _it.superindex();}
 
-    //! consecutive, codim-wise, level-wise index
-    int compressedLeafIndex () const
-    {
-      if (_g.level()==_g.mg()->maxlevel())
-        return _it.superindex();
-
-      // not on leaf level, interpolate to finest grid
-      int coord[dim];
-      for (int i=0; i<dim; i++) coord[i] = _it.coord(i)-(_g).vertex_overlap().origin(i);
-
-      // move coordinates up to maxlevel (multiply by 2 for each level
-      for (int k=0; k<dim; k++)
-        coord[k] = coord[k]*(1<<(_g.mg()->maxlevel()-_g.level()));
-
-      // do lexicographic numbering
-      int index = coord[dim-1];
-      for (int k=dim-2; k>=0; --k)
-        index = (index*(_g.mg()->rbegin().cell_overlap().size(k)+1))+coord[k];
-      return index;
-    }
 
   public:
     const I& transformingsubiterator() const { return _it; }

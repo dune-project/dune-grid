@@ -35,34 +35,19 @@ namespace Dune {
     YaspEntityPointer (const GridImp * yg, const YGLI & g, const I& it)
       : _g(g), _it(it),
         _entity(MakeableInterfaceObject<Entity>(YaspEntity<codim,dim,GridImp>(yg, _g,_it)))
-    {
-      if (codim>0 && codim<dim)
-      {
-        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
-      }
-    }
+    {}
 
     //! copy constructor
     YaspEntityPointer (const YaspEntityImp& entity)
       : _g(entity.gridlevel()),
         _it(entity.transformingsubiterator()),
         _entity(MakeableInterfaceObject<Entity>(YaspEntity<codim,dim,GridImp>(entity.yaspgrid(), _g,_it)))
-    {
-      if (codim>0 && codim<dim)
-      {
-        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
-      }
-    }
+    {}
 
     //! copy constructor
     YaspEntityPointer (const YaspEntityPointer& rhs)
       : _g(rhs._g), _it(rhs._it), _entity(MakeableInterfaceObject<Entity>(YaspEntity<codim,dim,GridImp>(GridImp::getRealImplementation(rhs._entity).yaspgrid(),_g,_it)))
-    {
-      if (codim>0 && codim<dim)
-      {
-        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
-      }
-    }
+    {}
 
     //! equality
     bool equals (const YaspEntityPointer& rhs) const
