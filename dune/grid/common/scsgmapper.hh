@@ -36,9 +36,12 @@ namespace Dune
    */
   template <typename GV, int c>
   class SingleCodimSingleGeomTypeMapper :
-    public Mapper<typename GV::Grid,SingleCodimSingleGeomTypeMapper<GV,c> >
+    public Mapper<typename GV::Grid,SingleCodimSingleGeomTypeMapper<GV,c>, typename GV::IndexSet::IndexType >
   {
   public:
+
+    /** \brief Number type used for indices */
+    typedef typename GV::IndexSet::IndexType Index;
 
     /** @brief Construct mapper from grid and one of its index sets.
 
@@ -52,7 +55,7 @@ namespace Dune
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    int map (const EntityType& e) const;
+    Index map (const EntityType& e) const;
 
     /** @brief Map subentity of codim 0 entity to array index.
 
@@ -61,7 +64,7 @@ namespace Dune
        \param codim Codimension of the subentity of e
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    int map (const typename GV::template Codim<0>::Entity& e,
+    Index map (const typename GV::template Codim<0>::Entity& e,
              int i, unsigned int codim) const;
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -81,7 +84,7 @@ namespace Dune
        \return true if entity is in entity set of the mapper
      */
     template<class EntityType>
-    bool contains (const EntityType& e, int& result) const;
+    bool contains (const EntityType& e, Index& result) const;
 
     /** @brief Returns true if the entity is contained in the index set
 
@@ -91,7 +94,7 @@ namespace Dune
        \param result integer reference where corresponding index is  stored if true
        \return true if entity is in entity set of the mapper
      */
-    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, int& result) const;
+    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, Index& result) const;
 
     /** @brief Recalculates map after mesh adaptation
      */
@@ -116,7 +119,7 @@ namespace Dune
 
   template <typename GV, int c>
   template<class EntityType>
-  inline int SingleCodimSingleGeomTypeMapper<GV,c>::map (const EntityType& e) const
+  inline typename SingleCodimSingleGeomTypeMapper<GV,c>::Index SingleCodimSingleGeomTypeMapper<GV,c>::map (const EntityType& e) const
   {
     enum { cc = EntityType::codimension };
     static_assert(cc == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
@@ -124,7 +127,7 @@ namespace Dune
   }
 
   template <typename GV, int c>
-  inline int SingleCodimSingleGeomTypeMapper<GV,c>::map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
+  inline typename SingleCodimSingleGeomTypeMapper<GV,c>::Index SingleCodimSingleGeomTypeMapper<GV,c>::map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
   {
     if (codim != c)
       DUNE_THROW(GridError, "Id of wrong codim requested from SingleCodimSingleGeomTypeMapper");
@@ -139,14 +142,14 @@ namespace Dune
 
   template <typename GV, int c>
   template<class EntityType>
-  inline bool SingleCodimSingleGeomTypeMapper<GV,c>::contains (const EntityType& e, int& result) const
+  inline bool SingleCodimSingleGeomTypeMapper<GV,c>::contains (const EntityType& e, Index& result) const
   {
     result = map(e);
     return true;
   }
 
   template <typename GV, int c>
-  inline bool SingleCodimSingleGeomTypeMapper<GV,c>::contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, int& result) const
+  inline bool SingleCodimSingleGeomTypeMapper<GV,c>::contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, Index& result) const
   {
     result = this->map(e,i,cc);
     return true;

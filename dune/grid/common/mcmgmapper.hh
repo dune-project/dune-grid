@@ -100,9 +100,12 @@ namespace Dune
    */
   template <typename GV, template<int> class Layout>
   class MultipleCodimMultipleGeomTypeMapper :
-    public Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,Layout> >
+    public Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,Layout>, typename GV::IndexSet::IndexType >
   {
   public:
+
+    /** \brief Number type used for indices */
+    typedef typename GV::IndexSet::IndexType Index;
 
     /** @brief Construct mapper from grid and one of its index sets.
      *
@@ -141,7 +144,7 @@ namespace Dune
      * \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    int map (const EntityType& e) const
+    Index map (const EntityType& e) const
     {
       const GeometryType gt = e.type();
       assert(layout.contains(gt));
@@ -155,7 +158,7 @@ namespace Dune
        \param codim Codimension of the subentity
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    int map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    Index map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
       GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
       assert(layout.contains(gt));
