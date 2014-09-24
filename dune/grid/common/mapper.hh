@@ -98,10 +98,8 @@ namespace Dune
      This class template is used as a base class for all mapper implementations.
      It uses the Barton-Nackman trick to ensure conformity to the interface.
 
-     Template parameters are:
-
-     - <tt>G</tt> Type that is a model of Dune::Grid.
-     - <tt>MapperImp</tt> Type that is a model of Dune::Mapper.
+     \tparam G Type that is a model of Dune::Grid
+     \tparam MapperImp Type that is a model of Dune::Mapper
 
    */
   template <typename G, typename MapperImp>
