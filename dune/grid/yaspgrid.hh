@@ -258,6 +258,17 @@ namespace Dune {
       return s;
     }
 
+    //! return whether the grid is periodic in direction i
+    bool isPeriodic(int i) const
+    {
+      return _periodic[i];
+    }
+
+    bool getRefineOption() const
+    {
+      return keep_ovlp;
+    }
+
     //! Iterator over the grid levels
     typedef typename ReservedVector<YGridLevel,32>::const_iterator YGridLevelIterator;
 
