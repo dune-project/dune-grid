@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <strstream>
+#include <sstream>
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
@@ -107,7 +107,7 @@ void check_yasp() {
   checkPartitionType( grid->leafGridView() );
 
   std::ofstream file;
-  std::ostrstream filename;
+  std::ostringstream filename;
   filename << "output" <<grid->comm().rank();
   file.open(filename.str());
   file << *grid << std::endl;
