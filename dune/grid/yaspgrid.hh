@@ -15,6 +15,7 @@
 typedef unsigned char uint8_t;
 #endif
 
+#include <dune/grid/common/backuprestore.hh>
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/common/capabilities.hh> // the capabilities
 #include <dune/common/power.hh>
@@ -991,6 +992,65 @@ namespace Dune {
     }
 
   private:
+
+    /** @brief Constructor for a tensorproduct YaspGrid with only coordinate
+     *         information on this processor
+     *  @param comm MPI communicator where this mesh is distributed to
+     *  @param coords coordinate vectors to be used for coarse grid
+     *  @param periodic tells if direction is periodic or not
+     *  @param overlap size of overlap on coarsest grid (same in all directions)
+     *  @param offset the index offset in a global coordinate vector
+     *  @param coarseSize the coarse size of the global grid
+     *  @param lb pointer to an overloaded YLoadBalance instance
+     *
+     *  @warning The construction of overlapping coordinate ranges is
+     *           an error-prone procedure. For this reason, it is kept private.
+     *           You can safely use it through BackupRestoreFacility. All other
+     *           use involves some serious pitfalls.
+     */
+    YaspGrid (Dune::MPIHelper::MPICommunicator comm,
+              Dune::array<std::vector<ctype>, dim> coords,
+              std::bitset<dim> periodic,
+              int overlap,
+              Dune::array<int,dim> offset,
+              Dune::array<int,dim> coarseSize,
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
+    #if HAVE_MPI
+    : ccobj(comm), _torus(comm,tag,coarseSize,lb),
+    #else
+    : _torus(tag,coarseSize,lb),
+    #endif
+    leafIndexSet_(*this),
+    _periodic(std::bitset<dim>(0)),
+    _overlap(overlap),
+    _coarseSize(coarseSize),
+    keep_ovlp(true),
+    adaptRefCount(0), adaptActive(false)
+    {
+      // check whether YaspGrid has been given the correct template parameter
+      static_assert(is_same<CoordCont,TensorProductCoordinates<ctype,dim> >::value,
+                  "YaspGrid coordinate container template parameter and given constructor values do not match!");
+
+      if (!Dune::Yasp::checkIfMonotonous(coords))
+        DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
+
+      _levels.resize(1);
+      TensorProductCoordinates<ctype,dim> cc(coords, offset);
+
+      // modify offset to point to the origin of the interior.
+      for (int i=0; i<dim; i++)
+        if ((periodic[i]) || (offset[i] > 0))
+          offset[i] += overlap;
+
+      // add level
+      makelevel(cc,periodic,offset,overlap);
+
+      init();
+    }
+
+    // the backup restore facility needs to be able to use above constructor
+    friend class BackupRestoreFacility<YaspGrid<dim,CoordCont> >;
+
     // do not copy this class
     YaspGrid(const YaspGrid&);
 
