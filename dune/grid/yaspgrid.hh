@@ -931,9 +931,9 @@ namespace Dune {
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
-      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
+      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),lb),
 #else
-      : _torus(tag,Dune::Yasp::sizeArray(coords),defaultLoadbalancer()),
+      : _torus(tag,Dune::Yasp::sizeArray(coords),lb),
 #endif
         leafIndexSet_(*this),
         _periodic(std::bitset<dim>(0)),
@@ -963,9 +963,9 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
 #if HAVE_MPI
       : ccobj(MPI_COMM_SELF),
-      _torus(MPI_COMM_SELF,tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
+      _torus(MPI_COMM_SELF,tag,Dune::Yasp::sizeArray<dim>(coords),lb),
 #else
-      : _torus(tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
+      : _torus(tag,Dune::Yasp::sizeArray<dim>(coords),lb),
 #endif
         leafIndexSet_(*this),
         _periodic(std::bitset<dim>(0)),
