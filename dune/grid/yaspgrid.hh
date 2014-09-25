@@ -695,7 +695,7 @@ namespace Dune {
     typedef YaspGlobalIdSet<YaspGrid<dim, CoordCont> > GlobalIdSetType;
 
     //! correctly initialize a tensorproduct Yaspgrid from information given in the constructor
-    void TensorProductSetup(Dune::array<std::vector<ctype>,dim> coords, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
+    void TensorProductSetup(Dune::array<std::vector<ctype>,dim> coords, std::bitset<dim> periodic, int overlap)
     {
       _periodic = periodic;
       _levels.resize(1);
@@ -771,7 +771,7 @@ namespace Dune {
     }
 
     //! correctly initialize an equidistant grid from the information given in the constructor
-    void EquidistantSetup(fTupel L, iTupel s, std::bitset<dim> periodic, int overlap, const YLoadBalance<dim>* lb = defaultLoadbalancer())
+    void EquidistantSetup(fTupel L, iTupel s, std::bitset<dim> periodic, int overlap)
     {
       _periodic = periodic;
       _levels.resize(1);
@@ -834,7 +834,7 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      EquidistantSetup(L,s,periodic,overlap,lb);
+      EquidistantSetup(L,s,periodic,overlap);
       init();
     }
 
@@ -865,7 +865,7 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      EquidistantSetup(L,s,periodic,overlap,lb);
+      EquidistantSetup(L,s,periodic,overlap);
       init();
     }
 
@@ -889,7 +889,7 @@ namespace Dune {
         leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      EquidistantSetup(L,elements,std::bitset<dim>(0ULL),0,defaultLoadbalancer());
+      EquidistantSetup(L,elements,std::bitset<dim>(0ULL),0);
       init();
     }
 
@@ -915,7 +915,7 @@ namespace Dune {
     {
       if (!Dune::Yasp::checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
-      TensorProductSetup(coords, std::bitset<dim>(0ULL),0,defaultLoadbalancer());
+      TensorProductSetup(coords, std::bitset<dim>(0ULL),0);
       init();
     }
 
@@ -943,7 +943,7 @@ namespace Dune {
     {
       if (!Dune::Yasp::checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
-      TensorProductSetup(coords, periodic, overlap, lb);
+      TensorProductSetup(coords, periodic, overlap);
       init();
     }
 
@@ -975,7 +975,7 @@ namespace Dune {
     {
       if (!Dune::Yasp::checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
-      TensorProductSetup(coords, periodic, overlap, lb);
+      TensorProductSetup(coords, periodic, overlap);
       init();
     }
 
