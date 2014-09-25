@@ -13,6 +13,26 @@
 
 namespace Dune
 {
+  /** \brief Implement load balancer that gets the info from a file
+   * To backup and restore the load balancing information, the BackupRestoreFacility
+   * needs a special load balancing object. Users dont need to touch this.
+   */
+  template<int d>
+  class YLoadBalanceBackup : public YLoadBalance<d>
+  {
+  public:
+    YLoadBalanceBackup(const Dune::array<int,d>& dims) : _dims(dims) {}
+
+    virtual ~YLoadBalanceBackup() {}
+
+    virtual void loadbalance(const Dune::array<int,d>& size, int P, Dune::array<int,d>& dims) const
+    {
+      dims = _dims;
+    }
+
+  private:
+    Dune::array<int,d> _dims;
+  };
 
   /** \copydoc Dune::BackupRestoreFacility */
   template<int dim, class ctype>
@@ -41,7 +61,10 @@ namespace Dune
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)  */
     static void backup ( const Grid &grid, std::ostream &stream )
     {
-      stream << "Refinement level: " << grid.maxLevel() << std::endl;
+      stream << "Torus structure: ";
+      for (int i=0; i<dim; i++)
+        stream << grid.torus().dims(i) << " ";
+      stream << std::endl << "Refinement level: " << grid.maxLevel() << std::endl;
       stream << "Periodicity: ";
       for (int i=0; i<dim; i++)
         stream << (grid.isPeriodic(i) ? "1 " : "0 ");
@@ -69,6 +92,12 @@ namespace Dune
     static Grid *restore ( std::istream &stream )
     {
       std::string input;
+
+      Dune::array<int,dim> torus_dims;
+      stream >> input >> input;
+      for (int i=0; i<dim; i++)
+        stream >> torus_dims[i];
+      std::cout << "Torus dims: " << torus_dims;
 
       int refinement;
       stream >> input >> input;
@@ -112,10 +141,11 @@ namespace Dune
       for (int i=0; i<dim; i++)
         h[i] *= s[i];
 
+      YLoadBalanceBackup<dim> lb(torus_dims);
 #if HAVE_MPI
-      Grid* grid = new Dune::YaspGrid<dim>(MPI_COMM_WORLD,length, s, periodic, overlap);
+      Grid* grid = new Dune::YaspGrid<dim>(MPI_COMM_WORLD,length, s, periodic, overlap, &lb);
 #else
-      Grid* grid = new Dune::YaspGrid<dim>(length, s, periodic, overlap);
+      Grid* grid = new Dune::YaspGrid<dim>(length, s, periodic, overlap, &lb);
 #endif
 
       grid->refineOptions(physicalOverlapSize);
@@ -150,7 +180,10 @@ namespace Dune
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)  */
     static void backup ( const Grid &grid, std::ostream &stream )
     {
-      stream << "Refinement level: " << grid.maxLevel() << std::endl;
+      stream << "Torus structure: ";
+      for (int i=0; i<dim; i++)
+        stream << grid.torus().dims(i) << " ";
+      stream << std::endl << "Refinement level: " << grid.maxLevel() << std::endl;
       stream << "Periodicity: ";
       for (int i=0; i<dim; i++)
         stream << (grid.isPeriodic(i) ? "1 " : "0 ");
@@ -184,6 +217,12 @@ namespace Dune
     static Grid *restore ( std::istream &stream )
     {
       std::string input;
+
+      Dune::array<int,dim> torus_dims;
+      stream >> input >> input;
+      for (int i=0; i<dim; i++)
+        stream >> torus_dims[i];
+      std::cout << "Torus dims: " << torus_dims << std::endl;
 
       int refinement;
       stream >> input >> input;
@@ -234,7 +273,8 @@ namespace Dune
       }
 
       // TODO this is a stub. It does treat the grid on the processor as a new grid.
-      Grid* grid = new Grid(MPI_COMM_WORLD, coords, periodic, overlap);
+      YLoadBalanceBackup<dim> lb(torus_dims);
+      Grid* grid = new Grid(MPI_COMM_WORLD, coords, periodic, overlap, &lb);
 
       grid->refineOptions(physicalOverlapSize);
       grid->globalRefine(refinement);
