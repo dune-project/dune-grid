@@ -41,7 +41,7 @@
 
 /* If this is set, public access to the implementation of facades like Entity,
    Geometry, etc. is granted. */
-#cmakedefine DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS @DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS@
+#cmakedefine DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS 1
 
 /* This is only true if grape was found by configure _and_ if the
    application uses the flags set by add_dune_grape_flags */
