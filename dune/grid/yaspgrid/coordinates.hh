@@ -100,7 +100,7 @@ namespace Dune
     /** \brief print information on this container */
     void print(std::ostream& s) const
     {
-      s << "Printing equidistant coordinate container:" << std::endl;
+      s << "Printing equidistant coordinate information:" << std::endl;
       s << "Meshsize: " << _h << std::endl << "Size: ";
       for (int i=0; i<dim; i++)
         s << _s[i] << " ";
@@ -232,13 +232,19 @@ namespace Dune
     /** \brief print information on this container */
     void print(std::ostream& s) const
     {
-      s << "Printing Tensor Product Coordinate Container information:" << std::endl;
+      // the operator<< of std::array is not used on purpose in order to
+      // have the same output format for FieldVector and array. std::array would
+      // be formatted as [x,y]. This is important for later parsing.
+      s << "ProcessorOffset: ";
+      for (int i=0; i<dim; i++)
+        s << _offset[i] << " ";
+      s << std::endl;
+      s << "Printing TensorProduct Coordinate information:" << std::endl;
       for (int i=0; i<dim; i++)
       {
-        s << "Direction " << i << ": ";
+        s << "Direction " << i << ": " << _c[i].size() << " coordinates" << std::endl;
         for (std::size_t j=0; j<_c[i].size(); j++)
-          s << _c[i][j] << " ";
-        s << std::endl;
+          s << _c[i][j] << std::endl;
       }
     }
 
