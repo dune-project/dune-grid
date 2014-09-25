@@ -79,14 +79,15 @@ struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
   }
 };
 
-template <int dim, class CC = Dune::EquidistantCoordinates<double,dim> >
-void check_yasp() {
+template <int dim, class CC>
+void check_yasp(Dune::YaspGrid<dim,CC>* grid) {
   std::cout << std::endl << "YaspGrid<" << dim << ">";
 
-  Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid();
+  if (grid == NULL)
+    Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid();
 
   gridcheck(*grid);
-  grid->globalRefine(2);
+  //grid->globalRefine(2);
 
   gridcheck(*grid);
 
@@ -123,11 +124,38 @@ void check_backuprestore()
 {
    typedef Dune::YaspGrid<dim,CC> Grid;
    Grid* grid = YaspFactory<dim,CC>::buildGrid();
-   grid->globalRefine(5);
+   grid->globalRefine(2);
 
-   Dune::BackupRestoreFacility<Grid>::backup(*grid, "testbackup");
-   Grid* restored = Dune::BackupRestoreFacility<Grid>::restore("testbackup");
-   delete restored;
+   Dune::BackupRestoreFacility<Grid>::backup(*grid, "backup");
+   Grid* restored = Dune::BackupRestoreFacility<Grid>::restore("backup");
+
+   // write a backup of the restored file. this has to be identical to backup
+   Dune::BackupRestoreFacility<Grid>::backup(*restored, "copy");
+
+   // check whether copy and backup are equal
+   std::ostringstream s1,s2;
+   s1 << "backup";
+   s2 << "copy";
+   if (std::is_same<CC,Dune::TensorProductCoordinates<double,dim> >::value)
+   {
+     s1 << grid->comm().rank();
+     s2 << grid->comm().rank();
+   }
+   std::ifstream file1, file2;
+   file1.open(s1.str());
+   file2.open(s2.str());
+
+   std::string token1, token2;
+   while(!file1.eof() && !file2.eof())
+   {
+     file1 >> token1;
+     file2 >> token2;
+     if (token1 != token2)
+       DUNE_THROW(Dune::Exception, "Error in BackupRestoreFacility");
+   }
+
+   check_yasp(restored);
+
    delete grid;
 }
 
@@ -136,14 +164,14 @@ int main (int argc , char **argv) {
     // Initialize MPI, if present
     Dune::MPIHelper::instance(argc, argv);
 
-//     check_yasp<1>();
-//     check_yasp<1, Dune::TensorProductCoordinates<double,1> >();
-//
-//     check_yasp<2>();
-//     check_yasp<2, Dune::TensorProductCoordinates<double,2> >();
-//
-//     check_yasp<3>();
-//     check_yasp<3, Dune::TensorProductCoordinates<double,3> >();
+    check_yasp(YaspFactory<1,Dune::EquidistantCoordinates<double,1> >::buildGrid());
+    check_yasp(YaspFactory<1,Dune::TensorProductCoordinates<double,1> >::buildGrid());
+
+    check_yasp(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid());
+    check_yasp(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid());
+
+    check_yasp(YaspFactory<3,Dune::EquidistantCoordinates<double,3> >::buildGrid());
+    check_yasp(YaspFactory<3,Dune::TensorProductCoordinates<double,3> >::buildGrid());
 
     check_backuprestore<2>();
     check_backuprestore<2, Dune::TensorProductCoordinates<double,2> >();
