@@ -189,6 +189,11 @@ namespace Dune
         stream << (grid.isPeriodic(i) ? "1 " : "0 ");
       stream << std::endl << "Overlap: " << grid.overlapSize(0,0) << std::endl;
       stream << "KeepPhysicalOverlap: " << (grid.getRefineOption() ? "1" : "0") << std::endl;
+      stream << "Coarse Size: ";
+      for (int i=0; i<dim; i++)
+        stream << grid.levelSize(0,i) << " ";
+      stream << std::endl;
+
       grid.begin()->coords.print(stream);
     }
 
@@ -249,6 +254,12 @@ namespace Dune
       stream >> physicalOverlapSize;
       std::cout << "Keep physical overlap size: " << physicalOverlapSize << std::endl;
 
+      Dune::array<int,dim> coarseSize;
+      stream >> input >> input;
+      for (int i=0; i<dim; i++)
+        stream >> coarseSize[i];
+      std::cout << "CoarseSize: " << coarseSize << std::endl;
+
       Dune::array<int,dim> offset;
       stream >> input;
       for (int i=0; i<dim; i++)
@@ -272,9 +283,8 @@ namespace Dune
         }
       }
 
-      // TODO this is a stub. It does treat the grid on the processor as a new grid.
       YLoadBalanceBackup<dim> lb(torus_dims);
-      Grid* grid = new Grid(MPI_COMM_WORLD, coords, periodic, overlap, &lb);
+      Grid* grid = new Grid(MPI_COMM_WORLD, coords, periodic, overlap, offset, coarseSize, &lb);
 
       grid->refineOptions(physicalOverlapSize);
       grid->globalRefine(refinement);
