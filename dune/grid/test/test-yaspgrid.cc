@@ -127,31 +127,38 @@ void check_backuprestore()
    grid->globalRefine(2);
 
    Dune::BackupRestoreFacility<Grid>::backup(*grid, "backup");
+
+   // avoid that processes that having nothing to backup try to restore
+   // a grid that has not been backuped yet.
+   grid->comm().barrier();
    Grid* restored = Dune::BackupRestoreFacility<Grid>::restore("backup");
 
    // write a backup of the restored file. this has to be identical to backup
    Dune::BackupRestoreFacility<Grid>::backup(*restored, "copy");
 
-   // check whether copy and backup are equal
-   std::ostringstream s1,s2;
-   s1 << "backup";
-   s2 << "copy";
-   if (std::is_same<CC,Dune::TensorProductCoordinates<double,dim> >::value)
+   if ((std::is_same<CC,Dune::TensorProductCoordinates<double,dim> >::value) || (grid->comm().rank() == 0))
    {
-     s1 << grid->comm().rank();
-     s2 << grid->comm().rank();
-   }
-   std::ifstream file1, file2;
-   file1.open(s1.str());
-   file2.open(s2.str());
+     // check whether copy and backup are equal
+     std::ostringstream s1,s2;
+     s1 << "backup";
+     s2 << "copy";
+     if (std::is_same<CC,Dune::TensorProductCoordinates<double,dim> >::value)
+     {
+       s1 << grid->comm().rank();
+       s2 << grid->comm().rank();
+     }
+     std::ifstream file1, file2;
+     file1.open(s1.str());
+     file2.open(s2.str());
 
-   std::string token1, token2;
-   while(!file1.eof() && !file2.eof())
-   {
-     file1 >> token1;
-     file2 >> token2;
-     if (token1 != token2)
-       DUNE_THROW(Dune::Exception, "Error in BackupRestoreFacility");
+     std::string token1, token2;
+     while(!file1.eof() && !file2.eof())
+     {
+       file1 >> token1;
+       file2 >> token2;
+       if (token1 != token2)
+         DUNE_THROW(Dune::Exception, "Error in BackupRestoreFacility");
+     }
    }
 
    check_yasp(restored);
