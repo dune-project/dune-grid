@@ -44,18 +44,17 @@ namespace Dune
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
     static void backup ( const Grid &grid, const std::string &filename )
     {
-      std::ostringstream filename_str;
-      filename_str << filename;
-      std::ofstream file( filename_str.str() );
-      if( file )
+      if (grid.comm().rank() == 0)
       {
-        // only write something if this is rank 0.
-        if (grid.comm().rank() == 0)
+        std::ofstream file(filename);
+        if( file )
+        {
           backup(grid,file);
-        file.close();
+          file.close();
+        }
+        else
+          std::cerr << "ERROR: BackupRestoreFacility::backup: couldn't open file `" << filename << "'" << std::endl;
       }
-      else
-        std::cerr << "ERROR: BackupRestoreFacility::backup: couldn't open file `" << filename_str.str() << "'" << std::endl;
     }
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)  */
@@ -70,20 +69,25 @@ namespace Dune
         stream << (grid.isPeriodic(i) ? "1 " : "0 ");
       stream << std::endl << "Overlap: " << grid.overlapSize(0,0) << std::endl;
       stream << "KeepPhysicalOverlap: " << (grid.getRefineOption() ? "1" : "0") << std::endl;
-      grid.begin()->coords.print(stream);
+      stream << "Coarse Size: ";
+      for (int i=0; i<dim; i++)
+        stream << grid.levelSize(0,i) << " ";
+      stream << std::endl;
+      stream << "Meshsize: " ;
+      for (int i=0; i<dim; i++)
+        stream << grid.begin()->coords.meshsize(i,0) << " ";
+      stream << std::endl;
     }
 
     /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
     static Grid *restore ( const std::string &filename )
     {
-      std::ostringstream filename_str;
-      filename_str << filename;
-      std::ifstream file(filename_str.str());
+      std::ifstream file(filename);
       if( file )
         return restore(file);
       else
       {
-        std::cerr << "ERROR: BackupRestoreFacility::restore: couldn't open file `" << filename_str.str() << "'" << std::endl;
+        std::cerr << "ERROR: BackupRestoreFacility::restore: couldn't open file `" << filename << "'" << std::endl;
         return 0;
       }
     }
@@ -124,28 +128,28 @@ namespace Dune
       stream >> physicalOverlapSize;
       std::cout << "Keep physical overlap size: " << physicalOverlapSize << std::endl;
 
+      Dune::array<int,dim> coarseSize;
+      stream >> input >> input;
+      for (int i=0; i<dim; i++)
+        stream >> coarseSize[i];
+      std::cout << "CoarseSize: " << coarseSize << std::endl;
+
       Dune::FieldVector<ctype,dim> h;
-      stream >> input >> input >> input >> input >> input;
+      stream >>  input;
       for (int i=0; i<dim; i++)
         stream >> h[i];
       std::cout << "Meshsize: " << h << std::endl;
 
-      Dune::array<int,dim> s;
-      stream >> input;
-      for (int i=0; i<dim; i++)
-        stream >> s[i];
-      std::cout << "Size: " << s << std::endl;
-
       // the constructor takes the upper right corner...
       Dune::FieldVector<ctype,dim> length(h);
       for (int i=0; i<dim; i++)
-        h[i] *= s[i];
+        length[i] *= coarseSize[i];
 
       YLoadBalanceBackup<dim> lb(torus_dims);
 #if HAVE_MPI
-      Grid* grid = new Dune::YaspGrid<dim>(MPI_COMM_WORLD,length, s, periodic, overlap, &lb);
+      Grid* grid = new Dune::YaspGrid<dim>(MPI_COMM_WORLD, length, coarseSize, periodic, overlap, &lb);
 #else
-      Grid* grid = new Dune::YaspGrid<dim>(length, s, periodic, overlap, &lb);
+      Grid* grid = new Dune::YaspGrid<dim>(length, coarseSize, periodic, overlap, &lb);
 #endif
 
       grid->refineOptions(physicalOverlapSize);
