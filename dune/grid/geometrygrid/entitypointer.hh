@@ -111,6 +111,11 @@ namespace Dune
       typedef typename EntityImpl::GeometryImpl GeometryImpl;
 
     public:
+      EntityPointer ()
+        : entity_( EntityImpl() ),
+          hostEntityIterator_()
+      {}
+
       EntityPointer ( const GeometryImpl &geo, const HostEntityIterator &hostEntityIterator )
         : entity_( EntityImpl( geo ) ),
           hostEntityIterator_( hostEntityIterator )
