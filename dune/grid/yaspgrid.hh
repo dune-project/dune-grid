@@ -1820,6 +1820,11 @@ namespace Dune {
     /** \struct hasBackupRestoreFacilities
        \ingroup YaspGrid
      */
+    template<int dim, class Coordinates>
+    struct hasBackupRestoreFacilities< YaspGrid<dim, Coordinates> >
+    {
+      static const bool v = true;
+    };
 
     /** \brief YaspGrid has only one geometry type for codim 0 entities
        \ingroup YaspGrid
