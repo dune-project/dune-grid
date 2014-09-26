@@ -45,6 +45,7 @@ namespace Dune
   {
     // type of grid
     typedef YaspGrid<dim,EquidistantCoordinates<ctype,dim> > Grid;
+    typedef typename Grid::Traits::CollectiveCommunication Comm;
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
     static void backup ( const Grid &grid, const std::string &filename )
@@ -85,11 +86,11 @@ namespace Dune
     }
 
     /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
-    static Grid *restore ( const std::string &filename )
+    static Grid *restore (const std::string &filename, Comm comm = Comm())
     {
       std::ifstream file(filename);
       if( file )
-        return restore(file);
+        return restore(file,comm);
       else
       {
         std::cerr << "ERROR: BackupRestoreFacility::restore: couldn't open file `" << filename << "'" << std::endl;
@@ -98,7 +99,7 @@ namespace Dune
     }
 
     /** \copydoc Dune::BackupRestoreFacility::restore(stream) */
-    static Grid *restore ( std::istream &stream )
+    static Grid *restore (std::istream &stream, Comm comm = Comm())
     {
       std::string input;
 
@@ -144,11 +145,13 @@ namespace Dune
         length[i] *= coarseSize[i];
 
       YLoadBalanceBackup<dim> lb(torus_dims);
-#if HAVE_MPI
-      Grid* grid = new Dune::YaspGrid<dim>(MPI_COMM_WORLD, length, coarseSize, periodic, overlap, &lb);
-#else
-      Grid* grid = new Dune::YaspGrid<dim>(length, coarseSize, periodic, overlap, &lb);
-#endif
+
+      //TODO check whether truely sequential grid can be built with the collective comm object
+// #if HAVE_MPI
+      Grid* grid = new Dune::YaspGrid<dim>(comm, length, coarseSize, periodic, overlap, &lb);
+// #else
+//       Grid* grid = new Dune::YaspGrid<dim>(length, coarseSize, periodic, overlap, &lb);
+// #endif
 
       grid->refineOptions(physicalOverlapSize);
       grid->globalRefine(refinement);
@@ -163,6 +166,7 @@ namespace Dune
   {
     // type of grid
     typedef YaspGrid<dim,TensorProductCoordinates<ctype,dim> > Grid;
+    typedef typename Grid::Traits::CollectiveCommunication Comm;
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
     static void backup ( const Grid &grid, const std::string &filename )
@@ -200,19 +204,14 @@ namespace Dune
     }
 
     /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
-    static Grid *restore ( const std::string &filename )
+    static Grid *restore (const std::string &filename, Comm comm = Comm())
     {
       std::ostringstream filename_str;
       filename_str << filename;
-      // TODO replace this by collective communication (handles sequential grids too)
-#if HAVE_MPI
-      int rank;
-      MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-      filename_str << rank;
-#endif
+      filename_str << comm.rank();
       std::ifstream file(filename_str.str());
       if( file )
-        return restore(file);
+        return restore(file, comm);
       else
       {
         std::cerr << "ERROR: BackupRestoreFacility::restore: couldn't open file `" << filename_str.str() << "'" << std::endl;
@@ -221,7 +220,7 @@ namespace Dune
     }
 
     /** \copydoc Dune::BackupRestoreFacility::restore(stream) */
-    static Grid *restore ( std::istream &stream )
+    static Grid *restore (std::istream &stream, Comm comm = Comm())
     {
       std::string input;
 
@@ -274,7 +273,7 @@ namespace Dune
       }
 
       YLoadBalanceBackup<dim> lb(torus_dims);
-      Grid* grid = new Grid(MPI_COMM_WORLD, coords, periodic, overlap, coarseSize, &lb);
+      Grid* grid = new Grid(comm, coords, periodic, overlap, coarseSize, &lb);
 
       grid->refineOptions(physicalOverlapSize);
       grid->globalRefine(refinement);
@@ -284,4 +283,4 @@ namespace Dune
   };
 } // namespace Dune
 
-#endif // #ifndef DUNE_GRID_ALUGRID_BACKUPRESTORE_HH
+#endif // #ifndef DUNE_GRID_YASPGRID_BACKUPRESTORE_HH
