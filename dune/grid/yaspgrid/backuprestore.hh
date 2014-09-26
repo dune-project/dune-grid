@@ -101,12 +101,10 @@ namespace Dune
       stream >> input >> input;
       for (int i=0; i<dim; i++)
         stream >> torus_dims[i];
-      std::cout << "Torus dims: " << torus_dims;
 
       int refinement;
       stream >> input >> input;
       stream >> refinement;
-      std::cout << "Refinement level: " << refinement << std::endl;
 
       std::bitset<dim> periodic;
       bool b;
@@ -116,29 +114,24 @@ namespace Dune
         stream >> b;
         periodic[i] = b;
       }
-      std::cout << "Periodicity: " << periodic << std::endl;
 
       int overlap;
       stream >> input;
       stream >> overlap;
-      std::cout << "Overlap size: " << overlap << std::endl;
 
       bool physicalOverlapSize;
       stream >> input;
       stream >> physicalOverlapSize;
-      std::cout << "Keep physical overlap size: " << physicalOverlapSize << std::endl;
 
       Dune::array<int,dim> coarseSize;
       stream >> input >> input;
       for (int i=0; i<dim; i++)
         stream >> coarseSize[i];
-      std::cout << "CoarseSize: " << coarseSize << std::endl;
 
       Dune::FieldVector<ctype,dim> h;
       stream >>  input;
       for (int i=0; i<dim; i++)
         stream >> h[i];
-      std::cout << "Meshsize: " << h << std::endl;
 
       // the constructor takes the upper right corner...
       Dune::FieldVector<ctype,dim> length(h);
@@ -231,12 +224,10 @@ namespace Dune
       stream >> input >> input;
       for (int i=0; i<dim; i++)
         stream >> torus_dims[i];
-      std::cout << "Torus dims: " << torus_dims << std::endl;
 
       int refinement;
       stream >> input >> input;
       stream >> refinement;
-      std::cout << "Refinement level: " << refinement << std::endl;
 
       std::bitset<dim> periodic;
       bool b;
@@ -246,29 +237,24 @@ namespace Dune
         stream >> b;
         periodic[i] = b;
       }
-      std::cout << "Periodicity: " << periodic << std::endl;
 
       int overlap;
       stream >> input;
       stream >> overlap;
-      std::cout << "Overlap size: " << overlap << std::endl;
 
       bool physicalOverlapSize;
       stream >> input;
       stream >> physicalOverlapSize;
-      std::cout << "Keep physical overlap size: " << physicalOverlapSize << std::endl;
 
       Dune::array<int,dim> coarseSize;
       stream >> input >> input;
       for (int i=0; i<dim; i++)
         stream >> coarseSize[i];
-      std::cout << "CoarseSize: " << coarseSize << std::endl;
 
       Dune::array<int,dim> offset;
       stream >> input;
       for (int i=0; i<dim; i++)
         stream >> offset[i];
-      std::cout << "ProcessorOffset: " << offset << std::endl;
 
       Dune::array<std::vector<ctype>,dim> coords;
       stream >> input >> input >> input >> input;
