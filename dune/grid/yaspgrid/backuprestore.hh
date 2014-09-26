@@ -25,8 +25,13 @@ namespace Dune
 
     virtual ~YLoadBalanceBackup() {}
 
-    virtual void loadbalance(const Dune::array<int,d>& size, int P, Dune::array<int,d>& dims) const
+    virtual void loadbalance(const Dune::array<int,d>&, int P, Dune::array<int,d>& dims) const
     {
+      int prod = 1;
+      for (int i=0; i<d; i++)
+        prod *= _dims[i];
+      if (P != prod)
+        DUNE_THROW(Dune::Exception,"Your processor number doesn't match the grid to restore");
       dims = _dims;
     }
 
