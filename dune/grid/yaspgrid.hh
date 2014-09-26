@@ -1012,7 +1012,6 @@ namespace Dune {
               Dune::array<std::vector<ctype>, dim> coords,
               std::bitset<dim> periodic,
               int overlap,
-              Dune::array<int,dim> offset,
               Dune::array<int,dim> coarseSize,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
     #if HAVE_MPI
@@ -1035,15 +1034,25 @@ namespace Dune {
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
 
       _levels.resize(1);
+
+      Dune::array<int,dim> o;
+      std::fill(o.begin(), o.end(), 0);
+      Dune::array<int,dim> o_interior(o);
+      Dune::array<int,dim> s_interior(coarseSize);
+#if HAVE_MPI
+      double imbal = _torus.partition(_torus.rank(),o,coarseSize,o_interior,s_interior);
+#endif
+
+      // get offset by modifying o_interior accoring to overlap
+      Dune::array<int,dim> offset(o_interior);
+      for (int i=0; i<dim; i++)
+        if ((periodic[i]) || (o_interior[i] > 0))
+          offset[i] -= overlap;
+
       TensorProductCoordinates<ctype,dim> cc(coords, offset);
 
-      // modify offset to point to the origin of the interior.
-      for (int i=0; i<dim; i++)
-        if ((periodic[i]) || (offset[i] > 0))
-          offset[i] += overlap;
-
       // add level
-      makelevel(cc,periodic,offset,overlap);
+      makelevel(cc,periodic,o_interior,overlap);
 
       init();
     }

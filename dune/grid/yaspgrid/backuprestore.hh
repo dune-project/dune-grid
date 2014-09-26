@@ -251,11 +251,6 @@ namespace Dune
       for (int i=0; i<dim; i++)
         stream >> coarseSize[i];
 
-      Dune::array<int,dim> offset;
-      stream >> input;
-      for (int i=0; i<dim; i++)
-        stream >> offset[i];
-
       Dune::array<std::vector<ctype>,dim> coords;
       stream >> input >> input >> input >> input;
       for (int d=0; d<dim; d++)
@@ -274,7 +269,7 @@ namespace Dune
       }
 
       YLoadBalanceBackup<dim> lb(torus_dims);
-      Grid* grid = new Grid(MPI_COMM_WORLD, coords, periodic, overlap, offset, coarseSize, &lb);
+      Grid* grid = new Grid(MPI_COMM_WORLD, coords, periodic, overlap, coarseSize, &lb);
 
       grid->refineOptions(physicalOverlapSize);
       grid->globalRefine(refinement);

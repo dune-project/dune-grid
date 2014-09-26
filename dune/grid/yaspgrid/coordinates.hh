@@ -226,13 +226,6 @@ namespace Dune
     /** \brief print information on this container */
     void print(std::ostream& s) const
     {
-      // the operator<< of std::array is not used on purpose in order to
-      // have the same output format for FieldVector and array. std::array would
-      // be formatted as [x,y]. This is important for later parsing.
-      s << "ProcessorOffset: ";
-      for (int i=0; i<dim; i++)
-        s << _offset[i] << " ";
-      s << std::endl;
       s << "Printing TensorProduct Coordinate information:" << std::endl;
       for (int i=0; i<dim; i++)
       {
