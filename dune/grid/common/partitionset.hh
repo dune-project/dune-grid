@@ -4,6 +4,7 @@
 #define DUNE_GRID_COMMON_PARTITIONSET_HH
 
 #include <dune/common/typetraits.hh>
+#include <dune/common/std/constexpr.hh>
 #include <dune/grid/common/gridenums.hh>
 
 namespace Dune {
@@ -148,6 +149,12 @@ namespace Dune {
     }
 
 #endif // HAVE_CONSTEXPR
+
+    //! Tests whether the given PartitionType is contained in this set.
+    static DUNE_CONSTEXPR bool contains(PartitionType pt)
+    {
+      return partitions & (1 << pt);
+    }
 
   };
 
