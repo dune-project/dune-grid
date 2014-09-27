@@ -14,7 +14,7 @@
 	 @ingroup Grid
         @brief Interfaces needed when working with a \ref Grid "Dune::Grid"
   */
-  /** @defgroup GIRelatedTypes Enumerations 
+  /** @defgroup GIRelatedTypes Related types and enumerations
       @ingroup GridInterface */
   /** @defgroup GIGrid Grid Abstract Base Class
       @ingroup GridInterface */

@@ -10,7 +10,7 @@
 namespace Dune {
 
   /**
-   * \addtogroup gridpartitions Parallel Grid Partitions
+   * \addtogroup GIRelatedTypes
    * \{
    */
 
