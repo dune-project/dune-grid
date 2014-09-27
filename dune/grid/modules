@@ -28,6 +28,8 @@
       @ingroup GridInterface */
   /** @defgroup GIIntersectionIterator Intersection and IntersectionIterator
       @ingroup GridInterface */
+  /** @defgroup GIIteration Iterating over grid entities and intersections
+      @ingroup GridInterface */
   /** @defgroup IndexIdSets IndexSet and IdSet
 	  @ingroup GridInterface */
   /** @defgroup GICollectiveCommunication CollectiveCommunication
