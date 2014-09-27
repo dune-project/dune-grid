@@ -350,7 +350,8 @@ namespace Dune
         }
         if ( nofVtxParam_ > 0 )
         {
-          for ( int v = 0; v < el.subEntities(dimension); ++v)
+          const int subEntities = el.subEntities(dimension);
+          for ( int v = 0; v < subEntities; ++v)
           {
             typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
             if ( vtxParam_[ index ].empty() )

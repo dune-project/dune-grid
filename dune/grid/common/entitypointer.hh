@@ -8,7 +8,7 @@
 #include <dune/grid/common/grid.hh>
 
 /** \file
-    \brief Wrapper and interface classe for a static iterator (EntityPointer)
+    \brief Wrapper and interface class for a static iterator (EntityPointer)
  */
 
 namespace Dune
@@ -44,7 +44,7 @@ namespace Dune
       : public Dune::EntityPointer< Grid, IteratorImp >;
       \endcode
 
-      This hierarchy must be mimicked in the implementation (i.e. SGrid):
+      This hierarchy must be mimicked in the implementation (e.g. SGrid):
       \code
       class SEntityPointer<...>;
 
@@ -76,9 +76,9 @@ namespace Dune
       The compiler takes care that you only assign/compare Iterators from the same
       Grid.
 
-      The downside (or advantage) of this inheritance is that you can
-      not use different comparison operators and different dereference
-      oprators for the different Iterators in one Grid. On the first
+      The downside (or advantage) of this inheritance is that you cannot
+      use different comparison operators and different dereference
+      operators for the different Iterators in one Grid. On the first
       sight it is a downside because one might consider it a good idea
       to have special treatment for different iterators. On the other
       hand it's very confusing for the user if different Iterators show
@@ -138,6 +138,10 @@ namespace Dune
     template< class ItImp >
     explicit EntityPointer ( const EntityPointer< GridImp, ItImp > &ep )
       : realIterator( ep.realIterator )
+    {}
+
+    /** \brief Default constructor of an empty (undefined) EntityPointer */
+    EntityPointer()
     {}
 
     /** \brief Templatized constructor from type of entity that

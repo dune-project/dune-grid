@@ -123,10 +123,9 @@ namespace Dune
       typedef typename Mapping::JacobianTransposed JacobianTransposed;
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
 
-      Geometry ( const Grid &grid )
-        : grid_( &grid ),
-          mapping_( nullptr )
-      {}
+      Geometry () : grid_( nullptr ), mapping_( nullptr ) {}
+
+      Geometry ( const Grid &grid ) : grid_( &grid ), mapping_( nullptr ) {}
 
       template< class CoordVector >
       Geometry ( const Grid &grid, const GeometryType &type, const CoordVector &coords )
@@ -181,7 +180,7 @@ namespace Dune
       JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianTransposed( local ); }
       JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianInverseTransposed( local ); }
 
-      const Grid &grid () const { return *grid_; }
+      const Grid &grid () const { assert( grid_ ); return *grid_; }
 
     private:
       void destroyMapping ()

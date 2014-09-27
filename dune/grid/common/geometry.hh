@@ -105,7 +105,7 @@ namespace Dune
      * The exact type is implementation-dependent.
      * However, it is guaranteed to have the following properties:
      * - It satisfies the ConstMatrix interface.
-     * - It is copy construcable and copy assignable.
+     * - It is copy constructible and copy assignable.
      * .
      */
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
@@ -116,7 +116,7 @@ namespace Dune
      * The exact type is implementation-dependent.
      * However, it is guaranteed to have the following properties:
      * - It satisfies the ConstMatrix interface.
-     * - It is copy construcable and copy assignable.
+     * - It is copy constructible and copy assignable.
      * .
      */
     typedef typename Implementation::JacobianTransposed JacobianTransposed;

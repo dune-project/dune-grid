@@ -31,6 +31,12 @@ namespace Dune
   public:
     typedef Dune::array<int, d> iTupel;
     virtual ~YLoadBalance() {}
+
+    /** \brief Distribute a structured grid across a set of processors
+     *
+     * \param [in] size Number of elements in each coordinate direction, for the entire grid
+     * \param [in] P Number of processors
+     */
     virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
     {
       double opt=1E100;
@@ -81,19 +87,16 @@ namespace Dune
   class YLoadBalancePowerD : public YLoadBalance<d>
   {
   public:
-   // typedef Dune::array<int, d>  iTupel;
     typedef Dune::array<int, d> iTupel;
     virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
     {
-      bool found=false;
       for(int i=1; i<P; ++i)
         if(Power<d>::eval(i)==P) {
-          for(int j=0; j<d; ++j)
-            dims[j]=i;
-          found=true;
+          std::fill(dims.begin(), dims.end(),i);
+          return;
         }
-      if(!found)
-        DUNE_THROW(GridError, "Loadbalancing failed\n");
+
+      DUNE_THROW(GridError, "Loadbalancing failed: your number of processes needs to be a " << d << "-th power.");
     }
   };
 

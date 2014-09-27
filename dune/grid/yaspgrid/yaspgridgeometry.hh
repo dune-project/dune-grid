@@ -9,13 +9,21 @@
    YaspGeometry realizes the concept of the geometric part of a mesh entity.
 
    We have specializations for dim == dimworld (elements) and dim == 0
-   (vertices).  The general version implements dim == dimworld-1 (faces)
-   and otherwise throws a GridError.
+   (vertices).  The general version implements all other codimensions.
+
+   As of September 2014, the functionality of YaspGeometry is identical
+   to that of AxisAlignedCubeGeometry. The latter cannot be used directly
+   due to the grid interface facade construction (it isnt templated to the
+   GridImp). As soon as template aliases are available, this header boils
+   down to one line.
  */
 
 namespace Dune {
 
-  //! The general version can do any dimension, but constructors currently exist only for dim==dimworld-1
+  /** \brief The general version that handles all codimensions but 0 and dim.
+   * \tparam mydim the codimension
+   * \tparam cdim the coordinate dimension (NOT codim)
+   */
   template<int mydim,int cdim, class GridImp>
   class YaspGeometry : public AxisAlignedCubeGeometry<typename GridImp::ctype,mydim,cdim>
   {
@@ -25,51 +33,21 @@ namespace Dune {
 
     //! default constructor
     YaspGeometry ()
-      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0)) // anything
+      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0))
     {}
 
-    //! constructor from midpoint and extension and missing direction number
-    YaspGeometry (const FieldVector<ctype, cdim>& p, const FieldVector<ctype, cdim>& h, uint8_t& m)
-      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0)) // anything
+    //! constructor from midpoint and extension and a bitset defining which unit vectors span the entity
+    YaspGeometry (const FieldVector<ctype, cdim>& ll, const FieldVector<ctype, cdim>& ur, const std::bitset<cdim>& shift)
+      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(ll,ur,shift)
     {
-      if (cdim!=mydim+1)
-        DUNE_THROW(GridError, "This YaspGeometry constructor assumes cdim=mydim+1");
-
-      FieldVector<ctype, cdim> lower = p;
-      FieldVector<ctype, cdim> upper = p;
-      lower.axpy(-0.5,h);
-      upper.axpy( 0.5,h);
-
-      lower[m] = upper[m] = p[m];
-
-      std::bitset<cdim> axes((1<<cdim)-1);    // all bits set
-      axes[m] = false; // except the one at 'missing'
-
-      // set up base class
-      static_cast< AxisAlignedCubeGeometry<ctype,mydim,cdim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,cdim>(lower, upper, axes);
+      assert(mydim == shift.count());
     }
 
     //! copy constructor
     YaspGeometry (const YaspGeometry& other)
       : AxisAlignedCubeGeometry<ctype,mydim,cdim>(other)
     {}
-
-    //! print function
-    void print (std::ostream& s) const
-    {
-      s << "YaspGeometry<"<<mydim<<","<<cdim<< "> ";
-      s << "midpoint";
-      for (int i=0; i<cdim; i++)
-        s << " " << 0.5*(this->lower_[i] + this->upper_[i]);
-      s << " extension";
-      for (int i=0; i<cdim; i++)
-        s << " " << (this->upper_[i] - this->lower_[i]);
-      s << " coordinates: " << this->axes_;
-    }
-
   };
-
-
 
   //! specialize for dim=dimworld, i.e. a volume element
   template<int mydim, class GridImp>
@@ -84,34 +62,14 @@ namespace Dune {
     {}
 
     //! constructor from midpoint and extension
-    YaspGeometry (const FieldVector<ctype, mydim>& p, const FieldVector<ctype, mydim>& h)
-      : AxisAlignedCubeGeometry<ctype,mydim,mydim>(FieldVector<ctype,mydim>(0),FieldVector<ctype,mydim>(0)) // anything
-    {
-      FieldVector<ctype, mydim> lower = p;
-      FieldVector<ctype, mydim> upper = p;
-      lower.axpy(-0.5,h);
-      upper.axpy( 0.5,h);
-      // set up base class
-      static_cast< AxisAlignedCubeGeometry<ctype,mydim,mydim> & >( *this ) = AxisAlignedCubeGeometry<ctype,mydim,mydim>(lower, upper);
-    }
+    YaspGeometry (const FieldVector<ctype, mydim>& ll, const FieldVector<ctype, mydim>& ur)
+      : AxisAlignedCubeGeometry<ctype,mydim,mydim>(ll,ur)
+    {}
 
     //! copy constructor (skipping temporary variables)
     YaspGeometry (const YaspGeometry& other)
       : AxisAlignedCubeGeometry<ctype,mydim,mydim>(other)
     {}
-
-    //! print function
-    void print (std::ostream& s) const
-    {
-      s << "YaspGeometry<"<<mydim<<","<<mydim<< "> ";
-      s << "midpoint";
-      for (int i=0; i<mydim; i++)
-        s << " " << 0.5 * (this->lower_[i] + this->upper_[i]);
-      s << " extension";
-      for (int i=0; i<mydim; i++)
-        s << " " << (this->upper_[i] + this->lower_[i]);
-    }
-
   };
 
   //! specialization for dim=0, this is a vertex
@@ -131,27 +89,10 @@ namespace Dune {
       : AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>( p )
     {}
 
-    YaspGeometry ( const FieldVector< ctype, cdim > &p, const FieldVector< ctype, cdim > &, uint8_t &)
+    YaspGeometry ( const FieldVector< ctype, cdim > &p, const FieldVector< ctype, cdim > &, const std::bitset<cdim> &)
       : AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>( p )
     {}
-
-    //! print function
-    void print (std::ostream& s) const
-    {
-      s << "YaspGeometry<"<<0<<","<<cdim<< "> ";
-      s << "position " << this->lower_;
-    }
   };
-
-  // operator<< for all YaspGeometrys
-  template <int mydim, int cdim, class GridImp>
-  inline
-  std::ostream& operator<< (std::ostream& s, YaspGeometry<mydim,cdim,GridImp>& e)
-  {
-    e.print(s);
-    return s;
-  }
-
 }  // namespace Dune
 
 #endif // DUNE_GRID_YASPGRIDGEOMETRY_HH

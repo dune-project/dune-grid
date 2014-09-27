@@ -169,12 +169,9 @@ namespace Dune
   el_update_base (Entity& en, DUNE_ELEM * he)
   {
     typedef typename Entity::Geometry DuneGeometryType;
-    typedef typename DuneGeometryType :: ctype ctype;
-
     enum { dim      = Entity::dimension };
-    enum { dimworld = DuneGeometryType::dimensionworld };
 
-    typedef FieldVector<ctype, dimworld> CoordinateType;
+    typedef typename DuneGeometryType :: GlobalCoordinate CoordinateType;
 
     const DuneGeometryType &geometry = en.geometry();
 
@@ -193,7 +190,7 @@ namespace Dune
 
     // number of corners and number of vertices schould be the same
     // grape visual does not work for other situations
-    assert( en.template count<dim>() == geometry.corners() );
+    assert( int(en.subEntities( dim )) == int(geometry.corners()) );
     assert( geometry.corners() <= MAX_EL_DOF );
 
     for( int i = 0; i < geometry.corners(); ++i )
@@ -219,12 +216,9 @@ namespace Dune
   {
     typedef typename GridType::Traits::template Codim<0>::Entity Entity;
     typedef typename Entity::Geometry DuneGeometryType;
-    typedef typename DuneGeometryType :: ctype ctype;
 
     enum { dim      = Entity::dimension };
     enum { dimworld = DuneGeometryType::dimensionworld };
-
-    typedef FieldVector<ctype, dimworld> CoordinateType;
 
     const Entity &en = (*it[0]);
 

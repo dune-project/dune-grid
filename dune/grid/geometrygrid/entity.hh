@@ -135,6 +135,8 @@ namespace Dune
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
+      EntityBase () : geo_(), hostEntity_( nullptr ) {}
+
       /** \brief construct an uninitialized entity
        *
        *  \param[in]  grid  GeometryGrid this entity belongs to
@@ -385,6 +387,8 @@ namespace Dune
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
+      EntityBase () : geo_(), hostElement_( nullptr ), subEntity_( -1 ) {}
+
       /** \brief construct an uninitialized entity
        *
        *  \param[in]  grid       GeometryGrid this entity belongs to
@@ -619,21 +623,13 @@ namespace Dune
       typedef typename Base::HostElement HostElement;
       typedef typename Base::GeometryImpl GeometryImpl;
 
-      explicit Entity ( const Grid &grid )
-        : Base( grid )
-      {}
+      Entity () : Base() {}
 
-      explicit Entity ( const GeometryImpl &geo )
-        : Base( geo )
-      {}
+      explicit Entity ( const Grid &grid ) : Base( grid ) {}
+      explicit Entity ( const GeometryImpl &geo ) : Base( geo ) {}
 
-      Entity ( const Grid &grid, int subEntity )
-        : Base( grid, subEntity )
-      {}
-
-      Entity ( const GeometryImpl &geo, int subEntity )
-        : Base( geo, subEntity )
-      {}
+      Entity ( const Grid &grid, int subEntity ) : Base( grid, subEntity ) {}
+      Entity ( const GeometryImpl &geo, int subEntity ) : Base( geo, subEntity ) {}
     };
 
 
@@ -692,13 +688,10 @@ namespace Dune
       using Base::grid;
       using Base::hostEntity;
 
-      explicit Entity ( const Grid &grid )
-        : Base( grid )
-      {}
+      Entity () : Base() {}
 
-      explicit Entity ( const GeometryImpl &geo )
-        : Base( geo )
-      {}
+      explicit Entity ( const Grid &grid ) : Base( grid ) {}
+      explicit Entity ( const GeometryImpl &geo ) : Base( geo ) {}
 
       template< int codim >
       int count () const

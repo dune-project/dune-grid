@@ -438,7 +438,7 @@ namespace Dune
      * For vector valued data all components for a vertex are assumed to
      * be consecutive.
      *
-     * @param v The container with the values of the grid function for each cell.
+     * @param v The container with the values of the grid function for each vertex.
      * @param name A name to identify the grid function.
      * @param ncomps Number of components (default is 1).
      */
@@ -902,7 +902,8 @@ namespace Dune
         ncells++;
         // because of the use of vertexmapper->map(), this iteration must be
         // in the order of Dune's numbering.
-        for (int i=0; i<it->subEntities(n); ++i)
+        const int subEntities = it->subEntities(n);
+        for (int i=0; i<subEntities; ++i)
         {
           ncorners++;
           if (datamode == VTK::conforming)

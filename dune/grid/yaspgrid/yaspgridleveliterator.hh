@@ -26,6 +26,10 @@ namespace Dune {
     typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename GridImp::YGrid::Iterator I;
 
+    //! default constructor
+    YaspLevelIterator ()
+    {}
+
     //! constructor
     YaspLevelIterator (const GridImp * yg, const YGLI & g, const I& it) :
       YaspEntityPointer<codim,GridImp>(yg,g,it) {}

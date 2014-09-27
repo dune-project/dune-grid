@@ -140,7 +140,8 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
       for( AllIterator it = gridView.template begin< 0, Dune::All_Partition >(); it != allEnd; ++it )
       {
         Dune::PartitionType ept = it->partitionType();
-        for( int i = 0; i < it->subEntities(codim); ++i )
+        const int subEntities = it->subEntities(codim);
+        for( int i = 0; i < subEntities; ++i )
         {
           Dune::PartitionType pt = it->template subEntity< codim >( i )->partitionType();
           if( !possibleSubPartitionType( ept, pt ) )

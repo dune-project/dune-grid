@@ -569,7 +569,7 @@ namespace Dune
                 const MPICommunicatorType mpiComm,
                 const DuneBoundaryProjectionType *bndPrj,
                 const DuneBoundaryProjectionVector *bndVec,
-                const ALUGridRefinementType refinementType );
+                const ALUGridRefinementType refinementType ) DUNE_DEPRECATED_MSG("ALUGrid is deprecated, please use the new module DUNE-ALUGrid.");
 
   public:
     //! \brief Desctructor

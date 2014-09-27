@@ -145,9 +145,9 @@ namespace Dune
 
      <h2>Geometry of an intersection</h2>
 
-     The method intersectionGlobal returns a geometry mapping the intersection
+     The method geometry returns a geometry mapping the intersection
      as a codim one structure to global coordinates. The methods
-     intersectionSelfLocal and intersectionNeighborLocal return geometries
+     geometryInInside and geometryInOutside return geometries
      mapping the intersection into the reference elements of the
      originating entity and the neighboring entity, respectively.
      The indexInInside and indexInOutside methods return the codim one
@@ -331,6 +331,9 @@ namespace Dune
      *  This method returns a Geometry object that provides a mapping from
      *  local coordinates of the intersection to global (world) coordinates.
      *
+     *  \note If the returned geometry has type <b>none</b> then only a limited set of features
+     *        is availalbe for the geometry, i.e. center and volume.
+     *
      *  \note Previously, the geometry was encapsulated in the intersection object
      *        and a const reference was returned.
      *
@@ -389,7 +392,7 @@ namespace Dune
           @copydoc Dune::Intersection::outerNormal
        The normal is scaled with the integration element of the intersection. This
           method is redundant but it may be more efficent to use this function
-          rather than computing the integration element via intersectionGlobal().
+          rather than computing the integration element via geometry().
      */
     GlobalCoordinate integrationOuterNormal (const LocalCoordinate& local) const
     {
@@ -467,7 +470,7 @@ namespace Dune
     FieldVector<ct, dimworld> integrationOuterNormal (const FieldVector<ct, dim-1>& local) const
     {
       FieldVector<ct, dimworld> n = asImp().unitOuterNormal(local);
-      n *= asImp().intersectionGlobal().integrationElement(local);
+      n *= asImp().geometry().integrationElement(local);
       return n;
     }
 
