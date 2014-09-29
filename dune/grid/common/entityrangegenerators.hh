@@ -329,6 +329,47 @@ namespace Dune
   //! \}
 
 
+
+  //! \name Hierarchic Entity range
+  //! \brief Iterator range for hierarchic access to the more-refined entities that result from the subdivision of a given element.
+  //! \{
+
+
+  //! Iterates over all descendant elements of the given element up to a maximum level.
+  /**
+   * This functions returns an object representing the range of descendat elements of the
+   * element (Entity with codimension 0) e. The main purpose of this function is to enable
+   * iteration over those descendants by means of a range-based for loop:
+   *
+   * \code
+   * // iterate over all descendants of an entity
+   * auto&& entity = ...; // get an entity from somewhere
+   * for (auto&& e : descendantElements(entity,grid.maxLevel()))
+   * {
+   *   std::cout << e.geometry().center() << std::endl;
+   * }
+   * \endcode
+   *
+   * \note This function only works for elements (entities with codimension 0). Attempting to
+   *       call this function with an entity of higher codimension will result in a compile
+   *       time error.
+   *
+   * \relates         Entity
+   * \param e         the Entity whose descendants should be iterated over.
+   * \param maxLevel  the maximum grid level for which to return descendants. Elements with
+   *                  `level > maxLevel` will be omitted from the range.
+   * \returns         an unspecified object that is guaranteed to fulfil the interface
+   *                  of IteratorRange and that can be iterated over using a range-based
+   *                  for loop.
+   */
+  template<typename Entity>
+  IteratorRange<...> descendantElements(const Entity& e, int maxLevel);
+  // Entity<int dim, class GridImp, template<int,int,class> class EntityImp>
+
+  //! \}
+
+
+
   //! \name Entity ranges with (co)dimension template argument
   //! \brief Entity ranges which allow specifying the codimension / dimension as a numeric template parameter.
   //! \{
@@ -698,6 +739,15 @@ namespace Dune
     return entities(gv,cd,Partitions::all);
   }
 
+  /**
+   * Hierarchic entity range implementation.
+   */
+  template<typename Entity>
+  IteratorRange<typename Entity::HierarchicIterator> descendantElements(const Entity& e, int maxLevel)
+  {
+    typedef IteratorRange<typename Entity::HierarchicIterator> return_type;
+    return return_type(e.hbegin(maxLevel),e.hend(maxLevel));
+  }
 
   /**
    * Intersection range implementation.
