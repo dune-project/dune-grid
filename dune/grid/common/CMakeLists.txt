@@ -9,7 +9,6 @@ set(HEADERS
   entity.hh
   entityiterator.hh
   entitypointer.hh
-  entityrangegenerators.hh
   entityseed.hh
   exceptions.hh
   geometry.hh
@@ -24,6 +23,7 @@ set(HEADERS
   mcmgmapper.hh
   mapper.hh
   partitionset.hh
+  rangegenerators.hh
   sizecache.hh
   scsgmapper.hh
   universalmapper.hh)

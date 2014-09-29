@@ -8,7 +8,7 @@
 #include <dune/geometry/type.hh>
 
 #include <dune/grid/common/datahandleif.hh>
-#include <dune/grid/common/entityrangegenerators.hh>
+#include <dune/grid/common/rangegenerators.hh>
 
 namespace Dune
 {

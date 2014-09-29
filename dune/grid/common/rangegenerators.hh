@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_COMMON_ENTITYRANGEGENERATORS_HH
-#define DUNE_GRID_COMMON_ENTITYRANGEGENERATORS_HH
+#ifndef DUNE_GRID_COMMON_RANGEGENERATORS_HH
+#define DUNE_GRID_COMMON_RANGEGENERATORS_HH
 
 #include <dune/common/iteratorrange.hh>
 #include <dune/geometry/dimension.hh>
@@ -845,4 +845,4 @@ namespace Dune
 
 } // namespace Dune
 
-#endif // DUNE_GRID_COMMON_ENTITYRANGEGENERATORS_HH
+#endif // DUNE_GRID_COMMON_RANGEGENERATORS_HH

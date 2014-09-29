@@ -12,7 +12,6 @@ common_HEADERS = \
 	entity.hh \
 	entityiterator.hh \
 	entitypointer.hh \
-	entityrangegenerators.hh \
 	entityseed.hh \
 	exceptions.hh \
 	geometry.hh \
@@ -27,6 +26,7 @@ common_HEADERS = \
 	mcmgmapper.hh \
 	mapper.hh \
 	partitionset.hh \
+	rangegenerators.hh \
 	sizecache.hh \
 	scsgmapper.hh \
 	universalmapper.hh
