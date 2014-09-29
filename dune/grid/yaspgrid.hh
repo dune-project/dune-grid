@@ -164,6 +164,11 @@ namespace Dune {
   public:
     //! Type used for coordinates
     typedef typename CoordCont::ctype ctype;
+#ifdef HAVE_MPI
+    typedef CollectiveCommunication<MPI_Comm> CollectiveCommunicationType;
+#else
+    typedef CollectiveCommunication<YaspGrid<dim, CoordCont> > CollectiveCommunicationType;
+#endif
 
 #ifndef DOXYGEN
     typedef typename Dune::YGrid<CoordCont> YGrid;
@@ -1605,21 +1610,12 @@ namespace Dune {
       return leafIndexSet_;
     }
 
-#if HAVE_MPI
     /*! @brief return a collective communication object
      */
-    const CollectiveCommunication<MPI_Comm>& comm () const
+    const CollectiveCommunicationType& comm () const
     {
       return ccobj;
     }
-#else
-    /*! @brief return a collective communication object
-     */
-    const CollectiveCommunication<YaspGrid>& comm () const
-    {
-      return ccobj;
-    }
-#endif
 
   private:
 
@@ -1714,11 +1710,7 @@ namespace Dune {
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }
 
-#if HAVE_MPI
-    CollectiveCommunication<MPI_Comm> ccobj;
-#else
-    CollectiveCommunication<YaspGrid> ccobj;
-#endif
+    CollectiveCommunicationType ccobj;
 
     Torus<dim> _torus;
 
