@@ -45,7 +45,8 @@ set(CACHECOORDFUNCTION 0)
 set(TESTS
   test_geogrid test_identitygrid test_oned test_sgrid test_yaspgrid
   ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
-  ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid)
+  ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid
+  testiteratorranges)
 
 set_property(DIRECTORY APPEND PROPERTY
   COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
@@ -100,6 +101,10 @@ if(ALUGRID_FOUND AND UG_FOUND)
   add_dune_ug_flags(test_dgfalu_uggrid_combination)
   add_dune_alugrid_flags(test_dgfalu_uggrid_combination)
 endif(ALUGRID_FOUND AND UG_FOUND)
+
+add_executable(testiteratorranges EXCLUDE_FROM_ALL testiteratorranges.cc)
+add_dune_mpi_flags(testiteratorranges)
+
 
 foreach(_exe ${TESTS})
   target_link_libraries(${_exe} "dunegrid" ${DUNE_LIBS})

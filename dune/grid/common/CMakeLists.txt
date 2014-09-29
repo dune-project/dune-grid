@@ -22,6 +22,8 @@ set(HEADERS
   intersectioniterator.hh
   mcmgmapper.hh
   mapper.hh
+  partitionset.hh
+  rangegenerators.hh
   sizecache.hh
   scsgmapper.hh
   universalmapper.hh)

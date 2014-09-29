@@ -14,7 +14,7 @@
 	 @ingroup Grid
         @brief Interfaces needed when working with a \ref Grid "Dune::Grid"
   */
-  /** @defgroup GIRelatedTypes Enumerations 
+  /** @defgroup GIRelatedTypes Related types and enumerations
       @ingroup GridInterface */
   /** @defgroup GIGrid Grid Abstract Base Class
       @ingroup GridInterface */
@@ -27,6 +27,8 @@
   /** @defgroup GIEntityPointer EntityPointer and Iterators
       @ingroup GridInterface */
   /** @defgroup GIIntersectionIterator Intersection and IntersectionIterator
+      @ingroup GridInterface */
+  /** @defgroup GIIteration Iterating over grid entities and intersections
       @ingroup GridInterface */
   /** @defgroup IndexIdSets IndexSet and IdSet
 	  @ingroup GridInterface */

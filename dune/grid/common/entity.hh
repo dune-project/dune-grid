@@ -3,9 +3,14 @@
 #ifndef DUNE_GRID_ENTITY_HH
 #define DUNE_GRID_ENTITY_HH
 
+#include <dune/common/iteratorrange.hh>
 #include <dune/common/typetraits.hh>
+
+#include <dune/geometry/dimension.hh>
+
 #include "grid.hh"
 #include "entitypointer.hh"
+#include "rangegenerators.hh"
 
 namespace Dune
 {
@@ -540,6 +545,7 @@ namespace Dune
     }
 
   };
+
 
 
   //********************************************************************
