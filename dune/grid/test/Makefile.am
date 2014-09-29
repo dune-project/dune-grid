@@ -222,23 +222,6 @@ testiteratorranges_LDADD =			\
 	$(DUNEMPILIBS)				\
 	$(LDADD)
 
-
-# force fallback test without range-based-for
-NORMALTESTS += testiteratorranges-no-range-based-for
-testiteratorranges_no_range_based_for_SOURCES = \
-	testiteratorranges.cc
-testiteratorranges_no_range_based_for_CPPFLAGS =\
-	$(AM_CPPFLAGS)				\
-	$(DUNEMPICPPFLAGS)			\
-	-DCHECK_WITHOUT_RANGE_BASED_FOR
-testiteratorranges_no_range_based_for_LDFLAGS = \
-	$(AM_LDFLAGS)				\
-	$(DUNEMPILDFLAGS)
-testiteratorranges_no_range_based_for_LDADD =	\
-	$(DUNEMPILIBS)				\
-	$(LDADD)
-
-
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = CMakeLists.txt $(SOURCES)
 

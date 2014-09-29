@@ -9,14 +9,10 @@
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
 
-// make it possible to compile fallback code on newer compilers
-#ifdef CHECK_WITHOUT_RANGE_BASED_FOR
-#undef HAVE_RANGE_BASED_FOR
-#endif
+// this whole test only makes sense if we have range-based for loops
+#if HAVE_RANGE_BASED_FOR
 
 #define VERIFY(t,msg) do { if (!((t))) DUNE_THROW(Dune::Exception, "Check " #t " failed (" msg ")"); } while (false)
-
-#if HAVE_RANGE_BASED_FOR
 
 template<typename GV, typename R>
 void checkRange(GV gv, int codim, R range, bool verify_less = false)
@@ -35,68 +31,10 @@ void checkRange(GV gv, int codim, R range, bool verify_less = false)
     VERIFY(count == gv.size(codim),"wrong number of elements for codim " << codim << " ");
 }
 
-#else // HAVE_RANGE_BASED_FOR
 
-template<typename GV, typename R>
-void checkRange(GV gv, int codim, R range, bool verify_less = false)
-{
-  int count = 0;
-  int indices = 0;
-  for (typename R::iterator it = range.begin(); it != range.end(); ++it)
-    {
-      VERIFY(codim == it->codimension,"wrong codimension");
-      ++count;
-      indices += gv.indexSet().index(*it);
-    }
-  if (verify_less)
-    VERIFY(count <= gv.size(codim),"wrong number of elements for codim " << codim << " ");
-  else
-    VERIFY(count == gv.size(codim),"wrong number of elements for codim " << codim << " ");
-}
-
-template<typename R>
-void checkIntersectionRange(const R& range, int& count, int& indices)
-{
-  for (typename R::iterator it = range.begin(); it != range.end(); ++it)
-    {
-      ++count;
-      indices += it->indexInInside();
-    }
-}
-
-template<typename R, typename Grid>
-void checkDescendantElementRange(const R& range, const Grid& grid, int& count, int& indices)
-{
-  for (typename R::iterator it = range.begin(); it != range.end(); ++it)
-    {
-      ++count;
-      indices += grid.levelGridView(it->level()).indexSet().index(*it);
-    }
-}
-
-#endif // HAVE_RANGE_BASED_FOR
-
-template<typename OS>
-void check_yasp(OS&& os) {
-
-  const int dim = 3;
-
-  Dune::FieldVector<double,dim> Len(1.0);
-  Dune::array<int,dim> s;
-  std::fill(s.begin(), s.end(), 8);
-  std::bitset<dim> p;
-  int overlap = 1;
-
-#if HAVE_MPI
-  Dune::YaspGrid<dim> grid(MPI_COMM_WORLD,Len,s,p,overlap);
-  os << "Parallel run on " << grid.comm().size() << " processors" << std::endl;
-#else
-  Dune::YaspGrid<dim> grid(Len,s,p,overlap);
-  os << "Sequential run" << std::endl;
-#endif
-
-  // refine once so that we can check the hierarchic iterator range
-  grid.globalRefine(1);
+// The grid *must* be refined at least once!
+template<typename Grid, typename OS>
+void check_ranges(const Grid& grid, OS&& os) {
 
   auto gv = grid.leafGridView();
 
@@ -229,13 +167,40 @@ Rank0Stream<S,C> rank0Stream(S& s, C c)
   return {s,c};
 }
 
+template<typename OS>
+void check_yasp_3d(OS& os)
+{
+
+  os << "Running tests on 3D YaspGrid..." << std::endl;
+
+  const int dim = 3;
+
+  Dune::FieldVector<double,dim> Len(1.0);
+  Dune::array<int,dim> s;
+  std::fill(s.begin(), s.end(), 8);
+  std::bitset<dim> p;
+  int overlap = 1;
+
+#if HAVE_MPI
+  Dune::YaspGrid<dim> grid(MPI_COMM_WORLD,Len,s,p,overlap);
+  os << "Parallel run on " << grid.comm().size() << " processors" << std::endl;
+#else
+  Dune::YaspGrid<dim> grid(Len,s,p,overlap);
+  os << "Sequential run" << std::endl;
+#endif
+
+  // refine once so that we can check the hierarchic iterator range
+  grid.globalRefine(1);
+
+  check_ranges(grid,os);
+}
 
 
-int main (int argc , char **argv) {
+int main(int argc , char **argv) {
   try {
     // Initialize MPI, if present
     Dune::MPIHelper::instance(argc, argv);
-    check_yasp(rank0Stream(std::cout,Dune::MPIHelper::getCollectiveCommunication()));
+    check_yasp_3d(rank0Stream(std::cout,Dune::MPIHelper::getCollectiveCommunication()));
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
@@ -247,3 +212,14 @@ int main (int argc , char **argv) {
 
   return 0;
 }
+
+
+#else // HAVE_RANGE_BASED_FOR
+
+int main(int argc, char** argv)
+{
+  std::cout << "Tests for iteration ranges skipped (compiler too old)" << std::endl;
+  return 0;
+}
+
+#endif // HAVE_RANGE_BASED_FOR

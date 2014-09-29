@@ -46,7 +46,7 @@ set(TESTS
   test_geogrid test_identitygrid test_oned test_sgrid test_yaspgrid
   ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
   ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid
-  testiteratorranges testiteratorranges-no-range-based-for)
+  testiteratorranges)
 
 set_property(DIRECTORY APPEND PROPERTY
   COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
@@ -105,12 +105,6 @@ endif(ALUGRID_FOUND AND UG_FOUND)
 add_executable(testiteratorranges EXCLUDE_FROM_ALL testiteratorranges.cc)
 add_dune_mpi_flags(testiteratorranges)
 
-add_executable(testiteratorranges-no-range-based-for EXCLUDE_FROM_ALL testiteratorranges.cc)
-add_dune_mpi_flags(testiteratorranges-no-range-based-for)
-set_property(TARGET testiteratorranges-no-range-based-for
-  APPEND PROPERTY COMPILE_DEFINITIONS
-  CHECK_WITHOUT_RANGE_BASED_FOR
-  )
 
 foreach(_exe ${TESTS})
   target_link_libraries(${_exe} "dunegrid" ${DUNE_LIBS})
