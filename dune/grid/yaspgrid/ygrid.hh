@@ -775,7 +775,7 @@ namespace Dune {
 
     private:
 
-    friend typename YGrid<CC>::Iterator;
+    friend class YGrid<CC>::Iterator;
     DAI _begin;
     DAI _end;
     Dune::array<int,StaticPower<2,dim>::power> _shiftmapping;
