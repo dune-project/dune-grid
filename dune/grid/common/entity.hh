@@ -10,6 +10,7 @@
 
 #include "grid.hh"
 #include "entitypointer.hh"
+#include "rangegenerators.hh"
 
 namespace Dune
 {
