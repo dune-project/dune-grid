@@ -172,8 +172,61 @@ void checkGeometryInFather(const GridType& grid)
         if (geometryInFather.integrationElement(center) <=0)
           DUNE_THROW(GridError, "nonpositive integration element found!");
 
-        /** \todo Missing local() */
-        /** \todo Missing global() */
+        // /////////////////////////////////////////////////////////////////////////////////////
+        // check global transformation of geometryInFather
+        // /////////////////////////////////////////////////////////////////////////////////////
+        for( int j=0; j < eIt->geometry().corners(); ++j )
+        {
+          // create a global vertex
+          const typename Geometry::GlobalCoordinate cornerViaSon =
+            eIt->geometry().corner(j);
+          // map to child local
+          const typename Geometry::LocalCoordinate cornerInSon =
+            eIt->geometry().local(cornerViaSon);
+          // map to father
+          const typename Geometry::LocalCoordinate cornerInFather =
+            geometryInFather.global(cornerViaSon);
+          // map father to global
+          const typename Geometry::GlobalCoordinate cornerViaFather =
+            eIt->father()->geometry().global(cornerInFather);
+
+          if( (cornerViaFather - cornerViaSon).infinity_norm() > 1e-7 )
+          {
+            ++differentVertexCoords;
+            std :: cout << "global transformation of geometryInFather yields different vertex position "
+                        << "(son: " << cornerViaSon
+                        << ", father: " << cornerViaFather << ")." << std :: endl;
+          }
+        }
+
+        // /////////////////////////////////////////////////////////////////////////////////////
+        // check local transformation of geometryInFather
+        // /////////////////////////////////////////////////////////////////////////////////////
+        for( int j=0; j < eIt->geometry().corners(); ++j )
+        {
+          // create a global vertex
+          const typename Geometry::GlobalCoordinate global =
+            eIt->geometry().corner(j);
+          // map to child local
+          const typename Geometry::LocalCoordinate cornerInSon =
+            eIt->geometry().local(global);
+          // map global to father
+          const typename Geometry::GlobalCoordinate cornerInFather =
+            eIt->father()->geometry().local(global);
+          // map from father to son
+          const typename Geometry::LocalCoordinate cornerViaFather =
+            geometryInFather.local(cornerInFather);
+
+          if( (cornerViaFather - cornerInSon).infinity_norm() > 1e-7 )
+          {
+            ++differentVertexCoords;
+            std :: cout << "local transformation of geometryInFather yields different vertex position "
+                        << "(global: " << global
+                        << ", son: " << cornerInSon
+                        << ", father: " << cornerViaFather << ")." << std :: endl;
+          }
+        }
+
         /** \todo Missing jacobianInverse() */
         /** \todo Missing checkInside() */
 
@@ -183,16 +236,16 @@ void checkGeometryInFather(const GridType& grid)
         // /////////////////////////////////////////////////////////////////////////////////////
         for( int j=0; j < geometryInFather.corners(); ++j )
         {
-          const typename Geometry::GlobalCoordinate cornerInFather
+          const typename Geometry::GlobalCoordinate cornerViaFather
             = eIt->father()->geometry().global( geometryInFather.corner( j ) );
-          const typename Geometry::GlobalCoordinate &cornerInSon = eIt->geometry().corner( j );
+          const typename Geometry::GlobalCoordinate &cornerViaSon = eIt->geometry().corner( j );
 
-          if( (cornerInFather - cornerInSon).infinity_norm() > 1e-7 )
+          if( (cornerViaFather - cornerViaSon).infinity_norm() > 1e-7 )
           {
             ++differentVertexCoords;
             std :: cout << "geometryInFather yields different vertex position "
-                        << "(son: " << cornerInSon
-                        << ", father: " << cornerInFather << ")." << std :: endl;
+                        << "(son: " << cornerViaSon
+                        << ", father: " << cornerViaFather << ")." << std :: endl;
           }
         }
       }
