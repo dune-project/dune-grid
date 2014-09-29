@@ -225,6 +225,7 @@ namespace Dune
    *
    * \sa elements(const GV&,PartitionSet<partitions>)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the elements.
    * \returns    an unspecified object that is guaranteed to fulfil the interface
@@ -259,6 +260,7 @@ namespace Dune
    *
    * \sa facets(const GV&,PartitionSet<partitions>)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the facets.
    * \returns    an unspecified object that is guaranteed to fulfil the interface
@@ -293,6 +295,7 @@ namespace Dune
    *
    * \sa edges(const GV&,PartitionSet<partitions>)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the edges.
    * \returns    an unspecified object that is guaranteed to fulfil the interface
@@ -327,6 +330,7 @@ namespace Dune
    *
    * \sa vertices(const GV&,PartitionSet<partitions>)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the vertices.
    * \returns    an unspecified object that is guaranteed to fulfil the interface
@@ -361,6 +365,7 @@ namespace Dune
    * }
    * \endcode
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \relates    Entity
    * \param gv   the GridView to use for determining interior intesections.
@@ -401,6 +406,7 @@ namespace Dune
    *       call this function with an entity of higher codimension will result in a compile
    *       time error.
    *
+   * \since      GCC 4.6
    * \relates         Entity
    * \param e         the Entity whose descendants should be iterated over.
    * \param maxLevel  the maximum grid level for which to return descendants. Elements with
@@ -453,6 +459,7 @@ namespace Dune
    * \sa entities(const GV&,Codim<codim>,PartitionSet<partitions>)
    * \sa entities(const GV&,Dim<dim>)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
    * \param cd   a Codim object that is used to specify the codimension of the entities by means
@@ -498,6 +505,7 @@ namespace Dune
    * \sa entities(const GV&,Dim<dim>,PartitionSet<partitions>)
    * \sa entities(const GV&,Codim<codim>)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
    * \param d    a Dim object that is used to specify the dimension of the entities by means
@@ -537,6 +545,7 @@ namespace Dune
    *
    * \sa elements(const GV&)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the elements.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
@@ -568,6 +577,7 @@ namespace Dune
    *
    * \sa facets(const GV&)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the facets.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
@@ -602,6 +612,7 @@ namespace Dune
    *
    * \sa edges(const GV&)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the edges.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
@@ -633,6 +644,7 @@ namespace Dune
    *
    * \sa vertices(const GV&)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the vertices.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
@@ -680,6 +692,7 @@ namespace Dune
    * \sa entities(const GV&,Codim<codim>)
    * \sa entities(const GV&,Dim<dim>,PartitionSet<partitions>)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
    * \param cd   a Codim object that is used to specify the codimension of the entities by means
@@ -721,6 +734,7 @@ namespace Dune
    * \sa entities(const GV&,Dim<dim>)
    * \sa entities(const GV&,Codim<codim>,PartitionSet<partitions>)
    *
+   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
    * \param cd   a Codim object that is used to specify the dimension of the entities by means
@@ -740,6 +754,8 @@ namespace Dune
 
 #else // DOXYGEN
 
+// only make the implementations available on new compilers - there is a really nasty bug in GCC 4.4...
+#if HAVE_RANGE_BASED_FOR
 
   // ******************************************************************************************
   // Implementations
@@ -883,6 +899,7 @@ namespace Dune
     return entities(gv,Dim<0>());
   }
 
+#endif // HAVE_RANGE_BASED_FOR
 
 #endif // DOXYGEN
 
