@@ -232,7 +232,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV>
-  IteratorRange<...> elements(const GV& gv);
+  inline IteratorRange<...> elements(const GV& gv);
 
 
   //! Iterates over all facets (entities with codimension 1) of a GridView.
@@ -266,7 +266,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV>
-  IteratorRange<...> facets(const GV& gv);
+  inline IteratorRange<...> facets(const GV& gv);
 
 
   //! Iterates over all edges (entities with dimension 1) of a GridView.
@@ -300,7 +300,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV>
-  IteratorRange<...> edges(const GV& gv);
+  inline IteratorRange<...> edges(const GV& gv);
 
 
   //! Iterates over all vertices (entities with dimension 0) of a GridView.
@@ -334,7 +334,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV>
-  IteratorRange<...> vertices(const GV& gv);
+  inline IteratorRange<...> vertices(const GV& gv);
 
 
   //! \}
@@ -370,7 +370,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, typename Entity>
-  IteratorRange<...> intersections(const GV& gv, const Entity& e);
+  inline IteratorRange<...> intersections(const GV& gv, const Entity& e);
 
 
   //! \}
@@ -410,7 +410,7 @@ namespace Dune
    *                  for loop.
    */
   template<typename Entity>
-  IteratorRange<...> descendantElements(const Entity& e, int maxLevel);
+  inline IteratorRange<...> descendantElements(const Entity& e, int maxLevel);
   // Entity<int dim, class GridImp, template<int,int,class> class EntityImp>
 
   //! \}
@@ -462,7 +462,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, int codim>
-  IteratorRange<...> entities(const GV& gv, Codim<codim> cd);
+  inline IteratorRange<...> entities(const GV& gv, Codim<codim> cd);
 
 
   //! Iterates over all entities of a GridView with the given dimension.
@@ -507,7 +507,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, int dim>
-  IteratorRange<...> entities(const GV& gv, Dim<dim> d);
+  inline IteratorRange<...> entities(const GV& gv, Dim<dim> d);
 
   //! \}
 
@@ -546,7 +546,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, unsigned int partitions>
-  IteratorRange<...> elements(const GV& gv, PartitionSet<partitions> ps);
+  inline IteratorRange<...> elements(const GV& gv, PartitionSet<partitions> ps);
 
 
   //! Iterates over all facets (entities with codimension 1) of a GridView that belong to the given PartitionSet.
@@ -580,7 +580,7 @@ namespace Dune
    * \relates GridView
    */
   template<typename GV, unsigned int partitions>
-  IteratorRange<...> facets(const GV& gv, PartitionSet<partitions> ps);
+  inline IteratorRange<...> facets(const GV& gv, PartitionSet<partitions> ps);
 
 
   //! Iterates over all edges (entities with dimension 1) of a GridView that belong to the given PartitionSet.
@@ -611,7 +611,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, unsigned int partitions>
-  IteratorRange<...> edges(const GV& gv, PartitionSet<partitions> ps);
+  inline IteratorRange<...> edges(const GV& gv, PartitionSet<partitions> ps);
 
 
   //! Iterates over all vertices (entities with dimension 0) of a GridView that belong to the given PartitionSet.
@@ -642,7 +642,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, unsigned int partitions>
-  IteratorRange<...> vertices(const GV& gv, PartitionSet<partitions> ps);
+  inline IteratorRange<...> vertices(const GV& gv, PartitionSet<partitions> ps);
 
   //! \}
 
@@ -691,7 +691,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, int codim, unsigned int partitions>
-  IteratorRange<...> entities(const GV& gv gv, Codim<codim> cd, PartitionSet<partitions> ps);
+  inline IteratorRange<...> entities(const GV& gv gv, Codim<codim> cd, PartitionSet<partitions> ps);
 
 
   //! Iterates over all entities of a GridView with the given dimension that belong to the given PartitionSet.
@@ -732,7 +732,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, int dim, unsigned int partitions>
-  IteratorRange<...> entities(const GV& gv, Dim<dim> d, PartitionSet<partitions> ps);
+  inline IteratorRange<...> entities(const GV& gv, Dim<dim> d, PartitionSet<partitions> ps);
 
 
   //! \}
@@ -756,7 +756,7 @@ namespace Dune
    * Dune namespace or in the namespace of the GridView object.
    */
   template<typename GV, int codim, unsigned int partitions>
-  IteratorRange<
+  inline IteratorRange<
     typename GV::template Codim<codim>::template Partition<
       derive_partition_iterator_type<partitions>::value
       >::Iterator
@@ -779,7 +779,7 @@ namespace Dune
    * All other functions without PartitionSet parameter forward to this function.
    */
   template<typename GV, int codim>
-  auto entities(const GV& gv, Codim<codim> cd)
+  inline auto entities(const GV& gv, Codim<codim> cd)
     -> decltype(entities(gv,cd,Partitions::all))
   {
     static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
@@ -790,7 +790,7 @@ namespace Dune
    * Hierarchic entity range implementation.
    */
   template<typename Entity>
-  IteratorRange<typename Entity::HierarchicIterator> descendantElements(const Entity& e, int maxLevel)
+  inline IteratorRange<typename Entity::HierarchicIterator> descendantElements(const Entity& e, int maxLevel)
   {
     typedef IteratorRange<typename Entity::HierarchicIterator> return_type;
     return return_type(e.hbegin(maxLevel),e.hend(maxLevel));
@@ -800,7 +800,7 @@ namespace Dune
    * Intersection range implementation.
    */
   template<typename GV, typename Entity>
-  IteratorRange<typename GV::IntersectionIterator> intersections(const GV& gv, const Entity& e)
+  inline IteratorRange<typename GV::IntersectionIterator> intersections(const GV& gv, const Entity& e)
   {
     return IteratorRange<typename GV::IntersectionIterator>(gv.ibegin(e),gv.iend(e));
   }
@@ -812,7 +812,7 @@ namespace Dune
    */
 
   template<typename GV, int dim, unsigned int partitions>
-  auto entities(const GV& gv, Dim<dim>, PartitionSet<partitions>)
+  inline auto entities(const GV& gv, Dim<dim>, PartitionSet<partitions>)
     -> decltype(entities(gv,Codim<GV::dimension - dim>(),PartitionSet<partitions>()))
   {
     static_assert(0 <= dim && dim <= GV::dimension, "invalid dimension for given GridView");
@@ -820,7 +820,7 @@ namespace Dune
   }
 
   template<typename GV, int dim>
-  auto entities(const GV& gv, Dim<dim>)
+  inline auto entities(const GV& gv, Dim<dim>)
     -> decltype(entities(gv,Codim<GV::dimension - dim>()))
   {
     static_assert(0 <= dim && dim <= GV::dimension, "invalid dimension for given GridView");
@@ -828,56 +828,56 @@ namespace Dune
   }
 
   template<typename GV, unsigned int partitions>
-  auto elements(const GV& gv, PartitionSet<partitions>)
+  inline auto elements(const GV& gv, PartitionSet<partitions>)
     -> decltype(entities(gv,Codim<0>(),PartitionSet<partitions>()))
   {
     return entities(gv,Codim<0>(),PartitionSet<partitions>());
   }
 
   template<typename GV>
-  auto elements(const GV& gv)
+  inline auto elements(const GV& gv)
     -> decltype(entities(gv,Codim<0>()))
   {
     return entities(gv,Codim<0>());
   }
 
   template<typename GV, unsigned int partitions>
-  auto facets(const GV& gv, PartitionSet<partitions>)
+  inline auto facets(const GV& gv, PartitionSet<partitions>)
     -> decltype(entities(gv,Codim<1>(),PartitionSet<partitions>()))
   {
     return entities(gv,Codim<1>(),PartitionSet<partitions>());
   }
 
   template<typename GV>
-  auto facets(const GV& gv)
+  inline auto facets(const GV& gv)
     -> decltype(entities(gv,Codim<1>()))
   {
     return entities(gv,Codim<1>());
   }
 
   template<typename GV, unsigned int partitions>
-  auto edges(const GV& gv, PartitionSet<partitions>)
+  inline auto edges(const GV& gv, PartitionSet<partitions>)
     -> decltype(entities(gv,Dim<1>(),PartitionSet<partitions>()))
   {
     return entities(gv,Dim<1>(),PartitionSet<partitions>());
   }
 
   template<typename GV>
-  auto edges(const GV& gv)
+  inline auto edges(const GV& gv)
     -> decltype(entities(gv,Dim<1>()))
   {
     return entities(gv,Dim<1>());
   }
 
   template<typename GV, unsigned int partitions>
-  auto vertices(const GV& gv, PartitionSet<partitions>)
+  inline auto vertices(const GV& gv, PartitionSet<partitions>)
     -> decltype(entities(gv,Dim<0>(),PartitionSet<partitions>()))
   {
     return entities(gv,Dim<0>(),PartitionSet<partitions>());
   }
 
   template<typename GV>
-  auto vertices(const GV& gv)
+  inline auto vertices(const GV& gv)
     -> decltype(entities(gv,Dim<0>()))
   {
     return entities(gv,Dim<0>());
