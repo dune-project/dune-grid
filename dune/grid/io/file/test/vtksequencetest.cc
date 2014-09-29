@@ -5,7 +5,7 @@
 #include "config.h" // autoconf defines, needed by the dune headers
 
 // dune headers
-#include <dune/grid/sgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriter.hh>
 
 #include <vector>
@@ -90,11 +90,12 @@ void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
 }
 
 template<int dim>
-void vtkCheck(int* n, double* h)
+void vtkCheck(const Dune::array<int,dim>& n,
+              const Dune::FieldVector<double,dim>& h)
 {
   const Dune :: PartitionIteratorType VTK_Partition = Dune :: InteriorBorder_Partition;
   std::cout << std::endl << "vtkSequenceCheck dim=" << dim << std::endl << std::endl;
-  Dune::SGrid<dim,dim> g(n, h);
+  Dune::YaspGrid<dim> g(h, n);
   g.globalRefine(1);
 
   doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::conforming );
@@ -109,12 +110,21 @@ int main(int argc, char **argv)
 {
   try {
 
-    int n[] = { 5, 5, 5, 5 };
-    double h[] = { 1.0, 2.0, 3.0, 4.0 };
-
-    vtkCheck<1>(n,h);
-    vtkCheck<2>(n,h);
-    vtkCheck<3>(n,h);
+    {
+      Dune::array<int,1> n = { 5 };
+      Dune::FieldVector<double,1> h = { 1.0 };
+      vtkCheck<1>(n,h);
+    }
+    {
+      Dune::array<int,2> n = { 5, 5 };
+      Dune::FieldVector<double,2> h = { 1.0, 2.0 };
+      vtkCheck<2>(n,h);
+    }
+    {
+      Dune::array<int,3> n = { 5, 5, 5 };
+      Dune::FieldVector<double,3> h = { 1.0, 2.0, 3.0 };
+      vtkCheck<3>(n,h);
+    }
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
