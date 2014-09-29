@@ -130,6 +130,53 @@ namespace Dune
    * }
    * \endcode
    *
+   * <h1>Information for grid implementors</h1>
+   *
+   * <h2>Custom range implementations</h2>
+   *
+   * The default implementation of the range generator functions calls the correct begin() and end()
+   * methods on the GridView / the Entity and stores the iterators returned by these methods in an
+   * IteratorRange object which is then returned by value (as a temporary object). While any overhead
+   * associated with this process will normally be negligible compared with the ensuing grid traversal,
+   * you can guarantee optimal performance by making sure that your iterators are move-constructible and
+   * move-assignable.
+   * If, for some reason, you don't want to rely on this default implementation, you only have to provide
+   * an overload for the function `entities(const GV&, Dune::Codim<cd>, Dune::PartitionSet<ps>)`. All
+   * other functions simply forward to this single function. Apart from that, you will of course have
+   * to overload `intersections()` and `descendantElements()` as well - those are entirely separate.
+   *
+   * <h2>ADL lookup for grids in non-standard namespaces</h2>
+   *
+   * The range generator functions described on this page are found by means of argument-dependent
+   * lookup (ADL). That way, users don't have to explicitly specify the namespace when using those
+   * functions.
+   *
+   * Making ADL work does however require some care from grid implementors who are developing grids
+   * which are not placed in the namespace `Dune`. More precisely, the GridView and the Entity classes
+   * have to be in that namespace. If you are using the default facade classes, you don't have to worry
+   * about this fact (the facade classes are in the correct namespace), but if your implementation
+   * does not use those facades, you will have to import the functions on this page into the namespace
+   * of your GridView and / or Entity classes to make ADL work:
+   *
+   * \code
+   * namespace MyAweSomeGrid {
+   *
+   *   using Dune::entities;
+   *   using Dune::elements;
+   *   using Dune::facets;
+   *   using Dune::edges;
+   *   using Dune::vertices;
+   *   using Dune::descendantElements;
+   *   using Dune::intersections;
+   *
+   *   ...
+   *
+   * }
+   * \endcode
+   *
+   * Of course, you can also reimplement all functions in your own namespace, but that's probably
+   * a bad idea...
+   *
    * \{
    */
 
