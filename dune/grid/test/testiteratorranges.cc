@@ -79,21 +79,11 @@ void check_ranges(const Grid& grid, OS&& os) {
     // we need a LevelGridView higher up in the hierarchy for this
     auto gv = grid.levelGridView(grid.maxLevel()-1);
 
-#if HAVE_RANGE_BASED_FOR
-
     for (auto& e : descendantElements(*elements(gv).begin(),grid.maxLevel()))
       {
         ++count;
         indices += grid.levelGridView(e.level()).indexSet().index(e);
       }
-
-#else // HAVE_RANGE_BASED_FOR
-
-    // do the check in a function to capture the return type of the descendantElements call
-    // -> greatly simplifies code
-    checkDescendantElementRange(descendantElements(*(elements(gv).begin()),grid.maxLevel()),grid,count,indices);
-
-#endif // HAVE_RANGE_BASED_FOR
 
     VERIFY(count == 1 << dim,"wrong number of descendant elements");
   }
@@ -106,21 +96,11 @@ void check_ranges(const Grid& grid, OS&& os) {
     int count = 0;
     int indices = 0;
 
-#if HAVE_RANGE_BASED_FOR
-
     for (auto& is : intersections(gv,*elements(gv).begin()))
       {
         ++count;
         indices += is.indexInInside();
       }
-
-#else // HAVE_RANGE_BASED_FOR
-
-    // do the check in a function to capture the return type of the intersections call
-    // -> greatly simplifies code
-    checkIntersectionRange(intersections(gv,*(elements(gv).begin())),count,indices);
-
-#endif // HAVE_RANGE_BASED_FOR
 
     VERIFY(count == 2 * dim,"wrong number of intersections");
   }
