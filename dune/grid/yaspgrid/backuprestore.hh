@@ -146,12 +146,7 @@ namespace Dune
 
       YLoadBalanceBackup<dim> lb(torus_dims);
 
-      //TODO check whether truely sequential grid can be built with the collective comm object
-// #if HAVE_MPI
-      Grid* grid = new Dune::YaspGrid<dim>(comm, length, coarseSize, periodic, overlap, &lb);
-// #else
-//       Grid* grid = new Dune::YaspGrid<dim>(length, coarseSize, periodic, overlap, &lb);
-// #endif
+      Grid* grid = new Dune::YaspGrid<dim>(length, coarseSize, periodic, overlap, comm, &lb);
 
       grid->refineOptions(physicalOverlapSize);
       grid->globalRefine(refinement);
@@ -273,7 +268,7 @@ namespace Dune
       }
 
       YLoadBalanceBackup<dim> lb(torus_dims);
-      Grid* grid = new Grid(comm, coords, periodic, overlap, coarseSize, &lb);
+      Grid* grid = new Grid(coords, periodic, overlap, comm, coarseSize, &lb);
 
       grid->refineOptions(physicalOverlapSize);
       grid->globalRefine(refinement);
