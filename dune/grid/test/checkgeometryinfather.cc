@@ -185,7 +185,7 @@ void checkGeometryInFather(const GridType& grid)
             eIt->geometry().local(cornerViaSon);
           // map to father
           const typename Geometry::LocalCoordinate cornerInFather =
-            geometryInFather.global(cornerViaSon);
+            geometryInFather.global(cornerInSon);
           // map father to global
           const typename Geometry::GlobalCoordinate cornerViaFather =
             eIt->father()->geometry().global(cornerInFather);
