@@ -102,7 +102,7 @@ namespace Dune {
     //! Returns a new PartitionSet that also contains the partitions in set.
     template<unsigned int p>
     struct PartitionSet<partitions | p>
-    operator+(const PartitionSet<p>& set)
+    operator+(const PartitionSet<p>& set) const
     {
       return PartitionSet<partitions | p>();
     }
@@ -110,14 +110,13 @@ namespace Dune {
     //! Returns a new PartitionSet that does not contain the partitions in set.
     template<unsigned int p>
     struct PartitionSet<partitions & ~p>
-    operator-(const PartitionSet<p>& set)
+    operator-(const PartitionSet<p>& set) const
     {
       return PartitionSet<partitions & ~p>();
     }
 
     //! Writes the PartitionSet to an output stream.
-    template<unsigned int partitions>
-    friend std::ostream& operator<<(std::ostream& os, const PartitionSet<partitions>&)
+    friend std::ostream& operator<<(std::ostream& os, const PartitionSet&)
     {
       unsigned int set = partitions;
       os << "partition set {";
