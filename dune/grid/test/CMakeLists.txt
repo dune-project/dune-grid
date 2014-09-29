@@ -43,14 +43,14 @@ set(CACHECOORDFUNCTION 0)
 
 # tests where program to build and program to run are equal
 set(TESTS
-  testiteratorranges test_geogrid test_identitygrid test_oned test_sgrid test_yaspgrid
+  test_geogrid test_identitygrid test_oned test_sgrid test_yaspgrid
   ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
-  ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid)
+  ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid
+  testiteratorranges testiteratorranges-no-range-based-for)
 
 set_property(DIRECTORY APPEND PROPERTY
   COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
 
-add_executable(testiteratorranges EXCLUDE_FROM_ALL testentityrange.cc)
 add_executable(test_geogrid EXCLUDE_FROM_ALL test-geogrid.cc)
 add_executable(test_identitygrid EXCLUDE_FROM_ALL test-identitygrid.cc)
 add_executable(test_oned EXCLUDE_FROM_ALL test-oned.cc)
@@ -101,6 +101,16 @@ if(ALUGRID_FOUND AND UG_FOUND)
   add_dune_ug_flags(test_dgfalu_uggrid_combination)
   add_dune_alugrid_flags(test_dgfalu_uggrid_combination)
 endif(ALUGRID_FOUND AND UG_FOUND)
+
+add_executable(testiteratorranges EXCLUDE_FROM_ALL testiteratorranges.cc)
+add_dune_mpi_flags(testiteratorranges)
+
+add_executable(testiteratorranges-no-range-based-for EXCLUDE_FROM_ALL testiteratorranges.cc)
+add_dune_mpi_flags(testiteratorranges-no-range-based-for)
+set_property(TARGET testiteratorranges-no-range-based-for
+  APPEND PROPERTY COMPILE_DEFINITIONS
+  CHECK_WITHOUT_RANGE_BASED_FOR
+  )
 
 foreach(_exe ${TESTS})
   target_link_libraries(${_exe} "dunegrid" ${DUNE_LIBS})
