@@ -232,7 +232,7 @@ namespace Dune {
 #endif
 
     //! return reference to torus
-    const Torus<dim>& torus () const
+    const Torus<CollectiveCommunicationType, dim>& torus () const
     {
       return _torus;
     }
@@ -564,7 +564,7 @@ namespace Dune {
 
       // fill send buffers; iterate over all neighboring processes
       // non-periodic case is handled automatically because intersection will be zero
-      for (typename Torus<dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
+      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
       {
         // determine if we communicate with this neighbor (and what)
         bool skip = false;
@@ -608,35 +608,35 @@ namespace Dune {
       }
 
       // issue send requests for sendgrid being sent to all neighbors
-      for (typename Torus<dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
+      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
       {
         mpifriendly_send_sendgrid[i.index()] = mpifriendly_ygrid(send_sendgrid[i.index()]);
         _torus.send(i.rank(), &mpifriendly_send_sendgrid[i.index()], sizeof(mpifriendly_ygrid));
       }
 
       // issue recv requests for sendgrids of neighbors
-      for (typename Torus<dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
+      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
         _torus.recv(i.rank(), &mpifriendly_recv_sendgrid[i.index()], sizeof(mpifriendly_ygrid));
 
       // exchange the sendgrids
       _torus.exchange();
 
       // issue send requests for recvgrid being sent to all neighbors
-      for (typename Torus<dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
+      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
       {
         mpifriendly_send_recvgrid[i.index()] = mpifriendly_ygrid(send_recvgrid[i.index()]);
         _torus.send(i.rank(), &mpifriendly_send_recvgrid[i.index()], sizeof(mpifriendly_ygrid));
       }
 
       // issue recv requests for recvgrid of neighbors
-      for (typename Torus<dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
+      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
         _torus.recv(i.rank(), &mpifriendly_recv_recvgrid[i.index()], sizeof(mpifriendly_ygrid));
 
       // exchange the recvgrid
       _torus.exchange();
 
       // process receive buffers and compute intersections
-      for (typename Torus<dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
+      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
       {
         // what must be sent to this neighbor
         Intersection send_intersection;
@@ -725,14 +725,9 @@ namespace Dune {
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
-    #if HAVE_MPI
-    : ccobj(comm),
-    _torus(comm,tag,s,lb),
-    #else
-    : _torus(tag,s,lb),
-    #endif
-    leafIndexSet_(*this), _periodic = periodic, _overlap = overlap, _coarseSize = s,
-    keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+      : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
+        _periodic(periodic), _overlap(overlap), _coarseSize(s),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
       static_assert(is_same<CoordCont,EquidistantCoordinates<ctype,dim> >::value,
@@ -783,16 +778,9 @@ namespace Dune {
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
-    #if HAVE_MPI
-    : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
-    #else
-    : _torus(tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
-    #endif
-    leafIndexSet_(*this),
-    _periodic(std::bitset<dim>(0)),
-    _overlap(overlap),
-    keep_ovlp(true),
-    adaptRefCount(0), adaptActive(false)
+      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
+        leafIndexSet_(*this), _periodic(periodic), _overlap(overlap),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       if (!Dune::Yasp::checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
@@ -1755,7 +1743,7 @@ namespace Dune {
 
     CollectiveCommunicationType ccobj;
 
-    Torus<dim> _torus;
+    Torus<CollectiveCommunicationType,dim> _torus;
 
     std::vector< shared_ptr< YaspIndexSet<const YaspGrid<dim,CoordCont>, false > > > indexsets;
     YaspIndexSet<const YaspGrid<dim,CoordCont>, true> leafIndexSet_;
