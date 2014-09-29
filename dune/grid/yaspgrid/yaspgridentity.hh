@@ -150,7 +150,7 @@ namespace Dune {
 
       std::bitset<dim> operator()(int index, int cc) const
       {
-        std::bitset<dim> result(0);
+        std::bitset<dim> result(0ull);
         for (int d = dim; d>0; d--)
           {
             if (cc == d)
@@ -193,7 +193,7 @@ namespace Dune {
 
       std::bitset<dim> operator()(int index, int cc) const
       {
-        std::bitset<dim> result(0);
+        std::bitset<dim> result(0ull);
         for (int d = dim; d>0; d--)
           {
             if (d == cc)
