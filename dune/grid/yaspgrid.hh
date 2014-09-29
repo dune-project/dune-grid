@@ -740,10 +740,7 @@ namespace Dune {
       iTupel o_interior(o);
       iTupel s_interior(s);
 
-      #if HAVE_MPI
       double imbal = _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
-      imbal = _torus.global_max(imbal);
-      #endif
 
       fTupel h(L);
       for (int i=0; i<dim; i++)
@@ -784,9 +781,12 @@ namespace Dune {
     {
       if (!Dune::Yasp::checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
-      _periodic = periodic;
+
+      // check whether YaspGrid has been given the correct template parameter
+      static_assert(is_same<CoordCont,TensorProductCoordinates<ctype,dim> >::value,
+                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
+
       _levels.resize(1);
-      _overlap = overlap;
 
       //determine sizes of vector to correctly construct torus structure and store for later size requests
       for (int i=0; i<dim; i++)
@@ -797,10 +797,7 @@ namespace Dune {
       iTupel o_interior(o);
       iTupel s_interior(_coarseSize);
 
-#if HAVE_MPI
       double imbal = _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
-      imbal = _torus.global_max(imbal);
-#endif
 
       Dune::array<std::vector<ctype>,dim> newcoords;
       Dune::array<int, dim> offset(o_interior);
@@ -847,10 +844,6 @@ namespace Dune {
         }
       }
 
-      // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<CoordCont,TensorProductCoordinates<ctype,dim> >::value,
-                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
-
       TensorProductCoordinates<ctype,dim> cc(newcoords, offset);
 
       // add level
@@ -876,13 +869,7 @@ namespace Dune {
               std::bitset<dim> periodic,
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
-#if HAVE_MPI
-      : ccobj(comm),
-        _torus(comm,tag,s,lb),
-#else
-      : _torus(tag,s,lb),
-#endif
-        leafIndexSet_(*this),
+      : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       _periodic = periodic;
@@ -895,10 +882,7 @@ namespace Dune {
       iTupel o_interior(o);
       iTupel s_interior(s);
 
-#if HAVE_MPI
       double imbal = _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
-      imbal = _torus.global_max(imbal);
-#endif
 
       fTupel h(L);
       for (int i=0; i<dim; i++)
@@ -940,11 +924,7 @@ namespace Dune {
               Dune::array<std::vector<ctype>, dim> coords,
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
-#if HAVE_MPI
       : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
-#else
-      : _torus(tag,Dune::Yasp::sizeArray(coords),defaultLoadbalancer()),
-#endif
         leafIndexSet_(*this),
         _periodic(std::bitset<dim>(0)),
         _overlap(overlap),
@@ -966,10 +946,7 @@ namespace Dune {
       iTupel o_interior(o);
       iTupel s_interior(_coarseSize);
 
-      #if HAVE_MPI
       double imbal = _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
-      imbal = _torus.global_max(imbal);
-      #endif
 
       Dune::array<std::vector<ctype>,dim> newcoords;
       Dune::array<int, dim> offset(o_interior);
@@ -1035,32 +1012,23 @@ namespace Dune {
      *  @param coords coordinate vectors to be used for coarse grid
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
-     *  @param offset the index offset in a global coordinate vector
      *  @param coarseSize the coarse size of the global grid
      *  @param lb pointer to an overloaded YLoadBalance instance
      *
      *  @warning The construction of overlapping coordinate ranges is
      *           an error-prone procedure. For this reason, it is kept private.
      *           You can safely use it through BackupRestoreFacility. All other
-     *           use involves some serious pitfalls.
+     *           use is not supported for the moment.
      */
-    YaspGrid (Dune::MPIHelper::MPICommunicator comm,
-              Dune::array<std::vector<ctype>, dim> coords,
+    YaspGrid (Dune::array<std::vector<ctype>, dim> coords,
               std::bitset<dim> periodic,
               int overlap,
+              CollectiveCommunicationType comm,
               Dune::array<int,dim> coarseSize,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
-    #if HAVE_MPI
-    : ccobj(comm), _torus(comm,tag,coarseSize,lb),
-    #else
-    : _torus(tag,coarseSize,lb),
-    #endif
-    leafIndexSet_(*this),
-    _periodic(std::bitset<dim>(0)),
-    _overlap(overlap),
-    _coarseSize(coarseSize),
-    keep_ovlp(true),
-    adaptRefCount(0), adaptActive(false)
+      : ccobj(comm), _torus(comm,tag,coarseSize,lb), leafIndexSet_(*this),
+        _periodic(periodic), _overlap(overlap), _coarseSize(coarseSize),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
       static_assert(is_same<CoordCont,TensorProductCoordinates<ctype,dim> >::value,
@@ -1075,9 +1043,8 @@ namespace Dune {
       std::fill(o.begin(), o.end(), 0);
       Dune::array<int,dim> o_interior(o);
       Dune::array<int,dim> s_interior(coarseSize);
-#if HAVE_MPI
+
       double imbal = _torus.partition(_torus.rank(),o,coarseSize,o_interior,s_interior);
-#endif
 
       // get offset by modifying o_interior accoring to overlap
       Dune::array<int,dim> offset(o_interior);
