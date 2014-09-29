@@ -27,23 +27,20 @@ namespace Dune
   {
   public:
 
+    typedef YaspGrid<dim, TensorProductCoordinateContainer<ctype, dim> > Grid;
+    typedef typename Grid::Traits::CollectiveCommunication Comm;
+
     //! initialize the factory with a set of default values
-    TensorYaspGridFactory () : _comm (MPI_COMM_SELF), _periodic (), _overlap (1)
+    TensorYaspGridFactory () : _periodic (), _overlap (1)
     {}
 
     //! finalizes the factory and gives a pointer to the constructed grid
-    YaspGrid<dim, TensorProductCoordinateContainer<ctype, dim> >* createGrid ()
+    Grid* createGrid(Comm comm = Comm())
     {
       if (!Dune::Yasp::checkIfMonotonous (_coords))
         DUNE_THROW( Dune::Exception,
           "TensorYaspFactory did not get enough coordinate information to construct a grid!");
-      return new YaspGrid<dim, TensorProductCoordinateContainer<ctype, dim> > (_comm, _coords, _periodic, _overlap);
-    }
-
-    //! set the communicator object
-    void setCommunicator (Dune::MPIHelper::MPICommunicator comm)
-    {
-      _comm = comm;
+      return new grid(_coords, _periodic, _overlap, comm);
     }
 
     //! set whether the grid is periodic in direction dir
@@ -288,7 +285,6 @@ namespace Dune
     }
 
     Dune::array<std::vector<ctype>, dim> _coords;
-    Dune::MPIHelper::MPICommunicator _comm;
     std::bitset<dim> _periodic;
     int _overlap;
   };
