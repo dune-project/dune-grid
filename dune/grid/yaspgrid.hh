@@ -726,7 +726,7 @@ namespace Dune {
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
-        _periodic(periodic), _overlap(overlap), _coarseSize(s),
+       _periodic(periodic), _coarseSize(s), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
@@ -740,7 +740,7 @@ namespace Dune {
       iTupel o_interior(o);
       iTupel s_interior(s);
 
-      double imbal = _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
+      _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
 
       fTupel h(L);
       for (int i=0; i<dim; i++)
@@ -797,7 +797,7 @@ namespace Dune {
       iTupel o_interior(o);
       iTupel s_interior(_coarseSize);
 
-      double imbal = _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
+      _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
 
       Dune::array<std::vector<ctype>,dim> newcoords;
       Dune::array<int, dim> offset(o_interior);
@@ -882,7 +882,7 @@ namespace Dune {
       iTupel o_interior(o);
       iTupel s_interior(s);
 
-      double imbal = _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
+      _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
 
       fTupel h(L);
       for (int i=0; i<dim; i++)
@@ -946,7 +946,7 @@ namespace Dune {
       iTupel o_interior(o);
       iTupel s_interior(_coarseSize);
 
-      double imbal = _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
+      _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
 
       Dune::array<std::vector<ctype>,dim> newcoords;
       Dune::array<int, dim> offset(o_interior);
@@ -1027,7 +1027,7 @@ namespace Dune {
               Dune::array<int,dim> coarseSize,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,coarseSize,lb), leafIndexSet_(*this),
-        _periodic(periodic), _overlap(overlap), _coarseSize(coarseSize),
+        _periodic(periodic), _coarseSize(coarseSize), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
@@ -1044,7 +1044,7 @@ namespace Dune {
       Dune::array<int,dim> o_interior(o);
       Dune::array<int,dim> s_interior(coarseSize);
 
-      double imbal = _torus.partition(_torus.rank(),o,coarseSize,o_interior,s_interior);
+      _torus.partition(_torus.rank(),o,coarseSize,o_interior,s_interior);
 
       // get offset by modifying o_interior accoring to overlap
       Dune::array<int,dim> offset(o_interior);

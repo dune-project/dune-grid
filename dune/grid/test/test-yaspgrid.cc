@@ -76,7 +76,7 @@ void check_yasp(Dune::YaspGrid<dim,CC>* grid) {
   std::cout << std::endl << "YaspGrid<" << dim << ">";
 
   if (grid == NULL)
-    Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid();
+    grid = YaspFactory<dim,CC>::buildGrid();
 
   gridcheck(*grid);
   //grid->globalRefine(2);
