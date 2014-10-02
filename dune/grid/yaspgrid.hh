@@ -1061,7 +1061,7 @@ namespace Dune {
     }
 
     // the backup restore facility needs to be able to use above constructor
-    friend class BackupRestoreFacility<YaspGrid<dim,Coordinates> >;
+    friend struct BackupRestoreFacility<YaspGrid<dim,Coordinates> >;
 
     // do not copy this class
     YaspGrid(const YaspGrid&);
