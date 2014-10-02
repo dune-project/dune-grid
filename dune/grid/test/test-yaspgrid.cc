@@ -38,11 +38,7 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
     std::bitset<dim> p(0);
     int overlap = 1;
 
-#if HAVE_MPI
-    return new Dune::YaspGrid<dim>(MPI_COMM_WORLD,Len,s,p,overlap);
-#else
     return new Dune::YaspGrid<dim>(Len,s,p,overlap);
-#endif
   }
 };
 
@@ -71,11 +67,7 @@ struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
       coords[i][8] =  1.0;
     }
 
-#if HAVE_MPI
-    return new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(MPI_COMM_WORLD,coords,p,overlap);
-#else
     return new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(coords,p,overlap);
-#endif
   }
 };
 
