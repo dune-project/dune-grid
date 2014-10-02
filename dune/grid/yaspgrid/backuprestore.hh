@@ -11,8 +11,13 @@
 #include <dune/grid/common/backuprestore.hh>
 #include <dune/grid/alugrid/common/declaration.hh>
 
+// bump this version number up if you introduce any changes
+// to the outout format of the YaspGrid BackupRestoreFacility.
+#define YASPGRID_BACKUPRESTORE_FORMAT_VERSION 1
+
 namespace Dune
 {
+
   /** \brief Implement load balancer that gets the info from a file
    * To backup and restore the load balancing information, the BackupRestoreFacility
    * needs a special load balancing object. Users dont need to touch this.
@@ -66,6 +71,7 @@ namespace Dune
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)  */
     static void backup ( const Grid &grid, std::ostream &stream )
     {
+      stream << "YaspGrid BackupRestore Format Version: " << YASPGRID_BACKUPRESTORE_FORMAT_VERSION << std::endl;
       stream << "Torus structure: ";
       for (int i=0; i<dim; i++)
         stream << grid.torus().dims(i) << " ";
@@ -102,6 +108,12 @@ namespace Dune
     static Grid *restore (std::istream &stream, Comm comm = Comm())
     {
       std::string input;
+
+      int version;
+      stream >> input >> input >> input >> input;
+      stream >> version;
+      if (version != YASPGRID_BACKUPRESTORE_FORMAT_VERSION)
+        DUNE_THROW(Dune::Exception, "Your YaspGrid backup file is written in an outdated format!");
 
       Dune::array<int,dim> torus_dims;
       stream >> input >> input;
@@ -181,6 +193,7 @@ namespace Dune
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)  */
     static void backup ( const Grid &grid, std::ostream &stream )
     {
+      stream << "YaspGrid BackupRestore Format Version: " << YASPGRID_BACKUPRESTORE_FORMAT_VERSION << std::endl;
       stream << "Torus structure: ";
       for (int i=0; i<dim; i++)
         stream << grid.torus().dims(i) << " ";
@@ -218,6 +231,12 @@ namespace Dune
     static Grid *restore (std::istream &stream, Comm comm = Comm())
     {
       std::string input;
+
+      int version;
+      stream >> input >> input >> input >> input;
+      stream >> version;
+      if (version != YASPGRID_BACKUPRESTORE_FORMAT_VERSION)
+        DUNE_THROW(Dune::Exception, "Your YaspGrid backup file is written in an outdated format!");
 
       Dune::array<int,dim> torus_dims;
       stream >> input >> input;
