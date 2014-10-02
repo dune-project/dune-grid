@@ -100,8 +100,8 @@ namespace Dune
     /** \brief print information on this container */
     void print(std::ostream& s) const
     {
-      s << "Printing equidistant coordinate container:" << std::endl;
-      s << "Meshsize = " << _h << "  size = " << _s << std::endl;
+      s << "Printing equidistant coordinate information:" << std::endl;
+      s << "Meshsize: " << _h << std::endl << "Size: " << _s << std::endl;
     }
 
     private:
@@ -226,13 +226,12 @@ namespace Dune
     /** \brief print information on this container */
     void print(std::ostream& s) const
     {
-      s << "Printing Tensor Product Coordinate Container information:" << std::endl;
+      s << "Printing TensorProduct Coordinate information:" << std::endl;
       for (int i=0; i<dim; i++)
       {
-        s << "Direction " << i << ": ";
+        s << "Direction " << i << ": " << _c[i].size() << " coordinates" << std::endl;
         for (std::size_t j=0; j<_c[i].size(); j++)
-          s << _c[i][j] << " ";
-        s << std::endl;
+          s << _c[i][j] << std::endl;
       }
     }
 

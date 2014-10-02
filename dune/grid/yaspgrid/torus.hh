@@ -113,7 +113,7 @@ namespace Dune
      - Provide means to partition a grid to the torus.
 
    */
-  template<int d>
+  template<class CollectiveCommunication, int d>
   class Torus {
   public:
     //! type used to pass tupels in and out
@@ -145,27 +145,11 @@ namespace Dune
     {}
 
     //! make partitioner from communicator and coarse mesh size
-#if HAVE_MPI
-    Torus (MPI_Comm comm, int tag, iTupel size, const YLoadBalance<d>* lb)
-#else
-    Torus (int tag, iTupel size, const YLoadBalance<d>* lb)
-#endif
+    Torus (CollectiveCommunication comm, int tag, iTupel size, const YLoadBalance<d>* lb)
+      : _comm(comm), _tag(tag)
     {
-      // MPI stuff
-#if HAVE_MPI
-      _comm = comm;
-      MPI_Comm_size(comm,&_procs);
-      MPI_Comm_rank(comm,&_rank);
-#else
-      _procs=1; _rank=0;
-#endif
-      _tag = tag;
-
       // determine dimensions
-      lb->loadbalance(size, _procs, _dims);
-      // if (_rank==0) std::cout << "Torus<" << d
-      //                         << ">: mapping " << _procs << " processes onto "
-      //                         << _dims << " torus." << std::endl;
+      lb->loadbalance(size, _comm.size(), _dims);
 
       // compute increments for lexicographic ordering
       int inc = 1;
@@ -182,19 +166,19 @@ namespace Dune
     //! return own rank
     int rank () const
     {
-      return _rank;
+      return _comm.rank();
     }
 
     //! return own coordinates
     iTupel coord () const
     {
-      return rank_to_coord(_rank);
+      return rank_to_coord(_comm.rank());
     }
 
     //! return number of processes
     int procs () const
     {
-      return _procs;
+      return _comm.size();
     }
 
     //! return dimensions of torus
@@ -209,13 +193,11 @@ namespace Dune
       return _dims[i];
     }
 
-    //! return MPI communicator
-#if HAVE_MPI
-    MPI_Comm comm () const
+    //! return communicator
+    CollectiveCommunication comm () const
     {
       return _comm;
     }
-#endif
 
     //! return tag used by torus
     int tag () const
@@ -235,7 +217,7 @@ namespace Dune
     iTupel rank_to_coord (int rank) const
     {
       iTupel coord;
-      rank = rank%_procs;
+      rank = rank%_comm.size();
       for (int i=d-1; i>=0; i--)
       {
         coord[i] = rank/_increment[i];
@@ -302,8 +284,7 @@ namespace Dune
     //! return true if neighbor with given delta is a neighbor under the given periodicity
     bool is_neighbor (iTupel delta, std::bitset<d> periodic) const
     {
-      iTupel coord = rank_to_coord(_rank); // my own coordinate with 0 <= c_i < dims_i
-
+      iTupel coord = rank_to_coord(_comm.rank()); // my own coordinate with 0 <= c_i < dims_i
 
       for (int i=0; i<d; i++)
       {
@@ -356,7 +337,7 @@ namespace Dune
           maxsize *= m+1;
         }
       }
-      return maxsize/(sz/_procs);
+      return maxsize/(sz/_comm.size());
     }
 
     /*!
@@ -456,7 +437,7 @@ namespace Dune
       task.rank = rank;
       task.buffer = buffer;
       task.size = size;
-      if (rank!=_rank)
+      if (rank!=_comm.rank())
         _sendrequests.push_back(task);
       else
         _localsendrequests.push_back(task);
@@ -469,7 +450,7 @@ namespace Dune
       task.rank = rank;
       task.buffer = buffer;
       task.size = size;
-      if (rank!=_rank)
+      if (rank!=_comm.rank())
         _recvrequests.push_back(task);
       else
         _localrecvrequests.push_back(task);
@@ -568,11 +549,7 @@ namespace Dune
     double global_max (double x) const
     {
       double res = 0.0;
-
-      if (_procs==1) return x;
-#if HAVE_MPI
-      MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_MAX,_comm);
-#endif
+      _comm.template allreduce<Dune::Max<double>,double>(&x, &res, 1);
       return res;
     }
 
@@ -607,7 +584,7 @@ namespace Dune
       std::fill(delta.begin(), delta.end(), -1);
       bool ready = false;
       iTupel me, nb;
-      me = rank_to_coord(_rank);
+      me = rank_to_coord(_comm.rank());
       int index = 0;
       int last = neighbors()-1;
       while (!ready)
@@ -650,11 +627,8 @@ namespace Dune
 
     }
 
-#if HAVE_MPI
-    MPI_Comm _comm;
-#endif
-    int _rank;
-    int _procs;
+    CollectiveCommunication _comm;
+
     iTupel _dims;
     iTupel _increment;
     int _tag;
@@ -669,8 +643,8 @@ namespace Dune
   };
 
   //! Output operator for Torus
-  template <int d>
-  inline std::ostream& operator<< (std::ostream& s, const Torus<d> & t)
+  template <class CollectiveCommunication, int d>
+  inline std::ostream& operator<< (std::ostream& s, const Torus<CollectiveCommunication, d> & t)
   {
     t.print(s);
     return s;
