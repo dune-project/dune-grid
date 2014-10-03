@@ -89,7 +89,7 @@ namespace Dune {
 #if HAVE_MPI
     typedef CollectiveCommunication<MPI_Comm> CCType;
 #else
-    typedef CollectiveCommunication<FakeMPIHelper::MPICommunicator> CCType;
+    typedef CollectiveCommunication<No_Comm> CCType;
 #endif
 
     typedef GridTraits<dim,                                     // dimension of the grid
@@ -167,7 +167,7 @@ namespace Dune {
 #ifdef HAVE_MPI
     typedef CollectiveCommunication<MPI_Comm> CollectiveCommunicationType;
 #else
-    typedef CollectiveCommunication<FakeMPIHelper::MPICommunicator> CollectiveCommunicationType;
+    typedef CollectiveCommunication<No_Comm> CollectiveCommunicationType;
 #endif
 
 #ifndef DOXYGEN
