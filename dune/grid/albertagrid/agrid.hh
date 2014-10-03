@@ -689,7 +689,6 @@ namespace Dune
 #undef MAX
 #endif
 
-#if DUNE_ALBERTA_VERSION >= 0x300
 #ifdef obstack_chunk_alloc
 #undef obstack_chunk_alloc
 #endif
@@ -697,9 +696,6 @@ namespace Dune
 #undef obstack_chunk_free
 #endif
 #include <dune/grid/albertagrid/undefine-3.0.hh>
-#else
-#include <dune/grid/albertagrid/undefine-2.0.hh>
-#endif
 
 // We use MEM_ALLOC, so undefine it here.
 #undef MEM_ALLOC

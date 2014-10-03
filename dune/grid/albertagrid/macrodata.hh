@@ -45,7 +45,7 @@ namespace Dune
     public:
       typedef int ElementId[ numVertices ];
 
-      static const int supportPeriodicity = (DUNE_ALBERTA_VERSION >= 0x300);
+      static const int supportPeriodicity = 1;
 
       MacroData ()
         : data_( NULL ),
@@ -274,7 +274,6 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline void MacroData< dim >::create ()
     {
@@ -286,21 +285,6 @@ namespace Dune
       vertexCount_ = elementCount_ = 0;
       elementCount_ = 0;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-#if DUNE_ALBERTA_VERSION == 0x200
-    template< int dim >
-    inline void MacroData< dim >::create ()
-    {
-      release();
-      data_ = ALBERTA alloc_macro_data( dim, initialSize, initialSize, 0 );
-      data_->boundary = memAlloc< BoundaryId >( initialSize*numVertices );
-      if( dim == 3 )
-        data_->el_type = memAlloc< ElementType >( initialSize );
-      vertexCount_ = elementCount_ = 0;
-      elementCount_ = 0;
-    }
-#endif // #if DUNE_ALBERTA_VERSION == 0x200
 
 
     template< int dim >
@@ -375,7 +359,6 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline void MacroData< dim >
     ::insertWallTrafo ( const GlobalMatrix &matrix, const GlobalVector &shift )
@@ -412,26 +395,6 @@ namespace Dune
       copy( shift, array[ count ].t );
       ++count;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-#if DUNE_ALBERTA_VERSION <= 0x200
-    template< int dim >
-    inline void MacroData< dim >
-    ::insertWallTrafo ( const GlobalMatrix &m, const GlobalVector &t )
-    {
-      DUNE_THROW( AlbertaError,
-                  "Periodic grids are only supported in ALBERTA 3.0 or higher." );
-    }
-
-    template< int dim >
-    inline void MacroData< dim >
-    ::insertWallTrafo ( const FieldMatrix< Real, dimWorld, dimWorld > &matrix,
-                        const FieldVector< Real, dimWorld > &shift )
-    {
-      DUNE_THROW( AlbertaError,
-                  "Periodic grids are only supported in ALBERTA 3.0 or higher." );
-    }
-#endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
     template< int dim >
