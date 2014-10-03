@@ -89,7 +89,7 @@ namespace Dune {
 #if HAVE_MPI
     typedef CollectiveCommunication<MPI_Comm> CCType;
 #else
-    typedef CollectiveCommunication<Dune::YaspGrid<dim, Coordinates> > CCType;
+    typedef CollectiveCommunication<FakeMPIHelper::MPICommunicator> CCType;
 #endif
 
     typedef GridTraits<dim,                                     // dimension of the grid
@@ -167,7 +167,7 @@ namespace Dune {
 #ifdef HAVE_MPI
     typedef CollectiveCommunication<MPI_Comm> CollectiveCommunicationType;
 #else
-    typedef CollectiveCommunication<YaspGrid<dim, Coordinates> > CollectiveCommunicationType;
+    typedef CollectiveCommunication<FakeMPIHelper::MPICommunicator> CollectiveCommunicationType;
 #endif
 
 #ifndef DOXYGEN
