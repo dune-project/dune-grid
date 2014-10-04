@@ -164,7 +164,7 @@ namespace Dune {
   public:
     //! Type used for coordinates
     typedef typename Coordinates::ctype ctype;
-#ifdef HAVE_MPI
+#if HAVE_MPI
     typedef CollectiveCommunication<MPI_Comm> CollectiveCommunicationType;
 #else
     typedef CollectiveCommunication<No_Comm> CollectiveCommunicationType;
