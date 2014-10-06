@@ -218,6 +218,7 @@ namespace Dune {
       // general
       YaspGrid<dim,Coordinates>* mg;  // each grid level knows its multigrid
       int overlapSize;           // in mesh cells on this level
+      bool keepOverlap;
 
       /** \brief The level number within the YaspGrid level hierarchy */
       int level_;
@@ -320,6 +321,7 @@ namespace Dune {
       g.mg = this;
       g.level_ = maxLevel();
       g.coords = coords;
+      g.keepOverlap = keep_ovlp;
 
       // set the inserting positions in the corresponding arrays of YGridLevelStructure
       typename Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator overlapfront_it = g.overlapfront_data.begin();

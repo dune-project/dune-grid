@@ -13,7 +13,7 @@
 
 // bump this version number up if you introduce any changes
 // to the outout format of the YaspGrid BackupRestoreFacility.
-#define YASPGRID_BACKUPRESTORE_FORMAT_VERSION 1
+#define YASPGRID_BACKUPRESTORE_FORMAT_VERSION 2
 
 namespace Dune
 {
@@ -80,7 +80,10 @@ namespace Dune
       for (int i=0; i<dim; i++)
         stream << (grid.isPeriodic(i) ? "1 " : "0 ");
       stream << std::endl << "Overlap: " << grid.overlapSize(0,0) << std::endl;
-      stream << "KeepPhysicalOverlap: " << (grid.getRefineOption() ? "1" : "0") << std::endl;
+      stream << "KeepPhysicalOverlap: ";
+      for (typename Grid::YGridLevelIterator i=++grid.begin(); i != grid.end(); ++i)
+        stream << (i->keepOverlap ? "1" : "0") << " ";
+      stream << std::endl;
       stream << "Coarse Size: ";
       for (int i=0; i<dim; i++)
         stream << grid.levelSize(0,i) << " ";
@@ -137,9 +140,14 @@ namespace Dune
       stream >> input;
       stream >> overlap;
 
-      bool physicalOverlapSize;
+      std::vector<bool> physicalOverlapSize;
+      physicalOverlapSize.resize(refinement);
       stream >> input;
-      stream >> physicalOverlapSize;
+      for (int i=0; i<refinement; ++i)
+      {
+        stream >> b;
+        physicalOverlapSize[i] = b;
+      }
 
       Dune::array<int,dim> coarseSize;
       stream >> input >> input;
@@ -160,8 +168,11 @@ namespace Dune
 
       Grid* grid = new Dune::YaspGrid<dim>(length, coarseSize, periodic, overlap, comm, &lb);
 
-      grid->refineOptions(physicalOverlapSize);
-      grid->globalRefine(refinement);
+      for (int i=0; i<refinement; ++i)
+      {
+        grid->refineOptions(physicalOverlapSize[i]);
+        grid->globalRefine(1);
+      }
 
       return grid;
     }
@@ -202,7 +213,10 @@ namespace Dune
       for (int i=0; i<dim; i++)
         stream << (grid.isPeriodic(i) ? "1 " : "0 ");
       stream << std::endl << "Overlap: " << grid.overlapSize(0,0) << std::endl;
-      stream << "KeepPhysicalOverlap: " << (grid.getRefineOption() ? "1" : "0") << std::endl;
+      stream << "KeepPhysicalOverlap: ";
+      for (typename Grid::YGridLevelIterator i=++grid.begin(); i != grid.end(); ++i)
+        stream << (i->keepOverlap ? "1" : "0") << " ";
+      stream << std::endl;
       stream << "Coarse Size: ";
       for (int i=0; i<dim; i++)
         stream << grid.levelSize(0,i) << " ";
@@ -260,9 +274,15 @@ namespace Dune
       stream >> input;
       stream >> overlap;
 
-      bool physicalOverlapSize;
+      std::vector<bool> physicalOverlapSize;
+      physicalOverlapSize.resize(refinement);
       stream >> input;
-      stream >> physicalOverlapSize;
+      for (int i=0; i<refinement; ++i)
+      {
+        stream >> b;
+        physicalOverlapSize[i] = b;
+      }
+
 
       Dune::array<int,dim> coarseSize;
       stream >> input >> input;
@@ -289,8 +309,11 @@ namespace Dune
       YLoadBalanceBackup<dim> lb(torus_dims);
       Grid* grid = new Grid(coords, periodic, overlap, comm, coarseSize, &lb);
 
-      grid->refineOptions(physicalOverlapSize);
-      grid->globalRefine(refinement);
+      for (int i=0; i<refinement; ++i)
+      {
+        grid->refineOptions(physicalOverlapSize[i]);
+        grid->globalRefine(1);
+      }
 
       return grid;
     }
