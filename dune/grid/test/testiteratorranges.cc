@@ -36,6 +36,8 @@ void checkRange(GV gv, int codim, R range, bool verify_less = false)
 template<typename Grid, typename OS>
 void check_ranges(const Grid& grid, OS&& os) {
 
+  const int dim = Grid::dimension;
+
   auto gv = grid.leafGridView();
 
   os << "Checking entity ranges with default PartitionSet... ";
@@ -148,7 +150,7 @@ Rank0Stream<S,C> rank0Stream(S& s, C c)
 }
 
 template<typename OS>
-void check_yasp_3d(OS& os)
+void check_yasp_3d(OS&& os)
 {
 
   os << "Running tests on 3D YaspGrid..." << std::endl;
@@ -161,11 +163,11 @@ void check_yasp_3d(OS& os)
   std::bitset<dim> p;
   int overlap = 1;
 
+  Dune::YaspGrid<dim> grid(Len,s,p,overlap);
+
 #if HAVE_MPI
-  Dune::YaspGrid<dim> grid(MPI_COMM_WORLD,Len,s,p,overlap);
   os << "Parallel run on " << grid.comm().size() << " processors" << std::endl;
 #else
-  Dune::YaspGrid<dim> grid(Len,s,p,overlap);
   os << "Sequential run" << std::endl;
 #endif
 
@@ -179,6 +181,7 @@ void check_yasp_3d(OS& os)
 int main(int argc , char **argv) {
   try {
     // Initialize MPI, if present
+
     Dune::MPIHelper::instance(argc, argv);
     check_yasp_3d(rank0Stream(std::cout,Dune::MPIHelper::getCollectiveCommunication()));
 
