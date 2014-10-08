@@ -503,8 +503,6 @@ namespace Dune
     IndexMap globalLocalMap_;
 
     /** \brief Stores global index of entities with entity's globally unique id as key
-     *
-     * Only used when CODIM == 0.
      */
     MapId2Index globalIndex_;
   };
