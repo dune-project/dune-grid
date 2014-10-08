@@ -282,26 +282,18 @@ namespace Dune
       }
 
       //! constructor
-      IndexExchange (const GlobalIdSet& globalidset, MapId2Index& mapid2entity, int &rank,
+      IndexExchange (const GlobalIdSet& globalidset, MapId2Index& mapid2entity,
                      const typename GridView::IndexSet& localIndexSet, IndexMap& localGlobal, IndexMap& globalLocal)
       : globalidset_(globalidset),
       mapid2entity_(mapid2entity),
-      rank_(rank),
       indexSet_(localIndexSet),
       localGlobalMap_(localGlobal),
       globalLocalMap_(globalLocal)
       {}
 
-      /** \brief Constructor for CODIM==0 (elements) */
-      IndexExchange (const GlobalIdSet& globalidset, MapId2Index& mapid2entity) :
-      globalidset_(globalidset),
-      mapid2entity_(mapid2entity)
-      {}
-
     private:
       const GlobalIdSet& globalidset_;
       MapId2Index& mapid2entity_;
-      int& rank_;
 
       const typename GridView::IndexSet& indexSet_;
       IndexMap& localGlobalMap_;
@@ -321,14 +313,15 @@ namespace Dune
       int rank = gridview.comm().rank();
       int size = gridview.comm().size();
 
-      nLocalEntity_  = uniqueEntityPartition_.numOwners();
-      nGlobalEntity_ = 0;
+      const typename GridView::IndexSet& indexSet = gridview.indexSet();
 
+      nLocalEntity_ = (CODIM==0)
+                    ? std::distance(gridview.template begin<0, Dune::Interior_Partition>(), gridview.template end<0, Dune::Interior_Partition>())
+                    : uniqueEntityPartition_.numOwners();
 
-      /** compute the global, non-redundant number of entities, i.e. the number of entities in the set
-       *  without double, aka. redundant entities, on the interprocessor boundary via global reduce. */
-      const CollectiveCommunication& collective = gridview_.comm();
-      nGlobalEntity_ = collective.template sum<int>(nLocalEntity_);
+      // Compute the global, non-redundant number of entities, i.e. the number of entities in the set
+      // without double, aka. redundant entities, on the interprocessor boundary via global reduce. */
+      nGlobalEntity_ = gridview.comm().template sum<int>(nLocalEntity_);
 
       /* communicate the number of locally owned entities to all other processes so that the respective offset
        * can be calculated on the respective processor; we use the Dune mpi collective communication facility
@@ -338,17 +331,30 @@ namespace Dune
       std::vector<int> offset(size);
       std::fill(offset.begin(), offset.end(), 0);
 
-      /** gather number of locally owned entities on root process */
-      collective.template gather<int>(&nLocalEntity_,offset.data(),1,0);
+      if (CODIM==0)  // This case is simpler
+      {
+        /** Share number of locally owned entities */
+        gridview_.comm().template allgather<int>(&nLocalEntity_, 1, offset.data());
+      }
+      else
+      {
+        // gather number of locally owned entities on root process
+        gridview.comm().template gather<int>(&nLocalEntity_,offset.data(),1,0);
 
-      /** broadcast the array containing the number of locally owned entities to all processes */
-      collective.template broadcast<int>(offset.data(),size,0);
+        // broadcast the array containing the number of locally owned entities to all processes
+        gridview.comm().template broadcast<int>(offset.data(),size,0);
+      }
 
       indexOffset_.clear();
-      indexOffset_.resize(size,0);
+
+      // Do we need both cases here?
+      if (CODIM==0)
+        indexOffset_.resize(size + 1, 0);
+      else
+        indexOffset_.resize(size, 0);
 
       for (unsigned int ii=0; ii<indexOffset_.size(); ++ii)
-        for (unsigned int jj=0; jj < ii; ++jj)
+        for (unsigned int jj=0; jj<ii; ++jj)
           indexOffset_[ii] += offset[jj];
 
       /*  compute globally unique index over all processes; the idea of the algorithm is as follows: if
@@ -367,16 +373,39 @@ namespace Dune
        */
 
       // 1st stage of global index calculation: calculate global index for owned entities
-      // intialize map that stores an entity's global index via it's globally unique id as key
-      MapId2Index globalIndex;
+      // initialize map that stores an entity's global index via it's globally unique id as key
+      globalIndex_.clear();
 
-      const typename GridView::IndexSet& indexSet = gridview.indexSet();
+      const GlobalIdSet& globalIdSet = gridview_.grid().globalIdSet();      /** retrieve globally unique Id set */
 
-      const GlobalIdSet &globalIdSet=gridview_.grid().globalIdSet();  /** retrieve globally unique Id set */
-      int myoffset=indexOffset_[rank];
+      const int myoffset = indexOffset_[rank];
 
-      int globalcontrib=0;    /** initialize contribution for the global index */
+      int globalcontrib = 0;      /** initialize contribution for the global index */
 
+      if (CODIM==0)  // This case is simpler
+      {
+        for (Iterator iter = gridview_.template begin<0>(); iter!=gridview_.template end<0>(); ++iter)
+        {
+          const IdType id = globalIdSet.id(*iter);      /** retrieve the entity's id */
+
+          /** if the entity is owned by the process, go ahead with computing the global index */
+          if (iter->partitionType() == Dune::InteriorEntity)
+          {
+            const int gindex = myoffset + globalcontrib;    /** compute global index */
+
+            globalIndex_[id] = gindex;                      /** insert pair (key, datum) into the map */
+            globalcontrib++;                                /** increment contribution to global index */
+          }
+
+          /** if entity is not owned, insert -1 to signal not yet calculated global index */
+          else
+          {
+            globalIndex_[id] = -1;     /** insert pair (key, datum) into the map */
+          }
+        }
+      }
+      else  // if (CODIM==0) else
+      {
       std::vector<bool> firstTime(gridview_.size(CODIM));
       std::fill(firstTime.begin(), firstTime.end(), true);
 
@@ -400,7 +429,7 @@ namespace Dune
           if (uniqueEntityPartition_.owner(idx) == true)  /** if the entity is owned by the process, go ahead with computing the global index */
           {
             const int gindex = myoffset + globalcontrib;    /** compute global index */
-            globalIndex.insert(std::make_pair(id,gindex)); /** insert pair (key, value) into the map */
+            globalIndex_.insert(std::make_pair(id,gindex)); /** insert pair (key, value) into the map */
 
             const int lindex = idx;
             localGlobalMap_[lindex] = gindex;
@@ -410,16 +439,17 @@ namespace Dune
           }
           else /** if entity is not owned, insert -1 to signal not yet calculated global index */
           {
-            globalIndex.insert(std::make_pair(id,-1));
+            globalIndex_.insert(std::make_pair(id,-1));
           }
         }
 
+      }
       }
 
       // 2nd stage of global index calculation: communicate global index for non-owned entities
 
       // Create the data handle and communicate.
-      IndexExchange dataHandle(globalIdSet,globalIndex,rank,indexSet,localGlobalMap_,globalLocalMap_);
+      IndexExchange dataHandle(globalIdSet,globalIndex_,indexSet,localGlobalMap_,globalLocalMap_);
       gridview_.communicate(dataHandle, Dune::All_All_Interface, Dune::ForwardCommunication);
     }
 
@@ -435,9 +465,20 @@ namespace Dune
 
     int globalIndex(const typename GridView::template Codim<CODIM>::Entity& entity) const
     {
-      return localGlobalMap_.find(gridview_.indexSet().index(entity))->second;
+      if (CODIM==0)
+      {
+        /** global unique index is only applicable for inter or border type entities */
+        const GlobalIdSet& globalIdSet = gridview_.grid().globalIdSet(); /** retrieve globally unique Id set */
+        const IdType id = globalIdSet.id(entity);                        /** obtain the entity's id */
+        const int gindex = globalIndex_.find(id)->second;                /** retrieve the global index in the map with the id as key */
+
+        return gindex;
+      }
+      else
+        return localGlobalMap_.find(gridview_.indexSet().index(entity))->second;
     }
 
+    /** \todo Remove, use a regular IndexSet if a local index is needed */
     int localIndex(const typename GridView::template Codim<CODIM>::Entity& entity) const {
       return gridview_.indexSet().index(entity);
     }
@@ -452,8 +493,15 @@ namespace Dune
       return nLocalEntity_;
     }
 
+    const std::vector<int>& indexOffset()
+    {
+      return indexOffset_;
+    }
+
   protected:
     const GridView gridview_;
+
+    /** \todo Only construct this when CODIM != 0 */
     UniqueEntityPartition uniqueEntityPartition_;
 
     //! Number of entities that are owned by the local process
@@ -467,226 +515,11 @@ namespace Dune
 
     IndexMap localGlobalMap_;
     IndexMap globalLocalMap_;
-  };
 
-
-
-  /** \brief Calculate globally unique entity index over all processes in a Dune grid
-   *
-   * This is the specialization for elements, i.e., codimension zero.
-   * Since there is a real partition of the Interior_Partition elements, computing
-   * a global index for elements is simpler than for entities of other codimensions.
-   */
-  template<class GridView>
-  class GlobalIndexSet<GridView,0>
-  {
-  public:
-    /** \brief The number type used for global indices  */
-    typedef int Index;
-
-  private:
-    /** define data types */
-    typedef typename GridView::Grid Grid;
-
-    typedef typename GridView::Grid::GlobalIdSet         GlobalIdSet;
-    typedef typename GridView::Grid::GlobalIdSet::IdType IdType;
-
-    typedef typename GridView::Traits::template Codim<0>::Iterator                                       Iterator;
-    typedef typename GridView::template Codim<0>::template Partition<Dune::Interior_Partition>::Iterator ElementIterator;
-    typedef typename GridView::Traits::template Codim<0>::Entity                                         Entity;
-
-    typedef std::map<IdType,Index> MapId2Index;
-
-    class IndexExchange : public Dune::CommDataHandleIF<IndexExchange, int> {
-    public:
-      //! returns true if data for this codim should be communicated
-      bool contains (int dim, int codim) const
-      {
-        return codim==0;
-      }
-
-      //! returns true if size per entity of given dim and codim is a constant
-      bool fixedsize (int dim, int codim) const
-      {
-        return true;
-      }
-
-      /** \brief How many objects of type DataType have to be sent for a given entity
-       *
-       * \note Only the sender side needs to know this size. */
-      template<class EntityType>
-      size_t size (EntityType& e) const
-      {
-        return 1;
-      }
-
-      /*! pack data from user to message buffer */
-      template<class MessageBuffer, class EntityType>
-      void gather (MessageBuffer& buff, const EntityType& e) const
-      {
-        const IdType id = globalidset_.id(e);
-
-        buff.write(mapid2entity_[id]);
-      }
-
-      /** \brief Unpack data from message buffer to user
-       *
-       * \param n The number of objects sent by the sender
-       */
-      template<class MessageBuffer, class EntityType>
-      void scatter (MessageBuffer& buff, const EntityType& e, size_t n)
-      {
-        int x;
-        buff.read(x);
-
-        /** only if the incoming index is a valid one,
-         *          i.e. if it is greater than zero, will it be
-         *          inserted as the global index; it is made
-         *          sure in the upper class, i.e. GlobalIndexSet,
-         *          that non-owning processes use -1 to mark an entity
-         *          that they do not own.
-         */
-        if(x >= 0) {
-          const IdType id = globalidset_.id(e);
-          mapid2entity_[id] = x;
-        }
-      }
-
-      //! constructor
-      IndexExchange (const GlobalIdSet& globalidset, MapId2Index& mapid2entity) :
-      globalidset_(globalidset),
-      mapid2entity_(mapid2entity)
-      {}
-
-    private:
-      const GlobalIdSet& globalidset_;
-      MapId2Index& mapid2entity_;
-    };
-
-  public:
-    /** \brief Constructor for a given GridView
+    /** \brief Stores global index of entities with entity's globally unique id as key
      *
-     * When the class is instantiated by passing a const reference to a
-     * GridView object, we calculate the complete set of global unique indices
-     * so that we can then later query the global index, by directly passing
-     * the entity in question, and the respective global index is returned.
+     * Only used when CODIM == 0.
      */
-    GlobalIndexSet(const GridView& gridview)
-    : gridview_(gridview)
-    {
-      // Count number of interior elements
-      nLocalEntity_ = std::distance(gridview.template begin<0, Dune::Interior_Partition>(), gridview.template end<0, Dune::Interior_Partition>());
-
-      // Compute total number of elements
-      nGlobalEntity_ = gridview.comm().template sum<int>(nLocalEntity_);
-
-      const int rank_ = gridview.comm().rank();
-      const int size_ = gridview.comm().size();
-
-      /** communicate the number of locally owned entities to all other processes so that the respective offset
-       *  can be calculated on the respective processor; we use the Dune mpi collective communication facility
-       *  for this */
-      std::vector<int> offset(size_, 0);
-
-      /** Share number of locally owned entities */
-      gridview_.comm().template allgather<int>(&nLocalEntity_, 1, offset.data());
-
-      indexOffset_.clear();
-      indexOffset_.resize(size_ + 1, 0);
-
-      for (unsigned int ii=0; ii<indexOffset_.size(); ++ii)
-        for (unsigned int jj=0; jj<ii; ++jj)
-          indexOffset_[ii] += offset[jj];
-
-      /*  compute globally unique index over all processes; the idea of the algorithm is as follows: if
-       *  an entity is owned by the process, it is assigned an index that is the addition of the offset
-       *  specific for this process and a consecutively incremented counter; if the entity is not owned
-       *  by the process, it is assigned -1, which signals that this specific entity will get its global
-       *  unique index through communication afterwards;
-       *
-       *  thus, the calculation of the globally unique index is divided into 2 stages:
-       *
-       *  (1) we calculate the global index independently;
-       *
-       *  (2) we achieve parallel adjustment by communicating the index
-       *      from the owning entity to the non-owning entity.
-       *
-       */
-
-      /* 1st stage of global index calculation: calculate global index for owned entities */
-      globalIndex_.clear();       /** initialize map that stores an entity's global index via it's globally unique id as key */
-      const GlobalIdSet& globalIdSet = gridview_.grid().globalIdSet();      /** retrieve globally unique Id set */
-      const int myoffset = indexOffset_[rank_];
-
-      int globalcontrib = 0;      /** initialize contribution for the global index */
-
-      for (Iterator iter = gridview_.template begin<0>(); iter!=gridview_.template end<0>(); ++iter)
-      {
-        const IdType id = globalIdSet.id(*iter);      /** retrieve the entity's id */
-
-        /** if the entity is owned by the process, go ahead with computing the global index */
-        if (iter->partitionType() == Dune::InteriorEntity)
-        {
-          const int gindex = myoffset + globalcontrib;    /** compute global index */
-
-          globalIndex_[id] = gindex;                      /** insert pair (key, datum) into the map */
-          globalcontrib++;                                /** increment contribution to global index */
-        }
-
-        /** if entity is not owned, insert -1 to signal not yet calculated global index */
-        else
-        {
-          globalIndex_[id] = -1;     /** insert pair (key, datum) into the map */
-        }
-      }
-
-      // 2nd stage of global index calculation: communicate global index for non-owned entities
-
-      // create the data handle and communicate
-      IndexExchange dh(globalIdSet, globalIndex_);
-      gridview_.communicate(dh, Dune::All_All_Interface, Dune::ForwardCommunication);
-    }
-
-
-    /**\brief Given an entity, retrieve its index globally unique over all processes */
-    const int globalIndex(const Entity& entity) const
-    {
-      /** global unique index is only applicable for inter or border type entities */
-      const GlobalIdSet& globalIdSet = gridview_.grid().globalIdSet(); /** retrieve globally unique Id set */
-      const IdType id = globalIdSet.id(entity);                        /** obtain the entity's id */
-      const int gindex = globalIndex_.find(id)->second;                /** retrieve the global index in the map with the id as key */
-
-      return gindex;
-    }
-
-    unsigned int nGlobalEntity() const
-    {
-      return nGlobalEntity_;
-    }
-
-    unsigned int nOwnedLocalEntity() const
-    {
-      return nLocalEntity_;
-    }
-
-    const std::vector<int>& indexOffset()
-    {
-      return indexOffset_;
-    }
-
-  protected:
-    const GridView& gridview_;
-
-    //! Number of entities stored by the local process
-    int nLocalEntity_;
-
-    //! Global number of entities, without rendundant entities on interprocessor boundaries
-    int nGlobalEntity_;
-
-    //! Offset of entity index on every process
-    std::vector<int> indexOffset_;
-
-    //! Stores global index of entities with entity's globally unique id as key
     MapId2Index globalIndex_;
   };
 
