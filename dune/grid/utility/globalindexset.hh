@@ -439,10 +439,6 @@ namespace Dune
       return nLocalEntity_;
     }
 
-    const GridView& getGridView() const {
-      return gridview_;
-    }
-
   protected:
     const GridView gridview_;
     UniqueEntityPartition uniqueEntityPartition_;
