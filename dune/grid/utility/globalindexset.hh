@@ -478,11 +478,6 @@ namespace Dune
         return localGlobalMap_.find(gridview_.indexSet().index(entity))->second;
     }
 
-    /** \todo Remove, use a regular IndexSet if a local index is needed */
-    int localIndex(const typename GridView::template Codim<CODIM>::Entity& entity) const {
-      return gridview_.indexSet().index(entity);
-    }
-
     inline unsigned int nGlobalEntity() const
     {
       return nGlobalEntity_;
