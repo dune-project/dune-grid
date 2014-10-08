@@ -151,34 +151,33 @@ namespace Dune
       /*! \brief Constructor needs to know the grid function space
        */
       UniqueEntityPartition (const GridView& gridview)
-      : gridview_(gridview),
-        assignment_(gridview.size(CODIM))
+      : assignment_(gridview.size(CODIM))
       {
         /** extract types from the GridView data type */
         typedef typename GridView::IndexSet IndexSet;
 
         // assign own rank to entities that I might have
-        for (auto it = gridview_.template begin<0>(); it!=gridview_.template end<0>(); ++it)
+        for (auto it = gridview.template begin<0>(); it!=gridview.template end<0>(); ++it)
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
           for (int i=0; i<it->subEntities(CODIM); i++)
 #else
           for (int i=0; i<it->template count<CODIM>(); i++)
 #endif
           {
-            assignment_[gridview_.indexSet().subIndex(*it,i,CODIM)]
+            assignment_[gridview.indexSet().subIndex(*it,i,CODIM)]
               = ( (it->template subEntity<CODIM>(i)->partitionType()==Dune::InteriorEntity) || (it->template subEntity<CODIM>(i)->partitionType()==Dune::BorderEntity) )
-              ? gridview_.comm().rank()  // set to own rank
+              ? gridview.comm().rank()  // set to own rank
               : - 1;   // it is a ghost entity, I will not possibly own it.
           }
 
         /** exchange entity index through communication */
-        MinimumExchange<IndexSet,std::vector<int> > dh(gridview_.indexSet(),assignment_);
+        MinimumExchange<IndexSet,std::vector<int> > dh(gridview.indexSet(),assignment_);
 
-        gridview_.communicate(dh,Dune::All_All_Interface,Dune::ForwardCommunication);
+        gridview.communicate(dh,Dune::All_All_Interface,Dune::ForwardCommunication);
 
         /* convert vector of minimum ranks to assignment vector */
         for (size_t i=0; i<assignment_.size(); i++)
-          assignment_[i] = (assignment_[i] == gridview_.comm().rank()) ? 1 : 0;
+          assignment_[i] = (assignment_[i] == gridview.comm().rank()) ? 1 : 0;
       }
 
       /** answer question if entity belongs to me, to this process */
@@ -192,15 +191,7 @@ namespace Dune
         return std::accumulate(assignment_.begin(), assignment_.end(), 0);
       }
 
-      /** \brief Answer question if entity belongs to me, to this process */
-      bool owner(const Entity& entity)
-      {
-        return assignment_[gridview_.indexSet().index(entity)];
-      }
-
     private:
-      /** declare private data members */
-      const GridView& gridview_;
       std::vector<int> assignment_;
     };
 
