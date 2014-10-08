@@ -241,7 +241,10 @@ namespace Dune
       {
         IdType id=globalidset_.id(e);
 
-        buff.write((*mapid2entity_.find(id)).second);
+        if (CODIM==0)
+          buff.write(mapid2entity_[id]);
+        else
+          buff.write((*mapid2entity_.find(id)).second);
       }
 
       /** \brief Unpack data from message buffer to user
@@ -261,15 +264,20 @@ namespace Dune
          *  that non-owning processes use -1 to mark an entity
          *  that they do not own.
          */
-        if(x >= 0)
-        {
-          IdType id = globalidset_.id(entity);
-          mapid2entity_.erase(id);
-          mapid2entity_.insert(std::make_pair(id,x));
+        if(x >= 0) {
+          const IdType id = globalidset_.id(entity);
 
-          const int lindex = indexSet_.index(entity);
-          localGlobalMap_[lindex] = x;
-          globalLocalMap_[x]      = lindex;
+          if (CODIM==0)
+            mapid2entity_[id] = x;
+          else
+          {
+            mapid2entity_.erase(id);
+            mapid2entity_.insert(std::make_pair(id,x));
+
+            const int lindex = indexSet_.index(entity);
+            localGlobalMap_[lindex] = x;
+            globalLocalMap_[x]      = lindex;
+          }
         }
       }
 
@@ -282,6 +290,12 @@ namespace Dune
       indexSet_(localIndexSet),
       localGlobalMap_(localGlobal),
       globalLocalMap_(globalLocal)
+      {}
+
+      /** \brief Constructor for CODIM==0 (elements) */
+      IndexExchange (const GlobalIdSet& globalidset, MapId2Index& mapid2entity) :
+      globalidset_(globalidset),
+      mapid2entity_(mapid2entity)
       {}
 
     private:
