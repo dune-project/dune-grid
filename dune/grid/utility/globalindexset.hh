@@ -45,9 +45,6 @@
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/datahandleif.hh>
 
-// Include Dune header files
-#include <dune/common/version.hh>
-
 /** include parallel capability */
 #if HAVE_MPI
   #include <dune/common/parallel/mpihelper.hh>
@@ -158,11 +155,7 @@ namespace Dune
 
         // assign own rank to entities that I might have
         for (auto it = gridview.template begin<0>(); it!=gridview.template end<0>(); ++it)
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
           for (int i=0; i<it->subEntities(CODIM); i++)
-#else
-          for (int i=0; i<it->template count<CODIM>(); i++)
-#endif
           {
             assignment_[gridview.indexSet().subIndex(*it,i,CODIM)]
               = ( (it->template subEntity<CODIM>(i)->partitionType()==Dune::InteriorEntity) || (it->template subEntity<CODIM>(i)->partitionType()==Dune::BorderEntity) )
@@ -405,11 +398,7 @@ namespace Dune
 
       for(Iterator iter = gridview_.template begin<0>();iter!=gridview_.template end<0>(); ++iter)
       {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         for (size_t i=0; i<iter->subEntities(CODIM); i++)
-#else
-        for (size_t i=0; i<iter->template count<CODIM>(); i++)
-#endif
         {
           IdType id=globalIdSet.subId(*iter,i,CODIM);                 /** retrieve the entity's id */
 
