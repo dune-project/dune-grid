@@ -209,9 +209,8 @@ namespace Dune
      * owning to the non-owning entity; the class is based on the MinimumExchange
      * class in the parallelsolver.hh header file.
      */
-    template<class GlobalIdSet, class IdType, class Map, typename ValueType>
     class IndexExchange
-    : public Dune::CommDataHandleIF<IndexExchange<GlobalIdSet,IdType,Map,ValueType>,ValueType>
+    : public Dune::CommDataHandleIF<IndexExchange,int>
     {
     public:
       //! returns true if data for this codim should be communicated
@@ -252,7 +251,7 @@ namespace Dune
       template<class MessageBuffer, class EntityType>
       void scatter (MessageBuffer& buff, const EntityType& entity, size_t n)
       {
-        ValueType x;
+        int x;
         buff.read(x);
 
         /** only if the incoming index is a valid one,
@@ -275,7 +274,7 @@ namespace Dune
       }
 
       //! constructor
-      IndexExchange (const GlobalIdSet& globalidset, Map& mapid2entity, int &rank,
+      IndexExchange (const GlobalIdSet& globalidset, MapId2Index& mapid2entity, int &rank,
                      const typename GridView::IndexSet& localIndexSet, IndexMap& localGlobal, IndexMap& globalLocal)
       : globalidset_(globalidset),
       mapid2entity_(mapid2entity),
@@ -287,7 +286,7 @@ namespace Dune
 
     private:
       const GlobalIdSet& globalidset_;
-      Map& mapid2entity_;
+      MapId2Index& mapid2entity_;
       int& rank_;
 
       const typename GridView::IndexSet& indexSet_;
@@ -406,7 +405,7 @@ namespace Dune
       // 2nd stage of global index calculation: communicate global index for non-owned entities
 
       // Create the data handle and communicate.
-      IndexExchange<GlobalIdSet,IdType,MapId2Index,int> dataHandle(globalIdSet,globalIndex,rank,indexSet,localGlobalMap_,globalLocalMap_);
+      IndexExchange dataHandle(globalIdSet,globalIndex,rank,indexSet,localGlobalMap_,globalLocalMap_);
       gridview_.communicate(dataHandle, Dune::All_All_Interface, Dune::ForwardCommunication);
     }
 
