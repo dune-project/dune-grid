@@ -4,6 +4,7 @@ Makefile
 *.log
 *.trs
 
+globalindexsettest
 persistentcontainertest
 structuredgridfactorytest
 vertexordertest

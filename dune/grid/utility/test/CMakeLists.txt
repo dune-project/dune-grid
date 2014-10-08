@@ -1,4 +1,5 @@
 set(TESTS
+  globalindexsettest
   structuredgridfactorytest
   vertexordertest
   persistentcontainertest)

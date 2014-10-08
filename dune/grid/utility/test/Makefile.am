@@ -5,6 +5,17 @@ TESTS =
 check_PROGRAMS =
 
 # define the programs
+TESTS += globalindexsettest
+check_PROGRAMS += globalindexsettest
+globalindexsettest_SOURCES = globalindexsettest.cc
+globalindexsettest_CPPFLAGS = $(AM_CPPFLAGS) \
+                              $(DUNEMPICPPFLAGS)
+globalindexsettest_LDFLAGS = $(AM_LDFLAGS) \
+                             $(DUNEMPILDFLAGS)
+globalindexsettest_LDADD = $(DUNEMPILIBS) \
+                           $(LDADD)
+
+# define the programs
 TESTS += structuredgridfactorytest
 check_PROGRAMS += structuredgridfactorytest
 structuredgridfactorytest_SOURCES = structuredgridfactorytest.cc
