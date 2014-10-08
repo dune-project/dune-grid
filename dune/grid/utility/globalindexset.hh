@@ -298,17 +298,20 @@ namespace Dune
      *  later query the global index, by directly passing the entity in question.
      */
     GlobalIndexSet(const GridView& gridview)
-    : gridview_(gridview),
-      uniqueEntityPartition_(gridview)
+    : gridview_(gridview)
     {
       int rank = gridview.comm().rank();
       int size = gridview.comm().size();
 
       const typename GridView::IndexSet& indexSet = gridview.indexSet();
 
+      std::unique_ptr<UniqueEntityPartition> uniqueEntityPartition;
+      if (CODIM!=0)
+        uniqueEntityPartition = std::unique_ptr<UniqueEntityPartition>(new UniqueEntityPartition(gridview));
+
       nLocalEntity_ = (CODIM==0)
                     ? std::distance(gridview.template begin<0, Dune::Interior_Partition>(), gridview.template end<0, Dune::Interior_Partition>())
-                    : uniqueEntityPartition_.numOwners();
+                    : uniqueEntityPartition->numOwners();
 
       // Compute the global, non-redundant number of entities, i.e. the number of entities in the set
       // without double, aka. redundant entities, on the interprocessor boundary via global reduce. */
@@ -417,7 +420,7 @@ namespace Dune
 
           firstTime[idx] = false;
 
-          if (uniqueEntityPartition_.owner(idx) == true)  /** if the entity is owned by the process, go ahead with computing the global index */
+          if (uniqueEntityPartition->owner(idx) == true)  /** if the entity is owned by the process, go ahead with computing the global index */
           {
             const int gindex = myoffset + globalcontrib;    /** compute global index */
             globalIndex_.insert(std::make_pair(id,gindex)); /** insert pair (key, value) into the map */
@@ -486,9 +489,6 @@ namespace Dune
 
   protected:
     const GridView gridview_;
-
-    /** \todo Only construct this when CODIM != 0 */
-    UniqueEntityPartition uniqueEntityPartition_;
 
     //! Number of entities that are owned by the local process
     int nLocalEntity_;
