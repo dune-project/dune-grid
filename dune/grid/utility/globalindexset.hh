@@ -86,7 +86,7 @@ namespace Dune
     class UniqueEntityPartition
     {
     private:
-      /* A DataHandle class to cacluate the minimum of a std::vector which is accompanied by an index set */
+      /* A DataHandle class to calculate the minimum of a std::vector which is accompanied by an index set */
       template<class IS, class V> // mapper type and vector type
       class MinimumExchange
       : public Dune::CommDataHandleIF<MinimumExchange<IS,V>,typename V::value_type>
