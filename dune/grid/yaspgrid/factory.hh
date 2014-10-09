@@ -128,10 +128,10 @@ namespace Dune
      *  \param h0 the starting interval length (optional)
      *
      *  Given a vector with last element \f$x_0\f$, this will add elements
-     *  \f$x_1,\dots ,x_n\f$ such that - with \f$h_i=x_{i+1}-x_i\f$ - \f$h_{i+1}=qh_i$
-     *  for a given ratio \f$q\f$. The first interval length can either be explicitly
-     *  given or be deduced by multiplying the ratio with the last interval
-     *  length in the container
+     *  \f$x_1,\dots ,x_n\f$ such that \f$h_{i+1}=qh_i\f$ for a given ratio
+     *  \f$q\f$ and interval length \f$h_i=x_{i+1}-x_i\f$. The first interval length
+     *  can either be explicitly given or be deduced by multiplying the ratio
+     *  with the last interval length in the container.
      */
     void geometric_fill_intervals (int d, int n, ctype ratio, ctype h0 =
         static_cast<ctype> (0))
@@ -149,12 +149,12 @@ namespace Dune
 
     /** \brief adds intervals in direction d according with a given length ratio until a given coordinate is reached
      * \param d the coordinate direction
-     * \param ratio the ratio of \f$ h_{i+1}\f$ to \f$h_i\f$
+     * \param ratio the ratio of \f$h_{i+1}\f$ to \f$h_i\f$
      * \param end the coordinate on the right border of the range
      * \param h0 the starting interval length (optional)
      *
      *  Given a vector with last element \f$x_0\f$, this will add elements
-     *  \f$x_1,\dots ,x_n\f$ such that - with \f$h_i=x_{i+1}-x_i\f$ - \f$h_{i+1}=qh_i$
+     *  \f$x_1,\dots ,x_n\f$ such that - with \f$h_i=x_{i+1}-x_i\f$ - \f$h_{i+1}=qh_i\f$
      *  for a given ratio \f$q\f$ and that \f$x_n < end < x_n + h\f$. The first interval
      *  length can either be explicitly given or be deduced by multiplying the ratio with
      *  the last interval length in the container.
@@ -181,8 +181,8 @@ namespace Dune
      * \param first true if the given h is to be the first interval, false if last one
      *
      * Given a vector with last element \f$x_0\f$, this will add elements
-     * \f$x_1,\dots ,x_n\f$ such that - with \f$h_i=x_{i+1}-x_i\f$ - the ratio
-     * \f$h_{i+1} / h_i\f$ is fixed throughout the range and \f$x_n=end\f$.
+     * \f$x_1,\dots ,x_n\f$ such that the ratio \f$h_{i+1} / h_i\f$ is fixed throughout
+     * the range and \f$x_n=end\f$, while \f$h_i=x_{i+1}-x_i\f$ is the interval length.
      * The first interval length can either be explicitly given or be deduced by taking
      * the last interval length in the container. By setting the optional parameter first
      * to false, the given h can instead be used as last interval length in the range.
