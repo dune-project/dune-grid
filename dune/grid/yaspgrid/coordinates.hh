@@ -252,9 +252,13 @@ namespace Dune
   bool checkIfMonotonous(const Dune::array<std::vector<ctype>, dim>& coords)
   {
     for (std::size_t i=0; i<dim; i++)
+    {
+      if (coords[i].size() <= 1)
+        return false;
       for (int j=1; j<coords[i].size(); j++)
         if (coords[i][j] < coords[i][j-1])
           return false;
+    }
     return true;
   }
  } // namespace Yasp
