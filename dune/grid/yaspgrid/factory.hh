@@ -32,7 +32,7 @@ namespace Dune
   {
   public:
 
-    typedef YaspGrid<dim, TensorProductCoordinateContainer<ctype, dim> > Grid;
+    typedef YaspGrid<dim, TensorProductCoordinates<ctype, dim> > Grid;
     typedef typename Grid::Traits::CollectiveCommunication Comm;
 
     //! initialize the factory with a set of default values
@@ -45,7 +45,7 @@ namespace Dune
       if (!Dune::Yasp::checkIfMonotonous (_coords))
         DUNE_THROW( Dune::Exception,
           "TensorYaspFactory did not get enough coordinate information to construct a grid!");
-      return new grid(_coords, _periodic, _overlap, comm);
+      return new Grid(_coords, _periodic, _overlap, comm);
     }
 
     //! set whether the grid is periodic in direction dir
