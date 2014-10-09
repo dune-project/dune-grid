@@ -28,6 +28,7 @@ namespace Dune
      \tparam GridImp Type that is a model of Dune::Grid.
      \tparam IndexSetImp Type that is a model of Dune::IndexSet.
      \tparam IndexTypeImp The type used by IndexSetImp to store the indices
+     \tparam TypesImp     iterator range for all geometry types in domain
 
      <H3>Overview</H3>
 
@@ -71,7 +72,7 @@ namespace Dune
 
      @ingroup IndexIdSets
    */
-  template<class GridImp, class IndexSetImp, class IndexTypeImp>
+  template< class GridImp, class IndexSetImp, class IndexTypeImp, class TypesImp >
   class IndexSet
   {
     /* We use the remove_const to extract the Type from the mutable class,
@@ -88,6 +89,9 @@ namespace Dune
 
     /** \brief The type used for the indices */
     typedef IndexTypeImp IndexType;
+
+    /** \brief iterator range for geometry types in doamin */
+    typedef TypesImp Types;
 
     /** \brief dimension of the grid (maximum allowed codimension) */
     static const int dimension = remove_const< GridImp >::type::dimension;
@@ -187,6 +191,27 @@ namespace Dune
     //@{
     //===========================================================
 
+    /**
+     * \brief obtain all geometry types of entities in domain
+     *
+     * This method returns an iterator range (something that behaves like
+     * Dune::IteratorRange) visiting all geometry types of codimension codim
+     * in the domain of the index map exactly once.
+     * The iterator must implement the concept of a forward iterator (in the
+     * sense of the STL).
+     * The elements in the iterator range are required to be of type
+     * Dune::GeometryType.
+     *
+     * \param[in]  codim  a valid codimension
+     *
+     * \return iterator range over Const reference to a vector of geometry types.
+     */
+    Types types ( int codim ) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION( (asImp().types( codim )) );
+      return asImp().types( codim );
+    }
+
     /** @brief Return vector with all geometry types of entities in domain of index map.
             Return a vector with all geometry types of a given codimension
             contained in the Entity set \f$E\f$.
@@ -194,7 +219,7 @@ namespace Dune
        \param[in] codim A valid codimension.
        \return Const reference to a vector of geometry types.
      */
-    const std::vector<GeometryType>& geomTypes (int codim) const
+    const std::vector<GeometryType>& geomTypes (int codim) const DUNE_DEPRECATED_MSG( "Use IndexSet::types instead." )
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().geomTypes(codim)));
       return asImp().geomTypes(codim);
@@ -269,6 +294,8 @@ namespace Dune
     /** \brief The type used for the indices */
     typedef typename Base::IndexType IndexType;
 
+    typedef typename Base::Types Types;
+
     /** \brief dimension of the grid (maximum allowed codimension) */
     static const int dimension = Base::dimension;
 
@@ -281,6 +308,8 @@ namespace Dune
     //@{
     //===========================================================
 
+    Types types ( int codim ) const { return asImp().geomTypes( codim ); }
+
     /** @brief Return total number of entities of given codim in the entity set \f$E\f$. This
             is simply a sum over all geometry types.
 
@@ -290,7 +319,7 @@ namespace Dune
     IndexType size ( const int codim ) const
     {
       IndexType s( 0 );
-      const std::vector< GeometryType > &geomTs = Base::geomTypes( codim );
+      const std::vector< GeometryType > &geomTs = asImp().geomTypes( codim );
       typedef typename std::vector< GeometryType >::const_iterator Iterator;
       const Iterator end = geomTs.end();
       for( Iterator it = geomTs.begin(); it != end; ++it )
@@ -298,6 +327,10 @@ namespace Dune
       return s;
     }
     //@{
+
+  private:
+    IndexSetImp &asImp () { return static_cast< IndexSetImp & >( *this );}
+    const IndexSetImp &asImp () const { return static_cast< const IndexSetImp & >( *this ); }
   };
 
 

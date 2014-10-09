@@ -132,6 +132,8 @@ namespace Dune {
       DUNE_THROW(NotImplemented, "Wrong codim!");
     }
 
+    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
+
     /** \brief Deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
@@ -271,6 +273,8 @@ namespace Dune {
         s += size(geomTs[i]);
       return s;
     }
+
+    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
 
     /** deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const

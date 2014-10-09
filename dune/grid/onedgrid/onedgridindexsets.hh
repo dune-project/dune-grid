@@ -58,6 +58,8 @@ namespace Dune {
       return grid_->size(level_,codim);
     }
 
+    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
+
     /** \brief Deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
@@ -211,6 +213,8 @@ namespace Dune {
 
       return 0;
     }
+
+    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
 
     /** deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const

@@ -23,10 +23,10 @@ namespace Dune
 
     template< class Grid, class HostIndexSet >
     class IndexSet
-      : public Dune::IndexSet< Grid, IndexSet< Grid, HostIndexSet >, typename HostIndexSet::IndexType >
+      : public Dune::IndexSet< Grid, IndexSet< Grid, HostIndexSet >, typename HostIndexSet::IndexType, typename HostIndexSet::Types >
     {
       typedef IndexSet< Grid, HostIndexSet > This;
-      typedef Dune::IndexSet< Grid, This, typename HostIndexSet::IndexType > Base;
+      typedef Dune::IndexSet< Grid, This, typename HostIndexSet::IndexType, typename HostIndexSet::Types > Base;
 
       typedef typename remove_const< Grid >::type::Traits Traits;
 
@@ -36,6 +36,8 @@ namespace Dune
       static const int dimension = Traits::dimension;
 
       typedef typename Base::IndexType IndexType;
+
+      typedef typename Base::Types Types;
 
       IndexSet ()
         : hostIndexSet_( 0 )
@@ -85,6 +87,8 @@ namespace Dune
       {
         return Grid::getRealImplementation( entity ).isContained( hostIndexSet() );
       }
+
+      Types types ( int codim ) const { return hostIndexSet().types( codim ); }
 
       const std::vector< GeometryType > &geomTypes ( int codim ) const
       {

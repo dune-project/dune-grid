@@ -252,15 +252,27 @@ namespace Dune
       geometryTypes.insert(it->type());
     }
 
+    const typename IndexSetType::Types types = lset.types( codim );
     bool geomTypesError = false;
+
     // Check whether all entries in the official geometry types list are contained in our self-computed one
+    for( auto it = types.begin(); it != types.end(); ++it )
+      if( geometryTypes.find( *it ) == geometryTypes.end() )
+        geomTypesError = true;
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     for (size_t i=0; i<lset.geomTypes(codim).size(); i++)
       if (geometryTypes.find(lset.geomTypes(codim)[i])==geometryTypes.end())
         geomTypesError = true;
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
 
     // And vice versa
-    for (std::set<GeometryType>::iterator it = geometryTypes.begin(); it!=geometryTypes.end(); ++it) {
+    for( std::set<GeometryType>::iterator it = geometryTypes.begin(); it != geometryTypes.end(); ++it )
+    {
+      if( std::find( types.begin(), types.end(), *it ) == types.end() )
+        geomTypesError = true;
+
+#if !DISABLE_DEPRECATED_METHOD_CHECK
       bool found = false;
       for (size_t i=0; i<lset.geomTypes(codim).size(); i++)
         if (*it == lset.geomTypes(codim)[i]) {
@@ -270,8 +282,10 @@ namespace Dune
 
       if (!found)
         geomTypesError = true;
-
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     }
+
+
 
     if (geomTypesError) {
 
@@ -280,9 +294,15 @@ namespace Dune
       for (std::set<GeometryType>::iterator it = geometryTypes.begin(); it!=geometryTypes.end(); ++it)
         std::cerr << "  " << *it << std::endl;
 
+      std::cerr << std::endl << "but the method types() returned:" << std::endl;
+      for( auto it = types.begin(); it != types.end(); ++it )
+        std::cerr << "  " << *it << std::endl;
+
+#if !DISABLE_DEPRECATED_METHOD_CHECK
       std::cerr << std::endl << "but the method geomTypes() returned:" << std::endl;
       for (size_t j=0; j<lset.geomTypes(codim).size(); j++)
         std::cerr << "  " << lset.geomTypes(codim)[j] << std::endl;
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
       DUNE_THROW(GridError, "!");
     }

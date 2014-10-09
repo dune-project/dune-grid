@@ -445,7 +445,11 @@ struct GridViewInterface
       gv.indexSet().contains( *gv.template begin< 0 >() );
     }
     for( int codim = 0; codim < GridView::dimension; ++codim )
+      gv.indexSet().types( codim );
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+    for( int codim = 0; codim < GridView::dimension; ++codim )
       gv.indexSet().geomTypes( codim );
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     // intersections
     if( gv.template begin< 0 >() != gv.template end< 0 >() )
@@ -543,8 +547,12 @@ struct GridInterface
 #endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     g.levelIndexSet(0).
     size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
+    for( int codim = 0; codim < Grid::dimension; ++codim )
+      g.levelIndexSet( 0 ).types( codim );
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     for (int codim = 0; codim < Grid::dimension; codim++)
       g.levelIndexSet(0).geomTypes(codim);
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
 #if !DISABLE_DEPRECATED_METHOD_CHECK
     if (g.template leafbegin<0>() != g.template leafend<0>() )
@@ -556,8 +564,12 @@ struct GridInterface
     /** \todo Test for subindex is missing, because I don't know yet
        how to test for the existence of certain codims */
     g.leafIndexSet().size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
+    for( int codim = 0; codim < Grid::dimension; ++codim )
+      g.leafIndexSet().types( codim );
+#if !DISABLE_DEPRECATED_METHOD_CHECK
     for (int codim = 0; codim < Grid::dimension; codim++)
       g.leafIndexSet().geomTypes(codim);
+#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     if ( g.levelGridView( 0 ).template begin< 0 >() != g.levelGridView( 0 ).template end< 0 >() )
     {
