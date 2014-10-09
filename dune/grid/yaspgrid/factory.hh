@@ -22,6 +22,10 @@
 
 namespace Dune
 {
+  /** \brief A factory class for conveniently creating tensorproduct grids
+   *  A collection of useful methods to create coordinate vectors for
+   *  tensorproduct grids.
+   */
   template<typename ctype, int dim>
   class TensorYaspGridFactory
   {
