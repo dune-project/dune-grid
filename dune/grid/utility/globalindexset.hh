@@ -100,8 +100,8 @@ namespace Dune
 
     typedef typename Grid::CollectiveCommunication CollectiveCommunication;
 
-    typedef std::map<IdType,int> MapId2Index;
-    typedef std::map<int,int>    IndexMap;
+    typedef std::map<IdType,Index> MapId2Index;
+    typedef std::map<Index,Index>    IndexMap;
 
     /*********************************************************************************************/
     /* calculate unique partitioning for all entities of a given codim in a given GridView,      */
@@ -197,7 +197,7 @@ namespace Dune
           }
 
         /** exchange entity index through communication */
-        MinimumExchange<IndexSet,std::vector<int> > dh(gridview.indexSet(),assignment_,codim);
+        MinimumExchange<IndexSet,std::vector<Index> > dh(gridview.indexSet(),assignment_,codim);
 
         gridview.communicate(dh,Dune::All_All_Interface,Dune::ForwardCommunication);
 
@@ -227,7 +227,7 @@ namespace Dune
      * class in the parallelsolver.hh header file.
      */
     class IndexExchange
-    : public Dune::CommDataHandleIF<IndexExchange,int>
+    : public Dune::CommDataHandleIF<IndexExchange,Index>
     {
     public:
       //! returns true if data for this codim should be communicated
@@ -271,7 +271,7 @@ namespace Dune
       template<class MessageBuffer, class EntityType>
       void scatter (MessageBuffer& buff, const EntityType& entity, size_t n)
       {
-        int x;
+        Index x;
         buff.read(x);
 
         /** only if the incoming index is a valid one,
@@ -291,7 +291,7 @@ namespace Dune
             mapid2entity_.erase(id);
             mapid2entity_.insert(std::make_pair(id,x));
 
-            const int lindex = indexSet_.index(entity);
+            const Index lindex = indexSet_.index(entity);
             localGlobalMap_[lindex] = x;
             globalLocalMap_[x]      = lindex;
           }
@@ -404,7 +404,7 @@ namespace Dune
 
       const int myoffset = indexOffset_[rank];
 
-      int globalcontrib = 0;      /** initialize contribution for the global index */
+      Index globalcontrib = 0;      /** initialize contribution for the global index */
 
       if (codim_==0)  // This case is simpler
       {
@@ -415,7 +415,7 @@ namespace Dune
           /** if the entity is owned by the process, go ahead with computing the global index */
           if (iter->partitionType() == Dune::InteriorEntity)
           {
-            const int gindex = myoffset + globalcontrib;    /** compute global index */
+            const Index gindex = myoffset + globalcontrib;    /** compute global index */
 
             globalIndex_[id] = gindex;                      /** insert pair (key, datum) into the map */
             globalcontrib++;                                /** increment contribution to global index */
@@ -439,7 +439,7 @@ namespace Dune
         {
           IdType id=globalIdSet.subId(*iter,i,codim_);
 
-          int idx = gridview_.indexSet().subIndex(*iter,i,codim_);
+          Index idx = gridview_.indexSet().subIndex(*iter,i,codim_);
 
           if (!firstTime[idx] )
             continue;
@@ -448,10 +448,10 @@ namespace Dune
 
           if (uniqueEntityPartition->owner(idx) == true)  /** if the entity is owned by the process, go ahead with computing the global index */
           {
-            const int gindex = myoffset + globalcontrib;    /** compute global index */
+            const Index gindex = myoffset + globalcontrib;    /** compute global index */
             globalIndex_.insert(std::make_pair(id,gindex)); /** insert pair (key, value) into the map */
 
-            const int lindex = idx;
+            const Index lindex = idx;
             localGlobalMap_[lindex] = gindex;
             globalLocalMap_[gindex] = lindex;
 
@@ -475,23 +475,23 @@ namespace Dune
 
 
     /** \brief Given a local index, retrieve its globally unique index */
-    int globalIndex(const int& localIndex) const {
+    Index globalIndex(const int& localIndex) const {
       return localGlobalMap_.find(localIndex)->second;
     }
 
-    int localIndex(const int& globalIndex) const {
+    Index localIndex(const int& globalIndex) const {
       return globalLocalMap_.find(globalIndex)->second;
     }
 
     template <class Entity>
-    int globalIndex(const Entity& entity) const
+    Index globalIndex(const Entity& entity) const
     {
       if (codim_==0)
       {
         /** global unique index is only applicable for inter or border type entities */
         const GlobalIdSet& globalIdSet = gridview_.grid().globalIdSet(); /** retrieve globally unique Id set */
         const IdType id = globalIdSet.id(entity);                        /** obtain the entity's id */
-        const int gindex = globalIndex_.find(id)->second;                /** retrieve the global index in the map with the id as key */
+        const Index gindex = globalIndex_.find(id)->second;                /** retrieve the global index in the map with the id as key */
 
         return gindex;
       }
