@@ -7,7 +7,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
 
 #include "gridcheck.cc"
@@ -16,8 +15,6 @@
 #include "checkintersectionit.cc"
 #include "checkadaptation.cc"
 #include "checkpartition.cc"
-
-#include "../yaspgrid/factory.hh"
 
 int rank;
 
@@ -71,7 +68,7 @@ struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
       coords[i][8] =  1.0;
     }
 
-#if HAVE_MPI
+    #if HAVE_MPI
     return new Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >(MPI_COMM_WORLD,coords,p,overlap);
 #else
     return new Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >(coords,p,overlap);
@@ -80,10 +77,13 @@ struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
 };
 
 template <int dim, class CC = Dune::EquidistantCoordinateContainer<double,dim> >
-void check_yasp() {
-  std::cout << std::endl << "YaspGrid<" << dim << ">";
+void check_yasp(bool p0=false) {
+  typedef Dune::FieldVector<double,dim> fTupel;
 
-  Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid();
+  std::cout << std::endl << "YaspGrid<" << dim << ">";
+  if (p0) std::cout << " periodic\n";
+
+  Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid(p0);
 
   gridcheck(*grid);
   grid->globalRefine(2);
@@ -106,40 +106,22 @@ void check_yasp() {
   checkPartitionType( grid->leafGridView() );
 
   std::ofstream file;
-  file.open("output"+std::to_string(grid->comm().rank()));
+  file.open("output"+std::to_string(rank));
   file << *grid << std::endl;
   file.close();
 
   delete grid;
 }
 
-template<int dim>
-void check_factory()
-{
-  Dune::TensorYaspGridFactory<double,dim> factory;
-
-  factory.setStart(0,-100.);
-  factory.fill_intervals(0,10,20.);
-  factory.fill_range(0, 5, 130.);
-  factory.geometric_fill_intervals(0, 5, 2.0);
-
-  factory.geometric_fill_range(1,10,100.,1.,false);
-  factory.fill_range(1,10,200);
-  factory.geometric_fill_range(1,10,250.,1.,true);
-  factory.fill_until(1,50,1000.);
-
-  factory.setCommunicator(MPI_COMM_WORLD);
-
-  factory.print();
-
-  Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >* grid = factory.createGrid();
-  delete grid;
-}
-
 int main (int argc , char **argv) {
   try {
-    // Initialize MPI, if present
-    Dune::MPIHelper::instance(argc, argv);
+#if HAVE_MPI
+    // initialize MPI
+    MPI_Init(&argc,&argv);
+
+    // get own rank
+    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#endif
 
     check_yasp<1>();
     check_yasp<1, Dune::TensorProductCoordinateContainer<double,1> >();
@@ -157,6 +139,11 @@ int main (int argc , char **argv) {
     std::cerr << "Generic exception!" << std::endl;
     return 2;
   }
+
+#if HAVE_MPI
+  // Terminate MPI
+  MPI_Finalize();
+#endif
 
   return 0;
 }
