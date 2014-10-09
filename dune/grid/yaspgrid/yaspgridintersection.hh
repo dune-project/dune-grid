@@ -238,8 +238,7 @@ namespace Dune {
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
     {
-      static const GeometryType cube(GeometryType::cube, dim-1);
-      return cube;
+      return GeometryType(GeometryType::cube, dim-1);
     }
 
     //! local index of codim 1 entity in self where intersection is contained in
