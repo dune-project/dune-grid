@@ -3,10 +3,12 @@
 #ifndef DUNE_GRIDVIEW_HH
 #define DUNE_GRIDVIEW_HH
 
+#include <dune/common/iteratorrange.hh>
+
 #include <dune/geometry/type.hh>
 
 #include <dune/grid/common/datahandleif.hh>
-#include <dune/grid/common/gridenums.hh>
+#include <dune/grid/common/rangegenerators.hh>
 
 namespace Dune
 {
@@ -17,7 +19,7 @@ namespace Dune
 
 
   /** \addtogroup GIGridView
-   *
+   *  @{
    *  Though a DUNE grid is hierarchic, one often only needs access to
    *  a certain subset of the entities in the grid, e.g., the all entities
    *  on a given level or the leaf entities in the hierarchy.
@@ -51,7 +53,6 @@ namespace Dune
    *
    *  The interface is implemented using the engine concept.
    *
-   *  \ingroup GIGridView
    */
   template< class ViewTraits >
   class GridView

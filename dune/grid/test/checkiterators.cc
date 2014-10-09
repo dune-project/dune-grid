@@ -3,7 +3,14 @@
 #include <map>
 
 #include <dune/common/forloop.hh>
+#include <dune/common/test/iteratortest.hh>
 
+template<class T>
+class NoopFunctor {
+public:
+  NoopFunctor() {}
+  void operator()(const T& t){}
+};
 
 // CheckCodimIterators
 // -------------------
@@ -90,7 +97,7 @@ inline void CheckCodimIterators< GridView, codim, true >
   for( ElementIterator it = gridView.template begin< 0 >(); it != elementEnd; ++it )
   {
     const typename ElementIterator::Entity &entity = *it;
-    for( int i = 0; i < entity.template count< codim >(); ++i )
+    for( int i = 0; i < entity.subEntities(codim); ++i )
     {
       IdType id = idSet.subId( entity, i, codim );
       if( count[ id ] != 1 )
@@ -102,6 +109,14 @@ inline void CheckCodimIterators< GridView, codim, true >
       }
     }
   }
+
+  // check forward iterator semantics
+  typedef typename GridView::template Codim<codim>::Entity Entity;
+  NoopFunctor<Entity> op;
+  if(0 != testForwardIterator(gridView.template begin<codim>(),
+                               gridView.template end<codim>(), op))
+    DUNE_THROW(Dune::Exception, "Iterator does not fulfill the forward iterator concept");
+
 }
 
 

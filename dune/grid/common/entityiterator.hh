@@ -50,9 +50,21 @@ namespace Dune
       return *this;
     }
 
+    /** \brief postfix increment operator */
+    EntityIterator operator++ (int)
+    {
+      EntityIterator tmp(*this);
+      realIterator.increment();
+      return tmp;
+    }
+
     /** \name Implementor's interface
      *  \{
      */
+
+    /** \brief default construct (undefined) iterator */
+    EntityIterator ( )
+    {}
 
     /** \brief copy constructor from implementaton */
     EntityIterator ( const IteratorImp &imp )
@@ -71,7 +83,7 @@ namespace std
   struct iterator_traits< Dune::EntityIterator< codim, Grid, IteratorImp > >
   {
     typedef ptrdiff_t difference_type;
-    typedef const typename Dune::EntityIterator< codim, Grid, IteratorImp >::Entity value_type;
+    typedef const typename IteratorImp::Entity value_type;
     typedef value_type *pointer;
     typedef value_type &reference;
     typedef forward_iterator_tag iterator_category;

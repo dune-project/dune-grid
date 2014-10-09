@@ -207,7 +207,8 @@ namespace Dune
         const EntityType & en = *it;
         int geomType = convertToGrapeType ( en.type() , dimension );
         double val = 0.0;
-        for(int i=0; i<en.template count<dimension>(); ++i)
+        const int vertices = en.subEntities( dimension );
+        for(int i=0; i<vertices; ++i)
         {
           evalDofNow ( en , geomType, df , i , &val );
           if(!initialized)
@@ -581,7 +582,6 @@ namespace Dune
   {
     typedef typename DiscFuncType::DiscreteFunctionSpaceType DiscreteFunctionSpaceType;
     enum { polynomialOrder = DiscreteFunctionSpaceType :: polynomialOrder };
-    typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
 
     assert(dinf);
     std::string name(dinf->name);

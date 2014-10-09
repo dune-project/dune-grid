@@ -212,6 +212,15 @@ SOURCES = basicunitcube.hh                      \
           gridcheck.cc                          \
           staticcheck.hh
 
+NORMALTESTS += testiteratorranges
+testiteratorranges_SOURCES = testiteratorranges.cc
+testiteratorranges_CPPFLAGS = $(AM_CPPFLAGS)	\
+	$(DUNEMPICPPFLAGS)
+testiteratorranges_LDFLAGS = $(AM_LDFLAGS)	\
+	$(DUNEMPILDFLAGS)
+testiteratorranges_LDADD =			\
+	$(DUNEMPILIBS)				\
+	$(LDADD)
 
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = CMakeLists.txt $(SOURCES)
@@ -221,5 +230,8 @@ CLEANFILES = *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*
 # install the tests as we want to support testing 3rdparty grids with installed dune-grid
 testgriddir = $(includedir)/dune/grid/test
 testgrid_HEADERS = $(SOURCES)
+
+NORMALTESTS += testiteratorranges
+testiteratorranges_SOURCES = testiteratorranges.cc
 
 include $(top_srcdir)/am/global-rules

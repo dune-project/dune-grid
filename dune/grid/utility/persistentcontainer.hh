@@ -29,6 +29,20 @@ namespace Dune
     {}
   };
 
+  /** \brief refer PersistentContainer<const Grid> to the implementation of the mutable grid */
+  template< class Grid, class T >
+  class PersistentContainer< const Grid, T >
+    : public PersistentContainer< Grid, T >
+  {
+    typedef PersistentContainer< Grid, T > Base;
+  public:
+    typedef typename Base::Value Value;
+
+    PersistentContainer ( const typename Base::Grid &grid, int codim, const Value &value = Value() )
+      : Base(grid, codim, value)
+    {}
+  };
+
 } // namespace Dune
 
 

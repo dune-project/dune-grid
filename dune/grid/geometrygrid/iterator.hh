@@ -226,6 +226,8 @@ namespace Dune
       using Base::grid;
 
     public:
+      Iterator () : Base() {}
+
       template< class HostGridView >
       Iterator ( const Grid &grid, const HostGridView &hostGridView, IteratorType type )
         : Base( grid, (type == Traits::begin ? hostGridView.template begin< codimension, Traits::Entity_Partition >()
@@ -273,6 +275,8 @@ namespace Dune
       using Base::grid;
 
     public:
+      Iterator () : Base(), hostEnd_(), hostIndexSet_( nullptr ) {}
+
       template< class HostGridView >
       Iterator ( const Grid &grid, const HostGridView &hostGridView, IteratorType type )
         : Base( grid, (type == Traits::begin ? hostGridView.template begin< 0, Traits::Element_Partition >()

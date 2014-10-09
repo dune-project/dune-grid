@@ -610,40 +610,18 @@ namespace Dune {
 
     //! View for a grid level
     template<PartitionIteratorType pitype>
-    typename Partition<pitype>::LevelGridView levelView(int level) const {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template levelView<pitype>(level)));
-      return asImp().template levelView<pitype>(level);
-    }
-
-    //! View for the leaf grid
-    template<PartitionIteratorType pitype>
-    typename Partition<pitype>::LeafGridView leafView() const {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafView<pitype>()));
-      return asImp().template leafView<pitype>();
-    }
-
-    //! View for a grid level for All_Partition
-    LevelGridView levelView(int level) const DUNE_DEPRECATED_MSG("The method levelView has been renamed to levelGridView.") {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().levelView(level)));
-      return asImp().levelView(level);
-    }
-
-    //! View for the leaf grid for All_Partition
-    LeafGridView leafView() const DUNE_DEPRECATED_MSG("The method leafView has been renamed to leafGridView.") {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().leafView()));
-      return asImp().leafView();
-    }
-
-    //! View for a grid level
-    template<PartitionIteratorType pitype>
-    typename Partition<pitype>::LevelGridView levelGridView(int level) const {
+    typename Partition<pitype>::LevelGridView
+    DUNE_DEPRECATED_MSG( "After DUNE 2.4, grid views will always model the All_Partition. The template method levelGridView< pitype > will be removed without replacement. Use levelGridView() instead." )
+    levelGridView(int level) const {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template levelGridView<pitype>(level)));
       return asImp().template levelGridView<pitype>(level);
     }
 
     //! View for the leaf grid
     template<PartitionIteratorType pitype>
-    typename Partition<pitype>::LeafGridView leafGridView() const {
+    typename Partition<pitype>::LeafGridView
+    DUNE_DEPRECATED_MSG( "After DUNE 2.4, grid views will always model the All_Partition. The template method leafGridView< pitype > will be removed without replacement. Use leafGridView() instead." )
+    leafGridView() const {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafGridView<pitype>()));
       return asImp().template leafGridView<pitype>();
     }
@@ -1087,32 +1065,8 @@ namespace Dune {
 
     //! View for a grid level
     template<PartitionIteratorType pitype>
-    typename Traits::template Partition<pitype>::LevelGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to levelGridView.")
-    levelView(int level) const {
-      return asImp().template levelGridView< pitype >( level );
-    }
-
-    //! View for the leaf grid
-    template<PartitionIteratorType pitype>
-    typename Traits::template Partition<pitype>::LeafGridView DUNE_DEPRECATED_MSG("The method levelView has been renamed to leafGridView.") leafView() const {
-      return asImp().template leafGridView< pitype >();
-    }
-
-    //! View for a grid level for All_Partition
-    typename Traits::template Partition<All_Partition>::LevelGridView
-    levelView(int level) const DUNE_DEPRECATED_MSG("The method levelView has been renamed to levelGridView.") {
-      return asImp().levelGridView( level );
-    }
-
-    //! View for the leaf grid for All_Partition
-    typename Traits::template Partition<All_Partition>::LeafGridView
-    leafView() const DUNE_DEPRECATED_MSG("The method leafView has been renamed to leafGridView.") {
-      return asImp().leafGridView();
-    }
-
-    //! View for a grid level
-    template<PartitionIteratorType pitype>
     typename Traits::template Partition<pitype>::LevelGridView
+    DUNE_DEPRECATED_MSG( "After DUNE 2.4, grid views will always model the All_Partition. The template method levelGridView< pitype > will be removed without replacement. Use levelGridView() instead." )
     levelGridView(int level) const {
       typedef typename Traits::template Partition<pitype>::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
@@ -1122,6 +1076,7 @@ namespace Dune {
     //! View for the leaf grid
     template<PartitionIteratorType pitype>
     typename Traits::template Partition<pitype>::LeafGridView
+    DUNE_DEPRECATED_MSG( "After DUNE 2.4, grid views will always model the All_Partition. The template method leafGridView< pitype > will be removed without replacement. Use leafGridView() instead." )
     leafGridView() const {
       typedef typename Traits::template Partition<pitype>::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;

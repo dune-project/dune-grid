@@ -68,9 +68,7 @@ namespace Dune {
           // filename
           std::string piecepath = concatPaths(path_, extendpath_);
           std::string fullname =
-            static_cast<Imp*>(this)->getParallelPieceName(seqName(i), piecepath,
-                                                          static_cast<Imp*>(this)->gridView_.comm().rank(),
-                                                          static_cast<Imp*>(this)->gridView_.comm().size());
+            static_cast<Imp*>(this)->getParallelHeaderName(seqName(i), piecepath);
           pvdFile << "<DataSet timestep=\"" << timesteps_[i]
                   << "\" group=\"\" part=\"0\" name=\"\" file=\""
                   << fullname << "\"/> \n";

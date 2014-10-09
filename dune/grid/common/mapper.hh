@@ -1,9 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id$
-
-#ifndef DUNE_MAPPER2_HH
-#define DUNE_MAPPER2_HH
+#ifndef DUNE_GRID_COMMON_MAPPER_HH
+#define DUNE_GRID_COMMON_MAPPER_HH
 
 #include <iostream>
 
@@ -100,15 +98,17 @@ namespace Dune
      This class template is used as a base class for all mapper implementations.
      It uses the Barton-Nackman trick to ensure conformity to the interface.
 
-     Template parameters are:
-
-     - <tt>G</tt> Type that is a model of Dune::Grid.
-     - <tt>MapperImp</tt> Type that is a model of Dune::Mapper.
-
+     \tparam G Type that is a model of Dune::Grid
+     \tparam MapperImp Type that is a model of Dune::Mapper
+     \tparam IndexType Integer type used for indices.  Default type is for backward-compatibility
+     \todo IndexType should be extracted from MapperImp, but gcc doesn't let me
    */
-  template <typename G, typename MapperImp>
+  template <typename G, typename MapperImp, typename IndexType=int>
   class Mapper {
   public:
+
+    /** \brief Number type used for indices */
+    typedef IndexType Index;
 
     /** @brief Map entity to array index.
 
@@ -116,7 +116,7 @@ namespace Dune
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    int map (const EntityType& e) const
+    Index map (const EntityType& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e)));
       return asImp().map(e);
@@ -130,7 +130,7 @@ namespace Dune
      * \param codim codimension of subentity of e
      * \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    int map (const typename G::Traits::template Codim<0>::Entity& e,
+    Index map (const typename G::Traits::template Codim<0>::Entity& e,
              int i,
              unsigned int codim) const
     {

@@ -3,9 +3,14 @@
 #ifndef DUNE_GRID_ENTITY_HH
 #define DUNE_GRID_ENTITY_HH
 
+#include <dune/common/iteratorrange.hh>
 #include <dune/common/typetraits.hh>
+
+#include <dune/geometry/dimension.hh>
+
 #include "grid.hh"
 #include "entitypointer.hh"
+#include "rangegenerators.hh"
 
 namespace Dune
 {
@@ -312,8 +317,11 @@ namespace Dune
      *
      * Strictly speaking this method is redundant, because the same information can be obtained
      * from the corresponding reference element. It is here for efficiency reasons only.
+     *
+     * \deprecated This method will be removed after the release of dune-grid-2.4.
+     *   Please use the method subEntities instead.
      */
-    template<int codim> int count () const { return realEntity.template count<codim>(); }
+    template<int codim> int DUNE_DEPRECATED_MSG("Use subEntities(unsigned int) instead!") count () const { return realEntity.template count<codim>(); }
 
     /**\brief Number of subentities with codimension <tt>codim</tt>.
      *
@@ -537,6 +545,7 @@ namespace Dune
     }
 
   };
+
 
 
   //********************************************************************

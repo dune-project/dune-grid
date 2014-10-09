@@ -4,9 +4,12 @@
 #define DUNE_GRID_YASPGRID_YGRID_HH
 
 #include <vector>
+#include <bitset>
+#include <deque>
 
 #include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/power.hh>
 
 /** \file
     \brief This provides a YGrid, the elemental component of the yaspgrid implementation
@@ -14,31 +17,26 @@
 
 namespace Dune {
 
-  //! define a tolerance value for coordinate comparisons
-  static const double Ytolerance=1E-13;
-
+ namespace Yasp {
   /** @returns an array containing the sizes of the grids associated with vectors in given array.
    *  Needed in this form due to the need of such functionality in class initializer lists.
    *  @param v the array of vectors to examine
-   *  @param r the shift vector to determine grid type
    */
   template<int d, typename ct>
-  Dune::array<int,d> sizeArray(Dune::array<std::vector<ct>,d> v, Dune::FieldVector<ct,d> r)
+  Dune::array<int,d> sizeArray(const Dune::array<std::vector<ct>,d>& v)
   {
     Dune::array<int,d> tmp;
     for (int i=0; i<d; ++i)
-      if (r[i] < Ytolerance)
-        tmp[i] = v[i].size();
-      else
-        tmp[i] = v[i].size() - 1;
+      tmp[i] = v[i].size() - 1;
     return tmp;
   }
+ } //namespace Yasp
 
   /**
      The YGrid considered here describes a finite set \f$d\f$-tupels of the form
      \f[ G = \{ (k_0,\ldots,k_{d-1}) | o_i \leq k_i < o_i+s_i \}  \f]
 
-     together with an affine mappin.g
+     together with an affine mapping.
 
      A YGrid is characterized by the following quantities:
 
@@ -69,19 +67,19 @@ namespace Dune {
      the functionality of former SubYGrid and SubYGrid::TransformingSubIterator. All other
      classes in the hierarchy have not been used.
    */
-  template<class CC>
-  class YGrid
+  template<class Coordinates>
+  class YGridComponent
   {
   public:
     //extract coordinate type and dimension from the coordinate container
-    typedef typename CC::ctype ct;
-    static const int d = CC::dimension;
+    typedef typename Coordinates::ctype ct;
+    static const int d = Coordinates::dimension;
 
     typedef Dune::array<int, d> iTupel;
     typedef FieldVector<ct,d> fTupel;
 
     //! make uninitialized ygrid
-    YGrid () : _shift(0.0)
+    YGridComponent () : _shift(0ULL)
     {
       std::fill(_origin.begin(), _origin.end(), 0);
       std::fill(_offset.begin(), _offset.end(), 0);
@@ -90,14 +88,13 @@ namespace Dune {
 
     /** @brief make ygrid without coordinate information
      *  @param origin origin of the grid in global coordinates
-     *  @param shift shift vector to be used for this grid
      *  @param size size of the grid
      *  Such grid has no coordinate information stored but can be
      *  used to determine an intersection with a grid with coordinate
      *  information. This avoids sending coordinates in the parallel case.
      */
-    YGrid(iTupel origin, iTupel size, fTupel shift)
-      : _origin(origin), _shift(shift), _size(size)
+    YGridComponent(iTupel origin, iTupel size)
+      : _origin(origin), _size(size)
     {}
 
     /** @brief make a subgrid by taking coordinates from a larger grid
@@ -105,14 +102,22 @@ namespace Dune {
      *  @param size size of the grid to be constructed
      *  @param enclosing the grid to take coordinates and shift vector from
      */
-    YGrid (iTupel origin, iTupel size, const YGrid<CC>& enclosing)
+    YGridComponent (iTupel origin, iTupel size, const YGridComponent<Coordinates>& enclosing)
       :  _origin(origin), _shift(enclosing.shift()), _coords(enclosing.getCoords()), _size(size), _supersize(enclosing.supersize())
     {
       for (int i=0; i<d; i++)
         _offset[i] = origin[i] - enclosing.origin(i) + enclosing.offset(i);
+
+      // compute superincrements
+      int inc = 1;
+      for (int i=0; i<d; ++i)
+        {
+          _superincrement[i] = inc;
+          inc *= _supersize[i];
+        }
     }
 
-    /** @brief Make YGrid by giving all parameters
+    /** @brief Make YGridComponent by giving all parameters
      *  @param origin the origin of the grid in global coordinates
      *  @param shift the shift vector
      *  @param coords the coordinate vectors to be used
@@ -120,9 +125,17 @@ namespace Dune {
      *  @param offset the offset in the enclosing grid
      *  @param supersize size of the enclosing grid
      */
-    YGrid (iTupel origin,  fTupel shift, CC* coords, iTupel size, iTupel offset, iTupel supersize)
+    YGridComponent (iTupel origin, std::bitset<d> shift, Coordinates* coords, iTupel size, iTupel offset, iTupel supersize)
       : _origin(origin), _shift(shift), _coords(coords), _size(size), _offset(offset), _supersize(supersize)
-    {}
+    {
+      // compute superincrements
+      int inc = 1;
+      for (int i=0; i<d; ++i)
+        {
+          _superincrement[i] = inc;
+          inc *= _supersize[i];
+        }
+    }
 
     //! Return origin in direction i
     int origin (int i) const
@@ -137,18 +150,18 @@ namespace Dune {
     }
 
     //! Return shift in direction i
-    ct shift (int i) const
+    bool shift (int i) const
     {
       return _shift[i];
     }
 
     //! Return shift tupel
-    const fTupel& shift () const
+    const std::bitset<d>& shift () const
     {
       return _shift;
     }
 
-    CC* getCoords() const
+    Coordinates* getCoords() const
     {
       return _coords;
     }
@@ -244,25 +257,21 @@ namespace Dune {
     }
 
     //! return grid moved by the vector v
-    YGrid<CC> move (iTupel v) const
+    YGridComponent<Coordinates> move (iTupel v) const
     {
       for (int i=0; i<d; i++)
         v[i] += _origin[i];
-      return YGrid<CC>(v,_size,*this);
+      return YGridComponent<Coordinates>(v,_size,*this);
     }
 
-    //! Return SubYGrid of supergrid of self which is the intersection of self and another YGrid
-    YGrid<CC> intersection (const YGrid<CC>& r) const
+    //! Return YGridComponent of supergrid of self which is the intersection of self and another YGridComponent
+    YGridComponent<Coordinates> intersection (const YGridComponent<Coordinates>& r) const
     {
       for (int i=0; i<d; i++)
       {
         //empty coordinate vectors result in empty intersections
         if (empty() || r.empty())
-          return YGrid<CC>();
-
-        //intersectable grids must have the same shift
-        if (std::abs(shift(i)-r.shift(i)) > Ytolerance)
-          return YGrid<CC>();
+          return YGridComponent<Coordinates>();
       }
 
       iTupel neworigin;
@@ -273,74 +282,47 @@ namespace Dune {
         newsize[i] = std::min(max(i),r.max(i)) - neworigin[i] + 1;
       }
 
-      return YGrid<CC>(neworigin,newsize,*this);
+      return YGridComponent<Coordinates>(neworigin,newsize,*this);
     }
 
 
-   /*! Iterator class allows one to run over all cells of a grid.
-       The cells of the grid to iterate over are numbered consecutively starting
-       with zero. Via the index() method the iterator provides a mapping of the
-       cells of the grid to a one-dimensional array. The number of entries
-       in this array must be the size of the grid.
+    /** Iterator class allows one to run over all cells of a grid.
+     *  The cells of the grid to iterate over are numbered consecutively starting
+     *  with zero. Via the index() method the iterator provides a mapping of the
+     *  cells of the grid to a one-dimensional array. The number of entries
+     *  in this array must be the size of the grid.
      */
     class Iterator {
     public:
+      // default constructor
+      Iterator () {}
+
       //! Make iterator pointing to first cell in a grid.
-      Iterator (const YGrid<CC>& r) : _grid(&r)
+      Iterator (const YGridComponent<Coordinates>& r) : _grid(&r)
       {
         iTupel coord(r.origin());
         reinit(r,coord);
       }
 
       //! Make iterator pointing to given cell in a grid.
-      Iterator (const YGrid<CC>& r, const iTupel& coord)
+      Iterator (const YGridComponent<Coordinates>& r, const iTupel& coord)
       {
         reinit(r,coord);
       }
 
       //! reinitialize iterator to given position
-      void reinit (const YGrid<CC>& r, const iTupel& coord)
+      void reinit (const YGridComponent<Coordinates>& r, const iTupel& coord)
       {
-        // compute increments;
-        int inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _increment[i] = inc;
-          inc *= r.size(i);
-        }
-
         // initialize to given position in index set
         for (int i=0; i<d; ++i)
           _coord[i] = coord[i];
-        _index = r.index(coord);
-
-        // compute superincrements
-        inc = 1;
-        for (int i=0; i<d; ++i)
-        {
-          _superincrement[i] = inc;
-          inc *= r.supersize(i);
-        }
 
         // move superindex to first cell in subgrid
         _superindex = 0;
         for (int i=0; i<d; ++i)
-          _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
+          _superindex += (r.offset(i)+coord[i]-r.origin(i))*r.superincrement(i);
 
         _grid = &r;
-        if (_grid->inside(coord))
-        {
-          for (int i=0; i<d; ++i)
-          {
-            if (!_grid->empty())
-              _begin[i] = _grid->getCoords()->coordinate(i,_grid->origin(i));
-            if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i) > Ytolerance))
-              _begin[i] += _grid->shift(i) * _grid->getCoords()->meshsize(i,_grid->origin(i));
-            _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-            if ((_grid->getCoords()->size(i) > 0) && (_grid->shift(i) > Ytolerance))
-              _position[i] += _grid->shift(i)* _grid->getCoords()->meshsize(i,_coord[i]);
-          }
-        }
       }
 
       //! Return true when two iterators over the same grid are equal (!).
@@ -353,12 +335,6 @@ namespace Dune {
       bool operator!= (const Iterator& i) const
       {
         return _superindex != i._superindex;
-      }
-
-      //! Return index of the current cell in the consecutive numbering.
-      int index () const
-      {
-        return _index;
       }
 
       //! Return consecutive index in enclosing grid
@@ -383,57 +359,64 @@ namespace Dune {
       void move (int i, int dist)
       {
         _coord[i] += dist;
-        _index += dist*_increment[i];
-        _superindex += dist*_superincrement[i];
-        if (_grid->inside(_coord))
-        {
-          _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-          if (_grid->shift(i) > Ytolerance)
-            _position[i] += _grid->shift(i) * meshsize(i);
-        }
+        _superindex += dist*_grid->superincrement(i);
       }
 
       //! Increment iterator to next cell with position.
       Iterator& operator++ ()
       {
-        ++_index;               // update consecutive index in subgrid
         for (int i=0; i<d; i++)         // check for wrap around
         {
-          _superindex += _superincrement[i];   // move on cell in direction i
+          _superindex += _grid->superincrement(i);   // move on cell in direction i
           if (++_coord[i] <= _grid->max(i))
-          {
-            _position[i] = _grid->getCoords()->coordinate(i,_coord[i]);
-            if (_grid->shift(i) > Ytolerance)
-              _position[i] += _grid->shift(i) * _grid->getCoords()->meshsize(i,_coord[i]);
             return *this;
-          }
           else
           {
             _coord[i] = _grid->origin(i);         // move back to origin in direction i
-            _superindex -= _grid->size(i) * _superincrement[i];
-            _position[i] = _begin[i];
+            _superindex -= _grid->size(i) * _grid->superincrement(i);
           }
         }
         // if we wrapped around, back to to begin(), we must put the iterator to end()
         if (_coord == _grid->origin())
         {
           for (int i=0; i<d; i++)
-            _superindex += (_grid->size(i)-1) * _superincrement[i];
-          _superindex += _superincrement[0];
+            _superindex += (_grid->size(i)-1) * _grid->superincrement(i);
+          _superindex += _grid->superincrement(0);
         }
         return *this;
       }
 
-      //! Return position of current cell in direction i.
-      ct position (int i) const
+      //! Return ith component of lower left corner of the entity associated with the current coordinates and shift.
+      ct lowerleft(int i) const
       {
-        return _position[i];
+        return _grid->getCoords()->coordinate(i,_coord[i]);
       }
 
-      //! Return position of current cell as reference.
-      const fTupel& position () const
+      //! Return lower left corner of the entity associated with the current coordinates and shift.
+      fTupel lowerleft() const
       {
-        return _position;
+        fTupel ll;
+        for (int i=0; i<d; i++)
+          ll[i] = lowerleft(i);
+        return ll;
+      }
+
+      //! Return ith component of upper right corder of the entity associated with the current coordinates and shift.
+      ct upperright(int i) const
+      {
+        int coord = _coord[i];
+        if (shift(i))
+          coord++;
+        return _grid->getCoords()->coordinate(i,coord);
+      }
+
+      //! Return upper right corder of the entity associated with the current coordinates and shift.
+      fTupel upperright() const
+      {
+        fTupel ur;
+        for (int i=0; i<d; i++)
+          ur[i] = upperright(i);
+        return ur;
       }
 
       //! Return meshsize in direction i
@@ -451,16 +434,41 @@ namespace Dune {
         return h;
       }
 
+      bool shift (int i) const
+      {
+        return _grid->shift(i);
+      }
+
+      std::bitset<d> shift() const
+      {
+        return _grid->shift();
+      }
+
+      Coordinates* coordCont() const
+      {
+        return _grid->getCoords();
+      }
+
     protected:
-      int _index;          //!< current lexicographic position in index set
       iTupel _coord;       //!< current position in index set
-      iTupel _increment;   //!< increment for next neighbor in direction i
       int _superindex;        //!< consecutive index in enclosing grid
-      iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
-      const YGrid<CC>* _grid;
-      fTupel _begin;    //!< position of origin of grid
-      fTupel _position; //!< current position
+      const YGridComponent<Coordinates>* _grid;
     };
+
+
+    int superindex(iTupel coord) const
+    {
+      // move superindex to first cell in subgrid
+      int si = 0;
+      for (int i=0; i<d; ++i)
+        si += (offset(i)+coord[i]-origin(i))*_superincrement[i];
+      return si;
+    }
+
+    int superincrement(int i) const
+    {
+      return _superincrement[i];
+    }
 
     //! return iterator to first element of index set
     Iterator begin () const
@@ -469,7 +477,7 @@ namespace Dune {
     }
 
     //! return iterator to given element of index set
-    Iterator begin (iTupel& co) const
+    Iterator begin (const iTupel& co) const
     {
       return Iterator(*this,co);
     }
@@ -486,19 +494,21 @@ namespace Dune {
 
   private:
     iTupel _origin;
-    fTupel _shift;
-    CC* _coords;
+    std::bitset<d> _shift;
+    Coordinates* _coords;
     iTupel _size;
     iTupel _offset;    //!< offset to origin of the enclosing grid
     iTupel _supersize; //!< size of the enclosing grid
+    iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
+
   };
 
 
   //! Output operator for ygrids
-  template <class CC>
-  inline std::ostream& operator<< (std::ostream& s, YGrid<CC> e)
+  template <class Coordinates>
+  inline std::ostream& operator<< (std::ostream& s, YGridComponent<Coordinates> e)
   {
-    s << "Printing YGrid structure:" << std::endl;
+    s << "Printing YGridComponent structure:" << std::endl;
     s << "Origin: " << e.origin() << std::endl;
     s << "Shift: " << e.shift() << std::endl;
     s << "Size: " << e.size() << std::endl;
@@ -508,14 +518,461 @@ namespace Dune {
   }
 
   //! Output operator for ygrids
-  template <class CC>
-  inline std::ostream& operator<< (std::ostream& s, typename YGrid<CC>::Iterator& e)
+  template <class Coordinates>
+  inline std::ostream& operator<< (std::ostream& s, typename YGridComponent<Coordinates>::Iterator& e)
   {
-    s << "Printing YGrid Iterator:" << std::endl << "Iterator at " << e.coord() << " (index ";
+    s << "Printing YGridComponent Iterator:" << std::endl << "Iterator at " << e.coord() << " (index ";
     s << e.index() << "), position " << e.position();
     return s;
   }
 
+  /** \brief implements a collection of YGridComponents which form a codimension
+   * Entities of given codimension c need to be represented by d choose c YgridComponents.
+   * All entities in one such component share the same set of spanning unit vectors.
+   * A YGrid is used to iterate over the entire set of components the codimension
+   * consists of. It doesnt hold any data, but instead holds an iterator range into
+   * an array of components (which is owned by YGridLevel).
+   */
+  template<class Coordinates>
+  class YGrid
+  {
+    public:
+    static const int dim = Coordinates::dimension;
+
+    // define data array iterator
+    typedef YGridComponent<Coordinates>* DAI;
+
+    typedef typename Dune::array<int, dim> iTupel;
+
+    //! set start iterator in the data array
+    void setBegin(DAI begin)
+    {
+      _begin = begin;
+    }
+
+    //! get which component belongs to a given shift vector
+    int shiftmapping(const std::bitset<dim>& shift) const
+    {
+      return _shiftmapping[shift.to_ulong()];
+    }
+
+    //! get start iterator in the data array
+    DAI dataBegin() const
+    {
+      return _begin;
+    }
+
+    //! get end iterator in the data array
+    DAI dataEnd() const
+    {
+      return _end;
+    }
+
+    //! decide whether a coordinate is in the grid (depending on the component)
+    bool inside(const iTupel& coord, const std::bitset<dim>& shift = std::bitset<dim>()) const
+    {
+      return (_begin+_shiftmapping[shift.to_ulong()])->inside(coord);
+    }
+
+    /** \brief Iterator over a collection o YGrids
+     * A YGrid::Iterator is the heart of an entity in YaspGrid.
+     */
+    class Iterator
+    {
+      public:
+
+      //! default constructor
+      Iterator ()
+      {}
+
+      //! construct an iterator from coordinates and component
+      Iterator (const YGrid<Coordinates>& yg, const Dune::array<int,dim>& coords, int which = 0)
+        : _which(which), _yg(&yg)
+      {
+        _it = typename YGridComponent<Coordinates>::Iterator(*(_yg->dataBegin()+which),coords);
+      }
+
+      //! create an iterator to start or end of the codimension
+      Iterator (const YGrid<Coordinates>& yg, bool end=false) : _yg(&yg)
+      {
+        if (end)
+        {
+          _it = _yg->_itends.back();
+          _which = _yg->_itends.size() - 1;
+        }
+        else
+        {
+          _it = _yg->_itbegins[0];
+          _which = 0;
+        }
+      }
+
+      //! reinitializes an iterator, as if it was just constructed.
+      void reinit(const YGrid<Coordinates>& yg, const Dune::array<int,dim>& coords, int which = 0)
+      {
+        _yg = &yg;
+        _which = which;
+        _it = typename YGridComponent<Coordinates>::Iterator(*(_yg->dataBegin()+which),coords);
+      }
+
+      //! return coordinate at the current position (direction i)
+      int coord (int i) const
+      {
+        return _it.coord(i);
+      }
+
+      //! return coordinate array at the current postion
+      const Dune::array<int, dim>& coord () const
+      {
+        return _it.coord();
+      }
+
+      typename Coordinates::ctype lowerleft(int i) const
+      {
+        return _it.lowerleft(i);
+      }
+
+      Dune::FieldVector<typename Coordinates::ctype,dim> lowerleft() const
+      {
+        return _it.lowerleft();
+      }
+
+      typename Coordinates::ctype upperright(int i) const
+      {
+        return _it.upperright(i);
+      }
+
+      Dune::FieldVector<typename Coordinates::ctype,dim> upperright() const
+      {
+        return _it.upperright();
+      }
+
+      //! return the current meshsize in direction i
+      typename Coordinates::ctype meshsize (int i) const
+      {
+        return _it.meshsize(i);
+      }
+
+      //! return the current meshsize vector
+      Dune::FieldVector<typename Coordinates::ctype,dim> meshsize() const
+      {
+        return _it.meshsize();
+      }
+
+      //! return the shift in direction i
+      bool shift (int i) const
+      {
+        return _it.shift(i);
+      }
+
+      //! return the shift vector
+      std::bitset<dim> shift () const
+      {
+        return _it.shift();
+      }
+
+      //! return the superindex
+      int superindex() const
+      {
+        // the offset of the current component has to be taken into account
+          return _yg->_indexOffset[_which] + _it.superindex();
+      }
+
+      //! increment to the next entity jumping to next component if necessary
+      Iterator& operator++ ()
+      {
+        if ((++_it == _yg->_itends[_which]) && (_which < _yg->_itends.size()-1))
+          _it = _yg->_itbegins[++_which];
+        return *this;
+      }
+
+      //! compare two iterators: component has to match
+      bool operator==(const Iterator& i) const
+      {
+        if (_which != i._which)
+          return false;
+        return _it == i._it;
+      }
+
+      //! compare two iterators: component has to match
+      bool operator!=(const Iterator& i) const
+      {
+        if (_it != i._it)
+          return true;
+        return _which != i._which;
+      }
+
+      //! return the current component number
+      int which() const
+      {
+        return _which;
+      }
+
+      //! move the grid, this is only done and needed for codim 0
+      void move(int i, int dist)
+      {
+        _it.move(i,dist);
+      }
+
+      Coordinates* coordCont() const
+      {
+        return _it.coordCont();
+      }
+
+
+      private:
+      int _which;
+      const YGrid<Coordinates>* _yg;
+      typename YGridComponent<Coordinates>::Iterator _it;
+    };
+
+    //! return begin iterator for the codimension and partition the ygrid represents
+    Iterator begin() const
+    {
+      return Iterator(*this);
+    }
+
+    //! return iterator pointint to a specified position
+    Iterator begin(const Dune::array<int, dim>& coord, int which = 0) const
+    {
+      return Iterator(*this, coord, which);
+    }
+
+    //! return end iterator for the codimension and partition the ygrid represents
+    Iterator end() const
+    {
+      return Iterator(*this,true);
+    }
+
+    int superindex(const iTupel& coord, int which) const
+    {
+      return _indexOffset[which] + (dataBegin()+which)->superindex(coord);
+    }
+
+
+    // finalize the ygrid construction by storing component iterators
+    void finalize(const DAI& end, int artificialOffset = 0)
+    {
+      // set the end iterator in the ygrid component array
+      _end = end;
+
+      _indexOffset.push_back(artificialOffset);
+      int k = 0;
+      for (DAI i=_begin; i != _end; ++i, ++k)
+      {
+        //store begin and end iterators
+        _itbegins.push_back(i->begin());
+        _itends.push_back(i->end());
+
+        // store index offset
+        _indexOffset.push_back(_indexOffset.back() + i->totalsize());
+
+        // store shift to component mapping
+        _shiftmapping[i->shift().to_ulong()] = k;
+      }
+      _indexOffset.resize(_itends.size());
+    }
+
+    private:
+
+    friend class YGrid<Coordinates>::Iterator;
+    DAI _begin;
+    DAI _end;
+    Dune::array<int,StaticPower<2,dim>::power> _shiftmapping;
+    std::vector<typename YGridComponent<Coordinates>::Iterator> _itbegins;
+    std::vector<typename YGridComponent<Coordinates>::Iterator> _itends;
+    std::vector<int> _indexOffset;
+  };
+
+  //! Output operator for ygrids
+  template <class Coordinates>
+  inline std::ostream& operator<< (std::ostream& s, const YGrid<Coordinates>& e)
+  {
+    s << "Printing YGrid structure:" << std::endl;
+    for (auto it = e.dataBegin(); it != e.dataEnd(); ++it)
+      s << *it << std::endl;
+    return s;
+  }
+
+  /** \brief implements a collection of multiple std::deque<Intersection>
+   * Intersections with neighboring processors are stored as std::deque<Intersection>.
+   * Eachsuch intersection only holds one YGridComponent. To do all communication
+   * associated with one codimension, multiple such deques have to be concatenated.
+   * YGridList manges this concatenation. As for YGrids, YGridList doesnt hold any
+   * data, but an iterator range into a data array owned by YGridLevel.
+   */
+  template<class Coordinates>
+  class YGridList
+  {
+    public:
+    static const int dim = Coordinates::dimension;
+
+    /** \brief type describing an intersection with a neighboring processor */
+    struct Intersection
+    {
+      /** \brief The intersection as a subgrid of the local grid */
+      YGridComponent<Coordinates> grid;
+      /** \brief Rank of the process where the other grid is stored */
+      int rank;
+      /** \brief Manhattan distance to the other grid */
+      int distance;
+      /** \brief a YGrid stub, that acts wraps above YGrid Component and handels the index offset */
+      YGrid<Coordinates> yg;
+    };
+
+    // define data array iterator type
+    typedef typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator DAI;
+
+    // iterator that allows to iterate over a concatenation of deques. namely those
+    // that belong to the same codimension.
+    class Iterator
+    {
+      public:
+
+      //! return iterator to begin and end of the container
+        Iterator(const YGridList<Coordinates>& ygl, bool end=false) : _end(ygl.dataEnd()), _which(ygl.dataBegin())
+      {
+        _it = _which->begin();
+
+        // advance the iterator to the first element that exists.
+        // some deques might be empty and should be skipped
+        while ((_which != _end) && (_it == _which->end()))
+        {
+          ++_which;
+          if (_which != _end)
+            _it = _which->begin();
+        }
+        // the iterator is at the end if and only if _which==_end
+        if (end)
+        {
+          _which = _end;
+        }
+      }
+
+      //! increment iterator
+      Iterator& operator++ ()
+      {
+        ++_it;
+        // advance the iterator to the next element that exists.
+        // some deques might be empty and should be skipped
+        while ((_which != _end) && (_it == _which->end()))
+        {
+          ++_which;
+          if (_which != _end)
+            _it = _which->begin();
+        }
+        return *this;
+      }
+
+      //! dereference iterator
+      typename std::deque<Intersection>::iterator  operator->() const
+      {
+        return _it;
+      }
+
+      //! dereference iterator
+      typename std::deque<Intersection>::iterator  operator*() const
+      {
+        return _it;
+      }
+
+      //! compare two iterators
+      bool operator== (const Iterator& i) const
+      {
+        if (_which != i._which)
+          return false;
+        if (_which == _end)
+          return true;
+        return _it == i._it;
+      }
+
+      //! compare two iterators
+      bool operator!= (const Iterator& i) const
+      {
+        if (_which != i._which)
+          return true;
+        if (_which == _end)
+          return false;
+        return _it != i._it;
+      }
+
+      private:
+      typename std::deque<Intersection>::iterator _it;
+      DAI _end;
+      DAI _which;
+    };
+
+    //! return iterator pointing to the begin of the container
+    Iterator begin() const
+    {
+      return Iterator(*this);
+    }
+
+    //! return iterator pointing to the end of the container
+    Iterator end() const
+    {
+      return Iterator(*this,true);
+    }
+
+    //! set start iterator in the data array
+    void setBegin(typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator begin)
+    {
+      _begin = begin;
+    }
+
+    //! get start iterator in the data array
+    DAI dataBegin() const
+    {
+      return _begin;
+    }
+
+    //! get end iterator in the data array
+    DAI dataEnd() const
+    {
+      return _end;
+    }
+
+    //! return the size of the container, this is the sum of the sizes of all deques
+    int size() const
+    {
+      int count = 0;
+      for (DAI it = _begin; it != _end; ++it)
+        count += it->size();
+      return count;
+    }
+
+    //! finalize the YGridLIst
+    void finalize(DAI end)
+    {
+      // set end iterator in the data array
+      _end = end;
+
+      //! set offsets allow the YGridComponents in the Intersctions to behave as YGrids
+      int offset = 0;
+
+      // iterate over all deques
+      for (DAI i=_begin; i!=_end; ++i)
+      {
+        // iterate over the intersections in the deque and set the offset
+        for (typename std::deque<Intersection>::iterator it = i->begin(); it != i->end(); ++it)
+          //it->indexOffset = offset;
+        {
+          it->yg.setBegin(&(it->grid));
+          it->yg.finalize(&(it->grid)+1, offset);
+        }
+
+        // update the offset by taking the totalsupersize of the first YGridComponent.
+        int add = 1;
+        for (int j=0; j<dim; j++)
+          add *= i->begin()->grid.supersize(j);
+        offset += add;
+      }
+    }
+
+    private:
+    DAI _begin;
+    DAI _end;
+  };
 
 } // namespace Dune
 

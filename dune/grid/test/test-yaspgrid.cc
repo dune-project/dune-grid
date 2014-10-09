@@ -6,24 +6,27 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
 
 #include "gridcheck.cc"
 #include "checkcommunicate.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkiterators.cc"
 #include "checkadaptation.cc"
 #include "checkpartition.cc"
 
-int rank;
+#include "../yaspgrid/backuprestore.hh"
 
 template<int dim, class CC>
 struct YaspFactory
 {};
 
 template<int dim>
-struct YaspFactory<dim, Dune::EquidistantCoordinateContainer<double,dim> >
+struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 {
   static Dune::YaspGrid<dim>* buildGrid()
   {
@@ -35,18 +38,14 @@ struct YaspFactory<dim, Dune::EquidistantCoordinateContainer<double,dim> >
     std::bitset<dim> p(0);
     int overlap = 1;
 
-#if HAVE_MPI
-    return new Dune::YaspGrid<dim>(MPI_COMM_WORLD,Len,s,p,overlap);
-#else
     return new Dune::YaspGrid<dim>(Len,s,p,overlap);
-#endif
   }
 };
 
 template<int dim>
-struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
+struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
 {
-  static Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >* buildGrid()
+  static Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >* buildGrid()
   {
     std::cout << " using tensorproduct coordinate container!" << std::endl << std::endl;
 
@@ -68,27 +67,24 @@ struct YaspFactory<dim, Dune::TensorProductCoordinateContainer<double,dim> >
       coords[i][8] =  1.0;
     }
 
-    #if HAVE_MPI
-    return new Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >(MPI_COMM_WORLD,coords,p,overlap);
-#else
-    return new Dune::YaspGrid<dim, Dune::TensorProductCoordinateContainer<double,dim> >(coords,p,overlap);
-#endif
+    return new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(coords,p,overlap);
   }
 };
 
-template <int dim, class CC = Dune::EquidistantCoordinateContainer<double,dim> >
-void check_yasp(bool p0=false) {
-  typedef Dune::FieldVector<double,dim> fTupel;
-
+template <int dim, class CC>
+void check_yasp(Dune::YaspGrid<dim,CC>* grid) {
   std::cout << std::endl << "YaspGrid<" << dim << ">";
-  if (p0) std::cout << " periodic\n";
 
-  Dune::YaspGrid<dim,CC>* grid = YaspFactory<dim,CC>::buildGrid(p0);
-
-  gridcheck(*grid);
-  grid->globalRefine(2);
+  if (grid == NULL)
+    grid = YaspFactory<dim,CC>::buildGrid();
 
   gridcheck(*grid);
+  //grid->globalRefine(2);
+
+  gridcheck(*grid);
+
+  checkIterators ( grid->leafGridView() );
+  checkIterators ( grid->levelGridView(0) );
 
   // check communication interface
   checkCommunication(*grid,-1,Dune::dvverb);
@@ -106,31 +102,78 @@ void check_yasp(bool p0=false) {
   checkPartitionType( grid->leafGridView() );
 
   std::ofstream file;
-  file.open("output"+std::to_string(rank));
+  std::ostringstream filename;
+  filename << "output" <<grid->comm().rank();
+  file.open(filename.str());
   file << *grid << std::endl;
   file.close();
 
   delete grid;
 }
 
+template <int dim, class CC = Dune::EquidistantCoordinates<double,dim> >
+void check_backuprestore()
+{
+   typedef Dune::YaspGrid<dim,CC> Grid;
+   Grid* grid = YaspFactory<dim,CC>::buildGrid();
+   grid->globalRefine(2);
+
+   Dune::BackupRestoreFacility<Grid>::backup(*grid, "backup");
+
+   // avoid that processes that having nothing to backup try to restore
+   // a grid that has not been backuped yet.
+   grid->comm().barrier();
+   Grid* restored = Dune::BackupRestoreFacility<Grid>::restore("backup");
+
+   // write a backup of the restored file. this has to be identical to backup
+   Dune::BackupRestoreFacility<Grid>::backup(*restored, "copy");
+
+   if ((std::is_same<CC,Dune::TensorProductCoordinates<double,dim> >::value) || (grid->comm().rank() == 0))
+   {
+     // check whether copy and backup are equal
+     std::ostringstream s1,s2;
+     s1 << "backup";
+     s2 << "copy";
+     if (std::is_same<CC,Dune::TensorProductCoordinates<double,dim> >::value)
+     {
+       s1 << grid->comm().rank();
+       s2 << grid->comm().rank();
+     }
+     std::ifstream file1, file2;
+     file1.open(s1.str());
+     file2.open(s2.str());
+
+     std::string token1, token2;
+     while(!file1.eof() && !file2.eof())
+     {
+       file1 >> token1;
+       file2 >> token2;
+       if (token1 != token2)
+         DUNE_THROW(Dune::Exception, "Error in BackupRestoreFacility");
+     }
+   }
+
+   check_yasp(restored);
+
+   delete grid;
+}
+
 int main (int argc , char **argv) {
   try {
-#if HAVE_MPI
-    // initialize MPI
-    MPI_Init(&argc,&argv);
+    // Initialize MPI, if present
+    Dune::MPIHelper::instance(argc, argv);
 
-    // get own rank
-    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-#endif
+    check_yasp(YaspFactory<1,Dune::EquidistantCoordinates<double,1> >::buildGrid());
+    check_yasp(YaspFactory<1,Dune::TensorProductCoordinates<double,1> >::buildGrid());
 
-    check_yasp<1>();
-    check_yasp<1, Dune::TensorProductCoordinateContainer<double,1> >();
+    check_yasp(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid());
+    check_yasp(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid());
 
-    check_yasp<2>();
-    check_yasp<2, Dune::TensorProductCoordinateContainer<double,2> >();
+    check_yasp(YaspFactory<3,Dune::EquidistantCoordinates<double,3> >::buildGrid());
+    check_yasp(YaspFactory<3,Dune::TensorProductCoordinates<double,3> >::buildGrid());
 
-    check_yasp<3>();
-    check_yasp<3, Dune::TensorProductCoordinateContainer<double,3> >();
+    check_backuprestore<2>();
+    check_backuprestore<2, Dune::TensorProductCoordinates<double,2> >();
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
@@ -139,11 +182,6 @@ int main (int argc , char **argv) {
     std::cerr << "Generic exception!" << std::endl;
     return 2;
   }
-
-#if HAVE_MPI
-  // Terminate MPI
-  MPI_Finalize();
-#endif
 
   return 0;
 }

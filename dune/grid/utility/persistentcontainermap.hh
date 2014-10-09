@@ -262,7 +262,8 @@ namespace Dune
     for( LevelIterator it = levelView.template begin< 0 >(); it != end; ++it )
     {
       const typename LevelIterator::Entity &entity = *it;
-      for( int i = 0; i < entity.template count< codim >(); ++i )
+      const int subEntities = entity.subEntities( codim );
+      for( int i = 0; i < subEntities; ++i )
         migrateEntry( idSet().subId( entity, i, codim ), value, data, data_ );
     }
   }

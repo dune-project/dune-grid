@@ -54,7 +54,7 @@ struct subIndexCheck
     }
 
     typedef typename Grid::template Codim< cd >::EntityPointer EntityPointer;
-    const int imax = e.template count<cd>();
+    const int imax = e.subEntities(cd);
     for( int i = 0; i < imax; ++i )
     {
       // check construction of entity pointers
@@ -192,13 +192,15 @@ void zeroEntityConsistency (Grid &g)
 
     // Entity::count<dim>() == Entity::geometry().corners();
     // Entity::geometry()[c] == Entity::entity<dim>.geometry()[0];
-    const int numCornersOld = it->template count< dimGrid >();
     const int numCorners = it->subEntities(dimGrid);
+#if !DISABLE_DEPRECATED_METHOD_CHECK
+    const int numCornersOld = it->template count< dimGrid >();
     if( numCorners != numCornersOld )
     {
       std::cerr << "Error: Entity::count< dimGrid >() != Entity::subEntities(dimGrid)." << std::endl;
       assert( false );
     }
+#endif
     if( numCorners != it->geometry().corners() )
     {
       std::cerr << "Error: Entity::count< dimGrid >() != Entity::geometry().corners()." << std::endl;
@@ -326,7 +328,7 @@ void assertNeighbor (Grid &g)
 #endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
       }
 
-      const int numFaces = entity.template count< 1 >();
+      const int numFaces = entity.subEntities(1);
       // flag vector for elements faces
       std::vector< bool > visited( numFaces, false );
 
@@ -407,7 +409,7 @@ void assertNeighbor (Grid &g)
 
           // numbering
           const int indexInOutside = it->indexInOutside();
-          const int numFaces = outside.template count< 1 >();
+          const int numFaces = outside.subEntities(1);
           if( (indexInOutside < 0) || (indexInOutside >= numFaces) )
           {
             std :: cout << "Error: Invalid indexInOutside: " << indexInOutside
@@ -614,8 +616,8 @@ void iteratorEquals (Grid &g)
     return;
 
   // check '==' consistency
-  EntityPointer a( g.template levelGridView<Dune::All_Partition>(0).template begin<0>() );
-  EntityPointer i( g.template levelGridView<Dune::Interior_Partition>(0).template begin<0>() );
+  EntityPointer a( g.levelGridView(0).template begin<0,Dune::All_Partition>() );
+  EntityPointer i( g.levelGridView(0).template begin<0,Dune::InteriorBorder_Partition>() );
 
   assert(
     (g.levelIndexSet(0).index(*a) != g.levelIndexSet(0).index(*i)) // index equal

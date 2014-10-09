@@ -23,7 +23,7 @@ namespace Dune
    *  @tparam dim the dimension of the grid
    */
   template<class ct, int dim>
-  class EquidistantCoordinateContainer
+  class EquidistantCoordinates
   {
     public:
     //! export the coordinate type
@@ -32,7 +32,7 @@ namespace Dune
     static const int dimension = dim;
 
     /** \brief default constructor */
-    EquidistantCoordinateContainer() {}
+    EquidistantCoordinates() {}
 
     /** \brief construct a container with all necessary information
      *  \param h the meshsize in all directions
@@ -40,7 +40,7 @@ namespace Dune
      *  the size information is kept with this container, because this is the natural
      *  way to handle this for a tensorproduct grid.
      */
-    EquidistantCoordinateContainer(Dune::FieldVector<ct,dim> h, Dune::array<int,dim> s)
+    EquidistantCoordinates(const Dune::FieldVector<ct,dim>& h, const Dune::array<int,dim>& s)
       : _h(h), _s(s) {}
 
     /** \returns the meshsize in given direction at given position
@@ -75,7 +75,7 @@ namespace Dune
      *  \param overlap the size of the overlap region
      *  \param keep_ovlp the refinement option parameter to be used
      */
-    EquidistantCoordinateContainer<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp) const
+    EquidistantCoordinates<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp) const
     {
       //determine new size and meshsize
       Dune::array<int,dim> news;
@@ -94,14 +94,14 @@ namespace Dune
 
         newh[i] = _h[i] / 2.;
       }
-      return EquidistantCoordinateContainer<ct,dim>(newh,news);
+      return EquidistantCoordinates<ct,dim>(newh,news);
     }
 
     /** \brief print information on this container */
     void print(std::ostream& s) const
     {
-      s << "Printing equidistant coordinate container:" << std::endl;
-      s << "Meshsize = " << _h << "  size = " << _s << std::endl;
+      s << "Printing equidistant coordinate information:" << std::endl;
+      s << "Meshsize: " << _h << std::endl << "Size: " << _s << std::endl;
     }
 
     private:
@@ -110,7 +110,7 @@ namespace Dune
   };
 
   template<class ct, int dim>
-  inline std::ostream& operator<< (std::ostream& s, EquidistantCoordinateContainer<ct,dim>& c)
+  inline std::ostream& operator<< (std::ostream& s, EquidistantCoordinates<ct,dim>& c)
   {
     c.print(s);
     return s;
@@ -121,7 +121,7 @@ namespace Dune
    *  @tparam dim the dimension of the grid
    */
   template<class ct, int dim>
-  class TensorProductCoordinateContainer
+  class TensorProductCoordinates
   {
     public:
     //! export the coordinate type
@@ -130,7 +130,7 @@ namespace Dune
     static const int dimension = dim;
 
     /** \brief the default constructor */
-    TensorProductCoordinateContainer() {}
+    TensorProductCoordinates() {}
 
     /** \brief construct a container with all necessary information
      *  \param c the array of coordinate vectors
@@ -138,7 +138,7 @@ namespace Dune
      *  the size information is deduced from c. Storing offset allows for use of
      *  global coordinates in the YaspGrid code.
      */
-    TensorProductCoordinateContainer(Dune::array<std::vector<ct>,dim> c, Dune::array<int,dim> offset)
+    TensorProductCoordinates(const Dune::array<std::vector<ct>,dim>& c, const Dune::array<int,dim>& offset)
       : _c(c),_offset(offset)
     {}
 
@@ -146,7 +146,7 @@ namespace Dune
      *  \param d the direction to be used
      *  \param i the global coordinate index where to return the meshsize
      */
-    inline ct meshsize(int d, int i)
+    inline ct meshsize(int d, int i) const
     {
       return _c[d][i+1-_offset[d]] - _c[d][i-_offset[d]];
     }
@@ -155,7 +155,7 @@ namespace Dune
      *  \param d the direction to be used
      *  \param i the global coordinate index
      */
-    inline ct coordinate(int d, int i)
+    inline ct coordinate(int d, int i) const
     {
       return _c[d][i-_offset[d]];
     }
@@ -163,7 +163,7 @@ namespace Dune
     /** \returns the size in given direction
      *  \param d the direction to be used
      */
-    inline int size(int d)
+    inline int size(int d) const
     {
       return _c[d].size() - 1;
     }
@@ -174,7 +174,7 @@ namespace Dune
      *  \param overlap the size of the overlap region
      *  \param keep_ovlp the refinement option parameter to be used
      */
-    TensorProductCoordinateContainer<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp)
+    TensorProductCoordinates<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp) const
     {
       Dune::array<std::vector<ct>,dim> newcoords;
       Dune::array<int,dim> newoffset(_offset);
@@ -220,19 +220,18 @@ namespace Dune
         if (++iit != newcoords[i].end())
           *iit = *it;
       }
-      return TensorProductCoordinateContainer<ct,dim>(newcoords, newoffset);
+      return TensorProductCoordinates<ct,dim>(newcoords, newoffset);
     }
 
     /** \brief print information on this container */
     void print(std::ostream& s) const
     {
-      s << "Printing Tensor Product Coordinate Container information:" << std::endl;
+      s << "Printing TensorProduct Coordinate information:" << std::endl;
       for (int i=0; i<dim; i++)
       {
-        s << "Direction " << i << ": ";
+        s << "Direction " << i << ": " << _c[i].size() << " coordinates" << std::endl;
         for (std::size_t j=0; j<_c[i].size(); j++)
-          s << _c[i][j] << " ";
-        s << std::endl;
+          s << _c[i][j] << std::endl;
       }
     }
 
@@ -242,14 +241,15 @@ namespace Dune
   };
 
   template<class ct, int dim>
-  inline std::ostream& operator<< (std::ostream& s, TensorProductCoordinateContainer<ct,dim>& c)
+  inline std::ostream& operator<< (std::ostream& s, TensorProductCoordinates<ct,dim>& c)
   {
     c.print(s);
     return s;
   }
 
+ namespace Yasp {
   template<class ctype, std::size_t dim>
-  bool checkIfMonotonous(Dune::array<std::vector<ctype>, dim>& coords)
+  bool checkIfMonotonous(const Dune::array<std::vector<ctype>, dim>& coords)
   {
     for (std::size_t i=0; i<dim; i++)
     {
@@ -261,6 +261,7 @@ namespace Dune
     }
     return true;
   }
+ } // namespace Yasp
 } // namespace Dune
 
 #endif

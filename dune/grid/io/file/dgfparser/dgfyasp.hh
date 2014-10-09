@@ -263,11 +263,7 @@ namespace Dune
     // get grid parameters
     dgf::YaspGridParameterBlock grdParam( gridin );
 
-#if HAVE_MPI
-    grid_ = new YaspGrid< dim >( comm, lang, anz, per, grdParam.overlap() );
-#else
-    grid_ = new YaspGrid< dim >( lang, anz, per, grdParam.overlap() );
-#endif
+    grid_ = new YaspGrid< dim >( lang, anz, per, grdParam.overlap(), comm );
 
     boundaryDomainBlock_ = new dgf::BoundaryDomBlock( gridin, dimension );
   }

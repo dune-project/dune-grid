@@ -212,13 +212,8 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
         for N in $ALBERTA_WORLD_DIMS ; do
           eval ALBERTA${N}D_CPPFLAGS="'\$(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=${N} -DENABLE_ALBERTA'"
           eval ALBERTA${N}D_LDFLAGS=
-          AS_IF([test -n "$DUNE_GRID_ROOT" -a -d "$DUNE_GRID_ROOT/include/dune"],[
-            # Dune was installed into directory given by with-dunegrid
-            eval ALBERTA${N}D_LIBS="'-L\$(DUNE_GRID_LIBDIR) -ldunealbertagrid_${N}d -ldunegrid \$(ALBERTA_LIBPATHFLAGS) -lalberta_${N}d \$(ALBERTA_BASE_LIBS)'"
-          ],[
-            # local modules is linked directly via the .la file
-            eval ALBERTA${N}D_LIBS="'\$(DUNE_GRID_LIBDIR)/libdunealbertagrid_${N}d.la \$(DUNE_GRID_LIBDIR)/libdunegrid.la \$(ALBERTA_LIBPATHFLAGS) -lalberta_${N}d \$(ALBERTA_BASE_LIBS)'"
-          ])
+          # Dune was installed into directory given by with-dunegrid
+          eval ALBERTA${N}D_LIBS="'-L\$(DUNE_GRID_LIBDIR) -ldunealbertagrid_${N}d -ldunegrid \$(ALBERTA_LIBPATHFLAGS) -lalberta_${N}d \$(ALBERTA_BASE_LIBS)'"
         done
       ],[
         HAVE_ALBERTA=0

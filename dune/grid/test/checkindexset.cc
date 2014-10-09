@@ -73,14 +73,14 @@ namespace Dune
       = ReferenceElements< coordType, dim >::general( type );
 
     // check whether the element has the number of codim-subentities mandated by the reference element
-    if(en.template count<codim>() != refElem.size(0,0,codim))
+    if(int(en.subEntities(codim)) != refElem.size(0,0,codim))
     {
       std::cerr << "entity index = " << lset.index(en)
                 << ", type = " << type
                 << std::endl
                 << "codim = " << codim
                 << std::endl
-                << "count<codim>() = " << en.template count<codim>()
+                << "subEntities(codim) = " << en.subEntities(codim)
                 << std::endl
                 << "refElem.size(codim) = " << refElem.size(0,0,codim)
                 << std::endl;
@@ -324,13 +324,13 @@ namespace Dune
       const LocalIdSetType &localIdSet = grid.localIdSet();
       for( ; it != endit; ++it )
       {
-        const typename Iterator::Entity &entity = *it;
+        const typename std::iterator_traits<Iterator>::value_type &entity = *it;
         if( !lset.contains( entity ) )
         {
           std::cerr << "Error: IndexSet does not contain all entities." << std::endl;
           assert( false );
         }
-        const int subcount = entity.template count< codim >();
+        const int subcount = entity.subEntities(codim);
         for( int i = 0; i < subcount; ++i )
         {
           const IdType id = localIdSet.id( *(entity.template subEntity< codim >( i ) ) );
@@ -433,7 +433,7 @@ namespace Dune
         sout << "****************************************\n";
         sout << "Element = " << lset.index(*it) << " on level " << it->level () << "\n";
         sout << "Vertices      = [";
-        int svx = it->template count<dim>();
+        int svx = it->subEntities(dim);
 
         // print all vertex numbers
         for( int i = 0; i < svx; ++i )

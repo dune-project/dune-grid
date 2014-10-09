@@ -147,12 +147,12 @@ void checkIntersections(const GridView &gv)
       ++ n;
     }
 
-    if (n != it->template count<1>())
+    if (n != it->subEntities(1))
     {
 
       DUNE_THROW(Dune::InvalidStateException,
                  "Number of faces for non-ghost cell incorrect. Is "
-                 << n << " but should be " << it->template count<1>());
+                 << n << " but should be " << it->subEntities(1));
     }
   }
 }
@@ -346,7 +346,7 @@ public:
     const typename GridView::template Codim<0>::Iterator
     &endIt = gridView.template end<0>();
     for (; it != endIt; ++it) {
-      int numberOfSubEntities = it->template count<commCodim>();
+      int numberOfSubEntities = it->subEntities(commCodim);
       for (int k = 0; k < numberOfSubEntities; k++)
       {
         typedef typename GridView::template Codim<0>::Entity Element;

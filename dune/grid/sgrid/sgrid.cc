@@ -292,7 +292,7 @@ namespace Dune {
     count = _count;
 
     // check if count is valid
-    if (count<0 || count>=grid->getRealImplementation(self).entity().template count<1>())
+    if (count<0 || count>=int(grid->getRealImplementation(self).entity().subEntities(1)))
     {
       grid->getRealImplementation(ne).index = -1;
       return;   // done, this is end iterator

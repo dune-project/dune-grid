@@ -3,6 +3,9 @@
 #ifndef DUNE_SGRID_HH
 #define DUNE_SGRID_HH
 
+#warning The SGrid grid manager has been deprecated, and will be removed after the dune-grid-2.4 release. \
+         Please use YaspGrid instead.
+
 #include <limits>
 #include <vector>
 #include <stack>

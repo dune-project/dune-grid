@@ -97,11 +97,8 @@ void vtkCheck(int* n, double* h)
   std::copy(n, n+dim, s.begin());
   std::bitset<dim> periodic;
 
-  Dune::YaspGrid<dim> g(
-#if HAVE_MPI
-    MPI_COMM_WORLD,
-#endif
-    L, s, periodic, 0);
+  Dune::YaspGrid<dim> g(L, s, periodic, 0);
+
   if(g.comm().rank() == 0)
     std::cout << std::endl
               << "subsamplingVTKCheck dim=" << dim

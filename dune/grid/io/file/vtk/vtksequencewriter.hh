@@ -26,6 +26,7 @@ namespace Dune {
   {
     typedef VTKWriter<GridView> BaseType;
     typedef VTKSequenceWriter<GridView> ThisType;
+    friend class VTKSequenceWriterBase<VTKSequenceWriter<GridView> >;
   public:
     using VTKSequenceWriterBase<VTKSequenceWriter<GridView> >::write;
     using BaseType::gridView_;
@@ -39,7 +40,12 @@ namespace Dune {
         VTKSequenceWriterBase<VTKSequenceWriter<GridView> >(name,path,extendpath)
     {}
     ~VTKSequenceWriter() {}
-
+  private:
+    std::string getParallelHeaderName(const std::string& name,
+                                      const std::string& path) const
+    {
+      return VTKWriter<GridView>::getParallelHeaderName(name,path,this->gridView_.comm().size());
+    }
   };
 
   /**
@@ -57,6 +63,7 @@ namespace Dune {
   {
     typedef SubsamplingVTKWriter<GridView> BaseType;
     typedef SubsamplingVTKSequenceWriter<GridView> ThisType;
+    friend class VTKSequenceWriterBase<SubsamplingVTKSequenceWriter<GridView> >;
   public:
     using VTKSequenceWriterBase<SubsamplingVTKSequenceWriter<GridView> >::write;
     using BaseType::gridView_;

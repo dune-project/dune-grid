@@ -90,7 +90,7 @@ void checkVertexDataMapper(const Mapper& mapper, const GridView& gridView)
 
   for (; eIt!=eEndIt; ++eIt)
   {
-    size_t numVertices = eIt->template count<dim>();
+    size_t numVertices = eIt->subEntities(dim);
     for (size_t curVertex = 0; curVertex < numVertices; ++curVertex)
     {
       size_t index = mapper.map(*eIt, curVertex, dim);
@@ -142,7 +142,7 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
       DUNE_THROW(GridError, "Mapper mixed index is not unique for elements!");
 
     // handle edges
-    size_t numEdges = eIt->template count<dim - 1>();
+    size_t numEdges = eIt->subEntities(dim-1);
     for (size_t curEdge = 0; curEdge < numEdges; ++curEdge)
     {
       index = mapper.map(*eIt, curEdge, dim - 1);
