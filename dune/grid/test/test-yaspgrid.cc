@@ -10,6 +10,8 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
+#include <dune/grid/yaspgrid/backuprestore.hh>
+#include <dune/grid/yaspgrid/factory.hh>
 
 #include "gridcheck.cc"
 #include "checkcommunicate.cc"
@@ -18,8 +20,6 @@
 #include "checkiterators.cc"
 #include "checkadaptation.cc"
 #include "checkpartition.cc"
-
-#include "../yaspgrid/backuprestore.hh"
 
 template<int dim, class CC>
 struct YaspFactory
@@ -112,10 +112,9 @@ void check_yasp(Dune::YaspGrid<dim,CC>* grid) {
 }
 
 template <int dim, class CC = Dune::EquidistantCoordinates<double,dim> >
-void check_backuprestore()
+void check_backuprestore(Dune::YaspGrid<dim,CC>* grid)
 {
    typedef Dune::YaspGrid<dim,CC> Grid;
-   Grid* grid = YaspFactory<dim,CC>::buildGrid();
    grid->globalRefine(2);
 
    Dune::BackupRestoreFacility<Grid>::backup(*grid, "backup");
@@ -172,8 +171,23 @@ int main (int argc , char **argv) {
     check_yasp(YaspFactory<3,Dune::EquidistantCoordinates<double,3> >::buildGrid());
     check_yasp(YaspFactory<3,Dune::TensorProductCoordinates<double,3> >::buildGrid());
 
-    check_backuprestore<2>();
-    check_backuprestore<2, Dune::TensorProductCoordinates<double,2> >();
+    // check the factory class for tensorproduct grids
+    Dune::TensorYaspGridFactory<double,2> factory;
+    factory.setStart(0,-100.);
+    factory.fill_intervals(0,10,20.);
+    factory.fill_range(0, 5, 130.);
+    factory.geometric_fill_intervals(0, 5, 2.0);
+
+    factory.geometric_fill_range(1,10,100.,1.,false);
+    factory.fill_range(1,10,200);
+    factory.geometric_fill_range(1,10,250.,1.,true);
+    factory.fill_until(1,50,1000.);
+
+    auto grid = factory.createGrid();
+
+    // check the backup restore facility
+    check_backuprestore(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid());
+    check_backuprestore(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid());
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
