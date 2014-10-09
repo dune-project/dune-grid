@@ -475,7 +475,7 @@ namespace Dune
 
 
     /** \brief Given a local index, retrieve its globally unique index */
-    Index globalIndex(const int& localIndex) const {
+    Index index(const int& localIndex) const {
       return localGlobalMap_.find(localIndex)->second;
     }
 
@@ -484,7 +484,7 @@ namespace Dune
     }
 
     template <class Entity>
-    Index globalIndex(const Entity& entity) const
+    Index index(const Entity& entity) const
     {
       if (codim_==0)
       {

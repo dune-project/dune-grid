@@ -21,7 +21,7 @@ void checkIndexSet(const GridView& gridView,
   for (auto it = gridView.template begin<0>(); it != gridView.template end<0>(); ++it)
     // Loop over all subEntities
     for (size_t i=0; i<it->subEntities(codim); i++)
-      indices.push_back(indexSet.globalIndex(*it->template subEntity<codim>(i)));
+      indices.push_back(indexSet.index(*it->template subEntity<codim>(i)));
 
   /////////////////////////////////////////////////////////////////////////
   //  Sent the locally collected global indices to the root process
