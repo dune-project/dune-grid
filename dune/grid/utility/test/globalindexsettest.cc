@@ -14,10 +14,10 @@ using namespace Dune;
 /** \brief Perform various consistency checks on a GlobalIndexSet object */
 template <class GridView, int codim>
 void checkIndexSet(const GridView& gridView,
-                   const GlobalIndexSet<GridView,codim>& indexSet)
+                   const GlobalIndexSet<GridView>& indexSet)
 {
   // Collect global indices on the current process
-  std::vector<typename GlobalIndexSet<GridView,codim>::Index> indices;
+  std::vector<typename GlobalIndexSet<GridView>::Index> indices;
   for (auto it = gridView.template begin<0>(); it != gridView.template end<0>(); ++it)
     // Loop over all subEntities
     for (size_t i=0; i<it->subEntities(codim); i++)
@@ -36,7 +36,7 @@ void checkIndexSet(const GridView& gridView,
   for (size_t k = 0; k < offsets.size(); ++k)
     offsets[k] = std::accumulate(sizes.begin(), sizes.begin() + k, 0);
 
-  std::vector<typename GlobalIndexSet<GridView,codim>::Index> indicesGlobal;
+  std::vector<typename GlobalIndexSet<GridView>::Index> indicesGlobal;
   if (gridView.comm().rank() == 0)
     indicesGlobal.resize(std::accumulate(sizes.begin(), sizes.end(), 0));
 
@@ -90,16 +90,16 @@ int main(int argc, char* argv[]) try
   /////////////////////////////////////////////////////
 
   // elements
-  GlobalIndexSet<GridView,0> elementIndexSet(gridView);
-  checkIndexSet(gridView, elementIndexSet);
+  GlobalIndexSet<GridView> elementIndexSet(gridView,0);
+  checkIndexSet<GridView,0>(gridView, elementIndexSet);
 
   // edges
-  GlobalIndexSet<GridView,1> edgeIndexSet(gridView);
-  checkIndexSet(gridView, edgeIndexSet);
+  GlobalIndexSet<GridView> edgeIndexSet(gridView,1);
+  checkIndexSet<GridView,1>(gridView, edgeIndexSet);
 
   // vertices
-  GlobalIndexSet<GridView,2> vertexIndexSet(gridView);
-  checkIndexSet(gridView, vertexIndexSet);
+  GlobalIndexSet<GridView> vertexIndexSet(gridView,2);
+  checkIndexSet<GridView,2>(gridView, vertexIndexSet);
 
   return 0;
 

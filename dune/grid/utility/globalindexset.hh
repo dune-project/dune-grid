@@ -55,12 +55,40 @@ namespace Dune
 
   /** \brief Calculate globally unique index over all processes in a Dune grid
    */
-  template<class GridView, int CODIM>
+  template<class GridView>
   class GlobalIndexSet
   {
   public:
     /** \brief The number type used for global indices  */
     typedef int Index;
+
+    /** \brief Helper class to provide access to subentity PartitionTypes with a run-time codimension
+     *
+     * This class can be removed if there is ever a method 'subPartitionType' similar to 'subIndex',
+     * that takes a run-time codimension argument.
+     */
+    template <class Entity, int Codim>
+    struct SubPartitionTypeProvider
+    {
+      /** \brief Get PartitionType of the i-th subentity of codimension 'codim' of entity 'entity'
+       */
+      static PartitionType get(const Entity& entity, int codim, int i)
+      {
+        if (codim==Codim)
+          return entity.template subEntity<Codim>(i)->partitionType();
+        else
+          return SubPartitionTypeProvider<Entity,Codim-1>::get(entity, codim, i);
+      }
+    };
+
+    template <class Entity>
+    struct SubPartitionTypeProvider<Entity,0>
+    {
+      static PartitionType get(const Entity& entity, int codim, int i)
+      {
+        return entity.template subEntity<0>(i)->partitionType();
+      }
+    };
 
   private:
     /** define data types */
@@ -69,7 +97,6 @@ namespace Dune
     typedef typename GridView::Grid::GlobalIdSet GlobalIdSet;
     typedef typename GridView::Grid::GlobalIdSet::IdType IdType;
     typedef typename GridView::Traits::template Codim<0>::Iterator Iterator;
-    typedef typename GridView::Traits::template Codim<CODIM>::Entity Entity;
 
     typedef typename Grid::CollectiveCommunication CollectiveCommunication;
 
@@ -95,7 +122,7 @@ namespace Dune
         //! returns true if data for this codim should be communicated
         bool contains (int dim, int codim) const
         {
-          return codim==CODIM ;
+          return codim==indexSetCodim_;
         }
 
         //! returns true if size per entity of given dim and codim is a constant
@@ -134,37 +161,43 @@ namespace Dune
         }
 
         //! constructor
-        MinimumExchange (const IS& indexset, V& v)
+        MinimumExchange (const IS& indexset, V& v, uint indexSetCodim)
         : indexset_(indexset),
-          v_(v)
+          v_(v),
+          indexSetCodim_(indexSetCodim)
         {}
 
       private:
         const IS& indexset_;
         V& v_;
+        uint indexSetCodim_;
       };
 
     public:
       /*! \brief Constructor needs to know the grid function space
        */
-      UniqueEntityPartition (const GridView& gridview)
-      : assignment_(gridview.size(CODIM))
+      UniqueEntityPartition (const GridView& gridview, uint codim)
+      : assignment_(gridview.size(codim))
       {
         /** extract types from the GridView data type */
         typedef typename GridView::IndexSet IndexSet;
 
         // assign own rank to entities that I might have
         for (auto it = gridview.template begin<0>(); it!=gridview.template end<0>(); ++it)
-          for (int i=0; i<it->subEntities(CODIM); i++)
+          for (int i=0; i<it->subEntities(codim); i++)
           {
-            assignment_[gridview.indexSet().subIndex(*it,i,CODIM)]
-              = ( (it->template subEntity<CODIM>(i)->partitionType()==Dune::InteriorEntity) || (it->template subEntity<CODIM>(i)->partitionType()==Dune::BorderEntity) )
+            // Evil hack: I need to call subEntity, which needs the entity codimension as a static parameter.
+            // However, we only have it as a run-time parameter.
+            PartitionType subPartitionType = SubPartitionTypeProvider<typename GridView::template Codim<0>::Entity, GridView::dimension>::get(*it,codim,i);
+
+            assignment_[gridview.indexSet().subIndex(*it,i,codim)]
+              = ( subPartitionType==Dune::InteriorEntity or subPartitionType==Dune::BorderEntity )
               ? gridview.comm().rank()  // set to own rank
               : - 1;   // it is a ghost entity, I will not possibly own it.
           }
 
         /** exchange entity index through communication */
-        MinimumExchange<IndexSet,std::vector<int> > dh(gridview.indexSet(),assignment_);
+        MinimumExchange<IndexSet,std::vector<int> > dh(gridview.indexSet(),assignment_,codim);
 
         gridview.communicate(dh,Dune::All_All_Interface,Dune::ForwardCommunication);
 
@@ -200,7 +233,7 @@ namespace Dune
       //! returns true if data for this codim should be communicated
       bool contains (int dim, int codim) const
       {
-        return codim==CODIM;
+        return codim==indexSetCodim_;
       }
 
       //! returns true if size per entity of given dim and codim is a constant
@@ -225,7 +258,7 @@ namespace Dune
       {
         IdType id=globalidset_.id(e);
 
-        if (CODIM==0)
+        if (indexSetCodim_==0)
           buff.write(mapid2entity_[id]);
         else
           buff.write((*mapid2entity_.find(id)).second);
@@ -251,7 +284,7 @@ namespace Dune
         if(x >= 0) {
           const IdType id = globalidset_.id(entity);
 
-          if (CODIM==0)
+          if (indexSetCodim_==0)
             mapid2entity_[id] = x;
           else
           {
@@ -267,12 +300,14 @@ namespace Dune
 
       //! constructor
       IndexExchange (const GlobalIdSet& globalidset, MapId2Index& mapid2entity,
-                     const typename GridView::IndexSet& localIndexSet, IndexMap& localGlobal, IndexMap& globalLocal)
+                     const typename GridView::IndexSet& localIndexSet, IndexMap& localGlobal, IndexMap& globalLocal,
+                     uint indexSetCodim)
       : globalidset_(globalidset),
       mapid2entity_(mapid2entity),
       indexSet_(localIndexSet),
       localGlobalMap_(localGlobal),
-      globalLocalMap_(globalLocal)
+      globalLocalMap_(globalLocal),
+      indexSetCodim_(indexSetCodim)
       {}
 
     private:
@@ -282,6 +317,7 @@ namespace Dune
       const typename GridView::IndexSet& indexSet_;
       IndexMap& localGlobalMap_;
       IndexMap& globalLocalMap_;
+      uint indexSetCodim_;
     };
 
   public:
@@ -290,8 +326,9 @@ namespace Dune
      * This constructor calculates the complete set of global unique indices so that we can then
      *  later query the global index, by directly passing the entity in question.
      */
-    GlobalIndexSet(const GridView& gridview)
-    : gridview_(gridview)
+    GlobalIndexSet(const GridView& gridview, int codim)
+    : gridview_(gridview),
+      codim_(codim)
     {
       int rank = gridview.comm().rank();
       int size = gridview.comm().size();
@@ -299,10 +336,10 @@ namespace Dune
       const typename GridView::IndexSet& indexSet = gridview.indexSet();
 
       std::unique_ptr<UniqueEntityPartition> uniqueEntityPartition;
-      if (CODIM!=0)
-        uniqueEntityPartition = std::unique_ptr<UniqueEntityPartition>(new UniqueEntityPartition(gridview));
+      if (codim_!=0)
+        uniqueEntityPartition = std::unique_ptr<UniqueEntityPartition>(new UniqueEntityPartition(gridview,codim_));
 
-      nLocalEntity_ = (CODIM==0)
+      nLocalEntity_ = (codim_==0)
                     ? std::distance(gridview.template begin<0, Dune::Interior_Partition>(), gridview.template end<0, Dune::Interior_Partition>())
                     : uniqueEntityPartition->numOwners();
 
@@ -318,7 +355,7 @@ namespace Dune
       std::vector<int> offset(size);
       std::fill(offset.begin(), offset.end(), 0);
 
-      if (CODIM==0)  // This case is simpler
+      if (codim_==0)
       {
         /** Share number of locally owned entities */
         gridview_.comm().template allgather<int>(&nLocalEntity_, 1, offset.data());
@@ -335,7 +372,7 @@ namespace Dune
       indexOffset_.clear();
 
       // Do we need both cases here?
-      if (CODIM==0)
+      if (codim_==0)
         indexOffset_.resize(size + 1, 0);
       else
         indexOffset_.resize(size, 0);
@@ -369,7 +406,7 @@ namespace Dune
 
       int globalcontrib = 0;      /** initialize contribution for the global index */
 
-      if (CODIM==0)  // This case is simpler
+      if (codim_==0)  // This case is simpler
       {
         for (Iterator iter = gridview_.template begin<0>(); iter!=gridview_.template end<0>(); ++iter)
         {
@@ -391,18 +428,18 @@ namespace Dune
           }
         }
       }
-      else  // if (CODIM==0) else
+      else  // if (codim==0) else
       {
-      std::vector<bool> firstTime(gridview_.size(CODIM));
+      std::vector<bool> firstTime(gridview_.size(codim_));
       std::fill(firstTime.begin(), firstTime.end(), true);
 
       for(Iterator iter = gridview_.template begin<0>();iter!=gridview_.template end<0>(); ++iter)
       {
-        for (size_t i=0; i<iter->subEntities(CODIM); i++)
+        for (size_t i=0; i<iter->subEntities(codim_); i++)
         {
-          IdType id=globalIdSet.subId(*iter,i,CODIM);                 /** retrieve the entity's id */
+          IdType id=globalIdSet.subId(*iter,i,codim_);
 
-          int idx = gridview_.indexSet().subIndex(*iter,i,CODIM);
+          int idx = gridview_.indexSet().subIndex(*iter,i,codim_);
 
           if (!firstTime[idx] )
             continue;
@@ -432,7 +469,7 @@ namespace Dune
       // 2nd stage of global index calculation: communicate global index for non-owned entities
 
       // Create the data handle and communicate.
-      IndexExchange dataHandle(globalIdSet,globalIndex_,indexSet,localGlobalMap_,globalLocalMap_);
+      IndexExchange dataHandle(globalIdSet,globalIndex_,indexSet,localGlobalMap_,globalLocalMap_,codim_);
       gridview_.communicate(dataHandle, Dune::All_All_Interface, Dune::ForwardCommunication);
     }
 
@@ -446,9 +483,10 @@ namespace Dune
       return globalLocalMap_.find(globalIndex)->second;
     }
 
-    int globalIndex(const typename GridView::template Codim<CODIM>::Entity& entity) const
+    template <class Entity>
+    int globalIndex(const Entity& entity) const
     {
-      if (CODIM==0)
+      if (codim_==0)
       {
         /** global unique index is only applicable for inter or border type entities */
         const GlobalIdSet& globalIdSet = gridview_.grid().globalIdSet(); /** retrieve globally unique Id set */
@@ -478,6 +516,9 @@ namespace Dune
 
   protected:
     const GridView gridview_;
+
+    /** \brief Codimension of the entities that we hold indices for */
+    uint codim_;
 
     //! Number of entities that are owned by the local process
     int nLocalEntity_;
