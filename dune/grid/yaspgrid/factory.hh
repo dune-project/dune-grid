@@ -82,7 +82,7 @@ namespace Dune
      * Given a vector with last element \f$x_0\f$, this will add elements
      * \f$x_1,\dots ,x_n\f$ such that \f$x_i=x_0+i*h\f$.
      */
-    void fill_intervals (int d, int n, ctype h)
+    void fillIntervals (int d, int n, ctype h)
     {
       emptyCheck (d);
       for (int i = 0; i < n; i++)
@@ -97,7 +97,7 @@ namespace Dune
      * Given a vector with last element \f$x_0\f$, this will add elements
      * \f$x_1,\dots ,x_n\f$ such that \f$x_i=x_0+i*\frac{end-x_0}{n}\f$.
      */
-    void fill_range (int d, int n, ctype end)
+    void fillRange (int d, int n, ctype end)
     {
       emptyCheck (d);
       const ctype h = (end - _coords[d].back ()) / n;
@@ -114,7 +114,7 @@ namespace Dune
      *  Given a vector with last element \f$x_0\f$, this will add elements
      * \f$x_1,\dots ,x_n\f$ such that \f$x_n < end < x_n + h\f$ and \f$x_{i+1}-x_i = h\f$.
      */
-    void fill_until (int d, ctype h, ctype end)
+    void fillUntil (int d, ctype h, ctype end)
     {
       emptyCheck (d);
       while (_coords[d].back () < end)
@@ -133,7 +133,7 @@ namespace Dune
      *  can either be explicitly given or be deduced by multiplying the ratio
      *  with the last interval length in the container.
      */
-    void geometric_fill_intervals (int d, int n, ctype ratio, ctype h0 =
+    void geometricFillIntervals (int d, int n, ctype ratio, ctype h0 =
         static_cast<ctype> (0))
     {
       emptyCheck (d);
@@ -159,8 +159,7 @@ namespace Dune
      *  length can either be explicitly given or be deduced by multiplying the ratio with
      *  the last interval length in the container.
      */
-    void geometric_fill_until (int d, ctype ratio, ctype end, ctype h0 =
-        static_cast<ctype> (0))
+    void geometricFillUntil (int d, ctype ratio, ctype end, ctype h0 = static_cast<ctype> (0))
     {
       emptyCheck (d);
       ctype h = h0;
@@ -187,7 +186,7 @@ namespace Dune
      * the last interval length in the container. By setting the optional parameter first
      * to false, the given h can instead be used as last interval length in the range.
      */
-    void geometric_fill_range (int d, int n, ctype end, ctype h =
+    void geometricFillRange (int d, int n, ctype end, ctype h =
         static_cast<ctype> (0),
         bool first = true)
     {

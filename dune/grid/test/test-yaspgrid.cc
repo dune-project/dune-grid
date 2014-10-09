@@ -174,14 +174,14 @@ int main (int argc , char **argv) {
     // check the factory class for tensorproduct grids
     Dune::TensorYaspGridFactory<double,2> factory;
     factory.setStart(0,-100.);
-    factory.fill_intervals(0,10,20.);
-    factory.fill_range(0, 5, 130.);
-    factory.geometric_fill_intervals(0, 5, 2.0);
+    factory.fillIntervals(0,10,20.);
+    factory.fillRange(0, 5, 130.);
+    factory.geometricFillIntervals(0, 5, 2.0);
 
-    factory.geometric_fill_range(1,10,100.,1.,false);
-    factory.fill_range(1,10,200);
-    factory.geometric_fill_range(1,10,250.,1.,true);
-    factory.fill_until(1,50,1000.);
+    factory.geometricFillRange(1,10,100.,1.,false);
+    factory.fillRange(1,10,200);
+    factory.geometricFillRange(1,10,250.,1.,true);
+    factory.fillUntil(1,50,1000.);
 
     auto grid = factory.createGrid();
 
