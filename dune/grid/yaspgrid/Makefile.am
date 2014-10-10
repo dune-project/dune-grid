@@ -1,7 +1,8 @@
 # $Id$
 
 yaspgriddir = $(includedir)/dune/grid/yaspgrid/
-yaspgrid_HEADERS = coordinates.hh \
+yaspgrid_HEADERS = backuprestore.hh \
+                   coordinates.hh \
                    factory.hh \
                    torus.hh \
                    yaspgridentity.hh \
