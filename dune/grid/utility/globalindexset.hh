@@ -293,20 +293,18 @@ namespace Dune
 
             const Index lindex = indexSet_.index(entity);
             localGlobalMap_[lindex] = x;
-            globalLocalMap_[x]      = lindex;
           }
         }
       }
 
       //! constructor
       IndexExchange (const GlobalIdSet& globalidset, MapId2Index& mapid2entity,
-                     const typename GridView::IndexSet& localIndexSet, IndexMap& localGlobal, IndexMap& globalLocal,
+                     const typename GridView::IndexSet& localIndexSet, IndexMap& localGlobal,
                      uint indexSetCodim)
       : globalidset_(globalidset),
       mapid2entity_(mapid2entity),
       indexSet_(localIndexSet),
       localGlobalMap_(localGlobal),
-      globalLocalMap_(globalLocal),
       indexSetCodim_(indexSetCodim)
       {}
 
@@ -316,7 +314,6 @@ namespace Dune
 
       const typename GridView::IndexSet& indexSet_;
       IndexMap& localGlobalMap_;
-      IndexMap& globalLocalMap_;
       uint indexSetCodim_;
     };
 
@@ -453,7 +450,6 @@ namespace Dune
 
             const Index lindex = idx;
             localGlobalMap_[lindex] = gindex;
-            globalLocalMap_[gindex] = lindex;
 
             globalcontrib++;                                /** increment contribution to global index */
           }
@@ -469,7 +465,7 @@ namespace Dune
       // 2nd stage of global index calculation: communicate global index for non-owned entities
 
       // Create the data handle and communicate.
-      IndexExchange dataHandle(globalIdSet,globalIndex_,indexSet,localGlobalMap_,globalLocalMap_,codim_);
+      IndexExchange dataHandle(globalIdSet,globalIndex_,indexSet,localGlobalMap_,codim_);
       gridview_.communicate(dataHandle, Dune::All_All_Interface, Dune::ForwardCommunication);
     }
 
@@ -477,10 +473,6 @@ namespace Dune
     /** \brief Given a local index, retrieve its globally unique index */
     Index index(const int& localIndex) const {
       return localGlobalMap_.find(localIndex)->second;
-    }
-
-    Index localIndex(const int& globalIndex) const {
-      return globalLocalMap_.find(globalIndex)->second;
     }
 
     template <class Entity>
@@ -530,7 +522,6 @@ namespace Dune
     std::vector<int> indexOffset_;
 
     IndexMap localGlobalMap_;
-    IndexMap globalLocalMap_;
 
     /** \brief Stores global index of entities with entity's globally unique id as key
      */
