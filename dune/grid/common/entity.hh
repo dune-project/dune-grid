@@ -150,6 +150,43 @@ namespace Dune
      *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const { return realEntity.seed(); }
+
+    //! Compares two entities for equality.
+    bool operator==(const Entity& other) const
+    {
+      return realEntity == other.realEntity;
+    }
+
+    //! Compares two entities for inequality.
+    bool operator!=(const Entity& other) const
+    {
+      return realEntity != other.realEntity;
+    }
+
+    //! Copy constructor from an existing entity.
+    Entity(const Entity& other)
+      : realEntity(other.realEntity)
+    {}
+
+    //! Move constructor from an existing entity.
+    Entity(Entity&& other)
+      : realEntity(std::move(other.realEntity))
+    {}
+
+    //! Copy assignment operator from an existing entity.
+    Entity& operator=(const Entity& other)
+    {
+      realEntity = other.realEntity;
+      return *this;
+    }
+
+    //! Move assignment operator from an existing entity.
+    Entity& operator=(Entity&& other)
+    {
+      realEntity = std::move(other.realEntity);
+      return *this;
+    }
+
     //@}
 
     //===========================================================
@@ -167,14 +204,6 @@ namespace Dune
 
     // need to make copy constructor of EntityPointer work for any iterator
     template< class, class > friend class Dune::EntityPointer;
-
-    /** hide copy constructor */
-    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {}
-    /** hide assignment operator */
-    Entity & operator = (const Entity& rhs) {
-      realEntity = rhs.realEntity;
-      return *this;
-    }
 
   };
 
@@ -305,6 +334,43 @@ namespace Dune
      *  to generate the entity again and uses as little memory as possible
      */
     EntitySeed seed () const { return realEntity.seed(); }
+
+    //! Compares two entities for equality.
+    bool operator==(const Entity& other) const
+    {
+      return realEntity == other.realEntity;
+    }
+
+    //! Compares two entities for inequality.
+    bool operator!=(const Entity& other) const
+    {
+      return realEntity != other.realEntity;
+    }
+
+    //! Copy constructor from an existing entity.
+    Entity(const Entity& other)
+      : realEntity(other.realEntity)
+    {}
+
+    //! Move constructor from an existing entity.
+    Entity(Entity&& other)
+      : realEntity(std::move(other.realEntity))
+    {}
+
+    //! Copy assignment operator from an existing entity.
+    Entity& operator=(const Entity& other)
+    {
+      realEntity = other.realEntity;
+      return *this;
+    }
+
+    //! Move assignment operator from an existing entity.
+    Entity& operator=(Entity&& other)
+    {
+      realEntity = std::move(other.realEntity);
+      return *this;
+    }
+
     //@}
 
     //===========================================================
@@ -535,14 +601,6 @@ namespace Dune
   protected:
     // needed to make copy constructor from EntityPointer work for any iterator
     template< class, class > friend class Dune::EntityPointer;
-
-    /** hide copy constructor */
-    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {}
-    /** hide assignment operator */
-    Entity & operator = (const Entity& rhs) {
-      realEntity = rhs.realEntity;
-      return *this;
-    }
 
   };
 
