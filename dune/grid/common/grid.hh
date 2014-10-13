@@ -13,6 +13,7 @@
 // dune-common includes
 #include <dune/common/fvector.hh>
 #include <dune/common/typetraits.hh>
+#include <dune/common/deprecated.hh>
 
 // dune-geometry includes
 #include <dune/geometry/type.hh>
