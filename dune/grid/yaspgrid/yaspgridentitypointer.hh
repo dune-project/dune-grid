@@ -61,7 +61,7 @@ namespace Dune {
     }
 
     //! dereferencing
-    const Entity& dereference() const
+    Entity& dereference() const
     {
       return _entity;
     }
