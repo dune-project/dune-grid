@@ -267,7 +267,19 @@ namespace Dune
     /*! @brief return EntityPointer to the Entity on the inside of this
        intersection. That is the Entity where we started this .
      */
-    EntityPointer inside() const
+#ifdef DOXYGEN
+    Entity
+#else
+    typename std::conditional<
+      std::is_same<
+        decltype(real.inside()),
+        Entity
+        >::value,
+      Entity,
+      EntityPointer
+      >::type
+#endif
+    inside() const
     {
       return this->real.inside();
     }
@@ -278,7 +290,19 @@ namespace Dune
        @warning Don't call this method if there is no neighboring Entity
        (neighbor() returns false). In this case the result is undefined.
      */
-    EntityPointer outside() const
+#ifdef DOXYGEN
+    Entity
+#else
+    typename std::conditional<
+      std::is_same<
+        decltype(real.outside()),
+        Entity
+        >::value,
+      Entity,
+      EntityPointer
+      >::type
+#endif
+    outside() const
     {
       return this->real.outside();
     }

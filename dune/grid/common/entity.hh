@@ -299,6 +299,7 @@ namespace Dune
     struct Codim
     {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
+      typedef typename GridImp::template Codim<cd>::Entity Entity;
     };
 
     /** \brief The codim==0 EntityPointer type */
@@ -454,7 +455,19 @@ namespace Dune
      *  \note The subentities are numbered 0, ..., count< codim >-1
      */
     template< int codim >
-    typename Codim< codim >::EntityPointer subEntity ( int i ) const
+#ifdef DOXYGEN
+    typename Codim< codim >::Entity
+#else
+    typename std::conditional<
+      std::is_same<
+        decltype(realEntity.template subEntity< codim >(0)),
+        typename Codim< codim >::Entity
+        >::value,
+      typename Codim< codim >::Entity,
+      typename Codim< codim >::EntityPointer
+      >::type
+#endif
+    subEntity ( int i ) const
     {
       return realEntity.template subEntity< codim >( i );
     }
@@ -536,7 +549,19 @@ namespace Dune
              or implemented in general.
              For some grids it might be available, though.
      */
-    EntityPointer father () const
+#ifdef DOXYGEN
+    Entity
+#else
+    typename std::conditional<
+      std::is_same<
+        decltype(realEntity.father()),
+        Entity
+        >::value,
+      Entity,
+      EntityPointer
+      >::type
+#endif
+    father () const
     {
       return realEntity.father();
     }
