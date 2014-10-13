@@ -22,7 +22,6 @@ namespace Dune {
     enum { dimworld=GridImp::dimensionworld };
     typedef typename GridImp::ctype ctype;
     YaspIntersection();
-    YaspIntersection& operator = (const YaspIntersection&);
 
     typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
     typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
@@ -38,7 +37,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
-    void update() const {
+    void update() {
       if (_count == 2*_dir + _face || _count >= 2*dim)
         return;
 
@@ -82,14 +81,13 @@ namespace Dune {
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const
     {
-      return _inside;
+      return EntityPointer(_inside);
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
     EntityPointer outside() const
     {
-      update();
-      return _outside;
+      return EntityPointer(_outside);
     }
 
 #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
@@ -108,7 +106,6 @@ namespace Dune {
     {
       if(! boundary())
         DUNE_THROW(GridError, "called boundarySegmentIndex while boundary() == false");
-      update();
       // size of local macro grid
       const Dune::array<int, dim> & size = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->size();
       const Dune::array<int, dim> & origin = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->origin();
@@ -212,7 +209,6 @@ namespace Dune {
      */
     Geometry geometry () const
     {
-      update();
 
       std::bitset<dim> shift;
       shift.set();
@@ -277,33 +273,33 @@ namespace Dune {
       _outside.transformingsubiterator().move(_dir,-1);
     }
 
-    //! copy constructor
-    YaspIntersection (const YaspIntersection& it) :
-      _inside(it._inside),
-      _outside(it._outside),
-      _count(it._count),
-      _dir(it._dir),
-      _face(it._face)
-    {}
+    //! copy constructor -- use default
 
-    //! copy operator
+    //! copy operator - use default
     void assign (const YaspIntersection& it)
     {
-      _inside = it._inside;
-      _outside = it._outside;
-      _count = it._count;
-      _dir = it._dir;
-      _face = it._face;
+      *this = it;
+    }
+
+    bool operator==(const YaspIntersection& other) const
+    {
+      // compare counts first -- that's cheaper if the test fails
+      return _count == other._count && _inside == other._inside;
+    }
+
+    bool operator!=(const YaspIntersection& other) const
+    {
+      return !(*this == other);
     }
 
   private:
     /* EntityPointers (get automatically updated) */
-    mutable YaspEntityPointer<0,GridImp> _inside;  //!< entitypointer to myself
-    mutable YaspEntityPointer<0,GridImp> _outside; //!< outside entitypointer
+    YaspEntity<0,GridImp::dimension,GridImp> _inside;  //!< entitypointer to myself
+    YaspEntity<0,GridImp::dimension,GridImp> _outside; //!< outside entitypointer
     /* current position */
     uint8_t _count;                                //!< valid neighbor count in 0 .. 2*dim-1
-    mutable uint8_t _dir;                          //!< count/2
-    mutable uint8_t _face;                         //!< count%2
+    uint8_t _dir;                                  //!< count/2
+    uint8_t _face;                                 //!< count%2
 
     /* static data */
     struct faceInfo
