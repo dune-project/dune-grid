@@ -294,7 +294,6 @@ namespace Dune {
     //! Return true when two iterators over the same grid are equal (!).
     bool operator== (const YaspEntity& e) const
     {
-      std::cout << "operator==\n";
       return _yg == e._yg && _it == e._it && _g == e._g;
     }
 
@@ -446,7 +445,6 @@ namespace Dune {
     //! Return true when two iterators over the same grid are equal (!).
     bool operator== (const YaspEntity& e) const
     {
-      std::cout << "operator==\n";
       return _yg == e._yg && _it == e._it && _g == e._g;
     }
 
@@ -808,7 +806,6 @@ namespace Dune {
     //! Return true when two iterators over the same grid are equal (!).
     bool operator== (const YaspEntity& e) const
     {
-      std::cout << "operator==\n";
       return _yg == e._yg && _it == e._it && _g == e._g;
     }
 
