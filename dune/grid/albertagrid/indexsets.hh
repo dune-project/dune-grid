@@ -39,7 +39,7 @@ namespace Dune
     : public IndexSet< AlbertaGridFamily< dim, dimworld >, AlbertaGridHierarchicIndexSet< dim,dimworld >, int, std::array< GeometryType, 1 > >
   {
     typedef AlbertaGridHierarchicIndexSet< dim, dimworld > This;
-    typedef IndexSet< AlbertaGridFamily< dim, dimworld >, This, int > Base;
+    typedef IndexSet< AlbertaGridFamily< dim, dimworld >, AlbertaGridHierarchicIndexSet< dim,dimworld >, int, std::array< GeometryType, 1 > > Base;
 
     friend class AlbertaGrid< dim, dimworld >;
 
@@ -333,7 +333,7 @@ namespace Dune
     : public IndexSet< AlbertaGrid< dim, dimworld >, AlbertaGridIndexSet< dim, dimworld >, int, std::array< GeometryType, 1 > >
   {
     typedef AlbertaGridIndexSet< dim, dimworld > This;
-    typedef IndexSet< AlbertaGrid< dim, dimworld >, This, int > Base;
+    typedef IndexSet< AlbertaGrid< dim, dimworld >, AlbertaGridIndexSet< dim, dimworld >, int, std::array< GeometryType, 1 > > Base;
 
   public:
     typedef AlbertaGrid< dim, dimworld > Grid;
