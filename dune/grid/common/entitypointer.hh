@@ -242,7 +242,7 @@ namespace Dune
     DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
     bool operator==(const Entity& rhs) const
     {
-      return (*this) == rhs;
+      return (**this) == rhs;
     }
 
     /** \brief Compares an EntityPointer with an Entity for inequality.
@@ -253,7 +253,7 @@ namespace Dune
     DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
     bool operator!=(const Entity& rhs) const
     {
-      return (*this) != rhs;
+      return (**this) != rhs;
     }
 
 
