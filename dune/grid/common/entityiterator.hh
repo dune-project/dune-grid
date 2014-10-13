@@ -58,6 +58,22 @@ namespace Dune
       return tmp;
     }
 
+    // The dereferencing operators are overridden here to avoid calling
+    // the deprecated versions int the EntityPointer facade.
+
+    /** \brief Dereferencing operator. */
+    const Entity& operator*() const
+    {
+      return this->realIterator.dereference();
+    }
+
+    /** \brief Pointer operator. */
+    const Entity * operator->() const
+    {
+      return & this->realIterator.dereference();
+    }
+
+
     /** \name Implementor's interface
      *  \{
      */
