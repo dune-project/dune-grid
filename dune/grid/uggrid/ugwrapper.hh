@@ -37,7 +37,7 @@ namespace Dune {
 #define UG_NAMESPACE UG::D3
 #endif
 
-    enum {
+    enum Priorities {
       PrioNone = UG_NAMESPACE::PrioNone,
       PrioMaster = UG_NAMESPACE::PrioMaster,
       PrioBorder = UG_NAMESPACE::PrioBorder,
