@@ -469,6 +469,7 @@ namespace Dune
 #endif
     subEntity ( int i ) const
     {
+      warnOnDeprecatedEntityPointer<decltype(realEntity.template subEntity<codim>(0))>();
       return realEntity.template subEntity< codim >( i );
     }
 
@@ -563,6 +564,7 @@ namespace Dune
 #endif
     father () const
     {
+      warnOnDeprecatedEntityPointer<decltype(realEntity.father())>();
       return realEntity.father();
     }
 

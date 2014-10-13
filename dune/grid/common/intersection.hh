@@ -281,6 +281,7 @@ namespace Dune
 #endif
     inside() const
     {
+      Entity::template warnOnDeprecatedEntityPointer<decltype(real.inside())>();
       return this->real.inside();
     }
 
@@ -304,6 +305,7 @@ namespace Dune
 #endif
     outside() const
     {
+      Entity::template warnOnDeprecatedEntityPointer<decltype(real.outside())>();
       return this->real.outside();
     }
 
