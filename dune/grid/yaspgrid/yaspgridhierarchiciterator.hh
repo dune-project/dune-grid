@@ -18,6 +18,9 @@ namespace Dune {
     public YaspEntityPointer<0,GridImp>
   {
     enum { dim=GridImp::dimension };
+
+    typedef YaspEntity<0,GridImp::dimension,GridImp> YaspEntityImp;
+
   public:
     // types used from grids
     typedef typename GridImp::YGridLevelIterator YGLI;
@@ -28,16 +31,18 @@ namespace Dune {
     YaspHierarchicIterator (const GridImp* yg, const YGLI& g, const I& it, int maxlevel) :
       YaspEntityPointer<0,GridImp>(yg,g,it)
     {
+      // store reference to entity implementation for better readability
+      YaspEntityImp& entity = entityImplementation();
       // now iterator points to current cell
-      StackElem se(this->_g);
-      std::copy(this->_it.coord().begin(), this->_it.coord().end(), se.coord.begin());
+      StackElem se(entity._g);
+      std::copy(entity._it.coord().begin(), entity._it.coord().end(), se.coord.begin());
       stack.push(se);
 
       // determine maximum level
-      _maxlevel = std::min(maxlevel,this->_g->mg->maxLevel());
+      _maxlevel = std::min(maxlevel,entity._g->mg->maxLevel());
 
       // if maxlevel not reached then push yourself and sons
-      if (this->_g->level()<_maxlevel)
+      if (entity._g->level()<_maxlevel)
       {
         push_sons();
       }
@@ -60,7 +65,7 @@ namespace Dune {
       if (stack.empty()) return;
 
       // if maxlevel not reached then push sons
-      if (this->_g->level()<_maxlevel)
+      if (entityImplementation()._g->level()<_maxlevel)
         push_sons();
 
       // in any case pop one element
@@ -69,10 +74,12 @@ namespace Dune {
 
     void print (std::ostream& s) const
     {
-      s << "HIER: " << "level=" << this->_g.level()
-        << " position=" << this->_it.coord()
-        << " superindex=" << this->_it.superindex()
-        << " maxlevel=" << this->_maxlevel
+      // store reference to entity implementation for better readability
+      YaspEntityImp& entity = entityImplementation();
+      s << "HIER: " << "level=" << entity._g.level()
+        << " position=" << entity._it.coord()
+        << " superindex=" << entity._it.superindex()
+        << " maxlevel=" << entity._maxlevel
         << " stacksize=" << stack.size()
         << std::endl;
     }
@@ -90,17 +97,20 @@ namespace Dune {
     // push sons of current element on the stack
     void push_sons ()
     {
+      // store reference to entity implementation for better readability
+      YaspEntityImp& entity = entityImplementation();
+
       // yes, process all 1<<dim sons
-      YGLI finer = this->_g;
+      YGLI finer = entity._g;
       ++finer;
       StackElem se(finer);
       for (int i=0; i<(1<<dim); i++)
       {
         for (int k=0; k<dim; k++)
           if (i&(1<<k))
-            se.coord[k] = this->_it.coord(k)*2+1;
+            se.coord[k] = entity._it.coord(k)*2+1;
           else
-            se.coord[k] = this->_it.coord(k)*2;
+            se.coord[k] = entity._it.coord(k)*2;
         // not all entities have 2^d subentities due to refineOptions with keep_ovlp==false
         bool exists = true;
         for (int k=0; k<dim; k++)
@@ -111,13 +121,18 @@ namespace Dune {
       }
     }
 
+    YaspEntityImp& entityImplementation()
+    {
+      return GridImp::getRealImplementation(this->_entity);
+    }
+
     // make TOS the current element
     void pop_tos ()
     {
       StackElem se = stack.top();
       stack.pop();
-      this->_g = se.g;
-      this->_it.reinit(this->_g->overlap[0],se.coord);
+      entityImplementation()._g = se.g;
+      entityImplementation()._it.reinit(entityImplementation()._g->overlap[0],se.coord);
     }
   };
 
