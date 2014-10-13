@@ -163,6 +163,30 @@ namespace Dune
       return !realEntity.equals(other.realEntity);
     }
 
+    /** \brief Compares an Entity with an EntityPointer for equality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    template<typename ItImp>
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator==(const Dune::EntityPointer<GridImp,ItImp>& other) const
+    {
+      return (*this) == (*other);
+    }
+
+    /** \brief Compares an Entity with an EntityPointer for inequality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    template<typename ItImp>
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator!=(const Dune::EntityPointer<GridImp,ItImp>& other) const
+    {
+      return (*this) != (*other);
+    }
+
     //! Copy constructor from an existing entity.
     Entity(const Entity& other)
       : realEntity(other.realEntity)
@@ -368,6 +392,30 @@ namespace Dune
     bool operator!=(const Entity& other) const
     {
       return !realEntity.equals(other.realEntity);
+    }
+
+    /** \brief Compares an Entity with an EntityPointer for equality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    template<typename ItImp>
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator==(const Dune::EntityPointer<GridImp,ItImp>& other) const
+    {
+      return (*this) == (*other);
+    }
+
+    /** \brief Compares an Entity with an EntityPointer for equality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    template<typename ItImp>
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator!=(const Dune::EntityPointer<GridImp,ItImp>& other) const
+    {
+      return (*this) != (*other);
     }
 
     //! Copy constructor from an existing entity.
