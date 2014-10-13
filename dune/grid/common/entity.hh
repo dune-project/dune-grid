@@ -666,6 +666,39 @@ namespace Dune
 
     //@}
 
+#ifndef DOXYGEN
+
+    // these two methods are just here for the 2.4 transition from EntityPointer to Entity
+    // they will generate a compile time warning if the grid implementation still returns
+    // an EntityPointer from certain interface methods.
+    // These methods are also required by the intersection facade, so I just made them public
+    // and hid them from Doxygen. As they don't do anything remotely useful, I don't think any
+    // user will try to call them manually... :-P
+
+    // this non-warning version only matches if E is an entity that has been correctly wrapped
+    // in a facade class
+    template<typename E>
+    static typename std::enable_if<
+      std::is_same<
+        E,
+        typename Codim<E::codimension>::Entity
+        >::value
+      >::type
+    warnOnDeprecatedEntityPointer()
+    {}
+
+    template<typename E>
+    DUNE_DEPRECATED_MSG("This grid still returns EntityPointers instead of Entities")
+    static typename std::enable_if<
+      not std::is_same<
+        E,
+        typename Codim<E::codimension>::Entity
+        >::value
+      >::type
+    warnOnDeprecatedEntityPointer()
+    {}
+
+#endif // DOXYGEN
 
   protected:
     // needed to make copy constructor from EntityPointer work for any iterator
