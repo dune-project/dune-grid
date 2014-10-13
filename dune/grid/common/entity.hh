@@ -187,6 +187,28 @@ namespace Dune
       return *this;
     }
 
+    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
+     *
+     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
+     *             It will be removed after the release of dune-grid-2.4.
+     */
+    const Entity& operator*() const
+    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
+    {
+      return *this;
+    }
+
+    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
+     *
+     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
+     *             It will be removed after the release of dune-grid-2.4.
+     */
+    const Entity* operator->() const
+    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
+    {
+      return this;
+    }
+
     //@}
 
     //===========================================================
@@ -369,6 +391,28 @@ namespace Dune
     {
       realEntity = std::move(other.realEntity);
       return *this;
+    }
+
+    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
+     *
+     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
+     *             It will be removed after the release of dune-grid-2.4.
+     */
+    const Entity& operator*() const
+    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
+    {
+      return *this;
+    }
+
+    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
+     *
+     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
+     *             It will be removed after the release of dune-grid-2.4.
+     */
+    const Entity* operator->() const
+    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
+    {
+      return this;
     }
 
     //@}
