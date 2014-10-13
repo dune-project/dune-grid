@@ -420,6 +420,42 @@ namespace Dune
       return this->real.centerUnitOuterNormal();
     }
 
+    //! Compares two intersections for equality.
+    bool operator==(const Intersection& other) const
+    {
+      return real == other.real;
+    }
+
+    //! Compares two intersections for inequality.
+    bool operator!=(const Intersection& other) const
+    {
+      return real != other.real;
+    }
+
+    //! Copy constructor from an existing intersection.
+    Intersection(const Intersection& other)
+      : real(other.real)
+    {}
+
+    //! Move constructor from an existing intersection.
+    Intersection(Intersection&& other)
+      : real(std::move(other.real))
+    {}
+
+    //! Copy assignment operator from an existing intersection.
+    Intersection& operator=(const Intersection& other)
+    {
+      real = other.real;
+      return *this;
+    }
+
+    //! Move assignment operator from an existing intersection.
+    Intersection& operator=(Intersection&& other)
+    {
+      real = std::move(other.real);
+      return *this;
+    }
+
     //===========================================================
     /** @name Implementor interface
      */
@@ -437,17 +473,6 @@ namespace Dune
     //! \todo cleanup this hack
     friend class IntersectionIterator<GridImp, IntersectionImp, IntersectionImp>;
 
-    /* hide copy constructor */
-    Intersection ( const Intersection &i )
-      : real( i.real )
-    {}
-
-    /* hide assignment operator */
-    const Intersection &operator= ( const Intersection &i )
-    {
-      real = i.real;
-      return *this;
-    }
   };
 
   //**********************************************************************
