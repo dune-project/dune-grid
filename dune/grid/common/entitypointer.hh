@@ -179,13 +179,13 @@ namespace Dune
     //===========================================================
 
     /** \brief Dereferencing operator. */
-    Entity & operator*() const
+    const Entity & operator*() const
     {
       return realIterator.dereference();
     }
 
     /** \brief Pointer operator. */
-    Entity * operator->() const
+    const Entity * operator->() const
     {
       return & realIterator.dereference();
     }
