@@ -137,12 +137,11 @@ namespace Dune
     template<PartitionIteratorType partition>
     EntityPointer findEntity(const FieldVector<ct,dimw>& global) const
     {
-      typedef typename Grid::template Partition<partition>::LevelGridView
-      LevelGV;
-      const LevelGV &gv = grid_.template levelGridView<partition>(0);
+      typedef typename Grid::LevelGridView LevelGV;
+      const LevelGV &gv = grid_.template levelGridView(0);
 
       //! type of LevelIterator
-      typedef typename LevelGV::template Codim<0>::Iterator LevelIterator;
+      typedef typename LevelGV::template Codim<0>::template Partition<partition>::Iterator LevelIterator;
 
       // type of element geometry
       typedef typename Entity::Geometry Geometry;
@@ -150,9 +149,8 @@ namespace Dune
       typedef typename Geometry::LocalCoordinate LocalCoordinate;
 
       // loop over macro level
-      LevelIterator it = gv.template begin<0>();
-      LevelIterator end = gv.template end<0>();
-      for (; it != end; ++it)
+      const LevelIterator end = gv.template end<0, partition>();
+      for (LevelIterator it = gv.template begin<0, partition>(); it != end; ++it)
       {
         const Entity &entity = *it;
         const Geometry &geo = entity.geometry();
