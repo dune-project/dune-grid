@@ -501,9 +501,14 @@ namespace Dune
         return localGlobalMap_.find(gridview_.indexSet().subIndex(entity,i,codim))->second;
     }
 
-    inline unsigned int nGlobalEntity() const
+    /** \brief Return the total number of entities over all processes that we have indices for
+     *
+     * \param codim If this matches GlobalIndexSet codimension, the number of entities is returned.
+     *              Otherwise, zero is returned.
+     */
+    unsigned int size(uint codim) const
     {
-      return nGlobalEntity_;
+      return (codim_==codim) ? nGlobalEntity_ : 0;
     }
 
     inline unsigned int nOwnedLocalEntity() const
