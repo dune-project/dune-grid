@@ -41,9 +41,9 @@ struct subIndexCheck
   subIndexCheck ( const Grid &g, const Entity &e )
   {
     {
+      #ifndef NDEBUG
       typedef typename Grid::template Codim< Entity::codimension >::EntityPointer EntityPointer;
       typedef typename Grid::template Codim< Entity::codimension >::EntitySeed EntitySeed;
-      #ifndef NDEBUG
       EntitySeed seed = e.seed();
 
       EntityPointer ep1 ( e );
