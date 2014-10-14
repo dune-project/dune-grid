@@ -1,6 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id$
 
 #ifndef DUNE_GRIDINFO_HH
 #define DUNE_GRIDINFO_HH
@@ -62,16 +61,16 @@ namespace Dune
 
     std::cout << prefix << "leaf"
               << " dim=" << dim
-              << " geomTypes=(";
+              << " types=(";
     bool first=true;
     for (int c=0; c<=dim; c++)
     {
-      for (std::size_t i=0; i<grid.leafIndexSet().geomTypes(c).size(); i++)
+      for (std::size_t i=0; i<grid.leafIndexSet().types(c).size(); i++)
       {
         if (!first) std::cout << ",";
-        std::cout << grid.leafIndexSet().geomTypes(c)[i]
+        std::cout << grid.leafIndexSet().types(c)[i]
                   << "[" << c << "]"
-                  << "=" << grid.leafIndexSet().size(grid.leafIndexSet().geomTypes(c)[i]);
+                  << "=" << grid.leafIndexSet().size(grid.leafIndexSet().types(c)[i]);
         first=false;
       }
     }
@@ -101,13 +100,13 @@ namespace Dune
     // print info about this level
     std::cout << prefix << "level=" << level
               << " dim=" << dim
-              << " geomTypes=(";
+              << " types=(";
     bool first=true;
-    for (unsigned i=0; i<grid.levelIndexSet(level).geomTypes(0).size(); i++)
+    for (unsigned i=0; i<grid.levelIndexSet(level).types(0).size(); i++)
     {
       if (!first) std::cout << ",";
-      std::cout << grid.levelIndexSet(level).geomTypes(0)[i]
-                << "=" << grid.levelIndexSet(level).size(grid.levelIndexSet(level).geomTypes(0)[i]);
+      std::cout << grid.levelIndexSet(level).types(0)[i]
+                << "=" << grid.levelIndexSet(level).size(grid.levelIndexSet(level).types(0)[i]);
       first=false;
     }
     std::cout << ")" << std::endl;
@@ -168,16 +167,16 @@ namespace Dune
     // print info about the leaf grid
     std::cout << prefix << "leaf"
               << " dim=" << dim
-              << " geomTypes=(";
+              << " types=(";
     bool first=true;
     for (int c=0; c<=dim; c++)
     {
-      for (unsigned i=0; i<grid.leafIndexSet().geomTypes(c).size(); i++)
+      for (unsigned i=0; i<grid.leafIndexSet().types(c).size(); i++)
       {
         if (!first) std::cout << ",";
-        std::cout << grid.leafIndexSet().geomTypes(c)[i]
+        std::cout << grid.leafIndexSet().types(c)[i]
                   << "[" << c << "]"
-                  << "=" << grid.leafIndexSet().size(grid.leafIndexSet().geomTypes(c)[i]);
+                  << "=" << grid.leafIndexSet().size(grid.leafIndexSet().types(c)[i]);
         first=false;
       }
     }

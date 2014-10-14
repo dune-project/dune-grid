@@ -51,7 +51,7 @@ namespace Dune
      : is(gridView.indexSet())
     {
       // check that grid has only a single geometry type
-      if (is.geomTypes(c).size() != 1)
+      if (is.types(c).size() != 1)
         DUNE_THROW(GridError, "mapper treats only a single codim and a single geometry type");
     }
 

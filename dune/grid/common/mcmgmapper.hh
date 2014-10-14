@@ -220,7 +220,7 @@ namespace Dune
       {
         // walk over all geometry types in the codimension
         typedef std::vector<GeometryType> GTV;
-        const GTV &gtv = is.geomTypes(codim);
+        const GTV &gtv = is.types(codim);
         for (typename GTV::const_iterator it = gtv.begin(); it != gtv.end(); ++it)
         {
           // if the geometry type is contained in the layout, increment offset

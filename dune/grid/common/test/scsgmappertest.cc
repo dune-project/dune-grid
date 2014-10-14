@@ -49,7 +49,7 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
     Index index;
     bool contained = mapper.contains(*eIt, index);
 
-    if ((is.geomTypes(0)[0] == eIt->type()) != contained)
+    if ((is.types(0)[0] == eIt->type()) != contained)
       DUNE_THROW(GridError, "Mapper::contains() does not agree with the "
                  "element's geometry type!");
     if (!contained)
