@@ -469,12 +469,6 @@ namespace Dune
       gridview_.communicate(dataHandle, Dune::All_All_Interface, Dune::ForwardCommunication);
     }
 
-
-    /** \brief Given a local index, retrieve its globally unique index */
-    Index index(const int& localIndex) const {
-      return localGlobalMap_.find(localIndex)->second;
-    }
-
     template <class Entity>
     Index index(const Entity& entity) const
     {
