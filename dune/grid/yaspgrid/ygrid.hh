@@ -362,6 +362,16 @@ namespace Dune {
         _superindex += dist*_grid->superincrement(i);
       }
 
+      //! move this iterator dist cells in direction i
+      void move (const iTupel& dist)
+      {
+        for (int i = 0; i < d; ++i)
+          {
+            _coord[i] += dist[i];
+            _superindex += dist[i]*_grid->superincrement(i);
+          }
+      }
+
       //! Increment iterator to next cell with position.
       Iterator& operator++ ()
       {
@@ -712,6 +722,11 @@ namespace Dune {
       void move(int i, int dist)
       {
         _it.move(i,dist);
+      }
+
+      void move(const iTupel& dist)
+      {
+        _it.move(dist);
       }
 
       Coordinates* coordCont() const

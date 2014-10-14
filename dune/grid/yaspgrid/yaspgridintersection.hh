@@ -38,18 +38,22 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
     void update() {
-      if (_count == 2*_dir + _face || _count >= 2*dim)
-        return;
 
-      // cleanup old stuff
-      _outside.transformingsubiterator().move(_dir,1-2*_face);   // move home
+      // vector with per-direction movements
+      std::array<int,dim> dist{0};
+
+      // first move: back to center
+      dist[_dir] = 1 - 2*_face;
 
       // update face info
       _dir = _count / 2;
       _face = _count % 2;
 
+      // second move: to new neighbor
+      dist[_dir] += -1 + 2*_face;
+
       // move transforming iterator
-      _outside.transformingsubiterator().move(_dir,-1+2*_face);
+      _outside.transformingsubiterator().move(dist);
     }
 
     /*! return true if neighbor ist outside the domain. Still the neighbor might
