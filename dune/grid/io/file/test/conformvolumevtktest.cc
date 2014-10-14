@@ -2,9 +2,11 @@
 // vi: set et ts=4 sw=2 sts=2:
 
 #if HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
+#include <algorithm>
+#include <array>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -17,7 +19,7 @@
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/grid/io/file/vtk/volumewriter.hh>
-#include <dune/grid/sgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 
 template< class GridView >
 class VTKVectorFunction
@@ -95,29 +97,48 @@ void doWrite( const GridView &gridView )
   vtk.write(name, Dune::VTK::appendedbase64);
 }
 
-template<int dim>
-void vtkCheck(int* n, double* h)
+template<unsigned int dim>
+void vtkCheck(Dune::FieldVector<double,dim>& length, std::array<int,dim> elements)
 {
-  const Dune :: PartitionIteratorType VTK_Partition = Dune :: InteriorBorder_Partition;
-  std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
-  Dune::SGrid<dim,dim> g(n, h);
-  g.globalRefine(1);
+  std::cout << "vtkCheck dim=" << dim << std::endl;
+  Dune::YaspGrid<dim> grid(length, elements);
+  grid.globalRefine(1);
 
-  doWrite( g.template leafGridView< VTK_Partition >() );
-  doWrite( g.template levelGridView< VTK_Partition >( 0 ) );
-  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ) );
+  doWrite( grid.leafGridView() );
+  doWrite( grid.levelGridView( 0 ) );
+  doWrite( grid.levelGridView( grid.maxLevel() ) );
 }
 
 int main(int argc, char **argv)
 {
-  try {
+  try
+  {
+    {
+      constexpr unsigned int dim = 1;
+      Dune::FieldVector<double,dim> length(1.0);
+      std::array<int,dim> elements;
+      std::fill(elements.begin(), elements.end(), 5);
+      vtkCheck<dim>(length, elements);
+    }
 
-    int n[] = { 5, 5, 5, 5 };
-    double h[] = { 1.0, 2.0, 3.0, 4.0 };
+    {
+      constexpr unsigned int dim = 2;
+      Dune::FieldVector<double,dim> length(1.0);
+      length[1] = 2.0;
+      std::array<int,dim> elements;
+      std::fill(elements.begin(), elements.end(), 5);
+      vtkCheck<dim>(length, elements);
+    }
 
-    vtkCheck<1>(n,h);
-    vtkCheck<2>(n,h);
-    vtkCheck<3>(n,h);
+    {
+      constexpr unsigned int dim = 3;
+      Dune::FieldVector<double,dim> length(1.0);
+      length[1] = 2.0;
+      length[2] = 3.0;
+      std::array<int,dim> elements;
+      std::fill(elements.begin(), elements.end(), 5);
+      vtkCheck<dim>(length, elements);
+    }
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
