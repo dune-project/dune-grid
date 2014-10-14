@@ -491,6 +491,22 @@ namespace Dune
         return localGlobalMap_.find(gridview_.indexSet().index(entity))->second;
     }
 
+    template <class Entity>
+    Index subIndex(const Entity& entity, uint i, uint codim) const
+    {
+      if (codim_==0)
+      {
+        /** global unique index is only applicable for inter or border type entities */
+        const GlobalIdSet& globalIdSet = gridview_.grid().globalIdSet(); /** retrieve globally unique Id set */
+        const IdType id = globalIdSet.subId(entity,i,codim);                        /** obtain the entity's id */
+        const Index gindex = globalIndex_.find(id)->second;                /** retrieve the global index in the map with the id as key */
+
+        return gindex;
+      }
+      else
+        return localGlobalMap_.find(gridview_.indexSet().subIndex(entity,i,codim))->second;
+    }
+
     inline unsigned int nGlobalEntity() const
     {
       return nGlobalEntity_;
