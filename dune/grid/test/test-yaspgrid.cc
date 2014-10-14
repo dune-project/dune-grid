@@ -43,6 +43,24 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 };
 
 template<int dim>
+struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
+{
+  static Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >* buildGrid()
+  {
+    std::cout << " using equidistant coordinate container with non-zero origin!" << std::endl << std::endl;
+
+    Dune::FieldVector<double,dim> lowerleft(-1.0);
+    Dune::FieldVector<double,dim> upperright(1.0);
+    Dune::array<int,dim> s;
+    std::fill(s.begin(), s.end(), 8);
+    std::bitset<dim> p(0);
+    int overlap = 1;
+
+    return new Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >(lowerleft,upperright,s,p,overlap);
+  }
+};
+
+template<int dim>
 struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
 {
   static Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >* buildGrid()
@@ -163,12 +181,15 @@ int main (int argc , char **argv) {
     Dune::MPIHelper::instance(argc, argv);
 
     check_yasp(YaspFactory<1,Dune::EquidistantCoordinates<double,1> >::buildGrid());
+    check_yasp(YaspFactory<1,Dune::EquidistantOffsetCoordinates<double,1> >::buildGrid());
     check_yasp(YaspFactory<1,Dune::TensorProductCoordinates<double,1> >::buildGrid());
 
     check_yasp(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid());
+    check_yasp(YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid());
     check_yasp(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid());
 
     check_yasp(YaspFactory<3,Dune::EquidistantCoordinates<double,3> >::buildGrid());
+    check_yasp(YaspFactory<3,Dune::EquidistantOffsetCoordinates<double,3> >::buildGrid());
     check_yasp(YaspFactory<3,Dune::TensorProductCoordinates<double,3> >::buildGrid());
 
     // check the factory class for tensorproduct grids

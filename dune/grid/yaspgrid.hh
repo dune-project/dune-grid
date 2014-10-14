@@ -776,6 +776,63 @@ namespace Dune {
       init();
     }
 
+    /** Constructor for an equidistant YaspGrid with non-trivial origin
+     *  @param L extension of the domain
+     *  @param s number of cells on coarse mesh in each direction
+     *  @param periodic tells if direction is periodic or not
+     *  @param overlap size of overlap on coarsest grid (same in all directions)
+     *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
+     *  @param lb pointer to an overloaded YLoadBalance instance
+     */
+    YaspGrid (Dune::FieldVector<ctype, dim> lowerleft,
+              Dune::FieldVector<ctype, dim> upperright,
+              Dune::array<int, dim> s,
+              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+              int overlap = 1,
+              CollectiveCommunicationType comm = CollectiveCommunicationType(),
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
+      : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
+       _periodic(periodic), _coarseSize(s), _overlap(overlap),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+    {
+      // check whether YaspGrid has been given the correct template parameter
+      static_assert(is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
+                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
+
+      _levels.resize(1);
+
+      iTupel o;
+      std::fill(o.begin(), o.end(), 0);
+      iTupel o_interior(o);
+      iTupel s_interior(s);
+
+      _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
+
+      Dune::FieldVector<ctype,dim> extension(upperright);
+      Dune::FieldVector<ctype,dim> h;
+      for (int i=0; i<dim; i++)
+      {
+        extension[i] -= lowerleft[i];
+        h[i] = extension[i] / s[i];
+      }
+
+      iTupel s_overlap(s_interior);
+      for (int i=0; i<dim; i++)
+      {
+        if ((o_interior[i] - overlap > 0) || (periodic[i]))
+          s_overlap[i] += overlap;
+        if ((o_interior[i] + s_interior[i] + overlap <= _coarseSize[i]) || (periodic[i]))
+          s_overlap[i] += overlap;
+      }
+
+      EquidistantOffsetCoordinates<ctype,dim> cc(lowerleft,h,s_overlap);
+
+      // add level
+      makelevel(cc,periodic,o_interior,overlap);
+
+      init();
+    }
+
     /** @brief Standard constructor for a tensorproduct YaspGrid
      *  @param coords coordinate vectors to be used for coarse grid
      *  @param periodic tells if direction is periodic or not

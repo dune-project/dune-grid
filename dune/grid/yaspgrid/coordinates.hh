@@ -116,6 +116,115 @@ namespace Dune
     return s;
   }
 
+  /** \brief Container for equidistant coordinates in a YaspGrid with non-trivial origin
+    *  @tparam ct the coordinate type
+    *  @tparam dim the dimension of the grid
+    */
+   template<class ct, int dim>
+   class EquidistantOffsetCoordinates
+   {
+     public:
+     //! export the coordinate type
+     typedef ct ctype;
+     //! export dimension
+     static const int dimension = dim;
+
+     /** \brief default constructor */
+     EquidistantOffsetCoordinates() {}
+
+     /** \brief construct a container with all necessary information
+      *  \param h the meshsize in all directions
+      *  \param s the size (in codim 0 elements) of the grid on this processor
+      *  \param origin the coordinate of the lowerleft corner of this grid
+      *  the size information is kept with this container, because this is the natural
+      *  way to handle this for a tensorproduct grid.
+      */
+     EquidistantOffsetCoordinates(const Dune::FieldVector<ct,dim>& origin, const Dune::FieldVector<ct,dim>& h, const Dune::array<int,dim>& s)
+       : _origin(origin), _h(h), _s(s) {}
+
+     /** \returns the meshsize in given direction at given position
+      *  \param d the direction to be used
+      *  \param i the global coordinate index where to return the meshsize
+      */
+     inline ct meshsize(int d, int i) const
+     {
+       return _h[d];
+     }
+
+     /** \returns a coordinate given a direction and an index
+      *  \param d the direction to be used
+      *  \param i the global coordinate index
+      */
+     inline ct coordinate(int d, int i) const
+     {
+       return _origin[d] + i*_h[d];
+     }
+
+     /** \returns the size in given direction
+      *  \param d the direction to be used
+      */
+     inline int size(int d) const
+     {
+       return _s[d];
+     }
+
+     /** \returns the dth component of the origin
+      *  \param the direction to be used
+      */
+     inline ct origin(int d) const
+     {
+       return _origin[d];
+     }
+
+     /** \returns a container that represents the same grid after one step of uniform refinement
+      *  \param ovlp_low whether we have an overlap area at the lower processor boundary
+      *  \param ovlp_up whether we have an overlap area at the upper processor boundary
+      *  \param overlap the size of the overlap region
+      *  \param keep_ovlp the refinement option parameter to be used
+      */
+     EquidistantOffsetCoordinates<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp) const
+     {
+       //determine new size and meshsize
+       Dune::array<int,dim> news;
+       Dune::FieldVector<ct,dim> newh;
+
+       for (int i=0; i<dim; i++)
+       {
+         news[i] = 2 * _s[i];
+         if (!keep_ovlp)
+         {
+           if (ovlp_low[i])
+             news[i] -= overlap;
+           if (ovlp_up[i])
+             news[i] -= overlap;
+         }
+
+         newh[i] = _h[i] / 2.;
+       }
+       return EquidistantOffsetCoordinates<ct,dim>(_origin,newh,news);
+     }
+
+     /** \brief print information on this container */
+     void print(std::ostream& s) const
+     {
+       s << "Printing equidistant coordinate information:" << std::endl;
+       s << "Meshsize: " << _h << std::endl << "Size: " << _s << std::endl;
+       s << "Offset to origin: " << _origin << std::endl;
+     }
+
+     private:
+     Dune::FieldVector<ct,dim> _origin;
+     Dune::FieldVector<ct,dim> _h;
+     Dune::array<int,dim> _s;
+   };
+
+   template<class ct, int dim>
+   inline std::ostream& operator<< (std::ostream& s, EquidistantOffsetCoordinates<ct,dim>& c)
+   {
+     c.print(s);
+     return s;
+   }
+
   /** \brief Coordinate container for a tensor product YaspGrid
    *  @tparam ct the coordinate type
    *  @tparam dim the dimension of the grid
