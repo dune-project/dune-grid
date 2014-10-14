@@ -205,9 +205,11 @@ int main (int argc , char **argv) {
     factory.fillUntil(1,50,1000.);
 
     auto grid = factory.createGrid();
+    delete grid;
 
     // check the backup restore facility
     check_backuprestore(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid());
+    check_backuprestore(YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid());
     check_backuprestore(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid());
 
   } catch (Dune::Exception &e) {

@@ -44,12 +44,67 @@ namespace Dune
     Dune::array<int,d> _dims;
   };
 
+  template<class Coordinates>
+  struct MaybeHaveOrigin
+  {
+
+    template<class S>
+    static void writeOrigin(S& s, const Coordinates& coord)
+    {}
+
+    template<class S>
+    static void readOrigin(S& s, Dune::FieldVector<typename Coordinates::ctype,Coordinates::dimension>& coord)
+    {}
+
+    template<typename... A>
+    static typename Dune::YaspGrid<Coordinates::dimension,Coordinates>* createGrid(
+      const Dune::FieldVector<typename Coordinates::ctype,Coordinates::dimension>& lowerleft, A... args)
+    {
+      return new Dune::YaspGrid<Coordinates::dimension,Coordinates>(args...);
+    }
+  };
+
+  template<class ctype, int dim>
+  struct MaybeHaveOrigin<Dune::EquidistantOffsetCoordinates<ctype, dim> >
+  {
+    typedef typename Dune::EquidistantOffsetCoordinates<ctype, dim> Coordinates;
+
+    template<class S>
+    static void writeOrigin(S& s, const Coordinates& coord)
+    {
+      s << "Origin: ";
+      for (int i=0; i<dim; i++)
+        s << coord.origin(i) << " ";
+      s << std::endl;
+    }
+
+    template<class S>
+    static void readOrigin(S& s, Dune::FieldVector<ctype, dim>& coord)
+    {
+      std::string token;
+      s >> token;
+      for (int i=0; i<dim; i++)
+        s >> coord[i];
+    }
+
+    template<typename... A>
+    static typename Dune::YaspGrid<Coordinates::dimension,Coordinates>* createGrid(
+      const Dune::FieldVector<typename Coordinates::ctype,Coordinates::dimension>& lowerleft,
+      const Dune::FieldVector<typename Coordinates::ctype,Coordinates::dimension>& extension, A... args)
+    {
+      Dune::FieldVector<typename Coordinates::ctype,Coordinates::dimension> upperright(lowerleft);
+      upperright += extension;
+      return new Dune::YaspGrid<Coordinates::dimension,Coordinates>(lowerleft, upperright, args...);
+    }
+  };
+
   /** \copydoc Dune::BackupRestoreFacility */
-  template<int dim, class ctype>
-  struct BackupRestoreFacility<YaspGrid<dim,EquidistantCoordinates<ctype,dim> > >
+  template<int dim, class Coordinates>
+  struct BackupRestoreFacility<Dune::YaspGrid<dim, Coordinates> >
   {
     // type of grid
-    typedef YaspGrid<dim,EquidistantCoordinates<ctype,dim> > Grid;
+    typedef typename Dune::YaspGrid<dim, Coordinates> Grid;
+    typedef typename Grid::ctype ctype;
     typedef typename Grid::Traits::CollectiveCommunication Comm;
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
@@ -92,6 +147,7 @@ namespace Dune
       for (int i=0; i<dim; i++)
         stream << grid.begin()->coords.meshsize(i,0) << " ";
       stream << std::endl;
+      MaybeHaveOrigin<Coordinates>::writeOrigin(stream, grid.begin()->coords);
     }
 
     /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
@@ -159,6 +215,9 @@ namespace Dune
       for (int i=0; i<dim; i++)
         stream >> h[i];
 
+      Dune::FieldVector<ctype,dim> origin;
+      MaybeHaveOrigin<Coordinates>::readOrigin(stream, origin);
+
       // the constructor takes the upper right corner...
       Dune::FieldVector<ctype,dim> length(h);
       for (int i=0; i<dim; i++)
@@ -166,7 +225,7 @@ namespace Dune
 
       YLoadBalanceBackup<dim> lb(torus_dims);
 
-      Grid* grid = new Dune::YaspGrid<dim>(length, coarseSize, periodic, overlap, comm, &lb);
+      Grid* grid = MaybeHaveOrigin<Coordinates>::createGrid(origin, length, coarseSize, periodic, overlap, comm, &lb);
 
       for (int i=0; i<refinement; ++i)
       {
