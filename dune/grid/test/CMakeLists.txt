@@ -113,7 +113,6 @@ set_property(TARGET
   test_mcmg_geogrid
   test_oned
   test_sgrid
-  test_yaspgrid
   ${ALBERTA_PROGRAMS}
   ${ALUGRID_PROGRAMS}
   ${UG_PROGRAMS}
