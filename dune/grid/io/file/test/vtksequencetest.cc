@@ -93,17 +93,16 @@ template<int dim>
 void vtkCheck(const Dune::array<int,dim>& n,
               const Dune::FieldVector<double,dim>& h)
 {
-  const Dune :: PartitionIteratorType VTK_Partition = Dune :: InteriorBorder_Partition;
   std::cout << std::endl << "vtkSequenceCheck dim=" << dim << std::endl << std::endl;
   Dune::YaspGrid<dim> g(h, n);
   g.globalRefine(1);
 
-  doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::conforming );
-  doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::nonconforming );
-  doWrite( g.template levelGridView< VTK_Partition >( 0 ), Dune::VTK::conforming );
-  doWrite( g.template levelGridView< VTK_Partition >( 0 ), Dune::VTK::nonconforming );
-  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ), Dune::VTK::conforming );
-  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ), Dune::VTK::nonconforming );
+  doWrite( g.template leafGridView(), Dune::VTK::conforming );
+  doWrite( g.template leafGridView(), Dune::VTK::nonconforming );
+  doWrite( g.template levelGridView( 0 ), Dune::VTK::conforming );
+  doWrite( g.template levelGridView( 0 ), Dune::VTK::nonconforming );
+  doWrite( g.template levelGridView( g.maxLevel() ), Dune::VTK::conforming );
+  doWrite( g.template levelGridView( g.maxLevel() ), Dune::VTK::nonconforming );
 }
 
 int main(int argc, char **argv)

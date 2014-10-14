@@ -92,14 +92,13 @@ void doWrite( const GridView &gridView )
 template<int dim>
 void vtkCheck(int* n, double* h)
 {
-  const Dune :: PartitionIteratorType VTK_Partition = Dune :: InteriorBorder_Partition;
   std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
   Dune::SGrid<dim,dim> g(n, h);
   g.globalRefine(1);
 
-  doWrite( g.template leafGridView< VTK_Partition >() );
-  doWrite( g.template levelGridView< VTK_Partition >( 0 ) );
-  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ) );
+  doWrite( g.template leafGridView() );
+  doWrite( g.template levelGridView( 0 ) );
+  doWrite( g.template levelGridView( g.maxLevel() ) );
 }
 
 int main(int argc, char **argv)

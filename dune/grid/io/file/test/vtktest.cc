@@ -1,6 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id:$
 
 #if HAVE_CONFIG_H
 #include "config.h" // autoconf defines, needed by the dune headers
@@ -110,8 +109,6 @@ void doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
 template<int dim>
 void vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
 {
-  const Dune :: PartitionIteratorType VTK_Partition
-    = Dune :: InteriorBorder_Partition;
   if(mpiHelper.rank() == 0)
     std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
 
@@ -125,15 +122,15 @@ void vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
 
   g.globalRefine(1);
 
-  doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::conforming );
-  doWrite( g.template leafGridView< VTK_Partition >(), Dune::VTK::nonconforming );
-  doWrite( g.template levelGridView< VTK_Partition >( 0 ),
+  doWrite( g.template leafGridView(), Dune::VTK::conforming );
+  doWrite( g.template leafGridView(), Dune::VTK::nonconforming );
+  doWrite( g.template levelGridView( 0 ),
            Dune::VTK::conforming );
-  doWrite( g.template levelGridView< VTK_Partition >( 0 ),
+  doWrite( g.template levelGridView( 0 ),
            Dune::VTK::nonconforming );
-  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ),
+  doWrite( g.template levelGridView( g.maxLevel() ),
            Dune::VTK::conforming );
-  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ),
+  doWrite( g.template levelGridView( g.maxLevel() ),
            Dune::VTK::nonconforming );
 }
 
