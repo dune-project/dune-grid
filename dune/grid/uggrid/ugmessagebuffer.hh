@@ -201,7 +201,7 @@ namespace Dune {
       Iterator it = gv.template begin<0, Dune::All_Partition>();
       const Iterator endIt = gv.template end<0, Dune::All_Partition>();
       for (; it != endIt; ++it) {
-        int numberOfSubentities = it->template count<codim>();
+        int numberOfSubentities = it->subEntities(codim);
         for (int k = 0; k < numberOfSubentities; k++)
         {
           typedef typename GridView::template Codim<0>::Entity Element;
