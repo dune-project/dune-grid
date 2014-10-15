@@ -21,6 +21,7 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/sgrid/numbering.hh>
 #include <dune/grid/common/indexidset.hh>
+#include <dune/grid/utility/structuredgridfactory.hh>
 
 /*! \file sgrid.hh
    This file documents the DUNE grid interface. We use the special implementation for
@@ -1740,6 +1741,57 @@ namespace Dune {
     };
 
   } // end namespace Capabilities
+
+  /** \brief Specialization of the StructuredGridFactory for SGrid
+   *
+   *  This allows a SGrid to be constructed using the
+   *  StructuredGridFactory just like the unstructured Grids. Limitations:
+   *  \li SGrid does not support simplices
+   */
+  template<int dim>
+  class StructuredGridFactory<SGrid<dim, dim> > {
+    typedef SGrid<dim, dim> GridType;
+    typedef typename GridType::ctype ctype;
+    static const int dimworld = GridType::dimensionworld;
+
+  public:
+    /** \brief Create a structured cube grid
+     *
+     *  \param lowerLeft  Lower left corner of the grid
+     *  \param upperRight Upper right corner of the grid
+     *  \param elements   Number of elements in each coordinate direction
+     */
+    static shared_ptr<GridType>
+    createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+                   const FieldVector<ctype,dimworld>& upperRight,
+                   const array<unsigned int,dim>& elements)
+    {
+      FieldVector<int, dim> elements_;
+      std::copy(elements.begin(), elements.end(), elements_.begin());
+
+      return shared_ptr<GridType>
+               (new GridType(elements_, lowerLeft, upperRight));
+    }
+
+    /** \brief Create a structured simplex grid
+     *
+     *  \param lowerLeft  Lower left corner of the grid
+     *  \param upperRight Upper right corner of the grid
+     *  \param elements   Number of elements in each coordinate direction
+     *
+     *  \note Simplices are not supported in SGrid, so this functions
+     *        unconditionally throws a GridError.
+     */
+    static shared_ptr<GridType>
+    createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+                      const FieldVector<ctype,dimworld>& upperRight,
+                      const array<unsigned int,dim>& elements)
+    {
+      DUNE_THROW(GridError, className<StructuredGridFactory>()
+                 << "::createSimplexGrid(): Simplices are not supported "
+                 "by SGrid.");
+    }
+  };
 
 } // end namespace Dune
 
