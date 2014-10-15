@@ -53,17 +53,17 @@ void checkIndexSet(const GridView& gridView,
   //  Check whether the set of global indices is consecutive and starts at zero.
   //  (It may contain multiple entries, though.)
   /////////////////////////////////////////////////////////////////////////////////
+
+  // To check we remove the duplicates
   std::sort(indicesGlobal.begin(), indicesGlobal.end());
+  auto last = std::unique(indicesGlobal.begin(), indicesGlobal.end());
+  indicesGlobal.erase(last, indicesGlobal.end());
 
   if (gridView.comm().rank()==0)
-  {
-    if (indicesGlobal[0] != 0)
-      DUNE_THROW(Exception, "Global index set does not contain the index '0'");
+    for (size_t i=0; i<indicesGlobal.size(); i++)
+      if ( indicesGlobal[i] != i )
+        DUNE_THROW(Exception, i << "th global index is not " << i);
 
-    for (size_t i=0; i<indicesGlobal.size()-1; i++)
-      if (indicesGlobal[i+1] > indicesGlobal[i]+1)
-        DUNE_THROW(Exception, "Global index set does not contain the index '" << indicesGlobal[i]+1 << "'");
-  }
 }
 
 int main(int argc, char* argv[]) try
@@ -92,14 +92,20 @@ int main(int argc, char* argv[]) try
   /////////////////////////////////////////////////////
 
   // elements
+  if (mpiHelper.rank() == 0)
+    std::cout << "Elements" << std::endl;
   GlobalIndexSet<GridView> elementIndexSet(gridView,0);
   checkIndexSet<GridView,0>(gridView, elementIndexSet);
 
   // edges
+  if (mpiHelper.rank() == 0)
+    std::cout << "Edges" << std::endl;
   GlobalIndexSet<GridView> edgeIndexSet(gridView,1);
   checkIndexSet<GridView,1>(gridView, edgeIndexSet);
 
   // vertices
+  if (mpiHelper.rank() == 0)
+    std::cout << "Vertices" << std::endl;
   GlobalIndexSet<GridView> vertexIndexSet(gridView,2);
   checkIndexSet<GridView,2>(gridView, vertexIndexSet);
 
