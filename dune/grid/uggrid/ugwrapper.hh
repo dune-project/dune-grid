@@ -401,7 +401,7 @@ namespace Dune {
       return FIRSTELEMENT(grid);
     }
 
-    /** \brief Returns pointers to the coordinate arrays of an UG element */
+    /** \brief Returns pointers to the coordinate arrays of a UG element */
     static void Corner_Coordinates(const UG_NS< UG_DIM >::Element* theElement, double* x[]) {
       using UG_NAMESPACE ::NODE;
       using UG_NAMESPACE ::TRIANGLE;
@@ -415,7 +415,7 @@ namespace Dune {
       CORNER_COORDINATES(theElement, n, x);
     }
 
-    /** \brief Returns pointers to the coordinate arrays of an UG node */
+    /** \brief Returns pointers to the coordinate arrays of a UG node */
     static void Corner_Coordinates(const UG_NS< UG_DIM >::Node* theNode, double* x[]) {
       x[0] = theNode->myvertex->iv.x;
     }
