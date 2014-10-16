@@ -200,21 +200,18 @@ namespace Dune
         MinimumExchange<IndexSet,std::vector<Index> > dh(gridview.indexSet(),assignment_,codim);
 
         gridview.communicate(dh,Dune::All_All_Interface,Dune::ForwardCommunication);
-
-        /* convert vector of minimum ranks to assignment vector */
-        for (size_t i=0; i<assignment_.size(); i++)
-          assignment_[i] = (assignment_[i] == gridview.comm().rank()) ? 1 : 0;
       }
 
-      /** answer question if entity belongs to me, to this process */
-      bool owner(size_t i)
+      /** \brief Which rank is the i-th entity assigned to? */
+      int owner(size_t i)
       {
         return assignment_[i];
       }
 
-      size_t numOwners() const
+      /** \brief Report the number of entities assigned to the rank 'rank' */
+      size_t numOwners(int rank) const
       {
-        return std::accumulate(assignment_.begin(), assignment_.end(), 0);
+        return std::count(assignment_.begin(), assignment_.end(), rank);
       }
 
     private:
@@ -338,7 +335,7 @@ namespace Dune
 
       int nLocalEntity = (codim_==0)
                     ? std::distance(gridview.template begin<0, Dune::Interior_Partition>(), gridview.template end<0, Dune::Interior_Partition>())
-                    : uniqueEntityPartition->numOwners();
+                    : uniqueEntityPartition->numOwners(rank);
 
       // Compute the global, non-redundant number of entities, i.e. the number of entities in the set
       // without double, aka. redundant entities, on the interprocessor boundary via global reduce. */
@@ -443,7 +440,7 @@ namespace Dune
 
           firstTime[idx] = false;
 
-          if (uniqueEntityPartition->owner(idx) == true)  /** if the entity is owned by the process, go ahead with computing the global index */
+          if (uniqueEntityPartition->owner(idx) == rank)  /** if the entity is owned by the process, go ahead with computing the global index */
           {
             const Index gindex = myoffset + globalcontrib;    /** compute global index */
             globalIndex_.insert(std::make_pair(id,gindex)); /** insert pair (key, value) into the map */
@@ -469,6 +466,7 @@ namespace Dune
       gridview_.communicate(dataHandle, Dune::All_All_Interface, Dune::ForwardCommunication);
     }
 
+    /** \brief Return the global index of a given entity */
     template <class Entity>
     Index index(const Entity& entity) const
     {
@@ -485,6 +483,11 @@ namespace Dune
         return localGlobalMap_.find(gridview_.indexSet().index(entity))->second;
     }
 
+    /** \brief Return the global index of a subentity of a given entity
+     *
+     * \param i Number of the requested subentity among all subentities of the given codimension
+     * \param codim Codimension of the requested subentity
+     */
     template <class Entity>
     Index subIndex(const Entity& entity, uint i, uint codim) const
     {
