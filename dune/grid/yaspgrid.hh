@@ -161,6 +161,17 @@ namespace Dune {
   class YaspGrid
     : public GridDefaultImplementation<dim,dim,typename Coordinates::ctype,YaspGridFamily<dim, Coordinates> >
   {
+
+    template<int, PartitionIteratorType, typename>
+    friend class YaspLevelIterator;
+
+    template<typename>
+    friend class YaspHierarchicIterator;
+
+  protected:
+
+    using GridDefaultImplementation<dim,dim,typename Coordinates::ctype,YaspGridFamily<dim, Coordinates> >::getRealImplementation;
+
   public:
     //! Type used for coordinates
     typedef typename Coordinates::ctype ctype;
