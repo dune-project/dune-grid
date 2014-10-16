@@ -755,6 +755,12 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
 
+      // check whether the grid is large enough to be overlapping
+      for (int i=0; i<dim; i++)
+        if ((s_interior[i] <= overlap) &&                // interior is very small
+            (periodic[i] || (s_interior[i] != s[i])))    // there is an overlap in that direction
+          DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+
       fTupel h(L);
       for (int i=0; i<dim; i++)
         h[i] /= s[i];
@@ -807,6 +813,12 @@ namespace Dune {
       iTupel s_interior(s);
 
       _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
+
+      // check whether the grid is large enough to be overlapping
+      for (int i=0; i<dim; i++)
+        if ((s_interior[i] <= overlap) &&                // interior is very small
+            (periodic[i] || (s_interior[i] != s[i])))    // there is an overlap in that direction
+          DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
 
       Dune::FieldVector<ctype,dim> extension(upperright);
       Dune::FieldVector<ctype,dim> h;
@@ -868,6 +880,12 @@ namespace Dune {
       iTupel s_interior(_coarseSize);
 
       _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
+
+      // check whether the grid is large enough to be overlapping
+      for (int i=0; i<dim; i++)
+        if ((s_interior[i] <= overlap) &&                // interior is very small
+            (periodic[i] || (s_interior[i] != _coarseSize[i])))    // there is an overlap in that direction
+          DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
 
       Dune::array<std::vector<ctype>,dim> newcoords;
       Dune::array<int, dim> offset(o_interior);
