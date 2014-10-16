@@ -20,13 +20,13 @@
  *              that also contain these entities but do not own them, so that on a non-owner process
  *              we have information on the index of the entity that it got from the owner-process;
  *
- *  Copyright by Benedikt Oswald and Patrick Leidenberger, 2002-2010. All rights reserved.
- *
  *  \author    Benedikt Oswald, Patrick Leidenberger, Oliver Sander
  *
  *  \attention globally unique indices are ONLY provided for entities of the
  *             InteriorBorder_Partition type, NOT for the Ghost_Partition type !!!
  *
+ *  \bug This code will most likely not work on grids with more than one element type.
+ *       Please ask on the mailing list if you need this feature.
  *  \note The interface in this file is experimental, and may change without prior notice.
  */
 
