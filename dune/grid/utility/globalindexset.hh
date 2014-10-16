@@ -336,13 +336,13 @@ namespace Dune
       if (codim_!=0)
         uniqueEntityPartition = std::unique_ptr<UniqueEntityPartition>(new UniqueEntityPartition(gridview,codim_));
 
-      nLocalEntity_ = (codim_==0)
+      int nLocalEntity = (codim_==0)
                     ? std::distance(gridview.template begin<0, Dune::Interior_Partition>(), gridview.template end<0, Dune::Interior_Partition>())
                     : uniqueEntityPartition->numOwners();
 
       // Compute the global, non-redundant number of entities, i.e. the number of entities in the set
       // without double, aka. redundant entities, on the interprocessor boundary via global reduce. */
-      nGlobalEntity_ = gridview.comm().template sum<int>(nLocalEntity_);
+      nGlobalEntity_ = gridview.comm().template sum<int>(nLocalEntity);
 
       /* communicate the number of locally owned entities to all other processes so that the respective offset
        * can be calculated on the respective processor; we use the Dune mpi collective communication facility
@@ -355,12 +355,12 @@ namespace Dune
       if (codim_==0)
       {
         /** Share number of locally owned entities */
-        gridview_.comm().template allgather<int>(&nLocalEntity_, 1, offset.data());
+        gridview_.comm().template allgather<int>(&nLocalEntity, 1, offset.data());
       }
       else
       {
         // gather number of locally owned entities on root process
-        gridview.comm().template gather<int>(&nLocalEntity_,offset.data(),1,0);
+        gridview.comm().template gather<int>(&nLocalEntity, offset.data(),1,0);
 
         // broadcast the array containing the number of locally owned entities to all processes
         gridview.comm().template broadcast<int>(offset.data(),size,0);
@@ -511,11 +511,6 @@ namespace Dune
       return (codim_==codim) ? nGlobalEntity_ : 0;
     }
 
-    inline unsigned int nOwnedLocalEntity() const
-    {
-      return nLocalEntity_;
-    }
-
     const std::vector<int>& indexOffset()
     {
       return indexOffset_;
@@ -526,9 +521,6 @@ namespace Dune
 
     /** \brief Codimension of the entities that we hold indices for */
     uint codim_;
-
-    //! Number of entities that are owned by the local process
-    int nLocalEntity_;
 
     //! Global number of entities, i.e. number of entities without rendundant entities on interprocessor boundaries
     int nGlobalEntity_;
