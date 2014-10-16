@@ -9,10 +9,12 @@ TESTS += globalindexsettest
 check_PROGRAMS += globalindexsettest
 globalindexsettest_SOURCES = globalindexsettest.cc
 globalindexsettest_CPPFLAGS = $(AM_CPPFLAGS) \
-                              $(DUNEMPICPPFLAGS)
+                              $(DUNEMPICPPFLAGS) \
+	                      $(UG_CPPFLAGS)
 globalindexsettest_LDFLAGS = $(AM_LDFLAGS) \
-                             $(DUNEMPILDFLAGS)
-globalindexsettest_LDADD = $(DUNEMPILIBS) \
+                             $(DUNEMPILDFLAGS) \
+	                     $(UG_LDFLAGS)
+globalindexsettest_LDADD = $(UG_LIBS) $(DUNEMPILIBS) \
                            $(LDADD)
 
 # define the programs
