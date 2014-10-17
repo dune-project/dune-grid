@@ -143,8 +143,8 @@ namespace Dune
         typedef Dune::GridView<AlbertaLeafGridViewTraits<const GridImp,pitype> > LeafGridView;
       };
 
-      typedef IndexSet< GridImp, LevelIndexSetImp, int > LevelIndexSet;
-      typedef IndexSet< GridImp, LeafIndexSetImp, int > LeafIndexSet;
+      typedef IndexSet< GridImp, LevelIndexSetImp, int, std::array< GeometryType, 1 > > LevelIndexSet;
+      typedef IndexSet< GridImp, LeafIndexSetImp, int, std::array< GeometryType, 1 > > LeafIndexSet;
       typedef AlbertaGridHierarchicIndexSet< dim, dimworld > HierarchicIndexSet;
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;
