@@ -67,6 +67,9 @@
 #define __HEAPS__
 #define __UGENV__
 #define __DEVICESH__
+#ifdef ModelP
+#define __PPIF__
+#endif
 
 #define _3
 #include "uggrid/ugincludes.hh"
