@@ -159,6 +159,26 @@ namespace Dune {
 
   /****************************************************************/
   /*                                                              */
+  /*       Specialization for edges in 3d                         */
+  /*                                                              */
+  /****************************************************************/
+
+  template<class GridImp>
+  class UGGridGeometry<1, 3, GridImp> :
+    public MultiLinearGeometry<typename GridImp::ctype, 1, 3>
+  {
+  public:
+
+    /** \brief Constructor from a given geometry type and a vector of corner coordinates */
+    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
+      : MultiLinearGeometry<typename GridImp::ctype, 1, 3>(type, coordinates)
+    {}
+
+  };
+
+
+  /****************************************************************/
+  /*                                                              */
   /*       Specialization for faces in 2d                         */
   /*                                                              */
   /****************************************************************/

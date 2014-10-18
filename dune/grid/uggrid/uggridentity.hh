@@ -7,6 +7,8 @@
  * \brief The UGGridEntity class and its specializations
  */
 
+#include <memory>
+#include <dune/common/shared_ptr.hh>
 #include <dune/grid/common/gridenums.hh>
 
 
@@ -223,6 +225,8 @@ namespace Dune {
     friend class UGGridEntitySeed<codim, GridImp>;
     typedef typename GridImp::ctype UGCtype;
 
+    typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
+
   public:
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
@@ -271,6 +275,9 @@ namespace Dune {
     //!< Default codim 1 Faces and codim == dim Vertices
     template<int cc> int count () const;
 
+    //! geometry of this entity
+    Geometry geometry () const { return Geometry( *geo_ ); }
+
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
 
@@ -290,6 +297,20 @@ namespace Dune {
     /** \brief Set edge object to a UG edge object */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       target_ = target;
+
+      // obtain the corner coordinates from UG
+      UGCtype* cornerCoords[2*dim];
+      UG_NS<dim>::Corner_Coordinates(target_, cornerCoords);
+
+      // convert to the type required by MultiLinearGeometry
+      std::vector<FieldVector<UGCtype, dim> > geometryCoords(2);
+      for(size_t i = 0; i < 2; i++)
+        for (size_t j = 0; j < dim; j++)
+            geometryCoords[i][j] = cornerCoords[i][j];
+
+      geo_ = Dune::make_shared<GeometryImpl>(type(), geometryCoords);
+
+      gridImp_ = gridImp;
     }
   public:
     /** \brief Set edge object to a UG edge object using the center element and the side number
@@ -305,7 +326,14 @@ namespace Dune {
     }
 
   protected:
+    Dune::shared_ptr<GeometryImpl> geo_;
+
     typename UG_NS<dim>::template Entity<codim>::T* target_;
+
+    /** \brief gridImp Not actually used, only the codim-0 specialization needs it.
+     * But code is simpler if we just keep it everywhere.
+     */
+    const GridImp* gridImp_;
   };
 
   /*! \brief Specialization for edge in 2D
@@ -332,8 +360,13 @@ namespace Dune {
   class UGFaceEntity
   {
     enum {codim = 1};
+    typedef typename GridImp::ctype UGCtype;
+
+    typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
 
   public:
+
+    typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
     /** \brief Return the entity type identifier */
     GeometryType type() const
@@ -403,12 +436,30 @@ namespace Dune {
     }
 #endif
 
+    //! geometry of this entity
+    Geometry geometry () const { return Geometry( *geo_ ); }
+
     /** \brief Set to a UG side vector object
         \param target The UG side vector to point to
         \param gridImp Dummy argument, only for consistency with codim-0 entities
      */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       target_ = target;
+
+      // obtain the corner coordinates from UG
+      UGCtype* cornerCoords[4*dim];
+      UG_NS<dim>::Corner_Coordinates(target_, cornerCoords);
+
+      // convert to the type required by MultiLinearGeometry
+      size_t numCorners = type().isTriangle() ? 3 : 4;
+      std::vector<FieldVector<UGCtype, dim> > geometryCoords(numCorners);
+      for(size_t i = 0; i < numCorners; i++)
+        for (size_t j = 0; j < dim; j++)
+            geometryCoords[i][j] = cornerCoords[i][j];
+
+      geo_ = Dune::make_shared<GeometryImpl>(type(), geometryCoords);
+
+      gridImp_ = gridImp;
     }
 
     typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
@@ -416,9 +467,16 @@ namespace Dune {
       return target_;
     }
 
+protected:
+    Dune::shared_ptr<GeometryImpl> geo_;
+
     /** \brief The UG object (a side vector) that represents this face */
     typename UG_NS<dim>::template Entity<codim>::T* target_;
 
+    /** \brief gridImp Not actually used, only the codim-0 specialization needs it.
+     * But code is simpler if we just keep it everywhere.
+     */
+    const GridImp* gridImp_;
   };
 
   /*! \brief Specialization for faces in 3D

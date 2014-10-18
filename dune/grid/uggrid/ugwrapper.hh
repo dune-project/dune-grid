@@ -420,6 +420,24 @@ namespace Dune {
       x[0] = theNode->myvertex->iv.x;
     }
 
+    /** \brief Returns pointers to the coordinate arrays of a UG edge */
+    static void Corner_Coordinates(const UG_NS< UG_DIM >::Edge* theEdge, double* x[]) {
+      x[0] = theEdge->links[0].nbnode->myvertex->iv.x;
+      x[1] = theEdge->links[1].nbnode->myvertex->iv.x;
+    }
+
+    /** \brief Returns pointers to the coordinate arrays of a UG vector */
+    static void Corner_Coordinates(const UG_NS< UG_DIM >::Vector* theVector, double* x[]) {
+      typename UG_NS< UG_DIM >::Element* center;
+      unsigned int side;
+      UG_NS< UG_DIM >::GetElementAndSideFromSideVector(theVector, center, side);
+      for (int i = 0; i < Corners_Of_Side(center, side); i++)
+      {
+        unsigned idxInElem = Corner_Of_Side(center, side, i);
+        x[i] = Corner(center, idxInElem)->myvertex->iv.x;
+      }
+    }
+
     static int GlobalToLocal(int n, const double** cornerCoords,
                              const double* EvalPoint, double* localCoord) {
       if (UG_DIM==2)
