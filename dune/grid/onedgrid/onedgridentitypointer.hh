@@ -61,7 +61,7 @@ namespace Dune {
 
   protected:
 
-    mutable MakeableInterfaceObject<Entity> virtualEntity_;
+    Entity virtualEntity_;
 
   };
 
