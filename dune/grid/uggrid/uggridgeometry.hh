@@ -37,10 +37,7 @@ namespace Dune {
     /** \brief Default constructor
      */
     UGGridGeometry()
-    {
-      jacobianIsUpToDate_ = false;
-      jacobianInverseIsUpToDate_ = false;
-    }
+    {}
 
     /** \brief Return the element type identifier
      *
@@ -103,9 +100,9 @@ namespace Dune {
     }
 
     //! The inverse transpose of the Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<UGCtype, coorddim,mydim>& jacobianInverseTransposed (const FieldVector<UGCtype, mydim>& local) const;
+    FieldMatrix<UGCtype, coorddim,mydim> jacobianInverseTransposed (const FieldVector<UGCtype, mydim>& local) const;
     //! The transpose of the Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<UGCtype, mydim,coorddim>& jacobianTransposed (const FieldVector<UGCtype, mydim>& local) const;
+    FieldMatrix<UGCtype, mydim,coorddim> jacobianTransposed (const FieldVector<UGCtype, mydim>& local) const;
 
 
   private:
@@ -114,20 +111,7 @@ namespace Dune {
     void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target)
     {
       target_ = target;
-      jacobianIsUpToDate_ = false;
-      jacobianInverseIsUpToDate_ = false;
     }
-
-    //! The jacobian inverse transposed
-    mutable FieldMatrix<UGCtype,coorddim,mydim> jac_inverse_;
-    //! The jacobian transposed
-    mutable FieldMatrix<UGCtype,mydim,coorddim> jac_;
-
-    /** \brief For simplices the Jacobian matrix is a constant, hence it needs
-        to be computed only once for each new element.  This can save some
-        assembly time. */
-    mutable bool jacobianInverseIsUpToDate_;
-    mutable bool jacobianIsUpToDate_;
 
     // in element mode this points to the element we map to
     // in coord_mode this is the element whose reference element is mapped into the father's one
