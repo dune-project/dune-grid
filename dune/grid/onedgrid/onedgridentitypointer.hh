@@ -38,7 +38,7 @@ namespace Dune {
     }
 
     //! dereferencing
-    Entity& dereference() const {return virtualEntity_;}
+    const Entity& dereference() const {return virtualEntity_;}
 
     //! ask for level of entity
     int level () const {return virtualEntity_.level();}
