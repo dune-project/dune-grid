@@ -1114,6 +1114,12 @@ namespace Dune {
       return mytypes[codim];
     }
 
+    //! deliver all geometry types used in this grid
+    const std::vector<GeometryType>& types (int codim) const
+    {
+      return geomTypes(codim);
+    }
+
   private:
     const GridImp& grid;
     int level;
