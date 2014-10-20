@@ -23,84 +23,20 @@ namespace Dune {
   template<int mydim, int coorddim, class GridImp>
   class OneDGridGeometry;
 
+  //**********************************************************************
+  //
+  // --OneDGridGeometry
+  /** \brief Defines the geometry part of a vertex.
+   * \ingroup OneDGrid
+   */
   template<class GridImp>
   class OneDGridGeometry <0, 1, GridImp> :
-    public GeometryDefaultImplementation <0, 1, GridImp,OneDGridGeometry>
+    public AxisAlignedCubeGeometry<typename GridImp::ctype,0,1>
   {
-
-    template <int codim_, int dim_, class GridImp_>
-    friend class OneDGridEntity;
-    template <int mydim_, int coorddim_, class GridImp_>
-    friend class OneDGridGeometry;
-
   public:
-
-    OneDGridGeometry() : storeCoordsLocally_(false) {}
-
-    //! return the element type identifier (vertex)
-    GeometryType type () const {return GeometryType(0);}
-
-    //! here we have always an affine geometry
-    bool affine() const { return true; }
-
-    //! return the number of corners of this element (==1)
-    int corners () const {return 1;}
-
-    /** \brief access to coordinates of a corner */
-    const FieldVector< typename GridImp::ctype, 1 > corner ( const int i ) const
-    {
-      return (storeCoordsLocally_ ? pos_ : target_->pos_);
-    }
-
-    /** \brief Maps a local coordinate within reference element to
-     * global coordinate in element  */
-    FieldVector<typename GridImp::ctype, 1> global (const FieldVector<typename GridImp::ctype, 0>& local) const {
-      return (storeCoordsLocally_) ? pos_ : target_->pos_;
-    }
-
-    /** \brief Maps a global coordinate within the element to a
-     * local coordinate in its reference element */
-    FieldVector<typename GridImp::ctype, 0> local (const FieldVector<typename GridImp::ctype, 1>& global) const {
-      FieldVector<typename GridImp::ctype, 0> l;
-      return l;
-    }
-
-    /** \brief !!!
-
-       This method really doesn't make much sense for a zero-dimensional
-       object.  It always returns '1'.
-     */
-    typename GridImp::ctype integrationElement (const FieldVector<typename GridImp::ctype, 0>& local) const {
-      return 1;
-    }
-
-    //! The Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix< typename GridImp::ctype, 0, 1 > &
-    jacobianTransposed ( const FieldVector< typename GridImp::ctype, 0 > &local ) const
-    {
-      return jacTransposed_;
-    }
-
-    //! The Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<typename GridImp::ctype,1,0>& jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, 0>& local) const {
-      return jacInverse_;
-    }
-
-    void setPosition(const typename GridImp::ctype& p) {
-      storeCoordsLocally_ = true;
-      pos_[0] = p;
-    }
-
-    //private:
-    bool storeCoordsLocally_;
-
-    // Stores the element corner positions if it is returned as geometryInFather
-    FieldVector<typename GridImp::ctype,1> pos_;
-
-    OneDEntityImp<0>* target_;
-
-    FieldMatrix< typename GridImp::ctype, 0, 1 > jacTransposed_;
-    FieldMatrix<typename GridImp::ctype,1,0> jacInverse_;
+    explicit OneDGridGeometry(const FieldVector<typename GridImp::ctype,1>& p)
+      : AxisAlignedCubeGeometry<typename GridImp::ctype,0,1>(p)
+    {}
   };
 
   //**********************************************************************

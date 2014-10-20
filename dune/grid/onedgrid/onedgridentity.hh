@@ -202,18 +202,14 @@ namespace Dune {
     GeometryType type () const {return GeometryType(0);}
 
     //! geometry of this entity
-    Geometry geometry () const { return Geometry( geo_ ); }
+    Geometry geometry () const { return Geometry(GeometryImpl(target_->pos_)); }
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
 
     void setToTarget(OneDEntityImp<0>* target) {
       target_ = target;
-      geo_.target_ = target;
     }
-
-    //! the current geometry
-    GeometryImpl geo_;
 
     OneDEntityImp<0>* target_;
 
