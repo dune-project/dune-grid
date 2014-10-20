@@ -26,8 +26,11 @@ macro(dune_define_gridtype output)
    The required headers for this grid implementation are also included.
 */
 #if HAVE_DUNE_GRID && defined ${GRIDTYPE_GRIDTYPE} && ! defined USED_${GRIDTYPE_GRIDTYPE}_GRIDTYPE
+  #ifndef HAVE_GRIDTYPE
+    #define HAVE_GRIDTYPE 0
+  #endif
   #if HAVE_GRIDTYPE
-   #error \"Ambiguous definition of GRIDTYPE.\"
+    #error \"Ambiguous definition of GRIDTYPE.\"
   #endif
 
   #ifndef WORLDDIM
@@ -59,6 +62,7 @@ macro(dune_define_gridtype output)
       typedef ${GRIDTYPE_DUNETYPE} GridType;
     }
   }
+  #undef HAVE_GRIDTYPE
   #define HAVE_GRIDTYPE 1
   #define USED_${GRIDTYPE_GRIDTYPE}_GRIDTYPE 1
 #endif // #if HAVE_DUNE_GRID && defined ${GRIDTYPE_GRIDTYPE} && ..")
