@@ -123,19 +123,19 @@ namespace Dune {
       return true;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const
+    Entity inside() const
     {
-      return OneDGridEntityPointer<0,GridImp>(center_);
+      return Entity(OneDGridEntity<0,dim,GridImp>(center_));
     }
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return the Entity on the outside of this intersection
     //! (that is the neighboring Entity)
-    EntityPointer outside() const
+    Entity outside() const
     {
       assert(neighbor());
-      return OneDGridEntityPointer<0,GridImp>(target());
+      return Entity(OneDGridEntity<0,dim,GridImp>(target()));
     }
 
     //! return information about the Boundary
@@ -380,18 +380,18 @@ namespace Dune {
       return true;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const
+    Entity inside() const
     {
-      return OneDGridEntityPointer<0,GridImp>(center_);
+      return Entity(OneDGridEntity<0,dim,GridImp>(center_));
     }
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return the Entity on the outside of this intersection
     //! (that is the neighboring Entity)
-    EntityPointer outside() const
+    Entity outside() const
     {
-      return OneDGridEntityPointer<0,GridImp>(target());
+      return Entity(OneDGridEntity<0,dim,GridImp>(target()));
     }
 
     //! return information about the Boundary
