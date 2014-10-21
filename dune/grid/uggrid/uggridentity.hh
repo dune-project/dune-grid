@@ -178,6 +178,12 @@ namespace Dune {
       return target_;
     }
 
+    //! equality
+    bool equals(const UGGridEntity& other) const
+    {
+      return getTarget() == other.getTarget();
+    }
+
   private:
     /** \brief Set this entity to a particular UG entity */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target,const GridImp* gridImp) {
@@ -325,6 +331,12 @@ namespace Dune {
       return target_;
     }
 
+    //! equality
+    bool equals(const UGEdgeEntity& other) const
+    {
+      return getTarget() == other.getTarget();
+    }
+
   protected:
     Dune::shared_ptr<GeometryImpl> geo_;
 
@@ -465,6 +477,12 @@ namespace Dune {
     typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
     {
       return target_;
+    }
+
+    //! equality
+    bool equals(const UGFaceEntity& other) const
+    {
+      return getTarget() == other.getTarget();
     }
 
 protected:
@@ -701,6 +719,12 @@ protected:
     typename UG_NS<dim>::template Entity<0>::T* getTarget() const
     {
       return target_;
+    }
+
+    //! equality
+    bool equals(const UGGridEntity& other) const
+    {
+      return getTarget() == other.getTarget();
     }
 
     //! the current geometry
