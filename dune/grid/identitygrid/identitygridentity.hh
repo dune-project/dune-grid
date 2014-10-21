@@ -158,6 +158,11 @@ namespace Dune {
       return *this;
     }
 
+    bool equals(const IdentityGridEntity& other) const
+    {
+      return hostEntity_ == other.hostEntity_;
+    }
+
     //! returns true if father entity exists
     bool hasFather () const {
       return hostEntity_->hasFather();
@@ -284,6 +289,11 @@ namespace Dune {
         hostEntity_ = original.hostEntity_;
       }
       return *this;
+    }
+
+    bool equals(const IdentityGridEntity& other) const
+    {
+      return hostEntity_ == other.hostEntity_;
     }
 
     //! returns true if father entity exists

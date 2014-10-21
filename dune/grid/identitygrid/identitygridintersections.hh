@@ -56,6 +56,11 @@ namespace Dune {
         hostIterator_(hostIterator)
     {}
 
+    bool equals(const IdentityGridLeafIntersection& other) const
+    {
+      return hostIterator_ == other.hostIterator_;
+    }
+
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const {
@@ -206,6 +211,11 @@ namespace Dune {
                                   const HostLevelIntersectionIterator& hostIterator)
       : identityGrid_(identityGrid), hostIterator_(hostIterator)
     {}
+
+    bool equals(const IdentityGridLevelIntersection& other) const
+    {
+      return hostIterator_ == other.hostIterator_;
+    }
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
