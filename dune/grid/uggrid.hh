@@ -318,11 +318,21 @@ namespace Dune {
 
     /** \brief Create an EntityPointer from an EntitySeed */
     template <typename Seed>
+    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
     typename Traits::template Codim<Seed::codimension>::EntityPointer
     entityPointer(const Seed& seed) const
     {
       enum {codim = Seed::codimension};
       return typename Traits::template Codim<codim>::EntityPointer(UGGridEntityPointer<codim,const UGGrid<dim> >(this->getRealImplementation(seed).target(),this));
+    }
+
+    /** \brief Create an Entity from an EntitySeed */
+    template <typename Seed>
+    typename Traits::template Codim<Seed::codimension>::Entity
+    entity(const Seed& seed) const
+    {
+      const int codim = Seed::codimension;
+      return typename Traits::template Codim<codim>::Entity(UGGridEntity<codim,dim,const UGGrid<dim> >(this->getRealImplementation(seed).target(),this));
     }
 
     /** \brief Number of grid entities per level and codim

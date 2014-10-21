@@ -695,7 +695,7 @@ protected:
      *  are numbered 0 ... count<cc>()-1
      */
     template<int cc>
-    typename GridImp::template Codim<cc>::EntityPointer subEntity (int i) const;
+    typename GridImp::template Codim<cc>::Entity subEntity (int i) const;
 
     /** \todo It would be faster to not use -1 as the end marker but
         number of sides instead */
@@ -735,8 +735,8 @@ protected:
 
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
-    typename GridImp::template Codim<0>::EntityPointer father () const {
-      return typename GridImp::template Codim<0>::EntityPointer (UGGridEntityPointer<0,GridImp>(UG_NS<dim>::EFather(target_),gridImp_));
+    typename GridImp::template Codim<0>::Entity father () const {
+      return typename GridImp::template Codim<0>::Entity(UGGridEntity(UG_NS<dim>::EFather(target_),gridImp_));
     }
 
     //! returns true if father entity exists

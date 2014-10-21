@@ -135,7 +135,7 @@ int Dune::UGGridEntity<0,dim,GridImp>::count() const
 
 template <int dim, class GridImp>
 template <int cc>
-typename GridImp::template Codim<cc>::EntityPointer
+typename GridImp::template Codim<cc>::Entity
 Dune::UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
 {
   assert(i>=0 && i<count<cc>());
@@ -153,7 +153,7 @@ Dune::UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
   else
     DUNE_THROW(GridError, "subEntity for nonexisting codimension requested!" );
 
-  return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity, gridImp_));
+  return typename GridImp::template Codim<cc>::Entity(Dune::UGGridEntity<cc,dim,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity, gridImp_));
 }
 
 template<int dim, class GridImp>
@@ -440,23 +440,23 @@ template int Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::count<2>() const;
 template int Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::count<3>() const;
 
 
-template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<0>::EntityPointer
+template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<0>::Entity
 Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<0>(int) const;
 
-template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<1>::EntityPointer
+template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<1>::Entity
 Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<1>(int) const;
 
-template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<2>::EntityPointer
+template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<2>::Entity
 Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<2>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<0>::EntityPointer
+template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<0>::Entity
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<0>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<1>::EntityPointer
+template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<1>::Entity
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<1>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<2>::EntityPointer
+template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<2>::Entity
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<2>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<3>::EntityPointer
+template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<3>::Entity
 Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<3>(int) const;
