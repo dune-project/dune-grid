@@ -109,10 +109,10 @@ namespace Dune {
 
   // subentity construction
   template<int dim, class GridImp> template<int cc>
-  inline typename SEntity<0,dim,GridImp>::template Codim<cc>::EntityPointer SEntity<0,dim,GridImp>::subEntity (int i) const
+  inline typename SEntity<0,dim,GridImp>::template Codim<cc>::Entity SEntity<0,dim,GridImp>::subEntity (int i) const
   {
     // make Iterator
-    return SLevelIterator<cc,All_Partition,const GridImp>(this->grid,this->l,this->subCompressedIndex(cc,i));
+    return SLevelIterator<cc,All_Partition,const GridImp>(this->grid,this->l,this->subCompressedIndex(cc,i)).dereference();
   }
 
   template<int dim, class GridImp>
@@ -195,13 +195,13 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline typename SEntity<0,dim,GridImp>::EntityPointer SEntity<0,dim,GridImp>::father () const
+  inline typename SEntity<0,dim,GridImp>::Entity SEntity<0,dim,GridImp>::father () const
   {
     if (!built_father) make_father();
     if (this->l>0)
-      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),(this->l)-1,father_index);
+      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),(this->l)-1,father_index).dereference();
     else
-      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),this->l,index);
+      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),this->l,index).dereference();
   }
 
   template<int dim, class GridImp>
@@ -338,15 +338,15 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline typename SIntersection<GridImp>::EntityPointer SIntersection<GridImp>::inside () const
+  inline typename SIntersection<GridImp>::Entity SIntersection<GridImp>::inside () const
   {
-    return typename SIntersection<GridImp>::EntityPointer(self);
+    return self;
   }
 
   template<class GridImp>
-  inline typename SIntersection<GridImp>::EntityPointer SIntersection<GridImp>::outside () const
+  inline typename SIntersection<GridImp>::Entity SIntersection<GridImp>::outside () const
   {
-    return typename SIntersection<GridImp>::EntityPointer(ne);
+    return ne;
   }
 
   template<class GridImp>

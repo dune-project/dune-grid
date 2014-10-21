@@ -112,7 +112,6 @@ set_property(TARGET
   test_identitygrid
   test_mcmg_geogrid
   test_oned
-  test_sgrid
   ${ALBERTA_PROGRAMS}
   ${ALUGRID_PROGRAMS}
   ${UG_PROGRAMS}
