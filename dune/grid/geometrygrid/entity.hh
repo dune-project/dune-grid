@@ -173,6 +173,16 @@ namespace Dune
         return *this;
       }
 
+      /** \brief compare two entities */
+      bool equals ( const EntityBase &other) const
+      {
+        // first, check pointers
+        if ( hostEntity_ == other.hostEntity_ )
+          return true;
+        // compare host entities, but make sure we have no null pointers first
+        return hostEntity_ && other.hostEntity_ && hostEntity() == other.hostEntity();
+      }
+
       operator bool () const { return bool( hostEntity_ ); }
 
     public:
@@ -429,6 +439,36 @@ namespace Dune
         hostElement_ = nullptr;
         subEntity_ = other.subEntity_;
         return *this;
+      }
+
+      /** \brief compare two entities */
+      bool equals ( const EntityBase &other) const
+      {
+        const bool thisEnd = (subEntity() < 0);
+        const bool otherEnd = (other.subEntity() < 0);
+        if( thisEnd || otherEnd )
+          return thisEnd && otherEnd;
+
+        // if we don't have two valid pointers, consider two entities equal
+        // if they both point at nothing
+        if ( ! ( hostElement_ && other.hostElement_ ) )
+          return hostElement_ == other.hostElement_;
+
+        const int lvl = level();
+        if( lvl != other.level() )
+          return false;
+
+        const typename Traits::HostGrid::Traits::LevelIndexSet &indexSet
+          = grid().hostGrid().levelIndexSet( lvl );
+
+        const HostElement &thisElement = hostElement();
+        assert( indexSet.contains( thisElement ) );
+        const HostElement &otherElement = other.hostElement();
+        assert( indexSet.contains( otherElement ) );
+
+        const int thisIndex = indexSet.subIndex( thisElement, subEntity(), codimension );
+        const int otherIndex = indexSet.subIndex( otherElement, other.subEntity(), codimension );
+        return (thisIndex == otherIndex);
       }
 
       operator bool () const { return bool( hostElement_ ); }
