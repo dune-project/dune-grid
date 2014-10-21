@@ -158,6 +158,11 @@ namespace Dune {
       return l;
     }
 
+    bool equals(const SEntityBase& other) const
+    {
+      return (index==other.index)&&(l==other.l)&&(grid==other.grid);
+    }
+
     //! global index is calculated from the index and grid size
     int globalIndex() const;
 
@@ -260,16 +265,6 @@ namespace Dune {
     {
       DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
       return -1;
-    }
-
-    bool operator==(const SEntityBase& other) const
-    {
-      return (index==other.index)&&(l==other.l)&&(grid==other.grid);
-    }
-
-    bool operator!=(const SEntityBase& other) const
-    {
-      return (index==other.index)&&(l==other.l)&&(grid==other.grid);
     }
 
   protected:
@@ -659,11 +654,6 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     bool equals(const SIntersection& other) const;
-
-    bool operator==(const SIntersection& other) const
-    {
-      return equals(other);
-    }
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
