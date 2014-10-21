@@ -16,11 +16,16 @@ namespace Dune {
   /** \todo Take the index types from the host grid */
   template<class GridImp>
   class IdentityGridLevelIndexSet :
-    public IndexSet<GridImp,IdentityGridLevelIndexSet<GridImp> >
+    public IndexSet<GridImp,
+                    IdentityGridLevelIndexSet<GridImp>,
+                    typename remove_const<GridImp>::type::HostGridType::LevelGridView::IndexSet::IndexType,
+                    typename remove_const<GridImp>::type::HostGridType::LevelGridView::IndexSet::Types
+                    >
   {
   public:
 
     typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
+    typedef typename HostGrid::LevelGridView::IndexSet::Types Types;
 
     enum {dim = GridImp::dimension};
 
@@ -59,6 +64,12 @@ namespace Dune {
       return grid_->hostgrid_->levelIndexSet(level_).geomTypes(codim);
     }
 
+    /** \brief Deliver all geometry types used in this grid */
+    Types types (int codim) const
+    {
+      return grid_->hostgrid_->levelIndexSet(level_).types(codim);
+    }
+
     /** \brief Return true if the given entity is contained in the index set */
     template<class EntityType>
     bool contains (const EntityType& e) const
@@ -82,12 +93,17 @@ namespace Dune {
 
   template<class GridImp>
   class IdentityGridLeafIndexSet :
-    public IndexSet<GridImp,IdentityGridLeafIndexSet<GridImp> >
+    public IndexSet<GridImp,
+                    IdentityGridLeafIndexSet<GridImp>,
+                    typename remove_const<GridImp>::type::HostGridType::LeafGridView::IndexSet::IndexType,
+                    typename remove_const<GridImp>::type::HostGridType::LeafGridView::IndexSet::Types
+                    >
   {
     typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
 
   public:
 
+    typedef typename HostGrid::LevelGridView::IndexSet::Types Types;
 
     /*
      * We use the remove_const to extract the Type from the mutable class,
@@ -144,6 +160,12 @@ namespace Dune {
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return grid_->hostgrid_->leafIndexSet().geomTypes(codim);
+    }
+
+    /** \brief Deliver all geometry types used in this grid */
+    Types types (int codim) const
+    {
+      return grid_->hostgrid_->leafIndexSet().types(codim);
     }
 
     /** \brief Return true if the given entity is contained in the index set */
