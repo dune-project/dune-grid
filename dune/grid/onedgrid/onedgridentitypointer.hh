@@ -33,8 +33,7 @@ namespace Dune {
 
     //! equality
     bool equals(const OneDGridEntityPointer<codim,GridImp>& other) const {
-      return GridImp::getRealImplementation(other.virtualEntity_).target_
-             == GridImp::getRealImplementation(virtualEntity_).target_;
+      return virtualEntity_ == other.virtualEntity_;
     }
 
     //! dereferencing
