@@ -149,9 +149,17 @@ namespace CheckEntitySeed // don't blur namespace Dune
         const Entity &entity = *it;
         EntitySeed seed = entity.seed();
 
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
         // get entity pointer from seed
         EntityPointer entityPointer = grid.entityPointer( seed );
         compare( entityPointer, EntityPointer( it ), output );
+#endif
+
+#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+        // get entity from seed
+        Entity entity2 = grid.entity( seed );
+        compare( entity, *it, output );
+#endif
 
         // test default constructor
         EntitySeed seed2;
@@ -162,11 +170,18 @@ namespace CheckEntitySeed // don't blur namespace Dune
         assert( seed2.isValid());
 
         // we might like to check the assignment operator as well
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
         compare( entityPointer, grid.entityPointer( seed2 ), output );
+#endif
+#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+        compare( entity2, grid.entity( seed2 ), output );
+#endif
       }
     }
 
   private:
+
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
     // compare two entity pointers for equality
     static void compare ( const EntityPointer &ep1, const EntityPointer &ep2, std::ostream &output )
     {
@@ -179,6 +194,21 @@ namespace CheckEntitySeed // don't blur namespace Dune
       if( !Equals< Geometry >::apply( ep1->geometry(), ep2->geometry(), eps ) )
         output << "Warning: Geometries do not conincide" << std::endl;
     }
+#endif
+
+    // compare two entities for equality
+    static void compare ( const Entity &e1, const Entity &e2, std::ostream &output )
+    {
+      // compare entities
+      if( !Equals< Entity >::apply( e1, e2 ) )
+        output << "Warning: Entities do not conincide" << std::endl;
+
+      // compare geometries
+      const double eps = 1e-10;
+      if( !Equals< Geometry >::apply( e1.geometry(), e2.geometry(), eps ) )
+        output << "Warning: Geometries do not conincide" << std::endl;
+    }
+
   };
 
 

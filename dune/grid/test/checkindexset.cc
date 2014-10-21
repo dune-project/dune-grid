@@ -122,51 +122,70 @@ namespace Dune
       // Check whether we get the same index if we
       // -- ask for the subEntity itself and then its index
       // -- ask for the subIndex directly
+      typedef typename GridType::template Codim< codim >::Entity SubE;
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
       typedef typename GridType::template Codim< codim >::EntityPointer SubEntityPointer;
       const SubEntityPointer subEntityPtr = en.template subEntity< codim >( subEntity );
-      if( lset.subIndex( en, subEntity, codim ) != lset.index( *subEntityPtr) )
+      *subEntityPtr;
+#endif
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+      const SubE& subE = *subEntityPtr;
+#else
+      SubE subE = en.template subEntity< codim >( subEntity );
+#endif
+
+      if( lset.subIndex( en, subEntity, codim ) != lset.index( subE) )
       {
         std::cerr << "Index for subEntity does not match." << std::endl;
-        assert( lset.subIndex( en, subEntity, codim ) == lset.index( *subEntityPtr) );
+        assert( lset.subIndex( en, subEntity, codim ) == lset.index( subE) );
       }
 
       // Make a unique identifier for the subEntity.  Since indices are unique only per GeometryType,
       // we need a (index,GeometryType)-pair.
-      std::pair<int, GeometryType> globalSubEntity( lset.index( *subEntityPtr ), subEntityPtr->type() );
+      std::pair<int, GeometryType> globalSubEntity( lset.index( subE ), subE.type() );
       assert( globalSubEntity.first >= 0 );
       sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << ","
            << globalSubEntity.second << ") on en = " << lset.index(en) << std::endl;
 
-      if( subEntityPtr->type() != subEntityPtr->geometry().type() )
+      if( subE.type() != subE.geometry().type() )
       {
         std::cerr << "Geometry types for subEntity don't match." << std::endl;
-        assert( subEntityPtr->type() == subEntityPtr->geometry().type() );
+        assert( subE.type() == subE.geometry().type() );
       }
 
       // assert that all sub entities have the same level
-      assert( subEntityPtr->level() == en.level() );
+      assert( subE.level() == en.level() );
 
       // Loop over all vertices
       for( int j = 0; j < numVertices; ++j )
       {
 
         // get entity pointer to subEntity vertex
+        typedef typename GridType::template Codim< dim >::Entity VertexE;
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
         typedef typename GridType::template Codim< dim >::EntityPointer VertexPointer;
         VertexPointer vxp = en.template subEntity< dim >( local[ j ] );
+        *vxp;
+#endif
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+        const VertexE& vxE = *vxp;
+#else
+        VertexE vxE = en.template subEntity< dim >( local[ j ] );
+#endif
 
         // Find the global coordinate of the vertex by its index
         if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
         {
           // Check whether index and coordinate match
           FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap.find(global[j])->second );
-          FieldVector< coordType, dimworld > vx1 = vxp->geometry().corner( 0 );
+          FieldVector< coordType, dimworld > vx1 = vxE.geometry().corner( 0 );
           if( ! compareVec( vxcheck, vx1 ) )
           {
             std::cerr << "ERROR map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx1 << "\n";
             assert( compareVec( vxcheck, vx1 ) );
           }
         }
-        sout << "vx[" << global[j] << "] = "  <<  subEntityPtr->geometry().corner( j ) << "\n";
+        sout << "vx[" << global[j] << "] = "  <<  subE.geometry().corner( j ) << "\n";
       }
       sout << "sort vector of global vertex\n";
 
@@ -353,7 +372,11 @@ namespace Dune
         const int subcount = entity.subEntities(codim);
         for( int i = 0; i < subcount; ++i )
         {
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
           const IdType id = localIdSet.id( *(entity.template subEntity< codim >( i ) ) );
+#else
+          const IdType id = localIdSet.id( entity.template subEntity< codim >( i ) );
+#endif
           entityfound.insert( id );
         }
       }
@@ -467,11 +490,20 @@ namespace Dune
         for( int i = 0; i < svx; ++i )
         {
           // get entity pointer of sub entity codim=dim (Vertex)
-          typedef typename Grid::template Codim< dim >::EntityPointer VertexPointer;
+          typedef typename GridView::template Codim< dim >::Entity VertexE;
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+          typedef typename GridView::template Codim< dim >::EntityPointer VertexPointer;
           VertexPointer vxp = it->template subEntity< dim >( i );
+          *vxp;
+#endif
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+          const VertexE& vxE = *vxp;
+#else
+          VertexE vxE = it->template subEntity< dim >( i );
+#endif
 
           // get coordinates of entity pointer
-          FieldVector< coordType, dimworld > vx( vxp->geometry().corner( 0 ) );
+          FieldVector< coordType, dimworld > vx( vxE.geometry().corner( 0 ) );
 
           // output vertex coordinates
           sout << vx << (i < svx-1 ? ", " : "]\n");
@@ -479,10 +511,10 @@ namespace Dune
           const typename IndexSetType::IndexType vxidx = lset.subIndex( *it, i, dim );
 
           // the subIndex and the index for subEntity must be the same
-          if( vxidx != lset.index( *vxp ) )
+          if( vxidx != lset.index( vxE ) )
           {
             std::cerr << "Error: index( *subEntity< dim >( i ) ) != subIndex( entity, i, dim )" << std::endl;
-            assert( vxidx == lset.index( *vxp ) );
+            assert( vxidx == lset.index( vxE ) );
           }
 
           // check whether the coordinates are the same
@@ -516,8 +548,13 @@ namespace Dune
               if( !nit->neighbor() )
                 continue;
 
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
               checkSubEntity< codim >( grid, *(nit->outside()), lset, sout,
                                        setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
+#else
+              checkSubEntity< codim >( grid, nit->outside(), lset, sout,
+                                       setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
+#endif
             }
           }
           else

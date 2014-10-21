@@ -106,6 +106,21 @@ add_executable(testiteratorranges EXCLUDE_FROM_ALL testiteratorranges.cc)
 add_dune_mpi_flags(testiteratorranges)
 
 
+# tell gridcheck to use old entity and intersections interface for unported grids
+set_property(TARGET
+  test_geogrid
+  test_identitygrid
+  test_mcmg_geogrid
+  test_oned
+  test_sgrid
+  test_yaspgrid
+  ${ALBERTA_PROGRAMS}
+  ${ALUGRID_PROGRAMS}
+  ${UG_PROGRAMS}
+  APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE"
+  )
+
+
 foreach(_exe ${TESTS})
   target_link_libraries(${_exe} "dunegrid" ${DUNE_LIBS})
   add_test(${_exe} ${_exe})

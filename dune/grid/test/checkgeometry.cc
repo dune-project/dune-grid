@@ -62,10 +62,20 @@ namespace Dune
     {
       for (unsigned int i=0; i<entity.subEntities(codim); ++i)
       {
+        typedef typename Entity::template Codim< codim >::Entity SubE;
+
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
         typedef typename Entity::template Codim< codim >::EntityPointer SubEP;
         const SubEP subEP = entity.template subEntity<codim>(i);
-        const typename SubEP::Entity &subEn = *subEP;
-        const typename SubEP::Entity::Geometry &subGeo = subEn.geometry();
+        *subEP;
+#endif
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+        const SubE& subEn = *subEP;
+#else
+        const SubE subEn = entity.template subEntity<codim>(i);
+#endif
+
+        typename SubE::Geometry subGeo = subEn.geometry();
 
         if( subEn.type() != subGeo.type() )
           std::cerr << "Error: Entity and geometry report different geometry types on codimension " << codim << "." << std::endl;
