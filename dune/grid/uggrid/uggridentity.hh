@@ -107,6 +107,11 @@ namespace Dune {
     UGGridEntity()
     {}
 
+    UGGridEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
+    {
+      setToTarget(target,gridImp);
+    }
+
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
     /** \brief The type of UGGrid Entity seeds */
@@ -240,6 +245,14 @@ namespace Dune {
     /** \brief The type of UGGrid Entity seeds */
     typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
 
+    UGEdgeEntity()
+    {}
+
+    UGEdgeEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
+    {
+      setToTarget(target,gridImp);
+    }
+
     //! level of the edge
     int level () const {
       return UG_NS<dim>::myLevel(target_);
@@ -354,7 +367,18 @@ namespace Dune {
   template<class GridImp>
   class UGGridEntity<1,2,GridImp>
     : public UGEdgeEntity<2,GridImp>
-  {};
+  {
+
+  public:
+
+    UGGridEntity()
+    {}
+
+    UGGridEntity(typename UG_NS<2>::template Entity<1>::T* target, const GridImp* gridImp)
+      : UGEdgeEntity<2,GridImp>(target,gridImp)
+    {}
+
+  };
 
   /*! \brief Specialization for edge in 3D
    * \ingroup UGGrid
@@ -362,7 +386,18 @@ namespace Dune {
   template<class GridImp>
   class UGGridEntity<2,3,GridImp>
     : public UGEdgeEntity<3,GridImp>
-  {};
+  {
+
+  public:
+
+    UGGridEntity()
+    {}
+
+    UGGridEntity(typename UG_NS<3>::template Entity<2>::T* target, const GridImp* gridImp)
+      : UGEdgeEntity<3,GridImp>(target,gridImp)
+    {}
+
+  };
 
 
   /*! \brief UGGrid face entity
@@ -379,6 +414,14 @@ namespace Dune {
   public:
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
+
+    UGFaceEntity()
+    {}
+
+    UGFaceEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
+    {
+      setToTarget(target,gridImp);
+    }
 
     /** \brief Return the entity type identifier */
     GeometryType type() const
@@ -503,7 +546,18 @@ protected:
   template<class GridImp>
   class UGGridEntity<1,3,GridImp>
     : public UGFaceEntity<3,GridImp>
-  {};
+  {
+
+  public:
+
+    UGGridEntity()
+    {}
+
+    UGGridEntity(typename UG_NS<3>::template Entity<1>::T* target, const GridImp* gridImp)
+      : UGFaceEntity<3,GridImp>(target,gridImp)
+    {}
+
+  };
 
 
 
@@ -561,6 +615,11 @@ protected:
     UGGridEntity()
       : gridImp_(NULL)
     {}
+
+    UGGridEntity(typename UG_NS<dim>::Element* target, const GridImp* gridImp)
+    {
+      setToTarget(target,gridImp);
+    }
 
     //! Level of this element
     int level () const {
