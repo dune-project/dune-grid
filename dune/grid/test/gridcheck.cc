@@ -70,7 +70,7 @@ struct subIndexCheck
       #endif
       assert( ep == ep2 );
 
-      const typename Grid::LevelGridView &levelGridView = g.levelGridView(e.level());
+      typename Grid::LevelGridView levelGridView = g.levelGridView(e.level());
 
       if( !levelGridView.contains( *ep ) )
       {
