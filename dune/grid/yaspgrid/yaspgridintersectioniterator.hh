@@ -34,8 +34,7 @@ namespace Dune {
     //! equality
     bool equals (const YaspIntersectionIterator& other) const
     {
-      return GridImp::getRealImplementation(intersection_)._inside == GridImp::getRealImplementation(other.intersection_)._inside
-        and GridImp::getRealImplementation(intersection_)._count == GridImp::getRealImplementation(other.intersection_)._count;
+      return intersection_ == other.intersection_;
     }
 
     //! \brief dereferencing

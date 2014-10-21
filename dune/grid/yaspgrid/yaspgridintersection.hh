@@ -285,15 +285,10 @@ namespace Dune {
       *this = it;
     }
 
-    bool operator==(const YaspIntersection& other) const
+    bool equals(const YaspIntersection& other) const
     {
       // compare counts first -- that's cheaper if the test fails
-      return _count == other._count && _inside == other._inside;
-    }
-
-    bool operator!=(const YaspIntersection& other) const
-    {
-      return !(*this == other);
+      return _count == other._count && _inside.equals(other._inside);
     }
 
   private:
