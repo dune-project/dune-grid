@@ -142,7 +142,7 @@ namespace Dune {
     public EntityDefaultImplementation<codim,dim,GridImp,EntityImp>
   {
     friend class SEntityPointer<codim,GridImp>;
-    friend class SIntersectionIterator<GridImp>;
+    friend class SIntersection<GridImp>;
     enum { dimworld = GridImp::dimensionworld };
 
     typedef typename GridImp::Traits::template Codim< codim >::GeometryImpl GeometryImpl;
@@ -262,6 +262,16 @@ namespace Dune {
       return -1;
     }
 
+    bool operator==(const SEntityBase& other) const
+    {
+      return (index==other.index)&&(l==other.l)&&(grid==other.grid);
+    }
+
+    bool operator!=(const SEntityBase& other) const
+    {
+      return (index==other.index)&&(l==other.l)&&(grid==other.grid);
+    }
+
   protected:
     // this is how we implement our elements
     GridImp* grid;       //!< grid containes mapper, geometry, etc.
@@ -340,8 +350,10 @@ namespace Dune {
     struct Codim
     {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
+      typedef typename GridImp::template Codim<cd>::Entity Entity;
     };
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::LeafIntersectionIterator IntersectionIterator;
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
@@ -580,8 +592,6 @@ namespace Dune {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
 
-    typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
-    typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
 
     friend class SIntersection<GridImp>;
 
@@ -600,7 +610,11 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     //! equality
-    bool equals(const SIntersectionIterator<GridImp>& i) const;
+    bool equals(const SIntersectionIterator<GridImp>& i) const
+    {
+      return intersection == i.intersection;
+    }
+
     //! increment
     void increment();
 
@@ -608,6 +622,47 @@ namespace Dune {
     const Intersection & dereference() const
     {
       return intersection;
+    }
+
+    SIntersectionIterator (GridImp* _grid, const SEntity<0,dim,GridImp >* _self, int _count) :
+      intersection(IntersectionImp(_grid,_self,_count))
+    {}
+
+  private:
+    Intersection intersection;
+  };
+
+  template<class GridImp>
+  class SIntersection
+  {
+    enum { dim=GridImp::dimension };
+    enum { dimworld=GridImp::dimensionworld };
+
+    friend class SIntersectionIterator<GridImp>;
+
+    typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
+    typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
+
+  public:
+    typedef typename GridImp::template Codim<0>::Entity Entity;
+    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<1>::Geometry Geometry;
+    typedef typename Geometry::LocalCoordinate LocalCoordinate;
+    typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
+    typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
+    typedef Dune::Intersection< const GridImp, Dune::SIntersectionIterator< const GridImp > > Intersection;
+    //! know your own dimension
+    enum { dimension=dim };
+    //! know your own dimension of world
+    enum { dimensionworld=dimworld };
+    //! define type used for coordinates in grid module
+    typedef typename GridImp::ctype ctype;
+
+    bool equals(const SIntersection& other) const;
+
+    bool operator==(const SIntersection& other) const
+    {
+      return equals(other);
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
@@ -628,7 +683,7 @@ namespace Dune {
 
     int boundarySegmentIndex () const {
       if (boundary())
-        return grid->boundarySegmentIndex(self->level(), count, zred);
+        return grid->boundarySegmentIndex(self.level(), count, zred);
       return -1;
     }
 
@@ -651,8 +706,7 @@ namespace Dune {
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
     {
-      static const GeometryType cubeType(GeometryType::cube,dim-1);
-      return cubeType;
+      return GeometryType(GeometryType::cube,dim-1);
     }
 
     //! local index of codim 1 entity in self where intersection is contained in
@@ -661,27 +715,25 @@ namespace Dune {
     int indexInOutside () const;
 
     //! constructor
-    SIntersectionIterator (GridImp* _grid, const SEntity<0,dim,GridImp >* _self, int _count) :
+    SIntersection (GridImp* _grid, const SEntity<0,dim,GridImp >* _self, int _count) :
       self(*_self), ne(self), grid(_grid),
-      partition(_grid->partition(grid->getRealImplementation(ne).l,_self->z)),
-      zred(_grid->compress(grid->getRealImplementation(ne).l,_self->z)),
-      intersection(IntersectionImp(*this))
+      partition(_grid->partition(grid->getRealImplementation(ne).level(),_self->z)),
+      zred(_grid->compress(grid->getRealImplementation(ne).level(),_self->z))
     {
       // make neighbor
       make(_count);
     }
 
-    SIntersectionIterator (const SIntersectionIterator & other) :
+    SIntersection (const SIntersection & other) :
       self(other.self), ne(other.ne), grid(other.grid),
       partition(other.partition), zred(other.zred),
       count(other.count), valid_count(other.valid_count),
       valid_nb(other.valid_nb), is_on_boundary(other.is_on_boundary),
-      built_intersections(false),
-      intersection(IntersectionImp(*this))
+      built_intersections(false)
     {}
 
     //! assignment operator
-    SIntersectionIterator& operator = (const SIntersectionIterator& other)
+    SIntersection& operator = (const SIntersection& other)
     {
       /* We can't assign the grid */
       assert(grid == other.grid);
@@ -702,120 +754,10 @@ namespace Dune {
       return *this;
     }
 
-  private:
-    void make (int _count) const;         //!< reinitialze iterator with given neighbor
-    void makeintersections () const;      //!< compute intersections
-    EntityPointer self;                   //!< EntityPointer for myself
-    mutable EntityPointer ne;             //!< EntityPointer for neighbor
-    const GridImp * grid;                 //!< Pointer to the grid
-    int partition;                        //!< partition number of self, needed for coordinate expansion
-    array<int,dim> zred;                  //!< reduced coordinates of myself, allows easy computation of neighbors
-    mutable int count;                    //!< number of neighbor
-    mutable bool valid_count;             //!< true if count is in range
-    mutable bool valid_nb;                //!< true if nb is initialized
-    mutable bool is_on_boundary;          //!< true if neighbor is otside the domain
-    mutable bool built_intersections;     //!< true if all intersections have been built
-    mutable LocalGeometryImpl is_self_local;  //!< intersection in own local coordinates
-    mutable GeometryImpl is_global;           //!< intersection in global coordinates, map consistent with is_self_local
-    mutable LocalGeometryImpl is_nb_local;    //!< intersection in neighbors local coordinates
-    Intersection intersection;
-  };
-
-  template<class GridImp>
-  class SIntersection
-  {
-    enum { dim=GridImp::dimension };
-    enum { dimworld=GridImp::dimensionworld };
-  public:
-    typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-    typedef typename GridImp::template Codim<1>::Geometry Geometry;
-    typedef typename Geometry::LocalCoordinate LocalCoordinate;
-    typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
-    typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef Dune::Intersection< const GridImp, Dune::SIntersectionIterator< const GridImp > > Intersection;
-    //! know your own dimension
-    enum { dimension=dim };
-    //! know your own dimension of world
-    enum { dimensionworld=dimworld };
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
-
-    bool boundary () const
-    {
-      return is.boundary();
-    }
-
-    /*! @brief Identifier for boundary segment from macro grid. */
-    int boundaryId () const
-    {
-      return is.boundaryId();
-    }
-
-    /*! @brief index of the boundary segment within the macro grid  */
-    size_t boundarySegmentIndex () const
-    {
-      return is.boundarySegmentIndex();
-    }
-
-    /*! @brief return true if intersection is shared with another element. */
-    bool neighbor () const
-    {
-      return is.neighbor();
-    }
-
-    /*! @brief return EntityPointer to the Entity on the inside of this intersection. */
-    EntityPointer inside() const
-    {
-      return is.inside();
-    }
-
-    /*! @brief return EntityPointer to the Entity on the outside of this intersection. */
-    EntityPointer outside() const
-    {
-      return is.outside();
-    }
-
     /*! @brief return true if intersection is conform. */
     bool conforming () const
     {
       return true;
-    }
-
-    /*! @brief geometrical information about this intersection in local coordinates of the inside() entity. */
-    LocalGeometry geometryInInside () const
-    {
-      return is.geometryInInside();
-    }
-
-    /*! @brief geometrical information about this intersection in local coordinates of the outside() entity. */
-    LocalGeometry geometryInOutside () const
-    {
-      return is.geometryInOutside();
-    }
-
-    /*! @brief geometrical information about the intersection in global coordinates. */
-    Geometry geometry () const
-    {
-      return is.geometry();
-    }
-
-    /*! @brief obtain the type of reference element for this intersection */
-    GeometryType type () const
-    {
-      return is.type();
-    }
-
-    /*! @brief Local index of codim 1 entity in the inside() entity where intersection is contained in */
-    int indexInInside () const
-    {
-      return is.indexInInside();
-    }
-
-    /*! @brief Local index of codim 1 entity in outside() entity where intersection is contained in */
-    int indexInOutside () const
-    {
-      return is.indexInOutside();
     }
 
     /*! @brief Return an outer normal (length not necessarily 1) */
@@ -828,7 +770,7 @@ namespace Dune {
     GlobalCoordinate integrationOuterNormal (const LocalCoordinate& local) const
     {
       FieldVector<ctype, dimworld> n = centerUnitOuterNormal();
-      n *= is.geometry().integrationElement(local);
+      n *= geometry().integrationElement(local);
       return n;
     }
 
@@ -842,17 +784,28 @@ namespace Dune {
     GlobalCoordinate centerUnitOuterNormal () const
     {
       FieldVector<ctype, dimworld> normal(0.0);
-      normal[is.count/2] =  (is.count%2) ? 1.0 : -1.0;
+      normal[count/2] =  (count%2) ? 1.0 : -1.0;
       return normal;
     }
 
-    //! constructor
-    SIntersection (const SIntersectionIterator<GridImp> & is_) : is(is_) {}
-
   private:
-#ifndef DOXYGEN // doxygen can't handle this recursive usage
-    const SIntersectionIterator<GridImp> & is;
-#endif
+
+    void make (int _count) const;         //!< reinitialze iterator with given neighbor
+    void makeintersections () const;      //!< compute intersections
+    Entity self;                   //!< EntityPointer for myself
+    mutable Entity ne;             //!< EntityPointer for neighbor
+    const GridImp * grid;                 //!< Pointer to the grid
+    int partition;                        //!< partition number of self, needed for coordinate expansion
+    array<int,dim> zred;                  //!< reduced coordinates of myself, allows easy computation of neighbors
+    mutable int count;                    //!< number of neighbor
+    mutable bool valid_count;             //!< true if count is in range
+    mutable bool valid_nb;                //!< true if nb is initialized
+    mutable bool is_on_boundary;          //!< true if neighbor is otside the domain
+    mutable bool built_intersections;     //!< true if all intersections have been built
+    mutable LocalGeometryImpl is_self_local;  //!< intersection in own local coordinates
+    mutable GeometryImpl is_global;           //!< intersection in global coordinates, map consistent with is_self_local
+    mutable LocalGeometryImpl is_nb_local;    //!< intersection in neighbors local coordinates
+
   };
 
   //************************************************************************
@@ -1536,7 +1489,7 @@ namespace Dune {
      */
     friend class Dune::SGridLevelIndexSet<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SGridGlobalIdSet<Dune::SGrid<dim,dimworld> >;
-    friend class Dune::SIntersectionIterator<Dune::SGrid<dim,dimworld> >;
+    friend class Dune::SIntersection<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SHierarchicIterator<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SEntity<0,dim,Dune::SGrid<dim,dimworld> >;
 
