@@ -23,18 +23,12 @@ namespace Dune {
 
     //! Constructor for a given grid entity and a given neighbor
     OneDGridLevelIntersection(OneDEntityImp<1>* center, int nb)
-      : center_(center), neighbor_(nb),
-        intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
-        intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
-        intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
+      : center_(center), neighbor_(nb)
     {}
 
     /** \brief Constructor creating the 'one-after-last'-iterator */
     OneDGridLevelIntersection(OneDEntityImp<1>* center)
-      : center_(center), neighbor_(2),
-        intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
-        intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
-        intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
+      : center_(center), neighbor_(2)
     {}
 
     typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
@@ -160,24 +154,21 @@ namespace Dune {
     //! where iteration started.
     LocalGeometry geometryInInside () const
     {
-      intersectionSelfLocal_.setPosition( (indexInInside() == 0) ? 0 : 1 );
-      return LocalGeometry( intersectionSelfLocal_ );
+      return LocalGeometry( LocalGeometryImpl( (indexInInside() == 0) ? 0 : 1 ) );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     LocalGeometry geometryInOutside () const
     {
-      intersectionNeighborLocal_.setPosition( (indexInInside() == 0) ? 1 : 0 );
-      return LocalGeometry( intersectionNeighborLocal_ );
+      return LocalGeometry( LocalGeometryImpl( (indexInInside() == 0) ? 1 : 0 ) );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     Geometry geometry () const
     {
-      intersectionGlobal_.target_ = center_->vertex_[neighbor_];
-      return Geometry( intersectionGlobal_ );
+      return Geometry( GeometryImpl( center_->vertex_[neighbor_]->pos_ ) );
     }
 
     /** \brief obtain the type of reference element for this intersection */
@@ -200,24 +191,23 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<typename GridImp::ctype, dimworld>& outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
       return centerUnitOuterNormal();
     }
 
     //! Return outer normal scaled with the integration element
-    const FieldVector<typename GridImp::ctype, dimworld>& integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
       return centerUnitOuterNormal();
     }
 
     //! return unit outer normal
-    const FieldVector<typename GridImp::ctype, dimworld>& unitOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> unitOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
       return centerUnitOuterNormal();
     }
 
     //! return unit outer normal at center of intersection
-    const FieldVector<typename GridImp::ctype, dimworld>& centerUnitOuterNormal () const {
-      outerNormal_[0] = (neighbor_==0) ? -1 : 1;
-      return outerNormal_;
+    FieldVector<typename GridImp::ctype, dimworld> centerUnitOuterNormal () const {
+      return FieldVector<typename GridImp::ctype, dimworld>(2 * neighbor_ - 1);
     }
 
   private:
@@ -227,22 +217,8 @@ namespace Dune {
 
     OneDEntityImp<1>* center_;
 
-    //! vector storing the outer normal
-    mutable FieldVector<typename GridImp::ctype, dimworld> outerNormal_;
-
     /** \brief Count on which neighbor we are lookin' at.  Can be only 0 or 1. */
     int neighbor_;
-
-    /** \brief The geometry that's being returned when intersectionSelfLocal() is called
-     */
-    mutable LocalGeometryImpl intersectionSelfLocal_;
-
-    /** \brief The geometry that's being returned when intersectionNeighborLocal() is called
-     */
-    mutable LocalGeometryImpl intersectionNeighborLocal_;
-
-    //! The geometry that's being returned when intersectionSelfGlobal() is called
-    mutable GeometryImpl intersectionGlobal_;
 
   };
 
@@ -259,18 +235,12 @@ namespace Dune {
 
     //! Constructor for a given grid entity and a given neighbor
     OneDGridLeafIntersection(OneDEntityImp<1>* center, int nb)
-      : center_(center), neighbor_(nb),
-        intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
-        intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
-        intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
+      : center_(center), neighbor_(nb)
     {}
 
     /** \brief Constructor creating the 'one-after-last'-iterator */
     OneDGridLeafIntersection(OneDEntityImp<1>* center)
-      : center_(center), neighbor_(2),
-        intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
-        intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
-        intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
+      : center_(center), neighbor_(2)
     {}
 
     typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
@@ -440,24 +410,21 @@ namespace Dune {
     //! where iteration started.
     LocalGeometry geometryInInside () const
     {
-      intersectionSelfLocal_.setPosition( (indexInInside() == 0) ? 0 : 1 );
-      return LocalGeometry( intersectionSelfLocal_ );
+      return LocalGeometry( LocalGeometryImpl( (indexInInside() == 0) ? 0 : 1 ) );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     LocalGeometry geometryInOutside () const
     {
-      intersectionNeighborLocal_.setPosition( (indexInInside() == 0) ? 1 : 0 );
-      return LocalGeometry( intersectionNeighborLocal_ );
+      return LocalGeometry( LocalGeometryImpl( (indexInInside() == 0) ? 1 : 0 ) );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     Geometry geometry () const
     {
-      intersectionGlobal_.target_ = center_->vertex_[neighbor_%2];
-      return Geometry( intersectionGlobal_ );
+      return Geometry( GeometryImpl( center_->vertex_[neighbor_%2]->pos_ ) );
     }
 
     /** \brief obtain the type of reference element for this intersection */
@@ -480,25 +447,24 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<typename GridImp::ctype, dimworld>& outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
       return centerUnitOuterNormal();
     }
 
     //! Return outer normal scaled with the integration element
-    const FieldVector<typename GridImp::ctype, dimworld>& integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const
+    FieldVector<typename GridImp::ctype, dimworld> integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const
     {
       return centerUnitOuterNormal();
     }
 
     //! return unit outer normal
-    const FieldVector<typename GridImp::ctype, dimworld>& unitOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> unitOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
       return centerUnitOuterNormal();
     }
 
     //! return unit outer normal at center of intersection
-    const FieldVector<typename GridImp::ctype, dimworld>& centerUnitOuterNormal () const {
-      outerNormal_[0] = ((neighbor_%2)==0) ? -1 : 1;
-      return outerNormal_;
+    FieldVector<typename GridImp::ctype, dimworld> centerUnitOuterNormal () const {
+      return FieldVector<typename GridImp::ctype, dimworld>(2 * neighbor_ - 1);
     }
 
   private:
@@ -508,25 +474,11 @@ namespace Dune {
 
     OneDEntityImp<1>* center_;
 
-    //! vector storing the outer normal
-    mutable FieldVector<typename GridImp::ctype, dimworld> outerNormal_;
-
     /** \brief Count on which neighbor we are lookin' at
 
        0,1 are the level neighbors, 2 and 3 are the leaf neighbors,
        if they differ from the level neighbors. */
     int neighbor_;
-
-    /** \brief The geometry that's being returned when intersectionSelfLocal() is called
-     */
-    mutable LocalGeometryImpl intersectionSelfLocal_;
-
-    /** \brief The geometry that's being returned when intersectionNeighborLocal() is called
-     */
-    mutable LocalGeometryImpl intersectionNeighborLocal_;
-
-    //! The geometry that's being returned when intersectionSelfGlobal() is called
-    mutable GeometryImpl intersectionGlobal_;
 
   };
 

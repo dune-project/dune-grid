@@ -52,7 +52,7 @@ namespace Dune {
 
   private:
 
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+    Intersection intersection_;
   };
 
 
@@ -97,7 +97,7 @@ namespace Dune {
 
   private:
 
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+    Intersection intersection_;
 
   };
 
