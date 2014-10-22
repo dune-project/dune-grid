@@ -37,6 +37,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <map>
 #include <utility>
 #include <algorithm>
