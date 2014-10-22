@@ -33,11 +33,7 @@ namespace Dune
       if( !(macroData.data_->neigh) )
         return true;
 
-#if DUNE_ALBERTA_VERSION >= 0x300
       const bool hasOppVertex = (bool)macroData.data_->opp_vertex;
-#else
-      const bool hasOppVertex = false;
-#endif
 
       const int count = macroData.elementCount();
       for( int i = 0; i < count; ++i )
@@ -50,7 +46,6 @@ namespace Dune
           if( nb >= macroData.elementCount() )
             return false;
 
-#if DUNE_ALBERTA_VERSION >= 0x300
           if( hasOppVertex )
           {
             const int ov = macroData.data_->opp_vertex[ i*numVertices + j ];
@@ -61,9 +56,7 @@ namespace Dune
             if( macroData.data_->opp_vertex[ nb*numVertices + ov ] != j )
               return false;
           }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-          if( !hasOppVertex )
+          else
           {
             bool foundSelf = false;
             for( int k = 0; k <= dimension; ++k )
@@ -194,75 +187,6 @@ namespace Dune
 #endif // #if ALBERTA_DIM <= 3
 
 
-#if DUNE_ALBERTA_VERSION < 0x300
-    template<>
-    template<>
-    void MacroData< 2 >::Library< 3 >
-    ::setOrientation ( MacroData &macroData, const Real orientation )
-    {
-      const int count = macroData.elementCount();
-
-      std::vector< FieldVector< Real, 3 > > normal( count );
-      for( int i = 0; i < count; ++i )
-      {
-        ElementId &id = macroData.element( i );
-
-        FieldMatrix< Real, 2, 3 > jacobianTransposed;
-        const GlobalVector &x = macroData.vertex( id[ 0 ] );
-        for( int j = 0; j < 2; ++j )
-        {
-          const GlobalVector &y = macroData.vertex( id[ j+1 ] );
-          for( int k = 0; k < 3; ++k )
-            jacobianTransposed[ j ][ k ] = y[ k ] - x[ k ];
-        }
-        normal[ i ] = vectorProduct( jacobianTransposed[ 0 ], jacobianTransposed[ 1 ] );
-      }
-
-      std::vector< int > previous( count, -1 );
-      std::vector< int > face( count, -1 );
-      for( int i = 0; i < count; ++i )
-      {
-        if( face[ i ] >= 0 )
-          continue;
-
-        int element = i;
-        while( element >= 0 )
-        {
-          ++face[ element ];
-          if( face[ element ] < 3 )
-          {
-            const int neighbor = macroData.neighbor( element, face[ element ] );
-            if( (neighbor >= 0) && (face[ neighbor ] < 0) )
-            {
-              previous[ neighbor ] = element;
-              if( normal[ element ] * normal[ neighbor ] < 0 )
-              {
-                swap( macroData, neighbor, 0, 1 );
-                normal[ neighbor ] *= -1;
-              }
-              element = neighbor;
-            }
-          }
-          else
-            element = previous[ element ];
-        }
-      }
-
-      bool oriented = true;
-      for( int i = 0; i < count; ++i )
-      {
-        for( int j = 0; j < 3; ++j )
-        {
-          const int nb = macroData.neighbor( i, j );
-          oriented &= ((nb < 0) || (normal[ i ] * normal[ nb ] > 0));
-        }
-      }
-      if( !oriented )
-        DUNE_THROW( GridError, "Surface grid cannot be oriented." );
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x300
-
-
     template< int dim >
     template< int dimWorld >
     inline Real MacroData< dim >::Library< dimWorld >
@@ -327,7 +251,6 @@ namespace Dune
       rotate( macroData.data_->mel_vertices, i, shift );
 
       // correct opposite vertices
-#if DUNE_ALBERTA_VERSION >= 0x300
       if( macroData.data_->opp_vertex )
       {
         assert( macroData.data_->neigh );
@@ -344,7 +267,6 @@ namespace Dune
         }
         rotate( macroData.data_->opp_vertex, i, shift );
       }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
       // correct neighbors and boundaries
       rotate( macroData.data_->neigh, i, shift );
@@ -358,7 +280,7 @@ namespace Dune
     ::swap ( MacroData &macroData, int el, int v1, int v2 )
     {
       std::swap( macroData.element( el )[ v1 ], macroData.element( el )[ v2 ] );
-#if DUNE_ALBERTA_VERSION >= 0x300
+
       if( macroData.data_->opp_vertex )
       {
         assert( macroData.data_->neigh );
@@ -384,7 +306,6 @@ namespace Dune
         std::swap( macroData.data_->opp_vertex[ el*numVertices + v1 ],
                    macroData.data_->opp_vertex[ el*numVertices + v2 ] );
       }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
       if( macroData.data_->neigh )
         std::swap( macroData.neighbor( el, v1 ), macroData.neighbor( el, v2 ) );
