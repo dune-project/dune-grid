@@ -336,6 +336,7 @@ namespace Dune {
 
     friend class SEntityPointer<0,GridImp>;
     friend class SIntersectionIterator<GridImp>;
+    friend class SIntersection<GridImp>;
 
   public:
     typedef typename GridImp::ctype ctype;
