@@ -40,7 +40,7 @@ namespace Dune {
     void update() {
 
       // vector with per-direction movements
-      std::array<int,dim> dist{0};
+      std::array<int,dim> dist{{0}};
 
       // first move: back to center
       dist[_dir] = 1 - 2*_face;
