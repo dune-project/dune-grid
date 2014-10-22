@@ -154,13 +154,13 @@ namespace Dune
     //! Compares two entities for equality.
     bool operator==(const Entity& other) const
     {
-      return realEntity == other.realEntity;
+      return realEntity.equals(other.realEntity);
     }
 
     //! Compares two entities for inequality.
     bool operator!=(const Entity& other) const
     {
-      return realEntity != other.realEntity;
+      return !realEntity.equals(other.realEntity);
     }
 
     //! Copy constructor from an existing entity.
@@ -338,13 +338,13 @@ namespace Dune
     //! Compares two entities for equality.
     bool operator==(const Entity& other) const
     {
-      return realEntity == other.realEntity;
+      return realEntity.equals(other.realEntity);
     }
 
     //! Compares two entities for inequality.
     bool operator!=(const Entity& other) const
     {
-      return realEntity != other.realEntity;
+      return !realEntity.equals(other.realEntity);
     }
 
     //! Copy constructor from an existing entity.

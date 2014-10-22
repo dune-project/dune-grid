@@ -423,13 +423,13 @@ namespace Dune
     //! Compares two intersections for equality.
     bool operator==(const Intersection& other) const
     {
-      return real == other.real;
+      return real.equals(other.real);
     }
 
     //! Compares two intersections for inequality.
     bool operator!=(const Intersection& other) const
     {
-      return real != other.real;
+      return !real.equals(other.real);
     }
 
     //! Copy constructor from an existing intersection.

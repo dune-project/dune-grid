@@ -140,6 +140,11 @@ namespace Dune
 
     AlbertaGridLeafIntersection ( const This &other );
 
+    bool equals( const AlbertaGridLeafIntersection& other ) const
+    {
+      return (*this) == other;
+    }
+
     This &operator= ( const This &other );
 
     bool operator== ( const This &other ) const;

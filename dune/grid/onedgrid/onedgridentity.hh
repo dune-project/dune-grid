@@ -186,6 +186,11 @@ namespace Dune {
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
     typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
 
+    bool equals(const OneDGridEntity& other) const
+    {
+      return target_ == other.target_;
+    }
+
     //! level of this element
     int level () const {return target_->level_;}
 
@@ -264,6 +269,10 @@ namespace Dune {
       : target_( OneDGridNullIteratorFactory<1>::null() )
     {}
 
+    bool equals(const OneDGridEntity& other) const
+    {
+      return target_ == other.target_;
+    }
 
     //! Level of this element
     int level () const {return target_->level_;}

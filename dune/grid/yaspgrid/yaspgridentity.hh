@@ -300,15 +300,9 @@ namespace Dune {
     {}
 
     //! Return true when two iterators over the same grid are equal (!).
-    bool operator== (const YaspEntity& e) const
+    bool equals (const YaspEntity& e) const
     {
       return _yg == e._yg && _it == e._it && _g == e._g;
-    }
-
-    //! Return true when two iterators over the same grid are not equal (!).
-    bool operator!= (const YaspEntity& e) const
-    {
-      return ! operator==(e);
     }
 
     // IndexSets needs access to the private index methods
@@ -463,15 +457,9 @@ namespace Dune {
 
 
     //! Return true when two iterators over the same grid are equal (!).
-    bool operator== (const YaspEntity& e) const
+    bool equals (const YaspEntity& e) const
     {
       return _yg == e._yg && _it == e._it && _g == e._g;
-    }
-
-    //! Return true when two iterators over the same grid are not equal (!).
-    bool operator!= (const YaspEntity& e) const
-    {
-      return ! operator==(e);
     }
 
     //! level of this element
@@ -833,15 +821,9 @@ namespace Dune {
     {}
 
     //! Return true when two iterators over the same grid are equal (!).
-    bool operator== (const YaspEntity& e) const
+    bool equals (const YaspEntity& e) const
     {
       return _yg == e._yg && _it == e._it && _g == e._g;
-    }
-
-    //! Return true when two iterators over the same grid are not equal (!).
-    bool operator!= (const YaspEntity& e) const
-    {
-      return ! operator==(e);
     }
 
     //! level of this element

@@ -601,9 +601,12 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
 
   typedef typename Grid::LeafGridView LeafGridView;
+  typedef typename Grid::LevelGridView LevelGridView;
   typedef typename LeafGridView::IntersectionIterator LeafIntersectionIterator;
+  typedef typename LevelGridView::IntersectionIterator LevelIntersectionIterator;
 
   LeafGridView leafGridView = g.leafGridView();
+  LevelGridView levelGridView = g.levelGridView(0);
 
   // assignment tests
   LevelIterator l1 = g.template lbegin<0>(0);
@@ -657,6 +660,32 @@ void iteratorEquals (Grid &g)
   TestEquals(L1);
   if (i1 != leafGridView.iend( *l2 )) TestEquals(i1->inside());
   if (i1 != leafGridView.iend( *l2 ) && i1->neighbor()) TestEquals(i1->outside());
+
+  // iterator comparisons
+  assert(l1 == l2 && !(l1 != l2));
+  assert(L1 == L2 && !(L1 != L2));
+  assert(h1 == h2 && !(h1 != h2));
+  assert(i1 == i2 && !(i1 != i2));
+
+  // entity comparisons
+  assert(*l1 == *l2 && !(*l1 != *l2));
+  assert(*L1 == *L2 && !(*L1 != *L2));
+  if (h1 != l1->hend(99))
+    assert(*h1 == *h2 && !(*h1 != *h2));
+
+  // intersection comparison
+  if (i1 != leafGridView.iend(*l1))
+    assert(*i1 == *i2 && !(*i1 != *i2));
+
+  if( EnableLevelIntersectionIteratorCheck< Grid >::v )
+  {
+    LevelIntersectionIterator li1 = levelGridView.ibegin( *l1 );
+    LevelIntersectionIterator li2 = levelGridView.ibegin( *l2 );
+    assert(li1 == li2 && !(li1 != li2));
+    if (li1 != levelGridView.iend(*l1))
+      assert(*li1 == *li2 && !(*li1 != *li2));
+  }
+
 }
 
 

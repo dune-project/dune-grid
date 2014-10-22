@@ -65,6 +65,15 @@ namespace Dune
         return *this;
       }
 
+      bool equals ( const Intersection &other) const
+      {
+        // first, check pointers
+        if ( hostIntersection_ == other.hostIntersection_ )
+          return true;
+        // compare host entities, but make sure we have no null pointers first
+        return hostIntersection_ && other.hostIntersection_ && hostIntersection() == other.hostIntersection();
+      }
+
       operator bool () const { return bool( hostIntersection_ ); }
 
       EntityPointer inside () const
