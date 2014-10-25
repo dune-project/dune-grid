@@ -412,7 +412,6 @@ namespace Dune {
 #endif
       }
 
-#if defined ModelP
       if (dim-cd==1) {
 
         const typename UG_NS<dim>::Edge* edge = (typename UG_NS<dim>::Edge* const)(grid_.getRealImplementation(e).getTarget());
@@ -447,15 +446,15 @@ namespace Dune {
         typename UG_NS<dim>::Node *node =
           reinterpret_cast<typename UG_NS<dim>::Node *>(grid_.getRealImplementation(e).getTarget());
 
+#ifdef ModelP
         return node->myvertex->iv.ddd.gid;
-      }
-      else {
-        DUNE_THROW(NotImplemented,
-                   "persistent ids for entities which are neither nodes nor elements.");
-      }
 #else
-      return UG_NS<dim>::id(grid_.getRealImplementation(e).getTarget());
+        return UG_NS<dim>::id(node);
 #endif
+      }
+
+      DUNE_THROW(NotImplemented,
+                 "Ids for faces are not implemented yet!");
 
     }
 
