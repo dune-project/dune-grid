@@ -206,7 +206,10 @@ namespace Dune
      */
     bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, Index& result) const
     {
-      result = this->map(e,i,cc);
+      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
+      if (not layout.contains(gt))
+        return false;
+      result = is.subIndex(e, i, cc) + offset[GlobalGeometryTypeIndex::index(gt)];
       return true;
     }
 
