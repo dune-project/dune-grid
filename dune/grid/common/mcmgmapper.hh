@@ -185,7 +185,7 @@ namespace Dune
        \return true if entity is in entity set of the mapper
      */
     template<class EntityType>
-    bool contains (const EntityType& e, int& result) const
+    bool contains (const EntityType& e, Index& result) const
     {
       if(!is.contains(e) || !layout.contains(e.type()))
       {
@@ -204,7 +204,7 @@ namespace Dune
        \param result integer reference where corresponding index is  stored if true
        \return true if entity is in entity set of the mapper
      */
-    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, int& result) const
+    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, Index& result) const
     {
       result = this->map(e,i,cc);
       return true;
