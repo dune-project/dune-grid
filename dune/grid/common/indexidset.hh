@@ -47,7 +47,7 @@ namespace Dune
      \f$0\leq m(e) < |E_g^c|\f$ for any \f$e\in E_g^c\f$.
 
      Index sets are used to assign user defined data (e.g. degrees of freedom
-     of a discretization) to entities of the grid. For efficiency reasons the prefered
+     of a discretization) to entities of the grid. For efficiency reasons the preferred
      data structure for user data is the array. In order to access the data from the
      entity, its index (with respect to an index set - there may be several) is evaluated
      and used as an index to an array (or some other container providing random access).
@@ -56,7 +56,7 @@ namespace Dune
      compute the array index from the information supplied by an index set.
 
      It is important to note that the index assigned to an entity may change during
-     grid modification (i.e. refinement or dynamic load balancing). The user is reponsible
+     grid modification (i.e. refinement or dynamic load balancing). The user is responsible
      for reorganizing the information stored in the external arrays appropriately. In
      order to do this the IdSet concept is supplied.
 
@@ -90,7 +90,7 @@ namespace Dune
     /** \brief The type used for the indices */
     typedef IndexTypeImp IndexType;
 
-    /** \brief iterator range for geometry types in doamin */
+    /** \brief iterator range for geometry types in domain */
     typedef TypesImp Types;
 
     /** \brief dimension of the grid (maximum allowed codimension) */
@@ -260,7 +260,7 @@ namespace Dune
       return asImp().contains(e);
     }
 
-    // Must be explicitely defined although this class should get a default constructor.
+    // Must be explicitly defined although this class should get a default constructor.
     IndexSet() {}
 
   private:
@@ -378,7 +378,7 @@ namespace Dune
      <H3>Ids and leaf entities</H3>
 
      An element is a copy of its father element if it is the only son. This
-     concept can be transfered to all higher codimensions because in a nested grid
+     concept can be transferred to all higher codimensions because in a nested grid
      structure the entities of any codimension form a set of trees. However, the roots
      of these trees are not necessarily on level 0.
      Thus, we define that an entity is a copy of another entity if it is the only descendant
