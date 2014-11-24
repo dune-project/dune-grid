@@ -35,7 +35,7 @@ int main()
 {
   try
   {
-    constexpr unsigned int dim = 1;
+    const unsigned int dim = 1;
     Dune::FieldVector<double,dim> length(1.0);
     std::array<int,dim> elements;
     elements[0] = 10;
