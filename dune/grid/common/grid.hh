@@ -9,6 +9,7 @@
 // system includes
 #include <iostream>
 #include <string>
+#include <vector>
 
 // dune-common includes
 #include <dune/common/fvector.hh>
