@@ -428,7 +428,7 @@ namespace Dune {
 
     /** \brief Returns pointers to the coordinate arrays of a UG vector */
     static void Corner_Coordinates(const UG_NS< UG_DIM >::Vector* theVector, double* x[]) {
-      typename UG_NS< UG_DIM >::Element* center;
+      UG_NS< UG_DIM >::Element* center;
       unsigned int side;
       UG_NS< UG_DIM >::GetElementAndSideFromSideVector(theVector, center, side);
       for (int i = 0; i < Corners_Of_Side(center, side); i++)
