@@ -124,7 +124,6 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       done
     ])
 
-    ALBERTA_VERSION="3.0"
 
     # set variables so that tests can use them
     ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTAROOT/include -I$ALBERTAROOT/include/alberta"
@@ -146,6 +145,13 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     AC_CHECK_HEADER([alberta/alberta.h], [HAVE_ALBERTA="1"],[
       AC_MSG_WARN([alberta/alberta.h not found in $ALBERTA_INCLUDE_CPPFLAGS])
     ])
+
+    if test "x$HAVE_ALBERTA" = "x1" ; then
+      AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],
+        [AC_MSG_WARN([version 3 not found, deactivating Alberta])
+          HAVE_ALBERTA="0"],
+        [#include <alberta/alberta.h>])
+    fi
 
     CPPFLAGS="$ac_save_CPPFLAGS $ALBERTA_INCLUDE_CPPFLAGS"
 
