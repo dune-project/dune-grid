@@ -11,6 +11,7 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/onedgrid.hh>
+#include <dune/grid/sgrid.hh>
 #if HAVE_UG
 #include <dune/grid/uggrid.hh>
 #endif
