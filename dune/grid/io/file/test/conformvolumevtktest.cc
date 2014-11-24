@@ -114,7 +114,7 @@ int main(int argc, char **argv)
   try
   {
     {
-      constexpr unsigned int dim = 1;
+      const unsigned int dim = 1;
       Dune::FieldVector<double,dim> length(1.0);
       std::array<int,dim> elements;
       std::fill(elements.begin(), elements.end(), 5);
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
     }
 
     {
-      constexpr unsigned int dim = 2;
+      const unsigned int dim = 2;
       Dune::FieldVector<double,dim> length(1.0);
       length[1] = 2.0;
       std::array<int,dim> elements;
@@ -131,7 +131,7 @@ int main(int argc, char **argv)
     }
 
     {
-      constexpr unsigned int dim = 3;
+      const unsigned int dim = 3;
       Dune::FieldVector<double,dim> length(1.0);
       length[1] = 2.0;
       length[2] = 3.0;
