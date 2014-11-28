@@ -62,7 +62,24 @@ namespace Dune
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    Index map (const EntityType& e) const
+    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const EntityType& e) const
+    {
+      IdType id = ids.id(e);                                 // get id
+      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
+      if (it!=index.end()) return it->second;                // return index if found
+      index[id] = n++;                                       // put next index in map
+      return n-1;                                            // and return it
+    }
+
+    /** @brief Map entity to array index.
+
+       If an entity is queried with map, the known index is returned or a new index is created. A call to map can never fail.
+
+            \param e Reference to codim cc entity, where cc is the template parameter of the function.
+            \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    template<class EntityType>
+    Index index (const EntityType& e) const
     {
       IdType id = ids.id(e);                                 // get id
       typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
@@ -81,7 +98,25 @@ namespace Dune
        \param cc codim of the subentity
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    Index map (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc) const
+    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'subIndex' instead!") map (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc) const
+    {
+      IdType id = ids.subId(e,i,cc);           // get id
+      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
+      if (it!=index.end()) return it->second;                // return index if found
+      index[id] = n++;                                       // put next index in map
+      return n-1;                                            // and return it
+    }
+
+    /** @brief Map subentity of codim 0 entity to array index.
+
+       If an entity is queried with map, the known index is returned or a new index is created. A call to map can never fail.
+
+       \param e Reference to codim 0 entity.
+       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
+       \param cc codim of the subentity
+       \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    Index subIndex (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc) const
     {
       IdType id = ids.subId(e,i,cc);           // get id
       typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map

@@ -64,11 +64,11 @@
    This interface is implemented by the class template Dune::Mapper. For a full documentation see the
    description of this class.
 
-   The function Dune::Mapper::map delivers the index for an entity. Note that that for
+   The function Dune::Mapper::index delivers the index for an entity. Note that that for
    performance reasons it is usually not checked whether the entity is really in the
    entity set.
 
-   The functions Dune::Mapper::map delivers the index for a (sub-)entity
+   The functions Dune::Mapper::index delivers the index for a (sub-)entity
 
    The function Dune::Mapper::size returns the size of the entity set, i.e. \f$|E^\prime|\f$
 
@@ -116,10 +116,23 @@ namespace Dune
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    Index map (const EntityType& e) const
+    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const EntityType& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e)));
       return asImp().map(e);
+    }
+
+
+    /** @brief Map entity to array index.
+
+            \param e Reference to codim cc entity. The codim is extracted from the entity.
+            \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    template<class EntityType>
+    Index index (const EntityType& e) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e)));
+      return asImp().index(e);
     }
 
 
@@ -130,12 +143,27 @@ namespace Dune
      * \param codim codimension of subentity of e
      * \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    Index map (const typename G::Traits::template Codim<0>::Entity& e,
+    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const typename G::Traits::template Codim<0>::Entity& e,
              int i,
              unsigned int codim) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e,i,codim)));
       return asImp().map(e,i,codim);
+    }
+
+    /** @brief Map subentity i of codim cc of a codim 0 entity to array index.
+     *
+     * \param e Reference to codim 0 entity.
+     * \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
+     * \param codim codimension of subentity of e
+     * \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    Index subIndex (const typename G::Traits::template Codim<0>::Entity& e,
+                    int i,
+                    unsigned int codim) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e,i,codim)));
+      return asImp().subIndex(e,i,codim);
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
