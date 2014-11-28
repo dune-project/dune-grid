@@ -29,7 +29,7 @@ namespace Dune {
      */
     UGGridLeafIterator(const GridImp& grid) : grid_(&grid) {
       // Entities below this level are certainly not leaf entities
-      unsigned int levelCounter = grid.leafIndexSet_.coarsestLevelWithLeafElements_;
+      int levelCounter = grid.leafIndexSet_.coarsestLevelWithLeafElements_;
 
       // If the grid is distributed, the grid on the 'coarsestLevelWithLeafElements_' may actually be empty, because
       // it is all on other processors.  Therefore we have to also look at finer levels.
