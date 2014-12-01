@@ -525,18 +525,18 @@ createGrid()
   //   Actually insert all the elements
   // ////////////////////////////////////////////////
 
-  std::vector<const typename UG_NS<dimworld>::Node*> nodePointers(isBoundaryNode.size());
+  std::vector<typename UG_NS<dimworld>::Node*> nodePointers(isBoundaryNode.size());
   for (typename UG_NS<dimworld>::Node* theNode=UG_NS<dimworld>::FirstNode(grid_->multigrid_->grids[0]); theNode!=NULL; theNode=theNode->succ)
     nodePointers[theNode->id] = theNode;
 
   int idx = 0;
   for (size_t i=0; i<elementTypes_.size(); i++) {
 
-    std::vector<const typename UG_NS<dimworld>::Node*> vertices(elementTypes_[i]);
+    std::vector<typename UG_NS<dimworld>::Node*> vertices(elementTypes_[i]);
     for (size_t j=0; j<elementTypes_[i]; j++)
       vertices[j] = nodePointers[isBoundaryNode[elementVertices_[idx++]]];
 
-    if (InsertElement(grid_->multigrid_->grids[0], elementTypes_[i],const_cast<typename UG_NS<dimworld>::Node**>(&(vertices[0])),NULL,NULL,NULL)==NULL)
+    if (InsertElement(grid_->multigrid_->grids[0], elementTypes_[i],&(vertices[0]),NULL,NULL,NULL)==NULL)
       DUNE_THROW(GridError, "Inserting element into UGGrid failed!");
   }
 
