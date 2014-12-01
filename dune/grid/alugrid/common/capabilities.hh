@@ -52,9 +52,9 @@ namespace Dune
        \ingroup ALUGrid
      */
     template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel< ALUGrid< dim, dimworld, eltype, refinementtype, No_Comm > >
+    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< ALUGrid< dim, dimworld, eltype, refinementtype, No_Comm > >
     {
-      static const bool v = false;
+      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = false;
     };
 
     /** \brief ALUGrid is parallel when Comm == MPI_Comm
@@ -62,9 +62,9 @@ namespace Dune
      */
 #if ALU3DGRID_PARALLEL
     template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel< ALUGrid< 3, 3, eltype, refinementtype,  MPI_Comm > >
+    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< ALUGrid< 3, 3, eltype, refinementtype,  MPI_Comm > >
     {
-      static const bool v = true;
+      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = true;
     };
 #endif
 

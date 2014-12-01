@@ -63,9 +63,9 @@ namespace Dune
      * \ingroup GICapabilities
      */
     template<class Grid>
-    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel
+    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel
     {
-      static const bool v = false;
+      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = false;
     };
 
     /** \brief specialize with 'true' for all codims that a grid can communicate data on (default=false)

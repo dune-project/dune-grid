@@ -492,9 +492,9 @@ namespace Dune
      * \ingroup IdentityGrid
      */
     template<class HostGrid>
-    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel<IdentityGrid<HostGrid> >
+    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel<IdentityGrid<HostGrid> >
     {
-      static const bool v = isParallel<HostGrid>::v;
+      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = isParallel<HostGrid>::v;
     };
 
     /** \brief has conforming level grids when host grid has
