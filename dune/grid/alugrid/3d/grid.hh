@@ -11,6 +11,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/alugrid/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
+#include <dune/common/deprecated.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -1120,7 +1121,7 @@ namespace Dune
     };
 
     template< ALU3dGridElementType elType, class Comm >
-    struct isParallel< ALU3dGrid< elType, Comm > >
+    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel< ALU3dGrid< elType, Comm > >
     {
       static const bool v = true;
     };

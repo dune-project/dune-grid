@@ -6,6 +6,8 @@
 // only include this code, if ENABLE_ALUGRID is defined
 #if HAVE_ALUGRID
 
+#include <dune/common/deprecated.hh>
+
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/alugrid/common/declaration.hh>
 #include <dune/grid/alugrid/common/checkparallel.hh>
@@ -50,7 +52,7 @@ namespace Dune
        \ingroup ALUGrid
      */
     template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct isParallel< ALUGrid< dim, dimworld, eltype, refinementtype, No_Comm > >
+    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel< ALUGrid< dim, dimworld, eltype, refinementtype, No_Comm > >
     {
       static const bool v = false;
     };
@@ -60,7 +62,7 @@ namespace Dune
      */
 #if ALU3DGRID_PARALLEL
     template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct isParallel< ALUGrid< 3, 3, eltype, refinementtype,  MPI_Comm > >
+    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel< ALUGrid< 3, 3, eltype, refinementtype,  MPI_Comm > >
     {
       static const bool v = true;
     };

@@ -25,6 +25,7 @@ typedef unsigned char uint8_t;
 #include <dune/common/reservedvector.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/deprecated.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/axisalignedcubegeometry.hh>
 #include <dune/grid/common/indexidset.hh>
@@ -1942,10 +1943,11 @@ namespace Dune {
     };
 
     /** \brief YaspGrid is parallel
-       \ingroup YaspGrid
+     * \deprecated This capability will be removed after dune-grid 2.4.
+     * \ingroup YaspGrid
      */
     template<int dim, class Coordinates>
-    struct isParallel< YaspGrid<dim, Coordinates> >
+    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel< YaspGrid<dim, Coordinates> >
     {
       static const bool v = true;
     };

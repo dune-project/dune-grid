@@ -15,6 +15,7 @@
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/reservedvector.hh>
+#include <dune/common/deprecated.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/axisalignedcubegeometry.hh>
 #include <dune/grid/common/capabilities.hh>

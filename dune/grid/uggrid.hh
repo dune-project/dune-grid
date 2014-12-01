@@ -12,6 +12,7 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/deprecated.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/capabilities.hh>
@@ -1001,7 +1002,7 @@ namespace Dune {
        \ingroup UGGrid
      */
     template<int dim>
-    struct isParallel< UGGrid<dim> >
+    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel< UGGrid<dim> >
     {
 #ifdef ModelP
       static const bool v = true;

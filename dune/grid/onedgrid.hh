@@ -458,7 +458,7 @@ namespace Dune {
        \ingroup OneDGrid
      */
     template<>
-    struct isParallel< OneDGrid >
+    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel< OneDGrid >
     {
       static const bool v = false;
     };

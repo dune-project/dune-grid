@@ -58,10 +58,12 @@ namespace Dune
     };
 
     /** \brief Specialize with 'true' if implementation supports parallelism. (default=false)
-        \ingroup GICapabilities
+     *
+     * \deprecated This capability will be removed after dune-grid 2.4.
+     * \ingroup GICapabilities
      */
     template<class Grid>
-    struct isParallel
+    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel
     {
       static const bool v = false;
     };
@@ -179,7 +181,7 @@ namespace Dune
     };
 
     template<class Grid>
-    struct isParallel<const Grid>
+    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel<const Grid>
     {
       static const bool v = Dune::Capabilities::isParallel<Grid>::v;
     };

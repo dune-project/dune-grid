@@ -10,6 +10,7 @@
 #include <string>
 #include <map>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
@@ -491,7 +492,7 @@ namespace Dune
      * \ingroup IdentityGrid
      */
     template<class HostGrid>
-    struct isParallel<IdentityGrid<HostGrid> >
+    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel<IdentityGrid<HostGrid> >
     {
       static const bool v = isParallel<HostGrid>::v;
     };
