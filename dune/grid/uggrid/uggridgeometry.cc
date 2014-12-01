@@ -88,7 +88,8 @@ global(const FieldVector<UGCtype, mydim>& local) const
   FieldVector<UGCtype, coorddim> globalCoord(0.0);
 
   // we are an actual element in UG
-  UGCtype* cornerCoords[corners()];
+  // coorddim*coorddim is an upper bound for the number of vertices
+  UGCtype* cornerCoords[coorddim*coorddim];
   UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
   // Actually do the computation
@@ -141,7 +142,8 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
   FieldMatrix<UGCtype,coorddim,mydim> jIT;
 
   // compile array of pointers to corner coordinates
-  UGCtype* cornerCoords[corners()];
+  // coorddim*coorddim is an upper bound for the number of vertices
+  UGCtype* cornerCoords[coorddim*coorddim];
   UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
   // compute the transformation onto the reference element (or vice versa?)
@@ -156,7 +158,8 @@ jacobianTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& loc
   FieldMatrix<UGCtype,mydim,coorddim> jac;
 
   // compile array of pointers to corner coordinates
-  UGCtype* cornerCoords[corners()];
+  // coorddim*coorddim is an upper bound for the number of vertices
+  UGCtype* cornerCoords[coorddim*coorddim];
   UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
   // compute the transformation onto the reference element (or vice versa?)
