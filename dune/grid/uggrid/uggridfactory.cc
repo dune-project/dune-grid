@@ -3,6 +3,9 @@
 
 #include <config.h>
 
+#include <memory>
+
+#include <dune/common/std/memory.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/uggrid/uggridfactory.hh>
@@ -529,11 +532,11 @@ createGrid()
   int idx = 0;
   for (size_t i=0; i<elementTypes_.size(); i++) {
 
-    const typename UG_NS<dimworld>::Node* vertices[elementTypes_[i]];
+    std::vector<const typename UG_NS<dimworld>::Node*> vertices(elementTypes_[i]);
     for (size_t j=0; j<elementTypes_[i]; j++)
       vertices[j] = nodePointers[isBoundaryNode[elementVertices_[idx++]]];
 
-    if (InsertElement(grid_->multigrid_->grids[0], elementTypes_[i],const_cast<typename UG_NS<dimworld>::Node**>(vertices),NULL,NULL,NULL)==NULL)
+    if (InsertElement(grid_->multigrid_->grids[0], elementTypes_[i],const_cast<typename UG_NS<dimworld>::Node**>(&(vertices[0])),NULL,NULL,NULL)==NULL)
       DUNE_THROW(GridError, "Inserting element into UGGrid failed!");
   }
 
