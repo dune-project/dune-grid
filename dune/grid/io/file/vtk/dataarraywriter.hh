@@ -347,7 +347,7 @@ namespace Dune
         : type(type_), stream(stream_), offset(0), phase(main)
       { }
 
-      //! signal start of the appeneded section
+      //! signal start of the appended section
       /**
        * This method should be called after the main section has been written,
        * but before the appended section has been started.  After this method
