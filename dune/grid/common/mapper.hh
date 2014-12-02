@@ -5,6 +5,7 @@
 
 #include <iostream>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/bartonnackmanifcheck.hh>
 
 /** @file

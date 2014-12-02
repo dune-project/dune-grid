@@ -3,6 +3,8 @@
 #ifndef DUNE_CAPABILITIES_HH
 #define DUNE_CAPABILITIES_HH
 
+#include <dune/common/deprecated.hh>
+
 /** \file
     \brief A set of traits classes to store static information about grid implementation
  */
