@@ -49,7 +49,7 @@ namespace Dune
 
      */
     UniversalMapper (const G& grid, const IDS& idset)
-      : g(grid), ids(idset), index()
+      : g(grid), ids(idset), index_()
     {
       n=0;     // zero data elements
     }
@@ -65,9 +65,9 @@ namespace Dune
     Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const EntityType& e) const
     {
       IdType id = ids.id(e);                                 // get id
-      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
-      if (it!=index.end()) return it->second;                // return index if found
-      index[id] = n++;                                       // put next index in map
+      typename std::map<IdType,Index>::iterator it = index_.find(id);    // look up in map
+      if (it!=index_.end()) return it->second;               // return index if found
+      index_[id] = n++;                                      // put next index in map
       return n-1;                                            // and return it
     }
 
@@ -82,9 +82,9 @@ namespace Dune
     Index index (const EntityType& e) const
     {
       IdType id = ids.id(e);                                 // get id
-      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
-      if (it!=index.end()) return it->second;                // return index if found
-      index[id] = n++;                                       // put next index in map
+      typename std::map<IdType,Index>::iterator it = index_.find(id);    // look up in map
+      if (it!=index_.end()) return it->second;               // return index if found
+      index_[id] = n++;                                      // put next index in map
       return n-1;                                            // and return it
     }
 
@@ -101,9 +101,9 @@ namespace Dune
     Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'subIndex' instead!") map (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc) const
     {
       IdType id = ids.subId(e,i,cc);           // get id
-      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
-      if (it!=index.end()) return it->second;                // return index if found
-      index[id] = n++;                                       // put next index in map
+      typename std::map<IdType,Index>::iterator it = index_.find(id);    // look up in map
+      if (it!=index_.end()) return it->second;               // return index if found
+      index_[id] = n++;                                      // put next index in map
       return n-1;                                            // and return it
     }
 
@@ -119,9 +119,9 @@ namespace Dune
     Index subIndex (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc) const
     {
       IdType id = ids.subId(e,i,cc);           // get id
-      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
-      if (it!=index.end()) return it->second;                // return index if found
-      index[id] = n++;                                       // put next index in map
+      typename std::map<IdType,Index>::iterator it = index_.find(id);    // look up in map
+      if (it!=index_.end()) return it->second;               // return index if found
+      index_[id] = n++;                                      // put next index in map
       return n-1;                                            // and return it
     }
 
@@ -150,8 +150,8 @@ namespace Dune
     bool contains (const EntityType& e, Index& result) const
     {
       IdType id = ids.id(e);                                 // get id
-      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
-      if (it!=index.end())
+      typename std::map<IdType,Index>::iterator it = index_.find(id);    // look up in map
+      if (it!=index_.end())
       {
         result = it->second;
         return true;
@@ -171,8 +171,8 @@ namespace Dune
     bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, Index& result) const
     {
       IdType id = ids.subId(e,i,cc);           // get id
-      typename std::map<IdType,Index>::iterator it = index.find(id);    // look up in map
-      if (it!=index.end())
+      typename std::map<IdType,Index>::iterator it = index_.find(id);    // look up in map
+      if (it!=index_.end())
       {
         result = it->second;
         return true;
@@ -190,7 +190,7 @@ namespace Dune
     // clear the mapper
     void clear ()
     {
-      index.clear();
+      index_.clear();
       n = 0;
     }
 
@@ -198,7 +198,7 @@ namespace Dune
     mutable int n;     // number of data elements required
     const G& g;
     const IDS& ids;
-    mutable std::map<IdType,Index> index;
+    mutable std::map<IdType,Index> index_;
   };
 
 
