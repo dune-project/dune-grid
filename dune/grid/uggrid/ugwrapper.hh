@@ -491,7 +491,7 @@ namespace Dune {
       return REFINECLASS(theElement) == YELLOW_CLASS;
     }
 
-    //! return true if element has an exact copy on the next level
+    //! Returns true if element is on level 0 or has been created by red refinement
     static bool isRegular (const UG_NS< UG_DIM >::Element* theElement) {
       using UG_NAMESPACE ::ELEMENT;
       using UG_NAMESPACE ::control_entries;

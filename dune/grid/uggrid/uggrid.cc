@@ -345,7 +345,7 @@ bool Dune::UGGrid < dim >::adapt()
   // I don't really know what this means
   int seq = UG_NS<dim>::GM_REFINE_PARALLEL;
 
-  // I don't really know what this means either
+  // Skip test whether we have enough memory available
   int mgtest = UG_NS<dim>::GM_REFINE_NOHEAPTEST;
 
   int rv = AdaptMultiGrid(multigrid_,mode,seq,mgtest);
