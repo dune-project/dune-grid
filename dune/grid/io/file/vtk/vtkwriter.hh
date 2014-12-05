@@ -187,19 +187,19 @@ namespace Dune
         offset(0)
       {
         if (datamode == VTK::conforming && git != gend)
-          visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
+          visited[vertexmapper.subIndex(*git,cornerIndexDune,n)] = true;
       }
       void increment ()
       {
         switch (datamode)
         {
         case VTK::conforming :
-          while(visited[vertexmapper.map(*git,cornerIndexDune,n)])
+          while(visited[vertexmapper.subIndex(*git,cornerIndexDune,n)])
           {
             basicIncrement();
             if (git == gend) return;
           }
-          visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
+          visited[vertexmapper.subIndex(*git,cornerIndexDune,n)] = true;
           break;
         case VTK::nonconforming :
           basicIncrement();
@@ -322,7 +322,7 @@ namespace Dune
         {
         case VTK::conforming :
           return
-            number[vertexmapper.map(*git,VTK::renumber(*git,cornerIndexVTK),
+            number[vertexmapper.subIndex(*git,VTK::renumber(*git,cornerIndexVTK),
                                     n)];
         case VTK::nonconforming :
           return offset + VTK::renumber(*git,cornerIndexVTK);
@@ -908,7 +908,7 @@ namespace Dune
           ncorners++;
           if (datamode == VTK::conforming)
           {
-            int alpha = vertexmapper->map(*it,i,n);
+            int alpha = vertexmapper->subIndex(*it,i,n);
             if (number[alpha]<0)
               number[alpha] = nvertices++;
           }
