@@ -12,6 +12,7 @@ gridutility_HEADERS =				\
 	gridtype.hh				\
 	hierarchicsearch.hh			\
 	hostgridaccess.hh			\
+	parmetisgridpartitioner.hh		\
 	persistentcontainer.hh			\
 	persistentcontainerinterface.hh		\
 	persistentcontainermap.hh		\
