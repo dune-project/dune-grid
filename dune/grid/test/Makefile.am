@@ -14,7 +14,7 @@ if ALUGRID
 endif
 
 if UG
-  UPROG = test-ug test-parallel-ug
+  UPROG = test-ug test-parallel-ug test-loadbalancing
 if ALUGRID
   DGFALU_UGGRID = test-dgfalu-uggrid-combination
 else
@@ -183,6 +183,21 @@ test_parallel_ug_LDFLAGS = $(AM_LDFLAGS)	\
 test_parallel_ug_LDADD =			\
 	$(UG_LIBS)				\
 	$(DUNEMPILIBS)				\
+	$(LDADD)
+
+test_loadbalancing_SOURCES = test-loadbalancing.cc
+test_loadbalancing_CPPFLAGS = $(AM_CPPFLAGS)	\
+	$(DUNEMPICPPFLAGS)			\
+	$(UG_CPPFLAGS)				\
+	$(PARMETIS_CPPFLAGS)
+test_loadbalancing_LDFLAGS = $(AM_LDFLAGS)	\
+	$(DUNEMPILDFLAGS)			\
+	$(UG_LDFLAGS)				\
+	$(PARMETIS_LDFLAGS)
+test_loadbalancing_LDADD =			\
+	$(UG_LIBS)				\
+	$(DUNEMPILIBS)				\
+	$(PARMETIS_LIBS)			\
 	$(LDADD)
 
 # Test whether you can combine the different implementations in one file
