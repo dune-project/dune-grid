@@ -94,6 +94,10 @@ if(UG_FOUND)
   add_dune_ug_flags(test_ug)
   add_executable(test_parallel_ug EXCLUDE_FROM_ALL test-parallel-ug.cc)
   add_dune_ug_flags(test_parallel_ug)
+  # test_loadbalancing
+  add_executable(test_loadbalancing EXCLUDE_FROM_ALL test-loadbalancing.cc)
+  add_dune_ug_flags(test_loadbalancing)
+  add_dune_parmetis_flags(test_loadbalancing)
 endif(UG_FOUND)
 
 if(ALUGRID_FOUND AND UG_FOUND)
