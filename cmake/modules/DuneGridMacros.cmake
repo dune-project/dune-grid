@@ -4,6 +4,9 @@ include(GridType)
 set(DUNE_GRID_EXTRA_UTILS "" CACHE BOOL
   "Enable compilation and installation of extra utilities from the \"src\" subdirectory.")
 
+find_package(METIS)
+find_package(ParMETIS)
+include(AddParMETISFlags)
 find_package(ALUGrid)
 include(AddALUGridFlags)
 find_package(Alberta)
