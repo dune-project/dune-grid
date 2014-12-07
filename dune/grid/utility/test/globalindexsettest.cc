@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) try
 #if HAVE_UG
   typedef UGGrid<dim> GridType;
 
-  array<uint,dim> elements = {8, 8};
+  array<uint,dim> elements = { {8, 8} };
   FieldVector<double,dim> lower = {0, 0};
   FieldVector<double,dim> bbox = {10, 10};
 

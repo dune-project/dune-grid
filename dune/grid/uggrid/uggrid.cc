@@ -553,7 +553,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
 
       if (it->isLeaf()) {
 
-        unsigned int targetRank = targetProcessors[elementMapper.map(*it)];
+        unsigned int targetRank = targetProcessors[elementMapper.index(*it)];
 
         // sanity check
         if (targetRank >= comm().size())
