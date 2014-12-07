@@ -81,13 +81,13 @@ public:
   template<class MessageBuffer, class EntityType>
   void gather(MessageBuffer& buff, const EntityType& e) const
   {
-    DataType x = mapper_.map(e);
+    DataType x = mapper_.index(e);
 
-    userDataSend_[mapper_.map(e)][0] = x;
+    userDataSend_[mapper_.index(e)][0] = x;
     std::cout << "Process "
               << Dune::MPIHelper::getCollectiveCommunication().rank()+1
               << " sends for entity "
-              << mapper_.map(e)
+              << mapper_.index(e)
               << ": "
               << std::setprecision(20)
               << x << "\n";
@@ -105,11 +105,11 @@ public:
     DataType x;
     buff.read(x);
 
-    userDataReceive_[mapper_.map(e)][0] = x;
+    userDataReceive_[mapper_.index(e)][0] = x;
     std::cout << "Process "
               << Dune::MPIHelper::getCollectiveCommunication().rank()+1
               << " received for entity "
-              << mapper_.map(e)
+              << mapper_.index(e)
               << ": "
               << std::setprecision(20)
               << x << "\n";
@@ -187,7 +187,7 @@ void checkMappers(const GridView &gridView)
   std::vector<int> indices(numEntities, -100);
   it = gridView.template begin<codim>();
   for (; it != endIt; ++it) {
-    int i = mapper.map(*it);
+    int i = mapper.index(*it);
     if (i < 0 || i >= numEntities) {
       DUNE_THROW(InvalidStateException,
                  gridView.comm().rank() + 1
@@ -264,8 +264,8 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
   const typename GridView::template Codim<commCodim>::Iterator
   &endIt = gridView.template end<commCodim>();
   for (; it != endIt; ++it) {
-    entityIndex[mapper.map(*it)]   = mapper.map(*it);
-    partitionType[mapper.map(*it)] = it->partitionType();
+    entityIndex[mapper.index(*it)]   = mapper.index(*it);
+    partitionType[mapper.index(*it)] = it->partitionType();
   }
 
   // initialize data handle (marks the nodes where some data was
@@ -352,8 +352,8 @@ public:
         typedef typename GridView::template Codim<0>::Entity Element;
         typedef typename Element::template Codim<commCodim>::EntityPointer EntityPointer;
         const EntityPointer entityPointer(it->template subEntity<commCodim>(k));
-        entityIndex[mapper.map(*entityPointer)]   = mapper.map(*entityPointer);
-        partitionType[mapper.map(*entityPointer)] = entityPointer->partitionType();
+        entityIndex[mapper.index(*entityPointer)]   = mapper.index(*entityPointer);
+        partitionType[mapper.index(*entityPointer)] = entityPointer->partitionType();
 
         if (entityPointer->partitionType() == Dune::BorderEntity)
         {
@@ -367,7 +367,7 @@ public:
           entityGlobal = geometry.global(referenceElement.position(k, commCodim));
           std::cout << gridView.comm().rank()+1 << ": border codim "
                     << commCodim << " entity "
-                    << mapper.map(*entityPointer) << " (" << entityGlobal
+                    << mapper.index(*entityPointer) << " (" << entityGlobal
                     << ")" << std::endl;
         }
       }
