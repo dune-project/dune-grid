@@ -13,7 +13,9 @@
 #include <dune/common/parametertree.hh>
 #include <dune/common/parametertreeparser.hh>
 
+#if HAVE_PARMETIS
 #include <dune/grid/utility/parmetisgridpartitioner.hh>
+#endif
 
 using namespace Dune;
 
@@ -76,6 +78,10 @@ typedef GridType::LeafGridView GV;
 
 int main(int argc, char** argv) try
 {
+#if ! HAVE_PARMETIS
+  // Skip test -- without ParMetis it doesn't do anything useful
+  return 77;
+#else
   // Create MPIHelper instance
   MPIHelper& mpihelper = MPIHelper::instance(argc, argv);
 
@@ -177,6 +183,7 @@ int main(int argc, char** argv) try
   }
 
   return 0;
+#endif   // HAVE_PARMETIS
 }
 catch (Exception &e){
   std::cerr << "Exception: " << e << std::endl;
