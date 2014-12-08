@@ -282,13 +282,12 @@ namespace Dune {
       StructuredGridFactory just like the unstructured Grids.  There are two
       limitations:
       \li YaspGrid does not support simplices
-      \li YaspGrid only support grids which have their lower left corder at
-          the origin.
+      \li If the lower left corner should not be at the origin, the second template parameter
+          of Yaspgrid has to be chosen as Dune::EquidistantOffsetCoordinates<ctype,dim>
    */
-  template<int dim>
-  class StructuredGridFactory<YaspGrid<dim> > {
-    typedef YaspGrid<dim> GridType;
-    typedef typename GridType::ctype ctype;
+  template<class ctype, int dim>
+  class StructuredGridFactory<YaspGrid<dim, EquidistantCoordinates<ctype,dim> > > {
+    typedef YaspGrid<dim, EquidistantCoordinates<ctype,dim> > GridType;
     static const int dimworld = GridType::dimensionworld;
 
   public:
@@ -298,8 +297,9 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements   Number of elements in each coordinate direction
 
-        \note YaspGrid only supports lowerLeft at the origin.  This
-              function throws a GridError if this requirement is not met.
+        \note The default variant of YaspGrid only supports lowerLeft at the origin.
+              Use YaspGrid<dim, EquidistantOffsetCoordinates<ctype,dim> > instead
+              for non-trivial origin.
      */
     static shared_ptr<GridType>
     createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
@@ -309,14 +309,60 @@ namespace Dune {
       for(int d = 0; d < dimworld; ++d)
         if(std::abs(lowerLeft[d]) > std::abs(upperRight[d])*1e-10)
           DUNE_THROW(GridError, className<StructuredGridFactory>()
-                     << "::createCubeGrid(): The lower coordinates "
-                     "must be at the origin for YaspGrid.");
-
-      Dune::array<int, dim> elements_;
-      std::copy(elements.begin(), elements.end(), elements_.begin());
+                     << "::createCubeGrid(): You have to use Yaspgrid<dim"
+                     ", EquidistantOffsetCoordinates<ctype,dim> > as your"
+                     "grid type for non-trivial origin." );
 
       return shared_ptr<GridType>
-               (new GridType(upperRight, elements_,
+               (new GridType(upperRight, elements,
+                             std::bitset<dim>(), 0));  // default constructor of bitset sets to zero
+    }
+
+    /** \brief Create a structured simplex grid
+
+        \note Simplices are not supported in YaspGrid, so this functions
+              unconditionally throws a GridError.
+     */
+    static shared_ptr<GridType>
+    createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+                      const FieldVector<ctype,dimworld>& upperRight,
+                      const array<unsigned int,dim>& elements)
+    {
+      DUNE_THROW(GridError, className<StructuredGridFactory>()
+                 << "::createSimplexGrid(): Simplices are not supported "
+                 "by YaspGrid.");
+    }
+
+  };
+
+  /** \brief Specialization of the StructuredGridFactory for YaspGrid
+
+      This allows a YaspGrid to be constructed using the
+      StructuredGridFactory just like the unstructured Grids.  There are two
+      limitations:
+      \li YaspGrid does not support simplices
+      \li If the lower left corner should not be at the origin, the second template parameter
+          of Yaspgrid has to be chosen as Dune::EquidistantOffsetCoordinates<ctype,dim>
+   */
+  template<class ctype, int dim>
+  class StructuredGridFactory<YaspGrid<dim, EquidistantOffsetCoordinates<ctype,dim> > > {
+    typedef YaspGrid<dim, EquidistantOffsetCoordinates<ctype,dim> > GridType;
+    static const int dimworld = GridType::dimensionworld;
+
+  public:
+    /** \brief Create a structured cube grid
+
+        \param lowerLeft  Lower left corner of the grid
+        \param upperRight Upper right corner of the grid
+        \param elements   Number of elements in each coordinate direction
+     */
+    static shared_ptr<GridType>
+    createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+                   const FieldVector<ctype,dimworld>& upperRight,
+                   const array<unsigned int,dim>& elements)
+    {
+      return shared_ptr<GridType>
+               (new GridType(lowerLeft, upperRight, elements,
                              std::bitset<dim>(), 0));  // default constructor of bitset sets to zero
     }
 
