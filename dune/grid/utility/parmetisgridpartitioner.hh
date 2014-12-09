@@ -5,15 +5,19 @@
  *  \brief Compute a repartitioning of a Dune grid using ParMetis
  */
 
-#include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/exceptions.hh>
-
 #include <algorithm>
 #include <vector>
 
-#include <parmetis.h>
+#include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/exceptions.hh>
+
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/utility/globalindexset.hh>
+#include <dune/grid/common/mcmgmapper.hh>
+
+#if HAVE_PARMETIS
+#include <parmetis.h>
 
 namespace Dune
 {
@@ -196,4 +200,8 @@ namespace Dune
 
 }  // namespace Dune
 
+#else // HAVE_PARMETIS
+#warning "PARMETIS was not found, please check your configuration"
 #endif
+
+#endif // DUNE_GRID_UTILITY_PARMETISGRIDPARTITIONER_HH
