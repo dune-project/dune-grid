@@ -313,8 +313,12 @@ namespace Dune {
                      ", EquidistantOffsetCoordinates<ctype,dim> > as your"
                      "grid type for non-trivial origin." );
 
+      // construct array of ints instead of unsigned ints
+      array<int, dim> elem;
+      std::copy(elements.begin(), elements.end(), elem.begin());
+
       return shared_ptr<GridType>
-               (new GridType(upperRight, elements,
+               (new GridType(upperRight, elem,
                              std::bitset<dim>(), 0));  // default constructor of bitset sets to zero
     }
 
@@ -361,8 +365,12 @@ namespace Dune {
                    const FieldVector<ctype,dimworld>& upperRight,
                    const array<unsigned int,dim>& elements)
     {
+      // construct array of ints instead of unsigned ints
+      array<int, dim> elem;
+      std::copy(elements.begin(), elements.end(), elem.begin());
+
       return shared_ptr<GridType>
-               (new GridType(lowerLeft, upperRight, elements,
+               (new GridType(lowerLeft, upperRight, elem,
                              std::bitset<dim>(), 0));  // default constructor of bitset sets to zero
     }
 
