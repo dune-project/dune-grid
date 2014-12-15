@@ -1747,4 +1747,6 @@ namespace Dune {
 
 #include "sgrid/sgrid.cc"
 
+#include <dune/grid/io/file/dgfparser/dgfs.hh>
+
 #endif

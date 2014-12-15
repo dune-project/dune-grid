@@ -10,7 +10,6 @@
 #include "dgfparser/dgfug.hh"
 #include "dgfparser/dgfoned.hh"
 #include "dgfparser/dgfyasp.hh"
-#include "dgfparser/dgfs.hh"
 #include "dgfparser/dgfgeogrid.hh"
 #include "dgfparser/dgfidentitygrid.hh"
 #endif
