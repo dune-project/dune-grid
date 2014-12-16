@@ -66,6 +66,8 @@ if(UG_FOUND)
   foreach(dir ${UG_INCLUDES})
     set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
   endforeach()
+  set_property(GLOBAL APPEND PROPERTY
+    ALL_PKG_LIBS "${UG_LIBRARIES}")
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
     "Determining location of UG ${UG_VERSION} succeded:\n"

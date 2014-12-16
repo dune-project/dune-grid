@@ -94,4 +94,6 @@ if(GRAPE_FOUND)
   foreach(dir ${GRAPE_INCLUDE_DIR})
     set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
   endforeach()
+  set_property(GLOBAL APPEND PROPERTY
+    ALL_PKG_LIBS "${GRAPE_LIBRARIES}")
 endif()

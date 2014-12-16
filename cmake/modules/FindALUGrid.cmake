@@ -182,4 +182,6 @@ if(ALUGRID_FOUND)
   foreach(dir ${ALUGRID_INCLUDES})
     set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
   endforeach()
+  set_property(GLOBAL APPEND PROPERTY
+    ALL_PKG_LIBS "${ALUGRID_LIBRARIES}")
 endif()
