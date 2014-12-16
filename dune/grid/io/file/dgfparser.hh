@@ -10,6 +10,14 @@
 #include "dgfparser/dgfug.hh"
 #include "dgfparser/dgfoned.hh"
 #include "dgfparser/dgfyasp.hh"
+
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+// this include is to be removed when SGrid is removed
+#define DUNE_AVOID_SGRID_DEPRE_WARNING_BECAUSE_I_KNOW_WHAT_IM_DOING
+#include "dgfparser/dgfs.hh"
+#undef DUNE_AVOID_SGRID_DEPRE_WARNING_BECAUSE_I_KNOW_WHAT_IM_DOING
+#endif
+
 #include "dgfparser/dgfgeogrid.hh"
 #include "dgfparser/dgfidentitygrid.hh"
 #endif

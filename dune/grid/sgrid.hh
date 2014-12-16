@@ -3,8 +3,10 @@
 #ifndef DUNE_SGRID_HH
 #define DUNE_SGRID_HH
 
+#ifndef DUNE_AVOID_SGRID_DEPRE_WARNING_BECAUSE_I_KNOW_WHAT_IM_DOING
 #warning The SGrid grid manager has been deprecated, and will be removed after the dune-grid-2.4 release. \
          Please use YaspGrid instead.
+#endif
 
 #include <limits>
 #include <vector>
@@ -1746,7 +1748,5 @@ namespace Dune {
 } // end namespace Dune
 
 #include "sgrid/sgrid.cc"
-
-#include <dune/grid/io/file/dgfparser/dgfs.hh>
 
 #endif
