@@ -28,8 +28,8 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! constructor
-    YaspHierarchicIterator (const GridImp* yg, const YGLI& g, const I& it, int maxlevel) :
-      YaspEntityPointer<0,GridImp>(yg,g,it)
+    YaspHierarchicIterator (const YGLI& g, const I& it, int maxlevel) :
+      YaspEntityPointer<0,GridImp>(g,it)
     {
       // store reference to entity implementation for better readability
       YaspEntityImp& entity = entityImplementation();

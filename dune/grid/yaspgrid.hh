@@ -1341,7 +1341,7 @@ namespace Dune {
       const int codim = Seed::codimension;
       YGridLevelIterator g = begin(this->getRealImplementation(seed).level());
 
-      return YaspEntityPointer<codim,GridImp>(this,g,
+      return YaspEntityPointer<codim,GridImp>(g,
         typename YGrid::Iterator(g->overlapfront[codim], this->getRealImplementation(seed).coord(),this->getRealImplementation(seed).offset()));
     }
 
@@ -1492,7 +1492,7 @@ namespace Dune {
         for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this, g, typename YGrid::Iterator(is->yg)));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
           send_size[cnt] = is->grid.totalsize() * data.size(*it);
           cnt++;
         }
@@ -1500,7 +1500,7 @@ namespace Dune {
         for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g, typename YGrid::Iterator(is->yg)));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
           recv_size[cnt] = is->grid.totalsize() * data.size(*it);
           cnt++;
         }
@@ -1518,9 +1518,9 @@ namespace Dune {
           // loop over entities and ask for size
           int i=0; size_t n=0;
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g, typename YGrid::Iterator(is->yg)));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          itend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g, typename YGrid::Iterator(is->yg,true)));
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
           for ( ; it!=itend; ++it)
           {
             buf[i] = data.size(*it);
@@ -1596,9 +1596,9 @@ namespace Dune {
 
         // fill send buffer; iterate over cells in intersection
         typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-        it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g, typename YGrid::Iterator(is->yg)));
+        it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
         typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-        itend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g, typename YGrid::Iterator(is->yg,true)));
+        itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
         for ( ; it!=itend; ++it)
           data.gather(mb,*it);
 
@@ -1649,10 +1649,10 @@ namespace Dune {
         if (data.fixedsize(dim,codim))
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g, typename YGrid::Iterator(is->yg)));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
           size_t n=data.size(*it);
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          itend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g, typename YGrid::Iterator(is->yg,true)));
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
           for ( ; it!=itend; ++it)
             data.scatter(mb,*it,n);
         }
@@ -1661,9 +1661,9 @@ namespace Dune {
           int i=0;
           size_t *sbuf = recv_sizes[cnt];
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          it(YaspLevelIterator<codim,All_Partition,GridImp>(this,g, typename YGrid::Iterator(is->yg)));
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-          itend(YaspLevelIterator<codim,All_Partition,GridImp>(this,g, typename YGrid::Iterator(is->yg,true)));
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
           for ( ; it!=itend; ++it)
             data.scatter(mb,*it,sbuf[i++]);
           delete[] sbuf;
@@ -1765,13 +1765,13 @@ namespace Dune {
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
 
       if (pitype==Interior_Partition)
-        return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->interior[cd].begin());
+        return YaspLevelIterator<cd,pitype,GridImp>(g,g->interior[cd].begin());
       if (pitype==InteriorBorder_Partition)
-        return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->interiorborder[cd].begin());
+        return YaspLevelIterator<cd,pitype,GridImp>(g,g->interiorborder[cd].begin());
       if (pitype==Overlap_Partition)
-        return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->overlap[cd].begin());
+        return YaspLevelIterator<cd,pitype,GridImp>(g,g->overlap[cd].begin());
       if (pitype<=All_Partition)
-        return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->overlapfront[cd].begin());
+        return YaspLevelIterator<cd,pitype,GridImp>(g,g->overlapfront[cd].begin());
       if (pitype==Ghost_Partition)
         return levelend <cd, pitype> (level);
 
@@ -1786,13 +1786,13 @@ namespace Dune {
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
 
       if (pitype==Interior_Partition)
-        return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->interior[cd].end());
+        return YaspLevelIterator<cd,pitype,GridImp>(g,g->interior[cd].end());
       if (pitype==InteriorBorder_Partition)
-        return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->interiorborder[cd].end());
+        return YaspLevelIterator<cd,pitype,GridImp>(g,g->interiorborder[cd].end());
       if (pitype==Overlap_Partition)
-        return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->overlap[cd].end());
+        return YaspLevelIterator<cd,pitype,GridImp>(g,g->overlap[cd].end());
       if (pitype<=All_Partition || pitype == Ghost_Partition)
-        return YaspLevelIterator<cd,pitype,GridImp>(this,g,g->overlapfront[cd].end());
+        return YaspLevelIterator<cd,pitype,GridImp>(g,g->overlapfront[cd].end());
 
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }

@@ -37,8 +37,8 @@ namespace Dune {
     {}
 
     //! constructor
-    YaspEntityPointer (const GridImp * yg, const YGLI & g, const I& it)
-      : _entity(YaspEntityImp(yg,g,it))
+    YaspEntityPointer (const YGLI & g, const I& it)
+      : _entity(YaspEntityImp(g,it))
     {}
 
 

@@ -31,8 +31,8 @@ namespace Dune {
     {}
 
     //! constructor
-    YaspLevelIterator (const GridImp * yg, const YGLI & g, const I& it) :
-      YaspEntityPointer<codim,GridImp>(yg,g,it) {}
+    YaspLevelIterator (const YGLI & g, const I& it) :
+      YaspEntityPointer<codim,GridImp>(g,it) {}
 
     //! copy constructor
     YaspLevelIterator (const YaspLevelIterator& i) :

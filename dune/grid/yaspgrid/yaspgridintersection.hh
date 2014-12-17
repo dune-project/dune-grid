@@ -256,9 +256,9 @@ namespace Dune {
 
     //! make intersection iterator from entity, initialize to first neighbor
     YaspIntersection (const YaspEntity<0,dim,GridImp>& myself, bool toend) :
-      _inside(myself.yaspgrid(), myself.gridlevel(),
+      _inside(myself.gridlevel(),
               myself.transformingsubiterator()),
-      _outside(myself.yaspgrid(), myself.gridlevel(),
+      _outside(myself.gridlevel(),
                myself.transformingsubiterator()),
       // initialize to first neighbor
       _count(0),

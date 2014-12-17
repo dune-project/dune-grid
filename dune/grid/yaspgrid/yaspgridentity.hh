@@ -288,21 +288,20 @@ namespace Dune {
     typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename GridImp::YGrid::Iterator I;
     YaspEntity ()
-      : _yg(nullptr)
     {}
 
-    YaspEntity (const GridImp* yg, const YGLI& g, const I& it)
-      : _yg(yg), _it(it), _g(g)
+    YaspEntity (const YGLI& g, const I& it)
+      : _it(it), _g(g)
     {}
 
-    YaspEntity (const GridImp* yg, YGLI&& g, const I&& it)
-      : _yg(yg), _it(std::move(it)), _g(std::move(g))
+    YaspEntity (YGLI&& g, const I&& it)
+      : _it(std::move(it)), _g(std::move(g))
     {}
 
     //! Return true when two iterators over the same grid are equal (!).
     bool equals (const YaspEntity& e) const
     {
-      return _yg == e._yg && _it == e._it && _g == e._g;
+      return _it == e._it && _g == e._g;
     }
 
     // IndexSets needs access to the private index methods
@@ -391,9 +390,8 @@ namespace Dune {
     const YGLI& gridlevel() const { return _g; }
     I& transformingsubiterator() { return _it; }
     YGLI& gridlevel() { return _g; }
-    const GridImp * yaspgrid() const { return _yg; }
+    const GridImp * yaspgrid() const { return _g->mg; }
     protected:
-    const GridImp * _yg;          // access to YaspGrid
     I _it;               // position in the grid level
     YGLI _g;               // access to grid level
   };
@@ -444,22 +442,21 @@ namespace Dune {
 
     // constructor
     YaspEntity ()
-      : _yg(nullptr)
     {}
 
-    YaspEntity (const GridImp * yg, const YGLI& g, const I& it)
-      : _yg(yg), _it(it), _g(g)
+    YaspEntity (const YGLI& g, const I& it)
+      : _it(it), _g(g)
     {}
 
-    YaspEntity (const GridImp * yg, YGLI&& g, I&& it)
-      : _yg(yg), _it(std::move(it)), _g(std::move(g))
+    YaspEntity (YGLI&& g, I&& it)
+      : _it(std::move(it)), _g(std::move(g))
     {}
 
 
     //! Return true when two iterators over the same grid are equal (!).
     bool equals (const YaspEntity& e) const
     {
-      return _yg == e._yg && _it == e._it && _g == e._g;
+      return _it == e._it && _g == e._g;
     }
 
     //! level of this element
@@ -523,7 +520,7 @@ namespace Dune {
           coord[j]++;
 
       int which = _g->overlapfront[cc].shiftmapping(Dune::Yasp::entityShift<dim>(i,cc));
-      return YaspEntityPointer<cc,GridImp>(_yg,_g,_g->overlapfront[cc].begin(coord, which));
+      return YaspEntityPointer<cc,GridImp>(_g,_g->overlapfront[cc].begin(coord, which));
     }
 
     //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
@@ -543,7 +540,7 @@ namespace Dune {
       // get coordinates on next coarser level
       for (int k=0; k<dim; k++) coord[k] = coord[k]/2;
 
-      return YaspEntityPointer<0,GridImp>(_yg,cg,cg->overlap[0].begin(coord));
+      return YaspEntityPointer<0,GridImp>(cg,cg->overlap[0].begin(coord));
     }
 
     //! returns true if father entity exists
@@ -575,16 +572,16 @@ namespace Dune {
     const YGLI& gridlevel () const { return _g; }
     I& transformingsubiterator() { return _it; }
     YGLI& gridlevel() { return _g; }
-    const GridImp* yaspgrid () const { return _yg; }
+    const GridImp* yaspgrid () const { return _g->mg; }
 
     bool isLeaf() const
     {
-      return (_g->level() == _yg->maxLevel());
+      return (_g->level() == yaspgrid()->maxLevel());
     }
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
      */
-    bool isNew () const { return _yg->adaptRefCount > 0 && _yg->maxLevel() < _g->level() + _yg->adaptRefCount; }
+    bool isNew () const { return yaspgrid()->adaptRefCount > 0 && yaspgrid()->maxLevel() < _g->level() + yaspgrid()->adaptRefCount; }
 
     /**\brief Returns true, if entity might disappear during the next call to adapt()
      */
@@ -633,13 +630,13 @@ namespace Dune {
      */
     HierarchicIterator hbegin (int maxlevel) const
     {
-      return YaspHierarchicIterator<GridImp>(_yg,_g,_it,maxlevel);
+      return YaspHierarchicIterator<GridImp>(_g,_it,maxlevel);
     }
 
     //! Returns iterator to one past the last son
     HierarchicIterator hend (int maxlevel) const
     {
-      return YaspHierarchicIterator<GridImp>(_yg,_g,_it,_g->level());
+      return YaspHierarchicIterator<GridImp>(_g,_it,_g->level());
     }
 
   private:
@@ -766,7 +763,6 @@ namespace Dune {
       return _g->overlapfront[cc].superindex(coord,which);
     }
 
-    const GridImp * _yg;    // access to YaspGrid
     I _it;         // position in the grid level
     YGLI _g;         // access to grid level
   };
@@ -809,21 +805,20 @@ namespace Dune {
 
     // constructor
     YaspEntity ()
-      : _yg(nullptr)
     {}
 
-    YaspEntity (const GridImp* yg, const YGLI& g, const I& it)
-      : _yg(yg), _it(it), _g(g)
+    YaspEntity (const YGLI& g, const I& it)
+      : _it(it), _g(g)
     {}
 
-    YaspEntity (const GridImp* yg, YGLI&& g, I&& it)
-      : _yg(yg), _it(std::move(it)), _g(std::move(g))
+    YaspEntity (YGLI&& g, I&& it)
+      : _it(std::move(it)), _g(std::move(g))
     {}
 
     //! Return true when two iterators over the same grid are equal (!).
     bool equals (const YaspEntity& e) const
     {
-      return _yg == e._yg && _it == e._it && _g == e._g;
+      return _it == e._it && _g == e._g;
     }
 
     //! level of this element
@@ -931,9 +926,8 @@ namespace Dune {
     I& transformingsubiterator() { return _it; }
     YGLI& gridlevel() { return _g; }
 
-    const GridImp * yaspgrid() const { return _yg; }
+    const GridImp * yaspgrid() const { return _g->mg; }
   protected:
-    const GridImp * _yg;          // access to YaspGrid
     I _it;               // position in the grid level
     YGLI _g;               // access to grid level
   };
