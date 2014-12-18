@@ -74,22 +74,27 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
   // ////////////////////////////////////////////////////////////////////
 
 
+  typedef typename GridView::IndexSet::Types GeomTypes;
+  const GeomTypes& geomTypes = indexSet.types(0);
 
   if (splitAll) {
     Dune::GeometryType coerceTo(Dune::GeometryType::simplex,dim);
     noOfElements = 0;
     int count=0;
 
-    for (const auto& gt : indexSet.types(0)) {
+    typename GeomTypes::const_iterator gt = geomTypes.begin();
+    typename GeomTypes::const_iterator gtEnd = geomTypes.end();
 
-      if (gt.isSimplex())
+    for (; gt != gtEnd; ++gt) {
+
+      if (gt->isSimplex())
         count=1;
       else {
-        Refinement & refinement = Dune::buildRefinement<dim, ct>(gt,coerceTo);
+        Refinement & refinement = Dune::buildRefinement<dim,ct>(*gt,coerceTo);
         count = refinement.nElements(0);
       }
 
-      noOfElements += count * indexSet.size(gt);
+      noOfElements += count * indexSet.size(*gt);
 
     }
 
@@ -164,7 +169,6 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
     // Find out whether the grid contains only tetrahedra.  If yes, then
     // it is written in TetraGrid format.  If not, it is written in
     // hexagrid format.
-    const auto& geomTypes = indexSet.types(0);
     bool containsOnlySimplices =
       (geomTypes.size()==1) && (geomTypes.begin()->isSimplex());
 
@@ -336,7 +340,7 @@ void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
   // Find out whether the grid contains only tetrahedra.  If yes, then
   // it is written in TetraGrid format.  If not, it is written in
   // hexagrid format (if gridSplitUp=false).
-  const auto& geomTypes = indexSet.types(0);
+  const typename GridView::IndexSet::Types& geomTypes = indexSet.types(0);
   bool containsOnlyTetrahedra =
       (geomTypes.size()==1) && (geomTypes.begin()->isSimplex());
 
@@ -364,17 +368,21 @@ void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
       int noOfElements = 0;
       int count;
 
-      for (const auto& gt : indexSet.types(0))
+      typedef typename GridView::IndexSet::Types::const_iterator GeomTypeIterator;
+      GeomTypeIterator gt = geomTypes.begin();
+      GeomTypeIterator gtEnd = geomTypes.end();
+
+      for (; gt != gtEnd; ++gt)
       {
-        if (gt.isSimplex())
+        if (gt->isSimplex())
           count=1;
         else
         {
-          Refinement & refinement = Dune::buildRefinement<dim, ct>(gt,coerceTo);
+          Refinement & refinement = Dune::buildRefinement<dim, ct>(*gt,coerceTo);
           count = refinement.nElements(0);
         }
 
-        noOfElements += count * indexSet.size(gt);
+        noOfElements += count * indexSet.size(*gt);
       }
 
       amLocation = new AmiraMesh::Location((dim==2) ? "Triangles" : "Tetrahedra", noOfElements);
@@ -454,7 +462,7 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
   // Find out whether the grid contains only tetrahedra.  If yes, then
   // it is written in TetraGrid format.  If not, it is written in
   // hexagrid format (if gridSplitUp=false).
-  const auto& geomTypes = indexSet.types(0);
+  const typename GridView::IndexSet::Types& geomTypes = indexSet.types(0);
   bool containsOnlyTetrahedra =
       (geomTypes.size()==1) && (geomTypes.begin()->isSimplex());
 
