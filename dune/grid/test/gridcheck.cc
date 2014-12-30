@@ -152,8 +152,8 @@ void zeroEntityConsistency (Grid &g)
   const typename Grid::LocalIdSet &localIdSet = g.localIdSet();
   const typename Grid::GlobalIdSet &globalIdSet = g.globalIdSet();
 
-  LevelIterator it = g.template lbegin<0>(g.maxLevel());
-  const LevelIterator endit = g.template lend<0>(g.maxLevel());
+  LevelIterator it = g.levelGridView(g.maxLevel()).template begin<0>();
+  const LevelIterator endit = g.levelGridView(g.maxLevel()).template end<0>();
 
   for (; it!=endit; ++it)
   {
@@ -278,8 +278,8 @@ void assertNeighbor (Grid &g)
 
   GridView gridView = g.levelGridView( 0 );
 
-  LevelIterator e = g.template lbegin<0>(0);
-  const LevelIterator eend = g.template lend<0>(0);
+  LevelIterator e = g.levelGridView(0).template begin<0>();
+  const LevelIterator eend = g.levelGridView(0).template end<0>();
 
   LevelIterator next = e;
   if (next != eend)
@@ -299,9 +299,9 @@ void assertNeighbor (Grid &g)
     // after creation of LevelIterator on different level
     if (g.maxLevel()>0)
     {
-      EntityPointer p( g.template lbegin<0>(0) );
-      p = g.template lbegin<0>(1);
-      LevelIterator it = g.template lbegin<0>(0);
+      EntityPointer p( g.levelGridView(0).template begin<0>() );
+      p = g.levelGridView(1).template begin<0>();
+      LevelIterator it = g.levelGridView(0).template begin<0>();
       ++it;
 #if !DISABLE_DEPRECATED_METHOD_CHECK
       p->ilevelbegin();
@@ -430,8 +430,8 @@ void assertNeighbor (Grid &g)
 
             const int level = entity.level();
             bool foundNeighbor = false;
-            LevelIterator nit = g.template lbegin< 0, pitype >( level );
-            const LevelIterator nend = g.template lend< 0, pitype > ( level );
+            LevelIterator nit = g.levelGridView(level).template begin< 0, pitype >();
+            const LevelIterator nend = g.levelGridView(level).template end< 0, pitype > ();
             for( ; nit != nend; ++nit )
             {
               if( nit->partitionType() != Dune::InteriorEntity )
@@ -510,9 +510,9 @@ void iterate(Grid &g)
   //typedef typename Grid::template Codim<0>::EntityPointer EntityPointer DUNE_UNUSED;
   //typedef typename Grid::HierarchicIterator HierarchicIterator DUNE_UNUSED;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
-  int l = g.maxLevel();
-  LevelIterator it = g.template lbegin<0>(l);
-  const LevelIterator endit = g.template lend<0>(l);
+  int maxLevel = g.maxLevel();
+  LevelIterator it = g.levelGridView(maxLevel).template begin<0>();
+  const LevelIterator endit = g.levelGridView(maxLevel).template end<0>();
 
   typename Geometry::LocalCoordinate origin(1);
   typename Geometry::LocalCoordinate result;
@@ -551,8 +551,8 @@ void iterate(Grid &g)
   }
 
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
-  LeafIterator lit = g.template leafbegin<0>();
-  const LeafIterator lend = g.template leafend<0>();
+  LeafIterator lit = g.leafGridView().template begin<0>();
+  const LeafIterator lend = g.leafGridView().template end<0>();
 
   // if empty grid, do nothing
   if(lit == lend) return;
@@ -609,13 +609,13 @@ void iteratorEquals (Grid &g)
   LevelGridView levelGridView = g.levelGridView(0);
 
   // assignment tests
-  LevelIterator l1 = g.template lbegin<0>(0);
-  LevelIterator l2 = g.template lbegin<0>(0);
-  LeafIterator L1 = g.template leafbegin<0>();
-  LeafIterator L2 = g.template leafbegin<0>();
+  LevelIterator l1 = g.levelGridView(0).template begin<0>();
+  LevelIterator l2 = g.levelGridView(0).template begin<0>();
+  LeafIterator L1 = g.leafGridView().template begin<0>();
+  LeafIterator L2 = g.leafGridView().template begin<0>();
 
   // if grid empty, leave
-  if (l1 == g.template lend<0>(0))
+  if (l1 == g.levelGridView(0).template end<0>())
     return;
 
   // check '==' consistency
@@ -950,8 +950,10 @@ void gridcheck (Grid &g)
 
   // check at least if the subId method is there
   {
-    typename Grid::Traits::template Codim<0>::LevelIterator it = g.template lbegin<0>(g.maxLevel());
-    typename Grid::Traits::template Codim<0>::LevelIterator end = g.template lend<0>(g.maxLevel());
+    typename Grid::Traits::template Codim<0>::LevelIterator it =
+      g.levelGridView( g.maxLevel() ).template begin<0>();
+    typename Grid::Traits::template Codim<0>::LevelIterator end =
+      g.levelGridView( g.maxLevel() ).template end<0>();
     for (; it != end; ++it)
     {
       g.globalIdSet().subId(*it,0,dim);

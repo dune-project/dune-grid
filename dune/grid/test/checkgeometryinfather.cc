@@ -39,11 +39,11 @@ void checkGeometryInFather(const GridType& grid)
   }
 
   // Loop over all levels except the lowest one
-  for (int i=1; i<=grid.maxLevel(); i++) {
-
+  for (int level = 1; level <= grid.maxLevel(); ++level)
+  {
     typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
-    ElementIterator eIt    = grid.template lbegin<0>(i);
-    ElementIterator eEndIt = grid.template lend<0>(i);
+    ElementIterator eIt    = grid.levelGridView(level).template begin<0>();
+    ElementIterator eEndIt = grid.levelGridView(level).template end<0>();
 
     for (; eIt!=eEndIt; ++eIt)
     {
