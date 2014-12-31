@@ -65,9 +65,17 @@ namespace Dune
      * \ingroup GICapabilities
      */
     template<class Grid>
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel
+    struct
+#ifndef DUNE_AVOID_CAPABILITIES_IS_PARALLEL_DEPRECATION_WARNING
+    DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.")
+#endif
+    isParallel
     {
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = false;
+      static const bool
+#ifndef DUNE_AVOID_CAPABILITIES_IS_PARALLEL_DEPRECATION_WARNING
+      DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.")
+#endif
+      v = false;
     };
 
     /** \brief specialize with 'true' for all codims that a grid can communicate data on (default=false)
@@ -183,7 +191,11 @@ namespace Dune
     };
 
     template<class Grid>
-    struct DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.") isParallel<const Grid>
+    struct
+#ifndef DUNE_AVOID_CAPABILITIES_IS_PARALLEL_DEPRECATION_WARNING
+    DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.")
+#endif
+    isParallel<const Grid>
     {
       static const bool v = Dune::Capabilities::isParallel<Grid>::v;
     };

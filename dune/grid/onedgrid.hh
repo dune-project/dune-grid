@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/tuples.hh>
 
@@ -458,9 +459,17 @@ namespace Dune {
        \ingroup OneDGrid
      */
     template<>
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< OneDGrid >
+    struct
+#ifndef DUNE_AVOID_CAPABILITIES_IS_PARALLEL_DEPRECATION_WARNING
+    DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.")
+#endif
+    isParallel< OneDGrid >
     {
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = false;
+      static const bool
+#ifndef DUNE_AVOID_CAPABILITIES_IS_PARALLEL_DEPRECATION_WARNING
+      DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.")
+#endif
+      v = false;
     };
 
     /** \brief OneDGrid is levelwise conforming
