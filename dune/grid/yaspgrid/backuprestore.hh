@@ -9,7 +9,6 @@
 //- Dune headers
 #include <dune/common/exceptions.hh>
 #include <dune/grid/common/backuprestore.hh>
-#include <dune/grid/alugrid/common/declaration.hh>
 
 // bump this version number up if you introduce any changes
 // to the outout format of the YaspGrid BackupRestoreFacility.
