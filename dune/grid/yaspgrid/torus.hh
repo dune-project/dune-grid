@@ -13,6 +13,7 @@
 #endif
 
 #include <dune/common/array.hh>
+#include <dune/common/binaryfunctions.hh>
 #include <dune/common/power.hh>
 #include <dune/grid/common/exceptions.hh>
 

@@ -8,6 +8,7 @@
 #include <dune/grid/common/exceptions.hh>
 
 #include "coordinates.hh"
+#include "../yaspgrid.hh"
 
 /** \file
  *  \brief This file provides a factory class for tensorproduct
