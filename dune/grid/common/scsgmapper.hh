@@ -131,7 +131,7 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e, Index& result) const
     {
-      result = map(e);
+      result = index(e);
       return true;
     }
 
@@ -145,7 +145,7 @@ namespace Dune
      */
     bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, Index& result) const
     {
-      result = map(e,i,cc);
+      result = subIndex(e,i,cc);
       return true;
     }
 

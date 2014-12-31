@@ -55,7 +55,7 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
 
   for (; eIt!=eEndIt; ++eIt)
   {
-    size_t index = mapper.map(*eIt);
+    size_t index = mapper.index(*eIt);
     min = std::min(min, index);
     max = std::max(max, index);
     std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
@@ -93,7 +93,7 @@ void checkVertexDataMapper(const Mapper& mapper, const GridView& gridView)
     size_t numVertices = eIt->subEntities(dim);
     for (size_t curVertex = 0; curVertex < numVertices; ++curVertex)
     {
-      size_t index = mapper.map(*eIt, curVertex, dim);
+      size_t index = mapper.subIndex(*eIt, curVertex, dim);
       min = std::min(min, index);
       max = std::max(max, index);
       indices.insert(index);
@@ -133,7 +133,7 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
   for (; eIt!=eEndIt; ++eIt)
   {
     // handle elements
-    size_t index = mapper.map(*eIt);
+    size_t index = mapper.index(*eIt);
     min = std::min(min, index);
     max = std::max(max, index);
     std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
@@ -145,7 +145,7 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
     size_t numEdges = eIt->subEntities(dim-1);
     for (size_t curEdge = 0; curEdge < numEdges; ++curEdge)
     {
-      index = mapper.map(*eIt, curEdge, dim - 1);
+      index = mapper.subIndex(*eIt, curEdge, dim - 1);
       min = std::min(min, index);
       max = std::max(max, index);
       indices.insert(index);
