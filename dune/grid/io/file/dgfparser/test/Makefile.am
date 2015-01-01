@@ -34,7 +34,7 @@ EXTRA_PROGRAMS = tester viewdgf
 # list of tests to run
 TESTS = $(ALLTESTS)
 
-tester_SOURCES = main.cc
+tester_SOURCES = test-dgf.cc
 tester_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(ALL_PKG_CPPFLAGS) $(DUNEMPICPPFLAGS)
 tester_LDFLAGS = $(AM_LDFLAGS)			\
@@ -52,7 +52,7 @@ viewdgf_LDADD =					\
 	$(LDADD)
 
 if ALUGRID
-testalu_SOURCES = main.cc
+testalu_SOURCES = test-dgf.cc
 testalu_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(ALUGRID_CPPFLAGS)			\
 	-DALUGRID_CUBE -DGRIDDIM=3
@@ -64,7 +64,7 @@ testalu_LDADD =					\
 endif
 
 if ALBERTA
-testalberta_SOURCES = main.cc
+testalberta_SOURCES = test-dgf.cc
 testalberta_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(ALBERTA2D_CPPFLAGS)			\
 	-DALBERTAGRID -DGRIDDIM=2 -DWORLDDIM=2
@@ -75,20 +75,20 @@ testalberta_LDADD =				\
 	$(LDADD)
 endif
 
-testsgrid_SOURCES = main.cc
+testsgrid_SOURCES = test-dgf.cc
 testsgrid_CPPFLAGS = $(AM_CPPFLAGS)		\
 	-DSGRID -DGRIDDIM=3
 
-testyasp_SOURCES = main.cc
+testyasp_SOURCES = test-dgf.cc
 testyasp_CPPFLAGS = $(AM_CPPFLAGS)		\
 	-DYASPGRID -DGRIDDIM=3
 
-testoned_SOURCES = main.cc
+testoned_SOURCES = test-dgf.cc
 testoned_CPPFLAGS = $(AM_CPPFLAGS)		\
 	-DONEDGRID -DGRIDDIM=1
 
 if UG
-testug_SOURCES = main.cc
+testug_SOURCES = test-dgf.cc
 testug_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(UG_CPPFLAGS)				\
 	-DUGGRID -DGRIDDIM=3

@@ -15,7 +15,7 @@ if(UG_FOUND)
 endif(UG_FOUND)
 
 foreach(_test ${TESTS})
-  add_executable(${_test} main.cc)
+  add_executable(${_test} test-dgf.cc)
   target_link_libraries(${_test} dunegrid ${DUNE_LIBS})
   add_test(${_test} ${_test})
 endforeach(_test ${TESTS})
