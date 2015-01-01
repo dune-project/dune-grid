@@ -1,28 +1,28 @@
 if(ALBERTA_FOUND)
   set(ALBERTA_PROGRAMS
-    test_alberta_1_1
-    test_alberta_1_2
-    test_alberta_2_2
-    test_alberta_1_3
-    test_alberta_2_3
-    test_alberta_3_3
-    test_alberta_generic)
-  set(ALBERTA_EXTRA_PRGRAMS test_alberta)
-  message(AUTHOR_WARNING "TODO: Check whether test_alberta is treated correctly.")
+    test-alberta-1-1
+    test-alberta-1-2
+    test-alberta-2-2
+    test-alberta-1-3
+    test-alberta-2-3
+    test-alberta-3-3
+    test-alberta-generic)
+  set(ALBERTA_EXTRA_PRGRAMS test-alberta)
+  message(AUTHOR_WARNING "TODO: Check whether test-alberta is treated correctly.")
 endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
-  set(ALUGRID_PROGRAMS test_alugrid)
+  set(ALUGRID_PROGRAMS test-alugrid)
 endif(ALUGRID_FOUND)
 
 if(UG_FOUND)
   set(UG_PROGRAMS
-    test_ug
-    test_parallel_ug)
+    test-ug
+    test-parallel-ug)
 endif(UG_FOUND)
 
 if(UG_FOUND AND ALUGRID_FOUND)
-  set(DGFALUGRID_UG_PROGRAMS test_dgfalu_uggrid_combination)
+  set(DGFALUGRID_UG_PROGRAMS test-dgfalu-uggrid-combination)
 endif(UG_FOUND AND ALUGRID_FOUND)
 set(GRIDDIM 2)
 set(WORLDDIM 2)
@@ -43,67 +43,67 @@ set(CACHECOORDFUNCTION 0)
 
 # tests where program to build and program to run are equal
 set(TESTS
-  test_geogrid test_identitygrid test_oned test_sgrid test_yaspgrid
+  test-geogrid test-identitygrid test-oned test-sgrid test-yaspgrid
   ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
-  ${DGFALUGRID_UG_PROGRAMS} test_mcmg_geogrid
+  ${DGFALUGRID_UG_PROGRAMS} test-mcmg-geogrid
   testiteratorranges)
 
 set_property(DIRECTORY APPEND PROPERTY
   COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
 
-add_executable(test_geogrid EXCLUDE_FROM_ALL test-geogrid.cc)
-add_executable(test_identitygrid EXCLUDE_FROM_ALL test-identitygrid.cc)
-add_executable(test_oned EXCLUDE_FROM_ALL test-oned.cc)
-add_executable(test_mcmg_geogrid EXCLUDE_FROM_ALL test-mcmg-geogrid.cc)
-add_executable(test_sgrid EXCLUDE_FROM_ALL test-sgrid.cc)
-add_executable(test_yaspgrid EXCLUDE_FROM_ALL test-yaspgrid.cc)
+add_executable(test-geogrid EXCLUDE_FROM_ALL test-geogrid.cc)
+add_executable(test-identitygrid EXCLUDE_FROM_ALL test-identitygrid.cc)
+add_executable(test-oned EXCLUDE_FROM_ALL test-oned.cc)
+add_executable(test-mcmg-geogrid EXCLUDE_FROM_ALL test-mcmg-geogrid.cc)
+add_executable(test-sgrid EXCLUDE_FROM_ALL test-sgrid.cc)
+add_executable(test-yaspgrid EXCLUDE_FROM_ALL test-yaspgrid.cc)
+add_dune_mpi_flags(test-yaspgrid)
 
-set_property(TARGET test_sgrid test_oned test_yaspgrid test_geogrid APPEND
+set_property(TARGET test-sgrid test-oned test-yaspgrid test-geogrid APPEND
   PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
 
-set_property(TARGET test_geogrid APPEND PROPERTY COMPILE_DEFINITIONS
+set_property(TARGET test-geogrid APPEND PROPERTY COMPILE_DEFINITIONS
   COORDFUNCTION=${COORDFUNCTION} CACHECOORDFUNCTION=${CACHECOORDFUNCTION})
-add_dune_mpi_flags(test_yaspgrid)
 
 if(ALBERTA_FOUND)
-  add_executable(test_alberta EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test_alberta WORLDDIM ${GRIDDIM})
-  add_executable(test_alberta_1_1 EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test_alberta_1_1 GRIDDIM 1 WORLDDIM 1)
-  add_executable(test_alberta_1_2 EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test_alberta_1_2 GRIDDIM 1 WORLDDIM 2)
-  add_executable(test_alberta_2_2 EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test_alberta_2_2 GRIDDIM 2 WORLDDIM 2)
-  add_executable(test_alberta_1_3 EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test_alberta_1_3 GRIDDIM 1 WORLDDIM 3)
-  add_executable(test_alberta_2_3 EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test_alberta_2_3 GRIDDIM 2 WORLDDIM 3)
-  add_executable(test_alberta_3_3 EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test_alberta_3_3 GRIDDIM 3 WORLDDIM 3)
-  add_executable(test_alberta_generic EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test_alberta_generic USE_GENERIC GRIDDIM 2)
+  add_executable(test-alberta EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta WORLDDIM ${GRIDDIM})
+  add_executable(test-alberta-1-1 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-1-1 GRIDDIM 1 WORLDDIM 1)
+  add_executable(test-alberta-1-2 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-1-2 GRIDDIM 1 WORLDDIM 2)
+  add_executable(test-alberta-2-2 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-2-2 GRIDDIM 2 WORLDDIM 2)
+  add_executable(test-alberta-1-3 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-1-3 GRIDDIM 1 WORLDDIM 3)
+  add_executable(test-alberta-2-3 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-2-3 GRIDDIM 2 WORLDDIM 3)
+  add_executable(test-alberta-3-3 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-3-3 GRIDDIM 3 WORLDDIM 3)
+  add_executable(test-alberta-generic EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-generic USE_GENERIC GRIDDIM 2)
 endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
-  add_executable(test_alugrid EXCLUDE_FROM_ALL test-alugrid.cc)
-  add_dune_alugrid_flags(test_alugrid)
+  add_executable(test-alugrid EXCLUDE_FROM_ALL test-alugrid.cc)
+  add_dune_alugrid_flags(test-alugrid)
 endif(ALUGRID_FOUND)
 
 if(UG_FOUND)
-  add_executable(test_ug EXCLUDE_FROM_ALL test-ug.cc)
-  add_dune_ug_flags(test_ug)
-  add_executable(test_parallel_ug EXCLUDE_FROM_ALL test-parallel-ug.cc)
-  add_dune_ug_flags(test_parallel_ug)
-  # test_loadbalancing
-  add_executable(test_loadbalancing EXCLUDE_FROM_ALL test-loadbalancing.cc)
-  add_dune_ug_flags(test_loadbalancing)
-  add_dune_parmetis_flags(test_loadbalancing)
+  add_executable(test-ug EXCLUDE_FROM_ALL test-ug.cc)
+  add_dune_ug_flags(test-ug)
+  add_executable(test-parallel-ug EXCLUDE_FROM_ALL test-parallel-ug.cc)
+  add_dune_ug_flags(test-parallel-ug)
+  # test-loadbalancing
+  add_executable(test-loadbalancing EXCLUDE_FROM_ALL test-loadbalancing.cc)
+  add_dune_ug_flags(test-loadbalancing)
+  add_dune_parmetis_flags(test-loadbalancing)
 endif(UG_FOUND)
 
 if(ALUGRID_FOUND AND UG_FOUND)
-  add_executable(test_dgfalu_uggrid_combination EXCLUDE_FROM_ALL test-dgfalu-uggrid-combination.cc)
-  add_dune_ug_flags(test_dgfalu_uggrid_combination)
-  add_dune_alugrid_flags(test_dgfalu_uggrid_combination)
+  add_executable(test-dgfalu-uggrid-combination EXCLUDE_FROM_ALL test-dgfalu-uggrid-combination.cc)
+  add_dune_ug_flags(test-dgfalu-uggrid-combination)
+  add_dune_alugrid_flags(test-dgfalu-uggrid-combination)
 endif(ALUGRID_FOUND AND UG_FOUND)
 
 add_executable(testiteratorranges EXCLUDE_FROM_ALL testiteratorranges.cc)

@@ -19,11 +19,11 @@ if(AMIRAMESH_FOUND AND PSURFACE_FOUND)
 endif(AMIRAMESH_FOUND AND PSURFACE_FOUND)
 
 if(ALBERTA_FOUND)
-  set(ALBERTA_TESTS gmshtest_alberta2d gmshtest_alberta3d)
+  set(ALBERTA_TESTS gmshtest-alberta2d gmshtest-alberta3d)
 endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
-  set(ALUGRID_TESTS gmshtest_alugrid)
+  set(ALUGRID_TESTS gmshtest-alugrid)
 endif(ALUGRID_FOUND)
 
 if(UG_FOUND)
@@ -59,18 +59,18 @@ endforeach(_test ${AMIRAMESH_TESTS})
 
 add_dune_mpi_flags(${VTK_TESTS})
 
-add_executable(gmshtest_alugrid gmshtest.cc)
-add_dune_alugrid_flags(gmshtest_alugrid)
+add_executable(gmshtest-alugrid gmshtest.cc)
+add_dune_alugrid_flags(gmshtest-alugrid)
 
-add_executable(gmshtest_alberta2d gmshtest.cc)
-add_dune_alberta_flags(gmshtest_alberta2d WORLDDIM 2)
-add_dune_grape_flags(gmshtest_alberta2d)
-set_property(TARGET gmshtest_alberta2d APPEND_STRING
+add_executable(gmshtest-alberta2d gmshtest.cc)
+add_dune_alberta_flags(gmshtest-alberta2d WORLDDIM 2)
+add_dune_grape_flags(gmshtest-alberta2d)
+set_property(TARGET gmshtest-alberta2d APPEND_STRING
   PROPERTY COMPILE_FLAGS "-DGRIDDIM=${ALBERTA_DIM}")
 
-add_executable(gmshtest_alberta3d gmshtest.cc)
-add_dune_alberta_flags(gmshtest_alberta3d WORLDDIM 3)
-add_dune_grape_flags(gmshtest_alberta3d)
+add_executable(gmshtest-alberta3d gmshtest.cc)
+add_dune_alberta_flags(gmshtest-alberta3d WORLDDIM 3)
+add_dune_grape_flags(gmshtest-alberta3d)
 
 foreach(_test ${UG_TESTS})
   add_dune_ug_flags(${_test})
