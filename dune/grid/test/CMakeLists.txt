@@ -7,8 +7,6 @@ if(ALBERTA_FOUND)
     test_alberta_2_3
     test_alberta_3_3
     test_alberta_generic)
-  set(ALBERTA_EXTRA_PRGRAMS test_alberta)
-  message(AUTHOR_WARNING "TODO: Check whether test_alberta is treated correctly.")
 endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
