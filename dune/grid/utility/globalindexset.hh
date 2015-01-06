@@ -350,19 +350,8 @@ namespace Dune
       std::vector<int> offset(size);
       std::fill(offset.begin(), offset.end(), 0);
 
-      if (codim_==0)
-      {
-        /** Share number of locally owned entities */
-        gridview_.comm().template allgather<int>(&nLocalEntity, 1, offset.data());
-      }
-      else
-      {
-        // gather number of locally owned entities on root process
-        gridview.comm().template gather<int>(&nLocalEntity, offset.data(),1,0);
-
-        // broadcast the array containing the number of locally owned entities to all processes
-        gridview.comm().template broadcast<int>(offset.data(),size,0);
-      }
+      /** Share number of locally owned entities */
+      gridview_.comm().template allgather<int>(&nLocalEntity, 1, offset.data());
 
       indexOffset_.clear();
 
