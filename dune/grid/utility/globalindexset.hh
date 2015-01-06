@@ -121,7 +121,7 @@ namespace Dune
         typedef typename V::value_type DataType;
 
         //! returns true if data for this codim should be communicated
-        bool contains (int dim, int codim) const
+        bool contains (int dim, unsigned int codim) const
         {
           return codim==indexSetCodim_;
         }
@@ -185,7 +185,7 @@ namespace Dune
 
         // assign own rank to entities that I might have
         for (auto it = gridview.template begin<0>(); it!=gridview.template end<0>(); ++it)
-          for (int i=0; i<it->subEntities(codim); i++)
+          for (unsigned int i=0; i<it->subEntities(codim); i++)
           {
             // Evil hack: I need to call subEntity, which needs the entity codimension as a static parameter.
             // However, we only have it as a run-time parameter.
@@ -229,7 +229,7 @@ namespace Dune
     {
     public:
       //! returns true if data for this codim should be communicated
-      bool contains (int dim, int codim) const
+      bool contains (int dim, unsigned int codim) const
       {
         return codim==indexSetCodim_;
       }
