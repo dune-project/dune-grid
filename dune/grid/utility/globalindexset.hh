@@ -353,17 +353,9 @@ namespace Dune
       /** Share number of locally owned entities */
       gridview_.comm().template allgather<int>(&nLocalEntity, 1, offset.data());
 
-      indexOffset_.clear();
-
-      // Do we need both cases here?
-      if (codim_==0)
-        indexOffset_.resize(size + 1, 0);
-      else
-        indexOffset_.resize(size, 0);
-
-      for (unsigned int ii=0; ii<indexOffset_.size(); ++ii)
-        for (unsigned int jj=0; jj<ii; ++jj)
-          indexOffset_[ii] += offset[jj];
+      int myoffset = 0;
+      for (int i=1; i<rank+1; i++)
+        myoffset += offset[i-1];
 
       /*  compute globally unique index over all processes; the idea of the algorithm is as follows: if
        *  an entity is owned by the process, it is assigned an index that is the addition of the offset
@@ -385,8 +377,6 @@ namespace Dune
       globalIndex_.clear();
 
       const GlobalIdSet& globalIdSet = gridview_.grid().globalIdSet();      /** retrieve globally unique Id set */
-
-      const int myoffset = indexOffset_[rank];
 
       Index globalcontrib = 0;      /** initialize contribution for the global index */
 
@@ -504,11 +494,6 @@ namespace Dune
       return (codim_==codim) ? nGlobalEntity_ : 0;
     }
 
-    const std::vector<int>& indexOffset()
-    {
-      return indexOffset_;
-    }
-
   protected:
     const GridView gridview_;
 
@@ -517,9 +502,6 @@ namespace Dune
 
     //! Global number of entities, i.e. number of entities without rendundant entities on interprocessor boundaries
     int nGlobalEntity_;
-
-    //! Offset of entity index on every process
-    std::vector<int> indexOffset_;
 
     IndexMap localGlobalMap_;
 
