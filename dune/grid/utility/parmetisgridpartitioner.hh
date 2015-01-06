@@ -125,7 +125,7 @@ namespace Dune
       // Create global index map
       GlobalIndexSet<GridView> globalIndex(gv,0);
 
-      const unsigned numElements = std::distance(gv.template begin<0, Interior_Partition>(),
+      int numElements = std::distance(gv.template begin<0, Interior_Partition>(),
                                                  gv.template end<0, Interior_Partition>());
 
       std::vector<unsigned> interiorPart(numElements);
@@ -142,10 +142,20 @@ namespace Dune
 
       MPI_Comm comm = Dune::MPIHelper::getCommunicator();
 
-      // Setup graph for local elements
-      // The difference vtxdist[i+1] - vtxdist[i] is the number of elements that are on process i
-      std::vector<idx_t> vtxdist(globalIndex.indexOffset());
+      // Make the number of interior elements of each processor available to all processors
+      std::vector<int> offset(gv.comm().size());
+      std::fill(offset.begin(), offset.end(), 0);
 
+      gv.comm().template allgather<int>(&numElements, 1, offset.data());
+
+      // The difference vtxdist[i+1] - vtxdist[i] is the number of elements that are on process i
+      std::vector<idx_t> vtxdist(gv.comm().size()+1);
+      vtxdist[0] = 0;
+
+      for (unsigned int i=1; i<vtxdist.size(); ++i)
+        vtxdist[i] = vtxdist[i-1] + offset[i-1];
+
+      // Set up element adjacency lists
       std::vector<idx_t> xadj, adjncy;
       xadj.push_back(0);
 
