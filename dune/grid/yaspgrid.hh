@@ -858,7 +858,7 @@ namespace Dune {
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
-      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
+      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),lb),
         leafIndexSet_(*this), _periodic(periodic), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
