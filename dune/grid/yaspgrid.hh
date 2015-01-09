@@ -1013,7 +1013,7 @@ namespace Dune {
               Dune::array<std::vector<ctype>, dim> coords,
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
-      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),defaultLoadbalancer()),
+      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),lb),
         leafIndexSet_(*this),
         _periodic(std::bitset<dim>(0)),
         _overlap(overlap),
