@@ -170,6 +170,10 @@ namespace Dune
         inc *= _dims[i];
       }
 
+      // check whether the load balancing matches the size of the communicator
+      if (inc != _comm.size())
+        DUNE_THROW(Dune::Exception, "Communicator size and result of the given load balancer do not match!");
+
       // make full schedule
       proclists();
     }
