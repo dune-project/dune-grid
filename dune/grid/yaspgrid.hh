@@ -312,9 +312,9 @@ namespace Dune {
     }
 
     // static method to create the default load balance strategy
-    static const YLoadBalance<dim>* defaultLoadbalancer()
+    static const YLoadBalanceDefault<dim>* defaultLoadbalancer()
     {
-      static YLoadBalance<dim> lb;
+      static YLoadBalanceDefault<dim> lb;
       return & lb;
     }
 

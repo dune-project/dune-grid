@@ -23,8 +23,7 @@
 
 namespace Dune
 {
-
- /** \brief Implement the default load balance strategy of yaspgrid
+  /** \brief a base class for the yaspgrid load balancing strategy
    */
   template<int d>
   class YLoadBalance
@@ -32,6 +31,17 @@ namespace Dune
   public:
     typedef Dune::array<int, d> iTupel;
     virtual ~YLoadBalance() {}
+    virtual void loadbalance(const iTupel&, int, iTupel&) const = 0;
+  };
+
+ /** \brief Implement the default load balance strategy of yaspgrid
+   */
+  template<int d>
+  class YLoadBalanceDefault : public YLoadBalance<d>
+  {
+  public:
+    typedef Dune::array<int, d> iTupel;
+    virtual ~YLoadBalanceDefault() {}
 
     /** \brief Distribute a structured grid across a set of processors
      *
