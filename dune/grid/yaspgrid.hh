@@ -403,7 +403,7 @@ namespace Dune {
         }
       }
 
-      for (int codim = 0; codim < dim + 1; codim++)
+      for (unsigned int codim = 0; codim < dim + 1; codim++)
       {
         // set the begin iterator for the corresponding ygrids
         g.overlapfront[codim].setBegin(overlapfront_it);
