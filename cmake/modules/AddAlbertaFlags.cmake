@@ -3,7 +3,9 @@
 #
 # Provides the following functions:
 #
-# add_dune_superlu_flags(target1 target2 ...)
+# add_dune_alberta_flags(target1 [target2 ...]
+#                        [OBJECT|SOURCE_ONLY] [USE_GENERIC]
+#                        [GRIDDIM <griddim>] [WORLDDIM] <worlddim>])
 #
 # adds Alberta flags to the targets for compilation and linking
 #
@@ -51,7 +53,8 @@ macro(add_dune_alberta_flags)
     include_directories(${ALBERTA_INCLUDES})
     replace_properties(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS}
       PROPERTY
-      COMPILE_DEFINITIONS ENABLE_ALBERTA ENABLE_ALBERTA
+      COMPILE_DEFINITIONS
+      ENABLE_ALBERTA ENABLE_ALBERTA
       ALBERTA_DIM=.* ALBERTA_DIM=${ADD_ALBERTA_GRIDDIM}
       WORLDDIM=.* WORLDDIM=${ADD_ALBERTA_WORLDDIM})
     if(ADD_ALBERTA_USE_GENERIC)
