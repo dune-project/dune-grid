@@ -178,10 +178,7 @@ endif(ALUGRID_FOUND)
 
 #add all alugrid related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_alugrid_flags
 if(ALUGRID_FOUND)
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-DENABLE_ALUGRID")
-  foreach(dir ${ALUGRID_INCLUDES})
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-  endforeach()
-  set_property(GLOBAL APPEND PROPERTY
-    ALL_PKG_LIBS "${ALUGRID_LIBRARIES}")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_DEFS "ENABLE_ALUGRID=1")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_INCS "${ALUGRID_INCLUDES}")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_LIBS "${ALUGRID_LIBRARIES}")
 endif()

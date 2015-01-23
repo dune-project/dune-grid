@@ -91,9 +91,7 @@ if(GRAPE_FOUND)
   set(HAVE_GRAPE TRUE
       CACHE BOOL "Whether Grape was found")
   # add all grape related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_grape_flags
-  foreach(dir ${GRAPE_INCLUDE_DIR})
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-  endforeach()
-  set_property(GLOBAL APPEND PROPERTY
-    ALL_PKG_LIBS "${GRAPE_LIBRARIES}")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_DEFS "ENABLE_GRAPE=1")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_INCS "${GRAPE_INCLUDE_DIR}")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_LIBS "${GRAPE_LIBRARIES}")
 endif()

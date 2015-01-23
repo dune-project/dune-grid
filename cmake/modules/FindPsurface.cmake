@@ -114,9 +114,6 @@ set(HAVE_PSURFACE ${PSURFACE_FOUND})
 
 #add all psurface related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_psurface_flags
 if(PSURFACE_FOUND)
-  foreach(dir ${PSURFACE_INCLUDE_DIRS})
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-  endforeach()
-  set_property(GLOBAL APPEND PROPERTY
-    ALL_PKG_LIBS "${PSURFACE_LIBRARIES}")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_INCS "${PSURFACE_INCLUDE_DIRS}")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_LIBS "${PSURFACE_LIBRARIES}")
 endif()
