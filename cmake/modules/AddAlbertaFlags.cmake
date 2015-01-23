@@ -30,7 +30,7 @@ macro(add_dune_alberta_flags)
     else(NOT ADD_ALBERTA_WORLDDIM)
       list(FIND ALBERTA_WORLD_DIMS ${ADD_ALBERTA_WORLDDIM} _index)
       if(_index EQUAL -1)
-        message(FATAL_ERROR "There is no alberta library for dimension ${ADD_ALBERTA_GRIDDIM}.")
+        message(FATAL_ERROR "There is no alberta library for dimension ${ADD_ALBERTA_WORLDDIM}.")
       endif(_index EQUAL -1)
     endif(NOT ADD_ALBERTA_WORLDDIM)
 
@@ -44,19 +44,17 @@ macro(add_dune_alberta_flags)
         foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
           target_link_libraries(${_target}
             dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d
-            ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB}
+            ${ALBERTA_${ADD_ALBERTA_WORLDDIM}D_LIB}
             dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
         endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
       endif()
     endif(ADD_ALBERTA_SOURCE_ONLY)
 
     include_directories(${ALBERTA_INCLUDES})
-    replace_properties(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS}
-      PROPERTY
-      COMPILE_DEFINITIONS
-      ENABLE_ALBERTA ENABLE_ALBERTA
-      ALBERTA_DIM=.* ALBERTA_DIM=${ADD_ALBERTA_GRIDDIM}
-      WORLDDIM=.* WORLDDIM=${ADD_ALBERTA_WORLDDIM})
+    set_property(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS}
+      APPEND PROPERTY
+      COMPILE_DEFINITIONS ENABLE_ALBERTA
+      ALBERTA_DIM=${ADD_ALBERTA_WORLDDIM})
     if(ADD_ALBERTA_USE_GENERIC)
       set_property(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS}
         APPEND PROPERTY
