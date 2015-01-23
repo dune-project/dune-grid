@@ -19,32 +19,6 @@
 namespace Dune
 {
 
-  /** \brief Implement load balancer that gets the info from a file
-   * To backup and restore the load balancing information, the BackupRestoreFacility
-   * needs a special load balancing object. Users dont need to touch this.
-   */
-  template<int d>
-  class YLoadBalanceBackup : public YLoadBalance<d>
-  {
-  public:
-    YLoadBalanceBackup(const Dune::array<int,d>& dims) : _dims(dims) {}
-
-    virtual ~YLoadBalanceBackup() {}
-
-    virtual void loadbalance(const Dune::array<int,d>&, int P, Dune::array<int,d>& dims) const
-    {
-      int prod = 1;
-      for (int i=0; i<d; i++)
-        prod *= _dims[i];
-      if (P != prod)
-        DUNE_THROW(Dune::Exception,"Your processor number doesn't match the grid to restore");
-      dims = _dims;
-    }
-
-  private:
-    Dune::array<int,d> _dims;
-  };
-
   template<class Coordinates>
   struct MaybeHaveOrigin
   {
@@ -224,7 +198,7 @@ namespace Dune
       for (int i=0; i<dim; i++)
         length[i] *= coarseSize[i];
 
-      YLoadBalanceBackup<dim> lb(torus_dims);
+      YaspFixedSizePartitioner<dim> lb(torus_dims);
 
       Grid* grid = MaybeHaveOrigin<Coordinates>::createGrid(origin, length, coarseSize, periodic, overlap, comm, &lb);
 
@@ -366,7 +340,7 @@ namespace Dune
         }
       }
 
-      YLoadBalanceBackup<dim> lb(torus_dims);
+      YaspFixedSizePartitioner<dim> lb(torus_dims);
       Grid* grid = new Grid(coords, periodic, overlap, comm, coarseSize, &lb);
 
       for (int i=0; i<refinement; ++i)
