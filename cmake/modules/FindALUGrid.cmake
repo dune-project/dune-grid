@@ -167,7 +167,7 @@ if(ALUGRID_FOUND)
 
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determing location of ALUGrid ${ALUGRID_VERSION} succeded:\n"
+    "Determing location of ALUGrid ${ALUGRID_VERSION} succeeded:\n"
     "Include directory: ${ALUGRID_INCLUDES}\n"
     "Library directory: ${ALUGRID_LIBRARIES}\n\n")
 else()

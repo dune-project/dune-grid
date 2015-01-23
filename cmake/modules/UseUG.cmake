@@ -70,7 +70,7 @@ if(UG_FOUND)
     ALL_PKG_LIBS "${UG_LIBRARIES}")
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determining location of UG ${UG_VERSION} succeded:\n"
+    "Determining location of UG ${UG_VERSION} succeeded:\n"
     "Include directories: ${UG_INCLUDES}\n"
     "Libraries: ${UG_LIBRARIES}\n\n")
 else()
