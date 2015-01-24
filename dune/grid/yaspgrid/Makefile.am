@@ -4,6 +4,7 @@ yaspgriddir = $(includedir)/dune/grid/yaspgrid/
 yaspgrid_HEADERS = backuprestore.hh \
                    coordinates.hh \
                    factory.hh \
+                   partitioning.hh \
                    torus.hh \
                    yaspgridentity.hh \
                    yaspgridentityseed.hh \
