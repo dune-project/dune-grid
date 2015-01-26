@@ -2,8 +2,6 @@
 # but just build them on demand
 add_directory_test_target(_test_target)
 
-set(GRIDDIM 2)
-
 if(ALBERTA_FOUND)
   set(ALBERTA_TESTS
     test-alberta3d-refine)
