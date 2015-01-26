@@ -107,9 +107,9 @@ namespace Dune
     }
   };
 
-  /** \brief Implement partitioner that gets the info from a file
-   * To backup and restore the load balancing information, the BackupRestoreFacility
-   * needs a special load balancing object. Users dont need to touch this.
+  /** \brief Implement partitioner that gets a fixed partitioning from an array
+   *  If the given partitioning doesn't match the number of processors, the grid should
+   *  be distributed to, an exception is thrown.
    */
   template<int d>
   class YaspFixedSizePartitioner : public YLoadBalance<d>
