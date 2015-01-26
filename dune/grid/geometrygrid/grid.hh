@@ -655,12 +655,10 @@ namespace Dune
 
     using Base::getRealImplementation;
 
-  protected:
-    const CoordFunction &coordFunction () const
-    {
-      return coordFunction_;
-    }
+    const CoordFunction &coordFunction () const { return coordFunction_; }
+    CoordFunction &coordFunction () { return coordFunction_; }
 
+  protected:
     template< int codim >
     static const typename HostGrid::template Codim< codim >::Entity &
     getHostEntity( const typename Codim< codim >::Entity &entity )
