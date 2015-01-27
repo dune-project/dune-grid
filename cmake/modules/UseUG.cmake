@@ -63,8 +63,11 @@ if(UG_FOUND)
   # add all UG related flags to ALL_PKG_FLAGS, this must happen
   # regardless of a target using add_dune_ug_flags
   set_property(GLOBAL APPEND PROPERTY ALL_PKG_DEFS "ENABLE_UG")
+  if(UG_PARALLEL STREQUAL "yes")
+    set_property(GLOBAL APPEND PROPERTY ALL_PKG_DEFS "ModelP")
+  endif()
   set_property(GLOBAL APPEND PROPERTY ALL_PKG_INCS "${UG_INCLUDES}")
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_LIBS "${UG_LIBRARIES}")
+  set_property(GLOBAL APPEND PROPERTY ALL_PKG_LIBS "dunegrid" "${UG_LIBRARIES}" "${DUNE_LIBS}")
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
     "Determining location of UG ${UG_VERSION} succeded:\n"
