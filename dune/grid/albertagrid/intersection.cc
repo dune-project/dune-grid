@@ -108,6 +108,7 @@ namespace Dune
     return n;
   }
 
+#if defined GRIDDIM && GRIDDIM > 1
   template<>
   inline AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::NormalVector
   AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::centerIntegrationOuterNormal () const
@@ -120,6 +121,7 @@ namespace Dune
     n[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
     return n;
   }
+#endif // defined GRIDDIM && GRIDDIM > 1
 
   template<>
   inline AlbertaGridIntersectionBase< const AlbertaGrid< 3, 3 > >::NormalVector
