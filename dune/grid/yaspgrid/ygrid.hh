@@ -736,7 +736,7 @@ namespace Dune {
 
 
       private:
-      int _which;
+      unsigned int _which;
       const YGrid<Coordinates>* _yg;
       typename YGridComponent<Coordinates>::Iterator _it;
     };
