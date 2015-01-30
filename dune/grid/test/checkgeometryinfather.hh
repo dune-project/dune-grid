@@ -256,6 +256,49 @@ void checkGeometryInFather(const GridType& grid)
           }
         }
 
+        typename GridType::template Codim<0>::EntityPointer e(eIt);
+        const typename Geometry::LocalCoordinate X(0.2);
+        typename Geometry::LocalCoordinate x = X;
+        while (e->level() != 0)
+        {
+            x = e->geometryInFather().global(x);
+            e = e->father();
+        }
+        if ((e->geometry().global(x)-eIt->geometry().global(X)).two_norm() > 1e-8)
+        {
+          std::cerr << "Warning: mapping broken! " << e->geometry().global(x)
+                    << " vs. "  << eIt->geometry().global(X)
+                    << "\tchild " << eIt->geometry().center()
+                    << "\tfather " << e->geometry().center()
+                    << "\tat "  << x
+                    << "\tmaps to " << X << std::endl;
+        }
+
+        for( int j=0; j < eIt->geometry().corners(); ++j )
+        {
+          // create a global vertex
+          const typename Geometry::GlobalCoordinate cornerViaSon =
+            eIt->geometry().corner(j);
+          // map to child local
+          const typename Geometry::LocalCoordinate cornerInSon =
+            eIt->geometry().local(cornerViaSon);
+          // map to father local
+          const typename Geometry::LocalCoordinate cornerInFather =
+            geometryInFather.global(cornerInSon);
+          // map father to
+          const typename Geometry::GlobalCoordinate cornerFromGlobal =
+            eIt->father()->geometry().local(cornerViaSon);
+
+          if( (cornerInFather - cornerFromGlobal).infinity_norm() > 1e-7 )
+          {
+            ++differentVertexCoords;
+            std :: cout << "geometryInFather().global() and yields different vertex position than father().geometry().local()"
+                        << "(from son: " << cornerInFather
+                        << ", from global: " << cornerFromGlobal << ")." << std :: endl;
+            break;
+          }
+        }
+
         // /////////////////////////////////////////////////////////////////////////////////////
         // check local transformation of geometryInFather
         // /////////////////////////////////////////////////////////////////////////////////////
