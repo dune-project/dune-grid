@@ -85,11 +85,21 @@ namespace Dune
       different behavior in the same situation. So now they are forced to
       show the same behavior.
 
+      \deprecated The EntityPointer is deprecated and will be removed after the release
+                  of dune-grid-2.4. It is not needed anymore because starting with
+                  dune-grid-2.4, you can now simply copy and store entities directly.
+                  If you need to store many entities for an extended time, use EntitySeed
+                  instead. Please note that due to the effort required by this change,
+                  those grids that are deprecated in dune-grid-2.4 will not have copyable
+                  entities, so if you are forced to use one of those grids, you will have
+                  to continue using EntityPointer as well.
 
       \ingroup GIEntityPointer
    */
   template<class GridImp, class IteratorImp>
-  class EntityPointer
+  class
+  DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+  EntityPointer
   {
     // need to make copy constructor of EntityPointer work for any iterator
     //friend class EntityPointer<GridImp,typename IteratorImp::EntityPointerImp>;
@@ -150,6 +160,7 @@ namespace Dune
         entity. The implementation of EntityPointer has to have a
         constructor taking a Dune::Entity.
      */
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
     EntityPointer(const Entity& entity)
       : realIterator( entity.impl() )
     {}
@@ -164,7 +175,8 @@ namespace Dune
     {}
 
     template< class ItImp >
-    EntityPointer &operator= ( const EntityPointer< GridImp, ItImp > &ep )
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    inline EntityPointer & operator= ( const EntityPointer< GridImp, ItImp > &ep )
     {
       realIterator = ep.realIterator;
       return *this;
@@ -179,13 +191,15 @@ namespace Dune
     //===========================================================
 
     /** \brief Dereferencing operator. */
-    const Entity & operator*() const
+    const Entity& operator*() const
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
     {
       return realIterator.dereference();
     }
 
     /** \brief Pointer operator. */
     const Entity * operator->() const
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
     {
       return & realIterator.dereference();
     }
@@ -219,6 +233,28 @@ namespace Dune
       return !equals( rhs );
     }
     //@}
+
+    /** \brief Compares an EntityPointer with an Entity for equality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator==(const Entity& rhs) const
+    {
+      return (**this) == rhs;
+    }
+
+    /** \brief Compares an EntityPointer with an Entity for inequality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator!=(const Entity& rhs) const
+    {
+      return (**this) != rhs;
+    }
 
 
     //===========================================================

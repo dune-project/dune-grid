@@ -195,6 +195,15 @@ namespace Dune {
       return typename Traits::template Codim<codim>::EntityPointer(OneDGridEntityPointer<codim,const OneDGrid>(OneDGrid::getRealImplementation(seed).target()));
     }
 
+    /** \brief Create an Entity from an EntitySeed */
+    template <typename Seed>
+    static typename Traits::template Codim<Seed::codimension>::Entity
+    entity(const Seed& seed)
+    {
+      const int codim = Seed::codimension;
+      return typename Traits::template Codim<codim>::Entity(OneDGridEntity<codim,dim,const OneDGrid>(OneDGrid::getRealImplementation(seed).target()));
+    }
+
 
     /** \brief Number of grid entities per level and codim
      */

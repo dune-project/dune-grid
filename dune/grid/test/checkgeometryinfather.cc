@@ -53,6 +53,7 @@ void checkGeometryInFather(const GridType& grid)
       // check the father method
       if( eIt->hasFather() )
       {
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
         typedef typename GridType::template Codim<0>::EntityPointer EntityPointer;
         EntityPointer father = eIt->father();
 
@@ -88,6 +89,43 @@ void checkGeometryInFather(const GridType& grid)
             DUNE_THROW( GridError, "Cannot find child in its own father." );
           father = grandPa;
         }
+#else // defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+        typedef typename GridType::template Codim<0>::Entity Entity;
+        Entity father = eIt->father();
+
+        // check geometry
+        checkGeometry( father.geometry() );
+
+        while ( father.hasFather() )
+        {
+          if( father.level() == 0 )
+            DUNE_THROW( GridError, "A level zero entity returns hasFather()=true." );
+          Entity grandPa = father.father();
+          typedef typename GridType :: Traits :: HierarchicIterator HierarchicIterator;
+
+          const int mxl = grandPa.level() + 1;
+
+          bool foundChild = false;
+          const HierarchicIterator end = grandPa.hend( mxl );
+          for( HierarchicIterator sons = grandPa.hbegin( mxl ); sons != end; ++sons )
+          {
+            // check geometry
+            checkGeometry( sons->geometry() );
+
+            if( father != *sons )
+            {
+              if( idSet.id( father ) == idSet.id( *sons ) )
+                DUNE_THROW( GridError, "Two different entities have the same id." );
+            }
+            else
+              foundChild = true;
+          }
+
+          if( !foundChild )
+            DUNE_THROW( GridError, "Cannot find child in its own father." );
+          father = grandPa;
+        }
+#endif // defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
       }
 
       // hierarchy check
@@ -104,6 +142,7 @@ void checkGeometryInFather(const GridType& grid)
           int count = sons->level();
           if( sons->hasFather() )
           {
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
             typedef typename GridType::template Codim<0>::EntityPointer EntityPointer;
             EntityPointer father = sons->father();
             --count;
@@ -112,6 +151,16 @@ void checkGeometryInFather(const GridType& grid)
               father = father->father();
               --count;
             }
+#else // defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+            typedef typename GridType::template Codim<0>::Entity Entity;
+            Entity father = sons->father();
+            --count;
+            while ( father.hasFather() )
+            {
+              father = father.father();
+              --count;
+            }
+#endif // defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
           }
           assert( count == 0 );
         }
@@ -127,7 +176,11 @@ void checkGeometryInFather(const GridType& grid)
         typedef typename GridType::template Codim<0>::Entity::LocalGeometry LocalGeometry;
 
         const LocalGeometry& geometryInFather = eIt->geometryInFather();
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
         checkLocalGeometry( geometryInFather, eIt->father()->type(), "geometryInFather" );
+#else
+        checkLocalGeometry( geometryInFather, eIt->father().type(), "geometryInFather" );
+#endif
 
         // //////////////////////////////////////////////////////
         //   Check for types and constants
@@ -188,7 +241,11 @@ void checkGeometryInFather(const GridType& grid)
             geometryInFather.global(cornerInSon);
           // map father to global
           const typename Geometry::GlobalCoordinate cornerViaFather =
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
             eIt->father()->geometry().global(cornerInFather);
+#else
+            eIt->father().geometry().global(cornerInFather);
+#endif
 
           if( (cornerViaFather - cornerViaSon).infinity_norm() > 1e-7 )
           {
@@ -212,7 +269,12 @@ void checkGeometryInFather(const GridType& grid)
             eIt->geometry().local(global);
           // map global to father
           const typename Geometry::LocalCoordinate cornerInFather =
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
             eIt->father()->geometry().local(global);
+#else
+            eIt->father().geometry().local(global);
+#endif
+
           // map from father to son
           const typename Geometry::LocalCoordinate cornerViaFather =
             geometryInFather.local(cornerInFather);
@@ -237,7 +299,12 @@ void checkGeometryInFather(const GridType& grid)
         for( int j=0; j < geometryInFather.corners(); ++j )
         {
           const typename Geometry::GlobalCoordinate cornerViaFather
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
             = eIt->father()->geometry().global( geometryInFather.corner( j ) );
+#else
+            = eIt->father().geometry().global( geometryInFather.corner( j ) );
+#endif
+
           const typename Geometry::GlobalCoordinate &cornerViaSon = eIt->geometry().corner( j );
 
           if( (cornerViaFather - cornerViaSon).infinity_norm() > 1e-7 )

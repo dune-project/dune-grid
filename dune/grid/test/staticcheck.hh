@@ -289,8 +289,15 @@ struct EntityInterface<Grid, 0, dim, true>
     // grid hierarchy
     if ( e.hasFather() )
     {
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)    // grid hierarchy
       const typename Entity::EntityPointer fatherPtr = e.father();
-      const Entity &father = *fatherPtr;
+      *fatherPtr;
+#endif
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+      const Entity& father = *fatherPtr;
+#else
+      const Entity father = e.father();
+#endif
       father.hbegin(0);
       e.geometryInFather();
     }

@@ -163,6 +163,30 @@ namespace Dune
       return !realEntity.equals(other.realEntity);
     }
 
+    /** \brief Compares an Entity with an EntityPointer for equality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    template<typename ItImp>
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator==(const Dune::EntityPointer<GridImp,ItImp>& other) const
+    {
+      return (*this) == (*other);
+    }
+
+    /** \brief Compares an Entity with an EntityPointer for inequality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    template<typename ItImp>
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator!=(const Dune::EntityPointer<GridImp,ItImp>& other) const
+    {
+      return (*this) != (*other);
+    }
+
     //! Copy constructor from an existing entity.
     Entity(const Entity& other)
       : realEntity(other.realEntity)
@@ -185,6 +209,28 @@ namespace Dune
     {
       realEntity = std::move(other.realEntity);
       return *this;
+    }
+
+    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
+     *
+     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
+     *             It will be removed after the release of dune-grid-2.4.
+     */
+    const Entity& operator*() const
+    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
+    {
+      return *this;
+    }
+
+    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
+     *
+     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
+     *             It will be removed after the release of dune-grid-2.4.
+     */
+    const Entity* operator->() const
+    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
+    {
+      return this;
     }
 
     //@}
@@ -277,6 +323,7 @@ namespace Dune
     struct Codim
     {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
+      typedef typename GridImp::template Codim<cd>::Entity Entity;
     };
 
     /** \brief The codim==0 EntityPointer type */
@@ -347,6 +394,30 @@ namespace Dune
       return !realEntity.equals(other.realEntity);
     }
 
+    /** \brief Compares an Entity with an EntityPointer for equality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    template<typename ItImp>
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator==(const Dune::EntityPointer<GridImp,ItImp>& other) const
+    {
+      return (*this) == (*other);
+    }
+
+    /** \brief Compares an Entity with an EntityPointer for equality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    template<typename ItImp>
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    bool operator!=(const Dune::EntityPointer<GridImp,ItImp>& other) const
+    {
+      return (*this) != (*other);
+    }
+
     //! Copy constructor from an existing entity.
     Entity(const Entity& other)
       : realEntity(other.realEntity)
@@ -369,6 +440,28 @@ namespace Dune
     {
       realEntity = std::move(other.realEntity);
       return *this;
+    }
+
+    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
+     *
+     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
+     *             It will be removed after the release of dune-grid-2.4.
+     */
+    const Entity& operator*() const
+    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
+    {
+      return *this;
+    }
+
+    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
+     *
+     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
+     *             It will be removed after the release of dune-grid-2.4.
+     */
+    const Entity* operator->() const
+    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
+    {
+      return this;
     }
 
     //@}
@@ -410,8 +503,21 @@ namespace Dune
      *  \note The subentities are numbered 0, ..., subEntities( codim )-1
      */
     template< int codim >
-    typename Codim< codim >::EntityPointer subEntity ( int i ) const
+#ifdef DOXYGEN
+    typename Codim< codim >::Entity
+#else
+    typename std::conditional<
+      std::is_same<
+        decltype(realEntity.template subEntity< codim >(0)),
+        typename Codim< codim >::Entity
+        >::value,
+      typename Codim< codim >::Entity,
+      typename Codim< codim >::EntityPointer
+      >::type
+#endif
+    subEntity ( int i ) const
     {
+      warnOnDeprecatedEntityPointer<decltype(realEntity.template subEntity<codim>(0))>();
       return realEntity.template subEntity< codim >( i );
     }
 
@@ -492,8 +598,21 @@ namespace Dune
              or implemented in general.
              For some grids it might be available, though.
      */
-    EntityPointer father () const
+#ifdef DOXYGEN
+    Entity
+#else
+    typename std::conditional<
+      std::is_same<
+        decltype(realEntity.father()),
+        Entity
+        >::value,
+      Entity,
+      EntityPointer
+      >::type
+#endif
+    father () const
     {
+      warnOnDeprecatedEntityPointer<decltype(realEntity.father())>();
       return realEntity.father();
     }
 
@@ -597,6 +716,39 @@ namespace Dune
 
     //@}
 
+#ifndef DOXYGEN
+
+    // these two methods are just here for the 2.4 transition from EntityPointer to Entity
+    // they will generate a compile time warning if the grid implementation still returns
+    // an EntityPointer from certain interface methods.
+    // These methods are also required by the intersection facade, so I just made them public
+    // and hid them from Doxygen. As they don't do anything remotely useful, I don't think any
+    // user will try to call them manually... :-P
+
+    // this non-warning version only matches if E is an entity that has been correctly wrapped
+    // in a facade class
+    template<typename E>
+    static typename std::enable_if<
+      std::is_same<
+        E,
+        typename Codim<E::codimension>::Entity
+        >::value
+      >::type
+    warnOnDeprecatedEntityPointer()
+    {}
+
+    template<typename E>
+    DUNE_DEPRECATED_MSG("This grid still returns EntityPointers instead of Entities")
+    static typename std::enable_if<
+      not std::is_same<
+        E,
+        typename Codim<E::codimension>::Entity
+        >::value
+      >::type
+    warnOnDeprecatedEntityPointer()
+    {}
+
+#endif // DOXYGEN
 
   protected:
     // needed to make copy constructor from EntityPointer work for any iterator

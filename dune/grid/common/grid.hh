@@ -948,13 +948,30 @@ namespace Dune {
       return asImp().loadBalance(data);
     }
 
-    /** \brief obtain EntityPointer from EntitySeed. */
+    /** \brief obtain EntityPointer from EntitySeed.
+     *
+     * \deprecated This method is deprecated and will be removed after the release of
+     *             dune-grid 2.4. Please use entity() instead, which will directly return
+     *             an Entity object that you can then store for later use. The EntityPointer
+     *             concept in general is deprecated and will not be available after
+     *             dune-grid 2.4 has been released.
+     */
     template < class EntitySeed >
+    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
     typename Codim< EntitySeed :: codimension > :: EntityPointer
     entityPointer( const EntitySeed& seed ) const
     {
       CHECK_INTERFACE_IMPLEMENTATION( asImp().entityPointer( seed ) );
       return asImp().entityPointer( seed );
+    }
+
+    /** \brief obtain Entity from EntitySeed. */
+    template < class EntitySeed >
+    typename Codim< EntitySeed :: codimension > :: Entity
+    entity( const EntitySeed& seed ) const
+    {
+      //CHECK_INTERFACE_IMPLEMENTATION( asImp().entity( seed ) );
+      return asImp().entity( seed );
     }
   protected:
     //!  Barton-Nackman trick

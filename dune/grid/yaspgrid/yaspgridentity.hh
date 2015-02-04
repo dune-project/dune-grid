@@ -425,9 +425,11 @@ namespace Dune {
     struct Codim
     {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
+      typedef typename GridImp::template Codim<cd>::Entity Entity;
     };
 
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
     typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
     typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
@@ -446,6 +448,10 @@ namespace Dune {
 
     YaspEntity (const YGLI& g, const I& it)
       : _it(it), _g(g)
+    {}
+
+    YaspEntity (const YGLI& g, I&& it)
+      : _it(std::move(it)), _g(g)
     {}
 
     YaspEntity (YGLI&& g, I&& it)
@@ -508,7 +514,7 @@ namespace Dune {
     /*! Intra-element access to subentities of codimension cc > codim.
      */
     template<int cc>
-    typename Codim<cc>::EntityPointer subEntity (int i) const
+    typename Codim<cc>::Entity subEntity (int i) const
     {
       // calculate move bitset
       std::bitset<dim> move = Dune::Yasp::entityMove<dim>(i,cc);
@@ -520,11 +526,11 @@ namespace Dune {
           coord[j]++;
 
       int which = _g->overlapfront[cc].shiftmapping(Dune::Yasp::entityShift<dim>(i,cc));
-      return YaspEntityPointer<cc,GridImp>(_g,_g->overlapfront[cc].begin(coord, which));
+      return typename Codim<cc>::Entity(YaspEntity<cc,GridImp::dimension,GridImp>(_g,_g->overlapfront[cc].begin(coord, which)));
     }
 
     //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
-    EntityPointer father () const
+    Entity father () const
     {
       // check if coarse level exists
       if (_g->level()<=0)
@@ -540,7 +546,7 @@ namespace Dune {
       // get coordinates on next coarser level
       for (int k=0; k<dim; k++) coord[k] = coord[k]/2;
 
-      return YaspEntityPointer<0,GridImp>(cg,cg->overlap[0].begin(coord));
+      return Entity(YaspEntity<0,GridImp::dimension,GridImp>(cg,cg->overlap[0].begin(coord)));
     }
 
     //! returns true if father entity exists

@@ -47,8 +47,8 @@ namespace Dune {
 // after the next release anyway, I hacked in this hardcoded check for the compiler version
 #if not (defined(__GNUC__) && (__GNUC__ < 5) && (__GNUC_MINOR__ < 5))
 
-    YaspEntityPointer (const GridImp * yg, YGLI&& g, I&& it)
-      : _entity(YaspEntityImp(yg,std::move(g),std::move(it)))
+    YaspEntityPointer (YGLI&& g, I&& it)
+      : _entity(YaspEntityImp(std::move(g),std::move(it)))
     {}
 
 #endif

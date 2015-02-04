@@ -207,7 +207,10 @@ class CheckCommunication
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
   typedef typename GridView :: template Codim< 0 > :: Iterator Iterator;
 
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
   typedef typename GridView :: template Codim< cdim > :: EntityPointer SubEntityPointer;
+#endif
+  typedef typename GridView :: template Codim< cdim > :: Entity SubEntity;
 
   enum { dimworld = Grid :: dimensionworld };
   enum { dim = Grid :: dimension };
@@ -290,10 +293,18 @@ class CheckCommunication
               const int e = insideRefElem.subEntity( indexInInside, 1, i, cdim );
               const int idx = indexSet_.subIndex( entity, e, cdim );
               CoordinateVector cmid( 0.0 );
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
               SubEntityPointer subEp = entity.template subEntity< cdim >( e );
-              const int c = subEp->geometry().corners();
+              *subEp; // check dereferencing in case grid returns entity
+#endif
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+              const SubEntity& subE = *subEp;
+#else
+              SubEntity subE = entity.template subEntity< cdim >( e );
+#endif
+              const int c = subE.geometry().corners();
               for( int j = 0; j < c; ++j )
-                cmid += subEp->geometry().corner( j );
+                cmid += subE.geometry().corner( j );
               cmid /= double( c );
 
               data[ idx ] = f( cmid );
@@ -305,8 +316,15 @@ class CheckCommunication
             // as well
             if( intersection.neighbor() )
             {
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
               EntityPointer ep = intersection.outside();
+              *ep;
+#endif
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
               const Entity &neigh = *ep;
+#else
+              Entity neigh = intersection.outside();
+#endif
 
               assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
               assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
@@ -320,10 +338,18 @@ class CheckCommunication
                 const int e = outsideRefElem.subEntity( indexInOutside, 1, i, cdim );
                 const int idx = indexSet_.subIndex( neigh, e, cdim );
                 CoordinateVector cmid( 0.0 );
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
                 SubEntityPointer subEp = neigh.template subEntity< cdim >( e );
-                const int c = subEp->geometry().corners();
+                *subEp;
+#endif
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+                const SubEntity& subE = *subEp;
+#else
+                SubEntity subE = neigh.template subEntity< cdim >( e );
+#endif
+                const int c = subE.geometry().corners();
                 for( int j = 0; j < c; ++j )
-                  cmid += subEp->geometry().corner( j );
+                  cmid += subE.geometry().corner( j );
                 cmid /= double( c );
 
                 data[ idx ] = f( cmid );
@@ -392,14 +418,22 @@ class CheckCommunication
         const int numSubEntities = entity.subEntities(cdim);
         for( int i=0; i < numSubEntities; ++i )
         {
+#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
           SubEntityPointer subEp = entity.template subEntity< cdim >( i );
+          *subEp;
+#endif
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+          const SubEntity& subE = *subEp;
+#else
+          SubEntity subE = entity.template subEntity< cdim >( i );
+#endif
 
-          const int index = indexSet_.index( *subEp );
+          const int index = indexSet_.index( subE );
           CoordinateVector cmid( 0.0 );
 
-          const int numVertices = subEp->geometry().corners();
+          const int numVertices = subE.geometry().corners();
           for( int j = 0; j< numVertices; ++j )
-            cmid += subEp->geometry().corner( j );
+            cmid += subE.geometry().corner( j );
           cmid /= double( numVertices );
 
           double lerr = std::abs( f( cmid ) - data[ index ] );
@@ -420,7 +454,7 @@ class CheckCommunication
               const int vx = refElem.subEntity( i, cdim, j, dim );
 
               sout_ << "index: " << indexSet_.subIndex( entity, vx, dim )
-                    << " " << subEp->geometry().corner( j );
+                    << " " << subE.geometry().corner( j );
               (++j < numVertices ? sout_ <<  "/" : sout_ << std :: endl);
             }
           }

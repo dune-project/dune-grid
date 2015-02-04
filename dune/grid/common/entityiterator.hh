@@ -58,6 +58,137 @@ namespace Dune
       return tmp;
     }
 
+    // The dereferencing operators are overridden here to avoid calling
+    // the deprecated versions int the EntityPointer facade.
+
+    /** \brief Dereferencing operator. */
+    const Entity& operator*() const
+    {
+      return this->realIterator.dereference();
+    }
+
+    /** \brief Pointer operator. */
+    const Entity * operator->() const
+    {
+      return & this->realIterator.dereference();
+    }
+
+    /** \brief Checks for equality. */
+    bool operator==(const EntityIterator& rhs) const
+    {
+      return this->realIterator.equals(rhs.realIterator);
+    }
+
+    /** \brief Checks for inequality. */
+    bool operator!=(const EntityIterator& rhs) const
+    {
+      return !this->realIterator.equals(rhs.realIterator);
+    }
+
+    /** \brief Checks for equality.
+            Only works for EntityPointers and iterators on the same grid.
+            Due to the conversion operators one can compare
+            all kinds of iterators and EntityPointer.
+
+        \deprecated Comparing different types of iterators is deprecated and will be removed after the
+                    release of dune-grid 2.4. If you want to compare the entities pointed at by the
+                    iterators, dereference the iterators before comparing them.
+     */
+    template< class ItImp >
+    DUNE_DEPRECATED_MSG("Comparing different types of iterators is deprecated and will be removed after the \
+release of dune-grid 2.4. If you want to compare the entities pointed at by the iterators, dereference the \
+iterators before comparing them.")
+    bool operator== ( const EntityIterator< codim, Grid, ItImp > &rhs ) const
+    {
+      return this->equals( rhs );
+    }
+
+    /** \brief Checks for inequality.
+            Only works for EntityPointers and iterators on the same grid.
+            Due to the conversion operators one can compare
+            all kinds of iterators and EntityPointer.
+
+        \deprecated Comparing different types of iterators is deprecated and will be removed after the
+                    release of dune-grid 2.4. If you want to compare the entities pointed at by the
+                    iterators, dereference the iterators before comparing them.
+     */
+    template< class ItImp >
+    DUNE_DEPRECATED_MSG("Comparing different types of iterators is deprecated and will be removed after the \
+release of dune-grid 2.4. If you want to compare the entities pointed at by the iterators, dereference the \
+iterators before comparing them.")
+    bool operator!= ( const EntityIterator< codim, Grid, ItImp > &rhs ) const
+    {
+      return !this->equals( rhs );
+    }
+
+    /** \brief Checks for equality.
+            Only works for EntityPointers and iterators on the same grid.
+            Due to the conversion operators one can compare
+            all kinds of iterators and EntityPointer.
+
+        \deprecated Comparing different types of iterators is deprecated and will be removed after the
+                    release of dune-grid 2.4. If you want to compare the entities pointed at by the
+                    iterators, dereference the iterators before comparing them.
+     */
+    template< class ItImp >
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated will be removed after the release of dune-grid 2.4. \
+Moreover, comparing different types of iterators is deprecated as well and will also be removed after the \
+release of dune-grid 2.4. If you want to compare the entities pointed at by the iterators, dereference the \
+iterators before comparing them.")
+    bool operator== ( const EntityPointer< Grid, ItImp > &rhs ) const
+    {
+      return this->equals( rhs );
+    }
+
+    /** \brief Checks for inequality.
+            Only works for EntityPointers and iterators on the same grid.
+            Due to the conversion operators one can compare
+            all kinds of iterators and EntityPointer.
+
+        \deprecated Comparing different types of iterators is deprecated and will be removed after the
+                    release of dune-grid 2.4. If you want to compare the entities pointed at by the
+                    iterators, dereference the iterators before comparing them.
+     */
+    template< class ItImp >
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated will be removed after the release of dune-grid 2.4. \
+Moreover, comparing different types of iterators is deprecated as well and will also be removed after the \
+release of dune-grid 2.4. If you want to compare the entities pointed at by the iterators, dereference the \
+iterators before comparing them.")
+    bool operator!= ( const EntityPointer< Grid, ItImp > &rhs ) const
+    {
+      return !this->equals( rhs );
+    }
+
+
+    /** \brief Compares an EntityIterator with an Entity for equality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. \
+Instead, you can copy and store entities directly now. You probably stumbled across this warning because you \
+compared the return value of Entity::father(), Entity::subEntity(), Intersection::inside() or \
+Intersection::outside() with an iterator. To fix the problem, derefence the iterator before comparing.")
+    bool operator==(const Entity& rhs) const
+    {
+      return (**this) == rhs;
+    }
+
+    /** \brief Compares an EntityIterator with an Entity for inequality.
+     *
+     * \deprecated This method only exists for backwards compatibility during the 2.4
+     *             release cycle and will be removed after dune-grid-2.4 is released.
+     */
+    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. \
+Instead, you can copy and store entities directly now. You probably stumbled across this warning because you \
+compared the return value of Entity::father(), Entity::subEntity(), Intersection::inside() or \
+Intersection::outside() with an iterator. To fix the problem, derefence the iterator before comparing.")
+    bool operator!=(const Entity& rhs) const
+    {
+      return (**this) != rhs;
+    }
+
+
     /** \name Implementor's interface
      *  \{
      */

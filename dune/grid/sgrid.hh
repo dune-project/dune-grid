@@ -373,7 +373,7 @@ namespace Dune {
        Provide access to mesh entity i of given codimension. Entities
        are numbered 0 ... count<cc>()-1
      */
-    template<int cc> typename Codim<cc>::EntityPointer subEntity (int i) const;
+    template<int cc> typename Codim<cc>::Entity subEntity (int i) const;
 
     //! subentity compressed index
     int subCompressedIndex (int codim, int i) const
@@ -423,7 +423,7 @@ namespace Dune {
 
        Assumes that meshes are nested.
      */
-    EntityPointer father () const;
+    Entity father () const;
 
     //! returns true if father entity exists
     bool hasFather () const
@@ -660,11 +660,11 @@ namespace Dune {
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const;
+    Entity inside() const;
 
     //! return EntityPointer to the Entity on the outside of this intersection
     //! (that is the neighboring Entity)
-    EntityPointer outside() const;
+    Entity outside() const;
 
     //! return true if intersection is with boundary.
     bool boundary () const;
@@ -1318,6 +1318,19 @@ namespace Dune {
       return SEntityPointer<codim,const SGrid<dim,dimworld> >(this,
                                                               this->getRealImplementation(seed).level(),
                                                               this->getRealImplementation(seed).index());
+    }
+
+    // \brief obtain Entity from EntitySeed. */
+    template <typename Seed>
+    typename Traits::template Codim<Seed::codimension>::Entity
+    entity(const Seed& seed) const
+    {
+      enum { codim = Seed::codimension };
+      return typename Traits::template Codim<Seed::codimension>::Entity(
+        SEntity<codim,dim,const SGrid<dim,dimworld> >(this,
+                                                      this->getRealImplementation(seed).level(),
+                                                      this->getRealImplementation(seed).index())
+        );
     }
 
     /*! The communication interface

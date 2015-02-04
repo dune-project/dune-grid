@@ -83,15 +83,15 @@ namespace Dune {
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const
+    Entity inside() const
     {
-      return EntityPointer(_inside);
+      return Entity(_inside);
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
-    EntityPointer outside() const
+    Entity outside() const
     {
-      return EntityPointer(_outside);
+      return Entity(_outside);
     }
 
 #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
