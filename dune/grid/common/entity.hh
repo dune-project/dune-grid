@@ -187,6 +187,9 @@ namespace Dune
       return (*this) != (*other);
     }
 
+    Entity()
+    {}
+
     //! Copy constructor from an existing entity.
     Entity(const Entity& other)
       : realEntity(other.realEntity)
@@ -417,6 +420,9 @@ namespace Dune
     {
       return (*this) != (*other);
     }
+
+    Entity()
+    {}
 
     //! Copy constructor from an existing entity.
     Entity(const Entity& other)
