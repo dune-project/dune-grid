@@ -17,7 +17,7 @@
 #endif
 
 #include <dune/grid/utility/structuredgridfactory.hh>
-#include <dune/grid/test/gridcheck.cc>
+#include <dune/grid/test/gridcheck.hh>
 
 using namespace Dune;
 
