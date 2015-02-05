@@ -17,7 +17,7 @@ namespace Dune {
   template<int codim, int dim, class GridImp>
   class IdentityGridEntity;
 
-  template<int codim, class GridImp>
+  template<int codim, class GridImp, typename HostEntityPointer>
   class IdentityGridEntityPointer;
 
   template<int codim, PartitionIteratorType pitype, class GridImp>
@@ -38,47 +38,6 @@ namespace Dune {
   struct HostGridAccess;
 
 
-
-  template<int codim, int dim, class GridImp>
-  class IdentityGridMakeableEntity :
-    public GridImp::template Codim<codim>::Entity
-  {
-  public:
-
-    // The codimension of this entitypointer wrt the host grid
-    enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension + codim};
-
-    // EntityPointer to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::EntityPointer HostGridEntityPointer;
-
-
-    //! \todo Please doc me !
-    template< class HostGridEntityPointer >
-    IdentityGridMakeableEntity(const GridImp* identityGrid, const HostGridEntityPointer& hostEntity) :
-      GridImp::template Codim<codim>::Entity (IdentityGridEntity<codim, dim, const GridImp>(identityGrid,hostEntity)),
-      identityGrid_(identityGrid)
-    {}
-
-
-    //! \todo Please doc me !
-    template< class HostGridEntityPointer >
-    void setToTarget(const HostGridEntityPointer& hostEntity) {
-      this->realEntity.setToTarget(hostEntity);
-    }
-
-
-    //! \todo Please doc me !
-    const HostGridEntityPointer& getTarget() {
-      return this->realEntity.hostEntity_;
-    }
-
-
-  private:
-
-    const GridImp* identityGrid_;
-  };
-
-
   //**********************************************************************
   //
   // --IdentityGridEntity
@@ -95,7 +54,6 @@ namespace Dune {
   class IdentityGridEntity :
     public EntityDefaultImplementation <codim,dim,GridImp,IdentityGridEntity>
   {
-    friend class IdentityGridMakeableEntity<codim,dim,GridImp>;
 
     template <class GridImp_>
     friend class IdentityGridLevelIndexSet;
@@ -109,7 +67,8 @@ namespace Dune {
     template <class GridImp_>
     friend class IdentityGridGlobalIdSet;
 
-    friend class IdentityGridEntityPointer<codim,GridImp>;
+    template<int,typename, typename>
+    friend class IdentityGridEntityPointer;
 
     friend struct HostGridAccess< typename remove_const< GridImp >::type >;
 
@@ -122,7 +81,7 @@ namespace Dune {
     enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension + codim};
 
     // EntityPointer to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::EntityPointer HostGridEntityPointer;
+    typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Entity HostGridEntity;
 
 
   public:
@@ -132,20 +91,30 @@ namespace Dune {
     //! The type of the EntitySeed interface class
     typedef typename GridImp::template Codim<codim>::EntitySeed EntitySeed;
 
-    //! Constructor for an entity in a given grid level
-    template< class HostGridEntityPointer >
-    IdentityGridEntity(const GridImp* identityGrid, const HostGridEntityPointer& hostEntity) :
-      hostEntity_(hostEntity),
-      identityGrid_(identityGrid)
+    IdentityGridEntity()
+      : identityGrid_(nullptr)
     {}
 
+    IdentityGridEntity(const GridImp* identityGrid, const HostGridEntity& hostEntity)
+      : hostEntity_(hostEntity)
+      , identityGrid_(identityGrid)
+    {}
+
+    IdentityGridEntity(const GridImp* identityGrid, HostGridEntity&& hostEntity)
+      : hostEntity_(std::move(hostEntity))
+      , identityGrid_(identityGrid)
+    {}
 
     //! \todo Please doc me !
-    IdentityGridEntity(const IdentityGridEntity& original) :
-      hostEntity_(original.hostEntity_),
-      identityGrid_(original.identityGrid_)
+    IdentityGridEntity(const IdentityGridEntity& original)
+      : hostEntity_(original.hostEntity_)
+      , identityGrid_(original.identityGrid_)
     {}
 
+    IdentityGridEntity(IdentityGridEntity&& original)
+      : hostEntity_(std::move(original.hostEntity_))
+      , identityGrid_(original.identityGrid_)
+    {}
 
     //! \todo Please doc me !
     IdentityGridEntity& operator=(const IdentityGridEntity& original)
@@ -158,6 +127,17 @@ namespace Dune {
       return *this;
     }
 
+    //! \todo Please doc me !
+    IdentityGridEntity& operator=(IdentityGridEntity&& original)
+    {
+      if (this != &original)
+      {
+        identityGrid_ = original.identityGrid_;
+        hostEntity_ = std::move(original.hostEntity_);
+      }
+      return *this;
+    }
+
     bool equals(const IdentityGridEntity& other) const
     {
       return hostEntity_ == other.hostEntity_;
@@ -165,25 +145,25 @@ namespace Dune {
 
     //! returns true if father entity exists
     bool hasFather () const {
-      return hostEntity_->hasFather();
+      return hostEntity_.hasFather();
     }
 
     //! Create EntitySeed
     EntitySeed seed () const
     {
-      return EntitySeed(*hostEntity_);
+      return EntitySeed(hostEntity_);
     }
 
     //! level of this element
     int level () const {
-      return hostEntity_->level();
+      return hostEntity_.level();
     }
 
 
     /** \brief The partition type for parallel computing
      */
     PartitionType partitionType () const {
-      return hostEntity_->partitionType();
+      return hostEntity_.partitionType();
     }
 
 
@@ -191,33 +171,23 @@ namespace Dune {
      * with codimension cc.
      */
     template<int cc> int count () const {
-      return hostEntity_->template count<cc>();
+      return hostEntity_.template count<cc>();
     }
 
 
     //! geometry of this entity
     Geometry geometry () const
     {
-      return Geometry( hostEntity_->geometry() );
+      return Geometry( hostEntity_.geometry() );
     }
 
 
-    HostGridEntityPointer hostEntity_;
-
+    HostGridEntity hostEntity_;
 
   private:
 
-    //! \todo Please doc me !
-    template< class HostGridEntityPointer >
-    void setToTarget(const HostGridEntityPointer& target)
-    {
-      hostEntity_ = target;
-    }
-
-
     const GridImp* identityGrid_;
 
-    //! the current geometry
   };
 
 
@@ -241,13 +211,16 @@ namespace Dune {
   {
     friend struct HostGridAccess< typename remove_const< GridImp >::type >;
 
+    template<int,typename, typename>
+    friend class IdentityGridEntityPointer;
+
   public:
 
     // The codimension of this entitypointer wrt the host grid
     enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension};
 
     // EntityPointer to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::EntityPointer HostGridEntityPointer;
+    typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Entity HostGridEntity;
 
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
 
@@ -265,20 +238,32 @@ namespace Dune {
     //! The type of the EntitySeed interface class
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
 
-    //! Constructor for an entity in a given grid level
-    template< class HostGridEntityPointer >
-    IdentityGridEntity(const GridImp* identityGrid, const HostGridEntityPointer& hostEntity) :
-      identityGrid_(identityGrid),
-      hostEntity_(hostEntity)
+
+
+    IdentityGridEntity()
+      : identityGrid_(nullptr)
     {}
 
+    IdentityGridEntity(const GridImp* identityGrid, const HostGridEntity& hostEntity)
+      : hostEntity_(hostEntity)
+      , identityGrid_(identityGrid)
+    {}
+
+    IdentityGridEntity(const GridImp* identityGrid, HostGridEntity&& hostEntity)
+      : hostEntity_(std::move(hostEntity))
+      , identityGrid_(identityGrid)
+    {}
 
     //! \todo Please doc me !
-    IdentityGridEntity(const IdentityGridEntity& original) :
-      identityGrid_(original.identityGrid_),
-      hostEntity_(original.hostEntity_)
+    IdentityGridEntity(const IdentityGridEntity& original)
+      : hostEntity_(original.hostEntity_)
+      , identityGrid_(original.identityGrid_)
     {}
 
+    IdentityGridEntity(IdentityGridEntity&& original)
+      : hostEntity_(std::move(original.hostEntity_))
+      , identityGrid_(original.identityGrid_)
+    {}
 
     //! \todo Please doc me !
     IdentityGridEntity& operator=(const IdentityGridEntity& original)
@@ -291,6 +276,17 @@ namespace Dune {
       return *this;
     }
 
+    //! \todo Please doc me !
+    IdentityGridEntity& operator=(IdentityGridEntity&& original)
+    {
+      if (this != &original)
+      {
+        identityGrid_ = original.identityGrid_;
+        hostEntity_ = std::move(original.hostEntity_);
+      }
+      return *this;
+    }
+
     bool equals(const IdentityGridEntity& other) const
     {
       return hostEntity_ == other.hostEntity_;
@@ -298,32 +294,32 @@ namespace Dune {
 
     //! returns true if father entity exists
     bool hasFather () const {
-      return hostEntity_->hasFather();
+      return hostEntity_.hasFather();
     }
 
     //! Create EntitySeed
     EntitySeed seed () const
     {
-      return EntitySeed(*hostEntity_);
+      return EntitySeed(hostEntity_);
     }
 
     //! Level of this element
     int level () const
     {
-      return hostEntity_->level();
+      return hostEntity_.level();
     }
 
 
     /** \brief The partition type for parallel computing */
     PartitionType partitionType () const {
-      return hostEntity_->partitionType();
+      return hostEntity_.partitionType();
     }
 
 
     //! Geometry of this entity
     Geometry geometry () const
     {
-      return Geometry( hostEntity_->geometry() );
+      return Geometry( hostEntity_.geometry() );
     }
 
 
@@ -332,7 +328,7 @@ namespace Dune {
     template<int cc>
     int count () const
     {
-      return hostEntity_->template count<cc>();
+      return hostEntity_.template count<cc>();
     }
 
 
@@ -340,7 +336,7 @@ namespace Dune {
      */
     unsigned int subEntities (unsigned int codim) const
     {
-      return hostEntity_->subEntities(codim);
+      return hostEntity_.subEntities(codim);
     }
 
 
@@ -348,49 +344,53 @@ namespace Dune {
      *  are numbered 0 ... count<cc>()-1
      */
     template<int cc>
-    typename GridImp::template Codim<cc>::EntityPointer subEntity (int i) const {
-      return IdentityGridEntityPointer<cc,GridImp>(identityGrid_, hostEntity_->template subEntity<cc>(i));
+    typename GridImp::template Codim<cc>::Entity subEntity (int i) const {
+      return IdentityGridEntity<cc,dim,GridImp>(identityGrid_, hostEntity_.template subEntity<cc>(i));
     }
 
 
     //! First level intersection
     IdentityGridLevelIntersectionIterator<GridImp> ilevelbegin () const {
-      return IdentityGridLevelIntersectionIterator<GridImp>(identityGrid_,
-                                                            hostEntity_->ilevelbegin());
+      return IdentityGridLevelIntersectionIterator<GridImp>(
+        identityGrid_,
+        identityGrid_->getHostGrid().levelGridView(level()).ibegin(hostEntity_));
     }
 
 
     //! Reference to one past the last neighbor
     IdentityGridLevelIntersectionIterator<GridImp> ilevelend () const {
-      return IdentityGridLevelIntersectionIterator<GridImp>(identityGrid_,
-                                                            hostEntity_->ilevelend());
+      return IdentityGridLevelIntersectionIterator<GridImp>(
+        identityGrid_,
+        identityGrid_->getHostGrid().levelGridView(level()).iend(hostEntity_));
     }
 
 
     //! First leaf intersection
     IdentityGridLeafIntersectionIterator<GridImp> ileafbegin () const {
-      return IdentityGridLeafIntersectionIterator<GridImp>(identityGrid_,
-                                                           hostEntity_->ileafbegin());
+      return IdentityGridLeafIntersectionIterator<GridImp>(
+        identityGrid_,
+        identityGrid_->getHostGrid().leafGridView().ibegin(hostEntity_));
     }
 
 
     //! Reference to one past the last leaf intersection
     IdentityGridLeafIntersectionIterator<GridImp> ileafend () const {
-      return IdentityGridLeafIntersectionIterator<GridImp>(identityGrid_,
-                                                           hostEntity_->ileafend());
+      return IdentityGridLeafIntersectionIterator<GridImp>(
+        identityGrid_,
+        identityGrid_->getHostGrid().leafGridView().iend(hostEntity_));
     }
 
 
     //! returns true if Entity has NO children
     bool isLeaf() const {
-      return hostEntity_->isLeaf();
+      return hostEntity_.isLeaf();
     }
 
 
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
-    IdentityGridEntityPointer<0,GridImp> father () const {
-      return IdentityGridEntityPointer<0,GridImp>(identityGrid_, hostEntity_->father());
+    typename GridImp::template Codim<0>::Entity father () const {
+      return IdentityGridEntity(identityGrid_, hostEntity_.father());
     }
 
 
@@ -405,7 +405,7 @@ namespace Dune {
      */
     LocalGeometry geometryInFather () const
     {
-      return LocalGeometry( hostEntity_->geometryInFather() );
+      return LocalGeometry( hostEntity_.geometryInFather() );
     }
 
 
@@ -450,19 +450,8 @@ namespace Dune {
     // /////////////////////////////////////////
 
 
-    //! \todo Please doc me !
-    template< class HostGridEntityPointer >
-    void setToTarget(const HostGridEntityPointer& target)
-    {
-      hostEntity_ = target;
-    }
-
-
+    HostGridEntity hostEntity_;
     const GridImp* identityGrid_;
-
-    //! \todo Please doc me !
-    HostGridEntityPointer hostEntity_;
-
 
   private:
 
