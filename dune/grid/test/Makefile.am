@@ -212,6 +212,7 @@ test_dgfalu_uggrid_combination_LDADD =		\
 ## distribution tarball
 SOURCES = basicunitcube.hh                      \
           check-albertareader.cc                \
+          check-albertareader.hh                \
           checkadaptation.cc                    \
           checkadaptation.hh                    \
           checkcommunicate.cc                   \

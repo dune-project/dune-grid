@@ -136,6 +136,7 @@ set_property(TARGET ${TESTS} APPEND PROPERTY
 set(SOURCES
   basicunitcube.hh
   check-albertareader.cc
+  check-albertareader.hh
   checkadaptation.cc
   checkadaptation.hh
   checkcommunicate.cc

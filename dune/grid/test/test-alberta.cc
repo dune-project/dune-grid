@@ -23,7 +23,7 @@
 #include "checkcommunicate.hh"
 #include "checkiterators.hh"
 #include "checktwists.hh"
-#include "check-albertareader.cc"
+#include "check-albertareader.hh"
 #include "checkadaptation.hh"
 #include "checkpartition.hh"
 
