@@ -21,7 +21,7 @@
 #include "checkgeometry.hh"
 #include "checkintersectionit.hh"
 #include "checkcommunicate.hh"
-#include "checkiterators.cc"
+#include "checkiterators.hh"
 #include "checktwists.cc"
 #include "check-albertareader.cc"
 #include "checkadaptation.hh"

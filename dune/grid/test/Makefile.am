@@ -227,6 +227,7 @@ SOURCES = basicunitcube.hh                      \
           checkintersectionit.cc                \
           checkintersectionit.hh                \
           checkiterators.cc                     \
+          checkiterators.hh                     \
           checkjacobians.cc                     \
           checkpartition.cc                     \
           checktwists.cc                        \

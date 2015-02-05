@@ -151,6 +151,7 @@ set(SOURCES
   checkintersectionit.cc
   checkintersectionit.hh
   checkiterators.cc
+  checkiterators.hh
   checkpartition.cc
   checktwists.cc
   functions.hh

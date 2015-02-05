@@ -17,7 +17,7 @@
 #include "checkcommunicate.hh"
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"
-#include "checkiterators.cc"
+#include "checkiterators.hh"
 #include "checkadaptation.hh"
 #include "checkpartition.cc"
 
