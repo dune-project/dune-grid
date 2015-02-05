@@ -24,7 +24,7 @@
 #include "checkiterators.cc"
 #include "checktwists.cc"
 #include "check-albertareader.cc"
-#include "checkadaptation.cc"
+#include "checkadaptation.hh"
 #include "checkpartition.cc"
 
 

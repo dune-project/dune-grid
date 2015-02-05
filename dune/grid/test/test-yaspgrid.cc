@@ -18,7 +18,7 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkiterators.cc"
-#include "checkadaptation.cc"
+#include "checkadaptation.hh"
 #include "checkpartition.cc"
 
 template<int dim, class CC>

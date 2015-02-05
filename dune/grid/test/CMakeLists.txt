@@ -137,6 +137,7 @@ set(SOURCES
   basicunitcube.hh
   check-albertareader.cc
   checkadaptation.cc
+  checkadaptation.hh
   checkcommunicate.cc
   checkentityseed.cc
   checkgeometry.cc

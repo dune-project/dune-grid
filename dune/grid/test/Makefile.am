@@ -213,6 +213,7 @@ test_dgfalu_uggrid_combination_LDADD =		\
 SOURCES = basicunitcube.hh                      \
           check-albertareader.cc                \
           checkadaptation.cc                    \
+          checkadaptation.hh                    \
           checkcommunicate.cc                   \
           checkentityseed.cc                    \
           checkgeometry.cc                      \

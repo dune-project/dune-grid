@@ -12,7 +12,7 @@
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
-#include "checkadaptation.cc"
+#include "checkadaptation.hh"
 
 using namespace Dune;
 
