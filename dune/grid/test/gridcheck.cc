@@ -21,7 +21,7 @@
 #include "staticcheck.hh"
 #include "checkindexset.cc"
 #include "checkgeometry.cc"
-#include "checkentityseed.cc"
+#include "checkentityseed.hh"
 
 
 #include <limits>

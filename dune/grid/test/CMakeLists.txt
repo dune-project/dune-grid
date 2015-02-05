@@ -141,6 +141,7 @@ set(SOURCES
   checkcommunicate.cc
   checkcommunicate.hh
   checkentityseed.cc
+  checkentityseed.hh
   checkgeometry.cc
   checkgeometryinfather.cc
   checkindexset.cc
