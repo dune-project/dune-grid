@@ -22,7 +22,7 @@
 #include "checkintersectionit.hh"
 #include "checkcommunicate.hh"
 #include "checkiterators.hh"
-#include "checktwists.cc"
+#include "checktwists.hh"
 #include "check-albertareader.cc"
 #include "checkadaptation.hh"
 #include "checkpartition.hh"

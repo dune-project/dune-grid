@@ -233,6 +233,7 @@ SOURCES = basicunitcube.hh                      \
           checkpartition.cc                     \
           checkpartition.hh                     \
           checktwists.cc                        \
+          checktwists.hh                        \
           functions.hh                          \
           gridcheck.cc                          \
           staticcheck.hh
