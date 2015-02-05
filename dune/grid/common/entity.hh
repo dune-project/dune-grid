@@ -245,7 +245,10 @@ namespace Dune
     //===========================================================
 
     //! Copy constructor from EntityImp
-    explicit Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {}
+    Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {}
+
+    //! Move constructor from EntityImp
+    Entity(EntityImp<cd,dim,GridImp> && e) : realEntity(std::move(e)) {}
 
     //@}
 
@@ -749,7 +752,10 @@ namespace Dune
     //===========================================================
 
     //! Copy constructor from EntityImp
-    explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {}
+    Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {}
+
+    //! Move constructor from EntityImp
+    Entity(EntityImp<0,dim,GridImp> && e) : realEntity(std::move(e)) {}
 
     //@}
 
