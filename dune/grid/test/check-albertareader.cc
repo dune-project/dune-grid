@@ -6,7 +6,7 @@
 
 #include <dune/grid/albertagrid/albertareader.hh>
 
-#include "gridcheck.cc"
+#include "gridcheck.hh"
 
 template< class Grid >
 void checkAlbertaReader ()

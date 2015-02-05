@@ -18,7 +18,7 @@
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
-#include "gridcheck.cc"
+#include "gridcheck.hh"
 
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"

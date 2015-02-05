@@ -9,7 +9,7 @@
 
 #include <dune/grid/onedgrid.hh>
 
-#include "gridcheck.cc"
+#include "gridcheck.hh"
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"
 #include "checkadaptation.hh"

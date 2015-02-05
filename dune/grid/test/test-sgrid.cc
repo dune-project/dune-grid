@@ -8,7 +8,7 @@
 
 #include <dune/grid/sgrid.hh>
 
-#include "gridcheck.cc"
+#include "gridcheck.hh"
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"
 #include "checkpartition.hh"

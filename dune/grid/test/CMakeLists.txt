@@ -160,6 +160,7 @@ set(SOURCES
   checktwists.hh
   functions.hh
   gridcheck.cc
+  gridcheck.hh
   staticcheck.hh)
 
 # install the tests as we want to support testing 3rdparty grids with installed dune-grid

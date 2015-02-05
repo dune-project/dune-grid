@@ -13,7 +13,7 @@
 #include <dune/grid/yaspgrid/backuprestore.hh>
 #include <dune/grid/yaspgrid/factory.hh>
 
-#include "gridcheck.cc"
+#include "gridcheck.hh"
 #include "checkcommunicate.hh"
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"

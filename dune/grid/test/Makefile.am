@@ -236,6 +236,7 @@ SOURCES = basicunitcube.hh                      \
           checktwists.hh                        \
           functions.hh                          \
           gridcheck.cc                          \
+          gridcheck.hh                          \
           staticcheck.hh
 
 NORMALTESTS += testiteratorranges

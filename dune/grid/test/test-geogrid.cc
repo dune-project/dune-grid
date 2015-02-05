@@ -24,7 +24,7 @@
 
 #include "functions.hh"
 
-#include "gridcheck.cc"
+#include "gridcheck.hh"
 #include "checkcommunicate.hh"
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"
