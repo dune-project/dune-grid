@@ -229,6 +229,7 @@ SOURCES = basicunitcube.hh                      \
           checkiterators.cc                     \
           checkiterators.hh                     \
           checkjacobians.cc                     \
+          checkjacobians.hh                     \
           checkpartition.cc                     \
           checktwists.cc                        \
           functions.hh                          \
