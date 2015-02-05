@@ -19,7 +19,7 @@
 #include "gridcheck.cc"
 #include "checkgeometryinfather.hh"
 #include "checkgeometry.hh"
-#include "checkintersectionit.cc"
+#include "checkintersectionit.hh"
 #include "checkcommunicate.hh"
 #include "checkiterators.cc"
 #include "checktwists.cc"

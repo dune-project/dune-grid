@@ -149,6 +149,7 @@ set(SOURCES
   checkindexset.cc
   checkindexset.hh
   checkintersectionit.cc
+  checkintersectionit.hh
   checkiterators.cc
   checkpartition.cc
   checktwists.cc

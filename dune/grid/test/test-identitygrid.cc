@@ -10,7 +10,7 @@
 #include <dune/grid/identitygrid.hh>
 
 #include "gridcheck.cc"
-#include "checkintersectionit.cc"
+#include "checkintersectionit.hh"
 
 using namespace Dune;
 

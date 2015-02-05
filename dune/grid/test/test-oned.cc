@@ -11,7 +11,7 @@
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.hh"
-#include "checkintersectionit.cc"
+#include "checkintersectionit.hh"
 #include "checkadaptation.hh"
 
 using namespace Dune;

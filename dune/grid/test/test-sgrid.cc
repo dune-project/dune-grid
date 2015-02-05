@@ -10,7 +10,7 @@
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.hh"
-#include "checkintersectionit.cc"
+#include "checkintersectionit.hh"
 #include "checkpartition.cc"
 
 template<int d, int w>

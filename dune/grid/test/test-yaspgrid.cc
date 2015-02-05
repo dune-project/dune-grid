@@ -16,7 +16,7 @@
 #include "gridcheck.cc"
 #include "checkcommunicate.hh"
 #include "checkgeometryinfather.hh"
-#include "checkintersectionit.cc"
+#include "checkintersectionit.hh"
 #include "checkiterators.cc"
 #include "checkadaptation.hh"
 #include "checkpartition.cc"
