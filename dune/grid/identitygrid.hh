@@ -83,7 +83,7 @@ namespace Dune
   template <class HostGrid>
   class IdentityGrid
   : public GridDefaultImplementation<HostGrid::dimension, HostGrid::dimensionworld,
-      double, IdentityGridFamily<HostGrid::dimension, HostGrid> >
+                                     typename HostGrid::ctype, IdentityGridFamily<HostGrid::dimension, HostGrid> >
   {
     friend class IdentityGridLevelIndexSet<const IdentityGrid<HostGrid> >;
     friend class IdentityGridLeafIndexSet<const IdentityGrid<HostGrid> >;
