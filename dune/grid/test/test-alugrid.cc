@@ -18,12 +18,12 @@
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
-#include "gridcheck.cc"
+#include "gridcheck.hh"
 
-#include "checkgeometryinfather.cc"
-#include "checkintersectionit.cc"
-#include "checkcommunicate.cc"
-//#include "checktwists.cc"
+#include "checkgeometryinfather.hh"
+#include "checkintersectionit.hh"
+#include "checkcommunicate.hh"
+//#include "checktwists.hh"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 

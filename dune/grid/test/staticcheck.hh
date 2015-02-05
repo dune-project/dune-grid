@@ -1,8 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id: gridcheck.cc 6156 2010-01-17 16:40:14Z dedner $
-#ifndef DUNE_STATIC_CHECK_HH
-#define DUNE_STATIC_CHECK_HH
+#ifndef DUNE_GRID_TEST_STATICCHECK_HH
+#define DUNE_GRID_TEST_STATICCHECK_HH
 
 /** \file
     \brief Implements static grid checks
@@ -610,4 +609,4 @@ struct GridInterface
   void (*c)(const Grid&);
 };
 
-#endif // #ifndef DUNE_STATIC_CHECK_HH
+#endif // #ifndef DUNE_GRID_TEST_STATICCHECK_HH

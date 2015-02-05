@@ -24,13 +24,13 @@
 
 #include "functions.hh"
 
-#include "gridcheck.cc"
-#include "checkcommunicate.cc"
-#include "checkgeometryinfather.cc"
-#include "checkintersectionit.cc"
-#include "checkiterators.cc"
-#include "checkpartition.cc"
-#include "checkgeometry.cc"
+#include "gridcheck.hh"
+#include "checkcommunicate.hh"
+#include "checkgeometryinfather.hh"
+#include "checkintersectionit.hh"
+#include "checkiterators.hh"
+#include "checkpartition.hh"
+#include "checkgeometry.hh"
 
 namespace Dune
 {

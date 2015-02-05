@@ -15,10 +15,10 @@
 #include <dune/grid/uggrid.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
-#include "gridcheck.cc"
-#include "checkcommunicate.cc"
-#include "checkgeometryinfather.cc"
-#include "checkintersectionit.cc"
+#include "gridcheck.hh"
+#include "checkcommunicate.hh"
+#include "checkgeometryinfather.hh"
+#include "checkintersectionit.hh"
 
 #include <dune/common/parallel/mpihelper.hh>
 

@@ -13,13 +13,13 @@
 #include <dune/grid/yaspgrid/backuprestore.hh>
 #include <dune/grid/yaspgrid/factory.hh>
 
-#include "gridcheck.cc"
-#include "checkcommunicate.cc"
-#include "checkgeometryinfather.cc"
-#include "checkintersectionit.cc"
-#include "checkiterators.cc"
-#include "checkadaptation.cc"
-#include "checkpartition.cc"
+#include "gridcheck.hh"
+#include "checkcommunicate.hh"
+#include "checkgeometryinfather.hh"
+#include "checkintersectionit.hh"
+#include "checkiterators.hh"
+#include "checkadaptation.hh"
+#include "checkpartition.hh"
 
 template<int dim, class CC>
 struct YaspFactory

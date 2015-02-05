@@ -8,10 +8,10 @@
 
 #include <dune/grid/sgrid.hh>
 
-#include "gridcheck.cc"
-#include "checkgeometryinfather.cc"
-#include "checkintersectionit.cc"
-#include "checkpartition.cc"
+#include "gridcheck.hh"
+#include "checkgeometryinfather.hh"
+#include "checkintersectionit.hh"
+#include "checkpartition.hh"
 
 template<int d, int w>
 void runtest()

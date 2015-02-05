@@ -16,16 +16,16 @@
 
 #include "../common/boundaryprojection.hh"
 
-#include "gridcheck.cc"
-#include "checkgeometryinfather.cc"
-#include "checkgeometry.cc"
-#include "checkintersectionit.cc"
-#include "checkcommunicate.cc"
-#include "checkiterators.cc"
-#include "checktwists.cc"
-#include "check-albertareader.cc"
-#include "checkadaptation.cc"
-#include "checkpartition.cc"
+#include "gridcheck.hh"
+#include "checkgeometryinfather.hh"
+#include "checkgeometry.hh"
+#include "checkintersectionit.hh"
+#include "checkcommunicate.hh"
+#include "checkiterators.hh"
+#include "checktwists.hh"
+#include "check-albertareader.hh"
+#include "checkadaptation.hh"
+#include "checkpartition.hh"
 
 
 template< int dim, int dimworld >
