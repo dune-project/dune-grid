@@ -22,63 +22,36 @@ namespace Dune {
    */
   template<class GridImp>
   class IdentityGridHierarchicIterator :
-    public Dune::IdentityGridEntityPointer <0,GridImp>
+    public Dune::IdentityGridEntityPointer<0,GridImp,typename GridImp::HostGridType::template Codim<0>::Entity::HierarchicIterator>
   {
+
+    // Type of the corresponding HierarchicIterator in the host grid
+    typedef typename GridImp::HostGridType::template Codim<0>::Entity::HierarchicIterator HostGridHierarchicIterator;
+
+    typedef Dune::IdentityGridEntityPointer<0,GridImp,typename GridImp::HostGridType::template Codim<0>::Entity::HierarchicIterator> Base;
+
   public:
 
-    typedef typename GridImp::template Codim<0>::Entity Entity;
-
-    typedef IdentityGridEntity <0, GridImp::dimension, GridImp> IdentityGridElement;
-
+    typedef typename Base::Entity Entity;
 
     //! the default Constructor
-    explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const IdentityGridElement& startEntity, int maxLevel) :
-      IdentityGridEntityPointer<0,GridImp>(identityGrid, startEntity.hostEntity_->hbegin(maxLevel)),
-      identityGrid_(identityGrid),
-      hostGridHierarchicIterator_(startEntity.hostEntity_->hbegin(maxLevel)),
-      hostGridHierarchicEndIterator_(startEntity.hostEntity_->hend(maxLevel))
-    {
-      this->virtualEntity_.setToTarget(hostGridHierarchicIterator_);
-    }
+    explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const Entity& startEntity, int maxLevel) :
+      Base(identityGrid, GridImp::getRealImplementation(startEntity).hostEntity_.hbegin(maxLevel))
+    {}
 
 
     //! \todo Please doc me !
-    explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const IdentityGridElement& startEntity, int maxLevel, bool endDummy) :
-      IdentityGridEntityPointer<0,GridImp>(identityGrid, startEntity.hostEntity_->hend(maxLevel)),
-      identityGrid_(identityGrid),
-      hostGridHierarchicIterator_(startEntity.hostEntity_->hbegin(maxLevel)),
-      hostGridHierarchicEndIterator_(startEntity.hostEntity_->hend(maxLevel))
+    explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const Entity& startEntity, int maxLevel, bool endDummy) :
+      Base(identityGrid, GridImp::getRealImplementation(startEntity).hostEntity_.hend(maxLevel))
     {}
 
 
     //! \todo Please doc me !
     void increment()
     {
-      ++hostGridHierarchicIterator_;
-      this->virtualEntity_.setToTarget(hostGridHierarchicIterator_);
+      ++this->hostEntityPointer_;
     }
 
-
-  private:
-
-    // Type of the corresponding HierarchicIterator in the host grid
-    typedef typename GridImp::HostGridType::template Codim<0>::Entity::HierarchicIterator HostGridHierarchicIterator;
-
-    enum {dim = GridImp::HostGridType::dimension};
-
-
-    // The level index of the host entity that we are pointing to
-    //! \todo Please doc me !
-    unsigned int hostLevelIndex() const {
-      return identityGrid_->hostgrid_->levelIndexSet(hostGridHierarchicIterator_.level()).index(*hostGridHierarchicIterator_);
-    }
-
-
-    const GridImp* identityGrid_;
-
-    HostGridHierarchicIterator hostGridHierarchicIterator_;
-
-    HostGridHierarchicIterator hostGridHierarchicEndIterator_;
   };
 
 
