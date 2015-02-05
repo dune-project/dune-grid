@@ -41,27 +41,24 @@ namespace Dune {
 
     IdentityGridLeafIntersectionIterator(const GridImp* identityGrid,
                                          const HostLeafIntersectionIterator& hostIterator)
-      : intersection_(IdentityGridLeafIntersection<GridImp>(identityGrid, hostIterator))
+      : identityGrid_(identityGrid)
+      , hostIterator_(hostIterator)
     {}
 
-    //! The Destructor
-    ~IdentityGridLeafIntersectionIterator() {};
-
     //! equality
-    bool equals(const IdentityGridLeafIntersectionIterator<GridImp>& other) const {
-      return GridImp::getRealImplementation(intersection_).hostIterator_
-             == GridImp::getRealImplementation(other.intersection_).hostIterator_;
+    bool equals(const IdentityGridLeafIntersectionIterator& other) const {
+      return hostIterator_ == other.hostIterator_;
     }
 
 
     //! prefix increment
     void increment() {
-      ++GridImp::getRealImplementation(intersection_).hostIterator_;
+      ++hostIterator_;
     }
 
     //! \brief dereferencing
-    const Intersection & dereference() const {
-      return intersection_;
+    Intersection dereference() const {
+      return IdentityGridLeafIntersection<GridImp>(identityGrid_,*hostIterator_);
     }
 
   private:
@@ -69,9 +66,8 @@ namespace Dune {
     //  private data
     //**********************************************************
 
-    /** \brief The actual intersection
-     */
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+    const GridImp* identityGrid_;
+    HostLeafIntersectionIterator hostIterator_;
   };
 
 
@@ -96,30 +92,31 @@ namespace Dune {
 
     IdentityGridLevelIntersectionIterator(const GridImp* identityGrid,
                                           const HostLevelIntersectionIterator& hostIterator)
-      : intersection_(IdentityGridLevelIntersection<GridImp>(identityGrid,hostIterator))
+      : identityGrid_(identityGrid)
+      , hostIterator_(hostIterator)
     {}
 
     //! equality
     bool equals(const IdentityGridLevelIntersectionIterator<GridImp>& other) const {
-      return GridImp::getRealImplementation(intersection_).hostIterator_ == GridImp::getRealImplementation(other.intersection_).hostIterator_;
+      return hostIterator_ == other.hostIterator_;
     }
 
 
     //! prefix increment
     void increment() {
-      ++GridImp::getRealImplementation(intersection_).hostIterator_;
+      ++hostIterator_;
     }
 
     //! \brief dereferencing
-    const Intersection & dereference() const {
-      return intersection_;
+    Intersection dereference() const {
+      return IdentityGridLevelIntersection<GridImp>(identityGrid_,*hostIterator_);
     }
 
   private:
 
-    /** \brief The actual intersection
-     */
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+
+    const GridImp* identityGrid_;
+    HostLevelIntersectionIterator hostIterator_;
 
   };
 
