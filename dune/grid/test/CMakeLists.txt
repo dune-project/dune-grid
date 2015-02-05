@@ -147,6 +147,7 @@ set(SOURCES
   checkgeometryinfather.cc
   checkgeometryinfather.hh
   checkindexset.cc
+  checkindexset.hh
   checkintersectionit.cc
   checkiterators.cc
   checkpartition.cc

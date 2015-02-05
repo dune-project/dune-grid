@@ -19,7 +19,7 @@
 #include <dune/grid/common/capabilities.hh>
 
 #include "staticcheck.hh"
-#include "checkindexset.cc"
+#include "checkindexset.hh"
 #include "checkgeometry.hh"
 #include "checkentityseed.hh"
 

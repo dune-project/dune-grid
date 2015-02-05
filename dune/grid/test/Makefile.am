@@ -223,6 +223,7 @@ SOURCES = basicunitcube.hh                      \
           checkgeometryinfather.cc              \
           checkgeometryinfather.hh              \
           checkindexset.cc                      \
+          checkindexset.hh                      \
           checkintersectionit.cc                \
           checkiterators.cc                     \
           checkjacobians.cc                     \
