@@ -306,18 +306,18 @@ namespace Dune
      * <li> false, if marking was not possible </li>
      * </ul>
      */
-    bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer & e)
+    bool mark(int refCount, const typename Traits::template Codim<0>::Entity & e)
     {
-      return hostgrid_->mark(refCount, *getHostEntityPointer<0>(*e));
+      return hostgrid_->mark(refCount, *getHostEntityPointer<0>(e));
     }
 
     /** \brief Return refinement mark for entity
      *
      * \return refinement mark (1,0,-1)
      */
-    int getMark(const typename Traits::template Codim<0>::EntityPointer & e) const
+    int getMark(const typename Traits::template Codim<0>::Entity & e) const
     {
-      return hostgrid_->getMark(*getHostEntityPointer<0>(*e));
+      return hostgrid_->getMark(*getHostEntityPointer<0>(e));
     }
 
     /** \brief returns true, if at least one entity is marked for adaption */
