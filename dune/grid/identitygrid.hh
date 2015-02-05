@@ -383,7 +383,7 @@ namespace Dune
      */
     bool mark(int refCount, const typename Traits::template Codim<0>::Entity & e)
     {
-      return hostgrid_->mark(refCount, *getHostEntityPointer<0>(e));
+      return hostgrid_->mark(refCount, getHostEntity<0>(e));
     }
 
     /** \brief Return refinement mark for entity
@@ -392,7 +392,7 @@ namespace Dune
      */
     int getMark(const typename Traits::template Codim<0>::Entity & e) const
     {
-      return hostgrid_->getMark(*getHostEntityPointer<0>(e));
+      return hostgrid_->getMark(getHostEntity<0>(e));
     }
 
     /** \brief returns true, if at least one entity is marked for adaption */
