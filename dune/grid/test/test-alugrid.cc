@@ -22,7 +22,7 @@
 
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
-#include "checkcommunicate.cc"
+#include "checkcommunicate.hh"
 //#include "checktwists.cc"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>

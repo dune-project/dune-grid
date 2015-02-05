@@ -14,7 +14,7 @@
 #include <dune/grid/yaspgrid/factory.hh>
 
 #include "gridcheck.cc"
-#include "checkcommunicate.cc"
+#include "checkcommunicate.hh"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkiterators.cc"

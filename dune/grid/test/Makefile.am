@@ -215,6 +215,7 @@ SOURCES = basicunitcube.hh                      \
           checkadaptation.cc                    \
           checkadaptation.hh                    \
           checkcommunicate.cc                   \
+          checkcommunicate.hh                   \
           checkentityseed.cc                    \
           checkgeometry.cc                      \
           checkgeometryinfather.cc              \

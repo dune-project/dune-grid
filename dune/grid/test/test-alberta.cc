@@ -20,7 +20,7 @@
 #include "checkgeometryinfather.cc"
 #include "checkgeometry.cc"
 #include "checkintersectionit.cc"
-#include "checkcommunicate.cc"
+#include "checkcommunicate.hh"
 #include "checkiterators.cc"
 #include "checktwists.cc"
 #include "check-albertareader.cc"
