@@ -17,7 +17,7 @@
 #include "../common/boundaryprojection.hh"
 
 #include "gridcheck.cc"
-#include "checkgeometryinfather.cc"
+#include "checkgeometryinfather.hh"
 #include "checkgeometry.hh"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.hh"

@@ -221,6 +221,7 @@ SOURCES = basicunitcube.hh                      \
           checkgeometry.cc                      \
           checkgeometry.hh                      \
           checkgeometryinfather.cc              \
+          checkgeometryinfather.hh              \
           checkindexset.cc                      \
           checkintersectionit.cc                \
           checkiterators.cc                     \

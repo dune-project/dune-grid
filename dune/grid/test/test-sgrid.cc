@@ -9,7 +9,7 @@
 #include <dune/grid/sgrid.hh>
 
 #include "gridcheck.cc"
-#include "checkgeometryinfather.cc"
+#include "checkgeometryinfather.hh"
 #include "checkintersectionit.cc"
 #include "checkpartition.cc"
 

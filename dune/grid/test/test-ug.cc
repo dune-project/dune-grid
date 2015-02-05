@@ -17,7 +17,7 @@
 
 #include "gridcheck.cc"
 #include "checkcommunicate.hh"
-#include "checkgeometryinfather.cc"
+#include "checkgeometryinfather.hh"
 #include "checkintersectionit.cc"
 
 #include <dune/common/parallel/mpihelper.hh>
