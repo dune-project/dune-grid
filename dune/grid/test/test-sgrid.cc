@@ -11,7 +11,7 @@
 #include "gridcheck.cc"
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"
-#include "checkpartition.cc"
+#include "checkpartition.hh"
 
 template<int d, int w>
 void runtest()

@@ -25,7 +25,7 @@
 #include "checktwists.cc"
 #include "check-albertareader.cc"
 #include "checkadaptation.hh"
-#include "checkpartition.cc"
+#include "checkpartition.hh"
 
 
 template< int dim, int dimworld >

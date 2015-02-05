@@ -29,7 +29,7 @@
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"
 #include "checkiterators.hh"
-#include "checkpartition.cc"
+#include "checkpartition.hh"
 #include "checkgeometry.hh"
 
 namespace Dune

@@ -19,7 +19,7 @@
 #include "checkintersectionit.hh"
 #include "checkiterators.hh"
 #include "checkadaptation.hh"
-#include "checkpartition.cc"
+#include "checkpartition.hh"
 
 template<int dim, class CC>
 struct YaspFactory

@@ -155,6 +155,7 @@ set(SOURCES
   checkjacobians.cc
   checkjacobians.hh
   checkpartition.cc
+  checkpartition.hh
   checktwists.cc
   functions.hh
   gridcheck.cc
