@@ -20,7 +20,7 @@
 
 #include "staticcheck.hh"
 #include "checkindexset.cc"
-#include "checkgeometry.cc"
+#include "checkgeometry.hh"
 #include "checkentityseed.hh"
 
 

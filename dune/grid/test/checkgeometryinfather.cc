@@ -5,7 +5,7 @@
 
 #include <dune/common/typetraits.hh>
 
-#include "checkgeometry.cc"
+#include "checkgeometry.hh"
 
 /** \file
     \brief A test for the Method Geometry::geometryInFather()

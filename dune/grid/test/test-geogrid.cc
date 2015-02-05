@@ -30,7 +30,7 @@
 #include "checkintersectionit.cc"
 #include "checkiterators.cc"
 #include "checkpartition.cc"
-#include "checkgeometry.cc"
+#include "checkgeometry.hh"
 
 namespace Dune
 {

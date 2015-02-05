@@ -219,6 +219,7 @@ SOURCES = basicunitcube.hh                      \
           checkentityseed.cc                    \
           checkentityseed.hh                    \
           checkgeometry.cc                      \
+          checkgeometry.hh                      \
           checkgeometryinfather.cc              \
           checkindexset.cc                      \
           checkintersectionit.cc                \

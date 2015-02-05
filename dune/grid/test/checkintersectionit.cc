@@ -8,7 +8,7 @@
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/geometry/referenceelements.hh>
 
-#include "checkgeometry.cc"
+#include "checkgeometry.hh"
 
 /** \file
     \brief Tests for the IntersectionIterator
