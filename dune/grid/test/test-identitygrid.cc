@@ -20,7 +20,7 @@ void testDim()
 {
   typedef YaspGrid<dim> GridType;
   Dune::array<int,dim> n;
-  std::fill(n.begin(), n.end(), 1);
+  std::fill(n.begin(), n.end(), 1 << (5 - dim));
   Dune::FieldVector<double,dim> extension(1.0);
 
   GridType grid(extension,n);
