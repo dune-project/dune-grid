@@ -600,7 +600,9 @@ namespace Dune
      */
 #ifdef DOXYGEN
     Entity
+    father () const
 #else
+    template<typename Foo = void>
     typename std::conditional<
       std::is_same<
         decltype(realEntity.father()),
@@ -609,8 +611,8 @@ namespace Dune
       Entity,
       EntityPointer
       >::type
+    father (typename std::enable_if<std::is_same<Foo,void>::value,void*>::type = nullptr) const
 #endif
-    father () const
     {
       warnOnDeprecatedEntityPointer<decltype(realEntity.father())>();
       return realEntity.father();
