@@ -492,6 +492,42 @@ namespace Dune
       return realEntity.subEntities(codim);
     }
 
+#ifndef DOXYGEN
+
+    // The following ugly helper struct is here to work around deficiencies in the decltype() implementation
+    // of GCC 4.4.
+    // If we try to merge the two typedefs in the struct and put them directly into the return value of
+    // subEntity(), GCC 4.4 dies with an internal compiler error complaining that mangling of template_id_name
+    // is not supported.
+    // So we put everything into this separate struct and just instantiate it in the signature of subEntity()
+    // which makes GCC 4.4 happy.
+    template <int codim_>
+    struct subentity_return_info
+    {
+
+      // Step 1: Obtain return value of subentity from implementation class
+      //
+      // it would be more readable to use std::declval() here, but that's another thing that's missing
+      // GCC 4.4, so we do it the manual way with a static cast
+      typedef decltype(
+        static_cast<Implementation*>(nullptr)->template subEntity<codim_>(0)
+        ) implementation_return_type;
+
+      // Step 2: Check whether the implementation returned a facade entity or not
+      // If yes -> declare Entity return type
+      // If no  -> declare EntityPointer return type
+      typedef typename std::conditional<
+        std::is_same<
+          implementation_return_type,
+          typename Entity::template Codim<codim_>::Entity
+        >::value,
+        typename Entity::template Codim<codim_>::Entity,
+       typename Entity::template Codim<codim_>::EntityPointer
+        >::type type;
+    };
+
+#endif // DOXYGEN
+
     /** \brief Obtain a pointer to a subentity
      *
      *  \tparam  codim  codimension of the desired subentity
@@ -506,18 +542,11 @@ namespace Dune
 #ifdef DOXYGEN
     typename Codim< codim >::Entity
 #else
-    typename std::conditional<
-      std::is_same<
-        decltype(realEntity.template subEntity< codim >(0)),
-        typename Codim< codim >::Entity
-        >::value,
-      typename Codim< codim >::Entity,
-      typename Codim< codim >::EntityPointer
-      >::type
+    typename subentity_return_info<codim>::type
 #endif
     subEntity ( int i ) const
     {
-      warnOnDeprecatedEntityPointer<decltype(realEntity.template subEntity<codim>(0))>();
+      warnOnDeprecatedEntityPointer<typename subentity_return_info<codim>::type>();
       return realEntity.template subEntity< codim >( i );
     }
 
