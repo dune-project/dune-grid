@@ -83,6 +83,7 @@ namespace Dune
           typedef GeoGrid::EntityPointerTraits< codim, const Grid > EntityPointerTraits;
           typedef GeoGrid::EntityPointer< EntityPointerTraits > EntityPointerImpl;
           typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
+          typedef GeoGrid::Entity< codim, dimension, const Grid > EntityImpl;
           typedef typename EntityPointerTraits::Entity Entity;
 
           typedef Dune::EntitySeed< const Grid, GeoGrid::EntitySeed< codim, const Grid > > EntitySeed;
