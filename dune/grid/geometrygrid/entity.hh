@@ -135,55 +135,81 @@ namespace Dune
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
-      EntityBase () : geo_(), hostEntity_( nullptr ) {}
-
-      /** \brief construct an uninitialized entity
-       *
-       *  \param[in]  grid  GeometryGrid this entity belongs to
-       *
-       *  \note The geometry of an uninitialized entity might already be set
-       */
-      explicit EntityBase ( const Grid &grid )
-        : geo_( grid ),
-          hostEntity_( nullptr )
+      EntityBase ()
+        : hostEntity_()
+        , grid_( nullptr )
+        , geo_()
       {}
 
-      /** \brief construct an uninitialized entity
-       *
-       *  \param[in]  geo  already known geometry this entity will have
-       *
-       *  \note The geometry of an uninitialized entity might already be set
-       */
-      explicit EntityBase ( const GeometryImpl &geo )
-        : geo_( geo ),
-          hostEntity_( nullptr )
+      EntityBase ( const Grid &grid, const EntitySeed &seed )
+        : hostEntity_( grid.hostGrid().entity( grid.getRealImplementation(seed).hostEntitySeed() ) )
+        , grid_( &grid )
       {}
+
+      EntityBase ( const Grid &grid, const HostElement &hostElement, int i )
+        : hostEntity_( hostElement.template subEntity<codim>(i) )
+        , grid_( &grid )
+      {}
+
+
+      EntityBase ( const GeometryImpl &geo, const HostEntity &hostEntity )
+        : hostEntity_( hostEntity )
+        , grid_( &geo.grid() )
+        , geo_( geo )
+      {}
+
+      EntityBase ( const GeometryImpl &geo, HostEntity&& hostEntity )
+        : hostEntity_( std::move( hostEntity ) )
+        , grid_( &geo.grid() )
+        , geo_( geo )
+      {}
+
+      EntityBase ( const Grid &grid, const HostEntity& hostEntity )
+        : hostEntity_( hostEntity )
+        , grid_( &grid )
+      {}
+
+      EntityBase ( const Grid &grid, HostEntity&& hostEntity )
+        : hostEntity_( std::move( hostEntity ) )
+        , grid_( &grid )
+      {}
+
 
       EntityBase ( const EntityBase &other )
-        : geo_( other.geo_ ),
-          hostEntity_( nullptr )
+        : hostEntity_( other.hostEntity_ )
+        , grid_( other.grid_ )
+        , geo_( other.geo_ )
+      {}
+
+      EntityBase ( EntityBase&& other )
+        : hostEntity_( std::move( other.hostEntity_ ) )
+        , grid_( other.grid_ )
+        , geo_( std::move( other.geo_ ) )
       {}
 
       /** \} */
 
       const EntityBase &operator= ( const EntityBase &other )
       {
+        hostEntity_ = other.hostEntity_;
+        grid_ = other.grid_;
         geo_ = other.geo_;
-        hostEntity_ = nullptr;
+        return *this;
+      }
+
+      const EntityBase &operator= ( EntityBase&& other )
+      {
+        hostEntity_ = std::move( other.hostEntity_ );
+        grid_ = std::move( other.grid_ );
+        geo_ = std::move( other.geo_ );
         return *this;
       }
 
       /** \brief compare two entities */
       bool equals ( const EntityBase &other) const
       {
-        // first, check pointers
-        if ( hostEntity_ == other.hostEntity_ )
-          return true;
-        // compare host entities, but make sure we have no null pointers first
-        return hostEntity_ && other.hostEntity_ && hostEntity() == other.hostEntity();
+        return hostEntity_ == other.hostEntity_;
       }
-
-      operator bool () const { return bool( hostEntity_ ); }
 
     public:
       /** \name Methods Shared by Entities of All Codimensions
@@ -242,22 +268,19 @@ namespace Dune
       /** \name Methods Supporting the Grid Implementation
        *  \{ */
 
-      const Grid &grid () const { return geo_.grid(); }
+      const Grid &grid () const { assert( grid_ ); return *grid_; }
 
       const HostEntity &hostEntity () const
       {
-        assert( *this );
-        return *hostEntity_;
+        return hostEntity_;
       }
 
       /** \brief initiliaze an entity
        *
        *  \param[in]  hostEntity  reference to the host entity
        *
-       *  \note The reference must remain valid as long as this entity is in
-       *        use.
        */
-      void initialize ( const HostEntity &hostEntity ) { hostEntity_ = &hostEntity; }
+      void initialize ( const HostEntity &hostEntity ) { hostEntity_ = hostEntity; }
 
       /** \brief obtain the entity's index from a host IndexSet
        *
@@ -317,8 +340,9 @@ namespace Dune
       /** \} */
 
     private:
+      HostEntity hostEntity_;
+      const Grid *grid_;
       mutable GeometryImpl geo_;
-      const HostEntity *hostEntity_;
     };
 
 
@@ -397,38 +421,25 @@ namespace Dune
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
-      EntityBase () : geo_(), hostElement_( nullptr ), subEntity_( -1 ) {}
+      EntityBase () : geo_(), hostElement_(), subEntity_( -1 ) {}
 
-      /** \brief construct an uninitialized entity
-       *
-       *  \param[in]  grid       GeometryGrid this entity belongs to
-       *  \param[in]  subEntity  number of this entity within the host element
-       *
-       *  \note The geometry of an uninitialized entity might already be set
-       */
-      EntityBase ( const Grid &grid, int subEntity )
-        : geo_( grid ),
-          hostElement_( nullptr ),
-          subEntity_( subEntity )
-      {}
 
-      /** \brief construct an uninitialized entity
-       *
-       *  \param[in]  geo        already known geometry this entity will have
-       *  \param[in]  subEntity  number of this entity within the host element
-       *
-       *  \note The geometry of an uninitialized entity might already be set
-       */
-      EntityBase ( const GeometryImpl &geo, int subEntity )
-        : geo_( geo ),
-          hostElement_( nullptr ),
-          subEntity_( subEntity )
+      EntityBase ( const Grid &grid, const EntitySeed &seed )
+        : hostElement_( grid.hostGrid().entity( grid.getRealImplementation(seed).hostElementSeed() ) )
+        , grid_( &grid )
+        , subEntity_( grid.getRealImplementation(seed).subEntity() )
       {}
 
       EntityBase ( const EntityBase &other )
         : geo_( other.geo_ ),
-          hostElement_( nullptr ),
+          hostElement_( other.hostElement_ ),
           subEntity_( other.subEntity_ )
+      {}
+
+      EntityBase ( EntityBase &&other )
+        : geo_( std::move( other.geo_ ) ),
+          hostElement_( std::move( other.hostElement_ ) ),
+          subEntity_( std::move( other.subEntity_ ) )
       {}
 
       /** \} */
@@ -436,8 +447,16 @@ namespace Dune
       const EntityBase &operator= ( const EntityBase &other )
       {
         geo_ = other.geo_;
-        hostElement_ = nullptr;
+        hostElement_ = other.hostElement_;
         subEntity_ = other.subEntity_;
+        return *this;
+      }
+
+      const EntityBase &operator= ( EntityBase&& other )
+      {
+        geo_ = std::move( other.geo_ );
+        hostElement_ = std::move( other.hostElement_ );
+        subEntity_ = std::move( other.subEntity_ );
         return *this;
       }
 
@@ -448,11 +467,6 @@ namespace Dune
         const bool otherEnd = (other.subEntity() < 0);
         if( thisEnd || otherEnd )
           return thisEnd && otherEnd;
-
-        // if we don't have two valid pointers, consider two entities equal
-        // if they both point at nothing
-        if ( ! ( hostElement_ && other.hostElement_ ) )
-          return hostElement_ == other.hostElement_;
 
         const int lvl = level();
         if( lvl != other.level() )
@@ -470,8 +484,6 @@ namespace Dune
         const int otherIndex = indexSet.subIndex( otherElement, other.subEntity(), codimension );
         return (thisIndex == otherIndex);
       }
-
-      operator bool () const { return bool( hostElement_ ); }
 
       /** \name Methods Shared by Entities of All Codimensions
        *  \{ */
@@ -531,7 +543,7 @@ namespace Dune
        *  GeometryGrid's coordinate function \f$c\f$, i.e.,
        *  \f$y_i = c( x_i )\f$.
        *
-       *  \returns a const reference to the geometry
+       *  \returns a geometry object
        */
       Geometry geometry () const
       {
@@ -550,7 +562,7 @@ namespace Dune
       /** \name Methods Supporting the Grid Implementation
        *  \{ */
 
-      const Grid &grid () const { return geo_.grid(); }
+      const Grid &grid () const { assert( grid_ ); return *grid_; }
 
       const HostEntity &hostEntity () const
       {
@@ -560,7 +572,7 @@ namespace Dune
       const HostElement &hostElement () const
       {
         assert( *this );
-        return *hostElement_;
+        return hostElement_;
       }
 
       int subEntity () const { return subEntity_; }
@@ -572,7 +584,7 @@ namespace Dune
        *  \note The reference must remain valid as long as this entity is in
        *        use.
        */
-      void initialize ( const HostElement &hostElement ) { hostElement_ = &hostElement; }
+      void initialize ( const HostElement &hostElement ) { hostElement_ = hostElement; }
 
       /** \brief obtain the entity's index from a host IndexSet
        *
@@ -642,9 +654,10 @@ namespace Dune
       }
 
     private:
-      mutable GeometryImpl geo_;
-      const HostElement *hostElement_;
+      HostElement hostElement_;
       unsigned int subEntity_;
+      const Grid *grid_;
+      mutable GeometryImpl geo_;
     };
 
 
@@ -662,14 +675,17 @@ namespace Dune
       typedef typename Base::HostEntity HostEntity;
       typedef typename Base::HostElement HostElement;
       typedef typename Base::GeometryImpl GeometryImpl;
+      typedef typename Base::EntitySeed EntitySeed;
 
       Entity () : Base() {}
 
-      explicit Entity ( const Grid &grid ) : Base( grid ) {}
-      explicit Entity ( const GeometryImpl &geo ) : Base( geo ) {}
+      Entity ( const Grid &grid, const EntitySeed &seed ) : Base( grid, seed ) {}
 
-      Entity ( const Grid &grid, int subEntity ) : Base( grid, subEntity ) {}
-      Entity ( const GeometryImpl &geo, int subEntity ) : Base( geo, subEntity ) {}
+      Entity ( const Grid &grid, const HostEntity &hostEntity ) : Base( grid, hostEntity ) {}
+      Entity ( const Grid &grid, HostEntity&& hostEntity ) : Base( grid, std::move( hostEntity ) ) {}
+
+      Entity ( const Grid &grid, const HostElement &hostEntity, int i ) : Base( grid, hostEntity, i ) {}
+
     };
 
 
@@ -712,6 +728,8 @@ namespace Dune
       //! type of corresponding entity pointer
       typedef typename Traits::template Codim< codimension >::EntityPointer EntityPointer;
 
+      typedef Dune::Entity< 0, dim, Grid, Dune::GeoGrid::Entity > EntityFacade;
+
       //! type of hierarchic iterator
       typedef typename Traits::HierarchicIterator HierarchicIterator;
       //! type of leaf intersection iterator
@@ -724,14 +742,24 @@ namespace Dune
       typedef typename Base::HostEntity HostEntity;
       typedef typename Base::HostElement HostElement;
       typedef typename Base::GeometryImpl GeometryImpl;
+      typedef typename Base::EntitySeed EntitySeed;
 
       using Base::grid;
       using Base::hostEntity;
 
       Entity () : Base() {}
 
-      explicit Entity ( const Grid &grid ) : Base( grid ) {}
-      explicit Entity ( const GeometryImpl &geo ) : Base( geo ) {}
+      Entity ( const Grid &grid, const HostEntity &hostEntity ) : Base( grid, hostEntity ) {}
+      Entity ( const Grid &grid, HostEntity&& hostEntity ) : Base( grid, std::move( hostEntity ) ) {}
+      Entity ( const GeometryImpl &geo, const HostEntity& hostEntity ) : Base( geo, hostEntity ) {}
+      Entity ( const GeometryImpl &geo, HostEntity &&hostEntity ) : Base( geo, std::move( hostEntity ) ) {}
+
+      Entity ( const Grid &grid, const EntitySeed &seed ) : Base( grid, seed ) {}
+
+      Entity ( const Grid &grid, const HostEntity &hostEntity, int i ) : Base( grid, hostEntity )
+      {
+        assert( i == 0 );
+      }
 
       template< int codim >
       int count () const
@@ -744,13 +772,13 @@ namespace Dune
         return hostEntity().subEntities(codim);
       }
 
-      template< int codim >
-      typename Grid::template Codim< codim >::EntityPointer
-      subEntity ( int i ) const
-      {
-        typedef typename Traits::template Codim< codim >::EntityPointerImpl EntityPointerImpl;
-        return EntityPointerImpl( grid(), hostEntity(), i );
-      }
+       template< int codim >
+       typename Grid::template Codim< codim >::EntityPointer
+       subEntity ( int i ) const
+       {
+         typedef typename Traits::template Codim< codim >::EntityPointerImpl EntityPointerImpl;
+         return EntityPointerImpl( grid(), hostEntity(), i );
+       }
 
       LevelIntersectionIterator ilevelbegin () const
       {
