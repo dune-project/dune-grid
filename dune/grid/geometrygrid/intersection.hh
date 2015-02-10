@@ -46,32 +46,25 @@ namespace Dune
       typedef typename Traits::template Codim< 0 >::GeometryImpl ElementGeometryImpl;
 
     public:
-      explicit Intersection ( const ElementGeometry &insideGeo )
-        : insideGeo_( Grid::getRealImplementation( insideGeo ) ),
-          hostIntersection_( 0 ),
-          geo_( grid() )
+
+      Intersection()
       {}
 
-      Intersection ( const Intersection &other )
-        : insideGeo_( other.insideGeo_ ),
-          hostIntersection_( 0 ),
-          geo_( grid() )
+      explicit Intersection ( const HostIntersection &hostIntersection, const ElementGeometryImpl &insideGeo )
+        : hostIntersection_( hostIntersection )
+        , insideGeo_ ( insideGeo )
+        , geo_( grid() )
       {}
 
-      const Intersection &operator= ( const Intersection &other )
-      {
-        insideGeo_ = other.insideGeo_;
-        invalidate();
-        return *this;
-      }
+      explicit Intersection ( HostIntersection&& hostIntersection, const ElementGeometryImpl &insideGeo )
+        : hostIntersection_( std::move( hostIntersection ) )
+        , insideGeo_ ( insideGeo )
+        , geo_( grid() )
+      {}
 
       bool equals ( const Intersection &other) const
       {
-        // first, check pointers
-        if ( hostIntersection_ == other.hostIntersection_ )
-          return true;
-        // compare host entities, but make sure we have no null pointers first
-        return hostIntersection_ && other.hostIntersection_ && hostIntersection() == other.hostIntersection();
+        return hostIntersection_ == other.hostIntersection_;
       }
 
       operator bool () const { return bool( hostIntersection_ ); }
@@ -180,27 +173,14 @@ namespace Dune
 
       const HostIntersection &hostIntersection () const
       {
-        assert( *this );
-        return *hostIntersection_;
+        return hostIntersection_;
       }
 
       const Grid &grid () const { return insideGeo_.grid(); }
 
-      void invalidate ()
-      {
-        hostIntersection_ = 0;
-        geo_ = GeometryImpl( grid() );
-      }
-
-      void initialize ( const HostIntersection &hostIntersection )
-      {
-        assert( !(*this) );
-        hostIntersection_ = &hostIntersection;
-      }
-
     private:
+      HostIntersection hostIntersection_;
       ElementGeometryImpl insideGeo_;
-      const HostIntersection *hostIntersection_;
       mutable GeometryImpl geo_;
     };
 
