@@ -125,7 +125,7 @@ namespace Dune
 
       Geometry () : grid_( nullptr ), mapping_( nullptr ) {}
 
-      Geometry ( const Grid &grid ) : grid_( &grid ), mapping_( nullptr ) {}
+      explicit Geometry ( const Grid &grid ) : grid_( &grid ), mapping_( nullptr ) {}
 
       template< class CoordVector >
       Geometry ( const Grid &grid, const GeometryType &type, const CoordVector &coords )
