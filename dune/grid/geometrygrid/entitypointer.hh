@@ -111,59 +111,72 @@ namespace Dune
       typedef typename EntityImpl::GeometryImpl GeometryImpl;
 
     public:
-      EntityPointer ()
-        : entity_( EntityImpl() ),
-          hostEntityIterator_()
-      {}
 
-      EntityPointer ( const GeometryImpl &geo, const HostEntityIterator &hostEntityIterator )
-        : entity_( EntityImpl( geo ) ),
-          hostEntityIterator_( hostEntityIterator )
+      EntityPointer ()
+        : hostEntityIterator_()
+        , grid_( nullptr )
       {}
 
       EntityPointer ( const Grid &grid, const HostEntityIterator &hostEntityIterator )
-        : entity_( EntityImpl( grid ) ),
-          hostEntityIterator_( hostEntityIterator )
+        : hostEntityIterator_( hostEntityIterator )
+        , grid_( &grid )
+      {}
+
+      EntityPointer ( const Grid &grid, HostEntityIterator&& hostEntityIterator )
+        : hostEntityIterator_( std::move( hostEntityIterator ) )
+        , grid_( &grid )
       {}
 
       EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : entity_( EntityImpl( grid ) ),
-          hostEntityIterator_( hostElement.template subEntity< codimension >( subEntity ) )
+        : hostEntityIterator_( hostElement.template subEntity< codimension >( subEntity ) )
+        , grid_( &grid )
       {}
 
       EntityPointer ( const Grid &grid, const EntitySeed &seed )
-        : entity_( EntityImpl( grid ) ),
-          hostEntityIterator_( grid.hostGrid().entityPointer( grid.getRealImplementation(seed).hostEntitySeed() ) )
-      {}
-
-      explicit EntityPointer ( const EntityImpl &entity )
-        : entity_( entity ),
-          hostEntityIterator_( entity.hostEntity() )
+        : hostEntityIterator_( grid.hostGrid().entityPointer( grid.getRealImplementation(seed).hostEntitySeed() ) )
+        , grid_( &grid )
       {}
 
       EntityPointer ( const This &other )
-        : entity_( other.entityImpl() ),
-          hostEntityIterator_( other.hostEntityIterator_ )
+        : hostEntityIterator_( other.hostEntityIterator_ )
+        , grid_( other.grid_ )
+      {}
+
+      EntityPointer ( This&& other )
+        : hostEntityIterator_( std::move( other.hostEntityIterator_ ) )
+        , grid_( other.grid_ )
       {}
 
       template< class T >
       explicit EntityPointer ( const EntityPointer< T, fake > &other )
-        : entity_( other.entityImpl() ),
-          hostEntityIterator_( other.hostEntityIterator_ )
+        : hostEntityIterator_( other.hostEntityIterator_ )
+        , grid_( other.grid_ )
       {}
 
-      const This &operator= ( const This &other )
+      EntityPointer ( const EntityImpl &entity )
+        : hostEntityIterator_( entity.hostEntity() )
+        , grid_( &entity.grid() )
+      {}
+
+      This &operator= ( const This &other )
       {
-        entityImpl() = other.entityImpl();
         hostEntityIterator_ = other.hostEntityIterator_;
+        grid_ = other.grid_;
+        return *this;
+      }
+
+      This &operator= ( This&& other )
+      {
+        hostEntityIterator_ = std::move( other.hostEntityIterator_ );
+        grid_ = other.grid_;
         return *this;
       }
 
       template< class T >
-      const This &operator= ( const EntityPointer< T, fake > &other )
+      This &operator= ( const EntityPointer< T, fake > &other )
       {
-        entityImpl() = other.entityImpl();
         hostEntityIterator_ = other.hostEntityIterator_;
+        grid_ = other.grid_;
         return *this;
       }
 
@@ -173,30 +186,20 @@ namespace Dune
         return (hostIterator() == other.hostIterator());
       }
 
-      Entity &dereference () const
+      Entity dereference () const
       {
-        if( !entityImpl() )
-          entityImpl().initialize( *hostIterator() );
-        return entity_;
+        return EntityImpl( grid(), *hostIterator() );
       }
 
       int level () const { return hostIterator().level(); }
 
       const HostEntityIterator &hostIterator() const { return hostEntityIterator_; }
 
-      const Grid &grid () const { return entityImpl().grid(); }
-
-    protected:
-      EntityImpl &entityImpl () const
-      {
-        return Grid::getRealImplementation( entity_ );
-      }
-
-    private:
-      mutable Entity entity_;
+      const Grid &grid () const { return *grid_; }
 
     protected:
       HostEntityIterator hostEntityIterator_;
+      const Grid *grid_;
     };
 
 
@@ -235,54 +238,84 @@ namespace Dune
       typedef typename EntityImpl::GeometryImpl GeometryImpl;
 
     public:
-      EntityPointer ( const GeometryImpl &geo, const HostElementIterator &hostElementIterator, int subEntity )
-        : entity_( EntityImpl( geo, subEntity ) ),
-          hostElementIterator_( hostElementIterator )
+
+      EntityPointer ()
+        : hostElementIterator_()
+        , grid_( nullptr )
+        , subEntity_ ( 0 )
       {}
 
       EntityPointer ( const Grid &grid, const HostElementIterator &hostElementIterator, int subEntity )
-        : entity_( EntityImpl( grid, subEntity ) ),
-          hostElementIterator_( hostElementIterator )
+        : hostElementIterator_( hostElementIterator )
+        , grid_( &grid )
+        , subEntity_( subEntity )
+      {}
+
+      EntityPointer ( const Grid &grid, HostElementIterator&& hostElementIterator, int subEntity )
+        : hostElementIterator_( std::move( hostElementIterator ) )
+        , grid_( &grid )
+        , subEntity_( subEntity )
       {}
 
       EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
-        : entity_( EntityImpl( grid, subEntity ) ),
-          hostElementIterator_( hostElement )
+        : hostElementIterator_( hostElement )
+        , grid_( &grid )
+        , subEntity_( subEntity )
       {}
 
       EntityPointer ( const Grid &grid, const EntitySeed &seed )
-        : entity_( EntityImpl( grid, grid.getRealImplementation(seed).subEntity() ) ),
-          hostElementIterator_( grid.hostGrid().entityPointer( grid.getRealImplementation(seed).hostElementSeed() ) )
+        : hostElementIterator_( grid.hostGrid().entityPointer( grid.getRealImplementation(seed).hostElementSeed() ) )
+        , grid_( &grid )
+        , subEntity_( grid.getRealImplementation(seed).subEntity() )
       {}
 
       explicit EntityPointer ( const EntityImpl &entity )
-        : entity_( entity ),
-          hostElementIterator_( entity.hostElement() )
+        : hostElementIterator_( entity.hostElement() )
+        , grid_( entity.grid() )
+        , subEntity_( entity.subEntity() )
       {}
 
       EntityPointer ( const This &other )
-        : entity_( other.entityImpl() ),
-          hostElementIterator_( other.hostElementIterator_ )
+        : hostElementIterator_( other.hostElementIterator_ )
+        , grid_( other.grid_ )
+        , subEntity_( other.subEntity_ )
+      {}
+
+      EntityPointer ( This&& other )
+        : hostElementIterator_( std::move( other.hostElementIterator_ ) )
+        , grid_( other.grid_ )
+        , subEntity_( other.subEntity_ )
       {}
 
       template< class T >
       explicit EntityPointer ( const EntityPointer< T, fake > &other )
-        : entity_( other.entityImpl() ),
-          hostElementIterator_( other.hostElementIterator_ )
+        : hostElementIterator_( other.hostElementIterator_ )
+        , grid_( other.grid_ )
+        , subEntity_( other.subEntity_ )
       {}
 
-      const This &operator= ( const This &other )
+      This &operator= ( const This &other )
       {
-        entityImpl() = other.entityImpl();
         hostElementIterator_ = other.hostElementIterator_;
+        grid_ = other.grid_;
+        subEntity_ = other.subEntity_;
+        return *this;
+      }
+
+      This &operator= ( This&& other )
+      {
+        hostElementIterator_ = std::move( other.hostElementIterator_ );
+        grid_ = other.grid_;
+        subEntity_ = other.subEntity_;
         return *this;
       }
 
       template< class T >
-      const This &operator= ( const EntityPointer< T, fake > &other )
+      This &operator= ( const EntityPointer< T, fake > &other )
       {
-        entityImpl() = other.entityImpl();
         hostElementIterator_ = other.hostElementIterator_;
+        grid_ = other.grid_;
+        subEntity_ = other.subEntity_;
         return *this;
       }
 
@@ -311,34 +344,27 @@ namespace Dune
         return (thisIndex == otherIndex);
       }
 
-      Entity &dereference () const
+      Entity dereference () const
       {
-        if( !entityImpl() )
-          entityImpl().initialize( *hostElementIterator() );
-        return entity_;
+        return EntityImpl( grid(), *hostElementIterator(), subEntity() );
       }
 
       int level () const { return hostElementIterator()->level(); }
 
-      const Grid &grid () const { return entityImpl().grid(); }
-      int subEntity () const { return entityImpl().subEntity(); }
+      const Grid &grid () const { return grid_; }
+      int subEntity () const { return subEntity_; }
 
     protected:
-      EntityImpl &entityImpl () const
-      {
-        return Grid::getRealImplementation( entity_ );
-      }
 
       const HostElementIterator &hostElementIterator () const
       {
         return hostElementIterator_;
       }
 
-    private:
-      mutable Entity entity_;
-
     protected:
       HostElementIterator hostElementIterator_;
+      const Grid* grid_;
+      int subEntity_;
     };
 
   } // namespace GeoGrid
