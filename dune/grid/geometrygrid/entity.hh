@@ -772,13 +772,13 @@ namespace Dune
         return hostEntity().subEntities(codim);
       }
 
-       template< int codim >
-       typename Grid::template Codim< codim >::EntityPointer
-       subEntity ( int i ) const
-       {
-         typedef typename Traits::template Codim< codim >::EntityPointerImpl EntityPointerImpl;
-         return EntityPointerImpl( grid(), hostEntity(), i );
-       }
+      template< int codim >
+      typename Grid::template Codim< codim >::Entity
+      subEntity ( int i ) const
+      {
+        typedef typename Traits::template Codim< codim >::EntityImpl EntityImpl;
+        return EntityImpl( grid(), hostEntity(), i );
+      }
 
       LevelIntersectionIterator ilevelbegin () const
       {
@@ -814,10 +814,9 @@ namespace Dune
         return hostEntity().isLeaf();
       }
 
-      EntityPointer father () const
+      EntityFacade father () const
       {
-        typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
-        return EntityPointerImpl( grid(), hostEntity().father() );
+        return Entity( grid(), hostEntity().father() );
       }
 
       bool hasFather () const

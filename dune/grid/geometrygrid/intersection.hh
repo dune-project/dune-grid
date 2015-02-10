@@ -40,7 +40,7 @@ namespace Dune
     private:
       typedef GeoGrid::IntersectionCoordVector< Grid > CoordVector;
 
-      typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
+      typedef typename Traits::template Codim< 0 >::EntityImpl EntityImpl;
 
       typedef typename Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
       typedef typename Traits::template Codim< 0 >::GeometryImpl ElementGeometryImpl;
@@ -69,14 +69,14 @@ namespace Dune
 
       operator bool () const { return bool( hostIntersection_ ); }
 
-      EntityPointer inside () const
+      Entity inside () const
       {
-        return EntityPointerImpl( insideGeo_, hostIntersection().inside() );
+        return EntityImpl( insideGeo_, hostIntersection().inside() );
       }
 
-      EntityPointer outside () const
+      Entity outside () const
       {
-        return EntityPointerImpl( grid(), hostIntersection().outside() );
+        return EntityImpl( grid(), hostIntersection().outside() );
       }
 
       bool boundary () const { return hostIntersection().boundary(); }
