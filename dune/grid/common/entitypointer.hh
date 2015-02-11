@@ -11,6 +11,7 @@
     \brief Wrapper and interface class for a static iterator (EntityPointer)
  */
 
+#define DUNE_ENTITYPOINTER_DEPRECATED_MSG  DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now. Note, this might lead to a decreased performance until all grid implementations properly addressed this interface change.")
 namespace Dune
 {
 
@@ -98,7 +99,7 @@ namespace Dune
    */
   template<class GridImp, class IteratorImp>
   class
-  DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+  DUNE_ENTITYPOINTER_DEPRECATED_MSG
   EntityPointer
   {
     // need to make copy constructor of EntityPointer work for any iterator
@@ -160,7 +161,7 @@ namespace Dune
         entity. The implementation of EntityPointer has to have a
         constructor taking a Dune::Entity.
      */
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    DUNE_ENTITYPOINTER_DEPRECATED_MSG
     EntityPointer(const Entity& entity)
       : realIterator( entity.impl() )
     {}
@@ -175,7 +176,7 @@ namespace Dune
     {}
 
     template< class ItImp >
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    DUNE_ENTITYPOINTER_DEPRECATED_MSG
     inline EntityPointer & operator= ( const EntityPointer< GridImp, ItImp > &ep )
     {
       realIterator = ep.realIterator;
@@ -192,14 +193,14 @@ namespace Dune
 
     /** \brief Dereferencing operator. */
     const Entity& operator*() const
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    DUNE_ENTITYPOINTER_DEPRECATED_MSG
     {
       return realIterator.dereference();
     }
 
     /** \brief Pointer operator. */
     const Entity * operator->() const
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    DUNE_ENTITYPOINTER_DEPRECATED_MSG
     {
       return & realIterator.dereference();
     }
@@ -239,7 +240,7 @@ namespace Dune
      * \deprecated This method only exists for backwards compatibility during the 2.4
      *             release cycle and will be removed after dune-grid-2.4 is released.
      */
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    DUNE_ENTITYPOINTER_DEPRECATED_MSG
     bool operator==(const Entity& rhs) const
     {
       return (**this) == rhs;
@@ -250,7 +251,7 @@ namespace Dune
      * \deprecated This method only exists for backwards compatibility during the 2.4
      *             release cycle and will be removed after dune-grid-2.4 is released.
      */
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
+    DUNE_ENTITYPOINTER_DEPRECATED_MSG
     bool operator!=(const Entity& rhs) const
     {
       return (**this) != rhs;
@@ -273,7 +274,7 @@ namespace Dune
                    method level() from the dereferenced Entity instead.
      */
     int level () const
-    DUNE_DEPRECATED_MSG("Will be removed after the release of dune-grid-2.4. Use level() from Entity instead.")
+    DUNE_ENTITYPOINTER_DEPRECATED_MSG
     {
       return realIterator.level();
     }
@@ -306,5 +307,6 @@ namespace Dune
   };
 
 }
+#undef DUNE_ENTITYPOINTER_DEPRECATED_MSG
 
 #endif // DUNE_GRID_ENTITYPOINTER_HH
