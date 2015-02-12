@@ -48,6 +48,8 @@ namespace Dune
 
     typedef typename EntityImp::ElementInfo ElementInfo;
 
+    AlbertaGridEntityPointer ();
+
     //! make an EntityPointer that points to an element
     AlbertaGridEntityPointer ( const GridImp &grid,
                                const ElementInfo &elementInfo,
@@ -60,18 +62,8 @@ namespace Dune
     AlbertaGridEntityPointer ( const EntityImp &entity );
 
 #if 0
-    //! copy constructor
-    AlbertaGridEntityPointer ( const This &other );
-#endif
-
-#if 0
     //! Destructor
     ~AlbertaGridEntityPointer();
-#endif
-
-#if 0
-    //! assignment operator
-    This &operator= ( const This &other );
 #endif
 
     //! equality
@@ -101,6 +93,12 @@ namespace Dune
 
   template< int codim, class GridImp >
   inline AlbertaGridEntityPointer< codim, GridImp >
+  ::AlbertaGridEntityPointer ()
+  {}
+
+
+  template< int codim, class GridImp >
+  inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const GridImp &grid,
                                const ElementInfo &elementInfo,
                                int subEntity )
@@ -123,29 +121,9 @@ namespace Dune
 
 
 #if 0
-  template< int codim, class GridImp >
-  inline AlbertaGridEntityPointer< codim, GridImp >
-  ::AlbertaGridEntityPointer ( const This &other )
-    : entity_( other.entity_ )
-  {}
-#endif
-
-
-#if 0
   template<int codim, class GridImp >
   inline AlbertaGridEntityPointer< codim, GridImp >::~AlbertaGridEntityPointer ()
   {}
-#endif
-
-
-#if 0
-  template< int codim, class GridImp >
-  inline typename AlbertaGridEntityPointer< codim, GridImp >::This &
-  AlbertaGridEntityPointer< codim, GridImp >::operator= ( const This &other )
-  {
-    entityImp().setEntity( other.entityImp() );
-    return *this;
-  }
 #endif
 
 
