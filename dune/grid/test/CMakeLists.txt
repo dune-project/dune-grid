@@ -68,7 +68,11 @@ if(ALBERTA_FOUND)
   add_executable(test-alberta EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta WORLDDIM ${GRIDDIM})
   add_executable(test-alberta-1-1 EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test-alberta-1-1 WORLDDIM 1)
+  add_dune_alberta_flags(test-alberta-1-1 GRIDDIM 1 WORLDDIM 1)
+  add_executable(test-alberta-1-1-no-deprecated EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-1-1-no-deprecated GRIDDIM 1 WORLDDIM 1)
+  set_property(TARGET test-alberta-1-1-no-deprecated APPEND PROPERTY COMPILE_DEFINITIONS
+    DISABLE_DEPRECATED_METHOD_CHECK=1)
   add_executable(test-alberta-1-2 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-1-2 WORLDDIM 2)
   add_executable(test-alberta-2-2 EXCLUDE_FROM_ALL test-alberta.cc)
@@ -114,7 +118,7 @@ set_property(TARGET
   test-geogrid
   test-identitygrid
   test-mcmg-geogrid
-  ${ALBERTA_PROGRAMS}
+  #${ALBERTA_PROGRAMS}
   ${ALUGRID_PROGRAMS}
   APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE"
   )
