@@ -1,5 +1,6 @@
 if(ALBERTA_FOUND)
   set(ALBERTA_PROGRAMS
+    test-alberta
     test-alberta-1-1
     test-alberta-1-2
     test-alberta-2-2
