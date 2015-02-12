@@ -205,6 +205,8 @@ namespace Dune
 
     typedef AlbertaMarkerVector< dimension, dimensionworld > MarkerVector;
 
+    AlbertaGridTreeIterator ();
+
     //! Constructor making end iterator
     AlbertaGridTreeIterator ( const This &other );
 
@@ -305,6 +307,16 @@ namespace Dune
 
   // Implementation of AlbertaGridTreeIterator
   // -----------------------------------------
+
+  template< int codim, class GridImp, bool leafIterator >
+  inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
+  ::AlbertaGridTreeIterator ()
+    : Base(),
+      level_( -1 ),
+      subEntity_( -1 ),
+      macroIterator_(),
+      marker_( NULL )
+  {}
 
   template< int codim, class GridImp, bool leafIterator >
   inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
