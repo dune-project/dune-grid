@@ -57,6 +57,10 @@ namespace Dune
     struct LocalCoordReader;
 
   public:
+
+    AlbertaGridIntersectionBase ()
+    {}
+
     AlbertaGridIntersectionBase ( const EntityImp &entity, const int oppVertex );
 
     EntityPointer inside () const;
@@ -135,6 +139,9 @@ namespace Dune
     using Base::elementInfo;
 
     using Base::inside;
+
+    AlbertaGridLeafIntersection ()
+    {}
 
     AlbertaGridLeafIntersection ( const EntityImp &entity, const int n );
 
