@@ -119,6 +119,7 @@ namespace Dune
         typedef Dune::Geometry< dim-cd, dimworld, const Grid, AlbertaGridGlobalGeometry > Geometry;
         typedef Dune::Geometry< dim-cd, dim, const Grid, LocalGeometryReference > LocalGeometry;
 
+        typedef AlbertaGridEntity< cd, dim, const GridImp > EntityImpl;
         typedef Dune::Entity< cd, dim, const GridImp, AlbertaGridEntity > Entity;
 
         typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
