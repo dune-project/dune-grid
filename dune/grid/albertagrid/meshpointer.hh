@@ -169,11 +169,20 @@ namespace Dune
 
       friend class MeshPointer< dim >;
 
+      template< int, typename, bool >
+      friend class AlbertaGridTreeIterator;
+
     public:
       typedef Alberta::MeshPointer< dim > MeshPointer;
       typedef Alberta::ElementInfo< dim > ElementInfo;
 
     private:
+
+      MacroIterator ()
+        : mesh_(),
+          index_( -1 )
+      {}
+
       explicit MacroIterator ( const MeshPointer &mesh, bool end = false )
         : mesh_( mesh ),
           index_( end ? mesh.numMacroElements() : 0 )
