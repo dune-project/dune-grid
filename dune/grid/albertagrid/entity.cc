@@ -204,11 +204,11 @@ namespace Dune
 
   template< int dim, class Grid >
   template< int codim >
-  inline typename AlbertaGridEntity< 0, dim, Grid >::template Codim< codim >::EntityPointer
+  inline typename Grid::template Codim< codim >::Entity
   AlbertaGridEntity< 0, dim, Grid >::subEntity ( int i ) const
   {
-    typedef AlbertaGridEntityPointer< codim, Grid > EntityPointerImpl;
-    return EntityPointerImpl( grid(), elementInfo_, grid().generic2alberta( codim, i ) );
+    typedef AlbertaGridEntity< codim, dim, Grid > EntityImpl;
+    return EntityImpl( grid(), elementInfo_, grid().generic2alberta( codim, i ) );
   }
 
 
@@ -273,15 +273,15 @@ namespace Dune
 
 
   template< int dim, class Grid >
-  inline typename AlbertaGridEntity< 0, dim, Grid >::EntityPointer
+  inline typename Grid::template Codim< 0 >::Entity
   AlbertaGridEntity< 0, dim, Grid >::father () const
   {
-    typedef AlbertaGridEntityPointer< 0, Grid > EntityPointerImpl;
+    typedef AlbertaGridEntity< 0, dim, Grid > EntityImpl;
 
     assert( elementInfo_ );
     const ElementInfo fatherInfo = elementInfo_.father();
 
-    return EntityPointerImpl( grid(), fatherInfo, 0 );
+    return EntityImpl( grid(), fatherInfo, 0 );
   }
 
 

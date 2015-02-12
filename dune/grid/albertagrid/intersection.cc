@@ -21,11 +21,11 @@ namespace Dune
 
 
   template< class Grid >
-  inline typename AlbertaGridIntersectionBase< Grid >::EntityPointer
+  inline typename Grid::template Codim< 0 >::Entity
   AlbertaGridIntersectionBase< Grid >::inside () const
   {
-    typedef AlbertaGridEntityPointer< 0, Grid > EntityPointerImp;
-    return EntityPointerImp( grid(), elementInfo(), 0 );
+    typedef AlbertaGridEntity< 0, Grid::dimension, Grid > EntityImp;
+    return EntityImp( grid(), elementInfo(), 0 );
   }
 
 
@@ -386,10 +386,10 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline typename AlbertaGridLeafIntersection< GridImp >::EntityPointer
+  inline typename GridImp::template Codim< 0 >::Entity
   AlbertaGridLeafIntersection< GridImp >::outside () const
   {
-    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
+    typedef AlbertaGridEntity< 0, GridImp::dimension, GridImp > EntityImp;
 
     if( !neighborInfo_ )
     {
@@ -400,7 +400,7 @@ namespace Dune
 
     assert( !neighborInfo_ == false );
     assert( neighborInfo_.el() != NULL );
-    return EntityPointerImp( grid(), neighborInfo_, 0 );
+    return EntityImp( grid(), neighborInfo_, 0 );
   }
 
   template< class GridImp >

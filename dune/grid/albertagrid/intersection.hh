@@ -63,7 +63,7 @@ namespace Dune
 
     AlbertaGridIntersectionBase ( const EntityImp &entity, const int oppVertex );
 
-    EntityPointer inside () const;
+    Entity inside () const;
 
     bool boundary () const;
     int boundaryId () const;
@@ -158,7 +158,8 @@ namespace Dune
 
     void next ();
 
-    EntityPointer outside () const;
+    typename GridImp::template Codim< 0 >::Entity
+    outside () const;
 
     bool neighbor () const;
 
