@@ -78,6 +78,8 @@ namespace Dune
     //! constructor
     explicit AlbertaGridEntity ( const Grid &grid );
 
+    AlbertaGridEntity ();
+
     //! contructor
     AlbertaGridEntity ( const Grid &grid, const ElementInfo &elementInfo, int subEntity );
 
@@ -197,6 +199,8 @@ namespace Dune
 
     //! constructor
     explicit AlbertaGridEntity ( const Grid &grid );
+
+    AlbertaGridEntity ();
 
     //! constructor
     AlbertaGridEntity ( const Grid &grid, const ElementInfo &elementInfo, int subEntity );

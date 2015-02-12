@@ -86,7 +86,7 @@ namespace Dune
     const GridImp &grid () const;
 
   private:
-    mutable EntityObject entity_;
+    mutable Entity entity_;
   };
 
 

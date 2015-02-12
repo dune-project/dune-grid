@@ -25,6 +25,14 @@ namespace Dune
     subEntity_( -1 )
   {}
 
+  template<int codim, int dim, class Grid>
+  inline AlbertaGridEntity< codim, dim, Grid >
+    ::AlbertaGridEntity ()
+  : grid_( NULL ),
+    elementInfo_(),
+    subEntity_( -1 )
+  {}
+
   template< int codim, int dim, class Grid >
   inline PartitionType
   AlbertaGridEntity< codim,dim,Grid >::partitionType () const
@@ -125,6 +133,13 @@ namespace Dune
   inline AlbertaGridEntity< 0, dim, Grid >
     ::AlbertaGridEntity( const Grid &grid )
   : grid_( &grid ),
+    elementInfo_()
+  {}
+
+  template< int dim, class Grid >
+  inline AlbertaGridEntity< 0, dim, Grid >
+    ::AlbertaGridEntity ()
+  : grid_( NULL ),
     elementInfo_()
   {}
 
