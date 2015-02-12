@@ -39,6 +39,9 @@ namespace Dune
 
     typedef typename Base::ElementInfo ElementInfo;
 
+    AlbertaGridHierarchicIterator ()
+    {}
+
     //! the normal Constructor
     AlbertaGridHierarchicIterator ( const GridImp &grid,
                                     const ElementInfo &elementInfo,
