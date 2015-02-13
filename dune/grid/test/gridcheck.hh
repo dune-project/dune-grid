@@ -361,7 +361,7 @@ void assertNeighbor (Grid &g)
       const Entity& e = *p;
 #else
       Entity e( *g.levelGridView(0).template begin<0>() );
-      e = *g.template lbegin<0>(1);
+      e = *g.levelGridView(1).template begin<0>();
 #endif
       LevelIterator it = g.levelGridView(0).template begin<0>();
       ++it;
