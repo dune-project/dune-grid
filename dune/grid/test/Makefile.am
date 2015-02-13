@@ -78,6 +78,8 @@ test_sgrid_SOURCES = test-sgrid.cc
 test_oned_SOURCES = test-oned.cc
 
 test_identitygrid_SOURCES = test-identitygrid.cc
+test_identitygrid_CPPFLAGS = $(AM_CPPFLAGS)     \
+	-DDUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE
 
 test_yaspgrid_SOURCES = test-yaspgrid.cc
 test_yaspgrid_CPPFLAGS = $(AM_CPPFLAGS)		\
