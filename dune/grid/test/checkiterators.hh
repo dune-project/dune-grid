@@ -100,7 +100,7 @@ inline void CheckCodimIterators< GridView, codim, true >
   for( ElementIterator it = gridView.template begin< 0 >(); it != elementEnd; ++it )
   {
     const typename ElementIterator::Entity &entity = *it;
-    for( int i = 0; i < entity.subEntities(codim); ++i )
+    for( std::size_t i = 0; i < entity.subEntities(codim); ++i )
     {
       IdType id = idSet.subId( entity, i, codim );
       if( count[ id ] != 1 )
