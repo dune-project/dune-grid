@@ -355,7 +355,7 @@ namespace Dune
           {
             typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
             if ( vtxParam_[ index ].empty() )
-              std::swap( vtxParam_[ index ], dgfFactory.parameter(*el.template subEntity<dimension>(v) ) );
+              std::swap( vtxParam_[ index ], dgfFactory.parameter(el.template subEntity<dimension>(v) ) );
             assert( vtxParam_[ index ].size()  == (size_t)nofVtxParam_ );
           }
         }
