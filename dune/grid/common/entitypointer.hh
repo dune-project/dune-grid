@@ -236,6 +236,19 @@ namespace Dune
       return handle_proxy_member_access(realIterator.dereference());
     }
 
+    // this construction, where the deprecation warning is triggered by a separate function,
+    // is slightly convoluted, but I could not get the warning to trigger reliably when attached
+    // directly to the cast operator.
+    DUNE_DEPRECATED_MSG("The implicit cast from EntityPointer to an Entity reference is DANGEROUS. It's mainly there for writing backwards compatible code that doesn't trigger a deprecation warning for ported grids and must ONLY be used if the returned reference is used in an rvalue-like setting!")
+    void trigger_entity_cast_warning() const
+    {}
+
+    operator const Entity&() const
+    {
+      trigger_entity_cast_warning();
+      return realIterator.dereference();
+    }
+
 #endif // DOXYGEN
 
     //@}
