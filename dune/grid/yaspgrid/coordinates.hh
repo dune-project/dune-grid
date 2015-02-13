@@ -364,7 +364,7 @@ namespace Dune
     {
       if (coords[i].size() <= 1)
         return false;
-      for (int j=1; j<coords[i].size(); j++)
+      for (std::size_t j=1; j<coords[i].size(); j++)
         if (coords[i][j] < coords[i][j-1])
           return false;
     }
