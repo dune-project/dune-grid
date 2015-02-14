@@ -35,7 +35,7 @@ void testReadingUnstructuredGrid(const std::string& filename) {
 
 void testWritingUniformData() {
 
-  std::array<int,2>     n = { 10, 10 };
+  std::array<int,2>     n = { {10, 10} };
   FieldVector<double,2> h = {3.0, 2.0};
 
   // /////////////////////////////////////
@@ -65,7 +65,7 @@ void testWritingUniformData() {
   //   Test writing of 3d uniform grid
   // /////////////////////////////////////
 
-  YaspGrid<3> grid3d({3.0, 2.0, 1.0}, { 10, 10, 10 });
+  YaspGrid<3> grid3d({3.0, 2.0, 1.0}, { {10, 10, 10} });
 
   // create data buffer
   std::vector<FieldVector<double,1> > vertexdata3d(grid3d.size(3));
