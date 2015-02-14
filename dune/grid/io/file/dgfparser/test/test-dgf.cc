@@ -5,9 +5,9 @@
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 #define CHECK 1
 
-#include <dune/grid/test/gridcheck.cc>
-#include <dune/grid/test/checkgeometryinfather.cc>
-#include <dune/grid/test/checkintersectionit.cc>
+#include <dune/grid/test/gridcheck.hh>
+#include <dune/grid/test/checkgeometryinfather.hh>
+#include <dune/grid/test/checkintersectionit.hh>
 
 #if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>

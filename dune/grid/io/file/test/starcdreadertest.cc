@@ -9,7 +9,7 @@
 
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/io/file/starcdreader.hh>
-#include <dune/grid/test/gridcheck.cc>
+#include <dune/grid/test/gridcheck.hh>
 
 template <class GridType>
 void readGrid (const std::string& baseName)
