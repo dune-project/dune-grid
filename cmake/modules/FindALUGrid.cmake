@@ -176,9 +176,9 @@ else()
     "Determing location of ALUGrid failed.\n\n")
 endif(ALUGRID_FOUND)
 
-#add all alugrid related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_alugrid_flags
+# register all alugrid related flags
 if(ALUGRID_FOUND)
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_DEFS "ENABLE_ALUGRID=1")
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_INCS "${ALUGRID_INCLUDES}")
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_LIBS "${ALUGRID_LIBRARIES}")
+  dune_register_package_flags(COMPILE_DEFINITIONS "ENABLE_ALUGRID=1"
+                              INCLUDE_DIRS "${ALUGRID_INCLUDES}"
+                              LIBRARIES "${ALUGRID_LIBRARIES}")
 endif()

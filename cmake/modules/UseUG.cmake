@@ -60,14 +60,15 @@ if(UG_FOUND)
       endif(full_path)
   endforeach(lib ugS2 ugS3 devS)
 
-  # add all UG related flags to ALL_PKG_FLAGS, this must happen
-  # regardless of a target using add_dune_ug_flags
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_DEFS "ENABLE_UG")
+  # register all UG related flags
+  set(UG_DEFINITIONS "ENABLE_UG=1")
   if(UG_PARALLEL STREQUAL "yes")
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_DEFS "ModelP")
+    set(UG_DEFINITIONS "ENABLE_UG=1;ModelP")
   endif()
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_INCS "${UG_INCLUDES}")
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_LIBS "dunegrid" "${UG_LIBRARIES}" "${DUNE_LIBS}")
+  dune_register_package_flags(COMPILE_DEFINITIONS "${UG_DEFINITIONS}"
+                              INCLUDE_DIRS "${UG_INCLUDES}"
+                              LIBRARIES "dunegrid;${UG_LIBRARIES};${DUNE_LIBS}")
+
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
     "Determining location of UG ${UG_VERSION} succeded:\n"

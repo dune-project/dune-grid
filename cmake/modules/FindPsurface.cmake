@@ -112,8 +112,8 @@ endif(PSURFACE_FOUND)
 # set HAVE_PSURFACE for config.h
 set(HAVE_PSURFACE ${PSURFACE_FOUND})
 
-#add all psurface related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_psurface_flags
+# register all psurface related flags
 if(PSURFACE_FOUND)
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_INCS "${PSURFACE_INCLUDE_DIRS}")
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_LIBS "${PSURFACE_LIBRARIES}")
+  dune_register_package_flags(INCLUDE_DIRS "${PSURFACE_INCLUDE_DIRS}"
+                              LIBRARIES "${PSURFACE_LIBRARIES}")
 endif()
