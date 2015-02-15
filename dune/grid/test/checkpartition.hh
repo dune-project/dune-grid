@@ -11,6 +11,7 @@
 #include <dune/common/unused.hh>
 
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/utility/entitycommhelper.hh>
 

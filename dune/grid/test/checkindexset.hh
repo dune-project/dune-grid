@@ -3,17 +3,18 @@
 #ifndef DUNE_GRID_TEST_CHECKINDEXSET_HH
 #define DUNE_GRID_TEST_CHECKINDEXSET_HH
 
-#include <iostream>
 #include <algorithm>
-
-#include <dune/common/fvector.hh>
-#include <dune/geometry/referenceelements.hh>
-#include <dune/grid/common/capabilities.hh>
-
+#include <iostream>
+#include <limits>
 #include <map>
 #include <set>
 #include <vector>
-#include <limits>
+
+#include <dune/common/fvector.hh>
+#include <dune/common/stdstreams.hh>
+#include <dune/geometry/referenceelements.hh>
+#include <dune/grid/common/capabilities.hh>
+#include <dune/grid/common/exceptions.hh>
 
 /** @file
    @author Robert Kloefkorn

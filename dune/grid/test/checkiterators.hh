@@ -6,7 +6,10 @@
 #include <map>
 
 #include <dune/common/forloop.hh>
+#include <dune/common/exceptions.hh>
 #include <dune/common/test/iteratortest.hh>
+
+#include <dune/grid/common/capabilities.hh>
 
 template<class T>
 class NoopFunctor {

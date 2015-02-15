@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_TEST_CHECKTWISTS_HH
 #define DUNE_GRID_TEST_CHECKTWISTS_HH
 
+#include <dune/geometry/referenceelements.hh>
+
 int applyTwist ( const int twist, const int i, const int numCorners )
 {
   return (twist < 0 ? (2*numCorners + 1 - i + twist) : i + twist) % numCorners;

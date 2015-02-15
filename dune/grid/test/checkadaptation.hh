@@ -5,6 +5,8 @@
 
 #include <dune/common/typetraits.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/stdstreams.hh>
+
 #include <dune/grid/common/capabilities.hh>
 
 /** \file
