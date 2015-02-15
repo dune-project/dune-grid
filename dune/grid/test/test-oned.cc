@@ -51,8 +51,8 @@ OneDGrid* testFactory()
   // //////////////////////////////////////////////////////////////
   //   Test whether the vertex numbering is in insertion order
   // //////////////////////////////////////////////////////////////
-  OneDGrid::Codim<1>::LevelIterator vIt    = grid->lbegin<1>(0);
-  OneDGrid::Codim<1>::LevelIterator vEndIt = grid->lend<1>(0);
+  OneDGrid::Codim<1>::LevelIterator vIt    = grid->levelGridView(0).template begin<1>();
+  OneDGrid::Codim<1>::LevelIterator vEndIt = grid->levelGridView(0).template end<1>();
 
   const OneDGrid::LevelGridView::IndexSet& levelIndexSet = grid->levelGridView(0).indexSet();
   const OneDGrid::LeafGridView::IndexSet&  leafIndexSet  = grid->leafGridView().indexSet();
@@ -81,8 +81,8 @@ OneDGrid* testFactory()
   elementCenters[4] = 0.1;
   elementCenters[5] = 0.25;
 
-  OneDGrid::Codim<0>::LevelIterator eIt    = grid->lbegin<0>(0);
-  OneDGrid::Codim<0>::LevelIterator eEndIt = grid->lend<0>(0);
+  OneDGrid::Codim<0>::LevelIterator eIt    = grid->levelGridView(0).begin<0>();
+  OneDGrid::Codim<0>::LevelIterator eEndIt = grid->levelGridView(0).end<0>();
 
   for (; eIt!=eEndIt; ++eIt) {
     unsigned int idx = levelIndexSet.index(*eIt);
@@ -104,7 +104,7 @@ OneDGrid* testFactory()
   typedef  GridView::IntersectionIterator IntersectionIterator;
   const GridView gridView = grid->leafGridView();
 
-  for (eIt = grid->lbegin<0>(0); eIt!=eEndIt; ++eIt) {
+  for (eIt = grid->levelGridView(0).begin<0>(); eIt!=eEndIt; ++eIt) {
     IntersectionIterator iIt = gridView.ibegin(*eIt);
     const IntersectionIterator iEndIt = gridView.iend(*eIt);
 

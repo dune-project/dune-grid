@@ -526,6 +526,8 @@ struct GridInterface
     g.ghostSize(0);
 
     // check for iterator functions
+    g.levelGridView(0).template begin<0>();
+    g.levelGridView(0).template end<0>();
 #if !DISABLE_DEPRECATED_METHOD_CHECK
     g.template lbegin<0>(0);
     g.template lend<0>(0);
@@ -543,14 +545,15 @@ struct GridInterface
     typedef typename Grid::GlobalIdSet GlobalIdSet DUNE_UNUSED;
 
     g.levelIndexSet(0);
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    if (g.template lbegin<0>(0) !=g.template lend<0>(0) ) {
+
+    if (g.levelGridView(0).template begin<0>() != g.levelGridView(0).template end<0>())
+    {
       // Instantiate all methods of LevelIndexSet
-      g.levelIndexSet(0).index(*g.template lbegin<0>(0));
+      g.levelIndexSet(0).index(*g.levelGridView(0).template begin<0>());
       /** \todo Test for subindex is missing, because I don't know yet
           how to test for the existence of certain codims */
     }
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
+
     g.levelIndexSet(0).
     size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
     for( int codim = 0; codim < Grid::dimension; ++codim )
@@ -596,10 +599,8 @@ struct GridInterface
     EntityInterface< Grid, 0, Grid::dimension, Dune::Capabilities::hasEntity< Grid, 0 >::v >();
 
     // !!! check for parallel grid?
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    g.template lbegin<0, Dune::Ghost_Partition>(0);
-    g.template lend<0, Dune::Ghost_Partition>(0);
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
+    g.levelGridView(0).template begin<0, Dune::Ghost_Partition>();
+    g.levelGridView(0).template end<0, Dune::Ghost_Partition>();
   }
   GridInterface()
   {

@@ -112,8 +112,9 @@ namespace Dune
     std::cout << ")" << std::endl;
 
     // print info about each element on given level
-    LevelIterator eendit = grid.template lend<0>(level);
-    for (LevelIterator it = grid.template lbegin<0>(level); it!=eendit; ++it)
+    LevelIterator eendit = grid.levelGridView(level).template end<0>();
+    for (LevelIterator it = grid.levelGridView(level).template begin<0>();
+         it != eendit; ++it)
     {
       std::cout << prefix << "level=" << it->level()
                 << " " << it->type() << "[" << dim << "]"

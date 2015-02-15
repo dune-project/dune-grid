@@ -22,8 +22,8 @@ void markForAdaptation(GridType& grid, const int marker )
     typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
     typedef typename ElementIterator :: Entity EntityType ;
 
-    const ElementIterator eEndIt = grid.template lend<0>( level );
-    for (ElementIterator it = grid.template lbegin<0>( level );
+    const ElementIterator eEndIt = grid.levelGridView(level).template end<0>();
+    for (ElementIterator it = grid.levelGridView(level).template begin<0>();
          it != eEndIt; ++it )
     {
       const EntityType& entity = *it ;
@@ -100,7 +100,8 @@ void checkAdaptRefinement(GridType& grid, const bool greenClosure = false )
   using namespace Dune;
 
   // skip empty grids
-  if( grid.template lbegin<0>( 0 ) == grid.template lend<0>( 0 ) ) return ;
+  if ( grid.levelGridView(0).template begin<0>() == grid.levelGridView(0).template end<0>() )
+    return;
 
   // some things are different for bisection grids
   const bool bisectionGrid =
@@ -137,9 +138,9 @@ void checkAdaptRefinement(GridType& grid, const bool greenClosure = false )
     {
       typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
       typedef typename ElementIterator :: Entity EntityType ;
-      ElementIterator eEndIt = grid.template lend<0>( level );
+      ElementIterator eEndIt = grid.levelGridView(level).template end<0>();
 
-      for (ElementIterator it = grid.template lbegin<0>( level );
+      for (ElementIterator it = grid.levelGridView(level).template begin<0>();
            it != eEndIt; ++ it)
       {
         const EntityType& entity = *it ;
@@ -168,9 +169,9 @@ void checkAdaptRefinement(GridType& grid, const bool greenClosure = false )
     for (int level = 0 ; level <= grid.maxLevel(); ++level )
     {
       typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
-      ElementIterator eEndIt = grid.template lend<0>( level );
+      ElementIterator eEndIt = grid.levelGridView(level).template end<0>();
 
-      for (ElementIterator it = grid.template lbegin<0>( level );
+      for (ElementIterator it = grid.levelGridView(level).template begin<0>();
            it != eEndIt; ++ it)
       {
         if( it->isNew () )
@@ -188,7 +189,8 @@ void checkAdaptation(GridType& grid, const bool greenClosure = false )
   using namespace Dune;
 
   // skip empty grids
-  if( grid.template lbegin<0>( 0 ) == grid.template lend<0>( 0 ) ) return ;
+  if (grid.levelGridView(0).template begin<0>() == grid.levelGridView(0).template end<0>())
+    return;
 
   // save start level
   const int startLevel = grid.maxLevel();
@@ -226,9 +228,9 @@ void checkAdaptation(GridType& grid, const bool greenClosure = false )
 
     // check mightVanish
     typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
-    ElementIterator eEndIt = grid.template lend<0>( 0 );
+    ElementIterator eEndIt = grid.levelGridView(0).template end<0>();
 
-    for (ElementIterator it = grid.template lbegin<0>( 0 );
+    for (ElementIterator it = grid.levelGridView(0).template begin<0>();
          it != eEndIt; ++ it)
     {
       checkHierarchy( *it );
@@ -252,9 +254,9 @@ void checkAdaptation(GridType& grid, const bool greenClosure = false )
     for (int level = 0 ; level <= grid.maxLevel(); ++level )
     {
       typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
-      ElementIterator eEndIt = grid.template lend<0>( level );
+      ElementIterator eEndIt = grid.levelGridView(level).template end<0>();
 
-      for (ElementIterator it = grid.template lbegin<0>( level );
+      for (ElementIterator it = grid.levelGridView(level).template begin<0>();
            it != eEndIt; ++ it)
       {
         if( it->isNew () )
@@ -270,9 +272,9 @@ void checkAdaptation(GridType& grid, const bool greenClosure = false )
     for (int level = 0 ; level <= grid.maxLevel(); ++level )
     {
       typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
-      ElementIterator eEndIt = grid.template lend<0>( level );
+      ElementIterator eEndIt = grid.levelGridView(level).template end<0>();
 
-      for (ElementIterator it = grid.template lbegin<0>( level );
+      for (ElementIterator it = grid.levelGridView(level).template begin<0>();
            it != eEndIt; ++ it)
       {
         if( it->isNew () )

@@ -114,8 +114,9 @@ void checkIteratorAssignment(GridType & grid)
     typedef typename GridType :: template Codim<dim> :: LevelIterator
     IteratorType;
 
-    IteratorType it = grid.template lbegin<dim>(0);
-    if( grid.maxLevel() > 0 ) it = grid.template lbegin<dim>(1);
+    IteratorType it = grid.levelGridView(0).template begin<dim>();
+    if (grid.maxLevel() > 0)
+      it = grid.levelGridView(1).template begin<dim>();
   }
 
   {
@@ -124,9 +125,9 @@ void checkIteratorAssignment(GridType & grid)
     IteratorType;
     typedef typename GridType::Traits::template Codim<dim>::EntityPointer EntityPointerType;
 
-    IteratorType it = grid.template lbegin<dim>(0);
+    IteratorType it = grid.levelGridView(0).template begin<dim>();
 
-    if( it != grid.template lend<dim>(0) )
+    if (it != grid.levelGridView(0).template end<dim>())
     {
       assert( it->level() == 0 );
       EntityPointerType p( it );
@@ -138,7 +139,7 @@ void checkIteratorAssignment(GridType & grid)
 
       if( grid.maxLevel() > 0 )
       {
-        it = grid.template lbegin<dim>(1);
+        it = grid.levelGridView(1).template begin<dim>();
         if (grid.size(1,0)>0)
         {
           p = it;

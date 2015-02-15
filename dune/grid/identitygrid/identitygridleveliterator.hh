@@ -28,8 +28,10 @@ namespace Dune {
 
     //! Constructor
     explicit IdentityGridLevelIterator(const GridImp* identityGrid, int level)
-      : IdentityGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template lbegin<codim>(level)),
-        hostGridLevelIterator_(identityGrid->hostgrid_->template lbegin<codim>(level))
+      : IdentityGridEntityPointer<codim,GridImp>(
+          identityGrid, identityGrid->hostgrid_->levelGridView(level).template begin<codim>()),
+        hostGridLevelIterator_(
+          identityGrid->hostgrid_->levelGridView(level).template begin<codim>())
     {
       this->virtualEntity_.setToTarget(hostGridLevelIterator_);
     }
@@ -42,8 +44,10 @@ namespace Dune {
      */
     explicit IdentityGridLevelIterator(const GridImp* identityGrid, int level, bool endDummy)
       :
-        IdentityGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template lend<codim>(level)),
-        hostGridLevelIterator_(identityGrid->hostgrid_->template lend<codim>(level))
+        IdentityGridEntityPointer<codim,GridImp>(
+          identityGrid, identityGrid->hostgrid_->levelGridView(level).template end<codim>()),
+        hostGridLevelIterator_(
+          identityGrid->hostgrid_->levelGridView(level).template end<codim>())
     {}
 
 
