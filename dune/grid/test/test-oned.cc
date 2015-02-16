@@ -51,8 +51,8 @@ OneDGrid* testFactory()
   // //////////////////////////////////////////////////////////////
   //   Test whether the vertex numbering is in insertion order
   // //////////////////////////////////////////////////////////////
-  OneDGrid::Codim<1>::LevelIterator vIt    = grid->levelGridView(0).template begin<1>();
-  OneDGrid::Codim<1>::LevelIterator vEndIt = grid->levelGridView(0).template end<1>();
+  OneDGrid::Codim<1>::LevelIterator vIt    = grid->levelGridView(0).begin<1>();
+  OneDGrid::Codim<1>::LevelIterator vEndIt = grid->levelGridView(0).end<1>();
 
   const OneDGrid::LevelGridView::IndexSet& levelIndexSet = grid->levelGridView(0).indexSet();
   const OneDGrid::LeafGridView::IndexSet&  leafIndexSet  = grid->leafGridView().indexSet();
