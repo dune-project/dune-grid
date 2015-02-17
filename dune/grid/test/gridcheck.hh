@@ -378,16 +378,6 @@ void assertNeighbor (Grid &g)
       // call global id
       globalid.id( entity );
 
-      if( !entity.isLeaf() )
-      {
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-        if( entity.ileafbegin() != entity.ileafend() )
-        {
-          DUNE_THROW(CheckError, "On non-leaf entities ileafbegin should be equal to ileafend!");
-        }
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
-      }
-
       const int numFaces = entity.subEntities(1);
       // flag vector for elements faces
       std::vector< bool > visited( numFaces, false );

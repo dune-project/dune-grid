@@ -329,16 +329,6 @@ namespace Dune
     /** \brief The codim==0 EntityPointer type */
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
-    /** \brief The Dune::IntersectionIterator type for the LeafGridView
-      * \deprecated Will be removed in the release after dune-grid-2.3
-      */
-    typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
-
-    /** \brief The Dune::IntersectionIterator type for the LevelGridView
-      * \deprecated Will be removed in the release after dune-grid-2.3
-      */
-    typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
-
     /** \brief The HierarchicIterator type*/
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
 
@@ -548,74 +538,6 @@ namespace Dune
     {
       warnOnDeprecatedEntityPointer<typename subentity_return_info<codim>::type>();
       return realEntity.template subEntity< codim >( i );
-    }
-
-    /**\brief Access to intersections with neighboring leaf elements.
-       A neighbor is an entity of codimension 0
-       which has an intersection of codimension 1 in common with this entity.
-       Access to those neighbors is provided using the IntersectionIterator.
-       This method returns an iterator refering to the first neighbor.
-
-       \note If the partitionType of the Entity is GhostEntity,
-             this method might give you only one neighbor, which is the
-             interior Entity the GhostEntity is connected to.
-
-       \deprecated This method is deprecated and will be removed after
-                   Dune 2.3. Use LeafGridView.ibegin(Entity) instead.
-     */
-    LeafIntersectionIterator ileafbegin () const
-    DUNE_DEPRECATED_MSG("Use LeafGridView.ibegin(Entity) instead.")
-    {
-      return realEntity.ileafbegin();
-    }
-
-    /**\brief Reference to an IntersectionIterator one past the last intersection
-
-       \note If the partitionType of the Entity is GhostEntity,
-             this method might give you only one neighbor, which is the
-             interior Entity the GhostEntity is connected to.
-
-       \deprecated This method is deprecated and will be removed after
-                   Dune 2.3. Use LeafGridView.iend(Entity) instead.
-     */
-    LeafIntersectionIterator ileafend () const
-    DUNE_DEPRECATED_MSG("Use LeafGridView.iend(Entity) instead.")
-    {
-      return realEntity.ileafend();
-    }
-
-    /**\brief Intra-level access to intersections with neighboring elements.
-       A neighbor is an entity of codimension 0
-       which has an intersection of codimension 1 in common with this entity.
-       Access to those neighbors is provided using the IntersectionIterator.
-       This method returns an iterator refering to the first neighbor.
-
-       \note If the partitionType of the Entity is GhostEntity,
-             this method might give you only one neighbor, which is the
-             interior Entity the GhostEntity is connected to.
-
-       \deprecated This method is deprecated and will be removed after
-                   Dune 2.3. Use LevelGridView.ibegin(Entity) instead.
-     */
-    LevelIntersectionIterator ilevelbegin () const
-    DUNE_DEPRECATED_MSG("Use LevelGridView.ibegin(Entity) instead.")
-    {
-      return realEntity.ilevelbegin();
-    }
-
-    /**\brief Reference to an IntersectionIterator one past the last intersection
-
-       \note If the partitionType of the Entity is GhostEntity,
-             this method might give you only one neighbor, which is the
-             interior Entity the GhostEntity is connected to.
-
-       \deprecated This method is deprecated and will be removed after
-                   Dune 2.3. Use LevelGridView.iend(Entity) instead.
-     */
-    LevelIntersectionIterator ilevelend () const
-    DUNE_DEPRECATED_MSG("Use LevelGridView.iend(Entity) instead.")
-    {
-      return realEntity.ilevelend();
     }
 
     /**\brief Inter-level access to father entity on the next-coarser grid.

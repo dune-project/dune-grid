@@ -75,8 +75,6 @@ struct ZeroEntityMethodCheck
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator DUNE_UNUSED;
-    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator DUNE_UNUSED;
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
     typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
@@ -126,8 +124,6 @@ struct ZeroEntityMethodCheck<Grid, 0, true>
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator DUNE_UNUSED;
-    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator DUNE_UNUSED;
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
     typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
@@ -303,18 +299,10 @@ struct EntityInterface<Grid, 0, dim, true>
 
     // intersection iterator
     if (checkLevelIter) {
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-      e.ilevelbegin();
-      e.ilevelend();
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
       // #if 0 // WARNING must be updated to new interface
       IntersectionIteratorInterface<Grid,typename Grid::LevelIntersectionIterator>();
       // #endif
     }
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    e.ileafbegin();
-    e.ileafend();
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     // #if 0 // WARNING must be updated to new interface
     if(e.isLeaf())
       IntersectionIteratorInterface<Grid,typename Grid::LevelIntersectionIterator>();
