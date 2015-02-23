@@ -100,8 +100,6 @@ struct ZeroEntityMethodCheck<Grid, cd, false>
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator DUNE_UNUSED;
-    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator DUNE_UNUSED;
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
     typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
@@ -147,8 +145,6 @@ struct ZeroEntityMethodCheck<Grid, 0, false>
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator DUNE_UNUSED;
-    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator DUNE_UNUSED;
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
     typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
