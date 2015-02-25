@@ -286,9 +286,8 @@ void checkGeometryInFather(const GridType& grid)
           const typename Geometry::LocalCoordinate cornerInFather =
             geometryInFather.global(cornerInSon);
           // map father to
-          const typename Geometry::GlobalCoordinate cornerFromGlobal =
+          const typename Geometry::LocalCoordinate cornerFromGlobal =
             eIt->father()->geometry().local(cornerViaSon);
-
           if( (cornerInFather - cornerFromGlobal).infinity_norm() > 1e-7 )
           {
             ++differentVertexCoords;
