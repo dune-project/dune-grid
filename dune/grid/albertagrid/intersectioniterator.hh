@@ -37,6 +37,9 @@ namespace Dune
     typedef AlbertaGridLeafIntersection< GridImp > IntersectionImp;
 
   public:
+    AlbertaGridLeafIntersectionIterator ()
+    {}
+
     template< class EntityImp >
     AlbertaGridLeafIntersectionIterator ( const EntityImp &entity, Begin )
       : intersection_( IntersectionImp( entity, 0 ) )

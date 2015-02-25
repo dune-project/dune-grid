@@ -10,6 +10,7 @@
 
 #include <cassert>
 #include <vector>
+#include <utility>
 
 #include <dune/grid/albertagrid/geometrycache.hh>
 #include <dune/grid/albertagrid/macroelement.hh>
@@ -76,10 +77,12 @@ namespace Dune
       ElementInfo ( const MeshPointer &mesh, const Seed &seed,
                     typename FillFlags::Flags fillFlags = FillFlags::standard );
       ElementInfo ( const ElementInfo &other );
+      ElementInfo ( ElementInfo&& other );
 
       ~ElementInfo ();
 
       ElementInfo &operator= ( const ElementInfo &other );
+      ElementInfo &operator= ( ElementInfo &&other );
 
       operator bool () const { return (instance_ != null()); }
 
@@ -380,6 +383,13 @@ namespace Dune
       addReference();
     }
 
+    template< int dim >
+    inline ElementInfo< dim >::ElementInfo ( ElementInfo &&other )
+      : instance_( NULL )
+    {
+      using namespace std;
+      swap( instance_, other.instance_ );
+    }
 
     template< int dim >
     inline ElementInfo< dim >::~ElementInfo ()
@@ -398,6 +408,14 @@ namespace Dune
       return *this;
     }
 
+    template< int dim >
+    inline ElementInfo< dim > &
+    ElementInfo< dim >::operator= ( ElementInfo< dim > &&other )
+    {
+      using namespace std;
+      swap( instance_, other.instance_ );
+      return *this;
+    }
 
     template< int dim >
     inline bool
@@ -803,6 +821,9 @@ namespace Dune
     template< int dim >
     inline void ElementInfo< dim >::removeReference () const
     {
+      // short-circuit for rvalues that have been drained as argument to a move operation
+      if ( !instance_ )
+        return;
       // this loop breaks when instance becomes null()
       for( InstancePtr instance = instance_; --(instance->refCount) == 0; )
       {
