@@ -256,20 +256,31 @@ void checkGeometryInFather(const GridType& grid)
           }
         }
 
-        typename GridType::template Codim<0>::EntityPointer e(eIt);
         const typename Geometry::LocalCoordinate X(0.2);
         typename Geometry::LocalCoordinate x = X;
-        while (e->level() != 0)
+
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+        typename GridType::template Codim<0>::EntityPointer ep(eIt);
+        while (ep->level() != 0)
         {
-            x = e->geometryInFather().global(x);
-            e = e->father();
+            x = ep->geometryInFather().global(x);
+            ep = ep->father();
         }
-        if ((e->geometry().global(x)-eIt->geometry().global(X)).two_norm() > 1e-8)
+        const typename GridType::template Codim<0>::Entity& e(*ep);
+#else
+        typename GridType::template Codim<0>::Entity e(*eIt);
+        while (e.level() != 0)
         {
-          std::cerr << "Warning: mapping broken! " << e->geometry().global(x)
+            x = e.geometryInFather().global(x);
+            e = e.father();
+        }
+#endif
+        if ((e.geometry().global(x)-eIt->geometry().global(X)).two_norm() > 1e-8)
+        {
+          std::cerr << "Warning: mapping broken! " << e.geometry().global(x)
                     << " vs. "  << eIt->geometry().global(X)
                     << "\tchild " << eIt->geometry().center()
-                    << "\tfather " << e->geometry().center()
+                    << "\tfather " << e.geometry().center()
                     << "\tat "  << x
                     << "\tmaps to " << X << std::endl;
         }
@@ -287,7 +298,11 @@ void checkGeometryInFather(const GridType& grid)
             geometryInFather.global(cornerInSon);
           // map father to
           const typename Geometry::LocalCoordinate cornerFromGlobal =
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
             eIt->father()->geometry().local(cornerViaSon);
+#else
+            eIt->father().geometry().local(cornerViaSon);
+#endif
           if( (cornerInFather - cornerFromGlobal).infinity_norm() > 1e-7 )
           {
             ++differentVertexCoords;
