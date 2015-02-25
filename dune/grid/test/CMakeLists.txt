@@ -142,6 +142,7 @@ set(SOURCES
   checkadaptation.hh
   checkcommunicate.cc
   checkcommunicate.hh
+  checkentitylifetime.hh
   checkentityseed.cc
   checkentityseed.hh
   checkgeometry.cc
@@ -152,6 +153,7 @@ set(SOURCES
   checkindexset.hh
   checkintersectionit.cc
   checkintersectionit.hh
+  checkintersectionlifetime.hh
   checkiterators.cc
   checkiterators.hh
   checkjacobians.cc

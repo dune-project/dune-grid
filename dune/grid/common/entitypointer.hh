@@ -3,6 +3,7 @@
 #ifndef DUNE_GRID_ENTITYPOINTER_HH
 #define DUNE_GRID_ENTITYPOINTER_HH
 
+#include <dune/common/proxymemberaccess.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/deprecated.hh>
 #include <dune/grid/common/grid.hh>
@@ -191,19 +192,65 @@ namespace Dune
     //@{
     //===========================================================
 
+    // The behavior when dereferencing the EntityPointer facade depends on
+    // the way the grid implementation handles returning entities. The implementation
+    // may either return a reference to an entity stored inside the EntityPointer
+    // implementation or a temporary Entity object. This object has to be forwarded through
+    // the facade to the user, which requires a little trickery, especially for operator->().
+    //
+    // In order to avoid confusing users reading the Doxygen documentation, we provide "clean"
+    // function signatures to Doxygen and hide the actual implementations.
+
+#ifdef DOXYGEN
+
     /** \brief Dereferencing operator. */
-    const Entity& operator*() const
+    Entity operator*() const
+    DUNE_ENTITYPOINTER_DEPRECATED_MSG;
+
+
+    /** \brief Pointer operator. */
+    const Entity* operator->() const
+    DUNE_ENTITYPOINTER_DEPRECATED_MSG;
+
+#else // DOXYGEN
+
+    /** \brief Dereferencing operator. */
+    typename std::conditional<
+      std::is_lvalue_reference<
+        decltype(realIterator.dereference())
+        >::value,
+      const Entity&,
+      Entity
+      >::type
+    operator*() const
     DUNE_ENTITYPOINTER_DEPRECATED_MSG
     {
       return realIterator.dereference();
     }
 
     /** \brief Pointer operator. */
-    const Entity * operator->() const
+    decltype(handle_proxy_member_access(realIterator.dereference()))
+    operator->() const
     DUNE_ENTITYPOINTER_DEPRECATED_MSG
     {
-      return & realIterator.dereference();
+      return handle_proxy_member_access(realIterator.dereference());
     }
+
+    // this construction, where the deprecation warning is triggered by a separate function,
+    // is slightly convoluted, but I could not get the warning to trigger reliably when attached
+    // directly to the cast operator.
+    DUNE_DEPRECATED_MSG("The implicit cast from EntityPointer to an Entity reference is DANGEROUS. It's mainly there for writing backwards compatible code that doesn't trigger a deprecation warning for ported grids and must ONLY be used if the returned reference is used in an rvalue-like setting!")
+    void trigger_entity_cast_warning() const
+    {}
+
+    operator const Entity&() const
+    {
+      trigger_entity_cast_warning();
+      return realIterator.dereference();
+    }
+
+#endif // DOXYGEN
+
     //@}
 
     //===========================================================

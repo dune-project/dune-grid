@@ -492,6 +492,12 @@ namespace Dune
     Intersection ( const Implementation &impl )
       : real( impl )
     {}
+
+    /** Move Constructor from IntersectionImp */
+    Intersection ( Implementation&& impl )
+      : real( std::move(impl) )
+    {}
+
     //@}
 
   protected:

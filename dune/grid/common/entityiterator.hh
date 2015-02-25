@@ -61,17 +61,48 @@ namespace Dune
     // The dereferencing operators are overridden here to avoid calling
     // the deprecated versions int the EntityPointer facade.
 
+    // The behavior when dereferencing the EntityIterator facade depends on
+    // the way the grid implementation handles returning entities. The implementation
+    // may either return a reference to an entity stored inside the EntityIterator
+    // implementation or a temporary Entity object. This object has to be forwarded through
+    // the facade to the user, which requires a little trickery, especially for operator->().
+    //
+    // In order to avoid confusing users reading the Doxygen documentation, we provide "clean"
+    // function signatures to Doxygen and hide the actual implementations.
+
+
+#ifdef DOXYGEN
+
     /** \brief Dereferencing operator. */
-    const Entity& operator*() const
+    const Entity& operator*() const;
+
+    /** \brief Pointer operator. */
+    const Entity* operator->() const;
+
+#else // DOXYGEN
+
+    /** \brief Dereferencing operator. */
+    typename std::conditional<
+      std::is_lvalue_reference<
+        decltype(realIterator.dereference())
+        >::value,
+      const Entity&,
+      Entity
+      >::type
+    operator*() const
     {
-      return this->realIterator.dereference();
+      return realIterator.dereference();
     }
 
     /** \brief Pointer operator. */
-    const Entity * operator->() const
+    decltype(handle_proxy_member_access(realIterator.dereference()))
+    operator->() const
     {
-      return & this->realIterator.dereference();
+      return handle_proxy_member_access(realIterator.dereference());
     }
+
+#endif // DOXYGEN
+
 
     /** \brief Checks for equality. */
     bool operator==(const EntityIterator& rhs) const

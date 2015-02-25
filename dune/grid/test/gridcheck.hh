@@ -21,7 +21,8 @@
 #include "checkindexset.hh"
 #include "checkgeometry.hh"
 #include "checkentityseed.hh"
-
+#include "checkentitylifetime.hh"
+#include "checkintersectionlifetime.hh"
 
 #include <limits>
 
@@ -1107,6 +1108,13 @@ void gridcheck (Grid &g)
     checkBoundarySegmentIndex( g.leafGridView() );
   else
     std::cout << "Warning: Skipping boundary segment index check (missing level intersection iterator)." << std::endl;
+
+  // check for range-based for iteration and correct entity / intersection lifetime
+  checkEntityLifetime(g.levelGridView(g.maxLevel()));
+  if (EnableLevelIntersectionIteratorCheck< Grid >::v)
+    checkIntersectionLifetime(g.levelGridView(g.maxLevel()));
+  checkEntityLifetime(g.leafGridView());
+  checkIntersectionLifetime(g.leafGridView());
 }
 
 #endif // #ifndef DUNE_GRID_TEST_GRIDCHECK_HH

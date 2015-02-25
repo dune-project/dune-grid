@@ -230,6 +230,7 @@ SOURCES = basicunitcube.hh                      \
           checkadaptation.hh                    \
           checkcommunicate.cc                   \
           checkcommunicate.hh                   \
+          checkentitylifetime.hh                \
           checkentityseed.cc                    \
           checkentityseed.hh                    \
           checkgeometry.cc                      \
@@ -240,6 +241,7 @@ SOURCES = basicunitcube.hh                      \
           checkindexset.hh                      \
           checkintersectionit.cc                \
           checkintersectionit.hh                \
+          checkintersectionlifetime.hh          \
           checkiterators.cc                     \
           checkiterators.hh                     \
           checkjacobians.cc                     \
