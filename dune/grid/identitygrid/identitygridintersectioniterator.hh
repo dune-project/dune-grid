@@ -33,7 +33,7 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;
 
-    typedef typename GridImp::HostGridType::template Codim<0>::Entity::LeafIntersectionIterator HostLeafIntersectionIterator;
+    typedef typename GridImp::HostGridType::LeafGridView::IntersectionIterator HostLeafIntersectionIterator;
 
   public:
 
@@ -84,7 +84,7 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;
 
-    typedef typename GridImp::HostGridType::template Codim<0>::Entity::LevelIntersectionIterator HostLevelIntersectionIterator;
+    typedef typename GridImp::HostGridType::LevelGridView::IntersectionIterator HostLevelIntersectionIterator;
 
   public:
 
