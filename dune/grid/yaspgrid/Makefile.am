@@ -16,6 +16,7 @@ yaspgrid_HEADERS = backuprestore.hh \
                    yaspgridintersection.hh \
                    yaspgridintersectioniterator.hh \
                    yaspgridleveliterator.hh \
+                   yaspgridpersistentcontainer.hh \
                    ygrid.hh
 
 # The header yaspgrid.hh declares a few global variables.  These are used
@@ -29,7 +30,8 @@ headercheck_IGNORE = yaspgridentity.hh \
                      yaspgridindexsets.hh \
                      yaspgridintersection.hh \
                      yaspgridintersectioniterator.hh \
-                     yaspgridleveliterator.hh
+                     yaspgridleveliterator.hh \
+                     yaspgridpersistentcontainer.hh
 
 EXTRA_DIST = CMakeLists.txt grid.fig grid.eps grid.png subgrid.fig subgrid.eps subgrid.png
 

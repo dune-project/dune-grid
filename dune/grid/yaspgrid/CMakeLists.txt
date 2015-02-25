@@ -14,6 +14,7 @@ set(HEADERS
   yaspgridintersectioniterator.hh
   yaspgrididset.hh
   yaspgridleveliterator.hh
+  yaspgridpersistentcontainer.hh
   ygrid.hh)
 
 exclude_all_but_from_headercheck(backuprestore.hh torus.hh coordinates.hh ygrid.hh factory.hh)
