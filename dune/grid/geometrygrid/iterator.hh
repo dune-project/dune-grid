@@ -222,7 +222,6 @@ namespace Dune
       typedef typename Base::EntityImpl EntityImpl;
 
       using Base::hostEntityIterator_;
-      using Base::entityImpl;
       using Base::grid;
 
     public:
@@ -237,7 +236,6 @@ namespace Dune
       void increment ()
       {
         ++hostEntityIterator_;
-        entityImpl() = EntityImpl( grid() );
       }
     };
 
@@ -271,7 +269,6 @@ namespace Dune
       typedef typename Base::EntityImpl EntityImpl;
 
       using Base::hostElementIterator_;
-      using Base::entityImpl;
       using Base::grid;
 
     public:
@@ -314,14 +311,12 @@ namespace Dune
             if( !visited_[ index ] )
             {
               visited_[ index ] = true;
-              entityImpl() = EntityImpl( grid(), subEntity );
               return;
             }
           }
           ++hostElementIterator_;
           subEntity = -1;
         }
-        entityImpl() = EntityImpl( grid(), subEntity );
       }
 
     private:
@@ -363,7 +358,6 @@ namespace Dune
       typedef typename Traits::HostEntityIterator HostEntityIterator;
 
       using Base::hostEntityIterator_;
-      using Base::entityImpl;
       using Base::grid;
 
     public:
@@ -375,7 +369,6 @@ namespace Dune
       void increment ()
       {
         ++hostEntityIterator_;
-        entityImpl() = EntityImpl( grid() );
       }
     };
 

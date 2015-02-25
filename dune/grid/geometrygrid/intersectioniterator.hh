@@ -24,6 +24,7 @@ namespace Dune
 
       typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
       typedef typename Traits::template Codim< 0 >::Geometry ElementGeometry;
+      typedef typename Traits::template Codim< 0 >::GeometryImpl ElementGeometryImpl;
 
     public:
       typedef Dune::Intersection< Grid, IntersectionImpl > Intersection;
@@ -33,19 +34,31 @@ namespace Dune
       template< class Entity >
       IntersectionIterator ( const Entity &inside,
                              const HostIntersectionIterator &hostIterator )
-        : hostIterator_( hostIterator ),
-          intersection_( IntersectionImpl( inside.geometry() ) )
+        : hostIterator_( hostIterator )
+        , insideGeo_( Grid::getRealImplementation( inside.geometry() ) )
       {}
 
       IntersectionIterator ( const IntersectionIterator &other )
-        : hostIterator_( other.hostIterator_ ),
-          intersection_( IntersectionImpl( Grid::getRealImplementation( other.intersection_ ) ) )
+        : hostIterator_( other.hostIterator_ )
+        , insideGeo_( other.insideGeo_ )
+      {}
+
+      IntersectionIterator ( IntersectionIterator&& other )
+        : hostIterator_( std::move( other.hostIterator_ ) )
+        , insideGeo_( std::move( other.insideGeo_ ) )
       {}
 
       IntersectionIterator &operator= ( const IntersectionIterator &other )
       {
         hostIterator_ = other.hostIterator_;
-        Grid::getRealImplementation( intersection_ ) = Grid::getRealImplementation( other.intersection_ );
+        insideGeo_ = other.insideGeo_;
+        return *this;
+      }
+
+      IntersectionIterator &operator= ( IntersectionIterator&& other )
+      {
+        hostIterator_ = std::move( other.hostIterator_ );
+        insideGeo_ = std::move( other.insideGeo_ );
         return *this;
       }
 
@@ -57,24 +70,18 @@ namespace Dune
       void increment ()
       {
         ++hostIterator_;
-        intersectionImpl().invalidate();
       }
 
-      const Intersection &dereference () const
+      Intersection dereference () const
       {
-        if( !intersectionImpl() )
-          intersectionImpl().initialize( *hostIterator_ );
-        return intersection_;
+        return IntersectionImpl( *hostIterator_, insideGeo_ );
       }
 
     private:
-      IntersectionImpl &intersectionImpl () const
-      {
-        return Grid::getRealImplementation( intersection_ );
-      }
 
       HostIntersectionIterator hostIterator_;
-      mutable Intersection intersection_;
+      ElementGeometryImpl insideGeo_;
+
     };
 
   } // namespace GeoGrid

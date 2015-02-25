@@ -3,6 +3,8 @@
 #ifndef DUNE_GEOGRID_GEOMETRY_HH
 #define DUNE_GEOGRID_GEOMETRY_HH
 
+#include <utility>
+
 #include <dune/common/nullptr.hh>
 #include <dune/common/typetraits.hh>
 
@@ -125,7 +127,7 @@ namespace Dune
 
       Geometry () : grid_( nullptr ), mapping_( nullptr ) {}
 
-      Geometry ( const Grid &grid ) : grid_( &grid ), mapping_( nullptr ) {}
+      explicit Geometry ( const Grid &grid ) : grid_( &grid ), mapping_( nullptr ) {}
 
       template< class CoordVector >
       Geometry ( const Grid &grid, const GeometryType &type, const CoordVector &coords )
@@ -145,6 +147,14 @@ namespace Dune
           mapping_->addReference();
       }
 
+      Geometry ( This&& other )
+        : grid_( other.grid_ ),
+          mapping_( other.mapping_ )
+      {
+        other.grid_ = nullptr;
+        other.mapping_ = nullptr;
+      }
+
       ~Geometry ()
       {
         if( mapping_ && mapping_->removeReference() )
@@ -159,6 +169,14 @@ namespace Dune
           destroyMapping();
         grid_ = other.grid_;
         mapping_ = other.mapping_;
+        return *this;
+      }
+
+      const This &operator= ( This&& other )
+      {
+        using std::swap;
+        swap( grid_, other.grid_ );
+        swap( mapping_, other.mapping_ );
         return *this;
       }
 
