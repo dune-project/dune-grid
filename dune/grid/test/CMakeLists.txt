@@ -116,7 +116,6 @@ add_dune_mpi_flags(testiteratorranges)
 # tell gridcheck to use old entity and intersections interface for unported grids
 set_property(TARGET
   test-geogrid
-  test-identitygrid
   test-mcmg-geogrid
   #${ALBERTA_PROGRAMS}
   ${ALUGRID_PROGRAMS}
