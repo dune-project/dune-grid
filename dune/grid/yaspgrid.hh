@@ -1738,7 +1738,7 @@ namespace Dune {
     friend class Dune::YaspIndexSet<const Dune::YaspGrid<dim, Coordinates>, true >;
     friend class Dune::YaspIndexSet<const Dune::YaspGrid<dim, Coordinates>, false >;
     friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim, Coordinates> >;
-    friend class Dune::YaspPersistentContainerIndex<const Dune::YaspGrid<dim, Coordindates> >;
+    friend class Dune::YaspPersistentContainerIndex<const Dune::YaspGrid<dim, Coordinates> >;
 
     friend class Dune::YaspIntersectionIterator<const Dune::YaspGrid<dim, Coordinates> >;
     friend class Dune::YaspIntersection<const Dune::YaspGrid<dim, Coordinates> >;
