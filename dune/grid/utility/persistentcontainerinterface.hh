@@ -128,6 +128,9 @@ namespace Dune
      *  This method will enlarge the container such that there is an
      *  entry for each entity.
      *
+     *  After a grid modification, this method must be called before accessing
+     *  any data associated to newly created entities.
+     *
      *  \note The container might still hold entries for entities that no
      *        longer exist in the grid.
      *        While those entries ca no longer be accessed through an entity,
