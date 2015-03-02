@@ -12,7 +12,38 @@ namespace Dune
   // PersistentContainerVector
   // -------------------------
 
-  /** \brief vector-based implementation of the PersistentContainer */
+  /**
+   * \brief vector-based implementation of the PersistentContainer
+   *
+   * Some grid implementations, like YaspGrid, can provide consecutive,
+   * zero-based, persistent indices for the entire grid hierarchy.
+   * This implementation of a PersistentContainer uses such an index set and
+   * a std::vector-like container to store user data in an efficient and
+   * persistent manner.
+   *
+   * \note The persistent index set is actually allowed to be non-consecutive,
+   *       i.e., some indices might not be assigned to an entity.
+   *       As the result of the size method on the index set is used to allocate
+   *       storage for the vector, it must be larger than the largest used index.
+   *
+   * \note It is sufficient if the index set provides indices to the codimension
+   *       the persistent container is created for.
+   *       Neither the method types() nor the method contains() need to be
+   *       implemented.
+   *
+   * \note The persistent container is currently restricted to index sets
+   *       containing a single geometry type.
+   *
+   * \todo Actually, we use a mapper rather than an index set.
+   *       This would automatically resolve two problems:
+   *       - support multiple geometry types,
+   *       - the requirement to store a reference to the index set
+   *       .
+   *
+   * \tparam  G         type of grid
+   * \tparam  IndexSet  type of persistent index set
+   * \tparam  Vector    type of vector to store the data in
+   */
   template< class G, class IndexSet, class Vector >
   class PersistentContainerVector
   {
