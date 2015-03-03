@@ -107,6 +107,8 @@ namespace Dune
     typedef typename Base::Grid Grid;
     typedef typename Base::Value Value;
 
+    using Base::size;
+
     PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
       : IndexSet(grid, codim),
         Base(*this, codim, value)
