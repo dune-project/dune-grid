@@ -118,6 +118,7 @@ namespace Dune
     {
       return false;
     }
+
     template <class Intersection>
     int boundaryId(const Intersection &intersection) const
     {
@@ -191,6 +192,7 @@ namespace Dune
     std::vector<double> emptyParam;
   };
 
+  // generate YaspGrid from the provided DGF
   template< int dim >
   inline void DGFGridFactory< YaspGrid< dim > >
   ::generate ( std::istream &gridin, MPICommunicatorType comm )
@@ -213,11 +215,11 @@ namespace Dune
     const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
 
     FieldVector<double,dim> lang;
-    array<int,dim>    anz;
+    std::array<int,dim> anz;
     for( int i = 0; i < dim; ++i )
     {
       // check that start point is 0.0
-      if( fabs( interval.p[ 0 ][ i ] ) > 1e-10 )
+      if( std::abs( interval.p[ 0 ][ i ] ) > 1e-10 )
       {
         DUNE_THROW( DGFException,
                     "YaspGrid cannot handle grids with non-zero left lower corner." );
@@ -238,7 +240,7 @@ namespace Dune
       bool identity = true;
       for( int i = 0; i < dim; ++i )
         for( int j = 0; j < dim; ++j )
-          identity &= (fabs( (i == j ? 1.0 : 0.0) - trafo.matrix( i, j ) ) < 1e-10);
+          identity &= (std::abs( (i == j ? 1.0 : 0.0) - trafo.matrix( i, j ) ) < 1e-10);
       if( !identity )
         DUNE_THROW( DGFException, "YaspGrid can only handle shifts as periodic face transformations." );
 
@@ -246,12 +248,12 @@ namespace Dune
       int dir = -1;
       for( int i = 0; i < dim; ++i )
       {
-        if( fabs( trafo.shift[ i ] ) < 1e-10 )
+        if( std::abs( trafo.shift[ i ] ) < 1e-10 )
           continue;
         dir = i;
         ++numDirs;
       }
-      if( (numDirs != 1) || (fabs( fabs( trafo.shift[ dir ] ) - lang[ dir ] ) >= 1e-10) )
+      if( (numDirs != 1) || (std::abs( std::abs( trafo.shift[ dir ] ) - lang[ dir ] ) >= 1e-10) )
       {
         std::cerr << "Tranformation '" << trafo
                   << "' does not map boundaries on boundaries." << std::endl;
@@ -271,7 +273,7 @@ namespace Dune
   template <int dim>
   struct DGFGridInfo< YaspGrid<dim> > {
     static int refineStepsForHalf() {return 1;}
-    static double refineWeight() {return pow(0.5,dim);}
+    static double refineWeight() {return std::pow(0.5,dim);}
   };
 
 
