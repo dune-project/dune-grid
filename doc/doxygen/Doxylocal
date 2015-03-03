@@ -17,7 +17,7 @@ INPUT                 += @srcdir@/mainpage \
                          @top_srcdir@/dune/grid/uggrid/uggridfactory.hh \
                          @top_srcdir@/dune/grid/utility \
                          @top_srcdir@/dune/grid/yaspgrid.hh \
-                         @top_srcdir@/dune/grid/yaspgrid/factory.hh
+                         @top_srcdir@/dune/grid/yaspgrid
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or 
 # directories that contain example code fragments that are included (see 

@@ -36,10 +36,10 @@ typedef unsigned char uint8_t;
 #endif
 
 /*! \file yaspgrid.hh
-   YaspGrid stands for yet another structured parallel grid.
-   It will implement the dune grid interface for structured grids with codim 0
-   and dim, with arbitrary overlap, parallel features with two overlap
-   models, periodic boundaries and fast a implementation allowing on-the-fly computations.
+ * YaspGrid stands for yet another structured parallel grid.
+ * It will implement the dune grid interface for structured grids
+ * with arbitrary overlap, parallel features with two overlap
+ * models, periodic boundaries and a fast implementation allowing on-the-fly computations.
  */
 
 namespace Dune {
@@ -145,19 +145,20 @@ namespace Dune {
 
   //************************************************************************
   /*!
-     \brief [<em> provides \ref Dune::Grid </em>]
-     \brief Provides a distributed structured cube mesh.
-     \ingroup GridImplementations
-
-     YaspGrid stands for yet another structured parallel grid.
-     It implements the dune grid interface for structured grids with codim 0
-     and dim, with arbitrary overlap (including zero),
-     periodic boundaries and fast implementation allowing on-the-fly computations.
-
-     \tparam dim The dimension of the grid and its surrounding world
-
-     \par History:
-     \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
+   * \brief [<em> provides \ref Dune::Grid </em>]
+   * \brief Provides a distributed structured cube mesh.
+   * \ingroup GridImplementations
+   *
+   * YaspGrid stands for yet another structured parallel grid.
+   * It implements the dune grid interface for structured grids
+   * with arbitrary overlap (including zero),
+   * periodic boundaries, and a fast implementation allowing on-the-fly computations.
+   *
+   * YaspGrid supports three coordinate modes: \ref EquidistantCoordinates,
+   * \ref EquidistantOffsetCoordinates, and \ref Dune::TensorProductCoordinates.
+   *
+   * \tparam dim The dimension of the grid and its surrounding world
+   * \tparam Coordinates The coordinte mode of the grid.
    */
   template<int dim, class Coordinates = EquidistantCoordinates<double, dim> >
   class YaspGrid
