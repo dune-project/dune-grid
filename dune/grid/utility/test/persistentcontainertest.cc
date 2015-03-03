@@ -59,6 +59,14 @@ bool test(GridType &grid)
     }
   }
 
+  (void) container0.size();
+  (void) container1.size();
+  (void) container2.size();
+
+  (void) ccontainer0.size();
+  (void) ccontainer1.size();
+  (void) ccontainer2.size();
+
   grid.globalRefine(1);
   container0.resize();
   container1.resize();
