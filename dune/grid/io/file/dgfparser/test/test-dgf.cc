@@ -77,7 +77,11 @@ void test ( Grid &grid )
 
 int main(int argc, char ** argv, char ** envp)
 try {
+#ifndef COMPLETE_GRID_TYPE
   typedef GridSelector::GridType GridType;
+#else
+  typedef COMPLETE_GRID_TYPE GridType;
+#endif // COMPLETE_GRID_TYPE
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
 
