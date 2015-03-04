@@ -399,7 +399,7 @@ namespace Dune {
 
       <!---------------------------------------------->
      \section Simplexgeneration Using Tetgen/Triangle
-         The freely available simplex grid generators are direcltly
+         The freely available simplex grid generators are directly
          called via system
          call through the dgfparser.
          Therefore one should either add the path containing the executables of
@@ -415,11 +415,11 @@ namespace Dune {
             \endcode
             If the filetype is given, it will be appended to \b name and this will be
             passed to Tetgen/Triangle. Additional parameters for the grid generators
-            can be given by the the \b parameter token.
+            can be given by the \b parameter token.
             If no file type is given it is assumed that in a previous run of
             Tetgen/Triangle
             files name.node and name.ele were generated and these will be used
-            to described the vertices and elements of the Dune grid.
+            to describe the vertices and elements of the Dune grid.
          -# In the second approach the \b vertex and the \b interval blocks
             (if present)
             are used to generate the vertices of the grid; the \b Cube and \b
@@ -443,7 +443,7 @@ namespace Dune {
               segment has to be added, i.e., (p0,..,pn,p0).
             - If a \b cube or \b simplex block is found the element information
               is also passed to tetgen/triangle together with the parameters - if
-              given. Note that triangle can only handle one region atribute in
+              given. Note that a triangle can only handle one region atribute in
               its .poly files so that only the first parameter is the \b simplex
               or \b cube block can be retrived.
          .
@@ -454,7 +454,7 @@ namespace Dune {
             followed by a positive real number used as an upper bound for the
             area of all simplicies of the mesh.
          -  \b min-angle
-            followed by a positive number. In 2d this limits the angles in
+            followed by a positive number. In 2d this limits the angles in the
             resulting mesh from below; in 3d this bounds the radius-edge ratio
             from above.
          .
@@ -470,7 +470,7 @@ namespace Dune {
          The remaining identifiers are
          -  The identifier \b path
             (followed by a path name) can be used
-            to give search path for Triangle/Tetgen.
+            to give a search path for Triangle/Tetgen.
          -  The identifier \b display
             followed by 1 can be used to get a first impression
             of the resulting mesh using the visualization tools distributed with

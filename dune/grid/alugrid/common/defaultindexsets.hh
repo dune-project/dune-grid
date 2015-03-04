@@ -60,7 +60,7 @@ namespace Dune
 
   /*! \brief
      DefaultIndexSet creates an index set by using the grids persistent container
-     an a given pair of iterators
+     and a given pair of iterators
    */
   template < class GridImp, class IteratorImp >
   class DefaultIndexSet :

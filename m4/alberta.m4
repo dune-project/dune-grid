@@ -51,7 +51,7 @@
 #     All LDFLAGS required for the configured dimension.  These are currently
 #     empty and exist just for consistency.
 #
-#   If you want to use the the configured dimension, you have to use
+#   If you want to use the configured dimension, you have to use
 #   $(ALBERTA_LIBS), $(ALBERTA_CPPFLAGS) and $(ALBERTA_LDFLAGS).  If the
 #   configured dimension is anything other than 1, 2, or 3, these variable
 #   will substitute empty values, thus disabling support for alberta in the

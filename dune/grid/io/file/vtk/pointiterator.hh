@@ -40,7 +40,7 @@ namespace Dune
      *     dimension of the cell.
      * <li>IndexType should be the type of the indices returned by subIndex().
      * </ul>
-     * The requirements are crafted in such a way the the indexsets provided
+     * The requirements are crafted in such a way the indexsets provided
      * by the grid should fullfill them as long as the cells are codim=0
      * Entities.
      */
