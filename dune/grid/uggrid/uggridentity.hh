@@ -411,6 +411,8 @@ namespace Dune {
 
     typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
 
+    friend class UGGridEntityPointer<codim, GridImp>;
+
   public:
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
