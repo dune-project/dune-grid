@@ -187,13 +187,13 @@ if(ALUGRID_FOUND)
 
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determing location of ALUGrid ${ALUGRID_VERSION} succeeded:\n"
+    "Determining location of ALUGrid ${ALUGRID_VERSION} succeeded:\n"
     "Include directory: ${ALUGRID_INCLUDES}\n"
     "Library directory: ${ALUGRID_LIBRARIES}\n\n")
 else()
   # log errornous result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-    "Determing location of ALUGrid failed.\n\n")
+    "Determining location of ALUGrid failed.\n\n")
 endif(ALUGRID_FOUND)
 
 #add all alugrid related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_alugrid_flags

@@ -94,7 +94,7 @@ if(PSURFACE_FOUND)
   set(PSURFACE_LIBRARIES    ${PSURFACE_LIBRARY})
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determing location of ${PSURFACE_WITH_VERSION} succeeded:\n"
+    "Determining location of ${PSURFACE_WITH_VERSION} succeeded:\n"
     "Include directory: ${PSURFACE_INCLUDE_DIRS}\n"
     "Library directory: ${PSURFACE_LIBRARIES}\n\n")
   set(PSURFACE_DUNE_COMPILE_FLAGS "-I${PSURFACE_INCLUDE_DIRS}"
@@ -104,7 +104,7 @@ if(PSURFACE_FOUND)
 else(PSURFACE_FOUND)
   # log errornous result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-    "Determing location of psurface failed:\n"
+    "Determining location of psurface failed:\n"
     "Include directory: ${PSURFACE_INCLUDE_DIRS}\n"
     "Library directory: ${PSURFACE_LIBRARIES}\n\n")
 endif(PSURFACE_FOUND)
