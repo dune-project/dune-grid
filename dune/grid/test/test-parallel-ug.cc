@@ -136,7 +136,7 @@ void checkIntersections(const GridView &gv)
 
     IntersectionIterator isIt           = gv.ibegin(*it);
     const IntersectionIterator &isEndIt = gv.iend(*it);
-    int n = 0;
+    unsigned int n = 0;
     for (; isIt != isEndIt; ++isIt) {
       isIt->boundary();
       isIt->inside();
