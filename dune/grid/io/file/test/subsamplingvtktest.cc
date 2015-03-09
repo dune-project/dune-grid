@@ -95,9 +95,8 @@ void vtkCheck(int* n, double* h)
   std::copy(h, h+dim, L.begin());
   Dune::array<int, dim> s;
   std::copy(n, n+dim, s.begin());
-  std::bitset<dim> periodic;
 
-  Dune::YaspGrid<dim> g(L, s, periodic, 0);
+  Dune::YaspGrid<dim> g(L, s);
 
   if(g.comm().rank() == 0)
     std::cout << std::endl
