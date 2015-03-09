@@ -1,5 +1,3 @@
-# $Id$
-
 commondir = $(includedir)/dune/grid/common
 common_HEADERS = \
 	adaptcallback.hh \

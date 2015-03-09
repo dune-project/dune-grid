@@ -22,7 +22,3 @@ Important!  If you don't want to develop Dune itself you won't need to
 provide external components! The Dune-library and -headers are
 independent of other libraries, instead the applications can choose
 what parts to use.
-
-$Id$
-
-

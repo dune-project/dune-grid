@@ -1,5 +1,3 @@
-# $Id$
-
 # setting like in dune-web
 BASEDIR=../..
 CURDIR=doc/doxygen

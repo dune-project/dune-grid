@@ -1,5 +1,3 @@
-# $Id$
-
 sgriddir = $(includedir)/dune/grid/sgrid/
 sgrid_HEADERS = generic2dune.hh numbering.cc numbering.hh sgrid.cc
 

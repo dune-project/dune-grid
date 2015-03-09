@@ -1,6 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id: test-ug.cc 4424 2008-09-29 07:46:41Z sander $
 // Test parallel interface if a parallel UG is used
 
 #include <config.h>

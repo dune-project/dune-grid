@@ -1,5 +1,3 @@
-# $Id$
-
 if ALBERTA
 libalbertagrid_sources = dgfparser.cc  elementinfo.cc  indexsets.cc  macrodata.cc  meshpointer.cc
 libalbertagrid_cppflags = $(AM_CPPFLAGS) $(ALBERTA_INCLUDE_CPPFLAGS) -DENABLE_ALBERTA

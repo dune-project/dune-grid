@@ -1,5 +1,3 @@
-# $Id$
-
 if UG
 
 noinst_LTLIBRARIES = libuggrid.la

@@ -1,5 +1,4 @@
 ## -*- autoconf -*-
-# $Id: grape.m4 5710 2009-11-13 17:09:45Z robertk $
 # searches for albert-headers and libs
 
 # grape.h und libgr.a/libgr.so are located in the same discretory 

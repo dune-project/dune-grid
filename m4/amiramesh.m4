@@ -1,5 +1,4 @@
 ## -*- autoconf -*-
-# $Id: dune_amira.m4 5156 2008-04-14 09:28:06Z christi $
 # searches for amiramesh-headers and libs
 
 # DUNE_PATH_AMIRAMESH()

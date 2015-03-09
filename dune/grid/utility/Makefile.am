@@ -1,5 +1,3 @@
-# $Id$
-
 SUBDIRS = test
 
 gridutilitydir =  $(includedir)/dune/grid/utility

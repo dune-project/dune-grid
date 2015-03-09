@@ -1,5 +1,3 @@
-# $Id$
-
 SUBDIRS = amiramesh test dgfparser vtk gnuplot
 
 iofiledir = $(includedir)/dune/grid/io/file

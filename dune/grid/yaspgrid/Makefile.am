@@ -1,5 +1,3 @@
-# $Id$
-
 yaspgriddir = $(includedir)/dune/grid/yaspgrid/
 yaspgrid_HEADERS = backuprestore.hh \
                    coordinates.hh \
