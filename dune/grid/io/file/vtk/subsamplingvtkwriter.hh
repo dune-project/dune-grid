@@ -195,22 +195,25 @@ namespace Dune
     if(vertexdata.size() == 0)
       return;
 
-    std::string scalars = "";
+    // Find the names of the first scalar and vector data fields.
+    // These will be marked as the default fields (the ones that ParaView shows
+    // when the file has just been opened).
+    std::string defaultScalarField = "";
     for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       if ((*it)->ncomps()==1)
       {
-        scalars = (*it)->name();
+        defaultScalarField = (*it)->name();
         break;
       }
-    std::string vectors = "";
+    std::string defaultVectorField = "";
     for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       if ((*it)->ncomps()>1)
       {
-        vectors = (*it)->name();
+        defaultVectorField = (*it)->name();
         break;
       }
 
-    writer.beginPointData(scalars, vectors);
+    writer.beginPointData(defaultScalarField, defaultVectorField);
     for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
     {
       // vtk file format: a vector data always should have 3 comps (with 3rd
