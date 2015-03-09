@@ -24,14 +24,14 @@ class VTKVectorFunction
   enum { w = GridView :: dimensionworld };
   typedef typename GridView :: Grid :: ctype DT;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
-  const char *type;
+  const std::string type;
 public:
   /** @brief Make a new VTKVectorFunction
    *
    * @param type_ Type of the function for use in its name (hint: "cell" or
    *              "vertex")
    */
-  VTKVectorFunction(const char *type_)
+  VTKVectorFunction(std::string type_)
     : type(type_)
   { }
 
@@ -54,9 +54,7 @@ public:
   // get name
   virtual std::string name () const
   {
-    char _name[256];
-    snprintf(_name, 256, "%s-vector-%iD", type, ncomps());
-    return std::string(_name);
+    return type + "-vector-" + std::to_string(ncomps()) + "D";
   }
 
 
@@ -78,13 +76,10 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
   vtk.addVertexData(new VTKVectorFunction<GridView>("vertex"));
   vtk.addCellData(new VTKVectorFunction<GridView>("cell"));
 
-  char name[256];
-  snprintf(name,256,"subsamplingvtktest-%iD-%s-ascii",
-           dim, (coerceToSimplex ? "simplex" : "natural"));
+  std::string name = "subsamplingvtktest-" + std::to_string(dim) + "D-" + (coerceToSimplex ? "simplex" : "natural") + "-ascii";
   vtk.write(name);
 
-  snprintf(name,256,"subsamplingvtktest-%iD-%s-appendedraw",
-           dim, (coerceToSimplex ? "simplex" : "natural"));
+  name = "subsamplingvtktest-" + std::to_string(dim) + "D-" + (coerceToSimplex ? "simplex" : "natural") + "-appendedraw";
   vtk.write(name, Dune::VTK::appendedraw);
 }
 
