@@ -24,15 +24,15 @@ class VTKVectorFunction
   enum { w = GridView :: dimensionworld };
   typedef typename GridView :: Grid :: ctype DT;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
-  const std::string type;
+  const std::string type_;
 public:
   /** @brief Make a new VTKVectorFunction
    *
    * @param type_ Type of the function for use in its name (hint: "cell" or
    *              "vertex")
    */
-  VTKVectorFunction(std::string type_)
-    : type(type_)
+  VTKVectorFunction(std::string type)
+    : type_(type)
   { }
 
   //! return number of components
@@ -54,7 +54,7 @@ public:
   // get name
   virtual std::string name () const
   {
-    return type + "-vector-" + std::to_string(ncomps()) + "D";
+    return type_ + "-vector-" + std::to_string(ncomps()) + "D";
   }
 
 
