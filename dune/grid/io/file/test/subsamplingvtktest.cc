@@ -20,7 +20,6 @@ class VTKVectorFunction
 {
   // extract types
   enum { n = GridView :: dimension };
-  enum { w = GridView :: dimensionworld };
   typedef typename GridView :: Grid :: ctype DT;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
   const std::string type_;
