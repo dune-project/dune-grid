@@ -39,6 +39,7 @@ foreach(_test ${BUILD_TESTS})
 endforeach(_test ${BUILD_TESTS})
 
 add_executable(subsamplingvtktest subsamplingvtktest.cc test-linking.cc)
+target_link_libraries(subsamplingvtktest ${DUNE_LIBS})
 
 foreach(_test ${ALLTESTS})
   add_test(${_test} ${_test})
