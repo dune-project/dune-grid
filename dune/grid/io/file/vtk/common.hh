@@ -294,6 +294,65 @@ namespace Dune
       unstructuredGrid
     };
 
+
+    //! Descriptor struct for VTK fields
+    /**
+     * This struct provides general information about a data field to be
+     * written to a VTK file.
+     *
+     * It currently stores the data type and the number of components as well as
+     * the name of the field.
+     */
+    class FieldInfo
+    {
+
+    public:
+
+      //! VTK data type
+      enum class Type {
+        //! scalar field (may also be multi-component, but is treated as a simply
+        //! array by ParaView
+        scalar,
+        //! vector-valued field (always 3D, will be padded if necessary)
+        vector,
+        //! tensor field (always 3x3)
+        tensor
+      };
+
+      //! Create a FieldInfo instance with the given name, type and size.
+      FieldInfo(std::string name, Type type, std::size_t size)
+        : _name(name)
+        , _type(type)
+        , _size(size)
+      {}
+
+      //! The name of the data field
+      std::string name() const
+      {
+        return _name;
+      }
+
+      //! The type of the data field
+      Type type() const
+      {
+        return _type;
+      }
+
+      //! The number of components in the data field.
+      std::size_t size() const
+      {
+        return _size;
+      }
+
+    private:
+
+      std::string _name;
+      Type _type;
+      std::size_t _size;
+
+    };
+
+
   } // namespace VTK
 
   //! \} group VTK
