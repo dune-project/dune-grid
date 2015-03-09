@@ -786,7 +786,8 @@ namespace Dune {
     }
 
     /** Constructor for an equidistant YaspGrid with non-trivial origin
-     *  @param L extension of the domain
+     *  @param lowerleft Lower left corner of the domain
+     *  @param upperright Upper right corner of the domain
      *  @param s number of cells on coarse mesh in each direction
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
