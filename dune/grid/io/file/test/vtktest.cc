@@ -89,8 +89,8 @@ void doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
 
-  vtk.addVertexData(new VTKVectorFunction<GridView>("vertex"));
-  vtk.addCellData(new VTKVectorFunction<GridView>("cell"));
+  vtk.addVertexData(std::make_shared< VTKVectorFunction<GridView> >("vertex"));
+  vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));
 
   char name[256];
   snprintf(name,256,"vtktest-%iD-%s-ascii", dim, VTKDataMode(dm));

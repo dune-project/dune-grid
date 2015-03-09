@@ -14,6 +14,7 @@
 #include <vector>
 #include <list>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/indent.hh>
 #include <dune/common/iteratorfacades.hh>
@@ -370,7 +371,7 @@ namespace Dune
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addCellData (VTKFunction* p)
+    void addCellData (VTKFunction* p) DUNE_DEPRECATED_MSG("Don't pass raw pointers, use the version with shared_ptr")
     {
       celldata.push_back(VTKFunctionPtr(p));
     }
@@ -409,7 +410,7 @@ namespace Dune
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addVertexData (VTKFunction* p)
+    void addVertexData (VTKFunction* p) DUNE_DEPRECATED_MSG("Don't pass raw pointers, use the version with shared_ptr")
     {
       vertexdata.push_back(VTKFunctionPtr(p));
     }

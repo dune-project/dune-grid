@@ -73,8 +73,8 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
   // disabled due to FS#676: vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
 
-  vtk.addVertexData(new VTKVectorFunction<GridView>("vertex"));
-  vtk.addCellData(new VTKVectorFunction<GridView>("cell"));
+  vtk.addVertexData(std::make_shared< VTKVectorFunction<GridView> >("vertex"));
+  vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));
 
   std::string name = "subsamplingvtktest-" + std::to_string(dim) + "D-" + (coerceToSimplex ? "simplex" : "natural") + "-ascii";
   vtk.write(name);

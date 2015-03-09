@@ -79,7 +79,8 @@ void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
 
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
-  VTKVectorFunction< GridView > *vectordata = new VTKVectorFunction< GridView >;
+  Dune::shared_ptr<VTKVectorFunction<GridView> > vectordata
+    (new VTKVectorFunction< GridView >);
   vtk.addVertexData(vectordata);
   double time = 0;
   while (time<1) {
