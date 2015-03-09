@@ -65,13 +65,10 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
 {
   enum { dim = GridView :: dimension };
 
-  const typename GridView :: IndexSet &is = gridView.indexSet();
-  std::vector<int> celldata(is.size(0));
-  for(std::size_t i = 0; i < celldata.size(); ++i) celldata[i] = i;
-
   Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, 1, coerceToSimplex);
-  // disabled due to FS#676: vtk.addVertexData(vertexdata,"vertexData");
-  vtk.addCellData(celldata,"cellData");
+  // disabled due to FS#676:
+  // vtk.addVertexData(vertexdata,"vertexData");
+  // vtk.addCellData(celldata,"cellData");
 
   vtk.addVertexData(std::make_shared< VTKVectorFunction<GridView> >("vertex"));
   vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));

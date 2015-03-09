@@ -105,14 +105,16 @@ namespace Dune
 
   public:
     using Base::addVertexData;
+    using Base::addCellData;
 
   private:
-    // hide addVertexData -- adding vertex data directly without a VTKFunction
-    // currently does not work since the P1VectorWrapper used for that uses a
-    // nearest-neighbour search to find the value for the given point.  See
-    // FS#676.
+    // hide addVertexData -- adding raw data directly without a VTKFunction
+    // currently does not make sense for subsampled meshes, as the higher order
+    // information is missing. See FS#676.
     template<class V>
     void addVertexData (const V& v, const std::string &name, int ncomps=1);
+    template<class V>
+    void addCellData (const V& v, const std::string &name, int ncomps=1);
 
     int level;
     bool coerceToSimplex;
