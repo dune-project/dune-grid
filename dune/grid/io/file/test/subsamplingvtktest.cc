@@ -89,14 +89,10 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
 }
 
 template<int dim>
-void vtkCheck(int* n, double* h)
+void vtkCheck(const Dune::array<int, dim>& elements,
+              const Dune::FieldVector<double, dim>& upperRight)
 {
-  Dune::FieldVector<double, dim> L(0);
-  std::copy(h, h+dim, L.begin());
-  Dune::array<int, dim> s;
-  std::copy(n, n+dim, s.begin());
-
-  Dune::YaspGrid<dim> g(L, s);
+  Dune::YaspGrid<dim> g(upperRight, elements);
 
   if(g.comm().rank() == 0)
     std::cout << std::endl
@@ -121,12 +117,9 @@ int main(int argc, char **argv)
 
     Dune::MPIHelper::instance(argc, argv);
 
-    int n[] = { 5, 5, 5, 5 };
-    double h[] = { 1.0, 2.0, 3.0, 4.0 };
-
-    vtkCheck<1>(n,h);
-    vtkCheck<2>(n,h);
-    vtkCheck<3>(n,h);
+    vtkCheck<1>({5}, {1.0});
+    vtkCheck<2>({5,5}, {1.0, 2.0});
+    vtkCheck<3>({5,5,5}, {1.0, 2.0, 3.0});
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
