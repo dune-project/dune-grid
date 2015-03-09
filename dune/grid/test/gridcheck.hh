@@ -668,7 +668,6 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
   typedef typename Grid::HierarchicIterator HierarchicIterator;
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-  typedef typename Grid::template Codim<0>::Entity Entity;
 
   typedef typename Grid::LeafGridView LeafGridView;
   typedef typename Grid::LevelGridView LevelGridView;
@@ -703,6 +702,7 @@ void iteratorEquals (Grid &g)
     );
 #else
   // check '==' consistency
+  typedef typename Grid::template Codim<0>::Entity Entity;
   Entity a( *levelGridView.template begin<0,Dune::All_Partition>() );
   Entity i( *levelGridView.template begin<0,Dune::InteriorBorder_Partition>() );
 
