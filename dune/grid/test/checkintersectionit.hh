@@ -428,12 +428,21 @@ void checkIntersectionIterator ( const GridViewType &view,
   static_assert((static_cast<int>(Intersection::dimensionworld)
                       == static_cast<int>(GridType::dimensionworld)),"IntersectionIterator has wrong dimensionworld");
 
+
+  // check default constructibility of intersections
+#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+  DUNE_UNUSED Intersection default_construct_intersection;
+#endif
+
   // initialize variables for element checks
 
   bool hasBoundaryIntersection = false;
   typename Intersection::GlobalCoordinate sumNormal( ctype( 0 ) );
 
-  const IntersectionIterator iend = view.iend( *eIt );
+  // check default-constructibility and copy constructor
+  IntersectionIterator idefault;
+  idefault = view.iend( *eIt );
+  const IntersectionIterator iend = idefault;
   for( IntersectionIterator iIt = view.ibegin( *eIt ); iIt != iend; ++iIt )
   {
     const Intersection &intersection = *iIt;
