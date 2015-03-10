@@ -19,7 +19,6 @@ namespace Dune {
   class YaspIntersectionIterator
   {
     enum { dim=GridImp::dimension };
-    YaspIntersectionIterator();
   public:
     // types used from grids
     typedef Dune::YaspIntersection< GridImp > IntersectionImp;
@@ -43,6 +42,9 @@ namespace Dune {
       GridImp::getRealImplementation(intersection_).update();
       return intersection_;
     }
+
+    YaspIntersectionIterator()
+    {}
 
     //! make intersection iterator from entity
     YaspIntersectionIterator (const YaspEntity<0,dim,GridImp>& myself, bool toend)
