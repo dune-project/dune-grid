@@ -99,9 +99,7 @@ namespace Dune
       \ingroup GIEntityPointer
    */
   template<class GridImp, class IteratorImp>
-  class
-  DUNE_ENTITYPOINTER_DEPRECATED_MSG
-  EntityPointer
+  class EntityPointer
   {
     // need to make copy constructor of EntityPointer work for any iterator
     //friend class EntityPointer<GridImp,typename IteratorImp::EntityPointerImp>;
@@ -236,6 +234,7 @@ namespace Dune
       return handle_proxy_member_access(realIterator.dereference());
     }
 
+    template<typename T>
     // this construction, where the deprecation warning is triggered by a separate function,
     // is slightly convoluted, but I could not get the warning to trigger reliably when attached
     // directly to the cast operator.
@@ -243,9 +242,11 @@ namespace Dune
     void trigger_entity_cast_warning() const
     {}
 
-    operator const Entity&() const
+    template<typename T, typename std::enable_if<std::is_same<T,Entity>::value,int>::type = 0>
+    operator const T&() const
     {
-      trigger_entity_cast_warning();
+      static_assert(std::is_same<T,Entity>::value,"invalid cast");
+      trigger_entity_cast_warning<T>();
       return realIterator.dereference();
     }
 
