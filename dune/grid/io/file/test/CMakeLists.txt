@@ -61,6 +61,10 @@ endforeach(_test ${AMIRAMESH_TESTS})
 add_dune_mpi_flags(${VTK_TESTS})
 
 add_executable(gmshtest-alugrid gmshtest.cc)
+set_property(
+  TARGET gmshtest-alugrid
+  APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE"
+  )
 add_dune_alugrid_flags(gmshtest-alugrid)
 
 add_executable(gmshtest-alberta2d gmshtest.cc)
