@@ -20,10 +20,23 @@ foreach(_test ${TESTS})
   add_test(${_test} ${_test})
 endforeach(_test ${TESTS})
 
+# test-dgf-sgrid
 set_property(TARGET test-dgf-sgrid APPEND PROPERTY
     COMPILE_DEFINITIONS GRIDDIM=3 SGRID HAVE_DUNE_GRID=1)
+# test-dgf-yasp
 set_property(TARGET test-dgf-yasp APPEND PROPERTY
     COMPILE_DEFINITIONS GRIDDIM=3 YASPGRID HAVE_DUNE_GRID=1)
+# test-dgf-yasp-offset
+add_executable(test-dgf-yasp-offset test-dgf.cc)
+target_link_libraries(test-dgf-yasp-offset dunegrid ${DUNE_LIBS})
+add_test(NAME test-dgf-yasp-offset
+  COMMAND test-dgf-yasp-offset "${PROJECT_SOURCE_DIR}/doc/grids/dgf/test2d_offset.dgf")
+set(gridtypeOffset "YaspGrid<2, EquidistantOffsetCoordinates<double, 2> >")
+set_property(TARGET test-dgf-yasp-offset
+  APPEND PROPERTY
+  COMPILE_DEFINITIONS GRIDDIM=2 YASPGRID HAVE_DUNE_GRID=1
+    COMPLETE_GRID_TYPE=${gridtypeOffset})
+# test-dgf-oned
 set_property(TARGET test-dgf-oned APPEND PROPERTY
     COMPILE_DEFINITIONS GRIDDIM=1 ONEDGRID HAVE_DUNE_GRID=1)
 

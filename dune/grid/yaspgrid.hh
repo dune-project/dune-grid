@@ -19,7 +19,6 @@ typedef unsigned char uint8_t;
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/common/capabilities.hh> // the capabilities
 #include <dune/common/power.hh>
-#include <dune/common/shared_ptr.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/reservedvector.hh>
@@ -37,10 +36,10 @@ typedef unsigned char uint8_t;
 #endif
 
 /*! \file yaspgrid.hh
-   YaspGrid stands for yet another structured parallel grid.
-   It will implement the dune grid interface for structured grids with codim 0
-   and dim, with arbitrary overlap, parallel features with two overlap
-   models, periodic boundaries and fast a implementation allowing on-the-fly computations.
+ * YaspGrid stands for yet another structured parallel grid.
+ * It will implement the dune grid interface for structured grids
+ * with arbitrary overlap, parallel features with two overlap
+ * models, periodic boundaries and a fast implementation allowing on-the-fly computations.
  */
 
 namespace Dune {
@@ -146,19 +145,20 @@ namespace Dune {
 
   //************************************************************************
   /*!
-     \brief [<em> provides \ref Dune::Grid </em>]
-     \brief Provides a distributed structured cube mesh.
-     \ingroup GridImplementations
-
-     YaspGrid stands for yet another structured parallel grid.
-     It implements the dune grid interface for structured grids with codim 0
-     and dim, with arbitrary overlap (including zero),
-     periodic boundaries and fast implementation allowing on-the-fly computations.
-
-     \tparam dim The dimension of the grid and its surrounding world
-
-     \par History:
-     \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
+   * \brief [<em> provides \ref Dune::Grid </em>]
+   * \brief Provides a distributed structured cube mesh.
+   * \ingroup GridImplementations
+   *
+   * YaspGrid stands for yet another structured parallel grid.
+   * It implements the dune grid interface for structured grids
+   * with arbitrary overlap (including zero),
+   * periodic boundaries, and a fast implementation allowing on-the-fly computations.
+   *
+   * YaspGrid supports three coordinate modes: \ref EquidistantCoordinates,
+   * \ref EquidistantOffsetCoordinates, and \ref Dune::TensorProductCoordinates.
+   *
+   * \tparam dim The dimension of the grid and its surrounding world
+   * \tparam Coordinates The coordinte mode of the grid.
    */
   template<int dim, class Coordinates = EquidistantCoordinates<double, dim> >
   class YaspGrid
@@ -200,34 +200,34 @@ namespace Dune {
 
       Coordinates coords;
 
-      Dune::array<YGrid, dim+1> overlapfront;
-      Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> overlapfront_data;
-      Dune::array<YGrid, dim+1> overlap;
-      Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> overlap_data;
-      Dune::array<YGrid, dim+1> interiorborder;
-      Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> interiorborder_data;
-      Dune::array<YGrid, dim+1> interior;
-      Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> interior_data;
+      std::array<YGrid, dim+1> overlapfront;
+      std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> overlapfront_data;
+      std::array<YGrid, dim+1> overlap;
+      std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> overlap_data;
+      std::array<YGrid, dim+1> interiorborder;
+      std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> interiorborder_data;
+      std::array<YGrid, dim+1> interior;
+      std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> interior_data;
 
-      Dune::array<YGridList<Coordinates>,dim+1> send_overlapfront_overlapfront;
-      Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_overlapfront_overlapfront_data;
-      Dune::array<YGridList<Coordinates>,dim+1> recv_overlapfront_overlapfront;
-      Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_overlapfront_overlapfront_data;
+      std::array<YGridList<Coordinates>,dim+1> send_overlapfront_overlapfront;
+      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_overlapfront_overlapfront_data;
+      std::array<YGridList<Coordinates>,dim+1> recv_overlapfront_overlapfront;
+      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_overlapfront_overlapfront_data;
 
-      Dune::array<YGridList<Coordinates>,dim+1> send_overlap_overlapfront;
-      Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_overlap_overlapfront_data;
-      Dune::array<YGridList<Coordinates>,dim+1> recv_overlapfront_overlap;
-      Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_overlapfront_overlap_data;
+      std::array<YGridList<Coordinates>,dim+1> send_overlap_overlapfront;
+      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_overlap_overlapfront_data;
+      std::array<YGridList<Coordinates>,dim+1> recv_overlapfront_overlap;
+      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_overlapfront_overlap_data;
 
-      Dune::array<YGridList<Coordinates>,dim+1> send_interiorborder_interiorborder;
-      Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_interiorborder_interiorborder_data;
-      Dune::array<YGridList<Coordinates>,dim+1> recv_interiorborder_interiorborder;
-      Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_interiorborder_interiorborder_data;
+      std::array<YGridList<Coordinates>,dim+1> send_interiorborder_interiorborder;
+      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_interiorborder_interiorborder_data;
+      std::array<YGridList<Coordinates>,dim+1> recv_interiorborder_interiorborder;
+      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_interiorborder_interiorborder_data;
 
-      Dune::array<YGridList<Coordinates>,dim+1> send_interiorborder_overlapfront;
-      Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_interiorborder_overlapfront_data;
-      Dune::array<YGridList<Coordinates>,dim+1> recv_overlapfront_interiorborder;
-      Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_overlapfront_interiorborder_data;
+      std::array<YGridList<Coordinates>,dim+1> send_interiorborder_overlapfront;
+      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_interiorborder_overlapfront_data;
+      std::array<YGridList<Coordinates>,dim+1> recv_overlapfront_interiorborder;
+      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_overlapfront_interiorborder_data;
 
       // general
       YaspGrid<dim,Coordinates>* mg;  // each grid level knows its multigrid
@@ -239,7 +239,7 @@ namespace Dune {
     };
 
     //! define types used for arguments
-    typedef Dune::array<int, dim> iTupel;
+    typedef std::array<int, dim> iTupel;
     typedef FieldVector<ctype, dim> fTupel;
 
     // communication tag used by multigrid
@@ -338,33 +338,33 @@ namespace Dune {
       g.keepOverlap = keep_ovlp;
 
       // set the inserting positions in the corresponding arrays of YGridLevelStructure
-      typename Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator overlapfront_it = g.overlapfront_data.begin();
-      typename Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator overlap_it = g.overlap_data.begin();
-      typename Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator interiorborder_it = g.interiorborder_data.begin();
-      typename Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator interior_it = g.interior_data.begin();
+      typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator overlapfront_it = g.overlapfront_data.begin();
+      typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator overlap_it = g.overlap_data.begin();
+      typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator interiorborder_it = g.interiorborder_data.begin();
+      typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator interior_it = g.interior_data.begin();
 
-      typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
         send_overlapfront_overlapfront_it = g.send_overlapfront_overlapfront_data.begin();
-      typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
         recv_overlapfront_overlapfront_it = g.recv_overlapfront_overlapfront_data.begin();
 
-      typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
         send_overlap_overlapfront_it = g.send_overlap_overlapfront_data.begin();
-      typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
         recv_overlapfront_overlap_it = g.recv_overlapfront_overlap_data.begin();
 
-      typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
         send_interiorborder_interiorborder_it = g.send_interiorborder_interiorborder_data.begin();
-      typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
         recv_interiorborder_interiorborder_it = g.recv_interiorborder_interiorborder_data.begin();
 
-      typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
         send_interiorborder_overlapfront_it = g.send_interiorborder_overlapfront_data.begin();
-      typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
         recv_overlapfront_interiorborder_it = g.recv_overlapfront_interiorborder_data.begin();
 
       // have a null array for constructor calls around
-      Dune::array<int,dim> n;
+      std::array<int,dim> n;
       std::fill(n.begin(), n.end(), 0);
 
       // determine origin of the grid with overlap and store whether an overlap area exists in direction i.
@@ -430,8 +430,8 @@ namespace Dune {
             continue;
 
           // get an origin and a size array for subsequent modification
-          Dune::array<int,dim> origin(o_overlap);
-          Dune::array<int,dim> size(s_overlap);
+          std::array<int,dim> origin(o_overlap);
+          std::array<int,dim> size(s_overlap);
 
           // build overlapfront
           // we have to extend the element size by one in all directions without shift.
@@ -682,14 +682,14 @@ namespace Dune {
       Yasp::BinomialTable<dim>::init();
       Yasp::EntityShiftTable<Yasp::calculate_entity_shift<dim>,dim>::init();
       Yasp::EntityShiftTable<Yasp::calculate_entity_move<dim>,dim>::init();
-      indexsets.push_back( make_shared< YaspIndexSet<const YaspGrid<dim, Coordinates>, false > >(*this,0) );
+      indexsets.push_back( std::make_shared< YaspIndexSet<const YaspGrid<dim, Coordinates>, false > >(*this,0) );
       boundarysegmentssize();
     }
 
     void boundarysegmentssize()
     {
       // sizes of local macro grid
-      Dune::array<int, dim> sides;
+      std::array<int, dim> sides;
       {
         for (int i=0; i<dim; i++)
         {
@@ -736,7 +736,7 @@ namespace Dune {
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
     YaspGrid (Dune::FieldVector<ctype, dim> L,
-              Dune::array<int, dim> s,
+              std::array<int, dim> s,
               std::bitset<dim> periodic = std::bitset<dim>(0ULL),
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
@@ -796,7 +796,7 @@ namespace Dune {
      */
     YaspGrid (Dune::FieldVector<ctype, dim> lowerleft,
               Dune::FieldVector<ctype, dim> upperright,
-              Dune::array<int, dim> s,
+              std::array<int, dim> s,
               std::bitset<dim> periodic = std::bitset<dim>(0ULL),
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
@@ -856,7 +856,7 @@ namespace Dune {
      *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
-    YaspGrid (Dune::array<std::vector<ctype>, dim> coords,
+    YaspGrid (std::array<std::vector<ctype>, dim> coords,
               std::bitset<dim> periodic = std::bitset<dim>(0ULL),
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
@@ -891,8 +891,8 @@ namespace Dune {
             (periodic[i] || (s_interior[i] != _coarseSize[i])))    // there is an overlap in that direction
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
 
-      Dune::array<std::vector<ctype>,dim> newcoords;
-      Dune::array<int, dim> offset(o_interior);
+      std::array<std::vector<ctype>,dim> newcoords;
+      std::array<int, dim> offset(o_interior);
 
       // find the relevant part of the coords vector for this processor and copy it to newcoords
       for (int i=0; i<dim; ++i)
@@ -957,7 +957,7 @@ namespace Dune {
     DUNE_DEPRECATED_MSG("This Yaspgrid constructor is deprecated.")
     YaspGrid (Dune::MPIHelper::MPICommunicator comm,
               Dune::FieldVector<ctype, dim> L,
-              Dune::array<int, dim> s,
+              std::array<int, dim> s,
               std::bitset<dim> periodic,
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
@@ -1013,7 +1013,7 @@ namespace Dune {
       */
     DUNE_DEPRECATED_MSG("This Yaspgrid constructor is deprecated.")
     YaspGrid (Dune::MPIHelper::MPICommunicator comm,
-              Dune::array<std::vector<ctype>, dim> coords,
+              std::array<std::vector<ctype>, dim> coords,
               std::bitset<dim> periodic, int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),lb),
@@ -1040,8 +1040,8 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
 
-      Dune::array<std::vector<ctype>,dim> newcoords;
-      Dune::array<int, dim> offset(o_interior);
+      std::array<std::vector<ctype>,dim> newcoords;
+      std::array<int, dim> offset(o_interior);
 
       // find the relevant part of the coords vector for this processor and copy it to newcoords
       for (int i=0; i<dim; ++i)
@@ -1112,11 +1112,11 @@ namespace Dune {
      *           You can safely use it through BackupRestoreFacility. All other
      *           use is not supported for the moment.
      */
-    YaspGrid (Dune::array<std::vector<ctype>, dim> coords,
+    YaspGrid (std::array<std::vector<ctype>, dim> coords,
               std::bitset<dim> periodic,
               int overlap,
               CollectiveCommunicationType comm,
-              Dune::array<int,dim> coarseSize,
+              std::array<int,dim> coarseSize,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,coarseSize,lb), leafIndexSet_(*this),
         _periodic(periodic), _coarseSize(coarseSize), _overlap(overlap),
@@ -1131,15 +1131,15 @@ namespace Dune {
 
       _levels.resize(1);
 
-      Dune::array<int,dim> o;
+      std::array<int,dim> o;
       std::fill(o.begin(), o.end(), 0);
-      Dune::array<int,dim> o_interior(o);
-      Dune::array<int,dim> s_interior(coarseSize);
+      std::array<int,dim> o_interior(o);
+      std::array<int,dim> s_interior(coarseSize);
 
       _torus.partition(_torus.rank(),o,coarseSize,o_interior,s_interior);
 
       // get offset by modifying o_interior accoring to overlap
-      Dune::array<int,dim> offset(o_interior);
+      std::array<int,dim> offset(o_interior);
       for (int i=0; i<dim; i++)
         if ((periodic[i]) || (o_interior[i] > 0))
           offset[i] -= overlap;
@@ -1215,7 +1215,7 @@ namespace Dune {
         _levels.resize(_levels.size() + 1);
         makelevel(newcont,_periodic,o_interior,overlap);
 
-        indexsets.push_back( make_shared<YaspIndexSet<const YaspGrid<dim,Coordinates>, false > >(*this,maxLevel()) );
+        indexsets.push_back( std::make_shared<YaspIndexSet<const YaspGrid<dim,Coordinates>, false > >(*this,maxLevel()) );
       }
     }
 
@@ -1404,7 +1404,7 @@ namespace Dune {
 
       // sum over all components of the codimension
       int count = 0;
-      typedef typename Dune::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator DAI;
+      typedef typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator DAI;
       for (DAI it = g->overlapfront[codim].dataBegin(); it != g->overlapfront[codim].dataEnd(); ++it)
         count += it->totalsize();
 
@@ -1828,7 +1828,7 @@ namespace Dune {
 
     Torus<CollectiveCommunicationType,dim> _torus;
 
-    std::vector< shared_ptr< YaspIndexSet<const YaspGrid<dim,Coordinates>, false > > > indexsets;
+    std::vector< std::shared_ptr< YaspIndexSet<const YaspGrid<dim,Coordinates>, false > > > indexsets;
     YaspIndexSet<const YaspGrid<dim,Coordinates>, true> leafIndexSet_;
     YaspGlobalIdSet<const YaspGrid<dim,Coordinates> > theglobalidset;
 

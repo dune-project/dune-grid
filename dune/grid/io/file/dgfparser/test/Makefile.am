@@ -25,7 +25,7 @@ if GRAPE
   VIEWPROGS = viewdgf
 endif
 
-ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
+ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testdgfyaspoffset testoned $(TESTUG)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(ALLTESTS)
@@ -82,6 +82,11 @@ testsgrid_CPPFLAGS = $(AM_CPPFLAGS)		\
 testyasp_SOURCES = test-dgf.cc
 testyasp_CPPFLAGS = $(AM_CPPFLAGS)		\
 	-DYASPGRID -DGRIDDIM=3
+
+testdgfyaspoffset_SOURCES = test-dgf.cc
+testdgfyaspoffset_CPPFLAGS = $(AM_CPPFLAGS)	\
+	-DYASPGRID -DGRIDDIM=3			\
+	-DCOMPLETE_GRID_TYPE="YaspGrid<2, EquidistantOffsetCoordinates<double, 2> >"
 
 testoned_SOURCES = test-dgf.cc
 testoned_CPPFLAGS = $(AM_CPPFLAGS)		\

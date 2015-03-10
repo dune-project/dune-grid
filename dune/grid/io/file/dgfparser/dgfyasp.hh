@@ -78,8 +78,11 @@ namespace Dune
 
   }
 
+  /*!
+   * \brief Grid factory for YaspGrid with equidistant coordinates.
+   */
   template <int dim>
-  struct DGFGridFactory< YaspGrid<dim> >
+  struct DGFGridFactory< YaspGrid<dim /*, EquidistantCoordinates<double, dim> */> >
   {
     typedef YaspGrid<dim> Grid;
     const static int dimension = Grid::dimension;
@@ -118,6 +121,7 @@ namespace Dune
     {
       return false;
     }
+
     template <class Intersection>
     int boundaryId(const Intersection &intersection) const
     {
@@ -191,8 +195,9 @@ namespace Dune
     std::vector<double> emptyParam;
   };
 
+  // generate YaspGrid from the provided DGF
   template< int dim >
-  inline void DGFGridFactory< YaspGrid< dim > >
+  inline void DGFGridFactory< YaspGrid< dim /*, EquidistantCoordinates<double, dim> */> >
   ::generate ( std::istream &gridin, MPICommunicatorType comm )
   {
     dgf::IntervalBlock intervalBlock( gridin );
@@ -213,11 +218,11 @@ namespace Dune
     const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
 
     FieldVector<double,dim> lang;
-    array<int,dim>    anz;
+    std::array<int,dim> anz;
     for( int i = 0; i < dim; ++i )
     {
       // check that start point is 0.0
-      if( fabs( interval.p[ 0 ][ i ] ) > 1e-10 )
+      if( std::abs( interval.p[ 0 ][ i ] ) > 1e-10 )
       {
         DUNE_THROW( DGFException,
                     "YaspGrid cannot handle grids with non-zero left lower corner." );
@@ -238,7 +243,7 @@ namespace Dune
       bool identity = true;
       for( int i = 0; i < dim; ++i )
         for( int j = 0; j < dim; ++j )
-          identity &= (fabs( (i == j ? 1.0 : 0.0) - trafo.matrix( i, j ) ) < 1e-10);
+          identity &= (std::abs( (i == j ? 1.0 : 0.0) - trafo.matrix( i, j ) ) < 1e-10);
       if( !identity )
         DUNE_THROW( DGFException, "YaspGrid can only handle shifts as periodic face transformations." );
 
@@ -246,12 +251,12 @@ namespace Dune
       int dir = -1;
       for( int i = 0; i < dim; ++i )
       {
-        if( fabs( trafo.shift[ i ] ) < 1e-10 )
+        if( std::abs( trafo.shift[ i ] ) < 1e-10 )
           continue;
         dir = i;
         ++numDirs;
       }
-      if( (numDirs != 1) || (fabs( fabs( trafo.shift[ dir ] ) - lang[ dir ] ) >= 1e-10) )
+      if( (numDirs != 1) || (std::abs( std::abs( trafo.shift[ dir ] ) - lang[ dir ] ) >= 1e-10) )
       {
         std::cerr << "Tranformation '" << trafo
                   << "' does not map boundaries on boundaries." << std::endl;
@@ -269,11 +274,212 @@ namespace Dune
   }
 
   template <int dim>
-  struct DGFGridInfo< YaspGrid<dim> > {
+  struct DGFGridInfo< YaspGrid<dim /*, EquidistantCoordinates<double, dim> */> > {
     static int refineStepsForHalf() {return 1;}
-    static double refineWeight() {return pow(0.5,dim);}
+    static double refineWeight() {return std::pow(0.5,dim);}
   };
 
+  /*!
+   * \brief Grid factory for YaspGrid with equidistant coordinates.
+   */
+  template <int dim>
+  struct DGFGridFactory< YaspGrid<dim, EquidistantOffsetCoordinates<double, dim> > >
+  {
+    typedef YaspGrid<dim, EquidistantOffsetCoordinates<double, dim> > Grid;
+    const static int dimension = Grid::dimension;
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
+
+  private:
+    typedef FieldVector< double, dimension > Point;
+    typedef dgf::BoundaryDomBlock BoundaryDomainBlock;
+
+  public:
+    explicit DGFGridFactory ( std::istream &input,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+    {
+      generate( input, comm );
+    }
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+    {
+      std::ifstream input( filename.c_str() );
+      generate( input, comm );
+    }
+
+    ~DGFGridFactory ()
+    {
+      delete boundaryDomainBlock_;
+    }
+
+    Grid *grid() const
+    {
+      return grid_;
+    }
+
+    template <class Intersection>
+    bool wasInserted(const Intersection &intersection) const
+    {
+      return false;
+    }
+
+    template <class Intersection>
+    int boundaryId(const Intersection &intersection) const
+    {
+      if( boundaryDomainBlock_->isactive() )
+      {
+        std::vector< Point > corners;
+        getCorners( intersection.geometry(), corners );
+        const dgf::DomainData *data = boundaryDomainBlock_->contains( corners );
+        if( data )
+          return data->id();
+        else
+          return intersection.indexInInside();
+      }
+      else
+        return intersection.indexInInside();
+    }
+
+    template< int codim >
+    int numParameters () const
+    {
+      return 0;
+    }
+
+    // return true if boundary parameters found
+    bool haveBoundaryParameters () const
+    {
+      return boundaryDomainBlock_->hasParameter();
+    }
+
+    template< class GG, class II >
+    const typename DGFBoundaryParameter::type &
+    boundaryParameter ( const Intersection< GG, II > & intersection ) const
+    {
+      if( haveBoundaryParameters() )
+      {
+        std::vector< Point > corners;
+        getCorners( intersection.geometry(), corners );
+        const dgf::DomainData *data = boundaryDomainBlock_->contains( corners );
+        if( data )
+          return data->parameter();
+        else
+          return DGFBoundaryParameter::defaultValue();
+      }
+      else
+        return DGFBoundaryParameter::defaultValue();
+    }
+
+    template< class Entity >
+    std::vector<double> &parameter ( const Entity &entity )
+    {
+      return emptyParam;
+    }
+
+  private:
+    void generate( std::istream &gridin, MPICommunicatorType comm );
+
+    template< class Geometry >
+    static void getCorners ( const Geometry &geometry, std::vector< Point > &corners )
+    {
+      corners.resize( geometry.corners() );
+      for( int i = 0; i < geometry.corners(); ++i )
+      {
+        const typename Geometry::GlobalCoordinate corner = geometry.corner( i );
+        for( int j = 0; j < dimension; ++j )
+          corners[ i ][ j ] = corner[ j ];
+      }
+    }
+
+    Grid *grid_;
+    dgf::BoundaryDomBlock *boundaryDomainBlock_;
+    std::vector<double> emptyParam;
+  };
+
+  // generate YaspGrid from the provided DGF
+  template< int dim >
+  inline void DGFGridFactory< YaspGrid<dim, EquidistantOffsetCoordinates<double, dim> > >
+  ::generate ( std::istream &gridin, MPICommunicatorType comm )
+  {
+    dgf::IntervalBlock intervalBlock( gridin );
+
+    if( !intervalBlock.isactive() )
+      DUNE_THROW( DGFException, "YaspGrid can only be created from an interval block." );
+
+    if( intervalBlock.numIntervals() != 1 )
+      DUNE_THROW( DGFException, "YaspGrid can only handle 1 interval block." );
+
+    if( intervalBlock.dimw() != dim )
+    {
+      DUNE_THROW( DGFException,
+                  "Cannot read an interval of dimension "
+                  << intervalBlock.dimw()
+                  << " into a YaspGrid< " << dim << " >." );
+    }
+
+    const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
+
+    FieldVector<double,dim> lower;
+    FieldVector<double,dim> upper;
+    std::array<int,dim> anz;
+    for( int i = 0; i < dim; ++i )
+    {
+      lower[ i ] = interval.p[ 0 ][ i ];
+      upper[ i ] = interval.p[ 1 ][ i ];
+      anz[ i ] = interval.n[ i ];
+    }
+
+    typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
+    dgf::PeriodicFaceTransformationBlock trafoBlock( gridin, dim );
+    std::bitset< dim > periodic;
+    const int numTrafos = trafoBlock.numTransformations();
+    for( int k = 0; k < numTrafos; ++k )
+    {
+      const Transformation &trafo = trafoBlock.transformation( k );
+
+      bool identity = true;
+      for( int i = 0; i < dim; ++i )
+        for( int j = 0; j < dim; ++j )
+          identity &= (std::abs( (i == j ? 1.0 : 0.0) - trafo.matrix( i, j ) ) < 1e-10);
+      if( !identity )
+        DUNE_THROW( DGFException, "YaspGrid can only handle shifts as periodic face transformations." );
+
+      int numDirs = 0;
+      int dir = -1;
+      for( int currentDir = 0; currentDir < dim; ++currentDir )
+      {
+        if( std::abs( trafo.shift[ currentDir ] ) > 1e-10 )
+        {
+          dir = currentDir;
+          ++numDirs;
+        }
+      }
+      if ( (numDirs != 1)
+          || (std::abs( std::abs( trafo.shift[ dir ] ) - std::abs( upper[ dir ] - lower[ dir ] ) ) >= 1e-10) )
+      {
+        std::cerr << "Tranformation '" << trafo
+                  << "' does not map boundaries on boundaries." << std::endl;
+      }
+      else
+      {
+        periodic[ dir ] = true;
+      }
+    }
+
+    // get grid parameters
+    dgf::YaspGridParameterBlock grdParam( gridin );
+
+    grid_ = new YaspGrid< dim, EquidistantOffsetCoordinates<double, dim> >
+                        ( lower, upper, anz, periodic, grdParam.overlap(), comm );
+
+    boundaryDomainBlock_ = new dgf::BoundaryDomBlock( gridin, dimension );
+  }
+
+  template <int dim>
+  struct DGFGridInfo< YaspGrid<dim, EquidistantOffsetCoordinates<double, dim> > > {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return std::pow(0.5,dim);}
+  };
 
 }
 #endif // #ifndef DUNE_DGFPARSERYASP_HH
