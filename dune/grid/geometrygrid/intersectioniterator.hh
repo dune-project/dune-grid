@@ -31,6 +31,9 @@ namespace Dune
 
       typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
 
+      IntersectionIterator()
+      {}
+
       template< class Entity >
       IntersectionIterator ( const Entity &inside,
                              const HostIntersectionIterator &hostIterator )
