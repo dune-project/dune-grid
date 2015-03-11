@@ -1103,7 +1103,7 @@ namespace Dune
             vectors = it->name();
             break;
           }
-      return std::tie(scalars,vectors);
+      return std::make_tuple(scalars,vectors);
     }
 
     template<typename Data, typename Iterator>
