@@ -7,6 +7,7 @@
  * \brief The OneDGridLevelIntersection and OneDGridLeafIntersection classes
  */
 
+#include <dune/common/nullptr.hh>
 #include <dune/grid/onedgrid/onedgridentity.hh>
 
 namespace Dune {
@@ -20,6 +21,14 @@ namespace Dune {
 
     // The corresponding iterator needs to access all members
     friend class OneDGridLevelIntersectionIterator<GridImp>;
+
+    template<typename,typename>
+    friend class Intersection;
+
+    OneDGridLevelIntersection()
+      : center_(nullptr)
+      , neighbor_(-1) // marker for invalid intersection
+    {}
 
     //! Constructor for a given grid entity and a given neighbor
     OneDGridLevelIntersection(OneDEntityImp<1>* center, int nb)
@@ -232,6 +241,14 @@ namespace Dune {
 
     // The corresponding iterator needs to access all members
     friend class OneDGridLeafIntersectionIterator<GridImp>;
+
+    template<typename,typename>
+    friend class Intersection;
+
+    OneDGridLeafIntersection()
+      : center_(nullptr)
+      , neighbor_(-1) // marker for invalid intersection
+    {}
 
     //! Constructor for a given grid entity and a given neighbor
     OneDGridLeafIntersection(OneDEntityImp<1>* center, int nb)
