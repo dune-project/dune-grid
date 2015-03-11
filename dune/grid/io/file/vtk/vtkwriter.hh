@@ -263,7 +263,7 @@ namespace Dune
         _f->write(pos,w,fieldInfo().size());
       }
 
-      std::unique_ptr<FunctionWrapperBase> _f;
+      std::shared_ptr<FunctionWrapperBase> _f;
       VTK::FieldInfo _fieldInfo;
 
     };
