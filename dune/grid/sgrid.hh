@@ -203,7 +203,7 @@ namespace Dune {
 
     //! empty constructor
     SEntityBase () :
-      grid(nullptr)m
+      grid(nullptr),
       l(-1),               // marker for invalid entity
       index(-1),           // marker for invalid entity
       builtgeometry(false) // mark geometry as not built
