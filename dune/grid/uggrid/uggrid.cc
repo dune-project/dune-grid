@@ -403,11 +403,18 @@ void Dune::UGGrid < dim >::globalRefine(int n)
 }
 
 template <int dim>
-void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Codim<0>::EntityPointer & e,
-                                             int elementSide,
-                                             int maxl,
-                                             std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
-                                             std::vector<unsigned char>& childElementSides) const
+template<typename T>
+typename std::enable_if<
+  std::is_same<
+    T,
+    typename UGGrid<dim>::Traits::template Codim<0>::EntityPointer
+    >::value
+  >::type
+Dune::UGGrid<dim>::getChildrenOfSubface(const T & e,
+                                        int elementSide,
+                                        int maxl,
+                                        std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
+                                        std::vector<unsigned char>& childElementSides) const
 {
 
   typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
@@ -500,6 +507,109 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
     // Dune numbers the faces of several elements differently than UG.
     // The following switch does the transformation
     childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i]->type());
+
+  }
+
+}
+
+template <int dim>
+void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Codim<0>::Entity & e,
+                                             int elementSide,
+                                             int maxl,
+                                             std::vector<typename Traits::template Codim<0>::Entity>& childElements,
+                                             std::vector<unsigned char>& childElementSides) const
+{
+
+  typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
+
+  SLList<ListEntryType> list;
+
+  // //////////////////////////////////////////////////////////////////////
+  //   Change the input face number from Dune numbering to UG numbering
+  // //////////////////////////////////////////////////////////////////////
+
+  elementSide = UGGridRenumberer<dim>::facesDUNEtoUG(elementSide, e->type());
+
+  // ///////////////
+  //   init list
+  // ///////////////
+  if (!e.isLeaf()   // Get_Sons_of_ElementSide returns GM_FATAL when called for a leaf !?!
+      && e.level() < maxl) {
+
+    typename UG_NS<dim>::Element* theElement = this->getRealImplementation(e).target_;
+
+    int Sons_of_Side = 0;
+    typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+    int SonSides[UG_NS<dim>::MAX_SONS];
+
+    int rv = Get_Sons_of_ElementSide(theElement,
+                                     elementSide,
+                                     &Sons_of_Side,
+                                     SonList,          // the output elements
+                                     SonSides,         // Output element side numbers
+                                     true,            // Element sons are not precomputed
+                                     true);            // ioflag: I have no idea what this is supposed to do
+    if (rv!=0)
+      DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
+
+    for (int i=0; i<Sons_of_Side; i++)
+      list.push_back(ListEntryType(SonList[i],SonSides[i]));
+
+  }
+
+  // //////////////////////////////////////////////////
+  //   Traverse and collect all children of the side
+  // //////////////////////////////////////////////////
+
+  typename SLList<ListEntryType>::iterator f = list.begin();
+  for (; f!=list.end(); ++f) {
+
+    typename UG_NS<dim>::Element* theElement = f->first;
+    int side                                  = f->second;
+
+    int Sons_of_Side = 0;
+    typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+    int SonSides[UG_NS<dim>::MAX_SONS];
+
+    if (UG_NS<dim>::myLevel(theElement) < maxl) {
+
+      Get_Sons_of_ElementSide(theElement,
+                              side,         // Input element side number
+                              &Sons_of_Side,       // Number of topological sons of the element side
+                              SonList,            // Output elements
+                              SonSides,           // Output element side numbers
+                              true,
+                              true);
+
+      for (int i=0; i<Sons_of_Side; i++)
+        list.push_back(ListEntryType(SonList[i],SonSides[i]));
+
+    }
+
+  }
+
+  // //////////////////////////////
+  //   Extract result from stack
+  // //////////////////////////////
+
+  // Use reserve / push_back since EntityPointer is not default constructable
+  childElements.clear();
+  childElements.reserve( list.size() );
+  childElementSides.resize(list.size());
+
+  int i=0;
+  for (f = list.begin(); f!=list.end(); ++f, ++i)
+  {
+
+    // Set element
+    typedef typename Traits::template Codim< 0 >::Entity Entity;
+    childElements.push_back( Entity( UGGridEntity< 0, dim, const UGGrid< dim > >( f->first, this ) ) );
+
+    int side = f->second;
+
+    // Dune numbers the faces of several elements differently than UG.
+    // The following switch does the transformation
+    childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i].type());
 
   }
 
@@ -608,10 +718,27 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
 }
 
 template < int dim >
-void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,
-                                       const FieldVector<double, dim>& pos)
+template< typename T >
+typename std::enable_if<
+  std::is_same<
+    T,
+    typename UGGrid<dim>::Traits::template Codim<dim>::EntityPointer
+    >::value
+  >::type
+Dune::UGGrid < dim >::setPosition(const T& e,
+                                  const FieldVector<double, dim>& pos)
 {
   typename UG_NS<dim>::Node* target = this->getRealImplementation(*e).target_;
+
+  for (int i=0; i<dim; i++)
+    target->myvertex->iv.x[i] = pos[i];
+}
+
+template < int dim >
+void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::Entity& e,
+                                       const FieldVector<double, dim>& pos)
+{
+  typename UG_NS<dim>::Node* target = this->getRealImplementation(e).target_;
 
   for (int i=0; i<dim; i++)
     target->myvertex->iv.x[i] = pos[i];
