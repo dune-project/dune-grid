@@ -58,8 +58,7 @@ namespace Dune
 
   public:
 
-    AlbertaGridIntersectionBase ()
-    {}
+    AlbertaGridIntersectionBase ();
 
     AlbertaGridIntersectionBase ( const EntityImp &entity, const int oppVertex );
 

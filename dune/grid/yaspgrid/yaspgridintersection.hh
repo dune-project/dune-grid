@@ -21,7 +21,6 @@ namespace Dune {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
     typedef typename GridImp::ctype ctype;
-    YaspIntersection();
 
     typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
     typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
@@ -253,6 +252,12 @@ namespace Dune {
       // flip the last bit
       return _count^1;
     }
+
+    YaspIntersection()
+      : _count(~uint8_t(0)) // Use as marker for invalid intersection
+      , _dir(0)
+      , _face(0)
+    {}
 
     //! make intersection iterator from entity, initialize to first neighbor
     YaspIntersection (const YaspEntity<0,dim,GridImp>& myself, bool toend) :

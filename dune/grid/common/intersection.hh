@@ -458,6 +458,10 @@ namespace Dune
       return !real.equals(other.real);
     }
 
+    //! Default constructor.
+    Intersection()
+    {}
+
     //! Copy constructor from an existing intersection.
     Intersection(const Intersection& other)
       : real(other.real)

@@ -105,6 +105,8 @@ namespace Dune {
 
   public:
     UGGridEntity()
+      : target_(nullptr)
+      , gridImp_(nullptr)
     {}
 
     UGGridEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
@@ -246,6 +248,8 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
 
     UGEdgeEntity()
+      : target_(nullptr)
+      , gridImp_(nullptr)
     {}
 
     UGEdgeEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
@@ -418,6 +422,8 @@ namespace Dune {
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
     UGFaceEntity()
+      : target_(nullptr)
+      , gridImp_(nullptr)
     {}
 
     UGFaceEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
@@ -615,7 +621,8 @@ protected:
     typedef typename GridImp::Traits::template Codim<0>::EntitySeed EntitySeed;
 
     UGGridEntity()
-      : gridImp_(NULL)
+      : target_(nullptr)
+      , gridImp_(nullptr)
     {}
 
     UGGridEntity(typename UG_NS<dim>::Element* target, const GridImp* gridImp)

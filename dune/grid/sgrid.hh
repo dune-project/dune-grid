@@ -203,6 +203,9 @@ namespace Dune {
 
     //! empty constructor
     SEntityBase () :
+      grid(nullptr)m
+      l(-1),               // marker for invalid entity
+      index(-1),           // marker for invalid entity
       builtgeometry(false) // mark geometry as not built
     {}
 
@@ -295,6 +298,9 @@ namespace Dune {
     //! constructor
     SEntity (GridImp* _grid, int _l, int _id) :
       SEntityBase(_grid,_l,_id) {}
+
+    SEntity()
+    {}
   };
 
   /**
@@ -461,6 +467,9 @@ namespace Dune {
     //! Returns iterator to one past the last son
     HierarchicIterator hend (int maxLevel) const;
 
+    SEntity()
+    {}
+
     // members specific to SEntity
     //! constructor
     SEntity (GridImp* _grid, int _l, int _index) :
@@ -487,9 +496,8 @@ namespace Dune {
       built_father = false;
     }
 
-  private:
 
-    SEntity();
+  private:
 
     mutable bool built_father;
     mutable int father_index;
@@ -622,6 +630,9 @@ namespace Dune {
       return intersection;
     }
 
+    SIntersectionIterator()
+    {}
+
     SIntersectionIterator (GridImp* _grid, const SEntity<0,dim,GridImp >* _self, int _count) :
       intersection(IntersectionImp(_grid,_self,_count))
     {}
@@ -706,6 +717,16 @@ namespace Dune {
     int indexInInside () const;
     //! local index of codim 1 entity in neighbor where intersection is contained in
     int indexInOutside () const;
+
+    SIntersection()
+      : grid(nullptr)
+      , partition(-1) // marker for invalid intersection
+      , count(-1)     // marker for invalid intersection
+      , valid_count(false)
+      , valid_nb(false)
+      , is_on_boundary(false)
+      , built_intersections(false)
+    {}
 
     //! constructor
     SIntersection (GridImp* _grid, const SEntity<0,dim,GridImp >* _self, int _count) :

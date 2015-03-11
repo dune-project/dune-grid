@@ -50,6 +50,9 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef FieldVector<ctype, dimworld> NormalVector;
 
+    IdentityGridLeafIntersection()
+    {}
+
     IdentityGridLeafIntersection(const GridImp* identityGrid,
                                  const HostLeafIntersection& hostIntersection)
       : identityGrid_(identityGrid)
@@ -212,6 +215,9 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef FieldVector<ctype, dimworld> NormalVector;
+
+    IdentityGridLevelIntersection()
+    {}
 
     IdentityGridLevelIntersection(const GridImp* identityGrid,
                                   const HostLevelIntersection& hostIntersection)

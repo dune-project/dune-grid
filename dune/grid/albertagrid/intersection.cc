@@ -3,6 +3,7 @@
 #ifndef DUNE_ALBERTA_INTERSECTION_CC
 #define DUNE_ALBERTA_INTERSECTION_CC
 
+#include <dune/common/nullptr.hh>
 #include <dune/grid/albertagrid/intersection.hh>
 
 namespace Dune
@@ -10,6 +11,14 @@ namespace Dune
 
   // AlbertaGridIntersectionBase
   // ---------------------------
+
+  template< class Grid >
+  inline AlbertaGridIntersectionBase< Grid >
+  ::AlbertaGridIntersectionBase ()
+    : grid_( nullptr ),
+      elementInfo_(),
+      oppVertex_( -1 ) // mark invalid intersection
+  {}
 
   template< class Grid >
   inline AlbertaGridIntersectionBase< Grid >

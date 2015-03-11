@@ -191,6 +191,10 @@ namespace Dune
       return *this;
     }
 
+    /** @brief Default constructor. */
+    IntersectionIterator()
+    {}
+
     //===========================================================
     /** @name Implementor interface
      */
