@@ -43,6 +43,12 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
+    UGGridLevelIntersection()
+      : center_(nullptr)
+      , neighborCount_(-1) // fixed marker value for invalid intersections to make equals() work
+      , gridImp_(nullptr)
+    {}
+
     /** The default Constructor makes empty Iterator
         \todo Should be private
      */
@@ -221,6 +227,13 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
+
+    UGGridLeafIntersection()
+      : center_(nullptr)
+      , neighborCount_(-1)                  // fixed marker value for invalid intersections to make equals() work
+      , subNeighborCount_(~unsigned(0))     // fixed marker value for invalid intersections to make equals() work
+      , gridImp_(nullptr)
+    {}
 
     UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : center_(center), neighborCount_(nb), subNeighborCount_(0),
