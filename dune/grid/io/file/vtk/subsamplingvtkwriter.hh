@@ -87,8 +87,33 @@ namespace Dune
       return geometryType;
     }
 
-    template<typename Data, typename Iterator>
-    void writeData(VTK::VTUWriter& writer, const Data& data, Iterator begin, Iterator end)
+
+    template<typename SubIterator>
+    struct IteratorSelector
+    {};
+
+    SubElementIterator refinementBegin(const Refinement& refinement, int level, IteratorSelector<SubElementIterator>)
+    {
+      return refinement.eBegin(level);
+    }
+
+    SubVertexIterator refinementBegin(const Refinement& refinement, int level, IteratorSelector<SubVertexIterator>)
+    {
+      return refinement.vBegin(level);
+    }
+
+    SubElementIterator refinementEnd(const Refinement& refinement, int level, IteratorSelector<SubElementIterator>)
+    {
+      return refinement.eEnd(level);
+    }
+
+    SubVertexIterator refinementEnd(const Refinement& refinement, int level, IteratorSelector<SubVertexIterator>)
+    {
+      return refinement.vEnd(level);
+    }
+
+    template<typename Data, typename Iterator, typename SubIterator>
+    void writeData(VTK::VTUWriter& writer, const Data& data, Iterator begin, Iterator end, IteratorSelector<SubIterator> sis)
     {
       for (auto it = data.begin(),
              iend = data.end();
@@ -121,8 +146,8 @@ namespace Dune
             Refinement &refinement =
               buildRefinement<dim, ctype>(begin->type(),
                                           subsampledGeometryType(begin->type()));
-            for(SubElementIterator sit = refinement.eBegin(level),
-                  send = refinement.eEnd(level);
+            for(SubIterator sit = refinementBegin(refinement,level,sis),
+                  send = refinementEnd(refinement,level,sis);
                 sit != send;
                 ++sit)
               {
@@ -202,7 +227,7 @@ namespace Dune
     std::tie(defaultScalarField, defaultVectorField) = this->getDataNames(celldata);
 
     writer.beginCellData(defaultScalarField, defaultVectorField);
-    writeData(writer,celldata,cellBegin(),cellEnd());
+    writeData(writer,celldata,cellBegin(),cellEnd(),IteratorSelector<SubElementIterator>());
     writer.endCellData();
   }
 
@@ -220,7 +245,7 @@ namespace Dune
     std::tie(defaultScalarField, defaultVectorField) = this->getDataNames(vertexdata);
 
     writer.beginPointData(defaultScalarField, defaultVectorField);
-    writeData(writer,vertexdata,cellBegin(),cellEnd());
+    writeData(writer,vertexdata,cellBegin(),cellEnd(),IteratorSelector<SubVertexIterator>());
     writer.endPointData();
   }
 
