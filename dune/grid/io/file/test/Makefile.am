@@ -6,6 +6,9 @@ GRIDTYPE=YASPGRID
 # The directory where the example grid files used for testing are located
 AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
 
+noinst_HEADERS =				\
+	checkvtkfile.hh
+
 # run amiramesh test only if amiramesh was found
 if AMIRAMESH
 if PSURFACE

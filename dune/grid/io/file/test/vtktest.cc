@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include <unistd.h>
@@ -15,6 +16,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
+#include <dune/grid/io/file/test/checkvtkfile.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/yaspgrid.hh>
 
@@ -76,8 +78,24 @@ public:
 
 };
 
+// accumulate exit status
+void acc(int &accresult, int result)
+{
+  if(accresult == 0 || (accresult == 77 && result != 0))
+    accresult = result;
+}
+
+struct Acc
+{
+  int operator()(int v1, int v2) const
+  {
+    acc(v1, v2);
+    return v1;
+  }
+};
+
 template< class GridView >
-void doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
+int doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
 {
   enum { dim = GridView :: dimension };
 
@@ -92,22 +110,32 @@ void doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
   vtk.addVertexData(std::make_shared< VTKVectorFunction<GridView> >("vertex"));
   vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));
 
+  int result = 0;
+  std::string resultname;
+  int rank = gridView.comm().rank();
   char name[256];
+
   snprintf(name,256,"vtktest-%iD-%s-ascii", dim, VTKDataMode(dm));
-  vtk.write(name);
+  resultname = vtk.write(name);
+  if(rank == 0) acc(result, checkVTKFile(resultname));
 
   snprintf(name,256,"vtktest-%iD-%s-base64", dim, VTKDataMode(dm));
-  vtk.write(name, Dune::VTK::base64);
+  resultname = vtk.write(name, Dune::VTK::base64);
+  if(rank == 0) acc(result, checkVTKFile(resultname));
 
   snprintf(name,256,"vtktest-%iD-%s-appendedraw", dim, VTKDataMode(dm));
-  vtk.write(name, Dune::VTK::appendedraw);
+  resultname = vtk.write(name, Dune::VTK::appendedraw);
+  if(rank == 0) acc(result, checkVTKFile(resultname));
 
   snprintf(name,256,"vtktest-%iD-%s-appendedbase64", dim, VTKDataMode(dm));
-  vtk.write(name, Dune::VTK::appendedbase64);
+  resultname = vtk.write(name, Dune::VTK::appendedbase64);
+  if(rank == 0) acc(result, checkVTKFile(resultname));
+
+  return result;
 }
 
 template<int dim>
-void vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
+int vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
 {
   if(mpiHelper.rank() == 0)
     std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
@@ -122,16 +150,20 @@ void vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
 
   g.globalRefine(1);
 
-  doWrite( g.template leafGridView(), Dune::VTK::conforming );
-  doWrite( g.template leafGridView(), Dune::VTK::nonconforming );
-  doWrite( g.template levelGridView( 0 ),
-           Dune::VTK::conforming );
-  doWrite( g.template levelGridView( 0 ),
-           Dune::VTK::nonconforming );
-  doWrite( g.template levelGridView( g.maxLevel() ),
-           Dune::VTK::conforming );
-  doWrite( g.template levelGridView( g.maxLevel() ),
-           Dune::VTK::nonconforming );
+  int result = 0;
+
+  acc(result, doWrite( g.template leafGridView(), Dune::VTK::conforming ));
+  acc(result, doWrite( g.template leafGridView(), Dune::VTK::nonconforming ));
+  acc(result, doWrite( g.template levelGridView( 0 ),
+                       Dune::VTK::conforming ));
+  acc(result, doWrite( g.template levelGridView( 0 ),
+                       Dune::VTK::nonconforming ));
+  acc(result, doWrite( g.template levelGridView( g.maxLevel() ),
+                       Dune::VTK::conforming ));
+  acc(result, doWrite( g.template levelGridView( g.maxLevel() ),
+                       Dune::VTK::nonconforming ));
+
+  return result;
 }
 
 int main(int argc, char **argv)
@@ -146,9 +178,15 @@ int main(int argc, char **argv)
     int n[] = { 5, 5, 5, 5 };
     double h[] = { 1.0, 2.0, 3.0, 4.0 };
 
-    vtkCheck<1>(mpiHelper,n,h);
-    vtkCheck<2>(mpiHelper,n,h);
-    vtkCheck<3>(mpiHelper,n,h);
+    int result = 0; // pass by default
+
+    acc(result, vtkCheck<1>(mpiHelper,n,h));
+    acc(result, vtkCheck<2>(mpiHelper,n,h));
+    acc(result, vtkCheck<3>(mpiHelper,n,h));
+
+    mpiHelper.getCollectiveCommunication().allreduce<Acc>(&result, 1);
+
+    return result;
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
@@ -161,5 +199,4 @@ int main(int argc, char **argv)
     return 2;
   }
 
-  return 0;
 }
