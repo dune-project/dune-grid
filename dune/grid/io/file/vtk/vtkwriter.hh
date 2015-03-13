@@ -218,8 +218,8 @@ namespace Dune
 
       //! Construct a VTKLocalFunction for a dune-functions style LocalFunction
       template<typename F>
-      VTKLocalFunction(const F& f, VTK::FieldInfo fieldInfo)
-        : _f(Dune::Std::make_unique<FunctionWrapper<F> >(f))
+      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
+        : _f(Dune::Std::make_unique<FunctionWrapper<F> >(std::forward<F>(f)))
         , _fieldInfo(fieldInfo)
       {}
 
