@@ -4,6 +4,7 @@
 #ifndef DUNE_GRID_IO_FILE_VTK_DATAARRAYWRITER_HH
 #define DUNE_GRID_IO_FILE_VTK_DATAARRAYWRITER_HH
 
+#include <cstdint>
 #include <ostream>
 #include <string>
 
@@ -140,8 +141,8 @@ namespace Dune
 
         // write indentation for the data chunk
         s << indent+1;
-        // store size
-        unsigned long int size = ncomps*nitems*sizeof(T);
+        // store size, needs to be exactly 32 bit
+        std::uint32_t size = ncomps*nitems*sizeof(T);
         b64.write(size);
         b64.flush();
       }
@@ -269,7 +270,7 @@ namespace Dune
         : b64(theStream)
       {
         // store size
-        unsigned long int size = ncomps*nitems*sizeof(T);
+        std::uint32_t size = ncomps*nitems*sizeof(T);
         b64.write(size);
         b64.flush();
       }
