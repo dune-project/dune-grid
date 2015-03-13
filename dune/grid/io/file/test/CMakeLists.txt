@@ -12,7 +12,7 @@ set(CONSISTENT_VTK_TESTS
   vtktest
   vtksequencetest)
 
-set(VTK_TESTS ${CONSISTENT_VTK_TEST} subsamplingvtktest)
+set(VTK_TESTS ${CONSISTENT_VTK_TESTS} subsamplingvtktest)
 
 if(AMIRAMESH_FOUND AND PSURFACE_FOUND)
   set(AMIRAMESH_TESTS amirameshtest)
