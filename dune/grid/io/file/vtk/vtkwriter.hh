@@ -1107,7 +1107,7 @@ namespace Dune
     }
 
     template<typename Data, typename Iterator>
-    void writeData(VTK::VTUWriter& writer, const Data& data, const Iterator begin, const Iterator end)
+    void writeData(VTK::VTUWriter& writer, const Data& data, const Iterator begin, const Iterator end, int nentries)
     {
       for (auto it = data.begin(),
              iend = data.end();
@@ -1132,7 +1132,7 @@ namespace Dune
             DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
           }
         shared_ptr<VTK::DataArrayWriter<float> > p
-          (writer.makeArrayWriter<float>(f.name(), writecomps, ncells));
+          (writer.makeArrayWriter<float>(f.name(), writecomps, nentries));
         if(!p->writeIsNoop())
           for (Iterator eit = begin; eit!=end; ++eit)
           {
@@ -1157,7 +1157,7 @@ namespace Dune
       std::tie(scalars,vectors) = getDataNames(celldata);
 
       writer.beginCellData(scalars, vectors);
-      writeData(writer,celldata,cellBegin(),cellEnd());
+      writeData(writer,celldata,cellBegin(),cellEnd(),ncells);
       writer.endCellData();
     }
 
@@ -1171,7 +1171,7 @@ namespace Dune
       std::tie(scalars,vectors) = getDataNames(vertexdata);
 
       writer.beginPointData(scalars, vectors);
-      writeData(writer,vertexdata,vertexBegin(),vertexEnd());
+      writeData(writer,vertexdata,vertexBegin(),vertexEnd(),nvertices);
       writer.endPointData();
     }
 
