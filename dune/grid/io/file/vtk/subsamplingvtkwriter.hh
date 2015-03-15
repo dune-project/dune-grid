@@ -113,7 +113,7 @@ namespace Dune
     }
 
     template<typename Data, typename Iterator, typename SubIterator>
-    void writeData(VTK::VTUWriter& writer, const Data& data, Iterator begin, Iterator end, IteratorSelector<SubIterator> sis)
+    void writeData(VTK::VTUWriter& writer, const Data& data, const Iterator begin, const Iterator end, IteratorSelector<SubIterator> sis)
     {
       for (auto it = data.begin(),
              iend = data.end();
@@ -140,7 +140,7 @@ namespace Dune
         shared_ptr<VTK::DataArrayWriter<float> > p
           (writer.makeArrayWriter<float>(f.name(), writecomps, ncells));
         if(!p->writeIsNoop())
-          for (; begin != end; ++begin)
+          for (Iterator eit = begin; eit!=end; ++eit)
           {
             f.bind(*begin);
             Refinement &refinement =

@@ -1107,7 +1107,7 @@ namespace Dune
     }
 
     template<typename Data, typename Iterator>
-    void writeData(VTK::VTUWriter& writer, const Data& data, Iterator begin, Iterator end)
+    void writeData(VTK::VTUWriter& writer, const Data& data, const Iterator begin, const Iterator end)
     {
       for (auto it = data.begin(),
              iend = data.end();
@@ -1134,10 +1134,10 @@ namespace Dune
         shared_ptr<VTK::DataArrayWriter<float> > p
           (writer.makeArrayWriter<float>(f.name(), writecomps, ncells));
         if(!p->writeIsNoop())
-          for (; begin!=end; ++begin)
+          for (Iterator eit = begin; eit!=end; ++eit)
           {
-            f.bind(*begin);
-            f.write(begin.position(),*p);
+            f.bind(*eit);
+            f.write(eit.position(),*p);
             f.unbind();
             // vtk file format: a vector data always should have 3 comps
             // (with 3rd comp = 0 in 2D case)
