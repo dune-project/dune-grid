@@ -142,10 +142,10 @@ namespace Dune
         if(!p->writeIsNoop())
           for (Iterator eit = begin; eit!=end; ++eit)
           {
-            f.bind(*begin);
+            f.bind(*eit);
             Refinement &refinement =
-              buildRefinement<dim, ctype>(begin->type(),
-                                          subsampledGeometryType(begin->type()));
+              buildRefinement<dim, ctype>(eit->type(),
+                                          subsampledGeometryType(eit->type()));
             for(SubIterator sit = refinementBegin(refinement,level,sis),
                   send = refinementEnd(refinement,level,sis);
                 sit != send;
