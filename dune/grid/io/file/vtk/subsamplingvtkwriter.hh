@@ -39,6 +39,7 @@ namespace Dune
     enum { dim = GridView::dimension };
     enum { dimw = GridView::dimensionworld };
     typedef typename GridView::Grid::ctype ctype;
+    typedef typename GridView::template Codim< 0 >::Entity Entity;
     typedef VirtualRefinement<dim, ctype> Refinement;
     typedef typename Refinement::IndexVector IndexVector;
     typedef typename Refinement::ElementIterator SubElementIterator;
@@ -142,7 +143,8 @@ namespace Dune
         if(!p->writeIsNoop())
           for (Iterator eit = begin; eit!=end; ++eit)
           {
-            f.bind(*eit);
+            const Entity & e = *eit;
+            f.bind(e);
             Refinement &refinement =
               buildRefinement<dim, ctype>(eit->type(),
                                           subsampledGeometryType(eit->type()));

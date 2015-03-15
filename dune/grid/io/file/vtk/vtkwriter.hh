@@ -1136,7 +1136,8 @@ namespace Dune
         if(!p->writeIsNoop())
           for (Iterator eit = begin; eit!=end; ++eit)
           {
-            f.bind(*eit);
+            const Entity & e = *eit;
+            f.bind(e);
             f.write(eit.position(),*p);
             f.unbind();
             // vtk file format: a vector data always should have 3 comps
