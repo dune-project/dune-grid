@@ -19,6 +19,7 @@
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/utility/multiindex.hh>
 #include <dune/grid/yaspgrid.hh>
 
 namespace Dune {
@@ -34,59 +35,13 @@ namespace Dune {
 
     static const int dimworld = GridType::dimensionworld;
 
-    /** \brief dim-dimensional multi-index.  The range for each component can be set individually
-     */
-    class MultiIndex
-      : public array<unsigned int,dim>
-    {
-
-      // The range of each component
-      array<unsigned int,dim> limits_;
-
-    public:
-      /** \brief Constructor with a given range for each digit */
-      MultiIndex(const array<unsigned int,dim>& limits)
-        : limits_(limits)
-      {
-        std::fill(this->begin(), this->end(), 0);
-      }
-
-      /** \brief Increment the MultiIndex */
-      MultiIndex& operator++() {
-
-        for (int i=0; i<dim; i++) {
-
-          // Augment digit
-          (*this)[i]++;
-
-          // If there is no carry-over we can stop here
-          if ((*this)[i]<limits_[i])
-            break;
-
-          (*this)[i] = 0;
-
-        }
-        return *this;
-      }
-
-      /** \brief Compute how many times you can call operator++ before getting to (0,...,0) again */
-      size_t cycle() const {
-        size_t result = 1;
-        for (int i=0; i<dim; i++)
-          result *= limits_[i];
-        return result;
-      }
-
-    };
-
     /** \brief Insert a structured set of vertices into the factory */
     static void insertVertices(GridFactory<GridType>& factory,
                                const FieldVector<ctype,dimworld>& lowerLeft,
                                const FieldVector<ctype,dimworld>& upperRight,
                                const array<unsigned int,dim>& vertices)
     {
-
-      MultiIndex index(vertices);
+      FactoryUtilities::MultiIndex<dim> index(vertices);
 
       // Compute the total number of vertices to be created
       int numVertices = index.cycle();
@@ -166,7 +121,7 @@ namespace Dune {
               cornersTemplate[i] += unitOffsets[j];
 
         // Insert elements
-        MultiIndex index(elements);
+        FactoryUtilities::MultiIndex<dim> index(elements);
 
         // Compute the total number of elementss to be created
         int numElements = index.cycle();
@@ -234,7 +189,7 @@ namespace Dune {
 
         // Loop over all "cubes", and split up each cube into dim!
         // (factorial) simplices
-        MultiIndex elementsIndex(elements);
+        FactoryUtilities::MultiIndex<dim> elementsIndex(elements);
         size_t cycle = elementsIndex.cycle();
 
         for (size_t i=0; i<cycle; ++elementsIndex, i++) {

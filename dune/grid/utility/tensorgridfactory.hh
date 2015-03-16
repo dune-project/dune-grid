@@ -19,6 +19,8 @@
 #include<memory>
 #include<vector>
 
+#include<dune/grid/utility/multiindex.hh>
+
 namespace Dune
 {
   // forward declaration of TensorGridFactoryCreator, which is the real factory
