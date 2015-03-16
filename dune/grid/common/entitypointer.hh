@@ -133,6 +133,15 @@ namespace Dune
     /** \brief The Entity that this EntityPointer can point to */
     typedef typename IteratorImp::Entity Entity;
 
+    /** \brief Tpy of the reference used when derefencing the Ptr */
+    typedef typename std::conditional<
+      std::is_lvalue_reference<
+        decltype(realIterator.dereference())
+        >::value,
+      const Entity&,
+      Entity
+      >::type Reference;
+
     //===========================================================
     /** @name Constructor & conversion
      */
@@ -213,13 +222,7 @@ namespace Dune
 #else // DOXYGEN
 
     /** \brief Dereferencing operator. */
-    typename std::conditional<
-      std::is_lvalue_reference<
-        decltype(realIterator.dereference())
-        >::value,
-      const Entity&,
-      Entity
-      >::type
+    Reference
     operator*() const
     DUNE_ENTITYPOINTER_DEPRECATED_MSG
     {
