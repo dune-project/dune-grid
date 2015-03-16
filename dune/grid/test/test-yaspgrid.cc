@@ -10,7 +10,7 @@
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/yaspgrid/backuprestore.hh>
-#include <dune/grid/yaspgrid/factory.hh>
+#include <dune/grid/utility/tensorgridfactory.hh>
 
 #include "gridcheck.hh"
 #include "checkcommunicate.hh"
@@ -192,7 +192,7 @@ int main (int argc , char **argv) {
     check_yasp(YaspFactory<3,Dune::TensorProductCoordinates<double,3> >::buildGrid());
 
     // check the factory class for tensorproduct grids
-    Dune::TensorYaspGridFactory<double,2> factory;
+    Dune::TensorGridFactory<Dune::YaspGrid<2, Dune::TensorProductCoordinates<double,2> > > factory;
     factory.setStart(0,-100.);
     factory.fillIntervals(0,10,20.);
     factory.fillRange(0, 5, 130.);
@@ -204,7 +204,6 @@ int main (int argc , char **argv) {
     factory.fillUntil(1,50,1000.);
 
     auto grid = factory.createGrid();
-    delete grid;
 
     // check the backup restore facility
     check_backuprestore(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid());
