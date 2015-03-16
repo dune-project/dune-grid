@@ -67,6 +67,7 @@ namespace Dune
     typedef typename GridView::template Codim< 0 >::Entity Cell;
     typedef typename GridView::template Codim< n >::Entity Vertex;
     typedef Cell Entity;
+    typedef typename GridView::template Codim< 0 >::EntityPointer::Reference EntityReference;
 
     typedef typename GridView::IndexSet IndexSet;
 
@@ -315,7 +316,7 @@ namespace Dune
      * corner.
      */
     class VertexIterator :
-      public ForwardIteratorFacade<VertexIterator, const Entity, const Entity&, int>
+      public ForwardIteratorFacade<VertexIterator, const Entity, EntityReference, int>
     {
       GridCellIterator git;
       GridCellIterator gend;
@@ -328,6 +329,9 @@ namespace Dune
       // in conforming mode, for each vertex id (as obtained by vertexmapper)
       // hold its number in the iteration order (VertexIterator)
       int offset;
+
+      // hide operator ->
+      void operator->();
     protected:
       void basicIncrement ()
       {
@@ -380,7 +384,7 @@ namespace Dune
                && cornerIndexDune == cit.cornerIndexDune
                && datamode == cit.datamode;
       }
-      const Entity& dereference() const
+      EntityReference dereference() const
       {
         return *git;
       }
@@ -427,7 +431,7 @@ namespace Dune
      * iteration order of VertexIterator.
      */
     class CornerIterator :
-      public ForwardIteratorFacade<CornerIterator, const Entity, const Entity&, int>
+      public ForwardIteratorFacade<CornerIterator, const Entity, EntityReference, int>
     {
       GridCellIterator git;
       GridCellIterator gend;
@@ -444,6 +448,8 @@ namespace Dune
       // excluding the current element
       int offset;
 
+      // hide operator ->
+      void operator->();
     public:
       CornerIterator(const GridCellIterator & x,
                      const GridCellIterator & end,
@@ -475,7 +481,7 @@ namespace Dune
                && cornerIndexVTK == cit.cornerIndexVTK
                && datamode == cit.datamode;
       }
-      const Entity& dereference() const
+      EntityReference dereference() const
       {
         return *git;
       }
@@ -1189,7 +1195,7 @@ namespace Dune
         {
           int dimw=w;
           for (int j=0; j<std::min(dimw,3); j++)
-            p->write(vit->geometry().corner(vit.localindex())[j]);
+            p->write((*vit).geometry().corner(vit.localindex())[j]);
           for (int j=std::min(dimw,3); j<3; j++)
             p->write(0.0);
         }
