@@ -31,6 +31,20 @@ structuredgridfactorytest_LDADD = $(UG_LIBS) \
 	                            $(DUNEMPILIBS) \
                                 $(LDADD)
 
+TESTS += tensorgridfactorytest
+check_PROGRAMS += tensorgridfactorytest
+tensorgridfactorytest_SOURCES = tensorgridfactorytest.cc
+tensorgridfactorytest_CPPFLAGS = $(AM_CPPFLAGS) \
+	                            $(DUNEMPICPPFLAGS) \
+	                            $(UG_CPPFLAGS)
+tensorgridfactorytest_LDFLAGS = $(AM_LDFLAGS) \
+	                            $(DUNEMPILDFLAGS) \
+	                            $(UG_LDFLAGS)
+tensorgridfactorytest_LDADD = $(UG_LIBS) \
+	                            $(DUNEMPILIBS) \
+                                $(LDADD)
+
+
 TESTS += vertexordertest
 check_PROGRAMS += vertexordertest
 vertexordertest_SOURCES = vertexordertest.cc

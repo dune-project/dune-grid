@@ -1,5 +1,6 @@
 set(TESTS
   globalindexsettest
+  tensorgridfactorytest
   structuredgridfactorytest
   vertexordertest
   persistentcontainertest)
@@ -11,7 +12,7 @@ foreach(_T ${TESTS})
 endforeach(_T ${TESTS})
 
 add_dune_ug_flags(${TESTS})
-add_dune_mpi_flags(structuredgridfactorytest)
+add_dune_mpi_flags(structuredgridfactorytest tensorgridfactorytest)
 add_dune_alugrid_flags(vertexordertest persistentcontainertest)
 
 # We do not want want to build the tests during make all,
