@@ -15,6 +15,7 @@ set(HEADERS
   persistentcontainervector.hh
   persistentcontainerwrapper.hh
   structuredgridfactory.hh
+  tensorgridfactory.hh
   vertexorderfactory.hh)
 
 install(FILES ${HEADERS}
