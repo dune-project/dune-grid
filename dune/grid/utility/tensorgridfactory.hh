@@ -301,12 +301,78 @@ namespace Dune
   {
   public:
     typedef typename Grid::Traits::CollectiveCommunication Comm;
+    typedef typename Grid::ctype ctype;
+    static const int dim = Grid::dimension;
 
     TensorGridFactoryCreator(const TensorGridFactory<Grid>& factory) : _factory(factory) {}
 
     std::shared_ptr<Grid> createGrid(Comm comm)
     {
-      DUNE_THROW(Dune::Exception, "Unstructured factory not yet implemented");
+      if (comm.rank() == 0)
+      {
+        // The grid factory
+        GridFactory<Grid> fac;
+
+        // determine the size of the grid
+        std::array<unsigned int, dim> vsizes, esizes;
+        std::size_t size = 1;
+        for (std::size_t i = 0; i<dim; ++i)
+        {
+          vsizes[i] = _factory[i].size();
+          esizes[i] = vsizes[i] - 1;
+          size *= vsizes[i];
+        }
+
+        // insert all vertices
+        FactoryUtilities::MultiIndex<dim> index(vsizes);
+        for (int i=0; i<size; ++i, ++index)
+        {
+          Dune::FieldVector<ctype, dim> position;
+          for (std::size_t j = 0; j<dim; ++j)
+            position[j] = _factory[j][index[j]];
+          fac.insertVertex(position);
+        }
+
+        // compute the offsets
+        std::array<std::size_t, dim> offsets;
+        offsets[0] = 1;
+        for (std::size_t i=1; i<dim; i++)
+          offsets[i] = offsets[i-1] * vsizes[i-1];
+
+        // Compute an element template (the cube at (0,...,0).  All
+        // other cubes are constructed by moving this template around
+        unsigned int nCorners = 1<<dim;
+
+        std::vector<unsigned int> cornersTemplate(nCorners,0);
+
+        for (size_t i=0; i<nCorners; i++)
+          for (int j=0; j<dim; j++)
+            if ( i & (1<<j) )
+              cornersTemplate[i] += offsets[j];
+
+        // Insert elements
+        FactoryUtilities::MultiIndex<dim> eindex(esizes);
+
+        // Compute the total number of elementss to be created
+        int numElements = eindex.cycle();
+
+        for (int i=0; i<numElements; i++, ++eindex)
+        {
+          // 'base' is the index of the lower left element corner
+          unsigned int base = 0;
+          for (int j=0; j<dim; j++)
+            base += eindex[j] * offsets[j];
+
+          // insert new element
+          std::vector<unsigned int> corners = cornersTemplate;
+          for (size_t j=0; j<corners.size(); j++)
+            corners[j] += base;
+
+          fac.insertElement(GeometryType(GeometryType::cube, dim), corners);
+        }
+
+        return std::shared_ptr<Grid>(fac.createGrid());
+      }
     }
 
   private:
