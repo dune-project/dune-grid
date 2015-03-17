@@ -47,7 +47,8 @@ public:
      @param[in]  xi     point in local coordinates of the reference element of e
      \return            value of the component
    */
-  virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<DT,n>& xi) const
+  virtual double evaluate (int comp, const Entity& e,
+                           const Dune::FieldVector<DT,n>& xi) const
   {
     Dune::FieldVector<DT,n> global = e.geometry().global( xi );
     return global.two_norm2();
@@ -58,7 +59,6 @@ public:
   {
     return type_ + "-vector-" + std::to_string(ncomps()) + "D";
   }
-
 
 };
 
