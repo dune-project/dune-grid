@@ -11,8 +11,6 @@
 #include <string>
 #include <vector>
 
-#include <unistd.h>
-
 #include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
@@ -39,18 +37,17 @@ class VTKVectorFunction
 {
   // extract types
   enum { n = GridView :: dimension };
-  enum { w = GridView :: dimensionworld };
   typedef typename GridView :: Grid :: ctype DT;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
-  const char *type;
+  const std::string type_;
 public:
   /** @brief Make a new VTKVectorFunction
    *
    * @param type_ Type of the function for use in its name (hint: "cell" or
    *              "vertex")
    */
-  VTKVectorFunction(const char *type_)
-    : type(type_)
+  VTKVectorFunction(std::string type)
+    : type_(type)
   { }
 
   //! return number of components
@@ -72,9 +69,7 @@ public:
   // get name
   virtual std::string name () const
   {
-    char _name[256];
-    snprintf(_name, 256, "%s-vector-%iD", type, ncomps());
-    return std::string(_name);
+    return type_ + "-vector-" + std::to_string(ncomps()) + "D";
   }
 
 };
@@ -112,25 +107,22 @@ int doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
   vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));
 
   int result = 0;
-  std::string resultname;
+  std::string name;
+  std::string prefix =
+    "vtktest-" + std::to_string(dim) + "D-" + VTKDataMode(dm);
   int rank = gridView.comm().rank();
-  char name[256];
 
-  snprintf(name,256,"vtktest-%iD-%s-ascii", dim, VTKDataMode(dm));
-  resultname = vtk.write(name);
-  if(rank == 0) acc(result, checkVTKFile(resultname));
+  name = vtk.write(prefix + "-ascii");
+  if(rank == 0) acc(result, checkVTKFile(name));
 
-  snprintf(name,256,"vtktest-%iD-%s-base64", dim, VTKDataMode(dm));
-  resultname = vtk.write(name, Dune::VTK::base64);
-  if(rank == 0) acc(result, checkVTKFile(resultname));
+  name = vtk.write(prefix + "-base64", Dune::VTK::base64);
+  if(rank == 0) acc(result, checkVTKFile(name));
 
-  snprintf(name,256,"vtktest-%iD-%s-appendedraw", dim, VTKDataMode(dm));
-  resultname = vtk.write(name, Dune::VTK::appendedraw);
-  if(rank == 0) acc(result, checkVTKFile(resultname));
+  name = vtk.write(prefix + "-appendedraw", Dune::VTK::appendedraw);
+  if(rank == 0) acc(result, checkVTKFile(name));
 
-  snprintf(name,256,"vtktest-%iD-%s-appendedbase64", dim, VTKDataMode(dm));
-  resultname = vtk.write(name, Dune::VTK::appendedbase64);
-  if(rank == 0) acc(result, checkVTKFile(resultname));
+  name = vtk.write(prefix + "-appendedbase64", Dune::VTK::appendedbase64);
+  if(rank == 0) acc(result, checkVTKFile(name));
 
   return result;
 }
