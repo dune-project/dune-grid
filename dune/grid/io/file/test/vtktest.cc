@@ -129,15 +129,10 @@ int doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
 }
 
 template<int dim>
-int vtkCheck(int* n, double* h)
+int vtkCheck(const Dune::array<int, dim>& elements,
+              const Dune::FieldVector<double, dim>& upperRight)
 {
-  typedef Dune::YaspGrid<dim> Grid;
-  Dune::FieldVector<typename Grid::ctype, dim> L(0);
-  std::copy(h, h+dim, L.begin());
-  Dune::array<int, dim> s;
-  std::copy(n, n+dim, s.begin());
-
-  Dune::YaspGrid<dim> g(L, s, std::bitset<dim>(), 0);
+  Dune::YaspGrid<dim> g(upperRight, elements);
 
   if(g.comm().rank() == 0)
     std::cout << std::endl
@@ -172,14 +167,11 @@ int main(int argc, char **argv)
       std::cout << "vtktest: MPI_Comm_size == " << mpiHelper.size()
                 << std::endl;
 
-    int n[] = { 5, 5, 5, 5 };
-    double h[] = { 1.0, 2.0, 3.0, 4.0 };
-
     int result = 0; // pass by default
 
-    acc(result, vtkCheck<1>(n,h));
-    acc(result, vtkCheck<2>(n,h));
-    acc(result, vtkCheck<3>(n,h));
+    acc(result, vtkCheck<1>({5}, {1.0}));
+    acc(result, vtkCheck<2>({5,5}, {1.0, 2.0}));
+    acc(result, vtkCheck<3>({5,5,5}, {1.0, 2.0, 3.0}));
 
     mpiHelper.getCollectiveCommunication().allreduce<Acc>(&result, 1);
 
