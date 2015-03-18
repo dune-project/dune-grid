@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -58,7 +59,9 @@ public:
   // get name
   virtual std::string name () const
   {
-    return type_ + "-vector-" + std::to_string(ncomps()) + "D";
+    std::ostringstream os;
+    os << type_ << "-vector-" << ncomps() << "D";
+    return os.str();
   }
 
 };
@@ -99,14 +102,15 @@ int doWrite( const GridView &gridView, bool coerceToSimplex)
 
   int result = 0;
   std::string name;
-  std::string prefix = "subsamplingvtktest-" + std::to_string(dim) + "D-"
-    + (coerceToSimplex ? "simplex" : "natural");
+  std::ostringstream prefix;
+  prefix << "subsamplingvtktest-" << dim << "D-"
+         << (coerceToSimplex ? "simplex" : "natural");
   int rank = gridView.comm().rank();
 
-  name = vtk.write(prefix + "-ascii");
+  name = vtk.write(prefix.str() + "-ascii");
   if(rank == 0) acc(result, checkVTKFile(name));
 
-  name = vtk.write(prefix + "-appendedraw", Dune::VTK::appendedraw);
+  name = vtk.write(prefix.str() + "-appendedraw", Dune::VTK::appendedraw);
   if(rank == 0) acc(result, checkVTKFile(name));
 
   return result;

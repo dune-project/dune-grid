@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -69,7 +70,9 @@ public:
   // get name
   virtual std::string name () const
   {
-    return type_ + "-vector-" + std::to_string(ncomps()) + "D";
+    std::ostringstream os;
+    os << type_ << "-vector-" << ncomps() << "D";
+    return os.str();
   }
 
 };
@@ -109,20 +112,21 @@ int doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
 
   int result = 0;
   std::string name;
-  std::string prefix =
-    "vtktest-" + std::to_string(dim) + "D-" + VTKDataMode(dm);
+  std::ostringstream prefix;
+  prefix << "vtktest-" << dim << "D-" << VTKDataMode(dm);
   int rank = gridView.comm().rank();
 
-  name = vtk.write(prefix + "-ascii");
+  name = vtk.write(prefix.str() + "-ascii");
   if(rank == 0) acc(result, checkVTKFile(name));
 
-  name = vtk.write(prefix + "-base64", Dune::VTK::base64);
+  name = vtk.write(prefix.str() + "-base64", Dune::VTK::base64);
   if(rank == 0) acc(result, checkVTKFile(name));
 
-  name = vtk.write(prefix + "-appendedraw", Dune::VTK::appendedraw);
+  name = vtk.write(prefix.str() + "-appendedraw", Dune::VTK::appendedraw);
   if(rank == 0) acc(result, checkVTKFile(name));
 
-  name = vtk.write(prefix + "-appendedbase64", Dune::VTK::appendedbase64);
+  name = vtk.write(prefix.str() + "-appendedbase64",
+                   Dune::VTK::appendedbase64);
   if(rank == 0) acc(result, checkVTKFile(name));
 
   return result;
