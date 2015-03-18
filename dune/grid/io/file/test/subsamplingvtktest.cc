@@ -80,11 +80,12 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
   vtk.addVertexData(std::make_shared< VTKVectorFunction<GridView> >("vertex"));
   vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));
 
-  std::string name = "subsamplingvtktest-" + std::to_string(dim) + "D-" + (coerceToSimplex ? "simplex" : "natural") + "-ascii";
-  vtk.write(name);
+  std::string prefix = "subsamplingvtktest-" + std::to_string(dim) + "D-"
+    + (coerceToSimplex ? "simplex" : "natural");
 
-  name = "subsamplingvtktest-" + std::to_string(dim) + "D-" + (coerceToSimplex ? "simplex" : "natural") + "-appendedraw";
-  vtk.write(name, Dune::VTK::appendedraw);
+  vtk.write(prefix + "-ascii");
+
+  vtk.write(prefix + "-appendedraw", Dune::VTK::appendedraw);
 }
 
 template<int dim>
