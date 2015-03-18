@@ -96,8 +96,7 @@ void vtkCheck(const Dune::array<int, dim>& elements,
 
   if(g.comm().rank() == 0)
     std::cout << std::endl
-              << "subsamplingVTKCheck dim=" << dim
-              << std::endl
+              << "subsamplingVTKCheck dim=" << dim << std::endl
               << std::endl;
 
   g.globalRefine(1);
@@ -115,7 +114,11 @@ int main(int argc, char **argv)
 {
   try {
 
-    Dune::MPIHelper::instance(argc, argv);
+    const Dune::MPIHelper &mpiHelper = Dune::MPIHelper::instance(argc, argv);
+
+    if(mpiHelper.rank() == 0)
+      std::cout << "subsamplingvtktest: MPI_Comm_size == " << mpiHelper.size()
+                << std::endl;
 
     vtkCheck<1>({5}, {1.0});
     vtkCheck<2>({5,5}, {1.0, 2.0});
