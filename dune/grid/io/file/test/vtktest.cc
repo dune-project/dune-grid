@@ -95,11 +95,12 @@ int doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
 {
   enum { dim = GridView :: dimension };
 
+  Dune :: VTKWriter< GridView > vtk( gridView, dm );
+
   const typename GridView :: IndexSet &is = gridView.indexSet();
   std::vector<int> vertexdata(is.size(dim),dim);
   std::vector<int> celldata(is.size(0),0);
 
-  Dune :: VTKWriter< GridView > vtk( gridView, dm );
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
 
