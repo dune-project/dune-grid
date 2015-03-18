@@ -129,11 +129,8 @@ int doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
 }
 
 template<int dim>
-int vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
+int vtkCheck(int* n, double* h)
 {
-  if(mpiHelper.rank() == 0)
-    std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
-
   typedef Dune::YaspGrid<dim> Grid;
   Dune::FieldVector<typename Grid::ctype, dim> L(0);
   std::copy(h, h+dim, L.begin());
@@ -141,6 +138,11 @@ int vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
   std::copy(n, n+dim, s.begin());
 
   Dune::YaspGrid<dim> g(L, s, std::bitset<dim>(), 0);
+
+  if(g.comm().rank() == 0)
+    std::cout << std::endl
+              << "vtkCheck dim=" << dim << std::endl
+              << std::endl;
 
   g.globalRefine(1);
 
@@ -163,6 +165,7 @@ int vtkCheck(const Dune::MPIHelper &mpiHelper, int* n, double* h)
 int main(int argc, char **argv)
 {
   try {
+
     const Dune::MPIHelper &mpiHelper = Dune::MPIHelper::instance(argc, argv);
 
     if(mpiHelper.rank() == 0)
@@ -174,9 +177,9 @@ int main(int argc, char **argv)
 
     int result = 0; // pass by default
 
-    acc(result, vtkCheck<1>(mpiHelper,n,h));
-    acc(result, vtkCheck<2>(mpiHelper,n,h));
-    acc(result, vtkCheck<3>(mpiHelper,n,h));
+    acc(result, vtkCheck<1>(n,h));
+    acc(result, vtkCheck<2>(n,h));
+    acc(result, vtkCheck<3>(n,h));
 
     mpiHelper.getCollectiveCommunication().allreduce<Acc>(&result, 1);
 
