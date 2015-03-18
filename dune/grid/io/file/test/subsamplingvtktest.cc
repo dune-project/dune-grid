@@ -15,6 +15,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
+#include <dune/grid/io/file/test/checkvtkfile.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 #include <dune/grid/yaspgrid.hh>
 
@@ -62,8 +63,24 @@ public:
 
 };
 
+// accumulate exit status
+void acc(int &accresult, int result)
+{
+  if(accresult == 0 || (accresult == 77 && result != 0))
+    accresult = result;
+}
+
+struct Acc
+{
+  int operator()(int v1, int v2) const
+  {
+    acc(v1, v2);
+    return v1;
+  }
+};
+
 template< class GridView >
-void doWrite( const GridView &gridView, bool coerceToSimplex)
+int doWrite( const GridView &gridView, bool coerceToSimplex)
 {
   enum { dim = GridView :: dimension };
 
@@ -80,16 +97,23 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
   vtk.addVertexData(std::make_shared< VTKVectorFunction<GridView> >("vertex"));
   vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));
 
+  int result = 0;
+  std::string name;
   std::string prefix = "subsamplingvtktest-" + std::to_string(dim) + "D-"
     + (coerceToSimplex ? "simplex" : "natural");
+  int rank = gridView.comm().rank();
 
-  vtk.write(prefix + "-ascii");
+  name = vtk.write(prefix + "-ascii");
+  if(rank == 0) acc(result, checkVTKFile(name));
 
-  vtk.write(prefix + "-appendedraw", Dune::VTK::appendedraw);
+  name = vtk.write(prefix + "-appendedraw", Dune::VTK::appendedraw);
+  if(rank == 0) acc(result, checkVTKFile(name));
+
+  return result;
 }
 
 template<int dim>
-void vtkCheck(const Dune::array<int, dim>& elements,
+int vtkCheck(const Dune::array<int, dim>& elements,
               const Dune::FieldVector<double, dim>& upperRight)
 {
   Dune::YaspGrid<dim> g(upperRight, elements);
@@ -101,13 +125,17 @@ void vtkCheck(const Dune::array<int, dim>& elements,
 
   g.globalRefine(1);
 
-  doWrite( g.leafGridView(), false);
-  doWrite( g.levelGridView( 0 ), false);
-  doWrite( g.levelGridView( g.maxLevel() ), false);
+  int result = 0;
 
-  doWrite( g.leafGridView(), true);
-  doWrite( g.levelGridView( 0 ), true);
-  doWrite( g.levelGridView( g.maxLevel() ), true);
+  acc(result, doWrite( g.leafGridView(), false));
+  acc(result, doWrite( g.levelGridView( 0 ), false));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false));
+
+  acc(result, doWrite( g.leafGridView(), true));
+  acc(result, doWrite( g.levelGridView( 0 ), true));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true));
+
+  return result;
 }
 
 int main(int argc, char **argv)
@@ -120,9 +148,15 @@ int main(int argc, char **argv)
       std::cout << "subsamplingvtktest: MPI_Comm_size == " << mpiHelper.size()
                 << std::endl;
 
-    vtkCheck<1>({5}, {1.0});
-    vtkCheck<2>({5,5}, {1.0, 2.0});
-    vtkCheck<3>({5,5,5}, {1.0, 2.0, 3.0});
+    int result = 0; // pass by default
+
+    acc(result, vtkCheck<1>({5}, {1.0}));
+    acc(result, vtkCheck<2>({5,5}, {1.0, 2.0}));
+    acc(result, vtkCheck<3>({5,5,5}, {1.0, 2.0, 3.0}));
+
+    mpiHelper.getCollectiveCommunication().allreduce<Acc>(&result, 1);
+
+    return result;
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
@@ -135,5 +169,4 @@ int main(int argc, char **argv)
     return 2;
   }
 
-  return 0;
 }
