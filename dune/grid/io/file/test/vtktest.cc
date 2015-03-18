@@ -13,6 +13,7 @@
 
 #include <unistd.h>
 
+#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
