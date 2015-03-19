@@ -43,22 +43,36 @@ try {
   fillFactory(fac1);
   {
     auto grid = fac1.createGrid();
+    gridcheck(*grid);
+    std::cout << "OneDgrid with " << grid->size(0) << " cells created." << std::endl;
   }
 
 #if HAVE_UG
   // Test UGGrid
-  TensorGridFactory<UGGrid<2> > fac2;
-  fillFactory(fac2);
+  TensorGridFactory<UGGrid<2> > fac3;
+  fillFactory(fac3);
   {
-    auto grid = fac2.createGrid();
+    auto grid = fac3.createGrid();
+    gridcheck(*grid);
+    std::cout << "UGGrid<2> with " << grid->size(0) << " cells created." << std::endl;
+  }
+
+  TensorGridFactory<UGGrid<3> > fac4;
+  fillFactory(fac4);
+  {
+    auto grid = fac4.createGrid();
+    gridcheck(*grid);
+    std::cout << "UGGrid<2> with " << grid->size(0) << " cells created." << std::endl;
   }
 #endif
 
   // Test YaspGrid
-  TensorGridFactory<YaspGrid<2, TensorProductCoordinates<double, 2> > > fac3;
-  fillFactory(fac3);
+  TensorGridFactory<YaspGrid<2, TensorProductCoordinates<double, 2> > > fac5;
+  fillFactory(fac5);
   {
-    auto grid = fac3.createGrid();
+    auto grid = fac5.createGrid();
+    gridcheck(*grid);
+    std::cout << "YaspGrid with " << grid->size(0) << " cells created." << std::endl;
   }
 
   return 0;
