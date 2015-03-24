@@ -14,6 +14,7 @@
 
 #include <dune/common/exceptions.hh>
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/common/rangegenerators.hh>
 
 #if not defined(HAVE_RANGE_BASED_FOR)
 

@@ -10,6 +10,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include <vector>
 
 #include <dune/common/exceptions.hh>
