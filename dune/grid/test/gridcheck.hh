@@ -595,6 +595,8 @@ void iterate(Grid &g)
     ++l2;
     assert( (l1 == l2) && (l2 == l1) );
 
+    origin = Dune::ReferenceElements<typename Geometry::ctype,
+               Geometry::dimension>::general(it->type()).position(0,0);
     const Geometry &geo = it->geometry();
 
     result = geo.local( geo.global( origin ) );
