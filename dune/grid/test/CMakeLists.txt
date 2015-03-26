@@ -45,7 +45,7 @@ set(TESTS
   test-geogrid test-identitygrid test-oned test-sgrid test-yaspgrid
   ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
   ${DGFALUGRID_UG_PROGRAMS} test-mcmg-geogrid
-  testiteratorranges)
+  testiteratorranges test-hierarchicsearch)
 
 set_property(DIRECTORY APPEND PROPERTY
   COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
@@ -111,6 +111,9 @@ endif(ALUGRID_FOUND AND UG_FOUND)
 
 add_executable(testiteratorranges EXCLUDE_FROM_ALL testiteratorranges.cc)
 add_dune_mpi_flags(testiteratorranges)
+
+add_executable(test-hierarchicsearch EXCLUDE_FROM_ALL test-hierarchicsearch.cc)
+add_dune_mpi_flags(test-hierarchicsearch)
 
 
 # tell gridcheck to use old entity and intersections interface for unported grids

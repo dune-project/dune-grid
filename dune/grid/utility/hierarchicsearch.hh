@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
@@ -71,8 +72,8 @@ namespace Dune
        recursively continue until we found an entity that is part of
        the IndexSet.
      */
-    EntityPointer hFindEntity ( const Entity &entity,
-                                const FieldVector<ct,dimw>& global) const
+    Entity hFindEntity ( const Entity &entity,
+                         const FieldVector<ct,dimw>& global) const
     {
       // type of element geometry
       typedef typename Entity::Geometry Geometry;
@@ -84,7 +85,7 @@ namespace Dune
       const HierarchicIterator end = entity.hend( childLevel );
       for( HierarchicIterator it = entity.hbegin( childLevel ); it != end; ++it )
       {
-        const Entity &child = *it;
+        Entity child = *it;
         const Geometry &geo = child.geometry();
 
         LocalCoordinate local = geo.local(global);
@@ -92,7 +93,7 @@ namespace Dune
         {
           // return if we found the leaf, else search through the child entites
           if( indexSet_.contains( child ) )
-            return EntityPointer( child );
+            return std::move( child );
           else
             return hFindEntity( child, global );
         }
@@ -124,7 +125,7 @@ namespace Dune
        \exception GridError No element of the coarse grid contains the given
                             coordinate.
      */
-    EntityPointer findEntity(const FieldVector<ct,dimw>& global) const
+    Entity findEntity(const FieldVector<ct,dimw>& global) const
     { return findEntity<All_Partition>(global); }
 
     /**
@@ -135,7 +136,7 @@ namespace Dune
                             coordinate.
      */
     template<PartitionIteratorType partition>
-    EntityPointer findEntity(const FieldVector<ct,dimw>& global) const
+    Entity findEntity(const FieldVector<ct,dimw>& global) const
     {
       typedef typename Grid::LevelGridView LevelGV;
       const LevelGV &gv = grid_.template levelGridView(0);
@@ -152,7 +153,7 @@ namespace Dune
       const LevelIterator end = gv.template end<0, partition>();
       for (LevelIterator it = gv.template begin<0, partition>(); it != end; ++it)
       {
-        const Entity &entity = *it;
+        Entity entity = *it;
         const Geometry &geo = entity.geometry();
 
         LocalCoordinate local = geo.local( global );
@@ -164,7 +165,7 @@ namespace Dune
 
         // return if we found the leaf, else search through the child entites
         if( indexSet_.contains( entity ) )
-          return EntityPointer( entity );
+          return std::move( entity );
         else
           return hFindEntity( entity, global );
       }

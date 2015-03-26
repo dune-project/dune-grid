@@ -255,6 +255,12 @@ testiteratorranges_LDADD =			\
 	$(DUNEMPILIBS)				\
 	$(LDADD)
 
+NORMALTESTS += test-hierarchicsearch
+test_hierarchicsearch_SOURCES = test-hierarchicsearch.cc
+test_hierarchicsearch_CPPFLAGS = $(AM_CPPFLAGS)	$(DUNEMPICPPFLAGS)
+test_hierarchicsearch_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
+test_hierarchicsearch_LDADD = $(DUNEMPILIBS) $(LDADD)
+
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = CMakeLists.txt $(SOURCES)
 
