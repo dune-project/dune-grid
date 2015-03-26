@@ -67,7 +67,6 @@ namespace Dune
     typedef typename GridView::template Codim< 0 >::Entity Cell;
     typedef typename GridView::template Codim< n >::Entity Vertex;
     typedef Cell Entity;
-    typedef typename GridView::template Codim< 0 >::EntityPointer::Reference EntityReference;
 
     typedef typename GridView::IndexSet IndexSet;
 
@@ -80,6 +79,8 @@ namespace Dune
     typedef typename GridView::template Codim< n >
     ::template Partition< VTK_Partition >::Iterator
     GridVertexIterator;
+
+    typedef typename GridCellIterator::Reference EntityReference;
 
     typedef typename GridView::template Codim< 0 >
     ::Entity::Geometry::LocalCoordinate Coordinate;
