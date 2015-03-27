@@ -669,9 +669,9 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
   typedef typename Grid::HierarchicIterator HierarchicIterator;
-#if !DISABLE_DEPRECATED_METHOD_CHECK
+#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE) || !DISABLE_DEPRECATED_METHOD_CHECK
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
+#endif // #if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE) || !DISABLE_DEPRECATED_METHOD_CHECK
 
   typedef typename Grid::LeafGridView LeafGridView;
   typedef typename Grid::LevelGridView LevelGridView;
