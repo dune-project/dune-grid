@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_ENTITYPOINTER_HH
 #define DUNE_GRID_ENTITYPOINTER_HH
 
+#include <utility>
+
 #include <dune/common/proxymemberaccess.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/deprecated.hh>
@@ -15,6 +17,14 @@
 #define DUNE_ENTITYPOINTER_DEPRECATED_MSG  DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now. Note, this might lead to a decreased performance until all grid implementations properly addressed this interface change.")
 namespace Dune
 {
+
+  // External forward declaration
+  // ----------------------------
+
+  template< int, int, class, template< int, int, class > class >
+  class Entity;
+
+
 
   /**
      @brief Wrapper class for pointers to entities
@@ -356,6 +366,87 @@ namespace Dune
     }
     //@}
   };
+
+
+
+#ifndef DOXYEN
+
+  // DefaultEntityPointer
+  // --------------------
+
+  /* The EntityPointer class defined above has been deprecated. Unitil its
+     final removal valid Dune grids still have to provide at least a suitable
+     EntityPointer typedef. This class provides a default implementation of an
+     entity pointer from a given Dune::Entity type:
+     \code
+     struct GridFamily
+     {
+       ...
+       typedef ImplementationDefined Entity;
+       typedef DefaultEntityPointer<Entity> EntityPointer;
+       ...
+     };
+     \endcode
+
+     This class will retain a possible compatibility support with the
+     deprecated interface behavior if the iterator classes in the grid
+     implementation provide the following two additional methods:
+     \code
+     class Iterator
+     {
+       // dereference() method required by Dune::EntityIterator
+       typedef ImplemenatationDefined Entity;
+       Entity dereference () const;
+
+       // allow for (deprecated) construction/assignment of EntityPointer from a given iterator
+       operator Dune::DefaultEntityPointer<Entity>() const
+       {
+         return Dune::DefaultEntityPointer<Entity>(dereference());
+       }
+
+       // allow for (deprecated) comparison of an iterator with an entity pointer
+       bool equals(const Dune::DefaultEntityPointer<Entity> &rhs) const
+       {
+         return dereference() == rhs.dereference();
+       }
+     };
+     \endcode
+  */
+  template< class E >
+  class DefaultEntityPointer;
+
+  template< int codim, int dim, class Grid, template< int, int, class > class EntityImp >
+  class DefaultEntityPointer< Dune::Entity< codim, dim, Grid, EntityImp > >
+  {
+  public:
+    static const int codimension = codim;
+
+    typedef Dune::Entity< codim, dim, Grid, EntityImp > Entity;
+
+    DefaultEntityPointer () {}
+
+    explicit DefaultEntityPointer ( Entity entity )
+      : entity_( std::move( entity ) )
+    {}
+
+    explicit DefaultEntityPointer ( EntityImp< codim, dim, Grid > entity )
+      : entity_( std::move( entity ) )
+    {}
+
+    const Entity &dereference () const { return entity_; }
+
+    bool equals ( const DefaultEntityPointer &rhs ) const
+    {
+      return entity_ == rhs.entity_;
+    }
+
+    int level () const { return entity_.level(); }
+
+  private:
+    Entity entity_;
+  };
+
+#endif // #ifndef DOXYEN
 
 }
 #undef DUNE_ENTITYPOINTER_DEPRECATED_MSG

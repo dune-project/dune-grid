@@ -8,7 +8,6 @@ set(HEADERS
   datahandle.hh
   declaration.hh
   entity.hh
-  entitypointer.hh
   entityseed.hh
   geometry.hh
   grid.hh

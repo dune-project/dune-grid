@@ -4,7 +4,6 @@
 #define DUNE_GEOGRID_INTERSECTION_HH
 
 #include <dune/grid/geometrygrid/declaration.hh>
-#include <dune/grid/geometrygrid/entitypointer.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
 
 namespace Dune
@@ -31,7 +30,6 @@ namespace Dune
       static const int dimensionworld = Traits::dimensionworld;
 
       typedef typename Traits::template Codim< 0 >::Entity Entity;
-      typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
       typedef typename Traits::template Codim< 1 >::Geometry Geometry;
       typedef typename Traits::template Codim< 1 >::LocalGeometry LocalGeometry;
 

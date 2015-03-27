@@ -3,7 +3,6 @@
 #ifndef DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 #define DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 
-#include <dune/grid/geometrygrid/entitypointer.hh>
 #include <dune/grid/geometrygrid/intersection.hh>
 
 namespace Dune
@@ -22,14 +21,11 @@ namespace Dune
 
       typedef GeoGrid::Intersection< Grid, typename HostIntersectionIterator::Intersection > IntersectionImpl;
 
-      typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
       typedef typename Traits::template Codim< 0 >::Geometry ElementGeometry;
       typedef typename Traits::template Codim< 0 >::GeometryImpl ElementGeometryImpl;
 
     public:
       typedef Dune::Intersection< Grid, IntersectionImpl > Intersection;
-
-      typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
 
       IntersectionIterator()
       {}
