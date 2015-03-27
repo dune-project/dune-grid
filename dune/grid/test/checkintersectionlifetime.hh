@@ -34,7 +34,7 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
 
   std::cout << "Intersection Lifetime / consistency check" << std::endl;
 
-  if (check_element_count > gv.size(0))
+  if (check_element_count > static_cast<std::size_t>(gv.size(0)))
     {
       std::cout << "WARNING! Requested check of intersections for first " << check_element_count
                 << " elements, but grid view only contains " << gv.size(0)
@@ -44,7 +44,7 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
 
   auto& index_set = gv.indexSet();
 
-  std::vector<std::vector<typename GV::IndexSet::IndexType> > indices;
+  std::vector<std::vector<int> > indices;
   std::vector<typename GV::template Codim<0>::Entity> entity_list;
   std::vector<std::vector<typename GV::Intersection> > intersection_list;
   std::vector<std::vector<typename GV::Intersection::Geometry::GlobalCoordinate> > coords;

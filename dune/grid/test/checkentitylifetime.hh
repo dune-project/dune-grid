@@ -38,7 +38,7 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
 
   std::cout << "Lifetime / consistency check for entities, codim " << codim << std::endl;
 
-  if (check_element_count > gv.size(codim))
+  if (check_element_count > static_cast<std::size_t>(gv.size(codim)))
     {
       std::cout << "WARNING! Requested check of first " << check_element_count
                 << " entities, but grid view only contains " << gv.size(codim)
