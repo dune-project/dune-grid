@@ -8,6 +8,7 @@ set(HEADERS
   gridtype.hh
   hierarchicsearch.hh
   hostgridaccess.hh
+  multiindex.hh
   parmetisgridpartitioner.hh
   persistentcontainer.hh
   persistentcontainerinterface.hh
@@ -15,6 +16,7 @@ set(HEADERS
   persistentcontainervector.hh
   persistentcontainerwrapper.hh
   structuredgridfactory.hh
+  tensorgridfactory.hh
   vertexorderfactory.hh)
 
 install(FILES ${HEADERS}

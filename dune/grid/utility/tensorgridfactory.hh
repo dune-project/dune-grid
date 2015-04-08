@@ -1,64 +1,66 @@
-// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
-// vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_YASPGRID_FACTORY_HH
-#define DUNE_GRID_YASPGRID_FACTORY_HH
-
-#include <vector>
-#include <dune/common/array.hh>
-#include <dune/grid/common/exceptions.hh>
-
-#include "coordinates.hh"
-#include "../yaspgrid.hh"
+#ifndef DUNE_GRID_UTILITY_TENSORGRIDFACTORY_HH
+#define DUNE_GRID_UTILITY_TENSORGRIDFACTORY_HH
 
 /** \file
  *  \brief This file provides a factory class for tensorproduct
- *  YaspGrids. This is a collection of methods to generate monotonous
+ *  grids. This is a collection of methods to generate monotonous
  *  sequences as needed for a tensorproduct grid. Apart
  *  from easy ones for locally equidistant grids, there are also
  *  more involved methods like splitting a range according to a
  *  geometric series.
  *
+ *  The grid generation process is implemented for unstructured grids
+ *  and for YaspGrid.
+ *
  *  \author Dominic Kempf
  */
 
+#include<array>
+#include<memory>
+#include<vector>
+
+#include<dune/grid/utility/multiindex.hh>
+
 namespace Dune
 {
+  // forward declaration of TensorGridFactoryCreator, which is the real factory
+  // that should be specialized for each grid.
+  template<typename Grid>
+  class TensorGridFactoryCreator;
+
   /** \brief A factory class for conveniently creating tensorproduct grids
    *
-   * \tparam ctype the coordinate type to use
-   * \tparam dim the grid dimension
+   * \tparam Grid the grid type
    */
-  template<typename ctype, int dim>
-  class TensorYaspGridFactory
+  template<typename Grid>
+  class TensorGridFactory
   {
   public:
-
-    typedef YaspGrid<dim, TensorProductCoordinates<ctype, dim> > Grid;
     typedef typename Grid::Traits::CollectiveCommunication Comm;
+    typedef typename Grid::ctype ctype;
+    static const int dim = Grid::dimension;
 
-    //! initialize the factory with a set of default values
-    TensorYaspGridFactory () : _periodic (), _overlap (1)
-    {}
-
-    //! finalizes the factory and gives a pointer to the constructed grid
-    Grid* createGrid(Comm comm = Comm())
+    std::shared_ptr<Grid> createGrid(Comm comm = Comm())
     {
-      if (!Dune::Yasp::checkIfMonotonous (_coords))
-        DUNE_THROW( Dune::Exception,
-          "TensorYaspFactory did not get enough coordinate information to construct a grid!");
-      return new Grid(_coords, _periodic, _overlap, comm);
+      TensorGridFactoryCreator<Grid> creator(*this);
+      return creator.createGrid(comm);
     }
 
-    //! set whether the grid is periodic in direction dir
-    void setPeriodicity (int dir)
+    std::array<std::vector<ctype> , dim> coords() const
     {
-      _periodic[dir] = true;
+      return _coords;
     }
 
-    //! set the number of overlap cells
-    void setOverlap (int overlap)
+    //! allow to manually tune the factory by overloading operator[] to export the coordinate vectors in the coordinate directories.
+    std::vector<ctype>& operator[](std::size_t d)
     {
-      _overlap = overlap;
+      return _coords[d];
+    }
+
+    //! allow to manually tune the factory by overloading operator[] to export the coordinate vectors in the coordinate directories.
+    const std::vector<ctype>& operator[](std::size_t d) const
+    {
+      return _coords[d];
     }
 
     /** \brief set a starting value in a given direction d
@@ -289,9 +291,109 @@ namespace Dune
       return xnew;
     }
 
-    Dune::array<std::vector<ctype>, dim> _coords;
-    std::bitset<dim> _periodic;
-    int _overlap;
+    std::array<std::vector<ctype>, dim> _coords;
+  };
+
+  // class that implements the actual grid creation process. The default is implementing
+  // standard creation for unstructured grids. Provide a specialization for other grids.
+  template<typename Grid>
+  class TensorGridFactoryCreator
+  {
+  public:
+    typedef typename Grid::Traits::CollectiveCommunication Comm;
+    typedef typename Grid::ctype ctype;
+    static const int dim = Grid::dimension;
+
+    TensorGridFactoryCreator(const TensorGridFactory<Grid>& factory) : _factory(factory) {}
+
+    std::shared_ptr<Grid> createGrid(Comm comm)
+    {
+      if (comm.rank() == 0)
+      {
+        // The grid factory
+        GridFactory<Grid> fac;
+
+        // determine the size of the grid
+        std::array<unsigned int, dim> vsizes, esizes;
+        std::size_t size = 1;
+        for (std::size_t i = 0; i<dim; ++i)
+        {
+          vsizes[i] = _factory[i].size();
+          esizes[i] = vsizes[i] - 1;
+          size *= vsizes[i];
+        }
+
+        // insert all vertices
+        FactoryUtilities::MultiIndex<dim> index(vsizes);
+        for (int i=0; i<size; ++i, ++index)
+        {
+          Dune::FieldVector<ctype, dim> position;
+          for (std::size_t j = 0; j<dim; ++j)
+            position[j] = _factory[j][index[j]];
+          fac.insertVertex(position);
+        }
+
+        // compute the offsets
+        std::array<std::size_t, dim> offsets;
+        offsets[0] = 1;
+        for (std::size_t i=1; i<dim; i++)
+          offsets[i] = offsets[i-1] * vsizes[i-1];
+
+        // Compute an element template (the cube at (0,...,0).  All
+        // other cubes are constructed by moving this template around
+        unsigned int nCorners = 1<<dim;
+
+        std::vector<unsigned int> cornersTemplate(nCorners,0);
+
+        for (size_t i=0; i<nCorners; i++)
+          for (int j=0; j<dim; j++)
+            if ( i & (1<<j) )
+              cornersTemplate[i] += offsets[j];
+
+        // Insert elements
+        FactoryUtilities::MultiIndex<dim> eindex(esizes);
+
+        // Compute the total number of elementss to be created
+        int numElements = eindex.cycle();
+
+        for (int i=0; i<numElements; i++, ++eindex)
+        {
+          // 'base' is the index of the lower left element corner
+          unsigned int base = 0;
+          for (int j=0; j<dim; j++)
+            base += eindex[j] * offsets[j];
+
+          // insert new element
+          std::vector<unsigned int> corners = cornersTemplate;
+          for (size_t j=0; j<corners.size(); j++)
+            corners[j] += base;
+
+          fac.insertElement(GeometryType(GeometryType::cube, dim), corners);
+        }
+
+        return std::shared_ptr<Grid>(fac.createGrid());
+      }
+    }
+
+  private:
+    const TensorGridFactory<Grid>& _factory;
+  };
+
+  template<typename ctype, int dim>
+  class TensorGridFactoryCreator<YaspGrid<dim, TensorProductCoordinates<ctype, dim> > >
+  {
+  public:
+    typedef YaspGrid<dim, TensorProductCoordinates<ctype, dim> > Grid;
+    typedef typename Grid::CollectiveCommunication Comm;
+
+    TensorGridFactoryCreator(const TensorGridFactory<Grid>& factory) : _factory(factory) {}
+
+    std::shared_ptr<Grid> createGrid(Comm comm)
+    {
+      return std::make_shared<Grid>(_factory.coords(), std::bitset<dim>(0ULL), 1, comm);
+    }
+  private:
+    const TensorGridFactory<Grid>& _factory;
   };
 }
 

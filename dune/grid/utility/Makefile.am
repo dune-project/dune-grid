@@ -10,6 +10,7 @@ gridutility_HEADERS =				\
 	gridtype.hh				\
 	hierarchicsearch.hh			\
 	hostgridaccess.hh			\
+	multiindex.hh \
 	parmetisgridpartitioner.hh		\
 	persistentcontainer.hh			\
 	persistentcontainerinterface.hh		\
@@ -17,6 +18,7 @@ gridutility_HEADERS =				\
 	persistentcontainervector.hh		\
 	persistentcontainerwrapper.hh		\
 	structuredgridfactory.hh		\
+	tensorgridfactory.hh \
 	vertexorderfactory.hh
 
 include $(top_srcdir)/am/global-rules
