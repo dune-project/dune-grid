@@ -182,11 +182,12 @@ namespace CheckEntitySeed // don't blur namespace Dune
   private:
 
 #if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+    template <class Ep>
     // compare two entity pointers for equality
-    static void compare ( const EntityPointer &ep1, const EntityPointer &ep2, std::ostream &output )
+    static void compare ( const Ep &ep1, const Ep &ep2, std::ostream &output )
     {
       // compare entity pointers
-      if( !Equals< EntityPointer >::apply( ep1, ep2 ) )
+      if( !Equals< Ep >::apply( ep1, ep2 ) )
         output << "Warning: EntityPointers do not conincide" << std::endl;
 
       // compare geometries
