@@ -117,7 +117,10 @@ namespace Dune {
       timesteps_.push_back(time);
 
       /* write VTK file */
-      std::string pvtuName = vtkWriter_->pwrite(seqName(count), path_,extendpath_,ot);
+      if(size_==1)
+        vtkWriter_->write(concatPaths(path_,seqName(count)),ot);
+      else
+        vtkWriter_->pwrite(seqName(count), path_,extendpath_,ot);
 
       /* write pvd file ... only on rank 0 */
       if (rank_==0) {
@@ -132,8 +135,16 @@ namespace Dune {
         for (unsigned int i=0; i<=count; i++)
         {
           // filename
-          std::string piecepath = concatPaths(path_, extendpath_);
-          std::string fullname = vtkWriter_->getParallelHeaderName(seqName(i), piecepath, size_);
+          std::string piecepath;
+          std::string fullname;
+          if(size_==1) {
+            piecepath = path_;
+            fullname = vtkWriter_->getSerialPieceName(seqName(i), piecepath);
+          }
+          else {
+            piecepath = concatPaths(path_, extendpath_);
+            fullname = vtkWriter_->getParallelHeaderName(seqName(i), piecepath, size_);
+          }
           pvdFile << "<DataSet timestep=\"" << timesteps_[i]
                   << "\" group=\"\" part=\"0\" name=\"\" file=\""
                   << fullname << "\"/> \n";
