@@ -113,6 +113,13 @@ int main(int argc, char **argv)
 {
   try
   {
+
+    const Dune::MPIHelper &mpiHelper = Dune::MPIHelper::instance(argc, argv);
+
+    if(mpiHelper.rank() == 0)
+      std::cout << "subsamplingvtktest: MPI_Comm_size == " << mpiHelper.size()
+                << std::endl;
+
     {
       const unsigned int dim = 1;
       Dune::FieldVector<double,dim> length(1.0);
