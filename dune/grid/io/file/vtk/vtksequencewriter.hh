@@ -21,31 +21,20 @@ namespace Dune {
    */
   template< class GridView >
   class VTKSequenceWriter :
-    public VTKWriter<GridView>,
-    public VTKSequenceWriterBase<VTKSequenceWriter<GridView> >
+    public VTKSequenceWriterBase<GridView>
   {
-    typedef VTKWriter<GridView> BaseType;
-    typedef VTKSequenceWriter<GridView> ThisType;
-    friend class VTKSequenceWriterBase<VTKSequenceWriter<GridView> >;
   public:
-    using VTKSequenceWriterBase<VTKSequenceWriter<GridView> >::write;
-    using BaseType::gridView_;
-    using BaseType::getParallelPieceName;
     explicit VTKSequenceWriter ( const GridView &gridView,
                                  const std::string& name,
                                  const std::string& path,
                                  const std::string& extendpath,
                                  VTK::DataMode dm = VTK::conforming )
-      : BaseType(gridView,dm),
-        VTKSequenceWriterBase<VTKSequenceWriter<GridView> >(name,path,extendpath)
+      : VTKSequenceWriterBase<GridView>(std::make_shared<VTKWriter<GridView> >(gridView,dm),
+                                        name,path,extendpath,
+                                        gridView.comm().rank(), gridView.comm().size())
     {}
+
     ~VTKSequenceWriter() {}
-  private:
-    std::string getParallelHeaderName(const std::string& name,
-                                      const std::string& path) const
-    {
-      return VTKWriter<GridView>::getParallelHeaderName(name,path,this->gridView_.comm().size());
-    }
   };
 
   /**
@@ -58,23 +47,17 @@ namespace Dune {
    */
   template< class GridView >
   class SubsamplingVTKSequenceWriter :
-    public SubsamplingVTKWriter<GridView>,
-    public VTKSequenceWriterBase<SubsamplingVTKSequenceWriter<GridView> >
+    public VTKSequenceWriterBase<GridView>
   {
-    typedef SubsamplingVTKWriter<GridView> BaseType;
-    typedef SubsamplingVTKSequenceWriter<GridView> ThisType;
-    friend class VTKSequenceWriterBase<SubsamplingVTKSequenceWriter<GridView> >;
   public:
-    using VTKSequenceWriterBase<SubsamplingVTKSequenceWriter<GridView> >::write;
-    using BaseType::gridView_;
-    using BaseType::getParallelPieceName;
     explicit SubsamplingVTKSequenceWriter ( const GridView &gridView,
                                             unsigned int level_,
                                             const std::string& name,
                                             const std::string& path,
                                             const std::string& extendpath)
-      : BaseType(gridView,level_),
-        VTKSequenceWriterBase<SubsamplingVTKSequenceWriter<GridView> >(name,path,extendpath)
+      : VTKSequenceWriterBase<GridView>(std::make_shared<SubsamplingVTKWriter<GridView> >(gridView,level_),
+                                        name,path,extendpath,
+                                        gridView.comm().rank(), gridView.comm().size())
     {}
     ~SubsamplingVTKSequenceWriter() {}
 
