@@ -106,6 +106,12 @@ int main(int argc, char **argv)
 {
   try
   {
+    const Dune::MPIHelper &mpiHelper = Dune::MPIHelper::instance(argc, argv);
+
+    if(mpiHelper.rank() == 0)
+      std::cout << "subsamplingvtktest: MPI_Comm_size == " << mpiHelper.size()
+                << std::endl;
+
     {
       Dune::array<int,2> n = { { 5, 5 } };
       Dune::FieldVector<double,2> h = { 1.0, 2.0 };
