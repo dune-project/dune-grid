@@ -19,6 +19,9 @@
 #include<memory>
 #include<vector>
 
+#include <dune/common/fvector.hh>
+#include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/yaspgrid.hh>
 #include<dune/grid/utility/multiindex.hh>
 
 namespace Dune
