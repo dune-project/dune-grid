@@ -90,10 +90,8 @@ mark_as_advanced(GRAPE_INCLUDE_DIR GRAPE_LIBRARY _GRAPE_LIB_FUNCTIONAL _GRAPE_HE
 if(GRAPE_FOUND)
   set(HAVE_GRAPE TRUE
       CACHE BOOL "Whether Grape was found")
-  # add all grape related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_grape_flags
-  foreach(dir ${GRAPE_INCLUDE_DIR})
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-  endforeach()
-  set_property(GLOBAL APPEND PROPERTY
-    ALL_PKG_LIBS "${GRAPE_LIBRARIES}")
+  # register all grape related flags
+  dune_register_package_flags(COMPILE_DEFINITIONS "ENABLE_GRAPE=1"
+                              INCLUDE_DIRS "${GRAPE_INCLUDE_DIR}"
+                              LIBRARIES "${GRAPE_LIBRARIES}")
 endif()

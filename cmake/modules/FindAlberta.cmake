@@ -116,10 +116,3 @@ if(ALBERTA_FOUND)
     HEADERS dune/grid/albertagrid.hh dune/grid/albertagrid/dgfparser.hh)
   _dune_set_alberta(TRUE)
 endif(ALBERTA_FOUND)
-
-#add all alberta grid related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_alberta_flags
-if(ALBERTA_FOUND)
-  foreach(dir ${ALBERTA_INCLUDES})
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-  endforeach()
-endif()
