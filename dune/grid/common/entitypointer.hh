@@ -349,7 +349,6 @@ namespace Dune
     //@{
     //===========================================================
 
-
     /** \brief Copy Constructor from an Iterator implementation.
 
        You can supply LeafIterator, LevelIterator, HierarchicIterator
@@ -365,6 +364,186 @@ namespace Dune
       return realIterator.equals( rhs.realIterator );
     }
     //@}
+
+    //===========================================================
+    /** @name Methods and Types of the Entity interface. These are here just for transition purpose
+     */
+    //@{
+    //===========================================================
+
+    /** \brief The geometry type of this entity */
+    typedef typename GridImp::template Codim<codimension>::Geometry Geometry;
+
+    //! \brief The corresponding entity seed (for storage of entities)
+    typedef typename GridImp::template Codim<codimension>::EntitySeed EntitySeed;
+
+    /** \brief The geometry type of this entity when the geometry is expressed
+       embedded in the father element.
+
+       This differs from Geometry in particular when dim != dimworld,
+       but even when dim == dimworld the implementation may choose to use
+       a different type here.
+     */
+    typedef typename GridImp::template Codim<codimension>::LocalGeometry LocalGeometry;
+
+    /** \brief EntityPointer types of the different codimensions */
+    template <int cd>
+    struct Codim
+    {
+      typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
+      typedef typename GridImp::template Codim<cd>::Entity Entity;
+    };
+
+    /** \brief The codim==0 EntityPointer type */
+    // typedef typename Entity::EntityPointer EntityPointer;
+
+    /** \brief The HierarchicIterator type*/
+    typedef typename GridImp::HierarchicIterator HierarchicIterator;
+
+    enum {
+      //! Know the grid's dimension
+      dimension=Entity::dimension
+    };
+    enum {
+      /** \brief Know dimension of the entity */
+      mydimension=Entity::dimension
+    };
+
+    //! Partition type of this entity
+    PartitionType partitionType () const { return realIterator.dereference().partitionType(); }
+
+    /** \brief obtain geometric realization of the entity
+     *
+     *  Each entity provides an object of type
+     *  Dune::Geometry< dimension-codimension, dimensionworld, ... > that
+     *  represents the map from a reference element to world coordinates.
+     *
+     *  \note Previously, the geometry was encapsulated in the entity object and
+     *        a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
+     */
+    Geometry geometry () const { return realIterator.dereference().geometry(); }
+
+    /** \brief Return the name of the reference element. The type can
+       be used to access the Dune::ReferenceElement.
+     */
+    GeometryType type () const { return realIterator.dereference().type(); }
+
+    /** \brief Return the entity seed which contains sufficient information
+     *  to generate the entity again and uses as little memory as possible
+     */
+    EntitySeed seed () const { return realIterator.dereference().seed(); }
+
+#define CHECK_CODIM0 int ecodim = codimension, typename std::enable_if<ecodim == 0,int>::type = 0
+#define ONLY_CODIM0 template<int ecodim = codimension, typename std::enable_if<ecodim == 0,int>::type = 0>
+
+    template< int codim, CHECK_CODIM0 >
+    typename Codim<codim>::Entity
+    subEntity ( int i ) const
+    {
+      return realIterator.dereference().template subEntity< codim >(i);
+    }
+
+    /**\brief Return true if entity has a father entity which can be accessed
+       using the father() method.
+     */
+    ONLY_CODIM0
+    bool hasFather () const
+    {
+      return realIterator.dereference().hasFather();
+    }
+
+    //! Returns true if the entity is contained in the leaf grid
+    ONLY_CODIM0
+    bool isLeaf () const
+    {
+      return realIterator.dereference().isLeaf();
+    }
+
+    /** @brief Returns true if element is of regular type in red/green type refinement.
+       In bisection or hanging node refinement this is always true.
+     */
+    ONLY_CODIM0
+    bool isRegular() const { return realIterator.dereference().isRegular(); }
+
+    /** \brief Provides information how this element has been subdivided from its
+     *         father element.
+     *
+     *  The returned LocalGeometry is a model of
+     *  Dune::Geometry<dimension,dimension,...>, mapping the reference element of
+     *  the given entity to the reference element of its father.
+     *
+     *  This information is sufficient to interpolate all degrees of freedom in
+     *  the conforming case.
+     *  Nonconforming may require access to neighbors of the father and
+     *  calculations with local coordinates.
+     *  The on-the-fly case is somewhat inefficient since degrees of freedom may be
+     *  visited several times.
+     *  If we store interpolation matrices, this is tolerable.
+     *  We assume that on-the-fly implementation of interpolation is only done for
+     *  simple discretizations.
+     *
+     *  \note For ghost entities, this method is not guaranteed to be implemented.
+     *
+     *  \note Previously, the geometry was encapsulated in the entity object and
+     *        a const reference was returned.
+     *
+     *  \note The returned geometry object is guaranteed to remain valid until the
+     *        grid is modified (or deleted).
+     */
+    ONLY_CODIM0
+    LocalGeometry geometryInFather () const { return realIterator.dereference().geometryInFather(); }
+
+    /**\brief Inter-level access to elements that resulted from (recursive)
+       subdivision of this element.
+
+       \param[in] maxlevel Iterator does not stop at elements with level greater than maxlevel.
+       \return Iterator to the first son (level is not greater than maxlevel)
+
+       \note If the partitionType of the Entity is GhostEntity,
+           it is not guaranteed that this method is working
+           or implemented in general.
+           For some grids it might be available, though.
+     */
+    ONLY_CODIM0
+    HierarchicIterator hbegin (int maxLevel) const
+    {
+      return realIterator.dereference().hbegin(maxLevel);
+    }
+
+    /** \brief Returns iterator to one past the last son element
+
+       \note If the partitionType of the Entity is GhostEntity,
+             it is not guaranteed that this method is working
+             or implemented in general.
+             For some grids it might be available, though.
+     */
+    ONLY_CODIM0
+    HierarchicIterator hend (int maxLevel) const
+    {
+      return realIterator.dereference().hend(maxLevel);
+    }
+
+    /**\brief Returns true, if the entity has been created during the last call to adapt()
+     */
+    ONLY_CODIM0
+    bool isNew () const { return realIterator.dereference().isNew(); }
+
+    /**\brief Returns true, if entity might disappear during the next call to adapt().
+     * If the method returns false, the entity is guaranteed to still be present after
+     * adaptation.
+     */
+    ONLY_CODIM0
+    bool mightVanish () const { return realIterator.dereference().mightVanish(); }
+
+    /**\brief Returns true, if entity has intersections with boundary
+     */
+    ONLY_CODIM0
+    bool hasBoundaryIntersections () const { return realIterator.dereference().hasBoundaryIntersections(); }
+    //@}
+
   };
 
 
