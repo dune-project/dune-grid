@@ -12,7 +12,6 @@
 #include <dune/common/std/memory.hh>
 
 #include <dune/grid/common/exceptions.hh>
-#include <dune/grid/common/rangegenerators.hh>
 #include <dune/grid/utility/hierarchicsearch.hh>
 #include <dune/grid/yaspgrid.hh>
 
@@ -51,10 +50,14 @@ void check ( GridView gridView )
   typedef Dune::HierarchicSearch< Grid, IndexSet > HierarchicSearch;
   HierarchicSearch hsearch( gridView.grid(), gridView.indexSet() );
 
-  using Dune::elements;
-  for( const auto &element : elements( gridView ) )
+  typedef typename GridView::template Codim< 0 >::Iterator Iterator;
+  typedef typename Iterator::Entity Entity;
+
+  const Iterator end = gridView.template end< 0 >();
+  for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
   {
-    if( element != hsearch.findEntity( element.geometry().center() ) )
+    const Entity &entity = *it;
+    if( entity != hsearch.findEntity( entity.geometry().center() ) )
       DUNE_THROW( Dune::GridError, "Could not retrieve element in hierarchic search" );
   }
 }
