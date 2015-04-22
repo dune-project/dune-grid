@@ -749,12 +749,10 @@ namespace Dune {
     //! assignment operator
     SIntersection& operator = (const SIntersection& other)
     {
-      /* We can't assign the grid */
-      assert(grid == other.grid);
-
       /* Assign data from other */
       self = other.self;
       ne = other.ne;
+      grid = other.grid;
       partition = other.partition;
       zred = other.zred;
       count = other.count;
