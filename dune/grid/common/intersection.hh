@@ -414,11 +414,13 @@ namespace Dune
       return this->real.outerNormal(local);
     }
 
-    /*! @brief return outer normal scaled with the integration element
-          @copydoc Dune::Intersection::outerNormal
+    /*! @brief return unit outer normal scaled with the integration element
+
        The normal is scaled with the integration element of the intersection. This
           method is redundant but it may be more efficent to use this function
           rather than computing the integration element via geometry().
+
+       The returned vector may depend on local position within the intersection.
      */
     GlobalCoordinate integrationOuterNormal (const LocalCoordinate& local) const
     {
