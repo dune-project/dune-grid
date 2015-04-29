@@ -158,7 +158,7 @@ namespace Dune {
    * \ref EquidistantOffsetCoordinates, and \ref Dune::TensorProductCoordinates.
    *
    * \tparam dim The dimension of the grid and its surrounding world
-   * \tparam Coordinates The coordinte mode of the grid.
+   * \tparam Coordinates The coordinate mode of the grid.
    */
   template<int dim, class Coordinates = EquidistantCoordinates<double, dim> >
   class YaspGrid
