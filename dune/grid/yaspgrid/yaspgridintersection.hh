@@ -55,23 +55,29 @@ namespace Dune {
       _outside.transformingsubiterator().move(dist);
     }
 
-    /*! return true if neighbor ist outside the domain. Still the neighbor might
-       exist in case of periodic boundary conditions, i.e. true is returned
-       if the neighbor is outside the periodic unit cell
+    /*! return true if we are on the boundary of the domain
+        unless we are periodic in that direction
      */
     bool boundary () const
     {
-      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 < 0
-              ||
-              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 > _inside.gridlevel()->mg->levelSize(_inside.gridlevel()->level(),_count/2)- 1) ;
+      // Coordinate of intersection in its direction
+      int coord = _inside.transformingsubiterator().coord(_dir) + _face;
+      if (_inside.gridlevel()->mg->isPeriodic(_dir))
+        return false;
+      else
+        return coord == 0
+               ||
+               coord == _inside.gridlevel()->mg->levelSize(_inside.gridlevel()->level(),_dir);
     }
 
     //! return true if neighbor across intersection exists in this processor
     bool neighbor () const
     {
-      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 >= _inside.gridlevel()->overlap[0].dataBegin()->min(_count/2)
-              &&
-              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 <= _inside.gridlevel()->overlap[0].dataBegin()->max(_count/2));
+      // Coordinate of intersection in its direction
+      int coord = _inside.transformingsubiterator().coord(_dir) + _face;
+      return coord > _inside.gridlevel()->overlap[0].dataBegin()->min(_dir)
+             &&
+             coord <= _inside.gridlevel()->overlap[0].dataBegin()->max(_dir);
     }
 
     //! Yasp is always conform
