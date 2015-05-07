@@ -660,9 +660,6 @@ namespace Dune {
     //! globally unique, persistent index
     PersistentIndexType persistentIndex () const
     {
-      // get size of global grid
-      const iTupel& size =  _g->mg->levelSize(_g->level());
-
       // encode codim
       PersistentIndexType id(_it.shift().to_ulong());
 
