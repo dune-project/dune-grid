@@ -32,6 +32,28 @@ static double factorEpsilon = 1.e8;
 class CheckError : public Dune::Exception {};
 
 
+
+namespace Dune {
+
+  // This flag can be used to disable the BoundarySegmentIndexCheck
+  // Disabling this flag is important for meta grids like SubGrid and
+  // MultiDomainGrid that cannot guarantee the usual boundary segment
+  // index semantics
+  //
+  // By default, this test is on.
+  template< class Grid >
+  struct EnableBoundarySegmentIndexCheck
+    : public std::true_type
+  {};
+
+  template< class Grid >
+  struct EnableBoundarySegmentIndexCheck< const Grid >
+    : public EnableBoundarySegmentIndexCheck<Grid>
+  {};
+
+}
+
+
 // check
 // Entity::geometry()[c] == Entity::entity<dim>.geometry()[0]
 // for codim=cd
@@ -1110,12 +1132,17 @@ void gridcheck (Grid &g)
     }
   }
 
-  if( EnableLevelIntersectionIteratorCheck< Grid >::v )
-    checkBoundarySegmentIndex( g.levelGridView( 0 ) );
-  else if( g.maxLevel() == 0 )
-    checkBoundarySegmentIndex( g.leafGridView() );
+  if(Dune::EnableBoundarySegmentIndexCheck<Grid>::value)
+    {
+      if( EnableLevelIntersectionIteratorCheck< Grid >::v )
+        checkBoundarySegmentIndex( g.levelGridView( 0 ) );
+      else if( g.maxLevel() == 0 )
+        checkBoundarySegmentIndex( g.leafGridView() );
+      else
+        std::cout << "Warning: Skipping boundary segment index check (missing level intersection iterator)." << std::endl;
+    }
   else
-    std::cout << "Warning: Skipping boundary segment index check (missing level intersection iterator)." << std::endl;
+    std::cout << "Warning: Skipping boundary segment index check because it has been explicitly disabled." << std::endl;
 
   // check for range-based for iteration and correct entity / intersection lifetime
   checkEntityLifetime(g.levelGridView(g.maxLevel()));
