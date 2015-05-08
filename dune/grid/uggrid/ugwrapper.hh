@@ -749,14 +749,14 @@ namespace Dune {
     }
 
     //! Gets the leaf index of a UG sidevector
-    static unsigned int& leafIndex(Vector* theVector) {
+    static UG::UINT& leafIndex(Vector* theVector) {
       // theVector->skip is actually something other than an index.
       // We use it anyways.
       return theVector->skip;
     }
 
     //! Gets the leaf index of a UG sidevector
-    static const unsigned int& leafIndex(const Vector* theVector) {
+    static const UG::UINT& leafIndex(const Vector* theVector) {
       // theVector->skip is actually something other than an index.
       // We use it anyways.
       return theVector->skip;
