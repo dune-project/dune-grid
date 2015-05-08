@@ -1071,7 +1071,7 @@ namespace Dune {
 
     static void* CreateBoundarySegment(const char *name, int left, int right,
                                        int index, int res,
-                                       int *point,
+                                       UG::INT *point,
                                        const double *alpha, const double *beta,
                                        UG_NAMESPACE ::BndSegFuncPtr boundarySegmentFunction,
                                        void *userData) {
@@ -1091,7 +1091,7 @@ namespace Dune {
     static void* CreateLinearSegment(const char *name,
                                      int left, int right,
                                      int index, int numVertices,
-                                     const int* cornerIndices,
+                                     const UG::INT* cornerIndices,
                                      double cornerCoordinates[2][ UG_DIM ])
     {
       return UG_NAMESPACE ::CreateLinearSegment(name,            // internal name of the boundary segment

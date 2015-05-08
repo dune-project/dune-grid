@@ -699,9 +699,9 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
     SLList<Face> list;
     int levelNeighborSide = numberInNeighbor(center_, levelNeighbor);
 
-    int Sons_of_Side = 0;
+    UG::INT Sons_of_Side = 0;
     typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
-    int SonSides[UG_NS<dim>::MAX_SONS];
+    UG::INT SonSides[UG_NS<dim>::MAX_SONS];
 
     int rv = Get_Sons_of_ElementSide(levelNeighbor,
                                      levelNeighborSide,
@@ -729,9 +729,9 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
 
       const typename UG_NS<dim>::Element* theElement = f->first;
 
-      int Sons_of_Side = 0;
+      UG::INT Sons_of_Side = 0;
       typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
-      int SonSides[UG_NS<dim>::MAX_SONS];
+      UG::INT SonSides[UG_NS<dim>::MAX_SONS];
 
       if (!UG_NS<dim>::isLeaf(theElement)) {
 
