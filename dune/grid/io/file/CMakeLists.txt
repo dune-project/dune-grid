@@ -11,6 +11,7 @@ set(HEADERS
   gmshreader.hh
   gmshwriter.hh
   gnuplot.hh
+  printgrid.hh
   starcdreader.hh
   vtk.hh)
 
