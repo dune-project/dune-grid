@@ -528,7 +528,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
   //   Change the input face number from Dune numbering to UG numbering
   // //////////////////////////////////////////////////////////////////////
 
-  elementSide = UGGridRenumberer<dim>::facesDUNEtoUG(elementSide, e->type());
+  elementSide = UGGridRenumberer<dim>::facesDUNEtoUG(elementSide, e.type());
 
   // ///////////////
   //   init list
