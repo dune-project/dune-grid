@@ -1,3 +1,5 @@
+add_subdirectory(yasp)
+
 dune_add_test(SOURCES test-geogrid.cc
               COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
                                   CACHECOORDFUNCTION=0
@@ -11,9 +13,6 @@ dune_add_test(SOURCES test-identitygrid.cc)
 dune_add_test(SOURCES test-oned.cc)
 
 dune_add_test(SOURCES test-mcmg-geogrid.cc)
-
-dune_add_test(SOURCES test-yaspgrid.cc
-              COMPILE_DEFINITIONS GRIDDIM=2 WORLDDIM=2)
 
 dune_add_test(SOURCES testiteratorranges.cc)
 
