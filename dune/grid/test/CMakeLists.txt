@@ -1,3 +1,5 @@
+add_subdirectory(yasp)
+
 dune_add_test(SOURCES geometrygrid-coordfunction-copyconstructor.cc)
 
 dune_add_test(NAME test-geogrid-yaspgrid
@@ -27,9 +29,6 @@ dune_add_test(SOURCES test-oned.cc
               LINK_LIBRARIES dunegrid)
 
 dune_add_test(SOURCES test-mcmg-geogrid.cc)
-
-dune_add_test(SOURCES test-yaspgrid.cc
-              COMPILE_DEFINITIONS GRIDDIM=2 WORLDDIM=2)
 
 dune_add_test(SOURCES testiteratorranges.cc)
 
