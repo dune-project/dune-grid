@@ -969,18 +969,22 @@ namespace Dune {
       for (DAI i=_begin; i!=_end; ++i)
       {
         // iterate over the intersections in the deque and set the offset
+        bool empty = true;
         for (typename std::deque<Intersection>::iterator it = i->begin(); it != i->end(); ++it)
-          //it->indexOffset = offset;
         {
           it->yg.setBegin(&(it->grid));
           it->yg.finalize(&(it->grid)+1, offset);
+          empty = false;
         }
 
         // update the offset by taking the totalsupersize of the first YGridComponent.
-        int add = 1;
-        for (int j=0; j<dim; j++)
-          add *= i->begin()->grid.supersize(j);
-        offset += add;
+        if (!empty)
+        {
+          int add = 1;
+          for (int j=0; j<dim; j++)
+            add *= i->begin()->grid.supersize(j);
+          offset += add;
+        }
       }
     }
 
