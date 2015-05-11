@@ -1,3 +1,7 @@
+
+# Add subdirectories
+add_subdirectory(yasp EXCLUDE_FROM_ALL)
+
 if(ALBERTA_FOUND)
   set(ALBERTA_PROGRAMS
     test-alberta
@@ -42,7 +46,7 @@ set(CACHECOORDFUNCTION 0)
 
 # tests where program to build and program to run are equal
 set(TESTS
-  test-geogrid test-identitygrid test-oned test-sgrid test-yaspgrid
+  test-geogrid test-identitygrid test-oned test-sgrid
   ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
   ${DGFALUGRID_UG_PROGRAMS} test-mcmg-geogrid
   testiteratorranges test-hierarchicsearch)
@@ -55,10 +59,8 @@ add_executable(test-identitygrid EXCLUDE_FROM_ALL test-identitygrid.cc)
 add_executable(test-oned EXCLUDE_FROM_ALL test-oned.cc)
 add_executable(test-mcmg-geogrid EXCLUDE_FROM_ALL test-mcmg-geogrid.cc)
 add_executable(test-sgrid EXCLUDE_FROM_ALL test-sgrid.cc)
-add_executable(test-yaspgrid EXCLUDE_FROM_ALL test-yaspgrid.cc)
-add_dune_mpi_flags(test-yaspgrid)
 
-set_property(TARGET test-sgrid test-oned test-yaspgrid test-geogrid APPEND
+set_property(TARGET test-sgrid test-oned test-geogrid APPEND
   PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
 
 set_property(TARGET test-geogrid APPEND PROPERTY COMPILE_DEFINITIONS
@@ -128,6 +130,7 @@ foreach(_exe ${TESTS})
   add_test(${_exe} ${_exe})
 endforeach(_exe ${TESTS})
 
+# Create test target
 # We do not want want to build the tests during make all,
 # but just build them on demand
 add_directory_test_target(_test_target)
