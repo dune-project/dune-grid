@@ -89,8 +89,7 @@ namespace Dune
   inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
   AlbertaGridIntersectionBase< Grid >::centerIntegrationOuterNormal () const
   {
-    const EntityPointer ep = inside();
-    const typename Entity::Geometry &geoInside = ep->geometry();
+    typename Entity::Geometry geoInside = inside().geometry();
 
     const int face = indexInInside();
     const ReferenceElement< ctype, dimension > &refSimplex = ReferenceElements< ctype, dimension >::simplex();
