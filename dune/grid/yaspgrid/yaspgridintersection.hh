@@ -224,16 +224,31 @@ namespace Dune {
       shift[_dir] = false;
 
       Dune::FieldVector<ctype,dimworld> ll, ur;
-
       for (int i=0; i<dimworld; i++)
       {
         int coord = _inside.transformingsubiterator().coord(i);
+
         if ((i == _dir) and (_face))
           coord++;
+
         ll[i] = _inside.transformingsubiterator().coordCont()->coordinate(i,coord);
         if (i != _dir)
           coord++;
         ur[i] = _inside.transformingsubiterator().coordCont()->coordinate(i,coord);
+
+        // If on periodic overlap, transform coordinates by domain size
+        if (_inside.gridlevel()->mg->isPeriodic(i)) {
+          int coord = _inside.transformingsubiterator().coord(i);
+          if (coord < 0) {
+            auto size = _inside.gridlevel()->mg->domainSize()[i];
+            ll[i] += size;
+            ur[i] += size;
+          } else if (coord + 1 > _inside.gridlevel()->mg->levelSize(_inside.gridlevel()->level(),i)) {
+            auto size = _inside.gridlevel()->mg->domainSize()[i];
+            ll[i] -= size;
+            ur[i] -= size;
+          }
+        }
       }
 
       GeometryImpl _is_global(ll,ur,shift);
