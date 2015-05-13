@@ -30,8 +30,6 @@ namespace Dune
     template< int dim >
     class HierarchyDofNumbering;
 
-
-
     // MeshPointer
     // -----------
 
@@ -169,19 +167,16 @@ namespace Dune
 
       friend class MeshPointer< dim >;
 
-      template< int, typename, bool >
-      friend class AlbertaGridTreeIterator;
-
     public:
       typedef Alberta::MeshPointer< dim > MeshPointer;
       typedef Alberta::ElementInfo< dim > ElementInfo;
-
-    private:
 
       MacroIterator ()
         : mesh_(),
           index_( -1 )
       {}
+
+    private:
 
       explicit MacroIterator ( const MeshPointer &mesh, bool end = false )
         : mesh_( mesh ),
