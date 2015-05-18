@@ -26,6 +26,9 @@ namespace Dune
     typedef typename Base::Entity Entity;
     typedef typename Base::MarkerVector MarkerVector;
 
+    AlbertaGridLeafIterator ()
+    {}
+
     //! Constructor making end iterator
     AlbertaGridLeafIterator ( const GridImp &grid, int level )
       : Base( grid, level )
@@ -56,6 +59,9 @@ namespace Dune
   public:
     typedef typename Base::Entity Entity;
     typedef typename Base::MarkerVector MarkerVector;
+
+     AlbertaGridLeafIterator ()
+    {}
 
     //! Constructor making end iterator
     AlbertaGridLeafIterator ( const GridImp &grid, int level )

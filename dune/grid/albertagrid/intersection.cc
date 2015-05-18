@@ -3,6 +3,7 @@
 #ifndef DUNE_ALBERTA_INTERSECTION_CC
 #define DUNE_ALBERTA_INTERSECTION_CC
 
+#include <dune/common/nullptr.hh>
 #include <dune/grid/albertagrid/intersection.hh>
 
 namespace Dune
@@ -10,6 +11,14 @@ namespace Dune
 
   // AlbertaGridIntersectionBase
   // ---------------------------
+
+  template< class Grid >
+  inline AlbertaGridIntersectionBase< Grid >
+  ::AlbertaGridIntersectionBase ()
+    : grid_( nullptr ),
+      elementInfo_(),
+      oppVertex_( -1 ) // mark invalid intersection
+  {}
 
   template< class Grid >
   inline AlbertaGridIntersectionBase< Grid >
@@ -21,11 +30,11 @@ namespace Dune
 
 
   template< class Grid >
-  inline typename AlbertaGridIntersectionBase< Grid >::EntityPointer
+  inline typename Grid::template Codim< 0 >::Entity
   AlbertaGridIntersectionBase< Grid >::inside () const
   {
-    typedef AlbertaGridEntityPointer< 0, Grid > EntityPointerImp;
-    return EntityPointerImp( grid(), elementInfo(), 0 );
+    typedef AlbertaGridEntity< 0, Grid::dimension, Grid > EntityImp;
+    return EntityImp( grid(), elementInfo(), 0 );
   }
 
 
@@ -80,8 +89,7 @@ namespace Dune
   inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
   AlbertaGridIntersectionBase< Grid >::centerIntegrationOuterNormal () const
   {
-    const EntityPointer ep = inside();
-    const typename Entity::Geometry &geoInside = ep->geometry();
+    const typename Entity::Geometry geoInside = inside().geometry();
 
     const int face = indexInInside();
     const ReferenceElement< ctype, dimension > &refSimplex = ReferenceElements< ctype, dimension >::simplex();
@@ -108,6 +116,7 @@ namespace Dune
     return n;
   }
 
+#if defined GRIDDIM && GRIDDIM > 1
   template<>
   inline AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::NormalVector
   AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::centerIntegrationOuterNormal () const
@@ -120,6 +129,7 @@ namespace Dune
     n[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
     return n;
   }
+#endif // defined GRIDDIM && GRIDDIM > 1
 
   template<>
   inline AlbertaGridIntersectionBase< const AlbertaGrid< 3, 3 > >::NormalVector
@@ -384,10 +394,10 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline typename AlbertaGridLeafIntersection< GridImp >::EntityPointer
+  inline typename GridImp::template Codim< 0 >::Entity
   AlbertaGridLeafIntersection< GridImp >::outside () const
   {
-    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
+    typedef AlbertaGridEntity< 0, GridImp::dimension, GridImp > EntityImp;
 
     if( !neighborInfo_ )
     {
@@ -398,7 +408,7 @@ namespace Dune
 
     assert( !neighborInfo_ == false );
     assert( neighborInfo_.el() != NULL );
-    return EntityPointerImp( grid(), neighborInfo_, 0 );
+    return EntityImp( grid(), neighborInfo_, 0 );
   }
 
   template< class GridImp >

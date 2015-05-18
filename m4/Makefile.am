@@ -1,5 +1,3 @@
-# $Id: Makefile.am 5184 2008-04-27 17:37:27Z christi $
-
 ALLM4S =					\
 	alberta.m4				\
 	alugrid.m4				\

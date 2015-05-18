@@ -3,7 +3,9 @@
 #
 # Provides the following functions:
 #
-# add_dune_superlu_flags(target1 target2 ...)
+# add_dune_alberta_flags(target1 [target2 ...]
+#                        [OBJECT|SOURCE_ONLY] [USE_GENERIC]
+#                        [GRIDDIM <griddim>] [WORLDDIM] <worlddim>])
 #
 # adds Alberta flags to the targets for compilation and linking
 #
@@ -28,7 +30,7 @@ macro(add_dune_alberta_flags)
     else(NOT ADD_ALBERTA_WORLDDIM)
       list(FIND ALBERTA_WORLD_DIMS ${ADD_ALBERTA_WORLDDIM} _index)
       if(_index EQUAL -1)
-        message(FATAL_ERROR "There is no alberta library for dimension ${ADD_ALBERTA_GRIDDIM}.")
+        message(FATAL_ERROR "There is no alberta library for dimension ${ADD_ALBERTA_WORLDDIM}.")
       endif(_index EQUAL -1)
     endif(NOT ADD_ALBERTA_WORLDDIM)
 
@@ -37,32 +39,22 @@ macro(add_dune_alberta_flags)
       set(_source_only SOURCE_ONLY)
     else()
       set(_prefix TARGET)
-      if(ADD_ALBERTA_OBJECT)
-        # This a dune object libraries. Therefore we need to set the options
-        # on the source files directly
-        set(_all_sources "")
-        foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
-          get_property(_sources GLOBAL PROPERTY DUNE_LIB_${_target}_SOURCES)
-          list(APPEND _all_sources ${_sources})
-        endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
-        set(ADD_ALBERTA_UNPARSED_ARGUMENTS ${_all_sources}) #override unparsed arguments
-      else()
+      if(NOT ADD_ALBERTA_OBJECT)
         # link to ALBERTA libraries
         foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
           target_link_libraries(${_target}
             dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d
-            ${ALBERTA_${ADD_ALBERTA_GRIDDIM}D_LIB}
-            ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
+            ${ALBERTA_${ADD_ALBERTA_WORLDDIM}D_LIB}
+            dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
         endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
-      endif(ADD_ALBERTA_OBJECT)
+      endif()
     endif(ADD_ALBERTA_SOURCE_ONLY)
 
     include_directories(${ALBERTA_INCLUDES})
-    replace_properties(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS}
-      PROPERTY
-      COMPILE_DEFINITIONS ENABLE_ALBERTA ENABLE_ALBERTA
-      ALBERTA_DIM=.* ALBERTA_DIM=${ADD_ALBERTA_GRIDDIM}
-      WORLDDIM=.* WORLDDIM=${ADD_ALBERTA_WORLDDIM})
+    set_property(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS}
+      APPEND PROPERTY
+      COMPILE_DEFINITIONS ENABLE_ALBERTA
+      ALBERTA_DIM=${ADD_ALBERTA_WORLDDIM})
     if(ADD_ALBERTA_USE_GENERIC)
       set_property(${_prefix} ${ADD_ALBERTA_UNPARSED_ARGUMENTS}
         APPEND PROPERTY

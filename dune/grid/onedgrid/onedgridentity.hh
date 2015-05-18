@@ -183,8 +183,17 @@ namespace Dune {
       : target_(OneDGridNullIteratorFactory<0>::null())
     {}
 
+    explicit OneDGridEntity(OneDEntityImp<0>* target)
+      : target_(target)
+    {}
+
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
     typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
+
+    bool equals(const OneDGridEntity& other) const
+    {
+      return target_ == other.target_;
+    }
 
     //! level of this element
     int level () const {return target_->level_;}
@@ -202,18 +211,14 @@ namespace Dune {
     GeometryType type () const {return GeometryType(0);}
 
     //! geometry of this entity
-    Geometry geometry () const { return Geometry( geo_ ); }
+    Geometry geometry () const { return Geometry(GeometryImpl(target_->pos_)); }
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
 
     void setToTarget(OneDEntityImp<0>* target) {
       target_ = target;
-      geo_.target_ = target;
     }
-
-    //! the current geometry
-    GeometryImpl geo_;
 
     OneDEntityImp<0>* target_;
 
@@ -263,11 +268,27 @@ namespace Dune {
     /** \brief The type of OneDGrid Entity seeds */
     typedef typename GridImp::Traits::template Codim<0>::EntitySeed EntitySeed;
 
+    template<int codim>
+    struct Codim
+    {
+      typedef typename GridImp::Traits::template Codim<codim>::Entity Entity;
+    };
+
+    typedef typename GridImp::Traits::template Codim<0>::Entity Entity;
+
     //! Default Constructor
     OneDGridEntity ()
       : target_( OneDGridNullIteratorFactory<1>::null() )
     {}
 
+    explicit OneDGridEntity (OneDEntityImp<1>* target)
+      : target_( target )
+    {}
+
+    bool equals(const OneDGridEntity& other) const
+    {
+      return target_ == other.target_;
+    }
 
     //! Level of this element
     int level () const {return target_->level_;}
@@ -301,7 +322,7 @@ namespace Dune {
 
     /** \brief Return the number of subentities of codimension codim.
      */
-    unsigned int count (unsigned int codim) const
+    unsigned int subEntities (unsigned int codim) const
     {
       assert(codim==0 || codim==1);
       return (codim==0) ? 1 : 2;
@@ -334,21 +355,28 @@ namespace Dune {
              : target_->vertex_[i]->id_;
     }
 
-    /** \brief Provide access to sub entity i of given codimension. Entities
-     *  are numbered 0 ... count<cc>()-1
-     */
+    /** \brief Access to codim 0 subentities */
     template<int cc>
-    typename GridImp::template Codim<cc>::EntityPointer subEntity (int i) const
+    typename std::enable_if<
+      cc == 0,
+      typename Codim<0>::Entity
+      >::type
+    subEntity (int i) const
     {
-      if (cc==0) {
-        assert(i==0);
-        // The cast is correct when this if clause is executed
-        return OneDGridLevelIterator<cc,All_Partition,GridImp>( (OneDEntityImp<1-cc>*) this->target_);
-      } else if (cc==1) {
-        assert(i==0 || i==1);
-        // The cast is correct when this if clause is executed
-        return OneDGridLevelIterator<cc,All_Partition,GridImp>( (OneDEntityImp<1-cc>*) this->target_->vertex_[i]);
-      }
+      assert(i==0);
+      return typename Codim<0>::Entity(OneDGridEntity<0,dim,GridImp>(this->target_));
+    }
+
+    /** \brief Access to codim 1 subentities */
+    template<int cc>
+    typename std::enable_if<
+      cc == 1,
+      typename Codim<1>::Entity
+      >::type
+    subEntity (int i) const
+    {
+      assert(i==0 || i==1);
+      return typename Codim<1>::Entity(OneDGridEntity<1,dim,GridImp>(this->target_->vertex_[i]));
     }
 
     LeafIntersectionIterator ileafbegin () const {
@@ -375,8 +403,8 @@ namespace Dune {
 
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
-    OneDGridEntityPointer<0, GridImp> father () const {
-      return OneDGridEntityPointer<0,GridImp>(target_->father_);
+    Entity father () const {
+      return Entity(OneDGridEntity(target_->father_));
     }
     //! returns true if father entity exists
     bool hasFather () const

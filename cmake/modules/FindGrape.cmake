@@ -65,8 +65,12 @@ check_library_exists(gr grape "${GRAPE_LIBRARY_PATH}" _GRAPE_LIB_FUNCTIONAL)
 cmake_pop_check_state()
 
 if(_GRAPE_LIB_FUNCTIONAL)
-  set(GRAPE_INCLUDE_DIRS ${GRAPE_INCLUDE_DIR})
-  set(GRAPE_LIBRARIES ${GRAPE_LIBRARY} ${OPENGL_LIBRARIES} ${XEXT_LIB} dl m)
+  set(GRAPE_FOUND ${GRAPE_INCLUDE_DIR}
+      CACHE FILEPATH "Whether Grape was found")
+  set(GRAPE_INCLUDE_DIRS ${GRAPE_INCLUDE_DIR}
+      CACHE STRING "Compile flags used by DUNE when compiling Grape programs")
+  set(GRAPE_LIBRARIES ${GRAPE_LIBRARY} ${OPENGL_LIBRARIES} ${XEXT_LIB} dl m
+      CACHE STRING "Libraries used by DUNE when linking Grape programs")
 endif(_GRAPE_LIB_FUNCTIONAL)
 
 # behave like a CMake module is supposed to behave
@@ -81,12 +85,13 @@ find_package_handle_standard_args(
   _GRAPE_LIB_FUNCTIONAL
   _GRAPE_HEADER_USABLE
 )
-set(HAVE_GRAPE ${GRAPE_FOUND})
 mark_as_advanced(GRAPE_INCLUDE_DIR GRAPE_LIBRARY _GRAPE_LIB_FUNCTIONAL _GRAPE_HEADER_USABLE)
 
-#add all grape related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_grape_flags
 if(GRAPE_FOUND)
-  foreach(dir ${GRAPE_INCLUDE_DIR})
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-  endforeach()
+  set(HAVE_GRAPE TRUE
+      CACHE BOOL "Whether Grape was found")
+  # register all grape related flags
+  dune_register_package_flags(COMPILE_DEFINITIONS "ENABLE_GRAPE=1"
+                              INCLUDE_DIRS "${GRAPE_INCLUDE_DIR}"
+                              LIBRARIES "${GRAPE_LIBRARIES}")
 endif()

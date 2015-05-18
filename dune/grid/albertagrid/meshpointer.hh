@@ -30,8 +30,6 @@ namespace Dune
     template< int dim >
     class HierarchyDofNumbering;
 
-
-
     // MeshPointer
     // -----------
 
@@ -173,7 +171,13 @@ namespace Dune
       typedef Alberta::MeshPointer< dim > MeshPointer;
       typedef Alberta::ElementInfo< dim > ElementInfo;
 
+      MacroIterator ()
+        : mesh_(),
+          index_( -1 )
+      {}
+
     private:
+
       explicit MacroIterator ( const MeshPointer &mesh, bool end = false )
         : mesh_( mesh ),
           index_( end ? mesh.numMacroElements() : 0 )
@@ -338,11 +342,7 @@ namespace Dune
       release();
 
       Library< dimWorld >::boundaryCount = 0;
-#if DUNE_ALBERTA_VERSION >= 0x300
       mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, NULL, NULL );
-#else
-      mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, NULL );
-#endif
       return Library< dimWorld >::boundaryCount;
     }
 
@@ -392,7 +392,6 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline bool MeshPointer< dim >::coarsen ( typename FillFlags::Flags fillFlags )
     {
@@ -401,37 +400,12 @@ namespace Dune
         ALBERTA dof_compress( mesh_ );
       return coarsened;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
-#if DUNE_ALBERTA_VERSION <= 0x200
-    template< int dim >
-    inline bool MeshPointer< dim >::coarsen ( typename FillFlags::Flags fillFlags )
-    {
-      assert( fillFlags == FillFlags::nothing );
-      const bool coarsened = (ALBERTA coarsen( mesh_ ) == meshCoarsened);
-      if( coarsened )
-        ALBERTA dof_compress( mesh_ );
-      return coarsened;
-    }
-#endif // #if DUNE_ALBERTA_VERSION <= 0x200
-
-
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline bool MeshPointer< dim >::refine ( typename FillFlags::Flags fillFlags )
     {
       return (ALBERTA refine( mesh_, fillFlags ) == meshRefined);
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-#if DUNE_ALBERTA_VERSION <= 0x200
-    template< int dim >
-    inline bool MeshPointer< dim >::refine ( typename FillFlags::Flags fillFlags )
-    {
-      assert( fillFlags == FillFlags::nothing );
-      return (ALBERTA refine( mesh_ ) == meshRefined);
-    }
-#endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
     template< int dim >

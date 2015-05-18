@@ -22,17 +22,18 @@ namespace Dune {
    */
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class IdentityGridLevelIterator :
-    public Dune::IdentityGridEntityPointer <codim,GridImp>
+    public Dune::IdentityGridEntityPointer<codim,GridImp,typename GridImp::HostGridType::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator>
   {
+
+    typedef typename GridImp::HostGridType::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator HostGridLevelIterator;
+    typedef Dune::IdentityGridEntityPointer<codim,GridImp,HostGridLevelIterator> Base;
+
   public:
 
     //! Constructor
     explicit IdentityGridLevelIterator(const GridImp* identityGrid, int level)
-      : IdentityGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template lbegin<codim>(level)),
-        hostGridLevelIterator_(identityGrid->hostgrid_->template lbegin<codim>(level))
-    {
-      this->virtualEntity_.setToTarget(hostGridLevelIterator_);
-    }
+      : Base(identityGrid, identityGrid->hostgrid_->levelGridView(level).template begin<codim,pitype>())
+    {}
 
 
     /** \brief Constructor which create the end iterator
@@ -41,26 +42,14 @@ namespace Dune {
         \param level         grid level on which the iterator shall be created
      */
     explicit IdentityGridLevelIterator(const GridImp* identityGrid, int level, bool endDummy)
-      :
-        IdentityGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template lend<codim>(level)),
-        hostGridLevelIterator_(identityGrid->hostgrid_->template lend<codim>(level))
+      : Base(identityGrid, identityGrid->hostgrid_->levelGridView(level).template end<codim,pitype>())
     {}
 
 
     //! prefix increment
     void increment() {
-      ++hostGridLevelIterator_;
-      this->virtualEntity_.setToTarget(hostGridLevelIterator_);
+      ++this->hostEntityPointer_;
     }
-
-
-  private:
-
-    // LevelIterator to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::Traits::template Codim<codim>::LevelIterator HostGridLevelIterator;
-
-    //! \todo Please doc me !
-    HostGridLevelIterator hostGridLevelIterator_;
 
   };
 

@@ -199,7 +199,7 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline unsigned int ALU3dGridEntity<0,dim,GridImp> :: count (unsigned int codim) const
+  inline unsigned int ALU3dGridEntity<0,dim,GridImp> :: subEntities (unsigned int codim) const
   {
     return grid().referenceElement().size(codim);
   }

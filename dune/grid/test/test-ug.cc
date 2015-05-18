@@ -1,6 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id$
 
 #include <config.h>
 
@@ -15,10 +14,10 @@
 #include <dune/grid/uggrid.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
-#include "gridcheck.cc"
-#include "checkcommunicate.cc"
-#include "checkgeometryinfather.cc"
-#include "checkintersectionit.cc"
+#include "gridcheck.hh"
+#include "checkcommunicate.hh"
+#include "checkgeometryinfather.hh"
+#include "checkintersectionit.hh"
 
 #include <dune/common/parallel/mpihelper.hh>
 
@@ -287,9 +286,9 @@ int main (int argc , char **argv) try
   gridWithoutParametrization.globalRefine(1);
 
   typedef Dune::UGGrid<2>::Codim<0>::LevelIterator ElementIterator;
-  ElementIterator eIt    = gridWithParametrization.lbegin<0>(1);
-  ElementIterator eWoIt  = gridWithoutParametrization.lbegin<0>(1);
-  ElementIterator eEndIt = gridWithParametrization.lend<0>(1);
+  ElementIterator eIt    = gridWithParametrization.levelGridView(1).begin<0>();
+  ElementIterator eWoIt  = gridWithoutParametrization.levelGridView(1).begin<0>();
+  ElementIterator eEndIt = gridWithParametrization.levelGridView(1).end<0>();
 
   for (; eIt!=eEndIt; ++eIt, ++eWoIt) {
 
@@ -332,8 +331,8 @@ int main (int argc , char **argv) try
 
     for (int level=0; level<locallyRefinedGrid.maxLevel(); ++level)
     {
-      ElementIterator eIt = locallyRefinedGrid.lbegin<0>(level);
-      ElementIterator eEnd = locallyRefinedGrid.lend<0>(level);
+      ElementIterator eIt = locallyRefinedGrid.levelGridView(level).begin<0>();
+      ElementIterator eEnd = locallyRefinedGrid.levelGridView(level).end<0>();
       for(; eIt!=eEnd; ++eIt)
       {
         int children = 0;

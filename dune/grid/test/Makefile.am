@@ -14,7 +14,7 @@ if ALUGRID
 endif
 
 if UG
-  UPROG = test-ug test-parallel-ug
+  UPROG = test-ug test-parallel-ug test-loadbalancing
 if ALUGRID
   DGFALU_UGGRID = test-dgfalu-uggrid-combination
 else
@@ -78,6 +78,8 @@ test_sgrid_SOURCES = test-sgrid.cc
 test_oned_SOURCES = test-oned.cc
 
 test_identitygrid_SOURCES = test-identitygrid.cc
+test_identitygrid_CPPFLAGS = $(AM_CPPFLAGS)     \
+	-DDUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE
 
 test_yaspgrid_SOURCES = test-yaspgrid.cc
 test_yaspgrid_CPPFLAGS = $(AM_CPPFLAGS)		\
@@ -135,7 +137,8 @@ test_alberta_generic_LDADD = $(test_alberta_LDADD)
 # files for alugrid
 test_alugrid_SOURCES = test-alugrid.cc
 test_alugrid_CPPFLAGS = $(AM_CPPFLAGS)		\
-	$(ALL_PKG_CPPFLAGS)
+	$(ALL_PKG_CPPFLAGS)                     \
+	-DDUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE
 test_alugrid_LDFLAGS = $(AM_LDFLAGS)		\
 	$(ALL_PKG_LDFLAGS)			\
 	-static
@@ -185,6 +188,21 @@ test_parallel_ug_LDADD =			\
 	$(DUNEMPILIBS)				\
 	$(LDADD)
 
+test_loadbalancing_SOURCES = test-loadbalancing.cc
+test_loadbalancing_CPPFLAGS = $(AM_CPPFLAGS)	\
+	$(DUNEMPICPPFLAGS)			\
+	$(UG_CPPFLAGS)				\
+	$(PARMETIS_CPPFLAGS)
+test_loadbalancing_LDFLAGS = $(AM_LDFLAGS)	\
+	$(DUNEMPILDFLAGS)			\
+	$(UG_LDFLAGS)				\
+	$(PARMETIS_LDFLAGS)
+test_loadbalancing_LDADD =			\
+	$(UG_LIBS)				\
+	$(DUNEMPILIBS)				\
+	$(PARMETIS_LIBS)			\
+	$(LDADD)
+
 # Test whether you can combine the different implementations in one file
 test_dgfalu_uggrid_combination_SOURCES = test-dgfalu-uggrid-combination.cc
 test_dgfalu_uggrid_combination_CPPFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(ALUGRID_CPPFLAGS)
@@ -197,21 +215,51 @@ test_dgfalu_uggrid_combination_LDADD =		\
 ## distribution tarball
 SOURCES = basicunitcube.hh                      \
           check-albertareader.cc                \
+          check-albertareader.hh                \
           checkadaptation.cc                    \
+          checkadaptation.hh                    \
           checkcommunicate.cc                   \
+          checkcommunicate.hh                   \
+          checkentitylifetime.hh                \
           checkentityseed.cc                    \
+          checkentityseed.hh                    \
           checkgeometry.cc                      \
+          checkgeometry.hh                      \
           checkgeometryinfather.cc              \
+          checkgeometryinfather.hh              \
           checkindexset.cc                      \
+          checkindexset.hh                      \
           checkintersectionit.cc                \
+          checkintersectionit.hh                \
+          checkintersectionlifetime.hh          \
           checkiterators.cc                     \
+          checkiterators.hh                     \
           checkjacobians.cc                     \
+          checkjacobians.hh                     \
           checkpartition.cc                     \
+          checkpartition.hh                     \
           checktwists.cc                        \
+          checktwists.hh                        \
           functions.hh                          \
           gridcheck.cc                          \
+          gridcheck.hh                          \
           staticcheck.hh
 
+NORMALTESTS += testiteratorranges
+testiteratorranges_SOURCES = testiteratorranges.cc
+testiteratorranges_CPPFLAGS = $(AM_CPPFLAGS)	\
+	$(DUNEMPICPPFLAGS)
+testiteratorranges_LDFLAGS = $(AM_LDFLAGS)	\
+	$(DUNEMPILDFLAGS)
+testiteratorranges_LDADD =			\
+	$(DUNEMPILIBS)				\
+	$(LDADD)
+
+NORMALTESTS += test-hierarchicsearch
+test_hierarchicsearch_SOURCES = test-hierarchicsearch.cc
+test_hierarchicsearch_CPPFLAGS = $(AM_CPPFLAGS)	$(DUNEMPICPPFLAGS)
+test_hierarchicsearch_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
+test_hierarchicsearch_LDADD = $(DUNEMPILIBS) $(LDADD)
 
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = CMakeLists.txt $(SOURCES)

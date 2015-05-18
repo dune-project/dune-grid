@@ -41,7 +41,7 @@
 
 /* If this is set, public access to the implementation of facades like Entity,
    Geometry, etc. is granted. */
-#cmakedefine DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS @DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS@
+#cmakedefine DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS 1
 
 /* This is only true if grape was found by configure _and_ if the
    application uses the flags set by add_dune_grape_flags */
@@ -79,9 +79,6 @@
 /* This is only true if UG was found by configure _and_ if the application
    uses the UG_CPPFLAGS */
 #cmakedefine HAVE_UG ENABLE_UG
-
-/* Do we have UG in at least version 3.9.1-patch10? */
-#define HAVE_UG_PATCH10 ${HAVE_UG_PATCH10}
 
 /* Grid type magic for DGF parser */
 @GRID_CONFIG_H_BOTTOM@

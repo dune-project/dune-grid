@@ -20,6 +20,12 @@ namespace Dune {
 
     friend class OneDGridEntity<0,dim,GridImp>;
 
+    template<typename, typename, typename>
+    friend class Dune::IntersectionIterator;
+
+    OneDGridLevelIntersectionIterator()
+    {}
+
     //! Constructor for a given grid entity and a given neighbor
     OneDGridLevelIntersectionIterator(OneDEntityImp<1>* center, int nb)
       : intersection_(OneDGridLevelIntersection<GridImp>(center,nb))
@@ -52,7 +58,7 @@ namespace Dune {
 
   private:
 
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+    Intersection intersection_;
   };
 
 
@@ -64,6 +70,12 @@ namespace Dune {
     enum { dimworld=GridImp::dimensionworld };
 
     friend class OneDGridEntity<0,dim,GridImp>;
+
+    template<typename, typename, typename>
+    friend class Dune::IntersectionIterator;
+
+    OneDGridLeafIntersectionIterator()
+    {}
 
     //! Constructor for a given grid entity and a given neighbor
     OneDGridLeafIntersectionIterator(OneDEntityImp<1>* center, int nb)
@@ -97,7 +109,7 @@ namespace Dune {
 
   private:
 
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+    Intersection intersection_;
 
   };
 

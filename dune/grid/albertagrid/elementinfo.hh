@@ -10,6 +10,7 @@
 
 #include <cassert>
 #include <vector>
+#include <utility>
 
 #include <dune/grid/albertagrid/geometrycache.hh>
 #include <dune/grid/albertagrid/macroelement.hh>
@@ -76,10 +77,12 @@ namespace Dune
       ElementInfo ( const MeshPointer &mesh, const Seed &seed,
                     typename FillFlags::Flags fillFlags = FillFlags::standard );
       ElementInfo ( const ElementInfo &other );
+      ElementInfo ( ElementInfo&& other );
 
       ~ElementInfo ();
 
       ElementInfo &operator= ( const ElementInfo &other );
+      ElementInfo &operator= ( ElementInfo &&other );
 
       operator bool () const { return (instance_ != null()); }
 
@@ -380,6 +383,13 @@ namespace Dune
       addReference();
     }
 
+    template< int dim >
+    inline ElementInfo< dim >::ElementInfo ( ElementInfo &&other )
+      : instance_( NULL )
+    {
+      using namespace std;
+      swap( instance_, other.instance_ );
+    }
 
     template< int dim >
     inline ElementInfo< dim >::~ElementInfo ()
@@ -398,6 +408,14 @@ namespace Dune
       return *this;
     }
 
+    template< int dim >
+    inline ElementInfo< dim > &
+    ElementInfo< dim >::operator= ( ElementInfo< dim > &&other )
+    {
+      using namespace std;
+      swap( instance_, other.instance_ );
+      return *this;
+    }
 
     template< int dim >
     inline bool
@@ -437,11 +455,7 @@ namespace Dune
     inline int ElementInfo< dim >::indexInFather () const
     {
       const Element *element = elInfo().el;
-#if DUNE_ALBERTA_VERSION >= 0x300
       const Element *father = elInfo().parent->el;
-#else
-      const Element *father = elInfo().parent;
-#endif
       assert( father != NULL );
 
       const int index = (father->child[ 0 ] == element ? 0 : 1);
@@ -550,7 +564,6 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline bool ElementInfo< dim >::hasLeafNeighbor ( const int face ) const
     {
@@ -564,15 +577,6 @@ namespace Dune
       else
         return true;
     }
-#endif // DUNE_ALBERTA_VERSION >= 0x300
-
-#if DUNE_ALBERTA_VERSION < 0x300
-    template< int dim >
-    inline bool ElementInfo< dim >::hasLeafNeighbor ( const int face ) const
-    {
-      return (neighbor( face ) != NULL);
-    }
-#endif // DUNE_ALBERTA_VERSION < 0x300
 
 
     template< int dim >
@@ -610,7 +614,6 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline bool ElementInfo< dim >::isBoundary ( int face ) const
     {
@@ -624,20 +627,8 @@ namespace Dune
       else
         return false;
     }
-#endif // DUNE_ALBERTA_VERSION >= 0x300
-
-#if DUNE_ALBERTA_VERSION <= 0x200
-    template< int dim >
-    inline bool ElementInfo< dim >::isBoundary ( int face ) const
-    {
-      assert( !!(*this) );
-      assert( (face >= 0) && (face < maxNeighbors) );
-      return (elInfo().neigh[ face ] == 0);
-    }
-#endif // DUNE_ALBERTA_VERSION <= 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline int ElementInfo< dim >::boundaryId ( int face ) const
     {
@@ -651,37 +642,8 @@ namespace Dune
       // assert( id == elInfo().wall_bound[ face ] );
       return id;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 
-#if DUNE_ALBERTA_VERSION == 0x200
-    template<>
-    inline int ElementInfo< 1 >::boundaryId ( int face ) const
-    {
-      assert( !!(*this) );
-      assert( (face >= 0) && (face < N_VERTICES_MAX) );
-      return elInfo().vertex_bound[ 1-face ];
-    }
-
-    template<>
-    inline int ElementInfo< 2 >::boundaryId ( int face ) const
-    {
-      assert( !!(*this) );
-      assert( (face >= 0) && (face < N_EDGES_MAX) );
-      return elInfo().edge_bound[ face ];
-    }
-
-    template<>
-    inline int ElementInfo< 3 >::boundaryId ( int face ) const
-    {
-      assert( !!(*this) );
-      assert( (face >= 0) && (face < N_FACES_MAX) );
-      return elInfo().face_bound[ face ];
-    }
-#endif // #if DUNE_ALBERTA_VERSION == 0x200
-
-
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline AffineTransformation *
     ElementInfo< dim >::transformation ( int face ) const
@@ -693,19 +655,8 @@ namespace Dune
       const int macroFace = elInfo().macro_wall[ face ];
       return (macroFace < 0 ? NULL : macroElement().wall_trafo[ macroFace ]);
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-#if DUNE_ALBERTA_VERSION <= 0x200
-    template< int dim >
-    inline AffineTransformation *
-    ElementInfo< dim >::transformation ( int face ) const
-    {
-      return NULL;
-    }
-#endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline BasicNodeProjection *
     ElementInfo< dim >::boundaryProjection ( int face ) const
@@ -720,19 +671,6 @@ namespace Dune
       else
         return 0;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-#if DUNE_ALBERTA_VERSION <= 0x200
-    template< int dim >
-    inline BasicNodeProjection *
-    ElementInfo< dim >::boundaryProjection ( int face ) const
-    {
-      assert( !!(*this) );
-      assert( (face >= 0) && (face < maxNeighbors) );
-      const int idx = (dim == 1 ? 2-face : 1+face);
-      return static_cast< BasicNodeProjection * >( elInfo().projections[ idx ] );
-    }
-#endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
     template< int dim >
@@ -863,42 +801,13 @@ namespace Dune
     ::fill ( Mesh *mesh, const ALBERTA MACRO_EL *mel, ALBERTA EL_INFO &elInfo )
     {
       ALBERTA fill_macro_info( mesh, mel, &elInfo );
-
-#if DUNE_ALBERTA_VERSION < 0x300
-      // The 1d grid does not fill in projections, so we do it here
-      if( (dim == 1) && (elInfo.fill_flag & FILL_PROJECTION) )
-      {
-        for( int i = 0; i <= N_VERTICES_1D; ++i )
-          elInfo.projections[ i ] = mel->projection[ i ];
-      }
-#endif
     }
 
     template< int dim >
     inline void ElementInfo< dim >
     ::fill ( int ichild, const ALBERTA EL_INFO &parentInfo, ALBERTA EL_INFO &elInfo )
     {
-#if DUNE_ALBERTA_VERSION >= 0x300
       ALBERTA fill_elinfo( ichild, FILL_ANY, &parentInfo, &elInfo );
-#else
-      ALBERTA fill_elinfo( ichild, &parentInfo, &elInfo );
-
-      // The 1d grid does not fill in projections, so we do it here
-      if( (dim == 1) && (elInfo.fill_flag & FILL_PROJECTION) )
-      {
-        elInfo.projections[ 0 ] = parentInfo.projections[ 0 ];
-        if( ichild == 0 )
-        {
-          elInfo.projections[ 1 ] = parentInfo.projections[ 0 ];
-          elInfo.projections[ 2 ] = parentInfo.projections[ 2 ];
-        }
-        else
-        {
-          elInfo.projections[ 1 ] = parentInfo.projections[ 1 ];
-          elInfo.projections[ 2 ] = parentInfo.projections[ 0 ];
-        }
-      }
-#endif
     }
 
 
@@ -912,6 +821,9 @@ namespace Dune
     template< int dim >
     inline void ElementInfo< dim >::removeReference () const
     {
+      // short-circuit for rvalues that have been drained as argument to a move operation
+      if ( !instance_ )
+        return;
       // this loop breaks when instance becomes null()
       for( InstancePtr instance = instance_; --(instance->refCount) == 0; )
       {

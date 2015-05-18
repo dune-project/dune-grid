@@ -1,6 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id: test-ug.cc 4424 2008-09-29 07:46:41Z sander $
 // Test parallel interface if a parallel UG is used
 
 #include <config.h>
@@ -81,13 +80,13 @@ public:
   template<class MessageBuffer, class EntityType>
   void gather(MessageBuffer& buff, const EntityType& e) const
   {
-    DataType x = mapper_.map(e);
+    DataType x = mapper_.index(e);
 
-    userDataSend_[mapper_.map(e)][0] = x;
+    userDataSend_[mapper_.index(e)][0] = x;
     std::cout << "Process "
               << Dune::MPIHelper::getCollectiveCommunication().rank()+1
               << " sends for entity "
-              << mapper_.map(e)
+              << mapper_.index(e)
               << ": "
               << std::setprecision(20)
               << x << "\n";
@@ -105,11 +104,11 @@ public:
     DataType x;
     buff.read(x);
 
-    userDataReceive_[mapper_.map(e)][0] = x;
+    userDataReceive_[mapper_.index(e)][0] = x;
     std::cout << "Process "
               << Dune::MPIHelper::getCollectiveCommunication().rank()+1
               << " received for entity "
-              << mapper_.map(e)
+              << mapper_.index(e)
               << ": "
               << std::setprecision(20)
               << x << "\n";
@@ -136,7 +135,7 @@ void checkIntersections(const GridView &gv)
 
     IntersectionIterator isIt           = gv.ibegin(*it);
     const IntersectionIterator &isEndIt = gv.iend(*it);
-    int n = 0;
+    unsigned int n = 0;
     for (; isIt != isEndIt; ++isIt) {
       isIt->boundary();
       isIt->inside();
@@ -147,12 +146,12 @@ void checkIntersections(const GridView &gv)
       ++ n;
     }
 
-    if (n != it->template count<1>())
+    if (n != it->subEntities(1))
     {
 
       DUNE_THROW(Dune::InvalidStateException,
                  "Number of faces for non-ghost cell incorrect. Is "
-                 << n << " but should be " << it->template count<1>());
+                 << n << " but should be " << it->subEntities(1));
     }
   }
 }
@@ -187,7 +186,7 @@ void checkMappers(const GridView &gridView)
   std::vector<int> indices(numEntities, -100);
   it = gridView.template begin<codim>();
   for (; it != endIt; ++it) {
-    int i = mapper.map(*it);
+    int i = mapper.index(*it);
     if (i < 0 || i >= numEntities) {
       DUNE_THROW(InvalidStateException,
                  gridView.comm().rank() + 1
@@ -264,8 +263,8 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
   const typename GridView::template Codim<commCodim>::Iterator
   &endIt = gridView.template end<commCodim>();
   for (; it != endIt; ++it) {
-    entityIndex[mapper.map(*it)]   = mapper.map(*it);
-    partitionType[mapper.map(*it)] = it->partitionType();
+    entityIndex[mapper.index(*it)]   = mapper.index(*it);
+    partitionType[mapper.index(*it)] = it->partitionType();
   }
 
   // initialize data handle (marks the nodes where some data was
@@ -346,14 +345,14 @@ public:
     const typename GridView::template Codim<0>::Iterator
     &endIt = gridView.template end<0>();
     for (; it != endIt; ++it) {
-      int numberOfSubEntities = it->template count<commCodim>();
+      int numberOfSubEntities = it->subEntities(commCodim);
       for (int k = 0; k < numberOfSubEntities; k++)
       {
         typedef typename GridView::template Codim<0>::Entity Element;
         typedef typename Element::template Codim<commCodim>::EntityPointer EntityPointer;
         const EntityPointer entityPointer(it->template subEntity<commCodim>(k));
-        entityIndex[mapper.map(*entityPointer)]   = mapper.map(*entityPointer);
-        partitionType[mapper.map(*entityPointer)] = entityPointer->partitionType();
+        entityIndex[mapper.index(*entityPointer)]   = mapper.index(*entityPointer);
+        partitionType[mapper.index(*entityPointer)] = entityPointer->partitionType();
 
         if (entityPointer->partitionType() == Dune::BorderEntity)
         {
@@ -367,7 +366,7 @@ public:
           entityGlobal = geometry.global(referenceElement.position(k, commCodim));
           std::cout << gridView.comm().rank()+1 << ": border codim "
                     << commCodim << " entity "
-                    << mapper.map(*entityPointer) << " (" << entityGlobal
+                    << mapper.index(*entityPointer) << " (" << entityGlobal
                     << ")" << std::endl;
         }
       }
@@ -443,9 +442,6 @@ public:
   template <class Grid>
   static void test(Grid& grid)
   {
-#if !HAVE_UG_PATCH10
-    grid.loadBalance();
-#else
     const int dim = Grid::dimension;
     const int commCodim = dim;
     typedef typename Grid::ctype ctype;
@@ -494,7 +490,6 @@ public:
 
     std::cout << gv.comm().rank()
               << ": load balancing with data was successful." << std::endl;
-#endif
   }
 };
 

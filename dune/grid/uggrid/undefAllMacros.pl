@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 # TODO: Detect location of UG from the DUNE build system
-$UGROOT = "../../../uginst";
+$UGROOT = "/home/sander/uginst";
 
 # Counts the total number of #undefs emitted
 $counter = 0;
@@ -30,17 +30,17 @@ foreach $file (@ARGV) {
   # Makedepend recursively searches for more included headers.
   # Warnings appear because the system headers will not be found.
   # Those warnings get piped to /dev/null.
-  foreach $_ (`makedepend -f- -w 20 -Y$UGROOT/include $file 2>/dev/null`) {
-    
+  foreach $_ (`makedepend -f- -w 20 -Y$UGROOT/include -DModelP $file 2>/dev/null`) {
+
     # The output of makedepend has the form
     # file.o: header.h
-    # We look for the ".o:" Everything that follows must be a header file  
+    # We look for the ".o:" Everything that follows must be a header file
     if (/\.o\:\s(\S+\.h)/) {
-      
+
       emitUndefs($1);
-      
+
     }
-    
+
   }
 
 }
@@ -64,15 +64,15 @@ sub emitUndefs {
 }
 
   while(<INFILE>) {
-    
+
     # looks for lines that define a C macro
     if (/\#define\s+(\w+)/) {
-      
+
       print OUTFILE "#undef $1\n";
       $counter = $counter + 1;
-      
+
     }
-    
+
   }
 
   close (INFILE);

@@ -187,7 +187,7 @@ namespace Dune {
         typedef typename GridView::template Codim<0>::template Partition<InteriorBorder_Partition>::Iterator ElementIterator;
         ElementIterator element = gv.template begin<0, InteriorBorder_Partition>();
         return sizeof(DataType)
-               * Base::duneDataHandle_->size(*element->template subEntity<codim>(0));
+               * Base::duneDataHandle_->size(element->template subEntity<codim>(0));
       }
 
       // iterate over all entities, find the maximum size for
@@ -201,15 +201,15 @@ namespace Dune {
       Iterator it = gv.template begin<0, Dune::All_Partition>();
       const Iterator endIt = gv.template end<0, Dune::All_Partition>();
       for (; it != endIt; ++it) {
-        int numberOfSubentities = it->template count<codim>();
+        int numberOfSubentities = it->subEntities(codim);
         for (int k = 0; k < numberOfSubentities; k++)
         {
           typedef typename GridView::template Codim<0>::Entity Element;
-          typedef typename Element::template Codim<codim>::EntityPointer EntityPointer;
-          const EntityPointer entityPointer(it->template subEntity<codim>(k));
+          typedef typename Element::template Codim<codim>::Entity SubEntity;
+          const SubEntity subEntity(it->template subEntity<codim>(k));
 
           maxSize = std::max((int) maxSize,
-                             (int) Base::duneDataHandle_->size(*entityPointer));
+                             (int) Base::duneDataHandle_->size(subEntity));
         }
       }
 

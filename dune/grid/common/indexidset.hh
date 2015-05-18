@@ -1,6 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id$
 
 #ifndef DUNE_GRID_COMMON_INDEXIDSET_HH
 #define DUNE_GRID_COMMON_INDEXIDSET_HH
@@ -28,6 +27,7 @@ namespace Dune
      \tparam GridImp Type that is a model of Dune::Grid.
      \tparam IndexSetImp Type that is a model of Dune::IndexSet.
      \tparam IndexTypeImp The type used by IndexSetImp to store the indices
+     \tparam TypesImp     iterator range for all geometry types in domain
 
      <H3>Overview</H3>
 
@@ -46,7 +46,7 @@ namespace Dune
      \f$0\leq m(e) < |E_g^c|\f$ for any \f$e\in E_g^c\f$.
 
      Index sets are used to assign user defined data (e.g. degrees of freedom
-     of a discretization) to entities of the grid. For efficiency reasons the prefered
+     of a discretization) to entities of the grid. For efficiency reasons the preferred
      data structure for user data is the array. In order to access the data from the
      entity, its index (with respect to an index set - there may be several) is evaluated
      and used as an index to an array (or some other container providing random access).
@@ -55,7 +55,7 @@ namespace Dune
      compute the array index from the information supplied by an index set.
 
      It is important to note that the index assigned to an entity may change during
-     grid modification (i.e. refinement or dynamic load balancing). The user is reponsible
+     grid modification (i.e. refinement or dynamic load balancing). The user is responsible
      for reorganizing the information stored in the external arrays appropriately. In
      order to do this the IdSet concept is supplied.
 
@@ -71,7 +71,7 @@ namespace Dune
 
      @ingroup IndexIdSets
    */
-  template<class GridImp, class IndexSetImp, class IndexTypeImp>
+  template< class GridImp, class IndexSetImp, class IndexTypeImp, class TypesImp >
   class IndexSet
   {
     /* We use the remove_const to extract the Type from the mutable class,
@@ -79,8 +79,18 @@ namespace Dune
     typedef typename remove_const< GridImp >::type::Traits Traits;
 
   public:
+    /** \brief Export the type of the entity used as parameter in the index(...) method */
+    template <int cc>
+    struct Codim
+    {
+      typedef typename Traits :: template Codim<cc> :: Entity Entity;
+    };
+
     /** \brief The type used for the indices */
     typedef IndexTypeImp IndexType;
+
+    /** \brief iterator range for geometry types in domain */
+    typedef TypesImp Types;
 
     /** \brief dimension of the grid (maximum allowed codimension) */
     static const int dimension = remove_const< GridImp >::type::dimension;
@@ -180,6 +190,27 @@ namespace Dune
     //@{
     //===========================================================
 
+    /**
+     * \brief obtain all geometry types of entities in domain
+     *
+     * This method returns an iterator range (something that behaves like
+     * Dune::IteratorRange) visiting all geometry types of codimension codim
+     * in the domain of the index map exactly once.
+     * The iterator must implement the concept of a forward iterator (in the
+     * sense of the STL).
+     * The elements in the iterator range are required to be of type
+     * Dune::GeometryType.
+     *
+     * \param[in]  codim  a valid codimension
+     *
+     * \return iterator range over Const reference to a vector of geometry types.
+     */
+    Types types ( int codim ) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION( (asImp().types( codim )) );
+      return asImp().types( codim );
+    }
+
     /** @brief Return vector with all geometry types of entities in domain of index map.
             Return a vector with all geometry types of a given codimension
             contained in the Entity set \f$E\f$.
@@ -187,7 +218,7 @@ namespace Dune
        \param[in] codim A valid codimension.
        \return Const reference to a vector of geometry types.
      */
-    const std::vector<GeometryType>& geomTypes (int codim) const
+    const std::vector<GeometryType>& geomTypes (int codim) const DUNE_DEPRECATED_MSG( "Use IndexSet::types instead." )
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().geomTypes(codim)));
       return asImp().geomTypes(codim);
@@ -228,7 +259,7 @@ namespace Dune
       return asImp().contains(e);
     }
 
-    // Must be explicitely defined although this class should get a default constructor.
+    // Must be explicitly defined although this class should get a default constructor.
     IndexSet() {}
 
   private:
@@ -262,6 +293,8 @@ namespace Dune
     /** \brief The type used for the indices */
     typedef typename Base::IndexType IndexType;
 
+    typedef typename Base::Types Types;
+
     /** \brief dimension of the grid (maximum allowed codimension) */
     static const int dimension = Base::dimension;
 
@@ -274,6 +307,8 @@ namespace Dune
     //@{
     //===========================================================
 
+    Types types ( int codim ) const { return asImp().geomTypes( codim ); }
+
     /** @brief Return total number of entities of given codim in the entity set \f$E\f$. This
             is simply a sum over all geometry types.
 
@@ -283,7 +318,7 @@ namespace Dune
     IndexType size ( const int codim ) const
     {
       IndexType s( 0 );
-      const std::vector< GeometryType > &geomTs = Base::geomTypes( codim );
+      const std::vector< GeometryType > &geomTs = asImp().geomTypes( codim );
       typedef typename std::vector< GeometryType >::const_iterator Iterator;
       const Iterator end = geomTs.end();
       for( Iterator it = geomTs.begin(); it != end; ++it )
@@ -291,6 +326,10 @@ namespace Dune
       return s;
     }
     //@{
+
+  private:
+    IndexSetImp &asImp () { return static_cast< IndexSetImp & >( *this );}
+    const IndexSetImp &asImp () const { return static_cast< const IndexSetImp & >( *this ); }
   };
 
 
@@ -338,7 +377,7 @@ namespace Dune
      <H3>Ids and leaf entities</H3>
 
      An element is a copy of its father element if it is the only son. This
-     concept can be transfered to all higher codimensions because in a nested grid
+     concept can be transferred to all higher codimensions because in a nested grid
      structure the entities of any codimension form a set of trees. However, the roots
      of these trees are not necessarily on level 0.
      Thus, we define that an entity is a copy of another entity if it is the only descendant

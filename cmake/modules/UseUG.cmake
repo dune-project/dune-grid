@@ -21,10 +21,10 @@ if(UG_ROOT AND NOT UG_DIR)
   endif()
 endif(UG_ROOT AND NOT UG_DIR)
 
-find_package(UG 3.9.1
+find_package(UG 3.11.0
   NO_MODULE QUIET
   NO_DEFAULT_PATH)
-find_package(UG 3.9.1
+find_package(UG 3.11.0
   NO_MODULE)
 
 if(UG_FOUND AND (NOT UG_FOR_DUNE STREQUAL "yes"))
@@ -41,13 +41,6 @@ if(UG_FOUND)
   dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
       DUNETYPE "Dune::UGGrid< dimgrid >"
       HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
-
-  # Remove the following as soon as we absolutely require patch10 or higher
-  if(${UG_DUNE_PATCHLEVEL} GREATER 9)
-    set(HAVE_UG_PATCH10 1)
-  else()
-    set(HAVE_UG_PATCH10 0)
-  endif(${UG_DUNE_PATCHLEVEL} GREATER 9)
 
   #Overwrite flags by hand (like for autoconf).
   set(UG_LIBRARIES)
@@ -67,15 +60,18 @@ if(UG_FOUND)
       endif(full_path)
   endforeach(lib ugS2 ugS3 devS)
 
-  # add all UG related flags to ALL_PKG_FLAGS, this must happen
-  # regardless of a target using add_dune_ug_flags
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-DENABLE_UG")
-  foreach(dir ${UG_INCLUDES})
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-  endforeach()
+  # register all UG related flags
+  set(UG_DEFINITIONS "ENABLE_UG=1")
+  if(UG_PARALLEL STREQUAL "yes")
+    set(UG_DEFINITIONS "ENABLE_UG=1;ModelP")
+  endif()
+  dune_register_package_flags(COMPILE_DEFINITIONS "${UG_DEFINITIONS}"
+                              INCLUDE_DIRS "${UG_INCLUDES}"
+                              LIBRARIES "dunegrid;${UG_LIBRARIES};${DUNE_LIBS}")
+
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determining location of UG ${UG_VERSION} succeded:\n"
+    "Determining location of UG ${UG_VERSION} succeeded:\n"
     "Include directories: ${UG_INCLUDES}\n"
     "Libraries: ${UG_LIBRARIES}\n\n")
 else()
@@ -106,7 +102,7 @@ function(add_dune_ug_flags)
       if(NOT ADD_UG_OBJECT)
         foreach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
           target_link_libraries(${_target}
-            dunegrid ${UG_LIBRARIES})
+            dunegrid ${UG_LIBRARIES} ${DUNE_LIBS})
         endforeach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
       endif()
       set(_prefix TARGET)
@@ -121,7 +117,7 @@ function(add_dune_ug_flags)
     if(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
       set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
         APPEND PROPERTY
-        LINK_LIBRARIES ${UG_LIBRARIES})
+        LINK_LIBRARIES dunegrid ${UG_LIBRARIES} ${DUNE_LIBS})
     endif(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
     if(UG_PARALLEL STREQUAL "yes")
       # Add modelp

@@ -12,18 +12,18 @@ set(CONSISTENT_VTK_TESTS
   vtktest
   vtksequencetest)
 
-set(VTK_TESTS ${CONSISTENT_VTK_TEST} subsamplingvtktest)
+set(VTK_TESTS ${CONSISTENT_VTK_TESTS} subsamplingvtktest)
 
 if(AMIRAMESH_FOUND AND PSURFACE_FOUND)
   set(AMIRAMESH_TESTS amirameshtest)
 endif(AMIRAMESH_FOUND AND PSURFACE_FOUND)
 
 if(ALBERTA_FOUND)
-  set(ALBERTA_TESTS gmshtest_alberta2d gmshtest_alberta3d)
+  set(ALBERTA_TESTS gmshtest-alberta2d gmshtest-alberta3d)
 endif(ALBERTA_FOUND)
 
 if(ALUGRID_FOUND)
-  set(ALUGRID_TESTS gmshtest_alugrid)
+  set(ALUGRID_TESTS gmshtest-alugrid)
 endif(ALUGRID_FOUND)
 
 if(UG_FOUND)
@@ -39,6 +39,7 @@ foreach(_test ${BUILD_TESTS})
 endforeach(_test ${BUILD_TESTS})
 
 add_executable(subsamplingvtktest subsamplingvtktest.cc test-linking.cc)
+target_link_libraries(subsamplingvtktest dunegrid ${DUNE_LIBS})
 
 foreach(_test ${ALLTESTS})
   add_test(${_test} ${_test})
@@ -59,22 +60,20 @@ endforeach(_test ${AMIRAMESH_TESTS})
 
 add_dune_mpi_flags(${VTK_TESTS})
 
-add_executable(gmshtest_alugrid gmshtest.cc)
-add_dune_alugrid_flags(gmshtest_alugrid)
+add_executable(gmshtest-alugrid gmshtest.cc)
+set_property(
+  TARGET gmshtest-alugrid
+  APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE"
+  )
+add_dune_alugrid_flags(gmshtest-alugrid)
 
-add_executable(gmshtest_alberta2d gmshtest.cc)
-add_dune_alberta_flags(gmshtest_alberta2d WORLDDIM 2)
-add_dune_grape_flags(gmshtest_alberta2d)
-set_property(TARGET gmshtest_alberta2d APPEND_STRING
-  PROPERTY COMPILE_FLAGS "-DGRIDDIM=${ALBERTA_DIM}")
+add_executable(gmshtest-alberta2d gmshtest.cc)
+add_dune_alberta_flags(gmshtest-alberta2d WORLDDIM 2)
+add_dune_grape_flags(gmshtest-alberta2d)
 
-add_executable(gmshtest_alberta3d gmshtest.cc)
-add_dune_alberta_flags(gmshtest_alberta3d WORLDDIM 3)
-add_dune_grape_flags(gmshtest_alberta3d)
-
-foreach(_test ${ALUGRID_TESTS} ${ALBERTA_TESTS})
-  target_link_libraries(${_test} dunegrid)
-endforeach()
+add_executable(gmshtest-alberta3d gmshtest.cc)
+add_dune_alberta_flags(gmshtest-alberta3d WORLDDIM 3)
+add_dune_grape_flags(gmshtest-alberta3d)
 
 foreach(_test ${UG_TESTS})
   add_dune_ug_flags(${_test})

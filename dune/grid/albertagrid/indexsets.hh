@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTAGRIDINDEXSETS_HH
 #define DUNE_ALBERTAGRIDINDEXSETS_HH
 
+#include <array>
+
 #include <dune/common/stdstreams.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -34,10 +36,10 @@ namespace Dune
 
   template< int dim, int dimworld >
   class AlbertaGridHierarchicIndexSet
-    : public IndexSet< AlbertaGridFamily< dim, dimworld >, AlbertaGridHierarchicIndexSet< dim,dimworld >, int >
+    : public IndexSet< AlbertaGridFamily< dim, dimworld >, AlbertaGridHierarchicIndexSet< dim,dimworld >, int, std::array< GeometryType, 1 > >
   {
     typedef AlbertaGridHierarchicIndexSet< dim, dimworld > This;
-    typedef IndexSet< AlbertaGridFamily< dim, dimworld >, This, int > Base;
+    typedef IndexSet< AlbertaGridFamily< dim, dimworld >, AlbertaGridHierarchicIndexSet< dim,dimworld >, int, std::array< GeometryType, 1 > > Base;
 
     friend class AlbertaGrid< dim, dimworld >;
 
@@ -46,6 +48,8 @@ namespace Dune
     typedef AlbertaGridFamily< dim, dimworld > GridFamily;
 
     typedef typename Base::IndexType IndexType;
+
+    typedef typename Base::Types Types;
 
     static const int dimension = GridFamily::dimension;
 
@@ -122,6 +126,14 @@ namespace Dune
     {
       assert( (codim >= 0) && (codim <= dimension) );
       return indexStack_[ codim ].size();
+    }
+
+    Types types ( int codim ) const
+    {
+      assert( (codim >= 0) && (codim <= dimension) );
+      std::array< GeometryType, 1 > types;
+      types[ 0 ] = GeometryType( GeometryType::simplex, dimension - codim );
+      return types;
     }
 
     //! return geometry types this set has indices for
@@ -318,15 +330,17 @@ namespace Dune
 
   template< int dim, int dimworld >
   class AlbertaGridIndexSet
-    : public IndexSet< AlbertaGrid< dim, dimworld >, AlbertaGridIndexSet< dim, dimworld >, int >
+    : public IndexSet< AlbertaGrid< dim, dimworld >, AlbertaGridIndexSet< dim, dimworld >, int, std::array< GeometryType, 1 > >
   {
     typedef AlbertaGridIndexSet< dim, dimworld > This;
-    typedef IndexSet< AlbertaGrid< dim, dimworld >, This, int > Base;
+    typedef IndexSet< AlbertaGrid< dim, dimworld >, AlbertaGridIndexSet< dim, dimworld >, int, std::array< GeometryType, 1 > > Base;
 
   public:
     typedef AlbertaGrid< dim, dimworld > Grid;
 
     typedef typename Base::IndexType IndexType;
+
+    typedef typename Base::Types Types;
 
     static const int dimension = Grid::dimension;
 
@@ -413,6 +427,14 @@ namespace Dune
     {
       assert( (codim >= 0) && (codim <= dimension) );
       return size_[ codim ];
+    }
+
+    Types types ( int codim ) const
+    {
+      assert( (codim >= 0) && (codim <= dimension) );
+      std::array< GeometryType, 1 > types;
+      types[ 0 ] = GeometryType( GeometryType::simplex, dimension - codim );
+      return types;
     }
 
     const std::vector< GeometryType > &geomTypes( int codim ) const

@@ -40,7 +40,7 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;
 
-    typedef typename GridImp::HostGridType::template Codim<0>::Entity::LeafIntersectionIterator HostLeafIntersectionIterator;
+    typedef typename GridImp::HostGridType::LeafGridView::Intersection HostLeafIntersection;
 
   public:
 
@@ -50,29 +50,43 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef FieldVector<ctype, dimworld> NormalVector;
 
-    IdentityGridLeafIntersection(const GridImp* identityGrid,
-                                 const HostLeafIntersectionIterator& hostIterator)
-      : identityGrid_(identityGrid),
-        hostIterator_(hostIterator)
+    IdentityGridLeafIntersection()
     {}
+
+    IdentityGridLeafIntersection(const GridImp* identityGrid,
+                                 const HostLeafIntersection& hostIntersection)
+      : identityGrid_(identityGrid)
+      , hostIntersection_(hostIntersection)
+    {}
+
+    IdentityGridLeafIntersection(const GridImp* identityGrid,
+                                 HostLeafIntersection&& hostIntersection)
+      : identityGrid_(identityGrid)
+      , hostIntersection_(std::move(hostIntersection))
+    {}
+
+    bool equals(const IdentityGridLeafIntersection& other) const
+    {
+      return hostIntersection_ == other.hostIntersection_;
+    }
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const {
-      return IdentityGridEntityPointer<0,GridImp> (identityGrid_, hostIterator_->inside());
+    Entity inside() const {
+      return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.inside());
     }
 
 
     //! return EntityPointer to the Entity on the outside of this intersection
     //! (that is the neighboring Entity)
-    EntityPointer outside() const {
-      return IdentityGridEntityPointer<0,GridImp> (identityGrid_, hostIterator_->outside());
+    Entity outside() const {
+      return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.outside());
     }
 
 
     //! return true if intersection is with boundary.
     bool boundary () const {
-      return hostIterator_->boundary();
+      return hostIntersection_.boundary();
     }
 
     /** \brief Return unit outer normal (length == 1)
@@ -81,33 +95,33 @@ namespace Dune {
      *     intersection's geometry.
      *       It is scaled to have unit length. */
     NormalVector centerUnitOuterNormal () const {
-      return hostIterator_->centerUnitOuterNormal();
+      return hostIntersection_.centerUnitOuterNormal();
     }
 
     //! return true if across the edge an neighbor on this level exists
     bool neighbor () const {
-      return hostIterator_->neighbor();
+      return hostIntersection_.neighbor();
     }
 
 
     //! return information about the Boundary
     int boundaryId () const {
-      return hostIterator_->boundaryId();
+      return hostIntersection_.boundaryId();
     }
 
     //! return the boundary segment index
     size_t boundarySegmentIndex() const {
-      return hostIterator_->boundarySegmentIndex();
+      return hostIntersection_.boundarySegmentIndex();
     }
 
     //! Return true if this is a conforming intersection
     bool conforming () const {
-      return hostIterator_->conforming();
+      return hostIntersection_.conforming();
     }
 
     //! Geometry type of an intersection
     GeometryType type () const {
-      return hostIterator_->type();
+      return hostIntersection_.type();
     }
 
 
@@ -117,49 +131,49 @@ namespace Dune {
     //! where iteration started.
     LocalGeometry geometryInInside () const
     {
-      return LocalGeometry( hostIterator_->geometryInInside() );
+      return LocalGeometry( hostIntersection_.geometryInInside() );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     LocalGeometry geometryInOutside () const
     {
-      return LocalGeometry( hostIterator_->geometryInOutside() );
+      return LocalGeometry( hostIntersection_.geometryInOutside() );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     Geometry geometry () const
     {
-      return Geometry( hostIterator_->geometry() );
+      return Geometry( hostIntersection_.geometry() );
     }
 
 
     //! local number of codim 1 entity in self where intersection is contained in
     int indexInInside () const {
-      return hostIterator_->indexInInside();
+      return hostIntersection_.indexInInside();
     }
 
 
     //! local number of codim 1 entity in neighbor where intersection is contained
     int indexInOutside () const {
-      return hostIterator_->indexInOutside();
+      return hostIntersection_.indexInOutside();
     }
 
 
     //! return outer normal
     FieldVector<ctype, GridImp::dimensionworld> outerNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const {
-      return hostIterator_->outerNormal(local);
+      return hostIntersection_.outerNormal(local);
     }
 
     //! return outer normal multiplied by the integration element
     FieldVector<ctype, GridImp::dimensionworld> integrationOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const {
-      return hostIterator_->integrationOuterNormal(local);
+      return hostIntersection_.integrationOuterNormal(local);
     }
 
     //! return unit outer normal
     FieldVector<ctype, GridImp::dimensionworld> unitOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const {
-      return hostIterator_->unitOuterNormal(local);
+      return hostIntersection_.unitOuterNormal(local);
     }
 
 
@@ -170,7 +184,7 @@ namespace Dune {
 
     const GridImp* identityGrid_;
 
-    HostLeafIntersectionIterator hostIterator_;
+    HostLeafIntersection hostIntersection_;
   };
 
 
@@ -192,7 +206,7 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;
 
-    typedef typename GridImp::HostGridType::template Codim<0>::Entity::LevelIntersectionIterator HostLevelIntersectionIterator;
+    typedef typename GridImp::HostGridType::LevelGridView::Intersection HostLevelIntersection;
 
   public:
 
@@ -202,29 +216,44 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef FieldVector<ctype, dimworld> NormalVector;
 
-    IdentityGridLevelIntersection(const GridImp* identityGrid,
-                                  const HostLevelIntersectionIterator& hostIterator)
-      : identityGrid_(identityGrid), hostIterator_(hostIterator)
+    IdentityGridLevelIntersection()
     {}
+
+    IdentityGridLevelIntersection(const GridImp* identityGrid,
+                                  const HostLevelIntersection& hostIntersection)
+      : identityGrid_(identityGrid)
+      , hostIntersection_(hostIntersection)
+    {}
+
+    IdentityGridLevelIntersection(const GridImp* identityGrid,
+                                  HostLevelIntersection&& hostIntersection)
+      : identityGrid_(identityGrid)
+      , hostIntersection_(std::move(hostIntersection))
+    {}
+
+    bool equals(const IdentityGridLevelIntersection& other) const
+    {
+      return hostIntersection_ == other.hostIntersection_;
+    }
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const {
-      return IdentityGridEntityPointer<0,GridImp> (identityGrid_, hostIterator_->inside());
+    Entity inside() const {
+      return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.inside());
     }
 
 
     //! return EntityPointer to the Entity on the outside of this intersection
     //! (that is the neighboring Entity)
-    EntityPointer outside() const {
-      return IdentityGridEntityPointer<0,GridImp> (identityGrid_, hostIterator_->outside());
+    Entity outside() const {
+      return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.outside());
     }
 
 
     /** \brief return true if intersection is with boundary.
      */
     bool boundary () const {
-      return hostIterator_->boundary();
+      return hostIntersection_.boundary();
     }
 
     /** \brief Return unit outer normal (length == 1)
@@ -233,33 +262,33 @@ namespace Dune {
      *     intersection's geometry.
      *       It is scaled to have unit length. */
     NormalVector centerUnitOuterNormal () const {
-      return hostIterator_->centerUnitOuterNormal();
+      return hostIntersection_.centerUnitOuterNormal();
     }
 
     //! return true if across the edge an neighbor on this level exists
     bool neighbor () const {
-      return hostIterator_->neighbor();
+      return hostIntersection_.neighbor();
     }
 
 
     //! return information about the Boundary
     int boundaryId () const {
-      return hostIterator_->boundaryId();
+      return hostIntersection_.boundaryId();
     }
 
     //! return the boundary segment index
     size_t boundarySegmentIndex() const {
-      return hostIterator_->boundarySegmentIndex();
+      return hostIntersection_.boundarySegmentIndex();
     }
 
     //! Return true if this is a conforming intersection
     bool conforming () const {
-      return hostIterator_->conforming();
+      return hostIntersection_.conforming();
     }
 
     //! Geometry type of an intersection
     GeometryType type () const {
-      return hostIterator_->type();
+      return hostIntersection_.type();
     }
 
 
@@ -269,56 +298,56 @@ namespace Dune {
     //! where iteration started.
     LocalGeometry geometryInInside () const
     {
-      return LocalGeometry( hostIterator_->geometryInInside() );
+      return LocalGeometry( hostIntersection_.geometryInInside() );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     LocalGeometry geometryInOutside () const
     {
-      return LocalGeometry( hostIterator_->geometryInOutside() );
+      return LocalGeometry( hostIntersection_.geometryInOutside() );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     Geometry geometry () const
     {
-      return Geometry( hostIterator_->geometry() );
+      return Geometry( hostIntersection_.geometry() );
     }
 
 
     //! local number of codim 1 entity in self where intersection is contained in
     int indexInInside () const {
-      return hostIterator_->indexInInside();
+      return hostIntersection_.indexInInside();
     }
 
 
     //! local number of codim 1 entity in neighbor where intersection is contained
     int indexInOutside () const {
-      return hostIterator_->indexInOutside();
+      return hostIntersection_.indexInOutside();
     }
 
 
     //! return outer normal
     FieldVector<ctype, dimworld> outerNormal (const FieldVector<ctype, dim-1>& local) const {
-      return hostIterator_->outerNormal(local);
+      return hostIntersection_.outerNormal(local);
     }
 
     //! return outer normal multiplied by the integration element
     FieldVector<ctype, dimworld> integrationOuterNormal (const FieldVector<ctype, dim-1>& local) const {
-      return hostIterator_->integrationOuterNormal(local);
+      return hostIntersection_.integrationOuterNormal(local);
     }
 
     //! return unit outer normal
     FieldVector<ctype, dimworld> unitOuterNormal (const FieldVector<ctype, dim-1>& local) const {
-      return hostIterator_->unitOuterNormal(local);
+      return hostIntersection_.unitOuterNormal(local);
     }
 
   private:
 
     const GridImp* identityGrid_;
 
-    HostLevelIntersectionIterator hostIterator_;
+    HostLevelIntersection hostIntersection_;
 
   };
 

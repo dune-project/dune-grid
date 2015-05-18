@@ -6,11 +6,11 @@
 
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 
-#include <dune/grid/sgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 #include <dune/grid/identitygrid.hh>
 
-#include "gridcheck.cc"
-#include "checkintersectionit.cc"
+#include "gridcheck.hh"
+#include "checkintersectionit.hh"
 
 using namespace Dune;
 
@@ -18,17 +18,12 @@ using namespace Dune;
 template <int dim>
 void testDim()
 {
-  typedef SGrid<dim,dim> GridType;
-  int n[dim];
-  double h[dim];
+  typedef YaspGrid<dim> GridType;
+  Dune::array<int,dim> n;
+  std::fill(n.begin(), n.end(), 1 << (5 - dim));
+  Dune::FieldVector<double,dim> extension(1.0);
 
-  for (int i=0; i<dim; ++i)
-  {
-    n[i] = 1;
-    h[i] = 1.0;
-  }
-
-  GridType grid(n,h);
+  GridType grid(extension,n);
 
   grid.globalRefine(1);
 

@@ -1,5 +1,3 @@
-# $Id$
-
 SUBDIRS =
 
 grapedir = $(includedir)/dune/grid/io/visual/grape

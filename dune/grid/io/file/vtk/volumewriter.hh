@@ -35,11 +35,10 @@ namespace Dune {
         : Factory(gv_), Base(static_cast<const Factory&>(*this)), gv(gv_)
       { }
 
-      using Base::addCellData;
       using Base::addPointData;
 
       void addCellData(const VTKFunctionPtr& p) {
-        addCellData(shared_ptr<typename Base::FunctionWriter>
+        Base::addCellData(shared_ptr<typename Base::FunctionWriter>
                       (new VTKFunctionWriter<VTKFunction>(p)));
       }
 

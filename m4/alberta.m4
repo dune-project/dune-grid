@@ -1,5 +1,4 @@
 ## -*- autoconf -*-
-# $Id: alberta.m4 5156 2008-04-14 09:28:06Z christi $
 # searches for alberta-headers and libs
 
 # Substitutes the following make variables:
@@ -65,7 +64,7 @@
 #   ALBERTA_DIM
 #     The Alberta dimension this binary will be linked with.
 #   DUNE_ALBERTA_VERSION
-#     Alberta version found by configure, either 0x200 for 2.0 or 0x300 for 3.0
+#     Alberta version found by configure, always 0x300 for 3.0
 #   HAVE_ALBERTA
 #     This is only true if alberta-library was found by configure 
 #     _and_ if the application uses the ALBERTA_CPPFLAGS
@@ -86,7 +85,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
   AC_ARG_WITH(alberta,
     AC_HELP_STRING([--with-alberta=PATH],[directory where ALBERTA (ALBERTA
-    version 2.0 or higher) is installed.  You can pass additional required
+    version 3.0) is installed.  You can pass additional required
     libraries in the ALBERTA_EXTRA environment variable (in a form suitable
     for $LIBS)]))
 
@@ -125,7 +124,6 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       done
     ])
 
-    ALBERTA_VERSION="2.0"
 
     # set variables so that tests can use them
     ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTAROOT/include -I$ALBERTAROOT/include/alberta"
@@ -146,11 +144,13 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     CPPFLAGS="$ac_save_CPPFLAGS $ALBERTA_INCLUDE_CPPFLAGS -DDIM_OF_WORLD=3 -DEL_INDEX=0"
     AC_CHECK_HEADER([alberta/alberta.h], [HAVE_ALBERTA="1"],[
       AC_MSG_WARN([alberta/alberta.h not found in $ALBERTA_INCLUDE_CPPFLAGS])
-      AC_MSG_NOTICE([In case you are using ALBERTA 2.0, use double quotes to include alberta.h in $ALBERTA_ROOT/include/alberta/alberta_inlines.h.])
     ])
 
     if test "x$HAVE_ALBERTA" = "x1" ; then
-      AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],[AC_MSG_WARN([version 3 not found, now looking for version 2])],[#include <alberta/alberta.h>])
+      AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],
+        [AC_MSG_WARN([version 3 not found, deactivating Alberta])
+          HAVE_ALBERTA="0"],
+        [#include <alberta/alberta.h>])
     fi
 
     CPPFLAGS="$ac_save_CPPFLAGS $ALBERTA_INCLUDE_CPPFLAGS"
@@ -212,13 +212,8 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
         for N in $ALBERTA_WORLD_DIMS ; do
           eval ALBERTA${N}D_CPPFLAGS="'\$(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=${N} -DENABLE_ALBERTA'"
           eval ALBERTA${N}D_LDFLAGS=
-          AS_IF([test -n "$DUNE_GRID_ROOT" -a -d "$DUNE_GRID_ROOT/include/dune"],[
-            # Dune was installed into directory given by with-dunegrid
-            eval ALBERTA${N}D_LIBS="'-L\$(DUNE_GRID_LIBDIR) -ldunealbertagrid_${N}d -ldunegrid \$(ALBERTA_LIBPATHFLAGS) -lalberta_${N}d \$(ALBERTA_BASE_LIBS)'"
-          ],[
-            # local modules is linked directly via the .la file
-            eval ALBERTA${N}D_LIBS="'\$(DUNE_GRID_LIBDIR)/libdunealbertagrid_${N}d.la \$(DUNE_GRID_LIBDIR)/libdunegrid.la \$(ALBERTA_LIBPATHFLAGS) -lalberta_${N}d \$(ALBERTA_BASE_LIBS)'"
-          ])
+          # Dune was installed into directory given by with-dunegrid
+          eval ALBERTA${N}D_LIBS="'-L\$(DUNE_GRID_LIBDIR) -ldunealbertagrid_${N}d -ldunegrid \$(ALBERTA_LIBPATHFLAGS) -lalberta_${N}d \$(ALBERTA_BASE_LIBS)'"
         done
       ],[
         HAVE_ALBERTA=0
@@ -235,10 +230,8 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       [This is only true if alberta-library was found by configure 
        _and_ if the application uses the ALBERTA_CPPFLAGS])
 
-    if test "$ALBERTA_VERSION" = "2.0" ; then
-      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x200], [Alberta version found by configure, either 0x200 for 2.0 or 0x300 for 3.0])
-    elif test "$ALBERTA_VERSION" = "3.0" ; then
-      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x300], [Alberta version found by configure, either 0x200 for 2.0 or 0x300 for 3.0])
+    if test "$ALBERTA_VERSION" = "3.0" ; then
+      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x300], [Alberta version found by configure, should be 0x300 for 3.0])
     else
       AC_MSG_ERROR([Internal Inconsistency: Invalid Alberta version reported: $ALBERTA_VERSION.])
     fi

@@ -6,6 +6,7 @@
 #include <cassert>
 
 #include <dune/common/forloop.hh>
+#include <dune/common/deprecated.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/geometrygrid/declaration.hh>
@@ -38,9 +39,9 @@ namespace Dune
 
 
     template< class HostGrid, class CoordFunction, class Allocator >
-    struct isParallel< GeometryGrid< HostGrid, CoordFunction, Allocator > >
+    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
-      static const bool v = isParallel< HostGrid >::v;
+      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = isParallel< HostGrid >::v;
     };
 
 

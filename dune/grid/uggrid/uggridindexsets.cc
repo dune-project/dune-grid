@@ -22,7 +22,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
   for (; eIt!=eEndIt; ++eIt) {
     typename UG_NS<dim>::Element* target_ = grid_->getRealImplementation(*eIt).target_;
     // codim dim-1
-    for (int i=0; i<eIt->template count<dim-1>(); i++)
+    for (unsigned int i=0; i<eIt->subEntities(dim-1); i++)
     {
       GeometryType gt = eIt->type();
       int a = ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
@@ -35,7 +35,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
     }
     /** \todo codim 1 (faces) */
     if (dim==3)
-      for (int i=0; i<eIt->template count<1>(); i++)
+      for (unsigned int i=0; i<eIt->subEntities(1); i++)
         UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,i)) = std::numeric_limits<UG::UINT>::max();
 
   }
@@ -74,7 +74,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
     }
 
     // codim dim-1 (edges)
-    for (int i=0; i<eIt->template count<dim-1>(); i++)
+    for (unsigned int i=0; i<eIt->subEntities(dim-1); i++)
     {
       int a = ReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,0,dim);
       int b = ReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,1,dim);
@@ -88,7 +88,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
 
     // codim 1 (faces): todo
     if (dim==3)
-      for (int i=0; i<eIt->template count<1>(); i++)
+      for (unsigned int i=0; i<eIt->subEntities(1); i++)
       {
         UG::UINT& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target,UGGridRenumberer<dim>::facesDUNEtoUG(i,eType)));
         if (index == std::numeric_limits<UG::UINT>::max()) {             // not visited yet
@@ -173,7 +173,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
       typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(*eIt).target_;
 
       // codim dim-1
-      for (int i=0; i<eIt->template count<dim-1>(); i++)
+      for (unsigned int i=0; i<eIt->subEntities(dim-1); i++)
       {
         GeometryType gt = eIt->type();
         int a = ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
@@ -187,7 +187,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
 
       // codim 1 (faces): todo
       if (dim==3)
-        for (int i=0; i<eIt->template count<1>(); i++)
+        for (unsigned int i=0; i<eIt->subEntities(1); i++)
         {
           GeometryType gt = eIt->type();
           UG::UINT& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
@@ -195,7 +195,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
         }
 
       // reset the isLeaf information of the nodes
-      for (int i=0; i<eIt->template count<dim>(); i++)
+      for (unsigned int i=0; i<eIt->subEntities(dim); i++)
       {
         // no need to renumber, we are visiting all the corners
         UG_NS<dim>::Corner(target_,i)->isLeaf = false;
@@ -233,7 +233,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
       typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(*eIt).target_;
 
       // codim dim-1 (edges)
-      for (int i=0; i<eIt->template count<dim-1>(); i++)
+      for (unsigned int i=0; i<eIt->subEntities(dim-1); i++)
       {
         GeometryType gt = eIt->type();
         int a = ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
@@ -262,7 +262,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
 
       // codim 1 (faces): todo
       if (dim==3)
-        for (int i=0; i<eIt->template count<1>(); i++)
+        for (unsigned int i=0; i<eIt->subEntities(1); i++)
         {
           GeometryType gt = eIt->type();
           UG::UINT& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
@@ -290,7 +290,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
         }
 
       // set the isLeaf information of the nodes based on the leaf elements
-      for (int i=0; i< eIt->template count<dim>(); i++)
+      for (unsigned int i=0; i< eIt->subEntities(dim); i++)
       {
         // no need to renumber, we are visiting all the corners
         typename UG_NS<dim>::Node* theNode = UG_NS<dim>::Corner(target_,i);

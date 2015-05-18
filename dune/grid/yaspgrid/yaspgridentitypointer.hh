@@ -22,7 +22,7 @@ namespace Dune {
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename GridImp::YGrid::Iterator I;
     typedef YaspEntityPointer<codim,GridImp> EntityPointerImp;
   protected:
     typedef YaspEntity<codim, dim, GridImp> YaspEntityImp;
@@ -31,90 +31,58 @@ namespace Dune {
     //! codimension of entity pointer
     enum { codimension = codim };
 
+    //! default constructor
+    YaspEntityPointer () :
+      _entity(YaspEntityImp())
+    {}
+
     //! constructor
-    YaspEntityPointer (const GridImp * yg, const YGLI & g, const TSI & it)
-      : _g(g), _it(it),
-        _entity(MakeableInterfaceObject<Entity>(YaspEntity<codim,dim,GridImp>(yg, _g,_it)))
-    {
-      if (codim>0 && codim<dim)
-      {
-        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
-      }
-    }
+    YaspEntityPointer (const YGLI & g, const I& it)
+      : _entity(YaspEntityImp(g,it))
+    {}
 
-    //! copy constructor
+
+// skip this constructor for GCC 4.4, which has a number of nasty bugs in its rvalue reference support
+// As this behavior is hard to trigger in small configuration tests and because we'll probably drop GCC 4.4
+// after the next release anyway, I hacked in this hardcoded check for the compiler version
+#if not (defined(__GNUC__) && (__GNUC__ < 5) && (__GNUC_MINOR__ < 5))
+
+    YaspEntityPointer (YGLI&& g, I&& it)
+      : _entity(YaspEntityImp(std::move(g),std::move(it)))
+    {}
+
+#endif
+
+    //! copying and moving
     YaspEntityPointer (const YaspEntityImp& entity)
-      : _g(entity.gridlevel()),
-        _it(entity.transformingsubiterator()),
-        _entity(MakeableInterfaceObject<Entity>(YaspEntity<codim,dim,GridImp>(entity.yaspgrid(), _g,_it)))
-    {
-      if (codim>0 && codim<dim)
-      {
-        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
-      }
-    }
+      : _entity(entity)
+    {}
 
-    //! copy constructor
-    YaspEntityPointer (const YaspEntityPointer& rhs)
-      : _g(rhs._g), _it(rhs._it), _entity(MakeableInterfaceObject<Entity>(YaspEntity<codim,dim,GridImp>(GridImp::getRealImplementation(rhs._entity).yaspgrid(),_g,_it)))
-    {
-      if (codim>0 && codim<dim)
-      {
-        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
-      }
-    }
+    YaspEntityPointer (YaspEntityImp&& entity)
+      : _entity(std::move(entity))
+    {}
+
+    //! copying and moving -- use default implementations
 
     //! equality
     bool equals (const YaspEntityPointer& rhs) const
     {
-      return (_it==rhs._it && _g == rhs._g);
+      return (_entity == rhs._entity);
     }
 
     //! dereferencing
-    Entity& dereference() const
+    const Entity& dereference() const
     {
       return _entity;
     }
 
     //! ask for level of entity
-    int level () const {return _g->level();}
+    int level () const {return _entity.level();}
 
-    const YaspEntityPointer&
-    operator = (const YaspEntityPointer& rhs)
-    {
-      _g = rhs._g;
-      _it = rhs._it;
-      /* _entity = i._entity
-       * is done implicitely, as the entity is completely
-       * defined via the iterator it belongs to
-       */
-      return *this;
-    }
-
-    const TSI& transformingsubiterator () const
-    {
-      return _it;
-    }
-
-    const YGLI& gridlevel () const
-    {
-      return _g;
-    }
-
-    TSI& transformingsubiterator ()
-    {
-      return _it;
-    }
-
-    YGLI& gridlevel ()
-    {
-      return _g;
-    }
+    //! use default assignment operator
 
   protected:
-    YGLI _g;             // access to grid level
-    TSI _it;             // position in the grid level
-    mutable MakeableInterfaceObject<Entity> _entity; //!< virtual entity
+    Entity _entity; //!< entity
   };
 
 }   // namespace Dune

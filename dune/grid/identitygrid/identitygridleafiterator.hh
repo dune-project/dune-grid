@@ -17,57 +17,35 @@ namespace Dune {
    */
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class IdentityGridLeafIterator :
-    public Dune::IdentityGridEntityPointer <codim,GridImp>
+    public Dune::IdentityGridEntityPointer<codim,GridImp,typename GridImp::HostGridType::template Codim<codim>::template Partition<pitype>::LeafIterator>
   {
   private:
 
-    enum {dim = GridImp::dimension};
+    // LevelIterator to the equivalent entity in the host grid
+    typedef typename GridImp::HostGridType::template Codim<codim>::template Partition<pitype>::LeafIterator HostGridLeafIterator;
 
+    typedef Dune::IdentityGridEntityPointer<codim,GridImp,HostGridLeafIterator> Base;
 
   public:
 
     //! \todo Please doc me !
     explicit IdentityGridLeafIterator(const GridImp* identityGrid) :
-      IdentityGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template leafbegin<codim>()),
-      hostGridLeafIterator_(identityGrid->hostgrid_->template leafbegin<codim>()),
-      hostGridLeafEndIterator_(identityGrid->hostgrid_->template leafend<codim>())
-    {
-      this->virtualEntity_.setToTarget(hostGridLeafIterator_);
-    }
-
+      Base(identityGrid, identityGrid->hostgrid_->leafGridView().template begin<codim,pitype>())
+    {}
 
     /** \brief Constructor which create the end iterator
      *  \param endDummy      Here only to distinguish it from the other constructor
      *  \param identityGrid  pointer to grid instance
      */
     explicit IdentityGridLeafIterator(const GridImp* identityGrid, bool endDummy) :
-      IdentityGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template leafend<codim>()),
-      hostGridLeafIterator_(identityGrid->hostgrid_->template leafbegin<codim>()),
-      hostGridLeafEndIterator_(identityGrid->hostgrid_->template leafend<codim>())
+      Base(identityGrid, identityGrid->hostgrid_->leafGridView().template end<codim,pitype>())
     {}
 
 
     //! prefix increment
     void increment() {
-      ++hostGridLeafIterator_;
-      this->virtualEntity_.setToTarget(hostGridLeafIterator_);
+      ++this->hostEntityPointer_;
     }
-
-
-  private:
-
-    // /////////////////////////////////////
-    //   Data members
-    // /////////////////////////////////////
-
-    // LevelIterator to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::template Codim<codim>::LeafIterator HostGridLeafIterator;
-
-    //! \todo Please doc me !
-    HostGridLeafIterator hostGridLeafIterator_;
-
-    //! \todo Please doc me !
-    HostGridLeafIterator hostGridLeafEndIterator_;
 
   };
 

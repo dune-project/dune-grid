@@ -6,6 +6,9 @@ GRIDTYPE=YASPGRID
 # The directory where the example grid files used for testing are located
 AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
 
+noinst_HEADERS =				\
+	checkvtkfile.hh
+
 # run amiramesh test only if amiramesh was found
 if AMIRAMESH
 if PSURFACE
@@ -98,7 +101,8 @@ gmshtest_alberta3d_LDFLAGS  = $(AM_LDFLAGS)  $(ALBERTA3D_LDFLAGS)  $(GRAPE_LDFLA
 gmshtest_alberta3d_LDADD    =	$(GRAPE_LIBS)	 $(ALBERTA3D_LIBS)		 $(LDADD)
 
 gmshtest_alugrid_SOURCES  = gmshtest.cc
-gmshtest_alugrid_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(GRAPE_CPPFLAGS) $(GRIDDIM_CPPFLAGS)
+gmshtest_alugrid_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(GRAPE_CPPFLAGS) $(GRIDDIM_CPPFLAGS) \
+	-DDUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE
 gmshtest_alugrid_LDFLAGS  = $(AM_LDFLAGS)	 $(ALUGRID_LDFLAGS)	 $(GRAPE_LDFLAGS)
 gmshtest_alugrid_LDADD    =	$(GRAPE_LIBS)	 $(ALUGRID_LIBS)		 $(LDADD)
 

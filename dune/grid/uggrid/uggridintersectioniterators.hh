@@ -22,6 +22,9 @@ namespace Dune {
   public:
     typedef Dune::Intersection< GridImp, Dune::UGGridLevelIntersection< GridImp > > Intersection;
 
+    UGGridLevelIntersectionIterator()
+    {}
+
     /** The default Constructor makes empty Iterator
      */
     UGGridLevelIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
@@ -49,7 +52,7 @@ namespace Dune {
 
   private:
 
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+    mutable Intersection intersection_;
 
   };
 
@@ -67,6 +70,9 @@ namespace Dune {
   public:
 
     typedef Dune::Intersection< GridImp, Dune::UGGridLeafIntersection< GridImp > > Intersection;
+
+    UGGridLeafIntersectionIterator()
+    {}
 
     UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : intersection_(UGGridLeafIntersection<GridImp>(center,nb,gridImp))
@@ -119,7 +125,7 @@ namespace Dune {
 
   private:
 
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+    mutable Intersection intersection_;
 
   };
 

@@ -43,6 +43,12 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
+    UGGridLevelIntersection()
+      : center_(nullptr)
+      , neighborCount_(-1) // fixed marker value for invalid intersections to make equals() work
+      , gridImp_(nullptr)
+    {}
+
     /** The default Constructor makes empty Iterator
         \todo Should be private
      */
@@ -58,19 +64,19 @@ namespace Dune {
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the entity where we started this iterator)
-    EntityPointer inside() const {
-      return UGGridEntityPointer<0,GridImp>(center_,gridImp_);
+    Entity inside() const {
+      return Entity(UGGridEntity<0,dim,GridImp>(center_,gridImp_));
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
     //! (that is the neighboring Entity)
-    EntityPointer outside() const {
+    Entity outside() const {
       typename UG_NS<dim>::Element* otherelem = UG_NS<dim>::NbElem(center_, neighborCount_);
 
       if (otherelem==0)
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
-      return UGGridEntityPointer<0,GridImp>(otherelem,gridImp_);
+      return Entity(UGGridEntity<0,dim,GridImp>(otherelem,gridImp_));
     }
 
     //! return true if intersection is with boundary.
@@ -222,6 +228,13 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
+    UGGridLeafIntersection()
+      : center_(nullptr)
+      , neighborCount_(-1)                  // fixed marker value for invalid intersections to make equals() work
+      , subNeighborCount_(~unsigned(0))     // fixed marker value for invalid intersections to make equals() work
+      , gridImp_(nullptr)
+    {}
+
     UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb, const GridImp* gridImp)
       : center_(center), neighborCount_(nb), subNeighborCount_(0),
         gridImp_(gridImp)
@@ -239,13 +252,13 @@ namespace Dune {
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const {
-      return UGGridEntityPointer<0,GridImp>(center_,gridImp_);
+    Entity inside() const {
+      return Entity(UGGridEntity<0,dim,GridImp>(center_,gridImp_));
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
     //! (that is the neighboring Entity)
-    EntityPointer outside() const {
+    Entity outside() const {
 
       const typename UG_NS<dim>::Element* otherelem = leafSubFaces_[subNeighborCount_].first;
 
@@ -253,7 +266,7 @@ namespace Dune {
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
       /** \todo Remove the const_cast */
-      return UGGridEntityPointer<0,GridImp>(const_cast<typename UG_NS<dim>::Element*>(otherelem),gridImp_);
+      return Entity(UGGridEntity<0,dim,GridImp>(const_cast<typename UG_NS<dim>::Element*>(otherelem),gridImp_));
     }
 
     //! return true if intersection is with boundary.

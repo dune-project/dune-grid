@@ -1,6 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id$
 
 #include <config.h>
 
@@ -8,10 +7,10 @@
 
 #include <dune/grid/sgrid.hh>
 
-#include "gridcheck.cc"
-#include "checkgeometryinfather.cc"
-#include "checkintersectionit.cc"
-#include "checkpartition.cc"
+#include "gridcheck.hh"
+#include "checkgeometryinfather.hh"
+#include "checkintersectionit.hh"
+#include "checkpartition.hh"
 
 template<int d, int w>
 void runtest()

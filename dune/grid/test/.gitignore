@@ -12,6 +12,7 @@ test-alberta-2-3
 test-alberta-3-3
 test-alberta-generic
 test-geogrid
+test-loadbalancing
 test-mcmg-geogrid
 test-identitygrid
 test-sgrid
@@ -32,3 +33,5 @@ alugrid.cfg
 *.swp
 *.vtu
 
+testiteratorranges
+test-hierarchicsearch

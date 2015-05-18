@@ -119,6 +119,7 @@ namespace Dune
         typedef Dune::Geometry< dim-cd, dimworld, const Grid, AlbertaGridGlobalGeometry > Geometry;
         typedef Dune::Geometry< dim-cd, dim, const Grid, LocalGeometryReference > LocalGeometry;
 
+        typedef AlbertaGridEntity< cd, dim, const GridImp > EntityImpl;
         typedef Dune::Entity< cd, dim, const GridImp, AlbertaGridEntity > Entity;
 
         typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
@@ -143,8 +144,8 @@ namespace Dune
         typedef Dune::GridView<AlbertaLeafGridViewTraits<const GridImp,pitype> > LeafGridView;
       };
 
-      typedef IndexSet< GridImp, LevelIndexSetImp, int > LevelIndexSet;
-      typedef IndexSet< GridImp, LeafIndexSetImp, int > LeafIndexSet;
+      typedef IndexSet< GridImp, LevelIndexSetImp, int, std::array< GeometryType, 1 > > LevelIndexSet;
+      typedef IndexSet< GridImp, LeafIndexSetImp, int, std::array< GeometryType, 1 > > LeafIndexSet;
       typedef AlbertaGridHierarchicIndexSet< dim, dimworld > HierarchicIndexSet;
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;

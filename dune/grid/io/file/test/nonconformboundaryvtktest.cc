@@ -17,7 +17,7 @@
 #include <dune/grid/io/file/vtk/boundarywriter.hh>
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/grid/io/file/vtk/skeletonfunction.hh>
-#include <dune/grid/sgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 
 template< class GridView >
 class ScalarFunction
@@ -90,27 +90,38 @@ void doWrite( const GridView &gridView )
 }
 
 template<int dim>
-void vtkCheck(int* n, double* h)
+void vtkCheck(const Dune::array<int,dim>& n,
+              const Dune::FieldVector<double,dim>& h)
 {
-  const Dune :: PartitionIteratorType VTK_Partition = Dune :: InteriorBorder_Partition;
   std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
-  Dune::SGrid<dim,dim> g(n, h);
-  g.globalRefine(1);
+  Dune::YaspGrid<dim> grid(h, n);
+  grid.globalRefine(1);
 
-  doWrite( g.template leafGridView< VTK_Partition >() );
-  doWrite( g.template levelGridView< VTK_Partition >( 0 ) );
-  doWrite( g.template levelGridView< VTK_Partition >( g.maxLevel() ) );
+  doWrite( grid.template leafGridView() );
+  doWrite( grid.template levelGridView( 0 ) );
+  doWrite( grid.template levelGridView( grid.maxLevel() ) );
 }
 
 int main(int argc, char **argv)
 {
-  try {
+  try
+  {
+    const Dune::MPIHelper &mpiHelper = Dune::MPIHelper::instance(argc, argv);
 
-    int n[] = { 5, 5, 5, 5 };
-    double h[] = { 1.0, 2.0, 3.0, 4.0 };
+    if(mpiHelper.rank() == 0)
+      std::cout << "subsamplingvtktest: MPI_Comm_size == " << mpiHelper.size()
+                << std::endl;
 
-    vtkCheck<2>(n,h);
-    vtkCheck<3>(n,h);
+    {
+      Dune::array<int,2> n = { { 5, 5 } };
+      Dune::FieldVector<double,2> h = { 1.0, 2.0 };
+      vtkCheck<2>(n,h);
+    }
+    {
+      Dune::array<int,3> n = { { 5, 5, 5 } };
+      Dune::FieldVector<double,3> h = { 1.0, 2.0, 3.0 };
+      vtkCheck<3>(n,h);
+    }
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;

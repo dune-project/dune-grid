@@ -220,7 +220,6 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline const DofSpace *
     HierarchyDofNumbering< dim >::createDofSpace ( const MeshPointer &mesh,
@@ -232,39 +231,14 @@ namespace Dune
         = ADM_PRESERVE_COARSE_DOFS | (periodic ? ADM_PERIODIC : 0);
       return ALBERTA get_dof_space ( mesh, name.c_str(), ndof, flags );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-#if DUNE_ALBERTA_VERSION == 0x200
-    template< int dim >
-    inline const DofSpace *
-    HierarchyDofNumbering< dim >::createDofSpace ( const MeshPointer &mesh,
-                                                   const std::string &name,
-                                                   const int (&ndof)[ nNodeTypes ],
-                                                   const bool periodic )
-    {
-      return ALBERTA get_fe_space( mesh, name.c_str(), ndof, NULL, 1 );
-    }
-#endif // #if DUNE_ALBERTA_VERSION == 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline void
     HierarchyDofNumbering< dim >::freeDofSpace ( const DofSpace *dofSpace )
     {
       ALBERTA free_fe_space( dofSpace );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-#if DUNE_ALBERTA_VERSION == 0x200
-    template< int dim >
-    inline void
-    HierarchyDofNumbering< dim >::freeDofSpace ( const DofSpace *dofSpace )
-    {
-      // the const cast is needed due to a bug in ALBERTA 2.0
-      ALBERTA free_fe_space( const_cast< DofSpace * >( dofSpace ) );
-    }
-#endif // #if DUNE_ALBERTA_VERSION == 0x200
 
 
 

@@ -4,6 +4,7 @@
 #define DUNE_GEOGRID_GRID_HH
 
 #include <dune/common/nullptr.hh>
+#include <dune/common/deprecated.hh>
 
 #include <dune/grid/common/grid.hh>
 
@@ -90,8 +91,6 @@ namespace Dune
     friend class GeoGrid::HierarchicIterator< const Grid >;
 
     template< int, class, bool > friend class GeoGrid::EntityBase;
-    template< class, bool > friend class GeoGrid::EntityPointer;
-    template< int, class > friend class GeoGrid::EntityProxy;
     template< int, int, class > friend class GeoGrid::Geometry;
     template< class, class, class, PartitionIteratorType > friend class GeoGrid::GridView;
     template< class, class > friend class GeoGrid::Intersection;
@@ -569,10 +568,20 @@ namespace Dune
     /** \brief obtain EntityPointer from EntitySeed. */
     template< class EntitySeed >
     typename Traits::template Codim< EntitySeed::codimension >::EntityPointer
+    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
     entityPointer ( const EntitySeed &seed ) const
     {
-      typedef typename Traits::template Codim< EntitySeed::codimension >::EntityPointerImpl EntityPointerImpl;
-      return EntityPointerImpl( *this, seed );
+      typedef typename Traits::template Codim< EntitySeed::codimension >::Entity Entity;
+      return DefaultEntityPointer< Entity >( entity( seed ) );
+    }
+
+    /** \brief obtain Entity from EntitySeed. */
+    template< class EntitySeed >
+    typename Traits::template Codim< EntitySeed::codimension >::Entity
+    entity ( const EntitySeed &seed ) const
+    {
+      typedef typename Traits::template Codim< EntitySeed::codimension >::EntityImpl EntityImpl;
+      return EntityImpl( *this, seed );
     }
 
     /** \} */
@@ -655,12 +664,10 @@ namespace Dune
 
     using Base::getRealImplementation;
 
-  protected:
-    const CoordFunction &coordFunction () const
-    {
-      return coordFunction_;
-    }
+    const CoordFunction &coordFunction () const { return coordFunction_; }
+    CoordFunction &coordFunction () { return coordFunction_; }
 
+  protected:
     template< int codim >
     static const typename HostGrid::template Codim< codim >::Entity &
     getHostEntity( const typename Codim< codim >::Entity &entity )

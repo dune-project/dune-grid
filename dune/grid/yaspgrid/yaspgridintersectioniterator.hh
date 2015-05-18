@@ -19,11 +19,10 @@ namespace Dune {
   class YaspIntersectionIterator
   {
     enum { dim=GridImp::dimension };
-    YaspIntersectionIterator();
   public:
     // types used from grids
-    typedef Dune::Intersection< GridImp, Dune::YaspIntersection< GridImp > > Intersection;
-    typedef MakeableInterfaceObject<Intersection> MakeableIntersection;
+    typedef Dune::YaspIntersection< GridImp > IntersectionImp;
+    typedef Dune::Intersection< GridImp, IntersectionImp > Intersection;
 
     //! increment
     void increment()
@@ -34,19 +33,22 @@ namespace Dune {
     //! equality
     bool equals (const YaspIntersectionIterator& other) const
     {
-      return GridImp::getRealImplementation(intersection_)._inside.equals(GridImp::getRealImplementation(other.intersection_)._inside)
-             and (GridImp::getRealImplementation(intersection_)._count == GridImp::getRealImplementation(other.intersection_)._count);
+      return intersection_ == other.intersection_;
     }
 
     //! \brief dereferencing
     const Intersection & dereference() const
     {
+      GridImp::getRealImplementation(intersection_).update();
       return intersection_;
     }
 
+    YaspIntersectionIterator()
+    {}
+
     //! make intersection iterator from entity
     YaspIntersectionIterator (const YaspEntity<0,dim,GridImp>& myself, bool toend)
-      : intersection_(MakeableIntersection(YaspIntersection<GridImp>(myself, toend)))
+      : intersection_(IntersectionImp(myself, toend))
     {}
 
     //! copy constructor
@@ -57,14 +59,13 @@ namespace Dune {
     //! assignment
     YaspIntersectionIterator & operator = (const YaspIntersectionIterator& other)
     {
-      GridImp::getRealImplementation(intersection_).assign(
-        GridImp::getRealImplementation(other.intersection_));
+      intersection_ = other.intersection_;
       return *this;
     }
 
   private:
     // The intersection this iterator points to
-    mutable MakeableIntersection intersection_;
+    mutable Intersection intersection_;
   };
 
 }        // namespace Dune

@@ -132,6 +132,8 @@ namespace Dune {
       DUNE_THROW(NotImplemented, "Wrong codim!");
     }
 
+    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
+
     /** \brief Deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
@@ -272,6 +274,8 @@ namespace Dune {
       return s;
     }
 
+    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
+
     /** deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
@@ -408,20 +412,49 @@ namespace Dune {
 #endif
       }
 
-#if defined ModelP
+      if (dim-cd==1) {
+
+        const typename UG_NS<dim>::Edge* edge = (typename UG_NS<dim>::Edge* const)(grid_.getRealImplementation(e).getTarget());
+
+        // If this edge is the copy of an edge on a lower level we return the id of that lower
+        // edge, because Dune wants entities which are copies of each other to have the same id.
+        // BUG: in the parallel setting, we only search on our own processor, but the lowest
+        // copy may actually be on a different processor!
+        const typename UG_NS<dim>::Edge* fatherEdge;
+        fatherEdge = GetFatherEdge(edge);
+
+        while (fatherEdge   // fatherEdge exists
+               // ... and it must be a true copy father
+               && ( (fatherEdge->links[0].nbnode->myvertex == edge->links[0].nbnode->myvertex
+                     && fatherEdge->links[1].nbnode->myvertex == edge->links[1].nbnode->myvertex)
+                    ||
+                    (fatherEdge->links[0].nbnode->myvertex == edge->links[1].nbnode->myvertex
+                     && fatherEdge->links[1].nbnode->myvertex == edge->links[0].nbnode->myvertex) ) ) {
+          edge = fatherEdge;
+          fatherEdge = GetFatherEdge(edge);
+        }
+
+#ifdef ModelP
+        return edge->ddd.gid;
+#else
+        return edge->id;
+#endif
+      }
+
+
       if (cd == dim) {
         typename UG_NS<dim>::Node *node =
           reinterpret_cast<typename UG_NS<dim>::Node *>(grid_.getRealImplementation(e).getTarget());
 
+#ifdef ModelP
         return node->myvertex->iv.ddd.gid;
-      }
-      else {
-        DUNE_THROW(NotImplemented,
-                   "persistent ids for entities which are neither nodes nor elements.");
-      }
 #else
-      return UG_NS<dim>::id(grid_.getRealImplementation(e).getTarget());
+        return UG_NS<dim>::id(node);
 #endif
+      }
+
+      DUNE_THROW(NotImplemented,
+                 "Ids for faces are not implemented yet!");
 
     }
 

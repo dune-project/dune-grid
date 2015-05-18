@@ -321,7 +321,7 @@ namespace Dune {
           ReferenceElementContainerType :: general( element.type() );
 
         // count all sub entities of codimension codim
-        const int count = element.template count< codim > ();
+        const int count = element.subEntities( codim );
         for( int i=0; i< count; ++ i )
         {
           // get geometry type

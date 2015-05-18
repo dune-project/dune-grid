@@ -56,7 +56,6 @@ namespace Dune {
     template<int cc>
     IndexType index (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e) const
     {
-      assert( cc == 0 || cc == GridImp::dimension );
       return grid.getRealImplementation(e).compressedIndex();
     }
 
@@ -96,6 +95,8 @@ namespace Dune {
         ? e.level() == grid.maxLevel()
         : e.level() == level;
     }
+
+    std::vector< GeometryType > types ( int codim ) const { return mytypes[ codim ]; }
 
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const

@@ -3,7 +3,7 @@
 #include "config.h"
 #include <iostream>
 #include <ostream>
-#include <dune/grid/sgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 #include <dune/grid/io/file/gnuplot.hh>
 
 template <class GV>
@@ -33,13 +33,16 @@ void testIO(const GV & gridView, std::string fname)
 
 int main()
 {
-  try {
-    int n[] = { 10 };
-    double h[] = { 1.0 };
-    Dune::SGrid<1,1> sgrid(n,h);
+  try
+  {
+    const unsigned int dim = 1;
+    Dune::FieldVector<double,dim> length(1.0);
+    std::array<int,dim> elements;
+    elements[0] = 10;
+    Dune::YaspGrid<1> grid(length, elements);
 
-    testIO(sgrid.leafGridView<Dune::InteriorBorder_Partition>(), "sgrid-leaf.data");
-    testIO(sgrid.levelGridView<Dune::InteriorBorder_Partition>(0), "sgrid-level.data");
+    testIO(grid.leafGridView(), "grid-leaf.data");
+    testIO(grid.levelGridView(0), "grid-level.data");
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
     return 1;

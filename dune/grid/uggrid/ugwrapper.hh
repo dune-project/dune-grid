@@ -37,7 +37,7 @@ namespace Dune {
 #define UG_NAMESPACE UG::D3
 #endif
 
-    enum {
+    enum Priorities {
       PrioNone = UG_NAMESPACE::PrioNone,
       PrioMaster = UG_NAMESPACE::PrioMaster,
       PrioBorder = UG_NAMESPACE::PrioBorder,
@@ -401,7 +401,7 @@ namespace Dune {
       return FIRSTELEMENT(grid);
     }
 
-    /** \brief Returns pointers to the coordinate arrays of an UG element */
+    /** \brief Returns pointers to the coordinate arrays of a UG element */
     static void Corner_Coordinates(const UG_NS< UG_DIM >::Element* theElement, double* x[]) {
       using UG_NAMESPACE ::NODE;
       using UG_NAMESPACE ::TRIANGLE;
@@ -415,9 +415,27 @@ namespace Dune {
       CORNER_COORDINATES(theElement, n, x);
     }
 
-    /** \brief Returns pointers to the coordinate arrays of an UG node */
+    /** \brief Returns pointers to the coordinate arrays of a UG node */
     static void Corner_Coordinates(const UG_NS< UG_DIM >::Node* theNode, double* x[]) {
       x[0] = theNode->myvertex->iv.x;
+    }
+
+    /** \brief Returns pointers to the coordinate arrays of a UG edge */
+    static void Corner_Coordinates(const UG_NS< UG_DIM >::Edge* theEdge, double* x[]) {
+      x[0] = theEdge->links[0].nbnode->myvertex->iv.x;
+      x[1] = theEdge->links[1].nbnode->myvertex->iv.x;
+    }
+
+    /** \brief Returns pointers to the coordinate arrays of a UG vector */
+    static void Corner_Coordinates(const UG_NS< UG_DIM >::Vector* theVector, double* x[]) {
+      UG_NS< UG_DIM >::Element* center;
+      unsigned int side;
+      UG_NS< UG_DIM >::GetElementAndSideFromSideVector(theVector, center, side);
+      for (int i = 0; i < Corners_Of_Side(center, side); i++)
+      {
+        unsigned idxInElem = Corner_Of_Side(center, side, i);
+        x[i] = Corner(center, idxInElem)->myvertex->iv.x;
+      }
     }
 
     static int GlobalToLocal(int n, const double** cornerCoords,
@@ -473,7 +491,7 @@ namespace Dune {
       return REFINECLASS(theElement) == YELLOW_CLASS;
     }
 
-    //! return true if element has an exact copy on the next level
+    //! Returns true if element is on level 0 or has been created by red refinement
     static bool isRegular (const UG_NS< UG_DIM >::Element* theElement) {
       using UG_NAMESPACE ::ELEMENT;
       using UG_NAMESPACE ::control_entries;
@@ -627,19 +645,6 @@ namespace Dune {
       return 0;
     }
 
-    /** \brief Set the vcount, which in a 3d UG grid, is the number of elements associated to
-     *         a SideVector (1 or 2)
-     *
-     *  This is needed for hacking around bugs in the UG handling of SideVectors
-     */
-    static void setVCount(const UG_NS< UG_DIM >::Element* theElement, int side, int count)
-    {
-      using UG::UINT;
-      typedef UG_NAMESPACE ::vector VECTOR;
-      using UG_NAMESPACE ::svector_offset;
-      SETVCOUNT(SVECTOR(theElement,side),count);
-    }
-
     //! Return true if the element is a ghost element
 #ifdef ModelP
     static bool isGhost(const UG_NS< UG_DIM >::Element* theElement) {
@@ -744,14 +749,14 @@ namespace Dune {
     }
 
     //! Gets the leaf index of a UG sidevector
-    static unsigned int& leafIndex(Vector* theVector) {
+    static UG::UINT& leafIndex(Vector* theVector) {
       // theVector->skip is actually something other than an index.
       // We use it anyways.
       return theVector->skip;
     }
 
     //! Gets the leaf index of a UG sidevector
-    static const unsigned int& leafIndex(const Vector* theVector) {
+    static const UG::UINT& leafIndex(const Vector* theVector) {
       // theVector->skip is actually something other than an index.
       // We use it anyways.
       return theVector->skip;
@@ -1022,9 +1027,11 @@ namespace Dune {
       return UG_NAMESPACE ::GetMultigrid(name);
     }
 
-    static int LBCommand(int argc, const char** argv) {
-      /** \todo Can we remove the cast? */
-      return UG_NAMESPACE ::LBCommand(argc, (char**)argv);
+    /** \brief Load-balance the grid by recursive coordinate bisection */
+    static void lbs(const char *argv, UG_NAMESPACE ::multigrid *theMG) {
+#ifdef ModelP
+      return UG_NAMESPACE ::lbs(argv, theMG);
+#endif
     }
 
     //! An UG-internal load balancing method
@@ -1064,7 +1071,7 @@ namespace Dune {
 
     static void* CreateBoundarySegment(const char *name, int left, int right,
                                        int index, int res,
-                                       int *point,
+                                       UG::INT *point,
                                        const double *alpha, const double *beta,
                                        UG_NAMESPACE ::BndSegFuncPtr boundarySegmentFunction,
                                        void *userData) {
@@ -1084,7 +1091,7 @@ namespace Dune {
     static void* CreateLinearSegment(const char *name,
                                      int left, int right,
                                      int index, int numVertices,
-                                     const int* cornerIndices,
+                                     const UG::INT* cornerIndices,
                                      double cornerCoordinates[2][ UG_DIM ])
     {
       return UG_NAMESPACE ::CreateLinearSegment(name,            // internal name of the boundary segment

@@ -37,10 +37,7 @@ namespace Dune {
     /** \brief Default constructor
      */
     UGGridGeometry()
-    {
-      jacobianIsUpToDate_ = false;
-      jacobianInverseIsUpToDate_ = false;
-    }
+    {}
 
     /** \brief Return the element type identifier
      *
@@ -103,9 +100,9 @@ namespace Dune {
     }
 
     //! The inverse transpose of the Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<UGCtype, coorddim,mydim>& jacobianInverseTransposed (const FieldVector<UGCtype, mydim>& local) const;
+    FieldMatrix<UGCtype, coorddim,mydim> jacobianInverseTransposed (const FieldVector<UGCtype, mydim>& local) const;
     //! The transpose of the Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<UGCtype, mydim,coorddim>& jacobianTransposed (const FieldVector<UGCtype, mydim>& local) const;
+    FieldMatrix<UGCtype, mydim,coorddim> jacobianTransposed (const FieldVector<UGCtype, mydim>& local) const;
 
 
   private:
@@ -114,20 +111,7 @@ namespace Dune {
     void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target)
     {
       target_ = target;
-      jacobianIsUpToDate_ = false;
-      jacobianInverseIsUpToDate_ = false;
     }
-
-    //! The jacobian inverse transposed
-    mutable FieldMatrix<UGCtype,coorddim,mydim> jac_inverse_;
-    //! The jacobian transposed
-    mutable FieldMatrix<UGCtype,mydim,coorddim> jac_;
-
-    /** \brief For simplices the Jacobian matrix is a constant, hence it needs
-        to be computed only once for each new element.  This can save some
-        assembly time. */
-    mutable bool jacobianInverseIsUpToDate_;
-    mutable bool jacobianIsUpToDate_;
 
     // in element mode this points to the element we map to
     // in coord_mode this is the element whose reference element is mapped into the father's one
@@ -145,13 +129,33 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry<2, 3, GridImp> :
-    public CachedMultiLinearGeometry<typename GridImp::ctype, 2, 3>
+    public MultiLinearGeometry<typename GridImp::ctype, 2, 3>
   {
   public:
 
     /** \brief Constructor from a given geometry type and a vector of corner coordinates */
     UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
-      : CachedMultiLinearGeometry<typename GridImp::ctype, 2, 3>(type, coordinates)
+      : MultiLinearGeometry<typename GridImp::ctype, 2, 3>(type, coordinates)
+    {}
+
+  };
+
+
+  /****************************************************************/
+  /*                                                              */
+  /*       Specialization for edges in 3d                         */
+  /*                                                              */
+  /****************************************************************/
+
+  template<class GridImp>
+  class UGGridGeometry<1, 3, GridImp> :
+    public MultiLinearGeometry<typename GridImp::ctype, 1, 3>
+  {
+  public:
+
+    /** \brief Constructor from a given geometry type and a vector of corner coordinates */
+    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
+      : MultiLinearGeometry<typename GridImp::ctype, 1, 3>(type, coordinates)
     {}
 
   };
@@ -165,13 +169,13 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry <1, 2, GridImp> :
-    public CachedMultiLinearGeometry<typename GridImp::ctype,1,2>
+    public MultiLinearGeometry<typename GridImp::ctype,1,2>
   {
   public:
 
     /** \brief Constructor from a given geometry type and a vector of corner coordinates */
     UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,2> >& coordinates)
-      : CachedMultiLinearGeometry<typename GridImp::ctype, 1, 2>(type, coordinates)
+      : MultiLinearGeometry<typename GridImp::ctype, 1, 2>(type, coordinates)
     {}
 
   };

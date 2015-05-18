@@ -1,8 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#ifndef DUNE_MCMGMAPPER_HH
-#define DUNE_MCMGMAPPER_HH
+#ifndef DUNE_GRID_COMMON_MCMGMAPPER_HH
+#define DUNE_GRID_COMMON_MCMGMAPPER_HH
 
 #include <iostream>
 #include <map>
@@ -100,9 +100,12 @@ namespace Dune
    */
   template <typename GV, template<int> class Layout>
   class MultipleCodimMultipleGeomTypeMapper :
-    public Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,Layout> >
+    public Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,Layout>, typename GV::IndexSet::IndexType >
   {
   public:
+
+    /** \brief Number type used for indices */
+    typedef typename GV::IndexSet::IndexType Index;
 
     /** @brief Construct mapper from grid and one of its index sets.
      *
@@ -141,9 +144,25 @@ namespace Dune
      * \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    int map (const EntityType& e) const
+    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const EntityType& e) const
     {
       const GeometryType gt = e.type();
+      assert(layout.contains(gt));
+      return is.index(e) + offset[GlobalGeometryTypeIndex::index(gt)];
+    }
+
+    /*!
+     * \brief Map entity to array index.
+     *
+     * \tparam EntityType
+     * \param e Reference to codim \a EntityType entity.
+     * \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    template<class EntityType>
+    Index index (const EntityType& e) const
+    {
+      const GeometryType gt = e.type();
+      assert(layout.contains(gt));
       return is.index(e) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 
@@ -154,10 +173,24 @@ namespace Dune
        \param codim Codimension of the subentity
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    int map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
       GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
-      assert(GlobalGeometryTypeIndex::index(gt) < n);
+      assert(layout.contains(gt));
+      return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
+    }
+
+    /** @brief Map subentity of codim 0 entity to array index.
+
+       \param e Reference to codim 0 entity.
+       \param i Number of subentity of e
+       \param codim Codimension of the subentity
+       \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    Index subIndex (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    {
+      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
+      assert(layout.contains(gt));
       return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 
@@ -181,7 +214,7 @@ namespace Dune
        \return true if entity is in entity set of the mapper
      */
     template<class EntityType>
-    bool contains (const EntityType& e, int& result) const
+    bool contains (const EntityType& e, Index& result) const
     {
       if(!is.contains(e) || !layout.contains(e.type()))
       {
@@ -200,9 +233,12 @@ namespace Dune
        \param result integer reference where corresponding index is  stored if true
        \return true if entity is in entity set of the mapper
      */
-    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, int& result) const
+    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, Index& result) const
     {
-      result = this->map(e,i,cc);
+      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
+      if (not layout.contains(gt))
+        return false;
+      result = is.subIndex(e, i, cc) + offset[GlobalGeometryTypeIndex::index(gt)];
       return true;
     }
 
@@ -215,8 +251,8 @@ namespace Dune
       for (unsigned int codim = 0; codim <= GV::dimension; ++codim)
       {
         // walk over all geometry types in the codimension
-        typedef std::vector<GeometryType> GTV;
-        const GTV &gtv = is.geomTypes(codim);
+        typedef typename GV::IndexSet::Types GTV;
+        GTV gtv = is.types(codim);
         for (typename GTV::const_iterator it = gtv.begin(); it != gtv.end(); ++it)
         {
           // if the geometry type is contained in the layout, increment offset

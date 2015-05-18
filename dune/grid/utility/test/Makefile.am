@@ -5,6 +5,19 @@ TESTS =
 check_PROGRAMS =
 
 # define the programs
+TESTS += globalindexsettest
+check_PROGRAMS += globalindexsettest
+globalindexsettest_SOURCES = globalindexsettest.cc
+globalindexsettest_CPPFLAGS = $(AM_CPPFLAGS) \
+                              $(DUNEMPICPPFLAGS) \
+	                      $(UG_CPPFLAGS)
+globalindexsettest_LDFLAGS = $(AM_LDFLAGS) \
+                             $(DUNEMPILDFLAGS) \
+	                     $(UG_LDFLAGS)
+globalindexsettest_LDADD = $(UG_LIBS) $(DUNEMPILIBS) \
+                           $(LDADD)
+
+# define the programs
 TESTS += structuredgridfactorytest
 check_PROGRAMS += structuredgridfactorytest
 structuredgridfactorytest_SOURCES = structuredgridfactorytest.cc
@@ -28,6 +41,20 @@ oddpartitionertest_LDFLAGS = $(AM_LDFLAGS)	\
 oddpartitionertest_LDADD =			\
 	$(ALBERTA2D_LIBS)			\
 	$(LDADD)
+
+TESTS += tensorgridfactorytest
+check_PROGRAMS += tensorgridfactorytest
+tensorgridfactorytest_SOURCES = tensorgridfactorytest.cc
+tensorgridfactorytest_CPPFLAGS = $(AM_CPPFLAGS) \
+	                            $(DUNEMPICPPFLAGS) \
+	                            $(UG_CPPFLAGS)
+tensorgridfactorytest_LDFLAGS = $(AM_LDFLAGS) \
+	                            $(DUNEMPILDFLAGS) \
+	                            $(UG_LDFLAGS)
+tensorgridfactorytest_LDADD = $(UG_LIBS) \
+	                            $(DUNEMPILIBS) \
+                                $(LDADD)
+
 
 TESTS += vertexordertest
 check_PROGRAMS += vertexordertest

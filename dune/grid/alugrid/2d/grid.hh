@@ -350,7 +350,7 @@ namespace Dune {
               const int nrOfHangingNodes,
               const DuneBoundaryProjectionType*,
               const DuneBoundaryProjectionVector*,
-              std::istream* macroFile = 0);
+              std::istream* macroFile = 0) DUNE_DEPRECATED_MSG("ALUGrid is deprecated, please use the new module DUNE-ALUGrid.");
 
     // method creating mesh object
     HmeshType* createGrid(const std::string&,

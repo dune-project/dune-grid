@@ -78,6 +78,8 @@ namespace Dune
     //! constructor
     explicit AlbertaGridEntity ( const Grid &grid );
 
+    AlbertaGridEntity ();
+
     //! contructor
     AlbertaGridEntity ( const Grid &grid, const ElementInfo &elementInfo, int subEntity );
 
@@ -179,6 +181,8 @@ namespace Dune
     {
       typedef typename Grid::template Codim< codim >::EntityPointer
       EntityPointer;
+      typedef typename Grid::template Codim< codim >::Entity
+      Entity;
     };
 
     typedef typename Grid::template Codim< 0 >::Entity Entity;
@@ -197,6 +201,8 @@ namespace Dune
 
     //! constructor
     explicit AlbertaGridEntity ( const Grid &grid );
+
+    AlbertaGridEntity ();
 
     //! constructor
     AlbertaGridEntity ( const Grid &grid, const ElementInfo &elementInfo, int subEntity );
@@ -236,7 +242,7 @@ namespace Dune
      *
      *  \returns the number of subentities of the given codimension
      */
-    unsigned int count (unsigned int codim) const
+    unsigned int subEntities (unsigned int codim) const
     {
       int n = dimension+1;
       int k = dimension-codim+1;
@@ -262,7 +268,7 @@ namespace Dune
      *  \note: The subentities are numbered 0, ..., count< codim >-1
      */
     template< int codim >
-    typename Codim< codim >::EntityPointer subEntity ( int i ) const;
+    typename Grid::template Codim< codim >::Entity subEntity ( int i ) const;
 
     /*! Intra-level access to intersection with neighboring elements.
        A neighbor is an entity of codimension 0
@@ -295,7 +301,7 @@ namespace Dune
 
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
-    EntityPointer father () const;
+    Entity father () const;
     //! returns true if father entity exists
     bool hasFather () const
     {

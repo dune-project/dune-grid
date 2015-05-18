@@ -10,6 +10,7 @@
 #include <string>
 #include <map>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
@@ -35,18 +36,37 @@ namespace Dune
   template< class Grid >
   struct HostGridAccess;
 
+  namespace {
+
+    // This is just a placeholder to stuff into the standard
+    // GridTraits, as those expect an EntityPointer implementation
+    // with two template parameters, but our EntityPointer uses three.
+    template<int,typename>
+    struct DummyIdentityGridEntityPointer
+    {};
+
+  }
 
 
   template<int dim, class HostGrid>
   struct IdentityGridFamily
   {
+
+  private:
+
+    // The type signature of our EntityPointer implementation does not fit into
+    // the scheme expected by GridTraits, so we have to provide our own Traits
+    // On the other hand, we don't want to retype everything, so we just inherit
+    // from the default Traits and just tweak the EntityPointer type in the derived
+    // Traits class
+
     typedef GridTraits<
         dim,
         HostGrid::dimensionworld,
         Dune::IdentityGrid<HostGrid>,
         IdentityGridGeometry,
         IdentityGridEntity,
-        IdentityGridEntityPointer,
+        DummyIdentityGridEntityPointer, // placeholder
         IdentityGridLevelIterator,
         IdentityGridLeafIntersection,
         IdentityGridLevelIntersection,
@@ -64,7 +84,37 @@ namespace Dune
         DefaultLevelGridViewTraits,
         DefaultLeafGridViewTraits,
         IdentityGridEntitySeed
-        > Traits;
+        > BaseTraits;
+
+  public:
+
+    // inherit everyting from the default Traits...
+    struct Traits
+      : public BaseTraits
+    {
+
+      // Except for the Codim struct, which we reimplement, but which
+      // again inherits everything from the base class...
+      template<int codim>
+      struct Codim
+        : public BaseTraits::template Codim<codim>
+      {
+
+        // ... except for the EntityPointer, which we override with our
+        // actual implementation
+        typedef Dune::EntityPointer<
+          const typename BaseTraits::Grid,
+          IdentityGridEntityPointer<
+            codim,
+            const typename BaseTraits::Grid,
+            typename HostGrid::template Codim<codim>::EntityPointer
+            >
+          > EntityPointer;
+
+      };
+
+    };
+
   };
 
   //**********************************************************************
@@ -82,7 +132,7 @@ namespace Dune
   template <class HostGrid>
   class IdentityGrid
   : public GridDefaultImplementation<HostGrid::dimension, HostGrid::dimensionworld,
-      double, IdentityGridFamily<HostGrid::dimension, HostGrid> >
+                                     typename HostGrid::ctype, IdentityGridFamily<HostGrid::dimension, HostGrid> >
   {
     friend class IdentityGridLevelIndexSet<const IdentityGrid<HostGrid> >;
     friend class IdentityGridLeafIndexSet<const IdentityGrid<HostGrid> >;
@@ -271,15 +321,41 @@ namespace Dune
     }
 
 
-    /** \brief Create EntityPointer from EntitySeed */
+    /** \brief Create EntityPointer from EntitySeed
+     *
+     * \deprecated This method is deprecated and will be removed after the release of
+     *             dune-grid 2.4. Please use entity() instead, which will directly return
+     *             an Entity object that you can then store for later use. The EntityPointer
+     *             concept in general is deprecated and will not be available after
+     *             dune-grid 2.4 has been released.
+     */
     template < class EntitySeed >
+    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
     typename Traits::template Codim<EntitySeed::codimension>::EntityPointer
     entityPointer(const EntitySeed& seed) const
     {
       typedef typename Traits::template Codim<EntitySeed::codimension>::EntityPointer EntityPointer;
-      typedef IdentityGridEntityPointer<EntitySeed::codimension, const typename Traits::Grid> EntityPointerImp;
+      typedef IdentityGridEntityPointer<
+        EntitySeed::codimension,
+        const typename Traits::Grid,
+        typename HostGrid::template Codim<EntitySeed::codimension>::EntityPointer
+        > EntityPointerImp;
 
-      return EntityPointer(EntityPointerImp(this, hostgrid_->entityPointer(this->getRealImplementation(seed).hostEntitySeed())));
+      return EntityPointer(EntityPointerImp(this, hostgrid_->entity(this->getRealImplementation(seed).hostEntitySeed())));
+    }
+
+    /** \brief Create Entity from EntitySeed */
+    template < class EntitySeed >
+    typename Traits::template Codim<EntitySeed::codimension>::Entity
+    entity(const EntitySeed& seed) const
+    {
+      typedef IdentityGridEntity<
+        EntitySeed::codimension,
+        HostGrid::dimension,
+        const typename Traits::Grid
+        > EntityImp;
+
+      return EntityImp(this, hostgrid_->entity(this->getRealImplementation(seed).hostEntitySeed()));
     }
 
 
@@ -305,18 +381,18 @@ namespace Dune
      * <li> false, if marking was not possible </li>
      * </ul>
      */
-    bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer & e)
+    bool mark(int refCount, const typename Traits::template Codim<0>::Entity & e)
     {
-      return hostgrid_->mark(refCount, *getHostEntityPointer<0>(*e));
+      return hostgrid_->mark(refCount, getHostEntity<0>(e));
     }
 
     /** \brief Return refinement mark for entity
      *
      * \return refinement mark (1,0,-1)
      */
-    int getMark(const typename Traits::template Codim<0>::EntityPointer & e) const
+    int getMark(const typename Traits::template Codim<0>::Entity & e) const
     {
-      return hostgrid_->getMark(*getHostEntityPointer<0>(*e));
+      return hostgrid_->getMark(getHostEntity<0>(e));
     }
 
     /** \brief returns true, if at least one entity is marked for adaption */
@@ -420,7 +496,14 @@ namespace Dune
 
     //! Returns the hostgrid entity encapsulated in given IdentityGrid entity
     template <int codim>
+    DUNE_DEPRECATED_MSG("getHostEntityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use getHostEntity() instead to obtain a reference to the host entity object.")
     typename HostGrid::Traits::template Codim<codim>::EntityPointer getHostEntityPointer(const typename Traits::template Codim<codim>::Entity& e) const
+    {
+      return this->getRealImplementation(e).hostEntity_;
+    }
+
+    template <int codim>
+    const typename HostGrid::Traits::template Codim<codim>::Entity& getHostEntity(const typename Traits::template Codim<codim>::Entity& e) const
     {
       return this->getRealImplementation(e).hostEntity_;
     }
@@ -491,9 +574,9 @@ namespace Dune
      * \ingroup IdentityGrid
      */
     template<class HostGrid>
-    struct isParallel<IdentityGrid<HostGrid> >
+    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel<IdentityGrid<HostGrid> >
     {
-      static const bool v = isParallel<HostGrid>::v;
+      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = isParallel<HostGrid>::v;
     };
 
     /** \brief has conforming level grids when host grid has

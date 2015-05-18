@@ -345,7 +345,7 @@ bool Dune::UGGrid < dim >::adapt()
   // I don't really know what this means
   int seq = UG_NS<dim>::GM_REFINE_PARALLEL;
 
-  // I don't really know what this means either
+  // Skip test whether we have enough memory available
   int mgtest = UG_NS<dim>::GM_REFINE_NOHEAPTEST;
 
   int rv = AdaptMultiGrid(multigrid_,mode,seq,mgtest);
@@ -403,11 +403,18 @@ void Dune::UGGrid < dim >::globalRefine(int n)
 }
 
 template <int dim>
-void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Codim<0>::EntityPointer & e,
-                                             int elementSide,
-                                             int maxl,
-                                             std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
-                                             std::vector<unsigned char>& childElementSides) const
+template<typename T>
+typename std::enable_if<
+  std::is_same<
+    T,
+    typename UGGrid<dim>::Traits::template Codim<0>::EntityPointer
+    >::value
+  >::type
+Dune::UGGrid<dim>::getChildrenOfSubface(const T & e,
+                                        int elementSide,
+                                        int maxl,
+                                        std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
+                                        std::vector<unsigned char>& childElementSides) const
 {
 
   typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
@@ -505,30 +512,119 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 
 }
 
+template <int dim>
+void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Codim<0>::Entity & e,
+                                             int elementSide,
+                                             int maxl,
+                                             std::vector<typename Traits::template Codim<0>::Entity>& childElements,
+                                             std::vector<unsigned char>& childElementSides) const
+{
+
+  typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
+
+  SLList<ListEntryType> list;
+
+  // //////////////////////////////////////////////////////////////////////
+  //   Change the input face number from Dune numbering to UG numbering
+  // //////////////////////////////////////////////////////////////////////
+
+  elementSide = UGGridRenumberer<dim>::facesDUNEtoUG(elementSide, e.type());
+
+  // ///////////////
+  //   init list
+  // ///////////////
+  if (!e.isLeaf()   // Get_Sons_of_ElementSide returns GM_FATAL when called for a leaf !?!
+      && e.level() < maxl) {
+
+    typename UG_NS<dim>::Element* theElement = this->getRealImplementation(e).target_;
+
+    UG::INT Sons_of_Side = 0;
+    typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+    UG::INT SonSides[UG_NS<dim>::MAX_SONS];
+
+    int rv = Get_Sons_of_ElementSide(theElement,
+                                     elementSide,
+                                     &Sons_of_Side,
+                                     SonList,          // the output elements
+                                     SonSides,         // Output element side numbers
+                                     true,            // Element sons are not precomputed
+                                     true);            // ioflag: I have no idea what this is supposed to do
+    if (rv!=0)
+      DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
+
+    for (int i=0; i<Sons_of_Side; i++)
+      list.push_back(ListEntryType(SonList[i],SonSides[i]));
+
+  }
+
+  // //////////////////////////////////////////////////
+  //   Traverse and collect all children of the side
+  // //////////////////////////////////////////////////
+
+  typename SLList<ListEntryType>::iterator f = list.begin();
+  for (; f!=list.end(); ++f) {
+
+    typename UG_NS<dim>::Element* theElement = f->first;
+    int side                                  = f->second;
+
+    UG::INT Sons_of_Side = 0;
+    typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+    UG::INT SonSides[UG_NS<dim>::MAX_SONS];
+
+    if (UG_NS<dim>::myLevel(theElement) < maxl) {
+
+      Get_Sons_of_ElementSide(theElement,
+                              side,         // Input element side number
+                              &Sons_of_Side,       // Number of topological sons of the element side
+                              SonList,            // Output elements
+                              SonSides,           // Output element side numbers
+                              true,
+                              true);
+
+      for (int i=0; i<Sons_of_Side; i++)
+        list.push_back(ListEntryType(SonList[i],SonSides[i]));
+
+    }
+
+  }
+
+  // //////////////////////////////
+  //   Extract result from stack
+  // //////////////////////////////
+
+  // Use reserve / push_back since EntityPointer is not default constructable
+  childElements.clear();
+  childElements.reserve( list.size() );
+  childElementSides.resize(list.size());
+
+  int i=0;
+  for (f = list.begin(); f!=list.end(); ++f, ++i)
+  {
+
+    // Set element
+    typedef typename Traits::template Codim< 0 >::Entity Entity;
+    childElements.push_back( Entity( UGGridEntity< 0, dim, const UGGrid< dim > >( f->first, this ) ) );
+
+    int side = f->second;
+
+    // Dune numbers the faces of several elements differently than UG.
+    // The following switch does the transformation
+    childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i].type());
+
+  }
+
+}
+
 template < int dim >
-bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel)
+bool Dune::UGGrid < dim >::loadBalance(int minlevel)
 {
   // Do nothing if we are on a single process
   if (comm().size()==1)
     return true;
 
-  /** \todo Test for valid arguments */
-  std::string argStrings[2];
-  std::stringstream numberAsAscii[4];
-
-  numberAsAscii[0] << strategy;
-  argStrings[0] = "lb " + numberAsAscii[0].str();
-
-  numberAsAscii[1] << minlevel;
-  argStrings[1] = "c " + numberAsAscii[1].str();
-
-  const char* argv[2] = {argStrings[0].c_str(),
-                         argStrings[1].c_str()};
-
-  int errCode = UG_NS<dim>::LBCommand(2, argv);
-
-  if (errCode)
-    DUNE_THROW(GridError, "UG" << dim << "d::LBCommand returned error code " << errCode);
+  std::stringstream levelarg;
+  levelarg << minlevel;
+  UG_NS<dim>::lbs(levelarg.str().c_str(), multigrid_);
 
   // Renumber everything.
   // Note: this must not be called when on a single process, because it renumbers the zero-level
@@ -567,7 +663,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
 
       if (it->isLeaf()) {
 
-        unsigned int targetRank = targetProcessors[elementMapper.map(*it)];
+        unsigned int targetRank = targetProcessors[elementMapper.index(*it)];
 
         // sanity check
         if (targetRank >= comm().size())
@@ -622,10 +718,27 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
 }
 
 template < int dim >
-void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,
-                                       const FieldVector<double, dim>& pos)
+template< typename T >
+typename std::enable_if<
+  std::is_same<
+    T,
+    typename UGGrid<dim>::Traits::template Codim<dim>::EntityPointer
+    >::value
+  >::type
+Dune::UGGrid < dim >::setPosition(const T& e,
+                                  const FieldVector<double, dim>& pos)
 {
   typename UG_NS<dim>::Node* target = this->getRealImplementation(*e).target_;
+
+  for (int i=0; i<dim; i++)
+    target->myvertex->iv.x[i] = pos[i];
+}
+
+template < int dim >
+void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::Entity& e,
+                                       const FieldVector<double, dim>& pos)
+{
+  typename UG_NS<dim>::Node* target = this->getRealImplementation(e).target_;
 
   for (int i=0; i<dim; i++)
     target->myvertex->iv.x[i] = pos[i];
@@ -697,79 +810,6 @@ template < int dim >
 void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
                                       std::vector<unsigned int>* nodePermutation)
 {
-  /** \todo The code in the following if-clause contains two workarounds to fix FlySpray issues 170
-      (inconsistent codim 1 subIndices) and 810 (Destructor of parallel UGGrid fails).
-
-      UGGrid uses UG's SideVector data structure to store the codim 1 subIndices of elements.
-      However the UG SideVector code is buggy and SideVectors are not correctly created during
-      refinement and load balancing.  In particular
-        - after refinement there may be _two_ SideVector objects for a single face,
-          instead of only one,
-        - After load balancing, and also after refinement, the VCOUNT field of the SideVector
-          (which stores how many elements reference the SideVector) is sometimes not correct.
-
-      I provide a workaround because it is outside of my capabilities to actually fix these
-      issues in UG itself.  I'd probably screw up other things if I started to mess around
-      in the UG refinement routines.
-
-      If ever UGGrid stops relying on SideVectors to store indices the following
-      if-clause can be deleted.
-   */
-  if (dim==3) {
-
-    for (int i=0; i<=maxLevel(); i++) {
-      typedef typename Base::LevelGridView GridView;
-      GridView gridView = this->levelGridView( i );
-
-      typedef typename GridView::template Codim<0>::Iterator Iterator;
-      const Iterator end = gridView.template end<0>();
-      for (Iterator it = gridView.template begin<0>(); it != end; ++it) {
-        const typename GridView::template Codim<0>::Entity &entity = *it;
-        const GeometryType gt = entity.type();
-
-        typename UG_NS<dim>::Element* elem0 = this->getRealImplementation(entity).target_;
-
-        typedef typename GridView::IntersectionIterator IntersectionIterator;
-        const IntersectionIterator iend = gridView.iend(entity);
-        for (IntersectionIterator iit = gridView.ibegin(entity); iit != iend; ++iit) {
-          const typename GridView::Intersection& intersection = *iit;
-
-          const int indexInInside = intersection.indexInInside();
-
-          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(indexInInside, gt);
-
-          if (intersection.neighbor()) {
-            const typename GridView::template Codim<0>::EntityPointer pOutside = intersection.outside();
-            const typename GridView::template Codim<0>::Entity& outside = *pOutside;
-
-            const int indexInOutside = intersection.indexInOutside();
-
-            typename UG_NS<dim>::Element* elem1 = this->getRealImplementation(outside).target_;
-
-            int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(indexInOutside, outside.type());
-
-            // If there are two SideVector objects instead of only one (as there should be),
-            // delete one of them.
-            // Isn't it great that UG even provides a dedicated method for this?
-            UG::D3::DisposeDoubledSideVector((typename UG_NS<3>::Grid*)multigrid_->grids[i],
-                                             (typename UG_NS<3>::Element*)elem0,
-                                             side0,
-                                             (typename UG_NS<3>::Element*)elem1,
-                                             side1);
-          }
-
-          // Set the correct value for the VCOUNT field:
-          // the number of elements adjacent to this face.
-          // This method may not be called before DisposeDoubledSideVector
-          UG_NS<dim>::setVCount(elem0, side0, (intersection.neighbor() ? 2 : 1));
-        }
-
-      }
-
-    }
-
-  }
-
   // Create new level index sets if necessary
   for (int i=levelIndexSets_.size(); i<=maxLevel(); i++)
     levelIndexSets_.push_back(make_shared<UGGridLevelIndexSet<const UGGrid<dim> > >());

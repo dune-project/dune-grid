@@ -23,17 +23,19 @@ namespace Dune {
 
     //! default construct an invalid entity seed
     YaspEntitySeed ()
-      : _l(-1), _c(0)
-    {}
+      : _l(-1), _o(0)
+    {
+      std::fill(_c.begin(),_c.end(),0);
+    }
 
     //! constructor
-    YaspEntitySeed (int level, FieldVector<int, dim> coord)
-      : _l(level), _c(coord)
+    YaspEntitySeed (int level, Dune::array<int, dim> coord, int o = 0)
+      : _l(level), _c(coord), _o(o)
     {}
 
     //! copy constructor
     YaspEntitySeed (const YaspEntitySeed& rhs)
-      : _l(rhs._l), _c(rhs._c)
+      : _l(rhs._l), _c(rhs._c), _o(rhs._o)
     {}
 
     //! check whether the EntitySeed refers to a valid Entity
@@ -43,11 +45,13 @@ namespace Dune {
     }
 
     int level () const { return _l; }
-    const FieldVector<int, dim> & coord() const { return _c; }
+    const Dune::array<int, dim> & coord() const { return _c; }
+    int offset () const { return _o; }
 
   protected:
-    int _l;                   // grid level
-    FieldVector<int, dim> _c; // coord in the global grid
+    int _l;                  // grid level
+    Dune::array<int, dim> _c; // coord in the global grid
+    int _o; // the offset: which YGridComponent, does the entity belong to
   };
 
 }  // namespace Dune

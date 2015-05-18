@@ -33,35 +33,35 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;
 
-    typedef typename GridImp::HostGridType::template Codim<0>::Entity::LeafIntersectionIterator HostLeafIntersectionIterator;
+    typedef typename GridImp::HostGridType::LeafGridView::IntersectionIterator HostLeafIntersectionIterator;
 
   public:
 
     typedef Dune::Intersection<const GridImp, Dune::IdentityGridLeafIntersection<GridImp> > Intersection;
 
-    IdentityGridLeafIntersectionIterator(const GridImp* identityGrid,
-                                         const HostLeafIntersectionIterator& hostIterator)
-      : intersection_(IdentityGridLeafIntersection<GridImp>(identityGrid, hostIterator))
+    IdentityGridLeafIntersectionIterator()
     {}
 
-    //! The Destructor
-    ~IdentityGridLeafIntersectionIterator() {};
+    IdentityGridLeafIntersectionIterator(const GridImp* identityGrid,
+                                         const HostLeafIntersectionIterator& hostIterator)
+      : identityGrid_(identityGrid)
+      , hostIterator_(hostIterator)
+    {}
 
     //! equality
-    bool equals(const IdentityGridLeafIntersectionIterator<GridImp>& other) const {
-      return GridImp::getRealImplementation(intersection_).hostIterator_
-             == GridImp::getRealImplementation(other.intersection_).hostIterator_;
+    bool equals(const IdentityGridLeafIntersectionIterator& other) const {
+      return hostIterator_ == other.hostIterator_;
     }
 
 
     //! prefix increment
     void increment() {
-      ++GridImp::getRealImplementation(intersection_).hostIterator_;
+      ++hostIterator_;
     }
 
     //! \brief dereferencing
-    const Intersection & dereference() const {
-      return intersection_;
+    Intersection dereference() const {
+      return IdentityGridLeafIntersection<GridImp>(identityGrid_,*hostIterator_);
     }
 
   private:
@@ -69,9 +69,8 @@ namespace Dune {
     //  private data
     //**********************************************************
 
-    /** \brief The actual intersection
-     */
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+    const GridImp* identityGrid_;
+    HostLeafIntersectionIterator hostIterator_;
   };
 
 
@@ -88,38 +87,42 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;
 
-    typedef typename GridImp::HostGridType::template Codim<0>::Entity::LevelIntersectionIterator HostLevelIntersectionIterator;
+    typedef typename GridImp::HostGridType::LevelGridView::IntersectionIterator HostLevelIntersectionIterator;
 
   public:
 
     typedef Dune::Intersection<const GridImp, Dune::IdentityGridLevelIntersection<GridImp> > Intersection;
 
+    IdentityGridLevelIntersectionIterator()
+    {}
+
     IdentityGridLevelIntersectionIterator(const GridImp* identityGrid,
                                           const HostLevelIntersectionIterator& hostIterator)
-      : intersection_(IdentityGridLevelIntersection<GridImp>(identityGrid,hostIterator))
+      : identityGrid_(identityGrid)
+      , hostIterator_(hostIterator)
     {}
 
     //! equality
     bool equals(const IdentityGridLevelIntersectionIterator<GridImp>& other) const {
-      return GridImp::getRealImplementation(intersection_).hostIterator_ == GridImp::getRealImplementation(other.intersection_).hostIterator_;
+      return hostIterator_ == other.hostIterator_;
     }
 
 
     //! prefix increment
     void increment() {
-      ++GridImp::getRealImplementation(intersection_).hostIterator_;
+      ++hostIterator_;
     }
 
     //! \brief dereferencing
-    const Intersection & dereference() const {
-      return intersection_;
+    Intersection dereference() const {
+      return IdentityGridLevelIntersection<GridImp>(identityGrid_,*hostIterator_);
     }
 
   private:
 
-    /** \brief The actual intersection
-     */
-    mutable MakeableInterfaceObject<Intersection> intersection_;
+
+    const GridImp* identityGrid_;
+    HostLevelIntersectionIterator hostIterator_;
 
   };
 

@@ -28,5 +28,9 @@ add_subdirectory("lib")
 add_subdirectory("src")
 add_subdirectory("cmake/modules")
 
+# Use a  custom section to export path to the grid examples.
+set(DUNE_CUSTOM_PKG_CONFIG_SECTION "#Export the directory with the grid example for downstream modules
+set(DUNE_GRID_EXAMPLE_GRIDS_PATH \"@DUNE_MODULE_SRC_DOCDIR@/grids/\")
+")
 # finalize the dune project, e.g. generating config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)

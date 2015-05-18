@@ -60,8 +60,8 @@ namespace Dune
       template< int codim >
       struct Codim
       {
-        typedef GeoGrid::IteratorTraits< HostGridView, codim, pitype, const Grid > IteratorTraits;
-        typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< IteratorTraits > > Iterator;
+        typedef GeoGrid::Iterator< HostGridView, codim, pitype, const Grid > IteratorImp;
+        typedef Dune::EntityIterator< codim, const Grid, IteratorImp > Iterator;
 
         typedef typename Grid::Traits::template Codim< codim >::Entity Entity;
         typedef typename Grid::Traits::template Codim< codim >::EntityPointer EntityPointer;
@@ -72,8 +72,8 @@ namespace Dune
         template< PartitionIteratorType pit >
         struct Partition
         {
-          typedef GeoGrid::IteratorTraits< HostGridView, codim, pit, const Grid > IteratorTraits;
-          typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< IteratorTraits > > Iterator;
+          typedef GeoGrid::Iterator< HostGridView, codim, pit, const Grid > IteratorImp;
+          typedef Dune::EntityIterator< codim, const Grid, IteratorImp > Iterator;
         };
       };
 
@@ -143,29 +143,25 @@ namespace Dune
       template< int codim >
       typename Codim< codim >::Iterator begin () const
       {
-        typedef typename Traits::template Codim< codim >::template Partition< pitype >::IteratorTraits IteratorTraits;
-        return GeoGrid::Iterator< IteratorTraits >( grid(), hostGridView(), IteratorTraits::begin );
+        return begin< codim, pitype >();
       }
 
       template< int codim, PartitionIteratorType pit >
       typename Codim< codim >::template Partition< pit >::Iterator begin () const
       {
-        typedef typename Traits::template Codim< codim >::template Partition< pit >::IteratorTraits IteratorTraits;
-        return GeoGrid::Iterator< IteratorTraits >( grid(), hostGridView(), IteratorTraits::begin );
+        return Traits::template Codim< codim >::template Partition< pit >::IteratorImp::begin( grid(), hostGridView() );
       }
 
       template< int codim >
       typename Codim< codim >::Iterator end () const
       {
-        typedef typename Traits::template Codim< codim >::template Partition< pitype >::IteratorTraits IteratorTraits;
-        return GeoGrid::Iterator< IteratorTraits >( grid(), hostGridView(), IteratorTraits::end );
+        return end< codim, pitype >();
       }
 
       template< int codim, PartitionIteratorType pit >
       typename Codim< codim >::template Partition< pit >::Iterator end () const
       {
-        typedef typename Traits::template Codim< codim >::template Partition< pit >::IteratorTraits IteratorTraits;
-        return GeoGrid::Iterator< IteratorTraits >( grid(), hostGridView(), IteratorTraits::end );
+        return Traits::template Codim< codim >::template Partition< pit >::IteratorImp::end( grid(), hostGridView() );
       }
 
       IntersectionIterator ibegin ( const typename Codim< 0 >::Entity &entity ) const

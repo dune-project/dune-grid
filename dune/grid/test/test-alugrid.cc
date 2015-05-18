@@ -18,12 +18,12 @@
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
-#include "gridcheck.cc"
+#include "gridcheck.hh"
 
-#include "checkgeometryinfather.cc"
-#include "checkintersectionit.cc"
-#include "checkcommunicate.cc"
-//#include "checktwists.cc"
+#include "checkgeometryinfather.hh"
+#include "checkintersectionit.hh"
+#include "checkcommunicate.hh"
+//#include "checktwists.hh"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 
@@ -53,6 +53,7 @@ void checkCapabilities(const Grid& grid)
   static_assert(Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                 "hasBackupRestoreFacilities is not set correctly");
 
+#if !DISABLE_DEPRECATED_METHOD_CHECK
   static const bool reallyParallel =
 #if ALU3DGRID_PARALLEL
     Grid :: dimension == 3;
@@ -61,6 +62,7 @@ void checkCapabilities(const Grid& grid)
 #endif
   static_assert(Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
                 "isParallel is not set correctly");
+#endif
 
   static const bool reallyCanCommunicate =
 #if ALU3DGRID_PARALLEL
@@ -112,8 +114,9 @@ void checkIteratorAssignment(GridType & grid)
     typedef typename GridType :: template Codim<dim> :: LevelIterator
     IteratorType;
 
-    IteratorType it = grid.template lbegin<dim>(0);
-    if( grid.maxLevel() > 0 ) it = grid.template lbegin<dim>(1);
+    IteratorType it = grid.levelGridView(0).template begin<dim>();
+    if (grid.maxLevel() > 0)
+      it = grid.levelGridView(1).template begin<dim>();
   }
 
   {
@@ -122,9 +125,9 @@ void checkIteratorAssignment(GridType & grid)
     IteratorType;
     typedef typename GridType::Traits::template Codim<dim>::EntityPointer EntityPointerType;
 
-    IteratorType it = grid.template lbegin<dim>(0);
+    IteratorType it = grid.levelGridView(0).template begin<dim>();
 
-    if( it != grid.template lend<dim>(0) )
+    if (it != grid.levelGridView(0).template end<dim>())
     {
       assert( it->level() == 0 );
       EntityPointerType p( it );
@@ -136,7 +139,7 @@ void checkIteratorAssignment(GridType & grid)
 
       if( grid.maxLevel() > 0 )
       {
-        it = grid.template lbegin<dim>(1);
+        it = grid.levelGridView(1).template begin<dim>();
         if (grid.size(1,0)>0)
         {
           p = it;

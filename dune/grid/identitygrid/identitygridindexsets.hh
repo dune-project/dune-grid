@@ -16,11 +16,16 @@ namespace Dune {
   /** \todo Take the index types from the host grid */
   template<class GridImp>
   class IdentityGridLevelIndexSet :
-    public IndexSet<GridImp,IdentityGridLevelIndexSet<GridImp> >
+    public IndexSet<GridImp,
+                    IdentityGridLevelIndexSet<GridImp>,
+                    typename remove_const<GridImp>::type::HostGridType::LevelGridView::IndexSet::IndexType,
+                    typename remove_const<GridImp>::type::HostGridType::LevelGridView::IndexSet::Types
+                    >
   {
   public:
 
     typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
+    typedef typename HostGrid::LevelGridView::IndexSet::Types Types;
 
     enum {dim = GridImp::dimension};
 
@@ -28,7 +33,7 @@ namespace Dune {
     template<int codim>
     int index (const typename GridImp::Traits::template Codim<codim>::Entity& e) const
     {
-      return grid_->hostgrid_->levelIndexSet(level_).template index<codim>(*grid_->template getHostEntityPointer<codim>(e));
+      return grid_->hostgrid_->levelIndexSet(level_).template index<codim>(grid_->template getHostEntity<codim>(e));
     }
 
 
@@ -36,7 +41,7 @@ namespace Dune {
     template<int cc>
     int subIndex (const typename GridImp::Traits::template Codim<cc>::Entity& e, int i, int codim) const
     {
-      return grid_->hostgrid_->levelIndexSet(level_).subIndex(*grid_->template getHostEntityPointer<cc>(e), i, codim);
+      return grid_->hostgrid_->levelIndexSet(level_).subIndex(grid_->template getHostEntity<cc>(e), i, codim);
     }
 
 
@@ -59,11 +64,17 @@ namespace Dune {
       return grid_->hostgrid_->levelIndexSet(level_).geomTypes(codim);
     }
 
+    /** \brief Deliver all geometry types used in this grid */
+    Types types (int codim) const
+    {
+      return grid_->hostgrid_->levelIndexSet(level_).types(codim);
+    }
+
     /** \brief Return true if the given entity is contained in the index set */
     template<class EntityType>
     bool contains (const EntityType& e) const
     {
-      return grid_->hostgrid_->levelIndexSet(level_).contains(*grid_->template getHostEntityPointer<EntityType::codimension>(e));
+      return grid_->hostgrid_->levelIndexSet(level_).contains(grid_->template getHostEntity<EntityType::codimension>(e));
     }
 
     /** \brief Set up the index set */
@@ -82,12 +93,17 @@ namespace Dune {
 
   template<class GridImp>
   class IdentityGridLeafIndexSet :
-    public IndexSet<GridImp,IdentityGridLeafIndexSet<GridImp> >
+    public IndexSet<GridImp,
+                    IdentityGridLeafIndexSet<GridImp>,
+                    typename remove_const<GridImp>::type::HostGridType::LeafGridView::IndexSet::IndexType,
+                    typename remove_const<GridImp>::type::HostGridType::LeafGridView::IndexSet::Types
+                    >
   {
     typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
 
   public:
 
+    typedef typename HostGrid::LevelGridView::IndexSet::Types Types;
 
     /*
      * We use the remove_const to extract the Type from the mutable class,
@@ -110,7 +126,7 @@ namespace Dune {
     template<int codim>
     int index (const typename remove_const<GridImp>::type::template Codim<codim>::Entity& e) const
     {
-      return grid_->hostgrid_->leafIndexSet().template index<codim>(*grid_->template getHostEntityPointer<codim>(e));
+      return grid_->hostgrid_->leafIndexSet().template index<codim>(grid_->template getHostEntity<codim>(e));
     }
 
 
@@ -122,7 +138,7 @@ namespace Dune {
     template<int cc>
     int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e, int i, int codim) const
     {
-      return grid_->hostgrid_->leafIndexSet().subIndex(*grid_->template getHostEntityPointer<cc>(e),i, codim);
+      return grid_->hostgrid_->leafIndexSet().subIndex(grid_->template getHostEntity<cc>(e),i, codim);
     }
 
 
@@ -146,11 +162,17 @@ namespace Dune {
       return grid_->hostgrid_->leafIndexSet().geomTypes(codim);
     }
 
+    /** \brief Deliver all geometry types used in this grid */
+    Types types (int codim) const
+    {
+      return grid_->hostgrid_->leafIndexSet().types(codim);
+    }
+
     /** \brief Return true if the given entity is contained in the index set */
     template<class EntityType>
     bool contains (const EntityType& e) const
     {
-      return grid_->hostgrid_->leafIndexSet().contains(*grid_->template getHostEntityPointer<EntityType::codimension>(e));
+      return grid_->hostgrid_->leafIndexSet().contains(grid_->template getHostEntity<EntityType::codimension>(e));
     }
 
 
@@ -194,7 +216,7 @@ namespace Dune {
     IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       // Return id of the host entity
-      return grid_->hostgrid_->globalIdSet().id(*grid_->getRealImplementation(e).hostEntity_);
+      return grid_->hostgrid_->globalIdSet().id(grid_->getRealImplementation(e).hostEntity_);
     }
 
 
@@ -206,7 +228,7 @@ namespace Dune {
     IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i, int codim) const
     {
       // Return sub id of the host entity
-      return grid_->hostgrid_->globalIdSet().subId(*grid_->getRealImplementation(e).hostEntity_,i, codim);
+      return grid_->hostgrid_->globalIdSet().subId(grid_->getRealImplementation(e).hostEntity_,i, codim);
     }
 
 
@@ -248,7 +270,7 @@ namespace Dune {
     IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       // Return id of the host entity
-      return grid_->hostgrid_->localIdSet().id(*grid_->getRealImplementation(e).hostEntity_);
+      return grid_->hostgrid_->localIdSet().id(grid_->getRealImplementation(e).hostEntity_);
     }
 
 
@@ -260,7 +282,7 @@ namespace Dune {
     IdType subId (const typename remove_const<GridImp>::type::template Codim<0>::Entity& e, int i, int codim) const
     {
       // Return sub id of the host entity
-      return grid_->hostgrid_->localIdSet().subId(*grid_->getRealImplementation(e).hostEntity_,i,codim);
+      return grid_->hostgrid_->localIdSet().subId(grid_->getRealImplementation(e).hostEntity_,i,codim);
     }
 
 

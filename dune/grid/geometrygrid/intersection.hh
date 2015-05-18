@@ -4,7 +4,6 @@
 #define DUNE_GEOGRID_INTERSECTION_HH
 
 #include <dune/grid/geometrygrid/declaration.hh>
-#include <dune/grid/geometrygrid/entitypointer.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
 
 namespace Dune
@@ -31,7 +30,6 @@ namespace Dune
       static const int dimensionworld = Traits::dimensionworld;
 
       typedef typename Traits::template Codim< 0 >::Entity Entity;
-      typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
       typedef typename Traits::template Codim< 1 >::Geometry Geometry;
       typedef typename Traits::template Codim< 1 >::LocalGeometry LocalGeometry;
 
@@ -40,41 +38,43 @@ namespace Dune
     private:
       typedef GeoGrid::IntersectionCoordVector< Grid > CoordVector;
 
-      typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
+      typedef typename Traits::template Codim< 0 >::EntityImpl EntityImpl;
 
       typedef typename Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
       typedef typename Traits::template Codim< 0 >::GeometryImpl ElementGeometryImpl;
 
     public:
-      explicit Intersection ( const ElementGeometry &insideGeo )
-        : insideGeo_( Grid::getRealImplementation( insideGeo ) ),
-          hostIntersection_( 0 ),
-          geo_( grid() )
+
+      Intersection()
       {}
 
-      Intersection ( const Intersection &other )
-        : insideGeo_( other.insideGeo_ ),
-          hostIntersection_( 0 ),
-          geo_( grid() )
+      explicit Intersection ( const HostIntersection &hostIntersection, const ElementGeometryImpl &insideGeo )
+        : hostIntersection_( hostIntersection )
+        , insideGeo_ ( insideGeo )
+        , geo_( grid() )
       {}
 
-      const Intersection &operator= ( const Intersection &other )
+      explicit Intersection ( HostIntersection&& hostIntersection, const ElementGeometryImpl &insideGeo )
+        : hostIntersection_( std::move( hostIntersection ) )
+        , insideGeo_ ( insideGeo )
+        , geo_( grid() )
+      {}
+
+      bool equals ( const Intersection &other) const
       {
-        insideGeo_ = other.insideGeo_;
-        invalidate();
-        return *this;
+        return hostIntersection_ == other.hostIntersection_;
       }
 
       operator bool () const { return bool( hostIntersection_ ); }
 
-      EntityPointer inside () const
+      Entity inside () const
       {
-        return EntityPointerImpl( insideGeo_, hostIntersection().inside() );
+        return EntityImpl( insideGeo_, hostIntersection().inside() );
       }
 
-      EntityPointer outside () const
+      Entity outside () const
       {
-        return EntityPointerImpl( grid(), hostIntersection().outside() );
+        return EntityImpl( grid(), hostIntersection().outside() );
       }
 
       bool boundary () const { return hostIntersection().boundary(); }
@@ -171,27 +171,14 @@ namespace Dune
 
       const HostIntersection &hostIntersection () const
       {
-        assert( *this );
-        return *hostIntersection_;
+        return hostIntersection_;
       }
 
       const Grid &grid () const { return insideGeo_.grid(); }
 
-      void invalidate ()
-      {
-        hostIntersection_ = 0;
-        geo_ = GeometryImpl( grid() );
-      }
-
-      void initialize ( const HostIntersection &hostIntersection )
-      {
-        assert( !(*this) );
-        hostIntersection_ = &hostIntersection;
-      }
-
     private:
+      HostIntersection hostIntersection_;
       ElementGeometryImpl insideGeo_;
-      const HostIntersection *hostIntersection_;
       mutable GeometryImpl geo_;
     };
 

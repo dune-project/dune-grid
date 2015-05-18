@@ -31,11 +31,7 @@ namespace Dune
     ::create ( MeshPointer &ptr, const MacroData< dim > &macroData,
                ALBERTA NODE_PROJECTION *(*initNodeProjection)( Mesh *, ALBERTA MACRO_EL *, int ) )
     {
-#if DUNE_ALBERTA_VERSION >= 0x300
       ptr.mesh_ = GET_MESH( dim, "DUNE AlbertaGrid", macroData, initNodeProjection, NULL );
-#else
-      ptr.mesh_ = GET_MESH( dim, "DUNE AlbertaGrid", macroData, initNodeProjection );
-#endif
 
       // The 1d grid does not create the face projections, so we do it here
       if( (dim == 1) && (ptr.mesh_ != NULL) )

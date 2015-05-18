@@ -1,5 +1,3 @@
-# $Id$
-
 commondir = $(includedir)/dune/grid/common
 common_HEADERS = \
 	adaptcallback.hh \
@@ -25,6 +23,8 @@ common_HEADERS = \
 	intersectioniterator.hh \
 	mcmgmapper.hh \
 	mapper.hh \
+	partitionset.hh \
+	rangegenerators.hh \
 	sizecache.hh \
 	scsgmapper.hh \
 	universalmapper.hh

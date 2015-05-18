@@ -58,6 +58,8 @@ namespace Dune {
       return grid_->size(level_,codim);
     }
 
+    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
+
     /** \brief Deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
@@ -66,7 +68,7 @@ namespace Dune {
 
     /** \brief Return true if e is contained in the index set.
 
-       Warning: this implementation takes O(n) time!  It also assumes that e belongs
+       \warning This implementation takes O(n) time!  It also assumes that e belongs
        to the correct grid.
      */
     template <class EntityType>
@@ -78,8 +80,8 @@ namespace Dune {
 
       enum { cd = EntityType::codimension };
       typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LevelIterator IteratorType;
-      IteratorType iend = grid_->template lend<cd,All_Partition>(level_);
-      for (IteratorType it = grid_->template lbegin<cd,All_Partition>(level_);
+      IteratorType iend = grid_->levelGridView(level_).template end<cd,All_Partition>();
+      for (IteratorType it = grid_->levelGridView(level_).template begin<cd,All_Partition>();
            it != iend; ++it)
       {
         if (this->template index<cd>(*it) == this->template index<cd>(e))
@@ -211,6 +213,8 @@ namespace Dune {
 
       return 0;
     }
+
+    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
 
     /** deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const

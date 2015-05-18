@@ -24,11 +24,15 @@ namespace Dune {
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename GridImp::YGrid::Iterator I;
+
+    //! default constructor
+    YaspLevelIterator ()
+    {}
 
     //! constructor
-    YaspLevelIterator (const GridImp * yg, const YGLI & g, const TSI & it) :
-      YaspEntityPointer<codim,GridImp>(yg,g,it) {}
+    YaspLevelIterator (const YGLI & g, const I& it) :
+      YaspEntityPointer<codim,GridImp>(g,it) {}
 
     //! copy constructor
     YaspLevelIterator (const YaspLevelIterator& i) :
@@ -37,7 +41,7 @@ namespace Dune {
     //! increment
     void increment()
     {
-      ++(this->_it);
+      ++(GridImp::getRealImplementation(this->_entity)._it);
     }
   };
 

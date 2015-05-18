@@ -1,5 +1,3 @@
-# $Id$
-
 noinst_LTLIBRARIES = libonedgrid.la
 
 libonedgrid_la_SOURCES = onedgrid.cc onedgridfactory.cc nulliteratorfactory.cc

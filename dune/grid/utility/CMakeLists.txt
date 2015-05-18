@@ -5,6 +5,7 @@ set(HEADERS
   entitycommhelper.hh
   entityrange.hh
   entityset.hh
+  globalindexset.hh
   grapedataioformattypes.hh
   gridinfo-gmsh-main.hh
   gridinfo.hh
@@ -13,12 +14,15 @@ set(HEADERS
   hostgridaccess.hh
   iterableentityset.hh
   iteratoradapters.hh
+  multiindex.hh
+  parmetisgridpartitioner.hh
   persistentcontainer.hh
   persistentcontainerinterface.hh
   persistentcontainermap.hh
   persistentcontainervector.hh
   persistentcontainerwrapper.hh
   structuredgridfactory.hh
+  tensorgridfactory.hh
   vertexorderfactory.hh)
 
 install(FILES ${HEADERS}

@@ -33,12 +33,11 @@ namespace Dune {
 
     //! equality
     bool equals(const OneDGridEntityPointer<codim,GridImp>& other) const {
-      return GridImp::getRealImplementation(other.virtualEntity_).target_
-             == GridImp::getRealImplementation(virtualEntity_).target_;
+      return virtualEntity_ == other.virtualEntity_;
     }
 
     //! dereferencing
-    Entity& dereference() const {return virtualEntity_;}
+    const Entity& dereference() const {return virtualEntity_;}
 
     //! ask for level of entity
     int level () const {return virtualEntity_.level();}
@@ -61,7 +60,7 @@ namespace Dune {
 
   protected:
 
-    mutable MakeableInterfaceObject<Entity> virtualEntity_;
+    Entity virtualEntity_;
 
   };
 

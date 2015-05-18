@@ -46,17 +46,7 @@ namespace Dune
     typedef ALBERTA REAL_B LocalVector; // in barycentric coordinates
     typedef ALBERTA REAL_D GlobalVector;
     typedef ALBERTA REAL_DD GlobalMatrix;
-
-#if DUNE_ALBERTA_VERSION >= 0x300
     typedef ALBERTA AFF_TRAFO AffineTransformation;
-#else
-    struct AffineTransformation
-    {
-      GlobalMatrix M;
-      GlobalVector t;
-    };
-#endif
-
     typedef ALBERTA MESH Mesh;
     typedef ALBERTA EL Element;
 
@@ -65,11 +55,7 @@ namespace Dune
 
     static const int InteriorBoundary = INTERIOR;
     static const int DirichletBoundary = DIRICHLET;
-#if DUNE_ALBERTA_VERSION >= 0x300
     typedef ALBERTA BNDRY_TYPE BoundaryId;
-#else
-    typedef S_CHAR BoundaryId;
-#endif
 
     typedef U_CHAR ElementType;
 
@@ -252,32 +238,16 @@ namespace Dune
 
       static const Flags projection = FILL_PROJECTION;
 
-#if DUNE_ALBERTA_VERSION >= 0x300
       static const Flags elementType = FILL_NOTHING;
-#else
-      static const Flags elementType = (dim == 3 ? FILL_EL_TYPE : FILL_NOTHING);
-#endif
 
-#if DUNE_ALBERTA_VERSION >= 0x300
       static const Flags boundaryId = FILL_MACRO_WALLS;
-#else
-      static const Flags boundaryId = FILL_BOUND;
-#endif
 
-#if DUNE_ALBERTA_VERSION >= 0x300
       static const Flags nonPeriodic = FILL_NON_PERIODIC;
-#else
-      static const Flags nonPeriodic = FILL_NOTHING;
-#endif
 
       static const Flags all = coords | neighbor | boundaryId | nonPeriodic
                                | orientation | projection | elementType;
 
-#if DUNE_ALBERTA_VERSION >= 0x300
       static const Flags standardWithCoords = all & ~nonPeriodic & ~projection;
-#else
-      static const Flags standardWithCoords = all;
-#endif
 
 #if DUNE_ALBERTA_CACHE_COORDINATES
       static const Flags standard = standardWithCoords & ~coords;

@@ -1,19 +1,24 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id:$
 
+#if HAVE_CONFIG_H
 #include "config.h" // autoconf defines, needed by the dune headers
+#endif
 
-// dune headers
+#include <algorithm>
+#include <iostream>
+#include <ostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
+#include <dune/grid/io/file/test/checkvtkfile.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 #include <dune/grid/yaspgrid.hh>
-
-#include <algorithm>
-#include <vector>
-#include <unistd.h>
 
 template< class GridView >
 class VTKVectorFunction
@@ -21,18 +26,17 @@ class VTKVectorFunction
 {
   // extract types
   enum { n = GridView :: dimension };
-  enum { w = GridView :: dimensionworld };
   typedef typename GridView :: Grid :: ctype DT;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
-  const char *type;
+  const std::string type_;
 public:
   /** @brief Make a new VTKVectorFunction
    *
    * @param type_ Type of the function for use in its name (hint: "cell" or
    *              "vertex")
    */
-  VTKVectorFunction(const char *type_)
-    : type(type_)
+  VTKVectorFunction(std::string type)
+    : type_(type)
   { }
 
   //! return number of components
@@ -45,7 +49,8 @@ public:
      @param[in]  xi     point in local coordinates of the reference element of e
      \return            value of the component
    */
-  virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<DT,n>& xi) const
+  virtual double evaluate (int comp, const Entity& e,
+                           const Dune::FieldVector<DT,n>& xi) const
   {
     Dune::FieldVector<DT,n> global = e.geometry().global( xi );
     return global.two_norm2();
@@ -54,83 +59,109 @@ public:
   // get name
   virtual std::string name () const
   {
-    char _name[256];
-    snprintf(_name, 256, "%s-vector-%iD", type, ncomps());
-    return std::string(_name);
+    std::ostringstream os;
+    os << type_ << "-vector-" << ncomps() << "D";
+    return os.str();
   }
-
 
 };
 
+// accumulate exit status
+void acc(int &accresult, int result)
+{
+  if(accresult == 0 || (accresult == 77 && result != 0))
+    accresult = result;
+}
+
+struct Acc
+{
+  int operator()(int v1, int v2) const
+  {
+    acc(v1, v2);
+    return v1;
+  }
+};
+
 template< class GridView >
-void doWrite( const GridView &gridView, bool coerceToSimplex)
+int doWrite( const GridView &gridView, bool coerceToSimplex)
 {
   enum { dim = GridView :: dimension };
 
-  const typename GridView :: IndexSet &is = gridView.indexSet();
-  std::vector<int> celldata(is.size(0));
-  for(std::size_t i = 0; i < celldata.size(); ++i) celldata[i] = i;
-
   Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, 1, coerceToSimplex);
-  // disabled due to FS#676: vtk.addVertexData(vertexdata,"vertexData");
-  vtk.addCellData(celldata,"cellData");
 
-  vtk.addVertexData(new VTKVectorFunction<GridView>("vertex"));
-  vtk.addCellData(new VTKVectorFunction<GridView>("cell"));
+  // disabled due to FS#676:
+  // const typename GridView :: IndexSet &is = gridView.indexSet();
+  // std::vector<int> vertexdata(is.size(dim),dim);
+  // std::vector<int> celldata(is.size(0),0);
 
-  char name[256];
-  snprintf(name,256,"subsamplingvtktest-%iD-%s-ascii",
-           dim, (coerceToSimplex ? "simplex" : "natural"));
-  vtk.write(name);
+  // vtk.addVertexData(vertexdata,"vertexData");
+  // vtk.addCellData(celldata,"cellData");
 
-  snprintf(name,256,"subsamplingvtktest-%iD-%s-appendedraw",
-           dim, (coerceToSimplex ? "simplex" : "natural"));
-  vtk.write(name, Dune::VTK::appendedraw);
+  vtk.addVertexData(std::make_shared< VTKVectorFunction<GridView> >("vertex"));
+  vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));
+
+  int result = 0;
+  std::string name;
+  std::ostringstream prefix;
+  prefix << "subsamplingvtktest-" << dim << "D-"
+         << (coerceToSimplex ? "simplex" : "natural");
+  int rank = gridView.comm().rank();
+
+  name = vtk.write(prefix.str() + "-ascii");
+  if(rank == 0) acc(result, checkVTKFile(name));
+
+  name = vtk.write(prefix.str() + "-appendedraw", Dune::VTK::appendedraw);
+  if(rank == 0) acc(result, checkVTKFile(name));
+
+  return result;
 }
 
 template<int dim>
-void vtkCheck(int* n, double* h)
+int vtkCheck(const Dune::array<int, dim>& elements,
+              const Dune::FieldVector<double, dim>& upperRight)
 {
-  Dune::FieldVector<double, dim> L(0);
-  std::copy(h, h+dim, L.begin());
-  Dune::array<int, dim> s;
-  std::copy(n, n+dim, s.begin());
-  std::bitset<dim> periodic;
+  Dune::YaspGrid<dim> g(upperRight, elements);
 
-  Dune::YaspGrid<dim> g(
-#if HAVE_MPI
-    MPI_COMM_WORLD,
-#endif
-    L, s, periodic, 0);
   if(g.comm().rank() == 0)
     std::cout << std::endl
-              << "subsamplingVTKCheck dim=" << dim
-              << std::endl
+              << "subsamplingVTKCheck dim=" << dim << std::endl
               << std::endl;
 
   g.globalRefine(1);
 
-  doWrite( g.leafGridView(), false);
-  doWrite( g.levelGridView( 0 ), false);
-  doWrite( g.levelGridView( g.maxLevel() ), false);
+  int result = 0;
 
-  doWrite( g.leafGridView(), true);
-  doWrite( g.levelGridView( 0 ), true);
-  doWrite( g.levelGridView( g.maxLevel() ), true);
+  acc(result, doWrite( g.leafGridView(), false));
+  acc(result, doWrite( g.levelGridView( 0 ), false));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false));
+
+  acc(result, doWrite( g.leafGridView(), true));
+  acc(result, doWrite( g.levelGridView( 0 ), true));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true));
+
+  return result;
 }
 
 int main(int argc, char **argv)
 {
   try {
 
-    Dune::MPIHelper::instance(argc, argv);
+    const Dune::MPIHelper &mpiHelper = Dune::MPIHelper::instance(argc, argv);
 
-    int n[] = { 5, 5, 5, 5 };
-    double h[] = { 1.0, 2.0, 3.0, 4.0 };
+    if(mpiHelper.rank() == 0)
+      std::cout << "subsamplingvtktest: MPI_Comm_size == " << mpiHelper.size()
+                << std::endl;
 
-    vtkCheck<1>(n,h);
-    vtkCheck<2>(n,h);
-    vtkCheck<3>(n,h);
+    int result = 0; // pass by default
+    using Dune::make_array;
+
+    acc(result, vtkCheck<1>(make_array(5), {1.0}));
+    acc(result, vtkCheck<2>(make_array(5,5), {1.0, 2.0}));
+    acc(result, vtkCheck<3>(make_array(5,5,5), {1.0, 2.0, 3.0}));
+
+    mpiHelper.getCollectiveCommunication().allreduce<Acc>(&result, 1);
+
+    return result;
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
@@ -143,5 +174,4 @@ int main(int argc, char **argv)
     return 2;
   }
 
-  return 0;
 }

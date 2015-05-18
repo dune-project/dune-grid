@@ -14,7 +14,10 @@
 #include <vector>
 #include <list>
 
+#include <dune/common/deprecated.hh>
+#include <dune/common/typetraits.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/std/memory.hh>
 #include <dune/common/indent.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/path.hh>
@@ -39,15 +42,15 @@
 
    details and examples regarding the VTK file format can be found here:
 
-   http://www.geophysik.uni-muenchen.de/intranet/it-service/applications/paraview/vtk-file-formats/
-   (not available any more)
-
-   http://www.geophysik.uni-muenchen.de/~moder/Paraview/VTK_File_Formats.php
-   (alternative)
- */
+   http://www.earthmodels.org/software/vtk-and-paraview/vtk-file-formats
+*/
 
 namespace Dune
 {
+  // Forward-declaration here, so the class can be friend of VTKWriter
+  template <class GridView>
+  class VTKSequenceWriterBase;
+
   /**
    * @brief Writer for the ouput of grid functions in the vtk format.
    * @ingroup VTK
@@ -58,6 +61,11 @@ namespace Dune
    */
   template< class GridView >
   class VTKWriter {
+
+    // VTKSequenceWriterBase needs getSerialPieceName
+    // and getParallelHeaderName
+    friend class VTKSequenceWriterBase<GridView>;
+
     // extract types
     typedef typename GridView::Grid Grid;
     typedef typename GridView::ctype DT;
@@ -80,6 +88,11 @@ namespace Dune
     ::template Partition< VTK_Partition >::Iterator
     GridVertexIterator;
 
+    typedef typename GridCellIterator::Reference EntityReference;
+
+    typedef typename GridView::template Codim< 0 >
+    ::Entity::Geometry::LocalCoordinate Coordinate;
+
     typedef MultipleCodimMultipleGeomTypeMapper< GridView, MCMGVertexLayout > VertexMapper;
 
     // return true if entity should be skipped in Vertex and Corner iterator
@@ -96,11 +109,176 @@ namespace Dune
     }
 
   public:
+
     typedef Dune::VTKFunction< GridView > VTKFunction;
     typedef shared_ptr< const VTKFunction > VTKFunctionPtr;
 
   protected:
-    typedef typename std::list<VTKFunctionPtr>::const_iterator FunctionIterator;
+
+    //! Type erasure wrapper for VTK data sets
+    /**
+     * This wrapper has value semantics
+     */
+    class VTKLocalFunction
+    {
+
+    public:
+
+      typedef VTK::DataArrayWriter<float> Writer;
+
+      //! Base class for polymorphic container of underlying data set
+      struct FunctionWrapperBase
+      {
+
+        //! Bind data set to grid entity - must be called before evaluating (i.e. calling write())
+        virtual void bind(const Entity& e) const = 0;
+
+        //! Unbind data set from current grid entity - mostly here for performance and symmetry reasons
+        virtual void unbind() const = 0;
+
+        //! Evaluate data set at local position pos inside the current entity and write result to w.
+        /**
+         * The function must write count scalar values as determined by the VTK::FieldInfo.
+         */
+        virtual void write(const Coordinate& pos, Writer& w, std::size_t count) const = 0;
+
+        virtual ~FunctionWrapperBase()
+        {}
+
+      };
+
+      //! Type erasure implementation for functions conforming to the dune-functions LocalFunction interface
+      template<typename F>
+      struct FunctionWrapper
+        : public FunctionWrapperBase
+      {
+
+        template<typename F_>
+        FunctionWrapper(F_&& f)
+          : _f(std::forward<F_>(f))
+        {}
+
+        virtual void bind(const Entity& e) const
+        {
+          _f.bind(e);
+        }
+
+        virtual void unbind() const
+        {
+          _f.unbind();
+        }
+
+        virtual void write(const Coordinate& pos, Writer& w, std::size_t count) const
+        {
+          auto r = _f(pos);
+          // we need to do different things here depending on whether r supports indexing into it or not.
+          do_write(w,r,count,is_indexable<decltype(r)>());
+        }
+
+      private:
+
+        template<typename R>
+        void do_write(Writer& w, const R& r, std::size_t count, std::true_type) const
+        {
+          for (std::size_t i = 0; i < count; ++i)
+            w.write(r[i]);
+        }
+
+        template<typename R>
+        void do_write(Writer& w, const R& r, std::size_t count, std::false_type) const
+        {
+          assert(count == 1);
+          w.write(r);
+        }
+
+        F _f;
+      };
+
+      //! Type erasure implementation for legacy VTKFunctions.
+      struct VTKFunctionWrapper
+        : public FunctionWrapperBase
+      {
+        VTKFunctionWrapper(const VTKFunctionPtr& f)
+          : _f(f)
+          , _entity(nullptr)
+        {}
+
+        virtual void bind(const Entity& e) const
+        {
+          _entity = &e;
+        }
+
+        virtual void unbind() const
+        {
+          _entity = nullptr;
+        }
+
+        virtual void write(const Coordinate& pos, Writer& w, std::size_t count) const
+        {
+          for (std::size_t i = 0; i < count; ++i)
+            w.write(_f->evaluate(i,*_entity,pos));
+        }
+
+      private:
+
+        VTKFunctionPtr _f;
+        mutable const Entity* _entity;
+
+      };
+
+      //! Construct a VTKLocalFunction for a dune-functions style LocalFunction
+      template<typename F>
+      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
+        : _f(Dune::Std::make_unique<FunctionWrapper<F> >(std::forward<F>(f)))
+        , _fieldInfo(fieldInfo)
+      {}
+
+      //! Construct a VTKLocalFunction for a legacy VTKFunction
+      explicit VTKLocalFunction (const VTKFunctionPtr& vtkFunctionPtr)
+        : _f(Dune::Std::make_unique<VTKFunctionWrapper>(vtkFunctionPtr))
+        , _fieldInfo(
+          vtkFunctionPtr->name(),
+          vtkFunctionPtr->ncomps() > 1 ? VTK::FieldInfo::Type::vector : VTK::FieldInfo::Type::scalar,
+          vtkFunctionPtr->ncomps()
+          )
+      {}
+
+      //! Returns the name of the data set
+      std::string name() const
+      {
+        return fieldInfo().name();
+      }
+
+      //! Returns the VTK::FieldInfo for the data set
+      const VTK::FieldInfo& fieldInfo() const
+      {
+        return _fieldInfo;
+      }
+
+      //! Bind the data set to grid entity e.
+      void bind(const Entity& e) const
+      {
+        _f->bind(e);
+      }
+
+      //! Unbind the data set from the currently bound entity.
+      void unbind() const
+      {
+        _f->unbind();
+      }
+
+      //! Write the value of the data set at local coordinate pos to the writer w.
+      void write(const Coordinate& pos, Writer& w) const
+      {
+        _f->write(pos,w,fieldInfo().size());
+      }
+
+      std::shared_ptr<FunctionWrapperBase> _f;
+      VTK::FieldInfo _fieldInfo;
+
+    };
+
+    typedef typename std::list<VTKLocalFunction>::const_iterator FunctionIterator;
 
     //! Iterator over the grids elements
     /**
@@ -147,7 +325,7 @@ namespace Dune
      * corner.
      */
     class VertexIterator :
-      public ForwardIteratorFacade<VertexIterator, const Entity, const Entity&, int>
+      public ForwardIteratorFacade<VertexIterator, const Entity, EntityReference, int>
     {
       GridCellIterator git;
       GridCellIterator gend;
@@ -160,13 +338,16 @@ namespace Dune
       // in conforming mode, for each vertex id (as obtained by vertexmapper)
       // hold its number in the iteration order (VertexIterator)
       int offset;
+
+      // hide operator ->
+      void operator->();
     protected:
       void basicIncrement ()
       {
         if( git == gend )
           return;
         ++cornerIndexDune;
-        const int numCorners = git->template count< n >();
+        const int numCorners = git->subEntities(n);
         if( cornerIndexDune == numCorners )
         {
           offset += numCorners;
@@ -187,19 +368,19 @@ namespace Dune
         offset(0)
       {
         if (datamode == VTK::conforming && git != gend)
-          visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
+          visited[vertexmapper.subIndex(*git,cornerIndexDune,n)] = true;
       }
       void increment ()
       {
         switch (datamode)
         {
         case VTK::conforming :
-          while(visited[vertexmapper.map(*git,cornerIndexDune,n)])
+          while(visited[vertexmapper.subIndex(*git,cornerIndexDune,n)])
           {
             basicIncrement();
             if (git == gend) return;
           }
-          visited[vertexmapper.map(*git,cornerIndexDune,n)] = true;
+          visited[vertexmapper.subIndex(*git,cornerIndexDune,n)] = true;
           break;
         case VTK::nonconforming :
           basicIncrement();
@@ -212,7 +393,7 @@ namespace Dune
                && cornerIndexDune == cit.cornerIndexDune
                && datamode == cit.datamode;
       }
-      const Entity& dereference() const
+      EntityReference dereference() const
       {
         return *git;
       }
@@ -259,7 +440,7 @@ namespace Dune
      * iteration order of VertexIterator.
      */
     class CornerIterator :
-      public ForwardIteratorFacade<CornerIterator, const Entity, const Entity&, int>
+      public ForwardIteratorFacade<CornerIterator, const Entity, EntityReference, int>
     {
       GridCellIterator git;
       GridCellIterator gend;
@@ -276,6 +457,8 @@ namespace Dune
       // excluding the current element
       int offset;
 
+      // hide operator ->
+      void operator->();
     public:
       CornerIterator(const GridCellIterator & x,
                      const GridCellIterator & end,
@@ -290,7 +473,7 @@ namespace Dune
         if( git == gend )
           return;
         ++cornerIndexVTK;
-        const int numCorners = git->template count< n >();
+        const int numCorners = git->subEntities(n);
         if( cornerIndexVTK == numCorners )
         {
           offset += numCorners;
@@ -307,7 +490,7 @@ namespace Dune
                && cornerIndexVTK == cit.cornerIndexVTK
                && datamode == cit.datamode;
       }
-      const Entity& dereference() const
+      EntityReference dereference() const
       {
         return *git;
       }
@@ -322,7 +505,7 @@ namespace Dune
         {
         case VTK::conforming :
           return
-            number[vertexmapper.map(*git,VTK::renumber(*git,cornerIndexVTK),
+            number[vertexmapper.subIndex(*git,VTK::renumber(*git,cornerIndexVTK),
                                     n)];
         case VTK::nonconforming :
           return offset + VTK::renumber(*git,cornerIndexVTK);
@@ -366,7 +549,13 @@ namespace Dune
      */
     void addCellData (const VTKFunctionPtr & p)
     {
-      celldata.push_back(p);
+      celldata.push_back(VTKLocalFunction(p));
+    }
+
+    template<typename F>
+    void addCellData(F&& f, VTK::FieldInfo vtkFieldInfo)
+    {
+      celldata.push_back(VTKLocalFunction(std::forward<F>(f),vtkFieldInfo));
     }
 
     /**
@@ -374,9 +563,9 @@ namespace Dune
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addCellData (VTKFunction* p)
+    void addCellData (VTKFunction* p) DUNE_DEPRECATED_MSG("Don't pass raw pointers, use the version with shared_ptr")
     {
-      celldata.push_back(VTKFunctionPtr(p));
+      celldata.push_back(VTKLocalFunction(VTKFunctionPtr(p)));
     }
 
     /**
@@ -404,7 +593,7 @@ namespace Dune
         if (ncomps>1)
           compName << "[" << c << "]";
         VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
-        celldata.push_back(VTKFunctionPtr(p));
+        addCellData(VTKFunctionPtr(p));
       }
     }
 
@@ -413,9 +602,9 @@ namespace Dune
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addVertexData (VTKFunction* p)
+    void addVertexData (VTKFunction* p) DUNE_DEPRECATED_MSG("Don't pass raw pointers, use the version with shared_ptr")
     {
-      vertexdata.push_back(VTKFunctionPtr(p));
+      vertexdata.push_back(VTKLocalFunction(VTKFunctionPtr(p)));
     }
 
     /**
@@ -424,8 +613,15 @@ namespace Dune
      */
     void addVertexData (const VTKFunctionPtr & p)
     {
-      vertexdata.push_back(p);
+      vertexdata.push_back(VTKLocalFunction(p));
     }
+
+    template<typename F>
+    void addVertexData(F&& f, VTK::FieldInfo vtkFieldInfo)
+    {
+      vertexdata.push_back(VTKLocalFunction(std::forward<F>(f),vtkFieldInfo));
+    }
+
 
     /**
      * @brief Add a grid function (represented by container) that lives on the vertices of the
@@ -438,7 +634,7 @@ namespace Dune
      * For vector valued data all components for a vertex are assumed to
      * be consecutive.
      *
-     * @param v The container with the values of the grid function for each cell.
+     * @param v The container with the values of the grid function for each vertex.
      * @param name A name to identify the grid function.
      * @param ncomps Number of components (default is 1).
      */
@@ -452,7 +648,7 @@ namespace Dune
         if (ncomps>1)
           compName << "[" << c << "]";
         VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
-        vertexdata.push_back(VTKFunctionPtr(p));
+        addVertexData(VTKFunctionPtr(p));
       }
     }
 
@@ -755,57 +951,35 @@ namespace Dune
 
       // PPointData
       {
-        std::string scalars;
-        for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end();
-             ++it)
-          if ((*it)->ncomps()==1)
-          {
-            scalars = (*it)->name();
-            break;
-          }
-        std::string vectors;
-        for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end();
-             ++it)
-          if ((*it)->ncomps()>1)
-          {
-            vectors = (*it)->name();
-            break;
-          }
+        std::string scalars, vectors;
+        std::tie(scalars,vectors) = getDataNames(vertexdata);
         writer.beginPointData(scalars, vectors);
       }
-      for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end();
+      for (auto it = vertexdata.begin(),
+             end = vertexdata.end();
+           it != end;
            ++it)
       {
-        unsigned writecomps = (*it)->ncomps();
+        unsigned writecomps = it->fieldInfo().size();
         if(writecomps == 2) writecomps = 3;
-        writer.addArray<float>((*it)->name(), writecomps);
+        writer.addArray<float>(it->name(), writecomps);
       }
       writer.endPointData();
 
       // PCellData
       {
-        std::string scalars;
-        for (FunctionIterator it=celldata.begin(); it!=celldata.end();
-             ++it)
-          if ((*it)->ncomps()==1)
-          {
-            scalars = (*it)->name();
-            break;
-          }
-        std::string vectors;
-        for (FunctionIterator it=celldata.begin(); it!=celldata.end();
-             ++it)
-          if ((*it)->ncomps()>1)
-          {
-            vectors = (*it)->name();
-            break;
-          }
+        std::string scalars, vectors;
+        std::tie(scalars,vectors) = getDataNames(celldata);
         writer.beginCellData(scalars, vectors);
       }
-      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it) {
-        unsigned writecomps = (*it)->ncomps();
+      for (auto it = celldata.begin(),
+             end = celldata.end();
+           it != end;
+           ++it)
+      {
+        unsigned writecomps = it->fieldInfo().size();
         if(writecomps == 2) writecomps = 3;
-        writer.addArray<float>((*it)->name(), writecomps);
+        writer.addArray<float>(it->name(), writecomps);
       }
       writer.endCellData();
 
@@ -902,12 +1076,13 @@ namespace Dune
         ncells++;
         // because of the use of vertexmapper->map(), this iteration must be
         // in the order of Dune's numbering.
-        for (int i=0; i<it->template count<n>(); ++i)
+        const int subEntities = it->subEntities(n);
+        for (int i=0; i<subEntities; ++i)
         {
           ncorners++;
           if (datamode == VTK::conforming)
           {
-            int alpha = vertexmapper->map(*it,i,n);
+            int alpha = vertexmapper->subIndex(*it,i,n);
             if (number[alpha]<0)
               number[alpha] = nvertices++;
           }
@@ -919,48 +1094,86 @@ namespace Dune
       }
     }
 
+    template<typename T>
+    std::tuple<std::string,std::string> getDataNames(const T& data) const
+    {
+      std::string scalars = "";
+      for (auto it = data.begin(),
+             end = data.end();
+           it != end;
+           ++it)
+        if (it->fieldInfo().type() == VTK::FieldInfo::Type::scalar)
+          {
+            scalars = it->name();
+            break;
+          }
+
+      std::string vectors = "";
+      for (auto it = data.begin(),
+             end = data.end();
+           it != end;
+           ++it)
+        if (it->fieldInfo().type() == VTK::FieldInfo::Type::vector)
+          {
+            vectors = it->name();
+            break;
+          }
+      return std::make_tuple(scalars,vectors);
+    }
+
+    template<typename Data, typename Iterator>
+    void writeData(VTK::VTUWriter& writer, const Data& data, const Iterator begin, const Iterator end, int nentries)
+    {
+      for (auto it = data.begin(),
+             iend = data.end();
+           it != iend;
+           ++it)
+      {
+        const auto& f = *it;
+        VTK::FieldInfo fieldInfo = f.fieldInfo();
+        std::size_t writecomps = fieldInfo.size();
+        switch (fieldInfo.type())
+          {
+          case VTK::FieldInfo::Type::scalar:
+            break;
+          case VTK::FieldInfo::Type::vector:
+            // vtk file format: a vector data always should have 3 comps (with
+            // 3rd comp = 0 in 2D case)
+            if (writecomps > 3)
+              DUNE_THROW(IOError,"Cannot write VTK vectors with more than 3 components (components was " << writecomps << ")");
+            writecomps = 3;
+            break;
+          case VTK::FieldInfo::Type::tensor:
+            DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
+          }
+        shared_ptr<VTK::DataArrayWriter<float> > p
+          (writer.makeArrayWriter<float>(f.name(), writecomps, nentries));
+        if(!p->writeIsNoop())
+          for (Iterator eit = begin; eit!=end; ++eit)
+          {
+            const Entity & e = *eit;
+            f.bind(e);
+            f.write(eit.position(),*p);
+            f.unbind();
+            // vtk file format: a vector data always should have 3 comps
+            // (with 3rd comp = 0 in 2D case)
+            for (std::size_t j=fieldInfo.size(); j < writecomps; ++j)
+              p->write(0.0);
+          }
+      }
+    }
+
     //! write cell data
     virtual void writeCellData(VTK::VTUWriter& writer)
     {
       if(celldata.size() == 0)
         return;
 
-      std::string scalars = "";
-      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
-        if ((*it)->ncomps()==1)
-        {
-          scalars = (*it)->name();
-          break;
-        }
-      std::string vectors = "";
-      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
-        if ((*it)->ncomps()>1)
-        {
-          vectors = (*it)->name();
-          break;
-        }
+      std::string scalars, vectors;
+      std::tie(scalars,vectors) = getDataNames(celldata);
 
       writer.beginCellData(scalars, vectors);
-      for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
-      {
-        // vtk file format: a vector data always should have 3 comps (with
-        // 3rd comp = 0 in 2D case)
-        unsigned writecomps = (*it)->ncomps();
-        if(writecomps == 2) writecomps = 3;
-        shared_ptr<VTK::DataArrayWriter<float> > p
-          (writer.makeArrayWriter<float>((*it)->name(), writecomps,
-                                         ncells));
-        if(!p->writeIsNoop())
-          for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
-          {
-            for (int j=0; j<(*it)->ncomps(); j++)
-              p->write((*it)->evaluate(j,*i,i.position()));
-            // vtk file format: a vector data always should have 3 comps
-            // (with 3rd comp = 0 in 2D case)
-            for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
-              p->write(0.0);
-          }
-      }
+      writeData(writer,celldata,cellBegin(),cellEnd(),ncells);
       writer.endCellData();
     }
 
@@ -970,42 +1183,11 @@ namespace Dune
       if(vertexdata.size() == 0)
         return;
 
-      std::string scalars = "";
-      for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
-        if ((*it)->ncomps()==1)
-        {
-          scalars = (*it)->name();
-          break;
-        }
-      std::string vectors = "";
-      for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
-        if ((*it)->ncomps()>1)
-        {
-          vectors = (*it)->name();
-          break;
-        }
+      std::string scalars, vectors;
+      std::tie(scalars,vectors) = getDataNames(vertexdata);
 
       writer.beginPointData(scalars, vectors);
-      for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
-      {
-        // vtk file format: a vector data always should have 3 comps (with
-        // 3rd comp = 0 in 2D case)
-        unsigned writecomps = (*it)->ncomps();
-        if(writecomps == 2) writecomps = 3;
-        shared_ptr<VTK::DataArrayWriter<float> > p
-          (writer.makeArrayWriter<float>((*it)->name(), writecomps,
-                                         nvertices));
-        if(!p->writeIsNoop())
-          for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
-          {
-            for (int j=0; j<(*it)->ncomps(); j++)
-              p->write((*it)->evaluate(j,*vit,vit.position()));
-            // vtk file format: a vector data always should have 3 comps
-            // (with 3rd comp = 0 in 2D case)
-            for (unsigned j=(*it)->ncomps(); j < writecomps; ++j)
-              p->write(0.0);
-          }
-      }
+      writeData(writer,vertexdata,vertexBegin(),vertexEnd(),nvertices);
       writer.endPointData();
     }
 
@@ -1022,7 +1204,7 @@ namespace Dune
         {
           int dimw=w;
           for (int j=0; j<std::min(dimw,3); j++)
-            p->write(vit->geometry().corner(vit.localindex())[j]);
+            p->write((*vit).geometry().corner(vit.localindex())[j]);
           for (int j=std::min(dimw,3); j<3; j++)
             p->write(0.0);
         }
@@ -1055,7 +1237,7 @@ namespace Dune
           int offset = 0;
           for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
           {
-            offset += it->template count<n>();
+            offset += it->subEntities(n);
             p2->write(offset);
           }
         }
@@ -1079,8 +1261,8 @@ namespace Dune
 
   protected:
     // the list of registered functions
-    std::list<VTKFunctionPtr> celldata;
-    std::list<VTKFunctionPtr> vertexdata;
+    std::list<VTKLocalFunction> celldata;
+    std::list<VTKLocalFunction> vertexdata;
 
     // the grid
     GridView gridView_;

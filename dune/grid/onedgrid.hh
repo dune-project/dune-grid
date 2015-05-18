@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/tuples.hh>
 
@@ -192,6 +193,15 @@ namespace Dune {
     {
       enum {codim = Seed::codimension};
       return typename Traits::template Codim<codim>::EntityPointer(OneDGridEntityPointer<codim,const OneDGrid>(OneDGrid::getRealImplementation(seed).target()));
+    }
+
+    /** \brief Create an Entity from an EntitySeed */
+    template <typename Seed>
+    static typename Traits::template Codim<Seed::codimension>::Entity
+    entity(const Seed& seed)
+    {
+      const int codim = Seed::codimension;
+      return typename Traits::template Codim<codim>::Entity(OneDGridEntity<codim,dim,const OneDGrid>(OneDGrid::getRealImplementation(seed).target()));
     }
 
 
@@ -458,9 +468,17 @@ namespace Dune {
        \ingroup OneDGrid
      */
     template<>
-    struct isParallel< OneDGrid >
+    struct
+#ifndef DUNE_AVOID_CAPABILITIES_IS_PARALLEL_DEPRECATION_WARNING
+    DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.")
+#endif
+    isParallel< OneDGrid >
     {
-      static const bool v = false;
+      static const bool
+#ifndef DUNE_AVOID_CAPABILITIES_IS_PARALLEL_DEPRECATION_WARNING
+      DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.")
+#endif
+      v = false;
     };
 
     /** \brief OneDGrid is levelwise conforming

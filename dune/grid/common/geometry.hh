@@ -81,14 +81,18 @@ namespace Dune
     const Implementation &impl () const { return realGeometry; }
 
   public:
-    //! @brief export grid dimension
+    /** @brief export grid dimension
+     * \deprecated This value will not be exported by versions after dune-grid-2.4
+     */
     enum { dimension=GridImp::dimension /*!< grid dimension */ };
     //! @brief export geometry dimension
     enum { mydimension=mydim /*!< geometry dimension */ };
     //! @brief export coordinate dimension
     enum { coorddimension=cdim /*!< dimension of embedding coordinate system */ };
 
-    //! @brief export dimension of world
+    /** @brief export dimension of world
+     * \deprecated This value will not be exported by versions after dune-grid-2.4
+     */
     enum { dimensionworld=GridImp::dimensionworld /*!< dimension of world */ };
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
@@ -105,7 +109,7 @@ namespace Dune
      * The exact type is implementation-dependent.
      * However, it is guaranteed to have the following properties:
      * - It satisfies the ConstMatrix interface.
-     * - It is copy construcable and copy assignable.
+     * - It is copy constructible and copy assignable.
      * .
      */
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
@@ -116,7 +120,7 @@ namespace Dune
      * The exact type is implementation-dependent.
      * However, it is guaranteed to have the following properties:
      * - It satisfies the ConstMatrix interface.
-     * - It is copy construcable and copy assignable.
+     * - It is copy constructible and copy assignable.
      * .
      */
     typedef typename Implementation::JacobianTransposed JacobianTransposed;

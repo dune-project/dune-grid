@@ -1,5 +1,3 @@
-# $Id: $
-
 ALBERTAGRID_LIBS =
 
 if ALBERTA_1D

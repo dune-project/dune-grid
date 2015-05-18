@@ -102,17 +102,17 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline unsigned int SEntity<0,dim,GridImp>::count (unsigned int codim) const
+  inline unsigned int SEntity<0,dim,GridImp>::subEntities (unsigned int codim) const
   {
     return SUnitCubeMapper<dim>::mapper.elements(codim);
   }
 
   // subentity construction
   template<int dim, class GridImp> template<int cc>
-  inline typename SEntity<0,dim,GridImp>::template Codim<cc>::EntityPointer SEntity<0,dim,GridImp>::subEntity (int i) const
+  inline typename SEntity<0,dim,GridImp>::template Codim<cc>::Entity SEntity<0,dim,GridImp>::subEntity (int i) const
   {
     // make Iterator
-    return SLevelIterator<cc,All_Partition,const GridImp>(this->grid,this->l,this->subCompressedIndex(cc,i));
+    return SLevelIterator<cc,All_Partition,const GridImp>(this->grid,this->l,this->subCompressedIndex(cc,i)).dereference();
   }
 
   template<int dim, class GridImp>
@@ -195,13 +195,13 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline typename SEntity<0,dim,GridImp>::EntityPointer SEntity<0,dim,GridImp>::father () const
+  inline typename SEntity<0,dim,GridImp>::Entity SEntity<0,dim,GridImp>::father () const
   {
     if (!built_father) make_father();
     if (this->l>0)
-      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),(this->l)-1,father_index);
+      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),(this->l)-1,father_index).dereference();
     else
-      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),this->l,index);
+      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),this->l,index).dereference();
   }
 
   template<int dim, class GridImp>
@@ -281,7 +281,17 @@ namespace Dune {
   // inline methods for IntersectionIterator
 
   template<class GridImp>
-  void SIntersectionIterator<GridImp>::make (int _count) const
+  inline void SIntersectionIterator<GridImp>::increment ()
+  {
+    GridImp::getRealImplementation(intersection).count++;
+    GridImp::getRealImplementation(intersection).make(GridImp::getRealImplementation(intersection).count);
+  }
+
+  //************************************************************************
+  // inline methods for Intersection
+
+  template<class GridImp>
+  void SIntersection<GridImp>::make (int _count) const
   {
     // reset cache flags
     built_intersections = false;
@@ -292,9 +302,9 @@ namespace Dune {
     count = _count;
 
     // check if count is valid
-    if (count<0 || count>=grid->getRealImplementation(self).entity().template count<1>())
+    if (count<0 || count>=int(grid->getRealImplementation(self).subEntities(1)))
     {
-      grid->getRealImplementation(ne).index = -1;
+      // grid->getRealImplementation(ne).index = -1; // yes, this kills debugging code, but SGrid is dying anyway...
       return;   // done, this is end iterator
     }
     valid_count = true;
@@ -304,62 +314,55 @@ namespace Dune {
     zrednb[count/2] += -1+2*(count%2); // (count%2) ? +1 : -1
 
     // now check if neighbor exists
-    is_on_boundary = !grid->exists(grid->getRealImplementation(self).l,zrednb);
+    is_on_boundary = !grid->exists(grid->getRealImplementation(self).level(),zrednb);
     if (is_on_boundary)
     {
-      grid->getRealImplementation(ne).index = -1;
+      // grid->getRealImplementation(ne).index = -1; // again, kill debugging code...
       return;   // ok, done it
     }
 
     // now neighbor is in the grid and must be initialized.
     // First compute its index
-    grid->getRealImplementation(ne).index =
-      grid->n(grid->getRealImplementation(self).l,
-              grid->expand(grid->getRealImplementation(self).l,zrednb,partition));
-    grid->getRealImplementation(ne).realEntity().make(
-      grid->getRealImplementation(ne).l,
-      grid->getRealImplementation(ne).index);
+    auto index =
+      grid->n(grid->getRealImplementation(self).level(),
+              grid->expand(grid->getRealImplementation(self).level(),zrednb,partition));
+    grid->getRealImplementation(ne).make(
+      grid->getRealImplementation(ne).level(),
+      index);
   }
 
   template<class GridImp>
-  inline bool SIntersectionIterator<GridImp>::equals (const SIntersectionIterator<GridImp>& i) const
+  inline bool SIntersection<GridImp>::equals (const SIntersection<GridImp>& i) const
   {
     return (self == i.self) && (count==i.count);
   }
 
   template<class GridImp>
-  inline typename SIntersectionIterator<GridImp>::EntityPointer SIntersectionIterator<GridImp>::inside () const
+  inline typename SIntersection<GridImp>::Entity SIntersection<GridImp>::inside () const
   {
     return self;
   }
 
   template<class GridImp>
-  inline typename SIntersectionIterator<GridImp>::EntityPointer SIntersectionIterator<GridImp>::outside () const
+  inline typename SIntersection<GridImp>::Entity SIntersection<GridImp>::outside () const
   {
     return ne;
   }
 
   template<class GridImp>
-  inline void SIntersectionIterator<GridImp>::increment ()
-  {
-    count++;
-    make(count);
-  }
-
-  template<class GridImp>
-  inline bool SIntersectionIterator<GridImp>::boundary () const
+  inline bool SIntersection<GridImp>::boundary () const
   {
     return is_on_boundary;
   }
 
   template<class GridImp>
-  inline bool SIntersectionIterator<GridImp>::neighbor () const
+  inline bool SIntersection<GridImp>::neighbor () const
   {
     return (!is_on_boundary);
   }
 
   template<class GridImp>
-  void SIntersectionIterator<GridImp>::makeintersections () const
+  void SIntersection<GridImp>::makeintersections () const
   {
     // compute direction and value in direction
     int dir = count/2;
@@ -367,7 +370,7 @@ namespace Dune {
 
     // compute expanded coordinates of entity
     array<int,dim> z1 =
-      grid->getRealImplementation(grid->getRealImplementation(self).entity()).z;
+      grid->getRealImplementation(self).z;
     if (c==1)
       z1[dir] += 1;   // odd
     else
@@ -420,9 +423,9 @@ namespace Dune {
       {
         // each i!=dir gives one direction vector
         z1[i] += 1;     // direction i => even
-        p2 = grid->pos(self->level(),z1);
+        p2 = grid->pos(self.level(),z1);
         z1[i] -= 2;     // direction i => even
-        p1 = grid->pos(self->level(),z1);
+        p1 = grid->pos(self.level(),z1);
         z1[i] += 1;     // revert t to original state
         A[t] = p2-p1;
         ++t;
@@ -432,14 +435,14 @@ namespace Dune {
         z1[i] -= 1;
 
     // update geometry
-    is_global.make(grid->pos(self->level(),z1), A);
+    is_global.make(grid->pos(self.level(),z1), A);
 
     built_intersections = true;
   }
 
   template<class GridImp>
-  inline typename SIntersectionIterator< GridImp >::LocalGeometry
-  SIntersectionIterator< GridImp >::geometryInInside () const
+  inline typename SIntersection< GridImp >::LocalGeometry
+  SIntersection< GridImp >::geometryInInside () const
   {
     assert (valid_count);
     if (!built_intersections) makeintersections();
@@ -447,8 +450,8 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline typename SIntersectionIterator< GridImp >::LocalGeometry
-  SIntersectionIterator< GridImp >::geometryInOutside () const
+  inline typename SIntersection< GridImp >::LocalGeometry
+  SIntersection< GridImp >::geometryInOutside () const
   {
     assert (valid_count);
     if (!built_intersections) makeintersections();
@@ -456,8 +459,8 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline typename SIntersectionIterator< GridImp >::Geometry
-  SIntersectionIterator< GridImp >::geometry () const
+  inline typename SIntersection< GridImp >::Geometry
+  SIntersection< GridImp >::geometry () const
   {
     assert (valid_count);
     if (!built_intersections) makeintersections();
@@ -465,13 +468,13 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline int SIntersectionIterator<GridImp>::indexInInside () const
+  inline int SIntersection<GridImp>::indexInInside () const
   {
     return count;
   }
 
   template<class GridImp>
-  inline int SIntersectionIterator<GridImp>::indexInOutside () const
+  inline int SIntersection<GridImp>::indexInOutside () const
   {
     return (count/2)*2 + (1-count%2);
   }

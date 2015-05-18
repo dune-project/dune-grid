@@ -3,12 +3,12 @@
 #ifndef DUNE_GEOGRID_GRIDFAMILY_HH
 #define DUNE_GEOGRID_GRIDFAMILY_HH
 
+#include <dune/grid/common/entitypointer.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/declaration.hh>
 #include <dune/grid/geometrygrid/entity.hh>
 #include <dune/grid/geometrygrid/entityseed.hh>
-#include <dune/grid/geometrygrid/entitypointer.hh>
 #include <dune/grid/geometrygrid/geometry.hh>
 #include <dune/grid/geometrygrid/gridview.hh>
 #include <dune/grid/geometrygrid/intersection.hh>
@@ -80,21 +80,21 @@ namespace Dune
           typedef Dune::Geometry< dimension-codim, dimensionworld, const Grid, Dune::GeoGrid::Geometry > Geometry;
           typedef typename HostGrid::template Codim< codim >::LocalGeometry LocalGeometry;
 
-          typedef GeoGrid::EntityPointerTraits< codim, const Grid > EntityPointerTraits;
-          typedef GeoGrid::EntityPointer< EntityPointerTraits > EntityPointerImpl;
-          typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
-          typedef typename EntityPointerTraits::Entity Entity;
+          typedef GeoGrid::Entity< codim, dimension, const Grid > EntityImpl;
+          typedef Dune::Entity< codim, dimension, const Grid, GeoGrid::Entity > Entity;
+
+          typedef Dune::EntityPointer< const Grid, Dune::DefaultEntityPointer< Entity > > EntityPointer;
 
           typedef Dune::EntitySeed< const Grid, GeoGrid::EntitySeed< codim, const Grid > > EntitySeed;
 
           template< PartitionIteratorType pitype >
           struct Partition
           {
-            typedef GeoGrid::IteratorTraits< typename HostGrid::LeafGridView, codim, pitype, const Grid > LeafIteratorTraits;
-            typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< LeafIteratorTraits > > LeafIterator;
+            typedef GeoGrid::Iterator< typename HostGrid::LeafGridView, codim, pitype, const Grid > LeafIteratorImp;
+            typedef Dune::EntityIterator< codim, const Grid, LeafIteratorImp > LeafIterator;
 
-            typedef GeoGrid::IteratorTraits< typename HostGrid::LevelGridView, codim, pitype, const Grid > LevelIteratorTraits;
-            typedef Dune::EntityIterator< codim, const Grid, GeoGrid::Iterator< LevelIteratorTraits > > LevelIterator;
+            typedef GeoGrid::Iterator< typename HostGrid::LevelGridView, codim, pitype, const Grid > LevelIteratorImp;
+            typedef Dune::EntityIterator< codim, const Grid, LevelIteratorImp > LevelIterator;
           };
 
           typedef typename Partition< All_Partition >::LeafIterator LeafIterator;

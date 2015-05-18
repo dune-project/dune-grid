@@ -119,7 +119,7 @@ namespace Dune
     virtual double evaluate (int comp, const Entity& e,
                              const Dune::FieldVector<ctype,dim>& xi) const
     {
-      return v[mapper.map(e)*ncomps_+mycomp_];
+      return v[mapper.index(e)*ncomps_+mycomp_];
     }
 
     //! get name
@@ -225,7 +225,8 @@ namespace Dune
       double min=1E100;
       int imin=-1;
       Dune::GeometryType gt = e.type();
-      for (int i=0; i<e.template count<dim>(); ++i)
+      const int subEntities = e.subEntities(dim);
+      for (int i=0; i<subEntities; ++i)
       {
         Dune::FieldVector<ctype,dim> local =
           Dune::ReferenceElements<ctype,dim>::general(gt)
@@ -237,7 +238,7 @@ namespace Dune
           imin = i;
         }
       }
-      return v[mapper.map(e,imin,dim)*ncomps_+mycomp_];
+      return v[mapper.subIndex(e,imin,dim)*ncomps_+mycomp_];
     }
 
     //! get name

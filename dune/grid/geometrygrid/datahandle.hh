@@ -16,54 +16,6 @@ namespace Dune
   namespace GeoGrid
   {
 
-    template< int codim, class Grid >
-    class EntityProxy
-    {
-      typedef typename remove_const< Grid >::type::Traits Traits;
-
-      typedef typename Traits::template Codim< codim >::Entity Entity;
-      typedef GeoGrid::Entity< codim, Traits::dimension, const Grid > EntityImpl;
-      typedef typename EntityImpl::HostEntity HostEntity;
-
-      template< bool >
-      struct InitReal
-      {
-        static void apply ( EntityImpl &entityImpl, const HostEntity &hostEntity )
-        {
-          entityImpl.initialize( hostEntity );
-        }
-      };
-
-      template< bool >
-      struct InitFake
-      {
-        static void apply ( EntityImpl &entityImpl, const HostEntity &hostEntity )
-        {
-          DUNE_THROW( NotImplemented, "Host grid has no entities for codimension " << codim << "." );
-        }
-      };
-
-      static const bool hasHostEntity = Capabilities::hasHostEntity< Grid, codim >::v;
-      typedef typename conditional< hasHostEntity, InitReal< true >, InitFake< false > >::type Init;
-
-    public:
-      EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
-        : entity_( EntityImpl( grid ) )
-      {
-        Init::apply( Grid::getRealImplementation( entity_ ), hostEntity );
-      }
-
-      const Entity &operator* () const
-      {
-        return entity_;
-      }
-
-    private:
-      Entity entity_;
-    };
-
-
-
     // GeometryGridDataHandle
     // ----------------------
 
@@ -95,22 +47,28 @@ namespace Dune
       template< class HostEntity >
       size_t size ( const HostEntity &hostEntity ) const
       {
-        EntityProxy< HostEntity::codimension, Grid > proxy( grid_, hostEntity );
-        return wrappedHandle_.size( *proxy );
+        typedef typename Grid::Traits::template Codim< HostEntity::codimension >::Entity Entity;
+        typedef typename Grid::Traits::template Codim< HostEntity::codimension >::EntityImpl EntityImpl;
+        Entity entity( EntityImpl( grid_, hostEntity ) );
+        return wrappedHandle_.size( entity );
       }
 
       template< class MessageBuffer, class HostEntity >
       void gather ( MessageBuffer &buffer, const HostEntity &hostEntity ) const
       {
-        EntityProxy< HostEntity::codimension, Grid > proxy( grid_, hostEntity );
-        wrappedHandle_.gather( buffer, *proxy );
+        typedef typename Grid::Traits::template Codim< HostEntity::codimension >::Entity Entity;
+        typedef typename Grid::Traits::template Codim< HostEntity::codimension >::EntityImpl EntityImpl;
+        Entity entity( EntityImpl( grid_, hostEntity ) );
+        wrappedHandle_.gather( buffer, entity );
       }
 
       template< class MessageBuffer, class HostEntity >
       void scatter ( MessageBuffer &buffer, const HostEntity &hostEntity, size_t size )
       {
-        EntityProxy< HostEntity::codimension, Grid > proxy( grid_, hostEntity );
-        wrappedHandle_.scatter( buffer, *proxy, size );
+        typedef typename Grid::Traits::template Codim< HostEntity::codimension >::Entity Entity;
+        typedef typename Grid::Traits::template Codim< HostEntity::codimension >::EntityImpl EntityImpl;
+        Entity entity( EntityImpl( grid_, hostEntity ) );
+        wrappedHandle_.scatter( buffer, entity, size );
       }
 
     private:

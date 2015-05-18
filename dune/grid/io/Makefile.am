@@ -1,5 +1,3 @@
-# $Id$
-
 SUBDIRS = file visual
 
 iodir = $(includedir)/dune/grid/io

@@ -4,6 +4,7 @@
 #define DUNE_GRID_INTERSECTIONITERATOR_HH
 
 #include <dune/common/iteratorfacades.hh>
+#include <dune/common/proxymemberaccess.hh>
 
 #include <dune/grid/common/intersection.hh>
 
@@ -112,17 +113,47 @@ namespace Dune
     //@{
     //===========================================================
 
+    // The behavior when dereferencing the IntersectionIterator facade depends on
+    // the way the grid implementation handles returning intersections. The implementation
+    // may either return a reference to an intersection stored inside the IntersectionIterator
+    // implementation or a temporary Intersection object. This object has to be forwarded through
+    // the facade to the user, which requires a little trickery, especially for operator->().
+    //
+    // In order to avoid confusing users reading the Doxygen documentation, we provide "clean"
+    // function signatures to Doxygen and hide the actual implementations.
+
+#ifdef DOXYGEN
+
     /** \brief Dereferencing operator. */
-    const Intersection & operator*() const
+    Intersection operator*() const;
+
+    /** \brief Pointer operator. */
+    const Intersection* operator->() const;
+
+#else // DOXYGEN
+
+    /** \brief Dereferencing operator. */
+    typename std::conditional<
+      std::is_lvalue_reference<
+        decltype(realIterator.dereference())
+        >::value,
+      const Intersection&,
+      Intersection
+      >::type
+    operator*() const
     {
       return this->realIterator.dereference();
     }
 
     /** \brief Pointer operator. */
-    const Intersection * operator->() const
+    decltype(handle_proxy_member_access(realIterator.dereference()))
+    operator->() const
     {
-      return & this->realIterator.dereference();
+      return handle_proxy_member_access(realIterator.dereference());
     }
+
+#endif // DOXYGEN
+
     //@}
 
 
@@ -159,6 +190,10 @@ namespace Dune
       this->realIterator.increment();
       return *this;
     }
+
+    /** @brief Default constructor. */
+    IntersectionIterator()
+    {}
 
     //===========================================================
     /** @name Implementor interface

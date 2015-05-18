@@ -7,6 +7,8 @@
  * \brief The UGGridEntity class and its specializations
  */
 
+#include <memory>
+#include <dune/common/shared_ptr.hh>
 #include <dune/grid/common/gridenums.hh>
 
 
@@ -103,7 +105,14 @@ namespace Dune {
 
   public:
     UGGridEntity()
+      : target_(nullptr)
+      , gridImp_(nullptr)
     {}
+
+    UGGridEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
+    {
+      setToTarget(target,gridImp);
+    }
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
@@ -176,6 +185,12 @@ namespace Dune {
       return target_;
     }
 
+    //! equality
+    bool equals(const UGGridEntity& other) const
+    {
+      return getTarget() == other.getTarget();
+    }
+
   private:
     /** \brief Set this entity to a particular UG entity */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target,const GridImp* gridImp) {
@@ -223,12 +238,24 @@ namespace Dune {
     friend class UGGridEntitySeed<codim, GridImp>;
     typedef typename GridImp::ctype UGCtype;
 
+    typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
+
   public:
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
     /** \brief The type of UGGrid Entity seeds */
     typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
+
+    UGEdgeEntity()
+      : target_(nullptr)
+      , gridImp_(nullptr)
+    {}
+
+    UGEdgeEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
+    {
+      setToTarget(target,gridImp);
+    }
 
     //! level of the edge
     int level () const {
@@ -271,6 +298,9 @@ namespace Dune {
     //!< Default codim 1 Faces and codim == dim Vertices
     template<int cc> int count () const;
 
+    //! geometry of this entity
+    Geometry geometry () const { return Geometry( *geo_ ); }
+
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
 
@@ -290,6 +320,20 @@ namespace Dune {
     /** \brief Set edge object to a UG edge object */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       target_ = target;
+
+      // obtain the corner coordinates from UG
+      UGCtype* cornerCoords[2*dim];
+      UG_NS<dim>::Corner_Coordinates(target_, cornerCoords);
+
+      // convert to the type required by MultiLinearGeometry
+      std::vector<FieldVector<UGCtype, dim> > geometryCoords(2);
+      for(size_t i = 0; i < 2; i++)
+        for (size_t j = 0; j < dim; j++)
+            geometryCoords[i][j] = cornerCoords[i][j];
+
+      geo_ = Dune::make_shared<GeometryImpl>(type(), geometryCoords);
+
+      gridImp_ = gridImp;
     }
   public:
     /** \brief Set edge object to a UG edge object using the center element and the side number
@@ -304,8 +348,21 @@ namespace Dune {
       return target_;
     }
 
+    //! equality
+    bool equals(const UGEdgeEntity& other) const
+    {
+      return getTarget() == other.getTarget();
+    }
+
   protected:
+    Dune::shared_ptr<GeometryImpl> geo_;
+
     typename UG_NS<dim>::template Entity<codim>::T* target_;
+
+    /** \brief gridImp Not actually used, only the codim-0 specialization needs it.
+     * But code is simpler if we just keep it everywhere.
+     */
+    const GridImp* gridImp_;
   };
 
   /*! \brief Specialization for edge in 2D
@@ -314,7 +371,18 @@ namespace Dune {
   template<class GridImp>
   class UGGridEntity<1,2,GridImp>
     : public UGEdgeEntity<2,GridImp>
-  {};
+  {
+
+  public:
+
+    UGGridEntity()
+    {}
+
+    UGGridEntity(typename UG_NS<2>::template Entity<1>::T* target, const GridImp* gridImp)
+      : UGEdgeEntity<2,GridImp>(target,gridImp)
+    {}
+
+  };
 
   /*! \brief Specialization for edge in 3D
    * \ingroup UGGrid
@@ -322,7 +390,18 @@ namespace Dune {
   template<class GridImp>
   class UGGridEntity<2,3,GridImp>
     : public UGEdgeEntity<3,GridImp>
-  {};
+  {
+
+  public:
+
+    UGGridEntity()
+    {}
+
+    UGGridEntity(typename UG_NS<3>::template Entity<2>::T* target, const GridImp* gridImp)
+      : UGEdgeEntity<3,GridImp>(target,gridImp)
+    {}
+
+  };
 
 
   /*! \brief UGGrid face entity
@@ -332,8 +411,25 @@ namespace Dune {
   class UGFaceEntity
   {
     enum {codim = 1};
+    typedef typename GridImp::ctype UGCtype;
+
+    typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
+
+    friend class UGGridEntityPointer<codim, GridImp>;
 
   public:
+
+    typedef typename GridImp::template Codim<codim>::Geometry Geometry;
+
+    UGFaceEntity()
+      : target_(nullptr)
+      , gridImp_(nullptr)
+    {}
+
+    UGFaceEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
+    {
+      setToTarget(target,gridImp);
+    }
 
     /** \brief Return the entity type identifier */
     GeometryType type() const
@@ -403,12 +499,30 @@ namespace Dune {
     }
 #endif
 
+    //! geometry of this entity
+    Geometry geometry () const { return Geometry( *geo_ ); }
+
     /** \brief Set to a UG side vector object
         \param target The UG side vector to point to
         \param gridImp Dummy argument, only for consistency with codim-0 entities
      */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       target_ = target;
+
+      // obtain the corner coordinates from UG
+      UGCtype* cornerCoords[4*dim];
+      UG_NS<dim>::Corner_Coordinates(target_, cornerCoords);
+
+      // convert to the type required by MultiLinearGeometry
+      size_t numCorners = type().isTriangle() ? 3 : 4;
+      std::vector<FieldVector<UGCtype, dim> > geometryCoords(numCorners);
+      for(size_t i = 0; i < numCorners; i++)
+        for (size_t j = 0; j < dim; j++)
+            geometryCoords[i][j] = cornerCoords[i][j];
+
+      geo_ = Dune::make_shared<GeometryImpl>(type(), geometryCoords);
+
+      gridImp_ = gridImp;
     }
 
     typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
@@ -416,9 +530,22 @@ namespace Dune {
       return target_;
     }
 
+    //! equality
+    bool equals(const UGFaceEntity& other) const
+    {
+      return getTarget() == other.getTarget();
+    }
+
+protected:
+    Dune::shared_ptr<GeometryImpl> geo_;
+
     /** \brief The UG object (a side vector) that represents this face */
     typename UG_NS<dim>::template Entity<codim>::T* target_;
 
+    /** \brief gridImp Not actually used, only the codim-0 specialization needs it.
+     * But code is simpler if we just keep it everywhere.
+     */
+    const GridImp* gridImp_;
   };
 
   /*! \brief Specialization for faces in 3D
@@ -427,7 +554,18 @@ namespace Dune {
   template<class GridImp>
   class UGGridEntity<1,3,GridImp>
     : public UGFaceEntity<3,GridImp>
-  {};
+  {
+
+  public:
+
+    UGGridEntity()
+    {}
+
+    UGGridEntity(typename UG_NS<3>::template Entity<1>::T* target, const GridImp* gridImp)
+      : UGFaceEntity<3,GridImp>(target,gridImp)
+    {}
+
+  };
 
 
 
@@ -483,8 +621,14 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim<0>::EntitySeed EntitySeed;
 
     UGGridEntity()
-      : gridImp_(NULL)
+      : target_(nullptr)
+      , gridImp_(nullptr)
     {}
+
+    UGGridEntity(typename UG_NS<dim>::Element* target, const GridImp* gridImp)
+    {
+      setToTarget(target,gridImp);
+    }
 
     //! Level of this element
     int level () const {
@@ -521,7 +665,7 @@ namespace Dune {
 
     /** \brief Return the number of subEntities of codimension codim.
      */
-    unsigned int count (unsigned int codim) const
+    unsigned int subEntities (unsigned int codim) const
     {
       if (dim==3) {
 
@@ -560,7 +704,7 @@ namespace Dune {
      *  are numbered 0 ... count<cc>()-1
      */
     template<int cc>
-    typename GridImp::template Codim<cc>::EntityPointer subEntity (int i) const;
+    typename GridImp::template Codim<cc>::Entity subEntity (int i) const;
 
     /** \todo It would be faster to not use -1 as the end marker but
         number of sides instead */
@@ -600,8 +744,8 @@ namespace Dune {
 
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
-    typename GridImp::template Codim<0>::EntityPointer father () const {
-      return typename GridImp::template Codim<0>::EntityPointer (UGGridEntityPointer<0,GridImp>(UG_NS<dim>::EFather(target_),gridImp_));
+    typename GridImp::template Codim<0>::Entity father () const {
+      return typename GridImp::template Codim<0>::Entity(UGGridEntity(UG_NS<dim>::EFather(target_),gridImp_));
     }
 
     //! returns true if father entity exists
@@ -643,6 +787,12 @@ namespace Dune {
     typename UG_NS<dim>::template Entity<0>::T* getTarget() const
     {
       return target_;
+    }
+
+    //! equality
+    bool equals(const UGGridEntity& other) const
+    {
+      return getTarget() == other.getTarget();
     }
 
     //! the current geometry

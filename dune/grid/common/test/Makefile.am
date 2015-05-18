@@ -1,5 +1,3 @@
-# $Id$
-
 if UG
 TESTPROGS = mcmgmappertest
 endif

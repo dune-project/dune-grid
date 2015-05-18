@@ -12,6 +12,7 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/deprecated.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/capabilities.hh>
@@ -67,6 +68,9 @@
 #define __HEAPS__
 #define __UGENV__
 #define __DEVICESH__
+#ifdef ModelP
+#define __PPIF__
+#endif
 
 #define _3
 #include "uggrid/ugincludes.hh"
@@ -315,11 +319,21 @@ namespace Dune {
 
     /** \brief Create an EntityPointer from an EntitySeed */
     template <typename Seed>
+    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
     typename Traits::template Codim<Seed::codimension>::EntityPointer
     entityPointer(const Seed& seed) const
     {
       enum {codim = Seed::codimension};
       return typename Traits::template Codim<codim>::EntityPointer(UGGridEntityPointer<codim,const UGGrid<dim> >(this->getRealImplementation(seed).target(),this));
+    }
+
+    /** \brief Create an Entity from an EntitySeed */
+    template <typename Seed>
+    typename Traits::template Codim<Seed::codimension>::Entity
+    entity(const Seed& seed) const
+    {
+      const int codim = Seed::codimension;
+      return typename Traits::template Codim<codim>::Entity(UGGridEntity<codim,dim,const UGGrid<dim> >(this->getRealImplementation(seed).target(),this));
     }
 
     /** \brief Number of grid entities per level and codim
@@ -488,14 +502,6 @@ namespace Dune {
       return (codim==0) ? 1 : 0;
     }
 
-    /** \brief Default load balancing.
-        \bug The return value is always 'true'
-        \return true if the grid has changed
-     */
-    bool loadBalance() {
-      return loadBalance(0,0);
-    }
-
     /** \brief Distributes the grid and some data over the available nodes in a distributed machine
 
         \tparam DataHandle works like the data handle for the communicate
@@ -506,9 +512,6 @@ namespace Dune {
     template<class DataHandle>
     bool loadBalance (DataHandle& dataHandle)
     {
-#if !HAVE_UG_PATCH10
-      DUNE_THROW(NotImplemented, "load balancing with data attached");
-#else
 #ifdef ModelP
       // gather element data
       //        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
@@ -530,22 +533,15 @@ namespace Dune {
 #endif
 
       return true;
-#endif  // HAVE_UG_PATCH10
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine
-
-       If you want the UG default for the parameters pick
-       <ul>
-       <li>strategy = 0</li>
-       <li>minlevel = 1</li>
-       </ul>
 
        \bug The return value is always 'true'
 
        \param minlevel The coarsest grid level that gets distributed
      */
-    bool loadBalance(int strategy, int minlevel);
+    bool loadBalance(int minlevel=0);
 
     /** \brief Distribute this grid over a distributed machine
      *
@@ -791,6 +787,9 @@ namespace Dune {
           // Is the following line needed or not?
           // dddIfaces.push_back(UG_NS<dim>::EdgeIF());
           return;
+        case All_All_Interface :
+          dddIfaces.push_back(UG_NS<dim>::EdgeSymmVHIF());
+          return;
         default :
           DUNE_THROW(GridError,
                      "Edge communication not supported for "
@@ -829,6 +828,45 @@ namespace Dune {
     // End of Interface Methods
     // **********************************************************
 
+#ifdef DOXYGEN
+
+    /** \brief Rudimentary substitute for a hierarchic iterator on faces
+        \param e, elementSide Grid face specified by an element and one of its sides
+        \param maxl The finest level that should be traversed by the iterator
+        \param[out] childElements For each subface: element index, elementSide, and level
+        \param[out] childElementSides Indices for transformation because Dune numbers the
+                                      faces of several elements differently than UG
+
+        \deprecated This method is deprecated and will be removed after the release of Dune
+                    2.4. Please use the corresponding method that uses entities instead of
+                    EntityPointers.
+     */
+    void getChildrenOfSubface(const typename Traits::template Codim<0>::EntityPointer & e,
+                              int elementSide,
+                              int maxl,
+                              std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
+                              std::vector<unsigned char>& childElementSides) const;
+
+#else
+
+    // This is the actual implementation of the deprecated method. We need this ugly trick of turning
+    // it into a template to avoid triggering a deprecation warning every time UGGrid is used.
+    template< typename T >
+    DUNE_DEPRECATED_MSG("This version of getChildrenOfSubface() uses EntityPointer and is deprecated. It will be removed after the release of Dune 2.4. Please use the new version with entities instead.")
+    typename std::enable_if<
+      std::is_same<
+        T,
+        typename UGGrid<dim>::Traits::template Codim<0>::EntityPointer
+        >::value
+      >::type
+    getChildrenOfSubface(const T & e,
+                         int elementSide,
+                         int maxl,
+                         std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
+                         std::vector<unsigned char>& childElementSides) const;
+
+#endif
+
     /** \brief Rudimentary substitute for a hierarchic iterator on faces
         \param e, elementSide Grid face specified by an element and one of its sides
         \param maxl The finest level that should be traversed by the iterator
@@ -836,10 +874,10 @@ namespace Dune {
         \param[out] childElementSides Indices for transformation because Dune numbers the
                                       faces of several elements differently than UG
      */
-    void getChildrenOfSubface(const typename Traits::template Codim<0>::EntityPointer & e,
+    void getChildrenOfSubface(const typename Traits::template Codim<0>::Entity & e,
                               int elementSide,
                               int maxl,
-                              std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
+                              std::vector<typename Traits::template Codim<0>::Entity>& childElements,
                               std::vector<unsigned char>& childElementSides) const;
 
     /** \brief The different forms of grid refinement that UG supports */
@@ -878,10 +916,40 @@ namespace Dune {
       heapSize_ = size;
     }
 
+#ifdef DOXYGEN
+
+    /** \brief Sets a vertex to a new position
+
+        Changing a vertex' position changes its position on all grid levels!
+
+        \deprecated This method is deprecated and will be removed after the release of Dune
+                    2.4. Please use the corresponding method that uses entities instead of
+                    EntityPointers.
+    */
+    void setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,
+                     const FieldVector<double, dim>& pos);
+
+#else
+
+    // This is the actual implementation of the deprecated method. We need this ugly trick of turning
+    // it into a template to avoid triggering a deprecation warning every time UGGrid is used.
+    template< typename T >
+    DUNE_DEPRECATED_MSG("This version of setPosition() uses EntityPointer and is deprecated. It will be removed after the release of Dune 2.4. Please use the new version with entities instead.")
+    typename std::enable_if<
+      std::is_same<
+        T,
+        typename UGGrid<dim>::Traits::template Codim<dim>::EntityPointer
+        >::value
+      >::type
+    setPosition(const T& e,
+                const FieldVector<double, dim>& pos);
+
+#endif
+
     /** \brief Sets a vertex to a new position
 
        Changing a vertex' position changes its position on all grid levels!*/
-    void setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,
+    void setPosition(const typename Traits::template Codim<dim>::Entity& e,
                      const FieldVector<double, dim>& pos);
 
     /** \brief Does uniform refinement
@@ -939,7 +1007,7 @@ namespace Dune {
     /** \brief Number of UGGrids currently in use.
      *
      * This counts the number of UGGrids currently instantiated.  All
-     * constructors of UGGrid look at this variable.  If it zero, they
+     * constructors of UGGrid look at this variable.  If it is zero, they
      * initialize UG before proceeding.  Destructors use the same mechanism
      * to safely shut down UG after deleting the last UGGrid object.
      */
@@ -1013,12 +1081,12 @@ namespace Dune {
        \ingroup UGGrid
      */
     template<int dim>
-    struct isParallel< UGGrid<dim> >
+    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< UGGrid<dim> >
     {
 #ifdef ModelP
-      static const bool v = true;
+      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = true;
 #else // !ModelP
-      static const bool v = false;
+      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = false;
 #endif // !ModelP
     };
 

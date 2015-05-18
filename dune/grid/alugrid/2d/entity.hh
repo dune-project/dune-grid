@@ -293,7 +293,7 @@ namespace Dune {
     /*! Intra-element access to entities of codimension cc > codim. Return number of entities
         with codimension cc.
      */
-    unsigned int count (unsigned int codim) const
+    unsigned int subEntities (unsigned int codim) const
     {
       assert( item_ );
       return (codim==0) ? 1 : item_->numvertices();

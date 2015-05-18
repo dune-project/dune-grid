@@ -4,7 +4,8 @@ Makefile
 *.log
 *.trs
 
-/tripartittest
+globalindexsettest
 persistentcontainertest
 structuredgridfactorytest
+tripartittest
 vertexordertest

@@ -21,8 +21,6 @@ namespace Dune {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
     typedef typename GridImp::ctype ctype;
-    YaspIntersection();
-    YaspIntersection& operator = (const YaspIntersection&);
 
     typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
     typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
@@ -32,48 +30,54 @@ namespace Dune {
   public:
     // types used from grids
     typedef typename GridImp::YGridLevelIterator YGLI;
-    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename GridImp::YGrid::Iterator I;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
-    void update() const {
-      if (_count == 2*_dir + _face || _count >= 2*dim)
-        return;
+    void update() {
 
-      // cleanup old stuff
-      _outside.transformingsubiterator().move(_dir,1-2*_face);   // move home
-      _pos_world[_dir] = _inside.transformingsubiterator().position(_dir);
+      // vector with per-direction movements
+      std::array<int,dim> dist{{0}};
+
+      // first move: back to center
+      dist[_dir] = 1 - 2*_face;
 
       // update face info
       _dir = _count / 2;
       _face = _count % 2;
 
-      // move transforming iterator
-      _outside.transformingsubiterator().move(_dir,-1+2*_face);
+      // second move: to new neighbor
+      dist[_dir] += -1 + 2*_face;
 
-      // make up faces
-      _pos_world[_dir] += (-0.5+_face)*_inside.transformingsubiterator().meshsize(_dir);
+      // move transforming iterator
+      _outside.transformingsubiterator().move(dist);
     }
 
-    /*! return true if neighbor ist outside the domain. Still the neighbor might
-       exist in case of periodic boundary conditions, i.e. true is returned
-       if the neighbor is outside the periodic unit cell
+    /*! return true if we are on the boundary of the domain
+        unless we are periodic in that direction
      */
     bool boundary () const
     {
-      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 < _inside.gridlevel()->cell_global.min(_count/2)
-              ||
-              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 > _inside.gridlevel()->cell_global.max(_count/2));
+      // Coordinate of intersection in its direction
+      int coord = _inside.transformingsubiterator().coord(_dir) + _face;
+      if (_inside.gridlevel()->mg->isPeriodic(_dir))
+        return false;
+      else
+        return coord == 0
+               ||
+               coord == _inside.gridlevel()->mg->levelSize(_inside.gridlevel()->level(),_dir);
     }
 
     //! return true if neighbor across intersection exists in this processor
     bool neighbor () const
     {
-      return (_inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 >= _inside.gridlevel()->cell_overlap.min(_count/2)
-              &&
-              _inside.transformingsubiterator().coord(_count/2) + 2*(_count%2) - 1 <= _inside.gridlevel()->cell_overlap.max(_count/2));
+      // Coordinate of intersection in its direction
+      int coord = _inside.transformingsubiterator().coord(_dir) + _face;
+      return coord > _inside.gridlevel()->overlap[0].dataBegin()->min(_dir)
+             &&
+             coord <= _inside.gridlevel()->overlap[0].dataBegin()->max(_dir);
     }
 
     //! Yasp is always conform
@@ -84,17 +88,15 @@ namespace Dune {
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const
+    Entity inside() const
     {
-      return _inside;
+      return Entity(_inside);
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
-    //! (that is the neighboring Entity)
-    EntityPointer outside() const
+    Entity outside() const
     {
-      update();
-      return _outside;
+      return Entity(_outside);
     }
 
 #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
@@ -113,29 +115,32 @@ namespace Dune {
     {
       if(! boundary())
         DUNE_THROW(GridError, "called boundarySegmentIndex while boundary() == false");
-      update();
       // size of local macro grid
-      const FieldVector<int, dim> & size = _inside.gridlevel()->mg->begin()->cell_overlap.size();
-      const FieldVector<int, dim> & origin = _inside.gridlevel()->mg->begin()->cell_overlap.origin();
-      FieldVector<int, dim> sides;
+      const Dune::array<int, dim> & size = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->size();
+      const Dune::array<int, dim> & origin = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->origin();
+      Dune::array<int, dim> sides;
       {
         for (int i=0; i<dim; i++)
         {
           sides[i] =
-            ((_inside.gridlevel()->mg->begin()->cell_overlap.origin(i)
-              == _inside.gridlevel()->mg->begin()->cell_global.origin(i))+
-             (_inside.gridlevel()->mg->begin()->cell_overlap.origin(i) +
-                      _inside.gridlevel()->mg->begin()->cell_overlap.size(i)
-                      == _inside.gridlevel()->mg->begin()->cell_global.origin(i) +
-                      _inside.gridlevel()->mg->begin()->cell_global.size(i)));
+            ((_inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->origin(i)
+              == 0)+
+            (_inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->origin(i) +
+                      _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->size(i)
+                      ==
+                      _inside.gridlevel()->mg->levelSize(0,i)));
+
         }
       }
       // global position of the cell on macro grid
-      FieldVector<int, dim> pos = _inside.transformingsubiterator().coord();
-      pos /= (1<<_inside.level());
-      pos -= origin;
+      Dune::array<int, dim> pos = _inside.transformingsubiterator().coord();
+      for(int i=0; i<dim; i++)
+      {
+        pos[i] = pos[i] / (1<<_inside.level());
+        pos[i] = pos[i] - origin[i];
+      }
       // compute unit-cube-face-sizes
-      FieldVector<int, dim> fsize;
+      Dune::array<int, dim> fsize;
       {
         int vol = 1;
         for (int k=0; k<dim; k++)
@@ -161,13 +166,6 @@ namespace Dune {
         // add fsize if we are on the right face and there is a left-face-boundary on this processor
         index += _face * (sides[_dir]>1) * fsize[_dir];
       }
-
-      // int rank = 0;
-      // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-      // std::cout << rank << "... size: " << size << " sides: " << sides
-      //           << " fsize: " << fsize
-      //           << " pos: " << pos << " face: " << int(_dir) << "/" << int(_face)
-      //           << " index: " << index << std::endl;
 
       return index;
     }
@@ -220,17 +218,32 @@ namespace Dune {
      */
     Geometry geometry () const
     {
-      update();
-      GeometryImpl
-      _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),_dir);
+
+      std::bitset<dim> shift;
+      shift.set();
+      shift[_dir] = false;
+
+      Dune::FieldVector<ctype,dimworld> ll, ur;
+
+      for (int i=0; i<dimworld; i++)
+      {
+        int coord = _inside.transformingsubiterator().coord(i);
+        if ((i == _dir) and (_face))
+          coord++;
+        ll[i] = _inside.transformingsubiterator().coordCont()->coordinate(i,coord);
+        if (i != _dir)
+          coord++;
+        ur[i] = _inside.transformingsubiterator().coordCont()->coordinate(i,coord);
+      }
+
+      GeometryImpl _is_global(ll,ur,shift);
       return Geometry( _is_global );
     }
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
     {
-      static const GeometryType cube(GeometryType::cube, dim-1);
-      return cube;
+      return GeometryType(GeometryType::cube, dim-1);
     }
 
     //! local index of codim 1 entity in self where intersection is contained in
@@ -246,17 +259,22 @@ namespace Dune {
       return _count^1;
     }
 
+    YaspIntersection()
+      : _count(~uint8_t(0)) // Use as marker for invalid intersection
+      , _dir(0)
+      , _face(0)
+    {}
+
     //! make intersection iterator from entity, initialize to first neighbor
     YaspIntersection (const YaspEntity<0,dim,GridImp>& myself, bool toend) :
-      _inside(myself.yaspgrid(), myself.gridlevel(),
+      _inside(myself.gridlevel(),
               myself.transformingsubiterator()),
-      _outside(myself.yaspgrid(), myself.gridlevel(),
+      _outside(myself.gridlevel(),
                myself.transformingsubiterator()),
       // initialize to first neighbor
       _count(0),
       _dir(0),
-      _face(0),
-      _pos_world(myself.transformingsubiterator().position())
+      _face(0)
     {
       if (toend)
       {
@@ -268,42 +286,30 @@ namespace Dune {
 
       // move transforming iterator
       _outside.transformingsubiterator().move(_dir,-1);
-
-      // make up faces
-      _pos_world[0] -= 0.5*_inside.transformingsubiterator().meshsize(0);
     }
 
-    //! copy constructor
-    YaspIntersection (const YaspIntersection& it) :
-      _inside(it._inside),
-      _outside(it._outside),
-      _count(it._count),
-      _dir(it._dir),
-      _face(it._face),
-      _pos_world(it._pos_world)
-    {}
+    //! copy constructor -- use default
 
-    //! copy operator
+    //! copy operator - use default
     void assign (const YaspIntersection& it)
     {
-      _inside = it._inside;
-      _outside = it._outside;
-      _count = it._count;
-      _dir = it._dir;
-      _face = it._face;
-      _pos_world = it._pos_world;
+      *this = it;
+    }
+
+    bool equals(const YaspIntersection& other) const
+    {
+      // compare counts first -- that's cheaper if the test fails
+      return _count == other._count && _inside.equals(other._inside);
     }
 
   private:
     /* EntityPointers (get automatically updated) */
-    mutable YaspEntityPointer<0,GridImp> _inside;  //!< entitypointer to myself
-    mutable YaspEntityPointer<0,GridImp> _outside; //!< outside entitypointer
+    YaspEntity<0,GridImp::dimension,GridImp> _inside;  //!< entitypointer to myself
+    YaspEntity<0,GridImp::dimension,GridImp> _outside; //!< outside entitypointer
     /* current position */
     uint8_t _count;                                //!< valid neighbor count in 0 .. 2*dim-1
-    mutable uint8_t _dir;                          //!< count/2
-    mutable uint8_t _face;                         //!< count%2
-    /* current position */
-    mutable FieldVector<ctype, dimworld> _pos_world;       //!< center of face in world coordinates
+    uint8_t _dir;                                  //!< count/2
+    uint8_t _face;                                 //!< count%2
 
     /* static data */
     struct faceInfo
@@ -318,28 +324,35 @@ namespace Dune {
 
     static array<faceInfo, 2*dim> initFaceInfo()
     {
-      const FieldVector<typename GridImp::ctype, GridImp::dimension> ext_local(1.0);
       array<faceInfo, 2*dim> I;
       for (uint8_t i=0; i<dim; i++)
       {
-        // center of face
-        FieldVector<ctype, dim> a(0.5); a[i] = 0.0;
-        FieldVector<ctype, dim> b(0.5); b[i] = 1.0;
-        // normal vectors
+        // compute normals
         I[2*i].normal = 0.0;
         I[2*i+1].normal = 0.0;
         I[2*i].normal[i] = -1.0;
         I[2*i+1].normal[i] = +1.0;
-        // geometries
-        I[2*i].geom_inside =
-          LocalGeometryImpl(a, ext_local, i);
-        I[2*i].geom_outside =
-          LocalGeometryImpl(b, ext_local, i);
-        I[2*i+1].geom_inside =
-          LocalGeometryImpl(b, ext_local, i);
-        I[2*i+1].geom_outside =
-          LocalGeometryImpl(a, ext_local, i);
+
+        // determine the shift vector for these intersection
+        std::bitset<dim> s;
+        s.set();
+        s[i] = false;
+
+        // store intersection geometries
+        Dune::FieldVector<ctype, dim> ll(0.0);
+        Dune::FieldVector<ctype, dim> ur(1.0);
+        ur[i] = 0.0;
+
+        I[2*i].geom_inside = LocalGeometryImpl(ll,ur,s);
+        I[2*i+1].geom_outside = LocalGeometryImpl(ll,ur,s);
+
+        ll[i] = 1.0;
+        ur[i] = 1.0;
+
+        I[2*i].geom_outside = LocalGeometryImpl(ll,ur,s);
+        I[2*i+1].geom_inside = LocalGeometryImpl(ll,ur,s);
       }
+
       return I;
     }
   };

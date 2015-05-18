@@ -94,7 +94,7 @@ if(PSURFACE_FOUND)
   set(PSURFACE_LIBRARIES    ${PSURFACE_LIBRARY})
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determing location of ${PSURFACE_WITH_VERSION} succeded:\n"
+    "Determining location of ${PSURFACE_WITH_VERSION} succeeded:\n"
     "Include directory: ${PSURFACE_INCLUDE_DIRS}\n"
     "Library directory: ${PSURFACE_LIBRARIES}\n\n")
   set(PSURFACE_DUNE_COMPILE_FLAGS "-I${PSURFACE_INCLUDE_DIRS}"
@@ -104,7 +104,7 @@ if(PSURFACE_FOUND)
 else(PSURFACE_FOUND)
   # log errornous result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-    "Determing location of psurface failed:\n"
+    "Determining location of psurface failed:\n"
     "Include directory: ${PSURFACE_INCLUDE_DIRS}\n"
     "Library directory: ${PSURFACE_LIBRARIES}\n\n")
 endif(PSURFACE_FOUND)
@@ -112,9 +112,8 @@ endif(PSURFACE_FOUND)
 # set HAVE_PSURFACE for config.h
 set(HAVE_PSURFACE ${PSURFACE_FOUND})
 
-#add all psurface related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_psurface_flags
+# register all psurface related flags
 if(PSURFACE_FOUND)
-  foreach(dir ${PSURFACE_INCLUDE_DIRS})
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-  endforeach()
+  dune_register_package_flags(INCLUDE_DIRS "${PSURFACE_INCLUDE_DIRS}"
+                              LIBRARIES "${PSURFACE_LIBRARIES}")
 endif()
