@@ -13,7 +13,7 @@
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
-#include <dune/grid/utility/intersectionrange.hh>
+#include <dune/grid/common/rangegenerators.hh>
 
 namespace Dune {
 
