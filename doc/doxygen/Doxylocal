@@ -1,6 +1,6 @@
-INPUT                 += @srcdir@/mainpage \
-                         @srcdir@/modules \
-                         @top_srcdir@/dune/grid/modules \
+INPUT                 += @srcdir@/mainpage.txt \
+                         @srcdir@/modules.txt \
+                         @top_srcdir@/dune/grid/modules.txt \
                          @top_srcdir@/dune/grid/albertagrid \
                          @top_srcdir@/dune/grid/albertagrid.hh \
                          @top_srcdir@/dune/grid/alugrid.hh \
