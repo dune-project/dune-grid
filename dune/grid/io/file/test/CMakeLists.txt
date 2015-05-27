@@ -4,7 +4,8 @@ add_definitions("-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grid
 
 set(TESTS
   gmshtest
-  gnuplottest)
+  gnuplottest
+  printgridtest)
 
 set(CONSISTENT_VTK_TESTS
   conformvolumevtktest
