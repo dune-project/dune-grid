@@ -25,7 +25,8 @@ find_package(UG 3.11.0
   NO_MODULE QUIET
   NO_DEFAULT_PATH)
 find_package(UG 3.11.0
-  NO_MODULE)
+  NO_MODULE
+  NO_SYSTEM_ENVIRONMENT_PATH)
 
 if(UG_FOUND AND (NOT UG_FOR_DUNE STREQUAL "yes"))
   message(WARNING "UG was not configured for DUNE. Did you pass --enable-dune to its configure?")
