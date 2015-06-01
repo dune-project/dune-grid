@@ -89,7 +89,7 @@ if test "x$no_x" != xyes && test x$with_grape != xno ; then
            _and_ if the application uses the GRAPE_CPPFLAGS])
 
     # add to global list
-    DUNE_ADD_ALL_PKG([GRAPE], [$GRAPE_CPPFLAGS], [$GRAPE_LDFLAGS], [$GRAPE_LIBS])
+    DUNE_ADD_ALL_PKG([GRAPE], [\${GRAPE_CPPFLAGS}], [\${GRAPE_LDFLAGS}], [\${GRAPE_LIBS}])
   fi
 elif test "x$X_LIBS" = x ; then 
   AC_MSG_WARN([X libraries were not found and therefore not Grape check possible! See ./configure --help for X library options.])

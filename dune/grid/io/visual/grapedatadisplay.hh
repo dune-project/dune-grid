@@ -3,6 +3,8 @@
 #ifndef DUNE_GRAPE_DATA_DISPLAY_HH
 #define DUNE_GRAPE_DATA_DISPLAY_HH
 
+#warning "Deprecated header, please use dune-grape module from https://users.dune-project.org/repositories/projects/dune-grape.git"
+
 //- system includes
 #include <vector>
 #include <limits>
@@ -268,10 +270,12 @@ namespace Dune
     typedef GridType MyGridType;
 
     //! Constructor, make a GrapeDataDisplay for given grid
+    DUNE_DEPRECATED_MSG("Deprecated class, please use dune-grape module from https://users.dune-project.org/repositories/projects/dune-grape.git")
     inline GrapeDataDisplay(const GridType &grid, const int myrank = -1);
 
     //! Constructor, make a GrapeDataDisplay for given grid
     template <class GridPartType>
+    DUNE_DEPRECATED_MSG("Deprecated class, please use dune-grape module from https://users.dune-project.org/repositories/projects/dune-grape.git")
     inline GrapeDataDisplay(const GridPartType & gridPart, const int myrank = -1);
 
     //! Desctructor

@@ -3,12 +3,15 @@
 #ifndef DUNE_GRAPEGRIDDISPLAY_HH
 #define DUNE_GRAPEGRIDDISPLAY_HH
 
+#warning "Deprecated header, please use dune-grape module from https://users.dune-project.org/repositories/projects/dune-grape.git"
+
 //- system includes
 #include <list>
 #include <set>
 #include <stack>
 
 //- Dune includes
+#include <dune/common/deprecated.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/typeindex.hh>
 #include <dune/grid/common/grid.hh>
@@ -84,14 +87,17 @@ namespace Dune
     //! copy Constructor
     GrapeGridDisplay(const GrapeGridDisplay &);
   public:
+    DUNE_DEPRECATED_MSG("Deprecated class, please use dune-grape module from https://users.dune-project.org/repositories/projects/dune-grape.git")
     //! Constructor, make a GrapeGridDisplay for given grid
     inline GrapeGridDisplay(const GridType &grid, const int myrank = -1);
 
     //! Constructor, make a GrapeGridDisplay for given grid
     template <class GridPartType>
+    DUNE_DEPRECATED_MSG("Deprecated class, please use dune-grape module from https://users.dune-project.org/repositories/projects/dune-grape.git")
     inline GrapeGridDisplay(const GridPartType &gridPart, const int myrank = -1);
 
     template< class VT >
+    DUNE_DEPRECATED_MSG("Deprecated class, please use dune-grape module from https://users.dune-project.org/repositories/projects/dune-grape.git")
     inline GrapeGridDisplay ( const GridView< VT > &gridView, const int myrank = -1 );
 
     //! Destructor for GrapeGridDisplay
