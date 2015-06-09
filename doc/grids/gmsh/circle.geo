@@ -1,7 +1,7 @@
 // mesh width associated with points
 lc = 1;
 
-// vertices of the pyramid
+// Two antipodal points on the circle, the third point is the circle center
 Point(1) = {-1, 0, 0, lc};
 Point(2) = {1, 0, 0, lc};
 Point(3) = {0, 0, 0, lc};
