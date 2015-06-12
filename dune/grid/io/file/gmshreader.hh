@@ -318,12 +318,16 @@ namespace Dune
         for( int i = 1; i <= number_of_nodes; ++i )
         {
           readfile(file,4, "%d %lg %lg %lg\n", &id, &x[ 0 ], &x[ 1 ], &x[ 2 ] );
-          if( id != i )
-            DUNE_THROW( Dune::IOError, "Expected id " << i << "(got id " << id << "." );
+
+          if (id > number_of_nodes) {
+            DUNE_THROW(Dune::IOError,
+                       "Only dense sequences of node indices are currently supported (node index "
+                       << id << " is invalid).");
+          }
 
           // just store node position
           for( int j = 0; j < dimWorld; ++j )
-            nodes[ i ][ j ] = x[ j ];
+            nodes[ id ][ j ] = x[ j ];
         }
         readfile(file,1,"%s\n",buf);
         if (strcmp(buf,"$EndNodes")!=0)
