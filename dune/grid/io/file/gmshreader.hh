@@ -311,7 +311,8 @@ namespace Dune
       if (verbose) std::cout << "file contains " << number_of_nodes << " nodes" << std::endl;
 
       // read nodes
-      std::vector< GlobalVector > nodes( number_of_nodes+1 );       // store positions
+      // The '+1' is due to the fact that gmsh numbers node starting from 1 rather than from 0
+      std::vector< GlobalVector > nodes( number_of_nodes+1 );
       {
         int id;
         double x[ 3 ];
@@ -343,7 +344,8 @@ namespace Dune
       if (verbose) std::cout << "file contains " << number_of_elements << " elements" << std::endl;
 
       //=========================================
-      // Pass 1: Renumber needed vertices
+      // Pass 1: Select and insert those vertices in the file that
+      //    actually occur as corners of an element.
       //=========================================
 
       long section_element_offset = ftell(file);
@@ -403,7 +405,11 @@ namespace Dune
       fclose(file);
     }
 
-    // dimension dependent routines
+    /** \brief Process one element during the first pass through the list of all elements
+     *
+     * Mainly, the method inserts all vertices needed by the current element,
+     * unless they have been inserted already for a previous element.
+     */
     void pass1HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
                             const std::vector< GlobalVector > & nodes)
@@ -488,8 +494,10 @@ namespace Dune
 
 
 
-
-
+    /** \brief Process one element during the second pass through the list of all elements
+     *
+     * This method actually inserts the element into the grid factory.
+     */
     virtual void pass2HandleElement(FILE* file, const int elm_type,
                                     std::map<int,unsigned int> & renumber,
                                     const std::vector< GlobalVector > & nodes,
