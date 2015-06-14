@@ -626,11 +626,13 @@ namespace Dune
     /** \name Miscellaneous Methods
      *  \{ */
 
+    /** \brief obtain constant reference to the host grid */
     const HostGrid &hostGrid () const
     {
       return *hostGrid_;
     }
 
+    /** \brief obtain mutable reference to the host grid */
     HostGrid &hostGrid ()
     {
       return *hostGrid_;
@@ -660,12 +662,16 @@ namespace Dune
       levelIndexSets_.resize( newNumLevels, nullptr );
     }
 
-    /** \} */
 
     using Base::getRealImplementation;
 
+    /** \brief obtain constant reference to the coordinate function */
     const CoordFunction &coordFunction () const { return coordFunction_; }
+
+    /** \brief obtain mutable reference to the coordinate function. */
     CoordFunction &coordFunction () { return coordFunction_; }
+
+    /** \} */
 
   protected:
     template< int codim >
@@ -762,7 +768,7 @@ namespace Dune
       LevelIterator;
     };
 
-    /** \brief type of level iterator
+    /** \brief type of leaf iterator
      *
      *  This iterator enumerates the entites of codimension \em codim of a
      *  grid level.
@@ -771,7 +777,7 @@ namespace Dune
      */
     typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
 
-    /** \brief type of leaf iterator
+    /** \brief type of level iterator
      *
      *  This iterator enumerates the entites of codimension \em codim of the
      *  leaf grid.
