@@ -234,7 +234,7 @@ namespace Dune
      */
     GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( &hostGrid ),
-        coordFunction_( coordFunction ),
+        coordFunction_( &coordFunction ),
         removeHostGrid_( false ),
         levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
         storageAllocator_( allocator )
@@ -251,11 +251,29 @@ namespace Dune
      */
     GeometryGrid ( HostGrid *hostGrid, CoordFunction *coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( hostGrid ),
-        coordFunction_( *coordFunction ),
+        coordFunction_( coordFunction ),
         removeHostGrid_( true ),
         levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
         storageAllocator_( allocator )
     {}
+
+    /** \brief constructor
+     *
+     *  The grid takes ownership of the pointer to host grid and it will
+     *  be deleted when the grid is destroyed. The coordinate function
+     *  is automatically constructed.
+     *
+     *  \param[in]  hostGrid       pointer to the grid to wrap
+     *  \param[in]  allocator      storage allocator
+     */
+    GeometryGrid ( HostGrid *hostGrid, const Allocator &allocator = Allocator() )
+      : hostGrid_( hostGrid ),
+        coordFunction_( new CoordFunction( hostGrid() ) ),
+        removeHostGrid_( true ),
+        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
+        storageAllocator_( allocator )
+    {}
+
 
     /** \brief destructor
      */
@@ -269,7 +287,7 @@ namespace Dune
 
       if( removeHostGrid_ )
       {
-        delete &coordFunction_;
+        delete coordFunction_;
         delete hostGrid_;
       }
     }
@@ -649,7 +667,7 @@ namespace Dune
     void update ()
     {
       // adapt the coordinate function
-      GeoGrid::AdaptCoordFunction< typename CoordFunction::Interface >::adapt( coordFunction_ );
+      GeoGrid::AdaptCoordFunction< typename CoordFunction::Interface >::adapt( coordFunction() );
 
       const int newNumLevels = maxLevel()+1;
       const int oldNumLevels = levelIndexSets_.size();
@@ -666,10 +684,10 @@ namespace Dune
     using Base::getRealImplementation;
 
     /** \brief obtain constant reference to the coordinate function */
-    const CoordFunction &coordFunction () const { return coordFunction_; }
+    const CoordFunction &coordFunction () const { return *coordFunction_; }
 
     /** \brief obtain mutable reference to the coordinate function. */
-    CoordFunction &coordFunction () { return coordFunction_; }
+    CoordFunction &coordFunction () { return *coordFunction_; }
 
     /** \} */
 
@@ -693,7 +711,7 @@ namespace Dune
 
   private:
     HostGrid *const hostGrid_;
-    CoordFunction &coordFunction_;
+    CoordFunction *coordFunction_;
     bool removeHostGrid_;
     mutable std::vector< LevelIndexSet *, typename Allocator::template rebind< LevelIndexSet * >::other > levelIndexSets_;
     mutable LeafIndexSet leafIndexSet_;
