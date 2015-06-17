@@ -75,6 +75,12 @@ add_executable(gmshtest-alberta3d gmshtest.cc)
 add_dune_alberta_flags(gmshtest-alberta3d WORLDDIM 3)
 add_dune_grape_flags(gmshtest-alberta3d)
 
+set_tests_properties(
+  vtktest
+  mpivtktest
+  PROPERTIES SKIP_RETURN_CODE 77
+)
+
 foreach(_test ${UG_TESTS})
   add_dune_ug_flags(${_test})
 endforeach(_test ${UG_TESTS})
