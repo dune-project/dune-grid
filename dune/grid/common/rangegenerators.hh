@@ -737,7 +737,7 @@ namespace Dune
    * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
-   * \param cd   a Codim object that is used to specify the dimension of the entities by means
+   * \param d    a Dim object that is used to specify the dimension of the entities by means
    *             of its template parameter.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
    *             the entities must belong.

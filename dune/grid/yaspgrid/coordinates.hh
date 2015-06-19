@@ -169,7 +169,7 @@ namespace Dune
      }
 
      /** \returns the dth component of the origin
-      *  \param the direction to be used
+      *  \param d the direction to be used
       */
      inline ct origin(int d) const
      {

@@ -627,7 +627,7 @@ namespace Dune
     /**\brief Inter-level access to elements that resulted from (recursive)
        subdivision of this element.
 
-       \param[in] maxlevel Iterator does not stop at elements with level greater than maxlevel.
+       \param[in] maxLevel Iterator does not stop at elements with level greater than maxlevel.
        \return Iterator to the first son (level is not greater than maxlevel)
 
        \note If the partitionType of the Entity is GhostEntity,
