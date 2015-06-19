@@ -48,6 +48,7 @@ endforeach(_test ${ALLTESTS})
 if(MPI_FOUND)
   add_test(NAME mpivtktest WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND mpirun -np 2 ./vtktest)
+  set_tests_properties(mpivtktest PROPERTIES SKIP_RETURN_CODE 77)
 endif(MPI_FOUND)
 
 foreach(_test ${AMIRAMESH_TESTS})
@@ -75,11 +76,7 @@ add_executable(gmshtest-alberta3d gmshtest.cc)
 add_dune_alberta_flags(gmshtest-alberta3d WORLDDIM 3)
 add_dune_grape_flags(gmshtest-alberta3d)
 
-set_tests_properties(
-  vtktest
-  mpivtktest
-  PROPERTIES SKIP_RETURN_CODE 77
-)
+set_tests_properties(vtktest PROPERTIES SKIP_RETURN_CODE 77)
 
 foreach(_test ${UG_TESTS})
   add_dune_ug_flags(${_test})
