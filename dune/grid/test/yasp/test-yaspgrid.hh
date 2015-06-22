@@ -16,7 +16,7 @@ struct YaspFactory
 template<int dim>
 struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 {
-  static Dune::YaspGrid<dim>* buildGrid()
+  static Dune::YaspGrid<dim>* buildGrid(bool keepPhysicalOverlap = true, int refCount = 0)
   {
     std::cout << " using equidistant coordinate container!" << std::endl << std::endl;
 
@@ -31,14 +31,17 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
     std::bitset<dim> p(0);
     int overlap = 1;
 
-    return new Dune::YaspGrid<dim>(Len,s,p,overlap);
+    auto grid = new Dune::YaspGrid<dim>(Len,s,p,overlap);
+    grid->refineOptions (keepPhysicalOverlap);
+    grid->globalRefine (refCount);
+    return grid;
   }
 };
 
 template<int dim>
 struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
 {
-  static Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >* buildGrid()
+  static Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >* buildGrid(bool keepPhysicalOverlap = true, int refCount = 0)
   {
     std::cout << " using equidistant coordinate container with non-zero origin!" << std::endl << std::endl;
 
@@ -54,14 +57,17 @@ struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
     std::bitset<dim> p(0);
     int overlap = 1;
 
-    return new Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >(lowerleft,upperright,s,p,overlap);
+    auto grid = new Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >(lowerleft,upperright,s,p,overlap);
+    grid->refineOptions (keepPhysicalOverlap);
+    grid->globalRefine (refCount);
+    return grid;
   }
 };
 
 template<int dim>
 struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
 {
-  static Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >* buildGrid()
+  static Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >* buildGrid(bool keepPhysicalOverlap = true, int refCount = 0)
   {
     std::cout << " using tensorproduct coordinate container!" << std::endl << std::endl;
 
@@ -97,7 +103,10 @@ struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
       }
     }
 
-    return new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(coords,p,overlap);
+    auto grid = new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(coords,p,overlap);
+    grid->refineOptions (keepPhysicalOverlap);
+    grid->globalRefine (refCount);
+    return grid;
   }
 };
 
