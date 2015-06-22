@@ -23,6 +23,11 @@ int main (int argc , char **argv) {
     check_backuprestore(YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid());
     check_backuprestore(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid());
 
+    // Test again with refinement
+    check_backuprestore(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid(true, 1));
+    check_backuprestore(YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid(true, 1));
+    check_backuprestore(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid(true, 1));
+
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
     return 1;
