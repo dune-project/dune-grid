@@ -1846,7 +1846,7 @@ namespace Dune {
   //! Output operator for multigrids
 
   template <int d, class CC>
-  inline std::ostream& operator<< (std::ostream& s, YaspGrid<d,CC>& grid)
+  std::ostream& operator<< (std::ostream& s, const YaspGrid<d,CC>& grid)
   {
     int rank = grid.torus().rank();
 
