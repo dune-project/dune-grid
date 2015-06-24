@@ -982,6 +982,8 @@ namespace Dune {
 
       for (auto yit = ygrid.dataBegin(); yit != ygrid.dataEnd(); ++yit)
       {
+        if (i == _end)
+          break;
         auto it = i->begin();
         if (it->grid.shift() == yit->shift())
         {
