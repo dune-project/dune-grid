@@ -1015,7 +1015,7 @@ namespace Dune {
          <i> A structured mesh in d dimensions consisting of "cubes".</i>
      \li Dune::UGGrid <br>
          <i> Provides the meshes of the finite element toolbox UG.
-             (http://sit.iwr.uni-heidelberg.de/~ug).</i>
+             (http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug).</i>
      \li Dune::YaspGrid (Yet Another Structured Parallel Grid) <br>
          <i> Provides a distributed structured cube mesh.</i>
 
