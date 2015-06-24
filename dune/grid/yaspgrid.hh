@@ -519,14 +519,14 @@ namespace Dune {
         g.overlap[codim].finalize(overlap_it);
         g.interiorborder[codim].finalize(interiorborder_it);
         g.interior[codim].finalize(interior_it);
-        g.send_overlapfront_overlapfront[codim].finalize(send_overlapfront_overlapfront_it);
-        g.recv_overlapfront_overlapfront[codim].finalize(recv_overlapfront_overlapfront_it);
-        g.send_overlap_overlapfront[codim].finalize(send_overlap_overlapfront_it);
-        g.recv_overlapfront_overlap[codim].finalize(recv_overlapfront_overlap_it);
-        g.send_interiorborder_interiorborder[codim].finalize(send_interiorborder_interiorborder_it);
-        g.recv_interiorborder_interiorborder[codim].finalize(recv_interiorborder_interiorborder_it);
-        g.send_interiorborder_overlapfront[codim].finalize(send_interiorborder_overlapfront_it);
-        g.recv_overlapfront_interiorborder[codim].finalize(recv_overlapfront_interiorborder_it);
+        g.send_overlapfront_overlapfront[codim].finalize(send_overlapfront_overlapfront_it,g.overlapfront[codim]);
+        g.recv_overlapfront_overlapfront[codim].finalize(recv_overlapfront_overlapfront_it,g.overlapfront[codim]);
+        g.send_overlap_overlapfront[codim].finalize(send_overlap_overlapfront_it,g.overlapfront[codim]);
+        g.recv_overlapfront_overlap[codim].finalize(recv_overlapfront_overlap_it,g.overlapfront[codim]);
+        g.send_interiorborder_interiorborder[codim].finalize(send_interiorborder_interiorborder_it,g.overlapfront[codim]);
+        g.recv_interiorborder_interiorborder[codim].finalize(recv_interiorborder_interiorborder_it,g.overlapfront[codim]);
+        g.send_interiorborder_overlapfront[codim].finalize(send_interiorborder_overlapfront_it,g.overlapfront[codim]);
+        g.recv_overlapfront_interiorborder[codim].finalize(recv_overlapfront_interiorborder_it,g.overlapfront[codim]);
       }
     }
 
