@@ -80,6 +80,9 @@
    uses the UG_CPPFLAGS */
 #cmakedefine HAVE_UG ENABLE_UG
 
+/* Define to 1 if you have mkstemp function */
+#cmakedefine01 HAVE_MKSTEMP
+
 /* Grid type magic for DGF parser */
 @GRID_CONFIG_H_BOTTOM@
 /* end dune-grid */
