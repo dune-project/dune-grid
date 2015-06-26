@@ -1,3 +1,4 @@
+include(CheckFunctionExists)
 check_function_exists(mkstemp HAVE_MKSTEMP)
 
 include(GridType)
