@@ -1203,13 +1203,13 @@ namespace Dune {
         std::bitset<dim> ovlp_low(0ULL), ovlp_up(0ULL);
         for (int i=0; i<dim; i++)
         {
-          if (cg.overlap[0].dataBegin()->origin(i) > 0)
+          if (cg.overlap[0].dataBegin()->origin(i) > 0 || _periodic[i])
             ovlp_low[i] = true;
-          if (cg.overlap[0].dataBegin()->max(i) + 1 < globalSize(i))
+          if (cg.overlap[0].dataBegin()->max(i) + 1 < globalSize(i) || _periodic[i])
             ovlp_up[i] = true;
         }
 
-        Coordinates newcont(cg.coords.refine(ovlp_low, ovlp_up, keep_ovlp, cg.overlapSize));
+        Coordinates newcont(cg.coords.refine(ovlp_low, ovlp_up, cg.overlapSize, keep_ovlp));
 
         int overlap = (keep_ovlp) ? 2*cg.overlapSize : cg.overlapSize;
 
