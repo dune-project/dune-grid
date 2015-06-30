@@ -743,7 +743,7 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
        _periodic(periodic), _coarseSize(s), _overlap(overlap),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false), _L(L)
     {
       // check whether YaspGrid has been given the correct template parameter
       static_assert(is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
@@ -803,7 +803,7 @@ namespace Dune {
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
        _periodic(periodic), _coarseSize(s), _overlap(overlap),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false), _L(upperright - lowerleft)
     {
       // check whether YaspGrid has been given the correct template parameter
       static_assert(is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
@@ -875,8 +875,10 @@ namespace Dune {
       _levels.resize(1);
 
       //determine sizes of vector to correctly construct torus structure and store for later size requests
-      for (int i=0; i<dim; i++)
+      for (int i=0; i<dim; i++) {
         _coarseSize[i] = coords[i].size() - 1;
+        _L[i] = coords[i][_coarseSize[i]] - coords[i][0];
+      }
 
       iTupel o;
       std::fill(o.begin(), o.end(), 0);
@@ -962,7 +964,7 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false), _L(L)
     {
       _periodic = periodic;
       _levels.resize(1);
@@ -1030,8 +1032,10 @@ namespace Dune {
       _overlap = overlap;
 
       //determine sizes of vector to correctly construct torus structure and store for later size requests
-      for (int i=0; i<dim; i++)
+      for (int i=0; i<dim; i++) {
         _coarseSize[i] = coords[i].size() - 1;
+        _L[i] = coords[i][_coarseSize[i]] - coords[i][0];
+      }
 
       iTupel o;
       std::fill(o.begin(), o.end(), 0);
@@ -1128,6 +1132,9 @@ namespace Dune {
 
       if (!Dune::Yasp::checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
+
+      for (int i=0; i<dim; i++)
+        _L[i] = coords[i][coords[i].size() - 1] - coords[i][0];
 
       _levels.resize(1);
 
@@ -1433,6 +1440,11 @@ namespace Dune {
     size_t numBoundarySegments () const
     {
       return nBSegments;
+    }
+
+    //! \brief returns the size of the physical domain
+    const Dune::FieldVector<ctype, dim>& domainSize () const {
+      return _L;
     }
 
     /*! The new communication interface
@@ -1832,7 +1844,7 @@ namespace Dune {
     YaspIndexSet<const YaspGrid<dim,Coordinates>, true> leafIndexSet_;
     YaspGlobalIdSet<const YaspGrid<dim,Coordinates> > theglobalidset;
 
-    fTupel _LL;
+    Dune::FieldVector<ctype, dim> _L;
     iTupel _s;
     std::bitset<dim> _periodic;
     iTupel _coarseSize;
