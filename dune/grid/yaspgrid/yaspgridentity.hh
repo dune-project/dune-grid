@@ -495,7 +495,26 @@ namespace Dune {
     //! geometry of this entity
     Geometry geometry () const {
       // the element geometry
-      GeometryImpl _geometry(_it.lowerleft(),_it.upperright());
+      auto ll = _it.lowerleft();
+      auto ur = _it.upperright();
+
+      // If on periodic overlap, transform coordinates by domain size
+      for (int i=0; i<dimworld; i++) {
+        if (gridlevel()->mg->isPeriodic(i)) {
+          int coord = transformingsubiterator().coord(i);
+          if (coord < 0) {
+            auto size = _g->mg->domainSize()[i];
+            ll[i] += size;
+            ur[i] += size;
+          } else if (coord + 1 > gridlevel()->mg->levelSize(gridlevel()->level(),i)) {
+            auto size = _g->mg->domainSize()[i];
+            ll[i] -= size;
+            ur[i] -= size;
+          }
+        }
+      }
+
+      GeometryImpl _geometry(ll,ur);
       return Geometry( _geometry );
     }
 
