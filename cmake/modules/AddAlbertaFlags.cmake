@@ -13,7 +13,7 @@ macro(add_dune_alberta_flags)
   if(ALBERTA_FOUND)
     include(CMakeParseArguments)
     cmake_parse_arguments(ADD_ALBERTA
-      "OBJECT;SOURCE_ONLY;USE_GENERIC" "GRIDDIM;WORLDDIM" "" ${ARGN})
+      "OBJECT;SOURCE_ONLY;USE_GENERIC;NO_LINK_DUNEALBERTAGRID" "GRIDDIM;WORLDDIM" "" ${ARGN})
 
     if(ADD_ALBERTA_GRIDDIM AND NOT ADD_ALBERTA_WORLDDIM)
       set(ADD_ALBERTA_WORLDDIM ${ADD_ALBERTA_GRIDDIM})
@@ -42,8 +42,11 @@ macro(add_dune_alberta_flags)
       if(NOT ADD_ALBERTA_OBJECT)
         # link to ALBERTA libraries
         foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
+          if(NOT ADD_ALBERTA_NO_LINK_DUNEALBERTAGRID)
+            target_link_libraries(${_target}
+              dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d)
+          endif(NOT ADD_ALBERTA_NO_LINK_DUNEALBERTAGRID)
           target_link_libraries(${_target}
-            dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d
             ${ALBERTA_${ADD_ALBERTA_WORLDDIM}D_LIB}
             dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
         endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})

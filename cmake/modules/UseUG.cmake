@@ -95,15 +95,18 @@ find_package_handle_standard_args(
 # Add flags to targets
 function(add_dune_ug_flags)
   if(UG_FOUND)
-    cmake_parse_arguments(ADD_UG "SOURCE_ONLY;OBJECT" "" "" ${ARGN})
+    cmake_parse_arguments(ADD_UG "SOURCE_ONLY;OBJECT;NO_LINK_DUNEGRID" "" "" ${ARGN})
     if(ADD_UG_SOURCE_ONLY)
       set(_prefix SOURCE)
       set(_source_only SOURCE_ONLY)
     else()
       if(NOT ADD_UG_OBJECT)
         foreach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
+          if(NOT ADD_UG_NO_LINK_DUNEGRID)
+            target_link_libraries(${_target} dunegrid)
+          endif()
           target_link_libraries(${_target}
-            dunegrid ${UG_LIBRARIES} ${DUNE_LIBS})
+            ${UG_LIBRARIES} ${DUNE_LIBS})
         endforeach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
       endif()
       set(_prefix TARGET)
@@ -116,9 +119,14 @@ function(add_dune_ug_flags)
       COMPILE_DEFINITIONS ENABLE_UG)
     # Add linker arguments
     if(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
+      if(NOT ADD_UG_NO_LINK_DUNEGRID)
+        set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
+          APPEND PROPERTY
+          LINK_LIBRARIES dunegrid)
+      endif()
       set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
         APPEND PROPERTY
-        LINK_LIBRARIES dunegrid ${UG_LIBRARIES} ${DUNE_LIBS})
+        LINK_LIBRARIES ${UG_LIBRARIES} ${DUNE_LIBS})
     endif(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
     if(UG_PARALLEL STREQUAL "yes")
       # Add modelp
