@@ -742,8 +742,8 @@ namespace Dune {
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
-       _periodic(periodic), _coarseSize(s), _overlap(overlap),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false), _L(L)
+        _L(L), _periodic(periodic), _coarseSize(s), _overlap(overlap),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
       static_assert(is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
@@ -802,8 +802,9 @@ namespace Dune {
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
-       _periodic(periodic), _coarseSize(s), _overlap(overlap),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false), _L(upperright - lowerleft)
+        _L(upperright - lowerleft),
+        _periodic(periodic), _coarseSize(s), _overlap(overlap),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
       static_assert(is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
@@ -964,7 +965,7 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false), _L(L)
+         _L(L), keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       _periodic = periodic;
       _levels.resize(1);
