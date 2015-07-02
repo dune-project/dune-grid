@@ -155,6 +155,14 @@ namespace Dune {
       return partitions & (1 << pt);
     }
 
+    //! Tests whether the given PartitionSet is contained in this set.
+    template<unsigned int contained_partitions>
+    static DUNE_CONSTEXPR bool contains(PartitionSet<contained_partitions>)
+    {
+      return (partitions & contained_partitions) == contained_partitions;
+    }
+
+
   };
 
   //! Creates a PartitionSet for the given PartitionType.
