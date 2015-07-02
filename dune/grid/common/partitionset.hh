@@ -181,34 +181,70 @@ namespace Dune {
 
 #ifdef DOXYGEN
 
+    //! Type of PartitionSet for the interior partition.
+    typedef PartitionSet<...> Interior;
+
+    //! Type of PartitionSet for the border partition.
+    typedef PartitionSet<...> Border;
+
+    //! Type of PartitionSet for the overlap partition.
+    typedef PartitionSet<...> Overlap;
+
+    //! Type of PartitionSet for the front partition.
+    typedef PartitionSet<...> Front;
+
+    //! Type of PartitionSet for the ghost partition.
+    typedef PartitionSet<...> Ghost;
+
+    //! Type of PartitionSet for the interior and border partitions.
+    typedef PartitionSet<...> InteriorBorder;
+
+    //! Type of PartitionSet for the interior, border and overlap partitions.
+    typedef PartitionSet<...> InteriorBorderOverlap;
+
+    //! Type of PartitionSet for the interior, border, overlap and front partitions.
+    typedef PartitionSet<...> InteriorBorderOverlapFront;
+
+    //! Type of PartitionSet for all partitions.
+    typedef PartitionSet<...> All;
+
+
     //! PartitionSet for the interior partition.
-    PartitionSet<...> interior;
+    Interior interior;
 
     //! PartitionSet for the border partition.
-    PartitionSet<...> border;
+    Border border;
 
     //! PartitionSet for the overlap partition.
-    PartitionSet<...> overlap;
+    Overlap overlap;
 
     //! PartitionSet for the front partition.
-    PartitionSet<...> front;
+    Front front;
 
     //! PartitionSet for the ghost partition.
-    PartitionSet<...> ghost;
+    Ghost ghost;
 
     //! PartitionSet for the interior and border partitions.
-    PartitionSet<...> interiorBorder;
+    InteriorBorder interiorBorder;
 
     //! PartitionSet for the interior, border and overlap partitions.
-    PartitionSet<...> interiorBorderOverlap;
+    InteriorBorderOverlap interiorBorderOverlap;
 
     //! PartitionSet for the interior, border, overlap and front partitions.
-    PartitionSet<...> interiorBorderOverlapFront;
+    InteriorBorderOverlapFront interiorBorderOverlapFront;
 
     //! PartitionSet for all partitions.
-    PartitionSet<...> all;
+     All all;
 
 #else // DOXYGEN
+
+    // First declare the types and objects for individual partitions
+
+    typedef decltype(partitionSet<InteriorEntity>()) Interior;
+    typedef decltype(partitionSet<BorderEntity>()) Border;
+    typedef decltype(partitionSet<OverlapEntity>()) Overlap;
+    typedef decltype(partitionSet<FrontEntity>()) Front;
+    typedef decltype(partitionSet<GhostEntity>()) Ghost;
 
     namespace {
 
@@ -216,16 +252,29 @@ namespace Dune {
       // restricted to the current translation unit, making it easier for the compiler
       // to eliminate the actual objects and to avoid linking problems
 
-      const decltype(partitionSet<InteriorEntity>()) interior = {};
-      const decltype(partitionSet<BorderEntity>()) border = {};
-      const decltype(partitionSet<OverlapEntity>()) overlap = {};
-      const decltype(partitionSet<FrontEntity>()) front = {};
-      const decltype(partitionSet<GhostEntity>()) ghost = {};
+      const Interior interior = {};
+      const Border border = {};
+      const Overlap overlap = {};
+      const Front front = {};
+      const Ghost ghost = {};
 
-      const decltype(interior + border) interiorBorder = {};
-      const decltype(interior + border + overlap) interiorBorderOverlap = {};
-      const decltype(interior + border + overlap + front) interiorBorderOverlapFront = {};
-      const decltype(interior + border + overlap + front + ghost) all = {};
+    }
+
+    // Now we can declare the partition sets that are a result of combining partitions
+
+    typedef decltype(interior + border) InteriorBorder;
+    typedef decltype(interior + border + overlap) InteriorBorderOverlap;
+    typedef decltype(interior + border + overlap + front) InteriorBorderOverlapFront;
+    typedef decltype(interior + border + overlap + front + ghost) All;
+
+    namespace {
+
+      // again, place the global objects in an anonymous namespace
+
+      const InteriorBorder interiorBorder = {};
+      const InteriorBorderOverlap interiorBorderOverlap = {};
+      const InteriorBorderOverlapFront interiorBorderOverlapFront = {};
+      const All all = {};
 
     }
 
