@@ -15,11 +15,8 @@ namespace Dune
      intersections with "neighboring" elements and with the domain
      boundary.
 
-     Template parameters are:
-
-     - <tt>GridImp</tt> Type that is a model of Dune::Grid
-     - <tt>IntersectionIteratorImp</tt> Class template that is a model of
-     Dune::IntersectionIterator
+     \tparam GridImp Type that is a model of Dune::Grid
+     \tparam IntersectionIteratorImp Class template that is a model of Dune::IntersectionIterator
 
      @warning The number of neigbors may be different from the number of
      faces/edges of an element!
