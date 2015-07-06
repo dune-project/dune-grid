@@ -26,7 +26,7 @@
       @ingroup GridInterface */
   /** @defgroup GIEntityPointer EntityPointer and Iterators
       @ingroup GridInterface */
-  /** @defgroup GIIntersectionIterator Intersection and IntersectionIterator
+  /** @defgroup GIIntersectionIterator Intersections
       @ingroup GridInterface */
   /** @defgroup GIIteration Iterating over grid entities and intersections
       @ingroup GridInterface */
