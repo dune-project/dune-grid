@@ -824,23 +824,11 @@ namespace Dune
      */
     bool hasBoundaryIntersections () const
     {
-      {
-        typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
-        IntersectionIterator end = asImp().ilevelend();
-        for(IntersectionIterator it = asImp().ilevelbegin(); it != end; ++it)
-        {
-          if( it->boundary() ) return true;
-        }
-      }
-
-      {
-        typedef typename GridImp::LeafIntersectionIterator IntersectionIterator;
-        IntersectionIterator end = asImp().ileafend();
-        for(IntersectionIterator it = asImp().ileafbegin(); it != end; ++it)
-        {
-          if( it->boundary() ) return true;
-        }
-      }
+      typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
+      IntersectionIterator end = asImp().ilevelend();
+      for (IntersectionIterator it = asImp().ilevelbegin(); it != end; ++it)
+        if( it->boundary() )
+          return true;
 
       return false;
     }
