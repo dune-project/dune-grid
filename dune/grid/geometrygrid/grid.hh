@@ -268,7 +268,7 @@ namespace Dune
      */
     GeometryGrid ( HostGrid *hostGrid, const Allocator &allocator = Allocator() )
       : hostGrid_( hostGrid ),
-        coordFunction_( new CoordFunction( hostGrid() ) ),
+        coordFunction_( new CoordFunction( this->hostGrid() ) ),
         removeHostGrid_( true ),
         levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
         storageAllocator_( allocator )
