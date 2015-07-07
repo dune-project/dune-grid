@@ -14,6 +14,7 @@
 #include <dune/geometry/type.hh>
 
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/mcmgmapper.hh>
 
 
 namespace Dune {
@@ -88,8 +89,12 @@ namespace Dune {
      * Counting of the element numbers starts by "1".
      * Tags are ignored, i.e. number-of-tags is always zero and no tags are printed.
      * node-number-list depends on the type of the given element.
+     * If the pysicalEntities parameter is set, its content is stored
+     * along the element in the first tag, using the MCMGMapper.
      */
-    void outputElements(std::ofstream& file) const {
+    void outputElements(std::ofstream& file,
+                        const std::vector<int>* physicalEntities = nullptr) const {
+      MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> elementMapper(gv);
       ElementIterator eIt    = gv.template begin<0>();
       ElementIterator eEndIt = gv.template end<0>();
 
@@ -98,7 +103,13 @@ namespace Dune {
         try {
           size_t element_type = translateDuneToGmshType(eIt->type());
 
-          file << i << " " << element_type << " " << 0; // "0" for "I do not use any tags."
+          file << i << " " << element_type;
+          // If present, set the first tag to the physical entity
+          if (physicalEntities) {
+            file << " " << 1 << " " << (*physicalEntities)[elementMapper.index(*eIt)];
+          } else {
+            file << " " << 0; // "0" for "I do not use any tags."
+          }
 
           // Output list of nodes.
           // 3, 5 and 7 got different vertex numbering compared to Dune
@@ -155,13 +166,6 @@ namespace Dune {
       }
     }
 
-
-  public:
-    /** \brief Constructor expecting GridView of Grid to be written.
-        \param gridView GridView that will be used in write(const std::string&).
-    */
-    GmshWriter(const GridView& gridView) : gv(gridView) {}
-
     /** \brief Write given grid in Gmsh 2.0 compatible ASCII file.
         \param fileName Path of file. write(const std::string&) does not attach a ".msh"-extension by itself.
 
@@ -170,10 +174,13 @@ namespace Dune {
 
         Boundary-Segments of the grid are ignored.
 
+        If the pysicalEntities parameter is set, its content is stored
+        along the element in its first tag, using the MCMGMapper.
+
         Throws an IOError if file could not be opened or an unsupported element type is
         encountered.
     */
-    void write(const std::string& fileName) const {
+    void writeImpl(const std::string& fileName, const std::vector<int>* physicalEntities = nullptr) const {
       std::ofstream file(fileName.c_str());
 
       if (!file.is_open())
@@ -200,12 +207,53 @@ namespace Dune {
       file << "$Elements" << std::endl
            << number_of_elements << std::endl;
 
-      outputElements(file);
+      outputElements(file, physicalEntities);
 
       file << "$EndElements" << std::endl; // Add an additional new line for good measure.
 
 
       file.close();
+    }
+
+
+  public:
+    /** \brief Constructor expecting GridView of Grid to be written.
+        \param gridView GridView that will be used in write(const std::string&).
+    */
+    GmshWriter(const GridView& gridView) : gv(gridView) {}
+
+    /** \brief Write given grid in Gmsh 2.0 compatible ASCII file.
+        \param fileName Path of file. write(const std::string&) does not attach a ".msh"-extension by itself.
+
+        Opens the file with given name and path, stores the element data of the grid
+        and closes the file when done.
+
+        Boundary-Segments of the grid are ignored.
+
+        Throws an IOError if file could not be opened or an unsupported element type is
+        encountered.
+    */
+    void write(const std::string& fileName) const {
+      writeImpl(fileName);
+    }
+
+    /** \brief Write given grid in Gmsh 2.0 compatible ASCII file.
+        \param fileName Path of file. write(const std::string&) does not attach a ".msh"-extension by itself.
+        \param physicalEntities Physical entities for each element.
+
+        Opens the file with given name and path, stores the element data of the grid
+        and closes the file when done.
+
+        Boundary-Segments of the grid are ignored.
+
+        The physical entity is stored along the element in its first tag, using the
+        MultipleCodimMultipleGeomTypeMapper with the MCMGElementLayout.
+
+        Throws an IOError if file could not be opened or an unsupported element type is
+        encountered.
+    */
+    void write(const std::string& fileName, const std::vector<int>& physicalEntities) const {
+      writeImpl(fileName, &physicalEntities);
     }
   };
 
