@@ -90,7 +90,7 @@ void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
 }
 
 template<int dim>
-void vtkCheck(const Dune::array<int,dim>& n,
+void vtkCheck(const std::array<int,dim>& n,
               const Dune::FieldVector<double,dim>& h)
 {
   std::cout << std::endl << "vtkSequenceCheck dim=" << dim << std::endl << std::endl;
@@ -116,17 +116,17 @@ int main(int argc, char **argv)
                 << std::endl;
 
     {
-      Dune::array<int,1> n = { { 5 } };
+      std::array<int,1> n = { { 5 } };
       Dune::FieldVector<double,1> h = { 1.0 };
       vtkCheck<1>(n,h);
     }
     {
-      Dune::array<int,2> n = { { 5, 5 } };
+      std::array<int,2> n = { { 5, 5 } };
       Dune::FieldVector<double,2> h = { 1.0, 2.0 };
       vtkCheck<2>(n,h);
     }
     {
-      Dune::array<int,3> n = { { 5, 5, 5 } };
+      std::array<int,3> n = { { 5, 5, 5 } };
       Dune::FieldVector<double,3> h = { 1.0, 2.0, 3.0 };
       vtkCheck<3>(n,h);
     }

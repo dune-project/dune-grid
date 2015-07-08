@@ -157,7 +157,7 @@ void check_yasp_3d(OS&& os)
   const int dim = 3;
 
   Dune::FieldVector<double,dim> Len(1.0);
-  Dune::array<int,dim> s;
+  std::array<int,dim> s;
   std::fill(s.begin(), s.end(), 8);
   std::bitset<dim> p;
   int overlap = 1;

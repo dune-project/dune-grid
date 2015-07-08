@@ -82,6 +82,7 @@ set_tests_properties(vtktest PROPERTIES SKIP_RETURN_CODE 77)
 foreach(_test ${UG_TESTS})
   add_dune_ug_flags(${_test})
 endforeach(_test ${UG_TESTS})
+  add_dune_ug_flags(gmshtest)
 
 # We do not want want to build the tests during make all,
 # but just build them on demand

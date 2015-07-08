@@ -117,7 +117,7 @@ int main (int argc, char** argv) try
     typedef GridType::ctype ctype;
 
     Dune::FieldVector<ctype, dim> L(1.0);
-    Dune::array<int, dim> s;
+    std::array<int, dim> s;
     std::fill(s.begin(), s.end(), 1);
     GridType grid(L,s);
 

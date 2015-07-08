@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) try
 #if 0
   typedef YaspGrid<dim> GridType;
 
-  array<int,dim> elements = {4, 4};
+  std::array<int,dim> elements = {4, 4};
   FieldVector<double,dim> bbox = {10, 10};
   std::bitset<dim> periodic(0);
   uint overlap = 1;
@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) try
 #if HAVE_UG
   typedef UGGrid<dim> GridType;
 
-  array<uint,dim> elements = { {8, 8} };
+  std::array<uint,dim> elements = { {8, 8} };
   FieldVector<double,dim> lower = {0, 0};
   FieldVector<double,dim> bbox = {10, 10};
 

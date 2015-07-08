@@ -3,7 +3,7 @@
 #ifndef DUNE_GEOGRID_CORNERSTORAGE_HH
 #define DUNE_GEOGRID_CORNERSTORAGE_HH
 
-#include <dune/common/array.hh>
+#include <array>
 
 #include <dune/grid/geometrygrid/coordfunctioncaller.hh>
 
@@ -49,7 +49,7 @@ namespace Dune
       {}
 
       template< std::size_t size >
-      void calculate ( array< Coordinate, size > (&corners) ) const
+      void calculate ( std::array< Coordinate, size > (&corners) ) const
       {
         const std::size_t numCorners = coordFunctionCaller_.size();
         assert( size >= numCorners );
@@ -93,7 +93,7 @@ namespace Dune
       {}
 
       template< std::size_t size >
-      void calculate ( array< Coordinate, size > (&corners) ) const
+      void calculate ( std::array< Coordinate, size > (&corners) ) const
       {
         const GeometryType type = coordFunctionCaller_.type();
         const ReferenceElement< ctype, dimension > &refElement
@@ -144,7 +144,7 @@ namespace Dune
       {}
 
       template< std::size_t size >
-      void calculate ( array< Coordinate, size > (&corners) ) const
+      void calculate ( std::array< Coordinate, size > (&corners) ) const
       {
         const std::size_t numCorners = hostLocalGeometry_.corners();
         assert( size >= numCorners );
@@ -176,7 +176,7 @@ namespace Dune
       typedef typename Traits::ctype ctype;
       typedef FieldVector< ctype, cdim > Coordinate;
 
-      typedef array< Coordinate, (1 << mydim) > Coords;
+      typedef std::array< Coordinate, (1 << mydim) > Coords;
 
     public:
       typedef typename Coords::const_iterator const_iterator;

@@ -508,7 +508,7 @@ void testParallelUG(bool localRefinement)
 
   Dune::FieldVector<double,dim> lowerLeft(0);
   Dune::FieldVector<double,dim> upperRight(1);
-  Dune::array<unsigned int, dim> elements;
+  std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
   shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
 

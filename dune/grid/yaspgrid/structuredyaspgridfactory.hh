@@ -40,7 +40,7 @@ namespace Dune
     static shared_ptr<GridType>
     createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                    const FieldVector<ctype,dimworld>& upperRight,
-                   const array<unsigned int,dim>& elements)
+                   const std::array<unsigned int,dim>& elements)
     {
       for(int d = 0; d < dimworld; ++d)
         if(std::abs(lowerLeft[d]) > std::abs(upperRight[d])*1e-10)
@@ -50,7 +50,7 @@ namespace Dune
                      "grid type for non-trivial origin." );
 
       // construct array of ints instead of unsigned ints
-      array<int, dim> elem;
+      std::array<int, dim> elem;
       std::copy(elements.begin(), elements.end(), elem.begin());
 
       return shared_ptr<GridType>
@@ -66,7 +66,7 @@ namespace Dune
     static shared_ptr<GridType>
     createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                       const FieldVector<ctype,dimworld>& upperRight,
-                      const array<unsigned int,dim>& elements)
+                      const std::array<unsigned int,dim>& elements)
     {
       DUNE_THROW(GridError, className<StructuredGridFactory>()
                  << "::createSimplexGrid(): Simplices are not supported "
@@ -97,10 +97,10 @@ namespace Dune
     static shared_ptr<GridType>
     createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                    const FieldVector<ctype,dimworld>& upperRight,
-                   const array<unsigned int,dim>& elements)
+                   const std::array<unsigned int,dim>& elements)
     {
       // construct array of ints instead of unsigned ints
-      array<int, dim> elem;
+      std::array<int, dim> elem;
       std::copy(elements.begin(), elements.end(), elem.begin());
 
       return shared_ptr<GridType>
@@ -116,7 +116,7 @@ namespace Dune
     static shared_ptr<GridType>
     createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                       const FieldVector<ctype,dimworld>& upperRight,
-                      const array<unsigned int,dim>& elements)
+                      const std::array<unsigned int,dim>& elements)
     {
       DUNE_THROW(GridError, className<StructuredGridFactory>()
                  << "::createSimplexGrid(): Simplices are not supported "

@@ -116,9 +116,9 @@ namespace Dune {
       if(! boundary())
         DUNE_THROW(GridError, "called boundarySegmentIndex while boundary() == false");
       // size of local macro grid
-      const Dune::array<int, dim> & size = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->size();
-      const Dune::array<int, dim> & origin = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->origin();
-      Dune::array<int, dim> sides;
+      const std::array<int, dim> & size = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->size();
+      const std::array<int, dim> & origin = _inside.gridlevel()->mg->begin()->overlap[0].dataBegin()->origin();
+      std::array<int, dim> sides;
       {
         for (int i=0; i<dim; i++)
         {
@@ -133,14 +133,14 @@ namespace Dune {
         }
       }
       // global position of the cell on macro grid
-      Dune::array<int, dim> pos = _inside.transformingsubiterator().coord();
+      std::array<int, dim> pos = _inside.transformingsubiterator().coord();
       for(int i=0; i<dim; i++)
       {
         pos[i] = pos[i] / (1<<_inside.level());
         pos[i] = pos[i] - origin[i];
       }
       // compute unit-cube-face-sizes
-      Dune::array<int, dim> fsize;
+      std::array<int, dim> fsize;
       {
         int vol = 1;
         for (int k=0; k<dim; k++)
@@ -335,11 +335,11 @@ namespace Dune {
     };
 
     /* static face info */
-    static const array<faceInfo, 2*GridImp::dimension> _faceInfo;
+    static const std::array<faceInfo, 2*GridImp::dimension> _faceInfo;
 
-    static array<faceInfo, 2*dim> initFaceInfo()
+    static std::array<faceInfo, 2*dim> initFaceInfo()
     {
-      array<faceInfo, 2*dim> I;
+      std::array<faceInfo, 2*dim> I;
       for (uint8_t i=0; i<dim; i++)
       {
         // compute normals
@@ -373,7 +373,7 @@ namespace Dune {
   };
 
   template<class GridImp>
-  const array<typename YaspIntersection<GridImp>::faceInfo, 2*GridImp::dimension>
+  const std::array<typename YaspIntersection<GridImp>::faceInfo, 2*GridImp::dimension>
   YaspIntersection<GridImp>::_faceInfo =
     YaspIntersection<GridImp>::initFaceInfo();
 

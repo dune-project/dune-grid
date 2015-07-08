@@ -15,8 +15,8 @@
 #include <iterator>
 #include <ostream>
 #include <vector>
+#include <array>
 
-#include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/shared_ptr.hh>
@@ -257,7 +257,7 @@ void testVertexOrderByIdSimplices(int &result) {
   typedef typename Grid::ctype DF;
   typedef Dune::FieldVector<DF, dimworld> Domain;
 
-  Dune::array<unsigned int, dim> elements;
+  std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
 
   Dune::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
@@ -277,7 +277,7 @@ void testVertexOrderByIdCubes(int &result) {
   typedef typename Grid::ctype DF;
   typedef Dune::FieldVector<DF, dimworld> Domain;
 
-  Dune::array<unsigned int, dim> elements;
+  std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
 
   Dune::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::

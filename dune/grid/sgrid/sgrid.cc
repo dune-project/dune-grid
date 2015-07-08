@@ -55,7 +55,7 @@ namespace Dune {
     // count number of direction vectors found
     int dir=0;
     FieldVector<ctype, dimworld> p1,p2;
-    array<int,dim> t=z;
+    std::array<int,dim> t=z;
 
     // check all directions
     for (int i=0; i<dim; i++)
@@ -165,7 +165,7 @@ namespace Dune {
     }
 
     // reduced coordinates from expanded coordinates
-    array<int,dim> zz = this->grid->compress(this->l,this->z);
+    std::array<int,dim> zz = this->grid->compress(this->l,this->z);
 
     // look for odd coordinates
     FieldVector<ctype, dim> delta;
@@ -234,9 +234,9 @@ namespace Dune {
     if (level+1>maxLevel) return;     // nothing to do
 
     // compute reduced coordinates of element
-    array<int,dim> z =
+    std::array<int,dim> z =
       grid->z(level,fatherid,0);      // expanded coordinates from index
-    array<int,dim> zred =
+    std::array<int,dim> zred =
       grid->compress(level,z);     // reduced coordinates from expaned coordinates
 
     // refine to first son
@@ -246,7 +246,7 @@ namespace Dune {
     int partition = grid->partition(level,z);
     for (int b=0; b<(1<<dim); b++)
     {
-      array<int,dim> zz = zred;
+      std::array<int,dim> zz = zred;
       for (int i=0; i<dim; i++)
         if (b&(1<<i)) zz[i] += 1;
       // zz is reduced coordinate of a son on level level+1
@@ -310,7 +310,7 @@ namespace Dune {
     valid_count = true;
 
     // and compute compressed coordinates of neighbor
-    array<int,dim> zrednb = zred;
+    std::array<int,dim> zrednb = zred;
     zrednb[count/2] += -1+2*(count%2); // (count%2) ? +1 : -1
 
     // now check if neighbor exists
@@ -369,7 +369,7 @@ namespace Dune {
     int c = count%2;
 
     // compute expanded coordinates of entity
-    array<int,dim> z1 =
+    std::array<int,dim> z1 =
       grid->getRealImplementation(self).z;
     if (c==1)
       z1[dir] += 1;   // odd
@@ -514,7 +514,7 @@ namespace Dune {
   //************************************************************************
   // inline methods for SGrid
   template<int dim, int dimworld, typename ctype>
-  inline void SGrid<dim,dimworld,ctype>::makeSGrid (const array<int,dim>& N_,
+  inline void SGrid<dim,dimworld,ctype>::makeSGrid (const std::array<int,dim>& N_,
                                                     const FieldVector<ctype,dim>& L_, const FieldVector<ctype,dim>& H_)
   {
     static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
@@ -561,7 +561,7 @@ namespace Dune {
     boundarysize = 0;
     for (int d=0; d<dim; d++)
     {
-      array<int,dim-1> fsize;
+      std::array<int,dim-1> fsize;
       for (int i=0; i<d; i++)
         fsize[i] = N_[i];
       for (int i=d+1; i<dim; i++)
@@ -576,7 +576,7 @@ namespace Dune {
   {
     static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
-    array<int,dim> N;
+    std::array<int,dim> N;
     FieldVector<ctype,dim> L(0.0);
     FieldVector<ctype,dim> H(0.0);
     for (int i=0; i<dim; i++ ) N[i] = N_[i];
@@ -590,7 +590,7 @@ namespace Dune {
   {
     static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
-    array<int,dim> N;
+    std::array<int,dim> N;
     FieldVector<ctype,dim> L(0.0);
     FieldVector<ctype,dim> H(0.0);
     for (int i=0; i<dim; i++ ) N[i] = N_[i];
@@ -606,7 +606,7 @@ namespace Dune {
   {
     static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
-    array<int,dim> N;
+    std::array<int,dim> N;
     for (int i=0; i<dim; i++ ) N[i] = N_[i];
     makeSGrid(N, L_, H_);
   }
@@ -617,7 +617,7 @@ namespace Dune {
   {
     static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
-    array<int,dim> N_;
+    std::array<int,dim> N_;
     FieldVector<ctype,dim> L_(0.0);
     FieldVector<ctype,dim> H_(1.0);
 
@@ -700,7 +700,7 @@ namespace Dune {
   }
 
   template<int dim, int dimworld, typename ctype>
-  inline FieldVector<ctype, dimworld> SGrid<dim,dimworld,ctype>::pos (int level, array<int,dim>& z) const
+  inline FieldVector<ctype, dimworld> SGrid<dim,dimworld,ctype>::pos (int level, std::array<int,dim>& z) const
   {
     FieldVector<ctype, dimworld> x;
     for (int k=0; k<dim; k++)
@@ -714,35 +714,35 @@ namespace Dune {
   }
 
   template<int dim, int dimworld, typename ctype>
-  inline int SGrid<dim,dimworld,ctype>::calc_codim (int level, const array<int,dim>& z) const
+  inline int SGrid<dim,dimworld,ctype>::calc_codim (int level, const std::array<int,dim>& z) const
   {
     return mapper[level].codim(z);
   }
 
   template<int dim, int dimworld, typename ctype>
-  inline int SGrid<dim,dimworld,ctype>::n (int level, const array<int,dim>& z) const
+  inline int SGrid<dim,dimworld,ctype>::n (int level, const std::array<int,dim>& z) const
   {
     return mapper[level].n(z);
   }
 
   template<int dim, int dimworld, typename ctype>
-  inline array<int,dim> SGrid<dim,dimworld,ctype>::z (int level, int i, int codim) const
+  inline std::array<int,dim> SGrid<dim,dimworld,ctype>::z (int level, int i, int codim) const
   {
     return mapper[level].z(i,codim);
   }
 
   template<int dim, int dimworld, typename ctype>
-  inline array<int,dim> SGrid<dim,dimworld,ctype>::subz (const array<int,dim> & z, int i, int codim) const
+  inline std::array<int,dim> SGrid<dim,dimworld,ctype>::subz (const std::array<int,dim> & z, int i, int codim) const
   {
     // map to old numbering
     const int j = SGridInternal::CubeNumberingTable<dim>::generic2dune( i, codim );
 
     // find expanded coordinates of entity in reference cube
     // has components in {0,1,2}
-    array<int,dim> zref = SUnitCubeMapper<dim>::mapper.z(j,codim);
+    std::array<int,dim> zref = SUnitCubeMapper<dim>::mapper.z(j,codim);
 
     // compute expanded coordinates of entity in global coordinates
-    array<int,dim> zentity;
+    std::array<int,dim> zentity;
     for (int k=0; k<dim; k++) zentity[k] = z[k] + zref[k] - 1;
 
     return zentity;
@@ -751,25 +751,25 @@ namespace Dune {
 
 
   template<int dim, int dimworld, typename ctype>
-  inline array<int,dim> SGrid<dim,dimworld,ctype>::compress (int level, const array<int,dim>& z) const
+  inline std::array<int,dim> SGrid<dim,dimworld,ctype>::compress (int level, const std::array<int,dim>& z) const
   {
     return mapper[level].compress(z);
   }
 
   template<int dim, int dimworld, typename ctype>
-  inline array<int,dim> SGrid<dim,dimworld,ctype>::expand (int level, const array<int,dim>& r, int b) const
+  inline std::array<int,dim> SGrid<dim,dimworld,ctype>::expand (int level, const std::array<int,dim>& r, int b) const
   {
     return mapper[level].expand(r,b);
   }
 
   template<int dim, int dimworld, typename ctype>
-  inline int SGrid<dim,dimworld,ctype>::partition (int level, const array<int,dim>& z) const
+  inline int SGrid<dim,dimworld,ctype>::partition (int level, const std::array<int,dim>& z) const
   {
     return mapper[level].partition(z);
   }
 
   template<int dim, int dimworld, typename ctype>
-  inline bool SGrid<dim,dimworld,ctype>::exists (int level, const array<int,dim>& zred) const
+  inline bool SGrid<dim,dimworld,ctype>::exists (int level, const std::array<int,dim>& zred) const
   {
     for (int i=0; i<dim; i++)
     {

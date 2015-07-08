@@ -23,9 +23,9 @@ namespace Dune {
    *  @param v the array of vectors to examine
    */
   template<int d, typename ct>
-  Dune::array<int,d> sizeArray(const Dune::array<std::vector<ct>,d>& v)
+  std::array<int,d> sizeArray(const std::array<std::vector<ct>,d>& v)
   {
-    Dune::array<int,d> tmp;
+    std::array<int,d> tmp;
     for (int i=0; i<d; ++i)
       tmp[i] = v[i].size() - 1;
     return tmp;
@@ -75,7 +75,7 @@ namespace Dune {
     typedef typename Coordinates::ctype ct;
     static const int d = Coordinates::dimension;
 
-    typedef Dune::array<int, d> iTupel;
+    typedef std::array<int, d> iTupel;
     typedef FieldVector<ct,d> fTupel;
 
     //! make uninitialized ygrid
@@ -552,7 +552,7 @@ namespace Dune {
     // define data array iterator
     typedef YGridComponent<Coordinates>* DAI;
 
-    typedef typename Dune::array<int, dim> iTupel;
+    typedef typename std::array<int, dim> iTupel;
 
     //! set start iterator in the data array
     void setBegin(DAI begin)
@@ -596,7 +596,7 @@ namespace Dune {
       {}
 
       //! construct an iterator from coordinates and component
-      Iterator (const YGrid<Coordinates>& yg, const Dune::array<int,dim>& coords, int which = 0)
+      Iterator (const YGrid<Coordinates>& yg, const std::array<int,dim>& coords, int which = 0)
         : _which(which), _yg(&yg)
       {
         _it = typename YGridComponent<Coordinates>::Iterator(*(_yg->dataBegin()+which),coords);
@@ -618,7 +618,7 @@ namespace Dune {
       }
 
       //! reinitializes an iterator, as if it was just constructed.
-      void reinit(const YGrid<Coordinates>& yg, const Dune::array<int,dim>& coords, int which = 0)
+      void reinit(const YGrid<Coordinates>& yg, const std::array<int,dim>& coords, int which = 0)
       {
         _yg = &yg;
         _which = which;
@@ -632,7 +632,7 @@ namespace Dune {
       }
 
       //! return coordinate array at the current postion
-      const Dune::array<int, dim>& coord () const
+      const std::array<int, dim>& coord () const
       {
         return _it.coord();
       }
@@ -748,7 +748,7 @@ namespace Dune {
     }
 
     //! return iterator pointint to a specified position
-    Iterator begin(const Dune::array<int, dim>& coord, int which = 0) const
+    Iterator begin(const std::array<int, dim>& coord, int which = 0) const
     {
       return Iterator(*this, coord, which);
     }
@@ -793,7 +793,7 @@ namespace Dune {
     friend class YGrid<Coordinates>::Iterator;
     DAI _begin;
     DAI _end;
-    Dune::array<int,StaticPower<2,dim>::power> _shiftmapping;
+    std::array<int,StaticPower<2,dim>::power> _shiftmapping;
     std::vector<typename YGridComponent<Coordinates>::Iterator> _itbegins;
     std::vector<typename YGridComponent<Coordinates>::Iterator> _itends;
     std::vector<int> _indexOffset;
@@ -836,7 +836,7 @@ namespace Dune {
     };
 
     // define data array iterator type
-    typedef typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator DAI;
+    typedef typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator DAI;
 
     // iterator that allows to iterate over a concatenation of deques. namely those
     // that belong to the same codimension.
@@ -930,7 +930,7 @@ namespace Dune {
     }
 
     //! set start iterator in the data array
-    void setBegin(typename Dune::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator begin)
+    void setBegin(typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator begin)
     {
       _begin = begin;
     }

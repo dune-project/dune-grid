@@ -5,8 +5,7 @@
 
 #include <iostream>
 #include <vector>
-
-#include <dune/common/array.hh>
+#include <array>
 
 #include <dune/grid/io/file/dgfparser/blocks/basic.hh>
 
@@ -22,7 +21,7 @@ namespace Dune
     {
       struct Interval
       {
-        array< std::vector< double >, 2 > p; // lower and upper boundary points
+        std::array< std::vector< double >, 2 > p; // lower and upper boundary points
         std::vector< double > h;             // width of the cells in each direction
         std::vector< int > n;                // number of cells in each direction
       };

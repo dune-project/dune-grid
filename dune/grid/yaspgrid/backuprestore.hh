@@ -149,7 +149,7 @@ namespace Dune
       if (version != YASPGRID_BACKUPRESTORE_FORMAT_VERSION)
         DUNE_THROW(Dune::Exception, "Your YaspGrid backup file is written in an outdated format!");
 
-      Dune::array<int,dim> torus_dims;
+      std::array<int,dim> torus_dims;
       stream >> input >> input;
       for (int i=0; i<dim; i++)
         stream >> torus_dims[i];
@@ -180,7 +180,7 @@ namespace Dune
         physicalOverlapSize[i] = b;
       }
 
-      Dune::array<int,dim> coarseSize;
+      std::array<int,dim> coarseSize;
       stream >> input >> input;
       for (int i=0; i<dim; i++)
         stream >> coarseSize[i];
@@ -286,7 +286,7 @@ namespace Dune
       if (version != YASPGRID_BACKUPRESTORE_FORMAT_VERSION)
         DUNE_THROW(Dune::Exception, "Your YaspGrid backup file is written in an outdated format!");
 
-      Dune::array<int,dim> torus_dims;
+      std::array<int,dim> torus_dims;
       stream >> input >> input;
       for (int i=0; i<dim; i++)
         stream >> torus_dims[i];
@@ -318,12 +318,12 @@ namespace Dune
       }
 
 
-      Dune::array<int,dim> coarseSize;
+      std::array<int,dim> coarseSize;
       stream >> input >> input;
       for (int i=0; i<dim; i++)
         stream >> coarseSize[i];
 
-      Dune::array<std::vector<ctype>,dim> coords;
+      std::array<std::vector<ctype>,dim> coords;
       stream >> input >> input >> input >> input;
       for (int d=0; d<dim; d++)
       {

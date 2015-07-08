@@ -3,7 +3,8 @@
 #ifndef DUNE_ONE_D_GRID_ENTITY_HH
 #define DUNE_ONE_D_GRID_ENTITY_HH
 
-#include <dune/common/array.hh>
+#include <array>
+
 #include <dune/common/fvector.hh>
 
 #include <dune/grid/common/gridenums.hh>
@@ -109,7 +110,7 @@ namespace Dune {
       return sons_[0]==OneDGridNullIteratorFactory<1>::null() && sons_[1]==OneDGridNullIteratorFactory<1>::null();
     }
 
-    array<OneDEntityImp<1>*, 2> sons_;
+    std::array<OneDEntityImp<1>*, 2> sons_;
 
     OneDEntityImp<1>* father_;
 

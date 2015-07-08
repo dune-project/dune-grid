@@ -42,7 +42,7 @@ namespace Dune
   class Torus {
   public:
     //! type used to pass tupels in and out
-    typedef Dune::array<int, d> iTupel;
+    typedef std::array<int, d> iTupel;
 
 
   private:

@@ -250,7 +250,7 @@ namespace Dune {
 
       // this is a vertex which is not on the finest level
       // move coordinates up to maxlevel (multiply by 2 for each level
-      array<int,dim> coord;
+      std::array<int,dim> coord;
       for (int k=0; k<dim; k++)
         coord[k] = z[k]*(1<<(grid->maxLevel()-l));
 
@@ -277,7 +277,7 @@ namespace Dune {
     GridImp* grid;       //!< grid containes mapper, geometry, etc.
     int l;               //!< level where element is on
     int index;           //!< my consecutive index
-    array<int,dim> z;    //!< my coordinate, number of even components = codim
+    std::array<int,dim> z;    //!< my coordinate, number of even components = codim
     mutable GeometryImpl geo; //!< geometry, is only built on demand
     mutable bool builtgeometry; //!< true if geometry has been constructed
   };
@@ -808,7 +808,7 @@ namespace Dune {
     mutable Entity ne;             //!< EntityPointer for neighbor
     const GridImp * grid;                 //!< Pointer to the grid
     int partition;                        //!< partition number of self, needed for coordinate expansion
-    array<int,dim> zred;                  //!< reduced coordinates of myself, allows easy computation of neighbors
+    std::array<int,dim> zred;                  //!< reduced coordinates of myself, allows easy computation of neighbors
     mutable int count;                    //!< number of neighbor
     mutable bool valid_count;             //!< true if count is in range
     mutable bool valid_nb;                //!< true if nb is initialized
@@ -1420,7 +1420,7 @@ namespace Dune {
     void globalRefine (int refCount);
 
     /** \brief Get number of elements in each coordinate direction */
-    const array<int, dim>& dims(int level) const {
+    const std::array<int, dim>& dims(int level) const {
       return N[level];
     }
 
@@ -1534,38 +1534,38 @@ namespace Dune {
     friend class Entity;
 
     //! map expanded coordinates to position
-    FieldVector<ctype, dimworld> pos (int level, array<int,dim>& z) const;
+    FieldVector<ctype, dimworld> pos (int level, std::array<int,dim>& z) const;
 
     //! compute codim from coordinate
-    int calc_codim (int level, const array<int,dim>& z) const;
+    int calc_codim (int level, const std::array<int,dim>& z) const;
 
     //! compute number from expanded coordinate
-    int n (int level, const array<int,dim>& z) const;
+    int n (int level, const std::array<int,dim>& z) const;
 
     //! compute coordinates from number and codimension
-    array<int,dim> z (int level, int i, int codim) const;
+    std::array<int,dim> z (int level, int i, int codim) const;
 
     //! compute zentity of subentity of given codim
-    array<int,dim> subz (const array<int,dim> & z, int i, int codim) const;
+    std::array<int,dim> subz (const std::array<int,dim> & z, int i, int codim) const;
 
     //! compress from expanded coordinates to grid for a single partition number
-    array<int,dim> compress (int level, const array<int,dim>& z) const;
+    std::array<int,dim> compress (int level, const std::array<int,dim>& z) const;
 
     //! expand with respect to partition number
-    array<int,dim> expand (int level, const array<int,dim>& r, int b) const;
+    std::array<int,dim> expand (int level, const std::array<int,dim>& r, int b) const;
 
     /*! There are \f$2^d\f$ possibilities of having even/odd coordinates.
           The binary representation is called partition number.
      */
-    int partition (int level, const array<int,dim>& z) const;
+    int partition (int level, const std::array<int,dim>& z) const;
 
     //! given reduced coordinates of an element, determine if element is in the grid
-    bool exists (int level, const array<int,dim>& zred) const;
+    bool exists (int level, const std::array<int,dim>& zred) const;
 
     // compute boundary segment index for a given zentity and a face
-    int boundarySegmentIndex (int l, int face, const array<int,dim> & zentity) const
+    int boundarySegmentIndex (int l, int face, const std::array<int,dim> & zentity) const
     {
-      array<int,dim-1> zface;
+      std::array<int,dim-1> zface;
       int dir = face/2;
       int side = face%2;
       // compute z inside the global face
@@ -1582,7 +1582,7 @@ namespace Dune {
     }
 
     // compute persistent index for a given zentity
-    PersistentIndexType persistentIndex (int l, int codim, const array<int,dim> & zentity) const
+    PersistentIndexType persistentIndex (int l, int codim, const std::array<int,dim> & zentity) const
     {
       if (codim!=dim)
       {
@@ -1645,7 +1645,7 @@ namespace Dune {
     SGrid(const SGrid &) {}
     SGrid & operator = (const SGrid &) { return *this; }
     // generate SGrid
-    void makeSGrid (const array<int,dim>& N_, const FieldVector<ctype, dim>& L_, const FieldVector<ctype, dim>& H_);
+    void makeSGrid (const std::array<int,dim>& N_, const FieldVector<ctype, dim>& L_, const FieldVector<ctype, dim>& H_);
 
     /*
        internal data
@@ -1658,12 +1658,12 @@ namespace Dune {
     int L;                        // number of levels in hierarchic mesh 0<=level<L
     FieldVector<ctype, dim> low;  // lower left corner of the grid
     FieldVector<ctype, dim> H;    // length of cube per direction
-    std::vector<array<int,dim> > N;            // number of elements per direction for each level
+    std::vector<std::array<int,dim> > N;            // number of elements per direction for each level
     std::vector<FieldVector<ctype, dim> > h;   // mesh size per direction for each level
     mutable CubeMapper<dim> *mapper; // a mapper for each level
 
     // boundary segement index set
-    array<CubeMapper<dim-1>, dim> boundarymapper; // a mapper for each coarse grid face
+    std::array<CubeMapper<dim-1>, dim> boundarymapper; // a mapper for each coarse grid face
     int boundarysize;
   };
 
@@ -1748,7 +1748,7 @@ namespace Dune {
     static shared_ptr<GridType>
     createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                    const FieldVector<ctype,dimworld>& upperRight,
-                   const array<unsigned int,dim>& elements)
+                   const std::array<unsigned int,dim>& elements)
     {
       FieldVector<int, dim> elements_;
       std::copy(elements.begin(), elements.end(), elements_.begin());
@@ -1769,7 +1769,7 @@ namespace Dune {
     static shared_ptr<GridType>
     createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                       const FieldVector<ctype,dimworld>& upperRight,
-                      const array<unsigned int,dim>& elements)
+                      const std::array<unsigned int,dim>& elements)
     {
       DUNE_THROW(GridError, className<StructuredGridFactory>()
                  << "::createSimplexGrid(): Simplices are not supported "

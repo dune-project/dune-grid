@@ -96,7 +96,7 @@ namespace Dune {
 
     /** \brief While inserting the elements this array records the vertices
         of the elements. */
-    std::vector<Dune::array<unsigned int, 2> > elements_;
+    std::vector<std::array<unsigned int, 2> > elements_;
 
     /** \brief Buffer the vertices until createGrid() is called */
     std::map<FieldVector<ctype,1>, unsigned int > vertexPositions_;

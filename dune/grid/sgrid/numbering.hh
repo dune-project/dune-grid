@@ -3,7 +3,7 @@
 #ifndef DUNE_NUMBERING_HH
 #define DUNE_NUMBERING_HH
 
-#include <dune/common/array.hh>
+#include <array>
 
 namespace Dune {
 
@@ -12,19 +12,19 @@ namespace Dune {
   class LexOrder {
   public:
     //! preprocess ordering
-    void init (const array<int, dim>& _NN);
+    void init (const std::array<int, dim>& _NN);
 
     //! get total number of tupels
     int tupels () const;
 
     //! compute number from a given tupel
-    int n (const array<int,dim>& z) const;
+    int n (const std::array<int,dim>& z) const;
 
     //! compute tupel from number 0 <= n < tupels()
-    array<int,dim> z (int n) const;
+    std::array<int,dim> z (int n) const;
 
   private:
-    array<int,dim> N; // number of elements per direction
+    std::array<int,dim> N; // number of elements per direction
     int P[dim+1];     // P[i] = Prod_{i=0}^{i} N[i];
   };
 
@@ -33,7 +33,7 @@ namespace Dune {
   class JoinOrder {
   public:
     //! preprocess ordering
-    void init (const array<int,dim>& _NN);
+    void init (const std::array<int,dim>& _NN);
 
     //! get total number of elements in all sets
     int size () const;
@@ -48,7 +48,7 @@ namespace Dune {
     int index (int n) const;
 
   private:
-    array<int,dim> N;       // number of elements per direction
+    std::array<int,dim> N;       // number of elements per direction
     int offset[dim+1];      // P[i] = Sum_{i=0}^{i} N[i];
   };
 
@@ -78,7 +78,7 @@ namespace Dune {
   template<int dim>
   class CubeMapper {
     //! construct with number of elements (of codim 0) in each direction
-    CubeMapper (const array<int,dim>& _NN);
+    CubeMapper (const std::array<int,dim>& _NN);
 
     //! make cube of single element
     CubeMapper (const CubeMapper&);
@@ -87,36 +87,36 @@ namespace Dune {
     CubeMapper ();
 
     //! (re)initialize with number of elements (of codim 0) in each direction
-    void make (const array<int,dim>& _NN);
+    void make (const std::array<int,dim>& _NN);
 
     //! get number of elements in each codimension
     int elements (int codim) const;
 
     //! compute codim from coordinate
-    int codim (const array<int,dim>& z) const;
+    int codim (const std::array<int,dim>& z) const;
 
     /*! compute number from coordinate 0 <= n < elements(codim(z))
          general implementation is O(2^dim)
      */
-    int n (const array<int,dim>& z) const;
+    int n (const std::array<int,dim>& z) const;
 
     //! compute coordinates from number and codimension
-    array<int,dim> z (int i, int codim) const;
+    std::array<int,dim> z (int i, int codim) const;
 
     //! compress from expanded coordinates to grid for a single partition number
-    array<int,dim> compress (const array<int,dim>& z) const;
+    std::array<int,dim> compress (const std::array<int,dim>& z) const;
 
     //! expand with respect to partition number
-    array<int,dim> expand (const array<int,dim>& r, int b) const;
+    std::array<int,dim> expand (const std::array<int,dim>& r, int b) const;
 
     //! There are \f$2^d\f$ possibilities of having even/odd coordinates. The binary representation is called partition number
-    int partition (const array<int,dim>& z) const;
+    int partition (const std::array<int,dim>& z) const;
 
     //! print internal data
     void print (std::ostream& ss, int indent) const;
 
   private:
-    array<int,dim> N;     // number of elements per direction
+    std::array<int,dim> N;     // number of elements per direction
     int ne[dim+1];        // number of elements per codimension
     int nb[1<<dim];       // number of elements per binary partition
     int cb[1<<dim];       // codimension of binary partition

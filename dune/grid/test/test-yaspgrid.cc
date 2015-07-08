@@ -32,7 +32,7 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
     std::cout << " using equidistant coordinate container!" << std::endl << std::endl;
 
     Dune::FieldVector<double,dim> Len(1.0);
-    Dune::array<int,dim> s;
+    std::array<int,dim> s;
     std::fill(s.begin(), s.end(), 8);
     std::bitset<dim> p(0);
     int overlap = 1;
@@ -50,7 +50,7 @@ struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
 
     Dune::FieldVector<double,dim> lowerleft(-1.0);
     Dune::FieldVector<double,dim> upperright(1.0);
-    Dune::array<int,dim> s;
+    std::array<int,dim> s;
     std::fill(s.begin(), s.end(), 8);
     std::bitset<dim> p(0);
     int overlap = 1;
@@ -69,7 +69,7 @@ struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
     std::bitset<dim> p(0);
     int overlap = 1;
 
-    Dune::array<std::vector<double>,dim> coords;
+    std::array<std::vector<double>,dim> coords;
     for (int i=0; i<dim; i++)
     {
       coords[i].resize(9);

@@ -130,7 +130,7 @@ namespace Dune
     }
 
   private:
-    Dune::array<int,d> _dims;
+    std::array<int,d> _dims;
   };
 
 }

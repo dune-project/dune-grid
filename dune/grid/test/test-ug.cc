@@ -161,7 +161,7 @@ void generalTests(bool greenClosure)
 
   for (int i=0; i<3; i++) {
     assert(cArray[i] == (*((FieldVector<double,3>*)&cArray))[i]);
-    assert(cArray[i] == (*((array<double,3>*)&cArray))[i]);
+    assert(cArray[i] == (*((std::array<double,3>*)&cArray))[i]);
   }
 
   // //////////////////////////////////////////////////////////

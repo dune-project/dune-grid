@@ -141,7 +141,7 @@ try {
   {
     typedef YaspGrid<2> GridType;
     Dune::FieldVector<double,2> Len; Len = 1.0;
-    Dune::array<int,2> s = { {2, 6} };
+    std::array<int,2> s = { {2, 6} };
     std::bitset<2> p;
     int overlap = 1;
     GridType grid(Len,s,p,overlap);
@@ -152,7 +152,7 @@ try {
 #if HAVE_ALUGRID
   {
     typedef Dune::ALUGrid<2, 2, cube, nonconforming> GridType;
-    array<unsigned int,2> elements2d;
+    std::array<unsigned int,2> elements2d;
     elements2d.fill(4);
     shared_ptr<GridType> grid = StructuredGridFactory<GridType>::createCubeGrid(FieldVector<double,2>(0),
                                                                                 FieldVector<double,2>(1), elements2d);

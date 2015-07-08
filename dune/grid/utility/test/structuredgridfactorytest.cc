@@ -34,7 +34,7 @@ try {
   // /////////////////////////////////////////////////////////////////////////////
 
   // Test creation of 1d cube grids
-  array<unsigned int,1> elements1d;
+  std::array<unsigned int,1> elements1d;
   elements1d.fill(4);
 
   shared_ptr<OneDGrid> onedCubeGrid = StructuredGridFactory<OneDGrid>::createCubeGrid(FieldVector<double,1>(0),
@@ -95,7 +95,7 @@ try {
   //   Test 2d grids
   // /////////////////////////////////////////////////////////////////////////////
 
-  array<unsigned int,2> elements2d;
+  std::array<unsigned int,2> elements2d;
   elements2d.fill(4);
   unsigned int numVertices2d = (elements2d[0]+1) * (elements2d[1]+1);
   unsigned int numCubes2d    = elements2d[0] * elements2d[1];
@@ -181,7 +181,7 @@ try {
 #if HAVE_UG
   typedef UGGrid<3> HexahedralGridType;
 
-  array<unsigned int,3> elements3d;
+  std::array<unsigned int,3> elements3d;
   elements3d.fill(4);
   unsigned int numVertices3d = (elements3d[0]+1) * (elements3d[1]+1) * (elements3d[2]+1);
   unsigned int numCubes3d    = elements3d[0] * elements3d[1] * elements3d[2];

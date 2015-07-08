@@ -52,7 +52,7 @@ void testWritingUniformData() {
   for (; vIt2d!=vEndIt2d; ++vIt2d)
     vertexdata2d[grid2d.leafIndexSet().index(*vIt2d)] = vIt2d->geometry().corner(0).two_norm();
 
-  array<unsigned int, 2> n2;
+  std::array<unsigned int, 2> n2;
   n2[0] = n[0]+1;
   n2[1] = n[1]+1;
 
@@ -76,7 +76,7 @@ void testWritingUniformData() {
   for (; vIt!=vEndIt; ++vIt)
     vertexdata3d[grid3d.leafIndexSet().index(*vIt)] = vIt->geometry().corner(0).two_norm();
 
-  array<unsigned int, 3> n3;
+  std::array<unsigned int, 3> n3;
   n3[0] = n[0]+1;
   n3[1] = n[1]+1;
   n3[2] = n[2]+1;

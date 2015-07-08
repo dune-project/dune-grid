@@ -29,7 +29,7 @@ namespace Dune {
     }
 
     //! constructor
-    YaspEntitySeed (int level, Dune::array<int, dim> coord, int o = 0)
+    YaspEntitySeed (int level, std::array<int, dim> coord, int o = 0)
       : _l(level), _c(coord), _o(o)
     {}
 
@@ -45,12 +45,12 @@ namespace Dune {
     }
 
     int level () const { return _l; }
-    const Dune::array<int, dim> & coord() const { return _c; }
+    const std::array<int, dim> & coord() const { return _c; }
     int offset () const { return _o; }
 
   protected:
     int _l;                  // grid level
-    Dune::array<int, dim> _c; // coord in the global grid
+    std::array<int, dim> _c; // coord in the global grid
     int _o; // the offset: which YGridComponent, does the entity belong to
   };
 

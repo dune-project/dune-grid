@@ -8,7 +8,7 @@
 namespace Dune {
 
   template<int dim>
-  inline void LexOrder<dim>::init (const array<int,dim>& _NN)
+  inline void LexOrder<dim>::init (const std::array<int,dim>& _NN)
   {
     // store argument
     N=_NN;
@@ -25,7 +25,7 @@ namespace Dune {
   }
 
   template<int dim>
-  inline int LexOrder<dim>::n (const array<int,dim>& z) const
+  inline int LexOrder<dim>::n (const std::array<int,dim>& z) const
   {
     int r=0;
     for (int i=0; i<dim; i++) r += z[i]*P[i];
@@ -33,9 +33,9 @@ namespace Dune {
   }
 
   template<int dim>
-  inline array<int,dim> LexOrder<dim>::z (int n) const
+  inline std::array<int,dim> LexOrder<dim>::z (int n) const
   {
-    array<int,dim> z = {};
+    std::array<int,dim> z = {};
     for (int i=0; i<dim; i++)
     {
       z[i] = n%N[i];
@@ -47,7 +47,7 @@ namespace Dune {
   //************************************************************************
 
   template<int dim>
-  inline void JoinOrder<dim>::init (const array<int,dim>& _NN)
+  inline void JoinOrder<dim>::init (const std::array<int,dim>& _NN)
   {
     // store argument
     N=_NN;
@@ -98,18 +98,18 @@ namespace Dune {
   template<int dim>
   CubeMapper<dim>::CubeMapper ()
   {
-    array<int,dim> M;
+    std::array<int,dim> M;
     M.fill(1);
     make(M);
   }
 
   template<int dim>
-  void CubeMapper<dim>::make (const array<int,dim>& _NN)
+  void CubeMapper<dim>::make (const std::array<int,dim>& _NN)
   {
     // store argument
     N=_NN;
 
-    array<int,dim> t;
+    std::array<int,dim> t;
     t.fill(1);
 
     // preprocess binary partitions
@@ -137,7 +137,7 @@ namespace Dune {
     // preprocess lex ordering for each codimension
     for (int c=0; c<=dim; c++)
     {
-      array<int,1<<dim> t;
+      std::array<int,1<<dim> t;
       for (int b=0; b<power2(dim); b++)           // loop over all binary partitions
         if (ones(b)==c)
         {
@@ -176,7 +176,7 @@ namespace Dune {
   }
 
   template<int dim>
-  inline int CubeMapper<dim>::codim (const array<int,dim>& z) const
+  inline int CubeMapper<dim>::codim (const std::array<int,dim>& z) const
   {
     int r=0;
     for (int i=0; i<dim; i++)
@@ -185,10 +185,10 @@ namespace Dune {
   }
 
   template<int dim>
-  inline int CubeMapper<dim>::n (const array<int,dim>& z) const
+  inline int CubeMapper<dim>::n (const std::array<int,dim>& z) const
   {
     int p = partition(z);            // get partition
-    array<int,dim> r=compress(z);     // get compressd coordinate
+    std::array<int,dim> r=compress(z);     // get compressd coordinate
 
     // treat easy cases first
     if (p==0 || p==power2(dim)-1)
@@ -202,9 +202,9 @@ namespace Dune {
   }
 
   template<int dim>
-  inline array<int,dim> CubeMapper<dim>::z (int i, int codim) const
+  inline std::array<int,dim> CubeMapper<dim>::z (int i, int codim) const
   {
-    array<int,dim> r;
+    std::array<int,dim> r;
 
     // easy cases first
     if (codim==0)
@@ -239,7 +239,7 @@ namespace Dune {
   }
 
   template<int dim>
-  inline int CubeMapper<dim>::partition (const array<int,dim>& z) const
+  inline int CubeMapper<dim>::partition (const std::array<int,dim>& z) const
   {
     int r = 0;
     int mask = 1;
@@ -252,9 +252,9 @@ namespace Dune {
   }
 
   template<int dim>
-  inline array<int,dim> CubeMapper<dim>::compress (const array<int,dim>& z) const
+  inline std::array<int,dim> CubeMapper<dim>::compress (const std::array<int,dim>& z) const
   {
-    array<int,dim> r;
+    std::array<int,dim> r;
     for (int i=0; i<dim; i++)
       if (z[i]%2==0)
         r[i] = z[i]/2;                     // even component
@@ -264,9 +264,9 @@ namespace Dune {
   }
 
   template<int dim>
-  inline array<int,dim> CubeMapper<dim>::expand (const array<int,dim>& r, int b) const
+  inline std::array<int,dim> CubeMapper<dim>::expand (const std::array<int,dim>& r, int b) const
   {
-    array<int,dim> z;
+    std::array<int,dim> z;
     for (int i=0; i<dim; i++)
       if (b&(1<<i))
         z[i] = r[i]*2;                     // even component

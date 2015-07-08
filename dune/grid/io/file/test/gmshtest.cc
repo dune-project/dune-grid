@@ -121,7 +121,12 @@ try
 
   std::cout << "reading and writing hybrid UGGrid<3>" << std::endl;
   testReadingAndWritingGrid<UGGrid<3> >( hybrid_3d, hybrid_3d+".UGGrid_3_-gmshtest-write.msh", refinements );
-#endif
+
+  UGGrid<2>* grid = GmshReader<UGGrid<2> >::read("irregular-hybrid-square.msh");
+  VTKWriter<UGGrid<2>::LeafGridView> writer(grid->leafGridView());
+  writer.write("irregular-hybrid-square.vtu");
+
+  #endif
 
 #if HAVE_ALBERTA
 #if ALBERTA_DIM==2

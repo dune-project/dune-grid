@@ -562,7 +562,7 @@ void Dune::AmiraMeshWriter<GridView>::write(const std::string& filename,
 template<class GridView>
 template<class DataContainer>
 void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
-                                                     const array<unsigned int, dim>& n,
+                                                     const std::array<unsigned int, dim>& n,
                                                      const DataContainer& data)
 {
   static_assert(dim==2 || dim==3, "You can only write 2d and 3d uniform data to AmiraMesh");

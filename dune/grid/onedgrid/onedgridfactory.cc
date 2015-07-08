@@ -52,7 +52,7 @@ insertElement(const GeometryType& type,
   if (vertices.size() != 2)
     DUNE_THROW(GridError, "You cannot insert an element with " << vertices.size() << " vertices into a OneDGrid!");
 
-  elements_.push_back(Dune::array<unsigned int,2>());
+  elements_.push_back(std::array<unsigned int,2>());
   elements_.back()[0] = vertices[0];
   elements_.back()[1] = vertices[1];
 
@@ -135,7 +135,7 @@ createGrid()
   // ///////////////////////////////////////////////////////////////////
 
   // first sort elements by increasing position.  That is how they are expected in the grid data structure
-  std::map<double, std::pair<Dune::array<unsigned int, 2>, unsigned int> > elementsByPosition;
+  std::map<double, std::pair<std::array<unsigned int, 2>, unsigned int> > elementsByPosition;
 
   for (size_t i=0; i<elements_.size(); i++)
     elementsByPosition.insert(std::make_pair(vertexPositionsByIndex[elements_[i][0]],     // order by position of left vertex
@@ -144,7 +144,7 @@ createGrid()
 
 
   OneDGridList<OneDEntityImp<0> >::iterator it = Dune::get<0>(grid_->entityImps_[0]).begin();
-  std::map<double, std::pair<Dune::array<unsigned int, 2>, unsigned int> >::iterator eIt = elementsByPosition.begin();
+  std::map<double, std::pair<std::array<unsigned int, 2>, unsigned int> >::iterator eIt = elementsByPosition.begin();
 
   /** \todo Looping over the vertices to get all elements assumes that
       the grid is connected.

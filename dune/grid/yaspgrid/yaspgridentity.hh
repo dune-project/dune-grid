@@ -321,7 +321,7 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get size of global grid (in elements)
-      Dune::array<int,dim> size;
+      std::array<int,dim> size;
 
       for (int i=0; i<dim; i++)
       {
@@ -372,8 +372,8 @@ namespace Dune {
           j++;
         }
 
-      Dune::array<int, dim> size = _g->mg->levelSize(_g->level());
-      Dune::array<int, dim> coord = _it.coord();
+      std::array<int, dim> size = _g->mg->levelSize(_g->level());
+      std::array<int, dim> coord = _it.coord();
       for (int j=0; j<dim; j++)
       {
         if (!shift[j])
@@ -712,8 +712,8 @@ namespace Dune {
 
       int trailing = (cc == dim) ? 1000 : 0;
 
-      Dune::array<int,dim> size = _g->mg->levelSize(_g->level());
-      Dune::array<int, dim> coord = _it.coord();
+      std::array<int,dim> size = _g->mg->levelSize(_g->level());
+      std::array<int, dim> coord = _it.coord();
       for (int j=0; j<dim; j++)
       {
         // correct size according to shift
@@ -764,8 +764,8 @@ namespace Dune {
       std::bitset<dim> shift = Dune::Yasp::entityShift<dim>(i,cc);
       std::bitset<dim> move = Dune::Yasp::entityMove<dim>(i,cc);
 
-      Dune::array<int,dim> size = _g->mg->levelSize(_g->level());
-      Dune::array<int, dim> coord = _it.coord();
+      std::array<int,dim> size = _g->mg->levelSize(_g->level());
+      std::array<int, dim> coord = _it.coord();
       for (int j=0; j<dim; j++)
       {
 

@@ -12,8 +12,7 @@
 #include <algorithm>
 #include <limits>
 #include <map>
-
-#include <dune/common/array.hh>
+#include <array>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -90,7 +89,7 @@ namespace Dune
     typedef Alberta::NumberingMap< dimension, Alberta::Dune2AlbertaNumbering > NumberingMap;
     typedef Alberta::DuneBoundaryProjection< dimension > Projection;
 
-    typedef array< unsigned int, dimension > FaceId;
+    typedef std::array< unsigned int, dimension > FaceId;
     typedef std::map< FaceId, size_t > BoundaryMap;
 
     class ProjectionFactory;

@@ -3,13 +3,13 @@
 #include <config.h>
 
 #include <vector>
+#include <array>
 
 /** \file
  *  \author Martin Nolte
  *  \brief  provides a wrapper for ALBERTA's macro_data structure
  */
 
-#include <dune/common/array.hh>
 #include <dune/common/forloop.hh>
 
 #include <dune/grid/common/exceptions.hh>
@@ -117,7 +117,7 @@ namespace Dune
         const ElementId &element = macroData.element( i );
 
         // calculate edge lengths
-        array< Real, 6 > length;
+        std::array< Real, 6 > length;
         for( int j = 0; j < 6; ++j )
           length[ j ] = edgeLength ( macroData, element, j );
 

@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <set>
-#include <dune/common/array.hh>
+#include <array>
 
 
 namespace Dune {
@@ -24,7 +24,7 @@ namespace Dune {
 
   /** \brief Specialization of the boundary segment class for 2d */
   template <>
-  class UGGridBoundarySegment<2> : public array<int,2> {
+  class UGGridBoundarySegment<2> : public std::array<int,2> {
 
   public:
 
@@ -67,7 +67,7 @@ namespace Dune {
 
   /** \brief Specialization of the boundary segment class for 2d */
   template <>
-  class UGGridBoundarySegment<3> : public array<int,4> {
+  class UGGridBoundarySegment<3> : public std::array<int,4> {
 
   public:
 

@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
+#include <array>
 
-#include <dune/common/array.hh>
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
@@ -38,7 +38,7 @@ namespace Dune {
     static void insertVertices(GridFactory<GridType>& factory,
                                const FieldVector<ctype,dimworld>& lowerLeft,
                                const FieldVector<ctype,dimworld>& upperRight,
-                               const array<unsigned int,dim>& vertices)
+                               const std::array<unsigned int,dim>& vertices)
     {
       FactoryUtilities::MultiIndex<dim> index(vertices);
 
@@ -63,9 +63,9 @@ namespace Dune {
 
     // Compute the index offsets needed to move to the adjacent vertices
     // in the different coordinate directions
-    static array<unsigned int, dim> computeUnitOffsets(const array<unsigned int,dim>& vertices)
+    static std::array<unsigned int, dim> computeUnitOffsets(const std::array<unsigned int,dim>& vertices)
     {
-      array<unsigned int, dim> unitOffsets;
+      std::array<unsigned int, dim> unitOffsets;
       if (dim>0)        // paranoia
         unitOffsets[0] = 1;
 
@@ -88,7 +88,7 @@ namespace Dune {
      */
     static shared_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                                                const FieldVector<ctype,dimworld>& upperRight,
-                                               const array<unsigned int,dim>& elements)
+                                               const std::array<unsigned int,dim>& elements)
     {
       // The grid factory
       GridFactory<GridType> factory;
@@ -96,7 +96,7 @@ namespace Dune {
       if (MPIHelper::getCollectiveCommunication().rank() == 0)
       {
         // Insert uniformly spaced vertices
-        array<unsigned int,dim> vertices = elements;
+        std::array<unsigned int,dim> vertices = elements;
         for( size_t i = 0; i < vertices.size(); ++i )
           vertices[i]++;
 
@@ -105,7 +105,7 @@ namespace Dune {
 
         // Compute the index offsets needed to move to the adjacent
         // vertices in the different coordinate directions
-        array<unsigned int, dim> unitOffsets =
+        std::array<unsigned int, dim> unitOffsets =
           computeUnitOffsets(vertices);
 
         // Compute an element template (the cube at (0,...,0).  All
@@ -164,7 +164,7 @@ namespace Dune {
      */
     static shared_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                                                   const FieldVector<ctype,dimworld>& upperRight,
-                                                  const array<unsigned int,dim>& elements)
+                                                  const std::array<unsigned int,dim>& elements)
     {
       // The grid factory
       GridFactory<GridType> factory;
@@ -172,7 +172,7 @@ namespace Dune {
       if(MPIHelper::getCollectiveCommunication().rank() == 0)
       {
         // Insert uniformly spaced vertices
-        array<unsigned int,dim> vertices = elements;
+        std::array<unsigned int,dim> vertices = elements;
         for (std::size_t i=0; i<vertices.size(); i++)
           vertices[i]++;
 
@@ -180,7 +180,7 @@ namespace Dune {
 
         // Compute the index offsets needed to move to the adjacent
         // vertices in the different coordinate directions
-        array<unsigned int, dim> unitOffsets =
+        std::array<unsigned int, dim> unitOffsets =
           computeUnitOffsets(vertices);
 
         // Insert the elements
