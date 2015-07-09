@@ -107,10 +107,6 @@ namespace Dune
             \param e Reference to codim cc entity, where cc is the template parameter of the function.
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
     template<int cc>
     IndexType index (const typename Traits::template Codim<cc>::Entity& e) const
     {
