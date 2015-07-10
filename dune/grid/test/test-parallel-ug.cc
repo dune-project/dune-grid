@@ -17,6 +17,8 @@
 #include <dune/grid/utility/structuredgridfactory.hh>
 #include <dune/geometry/referenceelements.hh>
 
+#include "dune/grid/test/checkcomcorrectness.hh"
+
 using namespace Dune;
 
 //! a "flexible" layout where for which arbitrary codims can be
@@ -642,6 +644,8 @@ void testParallelUG(bool localRefinement)
   if (dim == 3)
     EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(grid->leafGridView());
 
+  // check communication correctness
+  Dune::GridCheck::check_communication_correctness(grid->leafGridView());
 }
 
 int main (int argc , char **argv) try
