@@ -19,7 +19,8 @@ struct YaspFactory
 template<int dim>
 struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 {
-  static Dune::YaspGrid<dim>* buildGrid(bool keepPhysicalOverlap = true, int refCount = 0)
+  static Dune::YaspGrid<dim>* buildGrid(
+      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false)
   {
     std::cout << " using equidistant coordinate container!" << std::endl << std::endl;
 
@@ -30,6 +31,7 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
     else
       std::fill(s.begin(), s.end(), 4);
     std::bitset<dim> p(0);
+    p[0] = periodic;
     int overlap = 1;
 
     auto grid = new Dune::YaspGrid<dim>(Len,s,p,overlap);
@@ -42,7 +44,8 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 template<int dim>
 struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
 {
-  static Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >* buildGrid(bool keepPhysicalOverlap = true, int refCount = 0)
+  static Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >* buildGrid(
+      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false)
   {
     std::cout << " using equidistant coordinate container with non-zero origin!" << std::endl << std::endl;
 
@@ -54,6 +57,7 @@ struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
     else
       std::fill(s.begin(), s.end(), 4);
     std::bitset<dim> p(0);
+    p[0] = periodic;
     int overlap = 1;
 
     auto grid = new Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >(lowerleft,upperright,s,p,overlap);
@@ -66,11 +70,13 @@ struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
 template<int dim>
 struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
 {
-  static Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >* buildGrid(bool keepPhysicalOverlap = true, int refCount = 0)
+  static Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >* buildGrid(
+      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false)
   {
     std::cout << " using tensorproduct coordinate container!" << std::endl << std::endl;
 
     std::bitset<dim> p(0);
+    p[0] = periodic;
     int overlap = 1;
 
     std::array<std::vector<double>,dim> coords;
