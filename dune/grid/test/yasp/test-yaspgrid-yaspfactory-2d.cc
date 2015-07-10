@@ -18,14 +18,22 @@ int main (int argc , char **argv) {
     // Initialize MPI, if present
     Dune::MPIHelper::instance(argc, argv);
 
+    check_yasp(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid(true, 0));
+    check_yasp(YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid(true, 0));
+    check_yasp(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid(true, 0));
+
     // In 2D, also test refinement
     for (int refineOpt = 0; refineOpt <= 1; ++refineOpt) {
-      for (int refines = 0; refines <= 1; ++refines) {
-        check_yasp(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid(refineOpt == 1, refines));
-        check_yasp(YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid(refineOpt == 1, refines));
-        check_yasp(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid(refineOpt == 1, refines));
-      }
+      check_yasp(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid(refineOpt == 1, 1));
+      check_yasp(YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid(refineOpt == 1, 1));
+      check_yasp(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid(refineOpt == 1, 1));
     }
+
+    // And periodicity
+    check_yasp(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid(true, 0, true));
+    check_yasp(YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid(true, 0, true));
+    check_yasp(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid(true, 0, true));
+
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
