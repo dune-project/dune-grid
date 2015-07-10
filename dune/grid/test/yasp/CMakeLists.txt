@@ -4,7 +4,9 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   PROPERTY TEST_INCLUDE_FILE ${CMAKE_CURRENT_BINARY_DIR}/BuildTests.cmake)
 
 set(TESTS
-  test-yaspgrid-backuprestore
+  test-yaspgrid-backuprestore-equidistant
+  test-yaspgrid-backuprestore-equidistantoffset
+  test-yaspgrid-backuprestore-tensor
   test-yaspgrid-tensorgridfactory
   test-yaspgrid-yaspfactory-1d
   test-yaspgrid-yaspfactory-2d
