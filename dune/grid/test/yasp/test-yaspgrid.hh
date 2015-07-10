@@ -9,6 +9,9 @@
 #include <dune/grid/test/checkadaptation.hh>
 #include <dune/grid/test/checkpartition.hh>
 
+#include "dune/grid/test/checkcomcorrectness.hh"
+
+
 template<int dim, class CC>
 struct YaspFactory
 {};
@@ -21,8 +24,6 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
     std::cout << " using equidistant coordinate container!" << std::endl << std::endl;
 
     Dune::FieldVector<double,dim> Len(1.0);
-    std::array<int,dim> s;
-    std::fill(s.begin(), s.end(), 8);
     std::array<int,dim> s;
     if (dim < 3)
       std::fill(s.begin(), s.end(), 8);
@@ -47,8 +48,6 @@ struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
 
     Dune::FieldVector<double,dim> lowerleft(-1.0);
     Dune::FieldVector<double,dim> upperright(1.0);
-    std::array<int,dim> s;
-    std::fill(s.begin(), s.end(), 8);
     std::array<int,dim> s;
     if (dim < 3)
       std::fill(s.begin(), s.end(), 8);
@@ -129,6 +128,9 @@ void check_yasp(Dune::YaspGrid<dim,CC>* grid) {
   checkCommunication(*grid,-1,Dune::dvverb);
   for(int l=0; l<=grid->maxLevel(); ++l)
     checkCommunication(*grid,l,Dune::dvverb);
+
+  // check communication correctness
+  Dune::GridCheck::check_communication_correctness(grid->leafGridView());
 
   // check geometry lifetime
   checkGeometryLifetime( grid->leafGridView() );
