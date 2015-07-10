@@ -83,6 +83,9 @@
 /* Do we have UG in at least version 3.9.1-patch10? */
 #define HAVE_UG_PATCH10 ${HAVE_UG_PATCH10}
 
+/* Define to 1 if you have mkstemp function */
+#cmakedefine01 HAVE_MKSTEMP
+
 /* Grid type magic for DGF parser */
 @GRID_CONFIG_H_BOTTOM@
 /* end dune-grid */

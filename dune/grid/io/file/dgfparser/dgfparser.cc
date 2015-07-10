@@ -3,6 +3,11 @@
 #include <config.h>
 
 #include <cstdio>
+#if HAVE_MKSTEMP
+#include <unistd.h>
+#endif
+
+#include <dune/common/exceptions.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -1086,8 +1091,18 @@ namespace Dune
   inline std::string
   DuneGridFormatParser::temporaryFileName ()
   {
+#if HAVE_MKSTEMP
+    char filetemp[ FILENAME_MAX ];
+    std :: strcpy( filetemp, "dgfparser.XXXXXX" );
+    const int fd = mkstemp( filetemp );
+    if( fd < 0 )
+      DUNE_THROW( IOError, "Unable to create temporary file." );
+    close( fd );
+    return std :: string( filetemp );
+#else
     char buffer[ L_tmpnam ]; // supply buffer to make it thread safe
     return std::string( std::tmpnam( buffer ) );
+#endif
   }
 
 } // end namespace Dune
