@@ -1,7 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil -*-
 
-// Based on: Boilerplate tutorial poisson_uniform.cc
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -14,7 +12,7 @@ int main(int argc, char **argv)
 {
   try {
     // initialize MPI, finalize is done automatically on exit
-    Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc,argv);
+    Dune::MPIHelper::instance(argc,argv);
 
     // make grid
     const int dim = 2;
@@ -26,8 +24,8 @@ int main(int argc, char **argv)
     Dune::YaspGrid<dim> grid(L,N,periodic, overlap);
 
     // write .plt files (one for png, one for svg) without executing gnuplot on them
-    Dune::printgrid (grid, helper, "printgridtest_yasp_svg", 4000, false, false);
-    Dune::printgrid (grid, helper, "printgridtest_yasp_png", 4000, false);
+    Dune::printgrid (grid, "printgridtest_yasp_svg", 4000, false, false);
+    Dune::printgrid (grid, "printgridtest_yasp_png", 4000, false);
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
     return 1;

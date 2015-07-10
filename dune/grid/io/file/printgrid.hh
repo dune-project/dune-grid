@@ -56,7 +56,6 @@ namespace Dune {
   /** \brief Print a grid as a gnuplot for testing and development
    *  \tparam GridType the type of grid to work with
    *  \param grid the grid to print
-   *  \param helper an MPIHelper to create unique output file names in parallel case
    *  \param output_file the base of the output filename
    *  \param size size of the plot in pixels; increase if plot is too cramped
    *  \param execute_plot whether to execute gnuplot automatically
@@ -67,13 +66,14 @@ namespace Dune {
    *  Creates a gnuplot (one per process if parallel) showing the grid structure with indices, intersection types etc.
    */
   template <typename GridType>
-  void printgrid (const GridType& grid, const Dune::MPIHelper& helper, std::string output_file = "printgrid",
+  void printgrid (const GridType& grid, std::string output_file = "printgrid",
                   int size = 2000, bool execute_plot = true, bool png = true, bool local_corner_indices = true,
                   bool local_intersection_indices = true, bool outer_normals = true)
   {
 
     // Create output file
-    output_file = output_file + "_" + std::to_string(helper.rank());
+    if (grid.comm().size() > 1)
+      output_file = output_file + "_" + std::to_string(grid.comm().rank());
     std::ofstream plotfile (output_file, std::ios::out | std::ios::trunc);
     if (!plotfile.is_open()) {
       DUNE_THROW(Dune::IOError, "Could not create plot file " << output_file << "!");
@@ -193,7 +193,10 @@ namespace Dune {
 
     if (execute_plot) {
       std::string cmd = "gnuplot -p '" + output_file + "'";
-      std::system (cmd.c_str());
+      int result = std::system (cmd.c_str());
+      if (result != 0) {
+        DUNE_THROW(Dune::IOError, "Gnuplot call on file " << output_file << " failed!");
+      }
     }
   }
 
