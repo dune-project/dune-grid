@@ -239,7 +239,7 @@ namespace Dune {
       // count All_Partition entities
       typedef typename GridType :: LeafGridView GridView ;
       typedef typename GridView :: template Codim< codim > :: template Partition<pitype>  :: Iterator Iterator ;
-      GridView gridView = grid_.leafView();
+      GridView gridView = grid_.leafGridView();
       Iterator it  = gridView.template begin<codim,pitype> ();
       Iterator end = gridView.template end<codim,pitype>   ();
       leafSizes_[codim] = countElements(it,end, leafTypeSizes_[codim] );
@@ -283,7 +283,7 @@ namespace Dune {
       // count All_Partition entities
       typedef typename GridType :: LeafGridView GridView ;
       typedef typename GridView :: template Codim< 0 > :: template Partition<pitype>  :: Iterator Iterator ;
-      GridView gridView = grid_.leafView();
+      GridView gridView = grid_.leafGridView();
       Iterator it  = gridView.template begin< 0, pitype > ();
       Iterator end = gridView.template end< 0, pitype >   ();
       leafSizes_[codim] = countElementsNoCodim< codim >(it,end, leafTypeSizes_[codim] );
