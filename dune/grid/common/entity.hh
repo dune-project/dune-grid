@@ -551,7 +551,8 @@ namespace Dune
 
     /**\brief Inter-level access to father entity on the next-coarser grid.
        The given entity resulted directly from a subdivision of its father
-       entity. For the macro elements dereferencing the EntityPointer is undefined.
+       entity. The behaviour for elements on the macro grid, that is when
+       \ref hasFather() is false, is undefined.
 
        \note If the partitionType of the Entity is GhostEntity,
              it is not guaranteed that this method is working
