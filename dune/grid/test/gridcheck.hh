@@ -1056,12 +1056,15 @@ void gridcheck (Grid &g)
   {
     for (int i=0; i<=dim; i++)
     {
-      assert(g.size(i)>0);
-      for (int j=0; j<=g.maxLevel(); j++)
-        if (g.comm().size() == 0)
-          assert(g.size(j,i)>0);
-        else
-          assert(g.size(j,i)>=0);   // in parallel this could be zero (depends on definition of maxLevel() method in parallel)
+      // if entities for a specific codimension are not available the size can be 0
+      if( g.size(i) > 0 )
+      {
+        for (int j=0; j<=g.maxLevel(); j++)
+          if (g.comm().size() == 0)
+            assert(g.size(j,i)>0);
+          else
+            assert(g.size(j,i)>=0);   // in parallel this could be zero (depends on definition of maxLevel() method in parallel)
+      }
     }
   }
 
