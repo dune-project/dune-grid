@@ -151,8 +151,6 @@ namespace Dune
       out << "[" << this->_a << "," << this->_b << "," << this->_c << "," << this->_d << "]";
     }
 
-#ifdef HAVE_DUNE_HASH
-
     inline friend std::size_t hash_value(const ALUMacroKey& arg)
     {
       std::size_t seed = 0;
@@ -162,8 +160,6 @@ namespace Dune
       hash_combine(seed,arg._d);
       return seed;
     }
-
-#endif // HAVE_DUNE_HASH
 
   };
 
@@ -251,8 +247,6 @@ namespace Dune
       out << "(" << getKey() << "," << nChild_ << "," << codim_ << ")";
     }
 
-#ifdef HAVE_DUNE_HASH
-
     inline friend std::size_t hash_value(const ALUGridId& arg)
     {
       std::size_t seed = hash<MacroKeyImp>() (arg.getKey());
@@ -260,8 +254,6 @@ namespace Dune
       hash_combine(seed,arg.codim());
       return seed;
     }
-
-#endif // HAVE_DUNE_HASH
 
   protected:
     // returns true is the id is lesser then org
