@@ -311,7 +311,8 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   static const int dim      = GridType::dimension;
   static const int dimworld = GridType::dimensionworld;
 
-  static_assert(dim==dimworld, "AmiraMesh can only be read for grids with dim==dimworld!");
+  if (dim!=dimworld)
+    DUNE_THROW(IOError, "AmiraMesh can only be read for grids with dim==dimworld!");
 
   dverb << "This is the AmiraMesh reader for file '" << filename << "'!" << std::endl;
 
