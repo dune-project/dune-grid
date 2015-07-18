@@ -11,6 +11,7 @@
 
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/multilineargeometry.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
 
@@ -178,11 +179,6 @@ namespace Dune
    * may represent a field with multiple components of which one may be
    * selected.
    *
-   * \note While this function may be evaluated anywhere on a given grid
-   *       element, it does not interpolate between the corners of the element
-   *       -- instead, it returns the value at the nearest corner (as
-   *       determined in local coordinates).
-   *
    * \tparam GV Type of GridView the vector applies to.
    * \tparam V  Type of vector.
    */
@@ -222,23 +218,16 @@ namespace Dune
     virtual double evaluate (int comp, const Entity& e,
                              const Dune::FieldVector<ctype,dim>& xi) const
     {
-      double min=1E100;
-      int imin=-1;
-      Dune::GeometryType gt = e.type();
-      const int subEntities = e.subEntities(dim);
-      for (int i=0; i<subEntities; ++i)
-      {
-        Dune::FieldVector<ctype,dim> local =
-          Dune::ReferenceElements<ctype,dim>::general(gt)
-          .position(i,dim);
-        local -= xi;
-        if (local.infinity_norm()<min)
-        {
-          min = local.infinity_norm();
-          imin = i;
-        }
-      }
-      return v[mapper.subIndex(e,imin,dim)*ncomps_+mycomp_];
+      const unsigned int dim = Entity::mydimension;
+      const unsigned int nVertices = e.subEntities(dim);
+
+      std::vector<FieldVector<typename V::field_type,1> > cornerValues(nVertices);
+      for (int i=0; i<nVertices; ++i)
+        cornerValues[i] = v[mapper.subIndex(e,i,dim)*ncomps_+mycomp_];
+
+      // (Ab)use the MultiLinearGeometry class to do multi-linear interpolation between scalars
+      const MultiLinearGeometry<ctype,dim,1> interpolation(e.type(), cornerValues);
+      return interpolation.global(xi);
     }
 
     //! get name
