@@ -21,7 +21,7 @@ namespace Dune
   /** \addtogroup GIGridView
    *  @{
    *  Though a DUNE grid is hierarchic, one often only needs access to
-   *  a certain subset of the entities in the grid, e.g., the all entities
+   *  a certain subset of the entities in the grid, e.g., all entities
    *  on a given level or the leaf entities in the hierarchy.
    *  These views are provided by an
    *  implementation of GridView. Each grid exports a LevelGridView and

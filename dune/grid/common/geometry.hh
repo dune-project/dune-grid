@@ -125,7 +125,7 @@ namespace Dune
      */
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
-    /** \brief Return the name of the reference element. The type can
+    /** \brief Return the type of the reference element. The type can
        be used to access the Dune::ReferenceElement.
      */
     GeometryType type () const { return impl().type(); }
