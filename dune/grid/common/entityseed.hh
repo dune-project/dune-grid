@@ -15,9 +15,9 @@ namespace Dune {
    *
    * The EntitySeed provides a light-weight way to store an entity.  It is supposed
    * to be implemented as memory-efficiently as possible.  To get back the actual
-   * entity (or, rather, EntityPointer), you need the corresponding grid.
-   * On the grid, there is the method entityPointer(const EntitySeed&), which
-   * gives you an EntityPointer in exchange for an EntitySeed.
+   * entity, you need the corresponding grid.
+   * On the grid, there is the method entity(const EntitySeed&), which
+   * gives you an Entity in exchange for an EntitySeed.
    */
   template<class GridImp, class EntitySeedImp>
   class EntitySeed
