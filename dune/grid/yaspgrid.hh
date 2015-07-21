@@ -760,9 +760,15 @@ namespace Dune {
 
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
-        if ((s_interior[i] <= overlap) &&                // interior is very small
-            (periodic[i] || (s_interior[i] != s[i])))    // there is an overlap in that direction
+      {
+        // find out whether the grid is too small to
+        bool toosmall = (s_interior[i] <= overlap) &&    // interior is very small
+            (periodic[i] || (s_interior[i] != s[i]));    // there is an overlap in that direction
+        // communicate the result to all those processes to have all processors error out if one process failed.
+        MPI_Allreduce(&toosmall, &toosmall, 1, MPI_INT, MPI_LOR, comm);
+        if (toosmall)
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+      }
 
       fTupel h(L);
       for (int i=0; i<dim; i++)
@@ -821,9 +827,15 @@ namespace Dune {
 
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
-        if ((s_interior[i] <= overlap) &&                // interior is very small
-            (periodic[i] || (s_interior[i] != s[i])))    // there is an overlap in that direction
+      {
+        // find out whether the grid is too small to
+        bool toosmall = (s_interior[i] <= overlap) &&    // interior is very small
+            (periodic[i] || (s_interior[i] != s[i]));    // there is an overlap in that direction
+        // communicate the result to all those processes to have all processors error out if one process failed.
+        MPI_Allreduce(&toosmall, &toosmall, 1, MPI_INT, MPI_LOR, comm);
+        if (toosmall)
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+      }
 
       Dune::FieldVector<ctype,dim> extension(upperright);
       Dune::FieldVector<ctype,dim> h;
@@ -890,9 +902,16 @@ namespace Dune {
 
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
-        if ((s_interior[i] <= overlap) &&                // interior is very small
-            (periodic[i] || (s_interior[i] != _coarseSize[i])))    // there is an overlap in that direction
+      {
+        // find out whether the grid is too small to
+        bool toosmall = (s_interior[i] <= overlap) &&               // interior is very small
+             (periodic[i] || (s_interior[i] != _coarseSize[i]));    // there is an overlap in that direction
+        // communicate the result to all those processes to have all processors error out if one process failed.
+        MPI_Allreduce(&toosmall, &toosmall, 1, MPI_INT, MPI_LOR, comm);
+        if (toosmall)
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+      }
+
 
       std::array<std::vector<ctype>,dim> newcoords;
       std::array<int, dim> offset(o_interior);
