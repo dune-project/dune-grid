@@ -37,6 +37,7 @@ GRIDS = basicunitcube-2d.dgf \
         test1d.dgf \
         test1d-vertex.dgf \
         test2d.dgf \
+        test2d_offset.dgf \
         test2ug.dgf \
         test3d.dgf \
         torus-2.dgf \
