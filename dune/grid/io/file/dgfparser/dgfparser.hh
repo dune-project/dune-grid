@@ -214,7 +214,7 @@ namespace Dune {
        - \b Simplexgenerator \n
          Using this block a simplex grid can be automatically generated using
          one of the freely available grid generation tools
-         Tetgen (http://tetgen.berlios.de) for \c dimworld=3 or
+         Tetgen (http://tetgen.org) for \c dimworld=3 or
          Triangle (http://www.cs.cmu.edu/~quake/triangle.html) for \c dimworld=2.
          For more detail see \ref Simplexgeneration.
        - \b Vertex \n
@@ -481,7 +481,7 @@ namespace Dune {
          retrieved as described in Section \ref PARAMETERS.
 
          Download
-         - Tetgen http://tetgen.berlios.de
+         - Tetgen http://tetgen.org
          - Triangle http://www.cs.cmu.edu/~quake/triangle.html
 
 
