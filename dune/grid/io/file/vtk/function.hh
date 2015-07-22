@@ -221,7 +221,7 @@ namespace Dune
       const unsigned int dim = Entity::mydimension;
       const unsigned int nVertices = e.subEntities(dim);
 
-      std::vector<FieldVector<typename V::field_type,1> > cornerValues(nVertices);
+      std::vector<FieldVector<ctype,1> > cornerValues(nVertices);
       for (int i=0; i<nVertices; ++i)
         cornerValues[i] = v[mapper.subIndex(e,i,dim)*ncomps_+mycomp_];
 
