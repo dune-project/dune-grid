@@ -964,7 +964,7 @@ namespace Dune {
       // through the list of intersection deques in parallel.
       // The reason for this convoluted iteration technique is that there are not
       // necessarily intersections for all possible shifts, but we have to make
-      // sure that we stop at each shift to update the per-component index shift
+      // sure that we stop at each shift to update the per-component index shift.
       // This is ensured by iterating over the ygrid, which is guaranteed to have
       // a component for each shift vector.
 
