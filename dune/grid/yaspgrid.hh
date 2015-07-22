@@ -758,6 +758,7 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
 
+#if HAVE_MPI
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
       {
@@ -770,6 +771,7 @@ namespace Dune {
         if (global)
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
       }
+#endif // #if HAVE_MPI
 
       fTupel h(L);
       for (int i=0; i<dim; i++)
@@ -826,6 +828,7 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
 
+#if HAVE_MPI
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
       {
@@ -838,6 +841,7 @@ namespace Dune {
         if (global)
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
       }
+#endif // #if HAVE_MPI
 
       Dune::FieldVector<ctype,dim> extension(upperright);
       Dune::FieldVector<ctype,dim> h;
@@ -902,6 +906,7 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
 
+#if HAVE_MPI
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
       {
@@ -914,6 +919,7 @@ namespace Dune {
         if (global)
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
       }
+#endif // #if HAVE_MPI
 
 
       std::array<std::vector<ctype>,dim> newcoords;
