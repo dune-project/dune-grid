@@ -11,6 +11,11 @@ foreach(_T ${TESTS})
   add_test(${_T} ${_T})
 endforeach(_T ${TESTS})
 
+if(MPI_FOUND)
+  add_test(NAME structuredgridfactorytest-parallel
+      COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} "2" structuredgridfactorytest)
+endif(MPI_FOUND)
+
 add_dune_ug_flags(${TESTS})
 add_dune_mpi_flags(structuredgridfactorytest tensorgridfactorytest)
 add_dune_alugrid_flags(vertexordertest persistentcontainertest)

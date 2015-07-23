@@ -18,6 +18,7 @@
 #endif
 
 #include <dune/grid/utility/structuredgridfactory.hh>
+#include <dune/grid/test/checkparallelug.hh>
 #include <dune/grid/test/gridcheck.hh>
 
 using namespace Dune;
@@ -35,27 +36,30 @@ try {
 
   // Test creation of 1d cube grids
   std::array<unsigned int,1> elements1d;
-  elements1d.fill(4);
+  elements1d.fill(64);
 
-  shared_ptr<OneDGrid> onedCubeGrid = StructuredGridFactory<OneDGrid>::createCubeGrid(FieldVector<double,1>(0),
-                                                                                      FieldVector<double,1>(1),
-                                                                                      elements1d);
+  // OneDGrid is sequential only
+  if (mpihelper.size() == 1) {
+    shared_ptr<OneDGrid> onedCubeGrid = StructuredGridFactory<OneDGrid>::createCubeGrid(FieldVector<double,1>(0),
+                                                                                        FieldVector<double,1>(1),
+                                                                                        elements1d);
 
-  assert(onedCubeGrid->size(1) == elements1d[0]+1);
-  assert(onedCubeGrid->size(0) == elements1d[0]);
+    assert(onedCubeGrid->size(1) == elements1d[0]+1);
+    assert(onedCubeGrid->size(0) == elements1d[0]);
 
-  gridcheck(*onedCubeGrid);
+    gridcheck(*onedCubeGrid);
 
 
-  // Test creation of 1d simplex grids
-  shared_ptr<OneDGrid> onedSimplexGrid = StructuredGridFactory<OneDGrid>::createSimplexGrid(FieldVector<double,1>(0),
-                                                                                            FieldVector<double,1>(1),
-                                                                                            elements1d);
+    // Test creation of 1d simplex grids
+    shared_ptr<OneDGrid> onedSimplexGrid = StructuredGridFactory<OneDGrid>::createSimplexGrid(FieldVector<double,1>(0),
+                                                                                              FieldVector<double,1>(1),
+                                                                                              elements1d);
 
-  assert(onedCubeGrid->size(1) == elements1d[0]+1);
-  assert(onedCubeGrid->size(0) == elements1d[0]);
+    assert(onedCubeGrid->size(1) == elements1d[0]+1);
+    assert(onedCubeGrid->size(0) == elements1d[0]);
 
-  gridcheck(*onedSimplexGrid);
+    gridcheck(*onedSimplexGrid);
+  }
 
   // Test creation of 1d YaspGrid
   shared_ptr<YaspGrid<1> > yaspGrid1d =
@@ -63,8 +67,10 @@ try {
                                                         FieldVector<double,1>(1),
                                                         elements1d);
 
-  assert(yaspGrid1d->size(1) == elements1d[0]+1);
-  assert(yaspGrid1d->size(0) == elements1d[0]);
+  if (mpihelper.size() == 1) {
+    assert(yaspGrid1d->size(1) == elements1d[0]+1);
+    assert(yaspGrid1d->size(0) == elements1d[0]);
+  }
 
   gridcheck(*yaspGrid1d);
 
@@ -74,8 +80,10 @@ try {
                                                           FieldVector<double,1>(1),
                                                           elements1d);
 
-  assert(sGrid1d->size(1) == elements1d[0]+1);
-  assert(sGrid1d->size(0) == elements1d[0]);
+  if (mpihelper.size() == 1) {
+    assert(sGrid1d->size(1) == elements1d[0]+1);
+    assert(sGrid1d->size(0) == elements1d[0]);
+  }
 
   {
     shared_ptr<YaspGrid<1, EquidistantOffsetCoordinates<double,1> > > yaspGridOff1d
@@ -83,8 +91,10 @@ try {
                                                                 FieldVector<double,1>(1),
                                                                 elements1d);
 
-    assert(yaspGridOff1d->size(1) == elements1d[0]+1);
-    assert(yaspGridOff1d->size(0) == elements1d[0]);
+    if (mpihelper.size() == 1) {
+      assert(yaspGridOff1d->size(1) == elements1d[0]+1);
+      assert(yaspGridOff1d->size(0) == elements1d[0]);
+    }
 
     gridcheck(*yaspGridOff1d);
   }
@@ -96,7 +106,7 @@ try {
   // /////////////////////////////////////////////////////////////////////////////
 
   std::array<unsigned int,2> elements2d;
-  elements2d.fill(4);
+  elements2d.fill(8);
   unsigned int numVertices2d = (elements2d[0]+1) * (elements2d[1]+1);
   unsigned int numCubes2d    = elements2d[0] * elements2d[1];
 
@@ -106,8 +116,10 @@ try {
                                                           FieldVector<double,2>(1),
                                                           elements2d);
 
-  assert(yaspGrid2d->size(2) == numVertices2d);
-  assert(yaspGrid2d->size(0) == numCubes2d);
+  if (mpihelper.size() == 1) {
+    assert(yaspGrid2d->size(2) == numVertices2d);
+    assert(yaspGrid2d->size(0) == numCubes2d);
+  }
 
   gridcheck(*yaspGrid2d);
 
@@ -117,8 +129,10 @@ try {
                                                               FieldVector<double,2>(1),
                                                               elements2d);
 
-      assert(yaspGridOff2d->size(2) == numVertices2d);
-      assert(yaspGridOff2d->size(0) == numCubes2d);
+      if (mpihelper.size() == 1) {
+        assert(yaspGridOff2d->size(2) == numVertices2d);
+        assert(yaspGridOff2d->size(0) == numCubes2d);
+      }
 
       gridcheck(*yaspGridOff2d);
   }
@@ -129,8 +143,10 @@ try {
                                                           FieldVector<double,2>(1),
                                                           elements2d);
 
-  assert(sGrid2d->size(2) == numVertices2d);
-  assert(sGrid2d->size(0) == numCubes2d);
+  if (mpihelper.size() == 1) {
+    assert(sGrid2d->size(2) == numVertices2d);
+    assert(sGrid2d->size(0) == numCubes2d);
+  }
 
   gridcheck(*sGrid2d);
 
@@ -142,10 +158,14 @@ try {
                                                                                                                      FieldVector<double,2>(1),
                                                                                                                      elements2d);
 
-  assert(quadrilateralGrid->size(2) == numVertices2d);
-  assert(quadrilateralGrid->size(0) == numCubes2d);
-
-  gridcheck(*quadrilateralGrid);
+  if (mpihelper.size() == 1) {
+    assert(quadrilateralGrid->size(2) == numVertices2d);
+    assert(quadrilateralGrid->size(0) == numCubes2d);
+    gridcheck(*quadrilateralGrid);
+  } else {
+    Dune::GridCheck::testParallelUGLoadBalance (quadrilateralGrid);
+    Dune::GridCheck::testParallelUG(quadrilateralGrid);
+  }
 #ifdef ModelP  // parallel UGGrid can only have one grid at a time
   quadrilateralGrid.reset();
 #endif
@@ -162,10 +182,14 @@ try {
                                                                                                          FieldVector<double,2>(1),
                                                                                                          elements2d);
 
-  assert(triangleGrid->size(2) == numVertices2d);
-  assert(triangleGrid->size(0) == 2*numCubes2d);    // each cube gets split into 2 triangles
-
-  gridcheck(*triangleGrid);
+  if (mpihelper.size() == 1) {
+    assert(triangleGrid->size(2) == numVertices2d);
+    assert(triangleGrid->size(0) == 2*numCubes2d);    // each cube gets split into 2 triangles
+    gridcheck(*triangleGrid);
+  } else {
+    Dune::GridCheck::testParallelUGLoadBalance (triangleGrid);
+    Dune::GridCheck::testParallelUG(triangleGrid);
+  }
 #ifdef ModelP  // parallel UGGrid can only have one grid at a time
   triangleGrid.reset();
 #endif
@@ -190,10 +214,14 @@ try {
                                                                                                             FieldVector<double,3>(1),
                                                                                                             elements3d);
 
-  assert(hexahedralGrid->size(3) == numVertices3d);
-  assert(hexahedralGrid->size(0) == numCubes3d);
-
-  gridcheck(*hexahedralGrid);
+  if (mpihelper.size() == 1) {
+    assert(hexahedralGrid->size(3) == numVertices3d);
+    assert(hexahedralGrid->size(0) == numCubes3d);
+    gridcheck(*hexahedralGrid);
+  } else {
+    Dune::GridCheck::testParallelUGLoadBalance (hexahedralGrid);
+    Dune::GridCheck::testParallelUG(hexahedralGrid);
+  }
 #ifdef ModelP  // parallel UGGrid can only have one grid at a time
   hexahedralGrid.reset();
 #endif
@@ -209,10 +237,14 @@ try {
                                                                                                                   FieldVector<double,3>(1),
                                                                                                                   elements3d);
 
-  assert(tetrahedralGrid->size(3) == numVertices3d);
-  assert(tetrahedralGrid->size(0) == 6*numCubes3d);    // each cube gets split into 6 tetrahedra
-
-  gridcheck(*tetrahedralGrid);
+  if (mpihelper.size() == 1) {
+    assert(tetrahedralGrid->size(3) == numVertices3d);
+    assert(tetrahedralGrid->size(0) == 6*numCubes3d);    // each cube gets split into 6 tetrahedra
+    gridcheck(*tetrahedralGrid);
+  } else {
+    Dune::GridCheck::testParallelUGLoadBalance (tetrahedralGrid);
+    Dune::GridCheck::testParallelUG(tetrahedralGrid);
+  }
 #ifdef ModelP  // parallel UGGrid can only have one grid at a time
   tetrahedralGrid.reset();
 #endif
