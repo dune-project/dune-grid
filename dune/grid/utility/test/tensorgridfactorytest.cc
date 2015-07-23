@@ -17,6 +17,7 @@
 #include <dune/grid/yaspgrid.hh>
 
 #include <dune/grid/utility/tensorgridfactory.hh>
+#include <dune/grid/test/checkparallelug.hh>
 #include <dune/grid/test/gridcheck.hh>
 
 using namespace Dune;
@@ -39,9 +40,9 @@ try {
   MPIHelper & mpihelper = MPIHelper::instance(argc,argv);
 
   // Test OneDGrid
-  TensorGridFactory<OneDGrid> fac1;
-  fillFactory(fac1);
-  {
+  if (mpihelper.size() == 1) {
+    TensorGridFactory<OneDGrid> fac1;
+    fillFactory(fac1);
     auto grid = fac1.createGrid();
     gridcheck(*grid);
     std::cout << "OneDgrid with " << grid->size(0) << " cells created." << std::endl;
@@ -52,16 +53,26 @@ try {
   TensorGridFactory<UGGrid<2> > fac3;
   fillFactory(fac3);
   {
-    auto grid = fac3.createGrid();
-    gridcheck(*grid);
+    shared_ptr<UGGrid<2> > grid = fac3.createGrid();
+    if (mpihelper.size() == 1)
+      gridcheck(*grid);
+    else {
+      Dune::GridCheck::testParallelUGLoadBalance (grid);
+      Dune::GridCheck::testParallelUG (grid);
+    }
     std::cout << "UGGrid<2> with " << grid->size(0) << " cells created." << std::endl;
   }
 
   TensorGridFactory<UGGrid<3> > fac4;
   fillFactory(fac4);
   {
-    auto grid = fac4.createGrid();
-    gridcheck(*grid);
+    shared_ptr<UGGrid<3> > grid = fac4.createGrid();
+    if (mpihelper.size() == 1)
+      gridcheck(*grid);
+    else {
+      Dune::GridCheck::testParallelUGLoadBalance (grid);
+      Dune::GridCheck::testParallelUG (grid);
+    }
     std::cout << "UGGrid<2> with " << grid->size(0) << " cells created." << std::endl;
   }
 #endif

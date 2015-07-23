@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_TEST_CHECKPARALLELUG_HH
 #define DUNE_GRID_TEST_CHECKPARALLELUG_HH
 
+#if HAVE_UG
+
 #include <unistd.h>
 #include <iostream>
 #include <vector>
@@ -586,5 +588,7 @@ namespace Dune {
   } // GridCheck
 
 } // Dune
+
+#endif HAVE_UG
 
 #endif // #ifndef DUNE_GRID_TEST_CHECKPARALLELUG_HH

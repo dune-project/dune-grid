@@ -14,6 +14,8 @@ endforeach(_T ${TESTS})
 if(MPI_FOUND)
   add_test(NAME structuredgridfactorytest-parallel
       COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} "2" structuredgridfactorytest)
+  add_test(NAME tensorgridfactorytest-parallel
+      COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} "2" tensorgridfactorytest)
 endif(MPI_FOUND)
 
 add_dune_ug_flags(${TESTS})
