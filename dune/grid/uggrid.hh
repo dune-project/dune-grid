@@ -26,8 +26,8 @@
 
 /* The following lines including the necessary UG headers are somewhat
    tricky.  Here's what's happening:
-   UG can support two- and three-dimensional grids.  You choose be setting
-   either _2 oder _3 while compiling.  This changes all sorts of stuff, in
+   UG can support two- and three-dimensional grids.  You choose by setting
+   either _2 or _3 while compiling.  This changes all sorts of stuff, in
    particular data structures in the headers.
    UG was never supposed to provide 2d and 3d grids at the same time.
    However, when compiling it as c++, the dimension-dependent parts are
@@ -617,8 +617,8 @@ namespace Dune {
 
     /** \brief The communication interface for all codims on a given level
        @param dataHandle type used to gather/scatter data in and out of the message buffer
-       @param iftype one of the predifined interface types, throws error if it is not implemented
-       @param dir choose beetween forward and backward communication
+       @param iftype one of the predefined interface types, throws error if it is not implemented
+       @param dir choose between forward and backward communication
        @param level communicate for entities on the given level
 
        Implements a generic communication function sending an object of type P for each entity
@@ -653,8 +653,8 @@ namespace Dune {
 
     /** \brief The communication interface for all codims on the leaf level
        @param dataHandle type used to gather/scatter data in and out of the message buffer
-       @param iftype one of the predifined interface types, throws error if it is not implemented
-       @param dir choose beetween forward and backward communication
+       @param iftype one of the predefined interface types, throws error if it is not implemented
+       @param dir choose between forward and backward communication
 
        Implements a generic communication function sending an object of type P for each entity
        in the intersection of two processors. P has two methods gather and scatter that implement
