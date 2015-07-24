@@ -222,7 +222,7 @@ namespace Dune
       const unsigned int nVertices = e.subEntities(dim);
 
       std::vector<FieldVector<ctype,1> > cornerValues(nVertices);
-      for (int i=0; i<nVertices; ++i)
+      for (unsigned i=0; i<nVertices; ++i)
         cornerValues[i] = v[mapper.subIndex(e,i,dim)*ncomps_+mycomp_];
 
       // (Ab)use the MultiLinearGeometry class to do multi-linear interpolation between scalars
