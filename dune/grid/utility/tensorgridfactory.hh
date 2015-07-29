@@ -311,11 +311,11 @@ namespace Dune
 
     std::shared_ptr<Grid> createGrid(Comm comm)
     {
+      // The grid factory
+      GridFactory<Grid> fac;
+
       if (comm.rank() == 0)
       {
-        // The grid factory
-        GridFactory<Grid> fac;
-
         // determine the size of the grid
         std::array<unsigned int, dim> vsizes, esizes;
         std::size_t size = 1;
@@ -373,9 +373,9 @@ namespace Dune
 
           fac.insertElement(GeometryType(GeometryType::cube, dim), corners);
         }
-
-        return std::shared_ptr<Grid>(fac.createGrid());
       }
+
+      return std::shared_ptr<Grid>(fac.createGrid());
     }
 
   private:
