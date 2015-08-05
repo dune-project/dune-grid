@@ -5,7 +5,9 @@
 
 #include <dune/geometry/type.hh>
 
+#if HAVE_ALUGRID && DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
 #include <dune/grid/alugrid/3d/topology.hh>
+#endif
 #include <dune/grid/common/entity.hh>
 
 namespace Dune
@@ -14,13 +16,13 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
+#if HAVE_ALUGRID && DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   template< int, int, class >
   class ALU3dGridEntity;
 
   template< ALU3dGridElementType, class >
   struct ALU3dImplTraits;
-
-
+#endif
 
   namespace GeoGrid
   {
@@ -64,7 +66,7 @@ namespace Dune
     // HostCorners for ALU3dGrid
     // -------------------------
 
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+#if HAVE_ALUGRID && DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
     template< int dim, class Grid >
     class HostCorners< Dune::Entity< 0, dim, Grid, ALU3dGridEntity > >
     {
