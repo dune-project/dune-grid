@@ -84,10 +84,10 @@ namespace Dune
   template< int dim, int dimworld >
   class ALUSimplexGrid;
 
-  //- include declaration of ALUGrid
-#include <dune/grid/alugrid/common/declaration.hh>
-
 } //end  namespace Dune
+
+//- include declaration of ALUGrid
+#include <dune/grid/alugrid/common/declaration.hh>
 
 #endif // #ifdef HAVE_ALUGRID || DOXYGEN
 
