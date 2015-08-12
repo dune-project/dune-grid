@@ -4,6 +4,9 @@
 #ifndef DUNE_GRID_TEST_CHECKPARTITION_HH
 #define DUNE_GRID_TEST_CHECKPARTITION_HH
 
+#include <cstddef>
+
+#include <bitset>
 #include <map>
 
 #include <dune/common/forloop.hh>
@@ -215,7 +218,7 @@ class CheckPartitionDataHandle
   template< int codim >
   struct Contains
   {
-    static void apply ( bool (&contains)[ dimension+1 ] )
+    static void apply ( std::bitset< dimension+1 > &contains )
     {
       contains[ codim ] = Dune::Capabilities::canCommunicate< Grid, codim >::v;
     }
@@ -232,7 +235,8 @@ public:
       invalidReceiveEntity_( false ),
       invalidSize_( false ),
       selfReceive_( false ),
-      doubleInterior_( false )
+      doubleInterior_( false ),
+      interiorBorder_( false )
   {
     Dune::ForLoop< Contains, 0, dimension >::apply( contains_ );
   }
@@ -255,9 +259,11 @@ public:
       std::cerr << "[ " << rank_ << " ] Warning: Received data from own process during communication." << std::endl;
     if( doubleInterior_ )
       std::cerr << "[ " << rank_ << " ] Error: Received interior data on interior entity." << std::endl;
+    if( interiorBorder_ )
+      std::cerr << "[ " << rank_ << " ] Error: Received interior data on border entity / border data on interior entity." << std::endl;
   }
 
-  bool contains ( int const dim, const int codim ) const
+  bool contains ( const int dim, const int codim ) const
   {
     invalidDimension_ |= (dim != dimension);
     invalidCodimension_ |= ((codim < 0) || (codim > dimension));
@@ -272,7 +278,7 @@ public:
   }
 
   template< class Entity >
-  size_t size ( const Entity &entity ) const
+  std::size_t size ( const Entity &entity ) const
   {
     DUNE_UNUSED_PARAMETER(entity);
     static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
@@ -294,14 +300,14 @@ public:
   }
 
   template< class Buffer, class Entity >
-  void scatter ( Buffer &buffer, const Entity &entity, size_t n )
+  void scatter ( Buffer &buffer, const Entity &entity, std::size_t n )
   {
     static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
     static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
 
     invalidEntity_ |= !contains_[ Entity::codimension ];
     invalidSize_ |= (n != size( entity ));
-    invalidSendEntity_ |= !Dune::EntityCommHelper< iftype >::receive( entity.partitionType() );
+    invalidReceiveEntity_ |= !Dune::EntityCommHelper< iftype >::receive( entity.partitionType() );
 
     int rank, partitionType;
     buffer.read( rank );
@@ -313,6 +319,18 @@ public:
       std::cout << "[ " << rank_ << " ] Error: Receive interior data from process " << rank
                 << " on interior entity " << grid_.globalIdSet().id( entity ) << "." << std::endl;
       doubleInterior_ = true;
+    }
+    if( (partitionType == int( Dune::BorderEntity )) && (entity.partitionType() == Dune::InteriorEntity) )
+    {
+      std::cout << "[ " << rank_ << " ] Error: Receive border data from process " << rank
+                << " on interior entity " << grid_.globalIdSet().id( entity ) << "." << std::endl;
+      interiorBorder_ = true;
+    }
+    if( (partitionType == int( Dune::InteriorEntity )) && (entity.partitionType() == Dune::BorderEntity) )
+    {
+      std::cout << "[ " << rank_ << " ] Error: Receive interior data from process " << rank
+                << " on border entity " << grid_.globalIdSet().id( entity ) << "." << std::endl;
+      interiorBorder_ = true;
     }
   }
 
@@ -326,7 +344,7 @@ public:
 private:
   const Grid &grid_;
   const int rank_;
-  bool contains_[ dimension+1 ];
+  std::bitset< dimension+1 > contains_;
   mutable bool invalidDimension_;
   mutable bool invalidCodimension_;
   mutable bool invalidEntity_;
@@ -335,6 +353,7 @@ private:
   bool invalidSize_;
   bool selfReceive_;
   bool doubleInterior_;
+  bool interiorBorder_;
 };
 
 
