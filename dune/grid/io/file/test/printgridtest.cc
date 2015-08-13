@@ -19,7 +19,6 @@ int main(int argc, char **argv)
     Dune::FieldVector<double,dim> L(1.0);
     std::array<int,dim> N(Dune::fill_array<int,dim>(4));
     std::bitset<dim> periodic (false);
-    periodic[0] = true;
     int overlap = 1;
     Dune::YaspGrid<dim> grid(L,N,periodic, overlap);
 

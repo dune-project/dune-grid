@@ -53,7 +53,7 @@ namespace Dune {
 
   }
 
-  /** \brief Print a grid as a gnuplot for testing and development
+  /** \brief Print a 2D grid as a gnuplot for testing and development
    *  \tparam GridType the type of grid to work with
    *  \param grid the grid to print
    *  \param output_file the base of the output filename
@@ -70,6 +70,8 @@ namespace Dune {
                   int size = 2000, bool execute_plot = true, bool png = true, bool local_corner_indices = true,
                   bool local_intersection_indices = true, bool outer_normals = true)
   {
+    // Assert correct dimension
+    static_assert (GridType::dimension == 2, "printgrid only supports 2D grids!");
 
     // Create output file
     if (grid.comm().size() > 1)
