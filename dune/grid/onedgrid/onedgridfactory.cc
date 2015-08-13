@@ -82,6 +82,9 @@ createGrid()
   if (grid_==NULL)
     return NULL;
 
+  // Assert that vertices are given
+  assert (vertexPositions_.size() > 0);
+
   // ////////////////////////////////////////////////////////
   //   Insert the vertices into the grid
   // ////////////////////////////////////////////////////////
