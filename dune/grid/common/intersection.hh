@@ -68,7 +68,8 @@ namespace Dune
      <td>false</td><td>true</td><td><em>undefined</em></td></tr>
      <tr>
      <td>3</td><td>on periodic boundary</td>
-     <td>true</td><td>true</td><td>Ghost-/Overlap cell<br>(with transformed geometry)</td></tr>
+     <td>true</td><td>true</td><td>Ghost-/Overlap cell <br>
+                                   (with transformed geometry)</td></tr>
      <tr>
      <td>4</td><td>on processor boundary</td>
      <td>false <em>if grid has no ghosts</em><br>true <em>otherwise</em></td><td>false </td>
