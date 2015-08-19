@@ -446,7 +446,13 @@ namespace Dune
     }
     generateBoundaries( gridin, !interval.isactive() );
     if( nofelements<=0 )
-      DUNE_THROW( DGFException, "Error: No elements found." );
+    {
+      std::cerr << "No suitable element block found in dgf file "
+        << "for the chosen grid type - "
+        << "perhaps you are building a grid supporting cube elements "
+        << "from a dgf file containing only a simplex block?" << std::endl;
+      DUNE_THROW( DGFException, "Error: No usable block to construct elements found." );
+    }
 
     info->finish();
     delete info;
