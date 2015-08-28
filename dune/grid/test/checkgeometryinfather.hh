@@ -191,10 +191,6 @@ void checkGeometryInFather(const GridType& grid)
                          typename GridType::ctype>::value == true),
                       "Geometry has wrong ctype");
 
-        static_assert((static_cast<int>(Geometry::dimension)
-                       == static_cast<int>(GridType::dimension)),
-                      "Geometry has wrong dimension");
-
         static_assert((static_cast<int>(Geometry::mydimension)
                        == static_cast<int>(GridType::dimension)),
                       "Geometry has wrong mydimension");
@@ -202,10 +198,6 @@ void checkGeometryInFather(const GridType& grid)
         static_assert((static_cast<int>(Geometry::coorddimension)
                        == static_cast<int>(GridType::dimensionworld)),
                       "Geometry has wrong coorddimension");
-
-        static_assert((static_cast<int>(Geometry::dimensionworld)
-                       == static_cast<int>(GridType::dimensionworld)),
-                      "Geometry has wrong dimensionworld");
 
         // ///////////////////////////////////////////////////////
         //   Check the different methods

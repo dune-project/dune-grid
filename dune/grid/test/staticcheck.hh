@@ -21,7 +21,6 @@ struct GeometryInterface
   static void check ( const Geometry &geo )
   {
     static_assert( (Geometry::mydimension == dim-codim), "" );
-    static_assert( (Geometry::dimension == dim), "" );
 
     typedef typename Geometry::ctype ctype DUNE_UNUSED;
 
