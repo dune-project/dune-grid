@@ -107,7 +107,7 @@ public:
   {
     // flag+data+coordinates
     typedef typename EntityType::Geometry Geometry;
-    return 2+e.geometry().corners() * Geometry::dimensionworld;
+    return 2+e.geometry().corners() * Geometry::coorddimension;
   }
 
   //! pack data from user to message buffer
@@ -126,9 +126,9 @@ public:
     const Geometry &geometry = e.geometry();
     for( int i = 0; i < geometry.corners(); ++i )
     {
-      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
+      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::coorddimension > Vector;
       const Vector corner = geometry.corner( i );
-      for( int j = 0; j < Geometry::dimensionworld; ++j )
+      for( int j = 0; j < Geometry::coorddimension; ++j )
         buff.write( corner[ j ] );
     }
   }
@@ -177,9 +177,9 @@ public:
     const Geometry &geometry = e.geometry();
     for( int i = 0; i < geometry.corners(); ++i )
     {
-      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
+      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::coorddimension > Vector;
       const Vector corner = geometry.corner( i );
-      for( int j = 0; j < Geometry::dimensionworld; ++j )
+      for( int j = 0; j < Geometry::coorddimension; ++j )
       {
         buff.read(x);
         if( std::abs( corner[ j ] - x ) > 1e-8 )
