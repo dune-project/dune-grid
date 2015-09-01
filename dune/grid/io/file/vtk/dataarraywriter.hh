@@ -201,7 +201,7 @@ namespace Dune
       }
 
       //! write one data element to output stream (noop)
-      void write (T data) { }
+      void write (T) { }
 
       //! whether calls to write may be skipped
       bool writeIsNoop() const { return true; }
@@ -242,7 +242,7 @@ namespace Dune
       }
 
       //! write one data element to output stream (noop)
-      void write (T data) { }
+      void write (T) { }
 
       //! whether calls to write may be skipped
       bool writeIsNoop() const { return true; }

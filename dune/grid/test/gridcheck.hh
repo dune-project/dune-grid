@@ -64,6 +64,7 @@ struct subIndexCheck
   template<typename E>
   void checkEntitySeedRecovery( const Grid& g, const E& e )
   {
+    DUNE_UNUSED_PARAMETER(g);
     typedef typename Grid::template Codim< E::codimension >::EntitySeed EntitySeed;
     EntitySeed seed = e.seed();
 
@@ -181,7 +182,7 @@ struct subIndexCheck<cd, Grid, Entity, false>
 template <class Grid, class Entity>
 struct subIndexCheck<-1, Grid, Entity, false>
 {
-  subIndexCheck (const Grid & g, const Entity & e)
+  subIndexCheck (const Grid & , const Entity & )
   {
     return;
   }
@@ -586,7 +587,7 @@ template <class GridType>
 struct CheckMark<GridType,false>
 {
   template <class IteratorType>
-  static void check(const GridType & grid, IteratorType & it )
+  static void check(const GridType &, IteratorType & )
   {}
 };
 

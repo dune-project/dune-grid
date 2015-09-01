@@ -117,8 +117,8 @@ namespace Dune
     }
 
     //! evaluate
-    virtual double evaluate (int comp, const Entity& e,
-                             const Dune::FieldVector<ctype,dim>& xi) const
+    virtual double evaluate (int, const Entity& e,
+                             const Dune::FieldVector<ctype,dim>&) const
     {
       return v[mapper.index(e)*ncomps_+mycomp_];
     }

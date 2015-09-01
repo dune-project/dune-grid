@@ -83,7 +83,7 @@ namespace Dune
       }
     }
     template <class Entity>
-    static void check(const false_type&, const Entity &entity)
+    static void check(const false_type&, const Entity &)
     {}
   };
 
