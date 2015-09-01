@@ -57,7 +57,7 @@ namespace Dune
   template <int codim, class GridType,
       class IndexSetType, class OutputStreamImp,
       class MapType1 , class MapType2 , class MapType3 >
-  void checkSubEntity ( const GridType & grid,
+  void checkSubEntity ( const GridType &,
                         const typename GridType::template Codim<0>::Entity &en , const IndexSetType & lset,
                         OutputStreamImp & sout , MapType1 & setOfVerticesPerSubEntity ,
                         MapType2 & subEntityPerSetOfVertices,

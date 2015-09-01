@@ -97,7 +97,7 @@ template<class Grid, int cd>
 struct ZeroEntityMethodCheck<Grid, cd, false>
 {
   typedef typename Grid::template Codim<0>::Entity Entity;
-  static void check(Entity &e)
+  static void check(Entity &)
   {
     // check types
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
@@ -245,7 +245,7 @@ struct EntityInterface<Grid, codim, dim, false>
 {
   typedef typename Grid::template Codim<codim>::Entity Entity;
 
-  static void check (Entity &e)
+  static void check (Entity &)
   {
     // recursively check sub-entities
     EntityInterface<Grid, codim + 1, dim,
@@ -391,6 +391,7 @@ struct LeafInterface
 {
   static void check(Grid &g)
   {
+    DUNE_UNUSED_PARAMETER(g);
 #if !DISABLE_DEPRECATED_METHOD_CHECK
     g.template leafbegin<0>();
     g.template leafend<0>();

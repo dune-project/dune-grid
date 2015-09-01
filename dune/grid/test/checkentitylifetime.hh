@@ -13,14 +13,16 @@
 #include <vector>
 
 #include <dune/common/exceptions.hh>
+#include <dune/common/unused.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/rangegenerators.hh>
 
 #if not defined(HAVE_RANGE_BASED_FOR)
 
 template<typename GV>
-void checkEntityLifetime(GV gv, const std::size_t check_element_count = 32)
+void checkEntityLifetime(GV, const std::size_t check_element_count = 32)
 {
+  DUNE_UNUSED_PARAMETER(check_element_count);
   std::cout << "SKIPPING entity lifetime / consistency checks on compiler without range-based for" << std::endl;
 }
 

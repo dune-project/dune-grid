@@ -108,7 +108,7 @@ namespace CheckEntitySeed // don't blur namespace Dune
   class Check< codim, GridView, false >
   {
   public:
-    static void apply ( const GridView &gridView, std::ostream &output )
+    static void apply ( const GridView &, std::ostream & )
     { };
   };
 
