@@ -47,6 +47,28 @@
 
 namespace Dune
 {
+
+  namespace detail {
+
+    template<typename F, typename = int>
+    struct _has_local_context
+      : public std::false_type
+    {};
+
+    template<typename T>
+    struct _has_local_context<T,typename std::enable_if<(sizeof(std::declval<T>().localContext()) > 0),int>::type>
+      : public std::true_type
+    {};
+
+  }
+
+  namespace VTKWriteTypeTraits {
+    template<typename T>
+    struct IsLocalFunction
+    {
+    };
+  }
+
   // Forward-declaration here, so the class can be friend of VTKWriter
   template <class GridView>
   class VTKSequenceWriterBase;
@@ -229,8 +251,19 @@ namespace Dune
 
       //! Construct a VTKLocalFunction for a dune-functions style LocalFunction
       template<typename F>
-      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
+      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo,
+        typename std::enable_if<detail::_has_local_context<F>::value,int>::type dummy = 0)
         : _f(Dune::Std::make_unique<FunctionWrapper<F> >(std::forward<F>(f)))
+        , _fieldInfo(fieldInfo)
+      {}
+
+      //! Construct a VTKLocalFunction for a dune-functions style Function
+      template<typename F>
+      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo,
+        typename std::enable_if<not detail::_has_local_context<F>::value,int>::type dummy = 0)
+        : _f(Dune::Std::make_unique< FunctionWrapper<
+          typename std::decay<decltype(localFunction(std::forward<F>(f)))>::type
+          > >(localFunction(std::forward<F>(f))))
         , _fieldInfo(fieldInfo)
       {}
 
