@@ -131,10 +131,10 @@ namespace Dune
       {
 
         //! Bind data set to grid entity - must be called before evaluating (i.e. calling write())
-        virtual void bind(const Entity& e) const = 0;
+        virtual void bind(const Entity& e) = 0;
 
         //! Unbind data set from current grid entity - mostly here for performance and symmetry reasons
-        virtual void unbind() const = 0;
+        virtual void unbind() = 0;
 
         //! Evaluate data set at local position pos inside the current entity and write result to w.
         /**
@@ -152,18 +152,19 @@ namespace Dune
       struct FunctionWrapper
         : public FunctionWrapperBase
       {
+        using Function = typename std::decay<F>::type;
 
         template<typename F_>
         FunctionWrapper(F_&& f)
           : _f(std::forward<F_>(f))
         {}
 
-        virtual void bind(const Entity& e) const
+        virtual void bind(const Entity& e)
         {
           _f.bind(e);
         }
 
-        virtual void unbind() const
+        virtual void unbind()
         {
           _f.unbind();
         }
@@ -191,7 +192,7 @@ namespace Dune
           w.write(r);
         }
 
-        F _f;
+        Function _f;
       };
 
       //! Type erasure implementation for legacy VTKFunctions.
@@ -203,12 +204,12 @@ namespace Dune
           , _entity(nullptr)
         {}
 
-        virtual void bind(const Entity& e) const
+        virtual void bind(const Entity& e)
         {
           _entity = &e;
         }
 
-        virtual void unbind() const
+        virtual void unbind()
         {
           _entity = nullptr;
         }
@@ -222,7 +223,7 @@ namespace Dune
       private:
 
         VTKFunctionPtr _f;
-        mutable const Entity* _entity;
+        const Entity* _entity;
 
       };
 
