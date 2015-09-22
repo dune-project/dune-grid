@@ -26,8 +26,8 @@ int main(int argc, char **argv)
     Dune::YaspGrid<dim> grid(L,N,periodic, overlap);
 
     // write .plt files (one for png, one for svg) without executing gnuplot on them
-    Dune::printgrid (grid, helper, "printgridtest_yasp_svg", 4000, false, false);
-    Dune::printgrid (grid, helper, "printgridtest_yasp_png", 4000, false);
+    Dune::printGrid (grid, helper, "printgridtest_yasp_svg", 4000, true, false);
+    Dune::printGrid (grid, helper, "printgridtest_yasp_png", 4000, true);
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
     return 1;
