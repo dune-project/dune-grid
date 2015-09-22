@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 
+#include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
@@ -74,7 +75,8 @@ namespace Dune {
 
     // Create output file
     output_file = output_file + "_" + std::to_string(helper.rank());
-    std::ofstream plotfile (output_file, std::ios::out | std::ios::trunc);
+    std::string plot_file_name = output_file + ".gnuplot";
+    std::ofstream plotfile (plot_file_name, std::ios::out | std::ios::trunc);
     if (!plotfile.is_open()) {
       DUNE_THROW(Dune::IOError, "Could not create plot file " << output_file << "!");
       return;
@@ -192,8 +194,9 @@ namespace Dune {
     plotfile.close();
 
     if (execute_plot) {
-      std::string cmd = "gnuplot -p '" + output_file + "'";
-      std::system (cmd.c_str());
+      std::string cmd = "gnuplot -p '" + plot_file_name + "'";
+      if (std::system (cmd.c_str()) != 0)
+        DUNE_THROW(Dune::Exception,"Error running GNUPlot: " << cmd);
     }
   }
 
