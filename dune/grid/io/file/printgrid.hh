@@ -67,7 +67,7 @@ namespace Dune {
    *  Creates a gnuplot (one per process if parallel) showing the grid structure with indices, intersection types etc.
    */
   template <typename GridType>
-  void printgrid (const GridType& grid, const Dune::MPIHelper& helper, std::string output_file = "printgrid",
+  void printGrid (const GridType& grid, const Dune::MPIHelper& helper, std::string output_file = "printgrid",
                   int size = 2000, bool execute_plot = true, bool png = true, bool local_corner_indices = true,
                   bool local_intersection_indices = true, bool outer_normals = true)
   {
