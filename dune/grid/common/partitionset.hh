@@ -162,6 +162,19 @@ namespace Dune {
       return (partitions & contained_partitions) == contained_partitions;
     }
 
+    //! Tests whether two PartitionsSet are equal.
+    template<unsigned int p2>
+    DUNE_CONSTEXPR bool operator==(PartitionSet<p2>) const
+    {
+      return partitions == p2;
+    }
+
+    //! Tests whether two PartitionsSet are not equal.
+    template<unsigned int p2>
+    DUNE_CONSTEXPR bool operator!=(PartitionSet<p2>) const
+    {
+      return partitions != p2;
+    }
 
   };
 
