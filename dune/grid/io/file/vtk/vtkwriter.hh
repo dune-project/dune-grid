@@ -606,7 +606,7 @@ namespace Dune
      * @brief Add a grid function (represented by container) that lives on the cells of
      * the grid to the visualization.
      *
-     * The container has to have random access via operator[] (e. g. std::vector). The
+     * The container has to have random access via operator[] (e.g. std::vector). The
      * value of the grid function for an arbitrary element
      * will be accessed by calling operator[] with the index (corresponding
      * to the index from the MGMC mapper on the grid view) of the element.
@@ -661,7 +661,7 @@ namespace Dune
      * @brief Add a grid function (represented by container) that lives on the vertices of the
      * grid to the visualization output.
      *
-     * The container has to have random access via operator[] (e. g. std::vector). The value
+     * The container has to have random access via operator[] (e.g. std::vector). The value
      * of the grid function for an arbitrary element
      * will be accessed by calling operator[] with the index (corresponding
      * to the index from the MGMC mapper on the grid view) of the vertex.
