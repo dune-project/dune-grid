@@ -144,40 +144,11 @@ namespace Dune
      * \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const EntityType& e) const
-    {
-      const GeometryType gt = e.type();
-      assert(layout.contains(gt));
-      return is.index(e) + offset[GlobalGeometryTypeIndex::index(gt)];
-    }
-
-    /*!
-     * \brief Map entity to array index.
-     *
-     * \tparam EntityType
-     * \param e Reference to codim \a EntityType entity.
-     * \return An index in the range 0 ... Max number of entities in set - 1.
-     */
-    template<class EntityType>
     Index index (const EntityType& e) const
     {
       const GeometryType gt = e.type();
       assert(layout.contains(gt));
       return is.index(e) + offset[GlobalGeometryTypeIndex::index(gt)];
-    }
-
-    /** @brief Map subentity of codim 0 entity to array index.
-
-       \param e Reference to codim 0 entity.
-       \param i Number of subentity of e
-       \param codim Codimension of the subentity
-       \return An index in the range 0 ... Max number of entities in set - 1.
-     */
-    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
-    {
-      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
-      assert(layout.contains(gt));
-      return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
 
     /** @brief Map subentity of codim 0 entity to array index.
