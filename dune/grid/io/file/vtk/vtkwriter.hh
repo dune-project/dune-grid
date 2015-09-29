@@ -14,7 +14,6 @@
 #include <vector>
 #include <list>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/std/memory.hh>
@@ -593,16 +592,6 @@ namespace Dune
     }
 
     /**
-     * @brief Add a grid function that lives on the cells of the grid to the visualization.
-     * @param p The function to visualize.  The VTKWriter object will take
-     *          ownership of the VTKFunction *p and delete it when it's done.
-     */
-    void addCellData (VTKFunction* p) DUNE_DEPRECATED_MSG("Don't pass raw pointers, use the version with shared_ptr")
-    {
-      celldata.push_back(VTKLocalFunction(VTKFunctionPtr(p)));
-    }
-
-    /**
      * @brief Add a grid function (represented by container) that lives on the cells of
      * the grid to the visualization.
      *
@@ -629,16 +618,6 @@ namespace Dune
         VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
         addCellData(VTKFunctionPtr(p));
       }
-    }
-
-    /**
-     * @brief Add a grid function that lives on the vertices of the grid to the visualization.
-     * @param p The function to visualize.  The VTKWriter object will take
-     *          ownership of the VTKFunction *p and delete it when it's done.
-     */
-    void addVertexData (VTKFunction* p) DUNE_DEPRECATED_MSG("Don't pass raw pointers, use the version with shared_ptr")
-    {
-      vertexdata.push_back(VTKLocalFunction(VTKFunctionPtr(p)));
     }
 
     /**
