@@ -617,10 +617,10 @@ namespace Dune
      * @param name A name to identify the grid function.
      * @param ncomps Number of components (default is 1).
      */
-    template<class V>
-    void addCellData (const V& v, const std::string &name, int ncomps = 1)
+    template<class Container>
+    void addCellData (const Container& v, const std::string &name, int ncomps = 1)
     {
-      typedef P0VTKFunction<GridView, V> Function;
+      typedef P0VTKFunction<GridView, Container> Function;
       for (int c=0; c<ncomps; ++c) {
         std::stringstream compName;
         compName << name;
@@ -672,10 +672,10 @@ namespace Dune
      * @param name A name to identify the grid function.
      * @param ncomps Number of components (default is 1).
      */
-    template<class V>
-    void addVertexData (const V& v, const std::string &name, int ncomps=1)
+    template<class Container>
+    void addVertexData (const Container& v, const std::string &name, int ncomps=1)
     {
-      typedef P1VTKFunction<GridView, V> Function;
+      typedef P1VTKFunction<GridView, Container> Function;
       for (int c=0; c<ncomps; ++c) {
         std::stringstream compName;
         compName << name;
