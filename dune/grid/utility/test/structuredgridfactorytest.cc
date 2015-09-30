@@ -11,7 +11,6 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/onedgrid.hh>
-#include <dune/grid/sgrid.hh>
 #include <dune/grid/yaspgrid.hh>
 #if HAVE_UG
 #include <dune/grid/uggrid.hh>
@@ -68,15 +67,6 @@ try {
 
   gridcheck(*yaspGrid1d);
 
-  // Test creation of 1d SGrid
-  shared_ptr<SGrid<1, 1> > sGrid1d
-    = StructuredGridFactory<SGrid<1, 1> >::createCubeGrid(FieldVector<double,1>(0),
-                                                          FieldVector<double,1>(1),
-                                                          elements1d);
-
-  assert(sGrid1d->size(1) == elements1d[0]+1);
-  assert(sGrid1d->size(0) == elements1d[0]);
-
   {
     shared_ptr<YaspGrid<1, EquidistantOffsetCoordinates<double,1> > > yaspGridOff1d
       = StructuredGridFactory<YaspGrid<1, EquidistantOffsetCoordinates<double,1> > >::createCubeGrid(FieldVector<double,1>(-1.),
@@ -88,8 +78,6 @@ try {
 
     gridcheck(*yaspGridOff1d);
   }
-
-  gridcheck(*sGrid1d);
 
   // /////////////////////////////////////////////////////////////////////////////
   //   Test 2d grids
@@ -122,17 +110,6 @@ try {
 
       gridcheck(*yaspGridOff2d);
   }
-
-  // Test creation of 2d SGrid
-  shared_ptr<SGrid<2, 2> > sGrid2d
-    = StructuredGridFactory<SGrid<2, 2> >::createCubeGrid(FieldVector<double,2>(0),
-                                                          FieldVector<double,2>(1),
-                                                          elements2d);
-
-  assert(sGrid2d->size(2) == numVertices2d);
-  assert(sGrid2d->size(0) == numCubes2d);
-
-  gridcheck(*sGrid2d);
 
   // Test creation of 2d cube grid using UG
 #if HAVE_UG
