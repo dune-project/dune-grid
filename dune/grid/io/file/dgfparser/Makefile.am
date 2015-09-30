@@ -23,7 +23,7 @@ dgfparser_HEADERS = dgfalu.cc  dgfexception.hh  \
 		    dgfalu.hh  dgfug.hh \
 		    dgfparser.hh  dgfgeogrid.hh \
 		    dgfwriter.hh  dgfyasp.hh \
-		    entitykey.hh  dgfs.hh  entitykey_inline.hh  \
+		    entitykey.hh  entitykey_inline.hh  \
 		    dgfoned.hh dgfgridfactory.hh \
 		    macrogrid.hh  gridptr.hh  parser.hh
 
