@@ -18,6 +18,7 @@
 #include <vector>
 
 // Dune includes
+#include <dune/common/deprecated.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/stdstreams.hh>
@@ -31,9 +32,6 @@
 //- Local includes
 // some cpp defines and include of alberta.h
 #include "albertaheader.hh"
-
-// grape data io
-#include <dune/grid/utility/grapedataioformattypes.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/capabilities.hh>
@@ -496,12 +494,10 @@ namespace Dune
     //**********************************************************
     // End of Interface Methods
     //**********************************************************
-    /** \brief write Grid to file in specified GrapeIOFileFormatType */
-    template< GrapeIOFileFormatType ftype >
+    /** \brief write Grid to file in Xdr */
     bool writeGrid( const std::string &filename, ctype time ) const;
 
     /** \brief read Grid from file filename and store time of mesh in time */
-    template< GrapeIOFileFormatType ftype >
     bool readGrid( const std::string &filename, ctype &time );
 
     // return hierarchic index set
@@ -567,10 +563,14 @@ namespace Dune
     }
 
     // write ALBERTA mesh file
-    bool writeGridXdr ( const std::string &filename, ctype time ) const;
+    bool
+    DUNE_DEPRECATED_MSG("Deprecated in Dune 3.0, use writeGrid instead.")
+    writeGridXdr ( const std::string &filename, ctype time ) const;
 
     //! reads ALBERTA mesh file
-    bool readGridXdr ( const std::string &filename, ctype &time );
+    bool
+    DUNE_DEPRECATED_MSG("Deprecated in Dune 3.0, use readGrid instead.")
+    readGridXdr ( const std::string &filename, ctype &time );
 
   private:
     using Base::getRealImplementation;
