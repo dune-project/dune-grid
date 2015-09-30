@@ -84,7 +84,7 @@ void testWritingUniformData() {
   // write data
   AmiraMeshWriter<YaspGrid<3>::LeafGridView> amiramesh3d;
   amiramesh3d.addUniformData(grid3d.leafGridView(), n3, vertexdata3d);
-  amiramesh3d.write("sgrid3d.am");
+  amiramesh3d.write("yaspgrid3d.am");
 
 }
 
