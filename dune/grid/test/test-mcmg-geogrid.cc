@@ -6,7 +6,7 @@
 
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/geometrygrid/coordfunction.hh>
-#include <dune/grid/sgrid.hh>
+#include <dune/grid/yaspgrid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
 const int dim=2;
@@ -44,12 +44,12 @@ public:
 int main (int argc, char *argv[]) try
 {
 
-  // make simple SGrid
-  typedef SGrid<2,2,double> GridType;
+  // make simple structured grid
+  typedef YaspGrid<2> GridType;
 
-  int cells[2] = {1,1};
-  double extend[2] = {1,1};
-  GridType grid(cells,extend);
+  std::array<int,2> cells = {1,1};
+  FieldVector<double,2> extend = {1,1};
+  GridType grid(extend,cells);
 
   // make deformed grid with identity deformation
   typedef DeformationFunction<GridType::LeafGridView> DeformationFunction;
