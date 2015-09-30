@@ -10,11 +10,12 @@
 
 #if HAVE_ALBERTA || DOXYGEN
 
-#include <iostream>
-#include <fstream>
+#include <cassert>
+#include <cstddef>
 
 #include <algorithm>
-#include <cassert>
+#include <iostream>
+#include <fstream>
 #include <vector>
 
 // Dune includes
@@ -145,8 +146,8 @@ namespace Dune
 
     template< int, int, class > friend class AlbertaGridEntity;
     template< int, class > friend class AlbertaGridEntityPointer;
-    template< class, PartitionIteratorType > friend class AlbertaLevelGridView;
-    template< class, PartitionIteratorType > friend class AlbertaLeafGridView;
+    template< class > friend class AlbertaLevelGridView;
+    template< class > friend class AlbertaLeafGridView;
 
     friend class GridFactory< This >;
     friend struct DGFGridFactory< This >;
@@ -380,43 +381,23 @@ namespace Dune
     int size (GeometryType type) const;
 
     //! number of boundary segments within the macro grid
-    size_t numBoundarySegments () const
+    std::size_t numBoundarySegments () const
     {
       return numBoundarySegments_;
     }
 
-    //! View for a grid level
-    template< PartitionIteratorType pitype >
-    typename Traits::template Partition< pitype >::LevelGridView
-    levelGridView ( int level ) const
-    {
-      typedef typename Traits::template Partition< pitype >::LevelGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, level ) );
-    }
-
-    //! View for the leaf grid
-    template< PartitionIteratorType pitype >
-    typename Traits::template Partition< pitype >::LeafGridView leafGridView () const
-    {
-      typedef typename Traits::template Partition< pitype >::LeafGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this ) );
-    }
-
     //! View for a grid level for All_Partition
-    typename Traits::template Partition< All_Partition >::LevelGridView
-    levelGridView ( int level ) const
+    typename Traits::LevelGridView levelGridView ( int level ) const
     {
-      typedef typename Traits::template Partition< All_Partition >::LevelGridView View;
+      typedef typename Traits::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View( ViewImp( *this, level ) );
     }
 
     //! View for the leaf grid for All_Partition
-    typename Traits::template Partition< All_Partition >::LeafGridView leafGridView () const
+    typename Traits::LeafGridView leafGridView () const
     {
-      typedef typename Traits::template Partition< All_Partition >::LeafGridView View;
+      typedef typename Traits::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View( ViewImp( *this ) );
     }

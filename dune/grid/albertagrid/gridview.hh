@@ -16,17 +16,17 @@
 namespace Dune
 {
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   class AlbertaLevelGridView;
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   class AlbertaLeafGridView;
 
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   struct AlbertaLevelGridViewTraits
   {
-    typedef AlbertaLevelGridView< GridImp, pitype > GridViewImp;
+    typedef AlbertaLevelGridView< GridImp > GridViewImp;
 
     /** \brief type of the grid */
     typedef typename remove_const<GridImp>::type Grid;
@@ -47,8 +47,7 @@ namespace Dune
     template< int cd >
     struct Codim
     {
-      typedef typename Grid::Traits::template Codim< cd >::template Partition< pitype >::LevelIterator
-      Iterator;
+      typedef typename Grid::Traits::template Codim< cd >::template Partition< All_Partition >::LevelIterator Iterator;
 
       typedef typename Grid::Traits::template Codim< cd >::Entity Entity;
       typedef typename Grid::Traits::template Codim< cd >::EntityPointer
@@ -72,13 +71,13 @@ namespace Dune
   };
 
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   class AlbertaLevelGridView
   {
-    typedef AlbertaLevelGridView< GridImp, pitype > ThisType;
+    typedef AlbertaLevelGridView< GridImp > ThisType;
 
   public:
-    typedef AlbertaLevelGridViewTraits<GridImp,pitype> Traits;
+    typedef AlbertaLevelGridViewTraits<GridImp> Traits;
 
     /** \brief type of the grid */
     typedef typename Traits::Grid Grid;
@@ -158,7 +157,7 @@ namespace Dune
     template< int cd >
     typename Codim< cd >::Iterator begin () const
     {
-      return grid().template lbegin< cd, pitype >( level_ );
+      return grid().template lbegin< cd, All_Partition >( level_ );
     }
 
     /** \brief obtain begin iterator for this view */
@@ -172,7 +171,7 @@ namespace Dune
     template< int cd >
     typename Codim< cd >::Iterator end () const
     {
-      return grid().template lend< cd, pitype >( level_ );
+      return grid().template lend< cd, All_Partition >( level_ );
     }
 
     /** \brief obtain end iterator for this view */
@@ -239,10 +238,10 @@ namespace Dune
   };
 
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   struct AlbertaLeafGridViewTraits
   {
-    typedef AlbertaLeafGridView< GridImp, pitype > GridViewImp;
+    typedef AlbertaLeafGridView< GridImp > GridViewImp;
 
     /** \brief type of the grid */
     typedef typename remove_const<GridImp>::type Grid;
@@ -263,7 +262,7 @@ namespace Dune
     template< int cd >
     struct Codim
     {
-      typedef typename Grid::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
+      typedef typename Grid::Traits::template Codim< cd >::template Partition< All_Partition >::LeafIterator
       Iterator;
 
       typedef typename Grid::Traits::template Codim< cd >::Entity Entity;
@@ -288,13 +287,13 @@ namespace Dune
   };
 
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   class AlbertaLeafGridView
   {
-    typedef AlbertaLeafGridView< GridImp, pitype > ThisType;
+    typedef AlbertaLeafGridView< GridImp > ThisType;
 
   public:
-    typedef AlbertaLeafGridViewTraits<GridImp,pitype> Traits;
+    typedef AlbertaLeafGridViewTraits<GridImp> Traits;
 
     /** \brief type of the grid */
     typedef typename Traits::Grid Grid;
@@ -371,7 +370,7 @@ namespace Dune
     template< int cd >
     typename Codim< cd >::Iterator begin () const
     {
-      return grid().template leafbegin< cd, pitype >();
+      return grid().template leafbegin< cd, All_Partition >();
     }
 
     /** \brief obtain begin iterator for this view */
@@ -385,7 +384,7 @@ namespace Dune
     template< int cd >
     typename Codim< cd >::Iterator end () const
     {
-      return grid().template leafend< cd, pitype >();
+      return grid().template leafend< cd, All_Partition >();
     }
 
     /** \brief obtain end iterator for this view */
