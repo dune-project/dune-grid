@@ -415,18 +415,10 @@ namespace Dune {
     //@{
     //===========================================================
 
-    /** \brief Types for GridView */
-    template <PartitionIteratorType pitype>
-    struct Partition
-    {
-      typedef typename GridFamily::Traits::template Partition<pitype>::LevelGridView
-      LevelGridView;
-      typedef typename GridFamily::Traits::template Partition<pitype>::LeafGridView
-      LeafGridView;
-    };
-    /** \brief View types for All_Partition */
-    typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;
-    typedef typename Partition< All_Partition > :: LeafGridView LeafGridView;
+    /** \brief type of view for leaf grid */
+    typedef typename GridFamily::Traits::LeafGridView LeafGridView;
+    /** \brief type of view for level grid */
+    typedef typename GridFamily::Traits::LevelGridView LevelGridView;
 
 
     /** \brief A Traits struct that collects all associated types of one implementation
@@ -609,24 +601,6 @@ namespace Dune {
      */
     //@{
     //===========================================================
-
-    //! View for a grid level
-    template<PartitionIteratorType pitype>
-    typename Partition<pitype>::LevelGridView
-    DUNE_DEPRECATED_MSG( "After DUNE 2.4, grid views will always model the All_Partition. The template method levelGridView< pitype > will be removed without replacement. Use levelGridView() instead." )
-    levelGridView(int level) const {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template levelGridView<pitype>(level)));
-      return asImp().template levelGridView<pitype>(level);
-    }
-
-    //! View for the leaf grid
-    template<PartitionIteratorType pitype>
-    typename Partition<pitype>::LeafGridView
-    DUNE_DEPRECATED_MSG( "After DUNE 2.4, grid views will always model the All_Partition. The template method leafGridView< pitype > will be removed without replacement. Use leafGridView() instead." )
-    leafGridView() const {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafGridView<pitype>()));
-      return asImp().template leafGridView<pitype>();
-    }
 
     //! View for a grid level for All_Partition
     LevelGridView levelGridView(int level) const {
@@ -1098,38 +1072,18 @@ namespace Dune {
       return asImp().leafGridView().template end< codim, pitype >();
     }
 
-    //! View for a grid level
-    template<PartitionIteratorType pitype>
-    typename Traits::template Partition<pitype>::LevelGridView
-    DUNE_DEPRECATED_MSG( "After DUNE 2.4, grid views will always model the All_Partition. The template method levelGridView< pitype > will be removed without replacement. Use levelGridView() instead." )
-    levelGridView(int level) const {
-      typedef typename Traits::template Partition<pitype>::LevelGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View(ViewImp(asImp(),level));
-    }
-
-    //! View for the leaf grid
-    template<PartitionIteratorType pitype>
-    typename Traits::template Partition<pitype>::LeafGridView
-    DUNE_DEPRECATED_MSG( "After DUNE 2.4, grid views will always model the All_Partition. The template method leafGridView< pitype > will be removed without replacement. Use leafGridView() instead." )
-    leafGridView() const {
-      typedef typename Traits::template Partition<pitype>::LeafGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View(ViewImp(asImp()));
-    }
-
     //! View for a grid level for All_Partition
-    typename Traits::template Partition<All_Partition>::LevelGridView
-    levelGridView(int level) const {
-      typedef typename Traits::template Partition<All_Partition>::LevelGridView View;
+    typename Traits::LevelGridView levelGridView(int level) const
+    {
+      typedef typename Traits::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View(ViewImp(asImp(),level));
     }
 
     //! View for the leaf grid for All_Partition
-    typename Traits::template Partition<All_Partition>::LeafGridView
-    leafGridView() const {
-      typedef typename Traits::template Partition<All_Partition>::LeafGridView View;
+    typename Traits::LeafGridView leafGridView() const
+    {
+      typedef typename Traits::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View(ViewImp(asImp()));
     }
@@ -1335,8 +1289,8 @@ namespace Dune {
       template<int,PartitionIteratorType,class> class LeafIteratorImp,
       class LevelIndexSetImp, class LeafIndexSetImp,
       class GlobalIdSetImp, class GIDType, class LocalIdSetImp, class LIDType, class CCType,
-      template<class,PartitionIteratorType> class LevelGridViewTraits,
-      template<class,PartitionIteratorType> class LeafGridViewTraits,
+      template<class> class LevelGridViewTraits,
+      template<class> class LeafGridViewTraits,
       template<int,class> class EntitySeedImp,
       template<int,int,class> class LocalGeometryImp = GeometryImp
       >
@@ -1406,21 +1360,10 @@ namespace Dune {
       typedef EntityPointerImp<cd,const GridImp> EntityPointerImpl;
     };
 
-    /**
-     * \brief Traits associated with a specific grid partition type.
-     * \tparam pitype The type of the grid partition.
-     */
-    template <PartitionIteratorType pitype>
-    struct Partition
-    {
-      /** \brief The type of the level grid view associated with this partition type. */
-      typedef Dune::GridView<LevelGridViewTraits<const GridImp,pitype> >
-      LevelGridView;
-
-      /** \brief The type of the leaf grid view associated with this partition type. */
-      typedef Dune::GridView<LeafGridViewTraits<const GridImp,pitype> >
-      LeafGridView;
-    };
+    /** \brief type of view for leaf grid */
+    typedef Dune::GridView< LeafGridViewTraits< const GridImp > > LeafGridView;
+    /** \brief type of view for level grid */
+    typedef Dune::GridView< LevelGridViewTraits< const GridImp > > LevelGridView;
 
     /** \brief The type of the level index set. */
     typedef IndexSet<const GridImp,LevelIndexSetImp> LevelIndexSet;

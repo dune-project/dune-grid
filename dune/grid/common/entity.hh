@@ -71,8 +71,8 @@ namespace Dune
         typename GridImp::GridFamily> ;
 
     // Default*GridView classes need access to intersection iterators
-    template< class, PartitionIteratorType > friend class DefaultLevelGridView;
-    template< class, PartitionIteratorType > friend class DefaultLeafGridView;
+    template< class > friend class DefaultLevelGridView;
+    template< class > friend class DefaultLeafGridView;
 #endif
     // type of underlying implementation, for internal use only
     typedef EntityImp< cd, dim, GridImp > Implementation;
@@ -287,8 +287,8 @@ namespace Dune
         typename GridImp::GridFamily> ;
 
     // Default*GridView classes need access to intersection iterators
-    template< class, PartitionIteratorType > friend class DefaultLevelGridView;
-    template< class, PartitionIteratorType > friend class DefaultLeafGridView;
+    template< class > friend class DefaultLevelGridView;
+    template< class > friend class DefaultLeafGridView;
 #endif
     // type of underlying implementation, for internal use only
     typedef EntityImp< 0, dim, GridImp > Implementation;

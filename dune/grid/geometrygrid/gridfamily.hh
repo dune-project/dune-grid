@@ -111,14 +111,8 @@ namespace Dune
 
         typedef typename HostGrid::Traits::CollectiveCommunication CollectiveCommunication;
 
-        template< PartitionIteratorType pitype >
-        struct Partition
-        {
-          typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LeafGridView, CoordFunction, Allocator, pitype > >
-          LeafGridView;
-          typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LevelGridView, CoordFunction, Allocator, pitype > >
-          LevelGridView;
-        };
+        typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LeafGridView, CoordFunction, Allocator > > LeafGridView;
+        typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LevelGridView, CoordFunction, Allocator > > LevelGridView;
       };
     };
 

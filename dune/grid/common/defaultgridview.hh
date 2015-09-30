@@ -12,17 +12,17 @@
 namespace Dune
 {
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   class DefaultLevelGridView;
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   class DefaultLeafGridView;
 
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   struct DefaultLevelGridViewTraits
   {
-    typedef DefaultLevelGridView< GridImp, pitype > GridViewImp;
+    typedef DefaultLevelGridView< GridImp > GridViewImp;
 
     /** \brief type of the grid */
     typedef typename remove_const<GridImp>::type Grid;
@@ -44,7 +44,7 @@ namespace Dune
     struct Codim
     {
       typedef typename Grid :: Traits
-      :: template Codim< cd > :: template Partition< pitype > :: LevelIterator
+      :: template Codim< cd > :: template Partition< All_Partition > :: LevelIterator
       Iterator;
 
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
@@ -70,13 +70,13 @@ namespace Dune
   };
 
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   class DefaultLevelGridView
   {
-    typedef DefaultLevelGridView< GridImp, pitype > ThisType;
+    typedef DefaultLevelGridView< GridImp > ThisType;
 
   public:
-    typedef DefaultLevelGridViewTraits<GridImp,pitype> Traits;
+    typedef DefaultLevelGridViewTraits<GridImp> Traits;
 
     /** \brief type of the grid */
     typedef typename Traits::Grid Grid;
@@ -148,7 +148,7 @@ namespace Dune
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
     {
-      return grid().template lbegin< cd, pitype >( level_ );
+      return grid().template lbegin< cd, All_Partition >( level_ );
     }
 
     /** \brief obtain begin iterator for this view */
@@ -162,7 +162,7 @@ namespace Dune
     template< int cd >
     typename Codim< cd > :: Iterator end () const
     {
-      return grid().template lend< cd, pitype >( level_ );
+      return grid().template lend< cd, All_Partition >( level_ );
     }
 
     /** \brief obtain end iterator for this view */
@@ -219,9 +219,9 @@ namespace Dune
   };
 
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   struct DefaultLeafGridViewTraits {
-    typedef DefaultLeafGridView< GridImp, pitype > GridViewImp;
+    typedef DefaultLeafGridView< GridImp > GridViewImp;
 
     /** \brief type of the grid */
     typedef typename remove_const<GridImp>::type Grid;
@@ -243,7 +243,7 @@ namespace Dune
     struct Codim
     {
       typedef typename Grid :: Traits
-      :: template Codim< cd > :: template Partition< pitype > :: LeafIterator
+      :: template Codim< cd > :: template Partition< All_Partition > :: LeafIterator
       Iterator;
 
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
@@ -269,13 +269,13 @@ namespace Dune
   };
 
 
-  template< class GridImp, PartitionIteratorType pitype >
+  template< class GridImp >
   class DefaultLeafGridView
   {
-    typedef DefaultLeafGridView< GridImp, pitype > ThisType;
+    typedef DefaultLeafGridView< GridImp > ThisType;
 
   public:
-    typedef DefaultLeafGridViewTraits<GridImp,pitype> Traits;
+    typedef DefaultLeafGridViewTraits<GridImp> Traits;
 
     /** \brief type of the grid */
     typedef typename Traits::Grid Grid;
@@ -332,7 +332,7 @@ namespace Dune
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
     {
-      return grid().template leafbegin< cd, pitype >();
+      return grid().template leafbegin< cd, All_Partition >();
     }
 
     /** \brief obtain begin iterator for this view */
@@ -346,7 +346,7 @@ namespace Dune
     template< int cd >
     typename Codim< cd > :: Iterator end () const
     {
-      return grid().template leafend< cd, pitype >();
+      return grid().template leafend< cd, All_Partition >();
     }
 
     /** \brief obtain end iterator for this view */

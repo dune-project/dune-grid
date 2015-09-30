@@ -23,7 +23,7 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< class HGV, class CoordFunction, class Allocator, PartitionIteratorType pitype >
+    template< class HGV, class CoordFunction, class Allocator >
     class GridView;
 
 
@@ -31,10 +31,10 @@ namespace Dune
     // GridViewTraits
     // --------------
 
-    template< class HGV, class CoordFunction, class Allocator, PartitionIteratorType pitype >
+    template< class HGV, class CoordFunction, class Allocator >
     class GridViewTraits
     {
-      friend class GridView< HGV, CoordFunction, Allocator, pitype >;
+      friend class GridView< HGV, CoordFunction, Allocator >;
 
       typedef HGV HostGridView;
 
@@ -43,7 +43,7 @@ namespace Dune
       typedef typename HostGridView::IntersectionIterator HostIntersectionIterator;
 
     public:
-      typedef GridView< HostGridView, CoordFunction, Allocator, pitype > GridViewImp;
+      typedef GridView< HostGridView, CoordFunction, Allocator > GridViewImp;
 
       typedef Dune::GeometryGrid< HostGrid, CoordFunction, Allocator > Grid;
 
@@ -60,7 +60,7 @@ namespace Dune
       template< int codim >
       struct Codim
       {
-        typedef GeoGrid::Iterator< HostGridView, codim, pitype, const Grid > IteratorImp;
+        typedef GeoGrid::Iterator< HostGridView, codim, All_Partition, const Grid > IteratorImp;
         typedef Dune::EntityIterator< codim, const Grid, IteratorImp > Iterator;
 
         typedef typename Grid::Traits::template Codim< codim >::Entity Entity;
@@ -85,13 +85,13 @@ namespace Dune
     // GridView
     // --------
 
-    template< class HGV, class CoordFunction, class Allocator, PartitionIteratorType pitype >
+    template< class HGV, class CoordFunction, class Allocator >
     class GridView
     {
-      typedef GridView< HGV, CoordFunction, Allocator, pitype > This;
+      typedef GridView< HGV, CoordFunction, Allocator > This;
 
     public:
-      typedef GridViewTraits< HGV, CoordFunction, Allocator, pitype > Traits;
+      typedef GridViewTraits< HGV, CoordFunction, Allocator > Traits;
 
       typedef typename Traits::HostGridView HostGridView;
 
@@ -143,7 +143,7 @@ namespace Dune
       template< int codim >
       typename Codim< codim >::Iterator begin () const
       {
-        return begin< codim, pitype >();
+        return begin< codim, All_Partition >();
       }
 
       template< int codim, PartitionIteratorType pit >
@@ -155,7 +155,7 @@ namespace Dune
       template< int codim >
       typename Codim< codim >::Iterator end () const
       {
-        return end< codim, pitype >();
+        return end< codim, All_Partition >();
       }
 
       template< int codim, PartitionIteratorType pit >

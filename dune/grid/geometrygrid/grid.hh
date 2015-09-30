@@ -92,7 +92,7 @@ namespace Dune
 
     template< int, class, bool > friend class GeoGrid::EntityBase;
     template< int, int, class > friend class GeoGrid::Geometry;
-    template< class, class, class, PartitionIteratorType > friend class GeoGrid::GridView;
+    template< class, class, class > friend class GeoGrid::GridView;
     template< class, class > friend class GeoGrid::Intersection;
     template< class, class > friend class GeoGrid::IntersectionIterator;
     template< class, class > friend class GeoGrid::IdSet;
@@ -138,19 +138,10 @@ namespace Dune
     /** \name Grid View Types
      *  \{ */
 
-    /** \brief Types for GridView */
-    template< PartitionIteratorType pitype >
-    struct Partition
-    {
-      typedef typename GridFamily::Traits::template Partition< pitype >::LevelGridView
-      LevelGridView;
-      typedef typename GridFamily::Traits::template Partition< pitype >::LeafGridView
-      LeafGridView;
-    };
-
-    /** \brief View types for All_Partition */
-    typedef typename Partition< All_Partition >::LevelGridView LevelGridView;
-    typedef typename Partition< All_Partition >::LeafGridView LeafGridView;
+    /** \brief type of view for leaf grid */
+    typedef typename GridFamily::Traits::LeafGridView LeafGridView;
+    /** \brief type of view for level grid */
+    typedef typename GridFamily::Traits::LevelGridView LevelGridView;
 
     /** \} */
 
@@ -608,31 +599,13 @@ namespace Dune
      *  \{ */
 
     /** \brief View for a grid level */
-    template< PartitionIteratorType pitype >
-    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
-    {
-      typedef typename Partition< pitype >::LevelGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, hostGrid().levelGridView( level ) ) );
-    }
-
-    /** \brief View for the leaf grid */
-    template< PartitionIteratorType pitype >
-    typename Partition< pitype >::LeafGridView leafGridView () const
-    {
-      typedef typename Traits::template Partition< pitype >::LeafGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, hostGrid().leafGridView() ) );
-    }
-
-    /** \brief View for a grid level for All_Partition */
     LevelGridView levelGridView ( int level ) const
     {
       typedef typename LevelGridView::GridViewImp ViewImp;
       return LevelGridView( ViewImp( *this, hostGrid().levelGridView( level ) ) );
     }
 
-    /** \brief View for the leaf grid for All_Partition*/
+    /** \brief View for the leaf grid */
     LeafGridView leafGridView () const
     {
       typedef typename LeafGridView::GridViewImp ViewImp;
