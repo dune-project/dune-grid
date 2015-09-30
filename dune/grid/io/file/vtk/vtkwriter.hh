@@ -10,6 +10,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <memory>
 
 #include <vector>
 #include <list>
@@ -20,7 +21,6 @@
 #include <dune/common/indent.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/path.hh>
-#include <dune/common/shared_ptr.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/gridenums.hh>
@@ -132,7 +132,7 @@ namespace Dune
   public:
 
     typedef Dune::VTKFunction< GridView > VTKFunction;
-    typedef shared_ptr< const VTKFunction > VTKFunctionPtr;
+    typedef std::shared_ptr< const VTKFunction > VTKFunctionPtr;
 
   protected:
 
@@ -578,7 +578,7 @@ namespace Dune
 
     /**
      * @brief Add a grid function that lives on the cells of the grid to the visualization.
-     * @param p Dune::shared_ptr to the function to visualize
+     * @param p std::shared_ptr to the function to visualize
      */
     void addCellData (const VTKFunctionPtr & p)
     {
@@ -622,7 +622,7 @@ namespace Dune
 
     /**
      * @brief Add a grid function that lives on the vertices of the grid to the visualization.
-     * @param p Dune::shared_ptr to the function to visualize
+     * @param p std::shared_ptr to the function to visualize
      */
     void addVertexData (const VTKFunctionPtr & p)
     {
@@ -1159,7 +1159,7 @@ namespace Dune
           case VTK::FieldInfo::Type::tensor:
             DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
           }
-        shared_ptr<VTK::DataArrayWriter<float> > p
+        std::shared_ptr<VTK::DataArrayWriter<float> > p
           (writer.makeArrayWriter<float>(f.name(), writecomps, nentries));
         if(!p->writeIsNoop())
           for (Iterator eit = begin; eit!=end; ++eit)
@@ -1209,7 +1209,7 @@ namespace Dune
     {
       writer.beginPoints();
 
-      shared_ptr<VTK::DataArrayWriter<float> > p
+      std::shared_ptr<VTK::DataArrayWriter<float> > p
         (writer.makeArrayWriter<float>("Coordinates", 3, nvertices));
       if(!p->writeIsNoop()) {
         VertexIterator vEnd = vertexEnd();
@@ -1235,7 +1235,7 @@ namespace Dune
 
       // connectivity
       {
-        shared_ptr<VTK::DataArrayWriter<int> > p1
+        std::shared_ptr<VTK::DataArrayWriter<int> > p1
           (writer.makeArrayWriter<int>("connectivity", 1, ncorners));
         if(!p1->writeIsNoop())
           for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
@@ -1244,7 +1244,7 @@ namespace Dune
 
       // offsets
       {
-        shared_ptr<VTK::DataArrayWriter<int> > p2
+        std::shared_ptr<VTK::DataArrayWriter<int> > p2
           (writer.makeArrayWriter<int>("offsets", 1, ncells));
         if(!p2->writeIsNoop()) {
           int offset = 0;
@@ -1259,7 +1259,7 @@ namespace Dune
       // types
       if (n>1)
       {
-        shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
+        std::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
           (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
         if(!p3->writeIsNoop())
           for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
