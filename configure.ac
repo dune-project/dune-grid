@@ -66,8 +66,6 @@ AC_CONFIG_FILES([Makefile
     dune/grid/io/file/gnuplot/Makefile
     dune/grid/io/file/vtk/Makefile
     dune/grid/io/file/Makefile
-    dune/grid/io/visual/grape/Makefile
-    dune/grid/io/visual/Makefile
     dune/grid/io/Makefile
     dune/grid/geometrygrid/Makefile
     m4/Makefile

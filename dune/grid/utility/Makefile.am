@@ -4,7 +4,6 @@ gridutilitydir =  $(includedir)/dune/grid/utility
 gridutility_HEADERS =				\
 	entitycommhelper.hh 			\
 	globalindexset.hh			\
-	grapedataioformattypes.hh		\
 	gridinfo-gmsh-main.hh			\
 	gridinfo.hh				\
 	gridtype.hh				\

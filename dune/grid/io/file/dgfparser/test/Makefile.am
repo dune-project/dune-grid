@@ -21,15 +21,11 @@ if UG
   TESTUG = testug
 endif
 
-if GRAPE
-  VIEWPROGS = viewdgf
-endif
-
 ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testdgfyaspoffset testoned $(TESTUG)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(ALLTESTS)
-EXTRA_PROGRAMS = tester viewdgf
+EXTRA_PROGRAMS = tester
 
 # list of tests to run
 TESTS = $(ALLTESTS)
@@ -40,14 +36,6 @@ tester_CPPFLAGS = $(AM_CPPFLAGS)		\
 tester_LDFLAGS = $(AM_LDFLAGS)			\
 	$(ALL_PKG_LDFLAGS)
 tester_LDADD =					\
-	$(ALL_PKG_LIBS)				\
-	$(LDADD)
-
-viewdgf_SOURCES = viewdgf.cc
-viewdgf_CPPFLAGS = $(AM_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
-viewdgf_LDFLAGS = $(AM_LDFLAGS)			\
-	$(ALL_PKG_LDFLAGS)
-viewdgf_LDADD =					\
 	$(ALL_PKG_LIBS)				\
 	$(LDADD)
 

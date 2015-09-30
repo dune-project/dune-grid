@@ -25,8 +25,6 @@
 #include "checkcommunicate.hh"
 //#include "checktwists.hh"
 
-#include <dune/grid/io/visual/grapegriddisplay.hh>
-
 #if ALU3DGRID_PARALLEL && HAVE_MPI
 #define USE_PARALLEL_TEST 1
 #endif
@@ -415,12 +413,6 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 
   //writeFile( grid.leafGridView() );
 
-  if( display )
-  {
-    GrapeGridDisplay< GridType > grape( grid );
-    grape.display();
-  }
-
   std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
 
   // be careful, each global refine create 8 x maxlevel elements
@@ -451,12 +443,6 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     checkIntersectionIterator(grid, skipLevelIntersections);
     // if( checkTwist )
     //  checkTwists( grid.leafGridView(), NoMapTwist() );
-
-    if( display )
-    {
-      GrapeGridDisplay< GridType > grape( grid );
-      grape.display();
-    }
   }
 
   // check also non-conform grids
@@ -464,12 +450,6 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 
   // check iterators
   checkIterators( grid );
-
-  if( display )
-  {
-    GrapeGridDisplay< GridType > grape( grid );
-    grape.display();
-  }
 
   std::cout << "  CHECKING: non-conform" << std::endl;
   gridcheck(grid);

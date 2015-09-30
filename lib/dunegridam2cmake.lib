@@ -14,7 +14,7 @@
 #
 
 dune_grid_options_am2cmake(){
-    CMAKE_PACKAGES="AmiraMesh ALUGrid Alberta Grape Psurface UG"
+    CMAKE_PACKAGES="AmiraMesh ALUGrid Alberta Psurface UG"
     default_am2cmake_options $CMAKE_PACKAGES
 
     # Check for --enable-experimental-grid-extensions
@@ -22,7 +22,7 @@ dune_grid_options_am2cmake(){
     if test "$?" -eq 0 ; then
         CMAKE_PARAMS="$CMAKE_PARAMS -DENABLE_EXPERIMENTAL_GRID_EXTENSIONS:BOOL=TRUE"
     fi
-    
+
     # Check for --enable-experimental-grid-extensions
     echo $PARAMS | grep \\-\\-enable-extra-utils > /dev/null
     if test "$?" -eq 0 ; then

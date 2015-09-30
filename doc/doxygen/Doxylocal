@@ -46,7 +46,7 @@ PREDEFINED            += ENABLE_ALUGRID \
                          HAVE_ALBERTA:=1 \
                          HAVE_UG:=1
 
-EXCLUDE               += @top_srcdir@/dune/grid/io/visual/grape/grapewrapper.hh \
+EXCLUDE               += \
                          @top_srcdir@/dune/grid/alugrid/3d/mappings_imp.cc \
                          @top_srcdir@/dune/grid/alugrid/3d/faceutility_imp.cc \
                          @top_srcdir@/dune/grid/alugrid/3d/entity_imp.cc \

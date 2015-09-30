@@ -27,11 +27,6 @@
 #define GRIDDIM ALBERTA_DIM
 #endif
 
-// grape include
-#if HAVE_GRAPE
-#include <dune/grid/io/visual/grapegriddisplay.hh>
-#endif
-
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/gmshreader.hh>
@@ -60,12 +55,6 @@ void testReadingAndWritingGrid( const std::string& filename, const std::string& 
 
   // Do some tests to make sure the grid has been properly read
   gridcheck(*grid);
-
-  // grape output
-#if HAVE_GRAPE && USEGRAPE
-  Dune::GrapeGridDisplay<GridType> grape( *grid );
-  grape.display();
-#endif // #if HAVE_GRAPE
 
   // Test writing
   Dune::GmshWriter<typename GridType::LeafGridView> writer( grid->leafGridView() );
