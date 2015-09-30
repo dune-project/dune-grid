@@ -25,16 +25,12 @@ include(CheckExperimentalGridExtensions)
 set(DEFAULT_DGF_GRIDDIM 1)
 set(DEFAULT_DGF_WORLDDIM 1)
 set(DEFAULT_DGF_GRIDTYPE ONEDGRID)
-set(DGF_GRIDTYPES ONEDGRID ALUGRID_CONFORM ALUGRID_SIMPLEX ALBERTAGRID SGRID GEOGRID UGGRID)
+set(DGF_GRIDTYPES ONEDGRID ALUGRID_CONFORM ALUGRID_SIMPLEX ALBERTAGRID GEOGRID UGGRID)
 
 dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ONEDGRID
   ASSERTION "(GRIDDIM == 1) && (WORLDDIM == 1)"
   DUNETYPE "Dune::OneDGrid"
   HEADERS "dune/grid/onedgrid.hh" "dune/grid/io/file/dgfparser/dgfoned.hh")
-
-dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE SGRID
-  DUNETYPE "Dune::SGrid< dimgrid, dimworld >"
-  HEADERS "dune/grid/sgrid.hh" "dune/grid/io/file/dgfparser/dgfs.hh")
 
 dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE YASPGRID
   ASSERTION "GRIDDIM == WORLDDIM"

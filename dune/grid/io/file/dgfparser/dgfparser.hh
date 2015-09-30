@@ -82,7 +82,6 @@ namespace Dune {
           \c ALUGRID_CUBE ,
           \c ALUGRID_SIMPLEX ,
           \c ALUGRID_CONFORM ,
-          \c SGRID ,
           \c UGGRID , or
           \c YASPGRID
           and the integer
@@ -288,8 +287,7 @@ namespace Dune {
        given by \c GridType can handle.
 
        @subsection CONSTRCART Cartesian grids
-       (Dune::SGrid , or
-        Dune::YaspGrid )
+       (Dune::YaspGrid )
 
        The grid is constructed using only the information from the
        first three lines of the \b Interval  block.
@@ -603,10 +601,10 @@ namespace Dune {
 
      @include examplegrid5.dgf
 
-     \image html  examplegrid5c.png "The resulting grid using SGrid<2,2>"
+     \image html  examplegrid5c.png "The resulting grid using YaspGrid<2>"
      \image html  examplegrid5s.png "The resulting grid using AlbertaGrid<2,2>"
 
-     If UGGrid<2,2> is used the result would be the same as for SGrid<2,2>.
+     If UGGrid<2,2> is used the result would be the same as for YaspGrid<2>.
      If an empty \c Simplex Block
      @code
      Simplex

@@ -1,6 +1,6 @@
 add_definitions(-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
 
-set(TESTS test-dgf-sgrid test-dgf-yasp test-dgf-oned)
+set(TESTS test-dgf-yasp test-dgf-oned)
 
 if(ALUGRID_FOUND)
   list(APPEND TESTS test-dgf-alu)
@@ -20,9 +20,6 @@ foreach(_test ${TESTS})
   add_test(${_test} ${_test})
 endforeach(_test ${TESTS})
 
-# test-dgf-sgrid
-set_property(TARGET test-dgf-sgrid APPEND PROPERTY
-    COMPILE_DEFINITIONS GRIDDIM=3 SGRID HAVE_DUNE_GRID=1)
 # test-dgf-yasp
 set_property(TARGET test-dgf-yasp APPEND PROPERTY
     COMPILE_DEFINITIONS GRIDDIM=3 YASPGRID HAVE_DUNE_GRID=1)
