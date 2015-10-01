@@ -224,9 +224,9 @@ namespace Dune {
     friend class UGGridLevelIndexSet<const UGGrid<dim> >;
     friend class UGGridLeafIndexSet<const UGGrid<dim> >;
     friend class UGGridIdSet<const UGGrid<dim> >;
-    template <class GridImp_, PartitionIteratorType PiType_>
+    template <class GridImp_>
     friend class UGGridLeafGridView;
-    template <class GridImp_, PartitionIteratorType PiType_>
+    template <class GridImp_>
     friend class UGGridLevelGridView;
 
     friend class GridFactory<UGGrid<dim> >;
