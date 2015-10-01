@@ -22,7 +22,6 @@ namespace Dune {
    *
    * Derive from this class to write pvd-file suitable for easy visualization with
    * <a href="http://www.vtk.org/">The Visualization Toolkit (VTK)</a>.
-   * The derived class needs to inherit from the VTKWriter or the SubsamplingVTKWriter
    *
    * \tparam GridView Grid view of the grid we are writing
    *
