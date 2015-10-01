@@ -547,7 +547,7 @@ namespace Dune
   template< ALU3dGridElementType elType, class Comm >
   alu_inline
   bool ALU3dGrid< elType, Comm >
-  ::writeGrid_Ascii( const std::string filename, alu3d_ctype time , bool scientific ) const
+  ::writeGrid( const std::string filename, alu3d_ctype time , bool scientific ) const
   {
     // write ascii only works for serial grids at the moment
     if ( this->comm().size() > 1 )
@@ -682,32 +682,6 @@ namespace Dune
 
 
   template< ALU3dGridElementType elType, class Comm >
-  template <GrapeIOFileFormatType ftype>
-  alu_inline
-  bool ALU3dGrid< elType, Comm >
-  ::writeGrid ( const std::string filename, alu3d_ctype time ) const
-  {
-    switch(ftype)
-    {
-    case xdr  : return writeGrid_Xdr(filename,time);
-    case ascii : return writeGrid_Ascii(filename,time);
-    default : derr << "Wrong file type in writeGrid method~ \n";
-    }
-    return false;
-  }
-
-
-  template< ALU3dGridElementType elType, class Comm >
-  alu_inline
-  bool ALU3dGrid< elType, Comm >
-  ::writeGrid_Xdr ( const std::string filename, alu3d_ctype time ) const
-  {
-    myGrid().duneBackup( filename.c_str() );
-    return true;
-  }
-
-
-  template< ALU3dGridElementType elType, class Comm >
   inline bool ALU3dGrid< elType, Comm >
   ::writeMacroGrid ( const std::string path, const std::string name ) const
   {
@@ -729,7 +703,6 @@ namespace Dune
 
 
   template< ALU3dGridElementType elType, class Comm >
-  template <GrapeIOFileFormatType ftype>
   alu_inline
   bool ALU3dGrid< elType, Comm >
   ::readGrid ( const std::string filename, alu3d_ctype & time )

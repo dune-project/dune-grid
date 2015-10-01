@@ -71,11 +71,9 @@ add_dune_alugrid_flags(gmshtest-alugrid)
 
 add_executable(gmshtest-alberta2d gmshtest.cc)
 add_dune_alberta_flags(gmshtest-alberta2d WORLDDIM 2)
-add_dune_grape_flags(gmshtest-alberta2d)
 
 add_executable(gmshtest-alberta3d gmshtest.cc)
 add_dune_alberta_flags(gmshtest-alberta3d WORLDDIM 3)
-add_dune_grape_flags(gmshtest-alberta3d)
 
 set_tests_properties(vtktest PROPERTIES SKIP_RETURN_CODE 77)
 

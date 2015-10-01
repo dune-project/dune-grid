@@ -9,10 +9,6 @@
 #include <dune/grid/test/checkgeometryinfather.hh>
 #include <dune/grid/test/checkintersectionit.hh>
 
-#if HAVE_GRAPE
-#include <dune/grid/io/visual/grapegriddisplay.hh>
-#include <dune/grid/io/visual/grapedatadisplay.hh>
-#endif
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 
@@ -37,20 +33,6 @@ void display ( const std::string &name,
                std::vector< double > &elDat, int nofElParams,
                std::vector< double > &vtxDat, int nofVtxParams )
 {
-#if HAVE_GRAPE
-  if( nofElParams + nofVtxParams > 0 )
-  {
-    GrapeDataDisplay< typename GridView::Grid > disp( view );
-    disp.addVector( "el. Paramters", elDat, view.indexSet(), 0.0, 0, nofElParams, false );
-    disp.addVector( "vtx. Paramters", vtxDat, view.indexSet(), 0.0, 1, nofVtxParams, true );
-    disp.display();
-  }
-  else
-  {
-    GrapeGridDisplay< typename GridView::Grid > disp( view.grid() );
-    disp.display();
-  }
-#endif // #if HAVE_GRAPE
   VTKWriter<GridView> vtkWriter(view);
   // SubsamplingVTKWriter<GridView> vtkWriter(view,6);
   if( nofElParams + nofVtxParams > 0 )

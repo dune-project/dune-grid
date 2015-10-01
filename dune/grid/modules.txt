@@ -101,9 +101,6 @@
         /** @defgroup Gmsh Gmsh grid format
             @ingroup IO */
 
-        /** @defgroup Grape Grape
-            @ingroup IO */
-
         /** @defgroup StarCD StarCD
             @ingroup IO */
 

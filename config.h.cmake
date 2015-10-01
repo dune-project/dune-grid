@@ -43,10 +43,6 @@
    Geometry, etc. is granted. */
 #cmakedefine DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS 1
 
-/* This is only true if grape was found by configure _and_ if the
-   application uses the flags set by add_dune_grape_flags */
-#cmakedefine HAVE_GRAPE ENABLE_GRAPE
-
 /* Define to 1 if psurface library is found */
 #cmakedefine HAVE_PSURFACE 1
 

@@ -569,54 +569,24 @@ namespace Dune
 
 
   template< int dim, int dimworld >
-  template< GrapeIOFileFormatType format >
-  inline bool AlbertaGrid< dim, dimworld >
-  ::writeGrid ( const std::string &filename, ctype time ) const
-  {
-    switch( format )
-    {
-    case xdr :
-      return writeGridXdr( filename, time );
-
-    case ascii :
-      DUNE_THROW( NotImplemented, "AlbertaGrid does not support writeGrid< ascii >." );
-
-    // write leaf grid as macro triangulation
-    //int ret = ALBERTA write_macro( mesh_ , filename.c_str() );
-    //return (ret == 1) ? true : false;
-
-    default :
-      DUNE_THROW( NotImplemented, "AlbertaGrid: Unknown output format: " << format << "." );
-    }
-    return false;
-  }
-
-
-  template< int dim, int dimworld >
-  template< GrapeIOFileFormatType format >
-  inline bool AlbertaGrid< dim, dimworld >
-  ::readGrid ( const std::string &filename, ctype &time )
-  {
-    switch( format )
-    {
-    case xdr :
-      return readGridXdr( filename, time );
-
-    case ascii :
-      DUNE_THROW( NotImplemented, "AlbertaGrid does not support readGrid< ascii >." );
-
-    //return readGridAscii (filename , time );
-
-    default :
-      DUNE_THROW( NotImplemented, "AlbertaGrid: Unknown output format: " << format << "." );
-    }
-    return false;
-  }
-
-
-  template< int dim, int dimworld >
   inline bool AlbertaGrid< dim, dimworld >
   ::writeGridXdr ( const std::string &filename, ctype time ) const
+  {
+    return writeGrid( filename, time );
+  }
+
+
+  template< int dim, int dimworld >
+  inline bool AlbertaGrid< dim, dimworld >
+  ::readGridXdr ( const std::string &filename, ctype &time )
+  {
+    return readGrid( filename, time );
+  }
+
+
+  template< int dim, int dimworld >
+  inline bool AlbertaGrid< dim, dimworld >
+  ::writeGrid ( const std::string &filename, ctype time ) const
   {
     if( filename.size() <= 0 )
       DUNE_THROW( AlbertaIOError, "No filename given to writeGridXdr." );
@@ -626,7 +596,7 @@ namespace Dune
 
   template< int dim, int dimworld >
   inline bool AlbertaGrid< dim, dimworld >
-  ::readGridXdr ( const std::string &filename, ctype &time )
+  ::readGrid ( const std::string &filename, ctype &time )
   {
     //removeMesh();
 
