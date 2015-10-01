@@ -8,6 +8,7 @@
     \author Oliver Sander
  */
 
+#include <iostream>
 #include <vector>
 #include <set>
 #include <array>

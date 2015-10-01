@@ -5,6 +5,7 @@
 #define DUNE_SUBSAMPLINGVTKWRITER_HH
 
 #include <ostream>
+#include <memory>
 
 #include <dune/common/indent.hh>
 #include <dune/geometry/type.hh>
@@ -138,7 +139,7 @@ namespace Dune
           case VTK::FieldInfo::Type::tensor:
             DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
           }
-        shared_ptr<VTK::DataArrayWriter<float> > p
+        std::shared_ptr<VTK::DataArrayWriter<float> > p
           (writer.makeArrayWriter<float>(f.name(), writecomps, nentries));
         if(!p->writeIsNoop())
           for (Iterator eit = begin; eit!=end; ++eit)
@@ -257,7 +258,7 @@ namespace Dune
   {
     writer.beginPoints();
 
-    shared_ptr<VTK::DataArrayWriter<float> > p
+    std::shared_ptr<VTK::DataArrayWriter<float> > p
       (writer.makeArrayWriter<float>("Coordinates", 3, nvertices));
     if(!p->writeIsNoop())
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
@@ -290,7 +291,7 @@ namespace Dune
 
     // connectivity
     {
-      shared_ptr<VTK::DataArrayWriter<int> > p1
+      std::shared_ptr<VTK::DataArrayWriter<int> > p1
         (writer.makeArrayWriter<int>("connectivity", 1, ncorners));
       // The offset within the index numbering
       if(!p1->writeIsNoop()) {
@@ -315,7 +316,7 @@ namespace Dune
 
     // offsets
     {
-      shared_ptr<VTK::DataArrayWriter<int> > p2
+      std::shared_ptr<VTK::DataArrayWriter<int> > p2
         (writer.makeArrayWriter<int>("offsets", 1, ncells));
       if(!p2->writeIsNoop()) {
         // The offset into the connectivity array
@@ -340,7 +341,7 @@ namespace Dune
     // types
     if (dim>1)
     {
-      shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
+      std::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
         (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
       if(!p3->writeIsNoop())
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
