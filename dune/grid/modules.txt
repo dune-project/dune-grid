@@ -62,9 +62,6 @@
 	/** @defgroup OneDGrid OneDGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup SGrid SGrid 
-		@ingroup GridImplementations */
-
 	/** @defgroup UGGrid UGGrid 
 		@ingroup GridImplementations */
 
