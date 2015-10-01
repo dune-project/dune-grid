@@ -9,10 +9,10 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/common/path.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
@@ -31,7 +31,7 @@ namespace Dune {
   template<class GridView>
   class VTKSequenceWriterBase
   {
-    shared_ptr<VTKWriter<GridView> > vtkWriter_;
+    std::shared_ptr<VTKWriter<GridView> > vtkWriter_;
     std::vector<double> timesteps_;
     std::string name_,path_,extendpath_;
     int rank_;
@@ -43,7 +43,7 @@ namespace Dune {
      * \param rank Process number in a multi-process setting
      * \param size Total number of processes
      */
-    explicit VTKSequenceWriterBase( shared_ptr<VTKWriter<GridView> > vtkWriter,
+    explicit VTKSequenceWriterBase( std::shared_ptr<VTKWriter<GridView> > vtkWriter,
                                     const std::string& name,
                                     const std::string& path,
                                     const std::string& extendpath,
@@ -59,7 +59,7 @@ namespace Dune {
     ~VTKSequenceWriterBase() {}
 
     /** \brief Adds a field of cell data to the VTK file */
-    void addCellData (const shared_ptr<const typename VTKWriter<GridView>::VTKFunction> &p)
+    void addCellData (const std::shared_ptr<const typename VTKWriter<GridView>::VTKFunction> &p)
     {
       vtkWriter_->addCellData(p);
     }
