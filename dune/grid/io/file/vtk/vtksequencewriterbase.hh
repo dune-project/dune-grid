@@ -64,12 +64,6 @@ namespace Dune {
       vtkWriter_->addCellData(p);
     }
 
-    /** \brief Adds a field of cell data to the VTK file */
-    void addCellData (typename VTKWriter<GridView>::VTKFunction *p)
-    {
-      vtkWriter_->addCellData(p);
-    }
-
     /** \brief Adds a field of cell data to the VTK file
      * \param v The container with the values of the grid function for each cell
      * \param name A name to identify the grid function
@@ -79,12 +73,6 @@ namespace Dune {
     void addCellData (const V &v, const std::string &name, int ncomps=1)
     {
       vtkWriter_->addCellData(v, name, ncomps);
-    }
-
-    /** \brief Adds a field of vertex data to the VTK file */
-    void addVertexData (typename VTKWriter<GridView>::VTKFunction *p)
-    {
-      vtkWriter_->addVertexData(p);
     }
 
     /** \brief Adds a field of vertex data to the VTK file */
