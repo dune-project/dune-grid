@@ -21,7 +21,7 @@ if UG
   TESTUG = testug
 endif
 
-ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testdgfyaspoffset testoned $(TESTUG)
+ALLTESTS = $(TESTALU) $(TESTALBERTA) testyasp testdgfyaspoffset testoned $(TESTUG)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(ALLTESTS)
@@ -62,10 +62,6 @@ testalberta_LDADD =				\
 	$(ALBERTA2D_LIBS)	\
 	$(LDADD)
 endif
-
-testsgrid_SOURCES = test-dgf.cc
-testsgrid_CPPFLAGS = $(AM_CPPFLAGS)		\
-	-DSGRID -DGRIDDIM=3
 
 testyasp_SOURCES = test-dgf.cc
 testyasp_CPPFLAGS = $(AM_CPPFLAGS)		\

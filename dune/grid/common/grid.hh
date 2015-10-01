@@ -985,8 +985,6 @@ namespace Dune {
          <i> 2d/3d grid with support for non-conform adaptation and dynamic load balancing </i>
      \li Dune::OneDGrid <br>
          <i> Onedimensional adaptive grid</i>
-     \li Dune::SGrid <br>
-         <i> A structured mesh in d dimensions consisting of "cubes".</i>
      \li Dune::UGGrid <br>
          <i> Provides the meshes of the finite element toolbox UG.
              (http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug).</i>

@@ -14,15 +14,12 @@ if(UG_FOUND)
   set(UGLIB $<TARGET_OBJECTS:uggrid>)
 endif(UG_FOUND)
 
-set(HEADERS
+install(FILES
   albertagrid.hh
   alugrid.hh
   geometrygrid.hh
   identitygrid.hh
   onedgrid.hh
-  sgrid.hh
   uggrid.hh
-  yaspgrid.hh)
-
-install(FILES ${HEADERS}
+  yaspgrid.hh
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid)

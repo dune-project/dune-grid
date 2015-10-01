@@ -12,7 +12,6 @@ INPUT                 += @srcdir@/mainpage.txt \
                          @top_srcdir@/dune/grid/identitygrid \
                          @top_srcdir@/dune/grid/io \
                          @top_srcdir@/dune/grid/onedgrid.hh \
-                         @top_srcdir@/dune/grid/sgrid.hh \
                          @top_srcdir@/dune/grid/uggrid.hh \
                          @top_srcdir@/dune/grid/uggrid/uggridfactory.hh \
                          @top_srcdir@/dune/grid/utility \
@@ -36,7 +35,7 @@ EXAMPLE_PATTERNS      += *.dgf
 # directories that contain image that are included in the documentation (see 
 # the \image command).
 
-IMAGE_PATH            += @top_srcdir@/dune/grid/sgrid \
+IMAGE_PATH            += \
                          @top_srcdir@/dune/grid/yaspgrid \
                          @top_srcdir@/dune/grid/common \
                          @top_srcdir@/dune/grid/io/file/dgfparser/test \

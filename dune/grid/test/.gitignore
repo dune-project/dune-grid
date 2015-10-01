@@ -15,7 +15,6 @@ test-geogrid
 test-loadbalancing
 test-mcmg-geogrid
 test-identitygrid
-test-sgrid
 test-oned
 test-ug
 test-parallel-ug
