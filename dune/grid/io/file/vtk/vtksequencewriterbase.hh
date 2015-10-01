@@ -75,7 +75,7 @@ namespace Dune {
     }
 
     /** \brief Adds a field of vertex data to the VTK file */
-    void addVertexData (const typename VTKWriter<GridView>::VTKFunctionPtr &p)
+    void addVertexData (const std::shared_ptr<const typename VTKWriter<GridView>::VTKFunction> &p)
     {
       vtkWriter_->addVertexData(p);
     }

@@ -132,7 +132,6 @@ namespace Dune
   public:
 
     typedef Dune::VTKFunction< GridView > VTKFunction;
-    typedef std::shared_ptr< const VTKFunction > VTKFunctionPtr;
 
   protected:
 
@@ -220,7 +219,7 @@ namespace Dune
       struct VTKFunctionWrapper
         : public FunctionWrapperBase
       {
-        VTKFunctionWrapper(const VTKFunctionPtr& f)
+        VTKFunctionWrapper(const std::shared_ptr< const VTKFunction >& f)
           : _f(f)
           , _entity(nullptr)
         {}
@@ -243,7 +242,7 @@ namespace Dune
 
       private:
 
-        VTKFunctionPtr _f;
+        std::shared_ptr< const VTKFunction > _f;
         const Entity* _entity;
 
       };
@@ -267,7 +266,7 @@ namespace Dune
       {}
 
       //! Construct a VTKLocalFunction for a legacy VTKFunction
-      explicit VTKLocalFunction (const VTKFunctionPtr& vtkFunctionPtr)
+      explicit VTKLocalFunction (const std::shared_ptr< const VTKFunction >& vtkFunctionPtr)
         : _f(Dune::Std::make_unique<VTKFunctionWrapper>(vtkFunctionPtr))
         , _fieldInfo(
           vtkFunctionPtr->name(),
@@ -580,7 +579,7 @@ namespace Dune
      * @brief Add a grid function that lives on the cells of the grid to the visualization.
      * @param p std::shared_ptr to the function to visualize
      */
-    void addCellData (const VTKFunctionPtr & p)
+    void addCellData (const std::shared_ptr< const VTKFunction > & p)
     {
       celldata.push_back(VTKLocalFunction(p));
     }
@@ -616,7 +615,7 @@ namespace Dune
         if (ncomps>1)
           compName << "[" << c << "]";
         VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
-        addCellData(VTKFunctionPtr(p));
+        addCellData(std::shared_ptr< const VTKFunction >(p));
       }
     }
 
@@ -624,7 +623,7 @@ namespace Dune
      * @brief Add a grid function that lives on the vertices of the grid to the visualization.
      * @param p std::shared_ptr to the function to visualize
      */
-    void addVertexData (const VTKFunctionPtr & p)
+    void addVertexData (const std::shared_ptr< const VTKFunction > & p)
     {
       vertexdata.push_back(VTKLocalFunction(p));
     }
@@ -661,7 +660,7 @@ namespace Dune
         if (ncomps>1)
           compName << "[" << c << "]";
         VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
-        addVertexData(VTKFunctionPtr(p));
+        addVertexData(std::shared_ptr< const VTKFunction >(p));
       }
     }
 
