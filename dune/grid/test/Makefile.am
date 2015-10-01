@@ -45,7 +45,7 @@ CACHECOORDFUNCTION = 0
 #
 
 # tests where program to build and program to run are equal
-NORMALTESTS = test-sgrid test-oned test-yaspgrid test-geogrid \
+NORMALTESTS = test-oned test-yaspgrid test-geogrid \
               test-identitygrid test-mcmg-geogrid \
               $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID)
 
@@ -72,8 +72,6 @@ AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
 #
 ## define the programs
 #
-
-test_sgrid_SOURCES = test-sgrid.cc
 
 test_oned_SOURCES = test-oned.cc
 

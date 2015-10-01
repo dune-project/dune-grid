@@ -6,7 +6,6 @@ SUBDIRS = \
   identitygrid \
   io \
   onedgrid \
-  sgrid \
   test \
   uggrid \
   utility \
@@ -42,7 +41,6 @@ griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \
                alugrid.hh \
                identitygrid.hh \
-               sgrid.hh \
                uggrid.hh \
                yaspgrid.hh \
                onedgrid.hh \
