@@ -15,7 +15,6 @@ set(HEADERS
   dgfwriter.hh
   dgfyasp.hh
   entitykey.hh
-  dgfs.hh
   entitykey_inline.hh
   dgfoned.hh
   dgfgridfactory.hh
