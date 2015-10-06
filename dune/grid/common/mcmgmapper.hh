@@ -173,7 +173,7 @@ namespace Dune
        \param codim Codimension of the subentity
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'subIndex' instead!") map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
       GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
       assert(layout.contains(gt));
