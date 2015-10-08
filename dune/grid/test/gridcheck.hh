@@ -462,7 +462,8 @@ void assertNeighbor (Grid &g)
 #endif
 
         // geometry
-        it->geometryInInside();
+        if( !it->type().isNone() )
+          it->geometryInInside();
         it->geometry();
 
         // normal vectors
@@ -497,7 +498,8 @@ void assertNeighbor (Grid &g)
           }
 
           // geometry
-          it->geometryInOutside();
+          if( !it->type().isNone() )
+            it->geometryInOutside();
 
           // numbering
           const int indexInOutside = it->indexInOutside();
@@ -618,21 +620,7 @@ void iterate(Grid &g)
     ++l2;
     assert( (l1 == l2) && (l2 == l1) );
 
-    origin = Dune::ReferenceElements<typename Geometry::ctype,
-               Geometry::mydimension>::general(it->type()).position(0,0);
-    const Geometry &geo = it->geometry();
-
-    result = geo.local( geo.global( origin ) );
-    typename Grid::ctype error = (result-origin).two_norm();
-    if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
-    {
-      DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
-                                                          << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
-    };
-    geo.integrationElement( origin );
-
-    if((int)Geometry::coorddimension == (int)Geometry::mydimension)
-      geo.jacobianInverseTransposed( origin );
+    const Geometry geo = it->geometry();
 
     if( geo.type() != it->type() )
     {
@@ -640,6 +628,25 @@ void iterate(Grid &g)
                 << ", geometry.type() = " << geo.type() << "." << std::endl;
       assert( false );
     }
+
+    if( !geo.type().isNone() )
+    {
+      origin = Dune::ReferenceElements<typename Geometry::ctype,
+                 Geometry::mydimension>::general(it->type()).position(0,0);
+
+      result = geo.local( geo.global( origin ) );
+      typename Grid::ctype error = (result-origin).two_norm();
+      if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
+      {
+        DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
+                                                            << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
+      };
+      geo.integrationElement( origin );
+
+      if((int)Geometry::coorddimension == (int)Geometry::mydimension)
+        geo.jacobianInverseTransposed( origin );
+    }
+
     geo.corners();
     geo.corner( 0 );
   }
@@ -667,19 +674,23 @@ void iterate(Grid &g)
     // check adaptation mark for leaf entity mark
     CheckMark<Grid,checkMark>::check(g,lit);
 
-    result = lit->geometry().local(lit->geometry().global(origin));
-    typename Grid::ctype error = (result-origin).two_norm();
-    if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
+    if( !lit->type().isNone() )
     {
-      DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
-                                                          << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
-    };
-    lit->geometry().integrationElement(origin);
-    if((int)Geometry::coorddimension == (int)Geometry::mydimension)
-      lit->geometry().jacobianInverseTransposed(origin);
+      origin = Dune::ReferenceElements<typename Geometry::ctype,
+                 Geometry::mydimension>::general(lit->type()).position(0,0);
+      result = lit->geometry().local(lit->geometry().global(origin));
+      typename Grid::ctype error = (result-origin).two_norm();
+      if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
+      {
+        DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
+                                                            << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
+      }
+      lit->geometry().integrationElement(origin);
+      if((int)Geometry::coorddimension == (int)Geometry::mydimension)
+        lit->geometry().jacobianInverseTransposed(origin);
+    }
 
     lit->geometry().type();
-    lit->type();
     lit->geometry().corners();
     lit->geometry().corner( 0 );
   }

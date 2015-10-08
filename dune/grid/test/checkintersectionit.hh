@@ -135,16 +135,6 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   const int indexInInside = intersection.indexInInside();
 
-  const LocalGeometry geometryInInside = intersection.geometryInInside();
-  const Dune::ReferenceElement< ctype, mydimension > &refFace
-    = Dune::ReferenceElements< ctype, mydimension >::general( intersection.type() );
-
-  // create quadrature rule as a set of test points
-
-  const Dune::QuadratureType::Enum qt = Dune::QuadratureType::GaussLegendre;
-  const Dune::QuadratureRule< ctype, mydimension > &quadrature
-    = Dune::QuadratureRules< ctype, mydimension >::rule( intersection.type(), 3, qt );
-
   // obtain inside entity, its geometry and reference element
 
 #if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
@@ -182,40 +172,50 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   // check the geometryInInside
 
-  checkLocalGeometry( geometryInInside, inside.type(), "geometryInInside" );
-
-  if( geometryInInside.corners() != geometry.corners() )
-    DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside.");
-
-  for( std::size_t i = 0; i < quadrature.size(); ++i )
+  if( !inside.type().isNone() )
   {
-    const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
+    const LocalGeometry geometryInInside = intersection.geometryInInside();
+    checkLocalGeometry( geometryInInside, inside.type(), "geometryInInside" );
 
-    typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
-    typename Geometry::GlobalCoordinate localPos = insideGeometry.global( geometryInInside.global( pt ) );
+    if( geometryInInside.corners() != geometry.corners() )
+      DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside.");
 
-    if( (globalPos - localPos).infinity_norm() > 1e-6 )
+    // create quadrature rule as a set of test points
+
+    const Dune::QuadratureType::Enum qt = Dune::QuadratureType::GaussLegendre;
+    const Dune::QuadratureRule< ctype, mydimension > &quadrature
+      = Dune::QuadratureRules< ctype, mydimension >::rule( intersection.type(), 3, qt );
+
+    for( std::size_t i = 0; i < quadrature.size(); ++i )
     {
-      std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside." << std::endl;
+      const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
 
-      std::cerr << "       inside()->geometry().global( intersection.geometryInInside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
-      std::cerr << "       x = " << pt << std::endl;
-      std::cerr << "       interesction.geometry() = " << geometry.corner( 0 );
-      for( int i = 1; i < geometry.corners(); ++i )
-        std::cerr << " | " << geometry.corner( i );
-      std::cerr << std::endl;
+      typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
+      typename Geometry::GlobalCoordinate localPos = insideGeometry.global( geometryInInside.global( pt ) );
 
-      std::cerr << "       intersection.geometryInInside() = " << geometryInInside.corner( 0 );
-      for( int i = 1; i < geometryInInside.corners(); ++i )
-        std::cerr << " | " << geometryInInside.corner( i );
-      std::cerr << std::endl;
+      if( (globalPos - localPos).infinity_norm() > 1e-6 )
+      {
+        std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside." << std::endl;
 
-      std::cerr << "       inside()->geometry() = " << insideGeometry.corner( 0 );
-      for( int i = 1; i < insideGeometry.corners(); ++i )
-        std::cerr << " | " << insideGeometry.corner( i );
-      std::cerr << std::endl;
+        std::cerr << "       inside()->geometry().global( intersection.geometryInInside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
+        std::cerr << "       x = " << pt << std::endl;
+        std::cerr << "       interesction.geometry() = " << geometry.corner( 0 );
+        for( int i = 1; i < geometry.corners(); ++i )
+          std::cerr << " | " << geometry.corner( i );
+        std::cerr << std::endl;
 
-      assert( false );
+        std::cerr << "       intersection.geometryInInside() = " << geometryInInside.corner( 0 );
+        for( int i = 1; i < geometryInInside.corners(); ++i )
+          std::cerr << " | " << geometryInInside.corner( i );
+        std::cerr << std::endl;
+
+        std::cerr << "       inside()->geometry() = " << insideGeometry.corner( 0 );
+        for( int i = 1; i < insideGeometry.corners(); ++i )
+          std::cerr << " | " << insideGeometry.corner( i );
+        std::cerr << std::endl;
+
+        assert( false );
+      }
     }
   }
 
@@ -234,45 +234,54 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
     const Entity outside = intersection.outside();
 #endif
 
-    const LocalGeometry geometryInOutside = intersection.geometryInOutside();
-    checkLocalGeometry( geometryInOutside, outside.type(), "geometryInOutside" );
 
-    if( geometryInOutside.corners() != geometry.corners() )
-      DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside.");
-
-    if( !intersection.boundary() )
+    if( !outside.type().isNone() )
     {
-      const typename Entity::Geometry outsideGeometry = outside.geometry();
+      const LocalGeometry geometryInOutside = intersection.geometryInOutside();
+      checkLocalGeometry( geometryInOutside, outside.type(), "geometryInOutside" );
+      if( geometryInOutside.corners() != geometry.corners() )
+        DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside.");
 
-      for( std::size_t i = 0; i < quadrature.size(); ++i )
+      if( !intersection.boundary() )
       {
-        const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
+        const typename Entity::Geometry outsideGeometry = outside.geometry();
 
-        typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
-        typename Geometry::GlobalCoordinate localPos = outsideGeometry.global( geometryInOutside.global( pt ) );
+        // create quadrature rule as a set of test points
 
-        if( (globalPos - localPos).infinity_norm() > 1e-6 )
+        const Dune::QuadratureType::Enum qt = Dune::QuadratureType::GaussLegendre;
+        const Dune::QuadratureRule< ctype, mydimension > &quadrature
+          = Dune::QuadratureRules< ctype, mydimension >::rule( intersection.type(), 3, qt );
+
+        for( std::size_t i = 0; i < quadrature.size(); ++i )
         {
-          std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside." << std::endl;
+          const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
 
-          std::cerr << "       outside()->geometry().global( intersection.geometryInOutside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
-          std::cerr << "       x = " << pt << std::endl;
-          std::cerr << "       intersection.geometry() = " << geometry.corner( 0 );
-          for( int i = 1; i < geometry.corners(); ++i )
-            std::cerr << " | " << geometry.corner( i );
-          std::cerr << std::endl;
+          typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
+          typename Geometry::GlobalCoordinate localPos = outsideGeometry.global( geometryInOutside.global( pt ) );
 
-          std::cerr << "       intersection.geometryInOutside() = " << geometryInOutside.corner( 0 );
-          for( int i = 1; i < geometryInOutside.corners(); ++i )
-            std::cerr << " | " << geometryInOutside.corner( i );
-          std::cerr << std::endl;
+          if( (globalPos - localPos).infinity_norm() > 1e-6 )
+          {
+            std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside." << std::endl;
 
-          std::cerr << "       outside()->geometry() = " << outsideGeometry.corner( 0 );
-          for( int i = 1; i < outsideGeometry.corners(); ++i )
-            std::cerr << " | " << outsideGeometry.corner( i );
-          std::cerr << std::endl;
+            std::cerr << "       outside()->geometry().global( intersection.geometryInOutside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
+            std::cerr << "       x = " << pt << std::endl;
+            std::cerr << "       intersection.geometry() = " << geometry.corner( 0 );
+            for( int i = 1; i < geometry.corners(); ++i )
+              std::cerr << " | " << geometry.corner( i );
+            std::cerr << std::endl;
 
-          assert( false );
+            std::cerr << "       intersection.geometryInOutside() = " << geometryInOutside.corner( 0 );
+            for( int i = 1; i < geometryInOutside.corners(); ++i )
+              std::cerr << " | " << geometryInOutside.corner( i );
+            std::cerr << std::endl;
+
+            std::cerr << "       outside()->geometry() = " << outsideGeometry.corner( 0 );
+            for( int i = 1; i < outsideGeometry.corners(); ++i )
+              std::cerr << " | " << outsideGeometry.corner( i );
+            std::cerr << std::endl;
+
+            assert( false );
+          }
         }
       }
     }
@@ -280,115 +289,136 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   // check normal vectors
 
-  for( std::size_t i = 0; i < quadrature.size(); ++i )
+  if( !intersection.type().isNone() )
   {
-    const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
-    const typename Geometry::JacobianInverseTransposed &jit = geometry.jacobianInverseTransposed( pt );
 
-    // independently calculate the integration outer normal for the inside entity
-    const typename LocalGeometry::GlobalCoordinate xInside = geometryInInside.global( pt );
-    const typename LocalGeometry::GlobalCoordinate &refNormal = refElement.integrationOuterNormal( indexInInside );
-    typename Geometry::GlobalCoordinate refIntNormal;
-    insideGeometry.jacobianInverseTransposed( xInside ).mv( refNormal, refIntNormal );
+    // create quadrature rule as a set of test points
 
-    // note: refElement.template geometry< 1 >( indexInInside ) is affine,
-    //       hence we may use any point to obtain the integrationElement.
-    refIntNormal *= insideGeometry.integrationElement( xInside ) * geometryInInside.integrationElement( pt )
-                    / refElement.template geometry< 1 >( indexInInside ).integrationElement( pt );
+    const Dune::QuadratureType::Enum qt = Dune::QuadratureType::GaussLegendre;
+    const Dune::QuadratureRule< ctype, mydimension > &quadrature
+      = Dune::QuadratureRules< ctype, mydimension >::rule( intersection.type(), 3, qt );
 
-    // check outer normal
-    const typename Intersection::GlobalCoordinate normal
-      = intersection.outerNormal( pt );
-    checkParallel( normal, refIntNormal, "outerNormal" );
-
-    // check normal vector is orthogonal to all vectors connecting the vertices
-    // note: This only makes sense for non-curved faces. As there is no method
-    //       to check curvature, we only check this for affine surface.
-    if( geometry.affine() )
+    for( std::size_t i = 0; i < quadrature.size(); ++i )
     {
-      for( int c = 1; c < geometry.corners(); ++c )
+      const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
+      const typename Geometry::JacobianInverseTransposed &jit = geometry.jacobianInverseTransposed( pt );
+
+      // independently calculate the integration outer normal for the inside entity
+
+      typename Geometry::GlobalCoordinate refIntNormal;
+      if( !inside.type().isNone() )
       {
-        typename Geometry::GlobalCoordinate x = geometry.corner( c-1 );
-        x -= geometry.corner( c );
-        if( x*normal >= 1e3*std::numeric_limits< ctype >::epsilon() )
+        const LocalGeometry geometryInInside = intersection.geometryInInside();
+        const typename LocalGeometry::GlobalCoordinate xInside = geometryInInside.global( pt );
+        const typename LocalGeometry::GlobalCoordinate &refNormal = refElement.integrationOuterNormal( indexInInside );
+        insideGeometry.jacobianInverseTransposed( xInside ).mv( refNormal, refIntNormal );
+
+        // note: refElement.template geometry< 1 >( indexInInside ) is affine,
+        //       hence we may use any point to obtain the integrationElement.
+        refIntNormal *= insideGeometry.integrationElement( xInside ) * geometryInInside.integrationElement( pt )
+                        / refElement.template geometry< 1 >( indexInInside ).integrationElement( pt );
+      }
+
+      // check outer normal
+      const typename Intersection::GlobalCoordinate normal
+        = intersection.outerNormal( pt );
+      if( !inside.type().isNone() )
+        checkParallel( normal, refIntNormal, "outerNormal" );
+
+      // check normal vector is orthogonal to all vectors connecting the vertices
+      // note: This only makes sense for non-curved faces. As there is no method
+      //       to check curvature, we only check this for affine surface.
+      if( geometry.affine() )
+      {
+        for( int c = 1; c < geometry.corners(); ++c )
         {
-          std::cerr << "outerNormal not orthogonal to line between corner "
-                    << (c-1) << " and corner " << c << "." << std::endl;
-          assert( false );
+          typename Geometry::GlobalCoordinate x = geometry.corner( c-1 );
+          x -= geometry.corner( c );
+          if( x*normal >= 1e3*std::numeric_limits< ctype >::epsilon() )
+          {
+            std::cerr << "outerNormal not orthogonal to line between corner "
+                      << (c-1) << " and corner " << c << "." << std::endl;
+            assert( false );
+          }
         }
+      }
+
+      // check consistency with JacobianInverseTransposed (J^-1 * n) = 0,
+      // where J denotes the Jacobian of the intersection's geometry and n is a
+      // normal.
+      checkJIn( normal, jit, "outerNormal" );
+
+      // check integration outer normal
+
+      const typename Intersection::GlobalCoordinate intNormal = intersection.integrationOuterNormal( pt );
+      const ctype det = geometry.integrationElement( pt );
+      if( std::abs( det - intNormal.two_norm() ) > 1e-8 )
+      {
+        std::cerr << "Error: integrationOuterNormal yields wrong length." << std::endl;
+        std::cerr << "       |integrationOuterNormal| = " << intNormal.two_norm()
+                  << ", integrationElement = " << det << std::endl;
+        assert( false );
+      }
+
+      checkJIn( intNormal, jit, "integrationOuterNormal" );
+      if( !inside.type().isNone() )
+        checkParallel( intNormal, refIntNormal, "integrationOuterNormal" );
+
+      if( (intNormal - refIntNormal).two_norm() > 1e-8 )
+      {
+        std::cerr << "Error: Wrong integration outer normal (" << intNormal
+                  << ", should be " << refIntNormal << ")." << std::endl;
+        std::cerr << "       Intersection: " << geometry.corner( 0 );
+        for( int c = 1; c < geometry.corners(); ++c )
+          std::cerr << ", " << geometry.corner( c );
+        std::cerr << "." << std::endl;
+        assert( false );
+      }
+
+      // check unit outer normal
+
+      const typename Intersection::GlobalCoordinate unitNormal = intersection.unitOuterNormal( pt );
+      if( std::abs( ctype( 1 ) - unitNormal.two_norm() ) > 1e-8 )
+      {
+        std::cerr << "Error: unitOuterNormal yields wrong length." << std::endl;
+        std::cerr << "       |unitOuterNormal| = " << unitNormal.two_norm() << std::endl;
+        assert( false );
+      }
+
+      checkJIn( unitNormal, jit, "unitOuterNormal" );
+      if( !inside.type().isNone() )
+        checkParallel( unitNormal, refIntNormal, "unitOuterNormal" );
+
+      // check normal for Cartesian grids
+
+      if( isCartesian )
+      {
+        if( !geometry.affine() )
+          DUNE_THROW( Dune::GridError, "Intersection's geometry is not affine, although isCartesian is true" );
+
+        // check that unit normal of Cartesian grid is given in a specific way
+        typename Intersection::GlobalCoordinate normal( 0 );
+        normal[ indexInInside / 2 ] = 2 * (indexInInside % 2) - 1;
+
+        if( (normal - unitNormal).infinity_norm() > 1e-8 )
+          DUNE_THROW( Dune::GridError, "Unit normal is not in Cartesian format, although isCartesian is true" );
       }
     }
 
-    // check consistency with JacobianInverseTransposed (J^-1 * n) = 0,
-    // where J denotes the Jacobian of the intersection's geometry and n is a
-    // normal.
-    checkJIn( normal, jit, "outerNormal" );
+    // check center unit outer normal
 
-    // check integration outer normal
+    const Dune::ReferenceElement< ctype, mydimension > &refFace
+      = Dune::ReferenceElements< ctype, mydimension >::general( intersection.type() );
 
-    const typename Intersection::GlobalCoordinate intNormal = intersection.integrationOuterNormal( pt );
-    const ctype det = geometry.integrationElement( pt );
-    if( std::abs( det - intNormal.two_norm() ) > 1e-8 )
+    if( (intersection.centerUnitOuterNormal() - intersection.unitOuterNormal( refFace.position( 0, 0 ) )).two_norm() > 1e-8 )
     {
-      std::cerr << "Error: integrationOuterNormal yields wrong length." << std::endl;
-      std::cerr << "       |integrationOuterNormal| = " << intNormal.two_norm()
-                << ", integrationElement = " << det << std::endl;
+      std::cerr << "Error: centerUnitOuterNormal() does not match unitOuterNormal( "
+                << refFace.position( 0, 0 ) << " )." << std::endl;
+      std::cerr << "       centerUnitOuterNormal = " << intersection.centerUnitOuterNormal()
+                << ", unitOuterNormal( " << refFace.position( 0, 0 ) << " ) = "
+                << intersection.unitOuterNormal( refFace.position( 0, 0 ) ) << std::endl;
       assert( false );
     }
-
-    checkJIn( intNormal, jit, "integrationOuterNormal" );
-    checkParallel( intNormal, refIntNormal, "integrationOuterNormal" );
-
-    if( (intNormal - refIntNormal).two_norm() > 1e-8 )
-    {
-      std::cerr << "Error: Wrong integration outer normal (" << intNormal
-                << ", should be " << refIntNormal << ")." << std::endl;
-      std::cerr << "       Intersection: " << geometry.corner( 0 );
-      for( int c = 1; c < geometry.corners(); ++c )
-        std::cerr << ", " << geometry.corner( c );
-      std::cerr << "." << std::endl;
-      assert( false );
-    }
-
-    // check unit outer normal
-
-    const typename Intersection::GlobalCoordinate unitNormal = intersection.unitOuterNormal( pt );
-    if( std::abs( ctype( 1 ) - unitNormal.two_norm() ) > 1e-8 )
-    {
-      std::cerr << "Error: unitOuterNormal yields wrong length." << std::endl;
-      std::cerr << "       |unitOuterNormal| = " << unitNormal.two_norm() << std::endl;
-      assert( false );
-    }
-
-    checkJIn( unitNormal, jit, "unitOuterNormal" );
-    checkParallel( unitNormal, refIntNormal, "unitOuterNormal" );
-
-    // check normal for Cartesian grids
-
-    if( isCartesian )
-    {
-      if( !geometry.affine() )
-        DUNE_THROW( Dune::GridError, "Intersection's geometry is not affine, although isCartesian is true" );
-
-      // check that unit normal of Cartesian grid is given in a specific way
-      typename Intersection::GlobalCoordinate normal( 0 );
-      normal[ indexInInside / 2 ] = 2 * (indexInInside % 2) - 1;
-
-      if( (normal - unitNormal).infinity_norm() > 1e-8 )
-        DUNE_THROW( Dune::GridError, "Unit normal is not in Cartesian format, although isCartesian is true" );
-    }
-  }
-
-  // check center unit outer normal
-
-  if( (intersection.centerUnitOuterNormal() - intersection.unitOuterNormal( refFace.position( 0, 0 ) )).two_norm() > 1e-8 )
-  {
-    std::cerr << "Error: centerUnitOuterNormal() does not match unitOuterNormal( "
-              << refFace.position( 0, 0 ) << " )." << std::endl;
-    std::cerr << "       centerUnitOuterNormal = " << intersection.centerUnitOuterNormal()
-              << ", unitOuterNormal( " << refFace.position( 0, 0 ) << " ) = "
-              << intersection.unitOuterNormal( refFace.position( 0, 0 ) ) << std::endl;
-    assert( false );
   }
 }
 

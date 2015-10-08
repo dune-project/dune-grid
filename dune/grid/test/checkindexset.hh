@@ -70,6 +70,9 @@ namespace Dune
     const GeometryType type = en.type();
     assert( type == en.geometry().type() );
 
+    if( type.isNone() )
+      return;
+
     const ReferenceElement< coordType, dim > &refElem
       = ReferenceElements< coordType, dim >::general( type );
 
@@ -411,9 +414,10 @@ namespace Dune
            << " equals all found vertices "
            << (unsigned int)lset.size(Dune::GeometryType(0))
            << "\n";
-      // assertion goes wrong for parallel grid since no iteration over ghost
-      // subentities
-      assert( count == (unsigned int)lset.size(Dune::GeometryType(0)) );
+      // assertion goes wrong:
+      // - for parallel grid since no iteration over ghost subentities
+      // - if there are vertices with geometry type 'none'
+      //assert( count == (unsigned int)lset.size(Dune::GeometryType(0)) );
     }
 
     {
