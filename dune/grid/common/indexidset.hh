@@ -207,19 +207,6 @@ namespace Dune
       return asImp().types( codim );
     }
 
-    /** @brief Return vector with all geometry types of entities in domain of index map.
-            Return a vector with all geometry types of a given codimension
-            contained in the Entity set \f$E\f$.
-
-       \param[in] codim A valid codimension.
-       \return Const reference to a vector of geometry types.
-     */
-    const std::vector<GeometryType>& geomTypes (int codim) const DUNE_DEPRECATED_MSG( "Use IndexSet::types instead." )
-    {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().geomTypes(codim)));
-      return asImp().geomTypes(codim);
-    }
-
     /** @brief Return total number of entities of given geometry type in entity set \f$E\f$.
 
        \param[in] type A valid geometry type.

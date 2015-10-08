@@ -279,11 +279,6 @@ namespace Dune
     for( auto it = types.begin(); it != types.end(); ++it )
       if( geometryTypes.find( *it ) == geometryTypes.end() )
         geomTypesError = true;
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    for (size_t i=0; i<lset.geomTypes(codim).size(); i++)
-      if (geometryTypes.find(lset.geomTypes(codim)[i])==geometryTypes.end())
-        geomTypesError = true;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
 
     // And vice versa
@@ -291,18 +286,6 @@ namespace Dune
     {
       if( std::find( types.begin(), types.end(), *it ) == types.end() )
         geomTypesError = true;
-
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-      bool found = false;
-      for (size_t i=0; i<lset.geomTypes(codim).size(); i++)
-        if (*it == lset.geomTypes(codim)[i]) {
-          found = true;
-          break;
-        }
-
-      if (!found)
-        geomTypesError = true;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     }
 
 
@@ -317,12 +300,6 @@ namespace Dune
       std::cerr << std::endl << "but the method types() returned:" << std::endl;
       for( auto it = types.begin(); it != types.end(); ++it )
         std::cerr << "  " << *it << std::endl;
-
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-      std::cerr << std::endl << "but the method geomTypes() returned:" << std::endl;
-      for (size_t j=0; j<lset.geomTypes(codim).size(); j++)
-        std::cerr << "  " << lset.geomTypes(codim)[j] << std::endl;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
       DUNE_THROW(GridError, "!");
     }
