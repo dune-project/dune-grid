@@ -772,18 +772,12 @@ namespace Dune
    * Dune namespace or in the namespace of the GridView object.
    */
   template<typename GV, int codim, unsigned int partitions>
-  inline IteratorRange<
-    typename GV::template Codim<codim>::template Partition<
-      derive_partition_iterator_type<partitions>::value
-      >::Iterator
-    >
-  entities(const GV& gv, Codim<codim>, PartitionSet<partitions>)
+  inline auto entities(const GV& gv, Codim<codim>, PartitionSet<partitions>)
+    -> IteratorRange<decltype(gv.template begin<codim,derive_partition_iterator_type<partitions>::value>())>
   {
     static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
     const PartitionIteratorType pit = derive_partition_iterator_type<partitions>::value;
-    typedef IteratorRange<
-      typename GV::template Codim<codim>::template Partition<pit>::Iterator
-      > return_type;
+    typedef IteratorRange<decltype(gv.template begin<codim,pit>())> return_type;
     return return_type(gv.template begin<codim,pit>(),gv.template end<codim,pit>());
   }
 
@@ -795,15 +789,11 @@ namespace Dune
    * All other functions without PartitionSet parameter forward to this function.
    */
   template<typename GV, int codim>
-  inline IteratorRange<
-    typename GV::template Codim<codim>::Iterator
-    >
-  entities(const GV& gv, Codim<codim>)
+  inline auto entities(const GV& gv, Codim<codim>)
+    -> IteratorRange<decltype(gv.template begin<codim>())>
   {
     static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
-    typedef IteratorRange<
-      typename GV::template Codim<codim>::Iterator
-      > return_type;
+    typedef IteratorRange<decltype(gv.template begin<codim>())> return_type;
     return return_type(gv.template begin<codim>(),gv.template end<codim>());
   }
 
@@ -821,9 +811,10 @@ namespace Dune
    * Intersection range implementation.
    */
   template<typename GV, typename Entity>
-  inline IteratorRange<typename GV::IntersectionIterator> intersections(const GV& gv, const Entity& e)
+  inline auto intersections(const GV& gv, const Entity& e)
+    -> IteratorRange<decltype(gv.ibegin(e))>
   {
-    return IteratorRange<typename GV::IntersectionIterator>(gv.ibegin(e),gv.iend(e));
+    return IteratorRange<decltype(gv.ibegin(e))>(gv.ibegin(e),gv.iend(e));
   }
 
 
