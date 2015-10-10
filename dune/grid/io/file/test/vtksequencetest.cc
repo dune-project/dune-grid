@@ -1,16 +1,17 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#include "config.h" // autoconf defines, needed by the dune headers
+#include "config.h"
+
+#include <memory>
+#include <vector>
+#include <unistd.h>
 
 // dune headers
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriter.hh>
 
-#include <vector>
-#include <unistd.h>
-
-const char* VTKDataMode(Dune::VTK::DataMode dm)
+std::string VTKDataMode(Dune::VTK::DataMode dm)
 {
   switch(dm)
   {
@@ -78,8 +79,7 @@ void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
 
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
-  Dune::shared_ptr<VTKVectorFunction<GridView> > vectordata
-    (new VTKVectorFunction< GridView >);
+  auto vectordata = std::make_shared<VTKVectorFunction<GridView> >();
   vtk.addVertexData(vectordata);
   double time = 0;
   while (time<1) {
