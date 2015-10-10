@@ -72,6 +72,8 @@ namespace Dune
   // Forward-declaration here, so the class can be friend of VTKWriter
   template <class GridView>
   class VTKSequenceWriterBase;
+  template <class GridView>
+  class VTKSequenceWriter;
 
   /**
    * @brief Writer for the ouput of grid functions in the vtk format.
@@ -87,6 +89,8 @@ namespace Dune
     // VTKSequenceWriterBase needs getSerialPieceName
     // and getParallelHeaderName
     friend class VTKSequenceWriterBase<GridView>;
+    // VTKSequenceWriter needs the grid view, to get the MPI size and rank
+    friend class VTKSequenceWriter<GridView>;
 
     // extract types
     typedef typename GridView::Grid Grid;

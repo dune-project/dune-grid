@@ -24,6 +24,30 @@ namespace Dune {
     public VTKSequenceWriterBase<GridView>
   {
   public:
+    /** \brief Constructor with a given VTKWriter or SubsamplingVTKWriter
+     *
+     * At each time step, the VTKSequenceWriter writes the grid and data currently attached to the vtkWriter object.
+     * All calls to the addCellData and addVertexData methods of the VTKSequenceWriter class are forwarded to the
+     * vtkWriter, but we propose that you call the corresponding methods on the vtkWriter directly.
+     */
+    VTKSequenceWriter ( std::shared_ptr<VTKWriter<GridView> > vtkWriter,
+                        const std::string& name,
+                        const std::string& path,
+                        const std::string& extendpath )
+      : VTKSequenceWriterBase<GridView>(vtkWriter,
+                                        name,
+                                        path,
+                                        extendpath,
+                                        vtkWriter->gridView_.comm().rank(),
+                                        vtkWriter->gridView_.comm().size())
+    {}
+
+    /** \brief Constructor creating its own VTKWriter object
+     *
+     * At each time step, the VTKSequenceWriter writes the grid and data currently attached to the vtkWriter object.
+     * All calls to the addCellData and addVertexData methods of the VTKSequenceWriter class are forwarded to the
+     * vtkWriter.
+     */
     explicit VTKSequenceWriter ( const GridView &gridView,
                                  const std::string& name,
                                  const std::string& path,
