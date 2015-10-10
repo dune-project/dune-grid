@@ -73,9 +73,9 @@ void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
 
   std::stringstream name;
   name << "vtktest-" << dim << "D-" << VTKDataMode(dm);
-  Dune :: VTKSequenceWriter< GridView >
-  vtk( gridView, name.str(), ".", "", dm );
 
+  auto vtkWriter = std::make_shared<Dune::VTKWriter<GridView> >(gridView, dm);
+  Dune :: VTKSequenceWriter< GridView > vtk( vtkWriter, name.str(), ".", "" );
 
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
