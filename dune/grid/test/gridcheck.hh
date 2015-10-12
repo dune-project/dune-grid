@@ -11,6 +11,8 @@
 
  */
 
+#include <cstdlib>
+
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
@@ -970,7 +972,6 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
 
   size_t numBoundarySegments = gridView.grid().numBoundarySegments();
   size_t countBoundarySegments = 0;
-  std::vector< int > count( numBoundarySegments, 0 );
   bool error = false;
 
   const Iterator end = gridView.template end< 0 >();
@@ -981,9 +982,29 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
     const IntersectionIterator iend = gridView.iend( *it );
     for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
     {
+      if( iit->boundary() )
+        ++countBoundarySegments;
+    }
+  }
+
+  if( countBoundarySegments != numBoundarySegments )
+  {
+    std::cerr << "Error: Wrong number of boundary segments (reported: "
+              << numBoundarySegments << ", counted: "
+              << countBoundarySegments << ")." << std::endl;
+    std::abort();
+  }
+
+  std::vector< int > count( numBoundarySegments, 0 );
+  for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
+  {
+    if( !it->hasBoundaryIntersections() )
+      continue;
+    const IntersectionIterator iend = gridView.iend( *it );
+    for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
+    {
       if( !iit->boundary() )
         continue;
-      ++countBoundarySegments;
       const size_t index = iit->boundarySegmentIndex();
       if( index >= numBoundarySegments )
       {
@@ -997,14 +1018,6 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
       if( !it->isLeaf() )
         checkBoundarySegmentIndexProlongation( gridView.grid(), *it, *iit );
     }
-  }
-
-  if( countBoundarySegments != numBoundarySegments )
-  {
-    std::cerr << "Error: Wrong number of boundary segments (reported: "
-              << numBoundarySegments << ", counted: "
-              << countBoundarySegments << ")." << std::endl;
-    error = true;
   }
 
   for( size_t i = 0; i < count.size(); ++i )
