@@ -38,7 +38,7 @@ namespace Dune
       std::size_t idx = factory.insertionIndex( vertex );
       Vertex v = mesh.vertices()[ idx ];
       if( (v - vertex.geometry().center() ).two_norm() > 1e-8 )
-        DUNE_THROW( GridError, "GridFactor error, Vertex insertion Index wrong!" );
+        DUNE_THROW( GridError, "GridFactory error, Vertex insertion Index wrong!" );
     }
 
     // check element insertion index
@@ -52,7 +52,7 @@ namespace Dune
       unsigned int numSubeEntitites = element.subEntities( Grid::dimension );
 
       if( numSubeEntitites != mesh.elements()[ idx ].vertices().size() )
-        DUNE_THROW( GridError, "GridFactor error, wrong number of subEntities inserted!" );
+        DUNE_THROW( GridError, "GridFactory error, wrong number of subEntities inserted!" );
 
       for( unsigned int i = 0; i < numSubeEntitites; ++i )
       {
@@ -63,9 +63,8 @@ namespace Dune
       std::sort( insertIndices.begin(), insertIndices.end() );
       std::sort( indices.begin(), indices.end() );
 
-      for( unsigned int i = 0; i < indices.size(); ++i )
-        if( indices[ i ] != insertIndices[ i ] )
-          DUNE_THROW( GridError, "GridFactor error, Element insertion index wrong!" );
+      if( !std::equal( indices.begin(), indices.end(), insertIndices.begin() ) )
+        DUNE_THROW( GridError, "GridFactory error, Element insertion index wrong!" );
     }
 
   }
