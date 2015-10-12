@@ -26,6 +26,8 @@
 #include "check-albertareader.hh"
 #include "checkadaptation.hh"
 #include "checkpartition.hh"
+#include "mesh.hh"
+#include "checkgridfactory.hh"
 
 
 template< int dim, int dimworld >
@@ -83,6 +85,18 @@ try {
   typedef Dune::AlbertaGrid< dim > GridType;
 
   std::cout << "Testing " << GridType::typeName() << "..." << std::endl;
+
+#if ALBERTA_DIM == 2 && GRIDDIM == 2
+  std::cout << "Check GridFactory ..." <<std::endl;
+  Dune::Kuhn2dSimplexMesh mesh;
+  Dune::checkGridFactory< GridType > ( mesh );
+#endif // #if ALBERTA_DIM == 2 && GRIDDIM == 2
+
+#if ALBERTA_DIM == 3 && GRIDDIM == 3
+  std::cout << "Check GridFactory ..." <<std::endl;
+  Dune::Kuhn3dSimplexMesh mesh;
+  Dune::checkGridFactory< GridType > ( mesh );
+#endif // #if ALBERTA_DIM == 3 && GRIDDIM == 3
 
   std::string filename;
   if( argc <= 1 )
