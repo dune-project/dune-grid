@@ -117,7 +117,7 @@ namespace Dune {
         std::string pvdname = name_ + ".pvd";
         pvdFile.open(pvdname.c_str());
         pvdFile << "<?xml version=\"1.0\"?> \n"
-                << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\"> \n"
+                << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"" << VTK::getEndiannessString() << "\"> \n"
                 << "<Collection> \n";
         for (unsigned int i=0; i<=count; i++)
         {
