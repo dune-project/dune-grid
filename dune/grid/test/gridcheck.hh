@@ -376,7 +376,10 @@ void assertNeighbor (Grid &g)
     // small check if LevelIntersectionIterators
     // from work reassigned EntityPointers
     // after creation of LevelIterator on different level
-    if (g.maxLevel()>0)
+    if (g.maxLevel()>0
+        && g.levelGridView(0).template begin<0>() != g.levelGridView(0).template end<0>()
+        && g.levelGridView(1).template begin<0>() != g.levelGridView(1).template end<0>()
+        )
     {
 #if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
       EntityPointer p( g.levelGridView(0).template begin<0>() );
