@@ -224,6 +224,7 @@ SOURCES = basicunitcube.hh                      \
           checkgeometry.hh                      \
           checkgeometryinfather.cc              \
           checkgeometryinfather.hh              \
+					checkgridfactory.hh										\
           checkindexset.cc                      \
           checkindexset.hh                      \
           checkintersectionit.cc                \
@@ -240,6 +241,7 @@ SOURCES = basicunitcube.hh                      \
           functions.hh                          \
           gridcheck.cc                          \
           gridcheck.hh                          \
+					mesh.hh																\
           staticcheck.hh
 
 NORMALTESTS += testiteratorranges

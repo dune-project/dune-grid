@@ -151,6 +151,7 @@ set(SOURCES
   checkgeometry.hh
   checkgeometryinfather.cc
   checkgeometryinfather.hh
+  checkgridfactory.hh
   checkindexset.cc
   checkindexset.hh
   checkintersectionit.cc
@@ -167,6 +168,7 @@ set(SOURCES
   functions.hh
   gridcheck.cc
   gridcheck.hh
+  mesh.hh
   staticcheck.hh)
 
 # install the tests as we want to support testing 3rdparty grids with installed dune-grid
