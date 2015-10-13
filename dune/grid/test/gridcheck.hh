@@ -11,6 +11,8 @@
 
  */
 
+#include <cstdlib>
+
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
@@ -374,7 +376,10 @@ void assertNeighbor (Grid &g)
     // small check if LevelIntersectionIterators
     // from work reassigned EntityPointers
     // after creation of LevelIterator on different level
-    if (g.maxLevel()>0)
+    if (g.maxLevel()>0
+        && g.levelGridView(0).template begin<0>() != g.levelGridView(0).template end<0>()
+        && g.levelGridView(1).template begin<0>() != g.levelGridView(1).template end<0>()
+        )
     {
 #if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
       EntityPointer p( g.levelGridView(0).template begin<0>() );
@@ -981,7 +986,6 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
 
   size_t numBoundarySegments = gridView.grid().numBoundarySegments();
   size_t countBoundarySegments = 0;
-  std::vector< int > count( numBoundarySegments, 0 );
   bool error = false;
 
   const Iterator end = gridView.template end< 0 >();
@@ -992,9 +996,29 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
     const IntersectionIterator iend = gridView.iend( *it );
     for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
     {
+      if( iit->boundary() )
+        ++countBoundarySegments;
+    }
+  }
+
+  if( countBoundarySegments != numBoundarySegments )
+  {
+    std::cerr << "Error: Wrong number of boundary segments (reported: "
+              << numBoundarySegments << ", counted: "
+              << countBoundarySegments << ")." << std::endl;
+    std::abort();
+  }
+
+  std::vector< int > count( numBoundarySegments, 0 );
+  for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
+  {
+    if( !it->hasBoundaryIntersections() )
+      continue;
+    const IntersectionIterator iend = gridView.iend( *it );
+    for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
+    {
       if( !iit->boundary() )
         continue;
-      ++countBoundarySegments;
       const size_t index = iit->boundarySegmentIndex();
       if( index >= numBoundarySegments )
       {
@@ -1008,14 +1032,6 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
       if( !it->isLeaf() )
         checkBoundarySegmentIndexProlongation( gridView.grid(), *it, *iit );
     }
-  }
-
-  if( countBoundarySegments != numBoundarySegments )
-  {
-    std::cerr << "Error: Wrong number of boundary segments (reported: "
-              << numBoundarySegments << ", counted: "
-              << countBoundarySegments << ")." << std::endl;
-    error = true;
   }
 
   for( size_t i = 0; i < count.size(); ++i )
