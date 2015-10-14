@@ -12,7 +12,7 @@
  */
 
 #include <dune/grid/uggrid.hh>
-#include <doc/grids/gridfactory/hybridtestgrids.hh>
+#include <doc/grids/gridfactory/testgrids.hh>
 
 #include "gridcheck.hh"
 #include "checkcommunicate.hh"
@@ -168,8 +168,13 @@ void generalTests(bool greenClosure)
   //   Make some grids for testing
   // //////////////////////////////////////////////////////////
 
-  std::unique_ptr<Dune::UGGrid<2> > grid2d(make2DHybridTestGrid<Dune::UGGrid<2> >());
-  std::unique_ptr<Dune::UGGrid<3> > grid3d(make3DHybridTestGrid<Dune::UGGrid<3> >());
+  Dune::GridFactory< Dune::UGGrid<2> > factory2d;
+  Dune::TestGrids::hybrid2d.addToGridFactory( factory2d );
+  std::unique_ptr<Dune::UGGrid<2> > grid2d( factory2d.createGrid() );
+
+  Dune::GridFactory< Dune::UGGrid<3> > factory3d;
+  Dune::TestGrids::hybrid3d.addToGridFactory( factory3d );
+  std::unique_ptr<Dune::UGGrid<3> > grid3d( factory3d.createGrid() );
 
   // Switch of the green closure, if requested
   if (!greenClosure) {
