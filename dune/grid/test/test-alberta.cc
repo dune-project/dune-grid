@@ -26,9 +26,9 @@
 #include "check-albertareader.hh"
 #include "checkadaptation.hh"
 #include "checkpartition.hh"
-#include "mesh.hh"
 #include "checkgridfactory.hh"
 
+#include <doc/grids/gridfactory/testgrids.hh>
 
 template< int dim, int dimworld >
 struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > >
@@ -88,14 +88,12 @@ try {
 
 #if ALBERTA_DIM == 2 && GRIDDIM == 2
   std::cout << "Check GridFactory ..." <<std::endl;
-  Dune::Kuhn2dSimplexMesh mesh;
-  Dune::checkGridFactory< GridType > ( mesh );
+  Dune::checkGridFactory< GridType >( Dune::TestGrids::kuhn2d );
 #endif // #if ALBERTA_DIM == 2 && GRIDDIM == 2
 
 #if ALBERTA_DIM == 3 && GRIDDIM == 3
   std::cout << "Check GridFactory ..." <<std::endl;
-  Dune::Kuhn3dSimplexMesh mesh;
-  Dune::checkGridFactory< GridType > ( mesh );
+  Dune::checkGridFactory< GridType >( Dune::TestGrids::kuhn3d );
 #endif // #if ALBERTA_DIM == 3 && GRIDDIM == 3
 
   std::string filename;

@@ -241,7 +241,6 @@ SOURCES = basicunitcube.hh                      \
           functions.hh                          \
           gridcheck.cc                          \
           gridcheck.hh                          \
-					mesh.hh																\
           staticcheck.hh
 
 NORMALTESTS += testiteratorranges

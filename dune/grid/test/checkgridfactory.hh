@@ -13,19 +13,15 @@ namespace Dune
   // checkGridFactory
   // ----------------
 
-  template< class Grid, class Mesh >
-  void checkGridFactory ( const Mesh &mesh )
+  template< class Grid, class Mesh, class Projection >
+  void checkGridFactory ( const Mesh &mesh, Projection &&projection )
   {
     GridFactory< Grid > factory;
 
     // create grid from mesh
     typedef FieldVector< typename Grid::ctype, Grid::dimensionworld > Vertex;
 
-    for( Vertex vertex : mesh.vertices() )
-      factory.insertVertex( vertex );
-
-    for( const auto &element : mesh.elements() )
-      factory.insertElement( element.type(), element.vertices() );
+    mesh.addToGridFactory( factory, projection );
 
     std::unique_ptr< Grid > gridptr( factory.createGrid() );
     Grid &grid = *gridptr;
@@ -36,7 +32,7 @@ namespace Dune
     for( const auto vertex : vertices( grid.leafGridView() ) )
     {
       std::size_t idx = factory.insertionIndex( vertex );
-      Vertex v = mesh.vertices()[ idx ];
+      Vertex v = mesh.vertices[ idx ];
       if( (v - vertex.geometry().center() ).two_norm() > 1e-8 )
         DUNE_THROW( GridError, "GridFactory error, Vertex insertion Index wrong!" );
     }
@@ -45,28 +41,29 @@ namespace Dune
     std::vector< unsigned int > insertIndices, indices;
     for( const auto element : elements( grid.leafGridView() ) )
     {
-      indices.clear();
-      insertIndices.clear();
-
       std::size_t idx = factory.insertionIndex( element );
       unsigned int numSubeEntitites = element.subEntities( Grid::dimension );
 
-      if( numSubeEntitites != mesh.elements()[ idx ].vertices().size() )
+      insertIndices = mesh.elements[ idx ].second;
+      std::sort( insertIndices.begin(), insertIndices.end() );
+
+      if( numSubeEntitites != insertIndices.size() )
         DUNE_THROW( GridError, "GridFactory error, wrong number of subEntities inserted!" );
 
+      indices.clear();
       for( unsigned int i = 0; i < numSubeEntitites; ++i )
-      {
         indices.push_back( factory.insertionIndex( element.template subEntity< Grid::dimension >( i ) ) );
-        insertIndices.push_back( mesh.elements()[ idx ].vertices()[ i ] );
-      }
-
-      std::sort( insertIndices.begin(), insertIndices.end() );
       std::sort( indices.begin(), indices.end() );
 
       if( !std::equal( indices.begin(), indices.end(), insertIndices.begin() ) )
         DUNE_THROW( GridError, "GridFactory error, Element insertion index wrong!" );
     }
+  }
 
+  template< class Grid, class Mesh >
+  void checkGridFactory ( const Mesh &mesh )
+  {
+    checkGridFactory< Grid >( mesh, [] ( const typename Mesh::Vertex &v ) { return v; } );
   }
 
 } // namespace Dune
