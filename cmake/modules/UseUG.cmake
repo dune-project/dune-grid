@@ -1,15 +1,61 @@
-#
 # This module first tests for UG and then sets the necessary flags
 # and config.h defines. If UG is found UG_FOUND will be true.
 #
-# Provides the following function:
+# .. cmake_module::
 #
-# add_dune_ug_flags(<target1> [<target2> ...] [SOURCE_ONLY] [OBJECT])
+#    Checks for presence and usability of the UG library.
 #
-# This functions sets the necessary flags for a program that uses UG.
-# The option SOURCE_ONLY indicates that the targets are source files.
-# The option OBJECT indicates that the targets are object libraries.
+#    You may set the following variables to configure this module:
 #
+#    :ref:`UG_ROOT`
+#       Path list to search for UG
+#
+#    This module sets the following variables:
+#
+#    :code:`UG_FOUND`
+#       True if the UG library was found
+#
+#    :code:`UG_VERSION`
+#       The version string of the found UG library
+#
+#    :code:`UG_INCLUDES`
+#       The include directories needed or UG
+#
+#    :code:`UG_LIBRARIES`
+#       The libraries, UG needs to link to
+#
+#    .. note::
+#       This module is not called `FindUG`, because UG does ship the module
+#       of that name and we would otherwise shadow that one.
+#
+# .. cmake_variable:: UG_ROOT
+#
+#    You may set this variable to have :ref:`UseUG` look
+#    for the UG package in the given path before inspecting
+#    system paths.
+#
+# .. cmake_function:: add_dune_ug_flags
+#
+#    .. cmake_param:: targets
+#       :single:
+#       :positional:
+#       :required:
+#
+#       The targets to add the UG flags to.
+#
+#    .. cmake_param:: SOURCE_ONLY
+#       :option:
+#
+#       TODO doc me
+#       old doc: indicates that the targets are source files.
+#
+#    .. cmake_param:: OBJECT
+#       :option:
+#
+#       TODO doc me
+#       old doc: indicates that the targets are object libraries.
+#
+
 if(UG_ROOT AND NOT UG_DIR)
   # define the directory where the config file resides
   if(EXISTS "${UG_ROOT}/lib/cmake/ug/ug-config.cmake")

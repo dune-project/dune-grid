@@ -1,3 +1,8 @@
+# .. cmake_module::
+#
+#    This modules content is executed whenever a module required or suggests dune-grid!
+#
+
 include(CheckFunctionExists)
 check_function_exists(mkstemp HAVE_MKSTEMP)
 

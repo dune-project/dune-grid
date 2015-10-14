@@ -1,11 +1,13 @@
-#
 # Module providing convenience methods for compile binaries with AmiraMesh support.
 #
-# Provides the following functions:
+# .. cmake_function:: add_dune_amiramesh_flags
 #
-# add_dune_amiramesh_flags(target1 target2 ...)
+#    .. cmake_param:: targets
+#       :single:
+#       :positional:
+#       :required:
 #
-# adds AmiraMesh flags to the targets for compilation and linking
+#       The targets to add the amiramesh flags to.
 #
 
 function(add_dune_amiramesh_flags _targets)

@@ -1,12 +1,15 @@
-#
 # Module providing convenience methods for compile binaries with psurface support.
 #
-# Provides the following functions:
+# .. cmake_function:: add_dune_psurface_flags
 #
-# add_dune_psurface_flags(target1 target2 ...)
+#    .. cmake_param:: targets
+#       :single:
+#       :required:
+#       :positional:
 #
-# adds psurface flags to the targets for compilation and linking
+#       the targets to add the Psurface flags to.
 #
+
 function(add_dune_psurface_flags _targets)
   if(PSURFACE_FOUND)
     foreach(_target ${_targets})
