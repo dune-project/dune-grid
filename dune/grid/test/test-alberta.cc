@@ -12,7 +12,7 @@
 #include <dune/grid/albertagrid.hh>
 #include <dune/grid/albertagrid/dgfparser.hh>
 
-#include "basicunitcube.hh"
+#include <doc/grids/gridfactory/testgrids.hh>
 
 #include "../common/boundaryprojection.hh"
 
@@ -28,7 +28,6 @@
 #include "checkpartition.hh"
 #include "checkgridfactory.hh"
 
-#include <doc/grids/gridfactory/testgrids.hh>
 
 template< int dim, int dimworld >
 struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > >
@@ -57,6 +56,44 @@ void markOne ( GridType & grid , int num , int ref )
   grid.postAdapt();
 }
 
+template< class Grid, int dim >
+void addToGridFactory ( Dune::GridFactory< Grid > &factory, Dune::Dim< dim > );
+
+template< class Grid >
+void addToGridFactory ( Dune::GridFactory< Grid > &factory, Dune::Dim< 1 > )
+{
+  Dune::TestGrids::unitLine.addToGridFactory( factory,
+      [] ( const typename Dune::TestGrid< 1 >::Vertex &x ) {
+        typename Dune::TestGrid< 1 >::Vertex y = x;
+        y *= 2.0; y -= typename Dune::TestGrid< 1 >::Vertex( 1.0 );
+        return y;
+        }
+      );
+}
+
+template< class Grid >
+void addToGridFactory ( Dune::GridFactory< Grid > &factory, Dune::Dim< 2 > )
+{
+  Dune::TestGrids::kuhn2d.addToGridFactory( factory,
+      [] ( const typename Dune::TestGrid< 2 >::Vertex &x ) {
+        typename Dune::TestGrid< 2 >::Vertex y = x;
+        y *= 2.0; y -= typename Dune::TestGrid< 2 >::Vertex( 1.0 );
+        return y;
+        }
+      );
+}
+
+template< class Grid >
+void addToGridFactory ( Dune::GridFactory< Grid > &factory, Dune::Dim< 3 > )
+{
+  Dune::TestGrids::kuhn3d.addToGridFactory( factory,
+      [] ( const typename Dune::TestGrid< 3 >::Vertex &x ) {
+        typename Dune::TestGrid< 3 >::Vertex y = x;
+        y *= 2.0; y -= typename Dune::TestGrid< 3 >::Vertex( 1.0 );
+        return y;
+        }
+      );
+}
 
 template< class Grid >
 void checkProjectedUnitCube ()
@@ -64,8 +101,7 @@ void checkProjectedUnitCube ()
   typedef Dune::CircleBoundaryProjection< Grid::dimensionworld > Projection;
   std::cout << ">>> Checking projected unit cube..." << std::endl;
   Dune::GridFactory< Grid > gridFactory;
-  BasicUnitCube< Grid::dimension >::insertVertices( gridFactory, -1.0, 1.0 );
-  BasicUnitCube< Grid::dimension >::insertSimplices( gridFactory );
+  addToGridFactory( gridFactory, Dune::Dim< Grid::dimensionworld > () );
   gridFactory.insertBoundaryProjection( new Projection );
   gridFactory.markLongestEdge();
   Grid *grid = gridFactory.createGrid();
