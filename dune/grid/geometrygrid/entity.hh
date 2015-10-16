@@ -3,8 +3,6 @@
 #ifndef DUNE_GEOGRID_ENTITY_HH
 #define DUNE_GEOGRID_ENTITY_HH
 
-#include <dune/common/nullptr.hh>
-
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/grid.hh>

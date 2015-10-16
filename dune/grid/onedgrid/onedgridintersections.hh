@@ -7,7 +7,6 @@
  * \brief The OneDGridLevelIntersection and OneDGridLeafIntersection classes
  */
 
-#include <dune/common/nullptr.hh>
 #include <dune/grid/onedgrid/onedgridentity.hh>
 
 namespace Dune {

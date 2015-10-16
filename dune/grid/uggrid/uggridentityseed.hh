@@ -7,8 +7,6 @@
  *  \brief Implementation of EntitySeed for the UGGrid grid manager
  */
 
-#include <dune/common/nullptr.hh>
-
 namespace Dune {
 
   /** \brief Store a reference to an entity with a minimal memory footprint (one pointer)
