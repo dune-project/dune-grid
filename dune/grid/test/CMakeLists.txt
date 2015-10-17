@@ -138,34 +138,21 @@ set_property(TARGET ${TESTS} APPEND PROPERTY
 
 set(SOURCES
   basicunitcube.hh
-  check-albertareader.cc
   check-albertareader.hh
-  checkadaptation.cc
   checkadaptation.hh
-  checkcommunicate.cc
   checkcommunicate.hh
   checkentitylifetime.hh
-  checkentityseed.cc
   checkentityseed.hh
-  checkgeometry.cc
   checkgeometry.hh
-  checkgeometryinfather.cc
   checkgeometryinfather.hh
-  checkindexset.cc
   checkindexset.hh
-  checkintersectionit.cc
   checkintersectionit.hh
   checkintersectionlifetime.hh
-  checkiterators.cc
   checkiterators.hh
-  checkjacobians.cc
   checkjacobians.hh
-  checkpartition.cc
   checkpartition.hh
-  checktwists.cc
   checktwists.hh
   functions.hh
-  gridcheck.cc
   gridcheck.hh
   staticcheck.hh)
 
