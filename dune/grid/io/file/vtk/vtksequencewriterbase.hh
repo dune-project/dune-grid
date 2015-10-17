@@ -95,9 +95,9 @@ namespace Dune {
     /**
      * \brief Writes VTK data for the given time,
      * \param time The time(step) for the data to be written.
-     * \param ot VTK output type.
+     * \param type VTK output type.
      */
-    void write (double time, VTK::OutputType ot = VTK::ascii)
+    void write (double time, VTK::OutputType type = VTK::ascii)
     {
       /* remember current time step */
       unsigned int count = timesteps_.size();
@@ -105,9 +105,9 @@ namespace Dune {
 
       /* write VTK file */
       if(size_==1)
-        vtkWriter_->write(concatPaths(path_,seqName(count)),ot);
+        vtkWriter_->write(concatPaths(path_,seqName(count)),type);
       else
-        vtkWriter_->pwrite(seqName(count), path_,extendpath_,ot);
+        vtkWriter_->pwrite(seqName(count), path_,extendpath_,type);
 
       /* write pvd file ... only on rank 0 */
       if (rank_==0) {
