@@ -6,8 +6,6 @@
 // only include this code, if ENABLE_ALUGRID is defined
 #if HAVE_ALUGRID
 
-#include <dune/common/deprecated.hh>
-
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/alugrid/common/declaration.hh>
 #include <dune/grid/alugrid/common/checkparallel.hh>
@@ -47,26 +45,6 @@ namespace Dune
     {
       static const bool v = true;
     };
-
-    /** \brief ALUGrid is parallel when Comm == MPI_Comm
-       \ingroup ALUGrid
-     */
-    template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< ALUGrid< dim, dimworld, eltype, refinementtype, No_Comm > >
-    {
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = false;
-    };
-
-    /** \brief ALUGrid is parallel when Comm == MPI_Comm
-       \ingroup ALUGrid
-     */
-#if ALU3DGRID_PARALLEL
-    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< ALUGrid< 3, 3, eltype, refinementtype,  MPI_Comm > >
-    {
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = true;
-    };
-#endif
 
     /** \brief ALUGrid can communicate when Comm == MPI_Comm
        \ingroup ALUGrid

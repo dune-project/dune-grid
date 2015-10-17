@@ -2010,16 +2010,6 @@ namespace Dune {
       static const bool v = true;
     };
 
-    /** \brief YaspGrid is parallel
-     * \deprecated This capability will be removed after dune-grid 2.4.
-     * \ingroup YaspGrid
-     */
-    template<int dim, class Coordinates>
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< YaspGrid<dim, Coordinates> >
-    {
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = true;
-    };
-
     /** \brief YaspGrid is levelwise conforming
        \ingroup YaspGrid
      */

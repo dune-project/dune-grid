@@ -570,15 +570,6 @@ namespace Dune
       static const bool v = hasEntity<HostGrid,codim>::v;
     };
 
-    /** \brief is parallel when host grid is
-     * \ingroup IdentityGrid
-     */
-    template<class HostGrid>
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel<IdentityGrid<HostGrid> >
-    {
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = isParallel<HostGrid>::v;
-    };
-
     /** \brief has conforming level grids when host grid has
      * \ingroup IdentityGrid
      */

@@ -51,17 +51,6 @@ void checkCapabilities(const Grid& grid)
   static_assert(Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                 "hasBackupRestoreFacilities is not set correctly");
 
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  static const bool reallyParallel =
-#if ALU3DGRID_PARALLEL
-    Grid :: dimension == 3;
-#else
-    false ;
-#endif
-  static_assert(Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
-                "isParallel is not set correctly");
-#endif
-
   static const bool reallyCanCommunicate =
 #if ALU3DGRID_PARALLEL
     Grid :: dimension == 3;

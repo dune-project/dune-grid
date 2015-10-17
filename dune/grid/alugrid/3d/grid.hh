@@ -1113,12 +1113,6 @@ namespace Dune
     };
 
     template< ALU3dGridElementType elType, class Comm >
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< ALU3dGrid< elType, Comm > >
-    {
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = true;
-    };
-
-    template< ALU3dGridElementType elType, class Comm >
     struct isLevelwiseConforming< ALU3dGrid< elType, Comm > >
     {
       static const bool v = true;

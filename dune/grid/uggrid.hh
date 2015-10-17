@@ -1077,19 +1077,6 @@ namespace Dune {
       static const bool v = true;
     };
 
-    /** \brief UGGrid is parallel
-       \ingroup UGGrid
-     */
-    template<int dim>
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< UGGrid<dim> >
-    {
-#ifdef ModelP
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = true;
-#else // !ModelP
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = false;
-#endif // !ModelP
-    };
-
     /** \brief UGGrid is levelwise conforming
        \ingroup UGGrid
      */
