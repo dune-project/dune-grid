@@ -28,15 +28,20 @@ set(DEFAULT_DGF_WORLDDIM 1)
 set(DEFAULT_DGF_GRIDTYPE ONEDGRID)
 set(DGF_GRIDTYPES ONEDGRID ALBERTAGRID GEOGRID UGGRID)
 
-dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ONEDGRID
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ONEDGRID
   ASSERTION "(GRIDDIM == 1) && (WORLDDIM == 1)"
   DUNETYPE "Dune::OneDGrid"
   HEADERS "dune/grid/onedgrid.hh" "dune/grid/io/file/dgfparser/dgfoned.hh")
 
-dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE YASPGRID
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE YASPGRID
   ASSERTION "GRIDDIM == WORLDDIM"
   DUNETYPE "Dune::YaspGrid< dimgrid >"
   HEADERS "dune/grid/yaspgrid.hh" "dune/grid/io/file/dgfparser/dgfyasp.hh")
+
+option(ENABLE_GRID_SELECTOR "Grid selector added to config.h" OFF)
+if (ENABLE_GRID_SELECTOR)
+  set(GRID_CONFIG_H_BOTTOM "${GRID_CONFIG_H_BOTTOM} ${GRIDSELECTOR_GRIDS}")
+endif (ENABLE_GRID_SELECTOR)
 
 macro(add_dgf_flags target)
   cmake_parse_arguments(DGF "" "GRIDDIM;WORLDDIM;GRIDTYPE" "" ${ARGN})
