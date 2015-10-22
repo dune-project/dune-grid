@@ -16,6 +16,7 @@ dune_add_test(NAME subsamplingvtktest
               SOURCES subsamplingvtktest.cc test-linking.cc)
 
 dune_add_test(SOURCES vtktest.cc
+              MPI_RANKS 1 2
               SKIP_ON_77)
 
 dune_add_test(SOURCES vtksequencetest.cc)
@@ -28,14 +29,6 @@ if(UG_FOUND)
   dune_add_test(SOURCES starcdreadertest.cc
                 COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
 endif()
-
-# Porting this test will wait for the my next iteration, which will
-# introduce proper parallel testing.
-if(MPI_FOUND)
-  _add_test(NAME mpivtktest WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND mpirun -np 2 ./vtktest)
-  set_tests_properties(mpivtktest PROPERTIES SKIP_RETURN_CODE 77)
-endif(MPI_FOUND)
 
 # the gmsh tests
 dune_add_test(NAME gmshtest-onedgrid
