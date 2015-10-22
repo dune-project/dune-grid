@@ -162,7 +162,7 @@ namespace Dune
         }
 
         //! constructor
-        MinimumExchange (const IS& indexset, V& v, uint indexSetCodim)
+        MinimumExchange (const IS& indexset, V& v, unsigned int indexSetCodim)
         : indexset_(indexset),
           v_(v),
           indexSetCodim_(indexSetCodim)
@@ -171,13 +171,13 @@ namespace Dune
       private:
         const IS& indexset_;
         V& v_;
-        uint indexSetCodim_;
+        unsigned int indexSetCodim_;
       };
 
     public:
       /*! \brief Constructor needs to know the grid function space
        */
-      UniqueEntityPartition (const GridView& gridview, uint codim)
+      UniqueEntityPartition (const GridView& gridview, unsigned int codim)
       : assignment_(gridview.size(codim))
       {
         /** extract types from the GridView data type */
@@ -298,7 +298,7 @@ namespace Dune
       //! constructor
       IndexExchange (const GlobalIdSet& globalidset, MapId2Index& mapid2entity,
                      const typename GridView::IndexSet& localIndexSet, IndexMap& localGlobal,
-                     uint indexSetCodim)
+                     unsigned int indexSetCodim)
       : globalidset_(globalidset),
       mapid2entity_(mapid2entity),
       indexSet_(localIndexSet),
@@ -312,7 +312,7 @@ namespace Dune
 
       const typename GridView::IndexSet& indexSet_;
       IndexMap& localGlobalMap_;
-      uint indexSetCodim_;
+      unsigned int indexSetCodim_;
     };
 
   public:
@@ -469,7 +469,7 @@ namespace Dune
      * \param codim Codimension of the requested subentity
      */
     template <class Entity>
-    Index subIndex(const Entity& entity, uint i, uint codim) const
+    Index subIndex(const Entity& entity, unsigned int i, unsigned int codim) const
     {
       if (codim_==0)
       {
@@ -489,7 +489,7 @@ namespace Dune
      * \param codim If this matches GlobalIndexSet codimension, the number of entities is returned.
      *              Otherwise, zero is returned.
      */
-    unsigned int size(uint codim) const
+    unsigned int size(unsigned int codim) const
     {
       return (codim_==codim) ? nGlobalEntity_ : 0;
     }
@@ -498,7 +498,7 @@ namespace Dune
     const GridView gridview_;
 
     /** \brief Codimension of the entities that we hold indices for */
-    uint codim_;
+    unsigned int codim_;
 
     //! Global number of entities, i.e. number of entities without rendundant entities on interprocessor boundaries
     int nGlobalEntity_;
