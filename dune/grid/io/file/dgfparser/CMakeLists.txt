@@ -1,5 +1,5 @@
 add_subdirectory(blocks)
-add_subdirectory(test EXCLUDE_FROM_ALL)
+add_subdirectory(test)
 add_subdirectory(utils)
 
 dune_add_library(dgfparser OBJECT dgfparser.cc dgfug.cc)

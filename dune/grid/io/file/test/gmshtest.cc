@@ -89,7 +89,7 @@ try
   std::string oned(      path); oned += "oned-testgrid.msh";
 
   // test reading and writing of unstructured grids
-#if HAVE_UG
+#if GMSH_UGGRID
   std::cout << "reading and writing UGGrid<2>" << std::endl;
   testReadingAndWritingGrid<UGGrid<2> >( curved2d, curved2d+".UGGrid_2_-gmshtest-write.msh", refinements );
 
@@ -112,7 +112,7 @@ try
   testReadingAndWritingGrid<UGGrid<3> >( hybrid_3d, hybrid_3d+".UGGrid_3_-gmshtest-write.msh", refinements );
 #endif
 
-#if HAVE_ALBERTA
+#if GMSH_ALBERTAGRID
 #if ALBERTA_DIM==2
   std::cout << "reading and writing AlbertaGrid<2>" << std::endl;
   testReadingAndWritingGrid<AlbertaGrid<2> >( curved2d, curved2d+".AlbertaGrid_2_-gmshtest-write.msh", refinements );
@@ -125,17 +125,18 @@ try
 #endif
 #endif
 
-#if HAVE_ALUGRID
+#if GMSH_ONEDGRID
+  std::cout << "reading and writing OneDGrid" << std::endl;
+  testReadingAndWritingGrid<OneDGrid>( oned, oned+".OneDGrid-gmshtest-write.msh", refinements );
+#endif
+
+#if GMSH_ALUGRID
   std::cout << "reading and writing ALUGrid<2,2,simplex,nonconforming>" << std::endl;
   testReadingAndWritingGrid<ALUGrid<2,2,simplex,nonconforming> >( curved2d, curved2d+".ALUGrid_2_2_simplex-gmshtest-write.msh", refinements );
 
   std::cout << "reading and writing ALUGrid<3,3,simplex,nonconforming>" << std::endl;
   testReadingAndWritingGrid<ALUGrid<3,3,simplex,nonconforming> >( pyramid, pyramid+".ALUGrid_3_3_simplex-gmshtest-write.msh", refinements );
 #endif
-
-  std::cout << "reading and writing OneDGrid" << std::endl;
-  testReadingAndWritingGrid<OneDGrid>( oned, oned+".OneDGrid-gmshtest-write.msh", refinements );
-
 
   return 0;
 

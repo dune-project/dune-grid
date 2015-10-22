@@ -1,88 +1,71 @@
-set(GRIDDIM 2)
-set(GRIDTYPE YASPGRID)
-add_definitions("-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
+# TODO when porting this file to dune_add_test, the GMSH test needed to be adapted.
+# It previously relied on the flags added to the executable to switch different grid types.
+# I have adapted it quickly by adding a preprocesor variable. This could be and should
+# be done more nicely.
+#
 
-set(TESTS
-  gmshtest
-  gnuplottest
-  printgridtest)
+dune_add_test(SOURCES conformvolumevtktest.cc)
 
-set(CONSISTENT_VTK_TESTS
-  conformvolumevtktest
-  nonconformboundaryvtktest
-  vtktest
-  vtksequencetest)
+dune_add_test(SOURCES gnuplottest.cc)
 
-set(VTK_TESTS ${CONSISTENT_VTK_TESTS} subsamplingvtktest)
+dune_add_test(SOURCES nonconformboundaryvtktest.cc)
 
-if(AMIRAMESH_FOUND AND PSURFACE_FOUND)
-  set(AMIRAMESH_TESTS amirameshtest)
-endif(AMIRAMESH_FOUND AND PSURFACE_FOUND)
+dune_add_test(SOURCES printgridtest.cc)
 
-if(ALBERTA_FOUND)
-  set(ALBERTA_TESTS gmshtest-alberta2d gmshtest-alberta3d)
-endif(ALBERTA_FOUND)
+dune_add_test(NAME subsamplingvtktest
+              SOURCES subsamplingvtktest.cc test-linking.cc)
 
-if(ALUGRID_FOUND)
-  set(ALUGRID_TESTS gmshtest-alugrid)
-endif(ALUGRID_FOUND)
+dune_add_test(SOURCES vtktest.cc
+              SKIP_ON_77)
+
+dune_add_test(SOURCES vtksequencetest.cc)
+
+if(AMIRAMESH_FOUND)
+  dune_add_test(SOURCES amirameshtest.cc)
+endif()
 
 if(UG_FOUND)
-  set(UG_TESTS starcdreadertest)
-endif(UG_FOUND)
+  dune_add_test(SOURCES starcdreadertest.cc
+                COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+endif()
 
-set(BUILD_TESTS ${TESTS} ${UG_TESTS} ${CONSISTENT_VTK_TESTS} ${AMIRAMESH_TESTS})
-set(ALLTESTS ${BUILD_TESTS}  ${ALUGRID_TESTS} ${ALBERTA_TESTS})
-
-foreach(_test ${BUILD_TESTS})
-  add_executable(${_test} ${_test}.cc)
-  target_link_libraries(${_test} dunegrid ${DUNE_LIBS})
-endforeach(_test ${BUILD_TESTS})
-
-add_executable(subsamplingvtktest subsamplingvtktest.cc test-linking.cc)
-target_link_libraries(subsamplingvtktest dunegrid ${DUNE_LIBS})
-
-foreach(_test ${ALLTESTS})
-  add_test(${_test} ${_test})
-endforeach(_test ${ALLTESTS})
-
+# Porting this test will wait for the my next iteration, which will
+# introduce proper parallel testing.
 if(MPI_FOUND)
-  add_test(NAME mpivtktest WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  _add_test(NAME mpivtktest WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND mpirun -np 2 ./vtktest)
   set_tests_properties(mpivtktest PROPERTIES SKIP_RETURN_CODE 77)
 endif(MPI_FOUND)
 
-foreach(_test ${AMIRAMESH_TESTS})
-  add_dune_amiramesh_flags(${_test})
-  add_dune_ug_flags(${_test})
-  add_dune_alugrid_flags(${_test})
-  add_dune_alberta_flags(${_test} GRIDDIM 2)
-  add_dune_psurface_flags(${_test})
-endforeach(_test ${AMIRAMESH_TESTS})
+# the gmsh tests
+dune_add_test(NAME gmshtest-onedgrid
+              SOURCES gmshtest.cc
+              COMPILE_DEFINITIONS GMSH_ONEDGRID
+                                  DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
 
-add_dune_mpi_flags(${VTK_TESTS})
+if(HAVE_UG)
+  dune_add_test(NAME gmshtest-uggrid
+                SOURCES gmshtest.cc
+                COMPILE_DEFINITIONS GMSH_UGGRID
+                                    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+endif()
 
-add_executable(gmshtest-alugrid gmshtest.cc)
-set_property(
-  TARGET gmshtest-alugrid
-  APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE"
-  )
-add_dune_alugrid_flags(gmshtest-alugrid)
+if(HAVE_ALUGRID)
+  dune_add_test(NAME gmshtest-alugrid
+                SOURCES gmshtest.cc
+                COMPILE_DEFINITIONS GMSH_ALUGRID
+                                    DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE
+                                    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+endif()
 
-add_executable(gmshtest-alberta2d gmshtest.cc)
-add_dune_alberta_flags(gmshtest-alberta2d WORLDDIM 2)
+if(HAVE_ALBERTA)
+  add_executable(gmshtest-alberta2d gmshtest.cc)
+  add_dune_alberta_flags(gmshtest-alberta2d WORLDDIM 2)
+  target_compile_definitions(gmshtest-alberta2d PUBLIC GMSH_ALBERTAGRID DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET gmshtest-alberta2d)
 
-add_executable(gmshtest-alberta3d gmshtest.cc)
-add_dune_alberta_flags(gmshtest-alberta3d WORLDDIM 3)
-
-set_tests_properties(vtktest PROPERTIES SKIP_RETURN_CODE 77)
-
-foreach(_test ${UG_TESTS})
-  add_dune_ug_flags(${_test})
-endforeach(_test ${UG_TESTS})
-  add_dune_ug_flags(gmshtest)
-
-# We do not want want to build the tests during make all,
-# but just build them on demand
-add_directory_test_target(_test_target)
-add_dependencies(${_test_target} ${ALLTESTS})
+  add_executable(gmshtest-alberta3d gmshtest.cc)
+  add_dune_alberta_flags(gmshtest-alberta3d WORLDDIM 3)
+  target_compile_definitions(gmshtest-alberta3d PUBLIC GMSH_ALBERTAGRID DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET gmshtest-alberta3d)
+endif()
