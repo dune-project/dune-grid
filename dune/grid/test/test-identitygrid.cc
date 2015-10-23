@@ -35,6 +35,7 @@ void testDim()
 
 int main (int argc, char *argv[]) try
 {
+  Dune::MPIHelper::instance(argc, argv);
   testDim<1>();
   testDim<2>();
   testDim<3>();

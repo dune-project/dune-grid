@@ -28,6 +28,6 @@ set(HEADERS
   scsgmapper.hh
   universalmapper.hh)
 
-add_subdirectory(test EXCLUDE_FROM_ALL)
+add_subdirectory(test)
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/common)
