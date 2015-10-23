@@ -1300,25 +1300,32 @@ namespace Dune {
       return _L;
     }
 
-    /*! The new communication interface
+    // /*! The new communication interface
 
-       communicate objects for all codims on a given level
-     */
-    template<class DataHandleImp, class DataType>
-    void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
-    {
-      YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,level);
-    }
+    //    communicate objects for all codims on a given level
+    //  */
+    // template<class DataHandleImp, class DataType>
+    // void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
+    // {
+    //   YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,level);
+    // }
 
-    /*! The new communication interface
+    // /*! The new communication interface
 
-       communicate objects for all codims on the leaf grid
-     */
+    //    communicate objects for all codims on the leaf grid
+    //  */
+    // template<class DataHandleImp, class DataType>
+    // void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
+    // {
+    //   YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,this->maxLevel());
+    // }
+
     template<class DataHandleImp, class DataType>
     void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
     {
-      YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,this->maxLevel());
+      communicateIntersection<CommDataHandleIF<DataHandleImp,DataType>,1>(data,iftype,dir,this->maxLevel());
     }
+
 
     /*! The new communication interface
 
@@ -1326,6 +1333,250 @@ namespace Dune {
      */
     template<class DataHandle, int codim>
     void communicateCodim (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
+    {
+      // check input
+      if (!data.contains(dim,codim)) return; // should have been checked outside
+
+      // data types
+      typedef typename DataHandle::DataType DataType;
+
+      // access to grid level
+      YGridLevelIterator g = begin(level);
+
+      // find send/recv lists or throw error
+      const YGridList<Coordinates>* sendlist = 0;
+      const YGridList<Coordinates>* recvlist = 0;
+
+      if (iftype==InteriorBorder_InteriorBorder_Interface)
+      {
+        sendlist = &g->send_interiorborder_interiorborder[codim];
+        recvlist = &g->recv_interiorborder_interiorborder[codim];
+      }
+      if (iftype==InteriorBorder_All_Interface)
+      {
+        sendlist = &g->send_interiorborder_overlapfront[codim];
+        recvlist = &g->recv_overlapfront_interiorborder[codim];
+      }
+      if (iftype==Overlap_OverlapFront_Interface || iftype==Overlap_All_Interface)
+      {
+        sendlist = &g->send_overlap_overlapfront[codim];
+        recvlist = &g->recv_overlapfront_overlap[codim];
+      }
+      if (iftype==All_All_Interface)
+      {
+        sendlist = &g->send_overlapfront_overlapfront[codim];
+        recvlist = &g->recv_overlapfront_overlapfront[codim];
+      }
+
+      // change communication direction?
+      if (dir==BackwardCommunication)
+        std::swap(sendlist,recvlist);
+
+      int cnt;
+
+      // Size computation (requires communication if variable size)
+      std::vector<int> send_size(sendlist->size(),-1);    // map rank to total number of objects (of type DataType) to be sent
+      std::vector<int> recv_size(recvlist->size(),-1);    // map rank to total number of objects (of type DataType) to be recvd
+      std::vector<size_t*> send_sizes(sendlist->size(),static_cast<size_t*>(0)); // map rank to array giving number of objects per entity to be sent
+      std::vector<size_t*> recv_sizes(recvlist->size(),static_cast<size_t*>(0)); // map rank to array giving number of objects per entity to be recvd
+
+      // define type to iterate over send and recv lists
+      typedef typename YGridList<Coordinates>::Iterator ListIt;
+
+      if (data.fixedsize(dim,codim))
+      {
+        // fixed size: just take a dummy entity, size can be computed without communication
+        cnt=0;
+        for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+        {
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          send_size[cnt] = is->grid.totalsize() * data.size(*it);
+          cnt++;
+        }
+        cnt=0;
+        for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+        {
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          recv_size[cnt] = is->grid.totalsize() * data.size(*it);
+          cnt++;
+        }
+      }
+      else
+      {
+        // variable size case: sender side determines the size
+        cnt=0;
+        for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+        {
+          // allocate send buffer for sizes per entitiy
+          size_t *buf = new size_t[is->grid.totalsize()];
+          send_sizes[cnt] = buf;
+
+          // loop over entities and ask for size
+          int i=0; size_t n=0;
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
+          for ( ; it!=itend; ++it)
+          {
+            buf[i] = data.size(*it);
+            n += buf[i];
+            i++;
+          }
+
+          // now we know the size for this rank
+          send_size[cnt] = n;
+
+          // hand over send request to torus class
+          torus().send(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
+          cnt++;
+        }
+
+        // allocate recv buffers for sizes and store receive request
+        cnt=0;
+        for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+        {
+          // allocate recv buffer
+          size_t *buf = new size_t[is->grid.totalsize()];
+          recv_sizes[cnt] = buf;
+
+          // hand over recv request to torus class
+          torus().recv(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
+          cnt++;
+        }
+
+        // exchange all size buffers now
+        torus().exchange();
+
+        // release send size buffers
+        cnt=0;
+        for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+        {
+          delete[] send_sizes[cnt];
+          send_sizes[cnt] = 0;
+          cnt++;
+        }
+
+        // process receive size buffers
+        cnt=0;
+        for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+        {
+          // get recv buffer
+          size_t *buf = recv_sizes[cnt];
+
+          // compute total size
+          size_t n=0;
+          for (int i=0; i<is->grid.totalsize(); ++i)
+            n += buf[i];
+
+          // ... and store it
+          recv_size[cnt] = n;
+          ++cnt;
+        }
+      }
+
+
+      // allocate & fill the send buffers & store send request
+      std::vector<DataType*> sends(sendlist->size(), static_cast<DataType*>(0)); // store pointers to send buffers
+      cnt=0;
+      for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+      {
+        // allocate send buffer
+        DataType *buf = new DataType[send_size[cnt]];
+
+        // remember send buffer
+        sends[cnt] = buf;
+
+        // make a message buffer
+        MessageBuffer<DataType> mb(buf);
+
+        // fill send buffer; iterate over cells in intersection
+        typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+        it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+        typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+        itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
+        for ( ; it!=itend; ++it)
+          data.gather(mb,*it);
+
+        // hand over send request to torus class
+        torus().send(is->rank,buf,send_size[cnt]*sizeof(DataType));
+        cnt++;
+      }
+
+      // allocate recv buffers and store receive request
+      std::vector<DataType*> recvs(recvlist->size(),static_cast<DataType*>(0)); // store pointers to send buffers
+      cnt=0;
+      for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+      {
+        // allocate recv buffer
+        DataType *buf = new DataType[recv_size[cnt]];
+
+        // remember recv buffer
+        recvs[cnt] = buf;
+
+        // hand over recv request to torus class
+        torus().recv(is->rank,buf,recv_size[cnt]*sizeof(DataType));
+        cnt++;
+      }
+
+      // exchange all buffers now
+      torus().exchange();
+
+      // release send buffers
+      cnt=0;
+      for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+      {
+        delete[] sends[cnt];
+        sends[cnt] = 0;
+        cnt++;
+      }
+
+      // process receive buffers and delete them
+      cnt=0;
+      for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+      {
+        // get recv buffer
+        DataType *buf = recvs[cnt];
+
+        // make a message buffer
+        MessageBuffer<DataType> mb(buf);
+
+        // copy data from receive buffer; iterate over cells in intersection
+        if (data.fixedsize(dim,codim))
+        {
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          size_t n=data.size(*it);
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
+          for ( ; it!=itend; ++it)
+            data.scatter(mb,*it,n);
+        }
+        else
+        {
+          int i=0;
+          size_t *sbuf = recv_sizes[cnt];
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
+          for ( ; it!=itend; ++it)
+            data.scatter(mb,*it,sbuf[i++]);
+          delete[] sbuf;
+        }
+
+        // delete buffer
+        delete[] buf; // hier krachts !
+        cnt++;
+      }
+    }
+
+
+
+    template<class DataHandle, int codim>
+    void communicateIntersection (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
       // check input
       if (!data.contains(dim,codim)) return; // should have been checked outside
@@ -1565,6 +1816,10 @@ namespace Dune {
         cnt++;
       }
     }
+
+
+
+
 
     // The new index sets from DDM 11.07.2005
     const typename Traits::GlobalIdSet& globalIdSet() const
