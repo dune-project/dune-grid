@@ -1,6 +1,3 @@
-
-set(ALULIBS _DUNE_TARGET_OBJECTS:alu2d_ _DUNE_TARGET_OBJECTS:alu3d_)
-
 if(UG_FOUND)
   set(UGLIB _DUNE_TARGET_OBJECTS:uggrid_)
 endif(UG_FOUND)
@@ -16,10 +13,9 @@ dune_add_library(dunegrid
   _DUNE_TARGET_OBJECTS:onedgrid_
   _DUNE_TARGET_OBJECTS:dgfparser_
   _DUNE_TARGET_OBJECTS:dgfparserblocks_
-  ${ALULIBS} ${UGLIB}
+  ${UGLIB}
   ADD_LIBS ${DUNE_LIBS})
 add_dune_ug_flags(dunegrid ${_OBJECT_FLAG} NO_LINK_DUNEGRID)
-add_dune_alugrid_flags(dunegrid ${_OBJECT_FLAG} NO_LINK_DUNEGRID)
 
 if(ALBERTA_FOUND)
 foreach(_dim ${ALBERTA_WORLD_DIMS})

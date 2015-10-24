@@ -1,5 +1,4 @@
 add_subdirectory(albertagrid)
-add_subdirectory(alugrid)
 add_subdirectory(common)
 add_subdirectory(geometrygrid)
 add_subdirectory(identitygrid)
@@ -16,7 +15,6 @@ endif(UG_FOUND)
 
 install(FILES
   albertagrid.hh
-  alugrid.hh
   geometrygrid.hh
   identitygrid.hh
   onedgrid.hh
