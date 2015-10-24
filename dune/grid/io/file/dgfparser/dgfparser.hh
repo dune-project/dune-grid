@@ -273,8 +273,8 @@ namespace Dune {
          boundary segments:\n
          <b>default</b> <em>function</em>\n
          Note: Currently, the attached functions map global coordinates to global
-               coordinates. This feature is only available with AlbertaGrid (Version 3.0
-                   or above) or with ALUGrid.
+               coordinates. This feature is only available with AlbertaGrid or
+               with dune-ALUGrid.
        .
 
        @section CONSTR The Grid Construction Process
