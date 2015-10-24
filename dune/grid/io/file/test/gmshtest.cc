@@ -32,6 +32,7 @@
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #endif
 
+#include <dune/grid/onedgrid.hh>
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/gmshreader.hh>
