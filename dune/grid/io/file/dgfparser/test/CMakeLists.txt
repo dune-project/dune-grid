@@ -21,14 +21,6 @@ dune_add_test(NAME test-dgf-oned
                                   HAVE_DUNE_GRID=1
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
 
-if(ALUGRID_FOUND)
-  dune_add_test(NAME test-dgf-alu
-                SOURCES test-dgf.cc
-                COMPILE_DEFINITIONS ALUGRID_CUBE
-                                    GRIDDIM=3
-                                    HAVE_DUNE_GRID=1)
-endif(ALUGRID_FOUND)
-
 if(ALBERTA_FOUND)
   add_executable(test-dgf-alberta test-dgf.cc)
   add_dune_alberta_flags(test-dgf-alberta GRIDDIM 2)
