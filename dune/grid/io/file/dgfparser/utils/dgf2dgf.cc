@@ -19,7 +19,7 @@
  *  - Resolve the simplex generator block into a vertex and a simplex block, so
  *    that it can be used without triangle or tetgen.
  *  - Construct a refined macro grid, which is very useful when setting up
- *    parallel computations with ALUGrid.
+ *    parallel computations with dune-ALUGrid.
  *  .
  *
  *  The source code of this program also demonstrates the easy use of the DGF
