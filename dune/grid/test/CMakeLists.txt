@@ -8,9 +8,7 @@ dune_add_test(SOURCES test-geogrid.cc
 
 dune_add_test(SOURCES test-identitygrid.cc)
 
-# TODO: WTF? I need to set GRIDDIM to 2 to compile OneDGrid????????
-dune_add_test(SOURCES test-oned.cc
-              COMPILE_DEFINITIONS GRIDDIM=2 WORLDDIM=2)
+dune_add_test(SOURCES test-oned.cc)
 
 dune_add_test(SOURCES test-mcmg-geogrid.cc)
 
@@ -44,7 +42,7 @@ endif(ALUGRID_FOUND AND UG_FOUND)
 # - buildsystemwise. PLEASE DONT LOOK AT THIS IF YOU WANT TO KNOW HOW TO WRITE TESTS.
 if(ALBERTA_FOUND)
   add_executable(test-alberta EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test-alberta WORLDDIM ${GRIDDIM})
+  add_dune_alberta_flags(test-alberta WORLDDIM 2)
   target_compile_definitions(test-alberta PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
   dune_add_test(TARGET test-alberta)
 
