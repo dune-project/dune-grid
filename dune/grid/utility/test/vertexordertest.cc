@@ -26,15 +26,10 @@
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/generalvertexorder.hh>
 
-#include <dune/grid/alugrid.hh>
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/uggrid.hh>
 #include "../structuredgridfactory.hh"
 #include "../vertexorderfactory.hh"
-
-#ifdef ALUGRID_SURFACE_2D
-#define USE_ALUGRID_SURFACE_2D
-#endif
 
 void fail(int &result) {
   result = 1;
@@ -320,29 +315,6 @@ try {
   testVertexOrderByIdSimplices<Dune::UGGrid<2> >(result);
 #endif // HAVE_UG
 
-#if HAVE_ALUGRID
-  std::cout << "== Testing ALUGrid<2,2,simplex,conforming> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 3, Dune::simplex, Dune::conforming> >(result);
-#ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUGrid<2,3,simplex,conforming> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 3, Dune::simplex, Dune::conforming> >(result);
-#endif // USE_ALUGRID_SURFACE_2D
-
-#ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing Dune::ALUGrid<2,2,cube,nonconforming> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUGrid<2, 3, Dune::cube, Dune::nonconforming> >(result);
-  std::cout << "== Testing Dune::ALUGrid<2,3,cube,nonconforming> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUGrid<2, 3, Dune::cube, Dune::nonconforming> >(result);
-#endif // USE_ALUGRID_SURFACE_2D
-
-  std::cout << "== Testing ALUGrid<2,2,simplex,nonconforming> with simplices with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 2, Dune::simplex, Dune::nonconforming> >(result);
-#ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUGrid<2,3,simplex,nonconforming> with simplices with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 3, Dune::simplex, Dune::nonconforming> >(result);
-#endif // USE_ALUGRID_SURFACE_2D
-#endif // HAVE_ALUGRID
-
   //////////////////////////////////////////////////////////////////////
   //   Test 3d grids
   //////////////////////////////////////////////////////////////////////
@@ -356,15 +328,7 @@ try {
   testVertexOrderByIdSimplices<Dune::UGGrid<3> >(result);
 #endif // HAVE_UG
 
-#if HAVE_ALUGRID
-  std::cout << "== Testing Dune::ALUGrid<3,3,cube,nonconforming> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUGrid<3, 3, Dune::cube, Dune::nonconforming> >(result);
-  std::cout << "== Testing ALUGrid<3,3,simplex,nonconforming> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<3, 3, Dune::simplex, Dune::nonconforming> >(result);
-#endif // HAVE_ALUGRID
-
   return result;
-
 }
 catch (const Dune::Exception &e) {
   std::cerr << e << std::endl;

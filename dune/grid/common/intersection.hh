@@ -98,7 +98,7 @@ namespace Dune
      \if old_documentation
        Different types of physical boundaries can be modeled using either
        the global coordinates of the intersection or by using the
-       boundaryID method. On some grids (AluGrid, AlbertaGrid) this
+       boundaryID method. On some grids (dune-ALUGrid, AlbertaGrid) this
        method returns an integer value which can be individually assigned
        to each boundary intersection of the macro grid and which is
        prolonged to higher levels during grid refinement.<br>
