@@ -1,12 +1,10 @@
 MODULES = \
   AddAlbertaFlags.cmake \
-  AddALUGridFlags.cmake \
   AddAmiraMeshFlags.cmake \
   AddPsurfaceFlags.cmake \
   CheckExperimentalGridExtensions.cmake \
   DuneGridMacros.cmake \
   FindAlberta.cmake \
-  FindALUGrid.cmake \
   FindAmiraMesh.cmake \
   FindPsurface.cmake \
   GridType.cmake \
