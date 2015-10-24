@@ -3,8 +3,6 @@ INPUT                 += @srcdir@/mainpage.txt \
                          @top_srcdir@/dune/grid/modules.txt \
                          @top_srcdir@/dune/grid/albertagrid \
                          @top_srcdir@/dune/grid/albertagrid.hh \
-                         @top_srcdir@/dune/grid/alugrid.hh \
-                         @top_srcdir@/dune/grid/alugrid \
                          @top_srcdir@/dune/grid/common \
                          @top_srcdir@/dune/grid/geometrygrid.hh \
                          @top_srcdir@/dune/grid/geometrygrid \
@@ -41,20 +39,9 @@ IMAGE_PATH            += \
                          @top_srcdir@/dune/grid/io/file/dgfparser/test \
                          @top_srcdir@/dune/grid/geometrygrid
 
-PREDEFINED            += ENABLE_ALUGRID \
+PREDEFINED            += \
                          HAVE_ALBERTA:=1 \
                          HAVE_UG:=1
 
 EXCLUDE               += \
-                         @top_srcdir@/dune/grid/alugrid/3d/mappings_imp.cc \
-                         @top_srcdir@/dune/grid/alugrid/3d/faceutility_imp.cc \
-                         @top_srcdir@/dune/grid/alugrid/3d/entity_imp.cc \
-                         @top_srcdir@/dune/grid/alugrid/3d/geometry_imp.cc \
-                         @top_srcdir@/dune/grid/alugrid/3d/grid_imp.cc \
-                         @top_srcdir@/dune/grid/alugrid/3d/iterator_imp.cc \
-                         @top_srcdir@/dune/grid/alugrid/3d/topology.cc \
-                         @top_srcdir@/dune/grid/alugrid/2d/entity_imp.cc \
-                         @top_srcdir@/dune/grid/alugrid/2d/geometry_imp.cc  \
-                         @top_srcdir@/dune/grid/alugrid/2d/grid_imp.cc \
-                         @top_srcdir@/dune/grid/alugrid/2d/iterator_imp.cc \
                          @top_srcdir@/dune/grid/io/file/amiramesh/psurface.cc
