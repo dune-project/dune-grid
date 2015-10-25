@@ -16,13 +16,31 @@ namespace Dune
     IntervalBlock::IntervalBlock ( std::istream &in )
       : BasicBlock( in, "Interval" ),
         intervals_( 0 ),
+        map_(),
         good_( false ),
         dimw_( 0 )
     {
       if( !isactive() )
         return;
 
+      const bool hasMapping = findtoken("map");
+
+      if( hasMapping )
+      {
+        int x;
+        map_.clear();
+        while( getnextentry( x ) )
+        {
+          map_.push_back( x );
+        }
+      }
+      else
+      {
+        reset();
+      }
+
       getnextline();
+
       for( double x; getnextentry( x ); ++dimw_ ) ;
       if( dimw_ == 0 )
       {
@@ -30,8 +48,34 @@ namespace Dune
                     "Too few coordinates for point p0 in IntervalBlock" );
       }
 
+      // reset stream
       reset();
+      // skip first line if mapping was found
+      if( hasMapping )
+        getnextline();
+
       while( next() ) ;
+
+      // set default map
+      if( map_.empty() )
+      {
+        map_.resize( dimw_ );
+        for( int i=0; i<dimw_; ++i )
+          map_[ i ] = i;
+      }
+
+      // check mapping
+      if( int(map_.size()) != dimw_ )
+        DUNE_THROW( DGFException,
+                    "Error in " << *this << ": "
+                                << "Incomplete ijk mapping "
+                                << "(got " << map_.size() << " entries, "
+                                << "expected " << dimw_ << " entries." );
+      for( int i=0; i<dimw_; ++i )
+      {
+        if( map_[ i ] < 0 || map_[ i ] >= dimw_ )
+          DUNE_THROW( DGFException, "Error in " << *this << ": ijk mapping is not a permutation of {0,...," << dimw_-1 << "}");
+      }
     }
 
 
@@ -39,7 +83,7 @@ namespace Dune
     {
       dverb << "reading vertices for interval " << block << "... ";
 
-      const Interval &interval = get( block );
+      Interval interval( get( block ), map_ );
 
       size_t old_size = vtx.size();
       vtx.resize( old_size + nofvtx( block ) );
@@ -58,7 +102,8 @@ namespace Dune
 
         assert( m < vtx.size() );
         for( int j = 0; j < dimw(); ++j ) {
-          vtx[ m ][ j ] = interval.p[ 0 ][ j ] + double(i[ j ])*interval.h[ j ];
+          // apply mapping to get correct coordinates
+          vtx[ m ][ map_[ j ] ] = interval.p[ 0 ][ j ] + double(i[ j ])*interval.h[ j ];
         }
         ++m;
 
@@ -76,8 +121,7 @@ namespace Dune
     {
       dverb << "generating cubes for interval " << block << "... ";
 
-      const Interval &interval = get( block );
-
+      Interval interval( get( block ), map_ );
       const int verticesPerCube = 1 << dimw();
 
       size_t old_size = cubes.size();
