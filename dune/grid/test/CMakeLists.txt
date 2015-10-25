@@ -24,7 +24,8 @@ if(UG_FOUND)
 
   dune_add_test(SOURCES test-parallel-ug.cc)
 
-  dune_add_test(SOURCES test-loadbalancing.cc)
+  dune_add_test(SOURCES test-loadbalancing.cc
+                SKIP_ON_77)
 endif(UG_FOUND)
 
 # The alberta tests are only alibi-ported, until the  grid and world dimension
