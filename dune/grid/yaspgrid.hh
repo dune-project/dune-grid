@@ -1573,6 +1573,12 @@ namespace Dune {
       }
     }
 
+
+    /** build Dune intersection from codim 1 entity
+     *
+     * The inside cell from the intersection lives on the same proces, the outside
+     * cell is on another proces.
+     */
     template <typename Ent>
     Dune::Intersection<GridImp, Dune::YaspIntersection<GridImp> > buildIntersection(const Ent& ent ) const
     {
@@ -1585,7 +1591,6 @@ namespace Dune {
 
       // origin (lowerleft) coordinate from codim 0 cells of interior part
       auto origin = yglit->interior[0].dataBegin()->origin();
-      // std::cout << "palpo origin: " << origin << std::endl;
 
       // Determine coordinate of codim 0 entity corresponding to
       // given codim 1 entity that lives on the same process.
@@ -1616,13 +1621,8 @@ namespace Dune {
       yi._count = count;
       yi.update();
 
-      // std::cout << "palpo count: " << unsigned(yi._count) << std::endl;
-
       // create Dune intersection
       Dune::Intersection<GridImp,Dune::YaspIntersection<GridImp> > inter(yi);
-      // std::cout << "palpo inside center: " << inter.inside().geometry().center() << std::endl;
-      // std::cout << "palpo outside center: " << inter.outside().geometry().center() << std::endl
-        ;
 
       return inter;
     }
