@@ -1594,6 +1594,59 @@ namespace Dune {
       }
     }
 
+    template <typename Ent>
+    Dune::Intersection<GridImp, Dune::YaspIntersection<GridImp> > buildIntersection(const Ent& ent ) const
+    {
+      // get current grid level
+      YGridLevelIterator yglit = begin(GridImp::getRealImplementation(ent).level());
+
+      // coordinate and shift from codim 1 entity
+      auto shift = GridImp::getRealImplementation(ent).transformingsubiterator().shift();
+      auto coord = GridImp::getRealImplementation(ent).transformingsubiterator().coord();
+
+      // origin (lowerleft) coordinate from codim 0 cells of interior part
+      auto origin = yglit->interior[0].dataBegin()->origin();
+      // std::cout << "palpo origin: " << origin << std::endl;
+
+      // Determine coordinate of codim 0 entity corresponding to
+      // given codim 1 entity that lives on the same process.
+      //
+      // On the same time we calculate the count of the
+      // intersection we want to create. The index where the
+      // shift is equal to zero corresponds to the direction
+      // _dir of the intersection. If we need to transform coord
+      // we are in the case were _face from intersection equals
+      // one. Count can be computed by 2*_dir+_face.
+      unsigned int count(0);
+      for (unsigned int i=0; i<coord.size(); ++i){
+        if (shift[i]==0){
+          count = 2*i;
+          if (coord[i]>origin[i]){
+            coord[i]-=1;
+            count += 1;
+          }
+        }
+      }
+
+      // create yasp grid codim 0 entity from iterators
+      typename YGrid::Iterator ygit(yglit->overlapfront[0], coord, 0);
+      YaspEntity<0,dim,GridImp> blub(yglit, ygit);
+
+      // create intersection
+      Dune::YaspIntersection<GridImp> yi(blub,false);
+      yi._count = count;
+      yi.update();
+
+      // std::cout << "palpo count: " << unsigned(yi._count) << std::endl;
+
+      // create Dune intersection
+      Dune::Intersection<GridImp,Dune::YaspIntersection<GridImp> > inter(yi);
+      // std::cout << "palpo inside center: " << inter.inside().geometry().center() << std::endl;
+      // std::cout << "palpo outside center: " << inter.outside().geometry().center() << std::endl
+        ;
+
+      return inter;
+    }
 
 
     template<class DataHandle, int codim>
@@ -1766,52 +1819,7 @@ namespace Dune {
         for ( ; it!=itend; ++it){
           if(is->rank==0){
             std::cout << "palpo rank: " << is->rank << std::endl;
-
-            // get current grid level
-            YGridLevelIterator yglit = begin(GridImp::getRealImplementation(*it).level());
-
-            // coordinate and shift from codim 1 entity
-            auto shift = GridImp::getRealImplementation(*it).transformingsubiterator().shift();
-            auto coord = GridImp::getRealImplementation(*it).transformingsubiterator().coord();
-
-            // origin (lowerleft) coordinate from codim 0 cells of interior part
-            auto origin = yglit->interior[0].dataBegin()->origin();
-            std::cout << "palpo origin: " << origin << std::endl;
-
-            // Determine coordinate of codim 0 entity corresponding to
-            // given codim 1 entity that lives on the same process.
-            //
-            // On the same time we calculate the count of the
-            // intersection we want to create. The index where the
-            // shift is equal to zero corresponds to the direction
-            // _dir of the intersection. If we need to transform coord
-            // we are in the case were _face from intersection equals
-            // one. Count can be computed by 2*_dir+_face.
-            unsigned int count(0);
-            for (unsigned int i=0; i<coord.size(); ++i){
-              if (shift[i]==0){
-                count = 2*i;
-                if (coord[i]>origin[i]){
-                  coord[i]-=1;
-                  count += 1;
-                }
-              }
-            }
-
-            // create yasp grid codim 0 entity from iterators
-            typename YGrid::Iterator ygit(yglit->overlapfront[0], coord, 0);
-            YaspEntity<0,dim,GridImp> blub(yglit, ygit);
-
-            // create intersection
-            Dune::YaspIntersection<GridImp> yi(blub,false);
-            yi._count = count;
-            yi.update();
-
-
-            std::cout << "palpo count: " << unsigned(yi._count) << std::endl;
-
-            // create Dune intersection
-            Dune::Intersection<GridImp,Dune::YaspIntersection<GridImp> > inter(yi);
+            Dune::Intersection<GridImp,Dune::YaspIntersection<GridImp> > inter(buildIntersection(*it));
             std::cout << "palpo inside center: " << inter.inside().geometry().center() << std::endl;
             std::cout << "palpo outside center: " << inter.outside().geometry().center() << std::endl;
          }
