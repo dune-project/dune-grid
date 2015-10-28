@@ -1323,7 +1323,7 @@ namespace Dune {
     template<class DataHandleImp, class DataType>
     void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
     {
-      communicateIntersection<CommDataHandleIF<DataHandleImp,DataType>,1>(data,iftype,dir,this->maxLevel());
+      communicateIntersection<CommDataHandleIF<DataHandleImp,DataType> >(data,iftype,dir,this->maxLevel());
     }
 
 
@@ -1628,9 +1628,11 @@ namespace Dune {
     }
 
 
-    template<class DataHandle, int codim>
+    template<class DataHandle>
     void communicateIntersection (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
+      const int codim=1;
+
       // check input
       if (!data.contains(dim,codim)) return; // should have been checked outside
 
@@ -1688,7 +1690,8 @@ namespace Dune {
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
-          send_size[cnt] = is->grid.totalsize() * data.size(*it);
+          auto intersection = buildIntersection(*it);
+          send_size[cnt] = is->grid.totalsize() * data.size(intersection);
           cnt++;
         }
         cnt=0;
@@ -1696,7 +1699,8 @@ namespace Dune {
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
-          recv_size[cnt] = is->grid.totalsize() * data.size(*it);
+          auto intersection = buildIntersection(*it);
+          recv_size[cnt] = is->grid.totalsize() * data.size(intersection);
           cnt++;
         }
       }
@@ -1718,7 +1722,8 @@ namespace Dune {
           itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
           for ( ; it!=itend; ++it)
           {
-            buf[i] = data.size(*it);
+            auto intersection = buildIntersection(*it);
+            buf[i] = data.size(intersection);
             n += buf[i];
             i++;
           }
@@ -1803,7 +1808,8 @@ namespace Dune {
             std::cout << "palpo outside center: " << inter.outside().geometry().center() << std::endl;
          }
 
-          data.gather(mb,*it);
+          auto intersection = buildIntersection(*it);
+          data.gather(mb,intersection);
         }
 
         // hand over send request to torus class
@@ -1854,11 +1860,14 @@ namespace Dune {
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
-          size_t n=data.size(*it);
+          auto intersection = buildIntersection(*it);
+          size_t n=data.size(intersection);
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
-          for ( ; it!=itend; ++it)
-            data.scatter(mb,*it,n);
+          for ( ; it!=itend; ++it){
+            auto intersection = buildIntersection(*it);
+            data.scatter(mb,intersection,n);
+          }
         }
         else
         {
@@ -1868,8 +1877,10 @@ namespace Dune {
           it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
-          for ( ; it!=itend; ++it)
-            data.scatter(mb,*it,sbuf[i++]);
+          for ( ; it!=itend; ++it){
+            auto intersection = buildIntersection(*it);
+            data.scatter(mb,intersection,sbuf[i++]);
+          }
           delete[] sbuf;
         }
 
