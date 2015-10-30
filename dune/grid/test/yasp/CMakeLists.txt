@@ -1,85 +1,78 @@
+# Add all tests without deprecations
+dune_add_test(NAME test-yaspgrid-backuprestore-equidistant-without-deprecations
+              SOURCES test-yaspgrid-backuprestore-equidistant.cc
+              MPI_RANKS 1 2
+              COMPILE_DEFINITIONS DISABLE_DEPRECATED_METHOD_CHECK=1
+              COMPILE_FLAGS -Wall -Werror)
 
-# add test include property manually because the folder is not called "test"
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  PROPERTY TEST_INCLUDE_FILE ${CMAKE_CURRENT_BINARY_DIR}/BuildTests.cmake)
+dune_add_test(NAME test-yaspgrid-backuprestore-equidistantoffset-without-deprecations
+              SOURCES test-yaspgrid-backuprestore-equidistantoffset.cc
+              MPI_RANKS 1 2
+              COMPILE_DEFINITIONS DISABLE_DEPRECATED_METHOD_CHECK=1
+              COMPILE_FLAGS -Wall -Werror)
 
-set(TESTS
-  test-yaspgrid-backuprestore-equidistant
-  test-yaspgrid-backuprestore-equidistantoffset
-  test-yaspgrid-backuprestore-tensor
-  test-yaspgrid-tensorgridfactory
-  test-yaspgrid-yaspfactory-1d
-  test-yaspgrid-yaspfactory-2d
-  test-yaspgrid-yaspfactory-3d
-)
+dune_add_test(NAME test-yaspgrid-backuprestore-tensor-without-deprecations
+              SOURCES test-yaspgrid-backuprestore-tensor.cc
+              MPI_RANKS 1 2
+              COMPILE_DEFINITIONS DISABLE_DEPRECATED_METHOD_CHECK=1
+              COMPILE_FLAGS -Wall -Werror)
 
-# Add tests to test target
-add_directory_test_target(_test_target)
+dune_add_test(NAME test-yaspgrid-tensorgridfactory-without-deprecations
+              SOURCES test-yaspgrid-tensorgridfactory.cc
+              MPI_RANKS 1 2
+              COMPILE_DEFINITIONS DISABLE_DEPRECATED_METHOD_CHECK=1
+              COMPILE_FLAGS -Wall -Werror)
 
-# Add all tests, do not check deprecation
-foreach(_test ${TESTS})
-  add_executable(${_test} EXCLUDE_FROM_ALL ${_test}.cc)
-  add_dune_mpi_flags(${_test})
+dune_add_test(NAME test-yaspgrid-yaspfactory-1d-without-deprecations
+              SOURCES test-yaspgrid-yaspfactory-1d.cc
+              MPI_RANKS 1 2
+              COMPILE_DEFINITIONS DISABLE_DEPRECATED_METHOD_CHECK=1
+              COMPILE_FLAGS -Wall -Werror)
 
-  target_compile_definitions(${_test}
-    PUBLIC
-    DISABLE_DEPRECATED_METHOD_CHECK=1
-  )
-  target_compile_options(${_test}
-    PUBLIC
-    -Wall
-    -Werror
-  )
+dune_add_test(NAME test-yaspgrid-yaspfactory-2d-without-deprecations
+              SOURCES test-yaspgrid-yaspfactory-2d.cc
+              MPI_RANKS 1 2
+              COMPILE_DEFINITIONS DISABLE_DEPRECATED_METHOD_CHECK=1
+              COMPILE_FLAGS -Wall -Werror)
 
-  target_link_libraries(${_test} "dunegrid" ${DUNE_LIBS})
-  add_test(${_test} ${_test})
-  add_dependencies(${_test_target} ${_test})
-endforeach(_test ${TESTS})
+dune_add_test(NAME test-yaspgrid-yaspfactory-3d-without-deprecations
+              SOURCES test-yaspgrid-yaspfactory-3d.cc
+              MPI_RANKS 1 2
+              COMPILE_DEFINITIONS DISABLE_DEPRECATED_METHOD_CHECK=1
+              COMPILE_FLAGS -Wall -Werror)
 
-# Add all tests again, this time with deprecation check
-foreach(_test ${TESTS})
-  add_executable(${_test}_dep EXCLUDE_FROM_ALL ${_test}.cc)
-  add_dune_mpi_flags(${_test}_dep)
+# Add all tests with deprecations!
+dune_add_test(NAME test-yaspgrid-backuprestore-equidistant-with-deprecations
+              SOURCES test-yaspgrid-backuprestore-equidistant.cc
+              MPI_RANKS 1 2
+              COMPILE_FLAGS -Wall -Werror -Wno-deprecated-declarations)
 
-  target_compile_options(${_test}_dep
-    PUBLIC
-    -Wall
-    -Wno-deprecated-declarations
-    -Werror
-  )
+dune_add_test(NAME test-yaspgrid-backuprestore-equidistantoffset-with-deprecations
+              SOURCES test-yaspgrid-backuprestore-equidistantoffset.cc
+              MPI_RANKS 1 2
+              COMPILE_FLAGS -Wall -Werror -Wno-deprecated-declarations)
 
-  target_link_libraries(${_test}_dep "dunegrid" ${DUNE_LIBS})
-  add_test(${_test}_dep ${_test}_dep)
-  add_dependencies(${_test_target} ${_test}_dep)
-endforeach(_test ${TESTS})
+dune_add_test(NAME test-yaspgrid-backuprestore-tensor-with-deprecations
+              SOURCES test-yaspgrid-backuprestore-tensor.cc
+              MPI_RANKS 1 2
+              COMPILE_FLAGS -Wall -Werror -Wno-deprecated-declarations)
 
+dune_add_test(NAME test-yaspgrid-tensorgridfactory-with-deprecations
+              SOURCES test-yaspgrid-tensorgridfactory.cc
+              MPI_RANKS 1 2
+              COMPILE_FLAGS -Wall -Werror -Wno-deprecated-declarations)
 
-# If we have MPI, include parallel tests
-if(MPI_FOUND)
+dune_add_test(NAME test-yaspgrid-yaspfactory-1d-with-deprecations
+              SOURCES test-yaspgrid-yaspfactory-1d.cc
+              MPI_RANKS 1 2
+              COMPILE_FLAGS -Wall -Werror -Wno-deprecated-declarations)
 
-  set(TESTS_PARALLEL
-    test-yaspgrid-backuprestore
-    test-yaspgrid-tensorgridfactory
-    test-yaspgrid-yaspfactory-1d
-    test-yaspgrid-yaspfactory-2d
-    test-yaspgrid-yaspfactory-3d
-  )
+dune_add_test(NAME test-yaspgrid-yaspfactory-2d-with-deprecations
+              SOURCES test-yaspgrid-yaspfactory-2d.cc
+              MPI_RANKS 1 2
+              COMPILE_FLAGS -Wall -Werror -Wno-deprecated-declarations)
 
-  # Create tests with mpi command and add them to the test target
-  foreach(_test ${TESTS_PARALLEL})
-    add_test(NAME ${_test}_parallel
-      COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} "2" ${_test})
-    add_dependencies(${_test_target} ${_test}_parallel)
-  endforeach(_test ${TESTS_PARALLEL})
-
-endif(MPI_FOUND)
-
-set(SOURCES
-  test-yaspgrid-backuprestore.cc
-  test-yaspgrid-tensorgridfactory.cc
-  test-yaspgrid-yaspfactory-1d.cc
-  test-yaspgrid-yaspfactory-2d.cc
-  test-yaspgrid-yaspfactory-3d.cc
-  test-yaspgrid.hh
-)
-install(FILES ${SOURCES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/test)
+dune_add_test(NAME test-yaspgrid-yaspfactory-3d-with-deprecations
+              SOURCES test-yaspgrid-yaspfactory-3d.cc
+              MPI_RANKS 1 2
+              COMPILE_FLAGS -Wall -Werror -Wno-deprecated-declarations)
