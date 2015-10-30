@@ -13,9 +13,6 @@
 #include <dune/common/hash.hh>
 #include <dune/common/float_cmp.hh>
 #include <dune/grid/common/mcmgmapper.hh>
-#include <dune/grid/yaspgrid.hh>
-#include <dune/grid/yaspgrid/backuprestore.hh>
-#include <dune/grid/utility/tensorgridfactory.hh>
 
 namespace Dune {
 

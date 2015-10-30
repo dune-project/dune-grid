@@ -93,6 +93,7 @@ endif(ALBERTA_FOUND)
 install(FILES basicunitcube.hh
               check-albertareader.hh
               checkadaptation.hh
+              checkcomcorrectness.hh
               checkcommunicate.hh
               checkentitylifetime.hh
               checkentityseed.hh
