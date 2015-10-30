@@ -9,7 +9,7 @@
 namespace Dune
 {
 
-  /** \brief %Intersection of a mesh entities of codimension 0 ("elements")
+  /** \brief %Intersection of a mesh entity of codimension 0 ("element")
       with a "neighboring" element or with the domain
       boundary.
 
@@ -251,7 +251,7 @@ namespace Dune
      *
      *  In the DUNE framework, data is stored in arrays, addressed by an index,
      *  in this case the boundarySegmentIndex. The size of these arrays can be
-     *  obtained by the Grid::numBoundarySegments.
+     *  obtained by the Grid::numBoundarySegments method.
      *
      *  The indices returned by this method are consecutive, zero based, and local to the
      *  processor. Notice that these indices do not necessarily coincide with the insertion
@@ -362,7 +362,7 @@ namespace Dune
      *  local coordinates of the intersection to global (world) coordinates.
      *
      *  \note If the returned geometry has type <b>none</b> then only a limited set of features
-     *        is availalbe for the geometry, i.e. center and volume.
+     *        is available for the geometry, i.e. center and volume.
      *
      *  \note Previously, the geometry was encapsulated in the intersection object
      *        and a const reference was returned.
