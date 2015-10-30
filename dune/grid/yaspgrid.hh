@@ -1801,13 +1801,6 @@ namespace Dune {
         itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
 
         for ( ; it!=itend; ++it){
-          if(is->rank==0){
-            std::cout << "palpo rank: " << is->rank << std::endl;
-            Dune::Intersection<GridImp,Dune::YaspIntersection<GridImp> > inter(buildIntersection(*it));
-            std::cout << "palpo inside center: " << inter.inside().geometry().center() << std::endl;
-            std::cout << "palpo outside center: " << inter.outside().geometry().center() << std::endl;
-         }
-
           auto intersection = buildIntersection(*it);
           data.gather(mb,intersection);
         }
