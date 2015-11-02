@@ -25,4 +25,4 @@ am
 *.o
 compile
 test-driver
-build-cmake/
+build-*/
