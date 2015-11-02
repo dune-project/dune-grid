@@ -21,7 +21,6 @@ include(DuneMacros)
 # start a dune project with information from dune.module
 dune_project()
 
-add_subdirectory("m4")
 add_subdirectory("dune")
 add_subdirectory("doc")
 add_subdirectory("lib")
