@@ -6,7 +6,15 @@ endmacro(_dune_set_alberta val)
 
 set(ALBERTA_LIBCHECK ON CACHE BOOL "Whether to try to link against libalberta_Nd.")
 set(ALBERTA_ROOT "" CACHE FILEPATH "Root directory of Alberta installation.")
-set(ALBERTA_EXTRA_LIBS "ltdl;m" CACHE FILEPATH "Extra libraries needed by alberta for linking.")
+set(ALBERTA_EXTRA_LIBS "m" CACHE FILEPATH "Extra libraries needed by alberta for linking.")
+# check for ltdl
+find_library(ALBERTA_LTDL_LIB
+  NAMES ltdl
+  PATH_SUFFIXES lib lib32 lib64
+)
+if (ALBERTA_LTDL_LIB)
+  list(APPEND ALBERTA_EXTRA_LIBS "ltdl")
+endif()
 
 # look for header alberta/alberta.h
 find_path(ALBERTA_INCLUDE_DIR

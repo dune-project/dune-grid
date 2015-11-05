@@ -519,14 +519,14 @@ namespace Dune {
         g.overlap[codim].finalize(overlap_it);
         g.interiorborder[codim].finalize(interiorborder_it);
         g.interior[codim].finalize(interior_it);
-        g.send_overlapfront_overlapfront[codim].finalize(send_overlapfront_overlapfront_it);
-        g.recv_overlapfront_overlapfront[codim].finalize(recv_overlapfront_overlapfront_it);
-        g.send_overlap_overlapfront[codim].finalize(send_overlap_overlapfront_it);
-        g.recv_overlapfront_overlap[codim].finalize(recv_overlapfront_overlap_it);
-        g.send_interiorborder_interiorborder[codim].finalize(send_interiorborder_interiorborder_it);
-        g.recv_interiorborder_interiorborder[codim].finalize(recv_interiorborder_interiorborder_it);
-        g.send_interiorborder_overlapfront[codim].finalize(send_interiorborder_overlapfront_it);
-        g.recv_overlapfront_interiorborder[codim].finalize(recv_overlapfront_interiorborder_it);
+        g.send_overlapfront_overlapfront[codim].finalize(send_overlapfront_overlapfront_it,g.overlapfront[codim]);
+        g.recv_overlapfront_overlapfront[codim].finalize(recv_overlapfront_overlapfront_it,g.overlapfront[codim]);
+        g.send_overlap_overlapfront[codim].finalize(send_overlap_overlapfront_it,g.overlapfront[codim]);
+        g.recv_overlapfront_overlap[codim].finalize(recv_overlapfront_overlap_it,g.overlapfront[codim]);
+        g.send_interiorborder_interiorborder[codim].finalize(send_interiorborder_interiorborder_it,g.overlapfront[codim]);
+        g.recv_interiorborder_interiorborder[codim].finalize(recv_interiorborder_interiorborder_it,g.overlapfront[codim]);
+        g.send_interiorborder_overlapfront[codim].finalize(send_interiorborder_overlapfront_it,g.overlapfront[codim]);
+        g.recv_overlapfront_interiorborder[codim].finalize(recv_overlapfront_interiorborder_it,g.overlapfront[codim]);
       }
     }
 
@@ -742,7 +742,7 @@ namespace Dune {
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
-       _periodic(periodic), _coarseSize(s), _overlap(overlap),
+        _L(L), _periodic(periodic), _coarseSize(s), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
@@ -802,7 +802,8 @@ namespace Dune {
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
-       _periodic(periodic), _coarseSize(s), _overlap(overlap),
+        _L(upperright - lowerleft),
+        _periodic(periodic), _coarseSize(s), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
@@ -875,8 +876,10 @@ namespace Dune {
       _levels.resize(1);
 
       //determine sizes of vector to correctly construct torus structure and store for later size requests
-      for (int i=0; i<dim; i++)
+      for (int i=0; i<dim; i++) {
         _coarseSize[i] = coords[i].size() - 1;
+        _L[i] = coords[i][_coarseSize[i]] - coords[i][0];
+      }
 
       iTupel o;
       std::fill(o.begin(), o.end(), 0);
@@ -962,7 +965,7 @@ namespace Dune {
               int overlap,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
-        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+         _L(L), keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       _periodic = periodic;
       _levels.resize(1);
@@ -1030,8 +1033,10 @@ namespace Dune {
       _overlap = overlap;
 
       //determine sizes of vector to correctly construct torus structure and store for later size requests
-      for (int i=0; i<dim; i++)
+      for (int i=0; i<dim; i++) {
         _coarseSize[i] = coords[i].size() - 1;
+        _L[i] = coords[i][_coarseSize[i]] - coords[i][0];
+      }
 
       iTupel o;
       std::fill(o.begin(), o.end(), 0);
@@ -1129,6 +1134,9 @@ namespace Dune {
       if (!Dune::Yasp::checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
 
+      for (int i=0; i<dim; i++)
+        _L[i] = coords[i][coords[i].size() - 1] - coords[i][0];
+
       _levels.resize(1);
 
       std::array<int,dim> o;
@@ -1196,13 +1204,13 @@ namespace Dune {
         std::bitset<dim> ovlp_low(0ULL), ovlp_up(0ULL);
         for (int i=0; i<dim; i++)
         {
-          if (cg.overlap[0].dataBegin()->origin(i) > 0)
+          if (cg.overlap[0].dataBegin()->origin(i) > 0 || _periodic[i])
             ovlp_low[i] = true;
-          if (cg.overlap[0].dataBegin()->max(i) + 1 < globalSize(i))
+          if (cg.overlap[0].dataBegin()->max(i) + 1 < globalSize(i) || _periodic[i])
             ovlp_up[i] = true;
         }
 
-        Coordinates newcont(cg.coords.refine(ovlp_low, ovlp_up, keep_ovlp, cg.overlapSize));
+        Coordinates newcont(cg.coords.refine(ovlp_low, ovlp_up, cg.overlapSize, keep_ovlp));
 
         int overlap = (keep_ovlp) ? 2*cg.overlapSize : cg.overlapSize;
 
@@ -1433,6 +1441,11 @@ namespace Dune {
     size_t numBoundarySegments () const
     {
       return nBSegments;
+    }
+
+    //! \brief returns the size of the physical domain
+    const Dune::FieldVector<ctype, dim>& domainSize () const {
+      return _L;
     }
 
     /*! The new communication interface
@@ -1832,7 +1845,7 @@ namespace Dune {
     YaspIndexSet<const YaspGrid<dim,Coordinates>, true> leafIndexSet_;
     YaspGlobalIdSet<const YaspGrid<dim,Coordinates> > theglobalidset;
 
-    fTupel _LL;
+    Dune::FieldVector<ctype, dim> _L;
     iTupel _s;
     std::bitset<dim> _periodic;
     iTupel _coarseSize;
@@ -1846,7 +1859,7 @@ namespace Dune {
   //! Output operator for multigrids
 
   template <int d, class CC>
-  inline std::ostream& operator<< (std::ostream& s, YaspGrid<d,CC>& grid)
+  std::ostream& operator<< (std::ostream& s, const YaspGrid<d,CC>& grid)
   {
     int rank = grid.torus().rank();
 

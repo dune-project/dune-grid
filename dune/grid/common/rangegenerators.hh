@@ -737,7 +737,7 @@ namespace Dune
    * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
-   * \param cd   a Codim object that is used to specify the dimension of the entities by means
+   * \param d    a Dim object that is used to specify the dimension of the entities by means
    *             of its template parameter.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
    *             the entities must belong.
@@ -788,18 +788,23 @@ namespace Dune
   }
 
   /**
-   * Entity range implementation without PartitionSet parameter. The default implementation forwards
-   * this by adding Dune::Partitions::all, but if you have a GridView-like object that cannot handle
-   * parallel partitions correctly, you can provide an overload for this function.
+   * Entity range implementation without PartitionSet parameter. The default implementation obtains the
+   * standard iterators by calling begin() and end() without specifying a partition type. This makes it
+   * possible to have user-defined GridView-like objects with a different default partition.
    *
    * All other functions without PartitionSet parameter forward to this function.
    */
   template<typename GV, int codim>
-  inline auto entities(const GV& gv, Codim<codim> cd)
-    -> decltype(entities(gv,cd,Partitions::all))
+  inline IteratorRange<
+    typename GV::template Codim<codim>::Iterator
+    >
+  entities(const GV& gv, Codim<codim>)
   {
     static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
-    return entities(gv,cd,Partitions::all);
+    typedef IteratorRange<
+      typename GV::template Codim<codim>::Iterator
+      > return_type;
+    return return_type(gv.template begin<codim>(),gv.template end<codim>());
   }
 
   /**

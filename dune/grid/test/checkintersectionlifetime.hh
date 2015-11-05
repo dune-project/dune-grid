@@ -18,8 +18,9 @@
 #if not defined(HAVE_RANGE_BASED_FOR)
 
 template<typename GV>
-void checkIntersectionLifetime(GV gv, const std::size_t check_element_count = 32)
+void checkIntersectionLifetime(GV, const std::size_t check_element_count = 32)
 {
+  DUNE_UNUSED_PARAMETER(check_element_count);
   std::cout << "SKIPPING intersection lifetime / consistency check on compiler without range-based for" << std::endl;
 }
 

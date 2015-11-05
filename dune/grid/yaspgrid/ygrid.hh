@@ -957,35 +957,56 @@ namespace Dune {
     }
 
     //! finalize the YGridLIst
-    void finalize(DAI end)
+    void finalize(DAI end, const YGrid<Coordinates>& ygrid)
     {
+      // Instead of directly iterating over the intersection deques, this code
+      // iterates over the components of an associated ygrid and works its way
+      // through the list of intersection deques in parallel.
+      // The reason for this convoluted iteration technique is that there are not
+      // necessarily intersections for all possible shifts, but we have to make
+      // sure that we stop at each shift to update the the per-component index shift
+      // This is ensured by iterating over the ygrid, which is guaranteed to have
+      // a component for each shift vector.
+
       // set end iterator in the data array
       _end = end;
 
       //! set offsets allow the YGridComponents in the Intersctions to behave as YGrids
       int offset = 0;
 
-      // iterate over all deques
-      for (DAI i=_begin; i!=_end; ++i)
+      DAI i = _begin;
+
+      // make sure that we have a valid deque (i.e. a non-empty one)
+      while (i != _end && i->begin() == i->end())
+        ++i;
+
+      for (auto yit = ygrid.dataBegin(); yit != ygrid.dataEnd(); ++yit)
       {
-        // iterate over the intersections in the deque and set the offset
-        bool empty = true;
-        for (typename std::deque<Intersection>::iterator it = i->begin(); it != i->end(); ++it)
+        if (i == _end)
+          break;
+        auto it = i->begin();
+        if (it->grid.shift() == yit->shift())
         {
-          it->yg.setBegin(&(it->grid));
-          it->yg.finalize(&(it->grid)+1, offset);
-          empty = false;
+          // iterate over the intersections in the deque and set the offset
+          for (; it != i->end(); ++it)
+          {
+            it->yg.setBegin(&(it->grid));
+            it->yg.finalize(&(it->grid)+1, offset);
+          }
+
+          // advance to next non-empty deque
+          ++i;
+          while (i != _end && i->begin() == i->end())
+            ++i;
         }
 
-        // update the offset by taking the totalsupersize of the first YGridComponent.
-        if (!empty)
-        {
-          int add = 1;
-          for (int j=0; j<dim; j++)
-            add *= i->begin()->grid.supersize(j);
-          offset += add;
-        }
+        // update the offset from the ygrid component
+        int add = 1;
+        for (int j=0; j<dim; j++)
+          add *= yit->supersize(j);
+        offset += add;
       }
+      assert (i == end);
     }
 
     private:

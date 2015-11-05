@@ -252,6 +252,10 @@ namespace Dune
      *  In the DUNE framework, data is stored in arrays, addressed by an index,
      *  in this case the boundarySegmentIndex. The size of these arrays can be
      *  obtained by the Grid::numBoundarySegments.
+     *
+     *  The indices returned by this method are consecutive, zero based, and local to the
+     *  processor. Notice that these indices do not necessarily coincide with the insertion
+     *  indices of the corresponding boundary segments as provided by the GridFactory.
      */
     size_t boundarySegmentIndex () const
     {
