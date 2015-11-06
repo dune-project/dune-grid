@@ -43,14 +43,6 @@ if(HAVE_UG)
                                     DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
 endif()
 
-if(HAVE_ALUGRID)
-  dune_add_test(NAME gmshtest-alugrid
-                SOURCES gmshtest.cc
-                COMPILE_DEFINITIONS GMSH_ALUGRID
-                                    DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE
-                                    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
-endif()
-
 if(HAVE_ALBERTA)
   add_executable(gmshtest-alberta2d gmshtest.cc)
   add_dune_alberta_flags(gmshtest-alberta2d WORLDDIM 2)

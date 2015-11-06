@@ -6,7 +6,7 @@
 /** \file
  *  \author Martin Nolte
  *  \brief  interfaces and wrappers needed for the callback adaptation provided
- *          by AlbertaGrid and ALUGrid
+ *          by AlbertaGrid and dune-ALUGrid
  */
 
 namespace Dune

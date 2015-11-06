@@ -19,12 +19,6 @@ dune_add_test(SOURCES testiteratorranges.cc)
 
 dune_add_test(SOURCES test-hierarchicsearch.cc)
 
-
-if(ALUGRID_FOUND)
-  dune_add_test(SOURCES test-alugrid.cc
-                COMPILE_DEFINITIONS DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-endif(ALUGRID_FOUND)
-
 if(UG_FOUND)
   dune_add_test(SOURCES test-ug.cc)
 
@@ -32,10 +26,6 @@ if(UG_FOUND)
 
   dune_add_test(SOURCES test-loadbalancing.cc)
 endif(UG_FOUND)
-
-if(ALUGRID_FOUND AND UG_FOUND)
-  dune_add_test(SOURCES test-dgfalu-uggrid-combination.cc)
-endif(ALUGRID_FOUND AND UG_FOUND)
 
 # The alberta tests are only alibi-ported, until the  grid and world dimension
 # are configuretime parameters and we can treat alberta just as any other grid manager

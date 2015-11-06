@@ -13,10 +13,6 @@
 #if HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #endif
-#if HAVE_ALUGRID
-#include <dune/grid/alugrid.hh>
-#endif
-#include <dune/grid/onedgrid.hh>
 
 // alberta related stuff
 #ifndef ALBERTA_DIM
@@ -27,6 +23,7 @@
 #define GRIDDIM ALBERTA_DIM
 #endif
 
+#include <dune/grid/onedgrid.hh>
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/gmshreader.hh>
@@ -128,14 +125,6 @@ try
 #if GMSH_ONEDGRID
   std::cout << "reading and writing OneDGrid" << std::endl;
   testReadingAndWritingGrid<OneDGrid>( oned, oned+".OneDGrid-gmshtest-write.msh", refinements );
-#endif
-
-#if GMSH_ALUGRID
-  std::cout << "reading and writing ALUGrid<2,2,simplex,nonconforming>" << std::endl;
-  testReadingAndWritingGrid<ALUGrid<2,2,simplex,nonconforming> >( curved2d, curved2d+".ALUGrid_2_2_simplex-gmshtest-write.msh", refinements );
-
-  std::cout << "reading and writing ALUGrid<3,3,simplex,nonconforming>" << std::endl;
-  testReadingAndWritingGrid<ALUGrid<3,3,simplex,nonconforming> >( pyramid, pyramid+".ALUGrid_3_3_simplex-gmshtest-write.msh", refinements );
 #endif
 
   return 0;

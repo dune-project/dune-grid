@@ -14,8 +14,6 @@ set(DUNE_GRID_EXTRA_UTILS "" CACHE BOOL
 find_package(METIS)
 find_package(ParMETIS)
 include(AddParMETISFlags)
-find_package(ALUGrid)
-include(AddALUGridFlags)
 find_package(Alberta)
 include(AddAlbertaFlags)
 include(UseUG)
@@ -28,7 +26,7 @@ include(CheckExperimentalGridExtensions)
 set(DEFAULT_DGF_GRIDDIM 1)
 set(DEFAULT_DGF_WORLDDIM 1)
 set(DEFAULT_DGF_GRIDTYPE ONEDGRID)
-set(DGF_GRIDTYPES ONEDGRID ALUGRID_CONFORM ALUGRID_SIMPLEX ALBERTAGRID GEOGRID UGGRID)
+set(DGF_GRIDTYPES ONEDGRID ALBERTAGRID GEOGRID UGGRID)
 
 dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ONEDGRID
   ASSERTION "(GRIDDIM == 1) && (WORLDDIM == 1)"
