@@ -66,10 +66,7 @@ AC_CONFIG_FILES([Makefile
     m4/Makefile
     dune-grid.pc
     src/Makefile
-    src/alu-to-vtk/Makefile
-    src/gmsh-to-alu/Makefile
     src/gridinfo-gmsh/Makefile
-    src/structured-to-alu/Makefile
     ])
 AC_CONFIG_FILES([dune/grid/io/file/test/mpivtktest],
     [chmod +x dune/grid/io/file/test/mpivtktest])
