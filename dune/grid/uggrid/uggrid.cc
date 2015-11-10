@@ -8,8 +8,9 @@
 
 #include <dune/grid/uggrid.hh>
 
-/** \todo Remove the following include once getAllSubfaces... is gone */
-#include <dune/common/sllist.hh>
+/** \todo Remove the following two includes once getAllSubfaces... is gone */
+#include <forward_list>
+#include <iterator>
 #include <dune/common/stdstreams.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
@@ -419,7 +420,7 @@ Dune::UGGrid<dim>::getChildrenOfSubface(const T & e,
 
   typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
 
-  SLList<ListEntryType> list;
+  std::forward_list<ListEntryType> list;
 
   // //////////////////////////////////////////////////////////////////////
   //   Change the input face number from Dune numbering to UG numbering
@@ -450,7 +451,7 @@ Dune::UGGrid<dim>::getChildrenOfSubface(const T & e,
       DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
     for (int i=0; i<Sons_of_Side; i++)
-      list.push_back(ListEntryType(SonList[i],SonSides[i]));
+      list.push_front(ListEntryType(SonList[i],SonSides[i]));
 
   }
 
@@ -458,11 +459,10 @@ Dune::UGGrid<dim>::getChildrenOfSubface(const T & e,
   //   Traverse and collect all children of the side
   // //////////////////////////////////////////////////
 
-  typename SLList<ListEntryType>::iterator f = list.begin();
-  for (; f!=list.end(); ++f) {
-
-    typename UG_NS<dim>::Element* theElement = f->first;
-    int side                                  = f->second;
+  for (const auto& f : list)
+  {
+    typename UG_NS<dim>::Element* theElement = f.first;
+    int side                                  = f.second;
 
     int Sons_of_Side = 0;
     typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
@@ -479,7 +479,7 @@ Dune::UGGrid<dim>::getChildrenOfSubface(const T & e,
                               true);
 
       for (int i=0; i<Sons_of_Side; i++)
-        list.push_back(ListEntryType(SonList[i],SonSides[i]));
+        list.push_front(ListEntryType(SonList[i],SonSides[i]));
 
     }
 
@@ -491,23 +491,22 @@ Dune::UGGrid<dim>::getChildrenOfSubface(const T & e,
 
   // Use reserve / push_back since EntityPointer is not default constructable
   childElements.clear();
-  childElements.reserve( list.size() );
-  childElementSides.resize(list.size());
+  childElements.reserve(std::distance(list.begin(), list.end()));
+  childElementSides.resize(childElements.size());
 
   int i=0;
-  for (f = list.begin(); f!=list.end(); ++f, ++i)
+  for (const auto &f : list)
   {
-
     // Set element
     typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
-    childElements.push_back( EntityPointer( UGGridEntityPointer< 0, const UGGrid< dim > >( f->first, this ) ) );
+    childElements.push_back( EntityPointer( UGGridEntityPointer< 0, const UGGrid< dim > >( f.first, this ) ) );
 
-    int side = f->second;
+    int side = f.second;
 
     // Dune numbers the faces of several elements differently than UG.
     // The following switch does the transformation
     childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i]->type());
-
+    ++i;
   }
 
 }
@@ -522,7 +521,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 
   typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
 
-  SLList<ListEntryType> list;
+  std::forward_list<ListEntryType> list;
 
   // //////////////////////////////////////////////////////////////////////
   //   Change the input face number from Dune numbering to UG numbering
@@ -553,7 +552,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
       DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
     for (int i=0; i<Sons_of_Side; i++)
-      list.push_back(ListEntryType(SonList[i],SonSides[i]));
+      list.push_front(ListEntryType(SonList[i],SonSides[i]));
 
   }
 
@@ -561,11 +560,10 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
   //   Traverse and collect all children of the side
   // //////////////////////////////////////////////////
 
-  typename SLList<ListEntryType>::iterator f = list.begin();
-  for (; f!=list.end(); ++f) {
-
-    typename UG_NS<dim>::Element* theElement = f->first;
-    int side                                  = f->second;
+  for (const auto& f : list)
+  {
+    typename UG_NS<dim>::Element* theElement = f.first;
+    int side                                  = f.second;
 
     UG::INT Sons_of_Side = 0;
     typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
@@ -582,7 +580,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
                               true);
 
       for (int i=0; i<Sons_of_Side; i++)
-        list.push_back(ListEntryType(SonList[i],SonSides[i]));
+        list.push_front(ListEntryType(SonList[i],SonSides[i]));
 
     }
 
@@ -594,23 +592,22 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 
   // Use reserve / push_back since EntityPointer is not default constructable
   childElements.clear();
-  childElements.reserve( list.size() );
-  childElementSides.resize(list.size());
+  childElements.reserve(std::distance(list.begin(), list.end()));
+  childElementSides.resize(childElements.size());
 
   int i=0;
-  for (f = list.begin(); f!=list.end(); ++f, ++i)
+  for (const auto f : list)
   {
-
     // Set element
     typedef typename Traits::template Codim< 0 >::Entity Entity;
-    childElements.push_back( Entity( UGGridEntity< 0, dim, const UGGrid< dim > >( f->first, this ) ) );
+    childElements.push_back( Entity( UGGridEntity< 0, dim, const UGGrid< dim > >( f.first, this ) ) );
 
-    int side = f->second;
+    int side = f.second;
 
     // Dune numbers the faces of several elements differently than UG.
     // The following switch does the transformation
     childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i].type());
-
+    ++i;
   }
 
 }

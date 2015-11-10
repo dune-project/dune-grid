@@ -3,7 +3,6 @@
 #ifndef DUNE_UGGRID_INTERSECTIONS_HH
 #define DUNE_UGGRID_INTERSECTIONS_HH
 
-#include <dune/common/sllist.hh>
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/uggrid/uggridrenumberer.hh>
