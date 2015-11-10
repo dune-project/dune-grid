@@ -5,8 +5,6 @@
 
 #include <memory>
 
-#include <dune/common/sllist.hh>
-
 #include <dune/grid/uggrid/uggridrenumberer.hh>
 
 /** \file
