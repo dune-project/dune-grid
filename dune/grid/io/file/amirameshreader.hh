@@ -3,6 +3,7 @@
 #ifndef DUNE_AMIRAMESH_READER_HH
 #define DUNE_AMIRAMESH_READER_HH
 
+#include <memory>
 #include <string>
 
 #include <dune/grid/common/gridfactory.hh>
@@ -30,7 +31,7 @@ namespace Dune {
     enum {dim = GridType::dimension};
 
     /** \brief Create the boundary description from an explicitly given psurface object */
-    static void createDomain(GridFactory<GridType>& factory, const shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
+    static void createDomain(GridFactory<GridType>& factory, const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
 
     /** \brief Create the actual grid */
     static void buildGrid(GridFactory<GridType>& factory, AmiraMesh* am);
@@ -64,7 +65,7 @@ namespace Dune {
        @param boundary Pointer to an object holding the description of the grid domain boundary
      */
     static GridType* read(const std::string& filename,
-                          const shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
+                          const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
 
   private:
     /** \brief Read a grid with a parametrized boundary into a given grid object
@@ -78,7 +79,7 @@ namespace Dune {
      */
     static void read(GridType& grid,
                      const std::string& filename,
-                     const shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
+                     const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
 
   public:
     /** \brief Read a block vector from an AmiraMesh file

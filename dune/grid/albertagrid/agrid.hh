@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <vector>
 
 // Dune includes
@@ -301,8 +302,8 @@ namespace Dune
      *  \param[in]  projection  shared pointer to a global boundary projection (defaults to 0)
      */
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
-                  const Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection
-                    = Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > >() );
+                  const std::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection
+                    = std::shared_ptr< DuneBoundaryProjection< dimensionworld > >() );
 
     template< class Proj, class Impl >
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,

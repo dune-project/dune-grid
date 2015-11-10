@@ -10,16 +10,16 @@
 #endif
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <ostream>
 #include <vector>
-#include <array>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
@@ -255,7 +255,7 @@ void testVertexOrderByIdSimplices(int &result) {
   std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
 
-  Dune::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
+  std::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
                                  createSimplexGrid(Domain(0), Domain(1), elements);
 
   typedef typename Grid::GlobalIdSet IdSet;
@@ -275,7 +275,7 @@ void testVertexOrderByIdCubes(int &result) {
   std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
 
-  Dune::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
+  std::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
                                  createCubeGrid(Domain(0), Domain(1), elements);
 
   typedef typename Grid::GlobalIdSet IdSet;

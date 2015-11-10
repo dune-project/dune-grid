@@ -4,6 +4,8 @@
 #ifndef DUNE_VTKSEQUENCE_HH
 #define DUNE_VTKSEQUENCE_HH
 
+#include <memory>
+
 #include <dune/common/deprecated.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriterbase.hh>
 

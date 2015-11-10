@@ -10,9 +10,10 @@
  */
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <map>
-#include <array>
+#include <memory>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -66,7 +67,7 @@ namespace Dune
     typedef FieldMatrix< ctype, dimensionworld, dimensionworld > WorldMatrix;
 
     typedef DuneBoundaryProjection< dimensionworld > DuneProjection;
-    typedef Dune::shared_ptr< const DuneProjection > DuneProjectionPtr;
+    typedef std::shared_ptr< const DuneProjection > DuneProjectionPtr;
     typedef Dune::BoundarySegment< dimension, dimensionworld > BoundarySegment;
 
     template< int codim >
@@ -224,7 +225,7 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int > &vertices,
-                            const shared_ptr< BoundarySegment > &boundarySegment )
+                            const std::shared_ptr< BoundarySegment > &boundarySegment )
     {
       const ReferenceElement< ctype, dimension-1 > &refSimplex
         = ReferenceElements< ctype, dimension-1 >::simplex();

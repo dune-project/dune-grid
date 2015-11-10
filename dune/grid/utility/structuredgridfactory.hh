@@ -8,15 +8,15 @@
  */
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdlib>
-#include <array>
+#include <memory>
 
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/utility/multiindex.hh>
@@ -86,7 +86,7 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static shared_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+    static std::shared_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                                                const FieldVector<ctype,dimworld>& upperRight,
                                                const std::array<unsigned int,dim>& elements)
     {
@@ -145,7 +145,7 @@ namespace Dune {
       }       // if(rank == 0)
 
       // Create the grid and hand it to the calling method
-      return shared_ptr<GridType>(factory.createGrid());
+      return std::shared_ptr<GridType>(factory.createGrid());
 
     }
 
@@ -162,7 +162,7 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static shared_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+    static std::shared_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                                                   const FieldVector<ctype,dimworld>& upperRight,
                                                   const std::array<unsigned int,dim>& elements)
     {
@@ -225,7 +225,7 @@ namespace Dune {
       }       // if(rank == 0)
 
       // Create the grid and hand it to the calling method
-      return shared_ptr<GridType>(factory.createGrid());
+      return std::shared_ptr<GridType>(factory.createGrid());
     }
 
   };

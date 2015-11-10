@@ -97,7 +97,7 @@ int main(int argc, char** argv) try
     lower = parameterSet.get<FieldVector<double, dim> >("lower"),
     upper = parameterSet.get<FieldVector<double, dim> >("upper");
 
-  shared_ptr<GridType> grid = StructuredGridFactory<GridType>::createSimplexGrid(lower, upper, n);
+  std::shared_ptr<GridType> grid = StructuredGridFactory<GridType>::createSimplexGrid(lower, upper, n);
 
   const GV gv = grid->leafGridView();
 

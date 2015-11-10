@@ -85,7 +85,7 @@ namespace Dune
   template< int dim, int dimworld >
   inline AlbertaGrid< dim, dimworld >
   ::AlbertaGrid ( const Alberta::MacroData< dimension> &macroData,
-                  const Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection )
+                  const std::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection )
     : mesh_(),
       maxlevel_( 0 ),
       numBoundarySegments_( 0 ),

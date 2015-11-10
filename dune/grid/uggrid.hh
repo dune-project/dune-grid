@@ -8,6 +8,8 @@
  * \brief The UGGrid class
  */
 
+#include <memory>
+
 #include <dune/common/classname.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/exceptions.hh>
@@ -990,7 +992,7 @@ namespace Dune {
     std::string name_;
 
     // Our set of level indices
-    std::vector<shared_ptr<UGGridLevelIndexSet<const UGGrid<dim> > > > levelIndexSets_;
+    std::vector<std::shared_ptr<UGGridLevelIndexSet<const UGGrid<dim> > > > levelIndexSets_;
 
     UGGridLeafIndexSet<const UGGrid<dim> > leafIndexSet_;
 
@@ -1034,7 +1036,7 @@ namespace Dune {
     static unsigned int heapSize_;
 
     /** \brief The classes implementing the geometry of the boundary segments, if requested */
-    std::vector<shared_ptr<BoundarySegment<dim> > > boundarySegments_;
+    std::vector<std::shared_ptr<BoundarySegment<dim> > > boundarySegments_;
 
     /** \brief Overall number of coarse grid boundary segments.
 

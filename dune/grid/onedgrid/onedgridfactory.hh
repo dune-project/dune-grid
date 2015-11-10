@@ -9,8 +9,9 @@
     \author Oliver Sander
  */
 
-#include <vector>
 #include <map>
+#include <memory>
+#include <vector>
 
 #include <dune/common/fvector.hh>
 
@@ -73,7 +74,7 @@ namespace Dune {
         The BoundarySegment object does not actually have any effect.
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices,
-                                       const shared_ptr<BoundarySegment<1> >& boundarySegment);
+                                       const std::shared_ptr<BoundarySegment<1> >& boundarySegment);
 
 
     /** \brief Finalize grid creation and hand over the grid

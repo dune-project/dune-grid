@@ -4,13 +4,13 @@
 #include <config.h>
 
 #include <iostream>
+#include <memory>
+
+#include <dune/common/parallel/mpihelper.hh>
 
 /*
-
    Instantiate UG-Grid and feed it to the generic gridcheck()
-
  */
-
 #include <dune/grid/uggrid.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
@@ -19,7 +19,6 @@
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"
 
-#include <dune/common/parallel/mpihelper.hh>
 
 using namespace Dune;
 
@@ -70,13 +69,13 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
     if (parametrization) {
 
       vertices[0] = 1;  vertices[1] = 2;
-      factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI, M_PI*4/3)));
+      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI, M_PI*4/3)));
 
       vertices[0] = 2;  vertices[1] = 3;
-      factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3)));
+      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3)));
 
       vertices[0] = 3;  vertices[1] = 0;
-      factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2)));
+      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2)));
 
     } else {
 
