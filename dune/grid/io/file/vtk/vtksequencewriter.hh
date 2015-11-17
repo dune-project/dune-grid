@@ -4,6 +4,9 @@
 #ifndef DUNE_VTKSEQUENCE_HH
 #define DUNE_VTKSEQUENCE_HH
 
+#include <memory>
+
+#include <dune/common/deprecated.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriterbase.hh>
 
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
@@ -29,6 +32,38 @@ namespace Dune {
      * At each time step, the VTKSequenceWriter writes the grid and data currently attached to the vtkWriter object.
      * All calls to the addCellData and addVertexData methods of the VTKSequenceWriter class are forwarded to the
      * vtkWriter, but we propose that you call the corresponding methods on the vtkWriter directly.
+     *
+     * \param name       Base name of the output files.  This should not
+     *                   contain any directory part and not filename
+     *                   extensions.  It will be used both for each processes
+     *                   piece as well as the parallel collection file.
+     */
+    VTKSequenceWriter ( std::shared_ptr<VTKWriter<GridView> > vtkWriter,
+                        const std::string& name )
+      : VTKSequenceWriterBase<GridView>(vtkWriter,
+                                        name,
+                                        "",
+                                        "",
+                                        vtkWriter->gridView_.comm().rank(),
+                                        vtkWriter->gridView_.comm().size())
+    {}
+
+    /** \brief Constructor with a given VTKWriter or SubsamplingVTKWriter
+     *
+     * At each time step, the VTKSequenceWriter writes the grid and data currently attached to the vtkWriter object.
+     * All calls to the addCellData and addVertexData methods of the VTKSequenceWriter class are forwarded to the
+     * vtkWriter, but we propose that you call the corresponding methods on the vtkWriter directly.
+     *
+     * \param name       Base name of the output files.  This should not
+     *                   contain any directory part and not filename
+     *                   extensions.  It will be used both for each processes
+     *                   piece as well as the parallel collection file.
+     * \param path       Directory where to put the parallel collection
+     *                   (.pvtu/.pvtp) files.  If it is relative, it is taken
+     *                   relative to the current directory.
+     * \param extendpath Directory where to put the piece files (.vtu/.vtp) of
+     *                   this process.  If it is relative, it is taken
+     *                   relative to the directory denoted by path.
      */
     VTKSequenceWriter ( std::shared_ptr<VTKWriter<GridView> > vtkWriter,
                         const std::string& name,
@@ -68,9 +103,13 @@ namespace Dune {
    * Writes arbitrary grid functions (living on cells or vertices of a grid)
    * to a file suitable for easy visualization with
    * <a href="http://www.vtk.org/">The Visualization Toolkit (VTK)</a>.
+   *
+   * \deprecated Please use VTKSequenceWriter together with a SubsamplingVTKWriter instead!
    */
   template< class GridView >
-  class SubsamplingVTKSequenceWriter :
+  class
+  DUNE_DEPRECATED_MSG("Use VTKSequenceWriter together with a SubsamplingVTKWriter instead of SubsamplingVTKSequenceWriter!")
+  SubsamplingVTKSequenceWriter :
     public VTKSequenceWriterBase<GridView>
   {
   public:

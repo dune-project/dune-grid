@@ -21,10 +21,6 @@ ALLTESTS += gmshtest-alberta2d
 ALLTESTS += gmshtest-alberta3d
 endif
 
-if ALUGRID
-ALLTESTS += gmshtest-alugrid
-endif
-
 # Currently, Star-CD files can only be read into UGGrid objects
 if UG
 ALLTESTS += starcdreadertest
@@ -69,17 +65,14 @@ amirameshtest_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(AMIRAMESH_CPPFLAGS)			\
 	$(UG_CPPFLAGS)				\
 	$(ALBERTA_CPPFLAGS)			\
-	$(ALUGRID_CPPFLAGS)			\
 	$(PSURFACE_CPPFLAGS)
 amirameshtest_LDFLAGS = $(AM_LDFLAGS)		\
 	$(AMIRAMESH_LDFLAGS)			\
 	$(UG_LDFLAGS)				\
 	$(ALBERTA_LDFLAGS)			\
-	$(ALUGRID_LDFLAGS)			\
 	$(PSURFACE_LDFLAGS)
 amirameshtest_LDADD =				\
 	$(PSURFACE_LIBS)			\
-	$(ALUGRID_LIBS)				\
 	$(ALBERTA_LIBS)				\
 	$(UG_LIBS)				\
 	$(AMIRAMESH_LIBS)			\
@@ -99,12 +92,6 @@ gmshtest_alberta3d_SOURCES  = gmshtest.cc
 gmshtest_alberta3d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA3D_CPPFLAGS)
 gmshtest_alberta3d_LDFLAGS  = $(AM_LDFLAGS)  $(ALBERTA3D_LDFLAGS)
 gmshtest_alberta3d_LDADD    = $(ALBERTA3D_LIBS) $(LDADD)
-
-gmshtest_alugrid_SOURCES  = gmshtest.cc
-gmshtest_alugrid_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(GRIDDIM_CPPFLAGS) \
-	-DDUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE
-gmshtest_alugrid_LDFLAGS  = $(AM_LDFLAGS)	 $(ALUGRID_LDFLAGS)
-gmshtest_alugrid_LDADD    = $(ALUGRID_LIBS) $(LDADD)
 
 starcdreadertest_SOURCES = starcdreadertest.cc
 starcdreadertest_CPPFLAGS = $(AM_CPPFLAGS)	\

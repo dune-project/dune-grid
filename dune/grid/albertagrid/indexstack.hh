@@ -82,7 +82,7 @@ namespace Dune {
     //! store index on stack
     inline void freeIndex(T index);
 
-    //! test stack funtcionality
+    //! test stack functionality
     inline void test ();
 
     // backup set to out stream

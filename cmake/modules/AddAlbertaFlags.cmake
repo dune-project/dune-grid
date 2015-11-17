@@ -1,14 +1,35 @@
-#
 # Module providing convenience methods for compile binaries with Alberta support.
 #
-# Provides the following functions:
+# .. cmake_function:: add_dune_alberta_flags
 #
-# add_dune_alberta_flags(target1 [target2 ...]
-#                        [OBJECT|SOURCE_ONLY] [USE_GENERIC]
-#                        [GRIDDIM <griddim>] [WORLDDIM] <worlddim>])
+#    .. cmake_param:: targets
+#       :single:
+#       :required:
+#       :positional:
 #
-# adds Alberta flags to the targets for compilation and linking
+#       The targets to add the Alberta flags to.
 #
+#    .. cmake_param:: OBJECT|SOURCE_ONLY
+#       :option:
+#
+#       TODO: doc me
+#
+#    .. cmake_param:: USE_GENERIC
+#       :option:
+#
+#       TODO doc me
+#
+#    .. cmake_param:: GRIDDIM
+#       :single:
+#
+#       The dimension of the grid, defaults to 2.
+#
+#    .. cmake_param:: WORLDDIM
+#       :single:
+#
+#       The dimension of the world space, defaults to :code:`GRIDDIM`.
+#
+
 macro(add_dune_alberta_flags)
   if(ALBERTA_FOUND)
     include(CMakeParseArguments)

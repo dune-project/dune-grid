@@ -1,15 +1,14 @@
-set(modules
+include(GNUInstallDirs)
+
+install(FILES
   AddAlbertaFlags.cmake
-  AddALUGridFlags.cmake
   AddAmiraMeshFlags.cmake
   AddPsurfaceFlags.cmake
   CheckExperimentalGridExtensions.cmake
   DuneGridMacros.cmake
   FindAlberta.cmake
-  FindALUGrid.cmake
   FindAmiraMesh.cmake
   FindPsurface.cmake
   GridType.cmake
-  UseUG.cmake)
-include(GNUInstallDirs)
-install(FILES ${modules} DESTINATION ${DUNE_INSTALL_MODULEDIR})
+  UseUG.cmake
+  DESTINATION ${DUNE_INSTALL_MODULEDIR})

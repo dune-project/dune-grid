@@ -203,6 +203,10 @@ namespace Dune {
          the third line consists of \c dimworld integers. used to determine the
          initial partition of the interval into equal sized cubes.
          More than one interval can be described in this fashion.
+         Optional a reordering of the i-j-k logic can be added as a first line
+         of the Interval block. The reordering is indicated by the keyword map
+         followed by the permutation of the coordinates {0,...,d}
+         (which is the default ordering).
        - \b Simplex \n
          Each line consists of \c dimworld+1 vertex indices (see \b Vertex block)
          describing one simplex
@@ -269,8 +273,8 @@ namespace Dune {
          boundary segments:\n
          <b>default</b> <em>function</em>\n
          Note: Currently, the attached functions map global coordinates to global
-               coordinates. This feature is only available with AlbertaGrid (Version 3.0
-                   or above) or with ALUGrid.
+               coordinates. This feature is only available with AlbertaGrid or
+               with dune-ALUGrid.
        .
 
        @section CONSTR The Grid Construction Process

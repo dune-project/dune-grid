@@ -3,8 +3,6 @@
 #ifndef DUNE_GEOGRID_ENTITY_HH
 #define DUNE_GEOGRID_ENTITY_HH
 
-#include <dune/common/nullptr.hh>
-
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -508,9 +506,6 @@ namespace Dune
       /** \brief obtain the partition type of this entity */
       PartitionType partitionType () const
       {
-        if( !(Capabilities::isParallel< HostGrid >::v) )
-          return InteriorEntity;
-
         const ReferenceElement< ctype, dimension > &refElement
           = ReferenceElements< ctype, dimension >::general( hostElement().type() );
 

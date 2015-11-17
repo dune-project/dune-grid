@@ -5,13 +5,12 @@
 #include "config.h"
 #endif
 
+#include <cstdio>
 #include <iostream>
-
-#include <stdio.h>
+#include <memory>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/io/file/vtk/boundarywriter.hh>
@@ -65,12 +64,12 @@ void doWrite( const GridView &gridView )
 
   Dune::VTK::NonConformingBoundaryWriter< GridView > vtk( gridView );
 
-  Dune::shared_ptr<ScalarFunction<GridView> > scalarFunc
+  std::shared_ptr<ScalarFunction<GridView> > scalarFunc
     (new ScalarFunction<GridView>);
   vtk.addCellData(scalarFunc, "cellScalar");
   vtk.addPointData(scalarFunc, "pointScalar");
 
-  Dune::shared_ptr<VectorFunction<GridView> > vectorFunc
+  std::shared_ptr<VectorFunction<GridView> > vectorFunc
     (new VectorFunction<GridView>);
   vtk.addCellData(vectorFunc, "cellVector");
   vtk.addPointData(vectorFunc, "pointVector");

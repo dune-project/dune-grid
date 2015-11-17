@@ -1,7 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#include <vector>
 #include <algorithm>
+#include <memory>
+#include <vector>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/common/stdstreams.hh>
@@ -144,7 +145,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 // Create the domain from an explicitly given boundary description
 template <class GridType>
 void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factory,
-                                                   const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
+                                                   const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if HAVE_PSURFACE
   if (dim!=3)
@@ -174,7 +175,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
     vertices[2] = psurface->triangles(i).vertices[2];
 
     factory.insertBoundarySegment(vertices,
-                                  shared_ptr<BoundarySegment<dim,dim> >(new typename PSurfaceBoundary<dim-1>::PSurfaceBoundarySegment(boundary,i)));
+                                  std::shared_ptr<BoundarySegment<dim,dim> >(new typename PSurfaceBoundary<dim-1>::PSurfaceBoundarySegment(boundary,i)));
 
   }
 
@@ -186,7 +187,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
 
 template <class GridType>
 GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
-                                                const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
+                                                const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if ! HAVE_PSURFACE
   DUNE_THROW(IOError, "Dune has not been built with support for the "
@@ -230,7 +231,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
 template <class GridType>
 void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
                                            const std::string& filename,
-                                           const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
+                                           const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if ! HAVE_PSURFACE
   DUNE_THROW(IOError, "Dune has not been built with support for the "

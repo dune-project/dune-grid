@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -17,7 +18,6 @@
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/io/file/gmshreader.hh>
 #include <dune/grid/utility/gridinfo.hh>
@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
 
     // read grid
     typedef Dune::GmshReader<Grid> Reader;
-    Dune::shared_ptr<Grid> gridp(Reader::read(gridFileName));
+    std::shared_ptr<Grid> gridp(Reader::read(gridFileName));
     gridp->globalRefine(refines);
 
     // collect information

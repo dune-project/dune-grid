@@ -12,6 +12,8 @@ namespace Dune {
       @author Christian Engwer
       @brief Simple base64 encode
 
+      We implement the base64 encoding (c.f. RFC 4648 https://tools.ietf.org/html/rfc4648).
+
       @{
    */
 

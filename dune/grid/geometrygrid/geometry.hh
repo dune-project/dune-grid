@@ -5,7 +5,6 @@
 
 #include <utility>
 
-#include <dune/common/nullptr.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>

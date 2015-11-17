@@ -31,10 +31,11 @@ void testIO(const GV & gridView, std::string fname)
   gnuplot.write(fname);
 }
 
-int main()
+int main(int argc, char** argv)
 {
   try
   {
+    Dune::MPIHelper::instance(argc, argv);
     const unsigned int dim = 1;
     Dune::FieldVector<double,dim> length(1.0);
     std::array<int,dim> elements;

@@ -14,6 +14,5 @@ AC_DEFUN([DUNE_GRID_CHECKS],[
 ])
 
 AC_DEFUN([DUNE_GRID_CHECK_MODULE],[
-  DUNE_CHECK_MODULES([dune-grid], [grid/common/gridenums.hh],[dnl
-  return Dune::InteriorEntity == Dune::InteriorEntity ? 0 : 1;])
+  DUNE_CHECK_MODULES([dune-grid], [grid/utility/multiindex.hh])
 ])

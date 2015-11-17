@@ -69,7 +69,7 @@ insertBoundarySegment(const std::vector<unsigned int>& vertices)
 
 void Dune::GridFactory<Dune::OneDGrid>::
 insertBoundarySegment(const std::vector<unsigned int>& vertices,
-                      const shared_ptr<BoundarySegment<1> > &boundarySegment)
+                      const std::shared_ptr<BoundarySegment<1> > &boundarySegment)
 {
   insertBoundarySegment(vertices);
 }
@@ -81,6 +81,9 @@ createGrid()
   // You never know who may do this...
   if (grid_==NULL)
     return NULL;
+
+  // Assert that vertices are given
+  assert (vertexPositions_.size() > 0);
 
   // ////////////////////////////////////////////////////////
   //   Insert the vertices into the grid

@@ -5,7 +5,6 @@
 
 #include <iostream>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/bartonnackmanifcheck.hh>
 
 /** @file
@@ -117,40 +116,12 @@ namespace Dune
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const EntityType& e) const
-    {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e)));
-      return asImp().map(e);
-    }
-
-
-    /** @brief Map entity to array index.
-
-            \param e Reference to codim cc entity. The codim is extracted from the entity.
-            \return An index in the range 0 ... Max number of entities in set - 1.
-     */
-    template<class EntityType>
     Index index (const EntityType& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e)));
       return asImp().index(e);
     }
 
-
-    /** @brief Map subentity i of codim cc of a codim 0 entity to array index.
-     *
-     * \param e Reference to codim 0 entity.
-     * \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
-     * \param codim codimension of subentity of e
-     * \return An index in the range 0 ... Max number of entities in set - 1.
-     */
-    Index DUNE_DEPRECATED_MSG("Will be removed after dune-grid-2.4.  Use method 'index' instead!") map (const typename G::Traits::template Codim<0>::Entity& e,
-             int i,
-             unsigned int codim) const
-    {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e,i,codim)));
-      return asImp().map(e,i,codim);
-    }
 
     /** @brief Map subentity i of codim cc of a codim 0 entity to array index.
      *

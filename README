@@ -31,8 +31,7 @@ The following software is recommend but optional:
 - MPI (either OpenMPI, lam, or mpich suffice)
 - External grids:
   * ALBERTA [4]
-  * ALUGrid [5]
-  * UG
+  * UG [5]
 
 For a full explanation of the DUNE installation process please read
 the installation notes [0]. The following introduction is meant for
@@ -75,4 +74,4 @@ Links
 2. http://dune-project.org/doc/buildsystem/buildsystem.pdf
 3. http://gcc.gnu.org/onlinedocs/libstdc++/faq.html#faq.license
 4. http://www.alberta-fem.de
-5. http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/
+5. http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug

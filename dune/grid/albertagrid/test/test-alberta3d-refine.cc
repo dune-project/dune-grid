@@ -5,12 +5,12 @@
 #endif
 
 #include <cmath>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <vector>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/geometry/type.hh>
 #include <dune/geometry/quadraturerules.hh>
@@ -27,7 +27,7 @@ class UnitTetMaker {
   static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
   static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
 public:
-  static Dune::shared_ptr<Grid> create() {
+  static std::shared_ptr<Grid> create() {
     Dune::GridFactory<Grid> gf;
 
     // insert vertices
@@ -43,7 +43,7 @@ public:
     std::vector<unsigned int> vid(4);
     vid[0] = 0; vid[1] = 1; vid[2] = 2; vid[3] = 3; gf.insertElement(type, vid);
 
-    return Dune::shared_ptr<Grid>(gf.createGrid());
+    return std::shared_ptr<Grid>(gf.createGrid());
   }
 };
 
@@ -53,7 +53,7 @@ class KuhnTriangulatedUnitCubeMaker {
   static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
   static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
 public:
-  static Dune::shared_ptr<Grid> create() {
+  static std::shared_ptr<Grid> create() {
     Dune::GridFactory<Grid> gf;
     Dune::FieldVector<typename Grid::ctype, 3> pos;
 
@@ -78,7 +78,7 @@ public:
     vid[0] = 0; vid[1] = 1; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
 
     gf.markLongestEdge();
-    return Dune::shared_ptr<Grid>(gf.createGrid());
+    return std::shared_ptr<Grid>(gf.createGrid());
   }
 };
 
@@ -88,7 +88,7 @@ class MinTriangulatedUnitCubeMaker {
   static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
   static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
 public:
-  static Dune::shared_ptr<Grid> create() {
+  static std::shared_ptr<Grid> create() {
     Dune::GridFactory<Grid> gf;
     Dune::FieldVector<typename Grid::ctype, 3> pos;
 
@@ -117,7 +117,7 @@ public:
     vid[0] = 2; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
 
     gf.markLongestEdge();
-    return Dune::shared_ptr<Grid>(gf.createGrid());
+    return std::shared_ptr<Grid>(gf.createGrid());
   }
 };
 

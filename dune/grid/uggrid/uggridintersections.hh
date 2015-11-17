@@ -3,8 +3,9 @@
 #ifndef DUNE_UGGRID_INTERSECTIONS_HH
 #define DUNE_UGGRID_INTERSECTIONS_HH
 
+#include <memory>
+
 #include <dune/common/sllist.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/uggrid/uggridrenumberer.hh>
 
@@ -180,9 +181,9 @@ namespace Dune {
     mutable bool geometryIsUpToDate_;
 
     //! pointers holding the global and local geometries
-    mutable Dune::shared_ptr<GeometryImpl>      geometry_;
-    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInInside_;
-    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInOutside_;
+    mutable std::shared_ptr<GeometryImpl>      geometry_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
@@ -433,9 +434,9 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
     //! pointer to global and local intersection geometries
-    mutable Dune::shared_ptr<GeometryImpl>      geometry_;
-    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInInside_;
-    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInOutside_;
+    mutable std::shared_ptr<GeometryImpl>      geometry_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;

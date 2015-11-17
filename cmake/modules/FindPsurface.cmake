@@ -1,14 +1,28 @@
+# .. cmake_module::
 #
-# Module that checks whether psurface is available and usable.
+#    Module that checks whether psurface is available and usable.
 #
-# Variables used by this module which you may want to set:
-# PSURFACE_ROOT         Path list to search for psurface
+#    Variables used by this module which you may want to set:
 #
-# Sets the follwing variable:
+#    :ref:`PSURFACE_ROOT`
+#       Path list to search for psurface
 #
-# PSURFACE_FOUND          True if PSurface available and usable.
-# PSURFACE_INCLUDE_DIRS   Path to the PSurface include dirs.
-# PSURFACE_LIBRARIES      Name to the PSurface library.
+#    Sets the follwing variables:
+#
+#    :code:`PSURFACE_FOUND`
+#       True if PSurface available and usable.
+#
+#    :code:`PSURFACE_INCLUDE_DIRS`
+#       Path to the PSurface include dirs.
+#
+#    :code:`PSURFACE_LIBRARIES`
+#       Name to the PSurface library.
+#
+# .. cmake_variable:: PSURFACE_ROOT
+#
+#    You may set this variable to have :ref:`FindPsurface` look
+#    for the Psurface package in the given path before inspecting
+#    system paths.
 #
 
 # look for header files, only at positions given by the user

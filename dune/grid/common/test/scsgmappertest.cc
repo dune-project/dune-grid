@@ -55,12 +55,6 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
     if (!contained)
       continue;
 
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    if (index != mapper.map(*eIt))
-      DUNE_THROW(GridError, "Mapper::contains() and mapper.map() "
-                 "compute different indices!");
-#endif
-
     if (index != mapper.index(*eIt))
       DUNE_THROW(GridError, "Mapper::contains() and mapper.index() "
                  "compute different indices!");

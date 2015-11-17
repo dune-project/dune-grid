@@ -6,16 +6,17 @@
 
 #include <unistd.h>
 #include <iostream>
+#include <memory>
 #include <vector>
 
-#include <dune/grid/uggrid.hh>
-#include <dune/grid/common/mcmgmapper.hh>
-#include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/float_cmp.hh>
-#include <dune/grid/common/gridenums.hh>
-#include <dune/grid/utility/structuredgridfactory.hh>
 #include <dune/geometry/referenceelements.hh>
+#include <dune/grid/common/gridenums.hh>
+#include <dune/grid/common/mcmgmapper.hh>
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
+#include <dune/grid/uggrid.hh>
+#include <dune/grid/utility/structuredgridfactory.hh>
 
 using namespace Dune;
 
@@ -510,7 +511,7 @@ void testParallelUG(bool localRefinement)
   Dune::FieldVector<double,dim> upperRight(1);
   std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
-  shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
+  std::shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
 
   //////////////////////////////////////////////////////
   // Distribute the grid

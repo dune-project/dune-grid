@@ -10,10 +10,9 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-
-#include <stdio.h>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
@@ -489,7 +488,7 @@ namespace Dune
                                                                                            v[3], v[4], v[5] );
 
       factory.insertBoundarySegment( vertices,
-                                     shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment) );
+                                     std::shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment) );
     }
 
 
@@ -611,7 +610,7 @@ namespace Dune
             BoundarySegment<dim,dimWorld>* newBoundarySegment
               = (BoundarySegment<dim,dimWorld>*) new GmshReaderQuadraticBoundarySegment< 2, dimWorld >(v[0], v[1], v[2]);
             factory.insertBoundarySegment(vertices,
-                                          shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment));
+                                          std::shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment));
             break;
           }
           case 9 : {              // 6-node triangle

@@ -7,11 +7,11 @@
     \brief Provide a generic factory class for unstructured grids.
  */
 
+#include <memory>
 #include <vector>
 
 #include <dune/common/function.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/geometry/type.hh>
 
@@ -55,7 +55,7 @@ namespace Dune
    * vid[0] = 0; vid[1] = 2; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
    * vid[0] = 0; vid[1] = 3; vid[2] = 2; vid[3] = 7; gf.insertElement(type, vid);
    *
-   * Dune::shared_ptr<Grid> gridp(gf.createGrid());
+   * std::shared_ptr<Grid> gridp(gf.createGrid());
    * \endcode
    * Make sure that the inserted elements are not inverted, since not all
    * grids support that.  For instance, in the following code snippet the
@@ -121,7 +121,7 @@ namespace Dune
      */
     virtual void insertElement(const GeometryType& type,
                                const std::vector<unsigned int>& vertices,
-                               const shared_ptr<VirtualFunction<FieldVector<ctype,dimension>,FieldVector<ctype,dimworld> > >& elementParametrization)
+                               const std::shared_ptr<VirtualFunction<FieldVector<ctype,dimension>,FieldVector<ctype,dimworld> > >& elementParametrization)
     {
       DUNE_THROW(GridError, "This grid does not support parametrized elements!");
     }
@@ -149,7 +149,7 @@ namespace Dune
      *  \param[in]  boundarySegment  user defined implementation of the boundary segment's geometry
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices,
-                                       const shared_ptr<BoundarySegment<dimension,dimworld> >& boundarySegment)
+                                       const std::shared_ptr<BoundarySegment<dimension,dimworld> >& boundarySegment)
     {
       DUNE_THROW(GridError, "This grid does not support parametrized boundary segments!");
     }

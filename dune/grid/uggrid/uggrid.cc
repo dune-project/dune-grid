@@ -5,6 +5,7 @@
 
 #include <set>
 #include <map>
+#include <memory>
 
 #include <dune/grid/uggrid.hh>
 
@@ -812,7 +813,7 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 {
   // Create new level index sets if necessary
   for (int i=levelIndexSets_.size(); i<=maxLevel(); i++)
-    levelIndexSets_.push_back(make_shared<UGGridLevelIndexSet<const UGGrid<dim> > >());
+    levelIndexSets_.push_back(std::make_shared<UGGridLevelIndexSet<const UGGrid<dim> > >());
 
   // Update the zero level LevelIndexSet.  It is updated only once, at the time
   // of creation of the coarse grid.  After that it is not touched anymore.

@@ -3,7 +3,6 @@
 #ifndef DUNE_ALBERTA_INTERSECTION_CC
 #define DUNE_ALBERTA_INTERSECTION_CC
 
-#include <dune/common/nullptr.hh>
 #include <dune/grid/albertagrid/intersection.hh>
 
 namespace Dune

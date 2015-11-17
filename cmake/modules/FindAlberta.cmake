@@ -1,3 +1,28 @@
+# .. cmake_module::
+#
+#    Module that checks whether the Alberta grid manager is available and usable.
+#
+#    Variables used by this module which you may want to set:
+#
+#    :ref:`ALBERTA_ROOT`
+#       Path list to search for psurface
+#
+#    Sets the follwing variables:
+#
+#    :code:`ALBERTA_FOUND`
+#       True if Alberta available and usable.
+#
+#    :code:`ALBERTA_VERSION`
+#       The version number of the found Alberta package
+#
+#    TODO: document this more, there was 0 doc before!
+#
+# .. cmake_variable:: ALBERTA_ROOT
+#
+#    You may set this variable to have :ref:`FindAlberta` look
+#    for the Alberta package in the given path before inspecting
+#    system paths.
+#
 
 macro(_dune_set_alberta val)
   set(ALBERTA_FOUND ${val})
@@ -40,6 +65,7 @@ cmake_push_check_state()
 set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DDIM_OF_WORLD=3 -DDEL_INDEX=0)
 set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${ALBERTA_INCLUDES})
 
+include(CheckIncludeFiles)
 check_include_files(alberta/alberta.h ALBERTA_FOUND)
 
 if(NOT ALBERTA_FOUND)

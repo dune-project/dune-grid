@@ -6,6 +6,8 @@
 /** \file
  *  \brief A domain boundary implemented by the psurface library
  */
+#include <memory>
+
 #include <dune/grid/common/gridfactory.hh>
 
 #if HAVE_PSURFACE
@@ -49,7 +51,7 @@ namespace Dune {
        * \param psurfaceBoundary The psurface object that implements the segment
        * \param segment The number of the boundary segment in the psurface object
        */
-      PSurfaceBoundarySegment(const shared_ptr<PSurfaceBoundary<dim> >& psurfaceBoundary, int segment)
+      PSurfaceBoundarySegment(const std::shared_ptr<PSurfaceBoundary<dim> >& psurfaceBoundary, int segment)
         : psurfaceBoundary_(psurfaceBoundary),
           segment_(segment)
       {}
@@ -80,7 +82,7 @@ namespace Dune {
         return result;
       }
 
-      shared_ptr<PSurfaceBoundary<dim> > psurfaceBoundary_;
+      std::shared_ptr<PSurfaceBoundary<dim> > psurfaceBoundary_;
       int segment_;
     };
 
@@ -110,7 +112,7 @@ namespace Dune {
      * The format is determined by the filename suffix.  If it is .h5, then the file
      * is assumed to be hdf5.  Otherwise it is assumed to be AmiraMesh.
      */
-    static shared_ptr<PSurfaceBoundary<dim> > read(const std::string& filename)
+    static std::shared_ptr<PSurfaceBoundary<dim> > read(const std::string& filename)
     {
       psurface::PSurface<dim,float>* newDomain;
 
@@ -119,7 +121,7 @@ namespace Dune {
       if (filename.find(".h5")==filename.length()-3) {
         newDomain = psurface::Hdf5IO<float,dim>::read(filename);
         if (newDomain)
-          return make_shared<PSurfaceBoundary<dim> >(newDomain);
+          return std::make_shared<PSurfaceBoundary<dim> >(newDomain);
       }
 #endif
 
@@ -135,7 +137,7 @@ namespace Dune {
       if (!newDomain)
         DUNE_THROW(IOError, "An error has occured while reading " << filename);
 
-      return make_shared<PSurfaceBoundary<dim> >(newDomain);
+      return std::make_shared<PSurfaceBoundary<dim> >(newDomain);
 #else
       DUNE_THROW(IOError, "The given file is not in a supported format!");
 #endif
