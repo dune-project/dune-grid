@@ -527,13 +527,13 @@ namespace Dune
 
 #endif // DOXYGEN
 
-    /** \brief Obtain a pointer to a subentity
+    /** \brief Obtain a subentity
      *
      *  \tparam  codim  codimension of the desired subentity
      *
      *  \param[in]  i  number of the subentity (in generic numbering)
      *
-     *  \returns an EntityPointer to the specified subentity
+     *  \returns the specified subentity
      *
      *  \note The subentities are numbered 0, ..., subEntities( codim )-1
      */
