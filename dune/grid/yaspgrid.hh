@@ -1300,31 +1300,31 @@ namespace Dune {
       return _L;
     }
 
-    // /*! The new communication interface
+    /*! The new communication interface
 
-    //    communicate objects for all codims on a given level
-    //  */
-    // template<class DataHandleImp, class DataType>
-    // void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
-    // {
-    //   YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,level);
-    // }
+       communicate objects for all codims on a given level
+     */
+    template<class DataHandleImp, class DataType>
+    void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
+    {
+      YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,level);
+    }
 
-    // /*! The new communication interface
+    /*! The new communication interface
 
-    //    communicate objects for all codims on the leaf grid
-    //  */
-    // template<class DataHandleImp, class DataType>
-    // void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
-    // {
-    //   YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,this->maxLevel());
-    // }
-
+       communicate objects for all codims on the leaf grid
+     */
     template<class DataHandleImp, class DataType>
     void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
     {
-      communicateIntersection<CommDataHandleIF<DataHandleImp,DataType> >(data,iftype,dir,this->maxLevel());
+      YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,this->maxLevel());
     }
+
+    // template<class DataHandleImp, class DataType>
+    // void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
+    // {
+    //   communicateIntersection<CommDataHandleIF<DataHandleImp,DataType> >(data,iftype,dir,this->maxLevel());
+    // }
 
 
     /*! The new communication interface
