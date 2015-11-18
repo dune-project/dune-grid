@@ -475,7 +475,7 @@ void checkIntersectionIterator ( const GridViewType &view,
   // check wether intersection iterator is a forward iterator
   NoopFunctor< Intersection > op;
   if( 0 != testForwardIterator( view.ibegin( *eIt ), view.iend( *eIt ), op ) )
-    std::cerr << "IntersectionIterator does not fulfill the forward iterator concept" << std::endl;
+    DUNE_THROW( Dune::Exception, "IntersectionIterator does not fulfill the forward iterator concept" );
 
   const IntersectionIterator iend = view.iend( *eIt );
   for( IntersectionIterator iIt = view.ibegin( *eIt ); iIt != iend; ++iIt )
