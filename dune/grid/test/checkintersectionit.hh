@@ -5,9 +5,12 @@
 
 #include <cmath>
 
+#include <dune/common/test/iteratortest.hh>
+
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/geometry/referenceelements.hh>
 
+#include "checkiterators.hh"
 #include "checkgeometry.hh"
 
 /** \file
@@ -469,10 +472,12 @@ void checkIntersectionIterator ( const GridViewType &view,
   bool hasBoundaryIntersection = false;
   typename Intersection::GlobalCoordinate sumNormal( ctype( 0 ) );
 
-  // check default-constructibility and copy constructor
-  IntersectionIterator idefault;
-  idefault = view.iend( *eIt );
-  const IntersectionIterator iend = idefault;
+  // check wether intersection iterator is a forward iterator
+  NoopFunctor< Intersection > op;
+  if( 0 != testForwardIterator( view.ibegin( *eIt ), view.iend( *eIt ), op ) )
+    std::cerr << "IntersectionIterator does not fulfill the forward iterator concept" << std::endl;
+
+  const IntersectionIterator iend = view.iend( *eIt );
   for( IntersectionIterator iIt = view.ibegin( *eIt ); iIt != iend; ++iIt )
   {
     const Intersection &intersection = *iIt;
