@@ -1648,7 +1648,7 @@ namespace Dune {
       return inter;
     }
 
-
+    /*! Communicate objects over intersections */
     template<class DataHandle>
     void communicateIntersection (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
