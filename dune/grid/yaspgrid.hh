@@ -1320,13 +1320,6 @@ namespace Dune {
       YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,this->maxLevel());
     }
 
-    // template<class DataHandleImp, class DataType>
-    // void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
-    // {
-    //   communicateIntersection<CommDataHandleIF<DataHandleImp,DataType> >(data,iftype,dir,this->maxLevel());
-    // }
-
-
     /*! The new communication interface
 
        communicate objects for one codim
