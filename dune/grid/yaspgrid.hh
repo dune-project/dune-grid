@@ -1628,10 +1628,10 @@ namespace Dune {
 
       // create yasp grid codim 0 entity from iterators
       typename YGrid::Iterator ygit(yglit->overlapfront[0], coord, 0);
-      YaspEntity<0,dim,GridImp> blub(yglit, ygit);
+      YaspEntity<0,dim,GridImp> yentity(yglit, ygit);
 
       // create intersection
-      Dune::YaspIntersection<GridImp> yi(blub,false);
+      Dune::YaspIntersection<GridImp> yi(yentity,false);
       yi._count = count;
       yi.update();
 
