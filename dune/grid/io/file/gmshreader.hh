@@ -664,9 +664,12 @@ namespace Dune
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
-      // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-      parser.read(fileName);
+      // only fill grid factory for rank 0
+      if (MPIHelper::getCollectiveCommunication().rank() == 0){
+        // create parse object
+        GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
+        parser.read(fileName);
+      }
 
       return factory.createGrid();
     }
@@ -680,12 +683,15 @@ namespace Dune
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
-      // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-      parser.read(fileName);
+      // only fill grid factory for rank 0
+      if (MPIHelper::getCollectiveCommunication().rank() == 0){
+        // create parse object
+        GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
+        parser.read(fileName);
 
-      boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
-      elementToPhysicalEntity.swap(parser.elementIndexMap());
+        boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
+        elementToPhysicalEntity.swap(parser.elementIndexMap());
+      }
 
       return factory.createGrid();
     }
@@ -694,9 +700,12 @@ namespace Dune
     static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
-      // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-      parser.read(fileName);
+      // only fill grid factory for rank 0
+      if (MPIHelper::getCollectiveCommunication().rank() == 0){
+        // create parse object
+        GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
+        parser.read(fileName);
+      }
     }
 
     /** \todo doc me */
@@ -706,12 +715,15 @@ namespace Dune
                       std::vector<int>& elementToPhysicalEntity,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
-      // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-      parser.read(fileName);
+      // only fill grid factory for rank 0
+      if (MPIHelper::getCollectiveCommunication().rank() == 0){
+        // create parse object
+        GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
+        parser.read(fileName);
 
-      boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
-      elementToPhysicalEntity.swap(parser.elementIndexMap());
+        boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
+        elementToPhysicalEntity.swap(parser.elementIndexMap());
+      }
     }
   };
 
