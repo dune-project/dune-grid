@@ -43,7 +43,7 @@ namespace Dune {
 
     /** \brief Returns index of i-th vertex of an element, plus 1 (for gmsh numbering) */
     template<typename Entity>
-    inline std::size_t nodeIndexFromEntity(const Entity& entity, int i) const {
+    std::size_t nodeIndexFromEntity(const Entity& entity, int i) const {
       return gv.indexSet().subIndex(entity, i, dim)+1;
     }
 
@@ -244,7 +244,7 @@ namespace Dune {
      * \brief Set the number of digits to be used when writing the vertices. By default is 6.
      * \brief numDigits Number of digits to use.
      */
-    inline void setPrecision(const int& numDigits) {
+    void setPrecision(const int& numDigits) {
       precision = numDigits;
     }
 
@@ -258,7 +258,7 @@ namespace Dune {
      * Throws an IOError if file could not be opened or an unsupported element type is
      * encountered.
      */
-    inline void write(const std::string& fileName) const {
+    void write(const std::string& fileName) const {
       writeImpl(fileName, nullptr, nullptr);
     }
 
@@ -275,7 +275,7 @@ namespace Dune {
      * Throws an IOError if file could not be opened or an unsupported element type is
      * encountered.
      */
-    inline void write(const std::string& fileName, const std::vector<int>& physicalEntities) const {
+    void write(const std::string& fileName, const std::vector<int>& physicalEntities) const {
       writeImpl(fileName, &physicalEntities, nullptr);
     }
 
@@ -296,7 +296,7 @@ namespace Dune {
      * Throws an IOError if file could not be opened or an unsupported element type is
      * encountered.
      */
-    inline void write(const std::string& fileName, const std::vector<int>& physicalEntities, const std::vector<int>& physicalBoundaries) const {
+    void write(const std::string& fileName, const std::vector<int>& physicalEntities, const std::vector<int>& physicalBoundaries) const {
       writeImpl(fileName, &physicalEntities, &physicalBoundaries);
     }
 
