@@ -37,8 +37,8 @@ namespace Dune {
     const GridView gv;
     int precision;
 
-    static const auto dim = GridView::dimension;
-    static const auto dimWorld = GridView::dimensionworld;
+    static const unsigned int dim = GridView::dimension;
+    static const unsigned int dimWorld = GridView::dimensionworld;
     static_assert( (dimWorld <= 3), "GmshWriter requires dimWorld <= 3." );
 
     /** \brief Returns index of i-th vertex of an element, plus 1 (for gmsh numbering) */
