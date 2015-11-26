@@ -3,19 +3,17 @@
 #ifndef DUNE_GRID_IO_FILE_GMSHWRITER_HH
 #define DUNE_GRID_IO_FILE_GMSHWRITER_HH
 
-
 #include <fstream>
 #include <iostream>
-
+#include <iomanip>
 #include <string>
+#include <vector>
 
 #include <dune/common/exceptions.hh>
-
 #include <dune/geometry/type.hh>
-
+#include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
-
 
 namespace Dune {
 
@@ -28,8 +26,6 @@ namespace Dune {
 
      If the grid contains an element type not supported by gmsh an IOError exception is thrown.
 
-     Boundary segments are ignored.
-
      All grids in a gmsh file live in three-dimensional Euclidean space. If the world dimension
      of the grid type that you are writing is less than three, the remaining coordinates are
      set to zero.
@@ -39,26 +35,23 @@ namespace Dune {
   {
   private:
     const GridView gv;
+    int precision;
 
-    static const int dim = GridView::dimension;
-    static const int dimWorld = GridView::dimensionworld;
+    static const auto dim = GridView::dimension;
+    static const auto dimWorld = GridView::dimensionworld;
     static_assert( (dimWorld <= 3), "GmshWriter requires dimWorld <= 3." );
 
-    typedef typename GridView::template Codim<dim>::Iterator VertexIterator;
-    typedef typename GridView::template Codim<0>::Iterator ElementIterator;
-
-
     /** \brief Returns index of i-th vertex of an element, plus 1 (for gmsh numbering) */
-    size_t nodeIndexFromIterator(const ElementIterator& eIt, int i) const {
-      return gv.indexSet().subIndex(*eIt, i, dim)+1;
+    template<typename Entity>
+    inline std::size_t nodeIndexFromEntity(const Entity& entity, int i) const {
+      return gv.indexSet().subIndex(entity, i, dim)+1;
     }
 
     /** \brief Translate GeometryType to corresponding Gmsh element type number
       * \throws IOError if there is no equivalent type in Gmsh
       */
-    static size_t translateDuneToGmshType(const GeometryType& type) {
-      // Probably the non-clever, but hopefully readable way of translating the GeometryTypes to the gmsh types
-      size_t element_type;
+    static std::size_t translateDuneToGmshType(const GeometryType& type) {
+      std::size_t element_type;
 
       if (type.isLine())
         element_type = 1;
@@ -87,53 +80,72 @@ namespace Dune {
      * Each line has the format
      *    element-number element-type number-of-tags <tags> node-number-list
      * Counting of the element numbers starts by "1".
-     * Tags are ignored, i.e. number-of-tags is always zero and no tags are printed.
-     * node-number-list depends on the type of the given element.
-     * If the pysicalEntities parameter is set, its content is stored
-     * along the element in the first tag, using the MCMGMapper.
+     *
+     * If the pysicalEntities parameter is not a nullptr, each element
+     * has a tag rappresenting its physcial id.
+     *
+     * If the physicalBoundaries parameter is not a nullptr, also the boundaries
+     * are written on file with the corresponding physical value. The physicalBoundaries
+     * vector need to be sorted according to the interesection boundary segment index.
      */
-    void outputElements(std::ofstream& file,
-                        const std::vector<int>* physicalEntities = nullptr) const {
+    void outputElements(std::ofstream& file, const std::vector<int>* physicalEntities, const std::vector<int>* physicalBoundaries) const {
       MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> elementMapper(gv);
-      ElementIterator eIt    = gv.template begin<0>();
-      ElementIterator eEndIt = gv.template end<0>();
-
-      for (size_t i = 1; eIt != eEndIt; ++eIt, ++i) {
+      std::size_t counter(1);
+      for (const auto& entity : elements(gv)) {
         // Check whether the type is compatible. If not, close file and rethrow exception.
         try {
-          size_t element_type = translateDuneToGmshType(eIt->type());
+          auto element_type = translateDuneToGmshType(entity.type());
 
-          file << i << " " << element_type;
+          file << counter << " " << element_type;
           // If present, set the first tag to the physical entity
-          if (physicalEntities) {
-            file << " " << 1 << " " << (*physicalEntities)[elementMapper.index(*eIt)];
-          } else {
+          if (physicalEntities!=nullptr)
+            file << " " << 1 << " " << (*physicalEntities)[elementMapper.index(entity)];
+          else
             file << " " << 0; // "0" for "I do not use any tags."
-          }
 
           // Output list of nodes.
           // 3, 5 and 7 got different vertex numbering compared to Dune
           if (3 == element_type)
             file << " "
-                 << nodeIndexFromIterator(eIt, 0) << " " << nodeIndexFromIterator(eIt, 1) << " "
-                 << nodeIndexFromIterator(eIt, 3) << " " << nodeIndexFromIterator(eIt, 2);
+                 << nodeIndexFromEntity(entity, 0) << " " << nodeIndexFromEntity(entity, 1) << " "
+                 << nodeIndexFromEntity(entity, 3) << " " << nodeIndexFromEntity(entity, 2);
           else if (5 == element_type)
             file << " "
-                 << nodeIndexFromIterator(eIt, 0) << " " << nodeIndexFromIterator(eIt, 1) << " "
-                 << nodeIndexFromIterator(eIt, 3) << " " << nodeIndexFromIterator(eIt, 2) << " "
-                 << nodeIndexFromIterator(eIt, 4) << " " << nodeIndexFromIterator(eIt, 5) << " "
-                 << nodeIndexFromIterator(eIt, 7) << " " << nodeIndexFromIterator(eIt, 6);
+                 << nodeIndexFromEntity(entity, 0) << " " << nodeIndexFromEntity(entity, 1) << " "
+                 << nodeIndexFromEntity(entity, 3) << " " << nodeIndexFromEntity(entity, 2) << " "
+                 << nodeIndexFromEntity(entity, 4) << " " << nodeIndexFromEntity(entity, 5) << " "
+                 << nodeIndexFromEntity(entity, 7) << " " << nodeIndexFromEntity(entity, 6);
           else if (7 == element_type)
             file << " "
-                 << nodeIndexFromIterator(eIt, 0) << " " << nodeIndexFromIterator(eIt, 1) << " "
-                 << nodeIndexFromIterator(eIt, 3) << " " << nodeIndexFromIterator(eIt, 2) << " "
-                 << nodeIndexFromIterator(eIt, 4);
+                 << nodeIndexFromEntity(entity, 0) << " " << nodeIndexFromEntity(entity, 1) << " "
+                 << nodeIndexFromEntity(entity, 3) << " " << nodeIndexFromEntity(entity, 2) << " "
+                 << nodeIndexFromEntity(entity, 4);
           else {
-            for (int k = 0; k < eIt->geometry().corners(); ++k)
-              file << " " << nodeIndexFromIterator(eIt, k);
+            for (int k = 0; k < entity.geometry().corners(); ++k)
+              file << " " << nodeIndexFromEntity(entity, k);
           }
+          ++counter;
 
           file << std::endl;
+
+          // Write boundaries
+          if (physicalBoundaries!=nullptr) {
+            const auto& refElement(ReferenceElements<typename GridView::ctype,dim>::general(entity.type()));
+            for(const auto& intersection : intersections(gv, entity)) {
+              if(intersection.boundary()) {
+                const auto faceLocalIndex(intersection.indexInInside());
+                file << counter << " " << translateDuneToGmshType(intersection.type())
+                  << " " << 1 << " " << (*physicalBoundaries)[intersection.boundarySegmentIndex()];
+                for (int k = 0; k < intersection.geometry().corners(); ++k)
+                {
+                  const auto vtxLocalIndex(refElement.subEntity(faceLocalIndex, 1, k, dim));
+                  file << " " << nodeIndexFromEntity(entity, vtxLocalIndex);
+                }
+                ++counter;
+                file << std::endl;
+              }
+            }
+          }
 
         } catch(Exception& e) {
           file.close();
@@ -150,12 +162,9 @@ namespace Dune {
      * The node-numbers will most certainly not have the arrangement "1, 2, 3, ...".
      */
     void outputNodes(std::ofstream& file) const {
-      VertexIterator vIt    = gv.template begin<dim>();
-      VertexIterator vEndIt = gv.template end<dim>();
-
-      for (; vIt != vEndIt; ++vIt) {
-        typename VertexIterator::Entity::Geometry::GlobalCoordinate globalCoord = vIt->geometry().center();
-        int nodeIndex = gv.indexSet().index(*vIt)+1; // Start counting indices by "1".
+      for (const auto& vertex : vertices(gv)) {
+        const auto globalCoord = vertex.geometry().center();
+        const auto nodeIndex = gv.indexSet().index(vertex)+1; // Start counting indices by "1".
 
         if (1 == dimWorld)
           file << nodeIndex << " " << globalCoord[0] << " " << 0 << " " << 0 << std::endl;
@@ -167,94 +176,130 @@ namespace Dune {
     }
 
     /** \brief Write given grid in Gmsh 2.0 compatible ASCII file.
-        \param fileName Path of file. write(const std::string&) does not attach a ".msh"-extension by itself.
+        \param fileName Path of file. This method does not attach a ".msh"-extension by itself.
 
         Opens the file with given name and path, stores the element data of the grid
         and closes the file when done.
 
-        Boundary-Segments of the grid are ignored.
+        If the pysicalEntities parameter is not a nullptr, each element
+        has a tag rappresenting its physcial id.
 
-        If the pysicalEntities parameter is set, its content is stored
-        along the element in its first tag, using the MCMGMapper.
+        If the physicalBoundaries parameter is not a nullptr, also the boundaries
+        are written on file with the corresponding physical value. The physicalBoundaries
+        vector need to be sorted according to the interesection boundary segment index.
 
         Throws an IOError if file could not be opened or an unsupported element type is
         encountered.
     */
-    void writeImpl(const std::string& fileName, const std::vector<int>* physicalEntities = nullptr) const {
-      std::ofstream file(fileName.c_str());
+    void writeImpl(const std::string& fileName, const std::vector<int>* physicalEntities, const std::vector<int>* physicalBoundaries) const {
 
+      // Open file
+      std::ofstream file(fileName.c_str());
       if (!file.is_open())
         DUNE_THROW(Dune::IOError, "Could not open " << fileName << " with write access.");
+
+      // Set precision
+      file << std::setprecision( precision );
 
       // Output Header
       file << "$MeshFormat" << std::endl
            << "2.0 0 " << sizeof(double) << std::endl // "2.0" for "version 2.0", "0" for ASCII
            << "$EndMeshFormat" << std::endl;
 
-
       // Output Nodes
-      const size_t number_of_nodes = gv.size(dim);
       file << "$Nodes" << std::endl
-           << number_of_nodes << std::endl;
+           << gv.size(dim) << std::endl;
 
       outputNodes(file);
 
       file << "$EndNodes" << std::endl;
 
+      // Output Elements;
+      int boundariesSize(0);
+      if(physicalBoundaries!=nullptr)
+        for(const auto& entity : elements(gv))
+          for(const auto& intersection : intersections(gv, entity))
+            if(intersection.boundary())
+              ++boundariesSize;
 
-      // Output Elements
-      const size_t number_of_elements = gv.size(0);
       file << "$Elements" << std::endl
-           << number_of_elements << std::endl;
+           << gv.size(0) + boundariesSize<< std::endl;
 
-      outputElements(file, physicalEntities);
+      outputElements(file, physicalEntities, physicalBoundaries);
 
-      file << "$EndElements" << std::endl; // Add an additional new line for good measure.
+      file << "$EndElements" << std::endl;
 
-
+      // Close file
       file.close();
     }
 
 
   public:
     /** \brief Constructor expecting GridView of Grid to be written.
-        \param gridView GridView that will be used in write(const std::string&).
-    */
-    GmshWriter(const GridView& gridView) : gv(gridView) {}
+        \param gridView GridView that will be written.
+     */
+    GmshWriter(const GridView& gridView) : gv(gridView), precision(6) {}
 
-    /** \brief Write given grid in Gmsh 2.0 compatible ASCII file.
-        \param fileName Path of file. write(const std::string&) does not attach a ".msh"-extension by itself.
-
-        Opens the file with given name and path, stores the element data of the grid
-        and closes the file when done.
-
-        Boundary-Segments of the grid are ignored.
-
-        Throws an IOError if file could not be opened or an unsupported element type is
-        encountered.
-    */
-    void write(const std::string& fileName) const {
-      writeImpl(fileName);
+    /**
+     * \brief Set the number of digits to be used when writing the vertices. By default is 6.
+     * \brief numDigits Number of digits to use.
+     */
+    inline void setPrecision(const int& numDigits) {
+      precision = numDigits;
     }
 
-    /** \brief Write given grid in Gmsh 2.0 compatible ASCII file.
-        \param fileName Path of file. write(const std::string&) does not attach a ".msh"-extension by itself.
-        \param physicalEntities Physical entities for each element.
-
-        Opens the file with given name and path, stores the element data of the grid
-        and closes the file when done.
-
-        Boundary-Segments of the grid are ignored.
-
-        The physical entity is stored along the element in its first tag, using the
-        MultipleCodimMultipleGeomTypeMapper with the MCMGElementLayout.
-
-        Throws an IOError if file could not be opened or an unsupported element type is
-        encountered.
-    */
-    void write(const std::string& fileName, const std::vector<int>& physicalEntities) const {
-      writeImpl(fileName, &physicalEntities);
+    /**
+     * \brief Write given grid in Gmsh 2.0 compatible ASCII file.
+     * \param fileName Path of file. This method does not attach a ".msh"-extension by itself.
+     *
+     * Opens the file with given name and path, stores the element data of the grid
+     * and closes the file when done.
+     *
+     * Throws an IOError if file could not be opened or an unsupported element type is
+     * encountered.
+     */
+    inline void write(const std::string& fileName) const {
+      writeImpl(fileName, nullptr, nullptr);
     }
+
+    /**
+     * \brief Write given grid in Gmsh 2.0 compatible ASCII file.
+     * \param fileName Path of file. This method does not attach a ".msh"-extension by itself.
+     * \param physicalEntities Physical entities for each element.
+     *
+     * Opens the file with given name and path, stores the element data of the grid
+     * and closes the file when done.
+     *
+     * Each element has a tag rappresenting its physcial id.
+     *
+     * Throws an IOError if file could not be opened or an unsupported element type is
+     * encountered.
+     */
+    inline void write(const std::string& fileName, const std::vector<int>& physicalEntities) const {
+      writeImpl(fileName, &physicalEntities, nullptr);
+    }
+
+    /**
+     * \brief Write given grid in Gmsh 2.0 compatible ASCII file.
+     * \param fileName Path of file. This method does not attach a ".msh"-extension by itself.
+     * \param physicalEntities Physical entities for each element.
+     * \param physicalBoundaries Physical boundaries.
+     *
+     * Opens the file with given name and path, stores the element data of the grid
+     * and closes the file when done.
+     *
+     * Each element has a tag rappresenting its physcial id.
+     *
+     * All the boundaries are written on file with the corresponding physical value.
+     * The physicalBoundaries vector need to be sorted according to the interesection boundary segment index.
+     *
+     * Throws an IOError if file could not be opened or an unsupported element type is
+     * encountered.
+     */
+    inline void write(const std::string& fileName, const std::vector<int>& physicalEntities, const std::vector<int>& physicalBoundaries) const {
+      writeImpl(fileName, &physicalEntities, &physicalBoundaries);
+    }
+
   };
 
 } // namespace Dune
