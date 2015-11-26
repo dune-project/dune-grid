@@ -91,10 +91,10 @@ namespace Dune {
     void outputElements(std::ofstream& file, const std::vector<int>* physicalEntities, const std::vector<int>* physicalBoundaries) const {
       MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> elementMapper(gv);
       std::size_t counter(1);
-      for (const auto& entity : elements(gv)) {
+      for (const auto entity : elements(gv)) {
         // Check whether the type is compatible. If not, close file and rethrow exception.
         try {
-          auto element_type = translateDuneToGmshType(entity.type());
+          std::size_t element_type = translateDuneToGmshType(entity.type());
 
           file << counter << " " << element_type;
           // If present, set the first tag to the physical entity
@@ -131,7 +131,7 @@ namespace Dune {
           // Write boundaries
           if (physicalBoundaries!=nullptr) {
             const auto& refElement(ReferenceElements<typename GridView::ctype,dim>::general(entity.type()));
-            for(const auto& intersection : intersections(gv, entity)) {
+            for(const auto intersection : intersections(gv, entity)) {
               if(intersection.boundary()) {
                 const auto faceLocalIndex(intersection.indexInInside());
                 file << counter << " " << translateDuneToGmshType(intersection.type())
@@ -217,8 +217,8 @@ namespace Dune {
       // Output Elements;
       int boundariesSize(0);
       if(physicalBoundaries!=nullptr)
-        for(const auto& entity : elements(gv))
-          for(const auto& intersection : intersections(gv, entity))
+        for(const auto entity : elements(gv))
+          for(const auto intersection : intersections(gv, entity))
             if(intersection.boundary())
               ++boundariesSize;
 
@@ -237,14 +237,15 @@ namespace Dune {
   public:
     /** \brief Constructor expecting GridView of Grid to be written.
         \param gridView GridView that will be written.
+        \param numDigits Number of digits to use.
      */
-    GmshWriter(const GridView& gridView) : gv(gridView), precision(6) {}
+    GmshWriter(const GridView& gridView, int numDigits=6) : gv(gridView), precision(numDigits) {}
 
     /**
      * \brief Set the number of digits to be used when writing the vertices. By default is 6.
      * \brief numDigits Number of digits to use.
      */
-    void setPrecision(const int& numDigits) {
+    void setPrecision(int numDigits) {
       precision = numDigits;
     }
 
