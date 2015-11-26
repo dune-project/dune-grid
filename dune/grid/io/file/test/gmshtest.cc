@@ -4,6 +4,9 @@
 #include "config.h"
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 
+#include <vector>
+#include <memory>
+
 #include <dune/common/parallel/mpihelper.hh>
 
 // dune grid includes
@@ -24,6 +27,7 @@
 #endif
 
 #include <dune/grid/onedgrid.hh>
+#include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/gmshreader.hh>
@@ -42,10 +46,23 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
 template <typename GridType>
 void testReadingAndWritingGrid( const std::string& filename, const std::string& outFilename, int refinements )
 {
-  // Read the grid with insertion of boundary segments (they may be the default ones)
-  std::unique_ptr<GridType> grid( GmshReader<GridType>::read( filename, true, true ) );
+  // Read the grid
+  GridFactory<GridType> gridFactory;
+  std::vector<int> boundaryIDs;
+  std::vector<int> elementsIDs;
+  GmshReader<GridType>::read(gridFactory,filename,boundaryIDs,elementsIDs);
+  auto grid=std::unique_ptr<GridType>(gridFactory.createGrid());
 
-  // load balancing and refinement
+  // Reorder boundary IDs according to the inserction index
+  std::vector<int> tempIDs(boundaryIDs.size(),0);
+  auto leafGridView(grid->leafGridView());
+  for(const auto entity:elements(leafGridView))
+    for(const auto intersection:intersections(leafGridView,entity))
+      if(intersection.boundary())
+        tempIDs[intersection.boundarySegmentIndex()]=boundaryIDs[gridFactory.insertionIndex(intersection)];
+  boundaryIDs=tempIDs;
+
+  // Load balancing and refinement
   grid->loadBalance();
   if ( refinements > 0 )
     grid->globalRefine( refinements );
@@ -55,7 +72,10 @@ void testReadingAndWritingGrid( const std::string& filename, const std::string& 
 
   // Test writing
   Dune::GmshWriter<typename GridType::LeafGridView> writer( grid->leafGridView() );
+  writer.setPrecision(10);
   writer.write( outFilename );
+  writer.write( "entity_"+outFilename, elementsIDs );
+  writer.write( "boundary_"+outFilename, elementsIDs, boundaryIDs );
 
   // vtk output
   std::ostringstream vtkName;
