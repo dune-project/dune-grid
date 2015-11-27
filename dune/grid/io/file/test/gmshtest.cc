@@ -4,8 +4,11 @@
 #include "config.h"
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 
-#include <vector>
+#include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include <dune/common/parallel/mpihelper.hh>
 
@@ -44,13 +47,14 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
 #endif
 
 template <typename GridType>
-void testReadingAndWritingGrid( const std::string& filename, const std::string& outFilename, int refinements )
+void testReadingAndWritingGrid( const std::string& path, const std::string& gridName, const std::string& gridManagerName, int refinements)
 {
   // Read the grid
   GridFactory<GridType> gridFactory;
   std::vector<int> boundaryIDs;
   std::vector<int> elementsIDs;
-  GmshReader<GridType>::read(gridFactory,filename,boundaryIDs,elementsIDs);
+  const std::string inputName(path+gridName+".msh");
+  GmshReader<GridType>::read(gridFactory,inputName,boundaryIDs,elementsIDs);
   auto grid=std::unique_ptr<GridType>(gridFactory.createGrid());
 
   // Reorder boundary IDs according to the inserction index
@@ -71,16 +75,19 @@ void testReadingAndWritingGrid( const std::string& filename, const std::string& 
   gridcheck(*grid);
 
   // Test writing
-  Dune::GmshWriter<typename GridType::LeafGridView> writer( grid->leafGridView() );
+  Dune::GmshWriter<typename GridType::LeafGridView> writer( leafGridView );
   writer.setPrecision(10);
-  writer.write( outFilename );
-  writer.write( "entity_"+outFilename, elementsIDs );
-  writer.write( "boundary_"+outFilename, elementsIDs, boundaryIDs );
+  const std::string outputName(path+gridName+"-"+gridManagerName+"-gmshtest-write.msh");
+  writer.write( outputName );
+  const std::string outputNameEntity(path+gridName+"-"+gridManagerName+"-gmshtest-write-entity.msh");
+  writer.write( outputNameEntity, elementsIDs );
+  const std::string outputNameBoundary(path+gridName+"-"+gridManagerName+"-gmshtest-write-boundary.msh");
+  writer.write( outputNameBoundary, elementsIDs, boundaryIDs );
 
   // vtk output
   std::ostringstream vtkName;
-  vtkName << filename << "-" << refinements;
-  Dune::VTKWriter<typename GridType::LeafGridView> vtkWriter( grid->leafGridView() );
+  vtkName << path << gridName << "-gmshtest-" << refinements;
+  VTKWriter<typename GridType::LeafGridView> vtkWriter( leafGridView );
   vtkWriter.write( vtkName.str() );
 }
 
@@ -88,63 +95,49 @@ void testReadingAndWritingGrid( const std::string& filename, const std::string& 
 int main( int argc, char** argv )
 try
 {
-  Dune::MPIHelper::instance( argc, argv );
-  int refinements = 0;
+  MPIHelper::instance( argc, argv );
+  const int refinements = ( argc > 1 ) ? atoi( argv[1] ) : 0;
+  const std::string path(static_cast<std::string>(DUNE_GRID_EXAMPLE_GRIDS_PATH)+"gmsh/");
 
-  if ( argc > 1 )
-    refinements = atoi( argv[1] );
-
-  const std::string path = std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "gmsh/";
-  std::string curved2d( path ); curved2d += "curved2d.msh";
-  std::string circ2nd(  path ); circ2nd  += "circle2ndorder.msh";
-  std::string unitsquare_quads_2x2(path);  unitsquare_quads_2x2 += "unitsquare_quads_2x2.msh";
-  std::string sphere(   path ); sphere    += "sphere.msh";
-  std::string pyramid(  path ); pyramid   += "pyramid.msh";
-  std::string pyr2nd(   path ); pyr2nd    += "pyramid2ndorder.msh";
-  std::string hybrid_2d( path); hybrid_2d += "hybrid-testgrid-2d.msh";
-  std::string hybrid_3d( path); hybrid_3d += "hybrid-testgrid-3d.msh";
-  std::string oned(      path); oned += "oned-testgrid.msh";
-
-  // test reading and writing of unstructured grids
 #if GMSH_UGGRID
   std::cout << "reading and writing UGGrid<2>" << std::endl;
-  testReadingAndWritingGrid<UGGrid<2> >( curved2d, curved2d+".UGGrid_2_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<UGGrid<2> >( path, "curved2d", "UGGrid-2D", refinements );
 
   std::cout << "reading and writing UGGrid<2> with second order boundary approximation" << std::endl;
-  testReadingAndWritingGrid<UGGrid<2> >( circ2nd, circ2nd+".UGGrid_2_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<UGGrid<2> >( path, "circle2ndorder", "UGGrid-2D", refinements );
 
   std::cout << "reading and writing UGGrid<2>" << std::endl;
-  testReadingAndWritingGrid<UGGrid<2> >( unitsquare_quads_2x2, unitsquare_quads_2x2+".UGGrid_2_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<UGGrid<2> >( path, "unitsquare_quads_2x2", "UGGrid-2D", refinements );
 
   std::cout << "reading and writing hybrid UGGrid<2>" << std::endl;
-  testReadingAndWritingGrid<UGGrid<2> >( hybrid_2d, hybrid_2d+".UGGrid_2_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<UGGrid<2> >( path, "hybrid-testgrid-2d", "UGGrid-2D", refinements );
 
   std::cout << "reading and writing UGGrid<3>" << std::endl;
-  testReadingAndWritingGrid<UGGrid<3> >( pyramid, pyramid+".UGGrid_3_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<UGGrid<3> >( path, "pyramid", "UGGrid-3D", refinements );
 
   std::cout << "reading and writing UGGrid<3> with second order boundary approximation" << std::endl;
-  testReadingAndWritingGrid<UGGrid<3> >( pyr2nd,  pyr2nd+".UGGrid_3_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<UGGrid<3> >( path, "pyramid2ndorder", "UGGrid-3D", refinements );
 
   std::cout << "reading and writing hybrid UGGrid<3>" << std::endl;
-  testReadingAndWritingGrid<UGGrid<3> >( hybrid_3d, hybrid_3d+".UGGrid_3_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<UGGrid<3> >( path, "hybrid-testgrid-3d", "UGGrid-3D", refinements );
 #endif
 
 #if GMSH_ALBERTAGRID
 #if ALBERTA_DIM==2
   std::cout << "reading and writing AlbertaGrid<2>" << std::endl;
-  testReadingAndWritingGrid<AlbertaGrid<2> >( curved2d, curved2d+".AlbertaGrid_2_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<AlbertaGrid<2> >( path, "curved2d", "AlbertaGrid-2D", refinements );
 #endif
 #if ALBERTA_DIM==3
   std::cout << "reading and writing AlbertaGrid<2>" << std::endl;
-  testReadingAndWritingGrid<AlbertaGrid<2> >( sphere, sphere+".AlbertaGrid_2_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<AlbertaGrid<2> >( path, "sphere", "AlbertaGrid-2D", refinements );
   std::cout << "reading and writing AlbertaGrid<3>" << std::endl;
-  testReadingAndWritingGrid<AlbertaGrid<3> >( pyramid, pyramid+".AlbertaGrid_3_-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<AlbertaGrid<3> >( path, "pyramid", "AlbertaGrid-3D", refinements );
 #endif
 #endif
 
 #if GMSH_ONEDGRID
   std::cout << "reading and writing OneDGrid" << std::endl;
-  testReadingAndWritingGrid<OneDGrid>( oned, oned+".OneDGrid-gmshtest-write.msh", refinements );
+  testReadingAndWritingGrid<OneDGrid>( path, "oned-testgrid", "OneDGrid", refinements );
 #endif
 
   return 0;
