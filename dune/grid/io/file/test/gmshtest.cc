@@ -49,7 +49,7 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
 template <typename GridType>
 void testReadingAndWritingGrid( const std::string& path, const std::string& gridName, const std::string& gridManagerName, int refinements)
 {
-  // read the grid
+  // Read the grid
   GridFactory<GridType> gridFactory;
   std::vector<int> boundaryIDs;
   std::vector<int> elementsIDs;
@@ -57,7 +57,7 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   GmshReader<GridType>::read(gridFactory,inputName,boundaryIDs,elementsIDs);
   auto grid=std::unique_ptr<GridType>(gridFactory.createGrid());
 
-  // reorder boundary IDs according to the inserction index
+  // Reorder boundary IDs according to the inserction index
   std::vector<int> tempIDs(boundaryIDs.size(),0);
   auto leafGridView(grid->leafGridView());
   for(const auto entity:elements(leafGridView))
@@ -66,15 +66,15 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
         tempIDs[intersection.boundarySegmentIndex()]=boundaryIDs[gridFactory.insertionIndex(intersection)];
   boundaryIDs=tempIDs;
 
-  // grid load balancing and refinement
+  // Load balancing and refinement
   grid->loadBalance();
   if ( refinements > 0 )
     grid->globalRefine( refinements );
 
-  // do some tests to make sure the grid has been properly read
+  // Do some tests to make sure the grid has been properly read
   gridcheck(*grid);
 
-  // test writing
+  // Test writing
   Dune::GmshWriter<typename GridType::LeafGridView> writer( leafGridView );
   writer.setPrecision(10);
   const std::string outputName(path+gridName+"-"+gridManagerName+"-gmshtest-write.msh");
