@@ -180,8 +180,7 @@ namespace Dune
     const DGFBoundaryParameter::type &boundaryParameter ( const Dune::Intersection< GG, II > &intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;
-      typename Intersection::EntityPointer inside = intersection.inside();
-      const typename Intersection::Entity &entity = *inside;
+      const typename Intersection::Entity &entity = intersection.inside();
       const int face = intersection.indexInInside();
 
       const ReferenceElement< double, dimension > &refElem
@@ -191,7 +190,7 @@ namespace Dune
       for( int i = 0; i < corners; ++i )
       {
         const int k = refElem.subEntity( face, 1, i, dimension );
-        bound[ i ] = factory_.insertionIndex( *entity.template subEntity< dimension >( k ) );
+        bound[ i ] = factory_.insertionIndex( entity.template subEntity< dimension >( k ) );
       }
 
       DuneGridFormatParser::facemap_t::key_type key( bound, false );
