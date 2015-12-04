@@ -345,12 +345,5 @@ namespace Dune {
     }
   };
 
-  //! organizes the caching of sizes for one grid and one GeometryType
-  template <class GridImp>
-  struct SingleTypeSizeCache : public SizeCache< GridImp >
-  {
-    DUNE_DEPRECATED SingleTypeSizeCache( const GridImp& grid, bool isSimplex , bool isCube, bool notWorry = false ) : SizeCache< GridImp >( grid ) {}
-  };
-
 } // end namespace Dune
 #endif
