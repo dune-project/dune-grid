@@ -391,11 +391,8 @@ struct LeafInterface
   static void check(Grid &g)
   {
     DUNE_UNUSED_PARAMETER(g);
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    g.template leafbegin<0>();
-    g.template leafend<0>();
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
   }
+
   LeafInterface()
   {
     c = check;
@@ -508,10 +505,6 @@ struct GridInterface
     // check for iterator functions
     g.levelGridView(0).template begin<0>();
     g.levelGridView(0).template end<0>();
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    g.template lbegin<0>(0);
-    g.template lend<0>(0);
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     LeafInterface< Grid >();
 
@@ -539,13 +532,6 @@ struct GridInterface
     for( int codim = 0; codim < Grid::dimension; ++codim )
       g.levelIndexSet( 0 ).types( codim );
 
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    if (g.template leafbegin<0>() != g.template leafend<0>() )
-    {
-      // Instantiate all methods of LeafIndexSet
-      g.leafIndexSet().index(*g.template leafbegin<0>());
-    }
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     /** \todo Test for subindex is missing, because I don't know yet
        how to test for the existence of certain codims */
     g.leafIndexSet().size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
