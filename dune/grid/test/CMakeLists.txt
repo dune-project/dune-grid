@@ -1,4 +1,5 @@
 dune_add_test(SOURCES test-geogrid.cc
+              LINK_LIBRARIES dunegrid
               COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
                                   CACHECOORDFUNCTION=0
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
@@ -8,7 +9,8 @@ dune_add_test(SOURCES test-geogrid.cc
 
 dune_add_test(SOURCES test-identitygrid.cc)
 
-dune_add_test(SOURCES test-oned.cc)
+dune_add_test(SOURCES test-oned.cc
+              LINK_LIBRARIES dunegrid)
 
 dune_add_test(SOURCES test-mcmg-geogrid.cc)
 

@@ -1,5 +1,6 @@
 dune_add_test(NAME test-dgf-yasp
               SOURCES test-dgf.cc
+              LINK_LIBRARIES dunegrid
               COMPILE_DEFINITIONS GRIDDIM=3
                                   YASPGRID
                                   HAVE_DUNE_GRID=1
@@ -7,6 +8,7 @@ dune_add_test(NAME test-dgf-yasp
 
 dune_add_test(NAME test-dgf-yasp-offset
               SOURCES test-dgf.cc
+              LINK_LIBRARIES dunegrid
               COMPILE_DEFINITIONS GRIDDIM=3
                                   YASPGRID
                                   HAVE_DUNE_GRID=1
@@ -16,6 +18,7 @@ dune_add_test(NAME test-dgf-yasp-offset
 
 dune_add_test(NAME test-dgf-oned
               SOURCES test-dgf.cc
+              LINK_LIBRARIES dunegrid
               COMPILE_DEFINITIONS GRIDDIM=1
                                   ONEDGRID
                                   HAVE_DUNE_GRID=1
