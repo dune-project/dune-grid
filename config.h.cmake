@@ -69,6 +69,11 @@
 /* Define to 1 if you have mkstemp function */
 #cmakedefine01 HAVE_MKSTEMP
 
+/* begin bottom */
+
 /* Grid type magic for DGF parser */
 @GRID_CONFIG_H_BOTTOM@
+
+/* end bottom */
+
 /* end dune-grid */
