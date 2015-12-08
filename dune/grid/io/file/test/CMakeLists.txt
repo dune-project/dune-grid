@@ -34,6 +34,7 @@ endif()
 # the gmsh tests
 dune_add_test(NAME gmshtest-onedgrid
               SOURCES gmshtest.cc
+              LINK_LIBRARIES dunegrid
               COMPILE_DEFINITIONS GMSH_ONEDGRID
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
 
