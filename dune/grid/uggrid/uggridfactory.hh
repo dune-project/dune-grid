@@ -9,6 +9,7 @@
     \author Oliver Sander
  */
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -255,6 +256,13 @@ namespace Dune {
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
       return intersection.boundarySegmentIndex();
+    }
+
+    /** \brief Return true if the intersection has been explictily insterted into the factory */
+    virtual bool
+    wasInserted ( const typename Grid::LeafIntersection &intersection ) const
+    {
+      return (insertionIndex( intersection ) < boundarySegmentVertices_.size());
     }
 
   private:
