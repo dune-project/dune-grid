@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <dune/common/fvector.hh>
+#include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/gridfactory.hh>
 
 namespace Dune
@@ -32,7 +33,7 @@ namespace Dune
     for( const auto vertex : vertices( grid.leafGridView() ) )
     {
       std::size_t idx = factory.insertionIndex( vertex );
-      Vertex v = mesh.vertices[ idx ];
+      Vertex v = projection( mesh.vertices[ idx ] );
       if( (v - vertex.geometry().center() ).two_norm() > 1e-8 )
         DUNE_THROW( GridError, "GridFactory error, Vertex insertion Index wrong!" );
     }
@@ -58,7 +59,43 @@ namespace Dune
       if( !std::equal( indices.begin(), indices.end(), insertIndices.begin() ) )
         DUNE_THROW( GridError, "GridFactory error, Element insertion index wrong!" );
     }
+
+    // check boundary segment index
+    typedef std::pair< unsigned int, std::vector< unsigned int > > BoundarySegementPair;
+    std::vector< BoundarySegementPair > bndInsIndex;
+
+    for( const auto &entity : elements( grid.leafGridView() ) )
+    {
+      const ReferenceElement< typename Grid::ctype, Grid::dimension > &refelement
+        = ReferenceElements< typename Grid::ctype, Grid::dimension >::general( entity.type() );
+
+      for( const auto &intersection : intersections( grid.leafGridView(), entity ) )
+        if( factory.wasInserted( intersection ) )
+        {
+          auto geometry = intersection.geometry();
+          std::vector< unsigned int > vertices;
+          const int numSubeEntitites = refelement.size( intersection.indexInInside(), 1, Grid::dimension );
+          for( int i = 0; i < numSubeEntitites; ++i )
+            vertices.push_back(
+              factory.insertionIndex(
+                entity.template subEntity< Grid::dimension >( refelement.subEntity( intersection.indexInInside(), 1, i, Grid::dimension ) )
+                ) );
+          bndInsIndex.emplace_back( factory.insertionIndex( intersection ), vertices );
+        }
+    }
+
+    auto compare = [] ( const BoundarySegementPair &v, const BoundarySegementPair &w ) { return v.first == w.first; };
+
+    bndInsIndex.resize( std::distance( bndInsIndex.begin(), std::unique( bndInsIndex.begin(), bndInsIndex.end(), compare ) ) );
+
+    if( bndInsIndex.size() != mesh.boundaries.size() )
+      DUNE_THROW( GridError, "GridFactory error, wrong number of boundary segments inserted." );
+
+    for( const BoundarySegementPair &pair : bndInsIndex )
+      if( !std::is_permutation( pair.second.begin(), pair.second.end(), mesh.boundaries[ pair.first ].begin() ) )
+        DUNE_THROW( GridError, "GridFactory error, insertion index for boundary segment wrong." );
   }
+
 
   template< class Grid, class Mesh >
   void checkGridFactory ( const Mesh &mesh )
