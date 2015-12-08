@@ -159,13 +159,15 @@ namespace Dune {
   template <int dimworld>
   class GridFactory<UGGrid<dimworld> > : public GridFactoryInterface<UGGrid<dimworld> > {
 
+  public:
+    /** \brief Type of grid this factory is for */
+    typedef UGGrid<dimworld> Grid;
+
     /** \brief Type used by the grid for coordinates */
-    typedef typename UGGrid<dimworld>::ctype ctype;
+    typedef typename Grid::ctype ctype;
 
     // UGGrid only in 2d and 3d
     static_assert(dimworld==2 || dimworld || 3, "UGGrid only in 2d and 3d");
-
-  public:
 
     /** \brief Default constructor */
     GridFactory();
@@ -180,7 +182,7 @@ namespace Dune {
        the pointer handed over to you by the method createGrid() is
        the one you supplied here.
      */
-    GridFactory(UGGrid<dimworld>* grid);
+    GridFactory(Grid* grid);
 
     /** \brief Destructor */
     ~GridFactory();
@@ -215,14 +217,14 @@ namespace Dune {
 
        The receiver takes responsibility of the memory allocated for the grid
      */
-    virtual UGGrid<dimworld>* createGrid();
+    virtual Grid* createGrid();
 
-    static const int dimension = UGGrid<dimworld>::dimension;
+    static const int dimension = Grid::dimension;
 
     template< int codim >
     struct Codim
     {
-      typedef typename UGGrid<dimworld>::template Codim< codim >::Entity Entity;
+      typedef typename Grid::template Codim< codim >::Entity Entity;
     };
 
     /** \brief Return the number of the element in the order of insertion into the factory
@@ -245,13 +247,23 @@ namespace Dune {
       return UG_NS<dimension>::levelIndex(grid_->getRealImplementation(entity).target_);
     }
 
+    /** \brief Return the number of the intersection in the order of insertion into the factory
+     *
+     * For UGGrid intersections this number is the same as the boundary segment index
+     */
+    virtual unsigned int
+    insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
+    {
+      return intersection.boundarySegmentIndex();
+    }
+
   private:
 
     // Initialize the grid structure in UG
     void createBegin();
 
     // Pointer to the grid being built
-    UGGrid<dimworld>* grid_;
+    Grid* grid_;
 
     // True if the factory allocated the grid itself, false if the
     // grid was handed over from the outside
