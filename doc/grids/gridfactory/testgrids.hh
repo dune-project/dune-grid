@@ -21,9 +21,10 @@ namespace Dune
   {
     typedef FieldVector< double, dimworld > Vertex;
     typedef std::pair< GeometryType, std::vector< unsigned int > > Element;
+    typedef std::vector< unsigned int > BoundarySegment;
 
-    TestGrid ( std::vector< Vertex > v, std::vector< Element > e )
-      : vertices( std::move( v ) ), elements( std::move( e ) )
+    TestGrid ( std::vector< Vertex > v, std::vector< Element > e, std::vector< BoundarySegment > b )
+      : vertices( std::move( v ) ), elements( std::move( e ) ), boundaries( std::move( b ) )
     {}
 
     template< class Grid, class Projection >
@@ -33,6 +34,8 @@ namespace Dune
         factory.insertVertex( projection( v ) );
       for( const Element &e : elements )
         factory.insertElement( e.first, e.second );
+      for( const BoundarySegment &b : boundaries )
+        factory.insertBoundarySegment( b );
     }
 
     template< class Grid >
@@ -43,6 +46,7 @@ namespace Dune
 
     std::vector< Vertex > vertices;
     std::vector< Element > elements;
+    std::vector< BoundarySegment > boundaries;
   };
 
 
@@ -62,14 +66,16 @@ namespace Dune
 
     static const TestGrid< 1 > unitLine = {
         { { 0.0 }, { 1.0 } },
-        { { line, { 0, 1 } } }
+        { { line, { 0, 1 } } },
+        { { 0 }, { 1 } }
       };
 
 
     // cube grids
     static const TestGrid< 2 > unitSquare = {
         { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } },
-        { { quadrilateral, { 0, 1, 2, 3 } } }
+        { { quadrilateral, { 0, 1, 2, 3 } } },
+        { { 0, 1 }, { 1, 3 }, { 3, 2 }, { 2, 0 } }
       };
 
     static const TestGrid< 3 > unitCube = {
@@ -77,13 +83,19 @@ namespace Dune
           { 0.0, 0.0, 0.0 }, { 1.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 }, { 1.0, 1.0, 0.0 },
           { 0.0, 0.0, 1.0 }, { 1.0, 0.0, 1.0 }, { 0.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }
         },
-        { { hexahedron, { 0, 1, 2, 3, 4, 5, 6, 7 } } }
+        { { hexahedron, { 0, 1, 2, 3, 4, 5, 6, 7 } } },
+        {
+          { 0, 1, 2, 3 }, { 1, 3, 7, 5 },
+          { 0, 4, 5, 1 }, { 0, 4, 6, 2 },
+          { 2, 3, 7, 6 }, { 4, 5, 7, 6 }
+        }
       };
 
     // simplex grids
     static const TestGrid< 2 > kuhn2d = {
         { { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { 1.0, 1.0 } },
-        { { triangle, { 0, 1, 3 } }, { triangle, { 0, 2, 3 } } }
+        { { triangle, { 0, 1, 3 } }, { triangle, { 0, 2, 3 } } },
+        { { 0, 1 }, { 1, 3 }, { 3, 2 }, { 2, 0 } }
       };
 
     static const TestGrid< 3 > kuhn3d = {
@@ -95,6 +107,14 @@ namespace Dune
           { tetrahedron, { 0, 1, 3, 7 } }, { tetrahedron, { 0, 1, 5, 7 } },
           { tetrahedron, { 0, 2, 3, 7 } }, { tetrahedron, { 0, 2, 6, 7 } },
           { tetrahedron, { 0, 4, 5, 7 } }, { tetrahedron, { 0, 4, 6, 7 } }
+        },
+        {
+          { 0, 1, 3 }, { 1, 3, 7 },
+          { 0, 1, 5 }, { 1, 5, 7 },
+          { 0, 2, 3 }, { 2, 3, 7 },
+          { 0, 2, 6 }, { 2, 6, 7 },
+          { 0, 4, 5 }, { 4, 5, 7 },
+          { 0, 4, 6 }, { 4, 6, 7 }
         }
       };
 
@@ -109,14 +129,15 @@ namespace Dune
         {
           { triangle, { 9, 10, 11} }, { triangle, { 15, 13, 14 } },
           { quadrilateral, {0, 4, 7, 8} }, { quadrilateral, {4, 1, 8, 5} },
-          { quadrilateral, {8, 5, 6, 2} }, { quadrilateral,{7, 8, 3, 6} },
+          { quadrilateral, {8, 5, 6, 2} }, { quadrilateral, {7, 8, 3, 6} },
           { quadrilateral, {1, 9, 5, 11} }, { quadrilateral, {5, 11, 2, 10} },
           { quadrilateral, {2, 10, 13, 12} }, { quadrilateral, {3, 6, 14, 15} },
           { quadrilateral, {6, 2, 15, 13} }
-        }
+        },
+        {}
       };
 
-   static const TestGrid< 3 > hybrid3d = {
+    static const TestGrid< 3 > hybrid3d = {
         {
           {0, 0, 0}, {0.5, 0, 0}, {0.5, 0.5, 0}, {0, 0.5, 0},
           {0, 0, 0.5}, {0.5, 0, 0.5}, {0.5, 0.5, 0.5}, {0, 0.5, 0.5},
@@ -136,33 +157,33 @@ namespace Dune
           {1.5, 1, 1}
         },
         {
-          { tetrahedron, {10, 29, 3, 32} }, { tetrahedron,{10, 2, 28, 32}},
-          { tetrahedron,{10, 28, 29, 32}}, { tetrahedron,{14, 28, 2, 32}},
-          { tetrahedron,{14, 6, 30, 32}}, { tetrahedron,{14, 30, 28, 32}},
-          { tetrahedron,{15, 31, 7, 32}}, { tetrahedron,{15, 3, 29, 32}},
-          { tetrahedron,{15, 29, 31, 32}}, { tetrahedron,{18, 30, 6, 32}},
-          { tetrahedron,{18, 7, 31, 32}}, { tetrahedron,{18, 31, 30, 32}},
-          { tetrahedron,{15, 29, 3, 37}}, { tetrahedron,{15, 7, 31, 37}},
-          { tetrahedron,{15, 31, 29, 37}}, { tetrahedron,{15, 36, 7, 37}},
-          { tetrahedron,{15, 3, 34, 37}}, { tetrahedron,{15, 34, 36, 37}},
-          { tetrahedron,{11, 38, 4, 40}}, { tetrahedron,{11, 3, 34, 40}},
-          { tetrahedron,{11, 34, 38, 40}}, { tetrahedron,{15, 34, 3, 40}},
-          { tetrahedron,{15, 7, 36, 40}}, { tetrahedron,{15, 36, 34, 40}},
-          { tetrahedron,{16, 39, 8, 40}}, { tetrahedron,{16, 4, 38, 40}},
-          { tetrahedron,{16, 38, 39, 40}}, { tetrahedron,{19, 36, 7, 40}},
-          { tetrahedron,{19, 8, 39, 40}}, { tetrahedron,{19, 39, 36, 40}},
-          { tetrahedron,{17, 42, 6, 45}}, { tetrahedron,{17, 5, 41, 45}},
-          { tetrahedron,{17, 41, 42, 45}}, { tetrahedron,{18, 43, 7, 45}},
-          { tetrahedron,{18, 6, 42, 45}}, { tetrahedron,{18, 42, 43, 45}},
-          { tetrahedron,{19, 44, 8, 45}}, { tetrahedron,{19, 7, 43, 45}},
-          { tetrahedron,{19, 43, 44, 45}}, { tetrahedron,{20, 41, 5, 45}},
-          { tetrahedron,{20, 8, 44, 45}}, { tetrahedron,{20, 44, 41, 45}},
-          { tetrahedron,{18, 31, 7, 48}}, { tetrahedron,{18, 6, 30, 48}},
-          { tetrahedron,{18, 30, 31, 48}}, { tetrahedron,{18, 42, 6, 48}},
-          { tetrahedron,{18, 7, 43, 48}}, { tetrahedron,{18, 43, 42, 48}},
-          { tetrahedron,{19, 39, 8, 52}}, { tetrahedron,{19, 7, 36, 52}},
-          { tetrahedron,{19, 36, 39, 52}}, { tetrahedron,{19, 43, 7, 52}},
-          { tetrahedron,{19, 8, 44, 52}}, { tetrahedron,{19, 44, 43, 52}},
+          { tetrahedron, {10, 29, 3, 32} }, { tetrahedron, {10, 2, 28, 32}},
+          { tetrahedron, {10, 28, 29, 32}}, { tetrahedron, {14, 28, 2, 32}},
+          { tetrahedron, {14, 6, 30, 32}}, { tetrahedron, {14, 30, 28, 32}},
+          { tetrahedron, {15, 31, 7, 32}}, { tetrahedron, {15, 3, 29, 32}},
+          { tetrahedron, {15, 29, 31, 32}}, { tetrahedron, {18, 30, 6, 32}},
+          { tetrahedron, {18, 7, 31, 32}}, { tetrahedron, {18, 31, 30, 32}},
+          { tetrahedron, {15, 29, 3, 37}}, { tetrahedron, {15, 7, 31, 37}},
+          { tetrahedron, {15, 31, 29, 37}}, { tetrahedron, {15, 36, 7, 37}},
+          { tetrahedron, {15, 3, 34, 37}}, { tetrahedron, {15, 34, 36, 37}},
+          { tetrahedron, {11, 38, 4, 40}}, { tetrahedron, {11, 3, 34, 40}},
+          { tetrahedron, {11, 34, 38, 40}}, { tetrahedron, {15, 34, 3, 40}},
+          { tetrahedron, {15, 7, 36, 40}}, { tetrahedron, {15, 36, 34, 40}},
+          { tetrahedron, {16, 39, 8, 40}}, { tetrahedron, {16, 4, 38, 40}},
+          { tetrahedron, {16, 38, 39, 40}}, { tetrahedron, {19, 36, 7, 40}},
+          { tetrahedron, {19, 8, 39, 40}}, { tetrahedron, {19, 39, 36, 40}},
+          { tetrahedron, {17, 42, 6, 45}}, { tetrahedron, {17, 5, 41, 45}},
+          { tetrahedron, {17, 41, 42, 45}}, { tetrahedron, {18, 43, 7, 45}},
+          { tetrahedron, {18, 6, 42, 45}}, { tetrahedron, {18, 42, 43, 45}},
+          { tetrahedron, {19, 44, 8, 45}}, { tetrahedron, {19, 7, 43, 45}},
+          { tetrahedron, {19, 43, 44, 45}}, { tetrahedron, {20, 41, 5, 45}},
+          { tetrahedron, {20, 8, 44, 45}}, { tetrahedron, {20, 44, 41, 45}},
+          { tetrahedron, {18, 31, 7, 48}}, { tetrahedron, {18, 6, 30, 48}},
+          { tetrahedron, {18, 30, 31, 48}}, { tetrahedron, {18, 42, 6, 48}},
+          { tetrahedron, {18, 7, 43, 48}}, { tetrahedron, {18, 43, 42, 48}},
+          { tetrahedron, {19, 39, 8, 52}}, { tetrahedron, {19, 7, 36, 52}},
+          { tetrahedron, {19, 36, 39, 52}}, { tetrahedron, {19, 43, 7, 52}},
+          { tetrahedron, {19, 8, 44, 52}}, { tetrahedron, {19, 44, 43, 52}},
           { pyramid, {28, 30, 29, 31, 32}}, { pyramid, {10, 23, 2,  14, 32}},
           { pyramid, {14, 23, 6,  18, 32}}, { pyramid, {18, 23, 7,  15, 32}},
           { pyramid, {15, 23, 3,  10, 32}}, { pyramid, {3,  29, 34, 33, 37}},
@@ -186,7 +207,8 @@ namespace Dune
           { hexahedron, {13, 22, 25, 27, 5, 17, 20, 26}}, { hexahedron, {22, 14, 27, 23, 17, 6, 26, 18}},
           { hexahedron, {27, 23, 24, 15, 26, 18, 19, 7}}, { hexahedron, {25, 27, 16, 24, 20, 26, 8, 19}},
           { hexahedron, {7, 31, 36, 35, 43, 47, 50, 49}}
-        }
+        },
+        {}
       };
 
   } // namespace TestGrids
