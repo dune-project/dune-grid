@@ -161,7 +161,7 @@ namespace Dune {
   class GridFactory<UGGrid<dimworld> > : public GridFactoryInterface<UGGrid<dimworld> > {
 
     /** \brief Type used by the grid for coordinates */
-    typedef typename Grid::ctype ctype;
+    typedef typename UGGrid<dimworld>::ctype ctype;
 
     // UGGrid only in 2d and 3d
     static_assert(dimworld==2 || dimworld || 3, "UGGrid only in 2d and 3d");
@@ -218,7 +218,7 @@ namespace Dune {
      */
     virtual UGGrid<dimworld>* createGrid();
 
-    static const int dimension = Grid::dimension;
+    static const int dimension = UGGrid<dimworld>::dimension;
 
     template< int codim >
     struct Codim
