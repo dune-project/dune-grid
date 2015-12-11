@@ -244,6 +244,23 @@ namespace Dune {
       return UG_NS<dimension>::levelIndex(grid_->getRealImplementation(entity).target_);
     }
 
+    /** \brief Return the number of the intersection in the order of insertion into the factory
+     *
+     * For UGGrid intersections this number is the same as the boundary segment index
+     */
+    virtual unsigned int
+    insertionIndex ( const typename UGGrid<dimworld>::LeafIntersection &intersection ) const
+    {
+      return intersection.boundarySegmentIndex();
+    }
+
+    /** \brief Return true if the intersection has been explictily insterted into the factory */
+    virtual bool
+    wasInserted ( const typename UGGrid<dimworld>::LeafIntersection &intersection ) const
+    {
+      return (insertionIndex( intersection ) < boundarySegmentVertices_.size());
+    }
+
   private:
 
     // Initialize the grid structure in UG
