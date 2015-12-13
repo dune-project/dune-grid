@@ -76,7 +76,7 @@ namespace Dune
       static PartitionType get(const Entity& entity, int codim, int i)
       {
         if (codim==Codim)
-          return entity.template subEntity<Codim>(i)->partitionType();
+          return entity.template subEntity<Codim>(i).partitionType();
         else
           return SubPartitionTypeProvider<Entity,Codim-1>::get(entity, codim, i);
       }
@@ -87,7 +87,7 @@ namespace Dune
     {
       static PartitionType get(const Entity& entity, int codim, int i)
       {
-        return entity.template subEntity<0>(i)->partitionType();
+        return entity.template subEntity<0>(i).partitionType();
       }
     };
 
