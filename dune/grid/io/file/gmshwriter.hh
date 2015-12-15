@@ -91,7 +91,7 @@ namespace Dune {
     void outputElements(std::ofstream& file, const std::vector<int>* physicalEntities, const std::vector<int>* physicalBoundaries) const {
       MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> elementMapper(gv);
       std::size_t counter(1);
-      for (const auto entity : elements(gv)) {
+      for (const auto& entity : elements(gv)) {
         // Check whether the type is compatible. If not, close file and rethrow exception.
         try {
           std::size_t element_type = translateDuneToGmshType(entity.type());
@@ -131,7 +131,7 @@ namespace Dune {
           // Write boundaries
           if (physicalBoundaries!=nullptr) {
             const auto& refElement(ReferenceElements<typename GridView::ctype,dim>::general(entity.type()));
-            for(const auto intersection : intersections(gv, entity)) {
+            for(const auto& intersection : intersections(gv, entity)) {
               if(intersection.boundary()) {
                 const auto faceLocalIndex(intersection.indexInInside());
                 file << counter << " " << translateDuneToGmshType(intersection.type())
@@ -217,8 +217,8 @@ namespace Dune {
       // Output Elements;
       int boundariesSize(0);
       if(physicalBoundaries!=nullptr)
-        for(const auto entity : elements(gv))
-          for(const auto intersection : intersections(gv, entity))
+        for(const auto& entity : elements(gv))
+          for(const auto& intersection : intersections(gv, entity))
             if(intersection.boundary())
               ++boundariesSize;
 
