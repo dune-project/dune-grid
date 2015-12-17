@@ -4,7 +4,6 @@
 #define DUNE_GRID_COMMON_PARTITIONSET_HH
 
 #include <dune/common/typetraits.hh>
-#include <dune/common/std/constexpr.hh>
 #include <dune/grid/common/gridenums.hh>
 
 namespace Dune {
@@ -134,44 +133,39 @@ namespace Dune {
       return os;
     }
 
-#if HAVE_CONSTEXPR || DOXYGEN
-
     //! Returns the PartitionIteratorType that can be used to iterate over the partitions in the set.
     /**
      *
      * \throws  raises a static assertion if the partitions do not correspond to a valid PartitionIteratorType.
-     * \since   GCC 4.6 (constexpr)
      */
     static constexpr PartitionIteratorType partitionIterator()
     {
       return derive_partition_iterator_type<partitions>::value;
     }
 
-#endif // HAVE_CONSTEXPR
-
     //! Tests whether the given PartitionType is contained in this set.
-    static DUNE_CONSTEXPR bool contains(PartitionType pt)
+    static constexpr bool contains(PartitionType pt)
     {
       return partitions & (1 << pt);
     }
 
     //! Tests whether the given PartitionSet is contained in this set.
     template<unsigned int contained_partitions>
-    static DUNE_CONSTEXPR bool contains(PartitionSet<contained_partitions>)
+    static constexpr bool contains(PartitionSet<contained_partitions>)
     {
       return (partitions & contained_partitions) == contained_partitions;
     }
 
     //! Tests whether two PartitionsSet are equal.
     template<unsigned int p2>
-    DUNE_CONSTEXPR bool operator==(PartitionSet<p2>) const
+    constexpr bool operator==(PartitionSet<p2>) const
     {
       return partitions == p2;
     }
 
     //! Tests whether two PartitionsSet are not equal.
     template<unsigned int p2>
-    DUNE_CONSTEXPR bool operator!=(PartitionSet<p2>) const
+    constexpr bool operator!=(PartitionSet<p2>) const
     {
       return partitions != p2;
     }
