@@ -28,7 +28,7 @@ namespace Dune
       typedef IndexSet< Grid, HostIndexSet > This;
       typedef Dune::IndexSet< Grid, This, typename HostIndexSet::IndexType, typename HostIndexSet::Types > Base;
 
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
       typedef typename Traits::HostGrid HostGrid;
 

@@ -31,7 +31,7 @@ namespace Dune {
 
     friend class IdentityGridLeafIntersectionIterator<GridImp>;
 
-    friend struct HostGridAccess< typename remove_const< GridImp >::type >;
+    friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
     enum {dim=GridImp::dimension};
 
@@ -197,7 +197,7 @@ namespace Dune {
 
     friend class IdentityGridLevelIntersectionIterator<GridImp>;
 
-    friend struct HostGridAccess< typename remove_const< GridImp >::type >;
+    friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
     enum {dim=GridImp::dimension};
 

@@ -29,7 +29,7 @@ namespace Dune
     typedef AlbertaLevelGridView< GridImp > GridViewImp;
 
     /** \brief type of the grid */
-    typedef typename remove_const<GridImp>::type Grid;
+    typedef typename std::remove_const<GridImp>::type Grid;
 
     /** \brief type of the index set */
     typedef typename Grid::Traits::LevelIndexSet IndexSet;
@@ -244,7 +244,7 @@ namespace Dune
     typedef AlbertaLeafGridView< GridImp > GridViewImp;
 
     /** \brief type of the grid */
-    typedef typename remove_const<GridImp>::type Grid;
+    typedef typename std::remove_const<GridImp>::type Grid;
 
     /** \brief type of the index set */
     typedef typename Grid::Traits::LeafIndexSet IndexSet;

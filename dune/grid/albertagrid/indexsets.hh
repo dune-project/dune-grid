@@ -565,7 +565,7 @@ namespace Dune
       return id< codim >( e );
     }
 
-    /** \copydoc IdSet::id(const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity &e) const */
+    /** \copydoc IdSet::id(const typename std::remove_const<GridImp>::type::Traits::template Codim<cc>::Entity &e) const */
     template< int codim >
     IdType id ( const typename Grid::template Codim< codim >::Entity &e ) const
     {
@@ -574,7 +574,7 @@ namespace Dune
       return (index << 2) | IdType( codim );
     }
 
-    /** \copydoc IdSet::subId(const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity &e,int i,unsigned int codim) const */
+    /** \copydoc IdSet::subId(const typename std::remove_const<GridImp>::type::Traits::template Codim<0>::Entity &e,int i,unsigned int codim) const */
     IdType subId ( const typename Grid::template Codim< 0 >::Entity &e, int i, unsigned int subcodim ) const
     {
       assert( int( subcodim ) <= dimension );

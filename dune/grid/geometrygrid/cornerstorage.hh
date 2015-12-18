@@ -23,7 +23,7 @@ namespace Dune
     template< int mydim, class Grid >
     class CoordVector< mydim, Grid, false >
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
       typedef typename Traits::ctype ctype;
 
@@ -65,7 +65,7 @@ namespace Dune
     template< int mydim, class Grid >
     class CoordVector< mydim, Grid, true >
     {
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
+      typedef typename std::remove_const< Grid > :: type :: Traits Traits;
 
       typedef typename Traits::ctype ctype;
 
@@ -120,7 +120,7 @@ namespace Dune
     template< class Grid >
     class IntersectionCoordVector
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
       typedef typename Traits::ctype ctype;
 
@@ -171,7 +171,7 @@ namespace Dune
     template< int mydim, int cdim, class Grid >
     class CornerStorage
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
       typedef typename Traits::ctype ctype;
       typedef FieldVector< ctype, cdim > Coordinate;

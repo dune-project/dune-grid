@@ -21,7 +21,7 @@ namespace Dune
       typedef typename HostIntersection::Geometry HostGeometry;
       typedef typename HostIntersection::LocalGeometry HostLocalGeometry;
 
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
     public:
       typedef typename Traits::ctype ctype;

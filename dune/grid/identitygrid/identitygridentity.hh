@@ -70,7 +70,7 @@ namespace Dune {
     template<int,typename, typename>
     friend class IdentityGridEntityPointer;
 
-    friend struct HostGridAccess< typename remove_const< GridImp >::type >;
+    friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
 
   private:
@@ -209,7 +209,7 @@ namespace Dune {
   class IdentityGridEntity<0,dim,GridImp> :
     public EntityDefaultImplementation<0,dim,GridImp, IdentityGridEntity>
   {
-    friend struct HostGridAccess< typename remove_const< GridImp >::type >;
+    friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
     template<int,typename, typename>
     friend class IdentityGridEntityPointer;
