@@ -40,7 +40,7 @@ void pass(int &result) {
 
 //! test consistency on one dimension and element
 template<std::size_t mydim, class VertexOrder>
-void testElementDim(const Dune::integral_constant<std::size_t, mydim>&,
+void testElementDim(const std::integral_constant<std::size_t, mydim>&,
                     const VertexOrder &vo)
 {
   static const std::size_t dim = VertexOrder::dimension;
@@ -71,10 +71,10 @@ void testElementDim(const Dune::integral_constant<std::size_t, mydim>&,
 
 // test inter-dimensional consistency
 template<std::size_t mydim, class VertexOrder>
-void testElementInterdim(const Dune::integral_constant<std::size_t, mydim>&,
+void testElementInterdim(const std::integral_constant<std::size_t, mydim>&,
                          const VertexOrder &vo)
 {
-  testElementDim(Dune::integral_constant<std::size_t, mydim>(), vo);
+  testElementDim(std::integral_constant<std::size_t, mydim>(), vo);
 
   static const std::size_t dim = VertexOrder::dimension;
   static const std::size_t codim = dim - mydim;
@@ -110,14 +110,14 @@ void testElementInterdim(const Dune::integral_constant<std::size_t, mydim>&,
   }
 }
 template<class VertexOrder>
-void testElementInterdim(const Dune::integral_constant<std::size_t, 0>&,
+void testElementInterdim(const std::integral_constant<std::size_t, 0>&,
                          const VertexOrder &vo)
 {
-  testElementDim(Dune::integral_constant<std::size_t, 0>(), vo);
+  testElementDim(std::integral_constant<std::size_t, 0>(), vo);
 }
 
 template<std::size_t mydim, class VertexOrder, class Intersection>
-void testNeighborDim(const Dune::integral_constant<std::size_t, mydim>&,
+void testNeighborDim(const std::integral_constant<std::size_t, mydim>&,
                      const VertexOrder &vo_s, const VertexOrder &vo_n,
                      const Intersection &is)
 {
@@ -193,21 +193,21 @@ void testNeighborDim(const Dune::integral_constant<std::size_t, mydim>&,
   }
 }
 template<class VertexOrder, class Intersection>
-void testNeighbor(const Dune::integral_constant<std::size_t, 0>&,
+void testNeighbor(const std::integral_constant<std::size_t, 0>&,
                   const VertexOrder &vo_s, const VertexOrder &vo_n,
                   const Intersection &is)
 {
-  testNeighborDim(Dune::integral_constant<std::size_t, 0>(),
+  testNeighborDim(std::integral_constant<std::size_t, 0>(),
                   vo_s, vo_n, is);
 }
 template<std::size_t mydim, class VertexOrder, class Intersection>
-void testNeighbor(const Dune::integral_constant<std::size_t, mydim>&,
+void testNeighbor(const std::integral_constant<std::size_t, mydim>&,
                   const VertexOrder &vo_s, const VertexOrder &vo_n,
                   const Intersection &is)
 {
-  testNeighbor(Dune::integral_constant<std::size_t, mydim-1>(),
+  testNeighbor(std::integral_constant<std::size_t, mydim-1>(),
                vo_s, vo_n, is);
-  testNeighborDim(Dune::integral_constant<std::size_t, mydim>(),
+  testNeighborDim(std::integral_constant<std::size_t, mydim>(),
                   vo_s, vo_n, is);
 }
 
@@ -227,13 +227,13 @@ void testVertexOrder(const GV& gv, const VertexOrderFactory &voFactory,
   for(EIterator eit = gv.template begin<0>(); eit != eend; ++eit)
     try {
       VertexOrder vo = voFactory.make(*eit);
-      testElementInterdim(Dune::integral_constant<std::size_t, dim-codim>(),
+      testElementInterdim(std::integral_constant<std::size_t, dim-codim>(),
                           vo);
       const IIterator &iend = gv.iend(*eit);
       for(IIterator iit = gv.ibegin(*eit); iit != iend; ++iit)
         if(iit->neighbor()) {
           VertexOrder vo_n = voFactory.make(*iit->outside());
-          testNeighbor(Dune::integral_constant<std::size_t,
+          testNeighbor(std::integral_constant<std::size_t,
                            dim-(codim==0 ? 1 : codim)>(),
                        vo, vo_n, *iit);
         }

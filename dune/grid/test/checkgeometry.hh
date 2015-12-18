@@ -52,7 +52,7 @@ namespace Dune
     template <int dim,class GI,template <int,int,class> class EI>
     static void apply(const Entity<0,dim,GI,EI> &entity)
     {
-      integral_constant<
+      std::integral_constant<
           bool, Dune::Capabilities::hasEntity<GI,codim>::v
           > capVar;
       check(capVar,entity);

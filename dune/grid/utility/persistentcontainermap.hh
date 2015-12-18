@@ -116,11 +116,11 @@ namespace Dune
 
     template< int codim >
     void migrateLevel ( int level, const Value &value, Map &data,
-                        integral_constant< bool, true > );
+                        std::integral_constant< bool, true > );
 
     template< int codim >
     void migrateLevel ( int level, const Value &value, Map &data,
-                        integral_constant< bool, false > );
+                        std::integral_constant< bool, false > );
 
     static void migrateEntry ( const typename IdSet::IdType &id, const Value &value,
                                Map &oldData, Map &newData );
@@ -218,7 +218,7 @@ namespace Dune
   template< int codim >
   inline void PersistentContainerMap< G, IdSet, Map >::resize ( const Value &value )
   {
-    integral_constant< bool, Capabilities::hasEntity< Grid, codim >::v > hasEntity;
+    std::integral_constant< bool, Capabilities::hasEntity< Grid, codim >::v > hasEntity;
     assert( codim == codimension() );
 
     // create empty map and swap it with current map (no need to copy twice)
@@ -236,7 +236,7 @@ namespace Dune
   template< int codim >
   inline void PersistentContainerMap< G, IdSet, Map >
   ::migrateLevel ( int level, const Value &value, Map &data,
-                   integral_constant< bool, true > )
+                   std::integral_constant< bool, true > )
   {
     typedef typename Grid::LevelGridView LevelView;
     typedef typename LevelView::template Codim< codim >::Iterator LevelIterator;
@@ -252,7 +252,7 @@ namespace Dune
   template< int codim >
   inline void PersistentContainerMap< G, IdSet, Map >
   ::migrateLevel ( int level, const Value &value, Map &data,
-                   integral_constant< bool, false > )
+                   std::integral_constant< bool, false > )
   {
     typedef typename Grid::LevelGridView LevelView;
     typedef typename LevelView::template Codim< 0 >::Iterator LevelIterator;
