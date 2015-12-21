@@ -120,7 +120,7 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
   typedef typename GridView::template Codim< 0 >::template Partition< Dune::All_Partition >::Iterator AllIterator;
 
   template< class IdSet >
-  static void check ( const Dune::true_type &, const GridView &gridView,
+  static void check ( const std::true_type &, const GridView &gridView,
                       const IdSet &idSet )
   {
     typedef std::map< typename IdSet::IdType, Dune::PartitionType > Map;
@@ -191,7 +191,7 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
   }
 
   template< class IdSet >
-  static void check ( const Dune::false_type &, const GridView &gridView, const IdSet &idSet )
+  static void check ( const std::false_type &, const GridView &gridView, const IdSet &idSet )
   {
     DUNE_UNUSED_PARAMETER(gridView);
     DUNE_UNUSED_PARAMETER(idSet);

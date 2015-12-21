@@ -58,7 +58,7 @@ namespace Dune
       check(capVar,entity);
     }
     template <class Entity>
-    static void check(const true_type&, const Entity &entity)
+    static void check(const std::true_type&, const Entity &entity)
     {
       for (unsigned int i=0; i<entity.subEntities(codim); ++i)
       {
@@ -83,7 +83,7 @@ namespace Dune
       }
     }
     template <class Entity>
-    static void check(const false_type&, const Entity &)
+    static void check(const std::false_type&, const Entity &)
     {}
   };
 
