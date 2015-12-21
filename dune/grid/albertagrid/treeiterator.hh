@@ -281,7 +281,7 @@ namespace Dune
   ::markSubEntities ( const Iterator &begin, const Iterator &end )
   {
     clear();
-    conditional< (firstCodim <= dimension), MarkSubEntities<true>, NoMarkSubEntities<false> >::type
+    std::conditional< (firstCodim <= dimension), MarkSubEntities<true>, NoMarkSubEntities<false> >::type
     ::template mark< firstCodim, Iterator >( dofNumbering_, marker_, begin, end );
   }
 
