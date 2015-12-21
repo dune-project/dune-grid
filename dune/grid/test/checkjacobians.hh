@@ -81,7 +81,7 @@ namespace Dune
     // ----------------------
 
     template< class ctype, int dimRange, int dimDomain, class Jacobian,
-              bool isFieldMatrix = is_same< Jacobian, FieldMatrix< ctype, dimRange, dimDomain > >::value
+              bool isFieldMatrix = std::is_same< Jacobian, FieldMatrix< ctype, dimRange, dimDomain > >::value
             >
     struct CheckJacobianInterface
     {

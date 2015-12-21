@@ -125,13 +125,13 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   // check consistency of exported types
 
-  static_assert((Dune::is_same< ctype, typename Entity::Geometry::ctype >::value),
+  static_assert((std::is_same< ctype, typename Entity::Geometry::ctype >::value),
                 "Type Intersection::ctype differs from Intersection::Entity::ctype.");
-  static_assert((Dune::is_same< ctype, typename LocalGeometry::ctype >::value),
+  static_assert((std::is_same< ctype, typename LocalGeometry::ctype >::value),
                 "Type Intersection::ctype differs from Intersection::LocalGeometry::ctype.");
-  static_assert((Dune::is_same< ctype, typename Geometry::ctype >::value),
+  static_assert((std::is_same< ctype, typename Geometry::ctype >::value),
                 "Type Intersection::ctype differs from Intersection::Geometry::ctype.");
-  static_assert((Dune::is_same< Entity, typename EntityPointer::Entity >::value),
+  static_assert((std::is_same< Entity, typename EntityPointer::Entity >::value),
                 "Type Intersection::EntityPointer::Entity differs from Intersection::Entity.");
 
   // cache some information on the intersection
@@ -449,10 +449,10 @@ void checkIntersectionIterator ( const GridViewType &view,
 
   // check consistency of exported types
 
-  static_assert( (Dune::is_same< ctype, typename Intersection::ctype >::value),
+  static_assert( (std::is_same< ctype, typename Intersection::ctype >::value),
                       "Type GridView::Grid::ctype differs from GridView::Intersection::ctype." );
 
-  static_assert( (Dune::is_same< Intersection, typename IntersectionIterator::Intersection >::value),
+  static_assert( (std::is_same< Intersection, typename IntersectionIterator::Intersection >::value),
                       "Type GridView::Intersection differs from GridView::IntersectionIterator::Intersection." );
 
   static_assert((static_cast<int>(Intersection::dimension)
