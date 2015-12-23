@@ -106,7 +106,7 @@ namespace Dune
 
     template<>
     struct PrintType<char> {
-      typedef conditional<std::numeric_limits<char>::is_signed,
+      typedef std::conditional<std::numeric_limits<char>::is_signed,
           int, unsigned>::type
       Type;
     };

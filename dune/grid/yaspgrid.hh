@@ -746,7 +746,7 @@ namespace Dune {
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
+      static_assert(std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
                     "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       _levels.resize(1);
@@ -816,7 +816,7 @@ namespace Dune {
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
+      static_assert(std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
                     "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       _levels.resize(1);
@@ -888,7 +888,7 @@ namespace Dune {
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
 
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
+      static_assert(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
                     "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       _levels.resize(1);
@@ -1001,7 +1001,7 @@ namespace Dune {
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
+      static_assert(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
                   "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       if (!Dune::Yasp::checkIfMonotonous(coords))
@@ -1652,7 +1652,7 @@ namespace Dune {
       template<class Y>
       void write (const Y& data)
       {
-        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(( std::is_same<DT,Y>::value ), "DataType mismatch");
         a[i++] = data;
       }
 
@@ -1660,7 +1660,7 @@ namespace Dune {
       template<class Y>
       void read (Y& data) const
       {
-        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(( std::is_same<DT,Y>::value ), "DataType mismatch");
         data = a[j++];
       }
 

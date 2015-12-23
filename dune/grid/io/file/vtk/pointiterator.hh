@@ -48,14 +48,14 @@ namespace Dune
     class PointIterator
       : public ForwardIteratorFacade
         < PointIterator<CellIterator, IS>,
-            const Corner<typename remove_const<typename std::iterator_traits<
+            const Corner<typename std::remove_const<typename std::iterator_traits<
                         CellIterator>::value_type>::type>,
-            const Corner<typename remove_const<typename std::iterator_traits<
+            const Corner<typename std::remove_const<typename std::iterator_traits<
                         CellIterator>::value_type>::type>&,
             typename std::iterator_traits<CellIterator>::difference_type>
     {
     public:
-      typedef VTK::Corner<typename remove_const<typename std::iterator_traits<
+      typedef VTK::Corner<typename std::remove_const<typename std::iterator_traits<
                   CellIterator>::value_type>::type> Corner;
 
       // reiterate the facades typedefs here

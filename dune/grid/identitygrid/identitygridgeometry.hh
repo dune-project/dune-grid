@@ -32,7 +32,7 @@ namespace Dune {
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Geometry HostGridGeometryType;
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Geometry HostGridLocalGeometryType;
 
-    typedef typename conditional<coorddim==DimensionWorld, HostGridGeometryType, HostGridLocalGeometryType>::type HostGridGeometry;
+    typedef typename std::conditional<coorddim==DimensionWorld, HostGridGeometryType, HostGridLocalGeometryType>::type HostGridGeometry;
 
     //! type of jacobian transposed
     typedef typename HostGridGeometryType::JacobianInverseTransposed JacobianInverseTransposed;

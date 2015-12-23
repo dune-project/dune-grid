@@ -52,13 +52,13 @@ namespace Dune
     template <int dim,class GI,template <int,int,class> class EI>
     static void apply(const Entity<0,dim,GI,EI> &entity)
     {
-      integral_constant<
+      std::integral_constant<
           bool, Dune::Capabilities::hasEntity<GI,codim>::v
           > capVar;
       check(capVar,entity);
     }
     template <class Entity>
-    static void check(const true_type&, const Entity &entity)
+    static void check(const std::true_type&, const Entity &entity)
     {
       for (unsigned int i=0; i<entity.subEntities(codim); ++i)
       {
@@ -83,7 +83,7 @@ namespace Dune
       }
     }
     template <class Entity>
-    static void check(const false_type&, const Entity &)
+    static void check(const std::false_type&, const Entity &)
     {}
   };
 

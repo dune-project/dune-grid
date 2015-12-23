@@ -238,7 +238,7 @@ namespace Dune
   template< class GridImp >
   struct AlbertaGridIntersectionBase< GridImp >::GlobalCoordReader
   {
-    typedef typename remove_const< GridImp >::type Grid;
+    typedef typename std::remove_const< GridImp >::type Grid;
 
     static const int dimension = Grid::dimension;
     static const int codimension = 1;
@@ -305,7 +305,7 @@ namespace Dune
   template< class GridImp >
   struct AlbertaGridIntersectionBase< GridImp >::LocalCoordReader
   {
-    typedef typename remove_const< GridImp >::type Grid;
+    typedef typename std::remove_const< GridImp >::type Grid;
 
     static const int dimension = Grid::dimension;
     static const int codimension = 1;

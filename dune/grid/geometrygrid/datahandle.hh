@@ -23,7 +23,7 @@ namespace Dune
     class CommDataHandle
       : public CommDataHandleIF< CommDataHandle< Grid, WrappedHandle >, typename WrappedHandle::DataType >
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
     public:
       CommDataHandle ( const Grid &grid, WrappedHandle &handle )

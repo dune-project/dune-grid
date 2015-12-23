@@ -186,7 +186,7 @@ void checkGeometryInFather(const GridType& grid)
         //   Check for types and constants
         // //////////////////////////////////////////////////////
 
-        static_assert((is_same<
+        static_assert((std::is_same<
                          typename Geometry::ctype,
                          typename GridType::ctype>::value == true),
                       "Geometry has wrong ctype");

@@ -72,7 +72,7 @@ namespace Dune
     template< int codim, class Grid >
     class EntityBase< codim, Grid, false >
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
     public:
       /** \name Attributes
@@ -358,7 +358,7 @@ namespace Dune
     template< int codim, class Grid >
     class EntityBase< codim, Grid, true >
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
     public:
       /** \name Attributes
@@ -694,7 +694,7 @@ namespace Dune
     {
       typedef EntityBase< 0, Grid > Base;
 
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
       typedef typename Traits::HostGrid HostGrid;
 

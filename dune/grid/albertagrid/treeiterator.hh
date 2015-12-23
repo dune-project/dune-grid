@@ -234,12 +234,12 @@ namespace Dune
     bool stopAtElement ( const ElementInfo &elementInfo ) const;
 
     void goNext ( ElementInfo &elementInfo );
-    void goNext ( const integral_constant< int, 0 > cdVariable,
+    void goNext ( const std::integral_constant< int, 0 > cdVariable,
                   ElementInfo &elementInfo );
-    void goNext ( const integral_constant< int, 1 > cdVariable,
+    void goNext ( const std::integral_constant< int, 1 > cdVariable,
                   ElementInfo &elementInfo );
     template< int cd >
-    void goNext ( const integral_constant< int, cd > cdVariable,
+    void goNext ( const std::integral_constant< int, cd > cdVariable,
                   ElementInfo &elementInfo );
 
     //! current level
@@ -281,7 +281,7 @@ namespace Dune
   ::markSubEntities ( const Iterator &begin, const Iterator &end )
   {
     clear();
-    conditional< (firstCodim <= dimension), MarkSubEntities<true>, NoMarkSubEntities<false> >::type
+    std::conditional< (firstCodim <= dimension), MarkSubEntities<true>, NoMarkSubEntities<false> >::type
     ::template mark< firstCodim, Iterator >( dofNumbering_, marker_, begin, end );
   }
 
@@ -433,13 +433,13 @@ namespace Dune
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNext ( ElementInfo &elementInfo )
   {
-    integral_constant< int, codim > codimVariable;
+    std::integral_constant< int, codim > codimVariable;
     goNext( codimVariable, elementInfo );
   }
 
   template< int codim, class GridImp, bool leafIterator >
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
-  ::goNext ( const integral_constant< int, 0 > cdVariable,
+  ::goNext ( const std::integral_constant< int, 0 > cdVariable,
              ElementInfo &elementInfo )
   {
     assert( stopAtElement( elementInfo ) );
@@ -450,7 +450,7 @@ namespace Dune
 
   template< int codim, class GridImp, bool leafIterator >
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
-  ::goNext ( const integral_constant< int, 1 > cdVariable,
+  ::goNext ( const std::integral_constant< int, 1 > cdVariable,
              ElementInfo &elementInfo )
   {
     assert( stopAtElement( elementInfo ) );
@@ -492,7 +492,7 @@ namespace Dune
   template< int codim, class GridImp, bool leafIterator >
   template< int cd >
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
-  ::goNext ( const integral_constant< int, cd > cdVariable,
+  ::goNext ( const std::integral_constant< int, cd > cdVariable,
              ElementInfo &elementInfo )
   {
     assert( stopAtElement( elementInfo ) );
