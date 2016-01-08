@@ -188,6 +188,7 @@ SOURCES = basicunitcube.hh                      \
           checkentityseed.hh                    \
           checkgeometry.hh                      \
           checkgeometryinfather.hh              \
+          checkgridfactory.hh										\
           checkindexset.hh                      \
           checkintersectionit.hh                \
           checkintersectionlifetime.hh          \
