@@ -237,12 +237,12 @@ namespace Dune {
 
         // If on periodic overlap, transform coordinates by domain size
         if (_inside.gridlevel()->mg->isPeriodic(i)) {
-          int coord = _inside.transformingsubiterator().coord(i);
-          if (coord < 0) {
+          int coordPeriodic = _inside.transformingsubiterator().coord(i);
+          if (coordPeriodic < 0) {
             auto size = _inside.gridlevel()->mg->domainSize()[i];
             ll[i] += size;
             ur[i] += size;
-          } else if (coord + 1 > _inside.gridlevel()->mg->levelSize(_inside.gridlevel()->level(),i)) {
+          } else if (coordPeriodic + 1 > _inside.gridlevel()->mg->levelSize(_inside.gridlevel()->level(),i)) {
             auto size = _inside.gridlevel()->mg->domainSize()[i];
             ll[i] -= size;
             ur[i] -= size;

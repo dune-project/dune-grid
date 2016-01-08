@@ -261,8 +261,6 @@ Dune::OneDGrid::getLeftNeighborWithSon(OneDGridList<OneDEntityImp<1> >::iterator
 
 bool Dune::OneDGrid::adapt()
 {
-  OneDGridList<OneDEntityImp<1> >::iterator eIt;
-
   // for the return value:  true if the grid was changed
   bool refinedGrid = false;
 
@@ -271,7 +269,7 @@ bool Dune::OneDGrid::adapt()
   // then the element is not removed.
   for (int i=1; i<=maxLevel(); i++) {
 
-    for (eIt = elements(i).begin(); eIt!=elements(i).end(); ) {
+    for (auto eIt = elements(i).begin(); eIt!=elements(i).end(); ) {
 
       OneDGridList<OneDEntityImp<1> >::iterator leftElementToBeDeleted  = eIt;
       OneDGridList<OneDEntityImp<1> >::iterator rightElementToBeDeleted = eIt->succ_;
@@ -337,7 +335,7 @@ bool Dune::OneDGrid::adapt()
   //  In that case add another level
   // /////////////////////////////////////////////////////////////////////////
   bool toplevelRefinement = false;
-  for (eIt =  elements(maxLevel()).begin();
+  for (auto eIt =  elements(maxLevel()).begin();
        eIt != elements(maxLevel()).end();
        eIt=eIt->succ_)
     if (eIt->markState_ == OneDEntityImp<1>::REFINE) {
@@ -357,7 +355,7 @@ bool Dune::OneDGrid::adapt()
   int oldMaxlevel = (toplevelRefinement) ? maxLevel()-1 : maxLevel();
   for (int i=0; i<=oldMaxlevel; i++) {
 
-    for (eIt = elements(i).begin(); eIt!=elements(i).end(); eIt = eIt->succ_) {
+    for (auto eIt = elements(i).begin(); eIt!=elements(i).end(); eIt = eIt->succ_) {
 
       if (eIt->markState_ == OneDEntityImp<1>::REFINE
           && eIt->isLeaf()) {
@@ -461,8 +459,7 @@ bool Dune::OneDGrid::adapt()
 
     for (int i=0; i<maxLevel(); i++) {
 
-      OneDGridList<OneDEntityImp<1> >::iterator eIt;
-      for (eIt = elements(i).begin(); eIt!=elements(i).end(); eIt = eIt->succ_) {
+      for (auto eIt = elements(i).begin(); eIt!=elements(i).end(); eIt = eIt->succ_) {
 
         if (eIt->isLeaf()) {
 

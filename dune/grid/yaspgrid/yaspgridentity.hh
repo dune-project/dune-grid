@@ -363,11 +363,11 @@ namespace Dune {
       std::bitset<dim-codim> subent_move = Dune::Yasp::entityMove<dim-codim>(i,cc);
       // combine the shifts to get the global shift of the subentity
       std::bitset<dim> shift,move;
-      for (int i=0,j=0; i<dim; i++)
-        if (ent_shift[i])
+      for (int curDim=0,j=0; curDim < dim; curDim++)
+        if (ent_shift[curDim])
         {
-          shift[i] = subent_shift[j];
-          move[i] = subent_move[j];
+          shift[curDim] = subent_shift[j];
+          move[curDim] = subent_move[j];
           j++;
         }
 

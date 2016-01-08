@@ -81,25 +81,25 @@ namespace Dune
     {
       if( findtoken( "dimension" ) )
       {
-        int dimworld;
-        if( !getnextentry( dimworld ) || (dimworld <= 0) )
+        int dimworldFromVertex;
+        if( !getnextentry( dimworldFromVertex ) || (dimworldFromVertex <= 0) )
         {
           DUNE_THROW( DGFException,
                       "Error in " << *this << ": "
                                   << "Invalid value given for 'dimension'." );
         }
-        return dimworld;
+        return dimworldFromVertex;
       }
 
       reset();
       while( getnextline() )
       {
-        int dimworld = -nofParam;
+        int dimworldFromVertex = -nofParam;
         double x;
         while( getnextentry( x ) )
-          ++dimworld;
-        if( dimworld > 0 )
-          return dimworld;
+          ++dimworldFromVertex;
+        if( dimworldFromVertex > 0 )
+          return dimworldFromVertex;
       }
 
       DUNE_THROW( DGFException,

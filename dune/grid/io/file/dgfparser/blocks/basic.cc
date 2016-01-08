@@ -44,10 +44,10 @@ namespace Dune
       linecount = 0;
       while( in.good() )
       {
-        std :: string line;
-        getline( in, line );
+        std::string curLine;
+        getline( in, curLine );
 
-        std :: istringstream linestream( line );
+        std::istringstream linestream( curLine );
         std :: string id;
         linestream >> id;
 
@@ -61,27 +61,27 @@ namespace Dune
       active = true;
       while( in.good() )
       {
-        std :: string line;
-        getline( in, line );
+        std::string curLine;
+        getline( in, curLine );
 
         // strip comments
-        if( !line.empty() )
+        if( !curLine.empty() )
         {
-          std::size_t comment = line.find( '%' );
+          std::size_t comment = curLine.find( '%' );
           if( comment != std::string::npos )
-            line.erase( comment );
+            curLine.erase( comment );
         }
-        if( line.empty() )
+        if( curLine.empty() )
           continue;
 
-        std :: istringstream linestream( line );
+        std :: istringstream linestream( curLine );
         char test = 0;
         linestream >> test;
         if( test == '#' )
           return;
 
         ++linecount;
-        block << line << std :: endl;
+        block << curLine << std :: endl;
       }
       DUNE_THROW( DGFException,
                   "Error reading from stream, expected \"#\" to end the block." );

@@ -75,8 +75,8 @@ namespace Dune
                   bound[j] = p[cube2simplex[i][j]];
                 }
 
-                EntityKey key( bound, false );
-                facemap[key] = BndParam( bndid, parameter );
+                EntityKey helperKey( bound, false );
+                facemap[helperKey] = BndParam( bndid, parameter );
                 ++lnofbound;
               }
             }
@@ -86,8 +86,8 @@ namespace Dune
               {
                 bound[0] = p[i-1];
                 bound[1] = p[i%size()];
-                EntityKey key( bound, false );
-                facemap[key] = BndParam( bndid, parameter );
+                EntityKey helperKey( bound, false );
+                facemap[helperKey] = BndParam( bndid, parameter );
                 ++lnofbound;
               }
             }

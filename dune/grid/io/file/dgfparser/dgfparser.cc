@@ -155,11 +155,10 @@ namespace Dune
 
         {
           std::ofstream out( (name + ".ele").c_str() );
-          int nr = 0;
           dverb << "Writing elements...";
           out << elements.size() << " 4 " << nofelparams << std::endl;
           for (size_t n=0; n<elements.size(); n++) {
-            out << nr++ << "   ";
+            out << n << "   ";
             for (int j=0; j<4; j++) {
               out << elements[n][j] << " ";
             }
@@ -196,9 +195,9 @@ namespace Dune
   {
     dverb << "Writing vertices...";
     out << nofvtx << " " << dimw << " " << nofvtxparams << " 0" << std::endl;
-    for( int n = 0, nr = 0; n < nofvtx; ++n )
+    for( int n = 0; n < nofvtx; ++n )
     {
-      out << nr++ << " ";
+      out << n << " ";
       for( int j = 0; j < dimw; ++j )
         out << " " << vtx[ n ][ j ];
       for( int j = 0; j < nofvtxparams; ++j )
@@ -244,7 +243,7 @@ namespace Dune
         if( dimw != 2 )
           DUNE_THROW( InvalidStateException, "Element parameters are not supported by tetgen." );
         out << elements.size() * nofelparams << std::endl;
-        int nr = 0;
+        int outputLineNum = 0;
         for( size_t i = 0; i < elements.size(); ++i )
         {
           double coord[ 2 ] = { 0, 0 };
@@ -256,7 +255,7 @@ namespace Dune
           coord[0] /= 3.;
           coord[1] /= 3.;
           for( int j = 0; j < nofelparams; ++j )
-            out << nr++ << " " << coord[ 0 ] << " " << coord[ 1 ] << " " << elParams[ i ][ j ] << std::endl;
+            out << outputLineNum++ << " " << coord[ 0 ] << " " << coord[ 1 ] << " " << elParams[ i ][ j ] << std::endl;
         }
       }
       else
@@ -534,9 +533,9 @@ namespace Dune
 
     if ( !dombound.isactive() && facemap.empty() ) return;
 
-    facemap_t :: iterator pos;
     // now add all boundary faces
     {
+      facemap_t :: iterator pos;
       for(int simpl=0; simpl < nofelements ; simpl++)
       {
         const int nFaces = ElementFaceUtil :: nofFaces( dimw, elements[ simpl ]);
@@ -589,27 +588,27 @@ namespace Dune
     {
       info->block( dombound );
       std::vector < std::vector < double > > v;
-      for( pos=facemap.begin(); pos != facemap.end(); ++pos )
+      for (auto& pos : facemap)
       {
-        if( pos->second.first != 0 )
+        if( pos.second.first != 0 )
           continue;
 
-        v.resize( pos->first.size() );
-        for( int i = 0; i < pos->first.size(); i++ )
-          v[ i ] = vtx[ pos->first[ i ] ];
+        v.resize( pos.first.size() );
+        for( int i = 0; i < pos.first.size(); i++ )
+          v[ i ] = vtx[ pos.first[ i ] ];
         const dgf::DomainData * data = dombound.contains( v );
         if ( data )
         {
-          pos->second.first = data->id();
-          pos->second.second = data->parameter();
+          pos.second.first = data->id();
+          pos.second.second = data->parameter();
           data->isDefault() ? defaultBndSegs ++ : inbnddomain++;
         }
       }
     }
 
-    for( pos = facemap.begin(); pos != facemap.end(); ++pos )
+    for (const auto& pos : facemap)
     {
-      if( pos->second.first == 0 )
+      if( pos.second.first == 0 )
         remainingBndSegs++;
     }
 
@@ -697,13 +696,13 @@ namespace Dune
       }
       if (para.display())
       {
-        std::stringstream command;
+        std::stringstream paraCommand;
         if (para.haspath())
-          command << para.path() << "/";
-        command << "showme " << name; // << ".1.ele";
-        dverb << "Calling : " << command.str() << std::endl;
-        if( system( command.str().c_str() ) < 0 )
-          DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
+          paraCommand << para.path() << "/";
+        paraCommand << "showme " << name; // << ".1.ele";
+        dverb << "Calling : " << paraCommand.str() << std::endl;
+        if( system( paraCommand.str().c_str() ) < 0 )
+          DUNE_THROW( SystemError, "Unable to call " << paraCommand.str() << "." );
       }
     }
     else if( dimw == 3 )
