@@ -62,6 +62,7 @@ namespace Dune
     AnalyticalCoordFunctionInterface () = default;
     AnalyticalCoordFunctionInterface ( const This & ) = default;
     AnalyticalCoordFunctionInterface ( This && ) = default;
+    ~AnalyticalCoordFunctionInterface () = default;
     This &operator= ( const This & ) = default;
     This &operator= ( This && ) = default;
 
@@ -106,6 +107,7 @@ namespace Dune
     AnalyticalCoordFunction () = default;
     AnalyticalCoordFunction ( const This & ) = default;
     AnalyticalCoordFunction ( This && ) = default;
+    ~AnalyticalCoordFunction () = default;
     This &operator= ( const This & ) = default;
     This &operator= ( This && ) = default;
 
@@ -156,6 +158,7 @@ namespace Dune
     DiscreteCoordFunctionInterface () = default;
     DiscreteCoordFunctionInterface ( const This & ) = default;
     DiscreteCoordFunctionInterface ( This && ) = default;
+    ~DiscreteCoordFunctionInterface () = default;
     This &operator= ( const This & ) = default;
     This &operator= ( This && ) = default;
 
@@ -214,6 +217,7 @@ namespace Dune
     DiscreteCoordFunction () = default;
     DiscreteCoordFunction ( const This & ) = default;
     DiscreteCoordFunction ( This && ) = default;
+    ~DiscreteCoordFunction () = default;
     This &operator= ( const This & ) = default;
     This &operator= ( This && ) = default;
 
