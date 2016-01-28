@@ -6,12 +6,19 @@
 #include "config.h"
 #endif
 
+#include <iostream>
+
 #include <dune/grid/yaspgrid.hh>
 
 #include <dune/grid/io/file/printgrid.hh>
 
 int main(int argc, char **argv)
 {
+  if (std::system("gnuplot --version") != 0) {
+    std::cerr << "GNUplot was not found." << std::endl;
+    std::exit(77);
+  }
+
   try {
     // initialize MPI, finalize is done automatically on exit
     Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc,argv);
