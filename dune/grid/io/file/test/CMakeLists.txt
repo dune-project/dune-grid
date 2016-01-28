@@ -18,7 +18,7 @@ dune_add_test(NAME subsamplingvtktest
 
 dune_add_test(SOURCES vtktest.cc
               MPI_RANKS 1 2
-              TIMEOUT 15
+              TIMEOUT 600
               SKIP_ON_77)
 
 dune_add_test(SOURCES vtksequencetest.cc)
