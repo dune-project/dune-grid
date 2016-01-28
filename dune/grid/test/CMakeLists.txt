@@ -1,3 +1,5 @@
+dune_add_test(SOURCES geometrygrid-coordfunction-copyconstructor.cc)
+
 dune_add_test(SOURCES test-geogrid.cc
               LINK_LIBRARIES dunegrid
               COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
