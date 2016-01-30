@@ -3,11 +3,11 @@
 #ifndef DUNE_GRID_YASPGRID_YGRID_HH
 #define DUNE_GRID_YASPGRID_YGRID_HH
 
+#include <array>
 #include <vector>
 #include <bitset>
 #include <deque>
 
-#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/power.hh>
 
