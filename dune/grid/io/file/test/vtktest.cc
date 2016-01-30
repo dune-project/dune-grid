@@ -11,8 +11,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <array>
 
+#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
