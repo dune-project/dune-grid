@@ -3,6 +3,7 @@
 #ifndef DUNE_GRID_YASPGRID_TORUS_HH
 #define DUNE_GRID_YASPGRID_TORUS_HH
 
+#include <array>
 #include <bitset>
 #include <cmath>
 #include <deque>
@@ -12,7 +13,6 @@
 #include <mpi.h>
 #endif
 
-#include <dune/common/array.hh>
 #include <dune/common/binaryfunctions.hh>
 #include <dune/grid/common/exceptions.hh>
 
