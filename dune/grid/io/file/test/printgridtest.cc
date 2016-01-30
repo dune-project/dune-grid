@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#include <dune/common/array.hh>
+
 #include <dune/grid/yaspgrid.hh>
 
 #include <dune/grid/io/file/printgrid.hh>
