@@ -3,10 +3,10 @@
 #ifndef DUNE_GRID_YASPGRID_COORDINATES_HH
 #define DUNE_GRID_YASPGRID_COORDINATES_HH
 
+#include <array>
 #include <bitset>
 #include <vector>
 
-#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 
 /** \file
