@@ -357,7 +357,6 @@ public:
 
         if (entityPointer->partitionType() == Dune::BorderEntity)
         {
-          typedef typename GridView::template Codim<0>::Entity Element;
           const typename Element::Geometry& geometry = it->geometry();
           Dune::GeometryType gt = geometry.type();
 
