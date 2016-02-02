@@ -350,12 +350,12 @@ public:
       for (int k = 0; k < numberOfSubEntities; k++)
       {
         typedef typename GridView::template Codim<0>::Entity Element;
-        typedef typename Element::template Codim<commCodim>::EntityPointer EntityPointer;
-        const EntityPointer entityPointer(it->template subEntity<commCodim>(k));
-        entityIndex[mapper.index(*entityPointer)]   = mapper.index(*entityPointer);
-        partitionType[mapper.index(*entityPointer)] = entityPointer->partitionType();
+        typedef typename Element::template Codim<commCodim>::Entity Entity;
+        const Entity entity(it->template subEntity<commCodim>(k));
+        entityIndex[mapper.index(entity)]   = mapper.index(entity);
+        partitionType[mapper.index(entity)] = entity.partitionType();
 
-        if (entityPointer->partitionType() == Dune::BorderEntity)
+        if (entity.partitionType() == Dune::BorderEntity)
         {
           const typename Element::Geometry& geometry = it->geometry();
           Dune::GeometryType gt = geometry.type();
@@ -366,7 +366,7 @@ public:
           entityGlobal = geometry.global(referenceElement.position(k, commCodim));
           std::cout << gridView.comm().rank()+1 << ": border codim "
                     << commCodim << " entity "
-                    << mapper.index(*entityPointer) << " (" << entityGlobal
+                    << mapper.index(entity) << " (" << entityGlobal
                     << ")" << std::endl;
         }
       }
