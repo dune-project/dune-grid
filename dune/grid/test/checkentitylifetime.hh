@@ -17,16 +17,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/rangegenerators.hh>
 
-#if not defined(HAVE_RANGE_BASED_FOR)
-
-template<typename GV>
-void checkEntityLifetime(GV, const std::size_t check_element_count = 32)
-{
-  DUNE_UNUSED_PARAMETER(check_element_count);
-  std::cout << "SKIPPING entity lifetime / consistency checks on compiler without range-based for" << std::endl;
-}
-
-#elif not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
+#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
 
 #if not defined(DUNE_ENTITY_LIFETIME_CHECK_ELEMENT_COUNT)
 #define DUNE_ENTITY_LIFETIME_CHECK_ELEMENT_COUNT 32

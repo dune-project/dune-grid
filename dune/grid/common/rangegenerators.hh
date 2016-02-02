@@ -760,9 +760,6 @@ namespace Dune
 
 #else // DOXYGEN
 
-// only make the implementations available on new compilers - there is a really nasty bug in GCC 4.4...
-#if HAVE_RANGE_BASED_FOR
-
   // ******************************************************************************************
   // Implementations
   // ******************************************************************************************
@@ -900,8 +897,6 @@ namespace Dune
   {
     return entities(gv,Dim<0>());
   }
-
-#endif // HAVE_RANGE_BASED_FOR
 
 #endif // DOXYGEN
 
