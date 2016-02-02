@@ -67,8 +67,7 @@ AM_CPPFLAGS+=-DDUNE_GRID_EXAMPLE_GRIDS_PATH=\"$(top_srcdir)/doc/grids/\"
 test_oned_SOURCES = test-oned.cc
 
 test_identitygrid_SOURCES = test-identitygrid.cc
-test_identitygrid_CPPFLAGS = $(AM_CPPFLAGS)     \
-	-DDUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE
+test_identitygrid_CPPFLAGS = $(AM_CPPFLAGS)
 
 test_yaspgrid_SOURCES = test-yaspgrid.cc
 test_yaspgrid_CPPFLAGS = $(AM_CPPFLAGS)		\
