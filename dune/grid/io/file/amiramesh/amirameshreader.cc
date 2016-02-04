@@ -137,6 +137,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
   if (!datafound)
     DUNE_THROW(IOError, "No data found in the file!");
 
+  delete(am);
   dverb << "Data field " << filename << " loaded successfully!" << std::endl;
 
 }
