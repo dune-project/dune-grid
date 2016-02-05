@@ -24,7 +24,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 
   // /////////////////////////////////////////////////////
   // Load the AmiraMesh file
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
   if(!am)
     DUNE_THROW(IOError, "Could not open AmiraMesh file: " << filename);
@@ -201,7 +201,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
   // /////////////////////////////////////////////////////
   // Load the AmiraMesh file
   // /////////////////////////////////////////////////////
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
   if(!am)
     DUNE_THROW(IOError, "Could not open AmiraMesh file " << filename);
@@ -220,8 +220,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
   }
 
   // read and build the grid
-  buildGrid(factory, am);
-  delete(am);
+  buildGrid(factory, am.get());
 
   return factory.createGrid();
 #endif // #define HAVE_PSURFACE
@@ -245,7 +244,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   // /////////////////////////////////////////////////////
   // Load the AmiraMesh file
   // /////////////////////////////////////////////////////
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
   if(!am)
     DUNE_THROW(IOError, "Could not open AmiraMesh file " << filename);
@@ -264,8 +263,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   }
 
   // read and build the grid
-  buildGrid(factory, am);
-  delete am;
+  buildGrid(factory, am.get());
 
   factory.createGrid();
 #endif // #define HAVE_PSURFACE
@@ -284,7 +282,8 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename)
   GridFactory<GridType> factory;
 
   // Load the AmiraMesh file
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
+
   if(!am)
     DUNE_THROW(IOError, "read: Could not open AmiraMesh file " << filename);
 
@@ -293,15 +292,14 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename)
   // ////////////////////////////////////////////////////
   if (dim==3) {
 
-    buildGrid(factory, am);
+    buildGrid(factory, am.get());
 
   } else {
 
-    build2dGrid(factory, am);
+    build2dGrid(factory, am.get());
 
   }
 
-  delete(am);
   return factory.createGrid();
 }
 
@@ -321,7 +319,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   GridFactory<GridType> factory(&grid);
 
   // Load the AmiraMesh file
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
   if(!am)
     DUNE_THROW(IOError, "read: Could not open AmiraMesh file " << filename);
 
@@ -330,15 +328,14 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   // ////////////////////////////////////////////////////
   if (dim==3) {
 
-    buildGrid(factory, am);
+    buildGrid(factory, am.get());
 
   } else {
 
-    build2dGrid(factory, am);
+    build2dGrid(factory, am.get());
 
   }
 
-  delete(am);
   factory.createGrid();
 }
 
