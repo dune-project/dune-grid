@@ -1,4 +1,4 @@
-ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest gmshtest
+ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest gmshtest printgridtest
 
 GRIDDIM=2
 GRIDTYPE=YASPGRID
@@ -54,6 +54,8 @@ vtktest_LDADD =					\
 vtksequencetest_SOURCES = vtksequencetest.cc
 
 gnuplottest_SOURCES = gnuplottest.cc
+
+printgridtest_SOURCES = printgridtest.cc
 
 subsamplingvtktest_SOURCES = subsamplingvtktest.cc test-linking.cc
 subsamplingvtktest_CPPFLAGS = $(AM_CPPFLAGS)	\
