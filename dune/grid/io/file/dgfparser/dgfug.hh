@@ -180,7 +180,7 @@ namespace Dune
     const DGFBoundaryParameter::type &boundaryParameter ( const Dune::Intersection< GG, II > &intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;
-      const typename Intersection::Entity &entity = intersection.inside();
+      typename Intersection::Entity entity = intersection.inside();
       const int face = intersection.indexInInside();
 
       const ReferenceElement< double, dimension > &refElem
