@@ -85,11 +85,18 @@ inline bool is_suffix(const std::string &s, const std::string &suffix)
 
 inline int checkVTKFile(const std::string &name)
 {
-  static const bool havePythonVTK = (runPython("from vtk import *") == 0);
+  static const bool havePythonVTK = [] {
+    // This check is invoked only once, even in a multithreading environment,
+    // since it is invoked in the initializer of a static variable.
+    if(runPython("from vtk import *") == 0)
+      return true;
+    std::cerr << "warning: python or python vtk module not available.  This "
+              << "will result in skipped tests, since we cannot check that "
+              << "vtk can read the files we wrote." << std::endl;
+    return false;
+  } ();
   if(!havePythonVTK)
   {
-    std::cerr << "warning: python or python vtk module not available"
-              << std::endl;
     std::cerr << "skip: " << name << std::endl;
     return 77;
   }
