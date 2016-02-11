@@ -22,9 +22,6 @@
     @brief Provides base classes for ALUGrid
  **/
 
-//- include declaration of ALUGrid
-#include <dune/grid/alugrid/common/declaration.hh>
-
 #endif // #ifdef HAVE_ALUGRID || DOXYGEN
 
 #endif
