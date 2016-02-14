@@ -6,7 +6,7 @@
  * See https://gitlab.dune-project.org/flyspray/FS/issues/1463
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <dune/grid/geometrygrid/coordfunction.hh>
 
@@ -50,13 +50,13 @@ int main()
   {
     Analytical a({1., 2., 3.});
     Analytical b = a;
-    Analytical c(a);
+    Analytical c(b);
   }
 
   {
     Discrete a({1., 2., 3.});
     Discrete b = a;
-    Discrete c(a);
+    Discrete c(b);
   }
 
   return 0;
