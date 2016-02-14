@@ -130,6 +130,9 @@ Dune::UGGrid < dim >::UGGrid()
 
 template < int dim >
 Dune::UGGrid < dim >::~UGGrid()
+#if HAVE_NOEXCEPT_SPECIFIER
+  noexcept(false)
+#endif
 {
   // Delete the UG multigrid if there is one (== createEnd() has been called)
   if (multigrid_) {

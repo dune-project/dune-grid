@@ -271,7 +271,11 @@ namespace Dune {
     UGGrid();
 
     //! Destructor
-    ~UGGrid();
+    ~UGGrid()
+#if HAVE_NOEXCEPT_SPECIFIER
+      noexcept(false)
+#endif
+      ;
 
     //! Return maximum level defined in this grid. Levels are numbered
     //! 0 ... maxlevel with 0 the coarsest level.
