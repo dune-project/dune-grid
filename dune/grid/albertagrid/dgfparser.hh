@@ -62,7 +62,7 @@ namespace Dune
       return Grid::getRealImplementation( intersection ).boundaryId();
     }
 
-    // return true if boundary paramters found
+    // return true if boundary parameters found
     bool haveBoundaryParameters () const
     {
       return dgf_.haveBndParameters;

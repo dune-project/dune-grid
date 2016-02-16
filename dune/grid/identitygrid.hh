@@ -88,7 +88,7 @@ namespace Dune
 
   public:
 
-    // inherit everyting from the default Traits...
+    // inherit everything from the default Traits...
     struct Traits
       : public BaseTraits
     {

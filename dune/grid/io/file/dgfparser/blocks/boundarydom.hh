@@ -243,7 +243,7 @@ namespace Dune
       }
 
       // return true if any boundary domain block has
-      // additional paramters
+      // additional parameters
       bool hasParameter () const;
 
       void reset ()

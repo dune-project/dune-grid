@@ -172,7 +172,7 @@ public:
       buff.read(x);
     }
 
-    // test if the sending/receving entities are geometrically the same
+    // test if the sending/receiving entities are geometrically the same
     typedef typename EntityType::Geometry Geometry;
     const Geometry &geometry = e.geometry();
     for( int i = 0; i < geometry.corners(); ++i )

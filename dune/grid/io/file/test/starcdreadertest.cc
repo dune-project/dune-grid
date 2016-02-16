@@ -30,7 +30,7 @@ void readGrid (const std::string& baseName)
 
 int main (int argc , char **argv) try
 {
-  // initialize MPI if neccessary
+  // initialize MPI if necessary
   Dune::MPIHelper::instance(argc, argv);
 
   std::string gridDirectory = std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "starcd/";

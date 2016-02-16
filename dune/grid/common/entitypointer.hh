@@ -78,7 +78,7 @@ namespace Dune
       Dune::EntityPointer<..., SLevelIterator> and
       Dune::HierarchicIterator<..., SHierarchicIterator> inherits
       Dune::EntityPointer<..., SHierarchicIterator>.
-      And virtualy all Dune::EntityPointer<..., SXxxIterator> are descendents
+      And virtually all Dune::EntityPointer<..., SXxxIterator> are descendents
       of Dune::EntityPointer<..., SEntityPointer>.
 
       Now you can compare Dune::LevelIterator with Dune::EntityPointer and

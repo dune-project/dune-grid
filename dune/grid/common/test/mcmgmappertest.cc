@@ -262,7 +262,7 @@ void checkGrid(const Grid& grid)
 int main(int argc, char** argv)
 try
 {
-  // initialize MPI if neccessary
+  // initialize MPI if necessary
   Dune::MPIHelper::instance(argc, argv);
 
   // Check grids with more than one element type.

@@ -58,7 +58,7 @@ namespace Dune {
        * \param c      The cell (intersection) to evaluate in.
        * \param xl     The local coordinate within the cell.
        * \param result Where to store the result.  The vector is resized as
-       *               nessecary, and is overwritten.
+       *               necessary, and is overwritten.
        */
       void evaluate(const typename Traits::Cell& c,
                     const typename Traits::Domain& xl,

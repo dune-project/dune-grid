@@ -28,7 +28,7 @@ namespace Dune {
     enum {CodimInHostGrid = GridImp::HostGridType::dimension - mydim};
     enum {DimensionWorld = GridImp::HostGridType::dimensionworld};
 
-    // select appropiate hostgrid geometry via typeswitch
+    // select appropriate hostgrid geometry via typeswitch
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Geometry HostGridGeometryType;
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Geometry HostGridLocalGeometryType;
 

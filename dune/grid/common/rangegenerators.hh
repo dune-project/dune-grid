@@ -25,7 +25,7 @@ namespace Dune
    *
    * <h2>Range-based for loop</h2>
    *
-   * \note Range-based for loops are availabe in GCC 4.6+, Clang 3.2+ and Intel ICC 13+.
+   * \note Range-based for loops are available in GCC 4.6+, Clang 3.2+ and Intel ICC 13+.
    *
    * A range-based for loop is a short-hand way of iterating over any object that provides the standard
    * begin() and end() methods. It looks like this:

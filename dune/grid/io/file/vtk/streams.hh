@@ -33,7 +33,7 @@ namespace Dune {
     /**
      * The result will be written to the stream, eventually.  This method may
      * be called multiple times in a row.  After this method has been called,
-     * noone else may write to the underlying stream until flush() has been
+     * no one else may write to the underlying stream until flush() has been
      * called or this writer object has been destroyed.
      */
     template <class X>

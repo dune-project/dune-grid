@@ -307,7 +307,7 @@ namespace Dune {
      * \param refCount if >0 mark for refinement, if <0 mark for coarsening
      * \param e Entity to the entity you want to mark
      *
-     * \return True, if marking was successfull
+     * \return True, if marking was successful
      */
     bool mark(int refCount, const Traits::Codim<0>::Entity& e );
 
