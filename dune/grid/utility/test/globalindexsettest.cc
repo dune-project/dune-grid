@@ -24,8 +24,8 @@ void checkIndexSet(const GridView& gridView,
   for (auto it = gridView.template begin<0>(); it != gridView.template end<0>(); ++it)
     // Loop over all subEntities
     for (size_t i=0; i<it->subEntities(codim); i++) {
-      assert( indexSet.index(*it->template subEntity<codim>(i)) == indexSet.subIndex(*it, i, codim) );
-      indices.push_back(indexSet.index(*it->template subEntity<codim>(i)));
+      assert( indexSet.index(it->template subEntity<codim>(i)) == indexSet.subIndex(*it, i, codim) );
+      indices.push_back(indexSet.index(it->template subEntity<codim>(i)));
     }
 
   /////////////////////////////////////////////////////////////////////////
