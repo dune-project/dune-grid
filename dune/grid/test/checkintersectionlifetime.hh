@@ -15,9 +15,6 @@
 
 #include <dune/common/exceptions.hh>
 
-#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-
-
 template<typename GV>
 void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
 {
@@ -101,15 +98,5 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
   }
 
 }
-
-#else // not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-
-template<typename GV>
-void checkIntersectionLifetime(GV gv, const std::size_t check_element_count = 32)
-{
-  std::cout << "SKIPPING intersection lifetime / consistency check on grid without copyable intersections " << std::endl;
-}
-
-#endif // not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
 
 #endif // #ifndef DUNE_GRID_TEST_CHECKENTITYLIFETIME_HH

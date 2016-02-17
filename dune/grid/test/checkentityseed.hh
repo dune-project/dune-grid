@@ -120,12 +120,10 @@ namespace CheckEntitySeed // don't blur namespace Dune
   class Check< codim, GridView, true >
   {
   public:
-    // entity pointer type
-    typedef typename GridView::template Codim< codim >::EntityPointer EntityPointer;
     // iterator type
     typedef typename GridView::template Codim< codim >::Iterator Iterator;
     // entity type
-    typedef typename EntityPointer::Entity Entity;
+    typedef typename GridView::template Codim< codim >::Entity Entity;
     // geometry type
     typedef typename Entity::Geometry Geometry;
 
@@ -149,17 +147,9 @@ namespace CheckEntitySeed // don't blur namespace Dune
         const Entity &entity = *it;
         EntitySeed seed = entity.seed();
 
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        // get entity pointer from seed
-        EntityPointer entityPointer = grid.entityPointer( seed );
-        compare( entityPointer, EntityPointer( it ), output );
-#endif
-
-#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
         // get entity from seed
         Entity entity2 = grid.entity( seed );
         compare( entity, *it, output );
-#endif
 
         // test default constructor
         EntitySeed seed2;
@@ -170,32 +160,11 @@ namespace CheckEntitySeed // don't blur namespace Dune
         assert( seed2.isValid());
 
         // we might like to check the assignment operator as well
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        compare( entityPointer, grid.entityPointer( seed2 ), output );
-#endif
-#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
         compare( entity2, grid.entity( seed2 ), output );
-#endif
       }
     }
 
   private:
-
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    template <class Ep>
-    // compare two entity pointers for equality
-    static void compare ( const Ep &ep1, const Ep &ep2, std::ostream &output )
-    {
-      // compare entity pointers
-      if( !Equals< Ep >::apply( ep1, ep2 ) )
-        output << "Warning: EntityPointers do not conincide" << std::endl;
-
-      // compare geometries
-      const double eps = 1e-10;
-      if( !Equals< Geometry >::apply( ep1->geometry(), ep2->geometry(), eps ) )
-        output << "Warning: Geometries do not conincide" << std::endl;
-    }
-#endif
 
     // compare two entities for equality
     static void compare ( const Entity &e1, const Entity &e2, std::ostream &output )

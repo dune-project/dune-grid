@@ -17,8 +17,6 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/rangegenerators.hh>
 
-#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-
 #if not defined(DUNE_ENTITY_LIFETIME_CHECK_ELEMENT_COUNT)
 #define DUNE_ENTITY_LIFETIME_CHECK_ELEMENT_COUNT 32
 #endif
@@ -147,17 +145,5 @@ void checkEntityLifetime(GV gv, const std::size_t check_element_count = 32)
 {
   do_check_entity_lifetime(gv,check_element_count,create_codims(gv));
 }
-
-
-#else // not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-
-template<typename GV>
-void checkEntityLifetime(GV gv, const std::size_t check_element_count = 32)
-{
-  std::cout << "SKIPPING entity lifetime / consistency checks on grid without copyable entities" << std::endl;
-}
-
-
-#endif // not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
 
 #endif // #ifndef DUNE_GRID_TEST_CHECKENTITYLIFETIME_HH
