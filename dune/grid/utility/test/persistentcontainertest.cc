@@ -49,9 +49,9 @@ bool test(GridType &grid)
       ccontainer0[*eit] = container0[*eit] = eit->geometry().center();
       const Dune::ReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
         = Dune::ReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
-      for (int i=0; i<eit->subEntities(1); ++i)
+      for (unsigned int i=0; i<eit->subEntities(1); ++i)
         ccontainer1(*eit,i) = container1(*eit,i) = eit->geometry().global( refElement.position(i,1) );
-      for (int i=0; i<eit->subEntities(2); ++i)
+      for (unsigned int i=0; i<eit->subEntities(2); ++i)
         container2(*eit,i) = eit->geometry().global( refElement.position(i,2) );
     }
   }
@@ -107,14 +107,14 @@ bool test(GridType &grid)
       }
       const Dune::ReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
         = Dune::ReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
-      for (int i=0; i<eit->subEntities(1); ++i)
+      for (unsigned int i=0; i<eit->subEntities(1); ++i)
         if ( ( container1(up,i).coord - up.geometry().global( refElement.position(i,1) ) ).two_norm() > 1e-8 )
         {
           std::cout << "ERROR: wrong data stored in container1 - stop testing" << std::endl;
           ret = false;
           break;
         }
-      for (int i=0; i<eit->subEntities(2); ++i)
+      for (unsigned int i=0; i<eit->subEntities(2); ++i)
         if ( ( container2(up,i).coord - up.geometry().global( refElement.position(i,2) ) ).two_norm() > 1e-8 )
         {
           std::cout << "ERROR: wrong data stored in container1 - stop testing" << std::endl;

@@ -328,7 +328,7 @@ namespace Dune
 
         // insert all vertices
         FactoryUtilities::MultiIndex<dim> index(vsizes);
-        for (int i=0; i<size; ++i, ++index)
+        for (std::size_t i=0; i<size; ++i, ++index)
         {
           Dune::FieldVector<ctype, dim> position;
           for (std::size_t j = 0; j<dim; ++j)

@@ -350,8 +350,8 @@ namespace Dune
         }
         if ( nofVtxParam_ > 0 )
         {
-          const int subEntities = el.subEntities(dimension);
-          for ( int v = 0; v < subEntities; ++v)
+          const unsigned int subEntities = el.subEntities(dimension);
+          for ( unsigned int v = 0; v < subEntities; ++v)
           {
             typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
             if ( vtxParam_[ index ].empty() )
@@ -432,7 +432,7 @@ namespace Dune
             std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
           if ( gridPtr_.nofVtxParam_ > 0 )
           {
-            for ( int v = 0; v < el.subEntities(dimension); ++v)
+            for ( unsigned int v = 0; v < el.subEntities(dimension); ++v)
             {
               typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
               if ( ! gridPtr_.vtxParam_[ index ].empty() )
@@ -466,7 +466,7 @@ namespace Dune
           }
           if ( gridPtr_.nofVtxParam_ > 0 )
           {
-            for ( int v = 0; v < el.subEntities(dimension); ++v)
+            for ( unsigned int v = 0; v < el.subEntities(dimension); ++v)
             {
               typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
               if ( gridPtr_.vtxParam_[ index ].empty() )
