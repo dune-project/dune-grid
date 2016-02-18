@@ -412,7 +412,7 @@ namespace Dune {
 
     /** \brief Mark method accepting a UG refinement rule
 
-       \param e Pointer to the element to be marked for refinement
+       \param e element to be marked for refinement
        \param rule One of the UG refinement rules
        \param side If rule==UG::%D2::%BLUE (one quadrilateral is split into two rectangles)
        you can choose the orientation of the cut by setting side==0 or side==1
