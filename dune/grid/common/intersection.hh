@@ -384,8 +384,11 @@ namespace Dune
     /** \brief Local index of codim 1 entity in the inside() entity where
      *         intersection is contained in
      *
-     *  \note This method returns the face number with respect to the generic
-     *        reference element.
+     *  This method returns the face number with respect to the generic reference
+     *  element.
+     *
+     *  \note This index can be used with the inside entity's
+     *        `subEntity<1>()` method to obtain the face.
      *
      *  \returns the index of the inside entity's face containing this
      *           intersection (with respect to the generic reference element)
@@ -398,8 +401,11 @@ namespace Dune
     /** \brief Local index of codim 1 entity in outside() entity where
      *         intersection is contained in
      *
-     *  \note This method returns the face number with respect to the generic
-     *        reference element.
+     *  This method returns the face number with respect to the generic reference
+     *  element.
+     *
+     *  \note This index can be used with the outside entity's
+     *        `subEntity<1>()` method to obtain the face.
      *
      *  \returns the index of the outside entity's face containing this
      *           intersection (with respect to the generic reference element)
