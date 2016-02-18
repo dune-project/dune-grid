@@ -442,10 +442,13 @@ void checkIntersectionIterator ( const GridViewType &view,
   bool hasBoundaryIntersection = false;
   typename Intersection::GlobalCoordinate sumNormal( ctype( 0 ) );
 
+
+#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
   // check wether intersection iterator is a forward iterator
   NoopFunctor< Intersection > op;
   if( 0 != testForwardIterator( view.ibegin( *eIt ), view.iend( *eIt ), op ) )
     DUNE_THROW( Dune::Exception, "IntersectionIterator does not fulfill the forward iterator concept" );
+#endif
 
   const IntersectionIterator iend = view.iend( *eIt );
   for( IntersectionIterator iIt = view.ibegin( *eIt ); iIt != iend; ++iIt )

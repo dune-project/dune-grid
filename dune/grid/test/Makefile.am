@@ -138,7 +138,8 @@ test_alberta_generic_LDADD = $(test_alberta_LDADD)
 test_alugrid_SOURCES = test-alugrid.cc
 test_alugrid_CPPFLAGS = $(AM_CPPFLAGS)		\
 	$(ALL_PKG_CPPFLAGS)                     \
-	-DDUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE
+	-DDUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE \
+	-DGRIDCHECK_ALUGRID_WORKAROUND
 test_alugrid_LDFLAGS = $(AM_LDFLAGS)		\
 	$(ALL_PKG_LDFLAGS)			\
 	-static
@@ -205,7 +206,9 @@ test_loadbalancing_LDADD =			\
 
 # Test whether you can combine the different implementations in one file
 test_dgfalu_uggrid_combination_SOURCES = test-dgfalu-uggrid-combination.cc
-test_dgfalu_uggrid_combination_CPPFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(ALUGRID_CPPFLAGS)
+test_dgfalu_uggrid_combination_CPPFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(ALUGRID_CPPFLAGS) \
+	-DDUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE \
+	-DGRIDCHECK_ALUGRID_WORKAROUND
 test_dgfalu_uggrid_combination_LDFLAGS = $(AM_LDFLAGS) $(UG_LDFLAGS) $(ALUGRID_LDFLAGS)
 test_dgfalu_uggrid_combination_LDADD =		\
 	$(ALUGRID_LIBS)				\

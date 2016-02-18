@@ -110,7 +110,9 @@ struct subIndexCheck
       // check operator*()
       // by directly invoking the operator on the return value of subEntity, this also checks the backwards
       // compatibility support of the Entity facade for grids that have already been ported to the new interface
+#ifndef GRIDCHECK_ALUGRID_WORKAROUND
       assert( *ep == *e.template subEntity< cd >( i ) );
+#endif GRIDCHECK_ALUGRID_WORKAROUND
       // check operator->()
       // by directly invoking the operator on the return value of subEntity, this also checks the backwards
       // compatibility support of the Entity facade for grids that have already been ported to the new interface
