@@ -59,7 +59,7 @@ namespace Dune
     }
 
     // The dereferencing operators are overridden here to avoid calling
-    // the deprecated versions int the EntityPointer facade.
+    // the deprecated versions in the EntityPointer facade.
 
     // The behavior when dereferencing the EntityIterator facade depends on
     // the way the grid implementation handles returning entities. The implementation
@@ -77,7 +77,7 @@ namespace Dune
     const Entity& operator*() const;
 
     /** \brief Pointer operator. */
-    const Entity* operator->() const;
+    const Entity& operator->() const;
 
 #else // DOXYGEN
 
