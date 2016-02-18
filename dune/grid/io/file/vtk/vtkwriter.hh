@@ -56,7 +56,7 @@ namespace Dune
     {};
 
     template<typename T>
-    struct _has_local_context<T,typename std::enable_if<(sizeof(std::declval<T>().localContext()) > 0),int>::type>
+    struct _has_local_context<T,typename std::enable_if<(sizeof(static_cast<T*>(nullptr)->localContext()) > 0),int>::type>
       : public std::true_type
     {};
 
@@ -178,7 +178,7 @@ namespace Dune
       struct FunctionWrapper
         : public FunctionWrapperBase
       {
-        using Function = typename std::decay<F>::type;
+        typedef typename std::decay<F>::type Function;
 
         template<typename F_>
         FunctionWrapper(F_&& f)
