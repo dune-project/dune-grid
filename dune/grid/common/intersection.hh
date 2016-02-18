@@ -268,48 +268,22 @@ namespace Dune
       return this->real.neighbor();
     }
 
-    /*! @brief return EntityPointer to the Entity on the inside of this
-       intersection. That is the Entity where we started this .
+    /*! @brief return Entity on the inside of this
+       intersection. That is the Entity where we started this.
      */
-#ifdef DOXYGEN
-    Entity
-#else
-    typename std::conditional<
-      std::is_same<
-        decltype(real.inside()),
-        Entity
-        >::value,
-      Entity,
-      EntityPointer
-      >::type
-#endif
-    inside() const
+    Entity inside() const
     {
-      Entity::template warnOnDeprecatedEntityPointer<decltype(real.inside())>();
       return this->real.inside();
     }
 
-    /*! @brief return EntityPointer to the Entity on the outside of this
+    /*! @brief return Entity on the outside of this
        intersection. That is the neighboring Entity.
 
        @warning Don't call this method if there is no neighboring Entity
        (neighbor() returns false). In this case the result is undefined.
      */
-#ifdef DOXYGEN
-    Entity
-#else
-    typename std::conditional<
-      std::is_same<
-        decltype(real.outside()),
-        Entity
-        >::value,
-      Entity,
-      EntityPointer
-      >::type
-#endif
-    outside() const
+    Entity outside() const
     {
-      Entity::template warnOnDeprecatedEntityPointer<decltype(real.outside())>();
       return this->real.outside();
     }
 
