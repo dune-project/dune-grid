@@ -20,7 +20,7 @@ namespace Dune
 
      Intersections are codimension 1 objects. These
      intersections are accessed via an Intersection. This allows
-     the implementation of non-matching grids, as one face can now
+     the implementation of non-matching grids, as one facet can now
      consist of several intersections.
      In a conforming mesh such an intersection corresponds to an entity of
      codimension 1 but in the general non-conforming case there will be no entity
@@ -384,10 +384,13 @@ namespace Dune
     /** \brief Local index of codim 1 entity in the inside() entity where
      *         intersection is contained in
      *
-     *  \note This method returns the face number with respect to the generic
-     *        reference element.
+     *  This method returns the facet number with respect to the generic reference
+     *  element.
      *
-     *  \returns the index of the inside entity's face containing this
+     *  \note This index can be used with the inside entity's
+     *        `subEntity<1>()` method to obtain the facet.
+     *
+     *  \returns the index of the inside entity's facet containing this
      *           intersection (with respect to the generic reference element)
      */
     int indexInInside () const
@@ -398,10 +401,13 @@ namespace Dune
     /** \brief Local index of codim 1 entity in outside() entity where
      *         intersection is contained in
      *
-     *  \note This method returns the face number with respect to the generic
-     *        reference element.
+     *  This method returns the facet number with respect to the generic reference
+     *  element.
      *
-     *  \returns the index of the outside entity's face containing this
+     *  \note This index can be used with the outside entity's
+     *        `subEntity<1>()` method to obtain the facet.
+     *
+     *  \returns the index of the outside entity's facet containing this
      *           intersection (with respect to the generic reference element)
      */
     int indexInOutside () const
