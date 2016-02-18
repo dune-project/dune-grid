@@ -496,13 +496,6 @@ namespace Dune
 
     //! Returns the hostgrid entity encapsulated in given IdentityGrid entity
     template <int codim>
-    DUNE_DEPRECATED_MSG("getHostEntityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use getHostEntity() instead to obtain a reference to the host entity object.")
-    typename HostGrid::Traits::template Codim<codim>::EntityPointer getHostEntityPointer(const typename Traits::template Codim<codim>::Entity& e) const
-    {
-      return this->getRealImplementation(e).hostEntity_;
-    }
-
-    template <int codim>
     const typename HostGrid::Traits::template Codim<codim>::Entity& getHostEntity(const typename Traits::template Codim<codim>::Entity& e) const
     {
       return this->getRealImplementation(e).hostEntity_;

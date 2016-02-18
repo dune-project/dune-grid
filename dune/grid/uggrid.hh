@@ -830,45 +830,6 @@ namespace Dune {
     // End of Interface Methods
     // **********************************************************
 
-#ifdef DOXYGEN
-
-    /** \brief Rudimentary substitute for a hierarchic iterator on faces
-        \param e, elementSide Grid face specified by an element and one of its sides
-        \param maxl The finest level that should be traversed by the iterator
-        \param[out] childElements For each subface: element index, elementSide, and level
-        \param[out] childElementSides Indices for transformation because Dune numbers the
-                                      faces of several elements differently than UG
-
-        \deprecated This method is deprecated and will be removed after the release of Dune
-                    2.4. Please use the corresponding method that uses entities instead of
-                    EntityPointers.
-     */
-    void getChildrenOfSubface(const typename Traits::template Codim<0>::EntityPointer & e,
-                              int elementSide,
-                              int maxl,
-                              std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
-                              std::vector<unsigned char>& childElementSides) const;
-
-#else
-
-    // This is the actual implementation of the deprecated method. We need this ugly trick of turning
-    // it into a template to avoid triggering a deprecation warning every time UGGrid is used.
-    template< typename T >
-    DUNE_DEPRECATED_MSG("This version of getChildrenOfSubface() uses EntityPointer and is deprecated. It will be removed after the release of Dune 2.4. Please use the new version with entities instead.")
-    typename std::enable_if<
-      std::is_same<
-        T,
-        typename UGGrid<dim>::Traits::template Codim<0>::EntityPointer
-        >::value
-      >::type
-    getChildrenOfSubface(const T & e,
-                         int elementSide,
-                         int maxl,
-                         std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
-                         std::vector<unsigned char>& childElementSides) const;
-
-#endif
-
     /** \brief Rudimentary substitute for a hierarchic iterator on faces
         \param e, elementSide Grid face specified by an element and one of its sides
         \param maxl The finest level that should be traversed by the iterator
@@ -917,36 +878,6 @@ namespace Dune {
     static void setDefaultHeapSize(unsigned size) {
       heapSize_ = size;
     }
-
-#ifdef DOXYGEN
-
-    /** \brief Sets a vertex to a new position
-
-        Changing a vertex' position changes its position on all grid levels!
-
-        \deprecated This method is deprecated and will be removed after the release of Dune
-                    2.4. Please use the corresponding method that uses entities instead of
-                    EntityPointers.
-    */
-    void setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,
-                     const FieldVector<double, dim>& pos);
-
-#else
-
-    // This is the actual implementation of the deprecated method. We need this ugly trick of turning
-    // it into a template to avoid triggering a deprecation warning every time UGGrid is used.
-    template< typename T >
-    DUNE_DEPRECATED_MSG("This version of setPosition() uses EntityPointer and is deprecated. It will be removed after the release of Dune 2.4. Please use the new version with entities instead.")
-    typename std::enable_if<
-      std::is_same<
-        T,
-        typename UGGrid<dim>::Traits::template Codim<dim>::EntityPointer
-        >::value
-      >::type
-    setPosition(const T& e,
-                const FieldVector<double, dim>& pos);
-
-#endif
 
     /** \brief Sets a vertex to a new position
 
