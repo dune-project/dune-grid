@@ -90,22 +90,13 @@ void checkIntersectionAssignment ( const GridView &view, const typename GridView
     // verify prerequisites
     assert( l1 != l2 );
     assert( it1 != it2 );
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    assert( it1->inside() == l1 );
-    assert( it2->inside() == l2 );
-#else
     assert( it1->inside() == *l1 );
     assert( it2->inside() == *l2 );
-#endif
 
     // check assignment
     it1 = it2;
     assert( it1 == it2 );
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    assert( it1->inside() == l2 );
-#else
     assert( it1->inside() == *l2 );
-#endif
   }
 }
 
@@ -116,7 +107,6 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
   typedef typename Intersection::ctype ctype;
 
   typedef typename Intersection::Entity Entity;
-  typedef typename Intersection::EntityPointer EntityPointer;
   typedef typename Intersection::LocalGeometry LocalGeometry;
   typedef typename Intersection::Geometry Geometry;
 
@@ -131,8 +121,6 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
                 "Type Intersection::ctype differs from Intersection::LocalGeometry::ctype.");
   static_assert((std::is_same< ctype, typename Geometry::ctype >::value),
                 "Type Intersection::ctype differs from Intersection::Geometry::ctype.");
-  static_assert((std::is_same< Entity, typename EntityPointer::Entity >::value),
-                "Type Intersection::EntityPointer::Entity differs from Intersection::Entity.");
 
   // cache some information on the intersection
 
@@ -140,15 +128,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   // obtain inside entity, its geometry and reference element
 
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  const EntityPointer pInside = intersection.inside();
-  *pInside;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  const Entity& inside = *pInside;
-#else
   const Entity inside = intersection.inside();
-#endif
 
   const typename Entity::Geometry insideGeometry = inside.geometry();
   const Dune::ReferenceElement< ctype, dimension > &refElement
@@ -227,16 +207,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
   if( intersection.neighbor() )
   {
 
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    const EntityPointer pOutside = intersection.outside();
-    *pOutside;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    const Entity& outside = *pOutside;
-#else
     const Entity outside = intersection.outside();
-#endif
-
 
     if( !outside.type().isNone() )
     {
@@ -439,9 +410,6 @@ void checkIntersectionIterator ( const GridViewType &view,
 
   typedef typename GridType::ctype ctype;
 
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  typedef typename Intersection::EntityPointer EntityPointer;
-#endif
   typedef typename Intersection::Entity Entity;
 
   const bool isCartesian = Dune::Capabilities::isCartesian< GridType >::v;
@@ -463,9 +431,7 @@ void checkIntersectionIterator ( const GridViewType &view,
 
 
   // check default constructibility of intersections
-#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
   DUNE_UNUSED Intersection default_construct_intersection;
-#endif
 
   // initialize variables for element checks
 
@@ -488,11 +454,7 @@ void checkIntersectionIterator ( const GridViewType &view,
 
     // check correctness of inside entity
 
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    if( *eIt != *intersection.inside() )
-#else
     if( *eIt != intersection.inside() )
-#endif
     {
       std::cerr << "Error: Intersection's inside entity does not equal the entity the intersection iterator was started on." << std::endl;
       assert( false );
@@ -506,15 +468,7 @@ void checkIntersectionIterator ( const GridViewType &view,
 
     if( intersection.neighbor() && checkOutside )
     {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      const EntityPointer pOutside = intersection.outside();
-      *pOutside;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      const Entity& outside = *pOutside;
-#else
       const Entity outside = intersection.outside();
-#endif
 
       bool insideFound = false;
 
@@ -567,15 +521,7 @@ void checkIntersectionIterator ( const GridViewType &view,
 
     if( intersection.conforming() && intersection.neighbor() && !intersection.boundary() )
     {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      const EntityPointer pOutside = intersection.outside();
-      *pOutside;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      const Entity& outside = *pOutside;
-#else
       const Entity outside = intersection.outside();
-#endif
 
       const int indexInInside = intersection.indexInInside();
       const int indexInOutside = intersection.indexInOutside();

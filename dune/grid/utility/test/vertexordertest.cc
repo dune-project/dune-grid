@@ -131,13 +131,13 @@ void testNeighborDim(const std::integral_constant<std::size_t, mydim>&,
   std::size_t index_s = is.indexInInside();
   std::size_t index_n = is.indexInOutside();
 
-  typedef typename Intersection::EntityPointer EP;
-  EP inside = is.inside();
-  EP outside = is.outside();
+  typedef typename Intersection::Entity Entity;
+  Entity inside = is.inside();
+  Entity outside = is.outside();
 
-  typedef typename EP::Entity::Geometry Geometry;
-  const Geometry &geo_s = inside->geometry();
-  const Geometry &geo_n = outside->geometry();
+  typedef typename Entity::Geometry Geometry;
+  const Geometry &geo_s = inside.geometry();
+  const Geometry &geo_n = outside.geometry();
 
   typedef typename Intersection::ctype DF;
   typedef Dune::FieldVector<DF, Intersection::dimensionworld> DomainW;
@@ -232,7 +232,7 @@ void testVertexOrder(const GV& gv, const VertexOrderFactory &voFactory,
       const IIterator &iend = gv.iend(*eit);
       for(IIterator iit = gv.ibegin(*eit); iit != iend; ++iit)
         if(iit->neighbor()) {
-          VertexOrder vo_n = voFactory.make(*iit->outside());
+          VertexOrder vo_n = voFactory.make(iit->outside());
           testNeighbor(std::integral_constant<std::size_t,
                            dim-(codim==0 ? 1 : codim)>(),
                        vo, vo_n, *iit);

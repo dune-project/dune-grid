@@ -127,16 +127,7 @@ namespace Dune
       // -- ask for the subEntity itself and then its index
       // -- ask for the subIndex directly
       typedef typename GridType::template Codim< codim >::Entity SubE;
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      typedef typename GridType::template Codim< codim >::EntityPointer SubEntityPointer;
-      const SubEntityPointer subEntityPtr = en.template subEntity< codim >( subEntity );
-      *subEntityPtr;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      const SubE& subE = *subEntityPtr;
-#else
       SubE subE = en.template subEntity< codim >( subEntity );
-#endif
 
       if( lset.subIndex( en, subEntity, codim ) != lset.index( subE) )
       {
@@ -166,16 +157,7 @@ namespace Dune
 
         // get entity pointer to subEntity vertex
         typedef typename GridType::template Codim< dim >::Entity VertexE;
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        typedef typename GridType::template Codim< dim >::EntityPointer VertexPointer;
-        VertexPointer vxp = en.template subEntity< dim >( local[ j ] );
-        *vxp;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        const VertexE& vxE = *vxp;
-#else
         VertexE vxE = en.template subEntity< dim >( local[ j ] );
-#endif
 
         // Find the global coordinate of the vertex by its index
         if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
@@ -353,11 +335,7 @@ namespace Dune
         const int subcount = entity.subEntities(codim);
         for( int i = 0; i < subcount; ++i )
         {
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          const IdType id = localIdSet.id( *(entity.template subEntity< codim >( i ) ) );
-#else
           const IdType id = localIdSet.id( entity.template subEntity< codim >( i ) );
-#endif
           entityfound.insert( id );
         }
       }
@@ -473,16 +451,7 @@ namespace Dune
         {
           // get entity pointer of sub entity codim=dim (Vertex)
           typedef typename GridView::template Codim< dim >::Entity VertexE;
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          typedef typename GridView::template Codim< dim >::EntityPointer VertexPointer;
-          VertexPointer vxp = it->template subEntity< dim >( i );
-          *vxp;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          const VertexE& vxE = *vxp;
-#else
           VertexE vxE = it->template subEntity< dim >( i );
-#endif
 
           // get coordinates of entity pointer
           FieldVector< coordType, dimworld > vx( vxE.geometry().corner( 0 ) );
@@ -530,13 +499,8 @@ namespace Dune
               if( !nit->neighbor() )
                 continue;
 
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-              checkSubEntity< codim >( grid, *(nit->outside()), lset, sout,
-                                       setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
-#else
               checkSubEntity< codim >( grid, nit->outside(), lset, sout,
                                        setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
-#endif
             }
           }
           else

@@ -148,11 +148,7 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
         const int subEntities = it->subEntities(codim);
         for( int i = 0; i < subEntities; ++i )
         {
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          Dune::PartitionType pt = it->template subEntity< codim >( i )->partitionType();
-#else
           Dune::PartitionType pt = it->template subEntity< codim >( i ).partitionType();
-#endif
           if( !possibleSubPartitionType( ept, pt ) )
           {
             std::cerr << "Error: Codim " << codim << " entity " << idSet.subId( *it, i, codim )

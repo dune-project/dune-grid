@@ -8,9 +8,6 @@
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
 
-// this whole test only makes sense if we have range-based for loops
-#if HAVE_RANGE_BASED_FOR
-
 #define VERIFY(t,msg) do { if (!((t))) DUNE_THROW(Dune::Exception, "Check " #t " failed (" msg ")"); } while (false)
 
 template<typename GV, typename R>
@@ -194,14 +191,3 @@ int main(int argc , char **argv) {
 
   return 0;
 }
-
-
-#else // HAVE_RANGE_BASED_FOR
-
-int main(int argc, char** argv)
-{
-  std::cout << "Tests for iteration ranges skipped (compiler too old)" << std::endl;
-  return 0;
-}
-
-#endif // HAVE_RANGE_BASED_FOR
