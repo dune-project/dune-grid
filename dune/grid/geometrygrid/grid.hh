@@ -573,16 +573,6 @@ namespace Dune
     }
 #endif
 
-    /** \brief obtain EntityPointer from EntitySeed. */
-    template< class EntitySeed >
-    typename Traits::template Codim< EntitySeed::codimension >::EntityPointer
-    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
-    entityPointer ( const EntitySeed &seed ) const
-    {
-      typedef typename Traits::template Codim< EntitySeed::codimension >::Entity Entity;
-      return DefaultEntityPointer< Entity >( entity( seed ) );
-    }
-
     /** \brief obtain Entity from EntitySeed
      *
      *  EntitySeed survives to a grid modification which only changes the grid coordinates.

@@ -1217,26 +1217,6 @@ namespace Dune {
       return levelend<cd,All_Partition>(maxLevel());
     }
 
-    /** \brief obtain EntityPointer from EntitySeed.
-     *
-     * \deprecated This method is deprecated and will be removed after the release of
-     *             dune-grid 2.4. Please use entity() instead, which will directly return
-     *             an Entity object that you can then store for later use. The EntityPointer
-     *             concept in general is deprecated and will not be available after
-     *             dune-grid 2.4 has been released.
-     */
-    template <typename Seed>
-    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
-    typename Traits::template Codim<Seed::codimension>::EntityPointer
-    entityPointer(const Seed& seed) const
-    {
-      const int codim = Seed::codimension;
-      YGridLevelIterator g = begin(this->getRealImplementation(seed).level());
-
-      return YaspEntityPointer<codim,GridImp>(g,
-        typename YGrid::Iterator(g->overlapfront[codim], this->getRealImplementation(seed).coord(),this->getRealImplementation(seed).offset()));
-    }
-
     // \brief obtain Entity from EntitySeed. */
     template <typename Seed>
     typename Traits::template Codim<Seed::codimension>::Entity

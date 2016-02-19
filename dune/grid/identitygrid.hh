@@ -321,29 +321,6 @@ namespace Dune
     }
 
 
-    /** \brief Create EntityPointer from EntitySeed
-     *
-     * \deprecated This method is deprecated and will be removed after the release of
-     *             dune-grid 2.4. Please use entity() instead, which will directly return
-     *             an Entity object that you can then store for later use. The EntityPointer
-     *             concept in general is deprecated and will not be available after
-     *             dune-grid 2.4 has been released.
-     */
-    template < class EntitySeed >
-    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
-    typename Traits::template Codim<EntitySeed::codimension>::EntityPointer
-    entityPointer(const EntitySeed& seed) const
-    {
-      typedef typename Traits::template Codim<EntitySeed::codimension>::EntityPointer EntityPointer;
-      typedef IdentityGridEntityPointer<
-        EntitySeed::codimension,
-        const typename Traits::Grid,
-        typename HostGrid::template Codim<EntitySeed::codimension>::EntityPointer
-        > EntityPointerImp;
-
-      return EntityPointer(EntityPointerImp(this, hostgrid_->entity(this->getRealImplementation(seed).hostEntitySeed())));
-    }
-
     /** \brief Create Entity from EntitySeed */
     template < class EntitySeed >
     typename Traits::template Codim<EntitySeed::codimension>::Entity
