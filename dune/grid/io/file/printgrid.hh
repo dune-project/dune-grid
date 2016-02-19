@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <string>
+#include <sstream>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
@@ -74,7 +75,9 @@ namespace Dune {
   {
 
     // Create output file
-    output_file = output_file + "_" + std::to_string(helper.rank());
+    std::stringstream of_name_stream(output_file);
+    of_name_stream << "_" << helper.rank();
+    output_file = of_name_stream.str();
     std::string plot_file_name = output_file + ".gnuplot";
     std::ofstream plotfile (plot_file_name, std::ios::out | std::ios::trunc);
     if (!plotfile.is_open()) {
@@ -114,7 +117,7 @@ namespace Dune {
     // Iterate over elements
     for (; it != gv.template end<0>(); ++it) {
 
-      const auto& entity = *it;
+      const typename GV::template Codim<0>::Entity& entity = *it;
       auto geo = entity.geometry();
 
       // Plot element index
@@ -143,7 +146,7 @@ namespace Dune {
       // Iterate over intersections
       for (IntersectionIterator is = gv.ibegin(entity); is != gv.iend(entity); ++is) {
 
-        const auto& intersection = *is;
+        const typename GV::Intersection& intersection = *is;
         auto igeo = intersection.geometry();
 
         // Draw intersection line
