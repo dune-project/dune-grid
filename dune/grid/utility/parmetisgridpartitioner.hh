@@ -17,7 +17,13 @@
 #include <dune/grid/common/mcmgmapper.hh>
 
 #if HAVE_PARMETIS
+
+// only enable for ParMETIS because the implementation uses functions that
+// are not emulated by scotch
+#ifdef PARMETIS_MAJOR_VERSION
+
 #include <parmetis.h>
+
 
 namespace Dune
 {
@@ -214,6 +220,10 @@ namespace Dune
   };
 
 }  // namespace Dune
+
+#else // PARMETIS_MAJOR_VERSION
+#warning "You seem to be using the ParMETIS emulation layer of scotch, which does not work with this file."
+#endif
 
 #else // HAVE_PARMETIS
 #warning "PARMETIS was not found, please check your configuration"
