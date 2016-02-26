@@ -7,6 +7,7 @@
 #include <bitset>
 #include <cmath>
 #include <deque>
+#include <iostream>
 #include <vector>
 
 #if HAVE_MPI
