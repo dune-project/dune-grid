@@ -1,5 +1,5 @@
 Module: dune-grid
-Version: 2.4.1-rc2
+Version: 2.4.1
 Maintainer: dune-devel@dune-project.org
 Depends: dune-common (>= 2.4.1) dune-geometry (>= 2.4.1)
 Whitespace-Hook: Yes
