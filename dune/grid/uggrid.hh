@@ -29,13 +29,14 @@
 /* The following lines including the necessary UG headers are somewhat
    tricky.  Here's what's happening:
    UG can support two- and three-dimensional grids.  You choose by setting
-   either _2 or _3 while compiling.  This changes all sorts of stuff, in
+   either UGDIM_2 or UGDIM_3 (or _2 and _3 prior to version 3.12.2) while compiling.
+   This changes all sorts of stuff, in
    particular data structures in the headers.
    UG was never supposed to provide 2d and 3d grids at the same time.
    However, when compiling it as c++, the dimension-dependent parts are
    wrapped up cleanly in the namespaces UG::D2 and UG::D3, respectively.  That
    way it is possible to link together the UG lib for 2d and the one for 3d.
-   But we also need the headers twice!  Once with _2 set and once with _3!
+   But we also need the headers twice!  Once with UGDIM_2 set and once with UGDIM_3!
    So here we go:*/
 
 /* The following define tells the UG headers that we want access to a few
@@ -43,7 +44,11 @@
 #define FOR_DUNE
 
 // Set UG's space-dimension flag to 2d
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
+#define UGDIM_2
+#else
 #define _2
+#endif
 // And include all necessary UG headers
 #include "uggrid/ugincludes.hh"
 
@@ -56,7 +61,11 @@
 // UG defines a whole load of preprocessor macros.  ug_undefs.hh undefines
 // them all, so we don't get name clashes.
 #include "uggrid/ug_undefs.hh"
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
+#undef UGDIM_2
+#else
 #undef _2
+#endif
 
 /* Now we're done with 2d, and we can do the whole thing over again for 3d */
 
@@ -74,7 +83,11 @@
 #define __PPIF__
 #endif
 
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
+#define UGDIM_3
+#else
 #define _3
+#endif
 #include "uggrid/ugincludes.hh"
 
 // Wrap a few large UG macros by functions before they get undef'ed away.
@@ -86,7 +99,11 @@
 // undef all macros defined by UG
 #include "uggrid/ug_undefs.hh"
 
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
+#undef UGDIM_3
+#else
 #undef _3
+#endif
 #undef FOR_DUNE
 
 // The components of the UGGrid interface
