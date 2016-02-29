@@ -85,6 +85,11 @@ if(UG_FOUND)
   # parse patch level: last number in UG version string is DUNE patch level
   string(REGEX MATCH "[0-9]*$" UG_DUNE_PATCHLEVEL ${UG_VERSION})
 
+  if (UG_VERSION VERSION_GREATER 3.13.0
+      OR UG_VERSION VERSION_EQUAL 3.13.0)
+    list(APPEND UG_DEFINITIONS "UG_USE_NEW_DIMENSION_DEFINES")
+  endif()
+
   dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
       DUNETYPE "Dune::UGGrid< dimgrid >"
       HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
@@ -163,6 +168,12 @@ function(add_dune_ug_flags)
     set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
       APPEND PROPERTY
       COMPILE_DEFINITIONS ENABLE_UG)
+    if (UG_VERSION VERSION_GREATER 3.13.0
+        OR UG_VERSION VERSION_EQUAL 3.13.0)
+      set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
+        APPEND PROPERTY
+        COMPILE_DEFINITIONS UG_USE_NEW_DIMENSION_DEFINES)
+    endif()
     # Add linker arguments
     if(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
       if(NOT ADD_UG_NO_LINK_DUNEGRID)

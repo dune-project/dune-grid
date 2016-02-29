@@ -46,8 +46,11 @@
 #define FOR_DUNE
 
 // Set UG's space-dimension flag to 2d
-#define _2    // for ug-3.12.0 and lower
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
 #define UG_DIM_2
+#else
+#define _2
+#endif
 // And include all necessary UG headers
 #include "uggrid/ugincludes.hh"
 
@@ -60,8 +63,11 @@
 // UG defines a whole load of preprocessor macros.  ug_undefs.hh undefines
 // them all, so we don't get name clashes.
 #include "uggrid/ug_undefs.hh"
-#undef _2
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
 #undef UG_DIM_2
+#else
+#undef _2
+#endif
 
 /* Now we're done with 2d, and we can do the whole thing over again for 3d */
 
@@ -79,8 +85,11 @@
 #define __PPIF__
 #endif
 
-#define _3  // for ug-3.12.0 and lower
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
 #define UG_DIM_3
+#else
+#define _3
+#endif
 
 #include "uggrid/ugincludes.hh"
 
@@ -93,8 +102,11 @@
 // undef all macros defined by UG
 #include "uggrid/ug_undefs.hh"
 
-#undef _3
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
 #undef UG_DIM_3
+#else
+#undef _3
+#endif
 #undef FOR_DUNE
 
 // The components of the UGGrid interface
