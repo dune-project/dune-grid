@@ -108,9 +108,9 @@ if(UG_FOUND)
   endforeach(lib ugS2 ugS3 devS)
 
   # register all UG related flags
-  set(UG_DEFINITIONS "ENABLE_UG=1")
+  list(APPEND UG_DEFINITIONS "ENABLE_UG=1")
   if(UG_PARALLEL STREQUAL "yes")
-    set(UG_DEFINITIONS "ENABLE_UG=1;ModelP")
+    list(APPEND UG_DEFINITIONS "ModelP")
   endif()
   dune_register_package_flags(COMPILE_DEFINITIONS "${UG_DEFINITIONS}"
                               INCLUDE_DIRS "${UG_INCLUDES}"
