@@ -75,8 +75,8 @@ namespace Dune {
   {
 
     // Create output file
-    std::stringstream of_name_stream(output_file);
-    of_name_stream << "_" << helper.rank();
+    std::stringstream of_name_stream;
+    of_name_stream << output_file << "_" << helper.rank();
     output_file = of_name_stream.str();
     std::string plot_file_name = output_file + ".gnuplot";
     std::ofstream plotfile (plot_file_name, std::ios::out | std::ios::trunc);
