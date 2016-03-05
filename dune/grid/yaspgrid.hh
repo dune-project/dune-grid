@@ -727,6 +727,28 @@ namespace Dune {
     typedef YaspIndexSet<YaspGrid<dim, Coordinates>, true > LeafIndexSetType;
     typedef YaspGlobalIdSet<YaspGrid<dim, Coordinates> > GlobalIdSetType;
 
+    /** Standard constructor for a uniformly partitioned equidistant YaspGrid
+     *  @param L extension of the domain
+     *  @param s number of cells on coarse mesh in each direction
+     *  @param periodic tells if direction is periodic or not
+     *  @param overlap size of overlap on coarsest grid (same in all directions)
+     *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
+     *  @param lb pointer to an overloaded YLoadBalance instance
+     */
+    YaspGrid(Dune::FieldVector<ctype, dim> L,
+             int s,
+             std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+             int overlap = 1,
+             CollectiveCommunicationType comm = CollectiveCommunicationType(),
+             const YLoadBalance<dim>* lb = defaultLoadbalancer())
+        : YaspGrid(L,
+                   [s]() {
+                     std::array<int, dim> sv;
+                     sv.fill(s);
+                     return sv;
+                   }(),
+                   periodic, overlap, comm, lb) {}
+
     /** Standard constructor for an equidistant YaspGrid
      *  @param L extension of the domain
      *  @param s number of cells on coarse mesh in each direction

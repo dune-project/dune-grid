@@ -27,12 +27,10 @@ int main(int argc, char **argv)
     // make grid
     const int dim = 2;
     Dune::FieldVector<double,dim> L(1.0);
-    std::array<int,dim> N;
-    std::fill(N.begin(), N.end(), 4);
     std::bitset<dim> periodic (false);
     periodic[0] = true;
     int overlap = 1;
-    Dune::YaspGrid<dim> grid(L,N,periodic, overlap);
+    Dune::YaspGrid<dim> grid(L,4,periodic, overlap);
 
     // write .plt files (one for png, one for svg) without executing gnuplot on them
     Dune::printGrid (grid, helper, "printgridtest_yasp_svg", 4000, true, false);
