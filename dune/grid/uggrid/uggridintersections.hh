@@ -174,10 +174,6 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
-    // The geometries are only constructed when necessary.  The following
-    // flags store whether they have been constructed already.
-    mutable bool geometryIsUpToDate_;
-
     //! pointers holding the global and local geometries
     mutable std::shared_ptr<GeometryImpl>      geometry_;
     mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;

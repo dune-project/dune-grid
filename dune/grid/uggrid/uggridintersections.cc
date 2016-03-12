@@ -510,9 +510,10 @@ int Dune::UGGridLeafIntersection<GridImp>::indexInOutside () const
   if (leafSubFaces_[subNeighborCount_].first == NULL)
     DUNE_THROW(GridError,"There is no neighbor!");
 
+#ifndef NDEBUG
   const int nSides = UG_NS<dim>::Sides_Of_Elem(leafSubFaces_[subNeighborCount_].first);
-
   assert(leafSubFaces_[subNeighborCount_].second < nSides);
+#endif
 
   // Renumber to DUNE numbering
   unsigned int tag = UG_NS<dim>::Tag(leafSubFaces_[subNeighborCount_].first);
