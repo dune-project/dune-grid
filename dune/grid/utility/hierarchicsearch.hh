@@ -65,7 +65,7 @@ namespace Dune
     /**
        internal helper method
 
-       @param[in] entity Entity whos children should be searched
+       @param[in] entity Entity whose children should be searched
        @param[in] global Point you are searching for
 
        Search the child entity containing point global. Recursively
