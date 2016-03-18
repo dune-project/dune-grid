@@ -444,7 +444,6 @@ namespace Dune {
        - NO_REFINEMENT
        - COPY
        - RED
-       - BLUE
        - COARSE
 
        - TETRA_RED_HEX
