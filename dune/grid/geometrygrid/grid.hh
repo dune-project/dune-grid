@@ -583,7 +583,25 @@ namespace Dune
       return DefaultEntityPointer< Entity >( entity( seed ) );
     }
 
-    /** \brief obtain Entity from EntitySeed. */
+    /** \brief obtain Entity from EntitySeed
+     *
+     *  EntitySeed survives to a grid modification which only changes the grid coordinates.
+     *  Therefore it is consistent to use an EntitySeed to rebuild an Entity after this kind of grid modification.
+     *
+     *  An example of this is given by the following code:
+     *  \code
+     *  // store seed of the first entity in the leaf view
+     *  const auto& gv = grid.leafGridView();
+     *  const auto& entity = (*(gv.template begin<0>()));
+     *  auto seed = entity.seed();
+     *
+     *  // perform a grid modification
+     *  grid.coordFunction().setTime(t);
+     *
+     *  // rebuild first entity from the seed
+     *  const auto& newEntity = grid.entity(seed);
+     *  \endcode
+     */
     template< class EntitySeed >
     typename Traits::template Codim< EntitySeed::codimension >::Entity
     entity ( const EntitySeed &seed ) const
