@@ -540,7 +540,7 @@ namespace Dune {
    * Entities of given codimension c need to be represented by d choose c YgridComponents.
    * All entities in one such component share the same set of spanning unit vectors.
    * A YGrid is used to iterate over the entire set of components the codimension
-   * consists of. It doesnt hold any data, but instead holds an iterator range into
+   * consists of. It doesn't hold any data, but instead holds an iterator range into
    * an array of components (which is owned by YGridLevel).
    */
   template<class Coordinates>
@@ -631,7 +631,7 @@ namespace Dune {
         return _it.coord(i);
       }
 
-      //! return coordinate array at the current postion
+      //! return coordinate array at the current position
       const std::array<int, dim>& coord () const
       {
         return _it.coord();
@@ -813,7 +813,7 @@ namespace Dune {
    * Intersections with neighboring processors are stored as std::deque<Intersection>.
    * Eachsuch intersection only holds one YGridComponent. To do all communication
    * associated with one codimension, multiple such deques have to be concatenated.
-   * YGridList manges this concatenation. As for YGrids, YGridList doesnt hold any
+   * YGridList manges this concatenation. As for YGrids, YGridList doesn't hold any
    * data, but an iterator range into a data array owned by YGridLevel.
    */
   template<class Coordinates>

@@ -898,7 +898,7 @@ namespace Dune
       // make data mode visible to private functions
       outputtype=ot;
 
-      // do some magic because paraview can only cope with relative pathes to piece files
+      // do some magic because paraview can only cope with relative paths to piece files
       std::ofstream file;
       file.exceptions(std::ios_base::badbit | std::ios_base::failbit |
                       std::ios_base::eofbit);

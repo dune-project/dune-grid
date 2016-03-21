@@ -1,7 +1,7 @@
 DGF
 
 % This DGF files models the unit octahedron.
-% Note that this octahedron is borderless, so boundary ids do not amke sense.
+% Note that this octahedron is borderless, so boundary ids do not make sense.
 
 VERTEX
  1   0   0

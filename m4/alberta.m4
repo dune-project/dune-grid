@@ -22,7 +22,7 @@
 #              $(ALBERTA_LIBPATHFLAGS) -lalberta_%DIM%d \
 #              $(ALBERTA_BASE_LIBS)
 #     All LIBS required for dimension %DIM% (1, 2, or 3).  The first value is
-#     substituted by default and is apropriate for modules depending on
+#     substituted by default and is appropriate for modules depending on
 #     dune-grid.  dune-grid itself will overwrite that with the second value
 #     however in configure.ac.
 #
@@ -157,7 +157,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
     # TODO: check if static flag exists 
     # link_static_flag defines the flag for the linker to link only static
-    # didnt work, with $link_static_flag, so quick hack here
+    # didn't work, with $link_static_flag, so quick hack here
 
     # check for libalberta_util...
     AS_IF([test "x$HAVE_ALBERTA" = "x1"],[

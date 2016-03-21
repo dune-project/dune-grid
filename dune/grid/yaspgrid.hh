@@ -1019,7 +1019,7 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,coarseSize,o_interior,s_interior);
 
-      // get offset by modifying o_interior accoring to overlap
+      // get offset by modifying o_interior according to overlap
       std::array<int,dim> offset(o_interior);
       for (int i=0; i<dim; i++)
         if ((periodic[i]) || (o_interior[i] > 0))

@@ -129,13 +129,13 @@ namespace Dune {
       std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
       if (!am.get())
-        DUNE_THROW(IOError, "An error has occured while reading " << filename);
+        DUNE_THROW(IOError, "An error has occurred while reading " << filename);
 
       newDomain
         = (psurface::PSurface<dim,float>*) psurface::AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
 
       if (!newDomain)
-        DUNE_THROW(IOError, "An error has occured while reading " << filename);
+        DUNE_THROW(IOError, "An error has occurred while reading " << filename);
 
       return std::make_shared<PSurfaceBoundary<dim> >(newDomain);
 #else

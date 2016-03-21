@@ -445,7 +445,7 @@ namespace Dune {
               segment has to be added, i.e., (p0,..,pn,p0).
             - If a \b cube or \b simplex block is found the element information
               is also passed to tetgen/triangle together with the parameters - if
-              given. Note that a triangle can only handle one region atribute in
+              given. Note that a triangle can only handle one region attribute in
               its .poly files so that only the first parameter is the \b simplex
               or \b cube block can be retrived.
          .

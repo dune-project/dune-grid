@@ -320,7 +320,7 @@ namespace Dune
 
 
 
-    // Auxilliary Functions
+    // Auxiliary Functions
     // --------------------
 
     inline void abs ( const DofVectorPointer< int > &dofVector )

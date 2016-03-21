@@ -67,7 +67,7 @@ namespace Dune {
     }
   };
 
-  /** @brief union representing the three byte text aswell as the four 6 bit chunks */
+  /** @brief union representing the three byte text as well as the four 6 bit chunks */
   union b64chunk
   {
     b64txt txt;

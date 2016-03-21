@@ -62,7 +62,7 @@ namespace {
     stream << "USAGE:\n"
            << "  " << programName << " [-R REFINES] GRIDFILE\n"
            << "\n"
-           << "PARAMTERS:\n"
+           << "PARAMETERS:\n"
            << "  -R REFINES How many global refines to do after reading\n"
            << "    (default: 0)\n"
            << "  GRIDFILE Name of the .msh file to read the grid from.\n"

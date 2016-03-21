@@ -34,7 +34,7 @@ endif(UG_FOUND)
 
 # The alberta tests are only alibi-ported, until the  grid and world dimension
 # are configuretime parameters and we can treat alberta just as any other grid manager
-# - buildsystemwise. PLEASE DONT LOOK AT THIS IF YOU WANT TO KNOW HOW TO WRITE TESTS.
+# - buildsystemwise. PLEASE DON'T LOOK AT THIS IF YOU WANT TO KNOW HOW TO WRITE TESTS.
 if(ALBERTA_FOUND)
   add_executable(test-alberta EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta WORLDDIM 2)

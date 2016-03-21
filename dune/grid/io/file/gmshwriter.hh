@@ -82,7 +82,7 @@ namespace Dune {
      * Counting of the element numbers starts by "1".
      *
      * If the pysicalEntities parameter is not a nullptr, each element
-     * has a tag rappresenting its physcial id.
+     * has a tag representing its physical id.
      *
      * If the physicalBoundaries parameter is not a nullptr, also the boundaries
      * are written on file with the corresponding physical value. The physicalBoundaries
@@ -182,7 +182,7 @@ namespace Dune {
         and closes the file when done.
 
         If the pysicalEntities parameter is not a nullptr, each element
-        has a tag rappresenting its physcial id.
+        has a tag representing its physical id.
 
         If the physicalBoundaries parameter is not a nullptr, also the boundaries
         are written on file with the corresponding physical value. The physicalBoundaries
@@ -271,7 +271,7 @@ namespace Dune {
      * Opens the file with given name and path, stores the element data of the grid
      * and closes the file when done.
      *
-     * Each element has a tag rappresenting its physcial id.
+     * Each element has a tag representing its physical id.
      *
      * Throws an IOError if file could not be opened or an unsupported element type is
      * encountered.
@@ -289,7 +289,7 @@ namespace Dune {
      * Opens the file with given name and path, stores the element data of the grid
      * and closes the file when done.
      *
-     * Each element has a tag rappresenting its physcial id.
+     * Each element has a tag representing its physical id.
      *
      * All the boundaries are written on file with the corresponding physical value.
      * The physicalBoundaries vector need to be sorted according to the interesection boundary segment index.

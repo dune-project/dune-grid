@@ -44,7 +44,7 @@ ac_save_LDFLAGS="$LDFLAGS"
 ac_save_CPPFLAGS="$CPPFLAGS"
 ac_save_LIBS="$LIBS"
 
-# initilize to sane value
+# initialize to sane value
 HAVE_ALUGRID=0
 
 ## do nothing if no --with-alugrid was supplied

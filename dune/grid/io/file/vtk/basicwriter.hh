@@ -394,7 +394,7 @@ namespace Dune
       {
         MPIGuard guard(factory.comm());
 
-        // do some magic because paraview can only cope with relative pathes to
+        // do some magic because paraview can only cope with relative paths to
         // piece files
         std::ofstream file;
         file.exceptions(std::ios_base::badbit | std::ios_base::failbit |
