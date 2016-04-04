@@ -147,7 +147,6 @@ namespace Dune {
     typedef GridTraits<dim,dim,Dune::UGGrid<dim>,
         UGGridGeometry,
         UGGridEntity,
-        UGGridEntityPointer,
         UGGridLevelIterator,
         UGGridLeafIntersection,
         UGGridLevelIntersection,

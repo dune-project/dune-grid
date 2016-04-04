@@ -1092,7 +1092,6 @@ namespace Dune {
   template <int dim, int dimw, class GridImp,
       template<int,int,class> class GeometryImp,
       template<int,int,class> class EntityImp,
-      template<int,class> class EntityPointerImp,
       template<int,PartitionIteratorType,class> class LevelIteratorImp,
       template<class> class LeafIntersectionImp,
       template<class> class LevelIntersectionImp,

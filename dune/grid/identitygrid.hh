@@ -36,29 +36,11 @@ namespace Dune
   template< class Grid >
   struct HostGridAccess;
 
-  namespace {
-
-    // This is just a placeholder to stuff into the standard
-    // GridTraits, as those expect an EntityPointer implementation
-    // with two template parameters, but our EntityPointer uses three.
-    template<int,typename>
-    struct DummyIdentityGridEntityPointer
-    {};
-
-  }
-
-
   template<int dim, class HostGrid>
   struct IdentityGridFamily
   {
 
   public:
-
-    // The type signature of our EntityPointer implementation does not fit into
-    // the scheme expected by GridTraits, so we have to provide our own Traits
-    // On the other hand, we don't want to retype everything, so we just inherit
-    // from the default Traits and just tweak the EntityPointer type in the derived
-    // Traits class
 
     typedef GridTraits<
         dim,
@@ -66,7 +48,6 @@ namespace Dune
         Dune::IdentityGrid<HostGrid>,
         IdentityGridGeometry,
         IdentityGridEntity,
-        DummyIdentityGridEntityPointer, // placeholder
         IdentityGridLevelIterator,
         IdentityGridLeafIntersection,
         IdentityGridLevelIntersection,

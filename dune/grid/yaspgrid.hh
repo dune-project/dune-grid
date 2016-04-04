@@ -98,7 +98,6 @@ namespace Dune {
         dim,                                                    // dimension of the world space
         Dune::YaspGrid<dim, Coordinates>,
         YaspGeometry,YaspEntity,
-        YaspEntityPointer,
         YaspLevelIterator,                                      // type used for the level iterator
         YaspIntersection,              // leaf  intersection
         YaspIntersection,              // level intersection

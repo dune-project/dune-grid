@@ -42,7 +42,6 @@ namespace Dune {
     typedef GridTraits<dim,dimw,Dune::OneDGrid,
         OneDGridGeometry,
         OneDGridEntity,
-        OneDGridEntityPointer,
         OneDGridLevelIterator,
         OneDGridLeafIntersection,
         OneDGridLevelIntersection,
