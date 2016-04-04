@@ -37,7 +37,6 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim<1>::LocalGeometryImpl LocalGeometryImpl;
 
   public:
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -218,7 +217,6 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim<1>::LocalGeometryImpl LocalGeometryImpl;
 
   public:
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;

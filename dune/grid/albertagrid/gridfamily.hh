@@ -122,8 +122,6 @@ namespace Dune
         typedef AlbertaGridEntity< cd, dim, const GridImp > EntityImpl;
         typedef Dune::Entity< cd, dim, const GridImp, AlbertaGridEntity > Entity;
 
-        typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
-        typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
         typedef Dune::EntitySeed< const GridImp, AlbertaGridEntitySeed< cd, const GridImp > > EntitySeed;
 
         template <PartitionIteratorType pitype>

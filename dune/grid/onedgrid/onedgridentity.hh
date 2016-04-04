@@ -189,7 +189,6 @@ namespace Dune {
     {}
 
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
-    typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
 
     bool equals(const OneDGridEntity& other) const
     {

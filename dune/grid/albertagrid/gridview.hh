@@ -50,8 +50,6 @@ namespace Dune
       typedef typename Grid::Traits::template Codim< cd >::template Partition< All_Partition >::LevelIterator Iterator;
 
       typedef typename Grid::Traits::template Codim< cd >::Entity Entity;
-      typedef typename Grid::Traits::template Codim< cd >::EntityPointer
-      EntityPointer;
 
       typedef typename Grid::template Codim< cd >::Geometry Geometry;
       typedef typename Grid::template Codim< cd >::LocalGeometry
@@ -266,8 +264,6 @@ namespace Dune
       Iterator;
 
       typedef typename Grid::Traits::template Codim< cd >::Entity Entity;
-      typedef typename Grid::Traits::template Codim< cd >::EntityPointer
-      EntityPointer;
 
       typedef typename Grid::template Codim< cd >::Geometry Geometry;
       typedef typename Grid::template Codim< cd >::LocalGeometry

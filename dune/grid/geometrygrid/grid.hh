@@ -719,12 +719,6 @@ namespace Dune
      */
     typedef typename Traits::template Codim< codim >::Entity Entity;
 
-    /** \brief type of entity pointer
-     *
-     *  The entity pointer is a model of Dune::EntityPointer.
-     */
-    typedef typename Traits::template Codim< codim >::EntityPointer EntityPointer;
-
     /** \} */
 
     /** \name Geometry Types

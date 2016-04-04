@@ -52,7 +52,7 @@ namespace Dune
   struct IdentityGridFamily
   {
 
-  private:
+  public:
 
     // The type signature of our EntityPointer implementation does not fit into
     // the scheme expected by GridTraits, so we have to provide our own Traits
@@ -84,36 +84,7 @@ namespace Dune
         DefaultLevelGridViewTraits,
         DefaultLeafGridViewTraits,
         IdentityGridEntitySeed
-        > BaseTraits;
-
-  public:
-
-    // inherit everything from the default Traits...
-    struct Traits
-      : public BaseTraits
-    {
-
-      // Except for the Codim struct, which we reimplement, but which
-      // again inherits everything from the base class...
-      template<int codim>
-      struct Codim
-        : public BaseTraits::template Codim<codim>
-      {
-
-        // ... except for the EntityPointer, which we override with our
-        // actual implementation
-        typedef Dune::EntityPointer<
-          const typename BaseTraits::Grid,
-          IdentityGridEntityPointer<
-            codim,
-            const typename BaseTraits::Grid,
-            typename HostGrid::template Codim<codim>::EntityPointer
-            >
-          > EntityPointer;
-
-      };
-
-    };
+        > Traits;
 
   };
 

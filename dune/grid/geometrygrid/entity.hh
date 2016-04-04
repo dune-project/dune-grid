@@ -112,8 +112,6 @@ namespace Dune
 
       //! type of corresponding host entity
       typedef typename HostGrid::template Codim< codimension >::Entity HostEntity;
-      //! type of corresponding host entity pointer
-      typedef typename HostGrid::template Codim< codimension >::EntityPointer HostEntityPointer;
 
       //! type of corresponding entity seed
       typedef typename Traits::template Codim< codimension >::EntitySeed EntitySeed;
@@ -397,8 +395,6 @@ namespace Dune
 
       //! type of corresponding host entity
       typedef typename HostGrid::template Codim< codimension >::Entity HostEntity;
-      //! type of corresponding host entity pointer
-      typedef typename HostGrid::template Codim< codimension >::EntityPointer HostEntityPointer;
 
       //! type of corresponding entity seed
       typedef typename Traits::template Codim< codimension >::EntitySeed EntitySeed;
@@ -411,7 +407,6 @@ namespace Dune
 
     private:
       typedef typename HostGrid::template Codim< 0 >::Geometry HostGeometry;
-      typedef typename HostGrid::template Codim< dimension >::EntityPointer HostVertexPointer;
 
       typedef GeoGrid::CoordVector< mydimension, Grid, fake > CoordVector;
 
@@ -720,8 +715,6 @@ namespace Dune
 
       //! type of corresponding local geometry
       typedef typename Traits::template Codim< codimension >::LocalGeometry LocalGeometry;
-      //! type of corresponding entity pointer
-      typedef typename Traits::template Codim< codimension >::EntityPointer EntityPointer;
 
       typedef Dune::Entity< 0, dim, Grid, Dune::GeoGrid::Entity > EntityFacade;
 

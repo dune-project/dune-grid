@@ -62,7 +62,7 @@ namespace Dune
     template< int cd >
     struct Codim
     {
-      typedef typename Grid::template Codim< cd >::EntityPointer EntityPointer;
+      typedef typename Grid::template Codim< cd >::Entity Entity;
     };
 
     typedef typename Grid::template Codim< codim >::Entity Entity;
@@ -179,8 +179,6 @@ namespace Dune
     template< int codim >
     struct Codim
     {
-      typedef typename Grid::template Codim< codim >::EntityPointer
-      EntityPointer;
       typedef typename Grid::template Codim< codim >::Entity
       Entity;
     };
@@ -192,7 +190,6 @@ namespace Dune
     typedef typename Grid::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
 
     typedef typename Grid::HierarchicIterator HierarchicIterator;
-    typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
 
     typedef Dune::AlbertaGridLeafIntersectionIterator< Grid > AlbertaGridLeafIntersectionIterator;
     typedef AlbertaGridLeafIntersectionIterator AlbertaGridLevelIntersectionIterator;

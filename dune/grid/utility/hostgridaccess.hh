@@ -57,13 +57,9 @@ namespace Dune
     {
       //! type of the GeometryGrid entity
       typedef typename Grid::template Codim< codim >::Entity Entity;
-      //! type of the GeometryGrid entity pointer
-      typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
 
       //! type of the host entity
       typedef typename HostGrid::template Codim< codim >::Entity HostEntity;
-      //! type of the host entity pointer
-      typedef typename HostGrid::template Codim< codim >::EntityPointer HostEntityPointer;
     };
 
     //! type of the GeometryGrid leaf intersection
@@ -137,13 +133,9 @@ namespace Dune
     {
       //! type of the IdGrid entity
       typedef typename Grid::template Codim< codim >::Entity Entity;
-      //! type of the IdGrid entity pointer
-      typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
 
       //! type of the host entity
       typedef typename HostGrid::template Codim< codim >::Entity HostEntity;
-      //! type of the host entity pointer
-      typedef typename HostGrid::template Codim< codim >::EntityPointer HostEntityPointer;
     };
 
     //! type of the IdGrid leaf intersection
