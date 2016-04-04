@@ -207,22 +207,15 @@ namespace Dune {
          - %Geometry which is a model of Dune::Geometry. This class encapsulates the geometric part
          of an entity by mapping local coordinates in a reference element to world coordinates.
 
-         - %EntityPointer which is a model of Dune::EntityPointer. This is a dereferenceable
-         type that delivers a reference to an entity. Moreover it is immutable, i.e. the
-         referenced entity can not be modified.
-
          - %LevelIterator which is a model of Dune::LevelIterator is an immutable iterator
      that provides access to all entities of a given codimension and level of the
-         grid. %EntityPointer is copy-constructible from a %LevelIterator.
-
+         grid.
          - %LeafIterator which is a model of Dune::LeafIterator is an immutable iterator
          that provides access to all entities of a given codimension of the leaf grid.
-         %EntityPointer is copy-constructible from a %LeafIterator.
 
          - %HierarchicIterator which is a model of Dune::HierarchicIterator is an immutable
          iterator that provides access to all entities of codimension 0 that resulted from subdivision
-         of a given entity of codimension 0. %EntityPointer is copy-constructible from a
-         %HierarchicIterator.
+         of a given entity of codimension 0.
 
          - %Intersection which is a model of Dune::Intersection
          provides access an intersection of codimension 1 of two entity of codimension 0
@@ -281,13 +274,6 @@ namespace Dune {
          <TD>no</TD>
          <TD>no</TD>
          <TD>no</TD>
-         <TD>no</TD>
-         </TR>
-         <TR>
-         <TD>EntityPointer</TD>
-         <TD>yes</TD>
-         <TD>no</TD>
-         <TD>yes</TD>
          <TD>no</TD>
          </TR>
          <TR>

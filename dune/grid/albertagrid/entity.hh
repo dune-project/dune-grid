@@ -260,7 +260,7 @@ namespace Dune
      *
      *  \param[in]  i  number of the subentity (in generic numbering)
      *
-     *  \returns an EntityPointer to the subentity
+     *  \returns the subentity
      *
      *  \note: The subentities are numbered 0, ..., count< codim >-1
      */

@@ -710,7 +710,7 @@ namespace Dune
   struct GeometryGrid< HostGrid, CoordFunction, Allocator >::Codim
     : public Base::template Codim< codim >
   {
-    /** \name Entity and Entity Pointer Types
+    /** \name Entity types
      *  \{ */
 
     /** \brief type of entity

@@ -278,7 +278,7 @@ namespace Dune
      */
     typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
 
-    /** \brief EntityPointer types of the different codimensions */
+    /** \brief Entity types of the different codimensions */
     template <int cd>
     struct Codim
     {

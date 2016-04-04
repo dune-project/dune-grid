@@ -69,14 +69,14 @@ namespace Dune {
       return hostIntersection_ == other.hostIntersection_;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     Entity inside() const {
       return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.inside());
     }
 
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return Entity on the outside of this intersection
     //! (that is the neighboring Entity)
     Entity outside() const {
       return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.outside());
@@ -234,14 +234,14 @@ namespace Dune {
       return hostIntersection_ == other.hostIntersection_;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     Entity inside() const {
       return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.inside());
     }
 
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return Entity on the outside of this intersection
     //! (that is the neighboring Entity)
     Entity outside() const {
       return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.outside());
