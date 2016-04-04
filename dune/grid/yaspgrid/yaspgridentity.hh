@@ -433,7 +433,7 @@ namespace Dune {
     typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
 
-    //! define the type used for persisitent indices
+    //! define the type used for persistent indices
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
     //! define type used for coordinates in grid module
@@ -801,7 +801,7 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<dim>::EntitySeed EntitySeed;
 
-    //! define the type used for persisitent indices
+    //! define the type used for persistent indices
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
     //! define type used for coordinates in grid module
