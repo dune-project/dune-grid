@@ -8,7 +8,8 @@
 #include <dune/common/proxymemberaccess.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/deprecated.hh>
-#include <dune/grid/common/grid.hh>
+#include <dune/geometry/type.hh>
+#include <dune/grid/common/gridenums.hh>
 
 /** \file
     \brief Wrapper and interface class for a static iterator (EntityPointer)
