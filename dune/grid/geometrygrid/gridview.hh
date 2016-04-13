@@ -64,7 +64,6 @@ namespace Dune
         typedef Dune::EntityIterator< codim, const Grid, IteratorImp > Iterator;
 
         typedef typename Grid::Traits::template Codim< codim >::Entity Entity;
-        typedef typename Grid::Traits::template Codim< codim >::EntityPointer EntityPointer;
 
         typedef typename Grid::template Codim< codim >::Geometry Geometry;
         typedef typename Grid::template Codim< codim >::LocalGeometry LocalGeometry;

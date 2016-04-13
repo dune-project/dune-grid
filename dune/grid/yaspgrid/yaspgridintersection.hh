@@ -32,7 +32,6 @@ namespace Dune {
     typedef typename GridImp::YGridLevelIterator YGLI;
     typedef typename GridImp::YGrid::Iterator I;
     typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
@@ -86,14 +85,14 @@ namespace Dune {
       return true;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     Entity inside() const
     {
       return Entity(_inside);
     }
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return Entity on the outside of this intersection
     Entity outside() const
     {
       return Entity(_outside);

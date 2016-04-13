@@ -80,7 +80,7 @@ namespace Dune {
     // The codimension of this entitypointer wrt the host grid
     enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension + codim};
 
-    // EntityPointer to the equivalent entity in the host grid
+    // equivalent entity in the host grid
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Entity HostGridEntity;
 
 
@@ -219,7 +219,7 @@ namespace Dune {
     // The codimension of this entitypointer wrt the host grid
     enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension};
 
-    // EntityPointer to the equivalent entity in the host grid
+    // equivalent entity in the host grid
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Entity HostGridEntity;
 
     typedef typename GridImp::template Codim<0>::Geometry Geometry;

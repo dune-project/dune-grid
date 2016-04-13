@@ -137,7 +137,7 @@ namespace CheckEntitySeed // don't blur namespace Dune
 
     static void apply ( const GridView &gridView, std::ostream &output )
     {
-      // get grid, as method entityPointer() is missing on GridViews
+      // get grid, as method entity() is missing on GridViews
       const Grid &grid = gridView.grid();
 
       const Iterator end = gridView.template end< codim >();

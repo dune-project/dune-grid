@@ -96,9 +96,6 @@ namespace Dune
       /** \brief type of iterator returned by the grid view */
       typedef typename Traits :: template Codim<cd> :: Iterator Iterator;
 
-      /** \brief type of corresponding entity pointer */
-      typedef typename Traits :: template Codim<cd> :: EntityPointer EntityPointer;
-
       /** \brief type of corresponding entity */
       typedef typename Traits :: template Codim<cd> :: Entity Entity;
 

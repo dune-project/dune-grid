@@ -207,22 +207,15 @@ namespace Dune {
          - %Geometry which is a model of Dune::Geometry. This class encapsulates the geometric part
          of an entity by mapping local coordinates in a reference element to world coordinates.
 
-         - %EntityPointer which is a model of Dune::EntityPointer. This is a dereferenceable
-         type that delivers a reference to an entity. Moreover it is immutable, i.e. the
-         referenced entity can not be modified.
-
          - %LevelIterator which is a model of Dune::LevelIterator is an immutable iterator
      that provides access to all entities of a given codimension and level of the
-         grid. %EntityPointer is copy-constructible from a %LevelIterator.
-
+         grid.
          - %LeafIterator which is a model of Dune::LeafIterator is an immutable iterator
          that provides access to all entities of a given codimension of the leaf grid.
-         %EntityPointer is copy-constructible from a %LeafIterator.
 
          - %HierarchicIterator which is a model of Dune::HierarchicIterator is an immutable
          iterator that provides access to all entities of codimension 0 that resulted from subdivision
-         of a given entity of codimension 0. %EntityPointer is copy-constructible from a
-         %HierarchicIterator.
+         of a given entity of codimension 0.
 
          - %Intersection which is a model of Dune::Intersection
          provides access an intersection of codimension 1 of two entity of codimension 0
@@ -281,13 +274,6 @@ namespace Dune {
          <TD>no</TD>
          <TD>no</TD>
          <TD>no</TD>
-         <TD>no</TD>
-         </TR>
-         <TR>
-         <TD>EntityPointer</TD>
-         <TD>yes</TD>
-         <TD>no</TD>
-         <TD>yes</TD>
          <TD>no</TD>
          </TR>
          <TR>
@@ -353,7 +339,6 @@ namespace Dune {
   // dim is necessary because Entity will be specialized for codim==0 _and_ codim==dim
   // EntityImp gets GridImp as 3rd template parameter to distinguish between const and mutable grid
   template<int codim, int dim, class GridImp,template<int,int,class> class EntityImp> class Entity;
-  template<class GridImp, class EntityPointerImp> class EntityPointer;
   template< int codim, class Grid, class IteratorImp > class EntityIterator;
   template<class GridImp, class EntitySeedImp> class EntitySeed;
   template< class GridImp, class IntersectionImp > class Intersection;
@@ -436,9 +421,6 @@ namespace Dune {
 
       //! A type that is a model of a Dune::Entity<cd,dim,...>.
       typedef typename GridFamily::Traits::template Codim<cd>::Entity Entity;
-
-      //! A type that is a model of Dune::EntityPointer<cd,dim,...>.
-      typedef typename GridFamily::Traits::template Codim<cd>::EntityPointer EntityPointer;
 
       //! A type that is a model (not yet) of Dune::EntitySeed<cd,dim,...>.
       typedef typename GridFamily::Traits::template Codim<cd>::EntitySeed EntitySeed;
@@ -1110,7 +1092,6 @@ namespace Dune {
   template <int dim, int dimw, class GridImp,
       template<int,int,class> class GeometryImp,
       template<int,int,class> class EntityImp,
-      template<int,class> class EntityPointerImp,
       template<int,PartitionIteratorType,class> class LevelIteratorImp,
       template<class> class LeafIntersectionImp,
       template<class> class LevelIntersectionImp,
@@ -1161,9 +1142,6 @@ namespace Dune {
       // we could - if needed - introduce another struct for dimglobal of Geometry
       typedef Dune::Entity<cd, dim, const GridImp, EntityImp> Entity;
 
-      /** \brief The type of the entity pointer for entities of this codim.*/
-      typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
-
       /** \brief The type of the entity seed of this codim.*/
       typedef Dune::EntitySeed<const GridImp, EntitySeedImp<cd, const GridImp> > EntitySeed;
 
@@ -1188,7 +1166,6 @@ namespace Dune {
 
     private:
       friend class Dune::Entity<cd, dim, const GridImp, EntityImp>;
-      typedef EntityPointerImp<cd,const GridImp> EntityPointerImpl;
     };
 
     /** \brief type of view for leaf grid */

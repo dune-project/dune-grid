@@ -36,29 +36,11 @@ namespace Dune
   template< class Grid >
   struct HostGridAccess;
 
-  namespace {
-
-    // This is just a placeholder to stuff into the standard
-    // GridTraits, as those expect an EntityPointer implementation
-    // with two template parameters, but our EntityPointer uses three.
-    template<int,typename>
-    struct DummyIdentityGridEntityPointer
-    {};
-
-  }
-
-
   template<int dim, class HostGrid>
   struct IdentityGridFamily
   {
 
-  private:
-
-    // The type signature of our EntityPointer implementation does not fit into
-    // the scheme expected by GridTraits, so we have to provide our own Traits
-    // On the other hand, we don't want to retype everything, so we just inherit
-    // from the default Traits and just tweak the EntityPointer type in the derived
-    // Traits class
+  public:
 
     typedef GridTraits<
         dim,
@@ -66,7 +48,6 @@ namespace Dune
         Dune::IdentityGrid<HostGrid>,
         IdentityGridGeometry,
         IdentityGridEntity,
-        DummyIdentityGridEntityPointer, // placeholder
         IdentityGridLevelIterator,
         IdentityGridLeafIntersection,
         IdentityGridLevelIntersection,
@@ -84,36 +65,7 @@ namespace Dune
         DefaultLevelGridViewTraits,
         DefaultLeafGridViewTraits,
         IdentityGridEntitySeed
-        > BaseTraits;
-
-  public:
-
-    // inherit everything from the default Traits...
-    struct Traits
-      : public BaseTraits
-    {
-
-      // Except for the Codim struct, which we reimplement, but which
-      // again inherits everything from the base class...
-      template<int codim>
-      struct Codim
-        : public BaseTraits::template Codim<codim>
-      {
-
-        // ... except for the EntityPointer, which we override with our
-        // actual implementation
-        typedef Dune::EntityPointer<
-          const typename BaseTraits::Grid,
-          IdentityGridEntityPointer<
-            codim,
-            const typename BaseTraits::Grid,
-            typename HostGrid::template Codim<codim>::EntityPointer
-            >
-          > EntityPointer;
-
-      };
-
-    };
+        > Traits;
 
   };
 
@@ -320,29 +272,6 @@ namespace Dune
       return leafIndexSet_;
     }
 
-
-    /** \brief Create EntityPointer from EntitySeed
-     *
-     * \deprecated This method is deprecated and will be removed after the release of
-     *             dune-grid 2.4. Please use entity() instead, which will directly return
-     *             an Entity object that you can then store for later use. The EntityPointer
-     *             concept in general is deprecated and will not be available after
-     *             dune-grid 2.4 has been released.
-     */
-    template < class EntitySeed >
-    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
-    typename Traits::template Codim<EntitySeed::codimension>::EntityPointer
-    entityPointer(const EntitySeed& seed) const
-    {
-      typedef typename Traits::template Codim<EntitySeed::codimension>::EntityPointer EntityPointer;
-      typedef IdentityGridEntityPointer<
-        EntitySeed::codimension,
-        const typename Traits::Grid,
-        typename HostGrid::template Codim<EntitySeed::codimension>::EntityPointer
-        > EntityPointerImp;
-
-      return EntityPointer(EntityPointerImp(this, hostgrid_->entity(this->getRealImplementation(seed).hostEntitySeed())));
-    }
 
     /** \brief Create Entity from EntitySeed */
     template < class EntitySeed >

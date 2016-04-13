@@ -37,7 +37,6 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim<1>::LocalGeometryImpl LocalGeometryImpl;
 
   public:
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -61,13 +60,13 @@ namespace Dune {
       return center_==i.center_ && neighborCount_ == i.neighborCount_;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the entity where we started this iterator)
     Entity inside() const {
       return Entity(UGGridEntity<0,dim,GridImp>(center_,gridImp_));
     }
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return Entity on the outside of this intersection
     //! (that is the neighboring Entity)
     Entity outside() const {
       typename UG_NS<dim>::Element* otherelem = UG_NS<dim>::NbElem(center_, neighborCount_);
@@ -218,7 +217,6 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim<1>::LocalGeometryImpl LocalGeometryImpl;
 
   public:
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -245,13 +243,13 @@ namespace Dune {
              && subNeighborCount_ == other.subNeighborCount_;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     Entity inside() const {
       return Entity(UGGridEntity<0,dim,GridImp>(center_,gridImp_));
     }
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return Entity on the outside of this intersection
     //! (that is the neighboring Entity)
     Entity outside() const {
 

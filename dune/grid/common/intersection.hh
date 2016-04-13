@@ -185,9 +185,6 @@ namespace Dune
     /** \brief Type of entity that this Intersection belongs to */
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
-    /** \brief Pointer to the type of entities that this Intersection belongs to */
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-
     /** \brief Codim 1 geometry returned by geometry() */
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
 

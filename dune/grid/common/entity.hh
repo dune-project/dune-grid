@@ -278,16 +278,12 @@ namespace Dune
      */
     typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
 
-    /** \brief EntityPointer types of the different codimensions */
+    /** \brief Entity types of the different codimensions */
     template <int cd>
     struct Codim
     {
-      typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
       typedef typename GridImp::template Codim<cd>::Entity Entity;
     };
-
-    /** \brief The codim==0 EntityPointer type */
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
     /** \brief The HierarchicIterator type*/
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
@@ -559,9 +555,6 @@ namespace Dune
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
 
-    //! \brief The corresponding entity seed (for storage of entities)
-    typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
-
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::ReferenceElement.
      */
@@ -605,9 +598,6 @@ namespace Dune
 
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
-
-    //! \brief The corresponding entity seed (for storage of entities)
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
     /** @brief Returns true if element is of regular type in red/green type refinement.
        In bisection or hanging node refinement this is always true.

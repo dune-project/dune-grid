@@ -24,7 +24,7 @@ namespace Dune {
     typedef YaspGlobalIdSet< GridImp > This;
 
   public:
-    //! define the type used for persisitent indices
+    //! define the type used for persistent indices
     typedef typename std::remove_const<GridImp>::type::PersistentIndexType IdType;
 
     using IdSet<GridImp, This, IdType>::subId;

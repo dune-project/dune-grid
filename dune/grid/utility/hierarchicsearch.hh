@@ -43,9 +43,6 @@ namespace Dune
     //! get entity from the grid
     typedef typename Grid::template Codim<0>::Entity Entity;
 
-    //! type of EntityPointer
-    typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-
     //! type of HierarchicIterator
     typedef typename Grid::HierarchicIterator HierarchicIterator;
 
