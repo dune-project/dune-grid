@@ -362,22 +362,22 @@ namespace Dune {
 
     /** \brief Get vertex lists directly -- makes the code more readable */
     OneDGridList<OneDEntityImp<0> >& vertices(int level) {
-      return Dune::get<0>(entityImps_[level]);
+      return std::get<0>(entityImps_[level]);
     }
 
     /** \brief Get vertex lists directly -- makes the code more readable */
     const OneDGridList<OneDEntityImp<0> >& vertices(int level) const {
-      return Dune::get<0>(entityImps_[level]);
+      return std::get<0>(entityImps_[level]);
     }
 
     /** \brief Get element lists directly -- makes the code more readable */
     OneDGridList<OneDEntityImp<1> >& elements(int level) {
-      return Dune::get<1>(entityImps_[level]);
+      return std::get<1>(entityImps_[level]);
     }
 
     /** \brief Get element lists directly -- makes the code more readable */
     const OneDGridList<OneDEntityImp<1> >& elements(int level) const {
-      return Dune::get<1>(entityImps_[level]);
+      return std::get<1>(entityImps_[level]);
     }
 
     CollectiveCommunication ccobj;
