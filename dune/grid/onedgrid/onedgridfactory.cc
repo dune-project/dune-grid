@@ -73,6 +73,33 @@ insertBoundarySegment(const std::vector<unsigned int>& vertices,
   insertBoundarySegment(vertices);
 }
 
+bool Dune::GridFactory<Dune::OneDGrid>::
+wasInserted(const typename OneDGrid::LeafIntersection& intersection) const
+{
+  bool inserted(false);
+  const auto vtx(intersection.geometry().center()[0]);
+  for(const auto& idx : boundarySegments_)
+    if(std::abs(vertexPositionsByIndex_[idx]-vtx)<1.e-12)
+    {
+      inserted=true;
+      break;
+    }
+  return inserted;
+}
+
+unsigned int Dune::GridFactory<Dune::OneDGrid>::
+insertionIndex(const typename OneDGrid::LeafIntersection& intersection) const
+{
+  unsigned int insertionIdx(0);
+  const auto vtx(intersection.geometry().center()[0]);
+  for(const auto& idx : boundarySegments_)
+    if(std::abs(vertexPositionsByIndex_[idx]-vtx)<1.e-12)
+      break;
+    else
+      ++insertionIdx;
+  return insertionIdx;
+}
+
 Dune::OneDGrid* Dune::GridFactory<Dune::OneDGrid>::
 createGrid()
 {
@@ -96,18 +123,17 @@ createGrid()
     grid_->vertices(0).push_back(newVertex);
   }
 
-  // Make an array with the vertex positions accessible by index
-  // We'll need that several times.
-  std::vector<ctype> vertexPositionsByIndex(vertexPositions_.size());
+  // Fill the vector with the vertex positions accessible by index
+  vertexPositionsByIndex_.resize(vertexPositions_.size());
   for (const auto& vtx : vertexPositions_)
-    vertexPositionsByIndex[vtx.second] = vtx.first;
+    vertexPositionsByIndex_[vtx.second] = vtx.first;
 
   // Set the numbering of the boundary segments
   if (boundarySegments_.size() > 2)
     DUNE_THROW(GridError, "You cannot provide more than two boundary segments to a OneDGrid (it must be connected).");
 
   if (boundarySegments_.size() > 1
-      && vertexPositionsByIndex[boundarySegments_[0]] > vertexPositions_.begin()->first[0])
+      && vertexPositionsByIndex_[boundarySegments_[0]] > vertexPositions_.begin()->first[0])
     grid_->reversedBoundarySegmentNumbering_ = true;
 
   // ///////////////////////////////////////////////////////////////////
@@ -121,7 +147,7 @@ createGrid()
   // First sort elements by increasing position. That is how they are expected in the grid data structure
   std::map<ctype, std::pair<std::array<unsigned int, 2>, unsigned int> > elementsByPosition;
   for (std::size_t i=0; i<elements_.size(); i++)
-    elementsByPosition.insert(std::make_pair(vertexPositionsByIndex[elements_[i][0]],     // order by position of left vertex
+    elementsByPosition.insert(std::make_pair(vertexPositionsByIndex_[elements_[i][0]],     // order by position of left vertex
                                              std::make_pair(elements_[i], i)      // the element and its position in the insertion sequence
                                              ));
 
