@@ -118,7 +118,7 @@ namespace Dune
       }
       else {
         // perform default grid traversal
-        for (const auto& element : elements(gridView))
+        for (const auto& element : elements(gridView_))
           writeElement(element, indexSet, elementType, vertexIndex, gridout);
       }
     }
