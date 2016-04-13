@@ -9,8 +9,11 @@
     \author Oliver Sander
  */
 
+#include <array>
 #include <map>
 #include <memory>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 #include <dune/common/fvector.hh>
@@ -78,8 +81,7 @@ namespace Dune {
 
 
     /** \brief Finalize grid creation and hand over the grid
-
-       The receiver takes responsibility of the memory allocated for the grid
+        The receiver takes responsibility of the memory allocated for the grid
      */
     virtual OneDGrid* createGrid();
 

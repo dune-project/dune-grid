@@ -98,7 +98,7 @@ createGrid()
 
   // Make an array with the vertex positions accessible by index
   // We'll need that several times.
-  std::vector<double> vertexPositionsByIndex(vertexPositions_.size());
+  std::vector<ctype> vertexPositionsByIndex(vertexPositions_.size());
   for (const auto& vtx : vertexPositions_)
     vertexPositionsByIndex[vtx.second] = vtx.first;
 
@@ -119,7 +119,7 @@ createGrid()
   // ///////////////////////////////////////////////////////////////////
 
   // First sort elements by increasing position. That is how they are expected in the grid data structure
-  std::map<double, std::pair<std::array<unsigned int, 2>, unsigned int> > elementsByPosition;
+  std::map<ctype, std::pair<std::array<unsigned int, 2>, unsigned int> > elementsByPosition;
   for (std::size_t i=0; i<elements_.size(); i++)
     elementsByPosition.insert(std::make_pair(vertexPositionsByIndex[elements_[i][0]],     // order by position of left vertex
                                              std::make_pair(elements_[i], i)      // the element and its position in the insertion sequence
