@@ -110,7 +110,9 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
   typedef typename Intersection::LocalGeometry LocalGeometry;
   typedef typename Intersection::Geometry Geometry;
 
+#if !DISABLE_DEPRECATED_METHOD_CHECK
   const int dimension = Intersection::dimension;
+#endif
   const int mydimension = Intersection::mydimension;
 
   // check consistency of exported types
@@ -423,8 +425,10 @@ void checkIntersectionIterator ( const GridViewType &view,
   static_assert( (std::is_same< Intersection, typename IntersectionIterator::Intersection >::value),
                       "Type GridView::Intersection differs from GridView::IntersectionIterator::Intersection." );
 
+#if !DISABLE_DEPRECATED_METHOD_CHECK
   static_assert((static_cast<int>(Intersection::dimension)
                       == static_cast<int>(GridType::dimension)),"IntersectionIterator has wrong dimension");
+#endif
 
   static_assert((static_cast<int>(Intersection::dimensionworld)
                       == static_cast<int>(GridType::dimensionworld)),"IntersectionIterator has wrong dimensionworld");
