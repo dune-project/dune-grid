@@ -9,8 +9,12 @@
     \author Oliver Sander
  */
 
+#include <array>
+#include <cmath>
 #include <map>
 #include <memory>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 #include <dune/common/fvector.hh>
@@ -28,9 +32,6 @@ namespace Dune {
 
     /** \brief Type used by the grid for coordinates */
     typedef OneDGrid::ctype ctype;
-
-    typedef std::map<FieldVector<ctype,1>, unsigned int >::iterator VertexIterator;
-
 
   public:
 
@@ -61,12 +62,10 @@ namespace Dune {
     virtual void insertElement(const GeometryType& type,
                                const std::vector<unsigned int>& vertices);
 
-
     /** \brief Insert a boundary segment (== a point).
         This influences the ordering of the boundary segments
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices);
-
 
     /** \brief Insert a boundary segment (== a point) and the boundary segment geometry
      *
@@ -76,10 +75,14 @@ namespace Dune {
     virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices,
                                        const std::shared_ptr<BoundarySegment<1> >& boundarySegment);
 
+    /** \brief Return true if the intersection has been explictily insterted into the factory */
+    virtual bool wasInserted(const typename OneDGrid::LeafIntersection& intersection) const;
+
+    /** \brief Return the number of the intersection in the order of insertion into the factory */
+    virtual unsigned int insertionIndex(const typename OneDGrid::LeafIntersection& intersection) const;
 
     /** \brief Finalize grid creation and hand over the grid
-
-       The receiver takes responsibility of the memory allocated for the grid
+        The receiver takes responsibility of the memory allocated for the grid
      */
     virtual OneDGrid* createGrid();
 
@@ -108,6 +111,8 @@ namespace Dune {
     /** \brief Store the explicitly given boundary segments until createGrid() is called */
     std::vector<unsigned int> boundarySegments_;
 
+    /** \brief Store vertex positions sorted by index */
+    std::vector<ctype> vertexPositionsByIndex_;
   };
 
 }
