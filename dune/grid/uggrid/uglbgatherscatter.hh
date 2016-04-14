@@ -72,11 +72,11 @@ namespace Dune {
 
         typedef typename DataHandle::DataType DataType;
         buffer = (char*)malloc(sizeof(int) + numberOfParams*sizeof(DataType));
-        *((int*)buffer) = numberOfParams*sizeof(DataType);       // Size of the actual payload
+        *((char*)buffer) = numberOfParams*sizeof(DataType);       // Size of the actual payload
 
         for (int paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
         {
-          DataType *dataPointer = (DataType*)(buffer + sizeof(int) + paramIdx*sizeof(DataType));
+          DataType *dataPointer = reinterpret_cast<DataType*>(buffer + sizeof(int) + paramIdx*sizeof(DataType));
           lbMessageBuffer.read(*dataPointer);
         }
       }
@@ -112,7 +112,7 @@ namespace Dune {
         for(int paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
         {
           typedef typename DataHandle::DataType DataType;
-          DataType *dataPointer = (DataType*)(buffer + sizeof(int) + paramIdx*sizeof(DataType));
+          DataType *dataPointer = reinterpret_cast<DataType*>(buffer + sizeof(int) + paramIdx*sizeof(DataType));
           lbMessageBuffer.write(*dataPointer);
         }
 
