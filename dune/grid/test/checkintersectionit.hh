@@ -112,6 +112,8 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
 #if !DISABLE_DEPRECATED_METHOD_CHECK
   const int dimension = Intersection::dimension;
+#else
+  const int dimension = Entity::dimension;
 #endif
   const int mydimension = Intersection::mydimension;
 
