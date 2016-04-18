@@ -81,14 +81,15 @@ namespace Dune {
      *    element-number element-type number-of-tags <tags> node-number-list
      * Counting of the element numbers starts by "1".
      *
-     * If the pysicalEntities parameter is not a nullptr, each element
-     * has a tag representing its physical id.
+     * If `physicalEntities` is not empty, each element has a tag representing its physical id.
      *
-     * If the physicalBoundaries parameter is not a nullptr, also the boundaries
-     * are written on file with the corresponding physical value. The physicalBoundaries
-     * vector need to be sorted according to the interesection boundary segment index.
+     * If `physicalBoundaries` is not empty, also the boundaries are written to the file with
+     * the corresponding physical value.
+     *
+     * The physicalBoundaries vector need to be sorted according to the interesection
+     * boundary segment index.
      */
-    void outputElements(std::ofstream& file, const std::vector<int>* physicalEntities, const std::vector<int>* physicalBoundaries) const {
+    void outputElements(std::ofstream& file, const std::vector<int>& physicalEntities, const std::vector<int>& physicalBoundaries) const {
       MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> elementMapper(gv);
       std::size_t counter(1);
       for (const auto& entity : elements(gv)) {
@@ -98,8 +99,8 @@ namespace Dune {
 
           file << counter << " " << element_type;
           // If present, set the first tag to the physical entity
-          if (physicalEntities!=nullptr)
-            file << " " << 1 << " " << (*physicalEntities)[elementMapper.index(entity)];
+          if (!physicalEntities.empty())
+            file << " " << 1 << " " << physicalEntities[elementMapper.index(entity)];
           else
             file << " " << 0; // "0" for "I do not use any tags."
 
@@ -129,13 +130,13 @@ namespace Dune {
           file << std::endl;
 
           // Write boundaries
-          if (physicalBoundaries!=nullptr) {
+          if (!physicalBoundaries.empty()) {
             const auto& refElement(ReferenceElements<typename GridView::ctype,dim>::general(entity.type()));
             for(const auto& intersection : intersections(gv, entity)) {
               if(intersection.boundary()) {
                 const auto faceLocalIndex(intersection.indexInInside());
                 file << counter << " " << translateDuneToGmshType(intersection.type())
-                  << " " << 1 << " " << (*physicalBoundaries)[intersection.boundarySegmentIndex()];
+                  << " " << 1 << " " << physicalBoundaries[intersection.boundarySegmentIndex()];
                 for (int k = 0; k < intersection.geometry().corners(); ++k)
                 {
                   const auto vtxLocalIndex(refElement.subEntity(faceLocalIndex, 1, k, dim));
@@ -175,24 +176,46 @@ namespace Dune {
       }
     }
 
-    /** \brief Write given grid in Gmsh 2.0 compatible ASCII file.
-        \param fileName Path of file. This method does not attach a ".msh"-extension by itself.
+  public:
+    /**
+     * \brief Constructor expecting GridView of Grid to be written.
+     * \param gridView GridView that will be written.
+     * \param numDigits Number of digits to use.
+     */
+    GmshWriter(const GridView& gridView, int numDigits=6) : gv(gridView), precision(numDigits) {}
 
-        Opens the file with given name and path, stores the element data of the grid
-        and closes the file when done.
+    /**
+     * \brief Set the number of digits to be used when writing the vertices. By default is 6.
+     * \brief numDigits Number of digits to use.
+     */
+    void setPrecision(int numDigits) {
+      precision = numDigits;
+    }
 
-        If the pysicalEntities parameter is not a nullptr, each element
-        has a tag representing its physical id.
-
-        If the physicalBoundaries parameter is not a nullptr, also the boundaries
-        are written on file with the corresponding physical value. The physicalBoundaries
-        vector need to be sorted according to the interesection boundary segment index.
-
-        Throws an IOError if file could not be opened or an unsupported element type is
-        encountered.
-    */
-    void writeImpl(const std::string& fileName, const std::vector<int>* physicalEntities, const std::vector<int>* physicalBoundaries) const {
-
+    /**
+     * \brief Write given grid in Gmsh 2.0 compatible ASCII file.
+     * \param fileName Path of file. This method does not attach a ".msh"-extension by itself.
+     * \param physicalEntities Physical entities for each element (optional).
+     * \param physicalBoundaries Physical boundaries (optional).
+     *
+     * Opens the file with given name and path, stores the element data of the grid
+     * and closes the file when done.
+     *
+     * If the optional parameter `physicalEntities` is provided, each element is written with
+     * a tag representing its physical id.
+     *
+     * If the optional parameter `physicalBoundaries` is provided, also the boundaries
+     * are written on file with the corresponding physical value.
+     *
+     * The physicalBoundaries vector need to be sorted according to the interesection boundary
+     * segment index.
+     *
+     * Throws an IOError if file could not be opened or an unsupported element type is
+     * encountered.
+     */
+    void write(const std::string& fileName,
+               const std::vector<int>& physicalEntities=std::vector<int>(),
+               const std::vector<int>& physicalBoundaries=std::vector<int>()) const {
       // Open file
       std::ofstream file(fileName.c_str());
       if (!file.is_open())
@@ -216,7 +239,7 @@ namespace Dune {
 
       // Output Elements;
       int boundariesSize(0);
-      if(physicalBoundaries!=nullptr)
+      if(!physicalBoundaries.empty())
         for(const auto& entity : elements(gv))
           for(const auto& intersection : intersections(gv, entity))
             if(intersection.boundary())
@@ -228,77 +251,6 @@ namespace Dune {
       outputElements(file, physicalEntities, physicalBoundaries);
 
       file << "$EndElements" << std::endl;
-
-      // Close file
-      file.close();
-    }
-
-
-  public:
-    /** \brief Constructor expecting GridView of Grid to be written.
-        \param gridView GridView that will be written.
-        \param numDigits Number of digits to use.
-     */
-    GmshWriter(const GridView& gridView, int numDigits=6) : gv(gridView), precision(numDigits) {}
-
-    /**
-     * \brief Set the number of digits to be used when writing the vertices. By default is 6.
-     * \brief numDigits Number of digits to use.
-     */
-    void setPrecision(int numDigits) {
-      precision = numDigits;
-    }
-
-    /**
-     * \brief Write given grid in Gmsh 2.0 compatible ASCII file.
-     * \param fileName Path of file. This method does not attach a ".msh"-extension by itself.
-     *
-     * Opens the file with given name and path, stores the element data of the grid
-     * and closes the file when done.
-     *
-     * Throws an IOError if file could not be opened or an unsupported element type is
-     * encountered.
-     */
-    void write(const std::string& fileName) const {
-      writeImpl(fileName, nullptr, nullptr);
-    }
-
-    /**
-     * \brief Write given grid in Gmsh 2.0 compatible ASCII file.
-     * \param fileName Path of file. This method does not attach a ".msh"-extension by itself.
-     * \param physicalEntities Physical entities for each element.
-     *
-     * Opens the file with given name and path, stores the element data of the grid
-     * and closes the file when done.
-     *
-     * Each element has a tag representing its physical id.
-     *
-     * Throws an IOError if file could not be opened or an unsupported element type is
-     * encountered.
-     */
-    void write(const std::string& fileName, const std::vector<int>& physicalEntities) const {
-      writeImpl(fileName, &physicalEntities, nullptr);
-    }
-
-    /**
-     * \brief Write given grid in Gmsh 2.0 compatible ASCII file.
-     * \param fileName Path of file. This method does not attach a ".msh"-extension by itself.
-     * \param physicalEntities Physical entities for each element.
-     * \param physicalBoundaries Physical boundaries.
-     *
-     * Opens the file with given name and path, stores the element data of the grid
-     * and closes the file when done.
-     *
-     * Each element has a tag representing its physical id.
-     *
-     * All the boundaries are written on file with the corresponding physical value.
-     * The physicalBoundaries vector need to be sorted according to the interesection boundary segment index.
-     *
-     * Throws an IOError if file could not be opened or an unsupported element type is
-     * encountered.
-     */
-    void write(const std::string& fileName, const std::vector<int>& physicalEntities, const std::vector<int>& physicalBoundaries) const {
-      writeImpl(fileName, &physicalEntities, &physicalBoundaries);
     }
 
   };
