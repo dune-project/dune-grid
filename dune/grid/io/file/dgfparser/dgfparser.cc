@@ -38,9 +38,9 @@ namespace Dune
     }
 
     template< class Block >
-    void block( const Block &block )
+    void block( const Block& printBlock )
     {
-      out << "Using " << block.id() << " block" << std::endl;
+      out << "Using " << printBlock.id() << " block" << std::endl;
     }
 
     void print( const std :: string &message )

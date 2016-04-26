@@ -303,10 +303,10 @@ namespace Dune
     {
       if ( gridPtr_->comm().size() == 1 )
         return;
-      int params = nofElParam_ + nofVtxParam_;
+      int nofParams = nofElParam_ + nofVtxParam_;
       if ( haveBndParam_ )
-        params += 1;
-      if ( gridPtr_->comm().max( params ) > 0 )
+        nofParams++;
+      if ( gridPtr_->comm().max( nofParams ) > 0 )
       {
         DataHandle dh(*this);
         gridPtr_->loadBalance( dh.interface() );

@@ -81,7 +81,7 @@ namespace Dune
           return;
 
         ++linecount;
-        block << curLine << std :: endl;
+        block_ << curLine << std :: endl;
       }
       DUNE_THROW( DGFException,
                   "Error reading from stream, expected \"#\" to end the block." );
@@ -91,7 +91,7 @@ namespace Dune
     // get next line and store in string stream
     bool BasicBlock :: getnextline ()
     {
-      getline( block, oneline );
+      getline( block_, oneline );
       line.clear();
       line.str( oneline );
       ++pos;
