@@ -532,7 +532,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
     return true;
 
 #ifdef ModelP  // The Partition field only exists if ModelP is set
-  if (targetProcessors.size() != this->leafGridView().size(0))
+  if (targetProcessors.size() != static_cast<unsigned int>(this->leafGridView().size(0)))
     DUNE_THROW(Exception, "targetProcessors argument does not have the correct size");
 
   // Get unique consecutive index across different element types
@@ -556,7 +556,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
         unsigned int targetRank = targetProcessors[elementMapper.index(*it)];
 
         // sanity check
-        if (targetRank >= comm().size())
+        if (targetRank >= static_cast<unsigned int>(comm().size()))
           DUNE_THROW(GridError, "Requesting target processor " << targetRank <<
                      ", but only " << comm().size() << " processors are available.");
 
@@ -579,7 +579,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
           else
             rank[childRank]++;
 
-          if (rank[childRank] > mostFrequentCount) {
+          if (static_cast<unsigned int>(rank[childRank]) > mostFrequentCount) {
             mostFrequentRank = childRank;
             mostFrequentCount = rank[childRank];
           }
