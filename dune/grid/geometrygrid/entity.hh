@@ -25,7 +25,7 @@ namespace Dune
      *  \tparam  codim  codimension of the entity
      *  \tparam  Grid   GeometryGrid, this entity belongs to
      *  \tparam  fake   \b true, if the host grid does not provide this entity
-     *                  (do not specify, the defualt value is already the
+     *                  (do not specify, the default value is already the
      *                  intended use)
      */
     template< int codim, class Grid, bool fake = !(Capabilities::hasHostEntity< Grid, codim >::v) >
