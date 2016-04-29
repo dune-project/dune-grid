@@ -416,6 +416,11 @@ namespace Dune
 
       EntityBase () : geo_(), hostElement_(), subEntity_( -1 ) {}
 
+      EntityBase(const Grid& grid, const HostElement& hostElement, unsigned int subEntity)
+        : hostElement_(hostElement)
+        , subEntity_(subEntity)
+        , grid_(&grid)
+      {}
 
       EntityBase ( const Grid &grid, const EntitySeed &seed )
         : hostElement_( grid.hostGrid().entity( grid.getRealImplementation(seed).hostElementSeed() ) )
