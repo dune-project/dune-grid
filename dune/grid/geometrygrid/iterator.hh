@@ -355,14 +355,14 @@ namespace Dune
 
       static Iterator begin ( const Grid &grid, const HostGridView &hostGridView )
       {
-        HostElementIterator first = hostGridView.template begin< codim, Filter::Element_Partition >();
-        HostElementIterator last = hostGridView.template begin< codim, Filter::Element_Partition >();
+        HostElementIterator first = hostGridView.template begin< 0, Filter::Element_Partition >();
+        HostElementIterator last = hostGridView.template end< 0, Filter::Element_Partition >();
         return Iterator( grid, std::move( first ), std::move( last ), hostGridView.indexSet() );
       }
 
       static Iterator end ( const Grid &grid, const HostGridView &hostGridView )
       {
-        HostElementIterator last = hostGridView.template begin< codim, Filter::Element_Partition >();
+        HostElementIterator last = hostGridView.template end< 0, Filter::Element_Partition >();
         return Iterator( grid, last, last, hostGridView.indexSet() );
       }
 
