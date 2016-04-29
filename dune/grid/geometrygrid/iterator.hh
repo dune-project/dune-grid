@@ -284,7 +284,7 @@ namespace Dune
 
       typedef PartitionIteratorFilter< codim, pitype, typename HostGridView::Grid > Filter;
 
-      typedef typename HostGridView::template Codim< codim >::template Partition< typename Filter::ElementPartition >::Iterator HostElementIterator;
+      typedef typename HostGridView::template Codim<0>::template Partition< Filter::Element_Partition >::Iterator HostElementIterator;
       typedef typename HostElementIterator::Entity HostElement;
       typedef typename HostGridView::IndexSet HostIndexSet;
 
