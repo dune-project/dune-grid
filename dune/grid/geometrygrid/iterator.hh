@@ -289,7 +289,7 @@ namespace Dune
       typedef typename HostGridView::IndexSet HostIndexSet;
 
     public:
-      Iterator () : grid_( nullptr ), hostIndexSet_( nullptr ), subEntity_( -1 ) {}
+      Iterator () : grid_( nullptr ), subEntity_( -1 ), hostIndexSet_( nullptr ) {}
 
       Iterator ( const Grid &grid, HostElementIterator hostElementIterator, HostElementIterator hostEnd, const HostIndexSet &hostIndexSet )
         : grid_( &grid ),
