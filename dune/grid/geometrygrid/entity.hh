@@ -431,13 +431,15 @@ namespace Dune
       EntityBase ( const EntityBase &other )
         : geo_( other.geo_ ),
           hostElement_( other.hostElement_ ),
-          subEntity_( other.subEntity_ )
+          subEntity_( other.subEntity_ ),
+          grid_(other.grid_)
       {}
 
       EntityBase ( EntityBase &&other )
         : geo_( std::move( other.geo_ ) ),
           hostElement_( std::move( other.hostElement_ ) ),
-          subEntity_( std::move( other.subEntity_ ) )
+          subEntity_( std::move( other.subEntity_ ) ),
+          grid_( std::move( other.grid_ ) )
       {}
 
       /** \} */
@@ -447,6 +449,7 @@ namespace Dune
         geo_ = other.geo_;
         hostElement_ = other.hostElement_;
         subEntity_ = other.subEntity_;
+        grid_ = other.grid_;
         return *this;
       }
 
@@ -455,6 +458,7 @@ namespace Dune
         geo_ = std::move( other.geo_ );
         hostElement_ = std::move( other.hostElement_ );
         subEntity_ = std::move( other.subEntity_ );
+        grid_ = std::move( other.grid_ );
         return *this;
       }
 
