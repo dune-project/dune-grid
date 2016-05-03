@@ -1,6 +1,7 @@
 dune_add_test(SOURCES geometrygrid-coordfunction-copyconstructor.cc)
 
-dune_add_test(SOURCES test-geogrid.cc
+dune_add_test(NAME test-geogrid-yaspgrid
+              SOURCES test-geogrid.cc
               LINK_LIBRARIES dunegrid
               COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
                                   CACHECOORDFUNCTION=0
@@ -8,6 +9,18 @@ dune_add_test(SOURCES test-geogrid.cc
                                   GRIDDIM=2
                                   WORLDDIM=2
                                   YASPGRID)
+
+if(UG_FOUND)
+  dune_add_test(NAME test-geogrid-uggrid
+                SOURCES test-geogrid.cc
+                LINK_LIBRARIES dunegrid
+                COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
+                                    CACHECOORDFUNCTION=0
+                                    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
+                                    GRIDDIM=2
+                                    WORLDDIM=2
+                                    UGGRID)
+endif()
 
 dune_add_test(SOURCES test-identitygrid.cc)
 
