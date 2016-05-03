@@ -1,5 +1,7 @@
-# This module first tests for UG and then sets the necessary flags
+# This module first tests for the old UG and then sets the necessary flags
 # and config.h defines. If UG is found UG_FOUND will be true.
+# If dune-uggrid was found it only adds the dgf magic to config.h
+# and makes add_dune_ug_flags available to stay compatible.
 #
 # .. cmake_module::
 #
@@ -56,6 +58,8 @@
 #       old doc: indicates that the targets are object libraries.
 #
 
+
+if(NOT dune-uggrid_FOUND)
 if(UG_ROOT AND NOT UG_DIR)
   # define the directory where the config file resides
   if(EXISTS "${UG_ROOT}/lib/cmake/ug/ug-config.cmake")
@@ -85,10 +89,6 @@ if(UG_FOUND)
   # parse patch level: last number in UG version string is DUNE patch level
   string(REGEX MATCH "[0-9]*$" UG_DUNE_PATCHLEVEL ${UG_VERSION})
 
-  dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
-      DUNETYPE "Dune::UGGrid< dimgrid >"
-      HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
-
   #Overwrite flags by hand (like for autoconf).
   set(UG_LIBRARIES)
   set(paths "${prefix}")
@@ -112,9 +112,6 @@ if(UG_FOUND)
   if(UG_PARALLEL STREQUAL "yes")
     set(UG_DEFINITIONS "ENABLE_UG=1;ModelP")
   endif()
-  dune_register_package_flags(COMPILE_DEFINITIONS "${UG_DEFINITIONS}"
-                              INCLUDE_DIRS "${UG_INCLUDES}"
-                              LIBRARIES "dunegrid;${UG_LIBRARIES};${DUNE_LIBS}")
 
   # log result
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -137,6 +134,17 @@ find_package_handle_standard_args(
   UG_DIR
   HAVE_UG
 )
+endif(NOT dune-uggrid_FOUND)
+
+# Add dgf magic to config.h and register flags
+if(UG_FOUND)
+  dune_register_package_flags(COMPILE_DEFINITIONS "${UG_DEFINITIONS}"
+                              INCLUDE_DIRS "${UG_INCLUDES}"
+                              LIBRARIES "dunegrid;${UG_LIBRARIES};${DUNE_LIBS}")
+  dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
+    DUNETYPE "Dune::UGGrid< dimgrid >"
+    HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
+endif()
 
 # Add flags to targets
 function(add_dune_ug_flags)
