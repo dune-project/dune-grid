@@ -18,6 +18,7 @@
 #include "checkcommunicate.hh"
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"
+#include "checkpartition.hh"
 
 
 using namespace Dune;
@@ -227,6 +228,14 @@ void generalTests(bool greenClosure)
   // check the intersection iterator
   checkIntersectionIterator(*grid2d);
   checkIntersectionIterator(*grid3d);
+
+  // Check partition iterators
+  checkPartitionType( grid2d->leafGridView() );
+  for( int i = 0; i <= grid2d->maxLevel(); ++i )
+    checkPartitionType( grid2d->levelGridView( i ) );
+  checkPartitionType( grid3d->leafGridView() );
+  for( int i = 0; i <= grid3d->maxLevel(); ++i )
+    checkPartitionType( grid3d->levelGridView( i ) );
 
 }
 
