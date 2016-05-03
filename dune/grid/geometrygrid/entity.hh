@@ -644,7 +644,7 @@ namespace Dune
       PartitionType
       vertexPartitionType ( const ReferenceElement< ctype, dimension > &refElement, int i ) const
       {
-        const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
+        const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
         return hostElement().template subEntity< dimension >( j ).partitionType();
       }
 
