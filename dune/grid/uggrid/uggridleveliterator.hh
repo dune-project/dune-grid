@@ -48,19 +48,15 @@ namespace Dune {
       if (codim==dim) {
         if (pitype==All_Partition || pitype==Ghost_Partition)
           this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(theGrid),gridImp_);
-        else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
+        else
           this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::FirstNode(theGrid),gridImp_);
-        else     // overlap and overlap-front
-          this->virtualEntity_.setToTarget(0,nullptr);
 
       }
       else if (codim==0) {
         if (pitype==All_Partition || pitype==Ghost_Partition)
           this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(theGrid),gridImp_);
-        else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
+        else
           this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::FirstElement(theGrid),gridImp_);
-        else     // overlap and overlap-front
-          this->virtualEntity_.setToTarget(0,nullptr);
       }
       else
         DUNE_THROW(NotImplemented, "UGGrid level iterators for codimension " << codim);
@@ -87,19 +83,30 @@ namespace Dune {
      */
     bool entityOK_()
     {
-      if (pitype == All_Partition)
-        return true;
-
       Dune::PartitionType entityPIType = this->virtualEntity_.partitionType();
-      if (pitype == Ghost_Partition && entityPIType == GhostEntity)
+      switch (pitype) {
+      case All_Partition:
         return true;
-      else if (pitype == Interior_Partition && entityPIType == InteriorEntity)
-        return true;
-      else if (pitype == InteriorBorder_Partition &&
-               (entityPIType == BorderEntity ||
-                entityPIType == InteriorEntity))
-        return true;
-      return false;
+      case Ghost_Partition:
+        if (entityPIType == GhostEntity)
+          return true;
+        else
+          return false;
+      case Interior_Partition:
+        if (entityPIType == InteriorEntity)
+          return true;
+        else
+          return false;
+      case InteriorBorder_Partition:
+      case Overlap_Partition:
+      case OverlapFront_Partition:
+        if (entityPIType == BorderEntity || entityPIType == InteriorEntity)
+          return true;
+        else
+          return false;
+      default:
+        DUNE_THROW(NotImplemented, "Unhandled partition iterator type " << pitype);
+      }
     }
 
     // /////////////////////////////////////
