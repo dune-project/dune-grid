@@ -58,7 +58,7 @@ namespace Dune
         for( int i = 0; i < size; ++i )
         {
           const int j = refElement.subEntity( subEntity, codim, i, dimension );
-          PartitionType type = element.template subEntity< dimension >( j )->partitionType();
+          PartitionType type = element.template subEntity< dimension >( j ).partitionType();
           if( type == InteriorEntity )
             return true;
         }
@@ -107,7 +107,7 @@ namespace Dune
         for( int i = 0; i < size; ++i )
         {
           const int j = refElement.subEntity( subEntity, codim, i, dimension );
-          PartitionType type = element.template subEntity< dimension >( j )->partitionType();
+          PartitionType type = element.template subEntity< dimension >( j ).partitionType();
           if( (type == OverlapEntity) || (type == BorderEntity) )
             return true;
         }
@@ -172,7 +172,7 @@ namespace Dune
         for( int i = 0; i < size; ++i )
         {
           const int j = refElement.subEntity( subEntity, codim, i, dimension );
-          PartitionType type = element.template subEntity< dimension >( j )->partitionType();
+          PartitionType type = element.template subEntity< dimension >( j ).partitionType();
           if( type == GhostEntity )
             return true;
         }
