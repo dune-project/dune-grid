@@ -19,7 +19,7 @@ add_dune_ug_flags(dunegrid ${_OBJECT_FLAG} NO_LINK_DUNEGRID)
 
 if(ALBERTA_FOUND)
 foreach(_dim ${ALBERTA_WORLD_DIMS})
-  dune_add_library(dunealbertagrid_${_dim}d
+  dune_add_library(dunealbertagrid_${_dim}d APPEND
     _DUNE_TARGET_OBJECTS:albertagrid_${_dim}d_
     _DUNE_TARGET_OBJECTS:dgfparser_
     _DUNE_TARGET_OBJECTS:dgfparserblocks_
