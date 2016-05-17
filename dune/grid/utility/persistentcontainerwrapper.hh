@@ -66,7 +66,7 @@ namespace Dune
 
     void fill ( const Value &value = Value() ) { hostContainer_.fill( value ); }
 
-    void swap ( This &other ) { hostContainer_.swap( other ); }
+    void swap ( This &other ) { hostContainer_.swap( other.hostContainer_ ); }
 
     ConstIterator begin () const { return hostContainer_.begin(); }
     Iterator begin () { return hostContainer_.begin(); }
