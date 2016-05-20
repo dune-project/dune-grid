@@ -25,7 +25,7 @@ namespace Dune
      *  \tparam  codim  codimension of the entity
      *  \tparam  Grid   GeometryGrid, this entity belongs to
      *  \tparam  fake   \b true, if the host grid does not provide this entity
-     *                  (do not specify, the defualt value is already the
+     *                  (do not specify, the default value is already the
      *                  intended use)
      */
     template< int codim, class Grid, bool fake = !(Capabilities::hasHostEntity< Grid, codim >::v) >
@@ -414,42 +414,56 @@ namespace Dune
       /** \name Construction, Initialization and Destruction
        *  \{ */
 
-      EntityBase () : geo_(), hostElement_(), subEntity_( -1 ) {}
+      EntityBase ()
+        : hostElement_()
+        , subEntity_(-1)
+        , grid_(nullptr)
+        , geo_()
+      {}
 
+      EntityBase(const Grid& grid, const HostElement& hostElement, unsigned int subEntity)
+        : hostElement_(hostElement)
+        , subEntity_(subEntity)
+        , grid_(&grid)
+      {}
 
       EntityBase ( const Grid &grid, const EntitySeed &seed )
         : hostElement_( grid.hostGrid().entity( grid.getRealImplementation(seed).hostElementSeed() ) )
-        , grid_( &grid )
         , subEntity_( grid.getRealImplementation(seed).subEntity() )
+        , grid_( &grid )
       {}
 
       EntityBase ( const EntityBase &other )
-        : geo_( other.geo_ ),
-          hostElement_( other.hostElement_ ),
-          subEntity_( other.subEntity_ )
+        : hostElement_( other.hostElement_ )
+        , subEntity_( other.subEntity_ )
+        , grid_(other.grid_)
+        , geo_( other.geo_ )
       {}
 
       EntityBase ( EntityBase &&other )
-        : geo_( std::move( other.geo_ ) ),
-          hostElement_( std::move( other.hostElement_ ) ),
-          subEntity_( std::move( other.subEntity_ ) )
+        : hostElement_( std::move( other.hostElement_ ) )
+        , subEntity_( std::move( other.subEntity_ ) )
+        , grid_( std::move( other.grid_ ) )
+        , geo_( std::move( other.geo_ ) )
       {}
 
       /** \} */
 
       const EntityBase &operator= ( const EntityBase &other )
       {
-        geo_ = other.geo_;
         hostElement_ = other.hostElement_;
         subEntity_ = other.subEntity_;
+        grid_ = other.grid_;
+        geo_ = other.geo_;
         return *this;
       }
 
       const EntityBase &operator= ( EntityBase&& other )
       {
-        geo_ = std::move( other.geo_ );
         hostElement_ = std::move( other.hostElement_ );
         subEntity_ = std::move( other.subEntity_ );
+        grid_ = std::move( other.grid_ );
+        geo_ = std::move( other.geo_ );
         return *this;
       }
 
@@ -639,8 +653,8 @@ namespace Dune
       PartitionType
       vertexPartitionType ( const ReferenceElement< ctype, dimension > &refElement, int i ) const
       {
-        const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
-        return hostElement().template subEntity< dimension >( j )->partitionType();
+        const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
+        return hostElement().template subEntity< dimension >( j ).partitionType();
       }
 
     private:

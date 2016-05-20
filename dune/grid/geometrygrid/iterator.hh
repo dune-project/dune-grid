@@ -58,7 +58,7 @@ namespace Dune
         for( int i = 0; i < size; ++i )
         {
           const int j = refElement.subEntity( subEntity, codim, i, dimension );
-          PartitionType type = element.template subEntity< dimension >( j )->partitionType();
+          PartitionType type = element.template subEntity< dimension >( j ).partitionType();
           if( type == InteriorEntity )
             return true;
         }
@@ -107,7 +107,7 @@ namespace Dune
         for( int i = 0; i < size; ++i )
         {
           const int j = refElement.subEntity( subEntity, codim, i, dimension );
-          PartitionType type = element.template subEntity< dimension >( j )->partitionType();
+          PartitionType type = element.template subEntity< dimension >( j ).partitionType();
           if( (type == OverlapEntity) || (type == BorderEntity) )
             return true;
         }
@@ -172,7 +172,7 @@ namespace Dune
         for( int i = 0; i < size; ++i )
         {
           const int j = refElement.subEntity( subEntity, codim, i, dimension );
-          PartitionType type = element.template subEntity< dimension >( j )->partitionType();
+          PartitionType type = element.template subEntity< dimension >( j ).partitionType();
           if( type == GhostEntity )
             return true;
         }
@@ -284,12 +284,12 @@ namespace Dune
 
       typedef PartitionIteratorFilter< codim, pitype, typename HostGridView::Grid > Filter;
 
-      typedef typename HostGridView::template Codim< codim >::template Partition< typename Filter::ElementPartition >::Iterator HostElementIterator;
+      typedef typename HostGridView::template Codim<0>::template Partition< Filter::Element_Partition >::Iterator HostElementIterator;
       typedef typename HostElementIterator::Entity HostElement;
       typedef typename HostGridView::IndexSet HostIndexSet;
 
     public:
-      Iterator () : grid_( nullptr ), hostIndexSet_( nullptr ), subEntity_( -1 ) {}
+      Iterator () : grid_( nullptr ), subEntity_( -1 ), hostIndexSet_( nullptr ) {}
 
       Iterator ( const Grid &grid, HostElementIterator hostElementIterator, HostElementIterator hostEnd, const HostIndexSet &hostIndexSet )
         : grid_( &grid ),
@@ -355,14 +355,14 @@ namespace Dune
 
       static Iterator begin ( const Grid &grid, const HostGridView &hostGridView )
       {
-        HostElementIterator first = hostGridView.template begin< codim, Filter::Element_Partition >();
-        HostElementIterator last = hostGridView.template begin< codim, Filter::Element_Partition >();
+        HostElementIterator first = hostGridView.template begin< 0, Filter::Element_Partition >();
+        HostElementIterator last = hostGridView.template end< 0, Filter::Element_Partition >();
         return Iterator( grid, std::move( first ), std::move( last ), hostGridView.indexSet() );
       }
 
       static Iterator end ( const Grid &grid, const HostGridView &hostGridView )
       {
-        HostElementIterator last = hostGridView.template begin< codim, Filter::Element_Partition >();
+        HostElementIterator last = hostGridView.template end< 0, Filter::Element_Partition >();
         return Iterator( grid, last, last, hostGridView.indexSet() );
       }
 
